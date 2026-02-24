@@ -102,6 +102,16 @@ describe('context-injector', () => {
     expect(ctx).toContain('pure-function');
   });
 
+  it('should include directory structure guidelines', async () => {
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('Directory Structure');
+    expect(ctx).toContain('index.ts (barrel export)');
+    expect(ctx).toContain('nearest common ancestor (LCA)');
+    expect(ctx).toContain('parent\'s public interface');
+    expect(ctx).toContain('/filid:fca-scan');
+  });
+
   it('should include development workflow guide', async () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
