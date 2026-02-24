@@ -1,0 +1,32 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ogham",
+  "owner": {
+    "name": "Vincent K. Kelvin"
+  },
+  "metadata": {
+    "description": "AI-powered developer tool plugins — FCA-AI structure management and fractal context architecture",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "filid",
+      "description": "FCA-AI rule enforcement + fractal structure management plugin for Claude Code agent workflows. Automated CLAUDE.md governance, multi-persona code review, structural drift detection.",
+      "version": "0.0.1",
+      "author": {
+        "name": "Vincent K. Kelvin"
+      },
+      "source": "./packages/filid",
+      "category": "productivity",
+      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/filid",
+      "tags": [
+        "fca-ai",
+        "fractal",
+        "structure",
+        "code-review",
+        "governance",
+        "documentation"
+      ]
+    }
+  ]
+}

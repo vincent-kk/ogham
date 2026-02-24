@@ -1,0 +1,53 @@
+{
+  "name": "ogham",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ogham monorepo — Claude Code plugins and developer tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "owner": "vincent-kk"
+  },
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:all": "yarn workspaces foreach -A run build",
+    "changeset": "changeset",
+    "changeset:publish": "yarn build:all && changeset publish",
+    "changeset:version": "changeset version",
+    "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
+    "run:all": "yarn workspaces foreach -A run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
+    "sort:packages": "npx sort-package-json '**/package.json'",
+    "filid": "yarn workspace @ogham/filid",
+    "tag:packages": "./scripts/tag-packages.sh",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.4",
+    "@eslint/js": "^9.0.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.14.0",
+    "eslint": "^9.0.0",
+    "eslint-import-resolver-typescript": "^4.4.3",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.4.0",
+    "tsx": "^4.20.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "yarn@4.12.0",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*.log
+npm-debug.log*
+.omc/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
