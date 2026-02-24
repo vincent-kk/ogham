@@ -12,19 +12,68 @@
 
 ---
 
-## Monorepo Structure
+## Quick Start — Marketplace Installation
 
-This repository hosts multiple packages with independent versioning and distribution:
+The easiest way to use Ogham plugins is through the Claude Code plugin marketplace.
 
-- **Claude plugins** — installed and used inside [Claude Code](https://claude.ai/code) (or compatible hosts) to extend agent behavior.
+```bash
+# 1. Register this repository as a marketplace source
+claude plugin marketplace add https://github.com/vincent-kk/ogham
 
-Each package has its own `README.md` with usage, dependencies, and examples.
+# 2. Install a plugin
+claude plugin install filid
+```
 
-### Packages
+That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-| Package                                  | Type          | Description                                                                                              |
-| ---------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------- |
-| **[`filid`](./packages/filid/)**         | Claude plugin | FCA-AI rule enforcement and fractal context for Claude Code agent workflows. Install as a Claude plugin. |
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:fca-init` to initialize FCA-AI in your project.
+
+---
+
+## Plugins
+
+### [`@ogham/filid`](./packages/filid/) — FCA-AI Rule Enforcement
+
+A Claude Code plugin that automatically manages project structure and documentation through **Fractal Context Architecture (FCA-AI)**.
+
+As codebases grow, AI agents lose context, documentation drifts from code, and directory structures lose consistency. filid solves this with automated rule enforcement.
+
+**What it provides:**
+
+| Component        | Count | Examples                                            |
+| ---------------- | ----- | --------------------------------------------------- |
+| Skills           | 14    | `/filid:fca-init`, `/filid:fca-review`, `/filid:fca-scan` |
+| MCP Tools        | 14    | Structure analysis, drift detection, metrics        |
+| Agents           | 7     | Architect, Implementer, QA Reviewer, etc.           |
+| Hooks            | 6     | Auto line-limit check, organ protection, rule injection |
+
+**Key features:**
+
+- **Multi-persona code review** — A committee of specialized reviewers reaches consensus on your PR changes
+- **Automated rule enforcement** — CLAUDE.md line limits, boundary sections, organ directory protection
+- **Structural drift detection** — Detects when code changes break documented structure and syncs automatically
+- **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular dependency detection
+
+```
+# Initialize FCA-AI in your project
+/filid:fca-init
+
+# Scan for rule violations
+/filid:fca-scan
+
+# Run multi-persona code review on current branch
+/filid:fca-review
+```
+
+For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
+
+---
+
+## All Packages
+
+| Package                                  | Type          | Version | Description                                      |
+| ---------------------------------------- | ------------- | ------- | ------------------------------------------------ |
+| **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.12  | FCA-AI rule enforcement and fractal context management |
 
 ---
 
@@ -116,3 +165,5 @@ This repository is provided under the MIT license. For more details, please refe
 ## Contact
 
 If you have any questions or suggestions related to the project, please create an issue.
+
+[Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
