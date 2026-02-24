@@ -73,7 +73,7 @@ For full documentation, see the [filid README](./packages/filid/README.md) ([Kor
 
 | Package                                  | Type          | Version | Description                                      |
 | ---------------------------------------- | ------------- | ------- | ------------------------------------------------ |
-| **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.12  | FCA-AI rule enforcement and fractal context management |
+| **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.2   | FCA-AI rule enforcement and fractal context management |
 
 ---
 

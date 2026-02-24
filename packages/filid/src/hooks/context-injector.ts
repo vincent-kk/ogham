@@ -41,7 +41,7 @@ function buildFcaContext(cwd: string): string {
   return [
     `[FCA-AI] Active in: ${cwd}`,
     'Rules:',
-    '- CLAUDE.md: max 100 lines, must include 3-tier boundary sections',
+    '- CLAUDE.md: max 50 lines, must include 3-tier boundary sections',
     '- SPEC.md: no append-only growth, must restructure on updates',
     '- Organ directories (auto-classified by structure analysis) must NOT have CLAUDE.md',
     '- Test files: max 15 cases per spec.ts (3 basic + 12 complex)',
@@ -51,7 +51,7 @@ function buildFcaContext(cwd: string): string {
     '- New module → must create CLAUDE.md (3-tier boundaries) + index.ts (barrel export)',
     '- Leaf utility dirs (components/, utils/, types/) → organ: no CLAUDE.md, keep flat',
     '- Shared code → place at nearest common ancestor (LCA) of its consumers',
-    '- No direct imports between siblings → route through parent\'s public interface',
+    "- No direct imports between siblings → route through parent's public interface",
     '- Use /filid:fca-scan to detect violations, /filid:fca-sync to fix structural drift',
     '',
     'Development Workflow:',

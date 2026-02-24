@@ -150,6 +150,13 @@ file. Preserve the original function's signature and return type.
 
 ---
 
+## MCP Tool Usage
+
+None — this agent operates directly on source files using Read, Write, Edit, Glob, Grep, and Bash tools without MCP tool dependencies.
+
+---
+
 ## Skill Participation
 
+- `/filid:fca-scan` — Phase 5 `--fix`: 3+12 rule violation remediation (it.each parameterization).
 - `/filid:fca-resolve` — Step 4: parallel fix application for accepted fix items.

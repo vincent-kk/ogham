@@ -33,6 +33,7 @@ fractal_scan(path: <PROJECT_ROOT>)
 Store `tree.nodes` as `SCAN_NODES` for use in A.1 classify calls.
 
 Build two lists:
+
 - `CHANGED_FILES`: all modified/added source files (`.ts`, `.tsx`, `.js`)
 - `CHANGED_DIRS`: unique parent directories of changed files
 - `CHANGED_SPEC_FILES`: changed `*.spec.ts` / `*.test.ts` files
@@ -52,11 +53,13 @@ structure_validate(path: <directory>)
 ```
 
 Checks:
+
 - If a changed directory is a fractal node → must have a CLAUDE.md
 - If a changed directory is an organ node → must NOT have a CLAUDE.md
 - `fractal_navigate(classify)` result must match the directory's actual role
 
 Severity mapping:
+
 - Organ directory has CLAUDE.md → HIGH
 - Fractal directory missing CLAUDE.md → MEDIUM
 - Category mismatch → HIGH
@@ -64,17 +67,20 @@ Severity mapping:
 ### A.2 — Stage 2: Document Compliance
 
 For each file in `CHANGED_CLAUDE_MDS`:
-- Line count must be <= 100
+
+- Line count must be <= 50
 - Must contain all three tier sections: "Always do", "Ask first", "Never do"
 - If line count >= 90: record as LOW severity warning (approaching limit; `doc_compress` recommended)
 
 For each file in `CHANGED_SPEC_MDS`:
+
 - Check for append-only patterns (duplicate section headings from prior iterations)
 
 Skip this stage if both lists are empty.
 
 Severity mapping:
-- Line count > 100 → HIGH
+
+- Line count > 50 → HIGH
 - Missing tier section → MEDIUM
 - SPEC.md append-only → MEDIUM
 
@@ -90,12 +96,13 @@ Also check: basic cases <= 3, complex cases <= 12.
 Skip this stage if `CHANGED_SPEC_FILES` is empty.
 
 Severity mapping:
+
 - Total cases > 15 → HIGH
 - Distribution violation (too many basic) → MEDIUM
 
 ### A.4 — Stage 4: Code Metrics (LCOM4 and CC)
 
-For each file in `CHANGED_FILES` (skip index.ts, *.d.ts, *.spec.ts):
+For each file in `CHANGED_FILES` (skip index.ts, _.d.ts, _.spec.ts):
 
 ```
 ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
@@ -104,12 +111,14 @@ test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComp
 ```
 
 Thresholds:
+
 - LCOM4 >= 2 → recommend split (LCOM4_SPLIT_THRESHOLD = 2)
 - CC > 15 → recommend compress/abstract (CC_THRESHOLD = 15)
 
 Skip this stage if `CHANGED_FILES` is empty.
 
 Severity mapping:
+
 - LCOM4 >= 2 on a module with 5+ exports → HIGH
 - LCOM4 >= 2 on smaller module → MEDIUM
 - CC > 15 → MEDIUM
@@ -123,12 +132,14 @@ ast_analyze(source: <file content>, analysisType: "dependency-graph")
 ```
 
 Checks:
+
 - Circular dependencies introduced by the changed files (CRITICAL)
 - Changed files importing from sibling fractals without a shared organ (HIGH)
 
 Skip this stage if `CHANGED_FILES` is empty.
 
 Severity mapping:
+
 - Circular dependency detected → CRITICAL
 - Cross-fractal boundary violation → HIGH
 
@@ -140,7 +151,7 @@ Write the following to `<REVIEW_DIR>/structure-check.md`:
 
 ```markdown
 ---
-scope: diff           # diff | full  (always "diff" in fca-review)
+scope: diff # diff | full  (always "diff" in fca-review)
 stage_results:
   structure: PASS|FAIL|SKIP
   documents: PASS|FAIL|SKIP
@@ -154,26 +165,28 @@ created_at: <ISO 8601>
 
 ## Structure Check — Stage Results (diff scope)
 
-| Stage | Name         | Result        | Issues |
-|-------|--------------|---------------|--------|
-| 1     | Structure    | PASS / FAIL   | N      |
-| 2     | Documents    | PASS / FAIL   | N      |
-| 3     | Tests        | PASS / FAIL   | N      |
-| 4     | Metrics      | PASS / FAIL   | N      |
-| 5     | Dependencies | PASS / FAIL   | N      |
-| **Overall** |       | **PASS/FAIL** | **N total** |
+| Stage       | Name         | Result        | Issues      |
+| ----------- | ------------ | ------------- | ----------- |
+| 1           | Structure    | PASS / FAIL   | N           |
+| 2           | Documents    | PASS / FAIL   | N           |
+| 3           | Tests        | PASS / FAIL   | N           |
+| 4           | Metrics      | PASS / FAIL   | N           |
+| 5           | Dependencies | PASS / FAIL   | N           |
+| **Overall** |              | **PASS/FAIL** | **N total** |
 
 ## Findings
 
 ### Critical / High
+
 | Sev | Stage | Path | Rule | Current Value | Recommended Fix |
-|-----|-------|------|------|---------------|-----------------|
-| ...  | ...   | ...  | ...  | ...           | ...             |
+| --- | ----- | ---- | ---- | ------------- | --------------- |
+| ... | ...   | ...  | ...  | ...           | ...             |
 
 ### Medium / Low
+
 | Sev | Stage | Path | Rule | Current Value | Recommended Fix |
-|-----|-------|------|------|---------------|-----------------|
-| ...  | ...   | ...  | ...  | ...           | ...             |
+| --- | ----- | ---- | ---- | ------------- | --------------- |
+| ... | ...   | ...  | ...  | ...           | ...             |
 ```
 
 ---

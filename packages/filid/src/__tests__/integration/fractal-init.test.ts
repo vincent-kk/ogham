@@ -122,9 +122,9 @@ describe('fractal-init pipeline', () => {
     );
   });
 
-  it('should reject CLAUDE.md exceeding 100 lines', () => {
+  it('should reject CLAUDE.md exceeding 50 lines', () => {
     const longContent = Array.from(
-      { length: 101 },
+      { length: 51 },
       (_, i) => `Line ${i + 1}`,
     ).join('\n');
     const validation = validateClaudeMd(longContent);

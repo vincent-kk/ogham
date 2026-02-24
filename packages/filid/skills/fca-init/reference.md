@@ -103,7 +103,7 @@ for each node in tree.nodes.values():
 For each directory classified as fractal that does not yet have a CLAUDE.md,
 generate one using the context-manager agent.
 
-CLAUDE.md structure (hard limit: 100 lines):
+CLAUDE.md structure (hard limit: 50 lines):
 
 ```markdown
 # <Module Name>
@@ -141,7 +141,7 @@ CLAUDE.md structure (hard limit: 100 lines):
 <list of modules this directory depends on>
 ```
 
-Enforce: file must not exceed 100 lines. If generation would exceed the
+Enforce: file must not exceed 50 lines. If generation would exceed the
 limit, summarize the most important conventions and boundary rules.
 
 ## Section 4 — SPEC.md Scaffolding
@@ -172,7 +172,7 @@ specifying. Do not create SPEC.md for leaf utility directories.
 
 After all files are written, validate the resulting structure:
 
-- Each fractal node's CLAUDE.md passes `validateClaudeMd()` (≤ 100 lines,
+- Each fractal node's CLAUDE.md passes `validateClaudeMd()` (≤ 50 lines,
   3-tier boundary sections present)
 - No organ directory contains a CLAUDE.md
 - All SPEC.md files pass `validateSpecMd()`

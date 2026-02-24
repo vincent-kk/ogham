@@ -46,7 +46,9 @@ by language extension, search with Grep, then filter false positives
 using LLM code understanding.
 See [reference.md Section 3](./reference.md#section-3--llm-search-fallback).
 
-### Phase 4 — LLM Replace Fallback
+If `--replace` is **not** provided, emit the search results and stop here.
+
+### Phase 4 — LLM Replace Fallback (only when `--replace` is provided)
 
 Perform search (Phase 3), show dry-run preview of proposed changes,
 ask for user confirmation, then apply via Edit tool.

@@ -55,7 +55,7 @@ See [reference.md Section 2](./reference.md#section-2--node-classification-rules
 
 ### Phase 3 — CLAUDE.md Generation
 
-Generate CLAUDE.md (≤100 lines, 3-tier boundaries) for each fractal directory
+Generate CLAUDE.md (≤50 lines, 3-tier boundaries) for each fractal directory
 that lacks one. Organ directories are skipped.
 See [reference.md Section 3](./reference.md#section-3--claudemd-generation-template).
 
@@ -104,7 +104,7 @@ KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helper
                                      | lib | styles | assets | constants
 KNOWN_ORGAN_DIR_NAMES (test/infra) = __tests__ | __mocks__ | __fixtures__
                                      | test | tests | spec | specs | fixtures | e2e
-CLAUDE_MD_LIMIT   = 100 lines
+CLAUDE_MD_LIMIT   = 50 lines
 3-TIER SECTIONS   = "Always do" | "Ask first" | "Never do"
 DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tree.nodes)
 ```
@@ -112,6 +112,6 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 Key rules:
 
 - Organ directories must never receive a CLAUDE.md
-- CLAUDE.md must not exceed 100 lines
+- CLAUDE.md must not exceed 50 lines
 - All three boundary sections are required in every CLAUDE.md
 - Existing CLAUDE.md files are preserved, never overwritten

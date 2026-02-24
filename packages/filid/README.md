@@ -62,7 +62,7 @@ Scans directories and generates `CLAUDE.md` boundary documents for each module. 
 /filid:fca-scan 고칠 수 있는 건 고쳐줘
 ```
 
-Detects CLAUDE.md exceeding 100 lines, missing boundary sections, CLAUDE.md in organ directories, etc.
+Detects CLAUDE.md exceeding 50 lines, missing boundary sections, CLAUDE.md in organ directories, etc.
 
 ### Sync Documentation After Code Changes
 
@@ -142,7 +142,7 @@ With the plugin active, these hooks fire **without user intervention**:
 
 | When                   | What                                  | Why                                                              |
 | ---------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| Writing/editing a file | Checks CLAUDE.md 100-line limit       | Prevents document bloat                                          |
+| Writing/editing a file | Checks CLAUDE.md 50-line limit        | Prevents document bloat                                          |
 | Writing/editing a file | Blocks CLAUDE.md in organ directories | Prevents unnecessary docs in utility folders                     |
 | Sub-agent starting     | Injects role restrictions             | Prevents agents from overstepping (e.g., architect editing code) |
 | User submits a prompt  | Injects FCA-AI rule context           | Ensures agents are aware of rules while working                  |
@@ -175,7 +175,7 @@ Core rules enforced by filid:
 
 | Rule                       | Threshold                                            | Enforcement         |
 | -------------------------- | ---------------------------------------------------- | ------------------- |
-| CLAUDE.md line limit       | 100 lines max                                        | Hook (auto-block)   |
+| CLAUDE.md line limit       | 50 lines max                                         | Hook (auto-block)   |
 | 3-tier boundary sections   | "Always do" / "Ask first" / "Never do" required      | Hook (warning)      |
 | Organ directory protection | No CLAUDE.md in `components`, `utils`, `types`, etc. | Hook (auto-block)   |
 | Test density               | Max 15 per spec.ts (3 core + 12 edge)                | MCP analysis        |

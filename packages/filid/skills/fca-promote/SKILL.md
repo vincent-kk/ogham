@@ -43,12 +43,17 @@ See [reference.md Section 3](./reference.md#section-3--pattern-analysis).
 
 ### Phase 4 — Spec Generation (`implementer`)
 
-Build parameterized `spec.ts` enforcing the 3+12 rule (≤15 total cases).
+Delegate to `filid:implementer` agent. Build parameterized `spec.ts` enforcing
+the 3+12 rule (≤15 total cases).
 See [reference.md Section 4](./reference.md#section-4--spec-generation-312-rule).
 
 ### Phase 5 — Validation (`qa-reviewer`)
 
 Verify generated specs pass `test_metrics(action: "check-312")` before writing.
+
+- **PASS**: Proceed to Phase 6.
+- **FAIL**: Abort migration for that file; report which cases exceed the 3+12 limit and skip Phase 6 for the failing file.
+
 See [reference.md Section 5](./reference.md#section-5--validation-and-migration).
 
 ### Phase 6 — Migration (`implementer`)

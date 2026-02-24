@@ -8,7 +8,7 @@
 
 | 상수명                   | 값              | 정의 위치                        | 용도                       |
 | ------------------------ | --------------- | -------------------------------- | -------------------------- |
-| `CLAUDE_MD_LINE_LIMIT`   | `100`           | `core/document-validator.ts:4`   | CLAUDE.md 최대 줄 수       |
+| `CLAUDE_MD_LINE_LIMIT`   | `50`            | `core/document-validator.ts:8`   | CLAUDE.md 최대 줄 수       |
 | `ORGAN_DIR_NAMES`        | 9개 문자열 배열 | `core/organ-classifier.ts:4-14`  | Organ 디렉토리 식별        |
 | `TEST_THRESHOLD`         | `15`            | `metrics/decision-tree.ts:4`     | 3+12 규칙 테스트 상한      |
 | `CC_THRESHOLD`           | `15`            | `metrics/decision-tree.ts:7`     | Cyclomatic Complexity 상한 |
@@ -52,7 +52,7 @@ const BOUNDARY_KEYWORDS = {
 
 | 규칙명             | 대상      | 조건                                   | 액션       | 심각도             |
 | ------------------ | --------- | -------------------------------------- | ---------- | ------------------ |
-| line-limit         | CLAUDE.md | 줄 수 > 100                            | Write 차단 | `error`            |
+| line-limit         | CLAUDE.md | 줄 수 > 50                             | Write 차단 | `error`            |
 | missing-boundaries | CLAUDE.md | Always do/Ask first/Never do 섹션 누락 | 경고 주입  | `warning`          |
 | append-only        | SPEC.md   | 기존 내용 유지 + 끝에만 추가           | Write 차단 | `error`            |
 | structure-guard    | CLAUDE.md | Organ 디렉토리 내 생성 시도            | Write 차단 | `error` (implicit) |
@@ -94,7 +94,7 @@ const BOUNDARY_KEYWORDS = {
 
 ### CLAUDE.md 검증 (`validateClaudeMd`)
 
-1. **줄 수 제한**: `countLines(content) > 100` → `error`
+1. **줄 수 제한**: `countLines(content) > 50` → `error`
    - 빈 문자열 = 0줄, 후행 개행 무시
 2. **3-tier 경계**: 3개 섹션 전부 존재해야 함 → 누락 시 `warning`
    - `### Always do` 또는 `## Always do` (대소문자 무시)
@@ -211,7 +211,7 @@ type DecisionAction = 'split' | 'compress' | 'parameterize' | 'ok';
 ```
 [FCA-AI] Active in: {cwd}
 Rules:
-- CLAUDE.md: max 100 lines, must include 3-tier boundary sections
+- CLAUDE.md: max 50 lines, must include 3-tier boundary sections
 - SPEC.md: no append-only growth, must restructure on updates
 - Organ directories (...) must NOT have CLAUDE.md
 - Test files: max 15 cases per spec.ts (3 basic + 12 complex)

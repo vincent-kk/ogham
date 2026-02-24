@@ -128,7 +128,7 @@ Stage 1 delegates to `/filid:fca-update`, which internally uses `cache_manage`,
 ```
 
 ```
-Stages:   Prerequisites → FCA Sync → Base Resolution → Change Analysis → PR Publication
+Stages:   Stage 0 (Prerequisites) → Stage 1 (FCA Sync) → Stage 2 (Base Resolution) → Stage 3 (Change Analysis) → Stage 4 (PR Publication)
 Agents:   (Stage 1 delegates to fca-update internal agents)
 Output:   GitHub PR URL
 Language: PR body in Korean (tech terms / code identifiers kept as-is)

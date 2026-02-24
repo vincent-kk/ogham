@@ -3,6 +3,7 @@
  * Replace code patterns using AST matching.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
   getFilesForLanguage,
@@ -56,9 +57,27 @@ export async function handleAstGrepReplace(
   | AstGrepReplaceError
   | { message: string; pattern: string; filesSearched: number }
 > {
-  const { pattern, replacement, language, path = '.', dry_run = true } = args;
+  const {
+    pattern,
+    replacement,
+    language,
+    path: searchPath = '.',
+    dry_run = true,
+  } = args;
 
   try {
+    // When applying changes (dry_run=false), validate that search path is
+    // not a system directory to prevent accidental modifications outside projects.
+    if (!dry_run) {
+      const resolvedSearch = resolve(searchPath);
+      const systemPrefixes = ['/usr', '/bin', '/sbin', '/etc', '/var/lib'];
+      if (systemPrefixes.some((p) => resolvedSearch.startsWith(p))) {
+        return {
+          error: `Refusing to modify files in system directory "${searchPath}". Only project directories are allowed.`,
+        };
+      }
+    }
+
     const sg = await getSgModule();
     if (!sg) {
       return {
@@ -67,11 +86,11 @@ export async function handleAstGrepReplace(
       };
     }
 
-    const files = getFilesForLanguage(path, language);
+    const files = getFilesForLanguage(searchPath, language);
 
     if (files.length === 0) {
       return {
-        message: `No ${language} files found in ${path}`,
+        message: `No ${language} files found in ${searchPath}`,
         pattern,
         filesSearched: 0,
       };
@@ -168,7 +187,7 @@ export async function handleAstGrepReplace(
 
     if (changes.length === 0) {
       return {
-        message: `No matches found for pattern: ${pattern}\n\nSearched ${files.length} ${language} file(s) in ${path}`,
+        message: `No matches found for pattern: ${pattern}\n\nSearched ${files.length} ${language} file(s) in ${searchPath}`,
         pattern,
         filesSearched: files.length,
       };

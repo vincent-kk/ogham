@@ -7,13 +7,13 @@ These are not standalone rule IDs in the rule engine but are enforced via PreToo
 
 ## CLAUDE.md Conventions
 
-### 100-Line Limit
+### 50-Line Limit
 
-Every `CLAUDE.md` file must not exceed **100 lines**.
+Every `CLAUDE.md` file must not exceed **50 lines**.
 
-CLAUDE.md is a working context document, not a design document. It must remain concise enough to be injected into Claude's context window without consuming excessive tokens. When a CLAUDE.md approaches 100 lines, it is a signal that the module has grown too large and should be decomposed into smaller fractal nodes, each with their own CLAUDE.md.
+CLAUDE.md is a working context document, not a design document. It must remain concise enough to be injected into Claude's context window without consuming excessive tokens. When a CLAUDE.md approaches 50 lines, it is a signal that the module has grown too large and should be decomposed into smaller fractal nodes, each with their own CLAUDE.md.
 
-**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations that produce a CLAUDE.md exceeding 100 lines (`continue: false`).
+**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations that produce a CLAUDE.md exceeding 50 lines (`continue: false`).
 
 ### 3-Tier Boundary Sections
 

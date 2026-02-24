@@ -21,7 +21,7 @@ describe('document-validator', () => {
   });
 
   describe('validateClaudeMd', () => {
-    it('should pass for valid CLAUDE.md under 100 lines', () => {
+    it('should pass for valid CLAUDE.md under 50 lines', () => {
       const content = [
         '# Module',
         '## Boundaries',
@@ -37,18 +37,18 @@ describe('document-validator', () => {
       expect(result.violations).toHaveLength(0);
     });
 
-    it('should pass for exactly 100 lines', () => {
+    it('should pass for exactly 50 lines', () => {
       const content = Array.from(
-        { length: 100 },
+        { length: 50 },
         (_, i) => `Line ${i + 1}`,
       ).join('\n');
       const result = validateClaudeMd(content);
       expect(result.valid).toBe(true);
     });
 
-    it('should fail for CLAUDE.md exceeding 100 lines', () => {
+    it('should fail for CLAUDE.md exceeding 50 lines', () => {
       const content = Array.from(
-        { length: 101 },
+        { length: 51 },
         (_, i) => `Line ${i + 1}`,
       ).join('\n');
       const result = validateClaudeMd(content);

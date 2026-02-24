@@ -46,10 +46,10 @@ function normalizeBranch(branchName: string): string {
   result = result.replace(/[#@~^:?*[\]\\]/g, '_');
 
   // Remove leading `.` and `-`
-  result = result.replace(/^[.\-]+/, '');
+  result = result.replace(/^[.-]+/, '');
 
   // Remove trailing `.` and `-`
-  result = result.replace(/[.\-]+$/, '');
+  result = result.replace(/[.-]+$/, '');
 
   return result;
 }
@@ -113,7 +113,12 @@ export async function handleReviewManage(
         normalized,
       );
 
-      const fileNames = ['session.md', 'verification.md', 'review-report.md'];
+      const fileNames = [
+        'structure-check.md',
+        'session.md',
+        'verification.md',
+        'review-report.md',
+      ];
       const existingFiles: string[] = [];
 
       for (const fileName of fileNames) {
@@ -125,15 +130,19 @@ export async function handleReviewManage(
         }
       }
 
+      const hasStructureCheck = existingFiles.includes('structure-check.md');
       const hasSession = existingFiles.includes('session.md');
       const hasVerification = existingFiles.includes('verification.md');
       const hasReport = existingFiles.includes('review-report.md');
 
       let phase: CheckpointStatus['phase'];
-      if (!hasSession) {
+      if (!hasStructureCheck && !hasSession) {
         phase = 'A';
-      } else if (!hasVerification) {
+      } else if (!hasSession) {
+        // Phase A done (structure-check.md exists), Phase B pending
         phase = 'B';
+      } else if (!hasVerification) {
+        phase = 'C';
       } else if (!hasReport) {
         phase = 'C';
       } else {
@@ -251,6 +260,15 @@ export async function handleReviewManage(
         'review',
         normalized,
       );
+
+      // Validate the resolved path stays under projectRoot/.filid/review/
+      const resolvedReview = path.resolve(reviewDir);
+      const expectedPrefix = path.resolve(
+        path.join(input.projectRoot, '.filid', 'review'),
+      );
+      if (!resolvedReview.startsWith(expectedPrefix)) {
+        throw new Error('Invalid cleanup target: path traversal detected');
+      }
 
       await fs.rm(reviewDir, { recursive: true, force: true });
 

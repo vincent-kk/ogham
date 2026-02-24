@@ -15,8 +15,8 @@ const baseInput: PreToolUseInput = {
 };
 
 describe('pre-tool-validator', () => {
-  it('should block Write to CLAUDE.md exceeding 100 lines', () => {
-    const content = Array.from({ length: 101 }, (_, i) => `Line ${i + 1}`).join(
+  it('should block Write to CLAUDE.md exceeding 50 lines', () => {
+    const content = Array.from({ length: 51 }, (_, i) => `Line ${i + 1}`).join(
       '\n',
     );
     const input: PreToolUseInput = {
@@ -27,7 +27,7 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(false);
   });
 
-  it('should allow Write to CLAUDE.md within 100 lines', () => {
+  it('should allow Write to CLAUDE.md within 50 lines', () => {
     const content = Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join(
       '\n',
     );
@@ -78,7 +78,7 @@ describe('pre-tool-validator', () => {
       '25 new lines',
     );
     expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'line limit (100)',
+      'line limit (50)',
     );
   });
 

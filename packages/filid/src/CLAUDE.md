@@ -47,5 +47,4 @@
 
 ## Dependencies
 
-- Node.js `>=20`, TypeScript 5.7
-- `@modelcontextprotocol/sdk`, `zod`, `fast-glob`
+- Node.js `>=20`, TypeScript 5.7, `@modelcontextprotocol/sdk`, `zod`, `fast-glob`

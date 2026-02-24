@@ -26,9 +26,9 @@ For every fractal node that has a CLAUDE.md, perform two checks:
 
 Read the CLAUDE.md content and count lines.
 
-| Condition         | Severity | Violation ID           |
-| ----------------- | -------- | ---------------------- |
-| `lineCount > 100` | high     | `CLAUDE_MD_LINE_LIMIT` |
+| Condition        | Severity | Violation ID           |
+| ---------------- | -------- | ---------------------- |
+| `lineCount > 50` | high     | `CLAUDE_MD_LINE_LIMIT` |
 
 **Check 2b — 3-tier boundary sections**
 
@@ -90,7 +90,7 @@ CRITICAL (<n>)
     Organ directories must not contain CLAUDE.md.
     Remediation: delete the file or reclassify the directory.
 
-  [CLAUDE_MD_LINE_LIMIT] src/payments/CLAUDE.md — 117 lines (limit: 100)
+  [CLAUDE_MD_LINE_LIMIT] src/payments/CLAUDE.md — 117 lines (limit: 50)
     Remediation: compress or split the document.
 
 HIGH (<n>)
@@ -106,13 +106,19 @@ Run with --fix to apply automatic remediations.
 
 ### With `--fix` — apply remediations then re-validate
 
-| Violation                      | Auto-fix Action                               |
-| ------------------------------ | --------------------------------------------- |
-| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the CLAUDE.md from the organ directory |
-| `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file |
+| Violation                      | Auto-fix Action                                                         | Agent             |
+| ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
+| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the CLAUDE.md from the organ directory                           | `context-manager` |
+| `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
+| `CLAUDE_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
+| `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
-Violations that require human judgement (line limit, test count) are
-flagged but not auto-fixed. After fixes, re-run Phases 2–4 and append
+Each fixable violation is delegated to the appropriate agent as a separate
+Task subagent (`run_in_background: true`). Violations requiring architectural
+decisions (reclassification, missing index.ts, structural drift) are reported
+but not auto-fixed — run `/filid:fca-sync` or `/filid:fca-restructure` for those.
+
+After all agent fixes complete, re-run Phases 2–4 on fixed files and append
 a fix summary:
 
 ```
@@ -124,9 +130,9 @@ Skipped : <n> (require manual remediation)
 
 ## Violation Quick Lookup
 
-| ID                             | Severity | Auto-fix |
-| ------------------------------ | -------- | -------- |
-| `CLAUDE_MD_LINE_LIMIT`         | high     | No       |
-| `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      |
-| `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      |
-| `TEST_312_EXCEEDED`            | high     | No       |
+| ID                             | Severity | Auto-fix | Agent             |
+| ------------------------------ | -------- | -------- | ----------------- |
+| `CLAUDE_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
+| `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
+| `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `context-manager` |
+| `TEST_312_EXCEEDED`            | high     | Yes      | `code-surgeon`    |

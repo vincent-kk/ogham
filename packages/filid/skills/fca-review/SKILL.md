@@ -34,12 +34,12 @@ and a state machine.
 4. Resume logic:
    - No checkpoint files → Phase A (unless `--no-structure-check`, then Phase B)
    - `structure-check.md` only → Phase B
-   - `session.md` only → Phase C
+   - `session.md` only → Phase C (regardless of `--no-structure-check`)
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
    - All complete (`review-report.md` exists) → "Review complete"
 
-If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)` first, then restart from Phase A.
+If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)` first, then restart from Phase A (or Phase B if `--no-structure-check`).
 
 ### Step 2 — Phase A + B: Parallel Delegation
 
@@ -49,6 +49,8 @@ If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>
 
 **Phase A: Structure Pre-Check** (`general-purpose`, model: `sonnet`,
 `run_in_background: true`)
+
+> Uses `general-purpose` subagent type (not filid agents) because these phases perform broad analysis that benefits from unrestricted tool access.
 
 Subagent reads and executes `phases/phase-a-structure.md`.
 Resolve path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/`.

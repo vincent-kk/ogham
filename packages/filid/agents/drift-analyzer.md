@@ -131,6 +131,6 @@ Total: 17 drift items
 
 ## Skill Participation
 
-- `/filid:fca-sync` — Lead: Stage 1 (project scan) and Stage 2 (drift detection & correction plan).
-- `/filid:fca-guide` — Supplementary: include current drift count in guide output.
+- `/filid:fca-sync` — Lead: Stage 1 (project scan), Stage 2 (drift detection & classification), and Stage 3 (correction plan generation; fractal-architect then reviews reclassification candidates via lca_resolve).
+- `/filid:fca-guide` — Reference role: this skill runs directly via MCP tools (fractal_scan, rule_query) without delegating to this agent. Invoke manually for supplementary drift context.
 - `/filid:fca-update` — Stage 2: drift detection and correction plan when critical/high violations present.

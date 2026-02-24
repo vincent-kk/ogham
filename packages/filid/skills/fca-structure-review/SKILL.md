@@ -32,13 +32,18 @@ pipeline independently and can be used to validate results after `/filid:fca-upd
 
 ## Core Workflow
 
+> **`--stage=N` mode**: When a single stage is specified, spawn **only that stage**
+> as a Task subagent — do NOT spawn the other stages. Stage 6 then reports only
+> the result of the selected stage (no cross-stage aggregation).
+
 Stages 1–5 are **independent** and run **in parallel** as separate Task subagents
 (`run_in_background: true`). Stage 6 aggregates their results and runs after all
 parallel stages complete.
 
-### Stages 1–5 (Parallel)
+### Stages 1–5 (Parallel — full run only)
 
-Spawn all five stages simultaneously. Await all before proceeding to Stage 6.
+When running without `--stage=N`: spawn all five stages simultaneously.
+Await all before proceeding to Stage 6.
 
 ### Stage 1 — Structure Verification
 
@@ -47,7 +52,7 @@ See [reference.md Section 1](./reference.md#section-1--structure-verification-de
 
 ### Stage 2 — Document Compliance
 
-Verify CLAUDE.md (≤100 lines, 3-tier sections) and SPEC.md (no append-only).
+Verify CLAUDE.md (≤50 lines, 3-tier sections) and SPEC.md (no append-only).
 See [reference.md Section 2](./reference.md#section-2--document-compliance-details).
 
 ### Stage 3 — Test Compliance
@@ -57,7 +62,7 @@ See [reference.md Section 3](./reference.md#section-3--test-compliance-details).
 
 ### Stage 4 — Metric Analysis
 
-Measure LCOM4 (split at ≥2) and CC (compress at >15) via `ast_analyze`.
+Measure LCOM4 (split at ≥2) and CC (compress at >15) via `ast_analyze`. When using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations.
 See [reference.md Section 4](./reference.md#section-4--metric-analysis-details).
 
 ### Stage 5 — Dependency Verification
@@ -65,9 +70,11 @@ See [reference.md Section 4](./reference.md#section-4--metric-analysis-details).
 Build the dependency DAG and verify acyclicity via `ast_analyze`.
 See [reference.md Section 5](./reference.md#section-5--dependency-verification-details).
 
-### Stage 6 — Summary Report (Sequential — after Stages 1–5)
+### Stage 6 — Summary Report (Sequential — after all spawned stages complete)
 
 Aggregate all stage results into a structured pass/fail verdict.
+When `--stage=N` is specified, only one stage was spawned; Stage 6 reports
+only that stage's result (no aggregation across other stages).
 See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 
 ## Available MCP Tools
@@ -105,7 +112,7 @@ Stages:   [Structure + Documents + Tests + Metrics + Dependencies] → Summary
           (Stages 1–5 run in parallel; Stage 6 aggregates)
 Agents:   qa-reviewer (lead), fractal-architect (assist — stages 1, 5)
 Thresholds:
-  CLAUDE_MD_LINE_LIMIT = 100
+  CLAUDE_MD_LINE_LIMIT = 50
   TEST_THRESHOLD       = 15  (max cases per spec.ts)
   CC_THRESHOLD         = 15  (max cyclomatic complexity)
   LCOM4_SPLIT          = 2   (split when LCOM4 >= 2)

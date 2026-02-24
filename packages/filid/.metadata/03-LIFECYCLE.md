@@ -76,7 +76,7 @@
        │
        ▼
 3. fractal 디렉토리에 CLAUDE.md 생성
-   - 100줄 이내
+   - 50줄 이내
    - 3-tier 경계 섹션 포함 (Always do / Ask first / Never do)
    - 프로젝트 구조 및 명령어 기록
        │
@@ -125,7 +125,7 @@
        ▼
 2. CLAUDE.md 검증
    각 fractal 노드의 CLAUDE.md에 대해:
-   ├── 100줄 초과 검사
+   ├── 50줄 초과 검사
    └── 3-tier 경계 섹션 존재 검사
        │
        ▼
@@ -156,7 +156,7 @@
 
 ### 관여 에이전트
 
-- **drift-analyzer** (Stage 1-2 주도): drift 감지 및 계획
+- **drift-analyzer** (Stage 1-3 주도): drift 감지, 계획 생성
 - **fractal-architect** (보조): 구조 분석 자문
 - **restructurer** (Stage 4): 승인된 수정 실행
 
@@ -236,7 +236,7 @@
          ▼
 ┌─ Stage 2: Documents ─────────────────────────┐
 │ CLAUDE.md/SPEC.md 규정 준수 검증                │
-│ - CLAUDE.md: 100줄 제한 + 3-tier 경계          │
+│ - CLAUDE.md: 50줄 제한 + 3-tier 경계           │
 │ - SPEC.md: append-only 패턴 없음               │
 │ - 문서-코드 동기화 상태                          │
 └──────────────────────────────────────────────┘

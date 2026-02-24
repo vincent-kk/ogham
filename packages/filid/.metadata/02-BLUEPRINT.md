@@ -131,7 +131,7 @@ isOrganDirectory(string) → boolean
 **핵심 알고리즘**:
 
 - `countLines`: 빈 문자열 = 0, 후행 `\n` 무시, `split('\n').length`
-- `validateClaudeMd`: 100줄 체크 + 3-tier regex 매칭
+- `validateClaudeMd`: 50줄 체크 + 3-tier regex 매칭
 - `detectAppendOnly`: 기존 줄 1:1 비교 + 새 줄 추가만 존재 판별
 - `validateSpecMd`: append-only 감지
 

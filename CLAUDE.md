@@ -5,7 +5,7 @@ Claude Code 플러그인 모노레포. AI 에이전트 워크플로우 확장 �
 ## Project Structure
 
 - **Monorepo**: Yarn 4.12 workspaces (`packages/*`)
-- **Package**: `@ogham/filid` — FCA-AI rule enforcement Claude Code plugin (v0.0.12)
+- **Package**: `@ogham/filid` — FCA-AI rule enforcement Claude Code plugin (v0.0.2)
 
 ```
 packages/filid/

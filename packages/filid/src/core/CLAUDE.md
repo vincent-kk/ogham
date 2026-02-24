@@ -13,7 +13,7 @@ FCA-AI 아키텍처의 핵심 알고리즘을 구현한다. 프랙탈 트리 구
 | `drift-detector.ts` | 구조 드리프트 감지 + SyncPlan 생성 |
 | `rule-engine.ts` | 7개 내장 규칙 평가 (`loadBuiltinRules`, `evaluateRules`) |
 | `fractal-validator.ts` | 구조 유효성 검증 (`validateStructure`, `validateNode`) |
-| `document-validator.ts` | CLAUDE.md/SPEC.md 100줄 + 3-tier 검증 |
+| `document-validator.ts` | CLAUDE.md/SPEC.md 50줄 + 3-tier 검증 |
 | `project-analyzer.ts` | 프로젝트 건강도 분석 + 리포트 생성 |
 | `dependency-graph.ts` | DAG 구축 · 위상 정렬 · 사이클 탐지 |
 | `lca-calculator.ts` | Lowest Common Ancestor 계산 |
@@ -32,7 +32,7 @@ FCA-AI 아키텍처의 핵심 알고리즘을 구현한다. 프랙탈 트리 구
 ### Always do
 
 - 새 규칙 추가 시 `rule-engine.ts`의 `loadBuiltinRules`에 등록
-- `document-validator.ts`를 통해 CLAUDE.md/SPEC.md 100줄 제한 강제
+- `document-validator.ts`를 통해 CLAUDE.md/SPEC.md 50줄 제한 강제
 - 공개 함수는 `src/index.ts`에 re-export
 
 ### Ask first

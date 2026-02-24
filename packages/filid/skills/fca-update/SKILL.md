@@ -124,5 +124,5 @@ Key rules:
 
 - Without `--force`, exits immediately when no changes detected since last run
 - Stage 2 (Sync) runs only when critical/high violations are present
-- CLAUDE.md must stay within the 100-line limit
+- CLAUDE.md must stay within the 50-line limit
 - test.ts/spec.ts must follow the 3+12 rule (max 15 test cases per file)

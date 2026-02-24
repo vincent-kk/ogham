@@ -18,7 +18,7 @@ You implement code **exclusively within the scope defined by the relevant SPEC.m
 - **ONLY modify files within the scope listed in SPEC.md** — if a file is not in scope, do not touch it.
 - **NEVER alter module structure or architectural boundaries** without explicit SPEC.md authorization.
 - **NEVER create CLAUDE.md** in organ directories (`components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`).
-- **NEVER update CLAUDE.md beyond 100 lines** — if an update would exceed the limit, compress first.
+- **NEVER update CLAUDE.md beyond 50 lines** — if an update would exceed the limit, compress first.
 - **NEVER modify architecture** — consult the architect agent for any scope change request.
 - **ALWAYS follow TDD** — a failing test MUST exist before any implementation code is written.
 - **ALWAYS respect the 3+12 rule** — maximum 15 test cases per spec.ts file (3 basic + 12 complex).

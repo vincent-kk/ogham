@@ -10,7 +10,7 @@ export { isSpecMd } from './shared.js';
  * PreToolUse hook logic for CLAUDE.md/SPEC.md validation.
  *
  * For Write tool targeting CLAUDE.md:
- * - Blocks if content exceeds 100-line limit (error)
+ * - Blocks if content exceeds 50-line limit (error)
  * - Warns if missing 3-tier boundary sections (warning, no block)
  *
  * For Write tool targeting SPEC.md:
@@ -35,8 +35,8 @@ export function validatePreToolUse(
         hookSpecificOutput: {
           additionalContext:
             `Note: Editing CLAUDE.md via Edit tool with ${lineCount} new lines — ` +
-            'line limit (100) cannot be enforced on partial edits. ' +
-            'Verify the final line count does not exceed 100 lines after editing.',
+            'line limit (50) cannot be enforced on partial edits. ' +
+            'Verify the final line count does not exceed 50 lines after editing.',
         },
       };
     }

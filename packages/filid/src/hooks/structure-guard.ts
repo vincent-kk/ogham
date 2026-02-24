@@ -9,16 +9,24 @@ import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isClaudeMd } from './shared.js';
 
+/** Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls */
+const organCache = new Map<string, boolean>();
+
 /**
  * 디렉토리 경로를 기반으로 organ 여부를 판별.
  * classifyNode()를 사용하여 구조 기반 분류를 수행하고,
  * 파일시스템 접근 실패 시 false를 반환한다.
+ * 결과는 프로세스 내 캐시에 저장하여 동일 경로 반복 검사를 방지한다.
  */
 function isOrganByStructure(dirPath: string): boolean {
+  const cached = organCache.get(dirPath);
+  if (cached !== undefined) return cached;
   try {
     if (!existsSync(dirPath)) {
       // 파일시스템에 없으면 레거시 이름 기반 폴백
-      return KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
+      const fallback = KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
+      organCache.set(dirPath, fallback);
+      return fallback;
     }
     const entries = readdirSync(dirPath, { withFileTypes: true });
     const hasClaudeMd = entries.some(
@@ -46,8 +54,11 @@ function isOrganByStructure(dirPath: string): boolean {
       hasFractalChildren,
       isLeafDirectory,
     });
-    return category === 'organ';
+    const result = category === 'organ';
+    organCache.set(dirPath, result);
+    return result;
   } catch {
+    organCache.set(dirPath, false);
     return false;
   }
 }

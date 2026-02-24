@@ -24,7 +24,7 @@ misclassified paths.
 
 ```
 for each CLAUDE.md in scope:
-  - lineCount <= 100                     // hard limit
+  - lineCount <= 50                     // hard limit
   - contains 3-tier boundary sections    // required headings
   - doc_compress(mode: "auto")           // size warning at >= 90 lines
 
@@ -109,7 +109,7 @@ with each cycle path listed.
 
 Issues by severity:
   CRITICAL (0)
-  HIGH (1):   src/core/CLAUDE.md — 103 lines, exceeds 100-line limit
+  HIGH (1):   src/core/CLAUDE.md — 103 lines, exceeds 50-line limit
   MEDIUM (1): src/parser/index.ts — LCOM4=3, recommend split
   LOW (0)
 
@@ -138,13 +138,13 @@ ast_analyze(source: source, analysisType: "lcom4")
 
 ## MCP Tool Reference
 
-| Tool               | Action / Parameters                              | Stage | Purpose                                      |
-| ------------------ | ------------------------------------------------ | ----- | -------------------------------------------- |
-| `fractal_scan`     | `path: cwd`                                      | 1, 5  | Retrieve module tree; verify classifications |
-| `fractal_navigate` | `action: "classify", path, entries`              | 1     | Classify a specific directory                |
-| `doc_compress`     | `mode: "auto"`                                   | 2     | Check document size                          |
-| `test_metrics`     | `action: "check-312", files`                     | 3     | Validate 3+12 rule per spec.ts               |
-| `test_metrics`     | `action: "decide", decisionInput`                | 4     | Generate split/compress recommendation       |
-| `ast_analyze`      | `analysisType: "lcom4", source`                  | 4     | Compute LCOM4 cohesion metric                |
-| `ast_analyze`      | `analysisType: "cyclomatic-complexity", source`  | 4     | Compute cyclomatic complexity                |
-| `ast_analyze`      | `analysisType: "dependency-graph", source`       | 5     | Build full import dependency DAG             |
+| Tool               | Action / Parameters                             | Stage | Purpose                                      |
+| ------------------ | ----------------------------------------------- | ----- | -------------------------------------------- |
+| `fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
+| `fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
+| `doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
+| `test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
+| `test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
+| `ast_analyze`      | `analysisType: "lcom4", source`                 | 4     | Compute LCOM4 cohesion metric                |
+| `ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |
+| `ast_analyze`      | `analysisType: "dependency-graph", source`      | 5     | Build full import dependency DAG             |

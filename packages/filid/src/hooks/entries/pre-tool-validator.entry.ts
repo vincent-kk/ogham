@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import type { PreToolUseInput } from '../../types/hooks.js';
 import { isSpecMd, validatePreToolUse } from '../pre-tool-validator.js';
@@ -18,7 +19,9 @@ try {
   let oldSpecContent: string | undefined;
   if (input.tool_name === 'Write' && isSpecMd(filePath)) {
     try {
-      oldSpecContent = readFileSync(filePath, 'utf-8');
+      // 상대 경로를 cwd 기준 절대 경로로 변환
+      const resolvedPath = resolve(input.cwd, filePath);
+      oldSpecContent = readFileSync(resolvedPath, 'utf-8');
     } catch {
       // 기존 파일 없으면 undefined (검증 건너뜀)
     }

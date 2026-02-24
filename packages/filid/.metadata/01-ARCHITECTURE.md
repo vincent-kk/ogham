@@ -34,7 +34,7 @@ AI 에이전트가 대규모 코드베이스를 다룰 때 발생하는 핵심 �
 | 프랙탈 단위              | `FractalNode` (type: 'fractal')           | `core/fractal-tree.ts`                                     |
 | 부속품(Organ)            | `FractalNode` (type: 'organ')             | `core/organ-classifier.ts`                                 |
 | 순수 함수 모듈           | `FractalNode` (type: 'pure-function')     | `core/organ-classifier.ts`                                 |
-| CLAUDE.md 100줄 제한     | `validateClaudeMd()`                      | `core/document-validator.ts`                               |
+| CLAUDE.md 50줄 제한      | `validateClaudeMd()`                      | `core/document-validator.ts`                               |
 | 3-tier 경계 시스템       | `ThreeTierBoundary` 검증                  | `core/document-validator.ts`                               |
 | SPEC.md append-only 금지 | `detectAppendOnly()` + `validateSpecMd()` | `core/document-validator.ts`                               |
 | Organ CLAUDE.md 금지     | `guardStructure()`                        | `hooks/structure-guard.ts`                                 |

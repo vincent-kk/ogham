@@ -5,7 +5,7 @@ import type {
 } from '../types/documents.js';
 
 /** Maximum line count for CLAUDE.md */
-const CLAUDE_MD_LINE_LIMIT = 100;
+const CLAUDE_MD_LINE_LIMIT = 50;
 
 /** 3-tier boundary keywords */
 const BOUNDARY_KEYWORDS = {
@@ -27,18 +27,18 @@ export function countLines(content: string): number {
 
 /**
  * Validate a CLAUDE.md document.
- * - 100-line limit
+ * - 50-line limit
  * - 3-tier boundary presence (Always do / Ask first / Never do)
  */
 export function validateClaudeMd(content: string): ClaudeMdValidation {
   const violations: DocumentViolation[] = [];
 
-  // Check 100-line limit
+  // Check 50-line limit
   const lines = countLines(content);
   if (lines > CLAUDE_MD_LINE_LIMIT) {
     violations.push({
       rule: 'line-limit',
-      message: `CLAUDE.md exceeds ${CLAUDE_MD_LINE_LIMIT}-line limit (${lines} lines). Compress or deduplicate content.`,
+      message: `CLAUDE.md exceeds ${CLAUDE_MD_LINE_LIMIT}-line limit (${lines} lines). Compress, deduplicate, or move detailed content to SPEC.md.`,
       severity: 'error',
     });
   }

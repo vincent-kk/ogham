@@ -44,7 +44,7 @@ subagents (`run_in_background: true`). Await all three before Phase 5.
 
 ### Phase 2 — CLAUDE.md Validation
 
-Check line count (≤100) and 3-tier boundary sections for every CLAUDE.md using Read and Grep.
+Check line count (≤50) and 3-tier boundary sections for every CLAUDE.md using Read and Grep.
 See [reference.md Section 2](./reference.md#section-2--claudemd-validation).
 
 ### Phase 3 — Organ Directory Validation
@@ -59,16 +59,31 @@ See [reference.md Section 4](./reference.md#section-4--test-file-validation-312-
 
 ### Phase 5 — Report Generation (Sequential — after Phases 2–4)
 
-Emit a structured violation report; with `--fix`, apply auto-remediations
-and re-validate.
+Emit a structured violation report. With `--fix`, apply auto-remediations
+and re-validate:
+
+- **CLAUDE.md line-count violations**: delegated to `context-manager` agent
+  (trims and compresses to bring within the 50-line limit).
+- **CLAUDE.md missing boundary sections**: delegated to `context-manager` agent
+  (appends skeleton "Always do" / "Ask first" / "Never do" sections).
+- **Organ directory CLAUDE.md violations**: delegated to `context-manager` agent
+  (removes the forbidden CLAUDE.md from the organ directory).
+- **3+12 rule violations in spec files**: delegated to `code-surgeon` agent
+  (parameterizes repetitive `it()` blocks into `it.each()` tables).
+- Violations that require architectural decisions (reclassification, missing
+  index.ts, structural drift) are **reported but not auto-fixed** — run
+  `/filid:fca-sync` or `/filid:fca-restructure` for those.
+
+After remediations, re-validate fixed files and include a before/after diff
+in the final report.
 See [reference.md Section 5](./reference.md#section-5--report-formats).
 
 ## Available MCP Tools
 
-| Tool               | Action      | Purpose                                   |
-| ------------------ | ----------- | ----------------------------------------- |
-| `fractal_scan`     | —           | Build complete project hierarchy for scan |
-| `test_metrics`     | `check-312` | Validate 3+12 rule across all spec files  |
+| Tool           | Action      | Purpose                                   |
+| -------------- | ----------- | ----------------------------------------- |
+| `fractal_scan` | —           | Build complete project hierarchy for scan |
+| `test_metrics` | `check-312` | Validate 3+12 rule across all spec files  |
 
 ## Options
 
@@ -96,8 +111,9 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 /filid:fca-scan --fix
 
 # Phases: 1 (Tree) → [2 + 3 + 4 in parallel] → 5 (Report)
+# Agents (--fix only): context-manager (CLAUDE.md remediation), code-surgeon (3+12 remediation)
 # Thresholds
-CLAUDE_MD_LINE_LIMIT = 100 lines
+CLAUDE_MD_LINE_LIMIT = 50 lines
 TEST_THRESHOLD       = 15 test cases per spec file
 ORGAN_DIR_NAMES      = components | utils | types | hooks | helpers
                        | lib | styles | assets | constants

@@ -58,7 +58,7 @@ For each accepted fix item from `justifications.md`:
 
 1. Check if the target file was modified in the Delta
 2. Re-run the relevant MCP tool to confirm the rule is now satisfied:
-   - LCOM4 violation → `ast_analyze(lcom4)` — verify LCOM4 < 2
+   - LCOM4 violation → `ast_analyze(lcom4)` — verify LCOM4 < 2 (when using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations)
    - CC violation → `ast_analyze(cyclomatic-complexity)` — verify CC <= 15
    - 3+12 violation → `test_metrics(check-312)` — verify PASS
    - Structure violation → `structure_validate` — verify PASS

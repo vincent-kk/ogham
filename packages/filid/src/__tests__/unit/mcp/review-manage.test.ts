@@ -185,14 +185,26 @@ describe('handleReviewManage – checkpoint', () => {
     expect(result.files).toEqual([]);
   });
 
-  it('returns phase B when only session.md exists', async () => {
-    await fs.writeFile(path.join(reviewDir, 'session.md'), '');
+  it('returns phase B when only structure-check.md exists', async () => {
+    await fs.writeFile(path.join(reviewDir, 'structure-check.md'), '');
     const result = await handleReviewManage({
       action: 'checkpoint',
       projectRoot: tmpDir,
       branchName: branch,
     });
     expect(result.phase).toBe('B');
+    expect(result.files).toContain('structure-check.md');
+    expect(result.files).not.toContain('session.md');
+  });
+
+  it('returns phase C when only session.md exists', async () => {
+    await fs.writeFile(path.join(reviewDir, 'session.md'), '');
+    const result = await handleReviewManage({
+      action: 'checkpoint',
+      projectRoot: tmpDir,
+      branchName: branch,
+    });
+    expect(result.phase).toBe('C');
     expect(result.files).toContain('session.md');
     expect(result.files).not.toContain('verification.md');
   });

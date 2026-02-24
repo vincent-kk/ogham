@@ -55,7 +55,9 @@ See [reference.md Section 3](./reference.md#section-3--plan--approval).
 
 ### Stage 4 — Correction Execution
 
-`restructurer` executes the approved corrections and `structure_validate` confirms
+Skipped when `--dry-run` is set — the plan from Stage 3 is printed and the skill exits without modifying any files.
+
+Otherwise, `restructurer` executes the approved corrections and `structure_validate` confirms
 the result.
 See [reference.md Section 4](./reference.md#section-4--correction-execution).
 
@@ -99,7 +101,7 @@ See [reference.md Section 4](./reference.md#section-4--correction-execution).
 /filid:fca-sync --severity critical --auto-approve
 
 Stages:   Scan → Detect → Plan → Execute
-Agents:   drift-analyzer (Stage 1, 2), fractal-architect (Stage 3 review), restructurer (Stage 4)
+Agents:   drift-analyzer (Stage 1, 2, 3), fractal-architect (Stage 3 review), restructurer (Stage 4)
 Severity: critical > high > medium > low
 ```
 

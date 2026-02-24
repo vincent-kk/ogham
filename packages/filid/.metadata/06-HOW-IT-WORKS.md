@@ -23,7 +23,7 @@
 ┌─ PreToolUse (matcher: Write|Edit) ──────────────────┐
 │  1. pre-tool-validator.mjs (timeout: 3s)             │
 │     ├─ CLAUDE.md Write → validateClaudeMd()          │
-│     │   ├─ 100줄 초과 → continue: false (BLOCKED)    │
+│     │   ├─ 50줄 초과 → continue: false (BLOCKED)     │
 │     │   └─ 3-tier 누락 → continue: true + 경고       │
 │     ├─ SPEC.md Write → validateSpecMd()              │
 │     │   └─ append-only → continue: false (BLOCKED)   │
@@ -98,7 +98,7 @@
 {
   "continue": false,
   "hookSpecificOutput": {
-    "additionalContext": "BLOCKED: CLAUDE.md exceeds 100-line limit (142 lines). Compress or deduplicate content."
+    "additionalContext": "BLOCKED: CLAUDE.md exceeds 50-line limit (142 lines). Compress or deduplicate content."
   }
 }
 ```

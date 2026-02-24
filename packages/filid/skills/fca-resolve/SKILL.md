@@ -159,5 +159,6 @@ Outputs:  justifications.md, .filid/debt/*.md (per rejected item)
 Prereq:   /filid:fca-review must have completed
 Next:     /filid:fca-revalidate (after applying accepted fixes)
 
+Agents:    code-surgeon (Step 4 — parallel fix application for accepted items)
 MCP tools: review_manage(normalize-branch), debt_manage(create)
 ```

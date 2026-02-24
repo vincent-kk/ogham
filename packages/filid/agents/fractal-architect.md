@@ -6,8 +6,8 @@ description: >
   proposing restructuring plans, reviewing structural health, recommending sync actions
   based on drift metrics, drafting SPEC.md content proposals, recommending split/compress
   actions based on LCOM4 or CC metrics, answering /filid:fca-context-query about structure,
-  leading /filid:fca-init, /filid:fca-guide, /filid:fca-restructure Stage 1 & 4,
-  /filid:fca-structure-review Stage 1 & 5.
+  reference role for /filid:fca-init and /filid:fca-guide (invoked manually for complex decisions),
+  leading /filid:fca-restructure Stage 1 & 4, /filid:fca-structure-review Stage 1 & 5.
   Trigger phrases: "analyze the fractal structure", "classify this directory",
   "design the restructure plan", "review structural health", "what is the LCA",
   "should this be split or merged", "draft a restructure proposal",

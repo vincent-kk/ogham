@@ -32,7 +32,7 @@ export function generateClaudeMdContent(
     lines.push('This module handles core business logic.');
     lines.push('');
     lines.push('## Constraints');
-    lines.push('- Max 100 lines');
+    lines.push('- Max 50 lines');
     lines.push('- Follow FCA-AI architecture');
     lines.push('');
     lines.push('## Interfaces');

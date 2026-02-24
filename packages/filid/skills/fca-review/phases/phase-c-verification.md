@@ -16,6 +16,7 @@ using MCP tools and assess existing technical debt bias. Write results to
 Read `<REVIEW_DIR>/structure-check.md` if it exists.
 
 Extract:
+
 - `stage_results`: per-stage PASS/FAIL (structure, documents, tests, metrics,
   dependencies)
 - All CRITICAL/HIGH findings from the Findings section
@@ -26,6 +27,7 @@ instead of re-running full-project scans.
 **Scope rule**: Phase A covers only the diff scope (changed files). Phase C also
 focuses on **diff-specific files only** (files listed in `session.md` changed file
 summary). When PHASEA_RESULTS is available:
+
 - C.2 (structure_validate): run only for changed fractal paths, reference Phase A
   for diff verdict
 - C.7 (drift_detect): skip if Phase A Stage 1 already passed
@@ -98,7 +100,7 @@ Record any structure drift findings.
 
 Check CLAUDE.md files in affected fractals:
 
-- Line count <= 100
+- Line count <= 50
 - 3-tier boundary sections present
 
 ### C.9 — Debt Bias Assessment
@@ -131,7 +133,7 @@ Write to `<REVIEW_DIR>/verification.md`:
 ```markdown
 ---
 session_ref: session.md
-structure_check_ref: structure-check.md  # present if Phase A ran
+structure_check_ref: structure-check.md # present if Phase A ran
 tools_executed:
   - <tool names used>
 all_passed: <true|false>

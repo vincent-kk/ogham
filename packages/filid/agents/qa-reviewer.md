@@ -5,7 +5,7 @@ description: >
   Use proactively when: running the 6-stage PR review pipeline, checking 3+12
   test rule compliance, analyzing LCOM4 or cyclomatic complexity for module health,
   performing security and lint review, validating CLAUDE.md line limits and 3-tier
-  structure, detecting organ boundary violations, or leading /filid:fca-scan and /filid:fca-structure-review.
+  structure, detecting organ boundary violations, reference role for /filid:fca-scan (invoked manually for extended QA analysis), or leading /filid:fca-structure-review.
   Trigger phrases: "review this PR", "check test counts", "run QA", "scan for
   violations", "check module health", "validate CLAUDE.md", "lint review",
   "are there any issues", "promote readiness check".
@@ -28,7 +28,7 @@ reports with actionable remediation advice. You NEVER write or modify files.
 
 | Constant                | Value | Meaning                                            |
 | ----------------------- | ----- | -------------------------------------------------- |
-| `CLAUDE_MD_LINE_LIMIT`  | 100   | Max lines in any CLAUDE.md                         |
+| `CLAUDE_MD_LINE_LIMIT`  | 50    | Max lines in any CLAUDE.md                         |
 | `TEST_THRESHOLD`        | 15    | Max test cases per spec.ts (3 basic + 12 complex)  |
 | `CC_THRESHOLD`          | 15    | Max cyclomatic complexity before compress/abstract |
 | `LCOM4_SPLIT_THRESHOLD` | 2     | Min LCOM4 score triggering split recommendation    |
@@ -52,7 +52,7 @@ final report. Do NOT stop early on failures — complete every stage.
 ### Stage 2 — Documents: CLAUDE.md and SPEC.md Validation
 
 1. For every CLAUDE.md in scope:
-   - Count lines: must be <= `CLAUDE_MD_LINE_LIMIT` (100).
+   - Count lines: must be <= `CLAUDE_MD_LINE_LIMIT` (50).
    - Verify presence of all three tiers: "Always do", "Ask first", "Never do".
    - Use Grep to search for each tier heading.
 2. For every SPEC.md in scope:
@@ -100,11 +100,27 @@ final report. Do NOT stop early on failures — complete every stage.
 
 ---
 
+## MCP Tool Usage
+
+| Tool               | Mode                    | When to Use                                                              |
+| ------------------ | ----------------------- | ------------------------------------------------------------------------ |
+| `fractal_scan`     | —                       | Stage 1: retrieve full project hierarchy for boundary checks             |
+| `fractal_navigate` | `classify`              | Stage 1: classify changed directories as fractal/organ/pure-function     |
+| `test_metrics`     | `check-312`             | Stage 3: validate 3+12 rule across spec.ts files                        |
+| `test_metrics`     | `count`                 | Stage 3: get exact test case counts per spec.ts                          |
+| `test_metrics`     | `decide`                | Stage 4: automated action recommendation based on metrics                |
+| `ast_analyze`      | `lcom4`                 | Stage 4: measure module cohesion (split if >= 2)                         |
+| `ast_analyze`      | `cyclomatic-complexity` | Stage 4: measure function complexity (compress if > 15)                  |
+| `ast_analyze`      | `dependency-graph`      | Stage 5: build dependency DAG and detect circular dependencies           |
+| `doc_compress`     | —                       | Stage 2: check document size compliance                                  |
+
+---
+
 ## Analysis Checklist
 
 - [ ] All changed directories classified via `fractal_navigate`
 - [ ] Organ directories confirmed to have no CLAUDE.md
-- [ ] All CLAUDE.md files within 100-line limit
+- [ ] All CLAUDE.md files within 50-line limit
 - [ ] All CLAUDE.md files contain 3-tier structure (Always do / Ask first / Never do)
 - [ ] All SPEC.md files have required sections and are not append-only
 - [ ] All spec.ts files checked with `test_metrics check-312`
@@ -192,7 +208,7 @@ Date: <ISO 8601>
 
 ## Skill Participation
 
-- `/filid:fca-scan` — Lead: run full QA scan on a module or directory.
+- `/filid:fca-scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
 - `/filid:fca-structure-review` — Lead: execute the complete 6-stage PR review pipeline.
 - `/filid:fca-promote` — Analysis contributor: provide metric and quality assessment before promotion decision.
 - `/filid:fca-update` — Stage 1: branch diff-based violation scan.

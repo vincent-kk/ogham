@@ -26,7 +26,7 @@
 function validateClaudeMd(content: string): ClaudeMdValidation;
 ```
 
-CLAUDE.md 내용을 검증한다. 100줄 제한 + 3-tier 경계 섹션 검사.
+CLAUDE.md 내용을 검증한다. 50줄 제한 + 3-tier 경계 섹션 검사.
 
 ```typescript
 function validateSpecMd(content: string, oldContent?: string): SpecMdValidation;
@@ -277,7 +277,7 @@ function validatePreToolUse(
 ```
 
 `PreToolUse` 이벤트 핸들러. Write 도구로 CLAUDE.md/SPEC.md 수정 시 검증.
-CLAUDE.md: 100줄 초과 → 차단, 3-tier 누락 → 경고.
+CLAUDE.md: 50줄 초과 → 차단, 3-tier 누락 → 경고.
 SPEC.md: append-only 감지 → 차단.
 
 ### structure-guard

@@ -42,7 +42,7 @@ test_metrics({ action: "check-312", files: [{ filePath, content }] })
 
 Scan result categories:
 
-- CLAUDE.md exceeds 100-line limit
+- CLAUDE.md exceeds 50-line limit
 - CLAUDE.md present inside an organ directory
 - test/spec files violating 3+12 rule (> 15 test cases)
 - Unclassified directories
@@ -63,7 +63,7 @@ scan violations to Stage 2 gate conditions:
 
 | fca-scan Violation Type               | Stage 2 Gate                      |
 | ------------------------------------- | --------------------------------- |
-| CLAUDE.md exceeds 100 lines           | high — triggers Stage 2           |
+| CLAUDE.md exceeds 50 lines            | high — triggers Stage 2           |
 | CLAUDE.md present in organ directory  | critical — triggers Stage 2       |
 | 3+12 rule violation (test count > 15) | high — triggers Stage 2           |
 | Unclassified directory                | medium — does NOT trigger Stage 2 |
@@ -93,7 +93,7 @@ non-overlapping file sets (docs vs tests) and can run simultaneously.
 
 For each fractal node containing changed files:
 
-1. **Check CLAUDE.md**: existence and 100-line limit
+1. **Check CLAUDE.md**: existence and 50-line limit
 2. **Create CLAUDE.md if missing**: include 3-tier boundary sections
 
    ```markdown
@@ -118,11 +118,11 @@ For each fractal node containing changed files:
    ## Dependencies
    ```
 
-3. **Update CLAUDE.md if present**: reflect implemented changes; compress if > 100 lines
+3. **Update CLAUDE.md if present**: reflect implemented changes; compress if > 50 lines
 
 ```
 doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
-// Suggests compression when content exceeds 100 lines
+// Suggests compression when content exceeds 50 lines
 ```
 
 4. **Check and update SPEC.md**: refresh implementation contracts (API signatures, type definitions)

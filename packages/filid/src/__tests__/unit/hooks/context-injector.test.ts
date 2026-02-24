@@ -63,10 +63,10 @@ describe('context-injector', () => {
     expect(ctx).toContain('Organ');
   });
 
-  it('should include CLAUDE.md 100-line limit reminder', async () => {
+  it('should include CLAUDE.md 50-line limit reminder', async () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('100');
+    expect(ctx).toContain('50');
   });
 
   it('should include 3+12 rule reminder', async () => {
@@ -108,7 +108,7 @@ describe('context-injector', () => {
     expect(ctx).toContain('Directory Structure');
     expect(ctx).toContain('index.ts (barrel export)');
     expect(ctx).toContain('nearest common ancestor (LCA)');
-    expect(ctx).toContain('parent\'s public interface');
+    expect(ctx).toContain("parent's public interface");
     expect(ctx).toContain('/filid:fca-scan');
   });
 

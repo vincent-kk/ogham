@@ -13,15 +13,15 @@ import { isFcaProject } from './shared.js';
  */
 const ROLE_RESTRICTIONS: Record<string, string> = {
   'fractal-architect':
-    'ROLE RESTRICTION: You are a Fractal Architect agent. You MUST NOT use Write or Edit tools. You are read-only — analyze structure, design, plan, and draft proposals only.',
+    'ROLE RESTRICTION: You are a Fractal Architect agent. You MUST NOT use Write, Edit, or Bash tools. You are read-only — analyze structure, design, plan, and draft proposals only.',
   'qa-reviewer':
-    'ROLE RESTRICTION: You are a QA/Reviewer agent. You MUST NOT use Write or Edit tools. Review, analyze, and report only.',
+    'ROLE RESTRICTION: You are a QA/Reviewer agent. You MUST NOT use Write, Edit, or Bash tools. Review, analyze, and report only.',
   implementer:
     'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by SPEC.md. Do not make architectural changes beyond the approved specification.',
   'context-manager':
-    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit CLAUDE.md and SPEC.md documents. Do not modify business logic or source code.',
+    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit CLAUDE.md and SPEC.md documents. Bash is permitted only for git diff to detect changed files. Do not modify business logic or source code.',
   'drift-analyzer':
-    'ROLE RESTRICTION: You are a Drift Analyzer agent. You MUST NOT use Write or Edit tools. You are read-only — detect drift, classify severity, and produce correction plans only.',
+    'ROLE RESTRICTION: You are a Drift Analyzer agent. You MUST NOT use Write, Edit, or Bash tools. You are read-only — detect drift, classify severity, and produce correction plans only.',
   restructurer:
     'ROLE RESTRICTION: You are a Restructurer agent. You may only execute actions from an approved restructuring plan. Do not make structural decisions or modify business logic.',
   'code-surgeon':
@@ -38,7 +38,7 @@ const PLANNING_GUIDANCE = [
   '1. Identify affected fractal modules (directories with CLAUDE.md)',
   '2. Plan SPEC.md updates for requirements/API changes BEFORE code',
   '3. Plan CLAUDE.md updates if boundaries or conventions change',
-  '4. New modules need CLAUDE.md (max 100 lines, 3-tier) + SPEC.md',
+  '4. New modules need CLAUDE.md (max 50 lines, 3-tier) + SPEC.md',
 ].join('\n');
 
 /**

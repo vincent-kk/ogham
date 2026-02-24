@@ -114,7 +114,7 @@ CLAUDE.md/SPEC.md가 아닌 일반 파일 Write 시:
 ```
 [FCA-AI] Active in: /Users/user/project
 Rules:
-- CLAUDE.md: max 100 lines, must include 3-tier boundary sections
+- CLAUDE.md: max 50 lines, must include 3-tier boundary sections
 - SPEC.md: no append-only growth, must restructure on updates
 - Organ directories (components, utils, types, hooks, helpers, lib, styles, assets, constants) must NOT have CLAUDE.md
 - Test files: max 15 cases per spec.ts (3 basic + 12 complex)
@@ -142,7 +142,7 @@ Rules:
 
 | 시나리오             | 메시지 예시                                                  | 추정 토큰 |
 | -------------------- | ------------------------------------------------------------ | --------- |
-| CLAUDE.md 100줄 초과 | "BLOCKED: CLAUDE.md exceeds 100-line limit (142 lines)..."   | ~25 토큰  |
+| CLAUDE.md 50줄 초과  | "BLOCKED: CLAUDE.md exceeds 50-line limit (142 lines)..."    | ~25 토큰  |
 | 3-tier 섹션 누락     | "CLAUDE.md is missing 3-tier boundary sections: Ask first"   | ~15 토큰  |
 | SPEC.md append-only  | "BLOCKED: SPEC.md must not be append-only..."                | ~20 토큰  |
 | Organ guard 차단     | "BLOCKED: Cannot create CLAUDE.md inside organ directory..." | ~25 토큰  |

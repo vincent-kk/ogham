@@ -28,11 +28,11 @@ Built entry files live in `bridge/` after `yarn build:plugin`.
 Fires on every `Write` or `Edit` tool call targeting a file path.
 
 **Behavior for `Write` targeting `CLAUDE.md`**:
-- Blocks (`continue: false`) if content exceeds 100 lines
+- Blocks (`continue: false`) if content exceeds 50 lines
 - Passes with warning if 3-tier boundary sections are missing (`## Always do`, `## Ask first`, `## Never do`)
 
 **Behavior for `Edit` targeting `CLAUDE.md`**:
-- Warns (does not block) when `new_string` exceeds 20 lines, reminding that the 100-line limit cannot be enforced on partial edits
+- Warns (does not block) when `new_string` exceeds 20 lines, reminding that the 50-line limit cannot be enforced on partial edits
 
 **Behavior for `Write` targeting `SPEC.md`**:
 - Blocks if the new content appears to be append-only growth (detected by comparing against the existing file content)
@@ -113,7 +113,7 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
 **Injected content**:
 1. Active FCA-AI project path
 2. Core FCA-AI rules summary:
-   - CLAUDE.md max 100 lines with 3-tier boundary sections
+   - CLAUDE.md max 50 lines with 3-tier boundary sections
    - SPEC.md no append-only growth
    - Organ directories must not have CLAUDE.md
    - Test files max 15 cases per spec (3 basic + 12 complex)
