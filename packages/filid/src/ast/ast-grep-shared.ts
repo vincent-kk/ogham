@@ -31,7 +31,13 @@ export async function getSgModule(): Promise<SgModule | null> {
   if (!sgModule) {
     try {
       // Use createRequire for CJS-style resolution (respects NODE_PATH)
-      const require = createRequire(import.meta.url || process.cwd() + '/');
+      // In CJS bundles, import.meta.url becomes undefined (esbuild replaces import.meta with {}).
+      // __filename provides the bundle file path as fallback for CJS-relative resolution.
+      const _base =
+        import.meta.url ||
+        (typeof __filename !== 'undefined' ? __filename : undefined) ||
+        process.cwd() + '/';
+      const require = createRequire(_base);
       sgModule = require('@ast-grep/napi') as SgModule;
     } catch {
       // Fallback to dynamic import for pure ESM environments

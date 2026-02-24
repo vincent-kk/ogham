@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "t": {
-      "command": "node",
+      "command": "${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh",
       "args": ["${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"]
     }
   }

@@ -190,7 +190,12 @@ fi
 # ---------------------------------------------------------------------------
 if [ -z "$NODE_BIN" ]; then
   printf '[filid] Error: Could not find node binary. Ensure Node.js >= 20 is installed.\n' >&2
-  exit 0  # exit 0 so this hook does not block Claude Code
+  # MCP server mode: exit 1 to report failure explicitly
+  # Hook mode: exit 0 so this hook does not block Claude Code
+  case "$1" in
+    */mcp-server*) exit 1 ;;
+    *) exit 0 ;;
+  esac
 fi
 
 # Cache the resolved path with version for subsequent invocations
