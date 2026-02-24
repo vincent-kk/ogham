@@ -69,7 +69,7 @@ Analyze the base↔HEAD diff and generate a 4-section structured PR body.
 - **Summary**: Core purpose, change scope, affected modules
 - **Architecture Changes (FCA Context Diff)**: Context document change analysis
 - **Code Changes**: Per-module/file changes with development intent
-- **Test Scenarios**: Given-When-Then based scenarios
+- **Test Plan**: Verification steps and test checklist
 
 Existing PR body is fully replaced (manual edits are not preserved).
 
@@ -131,7 +131,7 @@ Stage 1 delegates to `/filid:fca-update`, which internally uses `cache_manage`,
 Stages:   Stage 0 (Prerequisites) → Stage 1 (FCA Sync) → Stage 2 (Base Resolution) → Stage 3 (Change Analysis) → Stage 4 (PR Publication)
 Agents:   (Stage 1 delegates to fca-update internal agents)
 Output:   GitHub PR URL
-Language: PR body in Korean (tech terms / code identifiers kept as-is)
+Language: PR title in English; PR body in Korean (tech terms / code identifiers kept as-is)
 ```
 
 Key rules:
@@ -139,5 +139,5 @@ Key rules:
 - fca-update failure blocks PR creation (`--skip-update` to bypass)
 - Existing PR body is fully replaced after user confirmation
 - If `gh` auth fails, PR body is saved locally to `.filid/pr-draft/<branch>.md`
-- PR body written in Korean; technical terms and code identifiers remain in original form
+- PR title written in English; PR body written in Korean; technical terms and code identifiers remain in original form
 - File-level detail for ≤30 changed files; directory-level summary for >30 files

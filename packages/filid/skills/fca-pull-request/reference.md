@@ -200,10 +200,12 @@ changed_files grouped by:
 
 ### 3.3 Auto-Generated PR Title
 
+PR title MUST be written in English regardless of the `--title` option.
+
 When `--title` is unspecified:
 
 1. Extract common prefix from commit messages (feat, fix, refactor, docs, chore, test)
-2. Combine most frequent prefix + change scope summary
+2. Combine most frequent prefix + change scope summary (in English)
 3. Truncate to 70 characters
 
 Pattern:
@@ -252,43 +254,32 @@ with no applicable changes.
 - **{filename}**: Change description
   - Intent: Why this change was needed
 
-## Test Scenarios
+## Test Plan
 
-<!-- Given-When-Then scenarios in collapsible sections -->
-<!-- Written precisely for future automated test generation -->
+<!-- Verification steps and test checklist for reviewers -->
 
-- [ ] {Test scenario name 1}
-  <details>
-  <summary>Scenario</summary>
+- [ ] {Test scenario 1}: brief description of what to verify
+- [ ] {Test scenario 2}: brief description of what to verify
+- [ ] {Edge case 1}: brief description of edge case verification
+- [ ] {Error case 1}: brief description of error handling verification
 
-  **Given** (preconditions):
-  - {condition 1}
-  - {condition 2}
+<details>
+<summary>Detailed Scenarios (Given-When-Then)</summary>
 
-  **When** (action):
-  - {action 1}
+- **{Test scenario 1}**
+  - **Given**: {preconditions}
+  - **When**: {action}
+  - **Then**: {expected result}
 
-  **Then** (expected result):
-  - {result 1}
-  - {result 2}
+- **{Test scenario 2}**
+  - **Given**: {preconditions}
+  - **When**: {action}
+  - **Then**: {expected result}
 
-  </details>
+</details>
 
-- [ ] {Test scenario name 2}
-  <details>
-  <summary>Scenario</summary>
-
-  **Given** (preconditions):
-  - {condition 1}
-
-  **When** (action):
-  - {action 1}
-  - {action 2}
-
-  **Then** (expected result):
-  - {result 1}
-
-  </details>
+---
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
 ### 3.5 Section Generation Rules
@@ -316,16 +307,17 @@ with no applicable changes.
 - Extract intent from commit messages associated with each file
 - **Scale threshold**: ≤30 changed files → file-level detail; >30 files → directory-level summary with key files only
 
-**Test Scenarios**:
+**Test Plan**:
 
-- Derive scenarios from public functions/methods of changed source files
-- Given-When-Then format in `<details>` collapsible sections
-- Include happy path + edge cases + error cases
+- Top-level: bulleted checklist of verification steps (actionable for reviewers)
+- Include happy path + edge cases + error cases as checklist items
+- Detailed Given-When-Then scenarios inside a collapsible `<details>` block
 - Reflect existing test changes when test files are also modified
 - Write precisely for downstream automated test code generation
 
 ### 3.6 Language Rules
 
+- PR title: English (always, including auto-generated and user-provided titles)
 - PR body: Korean
 - Exceptions (keep original form):
   - Code inside code blocks
