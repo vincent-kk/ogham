@@ -1255,6 +1255,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ogham/giolla@workspace:packages/giolla":
+  version: 0.0.0-use.local
+  resolution: "@ogham/giolla@workspace:packages/giolla"
+  dependencies:
+    "@ast-grep/napi": "npm:^0.31.0"
+    "@modelcontextprotocol/sdk": "npm:^1.26.0"
+    "@types/node": "npm:^20.11.0"
+    "@vitest/coverage-v8": "npm:^3.2.4"
+    esbuild: "npm:^0.24.0"
+    fast-glob: "npm:^3.0.0"
+    typescript: "npm:^5.7.2"
+    zod: "npm:^4.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
