@@ -15,6 +15,7 @@ export type DiagnosticCategory =
   | 'stale-index'
   | 'orphan-node'
   | 'invalid-frontmatter'
+  | 'duplicate'
   | 'autonomy-lock';
 
 /** 자동 수정 액션 */

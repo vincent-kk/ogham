@@ -74,6 +74,12 @@ Execute memory-organizer judge logic:
 | `kg_navigate` | Traverse link relationships |
 | `coffaen_read` | Read document Frontmatter |
 
+## Error Handling
+
+- **No index**: "No index found. Please run `/coffaen:build` first."
+- **memory-organizer unavailable**: abort and guide to retry
+- **No candidates found**: display empty report with summary "No transition candidates at current threshold."
+
 ## Options
 
 ```

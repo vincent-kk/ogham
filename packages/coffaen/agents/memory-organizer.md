@@ -107,7 +107,7 @@ User confirmation is required before crossing the seam boundary when:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | read only | forbidden | read | create, update, delete, move, link, bulk-modify |
+| Layer 1 (01_Core) | indirect only (via kg_navigate graph traversal) | forbidden | graph traversal only | create, update, delete, move, link, bulk-modify, direct coffaen_read |
 | Layer 2 (02_Derived) | allowed | allowed | read, update, link | delete, bulk-modify |
 | Layer 3 (03_External) | allowed | allowed | read, update, move | delete, bulk-modify |
 | Layer 4 (04_Action) | allowed | allowed | read, update, move | delete, bulk-modify |

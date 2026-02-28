@@ -75,6 +75,14 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 | `coffaen_move` | Execute file move |
 | `coffaen_update` | Update Frontmatter |
 
+## Error Handling
+
+- **No index**: "No index found. Please run `/coffaen:build` first."
+- **memory-organizer unavailable**: abort and guide to retry
+- **coffaen_move failure**: skip the failed item, report it, and continue with remaining transitions
+- **User cancels confirmation**: abort execute stage; no filesystem changes made
+- **No transition candidates found**: "No transition candidates found at the current confidence threshold. Try `--min-confidence 0.5` to lower the threshold."
+
 ## Options
 
 ```
@@ -83,6 +91,6 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--dry-run` | false | Run judge only, skip execute |
+| `--dry-run` | false | Run judge only, skip execute stage (equivalent to `/coffaen:reflect` but without the detailed report format) |
 | `--layer` | 3,4 | Target Layer(s) to scan |
 | `--min-confidence` | 0.7 | Minimum confidence threshold |

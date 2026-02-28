@@ -78,6 +78,14 @@ and suggest adding links.
 | `kg_search` | Search for related documents |
 | `coffaen_update` | Add links |
 
+## Error Handling
+
+- **coffaen not initialized**: "Please run `/coffaen:setup` first."
+- **URL fetch failure**: report error and offer to save the URL as an L3 stub document with the source field set
+- **GitHub URL but no GitHub MCP**: guide to run `/coffaen:mcp-setup` to install the GitHub MCP server
+- **coffaen_create failure**: report error; no partial document created
+- **Duplicate detected via kg_search**: ask whether to create new or update existing document
+
 ## Options
 
 ```

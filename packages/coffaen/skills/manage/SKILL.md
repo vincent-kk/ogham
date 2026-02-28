@@ -112,6 +112,14 @@ Generate a new custom skill/agent template:
 | `coffaen_create` | Create new skill/agent files |
 | `coffaen_update` | Update disabled-registry.json |
 
+## Error Handling
+
+- **usage-stats.json missing**: display empty report with note "No usage data found. Stats accumulate after first skill invocations."
+- **disabled-registry.json missing**: treat as empty registry; create on first disable operation
+- **Attempt to delete built-in skill/agent**: "Built-in items cannot be deleted. Use `disable` instead."
+- **Name not found**: "No skill or agent named '{name}' found."
+- **coffaen_create failure during create mode**: report error; no partial file created
+
 ## ManageResult Type
 
 ```typescript

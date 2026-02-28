@@ -4,6 +4,8 @@ user_invocable: true
 description: External MCP server setup — modify Execution Area .mcp.json + .claude/settings.json
 version: 1.0.0
 complexity: medium
+context_layers: []
+orchestrator: mcp-setup skill
 plugin: coffaen
 ---
 

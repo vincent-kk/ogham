@@ -3,8 +3,8 @@ name: remember
 user_invocable: true
 description: Record new knowledge to the coffaen knowledge tree — automatic Layer recommendation + tag extraction + duplicate check
 version: 1.0.0
-complexity: simple
-context_layers: [1, 2]
+complexity: medium
+context_layers: [2, 3, 4]
 orchestrator: remember skill
 plugin: coffaen
 ---

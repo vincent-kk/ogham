@@ -4,6 +4,8 @@ user_invocable: true
 description: Knowledge search/recall — traverse the knowledge graph with a natural-language query and return relevant documents
 version: 1.0.0
 complexity: simple
+context_layers: [1, 2, 3, 4]
+orchestrator: recall skill
 plugin: coffaen
 ---
 

@@ -4,7 +4,7 @@ user_invocable: true
 description: SA-based interactive knowledge graph exploration — spread from a seed and discover hidden connections
 version: 1.0.0
 complexity: medium
-context_layers: [1, 2, 3]
+context_layers: [1, 2, 3, 4]
 orchestrator: explore skill
 plugin: coffaen
 ---

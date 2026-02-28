@@ -117,6 +117,13 @@ setup skill starts
 | `--step <1-6>` | Re-run a specific stage only |
 | `--reset` | Full reset (preserves existing L1 documents) |
 
+## Error Handling
+
+- **Vault path does not exist**: ask user to confirm creation before proceeding
+- **coffaen_create failure**: report error and skip to next document; resume at failed stage on retry
+- **identity-guardian unavailable**: proceed without L1 Frontmatter verification and note in completion summary
+- **Already initialized**: warn that re-running will overwrite existing Core Identity documents; require explicit `--reset` confirmation
+
 ## Acceptance Criteria
 
 - 4 documents in `01_Core/` + `trust-level.json` created

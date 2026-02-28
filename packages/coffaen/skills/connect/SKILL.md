@@ -4,6 +4,8 @@ user_invocable: true
 description: External data source registration/management — configure Execution Area .coffaen-meta/data-sources.json
 version: 1.0.0
 complexity: medium
+context_layers: []
+orchestrator: connect skill
 plugin: coffaen
 ---
 
@@ -152,6 +154,10 @@ Next steps:
   - If external MCP tools are needed: `/coffaen:mcp-setup`
   - To ingest now: `/coffaen:ingest`
 ```
+
+## Available MCP Tools
+
+This skill does not use coffaen MCP tools directly. It reads and writes `.coffaen-meta/data-sources.json` via filesystem access (Read/Write tools). External MCP tools (e.g., `mcp__github__*`) are referenced in the Supported Data Sources table above but are invoked by `/coffaen:ingest`, not by this skill.
 
 ## File Scope (Execution Area only)
 
