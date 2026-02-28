@@ -5,6 +5,7 @@
 import {
   existsSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   statSync,
   unlinkSync,
@@ -12,7 +13,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { isCoffaenVault, metaPath } from './shared.js';
+import { coffaenPath, isCoffaenVault, metaPath } from './shared.js';
 
 export interface SessionEndInput {
   session_id?: string;
@@ -54,7 +55,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   ensureDir(sessionsDir);
 
   // 세션 요약 저장
-  const summary = buildSessionSummary(input);
+  const summary = buildSessionSummary(input, cwd);
   const fileName = buildSessionFileName();
   const filePath = join(sessionsDir, fileName);
 
@@ -72,12 +73,11 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
 
 /**
  * 세션 요약 마크다운 문자열을 생성한다.
+ * usage-stats.json (누적 통계)과 stale-nodes.json을 읽어 실제 활동 데이터를 포함한다.
  */
-function buildSessionSummary(input: SessionEndInput): string {
+function buildSessionSummary(input: SessionEndInput, cwd: string): string {
   const now = new Date().toISOString();
   const sessionId = input.session_id ?? 'unknown';
-  const skillsUsed = input.skills_used ?? [];
-  const filesModified = input.files_modified ?? [];
 
   const lines: string[] = [
     `# 세션 요약`,
@@ -87,30 +87,64 @@ function buildSessionSummary(input: SessionEndInput): string {
     ``,
   ];
 
-  if (skillsUsed.length > 0) {
-    lines.push(`## 사용된 스킬`);
+  // usage-stats.json 읽기 (누적 통계)
+  const usageStats = readJsonSafe<Record<string, number>>(
+    metaPath(cwd, 'usage-stats.json'),
+  );
+
+  // stale-nodes.json 읽기
+  const staleNodes = readJsonSafe<{ paths: string[]; updatedAt: string }>(
+    coffaenPath(cwd, 'stale-nodes.json'),
+  );
+
+  const hasUsageStats =
+    usageStats !== null && Object.keys(usageStats).length > 0;
+  const hasStaleNodes =
+    staleNodes !== null &&
+    Array.isArray(staleNodes.paths) &&
+    staleNodes.paths.length > 0;
+
+  if (hasUsageStats) {
+    lines.push(`## Vault 도구 사용 현황 (누적)`);
     lines.push(``);
-    for (const skill of skillsUsed) {
-      lines.push(`- ${skill}`);
+    for (const [tool, count] of Object.entries(usageStats!)) {
+      lines.push(`- ${tool}: ${count}회`);
     }
     lines.push(``);
   }
 
-  if (filesModified.length > 0) {
-    lines.push(`## 수정된 문서`);
+  if (hasStaleNodes) {
+    lines.push(`## 대기 중인 인덱스 갱신 (stale nodes)`);
     lines.push(``);
-    for (const file of filesModified) {
-      lines.push(`- ${file}`);
+    for (const path of staleNodes!.paths) {
+      lines.push(`- ${path}`);
     }
     lines.push(``);
   }
 
-  if (skillsUsed.length === 0 && filesModified.length === 0) {
+  if (!hasUsageStats && !hasStaleNodes) {
     lines.push(`> 이 세션에서 기록된 활동이 없습니다.`);
     lines.push(``);
   }
 
+  if (hasUsageStats || hasStaleNodes) {
+    lines.push(`> 정확한 세션 단위 통계는 향후 개선 예정입니다.`);
+    lines.push(``);
+  }
+
   return lines.join('\n');
+}
+
+/**
+ * JSON 파일을 안전하게 읽는다. 파일이 없거나 파싱 실패 시 null을 반환한다.
+ */
+function readJsonSafe<T>(filePath: string): T | null {
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, 'utf-8')) as T;
+  } catch {
+    return null;
+  }
 }
 
 /**

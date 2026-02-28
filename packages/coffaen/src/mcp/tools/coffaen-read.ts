@@ -10,6 +10,7 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../core/document-parser.js';
+import { isLayer1Path } from '../../types/layer.js';
 import type { CoffaenReadInput, CoffaenReadResult } from '../../types/mcp.js';
 
 /**
@@ -55,11 +56,19 @@ export async function handleCoffaenRead(
     };
   }
 
+  const warnings: string[] = [];
+  if (isLayer1Path(input.path)) {
+    warnings.push(
+      'Layer 1 (01_Core/) 문서입니다. memory-organizer는 kg_navigate를 통한 간접 접근만 허용됩니다.',
+    );
+  }
+
   return {
     success: true,
     path: input.path,
     message: '문서를 성공적으로 읽었습니다.',
     content,
     node: nodeResult.node,
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }

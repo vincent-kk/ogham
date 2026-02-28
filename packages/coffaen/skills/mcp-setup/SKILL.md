@@ -42,9 +42,9 @@ This skill can run the MCP setup step of `/coffaen:setup` independently.
 
 | Data source | MCP package | Install command |
 |-------------|------------|----------------|
-| GitHub | `@anthropic/github-mcp` | `claude mcp add github` |
+| GitHub | `@modelcontextprotocol/server-github` | `claude mcp add github` |
 | Atlassian (Jira/Confluence) | `atlassian-mcp` | `claude mcp add atlassian` |
-| Slack | `@anthropic/slack-mcp` | `claude mcp add slack` |
+| Slack | `@modelcontextprotocol/server-slack` | `claude mcp add slack` |
 | Notion | `notion-mcp` | `claude mcp add notion` |
 | Linear | `linear-mcp` | `claude mcp add linear` |
 
@@ -60,16 +60,16 @@ Current status:
   Installed MCP: (none)
 
 Required MCP servers:
-  - GitHub -> @anthropic/github-mcp (not installed)
-  - Slack  -> @anthropic/slack-mcp  (not installed)
+  - GitHub -> @modelcontextprotocol/server-github (not installed)
+  - Slack  -> @modelcontextprotocol/server-slack  (not installed)
 ```
 
 ### Step 2 — Select MCP Servers to Install
 
 ```
 Which MCP servers would you like to install?
-  [x] @anthropic/github-mcp (GitHub)
-  [x] @anthropic/slack-mcp (Slack)
+  [x] @modelcontextprotocol/server-github (GitHub)
+  [x] @modelcontextprotocol/server-slack (Slack)
   [ ] atlassian-mcp (Jira/Confluence)
   [ ] notion-mcp (Notion)
   [ ] Enter manually...
@@ -88,14 +88,14 @@ If a file already exists, preserve the existing content and only add new servers
   "mcpServers": {
     "github": {
       "command": "npx",
-      "args": ["-y", "@anthropic/github-mcp"],
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "slack": {
       "command": "npx",
-      "args": ["-y", "@anthropic/slack-mcp"],
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
       "env": {
         "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
       }
@@ -159,7 +159,7 @@ Provide debugging guidance on failure.
 MCP setup complete!
 
 Installed servers:
-  - GitHub MCP (@anthropic/github-mcp)
+  - GitHub MCP (@modelcontextprotocol/server-github)
   - Slack MCP — SLACK_BOT_TOKEN setup required
 
 Next steps:

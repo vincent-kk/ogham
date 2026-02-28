@@ -9,8 +9,8 @@ import { join } from 'node:path';
 export const COFFAEN_META_DIR = '.coffaen-meta';
 /** coffaen 인덱스 디렉토리 이름 */
 export const COFFAEN_DIR = '.coffaen';
-/** Layer 1 디렉토리 접두사 */
-export const LAYER1_PREFIX = '01_Core';
+// isLayer1Path, LAYER1_PREFIX: types/layer.ts로 이동 — 하위 호환을 위해 re-export
+export { LAYER1_PREFIX, isLayer1Path } from '../types/layer.js';
 
 /**
  * 현재 작업 디렉토리가 coffaen vault인지 확인한다.
@@ -20,18 +20,6 @@ export function isCoffaenVault(cwd: string): boolean {
   return (
     existsSync(join(cwd, COFFAEN_DIR)) ||
     existsSync(join(cwd, COFFAEN_META_DIR))
-  );
-}
-
-/**
- * 파일 경로가 Layer 1 (01_Core/) 내에 있는지 확인한다.
- */
-export function isLayer1Path(filePath: string): boolean {
-  const normalized = filePath.replace(/\\/g, '/');
-  return (
-    normalized.includes(`/${LAYER1_PREFIX}/`) ||
-    normalized.startsWith(`${LAYER1_PREFIX}/`) ||
-    normalized === LAYER1_PREFIX
   );
 }
 

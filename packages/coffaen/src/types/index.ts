@@ -80,6 +80,8 @@ export type {
   ManageResult,
 } from './manage.js';
 
+export { LAYER1_PREFIX, isLayer1Path } from './layer.js';
+
 export type {
   CoffaenCreateInput,
   CoffaenReadInput,

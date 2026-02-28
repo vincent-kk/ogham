@@ -40,9 +40,12 @@ export function runIndexInvalidator(
   }
 
   // 영향받은 노드 경로 추출
+  // coffaen_update/delete/move: tool_input에 path가 존재
+  // coffaen_create: tool_input에 path 없음 → tool_response에서 추출
   const affectedPath =
     (input.tool_input?.path as string) ??
     (input.tool_input?.file_path as string) ??
+    extractPathFromResponse(input.tool_response) ??
     null;
 
   // stale-nodes.json 업데이트
@@ -108,6 +111,38 @@ function incrementUsageStat(cwd: string, toolName: string): void {
   stats[toolName] = (stats[toolName] ?? 0) + 1;
   ensureDir(statsPath);
   writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf-8');
+}
+
+/**
+ * MCP tool_response에서 CoffaenCrudResult.path를 추출한다.
+ * coffaen_create처럼 tool_input에 path가 없는 도구용.
+ *
+ * 두 가지 형식을 방어적으로 처리한다:
+ * - Format 1 (Flat): Claude Code가 MCP wrapper를 벗겨낸 경우 { path: string, ... }
+ * - Format 2 (MCP wrapper): { content: [{ type: "text", text: JSON.stringify(result) }] }
+ */
+function extractPathFromResponse(
+  response: Record<string, unknown> | undefined,
+): string | null {
+  if (!response) return null;
+  try {
+    // Format 1: Flat object (Claude Code may strip MCP wrapper)
+    if (typeof response.path === 'string' && response.path) {
+      return response.path;
+    }
+    // Format 2: MCP wrapper { content: [{ type: "text", text: JSON.stringify(result) }] }
+    const content = response.content;
+    if (Array.isArray(content) && content.length > 0) {
+      const first = content[0] as { type?: string; text?: string };
+      if (first.type === 'text' && first.text) {
+        const parsed = JSON.parse(first.text) as { path?: string };
+        if (typeof parsed.path === 'string' && parsed.path) return parsed.path;
+      }
+    }
+  } catch {
+    /* ignore parse failures */
+  }
+  return null;
 }
 
 function ensureDir(filePath: string): void {

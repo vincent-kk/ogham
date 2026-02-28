@@ -120,7 +120,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Constraints
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
-- **Direct coffaen_read on Layer 1 (01_Core/) files is forbidden** — use kg_navigate for graph traversal only
+- **Direct coffaen_read on Layer 1 (01_Core/) files is forbidden** — use kg_navigate for graph traversal only. 이 제약은 프롬프트 수준이며, coffaen_read 핸들러는 경고만 반환합니다 (읽기를 차단하지 않음)
 - **Maximum 5 transitions at a time** — prevents bulk-modify
 - **User confirmation required for transitions with confidence < 0.7**
 - **`confidence` field in Frontmatter is mandatory for L3 → L2 transitions**
@@ -132,7 +132,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 | Tool | Purpose |
 |------|---------|
-| `coffaen_read` | Read document Frontmatter + content |
+| `coffaen_read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
 | `coffaen_move` | Move file between Layers |
 | `coffaen_update` | Update Frontmatter layer and confidence fields |
 | `kg_navigate` | Traverse inbound/outbound links |
