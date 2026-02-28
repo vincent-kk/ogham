@@ -6,7 +6,7 @@
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { isCoffaenVault, metaPath, coffaenPath } from './shared.js';
+import { isCoffaenVault, metaPath } from './shared.js';
 
 export interface SessionStartInput {
   session_id?: string;
@@ -45,7 +45,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath)) {
     messages.push(
-      '[coffaen] 이전 세션의 미완료 트랜잭션(WAL)이 감지됐습니다. `/coffaen:recover`로 복구하세요.',
+      '[coffaen] 이전 세션의 미완료 트랜잭션(WAL)이 감지됐습니다. `/coffaen:doctor`로 진단하세요.',
     );
   }
 
@@ -78,12 +78,9 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   // 5. data-sources.json 미설정 확인
   const dataSourcesPath = metaPath(cwd, 'data-sources.json');
   if (!existsSync(dataSourcesPath)) {
-    const coffaenIndexPath = coffaenPath(cwd, 'graph.json');
-    if (!existsSync(coffaenIndexPath)) {
-      messages.push(
-        '[coffaen] 외부 데이터 소스가 연결되지 않았습니다. `/coffaen:connect`로 연결하세요.',
-      );
-    }
+    messages.push(
+      '[coffaen] 외부 데이터 소스가 연결되지 않았습니다. `/coffaen:connect`로 연결하세요.',
+    );
   }
 
   return {

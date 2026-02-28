@@ -39,7 +39,7 @@ maxTurns: 40
 ```
 탐지: kg_status로 inbound/outbound 링크가 모두 0인 노드
 심각도: warning
-자동 수정: /coffaen:connect 스킬 호출 제안 (링크 연결)
+자동 수정: /coffaen:explore 스킬 호출 제안 (관련 문서 탐색 후 링크 연결)
 ```
 
 ### D2. Stale 인덱스 (stale-index)

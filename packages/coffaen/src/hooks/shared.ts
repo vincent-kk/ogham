@@ -64,3 +64,14 @@ export async function readStdin(): Promise<string> {
 export function writeResult(result: unknown): void {
   process.stdout.write(JSON.stringify(result));
 }
+
+/**
+ * coffaen MCP 도구 이름 집합.
+ * SYNC: hooks/hooks.json PostToolUse.matcher와 동기화 필수
+ */
+export const COFFAEN_MCP_TOOLS = new Set([
+  'coffaen_create',
+  'coffaen_update',
+  'coffaen_delete',
+  'coffaen_move',
+]);

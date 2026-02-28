@@ -1,11 +1,11 @@
 /**
  * @file server.ts
- * @description coffaen MCP 서버 — 9개 도구 등록 + 라우팅
+ * @description coffaen MCP 서버 — 10개 도구 등록 + 라우팅
  *
  * 도구 목록:
  * CRUD 5개: coffaen_create, coffaen_read, coffaen_update, coffaen_delete, coffaen_move
  * 검색 4개: kg_search, kg_navigate, kg_context, kg_status
- * 빌드 1개: kg_build (총 실질적으로 9개 — kg_community는 Phase 2+)
+ * 빌드 1개: kg_build
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';

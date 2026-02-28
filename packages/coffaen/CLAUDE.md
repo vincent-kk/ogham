@@ -75,7 +75,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - `.claude-plugin/plugin.json` — 매니페스트
 - `.mcp.json` — MCP 서버 등록 (`bridge/mcp-server.cjs`)
 - `hooks/hooks.json` — 훅 이벤트 매핑 (SessionStart, PreToolUse→Write|Edit, PostToolUse→coffaen_*, SessionEnd)
-- `templates/rules/` — 규칙 템플릿 3개 (memory-guard, layer-structure, naming)
+- `templates/rules/` — 규칙 템플릿 5개 (coffaen-memory-guard, coffaen-naming, frontmatter-required, layer-structure, link-integrity)
 
 ## Development Notes
 

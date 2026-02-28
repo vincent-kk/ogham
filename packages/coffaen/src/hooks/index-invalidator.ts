@@ -5,7 +5,7 @@
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { isCoffaenVault, metaPath } from './shared.js';
+import { isCoffaenVault, metaPath, COFFAEN_MCP_TOOLS } from './shared.js';
 
 export interface PostToolUseInput {
   tool_name?: string;
@@ -17,14 +17,6 @@ export interface PostToolUseInput {
 export interface PostToolUseResult {
   continue: boolean;
 }
-
-/** coffaen MCP 도구 이름 집합 */
-const COFFAEN_MCP_TOOLS = new Set([
-  'coffaen_create',
-  'coffaen_update',
-  'coffaen_delete',
-  'coffaen_move',
-]);
 
 /**
  * Index Invalidator Hook 핸들러.
@@ -44,7 +36,6 @@ export function runIndexInvalidator(input: PostToolUseInput): PostToolUseResult 
   const affectedPath =
     (input.tool_input?.path as string) ??
     (input.tool_input?.file_path as string) ??
-    (input.tool_input?.from_path as string) ??
     null;
 
   // stale-nodes.json 업데이트
@@ -52,13 +43,11 @@ export function runIndexInvalidator(input: PostToolUseInput): PostToolUseResult 
     appendStaleNode(cwd, affectedPath);
   }
 
-  // 이동 시 대상 경로도 추가
-  if (toolName === 'coffaen_move') {
-    const toPath = input.tool_input?.to_path as string | undefined;
-    if (toPath) {
-      appendStaleNode(cwd, toPath);
-    }
-  }
+  // 참고: coffaen_move의 대상 경로 stale 추적은 coffaen-move.ts 핸들러(123-127줄)에서
+  // mcp/shared.ts의 appendStaleNode()를 직접 호출하므로 이 훅에서 중복 처리하지 않는다.
+  // 두 appendStaleNode 함수는 서로 다른 모듈의 별개 함수:
+  //   - hooks/index-invalidator.ts (동기, .coffaen-meta/stale-nodes.json)
+  //   - mcp/shared.ts (비동기, .coffaen/stale-nodes.json)
 
   // usage-stats.json 카운트 증가
   incrementUsageStat(cwd, toolName);

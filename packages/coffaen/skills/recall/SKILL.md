@@ -39,17 +39,17 @@ plugin: coffaen
 `kg_search` MCP 도구를 호출하여 시드 노드를 찾습니다.
 
 ```
-kg_search(query, limit=10, layer_filter?)
+kg_search(seed: [키워드1, 키워드2, ...], max_results=10, layer_filter?)
 ```
 
 결과가 없으면: "관련 문서를 찾지 못했습니다. 다른 키워드로 시도해보세요." 안내
 
-### Step 3 — SA 탐색 (kg_navigate)
+### Step 3 — 이웃 탐색 (kg_navigate)
 
-시드 노드에서 확산 활성화로 연관 노드를 탐색합니다.
+시드 노드에서 인/아웃바운드 링크를 탐색합니다.
 
 ```
-kg_navigate(seed_ids, max_hops=2, threshold=0.1)
+kg_navigate(path: 선택된_노드_경로, include_inbound=true, include_outbound=true, include_hierarchy=true)
 ```
 
 ### Step 4 — 컨텍스트 조립 (kg_context)
@@ -57,7 +57,7 @@ kg_navigate(seed_ids, max_hops=2, threshold=0.1)
 상위 활성화 노드의 컨텍스트를 조립합니다.
 
 ```
-kg_context(node_ids, max_tokens=2000)
+kg_context(query: 검색_쿼리_문자열, token_budget=2000)
 ```
 
 ### Step 5 — 결과 포맷팅
@@ -98,7 +98,7 @@ kg_context(node_ids, max_tokens=2000)
 | 도구 | 목적 |
 |------|------|
 | `kg_search` | 키워드 기반 시드 노드 탐색 |
-| `kg_navigate` | SA 기반 연관 노드 확산 탐색 |
+| `kg_navigate` | 이웃 노드 조회 (인바운드/아웃바운드/계층 링크 탐색) |
 | `kg_context` | 노드 컨텍스트 조립 |
 
 ## 옵션

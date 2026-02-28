@@ -125,14 +125,12 @@ Glob으로 01_Core/**/*.md 목록 수집
 
 ---
 
-## 접근 카운트 업데이트 (AutonomyLevel >= 2)
+## 접근 카운트 업데이트 (AutonomyLevel >= 2) — 미구현
 
-Layer 1 문서에 접근할 때마다 `accessed_count`를 증가시킨다.
-이는 문서의 중요도 측정에 사용되며, 내용 변경 없이 Frontmatter만 업데이트한다.
-
-**중요**: accessed_count 업데이트는 coffaen_update를 직접 호출하지 않고
-PostToolUse hook(index-invalidator)이 처리한다. 이 에이전트는 카운트를
-기록만 한다.
+> **참고**: 이 기능은 v0.0.1에서 미구현 상태이다.
+> 현재 index-invalidator는 `usage-stats.json`(도구 호출 통계)만 업데이트하며,
+> Frontmatter `accessed_count` 자동 증가는 구현되지 않았다.
+> 향후 버전에서 구현 예정.
 
 ---
 

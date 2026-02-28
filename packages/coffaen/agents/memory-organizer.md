@@ -109,7 +109,7 @@ seam 경계를 넘기 전 사용자 확인이 필요한 경우:
 | Layer 1 (01_Core) | 읽기만 | 금지 | read | create, update, delete, move, link, bulk-modify |
 | Layer 2 (02_Derived) | 허용 | 허용 | read, update, link | delete, bulk-modify |
 | Layer 3 (03_External) | 허용 | 허용 | read, update, move | delete, bulk-modify |
-| Layer 4 (04_Action) | 허용 | 허용 | read, update, move, delete | bulk-modify |
+| Layer 4 (04_Action) | 허용 | 허용 | read, update, move | delete, bulk-modify |
 
 필요한 최소 AutonomyLevel: **1** (반자율 — 전이 전 사용자 확인)
 
@@ -140,4 +140,4 @@ seam 경계를 넘기 전 사용자 확인이 필요한 경우:
 ## 스킬 참여
 
 - `/coffaen:organize` — 전체 워크플로우 진입점
-- `/coffaen:diagnose` — judge 모듈 결과 리포트 전용 (execute 미실행)
+- `/coffaen:reflect` — judge 모듈 결과 리포트 전용 (execute 미실행)

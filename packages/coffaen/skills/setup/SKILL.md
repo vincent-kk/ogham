@@ -59,7 +59,7 @@ AskUserQuestion으로 순차적으로 질문한다. 각 질문은 독립적이�
 
 또한 `02_Derived/`, `03_External/`, `04_Action/` 디렉토리를 생성한다.
 
-identity-guardian 에이전트에게 생성된 L1 문서 검토를 위임한다.
+identity-guardian 에이전트에게 생성된 L1 문서의 Frontmatter 규칙 준수를 coffaen_read로 확인하도록 위임한다.
 
 ### Stage 4 — Progressive Autonomy Level 0 설정
 

@@ -54,9 +54,13 @@ source: {원본 URL}
 
 ```
 coffaen_create({
-  path: "03_External/{제목}.md" 또는 "04_Action/{날짜}-{제목}.md",
+  layer: 3 또는 4,
+  tags: [자동 추출된 태그들],
   content: {변환된 마크다운},
-  frontmatter: {생성된 Frontmatter}
+  title: {제목},
+  filename: "날짜-제목" (Layer 4 임시 메모 시),
+  source: {원본 URL} (Layer 3 외부 참조 시),
+  expires: "YYYY-MM-DD" (Layer 4 만료 항목 시)
 })
 ```
 

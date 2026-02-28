@@ -1,5 +1,5 @@
 #!/bin/sh
-# filid Node.js Finder (find-node.sh)
+# coffaen Node.js Finder (find-node.sh)
 #
 # Locates the Node.js binary and executes it with the provided arguments.
 # Designed for nvm/fnm users where `node` is not on PATH in non-interactive
@@ -33,7 +33,7 @@ extract_major_version() {
 # ---------------------------------------------------------------------------
 # 0. Check cached path — if valid, exec immediately
 # ---------------------------------------------------------------------------
-CACHE_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/filid/node-path-cache"
+CACHE_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/coffaen/node-path-cache"
 
 if [ -f "$CACHE_FILE" ]; then
   CACHED_LINE=$(cat "$CACHE_FILE")
@@ -179,7 +179,7 @@ if [ -n "$NODE_BIN" ]; then
     '') _node_major=0 ;;
   esac
   if [ "$_node_major" -lt 20 ]; then
-    printf '[filid] Warning: Found node %s (%s) but require >= 20. Skipping.\n' \
+    printf '[coffaen] Warning: Found node %s (%s) but require >= 20. Skipping.\n' \
       "$_node_version" "$NODE_BIN" >&2
     NODE_BIN=""
   fi
@@ -189,7 +189,7 @@ fi
 # Invoke node with all provided arguments
 # ---------------------------------------------------------------------------
 if [ -z "$NODE_BIN" ]; then
-  printf '[filid] Error: Could not find node binary. Ensure Node.js >= 20 is installed.\n' >&2
+  printf '[coffaen] Error: Could not find node binary. Ensure Node.js >= 20 is installed.\n' >&2
   # MCP server mode: exit 1 to report failure explicitly
   # Hook mode: exit 0 so this hook does not block Claude Code
   case "$1" in

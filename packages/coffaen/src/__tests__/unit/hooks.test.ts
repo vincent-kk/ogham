@@ -180,17 +180,16 @@ describe('runIndexInvalidator', () => {
     expect(existsSync(stalePath)).toBe(false);
   });
 
-  it('coffaen_move 시 from_path와 to_path 모두 stale에 추가한다', () => {
+  it('coffaen_move 시 path로 소스 경로를 stale에 추가한다', () => {
     runIndexInvalidator({
       tool_name: 'coffaen_move',
-      tool_input: { from_path: 'a/a.md', to_path: 'b/b.md' },
+      tool_input: { path: '03_External/a.md', target_layer: 2 },
       cwd: vaultDir,
     });
     const { readFileSync } = require('node:fs');
     const stalePath = join(vaultDir, '.coffaen-meta', 'stale-nodes.json');
     const stale = JSON.parse(readFileSync(stalePath, 'utf-8'));
-    expect(stale).toContain('a/a.md');
-    expect(stale).toContain('b/b.md');
+    expect(stale).toContain('03_External/a.md');
   });
 });
 
