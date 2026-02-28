@@ -18,12 +18,10 @@ const root = resolve(__dirname, '..');
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
 const hookEntries = [
-  'pre-tool-validator',
-  'structure-guard',
-  'agent-enforcer',
-  'context-injector',
-  'plan-gate',
-  'session-cleanup',
+  'session-start',
+  'layer-guard',
+  'index-invalidator',
+  'session-end',
 ];
 
 await Promise.all(

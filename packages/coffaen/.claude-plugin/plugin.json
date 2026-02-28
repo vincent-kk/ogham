@@ -1,21 +1,23 @@
 {
-  "name": "filid",
-  "version": "0.0.5",
-  "description": "FCA-AI rule enforcement + fractal structure management plugin for Claude Code agent workflows",
+  "name": "coffaen",
+  "version": "0.0.1",
+  "description": "Personal knowledge space manager with markdown-based knowledge graph, spreading activation search, and memory lifecycle management",
   "author": {
     "name": "Vincent K. Kelvin"
   },
   "repository": "https://github.com/vincent-kk/ogham",
-  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/filid",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/coffaen",
   "license": "MIT",
   "keywords": [
     "claude-code",
     "plugin",
-    "fca-ai",
-    "fractal",
-    "context-architecture",
-    "structure"
+    "knowledge-graph",
+    "memory",
+    "spreading-activation",
+    "markdown"
   ],
   "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json"
 }
