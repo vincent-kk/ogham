@@ -27,7 +27,7 @@ function patchFrontmatterField(yaml: string, key: string, value: string): string
  */
 function updateFrontmatter(
   content: string,
-  updates: Partial<{ tags: string[]; title: string; confidence: number; schedule: string }>,
+  updates: Partial<{ tags: string[]; title: string; layer: number; confidence: number; schedule: string }>,
 ): string {
   const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   const match = FRONTMATTER_REGEX.exec(content);
@@ -44,6 +44,9 @@ function updateFrontmatter(
   }
   if (updates.title !== undefined) {
     yaml = patchFrontmatterField(yaml, 'title', updates.title);
+  }
+  if (updates.layer !== undefined) {
+    yaml = patchFrontmatterField(yaml, 'layer', String(updates.layer));
   }
   if (updates.confidence !== undefined) {
     yaml = patchFrontmatterField(yaml, 'confidence', String(updates.confidence));
@@ -85,31 +88,31 @@ export async function handleCoffaenUpdate(
   const fmMatch = FRONTMATTER_REGEX.exec(existing);
   let newContent: string;
 
+  // 기존 본문 추출 (Frontmatter 이후 부분)
+  const existingBody = fmMatch
+    ? existing.slice(fmMatch[0].length)
+    : existing;
+  // content가 생략되면 기존 본문 유지
+  const bodyToWrite = input.content ?? existingBody;
+
   if (fmMatch) {
     // Frontmatter 업데이트 (updated 자동 갱신 + 선택 필드)
-    const updatedFm = input.frontmatter
-      ? updateFrontmatter(existing, input.frontmatter)
-      : (() => {
-          // updated만 자동 갱신
-          const today = new Date().toISOString().slice(0, 10);
-          const fm = fmMatch[0];
-          const updatedFmBlock = fm.replace(
-            /^(updated:).*$/m,
-            `$1 ${today}`,
-          );
-          return updatedFmBlock + input.content;
-        })();
-
     if (input.frontmatter) {
-      // updateFrontmatter가 전체 문서를 반환하므로, 본문 교체 필요
-      const fmBlock = FRONTMATTER_REGEX.exec(updatedFm)?.[0] ?? fmMatch[0];
-      newContent = fmBlock + input.content;
+      const updatedDoc = updateFrontmatter(existing, input.frontmatter);
+      const updatedFmBlock = FRONTMATTER_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
+      newContent = updatedFmBlock + bodyToWrite;
     } else {
-      newContent = updatedFm;
+      // updated만 자동 갱신
+      const today = new Date().toISOString().slice(0, 10);
+      const updatedFmBlock = fmMatch[0].replace(
+        /^(updated:).*$/m,
+        `$1 ${today}`,
+      );
+      newContent = updatedFmBlock + bodyToWrite;
     }
   } else {
     // Frontmatter 없는 문서 → 내용만 교체
-    newContent = input.content;
+    newContent = bodyToWrite;
   }
 
   await writeFile(absolutePath, newContent, 'utf-8');

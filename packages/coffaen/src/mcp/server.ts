@@ -55,7 +55,7 @@ function invalidateCache(): void {
 }
 
 /**
- * coffaen MCP 서버를 생성하고 9개 도구를 등록한다.
+ * coffaen MCP 서버를 생성하고 10개 도구를 등록한다.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'coffaen', version: VERSION });
@@ -122,10 +122,11 @@ export function createServer(): McpServer {
         '기존 문서를 수정합니다. Frontmatter의 updated 필드가 자동으로 갱신됩니다.',
       inputSchema: z.object({
         path: z.string().describe('문서 경로'),
-        content: z.string().describe('새 내용 (마크다운)'),
+        content: z.string().optional().describe('새 내용 (마크다운, 생략 시 기존 내용 유지)'),
         frontmatter: z.object({
           tags: z.array(z.string()).optional(),
           title: z.string().optional(),
+          layer: z.number().int().min(1).max(4).optional().describe('Layer 변경 (1-4, Layer 위반 수정 시 사용)'),
           confidence: z.number().min(0).max(1).optional(),
           schedule: z.string().optional(),
         }).optional().describe('Frontmatter 부분 업데이트 (선택)'),

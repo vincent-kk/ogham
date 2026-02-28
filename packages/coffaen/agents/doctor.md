@@ -45,7 +45,7 @@ maxTurns: 40
 ### D2. Stale 인덱스 (stale-index)
 ```
 탐지: .coffaen-meta/stale-nodes.json 비어 있지 않음
-     또는 .coffaen/graph.json의 builtAt이 24시간 이상 경과
+     또는 .coffaen/index.json의 builtAt이 24시간 이상 경과
 심각도: warning
 자동 수정 가능: /coffaen:rebuild 호출
 ```

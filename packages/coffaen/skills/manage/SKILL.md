@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: medium
 context_layers: [1, 2, 3, 4]
 orchestrator: manage 스킬
+plugin: coffaen
 ---
 
 # manage — 스킬 및 에이전트 관리
@@ -55,9 +56,9 @@ disabled-registry.json에 등록하여 플러그인 로드 시 건너뛴다.
 // DisabledRegistryEntry 타입 기반
 {
   name: string,
-  type: 'skill' | 'agent',
   disabledAt: string,
-  reason?: string
+  reason?: string,
+  disabledBy: 'user' | 'system'
 }
 ```
 
@@ -117,9 +118,8 @@ disabled-registry.json에 등록하여 플러그인 로드 시 건너뛴다.
 // src/types/manage.ts 기반
 {
   mode: ManageMode,
-  action: SkillLifecycleAction,
-  affected: string[],
   success: boolean,
-  message: string
+  message: string,
+  affected?: string[]
 }
 ```

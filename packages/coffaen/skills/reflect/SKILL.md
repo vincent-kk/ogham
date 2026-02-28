@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: medium
 context_layers: [1, 2, 3, 4]
 orchestrator: reflect 스킬
+plugin: coffaen
 ---
 
 # reflect — 지식 저장소 분석 리포트

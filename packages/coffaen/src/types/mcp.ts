@@ -41,12 +41,13 @@ export interface CoffaenReadInput {
 export interface CoffaenUpdateInput {
   /** 문서 경로 */
   path: string;
-  /** 새 내용 (마크다운) */
-  content: string;
+  /** 새 내용 (마크다운, 생략 시 기존 내용 유지) */
+  content?: string;
   /** Frontmatter 부분 업데이트 (선택) */
   frontmatter?: Partial<{
     tags: string[];
     title: string;
+    layer: Layer;
     confidence: number;
     schedule: string;
   }>;

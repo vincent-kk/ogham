@@ -88,7 +88,7 @@ coffaen 인덱스 상태
 |------|-----------|
 | 정상 (stale < 10%) | 없음 |
 | 주의 (stale 10~30%) | `/coffaen:rebuild` |
-| 심각 (stale > 30%) | `/coffaen:build --force` |
+| 심각 (stale > 30%) | `/coffaen:build --full` |
 | 인덱스 없음 | `/coffaen:build` |
 | 구조적 문제 의심 | `/coffaen:doctor` 전체 진단 |
 

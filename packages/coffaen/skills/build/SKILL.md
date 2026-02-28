@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: medium
 context_layers: [1, 2]
 orchestrator: build 스킬
+plugin: coffaen
 ---
 
 # build — 인덱스 구축

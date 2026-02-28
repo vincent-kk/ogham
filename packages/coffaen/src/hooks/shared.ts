@@ -68,6 +68,9 @@ export function writeResult(result: unknown): void {
 /**
  * coffaen MCP 도구 이름 집합.
  * SYNC: hooks/hooks.json PostToolUse.matcher와 동기화 필수
+ *
+ * 주의: coffaen_read, kg_* 도구는 쓰기 부수효과가 없으므로 의도적으로 제외.
+ * hooks.json PostToolUse.matcher도 동일 집합만 포함해야 한다.
  */
 export const COFFAEN_MCP_TOOLS = new Set([
   'coffaen_create',

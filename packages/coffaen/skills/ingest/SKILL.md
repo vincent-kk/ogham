@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: medium
 context_layers: [3, 4]
 orchestrator: ingest 스킬
+plugin: coffaen
 ---
 
 # ingest — 외부 지식 수집

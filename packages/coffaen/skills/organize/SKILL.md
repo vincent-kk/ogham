@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: high
 context_layers: [1, 2, 3, 4]
 orchestrator: organize 스킬
+plugin: coffaen
 ---
 
 # organize — 지식 전이 오케스트레이션

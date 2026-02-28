@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: high
 context_layers: [1, 2, 3, 4]
 orchestrator: doctor 스킬
+plugin: coffaen
 ---
 
 # doctor — 지식 저장소 진단

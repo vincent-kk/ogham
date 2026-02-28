@@ -23,7 +23,7 @@ plugin: coffaen
 
 ## 전제 조건
 
-- coffaen 인덱스가 빌드되어 있어야 합니다 (`.coffaen/kg-graph.json` 존재)
+- coffaen 인덱스가 빌드되어 있어야 합니다 (`.coffaen/index.json` 존재)
 - 인덱스가 없으면: "인덱스가 없습니다. `/coffaen:build`를 먼저 실행해주세요." 안내
 - `kg_status`로 인덱스 상태를 먼저 확인한다
 

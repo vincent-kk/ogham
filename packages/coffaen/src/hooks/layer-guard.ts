@@ -48,7 +48,7 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
         `파일: ${filePath}`,
         ``,
         `Layer 1 문서는 핵심 정체성(Hub 노드)을 담습니다. 수정이 필요한 경우:`,
-        `  1. \`/coffaen:identity-guardian\` 에이전트를 통해 수정 요청`,
+        `  1. identity-guardian 에이전트를 통해 수정 요청 (자동 위임됨)`,
         `  2. 또는 충분한 이유를 설명 후 재시도`,
       ].join('\n'),
     };

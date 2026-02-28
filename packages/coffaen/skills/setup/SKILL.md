@@ -6,6 +6,7 @@ version: 1.0.0
 complexity: complex
 context_layers: [1]
 orchestrator: setup 스킬
+plugin: coffaen
 ---
 
 # setup — coffaen 온보딩 위저드
