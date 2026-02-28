@@ -1255,9 +1255,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ogham/giolla@workspace:packages/giolla":
+"@ogham/coffaen@workspace:packages/coffaen":
   version: 0.0.0-use.local
-  resolution: "@ogham/giolla@workspace:packages/giolla"
+  resolution: "@ogham/coffaen@workspace:packages/coffaen"
   dependencies:
     "@ast-grep/napi": "npm:^0.31.0"
     "@modelcontextprotocol/sdk": "npm:^1.26.0"

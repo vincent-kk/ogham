@@ -1,12 +1,12 @@
 {
-  "name": "@ogham/giolla",
+  "name": "@ogham/coffaen",
   "version": "0.0.1",
   "description": "FCA",
   "keywords": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/vincent-kk/ogham.git",
-    "directory": "packages/giolla"
+    "directory": "packages/coffaen"
   },
   "license": "MIT",
   "author": {
