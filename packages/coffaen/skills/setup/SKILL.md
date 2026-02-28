@@ -59,7 +59,7 @@ Generate Layer 1 documents from the collected interview answers:
 Create each document with the `coffaen_create` MCP tool (layer=1, tags required).
 Note: `trust-level.json` is created as an empty placeholder here; its content is initialized in Stage 4.
 
-Also create the `02_Derived/`, `03_External/`, and `04_Action/` directories.
+Also create the `02_Derived/`, `03_External/`, `04_Action/`, and `05_Context/` directories.
 
 Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via coffaen_read.
 
@@ -128,6 +128,6 @@ setup skill starts
 ## Acceptance Criteria
 
 - 4 documents in `01_Core/` + `trust-level.json` created
-- `02_Derived/`, `03_External/`, `04_Action/` directories created
+- `02_Derived/`, `03_External/`, `04_Action/`, `05_Context/` directories created
 - Progressive Autonomy Level 0 set
 - Skip responses allowed (all stages)

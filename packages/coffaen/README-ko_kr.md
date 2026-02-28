@@ -2,7 +2,7 @@
 
 마크다운 기반 Knowledge Graph로 개인 지식 공간을 관리하는 Claude Code 플러그인입니다.
 
-AI 에이전트는 세션이 끝나면 사용자를 잊습니다. 메모는 여러 도구에 흩어지고, 통찰은 사라지며, 매 대화는 제로에서 시작됩니다. coffaen은 이 문제를 **4-Layer 지식 모델**, **Spreading Activation 검색**, **기억 라이프사이클 관리**로 해결합니다 — 모두 직접 소유하는 마크다운 파일 위에서 동작합니다.
+AI 에이전트는 세션이 끝나면 사용자를 잊습니다. 메모는 여러 도구에 흩어지고, 통찰은 사라지며, 매 대화는 제로에서 시작됩니다. coffaen은 이 문제를 **5-Layer 지식 모델**, **Spreading Activation 검색**, **기억 라이프사이클 관리**로 해결합니다 — 모두 직접 소유하는 마크다운 파일 위에서 동작합니다.
 
 ---
 
@@ -127,16 +127,17 @@ coffaen 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 ---
 
-## 4-Layer 지식 모델
+## 5-Layer 지식 모델
 
-coffaen은 지식을 4개 Layer로 구분하며, 각 Layer는 Spreading Activation(SA) 감쇠율이 다릅니다:
+coffaen은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activation(SA) 감쇠율이 다릅니다:
 
-| Layer | 이름               | 디렉토리       | SA Decay | 용도                            |
-| ----- | ------------------ | -------------- | -------- | ------------------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변 |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술            |
-| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료         |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트 |
+| Layer | 이름               | 디렉토리       | SA Decay | 용도                             |
+| ----- | ------------------ | -------------- | -------- | -------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변  |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술             |
+| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료          |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트  |
+| L5    | Context            | `05_Context/`  | 0.95     | 맥락 메타데이터, 도메인 컨텍스트 |
 
 **감쇠율이 낮을수록 더 강하게 지속됩니다.** L1 문서는 검색 시 강하게 활성화되고 오래 유지됩니다. L4 문서는 강화되지 않으면 빠르게 사라집니다.
 
@@ -189,7 +190,7 @@ coffaen이 시행하는 주요 규칙입니다:
 | L1 보호          | Core Identity 문서는 기본적으로 읽기 전용       | Hook 자동 차단 |
 | Frontmatter 필수 | 모든 문서에 YAML frontmatter 필수               | MCP 검증       |
 | 네이밍 규칙      | `kebab-case.md`, Layer 접두사가 디렉토리와 일치 | MCP 검증       |
-| Layer 구조       | 4-Layer 디렉토리 계층 유지 필수                 | MCP + 에이전트 |
+| Layer 구조       | 5-Layer 디렉토리 계층 유지 필수                 | MCP + 에이전트 |
 | 링크 무결성      | 깨진 링크, 고아 문서 금지                       | Doctor 진단    |
 
 ---

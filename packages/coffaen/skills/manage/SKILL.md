@@ -4,7 +4,7 @@ user_invocable: true
 description: Skill/agent lifecycle management — list/disable/enable/delete/create/report modes
 version: 1.0.0
 complexity: medium
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: manage skill
 plugin: coffaen
 ---

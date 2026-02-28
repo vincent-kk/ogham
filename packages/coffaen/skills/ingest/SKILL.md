@@ -4,7 +4,7 @@ user_invocable: true
 description: Convert external data sources into coffaen documents (GitHub issues, Slack, etc. -> L3/L4)
 version: 1.0.0
 complexity: medium
-context_layers: [3, 4]
+context_layers: [3, 4, 5]
 orchestrator: ingest skill
 plugin: coffaen
 ---
@@ -38,6 +38,7 @@ Identify the data source type and content from input:
 | Temporary work note | Layer 4 | Volatile |
 | GitHub issue (in progress) | Layer 4 | Temporal proximity |
 | Completed issue/PR | Layer 3 | For reference |
+| Domain metadata, people profiles, environmental context | Layer 5 | Contextual |
 
 ### Step 3 — Auto-generate Frontmatter
 
@@ -45,7 +46,7 @@ Identify the data source type and content from input:
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 tags: [auto-extracted tags]
-layer: 3 or 4
+layer: 3, 4, or 5
 source: {original URL}
 ```
 
@@ -55,7 +56,7 @@ Tags are auto-extracted as core keywords from the content.
 
 ```
 coffaen_create({
-  layer: 3 or 4,
+  layer: 3, 4, or 5,
   tags: [auto-extracted tags],
   content: {converted markdown},
   title: {title},
@@ -89,7 +90,7 @@ and suggest adding links.
 ## Options
 
 ```
-/coffaen:ingest [source] [--layer <3|4>] [--tags <tags>] [--path <path>]
+/coffaen:ingest [source] [--layer <3|4|5>] [--tags <tags>] [--path <path>]
 ```
 
 | Option | Default | Description |

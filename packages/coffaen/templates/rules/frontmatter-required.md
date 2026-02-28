@@ -21,7 +21,7 @@ Apply validation based on FrontmatterSchema (Zod).
 | `created` | string | YYYY-MM-DD | Available (mtime-based) |
 | `updated` | string | YYYY-MM-DD | Available (current date) |
 | `tags` | string[] | Minimum 1 | Available (filename-based) |
-| `layer` | number | 1-4 | Available (path-based) |
+| `layer` | number | 1-5 | Available (path-based) |
 
 ## Optional Fields (by Layer)
 

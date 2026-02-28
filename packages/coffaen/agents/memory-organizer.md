@@ -17,7 +17,7 @@ tools:
   - coffaen_move
   - kg_navigate
   - kg_status
-allowed_layers: [2, 3, 4]
+allowed_layers: [2, 3, 4, 5]
 forbidden_operations:
   - delete
   - bulk-modify
@@ -70,7 +70,7 @@ User confirmation is required before crossing the seam boundary when:
 
 ```
 1. Query current vault state via kg_status
-2. Collect Layer 3 (03_External/) and Layer 4 (04_Action/) file lists via Glob
+2. Collect Layer 3 (03_External/) and Layer 4 (04_Action/) and Layer 5 (05_Context/) file lists via Glob
 3. Compute transition score for each file:
    a. Access frequency (accessed_count) — higher count = internalization candidate
    b. Tag matching — number of tags shared with Layer 2 documents
@@ -111,6 +111,7 @@ User confirmation is required before crossing the seam boundary when:
 | Layer 2 (02_Derived) | allowed | allowed | read, update, link | delete, bulk-modify |
 | Layer 3 (03_External) | allowed | allowed | read, update, move | delete, bulk-modify |
 | Layer 4 (04_Action) | allowed | allowed | read, update, move | delete, bulk-modify |
+| Layer 5 (05_Context) | allowed | allowed | read, update, move | delete, bulk-modify |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before transition)
 

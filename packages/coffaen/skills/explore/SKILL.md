@@ -4,7 +4,7 @@ user_invocable: true
 description: SA-based interactive knowledge graph exploration — spread from a seed and discover hidden connections
 version: 1.0.0
 complexity: medium
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: explore skill
 plugin: coffaen
 ---
@@ -120,14 +120,14 @@ After 3 rounds: "Exploration depth limit reached."
 > Options are interpreted by the LLM in natural language. Not strict CLI parsing.
 
 ```
-/coffaen:explore [seed] [--hops <1-10>] [--layer <1-4>] [--detail]
+/coffaen:explore [seed] [--hops <1-10>] [--layer <1-5>] [--detail]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `seed` | none (input requested) | Exploration starting point (path or keyword) |
 | `--hops` | 5 | Maximum hop count (1-10) |
-| `--layer` | all | Layer filter (1-4, multiple allowed) |
+| `--layer` | all | Layer filter (1-5, multiple allowed) |
 | `--detail` | false | Include document body excerpts in results |
 
 ## Usage Examples

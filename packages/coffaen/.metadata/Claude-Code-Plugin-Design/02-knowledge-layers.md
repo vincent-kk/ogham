@@ -1,15 +1,15 @@
 ---
 created: 2026-02-28
 updated: 2026-02-28
-tags: [knowledge-layers, 4-layer, directory-structure, graph-characteristics]
+tags: [knowledge-layers, 5-layer, directory-structure, graph-characteristics]
 layer: design-area-1
 ---
 
-# 4-Layer 지식 모델 — 계층 구조 + 그래프 노드 특성
+# 5-Layer 지식 모델 — 계층 구조 + 그래프 노드 특성
 
 ## 목적
 
-coffaen의 기억공간을 4개 계층으로 분리하여, 기억의 휘발성·내재화 수준에 따라
+coffaen의 기억공간을 5개 계층으로 분리하여, 기억의 휘발성·내재화 수준에 따라
 물리적 디렉토리 위치가 의미론적 계층을 표현하도록 한다.
 
 관련 문서: [트리-그래프 이중 구조](./03-tree-graph-structure.md) | [원자적 문서 정책](./04-atomic-document-policy.md) | [Frontmatter 스키마](./05-frontmatter-schema.md)
@@ -24,6 +24,7 @@ coffaen의 기억공간을 4개 계층으로 분리하여, 기억의 휘발성·
 | 2 | Derived Self | Layer 1 구체화, 복잡한 상호 연결 | **Dense cluster** | 3 |
 | 3 | External | 필요시 참조되는 외곽, 단방향 링크 | **Leaf 노드** | 1 (평면) |
 | 4 | Action | 시간 기반 일시적 활성, 휘발성 | **Volatile 노드** | 2 (YYYY/MM/) |
+| 5 | Context | 맥락 메타데이터, 도메인·인물 정보 | **Metadata 노드** | 2 |
 
 ---
 
@@ -38,6 +39,7 @@ coffaen의 기억공간을 4개 계층으로 분리하여, 기억의 휘발성·
 ├── 03_External/          # Layer 3: Leaf 노드
 ├── 04_Action/            # Layer 4: Volatile 노드
 │   └── 2026/02/
+├── 05_Context/           # Layer 5: Metadata 노드
 └── .coffaen-meta/        # 시스템 메타데이터
 ```
 
@@ -52,6 +54,8 @@ coffaen의 기억공간을 4개 계층으로 분리하여, 기억의 휘발성·
 **Leaf 노드 (Layer 3)**: `react-hooks-api.md` 등. Layer 2 향한 단방향만. `confidence`로 내재화 추적.
 
 **Volatile 노드 (Layer 4)**: `session-2026-02-28.md` 등. 세션 종료 후 Layer 3 승격 또는 삭제.
+
+**Metadata 노드 (Layer 5)**: `person-alice.md`, `domain-typescript.md` 등. 인물·도메인·환경 맥락 정보. 다른 레이어 문서들이 참조하는 보조 메타데이터.
 
 ---
 

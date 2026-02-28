@@ -4,7 +4,7 @@ user_invocable: true
 description: Force full index rebuild — ignore existing cache and rebuild the entire index from scratch
 version: 1.0.0
 complexity: simple
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: rebuild skill
 plugin: coffaen
 ---
@@ -90,6 +90,7 @@ Report results comparing before and after the rebuild.
 | Layer 2 | {before_l2} | {after_l2} | {delta_l2:+d} |
 | Layer 3 | {before_l3} | {after_l3} | {delta_l3:+d} |
 | Layer 4 | {before_l4} | {after_l4} | {delta_l4:+d} |
+| Layer 5 | {before_l5} | {after_l5} | {delta_l5:+d} |
 
 Build time: {duration}s
 ```

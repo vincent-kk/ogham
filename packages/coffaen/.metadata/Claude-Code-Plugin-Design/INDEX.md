@@ -7,7 +7,7 @@ layer: meta
 
 # coffaen 설계 문서 통합 목차
 
-coffaen은 4-Layer 지식 모델 + 지식 그래프 검색 엔진 기반의 개인 지식공간 관리 Claude Code 플러그인이다.
+coffaen은 5-Layer 지식 모델 + 지식 그래프 검색 엔진 기반의 개인 지식공간 관리 Claude Code 플러그인이다.
 
 관련 연구 문서:
 - [연구 제안서](../Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/)
@@ -21,7 +21,7 @@ coffaen은 4-Layer 지식 모델 + 지식 그래프 검색 엔진 기반의 개�
 |------|---|------|------|
 | 0 | 00 | 런타임 제약 분석 | [00](./00-runtime-constraints.md) |
 | 0 | 01 | 설계 원칙 | [01](./01-design-principles.md) |
-| 1 | 02 | 4-Layer 지식 모델 | [02](./02-knowledge-layers.md) |
+| 1 | 02 | 5-Layer 지식 모델 | [02](./02-knowledge-layers.md) |
 | 1 | 03 | 트리-그래프 이중 구조 | [03](./03-tree-graph-structure.md) |
 | 1 | 04 | 원자적 문서 정책 | [04](./04-atomic-document-policy.md) |
 | 1 | 05 | Frontmatter 스키마 | [05](./05-frontmatter-schema.md) |

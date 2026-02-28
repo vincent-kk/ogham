@@ -4,7 +4,7 @@ user_invocable: true
 description: memory-organizer judge module read-only analysis — transition candidates and duplicate detection report
 version: 1.0.0
 complexity: medium
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: reflect skill
 plugin: coffaen
 ---
@@ -83,7 +83,7 @@ Execute memory-organizer judge logic:
 ## Options
 
 ```
-/coffaen:reflect [--layer <1-4>] [--show-all]
+/coffaen:reflect [--layer <1-5>] [--show-all]
 ```
 
 | Option | Default | Description |

@@ -1,6 +1,6 @@
 # src
 
-coffaen 플러그인 소스 루트. 4-Layer Knowledge Model 기반 개인 지식 공간 관리자.
+coffaen 플러그인 소스 루트. 5-Layer Knowledge Model 기반 개인 지식 공간 관리자.
 
 ## Boundaries
 

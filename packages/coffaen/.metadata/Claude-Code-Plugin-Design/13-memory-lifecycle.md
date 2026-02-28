@@ -11,7 +11,7 @@ layer: design-area-3
 
 단기·중기·장기 기억의 정의와, 각 Layer 간 전이를 언제·어떻게 실행하는지를 명시한다.
 
-관련 문서: [4-Layer 지식 모델](./02-knowledge-layers.md) | [Frontmatter 스키마](./05-frontmatter-schema.md) | [크래시 복구](./15-crash-recovery.md)
+관련 문서: [5-Layer 지식 모델](./02-knowledge-layers.md) | [Frontmatter 스키마](./05-frontmatter-schema.md) | [크래시 복구](./15-crash-recovery.md)
 
 ---
 

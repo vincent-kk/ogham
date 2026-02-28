@@ -14,7 +14,7 @@ tools:
   - coffaen_update
   - kg_status
   - kg_navigate
-allowed_layers: [1, 2, 3, 4]
+allowed_layers: [1, 2, 3, 4, 5]
 forbidden_operations:
   - delete
   - move

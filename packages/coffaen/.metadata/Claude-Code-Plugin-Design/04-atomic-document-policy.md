@@ -12,7 +12,7 @@ layer: design-area-1
 각 .md 파일이 단일 아이디어를 담는 원자적 단위가 되도록,
 CRUD 연산마다 사전/사후 조건을 명시하고 자율 수준에 따른 승인 규칙을 정한다.
 
-관련 문서: [4-Layer 지식 모델](./02-knowledge-layers.md) | [Frontmatter 스키마](./05-frontmatter-schema.md) | [충돌 해소](./14-conflict-resolution.md)
+관련 문서: [5-Layer 지식 모델](./02-knowledge-layers.md) | [Frontmatter 스키마](./05-frontmatter-schema.md) | [충돌 해소](./14-conflict-resolution.md)
 
 ---
 

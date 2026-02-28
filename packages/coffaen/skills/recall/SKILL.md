@@ -4,7 +4,7 @@ user_invocable: true
 description: Knowledge search/recall — traverse the knowledge graph with a natural-language query and return relevant documents
 version: 1.0.0
 complexity: simple
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: recall skill
 plugin: coffaen
 ---
@@ -34,7 +34,7 @@ Extract core keywords and intent from user input.
 
 - Natural-language query → list of search keywords
 - Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
-- Layer filter detection: `--layer=1` through `--layer=4`
+- Layer filter detection: `--layer=1` through `--layer=5`
 
 ### Step 2 — Call kg_search
 
@@ -113,7 +113,7 @@ For more detail: `/coffaen:recall {query} --detail`
 |--------|---------|-------------|
 | `--summary` | default | Summary mode (title + 1-2 line summary) |
 | `--detail` | — | Detail mode (full content excerpt) |
-| `--layer=N` | all | Search a specific Layer only (1-4) |
+| `--layer=N` | all | Search a specific Layer only (1-5) |
 | `--limit=N` | 10 | Maximum number of results |
 
 ## Usage Examples

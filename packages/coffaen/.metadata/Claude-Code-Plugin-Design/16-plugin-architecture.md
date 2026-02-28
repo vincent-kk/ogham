@@ -46,7 +46,7 @@ Hook, MCP, Skill이 동일 인덱스에 접근하므로 상태 공유 규약 필
 
 ---
 
-## 3. 4-Layer ↔ 플러그인 계층 매핑
+## 3. 5-Layer ↔ 플러그인 계층 매핑
 
 | Layer | 역할 | 주요 플러그인 계층 |
 |-------|------|------------------|
@@ -54,6 +54,7 @@ Hook, MCP, Skill이 동일 인덱스에 접근하므로 상태 공유 규약 필
 | Layer 2 Derived | 내재화, Dense cluster | MCP(CRUD), Agent(연결) |
 | Layer 3 External | 외부 참조, Leaf | MCP(읽기), Skill(임포트) |
 | Layer 4 Action | 작업 기억, Volatile | Hook(감지), Agent(정리) |
+| Layer 5 Context | 맥락 메타데이터, 도메인 | MCP(읽기), Agent(정리) |
 
 ---
 

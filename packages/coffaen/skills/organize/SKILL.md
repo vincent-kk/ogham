@@ -4,7 +4,7 @@ user_invocable: true
 description: memory-organizer agent orchestration — knowledge transition recommendation and execution
 version: 1.0.0
 complexity: high
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: organize skill
 plugin: coffaen
 ---
@@ -89,11 +89,11 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 ## Options
 
 ```
-/coffaen:organize [--dry-run] [--layer <3|4>] [--min-confidence <0.0-1.0>]
+/coffaen:organize [--dry-run] [--layer <3|4|5>] [--min-confidence <0.0-1.0>]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--dry-run` | false | Run judge only, skip execute stage (equivalent to `/coffaen:reflect` but without the detailed report format) |
-| `--layer` | 3,4 | Target Layer(s) to scan |
+| `--layer` | 3,4 | Target Layer(s) to scan (3, 4, or 5) |
 | `--min-confidence` | 0.7 | Minimum confidence threshold |

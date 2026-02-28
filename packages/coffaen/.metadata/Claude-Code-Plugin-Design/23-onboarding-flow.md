@@ -12,7 +12,7 @@ layer: design-area-5
 첫 실행 시 Core Identity를 수집하고, 지식 트리를 초기화한 뒤,
 검색 엔진 인덱스를 구축하는 인터뷰형 온보딩 스킬.
 
-관련 문서: [스킬 명세](./18-skills.md) | [4-Layer 지식 모델](./02-knowledge-layers.md) | [Progressive Autonomy](./22-autonomy-levels.md)
+관련 문서: [스킬 명세](./18-skills.md) | [5-Layer 지식 모델](./02-knowledge-layers.md) | [Progressive Autonomy](./22-autonomy-levels.md)
 
 ---
 

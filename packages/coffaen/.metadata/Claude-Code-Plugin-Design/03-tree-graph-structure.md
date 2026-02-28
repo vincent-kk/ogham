@@ -12,7 +12,7 @@ layer: design-area-1
 coffaen 지식 저장소의 두 가지 구조적 차원 — 디렉토리 트리(수렴)와 링크 그래프(발산) —
 을 정의하고, 각 구조의 역할과 상호 보완 관계를 명시한다.
 
-관련 문서: [4-Layer 지식 모델](./02-knowledge-layers.md) | [링크 정책](./06-link-policy.md) | [코어 모듈](./08-core-modules.md)
+관련 문서: [5-Layer 지식 모델](./02-knowledge-layers.md) | [링크 정책](./06-link-policy.md) | [코어 모듈](./08-core-modules.md)
 
 ---
 
@@ -29,7 +29,7 @@ coffaen 지식 저장소의 두 가지 구조적 차원 — 디렉토리 트리(
 
 ## 2. 트리 구조 — 디렉토리 계층
 
-디렉토리 트리는 4-Layer 모델의 물리적 구현이다.
+디렉토리 트리는 5-Layer 모델의 물리적 구현이다.
 
 - **PARENT_OF / CHILD_OF**: 디렉토리-파일 또는 디렉토리-디렉토리 계층 관계
 - **SIBLING**: 동일 디렉토리 내 문서 관계

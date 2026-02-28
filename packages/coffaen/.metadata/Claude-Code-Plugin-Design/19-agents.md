@@ -33,12 +33,13 @@ Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
 
 ## 2. 에이전트-Layer 접근 매트릭스
 
-| 에이전트 | L1 | L2 | L3 | L4 | 쓰기 범위 |
-|---------|----|----|----|----|----------|
-| memory-organizer | 읽기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 전이/정리 |
-| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 링크 생성만 |
-| schedule-runner | 읽기 | 읽기 | - | 읽기/쓰기 | 스케줄 실행 기록 |
-| identity-guardian | 읽기/쓰기 | - | - | - | Layer 1 보호/갱신 |
+| 에이전트 | L1 | L2 | L3 | L4 | L5 | 쓰기 범위 |
+|---------|----|----|----|----|-----|----------|
+| memory-organizer | 읽기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 전이/정리 |
+| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 생성만 |
+| schedule-runner | 읽기 | 읽기 | - | 읽기/쓰기 | 읽기 | 스케줄 실행 기록 |
+| identity-guardian | 읽기/쓰기 | - | - | - | - | Layer 1 보호/갱신 |
+| doctor | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단만 |
 
 ---
 

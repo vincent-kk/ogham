@@ -23,7 +23,7 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 | `created` | string | YYYY-MM-DD | 최초 생성일. 변경 금지 |
 | `updated` | string | YYYY-MM-DD | 마지막 수정일. MCP 자동 갱신 |
 | `tags` | string[] | 배열 | 중복 감지·검색 기반. 최소 1개 필수 |
-| `layer` | number | 1-4 | 문서의 Layer 속성. 디렉토리와 일치 필요 |
+| `layer` | number | 1-5 | 문서의 Layer 속성. 디렉토리와 일치 필요 |
 
 검증: Create/Update 시 MCP 도구가 필수 필드 존재 검사. 누락 시 오류 반환.
 
@@ -39,6 +39,9 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 | `confidence` | number | 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준) |
 | `accessed_count` | number | 세션별 참조 횟수 누적 |
 | `schedule` | string | Lazy Scheduling 표현식 |
+| `person` | PersonSchema | 인물 참조 (Layer 4/5용) |
+| `domain` | string | 도메인 식별자 (크로스 레이어) |
+| `domain_type` | enum | 도메인 유형 분류 (크로스 레이어) |
 
 ---
 
@@ -63,6 +66,7 @@ Frontmatter 필드를 직접 활용한다:
 | 2 | `02_Derived/` | 경고 |
 | 3 | `03_External/` | 경고 |
 | 4 | `04_Action/` | 경고 |
+| 5 | `05_Context/` | 경고 |
 
 ## 5. 검증 시점
 

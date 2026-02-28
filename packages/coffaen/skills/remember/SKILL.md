@@ -4,7 +4,7 @@ user_invocable: true
 description: Record new knowledge to the coffaen knowledge tree — automatic Layer recommendation + tag extraction + duplicate check
 version: 1.0.0
 complexity: medium
-context_layers: [2, 3, 4]
+context_layers: [2, 3, 4, 5]
 orchestrator: remember skill
 plugin: coffaen
 ---
@@ -45,6 +45,7 @@ Recommend a Layer based on the nature of the content:
 | L2 Derived | Internalized skills/knowledge/insights | `02_Derived/` |
 | L3 External | External references, links, temporary knowledge | `03_External/` |
 | L4 Action | To-dos, current session context, temporary notes | `04_Action/` |
+| L5 Context | Environmental context, domain metadata, people profiles | `05_Context/` |
 
 **L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly
 **L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
@@ -112,6 +113,14 @@ expires: YYYY-MM-DD  # expiration date (if applicable)
 schedule: "once"     # or "daily", "weekly"
 ```
 
+**L5 Frontmatter**:
+```yaml
+layer: 5
+tags: [extracted tags]
+domain: "domain or context category"
+subject: "person name or entity (if applicable)"
+```
+
 ### Step 6 — Confirmation Report
 
 Report to the user after successful creation:
@@ -139,13 +148,13 @@ To explore related documents: /coffaen:explore {tag}
 > Options are interpreted by the LLM in natural language.
 
 ```
-/coffaen:remember [content] [--layer <2-4>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
+/coffaen:remember [content] [--layer <2-5>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `content` | conversation context | Content to record |
-| `--layer` | auto-recommended | Specify Layer (2-4; L1 not allowed) |
+| `--layer` | auto-recommended | Specify Layer (2-5; L1 not allowed) |
 | `--title` | auto-generated | Document title |
 | `--tags` | auto-extracted | Tag list (comma-separated) |
 | `--source` | none | External source URL (for L3) |

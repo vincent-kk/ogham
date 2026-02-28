@@ -4,7 +4,7 @@ user_invocable: true
 description: 6 diagnostics + report generation + auto-fix suggestions — knowledge vault health check
 version: 1.0.0
 complexity: high
-context_layers: [1, 2, 3, 4]
+context_layers: [1, 2, 3, 4, 5]
 orchestrator: doctor skill
 plugin: coffaen
 ---

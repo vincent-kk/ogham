@@ -72,7 +72,7 @@ Changes require deliberate intent and explicit user confirmation.
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
 | Layer 1 (01_Core) | allowed | **forbidden** (accessed_count only excepted at AutonomyLevel 2+) | read | create, update (content), delete, move, link, bulk-modify |
-| Layer 2~4 | read only | forbidden | read | all write operations |
+| Layer 2~5 | read only | forbidden | read | all write operations |
 
 Minimum required AutonomyLevel: **0** (active at all levels)
 

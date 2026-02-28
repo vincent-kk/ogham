@@ -35,7 +35,7 @@ All knowledge space documents must include the following Frontmatter fields:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `title` | Yes | Document title |
-| `layer` | Yes | Layer number (1-4) |
+| `layer` | Yes | Layer number (1-5) |
 | `created` | Yes | Creation date (YYYY-MM-DD) |
 | `updated` | Yes | Last modified date (YYYY-MM-DD) |
 | `tags` | No | Tag array |

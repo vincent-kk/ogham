@@ -2,7 +2,7 @@
 
 A Claude Code plugin that manages your personal knowledge space with a markdown-based Knowledge Graph.
 
-AI agents forget you between sessions. Your notes scatter across tools, your insights fade, and every conversation starts from zero. coffaen solves this with a **4-Layer Knowledge Model**, **Spreading Activation search**, and **memory lifecycle management** — all built on plain markdown files you own.
+AI agents forget you between sessions. Your notes scatter across tools, your insights fade, and every conversation starts from zero. coffaen solves this with a **5-Layer Knowledge Model**, **Spreading Activation search**, and **memory lifecycle management** — all built on plain markdown files you own.
 
 ---
 
@@ -127,9 +127,9 @@ View skill/agent activation status, usage reports, and toggle features on/off.
 
 ---
 
-## 4-Layer Knowledge Model
+## 5-Layer Knowledge Model
 
-coffaen organizes knowledge into four layers with distinct decay rates for Spreading Activation (SA):
+coffaen organizes knowledge into five layers with distinct decay rates for Spreading Activation (SA):
 
 | Layer | Name               | Directory      | SA Decay | Purpose                                 |
 | ----- | ------------------ | -------------- | -------- | --------------------------------------- |
@@ -137,6 +137,7 @@ coffaen organizes knowledge into four layers with distinct decay rates for Sprea
 | L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | Internalized insights and skills        |
 | L3    | External Reference | `03_External/` | 0.8      | Bookmarks, citations, external sources  |
 | L4    | Action Memory      | `04_Action/`   | 0.9      | Volatile task notes, session context    |
+| L5    | Context            | `05_Context/`  | 0.95     | Environmental metadata, domain context  |
 
 **Lower decay = stronger persistence.** L1 documents activate strongly and stay relevant across searches. L4 documents fade quickly unless reinforced.
 
@@ -189,7 +190,7 @@ Core rules enforced by coffaen:
 | L1 protection     | Core Identity documents are read-only by default | Hook (auto-block) |
 | Frontmatter       | YAML frontmatter required on all documents       | MCP validation    |
 | Naming convention | `kebab-case.md`, layer prefix matching directory | MCP validation    |
-| Layer structure   | 4-layer directory hierarchy must be maintained   | MCP + agent       |
+| Layer structure   | 5-layer directory hierarchy must be maintained   | MCP + agent       |
 | Link integrity    | No broken links, no orphan documents             | Doctor diagnostic |
 
 ---
