@@ -1,3 +1,5 @@
+> **[통합 완료 안내]** 이 문서 세트의 내용은 [Claude-Code-Plugin-Design](../../Claude-Code-Plugin-Design/INDEX.md) 통합 설계 문서(문서 07~12, 24~26)에 병합되었습니다. 최신 설계는 통합 문서를 참조하십시오. (2026-02-28)
+
 # Markdown Knowledge Graph Search Engine -- 고수준 아키텍처 설계문서
 
 ## 개요
