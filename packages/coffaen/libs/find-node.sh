@@ -6,7 +6,7 @@
 # shells (e.g. Claude Code hook invocations).
 #
 # Priority:
-#   0. Cached path in ~/.claude/plugins/filid/node-path-cache (skip full search)
+#   0. Cached path in ~/.claude/plugins/coffaen/node-path-cache (skip full search)
 #   1. nvm default alias → matching version, fallback to highest version
 #   2. fnm default alias → matching version, fallback to highest version
 #   3. `command -v node` (node is on PATH — fallback for non-nvm/fnm setups)

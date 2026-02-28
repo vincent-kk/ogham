@@ -37,6 +37,12 @@ Record previous state:
 - Last built: {last_built}
 - Stale node count: {stale_count}
 
+### Step 1b — Backup Existing Index (unless `--no-backup`)
+
+Before rebuilding, copy `.coffaen/index.json` to `.coffaen/index.json.bak` if it exists.
+This backup is used for rollback if Step 3 fails.
+Skip this step when `--no-backup` is specified.
+
 ### Step 2 — User Confirmation
 
 Request confirmation since a rebuild can take time.

@@ -146,6 +146,6 @@ Glob 01_Core/**/*.md to collect file list
 
 ## Skill Participation
 
-- `/coffaen:diagnose` — integrity check of Layer 1 documents
+- `/coffaen:setup` — verify Frontmatter rule compliance for generated L1 documents (Stage 3)
 - `/coffaen:explore` — Layer 1 structure query and relationship navigation
 - Layer Guard Hook (layer-guard.ts) — primary block at PreToolUse stage, then routes to this agent

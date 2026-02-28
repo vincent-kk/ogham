@@ -104,13 +104,16 @@ Generate a new custom skill/agent template:
 4. Output confirmation message
 ```
 
-## Available MCP Tools
+## Available Tools
 
 | Tool | Purpose |
 |------|---------|
-| `coffaen_read` | Query usage-stats.json, disabled-registry.json |
-| `coffaen_create` | Create new skill/agent files |
-| `coffaen_update` | Update disabled-registry.json |
+| `Read` | Read `.coffaen-meta/usage-stats.json`, `.coffaen-meta/disabled-registry.json` |
+| `Write` | Write `.coffaen-meta/disabled-registry.json` (disable/enable operations) |
+| `coffaen_create` | Create new skill/agent template files in the plugin directory |
+
+> Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.coffaen-meta/`
+> (not vault documents). They are accessed with Read/Write tools, not coffaen MCP tools.
 
 ## Error Handling
 

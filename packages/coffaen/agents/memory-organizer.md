@@ -119,6 +119,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Constraints
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
+- **Direct coffaen_read on Layer 1 (01_Core/) files is forbidden** — use kg_navigate for graph traversal only
 - **Maximum 5 transitions at a time** — prevents bulk-modify
 - **User confirmation required for transitions with confidence < 0.7**
 - **`confidence` field in Frontmatter is mandatory for L3 → L2 transitions**

@@ -29,7 +29,17 @@ Energy spreads from a seed node, uncovering unexpected connections along the way
 
 ## Workflow
 
-### Step 1 — Determine Exploration Starting Point
+### Step 1 — Check Index Status
+
+```
+kg_status()
+```
+
+- No index -> "No index found. Please run `/coffaen:build` first." (abort)
+- `rebuildRecommended: true` -> warn before exploration: "The index is stale. Results may be inaccurate. `/coffaen:rebuild` is recommended."
+- Ask user whether to continue if stale
+
+### Step 2 — Determine Exploration Starting Point
 
 Determine the seed from user input:
 
@@ -38,15 +48,6 @@ Determine the seed from user input:
 - Not specified -> ask user to enter a topic to explore
 
 If a Layer filter (`--layer`) is specified, only documents in that Layer are allowed as seed candidates.
-
-### Step 2 — Check Index Status
-
-```
-kg_status()
-```
-
-- `rebuildRecommended: true` -> warn before exploration: "The index is stale. Results may be inaccurate. `/coffaen:rebuild` is recommended."
-- Ask user whether to continue
 
 ### Step 3 — SA-Based Spreading Exploration
 

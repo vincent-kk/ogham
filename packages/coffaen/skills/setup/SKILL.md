@@ -54,9 +54,10 @@ Generate Layer 1 documents from the collected interview answers:
 | `01_Core/values.md` | Core values |
 | `01_Core/boundaries.md` | Absolute boundaries |
 | `01_Core/preferences.md` | Communication preferences |
-| `01_Core/trust-level.json` | Level 0 initialization |
+| `01_Core/trust-level.json` | Trust level tracker (initialized in Stage 4) |
 
 Create each document with the `coffaen_create` MCP tool (layer=1, tags required).
+Note: `trust-level.json` is created as an empty placeholder here; its content is initialized in Stage 4.
 
 Also create the `02_Derived/`, `03_External/`, and `04_Action/` directories.
 

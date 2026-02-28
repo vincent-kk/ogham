@@ -68,12 +68,15 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `kg_status` | Check vault status and stale-nodes |
-| `kg_navigate` | Traverse link relationships |
-| `coffaen_move` | Execute file move |
-| `coffaen_update` | Update Frontmatter |
+> The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent,
+> not directly by this skill. The skill coordinates the workflow and user confirmation flow.
+
+| Tool | Used by | Purpose |
+|------|---------|---------|
+| `kg_status` | skill (Step 1 pre-check) | Check vault status and stale-nodes |
+| `kg_navigate` | memory-organizer agent | Traverse link relationships |
+| `coffaen_move` | memory-organizer agent (execute module) | Execute file move |
+| `coffaen_update` | memory-organizer agent (execute module) | Update Frontmatter |
 
 ## Error Handling
 
