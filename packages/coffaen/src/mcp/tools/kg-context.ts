@@ -2,11 +2,10 @@
  * @file kg-context.ts
  * @description kg_context 도구 핸들러 — 토큰 최적화 컨텍스트 블록 반환
  */
-
-import type { KgContextInput, KgContextResult } from '../../types/mcp.js';
-import type { KnowledgeGraph } from '../../types/graph.js';
-import { query } from '../../search/query-engine.js';
 import { assembleContext } from '../../search/context-assembler.js';
+import { query } from '../../search/query-engine.js';
+import type { KnowledgeGraph } from '../../types/graph.js';
+import type { KgContextInput, KgContextResult } from '../../types/mcp.js';
 
 /**
  * kg_context 핸들러
@@ -16,7 +15,9 @@ export async function handleKgContext(
   input: KgContextInput,
 ): Promise<KgContextResult | { error: string }> {
   if (!graph) {
-    return { error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.' };
+    return {
+      error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.',
+    };
   }
 
   const tokenBudget = input.token_budget ?? 2000;

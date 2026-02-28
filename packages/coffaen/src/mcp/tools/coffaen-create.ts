@@ -2,12 +2,12 @@
  * @file coffaen-create.ts
  * @description coffaen_create 도구 핸들러 — 새 기억 문서 생성
  */
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 
-import { readFile, writeFile, mkdir, access } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
-
-import type { CoffaenCreateInput, CoffaenCrudResult } from '../../types/mcp.js';
 import { Layer } from '../../types/common.js';
+import type { CoffaenCreateInput, CoffaenCrudResult } from '../../types/mcp.js';
+import { appendStaleNode } from '../shared.js';
 
 /** Layer → 디렉토리 매핑 */
 const LAYER_DIR: Record<number, string> = {
@@ -115,7 +115,8 @@ export async function handleCoffaenCreate(
 
   // 파일명 결정
   const filename = input.filename
-    ? sanitizeFilename(input.filename) + (input.filename.endsWith('.md') ? '' : '.md')
+    ? sanitizeFilename(input.filename) +
+      (input.filename.endsWith('.md') ? '' : '.md')
     : generateFilename(input.title, input.tags);
 
   const relativePath = `${layerDir}/${filename}`;
@@ -142,28 +143,14 @@ export async function handleCoffaenCreate(
   await mkdir(dirname(absolutePath), { recursive: true });
   await writeFile(absolutePath, fileContent, 'utf-8');
 
-  // stale-nodes.json 무효화 (새 노드 추가)
-  const cacheDir = join(vaultPath, '.coffaen');
-  const staleNodesPath = join(cacheDir, 'stale-nodes.json');
-  try {
-    let stale: { paths: string[]; updatedAt: string } = { paths: [], updatedAt: '' };
-    try {
-      const raw = await readFile(staleNodesPath, 'utf-8');
-      stale = JSON.parse(raw) as typeof stale;
-    } catch {
-      // 없으면 초기화
-    }
-    stale.paths = Array.from(new Set([...stale.paths, relativePath]));
-    stale.updatedAt = new Date().toISOString();
-    await mkdir(cacheDir, { recursive: true });
-    await writeFile(staleNodesPath, JSON.stringify(stale, null, 2), 'utf-8');
-  } catch {
-    // stale 업데이트 실패는 경고만
-  }
+  // Invalidate stale-nodes (new node added)
+  await appendStaleNode(vaultPath, relativePath);
 
   // backlink-index 갱신 (링크 추출)
   const metaDir = join(vaultPath, '.coffaen-meta');
-  const linkMatches = [...input.content.matchAll(/\[([^\]]*)\]\(([^)]+\.md)\)/g)];
+  const linkMatches = [
+    ...input.content.matchAll(/\[([^\]]*)\]\(([^)]+\.md)\)/g),
+  ];
   const linkedPaths = linkMatches
     .map((m) => m[2])
     .filter((href) => !href.startsWith('http'));

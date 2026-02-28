@@ -10,17 +10,20 @@
  * 5. orphan-node — 고립 노드 감지
  * 6. layer-mismatch — Layer/디렉토리 불일치 감지
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
+import { scanVault } from '../../core/vault-scanner.js';
 import { handleCoffaenCreate } from '../../mcp/tools/coffaen-create.js';
 import { handleKgBuild } from '../../mcp/tools/kg-build.js';
 import { handleKgStatus } from '../../mcp/tools/kg-status.js';
-import { parseDocument, buildKnowledgeNode } from '../../core/document-parser.js';
-import { scanVault } from '../../core/vault-scanner.js';
 import type { DiagnosticItem, DiagnosticResult } from '../../types/doctor.js';
 
 async function makeTempVault(): Promise<string> {
@@ -50,7 +53,10 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
         severity: 'error',
         path: file.relativePath,
         message: `Frontmatter 누락: ${file.relativePath}`,
-        autoFix: { description: 'coffaen_update로 Frontmatter 추가', fixable: true },
+        autoFix: {
+          description: 'coffaen_update로 Frontmatter 추가',
+          fixable: true,
+        },
       });
     }
 
@@ -61,7 +67,10 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
         severity: 'warning',
         path: file.relativePath,
         message: `만료된 문서: ${file.relativePath} (만료일: ${fm.expires})`,
-        autoFix: { description: 'coffaen_delete로 만료 문서 삭제', fixable: true },
+        autoFix: {
+          description: 'coffaen_delete로 만료 문서 삭제',
+          fixable: true,
+        },
       });
     }
 
@@ -90,7 +99,10 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
       if (pathParts.length >= 2) {
         const dirName = pathParts[0];
         const layerDirMap: Record<number, string> = {
-          1: '01_Core', 2: '02_Derived', 3: '03_External', 4: '04_Action',
+          1: '01_Core',
+          2: '02_Derived',
+          3: '03_External',
+          4: '04_Action',
         };
         const expectedDir = layerDirMap[nodeResult.node.layer];
         if (expectedDir && dirName !== expectedDir) {
@@ -99,7 +111,10 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
             severity: 'warning',
             path: file.relativePath,
             message: `Layer 불일치: 파일은 ${dirName}에 있지만 frontmatter는 Layer ${nodeResult.node.layer}`,
-            autoFix: { description: 'coffaen_move로 올바른 Layer로 이동', fixable: true },
+            autoFix: {
+              description: 'coffaen_move로 올바른 Layer로 이동',
+              fixable: true,
+            },
           });
         }
       }
@@ -120,13 +135,20 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
   }
   for (const path of allPaths) {
     // Layer 1 문서는 고립 노드 검사 제외
-    if (!path.startsWith('01_Core/') && !linkedPaths.has(path) && files.length > 1) {
+    if (
+      !path.startsWith('01_Core/') &&
+      !linkedPaths.has(path) &&
+      files.length > 1
+    ) {
       items.push({
         category: 'orphan-node',
         severity: 'info',
         path,
         message: `고립 노드: ${path} — 다른 문서에서 참조되지 않음`,
-        autoFix: { description: '연결 문서 생성 또는 삭제 고려', fixable: false },
+        autoFix: {
+          description: '연결 문서 생성 또는 삭제 고려',
+          fixable: false,
+        },
       });
     }
   }
@@ -177,10 +199,16 @@ describe('Doctor 진단 통합 테스트', () => {
     // Frontmatter 없는 파일 생성
     const dir = join(vault, '02_Derived');
     await mkdir(dir, { recursive: true });
-    await writeFile(join(dir, 'no-frontmatter.md'), '# 제목만 있는 파일\n\n내용입니다.', 'utf-8');
+    await writeFile(
+      join(dir, 'no-frontmatter.md'),
+      '# 제목만 있는 파일\n\n내용입니다.',
+      'utf-8',
+    );
 
     const result = await runDiagnostics(vault);
-    const missingFm = result.items.filter((i) => i.category === 'missing-frontmatter');
+    const missingFm = result.items.filter(
+      (i) => i.category === 'missing-frontmatter',
+    );
     expect(missingFm.length).toBeGreaterThan(0);
     expect(missingFm[0].severity).toBe('error');
     expect(missingFm[0].path).toContain('no-frontmatter.md');
@@ -197,7 +225,9 @@ describe('Doctor 진단 통합 테스트', () => {
     });
 
     const result = await runDiagnostics(vault);
-    const expired = result.items.filter((i) => i.category === 'expired-document');
+    const expired = result.items.filter(
+      (i) => i.category === 'expired-document',
+    );
     expect(expired.length).toBeGreaterThan(0);
     expect(expired[0].severity).toBe('warning');
     expect(expired[0].message).toContain('2020-01-01');
@@ -221,10 +251,18 @@ describe('Doctor 진단 통합 테스트', () => {
     // stale-nodes 수동 추가 (2개 이상으로 10% 초과)
     const cacheDir = join(vault, '.coffaen');
     const staleNodes = {
-      paths: ['02_Derived/doc-0.md', '02_Derived/doc-1.md', '02_Derived/doc-2.md'],
+      paths: [
+        '02_Derived/doc-0.md',
+        '02_Derived/doc-1.md',
+        '02_Derived/doc-2.md',
+      ],
       updatedAt: new Date().toISOString(),
     };
-    await writeFile(join(cacheDir, 'stale-nodes.json'), JSON.stringify(staleNodes), 'utf-8');
+    await writeFile(
+      join(cacheDir, 'stale-nodes.json'),
+      JSON.stringify(staleNodes),
+      'utf-8',
+    );
 
     // graph 로드 후 status 확인
     const { MetadataStore } = await import('../../index/metadata-store.js');
@@ -276,7 +314,9 @@ layer: 1
     await writeFile(join(dir, 'misplaced.md'), content, 'utf-8');
 
     const result = await runDiagnostics(vault);
-    const mismatches = result.items.filter((i) => i.category === 'layer-mismatch');
+    const mismatches = result.items.filter(
+      (i) => i.category === 'layer-mismatch',
+    );
     expect(mismatches.length).toBeGreaterThan(0);
     expect(mismatches[0].message).toContain('Layer 불일치');
     expect(mismatches[0].autoFix?.fixable).toBe(true);
@@ -298,7 +338,9 @@ layer: 1
     });
 
     const result = await runDiagnostics(vault);
-    expect(result.errorCount + result.warningCount + result.infoCount).toBe(result.items.length);
+    expect(result.errorCount + result.warningCount + result.infoCount).toBe(
+      result.items.length,
+    );
     expect(result.fixableCount).toBeGreaterThanOrEqual(0);
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
   });

@@ -1,72 +1,72 @@
 ---
 rule_id: layer-structure
-rule_name: Layer 구조 규칙
+rule_name: Layer Structure Rules
 severity: error
 category: structure
 auto_fix: partial
 version: 1.0.0
 ---
 
-# Layer 구조 규칙
+# Layer Structure Rules
 
-## 목적
+## Purpose
 
-coffaen 4-Layer 지식 모델의 디렉토리 구조 준수를 강제한다.
-파일 경로와 Frontmatter `layer` 필드의 일치를 보장한다.
+Enforce directory structure compliance with the coffaen 4-Layer knowledge model.
+Ensure consistency between file paths and the Frontmatter `layer` field.
 
-## 규칙 정의
+## Rule Definitions
 
-### R1. 디렉토리-Layer 매핑
+### R1. Directory-to-Layer Mapping
 
-| 디렉토리 접두사 | Layer | 설명 |
-|--------------|-------|------|
+| Directory Prefix | Layer | Description |
+|-----------------|-------|-------------|
 | `01_Core/` | 1 | Core Identity Hub |
-| `02_Derived/` | 2 | 내재화 지식 |
-| `03_External/` | 3 | 외부 참조 |
-| `04_Action/` | 4 | 작업 기억 |
+| `02_Derived/` | 2 | Internalized knowledge |
+| `03_External/` | 3 | External references |
+| `04_Action/` | 4 | Action memory |
 
-### R2. Frontmatter layer 필드 일치
+### R2. Frontmatter layer Field Must Match
 
-파일 경로의 Layer와 Frontmatter `layer` 필드가 반드시 일치해야 한다.
+The Layer inferred from the file path must match the Frontmatter `layer` field.
 
 ```yaml
-# 올바른 예 (02_Derived/skills/programming.md)
+# Correct example (02_Derived/skills/programming.md)
 layer: 2
 
-# 위반 예 (02_Derived/skills/programming.md)
-layer: 3  # ERROR: 경로는 Layer 2인데 Frontmatter는 Layer 3
+# Violation example (02_Derived/skills/programming.md)
+layer: 3  # ERROR: path implies Layer 2 but Frontmatter says Layer 3
 ```
 
-### R3. Layer 1 아웃바운드 링크 금지
+### R3. Layer 1 Outbound Links Prohibited
 
-`01_Core/` 문서는 다른 문서로의 아웃바운드 링크를 가질 수 없다.
-Hub 노드는 참조되기만 한다.
+Documents in `01_Core/` may not contain outbound links to other documents.
+Hub nodes are only referenced by others; they do not reference outward.
 
 ```markdown
-<!-- 위반: 01_Core/values.md 내부 -->
-[관련 스킬](../02_Derived/skills/programming.md)  <!-- ERROR -->
+<!-- Violation: inside 01_Core/values.md -->
+[Related Skill](../02_Derived/skills/programming.md)  <!-- ERROR -->
 ```
 
-### R4. 상위 Layer → Layer 4 링크 금지
+### R4. Upper Layer → Layer 4 Links Prohibited
 
-Layer 1/2/3 문서는 Layer 4 (`04_Action/`) 문서를 참조할 수 없다.
-휘발성 작업 기억은 영속 지식에서 참조되지 않는다.
+Documents in Layer 1/2/3 may not reference Layer 4 (`04_Action/`) documents.
+Volatile action memory must not be referenced by persistent knowledge.
 
-## 검증 로직
+## Validation Logic
 
 ```typescript
 function validateLayerStructure(node: KnowledgeNode): DiagnosticItem[] {
   const issues: DiagnosticItem[] = [];
   const pathLayer = inferLayerFromPath(node.path);
 
-  // R2: Frontmatter layer 일치 검사
+  // R2: Frontmatter layer consistency check
   if (pathLayer !== node.layer) {
     issues.push({
       category: 'layer-mismatch',
       severity: 'error',
       path: node.path,
-      message: `경로 기준 Layer ${pathLayer}, Frontmatter layer: ${node.layer}`,
-      autoFix: { fixable: true, description: 'Frontmatter layer를 경로 기준으로 수정' }
+      message: `Path-inferred Layer ${pathLayer}, Frontmatter layer: ${node.layer}`,
+      autoFix: { fixable: true, description: 'Update Frontmatter layer to match path' }
     });
   }
 
@@ -74,12 +74,12 @@ function validateLayerStructure(node: KnowledgeNode): DiagnosticItem[] {
 }
 ```
 
-## 자동 수정
+## Auto-fix
 
-- **R2 위반**: Frontmatter `layer` 필드를 경로 기준 값으로 자동 수정 (`coffaen_update`)
-- **R1/R3/R4 위반**: 자동 수정 불가, 수동 링크 제거 필요
+- **R2 violations**: Automatically update Frontmatter `layer` field to the path-inferred value (`coffaen_update`)
+- **R1/R3/R4 violations**: Auto-fix not available; manual link removal required
 
-## 예외
+## Exceptions
 
-- `.coffaen/`, `.coffaen-meta/` 내부 파일은 이 규칙에서 제외
-- `README.md`, `index.md` 파일은 Layer 강제 없음
+- Files inside `.coffaen/` and `.coffaen-meta/` are excluded from this rule
+- `README.md` and `index.md` files are not subject to Layer enforcement

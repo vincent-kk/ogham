@@ -1,62 +1,62 @@
 ---
 rule_id: link-integrity
-rule_name: 링크 무결성 규칙
+rule_name: Link Integrity Rules
 severity: error
 category: structure
 auto_fix: false
 version: 1.0.0
 ---
 
-# 링크 무결성 규칙
+# Link Integrity Rules
 
-## 목적
+## Purpose
 
-coffaen 지식 그래프의 링크 유효성을 보장한다.
-깨진 링크, 잘못된 링크 형식, Layer 방향성 위반을 탐지한다.
+Ensure the validity of links in the coffaen knowledge graph.
+Detect broken links, malformed link formats, and Layer directionality violations.
 
-## 규칙 정의
+## Rule Definitions
 
-### R1. 상대 경로 전용
+### R1. Relative Paths Only
 
-마크다운 링크는 반드시 상대 경로를 사용해야 한다.
-절대 경로와 외부 URL은 `source` Frontmatter 필드로 기록한다.
+Markdown links must use relative paths exclusively.
+Absolute paths and external URLs are recorded in the `source` Frontmatter field.
 
 ```markdown
-<!-- 올바른 예 -->
-[관련 스킬](../02_Derived/skills/programming.md)
-[같은 디렉토리](./values-backup.md)
+<!-- Correct examples -->
+[Related Skill](../02_Derived/skills/programming.md)
+[Same Directory](./values-backup.md)
 
-<!-- 위반 예 -->
-[절대 경로](/Users/me/vault/01_Core/values.md)  <!-- ERROR -->
+<!-- Violation examples -->
+[Absolute Path](/Users/me/vault/01_Core/values.md)  <!-- ERROR -->
 ```
 
-### R2. 링크 대상 존재
+### R2. Link Target Must Exist
 
-`[텍스트](경로)` 링크의 대상 파일이 반드시 존재해야 한다.
-존재하지 않는 파일을 참조하는 링크는 `.coffaen-meta/broken-links.json`에 기록된다.
+The target file of a `[text](path)` link must exist.
+Links referencing non-existent files are recorded in `.coffaen-meta/broken-links.json`.
 
-### R3. Layer 방향성 준수
+### R3. Layer Directionality Compliance
 
-링크 방향은 Layer 정책을 따른다 (06-link-policy.md 기준):
+Link direction must follow Layer policy (per 06-link-policy.md):
 
-| 출발 Layer | 허용 대상 | 금지 대상 |
-|-----------|---------|---------|
-| Layer 1 | 없음 (아웃바운드 링크 금지) | 모든 Layer |
+| Source Layer | Allowed Targets | Prohibited Targets |
+|-------------|----------------|--------------------|
+| Layer 1 | None (outbound links prohibited) | All Layers |
 | Layer 2 | Layer 1, Layer 2 | Layer 4 |
 | Layer 3 | Layer 1, Layer 2 | Layer 4 |
 | Layer 4 | Layer 1, Layer 2, Layer 3 | — |
 
-### R4. 순환 참조 경고
+### R4. Circular Reference Warning
 
-두 문서가 서로를 참조하는 순환(A→B→A)은 DAGConverter가 가중치를 약화(0.1)하지만,
-직접 상호 참조는 warning으로 보고한다.
+Cycles where two documents reference each other (A→B→A) cause DAGConverter to weaken edge weights (0.1),
+but direct mutual references are reported as a warning.
 
-### R5. Backlink 인덱스 일관성
+### R5. Backlink Index Consistency
 
-`.coffaen-meta/backlink-index.json`의 항목이 실제 파일 시스템과 일치해야 한다.
-불일치는 SessionStart Hook이 탐지하고 기록한다.
+Entries in `.coffaen-meta/backlink-index.json` must match the actual file system.
+Inconsistencies are detected and recorded by the SessionStart Hook.
 
-## 검증 로직
+## Validation Logic
 
 ```typescript
 function validateLinkIntegrity(
@@ -70,25 +70,25 @@ function validateLinkIntegrity(
 
     const target = graph.nodes.get(edge.to);
 
-    // R2: 링크 대상 존재 확인
+    // R2: Check link target exists
     if (!target) {
       issues.push({
         category: 'broken-link',
         severity: 'error',
         path: node.path,
-        message: `깨진 링크: ${edge.to}`,
-        autoFix: { fixable: false, description: '수동으로 링크를 수정하거나 제거하세요' }
+        message: `Broken link: ${edge.to}`,
+        autoFix: { fixable: false, description: 'Manually fix or remove the link' }
       });
     }
 
-    // R3: Layer 방향성 확인
+    // R3: Check Layer directionality
     if (target && isLayerViolation(node.layer, target.layer)) {
       issues.push({
         category: 'layer-mismatch',
         severity: 'error',
         path: node.path,
-        message: `Layer ${node.layer} → Layer ${target.layer} 링크 위반`,
-        autoFix: { fixable: false, description: '링크를 제거하거나 대상 문서의 Layer를 변경하세요' }
+        message: `Layer ${node.layer} → Layer ${target.layer} link violation`,
+        autoFix: { fixable: false, description: 'Remove the link or move the target document to a different Layer' }
       });
     }
   }
@@ -97,24 +97,24 @@ function validateLinkIntegrity(
 }
 ```
 
-## Backlink 인덱스 갱신 트리거
+## Backlink Index Update Triggers
 
-| 이벤트 | 처리 |
-|--------|------|
-| `coffaen_create` | 새 아웃바운드 링크를 인덱스에 추가 |
-| `coffaen_update` | 변경된 링크 재분석 후 재구축 |
-| `coffaen_delete` | 해당 문서가 출처인 항목 제거 |
-| `coffaen_move` | 경로 갱신 후 인덱스 재구축 |
+| Event | Action |
+|-------|--------|
+| `coffaen_create` | Add new outbound links to the index |
+| `coffaen_update` | Re-analyze changed links and rebuild |
+| `coffaen_delete` | Remove entries where this document is the source |
+| `coffaen_move` | Update paths and rebuild the index |
 
-## 자동 수정
+## Auto-fix
 
-모든 링크 무결성 위반은 **자동 수정 불가**.
-수동 검토 후 처리:
-- 깨진 링크: 링크 제거 또는 대상 파일 복원
-- Layer 위반: 링크 제거 또는 문서 이동
+All link integrity violations are **not auto-fixable**.
+Manual review required:
+- Broken links: remove the link or restore the target file
+- Layer violations: remove the link or move the document
 
-## 예외
+## Exceptions
 
-- `http://`, `https://` URL 링크는 R1~R4 적용 제외
-- `#앵커` 링크는 R2 적용 제외
-- `![이미지](경로)` 이미지 링크는 R3 적용 제외
+- `http://` and `https://` URL links are exempt from R1-R4
+- `#anchor` links are exempt from R2
+- `![image](path)` image links are exempt from R3

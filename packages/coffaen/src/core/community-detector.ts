@@ -5,7 +5,6 @@
  * P0: 빈 배열 반환 (stub)
  * TODO(P2): Louvain / Label Propagation 알고리즘 구현
  */
-
 import type { NodeId } from '../types/common.js';
 import type { KnowledgeGraph } from '../types/graph.js';
 

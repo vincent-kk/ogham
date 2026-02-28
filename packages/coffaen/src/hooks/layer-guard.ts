@@ -3,8 +3,7 @@
  * @description PreToolUse Hook — Layer 1 (01_Core/) 파일 수정 시 경고 출력
  * identity-guardian 에이전트를 통한 수정 안내
  */
-
-import { isLayer1Path, isCoffaenVault } from './shared.js';
+import { isCoffaenVault, isLayer1Path } from './shared.js';
 
 export interface PreToolUseInput {
   tool_name?: string;

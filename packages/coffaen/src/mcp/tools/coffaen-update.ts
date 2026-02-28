@@ -2,18 +2,21 @@
  * @file coffaen-update.ts
  * @description coffaen_update 도구 핸들러 — 기존 문서 수정
  */
-
 import { readFile, writeFile } from 'node:fs/promises';
+import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { CoffaenUpdateInput, CoffaenCrudResult } from '../../types/mcp.js';
-import { stat } from 'node:fs/promises';
+import type { CoffaenCrudResult, CoffaenUpdateInput } from '../../types/mcp.js';
 import { appendStaleNode } from '../shared.js';
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
  */
-function patchFrontmatterField(yaml: string, key: string, value: string): string {
+function patchFrontmatterField(
+  yaml: string,
+  key: string,
+  value: string,
+): string {
   const regex = new RegExp(`^(${key}:).*$`, 'm');
   if (regex.test(yaml)) {
     return yaml.replace(regex, `$1 ${value}`);
@@ -27,7 +30,13 @@ function patchFrontmatterField(yaml: string, key: string, value: string): string
  */
 function updateFrontmatter(
   content: string,
-  updates: Partial<{ tags: string[]; title: string; layer: number; confidence: number; schedule: string }>,
+  updates: Partial<{
+    tags: string[];
+    title: string;
+    layer: number;
+    confidence: number;
+    schedule: string;
+  }>,
 ): string {
   const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   const match = FRONTMATTER_REGEX.exec(content);
@@ -49,7 +58,11 @@ function updateFrontmatter(
     yaml = patchFrontmatterField(yaml, 'layer', String(updates.layer));
   }
   if (updates.confidence !== undefined) {
-    yaml = patchFrontmatterField(yaml, 'confidence', String(updates.confidence));
+    yaml = patchFrontmatterField(
+      yaml,
+      'confidence',
+      String(updates.confidence),
+    );
   }
   if (updates.schedule !== undefined) {
     yaml = patchFrontmatterField(yaml, 'schedule', updates.schedule);
@@ -89,9 +102,7 @@ export async function handleCoffaenUpdate(
   let newContent: string;
 
   // 기존 본문 추출 (Frontmatter 이후 부분)
-  const existingBody = fmMatch
-    ? existing.slice(fmMatch[0].length)
-    : existing;
+  const existingBody = fmMatch ? existing.slice(fmMatch[0].length) : existing;
   // content가 생략되면 기존 본문 유지
   const bodyToWrite = input.content ?? existingBody;
 
@@ -99,7 +110,8 @@ export async function handleCoffaenUpdate(
     // Frontmatter 업데이트 (updated 자동 갱신 + 선택 필드)
     if (input.frontmatter) {
       const updatedDoc = updateFrontmatter(existing, input.frontmatter);
-      const updatedFmBlock = FRONTMATTER_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
+      const updatedFmBlock =
+        FRONTMATTER_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
       newContent = updatedFmBlock + bodyToWrite;
     } else {
       // updated만 자동 갱신

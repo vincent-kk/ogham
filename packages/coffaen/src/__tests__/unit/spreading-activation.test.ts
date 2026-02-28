@@ -2,16 +2,20 @@
  * @file spreading-activation.test.ts
  * @description SpreadingActivationEngine 유닛 테스트
  */
+import { describe, expect, it } from 'vitest';
 
-import { describe, it, expect } from 'vitest';
 import {
-  runSpreadingActivation,
-  buildAdjacencyList,
   SpreadingActivationEngine,
+  buildAdjacencyList,
+  runSpreadingActivation,
 } from '../../core/spreading-activation.js';
-import type { KnowledgeGraph, KnowledgeNode, KnowledgeEdge } from '../../types/graph.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 
 /** 테스트용 노드 생성 헬퍼 */
 function makeNode(id: string, layer: Layer): KnowledgeNode {
@@ -127,7 +131,9 @@ describe('runSpreadingActivation', () => {
   it('임계값 미만 노드는 결과에서 제외되어야 한다', () => {
     const graph = makeSimpleGraph();
     // threshold=0.5이면 B(0.4)도 제외
-    const results = runSpreadingActivation(graph, [toNodeId('A')], { threshold: 0.5 });
+    const results = runSpreadingActivation(graph, [toNodeId('A')], {
+      threshold: 0.5,
+    });
 
     const bResult = results.find((r) => r.nodeId === toNodeId('B'));
     expect(bResult).toBeUndefined();
@@ -144,7 +150,9 @@ describe('runSpreadingActivation', () => {
 
   it('maxHops 제한이 적용되어야 한다', () => {
     const graph = makeSimpleGraph();
-    const results = runSpreadingActivation(graph, [toNodeId('A')], { maxHops: 1 });
+    const results = runSpreadingActivation(graph, [toNodeId('A')], {
+      maxHops: 1,
+    });
 
     // maxHops=1이면 C(2홉)는 포함되지 않아야 한다
     const cResult = results.find((r) => r.nodeId === toNodeId('C'));
@@ -174,13 +182,19 @@ describe('runSpreadingActivation', () => {
     const results = runSpreadingActivation(graph, [toNodeId('A')]);
 
     const cResult = results.find((r) => r.nodeId === toNodeId('C'));
-    expect(cResult?.path).toEqual([toNodeId('A'), toNodeId('B'), toNodeId('C')]);
+    expect(cResult?.path).toEqual([
+      toNodeId('A'),
+      toNodeId('B'),
+      toNodeId('C'),
+    ]);
   });
 
   it('decayOverride가 적용되어야 한다', () => {
     const graph = makeSimpleGraph();
     // decayOverride=0.9: A -> B = 1.0 * 0.8 * 0.9 = 0.72
-    const results = runSpreadingActivation(graph, [toNodeId('A')], { decayOverride: 0.9 });
+    const results = runSpreadingActivation(graph, [toNodeId('A')], {
+      decayOverride: 0.9,
+    });
 
     const bResult = results.find((r) => r.nodeId === toNodeId('B'));
     expect(bResult!.score).toBeCloseTo(0.72, 5);

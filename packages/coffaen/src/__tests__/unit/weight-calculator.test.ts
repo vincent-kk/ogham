@@ -2,19 +2,26 @@
  * @file weight-calculator.test.ts
  * @description WeightCalculator 단위 테스트
  */
+import { describe, expect, it } from 'vitest';
 
-import { describe, it, expect } from 'vitest';
 import {
+  LAYER_DECAY_FACTORS,
   calculateWeights,
   computePageRank,
-  normalizeWeights,
   getLayerDecay,
-  LAYER_DECAY_FACTORS,
+  normalizeWeights,
 } from '../../core/weight-calculator.js';
 import { Layer, toNodeId } from '../../types/common.js';
-import type { KnowledgeGraph, KnowledgeNode, KnowledgeEdge } from '../../types/graph.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 
-function makeNode(path: string, layer: Layer = Layer.L2_DERIVED): KnowledgeNode {
+function makeNode(
+  path: string,
+  layer: Layer = Layer.L2_DERIVED,
+): KnowledgeNode {
   return {
     id: toNodeId(path),
     path,
@@ -28,7 +35,10 @@ function makeNode(path: string, layer: Layer = Layer.L2_DERIVED): KnowledgeNode 
   };
 }
 
-function makeGraph(nodes: KnowledgeNode[], edges: KnowledgeEdge[]): KnowledgeGraph {
+function makeGraph(
+  nodes: KnowledgeNode[],
+  edges: KnowledgeEdge[],
+): KnowledgeGraph {
   return {
     nodes: new Map(nodes.map((n) => [n.id, n])),
     edges,

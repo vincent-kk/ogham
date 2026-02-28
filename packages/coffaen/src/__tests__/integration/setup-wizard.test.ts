@@ -10,16 +10,21 @@
  * 5. index-build — kg_build로 인덱스 빌드
  * 6. guide — CLAUDE.md 통합
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, readdir, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  COFFAEN_END_MARKER,
+  COFFAEN_START_MARKER,
+  mergeCoffaenSection,
+  readCoffaenSection,
+} from '../../core/claude-md-merger.js';
 import { handleCoffaenCreate } from '../../mcp/tools/coffaen-create.js';
 import { handleKgBuild } from '../../mcp/tools/kg-build.js';
 import { handleKgStatus } from '../../mcp/tools/kg-status.js';
-import { mergeCoffaenSection, readCoffaenSection, COFFAEN_START_MARKER, COFFAEN_END_MARKER } from '../../core/claude-md-merger.js';
 import type { SetupProgress } from '../../types/setup.js';
 
 async function makeTempVault(): Promise<string> {
@@ -72,7 +77,11 @@ describe('Setup Wizard 6단계 통합 테스트', () => {
       goal: 'AI 기반 개인 지식 관리 시스템 구축',
       values: '효율성, 창의성, 지속적 학습',
     };
-    progress.completedSteps.push('welcome', 'vault-path', 'core-identity-interview');
+    progress.completedSteps.push(
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+    );
     progress.currentStep = 'scaffold-tree';
 
     expect(Object.keys(progress.interviewAnswers)).toHaveLength(4);
@@ -110,7 +119,12 @@ describe('Setup Wizard 6단계 통합 테스트', () => {
     expect(dirs).toContain('01_Core');
     expect(dirs).toContain('02_Derived');
 
-    progress.completedSteps.push('welcome', 'vault-path', 'core-identity-interview', 'scaffold-tree');
+    progress.completedSteps.push(
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+      'scaffold-tree',
+    );
     progress.currentStep = 'autonomy-init';
   });
 
@@ -152,7 +166,14 @@ describe('Setup Wizard 6단계 통합 테스트', () => {
     const statusResult = await handleKgStatus(vault, null, {});
     expect(statusResult.rebuildRecommended).toBe(true); // graph=null이므로
 
-    progress.completedSteps.push('welcome', 'vault-path', 'core-identity-interview', 'scaffold-tree', 'autonomy-init', 'index-build');
+    progress.completedSteps.push(
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+      'scaffold-tree',
+      'autonomy-init',
+      'index-build',
+    );
     progress.currentStep = 'guide';
   });
 
@@ -173,7 +194,9 @@ vault 경로: ${vault}
 - Layer 3 (03_External): 외부 정보
 - Layer 4 (04_Action): 액션 아이템`;
 
-    const mergeResult = mergeCoffaenSection(claudeMdPath, coffaenGuide, { dryRun: false });
+    const mergeResult = mergeCoffaenSection(claudeMdPath, coffaenGuide, {
+      dryRun: false,
+    });
     expect(mergeResult.changed).toBe(true);
     expect(mergeResult.hadExistingSection).toBe(false);
     expect(mergeResult.content).toContain(COFFAEN_START_MARKER);
@@ -198,8 +221,20 @@ vault 경로: ${vault}
 
     // Step 4: 문서 생성
     const createResults = await Promise.all([
-      handleCoffaenCreate(vault, { layer: 1, tags: ['identity'], content: '핵심 정체성 문서', title: 'Identity', filename: 'identity' }),
-      handleCoffaenCreate(vault, { layer: 2, tags: ['note'], content: '첫 번째 메모', title: 'First Note', filename: 'first-note' }),
+      handleCoffaenCreate(vault, {
+        layer: 1,
+        tags: ['identity'],
+        content: '핵심 정체성 문서',
+        title: 'Identity',
+        filename: 'identity',
+      }),
+      handleCoffaenCreate(vault, {
+        layer: 2,
+        tags: ['note'],
+        content: '첫 번째 메모',
+        title: 'First Note',
+        filename: 'first-note',
+      }),
     ]);
     expect(createResults.every((r) => r.success)).toBe(true);
 
@@ -209,7 +244,10 @@ vault 경로: ${vault}
 
     // Step 6: CLAUDE.md 통합
     const claudeMdPath = join(vault, 'CLAUDE.md');
-    const mergeResult = mergeCoffaenSection(claudeMdPath, '## coffaen 활성화됨\n- vault: ' + vault);
+    const mergeResult = mergeCoffaenSection(
+      claudeMdPath,
+      '## coffaen 활성화됨\n- vault: ' + vault,
+    );
     expect(mergeResult.changed).toBe(true);
 
     // 완료 표시

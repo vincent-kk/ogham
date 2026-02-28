@@ -9,20 +9,31 @@
  * - kg-status.ts: handleKgStatus
  * - kg-navigate.ts: handleKgNavigate
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { appendStaleNode, removeBacklinks, getBacklinks, toolResult, toolError, mapReplacer } from '../../mcp/shared.js';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  appendStaleNode,
+  getBacklinks,
+  mapReplacer,
+  removeBacklinks,
+  toolError,
+  toolResult,
+} from '../../mcp/shared.js';
 import { handleCoffaenCreate } from '../../mcp/tools/coffaen-create.js';
 import { handleCoffaenDelete } from '../../mcp/tools/coffaen-delete.js';
-import { handleKgStatus } from '../../mcp/tools/kg-status.js';
 import { handleKgNavigate } from '../../mcp/tools/kg-navigate.js';
-import type { KnowledgeGraph, KnowledgeNode, KnowledgeEdge } from '../../types/graph.js';
+import { handleKgStatus } from '../../mcp/tools/kg-status.js';
 import { toNodeId } from '../../types/common.js';
 import { Layer } from '../../types/common.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 
@@ -49,7 +60,10 @@ function makeNode(id: string, layer: number = 2): KnowledgeNode {
   };
 }
 
-function makeGraph(nodes: KnowledgeNode[], edges: KnowledgeEdge[] = []): KnowledgeGraph {
+function makeGraph(
+  nodes: KnowledgeNode[],
+  edges: KnowledgeEdge[] = [],
+): KnowledgeGraph {
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   return {
     nodes: nodeMap,
@@ -76,7 +90,10 @@ describe('shared.ts', () => {
   describe('appendStaleNode', () => {
     it('stale-nodes.json이 없을 때 새로 생성한다', async () => {
       await appendStaleNode(vault, '01_Core/test.md');
-      const raw = await readFile(join(vault, '.coffaen/stale-nodes.json'), 'utf-8');
+      const raw = await readFile(
+        join(vault, '.coffaen/stale-nodes.json'),
+        'utf-8',
+      );
       const data = JSON.parse(raw) as { paths: string[]; updatedAt: string };
       expect(data.paths).toContain('01_Core/test.md');
       expect(data.updatedAt).toBeTruthy();
@@ -85,7 +102,10 @@ describe('shared.ts', () => {
     it('기존 stale-nodes.json에 경로를 추가한다', async () => {
       await appendStaleNode(vault, '01_Core/first.md');
       await appendStaleNode(vault, '02_Derived/second.md');
-      const raw = await readFile(join(vault, '.coffaen/stale-nodes.json'), 'utf-8');
+      const raw = await readFile(
+        join(vault, '.coffaen/stale-nodes.json'),
+        'utf-8',
+      );
       const data = JSON.parse(raw) as { paths: string[] };
       expect(data.paths).toContain('01_Core/first.md');
       expect(data.paths).toContain('02_Derived/second.md');
@@ -94,7 +114,10 @@ describe('shared.ts', () => {
     it('중복 경로를 추가하지 않는다', async () => {
       await appendStaleNode(vault, '01_Core/test.md');
       await appendStaleNode(vault, '01_Core/test.md');
-      const raw = await readFile(join(vault, '.coffaen/stale-nodes.json'), 'utf-8');
+      const raw = await readFile(
+        join(vault, '.coffaen/stale-nodes.json'),
+        'utf-8',
+      );
       const data = JSON.parse(raw) as { paths: string[] };
       expect(data.paths.filter((p) => p === '01_Core/test.md')).toHaveLength(1);
     });
@@ -112,7 +135,11 @@ describe('shared.ts', () => {
       const index = {
         '01_Core/target.md': ['02_Derived/source.md', '03_External/ref.md'],
       };
-      await writeFile(join(metaDir, 'backlink-index.json'), JSON.stringify(index), 'utf-8');
+      await writeFile(
+        join(metaDir, 'backlink-index.json'),
+        JSON.stringify(index),
+        'utf-8',
+      );
 
       const result = await getBacklinks(vault, '01_Core/target.md');
       expect(result).toEqual(['02_Derived/source.md', '03_External/ref.md']);
@@ -125,7 +152,11 @@ describe('shared.ts', () => {
         '01_Core/target.md': ['02_Derived/source.md', '03_External/ref.md'],
         '01_Core/other.md': ['02_Derived/source.md'],
       };
-      await writeFile(join(metaDir, 'backlink-index.json'), JSON.stringify(index), 'utf-8');
+      await writeFile(
+        join(metaDir, 'backlink-index.json'),
+        JSON.stringify(index),
+        'utf-8',
+      );
 
       await removeBacklinks(vault, '02_Derived/source.md');
 
@@ -245,7 +276,10 @@ describe('handleCoffaenCreate', () => {
     );
     expect(files.length).toBeGreaterThan(0);
 
-    const content = await readFile(join(vault, '02_Derived', files[0]), 'utf-8');
+    const content = await readFile(
+      join(vault, '02_Derived', files[0]),
+      'utf-8',
+    );
     expect(content).toContain('---');
     expect(content).toContain('tags:');
     expect(content).toContain('layer: 2');
@@ -277,7 +311,10 @@ describe('handleCoffaenCreate', () => {
       title: 'Stale Test',
     });
 
-    const raw = await readFile(join(vault, '.coffaen/stale-nodes.json'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '.coffaen/stale-nodes.json'),
+      'utf-8',
+    );
     const data = JSON.parse(raw) as { paths: string[] };
     expect(data.paths.some((p) => p.startsWith('02_Derived/'))).toBe(true);
   });
@@ -295,7 +332,10 @@ describe('handleCoffaenCreate', () => {
     const files = await import('node:fs/promises').then((m) =>
       m.readdir(join(vault, '03_External')),
     );
-    const content = await readFile(join(vault, '03_External', files[0]), 'utf-8');
+    const content = await readFile(
+      join(vault, '03_External', files[0]),
+      'utf-8',
+    );
     expect(content).toContain('source: https://example.com');
     expect(content).toContain('expires: 2025-12-31');
   });
@@ -314,7 +354,10 @@ describe('handleCoffaenDelete', () => {
     await removeTempVault(vault);
   });
 
-  async function createTestFile(relativePath: string, layer: number = 2): Promise<void> {
+  async function createTestFile(
+    relativePath: string,
+    layer: number = 2,
+  ): Promise<void> {
     const absPath = join(vault, relativePath);
     await mkdir(join(vault, relativePath.split('/')[0]), { recursive: true });
     const content = `---\ncreated: 2024-01-01\nupdated: 2024-01-01\ntags: [test]\nlayer: ${layer}\n---\n\n테스트 문서.`;
@@ -329,7 +372,9 @@ describe('handleCoffaenDelete', () => {
 
   it('Layer 1 문서 삭제는 금지된다', async () => {
     await createTestFile('01_Core/identity.md', 1);
-    const result = await handleCoffaenDelete(vault, { path: '01_Core/identity.md' });
+    const result = await handleCoffaenDelete(vault, {
+      path: '01_Core/identity.md',
+    });
     expect(result.success).toBe(false);
     expect(result.message).toContain('Layer 1');
   });
@@ -340,7 +385,11 @@ describe('handleCoffaenDelete', () => {
     const metaDir = join(vault, '.coffaen-meta');
     await mkdir(metaDir, { recursive: true });
     const index = { '02_Derived/target.md': ['02_Derived/source.md'] };
-    await writeFile(join(metaDir, 'backlink-index.json'), JSON.stringify(index), 'utf-8');
+    await writeFile(
+      join(metaDir, 'backlink-index.json'),
+      JSON.stringify(index),
+      'utf-8',
+    );
 
     const result = await handleCoffaenDelete(vault, {
       path: '02_Derived/target.md',
@@ -357,7 +406,11 @@ describe('handleCoffaenDelete', () => {
     const metaDir = join(vault, '.coffaen-meta');
     await mkdir(metaDir, { recursive: true });
     const index = { '02_Derived/target.md': ['02_Derived/source.md'] };
-    await writeFile(join(metaDir, 'backlink-index.json'), JSON.stringify(index), 'utf-8');
+    await writeFile(
+      join(metaDir, 'backlink-index.json'),
+      JSON.stringify(index),
+      'utf-8',
+    );
 
     const result = await handleCoffaenDelete(vault, {
       path: '02_Derived/target.md',
@@ -373,14 +426,19 @@ describe('handleCoffaenDelete', () => {
     await createTestFile('02_Derived/to-delete.md', 2);
     await handleCoffaenDelete(vault, { path: '02_Derived/to-delete.md' });
 
-    const raw = await readFile(join(vault, '.coffaen/stale-nodes.json'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '.coffaen/stale-nodes.json'),
+      'utf-8',
+    );
     const data = JSON.parse(raw) as { paths: string[] };
     expect(data.paths).toContain('02_Derived/to-delete.md');
   });
 
   it('Layer 2 문서가 backlink 없이 정상 삭제된다', async () => {
     await createTestFile('02_Derived/simple.md', 2);
-    const result = await handleCoffaenDelete(vault, { path: '02_Derived/simple.md' });
+    const result = await handleCoffaenDelete(vault, {
+      path: '02_Derived/simple.md',
+    });
 
     expect(result.success).toBe(true);
     expect(result.message).toContain('삭제되었습니다');
@@ -420,7 +478,18 @@ describe('handleKgStatus', () => {
   });
 
   it('stale-nodes가 있으면 freshnessPercent가 감소한다', async () => {
-    const nodes = [makeNode('a.md'), makeNode('b.md'), makeNode('c.md'), makeNode('d.md'), makeNode('e.md'), makeNode('f.md'), makeNode('g.md'), makeNode('h.md'), makeNode('i.md'), makeNode('j.md')];
+    const nodes = [
+      makeNode('a.md'),
+      makeNode('b.md'),
+      makeNode('c.md'),
+      makeNode('d.md'),
+      makeNode('e.md'),
+      makeNode('f.md'),
+      makeNode('g.md'),
+      makeNode('h.md'),
+      makeNode('i.md'),
+      makeNode('j.md'),
+    ];
     const graph = makeGraph(nodes);
 
     // 노드 10개 중 2개 stale → 80%
@@ -428,7 +497,10 @@ describe('handleKgStatus', () => {
     await mkdir(cacheDir, { recursive: true });
     await writeFile(
       join(cacheDir, 'stale-nodes.json'),
-      JSON.stringify({ paths: ['a.md', 'b.md'], updatedAt: new Date().toISOString() }),
+      JSON.stringify({
+        paths: ['a.md', 'b.md'],
+        updatedAt: new Date().toISOString(),
+      }),
       'utf-8',
     );
 
@@ -439,14 +511,19 @@ describe('handleKgStatus', () => {
   });
 
   it('stale 비율이 10% 초과이면 rebuildRecommended=true', async () => {
-    const nodes = Array.from({ length: 10 }, (_, i) => makeNode(`node-${i}.md`));
+    const nodes = Array.from({ length: 10 }, (_, i) =>
+      makeNode(`node-${i}.md`),
+    );
     const graph = makeGraph(nodes);
 
     const cacheDir = join(vault, '.coffaen');
     await mkdir(cacheDir, { recursive: true });
     await writeFile(
       join(cacheDir, 'stale-nodes.json'),
-      JSON.stringify({ paths: ['node-0.md', 'node-1.md'], updatedAt: new Date().toISOString() }),
+      JSON.stringify({
+        paths: ['node-0.md', 'node-1.md'],
+        updatedAt: new Date().toISOString(),
+      }),
       'utf-8',
     );
 

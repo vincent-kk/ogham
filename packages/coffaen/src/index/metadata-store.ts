@@ -6,12 +6,16 @@
  * 형식: JSON (외부 의존성 제로, 디버깅 가능)
  * 원칙: .coffaen/ 전체 삭제 후 원본 마크다운에서 완전 재빌드 가능
  */
-
-import { readFile, writeFile, mkdir, access } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { KnowledgeGraph, KnowledgeEdge, KnowledgeNode, SerializedGraph } from '../types/graph.js';
 import type { NodeId } from '../types/common.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+  SerializedGraph,
+} from '../types/graph.js';
 
 /** .coffaen/ 파일 이름 상수 */
 export const CACHE_FILES = {
@@ -20,7 +24,6 @@ export const CACHE_FILES = {
   SNAPSHOT: 'snapshot.json',
   COMMUNITIES: 'communities.json',
   STALE_NODES: 'stale-nodes.json',
-  LOCK: '.lock',
 } as const;
 
 /** 파일 스냅샷 항목 */
@@ -135,7 +138,10 @@ export class MetadataStore {
    */
   async loadGraph(): Promise<KnowledgeGraph | null> {
     try {
-      const raw = await readFile(join(this.cacheDir, CACHE_FILES.INDEX), 'utf-8');
+      const raw = await readFile(
+        join(this.cacheDir, CACHE_FILES.INDEX),
+        'utf-8',
+      );
       const data = JSON.parse(raw) as SerializedGraph;
       return deserializeGraph(data);
     } catch {
@@ -160,7 +166,10 @@ export class MetadataStore {
    */
   async loadWeights(): Promise<WeightsData | null> {
     try {
-      const raw = await readFile(join(this.cacheDir, CACHE_FILES.WEIGHTS), 'utf-8');
+      const raw = await readFile(
+        join(this.cacheDir, CACHE_FILES.WEIGHTS),
+        'utf-8',
+      );
       return JSON.parse(raw) as WeightsData;
     } catch {
       return null;
@@ -184,7 +193,10 @@ export class MetadataStore {
    */
   async loadSnapshot(): Promise<FileSnapshot | null> {
     try {
-      const raw = await readFile(join(this.cacheDir, CACHE_FILES.SNAPSHOT), 'utf-8');
+      const raw = await readFile(
+        join(this.cacheDir, CACHE_FILES.SNAPSHOT),
+        'utf-8',
+      );
       return JSON.parse(raw) as FileSnapshot;
     } catch {
       return null;
@@ -196,7 +208,10 @@ export class MetadataStore {
    */
   async loadStaleNodes(): Promise<StaleNodes> {
     try {
-      const raw = await readFile(join(this.cacheDir, CACHE_FILES.STALE_NODES), 'utf-8');
+      const raw = await readFile(
+        join(this.cacheDir, CACHE_FILES.STALE_NODES),
+        'utf-8',
+      );
       return JSON.parse(raw) as StaleNodes;
     } catch {
       return { paths: [], updatedAt: new Date().toISOString() };
@@ -210,7 +225,10 @@ export class MetadataStore {
     await this.ensureCacheDir();
     const existing = await this.loadStaleNodes();
     const merged = Array.from(new Set([...existing.paths, ...paths]));
-    const updated: StaleNodes = { paths: merged, updatedAt: new Date().toISOString() };
+    const updated: StaleNodes = {
+      paths: merged,
+      updatedAt: new Date().toISOString(),
+    };
     await writeFile(
       join(this.cacheDir, CACHE_FILES.STALE_NODES),
       JSON.stringify(updated, null, 2),

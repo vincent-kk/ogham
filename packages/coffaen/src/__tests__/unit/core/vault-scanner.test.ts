@@ -2,13 +2,13 @@
  * @file vault-scanner.test.ts
  * @description VaultScanner 단위 테스트
  */
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
+  type FileSnapshot,
+  type ScannedFile,
   buildSnapshot,
   computeChangeSet,
-  type ScannedFile,
-  type FileSnapshot,
 } from '../../../core/vault-scanner.js';
 
 // ScannedFile 헬퍼
@@ -142,10 +142,10 @@ describe('computeChangeSet', () => {
 
   it('복합 변경 시나리오를 올바르게 처리한다', () => {
     const current: ScannedFile[] = [
-      makeFile('01_Core/identity.md', 1000),       // unchanged
-      makeFile('02_Derived/notes.md', 9999),        // modified
+      makeFile('01_Core/identity.md', 1000), // unchanged
+      makeFile('02_Derived/notes.md', 9999), // modified
       // 03_External/ref.md 삭제
-      makeFile('04_Action/todo.md', 4000),          // added
+      makeFile('04_Action/todo.md', 4000), // added
     ];
 
     const changeSet = computeChangeSet(previous, current);

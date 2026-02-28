@@ -2,7 +2,6 @@
  * @file frontmatter.ts
  * @description Zod 기반 Frontmatter 스키마 — 모든 coffaen 문서 공통 메타데이터
  */
-
 import { z } from 'zod';
 
 /** Frontmatter Zod 스키마 */
@@ -20,7 +19,10 @@ export const FrontmatterSchema = z.object({
   /** 외부 출처 (Layer 3용, 선택) */
   source: z.string().optional(),
   /** 만료일 YYYY-MM-DD (Layer 4용, 선택) */
-  expires: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  expires: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   /** 내재화 신뢰도 0.0~1.0 (Layer 3→2 전이 기준, 선택) */
   confidence: z.number().min(0).max(1).optional(),
   /** 세션별 참조 횟수 누적 (선택) */

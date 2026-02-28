@@ -2,10 +2,9 @@
  * @file kg-navigate.ts
  * @description kg_navigate 도구 핸들러 — 특정 노드의 이웃 조회
  */
-
-import type { KgNavigateInput, KgNavigateResult } from '../../types/mcp.js';
-import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 import { toNodeId } from '../../types/common.js';
+import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
+import type { KgNavigateInput, KgNavigateResult } from '../../types/mcp.js';
 
 /**
  * kg_navigate 핸들러
@@ -15,7 +14,9 @@ export async function handleKgNavigate(
   input: KgNavigateInput,
 ): Promise<KgNavigateResult | { error: string }> {
   if (!graph) {
-    return { error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.' };
+    return {
+      error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.',
+    };
   }
 
   const nodeId = toNodeId(input.path);

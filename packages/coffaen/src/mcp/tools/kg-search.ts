@@ -2,10 +2,9 @@
  * @file kg-search.ts
  * @description kg_search 도구 핸들러 — SA 기반 관련 문서 검색
  */
-
-import type { KgSearchInput, KgSearchResult } from '../../types/mcp.js';
-import type { KnowledgeGraph } from '../../types/graph.js';
 import { query } from '../../search/query-engine.js';
+import type { KnowledgeGraph } from '../../types/graph.js';
+import type { KgSearchInput, KgSearchResult } from '../../types/mcp.js';
 
 /**
  * kg_search 핸들러
@@ -18,7 +17,9 @@ export async function handleKgSearch(
   input: KgSearchInput,
 ): Promise<KgSearchResult | { error: string }> {
   if (!graph) {
-    return { error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.' };
+    return {
+      error: '인덱스가 빌드되지 않았습니다. /coffaen:build를 먼저 실행하세요.',
+    };
   }
 
   const startTime = Date.now();

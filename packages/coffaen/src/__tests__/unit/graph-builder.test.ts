@@ -2,13 +2,20 @@
  * @file graph-builder.test.ts
  * @description GraphBuilder 단위 테스트
  */
+import { describe, expect, it } from 'vitest';
 
-import { describe, it, expect } from 'vitest';
-import { buildGraph, buildAdjacencyList, detectOrphans } from '../../core/graph-builder.js';
+import {
+  buildAdjacencyList,
+  buildGraph,
+  detectOrphans,
+} from '../../core/graph-builder.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeNode } from '../../types/graph.js';
 
-function makeNode(path: string, layer: Layer = Layer.L2_DERIVED): KnowledgeNode {
+function makeNode(
+  path: string,
+  layer: Layer = Layer.L2_DERIVED,
+): KnowledgeNode {
   return {
     id: toNodeId(path),
     path,
@@ -37,7 +44,9 @@ describe('buildGraph', () => {
   });
 
   it('LINK 엣지를 outboundLinks로부터 생성한다', () => {
-    const a = makeNode('01_Core/a.md') as KnowledgeNode & { outboundLinks: string[] };
+    const a = makeNode('01_Core/a.md') as KnowledgeNode & {
+      outboundLinks: string[];
+    };
     const b = makeNode('01_Core/b.md');
     a.outboundLinks = [b.path];
 
@@ -49,7 +58,9 @@ describe('buildGraph', () => {
   });
 
   it('존재하지 않는 링크 대상은 엣지를 생성하지 않는다', () => {
-    const a = makeNode('01_Core/a.md') as KnowledgeNode & { outboundLinks: string[] };
+    const a = makeNode('01_Core/a.md') as KnowledgeNode & {
+      outboundLinks: string[];
+    };
     a.outboundLinks = ['nonexistent.md'];
 
     const { graph } = buildGraph([a]);
@@ -73,7 +84,9 @@ describe('buildGraph', () => {
     const b = makeNode('02_Derived/b.md');
     // a와 b는 서로 다른 디렉토리, 링크 없음 → 고립
 
-    const { graph, orphanNodes } = buildGraph([a, b], { includeOrphans: false });
+    const { graph, orphanNodes } = buildGraph([a, b], {
+      includeOrphans: false,
+    });
     expect(orphanNodes.length).toBeGreaterThan(0);
     for (const orphanId of orphanNodes) {
       expect(graph.nodes.has(orphanId)).toBe(false);
@@ -100,8 +113,13 @@ describe('buildAdjacencyList', () => {
   it('엣지로부터 인접 리스트를 올바르게 구성한다', () => {
     const a = makeNode('a/a.md');
     const b = makeNode('b/b.md');
-    const nodeMap = new Map([[a.id, a], [b.id, b]]);
-    const edges = [{ from: a.id, to: b.id, type: 'LINK' as const, weight: 1.0 }];
+    const nodeMap = new Map([
+      [a.id, a],
+      [b.id, b],
+    ]);
+    const edges = [
+      { from: a.id, to: b.id, type: 'LINK' as const, weight: 1.0 },
+    ];
     const adj = buildAdjacencyList(nodeMap, edges);
     expect(adj.get(a.id)).toContain(b.id);
     expect(adj.get(b.id)).toHaveLength(0);
@@ -112,7 +130,10 @@ describe('detectOrphans', () => {
   it('엣지가 없는 노드를 고립 노드로 반환한다', () => {
     const a = makeNode('a/a.md');
     const b = makeNode('b/b.md');
-    const nodeMap = new Map([[a.id, a], [b.id, b]]);
+    const nodeMap = new Map([
+      [a.id, a],
+      [b.id, b],
+    ]);
     const orphans = detectOrphans(nodeMap, []);
     expect(orphans).toContain(a.id);
     expect(orphans).toContain(b.id);
@@ -121,8 +142,13 @@ describe('detectOrphans', () => {
   it('연결된 노드는 고립 노드로 반환하지 않는다', () => {
     const a = makeNode('a/a.md');
     const b = makeNode('b/b.md');
-    const nodeMap = new Map([[a.id, a], [b.id, b]]);
-    const edges = [{ from: a.id, to: b.id, type: 'LINK' as const, weight: 1.0 }];
+    const nodeMap = new Map([
+      [a.id, a],
+      [b.id, b],
+    ]);
+    const edges = [
+      { from: a.id, to: b.id, type: 'LINK' as const, weight: 1.0 },
+    ];
     const orphans = detectOrphans(nodeMap, edges);
     expect(orphans).not.toContain(a.id);
     expect(orphans).not.toContain(b.id);

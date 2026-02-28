@@ -3,9 +3,9 @@
  * @description SessionStart Hook — 지식 트리 점검, WAL 복구 감지, 스케줄 확인, 이전 세션 요약 로드
  * C1 제약: 5초 이내 완료 필수. 무거운 인덱스 빌드는 Skill에 위임.
  */
-
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+
 import { isCoffaenVault, metaPath } from './shared.js';
 
 export interface SessionStartInput {

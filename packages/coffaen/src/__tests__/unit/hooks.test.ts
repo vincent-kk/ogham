@@ -2,15 +2,16 @@
  * @file hooks.test.ts
  * @description coffaen Hook 유닛 테스트
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { runSessionStart } from '../../hooks/session-start.js';
-import { runLayerGuard } from '../../hooks/layer-guard.js';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { runIndexInvalidator } from '../../hooks/index-invalidator.js';
+import { runLayerGuard } from '../../hooks/layer-guard.js';
 import { runSessionEnd } from '../../hooks/session-end.js';
+import { runSessionStart } from '../../hooks/session-start.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
@@ -114,7 +115,9 @@ describe('runLayerGuard', () => {
   it('Layer 2 파일 수정은 허용한다', () => {
     const result = runLayerGuard({
       tool_name: 'Write',
-      tool_input: { file_path: join(vaultDir, '02_Derived/skills/programming.md') },
+      tool_input: {
+        file_path: join(vaultDir, '02_Derived/skills/programming.md'),
+      },
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
@@ -148,8 +151,14 @@ describe('runIndexInvalidator', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    const stalePath = join(vaultDir, '.coffaen-meta', 'stale-nodes.json');
+    const stalePath = join(vaultDir, '.coffaen', 'stale-nodes.json');
     expect(existsSync(stalePath)).toBe(true);
+    const stale = JSON.parse(
+      require('node:fs').readFileSync(stalePath, 'utf-8'),
+    );
+    expect(stale).toHaveProperty('paths');
+    expect(stale).toHaveProperty('updatedAt');
+    expect(stale.paths).toContain('02_Derived/new-note.md');
   });
 
   it('usage-stats.json 카운트를 증가한다', () => {
@@ -165,7 +174,9 @@ describe('runIndexInvalidator', () => {
     });
     const statsPath = join(vaultDir, '.coffaen-meta', 'usage-stats.json');
     expect(existsSync(statsPath)).toBe(true);
-    const stats = JSON.parse(require('node:fs').readFileSync(statsPath, 'utf-8'));
+    const stats = JSON.parse(
+      require('node:fs').readFileSync(statsPath, 'utf-8'),
+    );
     expect(stats['coffaen_update']).toBe(2);
   });
 
@@ -176,7 +187,7 @@ describe('runIndexInvalidator', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    const stalePath = join(vaultDir, '.coffaen-meta', 'stale-nodes.json');
+    const stalePath = join(vaultDir, '.coffaen', 'stale-nodes.json');
     expect(existsSync(stalePath)).toBe(false);
   });
 
@@ -187,9 +198,10 @@ describe('runIndexInvalidator', () => {
       cwd: vaultDir,
     });
     const { readFileSync } = require('node:fs');
-    const stalePath = join(vaultDir, '.coffaen-meta', 'stale-nodes.json');
+    const stalePath = join(vaultDir, '.coffaen', 'stale-nodes.json');
     const stale = JSON.parse(readFileSync(stalePath, 'utf-8'));
-    expect(stale).toContain('03_External/a.md');
+    expect(stale.paths).toContain('03_External/a.md');
+    expect(stale).toHaveProperty('updatedAt');
   });
 });
 
@@ -215,7 +227,9 @@ describe('runSessionEnd', () => {
     const sessionsDir = join(vaultDir, '.coffaen-meta', 'sessions');
     expect(existsSync(sessionsDir)).toBe(true);
     const { readdirSync } = require('node:fs');
-    const files = readdirSync(sessionsDir).filter((f: string) => f.endsWith('.md'));
+    const files = readdirSync(sessionsDir).filter((f: string) =>
+      f.endsWith('.md'),
+    );
     expect(files.length).toBe(1);
   });
 

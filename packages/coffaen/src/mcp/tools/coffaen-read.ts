@@ -2,13 +2,15 @@
  * @file coffaen-read.ts
  * @description coffaen_read 도구 핸들러 — 문서 읽기 + 관련 컨텍스트
  */
-
 import { readFile } from 'node:fs/promises';
+import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
 import type { CoffaenReadInput, CoffaenReadResult } from '../../types/mcp.js';
-import { parseDocument, buildKnowledgeNode } from '../../core/document-parser.js';
-import { stat } from 'node:fs/promises';
 
 /**
  * coffaen_read 핸들러

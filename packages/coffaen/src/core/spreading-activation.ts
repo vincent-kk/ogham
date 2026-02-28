@@ -6,9 +6,12 @@
  * Layer별 감쇠: L1=0.5, L2=0.7, L3=0.8, L4=0.9
  * BFS 방식 홉 확산, 임계값 기반 종료
  */
-
 import type { NodeId } from '../types/common.js';
-import type { KnowledgeGraph, AdjacencyList, ActivationResult } from '../types/graph.js';
+import type {
+  ActivationResult,
+  AdjacencyList,
+  KnowledgeGraph,
+} from '../types/graph.js';
 
 /** Layer별 감쇠 인자 */
 const LAYER_DECAY: Record<number, number> = {
@@ -67,7 +70,11 @@ export function buildAdjacencyList(graph: KnowledgeGraph): AdjacencyList {
 /**
  * 엣지 가중치 조회 (from → to)
  */
-function getEdgeWeight(graph: KnowledgeGraph, from: NodeId, to: NodeId): number {
+function getEdgeWeight(
+  graph: KnowledgeGraph,
+  from: NodeId,
+  to: NodeId,
+): number {
   const edge = graph.edges.find((e) => e.from === from && e.to === to);
   return edge?.weight ?? 0.5; // 기본 가중치
 }
@@ -75,7 +82,11 @@ function getEdgeWeight(graph: KnowledgeGraph, from: NodeId, to: NodeId): number 
 /**
  * 노드의 Layer에 따른 감쇠 인자 반환
  */
-function getDecayForNode(graph: KnowledgeGraph, nodeId: NodeId, decayOverride?: number): number {
+function getDecayForNode(
+  graph: KnowledgeGraph,
+  nodeId: NodeId,
+  decayOverride?: number,
+): number {
   if (decayOverride !== undefined) return decayOverride;
   const node = graph.nodes.get(nodeId);
   if (!node) return 0.7;

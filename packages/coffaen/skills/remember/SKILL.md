@@ -1,185 +1,169 @@
 ---
 name: remember
 user_invocable: true
-description: 새 지식을 coffaen 지식 트리에 기록 — Layer 자동 추천 + 태그 추출 + 중복 체크
+description: Record new knowledge to the coffaen knowledge tree — automatic Layer recommendation + tag extraction + duplicate check
 version: 1.0.0
 complexity: simple
 context_layers: [1, 2]
-orchestrator: remember 스킬
+orchestrator: remember skill
 plugin: coffaen
 ---
 
-# remember — 새 지식 기록
+# remember — Record New Knowledge
 
-현재 대화나 사용자 입력에서 지식을 추출하여 적절한 Layer에 마크다운 문서로 저장한다.
-Layer 자동 추천, 태그 추출, 중복 문서 사전 확인을 수행한다.
+Extracts knowledge from the current conversation or user input and saves it as a markdown document in the appropriate Layer.
+Performs automatic Layer recommendation, tag extraction, and pre-creation duplicate document checking.
 
 ## When to Use This Skill
 
-- 새로운 개념, 기술, 인사이트를 기록하고 싶을 때
-- 외부 참조(문서, 링크, 프레임워크)를 지식 트리에 추가할 때
-- 현재 세션의 작업 컨텍스트나 할 일을 Layer 4로 저장할 때
-- 대화에서 나온 중요한 결론을 영구 기록으로 남길 때
+- When you want to record a new concept, skill, or insight
+- When adding external references (documents, links, frameworks) to the knowledge tree
+- When saving current session work context or to-dos as Layer 4
+- When you want to permanently record important conclusions from a conversation
 
-## 전제 조건
+## Prerequisites
 
-- coffaen vault가 초기화되어 있어야 합니다 (Layer 디렉토리 존재)
-- L1 문서는 `/coffaen:setup`으로만 생성. remember로는 생성 불가.
+- The coffaen vault must be initialized (Layer directories must exist)
+- L1 documents can only be created via `/coffaen:setup` — not via remember.
 
-## 워크플로우
+## Workflow
 
-### Step 1 — 기록 내용 파악
+### Step 1 — Identify What to Record
 
-사용자 입력 또는 현재 대화 컨텍스트에서 기록할 내용을 파악한다:
+Identify the content to record from user input or current conversation context:
 
-- 명시적 내용: `"X를 기억해줘"`, `"Y를 저장해"`
-- 암묵적 내용: 대화에서 중요한 결론이나 인사이트 감지
-- 내용이 불명확하면: "무엇을 기록할까요?" 확인 요청
+- Explicit content: `"remember X"`, `"save Y"`
+- Implicit content: detect important conclusions or insights from the conversation
+- If content is unclear: ask "What would you like to record?"
 
-### Step 2 — Layer 결정
+### Step 2 — Determine Layer
 
-기록 내용의 성격에 따라 Layer를 추천한다:
+Recommend a Layer based on the nature of the content:
 
-| Layer | 기준 | 디렉토리 |
-|-------|------|---------|
-| L2 Derived | 내재화된 기술/지식/인사이트 | `02_Derived/` |
-| L3 External | 외부 참조, 링크, 임시 지식 | `03_External/` |
-| L4 Action | 할 일, 현재 세션 컨텍스트, 임시 메모 | `04_Action/` |
+| Layer | Criteria | Directory |
+|-------|----------|-----------|
+| L2 Derived | Internalized skills/knowledge/insights | `02_Derived/` |
+| L3 External | External references, links, temporary knowledge | `03_External/` |
+| L4 Action | To-dos, current session context, temporary notes | `04_Action/` |
 
-**L2 추천 기준**: 사용자가 직접 체득한 지식, 검증된 개념, 반복 참조 예상
-**L3 추천 기준**: URL 포함, 외부 자료 참조, `source:` 명시
-**L4 추천 기준**: "나중에", "오늘", "해야 할", 기간 한정, 만료일 있음
+**L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly
+**L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
+**L4 recommendation criteria**: "later", "today", "need to", time-limited, has an expiration date
 
-사용자가 `--layer`를 명시하면 해당 Layer 사용.
-추천 Layer를 사용자에게 확인 후 진행한다:
+If the user specifies `--layer`, use that Layer.
+Confirm the recommended Layer with the user before proceeding:
 ```
-"Layer {N} ({이름})에 저장하겠습니다. 맞나요? (y/n 또는 다른 Layer 번호)"
+"I'll save this to Layer {N} ({name}). Is that correct? (y/n or a different Layer number)"
 ```
 
-### Step 3 — 태그 추출
+### Step 3 — Tag Extraction
 
-내용에서 관련 태그를 3~5개 추출한다. 규칙:
+Extract 3–5 relevant tags from the content. Rules:
 
-- 핵심 개념/기술명 (예: `react`, `typescript`, `지식-그래프`)
-- 도메인 (예: `frontend`, `ai`, `개인-생산성`)
-- 문서 유형 (예: `tutorial`, `reference`, `insight`)
-- 영어 소문자 또는 한글, 하이픈(-) 사용
+- Core concept/technology names (e.g., `react`, `typescript`, `knowledge-graph`)
+- Domain (e.g., `frontend`, `ai`, `personal-productivity`)
+- Document type (e.g., `tutorial`, `reference`, `insight`)
+- Lowercase English or use hyphens (-)
 
-### Step 4 — 중복 문서 사전 확인
+### Step 4 — Pre-creation Duplicate Check
 
-`kg_search`로 유사 문서를 검색하여 중복을 방지한다:
+Search for similar documents with `kg_search` to prevent duplicates:
 
 ```
 kg_search(
-  seed: [핵심 태그 1~2개],
+  seed: [1-2 core tags],
   max_results: 3,
   threshold: 0.3
 )
 ```
 
-유사 문서 발견 시:
+If a similar document is found:
 ```
-"유사한 문서가 있습니다:
-  - {제목} ({path})
+"A similar document exists:
+  - {title} ({path})
 
-새 문서를 생성할까요, 기존 문서를 업데이트할까요? (새로 만들기/업데이트/취소)"
+Would you like to create a new document or update the existing one? (Create new / Update / Cancel)"
 ```
 
-### Step 5 — 문서 생성
+### Step 5 — Document Creation
 
-`coffaen_create` MCP 도구로 문서를 생성한다:
+Create the document with the `coffaen_create` MCP tool:
 
 **L2 Frontmatter**:
 ```yaml
 layer: 2
-tags: [추출된 태그들]
-title: 자동 생성 또는 사용자 제공
+tags: [extracted tags]
+title: auto-generated or user-provided
 ```
 
 **L3 Frontmatter**:
 ```yaml
 layer: 3
-tags: [추출된 태그들]
-source: "원본 출처 URL (있는 경우)"
-confidence: 0.3  # 초기값, 검증 후 상승
+tags: [extracted tags]
+source: "original source URL (if available)"
+confidence: 0.3  # initial value, increases after validation
 ```
 
 **L4 Frontmatter**:
 ```yaml
 layer: 4
-tags: [추출된 태그들]
-expires: YYYY-MM-DD  # 만료일 (있는 경우)
-schedule: "once"     # 또는 "daily", "weekly"
+tags: [extracted tags]
+expires: YYYY-MM-DD  # expiration date (if applicable)
+schedule: "once"     # or "daily", "weekly"
 ```
 
-### Step 6 — 확인 보고
+### Step 6 — Confirmation Report
 
-생성 성공 시 사용자에게 보고한다:
+Report to the user after successful creation:
 
 ```
-기록 완료: {title}
-경로: {path}
+Recorded: {title}
+Path: {path}
 Layer: {layer_name}
-태그: {tags}
+Tags: {tags}
 
-💡 관련 문서를 탐색하려면: /coffaen:explore {tag}
+To explore related documents: /coffaen:explore {tag}
 ```
 
 ## Available MCP Tools
 
-| 도구 | 용도 |
-|------|------|
-| `coffaen_create` | 문서 생성 (주요 도구) |
-| `kg_search` | 중복 문서 사전 확인 |
-| `coffaen_update` | 기존 문서 업데이트 (중복 발견 시) |
-| `coffaen_read` | 기존 문서 내용 확인 (중복 발견 시) |
+| Tool | Purpose |
+|------|---------|
+| `coffaen_create` | Create document (primary tool) |
+| `kg_search` | Pre-creation duplicate check |
+| `coffaen_update` | Update existing document (when duplicate found) |
+| `coffaen_read` | Read existing document content (when duplicate found) |
 
 ## Options
 
-> 옵션은 LLM이 자연어로 해석한다.
+> Options are interpreted by the LLM in natural language.
 
 ```
-/coffaen:remember [content] [--layer <2-4>] [--title <제목>] [--tags <태그1,태그2>] [--source <url>] [--expires <YYYY-MM-DD>]
+/coffaen:remember [content] [--layer <2-4>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
 ```
 
-| 옵션 | 기본값 | 설명 |
-|------|--------|------|
-| `content` | 대화 컨텍스트 | 기록할 내용 |
-| `--layer` | 자동 추천 | Layer 명시 (2-4, L1 불가) |
-| `--title` | 자동 생성 | 문서 제목 |
-| `--tags` | 자동 추출 | 태그 목록 (쉼표 구분) |
-| `--source` | 없음 | 외부 출처 URL (L3용) |
-| `--expires` | 없음 | 만료일 YYYY-MM-DD (L4용) |
-| `--no-check` | false | 중복 확인 건너뜀 |
+| Option | Default | Description |
+|--------|---------|-------------|
+| `content` | conversation context | Content to record |
+| `--layer` | auto-recommended | Specify Layer (2-4; L1 not allowed) |
+| `--title` | auto-generated | Document title |
+| `--tags` | auto-extracted | Tag list (comma-separated) |
+| `--source` | none | External source URL (for L3) |
+| `--expires` | none | Expiration date YYYY-MM-DD (for L4) |
+| `--no-check` | false | Skip duplicate check |
 
-## 사용 예시
-
-```
-/coffaen:remember 리액트 훅에서 의존성 배열을 빈 배열로 두면 마운트 시 1회만 실행된다
-/coffaen:remember https://example.com/paper 확산 활성화 관련 논문 --layer 3
-/coffaen:remember 내일까지 PR 리뷰 --layer 4 --expires 2024-12-31
-/coffaen:remember --title "TypeScript 제네릭 패턴" --tags typescript,generic,pattern
-```
-
-## 오류 처리
-
-- **L1 생성 시도**: "Layer 1은 `/coffaen:setup`으로만 생성 가능합니다." 안내
-- **중복 파일명**: 타임스탬프 접미사 자동 추가
-- **태그 미추출**: 사용자에게 직접 입력 요청
-- **인덱스 없음**: kg_search 생략 후 바로 생성 진행
-
-## Quick Reference
+## Usage Examples
 
 ```
-# 빠른 기록 (Layer 자동 추천)
-/coffaen:remember 오늘 배운 내용: ...
-
-# Layer 명시 기록
-/coffaen:remember 외부 논문 요약 --layer 3 --source https://...
-
-# 할 일 기록
-/coffaen:remember PR 리뷰 완료하기 --layer 4 --expires 2024-12-31
-
-# 중복 확인 없이 빠른 저장
-/coffaen:remember 메모 내용 --no-check
+/coffaen:remember If you leave the dependency array empty in a React hook, it only runs once on mount
+/coffaen:remember https://example.com/paper paper on spreading activation --layer 3
+/coffaen:remember PR review due tomorrow --layer 4 --expires 2024-12-31
+/coffaen:remember --title "TypeScript Generic Patterns" --tags typescript,generic,pattern
 ```
+
+## Error Handling
+
+- **Attempt to create L1**: "Layer 1 can only be created via `/coffaen:setup`."
+- **Duplicate filename**: automatically append a timestamp suffix
+- **Tags not extracted**: ask user to enter them directly
+- **No index**: skip kg_search and proceed directly to creation

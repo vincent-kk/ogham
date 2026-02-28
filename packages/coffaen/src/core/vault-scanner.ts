@@ -7,7 +7,6 @@
  * - .coffaen/, .coffaen-meta/ 디렉토리 자동 제외
  * - 증분 스캔: 이전 스냅샷과 mtime 비교로 변경 파일만 추출
  */
-
 import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -65,10 +64,7 @@ export async function scanVault(
 ): Promise<ScannedFile[]> {
   const { glob } = await import('fast-glob');
 
-  const exclude = [
-    ...DEFAULT_EXCLUDE,
-    ...(options?.extraExclude ?? []),
-  ];
+  const exclude = [...DEFAULT_EXCLUDE, ...(options?.extraExclude ?? [])];
 
   const filePaths: string[] = await glob('**/*.md', {
     cwd: vaultRoot,

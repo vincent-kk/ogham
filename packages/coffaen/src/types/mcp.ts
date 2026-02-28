@@ -2,7 +2,6 @@
  * @file mcp.ts
  * @description MCP 도구 입출력 스키마 — CRUD 5개 + 검색 4개
  */
-
 import type { Layer } from './common.js';
 import type { KnowledgeNode } from './graph.js';
 import type { ActivationResult } from './graph.js';

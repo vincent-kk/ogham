@@ -9,17 +9,17 @@
  * 4. kg_search로 ingest된 문서 검색 확인
  * 5. 관련 문서 생성 및 연결
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { handleCoffaenCreate } from '../../mcp/tools/coffaen-create.js';
 import { handleCoffaenRead } from '../../mcp/tools/coffaen-read.js';
 import { handleKgBuild } from '../../mcp/tools/kg-build.js';
-import { handleKgSearch } from '../../mcp/tools/kg-search.js';
 import { handleKgContext } from '../../mcp/tools/kg-context.js';
+import { handleKgSearch } from '../../mcp/tools/kg-search.js';
 import { handleKgStatus } from '../../mcp/tools/kg-status.js';
 
 async function makeTempVault(): Promise<string> {
@@ -93,11 +93,7 @@ ${result.publishedAt ? `- 발행일: ${result.publishedAt}` : ''}
 
     const createResult = await handleCoffaenCreate(vaultPath, {
       layer: 3,
-      tags: [
-        query.replace(/\s+/g, '-').toLowerCase(),
-        'ingest',
-        'external',
-      ],
+      tags: [query.replace(/\s+/g, '-').toLowerCase(), 'ingest', 'external'],
       content,
       title: result.title,
       filename,
@@ -140,7 +136,9 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     const ingested = await ingestSearchResults(vault, query, results);
 
     expect(ingested.length).toBe(results.length);
-    expect(ingested.every((path) => path.startsWith('03_External/'))).toBe(true);
+    expect(ingested.every((path) => path.startsWith('03_External/'))).toBe(
+      true,
+    );
 
     // 생성된 문서 읽기 확인
     const readResult = await handleCoffaenRead(vault, { path: ingested[0] });
@@ -245,7 +243,11 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     expect(externalResults.length).toBe(3);
 
     // Step 2: Layer 3로 ingest
-    const ingestedPaths = await ingestSearchResults(vault, query, externalResults);
+    const ingestedPaths = await ingestSearchResults(
+      vault,
+      query,
+      externalResults,
+    );
     expect(ingestedPaths).toHaveLength(3);
 
     // Step 3: 기반 지식 추가 (Layer 1, 2)
@@ -280,7 +282,8 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     });
 
     // Step 6: 합성 문서 생성 (Layer 2)
-    const resultCount = 'error' in searchResult ? 0 : searchResult.results.length;
+    const resultCount =
+      'error' in searchResult ? 0 : searchResult.results.length;
     const synthesisDoc = await handleCoffaenCreate(vault, {
       layer: 2,
       tags: ['synthesis', 'ingest-result'],

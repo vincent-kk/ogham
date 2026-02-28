@@ -2,10 +2,13 @@
  * @file weight-calculator.ts
  * @description 엣지 가중치 계산 — P0: 균일 가중치 1.0, Layer별 감쇠, 정규화
  */
-
 import { Layer } from '../types/common.js';
 import type { NodeId } from '../types/common.js';
-import type { KnowledgeEdge, KnowledgeGraph, KnowledgeNode } from '../types/graph.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../types/graph.js';
 
 /** Layer별 기본 감쇠 인자 (확산 활성화용) */
 export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
@@ -152,8 +155,7 @@ export function computePageRank(
     }
 
     for (const id of nodeIds) {
-      let rank =
-        (1 - dampingFactor) / n + (dampingFactor * danglingSum) / n;
+      let rank = (1 - dampingFactor) / n + (dampingFactor * danglingSum) / n;
       const sources = inbound.get(id) ?? [];
       for (const { from, weight } of sources) {
         const fromDegree = outDegree.get(from) ?? 1;

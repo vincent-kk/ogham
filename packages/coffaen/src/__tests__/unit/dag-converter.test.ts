@@ -2,13 +2,23 @@
  * @file dag-converter.test.ts
  * @description DAGConverter 단위 테스트
  */
+import { describe, expect, it } from 'vitest';
 
-import { describe, it, expect } from 'vitest';
-import { convertToDAG, applyLayerDirectionality } from '../../core/dag-converter.js';
+import {
+  applyLayerDirectionality,
+  convertToDAG,
+} from '../../core/dag-converter.js';
 import { Layer, toNodeId } from '../../types/common.js';
-import type { KnowledgeGraph, KnowledgeNode, KnowledgeEdge } from '../../types/graph.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 
-function makeNode(path: string, layer: Layer = Layer.L2_DERIVED): KnowledgeNode {
+function makeNode(
+  path: string,
+  layer: Layer = Layer.L2_DERIVED,
+): KnowledgeNode {
   return {
     id: toNodeId(path),
     path,
@@ -22,7 +32,10 @@ function makeNode(path: string, layer: Layer = Layer.L2_DERIVED): KnowledgeNode 
   };
 }
 
-function makeGraph(nodes: KnowledgeNode[], edges: KnowledgeEdge[]): KnowledgeGraph {
+function makeGraph(
+  nodes: KnowledgeNode[],
+  edges: KnowledgeEdge[],
+): KnowledgeGraph {
   return {
     nodes: new Map(nodes.map((n) => [n.id, n])),
     edges,
@@ -99,7 +112,9 @@ describe('convertToDAG', () => {
     const { graph: dag, weakenedEdges } = convertToDAG(graph);
     expect(weakenedEdges.length).toBeGreaterThan(0);
     for (const edge of dag.edges) {
-      const isWeakened = weakenedEdges.some((w) => w.from === edge.from && w.to === edge.to);
+      const isWeakened = weakenedEdges.some(
+        (w) => w.from === edge.from && w.to === edge.to,
+      );
       if (isWeakened) {
         expect(edge.weight).toBeLessThan(0.9);
       }

@@ -39,7 +39,10 @@ export {
   buildAdjacencyList,
   detectOrphans,
 } from './core/graph-builder.js';
-export type { GraphBuilderOptions, GraphBuildResult } from './core/graph-builder.js';
+export type {
+  GraphBuilderOptions,
+  GraphBuildResult,
+} from './core/graph-builder.js';
 
 export {
   convertToDAG,
@@ -86,7 +89,10 @@ export type { MergeResult } from './core/claude-md-merger.js';
 export { query, resolveSeedNodes, QueryEngine } from './search/query-engine.js';
 export type { QueryOptions, QueryResult } from './search/query-engine.js';
 
-export { assembleContext, ContextAssembler } from './search/context-assembler.js';
+export {
+  assembleContext,
+  ContextAssembler,
+} from './search/context-assembler.js';
 export type {
   ContextItem,
   AssembleOptions,
@@ -122,7 +128,14 @@ export type {
 
 // MCP modules
 export { createServer, startServer } from './mcp/server.js';
-export { appendStaleNode, removeBacklinks, getBacklinks, toolResult, toolError, mapReplacer } from './mcp/shared.js';
+export {
+  appendStaleNode,
+  removeBacklinks,
+  getBacklinks,
+  toolResult,
+  toolError,
+  mapReplacer,
+} from './mcp/shared.js';
 export { handleCoffaenCreate } from './mcp/tools/coffaen-create.js';
 export { handleCoffaenRead } from './mcp/tools/coffaen-read.js';
 export { handleCoffaenUpdate } from './mcp/tools/coffaen-update.js';

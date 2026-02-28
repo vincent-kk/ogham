@@ -2,18 +2,25 @@
  * @file claude-md-merger.test.ts
  * @description ClaudeMdMerger 유닛 테스트
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { writeFileSync, readFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  COFFAEN_END_MARKER,
+  COFFAEN_START_MARKER,
+  ClaudeMdMerger,
   mergeCoffaenSection,
   readCoffaenSection,
   removeCoffaenSection,
-  ClaudeMdMerger,
-  COFFAEN_START_MARKER,
-  COFFAEN_END_MARKER,
 } from '../../core/claude-md-merger.js';
 
 /** 테스트용 임시 디렉토리 */
@@ -61,7 +68,9 @@ describe('mergeCoffaenSection — 파일 없음', () => {
   });
 
   it('dryRun=true이면 파일을 실제로 생성하지 않아야 한다', () => {
-    const result = mergeCoffaenSection(claudeMdPath, SAMPLE_COFFAEN_CONTENT, { dryRun: true });
+    const result = mergeCoffaenSection(claudeMdPath, SAMPLE_COFFAEN_CONTENT, {
+      dryRun: true,
+    });
 
     expect(result.changed).toBe(true);
     expect(existsSync(claudeMdPath)).toBe(false);
@@ -141,8 +150,16 @@ describe('mergeCoffaenSection — 기존 coffaen 섹션 업데이트', () => {
     mergeCoffaenSection(claudeMdPath, SAMPLE_COFFAEN_CONTENT);
 
     const content = readFileSync(claudeMdPath, 'utf-8');
-    const startCount = (content.match(new RegExp(COFFAEN_START_MARKER.replace(/[<>!-]/g, '\\$&'), 'g')) ?? []).length;
-    const endCount = (content.match(new RegExp(COFFAEN_END_MARKER.replace(/[<>!-]/g, '\\$&'), 'g')) ?? []).length;
+    const startCount = (
+      content.match(
+        new RegExp(COFFAEN_START_MARKER.replace(/[<>!-]/g, '\\$&'), 'g'),
+      ) ?? []
+    ).length;
+    const endCount = (
+      content.match(
+        new RegExp(COFFAEN_END_MARKER.replace(/[<>!-]/g, '\\$&'), 'g'),
+      ) ?? []
+    ).length;
     expect(startCount).toBe(1);
     expect(endCount).toBe(1);
   });

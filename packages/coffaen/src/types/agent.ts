@@ -2,8 +2,7 @@
  * @file agent.ts
  * @description 에이전트 타입 — AgentRole, AgentAccessMatrix, TransitionDirective, LayerPermission
  */
-
-import type { Layer, AutonomyLevel } from './common.js';
+import type { AutonomyLevel, Layer } from './common.js';
 
 /** 에이전트 역할 */
 export type AgentRole =

@@ -5,12 +5,11 @@
  * 온라인 검색 계층: 사전 계산된 가중치 + SA로 실시간 검색 수행.
  * 시간 제약: MCP 도구 호출 컨텍스트에서 100ms 이하 목표.
  */
-
-import type { NodeId } from '../types/common.js';
-import type { KnowledgeGraph, ActivationResult } from '../types/graph.js';
 import { runSpreadingActivation } from '../core/spreading-activation.js';
 import type { SpreadingActivationParams } from '../core/spreading-activation.js';
+import type { NodeId } from '../types/common.js';
 import { toNodeId } from '../types/common.js';
+import type { ActivationResult, KnowledgeGraph } from '../types/graph.js';
 
 /** QueryEngine 검색 옵션 */
 export interface QueryOptions {
@@ -49,7 +48,10 @@ export interface QueryResult {
  * @param seeds - 시드 후보 (경로 또는 키워드)
  * @returns 유효한 시드 노드 ID 목록
  */
-export function resolveSeedNodes(graph: KnowledgeGraph, seeds: string[]): NodeId[] {
+export function resolveSeedNodes(
+  graph: KnowledgeGraph,
+  seeds: string[],
+): NodeId[] {
   const resolvedIds = new Set<NodeId>();
 
   for (const seed of seeds) {
@@ -66,7 +68,9 @@ export function resolveSeedNodes(graph: KnowledgeGraph, seeds: string[]): NodeId
       const keyword = seed.toLowerCase();
       for (const [id, node] of graph.nodes) {
         const titleMatch = node.title.toLowerCase().includes(keyword);
-        const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(keyword));
+        const tagMatch = node.tags.some((tag) =>
+          tag.toLowerCase().includes(keyword),
+        );
         if (titleMatch || tagMatch) {
           resolvedIds.add(id);
         }
@@ -106,7 +110,13 @@ export function query(
   options: QueryOptions = {},
 ): QueryResult {
   const startTime = Date.now();
-  const { maxResults = 10, decay = 0.7, threshold = 0.1, maxHops = 5, layerFilter = [] } = options;
+  const {
+    maxResults = 10,
+    decay = 0.7,
+    threshold = 0.1,
+    maxHops = 5,
+    layerFilter = [],
+  } = options;
 
   // 시드 노드 결정
   const seedIds = resolveSeedNodes(graph, seeds);
@@ -133,7 +143,9 @@ export function query(
 
   // 시드 자신은 결과에서 제외하고 상위 maxResults 반환
   const seedSet = new Set(seedIds);
-  const filtered = results.filter((r) => !seedSet.has(r.nodeId)).slice(0, maxResults);
+  const filtered = results
+    .filter((r) => !seedSet.has(r.nodeId))
+    .slice(0, maxResults);
 
   return {
     results: filtered,
@@ -154,14 +166,22 @@ export class QueryEngine {
   /**
    * 쿼리 실행
    */
-  query(graph: KnowledgeGraph, seeds: string[], options?: QueryOptions): QueryResult {
+  query(
+    graph: KnowledgeGraph,
+    seeds: string[],
+    options?: QueryOptions,
+  ): QueryResult {
     return query(graph, seeds, { ...this.defaultOptions, ...options });
   }
 
   /**
    * 단일 경로로 관련 문서 탐색
    */
-  findRelated(graph: KnowledgeGraph, path: string, options?: QueryOptions): QueryResult {
+  findRelated(
+    graph: KnowledgeGraph,
+    path: string,
+    options?: QueryOptions,
+  ): QueryResult {
     return this.query(graph, [path], options);
   }
 }

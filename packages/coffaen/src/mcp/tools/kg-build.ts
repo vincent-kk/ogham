@@ -2,18 +2,20 @@
  * @file kg-build.ts
  * @description kg_build 도구 핸들러 — 인덱스 전체/증분 빌드 트리거
  */
-
 import { stat } from 'node:fs/promises';
 
-import type { KnowledgeGraph } from '../../types/graph.js';
-import type { CoffaenCrudResult } from '../../types/mcp.js';
-import { scanVault } from '../../core/vault-scanner.js';
-import { parseDocument, buildKnowledgeNode } from '../../core/document-parser.js';
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
 import { buildGraph } from '../../core/graph-builder.js';
+import { scanVault } from '../../core/vault-scanner.js';
 import { calculateWeights } from '../../core/weight-calculator.js';
 import { MetadataStore } from '../../index/metadata-store.js';
-import type { KnowledgeNode } from '../../types/graph.js';
 import type { NodeId } from '../../types/common.js';
+import type { KnowledgeGraph } from '../../types/graph.js';
+import type { KnowledgeNode } from '../../types/graph.js';
+import type { CoffaenCrudResult } from '../../types/mcp.js';
 
 /** kg_build 입력 */
 export interface KgBuildInput {
@@ -72,7 +74,9 @@ async function fullBuild(vaultPath: string): Promise<KnowledgeGraph> {
   const graphResult = buildGraph(nodeList);
 
   // 가중치 계산
-  const { edges: weightedEdges, pageranks } = calculateWeights(graphResult.graph);
+  const { edges: weightedEdges, pageranks } = calculateWeights(
+    graphResult.graph,
+  );
 
   // PageRank를 노드에 반영
   for (const [nodeId, rank] of pageranks) {

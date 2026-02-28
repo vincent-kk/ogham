@@ -39,23 +39,23 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ### 4-Layer Knowledge Model
 
-| Layer | 이름 | 디렉토리 | SA Decay | 설명 |
-|-------|------|----------|----------|------|
-| L1 | Core Identity Hub | `01_Core/` | 0.5 | 핵심 정체성 (읽기 전용) |
-| L2 | Derived Knowledge | `02_Derived/` | 0.7 | 내재화 지식 |
-| L3 | External Reference | `03_External/` | 0.8 | 외부 참조 |
-| L4 | Action Memory | `04_Action/` | 0.9 | 휘발성 작업 기억 |
+| Layer | 이름               | 디렉토리       | SA Decay | 설명                    |
+| ----- | ------------------ | -------------- | -------- | ----------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 (읽기 전용) |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화 지식             |
+| L3    | External Reference | `03_External/` | 0.8      | 외부 참조               |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 기억        |
 
 ### Key Source Directories
 
-| 경로 | 역할 |
-|------|------|
-| `src/core/` | 핵심 로직 (VaultScanner, DocumentParser, GraphBuilder 등 8개) |
-| `src/mcp/` | MCP 서버 + 10개 도구 핸들러 |
-| `src/hooks/` | 훅 구현체 + `entries/` (esbuild 진입점) |
-| `src/search/` | QueryEngine, ContextAssembler |
-| `src/index/` | MetadataStore, IncrementalTracker |
-| `src/types/` | 타입 정의 (index.ts에서 중앙 export) |
+| 경로          | 역할                                                          |
+| ------------- | ------------------------------------------------------------- |
+| `src/core/`   | 핵심 로직 (VaultScanner, DocumentParser, GraphBuilder 등 8개) |
+| `src/mcp/`    | MCP 서버 + 10개 도구 핸들러                                   |
+| `src/hooks/`  | 훅 구현체 + `entries/` (esbuild 진입점)                       |
+| `src/search/` | QueryEngine, ContextAssembler                                 |
+| `src/index/`  | MetadataStore, IncrementalTracker                             |
+| `src/types/`  | 타입 정의 (index.ts에서 중앙 export)                          |
 
 ### MCP Tools (10)
 
@@ -74,7 +74,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 - `.claude-plugin/plugin.json` — 매니페스트
 - `.mcp.json` — MCP 서버 등록 (`bridge/mcp-server.cjs`)
-- `hooks/hooks.json` — 훅 이벤트 매핑 (SessionStart, PreToolUse→Write|Edit, PostToolUse→coffaen_*, SessionEnd)
+- `hooks/hooks.json` — 훅 이벤트 매핑 (SessionStart, PreToolUse→Write|Edit, PostToolUse→coffaen\_\*, SessionEnd)
 - `templates/rules/` — 규칙 템플릿 5개 (coffaen-memory-guard, coffaen-naming, frontmatter-required, layer-structure, link-integrity)
 
 ## Development Notes

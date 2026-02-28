@@ -2,18 +2,21 @@
  * @file document-parser.test.ts
  * @description DocumentParser 단위 테스트
  */
+import { describe, expect, it } from 'vitest';
 
-import { describe, it, expect } from 'vitest';
 import {
-  parseYamlFrontmatter,
+  buildKnowledgeNode,
   extractFrontmatter,
   extractLinks,
   parseDocument,
-  buildKnowledgeNode,
+  parseYamlFrontmatter,
 } from '../../../core/document-parser.js';
 
 // 유효한 frontmatter 마크다운 문서 생성 헬퍼
-function makeDoc(frontmatter: string, body = '# Title\n\nContent here.'): string {
+function makeDoc(
+  frontmatter: string,
+  body = '# Title\n\nContent here.',
+): string {
   return `---\n${frontmatter}\n---\n${body}`;
 }
 
@@ -71,7 +74,9 @@ describe('parseYamlFrontmatter', () => {
   });
 
   it('콜론 없는 줄은 무시한다', () => {
-    const result = parseYamlFrontmatter('created: 2026-02-28\ninvalid line\nupdated: 2026-02-28');
+    const result = parseYamlFrontmatter(
+      'created: 2026-02-28\ninvalid line\nupdated: 2026-02-28',
+    );
     expect(result['created']).toBe('2026-02-28');
     expect(result['updated']).toBe('2026-02-28');
   });
@@ -103,11 +108,13 @@ describe('extractFrontmatter', () => {
     const { frontmatter } = extractFrontmatter(content);
 
     expect(frontmatter.success).toBe(false);
-    expect(frontmatter.errors?.some(e => e.includes('tags'))).toBe(true);
+    expect(frontmatter.errors?.some((e) => e.includes('tags'))).toBe(true);
   });
 
   it('layer 범위 밖 값 시 실패한다', () => {
-    const content = makeDoc('created: 2026-02-28\nupdated: 2026-02-28\ntags: [a]\nlayer: 5');
+    const content = makeDoc(
+      'created: 2026-02-28\nupdated: 2026-02-28\ntags: [a]\nlayer: 5',
+    );
     const { frontmatter } = extractFrontmatter(content);
 
     expect(frontmatter.success).toBe(false);
@@ -139,7 +146,9 @@ describe('extractFrontmatter', () => {
   });
 
   it('tags 배열이 비어있으면 실패한다', () => {
-    const content = makeDoc('created: 2026-02-28\nupdated: 2026-02-28\ntags: []\nlayer: 1');
+    const content = makeDoc(
+      'created: 2026-02-28\nupdated: 2026-02-28\ntags: []\nlayer: 1',
+    );
     const { frontmatter } = extractFrontmatter(content);
 
     expect(frontmatter.success).toBe(false);
@@ -162,7 +171,7 @@ describe('extractLinks', () => {
     const links = extractLinks(body);
 
     expect(links).toHaveLength(3);
-    expect(links.map(l => l.href)).toEqual(['./a.md', './b.md', './c.md']);
+    expect(links.map((l) => l.href)).toEqual(['./a.md', './b.md', './c.md']);
   });
 
   it('상위 경로 링크를 처리한다', () => {

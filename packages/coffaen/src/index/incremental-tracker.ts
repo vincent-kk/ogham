@@ -7,9 +7,9 @@
  * - PageRank 같은 전역 메트릭은 다음 전체 빌드까지 유지
  * - stale 노드 비율 10% 초과 시 전체 재빌드 권장
  */
-
 import type { NodeId } from '../types/common.js';
 import type { KnowledgeGraph } from '../types/graph.js';
+
 import type { FileSnapshot, SnapshotEntry } from './metadata-store.js';
 
 /** 변경 세트 */
@@ -149,7 +149,11 @@ export function computeIncrementalScope(
   graph: KnowledgeGraph,
   changeSet: ChangeSet,
 ): IncrementalScope {
-  const allChanged = [...changeSet.added, ...changeSet.modified, ...changeSet.deleted];
+  const allChanged = [
+    ...changeSet.added,
+    ...changeSet.modified,
+    ...changeSet.deleted,
+  ];
   const totalNodes = graph.nodeCount;
 
   // 변경 비율 계산

@@ -2,3 +2,8 @@ node_modules/
 dist/
 *.log
 bench-results/
+
+# bridge/ is a build output (from esbuild) but intentionally NOT gitignored.
+# Plugin consumers need pre-built bridge files (MCP server + hook entry points)
+# to function without running a build step. Unlike dist/ (library exports),
+# bridge/ files are runtime entry points referenced by hooks.json and .mcp.json.

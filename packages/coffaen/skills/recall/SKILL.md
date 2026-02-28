@@ -1,130 +1,130 @@
 ---
 name: recall
 user_invocable: true
-description: 지식 검색/회상 — 자연어 쿼리로 지식 그래프를 탐색하여 관련 문서를 반환
+description: Knowledge search/recall — traverse the knowledge graph with a natural-language query and return relevant documents
 version: 1.0.0
 complexity: simple
 plugin: coffaen
 ---
 
-# recall — 지식 검색/회상
+# recall — Knowledge Search/Recall
 
-자연어 쿼리를 받아 coffaen 지식 그래프를 탐색하고, 확산 활성화(SA) 알고리즘으로
-관련 문서를 찾아 컨텍스트를 조립하여 반환합니다.
+Accepts a natural-language query, traverses the coffaen knowledge graph using the Spreading Activation (SA) algorithm,
+finds related documents, assembles context, and returns it.
 
-## 언제 사용하는가
+## When to Use This Skill
 
-- 과거에 기록한 지식을 검색할 때
-- 특정 주제와 연관된 문서를 찾을 때
-- 기억 공간에서 컨텍스트를 불러올 때
-- `/coffaen:explore`의 단일 쿼리 경량 버전이 필요할 때
+- When searching for knowledge recorded in the past
+- When looking for documents related to a specific topic
+- When loading context from the knowledge space
+- When a lightweight single-query alternative to `/coffaen:explore` is needed
 
-## 전제 조건
+## Prerequisites
 
-- coffaen 인덱스가 빌드되어 있어야 합니다 (`.coffaen/index.json` 존재)
-- 인덱스가 없으면: "인덱스가 없습니다. `/coffaen:build`를 먼저 실행해주세요." 안내
+- The coffaen index must be built (`.coffaen/index.json` must exist)
+- If no index: "No index found. Please run `/coffaen:build` first."
 
-## 워크플로우
+## Workflow
 
-### Step 1 — 쿼리 파싱
+### Step 1 — Query Parsing
 
-사용자 입력에서 핵심 키워드와 의도를 추출합니다.
+Extract core keywords and intent from user input.
 
-- 자연어 쿼리 → 검색 키워드 목록
-- 모드 감지: `--summary` (요약 모드, 기본) / `--detail` (상세 모드)
-- Layer 필터 감지: `--layer=1` ~ `--layer=4`
+- Natural-language query → list of search keywords
+- Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
+- Layer filter detection: `--layer=1` through `--layer=4`
 
-### Step 2 — kg_search 호출
+### Step 2 — Call kg_search
 
-`kg_search` MCP 도구를 호출하여 시드 노드를 찾습니다.
-
-```
-kg_search(seed: [키워드1, 키워드2, ...], max_results=10, layer_filter?)
-```
-
-결과가 없으면: "관련 문서를 찾지 못했습니다. 다른 키워드로 시도해보세요." 안내
-
-### Step 3 — 이웃 탐색 (kg_navigate)
-
-시드 노드에서 인/아웃바운드 링크를 탐색합니다.
+Call the `kg_search` MCP tool to find seed nodes.
 
 ```
-kg_navigate(path: 선택된_노드_경로, include_inbound=true, include_outbound=true, include_hierarchy=true)
+kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?)
 ```
 
-### Step 4 — 컨텍스트 조립 (kg_context)
+If no results: "No related documents found. Try different keywords."
 
-상위 활성화 노드의 컨텍스트를 조립합니다.
+### Step 3 — Neighbor Exploration (kg_navigate)
+
+Traverse inbound and outbound links from seed nodes.
 
 ```
-kg_context(query: 검색_쿼리_문자열, token_budget=2000)
+kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
 ```
 
-### Step 5 — 결과 포맷팅
+### Step 4 — Context Assembly (kg_context)
 
-**요약 모드 (기본)**:
+Assemble context for the top activated nodes.
+
 ```
-## 검색 결과: "{쿼리}"
+kg_context(query: search_query_string, token_budget=2000)
+```
 
-관련 문서 {N}개를 찾았습니다.
+### Step 5 — Result Formatting
 
-1. **{제목}** (Layer {N}, 관련도 {score}%)
-   {1-2줄 요약}
-   경로: {path}
+**Summary mode (default)**:
+```
+## Search Results: "{query}"
+
+Found {N} related documents.
+
+1. **{title}** (Layer {N}, relevance {score}%)
+   {1-2 line summary}
+   Path: {path}
 
 2. ...
 
-💡 더 자세히 보려면: `/coffaen:recall {쿼리} --detail`
+For more detail: `/coffaen:recall {query} --detail`
 ```
 
-**상세 모드 (`--detail`)**:
+**Detail mode (`--detail`)**:
 ```
-## 검색 결과: "{쿼리}"
+## Search Results: "{query}"
 
-### {제목}
-- **경로**: {path}
+### {title}
+- **Path**: {path}
 - **Layer**: {layer_name}
-- **태그**: {tags}
-- **관련도**: {score}%
-- **연결 문서**: {linked_docs}
+- **Tags**: {tags}
+- **Relevance**: {score}%
+- **Linked documents**: {linked_docs}
 
-{문서 주요 내용 발췌}
+{excerpt of document main content}
 
 ---
 ```
 
-## MCP 도구
+## MCP Tools
 
-| 도구 | 목적 |
-|------|------|
-| `kg_search` | 키워드 기반 시드 노드 탐색 |
-| `kg_navigate` | 이웃 노드 조회 (인바운드/아웃바운드/계층 링크 탐색) |
-| `kg_context` | 노드 컨텍스트 조립 |
+| Tool | Purpose |
+|------|---------|
+| `kg_search` | Keyword-based seed node search |
+| `kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
+| `kg_context` | Assemble node context |
 
-## 옵션
-
-```
-/coffaen:recall <쿼리> [옵션]
-```
-
-| 옵션 | 기본값 | 설명 |
-|------|--------|------|
-| `--summary` | 기본 | 요약 모드 (제목 + 1-2줄 요약) |
-| `--detail` | — | 상세 모드 (전체 내용 발췌) |
-| `--layer=N` | 전체 | 특정 Layer만 검색 (1-4) |
-| `--limit=N` | 10 | 최대 결과 수 |
-
-## 사용 예시
+## Options
 
 ```
-/coffaen:recall 리액트 상태관리 패턴
-/coffaen:recall 프로젝트 목표 --detail
-/coffaen:recall 일정 --layer=4
-/coffaen:recall 핵심 가치 --layer=1 --detail
+/coffaen:recall <query> [options]
 ```
 
-## 오류 처리
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--summary` | default | Summary mode (title + 1-2 line summary) |
+| `--detail` | — | Detail mode (full content excerpt) |
+| `--layer=N` | all | Search a specific Layer only (1-4) |
+| `--limit=N` | 10 | Maximum number of results |
 
-- **인덱스 없음**: `/coffaen:build` 실행 안내
-- **결과 없음**: 유사 키워드 제안 + `/coffaen:explore` 대화형 탐색 안내
-- **인덱스 stale**: stale 경고 표시 후 계속 진행
+## Usage Examples
+
+```
+/coffaen:recall react state management patterns
+/coffaen:recall project goals --detail
+/coffaen:recall schedule --layer=4
+/coffaen:recall core values --layer=1 --detail
+```
+
+## Error Handling
+
+- **No index**: guide to run `/coffaen:build`
+- **No results**: suggest similar keywords + guide to `/coffaen:explore` for interactive exploration
+- **Stale index**: display stale warning and continue

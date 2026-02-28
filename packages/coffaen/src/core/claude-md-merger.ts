@@ -11,8 +11,7 @@
  * VaultScanner와 동급의 파일시스템 I/O 예외 모듈.
  * 여러 스킬(setup, doctor, rebuild)에서 재사용.
  */
-
-import { readFileSync, writeFileSync, existsSync, copyFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 /** coffaen 섹션 시작 마커 */
 export const COFFAEN_START_MARKER = '<!-- COFFAEN:START -->';

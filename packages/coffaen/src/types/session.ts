@@ -2,7 +2,6 @@
  * @file session.ts
  * @description 세션 타입 — SessionSummary, UsageStats, SkillUsageEntry, AgentUsageEntry
  */
-
 import type { AgentRole } from './agent.js';
 
 /** 스킬 사용 기록 */

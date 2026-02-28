@@ -9,11 +9,11 @@
  *
  * 에이전트들은 MCP 도구를 통해 vault에 접근한다.
  */
-
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleCoffaenCreate } from '../../mcp/tools/coffaen-create.js';
 import { handleCoffaenDelete } from '../../mcp/tools/coffaen-delete.js';
@@ -21,7 +21,11 @@ import { handleCoffaenMove } from '../../mcp/tools/coffaen-move.js';
 import { handleCoffaenRead } from '../../mcp/tools/coffaen-read.js';
 import { handleKgBuild } from '../../mcp/tools/kg-build.js';
 import { handleKgSearch } from '../../mcp/tools/kg-search.js';
-import type { AgentRole, AgentExecutionResult, TransitionDirective } from '../../types/agent.js';
+import type {
+  AgentExecutionResult,
+  AgentRole,
+  TransitionDirective,
+} from '../../types/agent.js';
 
 async function makeTempVault(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'coffaen-agent-'));
@@ -132,10 +136,14 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     const today = new Date().toISOString().slice(0, 10);
 
     // 만료된 Layer 4 문서 삭제 — 파일 내용에서 expires 직접 파싱
-    const expiredRead = await handleCoffaenRead(vault, { path: '04_Action/expired-task.md' });
+    const expiredRead = await handleCoffaenRead(vault, {
+      path: '04_Action/expired-task.md',
+    });
     if (expiredRead.success) {
       // frontmatter에서 expires 추출
-      const expiresMatch = /^expires:\s*(\d{4}-\d{2}-\d{2})/m.exec(expiredRead.content);
+      const expiresMatch = /^expires:\s*(\d{4}-\d{2}-\d{2})/m.exec(
+        expiredRead.content,
+      );
       const expires = expiresMatch?.[1];
       if (expires && expires < today) {
         const deleteResult = await handleCoffaenDelete(vault, {
@@ -149,7 +157,9 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
 
     // 신뢰도 높은 Layer 3 → Layer 2 전이
     const transitions: TransitionDirective[] = [];
-    const extRead = await handleCoffaenRead(vault, { path: '03_External/high-conf-ext.md' });
+    const extRead = await handleCoffaenRead(vault, {
+      path: '03_External/high-conf-ext.md',
+    });
     if (extRead.success) {
       transitions.push({
         path: '03_External/high-conf-ext.md',
@@ -173,7 +183,9 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     }
 
     const result = makeAgentResult('memory-organizer', actions, transitions);
-    expect(result.actions).toContain('만료 문서 삭제: 04_Action/expired-task.md');
+    expect(result.actions).toContain(
+      '만료 문서 삭제: 04_Action/expired-task.md',
+    );
     expect(result.transitions).toHaveLength(1);
     expect(result.transitions[0].confidence).toBe(0.9);
   });
@@ -199,7 +211,9 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     });
 
     if (!('error' in searchResult)) {
-      actions.push(`검색 완료: ${searchResult.results.length}개 관련 문서 발견`);
+      actions.push(
+        `검색 완료: ${searchResult.results.length}개 관련 문서 발견`,
+      );
 
       // 검색 결과를 바탕으로 연결 문서 생성
       const connectorDoc = await handleCoffaenCreate(vault, {
@@ -226,11 +240,17 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
   });
 
   it('3개 에이전트 순차 협업 시퀀스', async () => {
-    const executionLog: Array<{ agent: AgentRole; action: string; success: boolean }> = [];
+    const executionLog: Array<{
+      agent: AgentRole;
+      action: string;
+      success: boolean;
+    }> = [];
 
     // === Agent 1: identity-guardian ===
     // Layer 1 보호 검증
-    const deleteAttempt = await handleCoffaenDelete(vault, { path: '01_Core/core-identity.md' });
+    const deleteAttempt = await handleCoffaenDelete(vault, {
+      path: '01_Core/core-identity.md',
+    });
     executionLog.push({
       agent: 'identity-guardian',
       action: 'Layer 1 삭제 차단',
@@ -239,7 +259,9 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
 
     // === Agent 2: memory-organizer ===
     // 만료 문서 정리
-    const expiredDelete = await handleCoffaenDelete(vault, { path: '04_Action/expired-task.md' });
+    const expiredDelete = await handleCoffaenDelete(vault, {
+      path: '04_Action/expired-task.md',
+    });
     executionLog.push({
       agent: 'memory-organizer',
       action: '만료 문서 삭제',
@@ -279,9 +301,15 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     expect(successfulActions.length).toBe(executionLog.length);
 
     // 에이전트별 작업 분포
-    const guardianActions = executionLog.filter((e) => e.agent === 'identity-guardian');
-    const organizerActions = executionLog.filter((e) => e.agent === 'memory-organizer');
-    const connectorActions = executionLog.filter((e) => e.agent === 'knowledge-connector');
+    const guardianActions = executionLog.filter(
+      (e) => e.agent === 'identity-guardian',
+    );
+    const organizerActions = executionLog.filter(
+      (e) => e.agent === 'memory-organizer',
+    );
+    const connectorActions = executionLog.filter(
+      (e) => e.agent === 'knowledge-connector',
+    );
 
     expect(guardianActions).toHaveLength(1);
     expect(organizerActions).toHaveLength(2);

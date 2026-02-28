@@ -7,14 +7,16 @@
  * - Zod 스키마로 Frontmatter 검증
  * - 순수 함수 지향: 파일시스템 I/O 없음 (문자열 입력 → 구조체 출력)
  */
-
 import { readFile } from 'node:fs/promises';
 
-import { FrontmatterSchema } from '../types/frontmatter.js';
-import type { Frontmatter, FrontmatterParseResult } from '../types/frontmatter.js';
-import type { KnowledgeNode } from '../types/graph.js';
 import type { Layer } from '../types/common.js';
 import { toNodeId } from '../types/common.js';
+import { FrontmatterSchema } from '../types/frontmatter.js';
+import type {
+  Frontmatter,
+  FrontmatterParseResult,
+} from '../types/frontmatter.js';
+import type { KnowledgeNode } from '../types/graph.js';
 
 /** 마크다운 링크 정보 */
 export interface MarkdownLink {
@@ -118,7 +120,10 @@ export function parseYamlFrontmatter(yaml: string): Record<string, unknown> {
       const items: string[] = [];
       i++;
       while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
-        const item = lines[i].replace(/^\s+-\s+/, '').trim().replace(/^["']|["']$/g, '');
+        const item = lines[i]
+          .replace(/^\s+-\s+/, '')
+          .trim()
+          .replace(/^["']|["']$/g, '');
         items.push(item);
         i++;
       }
@@ -141,8 +146,10 @@ export function parseYamlFrontmatter(yaml: string): Record<string, unknown> {
  */
 function parseScalarValue(raw: string): unknown {
   // 따옴표 제거
-  if ((raw.startsWith('"') && raw.endsWith('"')) ||
-      (raw.startsWith("'") && raw.endsWith("'"))) {
+  if (
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"))
+  ) {
     return raw.slice(1, -1);
   }
 

@@ -1,70 +1,70 @@
 ---
 name: setup
 user_invocable: true
-description: coffaen 온보딩 위저드 — Core Identity 수집 + 지식 트리 초기화 (6단계)
+description: coffaen onboarding wizard — Core Identity collection + knowledge tree initialization (6 stages)
 version: 1.0.0
 complexity: complex
 context_layers: [1]
-orchestrator: setup 스킬
+orchestrator: setup skill
 plugin: coffaen
 ---
 
-# setup — coffaen 온보딩 위저드
+# setup — coffaen Onboarding Wizard
 
-coffaen을 처음 사용하거나 Core Identity를 재설정할 때 실행하는 6단계 인터뷰형 위저드.
-한 번에 하나의 질문만 제시하며, 모든 단계는 건너뛸 수 있다.
+A 6-stage interview-style wizard for first-time coffaen setup or Core Identity reset.
+Presents one question at a time; every stage can be skipped.
 
 ## When to Use This Skill
 
-- coffaen을 처음 설치한 직후
-- Core Identity(가치관, 경계, 선호)를 업데이트하고 싶을 때 (`--step` 옵션으로 특정 단계 재실행)
-- 지식 트리 경로를 변경해야 할 때
-- Progressive Autonomy Level을 수동으로 재설정할 때
+- Immediately after installing coffaen for the first time
+- When you want to update Core Identity (values, boundaries, preferences) — use `--step` to re-run a specific stage
+- When you need to change the knowledge tree path
+- When manually resetting the Progressive Autonomy Level
 
-## 6단계 위저드 플로우
+## 6-Stage Wizard Flow
 
-### Stage 1 — 환영 + 기억공간 경로 설정
+### Stage 1 — Welcome + Knowledge Space Path Setup
 
-AskUserQuestion으로 vault 절대 경로를 수집한다.
-- 기본값: `~/.coffaen/`
-- 경로가 존재하지 않으면 생성 여부 확인
-- `.coffaen/` 캐시 디렉토리, `.coffaen-meta/` 메타 디렉토리도 함께 생성
+Collect the vault absolute path via AskUserQuestion.
+- Default: `~/.coffaen/`
+- If the path does not exist, confirm whether to create it
+- Also create the `.coffaen/` cache directory and `.coffaen-meta/` metadata directory
 
-### Stage 2 — Core Identity 인터뷰 (최소 5개)
+### Stage 2 — Core Identity Interview (minimum 5 questions)
 
-AskUserQuestion으로 순차적으로 질문한다. 각 질문은 독립적이며 "나중에"로 건너뛸 수 있다.
+Ask questions sequentially via AskUserQuestion. Each question is independent and can be skipped with "later".
 
-필수 세트 (5개):
-1. 이름/호칭 — "어떻게 불러드릴까요?"
-2. 핵심 가치관 3가지 — "당신에게 가장 중요한 가치관 3가지는 무엇인가요?"
-3. 절대 경계 1가지 — "절대로 해서는 안 되는 것 한 가지를 알려주세요."
-4. 주요 관심사 — "현재 가장 관심 있는 분야나 프로젝트는 무엇인가요?"
-5. 커뮤니케이션 스타일 — "어떤 방식의 소통을 선호하시나요?"
+Required set (5 questions):
+1. Name/title — "What would you like to be called?"
+2. Three core values — "What are the three values most important to you?"
+3. One absolute boundary — "Tell me one thing that must never be done."
+4. Primary interests — "What area or project are you most interested in right now?"
+5. Communication style — "What style of communication do you prefer?"
 
-선택 세트 (5개, 필수 완료 후 제안):
-6. 직업/역할 | 7. 장기 목표 | 8. 학습 스타일 | 9. 의사결정 기준 | 10. 일상 루틴
+Optional set (5 questions, suggested after completing required):
+6. Occupation/role | 7. Long-term goals | 8. Learning style | 9. Decision criteria | 10. Daily routine
 
-### Stage 3 — 초기 지식 트리 스캐폴딩
+### Stage 3 — Initial Knowledge Tree Scaffolding
 
-수집된 인터뷰 답변으로 Layer 1 문서를 생성한다:
+Generate Layer 1 documents from the collected interview answers:
 
-| 파일 | 내용 |
-|------|------|
-| `01_Core/identity.md` | 이름, 호칭, 정체성 |
-| `01_Core/values.md` | 핵심 가치관 |
-| `01_Core/boundaries.md` | 절대 경계 |
-| `01_Core/preferences.md` | 커뮤니케이션 선호 |
-| `01_Core/trust-level.json` | Level 0 초기화 |
+| File | Content |
+|------|---------|
+| `01_Core/identity.md` | Name, title, identity |
+| `01_Core/values.md` | Core values |
+| `01_Core/boundaries.md` | Absolute boundaries |
+| `01_Core/preferences.md` | Communication preferences |
+| `01_Core/trust-level.json` | Level 0 initialization |
 
-`coffaen_create` MCP 도구로 각 문서를 생성한다 (layer=1, tags 필수).
+Create each document with the `coffaen_create` MCP tool (layer=1, tags required).
 
-또한 `02_Derived/`, `03_External/`, `04_Action/` 디렉토리를 생성한다.
+Also create the `02_Derived/`, `03_External/`, and `04_Action/` directories.
 
-identity-guardian 에이전트에게 생성된 L1 문서의 Frontmatter 규칙 준수를 coffaen_read로 확인하도록 위임한다.
+Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via coffaen_read.
 
-### Stage 4 — Progressive Autonomy Level 0 설정
+### Stage 4 — Progressive Autonomy Level 0 Setup
 
-`01_Core/trust-level.json`을 Level 0으로 초기화:
+Initialize `01_Core/trust-level.json` at Level 0:
 ```json
 {
   "current_level": 0,
@@ -75,36 +75,36 @@ identity-guardian 에이전트에게 생성된 L1 문서의 Frontmatter 규칙 �
 }
 ```
 
-### Stage 5 — 초기 인덱스 빌드
+### Stage 5 — Initial Index Build
 
-`kg_status` MCP 도구로 인덱스 상태를 확인한다.
-- 기존 마크다운 저장소가 있는 경우: 전체 빌드를 제안하고 사용자 확인 후 `/coffaen:build` 실행
-- 신규인 경우: 생성된 L1 문서로 경량 빌드 실행
+Check index status with the `kg_status` MCP tool.
+- If an existing markdown vault is present: suggest a full build and run `/coffaen:build` after user confirmation
+- If new: run a lightweight build with the generated L1 documents
 
-### Stage 6 — 첫 번째 기억 기록 가이드
+### Stage 6 — First Memory Recording Guide
 
-완료 메시지와 함께 다음을 안내한다:
-- `/coffaen:remember` — 새 지식 기록
-- `/coffaen:recall` — 과거 지식 검색
-- `/coffaen:build` — 인덱스 전체 구축
-- `/coffaen:doctor` — 시스템 상태 점검
+Display a completion message along with guidance for:
+- `/coffaen:remember` — record new knowledge
+- `/coffaen:recall` — search past knowledge
+- `/coffaen:build` — build the full index
+- `/coffaen:doctor` — check system health
 
-## 에이전트 협업
+## Agent Collaboration
 
 ```
-setup 스킬 시작
-  -> Stage 3에서 identity-guardian 에이전트: L1 문서 생성 후 검토/보호
-  -> Stage 5에서 build 스킬 호출 (사용자 승인 시)
-  -> setup 스킬: 완료 요약 및 가이드 제공
+setup skill starts
+  -> Stage 3: identity-guardian agent — review/protect L1 documents after creation
+  -> Stage 5: invoke build skill (with user approval)
+  -> setup skill: provide completion summary and guidance
 ```
 
 ## Available MCP Tools
 
-| 도구 | 용도 |
-|------|------|
-| `coffaen_create` | L1 문서 생성 |
-| `coffaen_read` | 기존 L1 문서 확인 |
-| `kg_status` | 인덱스 상태 확인 |
+| Tool | Purpose |
+|------|---------|
+| `coffaen_create` | Create L1 documents |
+| `coffaen_read` | Verify existing L1 documents |
+| `kg_status` | Check index status |
 
 ## Options
 
@@ -112,14 +112,14 @@ setup 스킬 시작
 /coffaen:setup [--step <stage>] [--reset]
 ```
 
-| 옵션 | 설명 |
-|------|------|
-| `--step <1-6>` | 특정 단계만 재실행 |
-| `--reset` | 전체 초기화 (기존 L1 문서 보존) |
+| Option | Description |
+|--------|-------------|
+| `--step <1-6>` | Re-run a specific stage only |
+| `--reset` | Full reset (preserves existing L1 documents) |
 
-## 수용 기준
+## Acceptance Criteria
 
-- `01_Core/` 4개 문서 + `trust-level.json` 생성
-- `02_Derived/`, `03_External/`, `04_Action/` 디렉토리 생성
-- Progressive Autonomy Level 0 설정
-- 건너뛰기 응답 허용 (모든 단계)
+- 4 documents in `01_Core/` + `trust-level.json` created
+- `02_Derived/`, `03_External/`, `04_Action/` directories created
+- Progressive Autonomy Level 0 set
+- Skip responses allowed (all stages)

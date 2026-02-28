@@ -2,10 +2,15 @@
  * @file index-invalidator.ts
  * @description PostToolUse Hook — coffaen MCP 도구 호출 후 stale-nodes.json 업데이트 + 사용 통계 증가
  */
-
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { isCoffaenVault, metaPath, COFFAEN_MCP_TOOLS } from './shared.js';
+
+import {
+  COFFAEN_MCP_TOOLS,
+  coffaenPath,
+  isCoffaenVault,
+  metaPath,
+} from './shared.js';
 
 export interface PostToolUseInput {
   tool_name?: string;
@@ -24,7 +29,9 @@ export interface PostToolUseResult {
  * 1. 영향받은 노드를 stale-nodes.json에 추가
  * 2. usage-stats.json 사용 통계 카운트 증가
  */
-export function runIndexInvalidator(input: PostToolUseInput): PostToolUseResult {
+export function runIndexInvalidator(
+  input: PostToolUseInput,
+): PostToolUseResult {
   const cwd = input.cwd ?? process.cwd();
   const toolName = input.tool_name ?? '';
 
@@ -43,11 +50,9 @@ export function runIndexInvalidator(input: PostToolUseInput): PostToolUseResult 
     appendStaleNode(cwd, affectedPath);
   }
 
-  // 참고: coffaen_move의 대상 경로 stale 추적은 coffaen-move.ts 핸들러(123-127줄)에서
-  // mcp/shared.ts의 appendStaleNode()를 직접 호출하므로 이 훅에서 중복 처리하지 않는다.
-  // 두 appendStaleNode 함수는 서로 다른 모듈의 별개 함수:
-  //   - hooks/index-invalidator.ts (동기, .coffaen-meta/stale-nodes.json)
-  //   - mcp/shared.ts (비동기, .coffaen/stale-nodes.json)
+  // Note: coffaen_move target path stale tracking is handled by coffaen-move.ts handler
+  // via mcp/shared.ts appendStaleNode(), so this hook does not duplicate it.
+  // Both writers now target the same file: .coffaen/stale-nodes.json with StaleNodes format.
 
   // usage-stats.json 카운트 증가
   incrementUsageStat(cwd, toolName);
@@ -56,24 +61,29 @@ export function runIndexInvalidator(input: PostToolUseInput): PostToolUseResult 
 }
 
 /**
- * stale-nodes.json에 노드 경로를 추가한다 (중복 제거).
+ * Append a node path to .coffaen/stale-nodes.json (deduplicated).
+ * Uses StaleNodes format { paths: string[], updatedAt: string } matching MetadataStore.
  */
 function appendStaleNode(cwd: string, nodePath: string): void {
-  const stalePath = metaPath(cwd, 'stale-nodes.json');
-  let staleNodes: string[] = [];
+  const stalePath = coffaenPath(cwd, 'stale-nodes.json');
+  let stale: { paths: string[]; updatedAt: string } = {
+    paths: [],
+    updatedAt: new Date().toISOString(),
+  };
 
   if (existsSync(stalePath)) {
     try {
-      staleNodes = JSON.parse(readFileSync(stalePath, 'utf-8')) as string[];
+      stale = JSON.parse(readFileSync(stalePath, 'utf-8')) as typeof stale;
     } catch {
-      staleNodes = [];
+      stale = { paths: [], updatedAt: new Date().toISOString() };
     }
   }
 
-  if (!staleNodes.includes(nodePath)) {
-    staleNodes.push(nodePath);
+  if (!stale.paths.includes(nodePath)) {
+    stale.paths.push(nodePath);
+    stale.updatedAt = new Date().toISOString();
     ensureDir(stalePath);
-    writeFileSync(stalePath, JSON.stringify(staleNodes, null, 2), 'utf-8');
+    writeFileSync(stalePath, JSON.stringify(stale, null, 2), 'utf-8');
   }
 }
 
@@ -86,7 +96,10 @@ function incrementUsageStat(cwd: string, toolName: string): void {
 
   if (existsSync(statsPath)) {
     try {
-      stats = JSON.parse(readFileSync(statsPath, 'utf-8')) as Record<string, number>;
+      stats = JSON.parse(readFileSync(statsPath, 'utf-8')) as Record<
+        string,
+        number
+      >;
     } catch {
       stats = {};
     }

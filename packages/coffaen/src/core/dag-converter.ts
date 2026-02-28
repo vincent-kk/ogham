@@ -2,7 +2,6 @@
  * @file dag-converter.ts
  * @description 순환 탐지 (DFS) + DAG 변환 — 순환 엣지 가중치를 0.1로 약화, 레이어 기반 방향성 보정
  */
-
 import type { NodeId } from '../types/common.js';
 import type { KnowledgeEdge, KnowledgeGraph } from '../types/graph.js';
 
@@ -73,7 +72,9 @@ function detectCycleEdges(graph: KnowledgeGraph): {
   }
   for (const edge of graph.edges) {
     if (edge.type === 'LINK' || edge.type === 'PARENT_OF') {
-      adj.get(edge.from)?.push({ to: edge.to, edgeKey: edgeKey(edge.from, edge.to) });
+      adj
+        .get(edge.from)
+        ?.push({ to: edge.to, edgeKey: edgeKey(edge.from, edge.to) });
     }
   }
 
@@ -107,7 +108,9 @@ function detectCycleEdges(graph: KnowledgeGraph): {
  * Layer 값이 높은 노드 → 낮은 노드 방향이 올바른 방향.
  * 역방향 LINK 엣지(낮은 Layer → 높은 Layer)를 약화.
  */
-export function applyLayerDirectionality(graph: KnowledgeGraph): KnowledgeGraph {
+export function applyLayerDirectionality(
+  graph: KnowledgeGraph,
+): KnowledgeGraph {
   const newEdges = graph.edges.map((edge) => {
     if (edge.type !== 'LINK') return edge;
     const fromNode = graph.nodes.get(edge.from);

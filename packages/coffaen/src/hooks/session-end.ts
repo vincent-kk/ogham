@@ -2,24 +2,32 @@
  * @file session-end.ts
  * @description SessionEnd Hook — 세션 요약 저장 + 30일 초과 세션 파일 정리
  */
-
 import {
   existsSync,
-  writeFileSync,
   mkdirSync,
   readdirSync,
   statSync,
   unlinkSync,
+  writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
+
 import { isCoffaenVault, metaPath } from './shared.js';
 
 export interface SessionEndInput {
   session_id?: string;
   cwd?: string;
-  /** 세션 중 호출된 스킬 목록 */
+  /**
+   * Skills invoked during the session.
+   * NOTE: Claude Code SessionEnd hook does NOT provide this field.
+   * It always defaults to [] — reserved for future use.
+   */
   skills_used?: string[];
-  /** 세션 중 수정된 파일 목록 */
+  /**
+   * Files modified during the session.
+   * NOTE: Claude Code SessionEnd hook does NOT provide this field.
+   * It always defaults to [] — reserved for future use.
+   */
   files_modified?: string[];
 }
 

@@ -2,13 +2,12 @@
  * @file graph-builder.ts
  * @description KnowledgeNode[] → KnowledgeGraph 변환, 엣지 생성, 인접 리스트 구성, 고립 노드 탐지
  */
-
 import type { NodeId } from '../types/common.js';
 import type {
-  KnowledgeNode,
+  AdjacencyList,
   KnowledgeEdge,
   KnowledgeGraph,
-  AdjacencyList,
+  KnowledgeNode,
 } from '../types/graph.js';
 
 /** GraphBuilder 옵션 */

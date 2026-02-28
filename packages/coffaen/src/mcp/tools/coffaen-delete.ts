@@ -2,15 +2,17 @@
  * @file coffaen-delete.ts
  * @description coffaen_delete 도구 핸들러 — 문서 삭제 (Layer 1 삭제 금지, backlink 경고)
  */
-
 import { unlink } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { CoffaenDeleteInput, CoffaenCrudResult } from '../../types/mcp.js';
-import { parseDocument, buildKnowledgeNode } from '../../core/document-parser.js';
-import { readFile, stat } from 'node:fs/promises';
-import { getBacklinks, removeBacklinks, appendStaleNode } from '../shared.js';
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
 import { Layer } from '../../types/common.js';
+import type { CoffaenCrudResult, CoffaenDeleteInput } from '../../types/mcp.js';
+import { appendStaleNode, getBacklinks, removeBacklinks } from '../shared.js';
 
 /**
  * coffaen_delete 핸들러
@@ -48,7 +50,8 @@ export async function handleCoffaenDelete(
     return {
       success: false,
       path: input.path,
-      message: 'Layer 1 (Core Identity) 문서는 삭제할 수 없습니다. identity-guardian에게 문의하세요.',
+      message:
+        'Layer 1 (Core Identity) 문서는 삭제할 수 없습니다. identity-guardian에게 문의하세요.',
     };
   }
 

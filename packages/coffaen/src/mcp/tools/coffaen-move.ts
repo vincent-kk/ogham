@@ -2,14 +2,16 @@
  * @file coffaen-move.ts
  * @description coffaen_move 도구 핸들러 — 문서 Layer 간 이동 (전이)
  */
-
-import { readFile, writeFile, unlink, mkdir, access } from 'node:fs/promises';
-import { join, basename, dirname } from 'node:path';
+import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
+import { basename, dirname, join } from 'node:path';
 
-import type { CoffaenMoveInput, CoffaenCrudResult } from '../../types/mcp.js';
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
 import { Layer } from '../../types/common.js';
-import { parseDocument, buildKnowledgeNode } from '../../core/document-parser.js';
+import type { CoffaenCrudResult, CoffaenMoveInput } from '../../types/mcp.js';
 import { appendStaleNode } from '../shared.js';
 
 /** Layer → 디렉토리 매핑 */

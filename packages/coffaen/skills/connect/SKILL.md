@@ -1,123 +1,123 @@
 ---
 name: connect
 user_invocable: true
-description: 외부 데이터소스 등록/관리 — Execution Area .coffaen-meta/data-sources.json 설정
+description: External data source registration/management — configure Execution Area .coffaen-meta/data-sources.json
 version: 1.0.0
 complexity: medium
 plugin: coffaen
 ---
 
-# connect — 데이터소스 등록/관리
+# connect — Data Source Registration/Management
 
-외부 데이터 소스(GitHub, Jira, Slack 등)를 coffaen에 연결하고 수집 스케줄을
-설정합니다. `/coffaen:setup`의 데이터소스 등록 단계를 독립 실행할 수 있는 스킬입니다.
+Connects external data sources (GitHub, Jira, Slack, etc.) to coffaen and configures ingestion schedules.
+This skill can run the data source registration step of `/coffaen:setup` independently.
 
-> **영역 구분**:
-> - **Execution Area** (이 스킬이 수정하는 범위): `{CWD}/.coffaen-meta/data-sources.json`
-> - **Plugin Area** (수정 금지): `packages/coffaen/` 소스 코드
+> **Area distinction**:
+> - **Execution Area** (what this skill modifies): `{CWD}/.coffaen-meta/data-sources.json`
+> - **Plugin Area** (do not modify): `packages/coffaen/` source code
 >
-> 이 스킬은 Execution Area만 수정합니다.
+> This skill modifies the Execution Area only.
 
-## 언제 사용하는가
+## When to Use This Skill
 
-- 새 외부 데이터소스를 coffaen에 연결할 때
-- 기존 데이터소스 수집 빈도를 변경할 때
-- 연결된 소스 목록을 확인할 때
-- 특정 소스를 비활성화/제거할 때
+- When connecting a new external data source to coffaen
+- When changing the ingestion frequency of an existing data source
+- When reviewing the list of connected sources
+- When disabling/removing a specific source
 
-## 전제 조건
+## Prerequisites
 
-- coffaen이 초기화되어 있어야 합니다 (`.coffaen-meta/` 디렉토리 존재)
-- 미초기화 시: "먼저 `/coffaen:setup`을 실행해주세요." 안내
+- coffaen must be initialized (`.coffaen-meta/` directory must exist)
+- If not initialized: "Please run `/coffaen:setup` first."
 
-## 지원 데이터소스
+## Supported Data Sources
 
-| 소스 | MCP 도구 | 수집 내용 |
-|------|---------|----------|
-| GitHub | `mcp__github__*` | Issues, PRs, Discussions, 코드 변경 |
-| Jira | `mcp__jira__*` | Issues, 스프린트, 프로젝트 |
-| Slack | `mcp__slack__*` | 채널 메시지, 스레드 |
-| Notion | `mcp__notion__*` | 페이지, 데이터베이스 |
-| 로컬 디렉토리 | 파일시스템 직접 | 마크다운, 텍스트 파일 |
-| RSS/웹 | HTTP | 블로그, 뉴스피드 |
+| Source | MCP Tool | Collected Content |
+|--------|---------|------------------|
+| GitHub | `mcp__github__*` | Issues, PRs, Discussions, code changes |
+| Jira | `mcp__jira__*` | Issues, sprints, projects |
+| Slack | `mcp__slack__*` | Channel messages, threads |
+| Notion | `mcp__notion__*` | Pages, databases |
+| Local directory | filesystem direct | Markdown, text files |
+| RSS/Web | HTTP | Blogs, news feeds |
 
-## 워크플로우
+## Workflow
 
-### 모드 선택
-
-```
-/coffaen:connect          -- 대화형 (소스 추가/수정)
-/coffaen:connect list     -- 연결된 소스 목록 조회
-/coffaen:connect add      -- 새 소스 추가
-/coffaen:connect remove   -- 소스 제거
-/coffaen:connect disable  -- 소스 비활성화 (삭제 없이)
-/coffaen:connect enable   -- 비활성화된 소스 재활성화
-```
-
-### 대화형 모드 흐름
-
-#### Step 1 — 현재 상태 표시
-
-`.coffaen-meta/data-sources.json`을 읽어 현재 연결된 소스를 표시합니다.
+### Mode Selection
 
 ```
-현재 연결된 데이터소스:
-  [활성] GitHub (매 세션)
-  [비활성] Slack
-
-어떻게 하시겠습니까?
-  1. 새 소스 추가
-  2. 기존 소스 수정
-  3. 소스 비활성화/삭제
-  4. 완료
+/coffaen:connect          -- interactive (add/modify source)
+/coffaen:connect list     -- list connected sources
+/coffaen:connect add      -- add a new source
+/coffaen:connect remove   -- remove a source
+/coffaen:connect disable  -- disable a source (without deleting)
+/coffaen:connect enable   -- re-enable a disabled source
 ```
 
-#### Step 2 — 소스 선택
+### Interactive Mode Flow
+
+#### Step 1 — Display Current Status
+
+Read `.coffaen-meta/data-sources.json` and display currently connected sources.
 
 ```
-어떤 소스를 연결하시겠습니까? (복수 선택 가능)
+Currently connected data sources:
+  [active] GitHub (every session)
+  [inactive] Slack
+
+What would you like to do?
+  1. Add a new source
+  2. Modify an existing source
+  3. Disable/remove a source
+  4. Done
+```
+
+#### Step 2 — Select Source
+
+```
+Which source would you like to connect? (multiple selection allowed)
   [ ] GitHub (Issues, PRs)
   [ ] Jira
   [ ] Slack
   [ ] Notion
-  [ ] 로컬 디렉토리
-  [ ] RSS/웹
-  [ ] 없음 (나중에 설정)
+  [ ] Local directory
+  [ ] RSS/Web
+  [ ] None (configure later)
 ```
 
-#### Step 3 — 수집 빈도 설정
+#### Step 3 — Configure Ingestion Frequency
 
-각 선택된 소스에 대해:
+For each selected source:
 
 ```
-{소스명}의 수집 빈도를 선택하세요:
-  1. 매 세션 시작 시 (기본)
-  2. 매일 1회
-  3. 매주 1회
-  4. 수동만
+Select the ingestion frequency for {source name}:
+  1. Every session start (default)
+  2. Once a day
+  3. Once a week
+  4. Manual only
 ```
 
-#### Step 4 — 소스별 상세 설정
+#### Step 4 — Source-specific Configuration
 
 **GitHub**:
 ```
-GitHub 저장소 설정:
-- 저장소: {owner}/{repo} (예: vincent-kk/ogham)
-- 수집 항목: [x] Issues  [x] PRs  [ ] Discussions
-- 상태 필터: [x] open  [ ] closed  [ ] all
+GitHub repository settings:
+- Repository: {owner}/{repo} (e.g., vincent-kk/ogham)
+- Collect: [x] Issues  [x] PRs  [ ] Discussions
+- Status filter: [x] open  [ ] closed  [ ] all
 ```
 
-**로컬 디렉토리**:
+**Local directory**:
 ```
-로컬 디렉토리 설정:
-- 경로: {절대 경로 또는 CWD 상대 경로}
-- 파일 패턴: *.md, *.txt (기본)
-- 재귀 탐색: [예/아니오]
+Local directory settings:
+- Path: {absolute path or CWD-relative path}
+- File pattern: *.md, *.txt (default)
+- Recursive: [Yes/No]
 ```
 
-#### Step 5 — data-sources.json 저장
+#### Step 5 — Save data-sources.json
 
-`.coffaen-meta/data-sources.json`을 생성/갱신합니다.
+Create/update `.coffaen-meta/data-sources.json`.
 
 ```json
 {
@@ -139,48 +139,48 @@ GitHub 저장소 설정:
 }
 ```
 
-#### Step 6 — 완료 안내
+#### Step 6 — Completion Guide
 
 ```
-데이터소스 설정 완료!
+Data source configuration complete!
 
-연결된 소스:
-  ✓ GitHub (매 세션) — github-main
-  ✓ 로컬 ./docs/ (수동)
+Connected sources:
+  - GitHub (every session) — github-main
+  - Local ./docs/ (manual)
 
-다음 단계:
-  - 외부 MCP 도구가 필요하면: `/coffaen:mcp-setup`
-  - 지금 바로 수집하려면: `/coffaen:ingest`
+Next steps:
+  - If external MCP tools are needed: `/coffaen:mcp-setup`
+  - To ingest now: `/coffaen:ingest`
 ```
 
-## 파일 범위 (Execution Area만 수정)
+## File Scope (Execution Area only)
 
-| 파일 | 위치 | 작업 |
-|------|------|------|
-| `data-sources.json` | `{CWD}/.coffaen-meta/` | 생성/갱신 |
+| File | Location | Operation |
+|------|----------|-----------|
+| `data-sources.json` | `{CWD}/.coffaen-meta/` | create/update |
 
-**절대 수정하지 않는 파일**:
-- `{CWD}/.mcp.json` → `/coffaen:mcp-setup` 담당
-- `{CWD}/.claude/settings.json` → `/coffaen:mcp-setup` 담당
-- `{CWD}/.claude/settings.local.json` → 영구 수정 금지 (사용자 개인 설정)
-- `packages/coffaen/` 내 모든 파일 → Plugin Area (수정 금지)
+**Files that are never modified**:
+- `{CWD}/.mcp.json` -> handled by `/coffaen:mcp-setup`
+- `{CWD}/.claude/settings.json` -> handled by `/coffaen:mcp-setup`
+- `{CWD}/.claude/settings.local.json` -> permanently off-limits (user personal settings)
+- All files under `packages/coffaen/` -> Plugin Area (do not modify)
 
-## 옵션
+## Options
 
 ```
-/coffaen:connect [모드] [소스ID]
+/coffaen:connect [mode] [sourceId]
 ```
 
-| 옵션 | 설명 |
-|------|------|
-| `list` | 현재 소스 목록 표시 |
-| `add` | 새 소스 추가 (대화형) |
-| `remove <id>` | 소스 제거 |
-| `disable <id>` | 소스 비활성화 |
-| `enable <id>` | 소스 활성화 |
+| Option | Description |
+|--------|-------------|
+| `list` | Display current source list |
+| `add` | Add a new source (interactive) |
+| `remove <id>` | Remove a source |
+| `disable <id>` | Disable a source |
+| `enable <id>` | Enable a source |
 
-## 오류 처리
+## Error Handling
 
-- **coffaen 미초기화**: `/coffaen:setup` 실행 안내
-- **JSON 파싱 오류**: 기존 파일 백업 후 재생성 제안
-- **중복 소스**: 기존 설정 덮어쓸지 확인
+- **coffaen not initialized**: guide to run `/coffaen:setup`
+- **JSON parse error**: back up existing file and suggest recreation
+- **Duplicate source**: confirm whether to overwrite existing configuration

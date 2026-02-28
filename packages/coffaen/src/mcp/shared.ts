@@ -2,14 +2,16 @@
  * @file shared.ts
  * @description MCP 도구 공통 유틸리티
  */
-
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /**
  * stale-nodes.json에 경로를 추가한다 (append-only).
  */
-export async function appendStaleNode(vaultPath: string, path: string): Promise<void> {
+export async function appendStaleNode(
+  vaultPath: string,
+  path: string,
+): Promise<void> {
   const cacheDir = join(vaultPath, '.coffaen');
   const staleNodesPath = join(cacheDir, 'stale-nodes.json');
 
@@ -37,7 +39,10 @@ export async function appendStaleNode(vaultPath: string, path: string): Promise<
 /**
  * backlink-index.json에서 특정 소스의 링크를 제거한다.
  */
-export async function removeBacklinks(vaultPath: string, sourcePath: string): Promise<void> {
+export async function removeBacklinks(
+  vaultPath: string,
+  sourcePath: string,
+): Promise<void> {
   const metaDir = join(vaultPath, '.coffaen-meta');
   const indexPath = join(metaDir, 'backlink-index.json');
 

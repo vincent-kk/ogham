@@ -5,8 +5,7 @@
  * 핵심 가치: 최소 토큰으로 최대 맥락 전달 (AI 에이전트 Primary 사용자)
  * 출력 형태: 문서 경로 + Frontmatter 요약 + 관계 설명 + 활성화 점수
  */
-
-import type { KnowledgeGraph, ActivationResult } from '../types/graph.js';
+import type { ActivationResult, KnowledgeGraph } from '../types/graph.js';
 
 /** 컨텍스트 항목 */
 export interface ContextItem {
@@ -98,7 +97,10 @@ function describeRelation(hops: number): string {
 /**
  * ActivationResult 목록을 ContextItem 목록으로 변환한다.
  */
-function toContextItems(results: ActivationResult[], graph: KnowledgeGraph): ContextItem[] {
+function toContextItems(
+  results: ActivationResult[],
+  graph: KnowledgeGraph,
+): ContextItem[] {
   const items: ContextItem[] = [];
 
   for (const result of results) {
@@ -149,7 +151,11 @@ export function assembleContext(
   graph: KnowledgeGraph,
   options: AssembleOptions = {},
 ): AssembledContext {
-  const { tokenBudget = 2000, includeFull = false, maxFullDocuments = 3 } = options;
+  const {
+    tokenBudget = 2000,
+    includeFull = false,
+    maxFullDocuments = 3,
+  } = options;
 
   const allItems = toContextItems(results, graph);
 
@@ -192,7 +198,9 @@ export function assembleContext(
   } else {
     lines.push(`_${selectedItems.length}개 문서 (score 내림차순)_`, '');
     for (const item of selectedItems) {
-      lines.push(itemToMarkdown(item, includeFull && item.fullContent !== undefined));
+      lines.push(
+        itemToMarkdown(item, includeFull && item.fullContent !== undefined),
+      );
     }
   }
 
@@ -223,6 +231,9 @@ export class ContextAssembler {
     graph: KnowledgeGraph,
     options?: AssembleOptions,
   ): AssembledContext {
-    return assembleContext(results, graph, { ...this.defaultOptions, ...options });
+    return assembleContext(results, graph, {
+      ...this.defaultOptions,
+      ...options,
+    });
   }
 }

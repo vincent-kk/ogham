@@ -2,8 +2,7 @@
  * @file graph.ts
  * @description 지식 그래프 타입 — KnowledgeNode, KnowledgeEdge, KnowledgeGraph, AdjacencyList, ActivationResult
  */
-
-import type { NodeId, EdgeType, Layer } from './common.js';
+import type { EdgeType, Layer, NodeId } from './common.js';
 
 /** 지식 노드 (마크다운 문서) */
 export interface KnowledgeNode {

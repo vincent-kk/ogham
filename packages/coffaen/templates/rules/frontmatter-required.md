@@ -1,71 +1,71 @@
 ---
 rule_id: frontmatter-required
-rule_name: Frontmatter 필수 필드 규칙
+rule_name: Frontmatter Required Field Rules
 severity: error
 category: documentation
 auto_fix: partial
 version: 1.0.0
 ---
 
-# Frontmatter 필수 필드 규칙
+# Frontmatter Required Field Rules
 
-## 목적
+## Purpose
 
-모든 coffaen 마크다운 문서가 유효한 Frontmatter를 포함하도록 강제한다.
-FrontmatterSchema(Zod) 기반 검증을 적용한다.
+Enforce that all coffaen markdown documents include valid Frontmatter.
+Apply validation based on FrontmatterSchema (Zod).
 
-## 필수 필드
+## Required Fields
 
-| 필드 | 타입 | 형식 | 자동 수정 |
-|------|------|------|---------|
-| `created` | string | YYYY-MM-DD | 가능 (mtime 기반) |
-| `updated` | string | YYYY-MM-DD | 가능 (현재 날짜) |
-| `tags` | string[] | 최소 1개 | 가능 (파일명 기반) |
-| `layer` | number | 1-4 | 가능 (경로 기반) |
+| Field | Type | Format | Auto-fix |
+|-------|------|--------|---------|
+| `created` | string | YYYY-MM-DD | Available (mtime-based) |
+| `updated` | string | YYYY-MM-DD | Available (current date) |
+| `tags` | string[] | Minimum 1 | Available (filename-based) |
+| `layer` | number | 1-4 | Available (path-based) |
 
-## 선택 필드 (Layer별)
+## Optional Fields (by Layer)
 
-| 필드 | Layer | 설명 |
-|------|-------|------|
-| `title` | 전체 | 문서 제목 |
-| `source` | 3 | 외부 출처 URL |
-| `expires` | 4 | 만료일 YYYY-MM-DD |
-| `confidence` | 2,3 | 내재화 신뢰도 0.0~1.0 |
-| `accessed_count` | 전체 | 세션별 참조 횟수 |
+| Field | Layer | Description |
+|-------|-------|-------------|
+| `title` | All | Document title |
+| `source` | 3 | External source URL |
+| `expires` | 4 | Expiry date YYYY-MM-DD |
+| `confidence` | 2,3 | Internalization confidence 0.0~1.0 |
+| `accessed_count` | All | Reference count per session |
 
-## 규칙 정의
+## Rule Definitions
 
-### R1. Frontmatter 존재 필수
+### R1. Frontmatter Must Be Present
 
-모든 `.md` 파일(인덱스 파일 제외)은 YAML frontmatter(`---`)를 포함해야 한다.
+All `.md` files (excluding index files) must include YAML frontmatter (`---`).
 
-### R2. 날짜 형식 준수
+### R2. Date Format Compliance
 
-`created`, `updated`, `expires` 필드는 `YYYY-MM-DD` 형식이어야 한다.
+The `created`, `updated`, and `expires` fields must follow the `YYYY-MM-DD` format.
 
 ```yaml
-# 올바른 예
+# Correct example
 created: 2026-02-28
 
-# 위반 예
+# Violation examples
 created: 28/02/2026  # ERROR
 created: "2026-2-8"  # ERROR
 ```
 
-### R3. tags 최소 1개
+### R3. At Least One Tag Required
 
-`tags` 배열은 비어 있을 수 없다.
+The `tags` array must not be empty.
 
-### R4. created 불변
+### R4. created Is Immutable
 
-`created` 필드는 최초 생성 후 변경하지 않는다.
-MCP 도구가 `updated` 필드만 자동 갱신한다.
+The `created` field must not be changed after initial creation.
+MCP tools auto-update only the `updated` field.
 
-### R5. Layer 4 만료일 권장
+### R5. Layer 4 Expiry Date Recommended
 
-`04_Action/` 파일은 `expires` 필드를 갖는 것을 권장한다 (warning).
+Files in `04_Action/` are recommended to include an `expires` field (warning).
 
-## 검증 로직
+## Validation Logic
 
 ```typescript
 import { FrontmatterSchema } from '../types/frontmatter.js';
@@ -85,18 +85,18 @@ function validateFrontmatter(raw: string, path: string): DiagnosticItem[] {
 }
 ```
 
-## 자동 수정
+## Auto-fix
 
-| 위반 | 자동 수정 방법 |
-|------|-------------|
-| `created` 누락 | 파일 mtime에서 YYYY-MM-DD 추출 |
-| `updated` 누락 | 현재 날짜로 설정 |
-| `tags` 누락 | 파일명(확장자 제거)을 태그로 사용 |
-| `layer` 누락 | 경로에서 Layer 번호 추출 |
-| 날짜 형식 오류 | 자동 수정 불가 (수동 수정 필요) |
+| Violation | Auto-fix Method |
+|-----------|----------------|
+| `created` missing | Extract YYYY-MM-DD from file mtime |
+| `updated` missing | Set to current date |
+| `tags` missing | Use filename (without extension) as tag |
+| `layer` missing | Extract Layer number from path |
+| Date format error | Auto-fix not available (manual correction required) |
 
-## 예외
+## Exceptions
 
-- `.coffaen/`, `.coffaen-meta/` 내부 파일 제외
-- `README.md` 제외
-- Frontmatter가 없는 파일은 R1 위반으로 보고
+- Files inside `.coffaen/` and `.coffaen-meta/` are excluded
+- `README.md` is excluded
+- Files without Frontmatter are reported as R1 violations
