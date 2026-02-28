@@ -37,14 +37,15 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ## Architecture
 
-### 4-Layer Knowledge Model
+### 5-Layer Knowledge Model
 
-| Layer | 이름               | 디렉토리       | SA Decay | 설명                    |
-| ----- | ------------------ | -------------- | -------- | ----------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 (읽기 전용) |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화 지식             |
-| L3    | External Reference | `03_External/` | 0.8      | 외부 참조               |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 기억        |
+| Layer | 이름               | 디렉토리       | SA Decay | 설명                              |
+| ----- | ------------------ | -------------- | -------- | --------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 (읽기 전용)           |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화 지식                       |
+| L3    | External Reference | `03_External/` | 0.8      | 외부 참조                         |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 기억                  |
+| L5    | Context            | `05_Context/`  | 0.95     | 맥락 메타데이터 (인물, 도메인 등) |
 
 ### Key Source Directories
 

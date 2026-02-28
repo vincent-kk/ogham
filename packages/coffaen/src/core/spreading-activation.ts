@@ -3,7 +3,7 @@
  * @description 확산 활성화 엔진 — 시드 노드에서 에너지 확산, 관련 노드 탐색
  *
  * 핵심 수식: A[j] = sum(A[i] * W[i,j] * d)
- * Layer별 감쇠: L1=0.5, L2=0.7, L3=0.8, L4=0.9
+ * Layer별 감쇠: L1=0.5, L2=0.7, L3=0.8, L4=0.9, L5=0.95
  * BFS 방식 홉 확산, 임계값 기반 종료
  */
 import type { NodeId } from '../types/common.js';
@@ -19,6 +19,7 @@ const LAYER_DECAY: Record<number, number> = {
   2: 0.7, // L2 Derived — 표준 확산
   3: 0.8, // L3 External — 제한적 확산
   4: 0.9, // L4 Action — 최소 확산
+  5: 0.95, // L5 Context — 최소 확산 (신설)
 };
 
 /** 확산 활성화 파라미터 */

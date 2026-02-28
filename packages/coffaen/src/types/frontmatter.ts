@@ -4,6 +4,8 @@
  */
 import { z } from 'zod';
 
+import { PersonSchema } from './person.js';
+
 /** Frontmatter Zod 스키마 */
 export const FrontmatterSchema = z.object({
   /** 최초 생성일 YYYY-MM-DD (변경 금지) */
@@ -13,7 +15,7 @@ export const FrontmatterSchema = z.object({
   /** 태그 목록 (최소 1개 필수) */
   tags: z.array(z.string()).min(1),
   /** Layer 속성 (1-4) */
-  layer: z.number().int().min(1).max(4),
+  layer: z.number().int().min(1).max(5),
   /** 문서 제목 (선택) */
   title: z.string().optional(),
   /** 외부 출처 (Layer 3용, 선택) */
@@ -29,6 +31,12 @@ export const FrontmatterSchema = z.object({
   accessed_count: z.number().int().nonnegative().optional(),
   /** Lazy Scheduling 표현식 (선택) */
   schedule: z.string().optional(),
+  /** Person 메타데이터 (L4 person 문서 전용, 선택) */
+  person: PersonSchema.optional(),
+  /** Domain 이름 (모든 레이어, cross-layer 그룹핑용, 선택) */
+  domain: z.string().optional(),
+  /** Domain 유형 (선택) */
+  domain_type: z.enum(['life', 'professional']).optional(),
 });
 
 /** Frontmatter 타입 */

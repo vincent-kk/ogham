@@ -72,8 +72,10 @@ export function createServer(): McpServer {
           .number()
           .int()
           .min(1)
-          .max(4)
-          .describe('문서 Layer (1=Core, 2=Derived, 3=External, 4=Action)'),
+          .max(5)
+          .describe(
+            '문서 Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
+          ),
         tags: z.array(z.string()).min(1).describe('태그 목록 (최소 1개)'),
         content: z.string().describe('문서 내용 (마크다운)'),
         title: z.string().optional().describe('문서 제목 (선택)'),
@@ -94,7 +96,7 @@ export function createServer(): McpServer {
         const vaultPath = getVaultPath();
         const result = await handleCoffaenCreate(vaultPath, {
           ...args,
-          layer: args.layer as 1 | 2 | 3 | 4,
+          layer: args.layer as 1 | 2 | 3 | 4 | 5,
         });
         if (result.success) invalidateCache();
         return toolResult(result);
@@ -156,9 +158,9 @@ export function createServer(): McpServer {
               .number()
               .int()
               .min(1)
-              .max(4)
+              .max(5)
               .optional()
-              .describe('Layer 변경 (1-4, Layer 위반 수정 시 사용)'),
+              .describe('Layer 변경 (1-5, Layer 위반 수정 시 사용)'),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
           })
@@ -216,8 +218,8 @@ export function createServer(): McpServer {
           .number()
           .int()
           .min(1)
-          .max(4)
-          .describe('목표 Layer (1-4)'),
+          .max(5)
+          .describe('목표 Layer (1-5)'),
         reason: z.string().optional().describe('전이 사유'),
         confidence: z
           .number()
@@ -232,7 +234,7 @@ export function createServer(): McpServer {
         const vaultPath = getVaultPath();
         const result = await handleCoffaenMove(vaultPath, {
           ...args,
-          target_layer: args.target_layer as 1 | 2 | 3 | 4,
+          target_layer: args.target_layer as 1 | 2 | 3 | 4 | 5,
         });
         if (result.success) invalidateCache();
         return toolResult(result);
@@ -280,9 +282,9 @@ export function createServer(): McpServer {
           .optional()
           .describe('최대 홉 수 (기본 5)'),
         layer_filter: z
-          .array(z.number().int().min(1).max(4))
+          .array(z.number().int().min(1).max(5))
           .optional()
-          .describe('Layer 필터'),
+          .describe('Layer 필터 (1-5)'),
       }),
     },
     async (args) => {
@@ -291,7 +293,7 @@ export function createServer(): McpServer {
         const graph = await loadGraphIfNeeded(vaultPath);
         const result = await handleKgSearch(graph, {
           ...args,
-          layer_filter: args.layer_filter as (1 | 2 | 3 | 4)[] | undefined,
+          layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
         });
         if ('error' in result) {
           return { content: [{ type: 'text' as const, text: result.error }] };

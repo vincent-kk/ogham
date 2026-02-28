@@ -11,7 +11,7 @@ version: 1.0.0
 
 ## Purpose
 
-Enforce directory structure compliance with the coffaen 4-Layer knowledge model.
+Enforce directory structure compliance with the coffaen 5-Layer knowledge model.
 Ensure consistency between file paths and the Frontmatter `layer` field.
 
 ## Rule Definitions
@@ -24,6 +24,7 @@ Ensure consistency between file paths and the Frontmatter `layer` field.
 | `02_Derived/` | 2 | Internalized knowledge |
 | `03_External/` | 3 | External references |
 | `04_Action/` | 4 | Action memory |
+| `05_Context/` | 5 | Contextual metadata (persons, domains) |
 
 ### R2. Frontmatter layer Field Must Match
 

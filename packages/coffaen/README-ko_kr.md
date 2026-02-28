@@ -131,12 +131,12 @@ coffaen 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 coffaen은 지식을 4개 Layer로 구분하며, 각 Layer는 Spreading Activation(SA) 감쇠율이 다릅니다:
 
-| Layer | 이름               | 디렉토리       | SA Decay | 용도                               |
-| ----- | ------------------ | -------------- | -------- | ---------------------------------- |
-| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변   |
-| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술               |
-| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료            |
-| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트    |
+| Layer | 이름               | 디렉토리       | SA Decay | 용도                            |
+| ----- | ------------------ | -------------- | -------- | ------------------------------- |
+| L1    | Core Identity Hub  | `01_Core/`     | 0.5      | 핵심 정체성 — 보호됨, 거의 불변 |
+| L2    | Derived Knowledge  | `02_Derived/`  | 0.7      | 내재화된 통찰과 기술            |
+| L3    | External Reference | `03_External/` | 0.8      | 북마크, 인용, 외부 자료         |
+| L4    | Action Memory      | `04_Action/`   | 0.9      | 휘발성 작업 노트, 세션 컨텍스트 |
 
 **감쇠율이 낮을수록 더 강하게 지속됩니다.** L1 문서는 검색 시 강하게 활성화되고 오래 유지됩니다. L4 문서는 강화되지 않으면 빠르게 사라집니다.
 
@@ -148,12 +148,12 @@ coffaen은 지식을 4개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
 
-| 언제                              | 무엇을                        | 왜                                           |
-| --------------------------------- | ----------------------------- | -------------------------------------------- |
-| 세션 시작 시                      | Vault 컨텍스트 + 인덱스 로드  | 첫 턴부터 에이전트가 지식을 인지             |
-| 파일을 Write/Edit할 때            | Layer 보호 검사               | L1 문서의 무단 수정 방지                     |
-| coffaen 도구 사용 후              | 인덱스 무효화                 | Knowledge Graph 동기화 유지                  |
-| 세션 종료 시                      | 세션 정리 + 영속화            | 휘발성 상태 저장, 만료 항목 정리             |
+| 언제                   | 무엇을                       | 왜                               |
+| ---------------------- | ---------------------------- | -------------------------------- |
+| 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드 | 첫 턴부터 에이전트가 지식을 인지 |
+| 파일을 Write/Edit할 때 | Layer 보호 검사              | L1 문서의 무단 수정 방지         |
+| coffaen 도구 사용 후   | 인덱스 무효화                | Knowledge Graph 동기화 유지      |
+| 세션 종료 시           | 세션 정리 + 영속화           | 휘발성 상태 저장, 만료 항목 정리 |
 
 차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
 
@@ -161,22 +161,22 @@ coffaen은 지식을 4개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 ## 전체 스킬 목록
 
-| 스킬               | 분류      | 설명                                          |
-| ------------------ | --------- | --------------------------------------------- |
-| `/coffaen:setup`   | 설정      | 6단계 온보딩 위저드                            |
-| `/coffaen:remember`| 핵심      | 새 지식 기록 (자동 Layer, 태그, 중복 검사)     |
-| `/coffaen:recall`  | 핵심      | Spreading Activation 검색                      |
-| `/coffaen:explore` | 핵심      | 인터랙티브 그래프 탐색 (최대 3라운드)          |
-| `/coffaen:organize`| 핵심      | 에이전트 기반 문서 재구성                      |
-| `/coffaen:reflect` | 핵심      | 읽기 전용 지식 건강도 분석                     |
-| `/coffaen:build`   | 인덱스    | 인덱스 빌드 (자동 full/incremental)            |
-| `/coffaen:rebuild` | 인덱스    | 강제 전체 재인덱스                             |
-| `/coffaen:diagnose`| 건강      | 가벼운 상태 확인                               |
-| `/coffaen:doctor`  | 건강      | 6개 진단 + 자동 수정                           |
-| `/coffaen:ingest`  | 고급      | URL, GitHub, 텍스트에서 가져오기               |
-| `/coffaen:connect` | 고급      | 외부 데이터 소스 등록                          |
-| `/coffaen:mcp-setup`| 고급     | 외부 MCP 서버 설치                             |
-| `/coffaen:manage`  | 고급      | 스킬/에이전트 활성화 및 사용 리포트            |
+| 스킬                 | 분류   | 설명                                       |
+| -------------------- | ------ | ------------------------------------------ |
+| `/coffaen:setup`     | 설정   | 6단계 온보딩 위저드                        |
+| `/coffaen:remember`  | 핵심   | 새 지식 기록 (자동 Layer, 태그, 중복 검사) |
+| `/coffaen:recall`    | 핵심   | Spreading Activation 검색                  |
+| `/coffaen:explore`   | 핵심   | 인터랙티브 그래프 탐색 (최대 3라운드)      |
+| `/coffaen:organize`  | 핵심   | 에이전트 기반 문서 재구성                  |
+| `/coffaen:reflect`   | 핵심   | 읽기 전용 지식 건강도 분석                 |
+| `/coffaen:build`     | 인덱스 | 인덱스 빌드 (자동 full/incremental)        |
+| `/coffaen:rebuild`   | 인덱스 | 강제 전체 재인덱스                         |
+| `/coffaen:diagnose`  | 건강   | 가벼운 상태 확인                           |
+| `/coffaen:doctor`    | 건강   | 6개 진단 + 자동 수정                       |
+| `/coffaen:ingest`    | 고급   | URL, GitHub, 텍스트에서 가져오기           |
+| `/coffaen:connect`   | 고급   | 외부 데이터 소스 등록                      |
+| `/coffaen:mcp-setup` | 고급   | 외부 MCP 서버 설치                         |
+| `/coffaen:manage`    | 고급   | 스킬/에이전트 활성화 및 사용 리포트        |
 
 ---
 
@@ -184,13 +184,13 @@ coffaen은 지식을 4개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 coffaen이 시행하는 주요 규칙입니다:
 
-| 규칙               | 기준                                            | 시행 방식          |
-| ------------------ | ----------------------------------------------- | ------------------ |
-| L1 보호            | Core Identity 문서는 기본적으로 읽기 전용       | Hook 자동 차단     |
-| Frontmatter 필수   | 모든 문서에 YAML frontmatter 필수               | MCP 검증           |
-| 네이밍 규칙        | `kebab-case.md`, Layer 접두사가 디렉토리와 일치 | MCP 검증           |
-| Layer 구조         | 4-Layer 디렉토리 계층 유지 필수                 | MCP + 에이전트     |
-| 링크 무결성        | 깨진 링크, 고아 문서 금지                       | Doctor 진단        |
+| 규칙             | 기준                                            | 시행 방식      |
+| ---------------- | ----------------------------------------------- | -------------- |
+| L1 보호          | Core Identity 문서는 기본적으로 읽기 전용       | Hook 자동 차단 |
+| Frontmatter 필수 | 모든 문서에 YAML frontmatter 필수               | MCP 검증       |
+| 네이밍 규칙      | `kebab-case.md`, Layer 접두사가 디렉토리와 일치 | MCP 검증       |
+| Layer 구조       | 4-Layer 디렉토리 계층 유지 필수                 | MCP + 에이전트 |
+| 링크 무결성      | 깨진 링크, 고아 문서 금지                       | Doctor 진단    |
 
 ---
 
@@ -214,12 +214,12 @@ TypeScript 5.7, @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
 
 기술적 세부사항은 [`.metadata/`](./.metadata/) 디렉토리를 참조하세요:
 
-| 문서 세트 | 내용 |
-| --- | --- |
-| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26개) | 플러그인 아키텍처, 지식 레이어, 검색 엔진, 모듈, 라이프사이클, 온보딩 |
-| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6개) | 연구 배경, 이중 구조 설계, 이론적 기반, 계층 모델 |
-| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/) | Knowledge Graph 인덱싱, 순환 감지, Spreading Activation 모델 |
-| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/) | 시스템 구성요소, 데이터 흐름, 메타데이터 전략, 검색 구현 |
+| 문서 세트                                                                                                                 | 내용                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26개)                                                | 플러그인 아키텍처, 지식 레이어, 검색 엔진, 모듈, 라이프사이클, 온보딩 |
+| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6개) | 연구 배경, 이중 구조 설계, 이론적 기반, 계층 모델                     |
+| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)       | Knowledge Graph 인덱싱, 순환 감지, Spreading Activation 모델          |
+| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                   | 시스템 구성요소, 데이터 흐름, 메타데이터 전략, 검색 구현              |
 
 [English documentation (README.md)](./README.md) is also available.
 

@@ -148,12 +148,12 @@ coffaen organizes knowledge into four layers with distinct decay rates for Sprea
 
 With the plugin active, these hooks fire **without user intervention**:
 
-| When                              | What                          | Why                                            |
-| --------------------------------- | ----------------------------- | ---------------------------------------------- |
-| Session starts                    | Loads Vault context + index   | Agent knows your knowledge from the first turn |
-| Writing/editing a file            | Layer guard check             | Prevents unauthorized L1 modifications         |
-| After coffaen tool use            | Index invalidation            | Keeps the Knowledge Graph in sync              |
-| Session ends                      | Session cleanup + persistence | Saves volatile state, prunes expired entries   |
+| When                   | What                          | Why                                            |
+| ---------------------- | ----------------------------- | ---------------------------------------------- |
+| Session starts         | Loads Vault context + index   | Agent knows your knowledge from the first turn |
+| Writing/editing a file | Layer guard check             | Prevents unauthorized L1 modifications         |
+| After coffaen tool use | Index invalidation            | Keeps the Knowledge Graph in sync              |
+| Session ends           | Session cleanup + persistence | Saves volatile state, prunes expired entries   |
 
 When a block occurs, a message explaining the reason is displayed. No action needed.
 
@@ -161,22 +161,22 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 ## Skills Reference
 
-| Skill              | Category  | What it does                                           |
-| ------------------ | --------- | ------------------------------------------------------ |
-| `/coffaen:setup`   | Setup     | 6-step onboarding wizard                               |
-| `/coffaen:remember`| Core      | Record new knowledge (auto-layer, tags, dedup)         |
-| `/coffaen:recall`  | Core      | Spreading Activation search                            |
-| `/coffaen:explore` | Core      | Interactive graph traversal (up to 3 rounds)           |
-| `/coffaen:organize`| Core      | Agent-guided document reorganization                   |
-| `/coffaen:reflect` | Core      | Read-only knowledge health analysis                    |
-| `/coffaen:build`   | Index     | Build index (auto full/incremental)                    |
-| `/coffaen:rebuild` | Index     | Force full re-index                                    |
-| `/coffaen:diagnose`| Health    | Lightweight status check                               |
-| `/coffaen:doctor`  | Health    | 6 diagnostics + auto-fix                               |
-| `/coffaen:ingest`  | Advanced  | Import from URL, GitHub, or text                       |
-| `/coffaen:connect` | Advanced  | Register external data sources                         |
-| `/coffaen:mcp-setup`| Advanced | Install external MCP servers                           |
-| `/coffaen:manage`  | Advanced  | Skill/agent activation and usage reports               |
+| Skill                | Category | What it does                                   |
+| -------------------- | -------- | ---------------------------------------------- |
+| `/coffaen:setup`     | Setup    | 6-step onboarding wizard                       |
+| `/coffaen:remember`  | Core     | Record new knowledge (auto-layer, tags, dedup) |
+| `/coffaen:recall`    | Core     | Spreading Activation search                    |
+| `/coffaen:explore`   | Core     | Interactive graph traversal (up to 3 rounds)   |
+| `/coffaen:organize`  | Core     | Agent-guided document reorganization           |
+| `/coffaen:reflect`   | Core     | Read-only knowledge health analysis            |
+| `/coffaen:build`     | Index    | Build index (auto full/incremental)            |
+| `/coffaen:rebuild`   | Index    | Force full re-index                            |
+| `/coffaen:diagnose`  | Health   | Lightweight status check                       |
+| `/coffaen:doctor`    | Health   | 6 diagnostics + auto-fix                       |
+| `/coffaen:ingest`    | Advanced | Import from URL, GitHub, or text               |
+| `/coffaen:connect`   | Advanced | Register external data sources                 |
+| `/coffaen:mcp-setup` | Advanced | Install external MCP servers                   |
+| `/coffaen:manage`    | Advanced | Skill/agent activation and usage reports       |
 
 ---
 
@@ -184,13 +184,13 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 Core rules enforced by coffaen:
 
-| Rule               | Threshold                                          | Enforcement       |
-| ------------------ | -------------------------------------------------- | ----------------- |
-| L1 protection      | Core Identity documents are read-only by default   | Hook (auto-block) |
-| Frontmatter        | YAML frontmatter required on all documents         | MCP validation    |
-| Naming convention  | `kebab-case.md`, layer prefix matching directory   | MCP validation    |
-| Layer structure     | 4-layer directory hierarchy must be maintained     | MCP + agent       |
-| Link integrity     | No broken links, no orphan documents               | Doctor diagnostic |
+| Rule              | Threshold                                        | Enforcement       |
+| ----------------- | ------------------------------------------------ | ----------------- |
+| L1 protection     | Core Identity documents are read-only by default | Hook (auto-block) |
+| Frontmatter       | YAML frontmatter required on all documents       | MCP validation    |
+| Naming convention | `kebab-case.md`, layer prefix matching directory | MCP validation    |
+| Layer structure   | 4-layer directory hierarchy must be maintained   | MCP + agent       |
+| Link integrity    | No broken links, no orphan documents             | Doctor diagnostic |
 
 ---
 
@@ -214,12 +214,12 @@ TypeScript 5.7, @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
 
 For technical details, see the [`.metadata/`](./.metadata/) directory:
 
-| Document Set | Content |
-| --- | --- |
-| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26 docs) | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
-| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model |
-| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/) | Knowledge graph indexing, cycle detection, Spreading Activation model |
-| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/) | System components, data flow, metadata strategy, search implementation |
+| Document Set                                                                                                                 | Content                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26 docs)                                                | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
+| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model    |
+| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)          | Knowledge graph indexing, cycle detection, Spreading Activation model                |
+| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                      | System components, data flow, metadata strategy, search implementation               |
 
 [한국어 문서 (README-ko_kr.md)](./README-ko_kr.md)도 제공됩니다.
 

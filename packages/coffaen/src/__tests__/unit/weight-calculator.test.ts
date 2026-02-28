@@ -53,6 +53,10 @@ describe('LAYER_DECAY_FACTORS', () => {
     expect(LAYER_DECAY_FACTORS[Layer.L1_CORE]).toBe(0.5);
   });
 
+  it('Layer 5 감쇠 인자는 0.95이다', () => {
+    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.95);
+  });
+
   it('Layer 2 감쇠 인자는 0.7이다', () => {
     expect(LAYER_DECAY_FACTORS[Layer.L2_DERIVED]).toBe(0.7);
   });
@@ -64,6 +68,10 @@ describe('LAYER_DECAY_FACTORS', () => {
   it('Layer 4 감쇠 인자는 0.9이다', () => {
     expect(LAYER_DECAY_FACTORS[Layer.L4_ACTION]).toBe(0.9);
   });
+
+  it('Layer 5 감쇠 인자는 0.95이다', () => {
+    expect(LAYER_DECAY_FACTORS[Layer.L5_CONTEXT]).toBe(0.95);
+  });
 });
 
 describe('getLayerDecay', () => {
@@ -72,6 +80,7 @@ describe('getLayerDecay', () => {
     expect(getLayerDecay(Layer.L2_DERIVED)).toBe(0.7);
     expect(getLayerDecay(Layer.L3_EXTERNAL)).toBe(0.8);
     expect(getLayerDecay(Layer.L4_ACTION)).toBe(0.9);
+    expect(getLayerDecay(Layer.L5_CONTEXT)).toBe(0.95);
   });
 });
 
@@ -202,5 +211,74 @@ describe('normalizeWeights', () => {
     ];
     const result = normalizeWeights(edges);
     expect(result[1].weight / result[0].weight).toBeCloseTo(2.0, 10);
+  });
+});
+
+describe('computeRelationshipWeight (calculateWeights 통해 검증)', () => {
+  function makePersonNode(path: string, intimacyLevel: number): KnowledgeNode {
+    return {
+      id: toNodeId(path),
+      path,
+      title: path,
+      layer: Layer.L4_ACTION,
+      tags: ['test'],
+      created: '2026-01-01',
+      updated: '2026-01-01',
+      mtime: 0,
+      accessed_count: 0,
+      person: { relationship_type: 'friend', intimacy_level: intimacyLevel },
+    } as KnowledgeNode;
+  }
+
+  it('intimacy_level 1 → weight 0.2', () => {
+    const a = makePersonNode('04_Action/alice.md', 1);
+    const b = makePersonNode('04_Action/bob.md', 1);
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'RELATIONSHIP', weight: 0 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const { edges: weighted } = calculateWeights(graph);
+    const relEdge = weighted.find((e) => e.type === 'RELATIONSHIP');
+    expect(relEdge?.weight).toBeCloseTo(0.2, 5);
+  });
+
+  it('intimacy_level 3 → weight 0.6', () => {
+    const a = makePersonNode('04_Action/alice.md', 3);
+    const b = makePersonNode('04_Action/bob.md', 3);
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'RELATIONSHIP', weight: 0 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const { edges: weighted } = calculateWeights(graph);
+    const relEdge = weighted.find((e) => e.type === 'RELATIONSHIP');
+    expect(relEdge?.weight).toBeCloseTo(0.6, 5);
+  });
+
+  it('intimacy_level 5 → weight 1.0', () => {
+    const a = makePersonNode('04_Action/alice.md', 5);
+    const b = makePersonNode('04_Action/bob.md', 5);
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'RELATIONSHIP', weight: 0 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const { edges: weighted } = calculateWeights(graph);
+    const relEdge = weighted.find((e) => e.type === 'RELATIONSHIP');
+    expect(relEdge?.weight).toBeCloseTo(1.0, 5);
+  });
+});
+
+describe('PageRank RELATIONSHIP 포함', () => {
+  it('RELATIONSHIP 엣지가 PageRank out-degree에 포함된다', () => {
+    const a = makeNode('a/a.md');
+    const b = makeNode('b/b.md');
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'RELATIONSHIP', weight: 1.0 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const ranks = computePageRank(graph);
+    // b는 a로부터 인바운드를 받으므로 PageRank가 a보다 높다
+    const rankA = ranks.get(a.id) ?? 0;
+    const rankB = ranks.get(b.id) ?? 0;
+    expect(rankB).toBeGreaterThan(rankA);
   });
 });

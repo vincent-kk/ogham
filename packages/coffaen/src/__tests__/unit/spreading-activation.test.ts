@@ -199,6 +199,31 @@ describe('runSpreadingActivation', () => {
     const bResult = results.find((r) => r.nodeId === toNodeId('B'));
     expect(bResult!.score).toBeCloseTo(0.72, 5);
   });
+
+  it('L5_CONTEXT 노드는 decay=0.95가 적용되어야 한다', () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(toNodeId('A'), makeNode('A', Layer.L1_CORE));
+    nodes.set(toNodeId('E'), makeNode('E', Layer.L5_CONTEXT));
+    const edges: KnowledgeEdge[] = [makeEdge('A', 'E', 1.0)];
+    const graph: KnowledgeGraph = {
+      nodes,
+      edges,
+      builtAt: '2026-02-28T00:00:00Z',
+      nodeCount: nodes.size,
+      edgeCount: edges.length,
+    };
+
+    // A(L1, decay=0.5) -> E(weight=1.0): score = 1.0 * 1.0 * 0.5 = 0.5
+    const results = runSpreadingActivation(graph, [toNodeId('A')]);
+    const eResult = results.find((r) => r.nodeId === toNodeId('E'));
+    expect(eResult).toBeDefined();
+    expect(eResult!.score).toBeCloseTo(0.5, 5);
+
+    // E(L5, decay=0.95)에서 시작: 자기 자신 1.0
+    const fromE = runSpreadingActivation(graph, [toNodeId('E')]);
+    const seedE = fromE.find((r) => r.nodeId === toNodeId('E'));
+    expect(seedE!.score).toBe(1.0);
+  });
 });
 
 describe('SpreadingActivationEngine', () => {

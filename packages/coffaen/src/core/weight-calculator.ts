@@ -16,6 +16,7 @@ export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
   [Layer.L2_DERIVED]: 0.7,
   [Layer.L3_EXTERNAL]: 0.8,
   [Layer.L4_ACTION]: 0.9,
+  [Layer.L5_CONTEXT]: 0.95,
 };
 
 /** 가중치 계산 결과 */
@@ -61,6 +62,8 @@ function computeEdgeWeight(edge: KnowledgeEdge, graph: KnowledgeGraph): number {
     case 'CHILD_OF':
     case 'SIBLING':
       return computeWuPalmerWeight(fromNode, toNode);
+    case 'RELATIONSHIP':
+      return computeRelationshipWeight(fromNode, toNode);
     default:
       return 1.0;
   }
@@ -79,6 +82,19 @@ function computeWuPalmerWeight(a: KnowledgeNode, b: KnowledgeNode): number {
   const denominator = depthA + depthB;
   if (denominator === 0) return 1.0;
   return Math.min(1.0, (2 * lcsDepth) / denominator);
+}
+
+/**
+ * RELATIONSHIP 엣지 가중치 계산.
+ * intimacy_level 1-5 → 0.2-1.0 선형 매핑: 0.2 + (avg - 1) * 0.2
+ */
+function computeRelationshipWeight(a: KnowledgeNode, b: KnowledgeNode): number {
+  const aExt = a as KnowledgeNode & { person?: { intimacy_level?: number } };
+  const bExt = b as KnowledgeNode & { person?: { intimacy_level?: number } };
+  const levelA = aExt.person?.intimacy_level ?? 3;
+  const levelB = bExt.person?.intimacy_level ?? 3;
+  const avg = (levelA + levelB) / 2;
+  return Math.min(1.0, 0.2 + (avg - 1) * 0.2);
 }
 
 /**
@@ -125,7 +141,11 @@ export function computePageRank(
     outDegree.set(id, 0);
   }
   for (const edge of graph.edges) {
-    if (edge.type === 'LINK' || edge.type === 'PARENT_OF') {
+    if (
+      edge.type === 'LINK' ||
+      edge.type === 'PARENT_OF' ||
+      edge.type === 'RELATIONSHIP'
+    ) {
       outDegree.set(edge.from, (outDegree.get(edge.from) ?? 0) + 1);
     }
   }
@@ -136,7 +156,11 @@ export function computePageRank(
     inbound.set(id, []);
   }
   for (const edge of graph.edges) {
-    if (edge.type === 'LINK' || edge.type === 'PARENT_OF') {
+    if (
+      edge.type === 'LINK' ||
+      edge.type === 'PARENT_OF' ||
+      edge.type === 'RELATIONSHIP'
+    ) {
       inbound.get(edge.to)?.push({ from: edge.from, weight: edge.weight });
     }
   }

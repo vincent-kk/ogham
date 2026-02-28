@@ -10,17 +10,9 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../core/document-parser.js';
-import { Layer } from '../../types/common.js';
+import { LAYER_DIR, Layer } from '../../types/common.js';
 import type { CoffaenCrudResult, CoffaenMoveInput } from '../../types/mcp.js';
 import { appendStaleNode } from '../shared.js';
-
-/** Layer → 디렉토리 매핑 */
-const LAYER_DIR: Record<number, string> = {
-  [Layer.L1_CORE]: '01_Core',
-  [Layer.L2_DERIVED]: '02_Derived',
-  [Layer.L3_EXTERNAL]: '03_External',
-  [Layer.L4_ACTION]: '04_Action',
-};
 
 /**
  * Frontmatter의 layer 필드를 갱신한다.
@@ -67,7 +59,7 @@ export async function handleCoffaenMove(
   }
 
   // Layer 검증
-  const targetLayerNum = input.target_layer as number;
+  const targetLayerNum = input.target_layer as Layer;
   const targetLayerDir = LAYER_DIR[targetLayerNum];
   if (!targetLayerDir) {
     return {

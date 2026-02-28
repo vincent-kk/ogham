@@ -2,6 +2,7 @@
  * @file dag-converter.ts
  * @description 순환 탐지 (DFS) + DAG 변환 — 순환 엣지 가중치를 0.1로 약화, 레이어 기반 방향성 보정
  */
+import { Layer } from '../types/common.js';
 import type { NodeId } from '../types/common.js';
 import type { KnowledgeEdge, KnowledgeGraph } from '../types/graph.js';
 
@@ -117,7 +118,7 @@ export function applyLayerDirectionality(
     const toNode = graph.nodes.get(edge.to);
     if (!fromNode || !toNode) return edge;
     // Layer 1 → 높은 Layer로의 아웃바운드 링크는 설계 위반 → 약화
-    if (fromNode.layer === 1 && toNode.layer > 1) {
+    if (fromNode.layer === Layer.L1_CORE && toNode.layer > Layer.L1_CORE) {
       return { ...edge, weight: CYCLE_WEIGHT };
     }
     return edge;

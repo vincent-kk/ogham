@@ -61,7 +61,7 @@ export class CommunityDetector {
   private readonly params: CommunityDetectorParams;
 
   constructor(params: CommunityDetectorParams = {}) {
-    this.params = params; // eslint-disable-line @typescript-eslint/no-unused-vars
+    this.params = params;
     void this.params; // P2에서 사용 예정
   }
 

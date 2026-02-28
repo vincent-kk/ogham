@@ -5,17 +5,10 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { Layer } from '../../types/common.js';
+import type { Layer } from '../../types/common.js';
+import { LAYER_DIR } from '../../types/common.js';
 import type { CoffaenCreateInput, CoffaenCrudResult } from '../../types/mcp.js';
 import { appendStaleNode } from '../shared.js';
-
-/** Layer → 디렉토리 매핑 */
-const LAYER_DIR: Record<number, string> = {
-  [Layer.L1_CORE]: '01_Core',
-  [Layer.L2_DERIVED]: '02_Derived',
-  [Layer.L3_EXTERNAL]: '03_External',
-  [Layer.L4_ACTION]: '04_Action',
-};
 
 /**
  * 파일명 힌트로부터 안전한 파일명을 생성한다.
@@ -104,7 +97,7 @@ export async function handleCoffaenCreate(
   vaultPath: string,
   input: CoffaenCreateInput,
 ): Promise<CoffaenCrudResult> {
-  const layerDir = LAYER_DIR[input.layer as number];
+  const layerDir = LAYER_DIR[input.layer as Layer];
   if (!layerDir) {
     return {
       success: false,

@@ -103,6 +103,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
           2: '02_Derived',
           3: '03_External',
           4: '04_Action',
+          5: '05_Context',
         };
         const expectedDir = layerDirMap[nodeResult.node.layer];
         if (expectedDir && dirName !== expectedDir) {

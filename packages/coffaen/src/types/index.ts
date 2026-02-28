@@ -10,7 +10,13 @@ export type {
   AutonomyLevel,
   SourceType,
 } from './common.js';
-export { Layer, toNodeId } from './common.js';
+export {
+  Layer,
+  LAYER_DIR,
+  toNodeId,
+  layerFromDir,
+  dirFromLayer,
+} from './common.js';
 
 export type {
   KnowledgeNode,
@@ -23,6 +29,16 @@ export type {
 
 export { FrontmatterSchema } from './frontmatter.js';
 export type { Frontmatter, FrontmatterParseResult } from './frontmatter.js';
+
+export {
+  PersonSchema,
+  RelationshipTypeEnum,
+  SYMMETRIC_RELATIONSHIPS,
+} from './person.js';
+export type { Person, RelationshipType } from './person.js';
+
+export { DomainSchema, LifeDomainEnum } from './domain.js';
+export type { Domain, LifeDomain } from './domain.js';
 
 export type {
   AgentRole,

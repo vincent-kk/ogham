@@ -9,6 +9,7 @@ import type {
   KnowledgeGraph,
   KnowledgeNode,
 } from '../types/graph.js';
+import { SYMMETRIC_RELATIONSHIPS } from '../types/person.js';
 
 /** GraphBuilder 옵션 */
 export interface GraphBuilderOptions {
@@ -65,6 +66,14 @@ export function buildGraph(
   const dirMap = buildDirectoryMap(nodes);
   const treeEdges = buildTreeEdges(nodes, dirMap, nodeMap);
   edges.push(...treeEdges);
+
+  // RELATIONSHIP 엣지: person frontmatter가 있는 노드 쌍 간 관계 엣지 생성
+  const relationshipEdges = buildRelationshipEdges(nodes);
+  edges.push(...relationshipEdges);
+
+  // Domain cross-layer 연결: 동일 domain 태그를 가진 노드 간 약한 LINK 엣지 (weight=0.3)
+  const domainEdges = buildDomainEdges(nodes);
+  edges.push(...domainEdges);
 
   const graph: KnowledgeGraph = {
     nodes: nodeMap,
@@ -195,4 +204,80 @@ export function detectOrphans(
 function getDirectory(filePath: string): string {
   const lastSlash = filePath.lastIndexOf('/');
   return lastSlash >= 0 ? filePath.slice(0, lastSlash) : '';
+}
+
+/**
+ * Person frontmatter가 있는 노드 쌍 간 RELATIONSHIP 엣지 생성.
+ * 대칭 관계: 양방향 엣지 2개, 비대칭 관계: 단방향 엣지 1개.
+ */
+function buildRelationshipEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
+  const edges: KnowledgeEdge[] = [];
+  type PersonExt = KnowledgeNode & {
+    person?: { relationship_type?: string; intimacy_level?: number };
+  };
+
+  const personNodes = nodes.filter(
+    (n) => (n as PersonExt).person !== undefined,
+  ) as PersonExt[];
+
+  for (let i = 0; i < personNodes.length; i++) {
+    for (let j = i + 1; j < personNodes.length; j++) {
+      const a = personNodes[i];
+      const b = personNodes[j];
+      const relType = a.person?.relationship_type ?? '';
+      const weight = 0.6; // computeRelationshipWeight는 weight-calculator에서 재계산
+
+      if (isSymmetricRelationship(relType)) {
+        // 대칭 관계: 양방향 엣지
+        edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
+        edges.push({ from: b.id, to: a.id, type: 'RELATIONSHIP', weight });
+      } else {
+        // 비대칭 관계: 단방향 엣지 (a → b)
+        edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
+      }
+    }
+  }
+
+  return edges;
+}
+
+/**
+ * 동일 domain 태그를 가진 노드 간 약한 LINK 엣지 생성 (cross-layer 연결).
+ * weight=0.3, 양방향.
+ */
+function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
+  const edges: KnowledgeEdge[] = [];
+  type DomainExt = KnowledgeNode & { domain?: string };
+
+  // domain별로 노드 그룹화
+  const domainMap = new Map<string, DomainExt[]>();
+  for (const node of nodes) {
+    const ext = node as DomainExt;
+    if (ext.domain) {
+      if (!domainMap.has(ext.domain)) {
+        domainMap.set(ext.domain, []);
+      }
+      domainMap.get(ext.domain)!.push(ext);
+    }
+  }
+
+  for (const [, group] of domainMap) {
+    if (group.length < 2) continue;
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const a = group[i];
+        const b = group[j];
+        // 양방향 약한 LINK 엣지
+        edges.push({ from: a.id, to: b.id, type: 'LINK', weight: 0.3 });
+        edges.push({ from: b.id, to: a.id, type: 'LINK', weight: 0.3 });
+      }
+    }
+  }
+
+  return edges;
+}
+
+/** 대칭 관계 여부 확인 */
+function isSymmetricRelationship(type: string): boolean {
+  return (SYMMETRIC_RELATIONSHIPS as readonly string[]).includes(type);
 }
