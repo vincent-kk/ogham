@@ -8,6 +8,7 @@ export type SetupStep =
   | 'welcome'
   | 'vault-path'
   | 'core-identity-interview'
+  | 'companion-identity'
   | 'scaffold-tree'
   | 'autonomy-init'
   | 'index-build'

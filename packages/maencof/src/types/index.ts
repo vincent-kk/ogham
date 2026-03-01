@@ -37,6 +37,15 @@ export {
 } from './person.js';
 export type { Person, RelationshipType } from './person.js';
 
+export {
+  CompanionIdentitySchema,
+  CompanionPersonalitySchema,
+} from './companion.js';
+export type { CompanionIdentity, CompanionPersonality } from './companion.js';
+
+export { isValidCompanionIdentity } from './companion-guard.js';
+export type { CompanionIdentityMinimal } from './companion-guard.js';
+
 export { DomainSchema, LifeDomainEnum } from './domain.js';
 export type { Domain, LifeDomain } from './domain.js';
 

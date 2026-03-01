@@ -44,6 +44,28 @@ Required set (5 questions):
 Optional set (5 questions, suggested after completing required):
 6. Occupation/role | 7. Long-term goals | 8. Learning style | 9. Decision criteria | 10. Daily routine
 
+#### AI Companion Self-Naming
+
+After the Core Identity Interview is complete, propose an AI companion persona based on the collected answers:
+
+1. **Generate persona**: Synthesize interview answers (values, boundaries, interests, communication style) into a companion identity:
+   - `name`: A short, memorable name reflecting the user's personality
+   - `role`: How the AI positions itself (e.g., "지식 정리 파트너")
+   - `personality.tone`, `personality.approach`, `personality.traits`: Derived from communication style + values
+   - `principles`: Derived from core values
+   - `taboos`: Derived from absolute boundaries
+   - `origin_story`: A brief narrative connecting the user's goals to the companion's purpose
+   - `greeting`: A personalized session greeting (format: `[maencof:${name}] ${greeting}`)
+
+2. **User approval**: Present the generated persona via AskUserQuestion with 3 options:
+   - **Accept** — Save to `.maencof-meta/companion-identity.json`
+   - **Regenerate** — Generate a new persona with different characteristics
+   - **Skip** — Do not create a companion identity; proceed to next stage
+
+3. **Skip behavior**: If the user skips, do NOT add `companion-identity` to `completedSteps`. Proceed normally to Stage 3.
+
+4. **Reset**: `--reset --companion` deletes the existing `companion-identity.json`, re-reads L1 documents for context, and regenerates the persona.
+
 ### Stage 3 — Initial Knowledge Tree Scaffolding
 
 Generate Layer 1 documents from the collected interview answers:
@@ -128,6 +150,7 @@ setup skill starts
 |--------|-------------|
 | `--step <1-6>` | Re-run a specific stage only |
 | `--reset` | Full reset (recreates trust-level.json; existing L1 markdown documents are preserved) |
+| `--reset --companion` | Companion identity만 리셋 (JSON 삭제 → L1 재읽기 → 재생성) |
 
 ## Error Handling
 

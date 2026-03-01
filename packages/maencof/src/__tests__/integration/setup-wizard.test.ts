@@ -25,7 +25,7 @@ import {
 import { handleKgBuild } from '../../mcp/tools/kg-build.js';
 import { handleKgStatus } from '../../mcp/tools/kg-status.js';
 import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
-import type { SetupProgress } from '../../types/setup.js';
+import type { SetupProgress, SetupStep } from '../../types/setup.js';
 
 async function makeTempVault(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'maencof-setup-'));
@@ -254,5 +254,48 @@ vault 경로: ${vault}
     progress.completed = true;
     expect(progress.completed).toBe(true);
     expect(buildResult.nodeCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it('companion-identity를 completedSteps에 포함할 수 있다', () => {
+    progress.completedSteps.push(
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+      'companion-identity',
+    );
+    progress.currentStep = 'scaffold-tree';
+
+    expect(progress.completedSteps).toContain('companion-identity');
+    expect(progress.currentStep).toBe('scaffold-tree');
+  });
+
+  it('companion-identity 없이 기존 흐름이 정상 동작한다', () => {
+    progress.completedSteps.push(
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+    );
+    progress.currentStep = 'scaffold-tree';
+
+    expect(progress.completedSteps).not.toContain('companion-identity');
+    expect(progress.currentStep).toBe('scaffold-tree');
+  });
+
+  it('companion-identity skip 시 completedSteps에 미포함 + 다음 단계 진행', () => {
+    // Stage 2 완료 후 companion skip -> Stage 3로 바로 진행
+    const stepsWithoutCompanion: SetupStep[] = [
+      'welcome',
+      'vault-path',
+      'core-identity-interview',
+    ];
+    progress.completedSteps = stepsWithoutCompanion;
+    progress.currentStep = 'scaffold-tree';
+
+    expect(progress.completedSteps).not.toContain('companion-identity');
+    expect(progress.currentStep).toBe('scaffold-tree');
+    // 다음 단계들도 정상 진행 가능
+    progress.completedSteps.push('scaffold-tree');
+    progress.currentStep = 'autonomy-init';
+    expect(progress.completedSteps).toHaveLength(4);
   });
 });
