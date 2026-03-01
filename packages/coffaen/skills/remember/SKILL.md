@@ -97,12 +97,12 @@ tags: [extracted tags]
 title: auto-generated or user-provided
 ```
 
-**L3 Frontmatter**:
+**L3 Frontmatter** (fields written into the document by `coffaen_create`):
 ```yaml
 layer: 3
 tags: [extracted tags]
 source: "original source URL (if available)"
-confidence: 0.3  # initial value, increases after validation
+confidence: 0.3  # document-level metadata, not a coffaen_create parameter; initial value, increases after validation
 ```
 
 **L4 Frontmatter**:

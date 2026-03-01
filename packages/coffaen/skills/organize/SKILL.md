@@ -38,14 +38,19 @@ Calls the memory-organizer agent sequentially through judge -> (confirmation) ->
 
 ## Workflow
 
-### Step 1 — judge stage (memory-organizer delegation)
+### Step 1 — Pre-check Index Status
+
+Check vault status and stale nodes with the `kg_status` MCP tool before delegating to the agent.
+If no index is found, abort with: "No index found. Please run `/coffaen:build` first."
+
+### Step 2 — judge stage (memory-organizer delegation)
 
 Run the judge module of the `memory-organizer` agent:
 - Scan Layer 3/4 files
 - Evaluate access frequency, tag matching, and connection density
 - Generate a list of TransitionDirectives
 
-### Step 2 — Display Candidates and User Confirmation
+### Step 3 — Display Candidates and User Confirmation
 
 Display the generated TransitionDirectives in table format:
 
@@ -55,14 +60,14 @@ Display the generated TransitionDirectives in table format:
 
 The user can type "proceed" or select/exclude individual items.
 
-### Step 3 — execute stage (memory-organizer delegation)
+### Step 4 — execute stage (memory-organizer delegation)
 
 Run the execute module for approved TransitionDirectives:
 - Call `coffaen_move`
 - Update the Frontmatter `layer` field
 - Update link paths
 
-### Step 4 — Result Summary
+### Step 5 — Result Summary
 
 Output the list of executed transitions and an AgentExecutionResult summary.
 
@@ -73,7 +78,7 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 | Tool | Used by | Purpose |
 |------|---------|---------|
-| `kg_status` | skill (Step 1 pre-check) | Check vault status and stale-nodes |
+| `kg_status` | skill (Step 1) | Check vault status and stale-nodes |
 | `kg_navigate` | memory-organizer agent | Traverse link relationships |
 | `coffaen_move` | memory-organizer agent (execute module) | Execute file move |
 | `coffaen_update` | memory-organizer agent (execute module) | Update Frontmatter |

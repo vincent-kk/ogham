@@ -42,9 +42,9 @@ Identify the data source type and content from input:
 
 ### Step 3 — Auto-generate Frontmatter
 
+Determine the Frontmatter fields to pass to `coffaen_create`. The `created` and `updated` timestamps are set automatically by `coffaen_create` and do not need to be specified manually.
+
 ```yaml
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
 tags: [auto-extracted tags]
 layer: 3, 4, or 5
 source: {original URL}

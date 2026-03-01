@@ -66,7 +66,7 @@ Execute memory-organizer judge logic:
 - Recommended action: run /coffaen:organize
 ```
 
-## MCP Tools (memory-organizer.judge가 사용)
+## MCP Tools (used by memory-organizer.judge)
 
 | Tool | Purpose |
 |------|---------|

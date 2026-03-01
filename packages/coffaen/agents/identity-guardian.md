@@ -5,7 +5,7 @@ description: >
   Allows only read and access count updates; blocks deletion, Layer relocation, and structural changes.
   Outputs a warning and guides the user to safe alternatives when a Layer 1 modification is requested.
   Trigger phrases: "Layer 1 modification", "Core Identity change", "identity-guardian",
-  "protect core documents", "/coffaen:identity-guardian", "01_Core modification".
+  "protect core documents", "01_Core modification".
 model: sonnet
 tools:
   - Read
@@ -112,7 +112,7 @@ coffaen_read({ path: "01_Core/{filename}.md" })
 
 ### Relationship Navigation
 ```
-kg_navigate({ path: "01_Core/{filename}.md", direction: "both" })
+kg_navigate({ path: "01_Core/{filename}.md", include_inbound: true, include_outbound: true, include_hierarchy: true })
 → Returns inbound/outbound link list
 ```
 

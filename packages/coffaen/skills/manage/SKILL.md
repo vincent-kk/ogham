@@ -109,11 +109,14 @@ Generate a new custom skill/agent template:
 | Tool | Purpose |
 |------|---------|
 | `Read` | Read `.coffaen-meta/usage-stats.json`, `.coffaen-meta/disabled-registry.json` |
-| `Write` | Write `.coffaen-meta/disabled-registry.json` (disable/enable operations) |
-| `coffaen_create` | Create new skill/agent template files in the plugin directory |
+| `Write` | Write `.coffaen-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the plugin directory (`skills/<name>/SKILL.md`, `agents/<name>.md`) |
 
 > Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.coffaen-meta/`
 > (not vault documents). They are accessed with Read/Write tools, not coffaen MCP tools.
+>
+> Note: `coffaen_create` is intentionally excluded here. It creates vault knowledge documents
+> (requires Layer + tags + Frontmatter) and is not suitable for generating plugin structure files
+> such as SKILL.md or agent definitions. Use the `Write` tool for those.
 
 ## Error Handling
 

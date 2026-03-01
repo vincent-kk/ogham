@@ -37,13 +37,13 @@ Record previous state:
 - Last built: {last_built}
 - Stale node count: {stale_count}
 
-### Step 1b — Backup Existing Index (unless `--no-backup`)
+### Step 2 — Backup Existing Index (unless `--no-backup`)
 
 Before rebuilding, copy `.coffaen/index.json` to `.coffaen/index.json.bak` if it exists.
-This backup is used for rollback if Step 3 fails.
+This backup is used for rollback if Step 4 fails.
 Skip this step when `--no-backup` is specified.
 
-### Step 2 — User Confirmation
+### Step 3 — User Confirmation
 
 Request confirmation since a rebuild can take time.
 
@@ -57,7 +57,7 @@ Do you want to continue? [Yes/No]
 
 If `--force` is specified, proceed immediately without confirmation.
 
-### Step 3 — Run Full Rebuild
+### Step 4 — Run Full Rebuild
 
 Call `kg_build` with `force=true`.
 
@@ -75,7 +75,7 @@ Rebuilding...
 Done!
 ```
 
-### Step 4 — Result Report
+### Step 5 — Result Report
 
 Report results comparing before and after the rebuild.
 

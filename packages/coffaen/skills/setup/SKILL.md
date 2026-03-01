@@ -121,7 +121,7 @@ setup skill starts
 | Option | Description |
 |--------|-------------|
 | `--step <1-6>` | Re-run a specific stage only |
-| `--reset` | Full reset (preserves existing L1 documents) |
+| `--reset` | Full reset (recreates trust-level.json; existing L1 markdown documents are preserved) |
 
 ## Error Handling
 

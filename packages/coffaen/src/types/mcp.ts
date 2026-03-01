@@ -10,7 +10,7 @@ import type { ActivationResult } from './graph.js';
 
 /** coffaen_create 입력 */
 export interface CoffaenCreateInput {
-  /** 문서 Layer (1-4) */
+  /** 문서 Layer (1-5) */
   layer: Layer;
   /** 태그 목록 (최소 1개) */
   tags: string[];

@@ -66,7 +66,7 @@ export function createServer(): McpServer {
     'coffaen_create',
     {
       description:
-        '새 기억 문서를 지식 트리에 생성합니다. Layer(1-4)와 태그를 지정하면 Frontmatter가 자동 생성됩니다.',
+        '새 기억 문서를 지식 트리에 생성합니다. Layer(1-5)와 태그를 지정하면 Frontmatter가 자동 생성됩니다.',
       inputSchema: z.object({
         layer: z
           .number()

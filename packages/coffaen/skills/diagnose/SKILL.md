@@ -77,7 +77,7 @@ coffaen Index Status
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 Index: missing / critically stale
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-Recommended: Run /coffaen:build or /coffaen:doctor
+Recommended: Run /coffaen:build --full or /coffaen:doctor
 ```
 
 ### Step 3 — Present Recommended Actions
