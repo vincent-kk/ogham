@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+import{existsSync as i,readFileSync as S,readdirSync as R}from"node:fs";import{join as w}from"node:path";import{existsSync as p}from"node:fs";import{join as c}from"node:path";var m=".maencof-meta",y=".maencof";function l(t){return p(c(t,y))||p(c(t,m))}function s(t,...n){return c(t,m,...n)}async function d(){let t=[];for await(let n of process.stdin)t.push(n);return Buffer.concat(t).toString("utf-8")}function g(t){process.stdout.write(JSON.stringify(t))}function h(t){let n=t.cwd??process.cwd(),e=[];if(!l(n))return{continue:!0,message:"[maencof] Vault is not initialized. Run `/maencof:setup` to get started."};let f=s(n,"wal.json");i(f)&&e.push("[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:doctor` to diagnose.");let a=s(n,"schedule-log.json");if(i(a))try{let o=JSON.parse(S(a,"utf-8"));o.pending&&o.pending.length>0&&e.push(`[maencof] ${o.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`)}catch{}let r=s(n,"sessions");if(i(r)){let o=P(r);o&&e.push(`[maencof] Previous session summary:
+${o}`)}let x=s(n,"data-sources.json");return i(x)||e.push("[maencof] No external data sources connected. Run `/maencof:connect` to set up."),{continue:!0,message:e.length>0?e.join(`
+
+`):void 0}}function P(t){try{let n=R(t).filter(r=>r.endsWith(".md")).sort().reverse();if(n.length===0)return null;let e=w(t,n[0]);return S(e,"utf-8").split(`
+`).slice(0,10).join(`
+`).trim()||null}catch{return null}}var _=await d(),u;try{let t=JSON.parse(_);u=h(t)}catch{u={continue:!0}}g(u);
