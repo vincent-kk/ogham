@@ -1,6 +1,6 @@
 {
   "name": "maencof",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Personal knowledge space manager with markdown-based knowledge graph, spreading activation search, and memory lifecycle management",
   "author": {
     "name": "Vincent K. Kelvin"
