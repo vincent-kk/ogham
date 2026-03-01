@@ -120,10 +120,7 @@ function buildTreeEdges(
   dirMap: Map<string, NodeId[]>,
   nodeMap: Map<NodeId, KnowledgeNode>,
 ): KnowledgeEdge[] {
-  return [
-    ...buildHierarchyEdges(nodes, nodeMap),
-    ...buildSiblingEdges(dirMap),
-  ];
+  return [...buildHierarchyEdges(nodes, nodeMap), ...buildSiblingEdges(dirMap)];
 }
 
 /**
@@ -140,8 +137,18 @@ function buildHierarchyEdges(
     if (parentDir === dir) continue;
     const parentIndexId = `${parentDir}/index.md` as NodeId;
     if (!nodeMap.has(parentIndexId)) continue;
-    edges.push({ from: parentIndexId, to: node.id, type: 'PARENT_OF', weight: 1.0 });
-    edges.push({ from: node.id, to: parentIndexId, type: 'CHILD_OF', weight: 1.0 });
+    edges.push({
+      from: parentIndexId,
+      to: node.id,
+      type: 'PARENT_OF',
+      weight: 1.0,
+    });
+    edges.push({
+      from: node.id,
+      to: parentIndexId,
+      type: 'CHILD_OF',
+      weight: 1.0,
+    });
   }
   return edges;
 }

@@ -139,7 +139,12 @@ function processNeighbor(
 
   // 계속 확산 가능하면 큐에 추가
   if (newHops < maxHops) {
-    queue.push({ nodeId: neighborId, activation: cappedActivation, hops: newHops, path: newPath });
+    queue.push({
+      nodeId: neighborId,
+      activation: cappedActivation,
+      hops: newHops,
+      path: newPath,
+    });
   }
 }
 
@@ -205,7 +210,14 @@ export function runSpreadingActivation(
     // 현재 노드의 이웃 탐색
     for (const edge of graph.edges) {
       if (edge.from !== current.nodeId) continue;
-      processNeighbor(graph, current, edge.to, resolvedParams, activationMap, queue);
+      processNeighbor(
+        graph,
+        current,
+        edge.to,
+        resolvedParams,
+        activationMap,
+        queue,
+      );
     }
   }
 

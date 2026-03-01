@@ -54,10 +54,9 @@ Generate Layer 1 documents from the collected interview answers:
 | `01_Core/values.md` | Core values |
 | `01_Core/boundaries.md` | Absolute boundaries |
 | `01_Core/preferences.md` | Communication preferences |
-| `01_Core/trust-level.json` | Trust level tracker (created in Stage 4 — see below) |
 
 Create the 4 markdown documents above with the `maencof_create` MCP tool (layer=1, tags required).
-Note: `trust-level.json` is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown). It is created separately in Stage 4.
+Note: `01_Core/trust-level.json` is created separately in Stage 4 — it is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown).
 
 Also create the `02_Derived/`, `03_External/`, `04_Action/`, and `05_Context/` directories.
 

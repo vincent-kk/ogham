@@ -46,7 +46,7 @@ If no index is found, abort with: "No index found. Please run `/maencof:build` f
 ### Step 2 — judge stage (memory-organizer delegation)
 
 Run the judge module of the `memory-organizer` agent:
-- Scan Layer 3/4 files
+- Scan Layer 3/4/5 files
 - Evaluate access frequency, tag matching, and connection density
 - Generate a list of TransitionDirectives
 
@@ -79,6 +79,7 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 | Tool | Used by | Purpose |
 |------|---------|---------|
 | `kg_status` | skill (Step 1) | Check vault status and stale-nodes |
+| `maencof_read` | memory-organizer agent (judge module) | Read document Frontmatter |
 | `kg_navigate` | memory-organizer agent | Traverse link relationships |
 | `maencof_move` | memory-organizer agent (execute module) | Execute file move |
 | `maencof_update` | memory-organizer agent (execute module) | Update Frontmatter |
@@ -100,5 +101,5 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--dry-run` | false | Run judge only, skip execute stage (equivalent to `/maencof:reflect` but without the detailed report format) |
-| `--layer` | 3,4 | Target Layer(s) to scan (3, 4, or 5) |
+| `--layer` | 3,4,5 | Target Layer(s) to scan (3, 4, or 5) |
 | `--min-confidence` | 0.7 | Minimum confidence threshold |

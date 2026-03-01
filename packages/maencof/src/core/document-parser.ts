@@ -17,8 +17,10 @@ import type {
   FrontmatterParseResult,
 } from '../types/frontmatter.js';
 import type { KnowledgeNode } from '../types/graph.js';
-export { parseScalarValue, parseYamlFrontmatter } from './yaml-parser.js';
+
 import { parseYamlFrontmatter } from './yaml-parser.js';
+
+export { parseScalarValue, parseYamlFrontmatter } from './yaml-parser.js';
 
 /** 마크다운 링크 정보 */
 export interface MarkdownLink {

@@ -147,4 +147,4 @@ Glob 01_Core/**/*.md to collect file list
 ## Skill Participation
 
 - `/maencof:setup` — verify Frontmatter rule compliance for generated L1 documents (Stage 3)
-- Layer Guard Hook (layer-guard.ts) — primary block at PreToolUse stage, then routes to this agent
+- Layer Guard Hook (layer-guard.ts) — primary block at PreToolUse stage; the blocked message guides the LLM to consult this agent (not auto-routed)

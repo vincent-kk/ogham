@@ -144,7 +144,11 @@ function itemToMarkdown(item: ContextItem, includeFull: boolean): string {
 function selectItemsWithinBudget(
   allItems: ContextItem[],
   tokenBudget: number,
-): { selectedItems: ContextItem[]; totalTokens: number; truncatedCount: number } {
+): {
+  selectedItems: ContextItem[];
+  totalTokens: number;
+  truncatedCount: number;
+} {
   const selectedItems: ContextItem[] = [];
   let totalTokens = estimateTokens('## maencof Knowledge Context\n\n');
   let truncatedCount = 0;
@@ -178,7 +182,9 @@ function buildMarkdown(
   } else {
     lines.push(`_${selectedItems.length}개 문서 (score 내림차순)_`, '');
     for (const item of selectedItems) {
-      lines.push(itemToMarkdown(item, includeFull && item.fullContent !== undefined));
+      lines.push(
+        itemToMarkdown(item, includeFull && item.fullContent !== undefined),
+      );
     }
   }
 
@@ -202,10 +208,15 @@ export function assembleContext(
   graph: KnowledgeGraph,
   options: AssembleOptions = {},
 ): AssembledContext {
-  const { tokenBudget = 2000, includeFull = false, maxFullDocuments = 3 } = options;
+  const {
+    tokenBudget = 2000,
+    includeFull = false,
+    maxFullDocuments = 3,
+  } = options;
 
   const allItems = toContextItems(results, graph);
-  const { selectedItems, totalTokens, truncatedCount } = selectItemsWithinBudget(allItems, tokenBudget);
+  const { selectedItems, totalTokens, truncatedCount } =
+    selectItemsWithinBudget(allItems, tokenBudget);
 
   // 전문 포함 (상위 N개) — 실제 파일 내용은 MCP 도구 계층에서 주입
   if (includeFull && selectedItems.length > 0) {
@@ -217,7 +228,12 @@ export function assembleContext(
 
   const markdown = buildMarkdown(selectedItems, truncatedCount, includeFull);
 
-  return { markdown, items: selectedItems, estimatedTokens: totalTokens, truncatedCount };
+  return {
+    markdown,
+    items: selectedItems,
+    estimatedTokens: totalTokens,
+    truncatedCount,
+  };
 }
 
 /** ContextAssembler 클래스 */

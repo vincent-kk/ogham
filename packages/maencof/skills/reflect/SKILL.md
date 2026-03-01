@@ -41,7 +41,7 @@ Query the current index status, node count, and stale node list via `kg_status`.
 ### Step 2 — Run judge Module
 
 Execute memory-organizer judge logic:
-- Full scan of Layer 3/4
+- Full scan of Layer 3/4/5
 - Calculate transition score for each node (access frequency, tags, connection density, confidence)
 - Detect duplicate candidate pairs
 
@@ -83,10 +83,10 @@ Execute memory-organizer judge logic:
 ## Options
 
 ```
-/maencof:reflect [--layer <3|4>] [--show-all]
+/maencof:reflect [--layer <3|4|5>] [--show-all]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--layer` | 3,4 | Target Layer(s) to analyze |
+| `--layer` | 3,4,5 | Target Layer(s) to analyze |
 | `--show-all` | false | Show all candidates regardless of confidence |
