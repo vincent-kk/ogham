@@ -20,6 +20,7 @@ await mkdir(resolve(root, 'bridge'), { recursive: true });
 const hookEntries = [
   'session-start',
   'layer-guard',
+  'vault-redirector',
   'index-invalidator',
   'session-end',
   'lifecycle-dispatcher',

@@ -12,7 +12,20 @@ export type SetupStep =
   | 'scaffold-tree'
   | 'autonomy-init'
   | 'index-build'
-  | 'guide';
+  | 'guide'
+  | 'migrate';
+
+/** version.json 스키마 */
+export interface VaultVersionInfo {
+  /** 플러그인 버전 */
+  version: string;
+  /** 최초 설치 시각 */
+  installedAt: string;
+  /** 마지막 마이그레이션 시각 */
+  lastMigratedAt?: string;
+  /** 마이그레이션 이력 */
+  migrationHistory: string[];
+}
 
 /** 데이터 소스 타입 */
 export type DataSourceType =
