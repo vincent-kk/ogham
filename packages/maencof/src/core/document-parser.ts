@@ -81,7 +81,7 @@ export function extractFrontmatter(content: string): {
     return {
       frontmatter: {
         success: false,
-        errors: ['Frontmatter 블록을 찾을 수 없음 (--- 구분자 필요)'],
+        errors: ['Frontmatter block not found (--- delimiter required)'],
         raw: '',
       },
       body: content,
@@ -179,7 +179,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   if (!doc.frontmatter.success || !doc.frontmatter.data) {
     return {
       success: false,
-      error: `Frontmatter 검증 실패: ${doc.frontmatter.errors?.join(', ')}`,
+      error: `Frontmatter validation failed: ${doc.frontmatter.errors?.join(', ')}`,
     };
   }
 

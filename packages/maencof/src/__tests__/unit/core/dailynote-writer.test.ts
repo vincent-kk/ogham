@@ -188,19 +188,19 @@ describe('buildToolDescription', () => {
       layer: 2,
       tags: ['ts', 'design'],
     });
-    expect(desc).toBe('문서 생성 (L2, tags: ts, design)');
+    expect(desc).toBe('Document created (L2, tags: ts, design)');
   });
 
   it('maencof_move를 설명한다', () => {
     const desc = buildToolDescription('maencof_move', { target_layer: 3 });
-    expect(desc).toBe('문서 이동 (→ L3)');
+    expect(desc).toBe('Document moved (→ L3)');
   });
 
   it('kg_build force를 설명한다', () => {
     expect(buildToolDescription('kg_build', { force: true })).toBe(
-      '인덱스 전체 재빌드',
+      'Full index rebuild',
     );
-    expect(buildToolDescription('kg_build', {})).toBe('인덱스 증분 빌드');
+    expect(buildToolDescription('kg_build', {})).toBe('Incremental index build');
   });
 
   it('알 수 없는 도구명은 카테고리 또는 도구명을 반환한다', () => {

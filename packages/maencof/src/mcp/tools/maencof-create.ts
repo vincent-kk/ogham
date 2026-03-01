@@ -102,7 +102,7 @@ export async function handleMaencofCreate(
     return {
       success: false,
       path: '',
-      message: `유효하지 않은 Layer: ${input.layer}`,
+      message: `Invalid Layer: ${input.layer}`,
     };
   }
 
@@ -121,7 +121,7 @@ export async function handleMaencofCreate(
     return {
       success: false,
       path: relativePath,
-      message: `파일이 이미 존재합니다: ${relativePath}`,
+      message: `File already exists: ${relativePath}`,
     };
   } catch {
     // 파일 없음 → 정상
@@ -159,6 +159,6 @@ export async function handleMaencofCreate(
   return {
     success: true,
     path: relativePath,
-    message: `문서가 생성되었습니다: ${relativePath}`,
+    message: `Document created: ${relativePath}`,
   };
 }

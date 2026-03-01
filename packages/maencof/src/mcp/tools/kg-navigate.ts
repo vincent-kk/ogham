@@ -15,7 +15,7 @@ export async function handleKgNavigate(
 ): Promise<KgNavigateResult | { error: string }> {
   if (!graph) {
     return {
-      error: '인덱스가 빌드되지 않았습니다. /maencof:build를 먼저 실행하세요.',
+      error: 'Index not built. Please run /maencof:build first.',
     };
   }
 
@@ -23,7 +23,7 @@ export async function handleKgNavigate(
   const node = graph.nodes.get(nodeId);
 
   if (!node) {
-    return { error: `노드를 찾을 수 없습니다: ${input.path}` };
+    return { error: `Node not found: ${input.path}` };
   }
 
   const includeInbound = input.include_inbound ?? true;

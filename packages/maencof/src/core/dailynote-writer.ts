@@ -112,40 +112,40 @@ export function buildToolDescription(
       const tags = Array.isArray(toolInput['tags'])
         ? (toolInput['tags'] as string[]).join(', ')
         : '';
-      return `문서 생성 (L${layer}${tags ? `, tags: ${tags}` : ''})`;
+      return `Document created (L${layer}${tags ? `, tags: ${tags}` : ''})`;
     }
     case 'maencof_update':
-      return '문서 수정';
+      return 'Document updated';
     case 'maencof_delete':
-      return '문서 삭제';
+      return 'Document deleted';
     case 'maencof_move': {
       const target = toolInput['target_layer'] ?? '?';
-      return `문서 이동 (→ L${target})`;
+      return `Document moved (→ L${target})`;
     }
     case 'claudemd_merge':
-      return 'CLAUDE.md 지시문 병합';
+      return 'CLAUDE.md directive merged';
     case 'claudemd_remove':
-      return 'CLAUDE.md 지시문 제거';
+      return 'CLAUDE.md directive removed';
     case 'claudemd_read':
-      return 'CLAUDE.md 지시문 읽기';
+      return 'CLAUDE.md directive read';
     case 'kg_search': {
       const seed = Array.isArray(toolInput['seed'])
         ? (toolInput['seed'] as string[]).join(', ')
         : '';
-      return `KG 검색 (seed: ${seed})`;
+      return `KG search (seed: ${seed})`;
     }
     case 'kg_navigate':
-      return 'KG 탐색';
+      return 'KG navigation';
     case 'kg_context':
-      return '문맥 조립';
+      return 'Context assembly';
     case 'kg_build':
-      return toolInput['force'] ? '인덱스 전체 재빌드' : '인덱스 증분 빌드';
+      return toolInput['force'] ? 'Full index rebuild' : 'Incremental index build';
     case 'kg_status':
-      return 'Vault 상태 조회';
+      return 'Vault status check';
     case 'kg_suggest_links':
-      return '링크 추천';
+      return 'Link suggestion';
     default:
-      return category ? `${category} 작업` : toolName;
+      return category ? `${category} task` : toolName;
   }
 }
 

@@ -54,7 +54,7 @@ export async function handleMaencofMove(
     return {
       success: false,
       path: input.path,
-      message: `파일을 찾을 수 없습니다: ${input.path}`,
+      message: `File not found: ${input.path}`,
     };
   }
 
@@ -65,7 +65,7 @@ export async function handleMaencofMove(
     return {
       success: false,
       path: input.path,
-      message: `유효하지 않은 목표 Layer: ${input.target_layer}`,
+      message: `Invalid target Layer: ${input.target_layer}`,
     };
   }
 
@@ -77,7 +77,7 @@ export async function handleMaencofMove(
     return {
       success: false,
       path: input.path,
-      message: 'Layer 1 (Core Identity) 문서는 이동할 수 없습니다.',
+      message: 'Layer 1 (Core Identity) documents cannot be moved.',
     };
   }
 
@@ -85,7 +85,7 @@ export async function handleMaencofMove(
     return {
       success: false,
       path: input.path,
-      message: `이미 Layer ${targetLayerNum}에 있습니다.`,
+      message: `Already in Layer ${targetLayerNum}.`,
     };
   }
 
@@ -100,7 +100,7 @@ export async function handleMaencofMove(
     return {
       success: false,
       path: input.path,
-      message: `대상 경로에 파일이 이미 존재합니다: ${newRelativePath}`,
+      message: `File already exists at target path: ${newRelativePath}`,
     };
   } catch {
     // 없음 → 정상
@@ -122,16 +122,16 @@ export async function handleMaencofMove(
 
   const warnings: string[] = [];
   if (input.reason) {
-    warnings.push(`전이 사유: ${input.reason}`);
+    warnings.push(`Transition reason: ${input.reason}`);
   }
   if (input.confidence !== undefined) {
-    warnings.push(`신뢰도: ${input.confidence}`);
+    warnings.push(`Confidence: ${input.confidence}`);
   }
 
   return {
     success: true,
     path: newRelativePath,
-    message: `문서가 이동되었습니다: ${input.path} → ${newRelativePath}`,
+    message: `Document moved: ${input.path} → ${newRelativePath}`,
     warnings: warnings.length > 0 ? warnings : undefined,
   };
 }

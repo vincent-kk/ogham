@@ -92,7 +92,7 @@ export async function handleMaencofUpdate(
     return {
       success: false,
       path: input.path,
-      message: `파일을 찾을 수 없습니다: ${input.path}`,
+      message: `File not found: ${input.path}`,
     };
   }
 
@@ -135,6 +135,6 @@ export async function handleMaencofUpdate(
   return {
     success: true,
     path: input.path,
-    message: `문서가 수정되었습니다: ${input.path}`,
+    message: `Document updated: ${input.path}`,
   };
 }

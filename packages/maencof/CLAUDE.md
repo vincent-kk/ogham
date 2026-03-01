@@ -25,7 +25,7 @@ yarn format && yarn lint
 
 **Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
 
-**Skills (22)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `dailynote`
+**Skills (24)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`
 
 > 상세 문서: `../../.metadata/maencof/` 참조 (5-Layer 전체 사양, MCP 도구 계약, 에이전트/스킬 명세, 훅 이벤트 매핑)
 

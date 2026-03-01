@@ -111,7 +111,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     appendDailynoteEntry(cwd, {
       time: formatTime(new Date()),
       category: 'session',
-      description: `세션 시작 (session_id: ${sessionId})`,
+      description: `Session started (session_id: ${sessionId})`,
     });
   } catch {
     // Silent fallback — dailynote 기록 실패는 세션 시작에 영향 없음
@@ -170,7 +170,7 @@ function initClaudeMdSection(
       mergeMaencofSection(filePath, directive, { createIfMissing: true });
       writeVaultVersion(cwd, VERSION);
       messages.push(
-        '[maencof] CLAUDE.md에 maencof 지시문이 초기화되었습니다.',
+        '[maencof] maencof directives initialized in CLAUDE.md.',
       );
     } else if (vaultVersion === null) {
       // 마커 있음 + version.json 없음 → version.json 생성 (기존 vault 호환)
@@ -181,7 +181,7 @@ function initClaudeMdSection(
       mergeMaencofSection(filePath, directive, { createIfMissing: false });
       updateVaultVersion(cwd, vaultVersion);
       messages.push(
-        `[maencof] CLAUDE.md 지시문이 업데이트되었습니다 (${vaultVersion} → ${VERSION}).`,
+        `[maencof] CLAUDE.md directives updated (${vaultVersion} → ${VERSION}).`,
       );
     }
     // 마커 있음 + 같은 버전 → 스킵 (idempotent)
@@ -248,8 +248,8 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
     const vaultVersion = readVaultVersion(cwd);
     if (vaultVersion !== null && vaultVersion !== VERSION) {
       messages.push(
-        `[maencof] 플러그인이 업데이트되었습니다 (${vaultVersion} → ${VERSION}).` +
-        '\n`/maencof:setup`을 실행하여 마이그레이션을 완료하세요.',
+        `[maencof] Plugin updated (${vaultVersion} → ${VERSION}).` +
+        '\nRun `/maencof:setup` to complete the migration.',
       );
     }
   } catch {
@@ -268,47 +268,47 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
   return `${header}
 
 ## Vault
-- 경로: ${cwd}
-- 모델: 5-Layer (Core/Derived/External/Action/Context)
+- Path: ${cwd}
+- Model: 5-Layer (Core/Derived/External/Action/Context)
 
-## 필수 규칙 (MUST)
+## Required Rules (MUST)
 
-- vault 내 문서를 검색할 때 MUST use \`kg_search\` or \`kg_navigate\`. Grep, Read로 vault 파일을 직접 검색하지 마세요.
-- vault 내 문서를 읽을 때 MUST use \`maencof_read\`. Read 도구로 vault 마크다운 파일을 직접 읽지 마세요.
-- vault에 새 지식을 기록할 때 MUST use \`maencof_create\`. Write 도구로 vault에 직접 파일을 생성하지 마세요.
-- vault 문서를 수정할 때 MUST use \`maencof_update\`. Edit 도구로 vault 마크다운 파일을 직접 수정하지 마세요.
-- 새 정보를 학습하면 MUST use \`kg_suggest_links\`로 기존 지식과의 연결 가능성을 확인하세요.
-- 문서 생성 시 MUST specify layer와 tags.
+- When searching vault documents MUST use \`kg_search\` or \`kg_navigate\`. Do not search vault files directly with Grep or Read.
+- When reading vault documents MUST use \`maencof_read\`. Do not read vault markdown files directly with the Read tool.
+- When recording new knowledge to vault MUST use \`maencof_create\`. Do not create files directly in the vault with the Write tool.
+- When modifying vault documents MUST use \`maencof_update\`. Do not edit vault markdown files directly with the Edit tool.
+- When learning new information MUST use \`kg_suggest_links\` to check for connection possibilities with existing knowledge.
+- When creating documents MUST specify layer and tags.
 
-## 금지 규칙 (FORBIDDEN)
+## Forbidden Rules (FORBIDDEN)
 
-- FORBIDDEN: vault 경로 내 마크다운 파일에 대해 Read, Write, Edit, Grep, Glob 도구를 직접 사용하는 것
-- FORBIDDEN: L1_Core 문서를 직접 수정하는 것 (identity-guardian 에이전트를 통해야 함)
-- FORBIDDEN: .maencof/ 또는 .maencof-meta/ 디렉토리를 직접 수정하는 것
+- FORBIDDEN: Directly using Read, Write, Edit, Grep, Glob tools on markdown files within the vault path
+- FORBIDDEN: Directly modifying L1_Core documents (must go through the identity-guardian agent)
+- FORBIDDEN: Directly modifying the .maencof/ or .maencof-meta/ directories
 
-## 도구 매핑
+## Tool Mapping
 
-| 하고 싶은 일 | 사용할 도구 | 사용하지 말 것 |
+| Action | Use | Do NOT Use |
 |---|---|---|
-| vault 문서 검색 | kg_search, kg_navigate | Grep, Glob |
-| vault 문서 읽기 | maencof_read | Read |
-| vault 문서 생성 | maencof_create | Write |
-| vault 문서 수정 | maencof_update | Edit |
-| vault 문서 삭제 | maencof_delete | Bash rm |
-| vault 문서 이동 | maencof_move | Bash mv |
-| vault 상태 확인 | kg_status | ls, find |
-| 맥락 조합 | kg_context | 수동 파일 조합 |
-| CLAUDE.md 수정 | claudemd_merge | Edit (MAENCOF 영역) |
+| Search vault documents | kg_search, kg_navigate | Grep, Glob |
+| Read vault documents | maencof_read | Read |
+| Create vault documents | maencof_create | Write |
+| Update vault documents | maencof_update | Edit |
+| Delete vault documents | maencof_delete | Bash rm |
+| Move vault documents | maencof_move | Bash mv |
+| Check vault status | kg_status | ls, find |
+| Assemble context | kg_context | Manual file assembly |
+| Modify CLAUDE.md | claudemd_merge | Edit (MAENCOF section) |
 
-## 스킬
+## Skills
 
-| 스킬 | 용도 |
+| Skill | Purpose |
 |---|---|
-| /maencof:remember | 새 지식 기록 |
-| /maencof:recall | 과거 지식 검색 |
-| /maencof:explore | 지식 그래프 탐색 |
-| /maencof:organize | 지식 정리/리뷰 |
-| /maencof:reflect | 지식 회고 |`;
+| /maencof:remember | Record new knowledge |
+| /maencof:recall | Search past knowledge |
+| /maencof:explore | Explore knowledge graph |
+| /maencof:organize | Organize/review knowledge |
+| /maencof:reflect | Reflect on knowledge |`;
 }
 
 /**

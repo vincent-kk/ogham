@@ -3,9 +3,8 @@ name: doctor
 user_invocable: true
 description: 6 diagnostics + report generation + auto-fix suggestions — knowledge vault health check
 version: 1.0.0
-complexity: high
+complexity: medium
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: doctor skill
 plugin: maencof
 ---
 
@@ -16,73 +15,47 @@ Delegates detailed analysis to the doctor agent.
 
 ## When to Use This Skill
 
-- When you want to check the overall health of the knowledge vault
-- When you want to check for broken links, orphan nodes, and Frontmatter errors all at once
-- During regular vault maintenance
+- Check overall health of the knowledge vault
+- Detect broken links, orphan nodes, and Frontmatter errors all at once
+- Regular vault maintenance
 
-## Agent Collaboration Sequence
+## Prerequisites
+
+- The maencof vault must be initialized
+- If not initialized: guide to run `/maencof:setup`
+
+## Agent Collaboration
 
 ```
-[doctor skill] -> [doctor agent] -> DiagnosticResult
-                                 |
-                    classify auto-fixable items
-                                 |
-              user confirmation -> run auto-fix (AutoFixAction)
+[doctor skill] → [doctor agent] → DiagnosticResult
+                                 → classify auto-fixable items
+                                 → user confirmation → run auto-fix
 ```
 
-**Orchestrator**: the doctor skill delegates to the doctor agent to perform 6 diagnostics.
+The doctor skill delegates to the doctor agent for 6 diagnostics:
+orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter.
 
-## 6 Diagnostic Items
-
-| # | Diagnostic Item | Severity | Auto-fixable |
-|---|----------------|----------|-------------|
-| 1 | **orphan node** (orphan-node) | warning | partially |
-| 2 | **stale index** (stale-index) | warning | yes (`/maencof:rebuild`) |
-| 3 | **broken link** (broken-link) | error | no (manual review required) |
-| 4 | **Layer violation** (layer-mismatch) | error | partially |
-| 5 | **duplicate document** (duplicate) | warning | partially |
-| 6 | **Frontmatter validation** (invalid-frontmatter) | error | yes |
+> See **reference.md** for diagnostic item details, severity levels, and auto-fix rules.
 
 ## Workflow
 
 ### Step 1 — Run Diagnostics
 
-Delegate 6 diagnostics to the doctor agent:
-- Check stale nodes and orphan nodes via `kg_status`
-- Validate backlink-index.json integrity via `kg_navigate` (verify each link target is reachable)
-- Validate all .md file Frontmatter against the Zod schema via `maencof_read`
-- Check Layer directory rule compliance
+Delegate to the doctor agent. The agent runs `kg_status`, `kg_navigate`, `maencof_read` across all vault documents to perform 6 diagnostic checks.
 
 ### Step 2 — Generate Report
 
-```markdown
-## Diagnostic Report — {date}
+Display summary (Errors / Warnings / Info counts, auto-fixable count) and detailed findings grouped by diagnostic item.
 
-### Summary
-- Errors: N | Warnings: N | Info: N
-- Auto-fixable: N
-
-### Detailed Diagnostics
-#### Broken Links (error)
-- {file}: {link} -> unreachable
-
-#### Frontmatter Errors (error)
-- {file}: missing required field 'tags'
-
-#### Orphan Nodes (warning)
-- {file}: no inbound/outbound links
-
-### Recommended Actions
-1. /maencof:rebuild — rebuild stale index
-2. N broken links require manual fix
-```
+> See **reference.md § Report Format** for the full template.
 
 ### Step 3 — Run Auto-fix
 
-Run AutoFixAction after user confirmation:
-- Auto-fill missing Frontmatter fields (`maencof_update`)
-- Delegate stale index rebuild (`/maencof:rebuild`)
-- **Layer 1 (01_Core/) exception**: auto-fix via `maencof_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 3` or edit manually.
+After user confirmation, execute AutoFixAction:
+
+- Fill missing Frontmatter fields (`maencof_update`)
+- Rebuild stale index (`/maencof:rebuild`)
+- **L1 (01_Core/) exception**: auto-fix forbidden — guide to `/maencof:setup --step 3`
 
 ## Available MCP Tools
 
@@ -103,3 +76,7 @@ Run AutoFixAction after user confirmation:
 |--------|---------|-------------|
 | `--fix` | false | Run auto-fix (after confirmation) |
 | `--check` | all | Run only specific diagnostic items |
+
+## Resources
+
+- **reference.md**: 6 diagnostic items detail, report format template, auto-fix rules

@@ -18,7 +18,7 @@ export async function handleKgSearch(
 ): Promise<KgSearchResult | { error: string }> {
   if (!graph) {
     return {
-      error: '인덱스가 빌드되지 않았습니다. /maencof:build를 먼저 실행하세요.',
+      error: 'Index not built. Please run /maencof:build first.',
     };
   }
 

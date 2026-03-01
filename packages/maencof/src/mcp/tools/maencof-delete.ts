@@ -38,7 +38,7 @@ export async function handleMaencofDelete(
     return {
       success: false,
       path: input.path,
-      message: `파일을 찾을 수 없습니다: ${input.path}`,
+      message: `File not found: ${input.path}`,
     };
   }
 
@@ -51,7 +51,7 @@ export async function handleMaencofDelete(
       success: false,
       path: input.path,
       message:
-        'Layer 1 (Core Identity) 문서는 삭제할 수 없습니다. identity-guardian에게 문의하세요.',
+        'Layer 1 (Core Identity) documents cannot be deleted. Please contact the identity-guardian agent.',
     };
   }
 
@@ -61,8 +61,8 @@ export async function handleMaencofDelete(
     return {
       success: false,
       path: input.path,
-      message: `삭제 불가: ${backlinks.length}개 문서가 이 문서를 참조합니다. force=true로 강제 삭제 가능합니다.`,
-      warnings: backlinks.map((src) => `참조 문서: ${src}`),
+      message: `Cannot delete: ${backlinks.length} document(s) reference this document. Use force=true to force deletion.`,
+      warnings: backlinks.map((src) => `Referenced by: ${src}`),
     };
   }
 
@@ -77,13 +77,13 @@ export async function handleMaencofDelete(
 
   const warnings =
     backlinks.length > 0
-      ? [`경고: ${backlinks.length}개 문서의 backlink가 끊어졌습니다.`]
+      ? [`Warning: ${backlinks.length} document backlink(s) are now broken.`]
       : undefined;
 
   return {
     success: true,
     path: input.path,
-    message: `문서가 삭제되었습니다: ${input.path}`,
+    message: `Document deleted: ${input.path}`,
     warnings,
   };
 }

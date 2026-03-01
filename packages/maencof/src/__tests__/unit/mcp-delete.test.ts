@@ -51,7 +51,7 @@ describe('handleMaencofDelete', () => {
   it('존재하지 않는 파일은 실패를 반환한다', async () => {
     const result = await handleMaencofDelete(vault, { path: 'nonexistent.md' });
     expect(result.success).toBe(false);
-    expect(result.message).toContain('찾을 수 없습니다');
+    expect(result.message).toContain('File not found');
   });
 
   it('Layer 1 문서 삭제는 금지된다', async () => {
@@ -125,6 +125,6 @@ describe('handleMaencofDelete', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.message).toContain('삭제되었습니다');
+    expect(result.message).toContain('Document deleted');
   });
 });

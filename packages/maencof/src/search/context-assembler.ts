@@ -178,9 +178,9 @@ function buildMarkdown(
   const lines: string[] = ['## maencof Knowledge Context', ''];
 
   if (selectedItems.length === 0) {
-    lines.push('_관련 문서를 찾을 수 없습니다._');
+    lines.push('_No related documents found._');
   } else {
-    lines.push(`_${selectedItems.length}개 문서 (score 내림차순)_`, '');
+    lines.push(`_${selectedItems.length} document(s) (by score, descending)_`, '');
     for (const item of selectedItems) {
       lines.push(
         itemToMarkdown(item, includeFull && item.fullContent !== undefined),
@@ -189,7 +189,7 @@ function buildMarkdown(
   }
 
   if (truncatedCount > 0) {
-    lines.push('', `_토큰 예산 초과로 ${truncatedCount}개 문서 제외_`);
+    lines.push('', `_${truncatedCount} document(s) excluded due to token budget limit_`);
   }
 
   return lines.join('\n');

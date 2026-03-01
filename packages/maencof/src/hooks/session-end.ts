@@ -73,7 +73,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     appendDailynoteEntry(cwd, {
       time: formatTime(new Date()),
       category: 'session',
-      description: `세션 종료${detail}`,
+      description: `Session ended${detail}`,
     });
   } catch {
     // Silent fallback — dailynote 기록 실패는 세션 종료에 영향 없음

@@ -1,13 +1,13 @@
 /**
  * @file server.ts
- * @description maencof MCP 서버 — 15개 도구 등록 + 라우팅
+ * @description maencof MCP server — registers 15 tools + routing
  *
- * 도구 목록:
- * CRUD 5개: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
- * 검색 5개: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
- * 빌드 1개: kg_build
- * CLAUDE.md 3개: claudemd_merge, claudemd_read, claudemd_remove
- * Dailynote 1개: dailynote_read
+ * Tool list:
+ * CRUD x5: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+ * Search x5: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
+ * Build x1: kg_build
+ * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
+ * Dailynote x1: dailynote_read
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -36,25 +36,25 @@ import { handleMaencofMove } from './tools/maencof-move.js';
 import { handleMaencofRead } from './tools/maencof-read.js';
 import { handleMaencofUpdate } from './tools/maencof-update.js';
 
-/** 전역 경로 접근 차단 접두사 */
+/** Blocked prefixes for global config path access */
 const BLOCKED_PREFIXES = [
   resolve(homedir(), '.claude'),
   resolve(homedir(), '.config'),
 ];
 
 /**
- * vault 경로 (환경 변수 또는 CWD).
- * 전역 설정 경로로의 접근을 차단한다.
+ * vault path (from environment variable or CWD).
+ * Blocks access to global config paths.
  */
 function getVaultPath(): string {
   const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
   const resolved = resolve(raw);
 
-  // 전역 설정 경로 접근 차단
+  // Block access to global config paths
   for (const prefix of BLOCKED_PREFIXES) {
     if (resolved.startsWith(prefix)) {
       throw new Error(
-        `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
+        `Access to global config path is blocked: ${resolved}`,
       );
     }
   }
@@ -62,7 +62,7 @@ function getVaultPath(): string {
   return resolved;
 }
 
-/** 그래프 캐시 (서버 생명주기 동안 메모리 보존) */
+/** Graph cache (preserved in memory for the server lifecycle) */
 let cachedGraph: KnowledgeGraph | null = null;
 let cacheVaultPath: string | null = null;
 
@@ -86,7 +86,7 @@ function invalidateCache(): void {
 }
 
 /**
- * maencof MCP 서버를 생성하고 15개 도구를 등록한다.
+ * Creates the maencof MCP server and registers 15 tools.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
@@ -98,7 +98,7 @@ export function createServer(): McpServer {
 }
 
 /**
- * CRUD 5개 도구를 등록한다: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+ * Registers 5 CRUD tools: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
  */
 function registerCrudTools(server: McpServer): void {
   // ─── maencof_create ───────────────────────────────────────────────
@@ -106,7 +106,7 @@ function registerCrudTools(server: McpServer): void {
     'maencof_create',
     {
       description:
-        '새 기억 문서를 지식 트리에 생성합니다. Layer(1-5)와 태그를 지정하면 Frontmatter가 자동 생성됩니다.',
+        'Creates a new memory document in the knowledge tree. Frontmatter is auto-generated when Layer(1-5) and tags are specified.',
       inputSchema: z.object({
         layer: z
           .number()
@@ -114,21 +114,21 @@ function registerCrudTools(server: McpServer): void {
           .min(1)
           .max(5)
           .describe(
-            '문서 Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
+            'Document Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
           ),
-        tags: z.array(z.string()).min(1).describe('태그 목록 (최소 1개)'),
-        content: z.string().describe('문서 내용 (마크다운)'),
-        title: z.string().optional().describe('문서 제목 (선택)'),
+        tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
+        content: z.string().describe('Document content (markdown)'),
+        title: z.string().optional().describe('Document title (optional)'),
         filename: z
           .string()
           .optional()
-          .describe('파일명 힌트 (선택, 미지정 시 자동 생성)'),
-        source: z.string().optional().describe('외부 출처 (Layer 3용)'),
+          .describe('Filename hint (optional, auto-generated if omitted)'),
+        source: z.string().optional().describe('External source (for Layer 3)'),
         expires: z
           .string()
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
-          .describe('만료일 YYYY-MM-DD (Layer 4용)'),
+          .describe('Expiry date YYYY-MM-DD (for Layer 4)'),
       }),
     },
     async (args) => {
@@ -151,20 +151,20 @@ function registerCrudTools(server: McpServer): void {
     'maencof_read',
     {
       description:
-        '문서를 읽고 Frontmatter + 본문을 반환합니다. include_related=true이면 SA 기반 관련 문서도 포함합니다.',
+        'Reads a document and returns Frontmatter + body. When include_related=true, also includes SA-based related documents.',
       inputSchema: z.object({
-        path: z.string().describe('문서 경로 (vault 상대 경로)'),
+        path: z.string().describe('Document path (relative to vault)'),
         depth: z
           .number()
           .int()
           .min(1)
           .max(10)
           .optional()
-          .describe('SA 홉 수 (기본 2)'),
+          .describe('SA hop count (default 2)'),
         include_related: z
           .boolean()
           .optional()
-          .describe('관련 문서 포함 여부 (기본 true)'),
+          .describe('Include related documents (default true)'),
       }),
     },
     async (args) => {
@@ -183,13 +183,13 @@ function registerCrudTools(server: McpServer): void {
     'maencof_update',
     {
       description:
-        '기존 문서를 수정합니다. Frontmatter의 updated 필드가 자동으로 갱신됩니다.',
+        'Updates an existing document. The updated field in Frontmatter is automatically refreshed.',
       inputSchema: z.object({
-        path: z.string().describe('문서 경로'),
+        path: z.string().describe('Document path'),
         content: z
           .string()
           .optional()
-          .describe('새 내용 (마크다운, 생략 시 기존 내용 유지)'),
+          .describe('New content (markdown, preserves existing if omitted)'),
         frontmatter: z
           .object({
             tags: z.array(z.string()).optional(),
@@ -200,12 +200,12 @@ function registerCrudTools(server: McpServer): void {
               .min(1)
               .max(5)
               .optional()
-              .describe('Layer 변경 (1-5, Layer 위반 수정 시 사용)'),
+              .describe('Layer change (1-5, use when correcting Layer violations)'),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
           })
           .optional()
-          .describe('Frontmatter 부분 업데이트 (선택)'),
+          .describe('Partial Frontmatter update (optional)'),
       }),
     },
     async (args) => {
@@ -225,13 +225,13 @@ function registerCrudTools(server: McpServer): void {
     'maencof_delete',
     {
       description:
-        '문서를 삭제합니다. Layer 1 문서는 삭제 불가. backlink가 있으면 force=true 필요.',
+        'Deletes a document. Layer 1 documents cannot be deleted. Requires force=true if backlinks exist.',
       inputSchema: z.object({
-        path: z.string().describe('문서 경로'),
+        path: z.string().describe('Document path'),
         force: z
           .boolean()
           .optional()
-          .describe('backlink 경고 무시 여부 (기본 false)'),
+          .describe('Ignore backlink warnings (default false)'),
       }),
     },
     async (args) => {
@@ -251,22 +251,22 @@ function registerCrudTools(server: McpServer): void {
     'maencof_move',
     {
       description:
-        '문서를 다른 Layer로 이동합니다 (전이). Layer 1 문서는 이동 불가.',
+        'Moves a document to a different Layer (transition). Layer 1 documents cannot be moved.',
       inputSchema: z.object({
-        path: z.string().describe('문서 경로'),
+        path: z.string().describe('Document path'),
         target_layer: z
           .number()
           .int()
           .min(1)
           .max(5)
-          .describe('목표 Layer (1-5)'),
-        reason: z.string().optional().describe('전이 사유'),
+          .describe('Target Layer (1-5)'),
+        reason: z.string().optional().describe('Reason for transition'),
         confidence: z
           .number()
           .min(0)
           .max(1)
           .optional()
-          .describe('신뢰도 (Layer 3→2 전이 시)'),
+          .describe('Confidence score (for Layer 3→2 transition)'),
       }),
     },
     async (args) => {
@@ -286,7 +286,7 @@ function registerCrudTools(server: McpServer): void {
 }
 
 /**
- * KG 5개 도구를 등록한다: kg_search, kg_navigate, kg_context, kg_status, kg_build
+ * Registers 5 KG tools: kg_search, kg_navigate, kg_context, kg_status, kg_build
  */
 function registerKgTools(server: McpServer): void {
   // ─── kg_search ───────────────────────────────────────────────────
@@ -294,42 +294,42 @@ function registerKgTools(server: McpServer): void {
     'kg_search',
     {
       description:
-        '시드 노드(경로 또는 키워드)에서 확산 활성화(SA)로 관련 문서를 탐색합니다.',
+        'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords).',
       inputSchema: z.object({
         seed: z
           .array(z.string())
           .min(1)
-          .describe('시드 노드 (경로 또는 키워드)'),
+          .describe('Seed nodes (paths or keywords)'),
         max_results: z
           .number()
           .int()
           .min(1)
           .max(100)
           .optional()
-          .describe('최대 반환 수 (기본 10)'),
+          .describe('Maximum results to return (default 10)'),
         decay: z
           .number()
           .min(0)
           .max(1)
           .optional()
-          .describe('감쇠 인자 (기본 0.7)'),
+          .describe('Decay factor (default 0.7)'),
         threshold: z
           .number()
           .min(0)
           .max(1)
           .optional()
-          .describe('발화 임계값 (기본 0.1)'),
+          .describe('Activation threshold (default 0.1)'),
         max_hops: z
           .number()
           .int()
           .min(1)
           .max(20)
           .optional()
-          .describe('최대 홉 수 (기본 5)'),
+          .describe('Maximum hop count (default 5)'),
         layer_filter: z
           .array(z.number().int().min(1).max(5))
           .optional()
-          .describe('Layer 필터 (1-5)'),
+          .describe('Layer filter (1-5)'),
       }),
     },
     async (args) => {
@@ -355,21 +355,21 @@ function registerKgTools(server: McpServer): void {
     'kg_navigate',
     {
       description:
-        '특정 노드의 이웃(인/아웃 링크, 부모/자식, 형제)을 조회합니다.',
+        'Retrieves neighbors (inbound/outbound links, parent/child, siblings) of a specific node.',
       inputSchema: z.object({
-        path: z.string().describe('대상 노드 경로'),
+        path: z.string().describe('Target node path'),
         include_inbound: z
           .boolean()
           .optional()
-          .describe('인바운드 링크 포함 (기본 true)'),
+          .describe('Include inbound links (default true)'),
         include_outbound: z
           .boolean()
           .optional()
-          .describe('아웃바운드 링크 포함 (기본 true)'),
+          .describe('Include outbound links (default true)'),
         include_hierarchy: z
           .boolean()
           .optional()
-          .describe('부모/자식/형제 포함 (기본 true)'),
+          .describe('Include parent/child/siblings (default true)'),
       }),
     },
     async (args) => {
@@ -392,20 +392,20 @@ function registerKgTools(server: McpServer): void {
     'kg_context',
     {
       description:
-        '쿼리에 관련된 문서를 토큰 예산 내에서 조립한 컨텍스트 블록을 반환합니다.',
+        'Returns a context block assembled from documents relevant to the query within a token budget.',
       inputSchema: z.object({
-        query: z.string().describe('검색 쿼리'),
+        query: z.string().describe('Search query'),
         token_budget: z
           .number()
           .int()
           .min(100)
           .max(10000)
           .optional()
-          .describe('토큰 예산 (기본 2000)'),
+          .describe('Token budget (default 2000)'),
         include_full: z
           .boolean()
           .optional()
-          .describe('상위 N개 전문 포함 (기본 false)'),
+          .describe('Include full text of top N results (default false)'),
       }),
     },
     async (args) => {
@@ -428,7 +428,7 @@ function registerKgTools(server: McpServer): void {
     'kg_status',
     {
       description:
-        '인덱스 상태를 조회합니다 (노드 수, 엣지 수, stale 비율, 신선도).',
+        'Retrieves index status (node count, edge count, stale ratio, freshness).',
       inputSchema: z.object({}),
     },
     async (_args) => {
@@ -448,9 +448,9 @@ function registerKgTools(server: McpServer): void {
     'kg_build',
     {
       description:
-        '지식 그래프 인덱스를 빌드합니다. force=true이면 전체 재빌드, 기본은 증분 빌드.',
+        'Builds the knowledge graph index. force=true triggers a full rebuild; default is incremental.',
       inputSchema: z.object({
-        force: z.boolean().optional().describe('전체 재빌드 여부 (기본 false)'),
+        force: z.boolean().optional().describe('Full rebuild (default false)'),
       }),
     },
     async (args) => {
@@ -470,33 +470,33 @@ function registerKgTools(server: McpServer): void {
     'kg_suggest_links',
     {
       description:
-        '대상 문서에 대해 기존 지식 베이스 내 관련 문서 연결 후보를 추천합니다. 태그 Jaccard 유사도 + SA 보강 2단계 알고리즘.',
+        'Suggests link candidates from the existing knowledge base for a target document. Two-stage algorithm: tag Jaccard similarity + SA reinforcement.',
       inputSchema: z.object({
         path: z
           .string()
           .optional()
-          .describe('대상 문서 경로 (기존 문서)'),
+          .describe('Target document path (existing document)'),
         tags: z
           .array(z.string())
           .optional()
-          .describe('새 문서의 태그 목록'),
+          .describe('Tag list for a new document'),
         content_hint: z
           .string()
           .optional()
-          .describe('새 문서 내용 일부 (키워드 추출)'),
+          .describe('Partial content of a new document (for keyword extraction)'),
         max_suggestions: z
           .number()
           .int()
           .min(1)
           .max(20)
           .optional()
-          .describe('최대 추천 수 (기본 5)'),
+          .describe('Maximum suggestions (default 5)'),
         min_score: z
           .number()
           .min(0)
           .max(1)
           .optional()
-          .describe('최소 유사도 임계값 (기본 0.2)'),
+          .describe('Minimum similarity threshold (default 0.2)'),
       }),
     },
     async (args) => {
@@ -513,7 +513,7 @@ function registerKgTools(server: McpServer): void {
 }
 
 /**
- * CLAUDE.md 조작 3개 도구를 등록한다: claudemd_merge, claudemd_read, claudemd_remove
+ * Registers 3 CLAUDE.md tools: claudemd_merge, claudemd_read, claudemd_remove
  */
 function registerClaudeMdTools(server: McpServer): void {
   // ─── claudemd_merge ───────────────────────────────────────────────
@@ -521,15 +521,15 @@ function registerClaudeMdTools(server: McpServer): void {
     'claudemd_merge',
     {
       description:
-        'CWD의 CLAUDE.md에 maencof 지시문 섹션을 삽입하거나 업데이트합니다. 마커(MAENCOF:START/END) 기반 섹션 관리.',
+        'Inserts or updates the maencof directive section in CLAUDE.md at CWD. Section managed via markers (MAENCOF:START/END).',
       inputSchema: z.object({
         content: z
           .string()
-          .describe('CLAUDE.md에 삽입할 maencof 지시문 (마크다운)'),
+          .describe('maencof directive to insert into CLAUDE.md (markdown)'),
         dry_run: z
           .boolean()
           .optional()
-          .describe('드라이런 모드 (기본 false)'),
+          .describe('Dry run mode (default false)'),
       }),
     },
     (args) => {
@@ -548,7 +548,7 @@ function registerClaudeMdTools(server: McpServer): void {
     'claudemd_read',
     {
       description:
-        'CWD의 CLAUDE.md에서 maencof 지시문 섹션을 읽습니다.',
+        'Reads the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({}),
     },
     (_args) => {
@@ -567,12 +567,12 @@ function registerClaudeMdTools(server: McpServer): void {
     'claudemd_remove',
     {
       description:
-        'CWD의 CLAUDE.md에서 maencof 지시문 섹션을 제거합니다.',
+        'Removes the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({
         dry_run: z
           .boolean()
           .optional()
-          .describe('드라이런 모드 (기본 false)'),
+          .describe('Dry run mode (default false)'),
       }),
     },
     (args) => {
@@ -588,20 +588,20 @@ function registerClaudeMdTools(server: McpServer): void {
 }
 
 /**
- * Dailynote 1개 도구를 등록한다: dailynote_read
+ * Registers 1 Dailynote tool: dailynote_read
  */
 function registerDailynoteTools(server: McpServer): void {
   server.registerTool(
     'dailynote_read',
     {
       description:
-        'dailynote(일일 활동 로그)를 조회합니다. 날짜, 카테고리 필터, 최근 N일 조회를 지원합니다.',
+        'Queries the dailynote (daily activity log). Supports date, category filter, and last N days lookup.',
       inputSchema: z.object({
         date: z
           .string()
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
-          .describe('조회할 날짜 YYYY-MM-DD (기본: 오늘)'),
+          .describe('Date to query YYYY-MM-DD (default: today)'),
         category: z
           .enum([
             'document',
@@ -612,14 +612,14 @@ function registerDailynoteTools(server: McpServer): void {
             'diagnostic',
           ])
           .optional()
-          .describe('카테고리 필터'),
+          .describe('Category filter'),
         last_days: z
           .number()
           .int()
           .min(1)
           .max(30)
           .optional()
-          .describe('최근 N일 조회 (기본 1, 최대 30)'),
+          .describe('Query last N days (default 1, max 30)'),
       }),
     },
     (args) => {
@@ -635,7 +635,7 @@ function registerDailynoteTools(server: McpServer): void {
 }
 
 /**
- * MCP 서버를 stdio 트랜스포트로 시작한다.
+ * Starts the MCP server with stdio transport.
  */
 export async function startServer(): Promise<void> {
   const server = createServer();

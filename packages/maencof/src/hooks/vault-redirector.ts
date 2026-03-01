@@ -55,7 +55,7 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
 const TOOL_GUIDANCE: Record<string, string> = {
   Read: 'maencof_read',
   Grep: 'kg_search',
-  Glob: 'kg_search 또는 kg_navigate',
+  Glob: 'kg_search or kg_navigate',
 };
 
 /**
@@ -113,7 +113,7 @@ export function runVaultRedirector(input: VaultRedirectorInput): VaultRedirector
     return { continue: true };
   }
 
-  const suggestion = TOOL_GUIDANCE[toolName] ?? 'maencof MCP 도구';
+  const suggestion = TOOL_GUIDANCE[toolName] ?? 'maencof MCP tools';
   const cwdWithSep = cwd.endsWith('/') ? cwd : cwd + '/';
   const relPath = resolve(cwd, filePath).slice(cwdWithSep.length);
 
@@ -121,8 +121,8 @@ export function runVaultRedirector(input: VaultRedirectorInput): VaultRedirector
     continue: true,
     hookSpecificOutput: {
       additionalContext: [
-        `[maencof] vault 문서에 대해 ${toolName} 대신 ${suggestion}를 사용하세요.`,
-        `경로: ${relPath} → ${suggestion}(path: "${relPath}")`,
+        `[maencof] Use ${suggestion} instead of ${toolName} for vault documents.`,
+        `Path: ${relPath} → ${suggestion}(path: "${relPath}")`,
       ].join('\n'),
     },
   };
@@ -150,14 +150,14 @@ function handleGlobRedirect(
     return { continue: true };
   }
 
-  const suggestion = TOOL_GUIDANCE['Glob'] ?? 'maencof MCP 도구';
+  const suggestion = TOOL_GUIDANCE['Glob'] ?? 'maencof MCP tools';
 
   return {
     continue: true,
     hookSpecificOutput: {
       additionalContext: [
-        `[maencof] vault 문서에 대해 Glob 대신 ${suggestion}를 사용하세요.`,
-        `패턴: ${pattern} → ${suggestion}`,
+        `[maencof] Use ${suggestion} instead of Glob for vault documents.`,
+        `Pattern: ${pattern} → ${suggestion}`,
       ].join('\n'),
     },
   };

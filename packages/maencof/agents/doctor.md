@@ -39,7 +39,7 @@ for items that can be repaired automatically.
 ```
 Detection: nodes with both inbound and outbound link counts of 0 via kg_status
 Severity: warning
-Auto-fix: suggest calling /maencof:explore skill (discover related documents and add links)
+Auto-fix: suggest calling /maencof:suggest skill (discover related documents and recommend new connections)
 ```
 
 ### D2. Stale Index (stale-index)

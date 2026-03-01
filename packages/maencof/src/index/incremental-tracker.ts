@@ -165,7 +165,7 @@ export function computeIncrementalScope(
       filesToReparse: allChanged,
       nodesToReweight: [],
       fullRebuildRecommended: true,
-      fullRebuildReason: `변경 비율 ${(changeRatio * 100).toFixed(1)}% > 임계값 ${FULL_REBUILD_THRESHOLD * 100}%`,
+      fullRebuildReason: `Change ratio ${(changeRatio * 100).toFixed(1)}% > threshold ${FULL_REBUILD_THRESHOLD * 100}%`,
     };
   }
 

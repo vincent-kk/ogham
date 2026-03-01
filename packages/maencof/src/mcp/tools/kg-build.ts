@@ -134,7 +134,7 @@ export async function handleKgBuild(
     return {
       success: true,
       path: vaultPath,
-      message: `인덱스 빌드 완료: ${graph.nodeCount}개 노드, ${graph.edgeCount}개 엣지 (${durationMs}ms)`,
+      message: `Index build complete: ${graph.nodeCount} nodes, ${graph.edgeCount} edges (${durationMs}ms)`,
       nodeCount: graph.nodeCount,
       edgeCount: graph.edgeCount,
       durationMs,
@@ -145,7 +145,7 @@ export async function handleKgBuild(
     return {
       success: false,
       path: vaultPath,
-      message: `인덱스 빌드 실패: ${message}`,
+      message: `Index build failed: ${message}`,
       nodeCount: 0,
       edgeCount: 0,
       durationMs: Date.now() - startTime,

@@ -50,7 +50,7 @@ describe('handleKgNavigate', () => {
     const result = await handleKgNavigate(null, { path: 'test.md' });
     expect('error' in result).toBe(true);
     if ('error' in result) {
-      expect(result.error).toContain('인덱스');
+      expect(result.error).toContain('Index not built');
     }
   });
 
@@ -59,7 +59,7 @@ describe('handleKgNavigate', () => {
     const result = await handleKgNavigate(graph, { path: 'nonexistent.md' });
     expect('error' in result).toBe(true);
     if ('error' in result) {
-      expect(result.error).toContain('찾을 수 없습니다');
+      expect(result.error).toContain('Node not found');
     }
   });
 

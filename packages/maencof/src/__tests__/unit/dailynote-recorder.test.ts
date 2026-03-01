@@ -60,7 +60,7 @@ describe('runDailynoteRecorder', () => {
     const entries = parseDailynote(content);
     expect(entries).toHaveLength(1);
     expect(entries[0].category).toBe('document');
-    expect(entries[0].description).toContain('문서 생성');
+    expect(entries[0].description).toContain('Document created');
   });
 
   it('TOOL_CATEGORY_MAP에 없는 도구는 기록하지 않는다', () => {

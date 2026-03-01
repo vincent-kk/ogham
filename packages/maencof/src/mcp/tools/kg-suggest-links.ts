@@ -220,11 +220,11 @@ function buildReason(
   const parts: string[] = [];
 
   if (shared.length > 0) {
-    parts.push(`공통 태그: [${shared.join(', ')}]`);
+    parts.push(`Common tags: [${shared.join(', ')}]`);
   }
 
   if (saScore > 0) {
-    parts.push(`SA 간접 연결 (보강 점수: ${saScore.toFixed(2)})`);
+    parts.push(`SA indirect link (boost score: ${saScore.toFixed(2)})`);
   }
 
   const layerNames: Record<number, string> = {
@@ -239,5 +239,5 @@ function buildReason(
     parts.push(`Layer ${layerNum} (${layerNames[layerNum]})`);
   }
 
-  return parts.length > 0 ? parts.join(' | ') : '태그 유사도 기반 추천';
+  return parts.length > 0 ? parts.join(' | ') : 'Tag similarity-based suggestion';
 }

@@ -118,7 +118,7 @@ describe('handleMaencofCreate', () => {
 
     const second = await handleMaencofCreate(vault, input);
     expect(second.success).toBe(false);
-    expect(second.message).toContain('이미 존재합니다');
+    expect(second.message).toContain('File already exists');
   });
 
   it('stale-nodes.json에 새 경로가 추가된다', async () => {

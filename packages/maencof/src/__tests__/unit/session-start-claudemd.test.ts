@@ -59,8 +59,8 @@ describe('session-start CLAUDE.md 초기화', () => {
     runSessionStart({ cwd: vaultDir });
 
     const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
-    expect(content).toContain('## 필수 규칙 (MUST)');
-    expect(content).toContain('## 금지 규칙 (FORBIDDEN)');
+    expect(content).toContain('## Required Rules (MUST)');
+    expect(content).toContain('## Forbidden Rules (FORBIDDEN)');
     expect(content).toContain('MUST use `kg_search`');
     expect(content).toContain('MUST use `maencof_read`');
     expect(content).toContain('MUST use `maencof_create`');
@@ -71,9 +71,9 @@ describe('session-start CLAUDE.md 초기화', () => {
     runSessionStart({ cwd: vaultDir });
 
     const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
-    expect(content).toContain('## 도구 매핑');
-    expect(content).toContain('| vault 문서 검색 |');
-    expect(content).toContain('| vault 문서 읽기 |');
+    expect(content).toContain('## Tool Mapping');
+    expect(content).toContain('| Search vault documents |');
+    expect(content).toContain('| Read vault documents |');
     expect(content).toContain('kg_search');
     expect(content).toContain('maencof_read');
   });
@@ -156,7 +156,7 @@ describe('session-start CLAUDE.md 초기화', () => {
   it('초기화 메시지가 반환된다', () => {
     const result = runSessionStart({ cwd: vaultDir });
     expect(result.message).toContain('CLAUDE.md');
-    expect(result.message).toContain('초기화');
+    expect(result.message).toContain('initialized');
   });
 });
 
@@ -215,7 +215,7 @@ describe('session-start version.json 관리', () => {
     expect(data.lastMigratedAt).toBeTruthy();
 
     // 업데이트 메시지 포함
-    expect(result.message).toContain('업데이트');
+    expect(result.message).toContain('updated');
   });
 
   it('동일 버전이면 CLAUDE.md를 건드리지 않는다 (idempotent)', () => {
@@ -239,7 +239,7 @@ describe('session-start version.json 관리', () => {
     runSessionStart({ cwd: vaultDir });
 
     const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
-    expect(content).toContain('## 스킬');
+    expect(content).toContain('## Skills');
     expect(content).toContain('/maencof:remember');
     expect(content).toContain('/maencof:recall');
     expect(content).toContain('/maencof:explore');

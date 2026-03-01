@@ -36,7 +36,7 @@ export async function handleMaencofRead(
     return {
       success: false,
       path: input.path,
-      message: `파일을 찾을 수 없습니다: ${input.path}`,
+      message: `File not found: ${input.path}`,
       content: '',
       node: {} as never,
     };
@@ -49,7 +49,7 @@ export async function handleMaencofRead(
     return {
       success: false,
       path: input.path,
-      message: `문서 파싱 실패: ${nodeResult.error}`,
+      message: `Document parsing failed: ${nodeResult.error}`,
       content,
       node: {} as never,
       warnings: nodeResult.error ? [nodeResult.error] : undefined,
@@ -59,14 +59,14 @@ export async function handleMaencofRead(
   const warnings: string[] = [];
   if (isLayer1Path(input.path)) {
     warnings.push(
-      'Layer 1 (01_Core/) 문서입니다. memory-organizer는 kg_navigate를 통한 간접 접근만 허용됩니다.',
+      'This is a Layer 1 (01_Core/) document. memory-organizer only allows indirect access via kg_navigate.',
     );
   }
 
   return {
     success: true,
     path: input.path,
-    message: '문서를 성공적으로 읽었습니다.',
+    message: 'Document read successfully.',
     content,
     node: nodeResult.node,
     ...(warnings.length > 0 ? { warnings } : {}),

@@ -5,21 +5,21 @@ description: Lightweight index health diagnostic — quick status check and reco
 version: 1.0.0
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: diagnose skill
 plugin: maencof
 ---
 
 # diagnose — Index Health Diagnostic
 
 A lightweight version of `/maencof:doctor`. Performs a quick status check only without auto-fix.
-Reports index freshness, stale node ratio, and whether a rebuild is recommended — immediately.
+Reports index freshness, stale node ratio, and whether a rebuild is recommended.
+
+> **Difference from `/maencof:doctor`**: diagnose is read-only and fast (calls `kg_status` only). doctor runs a full scan with auto-fix suggestions.
 
 ## When to Use This Skill
 
-- When you want to quickly check if the index is up to date
+- Quick check if the index is up to date
 - Pre-flight status check before search/exploration
-- A simple pre-check before running `/maencof:doctor`
-- Status check in a build pipeline
+- Simple pre-check before running `/maencof:doctor`
 
 ## Prerequisites
 
@@ -30,75 +30,21 @@ Reports index freshness, stale node ratio, and whether a rebuild is recommended 
 
 ### Step 1 — Query Index Status
 
-Query basic status with the `kg_status` MCP tool:
+Call `kg_status()` to retrieve nodeCount, edgeCount, lastBuiltAt, staleNodeCount, freshnessPercent, rebuildRecommended.
 
-```
-kg_status()
-```
+### Step 2 — Generate Report
 
-Response fields:
-- `nodeCount`: total node count
-- `edgeCount`: total edge count
-- `lastBuiltAt`: last build timestamp
-- `staleNodeCount`: stale node count
-- `freshnessPercent`: index freshness (%)
-- `rebuildRecommended`: whether a full rebuild is recommended
+Format results based on health state:
 
-### Step 2 — Generate Diagnostic Report
+- **OK** (stale < 10%): display stats, status OK
+- **Caution** (stale 10-30%): display stats, recommend `/maencof:rebuild`
+- **Critical** (stale > 30% or no index): recommend `/maencof:build --full` or `/maencof:doctor`
 
-Format and output the query results:
+> See **reference.md** for full report format templates and action matrix.
 
-**Healthy state (stale < 10%)**:
-```
-maencof Index Status
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nodes:         {N}
-Edges:         {N}
-Last built:    {time ago / YYYY-MM-DD HH:mm}
-Stale ratio:   {N}% ({staleCount}) — OK
-Freshness:     {freshnessPercent}%
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Status: OK
-```
+### Step 3 (Optional) — Verbose Mode
 
-**Caution state (stale 10–30%)**:
-```
-maencof Index Status
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Nodes:         {N}
-Stale ratio:   {N}% — Caution
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Recommended: Run /maencof:rebuild.
-```
-
-**Critical state (stale > 30% or no index)**:
-```
-maencof Index Status
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Index: missing / critically stale
-━━━━━━━━━━━━━━━━━━━━━━━━━━
-Recommended: Run /maencof:build --full or /maencof:doctor
-```
-
-### Step 3 — Present Recommended Actions
-
-Guide the next steps based on status:
-
-| Status | Recommended Action |
-|--------|-------------------|
-| OK (stale < 10%) | none |
-| Caution (stale 10–30%) | `/maencof:rebuild` |
-| Critical (stale > 30%) | `/maencof:build --full` |
-| No index | `/maencof:build` |
-| Suspected structural issue | `/maencof:doctor` full diagnosis |
-
-### Step 4 (Optional) — Verbose Mode
-
-When `--verbose` is specified, display additional information:
-
-- List of stale node paths (up to 10)
-- Number of files modified since last build
-- Node distribution by Layer
+When `--verbose` is specified: list stale node paths, modified file count, Layer distribution.
 
 ## Available MCP Tools
 
@@ -107,8 +53,6 @@ When `--verbose` is specified, display additional information:
 | `kg_status` | Query index status (primary tool) |
 
 ## Options
-
-> Options are interpreted by the LLM in natural language.
 
 ```
 /maencof:diagnose [--verbose]
@@ -125,21 +69,6 @@ When `--verbose` is specified, display additional information:
 /maencof:diagnose --verbose
 ```
 
-## Error Handling
+## Resources
 
-- **kg_status failure**: "MCP server connection failed. Check your `.mcp.json` configuration."
-- **No index**: report as unbuilt state and guide to `/maencof:build`
-
-## Quick Reference
-
-```
-# Quick status check
-/maencof:diagnose
-
-# Detailed report
-/maencof:diagnose --verbose
-
-# Difference from doctor
-# diagnose: read-only, fast (calls kg_status only)
-# doctor: full scan + auto-fix suggestions (takes more time)
-```
+- **reference.md**: Report format templates, action matrix, verbose mode detail, kg_status response fields
