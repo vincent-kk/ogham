@@ -83,7 +83,7 @@ Execute memory-organizer judge logic:
 ## Options
 
 ```
-/maencof:reflect [--layer <1-5>] [--show-all]
+/maencof:reflect [--layer <3|4>] [--show-all]
 ```
 
 | Option | Default | Description |

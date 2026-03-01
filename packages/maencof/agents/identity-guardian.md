@@ -13,7 +13,7 @@ tools:
   - Grep
   - maencof_read
   - kg_navigate
-allowed_layers: [1]
+allowed_layers: [1, 2, 3, 4, 5]
 allowed_operations:
   - read
 forbidden_operations:

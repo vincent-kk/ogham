@@ -49,8 +49,8 @@ Delegates detailed analysis to the doctor agent.
 
 Delegate 6 diagnostics to the doctor agent:
 - Check stale nodes and orphan nodes via `kg_status`
-- Validate backlink-index.json integrity
-- Validate all .md file Frontmatter against the Zod schema
+- Validate backlink-index.json integrity via `kg_navigate` (verify each link target is reachable)
+- Validate all .md file Frontmatter against the Zod schema via `maencof_read`
 - Check Layer directory rule compliance
 
 ### Step 2 — Generate Report

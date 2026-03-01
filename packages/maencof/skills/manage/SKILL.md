@@ -124,7 +124,7 @@ Generate a new custom skill/agent template:
 - **disabled-registry.json missing**: treat as empty registry; create on first disable operation
 - **Attempt to delete built-in skill/agent**: "Built-in items cannot be deleted. Use `disable` instead."
 - **Name not found**: "No skill or agent named '{name}' found."
-- **maencof_create failure during create mode**: report error; no partial file created
+- **Write failure during create mode**: report error; no partial file created
 
 ## ManageResult Type
 

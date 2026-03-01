@@ -3,7 +3,7 @@ name: setup
 user_invocable: true
 description: maencof onboarding wizard — Core Identity collection + knowledge tree initialization (6 stages)
 version: 1.0.0
-complexity: complex
+complexity: high
 context_layers: [1]
 orchestrator: setup skill
 plugin: maencof

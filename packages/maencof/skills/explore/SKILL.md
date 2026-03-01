@@ -100,6 +100,18 @@ kg_navigate(
 
 Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring.
 
+When `--detail` is specified or the user requests full content, read the document body:
+
+```
+maencof_read(path: selected node path)
+```
+
+To assemble token-optimized context for multiple activated nodes, use:
+
+```
+kg_context(query: current seed or keyword, token_budget: 2000)
+```
+
 ### Step 6 — Interactive Expansion (Up to 3 Rounds)
 
 If the user selects a neighbor node as a new seed, re-run from Step 3.
