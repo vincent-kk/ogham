@@ -1,7 +1,7 @@
 /**
  * @file session-start.ts
- * @description SessionStart Hook — 지식 트리 점검, WAL 복구 감지, 스케줄 확인, 이전 세션 요약 로드
- * C1 제약: 5초 이내 완료 필수. 무거운 인덱스 빌드는 Skill에 위임.
+ * @description SessionStart Hook — Knowledge tree check, WAL recovery detection, schedule review, previous session summary load
+ * C1 constraint: Must complete within 5 seconds. Heavy index builds are delegated to Skills.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,40 +16,40 @@ export interface SessionStartInput {
 export interface SessionStartResult {
   continue: boolean;
   suppressOutput?: boolean;
-  /** 사용자에게 출력할 메시지 */
+  /** Message to display to the user */
   message?: string;
 }
 
 /**
- * SessionStart Hook 핸들러.
- * 1. .maencof/ 디렉토리 존재 확인 → 미존재 시 setup 안내
- * 2. WAL 잔존 감지 → 복구 제안
- * 3. schedule-log.json 확인 → organize 스킬 호출 제안
- * 4. 최근 세션 요약 로드 → 이전 컨텍스트 출력
- * 5. data-sources.json 미설정 시 connect 안내
+ * SessionStart Hook handler.
+ * 1. Check .maencof/ directory exists → prompt setup if missing
+ * 2. Detect leftover WAL → suggest recovery
+ * 3. Check schedule-log.json → suggest organize skill
+ * 4. Load recent session summary → display previous context
+ * 5. Check data-sources.json → suggest connect if missing
  */
 export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const cwd = input.cwd ?? process.cwd();
   const messages: string[] = [];
 
-  // 1. maencof vault 확인
+  // 1. Check maencof vault
   if (!isMaencofVault(cwd)) {
     return {
       continue: true,
       message:
-        '[maencof] vault가 초기화되지 않았습니다. `/maencof:setup`을 실행하여 시작하세요.',
+        '[maencof] Vault is not initialized. Run `/maencof:setup` to get started.',
     };
   }
 
-  // 2. WAL 잔존 감지
+  // 2. Detect leftover WAL
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath)) {
     messages.push(
-      '[maencof] 이전 세션의 미완료 트랜잭션(WAL)이 감지됐습니다. `/maencof:doctor`로 진단하세요.',
+      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:doctor` to diagnose.',
     );
   }
 
-  // 3. schedule-log.json 확인
+  // 3. Check schedule-log.json
   const scheduleLogPath = metaPath(cwd, 'schedule-log.json');
   if (existsSync(scheduleLogPath)) {
     try {
@@ -58,28 +58,28 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       };
       if (log.pending && log.pending.length > 0) {
         messages.push(
-          `[maencof] 예약된 작업 ${log.pending.length}개가 있습니다. \`/maencof:organize\`로 처리하세요.`,
+          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`,
         );
       }
     } catch {
-      // schedule-log.json 파싱 실패 시 무시
+      // Ignore schedule-log.json parse failures
     }
   }
 
-  // 4. 최근 세션 요약 로드
+  // 4. Load recent session summary
   const sessionsDir = metaPath(cwd, 'sessions');
   if (existsSync(sessionsDir)) {
     const recentSummary = loadRecentSessionSummary(sessionsDir);
     if (recentSummary) {
-      messages.push(`[maencof] 이전 세션 요약:\n${recentSummary}`);
+      messages.push(`[maencof] Previous session summary:\n${recentSummary}`);
     }
   }
 
-  // 5. data-sources.json 미설정 확인
+  // 5. Check data-sources.json
   const dataSourcesPath = metaPath(cwd, 'data-sources.json');
   if (!existsSync(dataSourcesPath)) {
     messages.push(
-      '[maencof] 외부 데이터 소스가 연결되지 않았습니다. `/maencof:connect`로 연결하세요.',
+      '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );
   }
 
@@ -90,7 +90,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 }
 
 /**
- * sessions/ 디렉토리에서 가장 최근 세션 요약을 읽는다.
+ * Load the most recent session summary from the sessions/ directory.
  */
 function loadRecentSessionSummary(sessionsDir: string): string | null {
   try {
@@ -104,7 +104,7 @@ function loadRecentSessionSummary(sessionsDir: string): string | null {
     const latestFile = join(sessionsDir, files[0]);
     const content = readFileSync(latestFile, 'utf-8');
 
-    // 요약 섹션만 추출 (처음 10줄)
+    // Extract summary section (first 10 lines)
     const lines = content.split('\n').slice(0, 10).join('\n');
     return lines.trim() || null;
   } catch {

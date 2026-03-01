@@ -1,7 +1,7 @@
 /**
  * @file layer-guard.ts
- * @description PreToolUse Hook — Layer 1 (01_Core/) 파일 수정 시 경고 출력
- * identity-guardian 에이전트를 통한 수정 안내
+ * @description PreToolUse Hook — Warn when modifying Layer 1 (01_Core/) files
+ * Guides modification through the identity-guardian agent
  */
 import { isLayer1Path, isMaencofVault } from './shared.js';
 
@@ -17,19 +17,19 @@ export interface PreToolUseInput {
 
 export interface PreToolUseResult {
   continue: boolean;
-  /** 차단 시 사용자에게 출력할 메시지 */
+  /** Message to display when the action is blocked */
   reason?: string;
 }
 
 /**
- * Layer Guard Hook 핸들러.
- * Write/Edit 도구로 Layer 1 (01_Core/) 파일을 수정하려 할 때 경고를 출력한다.
- * maencof vault가 아닌 경우 무조건 통과.
+ * Layer Guard Hook handler.
+ * Warns when Write/Edit tools attempt to modify Layer 1 (01_Core/) files.
+ * Always passes through if not in a maencof vault.
  */
 export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
   const cwd = input.cwd ?? process.cwd();
 
-  // maencof vault가 아니면 무조건 통과
+  // Always pass through if not in a maencof vault
   if (!isMaencofVault(cwd)) {
     return { continue: true };
   }
@@ -43,12 +43,12 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
     return {
       continue: false,
       reason: [
-        `[maencof] Layer 1 (01_Core/) 파일은 직접 수정이 제한됩니다.`,
-        `파일: ${filePath}`,
+        `[maencof] Direct modification of Layer 1 (01_Core/) files is restricted.`,
+        `File: ${filePath}`,
         ``,
-        `Layer 1 문서는 핵심 정체성(Hub 노드)을 담습니다. 수정이 필요한 경우:`,
-        `  1. identity-guardian 에이전트를 통해 수정 요청 (자동 위임됨)`,
-        `  2. 또는 충분한 이유를 설명 후 재시도`,
+        `Layer 1 documents contain core identity (Hub nodes). To modify:`,
+        `  1. Request changes through the identity-guardian agent (auto-delegated)`,
+        `  2. Or retry with a sufficient justification`,
       ].join('\n'),
     };
   }

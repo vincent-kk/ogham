@@ -1,6 +1,6 @@
 /**
  * @file index-invalidator.ts
- * @description PostToolUse Hook — maencof MCP 도구 호출 후 stale-nodes.json 업데이트 + 사용 통계 증가
+ * @description PostToolUse Hook — Update stale-nodes.json and increment usage stats after maencof MCP tool calls
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -24,10 +24,10 @@ export interface PostToolUseResult {
 }
 
 /**
- * Index Invalidator Hook 핸들러.
- * maencof CRUD 도구 호출 후:
- * 1. 영향받은 노드를 stale-nodes.json에 추가
- * 2. usage-stats.json 사용 통계 카운트 증가
+ * Index Invalidator Hook handler.
+ * After maencof CRUD tool calls:
+ * 1. Add affected nodes to stale-nodes.json
+ * 2. Increment usage-stats.json call counts
  */
 export function runIndexInvalidator(
   input: PostToolUseInput,
@@ -39,16 +39,16 @@ export function runIndexInvalidator(
     return { continue: true };
   }
 
-  // 영향받은 노드 경로 추출
-  // maencof_update/delete/move: tool_input에 path가 존재
-  // maencof_create: tool_input에 path 없음 → tool_response에서 추출
+  // Extract affected node path
+  // maencof_update/delete/move: path exists in tool_input
+  // maencof_create: no path in tool_input → extract from tool_response
   const affectedPath =
     (input.tool_input?.path as string) ??
     (input.tool_input?.file_path as string) ??
     extractPathFromResponse(input.tool_response) ??
     null;
 
-  // stale-nodes.json 업데이트
+  // Update stale-nodes.json
   if (affectedPath) {
     appendStaleNode(cwd, affectedPath);
   }
@@ -57,7 +57,7 @@ export function runIndexInvalidator(
   // via mcp/shared.ts appendStaleNode(), so this hook does not duplicate it.
   // Both writers now target the same file: .maencof/stale-nodes.json with StaleNodes format.
 
-  // usage-stats.json 카운트 증가
+  // Increment usage-stats.json counts
   incrementUsageStat(cwd, toolName);
 
   return { continue: true };
@@ -91,7 +91,7 @@ function appendStaleNode(cwd: string, nodePath: string): void {
 }
 
 /**
- * usage-stats.json의 도구별 호출 카운트를 증가한다.
+ * Increment the per-tool call count in usage-stats.json.
  */
 function incrementUsageStat(cwd: string, toolName: string): void {
   const statsPath = metaPath(cwd, 'usage-stats.json');
@@ -114,11 +114,11 @@ function incrementUsageStat(cwd: string, toolName: string): void {
 }
 
 /**
- * MCP tool_response에서 MaencofCrudResult.path를 추출한다.
- * maencof_create처럼 tool_input에 path가 없는 도구용.
+ * Extract MaencofCrudResult.path from MCP tool_response.
+ * For tools like maencof_create where path is not in tool_input.
  *
- * 두 가지 형식을 방어적으로 처리한다:
- * - Format 1 (Flat): Claude Code가 MCP wrapper를 벗겨낸 경우 { path: string, ... }
+ * Handles two response formats defensively:
+ * - Format 1 (Flat): Claude Code strips MCP wrapper { path: string, ... }
  * - Format 2 (MCP wrapper): { content: [{ type: "text", text: JSON.stringify(result) }] }
  */
 function extractPathFromResponse(

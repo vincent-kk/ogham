@@ -1,6 +1,6 @@
 /**
  * @file session-end.ts
- * @description SessionEnd Hook — 세션 요약 저장 + 30일 초과 세션 파일 정리
+ * @description SessionEnd Hook — Save session summary + clean up sessions older than 30 days
  */
 import {
   existsSync,
@@ -18,17 +18,9 @@ import { isMaencofVault, maencofPath, metaPath } from './shared.js';
 export interface SessionEndInput {
   session_id?: string;
   cwd?: string;
-  /**
-   * Skills invoked during the session.
-   * NOTE: Claude Code SessionEnd hook does NOT provide this field.
-   * It always defaults to [] — reserved for future use.
-   */
+  /** Skills invoked during the session. */
   skills_used?: string[];
-  /**
-   * Files modified during the session.
-   * NOTE: Claude Code SessionEnd hook does NOT provide this field.
-   * It always defaults to [] — reserved for future use.
-   */
+  /** Files modified during the session. */
   files_modified?: string[];
 }
 
@@ -36,13 +28,13 @@ export interface SessionEndResult {
   continue: boolean;
 }
 
-/** 세션 파일 보관 기간 (일) */
+/** Session file retention period (days) */
 const SESSION_RETENTION_DAYS = 30;
 
 /**
- * SessionEnd Hook 핸들러.
- * 1. 현재 세션 요약을 .maencof-meta/sessions/{timestamp}.md에 저장
- * 2. 30일 초과 세션 파일 정리
+ * SessionEnd Hook handler.
+ * 1. Save current session summary to .maencof-meta/sessions/{timestamp}.md
+ * 2. Clean up session files older than 30 days
  */
 export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   const cwd = input.cwd ?? process.cwd();
@@ -54,7 +46,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   const sessionsDir = metaPath(cwd, 'sessions');
   ensureDir(sessionsDir);
 
-  // 세션 요약 저장
+  // Save session summary
   const summary = buildSessionSummary(input, cwd);
   const fileName = buildSessionFileName();
   const filePath = join(sessionsDir, fileName);
@@ -62,37 +54,59 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   try {
     writeFileSync(filePath, summary, 'utf-8');
   } catch {
-    // 저장 실패 시 무시 (세션 종료를 막지 않음)
+    // Ignore write failure (must not block session exit)
   }
 
-  // 오래된 세션 파일 정리
+  // Clean up old session files
   cleanOldSessions(sessionsDir);
 
   return { continue: true };
 }
 
 /**
- * 세션 요약 마크다운 문자열을 생성한다.
- * usage-stats.json (누적 통계)과 stale-nodes.json을 읽어 실제 활동 데이터를 포함한다.
+ * Build a session summary markdown string.
+ * Includes usage-stats.json (cumulative) and stale-nodes.json data when available.
  */
 function buildSessionSummary(input: SessionEndInput, cwd: string): string {
   const now = new Date().toISOString();
   const sessionId = input.session_id ?? 'unknown';
 
   const lines: string[] = [
-    `# 세션 요약`,
+    `# Session Summary`,
     ``,
-    `- **세션 ID**: ${sessionId}`,
-    `- **종료 시각**: ${now}`,
+    `- **Session ID**: ${sessionId}`,
+    `- **Ended at**: ${now}`,
     ``,
   ];
 
-  // usage-stats.json 읽기 (누적 통계)
+  // Skills used in this session
+  const skills = input.skills_used ?? [];
+  if (skills.length > 0) {
+    lines.push(`## Skills Used`);
+    lines.push(``);
+    for (const skill of skills) {
+      lines.push(`- ${skill}`);
+    }
+    lines.push(``);
+  }
+
+  // Files modified in this session
+  const files = input.files_modified ?? [];
+  if (files.length > 0) {
+    lines.push(`## Files Modified`);
+    lines.push(``);
+    for (const file of files) {
+      lines.push(`- ${file}`);
+    }
+    lines.push(``);
+  }
+
+  // Read usage-stats.json (cumulative)
   const usageStats = readJsonSafe<Record<string, number>>(
     metaPath(cwd, 'usage-stats.json'),
   );
 
-  // stale-nodes.json 읽기
+  // Read stale-nodes.json
   const staleNodes = readJsonSafe<{ paths: string[]; updatedAt: string }>(
     maencofPath(cwd, 'stale-nodes.json'),
   );
@@ -105,16 +119,16 @@ function buildSessionSummary(input: SessionEndInput, cwd: string): string {
     staleNodes.paths.length > 0;
 
   if (hasUsageStats) {
-    lines.push(`## Vault 도구 사용 현황 (누적)`);
+    lines.push(`## Vault Tool Usage (Cumulative)`);
     lines.push(``);
     for (const [tool, count] of Object.entries(usageStats!)) {
-      lines.push(`- ${tool}: ${count}회`);
+      lines.push(`- ${tool}: ${count}`);
     }
     lines.push(``);
   }
 
   if (hasStaleNodes) {
-    lines.push(`## 대기 중인 인덱스 갱신 (stale nodes)`);
+    lines.push(`## Pending Index Updates (Stale Nodes)`);
     lines.push(``);
     for (const path of staleNodes!.paths) {
       lines.push(`- ${path}`);
@@ -122,13 +136,17 @@ function buildSessionSummary(input: SessionEndInput, cwd: string): string {
     lines.push(``);
   }
 
-  if (!hasUsageStats && !hasStaleNodes) {
-    lines.push(`> 이 세션에서 기록된 활동이 없습니다.`);
+  const hasSessionActivity = skills.length > 0 || files.length > 0;
+
+  if (!hasUsageStats && !hasStaleNodes && !hasSessionActivity) {
+    lines.push(`> No activity recorded in this session.`);
     lines.push(``);
   }
 
   if (hasUsageStats || hasStaleNodes) {
-    lines.push(`> 정확한 세션 단위 통계는 향후 개선 예정입니다.`);
+    lines.push(
+      `> Per-session statistics will be improved in a future release.`,
+    );
     lines.push(``);
   }
 
@@ -136,7 +154,7 @@ function buildSessionSummary(input: SessionEndInput, cwd: string): string {
 }
 
 /**
- * JSON 파일을 안전하게 읽는다. 파일이 없거나 파싱 실패 시 null을 반환한다.
+ * Safely read a JSON file. Returns null if the file is missing or unparseable.
  */
 function readJsonSafe<T>(filePath: string): T | null {
   if (!existsSync(filePath)) return null;
@@ -148,7 +166,7 @@ function readJsonSafe<T>(filePath: string): T | null {
 }
 
 /**
- * 세션 파일 이름을 생성한다 (YYYY-MM-DD-HHmmss.md).
+ * Generate a session file name (YYYY-MM-DD-HHmmss.md).
  */
 function buildSessionFileName(): string {
   const now = new Date();
@@ -162,7 +180,7 @@ function buildSessionFileName(): string {
 }
 
 /**
- * sessions/ 디렉토리에서 30일 초과 세션 파일을 삭제한다.
+ * Delete session files older than 30 days from the sessions/ directory.
  */
 function cleanOldSessions(sessionsDir: string): void {
   if (!existsSync(sessionsDir)) return;
@@ -180,11 +198,11 @@ function cleanOldSessions(sessionsDir: string): void {
           unlinkSync(filePath);
         }
       } catch {
-        // 개별 파일 처리 실패 시 무시
+        // Ignore individual file errors
       }
     }
   } catch {
-    // 디렉토리 읽기 실패 시 무시
+    // Ignore directory read errors
   }
 }
 
