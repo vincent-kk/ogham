@@ -27,6 +27,24 @@
         "governance",
         "documentation"
       ]
+    },
+    {
+      "name": "maencof",
+      "description": "Personal knowledge space manager with markdown-based knowledge graph, spreading activation search, and memory lifecycle management",
+      "version": "0.0.1",
+      "author": {
+        "name": "Vincent K. Kelvin"
+      },
+      "source": "./packages/maencof",
+      "category": "productivity",
+      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/maencof",
+      "tags": [
+        "knowledge-graph",
+        "memory",
+        "spreading-activation",
+        "markdown",
+        "personal-knowledge"
+      ]
     }
   ]
 }
