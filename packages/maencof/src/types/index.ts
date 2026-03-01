@@ -83,6 +83,27 @@ export type {
 export { LAYER1_PREFIX, isLayer1Path } from './layer.js';
 
 export type {
+  LifecycleEvent,
+  LifecycleActionType,
+  EchoConfig,
+  RemindConfig,
+  LifecycleActionConfig,
+  LifecycleAction,
+  LifecycleConfig,
+  LifecycleDispatchResult,
+} from './lifecycle.js';
+
+export type {
+  ConfigHealthSeverity,
+  ConfigIssueCategory,
+  ConfigHealthItem,
+  ConfigHealthReport,
+  ConfigBackup,
+  ConfigTarget,
+  MigrationAction,
+} from './configurator.js';
+
+export type {
   MaencofCreateInput,
   MaencofReadInput,
   MaencofUpdateInput,

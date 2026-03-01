@@ -22,6 +22,7 @@ const hookEntries = [
   'layer-guard',
   'index-invalidator',
   'session-end',
+  'lifecycle-dispatcher',
 ];
 
 await Promise.all(

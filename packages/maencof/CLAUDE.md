@@ -7,10 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `@ogham/maencof`은 개인 지식 공간 관리 Claude Code 플러그인이다. 마크다운 기반 Knowledge Graph, Spreading Activation 검색, 기억 라이프사이클 관리를 제공한다.
 
 ```
-Layer 1 (자동)  → Hooks (SessionStart, PreToolUse, PostToolUse, SessionEnd)
+Layer 1 (자동)  → Hooks (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd + lifecycle-dispatcher)
 Layer 2 (도구)  → MCP Server (10개 도구: maencof_* CRUD + kg_* 그래프)
-Layer 3 (에이전트) → 3개 특화 에이전트 (memory-organizer, identity-guardian, doctor)
-Layer 4 (사용자) → 14개 Skills (/maencof:setup, /maencof:remember 등)
+Layer 3 (에이전트) → 4개 특화 에이전트 (memory-organizer, identity-guardian, doctor, configurator)
+Layer 4 (사용자) → 21개 Skills (/maencof:setup, /maencof:configure 등)
 ```
 
 ## Commands
@@ -63,19 +63,21 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 `maencof_create`, `maencof_read`, `maencof_update`, `maencof_delete`, `maencof_move` (CRUD)
 `kg_build`, `kg_search`, `kg_navigate`, `kg_context`, `kg_status` (그래프)
 
-### Agents (3)
+### Agents (4)
 
-`memory-organizer` (judge/execute seam), `identity-guardian` (L1 보호), `doctor` (진단/복구)
+`memory-organizer` (judge/execute seam), `identity-guardian` (L1 보호), `doctor` (진단/복구), `configurator` (Project 설정 전문가)
 
-### Skills (14)
+### Skills (21)
 
-`setup`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `mcp-setup`, `manage`
+**지식 관리**: `setup`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `mcp-setup`, `manage`
+
+**환경 설정 (Configurator)**: `configure`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`
 
 ### Plugin Runtime
 
 - `.claude-plugin/plugin.json` — 매니페스트
 - `.mcp.json` — MCP 서버 등록 (`bridge/mcp-server.cjs`)
-- `hooks/hooks.json` — 훅 이벤트 매핑 (SessionStart, PreToolUse→Write|Edit, PostToolUse→maencof\_\*, SessionEnd)
+- `hooks/hooks.json` — 훅 이벤트 매핑 (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd + lifecycle-dispatcher)
 - `templates/rules/` — 규칙 템플릿 5개 (maencof-memory-guard, maencof-naming, frontmatter-required, layer-structure, link-integrity)
 
 ## Development Notes
