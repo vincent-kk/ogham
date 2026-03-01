@@ -13,6 +13,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
+import { appendDailynoteEntry, formatTime } from '../core/dailynote-writer.js';
 import { isMaencofVault, maencofPath, metaPath } from './shared.js';
 
 export interface SessionEndInput {
@@ -59,6 +60,24 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
 
   // Clean up old session files
   cleanOldSessions(sessionsDir);
+
+  // Record session end in dailynote
+  try {
+    const skills = input.skills_used ?? [];
+    const files = input.files_modified ?? [];
+    const parts: string[] = [];
+    if (files.length > 0) parts.push(`files: ${files.length}`);
+    if (skills.length > 0) parts.push(`skills: ${skills.join(', ')}`);
+    const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
+
+    appendDailynoteEntry(cwd, {
+      time: formatTime(new Date()),
+      category: 'session',
+      description: `세션 종료${detail}`,
+    });
+  } catch {
+    // Silent fallback — dailynote 기록 실패는 세션 종료에 영향 없음
+  }
 
   return { continue: true };
 }

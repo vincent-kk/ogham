@@ -72,6 +72,16 @@
         ]
       },
       {
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/dailynote-recorder.mjs\"",
+            "timeout": 3
+          }
+        ]
+      },
+      {
         "matcher": "*",
         "hooks": [
           {

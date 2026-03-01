@@ -22,6 +22,7 @@ const hookEntries = [
   'layer-guard',
   'vault-redirector',
   'index-invalidator',
+  'dailynote-recorder',
   'session-end',
   'lifecycle-dispatcher',
 ];

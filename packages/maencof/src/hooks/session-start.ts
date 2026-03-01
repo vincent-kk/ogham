@@ -10,6 +10,7 @@ import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../core/claude-md-merger.js';
+import { appendDailynoteEntry, formatTime } from '../core/dailynote-writer.js';
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
 import type { VaultVersionInfo } from '../types/setup.js';
@@ -102,6 +103,18 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );
+  }
+
+  // 7. Record session start in dailynote
+  try {
+    const sessionId = input.session_id ?? 'unknown';
+    appendDailynoteEntry(cwd, {
+      time: formatTime(new Date()),
+      category: 'session',
+      description: `세션 시작 (session_id: ${sessionId})`,
+    });
+  } catch {
+    // Silent fallback — dailynote 기록 실패는 세션 시작에 영향 없음
   }
 
   return {

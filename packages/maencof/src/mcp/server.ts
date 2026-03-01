@@ -1,12 +1,13 @@
 /**
  * @file server.ts
- * @description maencof MCP 서버 — 14개 도구 등록 + 라우팅
+ * @description maencof MCP 서버 — 15개 도구 등록 + 라우팅
  *
  * 도구 목록:
  * CRUD 5개: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
  * 검색 5개: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * 빌드 1개: kg_build
  * CLAUDE.md 3개: claudemd_merge, claudemd_read, claudemd_remove
+ * Dailynote 1개: dailynote_read
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -20,6 +21,7 @@ import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
+import { handleDailynoteRead } from './tools/dailynote-read.js';
 import { handleClaudeMdRead } from './tools/claudemd-read.js';
 import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
 import { handleKgBuild } from './tools/kg-build.js';
@@ -84,13 +86,14 @@ function invalidateCache(): void {
 }
 
 /**
- * maencof MCP 서버를 생성하고 14개 도구를 등록한다.
+ * maencof MCP 서버를 생성하고 15개 도구를 등록한다.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
   registerCrudTools(server);
   registerKgTools(server);
   registerClaudeMdTools(server);
+  registerDailynoteTools(server);
   return server;
 }
 
@@ -576,6 +579,53 @@ function registerClaudeMdTools(server: McpServer): void {
       try {
         const vaultPath = getVaultPath();
         const result = handleClaudeMdRemove(vaultPath, args);
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+}
+
+/**
+ * Dailynote 1개 도구를 등록한다: dailynote_read
+ */
+function registerDailynoteTools(server: McpServer): void {
+  server.registerTool(
+    'dailynote_read',
+    {
+      description:
+        'dailynote(일일 활동 로그)를 조회합니다. 날짜, 카테고리 필터, 최근 N일 조회를 지원합니다.',
+      inputSchema: z.object({
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional()
+          .describe('조회할 날짜 YYYY-MM-DD (기본: 오늘)'),
+        category: z
+          .enum([
+            'document',
+            'search',
+            'index',
+            'config',
+            'session',
+            'diagnostic',
+          ])
+          .optional()
+          .describe('카테고리 필터'),
+        last_days: z
+          .number()
+          .int()
+          .min(1)
+          .max(30)
+          .optional()
+          .describe('최근 N일 조회 (기본 1, 최대 30)'),
+      }),
+    },
+    (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = handleDailynoteRead(vaultPath, args);
         return toolResult(result);
       } catch (error) {
         return toolError(error);

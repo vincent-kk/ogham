@@ -112,6 +112,14 @@ export type {
   MigrationAction,
 } from './configurator.js';
 
+export { TOOL_CATEGORY_MAP } from './dailynote.js';
+export type {
+  DailynoteEntry,
+  DailynoteCategory,
+  DailynoteReadInput,
+  DailynoteReadResult,
+} from './dailynote.js';
+
 export type {
   MaencofCreateInput,
   MaencofReadInput,
