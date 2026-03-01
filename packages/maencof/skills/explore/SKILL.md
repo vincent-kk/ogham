@@ -44,7 +44,7 @@ kg_status()
 Determine the seed from user input:
 
 - Direct file path (contains `.md` or `/`) -> that node becomes the seed
-- Keyword -> determine seed by matching Frontmatter tags/title
+- Keyword -> pass to `kg_search` in Step 3; the top result becomes the seed node
 - Not specified -> ask user to enter a topic to explore
 
 If a Layer filter (`--layer`) is specified, only documents in that Layer are allowed as seed candidates.

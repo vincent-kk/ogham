@@ -1,11 +1,11 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-01
 tags: [skill, context-injection, knowledge-tree, search]
 layer: design-area-4
 ---
 
-# 스킬 명세 — 기존 5스킬 + 검색 4스킬 통합
+# 스킬 명세 — 전체 21개 스킬 통합
 
 ## 개요
 
@@ -21,7 +21,7 @@ layer: design-area-4
 | 스킬 | 호출 | 역할 | context_layers |
 |------|------|------|----------------|
 | setup | `/maencof:setup` | 초기 온보딩, Core Identity 수집 | L1 |
-| remember | `/maencof:remember` | 새 지식 기록 | L1, L2 |
+| remember | `/maencof:remember` | 새 지식 기록 | L2, L3, L4, L5 |
 | recall | `/maencof:recall` | 지식 검색/회상 | L1, L2, L3 |
 | organize | `/maencof:organize` | 기억 정리/전이 | L2, L4 |
 | reflect | `/maencof:reflect` | 지식 연결/통찰 | L1, L2, L3 |
@@ -39,11 +39,39 @@ layer: design-area-4
 
 ---
 
-## 3. 컨텍스트 주입 시퀀스
+## 3. 운영 스킬
+
+| 스킬 | 호출 | 역할 |
+|------|------|------|
+| doctor | `/maencof:doctor` | 6개 진단 + 자동 수정 |
+| ingest | `/maencof:ingest` | 외부 데이터 가져오기 |
+| connect | `/maencof:connect` | 외부 데이터 소스 등록 |
+| mcp-setup | `/maencof:mcp-setup` | 외부 MCP 서버 설치 |
+| manage | `/maencof:manage` | 스킬/에이전트 활성화 관리 |
+
+---
+
+## 4. 환경 설정 스킬 (Configurator)
+
+| 스킬 | 호출 | 역할 | orchestrator |
+|------|------|------|-------------|
+| configure | `/maencof:configure` | 통합 환경 설정 진입점 (router) | configurator |
+| bridge | `/maencof:bridge` | MCP 설치+등록+워크플로우 스킬 생성 | configurator |
+| craft-skill | `/maencof:craft-skill` | 커스텀 스킬 생성기 | configurator |
+| craft-agent | `/maencof:craft-agent` | 커스텀 에이전트 생성기 | configurator |
+| instruct | `/maencof:instruct` | CLAUDE.md 관리 | configurator |
+| rule | `/maencof:rule` | 규칙 관리 | configurator |
+| lifecycle | `/maencof:lifecycle` | 라이프사이클 관리 | configurator |
+
+설정 스킬은 `context_layers: []` — 지식 Layer를 사용하지 않고 프로젝트 설정 파일만 다룸.
+
+---
+
+## 5. 컨텍스트 주입 시퀀스
 
 ```
 1. /maencof:스킬명 호출
-2. skills/스킬명.md에서 system prompt 로드
+2. skills/스킬명/SKILL.md에서 system prompt 로드
 3. context_layers 설정에 따라 문서 수집
 4. SA 엔진으로 연관 문서 확산 탐색
 5. 토큰 예산 내에서 컨텍스트 주입
@@ -51,7 +79,7 @@ layer: design-area-4
 
 ---
 
-## 4. Progressive Autonomy와 스킬 실행
+## 6. Progressive Autonomy와 스킬 실행
 
 | Level | 스킬 실행 방식 |
 |-------|--------------|
@@ -63,12 +91,17 @@ layer: design-area-4
 
 ---
 
-## 5. 스킬 정의 위치
+## 7. 스킬 정의 위치
 
 ```
 packages/maencof/skills/
-├── setup.md, remember.md, recall.md, organize.md, reflect.md
-├── build.md, explore.md, diagnose.md, rebuild.md
+├── setup/SKILL.md, remember/SKILL.md, recall/SKILL.md, organize/SKILL.md, reflect/SKILL.md
+├── build/SKILL.md, explore/SKILL.md, diagnose/SKILL.md, rebuild/SKILL.md
+├── doctor/SKILL.md, ingest/SKILL.md, connect/SKILL.md, mcp-setup/SKILL.md, manage/SKILL.md
+├── configure/SKILL.md, bridge/SKILL.md, craft-skill/SKILL.md, craft-agent/SKILL.md
+├── instruct/SKILL.md, rule/SKILL.md, lifecycle/SKILL.md
 ```
+
+각 스킬 디렉토리에 선택적 `reference.md` 포함 가능.
 
 사용자 정의: `.maencof-meta/custom-skills/` ([등록 및 버전 관리](./20-registry-versioning.md))

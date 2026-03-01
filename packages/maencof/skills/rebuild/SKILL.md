@@ -86,14 +86,12 @@ Report results comparing before and after the rebuild.
 |------|--------|-------|--------|
 | Node count | {before_nodes} | {after_nodes} | {delta_nodes:+d} |
 | Edge count | {before_edges} | {after_edges} | {delta_edges:+d} |
-| Layer 1 | {before_l1} | {after_l1} | {delta_l1:+d} |
-| Layer 2 | {before_l2} | {after_l2} | {delta_l2:+d} |
-| Layer 3 | {before_l3} | {after_l3} | {delta_l3:+d} |
-| Layer 4 | {before_l4} | {after_l4} | {delta_l4:+d} |
-| Layer 5 | {before_l5} | {after_l5} | {delta_l5:+d} |
 
 Build time: {duration}s
 ```
+
+> Note: Layer-by-layer node distribution is not available from `kg_status`/`kg_build` responses.
+> To inspect layer distribution, use `/maencof:diagnose --verbose`.
 
 If the change is large (nodes ±20% or more), display a warning and recommend investigating the cause.
 

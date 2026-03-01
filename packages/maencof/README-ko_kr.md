@@ -37,7 +37,7 @@ claude --plugin-dir ./packages/maencof
 빌드하면 두 가지 산출물이 생성됩니다:
 
 - `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 10개)
-- `bridge/*.mjs` — Hook 스크립트 4개 (자동 지식 보호)
+- `bridge/*.mjs` — Hook 스크립트 5개 (session-start, layer-guard, index-invalidator, session-end, lifecycle-dispatcher)
 
 ---
 
@@ -125,6 +125,21 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 스킬/에이전트 활성화 상태, 사용 리포트 조회, 기능 토글을 수행합니다.
 
+### 환경 설정
+
+```
+/maencof:configure
+/maencof:bridge slack
+/maencof:craft-skill pr-review
+```
+
+- `configure` — 프로젝트 설정 통합 진입점 (MCP, 스킬, 에이전트, 규칙, CLAUDE.md).
+- `bridge` — 외부 서비스 엔드투엔드 통합: MCP 설치 + 데이터 소스 등록 + 워크플로우 스킬 생성.
+- `craft-skill` / `craft-agent` — 대화를 통해 커스텀 스킬 또는 에이전트를 생성.
+- `instruct` — 백업과 @import 분리를 통해 CLAUDE.md를 안전하게 편집.
+- `rule` — 동작 규칙을 생성, 편집, 삭제.
+- `lifecycle` — 라이프사이클 이벤트에 트리거될 동적 훅 액션(echo/remind)을 등록.
+
 ---
 
 ## 5-Layer 지식 모델
@@ -149,12 +164,14 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 플러그인이 활성화되면 아래 Hook들이 **사용자 개입 없이** 자동 실행됩니다:
 
-| 언제                   | 무엇을                       | 왜                               |
-| ---------------------- | ---------------------------- | -------------------------------- |
-| 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드 | 첫 턴부터 에이전트가 지식을 인지 |
-| 파일을 Write/Edit할 때 | Layer 보호 검사              | L1 문서의 무단 수정 방지         |
-| maencof 도구 사용 후   | 인덱스 무효화                | Knowledge Graph 동기화 유지      |
-| 세션 종료 시           | 세션 정리 + 영속화           | 휘발성 상태 저장, 만료 항목 정리 |
+| 언제                   | 무엇을                       | 왜                                             |
+| ---------------------- | ---------------------------- | ---------------------------------------------- |
+| 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드 | 첫 턴부터 에이전트가 지식을 인지               |
+| 파일을 Write/Edit할 때 | Layer 보호 검사              | L1 문서의 무단 수정 방지                       |
+| maencof 도구 사용 후   | 인덱스 무효화                | Knowledge Graph 동기화 유지                    |
+| 세션 종료 시           | 세션 정리 + 영속화           | 휘발성 상태 저장, 만료 항목 정리               |
+| 매 사용자 프롬프트 시  | 라이프사이클 디스패처        | lifecycle.json에 등록된 액션(echo/remind) 실행 |
+| 에이전트 종료 시       | 라이프사이클 디스패처        | 종료 이벤트에 등록된 액션 실행                 |
 
 차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
 
@@ -162,22 +179,29 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 ## 전체 스킬 목록
 
-| 스킬                 | 분류   | 설명                                       |
-| -------------------- | ------ | ------------------------------------------ |
-| `/maencof:setup`     | 설정   | 6단계 온보딩 위저드                        |
-| `/maencof:remember`  | 핵심   | 새 지식 기록 (자동 Layer, 태그, 중복 검사) |
-| `/maencof:recall`    | 핵심   | Spreading Activation 검색                  |
-| `/maencof:explore`   | 핵심   | 인터랙티브 그래프 탐색 (최대 3라운드)      |
-| `/maencof:organize`  | 핵심   | 에이전트 기반 문서 재구성                  |
-| `/maencof:reflect`   | 핵심   | 읽기 전용 지식 건강도 분석                 |
-| `/maencof:build`     | 인덱스 | 인덱스 빌드 (자동 full/incremental)        |
-| `/maencof:rebuild`   | 인덱스 | 강제 전체 재인덱스                         |
-| `/maencof:diagnose`  | 건강   | 가벼운 상태 확인                           |
-| `/maencof:doctor`    | 건강   | 6개 진단 + 자동 수정                       |
-| `/maencof:ingest`    | 고급   | URL, GitHub, 텍스트에서 가져오기           |
-| `/maencof:connect`   | 고급   | 외부 데이터 소스 등록                      |
-| `/maencof:mcp-setup` | 고급   | 외부 MCP 서버 설치                         |
-| `/maencof:manage`    | 고급   | 스킬/에이전트 활성화 및 사용 리포트        |
+| 스킬                   | 분류     | 설명                                       |
+| ---------------------- | -------- | ------------------------------------------ |
+| `/maencof:setup`       | 설정     | 6단계 온보딩 위저드                        |
+| `/maencof:remember`    | 핵심     | 새 지식 기록 (자동 Layer, 태그, 중복 검사) |
+| `/maencof:recall`      | 핵심     | Spreading Activation 검색                  |
+| `/maencof:explore`     | 핵심     | 인터랙티브 그래프 탐색 (최대 3라운드)      |
+| `/maencof:organize`    | 핵심     | 에이전트 기반 문서 재구성                  |
+| `/maencof:reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                 |
+| `/maencof:build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental)        |
+| `/maencof:rebuild`     | 인덱스   | 강제 전체 재인덱스                         |
+| `/maencof:diagnose`    | 건강     | 가벼운 상태 확인                           |
+| `/maencof:doctor`      | 건강     | 6개 진단 + 자동 수정                       |
+| `/maencof:ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기           |
+| `/maencof:connect`     | 고급     | 외부 데이터 소스 등록                      |
+| `/maencof:mcp-setup`   | 고급     | 외부 MCP 서버 설치                         |
+| `/maencof:manage`      | 고급     | 스킬/에이전트 활성화 및 사용 리포트        |
+| `/maencof:configure`   | 환경설정 | 통합 환경 설정 진입점 (router)             |
+| `/maencof:bridge`      | 환경설정 | MCP 설치+등록+워크플로우 스킬 생성         |
+| `/maencof:craft-skill` | 환경설정 | 커스텀 스킬 생성기                         |
+| `/maencof:craft-agent` | 환경설정 | 커스텀 에이전트 생성기                     |
+| `/maencof:instruct`    | 환경설정 | CLAUDE.md 관리                             |
+| `/maencof:rule`        | 환경설정 | 규칙 관리                                  |
+| `/maencof:lifecycle`   | 환경설정 | 라이프사이클 액션 관리                     |
 
 ---
 

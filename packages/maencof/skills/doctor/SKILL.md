@@ -82,6 +82,7 @@ Delegate 6 diagnostics to the doctor agent:
 Run AutoFixAction after user confirmation:
 - Auto-fill missing Frontmatter fields (`maencof_update`)
 - Delegate stale index rebuild (`/maencof:rebuild`)
+- **Layer 1 (01_Core/) exception**: auto-fix via `maencof_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 3` or edit manually.
 
 ## Available MCP Tools
 

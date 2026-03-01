@@ -37,7 +37,7 @@ claude --plugin-dir ./packages/maencof
 Building produces two outputs:
 
 - `bridge/mcp-server.cjs` — MCP server (10 knowledge tools)
-- `bridge/*.mjs` — 4 hook scripts (automatic knowledge protection)
+- `bridge/*.mjs` — 5 hook scripts (session-start, layer-guard, index-invalidator, session-end, lifecycle-dispatcher)
 
 ---
 
@@ -125,6 +125,21 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 
 View skill/agent activation status, usage reports, and toggle features on/off.
 
+### Environment Configuration
+
+```
+/maencof:configure
+/maencof:bridge slack
+/maencof:craft-skill pr-review
+```
+
+- `configure` — Unified entry point for project configuration (MCP, skills, agents, rules, CLAUDE.md).
+- `bridge` — End-to-end external service integration: install MCP + register data source + generate workflow skill.
+- `craft-skill` / `craft-agent` — Generate custom skills or agents via conversation.
+- `instruct` — Safely edit CLAUDE.md with backup and @import splitting.
+- `rule` — Create, edit, or remove behavioral rules.
+- `lifecycle` — Register dynamic hook actions (echo/remind) triggered by lifecycle events.
+
 ---
 
 ## 5-Layer Knowledge Model
@@ -149,12 +164,14 @@ maencof organizes knowledge into five layers with distinct decay rates for Sprea
 
 With the plugin active, these hooks fire **without user intervention**:
 
-| When                   | What                          | Why                                            |
-| ---------------------- | ----------------------------- | ---------------------------------------------- |
-| Session starts         | Loads Vault context + index   | Agent knows your knowledge from the first turn |
-| Writing/editing a file | Layer guard check             | Prevents unauthorized L1 modifications         |
-| After maencof tool use | Index invalidation            | Keeps the Knowledge Graph in sync              |
-| Session ends           | Session cleanup + persistence | Saves volatile state, prunes expired entries   |
+| When                   | What                          | Why                                                                |
+| ---------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| Session starts         | Loads Vault context + index   | Agent knows your knowledge from the first turn                     |
+| Writing/editing a file | Layer guard check             | Prevents unauthorized L1 modifications                             |
+| After maencof tool use | Index invalidation            | Keeps the Knowledge Graph in sync                                  |
+| Session ends           | Session cleanup + persistence | Saves volatile state, prunes expired entries                       |
+| On every user prompt   | Lifecycle dispatcher          | Executes user-registered actions (echo/remind) from lifecycle.json |
+| On agent stop          | Lifecycle dispatcher          | Executes registered stop-event actions                             |
 
 When a block occurs, a message explaining the reason is displayed. No action needed.
 
@@ -162,22 +179,29 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 ## Skills Reference
 
-| Skill                | Category | What it does                                   |
-| -------------------- | -------- | ---------------------------------------------- |
-| `/maencof:setup`     | Setup    | 6-step onboarding wizard                       |
-| `/maencof:remember`  | Core     | Record new knowledge (auto-layer, tags, dedup) |
-| `/maencof:recall`    | Core     | Spreading Activation search                    |
-| `/maencof:explore`   | Core     | Interactive graph traversal (up to 3 rounds)   |
-| `/maencof:organize`  | Core     | Agent-guided document reorganization           |
-| `/maencof:reflect`   | Core     | Read-only knowledge health analysis            |
-| `/maencof:build`     | Index    | Build index (auto full/incremental)            |
-| `/maencof:rebuild`   | Index    | Force full re-index                            |
-| `/maencof:diagnose`  | Health   | Lightweight status check                       |
-| `/maencof:doctor`    | Health   | 6 diagnostics + auto-fix                       |
-| `/maencof:ingest`    | Advanced | Import from URL, GitHub, or text               |
-| `/maencof:connect`   | Advanced | Register external data sources                 |
-| `/maencof:mcp-setup` | Advanced | Install external MCP servers                   |
-| `/maencof:manage`    | Advanced | Skill/agent activation and usage reports       |
+| Skill                  | Category | What it does                                   |
+| ---------------------- | -------- | ---------------------------------------------- |
+| `/maencof:setup`       | Setup    | 6-step onboarding wizard                       |
+| `/maencof:remember`    | Core     | Record new knowledge (auto-layer, tags, dedup) |
+| `/maencof:recall`      | Core     | Spreading Activation search                    |
+| `/maencof:explore`     | Core     | Interactive graph traversal (up to 3 rounds)   |
+| `/maencof:organize`    | Core     | Agent-guided document reorganization           |
+| `/maencof:reflect`     | Core     | Read-only knowledge health analysis            |
+| `/maencof:build`       | Index    | Build index (auto full/incremental)            |
+| `/maencof:rebuild`     | Index    | Force full re-index                            |
+| `/maencof:diagnose`    | Health   | Lightweight status check                       |
+| `/maencof:doctor`      | Health   | 6 diagnostics + auto-fix                       |
+| `/maencof:ingest`      | Advanced | Import from URL, GitHub, or text               |
+| `/maencof:connect`     | Advanced | Register external data sources                 |
+| `/maencof:mcp-setup`   | Advanced | Install external MCP servers                   |
+| `/maencof:manage`      | Advanced | Skill/agent activation and usage reports       |
+| `/maencof:configure`   | Config   | Unified environment configuration entry point  |
+| `/maencof:bridge`      | Config   | MCP install + register + workflow skill in one |
+| `/maencof:craft-skill` | Config   | Custom skill generator                         |
+| `/maencof:craft-agent` | Config   | Custom agent generator                         |
+| `/maencof:instruct`    | Config   | CLAUDE.md management                           |
+| `/maencof:rule`        | Config   | Behavioral rule management                     |
+| `/maencof:lifecycle`   | Config   | Lifecycle action management                    |
 
 ---
 

@@ -80,8 +80,8 @@ Built-in items cannot be deleted (use disable instead).
 /maencof:manage create <name> --type <skill|agent>
 ```
 Generate a new custom skill/agent template:
-- Skill: create `skills/<name>/SKILL.md` (with default template)
-- Agent: create `agents/<name>.md` (with default template)
+- Skill: create `{CWD}/.claude/skills/<name>/SKILL.md` (with default template)
+- Agent: create `{CWD}/.claude/agents/<name>.md` (with default template)
 
 ## Workflow
 
@@ -109,7 +109,7 @@ Generate a new custom skill/agent template:
 | Tool | Purpose |
 |------|---------|
 | `Read` | Read `.maencof-meta/usage-stats.json`, `.maencof-meta/disabled-registry.json` |
-| `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the plugin directory (`skills/<name>/SKILL.md`, `agents/<name>.md`) |
+| `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the Execution Area (`{CWD}/.claude/skills/<name>/SKILL.md`, `{CWD}/.claude/agents/<name>.md`) |
 
 > Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/`
 > (not vault documents). They are accessed with Read/Write tools, not maencof MCP tools.

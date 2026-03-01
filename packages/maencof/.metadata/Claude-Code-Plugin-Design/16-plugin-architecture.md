@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-01
 tags: [architecture, plugin, hook, mcp, skill, agent, state-sharing]
 layer: meta
 ---
@@ -19,18 +19,27 @@ maencof은 4개 계층(Hook, MCP 도구, Skill, Agent)으로 구성된다.
 ## 1. 4계층 역할
 
 ### Hook — 세션 경계 감지 + 무결성 가드
-- SessionStart: 지식 트리 점검, 인덱스 로드, WAL 복구, Lazy Scheduling
-- PreToolUse: Layer 1 문서 보호 경고
-- PostToolUse: 파일 변경 시 인덱스 무효화 (stale-nodes.json)
+- SessionStart: 지식 트리 점검, 인덱스 로드, WAL 복구, Lazy Scheduling + **lifecycle-dispatcher**
+- UserPromptSubmit: **lifecycle-dispatcher** (신규)
+- PreToolUse: Layer 1 문서 보호 경고 + **lifecycle-dispatcher**
+- PostToolUse: 파일 변경 시 인덱스 무효화 (stale-nodes.json) + **lifecycle-dispatcher**
+- Stop: **lifecycle-dispatcher** (신규)
+- SessionEnd: 세션 정리 + 영속화 + **lifecycle-dispatcher**
+
+**lifecycle-dispatcher**: `.maencof-meta/lifecycle.json`의 사용자 등록 액션(echo/remind)을 이벤트별로 디스패치. 항상 `continue: true` 반환 (비차단).
 
 ### MCP 도구 — 지식 그래프 핵심 기능
 - CRUD 5개 + 검색 5개 통합 도구 명세 ([MCP 도구](./17-mcp-tools.md))
 
 ### Skill — 사용자 대면 명령
-- 기존 5스킬 + 검색 4스킬 통합 ([스킬](./18-skills.md))
+- 기존 5스킬 + 검색 4스킬 + 운영 5스킬(doctor, ingest, connect, mcp-setup, manage) + 설정 7스킬(configure, bridge, craft-skill, craft-agent, instruct, rule, lifecycle) 통합 (총 21개) ([스킬](./18-skills.md))
 
 ### Agent — 특화 서브에이전트
-- 기억 정리, 지식 연결, 스케줄, 정체성 수호 ([에이전트](./19-agents.md))
+- 기억 정리, 정체성 수호, 진단 복구, 프로젝트 설정 관리 ([에이전트](./19-agents.md))
+  - memory-organizer: 문서 전이/정리
+  - identity-guardian: Layer 1 보호/갱신
+  - doctor: 진단 및 복구
+  - configurator: Project-scope 설정(`.claude/`, `.mcp.json`, `CLAUDE.md`, `.maencof-meta/`) 관리
 
 ---
 
@@ -43,6 +52,7 @@ Hook, MCP, Skill이 동일 인덱스에 접근하므로 상태 공유 규약 필
 | 읽기 (MCP, Hook) | 항상 허용 | 메모리 로드 스냅샷 |
 | 쓰기 (Skill/CLI) | 배타적 | `.maencof/.lock` 파일 |
 | 무효화 (Hook) | append-only | `.maencof/stale-nodes.json` |
+| lifecycle.json | 읽기: Hook(lifecycle-dispatcher) | `.maencof-meta/lifecycle.json` |
 
 ---
 
