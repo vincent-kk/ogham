@@ -27,7 +27,7 @@ yarn format && yarn lint
 
 **Skills (21)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`
 
-> 상세 문서: `.metadata/` 참조 (5-Layer 전체 사양, MCP 도구 계약, 에이전트/스킬 명세, 훅 이벤트 매핑)
+> 상세 문서: `../../.metadata/maencof/` 참조 (5-Layer 전체 사양, MCP 도구 계약, 에이전트/스킬 명세, 훅 이벤트 매핑)
 
 ## Always do
 

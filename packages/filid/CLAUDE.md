@@ -86,7 +86,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ## References
 
-`.metadata/`: `01-ARCHITECTURE.md` (설계), `06-HOW-IT-WORKS.md` (AST 엔진), `07-RULES-REFERENCE.md` (규칙), `08-API-SURFACE.md` (API)
+`../../.metadata/filid/`: `01-ARCHITECTURE.md` (설계), `06-HOW-IT-WORKS.md` (AST 엔진), `07-RULES-REFERENCE.md` (규칙), `08-API-SURFACE.md` (API)
 
 ## Development Notes
 
