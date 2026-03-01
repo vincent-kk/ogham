@@ -38,6 +38,13 @@ export function maencofPath(cwd: string, ...segments: string[]): string {
 }
 
 /**
+ * Return the CLAUDE.md path for the given CWD.
+ */
+export function claudeMdPath(cwd: string): string {
+  return join(cwd, 'CLAUDE.md');
+}
+
+/**
  * Read JSON input from stdin.
  */
 export async function readStdin(): Promise<string> {
@@ -69,4 +76,5 @@ export const MAENCOF_MCP_TOOLS = new Set([
   'maencof_update',
   'maencof_delete',
   'maencof_move',
+  'claudemd_merge',
 ]);

@@ -193,3 +193,98 @@ export interface KgStatusResult {
   /** vault 경로 */
   vaultPath: string;
 }
+
+// ─── CLAUDE.md 조작 도구 ─────────────────────────────────────────
+
+/** claudemd_merge 입력 */
+export interface ClaudeMdMergeInput {
+  /** 삽입할 maencof 섹션 내용 (마커 제외) */
+  content: string;
+  /** 드라이런 모드 (기본 false) */
+  dry_run?: boolean;
+}
+
+/** claudemd_merge 출력 */
+export interface ClaudeMdMergeResult {
+  /** 파일 변경 여부 */
+  changed: boolean;
+  /** 기존 섹션 존재 여부 */
+  had_existing_section: boolean;
+  /** 백업 파일 경로 */
+  backup_path?: string;
+  /** 최종 maencof 섹션 내용 */
+  section_content: string;
+}
+
+/** claudemd_read 입력 (파라미터 없음) */
+export type ClaudeMdReadInput = Record<string, never>;
+
+/** claudemd_read 출력 */
+export interface ClaudeMdReadResult {
+  /** maencof 섹션 존재 여부 */
+  exists: boolean;
+  /** 섹션 내용 (없으면 null) */
+  content: string | null;
+  /** CLAUDE.md 파일 존재 여부 */
+  file_exists: boolean;
+}
+
+/** claudemd_remove 입력 */
+export interface ClaudeMdRemoveInput {
+  /** 드라이런 모드 (기본 false) */
+  dry_run?: boolean;
+}
+
+/** claudemd_remove 출력 */
+export interface ClaudeMdRemoveResult {
+  /** 제거 성공 여부 */
+  removed: boolean;
+  /** 백업 파일 경로 */
+  backup_path?: string;
+}
+
+// ─── 지식 연결 추천 도구 ─────────────────────────────────────────
+
+/** kg_suggest_links 입력 */
+export interface KgSuggestLinksInput {
+  /** 대상 문서 경로 (vault 상대 경로). 기존 문서일 때 사용 */
+  path?: string;
+  /** 새 문서의 태그 (아직 생성되지 않은 문서의 연결 추천 시) */
+  tags?: string[];
+  /** 새 문서의 내용 일부 (키워드 추출용) */
+  content_hint?: string;
+  /** 최대 추천 수 (기본 5) */
+  max_suggestions?: number;
+  /** 최소 유사도 임계값 (기본 0.2) */
+  min_score?: number;
+}
+
+/** 연결 추천 항목 */
+export interface LinkSuggestion {
+  /** 추천 대상 문서 경로 */
+  target_path: string;
+  /** 추천 대상 문서 제목 */
+  target_title: string;
+  /** 추천 대상 문서 Layer */
+  target_layer: number;
+  /** 추천 대상 문서 태그 */
+  target_tags: string[];
+  /** 종합 유사도 점수 (0.0 ~ 1.0) */
+  score: number;
+  /** 연결 근거 (LLM이 판단할 수 있도록) */
+  reason: string;
+  /** 점수 구성: 태그 유사도 기여분 */
+  tag_score: number;
+  /** 점수 구성: SA 보강 점수 */
+  sa_score: number;
+}
+
+/** kg_suggest_links 출력 */
+export interface KgSuggestLinksResult {
+  /** 추천 목록 (점수 내림차순) */
+  suggestions: LinkSuggestion[];
+  /** 탐색된 총 후보 수 */
+  candidates_explored: number;
+  /** 소요 시간 (ms) */
+  duration_ms: number;
+}

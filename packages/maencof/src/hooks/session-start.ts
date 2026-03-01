@@ -6,9 +6,13 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  mergeMaencofSection,
+  readMaencofSection,
+} from '../core/claude-md-merger.js';
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
-import { isMaencofVault, metaPath } from './shared.js';
+import { claudeMdPath, isMaencofVault, metaPath } from './shared.js';
 
 export interface SessionStartInput {
   session_id?: string;
@@ -49,6 +53,9 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   if (companion) {
     messages.push(`[maencof:${companion.name}] ${companion.greeting}`);
   }
+
+  // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기)
+  initClaudeMdSection(cwd, companion?.name, messages);
 
   // 3. Detect leftover WAL
   const walPath = metaPath(cwd, 'wal.json');
@@ -116,6 +123,63 @@ function loadCompanionIdentity(
   } catch {
     return null;
   }
+}
+
+/**
+ * CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기).
+ *
+ * - MAENCOF 마커가 없을 때만 쓰기 (이미 존재하면 스킵)
+ * - 고정 템플릿 사용 (동적 생성 없음)
+ * - 실패 시 silent fallback (hook 실패로 전파하지 않음)
+ * - 2초 타임아웃 가드 내 실행
+ */
+function initClaudeMdSection(
+  cwd: string,
+  companionName: string | undefined,
+  messages: string[],
+): void {
+  try {
+    const filePath = claudeMdPath(cwd);
+
+    // 이미 maencof 섹션이 있으면 스킵
+    const existing = readMaencofSection(filePath);
+    if (existing !== null) return;
+
+    // 기본 지시문 삽입
+    const directive = buildDefaultDirective(cwd, companionName);
+    mergeMaencofSection(filePath, directive, { createIfMissing: true });
+    messages.push(
+      '[maencof] CLAUDE.md에 maencof 지시문이 초기화되었습니다.',
+    );
+  } catch {
+    // Silent fallback — hook 실패로 전파하지 않음
+  }
+}
+
+/**
+ * 기본 maencof 지시문 템플릿을 생성한다.
+ */
+function buildDefaultDirective(cwd: string, companionName?: string): string {
+  const header = companionName
+    ? `# maencof Knowledge Space (${companionName})`
+    : '# maencof Knowledge Space';
+
+  return `${header}
+
+## Vault
+- 경로: ${cwd}
+- 모델: 5-Layer (Core/Derived/External/Action/Context)
+
+## 도구
+- 문서: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+- 검색: kg_search, kg_navigate, kg_context, kg_status, kg_build
+- CLAUDE.md: claudemd_merge, claudemd_read, claudemd_remove
+- 연결: kg_suggest_links
+
+## 규칙
+- 새 정보 취득 시 kg_suggest_links로 기존 지식과 연결 가능성을 확인하세요
+- L1_Core 문서는 읽기 전용입니다
+- 문서 생성 시 반드시 layer와 tags를 지정하세요`;
 }
 
 /**

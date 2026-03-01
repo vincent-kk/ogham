@@ -10,7 +10,7 @@ Claude Code 플러그인 모노레포. AI 에이전트 워크플로우 확장 �
 
 ```
 packages/filid/    # FCA-AI 프랙탈 구조 규칙 엔진 (14 MCP tools, 7 agents, 14 skills)
-packages/maencof/  # 마크다운 Knowledge Graph 기반 지식 관리 (10 MCP tools, 4 agents, 21 skills)
+packages/maencof/  # 마크다운 Knowledge Graph 기반 지식 관리 (14 MCP tools, 4 agents, 21 skills)
 ```
 
 ## Tech Stack

@@ -1,14 +1,17 @@
 /**
  * @file server.ts
- * @description maencof MCP 서버 — 10개 도구 등록 + 라우팅
+ * @description maencof MCP 서버 — 14개 도구 등록 + 라우팅
  *
  * 도구 목록:
  * CRUD 5개: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
- * 검색 4개: kg_search, kg_navigate, kg_context, kg_status
+ * 검색 5개: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * 빌드 1개: kg_build
+ * CLAUDE.md 3개: claudemd_merge, claudemd_read, claudemd_remove
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { homedir } from 'node:os';
+import { resolve } from 'node:path';
 import { z } from 'zod';
 
 import { MetadataStore } from '../index/metadata-store.js';
@@ -16,20 +19,45 @@ import type { KnowledgeGraph } from '../types/graph.js';
 import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
+import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
+import { handleClaudeMdRead } from './tools/claudemd-read.js';
+import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
 import { handleKgBuild } from './tools/kg-build.js';
 import { handleKgContext } from './tools/kg-context.js';
 import { handleKgNavigate } from './tools/kg-navigate.js';
 import { handleKgSearch } from './tools/kg-search.js';
 import { handleKgStatus } from './tools/kg-status.js';
+import { handleKgSuggestLinks } from './tools/kg-suggest-links.js';
 import { handleMaencofCreate } from './tools/maencof-create.js';
 import { handleMaencofDelete } from './tools/maencof-delete.js';
 import { handleMaencofMove } from './tools/maencof-move.js';
 import { handleMaencofRead } from './tools/maencof-read.js';
 import { handleMaencofUpdate } from './tools/maencof-update.js';
 
-/** vault 경로 (환경 변수 또는 CWD) */
+/** 전역 경로 접근 차단 접두사 */
+const BLOCKED_PREFIXES = [
+  resolve(homedir(), '.claude'),
+  resolve(homedir(), '.config'),
+];
+
+/**
+ * vault 경로 (환경 변수 또는 CWD).
+ * 전역 설정 경로로의 접근을 차단한다.
+ */
 function getVaultPath(): string {
-  return process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
+  const raw = process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
+  const resolved = resolve(raw);
+
+  // 전역 설정 경로 접근 차단
+  for (const prefix of BLOCKED_PREFIXES) {
+    if (resolved.startsWith(prefix)) {
+      throw new Error(
+        `전역 설정 경로에 대한 접근이 차단되었습니다: ${resolved}`,
+      );
+    }
+  }
+
+  return resolved;
 }
 
 /** 그래프 캐시 (서버 생명주기 동안 메모리 보존) */
@@ -56,12 +84,13 @@ function invalidateCache(): void {
 }
 
 /**
- * maencof MCP 서버를 생성하고 10개 도구를 등록한다.
+ * maencof MCP 서버를 생성하고 14개 도구를 등록한다.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
   registerCrudTools(server);
   registerKgTools(server);
+  registerClaudeMdTools(server);
   return server;
 }
 
@@ -426,6 +455,127 @@ function registerKgTools(server: McpServer): void {
         const vaultPath = getVaultPath();
         const result = await handleKgBuild(vaultPath, args);
         if (result.success) invalidateCache();
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+
+  // ─── kg_suggest_links ─────────────────────────────────────────────
+  server.registerTool(
+    'kg_suggest_links',
+    {
+      description:
+        '대상 문서에 대해 기존 지식 베이스 내 관련 문서 연결 후보를 추천합니다. 태그 Jaccard 유사도 + SA 보강 2단계 알고리즘.',
+      inputSchema: z.object({
+        path: z
+          .string()
+          .optional()
+          .describe('대상 문서 경로 (기존 문서)'),
+        tags: z
+          .array(z.string())
+          .optional()
+          .describe('새 문서의 태그 목록'),
+        content_hint: z
+          .string()
+          .optional()
+          .describe('새 문서 내용 일부 (키워드 추출)'),
+        max_suggestions: z
+          .number()
+          .int()
+          .min(1)
+          .max(20)
+          .optional()
+          .describe('최대 추천 수 (기본 5)'),
+        min_score: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe('최소 유사도 임계값 (기본 0.2)'),
+      }),
+    },
+    async (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const graph = await loadGraphIfNeeded(vaultPath);
+        const result = handleKgSuggestLinks(graph, args);
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+}
+
+/**
+ * CLAUDE.md 조작 3개 도구를 등록한다: claudemd_merge, claudemd_read, claudemd_remove
+ */
+function registerClaudeMdTools(server: McpServer): void {
+  // ─── claudemd_merge ───────────────────────────────────────────────
+  server.registerTool(
+    'claudemd_merge',
+    {
+      description:
+        'CWD의 CLAUDE.md에 maencof 지시문 섹션을 삽입하거나 업데이트합니다. 마커(MAENCOF:START/END) 기반 섹션 관리.',
+      inputSchema: z.object({
+        content: z
+          .string()
+          .describe('CLAUDE.md에 삽입할 maencof 지시문 (마크다운)'),
+        dry_run: z
+          .boolean()
+          .optional()
+          .describe('드라이런 모드 (기본 false)'),
+      }),
+    },
+    (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = handleClaudeMdMerge(vaultPath, args);
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+
+  // ─── claudemd_read ────────────────────────────────────────────────
+  server.registerTool(
+    'claudemd_read',
+    {
+      description:
+        'CWD의 CLAUDE.md에서 maencof 지시문 섹션을 읽습니다.',
+      inputSchema: z.object({}),
+    },
+    (_args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = handleClaudeMdRead(vaultPath);
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+
+  // ─── claudemd_remove ──────────────────────────────────────────────
+  server.registerTool(
+    'claudemd_remove',
+    {
+      description:
+        'CWD의 CLAUDE.md에서 maencof 지시문 섹션을 제거합니다.',
+      inputSchema: z.object({
+        dry_run: z
+          .boolean()
+          .optional()
+          .describe('드라이런 모드 (기본 false)'),
+      }),
+    },
+    (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = handleClaudeMdRemove(vaultPath, args);
         return toolResult(result);
       } catch (error) {
         return toolError(error);

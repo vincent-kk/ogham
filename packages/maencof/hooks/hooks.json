@@ -52,7 +52,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move",
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge",
         "hooks": [
           {
             "type": "command",

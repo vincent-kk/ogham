@@ -21,7 +21,7 @@ yarn format && yarn lint
 | L4    | Action Memory      | `04_Action/`   | 휘발성 작업 기억        |
 | L5    | Context            | `05_Context/`  | 맥락 메타데이터         |
 
-**MCP Tools (10)**: `maencof_create/read/update/delete/move`, `kg_build/search/navigate/context/status`
+**MCP Tools (14)**: `maencof_create/read/update/delete/move`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`
 
 **Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
 
