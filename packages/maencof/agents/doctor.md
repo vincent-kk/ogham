@@ -10,10 +10,10 @@ tools:
   - Read
   - Glob
   - Grep
-  - maencof_read
-  - maencof_update
-  - kg_status
-  - kg_navigate
+  - mcp__maencof_t__maencof_read
+  - mcp__maencof_t__maencof_update
+  - mcp__maencof_t__kg_status
+  - mcp__maencof_t__kg_navigate
 allowed_layers: [1, 2, 3, 4, 5]
 forbidden_operations:
   - delete

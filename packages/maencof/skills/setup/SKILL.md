@@ -108,9 +108,16 @@ setup skill starts
 
 | Tool | Purpose |
 |------|---------|
-| `maencof_create` | Create L1 documents |
-| `maencof_read` | Verify existing L1 documents |
-| `kg_status` | Check index status |
+| `maencof_create` | Create L1 documents (Stage 3) |
+| `maencof_read` | Verify existing L1 documents (Stage 3, via identity-guardian) |
+| `kg_status` | Check index status (Stage 5) |
+
+## Available Native Tools
+
+| Tool | Purpose |
+|------|---------|
+| `Write` | Create `trust-level.json` during initial setup (Stage 4, first run only) |
+| `Bash` | Overwrite `trust-level.json` in `--reset` mode to bypass layer-guard (Stage 4) |
 
 ## Options
 
