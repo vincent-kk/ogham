@@ -5,7 +5,7 @@
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 describe('getVaultPath CWD guard', () => {
   const originalEnv = process.env['MAENCOF_VAULT_PATH'];

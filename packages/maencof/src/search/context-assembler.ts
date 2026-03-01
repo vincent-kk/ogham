@@ -180,7 +180,10 @@ function buildMarkdown(
   if (selectedItems.length === 0) {
     lines.push('_No related documents found._');
   } else {
-    lines.push(`_${selectedItems.length} document(s) (by score, descending)_`, '');
+    lines.push(
+      `_${selectedItems.length} document(s) (by score, descending)_`,
+      '',
+    );
     for (const item of selectedItems) {
       lines.push(
         itemToMarkdown(item, includeFull && item.fullContent !== undefined),
@@ -189,7 +192,10 @@ function buildMarkdown(
   }
 
   if (truncatedCount > 0) {
-    lines.push('', `_${truncatedCount} document(s) excluded due to token budget limit_`);
+    lines.push(
+      '',
+      `_${truncatedCount} document(s) excluded due to token budget limit_`,
+    );
   }
 
   return lines.join('\n');

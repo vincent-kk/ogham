@@ -9,10 +9,11 @@
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
  * Dailynote x1: dailynote_read
  */
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
+
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
 import { MetadataStore } from '../index/metadata-store.js';
@@ -21,9 +22,9 @@ import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
-import { handleDailynoteRead } from './tools/dailynote-read.js';
 import { handleClaudeMdRead } from './tools/claudemd-read.js';
 import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
+import { handleDailynoteRead } from './tools/dailynote-read.js';
 import { handleKgBuild } from './tools/kg-build.js';
 import { handleKgContext } from './tools/kg-context.js';
 import { handleKgNavigate } from './tools/kg-navigate.js';
@@ -53,9 +54,7 @@ function getVaultPath(): string {
   // Block access to global config paths
   for (const prefix of BLOCKED_PREFIXES) {
     if (resolved.startsWith(prefix)) {
-      throw new Error(
-        `Access to global config path is blocked: ${resolved}`,
-      );
+      throw new Error(`Access to global config path is blocked: ${resolved}`);
     }
   }
 
@@ -200,7 +199,9 @@ function registerCrudTools(server: McpServer): void {
               .min(1)
               .max(5)
               .optional()
-              .describe('Layer change (1-5, use when correcting Layer violations)'),
+              .describe(
+                'Layer change (1-5, use when correcting Layer violations)',
+              ),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
           })
@@ -483,7 +484,9 @@ function registerKgTools(server: McpServer): void {
         content_hint: z
           .string()
           .optional()
-          .describe('Partial content of a new document (for keyword extraction)'),
+          .describe(
+            'Partial content of a new document (for keyword extraction)',
+          ),
         max_suggestions: z
           .number()
           .int()
@@ -547,8 +550,7 @@ function registerClaudeMdTools(server: McpServer): void {
   server.registerTool(
     'claudemd_read',
     {
-      description:
-        'Reads the maencof directive section from CLAUDE.md at CWD.',
+      description: 'Reads the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({}),
     },
     (_args) => {

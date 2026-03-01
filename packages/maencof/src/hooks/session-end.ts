@@ -14,6 +14,7 @@ import {
 import { join } from 'node:path';
 
 import { appendDailynoteEntry, formatTime } from '../core/dailynote-writer.js';
+
 import { isMaencofVault, maencofPath, metaPath } from './shared.js';
 
 export interface SessionEndInput {

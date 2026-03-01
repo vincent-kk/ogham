@@ -15,6 +15,7 @@ import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
 import type { VaultVersionInfo } from '../types/setup.js';
 import { VERSION } from '../version.js';
+
 import { claudeMdPath, isMaencofVault, metaPath } from './shared.js';
 
 export interface SessionStartInput {
@@ -169,9 +170,7 @@ function initClaudeMdSection(
       const directive = buildDefaultDirective(cwd, companionName);
       mergeMaencofSection(filePath, directive, { createIfMissing: true });
       writeVaultVersion(cwd, VERSION);
-      messages.push(
-        '[maencof] maencof directives initialized in CLAUDE.md.',
-      );
+      messages.push('[maencof] maencof directives initialized in CLAUDE.md.');
     } else if (vaultVersion === null) {
       // 마커 있음 + version.json 없음 → version.json 생성 (기존 vault 호환)
       writeVaultVersion(cwd, VERSION);
@@ -198,7 +197,9 @@ function readVaultVersion(cwd: string): string | null {
   const versionPath = metaPath(cwd, 'version.json');
   if (!existsSync(versionPath)) return null;
   try {
-    const data = JSON.parse(readFileSync(versionPath, 'utf-8')) as VaultVersionInfo;
+    const data = JSON.parse(
+      readFileSync(versionPath, 'utf-8'),
+    ) as VaultVersionInfo;
     return data.version ?? null;
   } catch {
     return null;
@@ -249,7 +250,7 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
     if (vaultVersion !== null && vaultVersion !== VERSION) {
       messages.push(
         `[maencof] Plugin updated (${vaultVersion} → ${VERSION}).` +
-        '\nRun `/maencof:setup` to complete the migration.',
+          '\nRun `/maencof:setup` to complete the migration.',
       );
     }
   } catch {

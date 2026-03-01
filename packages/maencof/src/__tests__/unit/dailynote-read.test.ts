@@ -43,7 +43,12 @@ describe('handleDailynoteRead', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('특정 날짜의 dailynote를 조회한다', () => {
@@ -79,9 +84,7 @@ describe('handleDailynoteRead', () => {
 
   it('last_days로 최근 N일을 조회한다', () => {
     const today = formatDate(new Date());
-    const yesterday = formatDate(
-      new Date(Date.now() - 24 * 60 * 60 * 1000),
-    );
+    const yesterday = formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000));
 
     const todayContent = [
       `# Dailynote — ${today}`,

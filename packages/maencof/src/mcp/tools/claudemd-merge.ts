@@ -5,7 +5,10 @@
 import { join } from 'node:path';
 
 import { mergeMaencofSection } from '../../core/claude-md-merger.js';
-import type { ClaudeMdMergeInput, ClaudeMdMergeResult } from '../../types/mcp.js';
+import type {
+  ClaudeMdMergeInput,
+  ClaudeMdMergeResult,
+} from '../../types/mcp.js';
 
 /**
  * claudemd_merge 핸들러

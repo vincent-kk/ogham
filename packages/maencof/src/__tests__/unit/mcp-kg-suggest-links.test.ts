@@ -4,8 +4,12 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import type { KnowledgeEdge, KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 import { handleKgSuggestLinks } from '../../mcp/tools/kg-suggest-links.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 
 /** 테스트용 노드 생성 */
 function makeNode(
@@ -110,10 +114,19 @@ describe('handleKgSuggestLinks', () => {
         makeNode('linked', ['typescript', 'mcp']),
         makeNode('unlinked', ['typescript', 'plugin']),
       ],
-      [{ from: 'source', to: 'linked', type: 'REFERENCE' as const, weight: 0.8 }],
+      [
+        {
+          from: 'source',
+          to: 'linked',
+          type: 'REFERENCE' as const,
+          weight: 0.8,
+        },
+      ],
     );
 
-    const result = handleKgSuggestLinks(graph, { path: '02_Derived/source.md' });
+    const result = handleKgSuggestLinks(graph, {
+      path: '02_Derived/source.md',
+    });
 
     const paths = result.suggestions.map((s) => s.target_path);
     expect(paths).not.toContain('02_Derived/linked.md');
@@ -154,8 +167,18 @@ describe('handleKgSuggestLinks', () => {
         makeNode('target', ['typescript', 'plugin']),
       ],
       [
-        { from: 'source', to: 'middle', type: 'REFERENCE' as const, weight: 0.9 },
-        { from: 'middle', to: 'target', type: 'REFERENCE' as const, weight: 0.8 },
+        {
+          from: 'source',
+          to: 'middle',
+          type: 'REFERENCE' as const,
+          weight: 0.9,
+        },
+        {
+          from: 'middle',
+          to: 'target',
+          type: 'REFERENCE' as const,
+          weight: 0.8,
+        },
       ],
     );
 

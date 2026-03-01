@@ -11,8 +11,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   appendDailynoteEntry,
   buildToolDescription,
-  formatDate,
   formatDailynoteEntry,
+  formatDate,
   formatTime,
   getDailynoteDir,
   getDailynotePath,
@@ -125,7 +125,12 @@ describe('appendDailynoteEntry', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('파일이 없으면 헤더와 함께 새로 생성한다', () => {
@@ -200,7 +205,9 @@ describe('buildToolDescription', () => {
     expect(buildToolDescription('kg_build', { force: true })).toBe(
       'Full index rebuild',
     );
-    expect(buildToolDescription('kg_build', {})).toBe('Incremental index build');
+    expect(buildToolDescription('kg_build', {})).toBe(
+      'Incremental index build',
+    );
   });
 
   it('알 수 없는 도구명은 카테고리 또는 도구명을 반환한다', () => {

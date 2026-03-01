@@ -5,7 +5,10 @@
 import { join } from 'node:path';
 
 import { removeMaencofSection } from '../../core/claude-md-merger.js';
-import type { ClaudeMdRemoveInput, ClaudeMdRemoveResult } from '../../types/mcp.js';
+import type {
+  ClaudeMdRemoveInput,
+  ClaudeMdRemoveResult,
+} from '../../types/mcp.js';
 
 /**
  * claudemd_remove 핸들러

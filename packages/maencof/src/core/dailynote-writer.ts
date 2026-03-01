@@ -5,12 +5,7 @@
  * claude-md-merger.ts와 동급의 파일시스템 I/O 예외 모듈.
  * hooks, session-start, session-end, MCP 도구(dailynote_read) 등 여러 소비자에서 재사용.
  */
-import {
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-} from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type { DailynoteCategory, DailynoteEntry } from '../types/dailynote.js';
@@ -49,10 +44,7 @@ export function formatDailynoteEntry(entry: DailynoteEntry): string {
  * dailynote 파일에 엔트리를 추가한다.
  * 파일이 없으면 헤더와 함께 새로 생성한다.
  */
-export function appendDailynoteEntry(
-  cwd: string,
-  entry: DailynoteEntry,
-): void {
+export function appendDailynoteEntry(cwd: string, entry: DailynoteEntry): void {
   const filePath = getDailynotePath(cwd);
   const dir = dirname(filePath);
   mkdirSync(dir, { recursive: true });
@@ -76,8 +68,7 @@ export function parseDailynote(content: string): DailynoteEntry[] {
   const lines = content.split('\n');
 
   // 패턴: - **[HH:MM]** `category` description → path
-  const pattern =
-    /^- \*\*\[(\d{2}:\d{2})\]\*\* `([^`]+)` (.+?)(?:\s→\s(.+))?$/;
+  const pattern = /^- \*\*\[(\d{2}:\d{2})\]\*\* `([^`]+)` (.+?)(?:\s→\s(.+))?$/;
 
   for (const line of lines) {
     const match = pattern.exec(line.trim());
@@ -139,7 +130,9 @@ export function buildToolDescription(
     case 'kg_context':
       return 'Context assembly';
     case 'kg_build':
-      return toolInput['force'] ? 'Full index rebuild' : 'Incremental index build';
+      return toolInput['force']
+        ? 'Full index rebuild'
+        : 'Incremental index build';
     case 'kg_status':
       return 'Vault status check';
     case 'kg_suggest_links':

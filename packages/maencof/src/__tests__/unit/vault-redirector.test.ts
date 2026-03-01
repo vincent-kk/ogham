@@ -8,7 +8,11 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { isVaultDocDirectory, isVaultInternalPath, runVaultRedirector } from '../../hooks/vault-redirector.js';
+import {
+  isVaultDocDirectory,
+  isVaultInternalPath,
+  runVaultRedirector,
+} from '../../hooks/vault-redirector.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
@@ -36,7 +40,9 @@ describe('isVaultInternalPath', () => {
   });
 
   it('.maencof-meta/ 경로는 제외한다', () => {
-    expect(isVaultInternalPath(cwd, '.maencof-meta/companion-identity.json')).toBe(false);
+    expect(
+      isVaultInternalPath(cwd, '.maencof-meta/companion-identity.json'),
+    ).toBe(false);
   });
 
   it('비마크다운 파일은 제외한다', () => {
@@ -66,7 +72,9 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('maencof_read');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'maencof_read',
+    );
     expect(result.hookSpecificOutput?.additionalContext).toContain('[maencof]');
   });
 
@@ -97,7 +105,9 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('kg_navigate');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'kg_navigate',
+    );
   });
 
   it('vault 미초기화 디렉토리에서는 즉시 continue: true를 반환한다', () => {
@@ -143,7 +153,9 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('maencof_read');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'maencof_read',
+    );
   });
 
   it('비마크다운 파일은 hookSpecificOutput이 없다', () => {
@@ -173,7 +185,9 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('kg_navigate');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'kg_navigate',
+    );
     expect(result.hookSpecificOutput?.additionalContext).toContain('**/*.md');
   });
 
@@ -184,7 +198,9 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('kg_navigate');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'kg_navigate',
+    );
   });
 
   it('Glob pattern이 .md를 포함하지 않으면 hookSpecificOutput이 없다', () => {

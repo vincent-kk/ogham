@@ -28,7 +28,12 @@ describe('runSessionStart', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('maencof vault가 아닌 경우 setup 안내 메시지를 반환한다', () => {
@@ -136,7 +141,12 @@ describe('runSessionEnd', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('세션 요약 파일을 sessions/ 디렉토리에 저장한다', () => {

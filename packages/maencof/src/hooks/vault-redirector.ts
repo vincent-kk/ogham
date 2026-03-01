@@ -4,7 +4,8 @@
  * 차단하지 않고 additionalContext로 안내만 제공
  */
 import { resolve } from 'node:path';
-import { isMaencofVault, MAENCOF_DIR, MAENCOF_META_DIR } from './shared.js';
+
+import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from './shared.js';
 
 export interface VaultRedirectorInput {
   tool_name?: string;
@@ -89,7 +90,9 @@ export function isVaultDocDirectory(cwd: string, dirPath: string): boolean {
  * Read/Grep/Glob 도구가 vault 내 마크다운 파일을 대상으로 할 때 maencof 도구 사용을 안내한다.
  * 항상 continue: true — 차단하지 않음.
  */
-export function runVaultRedirector(input: VaultRedirectorInput): VaultRedirectorResult {
+export function runVaultRedirector(
+  input: VaultRedirectorInput,
+): VaultRedirectorResult {
   const cwd = input.cwd ?? process.cwd();
 
   if (!isMaencofVault(cwd)) {

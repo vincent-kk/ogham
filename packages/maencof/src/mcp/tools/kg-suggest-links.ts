@@ -7,6 +7,13 @@
  * 2단계: SA 엔진으로 간접 연결 노드에 보강 점수 부여
  * 종합: tag_score + sa_bonus → 정렬 → 상위 N개 반환
  */
+import { runSpreadingActivation } from '../../core/spreading-activation.js';
+import {
+  commonTags,
+  extractKeywords,
+  jaccardSimilarity,
+  normalizeTags,
+} from '../../core/tag-similarity.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 import type {
@@ -14,14 +21,6 @@ import type {
   KgSuggestLinksResult,
   LinkSuggestion,
 } from '../../types/mcp.js';
-
-import {
-  commonTags,
-  extractKeywords,
-  jaccardSimilarity,
-  normalizeTags,
-} from '../../core/tag-similarity.js';
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
 
 /** SA 보강 가중치 — 최종 점수에서 SA의 최대 기여 비율 */
 const SA_BONUS_WEIGHT = 0.3;
@@ -179,10 +178,7 @@ function collectSourceTags(
 }
 
 /** 경로로 노드 ID를 찾는다 */
-function findNodeByPath(
-  graph: KnowledgeGraph,
-  path: string,
-): NodeId | null {
+function findNodeByPath(graph: KnowledgeGraph, path: string): NodeId | null {
   for (const [nodeId, node] of graph.nodes) {
     if (node.path === path) return nodeId;
   }
@@ -239,5 +235,7 @@ function buildReason(
     parts.push(`Layer ${layerNum} (${layerNames[layerNum]})`);
   }
 
-  return parts.length > 0 ? parts.join(' | ') : 'Tag similarity-based suggestion';
+  return parts.length > 0
+    ? parts.join(' | ')
+    : 'Tag similarity-based suggestion';
 }

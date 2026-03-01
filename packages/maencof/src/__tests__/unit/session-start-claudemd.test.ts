@@ -38,7 +38,12 @@ describe('session-start CLAUDE.md 초기화', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('vault에 CLAUDE.md가 없으면 maencof 섹션을 포함한 CLAUDE.md를 생성한다', () => {
@@ -79,7 +84,11 @@ describe('session-start CLAUDE.md 초기화', () => {
   });
 
   it('기존 CLAUDE.md에 maencof 섹션이 없으면 추가한다', () => {
-    writeFileSync(join(vaultDir, 'CLAUDE.md'), '# My Project\n\nExisting content.\n', 'utf-8');
+    writeFileSync(
+      join(vaultDir, 'CLAUDE.md'),
+      '# My Project\n\nExisting content.\n',
+      'utf-8',
+    );
 
     runSessionStart({ cwd: vaultDir });
 
@@ -94,7 +103,11 @@ describe('session-start CLAUDE.md 초기화', () => {
     // version.json을 현재 버전으로 설정
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'version.json'),
-      JSON.stringify({ version: VERSION, installedAt: new Date().toISOString(), migrationHistory: [] }),
+      JSON.stringify({
+        version: VERSION,
+        installedAt: new Date().toISOString(),
+        migrationHistory: [],
+      }),
       'utf-8',
     );
     const existing = `# Project\n\n${MAENCOF_START_MARKER}\ncustom directive\n${MAENCOF_END_MARKER}\n`;
@@ -168,7 +181,12 @@ describe('session-start version.json 관리', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('CLAUDE.md 초기화 시 version.json이 생성된다', () => {
@@ -209,7 +227,9 @@ describe('session-start version.json 관리', () => {
     expect(content).toContain('# My Project');
 
     // version.json이 업데이트됨
-    const data = JSON.parse(readFileSync(join(vaultDir, '.maencof-meta', 'version.json'), 'utf-8'));
+    const data = JSON.parse(
+      readFileSync(join(vaultDir, '.maencof-meta', 'version.json'), 'utf-8'),
+    );
     expect(data.version).toBe(VERSION);
     expect(data.migrationHistory).toContain('0.0.0-old -> ' + VERSION);
     expect(data.lastMigratedAt).toBeTruthy();
@@ -222,7 +242,11 @@ describe('session-start version.json 관리', () => {
     // 현재 버전 version.json
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'version.json'),
-      JSON.stringify({ version: VERSION, installedAt: new Date().toISOString(), migrationHistory: [] }),
+      JSON.stringify({
+        version: VERSION,
+        installedAt: new Date().toISOString(),
+        migrationHistory: [],
+      }),
       'utf-8',
     );
     const customContent = `${MAENCOF_START_MARKER}\ncustom content\n${MAENCOF_END_MARKER}\n`;

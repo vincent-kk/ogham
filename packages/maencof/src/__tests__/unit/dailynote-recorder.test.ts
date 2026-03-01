@@ -8,7 +8,11 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { formatDate, getDailynotePath, parseDailynote } from '../../core/dailynote-writer.js';
+import {
+  formatDate,
+  getDailynotePath,
+  parseDailynote,
+} from '../../core/dailynote-writer.js';
 import { runDailynoteRecorder } from '../../hooks/dailynote-recorder.js';
 
 function createTempVault(): string {
@@ -27,7 +31,12 @@ describe('runDailynoteRecorder', () => {
   });
 
   afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   });
 
   it('vault가 아닌 경우 continue: true를 반환하고 기록하지 않는다', () => {

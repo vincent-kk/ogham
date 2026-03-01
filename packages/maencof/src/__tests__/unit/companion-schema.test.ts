@@ -4,11 +4,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 import {
   CompanionIdentitySchema,
   CompanionPersonalitySchema,
 } from '../../types/companion.js';
-import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 
 /** 완전한 유효 companion identity 픽스처 */
 function validIdentity(overrides?: Record<string, unknown>) {

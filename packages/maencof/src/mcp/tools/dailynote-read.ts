@@ -2,7 +2,7 @@
  * @file dailynote-read.ts
  * @description dailynote_read MCP 도구 핸들러
  */
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
   formatDate,

@@ -57,7 +57,9 @@ describe('jaccardSimilarity', () => {
 
 describe('extractKeywords', () => {
   it('영문 키워드를 추출한다', () => {
-    const keywords = extractKeywords('TypeScript is a great language for MCP development');
+    const keywords = extractKeywords(
+      'TypeScript is a great language for MCP development',
+    );
     expect(keywords).toContain('typescript');
     expect(keywords).toContain('great');
     expect(keywords).toContain('language');
