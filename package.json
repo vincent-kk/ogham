@@ -25,7 +25,7 @@
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "filid": "yarn workspace @ogham/filid",
-    "coffaen": "yarn workspace @ogham/coffaen",
+    "maencof": "yarn workspace @ogham/maencof",
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",

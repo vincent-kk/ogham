@@ -1240,10 +1240,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ogham/coffaen@workspace:packages/coffaen":
+"@ogham/filid@workspace:packages/filid":
   version: 0.0.0-use.local
-  resolution: "@ogham/coffaen@workspace:packages/coffaen"
+  resolution: "@ogham/filid@workspace:packages/filid"
   dependencies:
+    "@ast-grep/napi": "npm:^0.31.0"
     "@modelcontextprotocol/sdk": "npm:^1.26.0"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^3.2.4"
@@ -1254,11 +1255,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ogham/filid@workspace:packages/filid":
+"@ogham/maencof@workspace:packages/maencof":
   version: 0.0.0-use.local
-  resolution: "@ogham/filid@workspace:packages/filid"
+  resolution: "@ogham/maencof@workspace:packages/maencof"
   dependencies:
-    "@ast-grep/napi": "npm:^0.31.0"
     "@modelcontextprotocol/sdk": "npm:^1.26.0"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^3.2.4"
