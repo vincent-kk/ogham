@@ -120,33 +120,37 @@ function buildTreeEdges(
   dirMap: Map<string, NodeId[]>,
   nodeMap: Map<NodeId, KnowledgeNode>,
 ): KnowledgeEdge[] {
-  const edges: KnowledgeEdge[] = [];
+  return [
+    ...buildHierarchyEdges(nodes, nodeMap),
+    ...buildSiblingEdges(dirMap),
+  ];
+}
 
-  // PARENT_OF / CHILD_OF: 상위 디렉토리의 index.md → 하위 노드
+/**
+ * PARENT_OF / CHILD_OF 엣지 생성: 상위 디렉토리의 index.md → 하위 노드
+ */
+function buildHierarchyEdges(
+  nodes: KnowledgeNode[],
+  nodeMap: Map<NodeId, KnowledgeNode>,
+): KnowledgeEdge[] {
+  const edges: KnowledgeEdge[] = [];
   for (const node of nodes) {
     const dir = getDirectory(node.path);
     const parentDir = getDirectory(dir);
-    if (parentDir !== dir) {
-      // 상위 디렉토리에 index 노드가 있으면 PARENT_OF/CHILD_OF 엣지 생성
-      const parentIndexId = `${parentDir}/index.md` as NodeId;
-      if (nodeMap.has(parentIndexId)) {
-        edges.push({
-          from: parentIndexId,
-          to: node.id,
-          type: 'PARENT_OF',
-          weight: 1.0,
-        });
-        edges.push({
-          from: node.id,
-          to: parentIndexId,
-          type: 'CHILD_OF',
-          weight: 1.0,
-        });
-      }
-    }
+    if (parentDir === dir) continue;
+    const parentIndexId = `${parentDir}/index.md` as NodeId;
+    if (!nodeMap.has(parentIndexId)) continue;
+    edges.push({ from: parentIndexId, to: node.id, type: 'PARENT_OF', weight: 1.0 });
+    edges.push({ from: node.id, to: parentIndexId, type: 'CHILD_OF', weight: 1.0 });
   }
+  return edges;
+}
 
-  // SIBLING: 동일 디렉토리 내 노드 쌍
+/**
+ * SIBLING 엣지 생성: 동일 디렉토리 내 노드 쌍 (양방향)
+ */
+function buildSiblingEdges(dirMap: Map<string, NodeId[]>): KnowledgeEdge[] {
+  const edges: KnowledgeEdge[] = [];
   for (const [, siblings] of dirMap) {
     if (siblings.length < 2) continue;
     for (let i = 0; i < siblings.length; i++) {
@@ -158,7 +162,6 @@ function buildTreeEdges(
       }
     }
   }
-
   return edges;
 }
 

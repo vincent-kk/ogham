@@ -139,6 +139,57 @@ function itemToMarkdown(item: ContextItem, includeFull: boolean): string {
 }
 
 /**
+ * 토큰 예산 내에서 항목을 선택하고 남은 개수를 반환한다.
+ */
+function selectItemsWithinBudget(
+  allItems: ContextItem[],
+  tokenBudget: number,
+): { selectedItems: ContextItem[]; totalTokens: number; truncatedCount: number } {
+  const selectedItems: ContextItem[] = [];
+  let totalTokens = estimateTokens('## maencof Knowledge Context\n\n');
+  let truncatedCount = 0;
+
+  for (let i = 0; i < allItems.length; i++) {
+    const item = allItems[i];
+    const itemTokens = estimateTokens(itemToMarkdown(item, false));
+    if (totalTokens + itemTokens > tokenBudget) {
+      truncatedCount = allItems.length - i;
+      break;
+    }
+    selectedItems.push(item);
+    totalTokens += itemTokens;
+  }
+
+  return { selectedItems, totalTokens, truncatedCount };
+}
+
+/**
+ * 선택된 항목들을 마크다운 블록으로 조립한다.
+ */
+function buildMarkdown(
+  selectedItems: ContextItem[],
+  truncatedCount: number,
+  includeFull: boolean,
+): string {
+  const lines: string[] = ['## maencof Knowledge Context', ''];
+
+  if (selectedItems.length === 0) {
+    lines.push('_관련 문서를 찾을 수 없습니다._');
+  } else {
+    lines.push(`_${selectedItems.length}개 문서 (score 내림차순)_`, '');
+    for (const item of selectedItems) {
+      lines.push(itemToMarkdown(item, includeFull && item.fullContent !== undefined));
+    }
+  }
+
+  if (truncatedCount > 0) {
+    lines.push('', `_토큰 예산 초과로 ${truncatedCount}개 문서 제외_`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
  * SA 결과를 AI 에이전트용 컨텍스트 블록으로 조립한다.
  *
  * @param results - SA 결과 (score 내림차순)
@@ -151,71 +202,22 @@ export function assembleContext(
   graph: KnowledgeGraph,
   options: AssembleOptions = {},
 ): AssembledContext {
-  const {
-    tokenBudget = 2000,
-    includeFull = false,
-    maxFullDocuments = 3,
-  } = options;
+  const { tokenBudget = 2000, includeFull = false, maxFullDocuments = 3 } = options;
 
   const allItems = toContextItems(results, graph);
+  const { selectedItems, totalTokens, truncatedCount } = selectItemsWithinBudget(allItems, tokenBudget);
 
-  // 토큰 예산 내에서 항목 선택
-  const selectedItems: ContextItem[] = [];
-  let totalTokens = 0;
-  let truncatedCount = 0;
-
-  const headerTokens = estimateTokens('## maencof Knowledge Context\n\n');
-  totalTokens += headerTokens;
-
-  for (let i = 0; i < allItems.length; i++) {
-    const item = allItems[i];
-    const itemText = itemToMarkdown(item, false);
-    const itemTokens = estimateTokens(itemText);
-
-    if (totalTokens + itemTokens > tokenBudget) {
-      truncatedCount = allItems.length - i;
-      break;
-    }
-
-    selectedItems.push(item);
-    totalTokens += itemTokens;
-  }
-
-  // 전문 포함 (상위 N개)
+  // 전문 포함 (상위 N개) — 실제 파일 내용은 MCP 도구 계층에서 주입
   if (includeFull && selectedItems.length > 0) {
     const fullCount = Math.min(maxFullDocuments, selectedItems.length);
     for (let i = 0; i < fullCount; i++) {
-      // 실제 파일 내용은 MCP 도구 계층에서 주입 (여기서는 플레이스홀더)
       selectedItems[i].fullContent = undefined;
     }
   }
 
-  // 마크다운 조립
-  const lines: string[] = ['## maencof Knowledge Context', ''];
+  const markdown = buildMarkdown(selectedItems, truncatedCount, includeFull);
 
-  if (selectedItems.length === 0) {
-    lines.push('_관련 문서를 찾을 수 없습니다._');
-  } else {
-    lines.push(`_${selectedItems.length}개 문서 (score 내림차순)_`, '');
-    for (const item of selectedItems) {
-      lines.push(
-        itemToMarkdown(item, includeFull && item.fullContent !== undefined),
-      );
-    }
-  }
-
-  if (truncatedCount > 0) {
-    lines.push('', `_토큰 예산 초과로 ${truncatedCount}개 문서 제외_`);
-  }
-
-  const markdown = lines.join('\n');
-
-  return {
-    markdown,
-    items: selectedItems,
-    estimatedTokens: totalTokens,
-    truncatedCount,
-  };
+  return { markdown, items: selectedItems, estimatedTokens: totalTokens, truncatedCount };
 }
 
 /** ContextAssembler 클래스 */

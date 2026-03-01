@@ -96,6 +96,54 @@ function getDecayForNode(
 }
 
 /**
+ * 단일 이웃 노드에 대한 활성화 확산 처리.
+ * - 홉 한도, 순환 방지, 임계값 체크, 활성화 맵 업데이트, 큐 추가를 담당한다.
+ */
+function processNeighbor(
+  graph: KnowledgeGraph,
+  current: QueueItem,
+  neighborId: NodeId,
+  params: Required<SpreadingActivationParams>,
+  activationMap: Map<NodeId, ActivationResult>,
+  queue: QueueItem[],
+): void {
+  const { threshold, maxHops, decayOverride } = params;
+
+  if (!graph.nodes.has(neighborId)) return;
+
+  // 순환 방지
+  if (current.path.includes(neighborId)) return;
+
+  // A[j] = A[i] * W[i,j] * d
+  const decay = getDecayForNode(graph, current.nodeId, decayOverride);
+  const weight = getEdgeWeight(graph, current.nodeId, neighborId);
+  const newActivation = current.activation * weight * decay;
+
+  // 임계값 미만이면 확산 중단
+  if (newActivation < threshold) return;
+
+  const cappedActivation = Math.min(newActivation, 1.0);
+  const newPath = [...current.path, neighborId];
+  const newHops = current.hops + 1;
+
+  // 기존 활성화보다 높은 경우에만 업데이트
+  const existing = activationMap.get(neighborId);
+  if (existing && existing.score >= cappedActivation) return;
+
+  activationMap.set(neighborId, {
+    nodeId: neighborId,
+    score: cappedActivation,
+    hops: newHops,
+    path: newPath,
+  });
+
+  // 계속 확산 가능하면 큐에 추가
+  if (newHops < maxHops) {
+    queue.push({ nodeId: neighborId, activation: cappedActivation, hops: newHops, path: newPath });
+  }
+}
+
+/**
  * 확산 활성화 실행
  *
  * @param graph - 지식 그래프
@@ -108,12 +156,16 @@ export function runSpreadingActivation(
   seedIds: NodeId[],
   params: SpreadingActivationParams = {},
 ): ActivationResult[] {
-  const {
-    threshold = 0.1,
-    maxHops = 5,
-    maxActiveNodes = 100,
-    decayOverride,
-  } = params;
+  const threshold = params.threshold ?? 0.1;
+  const maxHops = params.maxHops ?? 5;
+  const maxActiveNodes = params.maxActiveNodes ?? 100;
+  const decayOverride = params.decayOverride;
+  const resolvedParams: Required<SpreadingActivationParams> = {
+    threshold,
+    maxHops,
+    maxActiveNodes,
+    decayOverride: decayOverride as number,
+  };
 
   // 활성화 맵: nodeId → 최고 활성화 값
   const activationMap = new Map<NodeId, ActivationResult>();
@@ -153,47 +205,7 @@ export function runSpreadingActivation(
     // 현재 노드의 이웃 탐색
     for (const edge of graph.edges) {
       if (edge.from !== current.nodeId) continue;
-
-      const neighborId = edge.to;
-      if (!graph.nodes.has(neighborId)) continue;
-
-      // 이미 path에 있는 노드는 건너뜀 (순환 방지)
-      if (current.path.includes(neighborId)) continue;
-
-      // A[j] = A[i] * W[i,j] * d
-      const decay = getDecayForNode(graph, current.nodeId, decayOverride);
-      const weight = getEdgeWeight(graph, current.nodeId, neighborId);
-      const newActivation = current.activation * weight * decay;
-
-      // 임계값 미만이면 확산 중단
-      if (newActivation < threshold) continue;
-
-      // 최대 1.0으로 캡핑
-      const cappedActivation = Math.min(newActivation, 1.0);
-
-      const newPath = [...current.path, neighborId];
-      const newHops = current.hops + 1;
-
-      // 기존 활성화보다 높은 경우에만 업데이트
-      const existing = activationMap.get(neighborId);
-      if (!existing || existing.score < cappedActivation) {
-        activationMap.set(neighborId, {
-          nodeId: neighborId,
-          score: cappedActivation,
-          hops: newHops,
-          path: newPath,
-        });
-
-        // 계속 확산 가능하면 큐에 추가
-        if (cappedActivation >= threshold && newHops < maxHops) {
-          queue.push({
-            nodeId: neighborId,
-            activation: cappedActivation,
-            hops: newHops,
-            path: newPath,
-          });
-        }
-      }
+      processNeighbor(graph, current, edge.to, resolvedParams, activationMap, queue);
     }
   }
 

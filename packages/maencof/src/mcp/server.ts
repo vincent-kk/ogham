@@ -60,7 +60,15 @@ function invalidateCache(): void {
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
+  registerCrudTools(server);
+  registerKgTools(server);
+  return server;
+}
 
+/**
+ * CRUD 5개 도구를 등록한다: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+ */
+function registerCrudTools(server: McpServer): void {
   // ─── maencof_create ───────────────────────────────────────────────
   server.registerTool(
     'maencof_create',
@@ -243,7 +251,12 @@ export function createServer(): McpServer {
       }
     },
   );
+}
 
+/**
+ * KG 5개 도구를 등록한다: kg_search, kg_navigate, kg_context, kg_status, kg_build
+ */
+function registerKgTools(server: McpServer): void {
   // ─── kg_search ───────────────────────────────────────────────────
   server.registerTool(
     'kg_search',
@@ -419,8 +432,6 @@ export function createServer(): McpServer {
       }
     },
   );
-
-  return server;
 }
 
 /**
