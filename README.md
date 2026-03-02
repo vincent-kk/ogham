@@ -22,6 +22,7 @@ claude plugin marketplace add https://github.com/vincent-kk/ogham
 
 # 2. Install a plugin
 claude plugin install filid
+claude plugin install maencof
 ```
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
@@ -67,6 +68,41 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
 
+### [`@ogham/maencof`](./packages/maencof/) — Personal Knowledge Space Manager
+
+A Claude Code plugin that manages your personal knowledge as a **markdown-based Knowledge Graph** with **Spreading Activation** search.
+
+AI agents forget you between sessions. Notes scatter across tools, insights vanish, and every conversation starts from zero. maencof solves this with a 5-layer knowledge model built on plain markdown files you own.
+
+**What it provides:**
+
+| Component  | Count | Examples                                                     |
+| ---------- | ----- | ------------------------------------------------------------ |
+| Skills     | 24    | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`     |
+| MCP Tools  | 15    | Knowledge CRUD, graph search, context assembly               |
+| Agents     | 4     | Memory Organizer, Identity Guardian, Doctor, etc.            |
+| Hooks      | 6     | L1 layer guard, index invalidation, activity logging         |
+
+**Key features:**
+
+- **5-Layer Knowledge Model** — Core Identity (L1) through Context (L5), each with distinct decay rates and protection rules
+- **Spreading Activation Search** — Graph-based associative search that finds related knowledge by energy propagation
+- **Memory Lifecycle Management** — Automated knowledge promotion, archival, and cleanup across layers
+- **AI Companion** — Personalized AI persona generated from your core identity, greeting you each session
+
+```
+# Initialize your knowledge vault
+/maencof:setup
+
+# Remember something new
+/maencof:remember
+
+# Search your knowledge
+/maencof:recall
+```
+
+For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
+
 ---
 
 ## All Packages
@@ -74,6 +110,7 @@ For full documentation, see the [filid README](./packages/filid/README.md) ([Kor
 | Package                                  | Type          | Version | Description                                      |
 | ---------------------------------------- | ------------- | ------- | ------------------------------------------------ |
 | **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.2   | FCA-AI rule enforcement and fractal context management |
+| **[`maencof`](./packages/maencof/)**     | Claude plugin | 0.0.2   | Personal knowledge space manager with Knowledge Graph  |
 
 ---
 

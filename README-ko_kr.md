@@ -22,6 +22,7 @@ claude plugin marketplace add https://github.com/vincent-kk/ogham
 
 # 2. 플러그인 설치
 claude plugin install filid
+claude plugin install maencof
 ```
 
 이것으로 끝입니다. 모든 컴포넌트(Skills, MCP 도구, Agents, Hooks)가 자동으로 등록되며, 별도의 설정이 필요 없습니다.
@@ -67,6 +68,41 @@ claude plugin install filid
 
 자세한 문서는 [filid README (영문)](./packages/filid/README.md) 또는 [filid README (한글)](./packages/filid/README-ko_kr.md)을 참조하세요.
 
+### [`@ogham/maencof`](./packages/maencof/) — 개인 지식 공간 관리자
+
+**마크다운 기반 Knowledge Graph**와 **Spreading Activation** 검색으로 개인 지식을 관리하는 Claude Code 플러그인입니다.
+
+AI 에이전트는 세션 간에 사용자를 잊습니다. 메모는 여러 도구에 흩어지고, 인사이트는 사라지며, 매번 대화가 처음부터 시작됩니다. maencof는 사용자가 소유하는 순수 마크다운 파일 위에 구축된 5계층 지식 모델로 이 문제를 해결합니다.
+
+**제공 컴포넌트:**
+
+| 컴포넌트   | 수량 | 예시                                                         |
+| ---------- | ---- | ------------------------------------------------------------ |
+| Skills     | 24   | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`     |
+| MCP 도구   | 15   | 지식 CRUD, 그래프 검색, 컨텍스트 조립                        |
+| Agents     | 4    | Memory Organizer, Identity Guardian, Doctor 등                |
+| Hooks      | 6    | L1 레이어 보호, 인덱스 무효화, 활동 로깅                     |
+
+**주요 기능:**
+
+- **5계층 지식 모델** — Core Identity(L1)부터 Context(L5)까지, 각 계층별 고유한 감쇠율과 보호 규칙 적용
+- **Spreading Activation 검색** — 에너지 전파를 통해 관련 지식을 찾는 그래프 기반 연상 검색
+- **메모리 수명 주기 관리** — 계층 간 지식의 자동 승격, 보관, 정리
+- **AI 컴패니언** — 핵심 정체성에서 생성된 개인화된 AI 페르소나가 매 세션마다 인사
+
+```
+# 지식 보관소 초기화
+/maencof:setup
+
+# 새로운 지식 기억하기
+/maencof:remember
+
+# 지식 검색하기
+/maencof:recall
+```
+
+자세한 문서는 [maencof README (영문)](./packages/maencof/README.md) 또는 [maencof README (한글)](./packages/maencof/README-ko_kr.md)을 참조하세요.
+
 ---
 
 ## 전체 패키지 목록
@@ -74,6 +110,7 @@ claude plugin install filid
 | 패키지                                   | 타입          | 버전   | 설명                                        |
 | ---------------------------------------- | ------------- | ------ | ------------------------------------------- |
 | **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.2  | FCA-AI 규칙 시행 및 프랙탈 컨텍스트 관리    |
+| **[`maencof`](./packages/maencof/)**     | Claude plugin | 0.0.2  | Knowledge Graph 기반 개인 지식 공간 관리     |
 
 ---
 
