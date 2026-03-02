@@ -4,7 +4,7 @@ user_invocable: true
 description: Force full index rebuild — ignore existing cache and rebuild the entire index from scratch
 version: 1.0.0
 complexity: simple
-context_layers: [1, 2, 3, 4, 5]
+context_layers: []
 orchestrator: rebuild skill
 plugin: maencof
 ---

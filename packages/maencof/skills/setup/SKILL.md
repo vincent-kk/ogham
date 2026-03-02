@@ -137,6 +137,7 @@ setup skill starts
 
 | Tool | Purpose |
 |------|---------|
+| `AskUserQuestion` | Collect user input during 6-stage interview (Stages 1–2) |
 | `Write` | Create `trust-level.json` during initial setup (Stage 4, first run only) |
 | `Bash` | Overwrite `trust-level.json` in `--reset` mode to bypass layer-guard (Stage 4) |
 

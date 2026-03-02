@@ -63,7 +63,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge",
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge|claudemd_remove",
         "hooks": [
           {
             "type": "command",
@@ -73,7 +73,7 @@
         ]
       },
       {
-        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge",
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge|claudemd_remove",
         "hooks": [
           {
             "type": "command",

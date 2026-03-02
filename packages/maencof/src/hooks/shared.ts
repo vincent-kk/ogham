@@ -77,4 +77,5 @@ export const MAENCOF_MCP_TOOLS = new Set([
   'maencof_delete',
   'maencof_move',
   'claudemd_merge',
+  'claudemd_remove',
 ]);

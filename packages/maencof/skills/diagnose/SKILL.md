@@ -4,7 +4,7 @@ user_invocable: true
 description: Lightweight index health diagnostic — quick status check and recommended actions via kg_status
 version: 1.0.0
 complexity: simple
-context_layers: [1, 2, 3, 4, 5]
+context_layers: []
 plugin: maencof
 ---
 

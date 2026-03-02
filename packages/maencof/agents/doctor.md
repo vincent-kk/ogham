@@ -140,4 +140,4 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 ## Skill Participation
 
 - `/maencof:doctor` — full workflow entry point
-- `/maencof:diagnose` — fast check of D2 (stale index) only
+- `/maencof:diagnose` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)

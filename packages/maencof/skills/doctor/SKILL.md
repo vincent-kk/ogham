@@ -61,10 +61,10 @@ After user confirmation, execute AutoFixAction:
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Index status, stale/orphan nodes |
-| `maencof_read` | Frontmatter validation |
-| `maencof_update` | Auto-fix Frontmatter |
-| `kg_navigate` | Verify link validity |
+| `kg_status` | Index status, stale/orphan nodes (D1, D2) |
+| `maencof_read` | Frontmatter validation (D4, D6) |
+| `maencof_update` | Auto-fix Frontmatter (D4, D6) |
+| `kg_navigate` | Verify link validity, detect broken links (D3) |
 
 ## Options
 
