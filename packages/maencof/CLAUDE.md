@@ -25,9 +25,22 @@ yarn format && yarn lint
 
 **Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
 
-**Skills (24)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`
+**Skills (26)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`, `think`, `refine`
 
 > 상세 문서: `../../.metadata/maencof/` 참조 (5-Layer 전체 사양, MCP 도구 계약, 에이전트/스킬 명세, 훅 이벤트 매핑)
+
+## Auto-invocation
+
+다음 조건이 감지되면 사용자 요청 없이 해당 스킬을 자동으로 호출한다:
+
+| 조건 | 스킬 | 설명 |
+|------|------|------|
+| 요구사항이 다중 해석 가능 | `think` | ToT로 후보 평가 후 최적 해석 선택 |
+| 입력이 모호/불완전 | `refine` | 인터뷰 루프로 정확한 사양 도출 |
+| 스킬 생성/수정/개선/수정 언급 | `craft-skill` | 4모드 스킬 엔지니어링 |
+| 에이전트 생성/수정/검증 언급 | `craft-agent` | 4모드 에이전트 빌더 |
+
+`think`과 `refine`은 연계 가능: 모호한 요구사항 → `refine`으로 정제 → 다중 해석 시 `think`으로 분석.
 
 ## Always do
 
