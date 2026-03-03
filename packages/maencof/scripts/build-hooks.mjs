@@ -25,6 +25,7 @@ const hookEntries = [
   'dailynote-recorder',
   'session-end',
   'lifecycle-dispatcher',
+  'vault-committer',
 ];
 
 await Promise.all(
