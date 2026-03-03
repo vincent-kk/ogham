@@ -121,6 +121,58 @@ describe('handleMaencofCreate', () => {
     expect(second.message).toContain('File already exists');
   });
 
+  it('서브디렉토리 경로가 포함된 filename으로 중첩 파일을 생성한다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 3,
+      tags: ['cve'],
+      content: 'CVE 문서.',
+      filename: 'cve/CVE-2025-1234',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.path).toBe('03_External/cve/cve-2025-1234.md');
+  });
+
+  it('다단계 서브디렉토리 경로를 지원한다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 3,
+      tags: ['news'],
+      content: '뉴스 기사.',
+      filename: 'news/tech/article-1',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.path).toBe('03_External/news/tech/article-1.md');
+  });
+
+  it('path traversal 시도를 차단한다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 3,
+      tags: ['hack'],
+      content: '악의적 경로.',
+      filename: '../escape/hack',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Path traversal');
+  });
+
+  it('서브디렉토리 경로에서도 중복 파일을 감지한다', async () => {
+    const input = {
+      layer: 3 as const,
+      tags: ['cve'],
+      content: '중복 테스트.',
+      filename: 'cve/dup-test',
+    };
+
+    const first = await handleMaencofCreate(vault, input);
+    expect(first.success).toBe(true);
+
+    const second = await handleMaencofCreate(vault, input);
+    expect(second.success).toBe(false);
+    expect(second.message).toContain('File already exists');
+  });
+
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {
     await handleMaencofCreate(vault, {
       layer: 3,

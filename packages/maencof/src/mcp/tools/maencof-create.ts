@@ -13,12 +13,18 @@ import type { MaencofCreateInput, MaencofCrudResult } from '../../types/mcp.js';
  * 파일명 힌트로부터 안전한 파일명을 생성한다.
  */
 function sanitizeFilename(hint: string): string {
-  return hint
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 80);
+  const parts = hint.split('/');
+  const sanitized = parts
+    .map((part) =>
+      part
+        .toLowerCase()
+        .replace(/[^a-z0-9가-힣\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .slice(0, 80),
+    )
+    .filter((v) => !!v);
+  return sanitized.join('/');
 }
 
 /**
@@ -102,6 +108,16 @@ export async function handleMaencofCreate(
       success: false,
       path: '',
       message: `Invalid Layer: ${input.layer}`,
+    };
+  }
+
+  // Path traversal 방어 (sanitize 전 raw input 검사)
+  if (input.filename && input.filename.includes('..')) {
+    return {
+      success: false,
+      path: '',
+      message:
+        'Path traversal detected: ".." segments are not allowed in filename',
     };
   }
 

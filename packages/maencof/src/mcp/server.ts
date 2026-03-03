@@ -174,7 +174,9 @@ function registerCrudTools(server: McpServer): void {
         filename: z
           .string()
           .optional()
-          .describe('Filename hint (optional, auto-generated if omitted)'),
+          .describe(
+            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234"',
+          ),
         source: z.string().optional().describe('External source (for Layer 3)'),
         expires: z
           .string()

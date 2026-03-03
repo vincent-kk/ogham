@@ -48,7 +48,7 @@ export function extractModuleExports(content: string): ModuleExportInfo[] {
               .pop()
               ?.trim() ?? '',
         )
-        .filter(Boolean);
+        .filter((v) => !!v);
       for (const name of names) {
         exports.push({ name, kind: 're-export', source });
       }
@@ -75,7 +75,7 @@ export function extractModuleExports(content: string): ModuleExportInfo[] {
               .pop()
               ?.trim() ?? '',
         )
-        .filter(Boolean);
+        .filter((v) => !!v);
       for (const name of names) {
         exports.push({ name, kind: 're-export', source });
       }
