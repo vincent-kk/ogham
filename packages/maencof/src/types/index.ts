@@ -137,3 +137,16 @@ export type {
   KgContextResult,
   KgStatusResult,
 } from './mcp.js';
+
+export {
+  InsightConfigSchema,
+  DEFAULT_INSIGHT_CONFIG,
+  DEFAULT_INSIGHT_STATS,
+} from './insight.js';
+export type {
+  InsightConfig,
+  InsightStats,
+  CaptureInsightInput,
+  PendingInsightCapture,
+  PendingInsightNotification,
+} from './insight.js';

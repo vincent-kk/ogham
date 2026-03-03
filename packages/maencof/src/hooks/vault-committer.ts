@@ -8,15 +8,15 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 
-import { isMaencofVault, metaPath } from './shared.js';
 import {
-  isGitRepo,
-  getGitRoot,
-  isIndexLocked,
-  hasVaultChanges,
   commitVaultChanges,
   generateCommitMessage,
+  getGitRoot,
+  hasVaultChanges,
+  isGitRepo,
+  isIndexLocked,
 } from './git-utils.js';
+import { isMaencofVault, metaPath } from './shared.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -47,9 +47,7 @@ const VAULT_COMMIT_CONFIG_FILE = 'vault-commit.json';
 /**
  * Read and validate vault-commit.json. Returns null if missing, malformed, or disabled.
  */
-export function readVaultCommitConfig(
-  cwd: string,
-): VaultCommitConfig | null {
+export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
   const configPath = metaPath(cwd, VAULT_COMMIT_CONFIG_FILE);
   if (!existsSync(configPath)) return null;
   try {

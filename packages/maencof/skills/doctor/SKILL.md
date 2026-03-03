@@ -77,6 +77,15 @@ After user confirmation, execute AutoFixAction:
 | `--fix` | false | Run auto-fix (after confirmation) |
 | `--check` | all | Run only specific diagnostic items |
 
+### auto-insight-health
+
+Check auto-insight system health:
+- Config file exists and is valid
+- Meta-prompt file exists
+- Stats file integrity
+- Orphaned auto-insight documents (no links, >30 days old)
+- Session capture limits appropriateness
+
 ## Resources
 
 - **reference.md**: 6 diagnostic items detail, report format template, auto-fix rules

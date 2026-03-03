@@ -2,9 +2,10 @@
  * @file git-utils.ts
  * @description Git helper utilities for vault-committer hook — repo detection, status, commit
  */
-import { existsSync } from 'node:fs';
 import { execFileSync, execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+
 import { MAENCOF_DIR, MAENCOF_META_DIR } from './shared.js';
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -13,8 +14,11 @@ export const EXEC_TIMEOUT_MS = 1500;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-export const execOpts = (cwd: string) =>
-  ({ cwd, timeout: EXEC_TIMEOUT_MS, stdio: 'pipe' as const });
+export const execOpts = (cwd: string) => ({
+  cwd,
+  timeout: EXEC_TIMEOUT_MS,
+  stdio: 'pipe' as const,
+});
 
 export function isGitRepo(cwd: string): boolean {
   try {

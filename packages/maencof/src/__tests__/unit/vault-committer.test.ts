@@ -2,18 +2,19 @@
  * @file vault-committer.test.ts
  * @description vault-committer hook unit tests — auto-commit vault changes on SessionEnd
  */
+import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { generateCommitMessage } from '../../hooks/git-utils.js';
 import {
   isClearCommand,
   readVaultCommitConfig,
   runVaultCommitter,
 } from '../../hooks/vault-committer.js';
-import { generateCommitMessage } from '../../hooks/git-utils.js';
 
 // ── Mock child_process ───────────────────────────────────────────────
 
@@ -22,15 +23,16 @@ vi.mock('node:child_process', () => ({
   execFileSync: vi.fn(),
 }));
 
-import { execFileSync, execSync } from 'node:child_process';
-
 const mockExecSync = vi.mocked(execSync);
 const mockExecFileSync = vi.mocked(execFileSync);
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-vc-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
+  const dir = join(
+    tmpdir(),
+    `maencof-vc-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+  );
   mkdirSync(dir, { recursive: true });
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
@@ -74,11 +76,7 @@ function setupGitMocks(
   // execFileSync handles git add and git commit
   mockExecFileSync.mockImplementation(
     (cmd: string, args?: readonly string[]) => {
-      if (
-        commitThrows &&
-        cmd === 'git' &&
-        args?.includes('commit')
-      ) {
+      if (commitThrows && cmd === 'git' && args?.includes('commit')) {
         throw new Error('commit failed');
       }
       return Buffer.from('');
@@ -207,7 +205,8 @@ describe('runVaultCommitter', () => {
     expect(result).toEqual({ continue: true });
     // Should not have called git status (stopped at index.lock check)
     const statusCalls = mockExecSync.mock.calls.filter(
-      (call) => typeof call[0] === 'string' && call[0].includes('status --porcelain'),
+      (call) =>
+        typeof call[0] === 'string' && call[0].includes('status --porcelain'),
     );
     expect(statusCalls).toHaveLength(0);
   });
@@ -346,10 +345,7 @@ describe('runVaultCommitter with UserPromptSubmit event', () => {
   it('skips when UserPromptSubmit prompt is missing', () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter(
-      { cwd: vaultDir },
-      'UserPromptSubmit',
-    );
+    const result = runVaultCommitter({ cwd: vaultDir }, 'UserPromptSubmit');
     expect(result).toEqual({ continue: true });
     expect(mockExecSync).not.toHaveBeenCalled();
   });
@@ -369,10 +365,7 @@ describe('runVaultCommitter with UserPromptSubmit event', () => {
   it('commits on SessionEnd without needing prompt field', () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter(
-      { cwd: vaultDir },
-      'SessionEnd',
-    );
+    const result = runVaultCommitter({ cwd: vaultDir }, 'SessionEnd');
     expect(result).toEqual({ continue: true });
     expect(mockExecFileSync).toHaveBeenCalled();
   });

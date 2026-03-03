@@ -92,6 +92,13 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 - **User cancels confirmation**: abort execute stage; no filesystem changes made
 - **No transition candidates found**: "No transition candidates found at the current confidence threshold. Try `--min-confidence 0.5` to lower the threshold."
 
+### Auto-Insight Documents
+
+When organizing, prioritize reviewing documents with the `auto-insight` tag:
+- L5 auto-insight documents with strong connections (high link count) → promote to L2
+- L5 auto-insight documents with no connections after 30+ days → archive candidate
+- Update `.maencof-meta/auto-insight-stats.json` when promoting (increment `l5_promoted`) or archiving (increment `l5_archived`)
+
 ## Options
 
 ```

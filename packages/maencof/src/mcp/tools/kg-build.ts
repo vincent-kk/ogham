@@ -13,10 +13,10 @@ import type { ScannedFile } from '../../core/vault-scanner.js';
 import { scanVault } from '../../core/vault-scanner.js';
 import { calculateWeights } from '../../core/weight-calculator.js';
 import {
+  type CurrentFileInfo,
   computeChangeSet,
   computeIncrementalScope,
   createSnapshot,
-  type CurrentFileInfo,
 } from '../../index/incremental-tracker.js';
 import { MetadataStore } from '../../index/metadata-store.js';
 import type { NodeId } from '../../types/common.js';

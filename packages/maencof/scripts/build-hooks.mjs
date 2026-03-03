@@ -26,6 +26,7 @@ const hookEntries = [
   'session-end',
   'lifecycle-dispatcher',
   'vault-committer',
+  'insight-injector',
 ];
 
 await Promise.all(

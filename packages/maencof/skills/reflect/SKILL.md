@@ -80,6 +80,14 @@ Execute memory-organizer judge logic:
 - **memory-organizer unavailable**: abort and guide to retry
 - **No candidates found**: display empty report with summary "No transition candidates at current threshold."
 
+### Auto-Insight Status
+
+Include in reflection output:
+- Auto-insight capture: enabled/disabled, sensitivity level
+- Recent capture stats: total, L2, L5
+- Noise ratio estimate: archived / total (if available)
+- Recommendation: adjust sensitivity if noise ratio > 50%
+
 ## Options
 
 ```

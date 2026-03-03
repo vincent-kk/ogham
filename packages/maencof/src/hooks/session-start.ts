@@ -11,6 +11,12 @@ import {
   readMaencofSection,
 } from '../core/claude-md-merger.js';
 import { appendDailynoteEntry, formatTime } from '../core/dailynote-writer.js';
+import {
+  buildMetaPrompt,
+  deletePendingNotification,
+  readInsightConfig,
+  readPendingNotification,
+} from '../core/insight-stats.js';
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
 import type { VaultVersionInfo } from '../types/setup.js';
@@ -104,6 +110,32 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );
+  }
+
+  // 6.5. Auto-Insight: meta-prompt injection + pending notification
+  try {
+    const insightConfig = readInsightConfig(cwd);
+
+    if (insightConfig.enabled) {
+      messages.push(buildMetaPrompt(insightConfig));
+    }
+
+    const pending = readPendingNotification(cwd);
+    if (pending && pending.captures.length > 0) {
+      const l2Count = pending.captures.filter((c) => c.layer === 2).length;
+      const l5Count = pending.captures.filter((c) => c.layer === 5).length;
+      const titles = pending.captures
+        .map((c) => `  - L${c.layer}: "${c.title}"`)
+        .join('\n');
+
+      messages.push(
+        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:insight --recent 로 확인하세요.`,
+      );
+
+      deletePendingNotification(cwd);
+    }
+  } catch {
+    // Silent — insight injection failure must not block session start
   }
 
   // 7. Record session start in dailynote
@@ -299,6 +331,7 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 | Move vault documents | maencof_move | Bash mv |
 | Check vault status | kg_status | ls, find |
 | Assemble context | kg_context | Manual file assembly |
+| Capture insight | maencof_capture_insight | maencof_create (use dedicated tool) |
 | Modify CLAUDE.md | claudemd_merge | Edit (MAENCOF section) |
 
 ## Skills
@@ -310,6 +343,15 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 | /maencof:explore | Explore knowledge graph |
 | /maencof:organize | Organize/review knowledge |
 | /maencof:reflect | Reflect on knowledge |
+| /maencof:insight | Manage auto-insight capture |
+
+## Auto-Insight Capture
+
+When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
+When you detect a meaningful insight during conversation, call \`maencof_capture_insight\` to record it.
+Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:insight --recent\`.
+After capture, display: 💡 Insight recorded to L{layer}: "{title}"
+Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
 ## Auto-Document Lifecycle (MUST)
 

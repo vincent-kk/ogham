@@ -1,9 +1,10 @@
 /**
  * @file server.ts
- * @description maencof MCP server — registers 15 tools + routing
+ * @description maencof MCP server — registers 16 tools + routing
  *
  * Tool list:
  * CRUD x5: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+ * Insight x1: maencof_capture_insight
  * Search x5: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * Build x1: kg_build
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
@@ -31,6 +32,10 @@ import { handleKgNavigate } from './tools/kg-navigate.js';
 import { handleKgSearch } from './tools/kg-search.js';
 import { handleKgStatus } from './tools/kg-status.js';
 import { handleKgSuggestLinks } from './tools/kg-suggest-links.js';
+import {
+  captureInsightInputSchema,
+  handleCaptureInsight,
+} from './tools/maencof-capture-insight.js';
 import { handleMaencofCreate } from './tools/maencof-create.js';
 import { handleMaencofDelete } from './tools/maencof-delete.js';
 import { handleMaencofMove } from './tools/maencof-move.js';
@@ -185,6 +190,27 @@ function registerCrudTools(server: McpServer): void {
           ...args,
           layer: args.layer as 1 | 2 | 3 | 4 | 5,
         });
+        if (result.success) invalidateCache();
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+
+  // ─── maencof_capture_insight ──────────────────────────────────────
+  server.registerTool(
+    'maencof_capture_insight',
+    {
+      description:
+        'Captures a conversation insight as a knowledge document. Auto-adds auto-insight tag, tracks stats, and handles session capture limits. Use this when you detect a meaningful insight in conversation.',
+      inputSchema: captureInsightInputSchema,
+    },
+    async (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        // Note: sessionId unavailable in MCP tool handler scope; falls back to 'unknown'
+        const result = await handleCaptureInsight(vaultPath, args);
         if (result.success) invalidateCache();
         return toolResult(result);
       } catch (error) {

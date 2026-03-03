@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-import type { VaultCommitterEvent, VaultCommitterInput } from '../vault-committer.js';
-import { runVaultCommitter } from '../vault-committer.js';
 import { readStdin, writeResult } from '../shared.js';
+import type {
+  VaultCommitterEvent,
+  VaultCommitterInput,
+} from '../vault-committer.js';
+import { runVaultCommitter } from '../vault-committer.js';
 
 // Event name passed as CLI argument: vault-committer.mjs [SessionEnd|UserPromptSubmit]
 const event = (process.argv[2] ?? 'SessionEnd') as VaultCommitterEvent;
