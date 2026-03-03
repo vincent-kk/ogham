@@ -22,6 +22,7 @@ import { isValidCompanionIdentity } from '../types/companion-guard.js';
 import type { VaultVersionInfo } from '../types/setup.js';
 import { VERSION } from '../version.js';
 
+import { provisionMissingConfigs } from './config-provisioner.js';
 import { claudeMdPath, isMaencofVault, metaPath } from './shared.js';
 
 export interface SessionStartInput {
@@ -65,7 +66,21 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   }
 
   // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
-  initClaudeMdSection(cwd, companion?.name, messages);
+  const needsProvisioning = initClaudeMdSection(cwd, companion?.name, messages);
+
+  // 2.7. Config file provisioning (separate concern from CLAUDE.md management)
+  if (needsProvisioning) {
+    try {
+      const provision = provisionMissingConfigs(cwd);
+      if (provision.created.length > 0) {
+        messages.push(
+          `[maencof] Config files provisioned: ${provision.created.join(', ')}`,
+        );
+      }
+    } catch {
+      // Silent fallback — provisioning failure must not block session start
+    }
+  }
 
   // 2.6. 버전 불일치 감지
   checkVersionMismatch(cwd, messages);
@@ -191,7 +206,8 @@ function initClaudeMdSection(
   cwd: string,
   companionName: string | undefined,
   messages: string[],
-): void {
+): boolean {
+  let needsProvisioning = false;
   try {
     const filePath = claudeMdPath(cwd);
     const existing = readMaencofSection(filePath);
@@ -203,9 +219,11 @@ function initClaudeMdSection(
       mergeMaencofSection(filePath, directive, { createIfMissing: true });
       writeVaultVersion(cwd, VERSION);
       messages.push('[maencof] maencof directives initialized in CLAUDE.md.');
+      needsProvisioning = true;
     } else if (vaultVersion === null) {
       // 마커 있음 + version.json 없음 → version.json 생성 (기존 vault 호환)
       writeVaultVersion(cwd, VERSION);
+      needsProvisioning = true;
     } else if (vaultVersion !== VERSION) {
       // 마커 있음 + 다른 버전 → 업데이트
       const directive = buildDefaultDirective(cwd, companionName);
@@ -214,11 +232,13 @@ function initClaudeMdSection(
       messages.push(
         `[maencof] CLAUDE.md directives updated (${vaultVersion} → ${VERSION}).`,
       );
+      needsProvisioning = true;
     }
     // 마커 있음 + 같은 버전 → 스킵 (idempotent)
   } catch {
     // Silent fallback — hook 실패로 전파하지 않음
   }
+  return needsProvisioning;
 }
 
 /**

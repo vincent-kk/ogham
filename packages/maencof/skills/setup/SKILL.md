@@ -29,6 +29,10 @@ Collect the vault absolute path via AskUserQuestion.
 - Default: `~/.maencof/`
 - If the path does not exist, confirm whether to create it
 - Also create the `.maencof/` cache directory and `.maencof-meta/` metadata directory
+- **Provision default config files**: After creating directories, provision all missing
+  config files with defaults (insight-config.json, vault-commit.json, lifecycle.json,
+  data-sources.json, auto-insight-stats.json, usage-stats.json).
+  Display the list of provisioned files to the user.
 
 ### Stage 2 — Core Identity Interview (minimum 5 questions)
 
