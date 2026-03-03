@@ -119,6 +119,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/changelog-gate.mjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
             "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/lifecycle-dispatcher.mjs\" Stop",
             "timeout": 3
           }

@@ -27,6 +27,7 @@ const hookEntries = [
   'lifecycle-dispatcher',
   'vault-committer',
   'insight-injector',
+  'changelog-gate',
 ];
 
 await Promise.all(

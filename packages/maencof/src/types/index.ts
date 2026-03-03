@@ -120,6 +120,19 @@ export type {
   DailynoteReadResult,
 } from './dailynote.js';
 
+export {
+  CHANGELOG_CATEGORY_LABELS,
+  CHANGELOG_CATEGORY_ORDER,
+  CHANGELOG_DIR,
+  CHANGELOG_EXCLUDE,
+  CHANGELOG_GATE_MARKER,
+  WATCHED_PATHS,
+} from './changelog.js';
+export type {
+  ChangelogCategory,
+  ChangelogEntry,
+} from './changelog.js';
+
 export type {
   MaencofCreateInput,
   MaencofReadInput,
