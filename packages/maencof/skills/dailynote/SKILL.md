@@ -55,7 +55,7 @@ dailynote_read({
 ## Output Format
 
 ```markdown
-## 📋 Dailynote — 2026-03-02
+## Dailynote — 2026-03-02
 
 | 시간 | 카테고리 | 활동 | 경로 |
 |------|----------|------|------|

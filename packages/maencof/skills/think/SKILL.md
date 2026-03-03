@@ -8,7 +8,6 @@ description: >
 version: 1.0.0
 complexity: medium
 context_layers: []
-orchestrator: null
 plugin: maencof
 ---
 

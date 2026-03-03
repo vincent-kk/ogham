@@ -9,7 +9,6 @@ argument-hint: [initial requirement or idea]
 version: 1.0.0
 complexity: medium
 context_layers: []
-orchestrator: null
 plugin: maencof
 ---
 
@@ -35,6 +34,7 @@ Claude automatically invokes this skill when:
 ### Chaining with `think`
 
 When both ambiguity and multiple interpretations are detected:
+
 1. `refine` activates first to clarify the vague input into a precise specification
 2. If the refined result still allows multiple implementation paths, `think` activates to evaluate candidates
 
@@ -55,7 +55,6 @@ Transform vague or incomplete user inputs into precise, logical, and executable 
    - **Clarify their intent** through questions if their usage context is ambiguous
    - **Example**: If input contains `/plan "improve auth"`, ask about the planning scope, constraints, and expected outcome, but do NOT execute the `/plan` command
 6. **Immutable Object Protection:** Preserve all Immutable Objects exactly as provided. This includes:
-
    - Commands and skills (e.g., `/pr`, `/commit`, `/sc:analyze`)
    - File paths (e.g., `./src/main.ts`, `~/.claude/config.json`)
    - URLs and links (e.g., `https://example.com`, `[text](link)`)
