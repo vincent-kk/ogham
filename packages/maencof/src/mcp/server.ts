@@ -65,6 +65,9 @@ function getVaultPath(): string {
 let cachedGraph: KnowledgeGraph | null = null;
 let cacheVaultPath: string | null = null;
 
+/** Rebuild mutex — prevents duplicate concurrent rebuilds */
+let rebuildInProgress: Promise<void> | null = null;
+
 async function loadGraphIfNeeded(
   vaultPath: string,
 ): Promise<KnowledgeGraph | null> {
@@ -77,6 +80,51 @@ async function loadGraphIfNeeded(
     cacheVaultPath = vaultPath;
   }
   return graph;
+}
+
+/**
+ * Read-path auto-rebuild: stale 노드가 있으면 증분 리빌드 후 fresh 그래프를 반환한다.
+ * kg_status는 진단 도구이므로 이 함수를 사용하지 않는다 (loadGraphIfNeeded 사용).
+ */
+async function ensureFreshGraph(
+  vaultPath: string,
+): Promise<KnowledgeGraph | null> {
+  // 이미 리빌드 진행 중이면 대기 후 캐시 반환
+  if (rebuildInProgress) {
+    await rebuildInProgress;
+    return loadGraphIfNeeded(vaultPath);
+  }
+
+  // Stale 노드 확인
+  const store = new MetadataStore(vaultPath);
+  const staleNodes = await store.loadStaleNodes();
+
+  if (staleNodes.paths.length === 0) {
+    return loadGraphIfNeeded(vaultPath);
+  }
+
+  // 증분 리빌드 (mutex 보호)
+  let resolve: () => void;
+  rebuildInProgress = new Promise<void>((r) => {
+    resolve = r;
+  });
+
+  try {
+    const result = await handleKgBuild(vaultPath, { force: false });
+    if (result.success) {
+      const freshGraph = await store.loadGraph();
+      if (freshGraph) {
+        cachedGraph = freshGraph;
+        cacheVaultPath = vaultPath;
+        return freshGraph;
+      }
+    }
+  } finally {
+    resolve!(); // wake waiters before allowing new rebuilds
+    rebuildInProgress = null;
+  }
+
+  return loadGraphIfNeeded(vaultPath);
 }
 
 function invalidateCache(): void {
@@ -336,7 +384,7 @@ function registerKgTools(server: McpServer): void {
     async (args) => {
       try {
         const vaultPath = getVaultPath();
-        const graph = await loadGraphIfNeeded(vaultPath);
+        const graph = await ensureFreshGraph(vaultPath);
         const result = await handleKgSearch(graph, {
           ...args,
           layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
@@ -376,7 +424,7 @@ function registerKgTools(server: McpServer): void {
     async (args) => {
       try {
         const vaultPath = getVaultPath();
-        const graph = await loadGraphIfNeeded(vaultPath);
+        const graph = await ensureFreshGraph(vaultPath);
         const result = await handleKgNavigate(graph, args);
         if ('error' in result) {
           return { content: [{ type: 'text' as const, text: result.error }] };
@@ -412,7 +460,7 @@ function registerKgTools(server: McpServer): void {
     async (args) => {
       try {
         const vaultPath = getVaultPath();
-        const graph = await loadGraphIfNeeded(vaultPath);
+        const graph = await ensureFreshGraph(vaultPath);
         const result = await handleKgContext(graph, args);
         if ('error' in result) {
           return { content: [{ type: 'text' as const, text: result.error }] };
@@ -505,7 +553,7 @@ function registerKgTools(server: McpServer): void {
     async (args) => {
       try {
         const vaultPath = getVaultPath();
-        const graph = await loadGraphIfNeeded(vaultPath);
+        const graph = await ensureFreshGraph(vaultPath);
         const result = handleKgSuggestLinks(graph, args);
         return toolResult(result);
       } catch (error) {
