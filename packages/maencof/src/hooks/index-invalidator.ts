@@ -44,7 +44,7 @@ export function readStaleNodeCount(cwd: string): number {
  * Returns 0 on any read/parse error.
  */
 export function readGraphNodeCount(cwd: string): number {
-  const indexPath = join(cwd, '.maencof', 'graph.json');
+  const indexPath = join(cwd, '.maencof', 'index.json');
   try {
     const raw = readFileSync(indexPath, 'utf-8');
     const parsed = JSON.parse(raw) as { nodes?: unknown };

@@ -41,7 +41,7 @@ function writeGraphJson(vaultDir: string, nodeCount: number): void {
     id: `node-${i}`,
   }));
   writeFileSync(
-    join(vaultDir, '.maencof', 'graph.json'),
+    join(vaultDir, '.maencof', 'index.json'),
     JSON.stringify({ nodes }),
     'utf-8',
   );
@@ -101,7 +101,7 @@ describe('readGraphNodeCount', () => {
     rmSync(vaultDir, { recursive: true, force: true });
   });
 
-  it('graph.json이 없을 때 0을 반환한다', () => {
+  it('index.json이 없을 때 0을 반환한다', () => {
     expect(readGraphNodeCount(vaultDir)).toBe(0);
   });
 
@@ -112,16 +112,16 @@ describe('readGraphNodeCount', () => {
 
   it('nodes가 객체인 경우 키 개수를 반환한다', () => {
     writeFileSync(
-      join(vaultDir, '.maencof', 'graph.json'),
+      join(vaultDir, '.maencof', 'index.json'),
       JSON.stringify({ nodes: { a: {}, b: {}, c: {} } }),
       'utf-8',
     );
     expect(readGraphNodeCount(vaultDir)).toBe(3);
   });
 
-  it('손상된 graph.json은 0을 반환한다', () => {
+  it('손상된 index.json은 0을 반환한다', () => {
     writeFileSync(
-      join(vaultDir, '.maencof', 'graph.json'),
+      join(vaultDir, '.maencof', 'index.json'),
       '{invalid json',
       'utf-8',
     );
@@ -234,9 +234,9 @@ describe('runIndexInvalidator advisory message', () => {
     expect(result.hookMessage).toContain('pending change');
   });
 
-  it('graph.json이 없을 때 graceful하게 처리한다 (percent=100으로 advisory 반환)', () => {
+  it('index.json이 없을 때 graceful하게 처리한다 (percent=100으로 advisory 반환)', () => {
     writeStaleNodes(vaultDir, ['02_Derived/a.md']);
-    // graph.json 없음 → totalCount=0 → percent=100 > 10 → rebuild advisory
+    // index.json 없음 → totalCount=0 → percent=100 > 10 → rebuild advisory
     const result = runIndexInvalidator({
       tool_name: 'maencof_update',
       tool_input: { path: '02_Derived/b.md' },
