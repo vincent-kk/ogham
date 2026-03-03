@@ -57,10 +57,16 @@ async function toCurrentFileInfos(
   );
 }
 
+/** 빌드 결과: 그래프 + 스캔된 파일 목록 (스냅샷 저장에 재사용) */
+interface BuildOutput {
+  graph: KnowledgeGraph;
+  files: ScannedFile[];
+}
+
 /**
  * 전체 vault를 스캔하고 그래프를 빌드하여 저장한다.
  */
-async function fullBuild(vaultPath: string): Promise<KnowledgeGraph> {
+async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   const files = await scanVault(vaultPath);
 
   const nodes = new Map<NodeId, KnowledgeNode>();
@@ -69,9 +75,7 @@ async function fullBuild(vaultPath: string): Promise<KnowledgeGraph> {
   await Promise.all(
     files.map(async (file) => {
       try {
-        const content = await import('node:fs/promises').then((m) =>
-          m.readFile(file.absolutePath, 'utf-8'),
-        );
+        const content = await readFile(file.absolutePath, 'utf-8');
         const doc = parseDocument(file.relativePath, content, file.mtime);
         const nodeResult = buildKnowledgeNode(doc);
 
@@ -109,7 +113,7 @@ async function fullBuild(vaultPath: string): Promise<KnowledgeGraph> {
   }
 
   const builtAt = new Date().toISOString();
-  const finalGraph: KnowledgeGraph = {
+  const graph: KnowledgeGraph = {
     nodes,
     edges: weightedEdges,
     builtAt,
@@ -117,19 +121,19 @@ async function fullBuild(vaultPath: string): Promise<KnowledgeGraph> {
     edgeCount: weightedEdges.length,
   };
 
-  return finalGraph;
+  return { graph, files };
 }
 
 /**
  * 증분 빌드: 변경된 파일만 재파싱하고, 전체 노드 셋으로 그래프를 재구축한다.
  * "Incremental scan, full graph construction" 전략.
  *
- * @returns 빌드된 그래프, 또는 null (전체 빌드 폴백 필요)
+ * @returns 빌드 결과, 또는 null (전체 빌드 폴백 필요)
  */
 async function incrementalBuild(
   vaultPath: string,
   store: MetadataStore,
-): Promise<KnowledgeGraph | null> {
+): Promise<BuildOutput | null> {
   // 이전 스냅샷과 그래프 로드
   const [previousSnapshot, previousGraph] = await Promise.all([
     store.loadSnapshot(),
@@ -153,7 +157,7 @@ async function incrementalBuild(
     changeSet.modified.length === 0 &&
     changeSet.deleted.length === 0
   ) {
-    return previousGraph;
+    return { graph: previousGraph, files };
   }
 
   // 증분 범위 계산 (전체 빌드 권장 여부 확인)
@@ -205,11 +209,14 @@ async function incrementalBuild(
   }
 
   return {
-    nodes,
-    edges: weightedEdges,
-    builtAt: new Date().toISOString(),
-    nodeCount: nodes.size,
-    edgeCount: weightedEdges.length,
+    graph: {
+      nodes,
+      edges: weightedEdges,
+      builtAt: new Date().toISOString(),
+      nodeCount: nodes.size,
+      edgeCount: weightedEdges.length,
+    },
+    files,
   };
 }
 
@@ -225,30 +232,35 @@ export async function handleKgBuild(
 
   try {
     let graph: KnowledgeGraph;
+    let scannedFiles: ScannedFile[];
     let isIncremental = false;
 
     if (!input.force) {
       // 증분 빌드 시도
       const result = await incrementalBuild(vaultPath, store);
       if (result) {
-        graph = result;
+        graph = result.graph;
+        scannedFiles = result.files;
         isIncremental = true;
       } else {
         // 폴백: 전체 빌드
-        graph = await fullBuild(vaultPath);
+        const full = await fullBuild(vaultPath);
+        graph = full.graph;
+        scannedFiles = full.files;
       }
     } else {
       // force=true → 항상 전체 빌드
-      graph = await fullBuild(vaultPath);
+      const full = await fullBuild(vaultPath);
+      graph = full.graph;
+      scannedFiles = full.files;
     }
 
     // 그래프 저장
     await store.saveGraph(graph);
     await store.clearStaleNodes();
 
-    // 스냅샷 저장
-    const files = await scanVault(vaultPath);
-    const snapshotEntries = await toCurrentFileInfos(files);
+    // 스냅샷 저장 (빌드 시 스캔한 파일 목록 재사용 — 중복 scanVault 방지)
+    const snapshotEntries = await toCurrentFileInfos(scannedFiles);
     await store.saveSnapshot(createSnapshot(snapshotEntries));
 
     const durationMs = Date.now() - startTime;

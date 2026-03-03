@@ -125,8 +125,8 @@ async function ensureFreshGraph(
       }
     }
   } finally {
-    resolve!(); // wake waiters before allowing new rebuilds
-    rebuildInProgress = null;
+    rebuildInProgress = null; // clear mutex before waking waiters
+    resolve!();
   }
 
   return loadGraphIfNeeded(vaultPath);
@@ -138,7 +138,7 @@ function invalidateCache(): void {
 }
 
 /**
- * Creates the maencof MCP server and registers 15 tools.
+ * Creates the maencof MCP server and registers 16 tools.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
