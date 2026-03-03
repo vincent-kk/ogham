@@ -2,39 +2,8 @@
  * @file shared.ts
  * @description MCP 도구 공통 유틸리티
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-
-/**
- * stale-nodes.json에 경로를 추가한다 (append-only).
- */
-export async function appendStaleNode(
-  vaultPath: string,
-  path: string,
-): Promise<void> {
-  const cacheDir = join(vaultPath, '.maencof');
-  const staleNodesPath = join(cacheDir, 'stale-nodes.json');
-
-  let stale: { paths: string[]; updatedAt: string } = {
-    paths: [],
-    updatedAt: new Date().toISOString(),
-  };
-
-  try {
-    const raw = await readFile(staleNodesPath, 'utf-8');
-    stale = JSON.parse(raw) as typeof stale;
-  } catch {
-    // 없으면 초기화
-  }
-
-  if (!stale.paths.includes(path)) {
-    stale.paths.push(path);
-  }
-  stale.updatedAt = new Date().toISOString();
-
-  await mkdir(cacheDir, { recursive: true });
-  await writeFile(staleNodesPath, JSON.stringify(stale, null, 2), 'utf-8');
-}
 
 /**
  * backlink-index.json에서 특정 소스의 링크를 제거한다.

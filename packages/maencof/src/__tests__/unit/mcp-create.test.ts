@@ -121,22 +121,6 @@ describe('handleMaencofCreate', () => {
     expect(second.message).toContain('File already exists');
   });
 
-  it('stale-nodes.json에 새 경로가 추가된다', async () => {
-    await handleMaencofCreate(vault, {
-      layer: 2,
-      tags: ['stale-test'],
-      content: '내용.',
-      title: 'Stale Test',
-    });
-
-    const raw = await readFile(
-      join(vault, '.maencof/stale-nodes.json'),
-      'utf-8',
-    );
-    const data = JSON.parse(raw) as { paths: string[] };
-    expect(data.paths.some((p) => p.startsWith('02_Derived/'))).toBe(true);
-  });
-
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {
     await handleMaencofCreate(vault, {
       layer: 3,

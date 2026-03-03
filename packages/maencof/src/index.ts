@@ -129,7 +129,6 @@ export type {
 // MCP modules
 export { createServer, startServer } from './mcp/server.js';
 export {
-  appendStaleNode,
   removeBacklinks,
   getBacklinks,
   toolResult,

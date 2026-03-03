@@ -8,7 +8,6 @@ import { dirname, join } from 'node:path';
 import type { Layer } from '../../types/common.js';
 import { LAYER_DIR } from '../../types/common.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../types/mcp.js';
-import { appendStaleNode } from '../shared.js';
 
 /**
  * 파일명 힌트로부터 안전한 파일명을 생성한다.
@@ -135,9 +134,6 @@ export async function handleMaencofCreate(
   // 디렉토리 생성 + 파일 쓰기
   await mkdir(dirname(absolutePath), { recursive: true });
   await writeFile(absolutePath, fileContent, 'utf-8');
-
-  // Invalidate stale-nodes (new node added)
-  await appendStaleNode(vaultPath, relativePath);
 
   // backlink-index 갱신 (링크 추출)
   const metaDir = join(vaultPath, '.maencof-meta');

@@ -7,7 +7,6 @@ import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { MaencofCrudResult, MaencofUpdateInput } from '../../types/mcp.js';
-import { appendStaleNode } from '../shared.js';
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
@@ -128,9 +127,6 @@ export async function handleMaencofUpdate(
   }
 
   await writeFile(absolutePath, newContent, 'utf-8');
-
-  // stale-nodes 무효화
-  await appendStaleNode(vaultPath, input.path);
 
   return {
     success: true,

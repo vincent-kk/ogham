@@ -3,7 +3,6 @@
  * @description shared.ts 유닛 테스트
  *
  * 테스트 대상:
- * - appendStaleNode
  * - getBacklinks / removeBacklinks
  * - toolResult / toolError / mapReplacer
  */
@@ -14,7 +13,6 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  appendStaleNode,
   getBacklinks,
   mapReplacer,
   removeBacklinks,
@@ -43,42 +41,6 @@ describe('shared.ts', () => {
 
   afterEach(async () => {
     await removeTempVault(vault);
-  });
-
-  describe('appendStaleNode', () => {
-    it('stale-nodes.json이 없을 때 새로 생성한다', async () => {
-      await appendStaleNode(vault, '01_Core/test.md');
-      const raw = await readFile(
-        join(vault, '.maencof/stale-nodes.json'),
-        'utf-8',
-      );
-      const data = JSON.parse(raw) as { paths: string[]; updatedAt: string };
-      expect(data.paths).toContain('01_Core/test.md');
-      expect(data.updatedAt).toBeTruthy();
-    });
-
-    it('기존 stale-nodes.json에 경로를 추가한다', async () => {
-      await appendStaleNode(vault, '01_Core/first.md');
-      await appendStaleNode(vault, '02_Derived/second.md');
-      const raw = await readFile(
-        join(vault, '.maencof/stale-nodes.json'),
-        'utf-8',
-      );
-      const data = JSON.parse(raw) as { paths: string[] };
-      expect(data.paths).toContain('01_Core/first.md');
-      expect(data.paths).toContain('02_Derived/second.md');
-    });
-
-    it('중복 경로를 추가하지 않는다', async () => {
-      await appendStaleNode(vault, '01_Core/test.md');
-      await appendStaleNode(vault, '01_Core/test.md');
-      const raw = await readFile(
-        join(vault, '.maencof/stale-nodes.json'),
-        'utf-8',
-      );
-      const data = JSON.parse(raw) as { paths: string[] };
-      expect(data.paths.filter((p) => p === '01_Core/test.md')).toHaveLength(1);
-    });
   });
 
   describe('getBacklinks / removeBacklinks', () => {

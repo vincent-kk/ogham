@@ -12,7 +12,7 @@ import {
 } from '../../core/document-parser.js';
 import { Layer } from '../../types/common.js';
 import type { MaencofCrudResult, MaencofDeleteInput } from '../../types/mcp.js';
-import { appendStaleNode, getBacklinks, removeBacklinks } from '../shared.js';
+import { getBacklinks, removeBacklinks } from '../shared.js';
 
 /**
  * maencof_delete 핸들러
@@ -69,11 +69,8 @@ export async function handleMaencofDelete(
   // 삭제 실행
   await unlink(absolutePath);
 
-  // stale-nodes 추가 + backlink 인덱스 정리
-  await Promise.all([
-    appendStaleNode(vaultPath, input.path),
-    removeBacklinks(vaultPath, input.path),
-  ]);
+  // backlink 인덱스 정리
+  await removeBacklinks(vaultPath, input.path);
 
   const warnings =
     backlinks.length > 0

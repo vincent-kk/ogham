@@ -309,7 +309,22 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 | /maencof:recall | Search past knowledge |
 | /maencof:explore | Explore knowledge graph |
 | /maencof:organize | Organize/review knowledge |
-| /maencof:reflect | Reflect on knowledge |`;
+| /maencof:reflect | Reflect on knowledge |
+
+## Auto-Document Lifecycle (MUST)
+
+- When learning new factual information during conversation, MUST create a vault document using \`maencof_create\` with appropriate layer and tags.
+- When discovering that existing vault information is outdated, MUST update the document using \`maencof_update\`.
+- For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
+- When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
+- When the system advises running \`kg_build\` (stale index advisory), follow the advice promptly.
+- Run \`kg_build\` explicitly only when advised by the system (high stale ratio) or for full PageRank recalculation.
+
+## Status Documents (Layer 4)
+
+- Create \`04_Action/\` status documents for: ongoing research, active decisions, session context
+- Set \`expires\` to 7 days for volatile context, 30 days for project status
+- The system tracks document freshness automatically via the knowledge graph`;
 }
 
 /**

@@ -106,18 +106,6 @@ describe('handleMaencofDelete', () => {
     expect(result.warnings![0]).toContain('backlink');
   });
 
-  it('삭제 성공 시 stale-nodes에 경로가 추가된다', async () => {
-    await createTestFile('02_Derived/to-delete.md', 2);
-    await handleMaencofDelete(vault, { path: '02_Derived/to-delete.md' });
-
-    const raw = await readFile(
-      join(vault, '.maencof/stale-nodes.json'),
-      'utf-8',
-    );
-    const data = JSON.parse(raw) as { paths: string[] };
-    expect(data.paths).toContain('02_Derived/to-delete.md');
-  });
-
   it('Layer 2 문서가 backlink 없이 정상 삭제된다', async () => {
     await createTestFile('02_Derived/simple.md', 2);
     const result = await handleMaencofDelete(vault, {

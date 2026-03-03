@@ -12,7 +12,6 @@ import {
 } from '../../core/document-parser.js';
 import { LAYER_DIR, Layer } from '../../types/common.js';
 import type { MaencofCrudResult, MaencofMoveInput } from '../../types/mcp.js';
-import { appendStaleNode } from '../shared.js';
 
 /**
  * Frontmatter의 layer 필드를 갱신한다.
@@ -113,12 +112,6 @@ export async function handleMaencofMove(
   await mkdir(dirname(newAbsPath), { recursive: true });
   await writeFile(newAbsPath, updatedContent, 'utf-8');
   await unlink(srcAbsPath);
-
-  // stale-nodes 업데이트 (소스 + 대상 모두)
-  await Promise.all([
-    appendStaleNode(vaultPath, input.path),
-    appendStaleNode(vaultPath, newRelativePath),
-  ]);
 
   const warnings: string[] = [];
   if (input.reason) {

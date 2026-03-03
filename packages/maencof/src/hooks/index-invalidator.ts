@@ -3,7 +3,7 @@
  * @description PostToolUse Hook — Update stale-nodes.json and increment usage stats after maencof MCP tool calls
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import {
   MAENCOF_MCP_TOOLS,
@@ -21,6 +21,58 @@ export interface PostToolUseInput {
 
 export interface PostToolUseResult {
   continue: boolean;
+  hookMessage?: string;
+}
+
+/**
+ * Read the number of stale nodes from stale-nodes.json.
+ * Returns 0 on any read/parse error.
+ */
+export function readStaleNodeCount(cwd: string): number {
+  const stalePath = join(cwd, '.maencof', 'stale-nodes.json');
+  try {
+    const raw = readFileSync(stalePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { paths?: unknown };
+    return Array.isArray(parsed.paths) ? parsed.paths.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Read the total number of graph nodes from the index.
+ * Returns 0 on any read/parse error.
+ */
+export function readGraphNodeCount(cwd: string): number {
+  const indexPath = join(cwd, '.maencof', 'graph.json');
+  try {
+    const raw = readFileSync(indexPath, 'utf-8');
+    const parsed = JSON.parse(raw) as { nodes?: unknown };
+    if (Array.isArray(parsed.nodes)) return parsed.nodes.length;
+    if (parsed.nodes && typeof parsed.nodes === 'object') {
+      return Object.keys(parsed.nodes).length;
+    }
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Build an advisory message based on stale ratio.
+ * >10% stale → rebuild warning; otherwise → soft advisory.
+ */
+function buildAdvisoryMessage(
+  staleCount: number,
+  totalCount: number,
+): string | null {
+  if (staleCount === 0) return null;
+  const percent =
+    totalCount > 0 ? Math.round((staleCount / totalCount) * 100) : 100;
+  if (totalCount > 0 && percent > 10) {
+    return `[maencof] ${staleCount} stale nodes detected (${percent}% of index). Run \`kg_build\` to rebuild the knowledge graph.`;
+  }
+  return `[maencof] Index has ${staleCount} pending change(s). The graph will auto-update on next search, or run \`kg_build\` manually.`;
 }
 
 /**
@@ -28,6 +80,7 @@ export interface PostToolUseResult {
  * After maencof CRUD tool calls:
  * 1. Add affected nodes to stale-nodes.json
  * 2. Increment usage-stats.json call counts
+ * 3. Return advisory message based on stale ratio
  */
 export function runIndexInvalidator(
   input: PostToolUseInput,
@@ -48,19 +101,28 @@ export function runIndexInvalidator(
     extractPathFromResponse(input.tool_response) ??
     null;
 
-  // Update stale-nodes.json
+  // Update stale-nodes.json (source path)
   if (affectedPath) {
     appendStaleNode(cwd, affectedPath);
   }
 
-  // Note: maencof_move target path stale tracking is handled by maencof-move.ts handler
-  // via mcp/shared.ts appendStaleNode(), so this hook does not duplicate it.
-  // Both writers now target the same file: .maencof/stale-nodes.json with StaleNodes format.
+  // maencof_move: also track target path
+  if (toolName === 'maencof_move') {
+    const targetPath = extractPathFromResponse(input.tool_response);
+    if (targetPath && targetPath !== affectedPath) {
+      appendStaleNode(cwd, targetPath);
+    }
+  }
 
   // Increment usage-stats.json counts
   incrementUsageStat(cwd, toolName);
 
-  return { continue: true };
+  // Build advisory message based on stale ratio
+  const staleCount = readStaleNodeCount(cwd);
+  const totalCount = readGraphNodeCount(cwd);
+  const hookMessage = buildAdvisoryMessage(staleCount, totalCount) ?? undefined;
+
+  return { continue: true, ...(hookMessage ? { hookMessage } : {}) };
 }
 
 /**
