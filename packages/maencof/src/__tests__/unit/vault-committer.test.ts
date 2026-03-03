@@ -13,6 +13,7 @@ import {
   readVaultCommitConfig,
   runVaultCommitter,
 } from '../../hooks/vault-committer.js';
+import { generateCommitMessage } from '../../hooks/git-utils.js';
 
 // ── Mock child_process ───────────────────────────────────────────────
 
@@ -226,17 +227,18 @@ describe('runVaultCommitter', () => {
     const result = runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
 
-    // Verify git add was called via execFileSync
+    // Verify git add was called separately for each directory
     const addCalls = mockExecFileSync.mock.calls.filter(
       (call) =>
         call[0] === 'git' &&
         Array.isArray(call[1]) &&
         (call[1] as string[]).includes('add'),
     );
-    expect(addCalls).toHaveLength(1);
-    expect(addCalls[0][1]).toEqual(['add', '.maencof/', '.maencof-meta/']);
+    expect(addCalls).toHaveLength(2);
+    expect(addCalls[0][1]).toEqual(['add', '.maencof/']);
+    expect(addCalls[1][1]).toEqual(['add', '.maencof-meta/']);
 
-    // Verify git commit was called with --no-verify via execFileSync
+    // Verify git commit was called with --no-verify and timestamped message
     const commitCalls = mockExecFileSync.mock.calls.filter(
       (call) =>
         call[0] === 'git' &&
@@ -244,12 +246,13 @@ describe('runVaultCommitter', () => {
         (call[1] as string[]).includes('commit'),
     );
     expect(commitCalls).toHaveLength(1);
-    expect(commitCalls[0][1]).toEqual([
-      'commit',
-      '--no-verify',
-      '-m',
-      'chore(maencof): auto-commit vault changes',
-    ]);
+    const commitArgs = commitCalls[0][1] as string[];
+    expect(commitArgs[0]).toBe('commit');
+    expect(commitArgs[1]).toBe('--no-verify');
+    expect(commitArgs[2]).toBe('-m');
+    expect(commitArgs[3]).toMatch(
+      /^chore\(maencof\): \d{4}_\d{2}_\d{2}:\d{2}_\d{2}_\d{2}_session_wrap$/,
+    );
   });
 
   it('returns { continue: true } when git commit fails', () => {

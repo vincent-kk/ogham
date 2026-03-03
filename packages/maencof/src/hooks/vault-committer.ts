@@ -15,6 +15,7 @@ import {
   isIndexLocked,
   hasVaultChanges,
   commitVaultChanges,
+  generateCommitMessage,
 } from './git-utils.js';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -40,7 +41,6 @@ export interface VaultCommitterResult {
 // ── Constants ────────────────────────────────────────────────────────
 
 const VAULT_COMMIT_CONFIG_FILE = 'vault-commit.json';
-const COMMIT_MESSAGE = 'chore(maencof): auto-commit vault changes';
 
 // ── Config Reader ────────────────────────────────────────────────────
 
@@ -121,7 +121,7 @@ export function runVaultCommitter(
     if (!hasVaultChanges(cwd)) return { continue: true };
 
     // 6. Stage and commit
-    commitVaultChanges(cwd, COMMIT_MESSAGE);
+    commitVaultChanges(cwd, generateCommitMessage());
   } catch {
     // Swallow all errors — must never block session exit
   }
