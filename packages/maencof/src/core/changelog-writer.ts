@@ -54,6 +54,23 @@ export function buildChangelogFrontmatter(date: string): string {
 }
 
 /**
+ * 단일 카테고리의 엔트리 목록을 마크다운 섹션으로 포맷한다.
+ */
+function formatCategorySection(
+  category: ChangelogCategory,
+  list: ChangelogEntry[],
+): string[] {
+  const label = CHANGELOG_CATEGORY_LABELS[category];
+  const items = list.map((entry) => {
+    const pathSuffix = entry.paths?.length
+      ? ` — \`${entry.paths.join('`, `')}\``
+      : '';
+    return `- ${entry.description}${pathSuffix}`;
+  });
+  return [`### ${label}`, '', ...items, ''];
+}
+
+/**
  * 카테고리별로 그룹된 엔트리를 마크다운 본문으로 포맷한다.
  */
 export function formatChangelogBody(entries: ChangelogEntry[]): string {
@@ -65,26 +82,10 @@ export function formatChangelogBody(entries: ChangelogEntry[]): string {
     grouped.set(entry.category, list);
   }
 
-  const sections: string[] = [];
-
-  for (const category of CHANGELOG_CATEGORY_ORDER) {
-    const list = grouped.get(category);
-    if (!list || list.length === 0) continue;
-
-    const label = CHANGELOG_CATEGORY_LABELS[category];
-    sections.push(`### ${label}`);
-    sections.push('');
-    for (const entry of list) {
-      const pathSuffix =
-        entry.paths && entry.paths.length > 0
-          ? ` — \`${entry.paths.join('`, `')}\``
-          : '';
-      sections.push(`- ${entry.description}${pathSuffix}`);
-    }
-    sections.push('');
-  }
-
-  return sections.join('\n');
+  return CHANGELOG_CATEGORY_ORDER
+    .filter((cat) => grouped.has(cat) && grouped.get(cat)!.length > 0)
+    .flatMap((cat) => formatCategorySection(cat, grouped.get(cat)!))
+    .join('\n');
 }
 
 /**

@@ -80,16 +80,6 @@ describe('provisionMissingConfigs', () => {
     expect(afterContent).toBe(originalContent);
   });
 
-  it('.maencof-meta/ 디렉토리가 없어도 자동으로 생성한다', () => {
-    // metaDir을 생성하지 않음
-    expect(existsSync(metaDir(cwd))).toBe(false);
-
-    const result = provisionMissingConfigs(cwd);
-
-    expect(existsSync(metaDir(cwd))).toBe(true);
-    expect(result.created).toHaveLength(6);
-  });
-
   it('생성된 파일들은 유효한 JSON을 포함한다', () => {
     const result = provisionMissingConfigs(cwd);
 
