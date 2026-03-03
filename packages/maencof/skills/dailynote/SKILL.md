@@ -65,6 +65,12 @@ dailynote_read({
 > 총 2건의 활동이 기록되었습니다.
 ```
 
+## Available MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `dailynote_read` | Read daily activity log entries |
+
 ## Error Handling
 
 - Vault가 초기화되지 않은 경우: "Vault가 초기화되지 않았습니다. `/maencof:setup`을 실행하세요."

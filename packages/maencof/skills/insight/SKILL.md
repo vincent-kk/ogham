@@ -4,6 +4,7 @@ user_invocable: true
 description: Manage auto-insight capture settings, view recent captures, and edit meta-prompt
 version: 1.0.0
 complexity: simple
+context_layers: []
 plugin: maencof
 ---
 
@@ -55,3 +56,19 @@ Set maximum captures per session.
 
 ## Default (no options)
 Show current status: enabled/disabled, sensitivity, session captures, max captures.
+
+## Available MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
+
+> Note: Config file operations (`.maencof-meta/insight-config.json`, `.maencof-meta/auto-insight-stats.json`, `.maencof-meta/pending-insight-notification.json`) use filesystem Read/Write tools, not maencof MCP tools.
+
+## Error Handling
+
+- **insight-config.json missing**: treat as default config (enabled: true, sensitivity: medium, max_captures_per_session: 5)
+- **auto-insight-stats.json missing**: display zeros for all stats
+- **pending-insight-notification.json missing**: treat as empty (no pending captures)
+- **Invalid sensitivity value**: "유효한 민감도 값은 high, medium, low입니다."
+- **Invalid --max value**: "최대 캡처 수는 1 이상의 정수여야 합니다."
