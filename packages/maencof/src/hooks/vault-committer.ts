@@ -7,10 +7,15 @@
  * Always returns { continue: true } — never blocks session exit or prompt submission.
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { execFileSync, execSync } from 'node:child_process';
-import { join } from 'node:path';
 
 import { isMaencofVault, metaPath } from './shared.js';
+import {
+  isGitRepo,
+  getGitRoot,
+  isIndexLocked,
+  hasVaultChanges,
+  commitVaultChanges,
+} from './git-utils.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -34,7 +39,6 @@ export interface VaultCommitterResult {
 
 // ── Constants ────────────────────────────────────────────────────────
 
-const EXEC_TIMEOUT_MS = 1500;
 const VAULT_COMMIT_CONFIG_FILE = 'vault-commit.json';
 const COMMIT_MESSAGE = 'chore(maencof): auto-commit vault changes';
 
@@ -63,57 +67,6 @@ export function readVaultCommitConfig(
   } catch {
     return null;
   }
-}
-
-// ── Git Helpers ──────────────────────────────────────────────────────
-
-const execOpts = (cwd: string) =>
-  ({ cwd, timeout: EXEC_TIMEOUT_MS, stdio: 'pipe' as const });
-
-function isGitRepo(cwd: string): boolean {
-  try {
-    execSync('git rev-parse --is-inside-work-tree', execOpts(cwd));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function getGitRoot(cwd: string): string | null {
-  try {
-    return execSync('git rev-parse --show-toplevel', execOpts(cwd))
-      .toString()
-      .trim();
-  } catch {
-    return null;
-  }
-}
-
-function isIndexLocked(gitRoot: string): boolean {
-  return existsSync(join(gitRoot, '.git', 'index.lock'));
-}
-
-function hasVaultChanges(cwd: string): boolean {
-  try {
-    const output = execSync(
-      'git status --porcelain -- .maencof/ .maencof-meta/',
-      execOpts(cwd),
-    )
-      .toString()
-      .trim();
-    return output.length > 0;
-  } catch {
-    return false;
-  }
-}
-
-function commitVaultChanges(cwd: string): void {
-  execFileSync('git', ['add', '.maencof/', '.maencof-meta/'], execOpts(cwd));
-  execFileSync(
-    'git',
-    ['commit', '--no-verify', '-m', COMMIT_MESSAGE],
-    execOpts(cwd),
-  );
 }
 
 // ── Prompt Detection ─────────────────────────────────────────────────
@@ -168,7 +121,7 @@ export function runVaultCommitter(
     if (!hasVaultChanges(cwd)) return { continue: true };
 
     // 6. Stage and commit
-    commitVaultChanges(cwd);
+    commitVaultChanges(cwd, COMMIT_MESSAGE);
   } catch {
     // Swallow all errors — must never block session exit
   }
