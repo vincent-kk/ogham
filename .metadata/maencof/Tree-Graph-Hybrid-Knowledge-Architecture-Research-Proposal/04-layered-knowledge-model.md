@@ -26,21 +26,21 @@
 
 * **트리 구조:** `/03_External/relational/` 디렉토리. 인물별 프로파일 파일을 배치한다.
 * **그래프 특성:** **Pointer 노드 (Who knows what)**. "누가 무엇을 알고 있는지"에 대한 메타 기억을 담는 포인터 역할을 한다. Layer 3C의 주제 노드와 `REFERENCES` 엣지로 연결되어, 특정 지식의 출처 또는 전문가를 즉시 추적할 수 있다.
-* **Frontmatter:** `layer: 3`, `sub_layer: A`
+* **Frontmatter:** `layer: 3`, `sub_layer: relational`
 * **SA 감쇠 인자:** 0.75
 
 #### **Layer 3B: 구조적/제도적 외부 (Structural & Institutional)**
 
 * **트리 구조:** `/03_External/structural/` 디렉토리. 조직/집단별 맥락 파일을 배치한다.
 * **그래프 특성:** **Context 노드 (Where context is)**. 지식이 생성되고 통용되는 '장(Ba)'의 역할을 하며, 소속된 조직의 규범과 맥락을 캡슐화한다. Layer 3A(인물)와 `BELONGS_TO` 엣지로, Layer 3C(주제)와 `APPLIES_IN` 엣지로 연결된다.
-* **Frontmatter:** `layer: 3`, `sub_layer: B`
+* **Frontmatter:** `layer: 3`, `sub_layer: structural`
 * **SA 감쇠 인자:** 0.80
 
 #### **Layer 3C: 의미론적/주제적 외부 (Semantic & Topical)**
 
 * **트리 구조:** `/03_External/topical/` 디렉토리. 관심사, 학문, 기술, 문헌 등 개념 단위의 노드를 배치한다.
 * **그래프 특성:** **Leaf 노드 (What it is)**. 기존 Layer 3의 외곽 노드 역할을 계승하며, 데이터 증식이 가장 빠른 영역이다. 개인용 '의미론적 계층(Semantic Layer)'으로 작동하여, 3A(인물) 및 3B(조직)와 메타데이터 차원에서 교차 연결된다.
-* **Frontmatter:** `layer: 3`, `sub_layer: C`
+* **Frontmatter:** `layer: 3`, `sub_layer: topical`
 * **SA 감쇠 인자:** 0.85
 
 ### **Layer 4: 행동 및 작업 기억 (Action & Working Context)**

@@ -57,7 +57,7 @@ L3/L5 서브레이어 구분을 타입 시스템에 반영한다. 기존 `Layer`
 
 ```typescript
 // L3 서브레이어
-export type L3SubLayer = 'A' | 'B' | 'C';
+export type L3SubLayer = 'relational' | 'structural' | 'topical';
 
 // L5 서브레이어
 export type L5SubLayer = 'buffer' | 'boundary';
@@ -67,9 +67,9 @@ export type SubLayer = L3SubLayer | L5SubLayer;
 
 // L3 서브레이어 디렉토리 매핑
 export const L3_SUBDIR: Record<L3SubLayer, string> = {
-  A: 'relational',
-  B: 'structural',
-  C: 'topical',
+  relational: 'relational',
+  structural: 'structural',
+  topical: 'topical',
 };
 
 // L5 서브레이어 디렉토리 매핑
@@ -92,7 +92,7 @@ export type EdgeType =
 
 ```typescript
 // sub_layer 필드 추가
-sub_layer: z.enum(['A', 'B', 'C', 'buffer', 'boundary']).optional(),
+sub_layer: z.enum(['relational', 'structural', 'topical', 'buffer', 'boundary']).optional(),
 
 // L3A 전용 필드
 person_ref: z.string().optional(),       // L5 persons/ 문서 참조
@@ -118,9 +118,9 @@ connected_layers: z.array(z.number().int().min(1).max(5)).optional(),
 ```
 
 서브레이어-필드 정합성 검증을 위한 `refineSuperRefine` 또는 별도 validator 함수 추가:
-- `layer=3` + `sub_layer='A'` → `person_ref` 허용, `org_type` 금지
-- `layer=3` + `sub_layer='B'` → `org_type` 허용, `person_ref` 금지
-- `layer=3` + `sub_layer='C'` → `topic_category` 허용
+- `layer=3` + `sub_layer='relational'` → `person_ref` 허용, `org_type` 금지
+- `layer=3` + `sub_layer='structural'` → `org_type` 허용, `person_ref` 금지
+- `layer=3` + `sub_layer='topical'` → `topic_category` 허용
 - `layer=5` + `sub_layer='buffer'` → `buffer_type`, `promotion_target` 허용
 - `layer=5` + `sub_layer='boundary'` → `boundary_type`, `connected_layers` 허용
 - `sub_layer` 미존재 시: 하위 호환 모드 (기존 동작 유지)
@@ -130,7 +130,7 @@ connected_layers: z.array(z.number().int().min(1).max(5)).optional(),
 ```typescript
 export interface KnowledgeNode {
   // ... 기존 필드 ...
-  /** 서브레이어 (L3: A/B/C, L5: buffer/boundary, 선택) */
+  /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary, 선택) */
   subLayer?: SubLayer;
 }
 ```
@@ -139,7 +139,7 @@ export interface KnowledgeNode {
 
 | 파일 | 변경 내용 |
 |------|----------|
-| `src/types/common.ts` | `SubLayer`, `L3SubLayer`, `L5SubLayer` 타입, `L3_SUBDIR`, `L5_SUBDIR` 매핑, `CROSS_LAYER` EdgeType |
+| `src/types/common.ts` | `SubLayer`, `L3SubLayer`(`relational`/`structural`/`topical`), `L5SubLayer` 타입, `L3_SUBDIR`, `L5_SUBDIR` 매핑, `CROSS_LAYER` EdgeType |
 | `src/types/frontmatter.ts` | `sub_layer` 필드 + 서브레이어 전용 필드 + 정합성 검증 |
 | `src/types/graph.ts` | `KnowledgeNode.subLayer` 필드 |
 | `src/types/index.ts` | 신규 타입 barrel export 추가 |
