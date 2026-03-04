@@ -29,10 +29,10 @@ export type DailynoteCategory =
   | 'diagnostic';
 
 /**
- * MCP 도구명 → 카테고리 매핑 (전체 14개 도구).
+ * MCP 도구명 → 카테고리 매핑 (전체 17개 도구 중 16개).
  *
- * PostToolUse hook matcher는 write 도구 5개만 사용
- * (maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge).
+ * PostToolUse hook matcher는 write 도구 7개 사용
+ * (maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove).
  * TOOL_CATEGORY_MAP은 전체 도구를 포함하여 향후 opt-in 확장에 대비한다.
  * dailynote_read는 의도적으로 제외 — 재귀적 기록 방지.
  */
@@ -42,12 +42,14 @@ export const TOOL_CATEGORY_MAP: Record<string, DailynoteCategory> = {
   maencof_update: 'document',
   maencof_delete: 'document',
   maencof_move: 'document',
+  maencof_capture_insight: 'document',
   kg_search: 'search',
   kg_navigate: 'search',
   kg_context: 'search',
   kg_build: 'index',
   kg_status: 'index',
   kg_suggest_links: 'search',
+  boundary_create: 'document',
   claudemd_merge: 'config',
   claudemd_read: 'config',
   claudemd_remove: 'config',

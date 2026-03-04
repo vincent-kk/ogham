@@ -2,7 +2,8 @@
  * @file graph.ts
  * @description 지식 그래프 타입 — KnowledgeNode, KnowledgeEdge, KnowledgeGraph, AdjacencyList, ActivationResult
  */
-import type { EdgeType, Layer, NodeId } from './common.js';
+import type { EdgeType, Layer, NodeId, SubLayer } from './common.js';
+import type { Person } from './person.js';
 
 /** 지식 노드 (마크다운 문서) */
 export interface KnowledgeNode {
@@ -27,6 +28,16 @@ export interface KnowledgeNode {
   pagerank?: number;
   /** CF (Content Frequency) 점수 */
   cf?: number;
+  /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
+  subLayer?: SubLayer;
+  /** 연결 레이어 목록 (L5-Boundary용) */
+  connectedLayers?: number[];
+  /** 경계 객체 유형 (L5-Boundary용) */
+  boundaryType?: string;
+  /** Person 메타데이터 (L3A relational용) */
+  person?: Person;
+  /** Domain 이름 (cross-layer 그룹핑용) */
+  domain?: string;
 }
 
 /** 그래프 엣지 */

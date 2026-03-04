@@ -122,7 +122,7 @@ export function handleKgSuggestLinks(
     if (score < minScore) continue;
 
     const shared = commonTags(sourceTags, node.tags);
-    const reason = buildReason(shared, saScore, node.layer);
+    const reason = buildReason(shared, saScore, node.layer, node.subLayer);
 
     suggestions.push({
       target_path: node.path,
@@ -207,11 +207,21 @@ function findSeedsByTags(
   return scored.slice(0, maxSeeds).map((s) => s.nodeId);
 }
 
+/** Sub-layer 표시명 매핑 */
+const SUB_LAYER_NAMES: Record<string, string> = {
+  relational: 'L3A-Relational',
+  structural: 'L3B-Structural',
+  topical: 'L3C-Topical',
+  buffer: 'L5-Buffer',
+  boundary: 'L5-Boundary',
+};
+
 /** reason 문자열을 생성한다 */
 function buildReason(
   shared: string[],
   saScore: number,
   layer: unknown,
+  subLayer?: string,
 ): string {
   const parts: string[] = [];
 
@@ -233,6 +243,10 @@ function buildReason(
   const layerNum = layer as number;
   if (layerNames[layerNum]) {
     parts.push(`Layer ${layerNum} (${layerNames[layerNum]})`);
+  }
+
+  if (subLayer && SUB_LAYER_NAMES[subLayer]) {
+    parts.push(`Sub-layer: ${SUB_LAYER_NAMES[subLayer]}`);
   }
 
   return parts.length > 0

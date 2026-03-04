@@ -35,6 +35,7 @@ function updateFrontmatter(
     layer: number;
     confidence: number;
     schedule: string;
+    sub_layer: string;
   }>,
 ): string {
   const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
@@ -65,6 +66,9 @@ function updateFrontmatter(
   }
   if (updates.schedule !== undefined) {
     yaml = patchFrontmatterField(yaml, 'schedule', updates.schedule);
+  }
+  if (updates.sub_layer !== undefined) {
+    yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);
   }
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);

@@ -5,6 +5,7 @@ description: SA + Jaccard similarity based link suggestion — discover related 
 version: 1.0.0
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
+orchestrator: suggest skill
 plugin: maencof
 ---
 

@@ -5,12 +5,21 @@ description: Manage auto-insight capture settings, view recent captures, and edi
 version: 1.0.0
 complexity: simple
 context_layers: []
+orchestrator: insight skill
 plugin: maencof
 ---
 
 # /maencof:insight
 
 Manage the auto-insight capture system.
+
+## When to Use This Skill
+
+- Check the current auto-insight capture status (enabled/disabled, sensitivity)
+- View recently captured insights from the current session or vault
+- Adjust capture sensitivity (high/medium/low)
+- Enable or disable auto-insight capture
+- Set the maximum number of captures per session
 
 ## Options
 

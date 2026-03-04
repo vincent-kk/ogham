@@ -32,8 +32,17 @@ export async function handleKgSearch(
     layerFilter: input.layer_filter as number[] | undefined,
   });
 
+  // Post-SA sub_layer 필터
+  let filtered = result.results;
+  if (input.sub_layer) {
+    filtered = result.results.filter((r) => {
+      const node = graph.nodes.get(r.nodeId);
+      return node?.subLayer === input.sub_layer;
+    });
+  }
+
   return {
-    results: result.results,
+    results: filtered,
     durationMs: Date.now() - startTime,
     exploredNodes: result.exploredNodes,
   };

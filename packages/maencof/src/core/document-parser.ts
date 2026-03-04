@@ -9,7 +9,7 @@
  */
 import { readFile } from 'node:fs/promises';
 
-import type { Layer } from '../types/common.js';
+import type { Layer, SubLayer } from '../types/common.js';
 import { toNodeId } from '../types/common.js';
 import { FrontmatterSchema } from '../types/frontmatter.js';
 import type {
@@ -200,12 +200,42 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
     accessed_count: fm.accessed_count ?? 0,
   };
 
-  if (fm.confidence !== undefined) {
-    // confidence는 KnowledgeNode에 저장하지 않음 (Frontmatter 전용)
-    // 향후 WeightCalculator에서 활용
-  }
+  // Step 2.0a: person/domain 전파 (pre-existing bug fix)
+  if (fm.person) node.person = fm.person;
+  if (fm.domain) node.domain = fm.domain;
+
+  // Step 2.0b: sub-layer 확장 필드 전파
+  node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);
+  if (fm.connected_layers) node.connectedLayers = fm.connected_layers;
+  if (fm.boundary_type) node.boundaryType = fm.boundary_type;
 
   return { success: true, node };
+}
+
+/** L3/L5 서브레이어 디렉토리 패턴 */
+const SUBLAYER_DIR_PATTERNS: Record<string, SubLayer> = {
+  '03_External/relational': 'relational',
+  '03_External/structural': 'structural',
+  '03_External/topical': 'topical',
+  '05_Context/buffer': 'buffer',
+  '05_Context/boundary': 'boundary',
+};
+
+/**
+ * 파일 경로에서 서브레이어를 추론한다.
+ * e.g. '03_External/relational/alice.md' → 'relational'
+ *      '05_Context/buffer/inbox.md' → 'buffer'
+ *      '03_External/react-hooks.md' → undefined
+ */
+export function inferSubLayerFromPath(
+  relativePath: string,
+): SubLayer | undefined {
+  for (const [prefix, subLayer] of Object.entries(SUBLAYER_DIR_PATTERNS)) {
+    if (relativePath.startsWith(`${prefix}/`)) {
+      return subLayer;
+    }
+  }
+  return undefined;
 }
 
 /**

@@ -25,6 +25,63 @@ export interface VaultVersionInfo {
   lastMigratedAt?: string;
   /** 마이그레이션 이력 */
   migrationHistory: string[];
+  /** 아키텍처 버전 (e.g. '1.0.0', '2.0.0') */
+  architecture_version?: string;
+}
+
+/** 마이그레이션 개별 작업 */
+export type MigrationOp =
+  | { type: 'create_dir'; path: string }
+  | { type: 'move_file'; from: string; to: string }
+  | {
+      type: 'update_frontmatter';
+      path: string;
+      field: string;
+      oldValue: unknown;
+      newValue: unknown;
+    }
+  | {
+      type: 'update_version';
+      path: string;
+      oldVersion: string;
+      newVersion: string;
+    };
+
+/** WAL 항목 (작업 + 실행 상태) */
+export interface MigrationWALEntry {
+  op: MigrationOp;
+  status: 'pending' | 'done' | 'rolled_back';
+  executedAt?: string;
+}
+
+/** Write-Ahead Log */
+export interface MigrationWAL {
+  id: string;
+  startedAt: string;
+  completedAt?: string;
+  status: 'in_progress' | 'completed' | 'rolled_back';
+  operations: MigrationWALEntry[];
+}
+
+/** 마이그레이션 계획 (side-effect 없는 프리뷰) */
+export interface MigrationPlan {
+  currentVersion: string;
+  targetVersion: string;
+  operations: MigrationOp[];
+  summary: {
+    dirsToCreate: number;
+    filesToMove: number;
+    frontmatterUpdates: number;
+  };
+}
+
+/** 마이그레이션 실행 결과 */
+export interface MigrationResult {
+  success: boolean;
+  walId: string;
+  operationsExecuted: number;
+  operationsFailed: number;
+  error?: string;
 }
 
 /** 데이터 소스 타입 */

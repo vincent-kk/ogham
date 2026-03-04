@@ -11,8 +11,8 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__maencof_t__maencof_read
-  - mcp__maencof_t__kg_navigate
+  - mcp__plugin_maencof_t__maencof_read
+  - mcp__plugin_maencof_t__kg_navigate
 allowed_layers: [1, 2, 3, 4, 5]
 allowed_operations:
   - read

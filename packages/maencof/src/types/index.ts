@@ -9,10 +9,16 @@ export type {
   LinkDirection,
   AutonomyLevel,
   SourceType,
+  L3SubLayer,
+  L5SubLayer,
+  SubLayer,
 } from './common.js';
 export {
   Layer,
   LAYER_DIR,
+  L3_SUBDIR,
+  L5_SUBDIR,
+  EXPECTED_ARCHITECTURE_VERSION,
   toNodeId,
   layerFromDir,
   dirFromLayer,
@@ -64,6 +70,11 @@ export type {
   DataSourceConfig,
   SetupProgress,
   InterviewQuestion,
+  MigrationOp,
+  MigrationWALEntry,
+  MigrationWAL,
+  MigrationPlan,
+  MigrationResult,
 } from './setup.js';
 
 export type {
@@ -128,10 +139,7 @@ export {
   CHANGELOG_GATE_MARKER,
   WATCHED_PATHS,
 } from './changelog.js';
-export type {
-  ChangelogCategory,
-  ChangelogEntry,
-} from './changelog.js';
+export type { ChangelogCategory, ChangelogEntry } from './changelog.js';
 
 export type {
   MaencofCreateInput,

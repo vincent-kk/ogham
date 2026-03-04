@@ -8,6 +8,7 @@ description: >
 version: 1.0.0
 complexity: medium
 context_layers: []
+orchestrator: think skill
 plugin: maencof
 ---
 

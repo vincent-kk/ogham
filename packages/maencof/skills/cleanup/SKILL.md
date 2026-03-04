@@ -5,6 +5,7 @@ description: Knowledge vault and CLAUDE.md cleanup — delete vault documents an
 version: 1.0.0
 complexity: simple
 context_layers: [2, 3, 4, 5]
+orchestrator: cleanup skill
 plugin: maencof
 ---
 
@@ -29,6 +30,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 |---------------|------|
 | file path or document keyword | **document** mode |
 | "claudemd", "CLAUDE.md" keyword | **claudemd** mode |
+| "buffer", "stale buffer" keyword | **buffer-cleanup** mode |
 | not specified | ask user to select mode |
 
 ## Workflow
@@ -42,6 +44,13 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 5. **Report** — show deleted path and recommend `/maencof:rebuild`
 
 > See **reference.md § Document Mode** for detailed safety check flows and report format.
+
+### buffer-cleanup mode — L5-Buffer Stale Item Cleanup
+
+1. **Scan** `05_Context/buffer/` for documents older than `--max-age` days (default: 30)
+2. **List** stale buffer items with creation date, tags, and connection count
+3. **Recommend action** per item: promote (to L2/L3 with sub-layer), archive, or delete
+4. **Execute** after user confirmation — uses `maencof_move` (promote) or `maencof_delete` (delete)
 
 ### claudemd mode — CLAUDE.md Section Management
 
@@ -63,7 +72,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 ## Options
 
 ```
-/maencof:cleanup [mode] [path] [--force] [--dry-run]
+/maencof:cleanup [mode] [path] [--force] [--dry-run] [--max-age <days>]
 ```
 
 | Option | Default | Description |
@@ -72,6 +81,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 | `path` | none | Target document path (document mode only) |
 | `--force` | false | Skip backlink warning (document mode only) |
 | `--dry-run` | false | Preview without executing (claudemd remove only) |
+| `--max-age` | 30 | Max age in days for buffer-cleanup mode |
 
 ## Usage Examples
 
@@ -80,6 +90,8 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 /maencof:cleanup document 03_External/old-reference.md --force
 /maencof:cleanup claudemd read
 /maencof:cleanup claudemd remove --dry-run
+/maencof:cleanup buffer --max-age 14
+/maencof:cleanup buffer --dry-run
 ```
 
 ## Resources

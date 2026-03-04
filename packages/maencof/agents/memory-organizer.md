@@ -12,11 +12,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__maencof_t__maencof_read
-  - mcp__maencof_t__maencof_update
-  - mcp__maencof_t__maencof_move
-  - mcp__maencof_t__kg_navigate
-  - mcp__maencof_t__kg_status
+  - mcp__plugin_maencof_t__maencof_read
+  - mcp__plugin_maencof_t__maencof_update
+  - mcp__plugin_maencof_t__maencof_move
+  - mcp__plugin_maencof_t__kg_navigate
+  - mcp__plugin_maencof_t__kg_status
 allowed_layers: [2, 3, 4, 5]
 forbidden_operations:
   - delete

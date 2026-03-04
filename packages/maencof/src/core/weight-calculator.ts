@@ -3,7 +3,7 @@
  * @description 엣지 가중치 계산 — P0: 균일 가중치 1.0, Layer별 감쇠, 정규화
  */
 import { Layer } from '../types/common.js';
-import type { NodeId } from '../types/common.js';
+import type { NodeId, SubLayer } from '../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
@@ -17,6 +17,15 @@ export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
   [Layer.L3_EXTERNAL]: 0.8,
   [Layer.L4_ACTION]: 0.9,
   [Layer.L5_CONTEXT]: 0.95,
+};
+
+/** 서브레이어별 감쇠 인자 */
+export const SUBLAYER_DECAY_FACTORS: Record<SubLayer, number> = {
+  relational: 0.75,
+  structural: 0.8,
+  topical: 0.85,
+  buffer: 0.95,
+  boundary: 0.6,
 };
 
 /** 가중치 계산 결과 */
@@ -64,6 +73,8 @@ function computeEdgeWeight(edge: KnowledgeEdge, graph: KnowledgeGraph): number {
       return computeWuPalmerWeight(fromNode, toNode);
     case 'RELATIONSHIP':
       return computeRelationshipWeight(fromNode, toNode);
+    case 'CROSS_LAYER':
+      return 1.0;
     default:
       return 1.0;
   }
@@ -210,9 +221,12 @@ export function normalizeWeights(edges: KnowledgeEdge[]): KnowledgeEdge[] {
 }
 
 /**
- * Layer별 감쇠 인자 반환.
+ * Layer별 감쇠 인자 반환. 서브레이어 지정 시 서브레이어 감쇠 사용.
  */
-export function getLayerDecay(layer: Layer): number {
+export function getLayerDecay(layer: Layer, subLayer?: SubLayer): number {
+  if (subLayer && subLayer in SUBLAYER_DECAY_FACTORS) {
+    return SUBLAYER_DECAY_FACTORS[subLayer];
+  }
   return LAYER_DECAY_FACTORS[layer] ?? 0.7;
 }
 

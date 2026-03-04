@@ -10,13 +10,22 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../core/document-parser.js';
-import { LAYER_DIR, Layer } from '../../types/common.js';
+import type { L3SubLayer, L5SubLayer } from '../../types/common.js';
+import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR, Layer } from '../../types/common.js';
 import type { MaencofCrudResult, MaencofMoveInput } from '../../types/mcp.js';
 
 /**
  * Frontmatter의 layer 필드를 갱신한다.
+ * sub_layer, buffer_type, promotion_target 필드도 함께 처리한다.
  */
-function updateLayerInFrontmatter(content: string, newLayer: number): string {
+function updateLayerInFrontmatter(
+  content: string,
+  newLayer: number,
+  options?: {
+    targetSubLayer?: string;
+    stripBufferFields?: boolean;
+  },
+): string {
   const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   const match = FRONTMATTER_REGEX.exec(content);
   if (!match) return content;
@@ -25,6 +34,27 @@ function updateLayerInFrontmatter(content: string, newLayer: number): string {
   let yaml = match[1];
   yaml = yaml.replace(/^layer:.*$/m, `layer: ${newLayer}`);
   yaml = yaml.replace(/^updated:.*$/m, `updated: ${today}`);
+
+  // sub_layer 갱신 또는 제거
+  if (options?.targetSubLayer) {
+    if (/^sub_layer:.*$/m.test(yaml)) {
+      yaml = yaml.replace(
+        /^sub_layer:.*$/m,
+        `sub_layer: ${options.targetSubLayer}`,
+      );
+    } else {
+      yaml += `\nsub_layer: ${options.targetSubLayer}`;
+    }
+  } else {
+    // 대상 layer에 sub_layer가 적용되지 않으면 제거
+    yaml = yaml.replace(/\n?^sub_layer:.*$/m, '');
+  }
+
+  // L5-Buffer → 다른 레이어 이동 시 buffer 전용 필드 제거
+  if (options?.stripBufferFields) {
+    yaml = yaml.replace(/\n?^buffer_type:.*$/m, '');
+    yaml = yaml.replace(/\n?^promotion_target:.*$/m, '');
+  }
 
   return content.replace(match[0], `---\n${yaml}\n---\n`);
 }
@@ -80,7 +110,16 @@ export async function handleMaencofMove(
     };
   }
 
-  if (nodeResult.success && nodeResult.node?.layer === targetLayerNum) {
+  const sourceSubLayer = nodeResult.success
+    ? nodeResult.node?.subLayer
+    : undefined;
+
+  // 같은 레이어 + 같은 서브레이어이면 이동 불필요 (서브레이어 변경은 허용)
+  if (
+    nodeResult.success &&
+    nodeResult.node?.layer === targetLayerNum &&
+    !input.target_sub_layer
+  ) {
     return {
       success: false,
       path: input.path,
@@ -88,9 +127,19 @@ export async function handleMaencofMove(
     };
   }
 
-  // 대상 경로 계산
+  // 대상 경로 계산 (서브레이어 디렉토리 포함)
   const filename = basename(input.path);
-  const newRelativePath = `${targetLayerDir}/${filename}`;
+  let subDir = '';
+  if (input.target_sub_layer) {
+    if (targetLayerNum === 3 && input.target_sub_layer in L3_SUBDIR) {
+      subDir = L3_SUBDIR[input.target_sub_layer as L3SubLayer];
+    } else if (targetLayerNum === 5 && input.target_sub_layer in L5_SUBDIR) {
+      subDir = L5_SUBDIR[input.target_sub_layer as L5SubLayer];
+    }
+  }
+  const newRelativePath = subDir
+    ? `${targetLayerDir}/${subDir}/${filename}`
+    : `${targetLayerDir}/${filename}`;
   const newAbsPath = join(vaultPath, newRelativePath);
 
   // 대상 파일 중복 확인
@@ -105,8 +154,14 @@ export async function handleMaencofMove(
     // 없음 → 정상
   }
 
-  // Frontmatter layer + updated 갱신
-  const updatedContent = updateLayerInFrontmatter(content, targetLayerNum);
+  // L5-Buffer에서 이동 시 buffer 전용 필드 자동 제거
+  const stripBufferFields = sourceSubLayer === 'buffer';
+
+  // Frontmatter layer + updated + sub_layer 갱신
+  const updatedContent = updateLayerInFrontmatter(content, targetLayerNum, {
+    targetSubLayer: input.target_sub_layer,
+    stripBufferFields,
+  });
 
   // WAL 기반 원자적 이동: 대상 쓰기 → 소스 삭제
   await mkdir(dirname(newAbsPath), { recursive: true });

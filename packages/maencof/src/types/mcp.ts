@@ -1,8 +1,8 @@
 /**
  * @file mcp.ts
- * @description MCP 도구 입출력 스키마 — CRUD 5개 + 검색 4개
+ * @description MCP 도구 입출력 스키마 — CRUD 6개 + KG 7개 + CLAUDE.md 3개 + dailynote 1개 = 17개
  */
-import type { Layer } from './common.js';
+import type { Layer, SubLayer } from './common.js';
 import type { KnowledgeNode } from './graph.js';
 import type { ActivationResult } from './graph.js';
 
@@ -24,6 +24,8 @@ export interface MaencofCreateInput {
   source?: string;
   /** 만료일 YYYY-MM-DD (Layer 4용) */
   expires?: string;
+  /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
+  sub_layer?: SubLayer;
 }
 
 /** maencof_read 입력 */
@@ -49,6 +51,7 @@ export interface MaencofUpdateInput {
     layer: Layer;
     confidence: number;
     schedule: string;
+    sub_layer: SubLayer;
   }>;
 }
 
@@ -70,6 +73,8 @@ export interface MaencofMoveInput {
   reason?: string;
   /** 신뢰도 (Layer 3→2 전이 시) */
   confidence?: number;
+  /** 목표 서브레이어 */
+  target_sub_layer?: SubLayer;
 }
 
 // ─── 검색 도구 입력 스키마 ─────────────────────────────────────────
@@ -88,6 +93,8 @@ export interface KgSearchInput {
   max_hops?: number;
   /** Layer 필터 */
   layer_filter?: Layer[];
+  /** 서브레이어 필터 */
+  sub_layer?: SubLayer;
 }
 
 /** kg_navigate 입력 */
@@ -162,6 +169,8 @@ export interface KgNavigateResult {
   children: KnowledgeNode[];
   /** 형제 노드 목록 */
   siblings: KnowledgeNode[];
+  /** CROSS_LAYER 연결 노드 (L5-Boundary 경유) */
+  crossLayer?: KnowledgeNode[];
 }
 
 /** kg_context 응답 */
@@ -192,6 +201,8 @@ export interface KgStatusResult {
   rebuildRecommended: boolean;
   /** vault 경로 */
   vaultPath: string;
+  /** 서브레이어별 노드 분포 */
+  subLayerDistribution?: Record<string, number>;
 }
 
 // ─── CLAUDE.md 조작 도구 ─────────────────────────────────────────

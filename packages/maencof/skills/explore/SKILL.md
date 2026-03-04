@@ -60,7 +60,8 @@ kg_search(
   decay: 0.7,
   threshold: 0.1,
   max_hops: --hops value (default 5),
-  layer_filter: --layer value (default none)
+  layer_filter: --layer value (default none),
+  sub_layer: --sub-layer value (default none)
 )
 ```
 
@@ -80,6 +81,14 @@ Display exploration results grouped by Layer:
 ### Layer 2 — Derived
 2. **{title}** (relevance {score}%)
    Path: {path}
+
+### Layer 3 — External
+#### Relational (L3A)
+- **{title}** (relevance {score}%)
+#### Structural (L3B)
+- ...
+#### Topical (L3C)
+- ...
 ...
 
 Enter a number for more detail. Enter 'q' to exit.
@@ -99,6 +108,7 @@ kg_navigate(
 ```
 
 Display inbound/outbound/parent/child/sibling nodes and ask whether to continue exploring.
+When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately as cross-layer connections.
 
 When `--detail` is specified or the user requests full content, read the document body:
 
@@ -132,7 +142,7 @@ After 3 rounds: "Exploration depth limit reached."
 > Options are interpreted by the LLM in natural language. Not strict CLI parsing.
 
 ```
-/maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--detail]
+/maencof:explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail]
 ```
 
 | Option | Default | Description |
@@ -140,6 +150,7 @@ After 3 rounds: "Exploration depth limit reached."
 | `seed` | none (input requested) | Exploration starting point (path or keyword) |
 | `--hops` | 5 | Maximum hop count (1-10) |
 | `--layer` | all | Layer filter (1-5, multiple allowed) |
+| `--sub-layer` | none | Sub-layer filter: relational/structural/topical (L3), buffer/boundary (L5) |
 | `--detail` | false | Include document body excerpts in results |
 
 ## Usage Examples
@@ -148,6 +159,7 @@ After 3 rounds: "Exploration depth limit reached."
 /maencof:explore react
 /maencof:explore 01_Core/identity.md --hops 3
 /maencof:explore machine-learning --layer 3
+/maencof:explore alice --sub-layer relational
 /maencof:explore project goals --detail
 ```
 

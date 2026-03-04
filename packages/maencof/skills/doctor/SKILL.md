@@ -5,6 +5,7 @@ description: 6 diagnostics + report generation + auto-fix suggestions — knowle
 version: 1.0.0
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
+orchestrator: doctor
 plugin: maencof
 ---
 

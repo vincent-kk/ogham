@@ -83,7 +83,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove",
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|boundary_create|claudemd_merge|claudemd_remove",
         "hooks": [
           {
             "type": "command",
@@ -93,7 +93,7 @@
         ]
       },
       {
-        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove",
+        "matcher": "maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|boundary_create|claudemd_merge|claudemd_remove",
         "hooks": [
           {
             "type": "command",

@@ -6,7 +6,7 @@ description: >
   modification, or debugging is needed. Supports four modes — CREATE, REFACTOR,
   IMPROVE, FIX. Features complexity-based structure generation and automated validation.
 version: 2.0.0
-complexity: complex
+complexity: high
 context_layers: []
 orchestrator: configurator
 plugin: maencof

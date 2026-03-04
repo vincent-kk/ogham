@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-04
 tags: [spreading-activation, decay-factor, firing-threshold, hop-analysis]
 layer: design-area-2
 ---
@@ -47,8 +47,12 @@ A[j] = sum(A[i] * W[i,j] * d)
 |-------|----------|------|
 | Layer 1 (Core) | 0.5 (낮음) | 멀리까지 확산 — 광범위한 영향력 반영 |
 | Layer 2 (Derived) | 0.7 (기본) | 표준 확산 범위 |
-| Layer 3 (External) | 0.8 (높음) | 외곽 노드는 가까운 이웃만 활성화 |
+| Layer 3A (Relational) | 0.75 | 관계적 정보는 중간 범위 확산 — TMS 포인터 특성 |
+| Layer 3B (Structural) | 0.80 | 조직 맥락은 지역적 — Ba 환경에 바운드 |
+| Layer 3C (Topical) | 0.85 | 주제 정보는 좁은 확산 — 기하급수적 팽창 방지 |
 | Layer 4 (Action) | 0.9 (매우 높음) | 시간적 근접성 — 최소 범위만 |
+| Layer 5-Buffer | 0.95 | 미분류 정보는 최소 확산 |
+| Layer 5-Boundary | 0.60 | 경계 객체는 광범위 확산 — 레이어 간 다리 역할 |
 
 ---
 

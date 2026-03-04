@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-04
 tags: [frontmatter, yaml, schema, metadata]
 layer: design-area-1
 ---
@@ -42,6 +42,19 @@ MCP 도구와 검색 엔진이 일관되게 파싱·검색·필터링할 수 있
 | `person` | PersonSchema | 인물 참조 (Layer 4/5용) |
 | `domain` | string | 도메인 식별자 (크로스 레이어) |
 | `domain_type` | enum | 도메인 유형 분류 (크로스 레이어) |
+| `sub_layer` | string | 서브레이어 식별 ('relational'\|'structural'\|'topical' for L3, 'buffer'\|'boundary' for L5) |
+| `person_ref` | string | L5 인물 메타데이터 참조 (L3A용) |
+| `trust_level` | number | 관계 신뢰도 0.0~1.0 (L3A용) |
+| `expertise_domains` | string[] | 해당 인물의 전문 분야 (L3A용) |
+| `org_type` | enum | 조직 유형: company\|community\|team\|institution (L3B용) |
+| `membership_status` | enum | 소속 상태: active\|inactive\|alumni (L3B용) |
+| `ba_context` | string | 조직의 Ba 맥락 설명 (L3B용) |
+| `topic_category` | enum | 주제 유형: interest\|academic\|technology\|literature (L3C용) |
+| `maturity` | enum | 성숙도: raw\|developing\|mature (L3C용) |
+| `buffer_type` | enum | 버퍼 유형: snippet\|conversation\|unclassified (L5-Buffer용) |
+| `promotion_target` | string | 승격 대상 레이어 제안 (L5-Buffer용) |
+| `boundary_type` | enum | 경계 유형: syntactic\|semantic\|pragmatic (L5-Boundary용) |
+| `connected_layers` | string[] | 연결된 서브레이어 목록 (L5-Boundary용) |
 
 ---
 
@@ -60,13 +73,18 @@ Frontmatter 필드를 직접 활용한다:
 
 ## 4. Layer-디렉토리 정합성 규칙
 
-| `layer` | 올바른 디렉토리 | 불일치 시 |
-|---------|--------------|----------|
-| 1 | `01_Core/` | 경고 (저장은 허용) |
-| 2 | `02_Derived/` | 경고 |
-| 3 | `03_External/` | 경고 |
-| 4 | `04_Action/` | 경고 |
-| 5 | `05_Context/` | 경고 |
+| `layer` | `sub_layer` | 올바른 디렉토리 | 불일치 시 |
+|---------|-------------|--------------|----------|
+| 1 | (없음) | `01_Core/` | 경고 (저장은 허용) |
+| 2 | (없음) | `02_Derived/` | 경고 |
+| 3 | relational | `03_External/relational/` | 경고 |
+| 3 | structural | `03_External/structural/` | 경고 |
+| 3 | topical | `03_External/topical/` | 경고 |
+| 3 | (없음) | `03_External/` (레거시) | 경고 + sub_layer 지정 권장 |
+| 4 | (없음) | `04_Action/` | 경고 |
+| 5 | buffer | `05_Context/buffer/` | 경고 |
+| 5 | boundary | `05_Context/boundary/` | 경고 |
+| 5 | (없음) | `05_Context/persons/` 또는 `05_Context/domains/` | 경고 |
 
 ## 5. 검증 시점
 

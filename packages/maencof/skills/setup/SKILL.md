@@ -84,7 +84,11 @@ Generate Layer 1 documents from the collected interview answers:
 Create the 4 markdown documents above with the `maencof_create` MCP tool (layer=1, tags required).
 Note: `01_Core/trust-level.json` is created separately in Stage 4 — it is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown).
 
-Also create the `02_Derived/`, `03_External/`, `04_Action/`, and `05_Context/` directories.
+Also create the Layer directories and sub-layer subdirectories:
+- `02_Derived/`
+- `03_External/`, `03_External/relational/`, `03_External/structural/`, `03_External/topical/`
+- `04_Action/`
+- `05_Context/`, `05_Context/buffer/`, `05_Context/boundary/`
 
 Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via maencof_read.
 
@@ -167,6 +171,6 @@ setup skill starts
 ## Acceptance Criteria
 
 - 4 documents in `01_Core/` + `trust-level.json` created
-- `02_Derived/`, `03_External/`, `04_Action/`, `05_Context/` directories created
+- `02_Derived/`, `03_External/` (with `relational/`, `structural/`, `topical/`), `04_Action/`, `05_Context/` (with `buffer/`, `boundary/`) directories created
 - Progressive Autonomy Level 0 set
 - Skip responses allowed (all stages)

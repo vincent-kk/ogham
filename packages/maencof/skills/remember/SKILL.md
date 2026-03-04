@@ -51,6 +51,29 @@ Recommend a Layer based on the nature of the content:
 **L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
 **L4 recommendation criteria**: "later", "today", "need to", time-limited, has an expiration date
 
+#### L3 Sub-Layer Selection
+
+When creating an L3 document, determine the appropriate sub-layer:
+
+| Sub-Layer | Criteria | Directory |
+|-----------|----------|-----------|
+| L3A Relational | People, relationships, social context | `03_External/relational/` |
+| L3B Structural | Organizations, teams, systems, processes | `03_External/structural/` |
+| L3C Topical | Concepts, technologies, external knowledge | `03_External/topical/` |
+
+Pass `sub_layer` to `maencof_create`. If the content doesn't clearly fit a sub-layer, create it in `03_External/` root (no sub-layer).
+
+#### L5 Sub-Layer Selection
+
+When creating an L5 document, determine the role:
+
+| Sub-Layer | Criteria | Directory |
+|-----------|----------|-----------|
+| L5-Buffer | Uncategorized temporary items, inbox | `05_Context/buffer/` |
+| L5-Boundary | Cross-layer bridge, project MOC, hub | `05_Context/boundary/` |
+
+Default to **Buffer** for general L5 content. Use **Boundary** only when the document explicitly bridges multiple layers (e.g., project MOC linking L1 values to L3 references).
+
 If the user specifies `--layer`, use that Layer.
 Confirm the recommended Layer with the user before proceeding:
 ```
@@ -100,9 +123,15 @@ title: auto-generated or user-provided
 **L3 Frontmatter** (fields written into the document by `maencof_create`):
 ```yaml
 layer: 3
+sub_layer: relational | structural | topical  # omit if unclear
 tags: [extracted tags]
 source: "original source URL (if available)"
 confidence: 0.3  # document-level metadata, not a maencof_create parameter; initial value, increases after validation
+# L3A (relational) additional fields:
+person: { name: "...", relationship_type: "friend|colleague|...", intimacy_level: 1-5 }
+# L3B (structural) additional fields:
+org_name: "organization name"
+org_role: "user's role in the org"
 ```
 
 **L4 Frontmatter**:
@@ -116,9 +145,13 @@ schedule: "once"     # or "daily", "weekly"
 **L5 Frontmatter**:
 ```yaml
 layer: 5
+sub_layer: buffer | boundary  # default: buffer
 tags: [extracted tags]
 domain: "domain or context category"
 subject: "person name or entity (if applicable)"
+# L5-Boundary additional fields:
+boundary_type: "project_moc | hub | domain_bridge"
+connected_layers: [1, 3]  # layers this boundary bridges
 ```
 
 ### Step 6 — Confirmation Report
@@ -148,13 +181,14 @@ To explore related documents: /maencof:explore {tag}
 > Options are interpreted by the LLM in natural language.
 
 ```
-/maencof:remember [content] [--layer <2-5>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
+/maencof:remember [content] [--layer <2-5>] [--sub-layer <name>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `content` | conversation context | Content to record |
 | `--layer` | auto-recommended | Specify Layer (2-5; L1 not allowed) |
+| `--sub-layer` | auto-recommended | Sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
 | `--title` | auto-generated | Document title |
 | `--tags` | auto-extracted | Tag list (comma-separated) |
 | `--source` | none | External source URL (for L3) |

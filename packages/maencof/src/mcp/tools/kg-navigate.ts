@@ -36,6 +36,8 @@ export async function handleKgNavigate(
   const children: KnowledgeNode[] = [];
   const siblings: KnowledgeNode[] = [];
 
+  const crossLayer: KnowledgeNode[] = [];
+
   for (const edge of graph.edges) {
     if (includeInbound && edge.to === nodeId && edge.type === 'LINK') {
       const src = graph.nodes.get(edge.from);
@@ -59,7 +61,25 @@ export async function handleKgNavigate(
         if (sib) siblings.push(sib);
       }
     }
+    // CROSS_LAYER 엣지 수집 (boundary 노드용)
+    if (edge.type === 'CROSS_LAYER') {
+      if (edge.from === nodeId) {
+        const target = graph.nodes.get(edge.to);
+        if (target) crossLayer.push(target);
+      } else if (edge.to === nodeId) {
+        const source = graph.nodes.get(edge.from);
+        if (source) crossLayer.push(source);
+      }
+    }
   }
 
-  return { node, inbound, outbound, parent, children, siblings };
+  return {
+    node,
+    inbound,
+    outbound,
+    parent,
+    children,
+    siblings,
+    crossLayer: crossLayer.length > 0 ? crossLayer : undefined,
+  };
 }

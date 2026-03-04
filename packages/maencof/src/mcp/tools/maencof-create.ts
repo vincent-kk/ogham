@@ -5,8 +5,8 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import type { Layer } from '../../types/common.js';
-import { LAYER_DIR } from '../../types/common.js';
+import type { L3SubLayer, L5SubLayer, Layer } from '../../types/common.js';
+import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../types/common.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../types/mcp.js';
 
 /**
@@ -55,6 +55,7 @@ function buildFrontmatter(input: MaencofCreateInput): string {
     `layer: ${input.layer}`,
   ];
 
+  if (input.sub_layer) lines.push(`sub_layer: ${input.sub_layer}`);
   if (input.title) lines.push(`title: ${input.title}`);
   if (input.source) lines.push(`source: ${input.source}`);
   if (input.expires) lines.push(`expires: ${input.expires}`);
@@ -127,7 +128,20 @@ export async function handleMaencofCreate(
       (input.filename.endsWith('.md') ? '' : '.md')
     : generateFilename(input.title, input.tags);
 
-  const relativePath = `${layerDir}/${filename}`;
+  // Sub-layer 디렉토리 결정
+  let subDir = '';
+  if (input.sub_layer) {
+    const layerNum = input.layer as Layer;
+    if (layerNum === 3 && input.sub_layer in L3_SUBDIR) {
+      subDir = L3_SUBDIR[input.sub_layer as L3SubLayer];
+    } else if (layerNum === 5 && input.sub_layer in L5_SUBDIR) {
+      subDir = L5_SUBDIR[input.sub_layer as L5SubLayer];
+    }
+  }
+
+  const relativePath = subDir
+    ? `${layerDir}/${subDir}/${filename}`
+    : `${layerDir}/${filename}`;
   const absolutePath = join(vaultPath, relativePath);
 
   // 중복 파일 확인

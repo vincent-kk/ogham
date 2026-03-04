@@ -39,13 +39,39 @@ export function toNodeId(path: string): NodeId {
   return path as NodeId;
 }
 
+/** L3 서브레이어 */
+export type L3SubLayer = 'relational' | 'structural' | 'topical';
+
+/** L5 서브레이어 */
+export type L5SubLayer = 'buffer' | 'boundary';
+
+/** 서브레이어 유니온 */
+export type SubLayer = L3SubLayer | L5SubLayer;
+
+/** L3 서브레이어 → 디렉토리 이름 매핑 */
+export const L3_SUBDIR: Record<L3SubLayer, string> = {
+  relational: 'relational',
+  structural: 'structural',
+  topical: 'topical',
+};
+
+/** L5 서브레이어 → 디렉토리 이름 매핑 */
+export const L5_SUBDIR: Record<L5SubLayer, string> = {
+  buffer: 'buffer',
+  boundary: 'boundary',
+};
+
+/** 아키텍처 버전 (v2: L3 서브레이어 + L5 Buffer/Boundary) */
+export const EXPECTED_ARCHITECTURE_VERSION = '2.0.0';
+
 /** 그래프 엣지 유형 */
 export type EdgeType =
   | 'LINK'
   | 'PARENT_OF'
   | 'CHILD_OF'
   | 'SIBLING'
-  | 'RELATIONSHIP';
+  | 'RELATIONSHIP'
+  | 'CROSS_LAYER';
 
 /** 링크 방향 */
 export type LinkDirection = 'outbound' | 'inbound' | 'bidirectional';

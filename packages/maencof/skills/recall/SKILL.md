@@ -41,7 +41,7 @@ Extract core keywords and intent from user input.
 Call the `kg_search` MCP tool to find seed nodes.
 
 ```
-kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?)
+kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
 ```
 
 If no results: "No related documents found. Try different keywords."
@@ -70,7 +70,7 @@ kg_context(query: search_query_string, token_budget=2000)
 
 Found {N} related documents.
 
-1. **{title}** (Layer {N}, relevance {score}%)
+1. **{title}** (Layer {N}{sub_layer ? ` / ${sub_layer}` : ''}, relevance {score}%)
    {1-2 line summary}
    Path: {path}
 
@@ -114,6 +114,7 @@ For more detail: `/maencof:recall {query} --detail`
 | `--summary` | default | Summary mode (title + 1-2 line summary) |
 | `--detail` | — | Detail mode (full content excerpt) |
 | `--layer=N` | all | Search a specific Layer only (1-5) |
+| `--sub-layer=X` | none | Filter by sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
 | `--limit=N` | 10 | Maximum number of results |
 
 ## Usage Examples
@@ -123,6 +124,8 @@ For more detail: `/maencof:recall {query} --detail`
 /maencof:recall project goals --detail
 /maencof:recall schedule --layer=4
 /maencof:recall core values --layer=1 --detail
+/maencof:recall alice --sub-layer=relational
+/maencof:recall project moc --sub-layer=boundary
 ```
 
 ## Error Handling
