@@ -31,8 +31,8 @@ export type DailynoteCategory =
 /**
  * MCP 도구명 → 카테고리 매핑 (전체 17개 도구 중 16개).
  *
- * PostToolUse hook matcher는 write 도구 7개 사용
- * (maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove).
+ * PostToolUse hook matcher는 write 도구 8개 사용
+ * (maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|boundary_create|claudemd_merge|claudemd_remove).
  * TOOL_CATEGORY_MAP은 전체 도구를 포함하여 향후 opt-in 확장에 대비한다.
  * dailynote_read는 의도적으로 제외 — 재귀적 기록 방지.
  */
