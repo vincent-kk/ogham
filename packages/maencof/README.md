@@ -36,8 +36,8 @@ claude --plugin-dir ./packages/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (10 knowledge tools)
-- `bridge/*.mjs` — 5 hook scripts (session-start, layer-guard, index-invalidator, session-end, lifecycle-dispatcher)
+- `bridge/mcp-server.cjs` — MCP server (17 knowledge tools)
+- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 ---
 
@@ -187,14 +187,20 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:explore`     | Core     | Interactive graph traversal (up to 3 rounds)   |
 | `/maencof:organize`    | Core     | Agent-guided document reorganization           |
 | `/maencof:reflect`     | Core     | Read-only knowledge health analysis            |
+| `/maencof:suggest`     | Core     | SA + Jaccard similarity link suggestions       |
 | `/maencof:build`       | Index    | Build index (auto full/incremental)            |
 | `/maencof:rebuild`     | Index    | Force full re-index                            |
 | `/maencof:diagnose`    | Health   | Lightweight status check                       |
 | `/maencof:doctor`      | Health   | 6 diagnostics + auto-fix                       |
+| `/maencof:cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
 | `/maencof:ingest`      | Advanced | Import from URL, GitHub, or text               |
 | `/maencof:connect`     | Advanced | Register external data sources                 |
 | `/maencof:mcp-setup`   | Advanced | Install external MCP servers                   |
 | `/maencof:manage`      | Advanced | Skill/agent activation and usage reports       |
+| `/maencof:dailynote`   | Advanced | View daily activity log                        |
+| `/maencof:insight`     | Advanced | Auto-insight capture management                |
+| `/maencof:changelog`   | Advanced | Self-change daily changelog recorder           |
+| `/maencof:migrate`     | Advanced | Vault architecture migration                   |
 | `/maencof:configure`   | Config   | Unified environment configuration entry point  |
 | `/maencof:bridge`      | Config   | MCP install + register + workflow skill in one |
 | `/maencof:craft-skill` | Config   | Custom skill generator                         |
@@ -202,6 +208,8 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:instruct`    | Config   | CLAUDE.md management                           |
 | `/maencof:rule`        | Config   | Behavioral rule management                     |
 | `/maencof:lifecycle`   | Config   | Lifecycle action management                    |
+| `/maencof:think`       | Analysis | Tree of Thoughts requirement analysis          |
+| `/maencof:refine`      | Analysis | Ambiguous input refinement interview loop      |
 
 ---
 

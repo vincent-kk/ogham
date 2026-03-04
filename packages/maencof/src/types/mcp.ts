@@ -1,6 +1,6 @@
 /**
  * @file mcp.ts
- * @description MCP 도구 입출력 스키마 — CRUD 5개 + 검색 4개
+ * @description MCP 도구 입출력 스키마 — CRUD 6개 + KG 7개 + CLAUDE.md 3개 + dailynote 1개 = 17개
  */
 import type { Layer, SubLayer } from './common.js';
 import type { KnowledgeNode } from './graph.js';

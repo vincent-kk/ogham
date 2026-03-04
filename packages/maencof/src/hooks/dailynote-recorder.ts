@@ -2,7 +2,7 @@
  * @file dailynote-recorder.ts
  * @description PostToolUse Hook — write 도구 호출 시 dailynote에 자동 기록
  *
- * matcher: maencof_create|maencof_update|maencof_delete|maencof_move|claudemd_merge (write 도구 5개)
+ * matcher: maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove (write 도구 7개)
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
 import {
