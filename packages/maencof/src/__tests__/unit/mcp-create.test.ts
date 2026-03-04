@@ -188,7 +188,9 @@ describe('handleMaencofCreate', () => {
       join(vault, '03_External', files[0]),
       'utf-8',
     );
-    expect(content).toContain('title: "Show GN: 이제 공부도 클로드 코드로 해보세요!"');
+    expect(content).toContain(
+      'title: "Show GN: 이제 공부도 클로드 코드로 해보세요!"',
+    );
   });
 
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {

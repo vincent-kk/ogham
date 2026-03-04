@@ -6,8 +6,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { MaencofCrudResult, MaencofUpdateInput } from '../../types/mcp.js';
 import { quoteYamlValue } from '../../core/yaml-parser.js';
+import type { MaencofCrudResult, MaencofUpdateInput } from '../../types/mcp.js';
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.

@@ -199,7 +199,11 @@ describe('quoteYamlValue', () => {
   });
 
   it('double-quote로 감싼 ": " 포함 값을 올바르게 파싱한다', () => {
-    const result = parseYamlFrontmatter('title: "Show GN: 이제 공부도 클로드 코드로 해보세요!"');
-    expect(result['title']).toBe('Show GN: 이제 공부도 클로드 코드로 해보세요!');
+    const result = parseYamlFrontmatter(
+      'title: "Show GN: 이제 공부도 클로드 코드로 해보세요!"',
+    );
+    expect(result['title']).toBe(
+      'Show GN: 이제 공부도 클로드 코드로 해보세요!',
+    );
   });
 });
