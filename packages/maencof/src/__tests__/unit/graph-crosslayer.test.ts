@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { buildGraph } from '../../core/graph-builder.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeNode } from '../../types/graph.js';
-import { buildGraph } from '../../core/graph-builder.js';
 
 function makeNode(
   path: string,
@@ -53,9 +53,11 @@ describe('buildCrossLayerEdges', () => {
     const l3Match = makeNode('03_External/frontend-lib.md', Layer.L3_EXTERNAL, [
       'frontend',
     ]);
-    const l2NoConnect = makeNode('02_Derived/react-notes.md', Layer.L2_DERIVED, [
-      'react',
-    ]); // L2 not in connected_layers
+    const l2NoConnect = makeNode(
+      '02_Derived/react-notes.md',
+      Layer.L2_DERIVED,
+      ['react'],
+    ); // L2 not in connected_layers
 
     const nodes = [boundary, l1Match, l1NoMatch, l3Match, l2NoConnect];
     const { graph } = buildGraph(nodes);

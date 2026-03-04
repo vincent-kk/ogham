@@ -77,7 +77,9 @@ export function hasGateMarker(cwd: string): boolean {
  * Changelog Gate Hook handler.
  * Stop 이벤트에서 감시 경로의 변경을 감지하고 changelog 기록을 유도한다.
  */
-export function runChangelogGate(input: ChangelogGateInput): ChangelogGateResult {
+export function runChangelogGate(
+  input: ChangelogGateInput,
+): ChangelogGateResult {
   try {
     const cwd = input.cwd ?? process.cwd();
 

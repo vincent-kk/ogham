@@ -17,9 +17,9 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../core/insight-stats.js';
+import { EXPECTED_ARCHITECTURE_VERSION } from '../types/common.js';
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
-import { EXPECTED_ARCHITECTURE_VERSION } from '../types/common.js';
 import type { VaultVersionInfo } from '../types/setup.js';
 import { VERSION } from '../version.js';
 
@@ -67,20 +67,23 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   }
 
   // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
-  const needsProvisioning = initClaudeMdSection(cwd, companion?.name, messages);
+  initClaudeMdSection(cwd, companion?.name, messages);
 
-  // 2.8. Config file provisioning (separate concern from CLAUDE.md management)
-  if (needsProvisioning) {
-    try {
-      const provision = provisionMissingConfigs(cwd);
-      if (provision.created.length > 0) {
-        messages.push(
-          `[maencof] Config files provisioned: ${provision.created.join(', ')}`,
-        );
-      }
-    } catch {
-      // Silent fallback — provisioning failure must not block session start
+  // 2.8. Config file provisioning + migration — always run regardless of needsProvisioning
+  try {
+    const provision = provisionMissingConfigs(cwd);
+    if (provision.created.length > 0) {
+      messages.push(
+        `[maencof] Config files provisioned: ${provision.created.join(', ')}`,
+      );
     }
+    if (provision.migrated.length > 0) {
+      messages.push(
+        `[maencof] Config schemas updated: ${provision.migrated.join(', ')}`,
+      );
+    }
+  } catch {
+    // Silent fallback — provisioning failure must not block session start
   }
 
   // 2.6. 아키텍처 버전 체크 (L3 서브레이어 + L5 Buffer/Boundary)
@@ -125,7 +128,15 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 6. Check data-sources.json
   const dataSourcesPath = metaPath(cwd, 'data-sources.json');
-  if (!existsSync(dataSourcesPath)) {
+  try {
+    const dataSourcesRaw = readFileSync(dataSourcesPath, 'utf-8');
+    const dataSources = JSON.parse(dataSourcesRaw) as { sources?: unknown[] };
+    if (!dataSources.sources || dataSources.sources.length === 0) {
+      messages.push(
+        '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
+      );
+    }
+  } catch {
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );

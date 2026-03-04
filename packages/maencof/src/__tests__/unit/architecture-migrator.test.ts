@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { cpSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -19,7 +20,10 @@ describe('architecture-migrator', () => {
   let testVault: string;
 
   beforeEach(() => {
-    testVault = join(tmpdir(), `maencof-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    testVault = join(
+      tmpdir(),
+      `maencof-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    );
     cpSync(FIXTURES_DIR, testVault, { recursive: true });
   });
 
@@ -206,8 +210,12 @@ describe('architecture-migrator', () => {
       expect(result.operationsFailed).toBe(0);
 
       // 서브디렉토리 생성 확인
-      expect(existsSync(join(testVault, '03_External', 'relational'))).toBe(true);
-      expect(existsSync(join(testVault, '03_External', 'structural'))).toBe(true);
+      expect(existsSync(join(testVault, '03_External', 'relational'))).toBe(
+        true,
+      );
+      expect(existsSync(join(testVault, '03_External', 'structural'))).toBe(
+        true,
+      );
       expect(existsSync(join(testVault, '03_External', 'topical'))).toBe(true);
       expect(existsSync(join(testVault, '05_Context', 'buffer'))).toBe(true);
       expect(existsSync(join(testVault, '05_Context', 'boundary'))).toBe(true);
@@ -217,14 +225,18 @@ describe('architecture-migrator', () => {
         existsSync(join(testVault, '03_External', 'relational', 'alice.md')),
       ).toBe(true);
       expect(
-        existsSync(join(testVault, '03_External', 'structural', 'company-x.md')),
+        existsSync(
+          join(testVault, '03_External', 'structural', 'company-x.md'),
+        ),
       ).toBe(true);
       expect(
         existsSync(join(testVault, '03_External', 'topical', 'react-hooks.md')),
       ).toBe(true);
 
       // 원본 위치에서 제거 확인
-      expect(existsSync(join(testVault, '03_External', 'alice.md'))).toBe(false);
+      expect(existsSync(join(testVault, '03_External', 'alice.md'))).toBe(
+        false,
+      );
     });
 
     it('WAL 파일이 생성된다', () => {
@@ -236,7 +248,9 @@ describe('architecture-migrator', () => {
 
       const wal = JSON.parse(readFileSync(walPath, 'utf-8'));
       expect(wal.status).toBe('completed');
-      expect(wal.operations.every((o: { status: string }) => o.status === 'done')).toBe(true);
+      expect(
+        wal.operations.every((o: { status: string }) => o.status === 'done'),
+      ).toBe(true);
     });
 
     it('아키텍처 버전이 업데이트된다', () => {
@@ -276,8 +290,12 @@ describe('architecture-migrator', () => {
 
       // 파일이 원래 위치로 돌아왔는지 확인
       expect(existsSync(join(testVault, '03_External', 'alice.md'))).toBe(true);
-      expect(existsSync(join(testVault, '03_External', 'company-x.md'))).toBe(true);
-      expect(existsSync(join(testVault, '03_External', 'react-hooks.md'))).toBe(true);
+      expect(existsSync(join(testVault, '03_External', 'company-x.md'))).toBe(
+        true,
+      );
+      expect(existsSync(join(testVault, '03_External', 'react-hooks.md'))).toBe(
+        true,
+      );
     });
 
     it('WAL 파일이 없으면 에러를 반환한다', () => {
@@ -310,8 +328,12 @@ describe('architecture-migrator', () => {
 
       const result = executeMigration(testVault, plan);
       expect(result.success).toBe(true);
-      expect(existsSync(join(testVault, '03_External', 'relational'))).toBe(true);
-      expect(existsSync(join(testVault, '03_External', 'structural'))).toBe(true);
+      expect(existsSync(join(testVault, '03_External', 'relational'))).toBe(
+        true,
+      );
+      expect(existsSync(join(testVault, '03_External', 'structural'))).toBe(
+        true,
+      );
       expect(existsSync(join(testVault, '03_External', 'topical'))).toBe(true);
     });
   });

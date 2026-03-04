@@ -29,10 +29,11 @@ export interface DataSourcesFileConfig extends Record<string, unknown> {
   updatedAt: string;
 }
 
-export const DEFAULT_DATA_SOURCES_CONFIG_FACTORY = (): DataSourcesFileConfig => ({
-  sources: [],
-  updatedAt: new Date().toISOString(),
-});
+export const DEFAULT_DATA_SOURCES_CONFIG_FACTORY =
+  (): DataSourcesFileConfig => ({
+    sources: [],
+    updatedAt: new Date().toISOString(),
+  });
 
 /**
  * Default usage-stats config. Empty tool call counts.

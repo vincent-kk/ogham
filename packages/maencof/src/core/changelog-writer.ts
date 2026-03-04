@@ -82,8 +82,9 @@ export function formatChangelogBody(entries: ChangelogEntry[]): string {
     grouped.set(entry.category, list);
   }
 
-  return CHANGELOG_CATEGORY_ORDER
-    .filter((cat) => grouped.has(cat) && grouped.get(cat)!.length > 0)
+  return CHANGELOG_CATEGORY_ORDER.filter(
+    (cat) => grouped.has(cat) && grouped.get(cat)!.length > 0,
+  )
     .flatMap((cat) => formatCategorySection(cat, grouped.get(cat)!))
     .join('\n');
 }

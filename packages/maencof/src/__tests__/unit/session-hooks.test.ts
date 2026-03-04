@@ -98,6 +98,75 @@ describe('runSessionStart', () => {
     expect(result.message ?? '').not.toContain('[maencof:');
   });
 
+  it('data-sources.json이 있지만 sources가 빈 배열이면 connect 안내를 포함한다', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'data-sources.json'),
+      JSON.stringify({ sources: [], updatedAt: new Date().toISOString() }),
+      'utf-8',
+    );
+    const result = runSessionStart({ cwd: vaultDir });
+    expect(result.message).toContain('/maencof:connect');
+  });
+
+  it('data-sources.json이 있고 sources에 항목이 있으면 connect 안내를 포함하지 않는다', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'data-sources.json'),
+      JSON.stringify({
+        sources: [{ type: 'obsidian', path: '/vault' }],
+        updatedAt: new Date().toISOString(),
+      }),
+      'utf-8',
+    );
+    const result = runSessionStart({ cwd: vaultDir });
+    expect(result.message ?? '').not.toContain('/maencof:connect');
+  });
+
+  it('data-sources.json이 손상된 JSON이면 connect 안내를 포함한다', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'data-sources.json'),
+      'INVALID_JSON',
+      'utf-8',
+    );
+    const result = runSessionStart({ cwd: vaultDir });
+    expect(result.message).toContain('/maencof:connect');
+  });
+
+  it('needsProvisioning=false일 때도 stale config가 migration된다', () => {
+    // 모든 파일이 이미 존재하지만 _schemaVersion이 없는 상태 (stale)
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'insight-config.json'),
+      JSON.stringify({ enabled: false }), // no _schemaVersion
+      'utf-8',
+    );
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({ enabled: false }), // no _schemaVersion
+      'utf-8',
+    );
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'lifecycle.json'),
+      JSON.stringify({ version: 1, actions: [] }), // no _schemaVersion
+      'utf-8',
+    );
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'auto-insight-stats.json'),
+      JSON.stringify({ updatedAt: new Date().toISOString() }), // no _schemaVersion
+      'utf-8',
+    );
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'data-sources.json'),
+      JSON.stringify({ sources: [], updatedAt: new Date().toISOString() }), // no _schemaVersion
+      'utf-8',
+    );
+
+    const result = runSessionStart({ cwd: vaultDir });
+
+    // Session start should complete without error
+    expect(result.continue).toBe(true);
+    // Migration message should appear since configs were migrated
+    expect(result.message).toContain('Config schemas updated');
+  });
+
   it('손상된 companion-identity.json은 graceful하게 무시한다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),

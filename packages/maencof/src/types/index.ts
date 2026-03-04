@@ -139,10 +139,7 @@ export {
   CHANGELOG_GATE_MARKER,
   WATCHED_PATHS,
 } from './changelog.js';
-export type {
-  ChangelogCategory,
-  ChangelogEntry,
-} from './changelog.js';
+export type { ChangelogCategory, ChangelogEntry } from './changelog.js';
 
 export type {
   MaencofCreateInput,

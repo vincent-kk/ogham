@@ -10,8 +10,8 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
-  rmdirSync,
   renameSync,
+  rmdirSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
@@ -19,9 +19,9 @@ import { basename, dirname, join } from 'node:path';
 
 import {
   EXPECTED_ARCHITECTURE_VERSION,
+  type L3SubLayer,
   L3_SUBDIR,
   L5_SUBDIR,
-  type L3SubLayer,
 } from '../types/common.js';
 import type {
   MigrationOp,
@@ -40,12 +40,7 @@ const PERSON_TAGS = new Set([
   'colleague',
   'mentor',
 ]);
-const ORG_TAGS = new Set([
-  'company',
-  'organization',
-  'team',
-  'community',
-]);
+const ORG_TAGS = new Set(['company', 'organization', 'team', 'community']);
 
 // ─── Public API ────────────────────────────────────────────────
 
@@ -428,8 +423,7 @@ function updateFrontmatterField(
   const lines = yaml.split('\n');
   const fieldLine = lines.findIndex((l) => l.startsWith(`${field}:`));
 
-  const valueStr =
-    value === undefined || value === null ? '' : String(value);
+  const valueStr = value === undefined || value === null ? '' : String(value);
 
   if (fieldLine >= 0) {
     if (valueStr === '') {

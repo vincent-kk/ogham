@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { Layer } from '../../types/common.js';
 import {
   SUBLAYER_DECAY_FACTORS,
   getLayerDecay,
 } from '../../core/weight-calculator.js';
+import { Layer } from '../../types/common.js';
 
 describe('getLayerDecay with sub-layer', () => {
   it('서브레이어 없으면 기존 레이어 감쇠 반환', () => {

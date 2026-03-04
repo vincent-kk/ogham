@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   EXPECTED_ARCHITECTURE_VERSION,
-  L3_SUBDIR,
-  L5_SUBDIR,
   type EdgeType,
   type L3SubLayer,
+  L3_SUBDIR,
   type L5SubLayer,
+  L5_SUBDIR,
   type SubLayer,
 } from '../../types/index.js';
 

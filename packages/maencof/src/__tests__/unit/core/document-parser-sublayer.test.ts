@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type ParsedDocument,
   buildKnowledgeNode,
   inferSubLayerFromPath,
   parseDocument,
-  type ParsedDocument,
 } from '../../../core/document-parser.js';
 
 function toYaml(obj: Record<string, unknown>, indent = 0): string {
@@ -125,7 +125,11 @@ describe('buildKnowledgeNode sub-layer propagation', () => {
         data: {
           ...baseFm,
           sub_layer: 'relational' as const,
-          person: { name: 'Alice', relationship_type: 'friend', intimacy_level: 4 },
+          person: {
+            name: 'Alice',
+            relationship_type: 'friend',
+            intimacy_level: 4,
+          },
         },
         raw: '',
       },

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { runSpreadingActivation } from '../../core/spreading-activation.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
 
 function makeNode(
   id: string,
@@ -150,11 +150,10 @@ describe('SA with sub-layer decay', () => {
     );
 
     // Should not hang or exceed maxActiveNodes
-    const results = runSpreadingActivation(
-      graph,
-      [toNodeId('boundary.md')],
-      { threshold: 0.01, maxHops: 10 },
-    );
+    const results = runSpreadingActivation(graph, [toNodeId('boundary.md')], {
+      threshold: 0.01,
+      maxHops: 10,
+    });
 
     expect(results.length).toBeLessThanOrEqual(100);
     for (const r of results) {

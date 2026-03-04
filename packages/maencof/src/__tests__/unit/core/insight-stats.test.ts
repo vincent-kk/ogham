@@ -135,7 +135,9 @@ describe('writeInsightConfig', () => {
 
     writeInsightConfig(nestedCwd, DEFAULT_INSIGHT_CONFIG);
     const read = readInsightConfig(nestedCwd);
-    expect(read).toEqual(DEFAULT_INSIGHT_CONFIG);
+    // readInsightConfig strips _schemaVersion (Zod schema doesn't include it)
+    const { _schemaVersion: _, ...expected } = DEFAULT_INSIGHT_CONFIG;
+    expect(read).toEqual(expected);
   });
 });
 

@@ -110,7 +110,9 @@ export async function handleMaencofMove(
     };
   }
 
-  const sourceSubLayer = nodeResult.success ? nodeResult.node?.subLayer : undefined;
+  const sourceSubLayer = nodeResult.success
+    ? nodeResult.node?.subLayer
+    : undefined;
 
   // 같은 레이어 + 같은 서브레이어이면 이동 불필요 (서브레이어 변경은 허용)
   if (

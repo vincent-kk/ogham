@@ -589,10 +589,7 @@ function registerKgTools(server: McpServer): void {
           .array(z.number().int().min(1).max(5))
           .min(1)
           .describe('Connected layer numbers'),
-        tags: z
-          .array(z.string())
-          .min(1)
-          .describe('Tag list (at least 1)'),
+        tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
       }),
     },
     async (args) => {
