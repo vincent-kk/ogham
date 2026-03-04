@@ -1,12 +1,13 @@
 /**
  * @file server.ts
- * @description maencof MCP server — registers 16 tools + routing
+ * @description maencof MCP server — registers 17 tools + routing
  *
  * Tool list:
  * CRUD x5: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
  * Insight x1: maencof_capture_insight
  * Search x5: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * Build x1: kg_build
+ * Boundary x1: boundary_create
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
  * Dailynote x1: dailynote_read
  */
@@ -22,6 +23,7 @@ import type { KnowledgeGraph } from '../types/graph.js';
 import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
+import { handleBoundaryCreate } from './tools/boundary-create.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
 import { handleClaudeMdRead } from './tools/claudemd-read.js';
 import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
@@ -138,7 +140,7 @@ function invalidateCache(): void {
 }
 
 /**
- * Creates the maencof MCP server and registers 16 tools.
+ * Creates the maencof MCP server and registers 17 tools.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
@@ -183,6 +185,12 @@ function registerCrudTools(server: McpServer): void {
           .regex(/^\d{4}-\d{2}-\d{2}$/)
           .optional()
           .describe('Expiry date YYYY-MM-DD (for Layer 4)'),
+        sub_layer: z
+          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .optional()
+          .describe(
+            'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+          ),
       }),
     },
     async (args) => {
@@ -280,6 +288,18 @@ function registerCrudTools(server: McpServer): void {
               ),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
+            sub_layer: z
+              .enum([
+                'relational',
+                'structural',
+                'topical',
+                'buffer',
+                'boundary',
+              ])
+              .optional()
+              .describe(
+                'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+              ),
           })
           .optional()
           .describe('Partial Frontmatter update (optional)'),
@@ -344,6 +364,12 @@ function registerCrudTools(server: McpServer): void {
           .max(1)
           .optional()
           .describe('Confidence score (for Layer 3→2 transition)'),
+        target_sub_layer: z
+          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .optional()
+          .describe(
+            'Target sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
+          ),
       }),
     },
     async (args) => {
@@ -363,7 +389,7 @@ function registerCrudTools(server: McpServer): void {
 }
 
 /**
- * Registers 5 KG tools: kg_search, kg_navigate, kg_context, kg_status, kg_build
+ * Registers 7 KG tools: kg_search, kg_navigate, kg_context, kg_status, kg_build, boundary_create, kg_suggest_links
  */
 function registerKgTools(server: McpServer): void {
   // ─── kg_search ───────────────────────────────────────────────────
@@ -407,6 +433,12 @@ function registerKgTools(server: McpServer): void {
           .array(z.number().int().min(1).max(5))
           .optional()
           .describe('Layer filter (1-5)'),
+        sub_layer: z
+          .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
+          .optional()
+          .describe(
+            'Sub-layer filter (L3: relational/structural/topical, L5: buffer/boundary)',
+          ),
       }),
     },
     async (args) => {
@@ -534,6 +566,39 @@ function registerKgTools(server: McpServer): void {
       try {
         const vaultPath = getVaultPath();
         const result = await handleKgBuild(vaultPath, args);
+        if (result.success) invalidateCache();
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+
+  // ─── boundary_create ─────────────────────────────────────────────
+  server.registerTool(
+    'boundary_create',
+    {
+      description:
+        'Creates a boundary document in 05_Context/boundary/. Boundary documents bridge multiple layers and enable CROSS_LAYER edges.',
+      inputSchema: z.object({
+        title: z.string().describe('Boundary document title'),
+        boundary_type: z
+          .enum(['project_moc', 'cross_domain', 'synthesis'])
+          .describe('Boundary object type'),
+        connected_layers: z
+          .array(z.number().int().min(1).max(5))
+          .min(1)
+          .describe('Connected layer numbers'),
+        tags: z
+          .array(z.string())
+          .min(1)
+          .describe('Tag list (at least 1)'),
+      }),
+    },
+    async (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = await handleBoundaryCreate(vaultPath, args);
         if (result.success) invalidateCache();
         return toolResult(result);
       } catch (error) {

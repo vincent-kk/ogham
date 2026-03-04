@@ -19,6 +19,7 @@ import {
 } from '../core/insight-stats.js';
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
+import { EXPECTED_ARCHITECTURE_VERSION } from '../types/common.js';
 import type { VaultVersionInfo } from '../types/setup.js';
 import { VERSION } from '../version.js';
 
@@ -68,7 +69,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   // 2.5. CLAUDE.md maencof 섹션 초기화 (조건부 경량 쓰기, version.json 기반)
   const needsProvisioning = initClaudeMdSection(cwd, companion?.name, messages);
 
-  // 2.7. Config file provisioning (separate concern from CLAUDE.md management)
+  // 2.8. Config file provisioning (separate concern from CLAUDE.md management)
   if (needsProvisioning) {
     try {
       const provision = provisionMissingConfigs(cwd);
@@ -82,7 +83,10 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     }
   }
 
-  // 2.6. 버전 불일치 감지
+  // 2.6. 아키텍처 버전 체크 (L3 서브레이어 + L5 Buffer/Boundary)
+  checkArchitectureMismatch(cwd, messages);
+
+  // 2.7a. 플러그인 버전 불일치 감지
   checkVersionMismatch(cwd, messages);
 
   // 3. Detect leftover WAL
@@ -293,6 +297,32 @@ function updateVaultVersion(cwd: string, previousVersion: string): void {
 }
 
 /**
+ * 아키텍처 버전 불일치 시 마이그레이션 안내 메시지를 추가한다.
+ * 자동 마이그레이션은 하지 않는다 — 항상 사용자 명시적 실행.
+ */
+function checkArchitectureMismatch(cwd: string, messages: string[]): void {
+  try {
+    const versionPath = metaPath(cwd, 'version.json');
+    let archVersion = '1.0.0';
+    if (existsSync(versionPath)) {
+      const data = JSON.parse(
+        readFileSync(versionPath, 'utf-8'),
+      ) as VaultVersionInfo;
+      archVersion = data.architecture_version ?? '1.0.0';
+    }
+    if (archVersion !== EXPECTED_ARCHITECTURE_VERSION) {
+      messages.push(
+        `[maencof] Architecture update available (${archVersion} → ${EXPECTED_ARCHITECTURE_VERSION}).` +
+          '\nL3 sub-layers (relational/structural/topical) and L5 sub-layers (buffer/boundary) are now supported.' +
+          '\nRun `/maencof:migrate` to upgrade your vault structure.',
+      );
+    }
+  } catch {
+    // Silent fallback
+  }
+}
+
+/**
  * 플러그인 버전과 vault의 version.json이 불일치하면 안내 메시지를 추가한다.
  * initClaudeMdSection()에서 자동 업데이트가 처리되지 않은 경우의 fallback.
  */
@@ -322,7 +352,7 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 
 ## Vault
 - Path: ${cwd}
-- Model: 5-Layer (Core/Derived/External/Action/Context)
+- Model: 5-Layer (L1:Core / L2:Derived / L3:External[relational,structural,topical] / L4:Action / L5:Context[buffer,boundary])
 
 ## Required Rules (MUST)
 

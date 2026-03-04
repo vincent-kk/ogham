@@ -40,11 +40,25 @@ Format results based on health state:
 - **Caution** (stale 10-30%): display stats, recommend `/maencof:rebuild`
 - **Critical** (stale > 30% or no index): recommend `/maencof:build --full` or `/maencof:doctor`
 
+Include **sub-layer distribution** from `kg_status` response (`subLayerDistribution` field):
+```
+Sub-Layer Distribution:
+  L3: relational (N), structural (N), topical (N), unclassified (N)
+  L5: buffer (N), boundary (N), unclassified (N)
+```
+
 > See **reference.md** for full report format templates and action matrix.
 
 ### Step 3 (Optional) — Verbose Mode
 
-When `--verbose` is specified: list stale node paths, modified file count, Layer distribution.
+When `--verbose` is specified: list stale node paths, modified file count, Layer distribution, and **sub-layer consistency check** (detect mismatches between directory path and frontmatter `sub_layer` field).
+
+Example consistency warning:
+```
+Sub-Layer Consistency Issues:
+  - 03_External/relational/doc.md has sub_layer: "topical" (expected: "relational")
+  - 05_Context/buffer/old.md has sub_layer: "boundary" (expected: "buffer")
+```
 
 ## Available MCP Tools
 

@@ -13,14 +13,7 @@ import type {
   KnowledgeGraph,
 } from '../types/graph.js';
 
-/** Layer별 감쇠 인자 */
-const LAYER_DECAY: Record<number, number> = {
-  1: 0.5, // L1 Core — 광범위한 확산
-  2: 0.7, // L2 Derived — 표준 확산
-  3: 0.8, // L3 External — 제한적 확산
-  4: 0.9, // L4 Action — 최소 확산
-  5: 0.95, // L5 Context — 최소 확산 (신설)
-};
+import { getLayerDecay } from './weight-calculator.js';
 
 /** 확산 활성화 파라미터 */
 export interface SpreadingActivationParams {
@@ -91,8 +84,7 @@ function getDecayForNode(
   if (decayOverride !== undefined) return decayOverride;
   const node = graph.nodes.get(nodeId);
   if (!node) return 0.7;
-  const layer = node.layer as unknown as number;
-  return LAYER_DECAY[layer] ?? 0.7;
+  return getLayerDecay(node.layer, node.subLayer);
 }
 
 /**

@@ -41,9 +41,10 @@ Query the current index status, node count, and stale node list via `kg_status`.
 ### Step 2 — Run judge Module
 
 Execute memory-organizer judge logic:
-- Full scan of Layer 3/4/5
+- Full scan of Layer 3/4/5 (including sub-layer directories)
 - Calculate transition score for each node (access frequency, tags, connection density, confidence)
 - Detect duplicate candidate pairs
+- **L5-Boundary analysis**: Evaluate cross-layer connection effectiveness — identify Boundary nodes with zero CROSS_LAYER edges (misconfigured) or excessive connections (>50 targets)
 
 ### Step 3 — Generate Report
 
@@ -51,17 +52,30 @@ Execute memory-organizer judge logic:
 ## Knowledge Vault Analysis Report
 
 ### Transition Candidates (Layer 3 -> Layer 2)
-| File | Access Count | Tag Matching | confidence | Recommendation |
-|------|-------------|-------------|-----------|----------------|
+| File | Sub-Layer | Access Count | Tag Matching | confidence | Recommendation |
+|------|-----------|-------------|-------------|-----------|----------------|
 
 ### Transition Candidates (Layer 4 -> Layer 3)
-| File | Last Accessed | Expiration | Recommendation |
+| File | Last Accessed | Expiration | Target Sub-Layer | Recommendation |
+
+### L5-Buffer Promotion Candidates
+| File | Age (days) | Connections | Recommended Target |
+
+### L5-Boundary Health
+| Boundary Node | Connected Layers | CROSS_LAYER Edges | Status |
+(OK / No edges / Overcrowded)
 
 ### Duplicate Detection
 | File A | File B | Common Tags | Similarity |
 
+### Sub-Layer Distribution
+| Layer | Sub-Layer | Count |
+(L3: relational/structural/topical, L5: buffer/boundary)
+
 ### Summary
 - Transition candidates: N
+- Buffer promotion candidates: N
+- Boundary health issues: N
 - Duplicate document pairs: N
 - Recommended action: run /maencof:organize
 ```

@@ -75,6 +75,10 @@ export function buildGraph(
   const domainEdges = buildDomainEdges(nodes);
   edges.push(...domainEdges);
 
+  // CROSS_LAYER 엣지: L5-Boundary 노드에서 connected_layers 내 태그 겹침 노드로
+  const crossLayerEdges = buildCrossLayerEdges(nodes);
+  edges.push(...crossLayerEdges);
+
   const graph: KnowledgeGraph = {
     nodes: nodeMap,
     edges,
@@ -290,4 +294,68 @@ function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
 /** 대칭 관계 여부 확인 */
 function isSymmetricRelationship(type: string): boolean {
   return (SYMMETRIC_RELATIONSHIPS as readonly string[]).includes(type);
+}
+
+/** Boundary 노드당 최대 CROSS_LAYER 엣지 수 */
+const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
+
+/**
+ * L5-Boundary 노드에서 connected_layers 내 노드로 CROSS_LAYER 엣지 생성.
+ * 태그 겹침 기반으로 바운딩하고 MAX_CROSS_LAYER_EDGES_PER_NODE 캡 적용.
+ */
+function buildCrossLayerEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
+  const edges: KnowledgeEdge[] = [];
+
+  const boundaryNodes = nodes.filter(
+    (n) =>
+      n.subLayer === 'boundary' &&
+      n.connectedLayers &&
+      n.connectedLayers.length > 0,
+  );
+
+  if (boundaryNodes.length === 0) return edges;
+
+  // Layer별 노드 그룹화
+  const layerMap = new Map<number, KnowledgeNode[]>();
+  for (const node of nodes) {
+    const layer = node.layer as number;
+    if (!layerMap.has(layer)) {
+      layerMap.set(layer, []);
+    }
+    layerMap.get(layer)!.push(node);
+  }
+
+  for (const boundary of boundaryNodes) {
+    const boundaryTags = new Set(boundary.tags);
+    let edgeCount = 0;
+
+    for (const targetLayer of boundary.connectedLayers!) {
+      const candidates = layerMap.get(targetLayer) ?? [];
+      for (const candidate of candidates) {
+        if (candidate.id === boundary.id) continue;
+        if (edgeCount >= MAX_CROSS_LAYER_EDGES_PER_NODE) break;
+
+        // 태그 겹침 확인
+        const hasOverlap = candidate.tags.some((tag) => boundaryTags.has(tag));
+        if (!hasOverlap) continue;
+
+        edges.push({
+          from: boundary.id,
+          to: candidate.id,
+          type: 'CROSS_LAYER',
+          weight: 1.0,
+        });
+        edges.push({
+          from: candidate.id,
+          to: boundary.id,
+          type: 'CROSS_LAYER',
+          weight: 1.0,
+        });
+        edgeCount++;
+      }
+      if (edgeCount >= MAX_CROSS_LAYER_EDGES_PER_NODE) break;
+    }
+  }
+
+  return edges;
 }

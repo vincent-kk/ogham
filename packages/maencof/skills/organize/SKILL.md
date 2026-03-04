@@ -46,9 +46,10 @@ If no index is found, abort with: "No index found. Please run `/maencof:build` f
 ### Step 2 — judge stage (memory-organizer delegation)
 
 Run the judge module of the `memory-organizer` agent:
-- Scan Layer 3/4/5 files
+- Scan Layer 3/4/5 files (including sub-layer directories: `relational/`, `structural/`, `topical/`, `buffer/`, `boundary/`)
 - Evaluate access frequency, tag matching, and connection density
 - Generate a list of TransitionDirectives
+- **L5-Buffer promotion**: Identify Buffer documents that have been categorized (have tags, connections) and recommend promotion to L2/L3 with appropriate sub-layer
 
 ### Step 3 — Display Candidates and User Confirmation
 
@@ -63,9 +64,10 @@ The user can type "proceed" or select/exclude individual items.
 ### Step 4 — execute stage (memory-organizer delegation)
 
 Run the execute module for approved TransitionDirectives:
-- Call `maencof_move`
-- Update the Frontmatter `layer` field
+- Call `maencof_move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
+- Update the Frontmatter `layer` and `sub_layer` fields
 - Update link paths
+- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `maencof_move` automatically strips buffer-specific metadata
 
 ### Step 5 — Result Summary
 
@@ -98,6 +100,14 @@ When organizing, prioritize reviewing documents with the `auto-insight` tag:
 - L5 auto-insight documents with strong connections (high link count) → promote to L2
 - L5 auto-insight documents with no connections after 30+ days → archive candidate
 - Update `.maencof-meta/auto-insight-stats.json` when promoting (increment `l5_promoted`) or archiving (increment `l5_archived`)
+
+### L5-Buffer Promotion Workflow
+
+Buffer documents are temporary holding areas. During organization:
+1. **Scan** `05_Context/buffer/` for documents older than 7 days
+2. **Evaluate** each document's connections, tags, and content type
+3. **Recommend target**: L2 (internalized), L3 with sub-layer (external reference), or archive
+4. **Execute** via `maencof_move` with `target_sub_layer` — buffer metadata is auto-stripped
 
 ## Options
 

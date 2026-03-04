@@ -39,6 +39,25 @@ export async function handleKgStatus(
 
   const rebuildRecommended = totalNodes > 0 && staleCount / totalNodes > 0.1;
 
+  // Sub-layer 분포 집계
+  const subLayerDistribution: Record<string, number> = {};
+  for (const [, node] of graph.nodes) {
+    if (node.subLayer) {
+      subLayerDistribution[node.subLayer] =
+        (subLayerDistribution[node.subLayer] ?? 0) + 1;
+    }
+  }
+
+  // CROSS_LAYER 엣지 수 집계
+  let crossLayerEdgeCount = 0;
+  for (const edge of graph.edges) {
+    if (edge.type === 'CROSS_LAYER') crossLayerEdgeCount++;
+  }
+
+  if (crossLayerEdgeCount > 0) {
+    subLayerDistribution['cross_layer_edges'] = crossLayerEdgeCount;
+  }
+
   return {
     nodeCount: graph.nodeCount,
     edgeCount: graph.edgeCount,
@@ -47,5 +66,9 @@ export async function handleKgStatus(
     freshnessPercent,
     rebuildRecommended,
     vaultPath,
+    subLayerDistribution:
+      Object.keys(subLayerDistribution).length > 0
+        ? subLayerDistribution
+        : undefined,
   };
 }

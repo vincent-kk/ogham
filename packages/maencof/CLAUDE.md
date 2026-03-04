@@ -13,13 +13,13 @@ yarn format && yarn lint
 
 ## Architecture
 
-**5-Layer Model**: `01_Core/` (identity, read-only) | `02_Derived/` (internalized knowledge) | `03_External/` (references) | `04_Action/` (volatile task memory) | `05_Context/` (metadata)
+**5-Layer Model**: `01_Core/` (identity, read-only) | `02_Derived/` (internalized knowledge) | `03_External/` (`relational/` L3A, `structural/` L3B, `topical/` L3C) | `04_Action/` (volatile task memory) | `05_Context/` (`buffer/` temp inbox, `boundary/` cross-layer bridge)
 
-**MCP Tools (16)**: `maencof_create/read/update/delete/move`, `maencof_capture_insight`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`
+**MCP Tools (17)**: `maencof_create/read/update/delete/move`, `maencof_capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`
 
 **Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
 
-**Skills (27)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`, `think`, `refine`, `insight`
+**Skills (29)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`, `think`, `refine`, `insight`, `changelog`, `migrate`
 
 > Detailed docs: `../../.metadata/maencof/` (5-Layer spec, MCP contracts, agent/skill definitions, hook event mappings)
 
