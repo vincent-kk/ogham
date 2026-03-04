@@ -52,6 +52,23 @@ Generate and display a migration plan WITHOUT executing:
 
 Present the plan to the user for review.
 
+### Step 2.5 — Create Migration Lock
+
+계획을 사용자에게 표시하기 전에 migration lock 파일을 생성한다.
+
+Write `.maencof-meta/migration.lock`:
+```json
+{
+  "startedAt": "<현재 ISO 타임스탬프>",
+  "ttlMinutes": 30,
+  "sessionId": "<input.session_id 또는 null>"
+}
+```
+
+이 파일이 존재하면 changelog-gate Stop hook이 migration 진행 중임을 인식하고 세션 종료를 허용한다.
+
+vault 루트 `.gitignore`에 `.maencof-meta/migration.lock` 패턴이 없으면 추가한다.
+
 ### Step 3 — User Confirmation
 
 **STOP HERE. Do NOT proceed to Step 4 until the user explicitly responds.**
@@ -70,7 +87,9 @@ Then use the `AskUserQuestion` tool to ask:
 Wait for the user's answer before taking any action.
 
 - If user confirms ("yes"): proceed to Step 4.
-- If user declines ("no") or does not explicitly confirm: exit immediately without any file changes.
+- If user declines ("no") or does not explicitly confirm:
+  1. Delete `.maencof-meta/migration.lock` if it exists.
+  2. Exit immediately without any file changes.
 
 ### Step 4 — Execute Migration
 
@@ -91,6 +110,9 @@ Display migration results:
 - Any errors encountered
 - Rollback instructions if needed
 - Recommendation to run `/maencof:doctor` for post-migration health check
+
+After reporting results (whether migration succeeded or rollback occurred):
+- Delete `.maencof-meta/migration.lock` if it exists.
 
 ## L3 Classification Rules
 

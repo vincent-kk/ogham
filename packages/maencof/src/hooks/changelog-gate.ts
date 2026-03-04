@@ -11,7 +11,7 @@
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -20,7 +20,7 @@ import {
   WATCHED_PATHS,
 } from '../types/changelog.js';
 
-import { isMaencofVault } from './shared.js';
+import { isMaencofVault, metaPath } from './shared.js';
 
 export interface ChangelogGateInput {
   session_id?: string;
@@ -91,6 +91,23 @@ export function runChangelogGate(
     // 2. maencof vault 확인
     if (!isMaencofVault(cwd)) {
       return { continue: true };
+    }
+
+    // 2.5. migration 진행 중이면 통과
+    const lockPath = metaPath(cwd, 'migration.lock');
+    if (existsSync(lockPath)) {
+      try {
+        const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
+        const startedAt = new Date(lock.startedAt).getTime();
+        const ttlMs = (lock.ttlMinutes ?? 30) * 60 * 1000;
+        const sessionMatch = !lock.sessionId || lock.sessionId === input.session_id;
+        if (Date.now() - startedAt < ttlMs && sessionMatch) {
+          return { continue: true };
+        }
+        // TTL 초과 또는 세션 불일치 → 무시하고 계속
+      } catch {
+        // parse 실패 → graceful degradation
+      }
     }
 
     // 3. 감시 경로에 git 변경 확인

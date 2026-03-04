@@ -115,7 +115,11 @@ tags: [changelog, growth, daily]
 - 각 카테고리에 해당하는 변경이 없으면 해당 섹션을 생략한다
 - 경로는 vault 기준 상대 경로로 기록한다
 
-### Step 5 — Commit Changes
+### Step 5 — Commit Changes (synchronous)
+
+**중요:** commit은 반드시 동기로 실행한다. commit이 성공한 경우에만 Step 6으로 진행한다.
+commit 실패 시 에러를 출력하고 마커 파일을 생성하지 않는다.
+진행 상황을 사용자에게 실시간으로 출력하지 않는다 — 완료 후 Step 7에서 요약만 출력한다.
 
 changelog 파일을 git에 커밋한다.
 
