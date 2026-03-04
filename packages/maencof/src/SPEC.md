@@ -14,7 +14,8 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 | `index/` | MetadataStore, IncrementalTracker |
 
 ## Public API
-- Core: scanVault, parseDocument, buildGraph, convertToDAG, calculateWeights, runSpreadingActivation, detectCommunities, mergeMaencofSection, ArchitectureMigrator, ChangelogWriter
+- Core: scanVault, parseDocument, buildGraph, convertToDAG, calculateWeights, runSpreadingActivation, detectCommunities, mergeMaencofSection, ArchitectureMigrator, ChangelogWriter, parseYamlFrontmatter
+- Core (internal): `quoteYamlValue`, `parseScalarValue` — YAML 직렬화 특수문자 안전 처리 (mcp/tools 내부 전용)
 - Search: query, assembleContext, QueryEngine, ContextAssembler
 - Index: MetadataStore, IncrementalTracker, computeIncrementalChangeSet
 - MCP: createServer, startServer, tool handlers (maencof_*, kg_*, boundary_*, claudemd_*, dailynote_*)
