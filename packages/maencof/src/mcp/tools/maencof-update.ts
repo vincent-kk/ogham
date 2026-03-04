@@ -7,6 +7,7 @@ import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { MaencofCrudResult, MaencofUpdateInput } from '../../types/mcp.js';
+import { quoteYamlValue } from '../../core/yaml-parser.js';
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
@@ -49,10 +50,14 @@ function updateFrontmatter(
   yaml = patchFrontmatterField(yaml, 'updated', today);
 
   if (updates.tags !== undefined) {
-    yaml = patchFrontmatterField(yaml, 'tags', `[${updates.tags.join(', ')}]`);
+    yaml = patchFrontmatterField(
+      yaml,
+      'tags',
+      `[${updates.tags.map((t) => quoteYamlValue(t)).join(', ')}]`,
+    );
   }
   if (updates.title !== undefined) {
-    yaml = patchFrontmatterField(yaml, 'title', updates.title);
+    yaml = patchFrontmatterField(yaml, 'title', quoteYamlValue(updates.title));
   }
   if (updates.layer !== undefined) {
     yaml = patchFrontmatterField(yaml, 'layer', String(updates.layer));
@@ -65,7 +70,11 @@ function updateFrontmatter(
     );
   }
   if (updates.schedule !== undefined) {
-    yaml = patchFrontmatterField(yaml, 'schedule', updates.schedule);
+    yaml = patchFrontmatterField(
+      yaml,
+      'schedule',
+      quoteYamlValue(updates.schedule),
+    );
   }
   if (updates.sub_layer !== undefined) {
     yaml = patchFrontmatterField(yaml, 'sub_layer', updates.sub_layer);

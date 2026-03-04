@@ -6,6 +6,7 @@ import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { L5_SUBDIR, LAYER_DIR, Layer } from '../../types/common.js';
+import { quoteYamlValue } from '../../core/yaml-parser.js';
 
 /** boundary_create input */
 export interface BoundaryCreateInput {
@@ -69,7 +70,7 @@ export async function handleBoundaryCreate(
 
   // Build frontmatter
   const today = new Date().toISOString().slice(0, 10);
-  const tagsYaml = `[${input.tags.join(', ')}]`;
+  const tagsYaml = `[${input.tags.map((t) => quoteYamlValue(t)).join(', ')}]`;
   const connectedLayersYaml = `[${input.connected_layers.join(', ')}]`;
 
   const frontmatter = [
@@ -79,9 +80,9 @@ export async function handleBoundaryCreate(
     `tags: ${tagsYaml}`,
     `layer: 5`,
     `sub_layer: boundary`,
-    `boundary_type: ${input.boundary_type}`,
+    `boundary_type: ${quoteYamlValue(input.boundary_type)}`,
     `connected_layers: ${connectedLayersYaml}`,
-    `title: ${input.title}`,
+    `title: ${quoteYamlValue(input.title)}`,
     '---',
   ].join('\n');
 
