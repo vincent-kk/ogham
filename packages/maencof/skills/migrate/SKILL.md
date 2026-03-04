@@ -35,6 +35,7 @@ Upgrades the vault directory structure from v1 (flat 5-Layer) to v2 (L3 sub-laye
 ### Step 1 — Version Check
 
 Check the current architecture version:
+
 - Read `.maencof-meta/version.json` → `architecture_version` field
 - If absent, assume `1.0.0`
 - Compare with expected version (`2.0.0`)
@@ -43,6 +44,7 @@ Check the current architecture version:
 ### Step 2 — Plan Preview
 
 Generate and display a migration plan WITHOUT executing:
+
 - List all directories to create
 - List all files to move (with L3 classification: relational/structural/topical)
 - Show frontmatter fields to update (`sub_layer`)
@@ -52,16 +54,28 @@ Present the plan to the user for review.
 
 ### Step 3 — User Confirmation
 
-Ask the user to confirm the migration plan. Show:
+**STOP HERE. Do NOT proceed to Step 4 until the user explicitly responds.**
+
+Present the plan summary and ask for confirmation. Show:
+
 - Total number of operations
 - Reminder about exclusive vault access
 - Rollback availability
 
-If user declines: exit without changes.
+Then use the `AskUserQuestion` tool to ask:
+
+> "이 계획을 실행할까요?"
+> Options: "예, 실행합니다" / "아니오, 취소합니다"
+
+Wait for the user's answer before taking any action.
+
+- If user confirms ("yes"): proceed to Step 4.
+- If user declines ("no") or does not explicitly confirm: exit immediately without any file changes.
 
 ### Step 4 — Execute Migration
 
 Execute the plan using WAL (Write-Ahead Log):
+
 1. Create subdirectories under `03_External/` and `05_Context/`
 2. Move L3 documents to classified subdirectories
 3. Update frontmatter `sub_layer` field for moved documents
@@ -72,6 +86,7 @@ Each operation is recorded in the WAL before execution.
 ### Step 5 — Report Results
 
 Display migration results:
+
 - Operations executed successfully
 - Any errors encountered
 - Rollback instructions if needed
@@ -80,6 +95,7 @@ Display migration results:
 ## L3 Classification Rules
 
 Documents in `03_External/` are classified by:
+
 1. `person` or `person_ref` field present → **relational**
 2. `org_type` field present → **structural**
 3. Tag heuristics (person/people/friend/colleague/mentor → relational; company/organization/team/community → structural)
@@ -88,6 +104,7 @@ Documents in `03_External/` are classified by:
 ## Rollback
 
 If migration fails or produces unexpected results:
+
 - The WAL file at `.maencof-meta/migration-wal.json` records all operations
 - Completed operations can be reversed in order
 - Rollback restores files to their original locations and removes added frontmatter fields
@@ -98,7 +115,7 @@ If migration fails or produces unexpected results:
 /maencof:migrate [--dry-run] [--rollback]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--dry-run` | false | Show migration plan without executing |
-| `--rollback` | false | Rollback the last migration using WAL |
+| Option       | Default | Description                           |
+| ------------ | ------- | ------------------------------------- |
+| `--dry-run`  | false   | Show migration plan without executing |
+| `--rollback` | false   | Rollback the last migration using WAL |
