@@ -173,6 +173,26 @@ describe('handleMaencofCreate', () => {
     expect(second.message).toContain('File already exists');
   });
 
+  it('title에 ": "가 포함되면 quote 처리된 frontmatter를 생성한다', async () => {
+    await handleMaencofCreate(vault, {
+      layer: 3,
+      tags: ['geeknews'],
+      content: '기사 내용.',
+      title: 'Show GN: 이제 공부도 클로드 코드로 해보세요!',
+    });
+
+    const files = await import('node:fs/promises').then((m) =>
+      m.readdir(join(vault, '03_External')),
+    );
+    const content = await readFile(
+      join(vault, '03_External', files[0]),
+      'utf-8',
+    );
+    expect(content).toContain(
+      'title: "Show GN: 이제 공부도 클로드 코드로 해보세요!"',
+    );
+  });
+
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {
     await handleMaencofCreate(vault, {
       layer: 3,

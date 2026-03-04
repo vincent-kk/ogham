@@ -13,11 +13,12 @@
  * 스칼라 YAML 값을 적절한 타입으로 변환한다.
  */
 export function parseScalarValue(raw: string): unknown {
-  // 따옴표 제거
-  if (
-    (raw.startsWith('"') && raw.endsWith('"')) ||
-    (raw.startsWith("'") && raw.endsWith("'"))
-  ) {
+  // double-quote: unescape 처리 (YAML 스펙상 \" \\ escape 지원)
+  if (raw.startsWith('"') && raw.endsWith('"')) {
+    return raw.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+  }
+  // single-quote: YAML 스펙상 escape 없음 ('' 로 리터럴 ' 표현)
+  if (raw.startsWith("'") && raw.endsWith("'")) {
     return raw.slice(1, -1);
   }
 
@@ -31,6 +32,32 @@ export function parseScalarValue(raw: string): unknown {
   if (!isNaN(num) && raw !== '') return num;
 
   return raw;
+}
+
+/**
+ * YAML 직렬화 시 특수문자를 포함하는 문자열을 안전하게 double-quote로 감싼다.
+ *
+ * @limitation 콤마를 포함하는 값은 인라인 배열(`[val1, val2]`) 형식에서
+ * 정상 파싱되지 않음. 인라인 배열 파서가 콤마 기반 단순 split을 사용하기 때문.
+ * 콤마 포함 값이 필요한 경우 블록 형식 배열 사용 권장.
+ */
+export function quoteYamlValue(value: string): string {
+  if (value === '') return '""';
+
+  const YAML_UNSAFE_START = /^[#'"{}[\],&*?|<>=!%@`\-]/;
+  const YAML_BOOLEAN_NULL = /^(true|false|null|~|yes|no|on|off)$/i;
+
+  if (
+    value.includes(': ') ||
+    value.includes(' #') ||
+    YAML_UNSAFE_START.test(value) ||
+    YAML_BOOLEAN_NULL.test(value)
+  ) {
+    const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    return `"${escaped}"`;
+  }
+
+  return value;
 }
 
 /**

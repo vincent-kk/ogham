@@ -5,6 +5,7 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import { quoteYamlValue } from '../../core/yaml-parser.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../types/common.js';
 import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../types/common.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../types/mcp.js';
@@ -45,7 +46,7 @@ function generateFilename(title?: string, tags?: string[]): string {
  */
 function buildFrontmatter(input: MaencofCreateInput): string {
   const today = new Date().toISOString().slice(0, 10);
-  const tagsYaml = `[${input.tags.map((t) => t).join(', ')}]`;
+  const tagsYaml = `[${input.tags.map((t) => quoteYamlValue(t)).join(', ')}]`;
 
   const lines = [
     '---',
@@ -56,8 +57,8 @@ function buildFrontmatter(input: MaencofCreateInput): string {
   ];
 
   if (input.sub_layer) lines.push(`sub_layer: ${input.sub_layer}`);
-  if (input.title) lines.push(`title: ${input.title}`);
-  if (input.source) lines.push(`source: ${input.source}`);
+  if (input.title) lines.push(`title: ${quoteYamlValue(input.title)}`);
+  if (input.source) lines.push(`source: ${quoteYamlValue(input.source)}`);
   if (input.expires) lines.push(`expires: ${input.expires}`);
 
   lines.push('---');
