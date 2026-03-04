@@ -9,6 +9,7 @@ argument-hint: [initial requirement or idea]
 version: 1.0.0
 complexity: medium
 context_layers: []
+orchestrator: refine skill
 plugin: maencof
 ---
 

@@ -5,6 +5,7 @@ description: Manage auto-insight capture settings, view recent captures, and edi
 version: 1.0.0
 complexity: simple
 context_layers: []
+orchestrator: insight skill
 plugin: maencof
 ---
 

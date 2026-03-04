@@ -3,7 +3,7 @@ name: changelog
 user_invocable: true
 description: Record self-changes to the daily changelog — detects git changes in watched paths, categorizes them, writes 02_Derived/changelog/YYYY-MM-DD.md, commits, and creates the gate marker
 version: 1.0.0
-complexity: moderate
+complexity: medium
 context_layers: []
 orchestrator: changelog skill
 plugin: maencof

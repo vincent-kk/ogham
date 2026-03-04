@@ -5,6 +5,7 @@ description: Knowledge vault and CLAUDE.md cleanup — delete vault documents an
 version: 1.0.0
 complexity: simple
 context_layers: [2, 3, 4, 5]
+orchestrator: cleanup skill
 plugin: maencof
 ---
 

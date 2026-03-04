@@ -5,6 +5,7 @@ description: Vault architecture migration — upgrades directory structure to su
 version: 1.0.0
 complexity: medium
 context_layers: []
+orchestrator: migrate skill
 plugin: maencof
 ---
 

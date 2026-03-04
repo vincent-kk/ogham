@@ -5,6 +5,7 @@ description: Lightweight index health diagnostic — quick status check and reco
 version: 1.0.0
 complexity: simple
 context_layers: []
+orchestrator: diagnose skill
 plugin: maencof
 ---
 
