@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-04
 tags: [memory, lifecycle, transition, internalization]
 layer: design-area-3
 ---
@@ -20,7 +20,7 @@ layer: design-area-3
 | 유형 | Layer | 지속 범위 | 특성 |
 |------|-------|----------|------|
 | 단기 기억 | Layer 4 | 세션 내 | 작업 컨텍스트. 세션 종료 시 아카이브 또는 삭제 |
-| 중기 기억 | Layer 3 | 세션 간 | 외부 지식 임시 보관. `confidence`로 추적 |
+| 중기 기억 | Layer 3A/B/C | 세션 간 | 외부 지식 임시 보관. `confidence`로 추적. 서브레이어별 관리 |
 | 장기 기억 | Layer 1-2 | 영구 | 내재화 완료. 의도적 삭제 외 유지 |
 
 ---
@@ -29,10 +29,16 @@ layer: design-area-3
 
 | 전이 | 조건 | 트리거 | Level 0-1 | Level 2-3 |
 |------|------|--------|-----------|-----------|
-| L4→L3 | 세션 종료 + 보존 결정 | SessionEnd | 명시적 승인 | 제안 후 확인 |
-| L3→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
-| L3→삭제 | expires 경과 AND accessed_count = 0 | SessionStart 정리 | 명시적 승인 | 제안 후 확인 |
+| L4→L3A/B/C | 세션 종료 + 보존 결정 + 대상 서브레이어 선택 | SessionEnd | 명시적 승인 | 제안 후 확인 |
+| L3A→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
+| L3B→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
+| L3C→L2 | confidence ≥ 0.7 AND accessed_count ≥ 5 | SessionStart 지연 전이 | 명시적 승인 | 자동 전이 |
+| L3A/B/C→삭제 | expires 경과 AND accessed_count = 0 | SessionStart 정리 | 명시적 승인 | 제안 후 확인 |
 | L4→삭제 | 30일 경과 AND 미참조 | SessionStart 정리 | 자동 | 자동 |
+| L5-Buffer→L3A/B/C | 사용자 분류 또는 시스템 분류 제안 | organize 스킬 | 명시적 승인 | 제안 후 확인 |
+| L5-Buffer→L2 | 직접 내재화 (이미 처리된 지식) | organize 스킬 | 명시적 승인 | 자동 전이 |
+| L5-Buffer→삭제 | 30일 경과 AND 미참조 | SessionStart | 명시적 승인 | 제안 후 확인 |
+| L3A/B/C→L5-Boundary | 노드가 교차 레이어 커넥터로 지정 | organize 스킬 | 명시적 승인 | 자동 |
 
 ---
 
@@ -52,13 +58,13 @@ Hook 타임아웃 내 불가 시: 목록 생성만 수행, 실행은 연기.
 
 ---
 
-## 4. 습득 프로세스 — Layer 3 → Layer 2
+## 4. 습득 프로세스 — Layer 3A/B/C → Layer 2
 
 ```
 confidence ≥ 0.7 AND accessed_count ≥ 5
   → 대상 Layer 2 디렉토리 결정 (태그 기반)
-  → 파일 이동: 03_External/ → 02_Derived/{category}/
-  → Frontmatter 갱신: layer 3→2
+  → 파일 이동: 03_External/{relational|structural|topical}/ → 02_Derived/{category}/
+  → Frontmatter 갱신: layer 3→2, sub_layer 필드 제거
   → backlink-index.json 재구축
 ```
 

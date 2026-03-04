@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-04
 tags: [link, backlink-index, relative-path, graph, edge-type]
 layer: design-area-1
 ---
@@ -40,6 +40,7 @@ layer: design-area-1
 | `PARENT_OF` | 디렉토리 계층 | Wu-Palmer |
 | `CHILD_OF` | 디렉토리 계층 | Wu-Palmer |
 | `SIBLING` | 동일 디렉토리 | Wu-Palmer |
+| `CROSS_LAYER` | L5-Boundary 경계 객체 연결 | SCS |
 
 ---
 
@@ -51,6 +52,13 @@ layer: design-area-1
 | Layer 2 ↔ Layer 2 | 허용 | 내재화 지식 간 양방향 |
 | Layer 2 → Layer 1 | 허용 | 파생→핵심 참조 |
 | Layer 3 → Layer 2,1 | 허용 | 외부→내부 참조 |
+| L3A ↔ L3B | 허용 | 인물 ↔ 조직 참조 (양방향) |
+| L3A ↔ L3C | 허용 | 인물 ↔ 주제 참조 (양방향) |
+| L3B ↔ L3C | 허용 | 조직 ↔ 주제 참조 (양방향) |
+| L3A/B/C → L5-Boundary | 허용 | 경계 객체 참조 |
+| L5-Boundary → L3A/B/C | 허용 | 경계 객체가 서브레이어 연결 |
+| L5-Buffer → 모든 레이어 | 허용 | 임시 참조 (승격 전) |
+| 모든 레이어 → L5-Buffer | 금지 | 임시 저장소 참조 불가 |
 | Layer 4 → Layer 1,2,3 | 허용 | 행동의 근거 추적 |
 | 상위 → Layer 4 | 금지 | 휘발성 노드 참조 불가 |
 

@@ -9,6 +9,8 @@
 - [§1 연구 배경 및 목적](./01-research-background.md) — 개인화된 AI 에이전트를 위한 하이브리드 지식 표상 체계의 필요성과 연구 목적
 - [§2 핵심 설계 원리: 트리-그래프 이중 구조](./02-dual-structure-design.md) — 디렉토리 트리(수렴적 분류)와 내부 링크(발산적 확장)를 결합한 이중 구조 원리
 - [§3 이론적 토대 및 보조 자료](./03-theoretical-foundation.md) — 제텔카스텐, 활성화 확산 모델, GraphRAG 세 가지 이론적 근거
-- [§4 지식의 층위 모델](./04-layered-knowledge-model.md) — 핵심 자아부터 행동 기억까지 4개 Layer로 구분한 지식 구조
+- [§4 지식의 층위 모델](./04-layered-knowledge-model.md) — 5개 Layer로 구분한 지식 구조 (L3 확장 및 L5 재정의 포함)
 - [§5 문서 작성 명세 및 제약 사항](./05-document-specification.md) — 100줄 제한, 상대 경로, YAML Frontmatter 등 문서 작성 규칙
 - [§6 기대 효과](./06-expected-outcomes.md) — 트리-그래프 아키텍처 적용 시 AI 에이전트의 맥락 추론 능력 향상 효과
+- [§7 Layer 3 방향성 확장 모델](./07-l3-directional-expansion.md) — 외부 지식의 3차원 분할 설계 (L3A 관계적/L3B 구조적/L3C 의미론적)
+- [§8 Layer 5 Buffer/Boundary 재정의](./08-l5-redefinition.md) — 미분류 임시 저장소(Buffer)와 경계 객체 계층(Boundary)의 이중 역할 모델

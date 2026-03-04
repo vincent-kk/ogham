@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-02-28
+updated: 2026-03-04
 tags: [metadata, strategy, phases, maencof-cache, synchronization]
 layer: design-area-2
 ---
@@ -21,6 +21,7 @@ AI 에이전트가 전체 저장소를 읽지 않고 관련 문서를 찾을 수
 ### Phase 1: 구조 메타데이터
 순수 파싱만으로 추출. 외부 의존성 없음.
 - 디렉토리 트리, Frontmatter, 링크 그래프, 기본 통계
+- `sub_layer` 필드 파싱: L3 서브레이어(A/B/C) 및 L5 역할(buffer/boundary) 식별 포함
 - 비용: 1,000 문서 기준 <5초, ~300KB
 
 ### Phase 2: 의미 메타데이터
@@ -57,6 +58,7 @@ LLM + 임베딩 의존. 선택적 확장.
   snapshot.json       # 파일 스냅샷
   communities.json    # 커뮤니티 (Phase 2+)
   stale-nodes.json    # 무효화된 노드 (Hook 추가)
+  sublayer-index.json # 서브레이어별 노드 인덱스 (L3A/B/C, L5-Buffer/Boundary)
 ```
 
 JSON 선택 근거: 외부 의존성 제로, 디버깅 가능, 수천 문서 규모 충분.
