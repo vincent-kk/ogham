@@ -1,6 +1,6 @@
 /**
  * @file server.ts
- * @description maencof MCP server — registers 17 tools + routing
+ * @description maencof MCP server — registers 18 tools + routing
  *
  * Tool list:
  * CRUD x5: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
@@ -10,6 +10,7 @@
  * Boundary x1: boundary_create
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
  * Dailynote x1: dailynote_read
+ * Cache x1: context_cache_manage
  */
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
@@ -24,6 +25,10 @@ import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
 import { handleBoundaryCreate } from './tools/boundary-create.js';
+import {
+  contextCacheManageInputSchema,
+  handleContextCacheManage,
+} from './tools/context-cache-manage.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
 import { handleClaudeMdRead } from './tools/claudemd-read.js';
 import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
@@ -140,7 +145,7 @@ function invalidateCache(): void {
 }
 
 /**
- * Creates the maencof MCP server and registers 17 tools.
+ * Creates the maencof MCP server and registers 18 tools.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
@@ -148,6 +153,7 @@ export function createServer(): McpServer {
   registerKgTools(server);
   registerClaudeMdTools(server);
   registerDailynoteTools(server);
+  registerCacheTools(server);
   return server;
 }
 
@@ -766,6 +772,29 @@ function registerDailynoteTools(server: McpServer): void {
       try {
         const vaultPath = getVaultPath();
         const result = handleDailynoteRead(vaultPath, args);
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
+      }
+    },
+  );
+}
+
+/**
+ * Registers 1 cache management tool: context_cache_manage
+ */
+function registerCacheTools(server: McpServer): void {
+  server.registerTool(
+    'context_cache_manage',
+    {
+      description:
+        'Manage the turn context injection cache. Pin/unpin nodes for persistent inclusion in turn context, force-refresh the cache, or list current cache state.',
+      inputSchema: z.object(contextCacheManageInputSchema),
+    },
+    async (args) => {
+      try {
+        const vaultPath = getVaultPath();
+        const result = await handleContextCacheManage(vaultPath, args);
         return toolResult(result);
       } catch (error) {
         return toolError(error);
