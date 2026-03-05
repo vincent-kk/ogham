@@ -36,7 +36,7 @@ claude --plugin-dir ./packages/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (17 knowledge tools)
+- `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
 - `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 ---
