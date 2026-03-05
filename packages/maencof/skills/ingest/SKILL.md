@@ -71,13 +71,14 @@ maencof_create({
 Search for existing documents related to the created document via `kg_search`
 and suggest adding links.
 
-## Available MCP Tools
+## Available Tools
 
-| Tool | Purpose |
-|------|---------|
-| `maencof_create` | Create document |
-| `kg_search` | Search for related documents |
-| `maencof_update` | Add links |
+| Tool | Type | Purpose |
+|------|------|---------|
+| `maencof_create` | MCP | Create document |
+| `kg_search` | MCP | Search for related documents |
+| `maencof_update` | MCP | Add links |
+| `WebFetch` | Native | Fetch web page content from URL |
 
 ## Error Handling
 

@@ -65,7 +65,9 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 |------|---------|
 | `maencof_delete` | Delete vault document (document mode) |
 | `maencof_read` | Preview document before deletion (document mode) |
+| `kg_search` | Keyword search to identify deletion target (document mode) |
 | `kg_navigate` | Check inbound links / backlink warnings (document mode) |
+| `maencof_move` | Promote buffer items to target layer (buffer-cleanup mode) |
 | `claudemd_read` | Read CLAUDE.md maencof section (claudemd mode) |
 | `claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode) |
 

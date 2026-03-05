@@ -160,9 +160,10 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 - git이 사용 불가능한 경우: changelog 파일만 기록하고 commit은 건너뛴다
 - 파일 쓰기 실패 시: 에러 메시지를 표시하고 마커 파일을 생성하지 않는다
 
-## Available MCP Tools
+## Available Tools
 
-| Tool | Purpose |
-|------|---------|
-| `maencof_create` | Create new vault document (alternative to direct file write) |
-| `maencof_read` | Read existing vault document |
+| Tool | Type | Purpose |
+|------|------|---------|
+| `maencof_create` | MCP | Create new vault document (alternative to direct file write) |
+| `maencof_read` | MCP | Read existing vault document |
+| `Bash` | Native | Run git commands (status, add, commit) |
