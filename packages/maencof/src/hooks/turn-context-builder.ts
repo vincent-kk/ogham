@@ -83,9 +83,7 @@ function readCompanionName(cwd: string): string | null {
  * Format layer counts as "L1:N,L2:N,L3:N,L4:N,L5:N".
  */
 function formatLayerCounts(layerCounts: Record<number, number>): string {
-  return [1, 2, 3, 4, 5]
-    .map((l) => `L${l}:${layerCounts[l] ?? 0}`)
-    .join(',');
+  return [1, 2, 3, 4, 5].map((l) => `L${l}:${layerCounts[l] ?? 0}`).join(',');
 }
 
 /**

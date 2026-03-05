@@ -15,8 +15,8 @@ import {
   readTurnContext,
   removeSessionFiles,
   sessionIdHash,
-  writePromptContext,
   writePinnedNodes,
+  writePromptContext,
   writeTurnContext,
 } from '../cache-manager.js';
 import type { PinnedNode } from '../cache-manager.js';
@@ -24,7 +24,10 @@ import type { PinnedNode } from '../cache-manager.js';
 let testDir: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-cache-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  testDir = join(
+    tmpdir(),
+    `maencof-cache-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(testDir, { recursive: true });
   vi.stubEnv('CLAUDE_CONFIG_DIR', testDir);
 });
@@ -126,7 +129,9 @@ describe('removeSessionFiles', () => {
     writePromptContext(cwd, 'ctx', 'sess-rm');
     // Create vault-scoped files
     writeTurnContext(cwd, 'turn');
-    writePinnedNodes(cwd, [{ id: 'x', title: 'X', layer: 1, pinnedAt: '2026-01-01T00:00:00Z' }]);
+    writePinnedNodes(cwd, [
+      { id: 'x', title: 'X', layer: 1, pinnedAt: '2026-01-01T00:00:00Z' },
+    ]);
 
     // Remove session files
     removeSessionFiles('sess-rm', cwd);
@@ -152,7 +157,9 @@ describe('pruneOldSessions', () => {
     const cacheDir = getCacheDir(cwd);
     // Manually backdate first 5 markers to >24h ago
     const files = require('node:fs').readdirSync(cacheDir) as string[];
-    const sessionFiles = files.filter((f: string) => f.startsWith('session-context-'));
+    const sessionFiles = files.filter((f: string) =>
+      f.startsWith('session-context-'),
+    );
     const oldTime = Date.now() - 25 * 60 * 60 * 1000; // 25h ago
 
     for (let i = 0; i < Math.min(5, sessionFiles.length); i++) {
@@ -164,7 +171,9 @@ describe('pruneOldSessions', () => {
     markSessionInjected('trigger-prune', cwd);
 
     // Old markers should be removed
-    const remaining = require('node:fs').readdirSync(cacheDir).filter((f: string) => f.startsWith('session-context-')) as string[];
+    const remaining = require('node:fs')
+      .readdirSync(cacheDir)
+      .filter((f: string) => f.startsWith('session-context-')) as string[];
     expect(remaining.length).toBeLessThanOrEqual(10);
   });
 });

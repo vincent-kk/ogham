@@ -546,7 +546,9 @@ describe('handleReviewManage – content-hash', () => {
     });
     expect(result.sessionHash).toBeDefined();
     expect((result.sessionHash as string).length).toBe(64);
-    expect(Object.keys(result.fileHashes as Record<string, string>)).toHaveLength(0);
+    expect(
+      Object.keys(result.fileHashes as Record<string, string>),
+    ).toHaveLength(0);
   });
 
   it('throws when baseRef is missing', async () => {
@@ -633,7 +635,12 @@ describe('handleReviewManage – check-cache', () => {
       baseRef: 'main',
     });
     // Create review-report.md to simulate completed review
-    const reviewDir = path.join(tmpDir, '.filid', 'review', 'feature--cache-test');
+    const reviewDir = path.join(
+      tmpDir,
+      '.filid',
+      'review',
+      'feature--cache-test',
+    );
     await fs.writeFile(path.join(reviewDir, 'review-report.md'), '# Report');
 
     const result = await handleReviewManage({
@@ -675,7 +682,12 @@ describe('handleReviewManage – check-cache', () => {
       branchName: 'feature/cache-test',
       baseRef: 'main',
     });
-    const reviewDir = path.join(tmpDir, '.filid', 'review', 'feature--cache-test');
+    const reviewDir = path.join(
+      tmpDir,
+      '.filid',
+      'review',
+      'feature--cache-test',
+    );
     await fs.writeFile(path.join(reviewDir, 'review-report.md'), '# Report');
 
     // Modify a file and commit

@@ -2,9 +2,13 @@
  * @file changelog-gate.test.ts
  * @description runChangelogGate 유닛 테스트 — Stop hook
  */
+import { execSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { runChangelogGate } from '../../hooks/changelog-gate.js';
+import { isMaencofVault, metaPath } from '../../hooks/shared.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
@@ -21,10 +25,6 @@ vi.mock('../../hooks/shared.js', () => ({
   isMaencofVault: vi.fn(),
   metaPath: vi.fn(),
 }));
-
-import { existsSync, readFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { isMaencofVault, metaPath } from '../../hooks/shared.js';
 
 const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
@@ -79,7 +79,10 @@ describe('runChangelogGate', () => {
 
     // (a) 변경 없음 → 통과
     mockExecSync.mockReturnValue(Buffer.from(''));
-    const resultNoChange = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+    const resultNoChange = runChangelogGate({
+      cwd: CWD,
+      session_id: SESSION_ID,
+    });
     expect(resultNoChange).toEqual({ continue: true });
 
     // (b) 변경 있음 → 차단

@@ -11,8 +11,14 @@ let vaultDir: string;
 let cacheTestDir: string;
 
 beforeEach(() => {
-  vaultDir = join(tmpdir(), `maencof-cu-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  cacheTestDir = join(tmpdir(), `maencof-cu-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  vaultDir = join(
+    tmpdir(),
+    `maencof-cu-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  cacheTestDir = join(
+    tmpdir(),
+    `maencof-cu-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(join(vaultDir, '.maencof'), { recursive: true });
   mkdirSync(join(vaultDir, '.maencof-meta'), { recursive: true });
   vi.stubEnv('CLAUDE_CONFIG_DIR', cacheTestDir);
@@ -40,7 +46,10 @@ function writeStaleNodes(paths: string[]): void {
 
 describe('runCacheUpdater', () => {
   it('skips non-vault directories', () => {
-    const result = runCacheUpdater({ cwd: '/nonexistent', tool_name: 'maencof_create' });
+    const result = runCacheUpdater({
+      cwd: '/nonexistent',
+      tool_name: 'maencof_create',
+    });
     expect(result.continue).toBe(true);
   });
 

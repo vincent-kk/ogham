@@ -6,14 +6,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { writePinnedNodes } from '../cache-manager.js';
 import type { PinnedNode } from '../cache-manager.js';
-import { buildTurnContext, readIndexMetadata, readStaleCount } from '../turn-context-builder.js';
+import {
+  buildTurnContext,
+  readIndexMetadata,
+  readStaleCount,
+} from '../turn-context-builder.js';
 
 let vaultDir: string;
 let cacheTestDir: string;
 
 beforeEach(() => {
-  vaultDir = join(tmpdir(), `maencof-tc-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  cacheTestDir = join(tmpdir(), `maencof-tc-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  vaultDir = join(
+    tmpdir(),
+    `maencof-tc-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  cacheTestDir = join(
+    tmpdir(),
+    `maencof-tc-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(join(vaultDir, '.maencof'), { recursive: true });
   mkdirSync(join(vaultDir, '.maencof-meta'), { recursive: true });
   vi.stubEnv('CLAUDE_CONFIG_DIR', cacheTestDir);
@@ -56,8 +66,11 @@ describe('readIndexMetadata', () => {
 
   it('counts nodes by layer', () => {
     writeIndex([
-      { layer: 1 }, { layer: 1 },
-      { layer: 3 }, { layer: 3 }, { layer: 3 },
+      { layer: 1 },
+      { layer: 1 },
+      { layer: 3 },
+      { layer: 3 },
+      { layer: 3 },
       { layer: 5 },
     ]);
     const result = readIndexMetadata(vaultDir);
@@ -105,8 +118,18 @@ describe('buildTurnContext', () => {
 
   it('includes pinned nodes as comma-separated titles', () => {
     const nodes: PinnedNode[] = [
-      { id: 'n1', title: 'Architecture', layer: 1, pinnedAt: '2026-01-01T00:00:00Z' },
-      { id: 'n2', title: 'Interview Prep', layer: 3, pinnedAt: '2026-01-02T00:00:00Z' },
+      {
+        id: 'n1',
+        title: 'Architecture',
+        layer: 1,
+        pinnedAt: '2026-01-01T00:00:00Z',
+      },
+      {
+        id: 'n2',
+        title: 'Interview Prep',
+        layer: 3,
+        pinnedAt: '2026-01-02T00:00:00Z',
+      },
     ];
     writePinnedNodes(vaultDir, nodes);
     const result = buildTurnContext(vaultDir);

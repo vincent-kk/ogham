@@ -24,14 +24,8 @@ export const contextCacheManageInputSchema = {
     .string()
     .optional()
     .describe('Vault root path (defaults to MAENCOF_VAULT_PATH or CWD)'),
-  node_id: z
-    .string()
-    .optional()
-    .describe('Node ID (required for pin/unpin)'),
-  node_title: z
-    .string()
-    .optional()
-    .describe('Node title (required for pin)'),
+  node_id: z.string().optional().describe('Node ID (required for pin/unpin)'),
+  node_title: z.string().optional().describe('Node title (required for pin)'),
   node_layer: z
     .number()
     .optional()

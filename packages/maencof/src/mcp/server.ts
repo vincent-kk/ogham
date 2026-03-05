@@ -25,13 +25,13 @@ import { VERSION } from '../version.js';
 
 import { toolError, toolResult } from './shared.js';
 import { handleBoundaryCreate } from './tools/boundary-create.js';
+import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
+import { handleClaudeMdRead } from './tools/claudemd-read.js';
+import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
 import {
   contextCacheManageInputSchema,
   handleContextCacheManage,
 } from './tools/context-cache-manage.js';
-import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
-import { handleClaudeMdRead } from './tools/claudemd-read.js';
-import { handleClaudeMdRemove } from './tools/claudemd-remove.js';
 import { handleDailynoteRead } from './tools/dailynote-read.js';
 import { handleKgBuild } from './tools/kg-build.js';
 import { handleKgContext } from './tools/kg-context.js';

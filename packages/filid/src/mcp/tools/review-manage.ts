@@ -105,7 +105,8 @@ async function computeContentHash(
     .sort()
     .map((p) => `${p}:${fileHashes[p]}`)
     .join('\n');
-  const hashInput = baseCommit + '\n' + (sortedEntries ? sortedEntries + '\n' : '');
+  const hashInput =
+    baseCommit + '\n' + (sortedEntries ? sortedEntries + '\n' : '');
   const sessionHash = createHash('sha256').update(hashInput).digest('hex');
 
   return { sessionHash, fileHashes };
@@ -378,7 +379,9 @@ export async function handleReviewManage(
         '--name-only',
         `${baseCommit}..HEAD`,
       ]);
-      const changedFiles = diffOutput ? diffOutput.split('\n').filter(Boolean) : [];
+      const changedFiles = diffOutput
+        ? diffOutput.split('\n').filter(Boolean)
+        : [];
 
       const { sessionHash, fileHashes } = await computeContentHash(
         input.projectRoot,
@@ -438,7 +441,9 @@ export async function handleReviewManage(
         '--name-only',
         `${baseCommit}..HEAD`,
       ]);
-      const changedFiles = diffOutput ? diffOutput.split('\n').filter(Boolean) : [];
+      const changedFiles = diffOutput
+        ? diffOutput.split('\n').filter(Boolean)
+        : [];
       const { sessionHash: currentHash } = await computeContentHash(
         input.projectRoot,
         baseCommit,
@@ -515,8 +520,7 @@ export async function handleReviewManage(
         cachedHash,
         existingReportPath: reportPath,
         existingFixRequestsPath: fixRequestsExists ? fixRequestsPath : null,
-        message:
-          'Review cache hit — content unchanged since last review.',
+        message: 'Review cache hit — content unchanged since last review.',
       };
       return result as unknown as Record<string, unknown>;
     }

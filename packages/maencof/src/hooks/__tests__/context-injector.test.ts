@@ -11,8 +11,14 @@ let vaultDir: string;
 let cacheTestDir: string;
 
 beforeEach(() => {
-  vaultDir = join(tmpdir(), `maencof-ci-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-  cacheTestDir = join(tmpdir(), `maencof-ci-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  vaultDir = join(
+    tmpdir(),
+    `maencof-ci-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  cacheTestDir = join(
+    tmpdir(),
+    `maencof-ci-cache-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   // Create vault structure
   mkdirSync(join(vaultDir, '.maencof'), { recursive: true });
   mkdirSync(join(vaultDir, '.maencof-meta'), { recursive: true });
@@ -33,7 +39,10 @@ function writeIndex(nodes: Array<{ layer?: number; domain?: string }>): void {
 
 describe('injectContext', () => {
   it('returns { continue: true } with no additionalContext for non-vault', () => {
-    const result = injectContext({ cwd: '/nonexistent/path', session_id: 's1' });
+    const result = injectContext({
+      cwd: '/nonexistent/path',
+      session_id: 's1',
+    });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
