@@ -399,7 +399,9 @@ export function createServer(): McpServer {
         "action='ensure-dir': 리뷰 디렉토리 생성(.filid/review/<normalized>). " +
         "action='checkpoint': 리뷰 진행 단계(A/B/C/DONE) 감지. " +
         "action='elect-committee': 변경 복잡도 기반 위원회 선출. " +
-        "action='cleanup': 리뷰 디렉토리 삭제.",
+        "action='cleanup': 리뷰 디렉토리 삭제. " +
+        "action='content-hash': 변경 파일의 content hash를 계산하고 저장. " +
+        "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단.",
       inputSchema: z.object({
         action: z
           .enum([
@@ -408,13 +410,21 @@ export function createServer(): McpServer {
             'checkpoint',
             'elect-committee',
             'cleanup',
+            'content-hash',
+            'check-cache',
           ])
           .describe('수행할 동작'),
         projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),
         branchName: z
           .string()
           .describe(
-            'normalize-branch / ensure-dir / checkpoint / cleanup 액션에서 사용할 브랜치명',
+            'normalize-branch / ensure-dir / checkpoint / cleanup / content-hash / check-cache 액션에서 사용할 브랜치명',
+          )
+          .optional(),
+        baseRef: z
+          .string()
+          .describe(
+            'content-hash / check-cache 액션에서 사용할 비교 기준 ref (e.g., main, origin/main)',
           )
           .optional(),
         changedFilesCount: z

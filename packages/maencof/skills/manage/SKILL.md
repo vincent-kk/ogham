@@ -83,6 +83,8 @@ Generate a new custom skill/agent template:
 - Skill: create `{CWD}/.claude/skills/<name>/SKILL.md` (with default template)
 - Agent: create `{CWD}/.claude/agents/<name>.md` (with default template)
 
+> **vs `/maencof:craft-skill` and `/maencof:craft-agent`**: `manage create` generates a minimal template for quick scaffolding. Use `/maencof:craft-skill` or `/maencof:craft-agent` for a full guided workflow with progressive disclosure, complexity tuning, and MCP integration.
+
 ## Workflow
 
 ### report mode workflow

@@ -66,6 +66,7 @@ After user confirmation, execute AutoFixAction:
 | `maencof_read` | Frontmatter validation (D4, D6) |
 | `maencof_update` | Auto-fix Frontmatter (D4, D6) |
 | `kg_navigate` | Verify link validity, detect broken links (D3) |
+| `kg_search` | Tag-based search for duplicate detection (D5) |
 
 ## Options
 

@@ -100,7 +100,8 @@ export function runChangelogGate(
         const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
         const startedAt = new Date(lock.startedAt).getTime();
         const ttlMs = (lock.ttlMinutes ?? 30) * 60 * 1000;
-        const sessionMatch = !lock.sessionId || lock.sessionId === input.session_id;
+        const sessionMatch =
+          !lock.sessionId || lock.sessionId === input.session_id;
         if (Date.now() - startedAt < ttlMs && sessionMatch) {
           return { continue: true };
         }

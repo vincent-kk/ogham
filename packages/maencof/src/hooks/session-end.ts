@@ -15,6 +15,7 @@ import { join } from 'node:path';
 
 import { appendDailynoteEntry, formatTime } from '../core/dailynote-writer.js';
 
+import { removeSessionFiles } from './cache-manager.js';
 import { isMaencofVault, maencofPath, metaPath } from './shared.js';
 
 export interface SessionEndInput {
@@ -57,6 +58,16 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     writeFileSync(filePath, summary, 'utf-8');
   } catch {
     // Ignore write failure (must not block session exit)
+  }
+
+  // Clean up context injection cache (session-specific files only)
+  try {
+    const sessionId = input.session_id ?? '';
+    if (sessionId) {
+      removeSessionFiles(sessionId, cwd);
+    }
+  } catch {
+    // Silent — cache cleanup failure must not block session end
   }
 
   // Clean up old session files

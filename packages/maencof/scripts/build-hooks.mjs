@@ -23,10 +23,12 @@ const hookEntries = [
   'vault-redirector',
   'index-invalidator',
   'dailynote-recorder',
+  'cache-updater',
   'session-end',
   'lifecycle-dispatcher',
   'vault-committer',
   'insight-injector',
+  'context-injector',
   'changelog-gate',
 ];
 

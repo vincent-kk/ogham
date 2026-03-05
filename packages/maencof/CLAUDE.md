@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/maencof
 
-Personal knowledge space management plugin (v0.0.7). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
+Personal knowledge space management plugin (v0.0.9). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
 
 ## Commands
 
@@ -15,7 +15,7 @@ yarn format && yarn lint
 
 **5-Layer Model v2**: `01_Core/` (identity, read-only) | `02_Derived/` (internalized) | `03_External/` (`relational/` L3A, `structural/` L3B, `topical/` L3C) | `04_Action/` (volatile task memory) | `05_Context/` (`buffer/` temp inbox, `boundary/` cross-layer bridge)
 
-**MCP Tools (17)**: `maencof_create/read/update/delete/move`, `maencof_capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`
+**MCP Tools (18)**: `maencof_create/read/update/delete/move`, `maencof_capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`, `context_cache_manage`
 
 **Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
 
