@@ -41,6 +41,12 @@ and a state machine.
 
 If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)` first, then restart from Phase A (or Phase B if `--no-structure-check`).
 
+5. Cache check (skip when `--force` is set or when no prior review exists):
+   Call: `review_manage(action: "check-cache", projectRoot: <project_root>, branchName: <branch>, baseRef: <base_ref>)`
+   Follow the `action` field in the response:
+   - `"skip-to-existing-results"`: Read and output existing `review-report.md` and `fix-requests.md` from the paths in the response. Done.
+   - `"proceed-full-review"`: Continue to Step 2 as normal.
+
 ### Step 2 — Phase A + B: Parallel Delegation
 
 > Phase A and Phase B are independent and run **in parallel** as separate Task
@@ -103,6 +109,14 @@ The chairperson executes Phase D directly:
    - `.filid/review/<branch>/fix-requests.md` — actionable fix items (includes
      CRITICAL/HIGH structure violations as FIX-XXX items)
 
+### Step 4.5 — Persist Content Hash
+
+After Phase D outputs are written, persist the content hash for future cache lookups:
+
+Call: `review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>, baseRef: <base_ref>)`
+
+This writes `content-hash.json` alongside the review outputs for future cache checks.
+
 ### Step 5 — PR Comment (Optional)
 
 When `--scope=pr`: check `gh auth status` (Bash), if authenticated post
@@ -117,6 +131,8 @@ When `--scope=pr`: check `gh auth status` (Bash), if authenticated post
 | `review_manage`  | `elect-committee`  | Deterministic committee election (Phase B)       |
 | `review_manage`  | `checkpoint`       | Check existing review progress for resume        |
 | `review_manage`  | `cleanup`          | Delete review session files (--force or on pass) |
+| `review_manage`  | `content-hash`     | Compute and persist content hash for cache       |
+| `review_manage`  | `check-cache`      | Check if review can be skipped (cache hit)       |
 
 ## Options
 

@@ -1,3 +1,5 @@
+import { execSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -438,5 +440,269 @@ describe('handleReviewManage – cleanup', () => {
     await expect(
       handleReviewManage({ action: 'cleanup', projectRoot: tmpDir }),
     ).rejects.toThrow('branchName');
+  });
+});
+
+// ─── content-hash ───────────────────────────────────────────────────────────
+
+describe('handleReviewManage – content-hash', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await makeTmp();
+    // Init a git repo with an initial commit on main
+    const git = (args: string) =>
+      execSync(`git ${args}`, { cwd: tmpDir, stdio: 'pipe' }).toString().trim();
+    git('init -b main');
+    git('config user.email "test@test.com"');
+    git('config user.name "Test"');
+    writeFileSync(path.join(tmpDir, 'file-a.ts'), 'const a = 1;');
+    writeFileSync(path.join(tmpDir, 'file-b.ts'), 'const b = 2;');
+    git('add .');
+    git('commit -m "initial"');
+    // Create feature branch with changes
+    git('checkout -b feature/test');
+    writeFileSync(path.join(tmpDir, 'file-a.ts'), 'const a = 42;');
+    writeFileSync(path.join(tmpDir, 'file-c.ts'), 'const c = 3;');
+    git('add .');
+    git('commit -m "feature changes"');
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  it('computes hash for a 2-file diff in tmp git repo', async () => {
+    const result = await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+      baseRef: 'main',
+    });
+    expect(result.sessionHash).toBeDefined();
+    expect(typeof result.sessionHash).toBe('string');
+    expect((result.sessionHash as string).length).toBe(64); // SHA-256 hex
+    expect(result.baseCommit).toBeDefined();
+    expect(result.fileHashes).toBeDefined();
+    const hashes = result.fileHashes as Record<string, string>;
+    expect(Object.keys(hashes)).toContain('file-a.ts');
+    expect(Object.keys(hashes)).toContain('file-c.ts');
+  });
+
+  it('includes baseCommit SHA in output', async () => {
+    const result = await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+      baseRef: 'main',
+    });
+    expect(typeof result.baseCommit).toBe('string');
+    expect((result.baseCommit as string).length).toBe(40); // Full SHA
+  });
+
+  it('writes content-hash.json to correct review dir', async () => {
+    await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+      baseRef: 'main',
+    });
+    const hashFile = path.join(
+      tmpDir,
+      '.filid',
+      'review',
+      'feature--test',
+      'content-hash.json',
+    );
+    const stat = await fs.stat(hashFile);
+    expect(stat.isFile()).toBe(true);
+    const content = JSON.parse(await fs.readFile(hashFile, 'utf-8'));
+    expect(content.sessionHash).toBeDefined();
+  });
+
+  it('deleted file uses DELETED sentinel', async () => {
+    const git = (args: string) =>
+      execSync(`git ${args}`, { cwd: tmpDir, stdio: 'pipe' }).toString().trim();
+    git('rm file-b.ts');
+    git('commit -m "delete file-b"');
+
+    const result = await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+      baseRef: 'main',
+    });
+    const hashes = result.fileHashes as Record<string, string>;
+    expect(hashes['file-b.ts']).toBe('DELETED');
+  });
+
+  it('empty diff produces valid hash', async () => {
+    // Point baseRef to HEAD so diff is empty
+    const result = await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/test',
+      baseRef: 'HEAD',
+    });
+    expect(result.sessionHash).toBeDefined();
+    expect((result.sessionHash as string).length).toBe(64);
+    expect(Object.keys(result.fileHashes as Record<string, string>)).toHaveLength(0);
+  });
+
+  it('throws when baseRef is missing', async () => {
+    await expect(
+      handleReviewManage({
+        action: 'content-hash',
+        projectRoot: tmpDir,
+        branchName: 'feature/test',
+      }),
+    ).rejects.toThrow('baseRef');
+  });
+
+  it('throws when branchName is missing', async () => {
+    await expect(
+      handleReviewManage({
+        action: 'content-hash',
+        projectRoot: tmpDir,
+        baseRef: 'main',
+      }),
+    ).rejects.toThrow('branchName');
+  });
+
+  it('throws on orphan branch (merge-base failure)', async () => {
+    const git = (args: string) =>
+      execSync(`git ${args}`, { cwd: tmpDir, stdio: 'pipe' }).toString().trim();
+    git('checkout --orphan orphan-branch');
+    writeFileSync(path.join(tmpDir, 'orphan.ts'), 'orphan');
+    git('add .');
+    git('commit -m "orphan commit"');
+
+    await expect(
+      handleReviewManage({
+        action: 'content-hash',
+        projectRoot: tmpDir,
+        branchName: 'orphan-branch',
+        baseRef: 'main',
+      }),
+    ).rejects.toThrow('merge-base');
+  });
+});
+
+// ─── check-cache ────────────────────────────────────────────────────────────
+
+describe('handleReviewManage – check-cache', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = await makeTmp();
+    const git = (args: string) =>
+      execSync(`git ${args}`, { cwd: tmpDir, stdio: 'pipe' }).toString().trim();
+    git('init -b main');
+    git('config user.email "test@test.com"');
+    git('config user.name "Test"');
+    writeFileSync(path.join(tmpDir, 'file-a.ts'), 'const a = 1;');
+    git('add .');
+    git('commit -m "initial"');
+    git('checkout -b feature/cache-test');
+    writeFileSync(path.join(tmpDir, 'file-a.ts'), 'const a = 99;');
+    git('add .');
+    git('commit -m "change"');
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  });
+
+  it('returns cache miss when no content-hash.json exists', async () => {
+    const result = await handleReviewManage({
+      action: 'check-cache',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    expect(result.cacheHit).toBe(false);
+    expect(result.action).toBe('proceed-full-review');
+  });
+
+  it('returns cache hit when hash matches AND review-report.md exists', async () => {
+    // First, create content hash
+    await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    // Create review-report.md to simulate completed review
+    const reviewDir = path.join(tmpDir, '.filid', 'review', 'feature--cache-test');
+    await fs.writeFile(path.join(reviewDir, 'review-report.md'), '# Report');
+
+    const result = await handleReviewManage({
+      action: 'check-cache',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    expect(result.cacheHit).toBe(true);
+    expect(result.action).toBe('skip-to-existing-results');
+    expect(result.existingReportPath).toContain('review-report.md');
+  });
+
+  it('returns cache miss when hash matches but review-report.md missing', async () => {
+    await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    // No review-report.md created
+
+    const result = await handleReviewManage({
+      action: 'check-cache',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    expect(result.cacheHit).toBe(false);
+    expect(result.action).toBe('proceed-full-review');
+    expect(result.message).toContain('incomplete');
+  });
+
+  it('returns cache miss when content has changed', async () => {
+    // Create content hash
+    await handleReviewManage({
+      action: 'content-hash',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    const reviewDir = path.join(tmpDir, '.filid', 'review', 'feature--cache-test');
+    await fs.writeFile(path.join(reviewDir, 'review-report.md'), '# Report');
+
+    // Modify a file and commit
+    const git = (args: string) =>
+      execSync(`git ${args}`, { cwd: tmpDir, stdio: 'pipe' }).toString().trim();
+    writeFileSync(path.join(tmpDir, 'file-a.ts'), 'const a = 999;');
+    git('add .');
+    git('commit -m "another change"');
+
+    const result = await handleReviewManage({
+      action: 'check-cache',
+      projectRoot: tmpDir,
+      branchName: 'feature/cache-test',
+      baseRef: 'main',
+    });
+    expect(result.cacheHit).toBe(false);
+    expect(result.action).toBe('proceed-full-review');
+    expect(result.message).toContain('changed');
+  });
+
+  it('throws when baseRef is missing', async () => {
+    await expect(
+      handleReviewManage({
+        action: 'check-cache',
+        projectRoot: tmpDir,
+        branchName: 'feature/cache-test',
+      }),
+    ).rejects.toThrow('baseRef');
   });
 });
