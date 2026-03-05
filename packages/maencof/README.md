@@ -88,12 +88,12 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 
 ```
 /maencof:diagnose
-/maencof:doctor
-/maencof:doctor --fix
+/maencof:checkup
+/maencof:checkup --fix
 ```
 
 - **`diagnose`** — Lightweight status check (index freshness, basic stats).
-- **`doctor`** — 6 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues.
+- **`checkup`** — 6 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues.
 
 ### Index Management
 
@@ -191,7 +191,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:build`       | Index    | Build index (auto full/incremental)            |
 | `/maencof:rebuild`     | Index    | Force full re-index                            |
 | `/maencof:diagnose`    | Health   | Lightweight status check                       |
-| `/maencof:doctor`      | Health   | 6 diagnostics + auto-fix                       |
+| `/maencof:checkup`     | Health   | 6 diagnostics + auto-fix                       |
 | `/maencof:cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
 | `/maencof:ingest`      | Advanced | Import from URL, GitHub, or text               |
 | `/maencof:connect`     | Advanced | Register external data sources                 |
@@ -217,13 +217,13 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 Core rules enforced by maencof:
 
-| Rule              | Threshold                                        | Enforcement       |
-| ----------------- | ------------------------------------------------ | ----------------- |
-| L1 protection     | Core Identity documents are read-only by default | Hook (auto-block) |
-| Frontmatter       | YAML frontmatter required on all documents       | MCP validation    |
-| Naming convention | `kebab-case.md`, layer prefix matching directory | MCP validation    |
-| Layer structure   | 5-layer directory hierarchy must be maintained   | MCP + agent       |
-| Link integrity    | No broken links, no orphan documents             | Doctor diagnostic |
+| Rule              | Threshold                                        | Enforcement        |
+| ----------------- | ------------------------------------------------ | ------------------ |
+| L1 protection     | Core Identity documents are read-only by default | Hook (auto-block)  |
+| Frontmatter       | YAML frontmatter required on all documents       | MCP validation     |
+| Naming convention | `kebab-case.md`, layer prefix matching directory | MCP validation     |
+| Layer structure   | 5-layer directory hierarchy must be maintained   | MCP + agent        |
+| Link integrity    | No broken links, no orphan documents             | Checkup diagnostic |
 
 ---
 

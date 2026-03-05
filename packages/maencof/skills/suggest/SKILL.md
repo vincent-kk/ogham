@@ -21,7 +21,7 @@ Helps fill gaps in the knowledge graph by discovering potential links.
 - Find related documents to link after creating a new document
 - Expand an existing document's connections
 - Exploratory queries like "what documents are related to this?"
-- Resolve orphan nodes detected by `/maencof:doctor`
+- Resolve orphan nodes detected by `/maencof:checkup`
 
 ## Prerequisites
 

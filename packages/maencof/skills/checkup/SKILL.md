@@ -1,18 +1,18 @@
 ---
-name: doctor
+name: checkup
 user_invocable: true
 description: 6 diagnostics + report generation + auto-fix suggestions — knowledge vault health check
 version: 1.0.0
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: doctor
+orchestrator: checkup
 plugin: maencof
 ---
 
-# doctor — Knowledge Vault Diagnosis
+# checkup — Knowledge Vault Diagnosis
 
 Checks knowledge vault health across 6 diagnostic items and suggests auto-fixes.
-Delegates detailed analysis to the doctor agent.
+Delegates detailed analysis to the checkup agent.
 
 ## When to Use This Skill
 
@@ -28,12 +28,12 @@ Delegates detailed analysis to the doctor agent.
 ## Agent Collaboration
 
 ```
-[doctor skill] → [doctor agent] → DiagnosticResult
+[checkup skill] → [checkup agent] → DiagnosticResult
                                  → classify auto-fixable items
                                  → user confirmation → run auto-fix
 ```
 
-The doctor skill delegates to the doctor agent for 6 diagnostics:
+The checkup skill delegates to the checkup agent for 6 diagnostics:
 orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter.
 
 > See **reference.md** for diagnostic item details, severity levels, and auto-fix rules.
@@ -42,7 +42,7 @@ orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontm
 
 ### Step 1 — Run Diagnostics
 
-Delegate to the doctor agent. The agent runs `kg_status`, `kg_navigate`, `maencof_read` across all vault documents to perform 6 diagnostic checks.
+Delegate to the checkup agent. The agent runs `kg_status`, `kg_navigate`, `maencof_read` across all vault documents to perform 6 diagnostic checks.
 
 ### Step 2 — Generate Report
 
@@ -71,7 +71,7 @@ After user confirmation, execute AutoFixAction:
 ## Options
 
 ```
-/maencof:doctor [--fix] [--check <item>]
+/maencof:checkup [--fix] [--check <item>]
 ```
 
 | Option | Default | Description |

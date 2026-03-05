@@ -88,12 +88,12 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 ```
 /maencof:diagnose
-/maencof:doctor
-/maencof:doctor --fix
+/maencof:checkup
+/maencof:checkup --fix
 ```
 
 - **`diagnose`** — 가벼운 상태 확인 (인덱스 신선도, 기본 통계).
-- **`doctor`** — 6개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제.
+- **`checkup`** — 6개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제.
 
 ### 인덱스 관리
 
@@ -191,7 +191,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental)        |
 | `/maencof:rebuild`     | 인덱스   | 강제 전체 재인덱스                         |
 | `/maencof:diagnose`    | 건강     | 가벼운 상태 확인                           |
-| `/maencof:doctor`      | 건강     | 6개 진단 + 자동 수정                       |
+| `/maencof:checkup`     | 건강     | 6개 진단 + 자동 수정                       |
 | `/maencof:cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리          |
 | `/maencof:ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기           |
 | `/maencof:connect`     | 고급     | 외부 데이터 소스 등록                      |
@@ -223,7 +223,7 @@ maencof이 시행하는 주요 규칙입니다:
 | Frontmatter 필수 | 모든 문서에 YAML frontmatter 필수               | MCP 검증       |
 | 네이밍 규칙      | `kebab-case.md`, Layer 접두사가 디렉토리와 일치 | MCP 검증       |
 | Layer 구조       | 5-Layer 디렉토리 계층 유지 필수                 | MCP + 에이전트 |
-| 링크 무결성      | 깨진 링크, 고아 문서 금지                       | Doctor 진단    |
+| 링크 무결성      | 깨진 링크, 고아 문서 금지                       | Checkup 진단   |
 
 ---
 

@@ -33,7 +33,7 @@ Scan, diagnose, and manage the entire Claude Code project environment from a sin
 | Execution | `{CWD}/.claude/skills/` | Read → `/maencof:craft-skill` |
 | Execution | `{CWD}/.claude/agents/` | Read → `/maencof:craft-agent` |
 | Execution | `{CWD}/.maencof-meta/lifecycle.json` | Read → `/maencof:lifecycle` |
-| Execution | `{CWD}/.maencof-meta/` (other) | Read → `/maencof:doctor` |
+| Execution | `{CWD}/.maencof-meta/` (other) | Read → `/maencof:checkup` |
 | Execution | `{CWD}/.claude/settings.local.json` | **Never** |
 | Plugin | `packages/maencof/` | **Never** |
 

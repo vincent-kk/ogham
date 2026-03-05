@@ -8,7 +8,7 @@ import type { AutonomyLevel, Layer } from './common.js';
 export type AgentRole =
   | 'memory-organizer'
   | 'identity-guardian'
-  | 'doctor'
+  | 'checkup'
   | 'knowledge-connector';
 
 /** Layer별 허용 작업 */

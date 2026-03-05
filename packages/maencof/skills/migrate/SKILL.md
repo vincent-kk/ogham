@@ -109,7 +109,7 @@ Display migration results:
 - Operations executed successfully
 - Any errors encountered
 - Rollback instructions if needed
-- Recommendation to run `/maencof:doctor` for post-migration health check
+- Recommendation to run `/maencof:checkup` for post-migration health check
 
 After reporting results (whether migration succeeded or rollback occurred):
 - Delete `.maencof-meta/migration.lock` if it exists.

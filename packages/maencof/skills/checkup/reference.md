@@ -1,4 +1,4 @@
-# doctor — Reference
+# checkup — Reference
 
 Detailed diagnostic items, report format, and auto-fix rules.
 
@@ -17,7 +17,7 @@ Detailed diagnostic items, report format, and auto-fix rules.
 
 ### Step 1 — Run Diagnostics
 
-Delegated to the doctor agent:
+Delegated to the checkup agent:
 
 - `kg_status` → detect D1 (orphan), D2 (stale)
 - `Glob "**/*.md"` → collect full file list
@@ -64,6 +64,6 @@ Execute AutoFixAction after user confirmation:
 
 ## Error Handling
 
-- **Doctor agent failure**: return partial results, list failed items
+- **Checkup agent failure**: return partial results, list failed items
 - **MCP server connection failure**: guide to check `.mcp.json` configuration
 - **Empty vault**: "No documents found. Run `/maencof:setup` first."

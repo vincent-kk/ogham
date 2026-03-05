@@ -9,7 +9,7 @@
  * - 수정 전 .bak 백업 생성
  *
  * VaultScanner와 동급의 파일시스템 I/O 예외 모듈.
- * 여러 스킬(setup, doctor, rebuild)에서 재사용.
+ * 여러 스킬(setup, checkup, rebuild)에서 재사용.
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 

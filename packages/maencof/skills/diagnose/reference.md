@@ -40,7 +40,7 @@ maencof Index Status
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 Index: missing / critically stale
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-Recommended: Run /maencof:build --full or /maencof:doctor
+Recommended: Run /maencof:build --full or /maencof:checkup
 ```
 
 ## Recommended Action Matrix
@@ -51,7 +51,7 @@ Recommended: Run /maencof:build --full or /maencof:doctor
 | Caution | stale 10-30% | `/maencof:rebuild` |
 | Critical | stale > 30% | `/maencof:build --full` |
 | No index | index missing | `/maencof:build` |
-| Structural issue | — | `/maencof:doctor` full diagnosis |
+| Structural issue | — | `/maencof:checkup` full diagnosis |
 
 ## Verbose Mode
 

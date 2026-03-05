@@ -96,7 +96,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath)) {
     messages.push(
-      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:doctor` to diagnose.',
+      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:checkup` to diagnose.',
     );
   }
 

@@ -1,10 +1,10 @@
 ---
-name: doctor
+name: checkup
 description: >
-  maencof Doctor — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions.
+  maencof Checkup — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions.
   Detects orphan nodes, stale indexes, broken links, Layer violations, duplicate documents, and
   Frontmatter errors, then generates AutoFixActions.
-  Trigger phrases: "diagnose", "health check", "doctor", "vault check", "/maencof:doctor".
+  Trigger phrases: "checkup", "health check", "vault check", "/maencof:checkup".
 model: sonnet
 tools:
   - Read
@@ -24,7 +24,7 @@ permissionMode: default
 maxTurns: 40
 ---
 
-# Doctor — maencof Diagnostic Agent
+# Checkup — maencof Diagnostic Agent
 
 ## Role
 
@@ -140,5 +140,5 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 
 ## Skill Participation
 
-- `/maencof:doctor` — full workflow entry point
+- `/maencof:checkup` — full workflow entry point
 - `/maencof:diagnose` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)

@@ -18,7 +18,7 @@ This is the force mode of `/maencof:build`.
 
 - When the index is corrupted or inconsistent
 - When an incremental build is incomplete after large-scale file moves/deletions/additions
-- When `/maencof:doctor` recommends a rebuild
+- When `/maencof:checkup` recommends a rebuild
 - When a migration is needed after an index structure change
 
 ## Workflow

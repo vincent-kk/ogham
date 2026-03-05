@@ -122,7 +122,7 @@ Display a completion message along with guidance for:
 - `/maencof:remember` — record new knowledge
 - `/maencof:recall` — search past knowledge
 - `/maencof:build` — build the full index
-- `/maencof:doctor` — check system health
+- `/maencof:checkup` — check system health
 
 ## Agent Collaboration
 

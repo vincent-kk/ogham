@@ -11,16 +11,16 @@ plugin: maencof
 
 # diagnose — Index Health Diagnostic
 
-A lightweight version of `/maencof:doctor`. Performs a quick status check only without auto-fix.
+A lightweight version of `/maencof:checkup`. Performs a quick status check only without auto-fix.
 Reports index freshness, stale node ratio, and whether a rebuild is recommended.
 
-> **Difference from `/maencof:doctor`**: diagnose is read-only and fast (calls `kg_status` only). doctor runs a full scan with auto-fix suggestions.
+> **Difference from `/maencof:checkup`**: diagnose is read-only and fast (calls `kg_status` only). checkup runs a full scan with auto-fix suggestions.
 
 ## When to Use This Skill
 
 - Quick check if the index is up to date
 - Pre-flight status check before search/exploration
-- Simple pre-check before running `/maencof:doctor`
+- Simple pre-check before running `/maencof:checkup`
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ Format results based on health state:
 
 - **OK** (stale < 10%): display stats, status OK
 - **Caution** (stale 10-30%): display stats, recommend `/maencof:rebuild`
-- **Critical** (stale > 30% or no index): recommend `/maencof:build --full` or `/maencof:doctor`
+- **Critical** (stale > 30% or no index): recommend `/maencof:build --full` or `/maencof:checkup`
 
 Include **sub-layer distribution** from `kg_status` response (`subLayerDistribution` field):
 ```

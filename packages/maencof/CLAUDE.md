@@ -17,9 +17,9 @@ yarn format && yarn lint
 
 **MCP Tools (18)**: `maencof_create/read/update/delete/move`, `maencof_capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`, `context_cache_manage`
 
-**Agents (4)**: `memory-organizer`, `identity-guardian`, `doctor`, `configurator`
+**Agents (4)**: `memory-organizer`, `identity-guardian`, `checkup`, `configurator`
 
-**Skills (29)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `doctor`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`, `think`, `refine`, `insight`, `changelog`, `migrate`
+**Skills (29)**: `setup`, `configure`, `remember`, `recall`, `organize`, `reflect`, `build`, `explore`, `suggest`, `checkup`, `rebuild`, `ingest`, `diagnose`, `connect`, `bridge`, `craft-skill`, `craft-agent`, `instruct`, `rule`, `lifecycle`, `mcp-setup`, `manage`, `cleanup`, `dailynote`, `think`, `refine`, `insight`, `changelog`, `migrate`
 
 > Detailed docs: `../../.metadata/maencof/` (5-Layer spec, MCP contracts, agent/skill definitions, hook event mappings)
 

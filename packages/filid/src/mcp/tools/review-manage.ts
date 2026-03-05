@@ -156,12 +156,7 @@ async function handleEnsureDir(
     throw new Error('branchName is required for ensure-dir action');
   }
   const normalized = normalizeBranch(input.branchName);
-  const dirPath = path.join(
-    input.projectRoot,
-    '.filid',
-    'review',
-    normalized,
-  );
+  const dirPath = path.join(input.projectRoot, '.filid', 'review', normalized);
 
   let created = false;
   try {
@@ -232,9 +227,7 @@ async function handleElectCommittee(
   input: ReviewManageInput,
 ): Promise<Record<string, unknown>> {
   if (input.changedFilesCount === undefined) {
-    throw new Error(
-      'changedFilesCount is required for elect-committee action',
-    );
+    throw new Error('changedFilesCount is required for elect-committee action');
   }
   if (input.changedFractalsCount === undefined) {
     throw new Error(
@@ -375,9 +368,7 @@ async function handleContentHash(
     '--name-only',
     `${baseCommit}..HEAD`,
   ]);
-  const changedFiles = diffOutput
-    ? diffOutput.split('\n').filter(Boolean)
-    : [];
+  const changedFiles = diffOutput ? diffOutput.split('\n').filter(Boolean) : [];
 
   const { sessionHash, fileHashes } = await computeContentHash(
     input.projectRoot,
@@ -439,9 +430,7 @@ async function handleCheckCache(
     '--name-only',
     `${baseCommit}..HEAD`,
   ]);
-  const changedFiles = diffOutput
-    ? diffOutput.split('\n').filter(Boolean)
-    : [];
+  const changedFiles = diffOutput ? diffOutput.split('\n').filter(Boolean) : [];
   const { sessionHash: currentHash } = await computeContentHash(
     input.projectRoot,
     baseCommit,
