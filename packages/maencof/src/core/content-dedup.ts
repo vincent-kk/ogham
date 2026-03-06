@@ -5,7 +5,6 @@
  *
  * Pure function: no file I/O, string in → string out.
  */
-
 import { parseYamlFrontmatter } from './yaml-parser.js';
 
 /** Frontmatter delimiter regex (content must start with ---) */

@@ -10,10 +10,16 @@ import type { SpreadingActivationParams } from '../core/spreading-activation.js'
 import type { NodeId } from '../types/common.js';
 import { toNodeId } from '../types/common.js';
 import type { ActivationResult, KnowledgeGraph } from '../types/graph.js';
+
 import { QueryCache } from './query-cache.js';
 
 /** 시드 매칭 유형 */
-export type MatchType = 'path-exact' | 'title-exact' | 'title-word' | 'tag-exact' | 'tag-prefix';
+export type MatchType =
+  | 'path-exact'
+  | 'title-exact'
+  | 'title-word'
+  | 'tag-exact'
+  | 'tag-prefix';
 
 /** 매칭 품질이 포함된 시드 */
 export interface ScoredSeed {
@@ -66,13 +72,16 @@ function classifyMatch(
 
   // title word boundary match
   const titleWords = titleLower.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/);
-  if (titleWords.some((w) => w === kw)) return { score: 0.8, type: 'title-word' };
+  if (titleWords.some((w) => w === kw))
+    return { score: 0.8, type: 'title-word' };
 
   // tag exact match
-  if (node.tags.some((t) => t.toLowerCase() === kw)) return { score: 0.5, type: 'tag-exact' };
+  if (node.tags.some((t) => t.toLowerCase() === kw))
+    return { score: 0.5, type: 'tag-exact' };
 
   // tag prefix match
-  if (node.tags.some((t) => t.toLowerCase().startsWith(kw))) return { score: 0.3, type: 'tag-prefix' };
+  if (node.tags.some((t) => t.toLowerCase().startsWith(kw)))
+    return { score: 0.3, type: 'tag-prefix' };
 
   // title contains keyword (fallback — still a match via inverted index)
   if (titleLower.includes(kw)) return { score: 0.8, type: 'title-word' };
@@ -89,7 +98,11 @@ function resolvePathSeed(
   if (graph.nodes.has(nodeId)) {
     const existing = bestScores.get(nodeId);
     if (!existing || existing.matchScore < 1.0) {
-      bestScores.set(nodeId, { nodeId, matchScore: 1.0, matchType: 'path-exact' });
+      bestScores.set(nodeId, {
+        nodeId,
+        matchScore: 1.0,
+        matchType: 'path-exact',
+      });
     }
   }
 }
@@ -111,7 +124,9 @@ function resolveKeywordSeed(
   } else {
     for (const [id, node] of graph.nodes) {
       const titleMatch = node.title.toLowerCase().includes(keyword);
-      const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(keyword));
+      const tagMatch = node.tags.some((tag) =>
+        tag.toLowerCase().includes(keyword),
+      );
       if (titleMatch || tagMatch) candidateIds.add(id);
     }
   }
@@ -222,14 +237,19 @@ export function query(
     // 적응형 SA 파라미터 (B1)
     let adaptedMaxHops = maxHops;
     let adaptedThreshold = threshold;
-    const useAdaptive = options.adaptiveSA !== false && options.maxHops === undefined;
+    const useAdaptive =
+      options.adaptiveSA !== false && options.maxHops === undefined;
 
     if (useAdaptive && scoredSeeds.length > 0) {
       const maxScore = Math.max(...scoredSeeds.map((s) => s.matchScore));
-      const avgScore = scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) / scoredSeeds.length;
-      const isStrongSignal = scoredSeeds.length === 1
-        && maxScore >= 0.9
-        && (scoredSeeds[0]!.matchType === 'path-exact' || scoredSeeds[0]!.matchType === 'title-exact');
+      const avgScore =
+        scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) /
+        scoredSeeds.length;
+      const isStrongSignal =
+        scoredSeeds.length === 1 &&
+        maxScore >= 0.9 &&
+        (scoredSeeds[0]!.matchType === 'path-exact' ||
+          scoredSeeds[0]!.matchType === 'title-exact');
 
       if (isStrongSignal) {
         adaptedMaxHops = Math.min(adaptedMaxHops, 2);

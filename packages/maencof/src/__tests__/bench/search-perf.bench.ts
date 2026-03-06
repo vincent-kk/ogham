@@ -30,7 +30,13 @@ function makeSyntheticNode(i: number, layer: Layer): KnowledgeNode {
 
 /** 합성 그래프 생성 (노드 수, 엣지 밀도 지정) */
 function makeSyntheticGraph(nodeCount: number): KnowledgeGraph {
-  const layers = [Layer.L1_CORE, Layer.L2_DERIVED, Layer.L3_EXTERNAL, Layer.L4_ACTION, Layer.L5_CONTEXT];
+  const layers = [
+    Layer.L1_CORE,
+    Layer.L2_DERIVED,
+    Layer.L3_EXTERNAL,
+    Layer.L4_ACTION,
+    Layer.L5_CONTEXT,
+  ];
   const nodes: KnowledgeNode[] = [];
 
   for (let i = 0; i < nodeCount; i++) {

@@ -12,8 +12,8 @@ import type {
   AdjacencyList,
   KnowledgeGraph,
 } from '../types/graph.js';
-import { buildAdjacencyList } from './graph-builder.js';
 
+import { buildAdjacencyList } from './graph-builder.js';
 import { getLayerDecay } from './weight-calculator.js';
 
 /** 확산 활성화 파라미터 */
@@ -76,7 +76,12 @@ function processNeighbor(
   graph: KnowledgeGraph,
   current: QueueItem,
   neighborId: NodeId,
-  params: { threshold: number; maxHops: number; maxActiveNodes: number; decayOverride: number | undefined },
+  params: {
+    threshold: number;
+    maxHops: number;
+    maxActiveNodes: number;
+    decayOverride: number | undefined;
+  },
   activationMap: Map<NodeId, ActivationResult>,
   queue: QueueItem[],
 ): void {

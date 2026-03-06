@@ -170,7 +170,9 @@ describe('deduplicateContent', () => {
 
   it('generated keys와 겹치는 loose key: value 라인을 제거한다', () => {
     const content = 'created: 2026-03-07\ntags: [test]\n\n본문 내용.';
-    const result = deduplicateContent(content, { generatedKeys: GENERATED_KEYS });
+    const result = deduplicateContent(content, {
+      generatedKeys: GENERATED_KEYS,
+    });
     expect(result.content).toBe('본문 내용.');
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('Loose metadata lines removed');
@@ -178,14 +180,18 @@ describe('deduplicateContent', () => {
 
   it('generated keys가 아닌 loose key:value 라인은 유지한다', () => {
     const content = 'custom_field: some value\n\n본문.';
-    const result = deduplicateContent(content, { generatedKeys: GENERATED_KEYS });
+    const result = deduplicateContent(content, {
+      generatedKeys: GENERATED_KEYS,
+    });
     expect(result.content).toBe(content);
     expect(result.warnings).toHaveLength(0);
   });
 
   it('본문 중간의 key:value 라인은 건드리지 않는다', () => {
     const content = '본문 시작.\n\ncreated: 2026-03-07\n\n본문 끝.';
-    const result = deduplicateContent(content, { generatedKeys: GENERATED_KEYS });
+    const result = deduplicateContent(content, {
+      generatedKeys: GENERATED_KEYS,
+    });
     expect(result.content).toBe(content);
     expect(result.warnings).toHaveLength(0);
   });

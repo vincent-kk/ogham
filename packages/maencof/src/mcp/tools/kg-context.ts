@@ -27,9 +27,10 @@ export async function handleKgContext(
 
   const tokenBudget = input.token_budget ?? 2000;
   const includeFull = input.include_full ?? false;
+  const queryTerms = input.query.split(/\s+/).filter((t) => t.length > 0);
 
   // 쿼리 실행
-  const queryResult = query(graph, [input.query], {
+  const queryResult = query(graph, queryTerms, {
     maxResults: 20,
     decay: 0.7,
     threshold: 0.05,
@@ -45,7 +46,6 @@ export async function handleKgContext(
   // Content snippet extraction (B4-lite)
   if (includeFull && vaultRoot && assembled.items.length > 0) {
     const maxFullDocuments = 3;
-    const queryTerms = input.query.split(/\s+/).filter((t) => t.length > 0);
     const topItems = assembled.items.slice(0, maxFullDocuments);
 
     await Promise.all(
@@ -63,7 +63,9 @@ export async function handleKgContext(
     const snippetLines: string[] = [];
     for (const item of topItems) {
       if (item.fullContent) {
-        snippetLines.push(`\n### ${item.title}\n\`\`\`\n${item.fullContent}\n\`\`\``);
+        snippetLines.push(
+          `\n### ${item.title}\n\`\`\`\n${item.fullContent}\n\`\`\``,
+        );
       }
     }
     if (snippetLines.length > 0) {

@@ -3,7 +3,11 @@
  * @description kg_navigate 도구 핸들러 — 특정 노드의 이웃 조회
  */
 import { toNodeId } from '../../types/common.js';
-import type { KnowledgeEdge, KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
+import type {
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 import type { KgNavigateInput, KgNavigateResult } from '../../types/mcp.js';
 
 /**
@@ -28,7 +32,8 @@ function getEdgesForNode(
 
   // 인접 리스트 기반 최적화: outbound 이웃 확인 후 엣지 타입/가중치 조회
   const outbound: KnowledgeEdge[] = [];
-  const neighbors = graph.adjacencyList.get(nodeId as ReturnType<typeof toNodeId>) ?? [];
+  const neighbors =
+    graph.adjacencyList.get(nodeId as ReturnType<typeof toNodeId>) ?? [];
   for (const neighborId of neighbors) {
     // edgeWeightMap에서 가중치, 엣지 배열에서 타입 조회
     const edge = graph.edges.find(
@@ -51,7 +56,12 @@ function collectOutboundNeighbors(
   graph: KnowledgeGraph,
   includeOutbound: boolean,
   includeHierarchy: boolean,
-): { outbound: KnowledgeNode[]; children: KnowledgeNode[]; siblings: KnowledgeNode[]; crossLayer: KnowledgeNode[] } {
+): {
+  outbound: KnowledgeNode[];
+  children: KnowledgeNode[];
+  siblings: KnowledgeNode[];
+  crossLayer: KnowledgeNode[];
+} {
   const outbound: KnowledgeNode[] = [];
   const children: KnowledgeNode[] = [];
   const siblings: KnowledgeNode[] = [];
@@ -86,7 +96,11 @@ function collectInboundNeighbors(
   graph: KnowledgeGraph,
   includeInbound: boolean,
   includeHierarchy: boolean,
-): { inbound: KnowledgeNode[]; parent: KnowledgeNode | undefined; crossLayer: KnowledgeNode[] } {
+): {
+  inbound: KnowledgeNode[];
+  parent: KnowledgeNode | undefined;
+  crossLayer: KnowledgeNode[];
+} {
   const inbound: KnowledgeNode[] = [];
   let parent: KnowledgeNode | undefined;
   const crossLayer: KnowledgeNode[] = [];
@@ -133,14 +147,22 @@ export async function handleKgNavigate(
   const includeOutbound = input.include_outbound ?? true;
   const includeHierarchy = input.include_hierarchy ?? true;
 
-  const { outbound: outEdges, inbound: inEdges } = getEdgesForNode(graph, nodeId);
+  const { outbound: outEdges, inbound: inEdges } = getEdgesForNode(
+    graph,
+    nodeId,
+  );
 
   const {
     outbound,
     children,
     siblings,
     crossLayer: outCrossLayer,
-  } = collectOutboundNeighbors(outEdges, graph, includeOutbound, includeHierarchy);
+  } = collectOutboundNeighbors(
+    outEdges,
+    graph,
+    includeOutbound,
+    includeHierarchy,
+  );
 
   const {
     inbound,

@@ -4,12 +4,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { buildAdjacencyList } from '../../core/graph-builder.js';
 import { runSpreadingActivation } from '../../core/spreading-activation.js';
+import { handleKgContext } from '../../mcp/tools/kg-context.js';
 import { extractBestSnippet } from '../../search/context-assembler.js';
-import {
-  query,
-  resolveSeedNodes,
-} from '../../search/query-engine.js';
+import { query, resolveSeedNodes } from '../../search/query-engine.js';
 import type { ScoredSeed } from '../../search/query-engine.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
@@ -17,7 +16,7 @@ import type {
   KnowledgeGraph,
   KnowledgeNode,
 } from '../../types/graph.js';
-import { buildAdjacencyList } from '../../core/graph-builder.js';
+import type { KgContextResult } from '../../types/mcp.js';
 
 /** 테스트용 노드 생성 헬퍼 */
 function makeNode(
@@ -149,9 +148,7 @@ describe('B3: resolveSeedNodes — ScoredSeed classification', () => {
   it('태그 prefix 매칭은 score 0.3, matchType tag-prefix', () => {
     const graph = makeClassificationGraph();
     const seeds = resolveSeedNodes(graph, ['infra']);
-    const infraSeed = seeds.find(
-      (s) => s.nodeId === toNodeId('k8s-setup.md'),
-    );
+    const infraSeed = seeds.find((s) => s.nodeId === toNodeId('k8s-setup.md'));
     expect(infraSeed).toBeDefined();
     expect(infraSeed!.matchScore).toBe(0.3);
     expect(infraSeed!.matchType).toBe('tag-prefix');
@@ -196,10 +193,7 @@ describe('B3: SA seedActivations — title-match vs tag-match ranking', () => {
       makeNode('D', Layer.L2_DERIVED, { title: 'B-neighbor' }),
     );
 
-    const edges = [
-      makeEdge('A', 'C', 0.8),
-      makeEdge('B', 'D', 0.8),
-    ];
+    const edges = [makeEdge('A', 'C', 0.8), makeEdge('B', 'D', 0.8)];
 
     const graph = buildGraphWithIndex(nodes, edges);
 
@@ -215,10 +209,8 @@ describe('B3: SA seedActivations — title-match vs tag-match ranking', () => {
       { seedActivations, decayOverride: 0.7 },
     );
 
-    const cScore =
-      results.find((r) => r.nodeId === toNodeId('C'))?.score ?? 0;
-    const dScore =
-      results.find((r) => r.nodeId === toNodeId('D'))?.score ?? 0;
+    const cScore = results.find((r) => r.nodeId === toNodeId('C'))?.score ?? 0;
+    const dScore = results.find((r) => r.nodeId === toNodeId('D'))?.score ?? 0;
     expect(cScore).toBeGreaterThan(dScore);
   });
 });
@@ -230,7 +222,13 @@ describe('B1: Adaptive SA Parameters', () => {
   /** 5-node chain: A-B-C-D-E */
   function makeChainGraph(): KnowledgeGraph {
     const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
-    const ids = ['chain-a.md', 'chain-b.md', 'chain-c.md', 'chain-d.md', 'chain-e.md'];
+    const ids = [
+      'chain-a.md',
+      'chain-b.md',
+      'chain-c.md',
+      'chain-d.md',
+      'chain-e.md',
+    ];
     for (const id of ids) {
       nodes.set(
         toNodeId(id),
@@ -377,32 +375,96 @@ describe('B6: Turn Context Directive', () => {
   // Import is side-effect free — we test the exported function output
   it('buildTurnContext에 kg_context snippet 언급이 포함되어야 한다', async () => {
     // We test the directive text directly from the module
-    const { buildTurnContext } = await import(
-      '../../hooks/turn-context-builder.js'
-    );
+    const { buildTurnContext } =
+      await import('../../hooks/turn-context-builder.js');
     // buildTurnContext needs a CWD with .maencof — mock by using a non-vault dir
     // The directive text is hardcoded so we can verify it from the source
     const fs = await import('node:fs');
     const source = fs.readFileSync(
-      new URL('../../hooks/turn-context-builder.ts', import.meta.url).pathname
-        .replace('/src/__tests__/unit/../../', '/src/'),
+      new URL(
+        '../../hooks/turn-context-builder.ts',
+        import.meta.url,
+      ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
       'utf-8',
     );
     expect(source).toContain('content snippets from top documents');
-    expect(source).toContain(
-      'Prefer kg_context over kg_search + maencof_read',
-    );
+    expect(source).toContain('Prefer kg_context over kg_search + maencof_read');
   });
 
   it('context-injector에 kg_context snippet directive가 포함되어야 한다', async () => {
     const fs = await import('node:fs');
     const source = fs.readFileSync(
-      new URL('../../hooks/context-injector.ts', import.meta.url).pathname
-        .replace('/src/__tests__/unit/../../', '/src/'),
+      new URL(
+        '../../hooks/context-injector.ts',
+        import.meta.url,
+      ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
       'utf-8',
     );
     expect(source).toContain(
       'kg_context now returns content snippets from top results',
     );
+  });
+});
+
+// ========================================
+// kg_context: Multi-word Query Splitting
+// ========================================
+describe('kg_context: multi-word query splitting', () => {
+  function makeMultiWordGraph(): KnowledgeGraph {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(
+      toNodeId('mongodb-vuln.md'),
+      makeNode('mongodb-vuln.md', Layer.L3_EXTERNAL, {
+        title: 'MongoDB Mongobleed Vulnerability',
+        tags: ['mongodb', 'security', 'cve'],
+      }),
+    );
+    nodes.set(
+      toNodeId('redis-notes.md'),
+      makeNode('redis-notes.md', Layer.L3_EXTERNAL, {
+        title: 'Redis Configuration Notes',
+        tags: ['redis', 'database'],
+      }),
+    );
+    nodes.set(
+      toNodeId('cve-report.md'),
+      makeNode('cve-report.md', Layer.L3_EXTERNAL, {
+        title: 'Critical RCE CVE Report',
+        tags: ['cve', 'rce', 'critical'],
+      }),
+    );
+
+    const edges = [
+      makeEdge('mongodb-vuln.md', 'cve-report.md', 0.6),
+      makeEdge('redis-notes.md', 'mongodb-vuln.md', 0.5),
+    ];
+
+    return buildGraphWithIndex(nodes, edges);
+  }
+
+  it('멀티워드 쿼리가 개별 키워드로 분리되어 결과를 반환한다', async () => {
+    const graph = makeMultiWordGraph();
+    const result = await handleKgContext(graph, {
+      query: 'mongodb mongobleed',
+    });
+    expect('error' in result).toBe(false);
+    const ctx = result as KgContextResult;
+    expect(ctx.documentCount).toBeGreaterThan(0);
+  });
+
+  it('단일 워드 쿼리도 정상 동작한다', async () => {
+    const graph = makeMultiWordGraph();
+    const result = await handleKgContext(graph, { query: 'redis' });
+    expect('error' in result).toBe(false);
+    const ctx = result as KgContextResult;
+    expect(ctx.documentCount).toBeGreaterThan(0);
+  });
+
+  it('공백만 있는 쿼리는 결과 0건을 반환한다', async () => {
+    const graph = makeMultiWordGraph();
+    const result = await handleKgContext(graph, { query: '   ' });
+    expect('error' in result).toBe(false);
+    const ctx = result as KgContextResult;
+    expect(ctx.documentCount).toBe(0);
   });
 });

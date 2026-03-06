@@ -90,8 +90,18 @@ export { deduplicateContent } from './core/content-dedup.js';
 export type { DeduplicateResult } from './core/content-dedup.js';
 
 // Search modules
-export { query, resolveSeedNodes, QueryEngine, invalidateQueryCache } from './search/query-engine.js';
-export type { QueryOptions, QueryResult, ScoredSeed, MatchType } from './search/query-engine.js';
+export {
+  query,
+  resolveSeedNodes,
+  QueryEngine,
+  invalidateQueryCache,
+} from './search/query-engine.js';
+export type {
+  QueryOptions,
+  QueryResult,
+  ScoredSeed,
+  MatchType,
+} from './search/query-engine.js';
 
 export {
   assembleContext,

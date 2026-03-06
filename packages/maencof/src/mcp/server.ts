@@ -20,10 +20,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 
 import { MetadataStore } from '../index/metadata-store.js';
+import { invalidateQueryCache } from '../search/query-engine.js';
 import type { KnowledgeGraph } from '../types/graph.js';
 import { VERSION } from '../version.js';
 
-import { invalidateQueryCache } from '../search/query-engine.js';
 import { toolError, toolResult } from './shared.js';
 import { handleBoundaryCreate } from './tools/boundary-create.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
