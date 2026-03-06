@@ -1,6 +1,6 @@
 # mcp
 
-MCP 서버 + 17개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
+MCP 서버 + 18개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 
 ## Always do
 

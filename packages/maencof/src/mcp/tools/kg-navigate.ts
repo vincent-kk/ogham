@@ -46,6 +46,69 @@ function getEdgesForNode(
   return { outbound, inbound };
 }
 
+function collectOutboundNeighbors(
+  outEdges: KnowledgeEdge[],
+  graph: KnowledgeGraph,
+  includeOutbound: boolean,
+  includeHierarchy: boolean,
+): { outbound: KnowledgeNode[]; children: KnowledgeNode[]; siblings: KnowledgeNode[]; crossLayer: KnowledgeNode[] } {
+  const outbound: KnowledgeNode[] = [];
+  const children: KnowledgeNode[] = [];
+  const siblings: KnowledgeNode[] = [];
+  const crossLayer: KnowledgeNode[] = [];
+
+  for (const edge of outEdges) {
+    if (includeOutbound && edge.type === 'LINK') {
+      const dst = graph.nodes.get(edge.to);
+      if (dst) outbound.push(dst);
+    }
+    if (includeHierarchy) {
+      if (edge.type === 'PARENT_OF') {
+        const child = graph.nodes.get(edge.to);
+        if (child) children.push(child);
+      }
+      if (edge.type === 'SIBLING') {
+        const sib = graph.nodes.get(edge.to);
+        if (sib) siblings.push(sib);
+      }
+    }
+    if (edge.type === 'CROSS_LAYER') {
+      const target = graph.nodes.get(edge.to);
+      if (target) crossLayer.push(target);
+    }
+  }
+
+  return { outbound, children, siblings, crossLayer };
+}
+
+function collectInboundNeighbors(
+  inEdges: KnowledgeEdge[],
+  graph: KnowledgeGraph,
+  includeInbound: boolean,
+  includeHierarchy: boolean,
+): { inbound: KnowledgeNode[]; parent: KnowledgeNode | undefined; crossLayer: KnowledgeNode[] } {
+  const inbound: KnowledgeNode[] = [];
+  let parent: KnowledgeNode | undefined;
+  const crossLayer: KnowledgeNode[] = [];
+
+  for (const edge of inEdges) {
+    if (includeInbound && edge.type === 'LINK') {
+      const src = graph.nodes.get(edge.from);
+      if (src) inbound.push(src);
+    }
+    if (includeHierarchy && edge.type === 'PARENT_OF') {
+      const p = graph.nodes.get(edge.from);
+      if (p) parent = p;
+    }
+    if (edge.type === 'CROSS_LAYER') {
+      const source = graph.nodes.get(edge.from);
+      if (source) crossLayer.push(source);
+    }
+  }
+
+  return { inbound, parent, crossLayer };
+}
+
 /**
  * kg_navigate 핸들러
  */
@@ -70,52 +133,22 @@ export async function handleKgNavigate(
   const includeOutbound = input.include_outbound ?? true;
   const includeHierarchy = input.include_hierarchy ?? true;
 
-  const inbound: KnowledgeNode[] = [];
-  const outbound: KnowledgeNode[] = [];
-  let parent: KnowledgeNode | undefined;
-  const children: KnowledgeNode[] = [];
-  const siblings: KnowledgeNode[] = [];
-  const crossLayer: KnowledgeNode[] = [];
-
   const { outbound: outEdges, inbound: inEdges } = getEdgesForNode(graph, nodeId);
 
-  // Outbound 엣지 처리
-  for (const edge of outEdges) {
-    if (includeOutbound && edge.type === 'LINK') {
-      const dst = graph.nodes.get(edge.to);
-      if (dst) outbound.push(dst);
-    }
-    if (includeHierarchy) {
-      if (edge.type === 'PARENT_OF') {
-        const child = graph.nodes.get(edge.to);
-        if (child) children.push(child);
-      }
-      if (edge.type === 'SIBLING') {
-        const sib = graph.nodes.get(edge.to);
-        if (sib) siblings.push(sib);
-      }
-    }
-    if (edge.type === 'CROSS_LAYER') {
-      const target = graph.nodes.get(edge.to);
-      if (target) crossLayer.push(target);
-    }
-  }
+  const {
+    outbound,
+    children,
+    siblings,
+    crossLayer: outCrossLayer,
+  } = collectOutboundNeighbors(outEdges, graph, includeOutbound, includeHierarchy);
 
-  // Inbound 엣지 처리
-  for (const edge of inEdges) {
-    if (includeInbound && edge.type === 'LINK') {
-      const src = graph.nodes.get(edge.from);
-      if (src) inbound.push(src);
-    }
-    if (includeHierarchy && edge.type === 'PARENT_OF') {
-      const p = graph.nodes.get(edge.from);
-      if (p) parent = p;
-    }
-    if (edge.type === 'CROSS_LAYER') {
-      const source = graph.nodes.get(edge.from);
-      if (source) crossLayer.push(source);
-    }
-  }
+  const {
+    inbound,
+    parent,
+    crossLayer: inCrossLayer,
+  } = collectInboundNeighbors(inEdges, graph, includeInbound, includeHierarchy);
+
+  const crossLayer = [...outCrossLayer, ...inCrossLayer];
 
   return {
     node,

@@ -80,6 +80,53 @@ function classifyMatch(
   return { score: 0.3, type: 'tag-prefix' };
 }
 
+function resolvePathSeed(
+  graph: KnowledgeGraph,
+  seed: string,
+  bestScores: Map<NodeId, ScoredSeed>,
+): void {
+  const nodeId = toNodeId(seed);
+  if (graph.nodes.has(nodeId)) {
+    const existing = bestScores.get(nodeId);
+    if (!existing || existing.matchScore < 1.0) {
+      bestScores.set(nodeId, { nodeId, matchScore: 1.0, matchType: 'path-exact' });
+    }
+  }
+}
+
+function resolveKeywordSeed(
+  graph: KnowledgeGraph,
+  seed: string,
+  bestScores: Map<NodeId, ScoredSeed>,
+): void {
+  const candidateIds = new Set<NodeId>();
+  const keyword = seed.toLowerCase();
+
+  if (graph.invertedIndex) {
+    for (const [term, nodeIds] of graph.invertedIndex) {
+      if (term.startsWith(keyword)) {
+        for (const id of nodeIds) candidateIds.add(id);
+      }
+    }
+  } else {
+    for (const [id, node] of graph.nodes) {
+      const titleMatch = node.title.toLowerCase().includes(keyword);
+      const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(keyword));
+      if (titleMatch || tagMatch) candidateIds.add(id);
+    }
+  }
+
+  for (const id of candidateIds) {
+    const node = graph.nodes.get(id);
+    if (!node) continue;
+    const { score, type } = classifyMatch(node, seed);
+    const existing = bestScores.get(id);
+    if (!existing || existing.matchScore < score) {
+      bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
+    }
+  }
+}
+
 /**
  * 쿼리 문자열에서 시드 노드를 결정한다.
  *
@@ -98,45 +145,10 @@ export function resolveSeedNodes(
   const bestScores = new Map<NodeId, ScoredSeed>();
 
   for (const seed of seeds) {
-    const isPathQuery = seed.endsWith('.md') || seed.includes('/');
-
-    if (isPathQuery) {
-      const nodeId = toNodeId(seed);
-      if (graph.nodes.has(nodeId)) {
-        const existing = bestScores.get(nodeId);
-        if (!existing || existing.matchScore < 1.0) {
-          bestScores.set(nodeId, { nodeId, matchScore: 1.0, matchType: 'path-exact' });
-        }
-      }
+    if (seed.endsWith('.md') || seed.includes('/')) {
+      resolvePathSeed(graph, seed, bestScores);
     } else {
-      // 후보 NodeId 수집 (invertedIndex 또는 linear scan)
-      const candidateIds = new Set<NodeId>();
-      const keyword = seed.toLowerCase();
-
-      if (graph.invertedIndex) {
-        for (const [term, nodeIds] of graph.invertedIndex) {
-          if (term.startsWith(keyword)) {
-            for (const id of nodeIds) candidateIds.add(id);
-          }
-        }
-      } else {
-        for (const [id, node] of graph.nodes) {
-          const titleMatch = node.title.toLowerCase().includes(keyword);
-          const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(keyword));
-          if (titleMatch || tagMatch) candidateIds.add(id);
-        }
-      }
-
-      // Post-lookup classification: 각 후보에 대해 매칭 품질 분류
-      for (const id of candidateIds) {
-        const node = graph.nodes.get(id);
-        if (!node) continue;
-        const { score, type } = classifyMatch(node, seed);
-        const existing = bestScores.get(id);
-        if (!existing || existing.matchScore < score) {
-          bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
-        }
-      }
+      resolveKeywordSeed(graph, seed, bestScores);
     }
   }
 
