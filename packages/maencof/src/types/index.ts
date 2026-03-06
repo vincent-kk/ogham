@@ -18,6 +18,7 @@ export {
   LAYER_DIR,
   L3_SUBDIR,
   L5_SUBDIR,
+  EDGE_TYPE,
   EXPECTED_ARCHITECTURE_VERSION,
   toNodeId,
   layerFromDir,

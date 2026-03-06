@@ -14,6 +14,7 @@ import {
   jaccardSimilarity,
   normalizeTags,
 } from '../../core/tag-similarity.js';
+import { EDGE_TYPE } from '../../types/common.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 import type {
@@ -62,6 +63,7 @@ export function handleKgSuggestLinks(
   if (sourceNodeId) {
     directlyLinked.add(sourceNodeId);
     for (const edge of graph.edges) {
+      if (edge.type !== EDGE_TYPE.LINK) continue;
       if (edge.from === sourceNodeId) directlyLinked.add(edge.to);
       if (edge.to === sourceNodeId) directlyLinked.add(edge.from);
     }

@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { handleKgSuggestLinks } from '../../mcp/tools/kg-suggest-links.js';
+import { EDGE_TYPE } from '../../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
@@ -118,7 +119,7 @@ describe('handleKgSuggestLinks', () => {
         {
           from: 'source',
           to: 'linked',
-          type: 'REFERENCE' as const,
+          type: EDGE_TYPE.LINK,
           weight: 0.8,
         },
       ],
@@ -170,13 +171,13 @@ describe('handleKgSuggestLinks', () => {
         {
           from: 'source',
           to: 'middle',
-          type: 'REFERENCE' as const,
+          type: EDGE_TYPE.LINK,
           weight: 0.9,
         },
         {
           from: 'middle',
           to: 'target',
-          type: 'REFERENCE' as const,
+          type: EDGE_TYPE.LINK,
           weight: 0.8,
         },
       ],
@@ -194,6 +195,56 @@ describe('handleKgSuggestLinks', () => {
     if (targetSuggestion) {
       expect(targetSuggestion.sa_score).toBeGreaterThan(0);
     }
+  });
+
+  it('SIBLING 엣지로만 연결된 노드는 추천 후보에 포함된다', () => {
+    const graph = makeGraph(
+      [
+        makeNode('source', ['security', 'cve']),
+        makeNode('sibling', ['security', 'cve', 'memory-leak']),
+      ],
+      [
+        {
+          from: 'source',
+          to: 'sibling',
+          type: EDGE_TYPE.SIBLING,
+          weight: 1.0,
+        },
+      ],
+    );
+
+    const result = handleKgSuggestLinks(graph, {
+      path: '02_Derived/source.md',
+      min_score: 0.1,
+    });
+
+    const paths = result.suggestions.map((s) => s.target_path);
+    expect(paths).toContain('02_Derived/sibling.md');
+  });
+
+  it('LINK 엣지로 연결된 노드는 여전히 제외된다', () => {
+    const graph = makeGraph(
+      [
+        makeNode('source', ['security', 'cve']),
+        makeNode('linked', ['security', 'cve', 'memory-leak']),
+      ],
+      [
+        {
+          from: 'source',
+          to: 'linked',
+          type: EDGE_TYPE.LINK,
+          weight: 1.0,
+        },
+      ],
+    );
+
+    const result = handleKgSuggestLinks(graph, {
+      path: '02_Derived/source.md',
+      min_score: 0.1,
+    });
+
+    const paths = result.suggestions.map((s) => s.target_path);
+    expect(paths).not.toContain('02_Derived/linked.md');
   });
 
   it('duration_ms가 양수여야 한다', () => {

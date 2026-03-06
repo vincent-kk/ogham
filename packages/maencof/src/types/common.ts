@@ -73,6 +73,16 @@ export type EdgeType =
   | 'RELATIONSHIP'
   | 'CROSS_LAYER';
 
+/** 그래프 엣지 유형 상수 */
+export const EDGE_TYPE = {
+  LINK: 'LINK',
+  PARENT_OF: 'PARENT_OF',
+  CHILD_OF: 'CHILD_OF',
+  SIBLING: 'SIBLING',
+  RELATIONSHIP: 'RELATIONSHIP',
+  CROSS_LAYER: 'CROSS_LAYER',
+} as const satisfies Record<EdgeType, EdgeType>;
+
 /** 링크 방향 */
 export type LinkDirection = 'outbound' | 'inbound' | 'bidirectional';
 
