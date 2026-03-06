@@ -10,6 +10,7 @@ import type { SpreadingActivationParams } from '../core/spreading-activation.js'
 import type { NodeId } from '../types/common.js';
 import { toNodeId } from '../types/common.js';
 import type { ActivationResult, KnowledgeGraph } from '../types/graph.js';
+import { QueryCache } from './query-cache.js';
 
 /** QueryEngine 검색 옵션 */
 export interface QueryOptions {
@@ -63,8 +64,18 @@ export function resolveSeedNodes(
       if (graph.nodes.has(nodeId)) {
         resolvedIds.add(nodeId);
       }
+    } else if (graph.invertedIndex) {
+      // 역 인덱스 기반 prefix matching (O(terms))
+      const keyword = seed.toLowerCase();
+      for (const [term, nodeIds] of graph.invertedIndex) {
+        if (term.startsWith(keyword)) {
+          for (const id of nodeIds) {
+            resolvedIds.add(id);
+          }
+        }
+      }
     } else {
-      // 태그/제목 키워드 매칭
+      // 폴백: 전체 노드 선형 스캔 (invertedIndex 미존재 시)
       const keyword = seed.toLowerCase();
       for (const [id, node] of graph.nodes) {
         const titleMatch = node.title.toLowerCase().includes(keyword);
@@ -96,6 +107,14 @@ function applyLayerFilter(
   });
 }
 
+/** 모듈 수준 쿼리 캐시 싱글턴 */
+const queryCache = new QueryCache();
+
+/** 쿼리 캐시를 무효화한다 (CRUD 도구 호출 시 사용) */
+export function invalidateQueryCache(): void {
+  queryCache.clear();
+}
+
 /**
  * QueryEngine: 쿼리를 실행하여 관련 노드를 반환한다.
  *
@@ -117,6 +136,12 @@ export function query(
     maxHops = 5,
     layerFilter = [],
   } = options;
+
+  // 캐시 조회
+  const cached = queryCache.get(seeds, options, graph.builtAt);
+  if (cached) {
+    return { ...cached, durationMs: Date.now() - startTime };
+  }
 
   // 시드 노드 결정
   const seedIds = resolveSeedNodes(graph, seeds);
@@ -147,12 +172,17 @@ export function query(
     .filter((r) => !seedSet.has(r.nodeId))
     .slice(0, maxResults);
 
-  return {
+  const result: QueryResult = {
     results: filtered,
     seedIds,
     exploredNodes: results.length,
     durationMs: Date.now() - startTime,
   };
+
+  // 캐시 저장
+  queryCache.set(seeds, options, graph.builtAt, result);
+
+  return result;
 }
 
 /** QueryEngine 클래스 (기본 옵션 보관) */

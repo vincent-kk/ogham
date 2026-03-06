@@ -12,6 +12,7 @@ import type {
   AdjacencyList,
   KnowledgeGraph,
 } from '../types/graph.js';
+import { buildAdjacencyList } from './graph-builder.js';
 
 import { getLayerDecay } from './weight-calculator.js';
 
@@ -36,41 +37,19 @@ interface QueueItem {
 }
 
 /**
- * 인접 리스트를 그래프에서 생성
- */
-export function buildAdjacencyList(graph: KnowledgeGraph): AdjacencyList {
-  const adj: AdjacencyList = new Map();
-
-  for (const nodeId of graph.nodes.keys()) {
-    adj.set(nodeId, []);
-  }
-
-  for (const edge of graph.edges) {
-    const neighbors = adj.get(edge.from) ?? [];
-    neighbors.push(edge.to);
-    adj.set(edge.from, neighbors);
-
-    // 양방향 링크의 경우 역방향도 추가
-    if (edge.type === 'SIBLING') {
-      const reverseNeighbors = adj.get(edge.to) ?? [];
-      reverseNeighbors.push(edge.from);
-      adj.set(edge.to, reverseNeighbors);
-    }
-  }
-
-  return adj;
-}
-
-/**
  * 엣지 가중치 조회 (from → to)
+ * edgeWeightMap이 있으면 O(1), 없으면 edges.find() 폴백
  */
 function getEdgeWeight(
   graph: KnowledgeGraph,
   from: NodeId,
   to: NodeId,
 ): number {
+  if (graph.edgeWeightMap) {
+    return graph.edgeWeightMap.get(from)?.get(to) ?? 0.5;
+  }
   const edge = graph.edges.find((e) => e.from === from && e.to === to);
-  return edge?.weight ?? 0.5; // 기본 가중치
+  return edge?.weight ?? 0.5;
 }
 
 /**
@@ -192,24 +171,31 @@ export function runSpreadingActivation(
     });
   }
 
-  // BFS 확산
-  while (queue.length > 0 && activationMap.size <= maxActiveNodes) {
-    const current = queue.shift()!;
+  // 인접 리스트 획득: 사전 계산된 것이 있으면 사용, 없으면 폴백 빌드
+  const adj: AdjacencyList =
+    graph.adjacencyList ?? buildAdjacencyList(graph.nodes, graph.edges);
+
+  // BFS 확산 (index pointer 방식 — shift() 대신 O(1) 접근)
+  let queueHead = 0;
+  while (queueHead < queue.length && activationMap.size <= maxActiveNodes) {
+    const current = queue[queueHead++]!;
 
     // 최대 홉 초과 시 확산 중단
     if (current.hops >= maxHops) continue;
 
-    // 현재 노드의 이웃 탐색
-    for (const edge of graph.edges) {
-      if (edge.from !== current.nodeId) continue;
-      processNeighbor(
-        graph,
-        current,
-        edge.to,
-        resolvedParams,
-        activationMap,
-        queue,
-      );
+    // 인접 리스트에서 이웃 탐색 (O(degree) — 기존 O(E) 대비 최적화)
+    const neighbors = adj.get(current.nodeId);
+    if (neighbors) {
+      for (const neighborId of neighbors) {
+        processNeighbor(
+          graph,
+          current,
+          neighborId,
+          resolvedParams,
+          activationMap,
+          queue,
+        );
+      }
     }
   }
 

@@ -5,6 +5,7 @@
 import type { NodeId } from '../types/common.js';
 import type {
   AdjacencyList,
+  InvertedIndex,
   KnowledgeEdge,
   KnowledgeGraph,
   KnowledgeNode,
@@ -21,6 +22,7 @@ export interface GraphBuilderOptions {
 export interface GraphBuildResult {
   graph: KnowledgeGraph;
   adjacencyList: AdjacencyList;
+  invertedIndex: InvertedIndex;
   orphanNodes: NodeId[];
 }
 
@@ -65,19 +67,19 @@ export function buildGraph(
   // 디렉토리 계층 엣지 (PARENT_OF / CHILD_OF / SIBLING)
   const dirMap = buildDirectoryMap(nodes);
   const treeEdges = buildTreeEdges(nodes, dirMap, nodeMap);
-  edges.push(...treeEdges);
+  for (const e of treeEdges) edges.push(e);
 
   // RELATIONSHIP 엣지: person frontmatter가 있는 노드 쌍 간 관계 엣지 생성
   const relationshipEdges = buildRelationshipEdges(nodes);
-  edges.push(...relationshipEdges);
+  for (const e of relationshipEdges) edges.push(e);
 
   // Domain cross-layer 연결: 동일 domain 태그를 가진 노드 간 약한 LINK 엣지 (weight=0.3)
   const domainEdges = buildDomainEdges(nodes);
-  edges.push(...domainEdges);
+  for (const e of domainEdges) edges.push(e);
 
   // CROSS_LAYER 엣지: L5-Boundary 노드에서 connected_layers 내 태그 겹침 노드로
   const crossLayerEdges = buildCrossLayerEdges(nodes);
-  edges.push(...crossLayerEdges);
+  for (const e of crossLayerEdges) edges.push(e);
 
   const graph: KnowledgeGraph = {
     nodes: nodeMap,
@@ -88,6 +90,7 @@ export function buildGraph(
   };
 
   const adjacencyList = buildAdjacencyList(nodeMap, edges);
+  const invertedIndex = buildInvertedIndex(nodeMap);
   const orphanNodes = detectOrphans(nodeMap, edges);
 
   if (!includeOrphans) {
@@ -97,7 +100,7 @@ export function buildGraph(
     graph.nodeCount = graph.nodes.size;
   }
 
-  return { graph, adjacencyList, orphanNodes };
+  return { graph, adjacencyList, invertedIndex, orphanNodes };
 }
 
 /**
@@ -191,6 +194,41 @@ export function buildAdjacencyList(
     adj.get(edge.from)?.push(edge.to);
   }
   return adj;
+}
+
+/**
+ * 역 인덱스 구축: 노드 제목(단어 분리)과 태그를 lowercase term → NodeId Set으로 매핑.
+ * 키워드 시드 해석 시 prefix matching으로 O(terms) 조회 지원.
+ */
+export function buildInvertedIndex(
+  nodeMap: Map<NodeId, KnowledgeNode>,
+): InvertedIndex {
+  const index: InvertedIndex = new Map();
+
+  function addTerm(term: string, nodeId: NodeId): void {
+    const lower = term.toLowerCase();
+    if (lower.length === 0) return;
+    let set = index.get(lower);
+    if (!set) {
+      set = new Set();
+      index.set(lower, set);
+    }
+    set.add(nodeId);
+  }
+
+  for (const [nodeId, node] of nodeMap) {
+    // 제목을 단어로 분리하여 인덱싱
+    const titleWords = node.title.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/);
+    for (const word of titleWords) {
+      addTerm(word, nodeId);
+    }
+    // 태그를 통째로 인덱싱
+    for (const tag of node.tags) {
+      addTerm(tag, nodeId);
+    }
+  }
+
+  return index;
 }
 
 /**

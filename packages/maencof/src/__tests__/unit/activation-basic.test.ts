@@ -5,9 +5,9 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { buildAdjacencyList } from '../../core/graph-builder.js';
 import {
   SpreadingActivationEngine,
-  buildAdjacencyList,
   runSpreadingActivation,
 } from '../../core/spreading-activation.js';
 import { Layer } from '../../types/common.js';
@@ -74,7 +74,7 @@ function makeSimpleGraph(): KnowledgeGraph {
 describe('buildAdjacencyList', () => {
   it('모든 노드를 인접 리스트에 포함해야 한다', () => {
     const graph = makeSimpleGraph();
-    const adj = buildAdjacencyList(graph);
+    const adj = buildAdjacencyList(graph.nodes, graph.edges);
 
     expect(adj.has(toNodeId('A'))).toBe(true);
     expect(adj.has(toNodeId('B'))).toBe(true);
@@ -84,7 +84,7 @@ describe('buildAdjacencyList', () => {
 
   it('엣지 방향대로 이웃을 구성해야 한다', () => {
     const graph = makeSimpleGraph();
-    const adj = buildAdjacencyList(graph);
+    const adj = buildAdjacencyList(graph.nodes, graph.edges);
 
     expect(adj.get(toNodeId('A'))).toContain(toNodeId('B'));
     expect(adj.get(toNodeId('B'))).toContain(toNodeId('C'));

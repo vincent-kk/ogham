@@ -86,7 +86,7 @@ export {
 export type { MergeResult } from './core/claude-md-merger.js';
 
 // Search modules
-export { query, resolveSeedNodes, QueryEngine } from './search/query-engine.js';
+export { query, resolveSeedNodes, QueryEngine, invalidateQueryCache } from './search/query-engine.js';
 export type { QueryOptions, QueryResult } from './search/query-engine.js';
 
 export {

@@ -20,8 +20,13 @@ import {
 } from '../../index/incremental-tracker.js';
 import { MetadataStore } from '../../index/metadata-store.js';
 import type { NodeId } from '../../types/common.js';
-import type { KnowledgeGraph } from '../../types/graph.js';
-import type { KnowledgeNode } from '../../types/graph.js';
+import type {
+  AdjacencyList,
+  EdgeWeightMap,
+  KnowledgeEdge,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../types/graph.js';
 import type { MaencofCrudResult } from '../../types/mcp.js';
 
 /** kg_build 입력 */
@@ -61,6 +66,40 @@ async function toCurrentFileInfos(
 interface BuildOutput {
   graph: KnowledgeGraph;
   files: ScannedFile[];
+}
+
+/**
+ * 엣지 배열로부터 EdgeWeightMap을 구축한다.
+ * calculateWeights() 이후에 호출하여 최종 가중치를 반영한다.
+ */
+function buildEdgeWeightMap(edges: KnowledgeEdge[]): EdgeWeightMap {
+  const map: EdgeWeightMap = new Map();
+  for (const edge of edges) {
+    let inner = map.get(edge.from);
+    if (!inner) {
+      inner = new Map();
+      map.set(edge.from, inner);
+    }
+    inner.set(edge.to, edge.weight);
+  }
+  return map;
+}
+
+/**
+ * 엣지 배열로부터 AdjacencyList를 구축한다.
+ */
+function buildAdjacencyListFromEdges(
+  nodes: Map<NodeId, KnowledgeNode>,
+  edges: KnowledgeEdge[],
+): AdjacencyList {
+  const adj: AdjacencyList = new Map();
+  for (const id of nodes.keys()) {
+    adj.set(id, []);
+  }
+  for (const edge of edges) {
+    adj.get(edge.from)?.push(edge.to);
+  }
+  return adj;
 }
 
 /**
@@ -113,12 +152,17 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   }
 
   const builtAt = new Date().toISOString();
+  const adjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
+  const edgeWeightMap = buildEdgeWeightMap(weightedEdges);
   const graph: KnowledgeGraph = {
     nodes,
     edges: weightedEdges,
     builtAt,
     nodeCount: nodes.size,
     edgeCount: weightedEdges.length,
+    adjacencyList,
+    edgeWeightMap,
+    invertedIndex: graphResult.invertedIndex,
   };
 
   return { graph, files };
@@ -208,6 +252,8 @@ async function incrementalBuild(
     }
   }
 
+  const incrAdjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
+  const incrEdgeWeightMap = buildEdgeWeightMap(weightedEdges);
   return {
     graph: {
       nodes,
@@ -215,6 +261,9 @@ async function incrementalBuild(
       builtAt: new Date().toISOString(),
       nodeCount: nodes.size,
       edgeCount: weightedEdges.length,
+      adjacencyList: incrAdjacencyList,
+      edgeWeightMap: incrEdgeWeightMap,
+      invertedIndex: graphResult.invertedIndex,
     },
     files,
   };

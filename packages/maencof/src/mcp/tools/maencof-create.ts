@@ -5,9 +5,11 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import { deduplicateContent } from '../../core/content-dedup.js';
 import { quoteYamlValue } from '../../core/yaml-parser.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../types/common.js';
 import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../types/common.js';
+import { AUTO_GENERATED_FM_KEYS } from '../../types/frontmatter.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../types/mcp.js';
 
 /**
@@ -41,10 +43,22 @@ function generateFilename(title?: string, tags?: string[]): string {
   return `note-${Date.now()}.md`;
 }
 
+/** Frontmatter build result */
+interface FrontmatterBuildResult {
+  /** Generated YAML string (including --- delimiters) */
+  yaml: string;
+  /** All keys that buildFrontmatter can produce (for dedup detection) */
+  possibleKeys: string[];
+}
+
 /**
  * Frontmatter YAML 문자열을 생성한다.
+ *
+ * `possibleKeys`는 이 함수가 생성할 수 있는 모든 키 목록을 반환한다.
+ * 조건부 키(sub_layer, title 등)도 포함되어, dedup이 content 내
+ * 잠재적 중복을 놓치지 않도록 한다.
  */
-function buildFrontmatter(input: MaencofCreateInput): string {
+function buildFrontmatter(input: MaencofCreateInput): FrontmatterBuildResult {
   const today = new Date().toISOString().slice(0, 10);
   const tagsYaml = `[${input.tags.map((t) => quoteYamlValue(t)).join(', ')}]`;
 
@@ -62,7 +76,11 @@ function buildFrontmatter(input: MaencofCreateInput): string {
   if (input.expires) lines.push(`expires: ${input.expires}`);
 
   lines.push('---');
-  return lines.join('\n');
+
+  return {
+    yaml: lines.join('\n'),
+    possibleKeys: [...AUTO_GENERATED_FM_KEYS],
+  };
 }
 
 /**
@@ -157,10 +175,14 @@ export async function handleMaencofCreate(
     // 파일 없음 → 정상
   }
 
-  // 문서 내용 조립
-  const frontmatter = buildFrontmatter(input);
+  // 문서 내용 조립 (content 중복 제거 후)
+  const { yaml: frontmatter, possibleKeys } = buildFrontmatter(input);
   const title = input.title ? `# ${input.title}\n\n` : '';
-  const fileContent = `${frontmatter}\n${title}${input.content}`;
+  const dedup = deduplicateContent(input.content, {
+    title: input.title,
+    generatedKeys: possibleKeys,
+  });
+  const fileContent = `${frontmatter}\n${title}${dedup.content}`;
 
   // 디렉토리 생성 + 파일 쓰기
   await mkdir(dirname(absolutePath), { recursive: true });
@@ -187,5 +209,6 @@ export async function handleMaencofCreate(
     success: true,
     path: relativePath,
     message: `Document created: ${relativePath}`,
+    ...(dedup.warnings.length > 0 && { warnings: dedup.warnings }),
   };
 }

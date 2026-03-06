@@ -23,6 +23,7 @@ import { MetadataStore } from '../index/metadata-store.js';
 import type { KnowledgeGraph } from '../types/graph.js';
 import { VERSION } from '../version.js';
 
+import { invalidateQueryCache } from '../search/query-engine.js';
 import { toolError, toolResult } from './shared.js';
 import { handleBoundaryCreate } from './tools/boundary-create.js';
 import { handleClaudeMdMerge } from './tools/claudemd-merge.js';
@@ -142,6 +143,7 @@ async function ensureFreshGraph(
 function invalidateCache(): void {
   cachedGraph = null;
   cacheVaultPath = null;
+  invalidateQueryCache();
 }
 
 /**
@@ -166,7 +168,7 @@ function registerCrudTools(server: McpServer): void {
     'maencof_create',
     {
       description:
-        'Creates a new memory document in the knowledge tree. Frontmatter is auto-generated when Layer(1-5) and tags are specified.',
+        'Creates a new memory document in the knowledge tree. Frontmatter and H1 title are auto-generated — do NOT include them in the content field.',
       inputSchema: z.object({
         layer: z
           .number()
@@ -177,7 +179,11 @@ function registerCrudTools(server: McpServer): void {
             'Document Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
           ),
         tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
-        content: z.string().describe('Document content (markdown)'),
+        content: z
+          .string()
+          .describe(
+            'Document body (markdown). Do NOT include frontmatter (---) or H1 heading — they are auto-generated.',
+          ),
         title: z.string().optional().describe('Document title (optional)'),
         filename: z
           .string()
