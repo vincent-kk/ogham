@@ -12,6 +12,7 @@ export {
   buildSnapshot,
   computeChangeSet,
   scanIncrementalChanges,
+  readVaultFile,
 } from './core/vault-scanner.js';
 export type {
   ScannedFile,
@@ -87,10 +88,11 @@ export type { MergeResult } from './core/claude-md-merger.js';
 
 // Search modules
 export { query, resolveSeedNodes, QueryEngine, invalidateQueryCache } from './search/query-engine.js';
-export type { QueryOptions, QueryResult } from './search/query-engine.js';
+export type { QueryOptions, QueryResult, ScoredSeed, MatchType } from './search/query-engine.js';
 
 export {
   assembleContext,
+  extractBestSnippet,
   ContextAssembler,
 } from './search/context-assembler.js';
 export type {

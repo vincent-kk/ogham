@@ -533,7 +533,7 @@ function registerKgTools(server: McpServer): void {
       try {
         const vaultPath = getVaultPath();
         const graph = await ensureFreshGraph(vaultPath);
-        const result = await handleKgContext(graph, args);
+        const result = await handleKgContext(graph, args, vaultPath);
         if ('error' in result) {
           return { content: [{ type: 'text' as const, text: result.error }] };
         }

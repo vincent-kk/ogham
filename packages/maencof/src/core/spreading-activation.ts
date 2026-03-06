@@ -26,6 +26,8 @@ export interface SpreadingActivationParams {
   maxActiveNodes?: number;
   /** 감쇠 인자 오버라이드 (기본: Layer별 감쇠 사용) */
   decayOverride?: number;
+  /** 시드별 초기 활성화 값 (미지정 시 1.0) */
+  seedActivations?: Map<NodeId, number>;
 }
 
 /** BFS 큐 항목 */
@@ -74,7 +76,7 @@ function processNeighbor(
   graph: KnowledgeGraph,
   current: QueueItem,
   neighborId: NodeId,
-  params: Required<SpreadingActivationParams>,
+  params: { threshold: number; maxHops: number; maxActiveNodes: number; decayOverride: number | undefined },
   activationMap: Map<NodeId, ActivationResult>,
   queue: QueueItem[],
 ): void {
@@ -136,11 +138,13 @@ export function runSpreadingActivation(
   const maxHops = params.maxHops ?? 5;
   const maxActiveNodes = params.maxActiveNodes ?? 100;
   const decayOverride = params.decayOverride;
-  const resolvedParams: Required<SpreadingActivationParams> = {
+  const seedActivations = params.seedActivations;
+  const resolvedParams = {
     threshold,
     maxHops,
     maxActiveNodes,
-    decayOverride: decayOverride as number,
+    decayOverride,
+    seedActivations,
   };
 
   // 활성화 맵: nodeId → 최고 활성화 값
@@ -149,15 +153,16 @@ export function runSpreadingActivation(
   // BFS 큐
   const queue: QueueItem[] = [];
 
-  // 시드 노드 초기화 (활성화 값 1.0)
+  // 시드 노드 초기화 (seedActivations 맵이 있으면 해당 값, 없으면 1.0)
   for (const seedId of seedIds) {
     if (!graph.nodes.has(seedId)) continue;
 
+    const seedScore = resolvedParams.seedActivations?.get(seedId) ?? 1.0;
     const existing = activationMap.get(seedId);
-    if (!existing || existing.score < 1.0) {
+    if (!existing || existing.score < seedScore) {
       activationMap.set(seedId, {
         nodeId: seedId,
-        score: 1.0,
+        score: seedScore,
         hops: 0,
         path: [seedId],
       });
@@ -165,7 +170,7 @@ export function runSpreadingActivation(
 
     queue.push({
       nodeId: seedId,
-      activation: 1.0,
+      activation: seedScore,
       hops: 0,
       path: [seedId],
     });

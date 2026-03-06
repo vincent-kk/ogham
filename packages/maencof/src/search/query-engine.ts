@@ -12,6 +12,16 @@ import { toNodeId } from '../types/common.js';
 import type { ActivationResult, KnowledgeGraph } from '../types/graph.js';
 import { QueryCache } from './query-cache.js';
 
+/** 시드 매칭 유형 */
+export type MatchType = 'path-exact' | 'title-exact' | 'title-word' | 'tag-exact' | 'tag-prefix';
+
+/** 매칭 품질이 포함된 시드 */
+export interface ScoredSeed {
+  nodeId: NodeId;
+  matchScore: number;
+  matchType: MatchType;
+}
+
 /** QueryEngine 검색 옵션 */
 export interface QueryOptions {
   /** 최대 결과 수 (기본: 10) */
@@ -24,6 +34,8 @@ export interface QueryOptions {
   maxHops?: number;
   /** Layer 필터 (미지정 시 전체 Layer) */
   layerFilter?: number[];
+  /** 적응형 SA 파라미터 활성화 (기본: true) */
+  adaptiveSA?: boolean;
 }
 
 /** 검색 결과 */
@@ -39,57 +51,96 @@ export interface QueryResult {
 }
 
 /**
+ * 노드에 대한 키워드 매칭 품질을 분류한다.
+ * InvertedIndex는 title/tag 출처를 구분하지 않으므로, post-lookup으로 node를 재검사한다.
+ */
+function classifyMatch(
+  node: { title: string; tags: string[] },
+  keyword: string,
+): { score: number; type: MatchType } {
+  const kw = keyword.toLowerCase();
+  const titleLower = node.title.toLowerCase();
+
+  // title exact match
+  if (titleLower === kw) return { score: 1.0, type: 'title-exact' };
+
+  // title word boundary match
+  const titleWords = titleLower.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/);
+  if (titleWords.some((w) => w === kw)) return { score: 0.8, type: 'title-word' };
+
+  // tag exact match
+  if (node.tags.some((t) => t.toLowerCase() === kw)) return { score: 0.5, type: 'tag-exact' };
+
+  // tag prefix match
+  if (node.tags.some((t) => t.toLowerCase().startsWith(kw))) return { score: 0.3, type: 'tag-prefix' };
+
+  // title contains keyword (fallback — still a match via inverted index)
+  if (titleLower.includes(kw)) return { score: 0.8, type: 'title-word' };
+
+  return { score: 0.3, type: 'tag-prefix' };
+}
+
+/**
  * 쿼리 문자열에서 시드 노드를 결정한다.
  *
  * 전략:
- * 1. 쿼리가 '.md'로 끝나거나 '/'를 포함하면 파일 경로로 처리
- * 2. 그 외: Frontmatter 태그/제목 매칭으로 노드 탐색
+ * 1. 쿼리가 '.md'로 끝나거나 '/'를 포함하면 파일 경로로 처리 (score=1.0)
+ * 2. 그 외: InvertedIndex prefix matching → post-lookup classification
  *
  * @param graph - 지식 그래프
  * @param seeds - 시드 후보 (경로 또는 키워드)
- * @returns 유효한 시드 노드 ID 목록
+ * @returns 매칭 품질이 포함된 시드 노드 목록
  */
 export function resolveSeedNodes(
   graph: KnowledgeGraph,
   seeds: string[],
-): NodeId[] {
-  const resolvedIds = new Set<NodeId>();
+): ScoredSeed[] {
+  const bestScores = new Map<NodeId, ScoredSeed>();
 
   for (const seed of seeds) {
     const isPathQuery = seed.endsWith('.md') || seed.includes('/');
 
     if (isPathQuery) {
-      // 직접 경로 매칭
       const nodeId = toNodeId(seed);
       if (graph.nodes.has(nodeId)) {
-        resolvedIds.add(nodeId);
-      }
-    } else if (graph.invertedIndex) {
-      // 역 인덱스 기반 prefix matching (O(terms))
-      const keyword = seed.toLowerCase();
-      for (const [term, nodeIds] of graph.invertedIndex) {
-        if (term.startsWith(keyword)) {
-          for (const id of nodeIds) {
-            resolvedIds.add(id);
-          }
+        const existing = bestScores.get(nodeId);
+        if (!existing || existing.matchScore < 1.0) {
+          bestScores.set(nodeId, { nodeId, matchScore: 1.0, matchType: 'path-exact' });
         }
       }
     } else {
-      // 폴백: 전체 노드 선형 스캔 (invertedIndex 미존재 시)
+      // 후보 NodeId 수집 (invertedIndex 또는 linear scan)
+      const candidateIds = new Set<NodeId>();
       const keyword = seed.toLowerCase();
-      for (const [id, node] of graph.nodes) {
-        const titleMatch = node.title.toLowerCase().includes(keyword);
-        const tagMatch = node.tags.some((tag) =>
-          tag.toLowerCase().includes(keyword),
-        );
-        if (titleMatch || tagMatch) {
-          resolvedIds.add(id);
+
+      if (graph.invertedIndex) {
+        for (const [term, nodeIds] of graph.invertedIndex) {
+          if (term.startsWith(keyword)) {
+            for (const id of nodeIds) candidateIds.add(id);
+          }
+        }
+      } else {
+        for (const [id, node] of graph.nodes) {
+          const titleMatch = node.title.toLowerCase().includes(keyword);
+          const tagMatch = node.tags.some((tag) => tag.toLowerCase().includes(keyword));
+          if (titleMatch || tagMatch) candidateIds.add(id);
+        }
+      }
+
+      // Post-lookup classification: 각 후보에 대해 매칭 품질 분류
+      for (const id of candidateIds) {
+        const node = graph.nodes.get(id);
+        if (!node) continue;
+        const { score, type } = classifyMatch(node, seed);
+        const existing = bestScores.get(id);
+        if (!existing || existing.matchScore < score) {
+          bestScores.set(id, { nodeId: id, matchScore: score, matchType: type });
         }
       }
     }
   }
 
-  return Array.from(resolvedIds);
+  return Array.from(bestScores.values());
 }
 
 /**
@@ -143,18 +194,46 @@ export function query(
     return { ...cached, durationMs: Date.now() - startTime };
   }
 
-  // 시드 노드 결정
-  const seedIds = resolveSeedNodes(graph, seeds);
+  // 시드 노드 결정 (매칭 품질 포함)
+  const scoredSeeds = resolveSeedNodes(graph, seeds);
+  const seedIds = scoredSeeds.map((s) => s.nodeId);
 
   let results: ActivationResult[] = [];
 
-  if (seedIds.length > 0) {
+  if (scoredSeeds.length > 0) {
+    // seedActivations 맵 구축
+    const seedActivations = new Map<NodeId, number>();
+    for (const s of scoredSeeds) {
+      seedActivations.set(s.nodeId, s.matchScore);
+    }
+
+    // 적응형 SA 파라미터 (B1)
+    let adaptedMaxHops = maxHops;
+    let adaptedThreshold = threshold;
+    const useAdaptive = options.adaptiveSA !== false && options.maxHops === undefined;
+
+    if (useAdaptive && scoredSeeds.length > 0) {
+      const maxScore = Math.max(...scoredSeeds.map((s) => s.matchScore));
+      const avgScore = scoredSeeds.reduce((sum, s) => sum + s.matchScore, 0) / scoredSeeds.length;
+      const isStrongSignal = scoredSeeds.length === 1
+        && maxScore >= 0.9
+        && (scoredSeeds[0]!.matchType === 'path-exact' || scoredSeeds[0]!.matchType === 'title-exact');
+
+      if (isStrongSignal) {
+        adaptedMaxHops = Math.min(adaptedMaxHops, 2);
+        adaptedThreshold = Math.max(adaptedThreshold, 0.05);
+      } else if (avgScore >= 0.6) {
+        adaptedMaxHops = Math.min(adaptedMaxHops, 3);
+      }
+    }
+
     // SA 파라미터
     const saParams: SpreadingActivationParams = {
-      threshold,
-      maxHops,
+      threshold: adaptedThreshold,
+      maxHops: adaptedMaxHops,
       maxActiveNodes: 100,
       decayOverride: decay,
+      seedActivations,
     };
 
     // 확산 활성화 실행

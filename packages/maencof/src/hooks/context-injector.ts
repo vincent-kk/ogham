@@ -73,6 +73,7 @@ function buildSessionContext(cwd: string): string {
     '- When <kg-core> shows low freshness (<90%), proactively run kg_build.',
     '- When <kg-stale-advisory> is present, run kg_build IMMEDIATELY before other vault operations.',
     '- When <pinned> contains nodes, prioritize those in context assembly via kg_context.',
+    '- kg_context now returns content snippets from top results. Use it as the primary content retrieval tool for multi-document queries.',
   ];
 
   return lines.join('\n');

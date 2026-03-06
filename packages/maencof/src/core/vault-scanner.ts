@@ -7,7 +7,7 @@
  * - .maencof/, .maencof-meta/ 디렉토리 자동 제외
  * - 증분 스캔: 이전 스냅샷과 mtime 비교로 변경 파일만 추출
  */
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 /** 스캔된 파일 정보 */
@@ -144,6 +144,21 @@ export function computeChangeSet(
   }
 
   return changeSet;
+}
+
+/**
+ * vault 내 파일의 내용을 읽어 반환한다.
+ *
+ * @param vaultRoot - vault 루트 절대 경로
+ * @param relativePath - vault 루트 기준 상대 경로
+ * @returns 파일 내용 (UTF-8)
+ */
+export async function readVaultFile(
+  vaultRoot: string,
+  relativePath: string,
+): Promise<string> {
+  const absolutePath = join(vaultRoot, relativePath);
+  return readFile(absolutePath, 'utf-8');
 }
 
 /**
