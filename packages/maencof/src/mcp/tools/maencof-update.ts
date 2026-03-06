@@ -6,7 +6,9 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { deduplicateContent } from '../../core/content-dedup.js';
 import { quoteYamlValue } from '../../core/yaml-parser.js';
+import { AUTO_GENERATED_FM_KEYS } from '../../types/frontmatter.js';
 import type { MaencofCrudResult, MaencofUpdateInput } from '../../types/mcp.js';
 
 /**
@@ -116,7 +118,12 @@ export async function handleMaencofUpdate(
   // 기존 본문 추출 (Frontmatter 이후 부분)
   const existingBody = fmMatch ? existing.slice(fmMatch[0].length) : existing;
   // content가 생략되면 기존 본문 유지
-  const bodyToWrite = input.content ?? existingBody;
+  const bodyToWrite = input.content
+    ? deduplicateContent(input.content, {
+        title: undefined,
+        generatedKeys: [...AUTO_GENERATED_FM_KEYS],
+      }).content
+    : existingBody;
 
   if (fmMatch) {
     // Frontmatter 업데이트 (updated 자동 갱신 + 선택 필드)

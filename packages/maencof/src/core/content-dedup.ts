@@ -54,6 +54,9 @@ export function deduplicateContent(
   // Step 1: Remove duplicate frontmatter block
   result = removeDuplicateFrontmatter(result, options.generatedKeys, warnings);
 
+  // Step 1.5: Remove loose key: value lines at start of content
+  result = removeLooseMetadataLines(result, options.generatedKeys, warnings);
+
   // Step 2: Remove duplicate H1 heading
   result = removeDuplicateH1(result, options.title, warnings);
 
@@ -91,6 +94,42 @@ function removeDuplicateFrontmatter(
     `Duplicate frontmatter removed from content (overlapping keys: ${overlapping.join(', ')})`,
   );
   return content.slice(match[0].length);
+}
+
+/**
+ * Removes loose `key: value` lines at the start of content where the key
+ * matches one of the generated keys. Stops at the first blank line or
+ * non-matching line (conservative policy).
+ */
+function removeLooseMetadataLines(
+  content: string,
+  generatedKeys: string[],
+  warnings: string[],
+): string {
+  const lines = content.split('\n');
+  const removedKeys: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    // Stop at blank line or non key:value line
+    const kvMatch = /^([a-zA-Z_][a-zA-Z0-9_]*):\s/.exec(line);
+    if (!kvMatch) break;
+
+    if (generatedKeys.includes(kvMatch[1])) {
+      removedKeys.push(kvMatch[1]);
+      i++;
+    } else {
+      break;
+    }
+  }
+
+  if (removedKeys.length === 0) return content;
+
+  warnings.push(
+    `Loose metadata lines removed from content (keys: ${removedKeys.join(', ')})`,
+  );
+  return lines.slice(i).join('\n');
 }
 
 /**
