@@ -61,11 +61,13 @@ function collectOutboundNeighbors(
   children: KnowledgeNode[];
   siblings: KnowledgeNode[];
   crossLayer: KnowledgeNode[];
+  domain: KnowledgeNode[];
 } {
   const outbound: KnowledgeNode[] = [];
   const children: KnowledgeNode[] = [];
   const siblings: KnowledgeNode[] = [];
   const crossLayer: KnowledgeNode[] = [];
+  const domain: KnowledgeNode[] = [];
 
   for (const edge of outEdges) {
     if (includeOutbound && edge.type === 'LINK') {
@@ -86,9 +88,13 @@ function collectOutboundNeighbors(
       const target = graph.nodes.get(edge.to);
       if (target) crossLayer.push(target);
     }
+    if (edge.type === 'DOMAIN') {
+      const target = graph.nodes.get(edge.to);
+      if (target) domain.push(target);
+    }
   }
 
-  return { outbound, children, siblings, crossLayer };
+  return { outbound, children, siblings, crossLayer, domain };
 }
 
 function collectInboundNeighbors(
@@ -100,10 +106,12 @@ function collectInboundNeighbors(
   inbound: KnowledgeNode[];
   parent: KnowledgeNode | undefined;
   crossLayer: KnowledgeNode[];
+  domain: KnowledgeNode[];
 } {
   const inbound: KnowledgeNode[] = [];
   let parent: KnowledgeNode | undefined;
   const crossLayer: KnowledgeNode[] = [];
+  const domain: KnowledgeNode[] = [];
 
   for (const edge of inEdges) {
     if (includeInbound && edge.type === 'LINK') {
@@ -118,9 +126,13 @@ function collectInboundNeighbors(
       const source = graph.nodes.get(edge.from);
       if (source) crossLayer.push(source);
     }
+    if (edge.type === 'DOMAIN') {
+      const source = graph.nodes.get(edge.from);
+      if (source) domain.push(source);
+    }
   }
 
-  return { inbound, parent, crossLayer };
+  return { inbound, parent, crossLayer, domain };
 }
 
 /**
@@ -157,6 +169,7 @@ export async function handleKgNavigate(
     children,
     siblings,
     crossLayer: outCrossLayer,
+    domain: outDomain,
   } = collectOutboundNeighbors(
     outEdges,
     graph,
@@ -168,9 +181,11 @@ export async function handleKgNavigate(
     inbound,
     parent,
     crossLayer: inCrossLayer,
+    domain: inDomain,
   } = collectInboundNeighbors(inEdges, graph, includeInbound, includeHierarchy);
 
   const crossLayer = [...outCrossLayer, ...inCrossLayer];
+  const domain = [...outDomain, ...inDomain];
 
   return {
     node,
@@ -180,5 +195,6 @@ export async function handleKgNavigate(
     children,
     siblings,
     crossLayer: crossLayer.length > 0 ? crossLayer : undefined,
+    domain: domain.length > 0 ? domain : undefined,
   };
 }

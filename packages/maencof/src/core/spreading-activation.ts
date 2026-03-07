@@ -6,7 +6,7 @@
  * Layer별 감쇠: L1=0.5, L2=0.7, L3=0.8, L4=0.9, L5=0.95
  * BFS 방식 홉 확산, 임계값 기반 종료
  */
-import type { NodeId } from '../types/common.js';
+import type { EdgeType, NodeId } from '../types/common.js';
 import type {
   ActivationResult,
   AdjacencyList,
@@ -15,6 +15,17 @@ import type {
 
 import { buildAdjacencyList } from './graph-builder.js';
 import { getLayerDecay } from './weight-calculator.js';
+
+/** 엣지 타입별 SA 활성화 멀티플라이어 */
+export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
+  LINK: 1.0,
+  PARENT_OF: 0.8,
+  CHILD_OF: 0.8,
+  SIBLING: 0.5,
+  RELATIONSHIP: 0.7,
+  CROSS_LAYER: 0.6,
+  DOMAIN: 0.3,
+};
 
 /** 확산 활성화 파라미터 */
 export interface SpreadingActivationParams {
@@ -39,7 +50,24 @@ interface QueueItem {
 }
 
 /**
+ * 엣지 타입 조회 (from → to)
+ * edgeTypeMap이 있으면 O(1), 없으면 edges.find() 폴백
+ */
+function getEdgeType(
+  graph: KnowledgeGraph,
+  from: NodeId,
+  to: NodeId,
+): EdgeType {
+  if (graph.edgeTypeMap) {
+    return graph.edgeTypeMap.get(from)?.get(to) ?? 'LINK';
+  }
+  const edge = graph.edges.find((e) => e.from === from && e.to === to);
+  return edge?.type ?? 'LINK';
+}
+
+/**
  * 엣지 가중치 조회 (from → to)
+ * 기본 가중치에 엣지 타입별 멀티플라이어를 적용한다.
  * edgeWeightMap이 있으면 O(1), 없으면 edges.find() 폴백
  */
 function getEdgeWeight(
@@ -47,11 +75,12 @@ function getEdgeWeight(
   from: NodeId,
   to: NodeId,
 ): number {
-  if (graph.edgeWeightMap) {
-    return graph.edgeWeightMap.get(from)?.get(to) ?? 0.5;
-  }
-  const edge = graph.edges.find((e) => e.from === from && e.to === to);
-  return edge?.weight ?? 0.5;
+  const baseWeight = graph.edgeWeightMap
+    ? (graph.edgeWeightMap.get(from)?.get(to) ?? 0.5)
+    : (graph.edges.find((e) => e.from === from && e.to === to)?.weight ?? 0.5);
+
+  const edgeType = getEdgeType(graph, from, to);
+  return baseWeight * EDGE_TYPE_MULTIPLIER[edgeType];
 }
 
 /**

@@ -203,6 +203,12 @@ function registerCrudTools(server: McpServer): void {
           .describe(
             'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
           ),
+        mentioned_persons: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'People mentioned in this document (e.g., ["홍길동", "Alice"])',
+          ),
       }),
     },
     async (args) => {

@@ -196,6 +196,34 @@ describe('computeRelationshipWeight (calculateWeights 통해 검증)', () => {
   });
 });
 
+describe('computeEdgeWeight DOMAIN', () => {
+  it('DOMAIN 엣지에 0.3 가중치를 할당한다', () => {
+    const a = makeNode('01_Core/a.md', Layer.L1_CORE);
+    const b = makeNode('02_Derived/b.md');
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'DOMAIN', weight: 0 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const { edges: weighted } = calculateWeights(graph);
+    const domainEdge = weighted.find((e) => e.type === 'DOMAIN');
+    expect(domainEdge?.weight).toBeCloseTo(0.3, 5);
+  });
+
+  it('DOMAIN 엣지는 PageRank에서 제외된다', () => {
+    const a = makeNode('a/a.md');
+    const b = makeNode('b/b.md');
+    const edges: KnowledgeEdge[] = [
+      { from: a.id, to: b.id, type: 'DOMAIN', weight: 0.3 },
+    ];
+    const graph = makeGraph([a, b], edges);
+    const ranks = computePageRank(graph);
+    // DOMAIN 엣지만 있으면 두 노드 모두 dangling — PageRank 균등 분배
+    const rankA = ranks.get(a.id) ?? 0;
+    const rankB = ranks.get(b.id) ?? 0;
+    expect(rankA).toBeCloseTo(rankB, 5);
+  });
+});
+
 describe('PageRank RELATIONSHIP 포함', () => {
   it('RELATIONSHIP 엣지가 PageRank out-degree에 포함된다', () => {
     const a = makeNode('a/a.md');

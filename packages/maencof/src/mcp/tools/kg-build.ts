@@ -3,6 +3,7 @@
  * @description kg_build 도구 핸들러 — 인덱스 전체/증분 빌드 트리거
  */
 import { readFile, stat } from 'node:fs/promises';
+import { posix } from 'node:path';
 
 import {
   buildKnowledgeNode,
@@ -22,6 +23,7 @@ import { MetadataStore } from '../../index/metadata-store.js';
 import type { NodeId } from '../../types/common.js';
 import type {
   AdjacencyList,
+  EdgeTypeMap,
   EdgeWeightMap,
   KnowledgeEdge,
   KnowledgeGraph,
@@ -86,6 +88,23 @@ function buildEdgeWeightMap(edges: KnowledgeEdge[]): EdgeWeightMap {
 }
 
 /**
+ * 엣지 배열로부터 EdgeTypeMap을 구축한다.
+ * SA에서 엣지 타입별 멀티플라이어를 적용하기 위한 O(1) 조회용.
+ */
+function buildEdgeTypeMap(edges: KnowledgeEdge[]): EdgeTypeMap {
+  const map: EdgeTypeMap = new Map();
+  for (const edge of edges) {
+    let inner = map.get(edge.from);
+    if (!inner) {
+      inner = new Map();
+      map.set(edge.from, inner);
+    }
+    inner.set(edge.to, edge.type);
+  }
+  return map;
+}
+
+/**
  * 엣지 배열로부터 AdjacencyList를 구축한다.
  */
 function buildAdjacencyListFromEdges(
@@ -100,6 +119,72 @@ function buildAdjacencyListFromEdges(
     adj.get(edge.from)?.push(edge.to);
   }
   return adj;
+}
+
+/**
+ * 파일명(stem) → 풀 경로 역인덱스를 구축한다.
+ * 동일 파일명이 여러 경로에 존재하면 정렬 순서상 첫 번째 경로를 사용한다.
+ */
+/** @internal 테스트용 export */
+export function buildStemIndex(
+  nodes: Map<NodeId, KnowledgeNode>,
+): Map<string, string> {
+  const stemIndex = new Map<string, string>();
+  const sortedPaths = Array.from(nodes.values())
+    .map((n) => n.path)
+    .sort();
+  for (const fullPath of sortedPaths) {
+    const filename = posix.basename(fullPath);
+    if (!stemIndex.has(filename)) {
+      stemIndex.set(filename, fullPath);
+    }
+  }
+  return stemIndex;
+}
+
+/**
+ * 수집된 링크를 해석하고 노드에 outboundLinks를 부착한다.
+ * - 상대 경로 (./、../): 소스 파일 디렉토리 기준으로 resolve
+ * - vault-root-relative 경로: 그대로 사용
+ * - stem-only 폴백: 직접 매칭 실패 시 파일명으로 역인덱스 조회
+ */
+/** @internal 테스트용 export */
+export function resolveAndAttachLinks(
+  nodes: Map<NodeId, KnowledgeNode>,
+  allLinks: Array<{ from: string; to: string }>,
+): void {
+  const nodePathSet = new Set(Array.from(nodes.values()).map((n) => n.path));
+  let stemIndex: Map<string, string> | undefined;
+
+  const linksBySource = new Map<string, string[]>();
+  for (const link of allLinks) {
+    if (!linksBySource.has(link.from)) linksBySource.set(link.from, []);
+    const sourceDir = posix.dirname(link.from);
+    const isRelative = link.to.startsWith('./') || link.to.startsWith('../');
+    // 상대 경로 해석: ./、../ → vault-root-relative
+    let resolved = isRelative
+      ? posix.normalize(posix.join(sourceDir, link.to))
+      : link.to;
+
+    // stem-only 폴백: 직접 매칭 실패 시 파일명으로 역인덱스 조회
+    if (!isRelative && !nodePathSet.has(resolved)) {
+      if (!stemIndex) stemIndex = buildStemIndex(nodes);
+      const filename = posix.basename(resolved);
+      const stemResolved = stemIndex.get(filename);
+      if (stemResolved) {
+        resolved = stemResolved;
+      }
+    }
+
+    linksBySource.get(link.from)!.push(resolved);
+  }
+  for (const [sourcePath, targets] of linksBySource) {
+    const nodeId = sourcePath as NodeId;
+    const node = nodes.get(nodeId);
+    if (node) {
+      node.outboundLinks = targets;
+    }
+  }
 }
 
 /**
@@ -134,6 +219,9 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
     }),
   );
 
+  // 아웃바운드 링크를 노드에 부착 (buildGraph에서 LINK 엣지 생성에 사용)
+  resolveAndAttachLinks(nodes, allLinks);
+
   // 그래프 빌드
   const nodeList = Array.from(nodes.values());
   const graphResult = buildGraph(nodeList);
@@ -154,6 +242,7 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
   const builtAt = new Date().toISOString();
   const adjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
   const edgeWeightMap = buildEdgeWeightMap(weightedEdges);
+  const edgeTypeMap = buildEdgeTypeMap(weightedEdges);
   const graph: KnowledgeGraph = {
     nodes,
     edges: weightedEdges,
@@ -162,6 +251,7 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
     edgeCount: weightedEdges.length,
     adjacencyList,
     edgeWeightMap,
+    edgeTypeMap,
     invertedIndex: graphResult.invertedIndex,
   };
 
@@ -220,6 +310,7 @@ async function incrementalBuild(
 
   // 변경된 파일만 재파싱 (I/O 절약의 핵심)
   const fileMap = new Map(files.map((f) => [f.relativePath, f]));
+  const allLinks: Array<{ from: string; to: string }> = [];
 
   await Promise.all(
     scope.filesToReparse.map(async (filePath) => {
@@ -231,12 +322,23 @@ async function incrementalBuild(
         const nodeResult = buildKnowledgeNode(doc);
         if (nodeResult.success && nodeResult.node) {
           nodes.set(nodeResult.node.id, nodeResult.node);
+
+          // 아웃바운드 링크 수집 (re-parsed 파일)
+          for (const link of doc.links) {
+            if (!link.isAbsolute) {
+              allLinks.push({ from: file.relativePath, to: link.href });
+            }
+          }
         }
       } catch {
         // 개별 파일 파싱 실패는 무시
       }
     }),
   );
+
+  // re-parsed 노드에 아웃바운드 링크 부착
+  // carry-over 노드는 직렬화를 통해 outboundLinks가 보존됨
+  resolveAndAttachLinks(nodes, allLinks);
 
   // 전체 노드 셋으로 그래프 재구축 (buildGraph/calculateWeights는 모놀리식)
   const nodeList = Array.from(nodes.values());
@@ -254,6 +356,7 @@ async function incrementalBuild(
 
   const incrAdjacencyList = buildAdjacencyListFromEdges(nodes, weightedEdges);
   const incrEdgeWeightMap = buildEdgeWeightMap(weightedEdges);
+  const incrEdgeTypeMap = buildEdgeTypeMap(weightedEdges);
   return {
     graph: {
       nodes,
@@ -263,6 +366,7 @@ async function incrementalBuild(
       edgeCount: weightedEdges.length,
       adjacencyList: incrAdjacencyList,
       edgeWeightMap: incrEdgeWeightMap,
+      edgeTypeMap: incrEdgeTypeMap,
       invertedIndex: graphResult.invertedIndex,
     },
     files,

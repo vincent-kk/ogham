@@ -62,6 +62,9 @@ const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 /** 마크다운 링크 정규식 ([text](href)) */
 const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
 
+/** 위키링크 정규식 ([[path]], [[path|display]], [[path#heading]]) */
+const WIKILINK_REGEX = /\[\[([^\]]+)\]\]/g;
+
 /** 절대 경로 판별 (http://, https://, /, #로 시작) */
 const ABSOLUTE_HREF_REGEX = /^(?:https?:\/\/|\/|#)/;
 
@@ -140,6 +143,28 @@ export function extractLinks(body: string): MarkdownLink[] {
     });
   }
 
+  // 위키링크 추출: [[path]], [[path|display]], [[path#heading]], [[path#heading|display]]
+  WIKILINK_REGEX.lastIndex = 0;
+  while ((match = WIKILINK_REGEX.exec(bodyWithoutCode)) !== null) {
+    const raw = match[1].trim();
+    if (!raw) continue;
+
+    // display text 분리: [[path|display]] → path
+    const withoutDisplay = raw.split('|')[0].trim();
+    // heading/block ref 분리: [[path#heading]] → path
+    const pathOnly = withoutDisplay.split('#')[0].trim();
+    if (!pathOnly) continue;
+
+    // .md 확장자 자동 보정 (Obsidian 컨벤션: 확장자 생략 가능)
+    const href = pathOnly.endsWith('.md') ? pathOnly : `${pathOnly}.md`;
+
+    links.push({
+      text: raw,
+      href,
+      isAbsolute: false, // 위키링크는 항상 vault-relative 내부 참조
+    });
+  }
+
   return links;
 }
 
@@ -208,6 +233,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);
   if (fm.connected_layers) node.connectedLayers = fm.connected_layers;
   if (fm.boundary_type) node.boundaryType = fm.boundary_type;
+  if (fm.mentioned_persons) node.mentioned_persons = fm.mentioned_persons;
 
   return { success: true, node };
 }

@@ -193,6 +193,59 @@ describe('handleMaencofCreate', () => {
     );
   });
 
+  it('mentioned_persons가 제공되면 Frontmatter에 포함된다', async () => {
+    await handleMaencofCreate(vault, {
+      layer: 2,
+      tags: ['meeting'],
+      content: '회의 내용.',
+      title: 'Meeting Notes',
+      mentioned_persons: ['Alice', '홍길동'],
+    });
+
+    const files = await import('node:fs/promises').then((m) =>
+      m.readdir(join(vault, '02_Derived')),
+    );
+    const content = await readFile(
+      join(vault, '02_Derived', files[0]),
+      'utf-8',
+    );
+    expect(content).toContain('mentioned_persons:');
+    expect(content).toContain('Alice');
+    expect(content).toContain('홍길동');
+  });
+
+  it('mentioned_persons가 없으면 Frontmatter에 미포함된다', async () => {
+    await handleMaencofCreate(vault, {
+      layer: 2,
+      tags: ['note'],
+      content: '일반 메모.',
+      title: 'Plain Note',
+    });
+
+    const files = await import('node:fs/promises').then((m) =>
+      m.readdir(join(vault, '02_Derived')),
+    );
+    const content = await readFile(
+      join(vault, '02_Derived', files[0]),
+      'utf-8',
+    );
+    expect(content).not.toContain('mentioned_persons');
+  });
+
+  it('성공 메시지에 태그 목록이 포함된다', async () => {
+    const result = await handleMaencofCreate(vault, {
+      layer: 2,
+      tags: ['react', 'hooks'],
+      content: 'React hooks 메모.',
+      title: 'React Hooks',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('tags:');
+    expect(result.message).toContain('react');
+    expect(result.message).toContain('hooks');
+  });
+
   it('source와 expires 옵션 필드가 Frontmatter에 포함된다', async () => {
     await handleMaencofCreate(vault, {
       layer: 3,

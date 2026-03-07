@@ -38,6 +38,10 @@ export interface KnowledgeNode {
   person?: Person;
   /** Domain 이름 (cross-layer 그룹핑용) */
   domain?: string;
+  /** 문서에서 언급된 인물 목록 (모든 레이어, person_ref와 별개) */
+  mentioned_persons?: string[];
+  /** 아웃바운드 링크 목록 (vault-root-relative 경로, 빌드 시 document-parser에서 수집) */
+  outboundLinks?: string[];
 }
 
 /** 그래프 엣지 */
@@ -68,6 +72,8 @@ export interface KnowledgeGraph {
   adjacencyList?: AdjacencyList;
   /** 사전 계산된 엣지 가중치 맵 (SA O(1) 가중치 조회) */
   edgeWeightMap?: EdgeWeightMap;
+  /** 사전 계산된 엣지 타입 맵 (SA O(1) 엣지 타입 조회) */
+  edgeTypeMap?: EdgeTypeMap;
   /** 사전 계산된 역 인덱스 (키워드 시드 O(1) 조회) */
   invertedIndex?: InvertedIndex;
 }
@@ -77,6 +83,9 @@ export type AdjacencyList = Map<NodeId, NodeId[]>;
 
 /** 엣지 가중치 맵 (from → to → weight) — O(1) 가중치 조회용 */
 export type EdgeWeightMap = Map<NodeId, Map<NodeId, number>>;
+
+/** 엣지 타입 맵 (from → to → EdgeType) — SA O(1) 엣지 타입 조회용 */
+export type EdgeTypeMap = Map<NodeId, Map<NodeId, EdgeType>>;
 
 /** 역 인덱스 (lowercase term → NodeId Set) — 키워드 시드 해석용 */
 export type InvertedIndex = Map<string, Set<NodeId>>;

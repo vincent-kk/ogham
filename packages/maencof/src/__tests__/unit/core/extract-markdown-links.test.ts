@@ -1,14 +1,14 @@
 /**
- * @file extract-links.test.ts
- * @description extractLinks 유닛 테스트
+ * @file extract-markdown-links.test.ts
+ * @description extractLinks 유닛 테스트 — 표준 마크다운 링크 [text](url)
  */
 import { describe, expect, it } from 'vitest';
 
 import { extractLinks } from '../../../core/document-parser.js';
 
-// ─── extractLinks ─────────────────────────────────────────────────────────────
+// ─── extractLinks — 마크다운 링크 ─────────────────────────────────────────────
 
-describe('extractLinks', () => {
+describe('extractLinks — markdown links', () => {
   it('기본 마크다운 링크를 추출한다', () => {
     const body = 'See [identity](./01_Core/identity.md) for details.';
     const links = extractLinks(body);

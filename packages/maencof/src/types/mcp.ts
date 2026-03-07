@@ -26,6 +26,8 @@ export interface MaencofCreateInput {
   expires?: string;
   /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
   sub_layer?: SubLayer;
+  /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
+  mentioned_persons?: string[];
 }
 
 /** maencof_read 입력 */
@@ -171,6 +173,8 @@ export interface KgNavigateResult {
   siblings: KnowledgeNode[];
   /** CROSS_LAYER 연결 노드 (L5-Boundary 경유) */
   crossLayer?: KnowledgeNode[];
+  /** DOMAIN 연결 노드 (동일 domain 태그) */
+  domain?: KnowledgeNode[];
 }
 
 /** kg_context 응답 */

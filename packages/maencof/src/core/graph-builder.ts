@@ -45,12 +45,10 @@ export function buildGraph(
 
   const edges: KnowledgeEdge[] = [];
 
-  // LINK 엣지는 DocumentParser가 채운 outboundLinks 필드로부터 생성
-  // KnowledgeNode에 outboundLinks가 있다고 가정 (graph.ts 확장 타입 참조)
+  // LINK 엣지는 kg-build가 채운 outboundLinks 필드로부터 생성
   for (const node of nodes) {
-    const ext = node as KnowledgeNode & { outboundLinks?: string[] };
-    if (ext.outboundLinks) {
-      for (const target of ext.outboundLinks) {
+    if (node.outboundLinks) {
+      for (const target of node.outboundLinks) {
         const targetId = target as NodeId;
         if (nodeMap.has(targetId)) {
           edges.push({
@@ -226,6 +224,12 @@ export function buildInvertedIndex(
     for (const tag of node.tags) {
       addTerm(tag, nodeId);
     }
+    // mentioned_persons 인덱싱 (프론트매터에서 파싱된 경우)
+    if (node.mentioned_persons) {
+      for (const person of node.mentioned_persons) {
+        addTerm(person, nodeId);
+      }
+    }
   }
 
   return index;
@@ -294,8 +298,8 @@ function buildRelationshipEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
 }
 
 /**
- * 동일 domain 태그를 가진 노드 간 약한 LINK 엣지 생성 (cross-layer 연결).
- * weight=0.3, 양방향.
+ * 동일 domain 태그를 가진 노드 간 DOMAIN 엣지 생성 (cross-layer 연결).
+ * weight=0.3, 양방향. 시스템 생성 엣지로 user-authored LINK와 구분된다.
  */
 function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
   const edges: KnowledgeEdge[] = [];
@@ -319,9 +323,9 @@ function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
       for (let j = i + 1; j < group.length; j++) {
         const a = group[i];
         const b = group[j];
-        // 양방향 약한 LINK 엣지
-        edges.push({ from: a.id, to: b.id, type: 'LINK', weight: 0.3 });
-        edges.push({ from: b.id, to: a.id, type: 'LINK', weight: 0.3 });
+        // 양방향 DOMAIN 엣지
+        edges.push({ from: a.id, to: b.id, type: 'DOMAIN', weight: 0.3 });
+        edges.push({ from: b.id, to: a.id, type: 'DOMAIN', weight: 0.3 });
       }
     }
   }

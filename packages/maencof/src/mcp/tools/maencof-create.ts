@@ -74,6 +74,10 @@ function buildFrontmatter(input: MaencofCreateInput): FrontmatterBuildResult {
   if (input.title) lines.push(`title: ${quoteYamlValue(input.title)}`);
   if (input.source) lines.push(`source: ${quoteYamlValue(input.source)}`);
   if (input.expires) lines.push(`expires: ${input.expires}`);
+  if (input.mentioned_persons && input.mentioned_persons.length > 0) {
+    const personsYaml = `[${input.mentioned_persons.map((p) => quoteYamlValue(p)).join(', ')}]`;
+    lines.push(`mentioned_persons: ${personsYaml}`);
+  }
 
   lines.push('---');
 
@@ -208,7 +212,7 @@ export async function handleMaencofCreate(
   return {
     success: true,
     path: relativePath,
-    message: `Document created: ${relativePath}`,
+    message: `Document created: ${relativePath} | tags: ${input.tags.join(', ')}`,
     ...(dedup.warnings.length > 0 && { warnings: dedup.warnings }),
   };
 }

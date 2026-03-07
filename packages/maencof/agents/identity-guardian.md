@@ -126,7 +126,7 @@ Glob 01_Core/**/*.md to collect file list
 
 ## Access Count Update (AutonomyLevel >= 2) — Not Implemented
 
-> **Note**: This feature is not implemented in v0.0.1.
+> **Note**: This feature is not yet implemented.
 > Currently, index-invalidator updates only `usage-stats.json` (tool call statistics);
 > automatic increment of Frontmatter `accessed_count` is not yet implemented.
 > Planned for a future version.
