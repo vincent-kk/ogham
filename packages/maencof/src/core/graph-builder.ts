@@ -224,6 +224,12 @@ export function buildInvertedIndex(
     for (const tag of node.tags) {
       addTerm(tag, nodeId);
     }
+    // mentioned_persons 인덱싱 (프론트매터에서 파싱된 경우)
+    if (node.mentioned_persons) {
+      for (const person of node.mentioned_persons) {
+        addTerm(person, nodeId);
+      }
+    }
   }
 
   return index;

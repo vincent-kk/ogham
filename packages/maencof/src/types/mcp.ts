@@ -26,6 +26,8 @@ export interface MaencofCreateInput {
   expires?: string;
   /** 서브레이어 (L3: relational/structural/topical, L5: buffer/boundary) */
   sub_layer?: SubLayer;
+  /** 문서 콘텐츠에서 언급된 인물 목록 (선택, 모든 레이어) */
+  mentioned_persons?: string[];
 }
 
 /** maencof_read 입력 */

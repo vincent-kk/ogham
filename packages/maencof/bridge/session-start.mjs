@@ -82,12 +82,20 @@ Run \`/maencof:setup\` to complete the migration.`)}catch{}}function Yd(e,r){ret
 - When modifying vault documents MUST use \`maencof_update\`. Do not edit vault markdown files directly with the Edit tool.
 - When learning new information MUST use \`kg_suggest_links\` to check for connection possibilities with existing knowledge.
 - When creating documents MUST specify layer and tags.
+- When creating documents about interactions with people (meetings, conversations, collaborations), MUST include \`mentioned_persons\` parameter in \`maencof_create\` with the names of people mentioned. This is separate from \`person_ref\` (L3A-only, identifies who a profile document is about). \`mentioned_persons\` captures anyone mentioned in any document at any layer.
 
 ## Forbidden Rules (FORBIDDEN)
 
 - FORBIDDEN: Directly using Read, Write, Edit, Grep, Glob tools on markdown files within the vault path
 - FORBIDDEN: Directly modifying L1_Core documents (must go through the identity-guardian agent)
 - FORBIDDEN: Directly modifying the .maencof/ or .maencof-meta/ directories
+- FORBIDDEN: Using Claude's built-in memory (<remember> tags / MEMORY.md) to store user knowledge or conversation insights
+
+## Memory Routing (CRITICAL)
+
+- NEVER use Claude's built-in auto-memory (<remember> tags or MEMORY.md) for knowledge the user asks to remember.
+- When the user says "\uAE30\uC5B5\uD574\uC918", "\uAE30\uC5B5\uD574", "remember this", "save this", "\uAE30\uB85D\uD574", "\uBA54\uBAA8\uD574" or similar memory requests, ALWAYS route to \`/maencof:remember\` skill or \`maencof_create\` tool.
+- Claude's auto-memory is ONLY for Claude's own operational notes (tool preferences, workflow settings). All user knowledge MUST go to the maencof vault.
 
 ## Tool Mapping
 
@@ -131,6 +139,15 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
 - When the system advises running \`kg_build\` (stale index advisory), follow the advice promptly.
 - Run \`kg_build\` explicitly only when advised by the system (high stale ratio) or for full PageRank recalculation.
+
+## Concept Document Lifecycle
+
+- After creating a document via \`maencof_create\`, check whether concept documents exist for each tag used.
+- A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
+- If a tag has been used 3+ times across documents but has no concept document, suggest creating one:
+  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
+- Use \`kg_search\` with the tag as seed to check for existing concept documents before suggesting.
+- Do NOT auto-create concept documents \u2014 always suggest and wait for user confirmation.
 
 ## Status Documents (Layer 4)
 

@@ -259,6 +259,38 @@ describe('session-start version.json 관리', () => {
     expect(content).not.toContain('maencof Knowledge Space');
   });
 
+  it('Memory Routing 디렉티브가 포함된다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('## Memory Routing');
+    expect(content).toContain('기억해줘');
+    expect(content).toContain('기억해');
+    expect(content).toContain('/maencof:remember');
+    expect(content).toMatch(
+      /FORBIDDEN.*built-in memory.*<remember>.*MEMORY\.md/s,
+    );
+  });
+
+  it('mentioned_persons 안내 디렉티브가 포함된다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('mentioned_persons');
+    expect(content).toContain('person_ref');
+    expect(content).toContain('L3A-only');
+  });
+
+  it('Concept Document Lifecycle 디렉티브가 포함된다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('## Concept Document Lifecycle');
+    expect(content).toContain('Layer 3C');
+    expect(content).toContain('kg_search');
+    expect(content).toContain('Do NOT auto-create');
+  });
+
   it('스킬 테이블이 지시문에 포함된다', () => {
     runSessionStart({ cwd: vaultDir });
 

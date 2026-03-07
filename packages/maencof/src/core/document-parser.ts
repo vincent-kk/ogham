@@ -233,6 +233,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   node.subLayer = fm.sub_layer ?? inferSubLayerFromPath(doc.relativePath);
   if (fm.connected_layers) node.connectedLayers = fm.connected_layers;
   if (fm.boundary_type) node.boundaryType = fm.boundary_type;
+  if (fm.mentioned_persons) node.mentioned_persons = fm.mentioned_persons;
 
   return { success: true, node };
 }

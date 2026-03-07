@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildAdjacencyList,
   buildGraph,
+  buildInvertedIndex,
   detectOrphans,
 } from '../../core/graph-builder.js';
 import { Layer, toNodeId } from '../../types/common.js';
@@ -153,5 +154,29 @@ describe('detectOrphans', () => {
     const orphans = detectOrphans(nodeMap, edges);
     expect(orphans).not.toContain(a.id);
     expect(orphans).not.toContain(b.id);
+  });
+});
+
+describe('buildInvertedIndex', () => {
+  it('mentioned_persons 값을 검색 인덱스에 등록한다', () => {
+    const node: KnowledgeNode = {
+      ...makeNode('02_Derived/meeting.md'),
+      mentioned_persons: ['홍길동', 'Alice'],
+    };
+    const nodeMap = new Map([[node.id, node]]);
+    const index = buildInvertedIndex(nodeMap);
+
+    expect(index.get('홍길동')?.has(node.id)).toBe(true);
+    expect(index.get('alice')?.has(node.id)).toBe(true);
+  });
+
+  it('mentioned_persons가 없는 노드는 인물 인덱싱을 건너뛴다', () => {
+    const node = makeNode('02_Derived/plain.md');
+    const nodeMap = new Map([[node.id, node]]);
+    const index = buildInvertedIndex(nodeMap);
+
+    // tags와 title은 인덱싱되지만 mentioned_persons 관련 항목은 없음
+    expect(index.has('plain.md')).toBe(false);
+    expect(index.get('test')?.has(node.id)).toBe(true); // tag 'test'
   });
 });
