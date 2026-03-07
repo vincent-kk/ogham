@@ -54,20 +54,20 @@ Present the plan to the user for review.
 
 ### Step 2.5 — Create Migration Lock
 
-계획을 사용자에게 표시하기 전에 migration lock 파일을 생성한다.
+After displaying the plan to the user, create the migration lock file.
 
 Write `.maencof-meta/migration.lock`:
 ```json
 {
-  "startedAt": "<현재 ISO 타임스탬프>",
+  "startedAt": "<current ISO timestamp>",
   "ttlMinutes": 30,
-  "sessionId": "<input.session_id 또는 null>"
+  "sessionId": "<input.session_id or null>"
 }
 ```
 
-이 파일이 존재하면 changelog-gate Stop hook이 migration 진행 중임을 인식하고 세션 종료를 허용한다.
+When this file exists, the changelog-gate Stop hook recognizes that a migration is in progress and allows session termination.
 
-vault 루트 `.gitignore`에 `.maencof-meta/migration.lock` 패턴이 없으면 추가한다.
+If the `.maencof-meta/migration.lock` pattern is not in the vault root `.gitignore`, add it.
 
 ### Step 3 — User Confirmation
 
@@ -81,8 +81,8 @@ Present the plan summary and ask for confirmation. Show:
 
 Then use the `AskUserQuestion` tool to ask:
 
-> "이 계획을 실행할까요?"
-> Options: "예, 실행합니다" / "아니오, 취소합니다"
+> "Proceed with this migration plan?"
+> Options: "Yes, execute" / "No, cancel"
 
 Wait for the user's answer before taking any action.
 

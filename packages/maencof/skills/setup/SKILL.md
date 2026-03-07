@@ -54,7 +54,7 @@ After the Core Identity Interview is complete, propose an AI companion persona b
 
 1. **Generate persona**: Synthesize interview answers (values, boundaries, interests, communication style) into a companion identity:
    - `name`: A short, memorable name reflecting the user's personality
-   - `role`: How the AI positions itself (e.g., "지식 정리 파트너")
+   - `role`: How the AI positions itself (e.g., "knowledge organization partner")
    - `personality.tone`, `personality.approach`, `personality.traits`: Derived from communication style + values
    - `principles`: Derived from core values
    - `taboos`: Derived from absolute boundaries
@@ -159,7 +159,7 @@ setup skill starts
 |--------|-------------|
 | `--step <1-6>` | Re-run a specific stage only |
 | `--reset` | Full reset (recreates trust-level.json; existing L1 markdown documents are preserved) |
-| `--reset --companion` | Companion identity만 리셋 (JSON 삭제 → L1 재읽기 → 재생성) |
+| `--reset --companion` | Reset companion identity only (delete JSON → re-read L1 → regenerate) |
 
 ## Error Handling
 

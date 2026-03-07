@@ -79,7 +79,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `mode` | interactive | `document` or `claudemd` |
+| `mode` | interactive | `document`, `buffer-cleanup`, or `claudemd` |
 | `path` | none | Target document path (document mode only) |
 | `--force` | false | Skip backlink warning (document mode only) |
 | `--dry-run` | false | Preview without executing (claudemd remove only) |

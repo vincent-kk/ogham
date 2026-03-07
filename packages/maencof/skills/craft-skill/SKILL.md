@@ -200,6 +200,7 @@ Automation tools for skill construction:
 - **init_skill.py**: Enhanced skill initialization
 - **package_skill.py**: Validation + packaging
 - **deployment_helper.py**: Intelligent deployment support
+- **quick_validate.py**: Quick validation shortcut
 
 Execute scripts directly without loading into context for efficiency.
 

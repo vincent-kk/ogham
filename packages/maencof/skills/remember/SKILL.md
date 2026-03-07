@@ -200,7 +200,7 @@ To explore related documents: /maencof:explore {tag}
 ```
 /maencof:remember If you leave the dependency array empty in a React hook, it only runs once on mount
 /maencof:remember https://example.com/paper paper on spreading activation --layer 3
-/maencof:remember PR review due tomorrow --layer 4 --expires 2024-12-31
+/maencof:remember PR review due tomorrow --layer 4 --expires 2026-12-31
 /maencof:remember --title "TypeScript Generic Patterns" --tags typescript,generic,pattern
 ```
 
