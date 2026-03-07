@@ -70,6 +70,8 @@ export interface KnowledgeGraph {
   adjacencyList?: AdjacencyList;
   /** 사전 계산된 엣지 가중치 맵 (SA O(1) 가중치 조회) */
   edgeWeightMap?: EdgeWeightMap;
+  /** 사전 계산된 엣지 타입 맵 (SA O(1) 엣지 타입 조회) */
+  edgeTypeMap?: EdgeTypeMap;
   /** 사전 계산된 역 인덱스 (키워드 시드 O(1) 조회) */
   invertedIndex?: InvertedIndex;
 }
@@ -79,6 +81,9 @@ export type AdjacencyList = Map<NodeId, NodeId[]>;
 
 /** 엣지 가중치 맵 (from → to → weight) — O(1) 가중치 조회용 */
 export type EdgeWeightMap = Map<NodeId, Map<NodeId, number>>;
+
+/** 엣지 타입 맵 (from → to → EdgeType) — SA O(1) 엣지 타입 조회용 */
+export type EdgeTypeMap = Map<NodeId, Map<NodeId, EdgeType>>;
 
 /** 역 인덱스 (lowercase term → NodeId Set) — 키워드 시드 해석용 */
 export type InvertedIndex = Map<string, Set<NodeId>>;

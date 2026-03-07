@@ -71,7 +71,8 @@ export type EdgeType =
   | 'CHILD_OF'
   | 'SIBLING'
   | 'RELATIONSHIP'
-  | 'CROSS_LAYER';
+  | 'CROSS_LAYER'
+  | 'DOMAIN';
 
 /** 그래프 엣지 유형 상수 */
 export const EDGE_TYPE = {
@@ -81,6 +82,7 @@ export const EDGE_TYPE = {
   SIBLING: 'SIBLING',
   RELATIONSHIP: 'RELATIONSHIP',
   CROSS_LAYER: 'CROSS_LAYER',
+  DOMAIN: 'DOMAIN',
 } as const satisfies Record<EdgeType, EdgeType>;
 
 /** 링크 방향 */

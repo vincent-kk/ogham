@@ -171,6 +171,8 @@ export interface KgNavigateResult {
   siblings: KnowledgeNode[];
   /** CROSS_LAYER 연결 노드 (L5-Boundary 경유) */
   crossLayer?: KnowledgeNode[];
+  /** DOMAIN 연결 노드 (동일 domain 태그) */
+  domain?: KnowledgeNode[];
 }
 
 /** kg_context 응답 */

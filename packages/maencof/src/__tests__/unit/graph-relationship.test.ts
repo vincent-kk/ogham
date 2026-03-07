@@ -85,7 +85,7 @@ describe('RELATIONSHIP 엣지 생성', () => {
     expect(relEdges).toHaveLength(0);
   });
 
-  it('동일 domain 태그를 가진 노드 간 약한 LINK 엣지(weight=0.3)가 생성된다', () => {
+  it('동일 domain 태그를 가진 노드 간 DOMAIN 엣지(weight=0.3)가 생성된다', () => {
     const a = {
       ...makeNode('01_Core/a.md', Layer.L1_CORE),
       domain: 'AI',
@@ -93,7 +93,7 @@ describe('RELATIONSHIP 엣지 생성', () => {
     const b = { ...makeNode('02_Derived/b.md'), domain: 'AI' } as KnowledgeNode;
     const { graph } = buildGraph([a, b]);
     const domainEdges = graph.edges.filter(
-      (e) => e.type === 'LINK' && e.weight === 0.3,
+      (e) => e.type === 'DOMAIN' && e.weight === 0.3,
     );
     expect(domainEdges.length).toBeGreaterThan(0);
   });

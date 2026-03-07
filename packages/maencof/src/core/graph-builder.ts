@@ -292,8 +292,8 @@ function buildRelationshipEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
 }
 
 /**
- * 동일 domain 태그를 가진 노드 간 약한 LINK 엣지 생성 (cross-layer 연결).
- * weight=0.3, 양방향.
+ * 동일 domain 태그를 가진 노드 간 DOMAIN 엣지 생성 (cross-layer 연결).
+ * weight=0.3, 양방향. 시스템 생성 엣지로 user-authored LINK와 구분된다.
  */
 function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
   const edges: KnowledgeEdge[] = [];
@@ -317,9 +317,9 @@ function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
       for (let j = i + 1; j < group.length; j++) {
         const a = group[i];
         const b = group[j];
-        // 양방향 약한 LINK 엣지
-        edges.push({ from: a.id, to: b.id, type: 'LINK', weight: 0.3 });
-        edges.push({ from: b.id, to: a.id, type: 'LINK', weight: 0.3 });
+        // 양방향 DOMAIN 엣지
+        edges.push({ from: a.id, to: b.id, type: 'DOMAIN', weight: 0.3 });
+        edges.push({ from: b.id, to: a.id, type: 'DOMAIN', weight: 0.3 });
       }
     }
   }

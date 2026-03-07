@@ -69,8 +69,9 @@ describe('SubLayer types', () => {
         'SIBLING',
         'RELATIONSHIP',
         'CROSS_LAYER',
+        'DOMAIN',
       ];
-      expect(existing).toHaveLength(6);
+      expect(existing).toHaveLength(7);
     });
   });
 

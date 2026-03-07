@@ -75,6 +75,8 @@ function computeEdgeWeight(edge: KnowledgeEdge, graph: KnowledgeGraph): number {
       return computeRelationshipWeight(fromNode, toNode);
     case 'CROSS_LAYER':
       return 1.0;
+    case 'DOMAIN':
+      return 0.3;
     default:
       return 1.0;
   }
