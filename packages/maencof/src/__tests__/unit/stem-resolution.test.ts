@@ -40,10 +40,7 @@ function makeNodes(...paths: string[]): Map<NodeId, KnowledgeNode> {
 
 describe('buildStemIndex', () => {
   it('파일명 → 풀 경로 역인덱스를 구축한다', () => {
-    const nodes = makeNodes(
-      '01_Core/values.md',
-      '02_Derived/notes/my-note.md',
-    );
+    const nodes = makeNodes('01_Core/values.md', '02_Derived/notes/my-note.md');
     const index = buildStemIndex(nodes);
     expect(index.get('values.md')).toBe('01_Core/values.md');
     expect(index.get('my-note.md')).toBe('02_Derived/notes/my-note.md');
@@ -71,15 +68,16 @@ describe('resolveAndAttachLinks — stem-only fallback', () => {
     resolveAndAttachLinks(nodes, links);
 
     const source = nodes.get(toNodeId('01_Core/source.md'));
-    expect(source?.outboundLinks).toEqual(['02_Derived/subfolder/note-name.md']);
+    expect(source?.outboundLinks).toEqual([
+      '02_Derived/subfolder/note-name.md',
+    ]);
   });
 
   it('vault-root-relative 경로가 직접 매칭되면 stem 폴백을 사용하지 않는다', () => {
-    const nodes = makeNodes(
-      '01_Core/source.md',
-      '02_Derived/exact-path.md',
-    );
-    const links = [{ from: '01_Core/source.md', to: '02_Derived/exact-path.md' }];
+    const nodes = makeNodes('01_Core/source.md', '02_Derived/exact-path.md');
+    const links = [
+      { from: '01_Core/source.md', to: '02_Derived/exact-path.md' },
+    ];
     resolveAndAttachLinks(nodes, links);
 
     const source = nodes.get(toNodeId('01_Core/source.md'));
@@ -87,10 +85,7 @@ describe('resolveAndAttachLinks — stem-only fallback', () => {
   });
 
   it('상대 경로 (./) 는 정상적으로 해석한다 (stem 폴백 없음)', () => {
-    const nodes = makeNodes(
-      '01_Core/source.md',
-      '01_Core/sibling.md',
-    );
+    const nodes = makeNodes('01_Core/source.md', '01_Core/sibling.md');
     const links = [{ from: '01_Core/source.md', to: './sibling.md' }];
     resolveAndAttachLinks(nodes, links);
 
@@ -99,10 +94,7 @@ describe('resolveAndAttachLinks — stem-only fallback', () => {
   });
 
   it('상대 경로 (../) 는 정상적으로 해석한다', () => {
-    const nodes = makeNodes(
-      '02_Derived/sub/source.md',
-      '02_Derived/target.md',
-    );
+    const nodes = makeNodes('02_Derived/sub/source.md', '02_Derived/target.md');
     const links = [{ from: '02_Derived/sub/source.md', to: '../target.md' }];
     resolveAndAttachLinks(nodes, links);
 

@@ -126,7 +126,9 @@ function buildAdjacencyListFromEdges(
  * 동일 파일명이 여러 경로에 존재하면 정렬 순서상 첫 번째 경로를 사용한다.
  */
 /** @internal 테스트용 export */
-export function buildStemIndex(nodes: Map<NodeId, KnowledgeNode>): Map<string, string> {
+export function buildStemIndex(
+  nodes: Map<NodeId, KnowledgeNode>,
+): Map<string, string> {
   const stemIndex = new Map<string, string>();
   const sortedPaths = Array.from(nodes.values())
     .map((n) => n.path)

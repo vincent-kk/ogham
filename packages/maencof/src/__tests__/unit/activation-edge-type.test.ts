@@ -182,12 +182,9 @@ describe('SA edge-type weighting', () => {
     const results = runSpreadingActivation(graph, [a.id], {
       decayOverride: 1.0,
     });
-    const scoreLink =
-      results.find((r) => r.nodeId === bLink.id)?.score ?? 0;
-    const scoreSib =
-      results.find((r) => r.nodeId === cSib.id)?.score ?? 0;
-    const scoreDom =
-      results.find((r) => r.nodeId === dDom.id)?.score ?? 0;
+    const scoreLink = results.find((r) => r.nodeId === bLink.id)?.score ?? 0;
+    const scoreSib = results.find((r) => r.nodeId === cSib.id)?.score ?? 0;
+    const scoreDom = results.find((r) => r.nodeId === dDom.id)?.score ?? 0;
     expect(scoreLink).toBeGreaterThan(scoreSib);
     expect(scoreSib).toBeGreaterThan(scoreDom);
   });
