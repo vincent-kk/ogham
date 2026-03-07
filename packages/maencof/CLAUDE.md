@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/maencof
 
-Personal knowledge space management plugin (v0.0.12). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
+Personal knowledge space management plugin (v0.0.14). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
 
 ## Commands
 

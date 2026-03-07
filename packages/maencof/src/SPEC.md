@@ -8,14 +8,15 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 | Directory | Role |
 |-----------|------|
 | `core/` | 순수 함수 모듈 (VaultScanner I/O 예외) |
-| `mcp/` | MCP 서버 + 17개 도구 핸들러 |
+| `mcp/` | MCP 서버 + 18개 도구 핸들러 |
 | `hooks/` | Claude Code hook 핸들러 (config-provisioner, changelog-gate, dailynote-recorder, session-start, config-registry) |
 | `types/` | 공유 타입 (외부 의존성 없음, zod 제외) |
 | `index/` | MetadataStore, IncrementalTracker |
 
 ## Public API
-- Core: scanVault, parseDocument, buildGraph, convertToDAG, calculateWeights, runSpreadingActivation, detectCommunities, mergeMaencofSection, ArchitectureMigrator, ChangelogWriter, parseYamlFrontmatter
+- Core: scanVault, parseDocument, buildGraph, convertToDAG, calculateWeights, runSpreadingActivation, detectCommunities, mergeMaencofSection, ArchitectureMigrator, ChangelogWriter, parseYamlFrontmatter, extractLinks
 - Core (internal): `quoteYamlValue`, `parseScalarValue` — YAML 직렬화 특수문자 안전 처리 (mcp/tools 내부 전용)
+- Types: EdgeType에 `DOMAIN` 추가, KnowledgeNode에 `mentioned_persons`/`outboundLinks` 필드, KnowledgeGraph에 `EdgeTypeMap`
 - Search: query, assembleContext, QueryEngine, ContextAssembler
 - Index: MetadataStore, IncrementalTracker, computeIncrementalChangeSet
 - MCP: createServer, startServer, tool handlers (maencof_*, kg_*, boundary_*, claudemd_*, dailynote_*)
