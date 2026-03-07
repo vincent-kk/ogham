@@ -3,6 +3,7 @@
  * @description kg_build 도구 핸들러 — 인덱스 전체/증분 빌드 트리거
  */
 import { readFile, stat } from 'node:fs/promises';
+import { posix } from 'node:path';
 
 import {
   buildKnowledgeNode,
@@ -103,6 +104,34 @@ function buildAdjacencyListFromEdges(
 }
 
 /**
+ * 수집된 링크를 해석하고 노드에 outboundLinks를 부착한다.
+ * - 상대 경로 (./、../): 소스 파일 디렉토리 기준으로 resolve
+ * - vault-root-relative 경로: 그대로 사용
+ */
+function resolveAndAttachLinks(
+  nodes: Map<NodeId, KnowledgeNode>,
+  allLinks: Array<{ from: string; to: string }>,
+): void {
+  const linksBySource = new Map<string, string[]>();
+  for (const link of allLinks) {
+    if (!linksBySource.has(link.from)) linksBySource.set(link.from, []);
+    const sourceDir = posix.dirname(link.from);
+    // 상대 경로 해석: ./、../ → vault-root-relative
+    const resolved = link.to.startsWith('./')  || link.to.startsWith('../')
+      ? posix.normalize(posix.join(sourceDir, link.to))
+      : link.to;
+    linksBySource.get(link.from)!.push(resolved);
+  }
+  for (const [sourcePath, targets] of linksBySource) {
+    const nodeId = sourcePath as NodeId;
+    const node = nodes.get(nodeId);
+    if (node) {
+      node.outboundLinks = targets;
+    }
+  }
+}
+
+/**
  * 전체 vault를 스캔하고 그래프를 빌드하여 저장한다.
  */
 async function fullBuild(vaultPath: string): Promise<BuildOutput> {
@@ -133,6 +162,9 @@ async function fullBuild(vaultPath: string): Promise<BuildOutput> {
       }
     }),
   );
+
+  // 아웃바운드 링크를 노드에 부착 (buildGraph에서 LINK 엣지 생성에 사용)
+  resolveAndAttachLinks(nodes, allLinks);
 
   // 그래프 빌드
   const nodeList = Array.from(nodes.values());
@@ -220,6 +252,7 @@ async function incrementalBuild(
 
   // 변경된 파일만 재파싱 (I/O 절약의 핵심)
   const fileMap = new Map(files.map((f) => [f.relativePath, f]));
+  const allLinks: Array<{ from: string; to: string }> = [];
 
   await Promise.all(
     scope.filesToReparse.map(async (filePath) => {
@@ -231,12 +264,23 @@ async function incrementalBuild(
         const nodeResult = buildKnowledgeNode(doc);
         if (nodeResult.success && nodeResult.node) {
           nodes.set(nodeResult.node.id, nodeResult.node);
+
+          // 아웃바운드 링크 수집 (re-parsed 파일)
+          for (const link of doc.links) {
+            if (!link.isAbsolute) {
+              allLinks.push({ from: file.relativePath, to: link.href });
+            }
+          }
         }
       } catch {
         // 개별 파일 파싱 실패는 무시
       }
     }),
   );
+
+  // re-parsed 노드에 아웃바운드 링크 부착
+  // carry-over 노드는 직렬화를 통해 outboundLinks가 보존됨
+  resolveAndAttachLinks(nodes, allLinks);
 
   // 전체 노드 셋으로 그래프 재구축 (buildGraph/calculateWeights는 모놀리식)
   const nodeList = Array.from(nodes.values());

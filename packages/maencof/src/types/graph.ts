@@ -38,6 +38,8 @@ export interface KnowledgeNode {
   person?: Person;
   /** Domain 이름 (cross-layer 그룹핑용) */
   domain?: string;
+  /** 아웃바운드 링크 목록 (vault-root-relative 경로, 빌드 시 document-parser에서 수집) */
+  outboundLinks?: string[];
 }
 
 /** 그래프 엣지 */

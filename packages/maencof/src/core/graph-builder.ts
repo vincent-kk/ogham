@@ -45,12 +45,10 @@ export function buildGraph(
 
   const edges: KnowledgeEdge[] = [];
 
-  // LINK 엣지는 DocumentParser가 채운 outboundLinks 필드로부터 생성
-  // KnowledgeNode에 outboundLinks가 있다고 가정 (graph.ts 확장 타입 참조)
+  // LINK 엣지는 kg-build가 채운 outboundLinks 필드로부터 생성
   for (const node of nodes) {
-    const ext = node as KnowledgeNode & { outboundLinks?: string[] };
-    if (ext.outboundLinks) {
-      for (const target of ext.outboundLinks) {
+    if (node.outboundLinks) {
+      for (const target of node.outboundLinks) {
         const targetId = target as NodeId;
         if (nodeMap.has(targetId)) {
           edges.push({
