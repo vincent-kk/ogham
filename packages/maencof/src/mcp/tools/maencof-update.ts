@@ -5,8 +5,11 @@
 import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { buildKnowledgeNode, parseDocument } from '../../core/document-parser.js';
 import { deduplicateContent } from '../../core/content-dedup.js';
+import {
+  buildKnowledgeNode,
+  parseDocument,
+} from '../../core/document-parser.js';
 import { quoteYamlValue } from '../../core/yaml-parser.js';
 import { Layer } from '../../types/common.js';
 import { AUTO_GENERATED_FM_KEYS } from '../../types/frontmatter.js';
@@ -116,8 +119,7 @@ export async function handleMaencofUpdate(
   // ─── L1 3중 게이트 ─────────────────────────────────────────────
   const doc = parseDocument(input.path, existing, mtime);
   const nodeResult = buildKnowledgeNode(doc);
-  const isL1 =
-    nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE;
+  const isL1 = nodeResult.success && nodeResult.node?.layer === Layer.L1_CORE;
 
   if (isL1) {
     if (!input.change_reason) {

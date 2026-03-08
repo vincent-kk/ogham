@@ -3,9 +3,9 @@
  * @description MCP 도구 입출력 스키마 — CRUD 6개 + KG 7개 + CLAUDE.md 3개 + dailynote 1개 = 17개
  */
 import type { Layer, SubLayer } from './common.js';
-import type { L1ChangeReason } from './l1-amendment.js';
 import type { KnowledgeNode } from './graph.js';
 import type { ActivationResult } from './graph.js';
+import type { L1ChangeReason } from './l1-amendment.js';
 
 // ─── CRUD 도구 입력 스키마 ───────────────────────────────────────────
 

@@ -16,8 +16,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleMaencofUpdate } from '../../mcp/tools/maencof-update.js';
 import {
-  L1_VERIFICATION_INTENSITY,
   type L1AmendmentRecord,
+  L1_VERIFICATION_INTENSITY,
 } from '../../types/l1-amendment.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
@@ -138,10 +138,7 @@ describe('handleMaencofUpdate — L1 Guard', () => {
     expect(result.message).toContain('Layer 1');
 
     // 파일 내용 확인
-    const updated = await readFile(
-      join(vault, '01_Core/values.md'),
-      'utf-8',
-    );
+    const updated = await readFile(join(vault, '01_Core/values.md'), 'utf-8');
     expect(updated).toContain('Updated identity content');
   });
 
@@ -217,9 +214,7 @@ describe('handleMaencofUpdate — L1 Audit Log', () => {
     const lines = (await readFile(auditPath, 'utf-8')).trim().split('\n');
     expect(lines).toHaveLength(3);
 
-    const records = lines.map(
-      (l) => JSON.parse(l) as L1AmendmentRecord,
-    );
+    const records = lines.map((l) => JSON.parse(l) as L1AmendmentRecord);
     expect(records[0].change_reason).toBe('info_update');
     expect(records[2].snapshot_before).toContain('Content version 1');
   });
