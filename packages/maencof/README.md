@@ -49,10 +49,10 @@ maencof skills are **LLM prompts**, not CLI commands. You invoke them in Claude 
 
 ```
 /maencof:setup
-/maencof:setup --step 3
+/maencof:setup --step 4
 ```
 
-6-step onboarding wizard: Vault path selection → Core Identity interview → Layer directory creation → initial index build → rule activation → completion summary.
+7-step onboarding wizard: Vault path selection → Core Identity interview → AI companion generation → Layer directory creation → initial index build → rule activation → completion summary.
 
 ### Record Knowledge
 
@@ -181,7 +181,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 | Skill                  | Category | What it does                                   |
 | ---------------------- | -------- | ---------------------------------------------- |
-| `/maencof:setup`       | Setup    | 6-step onboarding wizard                       |
+| `/maencof:setup`       | Setup    | 7-step onboarding wizard                       |
 | `/maencof:remember`    | Core     | Record new knowledge (auto-layer, tags, dedup) |
 | `/maencof:recall`      | Core     | Spreading Activation search                    |
 | `/maencof:explore`     | Core     | Interactive graph traversal (up to 3 rounds)   |

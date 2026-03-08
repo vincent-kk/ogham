@@ -1,14 +1,15 @@
 /**
  * @file setup-wizard.test.ts
- * @description Setup 6단계 워크플로우 통합 테스트
+ * @description Setup 7단계 워크플로우 통합 테스트
  *
  * 시뮬레이션 흐름:
  * 1. welcome — 사용자 인사
  * 2. vault-path — vault 경로 설정
  * 3. core-identity-interview — Core Identity 인터뷰
- * 4. scaffold-tree — 디렉토리 구조 생성 + maencof_create로 핵심 문서 생성
- * 5. index-build — kg_build로 인덱스 빌드
- * 6. guide — CLAUDE.md 통합
+ * 4. companion-identity — AI 동반자 생성
+ * 5. scaffold-tree — 디렉토리 구조 생성 + maencof_create로 핵심 문서 생성
+ * 6. index-build — kg_build로 인덱스 빌드
+ * 7. guide — CLAUDE.md 통합
  */
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -31,7 +32,7 @@ async function makeTempVault(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'maencof-setup-'));
 }
 
-describe('Setup Wizard 6단계 통합 테스트', () => {
+describe('Setup Wizard 7단계 통합 테스트', () => {
   let vault: string;
   let progress: SetupProgress;
 
@@ -214,7 +215,7 @@ vault 경로: ${vault}
     expect(progress.completed).toBe(true);
   });
 
-  it('전체 6단계 워크플로우 시뮬레이션', async () => {
+  it('전체 7단계 워크플로우 시뮬레이션', async () => {
     // Step 1-3: 설정
     progress.vaultPath = vault;
     progress.interviewAnswers = { name: '테스트 사용자', role: '개발자' };

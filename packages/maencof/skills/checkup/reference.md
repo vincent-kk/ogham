@@ -60,7 +60,7 @@ Execute AutoFixAction after user confirmation:
 | Fix layer field based on path | `maencof_update` | D4 items |
 | Suggest links for orphan nodes | `/maencof:suggest` | D1 items |
 
-**Layer 1 (01_Core/) exception**: Auto-fix via `maencof_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 3` or edit manually.
+**Layer 1 (01_Core/) exception**: Auto-fix via `maencof_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:setup --step 4` or edit manually.
 
 ## Error Handling
 

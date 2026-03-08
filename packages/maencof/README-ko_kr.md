@@ -49,10 +49,10 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 ```
 /maencof:setup
-/maencof:setup --step 3
+/maencof:setup --step 4
 ```
 
-6단계 온보딩 위저드: Vault 경로 선택 → Core Identity 인터뷰 → Layer 디렉토리 생성 → 초기 인덱스 빌드 → 규칙 활성화 → 완료 요약.
+7단계 온보딩 위저드: Vault 경로 선택 → Core Identity 인터뷰 → AI 동반자 생성 → Layer 디렉토리 생성 → 초기 인덱스 빌드 → 규칙 활성화 → 완료 요약.
 
 ### 지식 기록
 
@@ -181,7 +181,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 | 스킬                   | 분류     | 설명                                       |
 | ---------------------- | -------- | ------------------------------------------ |
-| `/maencof:setup`       | 설정     | 6단계 온보딩 위저드                        |
+| `/maencof:setup`       | 설정     | 7단계 온보딩 위저드                        |
 | `/maencof:remember`    | 핵심     | 새 지식 기록 (자동 Layer, 태그, 중복 검사) |
 | `/maencof:recall`      | 핵심     | Spreading Activation 검색                  |
 | `/maencof:explore`     | 핵심     | 인터랙티브 그래프 탐색 (최대 3라운드)      |

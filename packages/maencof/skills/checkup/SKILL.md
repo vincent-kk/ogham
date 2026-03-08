@@ -56,7 +56,7 @@ After user confirmation, execute AutoFixAction:
 
 - Fill missing Frontmatter fields (`maencof_update`)
 - Rebuild stale index (`/maencof:rebuild`)
-- **L1 (01_Core/) exception**: auto-fix forbidden — guide to `/maencof:setup --step 3`
+- **L1 (01_Core/) exception**: auto-fix forbidden — guide to `/maencof:setup --step 4`
 
 ## Available MCP Tools
 

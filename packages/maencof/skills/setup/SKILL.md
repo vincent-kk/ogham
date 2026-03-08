@@ -1,8 +1,8 @@
 ---
 name: setup
 user_invocable: true
-description: maencof onboarding wizard — Core Identity collection + knowledge tree initialization (6 stages)
-version: 1.0.0
+description: maencof onboarding wizard — Core Identity collection, AI companion generation, and knowledge tree initialization (7 stages)
+version: 2.0.0
 complexity: high
 context_layers: [1]
 orchestrator: setup skill
@@ -11,7 +11,7 @@ plugin: maencof
 
 # setup — maencof Onboarding Wizard
 
-A 6-stage interview-style wizard for first-time maencof setup or Core Identity reset.
+A 7-stage interview-style wizard for first-time maencof setup or Core Identity reset.
 Presents one question at a time; every stage can be skipped.
 
 ## When to Use This Skill
@@ -21,11 +21,15 @@ Presents one question at a time; every stage can be skipped.
 - When you need to change the knowledge tree path
 - When manually resetting the Progressive Autonomy Level
 
-## 6-Stage Wizard Flow
+## 7-Stage Wizard Flow
+
+→ Load **reference.md** when executing any stage to access output templates.
 
 ### Stage 1 — Welcome + Knowledge Space Path Setup
 
 Collect the vault absolute path via AskUserQuestion.
+→ Use templates T1-1, T1-2, T1-3 from reference.md.
+
 - Default: `~/.maencof/`
 - If the path does not exist, confirm whether to create it
 - Also create the `.maencof/` cache directory and `.maencof-meta/` metadata directory
@@ -36,43 +40,56 @@ Collect the vault absolute path via AskUserQuestion.
 
 ### Stage 2 — Core Identity Interview (minimum 5 questions)
 
-Ask questions sequentially via AskUserQuestion. Each question is independent and can be skipped with "later".
+Ask questions sequentially via AskUserQuestion. Each question is independent and can be skipped.
+→ Use templates T2-Q1 through T2-Q10, T2-SKIP, T2-DONE from reference.md.
 
-Required set (5 questions):
-1. Name/title — "What would you like to be called?"
-2. Three core values — "What are the three values most important to you?"
-3. One absolute boundary — "Tell me one thing that must never be done."
-4. Primary interests — "What area or project are you most interested in right now?"
-5. Communication style — "What style of communication do you prefer?"
+**Required set (5 questions with predefined options):**
 
-Optional set (5 questions, suggested after completing required):
-6. Occupation/role | 7. Long-term goals | 8. Learning style | 9. Decision criteria | 10. Daily routine
+1. **Name** — "어떤 이름으로 불러드릴까요?"
+   - Options: ["본명 사용", "닉네임 입력", "나중에 정할게"]
 
-#### AI Companion Self-Naming
+2. **Core values** — "지식을 쌓고 관리할 때 가장 중요하게 생각하는 가치 3가지를 골라주세요."
+   - Options (select up to 3): ["정확성", "실용성", "창의성", "체계성", "깊이", "폭넓음", "직관", "효율", "직접 입력"]
 
-After the Core Identity Interview is complete, propose an AI companion persona based on the collected answers:
+3. **Boundary** — "제가 절대 하지 말아야 할 행동이 있다면 하나만 알려주세요."
+   - Options: ["허락 없이 파일 삭제 금지", "확인 없이 정보 공유 금지", "근거 없는 추측 금지", "직접 입력", "나중에 정할게"]
 
-1. **Generate persona**: Synthesize interview answers (values, boundaries, interests, communication style) into a companion identity:
-   - `name`: A short, memorable name reflecting the user's personality
-   - `role`: How the AI positions itself (e.g., "knowledge organization partner")
-   - `personality.tone`, `personality.approach`, `personality.traits`: Derived from communication style + values
-   - `principles`: Derived from core values
-   - `taboos`: Derived from absolute boundaries
-   - `origin_story`: A brief narrative connecting the user's goals to the companion's purpose
-   - `greeting`: A personalized session greeting (format: `[maencof:${name}] ${greeting}`)
+4. **Primary interest** — "요즘 가장 관심 있는 분야나 프로젝트가 무엇인가요?"
+   - Options: ["AI/ML", "소프트웨어 개발", "독서/학습", "프로젝트 관리", "직접 입력"]
 
-2. **User approval**: Present the generated persona via AskUserQuestion with 3 options:
-   - **Accept** — Save to `.maencof-meta/companion-identity.json`
-   - **Regenerate** — Generate a new persona with different characteristics
-   - **Skip** — Do not create a companion identity; proceed to next stage
+5. **Communication style** — "어떤 말투를 선호하세요?"
+   - Options: ["간결하고 핵심만", "친근하고 대화하듯", "정중하고 격식있게", "직접 입력"]
 
-3. **Skip behavior**: If the user skips, do NOT add `companion-identity` to `completedSteps`. Proceed normally to Stage 3.
+**Optional set (5 questions, suggested after completing required):**
+
+6. **Occupation/role** — Options: ["개발자", "연구자", "학생", "기획자/PM", "디자이너", "직접 입력", "건너뛰기"]
+7. **Long-term goals** — Options: ["직접 입력", "건너뛰기"]
+8. **Learning style** — Options: ["직접 해보기", "문서/책 읽기", "영상 시청", "토론/질문", "직접 입력", "건너뛰기"]
+9. **Decision criteria** — Options: ["데이터/근거", "직관/경험", "효율/속도", "안정성/리스크", "직접 입력", "건너뛰기"]
+10. **Daily routine** — Options: ["아침형", "저녁형", "불규칙", "직접 입력", "건너뛰기"]
+
+See reference.md for full question text, hints, and notes for each question.
+
+### Stage 3 — AI Companion Identity
+
+Generate an AI companion persona based on the collected interview answers.
+→ Use templates T3-1, T3-2 from reference.md. Load **examples.md** § Example 3 for sample output.
+
+1. **Generate persona**: Map interview answers to `CompanionIdentitySchema` fields using the field generation rules in reference.md § T3-1. Every field has a deterministic mapping from interview answers.
+
+2. **User approval**: Present the generated persona (template T3-2) via AskUserQuestion with 3 options:
+   - **사용** — Save to `.maencof-meta/companion-identity.json`
+   - **다시 생성** — Generate a new persona with different characteristics
+   - **건너뛰기** — Do not create a companion identity; proceed to next stage
+
+3. **Skip behavior**: If the user skips, do NOT add `companion-identity` to `completedSteps`. Proceed normally to Stage 4.
 
 4. **Reset**: `--reset --companion` deletes the existing `companion-identity.json`, re-reads L1 documents for context, and regenerates the persona.
 
-### Stage 3 — Initial Knowledge Tree Scaffolding
+### Stage 4 — Initial Knowledge Tree Scaffolding
 
-Generate Layer 1 documents from the collected interview answers:
+Generate Layer 1 documents from the collected interview answers.
+→ Use templates T4-1, T4-2 from reference.md for document content and completion report.
 
 | File | Content |
 |------|---------|
@@ -82,7 +99,7 @@ Generate Layer 1 documents from the collected interview answers:
 | `01_Core/preferences.md` | Communication preferences |
 
 Create the 4 markdown documents above with the `maencof_create` MCP tool (layer=1, tags required).
-Note: `01_Core/trust-level.json` is created separately in Stage 4 — it is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown).
+Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown).
 
 Also create the Layer directories and sub-layer subdirectories:
 - `02_Derived/`
@@ -92,7 +109,7 @@ Also create the Layer directories and sub-layer subdirectories:
 
 Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via maencof_read.
 
-### Stage 4 — Progressive Autonomy Level 0 Setup
+### Stage 5 — Progressive Autonomy Level 0 Setup
 
 Create and initialize `01_Core/trust-level.json` at Level 0:
 
@@ -110,26 +127,25 @@ Create and initialize `01_Core/trust-level.json` at Level 0:
 - **Initial setup** (first run): Use the Write tool. The vault structure does not exist yet, so `isMaencofVault(cwd)` returns `false` and the layer-guard hook is inactive.
 - **`--reset` mode**: Use the Bash tool (`echo '{"current_level":0,...}' > 01_Core/trust-level.json`). The vault already exists, so the layer-guard would block Write/Edit on `01_Core/`. Bash bypasses the `Write|Edit` matcher in hooks.json.
 
-### Stage 5 — Initial Index Build
+### Stage 6 — Initial Index Build
 
 Check index status with the `kg_status` MCP tool.
+→ Use templates T6-1, T6-2 from reference.md.
+
 - If an existing markdown vault is present: suggest a full build and run `/maencof:build` after user confirmation
 - If new: run a lightweight build with the generated L1 documents
 
-### Stage 6 — First Memory Recording Guide
+### Stage 7 — Completion Guide
 
-Display a completion message along with guidance for:
-- `/maencof:remember` — record new knowledge
-- `/maencof:recall` — search past knowledge
-- `/maencof:build` — build the full index
-- `/maencof:checkup` — check system health
+Display a completion message with next-step guidance.
+→ Use template T7-1 from reference.md.
 
 ## Agent Collaboration
 
 ```
 setup skill starts
-  -> Stage 3: identity-guardian agent — review/protect L1 documents after creation
-  -> Stage 5: invoke build skill (with user approval)
+  -> Stage 4: identity-guardian agent — review/protect L1 documents after creation
+  -> Stage 6: invoke build skill (with user approval)
   -> setup skill: provide completion summary and guidance
 ```
 
@@ -137,17 +153,17 @@ setup skill starts
 
 | Tool | Purpose |
 |------|---------|
-| `maencof_create` | Create L1 documents (Stage 3) |
-| `maencof_read` | Verify existing L1 documents (Stage 3, via identity-guardian) |
-| `kg_status` | Check index status (Stage 5) |
+| `maencof_create` | Create L1 documents (Stage 4) |
+| `maencof_read` | Verify existing L1 documents (Stage 4, via identity-guardian) |
+| `kg_status` | Check index status (Stage 6) |
 
 ## Available Native Tools
 
 | Tool | Purpose |
 |------|---------|
-| `AskUserQuestion` | Collect user input during 6-stage interview (Stages 1–2) |
-| `Write` | Create `trust-level.json` during initial setup (Stage 4, first run only) |
-| `Bash` | Overwrite `trust-level.json` in `--reset` mode to bypass layer-guard (Stage 4) |
+| `AskUserQuestion` | Collect user input during interview (Stages 1–3) |
+| `Write` | Create `trust-level.json` during initial setup (Stage 5, first run only) |
+| `Bash` | Overwrite `trust-level.json` in `--reset` mode to bypass layer-guard (Stage 5) |
 
 ## Options
 
@@ -157,7 +173,7 @@ setup skill starts
 
 | Option | Description |
 |--------|-------------|
-| `--step <1-6>` | Re-run a specific stage only |
+| `--step <1-7>` | Re-run a specific stage only |
 | `--reset` | Full reset (recreates trust-level.json; existing L1 markdown documents are preserved) |
 | `--reset --companion` | Reset companion identity only (delete JSON → re-read L1 → regenerate) |
 
@@ -174,3 +190,27 @@ setup skill starts
 - `02_Derived/`, `03_External/` (with `relational/`, `structural/`, `topical/`), `04_Action/`, `05_Context/` (with `buffer/`, `boundary/`) directories created
 - Progressive Autonomy Level 0 set
 - Skip responses allowed (all stages)
+- Companion identity generated with deterministic field mappings (or skipped)
+
+## Resources
+
+### reference.md
+
+Output templates and field generation rules for all 7 stages. Contains:
+
+- Korean output templates (T1-1 through T7-1) for every user-facing message
+- Interview question text, hints, and predefined options (T2-Q1 through T2-Q10)
+- CompanionIdentitySchema field generation rules with mapping table (T3-1)
+- L1 document content templates with frontmatter (T4-1)
+
+Load reference.md when executing any setup stage.
+
+### examples.md
+
+Concrete usage examples and sample outputs:
+
+- Example 1: Complete interview session with predefined option selections
+- Example 2: Skip flow showing boundary skip + companion skip behavior
+- Example 3: companion-identity.json with full mapping trace from interview answers
+
+Load examples.md for concrete patterns and sample outputs.
