@@ -103,6 +103,12 @@ export type {
 
 export { LAYER1_PREFIX, isLayer1Path } from './layer.js';
 
+export { L1ChangeReasonSchema, L1_VERIFICATION_INTENSITY } from './l1-amendment.js';
+export type {
+  L1ChangeReason,
+  L1AmendmentRecord,
+} from './l1-amendment.js';
+
 export type {
   LifecycleEvent,
   LifecycleActionType,

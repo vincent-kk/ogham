@@ -321,6 +321,31 @@ function registerCrudTools(server: McpServer): void {
           })
           .optional()
           .describe('Partial Frontmatter update (optional)'),
+        change_reason: z
+          .enum([
+            'identity_evolution',
+            'error_correction',
+            'info_update',
+            'consolidation',
+            'reinterpretation',
+          ])
+          .optional()
+          .describe(
+            'Required for L1. Category: identity_evolution | error_correction | info_update | consolidation | reinterpretation',
+          ),
+        justification: z
+          .string()
+          .min(20)
+          .optional()
+          .describe(
+            'Required for L1. Why this Core Identity change is needed (min 20 chars)',
+          ),
+        confirm_l1: z
+          .boolean()
+          .optional()
+          .describe(
+            'Required for L1. Set true to confirm intentional modification',
+          ),
       }),
     },
     async (args) => {

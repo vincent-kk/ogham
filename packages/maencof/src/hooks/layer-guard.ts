@@ -46,9 +46,10 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
         `[maencof] Direct modification of Layer 1 (01_Core/) files is restricted.`,
         `File: ${filePath}`,
         ``,
-        `Layer 1 documents contain core identity (Hub nodes). To modify:`,
-        `  1. Request changes through the identity-guardian agent (auto-delegated)`,
-        `  2. Or retry with a sufficient justification`,
+        `Layer 1 requires structured verification. To modify:`,
+        `  1. Invoke identity-guardian agent for impact analysis + approval recommendation`,
+        `  2. Or use maencof_update with change_reason + justification (min 20 chars) + confirm_l1: true`,
+        `  Valid change_reason: identity_evolution, error_correction, info_update, consolidation, reinterpretation`,
       ].join('\n'),
     };
   }

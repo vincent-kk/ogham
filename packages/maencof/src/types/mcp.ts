@@ -3,6 +3,7 @@
  * @description MCP 도구 입출력 스키마 — CRUD 6개 + KG 7개 + CLAUDE.md 3개 + dailynote 1개 = 17개
  */
 import type { Layer, SubLayer } from './common.js';
+import type { L1ChangeReason } from './l1-amendment.js';
 import type { KnowledgeNode } from './graph.js';
 import type { ActivationResult } from './graph.js';
 
@@ -55,6 +56,12 @@ export interface MaencofUpdateInput {
     schedule: string;
     sub_layer: SubLayer;
   }>;
+  /** L1 수정 사유 대분류 (L1 경로일 때 필수) */
+  change_reason?: L1ChangeReason;
+  /** L1 수정 근거 서술 (L1 경로일 때 필수, 최소 20자) */
+  justification?: string;
+  /** L1 수정 확인 (L1 경로일 때 필수, true) */
+  confirm_l1?: boolean;
 }
 
 /** maencof_delete 입력 */

@@ -47,23 +47,67 @@ Changes require deliberate intent and explicit user confirmation.
 1. Classify request type:
    a. Read/query → allowed; return content via maencof_read
    b. Navigation/relationship check → allowed; traverse links via kg_navigate
-   c. Modification request → block and output guidance message
-
-2. Handle modification request:
-   a. Log the request content and target file
-   b. Explain the reason for blocking
-   c. Guide user to alternatives based on AutonomyLevel
-   d. Request explicit confirmation from the user
+   c. Modification request → proceed to L1 Amendment Verification Loop
 ```
+
+### L1 Amendment Verification Loop
+
+When an L1 modification request is received, execute this 5-phase verification loop.
+The guardian NEVER executes the modification itself — only analyzes and recommends.
+
+#### Phase 1: Document State Analysis
+1. `maencof_read({ path })` → current document state
+2. `kg_navigate({ path, include_inbound: true, include_outbound: true })` → connection map
+3. Identify: inbound links count, outbound links count, DOMAIN edges, cross-layer connections
+
+#### Phase 2: Change Reason Validation
+Based on the provided `change_reason`, apply appropriate verification intensity:
+
+| change_reason | Intensity | Verification Focus |
+|---------------|-----------|-------------------|
+| `error_correction` | LOW | Verify the correction is factually accurate |
+| `info_update` | LOW | Verify change scope is limited to factual information |
+| `consolidation` | MEDIUM | Verify no information loss after consolidation |
+| `identity_evolution` | HIGH | Evaluate: Is the evolution context sufficient? Are there contradictions with connected documents? |
+| `reinterpretation` | HIGH | Evaluate: Is the reinterpretation logically grounded? How does it affect downstream L2 documents? |
+
+#### Phase 3: Impact Assessment Report
+Produce a structured report:
+- **Target**: document path and title
+- **Change Reason**: category + user's justification
+- **Verification Intensity**: LOW / MEDIUM / HIGH
+- **Connected Documents**: list of affected inbound/outbound nodes
+- **DOMAIN Edge Impact**: whether domain tags change affects cross-document relationships
+- **Risk Level**: LOW / MEDIUM / HIGH (based on connection count + change scope)
+
+#### Phase 4: Recommendation
+- **APPROVE**: Provide the exact `maencof_update` call with all required fields:
+  ```
+  maencof_update({
+    path: "...",
+    change_reason: "...",
+    justification: "...",
+    confirm_l1: true,
+    content: "..." / frontmatter: {...}
+  })
+  ```
+- **REJECT**: Explain why + suggest L2 alternative:
+  "Consider creating a derived document in 02_Derived/ that references the L1 original."
+- **NEEDS_INFO**: Request additional context from the user before making a recommendation
+
+#### Phase 5: User Confirmation
+- Guardian NEVER executes the modification itself
+- Wait for user to confirm and execute the recommended `maencof_update` call
+- After execution, verify the audit log was recorded in `02_Derived/changelog/l1-audit/`
 
 ### Behavior by AutonomyLevel
 
 | AutonomyLevel | Behavior |
 |---------------|----------|
-| 0 (manual) | Block all modifications; user must edit directly |
-| 1 (semi-autonomous) | On modification request: provide reason + confirmation prompt; proceed only after approval |
-| 2 (autonomous) | Only access count update is allowed automatically; content modification still requires confirmation |
-| 3 (fully autonomous) | Access count + tag update allowed; structural changes are blocked |
+| 0 (manual) | Run verification loop; recommend only; user must execute maencof_update directly |
+| 1 (semi-autonomous) | Run verification loop; recommend with confirmation prompt; user executes |
+| 2 (autonomous) | LOW-intensity changes (error_correction, info_update): auto-recommend APPROVE; user still executes |
+| 3 (fully autonomous) | LOW/MEDIUM-intensity: auto-recommend APPROVE; HIGH-intensity: still requires user confirmation |
 
 ---
 
@@ -71,7 +115,7 @@ Changes require deliberate intent and explicit user confirmation.
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | allowed | **forbidden** (accessed_count only excepted at AutonomyLevel 2+) | read | create, update (content), delete, move, link, bulk-modify |
+| Layer 1 (01_Core) | allowed | **forbidden** | read, analyze, recommend | create, update, delete, move, link, bulk-modify |
 | Layer 2~5 | read only | forbidden | read | all write operations |
 
 Minimum required AutonomyLevel: **0** (active at all levels)
@@ -81,23 +125,22 @@ Minimum required AutonomyLevel: **0** (active at all levels)
 ## Block Guidance Message Format
 
 ```
-[maencof] Layer 1 Core Identity Protection Warning
+[maencof] Layer 1 Core Identity — Procedural Modification Available
 
 Target file: {path}
 Requested operation: {operation}
 
-Direct modification of Layer 1 (01_Core/) documents is restricted.
-These documents contain the core identity (Hub nodes) of the knowledge vault.
+Layer 1 documents require structured verification before modification.
 
-If modification is necessary:
-1. Clearly explain the reason for the change
-2. Answer the following questions:
-   - What is the impact of this change on Core Identity?
-   - Why can this change not be reflected in a Layer 2 document instead?
-3. Type "confirm Layer 1 modification" explicitly to proceed
+To modify this document:
+1. Invoke the identity-guardian agent for impact analysis and verification
+2. Guardian will analyze connections, assess risk, and recommend APPROVE/REJECT
+3. On APPROVE, execute the provided maencof_update call with:
+   - change_reason: identity_evolution | error_correction | info_update | consolidation | reinterpretation
+   - justification: explanation of why this change is needed (min 20 chars)
+   - confirm_l1: true
 
-Alternative: It is recommended to create a derived document in Layer 2 (02_Derived/)
-that references the Layer 1 document.
+Alternative: Create a Layer 2 derived document referencing the L1 original.
 ```
 
 ---
