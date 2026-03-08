@@ -1,0 +1,190 @@
+# fca-pipeline — Reference Documentation
+
+Detailed reference for the pipeline orchestrator skill, including
+auto-detection algorithm, flag passthrough, file contracts, and
+subagent delegation patterns.
+
+## Auto-Detection Algorithm
+
+When `--from` is omitted, the pipeline determines the entry point by
+checking signals in strict priority order. First match wins.
+
+```
+1. Detect branch: git branch --show-current
+2. Normalize: review_manage(normalize-branch)
+3. Set review_dir = .filid/review/<normalized>/
+
+Check signals:
+
+  Signal 1: Does <review_dir>/re-validate.md exist?
+    → YES: Pipeline already complete. Read and report existing results. DONE.
+    → NO:  Continue to Signal 2.
+
+  Signal 2: Does <review_dir>/justifications.md exist?
+    → YES: Check unpushed commits: git log @{upstream}..HEAD --oneline
+      → Has unpushed: Push first (git push), then start from REVALIDATE.
+      → All pushed (or command fails — no upstream): Start from REVALIDATE.
+      → NOTE: If git log @{upstream}..HEAD fails (no upstream tracking),
+        treat as "not pushed" — skip push, start from REVALIDATE anyway.
+    → NO:  Continue to Signal 3.
+
+  Signal 3: Does <review_dir>/fix-requests.md exist?
+    → YES: Start from RESOLVE.
+    → NO:  Continue to Signal 4.
+
+  Signal 4: Does a PR exist for this branch?
+    → Check: gh pr view (exit code)
+    → Exit 0 (PR exists): Start from REVIEW.
+    → Non-zero (no PR):   Start from PR-CREATE.
+```
+
+### Edge Cases
+
+| Condition | Behavior |
+| --------- | -------- |
+| Branch has no upstream tracking ref | `git log @{upstream}..HEAD` fails → treat as "cannot determine push status" → start from revalidate (skip push attempt) |
+| `gh` CLI not authenticated | Signal 4 fails → default to `pr-create` (will fail at PR creation stage with auth error) |
+| Review directory does not exist | All file checks return false → falls through to Signal 4 |
+| Multiple review directories | Only `<normalized>` branch directory is checked — other branches are ignored |
+
+## Flag Passthrough Matrix
+
+Flags provided to `fca-pipeline` are forwarded to the appropriate stage.
+Unrecognized flags are ignored.
+
+| Flag                   | pr-create | review | resolve | revalidate |
+| ---------------------- | --------- | ------ | ------- | ---------- |
+| `--base`               | ✓         | ✓      |         |            |
+| `--draft`              | ✓         |        |         |            |
+| `--skip-update`        | ✓         |        |         |            |
+| `--title`              | ✓         |        |         |            |
+| `--force`              |           | ✓      |         |            |
+| `--no-structure-check` |           | ✓      |         |            |
+| `--auto`               |           |        | always  |            |
+
+> `--auto` is **always** passed to resolve regardless of user input.
+> The pipeline implies full automation for the resolve stage.
+
+## Inter-Stage File Contracts
+
+Each stage reads and writes specific files in `.filid/review/<branch>/`.
+These files serve as the inter-stage communication interface.
+
+### Files Written by Each Stage
+
+| Stage       | Files written                                              |
+| ----------- | ---------------------------------------------------------- |
+| pr-create   | _(none in review dir — creates GitHub PR)_                 |
+| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md` |
+| resolve     | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
+| revalidate  | `re-validate.md`                                           |
+
+### Files Read by Each Stage
+
+| Stage       | Files required                                             |
+| ----------- | ---------------------------------------------------------- |
+| pr-create   | _(reads git state only)_                                   |
+| review      | _(reads git diff)_                                         |
+| resolve     | `fix-requests.md`                                          |
+| revalidate  | `justifications.md`, `fix-requests.md`, `review-report.md` |
+
+### Stage Success Signals
+
+| Stage       | Success signal                                             |
+| ----------- | ---------------------------------------------------------- |
+| pr-create   | Subagent completes without error                           |
+| review      | `fix-requests.md` exists (or `APPROVED` verdict)           |
+| resolve     | `justifications.md` exists                                 |
+| revalidate  | `re-validate.md` exists                                    |
+
+## `--from` Prerequisite Matrix
+
+Before starting at a given stage, the pipeline verifies that required
+artifacts from previous stages exist.
+
+| `--from` value  | Required artifacts                           | Check method                |
+| --------------- | -------------------------------------------- | --------------------------- |
+| `pr-create`     | _(none)_                                     | —                           |
+| `review`        | GitHub PR exists                             | `gh pr view` exit code 0    |
+| `resolve`       | `fix-requests.md` in review dir              | File existence check        |
+| `revalidate`    | `justifications.md` in review dir            | File existence check        |
+
+## Stage Transition Table
+
+Complete enumeration of stage outcomes and pipeline behavior.
+
+| #  | Situation                              | Next action                              |
+| -- | -------------------------------------- | ---------------------------------------- |
+| 1  | pr-create succeeds                     | Proceed to review                        |
+| 2  | review → `APPROVED` (no fix-requests)  | Pipeline **PASS** (skip resolve+revalidate) |
+| 3  | review → `REQUEST_CHANGES`             | Proceed to resolve                       |
+| 4  | resolve → 0 accepted fixes             | Proceed to revalidate                    |
+| 5  | resolve → N accepted fixes             | Proceed to revalidate                    |
+| 6  | revalidate → `PASS`                    | Pipeline **PASS**                        |
+| 7  | revalidate → `FAIL`                    | Pipeline **FAIL** (report unresolved)    |
+| 8  | Any stage execution error              | Pipeline **ERROR** (report + resume cmd) |
+| 9  | `--from` prerequisite missing          | Pipeline **ABORT** (before execution)    |
+
+## Subagent Delegation Pattern
+
+Each stage is delegated to an independent Task subagent to prevent
+context pollution across stages.
+
+```
+For each stage in pipeline:
+  result = Agent(
+    subagent_type: "general-purpose",
+    prompt: "Read and execute the following skill: Skill('filid:<skill-name>', '<flags>').
+             Project root: <project_root>. Branch: <branch>.",
+    description: "fca-pipeline: <stage-name>"
+  )
+
+  if result indicates failure:
+    Report: "Pipeline ERROR at stage <stage-name>: <error>"
+    Report: "Resume with: /filid:fca-pipeline --from=<stage-name>"
+    STOP pipeline.
+
+  Verify success signal (file existence check).
+  Proceed to next stage.
+```
+
+### Why Subagents?
+
+1. **Context isolation**: Each stage (especially review) consumes significant
+   context. Running all 4 in a single context would risk compaction and
+   degraded output quality.
+2. **Clean failure boundaries**: If a stage fails, only that subagent's
+   context is lost. The orchestrator retains pipeline state.
+3. **Skill reuse**: Subagents invoke existing skills via `Skill()` — the
+   same code path as standalone skill execution.
+
+## Example Pipeline Run
+
+```
+$ /filid:fca-pipeline --from=pr-create --base=main --draft
+
+[1/4] pr-create
+  → Skill("filid:fca-pull-request --base=main --draft")
+  → PR #42 created (draft)
+  ✓ Success
+
+[2/4] review
+  → Skill("filid:fca-review --scope=pr --base=main")
+  → Verdict: REQUEST_CHANGES (5 fix items)
+  ✓ fix-requests.md written
+
+[3/4] resolve
+  → Skill("filid:fca-resolve --auto")
+  → 5/5 fixes accepted, typecheck PASS
+  → Committed: fix(filid): resolve FIX-001, FIX-002, FIX-003, FIX-004, FIX-005 from fca-review
+  → Pushed to origin
+  ✓ justifications.md written
+
+[4/4] revalidate
+  → Skill("filid:fca-revalidate")
+  → Verdict: PASS (5/5 resolved, 0 unconstitutional)
+  → PR comment posted
+  ✓ re-validate.md written → session cleaned up
+
+Pipeline PASS — all stages completed successfully.
+```

@@ -7,7 +7,7 @@ fix request resolution skill.
 
 ```markdown
 ---
-resolve_commit_sha: <git rev-parse HEAD result>
+resolve_commit_sha: <base_sha captured at Step 4 start (pre-fix HEAD)>
 resolved_at: <ISO 8601>
 branch: <branch name>
 total_fixes: <total fix count>

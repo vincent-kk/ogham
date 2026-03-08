@@ -1,8 +1,8 @@
 ---
 name: fca-resolve
 user_invocable: true
-description: Interactive fix request resolution workflow. Parses fix-requests.md from a completed code review, presents items for accept/reject selection, collects developer justifications for rejected items, refines justifications into ADRs, and creates technical debt files for deferred fixes.
-version: 1.0.0
+description: Fix request resolution workflow with auto-commit/push. Parses fix-requests.md, presents items for accept/reject (or auto-accepts all with --auto), applies fixes via code-surgeon, runs typecheck verification, auto-commits and pushes changes, and optionally chains to fca-revalidate.
+version: 2.0.0
 complexity: medium
 ---
 
@@ -10,7 +10,7 @@ complexity: medium
 
 Resolve fix requests from a completed code review. Present each item for
 developer accept/reject, collect justifications for rejected items, refine
-them into ADRs, and create technical debt records.
+them into ADRs, create technical debt records, and auto-commit/push changes.
 
 > **References**: `reference.md` (output templates, justification format).
 
@@ -19,15 +19,27 @@ them into ADRs, and create technical debt records.
 - After `/filid:fca-review` generates `fix-requests.md`
 - To selectively accept or reject fix requests with formal justification
 - To create tracked technical debt for deferred fixes
+- To auto-accept all fixes and run the full resolve→revalidate cycle (`--auto`)
 
 ## Core Workflow
 
 ### Step 1 — Branch Detection & Review Directory Lookup
 
-1. Detect branch: `git branch --show-current` (Bash)
-2. Normalize: `review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
-3. Verify: Read `.filid/review/<normalized>/fix-requests.md`
-4. If not found: abort with "No fix requests found. Run /filid:fca-review first."
+1. **Pre-check — dirty working tree**:
+   - Run: `git status --porcelain` (Bash)
+   - If output is non-empty:
+     - In `--auto` mode: **ABORT** with error "Working tree has uncommitted changes.
+       Stash or commit them before running fca-resolve --auto."
+     - In interactive mode: warn and `AskUserQuestion`:
+       - "Working tree has uncommitted changes. These will be included in the
+         auto-commit. Continue anyway?"
+       - Options: "Continue anyway" / "Abort"
+       - On "Abort": stop execution.
+
+2. Detect branch: `git branch --show-current` (Bash)
+3. Normalize: `review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
+4. Verify: Read `.filid/review/<normalized>/fix-requests.md`
+5. If not found: abort with "No fix requests found. Run /filid:fca-review first."
 
 ### Step 2 — Parse Fix Requests
 
@@ -38,6 +50,9 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - Recommended action and code patch
 
 ### Step 3 — Present Select List
+
+> If `--auto` is set: **Accept ALL fix items. Skip `AskUserQuestion`.
+> Proceed directly to Step 4.**
 
 Use `AskUserQuestion` to present each fix item for decision:
 
@@ -54,6 +69,12 @@ For each fix item:
 
 ### Step 4 — Process Accepted Items
 
+**Before dispatching any code-surgeon subagents**, capture the base SHA:
+
+1. `base_sha = git rev-parse HEAD` (Bash) — store in memory.
+   This is the pre-fix baseline. It will be written to `justifications.md`
+   as `resolve_commit_sha` in Step 6.
+
 Delegate all accepted fixes **in parallel** as separate Task subagents
 (`filid:code-surgeon`, model: `sonnet`, `run_in_background: true`).
 
@@ -65,6 +86,9 @@ For each accepted fix, spawn one subagent with:
 Await all subagents before proceeding to Step 5.
 
 ### Step 5 — Process Rejected Items
+
+> If `--auto` is set: **Skip Step 5 entirely.** No rejected items exist
+> in `--auto` mode.
 
 For each rejected fix:
 
@@ -101,32 +125,80 @@ For each rejected fix:
 
 ### Step 6 — Write justifications.md
 
-Capture current commit SHA: `git rev-parse HEAD` (Bash)
+Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
+`resolve_commit_sha`. Do NOT run `git rev-parse HEAD` here — the base SHA
+was already captured before any code changes.
+
+> **Why**: `fca-revalidate` computes `git diff resolve_commit_sha..HEAD`.
+> After the auto-commit in Step 6.5, HEAD moves to the fix commit, so the
+> delta correctly contains only the fix changes.
 
 Write `.filid/review/<branch>/justifications.md` with frontmatter
-containing `resolve_commit_sha` (used by `/filid:fca-revalidate` as
-Delta baseline). See `reference.md` for the full output template.
+containing `resolve_commit_sha` (= `base_sha`). See `reference.md` for
+the full output template.
+
+### Step 6.5 — Typecheck, Stage & Commit
+
+If there were accepted fixes (files modified by code-surgeon):
+
+1. **Pre-commit verification gate**:
+   - Run: `npx tsc --noEmit` (Bash) on the project
+   - If typecheck **FAILS**:
+     - In `--auto` mode: **ABORT** with error "Typecheck failed after
+       applying fixes. Review code-surgeon output."
+     - In interactive mode: warn and `AskUserQuestion`:
+       - "Typecheck failed after applying fixes. Commit anyway?"
+       - Options: "Commit anyway" / "Abort and review"
+       - On "Abort and review": stop here, do not commit.
+   - If typecheck **PASSES**: proceed.
+
+2. **Stage all modified files**:
+   `git add <file1> <file2> ... <justifications.md> <debt files if any>`
+   - Include: files modified by code-surgeon + `justifications.md` +
+     any debt files created in Step 5.
+
+3. **Construct commit message** from accepted fix IDs:
+   ```
+   fix(filid): resolve FIX-001, FIX-003 from fca-review
+   ```
+   Format: `fix(filid): resolve <comma-separated accepted FIX-IDs> from fca-review`
+
+4. **Execute**: `git commit -m "<message>"` (Bash)
+
+If there were **NO** accepted fixes (all rejected):
+
+1. Stage only: `justifications.md` + any debt files.
+2. Commit: `chore(filid): record fix rejections from fca-review`
+3. Skip typecheck (no code changes).
+
+### Step 6.6 — Push
+
+1. **Check upstream**: `git rev-parse --abbrev-ref @{upstream}` (Bash)
+   - If no upstream (exit code != 0): skip push, inform user
+     "No upstream branch. Push manually when ready."
+2. **Execute**: `git push` (Bash)
+3. On **success**: proceed to Step 7.
+4. On **failure**: notify user via `AskUserQuestion`:
+   - "Push failed: <error>. Resolve manually, then run /filid:fca-revalidate."
+   - Options: "Continue to revalidate anyway" / "Stop here"
+   - On "Stop here": end execution.
 
 ### Step 7 — Offer to Run fca-revalidate
 
-After writing justifications.md, prompt the developer:
+> If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
+> `/filid:fca-revalidate`.** Then end execution.
 
 ```
-If there were accepted fixes (already applied to files by Step 4):
+If there were accepted fixes:
   AskUserQuestion(
-    question: "Fixes have been applied to the files above.\n\n"
-              + "IMPORTANT: You must commit the changes BEFORE running fca-revalidate.\n"
-              + "fca-revalidate computes a Delta from resolve_commit_sha..HEAD —\n"
-              + "if you run it before committing, the Delta will be empty and fixes\n"
-              + "will appear UNRESOLVED.\n\n"
-              + "Have you committed the changes and are ready to run fca-revalidate?",
+    question: "Fixes committed and pushed. Run fca-revalidate now?",
     options: [
-      { label: "Yes, committed — run now", description: "Invoke /filid:fca-revalidate (changes already committed)" },
-      { label: "Not yet",                  description: "Commit the changes first, then run manually" }
+      { label: "Yes — run now", description: "Invoke /filid:fca-revalidate" },
+      { label: "Not now",       description: "Run /filid:fca-revalidate later manually" }
     ]
   )
-  → On "Yes, committed — run now": invoke /filid:fca-revalidate
-  → On "Not yet": remind the developer: "Run `git commit` first, then run /filid:fca-revalidate"
+  → On "Yes — run now": invoke /filid:fca-revalidate
+  → On "Not now": done
 
 If there were NO accepted fixes (all rejected):
   Automatically invoke /filid:fca-revalidate — no pending code changes needed.
@@ -144,21 +216,33 @@ If there were NO accepted fixes (all rejected):
 > Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well.
 
 ```
-/filid:fca-resolve
+/filid:fca-resolve [--auto]
 ```
 
-No parameters. Current branch auto-detected.
+| Option   | Type | Default | Description                                                          |
+| -------- | ---- | ------- | -------------------------------------------------------------------- |
+| `--auto` | flag | off     | Accept all fixes, skip user prompts, auto-commit/push/revalidate     |
+
+Current branch auto-detected. No other parameters required.
 
 ## Quick Reference
 
 ```
-/filid:fca-resolve    # Resolve fix requests on current branch
+/filid:fca-resolve           # Interactive resolve on current branch
+/filid:fca-resolve --auto    # Accept all, commit, push, revalidate automatically
 
 Input:    .filid/review/<branch>/fix-requests.md
-Outputs:  justifications.md, .filid/debt/*.md (per rejected item)
+Outputs:  justifications.md, .filid/debt/*.md (per rejected item), git commit + push
 Prereq:   /filid:fca-review must have completed
-Next:     /filid:fca-revalidate (after applying accepted fixes)
+Next:     /filid:fca-revalidate (auto-chained or manual)
+
+Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surgeon + base SHA)
+          → 5 (Rejected items) → 6 (justifications.md) → 6.5 (Typecheck + commit)
+          → 6.6 (Push) → 7 (Revalidate)
 
 Agents:    code-surgeon (Step 4 — parallel fix application for accepted items)
 MCP tools: review_manage(normalize-branch), debt_manage(create)
+
+--auto:   Skips Steps 3 (accept all), 5 (no rejections), 7 prompt (auto-revalidate)
+          Aborts on: dirty working tree, typecheck failure
 ```
