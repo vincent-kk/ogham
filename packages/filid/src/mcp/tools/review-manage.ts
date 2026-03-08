@@ -18,6 +18,8 @@ import type {
   ReviewContentHash,
 } from '../../types/review.js';
 
+import { formatPrComment, formatRevalidateComment } from './review-format.js';
+
 const execFileAsync = promisify(execFile);
 
 export interface ReviewManageInput {
@@ -28,7 +30,9 @@ export interface ReviewManageInput {
     | 'elect-committee'
     | 'cleanup'
     | 'content-hash'
-    | 'check-cache';
+    | 'check-cache'
+    | 'format-pr-comment'
+    | 'format-revalidate-comment';
   projectRoot: string;
   branchName?: string;
   baseRef?: string;
@@ -538,6 +542,8 @@ export async function handleReviewManage(
     cleanup: handleCleanup,
     'content-hash': handleContentHash,
     'check-cache': handleCheckCache,
+    'format-pr-comment': formatPrComment,
+    'format-revalidate-comment': formatRevalidateComment,
   };
 
   const handler = handlers[input.action];

@@ -119,8 +119,14 @@ This writes `content-hash.json` alongside the review outputs for future cache ch
 
 ### Step 5 — PR Comment (Optional)
 
-When `--scope=pr`: check `gh auth status` (Bash), if authenticated post
-`gh pr comment --body "<summary>"` (Bash), otherwise skip with info message.
+When `--scope=pr`:
+
+1. Call `review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)` to get the formatted markdown.
+2. Check: `gh auth status` (Bash)
+3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
+4. If not authenticated: skip with info message.
+
+> **Language**: Write any additional commentary you add around the formatted content in the same language as the current conversation context.
 
 ## Available MCP Tools
 
@@ -133,6 +139,7 @@ When `--scope=pr`: check `gh auth status` (Bash), if authenticated post
 | `review_manage`  | `cleanup`          | Delete review session files (--force or on pass) |
 | `review_manage`  | `content-hash`     | Compute and persist content hash for cache       |
 | `review_manage`  | `check-cache`      | Check if review can be skipped (cache hit)       |
+| `review_manage`  | `format-pr-comment` | Format review results into collapsible PR comment |
 
 ## Options
 

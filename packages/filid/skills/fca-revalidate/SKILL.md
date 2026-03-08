@@ -108,9 +108,12 @@ See `reference.md` for the output template.
 
 Post verdict to PR if GitHub CLI is available:
 
-1. Check: `gh auth status` (Bash)
-2. If authenticated: `gh pr comment --body "<verdict summary>"` (Bash)
-3. If not authenticated: skip with info message
+1. Call `review_manage(action: "format-revalidate-comment", projectRoot: <project_root>, branchName: <branch>)` to get the formatted markdown.
+2. Check: `gh auth status` (Bash)
+3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
+4. If not authenticated: skip with info message.
+
+> **Language**: Write any additional commentary you add around the formatted content in the same language as the current conversation context.
 
 ### Step 8 — Cleanup on PASS
 
@@ -142,6 +145,7 @@ remaining unresolved items.
 | `structure_validate` | —                  | Verify structure violation resolved after accepted fix          |
 | `debt_manage`        | `list`             | Retrieve existing debt items to check for resolution            |
 | `debt_manage`        | `resolve`          | Mark a debt item as resolved when its rule is now satisfied     |
+| `review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment |
 
 ## Options
 

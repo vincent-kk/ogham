@@ -107,21 +107,44 @@ for assigning IDs sequentially across both sources.
 
 ## PR Comment Format
 
-When `--scope=pr` and `gh` CLI is authenticated:
+Use `review_manage(action: "format-pr-comment")` to generate the PR comment.
+The tool reads `review-report.md`, `structure-check.md`, and `fix-requests.md`,
+wraps each in collapsible `<details>` sections, and returns a ready-to-post
+markdown string in the `markdown` field. Post it via `gh pr comment --body`.
+
+The tool handles size limits (truncates if >50,000 chars) and extracts the
+verdict automatically. No manual formatting is needed.
+
+### Generated Output Structure
 
 ```markdown
 ## Code Review Governance — <Verdict>
 
-**Committee**: <persona list>
-**Complexity**: <LOW|MEDIUM|HIGH>
+<details><summary>Phase A — Structure Compliance</summary>
 
-### Summary
-- Technical checks: N/M passed
-- Fix requests: K items
-- Debt bias: <bias level>
+{full structure-check.md content — 5-stage structural verification results}
+
+</details>
+
+<details><summary>Review Report (Phase B~D)</summary>
+
+{full review-report.md content — committee composition, technical verification, deliberation log, final verdict}
+
+</details>
+
+<details><summary>Fix Requests</summary>
+
+{full fix-requests.md content — FIX-XXX items with severity, path, recommended action}
+
+</details>
 
 > Full report: `.filid/review/<branch>/review-report.md`
-````
+```
+
+Each `<details>` block is included only when the corresponding file exists.
+`structure-check.md` (Phase A) and `fix-requests.md` are optional; `review-report.md`
+is required. PR reviewers can expand each section to inspect full review details
+without access to local files.
 
 ## MCP Tool Usage Map by Phase
 

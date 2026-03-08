@@ -57,41 +57,32 @@ Unresolved items remain. Address the following before re-running:
 
 ## PR Comment Format
 
-### PASS Verdict
+Use `review_manage(action: "format-revalidate-comment")` to generate the PR comment.
+The tool reads `re-validate.md`, wraps it in a collapsible `<details>` section,
+and returns a ready-to-post markdown string in the `markdown` field.
+Post it via `gh pr comment --body`.
+
+The tool handles size limits (truncates if >50,000 chars) and extracts the
+PASS/FAIL verdict automatically. No manual formatting is needed.
+
+### Generated Output Structure
 
 ```markdown
-## Re-validation — PASS
+## Re-validation — ✅ PASS (or ❌ FAIL)
 
-**Branch**: <branch>
-**Delta**: <N> commits since resolution
+<details><summary>Re-validation Details</summary>
 
-| Fix     | Status                  |
-| ------- | ----------------------- |
-| FIX-001 | RESOLVED                |
-| FIX-002 | DEFERRED (debt tracked) |
+{full re-validate.md content — delta analysis, fix verification results, debt changes, final verdict}
 
-All fixes resolved or validly deferred. Ready for merge.
+</details>
 
 > Full report: `.filid/review/<branch>/re-validate.md`
 ```
 
-### FAIL Verdict
-
-```markdown
-## Re-validation — FAIL
-
-**Branch**: <branch>
-**Delta**: <N> commits since resolution
-
-| Fix     | Status     |
-| ------- | ---------- |
-| FIX-001 | RESOLVED   |
-| FIX-003 | UNRESOLVED |
-
-Action required: address unresolved items before merge.
-
-> Full report: `.filid/review/<branch>/re-validate.md`
-```
+The `<details>` block contains the full `re-validate.md` content (delta analysis,
+fix verification table, debt changes, new violation checks, final verdict) so that
+PR reviewers can expand and inspect the complete re-validation without access to
+local files.
 
 ## Verification MCP Tool Map
 

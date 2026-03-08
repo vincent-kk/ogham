@@ -401,7 +401,9 @@ export function createServer(): McpServer {
         "action='elect-committee': 변경 복잡도 기반 위원회 선출. " +
         "action='cleanup': 리뷰 디렉토리 삭제. " +
         "action='content-hash': 변경 파일의 content hash를 계산하고 저장. " +
-        "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단.",
+        "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단. " +
+        "action='format-pr-comment': 리뷰 결과 파일을 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
+        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷.",
       inputSchema: z.object({
         action: z
           .enum([
@@ -412,6 +414,8 @@ export function createServer(): McpServer {
             'cleanup',
             'content-hash',
             'check-cache',
+            'format-pr-comment',
+            'format-revalidate-comment',
           ])
           .describe('수행할 동작'),
         projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),

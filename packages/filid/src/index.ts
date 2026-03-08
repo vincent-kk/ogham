@@ -135,6 +135,10 @@ export { handleLcaResolve } from './mcp/tools/lca-resolve.js';
 export { handleRuleQuery } from './mcp/tools/rule-query.js';
 export { handleStructureValidate } from './mcp/tools/structure-validate.js';
 export { handleReviewManage } from './mcp/tools/review-manage.js';
+export {
+  formatPrComment,
+  formatRevalidateComment,
+} from './mcp/tools/review-format.js';
 export { handleDebtManage } from './mcp/tools/debt-manage.js';
 export { handleCacheManage } from './mcp/tools/cache-manage.js';
 
