@@ -5,8 +5,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   getCacheDir,
+  hasGuideInjected,
+  markGuideInjected,
   readBoundary,
   readFractalMap,
+  removeFractalMap,
   removeSessionFiles,
   sessionIdHash,
   writeBoundary,
@@ -224,6 +227,33 @@ describe('cache-manager boundary/fmap extensions', () => {
     }).not.toThrow();
 
     expect(readBoundary(cwd, sessionId, '')).toBe('/boundary');
+  });
+
+  // Test 15: removeFractalMap + hasGuideInjected/markGuideInjected lifecycle
+  it('removeFractalMap + hasGuideInjected/markGuideInjected lifecycle', () => {
+    const cwd = '/proj/workspace';
+
+    // Part 1: removeFractalMap deletes fmap, readFractalMap returns empty after
+    const sid1 = 'session-rm-1';
+    writeFractalMap(cwd, sid1, { reads: ['src/a'], intents: ['src/a'], details: [] });
+    removeFractalMap(cwd, sid1);
+    expect(readFractalMap(cwd, sid1)).toEqual({ reads: [], intents: [], details: [] });
+
+    // Part 2: removeFractalMap does NOT affect boundary cache
+    const sid2 = 'session-rm-2';
+    const dir = '/proj/workspace/src';
+    writeBoundary(cwd, sid2, dir, cwd);
+    writeFractalMap(cwd, sid2, { reads: ['src'], intents: [], details: [] });
+    removeFractalMap(cwd, sid2);
+    expect(readBoundary(cwd, sid2, dir)).toBe(cwd); // boundary survives
+
+    // Part 3: hasGuideInjected/markGuideInjected roundtrip
+    const sid3 = 'session-guide-1';
+    expect(hasGuideInjected(sid3, cwd)).toBe(false);
+    markGuideInjected(sid3, cwd);
+    expect(hasGuideInjected(sid3, cwd)).toBe(true);
+    // Different session → still false
+    expect(hasGuideInjected('session-guide-other', cwd)).toBe(false);
   });
 
   // Test 14: Multiple boundaries stress test

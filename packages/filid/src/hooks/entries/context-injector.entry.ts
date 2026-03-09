@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import type { UserPromptSubmitInput } from '../../types/hooks.js';
-import { injectContext } from '../context-injector.js';
+import { handleUserPromptSubmit } from '../user-prompt-submit.js';
 
 const chunks: Buffer[] = [];
 for await (const chunk of process.stdin) {
@@ -10,7 +10,7 @@ const raw = Buffer.concat(chunks).toString('utf-8');
 let result;
 try {
   const input = JSON.parse(raw) as UserPromptSubmitInput;
-  result = injectContext(input);
+  result = handleUserPromptSubmit(input);
 } catch {
   result = { continue: true };
 }

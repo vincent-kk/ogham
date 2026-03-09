@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { writeBoundary, writeFractalMap } from '../../../core/cache-manager.js';
+import { removeFractalMap, writeBoundary, writeFractalMap } from '../../../core/cache-manager.js';
 import { injectIntent } from '../../../hooks/intent-injector.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
@@ -327,5 +327,60 @@ describe('injectIntent', () => {
     expect(ctx).toContain('src/b');
     expect(ctx).toContain('src/c');
     expect(ctx).not.toMatch(/unread-intent:.*src\/a/);
+  });
+
+  it('cross-turn re-injection: removeFractalMap between calls → [filid:ctx] re-appears', () => {
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot module\n');
+    const filePath = join(tmpDir, 'index.ts');
+    writeFileSync(filePath, '');
+
+    const sessionId = `session-cross-turn-${Date.now()}`;
+    const input = makeInput({ cwd: tmpDir, session_id: sessionId, tool_input: { file_path: filePath } });
+
+    process.env.CLAUDE_CONFIG_DIR = tmpDir;
+
+    // Turn 1: first visit
+    const turn1 = injectIntent(input);
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain('Root module');
+
+    // Turn 1b: same directory — second visit in same turn → no ctx
+    const turn1b = injectIntent(input);
+    expect(turn1b.hookSpecificOutput?.additionalContext ?? '').not.toContain('[filid:ctx]');
+
+    // Simulate turn boundary: clear fmap (what UserPromptSubmit does)
+    removeFractalMap(tmpDir, sessionId);
+
+    // Turn 2: re-inject for same directory
+    const turn2 = injectIntent(input);
+    delete process.env.CLAUDE_CONFIG_DIR;
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain('Root module');
+  });
+
+  it('guide once per session: removeFractalMap between calls → guide NOT repeated', () => {
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot module\n');
+    const filePath = join(tmpDir, 'index.ts');
+    writeFileSync(filePath, '');
+
+    const sessionId = `session-guide-once-${Date.now()}`;
+    const input = makeInput({ cwd: tmpDir, session_id: sessionId, tool_input: { file_path: filePath } });
+
+    process.env.CLAUDE_CONFIG_DIR = tmpDir;
+
+    // Turn 1: first ctx ever → should include guide
+    const turn1 = injectIntent(input);
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain('[filid:guide]');
+
+    // Simulate turn boundary
+    removeFractalMap(tmpDir, sessionId);
+
+    // Turn 2: guide marker still exists → no guide
+    const turn2 = injectIntent(input);
+    delete process.env.CLAUDE_CONFIG_DIR;
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
+    expect(turn2.hookSpecificOutput?.additionalContext).not.toContain('[filid:guide]');
   });
 });

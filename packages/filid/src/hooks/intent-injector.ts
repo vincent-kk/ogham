@@ -3,6 +3,8 @@ import * as path from 'node:path';
 
 import { buildChain } from '../core/boundary-detector.js';
 import {
+  hasGuideInjected,
+  markGuideInjected,
   readBoundary,
   readFractalMap,
   writeBoundary,
@@ -225,7 +227,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   }
 
   const isFirstVisit = !fcaMap.intents.includes(relDir);
-  const isFirstCtxEver = fcaMap.intents.length === 0;
+  const guideNeeded = !hasGuideInjected(sessionId, input.cwd);
 
   const blocks: string[] = [];
 
@@ -280,8 +282,9 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
         chain.filter((d) => d !== ownerDir).some((d) => intents.get(d)))
     ) {
       // Inject guide once per session, before the very first ctx block
-      if (isFirstCtxEver) {
+      if (guideNeeded) {
         blocks.push(GUIDE_BLOCK);
+        markGuideInjected(sessionId, input.cwd);
       }
       blocks.push(
         buildCtxBlock(
