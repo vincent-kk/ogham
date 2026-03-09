@@ -14,7 +14,7 @@ fractal_scan({ path: "<target-path>" })
 The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode).
 Partition into three working sets:
 
-- **fractal nodes** — nodes with `hasClaudeMd: true` or `type: "fractal"`
+- **fractal nodes** — nodes with `hasIntentMd: true` or `type: "fractal"`
 - **organ nodes** — nodes with `type: "organ"` or names matching `ORGAN_DIR_NAMES`
 - **spec files** — files matching `*.spec.ts` pattern
 

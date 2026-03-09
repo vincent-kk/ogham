@@ -124,7 +124,7 @@ Recommendations:
 
 ```
 fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from fractal_scan */])
-// Returns: { type: "fractal" | "organ", hasClaude: boolean }
+// Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
 **ast_analyze lcom4:**
@@ -132,8 +132,9 @@ fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries:
 ```
 // Read file first, then call ast_analyze with source content
 const source = readFile("src/core/index.ts")
-ast_analyze(source: source, analysisType: "lcom4")
+ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 // Returns: { lcom4: 1 }
+// Note: className parameter is required for lcom4 analysis
 ```
 
 ## MCP Tool Reference
@@ -145,6 +146,6 @@ ast_analyze(source: source, analysisType: "lcom4")
 | `doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
 | `test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
 | `test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
-| `ast_analyze`      | `analysisType: "lcom4", source`                 | 4     | Compute LCOM4 cohesion metric                |
+| `ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
 | `ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |
 | `ast_analyze`      | `analysisType: "dependency-graph", source`      | 5     | Build full import dependency DAG             |

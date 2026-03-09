@@ -65,8 +65,8 @@ Read the content of each `CLAUDE.md` and `SPEC.md` file. Find internal reference
 Use `Grep` to locate references across all project files (not just the files being renamed):
 
 ```
-Grep({ pattern: "CLAUDE\\.md", path: "<project-root>", glob: "*.md" })
-Grep({ pattern: "SPEC\\.md", path: "<project-root>", glob: "*.md" })
+Grep({ pattern: "CLAUDE\\.md", path: "<project-root>", glob: "*.{md,ts,tsx,js,jsx}" })
+Grep({ pattern: "SPEC\\.md", path: "<project-root>", glob: "*.{md,ts,tsx,js,jsx}" })
 ```
 
 Build a migration plan: list of `{ source, target, contentReplacements[] }`.

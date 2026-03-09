@@ -27,7 +27,8 @@ Collect branch diff:
 
 ```bash
 git branch --show-current          # current branch name
-git diff --name-only main...HEAD   # list of changed files (default base: main)
+git rev-parse --verify main 2>/dev/null && BASE=main || BASE=master
+git diff --name-only ${BASE}...HEAD   # list of changed files (auto-detect base branch)
 ```
 
 Restrict scan to changed files only:
@@ -53,7 +54,7 @@ Scan result categories:
 
 ```
 drift_detect({ path: "<target-path>", severity: "high" })
-// Returns: { items: DriftItem[], bySeverity: { critical, high, medium, low } }
+// Returns: { drifts: DriftItem[], bySeverity: { critical, high, medium, low } }
 ```
 
 ### Severity Normalization Table

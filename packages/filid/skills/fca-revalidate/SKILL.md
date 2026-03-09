@@ -71,6 +71,7 @@ For each rejected fix with justification:
 1. Confirm the justification does not violate non-negotiable rules:
    - Hardcoded secrets — always FAIL regardless of justification
    - Circular dependencies — always FAIL regardless of justification
+   - Security vulnerabilities (injection, auth bypass) — always FAIL regardless of justification
 2. Verify debt file was created via `debt_manage(list)`
 3. Mark as DEFERRED (valid) or UNCONSTITUTIONAL (invalid justification)
 
