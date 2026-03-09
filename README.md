@@ -51,7 +51,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 **Key features:**
 
 - **Multi-persona code review** — A committee of specialized reviewers reaches consensus on your PR changes
-- **Automated rule enforcement** — CLAUDE.md line limits, boundary sections, organ directory protection
+- **Automated rule enforcement** — INTENT.md line limits, boundary sections, organ directory protection
 - **Structural drift detection** — Detects when code changes break documented structure and syncs automatically
 - **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular dependency detection
 
