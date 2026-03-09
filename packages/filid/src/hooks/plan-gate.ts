@@ -16,7 +16,7 @@ const PLAN_EXIT_CHECKLIST = [
  * PreToolUse hook for ExitPlanMode: inject FCA-AI document update checklist.
  *
  * When a plan is being finalized (ExitPlanMode), this hook reminds Claude
- * to include CLAUDE.md/SPEC.md update steps in the plan.
+ * to include INTENT.md/DETAIL.md update steps in the plan.
  *
  * Never blocks (always continue: true). Only injects context in FCA projects.
  */

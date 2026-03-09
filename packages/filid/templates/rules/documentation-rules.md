@@ -13,7 +13,7 @@ Every `INTENT.md` file must not exceed **50 lines**.
 
 INTENT.md is a working context document, not a design document. It must remain concise enough to be injected into Claude's context window without consuming excessive tokens. When a INTENT.md approaches 50 lines, it is a signal that the module has grown too large and should be decomposed into smaller fractal nodes, each with their own INTENT.md.
 
-**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations that produce a INTENT.md exceeding 50 lines (`continue: false`).
+**Enforcement**: The `pre-tool-use` hook blocks `Write` operations that produce a INTENT.md exceeding 50 lines (`continue: false`).
 
 ### 3-Tier Boundary Sections
 
@@ -78,7 +78,7 @@ Each update must restructure the specification to reflect the current state of t
 
 Append-only growth indicates the spec has become a changelog or a log of decisions rather than a living specification. A spec that only grows never gets pruned of stale or obsolete requirements.
 
-**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations where the new content is detected as append-only relative to the existing file content (`continue: false`).
+**Enforcement**: The `pre-tool-use` hook blocks `Write` operations where the new content is detected as append-only relative to the existing file content (`continue: false`).
 
 ### DETAIL.md Purpose
 

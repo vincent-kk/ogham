@@ -57,13 +57,13 @@ See [reference.md Section 2](./reference.md#section-2--node-classification-rules
 
 Generate INTENT.md (≤50 lines, 3-tier boundaries) for each fractal directory
 that lacks one. Organ directories are skipped.
-See [reference.md Section 3](./reference.md#section-3--claudemd-generation-template).
+See [reference.md Section 3](./reference.md#section-3--intentmd-generation-template).
 
 ### Phase 4 — DETAIL.md Scaffolding
 
 Create DETAIL.md scaffolds for fractal modules with public APIs that lack
 formal specifications.
-See [reference.md Section 4](./reference.md#section-4--specmd-scaffolding).
+See [reference.md Section 4](./reference.md#section-4--detailmd-scaffolding).
 
 ### Phase 5 — Validation and Report
 

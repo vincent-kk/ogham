@@ -12,7 +12,7 @@ fractal_scan({ path: "<target-path>" })
 ```
 
 The response is a `ScanReport` containing:
-- `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasClaudeMd`, `hasSpecMd`, `children`)
+- `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
 - `tree.root`: root directory path
 - `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
 
@@ -42,8 +42,8 @@ Apply the following decision logic in order:
 
 | Condition                               | Node Type     | Action                                  |
 | --------------------------------------- | ------------- | --------------------------------------- |
-| `hasClaudeMd === true`                  | fractal       | Preserve existing file, skip generation |
-| `hasSpecMd === true`                    | fractal       | Preserve existing file, skip generation |
+| `hasIntentMd === true`                  | fractal       | Preserve existing file, skip generation |
+| `hasDetailMd === true`                  | fractal       | Preserve existing file, skip generation |
 | Directory name in `KNOWN_ORGAN_DIR_NAMES` | organ       | Skip — INTENT.md is prohibited          |
 | No fractal children + leaf directory    | organ         | Skip — INTENT.md is prohibited          |
 | No observable side effects, stateless   | pure-function | No INTENT.md needed                     |
@@ -172,10 +172,10 @@ specifying. Do not create DETAIL.md for leaf utility directories.
 
 After all files are written, validate the resulting structure:
 
-- Each fractal node's INTENT.md passes `validateClaudeMd()` (≤ 50 lines,
+- Each fractal node's INTENT.md passes `validateIntentMd()` (≤ 50 lines,
   3-tier boundary sections present)
 - No organ directory contains a INTENT.md
-- All DETAIL.md files pass `validateSpecMd()`
+- All DETAIL.md files pass `validateDetailMd()`
 
 Print a summary report:
 
