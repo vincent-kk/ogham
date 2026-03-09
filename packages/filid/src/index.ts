@@ -100,6 +100,7 @@ export { guardStructure } from './hooks/structure-guard.js';
 export { trackChange } from './hooks/change-tracker.js';
 export { enforceAgentRole } from './hooks/agent-enforcer.js';
 export { injectContext } from './hooks/context-injector.js';
+export { processSetup } from './hooks/setup.js';
 
 // Cache manager
 export {

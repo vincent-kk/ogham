@@ -74,6 +74,11 @@ export interface HookOutput {
   };
 }
 
+/** SessionStart hook input */
+export interface SessionStartInput extends HookBaseInput {
+  hook_event_name: 'SessionStart';
+}
+
 /** SessionEnd hook input */
 export interface SessionEndInput extends HookBaseInput {
   hook_event_name: 'SessionEnd';
@@ -87,6 +92,7 @@ export type HookInput =
   | PostToolUseInput
   | SubagentStartInput
   | UserPromptSubmitInput
+  | SessionStartInput
   | SessionEndInput;
 
 /** structure-guard가 출력하는 검증 결과. */

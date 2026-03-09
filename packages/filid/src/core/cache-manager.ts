@@ -111,11 +111,13 @@ export function pruneOldSessions(cwd: string): void {
       try {
         if (now - statSync(fp).mtimeMs > TTL_MS) {
           unlinkSync(fp);
-          // also remove the paired prompt-context file
+          // also remove paired cache files (aligned with removeSessionFiles)
           const hash = file.replace('session-context-', '');
           const contextFp = join(dir, `prompt-context-${hash}`);
           const guideFp = join(dir, `guide-${hash}`);
-          for (const paired of [contextFp, guideFp]) {
+          const boundaryFp = join(dir, `boundary-${hash}`);
+          const fmapFp = join(dir, `fmap-${hash}.json`);
+          for (const paired of [contextFp, guideFp, boundaryFp, fmapFp]) {
             try {
               if (existsSync(paired)) unlinkSync(paired);
             } catch {
