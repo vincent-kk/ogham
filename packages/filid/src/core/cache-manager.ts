@@ -133,25 +133,12 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   const contextFile = join(cacheDir, `prompt-context-${hash}`);
   const boundaryFile = join(cacheDir, `boundary-${hash}`);
   const fmapFile = join(cacheDir, `fmap-${hash}.json`);
-  try {
-    if (existsSync(marker)) unlinkSync(marker);
-  } catch {
-    // silently ignore deletion failures
-  }
-  try {
-    if (existsSync(contextFile)) unlinkSync(contextFile);
-  } catch {
-    // silently ignore deletion failures
-  }
-  try {
-    if (existsSync(boundaryFile)) unlinkSync(boundaryFile);
-  } catch {
-    // silently ignore deletion failures
-  }
-  try {
-    if (existsSync(fmapFile)) unlinkSync(fmapFile);
-  } catch {
-    // silently ignore deletion failures
+  for (const file of [marker, contextFile, boundaryFile, fmapFile]) {
+    try {
+      unlinkSync(file);
+    } catch {
+      // silently ignore — file may not exist
+    }
   }
 }
 

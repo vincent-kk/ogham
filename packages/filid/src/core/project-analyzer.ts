@@ -121,10 +121,12 @@ export function calculateHealthScore(report: AnalysisReport): number {
   let score = 100;
 
   const { violations } = report.validation.result;
-  const errorCount = violations.filter((v) => v.severity === 'error').length;
-  const warningCount = violations.filter(
-    (v) => v.severity === 'warning',
-  ).length;
+  let errorCount = 0;
+  let warningCount = 0;
+  for (const v of violations) {
+    if (v.severity === 'error') errorCount++;
+    else if (v.severity === 'warning') warningCount++;
+  }
 
   score -= Math.min(errorCount * 5, 50);
   score -= Math.min(warningCount * 2, 20);

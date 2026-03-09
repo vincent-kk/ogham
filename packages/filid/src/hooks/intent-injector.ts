@@ -241,16 +241,21 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
     }
 
     // Mark owning fractal as visited too (if different from fileDir)
+    // This prevents re-inlining when sibling organs or the owner itself are visited later
     const ownerRelDir =
       path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
-    if (ownerDir !== fileDir && !fcaMap.intents.includes(ownerRelDir)) {
+    const ownerAlreadyVisited =
+      ownerDir !== fileDir && fcaMap.intents.includes(ownerRelDir);
+    if (ownerDir !== fileDir && !ownerAlreadyVisited) {
       fcaMap.intents.push(ownerRelDir);
     }
 
     // Only build ctx block if there's actual intent content or chain context
+    // Skip if the owning fractal was already inlined by a sibling organ visit
     if (
-      intentContent !== undefined ||
-      chain.filter((d) => d !== ownerDir).some((d) => intents.get(d))
+      !ownerAlreadyVisited &&
+      (intentContent !== undefined ||
+        chain.filter((d) => d !== ownerDir).some((d) => intents.get(d)))
     ) {
       // Inject guide once per session, before the very first ctx block
       if (isFirstCtxEver) {

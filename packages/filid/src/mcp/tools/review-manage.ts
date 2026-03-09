@@ -187,22 +187,14 @@ async function handleCheckpoint(
     normalized,
   );
 
-  const fileNames = [
-    'structure-check.md',
-    'session.md',
-    'verification.md',
-    'review-report.md',
-  ];
-  const existingFiles: string[] = [];
-
-  for (const fileName of fileNames) {
-    try {
-      await fs.access(path.join(reviewDir, fileName));
-      existingFiles.push(fileName);
-    } catch {
-      // file does not exist
-    }
+  let dirEntries: string[] = [];
+  try {
+    dirEntries = await fs.readdir(reviewDir);
+  } catch {
+    // directory does not exist
   }
+  const checkFiles = new Set(['structure-check.md', 'session.md', 'verification.md', 'review-report.md']);
+  const existingFiles = dirEntries.filter((f) => checkFiles.has(f));
 
   const hasStructureCheck = existingFiles.includes('structure-check.md');
   const hasSession = existingFiles.includes('session.md');

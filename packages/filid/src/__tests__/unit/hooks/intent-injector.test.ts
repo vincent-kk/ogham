@@ -226,6 +226,46 @@ describe('injectIntent', () => {
     expect(ctx).not.toMatch(/chain:.*src\/feature\/INTENT\.md/);
   });
 
+  it('sibling organ → does NOT re-inline owning fractal INTENT.md', () => {
+    // Structure: root/src/feature/{utils,types}
+    // feature has INTENT.md, utils and types are organs
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
+    mkdirSync(join(tmpDir, 'src', 'feature', 'utils'), { recursive: true });
+    mkdirSync(join(tmpDir, 'src', 'feature', 'types'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, 'src', 'feature', 'INTENT.md'),
+      '## Purpose\nFeature module\n',
+    );
+    writeFileSync(join(tmpDir, 'src', 'feature', 'utils', 'helper.ts'), '');
+    writeFileSync(join(tmpDir, 'src', 'feature', 'types', 'index.ts'), '');
+
+    const sessionId = `session-sibling-${Date.now()}`;
+
+    // First organ visit — should inline feature's INTENT.md
+    const input1 = makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts') },
+    });
+    const result1 = injectIntent(input1);
+    const ctx1 = result1.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx1).toContain('Feature module');
+    expect(ctx1).toContain('[filid:ctx]');
+
+    // Second organ visit (sibling) — should NOT re-inline
+    const input2 = makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'types', 'index.ts') },
+    });
+    const result2 = injectIntent(input2);
+    const ctx2 = result2.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx2).not.toContain('[filid:ctx]');
+    expect(ctx2).not.toContain('Feature module');
+    expect(ctx2).toContain('[filid:map]');
+  });
+
   it('fractal map accumulation: multiple calls → fmap.reads grows', () => {
     writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
     writeFileSync(
