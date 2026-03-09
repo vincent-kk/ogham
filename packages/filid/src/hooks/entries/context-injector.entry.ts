@@ -10,7 +10,7 @@ const raw = Buffer.concat(chunks).toString('utf-8');
 let result;
 try {
   const input = JSON.parse(raw) as UserPromptSubmitInput;
-  result = await injectContext(input);
+  result = injectContext(input);
 } catch {
   result = { continue: true };
 }

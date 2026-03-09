@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 
 import type {
   CategoryType,
@@ -297,7 +297,7 @@ export async function scanProject(
     immediateChildrenMap.set(absPath, []);
   }
   for (const absPath of allDirs) {
-    const parentDir = absPath.substring(0, absPath.lastIndexOf('/'));
+    const parentDir = dirname(absPath);
     if (parentDir && immediateChildrenMap.has(parentDir)) {
       immediateChildrenMap.get(parentDir)!.push(absPath);
     }
