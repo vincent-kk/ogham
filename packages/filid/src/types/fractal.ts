@@ -31,9 +31,9 @@ export interface FractalNode {
   children: string[];
   /** Organ directory paths */
   organs: string[];
-  /** Whether INTENT.md (or legacy CLAUDE.md) exists */
+  /** Whether INTENT.md exists */
   hasIntentMd: boolean;
-  /** Whether DETAIL.md (or legacy SPEC.md) exists */
+  /** Whether DETAIL.md exists */
   hasDetailMd: boolean;
   /** Whether index.ts or index.js exists in this directory */
   hasIndex: boolean;

@@ -30,10 +30,10 @@ function isOrganByStructure(dirPath: string): boolean {
     }
     const entries = readdirSync(dirPath, { withFileTypes: true });
     const hasIntentMd = entries.some(
-      (e) => e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
+      (e) => e.isFile() && e.name === 'INTENT.md',
     );
     const hasDetailMd = entries.some(
-      (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
+      (e) => e.isFile() && e.name === 'DETAIL.md',
     );
     const subDirs = entries.filter((e) => e.isDirectory());
     const hasFractalChildren = subDirs.some((d) => {
@@ -42,11 +42,7 @@ function isOrganByStructure(dirPath: string): boolean {
         const childEntries = readdirSync(childPath, { withFileTypes: true });
         return childEntries.some(
           (ce) =>
-            ce.isFile() &&
-            (ce.name === 'INTENT.md' ||
-              ce.name === 'CLAUDE.md' ||
-              ce.name === 'DETAIL.md' ||
-              ce.name === 'SPEC.md'),
+            ce.isFile() && (ce.name === 'INTENT.md' || ce.name === 'DETAIL.md'),
         );
       } catch {
         return false;
@@ -99,14 +95,6 @@ function isAncestorPath(
   return fileAbsolute.startsWith(resolvedImport + path.sep);
 }
 
-/**
- * PreToolUse hook: organ-guard 로직을 포팅하고 카테고리 검증 3가지를 추가.
- *
- * [기존 로직 보존] organ 디렉토리 내 CLAUDE.md Write → continue: false
- * [추가 검증] 경고 2가지 (continue: true):
- *   1. organ 내부 하위 디렉토리 생성
- *   2. 잠재적 순환 의존 import
- */
 export function guardStructure(input: PreToolUseInput): HookOutput {
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
     return { continue: true };

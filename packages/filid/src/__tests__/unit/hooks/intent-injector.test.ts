@@ -82,7 +82,7 @@ describe('compressPaths', () => {
 // ---------------------------------------------------------------------------
 
 describe('injectIntent', () => {
-  it('non-FCA project (no .filid/, INTENT.md, CLAUDE.md) → skip', () => {
+  it('non-FCA project (no .filid/, INTENT.md) → skip', () => {
     // tmpDir has no FCA markers and no package.json → buildChain returns null
     const filePath = join(tmpDir, 'src', 'index.ts');
     mkdirSync(join(tmpDir, 'src'), { recursive: true });

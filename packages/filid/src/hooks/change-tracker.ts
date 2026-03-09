@@ -32,15 +32,9 @@ function classifyPathCategory(filePath: string, cwd: string): string {
     .split('/')
     .filter((p) => p.length > 0);
 
-  // INTENT.md, CLAUDE.md, DETAIL.md, SPEC.md를 포함하면 fractal
+  // INTENT.md, DETAIL.md를 포함하면 fractal
   const fileName = segments[segments.length - 1] ?? '';
-  if (
-    fileName === 'INTENT.md' ||
-    fileName === 'CLAUDE.md' ||
-    fileName === 'DETAIL.md' ||
-    fileName === 'SPEC.md'
-  )
-    return 'fractal';
+  if (fileName === 'INTENT.md' || fileName === 'DETAIL.md') return 'fractal';
 
   // 구조 기반 organ 분류
   let dirSoFar = cwd;
@@ -54,11 +48,10 @@ function classifyPathCategory(filePath: string, cwd: string): string {
       }
       const entries = fs.readdirSync(dirSoFar, { withFileTypes: true });
       const hasIntentMd = entries.some(
-        (e) =>
-          e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
+        (e) => e.isFile() && e.name === 'INTENT.md',
       );
       const hasDetailMd = entries.some(
-        (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
+        (e) => e.isFile() && e.name === 'DETAIL.md',
       );
       const subdirs = entries.filter((e) => e.isDirectory());
       const isLeafDirectory = subdirs.length === 0;
@@ -71,10 +64,7 @@ function classifyPathCategory(filePath: string, cwd: string): string {
           return childEntries.some(
             (ce) =>
               ce.isFile() &&
-              (ce.name === 'INTENT.md' ||
-                ce.name === 'CLAUDE.md' ||
-                ce.name === 'DETAIL.md' ||
-                ce.name === 'SPEC.md'),
+              (ce.name === 'INTENT.md' || ce.name === 'DETAIL.md'),
           );
         } catch {
           return false;

@@ -102,32 +102,6 @@ describe('buildChain', () => {
     expect(result!.details.get(resolve(tmp))).toBe(false);
   });
 
-  it('CLAUDE.md 레거시 폴백: INTENT.md로 인식', () => {
-    writeFileSync(join(tmp, 'package.json'), '{}');
-    mkdirSync(join(tmp, 'src'), { recursive: true });
-    writeFileSync(join(tmp, 'src', 'CLAUDE.md'), '# legacy');
-    writeFileSync(join(tmp, 'src', 'file.ts'), '');
-
-    const result = buildChain(join(tmp, 'src', 'file.ts'));
-    expect(result).not.toBeNull();
-
-    const srcDir = resolve(join(tmp, 'src'));
-    expect(result!.intents.get(srcDir)).toBe(true);
-  });
-
-  it('SPEC.md 레거시 폴백: DETAIL.md로 인식', () => {
-    writeFileSync(join(tmp, 'package.json'), '{}');
-    mkdirSync(join(tmp, 'src'), { recursive: true });
-    writeFileSync(join(tmp, 'src', 'SPEC.md'), '# legacy spec');
-    writeFileSync(join(tmp, 'src', 'file.ts'), '');
-
-    const result = buildChain(join(tmp, 'src', 'file.ts'));
-    expect(result).not.toBeNull();
-
-    const srcDir = resolve(join(tmp, 'src'));
-    expect(result!.details.get(srcDir)).toBe(true);
-  });
-
   it('혼합 체인: INTENT.md 있는 디렉토리만 true', () => {
     writeFileSync(join(tmp, 'package.json'), '{}');
     mkdirSync(join(tmp, 'src', 'module'), { recursive: true });

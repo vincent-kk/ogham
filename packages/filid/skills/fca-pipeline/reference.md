@@ -75,7 +75,7 @@ These files serve as the inter-stage communication interface.
 | Stage       | Files written                                              |
 | ----------- | ---------------------------------------------------------- |
 | pr-create   | _(none in review dir — creates GitHub PR)_                 |
-| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md` |
+| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md`, `content-hash.json` |
 | resolve     | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
 | revalidate  | `re-validate.md`                                           |
 

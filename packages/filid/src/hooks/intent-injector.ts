@@ -200,9 +200,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
     let intentContent: string | undefined;
     const intentAbsPath = existsSync(path.join(fileDir, 'INTENT.md'))
       ? path.join(fileDir, 'INTENT.md')
-      : existsSync(path.join(fileDir, 'CLAUDE.md'))
-        ? path.join(fileDir, 'CLAUDE.md')
-        : undefined;
+      : undefined;
 
     if (intentAbsPath) {
       try {

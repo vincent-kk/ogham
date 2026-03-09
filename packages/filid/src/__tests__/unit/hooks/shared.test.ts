@@ -25,16 +25,6 @@ describe('shared hooks utilities', () => {
       expect(isFcaProject('/workspace/project')).toBe(true);
     });
 
-    it('should return true when only CLAUDE.md exists (no INTENT.md)', () => {
-      (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
-        (p: unknown) => {
-          if (typeof p === 'string' && p.endsWith('CLAUDE.md')) return true;
-          return false;
-        },
-      );
-      expect(isFcaProject('/workspace/project')).toBe(true);
-    });
-
     it('should return true when only INTENT.md exists', () => {
       (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
         (p: unknown) => {
@@ -57,11 +47,6 @@ describe('shared hooks utilities', () => {
       expect(isIntentMd('INTENT.md')).toBe(true);
     });
 
-    it('should return true for CLAUDE.md paths (fallback)', () => {
-      expect(isIntentMd('/path/to/CLAUDE.md')).toBe(true);
-      expect(isIntentMd('CLAUDE.md')).toBe(true);
-    });
-
     it('should return false for other file paths', () => {
       expect(isIntentMd('/app/README.md')).toBe(false);
       expect(isIntentMd('/app/intent.md')).toBe(false);
@@ -75,14 +60,10 @@ describe('shared hooks utilities', () => {
       expect(isDetailMd('DETAIL.md')).toBe(true);
     });
 
-    it('should return true for SPEC.md paths (fallback)', () => {
-      expect(isDetailMd('/path/to/SPEC.md')).toBe(true);
-      expect(isDetailMd('SPEC.md')).toBe(true);
-    });
-
     it('should return false for other file paths', () => {
       expect(isDetailMd('/app/README.md')).toBe(false);
       expect(isDetailMd('/app/spec.md')).toBe(false);
+      expect(isDetailMd('/app/SPEC.md')).toBe(false);
       expect(isDetailMd('/app/INTENT.md')).toBe(false);
     });
   });

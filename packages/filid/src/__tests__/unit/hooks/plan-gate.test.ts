@@ -71,10 +71,10 @@ describe('plan-gate', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('should detect FCA project via CLAUDE.md presence', () => {
+  it('should detect FCA project via INTENT.md presence', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('CLAUDE.md')) return true;
+        if (typeof p === 'string' && p.endsWith('INTENT.md')) return true;
         return false;
       },
     );

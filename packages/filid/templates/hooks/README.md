@@ -89,7 +89,7 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
 
 **Session gate**: Uses a session marker file in the cache directory (`~/.filid/cache/`) to ensure injection happens only once per session. Subsequent prompts in the same session return immediately.
 
-**Project detection**: Fires only when the working directory contains `.filid/`, `INTENT.md`, or `CLAUDE.md` (legacy). Returns `continue: true` silently for non-FCA-AI projects.
+**Project detection**: Fires only when the working directory contains `.filid/` or `INTENT.md`. Returns `continue: true` silently for non-FCA-AI projects.
 
 **Cache**: Content hash-based invalidation. If the generated context matches the cached version, the cached copy is returned immediately (no regeneration cost).
 
@@ -136,13 +136,13 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "Read|Write|Edit",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"", "timeout": 3 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"", "timeout": 3 }
         ]
       },
       {
         "matcher": "ExitPlanMode",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"", "timeout": 3 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"", "timeout": 3 }
         ]
       }
     ],
@@ -151,7 +151,7 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"", "timeout": 3 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"", "timeout": 3 }
         ]
       }
     ],
@@ -159,7 +159,7 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"", "timeout": 5 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"", "timeout": 5 }
         ]
       }
     ],
@@ -167,7 +167,7 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"", "timeout": 3 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"", "timeout": 3 }
         ]
       }
     ]

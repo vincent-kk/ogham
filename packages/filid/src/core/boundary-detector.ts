@@ -7,9 +7,9 @@ export interface ChainResult {
   boundary: string;
   /** Ancestor directories from leaf to root */
   chain: string[];
-  /** Which directories have INTENT.md (or CLAUDE.md) */
+  /** Which directories have INTENT.md */
   intents: Map<string, boolean>;
-  /** Which directories have DETAIL.md (or SPEC.md) */
+  /** Which directories have DETAIL.md */
   details: Map<string, boolean>;
 }
 
@@ -48,14 +48,12 @@ export function buildChain(filePath: string): ChainResult | null {
   while (true) {
     chain.push(dir);
 
-    // Check INTENT.md (or legacy CLAUDE.md)
-    const hasIntent =
-      existsSync(join(dir, 'INTENT.md')) || existsSync(join(dir, 'CLAUDE.md'));
+    // Check INTENT.md
+    const hasIntent = existsSync(join(dir, 'INTENT.md'));
     intents.set(dir, hasIntent);
 
-    // Check DETAIL.md (or legacy SPEC.md)
-    const hasDetail =
-      existsSync(join(dir, 'DETAIL.md')) || existsSync(join(dir, 'SPEC.md'));
+    // Check DETAIL.md
+    const hasDetail = existsSync(join(dir, 'DETAIL.md'));
     details.set(dir, hasDetail);
 
     if (dir === boundary) break;

@@ -303,12 +303,8 @@ export async function scanProject(
       absPath === rootPath
         ? (rootPath.split('/').pop() ?? '')
         : (absPath.split('/').pop() ?? '');
-    const hasIntentMd =
-      existsSync(join(absPath, 'INTENT.md')) ||
-      existsSync(join(absPath, 'CLAUDE.md'));
-    const hasDetailMd =
-      existsSync(join(absPath, 'DETAIL.md')) ||
-      existsSync(join(absPath, 'SPEC.md'));
+    const hasIntentMd = existsSync(join(absPath, 'INTENT.md'));
+    const hasDetailMd = existsSync(join(absPath, 'DETAIL.md'));
     const hasIndex =
       existsSync(join(absPath, 'index.ts')) ||
       existsSync(join(absPath, 'index.tsx')) ||

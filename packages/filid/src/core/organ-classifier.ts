@@ -33,9 +33,9 @@ export const KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
 export interface ClassifyInput {
   /** Directory name */
   dirName: string;
-  /** Whether INTENT.md (or legacy CLAUDE.md) exists */
+  /** Whether INTENT.md exists */
   hasIntentMd?: boolean;
-  /** Whether DETAIL.md (or legacy SPEC.md) exists */
+  /** Whether DETAIL.md exists */
   hasDetailMd?: boolean;
   /** Whether the directory contains fractal child directories */
   hasFractalChildren: boolean;

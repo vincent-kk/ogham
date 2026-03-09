@@ -161,11 +161,11 @@ describe('pre-tool-validator', () => {
 });
 
 describe('isDetailMd', () => {
-  it('should be exported and detect DETAIL.md/SPEC.md paths', () => {
+  it('should be exported and detect DETAIL.md paths', () => {
     expect(isDetailMd('/app/DETAIL.md')).toBe(true);
     expect(isDetailMd('DETAIL.md')).toBe(true);
-    expect(isDetailMd('/app/SPEC.md')).toBe(true);
-    expect(isDetailMd('SPEC.md')).toBe(true);
+    expect(isDetailMd('/app/SPEC.md')).toBe(false);
+    expect(isDetailMd('SPEC.md')).toBe(false);
     expect(isDetailMd('/app/README.md')).toBe(false);
     expect(isDetailMd('/app/spec.md')).toBe(false);
   });

@@ -55,11 +55,11 @@ export function loadBuiltinRules(): Rule[] {
       },
     },
 
-    // 2. organ-no-claudemd: organ 노드에 INTENT.md(또는 CLAUDE.md)가 없어야 한다
+    // 2. organ-no-claudemd: organ 노드에 INTENT.md가 없어야 한다
     {
       id: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       name: 'Organ No INTENT.md',
-      description: 'organ 노드에 INTENT.md(또는 CLAUDE.md)가 존재하면 안 된다.',
+      description: 'organ 노드에 INTENT.md가 존재하면 안 된다.',
       category: 'structure',
       severity: 'error',
       enabled: true,
