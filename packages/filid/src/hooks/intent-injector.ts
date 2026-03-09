@@ -10,6 +10,7 @@ import {
 } from '../core/cache-manager.js';
 import type { FractalMap } from '../core/cache-manager.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
+
 import { isFcaProject } from './shared.js';
 
 export type { FractalMap };
@@ -31,7 +32,9 @@ export function compressPaths(paths: string[], currentDir?: string): string {
   }
 
   // Mark currentDir with * suffix
-  const marked = paths.map((p) => (currentDir && p === currentDir ? `${p}/*` : p));
+  const marked = paths.map((p) =>
+    currentDir && p === currentDir ? `${p}/*` : p,
+  );
 
   return compressGroup(marked);
 }
@@ -79,18 +82,20 @@ function compressGroup(paths: string[]): string {
  */
 function buildCtxBlock(
   relFile: string,
-  relDir: string,
   intentContent: string | undefined,
   chain: string[],
   intents: Map<string, boolean>,
   details: Map<string, boolean>,
   boundary: string,
+  ownerDir: string,
 ): string {
   const lines: string[] = [];
   lines.push(`[filid:ctx] ${relFile}`);
 
-  // Intent line
-  const intentPath = path.join(relDir, 'INTENT.md');
+  // Intent line — point to owning fractal's INTENT.md, not organ's
+  const ownerRelDir =
+    path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
+  const intentPath = path.join(ownerRelDir, 'INTENT.md');
   lines.push(`intent: ${intentPath}`);
 
   if (intentContent !== undefined) {
@@ -99,20 +104,20 @@ function buildCtxBlock(
     lines.push('---');
   }
 
-  // Chain: ancestor directories with INTENT.md (skip current dir)
+  // Chain: ancestor directories with INTENT.md, skip ownerDir (already inlined)
   const chainIntents = chain
-    .slice(1) // skip the leaf directory itself
-    .filter((d) => intents.get(d))
-    .map((d) => path.join(path.relative(boundary, d), 'INTENT.md').replace(/\\/g, '/'));
+    .filter((d) => d !== ownerDir && intents.get(d))
+    .map((d) =>
+      path.join(path.relative(boundary, d), 'INTENT.md').replace(/\\/g, '/'),
+    );
 
   if (chainIntents.length > 0) {
     lines.push(`chain: ${chainIntents.join(' > ')}`);
   }
 
-  // Detail hint
-  const leafDir = chain[0];
-  if (leafDir !== undefined && details.get(leafDir)) {
-    const detailPath = path.join(relDir, 'DETAIL.md');
+  // Detail hint (check owning fractal for DETAIL.md too)
+  if (details.get(ownerDir)) {
+    const detailPath = path.join(ownerRelDir, 'DETAIL.md');
     lines.push(`detail: ${detailPath}`);
   }
 
@@ -162,7 +167,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   const fileDir = path.dirname(filePath);
 
   const sessionId = input.session_id;
-  const fmap = readFractalMap(input.cwd, sessionId);
+  const fcaMap = readFractalMap(input.cwd, sessionId);
 
   // Build context chain to determine boundary (with boundary cache)
   const cachedBoundary = readBoundary(input.cwd, sessionId, fileDir);
@@ -183,39 +188,50 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   const relFile = path.relative(boundary, filePath).replace(/\\/g, '/');
 
   // Add to reads (dedup)
-  if (!fmap.reads.includes(relDir)) {
-    fmap.reads.push(relDir);
+  if (!fcaMap.reads.includes(relDir)) {
+    fcaMap.reads.push(relDir);
   }
 
-  const isFirstVisit = !fmap.intents.includes(relDir);
-  const isFirstCtxEver = fmap.intents.length === 0;
+  const isFirstVisit = !fcaMap.intents.includes(relDir);
+  const isFirstCtxEver = fcaMap.intents.length === 0;
 
   const blocks: string[] = [];
 
   if (isFirstVisit) {
     // Mark as visited
     if (intents.get(fileDir)) {
-      if (!fmap.intents.includes(relDir)) {
-        fmap.intents.push(relDir);
+      if (!fcaMap.intents.includes(relDir)) {
+        fcaMap.intents.push(relDir);
       }
     } else {
       // Still track as first visit even without INTENT.md
-      if (!fmap.intents.includes(relDir)) {
-        fmap.intents.push(relDir);
+      if (!fcaMap.intents.includes(relDir)) {
+        fcaMap.intents.push(relDir);
       }
     }
     if (details.get(fileDir)) {
-      if (!fmap.details.includes(relDir)) {
-        fmap.details.push(relDir);
+      if (!fcaMap.details.includes(relDir)) {
+        fcaMap.details.push(relDir);
       }
     }
 
-    // Read INTENT.md content if exists
-    let intentContent: string | undefined;
-    const intentAbsPath = existsSync(path.join(fileDir, 'INTENT.md'))
-      ? path.join(fileDir, 'INTENT.md')
-      : undefined;
+    // Find INTENT.md: current dir first, then walk up chain to owning fractal
+    let intentAbsPath: string | undefined;
+    let ownerDir = fileDir;
 
+    if (existsSync(path.join(fileDir, 'INTENT.md'))) {
+      intentAbsPath = path.join(fileDir, 'INTENT.md');
+    } else {
+      for (let i = 1; i < chain.length; i++) {
+        if (intents.get(chain[i])) {
+          intentAbsPath = path.join(chain[i], 'INTENT.md');
+          ownerDir = chain[i];
+          break;
+        }
+      }
+    }
+
+    let intentContent: string | undefined;
     if (intentAbsPath) {
       try {
         intentContent = readFileSync(intentAbsPath, 'utf-8');
@@ -224,22 +240,32 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
       }
     }
 
+    // Mark owning fractal as visited too (if different from fileDir)
+    const ownerRelDir =
+      path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
+    if (ownerDir !== fileDir && !fcaMap.intents.includes(ownerRelDir)) {
+      fcaMap.intents.push(ownerRelDir);
+    }
+
     // Only build ctx block if there's actual intent content or chain context
-    if (intentContent !== undefined || chain.slice(1).some((d) => intents.get(d))) {
+    if (
+      intentContent !== undefined ||
+      chain.filter((d) => d !== ownerDir).some((d) => intents.get(d))
+    ) {
       // Inject guide once per session, before the very first ctx block
       if (isFirstCtxEver) {
         blocks.push(GUIDE_BLOCK);
       }
       blocks.push(
-        buildCtxBlock(relFile, relDir, intentContent, chain, intents, details, boundary),
+        buildCtxBlock(relFile, intentContent, chain, intents, details, boundary, ownerDir),
       );
     }
   }
 
   // Always append map block
-  blocks.push(buildMapBlock(fmap.reads, relDir));
+  blocks.push(buildMapBlock(fcaMap.reads, relDir));
 
-  writeFractalMap(input.cwd, sessionId, fmap);
+  writeFractalMap(input.cwd, sessionId, fcaMap);
 
   const additionalContext = blocks.join('\n');
   if (!additionalContext.trim()) {

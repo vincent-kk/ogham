@@ -196,6 +196,36 @@ describe('injectIntent', () => {
     expect(ctx).toContain('DETAIL.md');
   });
 
+  it('organ directory → inlines owning fractal INTENT.md, not organ path', () => {
+    // Structure: root/src/feature/utils/helper.ts
+    // root: package.json + INTENT.md
+    // src/feature: INTENT.md (owning fractal)
+    // src/feature/utils: organ (no INTENT.md)
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
+    mkdirSync(join(tmpDir, 'src', 'feature', 'utils'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, 'src', 'feature', 'INTENT.md'),
+      '## Purpose\nFeature module\n## Boundaries\nNever do: direct DB access\n',
+    );
+    writeFileSync(join(tmpDir, 'src', 'feature', 'utils', 'helper.ts'), '');
+
+    const input = makeInput({
+      cwd: tmpDir,
+      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts') },
+    });
+    const result = injectIntent(input);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+
+    // Should inline feature's INTENT.md content
+    expect(ctx).toContain('Feature module');
+    expect(ctx).toContain('direct DB access');
+    // intent: should point to feature's INTENT.md, not utils/INTENT.md
+    expect(ctx).toContain('intent: src/feature/INTENT.md');
+    // chain should NOT include feature (already inlined), but should include root
+    expect(ctx).not.toMatch(/chain:.*src\/feature\/INTENT\.md/);
+  });
+
   it('fractal map accumulation: multiple calls → fmap.reads grows', () => {
     writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
     writeFileSync(
