@@ -49,7 +49,7 @@ describe('rule-engine', () => {
       const rules = loadBuiltinRules();
       const ids = rules.map((r) => r.id);
       expect(ids).toContain(BUILTIN_RULE_IDS.NAMING_CONVENTION);
-      expect(ids).toContain(BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD);
+      expect(ids).toContain(BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD);
       expect(ids).toContain(BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN);
       expect(ids).toContain(BUILTIN_RULE_IDS.MODULE_ENTRY_POINT);
       expect(ids).toContain(BUILTIN_RULE_IDS.MAX_DEPTH);
@@ -122,10 +122,10 @@ describe('rule-engine', () => {
     });
   });
 
-  describe('organ-no-claudemd rule', () => {
+  describe('organ-no-intentmd rule', () => {
     it('should fail when organ has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
       const node = makeNode({ type: 'organ', hasIntentMd: true });
       const tree = makeTree([node]);
@@ -137,7 +137,7 @@ describe('rule-engine', () => {
 
     it('should pass when organ has no INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
       const node = makeNode({ type: 'organ', hasIntentMd: false });
       const tree = makeTree([node]);
@@ -147,7 +147,7 @@ describe('rule-engine', () => {
 
     it('should pass when fractal has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
       const node = makeNode({ type: 'fractal', hasIntentMd: true });
       const tree = makeTree([node]);

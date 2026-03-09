@@ -57,7 +57,7 @@ describe('fractal-validator', () => {
       const report = validateStructure(tree);
 
       const violation = report.result.violations.find(
-        (v) => v.ruleId === 'organ-no-claudemd',
+        (v) => v.ruleId === 'organ-no-intentmd',
       );
       expect(violation).toBeDefined();
       expect(violation!.severity).toBe('error');

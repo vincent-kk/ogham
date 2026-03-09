@@ -19,7 +19,7 @@ import type { RuleEvaluationResult, RuleViolation } from '../types/rules.js';
 /** RuleViolation의 ruleId → SyncAction 매핑 */
 const RULE_TO_ACTION: Record<string, SyncAction> = {
   'naming-convention': 'rename',
-  'organ-no-claudemd': 'move',
+  'organ-no-intentmd': 'move',
   'index-barrel-pattern': 'create-index',
   'module-entry-point': 'create-index',
   'max-depth': 'merge',
@@ -32,7 +32,7 @@ const RULE_TO_SEVERITY: Record<string, DriftSeverity> = {
   'circular-dependency': 'critical',
   'pure-function-isolation': 'critical',
   'max-depth': 'high',
-  'organ-no-claudemd': 'high',
+  'organ-no-intentmd': 'high',
   'index-barrel-pattern': 'medium',
   'module-entry-point': 'medium',
   'naming-convention': 'low',

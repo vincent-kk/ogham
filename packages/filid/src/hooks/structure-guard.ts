@@ -9,14 +9,31 @@ import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isIntentMd } from './shared.js';
 
-/** Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls */
+/**
+ * Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls.
+ * Lifecycle: module-scope — lives for the duration of the process.
+ * In hook mode (bridge scripts), each invocation spawns a fresh process,
+ * so this cache is effectively per-invocation.
+ * In MCP server / test environments, call clearOrganCache() to invalidate.
+ */
 const organCache = new Map<string, boolean>();
+
+/** Clear the organ classification cache. Useful in tests or long-lived processes. */
+export function clearOrganCache(): void {
+  organCache.clear();
+}
 
 /**
  * 디렉토리 경로를 기반으로 organ 여부를 판별.
  * classifyNode()를 사용하여 구조 기반 분류를 수행하고,
  * 파일시스템 접근 실패 시 false를 반환한다.
  * 결과는 프로세스 내 캐시에 저장하여 동일 경로 반복 검사를 방지한다.
+ *
+ * Performance: Uses readdirSync for the target dir and each child dir.
+ * For a directory with N subdirs, this makes N+1 sync filesystem calls
+ * on the first invocation (subsequent calls are cached via organCache).
+ * Acceptable for hook usage where directories are few; for large trees,
+ * prefer fractal_scan MCP tool results instead.
  */
 function isOrganByStructure(dirPath: string): boolean {
   const cached = organCache.get(dirPath);

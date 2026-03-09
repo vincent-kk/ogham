@@ -60,9 +60,9 @@ describe('drift-detector', () => {
       );
     });
 
-    it('should map organ-no-claudemd to high', () => {
+    it('should map organ-no-intentmd to high', () => {
       expect(
-        calculateSeverity(makeViolation('organ-no-claudemd', 'error')),
+        calculateSeverity(makeViolation('organ-no-intentmd', 'error')),
       ).toBe('high');
     });
 
@@ -113,7 +113,7 @@ describe('drift-detector', () => {
     it('should convert violations to DriftItems', () => {
       const tree = buildFractalTree([entry('/app', 'fractal', true)]);
       const violations: RuleViolation[] = [
-        makeViolation('organ-no-claudemd', 'error', '/app/utils'),
+        makeViolation('organ-no-intentmd', 'error', '/app/utils'),
         makeViolation('naming-convention', 'warning', '/app/MyComponent'),
       ];
 
@@ -128,7 +128,7 @@ describe('drift-detector', () => {
       const violations: RuleViolation[] = [
         makeViolation('naming-convention', 'warning', '/app/A'),
         makeViolation('circular-dependency', 'error', '/app/B'),
-        makeViolation('organ-no-claudemd', 'error', '/app/C'),
+        makeViolation('organ-no-intentmd', 'error', '/app/C'),
       ];
 
       const result = detectDrift(tree, violations);
@@ -143,7 +143,7 @@ describe('drift-detector', () => {
       const violations: RuleViolation[] = [
         makeViolation('circular-dependency', 'error', '/app/A'),
         makeViolation('pure-function-isolation', 'error', '/app/B'),
-        makeViolation('organ-no-claudemd', 'error', '/app/C'),
+        makeViolation('organ-no-intentmd', 'error', '/app/C'),
         makeViolation('module-entry-point', 'warning', '/app/D'),
       ];
 
@@ -181,7 +181,7 @@ describe('drift-detector', () => {
     it('should convert RuleEvaluationResult to DriftItems', () => {
       const tree = buildFractalTree([entry('/app', 'fractal', true)]);
       const evalResult: RuleEvaluationResult = {
-        violations: [makeViolation('organ-no-claudemd', 'error', '/app/utils')],
+        violations: [makeViolation('organ-no-intentmd', 'error', '/app/utils')],
         passed: 5,
         failed: 1,
         skipped: 0,
@@ -191,7 +191,7 @@ describe('drift-detector', () => {
       const items = compareCurrent(tree, evalResult);
 
       expect(items).toHaveLength(1);
-      expect(items[0].rule).toBe('organ-no-claudemd');
+      expect(items[0].rule).toBe('organ-no-intentmd');
       expect(items[0].severity).toBe('high');
       expect(items[0].suggestedAction).toBe('move');
     });
@@ -209,7 +209,7 @@ describe('drift-detector', () => {
       const drifts: DriftItem[] = [
         {
           path: '/app/utils',
-          rule: 'organ-no-claudemd',
+          rule: 'organ-no-intentmd',
           expected: 'No INTENT.md',
           actual: 'Has INTENT.md',
           severity: 'high',

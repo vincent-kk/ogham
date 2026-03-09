@@ -198,6 +198,13 @@ export function readBoundary(cwd: string, sessionId: string, dir: string): strin
 /**
  * Write boundary cache for a directory.
  */
+/**
+ * Write boundary cache for a directory.
+ *
+ * Note: read-modify-write is NOT atomic. This is acceptable because
+ * Claude Code hooks execute sequentially per session — concurrent
+ * writes to the same cache file do not occur in practice.
+ */
 export function writeBoundary(cwd: string, sessionId: string, dir: string, boundaryPath: string): void {
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });

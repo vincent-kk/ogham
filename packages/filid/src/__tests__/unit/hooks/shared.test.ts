@@ -52,6 +52,12 @@ describe('shared hooks utilities', () => {
       expect(isIntentMd('/app/intent.md')).toBe(false);
       expect(isIntentMd('/app/DETAIL.md')).toBe(false);
     });
+
+    it('should handle Windows-style backslash paths', () => {
+      expect(isIntentMd('C:\\app\\INTENT.md')).toBe(true);
+      expect(isIntentMd('C:\\app\\src\\INTENT.md')).toBe(true);
+      expect(isIntentMd('C:\\app\\README.md')).toBe(false);
+    });
   });
 
   describe('isDetailMd', () => {
@@ -65,6 +71,12 @@ describe('shared hooks utilities', () => {
       expect(isDetailMd('/app/spec.md')).toBe(false);
       expect(isDetailMd('/app/SPEC.md')).toBe(false);
       expect(isDetailMd('/app/INTENT.md')).toBe(false);
+    });
+
+    it('should handle Windows-style backslash paths', () => {
+      expect(isDetailMd('C:\\app\\DETAIL.md')).toBe(true);
+      expect(isDetailMd('C:\\app\\src\\DETAIL.md')).toBe(true);
+      expect(isDetailMd('C:\\app\\INTENT.md')).toBe(false);
     });
   });
 });

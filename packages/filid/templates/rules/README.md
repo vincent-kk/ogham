@@ -8,7 +8,7 @@ Rules are defined in `src/core/rule-engine.ts` and loaded via `loadBuiltinRules(
 | ID | Name | Category | Severity | Description |
 |---|---|---|---|---|
 | `naming-convention` | Naming Convention | naming | warning | Directory/file names must follow kebab-case or camelCase |
-| `organ-no-claudemd` | Organ No INTENT.md | structure | error | Organ nodes must not contain INTENT.md |
+| `organ-no-intentmd` | Organ No INTENT.md | structure | error | Organ nodes must not contain INTENT.md |
 | `index-barrel-pattern` | Index Barrel Pattern | index | warning | fractal/hybrid index.ts must be a pure barrel (re-exports only) |
 | `module-entry-point` | Module Entry Point | module | warning | All fractal nodes must have index.ts or main.ts |
 | `max-depth` | Max Depth | structure | error | Fractal tree depth must not exceed the configured maximum |
@@ -18,7 +18,7 @@ Rules are defined in `src/core/rule-engine.ts` and loaded via `loadBuiltinRules(
 ## Rule Files
 
 - [naming-convention.md](./naming-convention.md)
-- [structure-rules.md](./structure-rules.md) — covers `organ-no-claudemd` and `max-depth`
+- [structure-rules.md](./structure-rules.md) — covers `organ-no-intentmd` and `max-depth`
 - [index-rules.md](./index-rules.md) — covers `index-barrel-pattern`
 - [module-rules.md](./module-rules.md) — covers `module-entry-point`
 - [dependency-rules.md](./dependency-rules.md) — covers `circular-dependency` and `pure-function-isolation`

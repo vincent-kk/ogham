@@ -65,7 +65,7 @@ export interface RuleEvaluationResult {
 /** 내장 규칙 ID 상수. */
 export const BUILTIN_RULE_IDS = {
   NAMING_CONVENTION: 'naming-convention',
-  ORGAN_NO_CLAUDEMD: 'organ-no-claudemd',
+  ORGAN_NO_INTENTMD: 'organ-no-intentmd',
   INDEX_BARREL_PATTERN: 'index-barrel-pattern',
   MODULE_ENTRY_POINT: 'module-entry-point',
   MAX_DEPTH: 'max-depth',

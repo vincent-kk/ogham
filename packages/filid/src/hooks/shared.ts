@@ -16,22 +16,26 @@ export function isFcaProject(cwd: string): boolean {
 }
 
 /**
+ * Extract the filename from a path, handling both / and \ separators.
+ */
+function fileBasename(filePath: string): string {
+  const lastSlash = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+  return lastSlash === -1 ? filePath : filePath.slice(lastSlash + 1);
+}
+
+/**
  * Check if a file path targets INTENT.md.
+ * Handles both POSIX (/) and Windows (\) path separators.
  */
 export function isIntentMd(filePath: string): boolean {
-  return (
-    filePath.endsWith('/INTENT.md') ||
-    filePath === 'INTENT.md'
-  );
+  return fileBasename(filePath) === 'INTENT.md';
 }
 
 /**
  * Check if a file path targets DETAIL.md.
+ * Handles both POSIX (/) and Windows (\) path separators.
  */
 export function isDetailMd(filePath: string): boolean {
-  return (
-    filePath.endsWith('/DETAIL.md') ||
-    filePath === 'DETAIL.md'
-  );
+  return fileBasename(filePath) === 'DETAIL.md';
 }
 

@@ -55,9 +55,9 @@ export function loadBuiltinRules(): Rule[] {
       },
     },
 
-    // 2. organ-no-claudemd: organ 노드에 INTENT.md가 없어야 한다
+    // 2. organ-no-intentmd: organ 노드에 INTENT.md가 없어야 한다
     {
-      id: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+      id: BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       name: 'Organ No INTENT.md',
       description: 'organ 노드에 INTENT.md가 존재하면 안 된다.',
       category: 'structure',
@@ -68,7 +68,7 @@ export function loadBuiltinRules(): Rule[] {
         if (node.type === 'organ' && node.hasIntentMd) {
           return [
             {
-              ruleId: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+              ruleId: BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
               severity: 'error',
               message: `organ 디렉토리 "${node.name}"에 INTENT.md가 존재합니다. organ은 독립 문서화가 금지됩니다.`,
               path: node.path,

@@ -1,12 +1,12 @@
 # Rules: structure
 
-This file covers the two built-in structure-category rules: `organ-no-claudemd` and `max-depth`.
+This file covers the two built-in structure-category rules: `organ-no-intentmd` and `max-depth`.
 
 ---
 
-## Rule: organ-no-claudemd
+## Rule: organ-no-intentmd
 
-**ID**: `organ-no-claudemd`
+**ID**: `organ-no-intentmd`
 **Category**: structure
 **Severity**: error
 **Enabled by default**: yes

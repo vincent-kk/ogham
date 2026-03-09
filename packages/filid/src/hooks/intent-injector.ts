@@ -171,6 +171,23 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
 
   // Build context chain to determine boundary (with boundary cache)
   const cachedBoundary = readBoundary(input.cwd, sessionId, fileDir);
+
+  // Skip full buildChain when boundary is cached and dir was already visited
+  if (cachedBoundary !== null) {
+    const relDir = path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
+    if (fcaMap.intents.includes(relDir)) {
+      // Already visited — only update reads + map block
+      if (!fcaMap.reads.includes(relDir)) {
+        fcaMap.reads.push(relDir);
+      }
+      const mapBlock = buildMapBlock(fcaMap.reads, relDir);
+      writeFractalMap(input.cwd, sessionId, fcaMap);
+      return mapBlock.trim()
+        ? { continue: true, hookSpecificOutput: { additionalContext: mapBlock } }
+        : { continue: true };
+    }
+  }
+
   const chainResult = buildChain(filePath);
   if (!chainResult) {
     return { continue: true };
@@ -198,17 +215,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   const blocks: string[] = [];
 
   if (isFirstVisit) {
-    // Mark as visited
-    if (intents.get(fileDir)) {
-      if (!fcaMap.intents.includes(relDir)) {
-        fcaMap.intents.push(relDir);
-      }
-    } else {
-      // Still track as first visit even without INTENT.md
-      if (!fcaMap.intents.includes(relDir)) {
-        fcaMap.intents.push(relDir);
-      }
-    }
+    fcaMap.intents.push(relDir);
     if (details.get(fileDir)) {
       if (!fcaMap.details.includes(relDir)) {
         fcaMap.details.push(relDir);
