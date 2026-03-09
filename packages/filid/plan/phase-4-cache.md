@@ -19,6 +19,8 @@ INTENT.md 존재 여부 및 내용은 캐싱하지 않는다.
 | INTENT.md 존재 여부 | **X** | 생성/삭제 빈번 → 캐시 오동작 위험 |
 | INTENT.md 내용 | **X** | 50줄 이하, readFileSync 수 ms로 충분 |
 | chain 구성 결과 | **X** | boundary만 알면 chain 구성은 즉시 계산 가능 |
+| 프랙탈 맵 (읽은 경로 누적) | O | Phase 3의 `fmap-{sessionIdHash}.json`이 담당 |
+| 중복 주입 방지 (dedup) | O | fmap의 `intents` 배열이 담당 (별도 마커 불필요) |
 
 ## 왜 전체 캐시를 축소했는가
 
@@ -30,20 +32,22 @@ Phase 3의 intent-injector가 하는 일:
 depth 5 체인이어도 `existsSync` 5~6번 + `readFileSync` 1번 = **수 밀리초**.
 캐시 없이도 3초 timeout 내 충분. INTENT.md를 캐싱하면 생성/삭제 시 오동작 위험.
 
-## 구현
-
-### 기존 cache-manager.ts에 통합
-
-`src/core/cache-manager.ts`의 기존 패턴을 그대로 활용:
+## 캐시 파일 레이아웃
 
 ```
 ~/.claude/plugins/filid/{cwdHash}/
-├── session-context-{hash}                ← 기존: 세션 주입 마커
-├── prompt-context-{hash}                 ← 기존: FCA 규칙 텍스트 캐시
-├── run-{skillName}.hash                  ← 기존: 스킬 실행 해시
-├── boundary-{sessionIdHash}              ← 신규: boundary 위치 캐시 (JSON)
-└── injected-{sessionIdHash}-{dirHash}    ← 신규: 디렉토리별 주입 마커
+├── session-context-{hash}         ← 기존: 세션 주입 마커
+├── prompt-context-{hash}          ← 기존: FCA 규칙 텍스트 캐시
+├── run-{skillName}.hash           ← 기존: 스킬 실행 해시
+├── boundary-{sessionIdHash}       ← 신규: boundary 위치 캐시 (JSON)
+└── fmap-{sessionIdHash}.json      ← Phase 3: 프랙탈 맵 (dedup 겸용)
 ```
+
+**별도 마커 파일(`injected-*`) 불필요** — fmap의 `intents` 배열이 dedup 역할을 겸한다.
+
+## 구현
+
+### 기존 cache-manager.ts에 통합
 
 추가할 함수:
 
@@ -52,14 +56,22 @@ depth 5 체인이어도 `existsSync` 5~6번 + `readFileSync` 1번 = **수 밀리
 readBoundary(cwd, sessionId, dir): string | null
 writeBoundary(cwd, sessionId, dir, boundaryPath): void
 
-// 디렉토리별 주입 중복 방지 마커
-isIntentInjected(cwd, sessionId, dir): boolean
-markIntentInjected(cwd, sessionId, dir): void
+// 프랙탈 맵 (Phase 3에서 정의, Phase 4에서 cache-manager에 통합)
+readFractalMap(cwd, sessionId): FractalMap
+writeFractalMap(cwd, sessionId, map: FractalMap): void
+```
+
+```typescript
+interface FractalMap {
+  reads: string[];    // 접근한 디렉토리 경로 (순서 보존, 중복 없음)
+  intents: string[];  // INTENT.md 존재하는 디렉토리 (dedup 겸용)
+  details: string[];  // DETAIL.md 존재하는 디렉토리
+}
 ```
 
 기존 `removeSessionFiles(sessionId, cwd)` 확장:
-- boundary-{hash} 파일 정리
-- injected-{hash}-* 마커 정리
+- `boundary-{hash}` 파일 정리
+- `fmap-{hash}.json` 정리
 
 ### 무효화
 
@@ -74,9 +86,10 @@ markIntentInjected(cwd, sessionId, dir): void
 | mtime 기반 파일 단위 무효화 | 전체 무효화 (lazy 재빌드) |
 | `filid build` 프리빌드 CLI | 불필요 (lazy로 충분) |
 | git diff 선택적 무효화 | 불필요 (전체 무효화 비용 무시) |
+| 디렉토리별 마커 파일 (injected-*) | fmap 단일 파일로 대체 |
 
 ## 산출물
 
-- `cache-manager.ts` 확장 — boundary 캐시 읽기/쓰기
-- `session-cleanup.ts` 확장 — boundary 캐시 정리
+- `cache-manager.ts` 확장 — boundary 캐시 + fmap 읽기/쓰기
+- `session-cleanup.ts` 확장 — boundary + fmap 정리
 - Phase 6 (고속화)는 실측 후 필요 시에만 도입
