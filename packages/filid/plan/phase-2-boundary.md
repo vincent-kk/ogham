@@ -1,6 +1,6 @@
 # Phase 2: Boundary 감지 + 맥락 체인 구성
 
-> 상태: 미결 사항 결정 필요
+> 상태: 결정 완료 (Option A 채택)
 
 ## 목표
 
@@ -41,24 +41,25 @@ boundary를 넘어서는 조상 탐색 중단.
 같은 레벨의 형제 디렉토리 중 INTENT.md가 있는 것을 목록화.
 주입하지는 않지만, 존재 여부를 메타데이터로 제공.
 
-## ⚠️ 미결 사항: 모노레포 서브 boundary
+## ✅ 결정 완료: 모노레포 서브 boundary
+
+**채택: Option A — 가장 먼저 만나는 `package.json`에서 멈춤**
 
 ```
 monorepo/
 ├── package.json          ← 루트 boundary
 └── packages/
     └── payment/
-        ├── package.json  ← 서브 boundary
+        ├── package.json  ← 여기서 멈춤 (첫 번째 package.json)
         └── src/
             └── handler.ts
 ```
 
-`handler.ts` 접근 시:
-- **Option A**: `packages/payment/package.json`에서 멈춤 → 루트 INTENT.md 주입 안 됨
-- **Option B**: 루트까지 올라감 → 서브 boundary 무시
-- **Option C**: 서브 boundary까지 기본, 루트까지는 설정으로 opt-in
-
-**결정 필요**: 어떤 정책을 따를 것인지.
+근거:
+- 모노레포에서 각 패키지는 독립된 프랙탈 트리로 취급
+- 루트 맥락이 필요한 규모라면 루트에 CLAUDE.md(→INTENT.md)가 이미 존재
+- Claude Code가 루트 CLAUDE.md는 자동으로 읽으므로 중복 주입 불필요
+- 구현 단순: 위로 올라가며 `package.json` 발견 시 stop
 
 ## 기존 코드 활용 가능성
 

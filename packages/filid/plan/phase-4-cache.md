@@ -1,75 +1,82 @@
-# Phase 4: 디스크 캐시
+# Phase 4: Boundary 캐싱 (경량화)
 
-> 상태: 미결 사항 결정 필요 (#3, #4)
+> 상태: 결정 완료 — boundary만 캐싱, INTENT.md는 매번 직접 읽기
 
 ## 목표
 
-INTENT.md 체인 탐색 결과를 디스크에 캐싱하여 Hook 실행 시 반복적인 fs 탐색을 회피한다.
+프로젝트 루트 boundary(package.json 위치)만 세션 내 캐싱하여 반복적인 디렉토리 순회를 회피한다.
+INTENT.md 존재 여부 및 내용은 캐싱하지 않는다.
 
 ## 선행 조건
 
-- Phase 3 완료 (주입 시스템이 캐시 소비자)
+- Phase 3 완료 (intent-injector가 캐시 소비자)
 
-## 캐시 구조
+## 캐싱 범위
 
-```
-~/.claude/plugin/filid/{project-hash}/cache.json
-```
+| 대상 | 캐싱 | 이유 |
+|------|------|------|
+| boundary 위치 (package.json) | O | 세션 내 불변, 디렉토리 순회 비용 절감 |
+| INTENT.md 존재 여부 | **X** | 생성/삭제 빈번 → 캐시 오동작 위험 |
+| INTENT.md 내용 | **X** | 50줄 이하, readFileSync 수 ms로 충분 |
+| chain 구성 결과 | **X** | boundary만 알면 chain 구성은 즉시 계산 가능 |
 
-```json
-{
-  "version": 1,
-  "project_root": "/path/to/project",
-  "built_at": "2026-03-09T09:00:00+09:00",
-  "git_head": "abc1234",
-  "tree": {
-    "src/payment/checkout/": {
-      "chain": ["./", "src/", "src/payment/", "src/payment/checkout/"],
-      "mtimes": {
-        "./INTENT.md": 1741478400,
-        "src/INTENT.md": 1741478400,
-        "src/payment/INTENT.md": 1741478400,
-        "src/payment/checkout/INTENT.md": 1741478400
-      }
-    }
-  }
-}
-```
+## 왜 전체 캐시를 축소했는가
 
-## 무효화 전략
+Phase 3의 intent-injector가 하는 일:
+1. 디렉토리에서 위로 올라가며 `package.json` 찾기 (boundary) ← **이것만 캐싱**
+2. 경로상 `INTENT.md` 존재 여부 확인 (`existsSync`) ← 수 us
+3. 현재 디렉토리 `INTENT.md` 읽기 (`readFileSync`, 50줄) ← 수 ms
 
-### mtime 기반 (파일 단위)
+depth 5 체인이어도 `existsSync` 5~6번 + `readFileSync` 1번 = **수 밀리초**.
+캐시 없이도 3초 timeout 내 충분. INTENT.md를 캐싱하면 생성/삭제 시 오동작 위험.
 
-- 캐시된 mtime과 실제 mtime 비교
-- 변경된 INTENT.md만 재읽기 (chain 전체 무효화 아님)
+## 구현
 
-### git HEAD 기반 (프로젝트 단위)
+### 기존 cache-manager.ts에 통합
 
-- branch 전환 감지 → HEAD 변경 시 무효화
-- **미결 #4**: 전체 무효화 vs `git diff --name-only`로 변경 파일만 선택적 무효화
-
-## `filid build` 프리빌드
-
-프로젝트 전체 INTENT.md를 사전 스캔하여 캐시 일괄 구성.
-
-- CI/CD 또는 git hook (post-checkout, post-merge)에서 자동 실행 가능
-- **미결 #3**: Hook 내 자동 실행 vs 별도 CLI 패키지로 배포
-
-## 캐시 히트/미스 흐름
+`src/core/cache-manager.ts`의 기존 패턴을 그대로 활용:
 
 ```
-PreToolUse(file) →
-  1. project-hash 계산
-  2. cache.json 존재? → 없으면 전체 스캔 + 캐시 생성
-  3. git_head 일치? → 불일치 시 무효화 전략 적용
-  4. 해당 디렉토리 엔트리 존재? → 없으면 해당 체인만 스캔
-  5. mtime 비교 → 변경된 파일만 재읽기
-  6. 캐시 업데이트 + 결과 반환
+~/.claude/plugins/filid/{cwdHash}/
+├── session-context-{hash}                ← 기존: 세션 주입 마커
+├── prompt-context-{hash}                 ← 기존: FCA 규칙 텍스트 캐시
+├── run-{skillName}.hash                  ← 기존: 스킬 실행 해시
+├── boundary-{sessionIdHash}              ← 신규: boundary 위치 캐시 (JSON)
+└── injected-{sessionIdHash}-{dirHash}    ← 신규: 디렉토리별 주입 마커
 ```
+
+추가할 함수:
+
+```typescript
+// boundary 캐시
+readBoundary(cwd, sessionId, dir): string | null
+writeBoundary(cwd, sessionId, dir, boundaryPath): void
+
+// 디렉토리별 주입 중복 방지 마커
+isIntentInjected(cwd, sessionId, dir): boolean
+markIntentInjected(cwd, sessionId, dir): void
+```
+
+기존 `removeSessionFiles(sessionId, cwd)` 확장:
+- boundary-{hash} 파일 정리
+- injected-{hash}-* 마커 정리
+
+### 무효화
+
+- git HEAD 변경 시: **전체 무효화** (boundary 파일 삭제, lazy 재빌드)
+- 세션 종료 시: 기존 `session-cleanup.ts`(SessionEnd)에서 자동 정리
+
+## 기존 Phase 4 계획과의 차이
+
+| 원래 계획 | 현재 결정 |
+|-----------|-----------|
+| 전체 tree 캐싱 (chain, mtimes, INTENT.md 내용) | boundary 위치만 캐싱 |
+| mtime 기반 파일 단위 무효화 | 전체 무효화 (lazy 재빌드) |
+| `filid build` 프리빌드 CLI | 불필요 (lazy로 충분) |
+| git diff 선택적 무효화 | 불필요 (전체 무효화 비용 무시) |
 
 ## 산출물
 
-- `CacheManager` 모듈
-- `cache.json` 읽기/쓰기/무효화
-- `filid build` 커맨드 (또는 Hook 내 자동 빌드)
-- 미결 사항 #3, #4 결정 문서
+- `cache-manager.ts` 확장 — boundary 캐시 읽기/쓰기
+- `session-cleanup.ts` 확장 — boundary 캐시 정리
+- Phase 6 (고속화)는 실측 후 필요 시에만 도입

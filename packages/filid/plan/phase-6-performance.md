@@ -1,54 +1,31 @@
-# Phase 6: 고속화 (선택)
+# Phase 6: 고속화 (보류)
 
-> 상태: 미결 사항 결정 필요 (#1)
+> 상태: Phase 3에서 Hook 통합으로 선제 해결. 실측 후 필요 시에만 도입.
 
-## 목표
+## Phase 3 통합으로 해결된 사항
 
-Hook 실행 오버헤드를 최소화하여 사용자 경험에 영향을 주지 않는 수준으로 낮춘다.
+| 문제 | 해결 방식 |
+|------|-----------|
+| PreToolUse Hook 다중 fork (~200ms) | 단일 프로세스로 통합 (~100ms) |
+| Read Hook 없음 → 맥락 주입 불가 | 통합 Hook에 포함 (추가 비용 0) |
+| 별도 Shell 스크립트 필요성 | Node.js 단일 Hook으로 충분 |
 
-## 선행 조건
+## 남은 최적화 옵션 (실측 후 판단)
 
-- Phase 4 완료 (디스크 캐시)
+Phase 1~4 구현 완료 후 실제 성능을 측정하여 필요 시에만 도입.
 
-## 현재 성능 프로파일
+| 방식 | 예상 성능 | 도입 조건 |
+|------|-----------|-----------|
+| Node.js 단일 Hook (현재 계획) | ~100ms | 기본 |
+| esbuild 번들 경량화 | ~50-80ms | import 트리가 비대해질 경우 |
+| Daemon + IPC | ~1ms | ~100ms가 체감될 경우 |
 
-| 구현 방식 | Cold Start | 구현 복잡도 | 비고 |
-|---|---|---|---|
-| Node.js cold start | ~100ms | 낮음 | 프로토타입 단계 (현재) |
-| Shell + jq | ~10ms | 중간 | 디스크 캐시 히트 시 충분 |
-| **Daemon + IPC** | ~1ms | 높음 | 인메모리 캐시 필수 시 |
-| Rust/Go 바이너리 | ~5ms | 높음 | 배포 복잡도 증가 |
-
-## ⚠️ 미결 사항 #1: Daemon 채택 여부
-
-### Daemon 채택 시
-
-- 인메모리 경로 맵 (1차 캐시) 가능
-- FSEvents/inotify 실시간 감지 통합
-- Hook → IPC로 Daemon에 질의 (~1ms)
-- 복잡도: 높음 (프로세스 관리, IPC 프로토콜, 자동 기동/종료)
-
-### Daemon 미채택 시
-
-- 디스크 캐시만 사용 (Phase 4)
-- Shell + jq로 캐시 읽기 (~10ms)
-- 복잡도: 낮음
-- FSEvents 사용 불가 → mtime 폴링만
-
-### 판단 기준
+### Daemon 도입 기준
 
 - Phase 4까지 구현 후 실제 성능 측정
-- ~10ms (Shell+jq)가 수용 가능하면 Daemon 불필요
-- ~100ms (Node.js cold start)가 체감되면 최적화 필요
+- ~100ms (Node.js single hook)가 수용 가능하면 Daemon 불필요
+- 체감 지연이 발생하면 그때 설계
 
-## 산출물 (Daemon 채택 시)
+## 산출물
 
-- Daemon 프로세스 관리 (자동 기동/종료)
-- IPC 프로토콜 (Unix socket 또는 TCP)
-- 인메모리 캐시 + FSEvents 연동
-- Hook → Daemon 질의 클라이언트
-
-## 산출물 (Daemon 미채택 시)
-
-- Shell + jq 기반 캐시 리더
-- Node.js cold start 최적화 (lazy import, 번들 경량화)
+현재 없음. 실측 결과에 따라 결정.
