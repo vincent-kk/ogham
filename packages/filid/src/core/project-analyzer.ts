@@ -48,16 +48,15 @@ export async function analyzeProject(
   // 1. 스캔
   const scanStart = Date.now();
   const tree = await scanProject(root);
+  const moduleTargets = [...tree.nodes.values()].filter(
+    (n) => n.type === 'fractal' || n.type === 'hybrid',
+  );
+  const moduleResults = await Promise.allSettled(
+    moduleTargets.map((n) => analyzeModule(n.path)),
+  );
   const modules: ModuleInfo[] = [];
-  for (const [, node] of tree.nodes) {
-    if (node.type === 'fractal' || node.type === 'hybrid') {
-      try {
-        const moduleInfo = await analyzeModule(node.path);
-        modules.push(moduleInfo);
-      } catch {
-        // 분석 실패 시 무시 (best-effort)
-      }
-    }
+  for (const r of moduleResults) {
+    if (r.status === 'fulfilled') modules.push(r.value);
   }
   const scanReport: ScanReport = {
     tree,
