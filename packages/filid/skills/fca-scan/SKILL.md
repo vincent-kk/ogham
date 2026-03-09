@@ -45,7 +45,7 @@ subagents (`run_in_background: true`). Await all three before Phase 5.
 ### Phase 2 — INTENT.md Validation
 
 Check line count (≤50) and 3-tier boundary sections for every INTENT.md using Read and Grep.
-See [reference.md Section 2](./reference.md#section-2--claudemd-validation).
+See [reference.md Section 2](./reference.md#section-2--intentmd-validation).
 
 ### Phase 3 — Organ Directory Validation
 

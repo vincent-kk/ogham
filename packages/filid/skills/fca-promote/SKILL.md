@@ -59,7 +59,7 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-migration)
 ### Phase 6 — Migration (`implementer`)
 
 Write validated `spec.ts`, remove original `test.ts`, and emit report.
-See [reference.md Section 6](./reference.md#section-6--migration).
+See [reference.md Section 5 — Migration subsection](./reference.md#section-5--validation-and-migration).
 
 ## Available MCP Tools
 

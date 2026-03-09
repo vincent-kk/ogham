@@ -100,8 +100,9 @@ function makeReport(
 describe('project-analyzer', () => {
   describe('calculateHealthScore', () => {
     it('should return 100 for a perfect project', () => {
+      // makeReport({}) creates zero errors, warnings, and drifts
       const report = makeReport({});
-      report.summary.healthScore = 100;
+      // calculateHealthScore computes from violations/drifts, not summary.healthScore
       expect(calculateHealthScore(report)).toBe(100);
     });
 
