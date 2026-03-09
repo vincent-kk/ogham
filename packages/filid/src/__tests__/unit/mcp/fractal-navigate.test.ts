@@ -11,6 +11,8 @@ describe('fractal-navigate tool', () => {
       type: 'fractal',
       hasClaudeMd: true,
       hasSpecMd: false,
+      hasIntentMd: true,
+      hasDetailMd: false,
     },
     {
       name: 'auth',
@@ -18,6 +20,8 @@ describe('fractal-navigate tool', () => {
       type: 'fractal',
       hasClaudeMd: true,
       hasSpecMd: true,
+      hasIntentMd: true,
+      hasDetailMd: true,
     },
     {
       name: 'utils',
@@ -25,6 +29,8 @@ describe('fractal-navigate tool', () => {
       type: 'organ',
       hasClaudeMd: false,
       hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
     },
     {
       name: 'components',
@@ -32,6 +38,8 @@ describe('fractal-navigate tool', () => {
       type: 'organ',
       hasClaudeMd: false,
       hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
     },
   ];
 
@@ -92,6 +100,8 @@ describe('fractal-navigate tool', () => {
             type: 'fractal',
             hasClaudeMd: false,
             hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
           },
           {
             path: '/project/auth/login',
@@ -99,6 +109,8 @@ describe('fractal-navigate tool', () => {
             type: 'fractal',
             hasClaudeMd: false,
             hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
             hasIndex: true,
           },
         ],
@@ -117,6 +129,8 @@ describe('fractal-navigate tool', () => {
             type: 'organ',
             hasClaudeMd: false,
             hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
           },
         ],
       });
@@ -134,6 +148,8 @@ describe('fractal-navigate tool', () => {
             type: 'fractal',
             hasClaudeMd: false,
             hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
             hasIndex: true,
           },
         ],

@@ -14,7 +14,7 @@ import {
   generateFilePath,
 } from '../fixtures/generator.js';
 
-// pre-tool-validator: CLAUDE.md 라인 수 스케일링
+// pre-tool-validator: INTENT.md 라인 수 스케일링
 describe('scaling: pre-tool-validator line counts', () => {
   const lineCounts = [10, 25, 50, 75, 100, 150, 200, 500, 1000];
 
@@ -26,7 +26,7 @@ describe('scaling: pre-tool-validator line counts', () => {
       hook_event_name: 'PreToolUse',
       tool_name: 'Write',
       tool_input: {
-        file_path: '/workspace/CLAUDE.md',
+        file_path: '/workspace/INTENT.md',
         content,
       },
     };

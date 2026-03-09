@@ -18,6 +18,8 @@ function makeNode(
     organs: [],
     hasClaudeMd: false,
     hasSpecMd: false,
+    hasIntentMd: false,
+    hasDetailMd: false,
     hasIndex: false,
     hasMain: false,
     depth: 0,

@@ -21,6 +21,8 @@ function makeNode(overrides: Partial<FractalNode> = {}): FractalNode {
     organs: [],
     hasClaudeMd: false,
     hasSpecMd: false,
+    hasIntentMd: false,
+    hasDetailMd: false,
     hasIndex: true,
     hasMain: false,
     depth: 1,
@@ -35,7 +37,7 @@ function makeTree(nodes: FractalNode[]): FractalTree {
   for (const n of nodes) map.set(n.path, n);
   const root =
     nodes.find((n) => n.parent === null)?.path ?? nodes[0]?.path ?? '/root';
-  return { root, nodes: map, depth: 2, totalNodes: nodes.size };
+  return { root, nodes: map, depth: 2, totalNodes: nodes.length };
 }
 
 describe('rule-engine', () => {
@@ -123,11 +125,11 @@ describe('rule-engine', () => {
   });
 
   describe('organ-no-claudemd rule', () => {
-    it('should fail when organ has CLAUDE.md', () => {
+    it('should fail when organ has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'organ', hasClaudeMd: true });
+      const node = makeNode({ type: 'organ', hasIntentMd: true, hasClaudeMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       const violations = rule.check(ctx);
@@ -135,21 +137,21 @@ describe('rule-engine', () => {
       expect(violations[0].severity).toBe('error');
     });
 
-    it('should pass when organ has no CLAUDE.md', () => {
+    it('should pass when organ has no INTENT.md', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'organ', hasClaudeMd: false });
+      const node = makeNode({ type: 'organ', hasIntentMd: false, hasClaudeMd: false });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);
     });
 
-    it('should pass when fractal has CLAUDE.md', () => {
+    it('should pass when fractal has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'fractal', hasClaudeMd: true });
+      const node = makeNode({ type: 'fractal', hasIntentMd: true, hasClaudeMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);

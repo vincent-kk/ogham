@@ -17,7 +17,7 @@ const TIER_PARAMS = {
 type Tier = keyof typeof TIER_PARAMS;
 
 /**
- * CLAUDE.md 콘텐츠 생성
+ * INTENT.md 콘텐츠 생성
  */
 export function generateClaudeMdContent(
   lineCount: number,
@@ -64,7 +64,7 @@ export function generateFilePath(options: {
   isOrgan?: boolean;
   fileName?: string;
 }): string {
-  const { depth, isOrgan = false, fileName = 'CLAUDE.md' } = options;
+  const { depth, isOrgan = false, fileName = 'INTENT.md' } = options;
 
   const organDirs = ['components', 'utils', 'types', 'hooks', 'helpers'];
   const normalDirs = ['src', 'packages', 'modules', 'services', 'features'];

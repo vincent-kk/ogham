@@ -6,21 +6,23 @@ import {
   calculateHealthScore,
   generateReport,
 } from '../../../core/project-analyzer.js';
-import type { NodeType } from '../../../types/fractal.js';
+import type { CategoryType } from '../../../types/fractal.js';
 import type { AnalysisReport } from '../../../types/report.js';
 
 const entry = (
   path: string,
-  type: NodeType,
-  hasClaudeMd = false,
-  hasSpecMd = false,
+  type: CategoryType,
+  hasIntentMd = false,
+  hasDetailMd = false,
   hasIndex = false,
 ): NodeEntry => ({
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd,
-  hasSpecMd,
+  hasClaudeMd: hasIntentMd,
+  hasSpecMd: hasDetailMd,
+  hasIntentMd,
+  hasDetailMd,
   hasIndex,
 });
 

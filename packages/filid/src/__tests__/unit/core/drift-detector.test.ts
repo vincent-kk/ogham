@@ -9,7 +9,7 @@ import {
 import { buildFractalTree } from '../../../core/fractal-tree.js';
 import type { NodeEntry } from '../../../core/fractal-tree.js';
 import type { DriftItem } from '../../../types/drift.js';
-import type { NodeType } from '../../../types/fractal.js';
+import type { CategoryType } from '../../../types/fractal.js';
 import type {
   RuleEvaluationResult,
   RuleViolation,
@@ -17,15 +17,17 @@ import type {
 
 const entry = (
   path: string,
-  type: NodeType,
-  hasClaudeMd = false,
-  hasSpecMd = false,
+  type: CategoryType,
+  hasIntentMd = false,
+  hasDetailMd = false,
 ): NodeEntry => ({
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd,
-  hasSpecMd,
+  hasClaudeMd: hasIntentMd,
+  hasSpecMd: hasDetailMd,
+  hasIntentMd,
+  hasDetailMd,
 });
 
 const makeViolation = (
@@ -210,8 +212,8 @@ describe('drift-detector', () => {
         {
           path: '/app/utils',
           rule: 'organ-no-claudemd',
-          expected: 'No CLAUDE.md',
-          actual: 'Has CLAUDE.md',
+          expected: 'No INTENT.md',
+          actual: 'Has INTENT.md',
           severity: 'high',
           suggestedAction: 'move',
         },

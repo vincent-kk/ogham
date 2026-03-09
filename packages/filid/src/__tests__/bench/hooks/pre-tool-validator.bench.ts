@@ -13,14 +13,14 @@ const inputM = generatePreToolUseInput('M');
 const inputL = generatePreToolUseInput('L');
 const inputXL = generatePreToolUseInput('XL');
 
-// SPEC.md 벤치마크용 입력
+// DETAIL.md 벤치마크용 입력
 const specInput: PreToolUseInput = {
   cwd: '/workspace',
   session_id: 'bench-session',
   hook_event_name: 'PreToolUse',
   tool_name: 'Write',
   tool_input: {
-    file_path: '/workspace/SPEC.md',
+    file_path: '/workspace/DETAIL.md',
     content: '# Spec\n- Feature A\n- Feature B\n- Feature C\n',
   },
 };
@@ -33,30 +33,30 @@ const editInput: PreToolUseInput = {
   hook_event_name: 'PreToolUse',
   tool_name: 'Edit',
   tool_input: {
-    file_path: '/workspace/CLAUDE.md',
+    file_path: '/workspace/INTENT.md',
     old_string: 'old line',
     new_string: 'new line',
   },
 };
 
 describe('pre-tool-validator', () => {
-  bench('S: 10-line CLAUDE.md', () => {
+  bench('S: 10-line INTENT.md', () => {
     validatePreToolUse(inputS);
   });
 
-  bench('M: 60-line CLAUDE.md with boundaries', () => {
+  bench('M: 60-line INTENT.md with boundaries', () => {
     validatePreToolUse(inputM);
   });
 
-  bench('L: 95-line CLAUDE.md', () => {
+  bench('L: 95-line INTENT.md', () => {
     validatePreToolUse(inputL);
   });
 
-  bench('XL: 150-line CLAUDE.md', () => {
+  bench('XL: 150-line INTENT.md', () => {
     validatePreToolUse(inputXL);
   });
 
-  bench('SPEC.md validation (append-only detection)', () => {
+  bench('DETAIL.md validation (append-only detection)', () => {
     validatePreToolUse(specInput, oldSpecContent);
   });
 
@@ -85,10 +85,10 @@ describe('pre-tool-validator: context size scaling', () => {
       session_id: 'bench-session',
       hook_event_name: 'PreToolUse',
       tool_name: 'Write',
-      tool_input: { file_path: '/workspace/CLAUDE.md', content },
+      tool_input: { file_path: '/workspace/INTENT.md', content },
     };
 
-    bench(`${size}-line CLAUDE.md`, () => {
+    bench(`${size}-line INTENT.md`, () => {
       validatePreToolUse(input);
     });
   }

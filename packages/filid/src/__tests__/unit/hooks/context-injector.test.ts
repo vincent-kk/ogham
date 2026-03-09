@@ -63,7 +63,7 @@ describe('context-injector', () => {
     expect(ctx).toContain('Organ');
   });
 
-  it('should include CLAUDE.md 50-line limit reminder', async () => {
+  it('should include INTENT.md 50-line limit reminder', async () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('50');
@@ -116,8 +116,8 @@ describe('context-injector', () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('Development Workflow');
-    expect(ctx).toContain('SPEC.md');
-    expect(ctx).toContain('CLAUDE.md');
+    expect(ctx).toContain('DETAIL.md');
+    expect(ctx).toContain('INTENT.md');
   });
 
   // === Session-based inject tests ===

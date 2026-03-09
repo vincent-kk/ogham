@@ -12,21 +12,21 @@ const baseInput: PreToolUseInput = {
 };
 
 describe('structure-guard', () => {
-  it('should block CLAUDE.md creation inside organ directories', () => {
+  it('should block INTENT.md creation inside organ directories', () => {
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/src/utils/CLAUDE.md', content: '# Utils' },
+      tool_input: { file_path: '/app/src/utils/INTENT.md', content: '# Utils' },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(false);
     expect(result.hookSpecificOutput?.additionalContext).toContain('organ');
   });
 
-  it('should block CLAUDE.md in nested organ directories', () => {
+  it('should block INTENT.md in nested organ directories', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/src/components/ui/CLAUDE.md',
+        file_path: '/app/src/components/ui/INTENT.md',
         content: '# UI',
       },
     };
@@ -34,16 +34,16 @@ describe('structure-guard', () => {
     expect(result.continue).toBe(false);
   });
 
-  it('should allow CLAUDE.md in fractal directories', () => {
+  it('should allow INTENT.md in fractal directories', () => {
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/src/auth/CLAUDE.md', content: '# Auth' },
+      tool_input: { file_path: '/app/src/auth/INTENT.md', content: '# Auth' },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
   });
 
-  it('should allow non-CLAUDE.md files in organ directories', () => {
+  it('should allow non-INTENT.md files in organ directories', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
@@ -55,12 +55,12 @@ describe('structure-guard', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('should pass through Edit tool calls for CLAUDE.md', () => {
+  it('should pass through Edit tool calls for INTENT.md', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/src/utils/CLAUDE.md',
+        file_path: '/app/src/utils/INTENT.md',
         new_string: 'updated',
       },
     };
@@ -83,7 +83,7 @@ describe('structure-guard', () => {
     for (const dir of organDirs) {
       const input: PreToolUseInput = {
         ...baseInput,
-        tool_input: { file_path: `/app/src/${dir}/CLAUDE.md`, content: '# X' },
+        tool_input: { file_path: `/app/src/${dir}/INTENT.md`, content: '# X' },
       };
       const result = guardStructure(input);
       expect(result.continue, `Expected block for organ dir: ${dir}`).toBe(
@@ -92,10 +92,10 @@ describe('structure-guard', () => {
     }
   });
 
-  it('should handle root-relative CLAUDE.md paths', () => {
+  it('should handle root-relative INTENT.md paths', () => {
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: 'utils/CLAUDE.md', content: '# Utils' },
+      tool_input: { file_path: 'utils/INTENT.md', content: '# Utils' },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(false);
@@ -118,7 +118,7 @@ describe('structure-guard', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_name: 'Read',
-      tool_input: { file_path: '/app/src/utils/CLAUDE.md' },
+      tool_input: { file_path: '/app/src/utils/INTENT.md' },
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);

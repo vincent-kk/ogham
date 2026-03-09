@@ -83,14 +83,14 @@ describe('agent-enforcer', () => {
     expect(result.hookSpecificOutput?.additionalContext).toContain('Edit');
   });
 
-  it('should restrict implementer to SPEC.md scope', () => {
+  it('should restrict implementer to DETAIL.md scope', () => {
     const input: SubagentStartInput = {
       ...baseInput,
       agent_type: 'implementer',
     };
     const result = enforceAgentRole(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('SPEC.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('DETAIL.md');
   });
 
   it('should restrict context-manager to document files only', () => {
@@ -100,8 +100,8 @@ describe('agent-enforcer', () => {
     };
     const result = enforceAgentRole(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('CLAUDE.md');
-    expect(result.hookSpecificOutput?.additionalContext).toContain('SPEC.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('INTENT.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('DETAIL.md');
   });
 
   it('should pass through unknown agent types without restrictions', () => {
@@ -136,7 +136,7 @@ describe('agent-enforcer', () => {
         'FCA-AI Development Workflow',
       );
       expect(result.hookSpecificOutput?.additionalContext).toContain(
-        'CLAUDE.md',
+        'INTENT.md',
       );
     });
 

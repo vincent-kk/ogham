@@ -7,22 +7,24 @@ import {
   validateNode,
   validateStructure,
 } from '../../../core/fractal-validator.js';
-import type { NodeType } from '../../../types/fractal.js';
+import type { CategoryType } from '../../../types/fractal.js';
 import type { Rule, RuleContext } from '../../../types/rules.js';
 
 const entry = (
   path: string,
-  type: NodeType,
-  hasClaudeMd = false,
-  hasSpecMd = false,
+  type: CategoryType,
+  hasIntentMd = false,
+  hasDetailMd = false,
   hasIndex = false,
   hasMain = false,
 ): NodeEntry => ({
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd,
-  hasSpecMd,
+  hasClaudeMd: hasIntentMd,
+  hasSpecMd: hasDetailMd,
+  hasIntentMd,
+  hasDetailMd,
   hasIndex,
   hasMain,
 });
@@ -43,7 +45,7 @@ describe('fractal-validator', () => {
       expect(Array.isArray(report.result.violations)).toBe(true);
     });
 
-    it('should detect organ with CLAUDE.md as violation', () => {
+    it('should detect organ with INTENT.md as violation', () => {
       const tree = buildFractalTree([
         entry('/app', 'fractal', true, false, true),
         {
@@ -52,6 +54,8 @@ describe('fractal-validator', () => {
           type: 'organ',
           hasClaudeMd: true,
           hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
       ]);
       const report = validateStructure(tree);

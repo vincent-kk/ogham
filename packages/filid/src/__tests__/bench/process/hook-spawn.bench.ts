@@ -23,7 +23,7 @@ const PRE_TOOL_INPUT = JSON.stringify({
   hook_event_name: 'PreToolUse',
   tool_name: 'Write',
   tool_input: {
-    file_path: '/workspace/CLAUDE.md',
+    file_path: '/workspace/INTENT.md',
     content: Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join('\n'),
   },
 });

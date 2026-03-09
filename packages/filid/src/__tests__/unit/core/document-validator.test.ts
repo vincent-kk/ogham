@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   countLines,
   detectAppendOnly,
-  validateClaudeMd,
-  validateSpecMd,
+  validateDetailMd,
+  validateIntentMd,
 } from '../../../core/document-validator.js';
 
 describe('document-validator', () => {
@@ -20,8 +20,8 @@ describe('document-validator', () => {
     });
   });
 
-  describe('validateClaudeMd', () => {
-    it('should pass for valid CLAUDE.md under 50 lines', () => {
+  describe('validateIntentMd', () => {
+    it('should pass for valid INTENT.md under 50 lines', () => {
       const content = [
         '# Module',
         '## Boundaries',
@@ -32,7 +32,7 @@ describe('document-validator', () => {
         '### Never do',
         '- Skip tests',
       ].join('\n');
-      const result = validateClaudeMd(content);
+      const result = validateIntentMd(content);
       expect(result.valid).toBe(true);
       expect(result.violations).toHaveLength(0);
     });
@@ -42,16 +42,16 @@ describe('document-validator', () => {
         { length: 50 },
         (_, i) => `Line ${i + 1}`,
       ).join('\n');
-      const result = validateClaudeMd(content);
+      const result = validateIntentMd(content);
       expect(result.valid).toBe(true);
     });
 
-    it('should fail for CLAUDE.md exceeding 50 lines', () => {
+    it('should fail for INTENT.md exceeding 50 lines', () => {
       const content = Array.from(
         { length: 51 },
         (_, i) => `Line ${i + 1}`,
       ).join('\n');
-      const result = validateClaudeMd(content);
+      const result = validateIntentMd(content);
       expect(result.valid).toBe(false);
       expect(result.violations).toContainEqual(
         expect.objectContaining({
@@ -63,7 +63,7 @@ describe('document-validator', () => {
 
     it('should warn when missing 3-tier boundaries', () => {
       const content = '# My Module\nSome description\n';
-      const result = validateClaudeMd(content);
+      const result = validateIntentMd(content);
       expect(result.violations).toContainEqual(
         expect.objectContaining({
           rule: 'missing-boundaries',
@@ -83,7 +83,7 @@ describe('document-validator', () => {
         '### Never do',
         '- Commit secrets',
       ].join('\n');
-      const result = validateClaudeMd(content);
+      const result = validateIntentMd(content);
       const boundaryViolations = result.violations.filter(
         (v) => v.rule === 'missing-boundaries',
       );
@@ -91,10 +91,10 @@ describe('document-validator', () => {
     });
   });
 
-  describe('validateSpecMd', () => {
-    it('should pass for valid SPEC.md', () => {
+  describe('validateDetailMd', () => {
+    it('should pass for valid DETAIL.md', () => {
       const content = '# Spec\n## Requirements\n- Feature A\n';
-      const result = validateSpecMd(content);
+      const result = validateDetailMd(content);
       expect(result.valid).toBe(true);
     });
 
@@ -102,7 +102,7 @@ describe('document-validator', () => {
       const oldContent = '# Spec\n## Log\n- Entry 1\n- Entry 2\n';
       const newContent =
         '# Spec\n## Log\n- Entry 1\n- Entry 2\n- Entry 3\n- Entry 4\n';
-      const result = validateSpecMd(newContent, oldContent);
+      const result = validateDetailMd(newContent, oldContent);
       expect(result.valid).toBe(false);
       expect(result.violations).toContainEqual(
         expect.objectContaining({
@@ -115,7 +115,7 @@ describe('document-validator', () => {
     it('should pass when content is restructured not just appended', () => {
       const oldContent = '# Spec\n## Old Section\n- Item 1\n';
       const newContent = '# Spec\n## Refactored Section\n- Consolidated item\n';
-      const result = validateSpecMd(newContent, oldContent);
+      const result = validateDetailMd(newContent, oldContent);
       const appendViolations = result.violations.filter(
         (v) => v.rule === 'append-only',
       );

@@ -72,44 +72,44 @@ describe('organ-classifier', () => {
   describe('classifyNode', () => {
     it.each([
       [
-        'hasClaudeMd=true → fractal',
+        'hasIntentMd=true → fractal',
         {
           dirName: 'auth',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'hasSpecMd=true → fractal',
+        'hasDetailMd=true → fractal',
         {
           dirName: 'auth',
-          hasClaudeMd: false,
-          hasSpecMd: true,
+          hasIntentMd: false,
+          hasDetailMd: true,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'hasClaudeMd overrides known-organ name → fractal',
+        'hasIntentMd overrides known-organ name → fractal',
         {
           dirName: 'utils',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'CLAUDE.md+SPEC.md both present → fractal (CLAUDE.md priority)',
+        'INTENT.md+DETAIL.md both present → fractal (INTENT.md priority)',
         {
           dirName: 'auth',
-          hasClaudeMd: true,
-          hasSpecMd: true,
+          hasIntentMd: true,
+          hasDetailMd: true,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -121,11 +121,36 @@ describe('organ-classifier', () => {
 
     it.each([
       [
+        'hasClaudeMd=true → fractal (deprecated field compat)',
+        {
+          dirName: 'auth',
+          hasClaudeMd: true,
+          hasFractalChildren: false,
+          isLeafDirectory: true,
+        },
+        'fractal',
+      ],
+      [
+        'hasSpecMd=true → fractal (deprecated field compat)',
+        {
+          dirName: 'auth',
+          hasSpecMd: true,
+          hasFractalChildren: false,
+          isLeafDirectory: true,
+        },
+        'fractal',
+      ],
+    ])('deprecated field compat: %s', (_desc, input, expected) => {
+      expect(classifyNode(input)).toBe(expected);
+    });
+
+    it.each([
+      [
         'known-organ name components → organ',
         {
           dirName: 'components',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -135,8 +160,8 @@ describe('organ-classifier', () => {
         'known-organ name utils → organ',
         {
           dirName: 'utils',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -146,8 +171,8 @@ describe('organ-classifier', () => {
         'non-standard name, leaf, no markers → organ',
         {
           dirName: 'my-custom-dir',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -162,8 +187,8 @@ describe('organ-classifier', () => {
         'hasSideEffects=false → pure-function',
         {
           dirName: 'math-helpers',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
           hasSideEffects: false,
@@ -174,8 +199,8 @@ describe('organ-classifier', () => {
         'hasFractalChildren=true → fractal',
         {
           dirName: 'payments',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: true,
           isLeafDirectory: false,
           hasSideEffects: true,
@@ -186,8 +211,8 @@ describe('organ-classifier', () => {
         'non-leaf + hasSideEffects=true → fractal',
         {
           dirName: 'checkout',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
           hasSideEffects: true,
@@ -198,8 +223,8 @@ describe('organ-classifier', () => {
         'non-leaf + hasSideEffects=undefined → fractal (default)',
         {
           dirName: 'checkout',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
         },
@@ -225,8 +250,8 @@ describe('organ-classifier', () => {
         expect(
           classifyNode({
             dirName,
-            hasClaudeMd: false,
-            hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
             hasFractalChildren: false,
             isLeafDirectory: false,
           }),
@@ -236,11 +261,11 @@ describe('organ-classifier', () => {
 
     it.each([
       [
-        '__tests__+CLAUDE.md → fractal (explicit override)',
+        '__tests__+INTENT.md → fractal (explicit override)',
         {
           dirName: '__tests__',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
         },
@@ -250,25 +275,25 @@ describe('organ-classifier', () => {
         '__custom__ non-leaf → organ',
         {
           dirName: '__custom__',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
         },
         'organ',
       ],
       [
-        '.claude+CLAUDE.md → fractal (explicit override)',
+        '.claude+INTENT.md → fractal (explicit override)',
         {
           dirName: '.claude',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
         },
         'fractal',
       ],
-    ])('infra-pattern CLAUDE.md override: %s', (_desc, input, expected) => {
+    ])('infra-pattern INTENT.md override: %s', (_desc, input, expected) => {
       expect(classifyNode(input)).toBe(expected);
     });
 
@@ -278,8 +303,8 @@ describe('organ-classifier', () => {
         expect(
           classifyNode({
             dirName,
-            hasClaudeMd: false,
-            hasSpecMd: false,
+            hasIntentMd: false,
+            hasDetailMd: false,
             hasFractalChildren: false,
             isLeafDirectory: false,
           }),
@@ -294,8 +319,8 @@ describe('organ-classifier', () => {
         'non-organ name + hasIndex=true → fractal',
         {
           dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
           hasIndex: true,
@@ -306,8 +331,8 @@ describe('organ-classifier', () => {
         'known-organ name + hasIndex=true → organ (name wins)',
         {
           dirName: 'helpers',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
           hasIndex: true,
@@ -318,8 +343,8 @@ describe('organ-classifier', () => {
         'infra pattern __tests__ + hasIndex=true → organ (pattern wins)',
         {
           dirName: '__tests__',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
           hasIndex: true,
@@ -330,8 +355,8 @@ describe('organ-classifier', () => {
         'hasIndex=false + leaf → organ',
         {
           dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
           hasIndex: false,
@@ -342,8 +367,8 @@ describe('organ-classifier', () => {
         'hasIndex=undefined + leaf → organ (fallback)',
         {
           dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },

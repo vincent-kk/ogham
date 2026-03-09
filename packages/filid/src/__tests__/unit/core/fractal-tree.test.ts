@@ -19,14 +19,16 @@ import type { CategoryType } from '../../../types/fractal.js';
 const entry = (
   path: string,
   type: CategoryType,
-  hasClaudeMd = false,
-  hasSpecMd = false,
+  hasIntentMd = false,
+  hasDetailMd = false,
 ): NodeEntry => ({
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd,
-  hasSpecMd,
+  hasClaudeMd: hasIntentMd,
+  hasSpecMd: hasDetailMd,
+  hasIntentMd,
+  hasDetailMd,
 });
 
 describe('fractal-tree', () => {
@@ -349,8 +351,8 @@ describe('fractal-tree', () => {
 
     it('should build a tree from a real directory structure', async () => {
       setup({
-        '.': ['CLAUDE.md', 'index.ts'],
-        auth: ['CLAUDE.md', 'index.ts'],
+        '.': ['INTENT.md', 'index.ts'],
+        auth: ['INTENT.md', 'index.ts'],
         'auth/components': [],
       });
 
@@ -365,10 +367,10 @@ describe('fractal-tree', () => {
       }
     });
 
-    it('should detect CLAUDE.md and classify as fractal', async () => {
+    it('should detect INTENT.md and classify as fractal', async () => {
       setup({
-        '.': ['CLAUDE.md'],
-        auth: ['CLAUDE.md'],
+        '.': ['INTENT.md'],
+        auth: ['INTENT.md'],
       });
 
       try {
@@ -376,16 +378,16 @@ describe('fractal-tree', () => {
         const root = tree.nodes.get(tmpDir);
 
         expect(root).toBeDefined();
-        expect(root!.hasClaudeMd).toBe(true);
+        expect(root!.hasIntentMd ?? root!.hasClaudeMd).toBe(true);
         expect(root!.type).toBe('fractal');
       } finally {
         teardown();
       }
     });
 
-    it('should classify leaf dir without CLAUDE.md as organ', async () => {
+    it('should classify leaf dir without INTENT.md as organ', async () => {
       setup({
-        '.': ['CLAUDE.md'],
+        '.': ['INTENT.md'],
         utils: ['helper.ts'],
       });
 
@@ -402,7 +404,7 @@ describe('fractal-tree', () => {
 
     it('should detect index.ts presence', async () => {
       setup({
-        '.': ['CLAUDE.md', 'index.ts'],
+        '.': ['INTENT.md', 'index.ts'],
       });
 
       try {
@@ -417,7 +419,7 @@ describe('fractal-tree', () => {
 
     it('should respect maxDepth option', async () => {
       setup({
-        '.': ['CLAUDE.md'],
+        '.': ['INTENT.md'],
         level1: [],
         'level1/level2': [],
         'level1/level2/level3': [],
@@ -435,7 +437,7 @@ describe('fractal-tree', () => {
 
     it('should exclude node_modules by default', async () => {
       setup({
-        '.': ['CLAUDE.md'],
+        '.': ['INTENT.md'],
         'node_modules/some-package': [],
       });
 
@@ -453,8 +455,8 @@ describe('fractal-tree', () => {
 
     it('should return correct totalNodes and depth', async () => {
       setup({
-        '.': ['CLAUDE.md'],
-        auth: ['CLAUDE.md'],
+        '.': ['INTENT.md'],
+        auth: ['INTENT.md'],
         'auth/login': [],
       });
 
