@@ -11,6 +11,13 @@ import {
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
+/** In-memory fractal map per session */
+export interface FractalMap {
+  reads: string[];    // accessed directories (order preserved, no duplicates)
+  intents: string[];  // directories with INTENT.md (dedup dual-use)
+  details: string[];  // directories with DETAIL.md
+}
+
 // Cache directory layout:
 //   {cwdHash}/session-context-{hash}   — Layer 2: session inject marker (24h TTL)
 //   {cwdHash}/prompt-context-{hash}    — Layer 2: per-session FCA rules text cache
@@ -124,6 +131,8 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   const hash = sessionIdHash(sessionId);
   const marker = join(cacheDir, `session-context-${hash}`);
   const contextFile = join(cacheDir, `prompt-context-${hash}`);
+  const boundaryFile = join(cacheDir, `boundary-${hash}`);
+  const fmapFile = join(cacheDir, `fmap-${hash}.json`);
   try {
     if (existsSync(marker)) unlinkSync(marker);
   } catch {
@@ -131,6 +140,16 @@ export function removeSessionFiles(sessionId: string, cwd: string): void {
   }
   try {
     if (existsSync(contextFile)) unlinkSync(contextFile);
+  } catch {
+    // silently ignore deletion failures
+  }
+  try {
+    if (existsSync(boundaryFile)) unlinkSync(boundaryFile);
+  } catch {
+    // silently ignore deletion failures
+  }
+  try {
+    if (existsSync(fmapFile)) unlinkSync(fmapFile);
   } catch {
     // silently ignore deletion failures
   }
@@ -171,4 +190,61 @@ export function getLastRunHash(cwd: string, skillName: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Read boundary cache for a directory.
+ * Returns the cached boundary path or null if not cached.
+ */
+export function readBoundary(cwd: string, sessionId: string, dir: string): string | null {
+  const cacheDir = getCacheDir(cwd);
+  const hash = sessionIdHash(sessionId);
+  const filePath = join(cacheDir, `boundary-${hash}`);
+  try {
+    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+    return data[dir] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Write boundary cache for a directory.
+ */
+export function writeBoundary(cwd: string, sessionId: string, dir: string, boundaryPath: string): void {
+  const cacheDir = getCacheDir(cwd);
+  mkdirSync(cacheDir, { recursive: true });
+  const hash = sessionIdHash(sessionId);
+  const filePath = join(cacheDir, `boundary-${hash}`);
+  let data: Record<string, string> = {};
+  try {
+    data = JSON.parse(readFileSync(filePath, 'utf-8'));
+  } catch { /* new file */ }
+  data[dir] = boundaryPath;
+  writeFileSync(filePath, JSON.stringify(data));
+}
+
+/**
+ * Read fractal map from cache.
+ */
+export function readFractalMap(cwd: string, sessionId: string): FractalMap {
+  const cacheDir = getCacheDir(cwd);
+  const hash = sessionIdHash(sessionId);
+  const filePath = join(cacheDir, `fmap-${hash}.json`);
+  try {
+    return JSON.parse(readFileSync(filePath, 'utf-8'));
+  } catch {
+    return { reads: [], intents: [], details: [] };
+  }
+}
+
+/**
+ * Write fractal map to cache.
+ */
+export function writeFractalMap(cwd: string, sessionId: string, map: FractalMap): void {
+  const cacheDir = getCacheDir(cwd);
+  mkdirSync(cacheDir, { recursive: true });
+  const hash = sessionIdHash(sessionId);
+  const filePath = join(cacheDir, `fmap-${hash}.json`);
+  writeFileSync(filePath, JSON.stringify(map));
 }

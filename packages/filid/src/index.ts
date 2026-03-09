@@ -9,7 +9,14 @@
 export type * from './types/index.js';
 
 // Core modules
-export { validateClaudeMd, validateSpecMd } from './core/document-validator.js';
+export {
+  validateIntentMd,
+  validateDetailMd,
+  /** @deprecated Use validateIntentMd instead. Will be removed in v0.2.0 */
+  validateClaudeMd,
+  /** @deprecated Use validateDetailMd instead. Will be removed in v0.2.0 */
+  validateSpecMd,
+} from './core/document-validator.js';
 export {
   classifyNode,
   isInfraOrgDirectoryByPattern,
@@ -65,6 +72,8 @@ export {
   getModulePlacement,
   getAncestorPaths,
 } from './core/lca-calculator.js';
+export { findBoundary, buildChain } from './core/boundary-detector.js';
+export type { ChainResult } from './core/boundary-detector.js';
 
 // Metrics
 export { countTestCases } from './metrics/test-counter.js';
@@ -87,6 +96,8 @@ export { calculateCC } from './ast/cyclomatic-complexity.js';
 export { computeTreeDiff } from './ast/tree-diff.js';
 
 // Hooks
+export { handlePreToolUse, mergeResults } from './hooks/pre-tool-use.js';
+export { injectIntent, compressPaths } from './hooks/intent-injector.js';
 export { validatePreToolUse } from './hooks/pre-tool-validator.js';
 export { guardStructure } from './hooks/structure-guard.js';
 /** @deprecated Disabled in hooks.json. Entry stub uses no-op queue. */
@@ -108,7 +119,12 @@ export {
   markSessionInjected,
   saveRunHash,
   getLastRunHash,
+  readBoundary,
+  writeBoundary,
+  readFractalMap,
+  writeFractalMap,
 } from './core/cache-manager.js';
+export type { FractalMap } from './core/cache-manager.js';
 export { computeProjectHash } from './core/project-hash.js';
 
 // AST Grep tools (pattern matching via @ast-grep/napi)

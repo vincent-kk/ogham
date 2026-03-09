@@ -2,16 +2,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Read|Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-validator.mjs\"",
-            "timeout": 3
-          },
-          {
-            "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/structure-guard.mjs\"",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
             "timeout": 3
           }
         ]

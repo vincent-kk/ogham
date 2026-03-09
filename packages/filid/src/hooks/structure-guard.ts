@@ -7,7 +7,7 @@ import {
 } from '../core/organ-classifier.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
-import { isClaudeMd } from './shared.js';
+import { isIntentMd } from './shared.js';
 
 /** Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls */
 const organCache = new Map<string, boolean>();
@@ -29,10 +29,14 @@ function isOrganByStructure(dirPath: string): boolean {
       return fallback;
     }
     const entries = readdirSync(dirPath, { withFileTypes: true });
-    const hasClaudeMd = entries.some(
-      (e) => e.isFile() && e.name === 'CLAUDE.md',
+    const hasIntentMd = entries.some(
+      (e) => e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
     );
-    const hasSpecMd = entries.some((e) => e.isFile() && e.name === 'SPEC.md');
+    const hasClaudeMd = hasIntentMd;
+    const hasDetailMd = entries.some(
+      (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
+    );
+    const hasSpecMd = hasDetailMd;
     const subDirs = entries.filter((e) => e.isDirectory());
     const hasFractalChildren = subDirs.some((d) => {
       const childPath = path.join(dirPath, d.name);
@@ -40,7 +44,11 @@ function isOrganByStructure(dirPath: string): boolean {
         const childEntries = readdirSync(childPath, { withFileTypes: true });
         return childEntries.some(
           (ce) =>
-            ce.isFile() && (ce.name === 'CLAUDE.md' || ce.name === 'SPEC.md'),
+            ce.isFile() &&
+            (ce.name === 'INTENT.md' ||
+              ce.name === 'CLAUDE.md' ||
+              ce.name === 'DETAIL.md' ||
+              ce.name === 'SPEC.md'),
         );
       } catch {
         return false;
@@ -50,7 +58,9 @@ function isOrganByStructure(dirPath: string): boolean {
     const category = classifyNode({
       dirName: path.basename(dirPath),
       hasClaudeMd,
+      hasIntentMd,
       hasSpecMd,
+      hasDetailMd,
       hasFractalChildren,
       isLeafDirectory,
     });
@@ -69,7 +79,7 @@ function getParentSegments(filePath: string): string[] {
   return parts.slice(0, -1);
 }
 
-// isClaudeMd imported from shared.ts
+// isIntentMd imported from shared.ts
 
 function extractImportPaths(content: string): string[] {
   const importRegex = /from\s+['"]([^'"]+)['"]/g;
@@ -114,8 +124,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
 
-  // [기존 로직 보존] organ 디렉토리 내 CLAUDE.md Write → 차단 (continue: false)
-  if (input.tool_name === 'Write' && isClaudeMd(filePath)) {
+  // [기존 로직 보존] organ 디렉토리 내 INTENT.md Write → 차단 (continue: false)
+  if (input.tool_name === 'Write' && isIntentMd(filePath)) {
     let dirSoFar = cwd;
     for (const segment of segments) {
       dirSoFar = path.join(dirSoFar, segment);
@@ -124,8 +134,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
           continue: false,
           hookSpecificOutput: {
             additionalContext:
-              `BLOCKED: Cannot create CLAUDE.md inside organ directory "${segment}". ` +
-              `Organ directories are leaf-level compartments and should not have their own CLAUDE.md.`,
+              `BLOCKED: Cannot create INTENT.md inside organ directory "${segment}". ` +
+              `Organ directories are leaf-level compartments and should not have their own INTENT.md.`,
           },
         };
       }

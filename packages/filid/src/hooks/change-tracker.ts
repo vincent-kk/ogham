@@ -32,9 +32,15 @@ function classifyPathCategory(filePath: string, cwd: string): string {
     .split('/')
     .filter((p) => p.length > 0);
 
-  // CLAUDE.md 또는 SPEC.md를 포함하면 fractal
+  // INTENT.md, CLAUDE.md, DETAIL.md, SPEC.md를 포함하면 fractal
   const fileName = segments[segments.length - 1] ?? '';
-  if (fileName === 'CLAUDE.md' || fileName === 'SPEC.md') return 'fractal';
+  if (
+    fileName === 'INTENT.md' ||
+    fileName === 'CLAUDE.md' ||
+    fileName === 'DETAIL.md' ||
+    fileName === 'SPEC.md'
+  )
+    return 'fractal';
 
   // 구조 기반 organ 분류
   let dirSoFar = cwd;
@@ -47,10 +53,15 @@ function classifyPathCategory(filePath: string, cwd: string): string {
         continue;
       }
       const entries = fs.readdirSync(dirSoFar, { withFileTypes: true });
-      const hasClaudeMd = entries.some(
-        (e) => e.isFile() && e.name === 'CLAUDE.md',
+      const hasIntentMd = entries.some(
+        (e) =>
+          e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
       );
-      const hasSpecMd = entries.some((e) => e.isFile() && e.name === 'SPEC.md');
+      const hasClaudeMd = hasIntentMd;
+      const hasDetailMd = entries.some(
+        (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
+      );
+      const hasSpecMd = hasDetailMd;
       const subdirs = entries.filter((e) => e.isDirectory());
       const isLeafDirectory = subdirs.length === 0;
       const hasFractalChildren = subdirs.some((d) => {
@@ -61,7 +72,11 @@ function classifyPathCategory(filePath: string, cwd: string): string {
           });
           return childEntries.some(
             (ce) =>
-              ce.isFile() && (ce.name === 'CLAUDE.md' || ce.name === 'SPEC.md'),
+              ce.isFile() &&
+              (ce.name === 'INTENT.md' ||
+                ce.name === 'CLAUDE.md' ||
+                ce.name === 'DETAIL.md' ||
+                ce.name === 'SPEC.md'),
           );
         } catch {
           return false;
@@ -70,7 +85,9 @@ function classifyPathCategory(filePath: string, cwd: string): string {
       const category = classifyNode({
         dirName: segment,
         hasClaudeMd,
+        hasIntentMd,
         hasSpecMd,
+        hasDetailMd,
         hasFractalChildren,
         isLeafDirectory,
       });
