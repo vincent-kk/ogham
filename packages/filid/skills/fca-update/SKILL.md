@@ -1,7 +1,7 @@
 ---
 name: fca-update
 user_invocable: true
-description: Analyze changes in the current branch to update CLAUDE.md/SPEC.md and organize test.ts/spec.ts following FCA-AI principles — skips execution when no changes detected since last run
+description: Analyze changes in the current branch to update INTENT.md/DETAIL.md and organize test.ts/spec.ts following FCA-AI principles — skips execution when no changes detected since last run
 version: 1.0.0
 complexity: high
 ---
@@ -10,7 +10,7 @@ complexity: high
 
 Analyze files changed in the current branch to:
 
-1. Update CLAUDE.md / SPEC.md to match the implementation (create if missing)
+1. Update INTENT.md / DETAIL.md to match the implementation (create if missing)
 2. Organize and update test.ts / spec.ts following FCA-AI principles
 
 An incremental gate (Stage 0) skips execution when no changes have occurred since the last run.
@@ -21,7 +21,7 @@ An incremental gate (Stage 0) skips execution when no changes have occurred sinc
 
 - Immediately after writing or modifying code, to sync docs and tests
 - Before merging a branch, to verify FCA-AI compliance
-- When CLAUDE.md/SPEC.md are out of sync with the implementation
+- When INTENT.md/DETAIL.md are out of sync with the implementation
 - When test.ts/spec.ts violate the FCA-AI 3+12 rule
 
 ## Core Workflow
@@ -54,10 +54,10 @@ See [reference.md Section 2](./reference.md#section-2--sync).
 
 ### Stage 3 — Doc & Test Update (Parallel)
 
-Update CLAUDE.md/SPEC.md and organize test.ts/spec.ts based on changed files.
+Update INTENT.md/DETAIL.md and organize test.ts/spec.ts based on changed files.
 Two independent agents run in parallel on non-overlapping file sets.
 
-Agent: `context-manager` (sonnet) — document updates (CLAUDE.md / SPEC.md)
+Agent: `context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
 Agent: `implementer` (sonnet) — test organization (test.ts / spec.ts)
 See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
@@ -124,5 +124,5 @@ Key rules:
 
 - Without `--force`, exits immediately when no changes detected since last run
 - Stage 2 (Sync) runs only when critical/high violations are present
-- CLAUDE.md must stay within the 50-line limit
+- INTENT.md must stay within the 50-line limit
 - test.ts/spec.ts must follow the 3+12 rule (max 15 test cases per file)

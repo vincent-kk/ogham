@@ -37,8 +37,8 @@ Build two lists:
 - `CHANGED_FILES`: all modified/added source files (`.ts`, `.tsx`, `.js`)
 - `CHANGED_DIRS`: unique parent directories of changed files
 - `CHANGED_SPEC_FILES`: changed `*.spec.ts` / `*.test.ts` files
-- `CHANGED_CLAUDE_MDS`: changed `CLAUDE.md` files
-- `CHANGED_SPEC_MDS`: changed `SPEC.md` files
+- `CHANGED_CLAUDE_MDS`: changed `INTENT.md` files
+- `CHANGED_SPEC_MDS`: changed `DETAIL.md` files
 
 All subsequent stages operate on these lists only.
 If a list is empty for a given stage, record the stage as `SKIP`.
@@ -54,14 +54,14 @@ structure_validate(path: <directory>)
 
 Checks:
 
-- If a changed directory is a fractal node → must have a CLAUDE.md
-- If a changed directory is an organ node → must NOT have a CLAUDE.md
+- If a changed directory is a fractal node → must have a INTENT.md
+- If a changed directory is an organ node → must NOT have a INTENT.md
 - `fractal_navigate(classify)` result must match the directory's actual role
 
 Severity mapping:
 
-- Organ directory has CLAUDE.md → HIGH
-- Fractal directory missing CLAUDE.md → MEDIUM
+- Organ directory has INTENT.md → HIGH
+- Fractal directory missing INTENT.md → MEDIUM
 - Category mismatch → HIGH
 
 ### A.2 — Stage 2: Document Compliance
@@ -82,7 +82,7 @@ Severity mapping:
 
 - Line count > 50 → HIGH
 - Missing tier section → MEDIUM
-- SPEC.md append-only → MEDIUM
+- DETAIL.md append-only → MEDIUM
 
 ### A.3 — Stage 3: Test Compliance (3+12 Rule)
 

@@ -11,8 +11,8 @@ fractal_scan({ path: cwd })
 // Retrieve full module tree by scanning the filesystem
 
 checks:
-  - Every fractal dir has CLAUDE.md
-  - No organ dir has CLAUDE.md
+  - Every fractal dir has INTENT.md
+  - No organ dir has INTENT.md
   - fractal_navigate(action: "classify", path: dir, entries: [/* nodes from scan */])
     matches actual directory role
 ```
@@ -23,12 +23,12 @@ misclassified paths.
 ## Section 2 — Document Compliance Details
 
 ```
-for each CLAUDE.md in scope:
+for each INTENT.md in scope:
   - lineCount <= 50                     // hard limit
   - contains 3-tier boundary sections    // required headings
   - doc_compress(mode: "auto")           // size warning at >= 90 lines
 
-for each SPEC.md in scope:
+for each DETAIL.md in scope:
   - no append-only patterns detected     // no raw appended blocks
   - document-code synchronization status // content reflects current code
 ```
@@ -109,12 +109,12 @@ with each cycle path listed.
 
 Issues by severity:
   CRITICAL (0)
-  HIGH (1):   src/core/CLAUDE.md — 103 lines, exceeds 50-line limit
+  HIGH (1):   src/core/INTENT.md — 103 lines, exceeds 50-line limit
   MEDIUM (1): src/parser/index.ts — LCOM4=3, recommend split
   LOW (0)
 
 Recommendations:
-  1. Run /filid:fca-sync to auto-compress src/core/CLAUDE.md
+  1. Run /filid:fca-sync to auto-compress src/core/INTENT.md
   2. Split src/parser/index.ts into focused sub-modules
 ```
 

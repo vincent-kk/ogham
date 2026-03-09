@@ -8,7 +8,7 @@ complexity: medium
 
 # fca-pull-request — FCA-Aware Pull Request Generator
 
-Synchronize FCA context documents (CLAUDE.md/SPEC.md) with the latest code,
+Synchronize FCA context documents (INTENT.md/DETAIL.md) with the latest code,
 then analyze branch changes to automatically generate a structured GitHub PR.
 The fca-update sync is enforced as a prerequisite — PR creation is blocked on
 sync failure unless explicitly skipped.
@@ -44,7 +44,7 @@ See [reference.md Section 0](./reference.md#section-0--prerequisites--validation
 
 ### Stage 1 — FCA Context Sync
 
-Invoke `Skill("filid:fca-update")` to synchronize CLAUDE.md/SPEC.md with the
+Invoke `Skill("filid:fca-update")` to synchronize INTENT.md/DETAIL.md with the
 current codebase.
 
 - **Success**: Proceed to Stage 2

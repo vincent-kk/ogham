@@ -18,7 +18,7 @@ reference for the multi-persona code review governance pipeline.
 | Persona               | Election Basis            | Final Position |
 | --------------------- | ------------------------- | -------------- |
 | Engineering Architect | LCOM4 verification needed | SYNTHESIS      |
-| Knowledge Manager     | CLAUDE.md change detected | SYNTHESIS      |
+| Knowledge Manager     | INTENT.md change detected | SYNTHESIS      |
 | ...                   | ...                       | ...            |
 
 ## Structure Compliance (Phase A)
@@ -43,7 +43,7 @@ Structure violations elevated to committee agenda: <N critical/high items>
 | Check                 | Result         | Detail |
 | --------------------- | -------------- | ------ |
 | Fractal boundary      | PASS/WARN/FAIL | ...    |
-| CLAUDE.md compliance  | PASS/WARN/FAIL | ...    |
+| INTENT.md compliance  | PASS/WARN/FAIL | ...    |
 | 3+12 rule             | PASS/WARN/FAIL | ...    |
 | LCOM4                 | PASS/WARN/FAIL | ...    |
 | CC                    | PASS/WARN/FAIL | ...    |
@@ -154,7 +154,7 @@ without access to local files.
 | -------------------- | -------------------------------- | ----- | ------------------------------------------------ |
 | `fractal_navigate`   | `action: "classify"`             | 1     | Classify changed dirs for boundary check         |
 | `structure_validate` | `path: <changed dir>`            | 1     | Fractal/organ boundary validation (diff only)    |
-| `doc_compress`       | `mode: "auto"`                   | 2     | CLAUDE.md line count (changed CLAUDE.md only)    |
+| `doc_compress`       | `mode: "auto"`                   | 2     | INTENT.md line count (changed INTENT.md only)    |
 | `test_metrics`       | `action: "check-312"`            | 3     | 3+12 rule on changed spec.ts files only          |
 | `ast_analyze`        | `analysisType: "lcom4"`          | 4     | Module cohesion on changed source files          |
 | `ast_analyze`        | `analysisType: "cyclomatic-complexity"` | 4 | Complexity on changed source files          |

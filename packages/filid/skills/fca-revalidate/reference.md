@@ -94,7 +94,7 @@ local files.
 | Structure violation | `structure_validate`                 | No violations          |
 | Circular dependency | `ast_analyze(dependency-graph)`      | No cycles              |
 | Drift               | `drift_detect`                       | No drift               |
-| Document compliance | `doc_compress(auto)` + Read          | CLAUDE.md <= 50 lines  |
+| Document compliance | `doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
 
 ## Non-Negotiable Rules (Constitutional)
 

@@ -11,7 +11,7 @@
  *
  * - `fractal`: 하위 프랙탈 노드를 포함하는 복합 단위. 자체 index.ts를 가질 수 있다.
  * - `organ`: 특정 역할에 특화된 단말 디렉토리 (e.g., `hooks/`, `utils/`, `types/`).
- *            CLAUDE.md를 포함하지 않는다.
+ *            INTENT.md를 포함하지 않는다.
  * - `pure-function`: 단일 책임 함수/유틸리티 모음. 외부 의존이 없어야 한다.
  * - `hybrid`: fractal과 organ의 특성을 모두 갖는 과도기적 형태. 리팩토링 대상.
  */
@@ -31,10 +31,20 @@ export interface FractalNode {
   children: string[];
   /** Organ directory paths */
   organs: string[];
-  /** Whether CLAUDE.md exists */
+  /**
+   * Whether CLAUDE.md exists.
+   * @deprecated Use hasIntentMd instead. Will be removed in v0.2.0
+   */
   hasClaudeMd: boolean;
-  /** Whether SPEC.md exists */
+  /**
+   * Whether SPEC.md exists.
+   * @deprecated Use hasDetailMd instead. Will be removed in v0.2.0
+   */
   hasSpecMd: boolean;
+  /** Whether INTENT.md (or legacy CLAUDE.md) exists */
+  hasIntentMd?: boolean;
+  /** Whether DETAIL.md (or legacy SPEC.md) exists */
+  hasDetailMd?: boolean;
   /** Whether index.ts or index.js exists in this directory */
   hasIndex: boolean;
   /** Whether main.ts or main.js exists in this directory */

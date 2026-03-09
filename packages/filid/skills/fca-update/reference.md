@@ -42,8 +42,8 @@ test_metrics({ action: "check-312", files: [{ filePath, content }] })
 
 Scan result categories:
 
-- CLAUDE.md exceeds 50-line limit
-- CLAUDE.md present inside an organ directory
+- INTENT.md exceeds 50-line limit
+- INTENT.md present inside an organ directory
 - test/spec files violating 3+12 rule (> 15 test cases)
 - Unclassified directories
 
@@ -63,11 +63,11 @@ scan violations to Stage 2 gate conditions:
 
 | fca-scan Violation Type               | Stage 2 Gate                      |
 | ------------------------------------- | --------------------------------- |
-| CLAUDE.md exceeds 50 lines            | high — triggers Stage 2           |
-| CLAUDE.md present in organ directory  | critical — triggers Stage 2       |
+| INTENT.md exceeds 50 lines            | high — triggers Stage 2           |
+| INTENT.md present in organ directory  | critical — triggers Stage 2       |
 | 3+12 rule violation (test count > 15) | high — triggers Stage 2           |
 | Unclassified directory                | medium — does NOT trigger Stage 2 |
-| SPEC.md append-only growth            | medium — does NOT trigger Stage 2 |
+| DETAIL.md append-only growth            | medium — does NOT trigger Stage 2 |
 
 fca-sync DriftSeverity ordering: `critical > high > medium > low`
 
@@ -89,12 +89,12 @@ structure_validate({ path: "<target-path>" })
 **Execution mode**: Parallel — `context-manager` and `implementer` operate on
 non-overlapping file sets (docs vs tests) and can run simultaneously.
 
-### Document Update (CLAUDE.md / SPEC.md)
+### Document Update (INTENT.md / DETAIL.md)
 
 For each fractal node containing changed files:
 
-1. **Check CLAUDE.md**: existence and 50-line limit
-2. **Create CLAUDE.md if missing**: include 3-tier boundary sections
+1. **Check INTENT.md**: existence and 50-line limit
+2. **Create INTENT.md if missing**: include 3-tier boundary sections
 
    ```markdown
    # <module-name> — <one-line description>
@@ -118,14 +118,14 @@ For each fractal node containing changed files:
    ## Dependencies
    ```
 
-3. **Update CLAUDE.md if present**: reflect implemented changes; compress if > 50 lines
+3. **Update INTENT.md if present**: reflect implemented changes; compress if > 50 lines
 
 ```
 doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
 // Suggests compression when content exceeds 50 lines
 ```
 
-4. **Check and update SPEC.md**: refresh implementation contracts (API signatures, type definitions)
+4. **Check and update DETAIL.md**: refresh implementation contracts (API signatures, type definitions)
 
 ### Test Organization (test.ts / spec.ts)
 
@@ -177,8 +177,8 @@ Status: SKIPPED (no critical/high violations) | APPLIED (<n> corrections) | SKIP
 Corrections: <n> applied
 
 ### Stage 3 — Doc & Test Update
-CLAUDE.md updated: <n> files
-SPEC.md updated: <n> files
+INTENT.md updated: <n> files
+DETAIL.md updated: <n> files
 test.ts/spec.ts updated: <n> files
 Created: <n> new files
 

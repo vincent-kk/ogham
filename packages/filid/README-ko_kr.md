@@ -52,7 +52,7 @@ filid 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claud
 /filid:fca-init ./packages/my-app
 ```
 
-프로젝트 디렉토리를 스캔하여 각 모듈에 `CLAUDE.md` 경계 문서를 생성합니다. `components/`, `utils/` 같은 유틸리티 디렉토리(organ)는 자동으로 건너뜁니다.
+프로젝트 디렉토리를 스캔하여 각 모듈에 `INTENT.md` 경계 문서를 생성합니다. `components/`, `utils/` 같은 유틸리티 디렉토리(organ)는 자동으로 건너뜁니다.
 
 ### 규칙 위반 찾고 수정하기
 
@@ -62,7 +62,7 @@ filid 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claud
 /filid:fca-scan 고칠 수 있는 건 고쳐줘
 ```
 
-CLAUDE.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 CLAUDE.md 존재 등을 검출합니다.
+INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTENT.md 존재 등을 검출합니다.
 
 ### 코드 변경 후 문서 동기화
 
@@ -72,7 +72,7 @@ CLAUDE.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 CLAU
 /filid:fca-sync critical 이상만 처리해줘
 ```
 
-코드 변경으로 인한 구조적 drift를 감지하고, 해당 모듈의 CLAUDE.md/SPEC.md를 갱신합니다. 내부적으로 `drift-detect` MCP 도구를 사용합니다.
+코드 변경으로 인한 구조적 drift를 감지하고, 해당 모듈의 INTENT.md/DETAIL.md를 갱신합니다. 내부적으로 `drift-detect` MCP 도구를 사용합니다.
 
 ### 전체 프로젝트 구조 점검
 
@@ -142,8 +142,8 @@ CLAUDE.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 CLAU
 
 | 언제                          | 무엇을                                | 왜                                         |
 | ----------------------------- | ------------------------------------- | ------------------------------------------ |
-| 파일을 Write/Edit할 때        | CLAUDE.md 50줄 초과 검사              | 문서가 비대해지는 것을 방지                |
-| 파일을 Write/Edit할 때        | organ 디렉토리 내 CLAUDE.md 생성 차단 | 유틸리티 폴더의 불필요한 문서화 방지       |
+| 파일을 Write/Edit할 때        | INTENT.md 50줄 초과 검사              | 문서가 비대해지는 것을 방지                |
+| 파일을 Write/Edit할 때        | organ 디렉토리 내 INTENT.md 생성 차단 | 유틸리티 폴더의 불필요한 문서화 방지       |
 | 서브에이전트가 시작할 때      | 에이전트 역할 제한 주입               | architect가 코드를 수정하는 등의 월권 방지 |
 | 사용자가 프롬프트를 입력할 때 | FCA-AI 규칙 컨텍스트 주입             | 에이전트가 규칙을 인지하고 작업하도록 보장 |
 
@@ -175,9 +175,9 @@ filid가 시행하는 주요 규칙입니다:
 
 | 규칙                 | 기준                                               | 시행 방식                |
 | -------------------- | -------------------------------------------------- | ------------------------ |
-| CLAUDE.md 줄 수 제한 | 50줄 이하                                          | Hook 자동 차단           |
+| INTENT.md 줄 수 제한 | 50줄 이하                                          | Hook 자동 차단           |
 | 3-tier 경계 섹션     | "Always do" / "Ask first" / "Never do" 필수        | Hook 경고                |
-| Organ 디렉토리 보호  | `components`, `utils`, `types` 등에 CLAUDE.md 금지 | Hook 자동 차단           |
+| Organ 디렉토리 보호  | `components`, `utils`, `types` 등에 INTENT.md 금지 | Hook 자동 차단           |
 | 테스트 밀도          | spec.ts당 최대 15개 (3 core + 12 edge)             | MCP 분석                 |
 | 모듈 응집도          | LCOM4 >= 2이면 분할 권고                           | MCP 분석 + 의사결정 트리 |
 | 순환 의존성          | 비순환 그래프(DAG) 유지                            | Core 검증                |

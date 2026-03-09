@@ -1,4 +1,4 @@
-# CLAUDE.md
+# INTENT.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -40,9 +40,9 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ### Core Concepts
 
-- **FractalNode 타입**: `fractal` (CLAUDE.md 필요), `organ` (CLAUDE.md 금지), `pure-function`, `hybrid`
+- **FractalNode 타입**: `fractal` (INTENT.md 필요), `organ` (INTENT.md 금지), `pure-function`, `hybrid`
 - **3-Tier Boundary**: "Always do" / "Ask first" / "Never do" 섹션 필수
-- **50-line Limit**: CLAUDE.md/SPEC.md 각 50줄 이하
+- **50-line Limit**: INTENT.md/DETAIL.md 각 50줄 이하
 - **3+12 Test Rule**: 핵심 3 + 엣지 12 = 최대 15개 테스트
 - **Module Split**: LCOM4 ≥ 2 또는 CC > 15 또는 500줄 초과 → 분리 권장
 
@@ -66,7 +66,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - `src/hooks/context-injector.ts` — UserPromptSubmit 시 FCA-AI 규칙 주입 (세션 기반)
 - `src/hooks/plan-gate.ts` — ExitPlanMode 시 FCA-AI 문서 업데이트 체크리스트 주입
 - `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
-- `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isClaudeMd, isSpecMd)
+- `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
 - `scripts/build-mcp-server.mjs` — MCP 서버 esbuild 번들러
 - `scripts/build-hooks.mjs` — 훅 스크립트 esbuild 번들러
 

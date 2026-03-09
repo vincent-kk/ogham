@@ -1,8 +1,8 @@
 /**
- * CLAUDE.md / SPEC.md document schema type definitions
+ * INTENT.md / DETAIL.md document schema type definitions
  */
 
-/** CLAUDE.md 3-tier boundary system */
+/** INTENT.md 3-tier boundary system */
 export interface ThreeTierBoundary {
   /** Rules that must always be followed */
   alwaysDo: string[];
@@ -12,8 +12,8 @@ export interface ThreeTierBoundary {
   neverDo: string[];
 }
 
-/** CLAUDE.md document structure */
-export interface ClaudeMdSchema {
+/** INTENT.md document structure */
+export interface IntentMdSchema {
   /** Fractal name */
   name: string;
   /** 1-2 line purpose description */
@@ -24,14 +24,17 @@ export interface ClaudeMdSchema {
   structure: Record<string, string>;
   /** 3-tier boundary rules */
   boundaries: ThreeTierBoundary;
-  /** Sibling fractal CLAUDE.md references */
+  /** Sibling fractal INTENT.md references */
   dependencies: string[];
   /** Total line count */
   lineCount: number;
 }
 
-/** SPEC.md document structure */
-export interface SpecMdSchema {
+/** @deprecated Use IntentMdSchema instead. Will be removed in v0.2.0 */
+export type ClaudeMdSchema = IntentMdSchema;
+
+/** DETAIL.md document structure */
+export interface DetailMdSchema {
   /** Module specification title */
   title: string;
   /** Functional requirements */
@@ -43,6 +46,9 @@ export interface SpecMdSchema {
   /** Compression metadata */
   compressionMeta?: CompressionMeta;
 }
+
+/** @deprecated Use DetailMdSchema instead. Will be removed in v0.2.0 */
+export type SpecMdSchema = DetailMdSchema;
 
 /** Compression metadata */
 export interface CompressionMeta {
@@ -58,21 +64,27 @@ export interface CompressionMeta {
   recoverable: boolean;
 }
 
-/** CLAUDE.md validation result */
-export interface ClaudeMdValidation {
+/** INTENT.md validation result */
+export interface IntentMdValidation {
   /** Whether valid */
   valid: boolean;
   /** List of violations */
   violations: DocumentViolation[];
 }
 
-/** SPEC.md validation result */
-export interface SpecMdValidation {
+/** @deprecated Use IntentMdValidation instead. Will be removed in v0.2.0 */
+export type ClaudeMdValidation = IntentMdValidation;
+
+/** DETAIL.md validation result */
+export interface DetailMdValidation {
   /** Whether valid */
   valid: boolean;
   /** List of violations */
   violations: DocumentViolation[];
 }
+
+/** @deprecated Use DetailMdValidation instead. Will be removed in v0.2.0 */
+export type SpecMdValidation = DetailMdValidation;
 
 /** Document rule violation */
 export interface DocumentViolation {

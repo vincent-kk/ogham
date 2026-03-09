@@ -52,7 +52,7 @@ filid skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 /filid:fca-init ./packages/my-app
 ```
 
-Scans directories and generates `CLAUDE.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
+Scans directories and generates `INTENT.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
 
 ### Find and Fix Violations
 
@@ -62,7 +62,7 @@ Scans directories and generates `CLAUDE.md` boundary documents for each module. 
 /filid:fca-scan 고칠 수 있는 건 고쳐줘
 ```
 
-Detects CLAUDE.md exceeding 50 lines, missing boundary sections, CLAUDE.md in organ directories, etc.
+Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in organ directories, etc.
 
 ### Sync Documentation After Code Changes
 
@@ -72,7 +72,7 @@ Detects CLAUDE.md exceeding 50 lines, missing boundary sections, CLAUDE.md in or
 /filid:fca-sync critical 이상만 처리해줘
 ```
 
-Detects structural drift and updates the affected CLAUDE.md/SPEC.md files. Uses `drift-detect` MCP tool internally.
+Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Uses `drift-detect` MCP tool internally.
 
 ### Full Project Structure Check
 
@@ -142,8 +142,8 @@ With the plugin active, these hooks fire **without user intervention**:
 
 | When                   | What                                  | Why                                                              |
 | ---------------------- | ------------------------------------- | ---------------------------------------------------------------- |
-| Writing/editing a file | Checks CLAUDE.md 50-line limit        | Prevents document bloat                                          |
-| Writing/editing a file | Blocks CLAUDE.md in organ directories | Prevents unnecessary docs in utility folders                     |
+| Writing/editing a file | Checks INTENT.md 50-line limit        | Prevents document bloat                                          |
+| Writing/editing a file | Blocks INTENT.md in organ directories | Prevents unnecessary docs in utility folders                     |
 | Sub-agent starting     | Injects role restrictions             | Prevents agents from overstepping (e.g., architect editing code) |
 | User submits a prompt  | Injects FCA-AI rule context           | Ensures agents are aware of rules while working                  |
 
@@ -175,9 +175,9 @@ Core rules enforced by filid:
 
 | Rule                       | Threshold                                            | Enforcement         |
 | -------------------------- | ---------------------------------------------------- | ------------------- |
-| CLAUDE.md line limit       | 50 lines max                                         | Hook (auto-block)   |
+| INTENT.md line limit       | 50 lines max                                         | Hook (auto-block)   |
 | 3-tier boundary sections   | "Always do" / "Ask first" / "Never do" required      | Hook (warning)      |
-| Organ directory protection | No CLAUDE.md in `components`, `utils`, `types`, etc. | Hook (auto-block)   |
+| Organ directory protection | No INTENT.md in `components`, `utils`, `types`, etc. | Hook (auto-block)   |
 | Test density               | Max 15 per spec.ts (3 core + 12 edge)                | MCP analysis        |
 | Module cohesion            | LCOM4 >= 2 triggers split recommendation             | MCP + decision tree |
 | Circular dependencies      | Acyclic graph (DAG) required                         | Core validation     |

@@ -9,7 +9,7 @@ complexity: simple
 # fca-context-query — Context Query
 
 Answer a targeted question about the FCA-AI project by navigating the
-fractal hierarchy, loading the minimal CLAUDE.md chain, and responding
+fractal hierarchy, loading the minimal INTENT.md chain, and responding
 within a strict 3-Prompt Limit.
 
 > **Detail Reference**: For detailed workflow steps, MCP tool examples,
@@ -20,9 +20,9 @@ within a strict 3-Prompt Limit.
 
 - Looking up boundary rules for a specific module before making a change
 - Identifying which fractal node owns a particular concern or file
-- Checking what a CLAUDE.md says without manually reading the tree
+- Checking what a INTENT.md says without manually reading the tree
 - Understanding the context chain between a leaf module and the project root
-- Any focused question answerable from CLAUDE.md content alone
+- Any focused question answerable from INTENT.md content alone
 
 ## Core Workflow
 
@@ -39,7 +39,7 @@ See [reference.md Section 2](./reference.md#section-2--navigation-details).
 
 ### Phase 3 — Context Loading
 
-Load the CLAUDE.md chain from leaf node to project root.
+Load the INTENT.md chain from leaf node to project root.
 See [reference.md Section 3](./reference.md#section-3--context-chain-loading).
 
 ### Phase 4 — Compression (if needed)
@@ -58,7 +58,7 @@ See [reference.md Section 5](./reference.md#section-5--3-prompt-limit-protocol).
 | ------------------ | ---------- | ------------------------------------------------------- |
 | `fractal_scan`     | —          | Scan project hierarchy to locate the target module      |
 | `fractal_navigate` | `classify` | Resolve ambiguous module classification                 |
-| `doc_compress`     | `auto`     | Compress CLAUDE.md chain when it exceeds context limits |
+| `doc_compress`     | `auto`     | Compress INTENT.md chain when it exceeds context limits |
 
 ## Options
 
@@ -82,11 +82,11 @@ See [reference.md Section 5](./reference.md#section-5--3-prompt-limit-protocol).
 /filid:fca-context-query "Which fractal node owns retry logic?"
 
 # Check what is forbidden in a module
-/filid:fca-context-query "What does the auth CLAUDE.md say we must never do?"
+/filid:fca-context-query "What does the auth INTENT.md say we must never do?"
 
 # 3-Prompt Limit
 Prompt 1  →  fractal_scan (full tree) + fractal_navigate (classify target)
-Prompt 2  →  load/analyse CLAUDE.md chain
+Prompt 2  →  load/analyse INTENT.md chain
 Prompt 3  →  final answer (hard limit)
 
 # If answer requires > 3 prompts

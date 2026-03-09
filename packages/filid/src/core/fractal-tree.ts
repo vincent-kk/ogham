@@ -16,8 +16,12 @@ export interface NodeEntry {
   path: string;
   name: string;
   type: CategoryType;
+  /** @deprecated Use hasIntentMd */
   hasClaudeMd: boolean;
+  hasIntentMd?: boolean;
+  /** @deprecated Use hasDetailMd */
   hasSpecMd: boolean;
+  hasDetailMd?: boolean;
   hasIndex?: boolean;
   hasMain?: boolean;
 }
@@ -66,7 +70,9 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
       children: [],
       organs: [],
       hasClaudeMd: e.hasClaudeMd,
+      hasIntentMd: e.hasIntentMd ?? e.hasClaudeMd,
       hasSpecMd: e.hasSpecMd,
+      hasDetailMd: e.hasDetailMd ?? e.hasSpecMd,
       hasIndex: e.hasIndex ?? false,
       hasMain: e.hasMain ?? false,
       depth: 0,
@@ -303,8 +309,14 @@ export async function scanProject(
       absPath === rootPath
         ? (rootPath.split('/').pop() ?? '')
         : (absPath.split('/').pop() ?? '');
-    const hasClaudeMd = existsSync(join(absPath, 'CLAUDE.md'));
-    const hasSpecMd = existsSync(join(absPath, 'SPEC.md'));
+    const hasIntentMd =
+      existsSync(join(absPath, 'INTENT.md')) ||
+      existsSync(join(absPath, 'CLAUDE.md'));
+    const hasClaudeMd = hasIntentMd;
+    const hasDetailMd =
+      existsSync(join(absPath, 'DETAIL.md')) ||
+      existsSync(join(absPath, 'SPEC.md'));
+    const hasSpecMd = hasDetailMd;
     const hasIndex =
       existsSync(join(absPath, 'index.ts')) ||
       existsSync(join(absPath, 'index.tsx')) ||
@@ -337,7 +349,9 @@ export async function scanProject(
     const type = classifyNode({
       dirName: name,
       hasClaudeMd,
+      hasIntentMd,
       hasSpecMd,
+      hasDetailMd,
       hasFractalChildren,
       isLeafDirectory,
       hasIndex, // NEW: index 파일 여부 전달
@@ -348,7 +362,9 @@ export async function scanProject(
       name,
       type,
       hasClaudeMd,
+      hasIntentMd,
       hasSpecMd,
+      hasDetailMd,
       hasIndex,
       hasMain,
     });
@@ -383,7 +399,9 @@ export async function scanProject(
     const newType = classifyNode({
       dirName: entry.name,
       hasClaudeMd: entry.hasClaudeMd,
+      hasIntentMd: entry.hasIntentMd,
       hasSpecMd: entry.hasSpecMd,
+      hasDetailMd: entry.hasDetailMd,
       hasFractalChildren: hasFractalChildrenActual,
       isLeafDirectory: isLeafActual,
       hasIndex: entry.hasIndex ?? false,

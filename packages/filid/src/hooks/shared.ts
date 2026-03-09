@@ -6,22 +6,42 @@ import { join } from 'node:path';
 
 /**
  * Check if the cwd is an FCA-AI project.
- * Treats presence of .filid/ directory or CLAUDE.md as indicator.
+ * Treats presence of .filid/ directory, INTENT.md, or CLAUDE.md as indicator.
  */
 export function isFcaProject(cwd: string): boolean {
-  return existsSync(join(cwd, '.filid')) || existsSync(join(cwd, 'CLAUDE.md'));
+  return (
+    existsSync(join(cwd, '.filid')) ||
+    existsSync(join(cwd, 'INTENT.md')) ||
+    existsSync(join(cwd, 'CLAUDE.md'))
+  );
 }
 
 /**
- * Check if a file path targets CLAUDE.md.
+ * Check if a file path targets INTENT.md (or legacy CLAUDE.md).
  */
-export function isClaudeMd(filePath: string): boolean {
-  return filePath.endsWith('/CLAUDE.md') || filePath === 'CLAUDE.md';
+export function isIntentMd(filePath: string): boolean {
+  return (
+    filePath.endsWith('/INTENT.md') ||
+    filePath === 'INTENT.md' ||
+    filePath.endsWith('/CLAUDE.md') ||
+    filePath === 'CLAUDE.md'
+  );
 }
 
+/** @deprecated Use isIntentMd instead. Will be removed in v0.2.0 */
+export const isClaudeMd = isIntentMd;
+
 /**
- * Check if a file path targets SPEC.md.
+ * Check if a file path targets DETAIL.md (or legacy SPEC.md).
  */
-export function isSpecMd(filePath: string): boolean {
-  return filePath.endsWith('/SPEC.md') || filePath === 'SPEC.md';
+export function isDetailMd(filePath: string): boolean {
+  return (
+    filePath.endsWith('/DETAIL.md') ||
+    filePath === 'DETAIL.md' ||
+    filePath.endsWith('/SPEC.md') ||
+    filePath === 'SPEC.md'
+  );
 }
+
+/** @deprecated Use isDetailMd instead. Will be removed in v0.2.0 */
+export const isSpecMd = isDetailMd;

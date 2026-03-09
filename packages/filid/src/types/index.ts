@@ -13,12 +13,20 @@ export type {
 
 export type {
   ThreeTierBoundary,
-  ClaudeMdSchema,
-  SpecMdSchema,
+  IntentMdSchema,
+  DetailMdSchema,
   CompressionMeta,
-  ClaudeMdValidation,
-  SpecMdValidation,
+  IntentMdValidation,
+  DetailMdValidation,
   DocumentViolation,
+  /** @deprecated Use IntentMdSchema instead. Will be removed in v0.2.0 */
+  ClaudeMdSchema,
+  /** @deprecated Use DetailMdSchema instead. Will be removed in v0.2.0 */
+  SpecMdSchema,
+  /** @deprecated Use IntentMdValidation instead. Will be removed in v0.2.0 */
+  ClaudeMdValidation,
+  /** @deprecated Use DetailMdValidation instead. Will be removed in v0.2.0 */
+  SpecMdValidation,
 } from './documents.js';
 
 export type {

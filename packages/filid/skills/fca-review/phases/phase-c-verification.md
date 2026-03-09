@@ -31,7 +31,7 @@ summary). When PHASEA_RESULTS is available:
 - C.2 (structure_validate): run only for changed fractal paths, reference Phase A
   for diff verdict
 - C.7 (drift_detect): skip if Phase A Stage 1 already passed
-- C.8 (doc compliance): check only CLAUDE.md files in changed fractals; reference
+- C.8 (doc compliance): check only INTENT.md files in changed fractals; reference
   Phase A Stage 2 for diff verdict
 
 ### C.1 — Load Session
@@ -98,7 +98,7 @@ Record any structure drift findings.
 
 ### C.8 — Document Compliance
 
-Check CLAUDE.md files in affected fractals:
+Check INTENT.md files in affected fractals:
 
 - Line count <= 50
 - 3-tier boundary sections present
@@ -149,7 +149,7 @@ created_at: <ISO 8601>
 | Check                 | Result         | Detail |
 | --------------------- | -------------- | ------ |
 | Fractal boundary      | PASS/WARN/FAIL | ...    |
-| CLAUDE.md compliance  | PASS/WARN/FAIL | ...    |
+| INTENT.md compliance  | PASS/WARN/FAIL | ...    |
 | 3+12 rule             | PASS/WARN/FAIL | ...    |
 | LCOM4                 | PASS/WARN/FAIL | ...    |
 | CC                    | PASS/WARN/FAIL | ...    |

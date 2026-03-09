@@ -44,17 +44,17 @@ Apply the following decision logic in order:
 | --------------------------------------- | ------------- | --------------------------------------- |
 | `hasClaudeMd === true`                  | fractal       | Preserve existing file, skip generation |
 | `hasSpecMd === true`                    | fractal       | Preserve existing file, skip generation |
-| Directory name in `KNOWN_ORGAN_DIR_NAMES` | organ       | Skip — CLAUDE.md is prohibited          |
-| No fractal children + leaf directory    | organ         | Skip — CLAUDE.md is prohibited          |
-| No observable side effects, stateless   | pure-function | No CLAUDE.md needed                     |
-| Default (none of the above)             | fractal       | Generate CLAUDE.md                      |
+| Directory name in `KNOWN_ORGAN_DIR_NAMES` | organ       | Skip — INTENT.md is prohibited          |
+| No fractal children + leaf directory    | organ         | Skip — INTENT.md is prohibited          |
+| No observable side effects, stateless   | pure-function | No INTENT.md needed                     |
+| Default (none of the above)             | fractal       | Generate INTENT.md                      |
 
 `KNOWN_ORGAN_DIR_NAMES` (name-based, always organ regardless of structure):
 
 - **UI/shared**: `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
 - **Test/infra**: `__tests__`, `__mocks__`, `__fixtures__`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
 
-Pattern-based organ rules (applied before name list, after CLAUDE.md/SPEC.md check):
+Pattern-based organ rules (applied before name list, after INTENT.md/DETAIL.md check):
 
 | Pattern | Example | Classification |
 | ------- | ------- | -------------- |
@@ -62,17 +62,17 @@ Pattern-based organ rules (applied before name list, after CLAUDE.md/SPEC.md che
 | `.name` (dot-prefixed) | `.git`, `.github`, `.vscode`, `.claude` | organ |
 
 > **Important**: Pattern rules apply regardless of directory structure (leaf or
-> not). An explicit CLAUDE.md always takes precedence over pattern matching.
+> not). An explicit INTENT.md always takes precedence over pattern matching.
 
 ### Deep Scan — Fractal Nodes Inside Organ Directories
 
-Organ nodes are never CLAUDE.md targets, but fractal nodes can exist inside
+Organ nodes are never INTENT.md targets, but fractal nodes can exist inside
 them. Phase 2 must handle this by scanning the full `tree.nodes` map.
 
 **Core rules**:
-- Organ node itself → skip CLAUDE.md generation, but continue scanning inside
-- Fractal node inside an organ → eligible for CLAUDE.md generation
-- Organ node inside an organ → skip CLAUDE.md generation, continue scanning
+- Organ node itself → skip INTENT.md generation, but continue scanning inside
+- Fractal node inside an organ → eligible for INTENT.md generation
+- Organ node inside an organ → skip INTENT.md generation, continue scanning
 
 **Traversal algorithm** (iterate `tree.nodes` directly):
 
@@ -81,29 +81,29 @@ for each node in tree.nodes.values():
   if node.type === 'fractal' or 'pure-function':
     → include as a classification target (even if located inside an organ)
   if node.type === 'organ':
-    → skip CLAUDE.md generation; sub-nodes are handled by the same loop
+    → skip INTENT.md generation; sub-nodes are handled by the same loop
 ```
 
 **Example — three levels of organ nesting**:
 
 ```
-/app/src (fractal)                                      ← CLAUDE.md target
+/app/src (fractal)                                      ← INTENT.md target
   /app/src/components (organ)                           ← skip
-    /app/src/components/location (fractal, reclassified) ← CLAUDE.md target ✓
+    /app/src/components/location (fractal, reclassified) ← INTENT.md target ✓
       /app/src/components/location/FindLocationModal
-        (fractal)                                        ← CLAUDE.md target ✓
+        (fractal)                                        ← INTENT.md target ✓
 ```
 
 > `location` is not in `KNOWN_ORGAN_DIR_NAMES` and has a fractal child, so the
 > post-correction pass in `scanProject()` automatically reclassifies it as
 > fractal and places it in `components.children[]`.
 
-## Section 3 — CLAUDE.md Generation Template
+## Section 3 — INTENT.md Generation Template
 
-For each directory classified as fractal that does not yet have a CLAUDE.md,
+For each directory classified as fractal that does not yet have a INTENT.md,
 generate one using the context-manager agent.
 
-CLAUDE.md structure (hard limit: 50 lines):
+INTENT.md structure (hard limit: 50 lines):
 
 ```markdown
 # <Module Name>
@@ -144,9 +144,9 @@ CLAUDE.md structure (hard limit: 50 lines):
 Enforce: file must not exceed 50 lines. If generation would exceed the
 limit, summarize the most important conventions and boundary rules.
 
-## Section 4 — SPEC.md Scaffolding
+## Section 4 — DETAIL.md Scaffolding
 
-For fractal modules that expose a public API and lack a SPEC.md, generate
+For fractal modules that expose a public API and lack a DETAIL.md, generate
 a scaffold:
 
 ```markdown
@@ -165,17 +165,17 @@ a scaffold:
 <ISO date>
 ```
 
-Only create SPEC.md when the module clearly has an API surface worth
-specifying. Do not create SPEC.md for leaf utility directories.
+Only create DETAIL.md when the module clearly has an API surface worth
+specifying. Do not create DETAIL.md for leaf utility directories.
 
 ## Section 5 — Validation and Report Format
 
 After all files are written, validate the resulting structure:
 
-- Each fractal node's CLAUDE.md passes `validateClaudeMd()` (≤ 50 lines,
+- Each fractal node's INTENT.md passes `validateClaudeMd()` (≤ 50 lines,
   3-tier boundary sections present)
-- No organ directory contains a CLAUDE.md
-- All SPEC.md files pass `validateSpecMd()`
+- No organ directory contains a INTENT.md
+- All DETAIL.md files pass `validateSpecMd()`
 
 Print a summary report:
 
@@ -186,7 +186,7 @@ Directories scanned : <n>
 Fractal nodes       : <n>
 Organ nodes         : <n>
 Pure-function nodes : <n>
-CLAUDE.md created   : <n>
-SPEC.md created     : <n>
+INTENT.md created   : <n>
+DETAIL.md created     : <n>
 Warnings            : <list or "none">
 ```

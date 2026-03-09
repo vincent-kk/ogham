@@ -55,25 +55,25 @@ export function loadBuiltinRules(): Rule[] {
       },
     },
 
-    // 2. organ-no-claudemd: organ 노드에 CLAUDE.md가 없어야 한다
+    // 2. organ-no-claudemd: organ 노드에 INTENT.md(또는 CLAUDE.md)가 없어야 한다
     {
       id: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
-      name: 'Organ No CLAUDE.md',
-      description: 'organ 노드에 CLAUDE.md가 존재하면 안 된다.',
+      name: 'Organ No INTENT.md',
+      description: 'organ 노드에 INTENT.md(또는 CLAUDE.md)가 존재하면 안 된다.',
       category: 'structure',
       severity: 'error',
       enabled: true,
       check(context: RuleContext): RuleViolation[] {
         const { node } = context;
-        if (node.type === 'organ' && node.hasClaudeMd) {
+        if (node.type === 'organ' && (node.hasIntentMd ?? node.hasClaudeMd)) {
           return [
             {
               ruleId: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
               severity: 'error',
-              message: `organ 디렉토리 "${node.name}"에 CLAUDE.md가 존재합니다. organ은 독립 문서화가 금지됩니다.`,
+              message: `organ 디렉토리 "${node.name}"에 INTENT.md가 존재합니다. organ은 독립 문서화가 금지됩니다.`,
               path: node.path,
               suggestion:
-                'CLAUDE.md를 제거하거나 해당 디렉토리를 fractal로 재분류하세요.',
+                'INTENT.md를 제거하거나 해당 디렉토리를 fractal로 재분류하세요.',
             },
           ];
         }

@@ -7,7 +7,7 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 
 | Hook Event | Entry File | Purpose |
 |---|---|---|
-| `PreToolUse` (Write/Edit) | `pre-tool-validator.entry.ts` | CLAUDE.md / SPEC.md content validation |
+| `PreToolUse` (Write/Edit) | `pre-tool-validator.entry.ts` | INTENT.md / DETAIL.md content validation |
 | `PreToolUse` (Write/Edit) | `structure-guard.entry.ts` | Organ structure protection + circular dependency warning |
 | `PreToolUse` (ExitPlanMode) | `plan-gate.entry.ts` | FCA-AI compliance checklist before exiting plan mode |
 | `SubagentStart` | `agent-enforcer.entry.ts` | FCA-AI agent role restriction injection |
@@ -20,21 +20,21 @@ Built entry files live in `bridge/` after `yarn build:plugin`.
 
 ## Hook Details
 
-### 1. PreToolUse — CLAUDE.md / SPEC.md Validator
+### 1. PreToolUse — INTENT.md / DETAIL.md Validator
 
 **Entry**: `src/hooks/entries/pre-tool-validator.entry.ts`
 **Built output**: `bridge/pre-tool-validator.mjs`
 
 Fires on every `Write` or `Edit` tool call targeting a file path.
 
-**Behavior for `Write` targeting `CLAUDE.md`**:
+**Behavior for `Write` targeting `INTENT.md`**:
 - Blocks (`continue: false`) if content exceeds 50 lines
 - Passes with warning if 3-tier boundary sections are missing (`## Always do`, `## Ask first`, `## Never do`)
 
-**Behavior for `Edit` targeting `CLAUDE.md`**:
+**Behavior for `Edit` targeting `INTENT.md`**:
 - Warns (does not block) when `new_string` exceeds 20 lines, reminding that the 50-line limit cannot be enforced on partial edits
 
-**Behavior for `Write` targeting `SPEC.md`**:
+**Behavior for `Write` targeting `DETAIL.md`**:
 - Blocks if the new content appears to be append-only growth (detected by comparing against the existing file content)
 
 ---
@@ -46,8 +46,8 @@ Fires on every `Write` or `Edit` tool call targeting a file path.
 
 Fires on every `Write` or `Edit` tool call.
 
-**Behavior — organ CLAUDE.md block**:
-- Blocks (`continue: false`) `Write` of `CLAUDE.md` when any parent directory on the path is classified as an `organ` node
+**Behavior — organ INTENT.md block**:
+- Blocks (`continue: false`) `Write` of `INTENT.md` when any parent directory on the path is classified as an `organ` node
 - Organ directories are leaf-level compartments; independent documentation is prohibited
 
 **Behavior — organ nesting warning**:
@@ -74,8 +74,8 @@ Does not block agent startup; restrictions are communicated as instructions.
 |---|---|
 | `fractal-architect` | Read-only. Cannot use Write or Edit tools. Analysis and planning only. |
 | `qa-reviewer` | Read-only. Cannot use Write or Edit tools. Review and report only. |
-| `implementer` | Must implement within the scope defined by SPEC.md only. No architectural changes. |
-| `context-manager` | Can only edit CLAUDE.md and SPEC.md. Cannot modify business logic or source code. |
+| `implementer` | Must implement within the scope defined by DETAIL.md only. No architectural changes. |
+| `context-manager` | Can only edit INTENT.md and DETAIL.md. Cannot modify business logic or source code. |
 | `drift-analyzer` | Read-only. Cannot use Write or Edit tools. Detects drift and produces correction plans only. |
 | `restructurer` | Can only execute actions from an approved restructuring plan. No structural decisions. |
 | `code-surgeon` | Can only apply approved fix items from fix-requests.md. No architectural changes. |
@@ -92,7 +92,7 @@ Unrecognized agent types pass through with no restriction.
 Fires when `ExitPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context before the plan is finalized.
 
 **Behavior**:
-- Passes with `additionalContext` containing FCA-AI plan compliance reminders (CLAUDE.md limits, organ boundaries, 3+12 test rule)
+- Passes with `additionalContext` containing FCA-AI plan compliance reminders (INTENT.md limits, organ boundaries, 3+12 test rule)
 - Never blocks plan mode exit (always `continue: true`)
 
 ---
@@ -106,16 +106,16 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
 
 **Session gate**: Uses a session marker file in the cache directory (`~/.filid/cache/`) to ensure injection happens only once per session. Subsequent prompts in the same session return immediately.
 
-**Project detection**: Fires only when the working directory contains `.filid/` or `CLAUDE.md`. Returns `continue: true` silently for non-FCA-AI projects.
+**Project detection**: Fires only when the working directory contains `.filid/` or `INTENT.md`. Returns `continue: true` silently for non-FCA-AI projects.
 
 **Cache**: Content hash-based invalidation. If the generated context matches the cached version, the cached copy is returned immediately (no regeneration cost).
 
 **Injected content**:
 1. Active FCA-AI project path
 2. Core FCA-AI rules summary:
-   - CLAUDE.md max 50 lines with 3-tier boundary sections
-   - SPEC.md no append-only growth
-   - Organ directories must not have CLAUDE.md
+   - INTENT.md max 50 lines with 3-tier boundary sections
+   - DETAIL.md no append-only growth
+   - Organ directories must not have INTENT.md
    - Test files max 15 cases per spec (3 basic + 12 complex)
    - LCOM4 >= 2 triggers module split; CC > 15 triggers compress/abstract
 3. All 7 built-in fractal structure rules (from `rule-engine.ts`)

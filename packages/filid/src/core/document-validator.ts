@@ -1,11 +1,11 @@
 import type {
-  ClaudeMdValidation,
+  IntentMdValidation,
   DocumentViolation,
-  SpecMdValidation,
+  DetailMdValidation,
 } from '../types/documents.js';
 
-/** Maximum line count for CLAUDE.md */
-const CLAUDE_MD_LINE_LIMIT = 50;
+/** Maximum line count for INTENT.md */
+const INTENT_MD_LINE_LIMIT = 50;
 
 /** 3-tier boundary keywords */
 const BOUNDARY_KEYWORDS = {
@@ -26,19 +26,19 @@ export function countLines(content: string): number {
 }
 
 /**
- * Validate a CLAUDE.md document.
+ * Validate an INTENT.md document.
  * - 50-line limit
  * - 3-tier boundary presence (Always do / Ask first / Never do)
  */
-export function validateClaudeMd(content: string): ClaudeMdValidation {
+export function validateIntentMd(content: string): IntentMdValidation {
   const violations: DocumentViolation[] = [];
 
   // Check 50-line limit
   const lines = countLines(content);
-  if (lines > CLAUDE_MD_LINE_LIMIT) {
+  if (lines > INTENT_MD_LINE_LIMIT) {
     violations.push({
       rule: 'line-limit',
-      message: `CLAUDE.md exceeds ${CLAUDE_MD_LINE_LIMIT}-line limit (${lines} lines). Compress, deduplicate, or move detailed content to SPEC.md.`,
+      message: `INTENT.md exceeds ${INTENT_MD_LINE_LIMIT}-line limit (${lines} lines). Compress, deduplicate, or move detailed content to DETAIL.md.`,
       severity: 'error',
     });
   }
@@ -55,7 +55,7 @@ export function validateClaudeMd(content: string): ClaudeMdValidation {
     if (!hasNeverDo) missing.push('Never do');
     violations.push({
       rule: 'missing-boundaries',
-      message: `CLAUDE.md is missing 3-tier boundary sections: ${missing.join(', ')}`,
+      message: `INTENT.md is missing 3-tier boundary sections: ${missing.join(', ')}`,
       severity: 'warning',
     });
   }
@@ -65,6 +65,9 @@ export function validateClaudeMd(content: string): ClaudeMdValidation {
     violations,
   };
 }
+
+/** @deprecated Use validateIntentMd instead. Will be removed in v0.2.0 */
+export const validateClaudeMd = validateIntentMd;
 
 /**
  * Detect pure append-only changes.
@@ -92,13 +95,13 @@ export function detectAppendOnly(
 }
 
 /**
- * Validate a SPEC.md document.
+ * Validate a DETAIL.md document.
  * - Append-only pattern prohibited (when oldContent provided)
  */
-export function validateSpecMd(
+export function validateDetailMd(
   content: string,
   oldContent?: string,
-): SpecMdValidation {
+): DetailMdValidation {
   const violations: DocumentViolation[] = [];
 
   // Detect append-only (when previous content is provided)
@@ -106,7 +109,7 @@ export function validateSpecMd(
     violations.push({
       rule: 'append-only',
       message:
-        'SPEC.md must not be append-only. Restructure and compress content instead of simply appending.',
+        'DETAIL.md must not be append-only. Restructure and compress content instead of simply appending.',
       severity: 'error',
     });
   }
@@ -116,3 +119,6 @@ export function validateSpecMd(
     violations,
   };
 }
+
+/** @deprecated Use validateDetailMd instead. Will be removed in v0.2.0 */
+export const validateSpecMd = validateDetailMd;
