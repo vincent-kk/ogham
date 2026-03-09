@@ -57,11 +57,9 @@ function classifyPathCategory(filePath: string, cwd: string): string {
         (e) =>
           e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
       );
-      const hasClaudeMd = hasIntentMd;
       const hasDetailMd = entries.some(
         (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
       );
-      const hasSpecMd = hasDetailMd;
       const subdirs = entries.filter((e) => e.isDirectory());
       const isLeafDirectory = subdirs.length === 0;
       const hasFractalChildren = subdirs.some((d) => {
@@ -84,9 +82,7 @@ function classifyPathCategory(filePath: string, cwd: string): string {
       });
       const category = classifyNode({
         dirName: segment,
-        hasClaudeMd,
         hasIntentMd,
-        hasSpecMd,
         hasDetailMd,
         hasFractalChildren,
         isLeafDirectory,

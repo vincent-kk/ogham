@@ -12,10 +12,6 @@ export type * from './types/index.js';
 export {
   validateIntentMd,
   validateDetailMd,
-  /** @deprecated Use validateIntentMd instead. Will be removed in v0.2.0 */
-  validateClaudeMd,
-  /** @deprecated Use validateDetailMd instead. Will be removed in v0.2.0 */
-  validateSpecMd,
 } from './core/document-validator.js';
 export {
   classifyNode,

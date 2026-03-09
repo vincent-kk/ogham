@@ -32,11 +32,9 @@ function isOrganByStructure(dirPath: string): boolean {
     const hasIntentMd = entries.some(
       (e) => e.isFile() && (e.name === 'INTENT.md' || e.name === 'CLAUDE.md'),
     );
-    const hasClaudeMd = hasIntentMd;
     const hasDetailMd = entries.some(
       (e) => e.isFile() && (e.name === 'DETAIL.md' || e.name === 'SPEC.md'),
     );
-    const hasSpecMd = hasDetailMd;
     const subDirs = entries.filter((e) => e.isDirectory());
     const hasFractalChildren = subDirs.some((d) => {
       const childPath = path.join(dirPath, d.name);
@@ -57,9 +55,7 @@ function isOrganByStructure(dirPath: string): boolean {
     const isLeafDirectory = subDirs.length === 0;
     const category = classifyNode({
       dirName: path.basename(dirPath),
-      hasClaudeMd,
       hasIntentMd,
-      hasSpecMd,
       hasDetailMd,
       hasFractalChildren,
       isLeafDirectory,

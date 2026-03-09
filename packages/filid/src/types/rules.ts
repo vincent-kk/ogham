@@ -66,8 +66,6 @@ export interface RuleEvaluationResult {
 export const BUILTIN_RULE_IDS = {
   NAMING_CONVENTION: 'naming-convention',
   ORGAN_NO_CLAUDEMD: 'organ-no-claudemd',
-  /** @deprecated Use ORGAN_NO_CLAUDEMD (rule ID string unchanged for compatibility) */
-  ORGAN_NO_INTENTMD: 'organ-no-claudemd',
   INDEX_BARREL_PATTERN: 'index-barrel-pattern',
   MODULE_ENTRY_POINT: 'module-entry-point',
   MAX_DEPTH: 'max-depth',

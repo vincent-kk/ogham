@@ -28,9 +28,6 @@ export function isIntentMd(filePath: string): boolean {
   );
 }
 
-/** @deprecated Use isIntentMd instead. Will be removed in v0.2.0 */
-export const isClaudeMd = isIntentMd;
-
 /**
  * Check if a file path targets DETAIL.md (or legacy SPEC.md).
  */
@@ -43,5 +40,3 @@ export function isDetailMd(filePath: string): boolean {
   );
 }
 
-/** @deprecated Use isDetailMd instead. Will be removed in v0.2.0 */
-export const isSpecMd = isDetailMd;

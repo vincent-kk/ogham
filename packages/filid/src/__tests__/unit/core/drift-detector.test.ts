@@ -24,8 +24,6 @@ const entry = (
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd: hasIntentMd,
-  hasSpecMd: hasDetailMd,
   hasIntentMd,
   hasDetailMd,
 });

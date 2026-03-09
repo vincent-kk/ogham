@@ -16,8 +16,6 @@ function makeNode(
     parent: null,
     children: [],
     organs: [],
-    hasClaudeMd: false,
-    hasSpecMd: false,
     hasIntentMd: false,
     hasDetailMd: false,
     hasIndex: false,

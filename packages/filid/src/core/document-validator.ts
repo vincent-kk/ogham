@@ -66,9 +66,6 @@ export function validateIntentMd(content: string): IntentMdValidation {
   };
 }
 
-/** @deprecated Use validateIntentMd instead. Will be removed in v0.2.0 */
-export const validateClaudeMd = validateIntentMd;
-
 /**
  * Detect pure append-only changes.
  * Returns true if all old lines remain at the start of new content
@@ -120,5 +117,3 @@ export function validateDetailMd(
   };
 }
 
-/** @deprecated Use validateDetailMd instead. Will be removed in v0.2.0 */
-export const validateSpecMd = validateDetailMd;

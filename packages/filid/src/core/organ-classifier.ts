@@ -33,16 +33,6 @@ export const KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
 export interface ClassifyInput {
   /** Directory name */
   dirName: string;
-  /**
-   * Whether CLAUDE.md exists.
-   * @deprecated Use hasIntentMd instead. Will be removed in v0.2.0
-   */
-  hasClaudeMd?: boolean;
-  /**
-   * Whether SPEC.md exists.
-   * @deprecated Use hasDetailMd instead. Will be removed in v0.2.0
-   */
-  hasSpecMd?: boolean;
   /** Whether INTENT.md (or legacy CLAUDE.md) exists */
   hasIntentMd?: boolean;
   /** Whether DETAIL.md (or legacy SPEC.md) exists */
@@ -84,9 +74,8 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * Ambiguous cases should be delegated to LLM via context-injector by the caller.
  */
 export function classifyNode(input: ClassifyInput): CategoryType {
-  // Support both new and deprecated field names
-  const hasIntent = (input.hasIntentMd ?? false) || (input.hasClaudeMd ?? false);
-  const hasDetail = (input.hasDetailMd ?? false) || (input.hasSpecMd ?? false);
+  const hasIntent = input.hasIntentMd ?? false;
+  const hasDetail = input.hasDetailMd ?? false;
 
   if (hasIntent) return 'fractal';
   if (hasDetail) return 'fractal';

@@ -30,9 +30,6 @@ export interface IntentMdSchema {
   lineCount: number;
 }
 
-/** @deprecated Use IntentMdSchema instead. Will be removed in v0.2.0 */
-export type ClaudeMdSchema = IntentMdSchema;
-
 /** DETAIL.md document structure */
 export interface DetailMdSchema {
   /** Module specification title */
@@ -46,9 +43,6 @@ export interface DetailMdSchema {
   /** Compression metadata */
   compressionMeta?: CompressionMeta;
 }
-
-/** @deprecated Use DetailMdSchema instead. Will be removed in v0.2.0 */
-export type SpecMdSchema = DetailMdSchema;
 
 /** Compression metadata */
 export interface CompressionMeta {
@@ -72,9 +66,6 @@ export interface IntentMdValidation {
   violations: DocumentViolation[];
 }
 
-/** @deprecated Use IntentMdValidation instead. Will be removed in v0.2.0 */
-export type ClaudeMdValidation = IntentMdValidation;
-
 /** DETAIL.md validation result */
 export interface DetailMdValidation {
   /** Whether valid */
@@ -82,9 +73,6 @@ export interface DetailMdValidation {
   /** List of violations */
   violations: DocumentViolation[];
 }
-
-/** @deprecated Use DetailMdValidation instead. Will be removed in v0.2.0 */
-export type SpecMdValidation = DetailMdValidation;
 
 /** Document rule violation */
 export interface DocumentViolation {

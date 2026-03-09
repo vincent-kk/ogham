@@ -25,8 +25,6 @@ const entry = (
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd: hasIntentMd,
-  hasSpecMd: hasDetailMd,
   hasIntentMd,
   hasDetailMd,
 });
@@ -378,7 +376,7 @@ describe('fractal-tree', () => {
         const root = tree.nodes.get(tmpDir);
 
         expect(root).toBeDefined();
-        expect(root!.hasIntentMd ?? root!.hasClaudeMd).toBe(true);
+        expect(root!.hasIntentMd).toBe(true);
         expect(root!.type).toBe('fractal');
       } finally {
         teardown();

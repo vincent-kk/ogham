@@ -19,8 +19,6 @@ function makeNode(overrides: Partial<FractalNode> = {}): FractalNode {
     parent: '/root',
     children: [],
     organs: [],
-    hasClaudeMd: false,
-    hasSpecMd: false,
     hasIntentMd: false,
     hasDetailMd: false,
     hasIndex: true,
@@ -129,7 +127,7 @@ describe('rule-engine', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'organ', hasIntentMd: true, hasClaudeMd: true });
+      const node = makeNode({ type: 'organ', hasIntentMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       const violations = rule.check(ctx);
@@ -141,7 +139,7 @@ describe('rule-engine', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'organ', hasIntentMd: false, hasClaudeMd: false });
+      const node = makeNode({ type: 'organ', hasIntentMd: false });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);
@@ -151,7 +149,7 @@ describe('rule-engine', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
       )!;
-      const node = makeNode({ type: 'fractal', hasIntentMd: true, hasClaudeMd: true });
+      const node = makeNode({ type: 'fractal', hasIntentMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);

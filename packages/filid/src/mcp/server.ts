@@ -117,12 +117,8 @@ export function createServer(): McpServer {
                 'hybrid',
                 'directory',
               ]),
-              /** @deprecated Use hasIntentMd */
-              hasClaudeMd: z.boolean(),
-              hasIntentMd: z.boolean().optional(),
-              /** @deprecated Use hasDetailMd */
-              hasSpecMd: z.boolean(),
-              hasDetailMd: z.boolean().optional(),
+              hasIntentMd: z.boolean(),
+              hasDetailMd: z.boolean(),
               hasIndex: z.boolean().optional(),
               hasMain: z.boolean().optional(),
             }),

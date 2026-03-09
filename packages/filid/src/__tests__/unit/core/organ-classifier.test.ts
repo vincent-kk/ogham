@@ -121,31 +121,6 @@ describe('organ-classifier', () => {
 
     it.each([
       [
-        'hasClaudeMd=true → fractal (deprecated field compat)',
-        {
-          dirName: 'auth',
-          hasClaudeMd: true,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-        },
-        'fractal',
-      ],
-      [
-        'hasSpecMd=true → fractal (deprecated field compat)',
-        {
-          dirName: 'auth',
-          hasSpecMd: true,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-        },
-        'fractal',
-      ],
-    ])('deprecated field compat: %s', (_desc, input, expected) => {
-      expect(classifyNode(input)).toBe(expected);
-    });
-
-    it.each([
-      [
         'known-organ name components → organ',
         {
           dirName: 'components',

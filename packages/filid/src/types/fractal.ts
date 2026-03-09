@@ -31,20 +31,10 @@ export interface FractalNode {
   children: string[];
   /** Organ directory paths */
   organs: string[];
-  /**
-   * Whether CLAUDE.md exists.
-   * @deprecated Use hasIntentMd instead. Will be removed in v0.2.0
-   */
-  hasClaudeMd: boolean;
-  /**
-   * Whether SPEC.md exists.
-   * @deprecated Use hasDetailMd instead. Will be removed in v0.2.0
-   */
-  hasSpecMd: boolean;
   /** Whether INTENT.md (or legacy CLAUDE.md) exists */
-  hasIntentMd?: boolean;
+  hasIntentMd: boolean;
   /** Whether DETAIL.md (or legacy SPEC.md) exists */
-  hasDetailMd?: boolean;
+  hasDetailMd: boolean;
   /** Whether index.ts or index.js exists in this directory */
   hasIndex: boolean;
   /** Whether main.ts or main.js exists in this directory */

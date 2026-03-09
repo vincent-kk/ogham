@@ -65,7 +65,7 @@ export function loadBuiltinRules(): Rule[] {
       enabled: true,
       check(context: RuleContext): RuleViolation[] {
         const { node } = context;
-        if (node.type === 'organ' && (node.hasIntentMd ?? node.hasClaudeMd)) {
+        if (node.type === 'organ' && node.hasIntentMd) {
           return [
             {
               ruleId: BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
