@@ -171,6 +171,17 @@ describe('handlePreToolUse', () => {
     expect(result.hookSpecificOutput?.additionalContext).toContain('25 new lines');
   });
 
+  it('mergeResults: mixed block + context → continue=false with blocker output', () => {
+    const results: HookOutput[] = [
+      { continue: false, hookSpecificOutput: { additionalContext: 'BLOCKED: organ violation' } },
+      { continue: true, hookSpecificOutput: { additionalContext: 'intent context here' } },
+    ];
+    const out = mergeResults(results);
+    expect(out.continue).toBe(false);
+    // Blocker output takes precedence over passing context
+    expect(out.hookSpecificOutput?.additionalContext).toBe('BLOCKED: organ violation');
+  });
+
   it('Write DETAIL.md reads existing file content and passes to validator', async () => {
     const detailPath = join(tmpDir, 'DETAIL.md');
     // Existing content: 2 lines
@@ -188,5 +199,69 @@ describe('handlePreToolUse', () => {
     const result = await handlePreToolUse(input);
     // Append-only detection should block
     expect(result.continue).toBe(false);
+  });
+
+  it('Write INTENT.md in organ dir → structure-guard blocks + intent context collected', async () => {
+    // 'utils' is a known organ directory
+    const organDir = join(tmpDir, 'src', 'utils');
+    mkdirSync(organDir, { recursive: true });
+    const filePath = join(organDir, 'INTENT.md');
+
+    const input = makeInput({
+      tool_name: 'Write',
+      tool_input: { file_path: filePath, content: '# Utils intent\n' },
+    });
+
+    const result = await handlePreToolUse(input);
+    // Structure guard blocks organ INTENT.md creation
+    expect(result.continue).toBe(false);
+    expect(result.hookSpecificOutput?.additionalContext).toContain('organ');
+  });
+
+  it('Read on non-FCA project → clean continue:true, no hookSpecificOutput', async () => {
+    // Create a non-FCA temp dir (no package.json, no INTENT.md)
+    const nonFcaDir = join(tmpdir(), `filid-nonfca-${Date.now()}`);
+    mkdirSync(nonFcaDir, { recursive: true });
+    writeFileSync(join(nonFcaDir, 'index.ts'), '');
+
+    try {
+      const input: PreToolUseInput = {
+        cwd: nonFcaDir,
+        session_id: 'test-nonfca',
+        hook_event_name: 'PreToolUse',
+        tool_name: 'Read',
+        tool_input: { file_path: join(nonFcaDir, 'index.ts') },
+      };
+
+      const result = await handlePreToolUse(input);
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput).toBeUndefined();
+    } finally {
+      rmSync(nonFcaDir, { recursive: true, force: true });
+    }
+  });
+
+  it('Write .ts with ancestor import in FCA project → all 3 hooks produce context', async () => {
+    // Set up: file with ancestor import triggers structure-guard warning,
+    // FCA project with INTENT.md triggers intent injection,
+    // Write tool triggers validator
+    mkdirSync(join(tmpDir, 'src', 'deep'), { recursive: true });
+    const filePath = join(tmpDir, 'src', 'deep', 'child.ts');
+
+    const input = makeInput({
+      tool_name: 'Write',
+      tool_input: {
+        file_path: filePath,
+        content: 'import { foo } from "../../";\nexport const bar = foo;\n',
+      },
+    });
+
+    const result = await handlePreToolUse(input);
+    expect(result.continue).toBe(true);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    // Intent injection should produce [filid: block
+    expect(ctx).toContain('[filid:');
+    // Structure guard should warn about ancestor import
+    expect(ctx).toContain('import');
   });
 });

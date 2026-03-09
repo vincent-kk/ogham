@@ -44,7 +44,8 @@ export function readPromptContext(
   try {
     if (!existsSync(contextFile)) return null;
     return readFileSync(contextFile, 'utf-8');
-  } catch {
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] readPromptContext failed:', e);
     return null;
   }
 }
@@ -62,8 +63,8 @@ export function writePromptContext(
   try {
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(contextFile, context, 'utf-8');
-  } catch {
-    // silently ignore cache write failures
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] writePromptContext failed:', e);
   }
 }
 
@@ -74,7 +75,8 @@ export function hasPromptContext(sessionId: string, cwd: string): boolean {
   );
   try {
     return existsSync(contextFile);
-  } catch {
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] hasPromptContext failed:', e);
     return false;
   }
 }
@@ -90,7 +92,8 @@ export function isFirstInSession(sessionId: string, cwd: string): boolean {
   );
   try {
     return !existsSync(marker);
-  } catch {
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] isFirstInSession failed:', e);
     return true;
   }
 }
@@ -149,8 +152,8 @@ export function markSessionInjected(sessionId: string, cwd: string): void {
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(marker, '', 'utf-8');
     pruneOldSessions(cwd);
-  } catch {
-    // silently ignore marker write failures
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] markSessionInjected failed:', e);
   }
 }
 
@@ -164,8 +167,8 @@ export function saveRunHash(
   try {
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(hashFile, hash, 'utf-8');
-  } catch {
-    // silently ignore hash write failures
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] saveRunHash failed:', e);
   }
 }
 
@@ -174,7 +177,8 @@ export function getLastRunHash(cwd: string, skillName: string): string | null {
   const hashFile = join(cacheDir, `run-${skillName}.hash`);
   try {
     return readFileSync(hashFile, 'utf-8').trim();
-  } catch {
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] getLastRunHash failed:', e);
     return null;
   }
 }
@@ -190,7 +194,8 @@ export function readBoundary(cwd: string, sessionId: string, dir: string): strin
   try {
     const data = JSON.parse(readFileSync(filePath, 'utf-8'));
     return data[dir] ?? null;
-  } catch {
+  } catch (e) {
+    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] readBoundary failed:', e);
     return null;
   }
 }

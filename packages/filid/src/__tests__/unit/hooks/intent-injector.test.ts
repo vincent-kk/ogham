@@ -4,7 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { compressPaths, injectIntent } from '../../../hooks/intent-injector.js';
+import { writeBoundary, writeFractalMap } from '../../../core/cache-manager.js';
+import { injectIntent } from '../../../hooks/intent-injector.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
@@ -35,46 +36,6 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(tmpDir, { recursive: true, force: true });
-});
-
-// ---------------------------------------------------------------------------
-// compressPaths — pure function tests
-// ---------------------------------------------------------------------------
-
-describe('compressPaths', () => {
-  it('empty array → empty string', () => {
-    expect(compressPaths([])).toBe('');
-  });
-
-  it('single path → returns path unchanged', () => {
-    expect(compressPaths(['src/auth'])).toBe('src/auth');
-  });
-
-  it('two paths with common prefix → brace notation', () => {
-    const result = compressPaths(['src/payment/checkout', 'src/payment/refund']);
-    // Should contain the common prefix and both suffixes grouped
-    expect(result).toContain('payment');
-    expect(result).toContain('checkout');
-    expect(result).toContain('refund');
-    // Brace notation expected
-    expect(result).toMatch(/\{.*checkout.*refund.*\}|checkout.*refund/);
-  });
-
-  it('paths with no common prefix → comma-joined', () => {
-    const result = compressPaths(['src/auth', 'src/payment']);
-    expect(result).toContain('auth');
-    expect(result).toContain('payment');
-  });
-
-  it('currentDir marked with * suffix', () => {
-    const result = compressPaths(['src/auth', 'src/payment'], 'src/auth');
-    // compressPaths marks currentDir with /* suffix; brace notation groups under common prefix
-    expect(result).toContain('auth/*');
-  });
-
-  it('single path matching currentDir → adds * suffix', () => {
-    expect(compressPaths(['src/auth'], 'src/auth')).toBe('src/auth/*');
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -301,5 +262,70 @@ describe('injectIntent', () => {
     // Both dirs should appear in the compressed map
     expect(ctx).toContain('auth');
     expect(ctx).toContain('payment');
+  });
+
+  it('unread-intent: dir in reads but not intents → unread-intent line present', () => {
+    // Set up FCA project
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
+    mkdirSync(join(tmpDir, 'src', 'a'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'a', 'file.ts'), '');
+
+    const sessionId = `session-unread-${Date.now()}`;
+
+    // Pre-populate fmap: src/a in reads+intents, src/b in reads only (unread)
+    process.env.CLAUDE_CONFIG_DIR = tmpDir;
+    writeFractalMap(tmpDir, sessionId, {
+      reads: ['src/a', 'src/b'],
+      intents: ['src/a'],
+      details: [],
+    });
+    writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
+
+    // Visit src/a again → fast path (cached boundary + in intents)
+    const result = injectIntent(makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
+    }));
+    delete process.env.CLAUDE_CONFIG_DIR;
+
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('unread-intent:');
+    expect(ctx).toContain('src/b');
+  });
+
+  it('unread-intent: currentDir excluded from unread-intent list', () => {
+    // Set up FCA project
+    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
+    mkdirSync(join(tmpDir, 'src', 'a'), { recursive: true });
+    writeFileSync(join(tmpDir, 'src', 'a', 'file.ts'), '');
+
+    const sessionId = `session-cur-excl-${Date.now()}`;
+
+    // Pre-populate fmap: src/a (currentDir) + src/b + src/c in reads, only src/b in intents
+    process.env.CLAUDE_CONFIG_DIR = tmpDir;
+    writeFractalMap(tmpDir, sessionId, {
+      reads: ['src/a', 'src/b', 'src/c'],
+      intents: ['src/a'],
+      details: [],
+    });
+    writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
+
+    // Visit src/a → fast path, currentDir = src/a
+    const result = injectIntent(makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
+    }));
+    delete process.env.CLAUDE_CONFIG_DIR;
+
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    // src/b and src/c are unread, but src/a (currentDir) should be excluded
+    expect(ctx).toContain('unread-intent:');
+    expect(ctx).toContain('src/b');
+    expect(ctx).toContain('src/c');
+    expect(ctx).not.toMatch(/unread-intent:.*src\/a/);
   });
 });

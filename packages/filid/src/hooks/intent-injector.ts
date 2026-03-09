@@ -134,15 +134,26 @@ const GUIDE_BLOCK = [
   '  intent: INTENT.md path. --- ... --- is its inline content. Obey these rules.',
   '  chain: parent INTENT.md paths (nearest > root). Each is a readable file — read to learn parent rules.',
   '  detail: DETAIL.md path. Read BEFORE writing code in this module.',
-  '[filid:map] — visited directories this session. /* = current working directory.',
+  '[filid:map] — visited directories this session. /* = current working directory. unread-intent: directories with INTENT.md not yet surfaced — read their INTENT.md before modifying.',
 ].join('\n');
 
 /**
  * Build [filid:map] line from visited reads list.
  */
-function buildMapBlock(reads: string[], currentDir: string): string {
+function buildMapBlock(
+  reads: string[],
+  currentDir: string,
+  intents: string[],
+): string {
   const compressed = compressPaths(reads, currentDir);
-  return `[filid:map] ${compressed}`;
+  // Unread = in reads but NOT in intents, excluding currentDir (always has active context)
+  const unread = reads.filter(
+    (r) => r !== currentDir && intents.indexOf(r) === -1,
+  );
+  if (unread.length === 0) {
+    return `[filid:map] ${compressed}`;
+  }
+  return `[filid:map] ${compressed}\n  unread-intent: ${unread.join(', ')}`;
 }
 
 /**
@@ -174,16 +185,20 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
 
   // Skip full buildChain when boundary is cached and dir was already visited
   if (cachedBoundary !== null) {
-    const relDir = path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
+    const relDir =
+      path.relative(cachedBoundary, fileDir).replace(/\\/g, '/') || '.';
     if (fcaMap.intents.includes(relDir)) {
       // Already visited — only update reads + map block
       if (!fcaMap.reads.includes(relDir)) {
         fcaMap.reads.push(relDir);
       }
-      const mapBlock = buildMapBlock(fcaMap.reads, relDir);
+      const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
       writeFractalMap(input.cwd, sessionId, fcaMap);
       return mapBlock.trim()
-        ? { continue: true, hookSpecificOutput: { additionalContext: mapBlock } }
+        ? {
+            continue: true,
+            hookSpecificOutput: { additionalContext: mapBlock },
+          }
         : { continue: true };
     }
   }
@@ -269,13 +284,21 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
         blocks.push(GUIDE_BLOCK);
       }
       blocks.push(
-        buildCtxBlock(relFile, intentContent, chain, intents, details, boundary, ownerDir),
+        buildCtxBlock(
+          relFile,
+          intentContent,
+          chain,
+          intents,
+          details,
+          boundary,
+          ownerDir,
+        ),
       );
     }
   }
 
   // Always append map block
-  blocks.push(buildMapBlock(fcaMap.reads, relDir));
+  blocks.push(buildMapBlock(fcaMap.reads, relDir, fcaMap.intents));
 
   writeFractalMap(input.cwd, sessionId, fcaMap);
 
