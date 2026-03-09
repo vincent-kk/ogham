@@ -120,6 +120,19 @@ function buildCtxBlock(
 }
 
 /**
+ * One-time guide block injected on the very first [filid:ctx] of a session.
+ * Teaches the LLM what the injected tokens mean and how to act on them.
+ */
+const GUIDE_BLOCK = [
+  '[filid:guide]',
+  '[filid:ctx] — module boundary rules for the current directory.',
+  '  intent: INTENT.md path. --- ... --- is its inline content. Obey these rules.',
+  '  chain: parent INTENT.md paths (nearest > root). Each is a readable file — read to learn parent rules.',
+  '  detail: DETAIL.md path. Read BEFORE writing code in this module.',
+  '[filid:map] — visited directories this session. /* = current working directory.',
+].join('\n');
+
+/**
  * Build [filid:map] line from visited reads list.
  */
 function buildMapBlock(reads: string[], currentDir: string): string {
@@ -175,6 +188,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   }
 
   const isFirstVisit = !fmap.intents.includes(relDir);
+  const isFirstCtxEver = fmap.intents.length === 0;
 
   const blocks: string[] = [];
 
@@ -212,6 +226,10 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
 
     // Only build ctx block if there's actual intent content or chain context
     if (intentContent !== undefined || chain.slice(1).some((d) => intents.get(d))) {
+      // Inject guide once per session, before the very first ctx block
+      if (isFirstCtxEver) {
+        blocks.push(GUIDE_BLOCK);
+      }
       blocks.push(
         buildCtxBlock(relFile, relDir, intentContent, chain, intents, details, boundary),
       );
