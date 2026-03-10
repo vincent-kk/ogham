@@ -6,15 +6,18 @@
 
 ## Export 요약
 
-| 카테고리    | 함수/클래스 | 타입   | 합계   |
-| ----------- | ----------- | ------ | ------ |
-| Core        | 10          | 7      | 17     |
-| Metrics     | 4           | 7      | 11     |
-| Compression | 3           | 1      | 4      |
-| AST         | 5           | 8      | 13     |
-| Hooks       | 5           | 7      | 12     |
-| MCP         | 13          | 0      | 13     |
-| **합계**    | **40**      | **30** | **70** |
+| 카테고리       | 함수/클래스 | 타입   | 합계    |
+| -------------- | ----------- | ------ | ------- |
+| Core           | 30          | 9      | 39      |
+| Metrics        | 4           | 7      | 11      |
+| Compression    | 3           | 1      | 4       |
+| AST            | 12          | 8      | 20      |
+| Hooks          | 8           | 7      | 15      |
+| Cache Manager  | 13          | 1      | 14      |
+| MCP            | 16          | 0      | 16      |
+| **합계**       | **86**      | **33** | **119** |
+
+> `src/index.ts` 기준 실제 export 수. 함수/클래스와 타입 합산 94+ 심볼.
 
 ---
 
@@ -23,16 +26,16 @@
 ### document-validator
 
 ```typescript
-function validateClaudeMd(content: string): ClaudeMdValidation;
+function validateIntentMd(content: string): IntentMdValidation;
 ```
 
-CLAUDE.md 내용을 검증한다. 50줄 제한 + 3-tier 경계 섹션 검사.
+INTENT.md 내용을 검증한다. 50줄 제한 + 3-tier 경계 섹션 검사.
 
 ```typescript
-function validateSpecMd(content: string, oldContent?: string): SpecMdValidation;
+function validateDetailMd(content: string, oldContent?: string): DetailMdValidation;
 ```
 
-SPEC.md 내용을 검증한다. `oldContent` 제공 시 append-only 감지.
+DETAIL.md 내용을 검증한다. `oldContent` 제공 시 append-only 감지.
 
 ### organ-classifier
 
@@ -43,13 +46,13 @@ function classifyNode(input: ClassifyInput): NodeType;
 디렉토리를 fractal / organ / pure-function으로 분류한다.
 
 ```typescript
-function isOrganDirectory(dirName: string): boolean;
+function isInfraOrgDirectoryByPattern(dirName: string): boolean;
 ```
 
 디렉토리명이 Organ 패턴에 매칭되는지 검사한다.
 
 ```typescript
-const ORGAN_DIR_NAMES: readonly string[];
+const KNOWN_ORGAN_DIR_NAMES: readonly string[];
 ```
 
 9개 Organ 디렉토리명 상수 배열.
@@ -80,6 +83,38 @@ function getDescendants(tree: FractalTree, path: string): FractalNode[];
 
 주어진 경로의 모든 프랙탈/순수함수 자손을 반환한다 (organ 제외).
 
+```typescript
+function getFractalsUnderOrgans(tree: FractalTree): FractalNode[];
+```
+
+Organ 디렉토리 하위에 있는 프랙탈 노드를 반환한다 (구조 위반 감지용).
+
+```typescript
+async function scanProject(projectRoot: string, options?: ScanOptions): Promise<NodeEntry[]>;
+```
+
+프로젝트 루트를 재귀 탐색하여 `NodeEntry` 배열을 반환한다.
+
+```typescript
+function shouldExclude(name: string): boolean;
+```
+
+`node_modules`, `.git` 등 제외 대상 디렉토리명인지 검사한다.
+
+### boundary-detector
+
+```typescript
+function findBoundary(filePath: string, projectRoot?: string): string | null;
+```
+
+파일 경로에서 가장 가까운 상위 프랙탈 경계(INTENT.md 보유 디렉토리)를 탐색한다.
+
+```typescript
+function buildChain(filePath: string, projectRoot?: string): ChainResult;
+```
+
+파일 경로에서 루트까지의 프랙탈 경계 체인을 구축한다.
+
 ### dependency-graph
 
 ```typescript
@@ -105,6 +140,138 @@ function getDirectDependencies(dag: DependencyDAG, node: string): string[];
 ```
 
 노드의 직접 의존성 (나가는 엣지) 반환. 중복 제거.
+
+### drift-detector
+
+```typescript
+function detectDrift(projectRoot: string): Promise<DriftReport>;
+```
+
+프로젝트 내 코드-문서 드리프트(구조 불일치)를 감지한다.
+
+```typescript
+function compareCurrent(node: FractalNode, projectRoot: string): Promise<DriftItem[]>;
+```
+
+단일 노드의 현재 상태와 INTENT.md/DETAIL.md 선언을 비교한다.
+
+```typescript
+function calculateSeverity(drift: DriftItem): DriftSeverity;
+```
+
+드리프트 항목의 심각도(`critical` | `high` | `medium` | `low`)를 계산한다.
+
+```typescript
+function generateSyncPlan(drifts: DriftItem[]): SyncPlan;
+```
+
+드리프트 목록으로부터 동기화 계획을 생성한다.
+
+### project-analyzer
+
+```typescript
+function analyzeProject(projectRoot: string): Promise<ProjectReport>;
+```
+
+프로젝트 전체 구조를 분석하여 건강도 보고서를 생성한다.
+
+```typescript
+function calculateHealthScore(report: ProjectReport): number;
+```
+
+프로젝트 건강도 점수(0-100)를 계산한다.
+
+```typescript
+function generateReport(report: ProjectReport): string;
+```
+
+프로젝트 분석 보고서를 마크다운 문자열로 생성한다.
+
+### rule-engine
+
+```typescript
+function loadBuiltinRules(): Rule[];
+```
+
+빌트인 FCA-AI 규칙 목록을 로드한다.
+
+```typescript
+function evaluateRules(rules: Rule[], context: RuleContext): RuleViolation[];
+```
+
+규칙 목록을 컨텍스트에 대해 평가하고 위반 목록을 반환한다.
+
+```typescript
+function evaluateRule(rule: Rule, context: RuleContext): RuleViolation | null;
+```
+
+단일 규칙을 평가한다.
+
+```typescript
+function getActiveRules(rules: Rule[]): Rule[];
+```
+
+활성화된 규칙만 필터링하여 반환한다.
+
+### module-main-analyzer
+
+```typescript
+function analyzeModule(modulePath: string): Promise<ModuleInfo>;
+```
+
+모듈 디렉토리를 분석하여 진입점, import, 공개 API를 추출한다.
+
+```typescript
+function findEntryPoint(modulePath: string): Promise<string | null>;
+```
+
+모듈의 진입점 파일(`index.ts` 등)을 찾는다.
+
+```typescript
+function extractImports(filePath: string): ImportInfo[];
+```
+
+파일의 import 목록을 추출한다.
+
+```typescript
+function extractPublicApi(filePath: string): string[];
+```
+
+파일의 공개 export 심볼 목록을 추출한다.
+
+### index-analyzer
+
+```typescript
+function analyzeIndex(indexPath: string): Promise<IndexAnalysis>;
+```
+
+index 파일을 분석하여 re-export 구조를 파악한다.
+
+```typescript
+function extractModuleExports(indexPath: string): string[];
+```
+
+index 파일에서 모듈 export 목록을 추출한다.
+
+### lca-calculator
+
+```typescript
+function findLCA(tree: FractalTree, pathA: string, pathB: string): string | null;
+```
+
+두 모듈 경로의 최저 공통 조상(LCA) 프랙탈을 찾는다.
+
+```typescript
+function getModulePlacement(tree: FractalTree, modulePath: string): PlacementInfo;
+```
+
+모듈의 프랙탈 트리 내 위치 정보를 반환한다.
+
+```typescript
+function getAncestorPaths(path: string): string[];
+```
+
+경로의 모든 상위 경로를 루트까지 배열로 반환한다.
 
 ### change-queue
 
@@ -267,18 +434,46 @@ function computeTreeDiff(
 
 ## Hooks 모듈
 
+### pre-tool-use (통합 브릿지)
+
+```typescript
+function handlePreToolUse(input: PreToolUseInput): HookOutput;
+```
+
+`PreToolUse` 이벤트의 통합 핸들러. intent-injector + pre-tool-validator + structure-guard 로직을 순차 실행한다.
+
+```typescript
+function mergeResults(results: HookOutput[]): HookOutput;
+```
+
+여러 Hook 결과를 병합한다. 하나라도 차단이면 차단, additionalContext는 연결.
+
+### intent-injector
+
+```typescript
+function injectIntent(input: PreToolUseInput): HookOutput;
+```
+
+INTENT.md/DETAIL.md 파일 수정 전 관련 컨텍스트를 주입한다.
+
+```typescript
+function compressPaths(paths: string[]): string;
+```
+
+경로 목록을 공통 접두어 기반으로 압축하여 토큰 효율을 높인다.
+
 ### pre-tool-validator
 
 ```typescript
 function validatePreToolUse(
   input: PreToolUseInput,
-  oldSpecContent?: string,
+  oldDetailContent?: string,
 ): HookOutput;
 ```
 
-`PreToolUse` 이벤트 핸들러. Write 도구로 CLAUDE.md/SPEC.md 수정 시 검증.
-CLAUDE.md: 50줄 초과 → 차단, 3-tier 누락 → 경고.
-SPEC.md: append-only 감지 → 차단.
+`PreToolUse` 이벤트 핸들러. Write 도구로 INTENT.md/DETAIL.md 수정 시 검증.
+INTENT.md: 50줄 초과 → 차단, 3-tier 누락 → 경고.
+DETAIL.md: append-only 감지 → 차단.
 
 ### structure-guard
 
@@ -286,8 +481,8 @@ SPEC.md: append-only 감지 → 차단.
 function guardStructure(input: PreToolUseInput): HookOutput;
 ```
 
-Organ 디렉토리 내 CLAUDE.md 생성을 차단한다.
-경로의 모든 부모 세그먼트를 `ORGAN_DIR_NAMES`와 비교.
+Organ 디렉토리 내 INTENT.md 생성을 차단한다.
+경로의 모든 부모 세그먼트를 `KNOWN_ORGAN_DIR_NAMES`와 비교.
 
 > **Note**: 이전 명칭 `organ-guard` / `guardOrganWrite`에서 `structure-guard` / `guardStructure`로 리네임됨.
 
@@ -319,6 +514,120 @@ function injectContext(input: UserPromptSubmitInput): HookOutput;
 
 매 사용자 프롬프트에 FCA-AI 규칙 리마인더를 주입한다. 차단하지 않음.
 
+### setup
+
+```typescript
+function processSetup(input: HookBaseInput): HookOutput;
+```
+
+세션 시작 시 캐시 초기화 및 오래된 세션 파일 정리를 수행한다.
+
+---
+
+## Cache Manager 모듈
+
+```typescript
+function cwdHash(cwd: string): string;
+```
+
+작업 디렉토리 경로의 해시를 생성한다 (캐시 디렉토리 이름으로 사용).
+
+```typescript
+function getCacheDir(cwd: string): string;
+```
+
+주어진 작업 디렉토리에 대응하는 캐시 디렉토리 경로를 반환한다.
+
+```typescript
+function readPromptContext(cwd: string): PromptContext | null;
+```
+
+캐시에서 프롬프트 컨텍스트를 읽는다.
+
+```typescript
+function writePromptContext(cwd: string, context: PromptContext): void;
+```
+
+프롬프트 컨텍스트를 캐시에 저장한다.
+
+```typescript
+function hasPromptContext(cwd: string): boolean;
+```
+
+캐시에 프롬프트 컨텍스트가 존재하는지 확인한다.
+
+```typescript
+function sessionIdHash(sessionId: string): string;
+```
+
+세션 ID의 해시를 생성한다.
+
+```typescript
+function isFirstInSession(cwd: string, sessionId: string): boolean;
+```
+
+현재 세션에서 첫 번째 주입 여부를 확인한다.
+
+```typescript
+function pruneOldSessions(cwd: string, maxAgeDays?: number): void;
+```
+
+오래된 세션 캐시 파일을 정리한다.
+
+```typescript
+function removeSessionFiles(cwd: string, sessionId: string): void;
+```
+
+특정 세션의 캐시 파일을 삭제한다.
+
+```typescript
+function markSessionInjected(cwd: string, sessionId: string): void;
+```
+
+세션에 이미 컨텍스트가 주입되었음을 표시한다.
+
+```typescript
+function saveRunHash(cwd: string, hash: string): void;
+```
+
+현재 실행 해시를 캐시에 저장한다.
+
+```typescript
+function getLastRunHash(cwd: string): string | null;
+```
+
+마지막 실행 해시를 캐시에서 읽는다.
+
+```typescript
+function readBoundary(cwd: string): BoundaryInfo | null;
+```
+
+캐시에서 경계 정보를 읽는다.
+
+```typescript
+function writeBoundary(cwd: string, boundary: BoundaryInfo): void;
+```
+
+경계 정보를 캐시에 저장한다.
+
+```typescript
+function readFractalMap(cwd: string): FractalMap | null;
+```
+
+캐시에서 프랙탈 맵을 읽는다.
+
+```typescript
+function writeFractalMap(cwd: string, map: FractalMap): void;
+```
+
+프랙탈 맵을 캐시에 저장한다.
+
+```typescript
+function computeProjectHash(projectRoot: string): Promise<string>;
+```
+
+프로젝트 구조의 해시를 계산한다 (캐시 무효화 기준).
+
 ---
 
 ## MCP 도구
@@ -329,7 +638,7 @@ function injectContext(input: UserPromptSubmitInput): HookOutput;
 function createServer(): Server;
 ```
 
-FCA-AI MCP 서버를 생성하고 11개 도구를 등록한다.
+FCA-AI MCP 서버를 생성하고 14개 도구를 등록한다.
 
 ```typescript
 async function startServer(): Promise<void>;
@@ -357,7 +666,68 @@ function handleReviewManage(
   input: ReviewManageInput,
 ): Promise<ReviewManageOutput>;
 function handleDebtManage(input: DebtManageInput): Promise<DebtManageOutput>;
+function handleAstGrepSearch(input: AstGrepSearchInput): Promise<AstGrepSearchOutput>;
+function handleAstGrepReplace(input: AstGrepReplaceInput): Promise<AstGrepReplaceOutput>;
+function handleCacheManage(input: CacheManageInput): Promise<CacheManageOutput>;
 ```
+
+### review-format 유틸리티
+
+```typescript
+function formatPrComment(report: ReviewReport): string;
+```
+
+리뷰 보고서를 PR 코멘트 형식의 마크다운으로 포맷한다.
+
+```typescript
+function formatRevalidateComment(report: ReviewReport): string;
+```
+
+재검증 요청 코멘트를 마크다운으로 포맷한다.
+
+### ast-grep-shared 유틸리티
+
+```typescript
+function getSgModule(): SgModule | null;
+```
+
+`@ast-grep/napi` 모듈을 반환한다. 로드 실패 시 `null`.
+
+```typescript
+function getSgLoadError(): Error | null;
+```
+
+`@ast-grep/napi` 로드 에러를 반환한다. 성공 시 `null`.
+
+```typescript
+function getFilesForLanguage(dir: string, lang: string): Promise<string[]>;
+```
+
+디렉토리에서 특정 언어에 해당하는 파일 목록을 반환한다.
+
+```typescript
+function formatMatch(match: SgMatch): FormattedMatch;
+```
+
+ast-grep 매칭 결과를 가독성 좋은 형식으로 변환한다.
+
+```typescript
+function toLangEnum(ext: string): string | null;
+```
+
+파일 확장자를 ast-grep 언어 열거형으로 변환한다.
+
+```typescript
+const AST_GREP_LANGUAGES: readonly string[];
+```
+
+지원되는 ast-grep 언어 목록 상수.
+
+```typescript
+const EXT_TO_LANG: Record<string, string>;
+```
+
+파일 확장자 → ast-grep 언어 매핑 상수.
 
 ---
 
@@ -388,7 +758,7 @@ function handleDebtManage(input: DebtManageInput): Promise<DebtManageOutput>;
   "properties": {
     "action": "enum: classify | sibling-list | tree",
     "path": "string — 대상 경로",
-    "entries": "array — { name, path, type, hasClaudeMd, hasSpecMd }[]"
+    "entries": "array — { name, path, type, hasIntentMd, hasDetailMd }[]"
   }
 }
 ```
@@ -531,6 +901,53 @@ function handleDebtManage(input: DebtManageInput): Promise<DebtManageOutput>;
 }
 ```
 
+### ast_grep_search
+
+```json
+{
+  "name": "ast_grep_search",
+  "required": ["pattern", "path"],
+  "properties": {
+    "pattern": "string — ast-grep 패턴 (예: `console.log($ARG)`)",
+    "path": "string — 검색할 디렉토리 또는 파일 경로 (절대 경로)",
+    "language": "string — 언어 지정 (생략 시 확장자 자동 감지)",
+    "ruleYaml": "string — YAML 형식의 ast-grep 규칙 (pattern 대신 사용 가능)"
+  }
+}
+```
+
+### ast_grep_replace
+
+```json
+{
+  "name": "ast_grep_replace",
+  "required": ["pattern", "rewrite", "path"],
+  "properties": {
+    "pattern": "string — 매칭할 ast-grep 패턴",
+    "rewrite": "string — 교체 템플릿 (메타변수 사용 가능)",
+    "path": "string — 대상 디렉토리 또는 파일 경로 (절대 경로)",
+    "language": "string — 언어 지정 (생략 시 확장자 자동 감지)",
+    "dryRun": "boolean — true 시 파일 변경 없이 결과만 반환 (기본: false)"
+  }
+}
+```
+
+### cache_manage
+
+```json
+{
+  "name": "cache_manage",
+  "required": ["action", "projectRoot"],
+  "properties": {
+    "action": "enum: read | write | clear | prune | status",
+    "projectRoot": "string — 프로젝트 루트 디렉토리 (절대 경로)",
+    "key": "string — 캐시 키 (action=read/write용)",
+    "value": "unknown — 저장할 값 (action=write용)",
+    "maxAgeDays": "number — 정리 기준 일수 (action=prune용, 기본: 7)"
+  }
+}
+```
+
 ---
 
 ## 타입 정의
@@ -547,14 +964,22 @@ interface FractalNode {
   parent: string | null;
   children: string[];
   organs: string[];
-  hasClaudeMd: boolean;
-  hasSpecMd: boolean;
+  hasIntentMd: boolean;
+  hasDetailMd: boolean;
 }
 
 interface FractalTree {
   root: string;
   nodes: Map<string, FractalNode>;
 }
+type FractalMap = Map<string, FractalNode>;
+
+interface ChainResult {
+  chain: string[];
+  root: string | null;
+  boundary: string | null;
+}
+
 interface DependencyEdge {
   from: string;
   to: string;
@@ -575,7 +1000,7 @@ interface ThreeTierBoundary {
   askFirst: string[];
   neverDo: string[];
 }
-interface ClaudeMdSchema {
+interface IntentMdSchema {
   name: string;
   purpose: string;
   commands: Record<string, string>;
@@ -584,7 +1009,7 @@ interface ClaudeMdSchema {
   dependencies: string[];
   lineCount: number;
 }
-interface SpecMdSchema {
+interface DetailMdSchema {
   title: string;
   requirements: string[];
   apiContracts: string[];
@@ -598,11 +1023,11 @@ interface CompressionMeta {
   timestamp: string;
   recoverable: boolean;
 }
-interface ClaudeMdValidation {
+interface IntentMdValidation {
   valid: boolean;
   violations: DocumentViolation[];
 }
-interface SpecMdValidation {
+interface DetailMdValidation {
   valid: boolean;
   violations: DocumentViolation[];
 }

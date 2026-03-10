@@ -9,12 +9,12 @@
 ```
 src/
 ├── types/      7 파일   38 타입/인터페이스   ← 모든 모듈의 기반 (+review.ts, debt.ts)
-├── core/       5 모듈   10 함수 + 1 클래스    순수 비즈니스 로직
+├── core/       7 모듈   10 함수 + 1 클래스    순수 비즈니스 로직
 ├── ast/        5 모듈   7 함수               TypeScript AST 분석
 ├── metrics/    4 모듈   4 함수               소프트웨어 메트릭
 ├── compress/   2 모듈   3 함수               컨텍스트 압축
-├── hooks/      5 모듈   5 함수 + 5 엔트리     Claude Code Hook 연동
-└── mcp/tools/  6 모듈                        MCP tool 핸들러 (+review_manage, debt_manage)
+├── hooks/      8 모듈   8 함수 + 7 엔트리     Claude Code Hook 연동 (entries/ 하위 디렉토리)
+└── mcp/tools/  15 모듈                       MCP tool 핸들러 (+ast-grep-search, ast-grep-replace, cache-manage)
 ```
 
 ---
@@ -33,15 +33,15 @@ src/
 
 ### documents.ts (7 타입)
 
-| 타입                 | 용도                                         |
-| -------------------- | -------------------------------------------- |
-| `ThreeTierBoundary`  | alwaysDo / askFirst / neverDo 문자열 배열    |
-| `ClaudeMdSchema`     | CLAUDE.md 파싱 결과 구조                     |
-| `SpecMdSchema`       | SPEC.md 파싱 결과 구조                       |
-| `CompressionMeta`    | 압축 메타데이터 (method, lines, recoverable) |
-| `ClaudeMdValidation` | 검증 결과 (valid + violations)               |
-| `SpecMdValidation`   | 검증 결과 (valid + violations)               |
-| `DocumentViolation`  | 위반 상세 (rule, message, severity)          |
+| 타입                  | 용도                                         |
+| --------------------- | -------------------------------------------- |
+| `ThreeTierBoundary`   | alwaysDo / askFirst / neverDo 문자열 배열    |
+| `IntentMdSchema`      | INTENT.md 파싱 결과 구조                     |
+| `DetailMdSchema`      | DETAIL.md 파싱 결과 구조                     |
+| `CompressionMeta`     | 압축 메타데이터 (method, lines, recoverable) |
+| `IntentMdValidation`  | 검증 결과 (valid + violations)               |
+| `DetailMdValidation`  | 검증 결과 (valid + violations)               |
+| `DocumentViolation`   | 위반 상세 (rule, message, severity)          |
 
 ### metrics.ts (7 타입)
 
@@ -110,7 +110,7 @@ getDescendants(FractalTree, string) → FractalNode[] (BFS, organ 제외)
 
 **핵심 알고리즘**: 우선순위 기반 4단계 분류
 
-1. CLAUDE.md 존재 → fractal
+1. INTENT.md 존재 → fractal
 2. ORGAN_DIR_NAMES 매칭 → organ
 3. 사이드이펙트 없음 → pure-function
 4. 기본값 → fractal
@@ -126,20 +126,20 @@ isOrganDirectory(string) → boolean
 
 ### document-validator.ts
 
-**목적**: CLAUDE.md 및 SPEC.md 문서 규칙 검증
+**목적**: INTENT.md 및 DETAIL.md 문서 규칙 검증
 
 **핵심 알고리즘**:
 
 - `countLines`: 빈 문자열 = 0, 후행 `\n` 무시, `split('\n').length`
-- `validateClaudeMd`: 50줄 체크 + 3-tier regex 매칭
+- `validateIntentMd`: 50줄 체크 + 3-tier regex 매칭
 - `detectAppendOnly`: 기존 줄 1:1 비교 + 새 줄 추가만 존재 판별
-- `validateSpecMd`: append-only 감지
+- `validateDetailMd`: append-only 감지
 
 **입출력**:
 
 ```
-validateClaudeMd(string) → ClaudeMdValidation
-validateSpecMd(string, string?) → SpecMdValidation
+validateIntentMd(string) → IntentMdValidation
+validateDetailMd(string, string?) → DetailMdValidation
 countLines(string) → number
 detectAppendOnly(string, string) → boolean
 ```
@@ -166,6 +166,62 @@ getDirectDependencies(DependencyDAG, string) → string[]
 ```
 
 **의존**: `types/fractal` (DependencyEdge, DependencyDAG)
+
+### boundary-detector.ts
+
+**목적**: 파일 경로에서 패키지 경계(boundary) 탐색 및 INTENT.md/DETAIL.md 체인 구축
+
+**핵심 알고리즘**:
+
+- `findBoundary`: 파일 경로에서 위로 순회하며 `package.json` 존재 디렉토리 탐색
+- `buildChain`: boundary까지 각 디렉토리의 INTENT.md/DETAIL.md 존재 여부를 Map으로 수집
+
+**입출력**:
+
+```
+findBoundary(filePath: string) → string | null
+buildChain(filePath: string) → ChainResult | null
+```
+
+```typescript
+interface ChainResult {
+  boundary: string;         // package.json 포함 디렉토리
+  chain: string[];          // leaf → root 디렉토리 목록
+  intents: Map<string, boolean>;  // INTENT.md 존재 여부
+  details: Map<string, boolean>;  // DETAIL.md 존재 여부
+}
+```
+
+**의존**: 없음 (Node.js `fs`, `path` 내장)
+
+### cache-manager.ts
+
+**목적**: 세션별 컨텍스트 캐시 관리 (`~/.claude/plugins/filid/{cwdHash}/`)
+
+**핵심 알고리즘**: SHA-256 기반 cwd 해시로 프로젝트별 격리. 세션 ID 해시로 세션별 파일 분리. TTL 24h 초과 파일 자동 정리.
+
+**캐시 파일 종류**:
+
+| 파일 패턴 | 용도 |
+| --------- | ---- |
+| `session-context-{hash}` | 세션 시작 마커 |
+| `prompt-context-{hash}` | FCA 규칙 텍스트 캐시 |
+| `boundary-{hash}` | 디렉토리 → boundary 경로 매핑 (JSON) |
+| `fmap-{hash}.json` | FractalMap (reads/intents/details) |
+| `guide-{hash}` | `[filid:guide]` 주입 완료 마커 |
+| `run-{skillName}.hash` | 스킬 증분 실행용 해시 |
+
+**주요 함수**:
+
+```
+getCacheDir(cwd) → string
+readBoundary/writeBoundary(cwd, sessionId, dir, ...) → string|null/void
+readFractalMap/writeFractalMap/removeFractalMap(cwd, sessionId, ...) → FractalMap/void
+hasGuideInjected/markGuideInjected(sessionId, cwd) → boolean/void
+pruneOldSessions(cwd) → void
+```
+
+**의존**: Node.js `fs`, `crypto`, `os`
 
 ### change-queue.ts
 
@@ -412,17 +468,20 @@ summarizeLossy(ToolCallEntry[]) → LossySummaryResult
 
 ## 6. hooks/ — Claude Code Hook 연동
 
-### 로직 모듈 (5개)
+### 로직 모듈 (8개)
 
-| 모듈                 | Hook 이벤트      | 동작                                            |
-| -------------------- | ---------------- | ----------------------------------------------- |
-| `pre-tool-validator` | PreToolUse       | CLAUDE.md/SPEC.md Write 검증                    |
-| `structure-guard`    | PreToolUse       | Organ 디렉토리 CLAUDE.md 차단                   |
-| `change-tracker`     | _(disabled)_     | ChangeQueue에 변경 기록 (hooks.json에서 제거됨) |
-| `agent-enforcer`     | SubagentStart    | 에이전트 역할 제한 주입                         |
-| `context-injector`   | UserPromptSubmit | FCA-AI 규칙 리마인더 주입                       |
+| 모듈                 | Hook 이벤트      | 동작                                              |
+| -------------------- | ---------------- | ------------------------------------------------- |
+| `pre-tool-validator` | PreToolUse       | INTENT.md/DETAIL.md Write 검증                    |
+| `structure-guard`    | PreToolUse       | Organ 디렉토리 INTENT.md 차단                     |
+| `intent-injector`    | PreToolUse       | 파일 접근 시 INTENT.md 컨텍스트 + 프랙탈맵 주입  |
+| `change-tracker`     | _(disabled)_     | ChangeQueue에 변경 기록 (hooks.json에서 제거됨)   |
+| `agent-enforcer`     | SubagentStart    | 에이전트 역할 제한 주입                           |
+| `context-injector`   | UserPromptSubmit | 세션 첫 프롬프트에 FCA-AI 규칙 리마인더 주입      |
+| `setup`              | SessionStart     | 캐시 디렉토리 초기화 + 만료 세션 파일 정리        |
+| `shared`             | _(유틸)_         | `isFcaProject`, `isIntentMd`, `isDetailMd` 공용 헬퍼 |
 
-### 엔트리 스크립트 (5개: `hooks/entries/*.entry.ts`)
+### 엔트리 스크립트 (7개: `hooks/entries/*.entry.ts`)
 
 각 엔트리는 동일한 패턴:
 
@@ -437,6 +496,8 @@ process.stdout.write(JSON.stringify(result));
 ```
 
 stdin에서 JSON 읽기 → 핸들러 호출 → stdout에 JSON 쓰기.
+
+빌드 결과물은 ESM `.mjs` 파일로 생성 (`scripts/build-hooks.mjs` 사용). 후크 실행기는 `find-node.sh` 대신 `libs/run.cjs`를 통해 Node.js를 직접 호출한다.
 
 ---
 
@@ -501,7 +562,7 @@ skills/code-review/
     └── design-hci.md
 ```
 
-**MCP tool 의존**: `review_manage` (5 actions), `debt_manage` (1 action: calculate-bias), 기존 9개 MCP tool
+**MCP tool 의존**: `review_manage` (5 actions), `debt_manage` (1 action: calculate-bias), 기존 12개 MCP tool
 
 ### skills/resolve-review/
 

@@ -10,11 +10,14 @@
 
 | Hook 스크립트            | 이벤트           | timeout | 번들 크기 | 예상 실행 시간 |
 | ------------------------ | ---------------- | ------- | --------- | -------------- |
+| `pre-tool-use.mjs`       | PreToolUse       | 3초     | ~6KB      | <60ms          |
 | `pre-tool-validator.mjs` | PreToolUse       | 3초     | 4.1KB     | <50ms          |
 | `structure-guard.mjs`    | PreToolUse       | 3초     | 1.5KB     | <30ms          |
+| `intent-injector.mjs`    | PreToolUse       | 3초     | ~3KB      | <40ms          |
 | `change-tracker.mjs`     | _(disabled)_     | —       | 633B      | —              |
 | `agent-enforcer.mjs`     | SubagentStart    | 3초     | 1.3KB     | <30ms          |
 | `context-injector.mjs`   | UserPromptSubmit | 5초     | 988B      | <20ms          |
+| `setup.mjs`              | SessionStart     | 5초     | ~2KB      | <30ms          |
 
 > 예상 실행 시간은 Node.js 프로세스 시작 + stdin 읽기 + 로직 실행 + stdout 쓰기 합산.
 > 모든 Hook 스크립트는 esbuild self-contained 번들이므로 모듈 해석 오버헤드 없음.
@@ -24,10 +27,13 @@
 | Hook               | 트리거 조건           | 예상 호출 빈도               |
 | ------------------ | --------------------- | ---------------------------- |
 | context-injector   | 매 사용자 프롬프트    | **높음** — 모든 상호작용마다 |
+| pre-tool-use       | Write\|Edit 도구 호출 | **중간** — 파일 수정 시      |
 | pre-tool-validator | Write\|Edit 도구 호출 | **중간** — 파일 수정 시      |
 | structure-guard    | Write\|Edit 도구 호출 | **중간** — 파일 수정 시      |
+| intent-injector    | Write\|Edit 도구 호출 | **중간** — 파일 수정 시      |
 | change-tracker     | _(disabled)_          | —                            |
 | agent-enforcer     | 서브에이전트 생성     | **낮음** — 에이전트 생성 시  |
+| setup              | 세션 시작             | **매우 낮음** — 세션 1회     |
 
 ### stdin/stdout JSON 직렬화 비용
 
@@ -38,24 +44,25 @@
 
 ### PreToolUse 이중 Hook 비용
 
-Write|Edit 시 `pre-tool-validator` + `structure-guard` 두 Hook이 순차 실행:
+Write|Edit 시 `pre-tool-use` (intent-injector + pre-tool-validator + structure-guard 통합) Hook이 순차 실행:
 
 ```
 Write 도구 호출
     │
-    ├─ pre-tool-validator.mjs (Node 시작 → 실행 → 종료): ~50ms
-    │
-    ├─ structure-guard.mjs (Node 시작 → 실행 → 종료): ~30ms
+    ├─ pre-tool-use.mjs (intent-injector 로직): ~40ms
+    │     └─ pre-tool-validator 로직: ~50ms
+    │     └─ structure-guard 로직: ~30ms
     │
     ▼
-합계: ~80ms (Write 1회당 추가 지연)
+합계: ~120ms (Write 1회당 추가 지연)
 ```
 
-CLAUDE.md/SPEC.md가 아닌 일반 파일 Write 시:
+INTENT.md/DETAIL.md가 아닌 일반 파일 Write 시:
 
-- `pre-tool-validator`: 즉시 `{ continue: true }` 반환 (~20ms)
-- `structure-guard`: CLAUDE.md가 아니므로 즉시 통과 (~15ms)
-- 합계: ~35ms (최소 지연)
+- `pre-tool-use` (intent-injector): INTENT.md가 아니므로 즉시 통과 (~20ms)
+- `pre-tool-use` (pre-tool-validator): 즉시 `{ continue: true }` 반환 (~20ms)
+- `pre-tool-use` (structure-guard): INTENT.md가 아니므로 즉시 통과 (~15ms)
+- 합계: ~55ms (최소 지연)
 
 ---
 
@@ -63,13 +70,13 @@ CLAUDE.md/SPEC.md가 아닌 일반 파일 Write 시:
 
 ### 서버 기동 시간
 
-| 항목           | 설명                                     |
-| -------------- | ---------------------------------------- |
-| 번들 형식      | CJS (CommonJS)                           |
-| 번들 크기      | ~516KB (`bridge/mcp-server.cjs`)         |
-| 외부 의존성    | `typescript` (external, ~50MB 설치 크기) |
-| 기동 방식      | `node bridge/mcp-server.cjs` → stdio transport |
-| 예상 기동 시간 | ~200-500ms (TypeScript 모듈 로딩 포함)   |
+| 항목           | 설명                                                        |
+| -------------- | ----------------------------------------------------------- |
+| 번들 형식      | CJS (CommonJS), minified                                    |
+| 번들 크기      | ~726KB (`bridge/mcp-server.cjs`)                            |
+| 외부 의존성    | `typescript`, `@ast-grep/napi` (external, 별도 설치)        |
+| 기동 방식      | `node bridge/mcp-server.cjs` → stdio transport              |
+| 예상 기동 시간 | ~200-500ms (TypeScript + @ast-grep/napi 모듈 로딩 포함)     |
 
 > MCP 서버는 세션당 1회 기동 후 상주. 기동 비용은 초기 1회만 발생.
 
@@ -114,9 +121,9 @@ CLAUDE.md/SPEC.md가 아닌 일반 파일 Write 시:
 ```
 [FCA-AI] Active in: /Users/user/project
 Rules:
-- CLAUDE.md: max 50 lines, must include 3-tier boundary sections
-- SPEC.md: no append-only growth, must restructure on updates
-- Organ directories (components, utils, types, hooks, helpers, lib, styles, assets, constants) must NOT have CLAUDE.md
+- INTENT.md: max 50 lines, must include 3-tier boundary sections
+- DETAIL.md: no append-only growth, must restructure on updates
+- Organ directories (components, utils, types, hooks, helpers, lib, styles, assets, constants) must NOT have INTENT.md
 - Test files: max 15 cases per spec.ts (3 basic + 12 complex)
 - LCOM4 >= 2 → split module, CC > 15 → compress/abstract
 ```
@@ -140,12 +147,12 @@ Rules:
 
 ### pre-tool-validator 경고/차단 메시지
 
-| 시나리오             | 메시지 예시                                                  | 추정 토큰 |
-| -------------------- | ------------------------------------------------------------ | --------- |
-| CLAUDE.md 50줄 초과  | "BLOCKED: CLAUDE.md exceeds 50-line limit (142 lines)..."    | ~25 토큰  |
-| 3-tier 섹션 누락     | "CLAUDE.md is missing 3-tier boundary sections: Ask first"   | ~15 토큰  |
-| SPEC.md append-only  | "BLOCKED: SPEC.md must not be append-only..."                | ~20 토큰  |
-| Organ guard 차단     | "BLOCKED: Cannot create CLAUDE.md inside organ directory..." | ~25 토큰  |
+| 시나리오              | 메시지 예시                                                   | 추정 토큰 |
+| --------------------- | ------------------------------------------------------------- | --------- |
+| INTENT.md 50줄 초과   | "BLOCKED: INTENT.md exceeds 50-line limit (142 lines)..."     | ~25 토큰  |
+| 3-tier 섹션 누락      | "INTENT.md is missing 3-tier boundary sections: Ask first"    | ~15 토큰  |
+| DETAIL.md append-only | "BLOCKED: DETAIL.md must not be append-only..."               | ~20 토큰  |
+| Organ guard 차단      | "BLOCKED: Cannot create INTENT.md inside organ directory..."  | ~25 토큰  |
 
 > 차단/경고 시에만 발생. 정상 통과 시 추가 토큰 없음.
 
@@ -166,32 +173,35 @@ Rules:
 
 | 파일              | 크기  | 형식 | 포함 내용                                             |
 | ----------------- | ----- | ---- | ----------------------------------------------------- |
-| `bridge/mcp-server.cjs` | 516KB | CJS  | MCP SDK + core + ast + metrics + compress + mcp/tools |
+| `bridge/mcp-server.cjs` | ~726KB | CJS  | MCP SDK + core + ast + metrics + compress + mcp/tools |
 
-> `typescript`는 `external`로 제외 → 실행 시 `node_modules`에서 로드.
-> minify 미적용 (디버깅 가독성 우선).
+> `typescript`, `@ast-grep/napi`는 `external`로 제외 → 실행 시 `node_modules`에서 로드.
+> minify 적용 (크기 절감).
 > sourcemap 미생성 (크기 절감).
 
 ### Hook 스크립트 번들
 
-| 파일                             | 크기       | 형식 | 포함 내용                                 |
-| -------------------------------- | ---------- | ---- | ----------------------------------------- |
-| `scripts/pre-tool-validator.mjs` | 4.1KB      | ESM  | document-validator + hook 로직            |
-| `scripts/structure-guard.mjs`    | 1.5KB      | ESM  | organ-classifier + hook 로직              |
-| `scripts/agent-enforcer.mjs`     | 1.3KB      | ESM  | ROLE_RESTRICTIONS + hook 로직             |
-| `scripts/context-injector.mjs`   | 988B       | ESM  | 규칙 문자열 + hook 로직                   |
-| `scripts/change-tracker.mjs`     | 633B       | ESM  | ChangeQueue 타입 + hook 로직 _(disabled)_ |
-| **Hook 합계**                    | **~8.5KB** |      |                                           |
+| 파일                             | 크기        | 형식 | 포함 내용                                      |
+| -------------------------------- | ----------- | ---- | ---------------------------------------------- |
+| `scripts/pre-tool-use.mjs`       | ~12KB       | ESM  | intent-injector + pre-tool-validator + structure-guard 통합 |
+| `scripts/pre-tool-validator.mjs` | 4.1KB       | ESM  | document-validator + hook 로직                 |
+| `scripts/structure-guard.mjs`    | 1.5KB       | ESM  | organ-classifier + hook 로직                   |
+| `scripts/intent-injector.mjs`    | ~3KB        | ESM  | INTENT.md/DETAIL.md 주입 로직                  |
+| `scripts/agent-enforcer.mjs`     | 1.3KB       | ESM  | ROLE_RESTRICTIONS + hook 로직                  |
+| `scripts/context-injector.mjs`   | 988B        | ESM  | 규칙 문자열 + hook 로직                        |
+| `scripts/change-tracker.mjs`     | 633B        | ESM  | ChangeQueue 타입 + hook 로직 _(disabled)_      |
+| `scripts/setup.mjs`              | ~2KB        | ESM  | 세션 초기화 + 캐시 유지 관리 로직              |
+| **Hook 합계**                    | **~29KB**   |      |                                                |
 
 ### 전체 번들 합계
 
-| 카테고리            | 크기       |
-| ------------------- | ---------- |
-| MCP 서버            | 516KB      |
-| Hook 스크립트 (5개) | 8.5KB      |
-| **총 번들**         | **~525KB** |
+| 카테고리            | 크기        |
+| ------------------- | ----------- |
+| MCP 서버            | ~726KB      |
+| Hook 스크립트 (6개) | ~29KB       |
+| **총 번들**         | **~755KB**  |
 
-> `typescript` 패키지 (~50MB)는 별도. `npm install` 시 설치.
+> `typescript`, `@ast-grep/napi` 패키지는 별도. `npm install` 시 설치.
 
 ---
 
@@ -207,7 +217,7 @@ Rules:
 
 PR 생성 시 (1회)
 ├── /sync: ChangeQueue drain → 배치 문서 갱신
-├── 에이전트: CLAUDE.md/SPEC.md 갱신
+├── 에이전트: INTENT.md/DETAIL.md 갱신
 └── 비용: MCP 호출 + 문서 재작성 (1회성)
 ```
 
@@ -260,14 +270,14 @@ MCP 도구는 에이전트가 명시적으로 호출할 때만 실행:
 
 ## 성능 영향 요약
 
-| 시나리오          | 추가 지연         | 추가 토큰 | 영향도             |
-| ----------------- | ----------------- | --------- | ------------------ |
-| 일반 프롬프트     | ~20ms (injector)  | ~110 토큰 | 무시 가능          |
-| 일반 파일 Write   | ~35ms (2 hooks)   | 0 토큰    | 무시 가능          |
-| CLAUDE.md Write   | ~80ms (검증 포함) | 0-25 토큰 | 낮음               |
-| 서브에이전트 생성 | ~30ms (enforcer)  | ~35 토큰  | 무시 가능          |
-| /review 실행      | ~1-5초 (AST 분석) | ~500 토큰 | 중간 (1회성)       |
-| /sync 실행        | ~0.5-2초          | ~200 토큰 | 중간 (PR 시점 1회) |
+| 시나리오          | 추가 지연          | 추가 토큰 | 영향도             |
+| ----------------- | ------------------ | --------- | ------------------ |
+| 일반 프롬프트     | ~20ms (injector)   | ~110 토큰 | 무시 가능          |
+| 일반 파일 Write   | ~55ms (pre-tool-use) | 0 토큰  | 무시 가능          |
+| INTENT.md Write   | ~120ms (검증 포함) | 0-25 토큰 | 낮음               |
+| 서브에이전트 생성 | ~30ms (enforcer)   | ~35 토큰  | 무시 가능          |
+| /review 실행      | ~1-5초 (AST 분석)  | ~500 토큰 | 중간 (1회성)       |
+| /sync 실행        | ~0.5-2초           | ~200 토큰 | 중간 (PR 시점 1회) |
 
 ---
 

@@ -121,18 +121,40 @@ yarn test:run   # 1회 실행
 ```json
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/intent-injector.mjs\"",
+            "timeout": 3
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-validator.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-validator.mjs\"",
             "timeout": 3
           },
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/structure-guard.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/structure-guard.mjs\"",
             "timeout": 3
           }
         ]
@@ -142,7 +164,7 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"",
             "timeout": 3
           }
         ]
@@ -155,7 +177,7 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
             "timeout": 3
           }
         ]
@@ -167,7 +189,7 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"",
             "timeout": 5
           }
         ]
@@ -179,7 +201,7 @@ yarn test:run   # 1회 실행
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
             "timeout": 3
           }
         ]
@@ -189,23 +211,25 @@ yarn test:run   # 1회 실행
 }
 ```
 
-| Hook 이벤트      | matcher             | 스크립트                            | timeout |
-| ---------------- | ------------------- | ----------------------------------- | ------- |
-| PreToolUse       | `Write\|Edit`       | pre-tool-validator, structure-guard | 3초     |
-| PreToolUse       | `ExitPlanMode`      | plan-gate                           | 3초     |
-| PostToolUse      | —                   | _(disabled)_                        | —       |
-| SubagentStart    | `*` (모든 에이전트) | agent-enforcer                      | 3초     |
-| UserPromptSubmit | `*` (모든 프롬프트) | context-injector                    | 5초     |
-| SessionEnd       | `*` (모든 세션)     | session-cleanup                     | 3초     |
+| Hook 이벤트      | matcher                   | 스크립트                            | timeout |
+| ---------------- | ------------------------- | ----------------------------------- | ------- |
+| SessionStart     | `*` (모든 세션)           | setup                               | 5초     |
+| PreToolUse       | `Read\|Write\|Edit`       | intent-injector                     | 3초     |
+| PreToolUse       | `Write\|Edit`             | pre-tool-validator, structure-guard | 3초     |
+| PreToolUse       | `ExitPlanMode`            | plan-gate                           | 3초     |
+| PostToolUse      | —                         | _(disabled)_                        | —       |
+| SubagentStart    | `*` (모든 에이전트)       | agent-enforcer                      | 3초     |
+| UserPromptSubmit | `*` (모든 프롬프트)       | context-injector                    | 5초     |
+| SessionEnd       | `*` (모든 세션)           | session-cleanup                     | 3초     |
 
 ---
 
 ## 스킬 사용법
 
-### /init — 프로젝트 초기화
+### /fca-init — 프로젝트 초기화
 
 ```
-/init [path]
+/fca-init [path]
 ```
 
 | 옵션   | 기본값 | 설명          |
@@ -215,16 +239,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/init
-/init ./packages/my-app
+/fca-init
+/fca-init ./packages/my-app
 ```
 
-**결과**: fractal 디렉토리에 CLAUDE.md 생성, organ 디렉토리 건너뜀.
+**결과**: fractal 디렉토리에 INTENT.md 생성, organ 디렉토리 건너뜀.
 
-### /scan — 규칙 위반 검출
+### /fca-scan — 규칙 위반 검출
 
 ```
-/scan [path] [--fix]
+/fca-scan [path] [--fix]
 ```
 
 | 옵션    | 기본값 | 설명                       |
@@ -235,17 +259,17 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/scan
-/scan --fix
-/scan ./src --fix
+/fca-scan
+/fca-scan --fix
+/fca-scan ./src --fix
 ```
 
 **결과**: 위반 목록 (severity, 위치, 해결 방법 포함).
 
-### /sync — 문서 동기화
+### /fca-sync — 문서 동기화
 
 ```
-/sync [--dry-run]
+/fca-sync [--dry-run]
 ```
 
 | 옵션        | 기본값 | 설명                    |
@@ -255,16 +279,54 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/sync
-/sync --dry-run
+/fca-sync
+/fca-sync --dry-run
 ```
 
-**결과**: 변경된 프랙탈의 CLAUDE.md/SPEC.md 갱신.
+**결과**: 변경된 프랙탈의 INTENT.md/DETAIL.md 갱신.
 
-### /review — PR 검증 파이프라인
+### /fca-update — 문서/구조 갱신
 
 ```
-/review [--stage=1-6] [--verbose]
+/fca-update [path]
+```
+
+| 옵션   | 기본값 | 설명          |
+| ------ | ------ | ------------- |
+| `path` | cwd    | 대상 디렉토리 |
+
+**예시**:
+
+```
+/fca-update
+/fca-update ./src/core
+```
+
+**결과**: 구조 변경 후 INTENT.md/DETAIL.md 및 관련 문서 갱신.
+
+### /fca-migrate — 구조 마이그레이션
+
+```
+/fca-migrate [path]
+```
+
+| 옵션   | 기본값 | 설명          |
+| ------ | ------ | ------------- |
+| `path` | cwd    | 대상 디렉토리 |
+
+**예시**:
+
+```
+/fca-migrate
+/fca-migrate ./packages/legacy
+```
+
+**결과**: 기존 CLAUDE.md/SPEC.md를 INTENT.md/DETAIL.md로 마이그레이션.
+
+### /fca-review — PR 검증 파이프라인
+
+```
+/fca-review [--stage=1-6] [--verbose]
 ```
 
 | 옵션        | 기본값 | 설명                   |
@@ -275,17 +337,17 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/review
-/review --stage=3
-/review --verbose
+/fca-review
+/fca-review --stage=3
+/fca-review --verbose
 ```
 
 **결과**: 6단계 검증 보고서 (PASS/FAIL + 이슈 목록).
 
-### /promote — 테스트 승격
+### /fca-promote — 테스트 승격
 
 ```
-/promote [path] [--days=90]
+/fca-promote [path] [--days=90]
 ```
 
 | 옵션     | 기본값 | 설명                |
@@ -296,55 +358,73 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/promote
-/promote --days=60
-/promote ./src/core
+/fca-promote
+/fca-promote --days=60
+/fca-promote ./src/core
 ```
 
 **결과**: 승격 후보 목록 + eligible 상태.
 
-### /query — 컨텍스트 질의
+### /fca-query — 컨텍스트 질의
 
 ```
-/query <question>
+/fca-query <question>
 ```
 
 **예시**:
 
 ```
-/query fractal-tree 모듈의 역할은?
-/query organ 디렉토리에서 허용되는 작업은?
+/fca-query fractal-tree 모듈의 역할은?
+/fca-query organ 디렉토리에서 허용되는 작업은?
 ```
 
 **결과**: 3-Prompt Limit 내에서 답변. 컨텍스트 초과 시 압축 적용.
 
-### /code-review — AI 거버넌스 코드 리뷰
+### /fca-pipeline — 거버넌스 파이프라인 오케스트레이션
 
 ```
-/code-review [--scope=branch|pr|commit] [--base=ref] [--force] [--verbose]
+/fca-pipeline [--scope=branch|pr|commit] [--base=ref] [--verbose]
 ```
 
 | 옵션        | 기본값   | 설명                         |
 | ----------- | -------- | ---------------------------- |
 | `--scope`   | `branch` | 리뷰 범위 (branch/pr/commit) |
 | `--base`    | `main`   | 비교 기준 ref                |
-| `--force`   | (없음)   | 기존 리뷰 삭제 후 재시작     |
 | `--verbose` | (없음)   | 상세 분석 포함               |
 
 **예시**:
 
 ```
-/code-review
-/code-review --scope=pr --verbose
-/code-review --force
+/fca-pipeline
+/fca-pipeline --scope=pr --verbose
 ```
 
-**결과**: `.filid/review/<branch>/`에 review-report.md, fix-requests.md 생성. `--scope=pr` 시 PR 코멘트 게시.
+**결과**: `/fca-review` → `/fca-resolve` → `/fca-revalidate` 전체 파이프라인 자동 실행.
 
-### /resolve-review — 수정 사항 해결
+### /fca-pull-request — PR 생성 자동화
 
 ```
-/resolve-review
+/fca-pull-request [--base=ref] [--draft]
+```
+
+| 옵션      | 기본값 | 설명              |
+| --------- | ------ | ----------------- |
+| `--base`  | `main` | 베이스 브랜치     |
+| `--draft` | (없음) | 드래프트 PR 생성  |
+
+**예시**:
+
+```
+/fca-pull-request
+/fca-pull-request --draft
+```
+
+**결과**: FCA-AI 검증 통과 후 PR 자동 생성.
+
+### /fca-resolve — 수정 사항 해결
+
+```
+/fca-resolve
 ```
 
 파라미터 없음. 현재 브랜치 자동 감지.
@@ -352,15 +432,15 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/resolve-review
+/fca-resolve
 ```
 
 **결과**: 각 fix 항목에 대해 수용/거부 선택 → 거부 시 소명 수집 → justifications.md + 부채 파일 생성.
 
-### /re-validate — Delta 재검증
+### /fca-revalidate — Delta 재검증
 
 ```
-/re-validate
+/fca-revalidate
 ```
 
 파라미터 없음. 현재 브랜치 자동 감지.
@@ -368,7 +448,7 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/re-validate
+/fca-revalidate
 ```
 
 **결과**: PASS/FAIL 판정 → re-validate.md 생성. `gh` 인증 시 PR 코멘트 게시.
@@ -384,8 +464,8 @@ yarn test:run   # 1회 실행
 │   ├── verification.md       # Phase B: 기술 검증 결과
 │   ├── review-report.md      # Phase C: 최종 리뷰 보고서
 │   ├── fix-requests.md       # Phase C: 수정 요청 사항
-│   ├── justifications.md     # /resolve-review: 수용/거부 결정
-│   └── re-validate.md        # /re-validate: PASS/FAIL 판정
+│   ├── justifications.md     # /fca-resolve: 수용/거부 결정
+│   └── re-validate.md        # /fca-revalidate: PASS/FAIL 판정
 └── debt/                  # 기술 부채 (전체 공유, 커밋 대상)
     └── <debt-id>.md          # 개별 부채 항목 (YAML frontmatter)
 ```
@@ -512,12 +592,15 @@ disallowedTools: # 선택적 — 도구 제한
 ---
 ```
 
-| 에이전트        | disallowedTools   | 주 용도                         |
-| --------------- | ----------------- | ------------------------------- |
-| architect       | Write, Edit, Bash | 설계, 분석, SPEC.md 초안 제안   |
-| qa-reviewer     | Write, Edit, Bash | 규칙 검증, 메트릭 분석, PR 리뷰 |
-| implementer     | (없음)            | SPEC.md 범위 내 코드 구현       |
-| context-manager | (없음)            | CLAUDE.md/SPEC.md 문서 관리     |
+| 에이전트        | disallowedTools   | 주 용도                           |
+| --------------- | ----------------- | --------------------------------- |
+| architect       | Write, Edit, Bash | 설계, 분석, DETAIL.md 초안 제안   |
+| qa-reviewer     | Write, Edit, Bash | 규칙 검증, 메트릭 분석, PR 리뷰   |
+| implementer     | (없음)            | DETAIL.md 범위 내 코드 구현       |
+| context-manager | (없음)            | INTENT.md/DETAIL.md 문서 관리     |
+| drift-analyzer  | Write, Edit, Bash | 구조 이탈 감지 및 분석            |
+| restructurer    | (없음)            | 승인된 구조 변경 실행             |
+| code-surgeon    | (없음)            | 정밀 코드 수술 및 리팩토링        |
 
 ---
 
@@ -535,13 +618,14 @@ disallowedTools: # 선택적 — 도구 제한
 
 ### Hook이 동작하지 않음
 
-**증상**: CLAUDE.md 50줄 초과해도 차단 안 됨.
+**증상**: INTENT.md 50줄 초과해도 차단 안 됨.
 
 **원인 및 해결**:
 
-1. `scripts/*.mjs` 미존재 → `node build-plugin.mjs` 실행
+1. `bridge/*.mjs` 미존재 → `node build-plugin.mjs` 실행
 2. `hooks.json` 경로 오류 → `${CLAUDE_PLUGIN_ROOT}` 변수 확인
 3. 플러그인 미등록 → `.claude-plugin/plugin.json` 확인
+4. `libs/run.cjs` 미존재 → `node build-plugin.mjs` 실행 (크로스 플랫폼 훅 런너)
 
 ### Hook이 timeout으로 실패
 

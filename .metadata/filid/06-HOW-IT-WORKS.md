@@ -9,34 +9,56 @@
 ### 전체 이벤트 흐름
 
 ```
+세션 시작
+        │
+        ▼
+┌─ SessionStart ──────────────────────────────────────┐
+│  setup.mjs (timeout: 5s)                             │
+│  → 캐시 디렉토리 초기화 (~/.claude/plugins/filid/)    │
+│  → 만료 세션 파일 정리 (TTL 24h)                      │
+│  → FCA 프로젝트 시 hookEventName: 'SessionStart' 주입 │
+│  → 항상 continue: true                                │
+└──────────────────────────────────────────────────────┘
+        │
+        ▼
 사용자 프롬프트 입력
         │
         ▼
 ┌─ UserPromptSubmit ──────────────────────────────────┐
 │  context-injector.mjs (timeout: 5s)                  │
-│  → FCA-AI 규칙 리마인더 ~200자 주입                    │
+│  → 세션 첫 프롬프트에만 FCA-AI 규칙 리마인더 주입      │
+│  → hookEventName: 'UserPromptSubmit' 포함             │
 │  → 항상 continue: true (차단 없음)                     │
 └──────────────────────────────────────────────────────┘
         │
-        ▼ (에이전트가 Write/Edit 도구 호출 시)
+        ▼ (에이전트가 Read/Write/Edit 도구 호출 시)
         │
-┌─ PreToolUse (matcher: Write|Edit) ──────────────────┐
-│  1. pre-tool-validator.mjs (timeout: 3s)             │
-│     ├─ CLAUDE.md Write → validateClaudeMd()          │
+┌─ PreToolUse (matcher: Read|Write|Edit) ─────────────┐
+│  1. intent-injector.mjs (timeout: 5s)                │
+│     ├─ FCA 프로젝트 확인 (isFcaProject)               │
+│     ├─ 첫 방문 디렉토리 → [filid:ctx] 블록 주입        │
+│     │   ├─ INTENT.md 내용 인라인 포함                  │
+│     │   ├─ 상위 체인 INTENT.md 경로 나열               │
+│     │   └─ DETAIL.md 존재 시 경로 힌트                 │
+│     ├─ 재방문 → [filid:map] 블록만 갱신                │
+│     └─ hookEventName: 'PreToolUse' 포함               │
+│                                                       │
+│  2. pre-tool-validator.mjs (timeout: 3s)             │
+│     ├─ INTENT.md Write → validateIntentMd()          │
 │     │   ├─ 50줄 초과 → continue: false (BLOCKED)     │
 │     │   └─ 3-tier 누락 → continue: true + 경고       │
-│     ├─ SPEC.md Write → validateSpecMd()              │
+│     ├─ DETAIL.md Write → validateDetailMd()          │
 │     │   └─ append-only → continue: false (BLOCKED)   │
 │     └─ 기타 → continue: true (통과)                   │
 │                                                       │
-│  2. structure-guard.mjs (timeout: 3s)                 │
-│     ├─ Write + CLAUDE.md + Organ 경로                 │
+│  3. structure-guard.mjs (timeout: 3s)                 │
+│     ├─ Write + INTENT.md + Organ 경로                 │
 │     │   └─ continue: false (BLOCKED)                  │
 │     └─ 기타 → continue: true (통과)                   │
 └──────────────────────────────────────────────────────┘
         │ (통과 시)
         ▼
-┌─ Tool 실행 (파일 Write/Edit) ───────────────────────┐
+┌─ Tool 실행 (파일 Read/Write/Edit) ──────────────────┐
 └──────────────────────────────────────────────────────┘
         │
         ▼
@@ -52,6 +74,7 @@
 │  → agent_type 확인                                    │
 │  → ROLE_RESTRICTIONS[type] 존재 시                    │
 │     additionalContext에 역할 제한 메시지 주입           │
+│  → hookEventName: 'SubagentStart' 포함                │
 │  → 항상 continue: true (차단 없음, 지시만 주입)        │
 └──────────────────────────────────────────────────────┘
 ```
@@ -67,7 +90,7 @@
   "hook_event_name": "PreToolUse",
   "tool_name": "Write",
   "tool_input": {
-    "file_path": "/path/to/CLAUDE.md",
+    "file_path": "/path/to/INTENT.md",
     "content": "..."
   }
 }
@@ -87,7 +110,8 @@
 {
   "continue": true,
   "hookSpecificOutput": {
-    "additionalContext": "CLAUDE.md is missing 3-tier boundary sections: Ask first"
+    "hookEventName": "PreToolUse",
+    "additionalContext": "INTENT.md is missing 3-tier boundary sections: Ask first"
   }
 }
 ```
@@ -98,14 +122,17 @@
 {
   "continue": false,
   "hookSpecificOutput": {
-    "additionalContext": "BLOCKED: CLAUDE.md exceeds 50-line limit (142 lines). Compress or deduplicate content."
+    "hookEventName": "PreToolUse",
+    "additionalContext": "BLOCKED: INTENT.md exceeds 50-line limit (142 lines). Compress or deduplicate content."
   }
 }
 ```
 
+`hookSpecificOutput`에는 항상 `hookEventName` 필드가 포함되어야 한다. 이 필드 없이 `additionalContext`만 반환하면 Claude Code가 컨텍스트를 무시할 수 있다.
+
 ### Hook 엔트리 실행 패턴
 
-모든 엔트리 스크립트(`scripts/*.mjs`)는 동일한 패턴:
+모든 엔트리 스크립트(`hooks/entries/*.mjs`)는 동일한 패턴:
 
 ```
 Node.js 프로세스 시작
@@ -126,8 +153,10 @@ JSON.stringify → stdout 출력
 프로세스 종료
 ```
 
-esbuild 번들이므로 외부 의존성 없이 단일 파일로 실행됨.
-단, `typescript` 패키지는 MCP 서버에서만 사용되며 Hook 스크립트에는 포함되지 않음.
+esbuild 번들(`scripts/build-hooks.mjs`)이므로 외부 의존성 없이 단일 파일로 실행됨.
+빌드 결과는 ESM `.mjs` 파일로 생성되며, 실행기는 `libs/run.cjs`(구 `find-node.sh` 대체)를 사용한다.
+MCP 서버는 별도로 `scripts/build-mcp-server.mjs`로 빌드되며 `mcp-server.cjs` (~726KB 최소화) 단일 파일로 배포된다.
+`typescript` 패키지는 MCP 서버에서만 사용되며 Hook 스크립트에는 포함되지 않음.
 
 ---
 
@@ -330,7 +359,7 @@ newMap = Map<name, DeclSignature>
 | 액션           | 의미        | 코드 영향                                         | 테스트 영향                                |
 | -------------- | ----------- | ------------------------------------------------- | ------------------------------------------ |
 | `ok`           | 조치 불필요 | 없음                                              | 없음                                       |
-| `split`        | 모듈 분할   | 하위 프랙탈 디렉토리 생성, CLAUDE.md/SPEC.md 분리 | 각 하위 프랙탈에 spec.ts 분배              |
+| `split`        | 모듈 분할   | 하위 프랙탈 디렉토리 생성, INTENT.md/DETAIL.md 분리 | 각 하위 프랙탈에 spec.ts 분배            |
 | `compress`     | 코드 압축   | 메서드 추출, 전략 패턴, 조건 평탄화               | 기존 테스트 유지                           |
 | `parameterize` | 테스트 병합 | 없음                                              | 중복 테스트를 `test.each`/`it.each`로 병합 |
 
@@ -348,12 +377,23 @@ server.ts
     │ createServer()
     ▼
 Server (MCP SDK)
-    ├── ListToolsRequestSchema → TOOL_DEFINITIONS (4개 도구 스키마)
+    ├── ListToolsRequestSchema → TOOL_DEFINITIONS (15개 도구 스키마)
     └── CallToolRequestSchema → switch(name)
-            ├── 'ast_analyze' → handleAstAnalyze(args)
-            ├── 'fractal_navigate' → handleFractalNavigate(args)
-            ├── 'doc_compress' → handleDocCompress(args)
-            └── 'test_metrics' → handleTestMetrics(args)
+            ├── 'ast_analyze'        → handleAstAnalyze(args)
+            ├── 'ast_grep_search'    → handleAstGrepSearch(args)
+            ├── 'ast_grep_replace'   → handleAstGrepReplace(args)
+            ├── 'fractal_navigate'   → handleFractalNavigate(args)
+            ├── 'fractal_scan'       → handleFractalScan(args)
+            ├── 'structure_validate' → handleStructureValidate(args)
+            ├── 'drift_detect'       → handleDriftDetect(args)
+            ├── 'rule_query'         → handleRuleQuery(args)
+            ├── 'lca_resolve'        → handleLcaResolve(args)
+            ├── 'doc_compress'       → handleDocCompress(args)
+            ├── 'test_metrics'       → handleTestMetrics(args)
+            ├── 'cache_manage'       → handleCacheManage(args)
+            ├── 'review_manage'      → handleReviewManage(args)
+            ├── 'debt_manage'        → handleDebtManage(args)
+            └── 'review_format'      → handleReviewFormat(args)
 ```
 
 ### 도구별 내부 라우팅
