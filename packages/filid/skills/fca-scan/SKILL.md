@@ -113,7 +113,7 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 # Phases: 1 (Tree) → [2 + 3 + 4 in parallel] → 5 (Report)
 # Agents (--fix only): context-manager (INTENT.md remediation), code-surgeon (3+12 remediation)
 # Thresholds
-CLAUDE_MD_LINE_LIMIT = 50 lines
+INTENT_MD_LINE_LIMIT = 50 lines
 TEST_THRESHOLD       = 15 test cases per spec file
 ORGAN_DIR_NAMES      = components | utils | types | hooks | helpers
                        | lib | styles | assets | constants

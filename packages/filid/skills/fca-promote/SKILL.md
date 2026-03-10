@@ -43,7 +43,7 @@ See [reference.md Section 3](./reference.md#section-3--pattern-analysis).
 
 ### Phase 4 — Spec Generation (`implementer`)
 
-Delegate to `filid:implementer` agent. Build parameterized `spec.ts` enforcing
+Delegate to `implementer` agent. Build parameterized `spec.ts` enforcing
 the 3+12 rule (≤15 total cases).
 See [reference.md Section 4](./reference.md#section-4--spec-generation-312-rule).
 

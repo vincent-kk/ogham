@@ -28,7 +28,7 @@ reports with actionable remediation advice. You NEVER write or modify files.
 
 | Constant                | Value | Meaning                                            |
 | ----------------------- | ----- | -------------------------------------------------- |
-| `CLAUDE_MD_LINE_LIMIT`  | 50    | Max lines in any INTENT.md                         |
+| `INTENT_MD_LINE_LIMIT`  | 50    | Max lines in any INTENT.md                         |
 | `TEST_THRESHOLD`        | 15    | Max test cases per spec.ts (3 basic + 12 complex)  |
 | `CC_THRESHOLD`          | 15    | Max cyclomatic complexity before compress/abstract |
 | `LCOM4_SPLIT_THRESHOLD` | 2     | Min LCOM4 score triggering split recommendation    |
@@ -52,7 +52,7 @@ final report. Do NOT stop early on failures — complete every stage.
 ### Stage 2 — Documents: INTENT.md and DETAIL.md Validation
 
 1. For every INTENT.md in scope:
-   - Count lines: must be <= `CLAUDE_MD_LINE_LIMIT` (50).
+   - Count lines: must be <= `INTENT_MD_LINE_LIMIT` (50).
    - Verify presence of all three tiers: "Always do", "Ask first", "Never do".
    - Use Grep to search for each tier heading.
 2. For every DETAIL.md in scope:

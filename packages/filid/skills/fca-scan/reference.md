@@ -28,7 +28,7 @@ Read the INTENT.md content and count lines.
 
 | Condition        | Severity | Violation ID           |
 | ---------------- | -------- | ---------------------- |
-| `lineCount > 50` | high     | `CLAUDE_MD_LINE_LIMIT` |
+| `lineCount > 50` | high     | `INTENT_MD_LINE_LIMIT` |
 
 **Check 2b — 3-tier boundary sections**
 
@@ -90,7 +90,7 @@ CRITICAL (<n>)
     Organ directories must not contain INTENT.md.
     Remediation: delete the file or reclassify the directory.
 
-  [CLAUDE_MD_LINE_LIMIT] src/payments/INTENT.md — 117 lines (limit: 50)
+  [INTENT_MD_LINE_LIMIT] src/payments/INTENT.md — 117 lines (limit: 50)
     Remediation: compress or split the document.
 
 HIGH (<n>)
@@ -110,7 +110,7 @@ Run with --fix to apply automatic remediations.
 | ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
 | `ORGAN_CLAUDE_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `context-manager` |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
-| `CLAUDE_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
 Each fixable violation is delegated to the appropriate agent as a separate
@@ -132,7 +132,7 @@ Skipped : <n> (require manual remediation)
 
 | ID                             | Severity | Auto-fix | Agent             |
 | ------------------------------ | -------- | -------- | ----------------- |
-| `CLAUDE_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
 | `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `context-manager` |
 | `TEST_312_EXCEEDED`            | high     | Yes      | `code-surgeon`    |

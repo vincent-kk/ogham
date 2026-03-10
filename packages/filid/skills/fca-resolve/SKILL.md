@@ -76,7 +76,7 @@ For each fix item:
    as `resolve_commit_sha` in Step 6.
 
 Delegate all accepted fixes **in parallel** as separate Task subagents
-(`filid:code-surgeon`, model: `sonnet`, `run_in_background: true`).
+(`code-surgeon`, model: `sonnet`, `run_in_background: true`).
 
 For each accepted fix, spawn one subagent with:
 - The target file path

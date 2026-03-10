@@ -88,9 +88,9 @@ See [reference.md Section 4](./reference.md#section-4--pr-publication).
 
 ## Available MCP Tools
 
-None — this skill uses only Bash commands (git, gh) and the Skill tool.
-Stage 1 delegates to `/filid:fca-update`, which internally uses `cache_manage`,
-`fractal_scan`, `test_metrics`, etc.
+None — this skill uses no MCP tools directly. All operations use Bash (git, gh)
+and the Skill tool. Note: Stage 1 delegates to `/filid:fca-update`, which
+internally uses MCP tools (`cache_manage`, `fractal_scan`, `test_metrics`, etc.).
 
 ## Options
 

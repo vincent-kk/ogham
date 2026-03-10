@@ -112,7 +112,7 @@ Stages:   [Structure + Documents + Tests + Metrics + Dependencies] → Summary
           (Stages 1–5 run in parallel; Stage 6 aggregates)
 Agents:   qa-reviewer (lead), fractal-architect (assist — stages 1, 5)
 Thresholds:
-  CLAUDE_MD_LINE_LIMIT = 50
+  INTENT_MD_LINE_LIMIT = 50
   TEST_THRESHOLD       = 15  (max cases per spec.ts)
   CC_THRESHOLD         = 15  (max cyclomatic complexity)
   LCOM4_SPLIT          = 2   (split when LCOM4 >= 2)

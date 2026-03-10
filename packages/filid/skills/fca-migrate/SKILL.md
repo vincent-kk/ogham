@@ -77,13 +77,13 @@ See [reference.md Section 5](./reference.md#section-5--verification).
 
 ```
 /filid:fca-migrate [path] [--execute] [--auto-commit]
+# Without --execute: dry-run mode (default), no files modified
 ```
 
 | Option           | Type   | Default                   | Description                                          |
 | ---------------- | ------ | ------------------------- | ---------------------------------------------------- |
 | `path`           | string | Current working directory | Scope migration to a specific subdirectory           |
-| `--dry-run`      | flag   | **on**                    | Show planned changes without executing them          |
-| `--execute`      | flag   | off                       | Actually perform the renames and content updates     |
+| `--execute`      | flag   | off                       | Actually perform the renames and content updates (default: dry-run) |
 | `--auto-commit`  | flag   | off                       | Auto-commit migration changes after successful execution |
 
 ## Reversibility
