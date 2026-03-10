@@ -229,6 +229,8 @@ echo ""
 echo "## Phase 2 — Rename"
 
 _renamed_count=0
+_renamed_claude_dirs=""
+_renamed_spec_dirs=""
 
 if [ "$MODE" = "execute" ]; then
   # Rename CLAUDE.md → INTENT.md
@@ -245,6 +247,8 @@ if [ "$MODE" = "execute" ]; then
       else
         mv "$file" "$target"
       fi
+      _renamed_claude_dirs="${_renamed_claude_dirs}${dir}
+"
       _renamed_count=$((_renamed_count + 1))
     done
     IFS="$_ifs_save"
@@ -264,6 +268,8 @@ if [ "$MODE" = "execute" ]; then
       else
         mv "$file" "$target"
       fi
+      _renamed_spec_dirs="${_renamed_spec_dirs}${dir}
+"
       _renamed_count=$((_renamed_count + 1))
     done
     IFS="$_ifs_save"
@@ -271,61 +277,175 @@ if [ "$MODE" = "execute" ]; then
 
   echo "Renamed: $_renamed_count files"
 else
+  # Collect directories for dry-run Phase 3 scoping
+  if [ -n "$_tmp_rename_claude" ]; then
+    _ifs_save="$IFS"
+    IFS='
+'
+    for file in $_tmp_rename_claude; do
+      [ -z "$file" ] && continue
+      dir=$(dirname "$file")
+      _renamed_claude_dirs="${_renamed_claude_dirs}${dir}
+"
+    done
+    IFS="$_ifs_save"
+  fi
+  if [ -n "$_tmp_rename_spec" ]; then
+    _ifs_save="$IFS"
+    IFS='
+'
+    for file in $_tmp_rename_spec; do
+      [ -z "$file" ] && continue
+      dir=$(dirname "$file")
+      _renamed_spec_dirs="${_renamed_spec_dirs}${dir}
+"
+    done
+    IFS="$_ifs_save"
+  fi
   echo "(dry-run — skipped)"
 fi
 
 # ---------------------------------------------------------------------------
-# Phase 3 — Reference Update (--execute only)
+# Phase 3 — Scoped Reference Update
 # ---------------------------------------------------------------------------
 echo ""
-echo "## Phase 3 — Reference Update"
+echo "## Phase 3 — Reference Update (scoped)"
 
 _ref_files_updated=0
 
-if [ "$MODE" = "execute" ]; then
-  # Find all .md, .ts, .js files to update references
-  REF_FILES=$(find "$TARGET_PATH" \
-    \( -name "*.md" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \
-    -not -path "*/node_modules/*" \
-    -not -path "*/dist/*" \
-    -not -path "*/.git/*" \
-    2>/dev/null)
+# _build_rel_prefix depth — outputs "../" repeated $1 times
+_build_rel_prefix() {
+  _depth=$1
+  _prefix=""
+  _i=0
+  while [ "$_i" -lt "$_depth" ]; do
+    _prefix="${_prefix}../"
+    _i=$((_i + 1))
+  done
+  echo "$_prefix"
+}
 
-  if [ -n "$REF_FILES" ]; then
-    _ifs_save="$IFS"
+# _count_slashes path — counts '/' chars to measure directory depth
+_count_slashes() {
+  echo "$1" | tr -cd '/' | wc -c | tr -d ' '
+}
+
+# _scoped_update renamed_dirs old_name new_name mode
+#   old_name/new_name are plain filenames (e.g. "CLAUDE.md", "INTENT.md").
+#   For each renamed dir, find files underneath and apply depth-aware replacements.
+#   mode: "execute" applies sed, "dry-run" only lists matches.
+_scoped_update() {
+  _dirs="$1"
+  _old_name="$2"
+  _new_name="$3"
+  _run_mode="$4"
+  _updated=0
+
+  [ -z "$_dirs" ] && echo "$_updated" && return
+
+  # Escape old_name for sed regex (dot → \.)
+  _old_name_sed=$(echo "$_old_name" | sed 's|\.|\\.|g')
+
+  _ifs_save="$IFS"
+  IFS='
+'
+  for _rdir in $_dirs; do
+    [ -z "$_rdir" ] && continue
+    [ ! -d "$_rdir" ] && continue
+
+    _base_depth=$(_count_slashes "$_rdir")
+
+    _files=$(find "$_rdir" \
+      \( -name "*.md" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \
+      -not -path "*/node_modules/*" \
+      -not -path "*/dist/*" \
+      -not -path "*/.git/*" \
+      2>/dev/null)
+
+    [ -z "$_files" ] && continue
+
+    _ifs_save2="$IFS"
     IFS='
 '
-    for ref_file in $REF_FILES; do
-      [ -z "$ref_file" ] && continue
-      [ ! -f "$ref_file" ] && continue
+    for _file in $_files; do
+      [ -z "$_file" ] && continue
+      [ ! -f "$_file" ] && continue
 
-      # Check if file contains any references to update
-      if grep -q 'CLAUDE\.md\|SPEC\.md' "$ref_file" 2>/dev/null; then
-        _sed_inplace 's/CLAUDE\.md/INTENT.md/g' "$ref_file"
-        _sed_inplace 's/SPEC\.md/DETAIL.md/g' "$ref_file"
-        _ref_files_updated=$((_ref_files_updated + 1))
+      _file_dir=$(dirname "$_file")
+      _file_depth=$(_count_slashes "$_file_dir")
+      _depth=$((_file_depth - _base_depth))
+
+      if [ "$_depth" -eq 0 ]; then
+        # Same directory: match bare "CLAUDE.md" and "./CLAUDE.md"
+        if [ "$_run_mode" = "execute" ]; then
+          if grep -qF "$_old_name" "$_file" 2>/dev/null; then
+            _sed_inplace "s|\\./$_old_name_sed|./$_new_name|g" "$_file"
+            _sed_inplace "s|$_old_name_sed|$_new_name|g" "$_file"
+            _updated=$((_updated + 1))
+          fi
+        else
+          if grep -qF "$_old_name" "$_file" 2>/dev/null; then
+            echo "  $_file (depth=0: bare + ./)"
+            _updated=$((_updated + 1))
+          fi
+        fi
+      else
+        # Subdirectory: match only "../"*depth + "CLAUDE.md"
+        _prefix=$(_build_rel_prefix "$_depth")
+        _grep_pat="${_prefix}${_old_name}"
+        # Escape prefix for sed (dots → \.)
+        _escaped_prefix=$(echo "$_prefix" | sed 's|\.|\\.|g')
+        _sed_pat="${_escaped_prefix}${_old_name_sed}"
+        _sed_rep="${_prefix}${_new_name}"
+
+        if [ "$_run_mode" = "execute" ]; then
+          if grep -qF "$_grep_pat" "$_file" 2>/dev/null; then
+            _sed_inplace "s|${_sed_pat}|${_sed_rep}|g" "$_file"
+            _updated=$((_updated + 1))
+          fi
+        else
+          if grep -qF "$_grep_pat" "$_file" 2>/dev/null; then
+            echo "  $_file (depth=$_depth: $_grep_pat)"
+            _updated=$((_updated + 1))
+          fi
+        fi
       fi
     done
-    IFS="$_ifs_save"
-  fi
+    IFS="$_ifs_save2"
+  done
+  IFS="$_ifs_save"
 
+  echo "$_updated"
+}
+
+if [ "$MODE" = "execute" ]; then
+  _claude_updated=$(_scoped_update "$_renamed_claude_dirs" "CLAUDE.md" "INTENT.md" "execute")
+  _spec_updated=$(_scoped_update "$_renamed_spec_dirs" "SPEC.md" "DETAIL.md" "execute")
+  _ref_files_updated=$((_claude_updated + _spec_updated))
   echo "Updated references in: $_ref_files_updated files"
 else
-  # Dry-run: count files that would be updated
-  _ref_preview_count=0
-  REF_PREVIEW=$(grep -rl 'CLAUDE\.md\|SPEC\.md' "$TARGET_PATH" \
-    --include='*.md' --include='*.ts' --include='*.tsx' \
-    --include='*.js' --include='*.jsx' \
-    2>/dev/null | grep -v node_modules | grep -v dist | grep -v '.git/' || true)
+  echo "Scoped reference scan (files that would be updated):"
+  _claude_preview=$(_scoped_update "$_renamed_claude_dirs" "CLAUDE.md" "INTENT.md" "dry-run")
+  _spec_preview=$(_scoped_update "$_renamed_spec_dirs" "SPEC.md" "DETAIL.md" "dry-run")
 
-  if [ -n "$REF_PREVIEW" ]; then
-    _ref_preview_count=$(echo "$REF_PREVIEW" | wc -l | tr -d ' ')
-    echo "Files with references to update: $_ref_preview_count"
-    echo "$REF_PREVIEW" | while IFS= read -r f; do
-      echo "  $f"
-    done
+  # Extract count from last line of output (the echo "$_updated" line)
+  _claude_count=$(echo "$_claude_preview" | tail -1)
+  _spec_count=$(echo "$_spec_preview" | tail -1)
+
+  # Print file listings (all lines except the last count line)
+  _claude_list=$(echo "$_claude_preview" | sed '$d')
+  _spec_list=$(echo "$_spec_preview" | sed '$d')
+  [ -n "$_claude_list" ] && echo "$_claude_list"
+  [ -n "$_spec_list" ] && echo "$_spec_list"
+
+  _ref_preview_count=0
+  [ -n "$_claude_count" ] && _ref_preview_count=$((_ref_preview_count + _claude_count))
+  [ -n "$_spec_count" ] && _ref_preview_count=$((_ref_preview_count + _spec_count))
+
+  if [ "$_ref_preview_count" -eq 0 ]; then
+    echo "No scoped cross-file references found."
   else
-    echo "No cross-file references found."
+    echo "Files with scoped references to update: $_ref_preview_count"
   fi
   echo "(dry-run — no changes made)"
 fi

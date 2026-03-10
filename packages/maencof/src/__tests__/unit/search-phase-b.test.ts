@@ -9,7 +9,6 @@ import { runSpreadingActivation } from '../../core/spreading-activation.js';
 import { handleKgContext } from '../../mcp/tools/kg-context.js';
 import { extractBestSnippet } from '../../search/context-assembler.js';
 import { query, resolveSeedNodes } from '../../search/query-engine.js';
-import type { ScoredSeed } from '../../search/query-engine.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -35,7 +34,6 @@ function makeNode(
     mtime: 0,
     accessed_count: 0,
     ...overrides,
-    id: toNodeId(id),
   };
 }
 
@@ -466,5 +464,140 @@ describe('kg_context: multi-word query splitting', () => {
     expect('error' in result).toBe(false);
     const ctx = result as KgContextResult;
     expect(ctx.documentCount).toBe(0);
+  });
+});
+
+// ========================================
+// B7: Tag-based Seed Inclusion
+// ========================================
+describe('B7: Tag-based seed inclusion', () => {
+  it('tag-only seeds in isolated cluster appear in results', () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(
+      toNodeId('dir-a/news1.md'),
+      makeNode('dir-a/news1.md', Layer.L3_EXTERNAL, {
+        title: 'News Article One',
+        tags: ['geeknews'],
+      }),
+    );
+    nodes.set(
+      toNodeId('dir-b/news2.md'),
+      makeNode('dir-b/news2.md', Layer.L3_EXTERNAL, {
+        title: 'News Article Two',
+        tags: ['geeknews'],
+      }),
+    );
+    nodes.set(
+      toNodeId('dir-c/news3.md'),
+      makeNode('dir-c/news3.md', Layer.L3_EXTERNAL, {
+        title: 'News Article Three',
+        tags: ['geeknews'],
+      }),
+    );
+
+    const graph = buildGraphWithIndex(nodes, []);
+    const result = query(graph, ['geeknews']);
+
+    const resultIds = result.results.map((r) => r.nodeId);
+    expect(resultIds).toContain(toNodeId('dir-a/news1.md'));
+    expect(resultIds).toContain(toNodeId('dir-b/news2.md'));
+    expect(resultIds).toContain(toNodeId('dir-c/news3.md'));
+    expect(result.results.every((r) => r.score > 0)).toBe(true);
+  });
+
+  it('path-exact seed is still excluded from results', () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(
+      toNodeId('path/to/A.md'),
+      makeNode('path/to/A.md', Layer.L2_DERIVED, { title: 'Node A' }),
+    );
+    nodes.set(
+      toNodeId('path/to/B.md'),
+      makeNode('path/to/B.md', Layer.L2_DERIVED, { title: 'Node B' }),
+    );
+    nodes.set(
+      toNodeId('path/to/C.md'),
+      makeNode('path/to/C.md', Layer.L2_DERIVED, { title: 'Node C' }),
+    );
+
+    const edges = [
+      makeEdge('path/to/A.md', 'path/to/B.md', 0.8),
+      makeEdge('path/to/B.md', 'path/to/C.md', 0.8),
+    ];
+
+    const graph = buildGraphWithIndex(nodes, edges);
+    const result = query(graph, ['path/to/A.md']);
+
+    const resultIds = result.results.map((r) => r.nodeId);
+    expect(resultIds).not.toContain(toNodeId('path/to/A.md'));
+    expect(resultIds).toContain(toNodeId('path/to/B.md'));
+  });
+
+  it('mixed path + keyword seeds: path excluded, tag included', () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(
+      toNodeId('path/to/pathNode.md'),
+      makeNode('path/to/pathNode.md', Layer.L2_DERIVED, {
+        title: 'Path Node',
+        tags: [],
+      }),
+    );
+    nodes.set(
+      toNodeId('tag-a.md'),
+      makeNode('tag-a.md', Layer.L3_EXTERNAL, {
+        title: 'Tag Node A',
+        tags: ['topic'],
+      }),
+    );
+    nodes.set(
+      toNodeId('tag-b.md'),
+      makeNode('tag-b.md', Layer.L3_EXTERNAL, {
+        title: 'Tag Node B',
+        tags: ['topic'],
+      }),
+    );
+
+    const graph = buildGraphWithIndex(nodes, []);
+    const result = query(graph, ['path/to/pathNode.md', 'topic']);
+
+    const resultIds = result.results.map((r) => r.nodeId);
+    expect(resultIds).not.toContain(toNodeId('path/to/pathNode.md'));
+    expect(resultIds).toContain(toNodeId('tag-a.md'));
+    expect(resultIds).toContain(toNodeId('tag-b.md'));
+  });
+
+  it('tag seeds with connected neighbors both appear', () => {
+    const nodes = new Map<ReturnType<typeof toNodeId>, KnowledgeNode>();
+    nodes.set(
+      toNodeId('same-dir/tagged1.md'),
+      makeNode('same-dir/tagged1.md', Layer.L3_EXTERNAL, {
+        title: 'Tagged One',
+        tags: ['mytag'],
+      }),
+    );
+    nodes.set(
+      toNodeId('same-dir/tagged2.md'),
+      makeNode('same-dir/tagged2.md', Layer.L3_EXTERNAL, {
+        title: 'Tagged Two',
+        tags: ['mytag'],
+      }),
+    );
+    nodes.set(
+      toNodeId('neighbor.md'),
+      makeNode('neighbor.md', Layer.L2_DERIVED, {
+        title: 'Non-tagged Neighbor',
+        tags: [],
+      }),
+    );
+
+    const edges = [makeEdge('same-dir/tagged1.md', 'neighbor.md', 0.8)];
+
+    const graph = buildGraphWithIndex(nodes, edges);
+    const result = query(graph, ['mytag'], { decay: 0.9, threshold: 0.01 });
+
+    const resultIds = result.results.map((r) => r.nodeId);
+    expect(resultIds).toContain(toNodeId('same-dir/tagged1.md'));
+    expect(resultIds).toContain(toNodeId('same-dir/tagged2.md'));
+    expect(resultIds).toContain(toNodeId('neighbor.md'));
   });
 });

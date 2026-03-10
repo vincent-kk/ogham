@@ -48,7 +48,7 @@ export interface QueryOptions {
 export interface QueryResult {
   /** 활성화된 노드 목록 (score 내림차순) */
   results: ActivationResult[];
-  /** 시드로 사용된 노드 ID 목록 */
+  /** 시드로 사용된 노드 ID 목록. path-exact 시드만 결과에서 제외되며, 키워드/태그 매칭 시드는 results에도 포함될 수 있다. */
   seedIds: NodeId[];
   /** 탐색된 총 노드 수 */
   exploredNodes: number;
@@ -277,10 +277,14 @@ export function query(
     results = applyLayerFilter(results, graph, layerFilter);
   }
 
-  // 시드 자신은 결과에서 제외하고 상위 maxResults 반환
-  const seedSet = new Set(seedIds);
+  // path-exact 시드만 결과에서 제외 (키워드/태그 매칭 시드는 포함)
+  const pathExactSeedSet = new Set(
+    scoredSeeds
+      .filter((s) => s.matchType === 'path-exact')
+      .map((s) => s.nodeId),
+  );
   const filtered = results
-    .filter((r) => !seedSet.has(r.nodeId))
+    .filter((r) => !pathExactSeedSet.has(r.nodeId))
     .slice(0, maxResults);
 
   const result: QueryResult = {

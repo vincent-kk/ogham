@@ -7,6 +7,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
+import { isValidCompanionIdentity } from '../types/companion-guard.js';
 import type { PinnedNode } from './cache-manager.js';
 import { readPinnedNodes } from './cache-manager.js';
 
@@ -64,19 +66,46 @@ export function readStaleCount(cwd: string): number {
 }
 
 /**
- * Read companion name from .maencof-meta/companion-identity.json.
+ * Read companion identity from .maencof-meta/companion-identity.json.
+ * Returns validated identity or null on any failure.
  */
-function readCompanionName(cwd: string): string | null {
+export function readCompanionIdentity(
+  cwd: string,
+): CompanionIdentityMinimal | null {
   const identityPath = join(cwd, '.maencof-meta', 'companion-identity.json');
   try {
     if (!existsSync(identityPath)) return null;
-    const raw = JSON.parse(readFileSync(identityPath, 'utf-8')) as {
-      name?: string;
-    };
-    return typeof raw.name === 'string' ? raw.name : null;
+    const raw: unknown = JSON.parse(readFileSync(identityPath, 'utf-8'));
+    return isValidCompanionIdentity(raw) ? raw : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Build compressed `<companion-identity>` XML tag from identity data.
+ * Target: ~200 chars max to respect C1 5-second constraint.
+ */
+function buildCompanionIdentityTag(
+  identity: CompanionIdentityMinimal,
+): string {
+  const roleAttr = identity.role ? ` role="${identity.role}"` : '';
+  let tag = `<companion-identity name="${identity.name}"${roleAttr}>`;
+
+  if (identity.personality) {
+    const { tone, approach, traits } = identity.personality;
+    const toneAttr = tone ? ` tone="${tone}"` : '';
+    const approachAttr = approach ? ` approach="${approach}"` : '';
+    const traitsText = traits?.length ? traits.join(',') : '';
+    tag += `<personality${toneAttr}${approachAttr}>${traitsText}</personality>`;
+  }
+
+  if (identity.principles?.length) {
+    tag += `<principles>${identity.principles.join(' | ')}</principles>`;
+  }
+
+  tag += '</companion-identity>';
+  return tag;
 }
 
 /**
@@ -100,7 +129,7 @@ function formatPinnedNodes(nodes: PinnedNode[]): string {
 export function buildTurnContext(cwd: string): string {
   const { totalNodes, layerCounts } = readIndexMetadata(cwd);
   const staleCount = readStaleCount(cwd);
-  const companionName = readCompanionName(cwd);
+  const identity = readCompanionIdentity(cwd);
   const pinnedNodes = readPinnedNodes(cwd);
 
   const freshPercent =
@@ -108,10 +137,15 @@ export function buildTurnContext(cwd: string): string {
       ? Math.round(((totalNodes - staleCount) / totalNodes) * 100)
       : 100;
 
-  const vaultAttr = companionName ? ` vault="${companionName}"` : '';
+  const vaultAttr = identity ? ` vault="${identity.name}"` : '';
   const pinnedText = formatPinnedNodes(pinnedNodes);
 
   const parts: string[] = [];
+
+  // <companion-identity> tag (before kg-core)
+  if (identity) {
+    parts.push(buildCompanionIdentityTag(identity));
+  }
 
   // <kg-core> tag
   parts.push(
