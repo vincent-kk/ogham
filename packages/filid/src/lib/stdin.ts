@@ -22,10 +22,16 @@ export function readStdin(timeoutMs = 5000): Promise<string> {
     const chunks: Buffer[] = [];
     let settled = false;
 
+    const settle = (): void => {
+      clearTimeout(timeout);
+      process.stdin.removeAllListeners();
+    };
+
     const timeout = setTimeout(() => {
       if (!settled) {
         settled = true;
-        process.stdin.removeAllListeners();
+        settle();
+        // Timeout: stdin never sent EOF — force-close to release FD
         process.stdin.destroy();
         resolve(Buffer.concat(chunks).toString('utf-8'));
       }
@@ -38,7 +44,7 @@ export function readStdin(timeoutMs = 5000): Promise<string> {
     process.stdin.on('end', () => {
       if (!settled) {
         settled = true;
-        clearTimeout(timeout);
+        settle();
         resolve(Buffer.concat(chunks).toString('utf-8'));
       }
     });
@@ -46,7 +52,7 @@ export function readStdin(timeoutMs = 5000): Promise<string> {
     process.stdin.on('error', () => {
       if (!settled) {
         settled = true;
-        clearTimeout(timeout);
+        settle();
         resolve('');
       }
     });
@@ -56,7 +62,7 @@ export function readStdin(timeoutMs = 5000): Promise<string> {
     if (process.stdin.readableEnded) {
       if (!settled) {
         settled = true;
-        clearTimeout(timeout);
+        settle();
         resolve(Buffer.concat(chunks).toString('utf-8'));
       }
     }
