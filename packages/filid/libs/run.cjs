@@ -69,7 +69,7 @@ function resolveTarget(targetPath) {
     if (!scriptRelative || !existsSync(cacheBase)) return null;
 
     // Find version directories (real dirs or valid symlinks), pick latest
-    const { readdirSync, lstatSync, readlinkSync } = require('fs');
+    const { readdirSync } = require('fs');
     const entries = readdirSync(cacheBase).filter((v) =>
       /^\d+\.\d+\.\d+/.test(v),
     );
