@@ -34,7 +34,7 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.NAMING_CONVENTION,
       name: 'Naming Convention',
-      description: '디렉토리/파일명이 kebab-case 또는 camelCase를 따라야 한다.',
+      description: 'Directory and file names must follow kebab-case or camelCase.',
       category: 'naming',
       severity: 'warning',
       enabled: true,
@@ -45,9 +45,9 @@ export function loadBuiltinRules(): Rule[] {
             {
               ruleId: BUILTIN_RULE_IDS.NAMING_CONVENTION,
               severity: 'warning',
-              message: `디렉토리명 "${node.name}"이 kebab-case 또는 camelCase 규칙을 따르지 않습니다.`,
+              message: `Directory name "${node.name}" does not follow kebab-case or camelCase conventions.`,
               path: node.path,
-              suggestion: `"${node.name}"을 kebab-case(예: my-module) 또는 camelCase(예: myModule)로 변경하세요.`,
+              suggestion: `Rename "${node.name}" to kebab-case (e.g. my-module) or camelCase (e.g. myModule).`,
             },
           ];
         }
@@ -59,7 +59,7 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       name: 'Organ No INTENT.md',
-      description: 'organ 노드에 INTENT.md가 존재하면 안 된다.',
+      description: 'Organ nodes must not contain INTENT.md.',
       category: 'structure',
       severity: 'error',
       enabled: true,
@@ -70,10 +70,10 @@ export function loadBuiltinRules(): Rule[] {
             {
               ruleId: BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
               severity: 'error',
-              message: `organ 디렉토리 "${node.name}"에 INTENT.md가 존재합니다. organ은 독립 문서화가 금지됩니다.`,
+              message: `Organ directory "${node.name}" contains INTENT.md. Organ nodes must not have standalone documentation.`,
               path: node.path,
               suggestion:
-                'INTENT.md를 제거하거나 해당 디렉토리를 fractal로 재분류하세요.',
+                'Remove INTENT.md or reclassify this directory as a fractal node.',
             },
           ];
         }
@@ -86,7 +86,7 @@ export function loadBuiltinRules(): Rule[] {
       id: BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN,
       name: 'Index Barrel Pattern',
       description:
-        'fractal 노드의 index.ts는 순수 barrel(re-export만) 패턴을 따라야 한다.',
+        'index.ts in fractal nodes must follow the pure barrel (re-export only) pattern.',
       category: 'index',
       severity: 'warning',
       enabled: true,
@@ -110,10 +110,10 @@ export function loadBuiltinRules(): Rule[] {
             {
               ruleId: BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN,
               severity: 'warning',
-              message: `"${node.name}/index.ts"에 ${barrelPattern.declarationCount}개의 직접 선언이 있습니다. 순수 barrel 패턴을 따르지 않습니다.`,
+              message: `"${node.name}/index.ts" contains ${barrelPattern.declarationCount} direct declarations and does not follow the pure barrel pattern.`,
               path: node.path,
               suggestion:
-                '직접 선언을 별도 파일로 분리하고 index.ts에서 re-export하세요.',
+                'Move direct declarations into separate files and re-export them from index.ts.',
             },
           ];
         }
@@ -125,7 +125,7 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
       name: 'Module Entry Point',
-      description: '모든 fractal 노드에 index.ts 또는 main.ts가 존재해야 한다.',
+      description: 'Every fractal node must have either index.ts or main.ts as an entry point.',
       category: 'module',
       severity: 'warning',
       enabled: true,
@@ -137,10 +137,10 @@ export function loadBuiltinRules(): Rule[] {
             {
               ruleId: BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
               severity: 'warning',
-              message: `fractal 모듈 "${node.name}"에 진입점(index.ts 또는 main.ts)이 없습니다.`,
+              message: `Fractal module "${node.name}" does not have an entry point (index.ts or main.ts).`,
               path: node.path,
               suggestion:
-                'index.ts 또는 main.ts를 생성하여 모듈의 공개 API를 정의하세요.',
+                'Create index.ts or main.ts and define the public API of the module there.',
             },
           ];
         }
@@ -152,7 +152,7 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.MAX_DEPTH,
       name: 'Max Depth',
-      description: '프랙탈 트리의 깊이가 최대 허용 깊이를 초과하면 안 된다.',
+      description: 'The depth of the fractal tree must not exceed the maximum allowed depth.',
       category: 'structure',
       severity: 'error',
       enabled: true,
@@ -164,10 +164,10 @@ export function loadBuiltinRules(): Rule[] {
             {
               ruleId: BUILTIN_RULE_IDS.MAX_DEPTH,
               severity: 'error',
-              message: `"${node.name}"의 깊이(${node.depth})가 최대 허용 깊이(${maxDepth})를 초과합니다.`,
+              message: `The depth of "${node.name}" (${node.depth}) exceeds the maximum allowed depth (${maxDepth}).`,
               path: node.path,
               suggestion:
-                '디렉토리 구조를 평탄화하거나 관련 모듈을 병합하세요.',
+                'Flatten the directory structure or merge related modules.',
             },
           ];
         }
@@ -179,7 +179,7 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY,
       name: 'Circular Dependency',
-      description: '모듈 간 순환 의존이 없어야 한다.',
+      description: 'There must be no circular dependencies between modules.',
       category: 'dependency',
       severity: 'error',
       enabled: true,
@@ -195,7 +195,7 @@ export function loadBuiltinRules(): Rule[] {
       id: BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION,
       name: 'Pure Function Isolation',
       description:
-        'pure-function 노드는 상위 fractal 모듈을 import하면 안 된다.',
+        'pure-function nodes must not import parent fractal modules.',
       category: 'dependency',
       severity: 'error',
       enabled: true,
@@ -219,9 +219,9 @@ export function loadBuiltinRules(): Rule[] {
             violations.push({
               ruleId: BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION,
               severity: 'error',
-              message: `pure-function 노드 "${node.name}"이 fractal 모듈 "${depNode.name}"을 의존합니다.`,
+              message: `Pure-function node "${node.name}" depends on fractal module "${depNode.name}".`,
               path: node.path,
-              suggestion: `"${depNode.name}"의 하위 organ으로 이동하거나 의존을 제거하세요.`,
+              suggestion: `Move the dependency under "${depNode.name}" as an organ node or remove the dependency.`,
             });
           }
         }
