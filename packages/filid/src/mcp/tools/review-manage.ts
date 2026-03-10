@@ -212,6 +212,19 @@ async function handleCheckpoint(
   } else if (!hasSession) {
     // Phase A done (structure-check.md exists), Phase B pending
     phase = 'B';
+  } else if (!hasStructureCheck && hasSession && !hasVerification) {
+    // session.md only (no structure-check.md) — check no_structure_check flag
+    const sessionPath = path.join(reviewDir, 'session.md');
+    let noStructureCheck = false;
+    try {
+      const content = await fs.readFile(sessionPath, 'utf-8');
+      const match = content.match(/^no_structure_check:\s*(true)/m);
+      noStructureCheck = !!match;
+    } catch {
+      // file read error — treat as flag absent
+    }
+    // If Phase A was intentionally skipped, proceed to C; otherwise restart A
+    phase = noStructureCheck ? 'C' : 'A';
   } else if (!hasVerification) {
     phase = 'C';
   } else if (!hasReport) {

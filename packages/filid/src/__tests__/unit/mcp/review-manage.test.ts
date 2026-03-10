@@ -199,8 +199,23 @@ describe('handleReviewManage – checkpoint', () => {
     expect(result.files).not.toContain('session.md');
   });
 
-  it('returns phase C when only session.md exists', async () => {
+  it('returns phase A when only session.md exists without no_structure_check flag', async () => {
     await fs.writeFile(path.join(reviewDir, 'session.md'), '');
+    const result = await handleReviewManage({
+      action: 'checkpoint',
+      projectRoot: tmpDir,
+      branchName: branch,
+    });
+    expect(result.phase).toBe('A');
+    expect(result.files).toContain('session.md');
+    expect(result.files).not.toContain('verification.md');
+  });
+
+  it('returns phase C when only session.md exists with no_structure_check: true', async () => {
+    await fs.writeFile(
+      path.join(reviewDir, 'session.md'),
+      'no_structure_check: true\n\n# Session',
+    );
     const result = await handleReviewManage({
       action: 'checkpoint',
       projectRoot: tmpDir,
