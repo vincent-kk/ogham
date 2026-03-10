@@ -72,38 +72,51 @@ Renamed: 7 files
 
 ---
 
-## Phase 3 — Reference Update
+## Phase 3 — Scoped Reference Update
 
-Only runs with `--execute`.
+Only runs with `--execute`. Uses **relative-path-based scoped replacement** to
+avoid unintended changes to files outside renamed directories.
 
-Scans all `.md`, `.ts`, `.tsx`, `.js`, `.jsx` files (excluding `node_modules/`,
-`dist/`, `.git/`) and applies:
+### How it works
 
-| Find         | Replace      |
-| ------------ | ------------ |
-| `CLAUDE.md`  | `INTENT.md`  |
-| `SPEC.md`    | `DETAIL.md`  |
+Phase 2 collects which directories had renames (`_renamed_claude_dirs`,
+`_renamed_spec_dirs`). Phase 3 then only searches files **under those
+directories**, using depth-aware patterns:
+
+| File depth (relative to renamed dir) | Patterns replaced |
+| ------------------------------------ | ----------------------------------------- |
+| 0 (same directory) | `CLAUDE.md`, `./CLAUDE.md` |
+| 1 (one level deep) | `../CLAUDE.md` |
+| 2 (two levels deep) | `../../CLAUDE.md` |
+| N | `"../" × N + "CLAUDE.md"` |
+
+The same logic applies for `SPEC.md` → `DETAIL.md`.
+
+**Files outside renamed directories are never modified.** This prevents:
+- Skills prompts referencing `CLAUDE.md` as a concept from being changed
+- Logic code (e.g., `context-injector.ts`) with `CLAUDE.md` string constants
+  from being altered when the file is not under a renamed directory
 
 Uses `sed` with platform detection (macOS `sed -i ''` vs GNU `sed -i`).
 
-In dry-run mode, lists files that contain references without modifying them.
+In dry-run mode, lists matching files with their depth info without modifying.
 
 ### Output (dry-run)
 
 ```
-## Phase 3 — Reference Update
-Files with references to update: 12
-  src/core/scanner.ts
-  src/hooks/context-injector.ts
-  ...
+## Phase 3 — Reference Update (scoped)
+Scoped reference scan (files that would be updated):
+  src/core/README.md (depth=0: bare + ./)
+  src/core/__tests__/foo.test.ts (depth=1: ../CLAUDE.md)
+Files with scoped references to update: 2
 (dry-run — no changes made)
 ```
 
 ### Output (execute)
 
 ```
-## Phase 3 — Reference Update
-Updated references in: 12 files
+## Phase 3 — Reference Update (scoped)
+Updated references in: 2 files
 ```
 
 ---
