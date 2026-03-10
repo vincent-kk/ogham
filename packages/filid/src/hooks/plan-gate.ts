@@ -28,6 +28,7 @@ export function validatePlanExit(input: PreToolUseInput): HookOutput {
   return {
     continue: true,
     hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
       additionalContext: PLAN_EXIT_CHECKLIST,
     },
   };

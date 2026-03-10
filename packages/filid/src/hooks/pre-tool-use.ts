@@ -61,9 +61,12 @@ export function mergeResults(results: HookOutput[]): HookOutput {
   if (!combinedContinue) {
     return {
       continue: false,
-      hookSpecificOutput: blockOutput ?? {
-        additionalContext: contexts.join('\n\n'),
-      },
+      hookSpecificOutput: blockOutput
+        ? { ...blockOutput, hookEventName: 'PreToolUse' }
+        : {
+            hookEventName: 'PreToolUse',
+            additionalContext: contexts.join('\n\n'),
+          },
     };
   }
 
@@ -71,6 +74,7 @@ export function mergeResults(results: HookOutput[]): HookOutput {
     return {
       continue: true,
       hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
         additionalContext: contexts.join('\n\n'),
       },
     };

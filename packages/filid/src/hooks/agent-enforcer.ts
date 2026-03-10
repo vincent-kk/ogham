@@ -72,7 +72,7 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (restriction) {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: restriction },
+      hookSpecificOutput: { hookEventName: 'SubagentStart', additionalContext: restriction },
     };
   }
 
@@ -85,7 +85,7 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan') {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: PLANNING_GUIDANCE },
+      hookSpecificOutput: { hookEventName: 'SubagentStart', additionalContext: PLANNING_GUIDANCE },
     };
   }
 
@@ -93,7 +93,7 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (EXECUTOR_AGENT_RE.test(agentType) || agentType === 'general-purpose') {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: IMPLEMENTATION_REMINDER },
+      hookSpecificOutput: { hookEventName: 'SubagentStart', additionalContext: IMPLEMENTATION_REMINDER },
     };
   }
 
