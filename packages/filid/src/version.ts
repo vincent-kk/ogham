@@ -5,4 +5,4 @@
  * Current package version from package.json
  * Automatically synchronized during build process
  */
-export const VERSION = '0.0.10-alpha.1';
+export const VERSION = '0.0.10-alpha.2';
