@@ -12,7 +12,7 @@ MCP 서버 구현. 17개 도구를 stdio 전송으로 제공. vault 경로는 `M
 | Graph (5) | kg_search, kg_navigate, kg_context, kg_status, kg_build |
 | Boundary (1) | boundary_create |
 | Link (1) | kg_suggest_links |
-| CLAUDE.md (3) | claudemd_merge, claudemd_read, claudemd_remove |
+| INTENT.md (3) | claudemd_merge, claudemd_read, claudemd_remove |
 | Dailynote (1) | dailynote_read |
 
 ## Graph Cache
