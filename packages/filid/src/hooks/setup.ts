@@ -14,9 +14,12 @@ import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { getCacheDir, pruneOldSessions } from '../core/cache-manager.js';
+import { createLogger, setLogDir } from '../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../types/hooks.js';
 
 import { isFcaProject } from './shared.js';
+
+const log = createLogger('setup');
 
 /** Directories to skip during INTENT.md scan */
 const SCAN_SKIP_DIRS = new Set([
@@ -67,8 +70,9 @@ export function processSetup(input: SessionStartInput): HookOutput {
   try {
     const { cwd } = input;
 
-    // Phase 1: Init — ensure cache directory
+    // Phase 1: Init — ensure cache directory + enable file logging
     const cacheDir = getCacheDir(cwd);
+    setLogDir(cacheDir);
     if (!existsSync(cacheDir)) {
       mkdirSync(cacheDir, { recursive: true });
     }
@@ -81,21 +85,13 @@ export function processSetup(input: SessionStartInput): HookOutput {
         mkdirSync(join(cwd, '.filid'), { recursive: true });
         isFca = true;
 
-        if (process.env['FILID_DEBUG'] === '1') {
-          console.error(
-            `[filid:setup] Auto-detected FCA project, created .filid/ in ${cwd}`,
-          );
-        }
+        log.debug(`Auto-detected FCA project, created .filid/ in ${cwd}`);
       }
     } catch (e) {
-      if (process.env['FILID_DEBUG'] === '1') {
-        console.error('[filid:setup] Auto-detect failed:', e);
-      }
+      log.debug('Auto-detect failed:', e);
     }
 
-    if (process.env['FILID_DEBUG'] === '1') {
-      console.error(`[filid:setup] cwd=${cwd} fca=${isFca} cache=${cacheDir}`);
-    }
+    log.debug(`cwd=${cwd} fca=${isFca} cache=${cacheDir}`);
 
     // Phase 3: Maintenance — prune old session files
     pruneOldSessions(cwd);
@@ -113,9 +109,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
 
     return { continue: true };
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') {
-      console.error('[filid:setup] Error:', e);
-    }
+    log.error('Error:', e);
     return { continue: true };
   }
 }
