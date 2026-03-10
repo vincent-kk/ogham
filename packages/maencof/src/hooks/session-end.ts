@@ -47,17 +47,19 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   }
 
   const sessionsDir = metaPath(cwd, 'sessions');
-  ensureDir(sessionsDir);
 
-  // Save session summary
+  // Save session summary only when the session has meaningful data.
   const summary = buildSessionSummary(input, cwd);
-  const fileName = buildSessionFileName();
-  const filePath = join(sessionsDir, fileName);
+  if (summary !== null) {
+    ensureDir(sessionsDir);
+    const fileName = buildSessionFileName();
+    const filePath = join(sessionsDir, fileName);
 
-  try {
-    writeFileSync(filePath, summary, 'utf-8');
-  } catch {
-    // Ignore write failure (must not block session exit)
+    try {
+      writeFileSync(filePath, summary, 'utf-8');
+    } catch {
+      // Ignore write failure (must not block session exit)
+    }
   }
 
   // Clean up context injection cache (session-specific files only)
@@ -98,7 +100,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
  * Build a session summary markdown string.
  * Includes usage-stats.json (cumulative) and stale-nodes.json data when available.
  */
-function buildSessionSummary(input: SessionEndInput, cwd: string): string {
+function buildSessionSummary(input: SessionEndInput, cwd: string): string | null {
   const now = new Date().toISOString();
   const sessionId = input.session_id ?? 'unknown';
 
@@ -149,6 +151,14 @@ function buildSessionSummary(input: SessionEndInput, cwd: string): string {
     Array.isArray(staleNodes.paths) &&
     staleNodes.paths.length > 0;
 
+  const hasSessionActivity = skills.length > 0 || files.length > 0;
+  const hasMeaningfulSessionData =
+    hasUsageStats || hasStaleNodes || hasSessionActivity;
+
+  if (!hasMeaningfulSessionData) {
+    return null;
+  }
+
   if (hasUsageStats) {
     lines.push(`## Vault Tool Usage (Cumulative)`);
     lines.push(``);
@@ -164,13 +174,6 @@ function buildSessionSummary(input: SessionEndInput, cwd: string): string {
     for (const path of staleNodes!.paths) {
       lines.push(`- ${path}`);
     }
-    lines.push(``);
-  }
-
-  const hasSessionActivity = skills.length > 0 || files.length > 0;
-
-  if (!hasUsageStats && !hasStaleNodes && !hasSessionActivity) {
-    lines.push(`> No activity recorded in this session.`);
     lines.push(``);
   }
 

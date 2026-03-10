@@ -235,6 +235,16 @@ describe('runSessionEnd', () => {
     expect(files.length).toBe(1);
   });
 
+  it('빈 세션은 요약 파일을 남기지 않는다', () => {
+    const result = runSessionEnd({
+      session_id: 'empty-session',
+      cwd: vaultDir,
+    });
+
+    expect(result.continue).toBe(true);
+    expect(existsSync(join(vaultDir, '.maencof-meta', 'sessions'))).toBe(false);
+  });
+
   it('세션 요약에 스킬과 파일 정보가 포함된다', () => {
     runSessionEnd({
       session_id: 'test-session',

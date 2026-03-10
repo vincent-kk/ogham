@@ -31,3 +31,7 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 - types/는 외부 의존성 없음 (zod 제외)
 - version.ts는 빌드 시 inject-version.mjs가 자동 생성; 직접 수정 금지
 - bridge/ 출력 파일은 esbuild가 생성; 소스는 src/hooks/ 및 mcp/server-entry.ts
+
+## Hook Notes
+- `session-end`는 `.maencof-meta/sessions/`에 세션 요약을 저장하되, `skills_used`, `files_modified`, 누적 usage stats, stale nodes 중 하나라도 있을 때만 파일을 남긴다.
+- 활동/상태 정보가 전혀 없는 빈 세션은 요약 파일을 생성하지 않는다. 세션 종료 자체는 계속 `dailynote`에 기록되어 빈 세션 여부를 간접적으로 추론할 수 있다.
