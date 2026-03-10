@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 import type { UserPromptSubmitInput } from '../../types/hooks.js';
+import { readStdin } from '../../lib/stdin.js';
 import { handleUserPromptSubmit } from '../user-prompt-submit.js';
 
-const chunks: Buffer[] = [];
-for await (const chunk of process.stdin) {
-  chunks.push(chunk as Buffer);
-}
-const raw = Buffer.concat(chunks).toString('utf-8');
+const raw = await readStdin(3000);
 let result;
 try {
   const input = JSON.parse(raw) as UserPromptSubmitInput;
