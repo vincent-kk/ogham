@@ -1,7 +1,10 @@
-import { validateIntentMd, validateDetailMd } from '../core/document-validator.js';
+import {
+  validateDetailMd,
+  validateIntentMd,
+} from '../core/document-validator.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
-import { isIntentMd, isDetailMd } from './shared.js';
+import { isDetailMd, isIntentMd } from './shared.js';
 
 export { isDetailMd } from './shared.js';
 

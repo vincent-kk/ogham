@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
+
 import { injectIntent } from './intent-injector.js';
 import { validatePreToolUse } from './pre-tool-validator.js';
 import { isDetailMd } from './shared.js';
@@ -12,7 +13,9 @@ import { guardStructure } from './structure-guard.js';
  * Runs intent injection for all tools (Read|Write|Edit),
  * plus validation and structure guard for Write|Edit only.
  */
-export async function handlePreToolUse(input: PreToolUseInput): Promise<HookOutput> {
+export async function handlePreToolUse(
+  input: PreToolUseInput,
+): Promise<HookOutput> {
   const results: HookOutput[] = [];
 
   // 1. INTENT.md context injection (Read|Write|Edit)
@@ -25,7 +28,9 @@ export async function handlePreToolUse(input: PreToolUseInput): Promise<HookOutp
     if (isDetailMd(filePath)) {
       try {
         oldDetailContent = readFileSync(resolve(input.cwd, filePath), 'utf-8');
-      } catch { /* new file */ }
+      } catch {
+        /* new file */
+      }
     }
     results.push(validatePreToolUse(input, oldDetailContent));
     results.push(guardStructure(input));

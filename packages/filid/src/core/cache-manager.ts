@@ -13,9 +13,9 @@ import { join } from 'node:path';
 
 /** In-memory fractal map per session */
 export interface FractalMap {
-  reads: string[];    // accessed directories (order preserved, no duplicates)
-  intents: string[];  // directories with INTENT.md (dedup dual-use)
-  details: string[];  // directories with DETAIL.md
+  reads: string[]; // accessed directories (order preserved, no duplicates)
+  intents: string[]; // directories with INTENT.md (dedup dual-use)
+  details: string[]; // directories with DETAIL.md
 }
 
 // Cache directory layout:
@@ -45,7 +45,8 @@ export function readPromptContext(
     if (!existsSync(contextFile)) return null;
     return readFileSync(contextFile, 'utf-8');
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] readPromptContext failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] readPromptContext failed:', e);
     return null;
   }
 }
@@ -64,7 +65,8 @@ export function writePromptContext(
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(contextFile, context, 'utf-8');
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] writePromptContext failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] writePromptContext failed:', e);
   }
 }
 
@@ -76,7 +78,8 @@ export function hasPromptContext(sessionId: string, cwd: string): boolean {
   try {
     return existsSync(contextFile);
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] hasPromptContext failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] hasPromptContext failed:', e);
     return false;
   }
 }
@@ -93,7 +96,8 @@ export function isFirstInSession(sessionId: string, cwd: string): boolean {
   try {
     return !existsSync(marker);
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] isFirstInSession failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] isFirstInSession failed:', e);
     return true;
   }
 }
@@ -159,7 +163,8 @@ export function markSessionInjected(sessionId: string, cwd: string): void {
     writeFileSync(marker, '', 'utf-8');
     pruneOldSessions(cwd);
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] markSessionInjected failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] markSessionInjected failed:', e);
   }
 }
 
@@ -174,7 +179,8 @@ export function saveRunHash(
     if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
     writeFileSync(hashFile, hash, 'utf-8');
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] saveRunHash failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] saveRunHash failed:', e);
   }
 }
 
@@ -184,7 +190,8 @@ export function getLastRunHash(cwd: string, skillName: string): string | null {
   try {
     return readFileSync(hashFile, 'utf-8').trim();
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] getLastRunHash failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] getLastRunHash failed:', e);
     return null;
   }
 }
@@ -193,7 +200,11 @@ export function getLastRunHash(cwd: string, skillName: string): string | null {
  * Read boundary cache for a directory.
  * Returns the cached boundary path or null if not cached.
  */
-export function readBoundary(cwd: string, sessionId: string, dir: string): string | null {
+export function readBoundary(
+  cwd: string,
+  sessionId: string,
+  dir: string,
+): string | null {
   const cacheDir = getCacheDir(cwd);
   const hash = sessionIdHash(sessionId);
   const filePath = join(cacheDir, `boundary-${hash}`);
@@ -201,7 +212,8 @@ export function readBoundary(cwd: string, sessionId: string, dir: string): strin
     const data = JSON.parse(readFileSync(filePath, 'utf-8'));
     return data[dir] ?? null;
   } catch (e) {
-    if (process.env['FILID_DEBUG'] === '1') console.error('[filid:cache] readBoundary failed:', e);
+    if (process.env['FILID_DEBUG'] === '1')
+      console.error('[filid:cache] readBoundary failed:', e);
     return null;
   }
 }
@@ -216,7 +228,12 @@ export function readBoundary(cwd: string, sessionId: string, dir: string): strin
  * Claude Code hooks execute sequentially per session — concurrent
  * writes to the same cache file do not occur in practice.
  */
-export function writeBoundary(cwd: string, sessionId: string, dir: string, boundaryPath: string): void {
+export function writeBoundary(
+  cwd: string,
+  sessionId: string,
+  dir: string,
+  boundaryPath: string,
+): void {
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });
   const hash = sessionIdHash(sessionId);
@@ -224,7 +241,9 @@ export function writeBoundary(cwd: string, sessionId: string, dir: string, bound
   let data: Record<string, string> = {};
   try {
     data = JSON.parse(readFileSync(filePath, 'utf-8'));
-  } catch { /* new file */ }
+  } catch {
+    /* new file */
+  }
   data[dir] = boundaryPath;
   writeFileSync(filePath, JSON.stringify(data));
 }
@@ -246,7 +265,11 @@ export function readFractalMap(cwd: string, sessionId: string): FractalMap {
 /**
  * Write fractal map to cache.
  */
-export function writeFractalMap(cwd: string, sessionId: string, map: FractalMap): void {
+export function writeFractalMap(
+  cwd: string,
+  sessionId: string,
+  map: FractalMap,
+): void {
   const cacheDir = getCacheDir(cwd);
   mkdirSync(cacheDir, { recursive: true });
   const hash = sessionIdHash(sessionId);
@@ -287,5 +310,9 @@ export function hasGuideInjected(sessionId: string, cwd: string): boolean {
 export function markGuideInjected(sessionId: string, cwd: string): void {
   const cacheDir = getCacheDir(cwd);
   if (!existsSync(cacheDir)) mkdirSync(cacheDir, { recursive: true });
-  writeFileSync(join(cacheDir, `guide-${sessionIdHash(sessionId)}`), '', 'utf-8');
+  writeFileSync(
+    join(cacheDir, `guide-${sessionIdHash(sessionId)}`),
+    '',
+    'utf-8',
+  );
 }

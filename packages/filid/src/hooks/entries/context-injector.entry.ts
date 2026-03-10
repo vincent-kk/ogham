@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import type { UserPromptSubmitInput } from '../../types/hooks.js';
 import { readStdin } from '../../lib/stdin.js';
+import type { UserPromptSubmitInput } from '../../types/hooks.js';
 import { handleUserPromptSubmit } from '../user-prompt-submit.js';
 
 const raw = await readStdin(3000);

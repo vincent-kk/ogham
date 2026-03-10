@@ -54,13 +54,29 @@ function toolError(error: unknown) {
 function wrapHandler<T>(
   fn: (args: T) => unknown | Promise<unknown>,
   options?: { checkErrorField?: boolean },
-): (args: T) => Promise<ReturnType<typeof toolResult> | ReturnType<typeof toolError> | { content: Array<{ type: 'text'; text: string }> }> {
+): (
+  args: T,
+) => Promise<
+  | ReturnType<typeof toolResult>
+  | ReturnType<typeof toolError>
+  | { content: Array<{ type: 'text'; text: string }> }
+> {
   return async (args: T) => {
     try {
       const result = await fn(args);
-      if (options?.checkErrorField && result && typeof result === 'object' && 'error' in result) {
+      if (
+        options?.checkErrorField &&
+        result &&
+        typeof result === 'object' &&
+        'error' in result
+      ) {
         return {
-          content: [{ type: 'text' as const, text: String((result as { error: unknown }).error) }],
+          content: [
+            {
+              type: 'text' as const,
+              text: String((result as { error: unknown }).error),
+            },
+          ],
         };
       }
       return toolResult(result);
@@ -138,7 +154,11 @@ export function createServer(): McpServer {
       }),
     },
     // 'directory' in zod schema is resolved via classifyNode() inside the handler
-    wrapHandler((args) => handleFractalNavigate(args as Parameters<typeof handleFractalNavigate>[0])),
+    wrapHandler((args) =>
+      handleFractalNavigate(
+        args as Parameters<typeof handleFractalNavigate>[0],
+      ),
+    ),
   );
 
   server.registerTool(

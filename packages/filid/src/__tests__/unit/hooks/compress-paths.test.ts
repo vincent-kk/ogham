@@ -14,7 +14,10 @@ describe('compressPaths', () => {
   });
 
   it('two paths with common prefix → brace notation', () => {
-    const result = compressPaths(['src/payment/checkout', 'src/payment/refund']);
+    const result = compressPaths([
+      'src/payment/checkout',
+      'src/payment/refund',
+    ]);
     expect(result).toContain('payment');
     expect(result).toContain('checkout');
     expect(result).toContain('refund');
@@ -53,7 +56,12 @@ describe('compressPaths', () => {
   });
 
   it('4-level with multiple branching → deeply nested brace expansion', () => {
-    const result = compressPaths(['pkg/a/b/c/d', 'pkg/a/b/c/e', 'pkg/a/b/f', 'pkg/a/g']);
+    const result = compressPaths([
+      'pkg/a/b/c/d',
+      'pkg/a/b/c/e',
+      'pkg/a/b/f',
+      'pkg/a/g',
+    ]);
     // Expected: pkg/{a/{b/{c/{d,e},f},g}}
     expect(result).toBe('pkg/{a/{b/{c/{d,e},f},g}}');
   });

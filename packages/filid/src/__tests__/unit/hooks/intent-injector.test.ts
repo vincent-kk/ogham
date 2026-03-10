@@ -4,7 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { removeFractalMap, writeBoundary, writeFractalMap } from '../../../core/cache-manager.js';
+import {
+  removeFractalMap,
+  writeBoundary,
+  writeFractalMap,
+} from '../../../core/cache-manager.js';
 import { injectIntent } from '../../../hooks/intent-injector.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
@@ -16,7 +20,9 @@ let tmpDir: string;
 let sessionCounter = 0;
 
 function makeInput(
-  overrides: Partial<PreToolUseInput> & { tool_input?: PreToolUseInput['tool_input'] },
+  overrides: Partial<PreToolUseInput> & {
+    tool_input?: PreToolUseInput['tool_input'];
+  },
 ): PreToolUseInput {
   return {
     cwd: tmpDir,
@@ -30,7 +36,10 @@ function makeInput(
 }
 
 beforeEach(() => {
-  tmpDir = join(tmpdir(), `filid-injector-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  tmpDir = join(
+    tmpdir(),
+    `filid-injector-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(tmpDir, { recursive: true });
 });
 
@@ -58,7 +67,10 @@ describe('injectIntent', () => {
 
   it('INTENT.md exists at file directory → full context injection', () => {
     // Set up FCA project
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(
       join(tmpDir, 'INTENT.md'),
       '## Purpose\nRoot module\n## Boundaries\nAll\n',
@@ -67,21 +79,31 @@ describe('injectIntent', () => {
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
 
-    const input = makeInput({ cwd: tmpDir, tool_input: { file_path: filePath } });
+    const input = makeInput({
+      cwd: tmpDir,
+      tool_input: { file_path: filePath },
+    });
     const result = injectIntent(input);
 
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
     expect(result.hookSpecificOutput?.additionalContext).toContain('INTENT.md');
     // INTENT.md content should be embedded
-    expect(result.hookSpecificOutput?.additionalContext).toContain('Root module');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'Root module',
+    );
   });
 
   it('ancestor chain: ancestor directories with INTENT.md → chain: line in output', () => {
     // Structure: tmpDir/src/feature/file.ts
     // tmpDir has INTENT.md (root), tmpDir/src has INTENT.md (ancestor)
     // tmpDir/src/feature has INTENT.md (leaf)
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(
       join(tmpDir, 'INTENT.md'),
       '## Purpose\nRoot\n## Boundaries\nAll\n',
@@ -100,7 +122,10 @@ describe('injectIntent', () => {
     const filePath = join(tmpDir, 'src', 'feature', 'index.ts');
     writeFileSync(filePath, '');
 
-    const input = makeInput({ cwd: tmpDir, tool_input: { file_path: filePath } });
+    const input = makeInput({
+      cwd: tmpDir,
+      tool_input: { file_path: filePath },
+    });
     const result = injectIntent(input);
 
     expect(result.continue).toBe(true);
@@ -110,7 +135,10 @@ describe('injectIntent', () => {
   });
 
   it('dedup revisit: second call for same directory+session → only [filid:map] (no [filid:ctx])', () => {
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(
       join(tmpDir, 'INTENT.md'),
       '## Purpose\nRoot\n## Boundaries\nAll\n',
@@ -128,7 +156,9 @@ describe('injectIntent', () => {
 
     // First visit
     const first = injectIntent(input);
-    expect(first.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
+    expect(first.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
 
     // Second visit (same session, same directory)
     const second = injectIntent({ ...input, session_id: sessionId });
@@ -139,7 +169,10 @@ describe('injectIntent', () => {
   });
 
   it('DETAIL.md hint: directory has DETAIL.md → detail: line in output', () => {
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(
       join(tmpDir, 'INTENT.md'),
       '## Purpose\nRoot\n## Boundaries\nAll\n',
@@ -149,7 +182,10 @@ describe('injectIntent', () => {
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
 
-    const input = makeInput({ cwd: tmpDir, tool_input: { file_path: filePath } });
+    const input = makeInput({
+      cwd: tmpDir,
+      tool_input: { file_path: filePath },
+    });
     const result = injectIntent(input);
 
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
@@ -162,7 +198,10 @@ describe('injectIntent', () => {
     // root: package.json + INTENT.md
     // src/feature: INTENT.md (owning fractal)
     // src/feature/utils: organ (no INTENT.md)
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
     mkdirSync(join(tmpDir, 'src', 'feature', 'utils'), { recursive: true });
     writeFileSync(
@@ -173,7 +212,9 @@ describe('injectIntent', () => {
 
     const input = makeInput({
       cwd: tmpDir,
-      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts') },
+      tool_input: {
+        file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts'),
+      },
     });
     const result = injectIntent(input);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
@@ -190,7 +231,10 @@ describe('injectIntent', () => {
   it('sibling organ → does NOT re-inline owning fractal INTENT.md', () => {
     // Structure: root/src/feature/{utils,types}
     // feature has INTENT.md, utils and types are organs
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
     mkdirSync(join(tmpDir, 'src', 'feature', 'utils'), { recursive: true });
     mkdirSync(join(tmpDir, 'src', 'feature', 'types'), { recursive: true });
@@ -207,7 +251,9 @@ describe('injectIntent', () => {
     const input1 = makeInput({
       cwd: tmpDir,
       session_id: sessionId,
-      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts') },
+      tool_input: {
+        file_path: join(tmpDir, 'src', 'feature', 'utils', 'helper.ts'),
+      },
     });
     const result1 = injectIntent(input1);
     const ctx1 = result1.hookSpecificOutput?.additionalContext ?? '';
@@ -218,7 +264,9 @@ describe('injectIntent', () => {
     const input2 = makeInput({
       cwd: tmpDir,
       session_id: sessionId,
-      tool_input: { file_path: join(tmpDir, 'src', 'feature', 'types', 'index.ts') },
+      tool_input: {
+        file_path: join(tmpDir, 'src', 'feature', 'types', 'index.ts'),
+      },
     });
     const result2 = injectIntent(input2);
     const ctx2 = result2.hookSpecificOutput?.additionalContext ?? '';
@@ -228,7 +276,10 @@ describe('injectIntent', () => {
   });
 
   it('fractal map accumulation: multiple calls → fmap.reads grows', () => {
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(
       join(tmpDir, 'INTENT.md'),
       '## Purpose\nRoot\n## Boundaries\nAll\n',
@@ -266,7 +317,10 @@ describe('injectIntent', () => {
 
   it('unread-intent: dir in reads but not intents → unread-intent line present', () => {
     // Set up FCA project
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
     mkdirSync(join(tmpDir, 'src', 'a'), { recursive: true });
     writeFileSync(join(tmpDir, 'src', 'a', 'file.ts'), '');
@@ -283,11 +337,13 @@ describe('injectIntent', () => {
     writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
 
     // Visit src/a again → fast path (cached boundary + in intents)
-    const result = injectIntent(makeInput({
-      cwd: tmpDir,
-      session_id: sessionId,
-      tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
-    }));
+    const result = injectIntent(
+      makeInput({
+        cwd: tmpDir,
+        session_id: sessionId,
+        tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
+      }),
+    );
     delete process.env.CLAUDE_CONFIG_DIR;
 
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
@@ -297,7 +353,10 @@ describe('injectIntent', () => {
 
   it('unread-intent: currentDir excluded from unread-intent list', () => {
     // Set up FCA project
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot\n');
     mkdirSync(join(tmpDir, 'src', 'a'), { recursive: true });
     writeFileSync(join(tmpDir, 'src', 'a', 'file.ts'), '');
@@ -314,11 +373,13 @@ describe('injectIntent', () => {
     writeBoundary(tmpDir, sessionId, join(tmpDir, 'src', 'a'), tmpDir);
 
     // Visit src/a → fast path, currentDir = src/a
-    const result = injectIntent(makeInput({
-      cwd: tmpDir,
-      session_id: sessionId,
-      tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
-    }));
+    const result = injectIntent(
+      makeInput({
+        cwd: tmpDir,
+        session_id: sessionId,
+        tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
+      }),
+    );
     delete process.env.CLAUDE_CONFIG_DIR;
 
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
@@ -330,24 +391,37 @@ describe('injectIntent', () => {
   });
 
   it('cross-turn re-injection: removeFractalMap between calls → [filid:ctx] re-appears', () => {
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot module\n');
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
 
     const sessionId = `session-cross-turn-${Date.now()}`;
-    const input = makeInput({ cwd: tmpDir, session_id: sessionId, tool_input: { file_path: filePath } });
+    const input = makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: filePath },
+    });
 
     process.env.CLAUDE_CONFIG_DIR = tmpDir;
 
     // Turn 1: first visit
     const turn1 = injectIntent(input);
-    expect(turn1.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
-    expect(turn1.hookSpecificOutput?.additionalContext).toContain('Root module');
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain(
+      'Root module',
+    );
 
     // Turn 1b: same directory — second visit in same turn → no ctx
     const turn1b = injectIntent(input);
-    expect(turn1b.hookSpecificOutput?.additionalContext ?? '').not.toContain('[filid:ctx]');
+    expect(turn1b.hookSpecificOutput?.additionalContext ?? '').not.toContain(
+      '[filid:ctx]',
+    );
 
     // Simulate turn boundary: clear fmap (what UserPromptSubmit does)
     removeFractalMap(tmpDir, sessionId);
@@ -355,24 +429,37 @@ describe('injectIntent', () => {
     // Turn 2: re-inject for same directory
     const turn2 = injectIntent(input);
     delete process.env.CLAUDE_CONFIG_DIR;
-    expect(turn2.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
-    expect(turn2.hookSpecificOutput?.additionalContext).toContain('Root module');
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain(
+      'Root module',
+    );
   });
 
   it('guide once per session: removeFractalMap between calls → guide NOT repeated', () => {
-    writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test' }));
+    writeFileSync(
+      join(tmpDir, 'package.json'),
+      JSON.stringify({ name: 'test' }),
+    );
     writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nRoot module\n');
     const filePath = join(tmpDir, 'index.ts');
     writeFileSync(filePath, '');
 
     const sessionId = `session-guide-once-${Date.now()}`;
-    const input = makeInput({ cwd: tmpDir, session_id: sessionId, tool_input: { file_path: filePath } });
+    const input = makeInput({
+      cwd: tmpDir,
+      session_id: sessionId,
+      tool_input: { file_path: filePath },
+    });
 
     process.env.CLAUDE_CONFIG_DIR = tmpDir;
 
     // Turn 1: first ctx ever → should include guide
     const turn1 = injectIntent(input);
-    expect(turn1.hookSpecificOutput?.additionalContext).toContain('[filid:guide]');
+    expect(turn1.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:guide]',
+    );
 
     // Simulate turn boundary
     removeFractalMap(tmpDir, sessionId);
@@ -380,7 +467,11 @@ describe('injectIntent', () => {
     // Turn 2: guide marker still exists → no guide
     const turn2 = injectIntent(input);
     delete process.env.CLAUDE_CONFIG_DIR;
-    expect(turn2.hookSpecificOutput?.additionalContext).toContain('[filid:ctx]');
-    expect(turn2.hookSpecificOutput?.additionalContext).not.toContain('[filid:guide]');
+    expect(turn2.hookSpecificOutput?.additionalContext).toContain(
+      '[filid:ctx]',
+    );
+    expect(turn2.hookSpecificOutput?.additionalContext).not.toContain(
+      '[filid:guide]',
+    );
   });
 });

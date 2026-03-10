@@ -1,7 +1,7 @@
 import type {
-  IntentMdValidation,
-  DocumentViolation,
   DetailMdValidation,
+  DocumentViolation,
+  IntentMdValidation,
 } from '../types/documents.js';
 
 /** Maximum line count for INTENT.md */
@@ -116,4 +116,3 @@ export function validateDetailMd(
     violations,
   };
 }
-

@@ -13,7 +13,11 @@ import type { HookOutput, PreToolUseInput } from '../../../types/hooks.js';
 
 let tmpDir: string;
 
-function makeInput(overrides: Partial<PreToolUseInput> & { tool_input?: PreToolUseInput['tool_input'] }): PreToolUseInput {
+function makeInput(
+  overrides: Partial<PreToolUseInput> & {
+    tool_input?: PreToolUseInput['tool_input'];
+  },
+): PreToolUseInput {
   return {
     cwd: tmpDir,
     session_id: 'test-session-ptu',
@@ -32,8 +36,14 @@ beforeEach(() => {
   tmpDir = join(tmpdir(), `filid-ptu-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
   // Mark as FCA project
-  writeFileSync(join(tmpDir, 'package.json'), JSON.stringify({ name: 'test-pkg' }));
-  writeFileSync(join(tmpDir, 'INTENT.md'), '## Purpose\nTest project\n## Boundaries\nAll\n');
+  writeFileSync(
+    join(tmpDir, 'package.json'),
+    JSON.stringify({ name: 'test-pkg' }),
+  );
+  writeFileSync(
+    join(tmpDir, 'INTENT.md'),
+    '## Purpose\nTest project\n## Boundaries\nAll\n',
+  );
 });
 
 afterEach(() => {
@@ -77,10 +87,7 @@ describe('mergeResults', () => {
   });
 
   it('no additionalContext → no hookSpecificOutput', () => {
-    const results: HookOutput[] = [
-      { continue: true },
-      { continue: true },
-    ];
+    const results: HookOutput[] = [{ continue: true }, { continue: true }];
     const out = mergeResults(results);
     expect(out.hookSpecificOutput).toBeUndefined();
   });
@@ -157,9 +164,14 @@ describe('handlePreToolUse', () => {
   it('Edit INTENT.md with >20 line new_string → continue=true with warning', async () => {
     const intentPath = join(tmpDir, 'src', 'auth', 'INTENT.md');
     mkdirSync(join(tmpDir, 'src', 'auth'), { recursive: true });
-    writeFileSync(intentPath, '# Auth\n## Purpose\nAuth module\n## Boundaries\nAll\n');
+    writeFileSync(
+      intentPath,
+      '# Auth\n## Purpose\nAuth module\n## Boundaries\nAll\n',
+    );
 
-    const newString = Array.from({ length: 25 }, (_, i) => `Line ${i}`).join('\n');
+    const newString = Array.from({ length: 25 }, (_, i) => `Line ${i}`).join(
+      '\n',
+    );
 
     const input = makeInput({
       tool_name: 'Edit',
@@ -168,18 +180,28 @@ describe('handlePreToolUse', () => {
 
     const result = await handlePreToolUse(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('25 new lines');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      '25 new lines',
+    );
   });
 
   it('mergeResults: mixed block + context → continue=false with blocker output', () => {
     const results: HookOutput[] = [
-      { continue: false, hookSpecificOutput: { additionalContext: 'BLOCKED: organ violation' } },
-      { continue: true, hookSpecificOutput: { additionalContext: 'intent context here' } },
+      {
+        continue: false,
+        hookSpecificOutput: { additionalContext: 'BLOCKED: organ violation' },
+      },
+      {
+        continue: true,
+        hookSpecificOutput: { additionalContext: 'intent context here' },
+      },
     ];
     const out = mergeResults(results);
     expect(out.continue).toBe(false);
     // Blocker output takes precedence over passing context
-    expect(out.hookSpecificOutput?.additionalContext).toBe('BLOCKED: organ violation');
+    expect(out.hookSpecificOutput?.additionalContext).toBe(
+      'BLOCKED: organ violation',
+    );
   });
 
   it('Write DETAIL.md reads existing file content and passes to validator', async () => {

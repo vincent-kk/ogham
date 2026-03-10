@@ -152,7 +152,10 @@ export function trackChange(
     const tag = `[filid:change] ${timestamp} ${toolName} ${filePath} ${category}`;
     return {
       continue: true,
-      hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: tag },
+      hookSpecificOutput: {
+        hookEventName: 'PostToolUse',
+        additionalContext: tag,
+      },
     };
   }
 

@@ -1,5 +1,6 @@
 import { removeFractalMap } from '../core/cache-manager.js';
 import type { HookOutput, UserPromptSubmitInput } from '../types/hooks.js';
+
 import { injectContext } from './context-injector.js';
 import { isFcaProject } from './shared.js';
 

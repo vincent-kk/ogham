@@ -1,16 +1,23 @@
 import { mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { readFractalMap, writeFractalMap } from '../../../core/cache-manager.js';
+import {
+  readFractalMap,
+  writeFractalMap,
+} from '../../../core/cache-manager.js';
 import { handleUserPromptSubmit } from '../../../hooks/user-prompt-submit.js';
 import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 
 let tempDir: string;
 
 beforeEach(() => {
-  tempDir = join(tmpdir(), `filid-ups-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  tempDir = join(
+    tmpdir(),
+    `filid-ups-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(tempDir, { recursive: true });
   process.env.CLAUDE_CONFIG_DIR = tempDir;
 });
@@ -39,7 +46,10 @@ describe('handleUserPromptSubmit', () => {
     });
 
     // Verify fmap exists
-    expect(readFractalMap(tempDir, sessionId).reads).toEqual(['src/a', 'src/b']);
+    expect(readFractalMap(tempDir, sessionId).reads).toEqual([
+      'src/a',
+      'src/b',
+    ]);
 
     const input: UserPromptSubmitInput = {
       cwd: tempDir,
@@ -50,7 +60,11 @@ describe('handleUserPromptSubmit', () => {
     const result = handleUserPromptSubmit(input);
 
     // fmap should be cleared
-    expect(readFractalMap(tempDir, sessionId)).toEqual({ reads: [], intents: [], details: [] });
+    expect(readFractalMap(tempDir, sessionId)).toEqual({
+      reads: [],
+      intents: [],
+      details: [],
+    });
 
     // Should still return a valid hook output (from injectContext)
     expect(result.continue).toBe(true);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import type { PostToolUseInput } from '../../types/hooks.js';
 import { readStdin } from '../../lib/stdin.js';
+import type { PostToolUseInput } from '../../types/hooks.js';
 import { trackChange } from '../change-tracker.js';
 
 // Intentionally disabled hook — see change-tracker.ts @deprecated for rationale.

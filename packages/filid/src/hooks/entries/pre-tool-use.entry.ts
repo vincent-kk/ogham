@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import type { PreToolUseInput } from '../../types/hooks.js';
 import { readStdin } from '../../lib/stdin.js';
+import type { PreToolUseInput } from '../../types/hooks.js';
 import { handlePreToolUse } from '../pre-tool-use.js';
 
 const raw = await readStdin(2000);

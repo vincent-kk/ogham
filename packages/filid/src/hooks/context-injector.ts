@@ -68,9 +68,7 @@ function buildFcaContext(cwd: string): string {
  *
  * Never blocks user prompts (always continue: true).
  */
-export function injectContext(
-  input: UserPromptSubmitInput,
-): HookOutput {
+export function injectContext(input: UserPromptSubmitInput): HookOutput {
   const { cwd, session_id } = input;
 
   // Gate 1: skip if not an FCA-AI project

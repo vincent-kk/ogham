@@ -1,6 +1,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -19,7 +20,10 @@ import {
 let tempDir: string;
 
 beforeEach(() => {
-  tempDir = join(tmpdir(), `filid-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  tempDir = join(
+    tmpdir(),
+    `filid-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(tempDir, { recursive: true });
   // Override CLAUDE_CONFIG_DIR to isolate tests
   process.env.CLAUDE_CONFIG_DIR = tempDir;
@@ -91,7 +95,11 @@ describe('cache-manager boundary/fmap extensions', () => {
     const dir = '/proj/workspace/src';
 
     writeBoundary(cwd, sessionId, dir, cwd);
-    writeFractalMap(cwd, sessionId, { reads: ['src'], intents: [], details: [] });
+    writeFractalMap(cwd, sessionId, {
+      reads: ['src'],
+      intents: [],
+      details: [],
+    });
 
     // Verify files were written
     expect(readBoundary(cwd, sessionId, dir)).toBe(cwd);
@@ -101,7 +109,11 @@ describe('cache-manager boundary/fmap extensions', () => {
 
     // After cleanup, reads should return defaults
     expect(readBoundary(cwd, sessionId, dir)).toBeNull();
-    expect(readFractalMap(cwd, sessionId)).toEqual({ reads: [], intents: [], details: [] });
+    expect(readFractalMap(cwd, sessionId)).toEqual({
+      reads: [],
+      intents: [],
+      details: [],
+    });
   });
 
   // Test 5: Session isolation — different sessionIds do not share cache
@@ -112,10 +124,18 @@ describe('cache-manager boundary/fmap extensions', () => {
     const dir = '/proj/workspace/src';
 
     writeBoundary(cwd, sessionA, dir, '/proj/workspace');
-    writeFractalMap(cwd, sessionA, { reads: ['src'], intents: ['src'], details: [] });
+    writeFractalMap(cwd, sessionA, {
+      reads: ['src'],
+      intents: ['src'],
+      details: [],
+    });
 
     expect(readBoundary(cwd, sessionB, dir)).toBeNull();
-    expect(readFractalMap(cwd, sessionB)).toEqual({ reads: [], intents: [], details: [] });
+    expect(readFractalMap(cwd, sessionB)).toEqual({
+      reads: [],
+      intents: [],
+      details: [],
+    });
   });
 
   // Test 6: Auto-create cache dir
@@ -210,8 +230,16 @@ describe('cache-manager boundary/fmap extensions', () => {
     const cwd = '/proj/workspace';
     const sessionId = 'session-overwrite';
 
-    writeFractalMap(cwd, sessionId, { reads: ['old'], intents: ['old'], details: ['old'] });
-    writeFractalMap(cwd, sessionId, { reads: ['new'], intents: [], details: [] });
+    writeFractalMap(cwd, sessionId, {
+      reads: ['old'],
+      intents: ['old'],
+      details: ['old'],
+    });
+    writeFractalMap(cwd, sessionId, {
+      reads: ['new'],
+      intents: [],
+      details: [],
+    });
 
     const result = readFractalMap(cwd, sessionId);
     expect(result).toEqual({ reads: ['new'], intents: [], details: [] });
@@ -235,9 +263,17 @@ describe('cache-manager boundary/fmap extensions', () => {
 
     // Part 1: removeFractalMap deletes fmap, readFractalMap returns empty after
     const sid1 = 'session-rm-1';
-    writeFractalMap(cwd, sid1, { reads: ['src/a'], intents: ['src/a'], details: [] });
+    writeFractalMap(cwd, sid1, {
+      reads: ['src/a'],
+      intents: ['src/a'],
+      details: [],
+    });
     removeFractalMap(cwd, sid1);
-    expect(readFractalMap(cwd, sid1)).toEqual({ reads: [], intents: [], details: [] });
+    expect(readFractalMap(cwd, sid1)).toEqual({
+      reads: [],
+      intents: [],
+      details: [],
+    });
 
     // Part 2: removeFractalMap does NOT affect boundary cache
     const sid2 = 'session-rm-2';

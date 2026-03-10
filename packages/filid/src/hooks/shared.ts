@@ -9,17 +9,17 @@ import { join } from 'node:path';
  * Treats presence of .filid/ directory or INTENT.md as indicator.
  */
 export function isFcaProject(cwd: string): boolean {
-  return (
-    existsSync(join(cwd, '.filid')) ||
-    existsSync(join(cwd, 'INTENT.md'))
-  );
+  return existsSync(join(cwd, '.filid')) || existsSync(join(cwd, 'INTENT.md'));
 }
 
 /**
  * Extract the filename from a path, handling both / and \ separators.
  */
 function fileBasename(filePath: string): string {
-  const lastSlash = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+  const lastSlash = Math.max(
+    filePath.lastIndexOf('/'),
+    filePath.lastIndexOf('\\'),
+  );
   return lastSlash === -1 ? filePath : filePath.slice(lastSlash + 1);
 }
 
@@ -38,4 +38,3 @@ export function isIntentMd(filePath: string): boolean {
 export function isDetailMd(filePath: string): boolean {
   return fileBasename(filePath) === 'DETAIL.md';
 }
-

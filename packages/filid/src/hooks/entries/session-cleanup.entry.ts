@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import type { SessionEndInput } from '../../types/hooks.js';
 import { readStdin } from '../../lib/stdin.js';
+import type { SessionEndInput } from '../../types/hooks.js';
 import { cleanupSession } from '../session-cleanup.js';
 
 const raw = await readStdin(2000);

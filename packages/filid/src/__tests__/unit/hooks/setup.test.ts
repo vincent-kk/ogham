@@ -154,4 +154,3 @@ describe('processSetup', () => {
     expect(result.continue).toBe(true);
   });
 });
-

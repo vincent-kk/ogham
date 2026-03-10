@@ -193,7 +193,12 @@ async function handleCheckpoint(
   } catch {
     // directory does not exist
   }
-  const checkFiles = new Set(['structure-check.md', 'session.md', 'verification.md', 'review-report.md']);
+  const checkFiles = new Set([
+    'structure-check.md',
+    'session.md',
+    'verification.md',
+    'review-report.md',
+  ]);
   const existingFiles = dirEntries.filter((f) => checkFiles.has(f));
 
   const hasStructureCheck = existingFiles.includes('structure-check.md');

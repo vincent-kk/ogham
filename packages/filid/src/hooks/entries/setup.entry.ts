@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import type { SessionStartInput } from '../../types/hooks.js';
 import { readStdin } from '../../lib/stdin.js';
+import type { SessionStartInput } from '../../types/hooks.js';
 import { processSetup } from '../setup.js';
 
 const raw = await readStdin(5000);
