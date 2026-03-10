@@ -18,6 +18,8 @@ export interface CompanionIdentityMinimal {
     traits?: string[];
   };
   principles?: string[];
+  taboos?: string[];
+  origin_story?: string;
 }
 
 /**

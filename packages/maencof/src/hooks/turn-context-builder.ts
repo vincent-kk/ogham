@@ -83,28 +83,116 @@ export function readCompanionIdentity(
 }
 
 /**
+ * Strip YAML frontmatter, heading lines, and blank lines; return first paragraph
+ * up to maxChars characters.
+ */
+export function compressMarkdownBody(
+  content: string,
+  maxChars = 150,
+): string {
+  // Remove YAML frontmatter
+  let text = content.replace(/^---[\s\S]*?---\n?/, '');
+  // Remove heading lines and blank lines at start
+  const lines = text.split('\n');
+  const bodyLines: string[] = [];
+  let inBody = false;
+  for (const line of lines) {
+    if (!inBody) {
+      if (line.startsWith('#') || line.trim() === '') continue;
+      inBody = true;
+    }
+    bodyLines.push(line);
+  }
+  text = bodyLines.join('\n');
+  // Return first paragraph (up to first blank line), capped at maxChars
+  const firstPara = text.split(/\n\n/)[0] ?? '';
+  const flat = firstPara.replace(/\n/g, ' ').trim();
+  return flat.length > maxChars ? flat.slice(0, maxChars) : flat;
+}
+
+interface IndexNode {
+  layer?: number;
+  path?: string;
+  title?: string;
+  tags?: string[];
+}
+
+/**
+ * Read L1 nodes from index.json and return a compressed summary string.
+ * Format per node: "[title]: excerpt… | tags: t1,t2,t3"
+ * Returns empty string when no L1 nodes found or on any failure.
+ */
+export function readL1NodesSummary(cwd: string): string {
+  const indexPath = join(cwd, '.maencof', 'index.json');
+  try {
+    if (!existsSync(indexPath)) return '';
+    const parsed = JSON.parse(readFileSync(indexPath, 'utf-8')) as {
+      nodes?: unknown;
+    };
+
+    let nodes: IndexNode[] = [];
+    if (Array.isArray(parsed.nodes)) {
+      nodes = parsed.nodes as IndexNode[];
+    } else if (parsed.nodes && typeof parsed.nodes === 'object') {
+      nodes = Object.values(parsed.nodes) as IndexNode[];
+    }
+
+    const l1Nodes = nodes.filter((n) => n.layer === 1);
+    if (l1Nodes.length === 0) return '';
+
+    const lines: string[] = [];
+    for (const node of l1Nodes) {
+      if (!node.path || !node.title) continue;
+      try {
+        const filePath = join(cwd, node.path);
+        if (!existsSync(filePath)) continue;
+        const content = readFileSync(filePath, 'utf-8');
+        const excerpt = compressMarkdownBody(content);
+        const tagPart =
+          node.tags && node.tags.length > 0
+            ? ` | tags: ${node.tags.slice(0, 3).join(',')}`
+            : '';
+        lines.push(`[${node.title}]: ${excerpt}${tagPart}`);
+      } catch {
+        // silent fallback — skip this node
+      }
+    }
+    return lines.join('\n');
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Build compressed `<companion-identity>` XML tag from identity data.
+ * Uses plain-text identity declaration for better AI internalization.
  * Target: ~200 chars max to respect C1 5-second constraint.
  */
 function buildCompanionIdentityTag(
   identity: CompanionIdentityMinimal,
 ): string {
-  const roleAttr = identity.role ? ` role="${identity.role}"` : '';
-  let tag = `<companion-identity name="${identity.name}"${roleAttr}>`;
+  const roleDecl = identity.role
+    ? `You are ${identity.name}, a ${identity.role}.`
+    : `You are ${identity.name}.`;
+  let tag = `<companion-identity>\n  ${roleDecl}`;
 
   if (identity.personality) {
     const { tone, approach, traits } = identity.personality;
     const toneAttr = tone ? ` tone="${tone}"` : '';
     const approachAttr = approach ? ` approach="${approach}"` : '';
     const traitsText = traits?.length ? traits.join(',') : '';
-    tag += `<personality${toneAttr}${approachAttr}>${traitsText}</personality>`;
+    tag += `\n  <personality${toneAttr}${approachAttr}>${traitsText}</personality>`;
   }
 
   if (identity.principles?.length) {
-    tag += `<principles>${identity.principles.join(' | ')}</principles>`;
+    tag += `\n  <principles>${identity.principles.join(' | ')}</principles>`;
   }
 
-  tag += '</companion-identity>';
+  if (identity.taboos?.length) {
+    tag += `\n  <taboos>${identity.taboos.join(' | ')}</taboos>`;
+  }
+
+  tag += '\n</companion-identity>';
   return tag;
 }
 
@@ -152,6 +240,10 @@ export function buildTurnContext(cwd: string): string {
     `<kg-core${vaultAttr} nodes="${totalNodes}" fresh="${freshPercent}%" layers="${formatLayerCounts(layerCounts)}" stale="${staleCount}">`,
   );
   parts.push(`  <pinned>${pinnedText}</pinned>`);
+  const l1Summary = readL1NodesSummary(cwd);
+  if (l1Summary) {
+    parts.push(`  <l1-core>\n${l1Summary}\n  </l1-core>`);
+  }
   parts.push('</kg-core>');
 
   // <kg-directive> tag

@@ -20,6 +20,7 @@ import {
 import { isMaencofVault } from './shared.js';
 import {
   buildTurnContext,
+  readCompanionIdentity,
   readIndexMetadata,
   readStaleCount,
 } from './turn-context-builder.js';
@@ -75,6 +76,25 @@ function buildSessionContext(cwd: string): string {
     '- When <pinned> contains nodes, prioritize those in context assembly via kg_context.',
     '- kg_context now returns content snippets from top results. Use it as the primary content retrieval tool for multi-document queries.',
   ];
+
+  // Companion identity — origin_story and greeting (session-once)
+  const identity = readCompanionIdentity(cwd);
+  if (identity) {
+    lines.push('');
+    lines.push('[maencof] Companion Identity');
+    if (identity.origin_story) {
+      // First sentence up to 120 chars
+      const firstSentence = identity.origin_story.split(/\.\s/)[0] ?? '';
+      const origin =
+        firstSentence.length > 120
+          ? firstSentence.slice(0, 120)
+          : firstSentence;
+      lines.push(`- Origin: ${origin}`);
+    }
+    if (identity.greeting) {
+      lines.push(`- Greeting: ${identity.greeting}`);
+    }
+  }
 
   return lines.join('\n');
 }
