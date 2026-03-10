@@ -11,6 +11,13 @@ export interface CompanionIdentityMinimal {
   schema_version: number;
   name: string;
   greeting: string;
+  role?: string;
+  personality?: {
+    tone?: string;
+    approach?: string;
+    traits?: string[];
+  };
+  principles?: string[];
 }
 
 /**

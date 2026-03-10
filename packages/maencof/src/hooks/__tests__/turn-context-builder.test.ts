@@ -8,6 +8,7 @@ import { writePinnedNodes } from '../cache-manager.js';
 import type { PinnedNode } from '../cache-manager.js';
 import {
   buildTurnContext,
+  readCompanionIdentity,
   readIndexMetadata,
   readStaleCount,
 } from '../turn-context-builder.js';
@@ -49,10 +50,27 @@ function writeStaleNodes(paths: string[]): void {
   );
 }
 
-function writeCompanion(name: string): void {
+interface CompanionData {
+  name: string;
+  greeting?: string;
+  schema_version?: number;
+  role?: string;
+  personality?: {
+    tone?: string;
+    approach?: string;
+    traits?: string[];
+  };
+  principles?: string[];
+}
+
+function writeCompanion(nameOrData: string | CompanionData): void {
+  const data =
+    typeof nameOrData === 'string'
+      ? { schema_version: 1, name: nameOrData, greeting: 'Hello' }
+      : { schema_version: 1, greeting: 'Hello', ...nameOrData };
   writeFileSync(
     join(vaultDir, '.maencof-meta', 'companion-identity.json'),
-    JSON.stringify({ name, greeting: 'Hello' }),
+    JSON.stringify(data),
     'utf-8',
   );
 }
@@ -169,5 +187,91 @@ describe('buildTurnContext', () => {
     const result = buildTurnContext(vaultDir);
     // Check no Korean characters (Hangul range: U+AC00-U+D7A3)
     expect(result).not.toMatch(/[\uAC00-\uD7A3]/);
+  });
+
+  it('includes <companion-identity> tag with name and role', () => {
+    writeCompanion({
+      name: 'Ari',
+      role: 'knowledge curator',
+    });
+    const result = buildTurnContext(vaultDir);
+    expect(result).toContain('<companion-identity name="Ari" role="knowledge curator">');
+    expect(result).toContain('</companion-identity>');
+  });
+
+  it('includes personality attributes and traits in identity tag', () => {
+    writeCompanion({
+      name: 'Ari',
+      personality: {
+        tone: 'warm',
+        approach: 'socratic',
+        traits: ['curious', 'empathetic'],
+      },
+    });
+    const result = buildTurnContext(vaultDir);
+    expect(result).toContain('<personality tone="warm" approach="socratic">curious,empathetic</personality>');
+  });
+
+  it('includes principles in identity tag', () => {
+    writeCompanion({
+      name: 'Ari',
+      principles: ['clarity first', 'ask before assuming'],
+    });
+    const result = buildTurnContext(vaultDir);
+    expect(result).toContain('<principles>clarity first | ask before assuming</principles>');
+  });
+
+  it('places <companion-identity> before <kg-core>', () => {
+    writeCompanion({ name: 'Ari', role: 'guide' });
+    writeIndex([{ layer: 1 }]);
+    const result = buildTurnContext(vaultDir);
+    const identityIdx = result.indexOf('<companion-identity');
+    const kgCoreIdx = result.indexOf('<kg-core');
+    expect(identityIdx).toBeGreaterThanOrEqual(0);
+    expect(identityIdx).toBeLessThan(kgCoreIdx);
+  });
+
+  it('omits <companion-identity> when no identity file exists', () => {
+    const result = buildTurnContext(vaultDir);
+    expect(result).not.toContain('<companion-identity');
+  });
+
+  it('renders minimal identity tag with name only (no optional fields)', () => {
+    writeCompanion('Ari');
+    const result = buildTurnContext(vaultDir);
+    expect(result).toContain('<companion-identity name="Ari">');
+    expect(result).not.toContain('<personality');
+    expect(result).not.toContain('<principles');
+    expect(result).toContain('</companion-identity>');
+  });
+});
+
+describe('readCompanionIdentity', () => {
+  it('returns null when file is missing', () => {
+    expect(readCompanionIdentity('/nonexistent')).toBeNull();
+  });
+
+  it('returns full identity with optional fields', () => {
+    writeCompanion({
+      name: 'Ari',
+      role: 'curator',
+      personality: { tone: 'warm', traits: ['kind'] },
+      principles: ['be clear'],
+    });
+    const identity = readCompanionIdentity(vaultDir);
+    expect(identity).not.toBeNull();
+    expect(identity!.name).toBe('Ari');
+    expect(identity!.role).toBe('curator');
+    expect(identity!.personality?.tone).toBe('warm');
+    expect(identity!.principles).toEqual(['be clear']);
+  });
+
+  it('returns null for invalid data (missing required fields)', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'companion-identity.json'),
+      JSON.stringify({ schema_version: 1 }),
+      'utf-8',
+    );
+    expect(readCompanionIdentity(vaultDir)).toBeNull();
   });
 });
