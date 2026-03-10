@@ -2,7 +2,7 @@
 
 ## Purpose
 
-14개 MCP 도구의 비즈니스 로직 핸들러. zod 검증을 통과한 인자를 받아 `core/`, `ast/`, `metrics/`, `compress/` 모듈을 조합하여 결과를 반환한다.
+15개 MCP 도구의 비즈니스 로직 핸들러. zod 검증을 통과한 인자를 받아 `core/`, `ast/`, `metrics/`, `compress/` 모듈을 조합하여 결과를 반환한다.
 
 ## Structure
 
@@ -22,6 +22,7 @@
 | `review-manage.ts`      | `review_manage`      | 파일시스템 (`.filid/review/`)          |
 | `debt-manage.ts`        | `debt_manage`        | 파일시스템 (`.filid/debt/`)            |
 | `cache-manage.ts`       | `cache_manage`       | `core/cache-manager`                   |
+| `review-format.ts`      | (보조 유틸리티)      | PR 코멘트 · 재검증 코멘트 포맷팅       |
 
 ## Conventions
 

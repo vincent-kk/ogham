@@ -10,7 +10,7 @@
 |------|------|
 | `index.ts` | 공개 API 엔트리포인트 (94개 함수/상수 + 전체 타입 re-export) |
 | `version.ts` | 자동 생성 버전 상수 (직접 수정 금지) |
-| `core/` | FractalTree, RuleEngine, DriftDetector 등 12개 핵심 모듈 |
+| `core/` | FractalTree, RuleEngine, DriftDetector 등 15개 핵심 모듈 |
 | `ast/` | `@ast-grep/napi` 기반 AST 분석 (LCOM4, CC, 의존성) |
 | `mcp/` | MCP 서버 + 14개 도구 핸들러 |
 | `hooks/` | Claude Code 훅 구현체 + esbuild 진입점 |
