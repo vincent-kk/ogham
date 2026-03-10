@@ -13,7 +13,7 @@
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir, pruneOldSessions } from '../core/cache-manager.js';
+import { getCacheDir, pruneOldSessions, pruneStaleCacheDirs } from '../core/cache-manager.js';
 import { createLogger, setLogDir } from '../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../types/hooks.js';
 
@@ -93,8 +93,9 @@ export function processSetup(input: SessionStartInput): HookOutput {
 
     log.debug(`cwd=${cwd} fca=${isFca} cache=${cacheDir}`);
 
-    // Phase 3: Maintenance — prune old session files
+    // Phase 3: Maintenance — prune old session files + stale cache dirs
     pruneOldSessions(cwd);
+    pruneStaleCacheDirs();
 
     // Only inject context for FCA projects to minimize token usage
     if (isFca) {

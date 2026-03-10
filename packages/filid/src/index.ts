@@ -112,6 +112,7 @@ export {
   sessionIdHash,
   isFirstInSession,
   pruneOldSessions,
+  pruneStaleCacheDirs,
   removeSessionFiles,
   markSessionInjected,
   saveRunHash,

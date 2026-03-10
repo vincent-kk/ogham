@@ -35,6 +35,7 @@ function makeInput(
 beforeEach(() => {
   tmpDir = join(tmpdir(), `filid-ptu-test-${Date.now()}`);
   mkdirSync(tmpDir, { recursive: true });
+  process.env.CLAUDE_CONFIG_DIR = tmpDir;
   // Mark as FCA project
   writeFileSync(
     join(tmpDir, 'package.json'),
@@ -47,6 +48,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  delete process.env.CLAUDE_CONFIG_DIR;
   rmSync(tmpDir, { recursive: true, force: true });
   vi.restoreAllMocks();
 });

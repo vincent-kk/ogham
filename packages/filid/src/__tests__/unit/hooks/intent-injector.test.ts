@@ -41,9 +41,11 @@ beforeEach(() => {
     `filid-injector-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   mkdirSync(tmpDir, { recursive: true });
+  process.env.CLAUDE_CONFIG_DIR = tmpDir;
 });
 
 afterEach(() => {
+  delete process.env.CLAUDE_CONFIG_DIR;
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
@@ -328,7 +330,6 @@ describe('injectIntent', () => {
     const sessionId = `session-unread-${Date.now()}`;
 
     // Pre-populate fmap: src/a in reads+intents, src/b in reads only (unread)
-    process.env.CLAUDE_CONFIG_DIR = tmpDir;
     writeFractalMap(tmpDir, sessionId, {
       reads: ['src/a', 'src/b'],
       intents: ['src/a'],
@@ -344,7 +345,6 @@ describe('injectIntent', () => {
         tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
       }),
     );
-    delete process.env.CLAUDE_CONFIG_DIR;
 
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('unread-intent:');
@@ -364,7 +364,6 @@ describe('injectIntent', () => {
     const sessionId = `session-cur-excl-${Date.now()}`;
 
     // Pre-populate fmap: src/a (currentDir) + src/b + src/c in reads, only src/b in intents
-    process.env.CLAUDE_CONFIG_DIR = tmpDir;
     writeFractalMap(tmpDir, sessionId, {
       reads: ['src/a', 'src/b', 'src/c'],
       intents: ['src/a'],
@@ -380,7 +379,6 @@ describe('injectIntent', () => {
         tool_input: { file_path: join(tmpDir, 'src', 'a', 'file.ts') },
       }),
     );
-    delete process.env.CLAUDE_CONFIG_DIR;
 
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     // src/b and src/c are unread, but src/a (currentDir) should be excluded
@@ -406,8 +404,6 @@ describe('injectIntent', () => {
       tool_input: { file_path: filePath },
     });
 
-    process.env.CLAUDE_CONFIG_DIR = tmpDir;
-
     // Turn 1: first visit
     const turn1 = injectIntent(input);
     expect(turn1.hookSpecificOutput?.additionalContext).toContain(
@@ -428,7 +424,6 @@ describe('injectIntent', () => {
 
     // Turn 2: re-inject for same directory
     const turn2 = injectIntent(input);
-    delete process.env.CLAUDE_CONFIG_DIR;
     expect(turn2.hookSpecificOutput?.additionalContext).toContain(
       '[filid:ctx]',
     );
@@ -453,8 +448,6 @@ describe('injectIntent', () => {
       tool_input: { file_path: filePath },
     });
 
-    process.env.CLAUDE_CONFIG_DIR = tmpDir;
-
     // Turn 1: first ctx ever → should include guide
     const turn1 = injectIntent(input);
     expect(turn1.hookSpecificOutput?.additionalContext).toContain(
@@ -466,7 +459,6 @@ describe('injectIntent', () => {
 
     // Turn 2: guide marker still exists → no guide
     const turn2 = injectIntent(input);
-    delete process.env.CLAUDE_CONFIG_DIR;
     expect(turn2.hookSpecificOutput?.additionalContext).toContain(
       '[filid:ctx]',
     );
