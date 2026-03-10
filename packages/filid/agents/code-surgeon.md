@@ -5,7 +5,7 @@ description: >
   Delegate when: applying a specific FIX-XXX item from fix-requests.md, refactoring
   test files for 3+12 rule compliance (it.each parameterization, test consolidation),
   fixing LCOM4/CC rule violations, or applying any targeted code-quality patch approved
-  by the review committee. Does NOT require SPEC.md scope or TDD workflow — operates
+  by the review committee. Does NOT require DETAIL.md scope or TDD workflow — operates
   directly from fix-requests.md instructions. Trigger phrases: "apply fix", "apply
   patch", "fix the violation", "parameterize tests", "refactor for 3+12".
 tools: Read, Write, Edit, Glob, Grep, Bash

@@ -8,7 +8,7 @@ complexity: medium
 
 # fca-scan — FCA-AI Rule Scanner
 
-Scan the project for FCA-AI rule violations across CLAUDE.md documents,
+Scan the project for FCA-AI rule violations across INTENT.md documents,
 organ directory boundaries, and test file structure. Produces a prioritised
 violation report and, with `--fix`, applies automatic remediation.
 
@@ -42,14 +42,14 @@ See [reference.md Section 1](./reference.md#section-1--tree-construction).
 Phases 2, 3, and 4 are **independent** and run **in parallel** as separate Task
 subagents (`run_in_background: true`). Await all three before Phase 5.
 
-### Phase 2 — CLAUDE.md Validation
+### Phase 2 — INTENT.md Validation
 
-Check line count (≤50) and 3-tier boundary sections for every CLAUDE.md using Read and Grep.
-See [reference.md Section 2](./reference.md#section-2--claudemd-validation).
+Check line count (≤50) and 3-tier boundary sections for every INTENT.md using Read and Grep.
+See [reference.md Section 2](./reference.md#section-2--intentmd-validation).
 
 ### Phase 3 — Organ Directory Validation
 
-Verify no organ directory contains a CLAUDE.md file using `fractal_scan` results from Phase 1.
+Verify no organ directory contains a INTENT.md file using `fractal_scan` results from Phase 1.
 See [reference.md Section 3](./reference.md#section-3--organ-directory-validation).
 
 ### Phase 4 — Test File Validation (3+12 Rule)
@@ -62,12 +62,12 @@ See [reference.md Section 4](./reference.md#section-4--test-file-validation-312-
 Emit a structured violation report. With `--fix`, apply auto-remediations
 and re-validate:
 
-- **CLAUDE.md line-count violations**: delegated to `context-manager` agent
+- **INTENT.md line-count violations**: delegated to `context-manager` agent
   (trims and compresses to bring within the 50-line limit).
-- **CLAUDE.md missing boundary sections**: delegated to `context-manager` agent
+- **INTENT.md missing boundary sections**: delegated to `context-manager` agent
   (appends skeleton "Always do" / "Ask first" / "Never do" sections).
-- **Organ directory CLAUDE.md violations**: delegated to `context-manager` agent
-  (removes the forbidden CLAUDE.md from the organ directory).
+- **Organ directory INTENT.md violations**: delegated to `context-manager` agent
+  (removes the forbidden INTENT.md from the organ directory).
 - **3+12 rule violations in spec files**: delegated to `code-surgeon` agent
   (parameterizes repetitive `it()` blocks into `it.each()` tables).
 - Violations that require architectural decisions (reclassification, missing
@@ -111,9 +111,9 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 /filid:fca-scan --fix
 
 # Phases: 1 (Tree) → [2 + 3 + 4 in parallel] → 5 (Report)
-# Agents (--fix only): context-manager (CLAUDE.md remediation), code-surgeon (3+12 remediation)
+# Agents (--fix only): context-manager (INTENT.md remediation), code-surgeon (3+12 remediation)
 # Thresholds
-CLAUDE_MD_LINE_LIMIT = 50 lines
+INTENT_MD_LINE_LIMIT = 50 lines
 TEST_THRESHOLD       = 15 test cases per spec file
 ORGAN_DIR_NAMES      = components | utils | types | hooks | helpers
                        | lib | styles | assets | constants

@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 
 import type {
   CategoryType,
@@ -16,8 +16,8 @@ export interface NodeEntry {
   path: string;
   name: string;
   type: CategoryType;
-  hasClaudeMd: boolean;
-  hasSpecMd: boolean;
+  hasIntentMd: boolean;
+  hasDetailMd: boolean;
   hasIndex?: boolean;
   hasMain?: boolean;
 }
@@ -65,8 +65,8 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
       parent: null,
       children: [],
       organs: [],
-      hasClaudeMd: e.hasClaudeMd,
-      hasSpecMd: e.hasSpecMd,
+      hasIntentMd: e.hasIntentMd,
+      hasDetailMd: e.hasDetailMd,
       hasIndex: e.hasIndex ?? false,
       hasMain: e.hasMain ?? false,
       depth: 0,
@@ -291,6 +291,18 @@ export async function scanProject(
   // For each directory, collect metadata needed for classification
   const dirSet = new Set(allDirs);
 
+  // Pre-compute immediate children map: O(n) instead of O(n²) per-entry lookups
+  const immediateChildrenMap = new Map<string, string[]>();
+  for (const absPath of allDirs) {
+    immediateChildrenMap.set(absPath, []);
+  }
+  for (const absPath of allDirs) {
+    const parentDir = dirname(absPath);
+    if (parentDir && immediateChildrenMap.has(parentDir)) {
+      immediateChildrenMap.get(parentDir)!.push(absPath);
+    }
+  }
+
   const nodeEntries: NodeEntry[] = [];
 
   for (const absPath of allDirs) {
@@ -303,8 +315,8 @@ export async function scanProject(
       absPath === rootPath
         ? (rootPath.split('/').pop() ?? '')
         : (absPath.split('/').pop() ?? '');
-    const hasClaudeMd = existsSync(join(absPath, 'CLAUDE.md'));
-    const hasSpecMd = existsSync(join(absPath, 'SPEC.md'));
+    const hasIntentMd = existsSync(join(absPath, 'INTENT.md'));
+    const hasDetailMd = existsSync(join(absPath, 'DETAIL.md'));
     const hasIndex =
       existsSync(join(absPath, 'index.ts')) ||
       existsSync(join(absPath, 'index.tsx')) ||
@@ -315,40 +327,25 @@ export async function scanProject(
       existsSync(join(absPath, 'main.ts')) ||
       existsSync(join(absPath, 'main.js'));
 
-    // Check if this directory has fractal children (child dirs classified as fractal)
-    // We use a two-pass approach: first collect all directories, then classify
-    // For now, check if any immediate subdirectory exists in our set
-    const hasFractalChildren = allDirs.some(
-      (d) =>
-        d !== absPath &&
-        d.startsWith(absPath + '/') &&
-        d.replace(absPath + '/', '').indexOf('/') === -1 &&
-        dirSet.has(d),
-    );
-
-    // isLeafDirectory: no subdirectories at all
-    const isLeafDirectory = !allDirs.some(
-      (d) =>
-        d !== absPath &&
-        d.startsWith(absPath + '/') &&
-        d.replace(absPath + '/', '').indexOf('/') === -1,
-    );
+    const children = immediateChildrenMap.get(absPath) ?? [];
+    const hasFractalChildren = children.some((d) => dirSet.has(d));
+    const isLeafDirectory = children.length === 0;
 
     const type = classifyNode({
       dirName: name,
-      hasClaudeMd,
-      hasSpecMd,
+      hasIntentMd,
+      hasDetailMd,
       hasFractalChildren,
       isLeafDirectory,
-      hasIndex, // NEW: index 파일 여부 전달
+      hasIndex,
     });
 
     nodeEntries.push({
       path: absPath,
       name,
       type,
-      hasClaudeMd,
-      hasSpecMd,
+      hasIntentMd,
+      hasDetailMd,
       hasIndex,
       hasMain,
     });
@@ -366,24 +363,19 @@ export async function scanProject(
   );
 
   for (const entry of sortedByDepth) {
-    const immediateChildren = nodeEntries.filter(
-      (other) =>
-        other.path !== entry.path &&
-        other.path.startsWith(entry.path + '/') &&
-        other.path.replace(entry.path + '/', '').indexOf('/') === -1,
-    );
+    const children = immediateChildrenMap.get(entry.path) ?? [];
 
-    const hasFractalChildrenActual = immediateChildren.some(
-      (child) =>
-        typeMap.get(child.path) === 'fractal' ||
-        typeMap.get(child.path) === 'pure-function',
+    const hasFractalChildrenActual = children.some(
+      (childPath) =>
+        typeMap.get(childPath) === 'fractal' ||
+        typeMap.get(childPath) === 'pure-function',
     );
-    const isLeafActual = immediateChildren.length === 0;
+    const isLeafActual = children.length === 0;
 
     const newType = classifyNode({
       dirName: entry.name,
-      hasClaudeMd: entry.hasClaudeMd,
-      hasSpecMd: entry.hasSpecMd,
+      hasIntentMd: entry.hasIntentMd,
+      hasDetailMd: entry.hasDetailMd,
       hasFractalChildren: hasFractalChildrenActual,
       isLeafDirectory: isLeafActual,
       hasIndex: entry.hasIndex ?? false,

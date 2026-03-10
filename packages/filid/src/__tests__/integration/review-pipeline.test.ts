@@ -124,7 +124,7 @@ describe('review pipeline', () => {
   });
 
   describe('hook enforcement in review context', () => {
-    it('should block oversized CLAUDE.md writes', () => {
+    it('should block oversized INTENT.md writes', () => {
       const longContent = Array.from(
         { length: 101 },
         (_, i) => `Line ${i + 1}`,
@@ -132,7 +132,7 @@ describe('review pipeline', () => {
       const input: PreToolUseInput = {
         tool_name: 'Write',
         tool_input: {
-          file_path: '/project/CLAUDE.md',
+          file_path: '/project/INTENT.md',
           content: longContent,
         },
         cwd: '/project',
@@ -144,11 +144,11 @@ describe('review pipeline', () => {
       expect(result.continue).toBe(false);
     });
 
-    it('should block CLAUDE.md in organ directories', () => {
+    it('should block INTENT.md in organ directories', () => {
       const input: PreToolUseInput = {
         tool_name: 'Write',
         tool_input: {
-          file_path: '/project/auth/components/CLAUDE.md',
+          file_path: '/project/auth/components/INTENT.md',
           content: '# Components',
         },
         cwd: '/project',
@@ -160,7 +160,7 @@ describe('review pipeline', () => {
       expect(result.continue).toBe(false);
     });
 
-    it('should allow valid CLAUDE.md writes', () => {
+    it('should allow valid INTENT.md writes', () => {
       const validContent = Array.from(
         { length: 50 },
         (_, i) => `Line ${i + 1}`,
@@ -168,7 +168,7 @@ describe('review pipeline', () => {
       const input: PreToolUseInput = {
         tool_name: 'Write',
         tool_input: {
-          file_path: '/project/auth/CLAUDE.md',
+          file_path: '/project/auth/INTENT.md',
           content: validContent,
         },
         cwd: '/project',

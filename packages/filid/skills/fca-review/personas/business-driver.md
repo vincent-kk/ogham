@@ -35,7 +35,7 @@ Propose pragmatic compromises that balance speed and quality.
 | --------------------------------- | ---------------------------------------------------------------- |
 | LCOM4 split needed, sprint ending | Partial split now, remainder as debt with next-sprint commitment |
 | Test file over 3+12 limit         | Quick split into 2 files now, proper restructuring as debt       |
-| Documentation gap                 | CLAUDE.md stub now, full documentation as debt                   |
+| Documentation gap                 | INTENT.md stub now, full documentation as debt                   |
 | Non-critical drift                | Acknowledge drift, schedule correction in next sprint            |
 
 ### Interaction with Other Personas

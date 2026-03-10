@@ -1,6 +1,6 @@
 # 03. 플러그인 라이프사이클 & 워크플로우
 
-> 11개 스킬 기반 라이프사이클 단계, 에이전트 협업 시퀀스, Hook 이벤트 타임라인, 거버넌스 파이프라인.
+> 16개 스킬 기반 라이프사이클 단계, 에이전트 협업 시퀀스, Hook 이벤트 타임라인, 거버넌스 파이프라인.
 
 ---
 
@@ -9,52 +9,52 @@
 ### 기본 워크플로우 (6개 스킬)
 
 ```
-┌──────┐    ┌──────┐    ┌──────┐    ┌──────────────────┐    ┌─────────┐    ┌───────────────┐
-│ /init │───→│ /scan │───→│ /sync │───→│ /structure-review │───→│ /promote │───→│ /context-query │
-│      │    │      │    │      │    │                  │    │         │    │               │
-│ 초기화 │    │ 검증  │    │ 동기화 │    │ PR 구조 리뷰     │    │ 테스트   │    │ 질의           │
-│      │    │      │    │      │    │                  │    │ 승격     │    │               │
-└──────┘    └──────┘    └──────┘    └──────────────────┘    └─────────┘    └───────────────┘
-  1회성       수시      drift 감지     PR 시점              안정화 후        수시
+┌──────────┐    ┌───────────┐    ┌───────────┐    ┌──────────────────┐    ┌─────────┐    ┌───────────────┐
+│ /fca-init │───→│ /fca-scan │───→│ /fca-sync │───→│ /fca-review       │───→│ /fca-promote │───→│ /fca-query    │
+│          │    │           │    │           │    │                  │    │             │    │               │
+│ 초기화    │    │ 검증       │    │ 동기화     │    │ PR 구조 리뷰     │    │ 테스트      │    │ 질의           │
+│          │    │           │    │           │    │                  │    │ 승격        │    │               │
+└──────────┘    └───────────┘    └───────────┘    └──────────────────┘    └─────────────┘    └───────────────┘
+  1회성           수시             drift 감지        PR 시점               안정화 후           수시
 ```
 
-### 거버넌스 파이프라인 (3개 스킬)
+### 거버넌스 파이프라인 (4개 스킬)
 
 ```
-┌──────────────┐    ┌─────────────────┐    ┌───────────────┐
-│ /code-review  │───→│ /resolve-review  │───→│ /re-validate   │
-│              │    │                 │    │               │
-│ 다중 페르소나  │    │ 수정 해결/소명    │    │ Delta 재검증    │
-│ 합의 리뷰     │    │ + 부채 관리      │    │ + PASS/FAIL   │
-└──────────────┘    └─────────────────┘    └───────────────┘
-  PR 시점              리뷰 완료 후           수정 적용 후
+┌────────────────┐    ┌───────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ /fca-pipeline   │───→│ /fca-review   │───→│ /fca-resolve      │───→│ /fca-revalidate   │
+│                │    │               │    │                  │    │                  │
+│ 전체 파이프라인  │    │ 다중 페르소나  │    │ 수정 해결/소명     │    │ Delta 재검증      │
+│ 오케스트레이션  │    │ 합의 리뷰      │    │ + 부채 관리       │    │ + PASS/FAIL      │
+└────────────────┘    └───────────────┘    └──────────────────┘    └──────────────────┘
+  PR 시점               PR 시점              리뷰 완료 후              수정 적용 후
 ```
 
-### 보조 스킬 (2개)
+### 보조 스킬 (6개)
 
 ```
-┌───────────┐    ┌──────────────┐
-│ /guide     │    │ /restructure  │
-│           │    │              │
-│ 구조 가이드 │    │ 프랙탈 구조   │
-│ 생성       │    │ 리팩토링      │
-└───────────┘    └──────────────┘
-  수시               필요 시
+┌───────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│ /guide     │    │ /restructure  │    │ /fca-migrate │    │ /fca-pull-request│    │ /fca-update      │    │ /fca-revalidate│
+│           │    │              │    │             │    │                 │    │                 │    │ (단독 실행)   │
+│ 구조 가이드 │    │ 프랙탈 구조   │    │ 구조 마이그  │    │ PR 생성         │    │ 문서/구조 갱신   │    │ Delta 재검증   │
+│ 생성       │    │ 리팩토링      │    │ 레이션      │    │ 자동화          │    │                 │    │               │
+└───────────┘    └──────────────┘    └─────────────┘    └─────────────────┘    └─────────────────┘    └──────────────┘
+  수시               필요 시            마이그레이션 시    PR 준비 시            구조 변경 후            수정 적용 후
 ```
 
 ---
 
-## 단계 1: /init — 프로젝트 초기화
+## 단계 1: /fca-init — 프로젝트 초기화
 
 ### 트리거 조건
 
 - 프로젝트에 FCA-AI 구조가 없을 때 (최초 1회)
-- 사용자가 `/init [path]` 명령 실행
+- 사용자가 `/fca-init [path]` 명령 실행
 
 ### 관여 에이전트
 
 - **architect** (주도): 디렉토리 분석 및 프랙탈 경계 설계
-- **context-manager** (보조): CLAUDE.md/SPEC.md 생성
+- **context-manager** (보조): INTENT.md/DETAIL.md 생성
 
 ### 사용 MCP 도구
 
@@ -69,26 +69,26 @@
        │
        ▼
 2. 각 디렉토리 분류
-   ├── CLAUDE.md 존재 → fractal (유지)
-   ├── Organ 패턴 매칭 → organ (CLAUDE.md 생성 안 함)
+   ├── INTENT.md 존재 → fractal (유지)
+   ├── Organ 패턴 매칭 → organ (INTENT.md 생성 안 함)
    ├── 사이드이펙트 없음 → pure-function
-   └── 기본 → fractal (CLAUDE.md 생성 필요)
+   └── 기본 → fractal (INTENT.md 생성 필요)
        │
        ▼
-3. fractal 디렉토리에 CLAUDE.md 생성
+3. fractal 디렉토리에 INTENT.md 생성
    - 50줄 이내
    - 3-tier 경계 섹션 포함 (Always do / Ask first / Never do)
    - 프로젝트 구조 및 명령어 기록
        │
        ▼
-4. 필요 시 SPEC.md 생성
+4. 필요 시 DETAIL.md 생성
    - 모듈의 기능 요구사항
    - API 인터페이스 정의
        │
        ▼
 5. 초기화 요약 보고
    - 스캔된 디렉토리 수
-   - 생성된 CLAUDE.md 수
+   - 생성된 INTENT.md 수
    - 경고/이슈
 ```
 
@@ -99,12 +99,12 @@
 
 ---
 
-## 단계 2: /scan — 규칙 위반 검출
+## 단계 2: /fca-scan — 규칙 위반 검출
 
 ### 트리거 조건
 
 - 개발 중 수시로 실행
-- 사용자가 `/scan [path] [--fix]` 명령 실행
+- 사용자가 `/fca-scan [path] [--fix]` 명령 실행
 
 ### 관여 에이전트
 
@@ -123,15 +123,15 @@
    fractal_scan(path: <project_root>)
        │
        ▼
-2. CLAUDE.md 검증
-   각 fractal 노드의 CLAUDE.md에 대해:
+2. INTENT.md 검증
+   각 fractal 노드의 INTENT.md에 대해:
    ├── 50줄 초과 검사
    └── 3-tier 경계 섹션 존재 검사
        │
        ▼
 3. Organ 디렉토리 검증
    각 organ 노드에 대해:
-   └── CLAUDE.md 존재 여부 검사 (있으면 위반)
+   └── INTENT.md 존재 여부 검사 (있으면 위반)
        │
        ▼
 4. 테스트 파일 검증
@@ -147,12 +147,12 @@
 
 ---
 
-## 단계 3: /sync — 구조 Drift 감지 & 동기화
+## 단계 3: /fca-sync — 구조 Drift 감지 & 동기화
 
 ### 트리거 조건
 
 - 구조적 이탈이 의심될 때
-- 사용자가 `/sync [--dry-run] [--severity=<level>]` 명령 실행
+- 사용자가 `/fca-sync [--dry-run] [--severity=<level>]` 명령 실행
 
 ### 관여 에이전트
 
@@ -205,12 +205,12 @@
 
 ---
 
-## 단계 4: /review — 6단계 PR 검증 파이프라인
+## 단계 4: /fca-review — 6단계 PR 검증 파이프라인
 
 ### 트리거 조건
 
 - PR 제출 시
-- 사용자가 `/review [--stage=1-6] [--verbose]` 명령 실행
+- 사용자가 `/fca-review [--stage=1-6] [--verbose]` 명령 실행
 
 ### 관여 에이전트
 
@@ -228,16 +228,16 @@
 ```
 ┌─ Stage 1: Structure ─────────────────────────┐
 │ fractal/organ 경계 준수 검증                    │
-│ - 모든 fractal에 CLAUDE.md 존재?               │
-│ - organ 디렉토리에 CLAUDE.md 없음?              │
+│ - 모든 fractal에 INTENT.md 존재?               │
+│ - organ 디렉토리에 INTENT.md 없음?              │
 │ - 분류가 올바른지?                              │
 └──────────────────────────────────────────────┘
          │ pass/fail
          ▼
 ┌─ Stage 2: Documents ─────────────────────────┐
-│ CLAUDE.md/SPEC.md 규정 준수 검증                │
-│ - CLAUDE.md: 50줄 제한 + 3-tier 경계           │
-│ - SPEC.md: append-only 패턴 없음               │
+│ INTENT.md/DETAIL.md 규정 준수 검증              │
+│ - INTENT.md: 50줄 제한 + 3-tier 경계           │
+│ - DETAIL.md: append-only 패턴 없음             │
 │ - 문서-코드 동기화 상태                          │
 └──────────────────────────────────────────────┘
          │ pass/fail
@@ -277,12 +277,12 @@
 
 ---
 
-## 단계 5: /promote — 테스트 승격
+## 단계 5: /fca-promote — 테스트 승격
 
 ### 트리거 조건
 
 - 안정화 기간(90일) 경과 후
-- 사용자가 `/promote [path] [--days=90]` 명령 실행
+- 사용자가 `/fca-promote [path] [--days=90]` 명령 실행
 
 ### 관여 에이전트
 
@@ -318,12 +318,12 @@
 
 ---
 
-## 단계 6: /query — 인터랙티브 질의
+## 단계 6: /fca-query — 인터랙티브 질의
 
 ### 트리거 조건
 
 - 개발 중 수시로 실행
-- 사용자가 `/query <question>` 명령 실행
+- 사용자가 `/fca-query <question>` 명령 실행
 
 ### 관여 에이전트
 
@@ -340,7 +340,7 @@
 질문 수신
     │
     ▼
-Prompt 1: 모듈 위치 파악 + CLAUDE.md 체인 로드
+Prompt 1: 모듈 위치 파악 + INTENT.md 체인 로드
     │
     ▼
 Prompt 2: 상세 분석 또는 추가 정보 수집
@@ -364,10 +364,10 @@ Prompt 3 (최대): 최종 응답 생성
                  │ Architect │ ← 읽기 전용
                  │ (설계)     │
                  └─────┬────┘
-                       │ SPEC.md 초안
+                       │ DETAIL.md 초안
                        ▼
                  ┌──────────────┐
-                 │ Implementer   │ ← SPEC 범위 내 코드 작성
+                 │ Implementer   │ ← DETAIL 범위 내 코드 작성
                  │ (구현)         │
                  └─────┬────────┘
                        │ 코드 변경
@@ -376,7 +376,7 @@ Prompt 3 (최대): 최종 응답 생성
                  │ Context Manager │ ← 문서만 수정
                  │ (문서 동기화)     │
                  └─────┬──────────┘
-                       │ CLAUDE.md/SPEC.md 갱신
+                       │ INTENT.md/DETAIL.md 갱신
                        ▼
                  ┌──────────────┐
                  │ QA Reviewer   │ ← 읽기 전용
@@ -397,8 +397,9 @@ Prompt 3 (최대): 최종 응답 생성
 | qa-reviewer       | O    | O    | O    | X     | X    | X    | O   |
 | drift-analyzer    | O    | O    | O    | X     | X    | X    | O   |
 | restructurer      | O    | O    | O    | O     | O    | O    | O   |
+| code-surgeon      | O    | O    | O    | O     | O    | O    | O   |
 
-> \*context-manager: CLAUDE.md, SPEC.md 문서만 Write/Edit 가능 (역할 제한), Bash 사용 불가
+> \*context-manager: INTENT.md, DETAIL.md 문서만 Write/Edit 가능 (역할 제한), Bash 사용 불가
 
 ---
 
@@ -409,21 +410,26 @@ Prompt 3 (최대): 최종 응답 생성
 ```
 시간 →
 
-T0  사용자 프롬프트 입력
+T0  세션 시작
+    └─ SessionStart → setup
+       세션 초기화, 오래된 캐시 정리
+
+T1  사용자 프롬프트 입력
     └─ UserPromptSubmit → context-injector
        "[FCA-AI] Active in: /path ..." (~200자 주입)
 
-T1  에이전트가 Write 도구 호출
-    └─ PreToolUse (matcher: Write|Edit)
-       ├─ pre-tool-validator: CLAUDE.md/SPEC.md 검증
-       └─ structure-guard: Organ 디렉토리 보호 (구조 경비)
+T2  에이전트가 Read/Write 도구 호출
+    └─ PreToolUse (matcher: Read|Write|Edit)
+       ├─ intent-injector: INTENT.md 컨텍스트 주입 (Read|Write|Edit)
+       ├─ pre-tool-validator: INTENT.md/DETAIL.md 검증 (Write|Edit)
+       └─ structure-guard: Organ 디렉토리 보호 (Write|Edit)
        → pass/block 결정
 
-T2  (pass 시) Write 도구 실행 → 파일 생성/수정
+T3  (pass 시) Write 도구 실행 → 파일 생성/수정
 
-T3  PostToolUse (disabled — no active hooks)
+T4  PostToolUse (disabled — no active hooks)
 
-T4  에이전트가 서브에이전트 생성
+T5  에이전트가 서브에이전트 생성
     └─ SubagentStart (matcher: *)
        └─ agent-enforcer: 역할 제한 주입
 ```
@@ -435,20 +441,21 @@ T4  에이전트가 서브에이전트 생성
 ## 거버넌스 라이프사이클: 코드 리뷰 → 해결 → 재검증
 
 기존 6단계 라이프사이클과 독립적으로 동작하는 거버넌스 파이프라인.
+`/fca-pipeline`으로 전체 흐름을 오케스트레이션하거나 각 단계를 개별 실행 가능.
 
 ```
-┌──────────────┐    ┌─────────────────┐    ┌───────────────┐
-│ /code-review  │───→│ /resolve-review  │───→│ /re-validate   │
-│               │    │                  │    │                │
-│ Phase A: 분석  │    │ 수용/거부 선택     │    │ Delta 추출      │
-│ Phase B: 검증  │    │ 소명 수집         │    │ 수정 확인       │
-│ Phase C: 합의  │    │ ADR 정제         │    │ PASS/FAIL      │
-│               │    │ 부채 생성         │    │ PR 코멘트       │
-└──────────────┘    └─────────────────┘    └───────────────┘
-  PR 시점              리뷰 완료 후           수정 적용 후
+┌────────────────┐    ┌──────────────┐    ┌────────────────┐    ┌──────────────────┐
+│ /fca-pipeline   │    │ /fca-review   │───→│ /fca-resolve    │───→│ /fca-revalidate   │
+│                │───→│               │    │                │    │                  │
+│ 전체 오케스트레이 │    │ Phase A: 분석  │    │ 수용/거부 선택  │    │ Delta 추출        │
+│ 션 (선택)      │    │ Phase B: 검증  │    │ 소명 수집       │    │ 수정 확인         │
+│                │    │ Phase C: 합의  │    │ ADR 정제        │    │ PASS/FAIL        │
+│                │    │               │    │ 부채 생성        │    │ PR 코멘트         │
+└────────────────┘    └──────────────┘    └────────────────┘    └──────────────────┘
+  PR 시점               PR 시점              리뷰 완료 후            수정 적용 후
 ```
 
-### /code-review — 3-Phase 위임 패턴
+### /fca-review — 3-Phase 위임 패턴
 
 ```
 Phase A (haiku subagent)
@@ -469,7 +476,7 @@ Phase C (의장 직접)
 └── 출력: review-report.md, fix-requests.md
 ```
 
-### /resolve-review — 수정 사항 해결
+### /fca-resolve — 수정 사항 해결
 
 ```
 1. 브랜치 감지 + fix-requests.md 로딩
@@ -479,7 +486,7 @@ Phase C (의장 직접)
 5. justifications.md 출력 (resolve_commit_sha 포함)
 ```
 
-### /re-validate — Delta 재검증
+### /fca-revalidate — Delta 재검증
 
 ```
 1. resolve_commit_sha 기반 Delta 추출
@@ -498,9 +505,9 @@ Phase C (의장 직접)
 │ (create) │     │ (bias)    │     │ (resolve) │
 └─────────┘     └───────────┘     └──────────┘
 
-발생: /resolve-review에서 거부 시 debt_manage(create)
+발생: /fca-resolve에서 거부 시 debt_manage(create)
 누적: 이후 리뷰에서 동일 프랙탈 수정 시 touch_count++ → 가중치 2배
-해소: /re-validate에서 규칙 충족 시 debt_manage(resolve)
+해소: /fca-revalidate에서 규칙 충족 시 debt_manage(resolve)
 ```
 
 ### .filid/ 디렉토리 구조
@@ -512,8 +519,8 @@ Phase C (의장 직접)
 │   ├── verification.md       # Phase B 출력
 │   ├── review-report.md      # Phase C 출력 (최종 보고서)
 │   ├── fix-requests.md       # Phase C 출력 (수정 요청)
-│   ├── justifications.md     # /resolve-review 출력
-│   └── re-validate.md        # /re-validate 출력
+│   ├── justifications.md     # /fca-resolve 출력
+│   └── re-validate.md        # /fca-revalidate 출력
 └── debt/                  # 기술 부채 파일 (전체 공유)
     └── <debt-id>.md          # 개별 부채 항목
 ```

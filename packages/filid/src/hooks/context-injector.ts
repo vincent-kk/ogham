@@ -28,7 +28,7 @@ import type { HookOutput, UserPromptSubmitInput } from '../types/hooks.js';
 import { isFcaProject } from './shared.js';
 
 const CATEGORY_GUIDE = [
-  '- fractal: independent module with CLAUDE.md or SPEC.md',
+  '- fractal: independent module with INTENT.md or DETAIL.md',
   '- organ: leaf directory with no fractal children',
   '- pure-function: collection of pure functions with no side effects',
   '- hybrid: transitional node with both fractal and organ characteristics',
@@ -41,22 +41,22 @@ function buildFcaContext(cwd: string): string {
   return [
     `[FCA-AI] Active in: ${cwd}`,
     'Rules:',
-    '- CLAUDE.md: max 50 lines, must include 3-tier boundary sections',
-    '- SPEC.md: no append-only growth, must restructure on updates',
-    '- Organ directories (auto-classified by structure analysis) must NOT have CLAUDE.md',
+    '- INTENT.md: max 50 lines, must include 3-tier boundary sections',
+    '- DETAIL.md: no append-only growth, must restructure on updates',
+    '- Organ directories (auto-classified by structure analysis) must NOT have INTENT.md',
     '- Test files: max 15 cases per spec.ts (3 basic + 12 complex)',
     '- LCOM4 >= 2 → split module, CC > 15 → compress/abstract',
     '',
     'Directory Structure:',
-    '- New module → must create CLAUDE.md (3-tier boundaries) + index.ts (barrel export)',
-    '- Leaf utility dirs (components/, utils/, types/) → organ: no CLAUDE.md, keep flat',
+    '- New module → must create INTENT.md (3-tier boundaries) + index.ts (barrel export)',
+    '- Leaf utility dirs (components/, utils/, types/) → organ: no INTENT.md, keep flat',
     '- Shared code → place at nearest common ancestor (LCA) of its consumers',
     "- No direct imports between siblings → route through parent's public interface",
     '- Use /filid:fca-scan to detect violations, /filid:fca-sync to fix structural drift',
     '',
     'Development Workflow:',
-    '- When planning, include CLAUDE.md/SPEC.md updates for affected fractal modules',
-    '- Update SPEC.md (requirements) BEFORE code, CLAUDE.md when boundaries change',
+    '- When planning, include INTENT.md/DETAIL.md updates for affected fractal modules',
+    '- Update DETAIL.md (requirements) BEFORE code, INTENT.md when boundaries change',
   ].join('\n');
 }
 
@@ -68,9 +68,7 @@ function buildFcaContext(cwd: string): string {
  *
  * Never blocks user prompts (always continue: true).
  */
-export async function injectContext(
-  input: UserPromptSubmitInput,
-): Promise<HookOutput> {
+export function injectContext(input: UserPromptSubmitInput): HookOutput {
   const { cwd, session_id } = input;
 
   // Gate 1: skip if not an FCA-AI project

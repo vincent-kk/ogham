@@ -43,7 +43,7 @@ See [reference.md Section 3](./reference.md#section-3--pattern-analysis).
 
 ### Phase 4 — Spec Generation (`implementer`)
 
-Delegate to `filid:implementer` agent. Build parameterized `spec.ts` enforcing
+Delegate to `implementer` agent. Build parameterized `spec.ts` enforcing
 the 3+12 rule (≤15 total cases).
 See [reference.md Section 4](./reference.md#section-4--spec-generation-312-rule).
 
@@ -59,7 +59,7 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-migration)
 ### Phase 6 — Migration (`implementer`)
 
 Write validated `spec.ts`, remove original `test.ts`, and emit report.
-See [reference.md Section 6](./reference.md#section-6--migration).
+See [reference.md Section 5 — Migration subsection](./reference.md#section-5--validation-and-migration).
 
 ## Available MCP Tools
 

@@ -5,8 +5,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  validateClaudeMd,
-  validateSpecMd,
+  validateDetailMd,
+  validateIntentMd,
 } from '../../core/document-validator.js';
 import {
   buildFractalTree,
@@ -22,43 +22,43 @@ describe('fractal-init pipeline', () => {
       name: 'root',
       path: '/project',
       type: 'fractal' as const,
-      hasClaudeMd: true,
-      hasSpecMd: false,
+      hasIntentMd: true,
+      hasDetailMd: false,
     },
     {
       name: 'auth',
       path: '/project/auth',
       type: 'fractal' as const,
-      hasClaudeMd: true,
-      hasSpecMd: true,
+      hasIntentMd: true,
+      hasDetailMd: true,
     },
     {
       name: 'components',
       path: '/project/auth/components',
       type: 'organ' as const,
-      hasClaudeMd: false,
-      hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
     },
     {
       name: 'utils',
       path: '/project/auth/utils',
       type: 'organ' as const,
-      hasClaudeMd: false,
-      hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
     },
     {
       name: 'payment',
       path: '/project/payment',
       type: 'fractal' as const,
-      hasClaudeMd: true,
-      hasSpecMd: true,
+      hasIntentMd: true,
+      hasDetailMd: true,
     },
     {
       name: 'helpers',
       path: '/project/payment/helpers',
       type: 'organ' as const,
-      hasClaudeMd: false,
-      hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
     },
   ];
 
@@ -76,15 +76,15 @@ describe('fractal-init pipeline', () => {
   it('should classify organ directories correctly', () => {
     const organInput = (dirName: string) => ({
       dirName,
-      hasClaudeMd: false,
-      hasSpecMd: false,
+      hasIntentMd: false,
+      hasDetailMd: false,
       hasFractalChildren: false,
       isLeafDirectory: true,
     });
     expect(classifyNode(organInput('components'))).toBe('organ');
     expect(classifyNode(organInput('utils'))).toBe('organ');
     expect(classifyNode(organInput('helpers'))).toBe('organ');
-    expect(classifyNode({ ...organInput('auth'), hasClaudeMd: true })).toBe(
+    expect(classifyNode({ ...organInput('auth'), hasIntentMd: true })).toBe(
       'fractal',
     );
     expect(
@@ -99,8 +99,8 @@ describe('fractal-init pipeline', () => {
   it('should classify nodes with context', () => {
     const result = classifyNode({
       dirName: 'auth',
-      hasClaudeMd: true,
-      hasSpecMd: false,
+      hasIntentMd: true,
+      hasDetailMd: false,
       hasFractalChildren: false,
       isLeafDirectory: false,
     });
@@ -108,12 +108,12 @@ describe('fractal-init pipeline', () => {
     expect(result).toBe('fractal');
   });
 
-  it('should validate CLAUDE.md within line limit', () => {
+  it('should validate INTENT.md within line limit', () => {
     const validContent = Array.from(
       { length: 50 },
       (_, i) => `Line ${i + 1}`,
     ).join('\n');
-    const validation = validateClaudeMd(validContent);
+    const validation = validateIntentMd(validContent);
 
     // valid=true because line-limit is not violated (warnings don't block)
     expect(validation.valid).toBe(true);
@@ -122,12 +122,12 @@ describe('fractal-init pipeline', () => {
     );
   });
 
-  it('should reject CLAUDE.md exceeding 50 lines', () => {
+  it('should reject INTENT.md exceeding 50 lines', () => {
     const longContent = Array.from(
       { length: 51 },
       (_, i) => `Line ${i + 1}`,
     ).join('\n');
-    const validation = validateClaudeMd(longContent);
+    const validation = validateIntentMd(longContent);
 
     expect(validation.valid).toBe(false);
     expect(validation.violations.some((v) => v.rule === 'line-limit')).toBe(
@@ -135,9 +135,9 @@ describe('fractal-init pipeline', () => {
     );
   });
 
-  it('should validate SPEC.md structure', () => {
+  it('should validate DETAIL.md structure', () => {
     const specContent = '# Module Spec\n\n## API\n\n- `function foo(): void`\n';
-    const validation = validateSpecMd(specContent);
+    const validation = validateDetailMd(specContent);
 
     expect(validation.valid).toBe(true);
   });
@@ -153,18 +153,18 @@ describe('fractal-init pipeline', () => {
     expect(descendants.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('should verify organ directories lack CLAUDE.md', () => {
+  it('should verify organ directories lack INTENT.md', () => {
     const tree = buildFractalTree(entries);
 
-    // Organ directories should not have CLAUDE.md
+    // Organ directories should not have INTENT.md
     const components = tree.nodes.get('/project/auth/components');
     if (components) {
-      expect(components.hasClaudeMd).toBe(false);
+      expect(components.hasIntentMd).toBe(false);
     }
 
     const utils = tree.nodes.get('/project/auth/utils');
     if (utils) {
-      expect(utils.hasClaudeMd).toBe(false);
+      expect(utils.hasIntentMd).toBe(false);
     }
   });
 
@@ -176,22 +176,22 @@ describe('fractal-init pipeline', () => {
           name: 'auth',
           path: '/project2/auth',
           type: 'fractal' as const,
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
         {
           name: 'helpers',
           path: '/project2/auth/helpers',
           type: 'organ' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
         },
         {
           name: 'login',
           path: '/project2/auth/helpers/login',
           type: 'fractal' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasIndex: true,
         },
       ];
@@ -208,29 +208,29 @@ describe('fractal-init pipeline', () => {
           name: 'auth',
           path: '/project3/auth',
           type: 'fractal' as const,
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
         {
           name: 'helpers',
           path: '/project3/auth/helpers',
           type: 'organ' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
         },
         {
           name: 'impl',
           path: '/project3/auth/helpers/impl',
           type: 'organ' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
         },
         {
           name: 'login',
           path: '/project3/auth/helpers/impl/login',
           type: 'fractal' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasIndex: true,
         },
       ];
@@ -247,22 +247,22 @@ describe('fractal-init pipeline', () => {
           name: 'auth',
           path: '/project4/auth',
           type: 'fractal' as const,
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
         {
           name: 'utils',
           path: '/project4/auth/utils',
           type: 'organ' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
         },
         {
           name: 'string-helpers',
           path: '/project4/auth/utils/string-helpers',
           type: 'organ' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasIndex: false,
         },
       ];
@@ -275,30 +275,30 @@ describe('fractal-init pipeline', () => {
       expect(stringHelpers!.type).toBe('organ');
     });
 
-    it('깊은 중첩 CLAUDE.md 생성 대상에 nested fractal 포함 확인', () => {
+    it('깊은 중첩 INTENT.md 생성 대상에 nested fractal 포함 확인', () => {
       // hasIndex=true leaf가 fractal이면, getDescendants가 이를 포함해야 함
       const mixedEntries = [
         {
           name: 'root',
           path: '/project5',
           type: 'fractal' as const,
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
         {
           name: 'feature',
           path: '/project5/feature',
           type: 'fractal' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasIndex: true,
         },
         {
           name: 'sub',
           path: '/project5/feature/sub',
           type: 'fractal' as const,
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasIndex: true,
         },
       ];

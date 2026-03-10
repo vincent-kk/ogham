@@ -11,8 +11,8 @@ fractal_scan({ path: cwd })
 // Retrieve full module tree by scanning the filesystem
 
 checks:
-  - Every fractal dir has CLAUDE.md
-  - No organ dir has CLAUDE.md
+  - Every fractal dir has INTENT.md
+  - No organ dir has INTENT.md
   - fractal_navigate(action: "classify", path: dir, entries: [/* nodes from scan */])
     matches actual directory role
 ```
@@ -23,12 +23,12 @@ misclassified paths.
 ## Section 2 — Document Compliance Details
 
 ```
-for each CLAUDE.md in scope:
+for each INTENT.md in scope:
   - lineCount <= 50                     // hard limit
   - contains 3-tier boundary sections    // required headings
   - doc_compress(mode: "auto")           // size warning at >= 90 lines
 
-for each SPEC.md in scope:
+for each DETAIL.md in scope:
   - no append-only patterns detected     // no raw appended blocks
   - document-code synchronization status // content reflects current code
 ```
@@ -109,12 +109,12 @@ with each cycle path listed.
 
 Issues by severity:
   CRITICAL (0)
-  HIGH (1):   src/core/CLAUDE.md — 103 lines, exceeds 50-line limit
+  HIGH (1):   src/core/INTENT.md — 103 lines, exceeds 50-line limit
   MEDIUM (1): src/parser/index.ts — LCOM4=3, recommend split
   LOW (0)
 
 Recommendations:
-  1. Run /filid:fca-sync to auto-compress src/core/CLAUDE.md
+  1. Run /filid:fca-sync to auto-compress src/core/INTENT.md
   2. Split src/parser/index.ts into focused sub-modules
 ```
 
@@ -124,7 +124,7 @@ Recommendations:
 
 ```
 fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from fractal_scan */])
-// Returns: { type: "fractal" | "organ", hasClaude: boolean }
+// Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
 **ast_analyze lcom4:**
@@ -132,8 +132,9 @@ fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries:
 ```
 // Read file first, then call ast_analyze with source content
 const source = readFile("src/core/index.ts")
-ast_analyze(source: source, analysisType: "lcom4")
+ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 // Returns: { lcom4: 1 }
+// Note: className parameter is required for lcom4 analysis
 ```
 
 ## MCP Tool Reference
@@ -145,6 +146,6 @@ ast_analyze(source: source, analysisType: "lcom4")
 | `doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |
 | `test_metrics`     | `action: "check-312", files`                    | 3     | Validate 3+12 rule per spec.ts               |
 | `test_metrics`     | `action: "decide", decisionInput`               | 4     | Generate split/compress recommendation       |
-| `ast_analyze`      | `analysisType: "lcom4", source`                 | 4     | Compute LCOM4 cohesion metric                |
+| `ast_analyze`      | `analysisType: "lcom4", source, className`      | 4     | Compute LCOM4 cohesion metric                |
 | `ast_analyze`      | `analysisType: "cyclomatic-complexity", source` | 4     | Compute cyclomatic complexity                |
 | `ast_analyze`      | `analysisType: "dependency-graph", source`      | 5     | Build full import dependency DAG             |

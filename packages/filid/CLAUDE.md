@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
 Layer 2 (도구)  → MCP Server (14개 분석/관리 도구)
 Layer 3 (에이전트) → 7개 특화 에이전트 (architect, implementer, QA 등)
-Layer 4 (사용자) → 15개 Skills (/filid:fca-init, /filid:fca-review 등)
+Layer 4 (사용자) → 16개 Skills (/filid:fca-init, /filid:fca-review 등)
 ```
 
 ## Commands
@@ -40,9 +40,9 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ### Core Concepts
 
-- **FractalNode 타입**: `fractal` (CLAUDE.md 필요), `organ` (CLAUDE.md 금지), `pure-function`, `hybrid`
+- **FractalNode 타입**: `fractal` (INTENT.md 필요), `organ` (INTENT.md 금지), `pure-function`, `hybrid`
 - **3-Tier Boundary**: "Always do" / "Ask first" / "Never do" 섹션 필수
-- **50-line Limit**: CLAUDE.md/SPEC.md 각 50줄 이하
+- **50-line Limit**: INTENT.md/DETAIL.md 각 50줄 이하
 - **3+12 Test Rule**: 핵심 3 + 엣지 12 = 최대 15개 테스트
 - **Module Split**: LCOM4 ≥ 2 또는 CC > 15 또는 500줄 초과 → 분리 권장
 
@@ -66,7 +66,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - `src/hooks/context-injector.ts` — UserPromptSubmit 시 FCA-AI 규칙 주입 (세션 기반)
 - `src/hooks/plan-gate.ts` — ExitPlanMode 시 FCA-AI 문서 업데이트 체크리스트 주입
 - `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
-- `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isClaudeMd, isSpecMd)
+- `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
 - `scripts/build-mcp-server.mjs` — MCP 서버 esbuild 번들러
 - `scripts/build-hooks.mjs` — 훅 스크립트 esbuild 번들러
 
@@ -80,9 +80,9 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 `fractal-architect`, `qa-reviewer` (읽기 전용) · `implementer`, `restructurer` (구현) · `context-manager` (문서) · `drift-analyzer` (드리프트) · `code-surgeon` (패치)
 
-### Skills (15)
+### Skills (16)
 
-`fca-review` (다중 페르소나 리뷰), `fca-scan` (위반 스캔), `fca-init`, `fca-sync`, `fca-structure-review`, `fca-promote`, `fca-restructure`, `fca-resolve`, `fca-revalidate`, `fca-guide`, `fca-context-query`, `fca-update` (문서/테스트 동기화), `fca-pull-request` (FCA-aware PR 자동 생성), `fca-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `fca-ast-fallback` (LLM AST 패턴 매칭)
+`fca-review` (다중 페르소나 리뷰), `fca-scan` (위반 스캔), `fca-init`, `fca-sync`, `fca-structure-review`, `fca-promote`, `fca-restructure`, `fca-resolve`, `fca-revalidate`, `fca-guide`, `fca-context-query`, `fca-update` (문서/테스트 동기화), `fca-pull-request` (FCA-aware PR 자동 생성), `fca-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `fca-migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `fca-ast-fallback` (LLM AST 패턴 매칭)
 
 ## References
 

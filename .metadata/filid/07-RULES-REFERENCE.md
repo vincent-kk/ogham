@@ -8,18 +8,18 @@
 
 | 상수명                   | 값              | 정의 위치                        | 용도                       |
 | ------------------------ | --------------- | -------------------------------- | -------------------------- |
-| `CLAUDE_MD_LINE_LIMIT`   | `50`            | `core/document-validator.ts:8`   | CLAUDE.md 최대 줄 수       |
-| `ORGAN_DIR_NAMES`        | 9개 문자열 배열 | `core/organ-classifier.ts:4-14`  | Organ 디렉토리 식별        |
+| `INTENT_MD_LINE_LIMIT`   | `50`            | `core/document-validator.ts:8`   | INTENT.md 최대 줄 수       |
+| `KNOWN_KNOWN_ORGAN_DIR_NAMES`  | 9개 문자열 배열 | `core/organ-classifier.ts:4-14`  | Organ 디렉토리 식별        |
 | `TEST_THRESHOLD`         | `15`            | `metrics/decision-tree.ts:4`     | 3+12 규칙 테스트 상한      |
 | `CC_THRESHOLD`           | `15`            | `metrics/decision-tree.ts:7`     | Cyclomatic Complexity 상한 |
 | `LCOM4_SPLIT_THRESHOLD`  | `2`             | `metrics/decision-tree.ts:10`    | LCOM4 분할 기준            |
 | `DEFAULT_STABILITY_DAYS` | `90`            | `metrics/promotion-tracker.ts:4` | 테스트 승격 안정 기간 (일) |
 | `THRESHOLD` (3+12)       | `15`            | `metrics/three-plus-twelve.ts:4` | spec 파일별 테스트 상한    |
 
-### ORGAN_DIR_NAMES 전체 목록
+### KNOWN_KNOWN_ORGAN_DIR_NAMES 전체 목록
 
 ```typescript
-const ORGAN_DIR_NAMES: readonly string[] = [
+const KNOWN_KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
   'components', // UI 컴포넌트
   'utils', // 유틸리티 함수
   'types', // 타입 정의
@@ -32,7 +32,7 @@ const ORGAN_DIR_NAMES: readonly string[] = [
 ] as const;
 ```
 
-### BOUNDARY_KEYWORDS (CLAUDE.md 3-tier 검증)
+### BOUNDARY_KEYWORDS (INTENT.md 3-tier 검증)
 
 ```typescript
 const BOUNDARY_KEYWORDS = {
@@ -52,10 +52,10 @@ const BOUNDARY_KEYWORDS = {
 
 | 규칙명             | 대상      | 조건                                   | 액션       | 심각도             |
 | ------------------ | --------- | -------------------------------------- | ---------- | ------------------ |
-| line-limit         | CLAUDE.md | 줄 수 > 50                             | Write 차단 | `error`            |
-| missing-boundaries | CLAUDE.md | Always do/Ask first/Never do 섹션 누락 | 경고 주입  | `warning`          |
-| append-only        | SPEC.md   | 기존 내용 유지 + 끝에만 추가           | Write 차단 | `error`            |
-| structure-guard    | CLAUDE.md | Organ 디렉토리 내 생성 시도            | Write 차단 | `error` (implicit) |
+| line-limit         | INTENT.md | 줄 수 > 50                             | Write 차단 | `error`            |
+| missing-boundaries | INTENT.md | Always do/Ask first/Never do 섹션 누락 | 경고 주입  | `warning`          |
+| append-only        | DETAIL.md | 기존 내용 유지 + 끝에만 추가           | Write 차단 | `error`            |
+| structure-guard    | INTENT.md | Organ 디렉토리 내 생성 시도            | Write 차단 | `error` (implicit) |
 
 ### 메트릭 규칙
 
@@ -74,25 +74,25 @@ const BOUNDARY_KEYWORDS = {
 디렉토리 노드 분류 알고리즘 (`core/organ-classifier.ts:classifyNode`):
 
 ```
-우선순위 1: CLAUDE.md 존재 → fractal (명시적 선언)
-우선순위 2: ORGAN_DIR_NAMES 패턴 매칭 → organ
+우선순위 1: INTENT.md 존재 → fractal (명시적 선언)
+우선순위 2: KNOWN_ORGAN_DIR_NAMES 패턴 매칭 → organ
 우선순위 3: 사이드이펙트 없음 → pure-function
-우선순위 4: 기본값 → fractal (CLAUDE.md 추가 필요)
+우선순위 4: 기본값 → fractal (INTENT.md 추가 필요)
 ```
 
 ### NodeType 분류 체계
 
 | 타입            | 의미             | 특징                                        |
 | --------------- | ---------------- | ------------------------------------------- |
-| `fractal`       | 독립 도메인 경계 | CLAUDE.md 보유, 하위 프랙탈/organ 포함 가능 |
-| `organ`         | 리프 레벨 부속품 | CLAUDE.md 금지, 특정 디렉토리명 패턴        |
+| `fractal`       | 독립 도메인 경계 | INTENT.md 보유, 하위 프랙탈/organ 포함 가능 |
+| `organ`         | 리프 레벨 부속품 | INTENT.md 금지, 특정 디렉토리명 패턴        |
 | `pure-function` | 순수 함수 모듈   | 사이드이펙트 없음, 독립적                   |
 
 ---
 
 ## 검증 규칙 상세
 
-### CLAUDE.md 검증 (`validateClaudeMd`)
+### INTENT.md 검증 (`validateIntentMd`)
 
 1. **줄 수 제한**: `countLines(content) > 50` → `error`
    - 빈 문자열 = 0줄, 후행 개행 무시
@@ -101,7 +101,7 @@ const BOUNDARY_KEYWORDS = {
    - `### Ask first` 또는 `## Ask first`
    - `### Never do` 또는 `## Never do`
 
-### SPEC.md 검증 (`validateSpecMd`)
+### DETAIL.md 검증 (`validateDetailMd`)
 
 1. **Append-only 감지**: `detectAppendOnly(oldContent, newContent)`
    - 기존 줄이 모두 동일하게 유지되고 새 줄만 끝에 추가 → `error`
@@ -109,8 +109,8 @@ const BOUNDARY_KEYWORDS = {
 
 ### Organ Guard (`guardOrganWrite`)
 
-1. **대상**: `Write` 도구로 CLAUDE.md 생성 시
-2. **검사**: 경로의 모든 부모 세그먼트가 `ORGAN_DIR_NAMES`에 포함되는지
+1. **대상**: `Write` 도구로 INTENT.md 생성 시
+2. **검사**: 경로의 모든 부모 세그먼트가 `KNOWN_ORGAN_DIR_NAMES`에 포함되는지
 3. **결과**: Organ 디렉토리 내부면 차단 + 이유 메시지
 
 ---
@@ -121,8 +121,8 @@ const BOUNDARY_KEYWORDS = {
 | ----------------- | -------------------------- | ------------------------------ |
 | `architect`       | Write, Edit, Bash **금지** | 읽기 전용 — 분석, 설계, 계획만 |
 | `qa-reviewer`     | Write, Edit, Bash **금지** | 읽기 전용 — 리뷰, 분석, 보고만 |
-| `implementer`     | 제한 없음 (범위 제한)      | SPEC.md 범위 내 코드만 수정    |
-| `context-manager` | 제한 없음 (범위 제한)      | CLAUDE.md, SPEC.md 문서만 수정 |
+| `implementer`     | 제한 없음 (범위 제한)      | DETAIL.md 범위 내 코드만 수정    |
+| `context-manager` | 제한 없음 (범위 제한)      | INTENT.md, DETAIL.md 문서만 수정 |
 
 ### ROLE_RESTRICTIONS 메시지 (`hooks/agent-enforcer.ts:11-20`)
 
@@ -133,9 +133,9 @@ const ROLE_RESTRICTIONS: Record<string, string> = {
   'qa-reviewer':
     'ROLE RESTRICTION: You are a QA/Reviewer agent. You MUST NOT use Write or Edit tools. ...',
   implementer:
-    'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by SPEC.md. ...',
+    'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by DETAIL.md. ...',
   'context-manager':
-    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit CLAUDE.md and SPEC.md documents. ...',
+    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit INTENT.md and DETAIL.md documents. ...',
 };
 ```
 
@@ -201,7 +201,7 @@ type DecisionAction = 'split' | 'compress' | 'parameterize' | 'ok';
 
 | Hook 이벤트                 | 적용 규칙                   | 차단 가능     |
 | --------------------------- | --------------------------- | ------------- |
-| `PreToolUse` (Write\|Edit)  | CLAUDE.md 검증, Organ Guard | O             |
+| `PreToolUse` (Write\|Edit)  | INTENT.md 검증, Organ Guard | O             |
 | `PostToolUse` (Write\|Edit) | Change Queue 기록           | X (항상 통과) |
 | `SubagentStart` (\*)        | 에이전트 역할 제한 주입     | X (항상 통과) |
 | `UserPromptSubmit` (\*)     | FCA-AI 규칙 리마인더 주입   | X (항상 통과) |
@@ -211,9 +211,9 @@ type DecisionAction = 'split' | 'compress' | 'parameterize' | 'ok';
 ```
 [FCA-AI] Active in: {cwd}
 Rules:
-- CLAUDE.md: max 50 lines, must include 3-tier boundary sections
-- SPEC.md: no append-only growth, must restructure on updates
-- Organ directories (...) must NOT have CLAUDE.md
+- INTENT.md: max 50 lines, must include 3-tier boundary sections
+- DETAIL.md: no append-only growth, must restructure on updates
+- Organ directories (...) must NOT have INTENT.md
 - Test files: max 15 cases per spec.ts (3 basic + 12 complex)
 - LCOM4 >= 2 → split module, CC > 15 → compress/abstract
 ```

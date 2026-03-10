@@ -66,8 +66,8 @@ function handleClassify(input: FractalNavigateInput): FractalNavigateOutput {
       .split('/')
       .filter((s) => s.length > 0)
       .pop() ?? '';
-  const hasClaudeMd = entry?.hasClaudeMd ?? false;
-  const hasSpecMd = entry?.hasSpecMd ?? false;
+  const hasIntentMd = entry?.hasIntentMd ?? false;
+  const hasDetailMd = entry?.hasDetailMd ?? false;
   const hasIndex = entry?.hasIndex ?? false;
 
   // entries에서 실제 계산 (hardcode 제거)
@@ -84,8 +84,8 @@ function handleClassify(input: FractalNavigateInput): FractalNavigateOutput {
 
   const classifyInput: ClassifyInput = {
     dirName,
-    hasClaudeMd,
-    hasSpecMd,
+    hasIntentMd,
+    hasDetailMd,
     hasFractalChildren,
     isLeafDirectory,
     hasIndex,

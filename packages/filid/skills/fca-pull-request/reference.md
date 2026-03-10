@@ -178,7 +178,7 @@ git log <BASE_REF>..HEAD --oneline --no-decorate
 git log <BASE_REF>..HEAD --format="%s%n%b" --no-decorate
 
 # FCA context document changes (for Architecture Changes section)
-git diff <BASE_REF>..HEAD -- "**/CLAUDE.md" "**/SPEC.md"
+git diff <BASE_REF>..HEAD -- "**/INTENT.md" "**/DETAIL.md"
 ```
 
 When no changes exist (`git diff --name-status` output is empty):
@@ -238,7 +238,7 @@ with no applicable changes.
 
 ## Architecture Changes (FCA Context Diff)
 
-<!-- Analyze changes to FCA context documents (CLAUDE.md, SPEC.md) -->
+<!-- Analyze changes to FCA context documents (INTENT.md, DETAIL.md) -->
 <!-- Context docs are committed in the PR; focus on "design intent" here -->
 
 - What architectural decisions changed
@@ -293,8 +293,8 @@ with no applicable changes.
 
 **Architecture Changes**:
 
-- Check FCA context document changes via `git diff <BASE_REF>..HEAD -- "**/CLAUDE.md" "**/SPEC.md"`
-- If CLAUDE.md/SPEC.md diff exists, describe specific changes
+- Check FCA context document changes via `git diff <BASE_REF>..HEAD -- "**/INTENT.md" "**/DETAIL.md"`
+- If INTENT.md/DETAIL.md diff exists, describe specific changes
 - If new directories created or modules moved/split, describe structural changes
 - If `index.ts` or public export changed, describe interface changes
 - No applicable changes: "No relevant changes"

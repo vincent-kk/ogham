@@ -13,13 +13,13 @@ fractal_scan({ path: "<target-path>" })
 
 The response is a `ScanReport` containing:
 
-- `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasClaudeMd`, `hasSpecMd`, `children`)
+- `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
 - `tree.root`: root directory path
 - `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
 
 Build three working sets from `tree.nodes`:
 
-- **fractal nodes** — `type === "fractal"` or `hasClaudeMd === true`
+- **fractal nodes** — `type === "fractal"` or `hasIntentMd === true`
 - **organ nodes** — `type === "organ"`
 - **pure-function / hybrid nodes** — remaining types
 

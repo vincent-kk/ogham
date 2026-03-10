@@ -37,7 +37,7 @@ describe('plan-gate', () => {
     );
   });
 
-  it('should include CLAUDE.md/SPEC.md update steps in checklist', () => {
+  it('should include INTENT.md/DETAIL.md update steps in checklist', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p === 'string' && p.endsWith('.filid')) return true;
@@ -47,8 +47,8 @@ describe('plan-gate', () => {
 
     const result = validatePlanExit(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('CLAUDE.md');
-    expect(ctx).toContain('SPEC.md');
+    expect(ctx).toContain('INTENT.md');
+    expect(ctx).toContain('DETAIL.md');
   });
 
   it('should never block (always continue: true)', () => {
@@ -71,10 +71,10 @@ describe('plan-gate', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('should detect FCA project via CLAUDE.md presence', () => {
+  it('should detect FCA project via INTENT.md presence', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('CLAUDE.md')) return true;
+        if (typeof p === 'string' && p.endsWith('INTENT.md')) return true;
         return false;
       },
     );

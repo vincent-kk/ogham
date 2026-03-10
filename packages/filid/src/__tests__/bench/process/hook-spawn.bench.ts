@@ -10,9 +10,7 @@ const execFileAsync = promisify(execFile);
 const DIST_DIR = join(import.meta.dirname, '../../../../..', 'dist');
 
 const HOOK_SCRIPTS = {
-  preToolValidator: join(DIST_DIR, 'hooks', 'pre-tool-validator.mjs'),
-  structureGuard: join(DIST_DIR, 'hooks', 'structure-guard.mjs'),
-  changeTracker: join(DIST_DIR, 'hooks', 'change-tracker.mjs'),
+  preToolUse: join(DIST_DIR, 'hooks', 'pre-tool-use.mjs'),
   agentEnforcer: join(DIST_DIR, 'hooks', 'agent-enforcer.mjs'),
   contextInjector: join(DIST_DIR, 'hooks', 'context-injector.mjs'),
 };
@@ -23,7 +21,7 @@ const PRE_TOOL_INPUT = JSON.stringify({
   hook_event_name: 'PreToolUse',
   tool_name: 'Write',
   tool_input: {
-    file_path: '/workspace/CLAUDE.md',
+    file_path: '/workspace/INTENT.md',
     content: Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join('\n'),
   },
 });
@@ -56,9 +54,9 @@ const scriptsExist = Object.values(HOOK_SCRIPTS).every((p) => existsSync(p));
 if (scriptsExist) {
   describe('hook-spawn: end-to-end process spawn', () => {
     bench(
-      'pre-tool-validator spawn',
+      'pre-tool-use spawn',
       async () => {
-        await spawnHook(HOOK_SCRIPTS.preToolValidator, PRE_TOOL_INPUT);
+        await spawnHook(HOOK_SCRIPTS.preToolUse, PRE_TOOL_INPUT);
       },
       { time: 2000 },
     );

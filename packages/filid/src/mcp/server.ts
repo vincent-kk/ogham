@@ -48,6 +48,45 @@ function toolError(error: unknown) {
 }
 
 /**
+ * Wrap a tool handler with standard try/catch error handling.
+ * Reduces repetitive boilerplate across all 14 registerTool callbacks.
+ */
+function wrapHandler<T>(
+  fn: (args: T) => unknown | Promise<unknown>,
+  options?: { checkErrorField?: boolean },
+): (
+  args: T,
+) => Promise<
+  | ReturnType<typeof toolResult>
+  | ReturnType<typeof toolError>
+  | { content: Array<{ type: 'text'; text: string }> }
+> {
+  return async (args: T) => {
+    try {
+      const result = await fn(args);
+      if (
+        options?.checkErrorField &&
+        result &&
+        typeof result === 'object' &&
+        'error' in result
+      ) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: String((result as { error: unknown }).error),
+            },
+          ],
+        };
+      }
+      return toolResult(result);
+    } catch (error) {
+      return toolError(error);
+    }
+  };
+}
+
+/**
  * Create and configure the FCA-AI MCP server.
  */
 export function createServer(): McpServer {
@@ -80,19 +119,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleAstAnalyze(args);
-        if ('error' in result) {
-          return {
-            content: [{ type: 'text' as const, text: result.error as string }],
-          };
-        }
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleAstAnalyze, { checkErrorField: true }),
   );
 
   server.registerTool(
@@ -117,8 +144,8 @@ export function createServer(): McpServer {
                 'hybrid',
                 'directory',
               ]),
-              hasClaudeMd: z.boolean(),
-              hasSpecMd: z.boolean(),
+              hasIntentMd: z.boolean(),
+              hasDetailMd: z.boolean(),
               hasIndex: z.boolean().optional(),
               hasMain: z.boolean().optional(),
             }),
@@ -126,17 +153,12 @@ export function createServer(): McpServer {
           .describe('Directory/file entries for tree construction'),
       }),
     },
-    async (args) => {
-      try {
-        // 'directory' is accepted as input and resolved via classifyNode() inside the handler
-        const result = await handleFractalNavigate(
-          args as Parameters<typeof handleFractalNavigate>[0],
-        );
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    // 'directory' in zod schema is resolved via classifyNode() inside the handler
+    wrapHandler((args) =>
+      handleFractalNavigate(
+        args as Parameters<typeof handleFractalNavigate>[0],
+      ),
+    ),
   );
 
   server.registerTool(
@@ -169,14 +191,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleDocCompress(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleDocCompress),
   );
 
   server.registerTool(
@@ -207,14 +222,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleTestMetrics(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleTestMetrics),
   );
 
   server.registerTool(
@@ -238,14 +246,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleFractalScan(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleFractalScan),
   );
 
   server.registerTool(
@@ -272,14 +273,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleDriftDetect(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleDriftDetect),
   );
 
   server.registerTool(
@@ -303,14 +297,7 @@ export function createServer(): McpServer {
           ),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleLcaResolve(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleLcaResolve),
   );
 
   server.registerTool(
@@ -349,14 +336,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleRuleQuery(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleRuleQuery),
   );
 
   server.registerTool(
@@ -380,14 +360,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleStructureValidate(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleStructureValidate),
   );
 
   server.registerTool(
@@ -445,14 +418,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleReviewManage(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleReviewManage),
   );
 
   server.registerTool(
@@ -527,14 +493,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleDebtManage(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleDebtManage),
   );
 
   server.registerTool(
@@ -560,14 +519,7 @@ export function createServer(): McpServer {
           .optional(),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleCacheManage(args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleCacheManage),
   );
 
   // AST Grep tools — gracefully degrade if @ast-grep/napi is unavailable
@@ -610,19 +562,7 @@ export function createServer(): McpServer {
           .describe('Maximum results to return (default: 20)'),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleAstGrepSearch(args);
-        if ('error' in result) {
-          return {
-            content: [{ type: 'text' as const, text: result.error }],
-          };
-        }
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleAstGrepSearch, { checkErrorField: true }),
   );
 
   server.registerTool(
@@ -653,19 +593,7 @@ export function createServer(): McpServer {
           .describe("Preview only, don't apply changes (default: true)"),
       }),
     },
-    async (args) => {
-      try {
-        const result = await handleAstGrepReplace(args);
-        if ('error' in result) {
-          return {
-            content: [{ type: 'text' as const, text: result.error }],
-          };
-        }
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    wrapHandler(handleAstGrepReplace, { checkErrorField: true }),
   );
 
   return server;

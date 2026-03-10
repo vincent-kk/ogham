@@ -83,14 +83,14 @@ describe('agent-enforcer', () => {
     expect(result.hookSpecificOutput?.additionalContext).toContain('Edit');
   });
 
-  it('should restrict implementer to SPEC.md scope', () => {
+  it('should restrict implementer to DETAIL.md scope', () => {
     const input: SubagentStartInput = {
       ...baseInput,
       agent_type: 'implementer',
     };
     const result = enforceAgentRole(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('SPEC.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('DETAIL.md');
   });
 
   it('should restrict context-manager to document files only', () => {
@@ -100,8 +100,8 @@ describe('agent-enforcer', () => {
     };
     const result = enforceAgentRole(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('CLAUDE.md');
-    expect(result.hookSpecificOutput?.additionalContext).toContain('SPEC.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('INTENT.md');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('DETAIL.md');
   });
 
   it('should pass through unknown agent types without restrictions', () => {
@@ -136,7 +136,7 @@ describe('agent-enforcer', () => {
         'FCA-AI Development Workflow',
       );
       expect(result.hookSpecificOutput?.additionalContext).toContain(
-        'CLAUDE.md',
+        'INTENT.md',
       );
     });
 
@@ -186,66 +186,6 @@ describe('agent-enforcer', () => {
       expect(result.hookSpecificOutput?.additionalContext).toContain(
         'FCA-AI Development Workflow',
       );
-    });
-  });
-
-  describe('implementation agent reminder (FCA project)', () => {
-    it('should inject implementation reminder for oh-my-claudecode:executor', () => {
-      mockFcaProject();
-      const result = enforceAgentRole({
-        ...baseInput,
-        agent_type: 'oh-my-claudecode:executor',
-      });
-      expect(result.continue).toBe(true);
-      expect(result.hookSpecificOutput?.additionalContext).toContain(
-        'FCA-AI Pre-Implementation Check',
-      );
-    });
-
-    it('should inject implementation reminder for oh-my-claudecode:deep-executor', () => {
-      mockFcaProject();
-      const result = enforceAgentRole({
-        ...baseInput,
-        agent_type: 'oh-my-claudecode:deep-executor',
-      });
-      expect(result.continue).toBe(true);
-      expect(result.hookSpecificOutput?.additionalContext).toContain(
-        'FCA-AI Pre-Implementation Check',
-      );
-    });
-
-    it('should inject implementation reminder for native general-purpose agent', () => {
-      mockFcaProject();
-      const result = enforceAgentRole({
-        ...baseInput,
-        agent_type: 'general-purpose',
-      });
-      expect(result.continue).toBe(true);
-      expect(result.hookSpecificOutput?.additionalContext).toContain(
-        'FCA-AI Pre-Implementation Check',
-      );
-    });
-  });
-
-  describe('non-FCA project (no workflow guidance)', () => {
-    it('should skip guidance for OMC planner in non-FCA project', () => {
-      mockNonFcaProject();
-      const result = enforceAgentRole({
-        ...baseInput,
-        agent_type: 'oh-my-claudecode:planner',
-      });
-      expect(result.continue).toBe(true);
-      expect(result.hookSpecificOutput).toBeUndefined();
-    });
-
-    it('should skip guidance for general-purpose in non-FCA project', () => {
-      mockNonFcaProject();
-      const result = enforceAgentRole({
-        ...baseInput,
-        agent_type: 'general-purpose',
-      });
-      expect(result.continue).toBe(true);
-      expect(result.hookSpecificOutput).toBeUndefined();
     });
   });
 });

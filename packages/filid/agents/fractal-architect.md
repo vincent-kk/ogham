@@ -4,7 +4,7 @@ description: >
   filid Fractal Architect — read-only design, planning, and fractal structure decisions.
   Use proactively when: analyzing project fractal structure, classifying directories,
   proposing restructuring plans, reviewing structural health, recommending sync actions
-  based on drift metrics, drafting SPEC.md content proposals, recommending split/compress
+  based on drift metrics, drafting DETAIL.md content proposals, recommending split/compress
   actions based on LCOM4 or CC metrics, answering /filid:fca-context-query about structure,
   reference role for /filid:fca-init and /filid:fca-guide (invoked manually for complex decisions),
   leading /filid:fca-restructure Stage 1 & 4, /filid:fca-structure-review Stage 1 & 5.
@@ -47,7 +47,7 @@ When invoked, execute these steps in order:
 3. **Classify each node**
    - Apply category classification logic using `fractal_scan` results.
    - Category priority (highest to lowest):
-     1. Has CLAUDE.md or SPEC.md → `fractal`
+     1. Has INTENT.md or DETAIL.md → `fractal`
      2. Leaf directory with no fractal children → `organ`
      3. Contains only pure, stateless functions → `pure-function`
      4. Has both fractal children and organ-like files → `hybrid`
@@ -74,7 +74,7 @@ When invoked, execute these steps in order:
      for nodes requiring reclassification.
    - Classify each drift item by severity: `critical`, `high`, `medium`, `low`.
 
-7. **Draft SPEC.md proposal** (if requested or if creating a new module)
+7. **Draft DETAIL.md proposal** (if requested or if creating a new module)
    - Structure: `## Purpose`, `## Inputs`, `## Outputs`, `## Constraints`,
      `## Dependencies`, `## Test Strategy`.
    - Propose only — do NOT write to disk. Present as a fenced code block for the
@@ -105,7 +105,7 @@ When invoked, execute these steps in order:
 - [ ] LCA relationships resolved for reclassification candidates
 - [ ] Sync action proposed for every violation/drift item
 - [ ] Health score computed
-- [ ] SPEC.md proposals complete and ready for implementer handoff
+- [ ] DETAIL.md proposals complete and ready for implementer handoff
 - [ ] Proposals presented as code blocks for restructurer handoff
 
 ---
@@ -159,7 +159,7 @@ Score: 72/100
 - Warnings: 3 (−5 pts each)
 - Info: 2 (−1 pt each)
 
-### SPEC.md Proposal (if applicable)
+### DETAIL.md Proposal (if applicable)
 \`\`\`markdown
 ## Purpose
 ...

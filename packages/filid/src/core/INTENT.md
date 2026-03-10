@@ -2,7 +2,7 @@
 
 ## Purpose
 
-FCA-AI 아키텍처의 핵심 알고리즘을 구현한다. 프랙탈 트리 구조 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산 등 12개 모듈로 구성된다.
+FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산 등 15개 모듈.
 
 ## Structure
 
@@ -13,26 +13,28 @@ FCA-AI 아키텍처의 핵심 알고리즘을 구현한다. 프랙탈 트리 구
 | `drift-detector.ts` | 구조 드리프트 감지 + SyncPlan 생성 |
 | `rule-engine.ts` | 7개 내장 규칙 평가 (`loadBuiltinRules`, `evaluateRules`) |
 | `fractal-validator.ts` | 구조 유효성 검증 (`validateStructure`, `validateNode`) |
-| `document-validator.ts` | CLAUDE.md/SPEC.md 50줄 + 3-tier 검증 |
+| `document-validator.ts` | INTENT.md/DETAIL.md 50줄 + 3-tier 검증 |
 | `project-analyzer.ts` | 프로젝트 건강도 분석 + 리포트 생성 |
 | `dependency-graph.ts` | DAG 구축 · 위상 정렬 · 사이클 탐지 |
 | `lca-calculator.ts` | Lowest Common Ancestor 계산 |
 | `index-analyzer.ts` | index.ts export 분석 |
 | `module-main-analyzer.ts` | 모듈 진입점 · 공개 API 추출 |
 | `change-queue.ts` | 변경 이벤트 큐 (`ChangeQueue`) |
+| `boundary-detector.ts` | 프랙탈 경계 감지 (`findBoundary`, `buildChain`) |
+| `cache-manager.ts` | 세션/해시 캐시 읽기·쓰기 |
+| `project-hash.ts` | 프로젝트 해시 계산 (`computeProjectHash`) |
 
 ## Conventions
 
-- 외부 I/O는 `fractal-tree.ts`(`scanProject`), `rule-engine.ts`(`loadBuiltinRules`), `cache-manager.ts`(캐시 읽기/쓰기)에만 허용
+- 외부 I/O: `fractal-tree.ts`, `rule-engine.ts`, `cache-manager.ts`, `project-hash.ts`에만 허용
 - 나머지 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
-- `classifyNode()`는 구조 기반 분류 우선 (이름 기반 `ORGAN_DIR_NAMES`는 deprecated)
+- `classifyNode()`는 구조 기반 분류 우선
 
 ## Boundaries
 
 ### Always do
 
 - 새 규칙 추가 시 `rule-engine.ts`의 `loadBuiltinRules`에 등록
-- `document-validator.ts`를 통해 CLAUDE.md/SPEC.md 50줄 제한 강제
 - 공개 함수는 `src/index.ts`에 re-export
 
 ### Ask first
@@ -42,11 +44,7 @@ FCA-AI 아키텍처의 핵심 알고리즘을 구현한다. 프랙탈 트리 구
 
 ### Never do
 
-- `mcp/`, `hooks/`, `ast/` 모듈 직접 import (상위 레이어가 core에 의존, 역방향 금지)
-- `ChangeQueue`를 비동기 없이 블로킹 방식으로 사용
+- `mcp/`, `hooks/`, `ast/` 모듈 직접 import (역방향 금지)
 - `ORGAN_DIR_NAMES` 이름 기반 분류를 신규 코드에 사용
 
-## Dependencies
-
-- `../types/` — 전체 타입 정의
-- `fast-glob` — `scanProject` 내 파일시스템 탐색
+**Dependencies**: `../types/`, `fast-glob`

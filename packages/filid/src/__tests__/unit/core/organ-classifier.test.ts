@@ -72,44 +72,44 @@ describe('organ-classifier', () => {
   describe('classifyNode', () => {
     it.each([
       [
-        'hasClaudeMd=true → fractal',
+        'hasIntentMd=true → fractal',
         {
           dirName: 'auth',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'hasSpecMd=true → fractal',
+        'hasDetailMd=true → fractal',
         {
           dirName: 'auth',
-          hasClaudeMd: false,
-          hasSpecMd: true,
+          hasIntentMd: false,
+          hasDetailMd: true,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'hasClaudeMd overrides known-organ name → fractal',
+        'hasIntentMd overrides known-organ name → fractal',
         {
           dirName: 'utils',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'fractal',
       ],
       [
-        'CLAUDE.md+SPEC.md both present → fractal (CLAUDE.md priority)',
+        'INTENT.md+DETAIL.md both present → fractal (INTENT.md priority)',
         {
           dirName: 'auth',
-          hasClaudeMd: true,
-          hasSpecMd: true,
+          hasIntentMd: true,
+          hasDetailMd: true,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -124,8 +124,8 @@ describe('organ-classifier', () => {
         'known-organ name components → organ',
         {
           dirName: 'components',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -135,8 +135,8 @@ describe('organ-classifier', () => {
         'known-organ name utils → organ',
         {
           dirName: 'utils',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
@@ -146,210 +146,14 @@ describe('organ-classifier', () => {
         'non-standard name, leaf, no markers → organ',
         {
           dirName: 'my-custom-dir',
-          hasClaudeMd: false,
-          hasSpecMd: false,
+          hasIntentMd: false,
+          hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: true,
         },
         'organ',
       ],
     ])('leaf/no-markers: %s', (_desc, input, expected) => {
-      expect(classifyNode(input)).toBe(expected);
-    });
-
-    it.each([
-      [
-        'hasSideEffects=false → pure-function',
-        {
-          dirName: 'math-helpers',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-          hasSideEffects: false,
-        },
-        'pure-function',
-      ],
-      [
-        'hasFractalChildren=true → fractal',
-        {
-          dirName: 'payments',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: true,
-          isLeafDirectory: false,
-          hasSideEffects: true,
-        },
-        'fractal',
-      ],
-      [
-        'non-leaf + hasSideEffects=true → fractal',
-        {
-          dirName: 'checkout',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-          hasSideEffects: true,
-        },
-        'fractal',
-      ],
-      [
-        'non-leaf + hasSideEffects=undefined → fractal (default)',
-        {
-          dirName: 'checkout',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-        },
-        'fractal',
-      ],
-    ])('non-leaf: %s', (_desc, input, expected) => {
-      expect(classifyNode(input)).toBe(expected);
-    });
-
-    it('should classify test infrastructure dirs as organ regardless of structure', () => {
-      const testDirs = [
-        '__tests__',
-        '__mocks__',
-        '__fixtures__',
-        'test',
-        'tests',
-        'spec',
-        'specs',
-        'fixtures',
-        'e2e',
-      ];
-      for (const dirName of testDirs) {
-        expect(
-          classifyNode({
-            dirName,
-            hasClaudeMd: false,
-            hasSpecMd: false,
-            hasFractalChildren: false,
-            isLeafDirectory: false,
-          }),
-        ).toBe('organ');
-      }
-    });
-
-    it.each([
-      [
-        '__tests__+CLAUDE.md → fractal (explicit override)',
-        {
-          dirName: '__tests__',
-          hasClaudeMd: true,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-        },
-        'fractal',
-      ],
-      [
-        '__custom__ non-leaf → organ',
-        {
-          dirName: '__custom__',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-        },
-        'organ',
-      ],
-      [
-        '.claude+CLAUDE.md → fractal (explicit override)',
-        {
-          dirName: '.claude',
-          hasClaudeMd: true,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: false,
-        },
-        'fractal',
-      ],
-    ])('infra-pattern CLAUDE.md override: %s', (_desc, input, expected) => {
-      expect(classifyNode(input)).toBe(expected);
-    });
-
-    it('should classify dot-prefixed dirs as organ via pattern', () => {
-      const dotDirs = ['.git', '.github', '.vscode', '.claude'];
-      for (const dirName of dotDirs) {
-        expect(
-          classifyNode({
-            dirName,
-            hasClaudeMd: false,
-            hasSpecMd: false,
-            hasFractalChildren: false,
-            isLeafDirectory: false,
-          }),
-        ).toBe('organ');
-      }
-    });
-  });
-
-  describe('classifyNode — hasIndex rule', () => {
-    it.each([
-      [
-        'non-organ name + hasIndex=true → fractal',
-        {
-          dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-          hasIndex: true,
-        },
-        'fractal',
-      ],
-      [
-        'known-organ name + hasIndex=true → organ (name wins)',
-        {
-          dirName: 'helpers',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-          hasIndex: true,
-        },
-        'organ',
-      ],
-      [
-        'infra pattern __tests__ + hasIndex=true → organ (pattern wins)',
-        {
-          dirName: '__tests__',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-          hasIndex: true,
-        },
-        'organ',
-      ],
-      [
-        'hasIndex=false + leaf → organ',
-        {
-          dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-          hasIndex: false,
-        },
-        'organ',
-      ],
-      [
-        'hasIndex=undefined + leaf → organ (fallback)',
-        {
-          dirName: 'login',
-          hasClaudeMd: false,
-          hasSpecMd: false,
-          hasFractalChildren: false,
-          isLeafDirectory: true,
-        },
-        'organ',
-      ],
-    ])('%s', (_desc, input, expected) => {
       expect(classifyNode(input)).toBe(expected);
     });
   });

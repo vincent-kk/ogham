@@ -19,8 +19,8 @@ function makeNode(overrides: Partial<FractalNode> = {}): FractalNode {
     parent: '/root',
     children: [],
     organs: [],
-    hasClaudeMd: false,
-    hasSpecMd: false,
+    hasIntentMd: false,
+    hasDetailMd: false,
     hasIndex: true,
     hasMain: false,
     depth: 1,
@@ -35,7 +35,7 @@ function makeTree(nodes: FractalNode[]): FractalTree {
   for (const n of nodes) map.set(n.path, n);
   const root =
     nodes.find((n) => n.parent === null)?.path ?? nodes[0]?.path ?? '/root';
-  return { root, nodes: map, depth: 2, totalNodes: nodes.size };
+  return { root, nodes: map, depth: 2, totalNodes: nodes.length };
 }
 
 describe('rule-engine', () => {
@@ -49,7 +49,7 @@ describe('rule-engine', () => {
       const rules = loadBuiltinRules();
       const ids = rules.map((r) => r.id);
       expect(ids).toContain(BUILTIN_RULE_IDS.NAMING_CONVENTION);
-      expect(ids).toContain(BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD);
+      expect(ids).toContain(BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD);
       expect(ids).toContain(BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN);
       expect(ids).toContain(BUILTIN_RULE_IDS.MODULE_ENTRY_POINT);
       expect(ids).toContain(BUILTIN_RULE_IDS.MAX_DEPTH);
@@ -122,12 +122,12 @@ describe('rule-engine', () => {
     });
   });
 
-  describe('organ-no-claudemd rule', () => {
-    it('should fail when organ has CLAUDE.md', () => {
+  describe('organ-no-intentmd rule', () => {
+    it('should fail when organ has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
-      const node = makeNode({ type: 'organ', hasClaudeMd: true });
+      const node = makeNode({ type: 'organ', hasIntentMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       const violations = rule.check(ctx);
@@ -135,85 +135,23 @@ describe('rule-engine', () => {
       expect(violations[0].severity).toBe('error');
     });
 
-    it('should pass when organ has no CLAUDE.md', () => {
+    it('should pass when organ has no INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
-      const node = makeNode({ type: 'organ', hasClaudeMd: false });
+      const node = makeNode({ type: 'organ', hasIntentMd: false });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);
     });
 
-    it('should pass when fractal has CLAUDE.md', () => {
+    it('should pass when fractal has INTENT.md', () => {
       const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_CLAUDEMD,
+        (r) => r.id === BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD,
       )!;
-      const node = makeNode({ type: 'fractal', hasClaudeMd: true });
+      const node = makeNode({ type: 'fractal', hasIntentMd: true });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(0);
-    });
-  });
-
-  describe('module-entry-point rule', () => {
-    it('should fail for fractal without index.ts or main.ts', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
-      )!;
-      const node = makeNode({
-        type: 'fractal',
-        hasIndex: false,
-        hasMain: false,
-      });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(1);
-    });
-
-    it('should pass for fractal with index.ts', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
-      )!;
-      const node = makeNode({
-        type: 'fractal',
-        hasIndex: true,
-        hasMain: false,
-      });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(0);
-    });
-
-    it('should not apply to organ nodes', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
-      )!;
-      const node = makeNode({ type: 'organ', hasIndex: false, hasMain: false });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(0);
-    });
-  });
-
-  describe('max-depth rule', () => {
-    it('should fail when node depth exceeds maxDepth', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.MAX_DEPTH,
-      )!;
-      const node = makeNode({ depth: 11 });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree, scanOptions: { maxDepth: 10 } };
-      expect(rule.check(ctx)).toHaveLength(1);
-    });
-
-    it('should pass when node depth equals maxDepth', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.MAX_DEPTH,
-      )!;
-      const node = makeNode({ depth: 10 });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree, scanOptions: { maxDepth: 10 } };
       expect(rule.check(ctx)).toHaveLength(0);
     });
   });

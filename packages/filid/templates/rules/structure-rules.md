@@ -1,40 +1,40 @@
 # Rules: structure
 
-This file covers the two built-in structure-category rules: `organ-no-claudemd` and `max-depth`.
+This file covers the two built-in structure-category rules: `organ-no-intentmd` and `max-depth`.
 
 ---
 
-## Rule: organ-no-claudemd
+## Rule: organ-no-intentmd
 
-**ID**: `organ-no-claudemd`
+**ID**: `organ-no-intentmd`
 **Category**: structure
 **Severity**: error
 **Enabled by default**: yes
 
 ### Description
 
-Organ nodes must not contain a `CLAUDE.md` file.
+Organ nodes must not contain a `INTENT.md` file.
 
 An **organ** is a leaf-level directory compartment within a fractal module. Organs handle a single concern (e.g., `utils/`, `types/`, `helpers/`) and are not independent modules. They do not have their own architectural documentation.
 
-If an organ directory has its own `CLAUDE.md`, it implies independent module status — which contradicts the organ classification. This is an error because it signals a structural inconsistency that misleads both humans and AI agents.
+If an organ directory has its own `INTENT.md`, it implies independent module status — which contradicts the organ classification. This is an error because it signals a structural inconsistency that misleads both humans and AI agents.
 
 ### Violation Example
 
 ```
-ERROR: organ directory "utils" contains CLAUDE.md. Independent documentation is prohibited for organs.
+ERROR: organ directory "utils" contains INTENT.md. Independent documentation is prohibited for organs.
 Path: src/auth/utils
-Suggestion: Remove CLAUDE.md, or reclassify the directory as a fractal node.
+Suggestion: Remove INTENT.md, or reclassify the directory as a fractal node.
 ```
 
 ### Fix Options
 
-1. **Remove `CLAUDE.md`** if the directory is truly a leaf-level utility compartment with no independent concerns.
+1. **Remove `INTENT.md`** if the directory is truly a leaf-level utility compartment with no independent concerns.
 2. **Reclassify as `fractal`** if the directory has grown into an independent module with its own architecture, tests, and public API.
 
 ### Node Classification Reference
 
-| Type | CLAUDE.md | Fractal children | Description |
+| Type | INTENT.md | Fractal children | Description |
 |---|---|---|---|
 | `fractal` | required | possible | Independent module with own documentation and public API |
 | `organ` | forbidden | none | Leaf compartment inside a fractal module |

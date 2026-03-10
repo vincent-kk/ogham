@@ -14,21 +14,21 @@ fractal_scan({ path: "<target-path>" })
 The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode).
 Partition into three working sets:
 
-- **fractal nodes** — nodes with `hasClaudeMd: true` or `type: "fractal"`
+- **fractal nodes** — nodes with `hasIntentMd: true` or `type: "fractal"`
 - **organ nodes** — nodes with `type: "organ"` or names matching `ORGAN_DIR_NAMES`
 - **spec files** — files matching `*.spec.ts` pattern
 
-## Section 2 — CLAUDE.md Validation
+## Section 2 — INTENT.md Validation
 
-For every fractal node that has a CLAUDE.md, perform two checks:
+For every fractal node that has a INTENT.md, perform two checks:
 
 **Check 2a — Line count**
 
-Read the CLAUDE.md content and count lines.
+Read the INTENT.md content and count lines.
 
 | Condition        | Severity | Violation ID           |
 | ---------------- | -------- | ---------------------- |
-| `lineCount > 50` | high     | `CLAUDE_MD_LINE_LIMIT` |
+| `lineCount > 50` | high     | `INTENT_MD_LINE_LIMIT` |
 
 **Check 2b — 3-tier boundary sections**
 
@@ -45,11 +45,11 @@ Verify that all three required headings are present:
 ## Section 3 — Organ Directory Validation
 
 For every directory whose name matches `ORGAN_DIR_NAMES`, check that no
-CLAUDE.md is present inside it.
+INTENT.md is present inside it.
 
 | Condition                     | Severity | Violation ID              | Auto-fixable |
 | ----------------------------- | -------- | ------------------------- | ------------ |
-| CLAUDE.md exists in organ dir | critical | `ORGAN_CLAUDE_MD_PRESENT` | Yes (delete) |
+| INTENT.md exists in organ dir | critical | `ORGAN_CLAUDE_MD_PRESENT` | Yes (delete) |
 
 `ORGAN_DIR_NAMES` = `components`, `utils`, `types`, `hooks`, `helpers`,
 `lib`, `styles`, `assets`, `constants`
@@ -86,11 +86,11 @@ Checks run    : <n>
 Total violations: <n>
 
 CRITICAL (<n>)
-  [ORGAN_CLAUDE_MD_PRESENT] src/utils/CLAUDE.md
-    Organ directories must not contain CLAUDE.md.
+  [ORGAN_CLAUDE_MD_PRESENT] src/utils/INTENT.md
+    Organ directories must not contain INTENT.md.
     Remediation: delete the file or reclassify the directory.
 
-  [CLAUDE_MD_LINE_LIMIT] src/payments/CLAUDE.md — 117 lines (limit: 50)
+  [INTENT_MD_LINE_LIMIT] src/payments/INTENT.md — 117 lines (limit: 50)
     Remediation: compress or split the document.
 
 HIGH (<n>)
@@ -108,9 +108,9 @@ Run with --fix to apply automatic remediations.
 
 | Violation                      | Auto-fix Action                                                         | Agent             |
 | ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
-| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the CLAUDE.md from the organ directory                           | `context-manager` |
+| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `context-manager` |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
-| `CLAUDE_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
 Each fixable violation is delegated to the appropriate agent as a separate
@@ -132,7 +132,7 @@ Skipped : <n> (require manual remediation)
 
 | ID                             | Severity | Auto-fix | Agent             |
 | ------------------------------ | -------- | -------- | ----------------- |
-| `CLAUDE_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
 | `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `context-manager` |
 | `TEST_312_EXCEEDED`            | high     | Yes      | `code-surgeon`    |

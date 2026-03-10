@@ -33,17 +33,17 @@ export const KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
 export interface ClassifyInput {
   /** Directory name */
   dirName: string;
-  /** Whether CLAUDE.md exists */
-  hasClaudeMd: boolean;
-  /** Whether SPEC.md exists */
-  hasSpecMd: boolean;
+  /** Whether INTENT.md exists */
+  hasIntentMd?: boolean;
+  /** Whether DETAIL.md exists */
+  hasDetailMd?: boolean;
   /** Whether the directory contains fractal child directories */
   hasFractalChildren: boolean;
   /** Whether this is a leaf directory (no subdirectories) */
   isLeafDirectory: boolean;
   /** Whether side effects exist (defaults to true if unspecified) */
   hasSideEffects?: boolean;
-  /** index.ts/js/mjs/cjs 파일 존재 여부. 존재 시 fractal 모듈 진입점으로 간주 */
+  /** index.ts/js/mjs/cjs file exists. Treated as fractal module entry point */
   hasIndex?: boolean;
 }
 
@@ -63,22 +63,25 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * Classify a directory as fractal / organ / pure-function based on structure.
  *
  * Priority order:
- * 1. CLAUDE.md exists → fractal (explicit declaration)
- * 2. SPEC.md exists → fractal (documented module boundary)
+ * 1. INTENT.md exists → fractal (explicit declaration)
+ * 2. DETAIL.md exists → fractal (documented module boundary)
  * 3. Name matches __*__ or .* pattern → organ (infrastructure convention)
  * 4. Directory name in KNOWN_ORGAN_DIR_NAMES → organ (name-based, overrides structure)
  * 5. No fractal children + leaf directory → organ
  * 6. No side effects → pure-function
- * 7. Default → fractal (CLAUDE.md should be added)
+ * 7. Default → fractal (INTENT.md should be added)
  *
  * Ambiguous cases should be delegated to LLM via context-injector by the caller.
  */
 export function classifyNode(input: ClassifyInput): CategoryType {
-  if (input.hasClaudeMd) return 'fractal';
-  if (input.hasSpecMd) return 'fractal';
+  const hasIntent = input.hasIntentMd ?? false;
+  const hasDetail = input.hasDetailMd ?? false;
+
+  if (hasIntent) return 'fractal';
+  if (hasDetail) return 'fractal';
   if (isInfraOrgDirectoryByPattern(input.dirName)) return 'organ';
   if (KNOWN_ORGAN_DIR_NAMES.includes(input.dirName)) return 'organ';
-  // NEW: index 파일이 있는 non-organ, non-infra 디렉토리 = 프렉탈 모듈 진입점
+  // index file in non-organ, non-infra directory = fractal module entry point
   if (
     (input.hasIndex ?? false) &&
     !KNOWN_ORGAN_DIR_NAMES.includes(input.dirName) &&

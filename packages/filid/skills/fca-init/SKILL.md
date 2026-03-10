@@ -1,7 +1,7 @@
 ---
 name: fca-init
 user_invocable: true
-description: Initialize FCA-AI project — directory classification, CLAUDE.md/SPEC.md generation
+description: Initialize FCA-AI project — directory classification, INTENT.md/DETAIL.md generation
 version: 1.0.0
 complexity: medium
 ---
@@ -10,7 +10,7 @@ complexity: medium
 
 Initialize the FCA-AI fractal context architecture in a project. Scans the
 directory tree, classifies every directory by node type, generates missing
-CLAUDE.md files for fractal nodes, and produces a validation report.
+INTENT.md files for fractal nodes, and produces a validation report.
 
 > **Detail Reference**: For detailed workflow steps, MCP tool examples,
 > and output format templates, read the `reference.md` file in this
@@ -20,8 +20,8 @@ CLAUDE.md files for fractal nodes, and produces a validation report.
 
 - Starting a new project that will follow FCA-AI conventions
 - Onboarding an existing codebase into the fractal context system
-- Regenerating CLAUDE.md files after a large-scale refactor removed them
-- Creating SPEC.md scaffolds for modules that lack formal specifications
+- Regenerating INTENT.md files after a large-scale refactor removed them
+- Creating DETAIL.md scaffolds for modules that lack formal specifications
 - Auditing which directories are correctly classified before running `/filid:fca-scan`
 
 ## Prerequisites — Environment Check
@@ -53,17 +53,17 @@ Classify each directory as fractal, organ, or pure-function using
 `fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
 See [reference.md Section 2](./reference.md#section-2--node-classification-rules).
 
-### Phase 3 — CLAUDE.md Generation
+### Phase 3 — INTENT.md Generation
 
-Generate CLAUDE.md (≤50 lines, 3-tier boundaries) for each fractal directory
+Generate INTENT.md (≤50 lines, 3-tier boundaries) for each fractal directory
 that lacks one. Organ directories are skipped.
-See [reference.md Section 3](./reference.md#section-3--claudemd-generation-template).
+See [reference.md Section 3](./reference.md#section-3--intentmd-generation-template).
 
-### Phase 4 — SPEC.md Scaffolding
+### Phase 4 — DETAIL.md Scaffolding
 
-Create SPEC.md scaffolds for fractal modules with public APIs that lack
+Create DETAIL.md scaffolds for fractal modules with public APIs that lack
 formal specifications.
-See [reference.md Section 4](./reference.md#section-4--specmd-scaffolding).
+See [reference.md Section 4](./reference.md#section-4--detailmd-scaffolding).
 
 ### Phase 5 — Validation and Report
 
@@ -111,7 +111,7 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 
 Key rules:
 
-- Organ directories must never receive a CLAUDE.md
-- CLAUDE.md must not exceed 50 lines
-- All three boundary sections are required in every CLAUDE.md
-- Existing CLAUDE.md files are preserved, never overwritten
+- Organ directories must never receive a INTENT.md
+- INTENT.md must not exceed 50 lines
+- All three boundary sections are required in every INTENT.md
+- Existing INTENT.md files are preserved, never overwritten

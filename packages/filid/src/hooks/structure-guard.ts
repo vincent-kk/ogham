@@ -7,16 +7,33 @@ import {
 } from '../core/organ-classifier.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
-import { isClaudeMd } from './shared.js';
+import { isIntentMd } from './shared.js';
 
-/** Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls */
+/**
+ * Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls.
+ * Lifecycle: module-scope — lives for the duration of the process.
+ * In hook mode (bridge scripts), each invocation spawns a fresh process,
+ * so this cache is effectively per-invocation.
+ * In MCP server / test environments, call clearOrganCache() to invalidate.
+ */
 const organCache = new Map<string, boolean>();
+
+/** Clear the organ classification cache. Useful in tests or long-lived processes. */
+export function clearOrganCache(): void {
+  organCache.clear();
+}
 
 /**
  * 디렉토리 경로를 기반으로 organ 여부를 판별.
  * classifyNode()를 사용하여 구조 기반 분류를 수행하고,
  * 파일시스템 접근 실패 시 false를 반환한다.
  * 결과는 프로세스 내 캐시에 저장하여 동일 경로 반복 검사를 방지한다.
+ *
+ * Performance: Uses readdirSync for the target dir and each child dir.
+ * For a directory with N subdirs, this makes N+1 sync filesystem calls
+ * on the first invocation (subsequent calls are cached via organCache).
+ * Acceptable for hook usage where directories are few; for large trees,
+ * prefer fractal_scan MCP tool results instead.
  */
 function isOrganByStructure(dirPath: string): boolean {
   const cached = organCache.get(dirPath);
@@ -29,10 +46,12 @@ function isOrganByStructure(dirPath: string): boolean {
       return fallback;
     }
     const entries = readdirSync(dirPath, { withFileTypes: true });
-    const hasClaudeMd = entries.some(
-      (e) => e.isFile() && e.name === 'CLAUDE.md',
+    const hasIntentMd = entries.some(
+      (e) => e.isFile() && e.name === 'INTENT.md',
     );
-    const hasSpecMd = entries.some((e) => e.isFile() && e.name === 'SPEC.md');
+    const hasDetailMd = entries.some(
+      (e) => e.isFile() && e.name === 'DETAIL.md',
+    );
     const subDirs = entries.filter((e) => e.isDirectory());
     const hasFractalChildren = subDirs.some((d) => {
       const childPath = path.join(dirPath, d.name);
@@ -40,7 +59,7 @@ function isOrganByStructure(dirPath: string): boolean {
         const childEntries = readdirSync(childPath, { withFileTypes: true });
         return childEntries.some(
           (ce) =>
-            ce.isFile() && (ce.name === 'CLAUDE.md' || ce.name === 'SPEC.md'),
+            ce.isFile() && (ce.name === 'INTENT.md' || ce.name === 'DETAIL.md'),
         );
       } catch {
         return false;
@@ -49,8 +68,8 @@ function isOrganByStructure(dirPath: string): boolean {
     const isLeafDirectory = subDirs.length === 0;
     const category = classifyNode({
       dirName: path.basename(dirPath),
-      hasClaudeMd,
-      hasSpecMd,
+      hasIntentMd,
+      hasDetailMd,
       hasFractalChildren,
       isLeafDirectory,
     });
@@ -69,7 +88,7 @@ function getParentSegments(filePath: string): string[] {
   return parts.slice(0, -1);
 }
 
-// isClaudeMd imported from shared.ts
+// isIntentMd imported from shared.ts
 
 function extractImportPaths(content: string): string[] {
   const importRegex = /from\s+['"]([^'"]+)['"]/g;
@@ -93,14 +112,6 @@ function isAncestorPath(
   return fileAbsolute.startsWith(resolvedImport + path.sep);
 }
 
-/**
- * PreToolUse hook: organ-guard 로직을 포팅하고 카테고리 검증 3가지를 추가.
- *
- * [기존 로직 보존] organ 디렉토리 내 CLAUDE.md Write → continue: false
- * [추가 검증] 경고 2가지 (continue: true):
- *   1. organ 내부 하위 디렉토리 생성
- *   2. 잠재적 순환 의존 import
- */
 export function guardStructure(input: PreToolUseInput): HookOutput {
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
     return { continue: true };
@@ -114,8 +125,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
 
-  // [기존 로직 보존] organ 디렉토리 내 CLAUDE.md Write → 차단 (continue: false)
-  if (input.tool_name === 'Write' && isClaudeMd(filePath)) {
+  // [기존 로직 보존] organ 디렉토리 내 INTENT.md Write → 차단 (continue: false)
+  if (input.tool_name === 'Write' && isIntentMd(filePath)) {
     let dirSoFar = cwd;
     for (const segment of segments) {
       dirSoFar = path.join(dirSoFar, segment);
@@ -124,8 +135,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
           continue: false,
           hookSpecificOutput: {
             additionalContext:
-              `BLOCKED: Cannot create CLAUDE.md inside organ directory "${segment}". ` +
-              `Organ directories are leaf-level compartments and should not have their own CLAUDE.md.`,
+              `BLOCKED: Cannot create INTENT.md inside organ directory "${segment}". ` +
+              `Organ directories are leaf-level compartments and should not have their own INTENT.md.`,
           },
         };
       }

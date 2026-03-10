@@ -3,7 +3,7 @@ name: fca-structure-review
 user_invocable: true
 description: 6-stage FCA-AI PR verification — structure, docs, tests, metrics, dependencies
 version: 1.0.0
-complexity: complex
+complexity: high
 ---
 
 # fca-structure-review — 6-Stage PR Verification
@@ -19,7 +19,7 @@ documents, tests, metrics, and dependencies, then emit a consolidated verdict.
 
 - Before merging any PR that modifies FCA-AI module structure or documents
 - After adding new directories to confirm correct fractal/organ classification
-- When a CLAUDE.md or SPEC.md has been manually edited and needs compliance verification
+- When a INTENT.md or DETAIL.md has been manually edited and needs compliance verification
 - To confirm test files satisfy the 3+12 rule (≤15 cases per spec.ts)
 - To detect circular dependencies introduced by refactoring
 - For targeted checks on a single stage (`--stage=N`)
@@ -52,7 +52,7 @@ See [reference.md Section 1](./reference.md#section-1--structure-verification-de
 
 ### Stage 2 — Document Compliance
 
-Verify CLAUDE.md (≤50 lines, 3-tier sections) and SPEC.md (no append-only).
+Verify INTENT.md (≤50 lines, 3-tier sections) and DETAIL.md (no append-only).
 See [reference.md Section 2](./reference.md#section-2--document-compliance-details).
 
 ### Stage 3 — Test Compliance
@@ -112,7 +112,7 @@ Stages:   [Structure + Documents + Tests + Metrics + Dependencies] → Summary
           (Stages 1–5 run in parallel; Stage 6 aggregates)
 Agents:   qa-reviewer (lead), fractal-architect (assist — stages 1, 5)
 Thresholds:
-  CLAUDE_MD_LINE_LIMIT = 50
+  INTENT_MD_LINE_LIMIT = 50
   TEST_THRESHOLD       = 15  (max cases per spec.ts)
   CC_THRESHOLD         = 15  (max cyclomatic complexity)
   LCOM4_SPLIT          = 2   (split when LCOM4 >= 2)

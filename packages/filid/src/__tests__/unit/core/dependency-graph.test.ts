@@ -49,10 +49,15 @@ describe('dependency-graph', () => {
         { from: 'A', to: 'B', type: 'call' },
       ];
       const dag = buildDAG(edges);
+      // nodes are deduplicated: 2 edges between same pair → still 2 unique nodes
       expect(dag.nodes.size).toBe(2);
+      // edges are preserved individually (different types)
       expect(dag.edges).toHaveLength(2);
-      // adjacency may have duplicates for different edge types
+      // adjacency list keeps one entry per edge (not per unique target),
+      // deduplication is deferred to getDirectDependencies()
       expect(dag.adjacency.get('A')).toEqual(['B', 'B']);
+      // getDirectDependencies deduplicates at query time
+      expect(getDirectDependencies(dag, 'A')).toEqual(['B']);
     });
   });
 

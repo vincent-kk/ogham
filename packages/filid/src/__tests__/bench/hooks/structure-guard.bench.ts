@@ -44,17 +44,17 @@ describe('structure-guard: path depth (organ directory)', () => {
 });
 
 describe('structure-guard: tool type pass-through', () => {
-  const claudeMdPath = '/workspace/src/components/CLAUDE.md';
+  const intentMdPath = '/workspace/src/components/INTENT.md';
 
   bench('Edit tool pass-through', () => {
-    guardStructure(makeInput(claudeMdPath, 'Edit'));
+    guardStructure(makeInput(intentMdPath, 'Edit'));
   });
 
   bench('Read tool pass-through', () => {
-    guardStructure(makeInput(claudeMdPath, 'Read'));
+    guardStructure(makeInput(intentMdPath, 'Read'));
   });
 
-  bench('Write to non-CLAUDE.md file', () => {
+  bench('Write to non-INTENT.md file', () => {
     guardStructure(makeInput('/workspace/src/components/index.ts'));
   });
 });

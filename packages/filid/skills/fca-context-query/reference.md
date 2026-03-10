@@ -34,25 +34,25 @@ This counts as **Prompt 1** of the 3-Prompt budget.
 
 ## Section 3 — Context Chain Loading
 
-Load the CLAUDE.md chain from the identified leaf node up to the project root:
+Load the INTENT.md chain from the identified leaf node up to the project root:
 
 ```
-[leaf CLAUDE.md] → [parent CLAUDE.md] → [grandparent CLAUDE.md] → [root CLAUDE.md]
+[leaf INTENT.md] → [parent INTENT.md] → [grandparent INTENT.md] → [root INTENT.md]
 ```
 
-Claude Code loads `@`-referenced CLAUDE.md files natively. Construct the
+Claude Code loads `@`-referenced INTENT.md files natively. Construct the
 chain by following `parent` relationships in the fractal tree.
 
-Only load CLAUDE.md files that are directly in the ancestor path of the
+Only load INTENT.md files that are directly in the ancestor path of the
 target node. Do not load sibling or cousin nodes.
 
 ## Section 4 — Compression Strategy
 
-If the combined CLAUDE.md chain exceeds working context limits, call
+If the combined INTENT.md chain exceeds working context limits, call
 `doc_compress` before generating the response:
 
 ```
-doc_compress({ mode: "auto", filePath: "<CLAUDE.md path>", content: "<file content>" })
+doc_compress({ mode: "auto", filePath: "<INTENT.md path>", content: "<file content>" })
 ```
 
 `auto` mode selects `reversible` compression for structured documents
@@ -73,7 +73,7 @@ Apply compression only when necessary. Skip if the chain fits in context.
 If the question cannot be answered within 3 prompts, respond with:
 
 1. What is known from the loaded context
-2. Which additional CLAUDE.md files or information would be needed
+2. Which additional INTENT.md files or information would be needed
 3. The specific path or module the user should consult directly
 
 Do not continue searching beyond the 3-prompt budget. Surface what is

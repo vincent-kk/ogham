@@ -48,12 +48,13 @@ See [reference.md Section 2](./reference.md#section-2--plan-review--approval).
 
 `restructurer` applies the approved plan in priority order: file moves, renames,
 index.ts creation, and import path updates.
+`--dry-run` skips this stage (no file changes are made).
 See [reference.md Section 3](./reference.md#section-3--execution).
 
 ### Stage 4 — Validation
 
 `fractal-architect` validates the result using `structure_validate` and reports any
-remaining violations.
+remaining violations. `--dry-run` skips this stage.
 See [reference.md Section 4](./reference.md#section-4--validation).
 
 ## Available MCP Tools

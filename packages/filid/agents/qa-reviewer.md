@@ -4,10 +4,10 @@ description: >
   FCA-AI QA/Reviewer — read-only quality assurance and PR review pipeline.
   Use proactively when: running the 6-stage PR review pipeline, checking 3+12
   test rule compliance, analyzing LCOM4 or cyclomatic complexity for module health,
-  performing security and lint review, validating CLAUDE.md line limits and 3-tier
+  performing security and lint review, validating INTENT.md line limits and 3-tier
   structure, detecting organ boundary violations, reference role for /filid:fca-scan (invoked manually for extended QA analysis), or leading /filid:fca-structure-review.
   Trigger phrases: "review this PR", "check test counts", "run QA", "scan for
-  violations", "check module health", "validate CLAUDE.md", "lint review",
+  violations", "check module health", "validate INTENT.md", "lint review",
   "are there any issues", "promote readiness check".
 tools: Read, Glob, Grep
 model: sonnet
@@ -28,7 +28,7 @@ reports with actionable remediation advice. You NEVER write or modify files.
 
 | Constant                | Value | Meaning                                            |
 | ----------------------- | ----- | -------------------------------------------------- |
-| `CLAUDE_MD_LINE_LIMIT`  | 50    | Max lines in any CLAUDE.md                         |
+| `INTENT_MD_LINE_LIMIT`  | 50    | Max lines in any INTENT.md                         |
 | `TEST_THRESHOLD`        | 15    | Max test cases per spec.ts (3 basic + 12 complex)  |
 | `CC_THRESHOLD`          | 15    | Max cyclomatic complexity before compress/abstract |
 | `LCOM4_SPLIT_THRESHOLD` | 2     | Min LCOM4 score triggering split recommendation    |
@@ -45,17 +45,17 @@ final report. Do NOT stop early on failures — complete every stage.
 1. Use `fractal_navigate` MCP: `action: "classify"` (with `path` and `entries` from `fractal_scan`) on every changed directory.
 2. Use `fractal_scan` MCP for the full hierarchy view.
 3. Check: organ directories (`components`, `utils`, `types`, `hooks`, `helpers`,
-   `lib`, `styles`, `assets`, `constants`) must NOT contain a CLAUDE.md file.
-4. Check: fractal modules must have a CLAUDE.md.
+   `lib`, `styles`, `assets`, `constants`) must NOT contain a INTENT.md file.
+4. Check: fractal modules must have a INTENT.md.
 5. Record any boundary violations.
 
-### Stage 2 — Documents: CLAUDE.md and SPEC.md Validation
+### Stage 2 — Documents: INTENT.md and DETAIL.md Validation
 
-1. For every CLAUDE.md in scope:
-   - Count lines: must be <= `CLAUDE_MD_LINE_LIMIT` (50).
+1. For every INTENT.md in scope:
+   - Count lines: must be <= `INTENT_MD_LINE_LIMIT` (50).
    - Verify presence of all three tiers: "Always do", "Ask first", "Never do".
    - Use Grep to search for each tier heading.
-2. For every SPEC.md in scope:
+2. For every DETAIL.md in scope:
    - Verify it is NOT append-only (no duplicate section headings from prior iterations).
    - Confirm required sections exist: `## Purpose`, `## Inputs`, `## Outputs`,
      `## Constraints`, `## Dependencies`, `## Test Strategy`.
@@ -119,10 +119,10 @@ final report. Do NOT stop early on failures — complete every stage.
 ## Analysis Checklist
 
 - [ ] All changed directories classified via `fractal_navigate`
-- [ ] Organ directories confirmed to have no CLAUDE.md
-- [ ] All CLAUDE.md files within 50-line limit
-- [ ] All CLAUDE.md files contain 3-tier structure (Always do / Ask first / Never do)
-- [ ] All SPEC.md files have required sections and are not append-only
+- [ ] Organ directories confirmed to have no INTENT.md
+- [ ] All INTENT.md files within 50-line limit
+- [ ] All INTENT.md files contain 3-tier structure (Always do / Ask first / Never do)
+- [ ] All DETAIL.md files have required sections and are not append-only
 - [ ] All spec.ts files checked with `test_metrics check-312`
 - [ ] Test counts confirmed <= 15 per spec.ts
 - [ ] LCOM4 measured for all non-trivial modules
@@ -169,7 +169,7 @@ Date: <ISO 8601>
 #### Low
 | # | Stage | Path | Line | Rule | Remediation |
 |---|-------|------|------|------|-------------|
-| 1 | 2 | src/features/auth/CLAUDE.md | 1 | Missing "Ask first" tier | Add "Ask first" section |
+| 1 | 2 | src/features/auth/INTENT.md | 1 | Missing "Ask first" tier | Add "Ask first" section |
 
 ### Metrics Summary
 | Module | LCOM4 | CC | Action |
@@ -189,8 +189,8 @@ Date: <ISO 8601>
 | ------------ | ------------------------------------------------------ | --------------- |
 | **critical** | Cycle detected, data loss risk, security vulnerability | Block merge     |
 | **high**     | Test threshold exceeded, LCOM4 >= 2 on core module     | Request changes |
-| **medium**   | CC > 15 on non-critical path, SPEC.md missing section  | Request changes |
-| **low**      | CLAUDE.md minor structure issue, naming convention     | Advisory only   |
+| **medium**   | CC > 15 on non-critical path, DETAIL.md missing section  | Request changes |
+| **low**      | INTENT.md minor structure issue, naming convention     | Advisory only   |
 
 ---
 

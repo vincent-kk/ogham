@@ -13,11 +13,11 @@ export type {
 
 export type {
   ThreeTierBoundary,
-  ClaudeMdSchema,
-  SpecMdSchema,
+  IntentMdSchema,
+  DetailMdSchema,
   CompressionMeta,
-  ClaudeMdValidation,
-  SpecMdValidation,
+  IntentMdValidation,
+  DetailMdValidation,
   DocumentViolation,
 } from './documents.js';
 

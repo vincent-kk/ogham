@@ -28,7 +28,8 @@ isolation, communicating via `.filid/review/<branch>/` files.
 ```
 
 Each stage delegates to an existing skill. The pipeline is an orchestrator —
-it does not modify individual skill behavior.
+it does not modify individual skill behavior. Subagents use `general-purpose`
+type which has access to the `Skill()` tool for invoking existing skills.
 
 ## Core Workflow
 
@@ -57,7 +58,7 @@ order — first match wins.
 | Priority | Signal                                                             | Entry stage   |
 | -------- | ------------------------------------------------------------------ | ------------- |
 | 1        | `.filid/review/<branch>/re-validate.md` exists                     | Pipeline **complete** — report existing results |
-| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits (`git log @{upstream}..HEAD --oneline` non-empty) | Push first, then `revalidate` |
+| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits (`git log @{upstream}..HEAD --oneline` non-empty) | Execute `git push` (Bash). If push fails → pipeline **ERROR**, abort with "Push failed: `<error>`. Push manually and re-run." If push succeeds → enter `revalidate` |
 | 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)     | `revalidate`  |
 | 4        | `.filid/review/<branch>/fix-requests.md` exists                    | `resolve`     |
 | 5        | None of the above → check PR: `gh pr view` (Bash)                 | `review` if PR exists, `pr-create` if not |
@@ -128,6 +129,7 @@ Read the final verdict from `.filid/review/<branch>/re-validate.md`
 | resolve completes (N accepted fixes)   | Proceed to revalidate (code committed + pushed)          |
 | revalidate `PASS`                      | Pipeline **PASS**, report summary                        |
 | revalidate `FAIL`                      | Pipeline **FAIL**, report unresolved items               |
+| Auto-detect Priority 2 `git push` fails | Pipeline **ERROR**, report push error + manual push instructions |
 | Any stage execution error              | Pipeline **ERROR**, report stage + error + resume command |
 | `--from` prerequisite missing          | Pipeline **ABORT** before execution                      |
 

@@ -5,19 +5,19 @@ These are not standalone rule IDs in the rule engine but are enforced via PreToo
 
 ---
 
-## CLAUDE.md Conventions
+## INTENT.md Conventions
 
 ### 50-Line Limit
 
-Every `CLAUDE.md` file must not exceed **50 lines**.
+Every `INTENT.md` file must not exceed **50 lines**.
 
-CLAUDE.md is a working context document, not a design document. It must remain concise enough to be injected into Claude's context window without consuming excessive tokens. When a CLAUDE.md approaches 50 lines, it is a signal that the module has grown too large and should be decomposed into smaller fractal nodes, each with their own CLAUDE.md.
+INTENT.md is a working context document, not a design document. It must remain concise enough to be injected into Claude's context window without consuming excessive tokens. When a INTENT.md approaches 50 lines, it is a signal that the module has grown too large and should be decomposed into smaller fractal nodes, each with their own INTENT.md.
 
-**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations that produce a CLAUDE.md exceeding 50 lines (`continue: false`).
+**Enforcement**: The `pre-tool-use` hook blocks `Write` operations that produce a INTENT.md exceeding 50 lines (`continue: false`).
 
 ### 3-Tier Boundary Sections
 
-Every `CLAUDE.md` must include the following three sections:
+Every `INTENT.md` must include the following three sections:
 
 ```markdown
 ## Always do
@@ -35,7 +35,7 @@ Every `CLAUDE.md` must include the following three sections:
 
 These sections define the behavioral contract for AI agents working within the module. Missing sections trigger a warning (not a block) via the hook.
 
-### CLAUDE.md Template
+### INTENT.md Template
 
 ```markdown
 # <Module Name>
@@ -69,25 +69,25 @@ Key patterns and decisions for this module.
 
 ---
 
-## SPEC.md Conventions
+## DETAIL.md Conventions
 
 ### No Append-Only Growth
 
-`SPEC.md` must not grow by appending new content to the end of the existing file.
+`DETAIL.md` must not grow by appending new content to the end of the existing file.
 Each update must restructure the specification to reflect the current state of the module.
 
 Append-only growth indicates the spec has become a changelog or a log of decisions rather than a living specification. A spec that only grows never gets pruned of stale or obsolete requirements.
 
-**Enforcement**: The `pre-tool-validator` hook blocks `Write` operations where the new content is detected as append-only relative to the existing file content (`continue: false`).
+**Enforcement**: The `pre-tool-use` hook blocks `Write` operations where the new content is detected as append-only relative to the existing file content (`continue: false`).
 
-### SPEC.md Purpose
+### DETAIL.md Purpose
 
-SPEC.md is the formal specification document for a fractal module. It defines:
+DETAIL.md is the formal specification document for a fractal module. It defines:
 - The module's public API contract
 - Acceptance criteria for the current implementation
 - Scope boundaries for the `implementer` agent
 
-SPEC.md is read by the `implementer` agent to constrain implementation scope. It must always reflect the current intended behavior, not the historical evolution of decisions.
+DETAIL.md is read by the `implementer` agent to constrain implementation scope. It must always reflect the current intended behavior, not the historical evolution of decisions.
 
 ---
 

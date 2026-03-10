@@ -1,32 +1,34 @@
-import { validateClaudeMd } from '../core/document-validator.js';
-import { validateSpecMd } from '../core/document-validator.js';
+import {
+  validateDetailMd,
+  validateIntentMd,
+} from '../core/document-validator.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
-import { isClaudeMd, isSpecMd } from './shared.js';
+import { isDetailMd, isIntentMd } from './shared.js';
 
-export { isSpecMd } from './shared.js';
+export { isDetailMd } from './shared.js';
 
 /**
- * PreToolUse hook logic for CLAUDE.md/SPEC.md validation.
+ * PreToolUse hook logic for INTENT.md/DETAIL.md validation.
  *
- * For Write tool targeting CLAUDE.md:
+ * For Write tool targeting INTENT.md:
  * - Blocks if content exceeds 50-line limit (error)
  * - Warns if missing 3-tier boundary sections (warning, no block)
  *
- * For Write tool targeting SPEC.md:
- * - Blocks if detected as append-only (when oldSpecContent provided)
+ * For Write tool targeting DETAIL.md:
+ * - Blocks if detected as append-only (when oldDetailContent provided)
  *
- * For Edit tool targeting CLAUDE.md:
+ * For Edit tool targeting INTENT.md:
  * - Warns when new_string exceeds 20 lines (partial edits cannot be validated for line limit)
  */
 export function validatePreToolUse(
   input: PreToolUseInput,
-  oldSpecContent?: string,
+  oldDetailContent?: string,
 ): HookOutput {
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
 
-  // Edit targeting CLAUDE.md: 대규모 편집(>20줄) 시 경고 주입 (차단하지 않음)
-  if (input.tool_name === 'Edit' && isClaudeMd(filePath)) {
+  // Edit targeting INTENT.md: 대규모 편집(>20줄) 시 경고 주입 (차단하지 않음)
+  if (input.tool_name === 'Edit' && isIntentMd(filePath)) {
     const newString = (input.tool_input.new_string as string) ?? '';
     const lineCount = newString.split('\n').length;
     if (lineCount > 20) {
@@ -34,7 +36,7 @@ export function validatePreToolUse(
         continue: true,
         hookSpecificOutput: {
           additionalContext:
-            `Note: Editing CLAUDE.md via Edit tool with ${lineCount} new lines — ` +
+            `Note: Editing INTENT.md via Edit tool with ${lineCount} new lines — ` +
             'line limit (50) cannot be enforced on partial edits. ' +
             'Verify the final line count does not exceed 50 lines after editing.',
         },
@@ -50,9 +52,9 @@ export function validatePreToolUse(
     return { continue: true };
   }
 
-  // CLAUDE.md validation
-  if (isClaudeMd(filePath)) {
-    const result = validateClaudeMd(content);
+  // INTENT.md validation
+  if (isIntentMd(filePath)) {
+    const result = validateIntentMd(content);
 
     if (!result.valid) {
       const errorMessages = result.violations
@@ -81,9 +83,9 @@ export function validatePreToolUse(
     return { continue: true };
   }
 
-  // SPEC.md validation
-  if (isSpecMd(filePath) && oldSpecContent !== undefined) {
-    const result = validateSpecMd(content, oldSpecContent);
+  // DETAIL.md validation
+  if (isDetailMd(filePath) && oldDetailContent !== undefined) {
+    const result = validateDetailMd(content, oldDetailContent);
 
     if (!result.valid) {
       const errorMessages = result.violations

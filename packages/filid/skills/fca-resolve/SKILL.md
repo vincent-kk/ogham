@@ -76,7 +76,7 @@ For each fix item:
    as `resolve_commit_sha` in Step 6.
 
 Delegate all accepted fixes **in parallel** as separate Task subagents
-(`filid:code-surgeon`, model: `sonnet`, `run_in_background: true`).
+(`code-surgeon`, model: `sonnet`, `run_in_background: true`).
 
 For each accepted fix, spawn one subagent with:
 - The target file path
@@ -202,6 +202,9 @@ If there were accepted fixes:
 
 If there were NO accepted fixes (all rejected):
   Automatically invoke /filid:fca-revalidate — no pending code changes needed.
+  fca-revalidate will find zero accepted items, evaluate only the rejected-item
+  justifications and debt records, and return PASS if all justifications are
+  constitutionally compliant.
 ```
 
 ## Available MCP Tools

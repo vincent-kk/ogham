@@ -28,7 +28,7 @@ long-term architectural health over short-term delivery speed.
 3. **3+12 violation**: Recommend test file splitting (basic + edge separation).
 4. **Circular dependency**: Absolute block — must resolve before approval.
 5. **Fractal boundary violation**: File placed in wrong fractal scope.
-6. **Missing CLAUDE.md**: New fractal directory without governance document.
+6. **Missing INTENT.md**: New fractal directory without governance document.
 
 ### Evidence Sources
 

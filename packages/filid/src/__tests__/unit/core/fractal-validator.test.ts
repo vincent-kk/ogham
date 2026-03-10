@@ -7,22 +7,22 @@ import {
   validateNode,
   validateStructure,
 } from '../../../core/fractal-validator.js';
-import type { NodeType } from '../../../types/fractal.js';
+import type { CategoryType } from '../../../types/fractal.js';
 import type { Rule, RuleContext } from '../../../types/rules.js';
 
 const entry = (
   path: string,
-  type: NodeType,
-  hasClaudeMd = false,
-  hasSpecMd = false,
+  type: CategoryType,
+  hasIntentMd = false,
+  hasDetailMd = false,
   hasIndex = false,
   hasMain = false,
 ): NodeEntry => ({
   path,
   name: path.split('/').pop()!,
   type,
-  hasClaudeMd,
-  hasSpecMd,
+  hasIntentMd,
+  hasDetailMd,
   hasIndex,
   hasMain,
 });
@@ -43,21 +43,21 @@ describe('fractal-validator', () => {
       expect(Array.isArray(report.result.violations)).toBe(true);
     });
 
-    it('should detect organ with CLAUDE.md as violation', () => {
+    it('should detect organ with INTENT.md as violation', () => {
       const tree = buildFractalTree([
         entry('/app', 'fractal', true, false, true),
         {
           path: '/app/utils',
           name: 'utils',
           type: 'organ',
-          hasClaudeMd: true,
-          hasSpecMd: false,
+          hasIntentMd: true,
+          hasDetailMd: false,
         },
       ]);
       const report = validateStructure(tree);
 
       const violation = report.result.violations.find(
-        (v) => v.ruleId === 'organ-no-claudemd',
+        (v) => v.ruleId === 'organ-no-intentmd',
       );
       expect(violation).toBeDefined();
       expect(violation!.severity).toBe('error');

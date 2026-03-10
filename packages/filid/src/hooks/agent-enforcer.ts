@@ -7,8 +7,8 @@ import { isFcaProject } from './shared.js';
  *
  * - architect: read-only, no file modifications
  * - qa-reviewer: read-only, no file modifications
- * - implementer: code within SPEC.md scope only
- * - context-manager: only CLAUDE.md/SPEC.md documents
+ * - implementer: code within DETAIL.md scope only
+ * - context-manager: only INTENT.md/DETAIL.md documents
  * - code-surgeon: fix scope only, no collateral changes
  */
 const ROLE_RESTRICTIONS: Record<string, string> = {
@@ -17,9 +17,9 @@ const ROLE_RESTRICTIONS: Record<string, string> = {
   'qa-reviewer':
     'ROLE RESTRICTION: You are a QA/Reviewer agent. You MUST NOT use Write, Edit, or Bash tools. Review, analyze, and report only.',
   implementer:
-    'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by SPEC.md. Do not make architectural changes beyond the approved specification.',
+    'ROLE RESTRICTION: You are an Implementer agent. You MUST only implement within the scope defined by DETAIL.md. Do not make architectural changes beyond the approved specification.',
   'context-manager':
-    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit CLAUDE.md and SPEC.md documents. Bash is permitted only for git diff to detect changed files. Do not modify business logic or source code.',
+    'ROLE RESTRICTION: You are a Context Manager agent. You may only edit INTENT.md and DETAIL.md documents. Bash is permitted only for git diff to detect changed files. Do not modify business logic or source code.',
   'drift-analyzer':
     'ROLE RESTRICTION: You are a Drift Analyzer agent. You MUST NOT use Write, Edit, or Bash tools. You are read-only — detect drift, classify severity, and produce correction plans only.',
   restructurer:
@@ -34,11 +34,11 @@ const ROLE_RESTRICTIONS: Record<string, string> = {
  */
 const PLANNING_GUIDANCE = [
   '[FCA-AI Development Workflow]',
-  'When designing a plan, include CLAUDE.md/SPEC.md update steps:',
-  '1. Identify affected fractal modules (directories with CLAUDE.md)',
-  '2. Plan SPEC.md updates for requirements/API changes BEFORE code',
-  '3. Plan CLAUDE.md updates if boundaries or conventions change',
-  '4. New modules need CLAUDE.md (max 50 lines, 3-tier) + SPEC.md',
+  'When designing a plan, include INTENT.md/DETAIL.md update steps:',
+  '1. Identify affected fractal modules (directories with INTENT.md)',
+  '2. Plan DETAIL.md updates for requirements/API changes BEFORE code',
+  '3. Plan INTENT.md updates if boundaries or conventions change',
+  '4. New modules need INTENT.md (max 50 lines, 3-tier) + DETAIL.md',
 ].join('\n');
 
 /**
@@ -47,8 +47,8 @@ const PLANNING_GUIDANCE = [
  */
 const IMPLEMENTATION_REMINDER = [
   '[FCA-AI Pre-Implementation Check]',
-  'Before writing code, verify CLAUDE.md/SPEC.md are updated for planned changes.',
-  'SPEC.md first (requirements), then CLAUDE.md if boundaries change.',
+  'Before writing code, verify INTENT.md/DETAIL.md are updated for planned changes.',
+  'DETAIL.md first (requirements), then INTENT.md if boundaries change.',
 ].join('\n');
 
 const PLANNING_AGENT_RE =
@@ -72,7 +72,10 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (restriction) {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: restriction },
+      hookSpecificOutput: {
+        hookEventName: 'SubagentStart',
+        additionalContext: restriction,
+      },
     };
   }
 
@@ -85,7 +88,10 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan') {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: PLANNING_GUIDANCE },
+      hookSpecificOutput: {
+        hookEventName: 'SubagentStart',
+        additionalContext: PLANNING_GUIDANCE,
+      },
     };
   }
 
@@ -93,7 +99,10 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   if (EXECUTOR_AGENT_RE.test(agentType) || agentType === 'general-purpose') {
     return {
       continue: true,
-      hookSpecificOutput: { additionalContext: IMPLEMENTATION_REMINDER },
+      hookSpecificOutput: {
+        hookEventName: 'SubagentStart',
+        additionalContext: IMPLEMENTATION_REMINDER,
+      },
     };
   }
 

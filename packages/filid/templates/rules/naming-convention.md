@@ -47,7 +47,7 @@ mv src/AUTH_SERVICE src/authService
 ## Scope
 
 This rule is applied to every node in the FractalTree (both directories and files scanned as nodes).
-It does not apply to file extensions or to special files like `CLAUDE.md`, `SPEC.md`, or `README.md`,
+It does not apply to file extensions or to special files like `INTENT.md`, `DETAIL.md`, or `README.md`,
 which follow their own conventions.
 
 ## Notes

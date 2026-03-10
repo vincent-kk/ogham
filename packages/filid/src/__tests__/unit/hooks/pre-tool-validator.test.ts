@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  isSpecMd,
+  isDetailMd,
   validatePreToolUse,
 } from '../../../hooks/pre-tool-validator.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
@@ -15,31 +15,31 @@ const baseInput: PreToolUseInput = {
 };
 
 describe('pre-tool-validator', () => {
-  it('should block Write to CLAUDE.md exceeding 50 lines', () => {
+  it('should block Write to INTENT.md exceeding 50 lines', () => {
     const content = Array.from({ length: 51 }, (_, i) => `Line ${i + 1}`).join(
       '\n',
     );
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/CLAUDE.md', content },
+      tool_input: { file_path: '/app/INTENT.md', content },
     };
     const result = validatePreToolUse(input);
     expect(result.continue).toBe(false);
   });
 
-  it('should allow Write to CLAUDE.md within 50 lines', () => {
+  it('should allow Write to INTENT.md within 50 lines', () => {
     const content = Array.from({ length: 50 }, (_, i) => `Line ${i + 1}`).join(
       '\n',
     );
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/CLAUDE.md', content },
+      tool_input: { file_path: '/app/INTENT.md', content },
     };
     const result = validatePreToolUse(input);
     expect(result.continue).toBe(true);
   });
 
-  it('should pass through non-CLAUDE.md/SPEC.md files', () => {
+  it('should pass through non-INTENT.md/DETAIL.md files', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: { file_path: '/app/index.ts', content: 'const x = 1;' },
@@ -48,11 +48,11 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('should warn when CLAUDE.md is missing boundary sections', () => {
+  it('should warn when INTENT.md is missing boundary sections', () => {
     const content = '# My Module\nSome description\n';
     const input: PreToolUseInput = {
       ...baseInput,
-      tool_input: { file_path: '/app/CLAUDE.md', content },
+      tool_input: { file_path: '/app/INTENT.md', content },
     };
     const result = validatePreToolUse(input);
     // Missing boundaries is a warning, not a block
@@ -60,7 +60,7 @@ describe('pre-tool-validator', () => {
     expect(result.hookSpecificOutput?.additionalContext).toContain('missing');
   });
 
-  it('should warn on Edit to CLAUDE.md with >20 new lines', () => {
+  it('should warn on Edit to INTENT.md with >20 new lines', () => {
     const newString = Array.from({ length: 25 }, (_, i) => `Line ${i}`).join(
       '\n',
     );
@@ -68,7 +68,7 @@ describe('pre-tool-validator', () => {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/CLAUDE.md',
+        file_path: '/app/INTENT.md',
         new_string: newString,
       },
     };
@@ -82,7 +82,7 @@ describe('pre-tool-validator', () => {
     );
   });
 
-  it('should warn on Edit to CLAUDE.md with exactly 21 new lines (boundary)', () => {
+  it('should warn on Edit to INTENT.md with exactly 21 new lines (boundary)', () => {
     const newString = Array.from({ length: 21 }, (_, i) => `Line ${i}`).join(
       '\n',
     );
@@ -90,7 +90,7 @@ describe('pre-tool-validator', () => {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/CLAUDE.md',
+        file_path: '/app/INTENT.md',
         new_string: newString,
       },
     };
@@ -101,7 +101,7 @@ describe('pre-tool-validator', () => {
     );
   });
 
-  it('should pass Edit to CLAUDE.md with exactly 20 new lines (boundary)', () => {
+  it('should pass Edit to INTENT.md with exactly 20 new lines (boundary)', () => {
     const newString = Array.from({ length: 20 }, (_, i) => `Line ${i}`).join(
       '\n',
     );
@@ -109,7 +109,7 @@ describe('pre-tool-validator', () => {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/CLAUDE.md',
+        file_path: '/app/INTENT.md',
         new_string: newString,
       },
     };
@@ -118,7 +118,7 @@ describe('pre-tool-validator', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('should pass Edit to CLAUDE.md with <=20 new lines without warning', () => {
+  it('should pass Edit to INTENT.md with <=20 new lines without warning', () => {
     const newString = Array.from({ length: 5 }, (_, i) => `Line ${i}`).join(
       '\n',
     );
@@ -126,7 +126,7 @@ describe('pre-tool-validator', () => {
       ...baseInput,
       tool_name: 'Edit',
       tool_input: {
-        file_path: '/app/CLAUDE.md',
+        file_path: '/app/INTENT.md',
         new_string: newString,
       },
     };
@@ -135,11 +135,11 @@ describe('pre-tool-validator', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('should block SPEC.md if detected as append-only (when old content available)', () => {
+  it('should block DETAIL.md if detected as append-only (when old content available)', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/SPEC.md',
+        file_path: '/app/DETAIL.md',
         content: 'line1\nline2\nline3\nline4\n',
       },
     };
@@ -147,11 +147,11 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(false);
   });
 
-  it('should allow SPEC.md when content is restructured', () => {
+  it('should allow DETAIL.md when content is restructured', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
-        file_path: '/app/SPEC.md',
+        file_path: '/app/DETAIL.md',
         content: '# Refactored\n- New structure\n',
       },
     };
@@ -160,11 +160,13 @@ describe('pre-tool-validator', () => {
   });
 });
 
-describe('isSpecMd', () => {
-  it('should be exported and detect SPEC.md paths', () => {
-    expect(isSpecMd('/app/SPEC.md')).toBe(true);
-    expect(isSpecMd('SPEC.md')).toBe(true);
-    expect(isSpecMd('/app/README.md')).toBe(false);
-    expect(isSpecMd('/app/spec.md')).toBe(false);
+describe('isDetailMd', () => {
+  it('should be exported and detect DETAIL.md paths', () => {
+    expect(isDetailMd('/app/DETAIL.md')).toBe(true);
+    expect(isDetailMd('DETAIL.md')).toBe(true);
+    expect(isDetailMd('/app/SPEC.md')).toBe(false);
+    expect(isDetailMd('SPEC.md')).toBe(false);
+    expect(isDetailMd('/app/README.md')).toBe(false);
+    expect(isDetailMd('/app/spec.md')).toBe(false);
   });
 });

@@ -187,22 +187,19 @@ async function handleCheckpoint(
     normalized,
   );
 
-  const fileNames = [
+  let dirEntries: string[] = [];
+  try {
+    dirEntries = await fs.readdir(reviewDir);
+  } catch {
+    // directory does not exist
+  }
+  const checkFiles = new Set([
     'structure-check.md',
     'session.md',
     'verification.md',
     'review-report.md',
-  ];
-  const existingFiles: string[] = [];
-
-  for (const fileName of fileNames) {
-    try {
-      await fs.access(path.join(reviewDir, fileName));
-      existingFiles.push(fileName);
-    } catch {
-      // file does not exist
-    }
-  }
+  ]);
+  const existingFiles = dirEntries.filter((f) => checkFiles.has(f));
 
   const hasStructureCheck = existingFiles.includes('structure-check.md');
   const hasSession = existingFiles.includes('session.md');
@@ -215,6 +212,19 @@ async function handleCheckpoint(
   } else if (!hasSession) {
     // Phase A done (structure-check.md exists), Phase B pending
     phase = 'B';
+  } else if (!hasStructureCheck && hasSession && !hasVerification) {
+    // session.md only (no structure-check.md) — check no_structure_check flag
+    const sessionPath = path.join(reviewDir, 'session.md');
+    let noStructureCheck = false;
+    try {
+      const content = await fs.readFile(sessionPath, 'utf-8');
+      const match = content.match(/^no_structure_check:\s*(true)/m);
+      noStructureCheck = !!match;
+    } catch {
+      // file read error — treat as flag absent
+    }
+    // If Phase A was intentionally skipped, proceed to C; otherwise restart A
+    phase = noStructureCheck ? 'C' : 'A';
   } else if (!hasVerification) {
     phase = 'C';
   } else if (!hasReport) {
