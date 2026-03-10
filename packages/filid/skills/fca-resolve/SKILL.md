@@ -202,6 +202,9 @@ If there were accepted fixes:
 
 If there were NO accepted fixes (all rejected):
   Automatically invoke /filid:fca-revalidate — no pending code changes needed.
+  fca-revalidate will find zero accepted items, evaluate only the rejected-item
+  justifications and debt records, and return PASS if all justifications are
+  constitutionally compliant.
 ```
 
 ## Available MCP Tools

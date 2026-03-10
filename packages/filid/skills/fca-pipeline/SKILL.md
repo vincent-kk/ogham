@@ -28,7 +28,8 @@ isolation, communicating via `.filid/review/<branch>/` files.
 ```
 
 Each stage delegates to an existing skill. The pipeline is an orchestrator —
-it does not modify individual skill behavior.
+it does not modify individual skill behavior. Subagents use `general-purpose`
+type which has access to the `Skill()` tool for invoking existing skills.
 
 ## Core Workflow
 
@@ -57,7 +58,7 @@ order — first match wins.
 | Priority | Signal                                                             | Entry stage   |
 | -------- | ------------------------------------------------------------------ | ------------- |
 | 1        | `.filid/review/<branch>/re-validate.md` exists                     | Pipeline **complete** — report existing results |
-| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits (`git log @{upstream}..HEAD --oneline` non-empty) | Push first, then `revalidate` |
+| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits (`git log @{upstream}..HEAD --oneline` non-empty) | Execute `git push` (Bash), then enter `revalidate` |
 | 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)     | `revalidate`  |
 | 4        | `.filid/review/<branch>/fix-requests.md` exists                    | `resolve`     |
 | 5        | None of the above → check PR: `gh pr view` (Bash)                 | `review` if PR exists, `pr-create` if not |

@@ -3,7 +3,7 @@ name: fca-review
 user_invocable: true
 description: Multi-persona consensus-based code review governance. Delegates structure check (Phase A), analysis (Phase B), and verification (Phase C) to subagents, then executes political consensus (Phase D) directly as chairperson using a state machine with up to 5 deliberation rounds.
 version: 1.0.0
-complexity: complex
+complexity: high
 ---
 
 # fca-review — AI Code Review Governance
@@ -34,7 +34,9 @@ and a state machine.
 4. Resume logic:
    - No checkpoint files → Phase A (unless `--no-structure-check`, then Phase B)
    - `structure-check.md` only → Phase B
-   - `session.md` only → Phase C (regardless of `--no-structure-check`)
+   - `session.md` only → Check `session.md` frontmatter for `no_structure_check` flag:
+     - If `no_structure_check: true` → Phase C (Phase A was intentionally skipped)
+     - If `no_structure_check: false` or absent → Phase A (Phase A likely failed before completing; restart it)
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
    - All complete (`review-report.md` exists) → "Review complete"
@@ -97,7 +99,7 @@ The chairperson executes Phase D directly:
 
 1. **Load inputs**: Read `session.md` + `verification.md`
 2. **Load structure context**: Read `structure-check.md` if present
-3. **Load personas**: Read only elected committee personas from `personas/*.md`
+3. **Load personas**: Read the `elected_committee` list from `session.md` frontmatter (written by Phase B via `review_manage(elect-committee)`), then load only those persona files from `personas/*.md`
 4. **Load state machine**: Read `state-machine.md` for transition rules
 5. **Execute deliberation**: Run state machine (PROPOSAL → DEBATE → CONCLUSION)
    - Structure violations from `structure-check.md` are tabled as agenda items

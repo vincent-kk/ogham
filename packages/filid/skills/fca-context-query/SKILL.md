@@ -3,7 +3,7 @@ name: fca-context-query
 user_invocable: true
 description: Query FCA-AI context — module/rule lookup within 3-Prompt Limit
 version: 1.0.0
-complexity: simple
+complexity: low
 ---
 
 # fca-context-query — Context Query
