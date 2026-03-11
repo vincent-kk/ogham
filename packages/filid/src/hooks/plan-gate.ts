@@ -2,25 +2,24 @@ import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isFcaProject } from './shared.js';
 
-const PLAN_EXIT_CHECKLIST = [
+const PLAN_ENTRY_CHECKLIST = [
   '[FCA-AI Plan Compliance Checklist]',
-  'Before implementation, ensure the plan includes:',
+  'While writing the plan, ensure it includes:',
   '1. INTENT.md/DETAIL.md updates for ALL affected fractal modules',
   '2. DETAIL.md updates BEFORE code changes (spec-driven)',
   '3. INTENT.md boundary updates if module responsibilities change',
   '4. New fractal modules: INTENT.md (max 50 lines, 3-tier) + DETAIL.md',
-  'If missing, revise the plan to include document update steps.',
 ].join('\n');
 
 /**
- * PreToolUse hook for ExitPlanMode: inject FCA-AI document update checklist.
+ * PreToolUse hook for EnterPlanMode: inject FCA-AI document update checklist.
  *
- * When a plan is being finalized (ExitPlanMode), this hook reminds Claude
+ * When planning starts (EnterPlanMode), this hook reminds Claude
  * to include INTENT.md/DETAIL.md update steps in the plan.
  *
  * Never blocks (always continue: true). Only injects context in FCA projects.
  */
-export function validatePlanExit(input: PreToolUseInput): HookOutput {
+export function injectPlanChecklist(input: PreToolUseInput): HookOutput {
   if (!isFcaProject(input.cwd)) {
     return { continue: true };
   }
@@ -29,7 +28,7 @@ export function validatePlanExit(input: PreToolUseInput): HookOutput {
     continue: true,
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
-      additionalContext: PLAN_EXIT_CHECKLIST,
+      additionalContext: PLAN_ENTRY_CHECKLIST,
     },
   };
 }

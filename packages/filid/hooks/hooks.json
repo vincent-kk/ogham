@@ -24,7 +24,7 @@
         ]
       },
       {
-        "matcher": "ExitPlanMode",
+        "matcher": "EnterPlanMode",
         "hooks": [
           {
             "type": "command",
