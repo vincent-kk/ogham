@@ -113,3 +113,9 @@ export type {
   UsageCoverage,
   CoverageVerifyResult,
 } from './coverage.js';
+
+export type {
+  SummaryItemSeverity,
+  SummaryItem,
+  HumanSummary,
+} from './summary.js';

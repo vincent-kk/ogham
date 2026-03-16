@@ -377,7 +377,8 @@ export function createServer(): McpServer {
         "action='content-hash': 변경 파일의 content hash를 계산하고 저장. " +
         "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단. " +
         "action='format-pr-comment': 리뷰 결과 파일을 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
-        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷.",
+        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
+        "action='generate-human-summary': 리뷰 세션 파일을 파싱하여 인간 PL용 PR 요약(HumanSummary)을 생성. 오류 확률순 최대 5개 핵심 항목 + 자동 수정 가능 항목 분리.",
       inputSchema: z.object({
         action: z
           .enum([
@@ -390,6 +391,7 @@ export function createServer(): McpServer {
             'check-cache',
             'format-pr-comment',
             'format-revalidate-comment',
+            'generate-human-summary',
           ])
           .describe('수행할 동작'),
         projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),

@@ -26,6 +26,7 @@ FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지,
 | `import-resolver.ts` | import 소스 문자열 → 절대 경로 변환 (`resolveImportPath`) |
 | `usage-tracker.ts` | 서브트리 내 모듈 사용처 추적 (`findSubtreeUsages`) |
 | `test-coverage-checker.ts` | 사용처별 테스트 존재 여부 검증 (`checkTestCoverage`) |
+| `pr-summary-generator.ts` | PR 검증 결과 인간 친화적 요약 생성 (`generateHumanSummary`) |
 
 ## Conventions
 

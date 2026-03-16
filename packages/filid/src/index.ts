@@ -157,10 +157,27 @@ export { handleReviewManage } from './mcp/tools/review-manage.js';
 export {
   formatPrComment,
   formatRevalidateComment,
+  formatHumanSummary,
 } from './mcp/tools/review-format.js';
 export { handleDebtManage } from './mcp/tools/debt-manage.js';
 export { handleCacheManage } from './mcp/tools/cache-manage.js';
 export { handleCoverageVerify } from './mcp/tools/coverage-verify.js';
+
+// PR summary
+export {
+  generateHumanSummary,
+  parseStructureCheckFrontmatter,
+  parseFixRequests,
+  RULE_ERROR_PROBABILITY,
+} from './core/pr-summary-generator.js';
+export type { GenerateSummaryInput } from './core/pr-summary-generator.js';
+
+// Review shared utilities
+export {
+  normalizeBranch,
+  resolveReviewDir,
+  tryReadFile,
+} from './mcp/tools/review-utils.js';
 
 // Coverage verification (LCA-based)
 export { resolveImportPath } from './core/import-resolver.js';

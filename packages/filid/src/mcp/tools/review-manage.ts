@@ -18,7 +18,12 @@ import type {
   ReviewContentHash,
 } from '../../types/review.js';
 
-import { formatPrComment, formatRevalidateComment } from './review-format.js';
+import {
+  formatPrComment,
+  formatRevalidateComment,
+  handleGenerateHumanSummary,
+} from './review-format.js';
+import { normalizeBranch } from './review-utils.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -32,7 +37,8 @@ export interface ReviewManageInput {
     | 'content-hash'
     | 'check-cache'
     | 'format-pr-comment'
-    | 'format-revalidate-comment';
+    | 'format-revalidate-comment'
+    | 'generate-human-summary';
   projectRoot: string;
   branchName?: string;
   baseRef?: string;
@@ -116,32 +122,7 @@ async function computeContentHash(
   return { sessionHash, fileHashes };
 }
 
-/**
- * Normalize a git branch name to a filesystem-safe string.
- *
- * Rules:
- * - `/` → `--`
- * - `#`, `@`, `~`, `^`, `:`, `?`, `*`, `[`, `]`, `\` → `_`
- * - Remove leading/trailing `.` and `-`
- * - Consecutive `--` are preserved (intentional for uniqueness)
- */
-function normalizeBranch(branchName: string): string {
-  let result = branchName;
-
-  // Replace `/` with `--`
-  result = result.replace(/\//g, '--');
-
-  // Replace special characters with `_`
-  result = result.replace(/[#@~^:?*[\]\\]/g, '_');
-
-  // Remove leading `.` and `-`
-  result = result.replace(/^[.-]+/, '');
-
-  // Remove trailing `.` and `-`
-  result = result.replace(/[.-]+$/, '');
-
-  return result;
-}
+// normalizeBranch imported from review-utils.ts
 
 async function handleNormalizeBranch(
   input: ReviewManageInput,
@@ -554,6 +535,7 @@ export async function handleReviewManage(
     'check-cache': handleCheckCache,
     'format-pr-comment': formatPrComment,
     'format-revalidate-comment': formatRevalidateComment,
+    'generate-human-summary': handleGenerateHumanSummary,
   };
 
   const handler = handlers[input.action];
