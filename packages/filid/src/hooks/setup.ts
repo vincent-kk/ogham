@@ -13,7 +13,11 @@
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir, pruneOldSessions, pruneStaleCacheDirs } from '../core/cache-manager.js';
+import {
+  getCacheDir,
+  pruneOldSessions,
+  pruneStaleCacheDirs,
+} from '../core/cache-manager.js';
 import { createLogger, setLogDir } from '../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../types/hooks.js';
 

@@ -11,9 +11,8 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 const { existsSync, mkdirSync, appendFileSync } = await import('node:fs');
-const { createLogger, setLogDir, resetLogger } = await import(
-  '../../../lib/logger.js'
-);
+const { createLogger, setLogDir, resetLogger } =
+  await import('../../../lib/logger.js');
 
 describe('createLogger', () => {
   let errorSpy: ReturnType<typeof vi.spyOn>;

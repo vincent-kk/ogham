@@ -11,7 +11,7 @@ FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지,
 | `fractal-tree.ts` | FractalTree 빌드 · 탐색 (`buildFractalTree`, `scanProject`) |
 | `organ-classifier.ts` | 노드 타입 분류 (`classifyNode`, `isOrganDirectory`) |
 | `drift-detector.ts` | 구조 드리프트 감지 + SyncPlan 생성 |
-| `rule-engine.ts` | 7개 내장 규칙 평가 (`loadBuiltinRules`, `evaluateRules`) |
+| `rule-engine.ts` | 8개 내장 규칙 평가 (`loadBuiltinRules`, `evaluateRules`) |
 | `fractal-validator.ts` | 구조 유효성 검증 (`validateStructure`, `validateNode`) |
 | `document-validator.ts` | INTENT.md/DETAIL.md 50줄 + 3-tier 검증 |
 | `project-analyzer.ts` | 프로젝트 건강도 분석 + 리포트 생성 |

@@ -2,7 +2,7 @@
  * @file rule-engine.ts
  * @description 내장 규칙 로드 및 평가 엔진.
  *
- * 7개의 내장 규칙을 제공하고 FractalTree에 대해 규칙을 평가한다.
+ * 8개의 내장 규칙을 제공하고 FractalTree에 대해 규칙을 평가한다.
  * config-loader 의존 없이 동작한다.
  */
 import type { FractalTree } from '../types/fractal.js';
@@ -16,6 +16,8 @@ import { BUILTIN_RULE_IDS } from '../types/rules.js';
 import type { ScanOptions } from '../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../types/scan.js';
 
+import { ALLOWED_FRACTAL_ROOT_FILES } from './peer-file-registry.js';
+
 // kebab-case: 소문자, 숫자, 하이픈으로만 구성
 const KEBAB_CASE_RE = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 // camelCase: 소문자로 시작, 대문자 혼용 가능
@@ -26,7 +28,7 @@ function isValidNaming(name: string): boolean {
 }
 
 /**
- * 7개 내장 규칙 인스턴스를 생성하여 반환한다.
+ * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
  */
 export function loadBuiltinRules(): Rule[] {
   return [
@@ -34,7 +36,8 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.NAMING_CONVENTION,
       name: 'Naming Convention',
-      description: 'Directory and file names must follow kebab-case or camelCase.',
+      description:
+        'Directory and file names must follow kebab-case or camelCase.',
       category: 'naming',
       severity: 'warning',
       enabled: true,
@@ -125,7 +128,8 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.MODULE_ENTRY_POINT,
       name: 'Module Entry Point',
-      description: 'Every fractal node must have either index.ts or main.ts as an entry point.',
+      description:
+        'Every fractal node must have either index.ts or main.ts as an entry point.',
       category: 'module',
       severity: 'warning',
       enabled: true,
@@ -152,7 +156,8 @@ export function loadBuiltinRules(): Rule[] {
     {
       id: BUILTIN_RULE_IDS.MAX_DEPTH,
       name: 'Max Depth',
-      description: 'The depth of the fractal tree must not exceed the maximum allowed depth.',
+      description:
+        'The depth of the fractal tree must not exceed the maximum allowed depth.',
       category: 'structure',
       severity: 'error',
       enabled: true,
@@ -227,6 +232,51 @@ export function loadBuiltinRules(): Rule[] {
         }
 
         return violations;
+      },
+    },
+
+    // 8. zero-peer-file: 카테고리 기반 예외 시스템 (static + eponymous + framework)
+    {
+      id: BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+      name: 'Zero Peer File',
+      description:
+        'Fractal roots must not contain standalone peer files beyond the allowed categories (index/main, documentation, eponymous, framework reserved).',
+      category: 'structure',
+      severity: 'warning',
+      enabled: true,
+      check(context: RuleContext): RuleViolation[] {
+        const { node } = context;
+        if (node.type !== 'fractal' && node.type !== 'hybrid') return [];
+
+        const peerFiles = node.metadata['peerFiles'] as string[] | undefined;
+        if (!peerFiles || peerFiles.length === 0) return [];
+
+        // Compose the full allowed set for THIS node
+        const allowed = new Set(ALLOWED_FRACTAL_ROOT_FILES);
+
+        // Category: eponymous file (max 1, auto-detected by scanProject)
+        const eponymous = node.metadata['eponymousFile'] as
+          | string
+          | null
+          | undefined;
+        if (eponymous) allowed.add(eponymous);
+
+        // Category: framework reserved files (auto-detected from package.json)
+        const fwFiles = node.metadata['frameworkReservedFiles'] as
+          | string[]
+          | undefined;
+        if (fwFiles) for (const f of fwFiles) allowed.add(f);
+
+        const disallowed = peerFiles.filter((f) => !allowed.has(f));
+        if (disallowed.length === 0) return [];
+
+        return disallowed.map((file) => ({
+          ruleId: BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+          severity: 'warning' as const,
+          message: `Fractal root "${node.name}" contains peer file "${file}" not in any allowed category. Promote it to a sub-fractal directory.`,
+          path: node.path,
+          suggestion: `Create a subdirectory for "${file}" or add it to .filid/config.yaml additional-allowed if it belongs at the root.`,
+        }));
       },
     },
   ];

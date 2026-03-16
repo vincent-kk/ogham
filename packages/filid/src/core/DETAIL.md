@@ -4,7 +4,7 @@
 
 - 프랙탈 트리를 파일시스템에서 스캔하여 구축할 수 있어야 한다
 - 노드를 fractal/organ/pure-function으로 구조 기반 분류해야 한다
-- 7개 내장 규칙(naming, structure, dependency, documentation, index, module)을 평가할 수 있어야 한다
+- 8개 내장 규칙(naming, structure, dependency, documentation, index, module)을 평가할 수 있어야 한다
 - 현재 구조와 기대 구조 사이의 드리프트를 감지하고 SyncPlan을 생성해야 한다
 - INTENT.md/DETAIL.md의 50줄 제한과 3-tier 경계 섹션을 검증해야 한다
 - 두 모듈의 Lowest Common Ancestor(LCA)를 계산해야 한다

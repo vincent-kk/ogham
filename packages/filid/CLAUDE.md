@@ -61,7 +61,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 ### Key Files
 
 - `src/index.ts` — 94개 함수/상수 + 전체 타입 re-export
-- `src/core/rule-engine.ts` — 7개 내장 규칙 (naming, structure, dependency, documentation, index, module)
+- `src/core/rule-engine.ts` — 8개 내장 규칙 (naming, structure, dependency, documentation, index, module)
 - `src/mcp/server.ts` — MCP 서버 초기화 + 14개 도구 등록
 - `src/hooks/context-injector.ts` — UserPromptSubmit 시 FCA-AI 규칙 주입 (세션 기반)
 - `src/hooks/plan-gate.ts` — ExitPlanMode 시 FCA-AI 문서 업데이트 체크리스트 주입

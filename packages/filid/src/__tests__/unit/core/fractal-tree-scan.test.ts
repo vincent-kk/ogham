@@ -4,10 +4,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import {
-  scanProject,
-  shouldExclude,
-} from '../../../core/fractal-tree.js';
+import { scanProject, shouldExclude } from '../../../core/fractal-tree.js';
 
 describe('fractal-tree', () => {
   describe('shouldExclude', () => {

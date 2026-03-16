@@ -57,6 +57,11 @@ export {
   getActiveRules,
 } from './core/rule-engine.js';
 export {
+  ALLOWED_FRACTAL_ROOT_FILES,
+  FRAMEWORK_RESERVED_FILES,
+  FRAMEWORK_PACKAGES,
+} from './core/peer-file-registry.js';
+export {
   analyzeModule,
   findEntryPoint,
   extractImports,
