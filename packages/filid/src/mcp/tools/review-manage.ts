@@ -209,6 +209,10 @@ async function handleCheckpoint(
   } else if (!hasVerification) {
     phase = 'C';
   } else if (!hasReport) {
+    // NOTE: Returns 'C' here intentionally — Phase D is resolved by skill-level
+    // resume logic. Phase C is idempotent when verification.md already exists.
+    // See fca-review SKILL.md:41 for full resume mapping.
+    // TODO: Add 'D' to CheckpointPhase type in a separate PR for full alignment.
     phase = 'C';
   } else {
     phase = 'DONE';

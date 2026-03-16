@@ -83,7 +83,8 @@ See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 | ------------------ | ----- | ------------------------------------------------ |
 | `fractal_scan`     | 1     | Scan filesystem for full module tree             |
 | `fractal_navigate` | 1     | Classify individual directories                  |
-| `doc_compress`     | 2     | Document size checking                           |
+| `doc_compress`     | 2     | Document compression and size metadata reporting |
+| `coverage_verify`  | 3     | Test coverage verification                       |
 | `test_metrics`     | 3     | 3+12 rule validation and decision recommendation |
 | `ast_analyze`      | 4, 5  | LCOM4, CC metrics, dependency DAG                |
 
@@ -110,7 +111,7 @@ See [reference.md Section 6](./reference.md#section-6--summary-report-format).
 
 Stages:   [Structure + Documents + Tests + Metrics + Dependencies] → Summary
           (Stages 1–5 run in parallel; Stage 6 aggregates)
-Agents:   qa-reviewer (lead), fractal-architect (assist — stages 1, 5)
+Agents:   Task subagents per stage (no filid-specific agents required)
 Thresholds:
   INTENT_MD_LINE_LIMIT = 50
   TEST_THRESHOLD       = 15  (max cases per spec.ts)
