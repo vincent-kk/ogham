@@ -2,7 +2,7 @@
 
 ## Purpose
 
-FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산 등 15개 모듈.
+FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산, 테스트 커버리지 검증 등 18개 모듈.
 
 ## Structure
 
@@ -23,10 +23,13 @@ FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지,
 | `boundary-detector.ts` | 프랙탈 경계 감지 (`findBoundary`, `buildChain`) |
 | `cache-manager.ts` | 세션/해시 캐시 읽기·쓰기 |
 | `project-hash.ts` | 프로젝트 해시 계산 (`computeProjectHash`) |
+| `import-resolver.ts` | import 소스 문자열 → 절대 경로 변환 (`resolveImportPath`) |
+| `usage-tracker.ts` | 서브트리 내 모듈 사용처 추적 (`findSubtreeUsages`) |
+| `test-coverage-checker.ts` | 사용처별 테스트 존재 여부 검증 (`checkTestCoverage`) |
 
 ## Conventions
 
-- 외부 I/O: `fractal-tree.ts`, `rule-engine.ts`, `cache-manager.ts`, `project-hash.ts`에만 허용
+- 외부 I/O: `fractal-tree.ts`, `rule-engine.ts`, `cache-manager.ts`, `project-hash.ts`, `import-resolver.ts`, `usage-tracker.ts`, `test-coverage-checker.ts`에만 허용
 - 나머지 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
 - `classifyNode()`는 구조 기반 분류 우선
 
@@ -47,4 +50,4 @@ FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지,
 - `mcp/`, `hooks/`, `ast/` 모듈 직접 import (역방향 금지)
 - `ORGAN_DIR_NAMES` 이름 기반 분류를 신규 코드에 사용
 
-**Dependencies**: `../types/`, `fast-glob`
+**Dependencies**: `../types/`, `../ast/`, `fast-glob`

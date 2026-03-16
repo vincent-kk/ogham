@@ -160,6 +160,15 @@ export {
 } from './mcp/tools/review-format.js';
 export { handleDebtManage } from './mcp/tools/debt-manage.js';
 export { handleCacheManage } from './mcp/tools/cache-manage.js';
+export { handleCoverageVerify } from './mcp/tools/coverage-verify.js';
+
+// Coverage verification (LCA-based)
+export { resolveImportPath } from './core/import-resolver.js';
+export { findSubtreeUsages, getModuleName } from './core/usage-tracker.js';
+export {
+  checkTestCoverage,
+  generateCoverageWarnings,
+} from './core/test-coverage-checker.js';
 
 // MCP server
 export { createServer, startServer } from './mcp/server.js';
