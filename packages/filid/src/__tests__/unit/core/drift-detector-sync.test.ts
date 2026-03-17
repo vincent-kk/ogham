@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateSyncPlan } from '../../../core/drift-detector.js';
+import { generateSyncPlan } from '../../../core/rules/drift-detector.js';
 import type { DriftItem } from '../../../types/drift.js';
 
 describe('drift-detector — generateSyncPlan', () => {

@@ -23,7 +23,7 @@ vi.mock('fast-glob', () => ({
   glob: vi.fn(async () => []),
 }));
 
-vi.mock('../../../core/project-hash.js', async () => {
+vi.mock('../../../core/infra/project-hash.js', async () => {
   const { glob } = await import('fast-glob');
   const { statSync } = await import('node:fs');
   const { createHash } = await import('node:crypto');
@@ -53,7 +53,7 @@ describe('cache-manager', () => {
 
   // Test 1: cwdHash — same input returns same 12-char hash
   it('cwdHash: returns consistent 12-char hash for same input', async () => {
-    const { cwdHash } = await import('../../../core/cache-manager.js');
+    const { cwdHash } = await import('../../../core/infra/cache-manager.js');
     const h1 = cwdHash('/some/path');
     const h2 = cwdHash('/some/path');
     expect(h1).toBe(h2);
@@ -63,7 +63,7 @@ describe('cache-manager', () => {
   // Test 2: getCacheDir — returns ~/.claude/plugins/filid/{hash}/ shaped path
   it('getCacheDir: returns path in ~/.claude/plugins/filid/{hash} format', async () => {
     const { getCacheDir, cwdHash } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     const dir = getCacheDir('/my/project');
     const hash = cwdHash('/my/project');
     expect(dir).toContain('plugins/filid');
@@ -82,7 +82,7 @@ describe('cache-manager', () => {
     vi.mocked(fsMock.readFileSync).mockImplementation(() => stored);
 
     const { saveRunHash, getLastRunHash } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     saveRunHash('/proj', 'fca-review', 'abc123');
     const result = getLastRunHash('/proj', 'fca-review');
     expect(result).toBe('abc123');
@@ -91,7 +91,7 @@ describe('cache-manager', () => {
   // Test 4: getCacheDir — respects CLAUDE_CONFIG_DIR env var
   it('getCacheDir: respects CLAUDE_CONFIG_DIR environment variable', async () => {
     process.env.CLAUDE_CONFIG_DIR = '/custom/config';
-    const { getCacheDir } = await import('../../../core/cache-manager.js');
+    const { getCacheDir } = await import('../../../core/infra/cache-manager.js');
     const dir = getCacheDir('/proj');
     expect(dir).toContain('/custom/config');
     delete process.env.CLAUDE_CONFIG_DIR;
@@ -102,7 +102,7 @@ describe('cache-manager', () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(false);
     const { readPromptContext } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     const result = readPromptContext('/proj', 'sid-test');
     expect(result).toBeNull();
   });
@@ -123,7 +123,7 @@ describe('cache-manager', () => {
     });
 
     const { writePromptContext, readPromptContext } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     writePromptContext('/proj', 'hello context', 'sid-test');
     const result = readPromptContext('/proj', 'sid-test');
     expect(result).toBe('hello context');
@@ -135,14 +135,14 @@ describe('cache-manager', () => {
     vi.mocked(existsSync).mockReturnValue(false);
 
     const { readPromptContext } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     const result = readPromptContext('/proj', 'other-session');
     expect(result).toBeNull();
   });
 
   // Test 8: sessionIdHash — same input returns same hash
   it('sessionIdHash: returns consistent hash for same input', async () => {
-    const { sessionIdHash } = await import('../../../core/cache-manager.js');
+    const { sessionIdHash } = await import('../../../core/infra/cache-manager.js');
     const h1 = sessionIdHash('session-abc');
     const h2 = sessionIdHash('session-abc');
     expect(h1).toBe(h2);
@@ -153,7 +153,7 @@ describe('cache-manager', () => {
   it('isFirstInSession: returns true when session marker does not exist', async () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(false);
-    const { isFirstInSession } = await import('../../../core/cache-manager.js');
+    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-1', '/proj')).toBe(true);
   });
 
@@ -161,7 +161,7 @@ describe('cache-manager', () => {
   it('isFirstInSession: returns false when session marker exists', async () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(true);
-    const { isFirstInSession } = await import('../../../core/cache-manager.js');
+    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-2', '/proj')).toBe(false);
   });
 
@@ -171,7 +171,7 @@ describe('cache-manager', () => {
     vi.mocked(existsSync).mockImplementation(() => {
       throw new Error('permission denied');
     });
-    const { isFirstInSession } = await import('../../../core/cache-manager.js');
+    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-3', '/proj')).toBe(true);
   });
 
@@ -180,7 +180,7 @@ describe('cache-manager', () => {
     const { existsSync, writeFileSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(true);
     const { markSessionInjected } =
-      await import('../../../core/cache-manager.js');
+      await import('../../../core/infra/cache-manager.js');
     markSessionInjected('sid-4', '/proj');
     expect(vi.mocked(writeFileSync)).toHaveBeenCalled();
   });
@@ -193,7 +193,7 @@ describe('cache-manager', () => {
       'session-context-b',
       'session-context-c',
     ] as unknown as ReturnType<typeof readdirSync>);
-    const { pruneOldSessions } = await import('../../../core/cache-manager.js');
+    const { pruneOldSessions } = await import('../../../core/infra/cache-manager.js');
     pruneOldSessions('/proj');
     expect(vi.mocked(unlinkSync)).not.toHaveBeenCalled();
   });
@@ -204,7 +204,7 @@ describe('cache-manager', () => {
     vi.mocked(readFileSync).mockImplementation(() => {
       throw new Error('not found');
     });
-    const { getLastRunHash } = await import('../../../core/cache-manager.js');
+    const { getLastRunHash } = await import('../../../core/infra/cache-manager.js');
     expect(getLastRunHash('/proj', 'fca-scan')).toBeNull();
   });
 
@@ -219,7 +219,7 @@ describe('cache-manager', () => {
     } as ReturnType<typeof statSync>);
 
     const { computeProjectHash } =
-      await import('../../../core/project-hash.js');
+      await import('../../../core/infra/project-hash.js');
     const h1 = await computeProjectHash('/proj');
     const h2 = await computeProjectHash('/proj');
 

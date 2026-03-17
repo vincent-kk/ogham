@@ -5,7 +5,7 @@ import {
   evaluateRules,
   getActiveRules,
   loadBuiltinRules,
-} from '../../../core/rule-engine.js';
+} from '../../../core/rules/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { RuleContext } from '../../../types/rules.js';

@@ -8,17 +8,9 @@
 // Type exports
 export type * from './types/index.js';
 
-// Core modules
+// Core modules (via barrel)
 export {
-  validateIntentMd,
-  validateDetailMd,
-} from './core/document-validator.js';
-export {
-  classifyNode,
-  isInfraOrgDirectoryByPattern,
-  KNOWN_ORGAN_DIR_NAMES,
-} from './core/organ-classifier.js';
-export {
+  // tree
   buildFractalTree,
   findNode,
   getAncestors,
@@ -26,55 +18,90 @@ export {
   getFractalsUnderOrgans,
   scanProject,
   shouldExclude,
-} from './core/fractal-tree.js';
-export {
-  buildDAG,
-  topologicalSort,
-  detectCycles,
-  getDirectDependencies,
-} from './core/dependency-graph.js';
-export { ChangeQueue } from './core/change-queue.js';
-export {
-  validateStructure,
-  validateNode,
+  classifyNode,
+  isInfraOrgDirectoryByPattern,
+  KNOWN_ORGAN_DIR_NAMES,
+  buildChain,
+  findBoundary,
+  // rules
+  evaluateRule,
+  evaluateRules,
+  getActiveRules,
+  loadBuiltinRules,
   validateDependencies,
-} from './core/fractal-validator.js';
-export {
-  detectDrift,
-  compareCurrent,
+  validateNode,
+  validateStructure,
+  countLines,
+  detectAppendOnly,
+  validateDetailMd,
+  validateIntentMd,
+  SEVERITY_ORDER,
   calculateSeverity,
+  compareCurrent,
+  detectDrift,
   generateSyncPlan,
-} from './core/drift-detector.js';
-export {
+  // analysis
   analyzeProject,
   calculateHealthScore,
   generateReport,
-} from './core/project-analyzer.js';
-export {
-  loadBuiltinRules,
-  evaluateRules,
-  evaluateRule,
-  getActiveRules,
-} from './core/rule-engine.js';
-export {
-  ALLOWED_FRACTAL_ROOT_FILES,
-  FRAMEWORK_RESERVED_FILES,
-  FRAMEWORK_PACKAGES,
-} from './core/peer-file-registry.js';
-export {
+  buildDAG,
+  detectCycles,
+  getDirectDependencies,
+  topologicalSort,
+  findLCA,
+  getAncestorPaths,
+  getModulePlacement,
+  // module
+  analyzeIndex,
+  extractModuleExports,
   analyzeModule,
-  findEntryPoint,
   extractImports,
   extractPublicApi,
-} from './core/module-main-analyzer.js';
-export { analyzeIndex, extractModuleExports } from './core/index-analyzer.js';
-export {
-  findLCA,
-  getModulePlacement,
-  getAncestorPaths,
-} from './core/lca-calculator.js';
-export { findBoundary, buildChain } from './core/boundary-detector.js';
-export type { ChainResult } from './core/boundary-detector.js';
+  findEntryPoint,
+  // infra
+  cwdHash,
+  getCacheDir,
+  getLastRunHash,
+  hasPromptContext,
+  isFirstInSession,
+  markSessionInjected,
+  pruneOldSessions,
+  pruneStaleCacheDirs,
+  readBoundary,
+  readFractalMap,
+  readPromptContext,
+  removeSessionFiles,
+  removeFractalMap,
+  saveRunHash,
+  sessionIdHash,
+  writeBoundary,
+  writeFractalMap,
+  writePromptContext,
+  computeProjectHash,
+  ChangeQueue,
+  // coverage
+  findSubtreeUsages,
+  getModuleName,
+  checkTestCoverage,
+  generateCoverageWarnings,
+  resolveImportPath,
+  // utils
+  ALLOWED_FRACTAL_ROOT_FILES,
+  FRAMEWORK_PACKAGES,
+  FRAMEWORK_RESERVED_FILES,
+  RULE_ERROR_PROBABILITY,
+  generateHumanSummary,
+  parseFixRequests,
+  parseStructureCheckFrontmatter,
+} from './core/index.js';
+export type {
+  ChainResult,
+  ClassifyInput,
+  FractalMap,
+  GenerateSummaryInput,
+  NodeEntry,
+  ChangeRecord,
+} from './core/index.js';
 
 // Metrics
 export { countTestCases } from './metrics/test-counter.js';
@@ -106,29 +133,6 @@ export { trackChange } from './hooks/change-tracker.js';
 export { enforceAgentRole } from './hooks/agent-enforcer.js';
 export { injectContext } from './hooks/context-injector.js';
 export { processSetup } from './hooks/setup.js';
-
-// Cache manager
-export {
-  cwdHash,
-  getCacheDir,
-  readPromptContext,
-  writePromptContext,
-  hasPromptContext,
-  sessionIdHash,
-  isFirstInSession,
-  pruneOldSessions,
-  pruneStaleCacheDirs,
-  removeSessionFiles,
-  markSessionInjected,
-  saveRunHash,
-  getLastRunHash,
-  readBoundary,
-  writeBoundary,
-  readFractalMap,
-  writeFractalMap,
-} from './core/cache-manager.js';
-export type { FractalMap } from './core/cache-manager.js';
-export { computeProjectHash } from './core/project-hash.js';
 
 // AST Grep tools (pattern matching via @ast-grep/napi)
 export { handleAstGrepSearch } from './mcp/tools/ast-grep-search.js';
@@ -163,29 +167,12 @@ export { handleDebtManage } from './mcp/tools/debt-manage.js';
 export { handleCacheManage } from './mcp/tools/cache-manage.js';
 export { handleCoverageVerify } from './mcp/tools/coverage-verify.js';
 
-// PR summary
-export {
-  generateHumanSummary,
-  parseStructureCheckFrontmatter,
-  parseFixRequests,
-  RULE_ERROR_PROBABILITY,
-} from './core/pr-summary-generator.js';
-export type { GenerateSummaryInput } from './core/pr-summary-generator.js';
-
 // Review shared utilities
 export {
   normalizeBranch,
   resolveReviewDir,
   tryReadFile,
 } from './mcp/tools/review-utils.js';
-
-// Coverage verification (LCA-based)
-export { resolveImportPath } from './core/import-resolver.js';
-export { findSubtreeUsages, getModuleName } from './core/usage-tracker.js';
-export {
-  checkTestCoverage,
-  generateCoverageWarnings,
-} from './core/test-coverage-checker.js';
 
 // MCP server
 export { createServer, startServer } from './mcp/server.js';

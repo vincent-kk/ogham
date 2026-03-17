@@ -5,7 +5,7 @@ import {
   detectAppendOnly,
   validateDetailMd,
   validateIntentMd,
-} from '../../../core/document-validator.js';
+} from '../../../core/rules/document-validator.js';
 
 describe('document-validator', () => {
   describe('countLines', () => {

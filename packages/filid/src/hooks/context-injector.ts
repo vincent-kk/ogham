@@ -21,8 +21,8 @@ import {
   isFirstInSession,
   markSessionInjected,
   writePromptContext,
-} from '../core/cache-manager.js';
-import { getActiveRules, loadBuiltinRules } from '../core/rule-engine.js';
+} from '../core/infra/cache-manager.js';
+import { getActiveRules, loadBuiltinRules } from '../core/rules/rule-engine.js';
 import type { HookOutput, UserPromptSubmitInput } from '../types/hooks.js';
 
 import { isFcaProject } from './shared.js';

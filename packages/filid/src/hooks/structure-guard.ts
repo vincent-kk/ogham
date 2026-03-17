@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
-} from '../core/organ-classifier.js';
+} from '../core/tree/organ-classifier.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isIntentMd } from './shared.js';

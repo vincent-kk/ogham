@@ -12,7 +12,7 @@ import type {
   ModuleExportInfo,
   ModuleInfo,
   PublicApi,
-} from '../types/fractal.js';
+} from '../../types/fractal.js';
 
 import { extractModuleExports } from './index-analyzer.js';
 

@@ -8,12 +8,12 @@
 import { readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
-import { extractDependencies } from '../ast/dependency-extractor.js';
-import type { UsageSite } from '../types/coverage.js';
-import type { FractalTree } from '../types/fractal.js';
+import { extractDependencies } from '../../ast/dependency-extractor.js';
+import type { UsageSite } from '../../types/coverage.js';
+import type { FractalTree } from '../../types/fractal.js';
 
-import { scanProject } from './fractal-tree.js';
-import { getDescendants, getFractalsUnderOrgans } from './fractal-tree.js';
+import { scanProject } from '../tree/fractal-tree.js';
+import { getDescendants, getFractalsUnderOrgans } from '../tree/fractal-tree.js';
 import { resolveImportPath } from './import-resolver.js';
 
 /** File patterns to skip during usage analysis */

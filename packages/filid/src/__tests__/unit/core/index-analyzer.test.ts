@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   analyzeIndex,
   extractModuleExports,
-} from '../../../core/index-analyzer.js';
+} from '../../../core/module/index-analyzer.js';
 
 describe('index-analyzer', () => {
   describe('extractModuleExports', () => {

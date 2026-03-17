@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { resolveImportPath } from '../../../core/import-resolver.js';
+import { resolveImportPath } from '../../../core/coverage/import-resolver.js';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(() => false),

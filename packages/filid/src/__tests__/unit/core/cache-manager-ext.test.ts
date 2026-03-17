@@ -15,7 +15,7 @@ import {
   sessionIdHash,
   writeBoundary,
   writeFractalMap,
-} from '../../../core/cache-manager.js';
+} from '../../../core/infra/cache-manager.js';
 
 let tempDir: string;
 

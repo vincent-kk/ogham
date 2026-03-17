@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateHumanSummary } from '../../../core/pr-summary-generator.js';
+import { generateHumanSummary } from '../../../core/utils/pr-summary-generator.js';
 
 // --- Test fixtures ---
 

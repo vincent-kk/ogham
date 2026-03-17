@@ -12,9 +12,9 @@ import type {
   SyncAction,
   SyncPlan,
   SyncPlanAction,
-} from '../types/drift.js';
-import type { FractalTree } from '../types/fractal.js';
-import type { RuleEvaluationResult, RuleViolation } from '../types/rules.js';
+} from '../../types/drift.js';
+import type { FractalTree } from '../../types/fractal.js';
+import type { RuleEvaluationResult, RuleViolation } from '../../types/rules.js';
 
 /** RuleViolation의 ruleId → SyncAction 매핑 */
 const RULE_TO_ACTION: Record<string, SyncAction> = {

@@ -5,18 +5,18 @@
  * 8개의 내장 규칙을 제공하고 FractalTree에 대해 규칙을 평가한다.
  * config-loader 의존 없이 동작한다.
  */
-import type { FractalTree } from '../types/fractal.js';
+import type { FractalTree } from '../../types/fractal.js';
 import type {
   Rule,
   RuleContext,
   RuleEvaluationResult,
   RuleViolation,
-} from '../types/rules.js';
-import { BUILTIN_RULE_IDS } from '../types/rules.js';
-import type { ScanOptions } from '../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../types/scan.js';
+} from '../../types/rules.js';
+import { BUILTIN_RULE_IDS } from '../../types/rules.js';
+import type { ScanOptions } from '../../types/scan.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../types/scan.js';
 
-import { ALLOWED_FRACTAL_ROOT_FILES } from './peer-file-registry.js';
+import { ALLOWED_FRACTAL_ROOT_FILES } from '../utils/peer-file-registry.js';
 
 // kebab-case: 소문자, 숫자, 하이픈으로만 구성
 const KEBAB_CASE_RE = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;

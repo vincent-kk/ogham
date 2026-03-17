@@ -17,7 +17,7 @@ import {
   getCacheDir,
   pruneOldSessions,
   pruneStaleCacheDirs,
-} from '../core/cache-manager.js';
+} from '../core/infra/cache-manager.js';
 import { createLogger, setLogDir } from '../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../types/hooks.js';
 

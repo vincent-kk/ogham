@@ -13,9 +13,9 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 // Mock cache-manager to control getCacheDir and pruneOldSessions
-vi.mock('../../../core/cache-manager.js', async (importOriginal) => {
+vi.mock('../../../core/infra/cache-manager.js', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../../../core/cache-manager.js')>();
+    await importOriginal<typeof import('../../../core/infra/cache-manager.js')>();
   return {
     ...actual,
     getCacheDir: vi.fn(actual.getCacheDir),
@@ -27,7 +27,7 @@ const { processSetup } = await import('../../../hooks/setup.js');
 const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =
   await import('node:fs');
 const { getCacheDir, pruneOldSessions } =
-  await import('../../../core/cache-manager.js');
+  await import('../../../core/infra/cache-manager.js');
 
 const baseInput: SessionStartInput = {
   cwd: '/tmp/test-workspace',

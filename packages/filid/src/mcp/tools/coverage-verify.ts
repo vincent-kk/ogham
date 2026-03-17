@@ -6,12 +6,12 @@ import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
 import { extractDependencies } from '../../ast/dependency-extractor.js';
-import { scanProject } from '../../core/fractal-tree.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import {
   checkTestCoverage,
   generateCoverageWarnings,
-} from '../../core/test-coverage-checker.js';
-import { findSubtreeUsages } from '../../core/usage-tracker.js';
+} from '../../core/coverage/test-coverage-checker.js';
+import { findSubtreeUsages } from '../../core/coverage/usage-tracker.js';
 import type { CoverageVerifyResult } from '../../types/coverage.js';
 
 export interface CoverageVerifyInput {

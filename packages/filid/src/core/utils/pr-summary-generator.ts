@@ -9,7 +9,7 @@ import type {
   HumanSummary,
   SummaryItem,
   SummaryItemSeverity,
-} from '../types/summary.js';
+} from '../../types/summary.js';
 
 /** generateHumanSummary 입력. 각 파일의 내용을 문자열 또는 null로 전달한다. */
 export interface GenerateSummaryInput {

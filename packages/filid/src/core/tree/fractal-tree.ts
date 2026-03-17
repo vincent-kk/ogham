@@ -5,15 +5,15 @@ import type {
   CategoryType,
   FractalNode,
   FractalTree,
-} from '../types/fractal.js';
-import type { ScanOptions } from '../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../types/scan.js';
+} from '../../types/fractal.js';
+import type { ScanOptions } from '../../types/scan.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../types/scan.js';
 
 import { classifyNode } from './organ-classifier.js';
 import {
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
-} from './peer-file-registry.js';
+} from '../utils/peer-file-registry.js';
 
 /** Input entry for buildFractalTree */
 export interface NodeEntry {

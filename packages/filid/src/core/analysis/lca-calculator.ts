@@ -5,9 +5,9 @@
  * 프랙탈 트리에서 두 노드의 LCA를 계산하고 모듈 최적 배치 위치를 제안한다.
  * fractal-tree.getAncestors()를 내부적으로 활용한다.
  */
-import type { FractalNode, FractalTree } from '../types/fractal.js';
+import type { FractalNode, FractalTree } from '../../types/fractal.js';
 
-import { getAncestors } from './fractal-tree.js';
+import { getAncestors } from '../tree/fractal-tree.js';
 
 /**
  * 노드에서 루트까지의 조상 경로 배열을 반환한다.

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   checkTestCoverage,
   generateCoverageWarnings,
-} from '../../../core/test-coverage-checker.js';
+} from '../../../core/coverage/test-coverage-checker.js';
 import type { UsageSite } from '../../../types/coverage.js';
 
 vi.mock('node:fs', () => ({

@@ -2,11 +2,11 @@ import {
   type NodeEntry,
   buildFractalTree,
   findNode,
-} from '../../core/fractal-tree.js';
+} from '../../core/tree/fractal-tree.js';
 import {
   type ClassifyInput,
   classifyNode,
-} from '../../core/organ-classifier.js';
+} from '../../core/tree/organ-classifier.js';
 import type { FractalTree } from '../../types/fractal.js';
 
 /** Input for fractal-navigate tool */

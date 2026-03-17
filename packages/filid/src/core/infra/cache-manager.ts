@@ -12,7 +12,7 @@ import {
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { createLogger } from '../lib/logger.js';
+import { createLogger } from '../../lib/logger.js';
 
 const log = createLogger('cache');
 

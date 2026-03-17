@@ -178,7 +178,7 @@ export async function handleGenerateHumanSummary(
   args: unknown,
 ): Promise<Record<string, unknown>> {
   const { generateHumanSummary } =
-    await import('../../core/pr-summary-generator.js');
+    await import('../../core/utils/pr-summary-generator.js');
 
   const input = args as ReviewManageInput;
 

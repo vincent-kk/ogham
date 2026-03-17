@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
-import { buildChain } from '../core/boundary-detector.js';
+import { buildChain } from '../core/tree/boundary-detector.js';
 import {
   hasGuideInjected,
   markGuideInjected,
@@ -9,8 +9,8 @@ import {
   readFractalMap,
   writeBoundary,
   writeFractalMap,
-} from '../core/cache-manager.js';
-import type { FractalMap } from '../core/cache-manager.js';
+} from '../core/infra/cache-manager.js';
+import type { FractalMap } from '../core/infra/cache-manager.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isFcaProject } from './shared.js';
