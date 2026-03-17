@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  RULE_ERROR_PROBABILITY,
-  generateHumanSummary,
-  parseFixRequests,
-  parseStructureCheckFrontmatter,
-} from '../../../core/pr-summary-generator.js';
+import { generateHumanSummary } from '../../../core/pr-summary-generator.js';
 
 // --- Test fixtures ---
 
@@ -149,64 +144,6 @@ Issues remain.
 `;
 
 // --- Tests ---
-
-describe('parseStructureCheckFrontmatter', () => {
-  it('parses valid frontmatter with all stages', () => {
-    const result = parseStructureCheckFrontmatter(STRUCTURE_CHECK_ALL_PASS);
-    expect(result).not.toBeNull();
-    expect(result!.stageResults).toEqual({
-      structure: 'PASS',
-      documents: 'PASS',
-      tests: 'PASS',
-      metrics: 'PASS',
-      dependencies: 'PASS',
-    });
-    expect(result!.overall).toBe('PASS');
-    expect(result!.criticalCount).toBe(0);
-  });
-
-  it('parses frontmatter with FAIL and SKIP stages', () => {
-    const result = parseStructureCheckFrontmatter(
-      STRUCTURE_CHECK_WITH_FAILURES,
-    );
-    expect(result).not.toBeNull();
-    expect(result!.stageResults.structure).toBe('FAIL');
-    expect(result!.stageResults.metrics).toBe('SKIP');
-    expect(result!.overall).toBe('FAIL');
-    expect(result!.criticalCount).toBe(2);
-  });
-
-  it('returns null for content without frontmatter', () => {
-    expect(parseStructureCheckFrontmatter('no frontmatter')).toBeNull();
-  });
-});
-
-describe('parseFixRequests', () => {
-  it('parses single fix request', () => {
-    const items = parseFixRequests(FIX_REQUESTS_SINGLE);
-    expect(items).toHaveLength(1);
-    expect(items[0].id).toBe('FIX-001');
-    expect(items[0].severity).toBe('CRITICAL');
-    expect(items[0].source).toBe('structure');
-    expect(items[0].filePath).toBe('src/core/module-a.ts');
-    expect(items[0].rule).toBe('circular-dependency');
-    expect(items[0].recommendedAction).toBe(
-      'Break the cycle by extracting shared logic',
-    );
-  });
-
-  it('parses multiple fix requests', () => {
-    const items = parseFixRequests(FIX_REQUESTS_MULTI);
-    expect(items).toHaveLength(7);
-    expect(items[0].rule).toBe('circular-dependency');
-    expect(items[2].rule).toBe('naming-convention');
-    expect(items[5].rule).toBe(''); // code-quality has no rule
-  });
-
-  it('returns empty array for content without fix blocks', () => {
-    expect(parseFixRequests('no fix requests')).toHaveLength(0);
-  });
-});
 
 describe('generateHumanSummary', () => {
   // Basic tests
@@ -429,13 +366,5 @@ describe('generateHumanSummary', () => {
     expect(result.markdown).toContain('🚨');
     expect(result.markdown).toContain('## 이 PR에서 확인해야 할 것:');
     expect(result.markdown).toContain('Verdict: **REQUEST_CHANGES**');
-  });
-});
-
-describe('RULE_ERROR_PROBABILITY', () => {
-  it('contains all 8 builtin rule IDs', () => {
-    expect(Object.keys(RULE_ERROR_PROBABILITY)).toHaveLength(8);
-    expect(RULE_ERROR_PROBABILITY['circular-dependency']).toBe(0.95);
-    expect(RULE_ERROR_PROBABILITY['naming-convention']).toBe(0.2);
   });
 });

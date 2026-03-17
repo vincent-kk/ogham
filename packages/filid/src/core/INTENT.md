@@ -2,38 +2,24 @@
 
 ## Purpose
 
-FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산, 테스트 커버리지 검증 등 20개 모듈.
+FCA-AI 핵심 알고리즘 구현. 20개 모듈: 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 커버리지 검증 등.
 
 ## Structure
 
-| 파일 | 역할 |
-|------|------|
-| `fractal-tree.ts` | FractalTree 빌드 · 탐색 (`buildFractalTree`, `scanProject`) |
-| `organ-classifier.ts` | 노드 타입 분류 (`classifyNode`, `isOrganDirectory`) |
-| `drift-detector.ts` | 구조 드리프트 감지 + SyncPlan 생성 |
-| `rule-engine.ts` | 8개 내장 규칙 평가 (`loadBuiltinRules`, `evaluateRules`) |
-| `fractal-validator.ts` | 구조 유효성 검증 (`validateStructure`, `validateNode`) |
-| `document-validator.ts` | INTENT.md/DETAIL.md 50줄 + 3-tier 검증 |
-| `project-analyzer.ts` | 프로젝트 건강도 분석 + 리포트 생성 |
-| `dependency-graph.ts` | DAG 구축 · 위상 정렬 · 사이클 탐지 |
-| `lca-calculator.ts` | Lowest Common Ancestor 계산 |
-| `index-analyzer.ts` | index.ts export 분석 |
-| `module-main-analyzer.ts` | 모듈 진입점 · 공개 API 추출 |
-| `change-queue.ts` | 변경 이벤트 큐 (`ChangeQueue`) |
-| `boundary-detector.ts` | 프랙탈 경계 감지 (`findBoundary`, `buildChain`) |
-| `cache-manager.ts` | 세션/해시 캐시 읽기·쓰기 |
-| `project-hash.ts` | 프로젝트 해시 계산 (`computeProjectHash`) |
-| `import-resolver.ts` | import 소스 문자열 → 절대 경로 변환 (`resolveImportPath`) |
-| `usage-tracker.ts` | 서브트리 내 모듈 사용처 추적 (`findSubtreeUsages`) |
-| `test-coverage-checker.ts` | 사용처별 테스트 존재 여부 검증 (`checkTestCoverage`) |
-| `peer-file-registry.ts` | Zero Peer File 규칙 상수 레지스트리 (허용 파일, 프레임워크 예약 파일) |
-| `pr-summary-generator.ts` | PR 검증 결과 인간 친화적 요약 생성 (`generateHumanSummary`) |
+| 카테고리 | 모듈 |
+|----------|------|
+| 트리/분류 | `fractal-tree`, `organ-classifier`, `boundary-detector` |
+| 규칙/검증 | `rule-engine`(8규칙), `fractal-validator`, `document-validator`, `drift-detector` |
+| 분석/그래프 | `project-analyzer`, `dependency-graph`, `lca-calculator` |
+| 모듈 분석 | `index-analyzer`, `module-main-analyzer` |
+| 인프라 | `cache-manager`, `project-hash`, `change-queue` |
+| 커버리지 | `usage-tracker`, `test-coverage-checker`, `import-resolver` |
+| 유틸리티 | `peer-file-registry`, `pr-summary-generator` |
 
 ## Conventions
 
-- 외부 I/O: `fractal-tree.ts`, `rule-engine.ts`, `cache-manager.ts`, `project-hash.ts`, `import-resolver.ts`, `usage-tracker.ts`, `test-coverage-checker.ts`에만 허용
+- 외부 I/O: `fractal-tree`, `rule-engine`, `cache-manager`, `project-hash`, `import-resolver`, `usage-tracker`, `test-coverage-checker`에만 허용
 - 나머지 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
-- `classifyNode()`는 구조 기반 분류 우선
 
 ## Boundaries
 

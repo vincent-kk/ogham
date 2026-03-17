@@ -205,6 +205,67 @@ function computeErrorProbability(ruleId: string, severity: string): number {
   return DEFAULT_ERROR_PROBABILITY;
 }
 
+/** structure-check.md에서 FAIL 스테이지를 SummaryItem으로 변환한다. */
+function collectStructureItems(
+  content: string,
+): { items: SummaryItem[]; warnings: string[] } {
+  const items: SummaryItem[] = [];
+  const warnings: string[] = [];
+  const fm = parseStructureCheckFrontmatter(content);
+  if (fm) {
+    for (const [stage, result] of Object.entries(fm.stageResults)) {
+      if (result === 'FAIL') {
+        items.push({
+          severity: 'warning',
+          message: `${stage} 검증 실패`,
+          autoFixable: false,
+          errorProbability: 0.7,
+        });
+      }
+    }
+  } else {
+    warnings.push('structure-check.md frontmatter 파싱 실패');
+  }
+  return { items, warnings };
+}
+
+/** fix-requests.md에서 항목들을 SummaryItem으로 변환한다. */
+function collectFixRequestItems(content: string): SummaryItem[] {
+  const fixItems = parseFixRequests(content);
+  return fixItems.map((item) => {
+    const ruleId = item.rule;
+    return {
+      severity: mapSeverity(item.severity),
+      message:
+        item.recommendedAction ||
+        item.title ||
+        `${item.id}: ${item.severity} 위반`,
+      path: item.filePath || undefined,
+      ruleId: ruleId || undefined,
+      autoFixable: AUTO_FIXABLE_RULES.has(ruleId),
+      errorProbability: computeErrorProbability(ruleId, item.severity),
+    };
+  });
+}
+
+/** review-report.md와 re-validate.md에서 최종 verdict를 결정한다. */
+function resolveVerdict(
+  reviewReportContent: string | null,
+  revalidateContent: string | null,
+): string {
+  let verdict = 'UNKNOWN';
+  if (reviewReportContent) {
+    verdict = extractVerdict(reviewReportContent);
+  }
+  if (revalidateContent) {
+    const revalidateVerdict = extractRevalidateVerdict(revalidateContent);
+    if (revalidateVerdict !== 'UNKNOWN') {
+      verdict = revalidateVerdict;
+    }
+  }
+  return verdict;
+}
+
 /**
  * 파일 내용을 입력받아 인간 친화적 PR 요약을 생성한다.
  * 순수 함수: I/O 없음, 동일 입력 → 동일 출력 (generatedAt 제외).
@@ -213,70 +274,28 @@ export function generateHumanSummary(
   input: GenerateSummaryInput,
 ): HumanSummary {
   const allItems: SummaryItem[] = [];
-  const warnings: string[] = [];
+  let warnings: string[] = [];
 
-  // 1. Parse structure-check.md
   if (input.structureCheckContent) {
-    const fm = parseStructureCheckFrontmatter(input.structureCheckContent);
-    if (fm) {
-      for (const [stage, result] of Object.entries(fm.stageResults)) {
-        if (result === 'FAIL') {
-          allItems.push({
-            severity: 'warning',
-            message: `${stage} 검증 실패`,
-            autoFixable: false,
-            errorProbability: 0.7,
-          });
-        }
-      }
-    } else {
-      warnings.push('structure-check.md frontmatter 파싱 실패');
-    }
+    const result = collectStructureItems(input.structureCheckContent);
+    allItems.push(...result.items);
+    warnings = result.warnings;
   }
 
-  // 2. Parse fix-requests.md
   if (input.fixRequestsContent) {
-    const fixItems = parseFixRequests(input.fixRequestsContent);
-    for (const item of fixItems) {
-      const ruleId = item.rule;
-      const isAutoFixable = AUTO_FIXABLE_RULES.has(ruleId);
-      allItems.push({
-        severity: mapSeverity(item.severity),
-        message:
-          item.recommendedAction ||
-          item.title ||
-          `${item.id}: ${item.severity} 위반`,
-        path: item.filePath || undefined,
-        ruleId: ruleId || undefined,
-        autoFixable: isAutoFixable,
-        errorProbability: computeErrorProbability(ruleId, item.severity),
-      });
-    }
+    allItems.push(...collectFixRequestItems(input.fixRequestsContent));
   }
 
-  // 3. Extract verdict from review-report.md
-  let verdict = 'UNKNOWN';
-  if (input.reviewReportContent) {
-    verdict = extractVerdict(input.reviewReportContent);
-  }
+  const verdict = resolveVerdict(
+    input.reviewReportContent,
+    input.revalidateContent,
+  );
 
-  // 4. Override verdict with re-validate.md if present
-  if (input.revalidateContent) {
-    const revalidateVerdict = extractRevalidateVerdict(input.revalidateContent);
-    if (revalidateVerdict !== 'UNKNOWN') {
-      verdict = revalidateVerdict;
-    }
-  }
-
-  // 5. Separate autoFixable items
   const autoFixItems = allItems.filter((item) => item.autoFixable);
   const manualItems = allItems.filter((item) => !item.autoFixable);
-
-  // 6. Sort by errorProbability desc, take top 5
   manualItems.sort((a, b) => b.errorProbability - a.errorProbability);
   const reviewItems = manualItems.slice(0, MAX_REVIEW_ITEMS);
 
-  // 7. If all clean, add pass item
   if (allItems.length === 0 && (verdict === 'APPROVED' || verdict === 'PASS')) {
     reviewItems.push({
       severity: 'pass',
@@ -286,7 +305,6 @@ export function generateHumanSummary(
     });
   }
 
-  // 8. Parsing warnings fallback
   if (
     warnings.length > 0 &&
     reviewItems.length === 0 &&
@@ -300,9 +318,6 @@ export function generateHumanSummary(
     });
   }
 
-  const totalFindings = allItems.length;
-
-  // 9. Render markdown
   const markdown = renderMarkdown(verdict, reviewItems, autoFixItems);
 
   return {
@@ -311,7 +326,7 @@ export function generateHumanSummary(
     verdict,
     reviewItems,
     autoFixItems,
-    totalFindings,
+    totalFindings: allItems.length,
     markdown,
   };
 }

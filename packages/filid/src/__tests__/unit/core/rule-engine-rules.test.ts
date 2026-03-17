@@ -164,27 +164,19 @@ describe('rule-engine (rules)', () => {
       expect(rule.check(ctx)).toHaveLength(1);
     });
 
-    it('should not apply to organ nodes', () => {
-      const rule = getRule();
-      const node = makeNode({
-        type: 'organ',
-        metadata: { peerFiles: ['anything.ts'] },
-      });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(0);
-    });
-
-    it('should not apply to pure-function nodes', () => {
-      const rule = getRule();
-      const node = makeNode({
-        type: 'pure-function',
-        metadata: { peerFiles: ['anything.ts'] },
-      });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(0);
-    });
+    it.each(['organ', 'pure-function'] as const)(
+      'should not apply to %s nodes',
+      (nodeType) => {
+        const rule = getRule();
+        const node = makeNode({
+          type: nodeType,
+          metadata: { peerFiles: ['anything.ts'] },
+        });
+        const tree = makeTree([node]);
+        const ctx: RuleContext = { node, tree };
+        expect(rule.check(ctx)).toHaveLength(0);
+      },
+    );
 
     it('should pass when metadata.peerFiles is missing or empty', () => {
       const rule = getRule();
