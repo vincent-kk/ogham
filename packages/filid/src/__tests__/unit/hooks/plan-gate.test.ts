@@ -10,14 +10,14 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { validatePlanExit } = await import('../../../hooks/plan-gate.js');
+const { injectPlanChecklist } = await import('../../../hooks/plan-gate.js');
 const { existsSync } = await import('node:fs');
 
 const baseInput: PreToolUseInput = {
   cwd: '/workspace/project',
   session_id: 'test-session',
   hook_event_name: 'PreToolUse',
-  tool_name: 'ExitPlanMode',
+  tool_name: 'EnterPlanMode',
   tool_input: {},
 };
 
@@ -30,7 +30,7 @@ describe('plan-gate', () => {
       },
     );
 
-    const result = validatePlanExit(baseInput);
+    const result = injectPlanChecklist(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'FCA-AI Plan Compliance Checklist',
@@ -45,7 +45,7 @@ describe('plan-gate', () => {
       },
     );
 
-    const result = validatePlanExit(baseInput);
+    const result = injectPlanChecklist(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('INTENT.md');
     expect(ctx).toContain('DETAIL.md');
@@ -59,14 +59,14 @@ describe('plan-gate', () => {
       },
     );
 
-    const result = validatePlanExit(baseInput);
+    const result = injectPlanChecklist(baseInput);
     expect(result.continue).toBe(true);
   });
 
   it('should skip injection for non-FCA projects', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
-    const result = validatePlanExit(baseInput);
+    const result = injectPlanChecklist(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
@@ -79,7 +79,7 @@ describe('plan-gate', () => {
       },
     );
 
-    const result = validatePlanExit(baseInput);
+    const result = injectPlanChecklist(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'FCA-AI Plan Compliance Checklist',

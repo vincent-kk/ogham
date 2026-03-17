@@ -6,7 +6,7 @@ import {
   findNode,
   getAncestors,
   getDescendants,
-} from '../../../core/fractal-tree.js';
+} from '../../../core/tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 
 const entry = (

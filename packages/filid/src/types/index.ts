@@ -107,3 +107,15 @@ export type {
   BiasResult,
 } from './debt.js';
 export { DEBT_WEIGHT_CAP, DEBT_BASE_WEIGHT } from './debt.js';
+
+export type {
+  UsageSite,
+  UsageCoverage,
+  CoverageVerifyResult,
+} from './coverage.js';
+
+export type {
+  SummaryItemSeverity,
+  SummaryItem,
+  HumanSummary,
+} from './summary.js';

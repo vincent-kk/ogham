@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { ChangeQueue } from '../../../core/change-queue.js';
+import { ChangeQueue } from '../../../core/infra/change-queue.js';
 import { trackChange } from '../../../hooks/change-tracker.js';
 import { validatePreToolUse } from '../../../hooks/pre-tool-validator.js';
 import { guardStructure } from '../../../hooks/structure-guard.js';

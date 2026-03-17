@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  loadBuiltinRules,
-} from '../../../core/rule-engine.js';
+import { loadBuiltinRules } from '../../../core/rules/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { RuleContext } from '../../../types/rules.js';
@@ -95,6 +93,156 @@ describe('rule-engine (rules)', () => {
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree, scanOptions: { maxDepth: 10 } };
       expect(rule.check(ctx)).toHaveLength(0);
+    });
+  });
+
+  describe('zero-peer-file rule', () => {
+    const getRule = () =>
+      loadBuiltinRules().find((r) => r.id === BUILTIN_RULE_IDS.ZERO_PEER_FILE)!;
+
+    it('should flag any non-allowed peer file (strict, no threshold)', () => {
+      const rule = getRule();
+      const node = makeNode({
+        metadata: { peerFiles: ['index.ts', 'stray.ts'] },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      const violations = rule.check(ctx);
+      expect(violations).toHaveLength(1);
+      expect(violations[0].ruleId).toBe(BUILTIN_RULE_IDS.ZERO_PEER_FILE);
+      expect(violations[0].severity).toBe('warning');
+    });
+
+    it('should pass for fractal node with only static-allowed files', () => {
+      const rule = getRule();
+      const node = makeNode({
+        metadata: { peerFiles: ['index.ts', 'INTENT.md', 'DETAIL.md'] },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('should allow eponymous file', () => {
+      const rule = getRule();
+      const node = makeNode({
+        name: 'user-service',
+        path: '/root/user-service',
+        metadata: {
+          peerFiles: ['index.ts', 'user-service.ts'],
+          eponymousFile: 'user-service.ts',
+        },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('should allow framework reserved files', () => {
+      const rule = getRule();
+      const node = makeNode({
+        metadata: {
+          peerFiles: ['index.ts', 'layout.tsx', 'page.tsx'],
+          frameworkReservedFiles: ['layout.tsx', 'page.tsx'],
+        },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('should flag files not in framework reserved list', () => {
+      const rule = getRule();
+      const node = makeNode({
+        metadata: {
+          peerFiles: ['index.ts', 'layout.tsx', 'random.ts'],
+          frameworkReservedFiles: ['layout.tsx'],
+        },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(1);
+    });
+
+    it.each(['organ', 'pure-function'] as const)(
+      'should not apply to %s nodes',
+      (nodeType) => {
+        const rule = getRule();
+        const node = makeNode({
+          type: nodeType,
+          metadata: { peerFiles: ['anything.ts'] },
+        });
+        const tree = makeTree([node]);
+        const ctx: RuleContext = { node, tree };
+        expect(rule.check(ctx)).toHaveLength(0);
+      },
+    );
+
+    it('should pass when metadata.peerFiles is missing or empty', () => {
+      const rule = getRule();
+      const node1 = makeNode({ metadata: {} });
+      const node2 = makeNode({ metadata: { peerFiles: [] } });
+      const tree1 = makeTree([node1]);
+      const tree2 = makeTree([node2]);
+      expect(rule.check({ node: node1, tree: tree1 })).toHaveLength(0);
+      expect(rule.check({ node: node2, tree: tree2 })).toHaveLength(0);
+    });
+
+    it('should apply to hybrid nodes with stray files', () => {
+      const rule = getRule();
+      const node = makeNode({
+        type: 'hybrid',
+        metadata: { peerFiles: ['index.ts', 'stray.ts'] },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(1);
+    });
+
+    it('should allow all index/main variants and docs', () => {
+      const rule = getRule();
+      const node = makeNode({
+        metadata: {
+          peerFiles: [
+            'index.ts',
+            'index.js',
+            'index.tsx',
+            'index.mjs',
+            'index.cjs',
+            'main.ts',
+            'main.js',
+            'INTENT.md',
+            'DETAIL.md',
+          ],
+        },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
+    it('should compose all three categories correctly', () => {
+      const rule = getRule();
+      const node = makeNode({
+        name: 'my-feature',
+        path: '/root/my-feature',
+        metadata: {
+          peerFiles: [
+            'index.ts',
+            'my-feature.ts',
+            'page.tsx',
+            'INTENT.md',
+            'stray.ts',
+          ],
+          eponymousFile: 'my-feature.ts',
+          frameworkReservedFiles: ['page.tsx'],
+        },
+      });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      const violations = rule.check(ctx);
+      expect(violations).toHaveLength(1);
+      expect(violations[0].message).toContain('stray.ts');
     });
   });
 });

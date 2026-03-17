@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ChangeQueue } from '../../../core/change-queue.js';
+import { ChangeQueue } from '../../../core/infra/change-queue.js';
 import { trackChange } from '../../../hooks/change-tracker.js';
 import type { PostToolUseInput } from '../../../types/hooks.js';
 

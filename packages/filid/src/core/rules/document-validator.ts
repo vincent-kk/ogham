@@ -2,7 +2,7 @@ import type {
   DetailMdValidation,
   DocumentViolation,
   IntentMdValidation,
-} from '../types/documents.js';
+} from '../../types/documents.js';
 
 /** Maximum line count for INTENT.md */
 const INTENT_MD_LINE_LIMIT = 50;

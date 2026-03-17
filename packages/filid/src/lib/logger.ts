@@ -32,13 +32,21 @@ function formatArg(arg: unknown): string {
   }
 }
 
-function writeToFile(level: string, tag: string, msg: string, args: unknown[]): void {
+function writeToFile(
+  level: string,
+  tag: string,
+  msg: string,
+  args: unknown[],
+): void {
   if (!_logDir) return;
   try {
     if (!existsSync(_logDir)) mkdirSync(_logDir, { recursive: true });
     const ts = new Date().toISOString();
     const argsStr = args.length > 0 ? ' ' + args.map(formatArg).join(' ') : '';
-    appendFileSync(join(_logDir, 'debug.log'), `${ts} ${level} ${tag} ${msg}${argsStr}\n`);
+    appendFileSync(
+      join(_logDir, 'debug.log'),
+      `${ts} ${level} ${tag} ${msg}${argsStr}\n`,
+    );
   } catch {
     // never throw from logging
   }

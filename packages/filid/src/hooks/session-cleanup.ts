@@ -4,7 +4,7 @@
  * Removes session-context-{hash} marker and cached-context-{hash} cache
  * created by context-injector when the session ends.
  */
-import { removeSessionFiles } from '../core/cache-manager.js';
+import { removeSessionFiles } from '../core/infra/cache-manager.js';
 import type { HookOutput, SessionEndInput } from '../types/hooks.js';
 
 /**

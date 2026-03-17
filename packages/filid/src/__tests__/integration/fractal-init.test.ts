@@ -7,13 +7,13 @@ import { describe, expect, it } from 'vitest';
 import {
   validateDetailMd,
   validateIntentMd,
-} from '../../core/document-validator.js';
+} from '../../core/rules/document-validator.js';
 import {
   buildFractalTree,
   findNode,
   getDescendants,
-} from '../../core/fractal-tree.js';
-import { classifyNode } from '../../core/organ-classifier.js';
+} from '../../core/tree/fractal-tree.js';
+import { classifyNode } from '../../core/tree/organ-classifier.js';
 
 describe('fractal-init pipeline', () => {
   // Simulate a project with fractal/organ structure

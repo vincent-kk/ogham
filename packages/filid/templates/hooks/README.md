@@ -8,7 +8,7 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 | Hook Event | Entry File | Purpose |
 |---|---|---|
 | `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts` | Unified hook: intent injection + INTENT.md/DETAIL.md validation + organ structure protection |
-| `PreToolUse` (ExitPlanMode) | `plan-gate.entry.ts` | FCA-AI compliance checklist before exiting plan mode |
+| `PreToolUse` (EnterPlanMode) | `plan-gate.entry.ts` | FCA-AI compliance checklist when entering plan mode |
 | `SubagentStart` | `agent-enforcer.entry.ts` | FCA-AI agent role restriction injection |
 | `UserPromptSubmit` | `context-injector.entry.ts` | FCA-AI rules injection on session start |
 | `SessionEnd` | `session-cleanup.entry.ts` | Session cache and marker file cleanup |
@@ -67,12 +67,12 @@ Unrecognized agent types pass through with no restriction.
 
 ---
 
-### 3. PreToolUse (ExitPlanMode) — Plan Gate
+### 3. PreToolUse (EnterPlanMode) — Plan Gate
 
 **Entry**: `src/hooks/entries/plan-gate.entry.ts`
 **Built output**: `bridge/plan-gate.mjs`
 
-Fires when `ExitPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context before the plan is finalized.
+Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context when entering plan mode.
 
 **Behavior**:
 - Passes with `additionalContext` containing FCA-AI plan compliance reminders (INTENT.md limits, organ boundaries, 3+12 test rule)
@@ -140,7 +140,7 @@ then executes the built `.mjs` file in `bridge/`.
         ]
       },
       {
-        "matcher": "ExitPlanMode",
+        "matcher": "EnterPlanMode",
         "hooks": [
           { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"", "timeout": 3 }
         ]

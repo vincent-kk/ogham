@@ -5,8 +5,8 @@
  * scan → validate → drift → report 파이프라인을 실행하고
  * AnalysisReport를 생성한다.
  */
-import type { SyncPlan } from '../types/drift.js';
-import type { ModuleInfo } from '../types/fractal.js';
+import type { SyncPlan } from '../../types/drift.js';
+import type { ModuleInfo } from '../../types/fractal.js';
 import type {
   AnalysisReport,
   AnalyzeOptions,
@@ -14,12 +14,12 @@ import type {
   RenderedReport,
   ScanReport,
   ValidationReport,
-} from '../types/report.js';
+} from '../../types/report.js';
 
-import { detectDrift, generateSyncPlan } from './drift-detector.js';
-import { scanProject } from './fractal-tree.js';
-import { validateStructure } from './fractal-validator.js';
-import { analyzeModule } from './module-main-analyzer.js';
+import { detectDrift, generateSyncPlan } from '../rules/drift-detector.js';
+import { scanProject } from '../tree/fractal-tree.js';
+import { validateStructure } from '../rules/fractal-validator.js';
+import { analyzeModule } from '../module/module-main-analyzer.js';
 
 /**
  * 프로젝트 루트에서 시작하여 전체 분석 파이프라인을 실행한다.

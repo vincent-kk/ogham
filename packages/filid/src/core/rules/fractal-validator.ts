@@ -4,14 +4,14 @@
  *
  * rule-engine을 통해 모든 노드를 검증하고 ValidationReport를 생성한다.
  */
-import type { FractalNode, FractalTree } from '../types/fractal.js';
-import type { ValidationReport } from '../types/report.js';
+import type { FractalNode, FractalTree } from '../../types/fractal.js';
+import type { ValidationReport } from '../../types/report.js';
 import type {
   Rule,
   RuleContext,
   RuleEvaluationResult,
   RuleViolation,
-} from '../types/rules.js';
+} from '../../types/rules.js';
 
 import { loadBuiltinRules } from './rule-engine.js';
 

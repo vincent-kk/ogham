@@ -71,6 +71,7 @@ export const BUILTIN_RULE_IDS = {
   MAX_DEPTH: 'max-depth',
   CIRCULAR_DEPENDENCY: 'circular-dependency',
   PURE_FUNCTION_ISOLATION: 'pure-function-isolation',
+  ZERO_PEER_FILE: 'zero-peer-file',
 } as const;
 
 export type BuiltinRuleId =

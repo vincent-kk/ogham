@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { getLastRunHash, saveRunHash } from '../../../core/cache-manager.js';
-import { computeProjectHash } from '../../../core/project-hash.js';
+import { getLastRunHash, saveRunHash } from '../../../core/infra/cache-manager.js';
+import { computeProjectHash } from '../../../core/infra/project-hash.js';
 import { handleCacheManage } from '../../../mcp/tools/cache-manage.js';
 import type {
   ComputeHashResult,
@@ -9,12 +9,12 @@ import type {
   SaveHashResult,
 } from '../../../mcp/tools/cache-manage.js';
 
-vi.mock('../../../core/cache-manager.js', () => ({
+vi.mock('../../../core/infra/cache-manager.js', () => ({
   saveRunHash: vi.fn(),
   getLastRunHash: vi.fn(() => null),
 }));
 
-vi.mock('../../../core/project-hash.js', () => ({
+vi.mock('../../../core/infra/project-hash.js', () => ({
   computeProjectHash: vi.fn(async () => 'abcd1234efgh5678'),
 }));
 

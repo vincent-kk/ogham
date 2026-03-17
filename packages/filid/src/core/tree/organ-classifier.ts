@@ -1,4 +1,4 @@
-import type { CategoryType } from '../types/fractal.js';
+import type { CategoryType } from '../../types/fractal.js';
 
 /** Internal base list of UI/shared organ directory names (not exported). */
 const ORGAN_BASE_NAMES: readonly string[] = [

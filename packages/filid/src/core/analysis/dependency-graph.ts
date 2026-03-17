@@ -1,4 +1,4 @@
-import type { DependencyDAG, DependencyEdge } from '../types/fractal.js';
+import type { DependencyDAG, DependencyEdge } from '../../types/fractal.js';
 
 /**
  * Build a DAG (Directed Acyclic Graph) from an edge array.

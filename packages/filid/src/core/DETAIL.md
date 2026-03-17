@@ -4,7 +4,7 @@
 
 - 프랙탈 트리를 파일시스템에서 스캔하여 구축할 수 있어야 한다
 - 노드를 fractal/organ/pure-function으로 구조 기반 분류해야 한다
-- 7개 내장 규칙(naming, structure, dependency, documentation, index, module)을 평가할 수 있어야 한다
+- 8개 내장 규칙(naming, structure, dependency, documentation, index, module)을 평가할 수 있어야 한다
 - 현재 구조와 기대 구조 사이의 드리프트를 감지하고 SyncPlan을 생성해야 한다
 - INTENT.md/DETAIL.md의 50줄 제한과 3-tier 경계 섹션을 검증해야 한다
 - 두 모듈의 Lowest Common Ancestor(LCA)를 계산해야 한다
@@ -25,6 +25,14 @@
 - `getLastRunHash(cwd, skillName): string | null` — 저장된 해시 반환; 없으면 null
 - `computeProjectHash(cwd): Promise<string>` — `**/*.{ts,tsx,js,jsx,md}` 파일 경로+mtime 기반 16자 SHA256
 
+- `resolveImportPath(source: string, fromFile: string): string | null` — import 소스 문자열을 절대 경로로 변환; 해석 불가 시 null
+- `findSubtreeUsages(rootPath: string, targetModule: string): Promise<UsageInfo[]>` — 서브트리 내 대상 모듈 사용처 목록 반환
+- `checkTestCoverage(rootPath: string, modules: string[]): Promise<CoverageResult[]>` — 모듈별 테스트 존재 여부 검증; 각 결과에 covered 플래그 포함
+- `generateHumanSummary(sessionData: ReviewSession): string` — 리뷰 세션 데이터를 인간 친화적 마크다운 요약으로 변환
+- `ALLOWED_FRACTAL_ROOT_FILES: Set<string>` — fractal root에서 허용되는 파일명 집합 (상수)
+- `FRAMEWORK_RESERVED_FILES: Record<string, string[]>` — 프레임워크별 예약 파일 목록 (상수)
+- `FRAMEWORK_PACKAGES: Record<string, string>` — 패키지명 → 프레임워크 식별자 매핑 (상수)
+
 ## Last Updated
 
-2026-02-23
+2026-03-17

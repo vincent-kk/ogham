@@ -9,6 +9,7 @@ import { handleAstAnalyze } from './tools/ast-analyze.js';
 import { handleAstGrepReplace } from './tools/ast-grep-replace.js';
 import { handleAstGrepSearch } from './tools/ast-grep-search.js';
 import { handleCacheManage } from './tools/cache-manage.js';
+import { handleCoverageVerify } from './tools/coverage-verify.js';
 import { handleDebtManage } from './tools/debt-manage.js';
 import { handleDocCompress } from './tools/doc-compress.js';
 import { handleDriftDetect } from './tools/drift-detect.js';
@@ -49,7 +50,7 @@ function toolError(error: unknown) {
 
 /**
  * Wrap a tool handler with standard try/catch error handling.
- * Reduces repetitive boilerplate across all 14 registerTool callbacks.
+ * Reduces repetitive boilerplate across all 15 registerTool callbacks.
  */
 function wrapHandler<T>(
   fn: (args: T) => unknown | Promise<unknown>,
@@ -376,7 +377,8 @@ export function createServer(): McpServer {
         "action='content-hash': 변경 파일의 content hash를 계산하고 저장. " +
         "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단. " +
         "action='format-pr-comment': 리뷰 결과 파일을 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
-        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷.",
+        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
+        "action='generate-human-summary': 리뷰 세션 파일을 파싱하여 인간 PL용 PR 요약(HumanSummary)을 생성. 오류 확률순 최대 5개 핵심 항목 + 자동 수정 가능 항목 분리.",
       inputSchema: z.object({
         action: z
           .enum([
@@ -389,6 +391,7 @@ export function createServer(): McpServer {
             'check-cache',
             'format-pr-comment',
             'format-revalidate-comment',
+            'generate-human-summary',
           ])
           .describe('수행할 동작'),
         projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),
@@ -594,6 +597,34 @@ export function createServer(): McpServer {
       }),
     },
     wrapHandler(handleAstGrepReplace, { checkErrorField: true }),
+  );
+
+  server.registerTool(
+    'coverage_verify',
+    {
+      description:
+        '공유 모듈의 사용처별 테스트 커버리지를 검증한다. ' +
+        '대상 모듈을 import하는 프랙탈 서브트리 내 모든 파일을 찾고, ' +
+        '각 사용처에 대표 테스트가 존재하는지 확인한다. ' +
+        '커버리지 비율과 미커버 사용처에 대한 경고를 반환한다.',
+      inputSchema: z.object({
+        projectRoot: z.string().describe('프로젝트 루트 디렉토리의 절대 경로'),
+        targetPath: z
+          .string()
+          .describe(
+            '추적할 공유 모듈의 경로 (절대 경로 또는 projectRoot 기준 상대 경로)',
+          ),
+        subtreeRoot: z
+          .string()
+          .describe('검색 범위를 제한할 서브트리 루트 경로')
+          .optional(),
+        exportNames: z
+          .array(z.string())
+          .describe('추적할 특정 export 이름 목록 (기본값: 모든 export)')
+          .optional(),
+      }),
+    },
+    wrapHandler(handleCoverageVerify),
   );
 
   return server;

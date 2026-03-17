@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  classifyNode,
-} from '../../../core/organ-classifier.js';
+import { classifyNode } from '../../../core/tree/organ-classifier.js';
 
 describe('organ-classifier — classifyNode (extended)', () => {
   describe('classifyNode', () => {

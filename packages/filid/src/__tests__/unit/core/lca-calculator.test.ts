@@ -4,7 +4,7 @@ import {
   findLCA,
   getAncestorPaths,
   getModulePlacement,
-} from '../../../core/lca-calculator.js';
+} from '../../../core/analysis/lca-calculator.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 
 // 헬퍼: FractalNode 생성

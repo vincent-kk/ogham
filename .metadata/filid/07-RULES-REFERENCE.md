@@ -15,6 +15,8 @@
 | `LCOM4_SPLIT_THRESHOLD`  | `2`             | `metrics/decision-tree.ts:10`    | LCOM4 분할 기준            |
 | `DEFAULT_STABILITY_DAYS` | `90`            | `metrics/promotion-tracker.ts:4` | 테스트 승격 안정 기간 (일) |
 | `THRESHOLD` (3+12)       | `15`            | `metrics/three-plus-twelve.ts:4` | spec 파일별 테스트 상한    |
+| `MAX_PEER_FILE_COUNT`    | `3`             | `core/rule-engine.ts`            | 프랙탈 루트 허용 peer file 상한 |
+| `ALLOWED_FRACTAL_ROOT_FILES` | 9개 파일명 Set | `core/rule-engine.ts`        | peer file 카운트 제외 허용 파일 목록 |
 
 ### KNOWN_KNOWN_ORGAN_DIR_NAMES 전체 목록
 
@@ -66,6 +68,31 @@ const BOUNDARY_KEYWORDS = {
 | CC compress     | 함수/모듈   | CC > 15 (LCOM4 = 1)              | `compress` 권고     | 높은 응집도이지만 복잡한 제어 흐름 |
 | CC parameterize | 함수/모듈   | CC <= 15 (LCOM4 = 1, tests > 15) | `parameterize` 권고 | 중복 테스트 병합                   |
 | promotion       | `*.test.ts` | 90일 안정 + 실패 이력 없음       | `spec.ts`로 승격    | 안정된 테스트의 정규화             |
+
+### 구조 규칙 (내장 규칙 엔진)
+
+| 규칙명                   | 대상              | 조건                                                       | 액션        | 심각도    |
+| ------------------------ | ----------------- | ---------------------------------------------------------- | ----------- | --------- |
+| naming-convention        | 모든 노드         | 디렉토리명이 kebab-case/camelCase가 아닌 경우              | 경고        | `warning` |
+| organ-no-intentmd        | organ 노드        | INTENT.md가 존재하는 경우                                  | 오류 보고   | `error`   |
+| index-barrel-pattern     | fractal/hybrid    | index.ts에 직접 선언이 있는 경우 (순수 barrel 아님)        | 경고        | `warning` |
+| module-entry-point       | fractal/hybrid    | index.ts 또는 main.ts가 없는 경우                          | 경고        | `warning` |
+| max-depth                | 모든 노드         | 트리 깊이 > maxDepth (기본 10)                             | 오류 보고   | `error`   |
+| circular-dependency      | 모든 노드         | 순환 의존 감지 (placeholder)                               | 오류 보고   | `error`   |
+| pure-function-isolation  | pure-function     | fractal 모듈을 import하는 경우                             | 오류 보고   | `error`   |
+| zero-peer-file           | fractal/hybrid    | 허용 파일 외 peer file > MAX_PEER_FILE_COUNT (3)           | 경고        | `warning` |
+
+### ALLOWED_FRACTAL_ROOT_FILES 전체 목록
+
+```typescript
+const ALLOWED_FRACTAL_ROOT_FILES = new Set([
+  'index.ts', 'index.js', 'index.tsx', 'index.mjs', 'index.cjs',
+  'main.ts', 'main.js',
+  'INTENT.md', 'DETAIL.md',
+]);
+```
+
+> dot-file (`.eslintrc`, `.gitignore` 등)은 스캔 시 제외되어 peer file로 카운트되지 않음.
 
 ---
 

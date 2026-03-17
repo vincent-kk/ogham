@@ -5,7 +5,7 @@
  * TypeScript AST 파싱 없이 정규식 기반으로 export 구문을 분석한다.
  * re-export, named export, default export, type export를 구분한다.
  */
-import type { BarrelPattern, ModuleExportInfo } from '../types/fractal.js';
+import type { BarrelPattern, ModuleExportInfo } from '../../types/fractal.js';
 
 // 정규식 패턴
 const RE_NAMED_REEXPORT = /^export\s+\{[^}]*\}\s+from\s+['"][^'"]+['"]/gm;

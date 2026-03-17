@@ -12,7 +12,7 @@ import {
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { createLogger } from '../lib/logger.js';
+import { createLogger } from '../../lib/logger.js';
 
 const log = createLogger('cache');
 
@@ -148,7 +148,8 @@ export function pruneOldSessions(cwd: string): void {
  */
 export function pruneStaleCacheDirs(): void {
   try {
-    const configDir = process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
+    const configDir =
+      process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
     const pluginDir = join(configDir, 'plugins', 'filid');
     if (!existsSync(pluginDir)) return;
 
@@ -185,7 +186,9 @@ export function pruneStaleCacheDirs(): void {
       }
     }
 
-    log.debug(`pruneStaleCacheDirs: ${staleDirs.length}/${dirs.length} stale dirs to remove`);
+    log.debug(
+      `pruneStaleCacheDirs: ${staleDirs.length}/${dirs.length} stale dirs to remove`,
+    );
 
     for (const dirPath of staleDirs) {
       try {

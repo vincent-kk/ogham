@@ -1,4 +1,4 @@
-import { ChangeQueue } from '../../../core/change-queue.js';
+import { ChangeQueue } from '../../../core/infra/change-queue.js';
 import type {
   PostToolUseInput,
   PreToolUseInput,

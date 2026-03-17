@@ -72,6 +72,25 @@ test_metrics(action: "check-312", files: [{ filePath, content }])
 
 Threshold: total > 15 cases per file → FAIL (3+12 rule violation).
 
+### C.4.5 — Shared Dependency Test Coverage
+
+For each shared module identified by dependency analysis in changed fractals:
+
+```
+coverage_verify(
+  projectRoot: <PROJECT_ROOT>,
+  targetPath: <shared module path>
+)
+```
+
+If `uncoveredCount > 0`, record as WARN (not FAIL) with the warning list.
+Add a row to the verification table:
+
+| Shared dep coverage | PASS/WARN | N/M usage sites covered |
+
+Note: This step verifies that modules importing shared dependencies have at
+least one representative test. It does NOT require exhaustive test coverage.
+
 ### C.5 — Dependency Verification
 
 ```
@@ -155,6 +174,7 @@ created_at: <ISO 8601>
 | CC                    | PASS/WARN/FAIL | ...    |
 | Circular dependencies | PASS/WARN/FAIL | ...    |
 | Structure drift       | PASS/WARN/FAIL | ...    |
+| Shared dep coverage   | PASS/WARN      | ...    |
 
 ## Debt Status
 

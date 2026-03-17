@@ -5,7 +5,7 @@ import {
   evaluateRules,
   getActiveRules,
   loadBuiltinRules,
-} from '../../../core/rule-engine.js';
+} from '../../../core/rules/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { RuleContext } from '../../../types/rules.js';
@@ -40,9 +40,9 @@ function makeTree(nodes: FractalNode[]): FractalTree {
 
 describe('rule-engine', () => {
   describe('loadBuiltinRules', () => {
-    it('should return exactly 7 built-in rules', () => {
+    it('should return exactly 8 built-in rules', () => {
       const rules = loadBuiltinRules();
-      expect(rules).toHaveLength(7);
+      expect(rules).toHaveLength(8);
     });
 
     it('should include all required rule IDs', () => {
@@ -55,6 +55,7 @@ describe('rule-engine', () => {
       expect(ids).toContain(BUILTIN_RULE_IDS.MAX_DEPTH);
       expect(ids).toContain(BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY);
       expect(ids).toContain(BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION);
+      expect(ids).toContain(BUILTIN_RULE_IDS.ZERO_PEER_FILE);
     });
 
     it('should have all rules enabled by default', () => {
@@ -68,12 +69,12 @@ describe('rule-engine', () => {
       const rules = loadBuiltinRules();
       rules[0].enabled = false;
       const active = getActiveRules(rules);
-      expect(active).toHaveLength(6);
+      expect(active).toHaveLength(7);
     });
 
     it('should return all rules when all enabled', () => {
       const rules = loadBuiltinRules();
-      expect(getActiveRules(rules)).toHaveLength(7);
+      expect(getActiveRules(rules)).toHaveLength(8);
     });
   });
 

@@ -3,69 +3,20 @@
  * Formats review output files into collapsible GitHub PR comment markdown.
  * Used by fca-review (format-pr-comment) and fca-revalidate (format-revalidate-comment).
  */
-import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import type { HumanSummary } from '../../types/summary.js';
+
 import type { ReviewManageInput } from './review-manage.js';
+import {
+  extractRevalidateVerdict,
+  extractVerdict,
+  normalizeBranch,
+  tryReadFile,
+} from './review-utils.js';
 
 /** Maximum PR comment size before falling back to summary-only */
 const MAX_COMMENT_SIZE = 50_000;
-
-/**
- * Normalize a git branch name to a filesystem-safe string.
- * Duplicated from review-manage.ts to avoid circular coupling;
- * both modules are leaf handlers under the same MCP tool.
- */
-function normalizeBranch(branchName: string): string {
-  let result = branchName;
-  result = result.replace(/\//g, '--');
-  result = result.replace(/[#@~^:?*[\]\\]/g, '_');
-  result = result.replace(/^[.-]+/, '');
-  result = result.replace(/[.-]+$/, '');
-  return result;
-}
-
-/**
- * Try to read a file, returning null if it does not exist.
- */
-async function tryReadFile(filePath: string): Promise<string | null> {
-  try {
-    return await fs.readFile(filePath, 'utf-8');
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extract verdict from review-report.md content.
- * Looks for **Verdict**: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
- */
-function extractVerdict(content: string): string {
-  const match = content.match(
-    /\*\*Verdict\*\*:\s*(APPROVED|REQUEST_CHANGES|INCONCLUSIVE)/,
-  );
-  return match?.[1] ?? 'UNKNOWN';
-}
-
-/**
- * Extract verdict from re-validate.md content.
- * Looks for ## Re-validation — PASS or FAIL pattern, or **Verdict**: PASS|FAIL
- */
-function extractRevalidateVerdict(content: string): string {
-  // Try header pattern first: # ... — PASS/FAIL
-  const headerMatch = content.match(/—\s*(PASS|FAIL)/);
-  if (headerMatch) return headerMatch[1];
-
-  // Try **Verdict**: pattern
-  const verdictMatch = content.match(/\*\*Verdict\*\*:\s*(PASS|FAIL)/);
-  if (verdictMatch) return verdictMatch[1];
-
-  // Try **Final Verdict**: pattern
-  const finalMatch = content.match(/\*\*Final Verdict\*\*:\s*(PASS|FAIL)/);
-  if (finalMatch) return finalMatch[1];
-
-  return 'UNKNOWN';
-}
 
 /**
  * Wrap content in a collapsible <details> block.
@@ -208,4 +159,66 @@ export async function formatRevalidateComment(
   }
 
   return { markdown, verdict, normalized };
+}
+
+/**
+ * Format a HumanSummary into markdown string.
+ * The summary is pre-rendered by generateHumanSummary(), but this function
+ * can be used when a standalone markdown rendering is needed.
+ */
+export function formatHumanSummary(summary: HumanSummary): string {
+  return summary.markdown;
+}
+
+/**
+ * Handle generate-human-summary action.
+ * Reads review session files and delegates to generateHumanSummary() from core.
+ */
+export async function handleGenerateHumanSummary(
+  args: unknown,
+): Promise<Record<string, unknown>> {
+  const { generateHumanSummary } =
+    await import('../../core/utils/pr-summary-generator.js');
+
+  const input = args as ReviewManageInput;
+
+  if (!input.branchName) {
+    throw new Error('branchName is required for generate-human-summary action');
+  }
+  if (!input.projectRoot) {
+    throw new Error(
+      'projectRoot is required for generate-human-summary action',
+    );
+  }
+
+  const normalized = normalizeBranch(input.branchName);
+  const reviewDir = path.join(
+    input.projectRoot,
+    '.filid',
+    'review',
+    normalized,
+  );
+
+  const structureCheckContent = await tryReadFile(
+    path.join(reviewDir, 'structure-check.md'),
+  );
+  const fixRequestsContent = await tryReadFile(
+    path.join(reviewDir, 'fix-requests.md'),
+  );
+  const reviewReportContent = await tryReadFile(
+    path.join(reviewDir, 'review-report.md'),
+  );
+  const revalidateContent = await tryReadFile(
+    path.join(reviewDir, 're-validate.md'),
+  );
+
+  const summary = generateHumanSummary({
+    structureCheckContent,
+    fixRequestsContent,
+    reviewReportContent,
+    revalidateContent,
+    branch: input.branchName,
+  });
+
+  return summary as unknown as Record<string, unknown>;
 }

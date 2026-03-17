@@ -1,15 +1,19 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
 import type {
   CategoryType,
   FractalNode,
   FractalTree,
-} from '../types/fractal.js';
-import type { ScanOptions } from '../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../types/scan.js';
+} from '../../types/fractal.js';
+import type { ScanOptions } from '../../types/scan.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../types/scan.js';
 
 import { classifyNode } from './organ-classifier.js';
+import {
+  FRAMEWORK_PACKAGES,
+  FRAMEWORK_RESERVED_FILES,
+} from '../utils/peer-file-registry.js';
 
 /** Input entry for buildFractalTree */
 export interface NodeEntry {
@@ -20,6 +24,9 @@ export interface NodeEntry {
   hasDetailMd: boolean;
   hasIndex?: boolean;
   hasMain?: boolean;
+  peerFiles?: string[];
+  eponymousFile?: string | null;
+  frameworkReservedFiles?: string[];
 }
 
 /**
@@ -70,7 +77,15 @@ export function buildFractalTree(entries: NodeEntry[]): FractalTree {
       hasIndex: e.hasIndex ?? false,
       hasMain: e.hasMain ?? false,
       depth: 0,
-      metadata: {},
+      metadata: {
+        ...(e.peerFiles ? { peerFiles: e.peerFiles } : {}),
+        ...(e.eponymousFile !== undefined
+          ? { eponymousFile: e.eponymousFile }
+          : {}),
+        ...(e.frameworkReservedFiles
+          ? { frameworkReservedFiles: e.frameworkReservedFiles }
+          : {}),
+      },
     });
   }
 
@@ -251,6 +266,30 @@ export function shouldExclude(relPath: string, options: ScanOptions): boolean {
 }
 
 /**
+ * Detect frameworks from the nearest package.json's dependencies.
+ * Returns framework identifiers matching keys in FRAMEWORK_RESERVED_FILES.
+ */
+function detectFrameworks(rootPath: string): string[] {
+  const pkgPath = join(rootPath, 'package.json');
+  if (!existsSync(pkgPath)) return [];
+  try {
+    const raw = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const allDeps: Record<string, string> = {
+      ...raw.dependencies,
+      ...raw.devDependencies,
+    };
+    const detected: string[] = [];
+    for (const depName of Object.keys(allDeps ?? {})) {
+      const fw = FRAMEWORK_PACKAGES[depName];
+      if (fw && !detected.includes(fw)) detected.push(fw);
+    }
+    return detected;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Scan a project directory and build a FractalTree.
  * Uses fast-glob to discover directories, then classifies each one.
  *
@@ -265,6 +304,15 @@ export async function scanProject(
   const { glob } = await import('fast-glob');
   const opts = { ...DEFAULT_SCAN_OPTIONS, ...options };
   const maxDepth = opts.maxDepth;
+
+  // Detect frameworks once per scan (reads root package.json)
+  const detectedFrameworks = detectFrameworks(rootPath);
+  const frameworkReservedSet = new Set<string>();
+  for (const fw of detectedFrameworks) {
+    const files = FRAMEWORK_RESERVED_FILES[fw];
+    if (files) for (const f of files) frameworkReservedSet.add(f);
+  }
+  const frameworkReservedArr = [...frameworkReservedSet];
 
   // Discover all directories
   const dirPaths: string[] = await glob('**/', {
@@ -327,6 +375,16 @@ export async function scanProject(
       existsSync(join(absPath, 'main.ts')) ||
       existsSync(join(absPath, 'main.js'));
 
+    // Enumerate peer files (non-directory, non-dot-file entries)
+    const dirEntries = readdirSync(absPath, { withFileTypes: true });
+    const peerFiles = dirEntries
+      .filter((e) => e.isFile() && !e.name.startsWith('.'))
+      .map((e) => e.name);
+
+    // Detect eponymous file (dirname === filename sans extension, max 1)
+    const eponymousFile =
+      peerFiles.find((f) => f.replace(/\.[^.]+$/, '') === name) ?? null;
+
     const children = immediateChildrenMap.get(absPath) ?? [];
     const hasFractalChildren = children.some((d) => dirSet.has(d));
     const isLeafDirectory = children.length === 0;
@@ -348,6 +406,9 @@ export async function scanProject(
       hasDetailMd,
       hasIndex,
       hasMain,
+      peerFiles,
+      eponymousFile,
+      frameworkReservedFiles: frameworkReservedArr,
     });
   }
 

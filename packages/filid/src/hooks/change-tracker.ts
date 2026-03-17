@@ -11,11 +11,11 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import type { ChangeQueue, ChangeRecord } from '../core/change-queue.js';
+import type { ChangeQueue, ChangeRecord } from '../core/infra/change-queue.js';
 import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
-} from '../core/organ-classifier.js';
+} from '../core/tree/organ-classifier.js';
 import type { HookOutput, PostToolUseInput } from '../types/hooks.js';
 
 interface ChangeLogEntry {
