@@ -25,6 +25,14 @@
 - `getLastRunHash(cwd, skillName): string | null` — 저장된 해시 반환; 없으면 null
 - `computeProjectHash(cwd): Promise<string>` — `**/*.{ts,tsx,js,jsx,md}` 파일 경로+mtime 기반 16자 SHA256
 
+- `resolveImportPath(source: string, fromFile: string): string | null` — import 소스 문자열을 절대 경로로 변환; 해석 불가 시 null
+- `findSubtreeUsages(rootPath: string, targetModule: string): Promise<UsageInfo[]>` — 서브트리 내 대상 모듈 사용처 목록 반환
+- `checkTestCoverage(rootPath: string, modules: string[]): Promise<CoverageResult[]>` — 모듈별 테스트 존재 여부 검증; 각 결과에 covered 플래그 포함
+- `generateHumanSummary(sessionData: ReviewSession): string` — 리뷰 세션 데이터를 인간 친화적 마크다운 요약으로 변환
+- `ALLOWED_FRACTAL_ROOT_FILES: Set<string>` — fractal root에서 허용되는 파일명 집합 (상수)
+- `FRAMEWORK_RESERVED_FILES: Record<string, string[]>` — 프레임워크별 예약 파일 목록 (상수)
+- `FRAMEWORK_PACKAGES: Record<string, string>` — 패키지명 → 프레임워크 식별자 매핑 (상수)
+
 ## Last Updated
 
-2026-02-23
+2026-03-17

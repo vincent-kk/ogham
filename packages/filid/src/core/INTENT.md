@@ -2,7 +2,7 @@
 
 ## Purpose
 
-FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산, 테스트 커버리지 검증 등 18개 모듈.
+FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 프로젝트 분석, 의존성 그래프, LCA 계산, 테스트 커버리지 검증 등 20개 모듈.
 
 ## Structure
 
@@ -26,6 +26,7 @@ FCA-AI 핵심 알고리즘 구현. 프랙탈 트리 구축, 드리프트 감지,
 | `import-resolver.ts` | import 소스 문자열 → 절대 경로 변환 (`resolveImportPath`) |
 | `usage-tracker.ts` | 서브트리 내 모듈 사용처 추적 (`findSubtreeUsages`) |
 | `test-coverage-checker.ts` | 사용처별 테스트 존재 여부 검증 (`checkTestCoverage`) |
+| `peer-file-registry.ts` | Zero Peer File 규칙 상수 레지스트리 (허용 파일, 프레임워크 예약 파일) |
 | `pr-summary-generator.ts` | PR 검증 결과 인간 친화적 요약 생성 (`generateHumanSummary`) |
 
 ## Conventions
