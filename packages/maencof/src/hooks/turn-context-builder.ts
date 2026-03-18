@@ -9,6 +9,7 @@ import { join } from 'node:path';
 
 import type { CompanionIdentityMinimal } from '../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../types/companion-guard.js';
+
 import type { PinnedNode } from './cache-manager.js';
 import { readPinnedNodes } from './cache-manager.js';
 
@@ -86,10 +87,7 @@ export function readCompanionIdentity(
  * Strip YAML frontmatter, heading lines, and blank lines; return first paragraph
  * up to maxChars characters.
  */
-export function compressMarkdownBody(
-  content: string,
-  maxChars = 150,
-): string {
+export function compressMarkdownBody(content: string, maxChars = 150): string {
   // Remove YAML frontmatter
   let text = content.replace(/^---[\s\S]*?---\n?/, '');
   // Remove heading lines and blank lines at start
@@ -168,9 +166,7 @@ export function readL1NodesSummary(cwd: string): string {
  * Uses plain-text identity declaration for better AI internalization.
  * Target: ~200 chars max to respect C1 5-second constraint.
  */
-function buildCompanionIdentityTag(
-  identity: CompanionIdentityMinimal,
-): string {
+function buildCompanionIdentityTag(identity: CompanionIdentityMinimal): string {
   const roleDecl = identity.role
     ? `You are ${identity.name}, a ${identity.role}.`
     : `You are ${identity.name}.`;

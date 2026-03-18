@@ -100,7 +100,10 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
  * Build a session summary markdown string.
  * Includes usage-stats.json (cumulative) and stale-nodes.json data when available.
  */
-function buildSessionSummary(input: SessionEndInput, cwd: string): string | null {
+function buildSessionSummary(
+  input: SessionEndInput,
+  cwd: string,
+): string | null {
   const now = new Date().toISOString();
   const sessionId = input.session_id ?? 'unknown';
 

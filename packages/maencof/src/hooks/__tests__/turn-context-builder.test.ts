@@ -195,7 +195,9 @@ describe('buildTurnContext', () => {
       role: 'knowledge curator',
     });
     const result = buildTurnContext(vaultDir);
-    expect(result).toContain('<companion-identity name="Ari" role="knowledge curator">');
+    expect(result).toContain(
+      '<companion-identity name="Ari" role="knowledge curator">',
+    );
     expect(result).toContain('</companion-identity>');
   });
 
@@ -209,7 +211,9 @@ describe('buildTurnContext', () => {
       },
     });
     const result = buildTurnContext(vaultDir);
-    expect(result).toContain('<personality tone="warm" approach="socratic">curious,empathetic</personality>');
+    expect(result).toContain(
+      '<personality tone="warm" approach="socratic">curious,empathetic</personality>',
+    );
   });
 
   it('includes principles in identity tag', () => {
@@ -218,7 +222,9 @@ describe('buildTurnContext', () => {
       principles: ['clarity first', 'ask before assuming'],
     });
     const result = buildTurnContext(vaultDir);
-    expect(result).toContain('<principles>clarity first | ask before assuming</principles>');
+    expect(result).toContain(
+      '<principles>clarity first | ask before assuming</principles>',
+    );
   });
 
   it('places <companion-identity> before <kg-core>', () => {
