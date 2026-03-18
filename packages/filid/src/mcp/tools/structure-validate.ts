@@ -1,3 +1,4 @@
+import { loadRuleOverrides } from '../../core/infra/config-loader.js';
 import { scanProject } from '../../core/tree/fractal-tree.js';
 import { validateStructure } from '../../core/rules/fractal-validator.js';
 import { getActiveRules, loadBuiltinRules } from '../../core/rules/rule-engine.js';
@@ -32,7 +33,8 @@ export async function handleStructureValidate(
     throw new Error('path is required');
   }
 
-  const allRules = loadBuiltinRules();
+  const overrides = loadRuleOverrides(input.path);
+  const allRules = loadBuiltinRules(overrides);
   const activeRules = getActiveRules(allRules);
 
   let rulesToApply = activeRules;

@@ -22,6 +22,7 @@ import {
   markSessionInjected,
   writePromptContext,
 } from '../core/infra/cache-manager.js';
+import { loadRuleOverrides } from '../core/infra/config-loader.js';
 import { getActiveRules, loadBuiltinRules } from '../core/rules/rule-engine.js';
 import type { HookOutput, UserPromptSubmitInput } from '../types/hooks.js';
 
@@ -87,7 +88,8 @@ export function injectContext(input: UserPromptSubmitInput): HookOutput {
   // Step 2: fractal rules section (rule list + category guide only, no scan)
   let fractalSection = '';
   try {
-    const rules = getActiveRules(loadBuiltinRules());
+    const overrides = loadRuleOverrides(cwd);
+    const rules = getActiveRules(loadBuiltinRules(overrides));
     const rulesText = rules
       .map((r) => `- ${r.id}: ${r.description}`)
       .join('\n');
