@@ -1,5 +1,10 @@
 # Phase C — Technical Verification
 
+> **MANDATORY OUTPUT**: You MUST write `<REVIEW_DIR>/verification.md` before
+> completing. This is your PRIMARY DELIVERABLE. All analysis is meaningless
+> without the written file. If you run low on budget, skip remaining checks
+> and write the file with what you have (mark skipped checks as `SKIP`).
+
 You are a Phase C verification agent. Execute FCA-AI technical verification
 using MCP tools and assess existing technical debt bias. Write results to
 `verification.md`.

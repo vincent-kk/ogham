@@ -1,5 +1,10 @@
 # Phase A — Diff-Scope Structure Check
 
+> **MANDATORY OUTPUT**: You MUST write `<REVIEW_DIR>/structure-check.md` before
+> completing. This is your PRIMARY DELIVERABLE. All analysis is meaningless
+> without the written file. If you run low on budget, skip remaining analysis
+> stages and write the file with what you have (mark skipped stages as `SKIP`).
+
 You are a Phase A structure check agent. Execute the 5-stage FCA-AI structure
 verification pipeline scoped to **files changed in this PR/branch diff only**,
 then write the results to `structure-check.md`. This output is consumed by

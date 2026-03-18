@@ -1,5 +1,10 @@
 # Phase B — Analysis & Committee Election
 
+> **MANDATORY OUTPUT**: You MUST write `<REVIEW_DIR>/session.md` before
+> completing. This is your PRIMARY DELIVERABLE. All analysis is meaningless
+> without the written file. If you run low on budget, skip remaining analysis
+> and write the file with what you have (use placeholder values for missing fields).
+
 You are a Phase B analysis agent. Execute the following steps to analyze
 the code change and elect a review committee. Write the results to `session.md`.
 
@@ -105,6 +110,7 @@ changed_fractals:
   - <fractal path>
   - ...
 interface_changes: <true|false>
+no_structure_check: <true if --no-structure-check was set, false otherwise>
 structure_critical_count: <STRUCTURE_CRITICAL_COUNT>
 structure_overall: <PASS|FAIL|N/A>
 created_at: <ISO 8601>

@@ -62,16 +62,48 @@ If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>
 > subagents. Phase A is skipped when `--no-structure-check` is set; in that
 > case only Phase B runs.
 
+> Uses `general-purpose` subagent type (not filid agents) because these phases perform broad analysis that benefits from unrestricted tool access.
+
+#### Subagent Prompt Construction Rules
+
+When constructing subagent prompts, follow these rules to ensure reliable output:
+
+1. **State the output file first**: The prompt MUST begin with the mandatory output
+   file path and format. Example: "Your PRIMARY DELIVERABLE is writing
+   `<REVIEW_DIR>/structure-check.md`. You MUST write this file before completing."
+2. **Provide concrete context values**: Substitute all variables (`REVIEW_DIR`,
+   `PROJECT_ROOT`, `BASE_REF`, `BRANCH`) with actual values — never pass variable
+   names for the subagent to resolve.
+3. **Include the phase file path**: Tell the subagent to read the phase instructions
+   file, then provide the resolved path. Example: "Read and follow the instructions
+   in `/absolute/path/to/phase-a-structure.md`."
+4. **Reinforce the output at the end**: Close the prompt with a reminder: "REMINDER:
+   Write `<output_file>` before you finish. If you run low on budget, skip remaining
+   analysis and write the file with partial results."
+
 **Phase A: Structure Pre-Check** (`general-purpose`, model: `sonnet`,
 `run_in_background: true`)
 
-> Uses `general-purpose` subagent type (not filid agents) because these phases perform broad analysis that benefits from unrestricted tool access.
-
-Subagent reads and executes `phases/phase-a-structure.md`.
-Resolve path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/`.
+Resolve phase file path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/phase-a-structure.md`.
 Fallback: `Glob(**/skills/fca-review/phases/phase-a-structure.md)`.
-Provide context: review dir, project root, base ref, branch name.
-Output: `.filid/review/<branch>/structure-check.md`
+
+Prompt template:
+```
+Your PRIMARY DELIVERABLE is writing `<REVIEW_DIR>/structure-check.md`.
+You MUST write this file before completing — all analysis is meaningless without it.
+
+Read and follow the instructions in `<resolved phase-a path>`.
+
+Context:
+- REVIEW_DIR: <actual review dir>
+- PROJECT_ROOT: <actual project root>
+- BASE_REF: <actual base ref>
+- BRANCH: <actual branch>
+
+REMINDER: Write `<REVIEW_DIR>/structure-check.md` before you finish.
+If you run low on budget, skip remaining stages and write the file with
+partial results (mark skipped stages as SKIP).
+```
 
 Phase A scans only **files changed in this diff** across 5 structural stages
 and records PASS/FAIL per stage plus a `critical_count` of CRITICAL+HIGH findings.
@@ -80,29 +112,81 @@ These findings flow into Phase D (fix items).
 **Phase B: Analysis & Committee Election** (`general-purpose`, model: `haiku`,
 `run_in_background: true`)
 
-Subagent reads and executes `phases/phase-b-analysis.md`.
-Resolve path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/`.
+Resolve phase file path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/phase-b-analysis.md`.
 Fallback: `Glob(**/skills/fca-review/phases/phase-b-analysis.md)`.
-Provide context: branch name, normalized name, review dir, base ref, scope,
-project root. Output: `.filid/review/<branch>/session.md`
+
+Prompt template:
+```
+Your PRIMARY DELIVERABLE is writing `<REVIEW_DIR>/session.md`.
+You MUST write this file before completing — all analysis is meaningless without it.
+
+Read and follow the instructions in `<resolved phase-b path>`.
+
+Context:
+- BRANCH: <actual branch>
+- NORMALIZED: <actual normalized name>
+- REVIEW_DIR: <actual review dir>
+- BASE_REF: <actual base ref>
+- SCOPE: <actual scope>
+- PROJECT_ROOT: <actual project root>
+- NO_STRUCTURE_CHECK: <true|false>
+
+REMINDER: Write `<REVIEW_DIR>/session.md` before you finish.
+If you run low on budget, skip remaining analysis and write the file
+with partial results.
+```
 
 **Await both** background agents before proceeding. If `--no-structure-check`,
 only await Phase B.
 
-**→ After all background agents complete, immediately proceed to Step 3.**
+#### Post-Completion Verification
+
+After each subagent completes, verify its output file exists before proceeding:
+
+1. Check: Does `<REVIEW_DIR>/<expected_file>` exist? (Read or Glob)
+2. If **yes** → proceed to next step.
+3. If **no** → the subagent failed to write its deliverable. Do NOT re-launch
+   a subagent. Instead, read the phase instructions file yourself and execute
+   the steps directly as the chairperson. This is faster and more reliable
+   than re-delegating.
+
+Apply this verification to Phase A (`structure-check.md`), Phase B
+(`session.md`), and Phase C (`verification.md`).
+
+**→ After all background agents complete and outputs are verified, immediately proceed to Step 3.**
 
 ### Step 3 — Phase C: Technical Verification (Delegated)
 
 Delegate to Task subagent (`general-purpose`, model: `sonnet`).
-Subagent reads and executes `phases/phase-c-verification.md`.
 
-Resolve path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/`.
+Resolve phase file path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/phase-c-verification.md`.
 Fallback: `Glob(**/skills/fca-review/phases/phase-c-verification.md)`.
 
-Provide context: review dir, project root.
-Input: `session.md`. Output: `.filid/review/<branch>/verification.md`
+Prompt template:
+```
+Your PRIMARY DELIVERABLE is writing `<REVIEW_DIR>/verification.md`.
+You MUST write this file before completing — all analysis is meaningless without it.
 
-**→ After Phase C subagent completes, immediately proceed to Step 4.**
+Read and follow the instructions in `<resolved phase-c path>`.
+
+Context:
+- REVIEW_DIR: <actual review dir>
+- PROJECT_ROOT: <actual project root>
+
+Input: Read `<REVIEW_DIR>/session.md` for session context.
+If `<REVIEW_DIR>/structure-check.md` exists, read it for Phase A context.
+
+REMINDER: Write `<REVIEW_DIR>/verification.md` before you finish.
+If you run low on budget, skip remaining checks and write the file with
+partial results (mark skipped checks as SKIP).
+```
+
+#### Post-Phase C Verification
+
+After Phase C subagent completes, verify `<REVIEW_DIR>/verification.md` exists.
+If missing, execute Phase C directly as chairperson (same fallback as Step 2).
+
+**→ After Phase C subagent completes and output is verified, immediately proceed to Step 4.**
 
 ### Step 4 — Phase D: Political Consensus (Direct Execution)
 
