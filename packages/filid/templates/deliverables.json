@@ -44,7 +44,8 @@
   "fca-init": {
     "files": [
       "INTENT.md",
-      ".filid/config.json"
+      ".filid/config.json",
+      ".claude/rules/fca.md"
     ],
     "minSize": 100,
     "requiredSections": [
@@ -52,7 +53,7 @@
       "## Ask first",
       "## Never do"
     ],
-    "note": "Initial FCA-AI project setup. INTENT.md must include 3-tier boundary sections."
+    "note": "Initial FCA-AI project setup. INTENT.md must include 3-tier boundary sections. .claude/rules/fca.md provides native Claude Code rule enforcement."
   },
   "fca-review": {
     "files": [

@@ -1,7 +1,7 @@
 # filid Built-in Rules Reference
 
-filid ships 7 built-in rules that are automatically evaluated against the FractalTree of any scanned project.
-Rules are defined in `src/core/rule-engine.ts` and loaded via `loadBuiltinRules()`.
+filid ships 8 built-in rules that are automatically evaluated against the FractalTree of any scanned project.
+Rules are defined in `src/core/rules/rule-engine.ts` and loaded via `loadBuiltinRules(overrides?)`.
 
 ## Rule Summary
 
@@ -14,6 +14,7 @@ Rules are defined in `src/core/rule-engine.ts` and loaded via `loadBuiltinRules(
 | `max-depth` | Max Depth | structure | error | Fractal tree depth must not exceed the configured maximum |
 | `circular-dependency` | Circular Dependency | dependency | error | No circular dependencies between modules (Phase 2 placeholder) |
 | `pure-function-isolation` | Pure Function Isolation | dependency | error | pure-function nodes must not import from fractal modules |
+| `zero-peer-file` | Zero Peer File | structure | warning | Fractal roots must not contain peer files outside allowed categories |
 
 ## Rule Files
 
@@ -23,6 +24,7 @@ Rules are defined in `src/core/rule-engine.ts` and loaded via `loadBuiltinRules(
 - [module-rules.md](./module-rules.md) — covers `module-entry-point`
 - [dependency-rules.md](./dependency-rules.md) — covers `circular-dependency` and `pure-function-isolation`
 - [documentation-rules.md](./documentation-rules.md) — INTENT.md / DETAIL.md document conventions
+- [fca.md](./fca.md) — comprehensive FCA architecture + all rules guide (copied to `.claude/rules/fca.md` at init)
 
 ## Configuring Rules
 
