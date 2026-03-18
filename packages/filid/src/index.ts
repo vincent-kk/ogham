@@ -24,6 +24,7 @@ export {
   buildChain,
   findBoundary,
   // rules
+  applyOverrides,
   evaluateRule,
   evaluateRules,
   getActiveRules,
@@ -79,6 +80,12 @@ export {
   writePromptContext,
   computeProjectHash,
   ChangeQueue,
+  // config
+  createDefaultConfig,
+  initProject,
+  loadConfig,
+  loadRuleOverrides,
+  writeConfig,
   // coverage
   findSubtreeUsages,
   getModuleName,

@@ -76,3 +76,9 @@ export const BUILTIN_RULE_IDS = {
 
 export type BuiltinRuleId =
   (typeof BUILTIN_RULE_IDS)[keyof typeof BUILTIN_RULE_IDS];
+
+/** 프로젝트별 규칙 오버라이드. `.filid/config.json`의 rules 섹션에서 사용. */
+export interface RuleOverride {
+  enabled?: boolean;
+  severity?: RuleSeverity;
+}

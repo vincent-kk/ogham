@@ -22,6 +22,7 @@ export type { ChainResult } from './tree/boundary-detector.js';
 
 // rules
 export {
+  applyOverrides,
   evaluateRule,
   evaluateRules,
   getActiveRules,
@@ -98,6 +99,14 @@ export type { FractalMap } from './infra/cache-manager.js';
 export { computeProjectHash } from './infra/project-hash.js';
 export { ChangeQueue } from './infra/change-queue.js';
 export type { ChangeRecord } from './infra/change-queue.js';
+export {
+  createDefaultConfig,
+  initProject,
+  loadConfig,
+  loadRuleOverrides,
+  writeConfig,
+} from './infra/config-loader.js';
+export type { FilidConfig, InitResult } from './infra/config-loader.js';
 
 // coverage
 export { findSubtreeUsages, getModuleName } from './coverage/usage-tracker.js';

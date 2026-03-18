@@ -3,13 +3,14 @@
  * @description 내장 규칙 로드 및 평가 엔진.
  *
  * 8개의 내장 규칙을 제공하고 FractalTree에 대해 규칙을 평가한다.
- * config-loader 의존 없이 동작한다.
+ * loadBuiltinRules(overrides?)를 통해 .filid/config.json 기반 오버라이드를 지원한다.
  */
 import type { FractalTree } from '../../types/fractal.js';
 import type {
   Rule,
   RuleContext,
   RuleEvaluationResult,
+  RuleOverride,
   RuleViolation,
 } from '../../types/rules.js';
 import { BUILTIN_RULE_IDS } from '../../types/rules.js';
@@ -28,10 +29,41 @@ function isValidNaming(name: string): boolean {
 }
 
 /**
- * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
+ * 프로젝트별 오버라이드를 내장 규칙에 적용한다.
+ * Rule 객체의 enabled/severity 필드와 check() 내부 violation severity를 모두 동기화한다.
  */
-export function loadBuiltinRules(): Rule[] {
-  return [
+export function applyOverrides(
+  rules: Rule[],
+  overrides: Record<string, RuleOverride>,
+): Rule[] {
+  return rules.map((rule) => {
+    const override = overrides[rule.id];
+    if (!override) return rule;
+    const newEnabled = override.enabled ?? rule.enabled;
+    const newSeverity = override.severity ?? rule.severity;
+    if (newEnabled === rule.enabled && newSeverity === rule.severity) return rule;
+    const originalCheck = rule.check;
+    return {
+      ...rule,
+      enabled: newEnabled,
+      severity: newSeverity,
+      check:
+        newSeverity !== rule.severity
+          ? (ctx: RuleContext): RuleViolation[] =>
+              originalCheck(ctx).map((v) => ({ ...v, severity: newSeverity }))
+          : originalCheck,
+    };
+  });
+}
+
+/**
+ * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
+ * overrides가 전달되면 enabled/severity를 프로젝트별로 재정의한다.
+ */
+export function loadBuiltinRules(
+  overrides?: Record<string, RuleOverride>,
+): Rule[] {
+  const rules: Rule[] = [
     // 1. naming-convention: 디렉토리명이 kebab-case 또는 camelCase여야 한다
     {
       id: BUILTIN_RULE_IDS.NAMING_CONVENTION,
@@ -275,11 +307,12 @@ export function loadBuiltinRules(): Rule[] {
           severity: 'warning' as const,
           message: `Fractal root "${node.name}" contains peer file "${file}" not in any allowed category. Promote it to a sub-fractal directory.`,
           path: node.path,
-          suggestion: `Create a subdirectory for "${file}" or add it to .filid/config.yaml additional-allowed if it belongs at the root.`,
+          suggestion: `Create a subdirectory for "${file}" or add it to .filid/config.json additional-allowed if it belongs at the root.`,
         }));
       },
     },
   ];
+  return overrides ? applyOverrides(rules, overrides) : rules;
 }
 
 /**

@@ -3,6 +3,60 @@
 Detailed workflow, templates, and rules for the FCA-AI initialization skill.
 For the quick-start guide, see [SKILL.md](./SKILL.md).
 
+## Section 0 — Environment Setup Details
+
+Before starting the scanning workflow, ensure the FCA-AI project infrastructure is in place.
+
+### Step 1: Create `.filid/` directory
+
+```bash
+mkdir -p .filid
+```
+
+### Step 2: Initialize `.filid/config.json`
+
+If `.filid/config.json` does not exist, create it with the default rule configuration:
+
+```json
+{
+  "version": "1.0",
+  "rules": {
+    "naming-convention": { "enabled": true, "severity": "warning" },
+    "organ-no-intentmd": { "enabled": true, "severity": "error" },
+    "index-barrel-pattern": { "enabled": true, "severity": "warning" },
+    "module-entry-point": { "enabled": true, "severity": "warning" },
+    "max-depth": { "enabled": true, "severity": "error" },
+    "circular-dependency": { "enabled": true, "severity": "error" },
+    "pure-function-isolation": { "enabled": true, "severity": "error" },
+    "zero-peer-file": { "enabled": true, "severity": "warning" }
+  }
+}
+```
+
+Do NOT overwrite an existing `config.json` — the user may have customized rule settings.
+
+### Step 3: Create `.claude/rules/fca.md`
+
+If `.claude/rules/fca.md` does not exist, copy the FCA architecture and rules guide.
+The template source is `templates/rules/fca.md` in the filid plugin directory.
+
+This file is loaded natively by Claude Code as a system rule, ensuring strong adherence
+to FCA-AI architectural principles. Do NOT overwrite an existing file.
+
+### Step 4: Gitignore recommendation
+
+If `.filid/review/` or `.filid/cache/` are not in `.gitignore`, inform the user:
+
+```
+[INFO] Consider adding to .gitignore:
+  .filid/review/
+  .filid/cache/
+```
+
+`.filid/config.json` and `.claude/rules/fca.md` should be committed to version control.
+
+---
+
 ## Section 1 — Directory Scan Details
 
 Call `fractal_scan` to retrieve the complete project hierarchy by scanning the filesystem.

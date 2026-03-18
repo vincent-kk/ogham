@@ -41,6 +41,23 @@ Before starting the main workflow, check ast-grep availability by calling
 
 ## Core Workflow
 
+### Phase 0 — Environment Setup
+
+Before scanning, call the `project_init` MCP tool to set up FCA-AI infrastructure:
+
+```
+project_init({ path: "<target-path>" })
+```
+
+This creates:
+- `.filid/config.json` — default rule configuration (all 8 built-in rules enabled)
+- `.claude/rules/fca.md` — FCA architecture and rules guide (loaded natively by Claude Code)
+
+Existing files are never overwritten. See [reference.md Section 0](./reference.md#section-0--environment-setup-details).
+
+> **Note**: `.filid/config.json` and `.claude/rules/fca.md` should be committed to version control.
+> `.filid/review/` and `.filid/cache/` should be gitignored (transient data).
+
 ### Phase 1 — Directory Scan
 
 Retrieve the complete project hierarchy using `fractal_scan`.
@@ -74,6 +91,7 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 
 | Tool               | Action     | Purpose                                                        |
 | ------------------ | ---------- | -------------------------------------------------------------- |
+| `project_init`     | —          | Initialize .filid/config.json and .claude/rules/fca.md (Phase 0) |
 | `fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy |
 | `fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function |
 | `ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)      |

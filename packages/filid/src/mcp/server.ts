@@ -16,6 +16,7 @@ import { handleDriftDetect } from './tools/drift-detect.js';
 import { handleFractalNavigate } from './tools/fractal-navigate.js';
 import { handleFractalScan } from './tools/fractal-scan.js';
 import { handleLcaResolve } from './tools/lca-resolve.js';
+import { handleProjectInit } from './tools/project-init.js';
 import { handleReviewManage } from './tools/review-manage.js';
 import { handleRuleQuery } from './tools/rule-query.js';
 import { handleStructureValidate } from './tools/structure-validate.js';
@@ -50,7 +51,7 @@ function toolError(error: unknown) {
 
 /**
  * Wrap a tool handler with standard try/catch error handling.
- * Reduces repetitive boilerplate across all 15 registerTool callbacks.
+ * Reduces repetitive boilerplate across all 16 registerTool callbacks.
  */
 function wrapHandler<T>(
   fn: (args: T) => unknown | Promise<unknown>,
@@ -227,23 +228,37 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
+    'project_init',
+    {
+      description:
+        'Initialize FCA-AI project infrastructure. ' +
+        'Creates .filid/config.json (rule configuration) and .claude/rules/fca.md (FCA architecture guide). ' +
+        'Never overwrites existing files. Called during Phase 0 of the fca-init workflow.',
+      inputSchema: z.object({
+        path: z.string().describe('Absolute path to the project root directory to initialize'),
+      }),
+    },
+    wrapHandler(handleProjectInit),
+  );
+
+  server.registerTool(
     'fractal_scan',
     {
       description:
-        '프로젝트 디렉토리를 스캔하여 프랙탈 구조 트리(FractalTree)를 분석하고 ScanReport를 반환한다. ' +
-        '각 디렉토리 노드를 fractal/organ/pure-function/hybrid로 분류하며, ' +
-        'includeModuleInfo=true 설정 시 각 모듈의 진입점(index.ts, main.ts) 정보를 포함한다.',
+        'Scan a project directory to build a FractalTree and return a ScanReport. ' +
+        'Classifies each directory node as fractal/organ/pure-function/hybrid. ' +
+        'When includeModuleInfo=true, includes entry point (index.ts, main.ts) analysis for each module.',
       inputSchema: z.object({
-        path: z.string().describe('스캔할 프로젝트 루트 디렉토리의 절대 경로'),
+        path: z.string().describe('Absolute path to the project root directory to scan'),
         depth: z
           .number()
           .min(1)
           .max(20)
-          .describe('스캔할 최대 디렉토리 깊이. 기본값: 10')
+          .describe('Maximum directory scan depth. Default: 10')
           .optional(),
         includeModuleInfo: z
           .boolean()
-          .describe('모듈 진입점 분석 결과 포함 여부. 기본값: false')
+          .describe('Include module entry point analysis. Default: false')
           .optional(),
       }),
     },
@@ -254,23 +269,23 @@ export function createServer(): McpServer {
     'drift_detect',
     {
       description:
-        '현재 프로젝트 구조와 filid 프랙탈 구조 규칙 사이의 이격(drift)을 감지한다. ' +
-        '각 이격 항목에는 기대값, 실제값, severity(critical/high/medium/low), ' +
-        '보정 액션 제안(SyncAction)이 포함된다. ' +
-        'generatePlan=true 시 이격 해소를 위한 SyncPlan을 함께 생성한다.',
+        'Detect drift between the current project structure and filid fractal structure rules. ' +
+        'Each drift item includes expected value, actual value, severity (critical/high/medium/low), ' +
+        'and a suggested correction action (SyncAction). ' +
+        'When generatePlan=true, also generates a SyncPlan to resolve the drift.',
       inputSchema: z.object({
         path: z
           .string()
-          .describe('이격을 검사할 프로젝트 루트 디렉토리의 절대 경로'),
+          .describe('Absolute path to the project root directory to check for drift'),
         severity: z
           .enum(['critical', 'high', 'medium', 'low'])
           .describe(
-            '이 severity 이상의 이격만 반환. 생략 시 모든 severity 반환',
+            'Minimum severity filter. Only return drift items at or above this level. Omit to return all.',
           )
           .optional(),
         generatePlan: z
           .boolean()
-          .describe('이격 해소 SyncPlan 생성 여부. 기본값: false')
+          .describe('Whether to generate a SyncPlan for drift resolution. Default: false')
           .optional(),
       }),
     },
@@ -281,20 +296,20 @@ export function createServer(): McpServer {
     'lca_resolve',
     {
       description:
-        '두 모듈의 Lowest Common Ancestor(LCA)를 프랙탈 트리에서 계산한다. ' +
-        '새로운 공유 의존성을 어느 레이어에 배치해야 하는지 결정할 때 사용한다. ' +
-        '각 모듈에서 LCA까지의 거리와 권장 배치 경로(suggestedPlacement)를 반환한다.',
+        'Compute the Lowest Common Ancestor (LCA) of two modules in the fractal tree. ' +
+        'Used to determine where to place a new shared dependency. ' +
+        'Returns the distance from each module to the LCA and a suggestedPlacement path.',
       inputSchema: z.object({
-        path: z.string().describe('프로젝트 루트 디렉토리의 절대 경로'),
+        path: z.string().describe('Absolute path to the project root directory'),
         moduleA: z
           .string()
           .describe(
-            '첫 번째 모듈의 프로젝트 루트 기준 상대 경로 (예: src/features/auth)',
+            'Relative path of the first module from project root (e.g., src/features/auth)',
           ),
         moduleB: z
           .string()
           .describe(
-            '두 번째 모듈의 프로젝트 루트 기준 상대 경로 (예: src/features/payment)',
+            'Relative path of the second module from project root (e.g., src/features/payment)',
           ),
       }),
     },
@@ -305,18 +320,18 @@ export function createServer(): McpServer {
     'rule_query',
     {
       description:
-        '현재 프로젝트에 적용되는 filid 프랙탈 구조 규칙을 조회하거나, 특정 경로의 규칙 준수 여부를 확인한다. ' +
-        "action='list'는 전체 규칙 목록, " +
-        "action='get'은 특정 규칙 상세 정보, " +
-        "action='check'는 경로의 규칙 평가 결과를 반환한다.",
+        'Query filid fractal structure rules or check rule compliance for a specific path. ' +
+        "action='list': return all active rules. " +
+        "action='get': return details for a specific rule. " +
+        "action='check': evaluate rules against a target path.",
       inputSchema: z.object({
         action: z
           .enum(['list', 'get', 'check'])
-          .describe("수행할 동작: 'list' | 'get' | 'check'"),
-        path: z.string().describe('프로젝트 루트 디렉토리의 절대 경로'),
+          .describe("Action to perform: 'list' | 'get' | 'check'"),
+        path: z.string().describe('Absolute path to the project root directory'),
         ruleId: z
           .string()
-          .describe("action='get'일 때 조회할 규칙 ID")
+          .describe("Rule ID to retrieve (required for action='get')")
           .optional(),
         category: z
           .enum([
@@ -327,12 +342,12 @@ export function createServer(): McpServer {
             'index',
             'module',
           ])
-          .describe("action='list'일 때 카테고리 필터")
+          .describe("Category filter (for action='list')")
           .optional(),
         targetPath: z
           .string()
           .describe(
-            "action='check'일 때 검사 대상 경로 (프로젝트 루트 기준 상대 경로)",
+            "Target path to check (relative to project root, required for action='check')",
           )
           .optional(),
       }),
@@ -344,19 +359,19 @@ export function createServer(): McpServer {
     'structure_validate',
     {
       description:
-        '프로젝트 전체 또는 특정 규칙 집합에 대해 프랙탈 구조 유효성을 종합 검증한다. ' +
-        '위반 항목 목록과 통과/실패/경고 수를 반환한다. ' +
-        'fix=true 설정 시 safe 등급의 위반 항목을 자동으로 수정하고 잔여 위반 항목을 재보고한다.',
+        'Validate fractal structure compliance for the entire project or a specific set of rules. ' +
+        'Returns a list of violations with pass/fail/warning counts. ' +
+        'When fix=true, auto-fixes safe-level violations and re-reports remaining ones.',
       inputSchema: z.object({
-        path: z.string().describe('검증할 프로젝트 루트 디렉토리의 절대 경로'),
+        path: z.string().describe('Absolute path to the project root directory to validate'),
         rules: z
           .array(z.string())
-          .describe('검사할 규칙 ID 목록. 생략 시 모든 활성 규칙 검사')
+          .describe('List of rule IDs to check. Omit to check all active rules.')
           .optional(),
         fix: z
           .boolean()
           .describe(
-            'safe 등급 위반 항목 자동 수정 여부. 기본값: false (현재 미구현 — 향후 지원 예정)',
+            'Auto-fix safe-level violations. Default: false (not yet implemented — planned for future)',
           )
           .optional(),
       }),
@@ -368,17 +383,17 @@ export function createServer(): McpServer {
     'review_manage',
     {
       description:
-        '코드 리뷰 거버넌스 세션을 관리한다. ' +
-        "action='normalize-branch': 브랜치명을 파일시스템 안전 문자열로 변환. " +
-        "action='ensure-dir': 리뷰 디렉토리 생성(.filid/review/<normalized>). " +
-        "action='checkpoint': 리뷰 진행 단계(A/B/C/DONE) 감지. " +
-        "action='elect-committee': 변경 복잡도 기반 위원회 선출. " +
-        "action='cleanup': 리뷰 디렉토리 삭제. " +
-        "action='content-hash': 변경 파일의 content hash를 계산하고 저장. " +
-        "action='check-cache': 이전 리뷰 캐시와 비교하여 재실행 필요 여부 판단. " +
-        "action='format-pr-comment': 리뷰 결과 파일을 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
-        "action='format-revalidate-comment': 재검증 결과를 접을 수 있는 PR 코멘트 마크다운으로 포맷. " +
-        "action='generate-human-summary': 리뷰 세션 파일을 파싱하여 인간 PL용 PR 요약(HumanSummary)을 생성. 오류 확률순 최대 5개 핵심 항목 + 자동 수정 가능 항목 분리.",
+        'Manage code review governance sessions. ' +
+        "action='normalize-branch': convert branch name to filesystem-safe string. " +
+        "action='ensure-dir': create review directory (.filid/review/<normalized>). " +
+        "action='checkpoint': detect review progress phase (A/B/C/DONE). " +
+        "action='elect-committee': elect review committee based on change complexity. " +
+        "action='cleanup': delete review directory. " +
+        "action='content-hash': compute and store content hash for changed files. " +
+        "action='check-cache': compare against previous review cache to determine re-run necessity. " +
+        "action='format-pr-comment': format review results as collapsible PR comment markdown. " +
+        "action='format-revalidate-comment': format revalidation results as collapsible PR comment markdown. " +
+        "action='generate-human-summary': parse review session files to generate a human PL-facing PR summary (HumanSummary). Top 5 items by error probability + auto-fixable items separated.",
       inputSchema: z.object({
         action: z
           .enum([
@@ -393,31 +408,31 @@ export function createServer(): McpServer {
             'format-revalidate-comment',
             'generate-human-summary',
           ])
-          .describe('수행할 동작'),
-        projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),
+          .describe('Action to perform'),
+        projectRoot: z.string().describe('Absolute path to the project root directory'),
         branchName: z
           .string()
           .describe(
-            'normalize-branch / ensure-dir / checkpoint / cleanup / content-hash / check-cache 액션에서 사용할 브랜치명',
+            'Branch name for normalize-branch / ensure-dir / checkpoint / cleanup / content-hash / check-cache actions',
           )
           .optional(),
         baseRef: z
           .string()
           .describe(
-            'content-hash / check-cache 액션에서 사용할 비교 기준 ref (e.g., main, origin/main)',
+            'Base ref for content-hash / check-cache actions (e.g., main, origin/main)',
           )
           .optional(),
         changedFilesCount: z
           .number()
-          .describe('elect-committee 액션에서 사용할 변경 파일 수')
+          .describe('Number of changed files for elect-committee action')
           .optional(),
         changedFractalsCount: z
           .number()
-          .describe('elect-committee 액션에서 사용할 변경 프랙탈 수')
+          .describe('Number of changed fractals for elect-committee action')
           .optional(),
         hasInterfaceChanges: z
           .boolean()
-          .describe('elect-committee 액션에서 사용할 인터페이스 변경 여부')
+          .describe('Whether interface changes exist for elect-committee action')
           .optional(),
       }),
     },
@@ -428,16 +443,16 @@ export function createServer(): McpServer {
     'debt_manage',
     {
       description:
-        '기술 부채 항목을 관리한다. ' +
-        "action='create': 새 부채 항목을 .filid/debt/<id>.md 파일로 생성. " +
-        "action='list': 부채 목록 조회 (fractalPath로 필터 가능). " +
-        "action='resolve': 부채 항목 파일 삭제(해결 처리). " +
-        "action='calculate-bias': 변경된 프랙탈 경로 기반으로 가중치 재계산 및 바이어스 수준 산출.",
+        'Manage technical debt items. ' +
+        "action='create': create a new debt item as .filid/debt/<id>.md. " +
+        "action='list': list debt items (filterable by fractalPath). " +
+        "action='resolve': delete a debt item file (mark as resolved). " +
+        "action='calculate-bias': recalculate weights based on changed fractal paths and compute bias level.",
       inputSchema: z.object({
         action: z
           .enum(['create', 'list', 'resolve', 'calculate-bias'])
-          .describe('수행할 동작'),
-        projectRoot: z.string().describe('프로젝트 루트 디렉토리 절대 경로'),
+          .describe('Action to perform'),
+        projectRoot: z.string().describe('Absolute path to the project root directory'),
         debtItem: z
           .object({
             fractal_path: z.string(),
@@ -453,15 +468,15 @@ export function createServer(): McpServer {
             developer_justification: z.string(),
             refined_adr: z.string(),
           })
-          .describe("action='create'일 때 생성할 부채 항목")
+          .describe("Debt item to create (required for action='create')")
           .optional(),
         fractalPath: z
           .string()
-          .describe("action='list'일 때 필터링할 프랙탈 경로")
+          .describe("Fractal path filter (for action='list')")
           .optional(),
         debtId: z
           .string()
-          .describe("action='resolve'일 때 삭제할 부채 ID")
+          .describe("Debt ID to resolve/delete (required for action='resolve')")
           .optional(),
         debts: z
           .array(
@@ -484,15 +499,15 @@ export function createServer(): McpServer {
               refined_adr: z.string(),
             }),
           )
-          .describe("action='calculate-bias'일 때 평가할 부채 목록")
+          .describe("Debt items to evaluate (required for action='calculate-bias')")
           .optional(),
         changedFractalPaths: z
           .array(z.string())
-          .describe("action='calculate-bias'일 때 변경된 프랙탈 경로 목록")
+          .describe("Changed fractal paths (required for action='calculate-bias')")
           .optional(),
         currentCommitSha: z
           .string()
-          .describe("action='calculate-bias'일 때 현재 커밋 SHA (멱등성 보호)")
+          .describe("Current commit SHA for idempotency guard (for action='calculate-bias')")
           .optional(),
       }),
     },
@@ -603,24 +618,24 @@ export function createServer(): McpServer {
     'coverage_verify',
     {
       description:
-        '공유 모듈의 사용처별 테스트 커버리지를 검증한다. ' +
-        '대상 모듈을 import하는 프랙탈 서브트리 내 모든 파일을 찾고, ' +
-        '각 사용처에 대표 테스트가 존재하는지 확인한다. ' +
-        '커버리지 비율과 미커버 사용처에 대한 경고를 반환한다.',
+        'Verify per-consumer test coverage for a shared module. ' +
+        'Finds all files in the fractal subtree that import the target module, ' +
+        'and checks whether each consumer has a representative test. ' +
+        'Returns coverage ratio and warnings for uncovered consumers.',
       inputSchema: z.object({
-        projectRoot: z.string().describe('프로젝트 루트 디렉토리의 절대 경로'),
+        projectRoot: z.string().describe('Absolute path to the project root directory'),
         targetPath: z
           .string()
           .describe(
-            '추적할 공유 모듈의 경로 (절대 경로 또는 projectRoot 기준 상대 경로)',
+            'Path of the shared module to track (absolute or relative to projectRoot)',
           ),
         subtreeRoot: z
           .string()
-          .describe('검색 범위를 제한할 서브트리 루트 경로')
+          .describe('Subtree root path to limit the search scope')
           .optional(),
         exportNames: z
           .array(z.string())
-          .describe('추적할 특정 export 이름 목록 (기본값: 모든 export)')
+          .describe('Specific export names to track (default: all exports)')
           .optional(),
       }),
     },

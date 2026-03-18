@@ -80,10 +80,11 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 
 ## Available MCP Tools
 
-| Tool           | Action      | Purpose                                   |
-| -------------- | ----------- | ----------------------------------------- |
-| `fractal_scan` | —           | Build complete project hierarchy for scan |
-| `test_metrics` | `check-312` | Validate 3+12 rule across all spec files  |
+| Tool           | Action      | Purpose                                              |
+| -------------- | ----------- | ---------------------------------------------------- |
+| `fractal_scan` | —           | Build complete project hierarchy for scan            |
+| `test_metrics` | `check-312` | Validate 3+12 rule across all spec files             |
+| `doc_compress` | `auto`      | (`--fix`) Compress INTENT.md via context-manager agent |
 
 ## Options
 

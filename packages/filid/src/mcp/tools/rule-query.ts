@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 
+import { loadRuleOverrides } from '../../core/infra/config-loader.js';
 import { scanProject } from '../../core/tree/fractal-tree.js';
 import {
   evaluateRules,
@@ -55,7 +56,8 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     throw new Error('action and path are required');
   }
 
-  const allRules = loadBuiltinRules();
+  const overrides = loadRuleOverrides(input.path);
+  const allRules = loadBuiltinRules(overrides);
   const activeRules = getActiveRules(allRules);
 
   switch (input.action) {
