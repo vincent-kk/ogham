@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  applyOverrides,
   evaluateRule,
   evaluateRules,
   getActiveRules,
@@ -196,6 +197,64 @@ describe('rule-engine', () => {
       const tree = makeTree([node]);
       const result = evaluateRules(tree);
       expect(result.passed + result.failed + result.skipped).toBeGreaterThan(0);
+    });
+  });
+
+  describe('loadBuiltinRules with overrides', () => {
+    it('should disable a rule via overrides', () => {
+      const rules = loadBuiltinRules({
+        'naming-convention': { enabled: false },
+      });
+      const naming = rules.find((r) => r.id === 'naming-convention');
+      expect(naming?.enabled).toBe(false);
+    });
+
+    it('should override severity and propagate to violations', () => {
+      const rules = loadBuiltinRules({
+        'naming-convention': { severity: 'error' },
+      });
+      const naming = rules.find((r) => r.id === 'naming-convention')!;
+      expect(naming.severity).toBe('error');
+      const node = makeNode({ name: 'BadName_123' });
+      const tree = makeTree([node]);
+      const violations = naming.check({ node, tree });
+      expect(violations[0]?.severity).toBe('error');
+    });
+
+    it('should leave non-overridden rules unchanged', () => {
+      const rules = loadBuiltinRules({
+        'naming-convention': { enabled: false },
+      });
+      const organ = rules.find((r) => r.id === 'organ-no-intentmd');
+      expect(organ?.enabled).toBe(true);
+      expect(organ?.severity).toBe('error');
+    });
+
+    it('should return default rules when overrides is undefined', () => {
+      const rules = loadBuiltinRules();
+      expect(rules).toHaveLength(8);
+      expect(rules.every((r) => r.enabled)).toBe(true);
+    });
+  });
+
+  describe('applyOverrides', () => {
+    it('should return same rules when overrides is empty', () => {
+      const rules = loadBuiltinRules();
+      const applied = applyOverrides(rules, {});
+      expect(applied).toEqual(rules);
+    });
+
+    it('should wrap check to override violation severity', () => {
+      const rules = loadBuiltinRules();
+      const applied = applyOverrides(rules, {
+        'organ-no-intentmd': { severity: 'warning' },
+      });
+      const rule = applied.find((r) => r.id === 'organ-no-intentmd')!;
+      expect(rule.severity).toBe('warning');
+      const node = makeNode({ type: 'organ', hasIntentMd: true });
+      const tree = makeTree([node]);
+      const violations = rule.check({ node, tree });
+      expect(violations[0]?.severity).toBe('warning');
     });
   });
 });

@@ -62,6 +62,7 @@ export type {
   Rule,
   RuleSet,
   RuleEvaluationResult,
+  RuleOverride,
   BuiltinRuleId,
 } from './rules.js';
 export { BUILTIN_RULE_IDS } from './rules.js';
