@@ -1,12 +1,12 @@
 import { resolve } from 'node:path';
 
 import { loadRuleOverrides } from '../../core/infra/config-loader.js';
-import { scanProject } from '../../core/tree/fractal-tree.js';
 import {
   evaluateRules,
   getActiveRules,
   loadBuiltinRules,
 } from '../../core/rules/rule-engine.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import type { Rule, RuleEvaluationResult } from '../../types/rules.js';
 import type { RuleCategory } from '../../types/rules.js';
 

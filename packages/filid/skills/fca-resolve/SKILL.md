@@ -6,6 +6,11 @@ version: 2.0.0
 complexity: medium
 ---
 
+> **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next.
+> NEVER yield the turn after subagent results return, MCP tools complete,
+> or git operations finish. In --auto mode, no user interaction at any point.
+
 # fca-resolve — Fix Request Resolution
 
 Resolve fix requests from a completed code review. Present each item for
@@ -41,6 +46,8 @@ them into ADRs, create technical debt records, and auto-commit/push changes.
 4. Verify: Read `.filid/review/<normalized>/fix-requests.md`
 5. If not found: abort with "No fix requests found. Run /filid:fca-review first."
 
+**→ Immediately proceed to Step 2.**
+
 ### Step 2 — Parse Fix Requests
 
 Parse `fix-requests.md` to extract fix items. Each item has:
@@ -48,6 +55,8 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - Fix ID (e.g., `FIX-001`)
 - Title, severity, file path, rule violated
 - Recommended action and code patch
+
+**→ Immediately proceed to Step 3.**
 
 ### Step 3 — Present Select List
 
@@ -67,6 +76,8 @@ For each fix item:
   )
 ```
 
+**→ Immediately proceed to Step 4.**
+
 ### Step 4 — Process Accepted Items
 
 **Before dispatching any code-surgeon subagents**, capture the base SHA:
@@ -84,6 +95,8 @@ For each accepted fix, spawn one subagent with:
 - Instruction to apply the fix directly to the file
 
 Await all subagents before proceeding to Step 5.
+
+**→ After all code-surgeon subagents complete, immediately proceed to Step 5.**
 
 ### Step 5 — Process Rejected Items
 
@@ -123,6 +136,8 @@ For each rejected fix:
    )
    ```
 
+**→ Immediately proceed to Step 6.**
+
 ### Step 6 — Write justifications.md
 
 Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
@@ -136,6 +151,8 @@ was already captured before any code changes.
 Write `.filid/review/<branch>/justifications.md` with frontmatter
 containing `resolve_commit_sha` (= `base_sha`). See `reference.md` for
 the full output template.
+
+**→ Immediately proceed to Step 6.5.**
 
 ### Step 6.5 — Typecheck, Stage & Commit
 
@@ -171,17 +188,20 @@ If there were **NO** accepted fixes (all rejected):
 2. Commit: `chore(filid): record fix rejections from fca-review`
 3. Skip typecheck (no code changes).
 
+**→ Immediately proceed to Step 6.6.**
+
 ### Step 6.6 — Push
 
 1. **Check upstream**: `git rev-parse --abbrev-ref @{upstream}` (Bash)
    - If no upstream (exit code != 0): skip push, inform user
-     "No upstream branch. Push manually when ready."
+     "No upstream branch. Push manually when ready." Then proceed to Step 7.
 2. **Execute**: `git push` (Bash)
-3. On **success**: proceed to Step 7.
+3. On **success**: **→ Immediately proceed to Step 7.**
 4. On **failure**: notify user via `AskUserQuestion`:
    - "Push failed: <error>. Resolve manually, then run /filid:fca-revalidate."
    - Options: "Continue to revalidate anyway" / "Stop here"
-   - On "Stop here": end execution.
+   - On "Continue to revalidate anyway": **→ Immediately proceed to Step 7.**
+   - On "Stop here": **END execution.**
 
 ### Step 7 — Offer to Run fca-revalidate
 
@@ -206,6 +226,8 @@ If there were NO accepted fixes (all rejected):
   justifications and debt records, and return PASS if all justifications are
   constitutionally compliant.
 ```
+
+**After revalidate is invoked (or skipped), execution is COMPLETE.**
 
 ## Available MCP Tools
 

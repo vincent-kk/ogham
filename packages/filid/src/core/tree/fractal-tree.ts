@@ -8,12 +8,12 @@ import type {
 } from '../../types/fractal.js';
 import type { ScanOptions } from '../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../types/scan.js';
-
-import { classifyNode } from './organ-classifier.js';
 import {
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
 } from '../utils/peer-file-registry.js';
+
+import { classifyNode } from './organ-classifier.js';
 
 /** Input entry for buildFractalTree */
 export interface NodeEntry {

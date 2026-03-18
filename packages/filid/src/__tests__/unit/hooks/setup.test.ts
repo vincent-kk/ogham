@@ -15,7 +15,9 @@ vi.mock('node:fs', async (importOriginal) => {
 // Mock cache-manager to control getCacheDir and pruneOldSessions
 vi.mock('../../../core/infra/cache-manager.js', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('../../../core/infra/cache-manager.js')>();
+    await importOriginal<
+      typeof import('../../../core/infra/cache-manager.js')
+    >();
   return {
     ...actual,
     getCacheDir: vi.fn(actual.getCacheDir),

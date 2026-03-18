@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { getLastRunHash, saveRunHash } from '../../../core/infra/cache-manager.js';
+import {
+  getLastRunHash,
+  saveRunHash,
+} from '../../../core/infra/cache-manager.js';
 import { computeProjectHash } from '../../../core/infra/project-hash.js';
 import { handleCacheManage } from '../../../mcp/tools/cache-manage.js';
 import type {

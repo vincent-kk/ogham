@@ -6,6 +6,11 @@ version: 1.0.0
 complexity: high
 ---
 
+> **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next.
+> NEVER yield the turn after parallel subagents return or MCP tools complete.
+> Large diff outputs are internal working data — do NOT summarize to the user.
+
 # fca-revalidate — Delta Re-validation
 
 Perform lightweight re-validation after fix resolution. Extract the Delta
@@ -32,6 +37,8 @@ a final PASS/FAIL verdict. Optionally post the result as a PR comment.
    - `justifications.md` — resolution decisions + `resolve_commit_sha`
 4. If any file missing: abort with guidance message.
 
+**→ Immediately proceed to Step 2.**
+
 ### Step 2 — Extract Delta
 
 Extract `resolve_commit_sha` from `justifications.md` frontmatter.
@@ -47,10 +54,14 @@ For semantic analysis on changed files:
 ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
 ```
 
+**→ Immediately proceed to Steps 3-5 (parallel).**
+
 ### Steps 3–5 (Parallel — after Step 2)
 
 Steps 3, 4, and 5 are **independent** and run **in parallel** as separate Task
 subagents (`run_in_background: true`). Await all three before Step 6.
+
+**→ After all three subagents complete, immediately proceed to Step 6. Do NOT summarize individual results to the user.**
 
 ### Step 3 — Verify Accepted Fixes
 
@@ -105,6 +116,8 @@ For each debt item whose `file_path` is in the Delta:
 Write `.filid/review/<branch>/re-validate.md` with the verdict.
 See `reference.md` for the output template.
 
+**→ Immediately proceed to Step 7.**
+
 ### Step 7 — PR Comment (Optional)
 
 Post verdict to PR if GitHub CLI is available:
@@ -115,6 +128,8 @@ Post verdict to PR if GitHub CLI is available:
 4. If not authenticated: skip with info message.
 
 > **Language**: Write any additional commentary you add around the formatted content in the same language as the current conversation context.
+
+**→ Immediately proceed to Step 8.**
 
 ### Step 8 — Cleanup on PASS
 
@@ -132,6 +147,8 @@ separately by `debt_manage`.
 
 If the verdict is **FAIL**, skip cleanup so the developer can inspect the
 remaining unresolved items.
+
+**After cleanup completes (or is skipped on FAIL), execution is COMPLETE.**
 
 ## Available MCP Tools
 

@@ -5,14 +5,17 @@
  * Uses `execSync('git rev-parse')` internally to resolve git repository root.
  */
 import { execSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 import { createLogger } from '../../lib/logger.js';
-import {
-  BUILTIN_RULE_IDS,
-  type RuleOverride,
-} from '../../types/rules.js';
+import { BUILTIN_RULE_IDS, type RuleOverride } from '../../types/rules.js';
 
 const log = createLogger('config-loader');
 
@@ -58,13 +61,31 @@ export function createDefaultConfig(): FilidConfig {
   return {
     version: '1.0',
     rules: {
-      [BUILTIN_RULE_IDS.NAMING_CONVENTION]: { enabled: true, severity: 'warning' },
-      [BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD]: { enabled: true, severity: 'error' },
-      [BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN]: { enabled: true, severity: 'warning' },
-      [BUILTIN_RULE_IDS.MODULE_ENTRY_POINT]: { enabled: true, severity: 'warning' },
+      [BUILTIN_RULE_IDS.NAMING_CONVENTION]: {
+        enabled: true,
+        severity: 'warning',
+      },
+      [BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD]: {
+        enabled: true,
+        severity: 'error',
+      },
+      [BUILTIN_RULE_IDS.INDEX_BARREL_PATTERN]: {
+        enabled: true,
+        severity: 'warning',
+      },
+      [BUILTIN_RULE_IDS.MODULE_ENTRY_POINT]: {
+        enabled: true,
+        severity: 'warning',
+      },
       [BUILTIN_RULE_IDS.MAX_DEPTH]: { enabled: true, severity: 'error' },
-      [BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY]: { enabled: true, severity: 'error' },
-      [BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION]: { enabled: true, severity: 'error' },
+      [BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY]: {
+        enabled: true,
+        severity: 'error',
+      },
+      [BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION]: {
+        enabled: true,
+        severity: 'error',
+      },
       [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: { enabled: true, severity: 'warning' },
     },
   };

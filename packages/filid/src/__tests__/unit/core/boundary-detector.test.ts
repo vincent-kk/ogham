@@ -4,7 +4,10 @@ import { join, resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { buildChain, findBoundary } from '../../../core/tree/boundary-detector.js';
+import {
+  buildChain,
+  findBoundary,
+} from '../../../core/tree/boundary-detector.js';
 
 let tmp: string;
 

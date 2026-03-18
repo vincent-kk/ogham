@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildFractalTree } from '../../../core/tree/fractal-tree.js';
-import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
 import {
   validateDependencies,
   validateNode,
   validateStructure,
 } from '../../../core/rules/fractal-validator.js';
+import { buildFractalTree } from '../../../core/tree/fractal-tree.js';
+import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 import type { Rule, RuleContext } from '../../../types/rules.js';
 

@@ -206,9 +206,10 @@ function computeErrorProbability(ruleId: string, severity: string): number {
 }
 
 /** structure-check.md에서 FAIL 스테이지를 SummaryItem으로 변환한다. */
-function collectStructureItems(
-  content: string,
-): { items: SummaryItem[]; warnings: string[] } {
+function collectStructureItems(content: string): {
+  items: SummaryItem[];
+  warnings: string[];
+} {
   const items: SummaryItem[] = [];
   const warnings: string[] = [];
   const fm = parseStructureCheckFrontmatter(content);

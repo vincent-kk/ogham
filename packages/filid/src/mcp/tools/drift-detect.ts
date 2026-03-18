@@ -1,7 +1,10 @@
-import { detectDrift, generateSyncPlan } from '../../core/rules/drift-detector.js';
+import {
+  detectDrift,
+  generateSyncPlan,
+} from '../../core/rules/drift-detector.js';
 import { SEVERITY_ORDER } from '../../core/rules/drift-detector.js';
-import { scanProject } from '../../core/tree/fractal-tree.js';
 import { validateStructure } from '../../core/rules/fractal-validator.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import type { DriftItem, DriftSeverity, SyncPlan } from '../../types/drift.js';
 
 export interface DriftDetectInput {

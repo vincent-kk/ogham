@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
-import { scanProject } from '../../core/tree/fractal-tree.js';
 import { findLCA } from '../../core/analysis/lca-calculator.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import type { CategoryType } from '../../types/fractal.js';
 
 export interface LcaResolveInput {

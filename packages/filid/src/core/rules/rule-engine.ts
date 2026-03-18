@@ -16,7 +16,6 @@ import type {
 import { BUILTIN_RULE_IDS } from '../../types/rules.js';
 import type { ScanOptions } from '../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../types/scan.js';
-
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../utils/peer-file-registry.js';
 
 // kebab-case: 소문자, 숫자, 하이픈으로만 구성
@@ -41,7 +40,8 @@ export function applyOverrides(
     if (!override) return rule;
     const newEnabled = override.enabled ?? rule.enabled;
     const newSeverity = override.severity ?? rule.severity;
-    if (newEnabled === rule.enabled && newSeverity === rule.severity) return rule;
+    if (newEnabled === rule.enabled && newSeverity === rule.severity)
+      return rule;
     const originalCheck = rule.check;
     return {
       ...rule,

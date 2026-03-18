@@ -15,11 +15,10 @@ import type {
   ScanReport,
   ValidationReport,
 } from '../../types/report.js';
-
-import { detectDrift, generateSyncPlan } from '../rules/drift-detector.js';
-import { scanProject } from '../tree/fractal-tree.js';
-import { validateStructure } from '../rules/fractal-validator.js';
 import { analyzeModule } from '../module/module-main-analyzer.js';
+import { detectDrift, generateSyncPlan } from '../rules/drift-detector.js';
+import { validateStructure } from '../rules/fractal-validator.js';
+import { scanProject } from '../tree/fractal-tree.js';
 
 /**
  * 프로젝트 루트에서 시작하여 전체 분석 파이프라인을 실행한다.

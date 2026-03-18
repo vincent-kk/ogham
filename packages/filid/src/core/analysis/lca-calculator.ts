@@ -6,7 +6,6 @@
  * fractal-tree.getAncestors()를 내부적으로 활용한다.
  */
 import type { FractalNode, FractalTree } from '../../types/fractal.js';
-
 import { getAncestors } from '../tree/fractal-tree.js';
 
 /**

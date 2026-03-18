@@ -10,7 +10,10 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { type RawTestFile, countTestCases } from '../../metrics/test-counter.js';
+import {
+  type RawTestFile,
+  countTestCases,
+} from '../../metrics/test-counter.js';
 import type { UsageCoverage, UsageSite } from '../../types/coverage.js';
 
 /**

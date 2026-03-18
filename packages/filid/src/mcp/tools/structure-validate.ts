@@ -1,7 +1,10 @@
 import { loadRuleOverrides } from '../../core/infra/config-loader.js';
-import { scanProject } from '../../core/tree/fractal-tree.js';
 import { validateStructure } from '../../core/rules/fractal-validator.js';
-import { getActiveRules, loadBuiltinRules } from '../../core/rules/rule-engine.js';
+import {
+  getActiveRules,
+  loadBuiltinRules,
+} from '../../core/rules/rule-engine.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import type { ValidationReport } from '../../types/report.js';
 
 export interface StructureValidateInput {

@@ -235,7 +235,11 @@ export function createServer(): McpServer {
         'Creates .filid/config.json (rule configuration) and .claude/rules/fca.md (FCA architecture guide). ' +
         'Never overwrites existing files. Called during Phase 0 of the fca-init workflow.',
       inputSchema: z.object({
-        path: z.string().describe('Absolute path to the project root directory to initialize'),
+        path: z
+          .string()
+          .describe(
+            'Absolute path to the project root directory to initialize',
+          ),
       }),
     },
     wrapHandler(handleProjectInit),
@@ -249,7 +253,9 @@ export function createServer(): McpServer {
         'Classifies each directory node as fractal/organ/pure-function/hybrid. ' +
         'When includeModuleInfo=true, includes entry point (index.ts, main.ts) analysis for each module.',
       inputSchema: z.object({
-        path: z.string().describe('Absolute path to the project root directory to scan'),
+        path: z
+          .string()
+          .describe('Absolute path to the project root directory to scan'),
         depth: z
           .number()
           .min(1)
@@ -276,7 +282,9 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         path: z
           .string()
-          .describe('Absolute path to the project root directory to check for drift'),
+          .describe(
+            'Absolute path to the project root directory to check for drift',
+          ),
         severity: z
           .enum(['critical', 'high', 'medium', 'low'])
           .describe(
@@ -285,7 +293,9 @@ export function createServer(): McpServer {
           .optional(),
         generatePlan: z
           .boolean()
-          .describe('Whether to generate a SyncPlan for drift resolution. Default: false')
+          .describe(
+            'Whether to generate a SyncPlan for drift resolution. Default: false',
+          )
           .optional(),
       }),
     },
@@ -300,7 +310,9 @@ export function createServer(): McpServer {
         'Used to determine where to place a new shared dependency. ' +
         'Returns the distance from each module to the LCA and a suggestedPlacement path.',
       inputSchema: z.object({
-        path: z.string().describe('Absolute path to the project root directory'),
+        path: z
+          .string()
+          .describe('Absolute path to the project root directory'),
         moduleA: z
           .string()
           .describe(
@@ -328,7 +340,9 @@ export function createServer(): McpServer {
         action: z
           .enum(['list', 'get', 'check'])
           .describe("Action to perform: 'list' | 'get' | 'check'"),
-        path: z.string().describe('Absolute path to the project root directory'),
+        path: z
+          .string()
+          .describe('Absolute path to the project root directory'),
         ruleId: z
           .string()
           .describe("Rule ID to retrieve (required for action='get')")
@@ -363,10 +377,14 @@ export function createServer(): McpServer {
         'Returns a list of violations with pass/fail/warning counts. ' +
         'When fix=true, auto-fixes safe-level violations and re-reports remaining ones.',
       inputSchema: z.object({
-        path: z.string().describe('Absolute path to the project root directory to validate'),
+        path: z
+          .string()
+          .describe('Absolute path to the project root directory to validate'),
         rules: z
           .array(z.string())
-          .describe('List of rule IDs to check. Omit to check all active rules.')
+          .describe(
+            'List of rule IDs to check. Omit to check all active rules.',
+          )
           .optional(),
         fix: z
           .boolean()
@@ -409,7 +427,9 @@ export function createServer(): McpServer {
             'generate-human-summary',
           ])
           .describe('Action to perform'),
-        projectRoot: z.string().describe('Absolute path to the project root directory'),
+        projectRoot: z
+          .string()
+          .describe('Absolute path to the project root directory'),
         branchName: z
           .string()
           .describe(
@@ -432,7 +452,9 @@ export function createServer(): McpServer {
           .optional(),
         hasInterfaceChanges: z
           .boolean()
-          .describe('Whether interface changes exist for elect-committee action')
+          .describe(
+            'Whether interface changes exist for elect-committee action',
+          )
           .optional(),
       }),
     },
@@ -452,7 +474,9 @@ export function createServer(): McpServer {
         action: z
           .enum(['create', 'list', 'resolve', 'calculate-bias'])
           .describe('Action to perform'),
-        projectRoot: z.string().describe('Absolute path to the project root directory'),
+        projectRoot: z
+          .string()
+          .describe('Absolute path to the project root directory'),
         debtItem: z
           .object({
             fractal_path: z.string(),
@@ -499,15 +523,21 @@ export function createServer(): McpServer {
               refined_adr: z.string(),
             }),
           )
-          .describe("Debt items to evaluate (required for action='calculate-bias')")
+          .describe(
+            "Debt items to evaluate (required for action='calculate-bias')",
+          )
           .optional(),
         changedFractalPaths: z
           .array(z.string())
-          .describe("Changed fractal paths (required for action='calculate-bias')")
+          .describe(
+            "Changed fractal paths (required for action='calculate-bias')",
+          )
           .optional(),
         currentCommitSha: z
           .string()
-          .describe("Current commit SHA for idempotency guard (for action='calculate-bias')")
+          .describe(
+            "Current commit SHA for idempotency guard (for action='calculate-bias')",
+          )
           .optional(),
       }),
     },
@@ -623,7 +653,9 @@ export function createServer(): McpServer {
         'and checks whether each consumer has a representative test. ' +
         'Returns coverage ratio and warnings for uncovered consumers.',
       inputSchema: z.object({
-        projectRoot: z.string().describe('Absolute path to the project root directory'),
+        projectRoot: z
+          .string()
+          .describe('Absolute path to the project root directory'),
         targetPath: z
           .string()
           .describe(

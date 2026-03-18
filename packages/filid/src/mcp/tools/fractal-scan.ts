@@ -1,5 +1,5 @@
-import { scanProject } from '../../core/tree/fractal-tree.js';
 import { analyzeModule } from '../../core/module/module-main-analyzer.js';
+import { scanProject } from '../../core/tree/fractal-tree.js';
 import type { FractalTree, ModuleInfo } from '../../types/fractal.js';
 import type { ScanReport } from '../../types/report.js';
 

@@ -6,6 +6,12 @@ version: 1.0.0
 complexity: medium
 ---
 
+> **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
+> After each phase completes, IMMEDIATELY proceed to the next.
+> NEVER yield the turn after an MCP tool call returns or between phases.
+> Large tool responses (e.g., fractal_scan) are internal working data —
+> do NOT summarize them to the user. Skip phases with no work silently.
+
 # fca-init — FCA-AI Initialization
 
 Initialize the FCA-AI fractal context architecture in a project. Scans the
@@ -58,11 +64,15 @@ Existing files are never overwritten. See [reference.md Section 0](./reference.m
 > **Note**: `.filid/config.json` and `.claude/rules/fca.md` should be committed to version control.
 > `.filid/review/` and `.filid/cache/` should be gitignored (transient data).
 
+**→ After `project_init` completes, immediately proceed to Phase 1.**
+
 ### Phase 1 — Directory Scan
 
 Retrieve the complete project hierarchy using `fractal_scan`.
 Build a working list of all directories from `tree.nodes` for classification.
 See [reference.md Section 1](./reference.md#section-1--directory-scan-details).
+
+**→ After `fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
 
 ### Phase 2 — Node Classification
 
@@ -70,11 +80,15 @@ Classify each directory as fractal, organ, or pure-function using
 `fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
 See [reference.md Section 2](./reference.md#section-2--node-classification-rules).
 
+**→ After classifying all directories, immediately proceed to Phase 3.**
+
 ### Phase 3 — INTENT.md Generation
 
 Generate INTENT.md (≤50 lines, 3-tier boundaries) for each fractal directory
 that lacks one. Organ directories are skipped.
 See [reference.md Section 3](./reference.md#section-3--intentmd-generation-template).
+
+**→ After generating all INTENT.md files (or if none needed), immediately proceed to Phase 4.**
 
 ### Phase 4 — DETAIL.md Scaffolding
 
@@ -82,10 +96,14 @@ Create DETAIL.md scaffolds for fractal modules with public APIs that lack
 formal specifications.
 See [reference.md Section 4](./reference.md#section-4--detailmd-scaffolding).
 
+**→ After generating all DETAIL.md scaffolds (or if none needed), immediately proceed to Phase 5.**
+
 ### Phase 5 — Validation and Report
 
 Validate all generated files against FCA-AI rules and emit a summary report.
 See [reference.md Section 5](./reference.md#section-5--validation-and-report-format).
+
+**After printing the summary report, execution is COMPLETE. Do not ask the user any follow-up questions.**
 
 ## Available MCP Tools
 

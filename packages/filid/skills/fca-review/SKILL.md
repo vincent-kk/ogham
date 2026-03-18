@@ -6,6 +6,11 @@ version: 1.0.0
 complexity: high
 ---
 
+> **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.
+> After each step/phase completes, IMMEDIATELY proceed to the next.
+> NEVER yield the turn after subagent results return or MCP tools complete.
+> Checkpoint resume decisions are internal — do NOT ask the user which phase to start from.
+
 # fca-review — AI Code Review Governance
 
 Execute the multi-persona consensus-based code review governance pipeline.
@@ -49,6 +54,8 @@ If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>
    - `"skip-to-existing-results"`: Read and output existing `review-report.md` and `fix-requests.md` from the paths in the response. Done.
    - `"proceed-full-review"`: Continue to Step 2 as normal.
 
+**→ After entry point is determined, immediately proceed to Step 2.**
+
 ### Step 2 — Phase A + B: Parallel Delegation
 
 > Phase A and Phase B are independent and run **in parallel** as separate Task
@@ -82,6 +89,8 @@ project root. Output: `.filid/review/<branch>/session.md`
 **Await both** background agents before proceeding. If `--no-structure-check`,
 only await Phase B.
 
+**→ After all background agents complete, immediately proceed to Step 3.**
+
 ### Step 3 — Phase C: Technical Verification (Delegated)
 
 Delegate to Task subagent (`general-purpose`, model: `sonnet`).
@@ -92,6 +101,8 @@ Fallback: `Glob(**/skills/fca-review/phases/phase-c-verification.md)`.
 
 Provide context: review dir, project root.
 Input: `session.md`. Output: `.filid/review/<branch>/verification.md`
+
+**→ After Phase C subagent completes, immediately proceed to Step 4.**
 
 ### Step 4 — Phase D: Political Consensus (Direct Execution)
 
@@ -111,6 +122,8 @@ The chairperson executes Phase D directly:
    - `.filid/review/<branch>/fix-requests.md` — actionable fix items (includes
      CRITICAL/HIGH structure violations as FIX-XXX items)
 
+**→ After outputs are written, immediately proceed to Step 4.5.**
+
 ### Step 4.5 — Persist Content Hash
 
 After Phase D outputs are written, persist the content hash for future cache lookups:
@@ -118,6 +131,8 @@ After Phase D outputs are written, persist the content hash for future cache loo
 Call: `review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>, baseRef: <base_ref>)`
 
 This writes `content-hash.json` alongside the review outputs for future cache checks.
+
+**→ After content hash is persisted, immediately proceed to Step 5.**
 
 ### Step 5 — PR Comment (Optional)
 
@@ -129,6 +144,8 @@ When `--scope=pr`:
 4. If not authenticated: skip with info message.
 
 > **Language**: Write any additional commentary you add around the formatted content in the same language as the current conversation context.
+
+**After PR comment step completes (or is skipped), execution is COMPLETE.**
 
 ## Available MCP Tools
 

@@ -1,9 +1,15 @@
 import { execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createDefaultConfig,
@@ -15,7 +21,10 @@ import {
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 
 vi.mock('node:child_process', async () => {
-  const actual = await vi.importActual<typeof import('node:child_process')>('node:child_process');
+  const actual =
+    await vi.importActual<typeof import('node:child_process')>(
+      'node:child_process',
+    );
   return { ...actual, execSync: vi.fn(actual.execSync) };
 });
 
@@ -25,7 +34,10 @@ describe('config-loader', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = join(tmpdir(), `filid-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+    tmpDir = join(
+      tmpdir(),
+      `filid-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    );
     mkdirSync(tmpDir, { recursive: true });
   });
 
@@ -93,7 +105,10 @@ describe('config-loader', () => {
     config.rules['naming-convention'] = { enabled: false, severity: 'error' };
     writeConfig(tmpDir, config);
     const overrides = loadRuleOverrides(tmpDir);
-    expect(overrides['naming-convention']).toEqual({ enabled: false, severity: 'error' });
+    expect(overrides['naming-convention']).toEqual({
+      enabled: false,
+      severity: 'error',
+    });
   });
 
   it('writeConfig does not overwrite unrelated .filid contents', () => {
@@ -109,7 +124,10 @@ describe('config-loader', () => {
     config.rules['custom-rule'] = { enabled: true, severity: 'info' };
     writeConfig(tmpDir, config);
     const loaded = loadConfig(tmpDir);
-    expect(loaded?.rules['custom-rule']).toEqual({ enabled: true, severity: 'info' });
+    expect(loaded?.rules['custom-rule']).toEqual({
+      enabled: true,
+      severity: 'info',
+    });
   });
 
   // --- initProject ---
@@ -134,8 +152,14 @@ describe('config-loader', () => {
     it('copies fca.md when template exists in pluginRoot', () => {
       // Create a fake plugin root with template
       const fakePluginRoot = join(tmpDir, 'plugin');
-      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), { recursive: true });
-      writeFileSync(join(fakePluginRoot, 'templates', 'rules', 'fca.md'), '# FCA Rules', 'utf8');
+      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), {
+        recursive: true,
+      });
+      writeFileSync(
+        join(fakePluginRoot, 'templates', 'rules', 'fca.md'),
+        '# FCA Rules',
+        'utf8',
+      );
 
       const result = initProject(tmpDir, fakePluginRoot);
       expect(result.fcaRulesCopied).toBe(true);
@@ -144,15 +168,28 @@ describe('config-loader', () => {
 
     it('does not overwrite existing .claude/rules/fca.md', () => {
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
-      writeFileSync(join(tmpDir, '.claude', 'rules', 'fca.md'), '# Custom', 'utf8');
+      writeFileSync(
+        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        '# Custom',
+        'utf8',
+      );
 
       const fakePluginRoot = join(tmpDir, 'plugin');
-      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), { recursive: true });
-      writeFileSync(join(fakePluginRoot, 'templates', 'rules', 'fca.md'), '# FCA Rules', 'utf8');
+      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), {
+        recursive: true,
+      });
+      writeFileSync(
+        join(fakePluginRoot, 'templates', 'rules', 'fca.md'),
+        '# FCA Rules',
+        'utf8',
+      );
 
       const result = initProject(tmpDir, fakePluginRoot);
       expect(result.fcaRulesCopied).toBe(false);
-      const content = readFileSync(join(tmpDir, '.claude', 'rules', 'fca.md'), 'utf8');
+      const content = readFileSync(
+        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        'utf8',
+      );
       expect(content).toBe('# Custom');
     });
 
@@ -178,13 +215,16 @@ describe('config-loader', () => {
       mkdirSync(subDir, { recursive: true });
 
       mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
+          return fakeGitRoot + '\n';
         throw new Error('unexpected command');
       }) as typeof execSync);
 
       const result = initProject(subDir, subDir);
       expect(result.configCreated).toBe(true);
-      expect(result.filePath.config).toBe(join(fakeGitRoot, '.filid', 'config.json'));
+      expect(result.filePath.config).toBe(
+        join(fakeGitRoot, '.filid', 'config.json'),
+      );
       expect(existsSync(join(fakeGitRoot, '.filid', 'config.json'))).toBe(true);
     });
 
@@ -194,7 +234,8 @@ describe('config-loader', () => {
       mkdirSync(subDir, { recursive: true });
 
       mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
+          return fakeGitRoot + '\n';
         throw new Error('unexpected command');
       }) as typeof execSync);
 
@@ -213,7 +254,8 @@ describe('config-loader', () => {
       mkdirSync(subDir, { recursive: true });
 
       mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
+          return fakeGitRoot + '\n';
         throw new Error('unexpected command');
       }) as typeof execSync);
 
@@ -233,7 +275,9 @@ describe('config-loader', () => {
       const result = initProject(tmpDir, tmpDir);
       expect(result.configCreated).toBe(true);
       // Config should be at tmpDir itself (fallback)
-      expect(result.filePath.config).toBe(join(tmpDir, '.filid', 'config.json'));
+      expect(result.filePath.config).toBe(
+        join(tmpDir, '.filid', 'config.json'),
+      );
     });
 
     it('caches git root resolution — execSync called once per unique path', () => {
@@ -242,7 +286,8 @@ describe('config-loader', () => {
       mkdirSync(subDir, { recursive: true });
 
       mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
+          return fakeGitRoot + '\n';
         throw new Error('unexpected command');
       }) as typeof execSync);
 

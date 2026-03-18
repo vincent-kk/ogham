@@ -176,6 +176,21 @@ Score: 72/100
 
 ---
 
+## MCP Tool Usage
+
+| Tool                 | When to Use                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------- |
+| `fractal_scan`       | Retrieve complete directory tree with node classifications and metadata                   |
+| `fractal_navigate`   | Classify individual directories as fractal / organ / pure-function / hybrid               |
+| `rule_query`         | Retrieve all active rules (`action: "list"`) for violation validation                     |
+| `structure_validate` | Validate the full tree for rule violations (Step 4); post-execution validation (Stage 4)  |
+| `ast_analyze`        | Measure LCOM4 cohesion and cyclomatic complexity for module quality analysis              |
+| `test_metrics`       | Automated action recommendation (`action: "decide"`) based on test/LCOM4/CC metrics      |
+| `drift_detect`       | Identify deviations between current structure and expected fractal principles              |
+| `lca_resolve`        | Resolve LCA relationships for nodes requiring reclassification                            |
+
+---
+
 ## Constraints
 
 - NEVER use Write, Edit, or Bash tools under any circumstances.

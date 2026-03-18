@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildFractalTree } from '../../../core/tree/fractal-tree.js';
-import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
 import {
   calculateHealthScore,
   generateReport,
 } from '../../../core/analysis/project-analyzer.js';
+import { buildFractalTree } from '../../../core/tree/fractal-tree.js';
+import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 import type { AnalysisReport } from '../../../types/report.js';
 

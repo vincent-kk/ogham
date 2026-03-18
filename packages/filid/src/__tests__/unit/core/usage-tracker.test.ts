@@ -35,7 +35,8 @@ const { extractDependencies } =
   await import('../../../ast/dependency-extractor.js');
 const { scanProject, getDescendants, getFractalsUnderOrgans } =
   await import('../../../core/tree/fractal-tree.js');
-const { resolveImportPath } = await import('../../../core/coverage/import-resolver.js');
+const { resolveImportPath } =
+  await import('../../../core/coverage/import-resolver.js');
 
 const mockExtractDeps = vi.mocked(extractDependencies);
 const mockScanProject = vi.mocked(scanProject);

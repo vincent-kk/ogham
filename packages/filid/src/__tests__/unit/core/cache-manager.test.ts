@@ -91,7 +91,8 @@ describe('cache-manager', () => {
   // Test 4: getCacheDir — respects CLAUDE_CONFIG_DIR env var
   it('getCacheDir: respects CLAUDE_CONFIG_DIR environment variable', async () => {
     process.env.CLAUDE_CONFIG_DIR = '/custom/config';
-    const { getCacheDir } = await import('../../../core/infra/cache-manager.js');
+    const { getCacheDir } =
+      await import('../../../core/infra/cache-manager.js');
     const dir = getCacheDir('/proj');
     expect(dir).toContain('/custom/config');
     delete process.env.CLAUDE_CONFIG_DIR;
@@ -142,7 +143,8 @@ describe('cache-manager', () => {
 
   // Test 8: sessionIdHash — same input returns same hash
   it('sessionIdHash: returns consistent hash for same input', async () => {
-    const { sessionIdHash } = await import('../../../core/infra/cache-manager.js');
+    const { sessionIdHash } =
+      await import('../../../core/infra/cache-manager.js');
     const h1 = sessionIdHash('session-abc');
     const h2 = sessionIdHash('session-abc');
     expect(h1).toBe(h2);
@@ -153,7 +155,8 @@ describe('cache-manager', () => {
   it('isFirstInSession: returns true when session marker does not exist', async () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(false);
-    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
+    const { isFirstInSession } =
+      await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-1', '/proj')).toBe(true);
   });
 
@@ -161,7 +164,8 @@ describe('cache-manager', () => {
   it('isFirstInSession: returns false when session marker exists', async () => {
     const { existsSync } = await import('node:fs');
     vi.mocked(existsSync).mockReturnValue(true);
-    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
+    const { isFirstInSession } =
+      await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-2', '/proj')).toBe(false);
   });
 
@@ -171,7 +175,8 @@ describe('cache-manager', () => {
     vi.mocked(existsSync).mockImplementation(() => {
       throw new Error('permission denied');
     });
-    const { isFirstInSession } = await import('../../../core/infra/cache-manager.js');
+    const { isFirstInSession } =
+      await import('../../../core/infra/cache-manager.js');
     expect(isFirstInSession('sid-3', '/proj')).toBe(true);
   });
 
@@ -193,7 +198,8 @@ describe('cache-manager', () => {
       'session-context-b',
       'session-context-c',
     ] as unknown as ReturnType<typeof readdirSync>);
-    const { pruneOldSessions } = await import('../../../core/infra/cache-manager.js');
+    const { pruneOldSessions } =
+      await import('../../../core/infra/cache-manager.js');
     pruneOldSessions('/proj');
     expect(vi.mocked(unlinkSync)).not.toHaveBeenCalled();
   });
@@ -204,7 +210,8 @@ describe('cache-manager', () => {
     vi.mocked(readFileSync).mockImplementation(() => {
       throw new Error('not found');
     });
-    const { getLastRunHash } = await import('../../../core/infra/cache-manager.js');
+    const { getLastRunHash } =
+      await import('../../../core/infra/cache-manager.js');
     expect(getLastRunHash('/proj', 'fca-scan')).toBeNull();
   });
 
