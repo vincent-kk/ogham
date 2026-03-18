@@ -2,8 +2,9 @@
  * @file config-loader.ts
  * @description Per-project FCA rule overrides via .filid/config.json.
  *
- * Pure utility module — no side effects on import.
+ * Uses `execSync('git rev-parse')` internally to resolve git repository root.
  */
+import { execSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -24,9 +25,10 @@ export interface FilidConfig {
 const CONFIG_DIR = '.filid';
 const CONFIG_FILE = 'config.json';
 
-/** Read .filid/config.json from the given project root. Returns null if not found or invalid. */
+/** Read .filid/config.json from the given project root (resolves git root). Returns null if not found or invalid. */
 export function loadConfig(projectRoot: string): FilidConfig | null {
-  const configPath = join(projectRoot, CONFIG_DIR, CONFIG_FILE);
+  const resolvedRoot = resolveGitRoot(projectRoot);
+  const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
   if (!existsSync(configPath)) {
     log.debug('config not found', configPath);
     return null;
@@ -86,25 +88,55 @@ export interface InitResult {
   };
 }
 
+/** git root cache: dirPath → resolved root */
+const gitRootCache = new Map<string, string>();
+
+/**
+ * Resolve the git repository root for a given directory path.
+ * Returns the path itself if git root cannot be determined.
+ * Results are cached per dirPath to avoid repeated execSync calls.
+ */
+function resolveGitRoot(dirPath: string): string {
+  const cached = gitRootCache.get(dirPath);
+  if (cached !== undefined) return cached;
+  try {
+    const gitRoot = execSync('git rev-parse --show-toplevel', {
+      cwd: dirPath,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+    gitRootCache.set(dirPath, gitRoot);
+    return gitRoot;
+  } catch {
+    log.debug('git root not found, using provided path', dirPath);
+    gitRootCache.set(dirPath, dirPath);
+    return dirPath;
+  }
+}
+
 /**
  * Initialize FCA-AI project infrastructure.
  * Creates .filid/config.json and .claude/rules/fca.md if they don't exist.
  *
- * @param projectRoot - Target project root directory
+ * Resolves the git repository root from the given path so that config files
+ * are always created at the repository root, not at an arbitrary subdirectory.
+ *
+ * @param projectRoot - Target project directory (git root will be resolved from this)
  * @param pluginRoot - Plugin root directory (defaults to CLAUDE_PLUGIN_ROOT env var)
  */
 export function initProject(
   projectRoot: string,
   pluginRoot?: string,
 ): InitResult {
+  const resolvedRoot = resolveGitRoot(projectRoot);
   const root = pluginRoot ?? process.env.CLAUDE_PLUGIN_ROOT;
-  const configPath = join(projectRoot, CONFIG_DIR, CONFIG_FILE);
-  const fcaRulesPath = join(projectRoot, '.claude', 'rules', 'fca.md');
+  const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
+  const fcaRulesPath = join(resolvedRoot, '.claude', 'rules', 'fca.md');
 
   // 1. Create .filid/config.json
   let configCreated = false;
   if (!existsSync(configPath)) {
-    writeConfig(projectRoot, createDefaultConfig());
+    writeConfig(resolvedRoot, createDefaultConfig());
     configCreated = true;
     log.debug('created default config', configPath);
   }
@@ -112,7 +144,7 @@ export function initProject(
   // 2. Copy templates/rules/fca.md → .claude/rules/fca.md
   let fcaRulesCopied = false;
   if (!existsSync(fcaRulesPath)) {
-    mkdirSync(join(projectRoot, '.claude', 'rules'), { recursive: true });
+    mkdirSync(join(resolvedRoot, '.claude', 'rules'), { recursive: true });
     if (root) {
       const templatePath = join(root, 'templates', 'rules', 'fca.md');
       if (existsSync(templatePath)) {

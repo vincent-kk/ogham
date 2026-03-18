@@ -1,8 +1,9 @@
+import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 
 import {
   createDefaultConfig,
@@ -12,6 +13,13 @@ import {
   writeConfig,
 } from '../../../core/infra/config-loader.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
+
+vi.mock('node:child_process', async () => {
+  const actual = await vi.importActual<typeof import('node:child_process')>('node:child_process');
+  return { ...actual, execSync: vi.fn(actual.execSync) };
+});
+
+const mockedExecSync = vi.mocked(execSync);
 
 describe('config-loader', () => {
   let tmpDir: string;
@@ -23,6 +31,7 @@ describe('config-loader', () => {
 
   afterEach(() => {
     rmSync(tmpDir, { recursive: true, force: true });
+    vi.restoreAllMocks();
   });
 
   // --- Basic: createDefaultConfig ---
@@ -157,6 +166,99 @@ describe('config-loader', () => {
       } finally {
         if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
       }
+    });
+  });
+
+  // --- resolveGitRoot behavior (tested via loadConfig / initProject) ---
+
+  describe('git root resolution', () => {
+    it('resolves git root for subdirectory — initProject writes config at root', () => {
+      const fakeGitRoot = join(tmpDir, 'repo');
+      const subDir = join(fakeGitRoot, 'packages', 'sub');
+      mkdirSync(subDir, { recursive: true });
+
+      mockedExecSync.mockImplementation(((cmd: string) => {
+        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        throw new Error('unexpected command');
+      }) as typeof execSync);
+
+      const result = initProject(subDir, subDir);
+      expect(result.configCreated).toBe(true);
+      expect(result.filePath.config).toBe(join(fakeGitRoot, '.filid', 'config.json'));
+      expect(existsSync(join(fakeGitRoot, '.filid', 'config.json'))).toBe(true);
+    });
+
+    it('loadConfig resolves git root — reads config written at repo root from subdirectory', () => {
+      const fakeGitRoot = join(tmpDir, 'repo');
+      const subDir = join(fakeGitRoot, 'packages', 'sub');
+      mkdirSync(subDir, { recursive: true });
+
+      mockedExecSync.mockImplementation(((cmd: string) => {
+        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        throw new Error('unexpected command');
+      }) as typeof execSync);
+
+      // Write config at repo root
+      writeConfig(fakeGitRoot, createDefaultConfig());
+
+      // Load from subdirectory — should find it at repo root
+      const config = loadConfig(subDir);
+      expect(config).not.toBeNull();
+      expect(config?.version).toBe('1.0');
+    });
+
+    it('loadRuleOverrides resolves git root — consistent with initProject', () => {
+      const fakeGitRoot = join(tmpDir, 'repo');
+      const subDir = join(fakeGitRoot, 'packages', 'sub');
+      mkdirSync(subDir, { recursive: true });
+
+      mockedExecSync.mockImplementation(((cmd: string) => {
+        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        throw new Error('unexpected command');
+      }) as typeof execSync);
+
+      // init from subdirectory writes config at repo root
+      initProject(subDir, subDir);
+
+      // loadRuleOverrides from same subdirectory should find it
+      const overrides = loadRuleOverrides(subDir);
+      expect(Object.keys(overrides)).toHaveLength(8);
+    });
+
+    it('falls back to provided path when git root cannot be determined', () => {
+      mockedExecSync.mockImplementation((() => {
+        throw new Error('not a git repository');
+      }) as unknown as typeof execSync);
+
+      const result = initProject(tmpDir, tmpDir);
+      expect(result.configCreated).toBe(true);
+      // Config should be at tmpDir itself (fallback)
+      expect(result.filePath.config).toBe(join(tmpDir, '.filid', 'config.json'));
+    });
+
+    it('caches git root resolution — execSync called once per unique path', () => {
+      const fakeGitRoot = join(tmpDir, 'repo');
+      const subDir = join(fakeGitRoot, 'packages', 'sub');
+      mkdirSync(subDir, { recursive: true });
+
+      mockedExecSync.mockImplementation(((cmd: string) => {
+        if (typeof cmd === 'string' && cmd.includes('rev-parse')) return fakeGitRoot + '\n';
+        throw new Error('unexpected command');
+      }) as typeof execSync);
+
+      // Write config so loadConfig succeeds
+      writeConfig(fakeGitRoot, createDefaultConfig());
+
+      // Call multiple times with same path
+      loadConfig(subDir);
+      loadConfig(subDir);
+      loadRuleOverrides(subDir);
+
+      // execSync should be called only once for this path (cached after first call)
+      const revParseCalls = mockedExecSync.mock.calls.filter(
+        ([cmd]) => typeof cmd === 'string' && cmd.includes('rev-parse'),
+      );
+      expect(revParseCalls).toHaveLength(1);
     });
   });
 });
