@@ -7,7 +7,7 @@ description: >
   based on drift metrics, drafting DETAIL.md content proposals, recommending split/compress
   actions based on LCOM4 or CC metrics, answering /filid:fca-context-query about structure,
   reference role for /filid:fca-init and /filid:fca-guide (invoked manually for complex decisions),
-  leading /filid:fca-restructure Stage 1 & 4, /filid:fca-structure-review Stage 1 & 5.
+  leading /filid:fca-restructure Stage 1 & 4, reference role for /filid:fca-structure-review.
   Trigger phrases: "analyze the fractal structure", "classify this directory",
   "design the restructure plan", "review structural health", "what is the LCA",
   "should this be split or merged", "draft a restructure proposal",
@@ -195,7 +195,7 @@ Score: 72/100
 
 - `/filid:fca-init` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate) without delegating to this agent. Invoke this agent manually for complex classification decisions.
 - `/filid:fca-guide` — Reference role: this skill runs directly via MCP tools (fractal_scan, rule_query) without delegating to this agent. Invoke this agent manually for structural guidance.
-- `/filid:fca-structure-review` — Stage 1 (structure compliance) and Stage 5 (dependency verification) assist.
+- `/filid:fca-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for deep structural or dependency analysis.
 - `/filid:fca-context-query` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate, doc_compress) without delegating to this agent. Invoke this agent for deep architectural queries.
 - `/filid:fca-restructure` — Stage 1 (analysis & proposal) and Stage 4 (post-execution validation).
 - `/filid:fca-sync` — Stage 3 analysis phase: review drift-analyzer output, refine correction plan using lca_resolve.

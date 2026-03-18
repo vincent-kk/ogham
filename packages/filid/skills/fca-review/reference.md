@@ -206,7 +206,8 @@ No MCP tool calls. Reads `session.md` + `verification.md` + `structure-check.md`
 | ------------------------------------------------------------------ | ----------- |
 | None                                                               | Phase A     |
 | `structure-check.md` only                                         | Phase B     |
-| `session.md` only (no `verification.md`)                          | Phase C     |
+| `session.md` only (`no_structure_check: true` in frontmatter)     | Phase C     |
+| `session.md` only (`no_structure_check: false` or absent)         | Phase A     |
 | `structure-check.md` + `session.md` (no `verification.md`)        | Phase C     |
 | `session.md` + `verification.md`                                   | Phase D     |
 | `session.md` + `verification.md` + `review-report.md`             | Complete    |

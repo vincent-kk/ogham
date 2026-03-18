@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
-Layer 2 (도구)  → MCP Server (15개 분석/관리 도구)
+Layer 2 (도구)  → MCP Server (16개 분석/관리 도구)
 Layer 3 (에이전트) → 7개 특화 에이전트 (architect, implementer, QA 등)
 Layer 4 (사용자) → 16개 Skills (/filid:fca-init, /filid:fca-review 등)
 ```
@@ -52,7 +52,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 | --------------- | --------------------------------------------------------------- |
 | `src/core/`     | 핵심 로직 (FractalTree, RuleEngine, DriftDetector 등 12개 모듈) |
 | `src/ast/`      | `@ast-grep/napi` AST 분석 (LCOM4, CC, 의존성)                   |
-| `src/mcp/`      | MCP 서버 + 15개 도구 핸들러                                     |
+| `src/mcp/`      | MCP 서버 + 16개 도구 핸들러                                     |
 | `src/hooks/`    | 훅 구현체 + `entries/` (esbuild 진입점)                         |
 | `src/metrics/`  | 테스트 밀도, 모듈 분리 결정 메트릭                              |
 | `src/compress/` | 컨텍스트 압축 (가역/비가역)                                     |
@@ -62,7 +62,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 - `src/index.ts` — 94개 함수/상수 + 전체 타입 re-export
 - `src/core/rule-engine.ts` — 8개 내장 규칙 (naming, structure, dependency, documentation, index, module)
-- `src/mcp/server.ts` — MCP 서버 초기화 + 15개 도구 등록
+- `src/mcp/server.ts` — MCP 서버 초기화 + 16개 도구 등록
 - `src/hooks/context-injector.ts` — UserPromptSubmit 시 FCA-AI 규칙 주입 (세션 기반)
 - `src/hooks/plan-gate.ts` — EnterPlanMode 시 FCA-AI 문서 업데이트 체크리스트 주입
 - `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
