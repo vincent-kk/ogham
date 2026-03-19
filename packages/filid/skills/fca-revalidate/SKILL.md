@@ -127,7 +127,11 @@ Post verdict to PR if GitHub CLI is available:
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
 4. If not authenticated: skip with info message.
 
-> **Language**: Write any additional commentary you add around the formatted content in the same language as the current conversation context.
+> **Language**: All output files and PR comments MUST be written in the user's
+> language (as configured in their CLAUDE.md or system prompt — e.g., "Always
+> respond in Korean" → write in Korean). This applies to re-validate.md,
+> PR comments, and any additional commentary. Technical terms, code identifiers,
+> rule IDs, and file paths remain in their original form.
 
 **→ Immediately proceed to Step 8.**
 

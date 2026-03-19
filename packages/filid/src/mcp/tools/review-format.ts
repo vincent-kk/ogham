@@ -5,9 +5,9 @@
  */
 import path from 'node:path';
 
+import { parseStructureCheckFrontmatter } from '../../core/utils/pr-summary-generator.js';
 import type { HumanSummary } from '../../types/summary.js';
 
-import { parseStructureCheckFrontmatter } from '../../core/utils/pr-summary-generator.js';
 import type { ReviewManageInput } from './review-manage.js';
 import {
   extractRevalidateVerdict,
