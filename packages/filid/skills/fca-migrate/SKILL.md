@@ -37,8 +37,12 @@ reports the output to the user.
 Run the script without `--execute` to preview the migration plan:
 
 ```bash
-bash skills/fca-migrate/migrate.sh <target-path>
+bash "${CLAUDE_PLUGIN_ROOT}/skills/fca-migrate/migrate.sh" <target-path>
 ```
+
+> **Script resolution**: Use `${CLAUDE_PLUGIN_ROOT}` to resolve the absolute path.
+> If `CLAUDE_PLUGIN_ROOT` is not set, use `Glob(**/skills/fca-migrate/migrate.sh)`
+> to locate the script. If the script is not found, abort with an error message.
 
 The script outputs:
 - Phase 1: Files found, conflicts detected
@@ -51,7 +55,7 @@ Report the output to the user and ask for confirmation before proceeding.
 ### Step 2 — Execute (requires user confirmation)
 
 ```bash
-bash skills/fca-migrate/migrate.sh <target-path> --execute [--auto-commit]
+bash "${CLAUDE_PLUGIN_ROOT}/skills/fca-migrate/migrate.sh" <target-path> --execute [--auto-commit]
 ```
 
 The script performs:

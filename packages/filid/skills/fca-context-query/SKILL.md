@@ -34,7 +34,9 @@ See [reference.md Section 1](./reference.md#section-1--question-parsing).
 ### Phase 2 — Navigation (Prompt 1)
 
 Locate the target module using `fractal_scan` to retrieve the full tree, then
-find the node matching the query.
+find the node matching the query. If no matching node is found, report
+"No matching module found for the query" and suggest checking the module name
+or running `/filid:fca-guide` to see the full project structure.
 See [reference.md Section 2](./reference.md#section-2--navigation-details).
 
 ### Phase 3 — Context Loading

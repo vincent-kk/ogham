@@ -63,8 +63,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - `src/index.ts` — 94개 함수/상수 + 전체 타입 re-export
 - `src/core/rule-engine.ts` — 8개 내장 규칙 (naming, structure, dependency, documentation, index, module)
 - `src/mcp/server.ts` — MCP 서버 초기화 + 16개 도구 등록
-- `src/hooks/context-injector.ts` — UserPromptSubmit 시 FCA-AI 규칙 주입 (세션 기반)
-- `src/hooks/plan-gate.ts` — EnterPlanMode 시 FCA-AI 문서 업데이트 체크리스트 주입
+- `src/hooks/context-injector.ts` — UserPromptSubmit 시 최소 FCA-AI 포인터 주입 (규칙은 .claude/rules/fca.md에 위임)
 - `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
 - `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
 - `scripts/build-mcp-server.mjs` — MCP 서버 esbuild 번들러
@@ -74,7 +73,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 - `.claude-plugin/plugin.json` — 매니페스트 (name, version, skills, mcp)
 - `.mcp.json` — MCP 서버 등록 (`bridge/mcp-server.cjs`)
-- `hooks/hooks.json` — 훅 이벤트 매핑 (PreToolUse→Read/Write/Edit, PreToolUse→EnterPlanMode, SubagentStart→*, UserPromptSubmit→*, SessionStart→\*, SessionEnd→\*)
+- `hooks/hooks.json` — 훅 이벤트 매핑 (PreToolUse→Read/Write/Edit, SubagentStart→*, UserPromptSubmit→*, SessionStart→\*, SessionEnd→\*)
 
 ### Agents (7)
 

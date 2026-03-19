@@ -63,8 +63,11 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ### Stage 4 — Finalize
 
-1. `cache_manage({ action: "save-hash", cwd: "<path>", skillName: "fca-update", hash: currentHash })`
-2. Output consolidated report
+1. Verify all prior stages completed without errors. If any stage reported an
+   error, skip hash save and report the error — this ensures the next incremental
+   run re-processes the failed work.
+2. `cache_manage({ action: "save-hash", cwd: "<path>", skillName: "fca-update", hash: currentHash })`
+3. Output consolidated report
    See [reference.md Section 4](./reference.md#section-4--finalize).
 
 ## Available MCP Tools

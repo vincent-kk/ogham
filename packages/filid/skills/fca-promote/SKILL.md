@@ -34,6 +34,7 @@ See [reference.md Section 1](./reference.md#section-1--discovery-details).
 ### Phase 2 — Eligibility Check (`qa-reviewer`)
 
 Apply stability threshold (default 90 days) and failure history filter.
+If no files pass the eligibility check, report "No eligible test.ts files found (none meet the {N}-day stability threshold)" and exit without proceeding to Phase 3.
 See [reference.md Section 2](./reference.md#section-2--eligibility-rules).
 
 ### Phase 3 — Pattern Analysis (`qa-reviewer`)

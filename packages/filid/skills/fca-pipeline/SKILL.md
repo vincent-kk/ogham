@@ -62,13 +62,19 @@ order — first match wins. If no match, immediately check the next signal.
 2. Normalize: `review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
-| Priority | Signal                                                             | Entry stage   |
-| -------- | ------------------------------------------------------------------ | ------------- |
-| 1        | `.filid/review/<branch>/re-validate.md` exists                     | Pipeline **complete** — report existing results and END execution |
-| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits (`git log @{upstream}..HEAD --oneline` non-empty) | Execute `git push` (Bash). If push fails → pipeline **ERROR** — report "Push failed: `<error>`. Push manually and re-run." and END execution. If push succeeds → enter `revalidate` |
-| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)     | `revalidate`  |
-| 4        | `.filid/review/<branch>/fix-requests.md` exists                    | `resolve`     |
-| 5        | None of the above → check PR: `gh pr view` (Bash)                 | `review` if PR exists, `pr-create` if not |
+| Priority | Signal | Entry stage |
+| -------- | ------ | ----------- |
+| 1 | `.filid/review/<branch>/re-validate.md` exists | Pipeline **complete** — report existing results and END execution |
+| 2 | `.filid/review/<branch>/justifications.md` exists + unpushed commits | Execute `git push` and enter `revalidate` (see details below) |
+| 3 | `.filid/review/<branch>/justifications.md` exists (all pushed) | `revalidate` |
+| 4 | `.filid/review/<branch>/fix-requests.md` exists | `resolve` |
+| 5 | None of the above → check PR: `gh pr view` (Bash) | `review` if PR exists, `pr-create` if not |
+
+**Priority 2 details**: Detect unpushed commits via
+`git log @{upstream}..HEAD --oneline 2>/dev/null`. If no upstream is configured,
+treat as "unpushed" and attempt `git push -u origin <branch>`. If push fails →
+pipeline **ERROR** — report "Push failed: `<error>`. Push manually and re-run."
+and END execution. If push succeeds → enter `revalidate`.
 
 See `reference.md` for the full auto-detection algorithm with edge cases.
 

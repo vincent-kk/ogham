@@ -9,6 +9,7 @@ vi.mock('node:fs', async (importOriginal) => {
     ...actual,
     existsSync: vi.fn(actual.existsSync),
     mkdirSync: vi.fn(),
+    copyFileSync: vi.fn(),
   };
 });
 
@@ -22,6 +23,7 @@ vi.mock('../../../core/infra/cache-manager.js', async (importOriginal) => {
     ...actual,
     getCacheDir: vi.fn(actual.getCacheDir),
     pruneOldSessions: vi.fn(),
+    pruneStaleCacheDirs: vi.fn(),
   };
 });
 
@@ -155,4 +157,9 @@ describe('processSetup', () => {
 
     expect(result.continue).toBe(true);
   });
+
+  // ensureFcaRules is tested thoroughly in config-loader.test.ts (initProject, ensureFcaRules).
+  // setup.ts integration: existing "returns additionalContext for FCA projects" test verifies
+  // the FCA code path works end-to-end including the ensureFcaRules call (which is a no-op
+  // when existsSync returns true for fca.md).
 });

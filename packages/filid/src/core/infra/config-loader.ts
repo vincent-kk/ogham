@@ -136,6 +136,39 @@ function resolveGitRoot(dirPath: string): string {
 }
 
 /**
+ * Ensure .claude/rules/fca.md exists by copying from the plugin template.
+ * Does NOT overwrite an existing file. Safe to call on every session start.
+ *
+ * @param projectRoot - Project directory (used as-is, caller should resolve git root if needed)
+ * @param pluginRoot - Plugin root directory (defaults to CLAUDE_PLUGIN_ROOT env var)
+ * @returns true if the file was copied, false if it already existed or copy failed
+ */
+export function ensureFcaRules(
+  projectRoot: string,
+  pluginRoot?: string,
+): boolean {
+  const root = pluginRoot ?? process.env.CLAUDE_PLUGIN_ROOT;
+  const fcaRulesPath = join(projectRoot, '.claude', 'rules', 'fca.md');
+
+  if (existsSync(fcaRulesPath)) return false;
+
+  mkdirSync(join(projectRoot, '.claude', 'rules'), { recursive: true });
+  if (root) {
+    const templatePath = join(root, 'templates', 'rules', 'fca.md');
+    if (existsSync(templatePath)) {
+      copyFileSync(templatePath, fcaRulesPath);
+      log.debug('copied fca.md template', fcaRulesPath);
+      return true;
+    } else {
+      log.error('fca.md template not found at', templatePath);
+    }
+  } else {
+    log.error('CLAUDE_PLUGIN_ROOT not set, cannot locate fca.md template');
+  }
+  return false;
+}
+
+/**
  * Initialize FCA-AI project infrastructure.
  * Creates .filid/config.json and .claude/rules/fca.md if they don't exist.
  *
@@ -163,22 +196,7 @@ export function initProject(
   }
 
   // 2. Copy templates/rules/fca.md → .claude/rules/fca.md
-  let fcaRulesCopied = false;
-  if (!existsSync(fcaRulesPath)) {
-    mkdirSync(join(resolvedRoot, '.claude', 'rules'), { recursive: true });
-    if (root) {
-      const templatePath = join(root, 'templates', 'rules', 'fca.md');
-      if (existsSync(templatePath)) {
-        copyFileSync(templatePath, fcaRulesPath);
-        fcaRulesCopied = true;
-        log.debug('copied fca.md template', fcaRulesPath);
-      } else {
-        log.error('fca.md template not found at', templatePath);
-      }
-    } else {
-      log.error('CLAUDE_PLUGIN_ROOT not set, cannot locate fca.md template');
-    }
-  }
+  const fcaRulesCopied = ensureFcaRules(resolvedRoot, root);
 
   return {
     configCreated,

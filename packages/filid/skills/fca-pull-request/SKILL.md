@@ -88,11 +88,13 @@ See [reference.md Section 4](./reference.md#section-4--pr-publication).
 
 ## Available MCP Tools
 
-None — this skill uses no MCP tools directly. All operations use Bash (git, gh)
-and the Skill tool. Note: Stage 1 delegates to `/filid:fca-update`, which
-internally uses MCP tools (`cache_manage`, `fractal_scan`, `test_metrics`, etc.).
-Stage 3 may optionally use `review_manage(action: "generate-human-summary")` to
-produce a human-friendly PR summary when a review session exists for the branch.
+| Tool             | Action                   | Stage | Purpose                                                       |
+| ---------------- | ------------------------ | ----- | ------------------------------------------------------------- |
+| `review_manage`  | `generate-human-summary` | 3     | (Optional) Generate human-friendly PR summary from review session |
+
+Stage 1 delegates to `/filid:fca-update`, which internally uses its own MCP tools
+(`cache_manage`, `fractal_scan`, `test_metrics`, etc.). All other operations use
+Bash (git, gh) and the Skill tool.
 
 ## Options
 

@@ -18,6 +18,7 @@ import {
   pruneOldSessions,
   pruneStaleCacheDirs,
 } from '../core/infra/cache-manager.js';
+import { ensureFcaRules } from '../core/infra/config-loader.js';
 import { createLogger, setLogDir } from '../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../types/hooks.js';
 
@@ -100,6 +101,15 @@ export function processSetup(input: SessionStartInput): HookOutput {
     // Phase 3: Maintenance — prune old session files + stale cache dirs
     pruneOldSessions(cwd);
     pruneStaleCacheDirs();
+
+    // Ensure .claude/rules/fca.md exists for FCA projects
+    if (isFca) {
+      try {
+        ensureFcaRules(cwd);
+      } catch (e) {
+        log.debug('ensureFcaRules failed:', e);
+      }
+    }
 
     // Only inject context for FCA projects to minimize token usage
     if (isFca) {

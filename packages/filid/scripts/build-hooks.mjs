@@ -21,7 +21,6 @@ const hookEntries = [
   'pre-tool-use',
   'agent-enforcer',
   'context-injector',
-  'plan-gate',
   'session-cleanup',
   'setup',
 ];

@@ -36,9 +36,7 @@ pipeline independently and can be used to validate results after `/filid:fca-upd
 > as a Task subagent — do NOT spawn the other stages. Stage 6 then reports only
 > the result of the selected stage (no cross-stage aggregation).
 
-Stages 1–5 are **independent** and run **in parallel** as separate Task subagents
-(`run_in_background: true`). Stage 6 aggregates their results and runs after all
-parallel stages complete.
+Stages 1–5 are **independent** and run **in parallel** as separate Task subagents (`general-purpose`, model: `sonnet`, `run_in_background: true`). Stage 6 aggregates their results and runs after all parallel stages complete.
 
 ### Stages 1–5 (Parallel — full run only)
 

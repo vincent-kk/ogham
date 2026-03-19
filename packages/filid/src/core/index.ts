@@ -101,6 +101,7 @@ export { ChangeQueue } from './infra/change-queue.js';
 export type { ChangeRecord } from './infra/change-queue.js';
 export {
   createDefaultConfig,
+  ensureFcaRules,
   initProject,
   loadConfig,
   loadRuleOverrides,

@@ -22,16 +22,6 @@
             "timeout": 3
           }
         ]
-      },
-      {
-        "matcher": "EnterPlanMode",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"",
-            "timeout": 3
-          }
-        ]
       }
     ],
     "SubagentStart": [

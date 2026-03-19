@@ -50,35 +50,23 @@ describe('context-injector', () => {
     );
   });
 
-  it('should inject FCA-AI context reminder', async () => {
+  it('should inject minimal FCA-AI pointer', async () => {
     const result = await injectContext(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
-    expect(result.hookSpecificOutput?.additionalContext).toContain('FCA-AI');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      '[filid] FCA-AI active. Rules: .claude/rules/fca.md',
+    );
   });
 
-  it('should include organ directory awareness', async () => {
+  it('should not contain verbose rules content', async () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('Organ');
-  });
-
-  it('should include INTENT.md 50-line limit reminder', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('50');
-  });
-
-  it('should include 3+12 rule reminder', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('15');
-  });
-
-  it('should include current working directory in context', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('/workspace/project');
+    // These were in the old buildFcaContext — should no longer be present
+    expect(ctx).not.toContain('Directory Structure');
+    expect(ctx).not.toContain('Development Workflow');
+    expect(ctx).not.toContain('Category Classification');
+    expect(ctx).not.toContain('nearest common ancestor');
   });
 
   it('should always continue (never block user prompts)', async () => {
@@ -92,32 +80,6 @@ describe('context-injector', () => {
     const result = await injectContext(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput).toBeUndefined();
-  });
-
-  it('should include category classification guide', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('fractal');
-    expect(ctx).toContain('organ');
-    expect(ctx).toContain('pure-function');
-  });
-
-  it('should include directory structure guidelines', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('Directory Structure');
-    expect(ctx).toContain('index.ts (barrel export)');
-    expect(ctx).toContain('nearest common ancestor (LCA)');
-    expect(ctx).toContain("parent's public interface");
-    expect(ctx).toContain('/filid:fca-scan');
-  });
-
-  it('should include development workflow guide', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    expect(ctx).toContain('Development Workflow');
-    expect(ctx).toContain('DETAIL.md');
-    expect(ctx).toContain('INTENT.md');
   });
 
   // === Session-based inject tests ===
@@ -187,5 +149,14 @@ describe('context-injector', () => {
   it('should call readdirSync after markSessionInjected (pruneOldSessions invoked)', async () => {
     await injectContext(baseInput);
     expect(readdirSync).toHaveBeenCalled();
+  });
+
+  it('should output at most 2 lines for default config (no disabled rules)', async () => {
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    const lines = ctx.split('\n').filter((l: string) => l.trim() !== '');
+    // Default config: all rules enabled → only 1 line (pointer)
+    expect(lines.length).toBeLessThanOrEqual(2);
+    expect(lines[0]).toBe('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
   });
 });

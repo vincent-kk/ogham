@@ -41,7 +41,7 @@ and a state machine.
    - `structure-check.md` only → Phase B
    - `session.md` only → Check `session.md` frontmatter for `no_structure_check` flag:
      - If `no_structure_check: true` → Phase C (Phase A was intentionally skipped)
-     - If `no_structure_check: false` or absent → Phase A (Phase A likely failed before completing; restart it)
+     - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md` and restart only Phase A)
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
    - All complete (`review-report.md` exists) → "Review complete"
@@ -243,6 +243,7 @@ When `--scope=pr`:
 | `review_manage`  | `content-hash`     | Compute and persist content hash for cache       |
 | `review_manage`  | `check-cache`      | Check if review can be skipped (cache hit)       |
 | `review_manage`  | `format-pr-comment` | Format review results into collapsible PR comment |
+| `review_manage`  | `format-revalidate-comment` | Format re-validation results (used by fca-revalidate) |
 | `debt_manage`    | `calculate-bias`    | Compute debt bias level for Phase C analysis      |
 
 ## Options

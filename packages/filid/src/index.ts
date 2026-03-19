@@ -82,6 +82,7 @@ export {
   ChangeQueue,
   // config
   createDefaultConfig,
+  ensureFcaRules,
   initProject,
   loadConfig,
   loadRuleOverrides,
