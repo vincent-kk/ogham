@@ -11,6 +11,11 @@ complexity: medium
 > and proceed to the next stage. NEVER yield the turn between stages.
 > NEVER yield the turn after an MCP tool call or subagent returns.
 > On error, report it and END — do not ask for confirmation.
+>
+> **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
+> pipelines most commonly stall. Resolve ends with commit + push, which
+> FEELS like completion but IS NOT. You MUST spawn the revalidate subagent
+> immediately after resolve succeeds.
 
 # fca-pipeline — End-to-End Review Pipeline
 
@@ -117,7 +122,14 @@ context isolation. Subagents invoke existing skills via the `Skill()` tool.
   (`justifications.md` will exist with all-rejected entries)
 - **Failure**: END execution with error — "Resolve failed: `<error>`"
 - **Output**: `justifications.md`, committed + pushed changes
-- **→ After justifications.md is confirmed, immediately proceed to revalidate stage.**
+
+> **⚠️ CRITICAL — DO NOT STOP HERE**: Resolve completing (commit + push)
+> is NOT the end of the pipeline. The pipeline is **incomplete** without
+> the revalidate stage. You MUST spawn the revalidate subagent immediately
+> after confirming `justifications.md` exists. Stopping after resolve is
+> the single most common pipeline failure — do NOT let it happen.
+
+- **→ After justifications.md is confirmed, immediately spawn the revalidate subagent. Do NOT output any text without a tool call.**
 
 #### Stage: revalidate
 
