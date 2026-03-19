@@ -42,6 +42,9 @@ Verify that all three required headings are present:
 | ------------------- | -------- | ------------------------------ |
 | Any section missing | high     | `CLAUDE_MD_MISSING_BOUNDARIES` |
 
+Note: The validator matches English headings only (`### Always do`, `### Ask first`,
+`### Never do`). These headings MUST remain in English regardless of the content language.
+
 ## Section 3 — Organ Directory Validation
 
 For every directory whose name matches `ORGAN_DIR_NAMES`, check that no

@@ -72,6 +72,22 @@ describe('document-validator', () => {
       );
     });
 
+    it('should pass for INTENT.md with English headings and non-English content', () => {
+      const content = [
+        '# 인증 모듈',
+        '## Boundaries',
+        '### Always do',
+        '- 인증 토큰 검증',
+        '### Ask first',
+        '- 스키마 변경',
+        '### Never do',
+        '- 비밀번호 평문 저장',
+      ].join('\n');
+      const result = validateIntentMd(content);
+      expect(result.valid).toBe(true);
+      expect(result.violations).toHaveLength(0);
+    });
+
     it('should pass when all 3-tier boundaries are present', () => {
       const content = [
         '# My Module',

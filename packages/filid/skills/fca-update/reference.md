@@ -119,6 +119,8 @@ For each fractal node containing changed files:
    ## Dependencies
    ```
 
+   **Language**: All section headings MUST remain in English (validator anchors). Content follows the user's conversation language.
+
 3. **Update INTENT.md if present**: reflect implemented changes; compress if > 50 lines
 
 ```

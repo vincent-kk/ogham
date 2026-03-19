@@ -67,6 +67,8 @@ Key patterns and decisions for this module.
 - ...
 ```
 
+**Language rule**: All section headings in INTENT.md and DETAIL.md MUST remain in English (they are machine-readable anchors used by the validator). All descriptive content follows the user's conversation language.
+
 ---
 
 ## DETAIL.md Conventions

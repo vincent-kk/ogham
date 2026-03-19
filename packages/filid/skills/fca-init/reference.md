@@ -195,6 +195,8 @@ INTENT.md structure (hard limit: 50 lines):
 <list of modules this directory depends on>
 ```
 
+**Language**: Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`, `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English. All content text MUST be written in the user's conversation language.
+
 Enforce: file must not exceed 50 lines. If generation would exceed the
 limit, summarize the most important conventions and boundary rules.
 
@@ -218,6 +220,8 @@ a scaffold:
 
 <ISO date>
 ```
+
+**Language**: Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English. Content follows the user's conversation language.
 
 Only create DETAIL.md when the module clearly has an API surface worth
 specifying. Do not create DETAIL.md for leaf utility directories.

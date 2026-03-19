@@ -77,6 +77,7 @@ When invoked, execute these steps in order:
 7. **Draft DETAIL.md proposal** (if requested or if creating a new module)
    - Structure: `## Purpose`, `## Inputs`, `## Outputs`, `## Constraints`,
      `## Dependencies`, `## Test Strategy`.
+   - Write all content in the user's conversation language. Keep section headings in English.
    - Propose only — do NOT write to disk. Present as a fenced code block for the
      implementer to apply.
 
