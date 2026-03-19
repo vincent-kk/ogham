@@ -76,10 +76,12 @@ order — first match wins. If no match, immediately check the next signal.
 | 5 | None of the above → check PR: `gh pr view` (Bash) | `review` if PR exists, `pr-create` if not |
 
 **Priority 2 details**: Detect unpushed commits via
-`git log @{upstream}..HEAD --oneline 2>/dev/null`. If no upstream is configured,
-treat as "unpushed" and attempt `git push -u origin <branch>`. If push fails →
-pipeline **ERROR** — report "Push failed: `<error>`. Push manually and re-run."
-and END execution. If push succeeds → enter `revalidate`.
+`git log @{upstream}..HEAD --oneline 2>/dev/null`.
+- **Has unpushed commits**: Execute `git push`, then enter `revalidate`.
+- **All pushed**: Enter `revalidate` directly.
+- **No upstream tracking ref** (command fails): Skip push, enter `revalidate` directly.
+  The user may not have set up the remote yet — do not attempt `git push -u`.
+- **Push fails**: Pipeline **ERROR** — report "Push failed: `<error>`. Push manually and re-run." and END execution.
 
 See `reference.md` for the full auto-detection algorithm with edge cases.
 
@@ -107,6 +109,7 @@ context isolation. Subagents invoke existing skills via the `Skill()` tool.
 - **Success signal**: `review-report.md` exists (written by Phase D regardless of verdict)
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
   is generated → skip `resolve` + `revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
+  If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — delete the empty `fix-requests.md` and skip resolve + revalidate.
 - **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `resolve` +
   `revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:fca-pipeline --from=review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"

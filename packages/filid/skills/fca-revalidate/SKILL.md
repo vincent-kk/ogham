@@ -59,7 +59,9 @@ ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
 ### Steps 3–5 (Parallel — after Step 2)
 
 Steps 3, 4, and 5 are **independent** and run **in parallel** as separate Task
-subagents (`run_in_background: true`). Await all three before Step 6.
+subagents (`run_in_background: true`). Each verification step runs as a
+`general-purpose` subagent (`subagent_type: "general-purpose"`) with
+`run_in_background: true`. Await all three before Step 6.
 
 **→ After all three subagents complete, immediately proceed to Step 6. Do NOT summarize individual results to the user.**
 

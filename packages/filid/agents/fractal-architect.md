@@ -39,6 +39,9 @@ When invoked, execute these steps in order:
    - Determine the target path(s) using Glob and Read.
 
 2. **Scan the fractal structure**
+
+**Note**: MCP tools listed below are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Glob, Grep) only.
+
    - Use `fractal_scan` MCP tool to retrieve the complete directory tree with node
      classifications and metadata.
    - Build an internal map of all nodes: path, category, children, index presence,

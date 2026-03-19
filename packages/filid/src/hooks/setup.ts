@@ -99,6 +99,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
     log.debug(`cwd=${cwd} fca=${isFca} cache=${cacheDir}`);
 
     // Phase 3: Maintenance — prune old session files + stale cache dirs
+    // TODO: Add daily throttle to avoid O(projects * files) scan on every session start
     pruneOldSessions(cwd);
     pruneStaleCacheDirs();
 

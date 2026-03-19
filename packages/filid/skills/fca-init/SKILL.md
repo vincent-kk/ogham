@@ -85,7 +85,8 @@ See [reference.md Section 2](./reference.md#section-2--node-classification-rules
 ### Phase 3 — INTENT.md Generation
 
 Generate INTENT.md (≤50 lines, 3-tier boundaries) for each fractal directory
-that lacks one. Organ directories are skipped.
+that lacks one. Organ directories are skipped. This phase delegates INTENT.md
+generation to the `context-manager` agent (subagent_type: `filid:context-manager`).
 See [reference.md Section 3](./reference.md#section-3--intentmd-generation-template).
 
 **→ After generating all INTENT.md files (or if none needed), immediately proceed to Phase 4.**

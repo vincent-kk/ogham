@@ -102,6 +102,8 @@ final report. Do NOT stop early on failures — complete every stage.
 
 ## MCP Tool Usage
 
+**Note**: MCP tools listed below are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Glob, Grep) only.
+
 | Tool               | Mode                    | When to Use                                                              |
 | ------------------ | ----------------------- | ------------------------------------------------------------------------ |
 | `fractal_scan`     | —                       | Stage 1: retrieve full project hierarchy for boundary checks             |
@@ -210,5 +212,5 @@ Date: <ISO 8601>
 
 - `/filid:fca-scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
 - `/filid:fca-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for extended QA analysis across the 6 stages.
-- `/filid:fca-promote` — Analysis contributor: provide metric and quality assessment before promotion decision.
+- `/filid:fca-promote` — Phase 1 (discovery), Phase 2 (eligibility), Phase 3 (analysis), Phase 5 (validation)
 - `/filid:fca-update` — Stage 1: branch diff-based violation scan.

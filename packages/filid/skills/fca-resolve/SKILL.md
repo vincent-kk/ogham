@@ -159,7 +159,7 @@ the full output template.
 If there were accepted fixes (files modified by code-surgeon):
 
 1. **Pre-commit verification gate**:
-   - Run: `npx tsc --noEmit` (Bash) on the project
+   - Run: `npx tsc --noEmit` (Bash) from the project root (where `tsconfig.json` resides). In monorepo setups, ensure the correct `tsconfig.json` is used — add `--project <path>` if needed.
    - If typecheck **FAILS**:
      - In `--auto` mode: **ABORT** with error "Typecheck failed after
        applying fixes. Review code-surgeon output."

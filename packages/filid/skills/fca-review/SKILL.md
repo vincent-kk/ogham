@@ -42,6 +42,7 @@ and a state machine.
    - `session.md` only → Check `session.md` frontmatter for `no_structure_check` flag:
      - If `no_structure_check: true` → Phase C (Phase A was intentionally skipped)
      - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md` and restart only Phase A)
+     After Phase A completes and writes `structure-check.md`, re-evaluate the checkpoint state against the full table above to determine the next phase (typically Phase C).
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
    - All complete (`review-report.md` exists) → "Review complete"
@@ -120,6 +121,7 @@ These findings flow into Phase D (fix items).
 
 **Phase B: Analysis & Committee Election** (`general-purpose`, model: `haiku`,
 `run_in_background: true`)
+(haiku is chosen for speed; committee quality is ensured by the structured `review_manage(elect-committee)` MCP tool rather than LLM reasoning depth)
 
 Resolve phase file path via `${CLAUDE_PLUGIN_ROOT}/skills/fca-review/phases/phase-b-analysis.md`.
 Fallback: `Glob(**/skills/fca-review/phases/phase-b-analysis.md)`.
@@ -150,6 +152,11 @@ with partial results.
 
 **Await both** background agents before proceeding. If `--no-structure-check`,
 only await Phase B.
+
+**Race handling**: Phase B may complete before Phase A. If `structure-check.md`
+does not exist when Phase B reads it, Phase B sets `STRUCTURE_CRITICAL_COUNT = 0`.
+The chairperson awaits both phases before Phase C, ensuring Phase C and D always
+have complete data.
 
 #### Post-Completion Verification
 

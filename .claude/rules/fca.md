@@ -127,11 +127,15 @@ export const MY_CONSTANT = 'value';
 
 - Hard limit: **50 lines**. Exceeding 50 lines is blocked by the pre-tool-use hook.
 - MUST include 3-tier boundary sections:
-  - `## Always do` — actions that must always be taken in this module
-  - `## Ask first` — actions requiring discussion before proceeding
-  - `## Never do` — actions strictly prohibited in this module
+  - `### Always do` — actions that must always be taken in this module
+  - `### Ask first` — actions requiring discussion before proceeding
+  - `### Never do` — actions strictly prohibited in this module
 - Approaching 50 lines signals the module MUST be decomposed into smaller fractal nodes.
 - MUST NOT increase the limit; restructure the module instead.
+- Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`,
+  `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English
+  — they are machine-readable anchors for the validator.
+  All descriptive content MUST follow the user's conversation language.
 
 ### DETAIL.md
 
@@ -139,6 +143,8 @@ export const MY_CONSTANT = 'value';
 - Defines public API contract, acceptance criteria, and scope boundaries.
 - MUST reflect current intended behavior, not historical evolution.
 - Update DETAIL.md **before** code changes. Update INTENT.md when boundaries change.
+- Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English.
+  All descriptive content MUST follow the user's conversation language.
 
 ---
 

@@ -1,6 +1,11 @@
 #!/bin/sh
 # filid Node.js Finder (find-node.sh)
 #
+# NOTE: This script is included for environments where `node` is not on PATH
+# (e.g., nvm/fnm managed shells). Currently, hooks and MCP server use bare
+# `node` command via libs/run.cjs. To use this finder, set the MCP server
+# command in .mcp.json to: "bash ${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh"
+#
 # Locates the Node.js binary and executes it with the provided arguments.
 # Designed for nvm/fnm users where `node` is not on PATH in non-interactive
 # shells (e.g. Claude Code hook invocations).

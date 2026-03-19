@@ -23,9 +23,9 @@ Check signals:
   Signal 2: Does <review_dir>/justifications.md exist?
     → YES: Check unpushed commits: git log @{upstream}..HEAD --oneline
       → Has unpushed: Push first (git push), then start from REVALIDATE.
-      → All pushed (or command fails — no upstream): Start from REVALIDATE.
-      → NOTE: If git log @{upstream}..HEAD fails (no upstream tracking),
-        treat as "not pushed" — skip push, start from REVALIDATE anyway.
+      → All pushed: Start from REVALIDATE.
+      → No upstream tracking ref (command fails): Skip push, start from REVALIDATE.
+      → Push fails: Pipeline ERROR — report failure and END.
     → NO:  Continue to Signal 3.
 
   Signal 3: Does <review_dir>/fix-requests.md exist?
@@ -42,7 +42,7 @@ Check signals:
 
 | Condition | Behavior |
 | --------- | -------- |
-| Branch has no upstream tracking ref | `git log @{upstream}..HEAD` fails → treat as "cannot determine push status" → start from revalidate (skip push attempt) |
+| Branch has no upstream tracking ref | `git log @{upstream}..HEAD` fails → skip push, start from revalidate directly |
 | `gh` CLI not authenticated | Signal 4 fails → default to `pr-create` (will fail at PR creation stage with auth error) |
 | Review directory does not exist | All file checks return false → falls through to Signal 4 |
 | Multiple review directories | Only `<normalized>` branch directory is checked — other branches are ignored |

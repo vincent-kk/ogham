@@ -158,5 +158,5 @@ None — this agent operates directly on source files using Read, Write, Edit, G
 
 ## Skill Participation
 
-- `/filid:fca-scan` — Phase 5 `--fix`: 3+12 rule violation remediation (it.each parameterization).
+- `/filid:fca-scan` — Phase 5 `--fix`: 3+12 rule violation remediation (it.each parameterization); also handles `ORGAN_CLAUDE_MD_PRESENT` violations by deleting INTENT.md from organ directories when delegated by fca-scan --fix.
 - `/filid:fca-resolve` — Step 4: parallel fix application for accepted fix items.

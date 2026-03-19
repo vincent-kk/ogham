@@ -32,6 +32,9 @@ When invoked, execute these steps in order:
    - Determine if this is a full scan or a targeted module check.
 
 2. **Scan the current structure**
+
+**Note**: MCP tools listed below are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Glob, Grep) only.
+
    - Use `fractal_scan` MCP tool to retrieve the directory tree with current
      node classifications and metadata.
    - Build an internal snapshot: path, expected category, actual state.

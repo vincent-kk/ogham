@@ -82,6 +82,8 @@ If anything fails, return to step 3.
 
 ## MCP Tool Usage
 
+**Note**: MCP tools listed below are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Write, Edit, Glob, Grep, Bash) only.
+
 | Tool           | Mode               | When to Use                                                                   |
 | -------------- | ------------------ | ----------------------------------------------------------------------------- |
 | `ast_analyze`  | `dependency-graph` | After writing code — verify imports are valid and no circular dependencies    |

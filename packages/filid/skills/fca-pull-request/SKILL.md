@@ -51,6 +51,10 @@ current codebase.
 - **Failure**: Block PR creation, report failure reason, and exit
 - **`--skip-update`**: Skip Stage 1 entirely and proceed directly to Stage 2
 
+After `fca-update` completes, check for uncommitted changes (`git status --porcelain`).
+If changes exist (from INTENT.md/DETAIL.md updates or structural corrections),
+stage and commit them before proceeding to Stage 2.
+
 See [reference.md Section 1](./reference.md#section-1--fca-context-sync).
 
 ### Stage 2 — Base Branch Resolution

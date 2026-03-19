@@ -102,6 +102,8 @@ Report all files changed with absolute paths and line counts.
 
 ## MCP Tool Usage
 
+**Note**: MCP tools listed below are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Write, Edit, Glob, Grep, Bash) only.
+
 | Tool               | Mode               | When to Use                                           |
 | ------------------ | ------------------ | ----------------------------------------------------- |
 | `doc_compress`     | `reversible`       | Compress content that may need exact recall later     |

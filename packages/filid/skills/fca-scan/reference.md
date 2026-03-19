@@ -111,17 +111,24 @@ Run with --fix to apply automatic remediations.
 
 | Violation                      | Auto-fix Action                                                         | Agent             |
 | ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
-| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `context-manager` |
+| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `code-surgeon`    |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
 Each fixable violation is delegated to the appropriate agent as a **foreground**
-Agent call (not background). Launch independent fix agents in **parallel tool
-calls within a single response**. Do NOT use `run_in_background: true` — this
-causes the LLM to yield the turn. Violations requiring architectural decisions
-(reclassification, missing index.ts, structural drift) are reported but not
-auto-fixed — run `/filid:fca-sync` or `/filid:fca-restructure` for those.
+Agent call (not background) with explicit `subagent_type`: `filid:context-manager`
+for document fixes, `filid:code-surgeon` for code/file fixes. Launch independent
+fix agents in **parallel tool calls within a single response**. Do NOT use
+`run_in_background: true` — this causes the LLM to yield the turn.
+
+Agents target non-overlapping file types (`context-manager` edits INTENT.md/DETAIL.md
+content; `code-surgeon` handles file deletion and test refactoring), so parallel
+execution is safe without file locking.
+
+Violations requiring architectural decisions (reclassification, missing index.ts,
+structural drift) are reported but not auto-fixed — run `/filid:fca-sync` or
+`/filid:fca-restructure` for those.
 
 After all agent fixes complete, re-run Phases 2–4 on fixed files and append
 a fix summary:
@@ -139,5 +146,5 @@ Skipped : <n> (require manual remediation)
 | ------------------------------ | -------- | -------- | ----------------- |
 | `INTENT_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
 | `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
-| `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `context-manager` |
+| `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `code-surgeon`    |
 | `TEST_312_EXCEEDED`            | high     | Yes      | `code-surgeon`    |

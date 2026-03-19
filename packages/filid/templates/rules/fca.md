@@ -127,9 +127,9 @@ export const MY_CONSTANT = 'value';
 
 - Hard limit: **50 lines**. Exceeding 50 lines is blocked by the pre-tool-use hook.
 - MUST include 3-tier boundary sections:
-  - `## Always do` — actions that must always be taken in this module
-  - `## Ask first` — actions requiring discussion before proceeding
-  - `## Never do` — actions strictly prohibited in this module
+  - `### Always do` — actions that must always be taken in this module
+  - `### Ask first` — actions requiring discussion before proceeding
+  - `### Never do` — actions strictly prohibited in this module
 - Approaching 50 lines signals the module MUST be decomposed into smaller fractal nodes.
 - MUST NOT increase the limit; restructure the module instead.
 - Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`,

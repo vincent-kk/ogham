@@ -47,6 +47,7 @@ See [reference.md Section 1](./reference.md#section-1--scan).
 ### Stage 2 — Sync (Conditional Structure Correction)
 
 Runs only when Stage 1 detects `critical` or `high` severity violations.
+See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
 
 Agents: `drift-analyzer` (sonnet) → `restructurer` (sonnet)
 MCP: `drift_detect`, `lca_resolve`, `structure_validate`
@@ -59,6 +60,11 @@ Two independent agents run in parallel on non-overlapping file sets.
 
 Agent: `context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
 Agent: `implementer` (sonnet) — test organization (test.ts / spec.ts)
+
+If either agent (`context-manager` or `implementer`) fails, the orchestrator
+marks the stage as failed. Stage 4 (cache hash save) is skipped when any prior
+stage reported an error, ensuring the failed operation is retried on next run.
+
 See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ### Stage 4 — Finalize
