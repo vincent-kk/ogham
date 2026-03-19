@@ -116,10 +116,12 @@ Run with --fix to apply automatic remediations.
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
-Each fixable violation is delegated to the appropriate agent as a separate
-Task subagent (`run_in_background: true`). Violations requiring architectural
-decisions (reclassification, missing index.ts, structural drift) are reported
-but not auto-fixed — run `/filid:fca-sync` or `/filid:fca-restructure` for those.
+Each fixable violation is delegated to the appropriate agent as a **foreground**
+Agent call (not background). Launch independent fix agents in **parallel tool
+calls within a single response**. Do NOT use `run_in_background: true` — this
+causes the LLM to yield the turn. Violations requiring architectural decisions
+(reclassification, missing index.ts, structural drift) are reported but not
+auto-fixed — run `/filid:fca-sync` or `/filid:fca-restructure` for those.
 
 After all agent fixes complete, re-run Phases 2–4 on fixed files and append
 a fix summary:

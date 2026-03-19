@@ -31,16 +31,31 @@ with direct MCP calls. This standalone skill (`/filid:fca-scan`) always scans th
 
 ## Core Workflow
 
+> **CRITICAL — No-Yield Execution**: Every step below MUST chain directly into
+> the next via tool calls. NEVER output a text-only response between phases.
+> After each phase completes, immediately invoke the next phase's tool calls
+> in the same response.
+
 ### Phase 1 — Tree Construction
 
 Build the project hierarchy using `fractal_scan` and partition into fractal
 nodes, organ nodes, and spec files.
 See [reference.md Section 1](./reference.md#section-1--tree-construction).
 
-### Phases 2–4 (Parallel — after Phase 1)
+**Immediately after** receiving `fractal_scan` results, proceed to Phase 2–4
+in the same response — do NOT summarize or report Phase 1 results first.
 
-Phases 2, 3, and 4 are **independent** and run **in parallel** as separate Task
-subagents (`run_in_background: true`). Await all three before Phase 5.
+### Phases 2–4 (Inline Parallel — same response as Phase 1 result)
+
+Execute all three phases as **parallel inline tool calls in a single response**.
+Do NOT use background agents or subagents — call the tools directly:
+
+- **Phase 2** — Read each INTENT.md (parallel Read calls) and check line count + boundary sections
+- **Phase 3** — Filter organ nodes from Phase 1 results and check for INTENT.md presence (no extra tool calls needed if Phase 1 data suffices; use Glob only if needed)
+- **Phase 4** — Call `test_metrics` with `action: "check-312"` for all spec files
+
+Launch all independent Read/Glob/MCP calls for Phases 2–4 as **parallel tool
+calls in one response**. Then proceed directly to Phase 5.
 
 ### Phase 2 — INTENT.md Validation
 
@@ -57,10 +72,11 @@ See [reference.md Section 3](./reference.md#section-3--organ-directory-validatio
 Validate all `*.spec.ts` files against the 15-case limit using `test_metrics`.
 See [reference.md Section 4](./reference.md#section-4--test-file-validation-312-rule).
 
-### Phase 5 — Report Generation (Sequential — after Phases 2–4)
+### Phase 5 — Report Generation (Immediately after Phases 2–4)
 
-Emit a structured violation report. With `--fix`, apply auto-remediations
-and re-validate:
+Emit the violation report **in the same response** that processes Phase 2–4
+results. With `--fix`, apply auto-remediations using **foreground** agents
+(not background), then re-validate:
 
 - **INTENT.md line-count violations**: delegated to `context-manager` agent
   (trims and compresses to bring within the 50-line limit).
