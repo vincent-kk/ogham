@@ -7,6 +7,7 @@ import path from 'node:path';
 
 import type { HumanSummary } from '../../types/summary.js';
 
+import { parseStructureCheckFrontmatter } from '../../core/utils/pr-summary-generator.js';
 import type { ReviewManageInput } from './review-manage.js';
 import {
   extractRevalidateVerdict,
@@ -17,6 +18,50 @@ import {
 
 /** Maximum PR comment size before falling back to summary-only */
 const MAX_COMMENT_SIZE = 50_000;
+
+/** Stage key → display name mapping */
+const STAGE_DISPLAY_NAMES: Record<string, string> = {
+  structure: 'Structure',
+  documents: 'Documents',
+  tests: 'Tests',
+  metrics: 'Metrics',
+  dependencies: 'Dependencies',
+};
+
+function resultEmoji(result: string): string {
+  if (result === 'PASS') return '✅';
+  if (result === 'FAIL') return '❌';
+  return '⏭️';
+}
+
+/**
+ * Transform structure-check.md content: replace YAML frontmatter with a
+ * human-readable summary table while keeping the markdown body intact.
+ */
+function transformStructureContent(content: string): string {
+  const fm = parseStructureCheckFrontmatter(content);
+  if (!fm) return content;
+
+  const bodyContent = content.replace(/^---\n[\s\S]*?\n---\n*/, '');
+
+  const lines: string[] = [];
+  lines.push('| Stage | Result |');
+  lines.push('| :--- | :---: |');
+  for (const [key, result] of Object.entries(fm.stageResults)) {
+    const name = STAGE_DISPLAY_NAMES[key] ?? key;
+    lines.push(`| ${name} | ${resultEmoji(result)} ${result} |`);
+  }
+  const overallEmoji = resultEmoji(fm.overall);
+  lines.push(`| **Overall** | ${overallEmoji} **${fm.overall}** |`);
+
+  if (fm.criticalCount > 0) {
+    lines.push('');
+    lines.push(`> ⚠️ Critical issues: **${fm.criticalCount}**`);
+  }
+
+  const summaryTable = lines.join('\n');
+  return summaryTable + (bodyContent ? '\n\n' + bodyContent : '');
+}
 
 /**
  * Wrap content in a collapsible <details> block.
@@ -74,7 +119,10 @@ export async function formatPrComment(
 
   if (structureContent) {
     sections.push(
-      collapsible('Phase A — Structure Compliance', structureContent),
+      collapsible(
+        'Phase A — Structure Compliance',
+        transformStructureContent(structureContent),
+      ),
     );
   }
 

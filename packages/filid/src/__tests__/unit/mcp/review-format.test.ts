@@ -52,6 +52,12 @@ All members reached consensus.
 
 const SAMPLE_STRUCTURE = `---
 scope: diff
+stage_results:
+  structure: PASS
+  documents: PASS
+  tests: FAIL
+  metrics: PASS
+  dependencies: PASS
 overall: FAIL
 critical_count: 1
 ---
@@ -143,6 +149,15 @@ describe('formatPrComment', () => {
       '<details><summary>Review Report (Phase B~D)</summary>',
     );
     expect(md).toContain('<details><summary>Fix Requests</summary>');
+    // Frontmatter should be transformed into a summary table
+    expect(md).toContain('| Stage | Result |');
+    expect(md).toContain('✅ PASS');
+    expect(md).toContain('❌ FAIL');
+    expect(md).toContain('| **Overall** |');
+    expect(md).toContain('Critical issues: **1**');
+    // Raw frontmatter should not appear
+    expect(md).not.toContain('stage_results:');
+    expect(md).not.toContain('critical_count:');
     // Count <details> tags
     const detailsCount = (md.match(/<details>/g) || []).length;
     expect(detailsCount).toBe(3);
