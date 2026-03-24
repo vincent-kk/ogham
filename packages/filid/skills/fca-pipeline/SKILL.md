@@ -1,30 +1,36 @@
 ---
 name: fca-pipeline
 user_invocable: true
-description: End-to-end review pipeline orchestrator. Chains pr-create → review → resolve → revalidate with auto-detection of entry point, subagent context isolation, and file-based inter-stage communication.
+description: End-to-end review pipeline orchestrator. Chains pr-create → review → resolve → revalidate with auto-detection of entry point, hybrid execution model (subagent isolation for review, direct execution for other stages), and file-based inter-stage communication.
 version: 1.0.0
 complexity: medium
 ---
 
 > **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
-> After each stage's subagent completes, IMMEDIATELY verify the success signal
+> After each stage completes, IMMEDIATELY verify the success signal
 > and proceed to the next stage. NEVER yield the turn between stages.
-> NEVER yield the turn after an MCP tool call or subagent returns.
+> NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
+>
+> **HYBRID EXECUTION**: Only the `review` stage runs in a subagent (context
+> isolation for its ~100k token consumption). All other stages (`pr-create`,
+> `resolve`, `revalidate`) execute directly in the main context via `Skill()`.
 >
 > **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
 > pipelines most commonly stall. Resolve ends with commit + push, which
-> FEELS like completion but IS NOT. You MUST spawn the revalidate subagent
+> FEELS like completion but IS NOT. You MUST invoke `Skill("filid:fca-revalidate")`
 > immediately after resolve succeeds.
 
 # fca-pipeline — End-to-End Review Pipeline
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
-in a single command. Each stage runs in an independent subagent for context
-isolation, communicating via `.filid/review/<branch>/` files.
+in a single command. Uses a **hybrid execution model**: the `review` stage
+runs in an independent subagent for context isolation (~100k tokens), while
+`pr-create`, `resolve`, and `revalidate` execute directly in the main
+context via `Skill()`. Stages communicate via `.filid/review/<branch>/` files.
 
 > **References**: `reference.md` (auto-detection algorithm edge cases, flag passthrough
-> matrix, file contracts, subagent delegation pattern). All execution-critical
+> matrix, file contracts, stage execution pattern). All execution-critical
 > information is in this file.
 
 ## When to Use
@@ -39,9 +45,8 @@ isolation, communicating via `.filid/review/<branch>/` files.
 [pr-create] → [review] → [resolve --auto] → [revalidate]
 ```
 
-Each stage delegates to an existing skill. The pipeline is an orchestrator —
-it does not modify individual skill behavior. Subagents use `general-purpose`
-type which has access to the `Skill()` tool for invoking existing skills.
+Each stage delegates to an existing skill via `Skill()`. The pipeline is an
+orchestrator — it does not modify individual skill behavior.
 
 ## Core Workflow
 
@@ -89,20 +94,33 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 
 ### Step 2 — Execute Pipeline Stages
 
-Execute stages sequentially from the determined entry point. Each stage is
-delegated to an **independent Task subagent** (`general-purpose`) for
-context isolation. Subagents invoke existing skills via the `Skill()` tool.
+Execute stages sequentially from the determined entry point. The pipeline
+uses a **hybrid execution model**:
 
-#### Stage: pr-create
+- **Subagent stage** (`review`): Delegated to an independent `general-purpose`
+  Task subagent for context isolation. The review stage consumes ~100k tokens
+  and would degrade the main context if run inline.
+- **Main context stages** (`pr-create`, `resolve`, `revalidate`): Executed
+  directly via `Skill()` in the orchestrator's context. These stages are
+  lightweight and procedural — subagent delegation adds fragile two-level
+  indirection (Agent → Skill() → internal subagents) that causes premature
+  termination.
 
-- **Subagent invokes**: `Skill("filid:fca-pull-request")`
+> **Note**: Some main-context stages still spawn their own internal subagents
+> (e.g., `resolve` uses `code-surgeon` subagents, `revalidate` uses parallel
+> verification subagents). "Main context execution" means the *pipeline-level*
+> delegation is direct — internal skill behavior is unchanged.
+
+#### Stage: pr-create (main context)
+
+- **Execute**: `Skill("filid:fca-pull-request")`
 - **Pass through flags**: `--base`, `--draft`, `--skip-update`, `--title`
-- **Success signal**: subagent completes without error
+- **Success signal**: Skill completes without error
 - **Failure**: END execution with error — "PR creation failed: `<error>`"
 - **Output**: GitHub PR created/updated
-- **→ After subagent completes, immediately proceed to review stage.**
+- **→ After Skill() completes, immediately proceed to review stage.**
 
-#### Stage: review
+#### Stage: review (subagent)
 
 - **Subagent invokes**: `Skill("filid:fca-review --scope=pr")`
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
@@ -116,9 +134,9 @@ context isolation. Subagents invoke existing skills via the `Skill()` tool.
 - **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`)
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
 
-#### Stage: resolve
+#### Stage: resolve (main context)
 
-- **Subagent invokes**: `Skill("filid:fca-resolve --auto")`
+- **Execute**: `Skill("filid:fca-resolve", "--auto")`
 - **Always passes `--auto`** (pipeline implies full automation)
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
 - **Zero accepted fixes**: proceed to `revalidate` normally
@@ -126,17 +144,16 @@ context isolation. Subagents invoke existing skills via the `Skill()` tool.
 - **Failure**: END execution with error — "Resolve failed: `<error>`"
 - **Output**: `justifications.md`, committed + pushed changes
 
-> **⚠️ CRITICAL — DO NOT STOP HERE**: Resolve completing (commit + push)
-> is NOT the end of the pipeline. The pipeline is **incomplete** without
-> the revalidate stage. You MUST spawn the revalidate subagent immediately
-> after confirming `justifications.md` exists. Stopping after resolve is
-> the single most common pipeline failure — do NOT let it happen.
+> **⚠️ DO NOT STOP HERE**: Resolve completing (commit + push) is NOT the
+> end of the pipeline. The pipeline is **incomplete** without the revalidate
+> stage. You MUST invoke `Skill("filid:fca-revalidate")` immediately after
+> confirming `justifications.md` exists.
 
-- **→ After justifications.md is confirmed, immediately spawn the revalidate subagent. Do NOT output any text without a tool call.**
+- **→ After justifications.md is confirmed, immediately invoke Skill("filid:fca-revalidate"). Do NOT output any text without a tool call.**
 
-#### Stage: revalidate
+#### Stage: revalidate (main context)
 
-- **Subagent invokes**: `Skill("filid:fca-revalidate")`
+- **Execute**: `Skill("filid:fca-revalidate")`
 - **No additional flags**
 - **Success signal**: `.filid/review/<branch>/re-validate.md` exists
 - **Failure**: END execution with error — "Revalidate failed: `<error>`"
@@ -213,7 +230,7 @@ All other operations are delegated to existing skills via `Skill()` tool.
 /filid:fca-pipeline --from=revalidate      # Revalidate only
 
 Pipeline:  [pr-create] → [review] → [resolve --auto] → [revalidate]
-Stages:    Each runs in an independent subagent (context isolation)
+Execution: review = subagent (context isolation), others = main context (direct Skill())
 Skills:    fca-pull-request, fca-review (--scope=pr), fca-resolve (--auto), fca-revalidate
 Files:     .filid/review/<branch>/ (inter-stage communication)
 Resolve:   Always --auto (accept all, commit, push, auto-revalidate)

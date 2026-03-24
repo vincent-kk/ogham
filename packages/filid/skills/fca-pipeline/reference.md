@@ -2,7 +2,7 @@
 
 Detailed reference for the pipeline orchestrator skill, including
 auto-detection algorithm, flag passthrough, file contracts, and
-subagent delegation patterns.
+stage execution patterns.
 
 ## Auto-Detection Algorithm
 
@@ -92,7 +92,7 @@ These files serve as the inter-stage communication interface.
 
 | Stage       | Success signal                                             |
 | ----------- | ---------------------------------------------------------- |
-| pr-create   | Subagent completes without error                           |
+| pr-create   | Skill completes without error                              |
 | review      | `fix-requests.md` exists (or `APPROVED` verdict)           |
 | resolve     | `justifications.md` exists                                 |
 | revalidate  | `re-validate.md` exists                                    |
@@ -125,21 +125,38 @@ Complete enumeration of stage outcomes and pipeline behavior.
 | 8  | Any stage execution error              | Pipeline **ERROR** (report + resume cmd) |
 | 9  | `--from` prerequisite missing          | Pipeline **ABORT** (before execution)    |
 
-## Subagent Delegation Pattern
+## Stage Execution Pattern
 
-Each stage is delegated to an independent Task subagent to prevent
-context pollution across stages.
+The pipeline uses a **hybrid execution model** to balance context isolation
+with delegation reliability.
+
+### Execution Modes
+
+| Stage       | Mode         | Reason                                                    |
+| ----------- | ------------ | --------------------------------------------------------- |
+| pr-create   | Main context | Lightweight, procedural — direct `Skill()` is reliable    |
+| review      | Subagent     | ~100k tokens — must isolate to prevent main context bloat |
+| resolve     | Main context | Procedural with internal subagents (code-surgeon)         |
+| revalidate  | Main context | Lightweight with internal subagents (parallel verifiers)  |
+
+### Pseudocode
 
 ```
 For each stage in pipeline:
-  result = Agent(
-    subagent_type: "general-purpose",
-    prompt: "Read and execute the following skill: Skill('filid:<skill-name>', '<flags>').
-             Project root: <project_root>. Branch: <branch>.",
-    description: "fca-pipeline: <stage-name>"
-  )
 
-  if result indicates failure:
+  if stage == "review":
+    # Subagent delegation — context isolation required
+    result = Agent(
+      subagent_type: "general-purpose",
+      prompt: "Read and execute the following skill: Skill('filid:fca-review', '--scope=pr <flags>').
+               Project root: <project_root>. Branch: <branch>.",
+      description: "FCA review stage execution"
+    )
+  else:
+    # Main context execution — direct Skill() call
+    Skill("filid:<skill-name>", "<flags>")
+
+  if failure:
     Report: "Pipeline ERROR at stage <stage-name>: <error>"
     Report: "Resume with: /filid:fca-pipeline --from=<stage-name>"
     STOP pipeline.
@@ -148,39 +165,48 @@ For each stage in pipeline:
   Proceed to next stage.
 ```
 
-### Why Subagents?
+### Why Hybrid Execution?
 
-1. **Context isolation**: Each stage (especially review) consumes significant
-   context. Running all 4 in a single context would risk compaction and
-   degraded output quality.
-2. **Clean failure boundaries**: If a stage fails, only that subagent's
-   context is lost. The orchestrator retains pipeline state.
-3. **Skill reuse**: Subagents invoke existing skills via `Skill()` — the
-   same code path as standalone skill execution.
+1. **Context isolation for review**: The review stage consumes ~100k tokens
+   (multi-persona consensus with 5+ tool-heavy phases). Running it in the
+   main context would risk compaction and degraded output quality.
+2. **Reliable execution for procedural stages**: `resolve` and `revalidate`
+   are sequential, procedural workflows that spawn their own internal
+   subagents (code-surgeon, parallel verifiers). Wrapping them in a
+   pipeline-level subagent creates a fragile three-level nesting chain
+   (pipeline Agent → stage subagent → Skill() → internal subagents) that
+   causes `"summary is required when message is a string"` errors and
+   premature termination.
+3. **Skill reuse**: All stages invoke existing skills via `Skill()` — the
+   same code path as standalone skill execution, regardless of execution mode.
+
+> **Note**: "Main context execution" eliminates only the *pipeline-level*
+> subagent wrapper. Skills that internally spawn subagents (e.g., resolve's
+> code-surgeon, revalidate's parallel verifiers) continue to do so normally.
 
 ## Example Pipeline Run
 
 ```
 $ /filid:fca-pipeline --from=pr-create --base=main --draft
 
-[1/4] pr-create
-  → Skill("filid:fca-pull-request --base=main --draft")
+[1/4] pr-create (main context)
+  → Skill("filid:fca-pull-request", "--base=main --draft")
   → PR #42 created (draft)
   ✓ Success
 
-[2/4] review
-  → Skill("filid:fca-review --scope=pr --base=main")
+[2/4] review (subagent)
+  → Agent → Skill("filid:fca-review", "--scope=pr --base=main")
   → Verdict: REQUEST_CHANGES (5 fix items)
   ✓ fix-requests.md written
 
-[3/4] resolve
-  → Skill("filid:fca-resolve --auto")
+[3/4] resolve (main context)
+  → Skill("filid:fca-resolve", "--auto")
   → 5/5 fixes accepted, typecheck PASS
   → Committed: fix(filid): resolve FIX-001, FIX-002, FIX-003, FIX-004, FIX-005 from fca-review
   → Pushed to origin
   ✓ justifications.md written
 
-[4/4] revalidate
+[4/4] revalidate (main context)
   → Skill("filid:fca-revalidate")
   → Verdict: PASS (5/5 resolved, 0 unconstitutional)
   → PR comment posted
