@@ -102,8 +102,8 @@ Skip this stage if `CHANGED_SPEC_FILES` is empty.
 
 Severity mapping:
 
-- Total cases > 15 → HIGH
-- Distribution violation (too many basic) → MEDIUM
+- Total cases > 15 → HIGH (fix type: `promote`)
+- Distribution violation (too many basic) → MEDIUM (fix type: `promote`)
 
 ### A.4 — Stage 4: Code Metrics (LCOM4 and CC)
 
@@ -124,9 +124,9 @@ Skip this stage if `CHANGED_FILES` is empty.
 
 Severity mapping:
 
-- LCOM4 >= 2 on a module with 5+ exports → HIGH
-- LCOM4 >= 2 on smaller module → MEDIUM
-- CC > 15 → MEDIUM
+- LCOM4 >= 2 on a module with 5+ exports → HIGH (fix type: `restructure`)
+- LCOM4 >= 2 on smaller module → MEDIUM (fix type: `restructure`)
+- CC > 15 → MEDIUM (fix type: `code-fix`)
 
 ### A.5 — Stage 5: Dependency Verification (DAG)
 

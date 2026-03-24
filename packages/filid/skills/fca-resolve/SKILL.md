@@ -55,6 +55,12 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - Fix ID (e.g., `FIX-001`)
 - Title, severity, file path, rule violated
 - Recommended action and code patch
+- **Type** (one of `code-fix`, `promote`, `restructure`; defaults to `code-fix` if absent)
+
+Classify each item by type:
+- `code-fix` — standard code patch (applied by code-surgeon)
+- `promote` — test.ts → spec.ts promotion (3+12 rule compliance)
+- `restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
 
 **→ Immediately proceed to Step 3.**
 
@@ -80,23 +86,43 @@ For each fix item:
 
 ### Step 4 — Process Accepted Items
 
-**Before dispatching any code-surgeon subagents**, capture the base SHA:
+**Before dispatching any fixes**, capture the base SHA:
 
 1. `base_sha = git rev-parse HEAD` (Bash) — store in memory.
    This is the pre-fix baseline. It will be written to `justifications.md`
    as `resolve_commit_sha` in Step 6.
 
-Delegate all accepted fixes **in parallel** as separate Task subagents
-(`code-surgeon`, model: `sonnet`, `run_in_background: true`).
+#### Phase 4a — Code Fixes (parallel)
 
-For each accepted fix, spawn one subagent with:
+Delegate all accepted `code-fix` items **in parallel** as separate Task
+subagents (`code-surgeon`, model: `sonnet`, `run_in_background: true`).
+
+For each accepted code-fix, spawn one subagent with:
 - The target file path
 - The recommended action and code patch from `fix-requests.md`
 - Instruction to apply the fix directly to the file
 
-Await all subagents before proceeding to Step 5.
+Await all code-surgeon subagents before Phase 4b.
 
-**→ After all code-surgeon subagents complete, immediately proceed to Step 5.**
+#### Phase 4b — Structural Fixes (sequential, after code fixes)
+
+After all code fixes are applied, process structural fix items **sequentially**:
+
+For each accepted `promote` item:
+- Invoke `Skill("filid:fca-promote", "<target_path>")`.
+- If the skill reports no eligible files, log as "SKIP — no stable test.ts found"
+  and continue. This is non-blocking.
+
+For each accepted `restructure` item:
+- Invoke `Skill("filid:fca-restructure", "<target_path> --auto-approve")`.
+- If the skill fails or reports no actionable changes, log as
+  "SKIP — restructure not applicable" and continue. This is non-blocking.
+
+> **Important**: Structural fix failures MUST NOT block the pipeline.
+> Log the result and continue to Step 5. The revalidate stage will
+> catch any remaining issues.
+
+**→ After all fixes (code + structural) complete, immediately proceed to Step 5.**
 
 ### Step 5 — Process Rejected Items
 
@@ -265,7 +291,7 @@ Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surg
           → 5 (Rejected items) → 6 (justifications.md) → 6.5 (Typecheck + commit)
           → 6.6 (Push) → 7 (Revalidate)
 
-Agents:    code-surgeon (Step 4 — parallel fix application for accepted items)
+Agents:    code-surgeon (Step 4a — parallel code-fix), fca-promote (Step 4b), fca-restructure (Step 4b)
 MCP tools: review_manage(normalize-branch), debt_manage(create)
 
 --auto:   Skips Steps 3 (accept all), 5 (no rejections), 7 prompt (auto-revalidate)

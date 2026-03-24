@@ -90,6 +90,7 @@ for assigning IDs sequentially across both sources.
 
 - **Severity**: LOW | MEDIUM | HIGH | CRITICAL
 - **Source**: structure | code-quality        ← origin of the finding
+- **Type**: code-fix | promote | restructure ← dispatch type (default: code-fix)
 - **Path**: `<file path>`
 - **Rule**: <violated rule>
 - **Current**: <current value>
@@ -99,6 +100,11 @@ for assigning IDs sequentially across both sources.
   ```typescript
   // suggested fix (omit if structural — describe action instead)
   ```
+
+Type classification:
+- `code-fix`: standard inline code patches (default when omitted)
+- `promote`: 3+12 rule violations → resolved by test file promotion/splitting
+- `restructure`: LCOM4 >= 2 or structural drift → resolved by module reorganization
 ````
 
 ---

@@ -23,9 +23,9 @@ long-term architectural health over short-term delivery speed.
 
 ### Decision Criteria
 
-1. **LCOM4 >= 2**: Recommend module split. Specify target sub-modules.
-2. **CC > 15**: Recommend function decomposition or strategy pattern extraction.
-3. **3+12 violation**: Recommend test file splitting (basic + edge separation).
+1. **LCOM4 >= 2**: Recommend module split (fix type: `restructure`). Specify target sub-modules.
+2. **CC > 15**: Recommend function decomposition or strategy pattern extraction (fix type: `code-fix`).
+3. **3+12 violation**: Recommend test file promotion/splitting (fix type: `promote`).
 4. **Circular dependency**: Absolute block — must resolve before approval.
 5. **Fractal boundary violation**: File placed in wrong fractal scope.
 6. **Missing INTENT.md**: New fractal directory without governance document.

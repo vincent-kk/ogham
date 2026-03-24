@@ -55,10 +55,64 @@ Consequences: <technical debt created, future impact, estimated resolution>
 3. Include estimated resolution timeframe if mentioned
 4. Reference the created debt file ID
 
+## Fix Item Types
+
+Each fix item in `fix-requests.md` has an optional `type` field that determines
+how the resolve skill processes it:
+
+| Type | Default | Handler | Description |
+|------|---------|---------|-------------|
+| `code-fix` | yes | `code-surgeon` subagent | Standard code patch (inline edit) |
+| `promote` | no | `Skill("filid:fca-promote")` | test.ts → spec.ts promotion (3+12 compliance) |
+| `restructure` | no | `Skill("filid:fca-restructure")` | Module split/reorganization (LCOM4 >= 2) |
+
+When `type` is absent, the item is treated as `code-fix`.
+
+### Fix Item Format by Type
+
+**code-fix** (default):
+```markdown
+### FIX-001: Unused import in validator.ts
+- **Severity**: LOW
+- **Path**: `src/core/validator.ts`
+- **Rule**: zero-peer-file
+- **Type**: code-fix
+- **Action**: Remove unused import on line 12
+- **Patch**: (inline diff)
+```
+
+**promote**:
+```markdown
+### FIX-002: spec.ts 3+12 rule violation
+- **Severity**: MEDIUM
+- **Path**: `src/core/__tests__/unit/parser.test.ts`
+- **Rule**: 3+12 rule (18 test cases, limit 15)
+- **Type**: promote
+- **Action**: Promote test.ts to spec.ts with 3+12 split
+```
+
+**restructure**:
+```markdown
+### FIX-003: Module cohesion below threshold
+- **Severity**: HIGH
+- **Path**: `src/core/validator.ts`
+- **Rule**: LCOM4 >= 2 (current: 3)
+- **Type**: restructure
+- **Action**: Split module into focused sub-modules
+```
+
+### Dispatch Sequence
+
+1. **Phase 4a**: All `code-fix` items dispatched to `code-surgeon` in parallel
+2. **Phase 4b**: After code fixes complete, `promote` and `restructure` items
+   processed sequentially via their respective skills
+3. Structural fix failures are **non-blocking** — logged and skipped
+
 ## Accepted Fix Output Format
 
 Accepted fixes are applied directly to source files via parallel `code-surgeon`
-subagents. After all subagents complete, report results:
+subagents (code-fix type) or via skill invocations (promote/restructure type).
+After all handlers complete, report results:
 
 ```markdown
 ### FIX-<ID>: <title> — APPLIED
