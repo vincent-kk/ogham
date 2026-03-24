@@ -2,7 +2,7 @@
 
 ## Purpose
 
-16개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
+17개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
 
 ## Structure
 
@@ -24,6 +24,7 @@
 | `fca-promote/` | test.ts → spec.ts 승격 |
 | `fca-migrate/` | CLAUDE.md → INTENT.md 마이그레이션 |
 | `fca-ast-fallback/` | LLM AST 패턴 매칭 폴백 |
+| `fca-config/` | `.filid/config.json` 설정 관리 (show/set/reset) |
 
 ## Conventions
 
