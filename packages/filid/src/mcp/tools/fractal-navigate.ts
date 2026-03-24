@@ -122,5 +122,6 @@ function handleSiblingList(input: FractalNavigateInput): FractalNavigateOutput {
 
 function handleTree(input: FractalNavigateInput): FractalNavigateOutput {
   const tree = buildFractalTree(input.entries);
+  tree.nodesList = Array.from(tree.nodes.values());
   return { tree };
 }

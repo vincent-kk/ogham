@@ -11,8 +11,13 @@ Call `fractal_scan` to build the complete hierarchy by scanning the filesystem.
 fractal_scan({ path: "<target-path>" })
 ```
 
-The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode).
-Partition into three working sets:
+The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode)
+and `tree.nodesList` (flat array of all FractalNode objects).
+
+> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.**
+> Use `tree.nodesList` for safe array iteration. Use `tree.nodes["/path"]` for path-based lookup.
+
+Partition into three working sets (iterate `tree.nodesList` or `tree.nodes.values()`):
 
 - **fractal nodes** — nodes with `hasIntentMd: true` or `type: "fractal"`
 - **organ nodes** — nodes with `type: "organ"` or names matching `ORGAN_DIR_NAMES`

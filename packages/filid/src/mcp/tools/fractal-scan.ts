@@ -43,6 +43,8 @@ export async function handleFractalScan(args: unknown): Promise<ScanReport> {
       .map((r) => r.value);
   }
 
+  tree.nodesList = Array.from(tree.nodes.values());
+
   return {
     tree,
     modules,

@@ -128,7 +128,8 @@ export function createServer(): McpServer {
     'fractal_navigate',
     {
       description:
-        'Navigate the FCA-AI fractal tree structure. Classify directories as fractal/organ, list siblings, or build the full tree.',
+        'Navigate the FCA-AI fractal tree structure. Classify directories as fractal/organ, list siblings, or build the full tree. ' +
+        'For tree action: tree.nodes is an OBJECT keyed by path. Use tree.nodesList (flat array) for iteration.',
       inputSchema: z.object({
         action: z
           .enum(['classify', 'sibling-list', 'tree'])
@@ -251,7 +252,9 @@ export function createServer(): McpServer {
       description:
         'Scan a project directory to build a FractalTree and return a ScanReport. ' +
         'Classifies each directory node as fractal/organ/pure-function/hybrid. ' +
-        'When includeModuleInfo=true, includes entry point (index.ts, main.ts) analysis for each module.',
+        'When includeModuleInfo=true, includes entry point (index.ts, main.ts) analysis for each module. ' +
+        'IMPORTANT: In the JSON response, tree.nodes is an OBJECT keyed by path (not an array). ' +
+        'Use tree.nodesList (flat array of FractalNode) for iteration.',
       inputSchema: z.object({
         path: z
           .string()

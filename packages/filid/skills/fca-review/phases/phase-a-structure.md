@@ -35,7 +35,8 @@ fractal_scan(path: <PROJECT_ROOT>)
 // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, ... }
 ```
 
-Store `tree.nodes` as `SCAN_NODES` for use in A.1 classify calls.
+Store `tree.nodesList` (array) as `SCAN_NODES` for use in A.1 classify calls.
+(`tree.nodes` is a path-keyed object in JSON — use `tree.nodesList` for iteration.)
 
 Build two lists:
 

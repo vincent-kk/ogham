@@ -14,10 +14,14 @@ fractal_scan({ path: "<target-path>" })
 The response is a `ScanReport` containing:
 
 - `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
+- `tree.nodesList`: flat array of all FractalNode objects (for convenient iteration)
 - `tree.root`: root directory path
 - `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
 
-Build three working sets from `tree.nodes`:
+> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.**
+> Use `tree.nodesList` for safe array iteration. Use `tree.nodes["/path"]` for path-based lookup.
+
+Build three working sets from `tree.nodesList` (or `tree.nodes.values()`):
 
 - **fractal nodes** — `type === "fractal"` or `hasIntentMd === true`
 - **organ nodes** — `type === "organ"`

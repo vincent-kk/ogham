@@ -22,7 +22,9 @@ Use `fractal_scan` to retrieve the full project tree, then find the node matchin
 fractal_scan({ path: "<project-root>" })
 ```
 
-Scan `tree.nodes` for the node whose name or path best matches the target.
+Scan `tree.nodesList` (array) or `tree.nodes` (path-keyed object) for the node whose name or path best matches the target.
+
+> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.** Use `tree.nodesList` for iteration.
 If the match is ambiguous, use `fractal_navigate(classify)` with the node's
 known children from the scan result:
 

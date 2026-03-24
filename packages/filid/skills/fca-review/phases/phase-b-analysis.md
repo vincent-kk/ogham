@@ -50,7 +50,8 @@ fractal_scan(path: <PROJECT_ROOT>)
 // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, ... }
 ```
 
-Store `tree.nodes` as `SCAN_NODES` for use in classify calls below.
+Store `tree.nodesList` (array) as `SCAN_NODES` for use in classify calls below.
+(`tree.nodes` is a path-keyed object in JSON — use `tree.nodesList` for iteration.)
 
 For each changed file directory, call:
 

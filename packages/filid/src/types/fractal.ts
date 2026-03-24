@@ -55,6 +55,8 @@ export interface FractalTree {
   depth: number;
   /** Total node count (including root) */
   totalNodes: number;
+  /** Flat array of all nodes for convenient iteration (serialization helper) */
+  nodesList?: FractalNode[];
 }
 
 /** Dependency edge */
