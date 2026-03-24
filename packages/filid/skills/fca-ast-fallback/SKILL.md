@@ -1,6 +1,6 @@
 ---
 name: fca-ast-fallback
-user_invocable: true
+user_invocable: false
 description: AST pattern search/replace fallback using LLM when ast-grep is unavailable.
 version: 1.0.0
 complexity: low

@@ -1,6 +1,6 @@
 ---
 name: fca-restructure
-user_invocable: true
+user_invocable: false
 description: Analyze project structure and restructure it to follow fractal principles — multi-stage with user approval
 version: 1.0.0
 complexity: high

@@ -1,6 +1,6 @@
 ---
 name: fca-promote
-user_invocable: true
+user_invocable: false
 description: Promote stable test.ts files to 3+12 rule-compliant spec.ts
 version: 1.0.0
 complexity: medium
