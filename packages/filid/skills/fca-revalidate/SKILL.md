@@ -129,9 +129,9 @@ Post verdict to PR if GitHub CLI is available:
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
 4. If not authenticated: skip with info message.
 
-> **Language**: All output files and PR comments MUST be written in the user's
-> language (as configured in their CLAUDE.md or system prompt — e.g., "Always
-> respond in Korean" → write in Korean). This applies to re-validate.md,
+> **Language**: All output files and PR comments MUST be written in the language
+> specified by the `[filid:lang]` tag in system context (configured in `.filid/config.json`).
+> If no tag is present, follow the system's language setting; default to English. This applies to re-validate.md,
 > PR comments, and any additional commentary. Technical terms, code identifiers,
 > rule IDs, and file paths remain in their original form.
 

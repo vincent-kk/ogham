@@ -1,3 +1,4 @@
+import { loadConfig, resolveLanguage } from '../core/infra/config-loader.js';
 import type { HookOutput, SubagentStartInput } from '../types/hooks.js';
 
 import { isFcaProject } from './shared.js';
@@ -55,6 +56,16 @@ const PLANNING_AGENT_RE =
   /^oh-my-claudecode:(planner|architect|analyst|critic)$/;
 const EXECUTOR_AGENT_RE = /^oh-my-claudecode:(executor|deep-executor)$/;
 
+/** Resolve [filid:lang] tag for injection into agent context. */
+function buildLangTag(cwd: string): string {
+  try {
+    const config = loadConfig(cwd);
+    return `[filid:lang] ${resolveLanguage(config)}`;
+  } catch {
+    return '[filid:lang] en';
+  }
+}
+
 /**
  * SubagentStart hook: inject role-based tool restrictions and FCA-AI workflow guidance.
  *
@@ -67,14 +78,15 @@ const EXECUTOR_AGENT_RE = /^oh-my-claudecode:(executor|deep-executor)$/;
 export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   const agentType = input.agent_type ?? '';
 
-  // 1. filid agent role restrictions (unchanged)
+  // 1. filid agent role restrictions + language tag
   const restriction = ROLE_RESTRICTIONS[agentType];
   if (restriction) {
+    const langTag = buildLangTag(input.cwd);
     return {
       continue: true,
       hookSpecificOutput: {
         hookEventName: 'SubagentStart',
-        additionalContext: restriction,
+        additionalContext: `${restriction}\n${langTag}`,
       },
     };
   }
@@ -84,24 +96,25 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
     return { continue: true };
   }
 
-  // 3. Planning agents: inject development workflow
+  // 3. Planning agents: inject development workflow + language tag
+  const langTag = buildLangTag(input.cwd);
   if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan') {
     return {
       continue: true,
       hookSpecificOutput: {
         hookEventName: 'SubagentStart',
-        additionalContext: PLANNING_GUIDANCE,
+        additionalContext: `${PLANNING_GUIDANCE}\n${langTag}`,
       },
     };
   }
 
-  // 4. Implementation agents: inject pre-implementation reminder
+  // 4. Implementation agents: inject pre-implementation reminder + language tag
   if (EXECUTOR_AGENT_RE.test(agentType) || agentType === 'general-purpose') {
     return {
       continue: true,
       hookSpecificOutput: {
         hookEventName: 'SubagentStart',
-        additionalContext: IMPLEMENTATION_REMINDER,
+        additionalContext: `${IMPLEMENTATION_REMINDER}\n${langTag}`,
       },
     };
   }

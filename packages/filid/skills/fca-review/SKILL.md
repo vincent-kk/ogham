@@ -81,11 +81,11 @@ When constructing subagent prompts, follow these rules to ensure reliable output
 4. **Reinforce the output at the end**: Close the prompt with a reminder: "REMINDER:
    Write `<output_file>` before you finish. If you run low on budget, skip remaining
    analysis and write the file with partial results."
-5. **Pass the user's language**: Include a language instruction in every subagent
-   prompt: "Write all output files and commentary in the user's language. The user's
-   language setting is: `<language from CLAUDE.md or system prompt>`." This ensures
-   output files (structure-check.md, session.md, verification.md, review-report.md,
-   fix-requests.md) are written in the user's language, not the skill's prompt language.
+5. **Pass the language setting**: Include a language instruction in every subagent
+   prompt using the `[filid:lang]` tag from system context (e.g., `[filid:lang] ko`).
+   If no tag is present, follow the system's language setting; default to English.
+   This ensures output files (structure-check.md, session.md, verification.md,
+   review-report.md, fix-requests.md) are written in the configured language.
    Technical terms, code identifiers, rule IDs, and file paths remain in original form.
 
 **Phase A: Structure Pre-Check** (`general-purpose`, model: `sonnet`,
@@ -107,7 +107,7 @@ Context:
 - BASE_REF: <actual base ref>
 - BRANCH: <actual branch>
 
-Language: Write all output in the user's language. The user's language is: <language from CLAUDE.md/system prompt>.
+Language: Write all output in the language specified by the `[filid:lang]` tag in system context. If no tag is present, follow the system's language setting. Default: English.
 Technical terms, code identifiers, rule IDs, and file paths remain in original form.
 
 REMINDER: Write `<REVIEW_DIR>/structure-check.md` before you finish.
@@ -142,7 +142,7 @@ Context:
 - PROJECT_ROOT: <actual project root>
 - NO_STRUCTURE_CHECK: <true|false>
 
-Language: Write all output in the user's language. The user's language is: <language from CLAUDE.md/system prompt>.
+Language: Write all output in the language specified by the `[filid:lang]` tag in system context. If no tag is present, follow the system's language setting. Default: English.
 Technical terms, code identifiers, rule IDs, and file paths remain in original form.
 
 REMINDER: Write `<REVIEW_DIR>/session.md` before you finish.
@@ -195,7 +195,7 @@ Context:
 Input: Read `<REVIEW_DIR>/session.md` for session context.
 If `<REVIEW_DIR>/structure-check.md` exists, read it for Phase A context.
 
-Language: Write all output in the user's language. The user's language is: <language from CLAUDE.md/system prompt>.
+Language: Write all output in the language specified by the `[filid:lang]` tag in system context. If no tag is present, follow the system's language setting. Default: English.
 Technical terms, code identifiers, rule IDs, and file paths remain in original form.
 
 REMINDER: Write `<REVIEW_DIR>/verification.md` before you finish.
@@ -249,9 +249,9 @@ When `--scope=pr`:
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use the `markdown` field from the tool result as-is.
 4. If not authenticated: skip with info message.
 
-> **Language**: All output files and PR comments MUST be written in the user's
-> language (as configured in their CLAUDE.md or system prompt — e.g., "Always
-> respond in Korean" → write in Korean). This applies to review-report.md,
+> **Language**: All output files and PR comments MUST be written in the language
+> specified by the `[filid:lang]` tag in system context (configured in `.filid/config.json`).
+> If no tag is present, follow the system's language setting; default to English. This applies to review-report.md,
 > fix-requests.md, structure-check.md findings, PR comments, and any additional
 > commentary. Technical terms, code identifiers, rule IDs, and file paths
 > remain in their original form.

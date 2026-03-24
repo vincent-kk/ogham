@@ -105,6 +105,7 @@ export {
   initProject,
   loadConfig,
   loadRuleOverrides,
+  resolveLanguage,
   writeConfig,
 } from './infra/config-loader.js';
 export type { FilidConfig, InitResult } from './infra/config-loader.js';

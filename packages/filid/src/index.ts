@@ -86,6 +86,7 @@ export {
   initProject,
   loadConfig,
   loadRuleOverrides,
+  resolveLanguage,
   writeConfig,
   // coverage
   findSubtreeUsages,

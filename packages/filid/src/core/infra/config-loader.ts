@@ -23,6 +23,8 @@ const log = createLogger('config-loader');
 export interface FilidConfig {
   version: string;
   rules: Record<string, RuleOverride>;
+  /** Output language for documents (INTENT.md, DETAIL.md, reviews, PRs). Falls back to 'en'. */
+  language?: string;
 }
 
 const CONFIG_DIR = '.filid';
@@ -97,6 +99,15 @@ export function loadRuleOverrides(
 ): Record<string, RuleOverride> {
   const config = loadConfig(projectRoot);
   return config?.rules ?? {};
+}
+
+/**
+ * Resolve the output language from config.
+ * Priority: config.language → 'en' (default).
+ * System-level language detection is handled at the hook/skill layer.
+ */
+export function resolveLanguage(config: FilidConfig | null): string {
+  return config?.language ?? 'en';
 }
 
 /** Result of initProject. */

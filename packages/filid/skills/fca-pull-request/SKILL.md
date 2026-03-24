@@ -139,7 +139,7 @@ Bash (git, gh) and the Skill tool.
 Stages:   Stage 0 (Prerequisites) → Stage 1 (FCA Sync) → Stage 2 (Base Resolution) → Stage 3 (Change Analysis) → Stage 4 (PR Publication)
 Agents:   (Stage 1 delegates to fca-update internal agents)
 Output:   GitHub PR URL
-Language: PR title in English; PR body in Korean (tech terms / code identifiers kept as-is)
+Language: PR title in English; PR body in the language specified by the `[filid:lang]` tag (default: English). Tech terms / code identifiers kept as-is.
 ```
 
 Key rules:

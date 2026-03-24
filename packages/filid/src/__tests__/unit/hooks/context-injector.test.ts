@@ -151,12 +151,24 @@ describe('context-injector', () => {
     expect(readdirSync).toHaveBeenCalled();
   });
 
-  it('should output at most 2 lines for default config (no disabled rules)', async () => {
+  it('should output at most 3 lines for default config (pointer + lang, no disabled rules)', async () => {
     const result = await injectContext(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     const lines = ctx.split('\n').filter((l: string) => l.trim() !== '');
-    // Default config: all rules enabled → only 1 line (pointer)
-    expect(lines.length).toBeLessThanOrEqual(2);
+    // Default config: all rules enabled → pointer + lang tag = 2 lines
+    expect(lines.length).toBeLessThanOrEqual(3);
     expect(lines[0]).toBe('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
+  });
+
+  it('should include [filid:lang] tag in injected context', async () => {
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('[filid:lang]');
+  });
+
+  it('should default [filid:lang] to en when no config language is set', async () => {
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('[filid:lang] en');
   });
 });

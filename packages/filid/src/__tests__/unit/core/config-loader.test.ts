@@ -16,6 +16,7 @@ import {
   initProject,
   loadConfig,
   loadRuleOverrides,
+  resolveLanguage,
   writeConfig,
 } from '../../../core/infra/config-loader.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
@@ -128,6 +129,23 @@ describe('config-loader', () => {
       enabled: true,
       severity: 'info',
     });
+  });
+
+  // --- resolveLanguage ---
+
+  it('resolveLanguage returns configured language when set', () => {
+    const config = createDefaultConfig();
+    config.language = 'ko';
+    expect(resolveLanguage(config)).toBe('ko');
+  });
+
+  it('resolveLanguage returns "en" when language is not set', () => {
+    const config = createDefaultConfig();
+    expect(resolveLanguage(config)).toBe('en');
+  });
+
+  it('resolveLanguage returns "en" when config is null', () => {
+    expect(resolveLanguage(null)).toBe('en');
   });
 
   // --- initProject ---

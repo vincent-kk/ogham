@@ -12,7 +12,10 @@ import {
   markSessionInjected,
   writePromptContext,
 } from '../core/infra/cache-manager.js';
-import { loadRuleOverrides } from '../core/infra/config-loader.js';
+import {
+  loadConfig,
+  resolveLanguage,
+} from '../core/infra/config-loader.js';
 import { loadBuiltinRules } from '../core/rules/rule-engine.js';
 import type { HookOutput, UserPromptSubmitInput } from '../types/hooks.js';
 
@@ -27,7 +30,11 @@ function buildMinimalContext(cwd: string): string {
   ];
 
   try {
-    const overrides = loadRuleOverrides(cwd);
+    const config = loadConfig(cwd);
+    const lang = resolveLanguage(config);
+    lines.push(`[filid:lang] ${lang}`);
+
+    const overrides = config?.rules ?? {};
     const allRules = loadBuiltinRules(overrides);
     const disabledRules = allRules.filter((r) => !r.enabled);
     if (disabledRules.length > 0) {
@@ -36,7 +43,8 @@ function buildMinimalContext(cwd: string): string {
       );
     }
   } catch {
-    // on rule load failure, omit disabled rules line
+    // on rule load failure, still inject default language
+    lines.push('[filid:lang] en');
   }
 
   return lines.join('\n');

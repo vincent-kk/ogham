@@ -23,7 +23,7 @@ You manage **only INTENT.md and DETAIL.md files**. You never touch source code, 
 - **Bash is permitted only for `git diff` to detect changed files** — do not use Bash for file modification or arbitrary commands.
 - **Use git diff + fractal_scan** to identify which fractals are affected before making updates.
 - **Track all changes** — document what was updated and why.
-- **Content language**: Section headings (`## Purpose`, `### Always do`, etc.) stay in English (validator anchors). All descriptive content (purpose text, bullet items, table cells) MUST be written in the user's conversation language.
+- **Content language**: Section headings (`## Purpose`, `### Always do`, etc.) stay in English (validator anchors). All descriptive content (purpose text, bullet items, table cells) MUST be written in the language specified by the `[filid:lang]` tag in system context. If no tag is present, follow the system's language setting; default to English.
 
 ## Workflow
 
@@ -147,7 +147,7 @@ Every INTENT.md must contain these sections:
 - <Prohibited actions and anti-patterns>
 ```
 
-**Language**: All headings above MUST remain in English (machine-readable anchors). Write all content text in the user's conversation language.
+**Language**: All headings above MUST remain in English (machine-readable anchors). Write all content text in the language specified by the `[filid:lang]` tag. If no tag is present, follow the system's language setting; default to English.
 
 ## DETAIL.md Update Rules
 

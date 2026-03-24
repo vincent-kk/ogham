@@ -188,4 +188,51 @@ describe('agent-enforcer', () => {
       );
     });
   });
+
+  // === [filid:lang] tag injection ===
+
+  describe('language tag injection', () => {
+    it('should include [filid:lang] tag for filid agents', () => {
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'fractal-architect',
+      });
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        '[filid:lang]',
+      );
+    });
+
+    it('should include [filid:lang] tag for planning agents in FCA projects', () => {
+      mockFcaProject();
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'oh-my-claudecode:planner',
+      });
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        '[filid:lang]',
+      );
+    });
+
+    it('should include [filid:lang] tag for implementation agents in FCA projects', () => {
+      mockFcaProject();
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'general-purpose',
+      });
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        '[filid:lang]',
+      );
+    });
+
+    it('should default [filid:lang] to en when no config exists', () => {
+      mockFcaProject();
+      const result = enforceAgentRole({
+        ...baseInput,
+        agent_type: 'oh-my-claudecode:planner',
+      });
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        '[filid:lang] en',
+      );
+    });
+  });
 });

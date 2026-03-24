@@ -318,7 +318,7 @@ with no applicable changes.
 ### 3.6 Language Rules
 
 - PR title: English (always, including auto-generated and user-provided titles)
-- PR body: Korean
+- PR body: Use the language specified by the `[filid:lang]` tag in system context (configured in `.filid/config.json`). If no tag is present, follow the system's language setting; default to English.
 - Exceptions (keep original form):
   - Code inside code blocks
   - Filenames, variable names, function names, type names
