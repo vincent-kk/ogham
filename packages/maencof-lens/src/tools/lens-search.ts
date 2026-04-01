@@ -1,6 +1,5 @@
-import { handleKgSearch } from '@maencof/mcp/tools/kg-search.js';
-import type { KnowledgeGraph } from '@maencof/types/graph.js';
-import type { SubLayer } from '@maencof/types/common.js';
+import { handleKgSearch } from '@ogham/maencof';
+import type { KnowledgeGraph, SubLayer } from '@ogham/maencof';
 
 import { computeEffectiveLayers } from '../filter/layer-guard.js';
 

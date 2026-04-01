@@ -1,5 +1,5 @@
-import { MetadataStore } from '@maencof/index/metadata-store.js';
-import type { KnowledgeGraph } from '@maencof/types/graph.js';
+import { MetadataStore } from '@ogham/maencof';
+import type { KnowledgeGraph } from '@ogham/maencof';
 
 interface CacheEntry {
   graph: KnowledgeGraph;

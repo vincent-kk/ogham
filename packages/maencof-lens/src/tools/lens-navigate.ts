@@ -1,5 +1,5 @@
-import { handleKgNavigate } from '@maencof/mcp/tools/kg-navigate.js';
-import type { KnowledgeGraph } from '@maencof/types/graph.js';
+import { handleKgNavigate } from '@ogham/maencof';
+import type { KnowledgeGraph } from '@ogham/maencof';
 
 import { computeEffectiveLayers } from '../filter/layer-guard.js';
 

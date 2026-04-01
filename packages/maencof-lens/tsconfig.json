@@ -3,9 +3,7 @@
   "compilerOptions": {
     "types": ["node"],
     "composite": false,
-    "paths": {
-      "@maencof/*": ["../maencof/src/*"]
-    }
+
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"]

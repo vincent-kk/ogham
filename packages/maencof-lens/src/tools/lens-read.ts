@@ -1,4 +1,4 @@
-import { handleMaencofRead } from '@maencof/mcp/tools/maencof-read.js';
+import { handleMaencofRead } from '@ogham/maencof';
 
 import { computeEffectiveLayers } from '../filter/layer-guard.js';
 

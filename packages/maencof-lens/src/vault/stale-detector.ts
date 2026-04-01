@@ -1,7 +1,7 @@
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { scanVault } from '@maencof/core/vault-scanner.js';
+import { scanVault } from '@ogham/maencof';
 
 export interface StaleInfo {
   isStale: boolean;
