@@ -12,7 +12,10 @@ async function main() {
   if (result.hookSpecificOutput?.additionalContext) {
     process.stdout.write(
       JSON.stringify({
-        hookSpecificOutput: result.hookSpecificOutput,
+        hookSpecificOutput: {
+          hookEventName: 'SessionStart',
+          ...result.hookSpecificOutput,
+        },
       }),
     );
   }
