@@ -312,6 +312,9 @@ describe('config-loader', () => {
       // Write config so loadConfig succeeds
       writeConfig(fakeGitRoot, createDefaultConfig());
 
+      // Reset call history before measuring caching behavior
+      mockedExecSync.mockClear();
+
       // Call multiple times with same path
       loadConfig(subDir);
       loadConfig(subDir);

@@ -195,9 +195,8 @@ describe('buildTurnContext', () => {
       role: 'knowledge curator',
     });
     const result = buildTurnContext(vaultDir);
-    expect(result).toContain(
-      '<companion-identity name="Ari" role="knowledge curator">',
-    );
+    expect(result).toContain('<companion-identity>');
+    expect(result).toContain('You are Ari, a knowledge curator.');
     expect(result).toContain('</companion-identity>');
   });
 
@@ -245,7 +244,8 @@ describe('buildTurnContext', () => {
   it('renders minimal identity tag with name only (no optional fields)', () => {
     writeCompanion('Ari');
     const result = buildTurnContext(vaultDir);
-    expect(result).toContain('<companion-identity name="Ari">');
+    expect(result).toContain('<companion-identity>');
+    expect(result).toContain('You are Ari.');
     expect(result).not.toContain('<personality');
     expect(result).not.toContain('<principles');
     expect(result).toContain('</companion-identity>');
