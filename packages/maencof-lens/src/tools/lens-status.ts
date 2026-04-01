@@ -1,4 +1,5 @@
-import { handleKgStatus, type KnowledgeGraph } from '@ogham/maencof';
+import { handleKgStatus } from '@maencof/mcp/tools/kg-status.js';
+import type { KnowledgeGraph } from '@maencof/types/graph.js';
 
 import { detectStale } from '../vault/stale-detector.js';
 

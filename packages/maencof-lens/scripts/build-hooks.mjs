@@ -29,6 +29,9 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      alias: {
+        '@maencof': resolve(root, '../maencof/src'),
+      },
     }),
   ),
 );

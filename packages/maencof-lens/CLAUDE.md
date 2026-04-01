@@ -17,9 +17,11 @@ yarn test:run       # single run (CI)
 
 **MCP Tools (5)**: `lens_search`, `lens_context`, `lens_navigate`, `lens_read`, `lens_status`
 
-**Skills (1)**: `setup-lens` — config management for `.maencof-lens/config.json`
+**Skills (3)**: `setup-lens` (config), `lookup` (search + read + summarize), `context` (token-budgeted assembly)
 
-**Hooks (1)**: SessionStart — config detection + prompt injection
+**Agents (1)**: `researcher` — autonomous multi-tool vault exploration
+
+**Hooks (1)**: SessionStart — config detection + skill usage guide injection
 
 > Detailed docs: `../../.metadata/maencof-lens/` (design-spec, blueprint, phase-specs, work-plan)
 

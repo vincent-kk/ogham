@@ -22,34 +22,66 @@ All design documents are located in [`../../.metadata/maencof-lens/`](../../.met
 - **Skills (3)**: `setup-lens` (config), `lookup` (search→read→summarize), `context` (token-budgeted assembly)
 - **Agent (1)**: `researcher` — autonomous multi-tool vault exploration
 - **Config**: `.maencof-lens/config.json` in dev context root, managed by `/maencof-lens:setup-lens` skill
-- **Prompt Injection**: Skill usage guide (not raw tool list)
+- **Prompt Injection**: Skill usage guide + researcher hint (not raw tool list)
+- **Agent Discovery**: Convention-based (`agents/` directory), no `plugin.json` field needed
 - **maencof changes**: None for v1. v1.1: add `layer_filter` to `handleKgContext` (3-line change)
 
-## Phase 7 Implementation Plan
+## Phase 7 Implementation Plan (Consensus Approved)
 
 Phase 1-6 are complete. Phase 7 adds the extended interface layer.
 
-### Changes Overview
+### RALPLAN-DR Summary
 
-| Component | Type | Action |
-|-----------|------|--------|
-| `skills/lookup/SKILL.md` | Skill | **New** — keyword search → document read → summary |
-| `skills/context/SKILL.md` | Skill | **New** — token budget context assembly |
-| `agents/researcher.md` | Agent | **New** — autonomous 5-tool vault exploration |
-| `src/hooks/session-start.ts` | Hook | **Modify** — skill usage guide instead of tool list |
-| `.claude-plugin/plugin.json` | Config | **Modify** — add `agents` field |
-| `CLAUDE.md` | Doc | **Modify** — reflect 3 skills + 1 agent |
-| `INTENT.md` | Doc | **Modify** — update Structure section |
+**Principles**:
+1. Markdown-first — skills and agents are SKILL.md/AGENT.md files, not TypeScript
+2. Convention following — match existing maencof skill/agent patterns exactly
+3. Minimal code change — only session-start.ts needs TypeScript modification
+4. Read-only safety — all new components maintain the read-only vault principle
 
-### MCP Tool Access Level Changes
+**Decision Drivers**:
+1. Skill-constructor generates production-ready SKILL.md with proper YAML frontmatter
+2. Agent format must match maencof's memory-organizer.md pattern for Claude Code plugin compatibility
+3. Prompt injection change is the key UX shift — users interact via skills, not raw tools
 
-| Tool | Before | After |
-|------|--------|-------|
-| `lens_search` | Direct user | Skill/Agent mediated |
-| `lens_context` | Direct user | Skill/Agent mediated |
-| `lens_navigate` | Direct user | **Agent only** |
-| `lens_read` | Direct user | Skill/Agent mediated |
-| `lens_status` | Direct user | **Agent/Hook only** |
+**ADR**:
+- Decision: Use `/skill-constructor` for skills, direct write for agent
+- Alternatives: Manual authoring — rejected per user constraint
+- Consequence: Skill-constructor must be available in executor environment
+
+### MCP Tool Access Levels
+
+| Tool | Access Level | Consumers |
+|------|-------------|-----------|
+| `lens_search` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
+| `lens_context` | Skill/Agent mediated | `context` skill, `researcher` agent |
+| `lens_navigate` | Agent only | `researcher` agent |
+| `lens_read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
+| `lens_status` | Agent/Hook only | `researcher` agent, SessionStart hook |
+
+**Note**: `context` skill uses `lens_context` only (NOT `lens_search`).
+`lens_context` internally runs its own SA query via `handleKgContext` — a separate `lens_search` would be redundant.
+
+### Task Flow
+
+```
+T1 (lookup SKILL.md)  ─┐
+T2 (context SKILL.md)  ─┼─► T4 (session-start.ts) ─► T6 (docs) ─► T7 (build + verify)
+T3 (researcher.md)     ─┘
+```
+
+### Task Details
+
+| # | Task | Method | Files |
+|---|------|--------|-------|
+| T1 | Create lookup skill | `/skill-constructor` CREATE | `skills/lookup/SKILL.md` |
+| T2 | Create context skill | `/skill-constructor` CREATE | `skills/context/SKILL.md` |
+| T3 | Create researcher agent | Direct write | `agents/researcher.md` |
+| T4 | Update prompt injection | Edit | `src/hooks/session-start.ts` |
+| T6a | Update CLAUDE.md | Edit | `CLAUDE.md` |
+| T6b | Update INTENT.md | Edit | `INTENT.md` |
+| T6c | Create DETAIL.md | Write | `DETAIL.md` |
+| T6d | Sync phase-specs 7.2 | Edit | `../../.metadata/maencof-lens/phase-specs.md` |
+| T7 | Build + verify | `yarn build && yarn typecheck` | — |
 
 ### Prompt Injection Change
 
@@ -60,39 +92,30 @@ Available tools: lens_search, lens_context, lens_navigate, lens_read, lens_statu
 
 **After**:
 ```
-사용 방법:
-- /maencof-lens:lookup <키워드>: vault 지식 검색 및 조회
-- /maencof-lens:context <쿼리>: 컨텍스트 조립
+Usage:
+- /maencof-lens:lookup <keyword>: vault knowledge search and retrieval
+- /maencof-lens:context <query>: token-budgeted context assembly
+- Deep exploration: ask "vault research" or "vault explore" to trigger the researcher agent.
 ```
 
-### Task Execution Order
+### Architect Review Notes (incorporated)
 
-```
-7.1  Create skills/lookup/SKILL.md
-7.2  Create skills/context/SKILL.md
-7.3  Create agents/researcher.md
-7.4  Update src/hooks/session-start.ts (prompt change)
-7.5  Update .claude-plugin/plugin.json (add agents field)
-7.6  Update CLAUDE.md (3 skills + 1 agent)
-7.7  Update INTENT.md (structure section)
-7.8  Rebuild: yarn build (bundle updated session-start hook)
-```
-
-Tasks 7.1-7.3 are independent (SKILL.md/AGENT.md files, no TypeScript).
-Task 7.4 is the only code change (session-start.ts).
-Tasks 7.5-7.7 are doc/config updates.
-Task 7.8 is the final build verification.
+- ~~T5 (plugin.json agents field)~~ removed — agents discovered by convention, not manifest field. maencof (4 agents) and filid (7 agents) have no `agents` field.
+- T2 context skill — removed redundant `lens_search` step. `lens_context` handles search internally.
+- Researcher agent — added `allowed_layers: [2,3,4,5]` and `forbidden_operations` for pattern consistency with maencof agents.
+- Prompt — added researcher agent trigger hint for discoverability.
 
 ### Acceptance Criteria
 
-- [ ] `/maencof-lens:lookup` skill — complete workflow (search → read → summarize)
-- [ ] `/maencof-lens:context` skill — complete workflow (search → context assembly)
-- [ ] `maencof-lens:researcher` agent — 5 MCP tools, exploration strategy, trigger phrases
-- [ ] SessionStart prompt shows skill usage, not tool list
-- [ ] `plugin.json` includes `agents` field
-- [ ] `CLAUDE.md` reflects Skills (3) + Agents (1)
-- [ ] `INTENT.md` under 50 lines with updated structure
-- [ ] `yarn build` succeeds with updated session-start hook
+- [ ] `skills/lookup/SKILL.md` — complete workflow (search → read → summarize), `user_invocable: true`
+- [ ] `skills/context/SKILL.md` — complete workflow (`lens_context` only, no redundant search), `user_invocable: true`
+- [ ] `agents/researcher.md` — 5 MCP tools, `allowed_layers`, trigger phrases (Korean + English)
+- [ ] `session-start.ts` — skill usage + researcher hint, no raw tool names
+- [ ] `CLAUDE.md` — Skills (3) + Agents (1) reflected
+- [ ] `INTENT.md` — structure updated, under 50 lines
+- [ ] `DETAIL.md` — public API contracts for skills/agent/tools
+- [ ] `phase-specs.md` 7.2 — context skill workflow synced (lens_search removed)
+- [ ] `yarn build` and `yarn typecheck` pass
 
 ## Execution Order (full)
 
@@ -105,7 +128,7 @@ Phase 4    SessionStart hook + prompt injection          ✅ Complete
 Phase 5    setup-lens skill                              ✅ Complete
 Phase 6.7  FCA docs + monorepo integration + verification ✅ Complete
 Phase 7    Skills (lookup, context) + Agent (researcher)  ⬜ Next
-           + Prompt injection change
+           + Prompt injection change + docs update
 ```
 
 ## Known Limitations (v1)

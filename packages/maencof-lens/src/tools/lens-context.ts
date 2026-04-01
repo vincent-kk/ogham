@@ -1,4 +1,5 @@
-import { handleKgContext, type KnowledgeGraph } from '@ogham/maencof';
+import { handleKgContext } from '@maencof/mcp/tools/kg-context.js';
+import type { KnowledgeGraph } from '@maencof/types/graph.js';
 
 import { computeEffectiveLayers } from '../filter/layer-guard.js';
 

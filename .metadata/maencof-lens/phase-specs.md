@@ -693,9 +693,10 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 **Workflow**:
 1. 사용자 입력에서 쿼리와 예산 추출
-2. `lens_search(seed: [query keywords], max_results: 10)` 호출하여 관련 문서 식별
-3. `lens_context(query, token_budget)` 호출하여 컨텍스트 블록 조립
-4. 조립된 컨텍스트를 구조화하여 제시
+2. `lens_context(query, token_budget)` 호출 — 내부적으로 SA 검색 + 컨텍스트 조립 수행
+3. 조립된 컨텍스트를 구조화하여 제시
+
+> Note: `lens_context`는 `handleKgContext`를 통해 내부적으로 SA 쿼리를 실행하므로 별도 `lens_search` 호출 불필요.
 
 **Options**:
 ```
@@ -712,8 +713,7 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 **MCP Tools Used**:
 | Tool | Purpose |
 |------|---------|
-| `lens_search` | 관련 문서 식별 |
-| `lens_context` | 토큰 예산 기반 컨텍스트 조립 |
+| `lens_context` | SA 검색 + 토큰 예산 기반 컨텍스트 조립 (내부적으로 검색 수행) |
 
 **Output Format**:
 ```markdown

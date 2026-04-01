@@ -57,12 +57,16 @@ export async function runSessionStart(cwd: string): Promise<LensSessionStartResu
 
 Vault knowledge is available for reference during development.
 
-Available tools: lens_search, lens_context, lens_navigate, lens_read, lens_status
+Usage:
+- /maencof-lens:lookup <keyword>: vault knowledge search and retrieval
+- /maencof-lens:context <query>: token-budgeted context assembly
+- Deep exploration: ask "vault research" or "vault explore" to trigger the researcher agent.
 
 Registered vaults:
 ${vaultLines.join('\n')}
 
-Usage: vault data is read-only. Modifications require a maencof session.`;
+Vault data is read-only. Modifications require a maencof session.
+Default layer filter: L2-L5 (L1 Core Identity is private).`;
 
   return {
     continue: true,

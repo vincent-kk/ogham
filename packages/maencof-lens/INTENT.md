@@ -9,7 +9,9 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 - `src/filter/` — Layer filtering logic
 - `src/tools/` — 5 MCP tool wrappers (lens_search/context/navigate/read/status)
 - `src/mcp/` — MCP server setup
-- `src/hooks/` — SessionStart prompt injection
+- `src/hooks/` — SessionStart skill usage guide injection
+- `skills/` — 3 skills (setup-lens, lookup, context)
+- `agents/` — 1 agent (researcher)
 
 ## Conventions
 

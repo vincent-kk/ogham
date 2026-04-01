@@ -27,6 +27,9 @@ await esbuild.build({
   treeShaking: true,
   mainFields: ['module', 'main'],
   external: [],
+  alias: {
+    '@maencof': resolve(root, '../maencof/src'),
+  },
 });
 
 console.log(`  MCP server  -> bridge/mcp-server.cjs`);
