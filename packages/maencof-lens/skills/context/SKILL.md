@@ -70,7 +70,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 ## Options
 
 ```
-/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N>] [--full]
+/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full]
 ```
 
 | Option | Default | Description |
@@ -78,7 +78,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 | `query` | required | Context assembly query (natural language) |
 | `--budget` | 2000 | Token budget for assembled output |
 | `--vault` | default vault | Target vault name |
-| `--layer` | vault config | Layer filter ceiling (intersected with vault config) |
+| `--layer` | vault config | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
 | `--full` | false | Include full document text instead of snippets |
 
 ## Usage Examples

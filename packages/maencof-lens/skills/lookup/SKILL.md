@@ -79,14 +79,14 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 ## Options
 
 ```
-/maencof-lens:lookup <query> [--vault <name>] [--layer <N>] [--detail]
+/maencof-lens:lookup <query> [--vault <name>] [--layer <N,N,...>] [--detail]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `query` | required | Search query (natural language) |
 | `--vault` | default vault | Target vault name |
-| `--layer` | vault config | Layer filter ceiling (intersected with vault config) |
+| `--layer` | vault config | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
 | `--detail` | false | Read top 3 results instead of 1 |
 
 ## Usage Examples
