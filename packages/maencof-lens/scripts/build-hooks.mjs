@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+/**
+ * Build script for hook entry point bundles
+ * Output: bridge/<name>.mjs
+ */
+import * as esbuild from 'esbuild';
+import { mkdir } from 'fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, '..');
+
+await mkdir(resolve(root, 'bridge'), { recursive: true });
+
+const hookEntries = [
+  'session-start',
+];
+
+await Promise.all(
+  hookEntries.map((name) =>
+    esbuild.build({
+      entryPoints: [resolve(root, `src/hooks/entries/${name}.entry.ts`)],
+      bundle: true,
+      platform: 'node',
+      target: 'node20',
+      format: 'esm',
+      outfile: resolve(root, `bridge/${name}.mjs`),
+      minify: true,
+      sourcemap: false,
+      treeShaking: true,
+    }),
+  ),
+);
+
+console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);

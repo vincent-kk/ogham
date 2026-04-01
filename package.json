@@ -26,6 +26,7 @@
     "sort:packages": "npx sort-package-json '**/package.json'",
     "filid": "yarn workspace @ogham/filid",
     "maencof": "yarn workspace @ogham/maencof",
+    "maencof-lens": "yarn workspace @ogham/maencof-lens",
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",

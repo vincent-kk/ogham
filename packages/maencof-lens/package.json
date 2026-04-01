@@ -1,0 +1,68 @@
+{
+  "name": "@ogham/maencof-lens",
+  "version": "0.0.1",
+  "description": "Read-only vault knowledge access plugin for Claude Code",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "knowledge-graph",
+    "read-only",
+    "lens"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "directory": "packages/maencof-lens"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vincent K. Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "bridge",
+    "libs",
+    "hooks",
+    "skills",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "clean": "rm -rf bridge",
+    "version:sync": "node scripts/inject-version.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "dev": "tsc --watch",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@ogham/maencof": "workspace:*",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
