@@ -80,10 +80,12 @@ After `init` or `add` creates/modifies config, ensure `.maencof-lens` is git-ign
 
 1. Check if `<cwd>` is a git repository (`<cwd>/.git` exists)
    - If NOT a git repo → skip this step entirely
-2. Read `<cwd>/.gitignore` (create if missing)
-3. Check if `.maencof-lens` or `.maencof-lens/` already appears as a line
+2. Run `git check-ignore -q .maencof-lens` to test if git already ignores the path (via local `.gitignore`, global gitignore, or `.git/info/exclude`)
+   - If exit code 0 (already ignored) → skip this step entirely
+3. Read `<cwd>/.gitignore` (create if missing)
+4. Check if `.maencof-lens` or `.maencof-lens/` already appears as a line
    - If already present → skip (no duplicate)
-4. Append `.maencof-lens/` to `.gitignore`
+5. Append `.maencof-lens/` to `.gitignore`
 
 This step is skipped for `remove`, `set-default`, `set-layers`, and `show` subcommands.
 
