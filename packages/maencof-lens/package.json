@@ -1,6 +1,6 @@
 {
   "name": "@ogham/maencof-lens",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Read-only vault knowledge access plugin for Claude Code",
   "keywords": [
     "claude-code",
