@@ -8,6 +8,7 @@
 
 import * as esbuild from 'esbuild';
 import { mkdir } from 'fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,6 +19,10 @@ const outfile = resolve(root, 'bridge/mcp-server.cjs');
 
 // Ensure output directory exists
 await mkdir(resolve(root, 'bridge'), { recursive: true });
+
+// Resolve zod from MCP SDK's dependency tree — single copy in the bundle
+const require = createRequire(resolve(root, 'node_modules/@modelcontextprotocol/sdk/package.json'));
+const zodPath = dirname(require.resolve('zod/package.json'));
 
 // NODE_PATH auto-injection banner for MCP server bundle
 // Resolves global npm modules so native packages like @ast-grep/napi can be found
@@ -61,6 +66,9 @@ await esbuild.build({
   mainFields: ['module', 'main'],
   // Externalize native modules that can't be bundled
   external: ['@ast-grep/napi'],
+  alias: {
+    'zod': zodPath,
+  },
 });
 
 console.log(`  MCP server  -> bridge/mcp-server.cjs`);
