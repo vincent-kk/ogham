@@ -75,7 +75,7 @@ These files serve as the inter-stage communication interface.
 | Stage       | Files written                                              |
 | ----------- | ---------------------------------------------------------- |
 | pr-create   | _(none in review dir — creates GitHub PR)_                 |
-| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md`, `content-hash.json` |
+| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md`, `content-hash.json`, PR comment (via `gh pr comment`) |
 | resolve     | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
 | revalidate  | `re-validate.md`                                           |
 
@@ -93,7 +93,7 @@ These files serve as the inter-stage communication interface.
 | Stage       | Success signal                                             |
 | ----------- | ---------------------------------------------------------- |
 | pr-create   | Skill completes without error                              |
-| review      | `fix-requests.md` exists (or `APPROVED` verdict)           |
+| review      | `review-report.md` exists + PR comment posted (Step 5)     |
 | resolve     | `justifications.md` exists                                 |
 | revalidate  | `re-validate.md` exists                                    |
 
@@ -149,8 +149,13 @@ For each stage in pipeline:
     result = Agent(
       subagent_type: "general-purpose",
       prompt: "Read and execute the following skill: Skill('filid:fca-review', '--scope=pr <flags>').
-               Project root: <project_root>. Branch: <branch>.",
-      description: "FCA review stage execution"
+               Project root: <project_root>. Branch: <branch>.
+               CRITICAL: This skill has 5 steps. You MUST complete ALL steps including
+               Step 5 (PR Comment). Do NOT stop after writing review-report.md and
+               fix-requests.md — those are Step 4 outputs. Step 5 posts the review
+               as a PR comment via review_manage(format-pr-comment) + gh pr comment.
+               The task is incomplete until Step 5 executes.",
+      description: "FCA review stage execution (phases A-D + PR comment)"
     )
   else:
     # Main context execution — direct Skill() call

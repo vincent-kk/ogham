@@ -126,13 +126,22 @@ uses a **hybrid execution model**:
 - **Subagent invokes**: `Skill("filid:fca-review --scope=pr")`
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
 - **Success signal**: `review-report.md` exists (written by Phase D regardless of verdict)
+- **PR comment fallback**: After the review subagent returns and `review-report.md`
+  is confirmed, verify that a PR comment was posted. Check via
+  `gh pr view --json comments --jq '.comments[].body'` (Bash) — if no comment
+  contains `Code Review Governance`, the subagent skipped Step 5. In that case,
+  post the comment from the main context:
+  1. `review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)`
+  2. `gh pr comment --body "<markdown>"` (Bash)
+  This is a silent fallback — no error reporting needed. If `gh` is not
+  authenticated, skip quietly.
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
   is generated → skip `resolve` + `revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
   If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — delete the empty `fix-requests.md` and skip resolve + revalidate.
 - **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `resolve` +
   `revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:fca-pipeline --from=review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"
-- **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`)
+- **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
 
 #### Stage: resolve (main context)

@@ -196,10 +196,14 @@ If there were accepted fixes (files modified by code-surgeon):
        - On "Abort and review": stop here, do not commit.
    - If typecheck **PASSES**: proceed.
 
-2. **Stage all modified files**:
-   `git add <file1> <file2> ... <justifications.md> <debt files if any>`
-   - Include: files modified by code-surgeon + `justifications.md` +
-     any debt files created in Step 5.
+2. **Stage only code and debt files** (NOT review directory files):
+   `git add <file1> <file2> ... <debt files if any>`
+   - Include: files modified by code-surgeon + any debt files in `.filid/debt/` created in Step 5.
+   - **Do NOT stage `justifications.md`** — it lives in `.filid/review/<branch>/` which is
+     gitignored. It is an inter-stage communication file read by `fca-revalidate` from local
+     disk. Explicitly adding it via `git add` overrides `.gitignore` and pollutes the git tree.
+   - **Do NOT stage any file under `.filid/review/`** — all review session artifacts are
+     local-only and excluded by `.gitignore`.
 
 3. **Construct commit message** from accepted fix IDs:
    ```
@@ -211,8 +215,11 @@ If there were accepted fixes (files modified by code-surgeon):
 
 If there were **NO** accepted fixes (all rejected):
 
-1. Stage only: `justifications.md` + any debt files.
-2. Commit: `chore(filid): record fix rejections from fca-review`
+1. If debt files exist in `.filid/debt/`: stage only debt files, then commit:
+   `chore(filid): record fix rejections from fca-review`
+2. If no debt files either (e.g., `--auto` with all accepted = 0 items): skip commit entirely.
+   `justifications.md` is NOT committed — it stays as a local inter-stage file in
+   `.filid/review/<branch>/`.
 3. Skip typecheck (no code changes).
 
 **→ Immediately proceed to Step 6.6.**

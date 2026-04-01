@@ -37,6 +37,11 @@ rejected: <rejected count>
 ---
 ```
 
+> **Note**: `justifications.md` is a local inter-stage communication file. It is
+> NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored.
+> `fca-revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
+> Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
+
 ## ADR Refinement Guidelines
 
 Transform raw developer justification into structured ADR format:
