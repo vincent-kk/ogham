@@ -5,6 +5,7 @@
  */
 import * as esbuild from 'esbuild';
 import { mkdir } from 'fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,6 +15,10 @@ const root = resolve(__dirname, '..');
 const outfile = resolve(root, 'bridge/mcp-server.cjs');
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
+
+// Resolve zod from MCP SDK's dependency tree — single copy in the bundle
+const require = createRequire(resolve(root, 'node_modules/@modelcontextprotocol/sdk/package.json'));
+const zodPath = dirname(require.resolve('zod/package.json'));
 
 await esbuild.build({
   entryPoints: [resolve(root, 'src/mcp/server-entry.ts')],
@@ -29,6 +34,7 @@ await esbuild.build({
   external: [],
   alias: {
     '@ogham/maencof': resolve(root, '../maencof/src'),
+    'zod': zodPath,
   },
 });
 
