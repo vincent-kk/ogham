@@ -1,0 +1,20 @@
+{
+  "name": "maencof-lens",
+  "version": "0.0.1",
+  "description": "Read-only vault knowledge access for development contexts",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/maencof-lens",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "knowledge-graph",
+    "read-only",
+    "lens"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
