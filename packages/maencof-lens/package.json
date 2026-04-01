@@ -39,17 +39,20 @@
     "README.md"
   ],
   "scripts": {
-    "clean": "rm -rf bridge",
-    "version:sync": "node scripts/inject-version.mjs",
     "build": "yarn clean && yarn version:sync && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "clean": "rm -rf bridge",
     "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest",
-    "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
+    "version:sync": "node scripts/inject-version.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
