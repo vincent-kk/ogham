@@ -9,61 +9,55 @@ plugin: maencof-lens
 
 # lookup — Vault Knowledge Lookup
 
-Accepts a keyword/query, searches the vault knowledge graph, reads the top result, and returns a summary.
+Search → Read → Summarize pipeline for single-document quick reference.
+For multi-doc context assembly, use `/maencof-lens:context` instead.
 
-## When to Use This Skill
+## When to Use
 
-- When searching vault knowledge for a specific topic
-- Quick reference lookup for design docs, architecture refs, technical knowledge
-- When a single document summary is sufficient (use `/maencof-lens:context` for multi-doc assembly)
+- Quick reference lookup for a specific topic (design docs, architecture refs, technical knowledge)
+- Single-document summary is sufficient
+- **Not** for multi-document context loading — use `/maencof-lens:context`
 
 ## Prerequisites
 
-- `.maencof-lens/config.json` must exist in project root
-- Vault index must be built (`.maencof/index.json` in the vault)
-- If no config: "No lens config found. Run `/maencof-lens:setup-lens` to configure."
-- If no index: "Vault index not built. Run `kg_build` in a maencof session."
+- `.maencof-lens/config.json` required — if missing: "Run `/maencof-lens:setup-lens`"
+- Vault index required (`.maencof/index.json`) — if missing: "Run `kg_build` in a maencof session"
 
 ## Workflow
 
-### Step 1 — Keyword Extraction
+### Step 1 — Search (lens_search)
 
-Extract core keywords from user input.
-
-- Natural-language query → list of search keywords
-- Flag detection: `--vault`, `--layer`, `--detail`
-
-### Step 2 — Call lens_search
-
-Call the `lens_search` MCP tool to find relevant documents.
+Extract keywords from user input and search the vault knowledge graph.
 
 ```
-lens_search(seed: [keyword1, keyword2, ...], max_results: 5, vault?: specified_vault, layer_filter?: specified_layers)
+lens_search(seed: [keyword1, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
 ```
 
-If no results: "관련 문서를 찾지 못했습니다. 다른 키워드를 시도하세요."
+Optional SA tuning parameters — pass only when user explicitly specifies:
+`decay`, `threshold`, `max_hops`, `sub_layer`
 
-### Step 3 — Read Top Result (lens_read)
+No results → suggest different keywords.
 
-Read the content of the top search result.
+### Step 2 — Read Top Result (lens_read)
 
 ```
 lens_read(path: top_result.path, vault: same_vault)
 ```
 
-If `--detail` flag is set, read the top 3 results instead of just 1.
+- Default: read top 1 result
+- With `--detail`: read top 3 results
+- Layer-restricted document → skip and try next result
 
-### Step 4 — Summarize & Format
+### Step 3 — Summarize & Present
 
 Summarize document content in context of the query (1-3 paragraphs).
-Show additional results as a numbered list for optional deeper exploration.
+Show remaining results as a numbered list for optional deeper exploration.
 
-**Output format**:
-```
+```markdown
 ## Lookup: "{keyword}"
 
 ### {title} (L{layer}, relevance {score}%)
-{1-3 paragraph summary}
+{1-3 paragraph summary in context of the query}
 
 Path: {path}
 
@@ -79,21 +73,21 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 | Tool | Purpose |
 |------|---------|
-| `lens_search` | SA 기반 키워드 검색 |
-| `lens_read` | 문서 내용 읽기 |
+| `lens_search` | SA-based keyword search across vault graph |
+| `lens_read` | Read document content by path |
 
 ## Options
 
 ```
-/maencof-lens:lookup <keyword> [--vault <name>] [--layer <N>] [--detail]
+/maencof-lens:lookup <query> [--vault <name>] [--layer <N>] [--detail]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `keyword` | required | 검색 키워드 (자연어 가능) |
-| `--vault` | default vault | 대상 vault 지정 |
-| `--layer` | vault config | Layer 필터 (vault 상한 내) |
-| `--detail` | false | 상위 3개 문서까지 전문 읽기 |
+| `query` | required | Search query (natural language) |
+| `--vault` | default vault | Target vault name |
+| `--layer` | vault config | Layer filter ceiling (intersected with vault config) |
+| `--detail` | false | Read top 3 results instead of 1 |
 
 ## Usage Examples
 
@@ -106,7 +100,7 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 ## Error Handling
 
-- **No lens config**: guide to `/maencof-lens:setup-lens`
-- **No index**: guide to run `kg_build` in maencof session
-- **No results**: suggest different keywords
-- **Read failure**: show error and suggest `lens_search` results as alternatives
+- **No lens config** → guide to `/maencof-lens:setup-lens`
+- **No index** → guide to run `kg_build` in maencof session
+- **No results** → suggest different keywords
+- **Read failure** → show error and suggest alternative results from `lens_search`

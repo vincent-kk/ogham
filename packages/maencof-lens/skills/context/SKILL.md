@@ -9,49 +9,45 @@ plugin: maencof-lens
 
 # context — Vault Context Assembly
 
-Assembles a token-budgeted context block from vault documents matching a query.
-Use when you need vault knowledge loaded into the current conversation as a structured context block.
+Assemble a token-budgeted context block from vault documents matching a query.
+For single-doc quick reference, use `/maencof-lens:lookup` instead.
 
-## When to Use This Skill
+## When to Use
 
-- When vault context is needed for the current development task
-- When loading reference material for architecture decisions
-- When assembling knowledge for a specific topic
-- When multi-document context is needed (use `/maencof-lens:lookup` for single-doc summary)
+- Multi-document vault context needed for a development task
+- Loading reference material for architecture decisions or topic research
+- Assembling background knowledge as a structured context block
+- **Not** for single-doc lookup — use `/maencof-lens:lookup`
 
 ## Prerequisites
 
-- `.maencof-lens/config.json` must exist in project root
-- Vault index must be built
-- If no config: "No lens config found. Run `/maencof-lens:setup-lens` to configure."
+- `.maencof-lens/config.json` required — if missing: "Run `/maencof-lens:setup-lens`"
+- Vault index required (`.maencof/index.json`) — if missing: "Run `kg_build` in a maencof session"
 
 ## Workflow
 
-### Step 1 — Query & Budget Extraction
+### Step 1 — Parse Input
 
-Extract query and budget from user input.
+Extract query and options from user input:
 
 - Natural-language query → search keywords
-- Budget detection: `--budget <N>` (default 2000)
-- Vault filter: `--vault <name>` (default vault)
-- Layer filter: `--layer <N>` (vault config upper bound)
+- `--budget <N>` → token budget (default: 2000)
+- `--vault <name>` → target vault (default: config default)
+- `--layer <N>` → layer filter ceiling (default: vault config)
+- `--full` → include full document text instead of snippets
 
-### Step 2 — Call lens_context
-
-Call the `lens_context` MCP tool to run SA search and assemble a token-budgeted context block in one call.
+### Step 2 — Call lens_context (single tool call)
 
 ```
-lens_context(query: user_query, token_budget: budget, vault?: specified_vault, layer_filter?: specified_layers)
+lens_context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
 ```
 
-NOTE: `lens_context` internally runs its own Spreading Activation query via `handleKgContext`.
-A separate `lens_search` call is NOT needed — it would be redundant.
+`lens_context` internally runs SA search + context assembly via `handleKgContext`.
+Do NOT call `lens_search` separately — it is redundant.
 
-If no results: "관련 문서를 찾지 못했습니다. 다른 쿼리를 시도하세요."
+No results → suggest different query or broader keywords.
 
-### Step 3 — Result Formatting
-
-Format and present structured context block with source list and token usage.
+### Step 3 — Present Result
 
 ```markdown
 ## Context: "{query}" (budget: {N} tokens)
@@ -63,24 +59,27 @@ Sources: {N} documents from vault "{vault_name}"
 Token usage: ~{used}/{budget}
 ```
 
+If token budget exceeded, show truncation notice with actual vs. budget count.
+
 ## MCP Tools
 
 | Tool | Purpose |
 |------|---------|
-| `lens_context` | SA 검색 + 토큰 예산 기반 컨텍스트 조립 (내부적으로 검색 수행) |
+| `lens_context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 
 ```
-/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N>]
+/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N>] [--full]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `query` | required | 컨텍스트 조립 쿼리 (자연어) |
-| `--budget` | 2000 | 토큰 예산 |
-| `--vault` | default vault | 대상 vault |
-| `--layer` | vault config | Layer 필터 (vault 상한 내) |
+| `query` | required | Context assembly query (natural language) |
+| `--budget` | 2000 | Token budget for assembled output |
+| `--vault` | default vault | Target vault name |
+| `--layer` | vault config | Layer filter ceiling (intersected with vault config) |
+| `--full` | false | Include full document text instead of snippets |
 
 ## Usage Examples
 
@@ -89,11 +88,12 @@ Token usage: ~{used}/{budget}
 /maencof-lens:context NER model optimization --budget 4000
 /maencof-lens:context project goals --vault work
 /maencof-lens:context design decisions --layer 2 --budget 3000
+/maencof-lens:context deployment strategy --full
 ```
 
 ## Error Handling
 
-- **No lens config**: guide to `/maencof-lens:setup-lens`
-- **No index**: guide to run `kg_build` in maencof session
-- **No results**: suggest different query or broader keywords
-- **Token budget exceeded**: show truncation notice with count
+- **No lens config** → guide to `/maencof-lens:setup-lens`
+- **No index** → guide to run `kg_build` in maencof session
+- **No results** → suggest different query or broader keywords
+- **Token budget exceeded** → show truncation notice with used/budget count
