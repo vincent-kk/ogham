@@ -1,7 +1,7 @@
 ---
 name: fca-revalidate
 user_invocable: true
-description: Perform delta-based lightweight re-validation after fix resolution by extracting changes since resolve_commit_sha, verifying accepted fixes resolved their original issues, checking rejected-item justifications for constitutional compliance, and rendering a final PASS or FAIL verdict with an optional PR comment. Use after fca-resolve completes and fixes are applied, or to get the final merge-ready verdict before opening a pull request for review.
+description: Extract delta since resolve_commit_sha, verify accepted fixes resolved their issues, check rejected justifications for constitutional compliance, then render a final PASS or FAIL verdict with optional PR comment.
 version: "1.0.0"
 complexity: complex
 plugin: filid

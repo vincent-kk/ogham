@@ -1,7 +1,7 @@
 ---
 name: reflect
 user_invocable: true
-description: Use when you want to understand the current state of the knowledge vault without making any filesystem changes. Runs only the read-only judge module of the memory-organizer agent to identify layer transition candidates, detect duplicate documents, and generate a pure analysis report. Use this before running organize to safely preview recommendations first.
+description: Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations.
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

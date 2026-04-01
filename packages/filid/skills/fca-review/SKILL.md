@@ -1,7 +1,7 @@
 ---
 name: fca-review
 user_invocable: true
-description: Execute multi-persona consensus-based code review governance by delegating structure check, analysis and committee election, and technical verification to subagents before running political consensus directly as chairperson with up to 5 deliberation rounds. Use before merging PRs that require multi-perspective governance review, when changes span multiple fractal modules or modify interfaces, or to generate structured fix requests with severity ratings and code patches.
+description: Run multi-persona consensus code review governance across 4 phases: structure check, committee election, technical verification, and chairperson-led deliberation with up to 5 rounds producing fix requests.
 version: "1.0.0"
 complexity: complex
 plugin: filid

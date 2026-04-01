@@ -1,7 +1,7 @@
 ---
 name: fca-pull-request
 user_invocable: true
-description: Synchronize FCA context documents by invoking fca-update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes. Use after completing branch work before opening a PR, when INTENT.md and DETAIL.md need to be synchronized with code before delivery, or to automate repetitive manual PR authoring with a consistent structured body format.
+description: Sync INTENT.md and DETAIL.md via fca-update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes.
 version: "1.1.0"
 complexity: medium
 plugin: filid

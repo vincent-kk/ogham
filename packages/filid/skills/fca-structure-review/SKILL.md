@@ -1,7 +1,7 @@
 ---
 name: fca-structure-review
 user_invocable: true
-description: Execute the FCA-AI 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict. Use before merging any PR that modifies FCA-AI module structure or documents, after adding new directories to confirm correct fractal or organ classification, when INTENT.md or DETAIL.md has been manually edited, or to detect circular dependencies introduced by refactoring.
+description: Run the 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict.
 version: "1.0.0"
 complexity: complex
 plugin: filid

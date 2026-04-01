@@ -1,7 +1,7 @@
 ---
 name: fca-pipeline
 user_invocable: true
-description: End-to-end review pipeline orchestrator that chains pr-create, review, resolve, and revalidate stages in a single command with automatic entry point detection. Use when you want to run the full FCA review cycle from PR creation to final verdict without invoking four separate skills sequentially, or when resuming a previously interrupted pipeline from a specific stage using the --from flag.
+description: Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support.
 version: "1.0.0"
 complexity: medium
 plugin: filid

@@ -1,7 +1,7 @@
 ---
 name: dailynote
 user_invocable: true
-description: Use when you want to review what happened in maencof today or on a specific past date. Displays the daily activity log showing which tools were called, which documents were created or modified, and what session lifecycle events occurred, helping you build a clear picture of your knowledge management activity over time.
+description: Displays the daily maencof activity log for today or a past date, showing tool calls, document changes, and session lifecycle events to review knowledge management history.
 version: "1.0.0"
 complexity: simple
 context_layers: []

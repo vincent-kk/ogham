@@ -1,7 +1,7 @@
 ---
 name: fca-config
 user_invocable: true
-description: View and modify .filid/config.json project settings interactively without manual JSON editing using show, set, and reset subcommands with dot-notation paths. Use when setting the output language for FCA-AI documents such as ko or en, enabling or disabling specific rules like naming-convention, changing rule severity levels from error to warning, or resetting the entire configuration back to defaults.
+description: View and modify .filid/config.json interactively using show, set, and reset subcommands with dot-notation paths for language, rule enablement, and severity settings.
 version: "1.0.0"
 complexity: simple
 plugin: filid

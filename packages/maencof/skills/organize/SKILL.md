@@ -1,7 +1,7 @@
 ---
 name: organize
 user_invocable: true
-description: Use when you want to clean up and reorganize the knowledge vault by promoting frequently accessed external references to higher layers or retiring stale documents. Orchestrates the memory-organizer agent to evaluate all transition candidates across layers, presents ranked recommendations with rationale, then executes the actual document moves only after explicit user confirmation.
+description: Reorganizes the knowledge vault by promoting or retiring documents across layers. Presents ranked recommendations from the memory-organizer agent and executes moves only after explicit confirmation.
 version: "1.0.0"
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]

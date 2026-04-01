@@ -1,7 +1,7 @@
 ---
 name: checkup
 user_invocable: true
-description: Use when you want a comprehensive health assessment of the entire knowledge vault. Runs 6 diagnostic checks covering broken links, orphan nodes, frontmatter validation errors, stale index entries, and structural inconsistencies across all layers. Generates a detailed diagnostic report with prioritized findings and provides actionable auto-fix suggestions for every detected issue.
+description: Runs 6 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, and structural inconsistencies, then provides prioritized auto-fix suggestions.
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

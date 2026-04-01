@@ -1,7 +1,7 @@
 ---
 name: connect
 user_invocable: true
-description: Use when registering or managing external data sources such as GitHub, Jira, or Slack for maencof ingestion pipelines. Configures the Execution Area .maencof-meta/data-sources.json file with connection details, authentication tokens, and ingestion schedules. Can also be run independently as the standalone data source registration step of the full maencof setup workflow.
+description: Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json.
 version: "1.0.0"
 complexity: medium
 context_layers: []

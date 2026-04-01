@@ -1,7 +1,7 @@
 ---
 name: fca-ast-fallback
 user_invocable: false
-description: AST pattern search and replace fallback using LLM with Grep, Read, and Edit tools when the @ast-grep/napi native module is unavailable or returns an installation error. Use when ast_grep_search or ast_grep_replace MCP tools fail in sandboxed or CI environments, when native dependencies cannot be installed, or when performing quick one-off pattern searches across multiple languages without requiring ast-grep.
+description: LLM-based AST pattern search and replace fallback using Grep, Read, and Edit when the @ast-grep/napi native module is unavailable. Supports 17 languages with meta-variable approximation.
 version: "1.0.0"
 complexity: simple
 plugin: filid

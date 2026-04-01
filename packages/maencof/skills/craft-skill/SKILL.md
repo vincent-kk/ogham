@@ -1,7 +1,7 @@
 ---
 name: craft-skill
 user_invocable: true
-description: Automatically activates when the user requests creating a new skill from scratch, refactoring an existing one, improving its internal structure, or fixing a broken skill. Supports four modes: CREATE generates a new skill with complexity-appropriate scaffolding, REFACTOR restructures existing code, IMPROVE enhances quality, and FIX resolves errors with automated validation.
+description: Creates, refactors, improves, or fixes Claude Code skills. Supports four modes: CREATE with complexity-aware scaffolding, REFACTOR, IMPROVE, and FIX with automated validation.
 version: "2.0.0"
 complexity: complex
 context_layers: []

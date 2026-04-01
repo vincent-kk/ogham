@@ -1,7 +1,7 @@
 ---
 name: insight
 user_invocable: true
-description: Use when you want to check or adjust the auto-insight capture system that automatically records significant insights from your work sessions. Allows you to enable or disable capture, adjust the sensitivity level between high, medium, and low thresholds, view recently captured insights, and edit the meta-prompt that governs what gets captured.
+description: Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, views recent insights, and edits the meta-prompt governing what gets recorded.
 version: "1.0.0"
 complexity: simple
 context_layers: []

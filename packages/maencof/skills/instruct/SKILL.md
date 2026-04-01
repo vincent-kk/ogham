@@ -1,7 +1,7 @@
 ---
 name: instruct
 user_invocable: true
-description: Use when you need to add or modify AI behavioral instructions in CLAUDE.md, split an oversized CLAUDE.md file into @import references for better modular organization, or manage personal overrides in CLAUDE.local.md. Enforces the 200-line size guideline, automatically creates backups before any changes, and handles all edits safely through natural conversational interaction.
+description: Adds or modifies AI instructions in CLAUDE.md, splits oversized files into @import modules, and manages CLAUDE.local.md overrides while enforcing the 200-line limit with automatic backups.
 version: "1.1.0"
 complexity: medium
 context_layers: []

@@ -1,7 +1,7 @@
 ---
 name: setup
 user_invocable: true
-description: Use immediately after installing maencof for the first time, or when you want to update your Core Identity profile. Walks through a 7-stage interview-style onboarding wizard covering personal values, boundaries, preferences, and AI companion persona generation. Each stage can be independently skipped, and individual stages can be re-run later using the --step flag.
+description: Runs the 7-stage maencof onboarding wizard covering personal values, boundaries, preferences, and AI persona generation. Each stage is skippable and re-runnable via the --step flag.
 version: "2.0.0"
 complexity: complex
 context_layers: [1]

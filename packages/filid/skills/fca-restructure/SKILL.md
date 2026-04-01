@@ -1,7 +1,7 @@
 ---
 name: fca-restructure
 user_invocable: false
-description: Analyze the current project directory structure and restructure it according to fractal principles through a multi-stage workflow requiring explicit user approval before applying changes. Use when migrating an existing project to a fractal directory structure, recovering a project that has drifted after a large refactor, fixing fractal modules incorrectly placed under organ directories, or resolving accumulated structural violations in one coordinated operation.
+description: Analyze project directory structure and apply fractal principle restructuring through a proposal, user approval, execution, and validation workflow with optional dry-run and auto-approve modes.
 version: "1.0.0"
 complexity: complex
 plugin: filid

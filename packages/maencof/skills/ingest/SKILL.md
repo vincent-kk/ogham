@@ -1,7 +1,7 @@
 ---
 name: ingest
 user_invocable: true
-description: Use when you want to import content from external sources such as GitHub issues, pull requests, Slack messages, or web pages directly into the maencof knowledge vault. Fetches and converts the raw content into properly structured Layer 3 or Layer 4 documents complete with frontmatter, tags, and knowledge graph connections.
+description: Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3 or 4 documents with frontmatter, tags, and graph connections.
 version: "1.0.0"
 complexity: medium
 context_layers: [3, 4, 5]

@@ -1,7 +1,7 @@
 ---
 name: configure
 user_invocable: true
-description: Use when you need a health check on the entire Claude Code project environment, or when you are unsure which configuration sub-skill to invoke. Scans and diagnoses MCP servers, skills, agents, rules, hooks, and CLAUDE.md from a single entry point, then automatically routes to the appropriate specialized sub-skill for resolution.
+description: Health-checks the full Claude Code environment — MCP servers, skills, agents, rules, hooks, and CLAUDE.md — then routes automatically to the appropriate configuration sub-skill.
 version: "1.1.0"
 complexity: medium
 context_layers: []

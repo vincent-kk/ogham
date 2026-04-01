@@ -1,7 +1,7 @@
 ---
 name: manage
 user_invocable: true
-description: Use when you want to audit, disable, enable, or delete skills and agents in the maencof plugin. Provides detailed usage frequency reporting based on usage-stats.json so you can identify underused or obsolete skills, and supports creating new entries or performing bulk lifecycle operations across the entire skill and agent registry.
+description: Audits, enables, disables, or deletes maencof skills and agents. Reports usage frequency to identify obsolete entries and supports bulk lifecycle operations across the registry.
 version: "1.0.0"
 complexity: medium
 context_layers: []

@@ -1,7 +1,7 @@
 ---
 name: explore
 user_invocable: true
-description: Use when you want to interactively traverse the knowledge graph starting from a specific topic, concept, or document and discover unexpectedly related knowledge along the way. Uses the Spreading Activation algorithm to propagate activation energy from a seed node progressively outward, uncovering hidden connections and surprising associations across all knowledge layers.
+description: Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers.
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

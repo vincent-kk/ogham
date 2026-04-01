@@ -1,7 +1,7 @@
 ---
 name: recall
 user_invocable: true
-description: Use when searching for knowledge recorded in the past or looking for documents related to a specific topic or question. Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation algorithm, finds related documents across all five layers, assembles context, and returns the most relevant results ranked by relevance.
+description: Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers.
 version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]

@@ -1,7 +1,7 @@
 ---
 name: cleanup
 user_invocable: true
-description: Use when you need to delete vault documents from Layer 2 through Layer 5, or when you want to inspect and remove the maencof-managed section from CLAUDE.md. Handles two distinct cleanup domains: safely removing individual knowledge documents from the vault and managing maencof-injected configuration sections within the project instruction file.
+description: Deletes vault documents from Layers 2-5 and removes the maencof-managed section from CLAUDE.md. Handles both document removal and configuration cleanup safely.
 version: "1.0.0"
 complexity: simple
 context_layers: [2, 3, 4, 5]

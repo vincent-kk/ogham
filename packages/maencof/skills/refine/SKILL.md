@@ -1,7 +1,7 @@
 ---
 name: refine
 user_invocable: true
-description: Automatically activates when user input is vague, ambiguous, or underspecified and direct execution risks building the wrong thing. Transforms unclear requirements into precise, executable specifications through structured interview loops that ask one focused question at a time. Use to clarify project scope, resolve conflicting interpretations, or nail down concrete acceptance criteria before starting implementation.
+description: Transforms vague or ambiguous input into precise, executable specifications through structured one-question-at-a-time interview loops, clarifying scope and acceptance criteria before implementation begins.
 argument-hint: [initial requirement or idea]
 version: "1.0.0"
 complexity: medium

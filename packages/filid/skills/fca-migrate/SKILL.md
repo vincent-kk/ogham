@@ -1,7 +1,7 @@
 ---
 name: fca-migrate
 user_invocable: true
-description: Migrate an existing FCA-AI project from the legacy CLAUDE.md and SPEC.md naming convention to the new INTENT.md and DETAIL.md naming using a shell script for batch processing. Use when upgrading a project initialized with filid older than 0.1.0, after updating the filid plugin, or when fca-scan reports CLAUDE.md files that should be INTENT.md. Supports dry-run preview and auto-commit.
+description: Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a shell script for batch git-mv renames, reference updates, and optional auto-commit.
 version: "2.0.0"
 complexity: simple
 plugin: filid

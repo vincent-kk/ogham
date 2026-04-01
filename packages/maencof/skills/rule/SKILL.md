@@ -1,7 +1,7 @@
 ---
 name: rule
 user_invocable: true
-description: Use when you need to add, edit, or remove AI behavioral rules stored in .claude/rules/. Supports creating global rules that always apply and conditional rules that activate only for specific file patterns via the paths frontmatter field. Also helps migrate inline CLAUDE.md rules to dedicated rule files for better organization.
+description: Adds, edits, or removes AI behavioral rules in .claude/rules/, supporting global and path-conditional rules. Also migrates inline CLAUDE.md rules to dedicated rule files.
 version: "1.1.0"
 complexity: medium
 context_layers: []

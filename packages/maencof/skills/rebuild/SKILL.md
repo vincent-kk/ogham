@@ -1,7 +1,7 @@
 ---
 name: rebuild
 user_invocable: true
-description: Use when the knowledge graph index is corrupted, inconsistent, or incomplete after large-scale file moves, deletions, or bulk additions that left the cache in a bad state. Ignores the existing .maencof cache entirely and rebuilds the complete index from scratch. Choose this over the build skill when incremental repair would be insufficient.
+description: Discards the existing .maencof cache and rebuilds the knowledge graph index from scratch. Use when the index is corrupted or incremental repair via the build skill is insufficient.
 version: "1.0.0"
 complexity: simple
 context_layers: []
