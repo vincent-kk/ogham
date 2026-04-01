@@ -1,8 +1,8 @@
 ---
 name: context
 user_invocable: true
-description: Token-budgeted context assembly from vault knowledge
-version: 1.0.0
+description: Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering.
+version: 1.1.0
 complexity: simple
 plugin: maencof-lens
 ---

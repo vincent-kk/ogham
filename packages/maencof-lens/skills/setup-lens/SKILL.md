@@ -1,9 +1,10 @@
 ---
 name: setup-lens
 user_invocable: true
-description: Set up and manage .maencof-lens/config.json — vault registration and layer filtering
-version: 1.0.0
-complexity: low
+description: Initialize and manage .maencof-lens/config.json for read-only vault access configuration. Supports vault registration, removal, default vault switching, and layer filter management through interactive setup or direct subcommands. Run this first before using lookup or context skills.
+version: 1.1.0
+complexity: simple
+plugin: maencof-lens
 ---
 
 > **EXECUTION MODEL**: Execute as SINGLE CONTINUOUS OPERATION.
