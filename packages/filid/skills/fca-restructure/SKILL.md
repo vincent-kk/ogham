@@ -4,6 +4,7 @@ user_invocable: false
 description: Analyze project structure and restructure it to follow fractal principles — multi-stage with user approval
 version: 1.0.0
 complexity: high
+plugin: filid
 ---
 
 # fca-restructure — Fractal Structure Restructuring

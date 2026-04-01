@@ -4,6 +4,7 @@ user_invocable: true
 description: Scan for FCA-AI rule violations and generate report, --fix for auto-remediation
 version: 1.0.0
 complexity: medium
+plugin: filid
 ---
 
 # fca-scan — FCA-AI Rule Scanner

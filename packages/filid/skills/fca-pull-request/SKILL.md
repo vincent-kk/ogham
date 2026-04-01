@@ -4,6 +4,7 @@ user_invocable: true
 description: Auto-sync FCA context documents and create a structured GitHub PR from the current branch changes — blocks PR creation when fca-update fails
 version: 1.1.0
 complexity: medium
+plugin: filid
 ---
 
 # fca-pull-request — FCA-Aware Pull Request Generator

@@ -4,6 +4,7 @@ user_invocable: true
 description: View and modify .filid/config.json settings — language, rule overrides, and project configuration without manual JSON editing
 version: 1.0.0
 complexity: low
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute the requested subcommand as a SINGLE CONTINUOUS

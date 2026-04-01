@@ -4,6 +4,7 @@ user_invocable: true
 description: Fix request resolution workflow with auto-commit/push. Parses fix-requests.md, presents items for accept/reject (or auto-accepts all with --auto), applies fixes via code-surgeon, runs typecheck verification, auto-commits and pushes changes, and optionally chains to fca-revalidate.
 version: 2.0.0
 complexity: medium
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.

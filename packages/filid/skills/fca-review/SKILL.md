@@ -4,6 +4,7 @@ user_invocable: true
 description: Multi-persona consensus-based code review governance. Delegates structure check (Phase A), analysis (Phase B), and verification (Phase C) to subagents, then executes political consensus (Phase D) directly as chairperson using a state machine with up to 5 deliberation rounds.
 version: 1.0.0
 complexity: high
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.

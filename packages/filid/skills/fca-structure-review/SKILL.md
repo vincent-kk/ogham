@@ -4,6 +4,7 @@ user_invocable: true
 description: 6-stage FCA-AI PR verification — structure, docs, tests, metrics, dependencies
 version: 1.0.0
 complexity: high
+plugin: filid
 ---
 
 # fca-structure-review — 6-Stage PR Verification

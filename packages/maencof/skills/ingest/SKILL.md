@@ -1,7 +1,7 @@
 ---
 name: ingest
 user_invocable: true
-description: Convert external data sources into maencof documents (GitHub issues, Slack, etc. -> L3/L4)
+description: Convert external data sources into maencof documents (GitHub issues, Slack, etc.) and store them as Layer 3 or Layer 4 knowledge entries
 version: 1.0.0
 complexity: medium
 context_layers: [3, 4, 5]

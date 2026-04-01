@@ -4,6 +4,7 @@ user_invocable: true
 description: Initialize FCA-AI project — directory classification, INTENT.md/DETAIL.md generation
 version: 1.0.0
 complexity: medium
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.

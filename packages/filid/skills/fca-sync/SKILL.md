@@ -4,6 +4,7 @@ user_invocable: true
 description: Detect structural drift and correct deviations from fractal principles — supports severity filtering, dry-run, and auto-approve
 version: 1.0.0
 complexity: high
+plugin: filid
 ---
 
 # fca-sync — Structural Drift Synchronization

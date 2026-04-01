@@ -4,6 +4,7 @@ user_invocable: true
 description: Query FCA-AI context — module/rule lookup within 3-Prompt Limit
 version: 1.0.0
 complexity: low
+plugin: filid
 ---
 
 # fca-context-query — Context Query

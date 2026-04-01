@@ -1,7 +1,7 @@
 ---
 name: build
 user_invocable: true
-description: Full/incremental knowledge graph index build
+description: Full or incremental knowledge graph index build — scans vault markdown documents and rebuilds the graph, reprocessing only changed files by default
 version: 1.0.0
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

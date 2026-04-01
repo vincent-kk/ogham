@@ -1,9 +1,10 @@
 ---
 name: fca-revalidate
 user_invocable: true
-description: Delta-based lightweight re-validation after fix resolution. Extracts changes since resolve_commit_sha, verifies accepted fixes resolved their issues, checks justifications for constitutional compliance, resolves cleared debt, and renders final PASS/FAIL verdict with optional PR comment. On PASS, automatically cleans up the review session directory (.filid/review/<branch>/); debt files are preserved.
+description: Delta-based lightweight re-validation after fix resolution. Extracts changes since resolve_commit_sha, verifies accepted fixes resolved their issues, checks justifications for constitutional compliance, resolves cleared debt, and renders final PASS/FAIL verdict with optional PR comment. On PASS, automatically cleans up the review session directory; debt files are preserved.
 version: 1.0.0
 complexity: high
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.

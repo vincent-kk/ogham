@@ -1,10 +1,7 @@
 ---
 name: refine
 user_invocable: true
-description: >
-  Automatically activates when user input is vague or underspecified.
-  Transforms ambiguous inputs into precise, executable specifications through
-  structured interview loops. Asks one focused question at a time.
+description: Automatically activates when user input is vague or underspecified. Transforms ambiguous inputs into precise, executable specifications through structured interview loops, asking one focused question at a time.
 argument-hint: [initial requirement or idea]
 version: 1.0.0
 complexity: medium

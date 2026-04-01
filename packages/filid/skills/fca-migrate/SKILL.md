@@ -4,6 +4,7 @@ user_invocable: true
 description: Migrate FCA-AI project from CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md naming — supports dry-run, scoped migration, and auto-commit
 version: 2.0.0
 complexity: low
+plugin: filid
 ---
 
 # fca-migrate — CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md Migration
