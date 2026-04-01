@@ -1,8 +1,8 @@
 ---
 name: migrate
 user_invocable: true
-description: Vault architecture migration — upgrades directory structure to support L3 sub-layers and L5 Buffer/Boundary
-version: 1.0.0
+description: Use after updating the maencof plugin when a session-start advisory recommends an architecture migration. Upgrades the vault directory structure from the v1 flat 5-Layer layout to v2 with L3 sub-layers (relational, structural, topical) and L5 Buffer/Boundary separation, while safely preserving and relocating all existing documents throughout the entire migration process.
+version: "1.0.0"
 complexity: medium
 context_layers: []
 orchestrator: migrate skill

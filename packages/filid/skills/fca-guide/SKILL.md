@@ -1,9 +1,9 @@
 ---
 name: fca-guide
 user_invocable: true
-description: Generate a fractal structure guide for a directory — scans the project, queries active rules, and produces a readable guidance document
-version: 1.0.0
-complexity: low
+description: Generate a human-readable fractal structure guide by scanning the project hierarchy and querying all active rules. Use when introducing filid conventions to a team, confirming the fractal or organ classification of a directory, getting guidance on where to place a new module without causing violations, or reviewing the current state before running fca-restructure or fca-sync.
+version: "1.0.0"
+complexity: simple
 plugin: filid
 ---
 

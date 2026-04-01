@@ -1,8 +1,8 @@
 ---
 name: rule
 user_invocable: true
-description: Manage behavioral rules in .claude/rules/ via conversation — create, edit, delete rules with optional paths frontmatter for file-pattern-based conditional application.
-version: 1.1.0
+description: Use when you need to add, edit, or remove AI behavioral rules stored in .claude/rules/. Supports creating global rules that always apply and conditional rules that activate only for specific file patterns via the paths frontmatter field. Also helps migrate inline CLAUDE.md rules to dedicated rule files for better organization.
+version: "1.1.0"
 complexity: medium
 context_layers: []
 orchestrator: configurator

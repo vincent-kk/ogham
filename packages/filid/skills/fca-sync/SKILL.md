@@ -1,9 +1,9 @@
 ---
 name: fca-sync
 user_invocable: true
-description: Detect structural drift and correct deviations from fractal principles — supports severity filtering, dry-run, and auto-approve
-version: 1.0.0
-complexity: high
+description: Detect deviations between the current project structure and fractal principles, then apply targeted corrections with severity filtering, dry-run preview, and auto-approve support. Use when correcting minor structural drift after a development session, automatically detecting and fixing drift in a CI pipeline, selectively correcting only critical or high severity items, or inspecting drift status without making any changes using --dry-run.
+version: "1.0.0"
+complexity: complex
 plugin: filid
 ---
 

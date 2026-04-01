@@ -1,8 +1,8 @@
 ---
 name: think
 user_invocable: true
-description: Automatically analyzes ambiguous requirements using Tree of Thoughts methodology. Generates 3-5 candidate interpretations, evaluates each on a 100-point scale, and selects the optimal approach with rationale and backtrack plans.
-version: 1.0.0
+description: Automatically activates when a feature request or requirement can be interpreted in multiple distinct ways. Uses Tree of Thoughts methodology to generate 3 to 5 candidate interpretations, evaluates each candidate on a 100-point scale across feasibility and alignment dimensions, and selects the optimal approach with full rationale and detailed backtrack plans.
+version: "1.0.0"
 complexity: medium
 context_layers: []
 orchestrator: think skill

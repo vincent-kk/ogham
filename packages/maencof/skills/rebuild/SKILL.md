@@ -1,8 +1,8 @@
 ---
 name: rebuild
 user_invocable: true
-description: Force full index rebuild — ignore existing cache and rebuild the entire index from scratch
-version: 1.0.0
+description: Use when the knowledge graph index is corrupted, inconsistent, or incomplete after large-scale file moves, deletions, or bulk additions that left the cache in a bad state. Ignores the existing .maencof cache entirely and rebuilds the complete index from scratch. Choose this over the build skill when incremental repair would be insufficient.
+version: "1.0.0"
 complexity: simple
 context_layers: []
 orchestrator: rebuild skill

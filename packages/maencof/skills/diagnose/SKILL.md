@@ -1,8 +1,8 @@
 ---
 name: diagnose
 user_invocable: true
-description: Lightweight index health diagnostic — quick status check and recommended actions via kg_status
-version: 1.0.0
+description: Use when you need a quick read-only status check of the knowledge graph index without running a full diagnostic scan. Calls kg_status to report index freshness, stale node ratio, and whether a rebuild is recommended. Significantly faster and lighter than checkup, which performs an exhaustive full diagnostic scan with auto-fix suggestions.
+version: "1.0.0"
 complexity: simple
 context_layers: []
 orchestrator: diagnose skill

@@ -1,9 +1,9 @@
 ---
 name: craft-skill
 user_invocable: true
-description: Intelligent skill engineering system. Automatically activates when skill creation, modification, or debugging is needed. Supports four modes (CREATE, REFACTOR, IMPROVE, FIX) with complexity-based structure generation and automated validation.
-version: 2.0.0
-complexity: high
+description: Automatically activates when the user requests creating a new skill from scratch, refactoring an existing one, improving its internal structure, or fixing a broken skill. Supports four modes: CREATE generates a new skill with complexity-appropriate scaffolding, REFACTOR restructures existing code, IMPROVE enhances quality, and FIX resolves errors with automated validation.
+version: "2.0.0"
+complexity: complex
 context_layers: []
 orchestrator: configurator
 plugin: maencof

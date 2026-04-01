@@ -1,8 +1,8 @@
 ---
 name: mcp-setup
 user_invocable: true
-description: External MCP server setup — modify Execution Area .mcp.json + .claude/settings.json
-version: 1.0.0
+description: Use when you need to install and configure MCP servers for external data sources such as GitHub, Atlassian, Slack, or Notion in the current project. Modifies the Execution Area .mcp.json and .claude/settings.json configuration files and can be run independently as the dedicated MCP server setup step of the full maencof onboarding workflow.
+version: "1.0.0"
 complexity: medium
 context_layers: []
 orchestrator: mcp-setup skill

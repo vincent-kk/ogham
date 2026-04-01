@@ -1,8 +1,8 @@
 ---
 name: suggest
 user_invocable: true
-description: SA + Jaccard similarity based link suggestion — discover related documents and recommend new connections
-version: 1.0.0
+description: Use when you want to discover potential new connections between existing knowledge documents that are not yet linked in the graph. Combines Spreading Activation traversal and Jaccard similarity scoring to identify semantically related documents and recommend new graph edges. Unlike explore, suggest specifically focuses on structural gaps and missing links rather than general traversal.
+version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: suggest skill

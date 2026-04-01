@@ -1,8 +1,8 @@
 ---
 name: configure
 user_invocable: true
-description: Unified Claude Code environment configuration — scan, diagnose, and manage MCP servers, skills, agents, rules, hooks, and CLAUDE.md from a single entry point. Routes to specialized sub-skills.
-version: 1.1.0
+description: Use when you need a health check on the entire Claude Code project environment, or when you are unsure which configuration sub-skill to invoke. Scans and diagnoses MCP servers, skills, agents, rules, hooks, and CLAUDE.md from a single entry point, then automatically routes to the appropriate specialized sub-skill for resolution.
+version: "1.1.0"
 complexity: medium
 context_layers: []
 orchestrator: configurator

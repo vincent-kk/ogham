@@ -1,8 +1,8 @@
 ---
 name: instruct
 user_invocable: true
-description: Safely edit and manage CLAUDE.md (AI behavioral instructions) via conversation — supports @import splitting, 200-line guideline enforcement, CLAUDE.local.md personal overrides, and automatic backups.
-version: 1.1.0
+description: Use when you need to add or modify AI behavioral instructions in CLAUDE.md, split an oversized CLAUDE.md file into @import references for better modular organization, or manage personal overrides in CLAUDE.local.md. Enforces the 200-line size guideline, automatically creates backups before any changes, and handles all edits safely through natural conversational interaction.
+version: "1.1.0"
 complexity: medium
 context_layers: []
 orchestrator: configurator

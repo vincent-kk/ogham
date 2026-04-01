@@ -1,8 +1,8 @@
 ---
 name: fca-promote
 user_invocable: false
-description: Promote stable test.ts files to 3+12 rule-compliant spec.ts
-version: 1.0.0
+description: Promote stable test.ts files to parameterized spec.ts files that satisfy the FCA-AI 3+12 rule of maximum 15 test cases. Use when test.ts files have been stable for 90 or more days with no recent failures, before a release to consolidate ad-hoc tests into structured specs, after a feature stabilizes with predictable test patterns, or to bring a module into full FCA-AI compliance.
+version: "1.0.0"
 complexity: medium
 plugin: filid
 ---

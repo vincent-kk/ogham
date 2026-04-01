@@ -1,8 +1,8 @@
 ---
 name: insight
 user_invocable: true
-description: Manage auto-insight capture settings, view recent captures, and edit meta-prompt
-version: 1.0.0
+description: Use when you want to check or adjust the auto-insight capture system that automatically records significant insights from your work sessions. Allows you to enable or disable capture, adjust the sensitivity level between high, medium, and low thresholds, view recently captured insights, and edit the meta-prompt that governs what gets captured.
+version: "1.0.0"
 complexity: simple
 context_layers: []
 orchestrator: insight skill

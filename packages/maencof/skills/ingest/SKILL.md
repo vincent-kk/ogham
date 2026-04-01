@@ -1,8 +1,8 @@
 ---
 name: ingest
 user_invocable: true
-description: Convert external data sources into maencof documents (GitHub issues, Slack, etc.) and store them as Layer 3 or Layer 4 knowledge entries
-version: 1.0.0
+description: Use when you want to import content from external sources such as GitHub issues, pull requests, Slack messages, or web pages directly into the maencof knowledge vault. Fetches and converts the raw content into properly structured Layer 3 or Layer 4 documents complete with frontmatter, tags, and knowledge graph connections.
+version: "1.0.0"
 complexity: medium
 context_layers: [3, 4, 5]
 orchestrator: ingest skill

@@ -1,8 +1,8 @@
 ---
 name: fca-init
 user_invocable: true
-description: Initialize FCA-AI project — directory classification, INTENT.md/DETAIL.md generation
-version: 1.0.0
+description: Initialize the FCA-AI fractal context architecture in a project by scanning the directory tree, classifying every directory as fractal, organ, or pure-function, and generating missing INTENT.md and DETAIL.md files. Use when starting a new project, onboarding an existing codebase, regenerating INTENT.md files after a large refactor, or auditing directory classifications before running fca-scan.
+version: "1.0.0"
 complexity: medium
 plugin: filid
 ---

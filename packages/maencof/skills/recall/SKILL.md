@@ -1,8 +1,8 @@
 ---
 name: recall
 user_invocable: true
-description: Knowledge search/recall — traverse the knowledge graph with a natural-language query and return relevant documents
-version: 1.0.0
+description: Use when searching for knowledge recorded in the past or looking for documents related to a specific topic or question. Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation algorithm, finds related documents across all five layers, assembles context, and returns the most relevant results ranked by relevance.
+version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: recall skill

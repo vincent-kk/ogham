@@ -1,8 +1,8 @@
 ---
 name: changelog
 user_invocable: true
-description: Record self-changes to the daily changelog — detects git changes in watched paths, categorizes them, writes 02_Derived/changelog/YYYY-MM-DD.md, commits, and creates the gate marker
-version: 1.0.0
+description: Use when the changelog-gate Stop hook blocks session termination, or to manually record self-changes at any point during a session. Detects git changes in watched paths, categorizes them by change type, writes the daily entry to 02_Derived/changelog/YYYY-MM-DD.md, commits it, and creates the required gate marker file to unblock the session.
+version: "1.0.0"
 complexity: medium
 context_layers: [2]
 orchestrator: changelog skill

@@ -1,9 +1,9 @@
 ---
 name: craft-agent
 user_invocable: true
-description: Comprehensive agent construction system. Automatically activates when custom Claude Code subagent creation, modification, or validation is needed. Supports four modes (CREATE, EDIT, VALIDATE, LIST) and generates production-ready agent files.
-version: 2.0.0
-complexity: high
+description: Automatically activates when the user requests creating a new Claude Code subagent, editing an existing agent definition, validating agent configuration for correctness, or listing all available agents. Supports four modes: CREATE generates a new production-ready agent file, EDIT modifies an existing one, VALIDATE checks correctness, and LIST shows all agents.
+version: "2.0.0"
+complexity: complex
 context_layers: []
 orchestrator: configurator
 plugin: maencof
