@@ -192,7 +192,8 @@ lens는 `kg_build`를 수행하지 않는다. 인덱스가 stale일 때는 **경
 
 ### 5.5 프롬프트 주입 (Prompt Injection)
 
-maencof-lens 플러그인 활성화 시, 개발 컨텍스트의 시스템 프롬프트에 최소한의 가이드를 주입한다.
+maencof-lens 플러그인 활성화 시, 개발 컨텍스트의 시스템 프롬프트에 **스킬 사용법** 안내를 주입한다.
+도구 목록 대신 스킬을 안내하여, 사용자가 자연스러운 인터페이스로 vault 지식에 접근하도록 유도한다.
 
 **주입 내용 (개념):**
 
@@ -201,12 +202,9 @@ maencof-lens 플러그인 활성화 시, 개발 컨텍스트의 시스템 프롬
 
 개발 중 필요한 배경 지식, 설계서, 기술 레퍼런스를 maencof vault에서 조회할 수 있습니다.
 
-## 사용 가능한 도구
-- lens_search: 키워드 기반 지식 탐색
-- lens_context: 복수 문서 컨텍스트 조립
-- lens_navigate: 그래프 이웃 탐색
-- lens_read: 단일 문서 읽기
-- lens_status: vault 상태 조회
+## 사용 방법
+- /maencof-lens:lookup <키워드>: vault 지식 검색 및 조회
+- /maencof-lens:context <쿼리>: 컨텍스트 조립
 
 ## 사용 지침
 - 설계 의사결정이나 아키텍처 참조가 필요할 때 활용하세요
@@ -217,6 +215,27 @@ maencof-lens 플러그인 활성화 시, 개발 컨텍스트의 시스템 프롬
 **주입 방식:**
 - Claude Code 플러그인의 `system-prompt` contribution 또는 hook 기반 주입
 - 정적 텍스트 + vault 목록 동적 렌더링
+
+### 5.7 MCP 도구 접근 수준
+
+MCP 도구는 사용자 직접 호출이 아닌, 스킬/에이전트를 경유하여 사용된다.
+
+| 도구 | 접근 수준 | 소비자 |
+|------|----------|--------|
+| `lens_search` | 스킬/에이전트 경유 | `lookup` skill, `context` skill, `researcher` agent |
+| `lens_context` | 스킬/에이전트 경유 | `context` skill, `researcher` agent |
+| `lens_navigate` | 에이전트 전용 | `researcher` agent |
+| `lens_read` | 스킬/에이전트 경유 | `lookup` skill, `researcher` agent |
+| `lens_status` | 에이전트/Hook 전용 | `researcher` agent, SessionStart hook |
+
+### 5.8 스킬 및 에이전트
+
+| 컴포넌트 | 유형 | 역할 |
+|---------|------|------|
+| `/maencof-lens:setup-lens` | 스킬 | config 관리 (기존) |
+| `/maencof-lens:lookup` | 스킬 | 키워드 검색 → 문서 읽기 → 요약 |
+| `/maencof-lens:context` | 스킬 | 토큰 예산 기반 컨텍스트 조립 |
+| `maencof-lens:researcher` | 에이전트 | 5개 MCP 도구 활용 자율 vault 탐색 |
 
 ### 5.6 캐시 전략
 

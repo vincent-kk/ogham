@@ -197,6 +197,56 @@ Add a `version` field to `.maencof-lens/config.json`:
 
 ---
 
+## Phase 7: Skills + Agent + Prompt Injection 변경
+
+**Depends on**: Phase 5, Phase 6 (plugin manifest must be stable)
+**Spec**: `phase-specs.md` Phase 7
+
+| # | Task | Files | Acceptance |
+|---|------|-------|------------|
+| 7.1 | Create lookup SKILL.md | `skills/lookup/SKILL.md` | Complete skill definition with workflow, options, output format |
+| 7.2 | Create context SKILL.md | `skills/context/SKILL.md` | Complete skill definition with workflow, options, output format |
+| 7.3 | Create researcher AGENT.md | `agents/researcher.md` | 5 MCP tools referenced, trigger phrases, exploration strategy |
+| 7.4 | Update session-start prompt | `src/hooks/session-start.ts` | Skill usage shown instead of tool list |
+| 7.5 | Update plugin.json | `.claude-plugin/plugin.json` | `agents` field added |
+| 7.6 | Update CLAUDE.md | `CLAUDE.md` | Skills (3) + Agents (1) reflected |
+| 7.7 | Update INTENT.md | `INTENT.md` | Structure updated, still under 50 lines |
+| 7.8 | Rebuild hooks | `bridge/session-start.mjs` | `yarn build` produces updated bundle |
+
+**INTENT.md update**: Structure section updated with skills/ and agents/ directories.
+
+---
+
+## Execution Order (updated)
+
+```
+1. Phase 1 (scaffolding)        — foundation
+2. Phase 6.1-6.6 (build infra)  — need build to verify subsequent phases
+3. Phase 2 (server + vault)     — core infrastructure
+4. Phase 3 (tools)              — primary functionality
+5. Phase 4 (hooks)              — session integration
+6. Phase 5 (skills: setup-lens) — user-facing config management
+7. Phase 6.7-6.9 (docs + verify) — finalization
+8. Phase 7 (skills + agent + prompt) — extended interface layer
+```
+
+**Rationale**: Phase 7 builds on the stable Phase 5/6 foundation. Skills and agents are SKILL.md/AGENT.md files (no TypeScript), except for session-start.ts prompt change which requires a rebuild.
+
+---
+
+## Updated Task Dependency Graph
+
+```
+Phase 1 ──► Phase 2 ──► Phase 3 ──► Phase 4
+                                 ├──► Phase 5 ──┐
+                                 └──► Phase 6 ──┤
+                                                └──► Phase 7
+```
+
+Phase 7 depends on Phase 5 (skills dir established) and Phase 6 (plugin.json finalized).
+
+---
+
 ## Out of Scope (v2+)
 
 - Cross-vault unified search

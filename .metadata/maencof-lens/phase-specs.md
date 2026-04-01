@@ -619,3 +619,183 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 - [ ] INTENT.md is under 50 lines with 3-tier boundaries
 - [ ] Version sync works: `yarn version:sync` updates version.ts and plugin.json
 - [ ] Monorepo scripts (`build:all`, `test:run`) include maencof-lens
+
+---
+
+## Phase 7: Skills + Agent + Prompt Injection 변경
+
+### Objective
+2개 신규 스킬(`lookup`, `context`), 1개 에이전트(`researcher`)를 추가하고,
+SessionStart 프롬프트 주입을 도구 목록에서 스킬 사용법 안내로 변경한다.
+
+### Deliverables
+
+#### 7.1 lookup Skill (`skills/lookup/SKILL.md`)
+
+**Name**: `lookup`
+**Plugin prefix**: `/maencof-lens:lookup`
+**User-invocable**: true
+**Complexity**: simple
+
+**역할**: 키워드 검색 → 문서 읽기 → 요약. 가장 간단한 vault 지식 조회 진입점.
+
+**Workflow**:
+1. 사용자 입력에서 키워드 추출
+2. `lens_search(seed: [keywords], max_results: 5)` 호출
+3. 검색 결과가 없으면 → "관련 문서를 찾지 못했습니다. 다른 키워드를 시도하세요."
+4. 상위 결과에 대해 `lens_read(path: top_result.path)` 호출
+5. 문서 내용을 쿼리 컨텍스트에 맞게 요약하여 제시
+6. 추가 결과 목록을 함께 표시 (선택적 깊은 조회 안내)
+
+**Options**:
+```
+/maencof-lens:lookup <keyword> [--vault <name>] [--layer <N>] [--detail]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `keyword` | required | 검색 키워드 (자연어 가능) |
+| `--vault` | default vault | 대상 vault 지정 |
+| `--layer` | vault config | Layer 필터 (vault 상한 내) |
+| `--detail` | false | 상위 3개 문서까지 전문 읽기 |
+
+**MCP Tools Used**:
+| Tool | Purpose |
+|------|---------|
+| `lens_search` | SA 기반 문서 검색 |
+| `lens_read` | 문서 내용 읽기 |
+
+**Output Format**:
+```markdown
+## Lookup: "{keyword}"
+
+### {title} (L{layer}, relevance {score}%)
+{1-3 paragraph summary}
+
+Path: {path}
+
+---
+### Other Results
+1. **{title}** — {one-line summary} (L{layer}, {score}%)
+2. ...
+
+For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
+```
+
+#### 7.2 context Skill (`skills/context/SKILL.md`)
+
+**Name**: `context`
+**Plugin prefix**: `/maencof-lens:context`
+**User-invocable**: true
+**Complexity**: simple
+
+**역할**: 토큰 예산 기반 컨텍스트 조립. 현재 작업에 필요한 vault 지식을 한 블록으로 조립.
+
+**Workflow**:
+1. 사용자 입력에서 쿼리와 예산 추출
+2. `lens_search(seed: [query keywords], max_results: 10)` 호출하여 관련 문서 식별
+3. `lens_context(query, token_budget)` 호출하여 컨텍스트 블록 조립
+4. 조립된 컨텍스트를 구조화하여 제시
+
+**Options**:
+```
+/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N>]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `query` | required | 컨텍스트 조립 쿼리 |
+| `--budget` | 2000 | 토큰 예산 |
+| `--vault` | default vault | 대상 vault |
+| `--layer` | vault config | Layer 필터 |
+
+**MCP Tools Used**:
+| Tool | Purpose |
+|------|---------|
+| `lens_search` | 관련 문서 식별 |
+| `lens_context` | 토큰 예산 기반 컨텍스트 조립 |
+
+**Output Format**:
+```markdown
+## Context: "{query}" (budget: {N} tokens)
+
+{assembled context block}
+
+---
+Sources: {N} documents from vault "{vault_name}"
+Token usage: ~{used}/{budget}
+```
+
+#### 7.3 researcher Agent (`agents/researcher.md`)
+
+**Name**: `researcher`
+**Model**: sonnet
+**PermissionMode**: default
+**MaxTurns**: 30
+
+**역할**: 5개 MCP 도구 모두를 활용한 자율 vault 탐색 에이전트.
+스킬이 제공하는 단순 파이프라인으로는 부족한 깊은 탐색이 필요할 때 사용.
+
+**Available Tools**:
+- `Read`, `Glob`, `Grep` (파일시스템 접근)
+- `mcp__plugin_maencof-lens_t__lens_search`
+- `mcp__plugin_maencof-lens_t__lens_context`
+- `mcp__plugin_maencof-lens_t__lens_navigate`
+- `mcp__plugin_maencof-lens_t__lens_read`
+- `mcp__plugin_maencof-lens_t__lens_status`
+
+**Exploration Strategy**:
+1. `lens_status` — vault 상태 확인 (stale 여부)
+2. `lens_search` — 시드 키워드로 초기 탐색
+3. `lens_read` — 상위 결과 문서 읽기
+4. `lens_navigate` — 그래프 이웃 탐색 (inbound/outbound/hierarchy)
+5. 발견된 이웃 노드에서 2-4 반복 (최대 3라운드)
+6. `lens_context` — 최종 컨텍스트 조립
+
+**Trigger Phrases**:
+- "vault에서 조사해줘", "vault 탐색", "vault research"
+- "vault 지식 찾아줘", "관련 자료 찾아줘"
+
+#### 7.4 프롬프트 주입 변경 (`src/hooks/session-start.ts`)
+
+**변경 전** (도구 목록):
+```
+Available tools: lens_search, lens_context, lens_navigate, lens_read, lens_status
+```
+
+**변경 후** (스킬 사용법):
+```
+사용 방법:
+- /maencof-lens:lookup <키워드>: vault 지식 검색 및 조회
+- /maencof-lens:context <쿼리>: 컨텍스트 조립
+```
+
+**구현**: `session-start.ts`의 prompt 생성 부분에서 도구 나열을 스킬 안내로 교체.
+
+#### 7.5 plugin.json 업데이트
+
+`agents` 필드 추가:
+```json
+{
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "mcpServers": "./.mcp.json"
+}
+```
+
+#### 7.6 CLAUDE.md / INTENT.md 업데이트
+
+CLAUDE.md에 스킬/에이전트 목록 반영:
+- **Skills (3)**: `setup-lens`, `lookup`, `context`
+- **Agents (1)**: `researcher`
+
+INTENT.md Structure 섹션에 `skills/`, `agents/` 추가.
+
+### Acceptance Criteria
+- [ ] `skills/lookup/SKILL.md` — 완전한 스킬 정의, user_invocable: true
+- [ ] `skills/context/SKILL.md` — 완전한 스킬 정의, user_invocable: true
+- [ ] `agents/researcher.md` — 5개 MCP 도구 참조, trigger phrases 포함
+- [ ] `session-start.ts` — 프롬프트에 스킬 사용법 표시, 도구 목록 제거
+- [ ] `plugin.json` — agents 필드 추가
+- [ ] `CLAUDE.md` — 스킬 3개, 에이전트 1개 반영
+- [ ] `INTENT.md` — Structure에 skills/, agents/ 반영 (50줄 이내 유지)
