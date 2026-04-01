@@ -1,9 +1,9 @@
 ---
 name: bridge
 user_invocable: true
-description: End-to-end external service integration — discover and install MCP servers, define data collection workflows, and auto-generate dedicated workflow skills, all in one conversation.
-version: 1.1.0
-complexity: high
+description: Connects an external service (Slack, Jira, GitHub, Notion) to maencof end-to-end: installs the MCP server, defines data workflows, and auto-generates a ready-to-use integration skill.
+version: "1.1.0"
+complexity: complex
 context_layers: []
 orchestrator: configurator
 plugin: maencof

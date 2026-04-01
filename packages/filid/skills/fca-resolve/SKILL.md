@@ -1,9 +1,10 @@
 ---
 name: fca-resolve
 user_invocable: true
-description: Fix request resolution workflow with auto-commit/push. Parses fix-requests.md, presents items for accept/reject (or auto-accepts all with --auto), applies fixes via code-surgeon, runs typecheck verification, auto-commits and pushes changes, and optionally chains to fca-revalidate.
-version: 2.0.0
+description: Resolve fca-review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing.
+version: "2.0.0"
 complexity: medium
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.

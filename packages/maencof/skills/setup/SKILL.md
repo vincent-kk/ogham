@@ -1,9 +1,9 @@
 ---
 name: setup
 user_invocable: true
-description: maencof onboarding wizard — Core Identity collection, AI companion generation, and knowledge tree initialization (7 stages)
-version: 2.0.0
-complexity: high
+description: Runs the 7-stage maencof onboarding wizard covering personal values, boundaries, preferences, and AI persona generation. Each stage is skippable and re-runnable via the --step flag.
+version: "2.0.0"
+complexity: complex
 context_layers: [1]
 orchestrator: setup skill
 plugin: maencof

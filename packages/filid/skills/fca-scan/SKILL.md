@@ -1,9 +1,10 @@
 ---
 name: fca-scan
 user_invocable: true
-description: Scan for FCA-AI rule violations and generate report, --fix for auto-remediation
-version: 1.0.0
+description: Scan the entire project for FCA-AI rule violations across INTENT.md documents, organ boundaries, and test file structure, then produce a prioritized report with optional --fix auto-remediation.
+version: "1.0.0"
 complexity: medium
+plugin: filid
 ---
 
 # fca-scan — FCA-AI Rule Scanner

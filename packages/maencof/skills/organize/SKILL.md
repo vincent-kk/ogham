@@ -1,9 +1,9 @@
 ---
 name: organize
 user_invocable: true
-description: memory-organizer agent orchestration — knowledge transition recommendation and execution
-version: 1.0.0
-complexity: high
+description: Reorganizes the knowledge vault by promoting or retiring documents across layers. Presents ranked recommendations from the memory-organizer agent and executes moves only after explicit confirmation.
+version: "1.0.0"
+complexity: complex
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: organize skill
 plugin: maencof

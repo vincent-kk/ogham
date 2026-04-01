@@ -1,8 +1,8 @@
 ---
 name: connect
 user_invocable: true
-description: External data source registration/management — configure Execution Area .maencof-meta/data-sources.json
-version: 1.0.0
+description: Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json.
+version: "1.0.0"
 complexity: medium
 context_layers: []
 orchestrator: connect skill

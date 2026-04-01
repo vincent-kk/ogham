@@ -1,9 +1,10 @@
 ---
 name: fca-config
 user_invocable: true
-description: View and modify .filid/config.json settings — language, rule overrides, and project configuration without manual JSON editing
-version: 1.0.0
-complexity: low
+description: View and modify .filid/config.json interactively using show, set, and reset subcommands with dot-notation paths for language, rule enablement, and severity settings.
+version: "1.0.0"
+complexity: simple
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute the requested subcommand as a SINGLE CONTINUOUS

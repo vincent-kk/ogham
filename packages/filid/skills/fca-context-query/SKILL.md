@@ -1,9 +1,10 @@
 ---
 name: fca-context-query
 user_invocable: true
-description: Query FCA-AI context — module/rule lookup within 3-Prompt Limit
-version: 1.0.0
-complexity: low
+description: Answer targeted questions about module boundaries, ownership, and rules by navigating the fractal hierarchy and loading the minimal INTENT.md chain within a strict 3-prompt budget.
+version: "1.0.0"
+complexity: simple
+plugin: filid
 ---
 
 # fca-context-query — Context Query

@@ -1,9 +1,10 @@
 ---
 name: fca-structure-review
 user_invocable: true
-description: 6-stage FCA-AI PR verification — structure, docs, tests, metrics, dependencies
-version: 1.0.0
-complexity: high
+description: Run the 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict.
+version: "1.0.0"
+complexity: complex
+plugin: filid
 ---
 
 # fca-structure-review — 6-Stage PR Verification

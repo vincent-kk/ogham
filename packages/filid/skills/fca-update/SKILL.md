@@ -1,9 +1,10 @@
 ---
 name: fca-update
 user_invocable: false
-description: Analyze changes in the current branch to update INTENT.md/DETAIL.md and organize test.ts/spec.ts following FCA-AI principles — skips execution when no changes detected since last run
-version: 1.0.0
-complexity: high
+description: Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs.
+version: "1.0.0"
+complexity: complex
+plugin: filid
 ---
 
 # fca-update — Code-Docs-Tests Synchronization

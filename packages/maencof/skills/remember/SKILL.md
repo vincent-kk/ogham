@@ -1,8 +1,8 @@
 ---
 name: remember
 user_invocable: true
-description: Record new knowledge to the maencof knowledge tree — automatic Layer recommendation + tag extraction + duplicate check
-version: 1.0.0
+description: Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter.
+version: "1.0.0"
 complexity: medium
 context_layers: [2, 3, 4, 5]
 orchestrator: remember skill

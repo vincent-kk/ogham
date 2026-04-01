@@ -1,8 +1,8 @@
 ---
 name: ingest
 user_invocable: true
-description: Convert external data sources into maencof documents (GitHub issues, Slack, etc. -> L3/L4)
-version: 1.0.0
+description: Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3 or 4 documents with frontmatter, tags, and graph connections.
+version: "1.0.0"
 complexity: medium
 context_layers: [3, 4, 5]
 orchestrator: ingest skill

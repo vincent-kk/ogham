@@ -1,9 +1,10 @@
 ---
 name: fca-pipeline
 user_invocable: true
-description: End-to-end review pipeline orchestrator. Chains pr-create → review → resolve → revalidate with auto-detection of entry point, hybrid execution model (subagent isolation for review, direct execution for other stages), and file-based inter-stage communication.
-version: 1.0.0
+description: Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support.
+version: "1.0.0"
 complexity: medium
+plugin: filid
 ---
 
 > **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.

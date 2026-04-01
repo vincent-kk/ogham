@@ -1,8 +1,8 @@
 ---
 name: reflect
 user_invocable: true
-description: memory-organizer judge module read-only analysis — transition candidates and duplicate detection report
-version: 1.0.0
+description: Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations.
+version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: reflect skill

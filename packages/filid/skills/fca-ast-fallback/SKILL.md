@@ -1,9 +1,10 @@
 ---
 name: fca-ast-fallback
 user_invocable: false
-description: AST pattern search/replace fallback using LLM when ast-grep is unavailable.
-version: 1.0.0
-complexity: low
+description: LLM-based AST pattern search and replace fallback using Grep, Read, and Edit when the @ast-grep/napi native module is unavailable. Supports 17 languages with meta-variable approximation.
+version: "1.0.0"
+complexity: simple
+plugin: filid
 ---
 
 # fca-ast-fallback — AST Pattern Matching Fallback

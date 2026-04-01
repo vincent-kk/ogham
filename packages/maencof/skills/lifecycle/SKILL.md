@@ -1,8 +1,8 @@
 ---
 name: lifecycle
 user_invocable: true
-description: Register, edit, and remove dynamic actions on Claude Code hook events via conversation. Extends hooks safely through the lifecycle dispatcher without modifying static hooks.json.
-version: 1.1.0
+description: Attaches custom actions to Claude Code lifecycle events (session start, stop, tool use) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally.
+version: "1.1.0"
 complexity: medium
 context_layers: []
 orchestrator: configurator

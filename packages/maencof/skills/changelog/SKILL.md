@@ -1,8 +1,8 @@
 ---
 name: changelog
 user_invocable: true
-description: Record self-changes to the daily changelog — detects git changes in watched paths, categorizes them, writes 02_Derived/changelog/YYYY-MM-DD.md, commits, and creates the gate marker
-version: 1.0.0
+description: Records daily self-change entries to the vault changelog. Detects git changes, writes the dated entry, commits it, and unblocks the changelog-gate Stop hook.
+version: "1.0.0"
 complexity: medium
 context_layers: [2]
 orchestrator: changelog skill

@@ -1,9 +1,10 @@
 ---
 name: fca-migrate
 user_invocable: true
-description: Migrate FCA-AI project from CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md naming — supports dry-run, scoped migration, and auto-commit
-version: 2.0.0
-complexity: low
+description: Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a shell script for batch git-mv renames, reference updates, and optional auto-commit.
+version: "2.0.0"
+complexity: simple
+plugin: filid
 ---
 
 # fca-migrate — CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md Migration

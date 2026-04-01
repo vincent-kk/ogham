@@ -1,8 +1,8 @@
 ---
 name: build
 user_invocable: true
-description: Full/incremental knowledge graph index build
-version: 1.0.0
+description: Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, or performs a full rebuild when explicitly specified.
+version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: build skill
