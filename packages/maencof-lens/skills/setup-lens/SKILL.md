@@ -56,6 +56,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 2. Validate vault path exists and contains `.maencof/index.json`
 3. Create config with default layers `[2, 3, 4, 5]`
 4. Write `.maencof-lens/config.json`
+5. Run `.gitignore` guard (see Step 3)
 
 **`add`**:
 1. Load existing config (error if missing — run `init` first)
@@ -73,7 +74,20 @@ Config location: `<cwd>/.maencof-lens/config.json`
 1. Read `.maencof-lens/config.json` (error if missing)
 2. Display formatted table: name, path, layers, default status
 
-### Step 3 — Validation
+### Step 3 — `.gitignore` Guard
+
+After `init` or `add` creates/modifies config, ensure `.maencof-lens` is git-ignored:
+
+1. Check if `<cwd>` is a git repository (`<cwd>/.git` exists)
+   - If NOT a git repo → skip this step entirely
+2. Read `<cwd>/.gitignore` (create if missing)
+3. Check if `.maencof-lens` or `.maencof-lens/` already appears as a line
+   - If already present → skip (no duplicate)
+4. Append `.maencof-lens/` to `.gitignore`
+
+This step is skipped for `remove`, `set-default`, `set-layers`, and `show` subcommands.
+
+### Step 4 — Validation
 
 After any mutation, read the file back and verify valid JSON structure.
 
