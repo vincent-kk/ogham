@@ -1,6 +1,6 @@
 {
   "name": "maencof-lens",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Read-only vault knowledge access for development contexts",
   "author": {
     "name": "Vincent K. Kelvin"
