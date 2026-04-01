@@ -28,7 +28,7 @@ await esbuild.build({
   mainFields: ['module', 'main'],
   external: [],
   alias: {
-    '@maencof': resolve(root, '../maencof/src'),
+    '@ogham/maencof': resolve(root, '../maencof/src'),
   },
 });
 

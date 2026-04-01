@@ -30,7 +30,7 @@ await Promise.all(
       sourcemap: false,
       treeShaking: true,
       alias: {
-        '@maencof': resolve(root, '../maencof/src'),
+        '@ogham/maencof': resolve(root, '../maencof/src'),
       },
     }),
   ),
