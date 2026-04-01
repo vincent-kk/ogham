@@ -1255,13 +1255,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ogham/maencof@workspace:packages/maencof"
   dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.26.0"
+    "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^3.2.4"
     esbuild: "npm:^0.24.0"
     fast-glob: "npm:^3.0.0"
     typescript: "npm:^5.7.2"
-    zod: "npm:^4.0.0"
+    zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
 
