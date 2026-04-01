@@ -45,6 +45,25 @@
         "markdown",
         "personal-knowledge"
       ]
+    },
+    {
+      "name": "maencof-lens",
+      "description": "Read-only vault knowledge access plugin for Claude Code — wraps maencof knowledge graph with multi-vault routing and layer filtering",
+      "version": "0.0.1",
+      "author": {
+        "name": "Vincent K. Kelvin"
+      },
+      "source": "./packages/maencof-lens",
+      "category": "productivity",
+      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/maencof-lens",
+      "tags": [
+        "knowledge-graph",
+        "read-only",
+        "lens",
+        "vault",
+        "mcp",
+        "claude-code"
+      ]
     }
   ]
 }
