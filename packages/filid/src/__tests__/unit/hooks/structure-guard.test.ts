@@ -19,10 +19,10 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassify it as fractal');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassified from organ to fractal');
   });
 
-  it('should allow INTENT.md in nested organ directories with warning', () => {
+  it('should allow INTENT.md in nested organ directories with info', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
@@ -32,7 +32,7 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassify it as fractal');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassified from organ to fractal');
   });
 
   it('should allow INTENT.md in fractal directories', () => {

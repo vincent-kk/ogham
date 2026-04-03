@@ -125,20 +125,19 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
 
-  // [추가 검증] 경고만 수집 (continue: true)
   const warnings: string[] = [];
+  const info: string[] = [];
 
-  // INTENT.md Write → organ 디렉터리 재분류 경고 (차단하지 않음).
-  // FCA 규칙: "Fractal nodes CAN exist inside organ directories."
-  // classifyNode 우선순위 1(hasIntentMd → fractal)이 재분류를 보장한다.
+  // INTENT.md Write → organ directory reclassification notice.
+  // FCA: "Fractal nodes CAN exist inside organ directories."
+  // classifyNode priority 1 (hasIntentMd → fractal) guarantees reclassification.
   if (input.tool_name === 'Write' && isIntentMd(filePath)) {
     let dirSoFar = cwd;
     for (const segment of segments) {
       dirSoFar = path.join(dirSoFar, segment);
       if (isOrganByStructure(dirSoFar)) {
-        warnings.push(
-          `"${segment}" is an organ directory. ` +
-            `Creating INTENT.md will reclassify it as fractal (module-entry-point, zero-peer-file and other fractal rules will apply).`,
+        info.push(
+          `"${segment}" has been reclassified from organ to fractal by INTENT.md creation.`,
         );
         break;
       }
@@ -181,16 +180,26 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
     }
   }
 
-  if (warnings.length === 0) {
+  if (warnings.length === 0 && info.length === 0) {
     return { continue: true };
   }
 
-  const additionalContext =
-    `⚠️ Warning from filid structure-guard:\n` +
-    warnings.map((w, i) => `${i + 1}. ${w}`).join('\n');
+  const parts: string[] = [];
+  if (info.length > 0) {
+    parts.push(
+      `[filid:info] structure-guard:\n` +
+        info.map((m, i) => `${i + 1}. ${m}`).join('\n'),
+    );
+  }
+  if (warnings.length > 0) {
+    parts.push(
+      `[filid:warn] structure-guard:\n` +
+        warnings.map((w, i) => `${i + 1}. ${w}`).join('\n'),
+    );
+  }
 
   return {
     continue: true,
-    hookSpecificOutput: { additionalContext },
+    hookSpecificOutput: { additionalContext: parts.join('\n\n') },
   };
 }
