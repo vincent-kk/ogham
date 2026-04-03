@@ -1,0 +1,493 @@
+# SPEC-skills — imbas Skill 정의
+
+> Status: Draft v1.0 (2026-04-04)
+> Parent: [BLUEPRINT.md](../BLUEPRINT.md)
+
+---
+
+## 1. 스킬 목록 총괄
+
+### Core Workflow (3개)
+
+| Skill | Slash Command | 역할 | Agent 사용 |
+|-------|-------------|------|-----------|
+| **validate** | `/imbas:validate` | Phase 1 — 정합성 검증 | imbas-analyst |
+| **split** | `/imbas:split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
+| **devplan** | `/imbas:devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
+
+### Infrastructure (3개)
+
+| Skill | Slash Command | 역할 | Agent 사용 |
+|-------|-------------|------|-----------|
+| **setup** | `/imbas:setup` | 초기화, config, 프로젝트 캐시 | 없음 (직접 실행) |
+| **cache** | `/imbas:cache` | Jira 캐시 갱신/조회 | 없음 (직접 실행) |
+| **status** | `/imbas:status` | 런 상태 조회, 이력 | 없음 (직접 실행) |
+
+### Execution (1개)
+
+| Skill | Slash Command | 역할 | Agent 사용 |
+|-------|-------------|------|-----------|
+| **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | 없음 (직접 실행) |
+
+### Utility (1개)
+
+| Skill | Slash Command | 역할 | Agent 사용 |
+|-------|-------------|------|-----------|
+| **fetch-media** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
+
+**총 8개 스킬**, 사용자 직접 호출(slash) 또는 스킬/에이전트 내부 호출.
+
+---
+
+## 2. Core Workflow Skills
+
+### 2.1 imbas:validate — Phase 1 정합성 검증
+
+```yaml
+name: imbas-validate
+user_invocable: true
+description: >
+  Phase 1 of the imbas pipeline. Validates a planning document for contradictions,
+  divergences, omissions, and logical infeasibilities. Produces a markdown validation report.
+  Trigger: "validate spec", "check document", "정합성 검증", "문서 검증"
+complexity: moderate
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:validate <source>  [--project <KEY>] [--supplements <path,...>]
+
+<source>       : 기획 문서 경로 (로컬 md/txt) 또는 Confluence URL
+--project      : Jira 프로젝트 키 (config.defaults.project_key 대체)
+--supplements  : 보조 자료 경로 (콤마 구분)
+```
+
+**Workflow:**
+
+```
+Step 1 — Run 초기화
+  1. config.json 로드
+  2. 프로젝트 키 결정 (인자 > config.defaults)
+  3. run-id 생성 (YYYYMMDD-NNN)
+  4. .imbas/<KEY>/runs/<run-id>/ 디렉토리 생성
+  5. state.json 초기화 (current_phase: "validate", validate.status: "in_progress")
+  6. 원본 문서 → source.md 복사 (원본 불변 원칙)
+  7. 보조 자료 → supplements/ 복사
+
+Step 2 — 문서 소스 해석
+  - 로컬 파일: 직접 읽기
+  - Confluence URL: getConfluencePage로 마크다운 변환 후 저장
+  - 첨부 미디어 감지 → imbas:fetch-media 호출 안내 (자동 호출 안 함)
+
+Step 3 — imbas-analyst 호출
+  - Agent 호출: imbas-analyst
+  - 입력: source.md + supplements/
+  - 지시: 4종 검증 (모순/이격/누락/논리적 불능) 수행
+  - 출력: validation-report.md
+
+Step 4 — 결과 평가 & 게이트
+  - BLOCKING 이슈 존재 → state.json: validate.result = "BLOCKED"
+  - 이슈 없음 → state.json: validate.result = "PASS"
+  - 사용자에게 리포트 요약 표시
+
+Step 5 — 상태 갱신
+  - state.json: validate.status = "completed"
+  - PASS → "Phase 2(split) 진행 가능" 안내
+  - BLOCKED → "원본 수정 후 재검증 필요" 안내 + 블로킹 이슈 목록
+```
+
+**Output:** `validation-report.md` (리포트 포맷은 SPEC-agents.md §2.2 참조)
+
+---
+
+### 2.2 imbas:split — Phase 2 Story 분할
+
+```yaml
+name: imbas-split
+user_invocable: true
+description: >
+  Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant
+  Jira Stories. Applies 3→1→2 verification, size checks, and horizontal splitting.
+  Trigger: "split stories", "story 분할", "Phase 2", "imbas split"
+complexity: complex
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:split [--run <run-id>] [--epic <EPIC-KEY>]
+
+--run    : 기존 런 ID (없으면 가장 최근 PASS된 런 사용)
+--epic   : Epic Jira 키 (없으면 새 Epic 생성 여부 확인)
+```
+
+**전제조건:** state.json에서 `validate.status == "completed"` && `validate.result == "PASS"`
+
+**Workflow:**
+
+```
+Step 1 — 런 로드 & 전제조건 확인
+  1. state.json 로드
+  2. validate 완료 + PASS 확인 (미충족 → 에러 + 안내)
+  3. state.json: current_phase = "split", split.status = "in_progress"
+
+Step 2 — Epic 결정
+  - --epic 제공 → getJiraIssue로 존재 확인
+  - 미제공 → 사용자에게 Epic 생성 여부 질의
+    - 생성 → 매니페스트에 Epic 추가 (manifest 실행 시 생성)
+    - 기존 사용 → 키 입력
+
+Step 3 — imbas-planner 호출 (Story 분할)
+  - Agent 호출: imbas-planner
+  - 입력: source.md + supplements/ + Epic 정보
+  - 지시:
+    - INVEST 기준으로 Story 분할
+    - Story Description = User Story + AC (Given/When/Then or EARS)
+    - 각 Story에 원본 문서 근거 링크(섹션/인용) 명시
+  - 출력: Story 목록 (JSON)
+
+Step 4 — 3→1→2 검증 (각 Story에 대해)
+  [3] 근거 링크 확인
+    - 없음 → 리뷰 격상 플래그
+    - 있음 → 계속
+  [1] 상위 문맥 정합성 (코드 검증, 저비용)
+    - 이탈 → 리뷰 격상 플래그
+    - 정합 → 계속
+  [2] 역추론 검증 — imbas-analyst 호출
+    - 분할된 Story 전체 재조합 → 원본과 비교
+    - 불일치 → 리뷰 격상 플래그
+    - 일치 → 자율 통과
+
+Step 5 — 크기 검증
+  각 Story에 대해 4가지 기준 확인:
+  - 적정 규모, 명세 충분, 독립성, 단일 책임
+  - 미충족 → 수평 분할 실행
+    - imbas-planner 재호출 (해당 Story만)
+    - 원본 Story → Done 처리 예정 + split-into 링크
+    - 신규 Story에 3→1→2 + 크기 검증 반복
+
+Step 6 — stories-manifest.json 생성
+  - 전체 Story 목록 + 검증 결과 + 링크 정보
+  - 리뷰 격상 Story 표시
+
+Step 7 — 사용자 리뷰
+  - 매니페스트 요약 표시 (Story 수, 리뷰 필요 항목, 분할 이력)
+  - 사용자 승인 대기
+  - 승인 → state.json: split.status = "completed", split.pending_review = false
+  - 수정 요청 → Step 3으로 재진입 (해당 Story만)
+```
+
+**Output:** `stories-manifest.json` (스키마는 SPEC-state.md §6 참조)
+
+---
+
+### 2.3 imbas:devplan — Phase 3 Subtask/Task 생성
+
+```yaml
+name: imbas-devplan
+user_invocable: true
+description: >
+  Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts
+  cross-Story Tasks by exploring the local codebase. Operates on approved Stories only.
+  Trigger: "create devplan", "dev 계획", "Phase 3", "subtask 생성"
+complexity: complex
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:devplan [--run <run-id>] [--stories <S1,S2,...>]
+
+--run      : 런 ID
+--stories  : 대상 Story ID (콤마 구분, 없으면 전체)
+```
+
+**전제조건:** state.json에서 `split.status == "completed"` && `split.pending_review == false`
+
+**Workflow:**
+
+```
+Step 1 — 런 로드 & 매니페스트 확인
+  1. state.json 로드 + stories-manifest.json 로드
+  2. split 완료 + 리뷰 승인 확인
+  3. Jira에 Story가 생성되어 있는지 확인 (manifest에서 실행 전이면 안내)
+  4. state.json: current_phase = "devplan", devplan.status = "in_progress"
+
+Step 2 — imbas-engineer 호출
+  - Agent 호출: imbas-engineer
+  - 입력:
+    - stories-manifest.json (Story Description들)
+    - 로컬 코드베이스 루트 경로
+    - (선택) 아키텍처 문서 경로
+    - config.json의 subtask_limits
+  - 지시:
+    Step 2a. Story별 코드 탐색
+      - domain 키워드 추출 → 코드 진입점 → 관련 영역 순회
+    Step 2b. Story별 Subtask 초안 (EARS)
+      - 종료조건 4개 모두 충족 확인
+    Step 2c. 전체 Subtask 풀 중복 감지
+      - 코드 경로 기반 유사도 비교
+    Step 2d. Task 후보 추출
+      - 임계값 초과 중복 → Task + blocks 링크
+    Step 2e. devplan-manifest.json 생성
+  - 출력: devplan-manifest.json
+
+Step 3 — B→A 피드백 수집
+  - Story 정의 ≠ 코드 현실인 경우 → 코멘트 목록 생성
+  - 문제 공간 트리 미변경 원칙
+
+Step 4 — 사용자 리뷰
+  - 매니페스트 요약 표시:
+    - Task 수, Story별 Subtask 수
+    - 실행 순서 (execution_order)
+    - B→A 피드백 항목 (있으면)
+  - 사용자 승인 대기
+  - 승인 → state.json: devplan.status = "completed"
+```
+
+**Output:** `devplan-manifest.json` (스키마는 SPEC-state.md §6 참조)
+
+---
+
+## 3. Infrastructure Skills
+
+### 3.1 imbas:setup — 초기화 & 설정
+
+```yaml
+name: imbas-setup
+user_invocable: true
+description: >
+  Initialize .imbas/ directory, create config.json, and cache Jira project metadata.
+  Supports subcommands: init, show, set-project, set-language, refresh-cache.
+  Trigger: "setup imbas", "imbas 설정", "imbas init"
+complexity: simple
+plugin: imbas
+```
+
+**Subcommands:**
+
+| Command | 동작 |
+|---------|------|
+| `init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
+| `show` | config.json + 캐시 상태 표시 |
+| `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
+| `set-language <field> <lang>` | 언어 설정 변경 |
+| `refresh-cache [KEY]` | 캐시 강제 갱신 |
+
+**Init Workflow:**
+
+```
+Step 1 — .imbas/ 디렉토리 생성
+Step 2 — 사용자에게 Jira 프로젝트 키 질의
+  - getVisibleJiraProjects로 사용 가능 프로젝트 목록 표시
+  - 사용자 선택
+Step 3 — config.json 생성 (기본값 + 사용자 선택)
+Step 4 — 프로젝트 캐시 갱신
+  - .imbas/<KEY>/cache/ 디렉토리 생성
+  - Jira 메타데이터 수집 (issue-types, link-types, workflows)
+Step 5 — .gitignore 가드 (setup-lens 패턴)
+  - git repo 확인 → .imbas/ ignore 등록
+Step 6 — 결과 표시
+```
+
+**참고:** setup-lens 패턴 (`/Users/Vincent/Workspace/ogham/packages/maencof-lens/skills/setup-lens/SKILL.md`) 구조를 따름.
+
+---
+
+### 3.2 imbas:cache — Jira 캐시 관리
+
+```yaml
+name: imbas-cache
+user_invocable: true
+description: >
+  View or refresh Jira project metadata cache.
+  Trigger: "imbas cache", "캐시 갱신", "refresh jira cache"
+complexity: simple
+plugin: imbas
+```
+
+**Subcommands:**
+
+| Command | 동작 |
+|---------|------|
+| `show` (default) | 캐시 상태 + TTL 표시 |
+| `refresh [KEY]` | 지정 프로젝트(또는 기본) 캐시 강제 갱신 |
+| `clear [KEY]` | 캐시 삭제 |
+
+---
+
+### 3.3 imbas:status — 런 상태 조회
+
+```yaml
+name: imbas-status
+user_invocable: true
+description: >
+  Show current or historical imbas run status, including phase progress,
+  manifest summaries, and blocking issues.
+  Trigger: "imbas status", "런 상태", "imbas 진행상황"
+complexity: simple
+plugin: imbas
+```
+
+**Subcommands:**
+
+| Command | 동작 |
+|---------|------|
+| (default) | 가장 최근 런의 상태 표시 |
+| `list` | 모든 런 ID + 상태 요약 |
+| `<run-id>` | 특정 런 상세 표시 |
+| `resume <run-id>` | 중단된 런 재개 (다음 Phase 안내) |
+
+---
+
+## 4. Execution Skill
+
+### 4.1 imbas:manifest — 매니페스트 실행
+
+```yaml
+name: imbas-manifest
+user_invocable: true
+description: >
+  Execute a stories-manifest or devplan-manifest to batch-create Jira issues.
+  Supports dry-run, resume from failure, and selective execution.
+  Trigger: "execute manifest", "매니페스트 실행", "jira 생성"
+complexity: moderate
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:manifest <type> [--run <run-id>] [--dry-run]
+
+<type>    : "stories" | "devplan"
+--run     : 런 ID (없으면 최근)
+--dry-run : 실제 생성 없이 실행 계획만 표시
+```
+
+**Workflow:**
+
+```
+Step 1 — 매니페스트 로드
+  - type에 따라 stories-manifest.json 또는 devplan-manifest.json
+  - pending 항목 수 확인
+
+Step 2 — Dry Run (--dry-run 시)
+  - 생성 예정 항목 표시 (타입, 제목, 링크)
+  - 종료
+
+Step 3 — 실행 확인
+  - 사용자에게 생성 항목 수 + 프로젝트 키 표시
+  - 명시적 확인 대기
+
+Step 4 — 배치 실행
+  - devplan일 경우 execution_order 순서 따름:
+    1. Task 생성
+    2. Task Subtask 생성
+    3. Story↔Task 블로킹 링크 생성
+    4. Story Subtask 생성
+  - stories일 경우:
+    1. Epic 생성 (필요 시)
+    2. Story 생성
+    3. Split 링크 생성
+  - 각 항목 생성 후 즉시 manifest에 jira_key + status 기록 (복구용)
+
+Step 5 — 결과 리포트
+  - 생성된 이슈 수, 실패 수
+  - 실패 항목 목록 + 재시도 안내
+```
+
+**멱등성:** jira_key가 이미 있는 항목은 스킵. 중단 후 재실행 안전.
+
+---
+
+## 5. Utility Skill
+
+### 5.1 imbas:fetch-media — 미디어 다운로드 & 분석
+
+```yaml
+name: imbas-fetch-media
+user_invocable: true
+description: >
+  Download images, videos, and GIFs from Confluence/Jira. For video/GIF files,
+  extracts keyframes using scene-sieve and runs semantic analysis via imbas-media agent.
+  Trigger: "download media", "미디어 다운로드", "fetch attachment", "영상 분석"
+complexity: moderate
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:fetch-media <url-or-path> [--analyze] [--preset <name>]
+
+<url-or-path>  : Confluence 첨부 URL, Jira 첨부 URL, 또는 로컬 파일 경로
+--analyze      : 비디오/GIF인 경우 scene-sieve + imbas-media 분석 실행
+--preset       : scene-sieve 프리셋 오버라이드 (default: auto-detect)
+```
+
+**상세 설계는 [SPEC-media.md](./SPEC-media.md) 참조.**
+
+---
+
+## 6. 스킬 간 호출 관계
+
+```
+사용자
+  │
+  ├── /imbas:setup ─────────── (독립)
+  ├── /imbas:cache ─────────── (독립)
+  ├── /imbas:status ────────── (독립)
+  │
+  ├── /imbas:validate ─────── state.json 생성 → validation-report.md
+  │         │
+  │         ▼
+  ├── /imbas:split ────────── state.json 갱신 → stories-manifest.json
+  │         │
+  │         ├── (내부) imbas:fetch-media 안내 (미디어 발견 시)
+  │         │
+  │         ▼
+  ├── /imbas:manifest stories ── stories-manifest → Jira Story 생성
+  │         │
+  │         ▼
+  ├── /imbas:devplan ──────── state.json 갱신 → devplan-manifest.json
+  │         │
+  │         ▼
+  └── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+```
+
+---
+
+## 7. 공통 설계 패턴
+
+### 7.1 컨텍스트 절약
+
+모든 스킬은 **slash command 직접 호출** 또는 **스킬/에이전트 내부 호출**로만 실행.
+- 자동 트리거 없음 (불필요한 컨텍스트 점유 방지)
+- 에이전트는 필요 시점에만 spawn → 결과 반환 → 즉시 종료
+
+### 7.2 Plan-then-Execute
+
+Phase 1-3은 **매니페스트만 생성** (읽기 전용).
+실제 Jira 쓰기는 `imbas:manifest`에서만 수행.
+→ 사용자가 항상 실행 전 검토 가능.
+
+### 7.3 실패 복구
+
+- 매니페스트의 status + jira_key로 재실행 시 자동 스킵
+- state.json으로 중단된 Phase 감지 → `imbas:status resume` 안내
+
+### 7.4 단일 턴 실행
+
+각 스킬은 `> EXECUTION MODEL: Single continuous operation` 원칙.
+- 읽기 → 처리 → 에이전트 호출 → 결과 평가 → 상태 저장 → 사용자 리포트
+- 사용자 결정이 필요한 시점에서만 턴 양보
+
+---
+
+## Related
+
+- [SPEC-agents.md](./SPEC-agents.md) — 스킬이 호출하는 에이전트
+- [SPEC-state.md](./SPEC-state.md) — 스킬이 읽고 쓰는 상태
+- [SPEC-media.md](./SPEC-media.md) — fetch-media 상세
+- [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
+- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
