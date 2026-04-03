@@ -231,24 +231,25 @@ Phase 0 (기반)
 Phase 1 (Infra Skills)
   │
   ▼
-Phase 2 (Agent References) ──── Phase 3 (Agent Definitions)
-  │                                       │
-  └───────────────┬───────────────────────┘
-                  │
-                  ▼
-            Phase 4 (Core Skills)
-                  │
-                  ▼
-            Phase 5 (Exec & Util)
-                  │
-                  ▼
-            Phase 6 (Test & POC)
+Phase 2 (Agent References)
+  │
+  ▼
+Phase 3 (Agent Definitions)
+  │
+  ▼
+Phase 4 (Core Skills)
+  │
+  ▼
+Phase 5 (Exec & Util)
+  │
+  ▼
+Phase 6 (Test & POC)
 ```
 
 ---
 
 ## Notes
 
-- Phase 2와 3은 병렬 진행 가능 (references 준비 → agent 정의)
+- Phase 2 → 3은 순차 (Agent Definition이 References를 참조). 에이전트 단위 병렬만 가능 (예: analyst references 완료 → analyst agent 정의 가능, planner는 아직 진행 중)
 - Phase 4는 Phase 1 + 3 완료 후 착수 (infra + agent 모두 필요)
 - 각 Phase 완료 후 SPEC 문서 업데이트 (발견된 변경사항 반영)

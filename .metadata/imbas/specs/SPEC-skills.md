@@ -88,12 +88,13 @@ Step 3 — imbas-analyst 호출
 
 Step 4 — 결과 평가 & 게이트
   - BLOCKING 이슈 존재 → state.json: validate.result = "BLOCKED"
+  - WARNING만 존재 (BLOCKING 없음) → state.json: validate.result = "PASS_WITH_WARNINGS"
   - 이슈 없음 → state.json: validate.result = "PASS"
   - 사용자에게 리포트 요약 표시
 
 Step 5 — 상태 갱신
   - state.json: validate.status = "completed"
-  - PASS → "Phase 2(split) 진행 가능" 안내
+  - PASS / PASS_WITH_WARNINGS → "Phase 2(split) 진행 가능" 안내 (WARNING 시 경고 목록 표시)
   - BLOCKED → "원본 수정 후 재검증 필요" 안내 + 블로킹 이슈 목록
 ```
 
@@ -122,7 +123,7 @@ plugin: imbas
 --epic   : Epic Jira 키 (없으면 새 Epic 생성 여부 확인)
 ```
 
-**전제조건:** state.json에서 `validate.status == "completed"` && `validate.result == "PASS"`
+**전제조건:** state.json에서 `validate.status == "completed"` && `validate.result in ["PASS", "PASS_WITH_WARNINGS"]`
 
 **Workflow:**
 
@@ -159,13 +160,34 @@ Step 4 — 3→1→2 검증 (각 Story에 대해)
     - 불일치 → 리뷰 격상 플래그
     - 일치 → 자율 통과
 
+  자율/리뷰 판단 기준:
+    - 기준 A: 분할 결과가 하나의 해석만 가능 → 자율 통과
+    - 기준 B: 상위 티켓에 명시된 내용의 재구성 → 자율, 추론이 개입된 경우 → 리뷰 격상
+
+Step 4.5 — 탈출 조건 확인
+  분할 과정에서 다음 상황 감지 시 즉시 탈출 (리포트 생성):
+  | 코드 | 상황 | 액션 |
+  |------|------|------|
+  | E2-1 | 구체화 필요 — 정보 부족 | 부족 정보 목록 + 인간 보완 요청 |
+  | E2-2 | 모순/충돌 발견 | 충돌 지점 명시 + 인간 의사결정 요청 |
+  | E2-3 | 분할 불필요 — 이미 적정 크기 | Phase 3 직행 |
+  | EC-1 | 이해 불가 — 해석 불능 | 범위 동결 + 질의 구조화 |
+  | EC-2 | 원본 결함 발견 | 결함 리포트 (Phase 1 재검증 권고) |
+  탈출 시: state.json: split.status = "escaped", split.escape_code = "[코드]"
+  → 사용자에게 구조화된 리포트 출력 ("탈출은 리포트" 원칙)
+
 Step 5 — 크기 검증
   각 Story에 대해 4가지 기준 확인:
   - 적정 규모, 명세 충분, 독립성, 단일 책임
-  - 미충족 → 수평 분할 실행
-    - imbas-planner 재호출 (해당 Story만)
-    - 원본 Story → Done 처리 예정 + split-into 링크
-    - 신규 Story에 3→1→2 + 크기 검증 반복
+  - 미충족 → 원인에 따라 분기:
+    (a) 크기 초과 → **수평 분할** 실행
+      - imbas-planner 재호출 (해당 Story만)
+      - 원본 Story → Done 처리 예정 + `is split into` / `split from` 링크
+      - 신규 Story에 3→1→2 + 크기 검증 반복
+    (b) 개념적으로 하위 Story 필요 → **umbrella 패턴** 실행
+      - 원본 Story를 umbrella로 유지 (삭제/Done 하지 않음)
+      - 하위 Story 생성 + `relates to` 링크로 연결
+      - 실제 Subtask는 하위 Story에만 생성, umbrella에는 생성하지 않음
 
 Step 6 — stories-manifest.json 생성
   - 전체 Story 목록 + 검증 결과 + 링크 정보
@@ -211,7 +233,9 @@ plugin: imbas
 Step 1 — 런 로드 & 매니페스트 확인
   1. state.json 로드 + stories-manifest.json 로드
   2. split 완료 + 리뷰 승인 확인
-  3. Jira에 Story가 생성되어 있는지 확인 (manifest에서 실행 전이면 안내)
+  3. stories-manifest.json의 Story 항목 상태 확인:
+     - 모든 Story가 `created` (jira_key 존재) → 정상 진행
+     - `pending` 항목 존재 → "imbas:manifest stories 먼저 실행 필요" 안내 + 블로킹
   4. state.json: current_phase = "devplan", devplan.status = "in_progress"
 
 Step 2 — imbas-engineer 호출
@@ -234,8 +258,9 @@ Step 2 — imbas-engineer 호출
   - 출력: devplan-manifest.json
 
 Step 3 — B→A 피드백 수집
-  - Story 정의 ≠ 코드 현실인 경우 → 코멘트 목록 생성
-  - 문제 공간 트리 미변경 원칙
+  - Story 정의 ≠ 코드 현실인 경우 → devplan-manifest.json의 feedback_comments 필드에 기록
+  - type: mapping_divergence (매핑 불일치) | story_split_issue (분할 문제)
+  - 문제 공간 트리 미변경 원칙 — Story 자체는 수정하지 않음, 코멘트로 기록
 
 Step 4 — 사용자 리뷰
   - 매니페스트 요약 표시:
@@ -243,7 +268,7 @@ Step 4 — 사용자 리뷰
     - 실행 순서 (execution_order)
     - B→A 피드백 항목 (있으면)
   - 사용자 승인 대기
-  - 승인 → state.json: devplan.status = "completed"
+  - 승인 → state.json: devplan.status = "completed", devplan.pending_review = false
 ```
 
 **Output:** `devplan-manifest.json` (스키마는 SPEC-state.md §6 참조)
@@ -274,6 +299,7 @@ plugin: imbas
 | `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
 | `set-language <field> <lang>` | 언어 설정 변경 |
 | `refresh-cache [KEY]` | 캐시 강제 갱신 |
+| `clear-temp` | `.imbas/.temp/` 디렉토리 삭제 (미디어 임시 파일 정리) |
 
 **Init Workflow:**
 
@@ -386,10 +412,18 @@ Step 4 — 배치 실행
     2. Task Subtask 생성
     3. Story↔Task 블로킹 링크 생성
     4. Story Subtask 생성
+    5. B→A 피드백 코멘트 (feedback_comments → addCommentToJiraIssue)
   - stories일 경우:
     1. Epic 생성 (필요 시)
     2. Story 생성
-    3. Split 링크 생성
+    3. Split 링크 생성 (links[].to가 배열인 경우 순회하여 개별 링크 생성)
+       ```
+       for each link in manifest.links where status == "pending":
+         for each target in link.to:   // 1:N 확장
+           createIssueLink(link.type, resolve(link.from), resolve(target))
+         link.status = "created"
+         save manifest
+       ```
   - 각 항목 생성 후 즉시 manifest에 jira_key + status 기록 (복구용)
 
 Step 5 — 결과 리포트

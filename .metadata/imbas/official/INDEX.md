@@ -17,14 +17,14 @@
 
 ## design/ — imbas 설계 문서
 
-| 파일 | 내용 | 버전 |
-|------|------|------|
-| [imbas-design-v2.2.md](./design/imbas-design-v2.2.md) | **핵심 설계서** — 전체 흐름, 7원칙, Jira 3계층, Phase 1-3 상세 | v2.2 |
-| [imbas-spec-v1.md](./design/imbas-spec-v1.md) | Pipeline Specification — 구현 수준의 상세 스펙 + 시뮬레이션 | v1.0 |
-| [validation-workflow-v1.md](./design/validation-workflow-v1.md) | Phase 1 정합성 검증 워크플로우 — 4종 검증, 리포트 구조 | v1 |
-| [design-v3-jira-3tier.md](./design/design-v3-jira-3tier.md) | Jira 3계층 수정 아키텍처 (v2→v3 진화 과정 기록) | v3 |
-| [spec-ticket-format-v1.md](./design/spec-ticket-format-v1.md) | Spec 티켓 포맷 정의 — EARS 패턴, 도메인/I/O | v1 |
-| [merge-point-protocol-v1.md](./design/merge-point-protocol-v1.md) | 합류점 N:M 변환 프로토콜 — Task 추출 규칙 | v1 |
+| 파일 | 내용 | 버전 | 상태 |
+|------|------|------|------|
+| [imbas-design-v2.2.md](./design/imbas-design-v2.2.md) | **핵심 설계서** — 전체 흐름, 7원칙, Jira 3계층, Phase 1-3 상세 | v2.2 | Superseded by BLUEPRINT v1.0 |
+| [imbas-spec-v1.md](./design/imbas-spec-v1.md) | Pipeline Specification — 구현 수준의 상세 스펙 + 시뮬레이션 | v1.0 | Superseded by BLUEPRINT v1.0 + SPEC docs |
+| [validation-workflow-v1.md](./design/validation-workflow-v1.md) | Phase 1 정합성 검증 워크플로우 — 4종 검증, 리포트 구조 | v1 | Superseded by SPEC-skills/SPEC-agents (§classify 제거됨: 결정 9) |
+| [design-v3-jira-3tier.md](./design/design-v3-jira-3tier.md) | Jira 3계층 수정 아키텍처 (v2→v3 진화 과정 기록) | v3 | Superseded by BLUEPRINT v1.0 (미결사항 해소) |
+| [spec-ticket-format-v1.md](./design/spec-ticket-format-v1.md) | Spec 티켓 포맷 정의 — EARS 패턴, 도메인/I/O | v1 | 유지 — SPEC-agents §4.1에 반영 |
+| [merge-point-protocol-v1.md](./design/merge-point-protocol-v1.md) | 합류점 N:M 변환 프로토콜 — Task 추출 규칙 | v1 | Superseded by BLUEPRINT §7 + SPEC-agents §4.4 |
 
 ---
 

@@ -66,7 +66,7 @@ model: sonnet
 # imbas Validation Report
 source: [문서 식별자]
 date: YYYY-MM-DD
-status: PASS | BLOCKED
+status: PASS | PASS_WITH_WARNINGS | BLOCKED
 
 ## 🔴 모순 (N건)
 ### V-C01: [제목]
@@ -116,6 +116,7 @@ tools:
   - getConfluencePage
   - searchConfluenceUsingCql
   - getJiraIssue
+  - searchJiraIssuesUsingJql
 ```
 
 ### Permission Mode
@@ -246,7 +247,7 @@ tools:
 ### Permission Mode
 
 ```yaml
-mode: default  # Jira 이슈 생성은 사용자 확인 필요 (manifest 기반이므로 실제론 skill에서 제어)
+mode: default  # Jira 쓰기는 스킬 워크플로우가 제어 (Plan-then-Execute는 스킬 수준에서 강제)
 ```
 
 ---
@@ -280,6 +281,7 @@ When [trigger], the [system] shall [action].
 ## Domain
 
 - domain: [도메인 태그]
+- category: [상위기획 | spec | 기술설계 | QA]
 
 ## I/O
 
@@ -311,19 +313,29 @@ When [trigger], the [system] shall [action].
 4. 아키텍처 문서 참조 (존재 시)
 5. **전체 무차별 순회 금지** — 도메인 시드 기반 스코핑
 
-#### 4.4 Task 추출 규칙
+#### 4.4 Task 추출 규칙 (N:M 합류점 프로토콜)
 
-1. 전체 Subtask 풀에서 코드 경로 기반 유사도 비교
-2. 임계값 초과 중복 → Task 후보 플래그
-3. LLM이 병합 여부, 링크 구성 결정
-4. Task ──blocks──→ 관련 Story 모두 링크
-5. 원본 Story 삭제 금지
+1. **매핑 초안**: 전체 Subtask 풀에서 코드 경로 기반 유사도 비교
+2. **경로 실재 검증**: Subtask가 참조하는 코드 경로가 실제 존재하는지 확인 (Grep/Glob). 미존재 → 경고 플래그
+3. **플래그 자동 생성**:
+   - 중복 감지: 2개 이상 Story에서 동일 코드 경로/모듈에 대한 Subtask → "병합 후보" 플래그
+   - 미커버 감지: 매핑된 코드 경로가 없는 Subtask → "아키텍처 확장 필요" 플래그
+   - 크로스레이어 감지: Subtask의 I/O가 여러 레이어(API+DB+UI) 관통 → "분리 후보" 플래그
+4. **LLM 판단**: 플래그 기반으로 병합/분리/확장 여부 결정 + 링크 구성
+5. Task ──blocks──→ 관련 Story 모두 링크
+6. 원본 Story 삭제 금지 (트레이서빌리티 보존)
 
 #### 4.5 B→A 피드백 규칙
 
 - Story 트리(문제 공간)는 **건드리지 않음** (트레이서빌리티 보존)
 - Story 정의 ≠ 코드 현실 → dev 티켓에 매핑 근거 명시
 - Story 분할 자체가 잘못됨 → Story에 코멘트 기록
+
+#### 4.6 Story-Task 관계 원칙 (Reference)
+
+- **Task 완료 ≠ Story 자동 완료** — Task가 완료되어도 Story의 AC 충족 여부를 개별 확인해야 함
+- Story는 **실제 AC가 충족된 경우에만** 닫음 (사용자 가치 관점의 완료)
+- Task에 흡수된 Story를 **삭제하지 않음** — `blocks` 링크로 트레이서빌리티 유지
 
 ### Tools
 
@@ -335,6 +347,7 @@ tools:
   - Bash          # 빌드/테스트 확인
   # Atlassian MCP
   - getJiraIssue
+  - searchJiraIssuesUsingJql
   - createJiraIssue
   - createIssueLink
   - addCommentToJiraIssue
@@ -344,7 +357,7 @@ tools:
 ### Permission Mode
 
 ```yaml
-mode: default  # 코드 읽기는 자유, Jira 생성은 manifest 기반으로 skill에서 제어
+mode: default  # 코드 읽기는 자유, Jira 쓰기는 스킬 워크플로우가 제어
 ```
 
 ---

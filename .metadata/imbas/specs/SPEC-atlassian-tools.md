@@ -107,10 +107,13 @@ for each item in manifest where status == "pending":
 
 ```
 for each link in manifest.links where status == "pending":
-  1. resolve from/to → jira_key (manifest 참조)
-  2. createIssueLink(type, inwardIssue, outwardIssue)
-  3. link.status = "created"
-  4. save manifest
+  // links[].to는 배열 — 1:N 수평 분할 대응
+  for each target in link.to:
+    1. resolve link.from → jira_key (manifest 참조)
+    2. resolve target → jira_key (manifest 참조)
+    3. createIssueLink(type, inwardIssue, outwardIssue)
+  link.status = "created"
+  save manifest
 ```
 
 ### 3.3 캐시 갱신 패턴
@@ -130,7 +133,7 @@ for each link in manifest.links where status == "pending":
 
 ## 4. 도구 접근 제어
 
-스킬별 도구 사용 범위:
+### 4.1 스킬 수준 — 워크플로우가 직접 사용하는 도구
 
 | Skill | 읽기 도구 | 쓰기 도구 |
 |-------|----------|----------|
@@ -141,7 +144,18 @@ for each link in manifest.links where status == "pending":
 | imbas:manifest | getJiraIssue, getTransitionsForJiraIssue | createJiraIssue, createIssueLink, editJiraIssue, transitionJiraIssue, addCommentToJiraIssue |
 | imbas:fetch-media | getConfluencePage, fetchAtlassian | (없음) |
 
-**핵심 원칙**: Phase 1-3 스킬은 **Jira에 쓰지 않음**. 매니페스트만 생성. 실제 Jira 쓰기는 `imbas:manifest`에서만 수행 (Plan-then-Execute 패턴).
+### 4.2 에이전트 수준 — 에이전트가 보유하는 도구
+
+에이전트는 스킬보다 넓은 도구 세트를 보유할 수 있음. **스킬 프롬프트가 사용 시점을 제어** (Plan-then-Execute 원칙).
+
+| Agent | 읽기 도구 | 쓰기 도구 | 비고 |
+|-------|----------|----------|------|
+| imbas-analyst | getConfluencePage, searchConfluenceUsingCql, getJiraIssue, searchJiraIssuesUsingJql | (없음) | Phase 1 검증 + Phase 2 역추론 |
+| imbas-planner | searchJiraIssuesUsingJql, getJiraIssue, getJiraProjectIssueTypesMetadata | createJiraIssue, createIssueLink | 스킬이 매니페스트 생성만 지시 |
+| imbas-engineer | getJiraIssue, getJiraIssueTypeMetaWithFields, searchJiraIssuesUsingJql | createJiraIssue, createIssueLink, addCommentToJiraIssue | 스킬이 매니페스트 생성만 지시 |
+| imbas-media | (없음) | (없음) | Atlassian MCP 도구 불필요 |
+
+**핵심 원칙**: Phase 1-3 스킬은 **Jira에 쓰지 않음**. 매니페스트만 생성. 실제 Jira 쓰기는 `imbas:manifest`에서만 수행 (Plan-then-Execute 패턴). 에이전트가 쓰기 도구를 보유하더라도, 스킬 프롬프트가 매니페스트 생성만 지시하여 사용 시점을 제어함.
 
 ---
 

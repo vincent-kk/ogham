@@ -56,8 +56,9 @@
     │
     └── .temp/                           # 미디어 임시 파일 (gitignored)
         └── <filename>/
-            ├── frame_0001.jpg
-            ├── .metadata.json
+            ├── frames/
+            │   ├── frame_*.jpg
+            │   └── .metadata.json
             └── analysis.json
 ```
 
@@ -105,7 +106,8 @@
     "link_types": {
       "blocks": "Blocks",
       "split_into": "is split into",
-      "split_from": "split from"
+      "split_from": "split from",
+      "relates_to": "relates to"
     }
   },
   "media": {
@@ -150,8 +152,9 @@
       "started_at": "2026-04-04T10:00:00+09:00",
       "completed_at": "2026-04-04T10:15:00+09:00",
       "output": "validation-report.md",
-      "result": "PASS",
-      "blocking_issues": 0
+      "result": "PASS",            // "PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"
+      "blocking_issues": 0,
+      "warning_issues": 0
     },
     "split": {
       "status": "in_progress",
@@ -165,7 +168,8 @@
       "status": "pending",
       "started_at": null,
       "completed_at": null,
-      "output": "devplan-manifest.json"
+      "output": "devplan-manifest.json",
+      "pending_review": true
     }
   }
 }
@@ -174,13 +178,13 @@
 ### 상태 전이 규칙
 
 ```
-validate.status == "completed" && validate.result == "PASS"
-  → split 진입 가능
+validate.status == "completed" && validate.result in ["PASS", "PASS_WITH_WARNINGS"]
+  → split 진입 가능 (PASS_WITH_WARNINGS 시 경고 표시)
 
 split.status == "completed" && split.pending_review == false
   → devplan 진입 가능
 
-devplan.status == "completed"
+devplan.status == "completed" && devplan.pending_review == false
   → 매니페스트 실행 가능 (imbas:manifest)
 ```
 
@@ -331,11 +335,21 @@ devplan.status == "completed"
       ]
     }
   ],
+  "feedback_comments": [
+    {
+      "target_story": "S1-a",
+      "target_key": "PROJ-101",
+      "comment": "Story AC의 OAuth scope과 코드의 실제 scope 불일치 — devplan에서 별도 매핑",
+      "type": "mapping_divergence",
+      "status": "pending"
+    }
+  ],
   "execution_order": [
     { "step": 1, "action": "create_tasks", "items": ["T1"] },
     { "step": 2, "action": "create_task_subtasks", "items": ["T1-ST1", "T1-ST2"] },
     { "step": 3, "action": "create_links", "items": ["T1→S1-a", "T1→S1-b"] },
-    { "step": 4, "action": "create_story_subtasks", "items": ["S1a-ST1", "S1a-ST2"] }
+    { "step": 4, "action": "create_story_subtasks", "items": ["S1a-ST1", "S1a-ST2"] },
+    { "step": 5, "action": "add_feedback_comments", "items": ["S1-a"] }
   ]
 }
 ```

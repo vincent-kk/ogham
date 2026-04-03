@@ -237,7 +237,8 @@ Epic (Level 1)
 | Link | 용도 | 생성 시점 |
 |------|------|----------|
 | `blocks` / `is blocked by` | Story ↔ Task 실행 순서 | Phase 3 |
-| `is split into` / `split from` | 수평 분할 추적 | Phase 2 |
+| `is split into` / `split from` | 수평 분할 추적 (크기 초과 → 원본 Done) | Phase 2 |
+| `relates to` | umbrella Story ↔ 하위 Story 연결 (개념적 그룹핑) | Phase 2 |
 
 ### 7.3 워크플로우 상태
 
