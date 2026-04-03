@@ -1,0 +1,17 @@
+{
+  "name": "imbas",
+  "version": "0.0.1",
+  "description": "Imbas — Claude Code plugin",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/imbas",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}
