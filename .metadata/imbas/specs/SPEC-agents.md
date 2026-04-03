@@ -345,6 +345,9 @@ tools:
   - Grep          # 코드 검색
   - Glob          # 파일 패턴 탐색
   - Bash          # 빌드/테스트 확인
+  # imbas MCP (AST 코드 분석)
+  - imbas_ast_search
+  - imbas_ast_analyze
   # Atlassian MCP
   - getJiraIssue
   - searchJiraIssuesUsingJql

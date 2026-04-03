@@ -1,41 +1,36 @@
 # SPEC-skills — imbas Skill 정의
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.1 (2026-04-04)
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---
 
 ## 1. 스킬 목록 총괄
 
-### Core Workflow (3개)
+### 1.1 User-invocable Skills (사용자 직접 호출, 7개)
 
-| Skill | Slash Command | 역할 | Agent 사용 |
-|-------|-------------|------|-----------|
+사용자에게 slash command로 노출되는 스킬. 플러그인 설치 시 이 7개만 사용자에게 보임.
+
+| Skill | Slash Command | 역할 | Agent |
+|-------|-------------|------|-------|
+| **setup** | `/imbas:setup` | 초기화, config, 프로젝트 캐시 | — |
 | **validate** | `/imbas:validate` | Phase 1 — 정합성 검증 | imbas-analyst |
 | **split** | `/imbas:split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
 | **devplan** | `/imbas:devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
-
-### Infrastructure (3개)
-
-| Skill | Slash Command | 역할 | Agent 사용 |
-|-------|-------------|------|-----------|
-| **setup** | `/imbas:setup` | 초기화, config, 프로젝트 캐시 | 없음 (직접 실행) |
-| **cache** | `/imbas:cache` | Jira 캐시 갱신/조회 | 없음 (직접 실행) |
-| **status** | `/imbas:status` | 런 상태 조회, 이력 | 없음 (직접 실행) |
-
-### Execution (1개)
-
-| Skill | Slash Command | 역할 | Agent 사용 |
-|-------|-------------|------|-----------|
-| **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | 없음 (직접 실행) |
-
-### Utility (1개)
-
-| Skill | Slash Command | 역할 | Agent 사용 |
-|-------|-------------|------|-----------|
+| **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | — |
+| **status** | `/imbas:status` | 런 상태 조회, 이력 | — |
 | **fetch-media** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
 
-**총 8개 스킬**, 사용자 직접 호출(slash) 또는 스킬/에이전트 내부 호출.
+### 1.2 Internal Skills (내부 전용, 2개)
+
+`user_invocable: false`. 사용자에게 노출되지 않음. 다른 스킬이나 에이전트가 내부적으로 호출.
+
+| Skill | 호출자 | 역할 | Agent |
+|-------|--------|------|-------|
+| **read-issue** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
+| **cache** | setup, validate, split, devplan | Jira 메타데이터 캐시 자동 갱신/조회 | — |
+
+**총 9개 스킬** (user-invocable 7 + internal 2).
 
 ---
 
@@ -321,29 +316,7 @@ Step 6 — 결과 표시
 
 ---
 
-### 3.2 imbas:cache — Jira 캐시 관리
-
-```yaml
-name: imbas-cache
-user_invocable: true
-description: >
-  View or refresh Jira project metadata cache.
-  Trigger: "imbas cache", "캐시 갱신", "refresh jira cache"
-complexity: simple
-plugin: imbas
-```
-
-**Subcommands:**
-
-| Command | 동작 |
-|---------|------|
-| `show` (default) | 캐시 상태 + TTL 표시 |
-| `refresh [KEY]` | 지정 프로젝트(또는 기본) 캐시 강제 갱신 |
-| `clear [KEY]` | 캐시 삭제 |
-
----
-
-### 3.3 imbas:status — 런 상태 조회
+### 3.2 imbas:status — 런 상태 조회
 
 ```yaml
 name: imbas-status
@@ -435,7 +408,7 @@ Step 5 — 결과 리포트
 
 ---
 
-## 5. Utility Skill
+## 5. Utility Skills
 
 ### 5.1 imbas:fetch-media — 미디어 다운로드 & 분석
 
@@ -463,54 +436,210 @@ plugin: imbas
 
 ---
 
-## 6. 스킬 간 호출 관계
+## 6. Internal Skills
+
+### 6.1 imbas:read-issue — 이슈 컨텍스트 구조화 (내부 전용)
+
+```yaml
+name: imbas-read-issue
+user_invocable: false
+description: >
+  Internal skill. Reads a Jira issue with its full comment thread, reconstructs
+  the conversation context (who said what, decisions made, latest state), and
+  returns a structured JSON summary. Caches results per project for reuse across phases.
+complexity: moderate
+plugin: imbas
+```
+
+**호출 인터페이스:**
+```
+imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
+
+<issue-key>  : Jira 이슈 키 (e.g., PROJ-123)
+--no-cache   : 캐시 무시, 강제 재조회
+--depth      : shallow = 본문+메타만, full = 코멘트 포함 (default: full)
+```
+
+**Workflow:**
 
 ```
-사용자
+Step 1 — 캐시 확인
+  - .imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json 존재 확인
+  - 존재 + TTL 내 + --no-cache 아님 → 캐시 반환
+  - 미존재 또는 만료 → Step 2
+
+Step 2 — 이슈 조회
+  - getJiraIssue(issueIdOrKey) → 본문, 메타데이터, 코멘트
+  - depth == "shallow" → 코멘트 파싱 스킵 → Step 5
+
+Step 3 — 코멘트 대화 재구성
+  - 코멘트를 시간순 정렬
+  - 각 코멘트에서 추출:
+    - author (displayName)
+    - created (타임스탬프)
+    - body (본문)
+  - 대화 흐름 분석:
+    - 질문 → 답변 패턴 감지
+    - 제안 → 동의/반대 패턴 감지
+    - @멘션 기반 대화 상대 식별
+
+Step 4 — 맥락 종합
+  - 의사결정 추출:
+    - "확정", "결정", "합의", "agreed", "let's go with" 등 결정 시그널 탐색
+    - 결정 주체(누가), 내용(무엇을), 동의자(누가 동의) 구조화
+  - 최신 상태 판정:
+    - 본문(Description)과 코멘트 내용이 상충 시 → 최신 코멘트 우선
+    - 미해결 논의 감지 (질문 후 답변 없음, 반대 의견 후 합의 없음)
+  - 참여자 프로필:
+    - 코멘트 빈도 기반 역할 추론 (PO, 개발자, QA 등)
+
+Step 5 — 구조화 & 캐싱
+  - 결과 JSON 생성 (아래 스키마)
+  - .imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json 에 저장
+  - 호출자에게 반환
+```
+
+**Output Schema:**
+
+```json
+{
+  "key": "PROJ-123",
+  "summary": "소셜 로그인으로 신규 가입",
+  "type": "Story",
+  "status": "In Progress",
+  "assignee": "Bob",
+  "reporter": "Alice",
+  "created": "2026-03-20",
+  "updated": "2026-04-03",
+  "description_excerpt": "As a new user, I want to sign up via social accounts...",
+  "comment_count": 7,
+  "participants": [
+    { "name": "Alice", "role_hint": "PO", "comment_count": 3 },
+    { "name": "Bob", "role_hint": "BE Developer", "comment_count": 2 },
+    { "name": "Charlie", "role_hint": "QA", "comment_count": 2 }
+  ],
+  "decisions": [
+    {
+      "date": "2026-04-01",
+      "by": "Alice",
+      "content": "OAuth scope을 email+profile로 한정",
+      "agreed_by": ["Bob"],
+      "source_comment_index": 3
+    }
+  ],
+  "open_questions": [
+    {
+      "date": "2026-04-03",
+      "by": "Charlie",
+      "content": "Apple OAuth는 email이 optional인데 어떻게 처리?",
+      "status": "unanswered"
+    }
+  ],
+  "latest_context": "Bob이 4/3에 Apple OAuth는 scope 제한이 다르다고 지적. Charlie가 QA 관점에서 질문. 아직 미해결.",
+  "conversation_summary": "Alice(PO)가 scope 제안 → Bob(BE) 동의 → Charlie(QA)가 Apple 특수 케이스 질문 (미답변)",
+  "cached_at": "2026-04-04T10:30:00+09:00"
+}
+```
+
+**캐싱 정책:**
+- TTL: config.json의 `cache.issue_ttl_hours` (기본 4시간)
+- 저장 위치: `.imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json`
+- 같은 런 내에서 동일 이슈 재조회 시 캐시 히트
+- `--no-cache` 로 강제 갱신
+
+**에이전트에서의 사용 패턴:**
+- imbas-analyst: Phase 1에서 기존 관련 이슈 참조 시
+- imbas-planner: Phase 2에서 Epic이나 기존 Story 맥락 파악 시
+- imbas-engineer: Phase 3에서 Story의 Jira 코멘트(추가 논의) 확인 시
+
+---
+
+### 6.2 imbas:cache — Jira 캐시 관리 (내부 전용)
+
+```yaml
+name: imbas-cache
+user_invocable: false
+description: >
+  Internal skill. Manages Jira project metadata cache (issue types, link types,
+  workflows). Auto-refreshes when TTL expires. Called by setup and core workflow skills.
+complexity: simple
+plugin: imbas
+```
+
+**호출 인터페이스:**
+```
+imbas:cache <action> [--project <KEY>]
+
+<action>  : "ensure" | "refresh" | "clear"
+--project : 프로젝트 키 (없으면 config.defaults.project_key)
+```
+
+| Action | 동작 |
+|--------|------|
+| `ensure` | TTL 내면 스킵, 만료면 자동 갱신 |
+| `refresh` | 강제 갱신 |
+| `clear` | 캐시 삭제 |
+
+**사용자 접근 경로:** `/imbas:setup show` (캐시 상태 확인) / `/imbas:setup refresh-cache` (갱신)
+
+---
+
+## 7. 스킬 간 호출 관계
+
+```
+사용자 (user_invocable: true — 7개)
   │
-  ├── /imbas:setup ─────────── (독립)
-  ├── /imbas:cache ─────────── (독립)
-  ├── /imbas:status ────────── (독립)
+  ├── /imbas:setup ─────────── config.json + 캐시 초기화
+  │         └── (내부) cache ensure
+  │
+  ├── /imbas:status ────────── 런 상태 조회
   │
   ├── /imbas:validate ─────── state.json 생성 → validation-report.md
-  │         │
-  │         ▼
+  │         ├── (내부) cache ensure
+  │         └── (내부) read-issue (관련 기존 이슈 참조 시)
+  │
   ├── /imbas:split ────────── state.json 갱신 → stories-manifest.json
-  │         │
-  │         ├── (내부) imbas:fetch-media 안내 (미디어 발견 시)
-  │         │
-  │         ▼
+  │         ├── (내부) cache ensure
+  │         ├── (내부) read-issue (Epic/기존 Story 맥락 파악 시)
+  │         └── (안내) fetch-media (미디어 발견 시)
+  │
   ├── /imbas:manifest stories ── stories-manifest → Jira Story 생성
-  │         │
-  │         ▼
+  │
   ├── /imbas:devplan ──────── state.json 갱신 → devplan-manifest.json
-  │         │
-  │         ▼
-  └── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+  │         ├── (내부) cache ensure
+  │         └── (내부) read-issue (Story 코멘트 추가 논의 확인)
+  │
+  ├── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+  │
+  └── /imbas:fetch-media ──── 미디어 다운로드 + 분석
+
+내부 전용 (user_invocable: false — 2개)
+  ├── cache ─── setup, validate, split, devplan에서 자동 호출
+  └── read-issue ─── validate, split, devplan + 에이전트에서 호출
 ```
 
 ---
 
-## 7. 공통 설계 패턴
+## 8. 공통 설계 패턴
 
-### 7.1 컨텍스트 절약
+### 8.1 컨텍스트 절약
 
 모든 스킬은 **slash command 직접 호출** 또는 **스킬/에이전트 내부 호출**로만 실행.
 - 자동 트리거 없음 (불필요한 컨텍스트 점유 방지)
 - 에이전트는 필요 시점에만 spawn → 결과 반환 → 즉시 종료
 
-### 7.2 Plan-then-Execute
+### 8.2 Plan-then-Execute
 
 Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 실제 Jira 쓰기는 `imbas:manifest`에서만 수행.
 → 사용자가 항상 실행 전 검토 가능.
 
-### 7.3 실패 복구
+### 8.3 실패 복구
 
 - 매니페스트의 status + jira_key로 재실행 시 자동 스킵
 - state.json으로 중단된 Phase 감지 → `imbas:status resume` 안내
 
-### 7.4 단일 턴 실행
+### 8.4 단일 턴 실행
 
 각 스킬은 `> EXECUTION MODEL: Single continuous operation` 원칙.
 - 읽기 → 처리 → 에이전트 호출 → 결과 평가 → 상태 저장 → 사용자 리포트

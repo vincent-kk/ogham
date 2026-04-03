@@ -157,12 +157,13 @@
       "warning_issues": 0
     },
     "split": {
-      "status": "in_progress",
+      "status": "in_progress",          // "pending" | "in_progress" | "completed" | "escaped"
       "started_at": "2026-04-04T10:20:00+09:00",
       "completed_at": null,
       "output": "stories-manifest.json",
       "stories_created": 0,
-      "pending_review": true
+      "pending_review": true,
+      "escape_code": null               // null | "E2-1" | "E2-2" | "E2-3" | "EC-1" | "EC-2"
     },
     "devplan": {
       "status": "pending",
@@ -175,6 +176,24 @@
 }
 ```
 
+### PhaseStatus 열거형
+
+```
+"pending" | "in_progress" | "completed" | "escaped"
+```
+
+- `escaped`: split phase에서만 발생. 탈출 조건 감지 시 설정 (SPEC-skills.md §2.2 Step 4.5).
+
+### EscapeCode 열거형
+
+| Code | 상황 | 액션 |
+|------|------|------|
+| `E2-1` | 구체화 필요 — 정보 부족 | 부족 정보 목록 + 인간 보완 요청 |
+| `E2-2` | 모순/충돌 발견 | 충돌 지점 명시 + 인간 의사결정 요청 |
+| `E2-3` | 분할 불필요 — 이미 적정 크기 | Phase 3 직행 가능 |
+| `EC-1` | 이해 불가 — 해석 불능 | 범위 동결 + 질의 구조화 |
+| `EC-2` | 원본 결함 발견 | 결함 리포트 (Phase 1 재검증 권고) |
+
 ### 상태 전이 규칙
 
 ```
@@ -183,6 +202,12 @@ validate.status == "completed" && validate.result in ["PASS", "PASS_WITH_WARNING
 
 split.status == "completed" && split.pending_review == false
   → devplan 진입 가능
+
+split.status == "escaped" && split.escape_code == "E2-3"
+  → devplan 진입 가능 (분할 불필요 — 적정 크기)
+
+split.status == "escaped" && split.escape_code in ["E2-1", "E2-2", "EC-1", "EC-2"]
+  → devplan 진입 불가 — 사용자 개입 필요
 
 devplan.status == "completed" && devplan.pending_review == false
   → 매니페스트 실행 가능 (imbas:manifest)
