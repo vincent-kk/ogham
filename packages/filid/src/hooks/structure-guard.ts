@@ -9,6 +9,7 @@ import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
 import { isIntentMd } from './shared.js';
 
+
 /**
  * Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls.
  * Lifecycle: module-scope — lives for the duration of the process.
@@ -88,7 +89,6 @@ function getParentSegments(filePath: string): string[] {
   return parts.slice(0, -1);
 }
 
-// isIntentMd imported from shared.ts
 
 function extractImportPaths(content: string): string[] {
   const importRegex = /from\s+['"]([^'"]+)['"]/g;
@@ -125,26 +125,25 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
 
-  // [기존 로직 보존] organ 디렉토리 내 INTENT.md Write → 차단 (continue: false)
+  // [추가 검증] 경고만 수집 (continue: true)
+  const warnings: string[] = [];
+
+  // INTENT.md Write → organ 디렉터리 재분류 경고 (차단하지 않음).
+  // FCA 규칙: "Fractal nodes CAN exist inside organ directories."
+  // classifyNode 우선순위 1(hasIntentMd → fractal)이 재분류를 보장한다.
   if (input.tool_name === 'Write' && isIntentMd(filePath)) {
     let dirSoFar = cwd;
     for (const segment of segments) {
       dirSoFar = path.join(dirSoFar, segment);
       if (isOrganByStructure(dirSoFar)) {
-        return {
-          continue: false,
-          hookSpecificOutput: {
-            additionalContext:
-              `BLOCKED: Cannot create INTENT.md inside organ directory "${segment}". ` +
-              `Organ directories are leaf-level compartments and should not have their own INTENT.md.`,
-          },
-        };
+        warnings.push(
+          `"${segment}" is an organ directory. ` +
+            `Creating INTENT.md will reclassify it as fractal (module-entry-point, zero-peer-file and other fractal rules will apply).`,
+        );
+        break;
       }
     }
   }
-
-  // [추가 검증] 경고만 수집 (continue: true)
-  const warnings: string[] = [];
 
   // 검사 2: organ 내부 하위 디렉토리 생성 (organ은 flat이어야 한다)
   let organIdx = -1;
@@ -162,8 +161,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   }
   if (organIdx !== -1 && organIdx < segments.length - 1) {
     warnings.push(
-      `organ 디렉토리 "${organSegment}" 내부에 하위 디렉토리를 생성하려 합니다. ` +
-        `Organ 디렉토리는 flat leaf 구획으로 중첩 디렉토리를 가져서는 안 됩니다.`,
+      `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
+        `Organ directories should remain flat leaf compartments without nested subdirectories.`,
     );
   }
 
@@ -176,7 +175,7 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
     );
     if (circularCandidates.length > 0) {
       warnings.push(
-        `다음 import가 현재 파일의 조상 모듈을 참조합니다 (순환 의존 위험): ` +
+        `The following imports reference ancestor modules (potential circular dependency): ` +
           circularCandidates.map((p) => `"${p}"`).join(', '),
       );
     }

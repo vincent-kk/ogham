@@ -12,17 +12,17 @@ const baseInput: PreToolUseInput = {
 };
 
 describe('structure-guard', () => {
-  it('should block INTENT.md creation inside organ directories', () => {
+  it('should allow INTENT.md in organ-named directory with reclassification warning', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: { file_path: '/app/src/utils/INTENT.md', content: '# Utils' },
     };
     const result = guardStructure(input);
-    expect(result.continue).toBe(false);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('organ');
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassify it as fractal');
   });
 
-  it('should block INTENT.md in nested organ directories', () => {
+  it('should allow INTENT.md in nested organ directories with warning', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: {
@@ -31,7 +31,8 @@ describe('structure-guard', () => {
       },
     };
     const result = guardStructure(input);
-    expect(result.continue).toBe(false);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassify it as fractal');
   });
 
   it('should allow INTENT.md in fractal directories', () => {
@@ -68,7 +69,7 @@ describe('structure-guard', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('should detect all known organ directory names', () => {
+  it('should allow INTENT.md in all known organ-named target directories', () => {
     const organDirs = [
       'components',
       'utils',
@@ -86,19 +87,31 @@ describe('structure-guard', () => {
         tool_input: { file_path: `/app/src/${dir}/INTENT.md`, content: '# X' },
       };
       const result = guardStructure(input);
-      expect(result.continue, `Expected block for organ dir: ${dir}`).toBe(
-        false,
+      expect(result.continue, `Expected allow for target organ dir: ${dir}`).toBe(
+        true,
       );
     }
   });
 
-  it('should handle root-relative INTENT.md paths', () => {
+  it('should allow INTENT.md even when ancestor is organ (fractal inside organ)', () => {
+    const input: PreToolUseInput = {
+      ...baseInput,
+      tool_input: {
+        file_path: '/app/src/utils/sub-module/INTENT.md',
+        content: '# Sub',
+      },
+    };
+    const result = guardStructure(input);
+    expect(result.continue).toBe(true);
+  });
+
+  it('should allow root-relative INTENT.md in organ-named target directory', () => {
     const input: PreToolUseInput = {
       ...baseInput,
       tool_input: { file_path: 'utils/INTENT.md', content: '# Utils' },
     };
     const result = guardStructure(input);
-    expect(result.continue).toBe(false);
+    expect(result.continue).toBe(true);
   });
 
   it('should warn on organ nesting (subdirectory creation)', () => {
@@ -111,7 +124,7 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('organ');
+    expect(result.hookSpecificOutput?.additionalContext).toContain('organ directory');
   });
 
   it('should pass through non-Write/Edit tool calls', () => {

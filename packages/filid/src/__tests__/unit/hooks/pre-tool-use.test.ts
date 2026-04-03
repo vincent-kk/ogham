@@ -148,8 +148,9 @@ describe('handlePreToolUse', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('Write INTENT.md inside organ directory → block (continue=false)', async () => {
-    // 'utils' is a known organ directory
+  it('Write INTENT.md to organ-named target directory → allowed (chicken-and-egg fix)', async () => {
+    // 'utils' is a known organ directory name, but writing INTENT.md to it
+    // reclassifies it as fractal — the guard should not block.
     const organDir = join(tmpDir, 'src', 'utils');
     mkdirSync(organDir, { recursive: true });
     const filePath = join(organDir, 'INTENT.md');
@@ -160,7 +161,7 @@ describe('handlePreToolUse', () => {
     });
 
     const result = await handlePreToolUse(input);
-    expect(result.continue).toBe(false);
+    expect(result.continue).toBe(true);
   });
 
   it('Edit INTENT.md with >20 line new_string → continue=true with warning', async () => {
@@ -225,8 +226,8 @@ describe('handlePreToolUse', () => {
     expect(result.continue).toBe(false);
   });
 
-  it('Write INTENT.md in organ dir → structure-guard blocks + intent context collected', async () => {
-    // 'utils' is a known organ directory
+  it('Write INTENT.md in organ-named dir → allowed, intent context collected', async () => {
+    // 'utils' is a known organ directory name, but target dir is exempt
     const organDir = join(tmpDir, 'src', 'utils');
     mkdirSync(organDir, { recursive: true });
     const filePath = join(organDir, 'INTENT.md');
@@ -237,9 +238,22 @@ describe('handlePreToolUse', () => {
     });
 
     const result = await handlePreToolUse(input);
-    // Structure guard blocks organ INTENT.md creation
-    expect(result.continue).toBe(false);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('organ');
+    expect(result.continue).toBe(true);
+  });
+
+  it('Write INTENT.md inside ancestor organ dir → allowed (fractal inside organ)', async () => {
+    // 'utils' is ancestor organ, 'sub' is the target — both allowed
+    const subDir = join(tmpDir, 'src', 'utils', 'sub');
+    mkdirSync(subDir, { recursive: true });
+    const filePath = join(subDir, 'INTENT.md');
+
+    const input = makeInput({
+      tool_name: 'Write',
+      tool_input: { file_path: filePath, content: '# Sub\n' },
+    });
+
+    const result = await handlePreToolUse(input);
+    expect(result.continue).toBe(true);
   });
 
   it('Read on non-FCA project → clean continue:true, no hookSpecificOutput', async () => {
