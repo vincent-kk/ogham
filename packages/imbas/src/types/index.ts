@@ -4,3 +4,8 @@
  */
 
 export type { McpToolInput, McpToolResult } from './mcp.js';
+export type {
+  HookBaseInput,
+  HookOutput,
+  SessionStartInput,
+} from './hooks.js';
