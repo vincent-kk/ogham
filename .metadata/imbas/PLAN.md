@@ -36,13 +36,13 @@
 **Spec:** [SPEC-skills.md §3.1](./specs/SPEC-skills.md) — imbas:setup
 **Reference:** `/Users/Vincent/Workspace/ogham/packages/maencof-lens/skills/setup-lens/SKILL.md`
 
-### 1.2 imbas:cache 구현
-- [ ] SKILL.md 작성
-- [ ] show — 캐시 상태 + TTL
-- [ ] refresh — Jira 메타데이터 재수집
+### 1.2 imbas:cache 구현 (internal skill)
+- [ ] ensure — TTL 내면 스킵, 만료면 자동 갱신
+- [ ] refresh — Jira 메타데이터 강제 재수집
 - [ ] clear — 캐시 삭제
+- [ ] 사용자 접근 경로: setup show / setup refresh-cache
 
-**Spec:** [SPEC-skills.md §3.2](./specs/SPEC-skills.md) — imbas:cache
+**Spec:** [SPEC-skills.md §6.2](./specs/SPEC-skills.md) — imbas:cache (Internal)
 
 ### 1.3 imbas:status 구현
 - [ ] SKILL.md 작성
@@ -50,7 +50,7 @@
 - [ ] list — 전체 런 이력
 - [ ] resume — 중단된 런 재개 안내
 
-**Spec:** [SPEC-skills.md §3.3](./specs/SPEC-skills.md) — imbas:status
+**Spec:** [SPEC-skills.md §3.2](./specs/SPEC-skills.md) — imbas:status
 
 ---
 
@@ -187,7 +187,20 @@
 **Spec:** [SPEC-skills.md §4.1](./specs/SPEC-skills.md) — imbas:manifest
 **Spec:** [SPEC-atlassian-tools.md §3](./specs/SPEC-atlassian-tools.md) — 도구별 사용 패턴
 
-### 5.2 imbas:fetch-media 구현
+### 5.2 imbas:digest 구현
+- [ ] SKILL.md 작성
+- [ ] read-issue 호출 → 이슈 전체 컨텍스트 로드
+- [ ] State Tracking (상태 변화 타임라인 구성)
+- [ ] QA-Prompting (6개 질문 기반 핵심 추출)
+- [ ] 3-Layer 압축본 생성 (executive / structured / excerpts)
+- [ ] digest 마커 포맷 코멘트 생성
+- [ ] --preview 모드 지원
+- [ ] addCommentToJiraIssue 게시 + 사용자 확인
+- [ ] manifest Done 전환 시 제안 트리거 로직
+
+**Spec:** [SPEC-skills.md §6.3](./specs/SPEC-skills.md) — imbas:digest
+
+### 5.3 imbas:fetch-media 구현
 - [ ] SKILL.md 작성
 - [ ] URL/경로 판별 + 다운로드
 - [ ] 타입 판별 (이미지 vs 동영상/GIF)

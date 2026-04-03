@@ -20,6 +20,7 @@
 | **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | — |
 | **status** | `/imbas:status` | 런 상태 조회, 이력 | — |
 | **fetch-media** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
+| **digest** | `/imbas:digest` | 이슈 컨텍스트 압축 → Jira 코멘트 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
 
@@ -30,7 +31,7 @@
 | **read-issue** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
 | **cache** | setup, validate, split, devplan | Jira 메타데이터 캐시 자동 갱신/조회 | — |
 
-**총 9개 스킬** (user-invocable 7 + internal 2).
+**총 10개 스킬** (user-invocable 8 + internal 2).
 
 ---
 
@@ -463,16 +464,22 @@ imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
 **Workflow:**
 
 ```
-Step 1 — 캐시 확인
-  - .imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json 존재 확인
-  - 존재 + TTL 내 + --no-cache 아님 → 캐시 반환
-  - 미존재 또는 만료 → Step 2
-
-Step 2 — 이슈 조회
+Step 1 — 이슈 조회
   - getJiraIssue(issueIdOrKey) → 본문, 메타데이터, 코멘트
   - depth == "shallow" → 코멘트 파싱 스킵 → Step 5
 
-Step 3 — 코멘트 대화 재구성
+Step 2 — digest 코멘트 탐색 (Fast Path)
+  - 코멘트에서 imbas:digest 마커 검색:
+    <!-- imbas:digest v1 | generated: ... | comments_covered: 1-N -->
+  - 발견 시 → Fast Path:
+    a. digest 코멘트 파싱 → 구조화된 decisions/constraints/rejected/summary 추출
+    b. comments_covered 범위 확인 (예: 1-15)
+    c. digest 이후 신규 코멘트만 추가 분석 (16번째~)
+    d. 신규 코멘트가 없으면 → digest 내용만으로 결과 구성 → Step 5
+    e. 신규 코멘트가 있으면 → 신규분만 Step 3-4 처리 후 digest와 병합
+  - 미발견 → Full Path: Step 3으로
+
+Step 3 — 코멘트 대화 재구성 (Full Path)
   - 코멘트를 시간순 정렬
   - 각 코멘트에서 추출:
     - author (displayName)
@@ -493,10 +500,9 @@ Step 4 — 맥락 종합
   - 참여자 프로필:
     - 코멘트 빈도 기반 역할 추론 (PO, 개발자, QA 등)
 
-Step 5 — 구조화 & 캐싱
+Step 5 — 구조화 & 반환
   - 결과 JSON 생성 (아래 스키마)
-  - .imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json 에 저장
-  - 호출자에게 반환
+  - 호출자에게 반환 (캐싱 없음 — 이슈 내용은 수시로 변경됨)
 ```
 
 **Output Schema:**
@@ -537,15 +543,16 @@ Step 5 — 구조화 & 캐싱
   ],
   "latest_context": "Bob이 4/3에 Apple OAuth는 scope 제한이 다르다고 지적. Charlie가 QA 관점에서 질문. 아직 미해결.",
   "conversation_summary": "Alice(PO)가 scope 제안 → Bob(BE) 동의 → Charlie(QA)가 Apple 특수 케이스 질문 (미답변)",
-  "cached_at": "2026-04-04T10:30:00+09:00"
+  "digest_found": true,
+  "digest_covered_comments": "1-15",
+  "new_comments_after_digest": 2
 }
 ```
 
 **캐싱 정책:**
-- TTL: config.json의 `cache.issue_ttl_hours` (기본 4시간)
-- 저장 위치: `.imbas/<PROJECT>/cache/issues/<ISSUE-KEY>.json`
-- 같은 런 내에서 동일 이슈 재조회 시 캐시 히트
-- `--no-cache` 로 강제 갱신
+- 이슈 내용은 **캐싱하지 않음** — 코멘트가 수시로 변경되므로 매 호출마다 Jira에서 조회
+- digest 코멘트가 존재하면 Fast Path로 처리 비용 절감 (전체 파싱 불필요)
+- 프로젝트 메타데이터(이슈 타입, 링크 타입 등)만 cache 스킬을 통해 캐싱 (거의 변경되지 않는 정보)
 
 **에이전트에서의 사용 패턴:**
 - imbas-analyst: Phase 1에서 기존 관련 이슈 참조 시
@@ -584,10 +591,112 @@ imbas:cache <action> [--project <KEY>]
 
 ---
 
+### 6.3 imbas:digest — 이슈 컨텍스트 압축 (사용자 호출)
+
+```yaml
+name: imbas-digest
+user_invocable: true
+description: >
+  Compresses a Jira issue's full context (description + comment thread + media)
+  into a structured summary and posts it as a Jira comment. Uses State Tracking +
+  QA-Prompting hybrid approach. Designed for ticket closing or pre-analysis compression.
+  Trigger: "digest issue", "이슈 정리", "티켓 요약", "imbas digest"
+complexity: moderate
+plugin: imbas
+```
+
+**Arguments:**
+```
+/imbas:digest <issue-key> [--preview]
+
+<issue-key>  : Jira 이슈 키 (e.g., PROJ-123)
+--preview    : Jira에 코멘트 게시하지 않고 미리보기만
+```
+
+**Workflow:**
+
+```
+Step 1 — 이슈 읽기
+  - read-issue(issue-key, depth: full) 호출
+  - 첨부 미디어 감지 → 이미지/동영상 있으면 fetch-media 호출하여 시각 정보 포함
+
+Step 2 — State Tracking (상태 추적)
+  코멘트를 시간순으로 읽으며 상태 변화 기록:
+  - t0: 이슈 등록 — 초기 요구사항
+  - tN: 각 코멘트 — 상태 변경 감지 (결정/제약/질문/해결)
+  결과: 상태 변화 타임라인
+
+Step 3 — QA-Prompting (핵심 추출)
+  6개 질문으로 추출 품질 검증:
+  Q1: 어떤 결정이 내려졌는가?
+  Q2: 왜 그렇게 결정했는가? (근거)
+  Q3: 어떤 대안이 기각되었는가? (결과 + 사유만)
+  Q4: 어떤 기술적 제약이 발견되었는가?
+  Q5: 미해결된 문제가 있는가?
+  Q6: 핵심 참여자와 역할은?
+
+Step 4 — 압축본 생성 (3-Layer)
+  Layer 3 (executive): 1-2문장 최종 요약
+  Layer 2 (structured): decisions[], constraints[], rejected[], open_questions[]
+  Layer 1 (excerpts): 결정 근거 원문 발췌 (최소한만)
+
+Step 5 — 코멘트 포맷팅
+  마커 포함 마크다운 코멘트 생성:
+
+  <!-- imbas:digest v1 | generated: {timestamp} | comments_covered: 1-{N} -->
+  ## imbas Digest
+
+  ### Summary
+  {Layer 3 executive summary}
+
+  ### Decisions
+  - {decision} (by {who}, {date}, agreed: {others})
+
+  ### Constraints
+  - {constraint description}
+
+  ### Rejected
+  - {alternative} 기각. 사유: {reason}
+
+  ### Open Questions
+  - {question} (by {who}, {date}) — {status}
+
+  ### Participants
+  - {name} ({role_hint}): {contribution summary}
+  <!-- /imbas:digest -->
+
+Step 6 — 게시
+  - --preview → 사용자에게 미리보기 표시, 종료
+  - 기본 → 사용자에게 미리보기 + "이 내용을 코멘트로 게시할까요?" 확인
+  - 승인 → addCommentToJiraIssue로 게시
+```
+
+**digest 마커 규격:**
+```
+<!-- imbas:digest v{version} | generated: {ISO8601} | comments_covered: {start}-{end} -->
+...
+<!-- /imbas:digest -->
+```
+- `comments_covered`: digest가 분석한 코멘트 인덱스 범위
+- read-issue가 이 마커를 감지하면 Fast Path 활성화
+- 동일 이슈에 digest를 재실행하면 기존 digest 이후 코멘트만 추가 분석 → 신규 digest 코멘트 게시 (기존 것은 남겨둠)
+
+**제안 트리거:**
+- manifest가 transitionJiraIssue로 Done 전환 시
+- 해당 이슈의 코멘트 >= 3개 AND 작성자 >= 2명
+- 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:digest {key}` 로 정리할까요?"
+- 자동 실행 아님 — 제안만
+
+**교차 이슈 합성:**
+- 현재 스코프 밖. digest는 단일 이슈 전용.
+- 필요 시 별도 스킬로 추가 예정.
+
+---
+
 ## 7. 스킬 간 호출 관계
 
 ```
-사용자 (user_invocable: true — 7개)
+사용자 (user_invocable: true — 8개)
   │
   ├── /imbas:setup ─────────── config.json + 캐시 초기화
   │         └── (내부) cache ensure
@@ -610,12 +719,18 @@ imbas:cache <action> [--project <KEY>]
   │         └── (내부) read-issue (Story 코멘트 추가 논의 확인)
   │
   ├── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+  │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
-  └── /imbas:fetch-media ──── 미디어 다운로드 + 분석
+  ├── /imbas:fetch-media ──── 미디어 다운로드 + 분석
+  │
+  └── /imbas:digest ────────── 이슈 컨텍스트 압축 → Jira 코멘트 게시
+            ├── (내부) read-issue → 코멘트 대화 맥락
+            └── (내부) fetch-media → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출
-  └── read-issue ─── validate, split, devplan + 에이전트에서 호출
+  └── read-issue ─── validate, split, devplan, digest + 에이전트에서 호출
+                      └── digest 코멘트 감지 시 Fast Path (커버된 범위 스킵)
 ```
 
 ---

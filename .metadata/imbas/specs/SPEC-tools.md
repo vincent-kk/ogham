@@ -603,6 +603,7 @@ Output: { "status": "ok", "version": "<package version>" }
 | devplan | run_get, run_transition, manifest_get, manifest_save, manifest_validate, ast_search, ast_analyze | getJiraIssue, searchJiraIssuesUsingJql |
 | manifest | manifest_get, manifest_save, manifest_plan | createJiraIssue, createIssueLink, editJiraIssue, transitionJiraIssue, addCommentToJiraIssue, getTransitionsForJiraIssue |
 | fetch-media | — | getConfluencePage, fetchAtlassian |
+| digest | — | (read-issue 경유) getJiraIssue, addCommentToJiraIssue; (fetch-media 경유) fetchAtlassian |
 | read-issue | — | getJiraIssue (본문+코멘트 구조화) |
 
 ### 8.2 에이전트별

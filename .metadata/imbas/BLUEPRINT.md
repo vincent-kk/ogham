@@ -28,11 +28,12 @@
 ```
 ogham (사전 가이드 시스템)
   └── imbas (이슈 분해 플러그인)
-       ├── Skills (8개)
+       ├── Skills (10개: user 8 + internal 2)
        │    ├── Core:  validate, split, devplan
-       │    ├── Infra: setup, cache, status
-       │    ├── Exec:  manifest
-       │    └── Util:  fetch-media
+       │    ├── Infra: setup, status
+       │    ├── Exec:  manifest, digest
+       │    ├── Util:  fetch-media
+       │    └── Internal: read-issue, cache
        │
        ├── Agents (4개)
        │    ├── imbas-analyst   — 문서 정합성 검증
@@ -155,7 +156,7 @@ ogham (사전 가이드 시스템)
 
 ## 4. Skill Map
 
-### User-invocable (사용자 노출, 7개)
+### User-invocable (사용자 노출, 8개)
 
 | # | Skill | Type | Slash Command | Agent | 입력 | 출력 |
 |---|-------|------|--------------|-------|------|------|
@@ -166,15 +167,18 @@ ogham (사전 가이드 시스템)
 | 5 | manifest | Exec | `/imbas:manifest` | — | *-manifest.json | Jira 이슈 |
 | 6 | status | Infra | `/imbas:status` | — | — | 상태 표시 |
 | 7 | fetch-media | Util | `/imbas:fetch-media` | imbas-media | URL/경로 | analysis.json |
+| 8 | digest | Exec | `/imbas:digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)
 
 | # | Skill | 호출자 | 역할 | 출력 |
 |---|-------|--------|------|------|
-| 8 | read-issue | validate, split, devplan, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON (캐싱) |
-| 9 | cache | setup, core skills | Jira 메타데이터 캐시 자동 갱신 | cache/*.json |
+| 9 | read-issue | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
+| 10 | cache | setup, core skills | Jira 메타데이터 캐시 자동 갱신 | cache/*.json |
 
 → 상세: [SPEC-skills.md](./specs/SPEC-skills.md)
+
+**총 10개 스킬** (user-invocable 8 + internal 2).
 
 ---
 
@@ -275,7 +279,7 @@ Epic (Level 1)
 | Doc | 내용 |
 |-----|------|
 | [SPEC-agents.md](./specs/SPEC-agents.md) | 에이전트 4개 정의, reference material, 도구, 호출 관계 |
-| [SPEC-skills.md](./specs/SPEC-skills.md) | 스킬 8개 정의, 인터페이스, 워크플로우, 호출 관계 |
+| [SPEC-skills.md](./specs/SPEC-skills.md) | 스킬 10개 정의 (user 8 + internal 2), 인터페이스, 워크플로우, 호출 관계 |
 | [SPEC-state.md](./specs/SPEC-state.md) | .imbas/ 구조, config.json, state.json, manifest 스키마 |
 | [SPEC-tools.md](./specs/SPEC-tools.md) | imbas MCP tools 서버 15개 도구 정의, AST 분석, fallback 스킬 |
 | [SPEC-media.md](./specs/SPEC-media.md) | 미디어 다운로드, scene-sieve 통합, 서브에이전트 격리 |
