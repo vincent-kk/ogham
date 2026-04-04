@@ -9,6 +9,7 @@ import type {
   DebtItemCreate,
 } from '../../../types/debt.js';
 import { DEBT_BASE_WEIGHT, DEBT_WEIGHT_CAP } from '../../../types/debt.js';
+import { assertUnder } from '../utils/fs-guard.js';
 
 export interface DebtManageInput {
   action: 'create' | 'list' | 'resolve' | 'calculate-bias';
@@ -174,7 +175,6 @@ async function handleList(
       refined_adr: '',
     };
 
-    // Parse body sections
     const titleMatch = /^# 기술 부채: (.+)$/m.exec(content);
     if (titleMatch) debt.title = titleMatch[1].trim();
 
@@ -203,7 +203,9 @@ async function handleResolve(
   projectRoot: string,
   debtId: string,
 ): Promise<{ deleted: boolean }> {
-  const filePath = join(getDebtDir(projectRoot), `${debtId}.md`);
+  const debtDir = getDebtDir(projectRoot);
+  const filePath = join(debtDir, `${debtId}.md`);
+  assertUnder(debtDir, filePath);
   try {
     await unlink(filePath);
     return { deleted: true };
@@ -223,7 +225,6 @@ function handleCalculateBias(
     if (!changedSet.has(debt.fractal_path)) {
       return { ...debt };
     }
-    // Idempotency check
     if (debt.last_review_commit === currentCommitSha) {
       return { ...debt };
     }
@@ -246,11 +247,6 @@ function handleCalculateBias(
   return { biasLevel, totalScore, updatedDebts };
 }
 
-/**
- * Handle debt-manage MCP tool calls.
- *
- * Manages technical debt items: create, list, resolve, and calculate bias.
- */
 export async function handleDebtManage(
   args: unknown,
 ): Promise<

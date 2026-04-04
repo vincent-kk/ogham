@@ -306,6 +306,26 @@ describe('handleDebtManage', () => {
         handleDebtManage({ action: 'resolve', projectRoot: tmpDir }),
       ).rejects.toThrow('debtId');
     });
+
+    it('path traversal을 시도하는 debtId는 거부한다 (containment guard)', async () => {
+      await expect(
+        handleDebtManage({
+          action: 'resolve',
+          projectRoot: tmpDir,
+          debtId: '../../../etc/passwd',
+        }),
+      ).rejects.toThrow(/traversal detected/);
+    });
+
+    it('사이드웨이 디렉토리 프리픽스 일치도 거부한다', async () => {
+      await expect(
+        handleDebtManage({
+          action: 'resolve',
+          projectRoot: tmpDir,
+          debtId: '../debt-backdoor/exploit',
+        }),
+      ).rejects.toThrow(/traversal detected/);
+    });
   });
 
   // -------------------------
