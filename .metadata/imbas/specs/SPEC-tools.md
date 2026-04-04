@@ -667,7 +667,7 @@ function wrapHandler(handler: (args: any) => Promise<any>) {
   return async (args: any) => {
     try {
       const result = await handler(args);
-      return toolResult(JSON.stringify(result, mapReplacer, 2));
+      return toolResult(result);
     } catch (error) {
       return toolError(error instanceof Error ? error.message : String(error));
     }

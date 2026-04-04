@@ -7,7 +7,7 @@
 
 ## 1. 스킬 목록 총괄
 
-### 1.1 User-invocable Skills (사용자 직접 호출, 7개)
+### 1.1 User-invocable Skills (사용자 직접 호출, 8개)
 
 사용자에게 slash command로 노출되는 스킬. 플러그인 설치 시 이 7개만 사용자에게 보임.
 
