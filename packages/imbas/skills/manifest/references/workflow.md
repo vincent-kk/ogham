@@ -1,5 +1,19 @@
 # Manifest Execution Workflow
 
+## Preconditions
+
+Before loading the manifest, verify pipeline state:
+
+```
+1. Call imbas_run_get to read current state
+2. For type "stories":
+   - Verify split.status === "completed" AND split.pending_review === false
+   - Error if not met: "Cannot execute stories manifest: split phase not completed or pending review"
+3. For type "devplan":
+   - Verify devplan.status === "completed" AND devplan.pending_review === false
+   - Error if not met: "Cannot execute devplan manifest: devplan phase not completed or pending review"
+```
+
 ## Step 1 — Load Manifest & Pending Count
 
 1. Determine run: --run argument or most recent run via imbas_run_get.
@@ -85,6 +99,21 @@ For each link in manifest.links where status == "pending":
        )
   - Update link: status = "created"
   - Save manifest immediately
+
+#### Partial Failure Handling (1:N Links)
+
+When a link has multiple targets (`to` is an array) and some targets fail:
+
+```
+1. Track per-target status: each target in the to array is processed independently
+2. Successfully created links are NOT rolled back
+3. Failed targets are marked "failed" with error details
+4. Link item status:
+   - "created"  — all targets succeeded
+   - "partial"  — some targets succeeded, some failed
+   - "failed"   — all targets failed
+5. On re-run (imbas:manifest re-execution), only retry targets without jira_key confirmation
+```
 
 ### For "devplan" type
 

@@ -297,3 +297,62 @@ describe('escape_phase', () => {
     ).toThrow('expected "in_progress"');
   });
 });
+
+describe('skip_phases', () => {
+  it('marks validate and split as completed with correct defaults', () => {
+    const state = makeState();
+    const next = applyTransition(state, {
+      project_key: 'PROJ',
+      run_id: '20240101-001',
+      action: 'skip_phases',
+      phases: ['validate', 'split'],
+    });
+    expect(next.phases.validate.status).toBe('completed');
+    expect(next.phases.validate.result).toBe('PASS');
+    expect(next.phases.validate.blocking_issues).toBe(0);
+    expect(next.phases.validate.warning_issues).toBe(0);
+    expect(next.phases.split.status).toBe('completed');
+    expect(next.phases.split.pending_review).toBe(false);
+    expect(next.phases.split.stories_created).toBe(0);
+  });
+
+  it('advances current_phase past all skipped phases', () => {
+    const state = makeState();
+    const next = applyTransition(state, {
+      project_key: 'PROJ',
+      run_id: '20240101-001',
+      action: 'skip_phases',
+      phases: ['validate', 'split'],
+    });
+    expect(next.current_phase).toBe('devplan');
+  });
+
+  it('sets metadata.skipped_phases for auditability', () => {
+    const state = makeState();
+    const next = applyTransition(state, {
+      project_key: 'PROJ',
+      run_id: '20240101-001',
+      action: 'skip_phases',
+      phases: ['validate', 'split'],
+    });
+    expect(next.metadata?.skipped_phases).toEqual(['validate', 'split']);
+  });
+
+  it('allows start_phase devplan after skip_phases', () => {
+    const state = makeState();
+    const skipped = applyTransition(state, {
+      project_key: 'PROJ',
+      run_id: '20240101-001',
+      action: 'skip_phases',
+      phases: ['validate', 'split'],
+    });
+    const next = applyTransition(skipped, {
+      project_key: 'PROJ',
+      run_id: '20240101-001',
+      action: 'start_phase',
+      phase: 'devplan',
+    });
+    expect(next.phases.devplan.status).toBe('in_progress');
+    expect(next.current_phase).toBe('devplan');
+  });
+});

@@ -26,8 +26,8 @@ imbas:cache <action> [--project <KEY>]
 
 ## References
 
-- [actions.md](./actions.md) — ensure, refresh, and clear action workflows
-- [cache-structure.md](./cache-structure.md) — directory layout and JSON schemas
-- [ttl-logic.md](./ttl-logic.md) — TTL check algorithm and user access path
-- [tools.md](./tools.md) — imbas and Atlassian MCP tools used, agent spawn
-- [errors.md](./errors.md) — error conditions and responses
+- [actions.md](./references/actions.md) — ensure, refresh, and clear action workflows
+- [cache-structure.md](./references/cache-structure.md) — directory layout and JSON schemas
+- [ttl-logic.md](./references/ttl-logic.md) — TTL check algorithm and user access path
+- [tools.md](./references/tools.md) — imbas and Atlassian MCP tools used, agent spawn
+- [errors.md](./references/errors.md) — error conditions and responses

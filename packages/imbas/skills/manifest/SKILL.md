@@ -35,7 +35,7 @@ and idempotent re-execution.
 
 ## References
 
-- [Workflow](./workflow.md) — Steps 1–5: load, dry-run, confirm, batch execution, result report
-- [Tools](./tools.md) — imbas MCP tools, Atlassian MCP tools, output, agent spawn
-- [Error Handling](./errors.md) — Error conditions and recovery actions
-- [State Transitions](./state-transitions.md) — Preconditions and manifest item status spec
+- [Workflow](./references/workflow.md) — Steps 1–5: load, dry-run, confirm, batch execution, result report
+- [Tools](./references/tools.md) — imbas MCP tools, Atlassian MCP tools, output, agent spawn
+- [Error Handling](./references/errors.md) — Error conditions and recovery actions
+- [State Transitions](./references/state-transitions.md) — Preconditions and manifest item status spec

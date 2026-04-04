@@ -33,7 +33,7 @@ validation report that gates entry to Phase 2 (split).
 
 ## References
 
-- [Workflow](./workflow.md) — Steps 1–5: run initialization, source resolution, agent spawn, result gate, state update
-- [Tools Used & Agent Spawn](./tools.md) — imbas MCP tools, Atlassian tools, agent spawn instructions
-- [Error Handling](./errors.md) — error table
-- [State Transitions & Output](./state-transitions.md) — output path, entry/exit states
+- [Workflow](./references/workflow.md) — Steps 1–5: run initialization, source resolution, agent spawn, result gate, state update
+- [Tools Used & Agent Spawn](./references/tools.md) — imbas MCP tools, Atlassian tools, agent spawn instructions
+- [Error Handling](./references/errors.md) — error table
+- [State Transitions & Output](./references/state-transitions.md) — output path, entry/exit states

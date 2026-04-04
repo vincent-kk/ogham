@@ -113,7 +113,7 @@ Step 1.3 — imbas-analyst Agent Spawn
   - Input: source.md + supplements/*.md + config.json language settings
   - Instructions: Perform 4-type validation (contradictions, divergences, omissions, infeasibilities).
     Classify each issue as BLOCKING or WARNING.
-  - Agent writes: validation-report.md to the run directory
+  - Agent returns: validation-report.md content. Skill saves to run directory.
 
 Step 1.4 — Result Evaluation
   Parse validation-report.md:

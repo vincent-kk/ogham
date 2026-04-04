@@ -104,6 +104,28 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
       return updated;
     }
 
+    case 'skip_phases': {
+      const updated = deepClone(state);
+      for (const phase of action.phases) {
+        updated.phases[phase].status = 'completed';
+        updated.phases[phase].completed_at = now;
+        if (phase === 'validate') {
+          updated.phases.validate.result = 'PASS';
+          updated.phases.validate.blocking_issues = 0;
+          updated.phases.validate.warning_issues = 0;
+        }
+        if (phase === 'split') {
+          updated.phases.split.pending_review = false;
+          updated.phases.split.stories_created = 0;
+        }
+      }
+      const lastSkipped = action.phases[action.phases.length - 1]!;
+      updated.current_phase = advancePhase(lastSkipped);
+      updated.metadata = { ...updated.metadata, skipped_phases: action.phases };
+      updated.updated_at = now;
+      return updated;
+    }
+
     default: {
       const _exhaustive: never = action;
       throw new Error(`Unknown action: ${JSON.stringify(_exhaustive)}`);

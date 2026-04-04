@@ -51,7 +51,7 @@ Step 3 — imbas-analyst Agent Spawn
      - WARNING: can proceed but should be addressed
 
      Output: validation-report.md in the run directory."
-  - Agent writes: validation-report.md to the run directory
+  - Agent returns: validation-report.md content. Skill saves to run directory.
 
 Step 4 — Result Evaluation Gate
   Parse validation-report.md and determine result:

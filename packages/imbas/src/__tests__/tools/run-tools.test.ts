@@ -221,4 +221,58 @@ describe('handleRunTransition', () => {
     });
     expect(result.phases.validate.status).toBe('in_progress');
   });
+
+  it('applies skip_phases transition via MCP tool', async () => {
+    const runDir = join(tmpDir, '.imbas', 'PROJ', 'runs', '20260101-001');
+    const state = makeInitialState('20260101-001', 'PROJ', '/s.md');
+    writeStateJson(runDir, state);
+
+    const result = await handleRunTransition({
+      project_key: 'PROJ',
+      run_id: '20260101-001',
+      action: 'skip_phases',
+      phases: ['validate', 'split'],
+    });
+    expect(result.phases.validate.status).toBe('completed');
+    expect(result.phases.split.status).toBe('completed');
+    expect(result.current_phase).toBe('devplan');
+    expect(result.metadata?.skipped_phases).toEqual(['validate', 'split']);
+  });
+});
+
+describe('handleRunCreate sentinel source_file', () => {
+  let tmpDir: string;
+  let cwdSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+  });
+
+  afterEach(() => {
+    cwdSpy.mockRestore();
+  });
+
+  it('creates run with devplan-pipeline sentinel without ENOENT', async () => {
+    const result = await handleRunCreate({
+      project_key: 'TEST',
+      source_file: 'devplan-pipeline',
+    });
+    expect(result.run_id).toMatch(/^\d{8}-\d{3}$/);
+    expect(result.state.source_file).toBe('devplan-pipeline');
+
+    const { existsSync } = await import('node:fs');
+    expect(existsSync(join(result.run_dir, 'source.md'))).toBe(true);
+  });
+
+  it('still copies real files normally', async () => {
+    const src = writeSourceFile(tmpDir);
+    const result = await handleRunCreate({
+      project_key: 'TEST',
+      source_file: src,
+    });
+    const { readFileSync } = await import('node:fs');
+    const content = readFileSync(join(result.run_dir, 'source.md'), 'utf-8');
+    expect(content).toBe('# Test source\n');
+  });
 });

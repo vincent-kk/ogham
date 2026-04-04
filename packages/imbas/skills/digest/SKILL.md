@@ -35,8 +35,8 @@ or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approac
 
 ## References
 
-- [workflow.md](./workflow.md) — Complete Workflow (Steps 1-6): issue reading, state tracking, QA-prompting, 3-layer compression, comment formatting, preview/publish flow
-- [digest-marker.md](./digest-marker.md) — Digest Marker Specification: marker format, field descriptions, re-run behavior
-- [suggestion-trigger.md](./suggestion-trigger.md) — Suggestion Trigger Logic: trigger conditions, display format, cross-issue synthesis scope
-- [tools.md](./tools.md) — Tools Used & Agent Spawn: Atlassian MCP tools, internal skill dependencies
-- [errors.md](./errors.md) — Error Handling: error cases and recovery actions
+- [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-6): issue reading, state tracking, QA-prompting, 3-layer compression, comment formatting, preview/publish flow
+- [digest-marker.md](./references/digest-marker.md) — Digest Marker Specification: marker format, field descriptions, re-run behavior
+- [suggestion-trigger.md](./references/suggestion-trigger.md) — Suggestion Trigger Logic: trigger conditions, display format, cross-issue synthesis scope
+- [tools.md](./references/tools.md) — Tools Used & Agent Spawn: Atlassian MCP tools, internal skill dependencies
+- [errors.md](./references/errors.md) — Error Handling: error cases and recovery actions

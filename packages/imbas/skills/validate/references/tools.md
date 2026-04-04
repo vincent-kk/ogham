@@ -26,5 +26,5 @@
 Spawn instructions:
 - Provide source.md + all supplements as input context
 - Set language for report output per config.language.reports
-- Agent writes validation-report.md directly to the run directory
+- Agent returns validation-report.md content — skill saves it to the run directory
 - Agent does NOT have access to pipeline/manifest tools — skill handles all state updates

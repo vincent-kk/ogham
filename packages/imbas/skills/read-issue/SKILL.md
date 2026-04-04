@@ -28,8 +28,8 @@ imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
 
 ## References
 
-- [Workflow](./workflow.md) — Steps 1–5: issue query, digest fast path, comment reconstruction, context synthesis, structured output
-- [Output Schema](./output-schema.md) — JSON example and field reference table
-- [Caching & Usage](./caching-and-usage.md) — Caching policy and agent usage patterns
-- [Tools](./tools.md) — Atlassian MCP tools and agent spawn
-- [Error Handling](./errors.md) — Error conditions and recovery actions
+- [Workflow](./references/workflow.md) — Steps 1–5: issue query, digest fast path, comment reconstruction, context synthesis, structured output
+- [Output Schema](./references/output-schema.md) — JSON example and field reference table
+- [Caching & Usage](./references/caching-and-usage.md) — Caching policy and agent usage patterns
+- [Tools](./references/tools.md) — Atlassian MCP tools and agent spawn
+- [Error Handling](./references/errors.md) — Error conditions and recovery actions

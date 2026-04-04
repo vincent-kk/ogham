@@ -3,7 +3,7 @@
  * @description Create run directory and initial state.json
  */
 
-import { mkdirSync, copyFileSync } from 'node:fs';
+import { mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
 import { join, basename } from 'node:path';
 
 import { getProjectDir, getRunDir } from '../../core/paths.js';
@@ -26,9 +26,13 @@ export async function handleRunCreate(input: RunCreateInput) {
 
   mkdirSync(run_dir, { recursive: true });
 
-  // Copy source file — write-once copy, atomic pattern unnecessary
+  // Copy source file — or create placeholder for devplan-pipeline mode
   const destSource = join(run_dir, 'source.md');
-  copyFileSync(input.source_file, destSource);
+  if (input.source_file === 'devplan-pipeline') {
+    writeFileSync(destSource, '', 'utf-8');
+  } else {
+    copyFileSync(input.source_file, destSource);
+  }
 
   // Copy supplements
   if (input.supplements && input.supplements.length > 0) {

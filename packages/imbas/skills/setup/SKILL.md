@@ -39,7 +39,7 @@ Subcommands:
 
 ## References
 
-- [Subcommand Behaviors](./subcommands.md) — show, set-project, set-language, refresh-cache, clear-temp
-- [Init Workflow](./init-workflow.md) — Steps 1–6 of interactive initialization
-- [Tools Used](./tools.md) — imbas MCP tools, Atlassian MCP tools, agent spawn
-- [Error Handling & State Transitions](./errors.md) — error table and state notes
+- [Subcommand Behaviors](./references/subcommands.md) — show, set-project, set-language, refresh-cache, clear-temp
+- [Init Workflow](./references/init-workflow.md) — Steps 1–6 of interactive initialization
+- [Tools Used](./references/tools.md) — imbas MCP tools, Atlassian MCP tools, agent spawn
+- [Error Handling & State Transitions](./references/errors.md) — error table and state notes

@@ -153,8 +153,10 @@ Note approximate results in exploration log.
   ],
   "execution_order": [
     { "step": 1, "action": "create_tasks", "items": ["T1"] },
-    { "step": 2, "action": "create_subtasks", "items": ["S1-ST1"] },
-    { "step": 3, "action": "create_links", "items": ["T1->S1"] }
+    { "step": 2, "action": "create_task_subtasks", "items": ["T1-ST1"] },
+    { "step": 3, "action": "create_links", "items": ["T1->S1"] },
+    { "step": 4, "action": "create_story_subtasks", "items": ["S1a-ST1"] },
+    { "step": 5, "action": "add_feedback_comments", "items": ["S1-a"] }
   ],
   "code_exploration_log": [{
     "story_id": "S1",

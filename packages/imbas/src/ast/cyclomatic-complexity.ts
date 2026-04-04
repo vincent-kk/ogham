@@ -53,7 +53,7 @@ function computeCC(bodyNode: SgNode): number {
   walk(bodyNode, (node: SgNode) => {
     const kind = node.kind();
 
-    if (DECISION_KINDS.has(kind)) {
+    if (DECISION_KINDS.has(kind as string)) {
       cc++;
       return;
     }

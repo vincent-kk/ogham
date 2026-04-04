@@ -71,6 +71,9 @@ export const RunStateSchema = z.object({
   updated_at: z.string(),
   current_phase: PhaseNameSchema,
   phases: PhasesSchema,
+  metadata: z.object({
+    skipped_phases: z.array(PhaseNameSchema).optional(),
+  }).optional(),
 });
 export type RunState = z.infer<typeof RunStateSchema>;
 
@@ -103,10 +106,18 @@ export const EscapePhaseActionSchema = z.object({
   escape_code: EscapeCodeSchema,
 });
 
+export const SkipPhasesActionSchema = z.object({
+  project_key: z.string(),
+  run_id: z.string(),
+  action: z.literal('skip_phases'),
+  phases: z.array(PhaseNameSchema),
+});
+
 export const RunTransitionSchema = z.discriminatedUnion('action', [
   StartPhaseActionSchema,
   CompletePhaseActionSchema,
   EscapePhaseActionSchema,
+  SkipPhasesActionSchema,
 ]);
 export type RunTransition = z.infer<typeof RunTransitionSchema>;
 

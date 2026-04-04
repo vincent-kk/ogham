@@ -36,6 +36,6 @@ Subcommands:
 
 ## References
 
-- [Subcommand Behaviors](./subcommands.md) — default, list, \<run-id\>, resume display logic and resume guidance table
-- [Tools Used & Agent Spawn](./tools.md) — imbas MCP tools, Atlassian tools, agent spawn note
-- [Error Handling & State Transitions](./errors.md) — error table and read-only state note
+- [Subcommand Behaviors](./references/subcommands.md) — default, list, \<run-id\>, resume display logic and resume guidance table
+- [Tools Used & Agent Spawn](./references/tools.md) — imbas MCP tools, Atlassian tools, agent spawn note
+- [Error Handling & State Transitions](./references/errors.md) — error table and read-only state note

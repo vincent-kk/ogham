@@ -36,9 +36,9 @@ the imbas-media subagent to produce a structured analysis.json.
 
 ## References
 
-- [workflow.md](./workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
-- [preset-selection.md](./preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
-- [tools.md](./tools.md) — Tools Used, Agent Spawn & Caching: imbas/Atlassian MCP tools, imbas-media agent details, cache behavior
+- [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
+- [preset-selection.md](./references/preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
+- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: imbas/Atlassian MCP tools, imbas-media agent details, cache behavior
 - [scripts/probe.mjs](./scripts/probe.mjs) — Video probe + preset auto-selection script (run before extraction, cross-platform)
 - [presets/index.md](./presets/index.md) — Decision matrix and summary table for preset selection
   - [short-clip.md](./presets/short-clip.md) — <= 30s clips
@@ -51,4 +51,4 @@ the imbas-media subagent to produce a structured analysis.json.
   - [hq-capture.md](./presets/hq-capture.md) — High-quality screenshots
   - [inspection.md](./presets/inspection.md) — Visual bug detection
   - [screen-recording.md](./presets/screen-recording.md) — UI walkthroughs
-- [reference.md](./reference.md) — Complete flag reference (14 flags), JSON output schemas, error codes, troubleshooting
+- [reference.md](./references/reference.md) — Complete flag reference (14 flags), JSON output schemas, error codes, troubleshooting

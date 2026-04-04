@@ -118,24 +118,26 @@ export function getSgLoadError(): string {
  * Throws for unsupported languages.
  */
 export function toLangEnum(sg: SgModule, language: string): unknown {
+  // Lang enum only contains built-in languages (Html, JavaScript, Tsx, Css, TypeScript).
+  // All others (Python, Go, Rust, etc.) are CustomLang strings passed directly.
   const langMap: Record<string, unknown> = {
     javascript: sg.Lang.JavaScript,
     typescript: sg.Lang.TypeScript,
     tsx: sg.Lang.Tsx,
-    python: sg.Lang.Python,
-    ruby: sg.Lang.Ruby,
-    go: sg.Lang.Go,
-    rust: sg.Lang.Rust,
-    java: sg.Lang.Java,
-    kotlin: sg.Lang.Kotlin,
-    swift: sg.Lang.Swift,
-    c: sg.Lang.C,
-    cpp: sg.Lang.Cpp,
-    csharp: sg.Lang.CSharp,
     html: sg.Lang.Html,
     css: sg.Lang.Css,
-    json: sg.Lang.Json,
-    yaml: sg.Lang.Yaml,
+    python: 'Python',
+    ruby: 'Ruby',
+    go: 'Go',
+    rust: 'Rust',
+    java: 'Java',
+    kotlin: 'Kotlin',
+    swift: 'Swift',
+    c: 'C',
+    cpp: 'Cpp',
+    csharp: 'CSharp',
+    json: 'Json',
+    yaml: 'Yaml',
   };
   const lang = langMap[language];
   if (lang === undefined) {
