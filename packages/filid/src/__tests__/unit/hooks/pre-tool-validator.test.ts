@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isDetailMd,
   validatePreToolUse,
-} from '../../../hooks/pre-tool-validator.js';
+} from '../../../hooks/pre-tool-validator/pre-tool-validator.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const baseInput: PreToolUseInput = {

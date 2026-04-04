@@ -6,7 +6,7 @@ import {
   getSgLoadError,
   getSgModule,
   toLangEnum,
-} from '../../../ast/ast-grep-shared.js';
+} from '../../../ast/ast-grep-shared/ast-grep-shared.js';
 
 // ─── getSgModule ──────────────────────────────────────────────────────────────
 

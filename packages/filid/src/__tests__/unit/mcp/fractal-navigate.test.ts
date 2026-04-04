@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
-import { handleFractalNavigate } from '../../../mcp/tools/fractal-navigate.js';
+import type { NodeEntry } from '../../../core/tree/fractal-tree/fractal-tree.js';
+import { handleFractalNavigate } from '../../../mcp/tools/fractal-navigate/fractal-navigate.js';
 
 describe('fractal-navigate tool', () => {
   const sampleEntries: NodeEntry[] = [

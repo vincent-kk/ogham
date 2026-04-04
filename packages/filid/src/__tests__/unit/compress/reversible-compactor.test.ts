@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   compactReversible,
   restoreFromCompacted,
-} from '../../../compress/reversible-compactor.js';
+} from '../../../compress/reversible-compactor/reversible-compactor.js';
 
 describe('reversible-compactor', () => {
   it('should compact content to file path + metadata reference', () => {

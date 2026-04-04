@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleCoverageVerify } from '../../../mcp/tools/coverage-verify.js';
+import { handleCoverageVerify } from '../../../mcp/tools/coverage-verify/coverage-verify.js';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(() => false),
@@ -10,21 +10,21 @@ vi.mock('node:fs', () => ({
   readdirSync: vi.fn(() => []),
 }));
 
-vi.mock('../../../ast/dependency-extractor.js', () => ({
+vi.mock('../../../ast/dependency-extractor/dependency-extractor.js', () => ({
   extractDependencies: vi.fn(),
 }));
 
-vi.mock('../../../core/tree/fractal-tree.js', () => ({
+vi.mock('../../../core/tree/fractal-tree/fractal-tree.js', () => ({
   scanProject: vi.fn(),
   getDescendants: vi.fn(() => []),
   getFractalsUnderOrgans: vi.fn(() => []),
 }));
 
-vi.mock('../../../core/coverage/import-resolver.js', () => ({
+vi.mock('../../../core/coverage/import-resolver/import-resolver.js', () => ({
   resolveImportPath: vi.fn(() => null),
 }));
 
-vi.mock('../../../metrics/test-counter.js', () => ({
+vi.mock('../../../metrics/test-counter/test-counter.js', () => ({
   countTestCases: vi.fn(() => ({
     filePath: '',
     fileType: 'test',
@@ -37,11 +37,11 @@ vi.mock('../../../metrics/test-counter.js', () => ({
 const mockReadFileSync = vi.mocked(readFileSync);
 
 const { extractDependencies } =
-  await import('../../../ast/dependency-extractor.js');
+  await import('../../../ast/dependency-extractor/dependency-extractor.js');
 const { scanProject, getDescendants, getFractalsUnderOrgans } =
-  await import('../../../core/tree/fractal-tree.js');
+  await import('../../../core/tree/fractal-tree/fractal-tree.js');
 const { resolveImportPath } =
-  await import('../../../core/coverage/import-resolver.js');
+  await import('../../../core/coverage/import-resolver/import-resolver.js');
 
 const mockExtractDeps = vi.mocked(extractDependencies);
 const mockScanProject = vi.mocked(scanProject);

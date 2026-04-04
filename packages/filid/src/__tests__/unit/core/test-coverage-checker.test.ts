@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   checkTestCoverage,
   generateCoverageWarnings,
-} from '../../../core/coverage/test-coverage-checker.js';
+} from '../../../core/coverage/test-coverage-checker/test-coverage-checker.js';
 import type { UsageSite } from '../../../types/coverage.js';
 
 vi.mock('node:fs', () => ({
@@ -14,7 +14,7 @@ vi.mock('node:fs', () => ({
   readdirSync: vi.fn(() => []),
 }));
 
-vi.mock('../../../metrics/test-counter.js', () => ({
+vi.mock('../../../metrics/test-counter/test-counter.js', () => ({
   countTestCases: vi.fn(() => ({
     filePath: '',
     fileType: 'test',
@@ -28,7 +28,7 @@ const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
 const mockReaddirSync = vi.mocked(readdirSync);
 
-const { countTestCases } = await import('../../../metrics/test-counter.js');
+const { countTestCases } = await import('../../../metrics/test-counter/test-counter.js');
 const mockCountTestCases = vi.mocked(countTestCases);
 
 function makeSite(overrides: Partial<UsageSite> = {}): UsageSite {

@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
-} from '../../core/tree/organ-classifier.js';
+} from '../../core/tree/organ-classifier/organ-classifier.js';
 
 /**
  * Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls.

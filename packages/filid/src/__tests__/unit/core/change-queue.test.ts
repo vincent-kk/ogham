@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ChangeQueue } from '../../../core/infra/change-queue.js';
+import { ChangeQueue } from '../../../core/infra/change-queue/change-queue.js';
 
 describe('change-queue', () => {
   let queue: ChangeQueue;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatMatch } from '../../../ast/ast-grep-shared.js';
+import { formatMatch } from '../../../ast/ast-grep-shared/ast-grep-shared.js';
 
 // ─── formatMatch ────────────────────────────────────────────────────────────
 

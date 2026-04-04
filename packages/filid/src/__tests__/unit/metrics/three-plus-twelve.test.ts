@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { check312Rule } from '../../../metrics/three-plus-twelve.js';
+import { check312Rule } from '../../../metrics/three-plus-twelve/three-plus-twelve.js';
 import type { TestCaseCount } from '../../../types/metrics.js';
 
 const specFile = (

@@ -9,7 +9,7 @@ import {
   extractImports,
   extractPublicApi,
   findEntryPoint,
-} from '../../../core/module/module-main-analyzer.js';
+} from '../../../core/module/module-main-analyzer/module-main-analyzer.js';
 
 let tmpDir: string;
 

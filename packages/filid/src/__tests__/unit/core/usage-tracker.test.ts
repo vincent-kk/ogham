@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   findSubtreeUsages,
   getModuleName,
-} from '../../../core/coverage/usage-tracker.js';
+} from '../../../core/coverage/usage-tracker/usage-tracker.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 
 // Mock dependencies
@@ -14,17 +14,17 @@ vi.mock('node:fs', () => ({
   readFileSync: vi.fn(() => ''),
 }));
 
-vi.mock('../../../ast/dependency-extractor.js', () => ({
+vi.mock('../../../ast/dependency-extractor/dependency-extractor.js', () => ({
   extractDependencies: vi.fn(),
 }));
 
-vi.mock('../../../core/tree/fractal-tree.js', () => ({
+vi.mock('../../../core/tree/fractal-tree/fractal-tree.js', () => ({
   scanProject: vi.fn(),
   getDescendants: vi.fn(() => []),
   getFractalsUnderOrgans: vi.fn(() => []),
 }));
 
-vi.mock('../../../core/coverage/import-resolver.js', () => ({
+vi.mock('../../../core/coverage/import-resolver/import-resolver.js', () => ({
   resolveImportPath: vi.fn(() => null),
 }));
 
@@ -32,11 +32,11 @@ const mockReadFileSync = vi.mocked(readFileSync);
 
 // Import mocked modules
 const { extractDependencies } =
-  await import('../../../ast/dependency-extractor.js');
+  await import('../../../ast/dependency-extractor/dependency-extractor.js');
 const { scanProject, getDescendants, getFractalsUnderOrgans } =
-  await import('../../../core/tree/fractal-tree.js');
+  await import('../../../core/tree/fractal-tree/fractal-tree.js');
 const { resolveImportPath } =
-  await import('../../../core/coverage/import-resolver.js');
+  await import('../../../core/coverage/import-resolver/import-resolver.js');
 
 const mockExtractDeps = vi.mocked(extractDependencies);
 const mockScanProject = vi.mocked(scanProject);

@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { enforceAgentRole } from '../../../hooks/agent-enforcer.js';
+import { enforceAgentRole } from '../../../hooks/agent-enforcer/agent-enforcer.js';
 import { generateSubagentInput } from '../fixtures/generator.js';
 
 // 알려진 역할들

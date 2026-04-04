@@ -26,7 +26,7 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { injectContext } = await import('../../../hooks/context-injector.js');
+const { injectContext } = await import('../../../hooks/context-injector/context-injector.js');
 const { existsSync, readdirSync } = await import('node:fs');
 
 const baseInput: UserPromptSubmitInput = {

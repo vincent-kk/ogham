@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { handleAstAnalyze } from '../../../mcp/tools/ast-analyze.js';
+import { handleAstAnalyze } from '../../../mcp/tools/ast-analyze/ast-analyze.js';
 
 function isAstAnalyzeError(
   r: unknown,

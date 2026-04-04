@@ -4,9 +4,9 @@ import {
   calculateSeverity,
   compareCurrent,
   detectDrift,
-} from '../../../core/rules/drift-detector.js';
-import { buildFractalTree } from '../../../core/tree/fractal-tree.js';
-import type { NodeEntry } from '../../../core/tree/fractal-tree.js';
+} from '../../../core/rules/drift-detector/drift-detector.js';
+import { buildFractalTree } from '../../../core/tree/fractal-tree/fractal-tree.js';
+import type { NodeEntry } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 import type {
   RuleEvaluationResult,

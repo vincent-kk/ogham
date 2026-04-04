@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { isIntentMd } from '../shared.js';
+import { isIntentMd } from '../shared/shared.js';
 import { isOrganByStructure } from './organ-structure-checker.js';
 
 export function checkIntentMdReclassification(

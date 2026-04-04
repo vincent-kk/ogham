@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   type PromotionInput,
   checkPromotionEligibility,
-} from '../../../metrics/promotion-tracker.js';
+} from '../../../metrics/promotion-tracker/promotion-tracker.js';
 
 describe('promotion-tracker', () => {
   it('should mark eligible when stable for >= 90 days with no failures', () => {

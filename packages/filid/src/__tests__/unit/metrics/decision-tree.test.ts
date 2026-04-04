@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { decide } from '../../../metrics/decision-tree.js';
+import { decide } from '../../../metrics/decision-tree/decision-tree.js';
 
 describe('decision-tree', () => {
   it('should return "ok" when test count <= 15', () => {

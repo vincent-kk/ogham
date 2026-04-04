@@ -18,7 +18,7 @@ import {
   loadRuleOverrides,
   resolveLanguage,
   writeConfig,
-} from '../../../core/infra/config-loader.js';
+} from '../../../core/infra/config-loader/config-loader.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 
 vi.mock('node:child_process', async () => {

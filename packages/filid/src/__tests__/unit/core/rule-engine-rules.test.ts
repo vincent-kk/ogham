@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadBuiltinRules } from '../../../core/rules/rule-engine.js';
+import { loadBuiltinRules } from '../../../core/rules/rule-engine/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { RuleContext } from '../../../types/rules.js';

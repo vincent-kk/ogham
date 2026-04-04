@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseFile, parseSource } from '../../../ast/parser.js';
+import { parseFile, parseSource } from '../../../ast/parser/parser.js';
 
 describe('parser', () => {
   describe('parseSource', () => {

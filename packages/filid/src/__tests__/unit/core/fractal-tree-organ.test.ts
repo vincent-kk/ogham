@@ -4,7 +4,7 @@ import {
   type NodeEntry,
   buildFractalTree,
   getFractalsUnderOrgans,
-} from '../../../core/tree/fractal-tree.js';
+} from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 
 const entry = (
