@@ -3,6 +3,8 @@
  * Provides timeout-protected stdin reading to prevent hangs in subagent environments.
  */
 
+import { STDIN_TIMEOUT_MS } from '../constants/defaults.js';
+
 /**
  * Read all stdin with timeout to prevent indefinite hang.
  *
@@ -14,7 +16,7 @@
  * @param timeoutMs - Maximum time to wait for stdin (default: 5000ms)
  * @returns The stdin content, or empty string on error/timeout
  */
-export function readStdin(timeoutMs = 5000): Promise<string> {
+export function readStdin(timeoutMs = STDIN_TIMEOUT_MS): Promise<string> {
   return new Promise((resolve) => {
     const chunks: Buffer[] = [];
     let settled = false;

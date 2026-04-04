@@ -15,62 +15,27 @@ import { extname, join, resolve } from 'node:path';
 
 import type * as AstGrepNapi from '@ast-grep/napi';
 
+import {
+  AST_EXCLUDED_DIRS,
+  AST_MAX_FILES,
+  EXT_TO_LANG,
+  SUPPORTED_LANGUAGES,
+} from '../../constants/ast.js';
+
 export type SgModule = typeof AstGrepNapi;
 /** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
 export type NapiLang = Parameters<SgModule['parse']>[0];
 
+export {
+  AST_MAX_FILES as MAX_FILES,
+  AST_EXCLUDED_DIRS as EXCLUDED_DIRS,
+  SUPPORTED_LANGUAGES,
+  EXT_TO_LANG,
+};
+
 let sgModule: SgModule | null = null;
 let sgLoadFailed = false;
 let sgLoadError = '';
-
-/** Max files collected per search */
-export const MAX_FILES = 1000;
-
-/** Directories excluded from file walks */
-export const EXCLUDED_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'build',
-  '__pycache__',
-  '.venv',
-  'venv',
-]);
-
-/**
- * Supported languages mapped to their file extensions.
- * 17 languages supported by @ast-grep/napi.
- */
-export const SUPPORTED_LANGUAGES: Record<string, string[]> = {
-  javascript: ['.js', '.mjs', '.cjs', '.jsx'],
-  typescript: ['.ts', '.mts', '.cts'],
-  tsx: ['.tsx'],
-  python: ['.py'],
-  ruby: ['.rb'],
-  go: ['.go'],
-  rust: ['.rs'],
-  java: ['.java'],
-  kotlin: ['.kt', '.kts'],
-  swift: ['.swift'],
-  c: ['.c', '.h'],
-  cpp: ['.cpp', '.cc', '.cxx', '.hpp'],
-  csharp: ['.cs'],
-  html: ['.html', '.htm'],
-  css: ['.css'],
-  json: ['.json'],
-  yaml: ['.yaml', '.yml'],
-};
-
-/** Extension → language lookup (derived from SUPPORTED_LANGUAGES) */
-export const EXT_TO_LANG: Record<string, string> = Object.entries(
-  SUPPORTED_LANGUAGES,
-).reduce(
-  (acc, [lang, exts]) => {
-    for (const ext of exts) acc[ext] = lang;
-    return acc;
-  },
-  {} as Record<string, string>,
-);
 
 /**
  * Lazy-load @ast-grep/napi. Returns the module or null if unavailable.
@@ -171,7 +136,7 @@ export function getExtensionsForLanguage(lang: string): string[] {
 export function collectFiles(
   dir: string,
   language: string,
-  maxFiles = MAX_FILES,
+  maxFiles = AST_MAX_FILES,
 ): string[] {
   const extensions = new Set(getExtensionsForLanguage(language));
   if (extensions.size === 0) return [];
@@ -199,7 +164,7 @@ export function collectFiles(
     for (const entry of entries) {
       if (files.length >= maxFiles) return;
       if (entry.isDirectory()) {
-        if (!EXCLUDED_DIRS.has(entry.name)) {
+        if (!AST_EXCLUDED_DIRS.has(entry.name)) {
           walk(join(current, entry.name));
         }
       } else if (entry.isFile()) {

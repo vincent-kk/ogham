@@ -5,6 +5,7 @@
 
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 import { calculateComplexity } from '../../../ast/cyclomatic-complexity/cyclomatic-complexity.js';
+import { DEFAULT_ANONYMOUS_PATH } from '../../../constants/defaults.js';
 
 export interface AstAnalyzeInput {
   source: string;
@@ -13,7 +14,7 @@ export interface AstAnalyzeInput {
 }
 
 export async function handleAstAnalyze(input: AstAnalyzeInput) {
-  const filePath = input.file_path ?? 'anonymous.ts';
+  const filePath = input.file_path ?? DEFAULT_ANONYMOUS_PATH;
 
   if (input.analysis_type === 'dependency-graph') {
     return extractDependencies(input.source, filePath);

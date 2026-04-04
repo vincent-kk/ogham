@@ -11,6 +11,7 @@ import {
   collectFiles,
   toLangEnum,
 } from '../../../ast/ast-grep-shared/ast-grep-shared.js';
+import { AST_SEARCH_MAX_RESULTS } from '../../../constants/defaults.js';
 
 export interface AstSearchInput {
   pattern: string;
@@ -31,7 +32,7 @@ export async function handleAstSearch(input: AstSearchInput) {
 
   try {
     const searchDir = input.path ?? process.cwd();
-    const maxResults = input.max_results ?? 100;
+    const maxResults = input.max_results ?? AST_SEARCH_MAX_RESULTS;
     const files = collectFiles(searchDir, input.language);
 
     const lang = toLangEnum(sg, input.language);
