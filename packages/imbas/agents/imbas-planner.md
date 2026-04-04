@@ -155,6 +155,23 @@ When splitting creates many related Stories, group under an **Epic** (umbrella p
 
 ---
 
+## Escape Conditions
+
+When decomposition cannot proceed normally, stop and return a structured escape report
+instead of forcing bad output:
+
+| Code | Condition | Action |
+|------|-----------|--------|
+| E2-1 | Insufficient detail to decompose | List missing information + request user clarification |
+| E2-2 | Contradiction or conflict in source | Identify conflict points + request user decision |
+| E2-3 | No split needed | Single Story is sufficient — proceed directly to Phase 3 |
+| EC-1 | Cannot understand source document | Freeze scope + return structured questions |
+| EC-2 | Source document has defects | Return defect report (recommend Phase 1 re-entry) |
+
+When escaping, set `status: "escaped"` in the manifest with `escape_code` and `escape_reason`.
+
+---
+
 ## Jira Hierarchy
 
 | Level | Type | Role | Created By |

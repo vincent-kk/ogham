@@ -162,6 +162,12 @@ Note approximate results in exploration log.
     "entry_points": ["src/auth/login.ts"],
     "related_areas": ["src/auth/token.ts"],
     "architecture_docs": ["src/auth/INTENT.md"]
+  }],
+  "feedback_comments": [{
+    "target_story": "PROJ-42",
+    "type": "discrepancy | split_issue",
+    "message": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
+    "subtask_ref": "S1-ST2"
   }]
 }
 ```

@@ -1,6 +1,6 @@
 # SPEC-agents — imbas Agent 설계
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.1 (2026-04-04) — Synced with agent implementations
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---
@@ -111,7 +111,6 @@ tools:
   - Read          # 문서 읽기
   - Grep          # 문서 내 패턴 검색
   - Glob          # 파일 탐색
-  - Bash          # 유틸리티 실행
   # Atlassian MCP
   - getConfluencePage
   - searchConfluenceUsingCql
@@ -122,7 +121,7 @@ tools:
 ### Permission Mode
 
 ```yaml
-mode: bypassPermissions  # 읽기 전용 작업, 빠른 실행 필요
+mode: default  # 읽기 전용이지만, bypassPermissions는 권한 리스크로 불채택
 ```
 
 ---
@@ -220,7 +219,21 @@ When [trigger], the [system] shall [action].
 - `is split into` / `split from` 링크로 추적
 - 신규 Story에 3→1→2 검증 + 크기 검증 재실행
 
-#### 3.6 Jira 이슈 계층 지식
+#### 3.6 탈출 조건
+
+분할을 중단하고 사용자에게 반환해야 하는 상황:
+
+| Code | Condition | Action |
+|------|-----------|--------|
+| E2-1 | 구체화 필요 | 부족 정보 목록 + 인간 보완 요청 |
+| E2-2 | 모순/충돌 | 충돌 지점 명시 + 인간 의사결정 요청 |
+| E2-3 | 분할 불필요 | Phase 3 직행 (단일 Story로 충분) |
+| EC-1 | 이해 불가 | 범위 동결 + 질의 구조화 |
+| EC-2 | 원본 결함 | 결함 리포트 (Phase 1 재진입 권고) |
+
+탈출 시 매니페스트에 `status: "escaped"` + `escape_code` + `escape_reason` 기록.
+
+#### 3.7 Jira 이슈 계층 지식
 
 | Level | Type | Role | Naming Pattern |
 |-------|------|------|---------------|
@@ -235,19 +248,15 @@ tools:
   - Read
   - Grep
   - Glob
-  - Bash
-  # Atlassian MCP
+  # Atlassian MCP (읽기 전용 — Jira 쓰기는 manifest 스킬에서 수행)
   - searchJiraIssuesUsingJql
   - getJiraIssue
-  - createJiraIssue
-  - createIssueLink
-  - getJiraProjectIssueTypesMetadata
 ```
 
 ### Permission Mode
 
 ```yaml
-mode: default  # Jira 쓰기는 스킬 워크플로우가 제어 (Plan-then-Execute는 스킬 수준에서 강제)
+mode: default  # Plan-then-Execute: 에이전트는 매니페스트만 생성, Jira 쓰기는 스킬 수준에서 제어
 ```
 
 ---
@@ -330,8 +339,35 @@ When [trigger], the [system] shall [action].
 - Story 트리(문제 공간)는 **건드리지 않음** (트레이서빌리티 보존)
 - Story 정의 ≠ 코드 현실 → dev 티켓에 매핑 근거 명시
 - Story 분할 자체가 잘못됨 → Story에 코멘트 기록
+- 피드백은 `devplan-manifest.json`의 `feedback_comments` 필드에 구조화:
+  ```json
+  "feedback_comments": [
+    {
+      "target_story": "PROJ-42",
+      "type": "discrepancy | split_issue",
+      "message": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
+      "subtask_ref": "S1-ST2"
+    }
+  ]
+  ```
 
-#### 4.6 Story-Task 관계 원칙 (Reference)
+#### 4.6 AST Fallback 프로토콜
+
+AST 도구(`imbas_ast_search`, `imbas_ast_analyze`)가 `@ast-grep/napi` 미설치 오류를 반환할 경우, LLM 기반 분석으로 대체:
+
+| Native Tool | Fallback |
+|-------------|----------|
+| `imbas_ast_search` | 메타변수를 정규식으로 변환 → Grep → LLM이 false positive 필터링 |
+| `imbas_ast_analyze` (dependency-graph) | Read → LLM이 import/export/call 패턴 추출 |
+| `imbas_ast_analyze` (cyclomatic-complexity) | Read → LLM이 분기문 카운트 |
+
+**메타변수 변환**: `$NAME`/`$VALUE` → `[\w.]+`, `$TYPE` → `[\w.<>,\[\] ]+`, `$$$ARGS`/`$$$BODY` → `[\s\S]*?`
+
+**제한사항**: 텍스트 매칭만 가능 (코멘트/문자열 내 false positive — LLM 판단으로 필터). 관련 디렉토리로 Grep 범위 제한. 타입 인식/규칙 기반 매칭 불가. 근사 결과임을 exploration log에 기록.
+
+Fallback 활성화 시 1회 `[WARN] AST fallback activated` 출력.
+
+#### 4.7 Story-Task 관계 원칙 (Reference)
 
 - **Task 완료 ≠ Story 자동 완료** — Task가 완료되어도 Story의 AC 충족 여부를 개별 확인해야 함
 - Story는 **실제 AC가 충족된 경우에만** 닫음 (사용자 가치 관점의 완료)
@@ -348,19 +384,15 @@ tools:
   # imbas MCP (AST 코드 분석)
   - imbas_ast_search
   - imbas_ast_analyze
-  # Atlassian MCP
+  # Atlassian MCP (읽기 전용 — Jira 쓰기는 manifest 스킬에서 수행)
   - getJiraIssue
   - searchJiraIssuesUsingJql
-  - createJiraIssue
-  - createIssueLink
-  - addCommentToJiraIssue
-  - getJiraIssueTypeMetaWithFields
 ```
 
 ### Permission Mode
 
 ```yaml
-mode: default  # 코드 읽기는 자유, Jira 쓰기는 스킬 워크플로우가 제어
+mode: default  # Plan-then-Execute: 에이전트는 매니페스트만 생성, Jira 쓰기는 스킬 수준에서 제어
 ```
 
 ---
@@ -438,19 +470,26 @@ model: sonnet
 }
 ```
 
+### Frame Gap Handling
+
+scene-sieve는 시각적으로 유사한 프레임을 pruning하므로, 프레임 번호에 갭이 발생할 수 있다 (e.g., frame_0001 → frame_0003).
+- 타이밍 계산은 항상 `.metadata.json`의 `timestampMs` 사용 — 프레임 번호 산술 금지
+- 큰 갭은 분석에 기록: "12-frame gap ≈ 2.4s of static screen"
+- pruning된 프레임은 시각적으로 중복되어 제거된 것 — 중요 내용이 있다고 가정하지 않음
+
 ### Tools
 
 ```yaml
 tools:
   - Read          # 프레임 이미지 읽기 (멀티모달), metadata.json 읽기
-  - Bash          # 파일 시스템 조작
+  - Glob          # 프레임 파일 탐색
   - Write         # analysis.json 저장
 ```
 
 ### Permission Mode
 
 ```yaml
-mode: bypassPermissions  # 읽기 + 분석 전용, .temp 디렉토리 내에서만 쓰기
+mode: default  # 격리된 서브에이전트이지만, bypassPermissions는 권한 리스크로 불채택
 ```
 
 ---
