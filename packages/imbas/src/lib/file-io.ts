@@ -11,6 +11,7 @@ import { z } from 'zod';
 /**
  * Read a JSON file and optionally validate with a Zod schema.
  * Throws if file not found or JSON is invalid.
+ * Sync internals intentional — atomic read in single-threaded MCP stdio.
  */
 export async function readJson<T>(
   filePath: string,
@@ -46,6 +47,7 @@ export async function readJson<T>(
 /**
  * Write data as JSON to a file atomically.
  * Writes to a temp file first, then renames to the target path (crash-safe).
+ * Sync internals intentional — atomic rename requires no await gap.
  */
 export async function writeJson(filePath: string, data: unknown): Promise<void> {
   const dir = dirname(filePath);

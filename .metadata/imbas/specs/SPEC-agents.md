@@ -68,33 +68,35 @@ source: [문서 식별자]
 date: YYYY-MM-DD
 status: PASS | PASS_WITH_WARNINGS | BLOCKED
 
-## 🔴 모순 (N건)
+## Contradiction (N건)
 ### V-C01: [제목]
 - 위치 A: "[인용]" (섹션 X)
 - 위치 B: "[인용]" (섹션 Y)
 - 판정: 양립 불가 — [근거]
 - 심각도: BLOCKING | WARNING
 
-## 🟠 이격 (N건)
+## Divergence (N건)
 ### V-D01: [제목]
 - 상위: "[인용]" (섹션 X)
 - 하위: "[인용]" (섹션 Y)
 - 판정: 논리적 단절 — [근거]
 
-## 🟡 누락 (N건)
+## Omission (N건)
 ### V-M01: [제목]
 - 맥락: "[인용]" (섹션 X)
 - 기대 스펙: [논리적으로 있어야 할 내용]
 - 판정: 미정의 — [근거]
 
-## 🔴 논리적 불능 (N건)
+## Infeasibility (N건)
 ### V-I01: [제목]
 - 위치: "[인용]" (섹션 X)
 - 판정: 원리적 불가 — [근거]
 
-## ✅ 검증 통과 항목 요약
+## Passed Items Summary
 [정상 판정 영역 목록]
 ```
+
+> **Language Rule:** Report section headings and body text follow `config.language.reports` setting. The template above shows English headings as fallback default. When `config.language.reports` is set (e.g., `"ko"`), headings and content are written in that language.
 
 #### 2.3 역추론 검증 프로토콜 (Phase 2 지원)
 

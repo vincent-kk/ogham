@@ -125,6 +125,9 @@ export function createServer(): McpServer {
         project_key: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan']),
+        // Type-dependent schema (stories vs devplan) — cannot express conditional
+        // validation in a single MCP inputSchema. Handler validates internally via
+        // StoriesManifestSchema.parse() / DevplanManifestSchema.parse().
         manifest: z.unknown().optional(),
       }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
@@ -178,6 +181,8 @@ export function createServer(): McpServer {
     {
       description: 'Update config.json fields',
       inputSchema: z.object({
+        // Config values are heterogeneous (string, number, object) — z.unknown()
+        // allows any JSON value. Handler validates via dot-path resolution.
         updates: z.record(z.string(), z.unknown()),
       }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
@@ -207,6 +212,8 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_key: z.string(),
         cache_type: CacheTypeSchema,
+        // Cache data varies by type (jira metadata, issue types, etc.) — z.unknown()
+        // is intentional. Handler validates via CacheTypeSchema for the type field.
         data: z.unknown().optional(),
       }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },

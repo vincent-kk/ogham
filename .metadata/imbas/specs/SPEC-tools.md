@@ -315,7 +315,7 @@ devplan 매니페스트의 실행 계획을 생성한다 (dry-run).
 |-------|------|----------|-------------|
 | `field` | string | no | dot-path (예: `"defaults.project_key"`). 미지정 시 전체 |
 
-**Output:** `{ "config": { ... } }` 또는 field 지정 시 `{ "value": "PROJ" }`
+**Output:** 전체 config 객체 (wrapper 없음) 또는 field 지정 시 `{ "field": "<dot-path>", "value": <값> }`
 
 ---
 
@@ -663,13 +663,21 @@ server.registerTool('imbas_run_create', {
 ### 9.3 wrapHandler 패턴
 
 ```typescript
-function wrapHandler(handler: (args: any) => Promise<any>) {
-  return async (args: any) => {
+function wrapHandler<T>(
+  fn: (args: T) => unknown | Promise<unknown>,
+  options?: { checkErrorField?: boolean },
+) {
+  return async (args: T) => {
     try {
-      const result = await handler(args);
+      const result = await fn(args);
+      // When checkErrorField is true and result contains an error field,
+      // return it as a non-error text response (e.g., AST napi load failure).
+      if (options?.checkErrorField && result && typeof result === 'object' && 'error' in result) {
+        return { content: [{ type: 'text', text: String(result.error) }] };
+      }
       return toolResult(result);
     } catch (error) {
-      return toolError(error instanceof Error ? error.message : String(error));
+      return toolError(error);
     }
   };
 }

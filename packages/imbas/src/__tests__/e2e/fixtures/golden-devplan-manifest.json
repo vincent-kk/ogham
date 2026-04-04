@@ -1,0 +1,85 @@
+{
+  "batch": "B1",
+  "run_id": "20260101-001",
+  "project_key": "ALPHA",
+  "epic_key": "ALPHA-10",
+  "created_at": "2026-01-01T10:00:00.000Z",
+  "tasks": [
+    {
+      "id": "T-1",
+      "title": "인증 API 구현",
+      "description": "JWT 기반 로그인/로그아웃 REST API 엔드포인트를 구현한다.",
+      "type": "Task",
+      "status": "pending",
+      "jira_key": null,
+      "blocks": ["T-2"],
+      "subtasks": [
+        {
+          "id": "T-1-ST-1",
+          "title": "로그인 엔드포인트 구현",
+          "description": "POST /auth/login 핸들러 및 JWT 발급 로직",
+          "status": "pending",
+          "jira_key": null
+        },
+        {
+          "id": "T-1-ST-2",
+          "title": "토큰 검증 미들웨어",
+          "description": "Authorization 헤더에서 JWT를 추출하고 검증하는 미들웨어",
+          "status": "pending",
+          "jira_key": null
+        }
+      ]
+    },
+    {
+      "id": "T-2",
+      "title": "대시보드 프론트엔드 구현",
+      "description": "React 기반 대시보드 화면을 구현한다. T-1 완료 후 진행.",
+      "type": "Task",
+      "status": "pending",
+      "jira_key": null,
+      "blocks": [],
+      "subtasks": []
+    }
+  ],
+  "story_subtasks": [
+    {
+      "story_id": "S-1",
+      "story_key": null,
+      "subtasks": [
+        {
+          "id": "S-1-ST-1",
+          "title": "로그인 UI 컴포넌트",
+          "description": "이메일/비밀번호 입력 폼 및 제출 버튼",
+          "status": "pending",
+          "jira_key": null
+        }
+      ]
+    }
+  ],
+  "feedback_comments": [
+    {
+      "target_story": "S-2",
+      "target_key": null,
+      "comment": "S-2는 범위가 넓어 S-2a로 분리되었으나, 대시보드 피드 파트가 아직 스토리로 명시되지 않았습니다.",
+      "type": "story_split_issue",
+      "status": "pending"
+    }
+  ],
+  "execution_order": [
+    {
+      "step": 1,
+      "action": "create_tasks",
+      "items": ["T-1", "T-2"]
+    },
+    {
+      "step": 2,
+      "action": "create_task_subtasks",
+      "items": ["T-1-ST-1", "T-1-ST-2"]
+    },
+    {
+      "step": 3,
+      "action": "create_story_subtasks",
+      "items": ["S-1-ST-1"]
+    }
+  ]
+}

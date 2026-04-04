@@ -120,6 +120,17 @@ status: PASS | FAIL
 
 ---
 
+## Report Language
+
+Follow the language specified by `config.language.reports` for ALL report output:
+
+- **Section headings**: Write in the language specified by `config.language.reports`.
+- **Report body text**: Write in the language specified by `config.language.reports`.
+- **Fallback**: If `config.language.reports` is not provided or empty, use English as the default.
+- The `config.language.reports` value is passed as context when you are spawned. Honor it strictly.
+
+---
+
 ## Constraints
 
 - **Read-only**: Never modify documents, Jira issues, or external systems

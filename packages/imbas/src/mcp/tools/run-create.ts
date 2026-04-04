@@ -26,7 +26,7 @@ export async function handleRunCreate(input: RunCreateInput) {
 
   mkdirSync(run_dir, { recursive: true });
 
-  // Copy source file
+  // Copy source file — write-once copy, atomic pattern unnecessary
   const destSource = join(run_dir, 'source.md');
   copyFileSync(input.source_file, destSource);
 

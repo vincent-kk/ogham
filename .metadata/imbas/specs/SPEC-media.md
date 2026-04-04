@@ -117,7 +117,10 @@
 | ≤ 5분 | medium-video | 12 |
 | ≤ 30분 | long-video | 16 |
 | > 30분 | very-long | 20 |
+| `--preset quick-glance` | quick-glance | 4 |
 | `--preset detailed` | detailed | 25 |
+| `--preset hq-capture` | hq-capture | 15 |
+| `--preset inspection` | inspection | 30 |
 | `--preset screen-recording` | screen-recording | 20 |
 
 사용자가 `--preset` 으로 오버라이드 가능.
