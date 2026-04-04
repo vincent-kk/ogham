@@ -4,6 +4,7 @@
  */
 import {
   existsSync,
+  mkdtempSync,
   mkdirSync,
   readFileSync,
   rmSync,
@@ -25,8 +26,7 @@ let testDir: string;
 let claudeMdPath: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-test-${Date.now()}`);
-  mkdirSync(testDir, { recursive: true });
+  testDir = mkdtempSync(join(tmpdir(), 'maencof-test-'));
   claudeMdPath = join(testDir, 'CLAUDE.md');
 });
 

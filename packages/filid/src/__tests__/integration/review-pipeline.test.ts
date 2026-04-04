@@ -144,7 +144,7 @@ describe('review pipeline', () => {
       expect(result.continue).toBe(false);
     });
 
-    it('should block INTENT.md in organ directories', () => {
+    it('should allow INTENT.md in organ directories with reclassification info', () => {
       const input: PreToolUseInput = {
         tool_name: 'Write',
         tool_input: {
@@ -157,7 +157,10 @@ describe('review pipeline', () => {
       };
 
       const result = guardStructure(input);
-      expect(result.continue).toBe(false);
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        'reclassified from organ to fractal',
+      );
     });
 
     it('should allow valid INTENT.md writes', () => {

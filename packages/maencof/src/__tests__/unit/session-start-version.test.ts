@@ -5,6 +5,7 @@
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -23,8 +24,7 @@ import { VERSION } from '../../version.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-claudemd-init-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-claudemd-init-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;
