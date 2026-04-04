@@ -8,7 +8,7 @@
 |------|-------|----|
 | `getJiraIssue` | Read issue with full comment thread | read-issue skill |
 | `addCommentToJiraIssue` | Post digest comment to Jira | direct call |
-| `fetchAtlassian` | Download attached media files | fetch-media skill |
+| `fetchAtlassian` | Download attached media files | via `imbas:fetch-media` internal skill (not called directly by digest) |
 
 ## Agent Spawn
 

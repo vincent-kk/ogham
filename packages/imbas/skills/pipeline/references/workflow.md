@@ -22,18 +22,22 @@ Step 0.2 — Option Resolution
   2. Resolve each option by mode:
 
   DOCUMENT PIPELINE:
-    - project_key: --project argument > config.defaults.project_key > STOP
+    - project_ref: --project argument > config.defaults.project_ref > STOP
     - parent: --parent argument > "new" (auto-create Epic)
     - stop_at: --stop-at argument > none (full pipeline)
     - dry_run: --dry-run flag > false
 
   DEVPLAN PIPELINE:
-    - project_key: extracted from story_keys (e.g., "PROJ" from "PROJ-42") > --project > config
+    - project_ref: extracted from story_keys (e.g., "PROJ" from "PROJ-42") > --project > config
     - parent: N/A (Stories already exist in Jira)
     - stop_at: --stop-at argument > none (devplan + manifest)
     - dry_run: --dry-run flag > false
 
 Step 0.3 — Story Validation (DEVPLAN PIPELINE only)
+  Validate all keys share the same project prefix BEFORE the per-key loop:
+    - Extract project prefix from each key (e.g., "PROJ" from "PROJ-42")
+    - If mixed prefixes detected (e.g., PROJ-42 + OTHER-10) → STOP: "Mixed project keys in Story input."
+
   For each key in story_keys[]:
     1. Call Atlassian MCP: getJiraIssue(key)
     2. Verify issue type is "Story"
@@ -88,12 +92,12 @@ Skipped in devplan pipeline mode (input is Story keys).
 Step 1.1 — Run Initialization
   1. Determine project key (already resolved in Phase 0).
   2. Call imbas_run_create with:
-     - project_key: <determined key>
+     - project_ref: <determined key>
      - source_file: <source argument>
      - supplements: <--supplements paths array> (if provided)
      → Returns: run_id, run_dir, initial state
-  4. Call imbas_run_transition:
-     - project_key, run_id, action: "start_phase", phase: "validate"
+  3. Call imbas_run_transition:
+     - project_ref, run_id, action: "start_phase", phase: "validate"
 
 Step 1.2 — Document Source Resolution
   - Local file (*.md, *.txt): Already copied to source.md by imbas_run_create. Read directly.
@@ -218,8 +222,8 @@ Step 2.6 — Size Check + Horizontal Split
 
 Step 2.7 — Manifest Generation
   1. Compile stories-manifest.json with all Stories, verification results, links
-  2. Call imbas_manifest_save(project_key, run_id, type: "stories", manifest)
-  3. Call imbas_manifest_validate(project_key, run_id, type: "stories")
+  2. Call imbas_manifest_save(project_ref, run_id, type: "stories", manifest)
+  3. Call imbas_manifest_validate(project_ref, run_id, type: "stories")
      - If validation errors: attempt auto-fix (dedup, link resolution), re-validate
 
 >>> GATE 2: Split Quality (see auto-approval-gates.md)
@@ -285,7 +289,8 @@ Replicates devplan skill workflow (Steps 1-4) with auto-approval gate replacing 
 ```
 Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
   When Phase 0 detected DEVPLAN PIPELINE mode (story_keys[] from input):
-  1. Call imbas_run_create(project_key, source_file: "devplan-pipeline", supplements: [])
+  1. Call imbas_run_create(project_ref, source_file: "devplan-pipeline", supplements: [])
+     (sentinel value — not a file path; imbas_run_create skips file copy when source_file does not point to an existing file)
      → Creates run directory + state.json
   2. Story details already loaded in Phase 0 Step 0.3 (getJiraIssue per key)
   3. Build stories-manifest.json from collected Stories:
@@ -307,7 +312,7 @@ Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
 
 Step 3.1 — Start Phase
   1. Call imbas_run_transition: action "start_phase", phase "devplan"
-  2. Call imbas_manifest_get(project_key, run_id, type: "stories") to load stories-manifest
+  2. Call imbas_manifest_get(project_ref, run_id, type: "stories") to load stories-manifest
 
 Step 3.2 — imbas-engineer Agent Spawn
   - Spawn agent: imbas-engineer
@@ -335,8 +340,8 @@ Step 3.3 — B→A Feedback Collection
   - Call imbas_manifest_save to persist feedback_comments in devplan-manifest.json
 
 Step 3.4 — Manifest Validation
-  1. Call imbas_manifest_save(project_key, run_id, type: "devplan", manifest)
-  2. Call imbas_manifest_validate(project_key, run_id, type: "devplan")
+  1. Call imbas_manifest_save(project_ref, run_id, type: "devplan", manifest)
+  2. Call imbas_manifest_validate(project_ref, run_id, type: "devplan")
 
 >>> GATE 3: Devplan Quality (see auto-approval-gates.md)
   - All criteria pass → call imbas_run_transition(complete_phase, devplan, pending_review: false)
@@ -355,7 +360,7 @@ Replicates manifest skill workflow for "devplan" type. Follows execution_order f
 ```
 Step 3.5.1 — Dry-Run Check
   If --dry-run flag is set:
-  - Call imbas_manifest_plan(project_key, run_id) for execution plan preview
+  - Call imbas_manifest_plan(project_ref, run_id) for execution plan preview
   - Display each step: Tasks, Task Subtasks, Links, Story Subtasks, Feedback Comments
   - Skip execution, proceed to final report
 

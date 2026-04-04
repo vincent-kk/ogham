@@ -32,7 +32,7 @@ Stops immediately with a structured blocker report when any gate fails.
 <source-or-stories> : One of:
                       - Document path (local md/txt) or Confluence URL → full pipeline
                       - Jira Story key(s), comma-separated (e.g., PROJ-42 or PROJ-42,PROJ-43) → devplan pipeline
---project           : Jira project key (overrides config.defaults.project_key)
+--project           : Jira project key (overrides config.defaults.project_ref)
 --supplements       : Supplementary material paths (comma-separated)
 --parent            : Parent Epic key or "new" or "none" (default: "new"; only for document mode)
 --stop-at           : Stop after phase: validate | split | manifest-stories | devplan

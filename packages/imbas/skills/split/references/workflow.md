@@ -2,8 +2,8 @@
 
 ```
 Step 1 — Load Run & Verify Preconditions
-  1. If --run provided: call imbas_run_get(project_key, run_id).
-     If not provided: call imbas_run_get(project_key) → returns most recent run.
+  1. If --run provided: call imbas_run_get(project_ref, run_id).
+     If not provided: call imbas_run_get(project_ref) → returns most recent run.
   2. Verify validate.status == "completed" and validate.result in ["PASS", "PASS_WITH_WARNINGS"].
      - If PASS_WITH_WARNINGS: display warning list from validation-report.md.
      - If not met: error with guidance.
@@ -105,9 +105,9 @@ Step 6 — stories-manifest.json Generation
      - Split links ("is split into", "split from")
      - Umbrella links ("relates to")
   3. Call imbas_manifest_save:
-     - project_key, run_id, type: "stories", manifest: <full manifest>
+     - project_ref, run_id, type: "stories", manifest: <full manifest>
   4. Call imbas_manifest_validate:
-     - project_key, run_id, type: "stories"
+     - project_ref, run_id, type: "stories"
      - If validation errors: fix and re-save.
 
 Step 7 — User Review Flow

@@ -7,7 +7,7 @@ Before loading the manifest, verify pipeline state:
 ```
 1. Call imbas_run_get to read current state
 2. For type "stories":
-   - Verify split.status === "completed" AND split.pending_review === false
+   - Verify (split.status === "completed" AND split.pending_review === false) OR (split.status === "escaped" AND split.escape_code === "E2-3")
    - Error if not met: "Cannot execute stories manifest: split phase not completed or pending review"
 3. For type "devplan":
    - Verify devplan.status === "completed" AND devplan.pending_review === false
@@ -18,8 +18,8 @@ Before loading the manifest, verify pipeline state:
 
 1. Determine run: --run argument or most recent run via imbas_run_get.
 2. Load manifest based on type:
-   - "stories" → call imbas_manifest_get(project_key, run_id, type: "stories")
-   - "devplan" → call imbas_manifest_get(project_key, run_id, type: "devplan")
+   - "stories" → call imbas_manifest_get(project_ref, run_id, type: "stories")
+   - "devplan" → call imbas_manifest_get(project_ref, run_id, type: "devplan")
 3. Calculate pending items:
    - Count items where status == "pending" (no jira_key)
    - Items with existing jira_key are SKIPPED (idempotency)
@@ -37,7 +37,7 @@ For "stories" type:
   → Exit after display.
 
 For "devplan" type:
-  Call imbas_manifest_plan(project_key, run_id) for execution plan.
+  Call imbas_manifest_plan(project_ref, run_id) for execution plan.
   Display each step:
   1. Tasks to create (id, title)
   2. Task Subtasks to create (id, title, parent task)

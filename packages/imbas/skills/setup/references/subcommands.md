@@ -11,7 +11,7 @@
 
 ## set-project <KEY>
 
-1. Call `imbas_config_set` with `{ "defaults.project_key": "<KEY>" }`.
+1. Call `imbas_config_set` with `{ "defaults.project_ref": "<KEY>" }`.
 2. Execute cache population flow (Step 4 of Init Workflow) for the new project key.
 3. Display confirmation with new default project.
 
@@ -23,7 +23,7 @@
 
 ## refresh-cache [KEY]
 
-1. Determine project key: argument > config.defaults.project_key.
+1. Determine project key: argument > config.defaults.project_ref.
 2. Execute cache population flow (Step 4 of Init Workflow) with force refresh.
 3. Display refreshed cache summary.
 

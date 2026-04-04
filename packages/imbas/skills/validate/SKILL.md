@@ -27,7 +27,7 @@ validation report that gates entry to Phase 2 (split).
 /imbas:validate <source> [--project <KEY>] [--supplements <path,...>]
 
 <source>       : Planning document path (local md/txt) or Confluence URL
---project      : Jira project key (overrides config.defaults.project_key)
+--project      : Jira project key (overrides config.defaults.project_ref)
 --supplements  : Supplementary material paths (comma-separated)
 ```
 

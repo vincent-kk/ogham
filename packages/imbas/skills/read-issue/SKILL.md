@@ -19,10 +19,9 @@ by imbas-analyst, imbas-planner, imbas-engineer agents.
 ## Arguments
 
 ```
-imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
+imbas:read-issue <issue-key> [--depth shallow|full]
 
 <issue-key>  : Jira issue key (e.g., PROJ-123)
---no-cache   : Ignore cache, force re-query from Jira
 --depth      : shallow = metadata + description only, full = include comments (default: full)
 ```
 

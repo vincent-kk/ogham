@@ -3,10 +3,10 @@
 ```
 Step 1 — Run Initialization
   1. Load config.json via imbas_config_get.
-  2. Determine project key: --project argument > config.defaults.project_key.
+  2. Determine project key: --project argument > config.defaults.project_ref.
      If neither available → error: "No project key. Run /imbas:setup or pass --project."
   3. Call imbas_run_create with:
-     - project_key: <determined key>
+     - project_ref: <determined key>
      - source_file: <source path>
      - supplements: <supplement paths array> (if provided)
      → Returns: run_id, run_dir, initial state
@@ -16,7 +16,7 @@ Step 1 — Run Initialization
      - Copies supplements → supplements/ directory
      - Initializes state.json (current_phase: "validate", all phases: "pending")
   5. Call imbas_run_transition with:
-     - project_key, run_id, action: "start_phase", phase: "validate"
+     - project_ref, run_id, action: "start_phase", phase: "validate"
      → Sets validate.status = "in_progress", validate.started_at = now()
 
 Step 2 — Document Source Resolution
@@ -72,7 +72,7 @@ Step 4 — Result Evaluation Gate
 
 Step 5 — State Update
   Call imbas_run_transition with:
-  - project_key, run_id
+  - project_ref, run_id
   - action: "complete_phase"
   - phase: "validate"
   - result: "PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"

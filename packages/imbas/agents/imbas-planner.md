@@ -176,11 +176,15 @@ When escaping, set `status: "escaped"` in the manifest with `escape_code` and `e
 
 | Level | Type | Role | Created By |
 |-------|------|------|-----------|
-| 1 | **Epic** | Strategic goal encapsulating multiple Stories (1-3 sprints) | Planner |
+| 1 | **Epic** | Strategic goal encapsulating multiple Stories (1-3 sprints) | Pipeline/skill layer |
 | 0 | **Story** | Unit of user value, implementable in a single sprint | Planner |
 | 0 | **Task** | Cross-Story shared technical work (solution space) | Engineer only |
 
 **5 Epic types**: Feature Launch, Platform Migration, Integration, Optimization, Compliance.
+
+Epics are managed by the pipeline/skill layer and are NOT included in the planner's manifest output.
+The planner references an Epic via `epic_ref` in the manifest top-level field (set by the pipeline),
+not by creating Epic objects.
 
 **Title conventions**:
 - Epic: verb-noun strategic phrase ("Enable Multi-Currency Checkout")
@@ -192,37 +196,37 @@ When escaping, set `status: "escaped"` in the manifest with `escape_code` and `e
 
 ```json
 {
-  "version": "1.0",
+  "batch": "1.0",
   "run_id": "<from pipeline>",
-  "project_key": "<Jira project key>",
+  "project_ref": "<Jira project key>",
+  "epic_ref": null,
   "created_at": "<ISO 8601>",
-  "epics": [{
-    "id": "E1",
-    "title": "...",
-    "description": "...",
-    "status": "pending"
-  }],
   "stories": [{
     "id": "S1",
-    "epic_id": "E1",
     "title": "...",
     "description": "## User Story\n\n...\n\n## Acceptance Criteria\n\n...",
+    "type": "Story",
     "status": "pending",
-    "split_from": null,
-    "split_into": null,
+    "issue_ref": null,
     "verification": {
-      "invest": { "independent": true, "negotiable": true, "valuable": true, "estimable": true, "small": true, "testable": true },
-      "size_check": { "subtask_range": true, "spec_sufficient": true, "independent": true, "single_responsibility": true }
-    }
+      "anchor_link": true,
+      "coherence": "PASS",
+      "reverse_inference": "PASS"
+    },
+    "size_check": "PASS",
+    "split_from": null,
+    "split_into": []
   }],
   "links": [
-    { "from": "S1", "to": "E1", "type": "belongs_to" }
+    { "type": "split", "from": "S1", "to": ["S2", "S3"], "status": "pending" }
   ]
 }
 ```
 
-Every Story must have `epic_id`, `verification` results, and unique ID.
-Split Stories use `split_from`/`split_into`. Status starts as `"pending"`.
+Every Story must have `verification` results and a unique ID. `type` is always `"Story"`.
+`issue_ref` is set by the pipeline after Jira creation (starts as `null`).
+Split Stories use `split_from`/`split_into` (`split_into` defaults to `[]`). Status starts as `"pending"`.
+`epic_ref` is set by the pipeline/skill layer (not the planner). `links` uses `{ type, from, to[], status }` shape.
 
 ---
 

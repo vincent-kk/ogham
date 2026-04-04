@@ -40,7 +40,7 @@ ALL conditions must be true for auto-approval:
     - E2-3 is handled separately (see Special Case below)
 
 [ ] Manifest validation passes
-    - imbas_manifest_validate(project_key, run_id, type: "stories") returns 0 errors
+    - imbas_manifest_validate(project_ref, run_id, type: "stories") returns 0 errors
 
 [ ] Every Story passes ALL verification checks:
     [ ] verification.anchor_link == true
@@ -127,7 +127,7 @@ ALL conditions must be true:
 
 ```
 [ ] Manifest validation passes
-    - imbas_manifest_validate(project_key, run_id, type: "devplan") returns 0 errors
+    - imbas_manifest_validate(project_ref, run_id, type: "devplan") returns 0 errors
 
 [ ] No items flagged for review
     - Every Task: needs_review is absent or false

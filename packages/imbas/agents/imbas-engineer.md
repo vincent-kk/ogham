@@ -96,8 +96,8 @@ When multiple Stories touch the same code:
 ## B→A Feedback Rules
 
 - **Never modify the Story tree** — it is imbas-planner's immutable output
-- **Story ≠ code reality**: document discrepancy in Subtask Context ("Story assumes X, codebase shows Y, implementing Y-adjusted approach")
-- **Wrong Story split**: add `feedback` comment suggesting merge — do not merge yourself
+- **Story ≠ code reality**: document `mapping_divergence` in Subtask Context ("Story assumes X, codebase shows Y, implementing Y-adjusted approach")
+- **Wrong Story split**: add `story_split_issue` feedback comment suggesting merge — do not merge yourself
 
 ---
 
@@ -124,58 +124,56 @@ Note approximate results in exploration log.
 
 ```json
 {
-  "version": "1.0",
+  "batch": "1.0",
   "run_id": "<from pipeline>",
-  "project_key": "<Jira project key>",
+  "project_ref": "<Jira project key>",
+  "epic_ref": null,
   "created_at": "<ISO 8601>",
-  "stories": [{
-    "id": "S1",
-    "jira_key": "PROJ-42",
-    "title": "...",
+  "tasks": [{
+    "id": "T1",
+    "title": "[Domain] Shared work description",
+    "description": "## Spec\n\n...",
+    "type": "Task",
+    "status": "pending",
+    "issue_ref": null,
+    "blocks": ["S1", "S2"],
+    "subtasks": [{
+      "id": "T1-ST1",
+      "title": "[Domain] Action description",
+      "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
+      "status": "pending",
+      "issue_ref": null
+    }]
+  }],
+  "story_subtasks": [{
+    "story_id": "S1",
+    "story_ref": "PROJ-42",
     "subtasks": [{
       "id": "S1-ST1",
       "title": "[Domain] Action description",
       "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
       "status": "pending",
-      "needs_review": false
+      "issue_ref": null
     }]
   }],
-  "tasks": [{
-    "id": "T1",
-    "title": "[Domain] Shared work description",
-    "description": "## Spec\n\n...",
-    "status": "pending",
-    "blocks": ["S1", "S2"],
-    "flags": ["merge_candidate"]
+  "feedback_comments": [{
+    "target_story": "S1",
+    "target_ref": "PROJ-42",
+    "comment": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
+    "type": "mapping_divergence",
+    "status": "pending"
   }],
-  "links": [
-    { "from": "T1", "to": "S1", "type": "blocks" }
-  ],
   "execution_order": [
     { "step": 1, "action": "create_tasks", "items": ["T1"] },
     { "step": 2, "action": "create_task_subtasks", "items": ["T1-ST1"] },
     { "step": 3, "action": "create_links", "items": ["T1->S1"] },
-    { "step": 4, "action": "create_story_subtasks", "items": ["S1a-ST1"] },
-    { "step": 5, "action": "add_feedback_comments", "items": ["S1-a"] }
-  ],
-  "code_exploration_log": [{
-    "story_id": "S1",
-    "keywords": ["auth", "login"],
-    "entry_points": ["src/auth/login.ts"],
-    "related_areas": ["src/auth/token.ts"],
-    "architecture_docs": ["src/auth/INTENT.md"]
-  }],
-  "feedback_comments": [{
-    "target_story": "PROJ-42",
-    "type": "discrepancy | split_issue",
-    "message": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
-    "subtask_ref": "S1-ST2"
-  }]
+    { "step": 4, "action": "create_story_subtasks", "items": ["S1-ST1"] },
+    { "step": 5, "action": "add_feedback_comments", "items": ["S1"] }
+  ]
 }
 ```
 
-**Rules**: Tasks first → Subtasks → Links. Every Subtask references parent Story.
-Every Task lists `blocks`. `code_exploration_log` documents the search path for auditability.
+**Rules**: Tasks first → Task Subtasks → Links → Story Subtasks → Feedback. Every Task lists `blocks`. Every Subtask references its parent via `id` prefix. Links are implicit via `tasks[].blocks`.
 
 ---
 

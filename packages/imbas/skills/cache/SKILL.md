@@ -21,7 +21,7 @@ when the TTL (24 hours) expires. Called by setup, validate, split, and devplan s
 imbas:cache <action> [--project <KEY>]
 
 <action>   : "ensure" | "refresh" | "clear"
---project  : Jira project key (falls back to config.defaults.project_key if omitted)
+--project  : Jira project key (falls back to config.defaults.project_ref if omitted)
 ```
 
 ## References

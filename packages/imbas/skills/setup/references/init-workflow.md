@@ -28,7 +28,7 @@ Step 3 — config.json creation
          "reports": "ko"
        },
        "defaults": {
-         "project_key": "<selected key>",
+         "project_ref": "<selected key>",
          "llm_model": {
            "validate": "sonnet",
            "split": "sonnet",
@@ -60,12 +60,12 @@ Step 4 — Cache population
   2. Fetch issue types:
      - Call Atlassian MCP: getJiraProjectIssueTypesMetadata(projectKey)
      - For each issue type, call: getJiraIssueTypeMetaWithFields(issueTypeId)
-     - Call imbas_cache_set(project_key, "issue-types", <data>)
+     - Call imbas_cache_set(project_ref, "issue-types", <data>)
   3. Fetch link types:
      - Call Atlassian MCP: getIssueLinkTypes
-     - Call imbas_cache_set(project_key, "link-types", <data>)
+     - Call imbas_cache_set(project_ref, "link-types", <data>)
   4. Store project metadata:
-     - Call imbas_cache_set(project_key, "project-meta", <data>)
+     - Call imbas_cache_set(project_ref, "project-meta", <data>)
 
 Step 5 — .gitignore guard
   1. Check if .git directory exists at project root.

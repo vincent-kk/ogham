@@ -4,12 +4,12 @@
 
 ```
 Step 1 — Load Run & Manifest Checks
-  1. Call imbas_run_get(project_key, run_id) to load state.json.
+  1. Call imbas_run_get(project_ref, run_id) to load state.json.
   2. Verify split phase preconditions:
      - split.status == "completed" && split.pending_review == false
      - OR split.status == "escaped" && split.escape_code == "E2-3"
      - If not met → error with specific guidance.
-  3. Call imbas_manifest_get(project_key, run_id, type: "stories")
+  3. Call imbas_manifest_get(project_ref, run_id, type: "stories")
      to load stories-manifest.json.
   4. Check Story statuses:
      - All "created" (jira_key present) → proceed.
@@ -88,7 +88,7 @@ Step 4 — User Review Flow
   2. Wait for user decision:
 
   Option A — Approve:
-    1. Call imbas_manifest_validate(project_key, run_id, type: "devplan")
+    1. Call imbas_manifest_validate(project_ref, run_id, type: "devplan")
        - If validation errors: display and request correction before approval.
     2. Call imbas_run_transition:
        - action: "complete_phase", phase: "devplan"

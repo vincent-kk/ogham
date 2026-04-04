@@ -2,7 +2,7 @@
 
 ## (default) — Current Run Status
 
-1. Call `imbas_run_get(project_key)` with no run_id (returns most recent run).
+1. Call `imbas_run_get(project_ref)` with no run_id (returns most recent run).
 2. If no runs exist: display "No imbas runs found. Start with /imbas:validate <source>."
 3. Display formatted status:
 
@@ -33,7 +33,7 @@ If manifests are available, include summary:
 
 ## list — All Runs
 
-1. Call `imbas_run_list(project_key)`.
+1. Call `imbas_run_list(project_ref)`.
 2. Display table:
 
 ```
@@ -48,7 +48,7 @@ Run ID         | Phase     | Status       | Created
 
 ## \<run-id\> — Specific Run Detail
 
-1. Call `imbas_run_get(project_key, run_id)`.
+1. Call `imbas_run_get(project_ref, run_id)`.
 2. If run not found: display "Run <run-id> not found."
 3. Display full detail:
 
@@ -80,7 +80,7 @@ Phase 3 — devplan
 
 ## resume \<run-id\> — Resume Interrupted Run
 
-1. Call `imbas_run_get(project_key, run_id)`.
+1. Call `imbas_run_get(project_ref, run_id)`.
 2. If run not found: display "Run <run-id> not found."
 3. Analyze current state and determine next action:
 
