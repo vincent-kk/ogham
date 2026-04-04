@@ -12,7 +12,7 @@ import type { CyclomaticComplexityResult } from '../../types/metrics.js';
 import { parseSource, walk } from '../parser/parser.js';
 
 /** Decision point node kinds that always add +1 */
-const DECISION_KINDS = new Set([
+const DECISION_KINDS: ReadonlySet<string | number> = new Set([
   'if_statement',
   'for_statement',
   'for_in_statement',

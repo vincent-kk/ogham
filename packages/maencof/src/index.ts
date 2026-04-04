@@ -142,14 +142,14 @@ export type {
 } from './core/indexer/incremental-tracker/incremental-tracker.js';
 
 // MCP modules
-export { createServer, startServer } from './mcp/server.js';
+export { createServer, startServer } from './mcp/server/server.js';
 export {
   removeBacklinks,
   getBacklinks,
   toolResult,
   toolError,
   mapReplacer,
-} from './mcp/shared.js';
+} from './mcp/shared/shared.js';
 export { handleMaencofCreate } from './mcp/tools/maencof-create/maencof-create.js';
 export { handleMaencofRead } from './mcp/tools/maencof-read/maencof-read.js';
 export { handleMaencofUpdate } from './mcp/tools/maencof-update/maencof-update.js';

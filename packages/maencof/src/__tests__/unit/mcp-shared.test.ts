@@ -18,7 +18,7 @@ import {
   removeBacklinks,
   toolError,
   toolResult,
-} from '../../mcp/shared.js';
+} from '../../mcp/shared/shared.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 
