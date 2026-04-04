@@ -13,7 +13,7 @@ imbas 파이프라인의 비즈니스 로직 계층. .imbas/ 디렉토리의 상
 - `cache-manager.ts` — Jira 메타데이터 캐시 + TTL
 - `manifest-parser.ts` — 매니페스트 로드 + 요약
 - `manifest-validator.ts` — 스키마 + 참조 무결성 검증
-- `execution-planner.ts` ��� devplan 실행 계획 필터링
+- `execution-planner.ts` — devplan 실행 계획 필터링
 
 ## Boundaries
 
