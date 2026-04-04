@@ -43,9 +43,7 @@ export const SUPPORTED_LANGUAGES: Record<string, string[]> = {
 };
 
 /** 확장자 → 언어 역방향 조회 (SUPPORTED_LANGUAGES에서 파생) */
-export const EXT_TO_LANG: Record<string, string> = Object.entries(
-  SUPPORTED_LANGUAGES,
-).reduce(
+export const EXT_TO_LANG = Object.entries(SUPPORTED_LANGUAGES).reduce(
   (acc, [lang, exts]) => {
     for (const ext of exts) acc[ext] = lang;
     return acc;
