@@ -9,8 +9,8 @@ tools:
   - Read
   - Grep
   - Glob
-  - mcp__atlassian__searchJiraIssuesUsingJql
-  - mcp__atlassian__getJiraIssue
+  - mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql
+  - mcp__plugin_imbas_atlassian__getJiraIssue
 permissionMode: default
 maxTurns: 60
 ---

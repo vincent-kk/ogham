@@ -10,10 +10,10 @@ tools:
   - Grep
   - Glob
   - Bash
-  - mcp__plugin_imbas_t__imbas_ast_search
-  - mcp__plugin_imbas_t__imbas_ast_analyze
-  - mcp__atlassian__getJiraIssue
-  - mcp__atlassian__searchJiraIssuesUsingJql
+  - mcp__plugin_imbas_tools__imbas_ast_search
+  - mcp__plugin_imbas_tools__imbas_ast_analyze
+  - mcp__plugin_imbas_atlassian__getJiraIssue
+  - mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql
 permissionMode: default
 maxTurns: 80
 ---
