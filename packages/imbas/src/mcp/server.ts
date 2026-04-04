@@ -57,7 +57,7 @@ export function createServer(): McpServer {
     {
       description: 'Create run directory and state.json',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         source_file: z.string(),
         supplements: z.array(z.string()).optional(),
       }),
@@ -71,7 +71,7 @@ export function createServer(): McpServer {
     {
       description: 'Read state.json for a run',
       inputSchema: z.object({
-        project_key: z.string().optional(),
+        project_ref: z.string().optional(),
         run_id: z.string().optional(),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
@@ -94,7 +94,7 @@ export function createServer(): McpServer {
     {
       description: 'List runs for a project',
       inputSchema: z.object({
-        project_key: z.string().optional(),
+        project_ref: z.string().optional(),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
     },
@@ -108,7 +108,7 @@ export function createServer(): McpServer {
     {
       description: 'Load manifest with summary',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan']),
       }),
@@ -122,7 +122,7 @@ export function createServer(): McpServer {
     {
       description: 'Save manifest (full replace)',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan']),
         // Type-dependent schema (stories vs devplan) — cannot express conditional
@@ -140,7 +140,7 @@ export function createServer(): McpServer {
     {
       description: 'Validate manifest structure',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         run_id: z.string(),
         type: z.enum(['stories', 'devplan']),
       }),
@@ -154,7 +154,7 @@ export function createServer(): McpServer {
     {
       description: 'Execution plan from devplan manifest',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         run_id: z.string(),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
@@ -197,7 +197,7 @@ export function createServer(): McpServer {
     {
       description: 'Read Jira metadata cache',
       inputSchema: z.object({
-        project_key: z.string().optional(),
+        project_ref: z.string().optional(),
         cache_type: CacheTypeSchema.optional(),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
@@ -210,7 +210,7 @@ export function createServer(): McpServer {
     {
       description: 'Write Jira metadata cache',
       inputSchema: z.object({
-        project_key: z.string(),
+        project_ref: z.string(),
         cache_type: CacheTypeSchema,
         // Cache data varies by type (jira metadata, issue types, etc.) — z.unknown()
         // is intentional. Handler validates via CacheTypeSchema for the type field.

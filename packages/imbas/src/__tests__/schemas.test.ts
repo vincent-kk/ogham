@@ -15,8 +15,8 @@ import { CachedAtSchema } from '../types/cache.js';
 describe('RunStateSchema', () => {
   const validState = {
     run_id: '20240101-001',
-    project_key: 'PROJ',
-    epic_key: null,
+    project_ref: 'PROJ',
+    epic_ref: null,
     source_file: 'requirements.md',
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: '2024-01-01T00:00:00.000Z',
@@ -129,14 +129,14 @@ describe('ImbasConfigSchema', () => {
   it('preserves custom values', () => {
     const input = {
       version: '2.0',
-      language: { documents: 'en', skills: 'ko', jira_content: 'en', reports: 'en' },
-      defaults: { project_key: 'MYPROJ', llm_model: { validate: 'haiku', split: 'haiku', devplan: 'sonnet' }, subtask_limits: { max_lines: 100, max_files: 5, review_hours: 2 } },
+      language: { documents: 'en', skills: 'ko', issue_content: 'en', reports: 'en' },
+      defaults: { project_ref: 'MYPROJ', llm_model: { validate: 'haiku', split: 'haiku', devplan: 'sonnet' }, subtask_limits: { max_lines: 100, max_files: 5, review_hours: 2 } },
     };
     const result = ImbasConfigSchema.safeParse(input);
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.version).toBe('2.0');
-    expect(result.data.defaults.project_key).toBe('MYPROJ');
+    expect(result.data.defaults.project_ref).toBe('MYPROJ');
     expect(result.data.defaults.llm_model.validate).toBe('haiku');
   });
 
@@ -152,8 +152,8 @@ describe('StoriesManifestSchema', () => {
   const validManifest = {
     batch: 'batch-001',
     run_id: '20240101-001',
-    project_key: 'PROJ',
-    epic_key: null,
+    project_ref: 'PROJ',
+    epic_ref: null,
     created_at: '2024-01-01T00:00:00.000Z',
     stories: [
       {
@@ -200,8 +200,8 @@ describe('DevplanManifestSchema', () => {
   const validDevplan = {
     batch: 'batch-001',
     run_id: '20240101-001',
-    project_key: 'PROJ',
-    epic_key: null,
+    project_ref: 'PROJ',
+    epic_ref: null,
     created_at: '2024-01-01T00:00:00.000Z',
     tasks: [
       {
@@ -241,8 +241,8 @@ describe('DevplanManifestSchema', () => {
     const minimal = {
       batch: 'b',
       run_id: 'r',
-      project_key: 'P',
-      epic_key: null,
+      project_ref: 'P',
+      epic_ref: null,
       created_at: '2024-01-01T00:00:00.000Z',
     };
     const result = DevplanManifestSchema.safeParse(minimal);
@@ -258,7 +258,7 @@ describe('DevplanManifestSchema', () => {
 describe('RunTransitionSchema (discriminated union)', () => {
   it('parses start_phase action', () => {
     const result = RunTransitionSchema.safeParse({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'validate',
@@ -268,7 +268,7 @@ describe('RunTransitionSchema (discriminated union)', () => {
 
   it('parses complete_phase action', () => {
     const result = RunTransitionSchema.safeParse({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'complete_phase',
       phase: 'validate',
@@ -281,7 +281,7 @@ describe('RunTransitionSchema (discriminated union)', () => {
 
   it('parses escape_phase action', () => {
     const result = RunTransitionSchema.safeParse({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'escape_phase',
       phase: 'split',
@@ -292,7 +292,7 @@ describe('RunTransitionSchema (discriminated union)', () => {
 
   it('rejects invalid action', () => {
     const result = RunTransitionSchema.safeParse({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'delete_phase',
       phase: 'validate',
@@ -302,7 +302,7 @@ describe('RunTransitionSchema (discriminated union)', () => {
 
   it('rejects escape_phase with invalid phase (non-split)', () => {
     const result = RunTransitionSchema.safeParse({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'escape_phase',
       phase: 'validate',

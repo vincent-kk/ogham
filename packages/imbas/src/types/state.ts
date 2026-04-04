@@ -64,8 +64,8 @@ export type Phases = z.infer<typeof PhasesSchema>;
 
 export const RunStateSchema = z.object({
   run_id: z.string(),
-  project_key: z.string(),
-  epic_key: z.string().nullable().default(null),
+  project_ref: z.string(),
+  epic_ref: z.string().nullable().default(null),
   source_file: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -80,14 +80,14 @@ export type RunState = z.infer<typeof RunStateSchema>;
 // --- Transition Action Schemas (discriminated union) ---
 
 export const StartPhaseActionSchema = z.object({
-  project_key: z.string(),
+  project_ref: z.string(),
   run_id: z.string(),
   action: z.literal('start_phase'),
   phase: PhaseNameSchema,
 });
 
 export const CompletePhaseActionSchema = z.object({
-  project_key: z.string(),
+  project_ref: z.string(),
   run_id: z.string(),
   action: z.literal('complete_phase'),
   phase: PhaseNameSchema,
@@ -99,7 +99,7 @@ export const CompletePhaseActionSchema = z.object({
 });
 
 export const EscapePhaseActionSchema = z.object({
-  project_key: z.string(),
+  project_ref: z.string(),
   run_id: z.string(),
   action: z.literal('escape_phase'),
   phase: z.literal('split'),
@@ -107,7 +107,7 @@ export const EscapePhaseActionSchema = z.object({
 });
 
 export const SkipPhasesActionSchema = z.object({
-  project_key: z.string(),
+  project_ref: z.string(),
   run_id: z.string(),
   action: z.literal('skip_phases'),
   phases: z.array(PhaseNameSchema),
@@ -125,14 +125,14 @@ export type RunTransition = z.infer<typeof RunTransitionSchema>;
 
 export function createInitialRunState(params: {
   run_id: string;
-  project_key: string;
+  project_ref: string;
   source_file: string;
 }): RunState {
   const now = new Date().toISOString();
   return {
     run_id: params.run_id,
-    project_key: params.project_key,
-    epic_key: null,
+    project_ref: params.project_ref,
+    epic_ref: null,
     source_file: params.source_file,
     created_at: now,
     updated_at: now,

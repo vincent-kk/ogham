@@ -9,7 +9,7 @@ import { z } from 'zod';
 export const LanguageConfigSchema = z.object({
   documents: z.string().default('ko'),
   skills: z.string().default('en'),
-  jira_content: z.string().default('ko'),
+  issue_content: z.string().default('ko'),
   reports: z.string().default('ko'),
 });
 export type LanguageConfig = z.infer<typeof LanguageConfigSchema>;
@@ -29,7 +29,7 @@ export const SubtaskLimitsSchema = z.object({
 export type SubtaskLimits = z.infer<typeof SubtaskLimitsSchema>;
 
 export const DefaultsConfigSchema = z.object({
-  project_key: z.string().nullable().default(null),
+  project_ref: z.string().nullable().default(null),
   llm_model: LlmModelConfigSchema.default({}),
   subtask_limits: SubtaskLimitsSchema.default({}),
 });

@@ -90,11 +90,11 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id, run_dir } = await handleRunCreate({ project_key: 'ALPHA', source_file: src });
+      const { run_id, run_dir } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
 
-      await handleRunTransition({ project_key: 'ALPHA', run_id, action: 'start_phase', phase: 'validate' });
+      await handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'validate' });
       await handleRunTransition({
-        project_key: 'ALPHA',
+        project_ref: 'ALPHA',
         run_id,
         action: 'complete_phase',
         phase: 'validate',
@@ -103,15 +103,15 @@ describe('Pipeline Integration', () => {
         warning_issues: 0,
       });
 
-      await handleRunTransition({ project_key: 'ALPHA', run_id, action: 'start_phase', phase: 'split' });
+      await handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'split' });
 
-      const manifest = { ...goldenStories, run_id, project_key: 'ALPHA' };
-      const saveResult = await handleManifestSave({ project_key: 'ALPHA', run_id, type: 'stories', manifest });
+      const manifest = { ...goldenStories, run_id, project_ref: 'ALPHA' };
+      const saveResult = await handleManifestSave({ project_ref: 'ALPHA', run_id, type: 'stories', manifest });
       expect(saveResult.path).toContain('stories-manifest.json');
       expect(saveResult.summary.total).toBe(3);
 
       await handleRunTransition({
-        project_key: 'ALPHA',
+        project_ref: 'ALPHA',
         run_id,
         action: 'complete_phase',
         phase: 'split',
@@ -120,7 +120,7 @@ describe('Pipeline Integration', () => {
       });
 
       const afterSplit = await handleRunTransition({
-        project_key: 'ALPHA',
+        project_ref: 'ALPHA',
         run_id,
         action: 'start_phase',
         phase: 'devplan',
@@ -132,10 +132,10 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id } = await handleRunCreate({ project_key: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
 
       await expect(
-        handleRunTransition({ project_key: 'ALPHA', run_id, action: 'start_phase', phase: 'split' }),
+        handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'split' }),
       ).rejects.toThrow();
     });
 
@@ -143,15 +143,15 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id } = await handleRunCreate({ project_key: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
 
-      const manifest = { ...goldenStories, run_id, project_key: 'ALPHA' };
-      await handleManifestSave({ project_key: 'ALPHA', run_id, type: 'stories', manifest });
+      const manifest = { ...goldenStories, run_id, project_ref: 'ALPHA' };
+      await handleManifestSave({ project_ref: 'ALPHA', run_id, type: 'stories', manifest });
 
-      const getResult = await handleManifestGet({ project_key: 'ALPHA', run_id, type: 'stories' });
+      const getResult = await handleManifestGet({ project_ref: 'ALPHA', run_id, type: 'stories' });
       expect(getResult.summary.total).toBe(3);
 
-      const validateResult = await handleManifestValidate({ project_key: 'ALPHA', run_id, type: 'stories' });
+      const validateResult = await handleManifestValidate({ project_ref: 'ALPHA', run_id, type: 'stories' });
       expect(validateResult.valid).toBe(true);
       expect(validateResult.errors).toHaveLength(0);
     });

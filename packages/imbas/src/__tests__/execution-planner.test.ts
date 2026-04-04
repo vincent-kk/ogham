@@ -7,8 +7,8 @@ function makeManifest(overrides?: Partial<DevplanManifest>): DevplanManifest {
   return {
     batch: 'batch-001',
     run_id: '20240101-001',
-    project_key: 'PROJ',
-    epic_key: null,
+    project_ref: 'PROJ',
+    epic_ref: null,
     created_at: '2024-01-01T00:00:00.000Z',
     tasks: [],
     story_subtasks: [],
@@ -37,7 +37,7 @@ describe('planExecution', () => {
           description: 'Desc',
           type: 'Task',
           status: 'pending',
-          jira_key: null,
+          issue_ref: null,
           blocks: [],
           subtasks: [],
         },
@@ -47,7 +47,7 @@ describe('planExecution', () => {
           description: 'Desc',
           type: 'Task',
           status: 'created',
-          jira_key: null,
+          issue_ref: null,
           blocks: [],
           subtasks: [],
         },
@@ -68,10 +68,10 @@ describe('planExecution', () => {
       tasks: [
         {
           id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'pending', jira_key: null, blocks: [],
+          status: 'pending', issue_ref: null, blocks: [],
           subtasks: [
-            { id: 'ST-001', title: 'S1', description: 'D', status: 'pending', jira_key: null },
-            { id: 'ST-002', title: 'S2', description: 'D', status: 'created', jira_key: null },
+            { id: 'ST-001', title: 'S1', description: 'D', status: 'pending', issue_ref: null },
+            { id: 'ST-002', title: 'S2', description: 'D', status: 'created', issue_ref: null },
           ],
         },
       ],
@@ -94,7 +94,7 @@ describe('planExecution filtering', () => {
       tasks: [
         {
           id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'created', jira_key: null, blocks: [], subtasks: [],
+          status: 'created', issue_ref: null, blocks: [], subtasks: [],
         },
       ],
       execution_order: [
@@ -112,7 +112,7 @@ describe('planExecution filtering', () => {
       tasks: [
         {
           id: 'T-001', title: 'T', description: 'D', type: 'Task',
-          status: 'pending', jira_key: null, blocks: [], subtasks: [],
+          status: 'pending', issue_ref: null, blocks: [], subtasks: [],
         },
       ],
       execution_order: [
@@ -130,10 +130,10 @@ describe('planExecution filtering', () => {
       story_subtasks: [
         {
           story_id: 'S-001',
-          story_key: null,
+          story_ref: null,
           subtasks: [
-            { id: 'SS-001', title: 'SS1', description: 'D', status: 'pending', jira_key: null },
-            { id: 'SS-002', title: 'SS2', description: 'D', status: 'failed', jira_key: null },
+            { id: 'SS-001', title: 'SS1', description: 'D', status: 'pending', issue_ref: null },
+            { id: 'SS-002', title: 'SS2', description: 'D', status: 'failed', issue_ref: null },
           ],
         },
       ],
@@ -152,7 +152,7 @@ describe('planExecution filtering', () => {
       feedback_comments: [
         {
           target_story: 'S-001',
-          target_key: null,
+          target_ref: null,
           comment: 'Fix this',
           type: 'mapping_divergence',
           status: 'pending',
@@ -173,7 +173,7 @@ describe('planExecution filtering', () => {
       feedback_comments: [
         {
           target_story: 'S-001',
-          target_key: null,
+          target_ref: null,
           comment: 'Done',
           type: 'mapping_divergence',
           status: 'created',
@@ -193,10 +193,10 @@ describe('planExecution filtering', () => {
       tasks: [
         {
           id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'pending', jira_key: null, blocks: [],
+          status: 'pending', issue_ref: null, blocks: [],
           subtasks: [
-            { id: 'ST-001', title: 'S1', description: 'D', status: 'created', jira_key: null },
-            { id: 'ST-002', title: 'S2', description: 'D', status: 'pending', jira_key: null },
+            { id: 'ST-001', title: 'S1', description: 'D', status: 'created', issue_ref: null },
+            { id: 'ST-002', title: 'S2', description: 'D', status: 'pending', issue_ref: null },
           ],
         },
       ],

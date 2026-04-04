@@ -41,8 +41,8 @@ function writeDevplanManifest(runDir: string, manifest: DevplanManifest): void {
 const baseStoriesManifest: StoriesManifest = {
   batch: 'batch-001',
   run_id: '20240101-001',
-  project_key: 'PROJ',
-  epic_key: null,
+  project_ref: 'PROJ',
+  epic_ref: null,
   created_at: '2024-01-01T00:00:00.000Z',
   stories: [
     {
@@ -51,7 +51,7 @@ const baseStoriesManifest: StoriesManifest = {
       description: 'Desc 1',
       type: 'Story',
       status: 'pending',
-      jira_key: null,
+      issue_ref: null,
       verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
       size_check: 'PASS',
       split_from: null,
@@ -63,7 +63,7 @@ const baseStoriesManifest: StoriesManifest = {
       description: 'Desc 2',
       type: 'Story',
       status: 'pending',
-      jira_key: null,
+      issue_ref: null,
       verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
       size_check: 'PASS',
       split_from: null,
@@ -76,8 +76,8 @@ const baseStoriesManifest: StoriesManifest = {
 const baseDevplanManifest: DevplanManifest = {
   batch: 'batch-001',
   run_id: '20240101-001',
-  project_key: 'PROJ',
-  epic_key: null,
+  project_ref: 'PROJ',
+  epic_ref: null,
   created_at: '2024-01-01T00:00:00.000Z',
   tasks: [
     {
@@ -86,9 +86,9 @@ const baseDevplanManifest: DevplanManifest = {
       description: 'Task desc',
       type: 'Task',
       status: 'pending',
-      jira_key: null,
+      issue_ref: null,
       blocks: [],
-      subtasks: [{ id: 'ST-001', title: 'Sub 1', description: 'Sub desc', status: 'pending', jira_key: null }],
+      subtasks: [{ id: 'ST-001', title: 'Sub 1', description: 'Sub desc', status: 'pending', issue_ref: null }],
     },
   ],
   story_subtasks: [],

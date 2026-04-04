@@ -16,7 +16,7 @@ import type { RunState, RunTransition, PhaseName } from '../types/state.js';
 /** Create a new initial RunState (delegates to factory in types) */
 export function createRunState(params: {
   run_id: string;
-  project_key: string;
+  project_ref: string;
   source_file: string;
 }): RunState {
   return createInitialRunState(params);

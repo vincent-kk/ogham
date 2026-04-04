@@ -29,7 +29,7 @@ export const StoryItemSchema = z.object({
   description: z.string(),
   type: z.literal('Story'),
   status: ManifestItemStatusSchema.default('pending'),
-  jira_key: z.string().nullable().default(null),
+  issue_ref: z.string().nullable().default(null),
   verification: StoryVerificationSchema,
   size_check: z.enum(['PASS', 'FAIL', 'REVIEW']),
   split_from: z.string().nullable().default(null),
@@ -48,8 +48,8 @@ export type StoryLink = z.infer<typeof StoryLinkSchema>;
 export const StoriesManifestSchema = z.object({
   batch: z.string(),
   run_id: z.string(),
-  project_key: z.string(),
-  epic_key: z.string().nullable(),
+  project_ref: z.string(),
+  epic_ref: z.string().nullable(),
   created_at: z.string(),
   stories: z.array(StoryItemSchema),
   links: z.array(StoryLinkSchema).default([]),
@@ -63,7 +63,7 @@ export const SubtaskItemSchema = z.object({
   title: z.string(),
   description: z.string(),
   status: ManifestItemStatusSchema.default('pending'),
-  jira_key: z.string().nullable().default(null),
+  issue_ref: z.string().nullable().default(null),
 });
 export type SubtaskItem = z.infer<typeof SubtaskItemSchema>;
 
@@ -73,7 +73,7 @@ export const TaskItemSchema = z.object({
   description: z.string(),
   type: z.literal('Task'),
   status: ManifestItemStatusSchema.default('pending'),
-  jira_key: z.string().nullable().default(null),
+  issue_ref: z.string().nullable().default(null),
   blocks: z.array(z.string()),
   subtasks: z.array(SubtaskItemSchema).default([]),
 });
@@ -81,14 +81,14 @@ export type TaskItem = z.infer<typeof TaskItemSchema>;
 
 export const StorySubtasksSchema = z.object({
   story_id: z.string(),
-  story_key: z.string().nullable(),
+  story_ref: z.string().nullable(),
   subtasks: z.array(SubtaskItemSchema).default([]),
 });
 export type StorySubtasks = z.infer<typeof StorySubtasksSchema>;
 
 export const FeedbackCommentSchema = z.object({
   target_story: z.string(),
-  target_key: z.string().nullable(),
+  target_ref: z.string().nullable(),
   comment: z.string(),
   type: z.enum(['mapping_divergence', 'story_split_issue']),
   status: ManifestItemStatusSchema.default('pending'),
@@ -111,8 +111,8 @@ export type ExecutionStep = z.infer<typeof ExecutionStepSchema>;
 export const DevplanManifestSchema = z.object({
   batch: z.string(),
   run_id: z.string(),
-  project_key: z.string(),
-  epic_key: z.string().nullable(),
+  project_ref: z.string(),
+  epic_ref: z.string().nullable(),
   created_at: z.string(),
   tasks: z.array(TaskItemSchema).default([]),
   story_subtasks: z.array(StorySubtasksSchema).default([]),

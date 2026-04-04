@@ -18,7 +18,7 @@ export function processContextInjector(input: UserPromptSubmitInput): HookOutput
     if (!existsSync(configPath)) return { continue: true };
 
     const config = JSON.parse(readFileSync(configPath, 'utf-8'));
-    const projectKey = config?.defaults?.project_key;
+    const projectKey = config?.defaults?.project_ref;
     if (!projectKey) return { continue: true };
 
     const runsDir = join(imbasRoot, projectKey, RUNS_DIRNAME);

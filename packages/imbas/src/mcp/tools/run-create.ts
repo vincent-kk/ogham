@@ -12,14 +12,14 @@ import { createRunState, saveRunState } from '../../core/state-manager.js';
 import { SOURCE_FILENAME, SUPPLEMENTS_DIRNAME, DEVPLAN_PIPELINE_SOURCE } from '../../constants/index.js';
 
 export interface RunCreateInput {
-  project_key: string;
+  project_ref: string;
   source_file: string;
   supplements?: string[];
 }
 
 export async function handleRunCreate(input: RunCreateInput) {
   const cwd = process.cwd();
-  const runsDir = getRunsDir(cwd, input.project_key);
+  const runsDir = getRunsDir(cwd, input.project_ref);
 
   const run_id = generateRunId(runsDir);
   const run_dir = join(runsDir, run_id);
@@ -46,7 +46,7 @@ export async function handleRunCreate(input: RunCreateInput) {
   // Create initial state
   const state = createRunState({
     run_id,
-    project_key: input.project_key,
+    project_ref: input.project_ref,
     source_file: input.source_file,
   });
   await saveRunState(run_dir, state);

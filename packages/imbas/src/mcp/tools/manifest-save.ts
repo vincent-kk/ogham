@@ -12,7 +12,7 @@ import { MANIFEST_FILE_MAP } from '../../constants/index.js';
 import { StoriesManifestSchema, DevplanManifestSchema } from '../../types/manifest.js';
 
 export interface ManifestSaveInput {
-  project_key: string;
+  project_ref: string;
   run_id: string;
   type: 'stories' | 'devplan';
   manifest?: unknown;
@@ -20,7 +20,7 @@ export interface ManifestSaveInput {
 
 export async function handleManifestSave(input: ManifestSaveInput) {
   const cwd = process.cwd();
-  const run_dir = getRunDir(cwd, input.project_key, input.run_id);
+  const run_dir = getRunDir(cwd, input.project_ref, input.run_id);
 
   if (input.manifest === undefined) {
     throw new Error('manifest is required');

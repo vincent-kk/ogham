@@ -8,13 +8,13 @@ import { loadManifest } from '../../core/manifest-parser.js';
 import { planExecution } from '../../core/execution-planner.js';
 
 export interface ManifestPlanInput {
-  project_key: string;
+  project_ref: string;
   run_id: string;
 }
 
 export async function handleManifestPlan(input: ManifestPlanInput) {
   const cwd = process.cwd();
-  const run_dir = getRunDir(cwd, input.project_key, input.run_id);
+  const run_dir = getRunDir(cwd, input.project_ref, input.run_id);
 
   const manifest = await loadManifest(run_dir, 'devplan');
   return planExecution(manifest);

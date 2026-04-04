@@ -127,7 +127,7 @@ describe('loadConfig', () => {
     mkdirSync(join(cwd, '.imbas'), { recursive: true });
     const customConfig = {
       version: '2.0',
-      language: { documents: 'en', skills: 'en', jira_content: 'en', reports: 'en' },
+      language: { documents: 'en', skills: 'en', issue_content: 'en', reports: 'en' },
     };
     writeFileSync(
       join(cwd, '.imbas', 'config.json'),

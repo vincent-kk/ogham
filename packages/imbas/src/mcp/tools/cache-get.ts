@@ -13,25 +13,25 @@ import { CachedAtSchema } from '../../types/cache.js';
 import type { CacheType } from '../../types/cache.js';
 
 export interface CacheGetInput {
-  project_key?: string;
+  project_ref?: string;
   cache_type?: CacheType;
 }
 
 export async function handleCacheGet(input: CacheGetInput) {
   const cwd = process.cwd();
 
-  let project_key = input.project_key;
-  if (!project_key) {
+  let project_ref = input.project_ref;
+  if (!project_ref) {
     const config = await loadConfig(cwd);
-    project_key = config.defaults.project_key ?? undefined;
-    if (!project_key) {
-      throw new Error('project_key is required (or set defaults.project_key in config)');
+    project_ref = config.defaults.project_ref ?? undefined;
+    if (!project_ref) {
+      throw new Error('project_ref is required (or set defaults.project_ref in config)');
     }
   }
 
   const cache_type: CacheType = input.cache_type ?? 'all';
 
-  const cacheDir = getCacheDir(cwd, project_key);
+  const cacheDir = getCacheDir(cwd, project_ref);
   const cache = await loadCache(cacheDir, cache_type);
   const ttl_expired = await isCacheExpired(cacheDir);
 

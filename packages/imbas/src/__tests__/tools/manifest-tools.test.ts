@@ -25,8 +25,8 @@ function makeRunDir(base: string, projectKey: string, runId: string): string {
 const VALID_STORIES_MANIFEST = {
   batch: 'B1',
   run_id: 'R001',
-  project_key: 'PROJ',
-  epic_key: null,
+  project_ref: 'PROJ',
+  epic_ref: null,
   created_at: new Date().toISOString(),
   stories: [
     {
@@ -35,7 +35,7 @@ const VALID_STORIES_MANIFEST = {
       description: 'desc',
       type: 'Story' as const,
       status: 'pending' as const,
-      jira_key: null,
+      issue_ref: null,
       verification: { anchor_link: true, coherence: 'PASS' as const, reverse_inference: 'PASS' as const },
       size_check: 'PASS' as const,
       split_from: null,
@@ -48,8 +48,8 @@ const VALID_STORIES_MANIFEST = {
 const VALID_DEVPLAN_MANIFEST = {
   batch: 'B1',
   run_id: 'R001',
-  project_key: 'PROJ',
-  epic_key: null,
+  project_ref: 'PROJ',
+  epic_ref: null,
   created_at: new Date().toISOString(),
   tasks: [
     {
@@ -58,7 +58,7 @@ const VALID_DEVPLAN_MANIFEST = {
       description: 'desc',
       type: 'Task' as const,
       status: 'pending' as const,
-      jira_key: null,
+      issue_ref: null,
       blocks: [],
       subtasks: [],
     },
@@ -89,7 +89,7 @@ describe('handleManifestGet', () => {
     const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
     writeFileSync(join(runDir, 'stories-manifest.json'), JSON.stringify(VALID_STORIES_MANIFEST));
 
-    const result = await handleManifestGet({ project_key: 'PROJ', run_id: 'R001', type: 'stories' });
+    const result = await handleManifestGet({ project_ref: 'PROJ', run_id: 'R001', type: 'stories' });
     expect(result.manifest).toBeDefined();
     expect(result.summary.total).toBe(1);
     expect(result.summary.pending).toBe(1);
@@ -99,7 +99,7 @@ describe('handleManifestGet', () => {
     const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
     writeFileSync(join(runDir, 'devplan-manifest.json'), JSON.stringify(VALID_DEVPLAN_MANIFEST));
 
-    const result = await handleManifestGet({ project_key: 'PROJ', run_id: 'R001', type: 'devplan' });
+    const result = await handleManifestGet({ project_ref: 'PROJ', run_id: 'R001', type: 'devplan' });
     expect(result.manifest).toBeDefined();
     expect(result.summary.total).toBe(1);
   });
@@ -107,7 +107,7 @@ describe('handleManifestGet', () => {
   it('throws when manifest file is missing', async () => {
     makeRunDir(tmpDir, 'PROJ', 'R001');
     await expect(
-      handleManifestGet({ project_key: 'PROJ', run_id: 'R001', type: 'stories' }),
+      handleManifestGet({ project_ref: 'PROJ', run_id: 'R001', type: 'stories' }),
     ).rejects.toThrow();
   });
 });
@@ -128,7 +128,7 @@ describe('handleManifestSave', () => {
   it('saves stories manifest and returns path + summary', async () => {
     makeRunDir(tmpDir, 'PROJ', 'R001');
     const result = await handleManifestSave({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: 'R001',
       type: 'stories',
       manifest: VALID_STORIES_MANIFEST,
@@ -140,14 +140,14 @@ describe('handleManifestSave', () => {
   it('throws when manifest is undefined', async () => {
     makeRunDir(tmpDir, 'PROJ', 'R001');
     await expect(
-      handleManifestSave({ project_key: 'PROJ', run_id: 'R001', type: 'stories', manifest: undefined }),
+      handleManifestSave({ project_ref: 'PROJ', run_id: 'R001', type: 'stories', manifest: undefined }),
     ).rejects.toThrow('manifest is required');
   });
 
   it('throws when manifest fails schema validation', async () => {
     makeRunDir(tmpDir, 'PROJ', 'R001');
     await expect(
-      handleManifestSave({ project_key: 'PROJ', run_id: 'R001', type: 'stories', manifest: { bad: true } }),
+      handleManifestSave({ project_ref: 'PROJ', run_id: 'R001', type: 'stories', manifest: { bad: true } }),
     ).rejects.toThrow();
   });
 });
@@ -169,14 +169,14 @@ describe('handleManifestValidate', () => {
     const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
     writeFileSync(join(runDir, 'stories-manifest.json'), JSON.stringify(VALID_STORIES_MANIFEST));
 
-    const result = await handleManifestValidate({ project_key: 'PROJ', run_id: 'R001', type: 'stories' });
+    const result = await handleManifestValidate({ project_ref: 'PROJ', run_id: 'R001', type: 'stories' });
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
   it('returns valid: false when manifest file is missing', async () => {
     makeRunDir(tmpDir, 'PROJ', 'R001');
-    const result = await handleManifestValidate({ project_key: 'PROJ', run_id: 'R001', type: 'stories' });
+    const result = await handleManifestValidate({ project_ref: 'PROJ', run_id: 'R001', type: 'stories' });
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
   });
@@ -192,7 +192,7 @@ describe('handleManifestValidate', () => {
     };
     writeFileSync(join(runDir, 'stories-manifest.json'), JSON.stringify(dupManifest));
 
-    const result = await handleManifestValidate({ project_key: 'PROJ', run_id: 'R001', type: 'stories' });
+    const result = await handleManifestValidate({ project_ref: 'PROJ', run_id: 'R001', type: 'stories' });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('Duplicate story ID'))).toBe(true);
   });
@@ -215,7 +215,7 @@ describe('handleManifestPlan', () => {
     const runDir = makeRunDir(tmpDir, 'PROJ', 'R001');
     writeFileSync(join(runDir, 'devplan-manifest.json'), JSON.stringify(VALID_DEVPLAN_MANIFEST));
 
-    const result = await handleManifestPlan({ project_key: 'PROJ', run_id: 'R001' });
+    const result = await handleManifestPlan({ project_ref: 'PROJ', run_id: 'R001' });
     expect(result.steps).toHaveLength(1);
     expect(result.total_pending).toBe(1);
   });
@@ -228,7 +228,7 @@ describe('handleManifestPlan', () => {
     };
     writeFileSync(join(runDir, 'devplan-manifest.json'), JSON.stringify(completedManifest));
 
-    const result = await handleManifestPlan({ project_key: 'PROJ', run_id: 'R001' });
+    const result = await handleManifestPlan({ project_ref: 'PROJ', run_id: 'R001' });
     expect(result.steps).toHaveLength(0);
     expect(result.total_pending).toBe(0);
   });

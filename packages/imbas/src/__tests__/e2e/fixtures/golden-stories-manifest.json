@@ -1,8 +1,8 @@
 {
   "batch": "B1",
   "run_id": "20260101-001",
-  "project_key": "ALPHA",
-  "epic_key": "ALPHA-10",
+  "project_ref": "ALPHA",
+  "epic_ref": "ALPHA-10",
   "created_at": "2026-01-01T09:00:00.000Z",
   "stories": [
     {
@@ -11,7 +11,7 @@
       "description": "이메일과 비밀번호로 로그인하는 기능을 구현한다. JWT 토큰을 발급하고 세션을 관리한다.",
       "type": "Story",
       "status": "pending",
-      "jira_key": null,
+      "issue_ref": null,
       "verification": {
         "anchor_link": true,
         "coherence": "PASS",
@@ -27,7 +27,7 @@
       "description": "로그인 후 진입하는 대시보드 화면. 주요 KPI 위젯과 최근 활동 피드를 표시한다.",
       "type": "Story",
       "status": "pending",
-      "jira_key": null,
+      "issue_ref": null,
       "verification": {
         "anchor_link": true,
         "coherence": "PASS",
@@ -43,7 +43,7 @@
       "description": "대시보드 상단에 핵심 지표(KPI)를 카드 형태로 표시한다. S-2에서 분리됨.",
       "type": "Story",
       "status": "pending",
-      "jira_key": null,
+      "issue_ref": null,
       "verification": {
         "anchor_link": true,
         "coherence": "PASS",

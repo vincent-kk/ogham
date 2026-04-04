@@ -12,36 +12,36 @@ import { loadRunState } from '../../core/state-manager.js';
 import { MANIFEST_FILE_MAP } from '../../constants/index.js';
 
 export interface RunGetInput {
-  project_key?: string;
+  project_ref?: string;
   run_id?: string;
 }
 
 export async function handleRunGet(input: RunGetInput) {
   const cwd = process.cwd();
 
-  let project_key = input.project_key;
-  if (!project_key) {
+  let project_ref = input.project_ref;
+  if (!project_ref) {
     const config = await loadConfig(cwd);
-    project_key = config.defaults.project_key ?? undefined;
-    if (!project_key) {
-      throw new Error('project_key is required (or set defaults.project_key in config)');
+    project_ref = config.defaults.project_ref ?? undefined;
+    if (!project_ref) {
+      throw new Error('project_ref is required (or set defaults.project_ref in config)');
     }
   }
 
   let run_id = input.run_id;
   if (!run_id) {
-    const runsDir = getRunsDir(cwd, project_key);
+    const runsDir = getRunsDir(cwd, project_ref);
     if (!existsSync(runsDir)) {
-      throw new Error(`No runs directory found for project: ${project_key}`);
+      throw new Error(`No runs directory found for project: ${project_ref}`);
     }
     const entries = readdirSync(runsDir).sort();
     if (entries.length === 0) {
-      throw new Error(`No runs found for project: ${project_key}`);
+      throw new Error(`No runs found for project: ${project_ref}`);
     }
     run_id = entries[entries.length - 1]!;
   }
 
-  const run_dir = getRunDir(cwd, project_key, run_id);
+  const run_dir = getRunDir(cwd, project_ref, run_id);
   const state = await loadRunState(run_dir);
 
   const manifests_available: string[] = [];

@@ -8,7 +8,7 @@ import type { RunState } from '../types/state.js';
 function makeState(overrides?: Partial<RunState>): RunState {
   const base = createRunState({
     run_id: '20240101-001',
-    project_key: 'PROJ',
+    project_ref: 'PROJ',
     source_file: 'requirements.md',
   });
   return { ...base, ...overrides };
@@ -79,7 +79,7 @@ describe('createRunState', () => {
   it('returns valid initial state', () => {
     const state = makeState();
     expect(state.run_id).toBe('20240101-001');
-    expect(state.project_key).toBe('PROJ');
+    expect(state.project_ref).toBe('PROJ');
     expect(state.current_phase).toBe('validate');
     expect(state.phases.validate.status).toBe('pending');
     expect(state.phases.split.status).toBe('pending');
@@ -91,7 +91,7 @@ describe('applyTransition start_phase validate', () => {
   it('always allows starting validate phase', () => {
     const state = makeState();
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'validate',
@@ -111,7 +111,7 @@ describe('applyTransition complete_phase validate', () => {
       },
     };
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'complete_phase',
       phase: 'validate',
@@ -132,7 +132,7 @@ describe('start_phase split', () => {
   it('succeeds when validate is completed with PASS', () => {
     const state = withValidateCompleted(makeState(), 'PASS');
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'split',
@@ -143,7 +143,7 @@ describe('start_phase split', () => {
   it('succeeds when validate is completed with PASS_WITH_WARNINGS', () => {
     const state = withValidateCompleted(makeState(), 'PASS_WITH_WARNINGS');
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'split',
@@ -155,7 +155,7 @@ describe('start_phase split', () => {
     const state = makeState();
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'start_phase',
         phase: 'split',
@@ -167,7 +167,7 @@ describe('start_phase split', () => {
     const state = withValidateCompleted(makeState(), 'BLOCKED');
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'start_phase',
         phase: 'split',
@@ -180,7 +180,7 @@ describe('start_phase devplan', () => {
   it('succeeds when split is completed without pending_review', () => {
     const state = withSplitCompleted(withValidateCompleted(makeState()), false);
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'devplan',
@@ -191,7 +191,7 @@ describe('start_phase devplan', () => {
   it('succeeds when split escaped with E2-3', () => {
     const state = withSplitEscaped(withValidateCompleted(makeState()), 'E2-3');
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'devplan',
@@ -203,7 +203,7 @@ describe('start_phase devplan', () => {
     const state = withSplitCompleted(withValidateCompleted(makeState()), true);
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'start_phase',
         phase: 'devplan',
@@ -215,7 +215,7 @@ describe('start_phase devplan', () => {
     const state = withSplitEscaped(withValidateCompleted(makeState()), 'E2-1');
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'start_phase',
         phase: 'devplan',
@@ -228,7 +228,7 @@ describe('complete_phase', () => {
   it('succeeds when phase is in_progress', () => {
     const state = withSplitInProgress(withValidateCompleted(makeState()));
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'complete_phase',
       phase: 'split',
@@ -243,7 +243,7 @@ describe('complete_phase', () => {
     const state = makeState();
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'complete_phase',
         phase: 'validate',
@@ -260,7 +260,7 @@ describe('complete_phase', () => {
       },
     };
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'complete_phase',
       phase: 'validate',
@@ -274,7 +274,7 @@ describe('escape_phase', () => {
   it('succeeds for split phase when in_progress', () => {
     const state = withSplitInProgress(withValidateCompleted(makeState()));
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'escape_phase',
       phase: 'split',
@@ -288,7 +288,7 @@ describe('escape_phase', () => {
     const state = makeState();
     expect(() =>
       applyTransition(state, {
-        project_key: 'PROJ',
+        project_ref: 'PROJ',
         run_id: '20240101-001',
         action: 'escape_phase',
         phase: 'split',
@@ -302,7 +302,7 @@ describe('skip_phases', () => {
   it('marks validate and split as completed with correct defaults', () => {
     const state = makeState();
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
       phases: ['validate', 'split'],
@@ -319,7 +319,7 @@ describe('skip_phases', () => {
   it('advances current_phase past all skipped phases', () => {
     const state = makeState();
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
       phases: ['validate', 'split'],
@@ -330,7 +330,7 @@ describe('skip_phases', () => {
   it('sets metadata.skipped_phases for auditability', () => {
     const state = makeState();
     const next = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
       phases: ['validate', 'split'],
@@ -341,13 +341,13 @@ describe('skip_phases', () => {
   it('allows start_phase devplan after skip_phases', () => {
     const state = makeState();
     const skipped = applyTransition(state, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'skip_phases',
       phases: ['validate', 'split'],
     });
     const next = applyTransition(skipped, {
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20240101-001',
       action: 'start_phase',
       phase: 'devplan',

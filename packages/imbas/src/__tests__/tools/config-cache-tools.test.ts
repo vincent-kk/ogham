@@ -30,7 +30,7 @@ function writeCacheFile(base: string, projectKey: string, filename: string, data
 
 const BASE_CONFIG = {
   defaults: {
-    project_key: 'DEFAULT',
+    project_ref: 'DEFAULT',
     llm_model: {},
   },
   atlassian: {},
@@ -54,13 +54,13 @@ describe('handleConfigGet', () => {
   it('returns full config when no field specified', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
     const result = await handleConfigGet({});
-    expect((result as typeof BASE_CONFIG).defaults.project_key).toBe('DEFAULT');
+    expect((result as typeof BASE_CONFIG).defaults.project_ref).toBe('DEFAULT');
   });
 
   it('returns specific field value via dot-path', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
-    const result = await handleConfigGet({ field: 'defaults.project_key' }) as { field: string; value: unknown };
-    expect(result.field).toBe('defaults.project_key');
+    const result = await handleConfigGet({ field: 'defaults.project_ref' }) as { field: string; value: unknown };
+    expect(result.field).toBe('defaults.project_ref');
     expect(result.value).toBe('DEFAULT');
   });
 
@@ -92,18 +92,18 @@ describe('handleConfigSet', () => {
 
   it('updates and saves config field', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
-    await handleConfigSet({ updates: { 'defaults.project_key': 'UPDATED' } });
+    await handleConfigSet({ updates: { 'defaults.project_ref': 'UPDATED' } });
 
     // Verify the saved value
-    const result = await handleConfigGet({ field: 'defaults.project_key' }) as { value: unknown };
+    const result = await handleConfigGet({ field: 'defaults.project_ref' }) as { value: unknown };
     expect(result.value).toBe('UPDATED');
   });
 
   it('applies multiple dot-path updates at once', async () => {
     writeConfig(tmpDir, BASE_CONFIG);
-    await handleConfigSet({ updates: { 'defaults.project_key': 'X', 'defaults.llm_model.validate': 'opus' } });
+    await handleConfigSet({ updates: { 'defaults.project_ref': 'X', 'defaults.llm_model.validate': 'opus' } });
 
-    const pk = await handleConfigGet({ field: 'defaults.project_key' }) as { value: unknown };
+    const pk = await handleConfigGet({ field: 'defaults.project_ref' }) as { value: unknown };
     const lm = await handleConfigGet({ field: 'defaults.llm_model.validate' }) as { value: unknown };
     expect(pk.value).toBe('X');
     expect(lm.value).toBe('opus');
@@ -127,7 +127,7 @@ describe('handleCacheGet', () => {
     const cacheDir = join(tmpDir, '.imbas', 'PROJ', 'cache');
     mkdirSync(cacheDir, { recursive: true });
 
-    const result = await handleCacheGet({ project_key: 'PROJ', cache_type: 'all' });
+    const result = await handleCacheGet({ project_ref: 'PROJ', cache_type: 'all' });
     expect(result.ttl_expired).toBe(true);
     expect(result.cached_at).toBeNull();
   });
@@ -142,12 +142,12 @@ describe('handleCacheGet', () => {
       ttl_hours: 24,
     });
 
-    const result = await handleCacheGet({ project_key: 'PROJ', cache_type: 'project-meta' });
+    const result = await handleCacheGet({ project_ref: 'PROJ', cache_type: 'project-meta' });
     expect((result.cache as { key: string }).key).toBe('PROJ');
   });
 
-  it('throws when project_key missing and no config default', async () => {
-    await expect(handleCacheGet({})).rejects.toThrow('project_key is required');
+  it('throws when project_ref missing and no config default', async () => {
+    await expect(handleCacheGet({})).rejects.toThrow('project_ref is required');
   });
 });
 
@@ -166,22 +166,22 @@ describe('handleCacheSet', () => {
 
   it('writes cache and returns path and cached_at', async () => {
     const data = { key: 'PROJ', name: 'Test', url: 'https://example.com' };
-    const result = await handleCacheSet({ project_key: 'PROJ', cache_type: 'project-meta', data });
+    const result = await handleCacheSet({ project_ref: 'PROJ', cache_type: 'project-meta', data });
     expect(result.path).toContain('project-meta.json');
     expect(result.cached_at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   it('throws when data is undefined', async () => {
     await expect(
-      handleCacheSet({ project_key: 'PROJ', cache_type: 'project-meta', data: undefined }),
+      handleCacheSet({ project_ref: 'PROJ', cache_type: 'project-meta', data: undefined }),
     ).rejects.toThrow('data is required');
   });
 
   it('can read back what was written', async () => {
     const data = { key: 'PROJ', name: 'My Project', url: 'https://example.com' };
-    await handleCacheSet({ project_key: 'PROJ', cache_type: 'project-meta', data });
+    await handleCacheSet({ project_ref: 'PROJ', cache_type: 'project-meta', data });
 
-    const readResult = await handleCacheGet({ project_key: 'PROJ', cache_type: 'project-meta' });
+    const readResult = await handleCacheGet({ project_ref: 'PROJ', cache_type: 'project-meta' });
     expect((readResult.cache as typeof data).name).toBe('My Project');
   });
 });

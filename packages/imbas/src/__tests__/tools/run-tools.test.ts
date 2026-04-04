@@ -27,12 +27,12 @@ function writeStateJson(runDir: string, state: object): void {
   writeFileSync(join(runDir, 'state.json'), JSON.stringify(state, null, 2));
 }
 
-function makeInitialState(run_id: string, project_key: string, source_file: string) {
+function makeInitialState(run_id: string, project_ref: string, source_file: string) {
   const now = new Date().toISOString();
   return {
     run_id,
-    project_key,
-    epic_key: null,
+    project_ref,
+    epic_ref: null,
     source_file,
     created_at: now,
     updated_at: now,
@@ -85,20 +85,20 @@ describe('handleRunCreate', () => {
   it('creates run directory and returns run_id', async () => {
     const src = writeSourceFile(tmpDir);
     const result = await handleRunCreate({
-      project_key: 'TEST',
+      project_ref: 'TEST',
       source_file: src,
     });
     expect(result.run_id).toMatch(/^\d{8}-\d{3}$/);
     expect(result.run_dir).toContain('TEST');
   });
 
-  it('returns initial state with correct project_key', async () => {
+  it('returns initial state with correct project_ref', async () => {
     const src = writeSourceFile(tmpDir);
     const result = await handleRunCreate({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       source_file: src,
     });
-    expect(result.state.project_key).toBe('PROJ');
+    expect(result.state.project_ref).toBe('PROJ');
     expect(result.state.current_phase).toBe('validate');
   });
 
@@ -107,7 +107,7 @@ describe('handleRunCreate', () => {
     const suppFile = join(tmpDir, 'extra.md');
     writeFileSync(suppFile, '# Extra\n');
     const result = await handleRunCreate({
-      project_key: 'TEST',
+      project_ref: 'TEST',
       source_file: src,
       supplements: [suppFile],
     });
@@ -134,9 +134,9 @@ describe('handleRunGet', () => {
     const state = makeInitialState('20260101-001', 'MYPROJ', '/source.md');
     writeStateJson(runDir, state);
 
-    const result = await handleRunGet({ project_key: 'MYPROJ', run_id: '20260101-001' });
+    const result = await handleRunGet({ project_ref: 'MYPROJ', run_id: '20260101-001' });
     expect(result.state.run_id).toBe('20260101-001');
-    expect(result.state.project_key).toBe('MYPROJ');
+    expect(result.state.project_ref).toBe('MYPROJ');
   });
 
   it('returns manifests_available as empty when no manifest files exist', async () => {
@@ -144,16 +144,16 @@ describe('handleRunGet', () => {
     const state = makeInitialState('20260101-001', 'MYPROJ', '/source.md');
     writeStateJson(runDir, state);
 
-    const result = await handleRunGet({ project_key: 'MYPROJ', run_id: '20260101-001' });
+    const result = await handleRunGet({ project_ref: 'MYPROJ', run_id: '20260101-001' });
     expect(result.manifests_available).toEqual([]);
   });
 
-  it('throws when project_key missing and no config default', async () => {
-    await expect(handleRunGet({})).rejects.toThrow('project_key is required');
+  it('throws when project_ref missing and no config default', async () => {
+    await expect(handleRunGet({})).rejects.toThrow('project_ref is required');
   });
 
   it('throws when no runs directory exists', async () => {
-    await expect(handleRunGet({ project_key: 'NOPROJ' })).rejects.toThrow();
+    await expect(handleRunGet({ project_ref: 'NOPROJ' })).rejects.toThrow();
   });
 });
 
@@ -172,7 +172,7 @@ describe('handleRunList', () => {
 
   it('returns empty runs when no runs directory exists', async () => {
     mkdirSync(join(tmpDir, '.imbas', 'PROJ'), { recursive: true });
-    const result = await handleRunList({ project_key: 'PROJ' });
+    const result = await handleRunList({ project_ref: 'PROJ' });
     expect(result.runs).toEqual([]);
   });
 
@@ -184,14 +184,14 @@ describe('handleRunList', () => {
     writeStateJson(run1, state1);
     writeStateJson(run2, state2);
 
-    const result = await handleRunList({ project_key: 'PROJ' });
+    const result = await handleRunList({ project_ref: 'PROJ' });
     expect(result.runs).toHaveLength(2);
     expect(result.runs.map((r) => r.run_id)).toContain('20260101-001');
     expect(result.runs.map((r) => r.run_id)).toContain('20260101-002');
   });
 
-  it('throws when project_key missing and no config default', async () => {
-    await expect(handleRunList({})).rejects.toThrow('project_key is required');
+  it('throws when project_ref missing and no config default', async () => {
+    await expect(handleRunList({})).rejects.toThrow('project_ref is required');
   });
 });
 
@@ -214,7 +214,7 @@ describe('handleRunTransition', () => {
     writeStateJson(runDir, state);
 
     const result = await handleRunTransition({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20260101-001',
       action: 'start_phase',
       phase: 'validate',
@@ -228,7 +228,7 @@ describe('handleRunTransition', () => {
     writeStateJson(runDir, state);
 
     const result = await handleRunTransition({
-      project_key: 'PROJ',
+      project_ref: 'PROJ',
       run_id: '20260101-001',
       action: 'skip_phases',
       phases: ['validate', 'split'],
@@ -255,7 +255,7 @@ describe('handleRunCreate sentinel source_file', () => {
 
   it('creates run with devplan-pipeline sentinel without ENOENT', async () => {
     const result = await handleRunCreate({
-      project_key: 'TEST',
+      project_ref: 'TEST',
       source_file: 'devplan-pipeline',
     });
     expect(result.run_id).toMatch(/^\d{8}-\d{3}$/);
@@ -268,7 +268,7 @@ describe('handleRunCreate sentinel source_file', () => {
   it('still copies real files normally', async () => {
     const src = writeSourceFile(tmpDir);
     const result = await handleRunCreate({
-      project_key: 'TEST',
+      project_ref: 'TEST',
       source_file: src,
     });
     const { readFileSync } = await import('node:fs');
