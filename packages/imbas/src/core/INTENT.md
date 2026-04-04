@@ -30,4 +30,4 @@ imbas 파이프라인의 비즈니스 로직 계층. .imbas/ 디렉토리의 상
 ### Never do
 
 - 직접 fs.writeFileSync 호출 (atomic write 우회)
-- Jira API 직접 호출 (Atlassian MCP ���구 경유만 허용)
+- Jira API 직접 호출 (Atlassian MCP 도구 경유만 허용)

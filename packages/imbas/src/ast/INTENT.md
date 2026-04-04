@@ -14,7 +14,7 @@
 
 ### Always do
 
-- napi 미설치 시 `{ error, sgLoadError }` 반환 (throw 금���)
+- napi 미설치 시 `{ error, sgLoadError }` 반환 (throw 금지)
 - 세션 내 napi 로드 실패는 한 번만 시도
 
 ### Ask first
