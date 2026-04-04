@@ -13,8 +13,7 @@ import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 import type { PinnedNode } from '../cache-manager/cache-manager.js';
 import { readPinnedNodes } from '../cache-manager/cache-manager.js';
 
-/** Default stale threshold percentage */
-const STALE_THRESHOLD_PERCENT = 10;
+import { STALE_THRESHOLD_PERCENT } from '../../constants/thresholds.js';
 
 interface IndexMetadata {
   totalNodes: number;

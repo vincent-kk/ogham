@@ -5,6 +5,7 @@
 import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { FRONTMATTER_REGEX, FRONTMATTER_STRIP_REGEX } from '../../../constants/regexes.js';
 import { deduplicateContent } from '../../../core/content-dedup/content-dedup.js';
 import {
   buildKnowledgeNode,
@@ -46,7 +47,6 @@ function updateFrontmatter(
     sub_layer: string;
   }>,
 ): string {
-  const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   const match = FRONTMATTER_REGEX.exec(content);
   if (!match) return content;
 
@@ -159,8 +159,7 @@ export async function handleMaencofUpdate(
   }
 
   // Frontmatter 보존 + 본문 교체
-  const FRONTMATTER_REGEX = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
-  const fmMatch = FRONTMATTER_REGEX.exec(existing);
+  const fmMatch = FRONTMATTER_STRIP_REGEX.exec(existing);
   let newContent: string;
 
   // 기존 본문 추출 (Frontmatter 이후 부분)
@@ -178,7 +177,7 @@ export async function handleMaencofUpdate(
     if (input.frontmatter) {
       const updatedDoc = updateFrontmatter(existing, input.frontmatter);
       const updatedFmBlock =
-        FRONTMATTER_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
+        FRONTMATTER_STRIP_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
       newContent = updatedFmBlock + bodyToWrite;
     } else {
       // updated만 자동 갱신

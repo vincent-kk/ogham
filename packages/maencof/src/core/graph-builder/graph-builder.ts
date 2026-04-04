@@ -11,6 +11,7 @@ import type {
   KnowledgeNode,
 } from '../../types/graph.js';
 import { SYMMETRIC_RELATIONSHIPS } from '../../types/person.js';
+import { MAX_CROSS_LAYER_EDGES_PER_NODE } from '../../constants/thresholds.js';
 
 /** GraphBuilder 옵션 */
 export interface GraphBuilderOptions {
@@ -337,9 +338,6 @@ function buildDomainEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
 function isSymmetricRelationship(type: string): boolean {
   return (SYMMETRIC_RELATIONSHIPS as readonly string[]).includes(type);
 }
-
-/** Boundary 노드당 최대 CROSS_LAYER 엣지 수 */
-const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
 
 /**
  * L5-Boundary 노드에서 connected_layers 내 노드로 CROSS_LAYER 엣지 생성.

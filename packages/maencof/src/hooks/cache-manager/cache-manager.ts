@@ -16,6 +16,8 @@ import {
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
+import { MAX_PINNED_NODES, CACHE_TTL_MS } from '../../constants/performance.js';
+
 // Cache directory layout:
 //   {cwdHash}/session-context-{hash}   — session inject marker (24h TTL)
 //   {cwdHash}/prompt-context-{hash}    — per-session context text
@@ -133,8 +135,6 @@ export function readTurnContext(cwd: string): string | null {
   }
 }
 
-const MAX_PINNED_NODES = 20;
-
 export function readPinnedNodes(cwd: string): PinnedNode[] {
   const pinnedFile = join(getCacheDir(cwd), 'pinned-nodes.json');
   try {
@@ -175,11 +175,10 @@ export function pruneOldSessions(cwd: string): void {
     const sessionFiles = files.filter((f) => f.startsWith('session-context-'));
     if (sessionFiles.length <= 10) return;
     const now = Date.now();
-    const TTL_MS = 24 * 60 * 60 * 1000;
     for (const file of sessionFiles) {
       const fp = join(dir, file);
       try {
-        if (now - statSync(fp).mtimeMs > TTL_MS) {
+        if (now - statSync(fp).mtimeMs > CACHE_TTL_MS) {
           unlinkSync(fp);
           // also remove paired prompt-context file
           const hash = file.replace('session-context-', '');

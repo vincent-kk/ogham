@@ -6,12 +6,7 @@
  * Pure function: no file I/O, string in → string out.
  */
 import { parseYamlFrontmatter } from '../yaml-parser/yaml-parser.js';
-
-/** Frontmatter delimiter regex (content must start with ---) */
-const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
-
-/** H1 heading regex (must be the first non-empty line) */
-const H1_REGEX = /^#\s+(.+)$/m;
+import { FRONTMATTER_REGEX, H1_REGEX } from '../../constants/regexes.js';
 
 /** Result of deduplication with optional warnings */
 export interface DeduplicateResult {

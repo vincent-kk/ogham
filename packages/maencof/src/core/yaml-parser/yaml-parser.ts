@@ -34,6 +34,8 @@ export function parseScalarValue(raw: string): unknown {
   return raw;
 }
 
+import { YAML_BOOLEAN_NULL, YAML_UNSAFE_START } from '../../constants/regexes.js';
+
 /**
  * YAML 직렬화 시 특수문자를 포함하는 문자열을 안전하게 double-quote로 감싼다.
  *
@@ -43,9 +45,6 @@ export function parseScalarValue(raw: string): unknown {
  */
 export function quoteYamlValue(value: string): string {
   if (value === '') return '""';
-
-  const YAML_UNSAFE_START = /^[#'"{}[\],&*?|<>=!%@`\-]/;
-  const YAML_BOOLEAN_NULL = /^(true|false|null|~|yes|no|on|off)$/i;
 
   if (
     value.includes(': ') ||

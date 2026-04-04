@@ -9,6 +9,7 @@
  */
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeGraph } from '../../types/graph.js';
+import { FULL_REBUILD_THRESHOLD } from '../../constants/thresholds.js';
 
 import type { FileSnapshot, SnapshotEntry } from './metadata-store.js';
 
@@ -134,9 +135,6 @@ export function computeOneHopNeighbors(
 
   return affected;
 }
-
-/** 전체 재빌드 권장 임계값 */
-const FULL_REBUILD_THRESHOLD = 0.1; // 10%
 
 /**
  * 증분 업데이트 범위를 계산한다.

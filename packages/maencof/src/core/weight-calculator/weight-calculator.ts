@@ -9,24 +9,9 @@ import type {
   KnowledgeGraph,
   KnowledgeNode,
 } from '../../types/graph.js';
+import { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from '../../constants/weights.js';
 
-/** Layer별 기본 감쇠 인자 (확산 활성화용) */
-export const LAYER_DECAY_FACTORS: Record<Layer, number> = {
-  [Layer.L1_CORE]: 0.5,
-  [Layer.L2_DERIVED]: 0.7,
-  [Layer.L3_EXTERNAL]: 0.8,
-  [Layer.L4_ACTION]: 0.9,
-  [Layer.L5_CONTEXT]: 0.95,
-};
-
-/** 서브레이어별 감쇠 인자 */
-export const SUBLAYER_DECAY_FACTORS: Record<SubLayer, number> = {
-  relational: 0.75,
-  structural: 0.8,
-  topical: 0.85,
-  buffer: 0.95,
-  boundary: 0.6,
-};
+export { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from '../../constants/weights.js';
 
 /** 가중치 계산 결과 */
 export interface WeightCalcResult {

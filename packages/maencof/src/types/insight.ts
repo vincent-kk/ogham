@@ -11,12 +11,7 @@ export const InsightConfigSchema = z.object({
 
 export type InsightConfig = z.infer<typeof InsightConfigSchema>;
 
-export const DEFAULT_INSIGHT_CONFIG: InsightConfig = {
-  enabled: true,
-  sensitivity: 'medium',
-  max_captures_per_session: 10,
-  notify: true,
-};
+export { DEFAULT_INSIGHT_CONFIG } from '../constants/insight.js';
 
 // ─── MCP Tool Input ─────────────────────────────────────────────────
 
@@ -39,14 +34,7 @@ export interface InsightStats {
   updatedAt: string;
 }
 
-export const DEFAULT_INSIGHT_STATS: InsightStats = {
-  total_captured: 0,
-  l2_direct: 0,
-  l5_captured: 0,
-  l5_promoted: 0,
-  l5_archived: 0,
-  updatedAt: new Date().toISOString(),
-};
+export { DEFAULT_INSIGHT_STATS } from '../constants/insight.js';
 
 // ─── Pending Notification ───────────────────────────────────────────
 

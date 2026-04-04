@@ -5,6 +5,7 @@
 import { Layer } from '../../types/common.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeEdge, KnowledgeGraph } from '../../types/graph.js';
+import { CYCLE_WEIGHT } from '../../constants/weights.js';
 
 /** DAG 변환 결과 */
 export interface DAGConvertResult {
@@ -46,9 +47,6 @@ export function convertToDAG(graph: KnowledgeGraph): DAGConvertResult {
 
   return { graph: convertedGraph, weakenedEdges, cycleCount };
 }
-
-/** 순환 엣지 가중치 (제거 대신 약화) */
-const CYCLE_WEIGHT = 0.1;
 
 /**
  * DFS로 순환 엣지를 탐지한다.

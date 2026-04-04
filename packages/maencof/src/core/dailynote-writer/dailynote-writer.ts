@@ -11,8 +11,7 @@ import { dirname, join } from 'node:path';
 import type { DailynoteCategory, DailynoteEntry } from '../../types/dailynote.js';
 import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
 
-/** dailynotes 디렉토리명 */
-const DAILYNOTES_DIR = 'dailynotes';
+import { DAILYNOTES_DIR } from '../../constants/directories.js';
 
 /**
  * dailynotes 디렉토리 경로를 반환한다.

@@ -6,6 +6,7 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
+import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
   buildKnowledgeNode,
   parseDocument,
@@ -26,7 +27,6 @@ function updateLayerInFrontmatter(
     stripBufferFields?: boolean;
   },
 ): string {
-  const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   const match = FRONTMATTER_REGEX.exec(content);
   if (!match) return content;
 

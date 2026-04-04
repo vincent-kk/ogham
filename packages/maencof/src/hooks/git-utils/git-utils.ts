@@ -7,16 +7,17 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/shared.js';
+import { GIT_EXEC_TIMEOUT_MS } from '../../constants/performance.js';
 
 // ── Constants ────────────────────────────────────────────────────────
 
-export const EXEC_TIMEOUT_MS = 1500;
+export const EXEC_TIMEOUT_MS = GIT_EXEC_TIMEOUT_MS;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
 export const execOpts = (cwd: string) => ({
   cwd,
-  timeout: EXEC_TIMEOUT_MS,
+  timeout: GIT_EXEC_TIMEOUT_MS,
   stdio: 'pipe' as const,
 });
 

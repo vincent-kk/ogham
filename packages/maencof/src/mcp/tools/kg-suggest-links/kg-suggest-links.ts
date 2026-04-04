@@ -23,8 +23,7 @@ import type {
   LinkSuggestion,
 } from '../../../types/mcp.js';
 
-/** SA 보강 가중치 — 최종 점수에서 SA의 최대 기여 비율 */
-const SA_BONUS_WEIGHT = 0.3;
+import { SA_BONUS_WEIGHT } from '../../../constants/weights.js';
 
 /**
  * kg_suggest_links 핸들러

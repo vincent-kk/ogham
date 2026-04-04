@@ -13,11 +13,8 @@
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 
-/** maencof 섹션 시작 마커 */
-export const MAENCOF_START_MARKER = '<!-- MAENCOF:START -->';
-
-/** maencof 섹션 종료 마커 */
-export const MAENCOF_END_MARKER = '<!-- MAENCOF:END -->';
+export { MAENCOF_START_MARKER, MAENCOF_END_MARKER } from '../../constants/markers.js';
+import { MAENCOF_START_MARKER, MAENCOF_END_MARKER } from '../../constants/markers.js';
 
 /** 머지 결과 */
 export interface MergeResult {

@@ -15,6 +15,7 @@ import {
   writeTurnContext,
 } from '../../../hooks/cache-manager/cache-manager.js';
 import { buildTurnContext } from '../../../hooks/turn-context-builder/turn-context-builder.js';
+import { MAX_PINNED_NODES } from '../../../constants/performance.js';
 
 export const contextCacheManageInputSchema = {
   action: z
@@ -31,8 +32,6 @@ export const contextCacheManageInputSchema = {
     .optional()
     .describe('Node layer 1-5 (required for pin)'),
 };
-
-const MAX_PINNED = 20;
 
 function resolveVaultPath(cwd?: string): string {
   const raw = cwd ?? process.env['MAENCOF_VAULT_PATH'] ?? process.cwd();
@@ -85,13 +84,13 @@ export async function handleContextCacheManage(
 
       // Enforce max — evict oldest
       let toWrite = nodes;
-      if (toWrite.length > MAX_PINNED) {
+      if (toWrite.length > MAX_PINNED_NODES) {
         toWrite = [...toWrite]
           .sort(
             (a, b) =>
               new Date(b.pinnedAt).getTime() - new Date(a.pinnedAt).getTime(),
           )
-          .slice(0, MAX_PINNED);
+          .slice(0, MAX_PINNED_NODES);
       }
 
       writePinnedNodes(vault, toWrite);

@@ -19,6 +19,12 @@ import type {
 import type { KnowledgeNode } from '../../types/graph.js';
 
 import { parseYamlFrontmatter } from '../yaml-parser/yaml-parser.js';
+import {
+  ABSOLUTE_HREF_REGEX,
+  FRONTMATTER_REGEX,
+  MARKDOWN_LINK_REGEX,
+  WIKILINK_REGEX,
+} from '../../constants/regexes.js';
 
 export { parseScalarValue, parseYamlFrontmatter } from '../yaml-parser/yaml-parser.js';
 
@@ -56,17 +62,6 @@ export interface NodeBuildResult {
   error?: string;
 }
 
-/** Frontmatter 구분자 정규식 */
-const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
-
-/** 마크다운 링크 정규식 ([text](href)) */
-const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]+)\)/g;
-
-/** 위키링크 정규식 ([[path]], [[path|display]], [[path#heading]]) */
-const WIKILINK_REGEX = /\[\[([^\]]+)\]\]/g;
-
-/** 절대 경로 판별 (http://, https://, /, #로 시작) */
-const ABSOLUTE_HREF_REGEX = /^(?:https?:\/\/|\/|#)/;
 
 /**
  * 마크다운 문자열에서 Frontmatter를 추출하고 Zod로 검증한다.

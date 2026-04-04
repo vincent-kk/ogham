@@ -5,10 +5,8 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** maencof meta directory name */
-export const MAENCOF_META_DIR = '.maencof-meta';
-/** maencof index directory name */
-export const MAENCOF_DIR = '.maencof';
+export { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
+import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
 // isLayer1Path, LAYER1_PREFIX: moved to types/layer.ts — re-exported for backward compatibility
 export { LAYER1_PREFIX, isLayer1Path } from '../../types/layer.js';
 

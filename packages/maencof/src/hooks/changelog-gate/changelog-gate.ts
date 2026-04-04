@@ -16,9 +16,10 @@ import { join } from 'node:path';
 
 import {
   CHANGELOG_EXCLUDE,
-  CHANGELOG_GATE_MARKER,
   WATCHED_PATHS,
 } from '../../types/changelog.js';
+import { CHANGELOG_GATE_MARKER } from '../../constants/markers.js';
+import { EXEC_TIMEOUT_MS } from '../../constants/performance.js';
 
 import { isMaencofVault, metaPath } from '../shared/shared.js';
 
@@ -32,8 +33,6 @@ export interface ChangelogGateResult {
   /** 차단 시 사용자에게 표시할 메시지 */
   reason?: string;
 }
-
-const EXEC_TIMEOUT_MS = 2000;
 
 /**
  * 감시 경로에 대한 git 변경사항을 감지한다.

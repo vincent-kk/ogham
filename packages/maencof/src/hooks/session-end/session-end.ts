@@ -17,6 +17,7 @@ import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/da
 
 import { removeSessionFiles } from '../cache-manager/cache-manager.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/shared.js';
+import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
 
 export interface SessionEndInput {
   session_id?: string;
@@ -30,9 +31,6 @@ export interface SessionEndInput {
 export interface SessionEndResult {
   continue: boolean;
 }
-
-/** Session file retention period (days) */
-const SESSION_RETENTION_DAYS = 30;
 
 /**
  * SessionEnd Hook handler.

@@ -8,16 +8,19 @@ import {
 import { dirname, join } from 'node:path';
 
 import {
-  DEFAULT_INSIGHT_CONFIG,
-  DEFAULT_INSIGHT_STATS,
   type InsightConfig,
   InsightConfigSchema,
   type InsightStats,
   type PendingInsightCapture,
   type PendingInsightNotification,
 } from '../../types/insight.js';
-
-const MAENCOF_META_DIR = '.maencof-meta';
+import {
+  DEFAULT_INSIGHT_CONFIG,
+  DEFAULT_INSIGHT_STATS,
+  PENDING_FILE,
+  SENSITIVITY_CRITERIA,
+} from '../../constants/insight.js';
+import { MAENCOF_META_DIR } from '../../constants/directories.js';
 
 function metaPath(cwd: string, ...segments: string[]): string {
   return join(cwd, MAENCOF_META_DIR, ...segments);
@@ -76,8 +79,6 @@ export function incrementInsightStats(cwd: string, layer: 2 | 5): void {
 
 // ─── Pending Notification ───────────────────────────────────────────
 
-const PENDING_FILE = 'pending-insight-notification.json';
-
 export function readPendingNotification(
   cwd: string,
 ): PendingInsightNotification | null {
@@ -132,13 +133,6 @@ export function getSessionCaptureCount(cwd: string): number {
 }
 
 // ─── Meta-Prompt (code-generated, no disk file) ────────────────────
-
-const SENSITIVITY_CRITERIA: Record<string, string> = {
-  high: 'all opinions, experiences, discoveries, questions, conclusions, analogies, judgments. When in doubt, capture.',
-  medium:
-    'conclusions, deep experiences, significant discoveries, explicit judgments. Skip: simple opinions, incomplete questions, casual remarks.',
-  low: 'only verified experience+conclusion pairs, established principles, major discoveries. Skip most.',
-};
 
 /**
  * Build meta-prompt XML from config values.
