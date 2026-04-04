@@ -34,5 +34,6 @@
       "enabled": true,
       "severity": "warning"
     }
-  }
+  },
+  "additional-allowed": ["version.ts"]
 }

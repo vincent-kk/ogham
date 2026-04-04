@@ -1,4 +1,4 @@
-import { loadRuleOverrides } from '../../core/infra/config-loader.js';
+import { loadConfig } from '../../core/infra/config-loader.js';
 import { validateStructure } from '../../core/rules/fractal-validator.js';
 import {
   getActiveRules,
@@ -36,8 +36,9 @@ export async function handleStructureValidate(
     throw new Error('path is required');
   }
 
-  const overrides = loadRuleOverrides(input.path);
-  const allRules = loadBuiltinRules(overrides);
+  const config = loadConfig(input.path);
+  const overrides = config?.rules ?? {};
+  const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);
 
   let rulesToApply = activeRules;

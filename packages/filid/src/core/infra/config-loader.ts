@@ -25,6 +25,8 @@ export interface FilidConfig {
   rules: Record<string, RuleOverride>;
   /** Output language for documents (INTENT.md, DETAIL.md, reviews, PRs). Falls back to 'en'. */
   language?: string;
+  /** Additional file names allowed as peer files in fractal roots (zero-peer-file rule). */
+  'additional-allowed'?: string[];
 }
 
 const CONFIG_DIR = '.filid';

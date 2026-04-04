@@ -35,7 +35,7 @@ function buildMinimalContext(cwd: string): string {
     lines.push(`[filid:lang] ${lang}`);
 
     const overrides = config?.rules ?? {};
-    const allRules = loadBuiltinRules(overrides);
+    const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
     const disabledRules = allRules.filter((r) => !r.enabled);
     if (disabledRules.length > 0) {
       lines.push(

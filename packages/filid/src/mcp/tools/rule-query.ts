@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { loadRuleOverrides } from '../../core/infra/config-loader.js';
+import { loadConfig } from '../../core/infra/config-loader.js';
 import {
   evaluateRules,
   getActiveRules,
@@ -56,8 +56,9 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     throw new Error('action and path are required');
   }
 
-  const overrides = loadRuleOverrides(input.path);
-  const allRules = loadBuiltinRules(overrides);
+  const config = loadConfig(input.path);
+  const overrides = config?.rules ?? {};
+  const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);
 
   switch (input.action) {

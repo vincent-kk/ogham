@@ -62,6 +62,7 @@ export function applyOverrides(
  */
 export function loadBuiltinRules(
   overrides?: Record<string, RuleOverride>,
+  additionalAllowed?: string[],
 ): Rule[] {
   const rules: Rule[] = [
     // 1. naming-convention: 디렉토리명이 kebab-case 또는 camelCase여야 한다
@@ -298,6 +299,10 @@ export function loadBuiltinRules(
           | string[]
           | undefined;
         if (fwFiles) for (const f of fwFiles) allowed.add(f);
+
+        // Category: additional-allowed from .filid/config.json
+        if (additionalAllowed)
+          for (const f of additionalAllowed) allowed.add(f);
 
         const disallowed = peerFiles.filter((f) => !allowed.has(f));
         if (disallowed.length === 0) return [];
