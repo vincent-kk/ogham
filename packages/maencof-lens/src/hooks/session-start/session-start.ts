@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 import { loadConfig } from "../../config/config-loader/config-loader.js";
-import { CONFIG_DIR, CONFIG_FILE } from "../../config/defaults/defaults.js";
+import { CONFIG_DIR, CONFIG_FILE } from "../../constants/config.js";
+import { VAULT_STATUS } from "../../constants/vault-paths.js";
 import { detectStale } from "../../vault/stale-detector/stale-detector.js";
 
 export interface LensSessionStartResult {
@@ -57,20 +58,20 @@ export async function runSessionStart(
     const pathExists = existsSync(vault.path);
     const indexExists =
       pathExists && existsSync(join(vault.path, ".maencof", "index.json"));
-    let status = "ready";
+    let status: string = VAULT_STATUS.READY;
 
     if (!pathExists) {
-      status = "path not found";
+      status = VAULT_STATUS.PATH_NOT_FOUND;
     } else if (!indexExists) {
-      status = "index not built";
+      status = VAULT_STATUS.INDEX_NOT_BUILT;
     } else {
       try {
         const staleInfo = await detectStale(vault.path);
         if (staleInfo.isStale) {
-          status = `stale (${staleInfo.staleSince ?? "unknown"})`;
+          status = `${VAULT_STATUS.STALE} (${staleInfo.staleSince ?? "unknown"})`;
         }
       } catch {
-        status = "ready";
+        status = VAULT_STATUS.READY;
       }
     }
 
