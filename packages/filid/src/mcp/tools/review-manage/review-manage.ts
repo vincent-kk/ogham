@@ -59,7 +59,7 @@ async function gitExec(cwd: string, args: string[]): Promise<string> {
     return stdout.trimEnd();
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`git ${args[0]} failed in ${cwd}: ${msg}`);
+    throw new Error(`git ${args[0]} failed in ${cwd}: ${msg}`, { cause: error });
   }
 }
 
@@ -436,7 +436,7 @@ async function handleCheckCache(
   );
 
   // Read cached hash
-  let cachedHash: string | null = null;
+  let cachedHash: string | undefined;
   try {
     const raw = await fs.readFile(hashFilePath, 'utf-8');
     const cached = JSON.parse(raw) as ReviewContentHash;
