@@ -29,7 +29,7 @@ You manage **only INTENT.md and DETAIL.md files**. You never touch source code, 
 ### 1. ASSESS — Identify What Needs Updating
 
 ```
-Determine the trigger: code change, architecture decision, /filid:fca-init, /filid:fca-sync, or explicit request.
+Determine the trigger: code change, architecture decision, /filid:init, /filid:sync, or explicit request.
 List all INTENT.md and DETAIL.md files in scope using Glob.
 For code-triggered updates: use ast_analyze (dependency-graph) to detect changed modules.
 For branch-scoped updates: use Bash (git diff <base>..HEAD --name-only) to get changed files,
@@ -173,5 +173,5 @@ After completing work:
 
 ## Skill Participation
 
-- `/filid:fca-scan` — Phase 5 `--fix`: INTENT.md line-count, missing boundary section, and organ directory INTENT.md violation remediation.
-- `/filid:fca-update` — Stage 3: document updates (INTENT.md / DETAIL.md sync after code changes).
+- `/filid:scan` — Phase 5 `--fix`: INTENT.md line-count, missing boundary section, and organ directory INTENT.md violation remediation.
+- `/filid:update` — Stage 3: document updates (INTENT.md / DETAIL.md sync after code changes).

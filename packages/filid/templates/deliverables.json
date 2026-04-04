@@ -41,7 +41,7 @@
     "files": [],
     "note": "No specific deliverables — fixes are code changes. Re-verify after fix loop."
   },
-  "fca-init": {
+  "init": {
     "files": [
       "INTENT.md",
       ".filid/config.json",
@@ -55,7 +55,7 @@
     ],
     "note": "Initial FCA-AI project setup. INTENT.md must include 3-tier boundary sections. .claude/rules/fca.md provides native Claude Code rule enforcement."
   },
-  "fca-review": {
+  "review": {
     "files": [
       "REVIEW_REPORT.md"
     ],
@@ -65,7 +65,7 @@
     ],
     "note": "Multi-persona review output covering architecture, QA, and drift analysis."
   },
-  "fca-scan": {
+  "scan": {
     "files": [],
     "note": "Scan produces inline violation reports via MCP tools. No document deliverable required."
   }

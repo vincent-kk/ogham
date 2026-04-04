@@ -27,7 +27,7 @@ claude plugin install maencof
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:fca-init` to initialize FCA-AI in your project.
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:init` to initialize FCA-AI in your project.
 
 ---
 
@@ -43,7 +43,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 | Component        | Count | Examples                                            |
 | ---------------- | ----- | --------------------------------------------------- |
-| Skills           | 14    | `/filid:fca-init`, `/filid:fca-review`, `/filid:fca-scan` |
+| Skills           | 14    | `/filid:init`, `/filid:review`, `/filid:scan` |
 | MCP Tools        | 14    | Structure analysis, drift detection, metrics        |
 | Agents           | 7     | Architect, Implementer, QA Reviewer, etc.           |
 | Hooks            | 6     | Auto line-limit check, organ protection, rule injection |
@@ -57,13 +57,13 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 ```
 # Initialize FCA-AI in your project
-/filid:fca-init
+/filid:init
 
 # Scan for rule violations
-/filid:fca-scan
+/filid:scan
 
 # Run multi-persona code review on current branch
-/filid:fca-review
+/filid:review
 ```
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).

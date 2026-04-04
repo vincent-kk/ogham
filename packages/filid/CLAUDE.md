@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
 Layer 2 (도구)  → MCP Server (16개 분석/관리 도구)
 Layer 3 (에이전트) → 7개 특화 에이전트 (architect, implementer, QA 등)
-Layer 4 (사용자) → 17개 Skills (/filid:fca-init, /filid:fca-review 등)
+Layer 4 (사용자) → 17개 Skills (/filid:init, /filid:review 등)
 ```
 
 ## Commands
@@ -81,7 +81,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ### Skills (16)
 
-`fca-review` (다중 페르소나 리뷰), `fca-scan` (위반 스캔), `fca-init`, `fca-sync`, `fca-structure-review`, `fca-promote`, `fca-restructure`, `fca-resolve`, `fca-revalidate`, `fca-guide`, `fca-context-query`, `fca-update` (문서/테스트 동기화), `fca-pull-request` (FCA-aware PR 자동 생성), `fca-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `fca-migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `fca-ast-fallback` (LLM AST 패턴 매칭), `fca-config` (설정 관리)
+`review` (다중 페르소나 리뷰), `scan` (위반 스캔), `init`, `sync`, `structure-review`, `promote`, `restructure`, `resolve`, `revalidate`, `guide`, `context-query`, `update` (문서/테스트 동기화), `pull-request` (FCA-aware PR 자동 생성), `pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `ast-fallback` (LLM AST 패턴 매칭), `config` (설정 관리)
 
 ## References
 

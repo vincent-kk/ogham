@@ -5,7 +5,7 @@ description: >
   Use proactively when: running the 6-stage PR review pipeline, checking 3+12
   test rule compliance, analyzing LCOM4 or cyclomatic complexity for module health,
   performing security and lint review, validating INTENT.md line limits and 3-tier
-  structure, detecting organ boundary violations, reference role for /filid:fca-scan (invoked manually for extended QA analysis), reference role for /filid:fca-structure-review.
+  structure, detecting organ boundary violations, reference role for /filid:scan (invoked manually for extended QA analysis), reference role for /filid:structure-review.
   Trigger phrases: "review this PR", "check test counts", "run QA", "scan for
   violations", "check module health", "validate INTENT.md", "lint review",
   "are there any issues", "promote readiness check".
@@ -209,7 +209,7 @@ Date: <ISO 8601>
 
 ## Skill Participation
 
-- `/filid:fca-scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
-- `/filid:fca-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for extended QA analysis across the 6 stages.
-- `/filid:fca-promote` — Phase 1 (discovery), Phase 2 (eligibility), Phase 3 (analysis), Phase 5 (validation)
-- `/filid:fca-update` — Stage 1: branch diff-based violation scan.
+- `/filid:scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
+- `/filid:structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for extended QA analysis across the 6 stages.
+- `/filid:promote` — Phase 1 (discovery), Phase 2 (eligibility), Phase 3 (analysis), Phase 5 (validation)
+- `/filid:update` — Stage 1: branch diff-based violation scan.

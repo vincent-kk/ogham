@@ -103,4 +103,4 @@ Test files follow the **3+12 rule**:
 
 Exceeding 15 cases in a single spec file is a signal that the module under test is doing too much and should be split.
 
-This is enforced by the `test-metrics` MCP tool and reported by `fca-scan`.
+This is enforced by the `test-metrics` MCP tool and reported by `filid:scan`.

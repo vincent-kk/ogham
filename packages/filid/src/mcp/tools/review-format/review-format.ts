@@ -1,13 +1,12 @@
 /**
  * MCP tool handler: review-format
  * Formats review output files into collapsible GitHub PR comment markdown.
- * Used by fca-review (format-pr-comment) and fca-revalidate (format-revalidate-comment).
+ * Used by `filid:review` (`format-pr-comment`) and `filid:revalidate` (`format-revalidate-comment`).
  */
 import path from 'node:path';
 
 import { parseStructureCheckFrontmatter } from '../../../core/utils/pr-summary-generator.js';
 import type { HumanSummary } from '../../../types/summary.js';
-
 import type { ReviewManageInput } from '../review-manage/review-manage.js';
 import {
   extractRevalidateVerdict,

@@ -8,28 +8,28 @@
 
 | 경로 | 역할 |
 |------|------|
-| `fca-init/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
-| `fca-review/` | 다중 페르소나 합의 기반 코드 리뷰 |
-| `fca-scan/` | FCA-AI 규칙 위반 스캔 |
-| `fca-resolve/` | 리뷰 Fix Request 해결 워크플로우 |
-| `fca-revalidate/` | 수정 후 델타 기반 재검증 |
-| `fca-update/` | 코드-문서-테스트 동기화 |
-| `fca-pull-request/` | FCA-aware PR 자동 생성 |
-| `fca-pipeline/` | PR→리뷰→리졸브→재검증 파이프라인 |
-| `fca-sync/` | 구조 드리프트 감지 및 보정 |
-| `fca-restructure/` | 프랙탈 원칙 기반 구조 재편 |
-| `fca-structure-review/` | 6단계 PR 구조 검증 |
-| `fca-guide/` | 디렉토리별 프랙탈 가이드 생성 |
-| `fca-context-query/` | FCA-AI 컨텍스트 모듈/규칙 조회 |
-| `fca-promote/` | test.ts → spec.ts 승격 |
-| `fca-migrate/` | CLAUDE.md → INTENT.md 마이그레이션 |
-| `fca-ast-fallback/` | LLM AST 패턴 매칭 폴백 |
-| `fca-config/` | `.filid/config.json` 설정 관리 (show/set/reset) |
+| `init/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
+| `review/` | 다중 페르소나 합의 기반 코드 리뷰 |
+| `scan/` | FCA-AI 규칙 위반 스캔 |
+| `resolve/` | 리뷰 Fix Request 해결 워크플로우 |
+| `revalidate/` | 수정 후 델타 기반 재검증 |
+| `update/` | 코드-문서-테스트 동기화 |
+| `pull-request/` | FCA-aware PR 자동 생성 |
+| `pipeline/` | PR→리뷰→리졸브→재검증 파이프라인 |
+| `sync/` | 구조 드리프트 감지 및 보정 |
+| `restructure/` | 프랙탈 원칙 기반 구조 재편 |
+| `structure-review/` | 6단계 PR 구조 검증 |
+| `guide/` | 디렉토리별 프랙탈 가이드 생성 |
+| `context-query/` | FCA-AI 컨텍스트 모듈/규칙 조회 |
+| `promote/` | test.ts → spec.ts 승격 |
+| `migrate/` | CLAUDE.md → INTENT.md 마이그레이션 |
+| `ast-fallback/` | LLM AST 패턴 매칭 폴백 |
+| `config/` | `.filid/config.json` 설정 관리 (show/set/reset) |
 
 ## Conventions
 
 - 각 스킬 디렉토리: `SKILL.md` (LLM 프롬프트) + `reference.md` (상세 문서)
-- 스킬 이름: `fca-` 접두사 + kebab-case
+- 스킬 이름: kebab-case
 - SKILL.md는 워크플로우 개요, reference.md는 MCP 도구 시그니처/템플릿 상세
 
 ## Boundaries

@@ -226,10 +226,10 @@ yarn test:run   # 1회 실행
 
 ## 스킬 사용법
 
-### /fca-init — 프로젝트 초기화
+### /init — 프로젝트 초기화
 
 ```
-/fca-init [path]
+/init [path]
 ```
 
 | 옵션   | 기본값 | 설명          |
@@ -239,16 +239,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-init
-/fca-init ./packages/my-app
+/init
+/init ./packages/my-app
 ```
 
 **결과**: fractal 디렉토리에 INTENT.md 생성, organ 디렉토리 건너뜀.
 
-### /fca-scan — 규칙 위반 검출
+### /scan — 규칙 위반 검출
 
 ```
-/fca-scan [path] [--fix]
+/scan [path] [--fix]
 ```
 
 | 옵션    | 기본값 | 설명                       |
@@ -259,17 +259,17 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-scan
-/fca-scan --fix
-/fca-scan ./src --fix
+/scan
+/scan --fix
+/scan ./src --fix
 ```
 
 **결과**: 위반 목록 (severity, 위치, 해결 방법 포함).
 
-### /fca-sync — 문서 동기화
+### /sync — 문서 동기화
 
 ```
-/fca-sync [--dry-run]
+/sync [--dry-run]
 ```
 
 | 옵션        | 기본값 | 설명                    |
@@ -279,16 +279,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-sync
-/fca-sync --dry-run
+/sync
+/sync --dry-run
 ```
 
 **결과**: 변경된 프랙탈의 INTENT.md/DETAIL.md 갱신.
 
-### /fca-update — 문서/구조 갱신
+### /update — 문서/구조 갱신
 
 ```
-/fca-update [path]
+/update [path]
 ```
 
 | 옵션   | 기본값 | 설명          |
@@ -298,16 +298,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-update
-/fca-update ./src/core
+/update
+/update ./src/core
 ```
 
 **결과**: 구조 변경 후 INTENT.md/DETAIL.md 및 관련 문서 갱신.
 
-### /fca-migrate — 구조 마이그레이션
+### /migrate — 구조 마이그레이션
 
 ```
-/fca-migrate [path]
+/migrate [path]
 ```
 
 | 옵션   | 기본값 | 설명          |
@@ -317,16 +317,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-migrate
-/fca-migrate ./packages/legacy
+/migrate
+/migrate ./packages/legacy
 ```
 
 **결과**: 기존 CLAUDE.md/SPEC.md를 INTENT.md/DETAIL.md로 마이그레이션.
 
-### /fca-review — PR 검증 파이프라인
+### /review — PR 검증 파이프라인
 
 ```
-/fca-review [--stage=1-6] [--verbose]
+/review [--stage=1-6] [--verbose]
 ```
 
 | 옵션        | 기본값 | 설명                   |
@@ -337,17 +337,17 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-review
-/fca-review --stage=3
-/fca-review --verbose
+/review
+/review --stage=3
+/review --verbose
 ```
 
 **결과**: 6단계 검증 보고서 (PASS/FAIL + 이슈 목록).
 
-### /fca-promote — 테스트 승격
+### /promote — 테스트 승격
 
 ```
-/fca-promote [path] [--days=90]
+/promote [path] [--days=90]
 ```
 
 | 옵션     | 기본값 | 설명                |
@@ -358,9 +358,9 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-promote
-/fca-promote --days=60
-/fca-promote ./src/core
+/promote
+/promote --days=60
+/promote ./src/core
 ```
 
 **결과**: 승격 후보 목록 + eligible 상태.
@@ -380,10 +380,10 @@ yarn test:run   # 1회 실행
 
 **결과**: 3-Prompt Limit 내에서 답변. 컨텍스트 초과 시 압축 적용.
 
-### /fca-pipeline — 거버넌스 파이프라인 오케스트레이션
+### /pipeline — 거버넌스 파이프라인 오케스트레이션
 
 ```
-/fca-pipeline [--scope=branch|pr|commit] [--base=ref] [--verbose]
+/pipeline [--scope=branch|pr|commit] [--base=ref] [--verbose]
 ```
 
 | 옵션        | 기본값   | 설명                         |
@@ -395,16 +395,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-pipeline
-/fca-pipeline --scope=pr --verbose
+/pipeline
+/pipeline --scope=pr --verbose
 ```
 
-**결과**: `/fca-review` → `/fca-resolve` → `/fca-revalidate` 전체 파이프라인 자동 실행.
+**결과**: `/review` → `/resolve` → `/revalidate` 전체 파이프라인 자동 실행.
 
-### /fca-pull-request — PR 생성 자동화
+### /pull-request — PR 생성 자동화
 
 ```
-/fca-pull-request [--base=ref] [--draft]
+/pull-request [--base=ref] [--draft]
 ```
 
 | 옵션      | 기본값 | 설명              |
@@ -415,16 +415,16 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-pull-request
-/fca-pull-request --draft
+/pull-request
+/pull-request --draft
 ```
 
 **결과**: FCA-AI 검증 통과 후 PR 자동 생성.
 
-### /fca-resolve — 수정 사항 해결
+### /resolve — 수정 사항 해결
 
 ```
-/fca-resolve
+/resolve
 ```
 
 파라미터 없음. 현재 브랜치 자동 감지.
@@ -432,15 +432,15 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-resolve
+/resolve
 ```
 
 **결과**: 각 fix 항목에 대해 수용/거부 선택 → 거부 시 소명 수집 → justifications.md + 부채 파일 생성.
 
-### /fca-revalidate — Delta 재검증
+### /revalidate — Delta 재검증
 
 ```
-/fca-revalidate
+/revalidate
 ```
 
 파라미터 없음. 현재 브랜치 자동 감지.
@@ -448,7 +448,7 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/fca-revalidate
+/revalidate
 ```
 
 **결과**: PASS/FAIL 판정 → re-validate.md 생성. `gh` 인증 시 PR 코멘트 게시.
@@ -464,8 +464,8 @@ yarn test:run   # 1회 실행
 │   ├── verification.md       # Phase B: 기술 검증 결과
 │   ├── review-report.md      # Phase C: 최종 리뷰 보고서
 │   ├── fix-requests.md       # Phase C: 수정 요청 사항
-│   ├── justifications.md     # /fca-resolve: 수용/거부 결정
-│   └── re-validate.md        # /fca-revalidate: PASS/FAIL 판정
+│   ├── justifications.md     # /resolve: 수용/거부 결정
+│   └── re-validate.md        # /revalidate: PASS/FAIL 판정
 └── debt/                  # 기술 부채 (전체 공유, 커밋 대상)
     └── <debt-id>.md          # 개별 부채 항목 (YAML frontmatter)
 ```

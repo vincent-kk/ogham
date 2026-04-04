@@ -24,7 +24,7 @@ Circular dependencies cause initialization ordering issues, make modules impossi
 > which is not available at the individual node evaluation level.
 >
 > Full circular dependency detection is performed by `dependency-graph.ts` (`detectCycles()`) at the project-analyzer level.
-> Use the `fca-scan` skill or `project-analyzer` MCP tool to detect project-wide cycles.
+> Use the `filid:scan` skill or `project-analyzer` MCP tool to detect project-wide cycles.
 
 ### Full Detection (via project-analyzer)
 

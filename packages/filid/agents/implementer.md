@@ -125,5 +125,5 @@ After completing work:
 
 ## Skill Participation
 
-- `/filid:fca-promote` — Phase 4 (spec generation) and Phase 6 (migration: write spec.ts, remove test.ts).
-- `/filid:fca-update` — Stage 3: test organization (test.ts / spec.ts update for changed files).
+- `/filid:promote` — Phase 4 (spec generation) and Phase 6 (migration: write spec.ts, remove test.ts).
+- `/filid:update` — Stage 3: test organization (test.ts / spec.ts update for changed files).

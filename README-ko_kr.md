@@ -27,7 +27,7 @@ claude plugin install maencof
 
 이것으로 끝입니다. 모든 컴포넌트(Skills, MCP 도구, Agents, Hooks)가 자동으로 등록되며, 별도의 설정이 필요 없습니다.
 
-> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:fca-init`을 입력하면 프로젝트에 FCA-AI를 초기화합니다.
+> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:init`을 입력하면 프로젝트에 FCA-AI를 초기화합니다.
 
 ---
 
@@ -43,7 +43,7 @@ claude plugin install maencof
 
 | 컴포넌트  | 수량 | 예시                                                       |
 | --------- | ---- | ---------------------------------------------------------- |
-| Skills    | 14   | `/filid:fca-init`, `/filid:fca-review`, `/filid:fca-scan` |
+| Skills    | 14   | `/filid:init`, `/filid:review`, `/filid:scan` |
 | MCP 도구  | 14   | 구조 분석, 드리프트 감지, 메트릭                           |
 | Agents    | 7    | Architect, Implementer, QA Reviewer 등                     |
 | Hooks     | 6    | 줄 수 제한 자동 검사, organ 보호, 규칙 주입                |
@@ -57,13 +57,13 @@ claude plugin install maencof
 
 ```
 # 프로젝트에 FCA-AI 초기화
-/filid:fca-init
+/filid:init
 
 # 규칙 위반 스캔
-/filid:fca-scan
+/filid:scan
 
 # 현재 브랜치에 대해 다중 페르소나 코드 리뷰 실행
-/filid:fca-review
+/filid:review
 ```
 
 자세한 문서는 [filid README (영문)](./packages/filid/README.md) 또는 [filid README (한글)](./packages/filid/README-ko_kr.md)을 참조하세요.

@@ -83,8 +83,8 @@ describe('cache-manager', () => {
 
     const { saveRunHash, getLastRunHash } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
-    saveRunHash('/proj', 'fca-review', 'abc123');
-    const result = getLastRunHash('/proj', 'fca-review');
+    saveRunHash('/proj', 'review', 'abc123');
+    const result = getLastRunHash('/proj', 'review');
     expect(result).toBe('abc123');
   });
 
@@ -212,7 +212,7 @@ describe('cache-manager', () => {
     });
     const { getLastRunHash } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
-    expect(getLastRunHash('/proj', 'fca-scan')).toBeNull();
+    expect(getLastRunHash('/proj', 'scan')).toBeNull();
   });
 
   // Test 15: computeProjectHash — deterministic hash for same fast-glob result
