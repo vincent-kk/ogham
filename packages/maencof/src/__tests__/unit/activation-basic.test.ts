@@ -5,11 +5,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { buildAdjacencyList } from '../../core/graph-builder.js';
+import { buildAdjacencyList } from '../../core/graph-builder/graph-builder.js';
 import {
   SpreadingActivationEngine,
   runSpreadingActivation,
-} from '../../core/spreading-activation.js';
+} from '../../core/spreading-activation/spreading-activation.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type {

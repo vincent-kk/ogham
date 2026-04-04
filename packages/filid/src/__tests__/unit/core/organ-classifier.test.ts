@@ -4,7 +4,7 @@ import {
   KNOWN_ORGAN_DIR_NAMES,
   classifyNode,
   isInfraOrgDirectoryByPattern,
-} from '../../../core/tree/organ-classifier.js';
+} from '../../../core/tree/organ-classifier/organ-classifier.js';
 
 describe('organ-classifier', () => {
   describe('isInfraOrgDirectoryByPattern', () => {

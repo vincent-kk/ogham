@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { handleDocCompress } from '../../../mcp/tools/doc-compress.js';
+import { handleDocCompress } from '../../../mcp/tools/doc-compress/doc-compress.js';
 
 describe('doc-compress tool', () => {
   describe('mode: reversible', () => {

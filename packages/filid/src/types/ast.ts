@@ -1,6 +1,12 @@
+import type * as AstGrepNapi from '@ast-grep/napi';
+
 /**
  * AST analysis type definitions for TypeScript/JavaScript source parsing
  */
+
+export type SgModule = typeof AstGrepNapi;
+/** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
+export type NapiLang = Parameters<SgModule['parse']>[0];
 
 /** Import declaration info */
 export interface ImportInfo {

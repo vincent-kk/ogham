@@ -9,7 +9,7 @@ import {
   extractKeywords,
   jaccardSimilarity,
   normalizeTags,
-} from '../../core/tag-similarity.js';
+} from '../../core/tag-similarity/tag-similarity.js';
 
 describe('normalizeTags', () => {
   it('소문자로 변환하고 중복을 제거한다', () => {

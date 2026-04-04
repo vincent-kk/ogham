@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { handleTestMetrics } from '../../../mcp/tools/test-metrics.js';
+import { handleTestMetrics } from '../../../mcp/tools/test-metrics/test-metrics.js';
 
 describe('test-metrics tool', () => {
   describe('action: count', () => {

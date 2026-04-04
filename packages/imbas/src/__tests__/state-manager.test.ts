@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createRunState, applyTransition } from '../core/state-manager.js';
+import { createRunState, applyTransition } from '../core/state-manager/state-manager.js';
 import type { RunState } from '../types/state.js';
 
 // --- Helpers ---

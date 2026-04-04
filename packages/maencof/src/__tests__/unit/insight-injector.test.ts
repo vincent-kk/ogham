@@ -7,18 +7,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   getSessionCaptureCount,
   readInsightConfig,
-} from '../../core/insight-stats.js';
-import { runInsightInjector } from '../../hooks/insight-injector.js';
-import { isMaencofVault } from '../../hooks/shared.js';
+} from '../../core/insight-stats/insight-stats.js';
+import { runInsightInjector } from '../../hooks/insight-injector/insight-injector.js';
+import { isMaencofVault } from '../../hooks/shared/shared.js';
 import { DEFAULT_INSIGHT_CONFIG } from '../../types/insight.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
-vi.mock('../../hooks/shared.js', () => ({
+vi.mock('../../hooks/shared/shared.js', () => ({
   isMaencofVault: vi.fn(),
 }));
 
-vi.mock('../../core/insight-stats.js', () => ({
+vi.mock('../../core/insight-stats/insight-stats.js', () => ({
   readInsightConfig: vi.fn(),
   getSessionCaptureCount: vi.fn(),
 }));

@@ -4,6 +4,7 @@
  */
 import {
   existsSync,
+  mkdtempSync,
   mkdirSync,
   readFileSync,
   rmSync,
@@ -18,15 +19,14 @@ import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
   mergeMaencofSection,
-} from '../../core/claude-md-merger.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
 
 /** 테스트용 임시 디렉토리 */
 let testDir: string;
 let claudeMdPath: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-test-${Date.now()}`);
-  mkdirSync(testDir, { recursive: true });
+  testDir = mkdtempSync(join(tmpdir(), 'maencof-test-'));
   claudeMdPath = join(testDir, 'CLAUDE.md');
 });
 

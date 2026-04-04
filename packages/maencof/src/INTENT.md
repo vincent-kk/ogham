@@ -2,20 +2,22 @@
 
 maencof 플러그인 소스 루트. 5-Layer Knowledge Model v2 기반 개인 지식 공간 관리자.
 
-## Always do
+## Boundaries
+
+### Always do
 
 - types/ 중앙 타입을 import하여 사용
 - core/ 모듈은 순수 함수로 유지 (VaultScanner I/O 예외)
 - index.ts barrel export를 통해 외부 공개
 - hooks/ 추가 시 config-registry.ts에 등록하고 bridge/ 스크립트 빌드 확인
 
-## Ask first
+### Ask first
 
 - 새 core/ 모듈 추가 시 index.ts export 갱신 필요 여부
 - MCP 도구 추가 시 server.ts 등록 + Zod 스키마 + types/mcp.ts 타입 정의
 - 아키텍처 버전(EXPECTED_ARCHITECTURE_VERSION) 변경 시 마이그레이션 로직 필요 여부
 
-## Never do
+### Never do
 
 - hooks/ 진입점 파일을 직접 import하지 않음 (esbuild 진입점)
 - core/ 모듈에서 mcp/ 또는 hooks/ 직접 의존

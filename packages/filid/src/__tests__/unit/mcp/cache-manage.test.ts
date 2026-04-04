@@ -3,21 +3,21 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   getLastRunHash,
   saveRunHash,
-} from '../../../core/infra/cache-manager.js';
-import { computeProjectHash } from '../../../core/infra/project-hash.js';
-import { handleCacheManage } from '../../../mcp/tools/cache-manage.js';
+} from '../../../core/infra/cache-manager/cache-manager.js';
+import { computeProjectHash } from '../../../core/infra/project-hash/project-hash.js';
+import { handleCacheManage } from '../../../mcp/tools/cache-manage/cache-manage.js';
 import type {
   ComputeHashResult,
   GetHashResult,
   SaveHashResult,
-} from '../../../mcp/tools/cache-manage.js';
+} from '../../../mcp/tools/cache-manage/cache-manage.js';
 
-vi.mock('../../../core/infra/cache-manager.js', () => ({
+vi.mock('../../../core/infra/cache-manager/cache-manager.js', () => ({
   saveRunHash: vi.fn(),
   getLastRunHash: vi.fn(() => null),
 }));
 
-vi.mock('../../../core/infra/project-hash.js', () => ({
+vi.mock('../../../core/infra/project-hash/project-hash.js', () => ({
   computeProjectHash: vi.fn(async () => 'abcd1234efgh5678'),
 }));
 

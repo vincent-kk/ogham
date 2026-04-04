@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractDependencies } from '../../../ast/dependency-extractor.js';
+import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 
 describe('dependency-extractor', () => {
   it('should extract named imports', async () => {

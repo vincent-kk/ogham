@@ -8,8 +8,8 @@ import {
   removeFractalMap,
   writeBoundary,
   writeFractalMap,
-} from '../../../core/infra/cache-manager.js';
-import { injectIntent } from '../../../hooks/intent-injector.js';
+} from '../../../core/infra/cache-manager/cache-manager.js';
+import { injectIntent } from '../../../hooks/intent-injector/intent-injector.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------

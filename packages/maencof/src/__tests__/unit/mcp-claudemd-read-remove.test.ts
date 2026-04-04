@@ -11,9 +11,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
-} from '../../core/claude-md-merger.js';
-import { handleClaudeMdRead } from '../../mcp/tools/claudemd-read.js';
-import { handleClaudeMdRemove } from '../../mcp/tools/claudemd-remove.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
+import { handleClaudeMdRead } from '../../mcp/tools/claudemd-read/claudemd-read.js';
+import { handleClaudeMdRemove } from '../../mcp/tools/claudemd-remove/claudemd-remove.js';
 
 let testDir: string;
 

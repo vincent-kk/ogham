@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeEffectiveLayers, filterResultsByLayer } from '../filter/layer-guard.js';
+import { computeEffectiveLayers, filterResultsByLayer } from '../filter/layer-guard/layer-guard.js';
 
 describe('computeEffectiveLayers', () => {
   it('returns vault layers when no tool filter', () => {

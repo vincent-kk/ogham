@@ -44,6 +44,8 @@ export type {
 } from './hooks.js';
 
 export type {
+  SgModule,
+  NapiLang,
   ImportInfo,
   ExportInfo,
   CallInfo,

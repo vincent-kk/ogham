@@ -4,9 +4,9 @@
  */
 import { bench, describe } from 'vitest';
 
-import { buildGraph } from '../../core/graph-builder.js';
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
-import { resolveSeedNodes } from '../../search/query-engine.js';
+import { buildGraph } from '../../core/graph-builder/graph-builder.js';
+import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
+import { resolveSeedNodes } from '../../search/query-engine/query-engine.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';

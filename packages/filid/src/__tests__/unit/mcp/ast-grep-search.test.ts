@@ -4,11 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { handleAstGrepSearch } from '../../../mcp/tools/ast-grep-search.js';
+import { handleAstGrepSearch } from '../../../mcp/tools/ast-grep-search/ast-grep-search.js';
 import type {
   AstGrepSearchError,
   AstGrepSearchResult,
-} from '../../../mcp/tools/ast-grep-search.js';
+} from '../../../mcp/tools/ast-grep-search/ast-grep-search.js';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 

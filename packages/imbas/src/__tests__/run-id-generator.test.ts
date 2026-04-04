@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
-import { generateRunId } from '../core/run-id-generator.js';
+import { generateRunId } from '../core/run-id-generator/run-id-generator.js';
 
 const dirs: string[] = [];
 

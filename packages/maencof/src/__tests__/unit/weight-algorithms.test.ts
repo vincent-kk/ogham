@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import {
   calculateWeights,
   computePageRank,
-} from '../../core/weight-calculator.js';
+} from '../../core/weight-calculator/weight-calculator.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

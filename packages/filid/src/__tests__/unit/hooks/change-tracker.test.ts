@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { ChangeQueue } from '../../../core/infra/change-queue.js';
-import { trackChange } from '../../../hooks/change-tracker.js';
+import { ChangeQueue } from '../../../core/infra/change-queue/change-queue.js';
+import { trackChange } from '../../../hooks/change-tracker/change-tracker.js';
 import type { PostToolUseInput } from '../../../types/hooks.js';
 
 const baseInput: PostToolUseInput = {

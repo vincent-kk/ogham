@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runSessionStart } from '../../hooks/session-start.js';
+import { runSessionStart } from '../../hooks/session-start/session-start.js';
 
 const CONNECT_MSG =
   '[maencof] No external data sources connected. Run `/maencof:connect` to set up.';

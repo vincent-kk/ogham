@@ -9,7 +9,7 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 const { isFcaProject, isIntentMd, isDetailMd } =
-  await import('../../../hooks/shared.js');
+  await import('../../../hooks/shared/shared.js');
 const { existsSync } = await import('node:fs');
 
 describe('shared hooks utilities', () => {

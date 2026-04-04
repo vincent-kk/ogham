@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { summarizeLossy } from '../../../compress/lossy-summarizer.js';
+import { summarizeLossy } from '../../../compress/lossy-summarizer/lossy-summarizer.js';
 
 describe('lossy-summarizer', () => {
   it('should merge multiple tool call entries into a summary', () => {

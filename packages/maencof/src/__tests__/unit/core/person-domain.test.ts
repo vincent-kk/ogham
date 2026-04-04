@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { parseDocument } from '../../../core/document-parser.js';
+import { parseDocument } from '../../../core/document-parser/document-parser.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

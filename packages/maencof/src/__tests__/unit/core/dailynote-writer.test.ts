@@ -17,7 +17,7 @@ import {
   getDailynoteDir,
   getDailynotePath,
   parseDailynote,
-} from '../../../core/dailynote-writer.js';
+} from '../../../core/dailynote-writer/dailynote-writer.js';
 import type { DailynoteEntry } from '../../../types/dailynote.js';
 
 function createTempVault(): string {

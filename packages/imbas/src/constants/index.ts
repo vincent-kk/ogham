@@ -20,3 +20,16 @@ export {
   LOGGER_PREFIX,
   DEFAULT_CACHE_TTL_HOURS,
 } from './pipeline.js';
+
+export {
+  AST_MAX_FILES,
+  AST_EXCLUDED_DIRS,
+  SUPPORTED_LANGUAGES,
+  EXT_TO_LANG,
+} from './ast.js';
+
+export {
+  STDIN_TIMEOUT_MS,
+  AST_SEARCH_MAX_RESULTS,
+  DEFAULT_ANONYMOUS_PATH,
+} from './defaults.js';

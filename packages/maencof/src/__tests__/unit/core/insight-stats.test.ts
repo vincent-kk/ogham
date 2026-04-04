@@ -18,7 +18,7 @@ import {
   readInsightStats,
   readPendingNotification,
   writeInsightConfig,
-} from '../../../core/insight-stats.js';
+} from '../../../core/insight-stats/insight-stats.js';
 import {
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,

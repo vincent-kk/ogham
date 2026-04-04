@@ -14,13 +14,7 @@ export const RelationshipTypeEnum = z.enum([
   'acquaintance', // 대칭 (양방향)
 ]);
 
-/** 대칭 관계 유형 목록 (양방향 엣지 생성용) */
-export const SYMMETRIC_RELATIONSHIPS = [
-  'friend',
-  'family',
-  'colleague',
-  'acquaintance',
-] as const;
+export { SYMMETRIC_RELATIONSHIPS } from '../constants/validation-sets.js';
 
 /** PersonSchema — Person 전용 메타데이터 */
 export const PersonSchema = z.object({

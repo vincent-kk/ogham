@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { handleFractalScan } from '../../../mcp/tools/fractal-scan.js';
+import { handleFractalScan } from '../../../mcp/tools/fractal-scan/fractal-scan.js';
 
 describe('fractal-scan tool — nodesList', () => {
   it('should include nodesList as an array in the scan result', async () => {

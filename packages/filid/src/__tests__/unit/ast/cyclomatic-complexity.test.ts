@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculateCC } from '../../../ast/cyclomatic-complexity.js';
+import { calculateCC } from '../../../ast/cyclomatic-complexity/cyclomatic-complexity.js';
 
 describe('cyclomatic-complexity', () => {
   it('should return 1 for a simple function with no branches', async () => {

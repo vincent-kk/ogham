@@ -18,24 +18,4 @@ export interface ScanOptions {
   followSymlinks?: boolean;
 }
 
-/** 기본 스캔 옵션 (내장 하드코딩, 외부 설정 파일 없음) */
-export const DEFAULT_SCAN_OPTIONS: Required<ScanOptions> = {
-  include: ['**'],
-  exclude: [
-    '**/node_modules/**',
-    '**/.git/**',
-    '**/dist/**',
-    '**/build/**',
-    '**/coverage/**',
-    '**/docs/**',
-    '**/scripts/**',
-    '**/.filid/**',
-    '**/.claude/**',
-    '**/.omc/**',
-    '**/.metadata/**',
-    '**/next/**',
-    '**/bridge/**',
-  ],
-  maxDepth: 10,
-  followSymlinks: false,
-};
+export { DEFAULT_SCAN_OPTIONS } from '../constants/scan-defaults.js';

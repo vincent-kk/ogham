@@ -4,11 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { handleAstGrepReplace } from '../../../mcp/tools/ast-grep-replace.js';
+import { handleAstGrepReplace } from '../../../mcp/tools/ast-grep-replace/ast-grep-replace.js';
 import type {
   AstGrepReplaceError,
   AstGrepReplaceResult,
-} from '../../../mcp/tools/ast-grep-replace.js';
+} from '../../../mcp/tools/ast-grep-replace/ast-grep-replace.js';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 

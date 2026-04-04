@@ -4,11 +4,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { calculateCC } from '../../ast/cyclomatic-complexity.js';
-import { extractDependencies } from '../../ast/dependency-extractor.js';
-import { calculateLCOM4 } from '../../ast/lcom4.js';
-import { computeTreeDiff } from '../../ast/tree-diff.js';
-import { decide } from '../../metrics/decision-tree.js';
+import { calculateCC } from '../../ast/cyclomatic-complexity/cyclomatic-complexity.js';
+import { extractDependencies } from '../../ast/dependency-extractor/dependency-extractor.js';
+import { calculateLCOM4 } from '../../ast/lcom4/lcom4.js';
+import { computeTreeDiff } from '../../ast/tree-diff/tree-diff.js';
+import { decide } from '../../metrics/decision-tree/decision-tree.js';
 
 describe('sync pipeline', () => {
   const oldSource = `

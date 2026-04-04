@@ -8,8 +8,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runSessionEnd } from '../../hooks/session-end.js';
-import { runSessionStart } from '../../hooks/session-start.js';
+import { runSessionEnd } from '../../hooks/session-end/session-end.js';
+import { runSessionStart } from '../../hooks/session-start/session-start.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {

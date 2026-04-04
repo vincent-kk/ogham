@@ -1,0 +1,5 @@
+export const FULL_REBUILD_THRESHOLD = 0.1;
+
+export const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
+
+export const STALE_THRESHOLD_PERCENT = 10;

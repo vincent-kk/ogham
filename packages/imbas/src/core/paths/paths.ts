@@ -1,0 +1,43 @@
+/**
+ * @file core/paths.ts
+ * @description Path resolution for .imbas/ directory structure
+ */
+
+import { join } from 'node:path';
+
+import { IMBAS_ROOT_DIRNAME, RUNS_DIRNAME } from '../../constants/index.js';
+
+/** Returns root .imbas/ directory */
+export function getImbasRoot(cwd: string): string {
+  return join(cwd, IMBAS_ROOT_DIRNAME);
+}
+
+/** Returns .imbas/<KEY>/ */
+export function getProjectDir(cwd: string, projectKey: string): string {
+  return join(getImbasRoot(cwd), projectKey);
+}
+
+/** Returns .imbas/<KEY>/cache/ */
+export function getCacheDir(cwd: string, projectKey: string): string {
+  return join(getProjectDir(cwd, projectKey), 'cache');
+}
+
+/** Returns .imbas/<KEY>/runs/ */
+export function getRunsDir(cwd: string, projectKey: string): string {
+  return join(getProjectDir(cwd, projectKey), RUNS_DIRNAME);
+}
+
+/** Returns .imbas/<KEY>/runs/<runId>/ */
+export function getRunDir(cwd: string, projectKey: string, runId: string): string {
+  return join(getRunsDir(cwd, projectKey), runId);
+}
+
+/** Returns .imbas/.temp/ */
+export function getTempDir(cwd: string): string {
+  return join(getImbasRoot(cwd), '.temp');
+}
+
+/** Returns .imbas/.temp/<filename>/ */
+export function getMediaDir(cwd: string, filename: string): string {
+  return join(getTempDir(cwd), filename);
+}

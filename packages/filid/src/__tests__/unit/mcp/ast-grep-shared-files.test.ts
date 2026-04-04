@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { getFilesForLanguage } from '../../../ast/ast-grep-shared.js';
+import { getFilesForLanguage } from '../../../ast/ast-grep-shared/ast-grep-shared.js';
 
 // ─── getFilesForLanguage ────────────────────────────────────────────────────
 

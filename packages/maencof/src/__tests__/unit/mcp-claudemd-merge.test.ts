@@ -17,8 +17,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
-} from '../../core/claude-md-merger.js';
-import { handleClaudeMdMerge } from '../../mcp/tools/claudemd-merge.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
+import { handleClaudeMdMerge } from '../../mcp/tools/claudemd-merge/claudemd-merge.js';
 
 let testDir: string;
 

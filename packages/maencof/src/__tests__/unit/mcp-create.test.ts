@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

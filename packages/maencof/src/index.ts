@@ -13,13 +13,13 @@ export {
   computeChangeSet,
   scanIncrementalChanges,
   readVaultFile,
-} from './core/vault-scanner.js';
+} from './core/vault-scanner/vault-scanner.js';
 export type {
   ScannedFile,
   FileSnapshot,
   ChangeSet,
   VaultScanOptions,
-} from './core/vault-scanner.js';
+} from './core/vault-scanner/vault-scanner.js';
 
 export {
   parseYamlFrontmatter,
@@ -28,28 +28,28 @@ export {
   parseDocument,
   buildKnowledgeNode,
   parseDocumentFromFile,
-} from './core/document-parser.js';
+} from './core/document-parser/document-parser.js';
 export type {
   MarkdownLink,
   ParsedDocument,
   NodeBuildResult,
-} from './core/document-parser.js';
+} from './core/document-parser/document-parser.js';
 
 export {
   buildGraph,
   buildAdjacencyList,
   detectOrphans,
-} from './core/graph-builder.js';
+} from './core/graph-builder/graph-builder.js';
 export type {
   GraphBuilderOptions,
   GraphBuildResult,
-} from './core/graph-builder.js';
+} from './core/graph-builder/graph-builder.js';
 
 export {
   convertToDAG,
   applyLayerDirectionality,
-} from './core/dag-converter.js';
-export type { DAGConvertResult } from './core/dag-converter.js';
+} from './core/dag-converter/dag-converter.js';
+export type { DAGConvertResult } from './core/dag-converter/dag-converter.js';
 
 export {
   calculateWeights,
@@ -57,24 +57,24 @@ export {
   normalizeWeights,
   getLayerDecay,
   LAYER_DECAY_FACTORS,
-} from './core/weight-calculator.js';
-export type { WeightCalcResult } from './core/weight-calculator.js';
+} from './core/weight-calculator/weight-calculator.js';
+export type { WeightCalcResult } from './core/weight-calculator/weight-calculator.js';
 
 export {
   runSpreadingActivation,
   SpreadingActivationEngine,
-} from './core/spreading-activation.js';
-export type { SpreadingActivationParams } from './core/spreading-activation.js';
+} from './core/spreading-activation/spreading-activation.js';
+export type { SpreadingActivationParams } from './core/spreading-activation/spreading-activation.js';
 
 export {
   CommunityDetector,
   detectCommunities,
-} from './core/community-detector.js';
+} from './core/community-detector/community-detector.js';
 export type {
   Community,
   CommunityDetectionResult,
   CommunityDetectorParams,
-} from './core/community-detector.js';
+} from './core/community-detector/community-detector.js';
 
 export {
   mergeMaencofSection,
@@ -83,11 +83,11 @@ export {
   ClaudeMdMerger,
   MAENCOF_START_MARKER,
   MAENCOF_END_MARKER,
-} from './core/claude-md-merger.js';
-export type { MergeResult } from './core/claude-md-merger.js';
+} from './core/claude-md-merger/claude-md-merger.js';
+export type { MergeResult } from './core/claude-md-merger/claude-md-merger.js';
 
-export { deduplicateContent } from './core/content-dedup.js';
-export type { DeduplicateResult } from './core/content-dedup.js';
+export { deduplicateContent } from './core/content-dedup/content-dedup.js';
+export type { DeduplicateResult } from './core/content-dedup/content-dedup.js';
 
 // Search modules
 export {
@@ -95,24 +95,24 @@ export {
   resolveSeedNodes,
   QueryEngine,
   invalidateQueryCache,
-} from './search/query-engine.js';
+} from './search/query-engine/query-engine.js';
 export type {
   QueryOptions,
   QueryResult,
   ScoredSeed,
   MatchType,
-} from './search/query-engine.js';
+} from './search/query-engine/query-engine.js';
 
 export {
   assembleContext,
   extractBestSnippet,
   ContextAssembler,
-} from './search/context-assembler.js';
+} from './search/context-assembler/context-assembler.js';
 export type {
   ContextItem,
   AssembleOptions,
   AssembledContext,
-} from './search/context-assembler.js';
+} from './search/context-assembler/context-assembler.js';
 
 // Index modules
 export {
@@ -120,13 +120,13 @@ export {
   deserializeGraph,
   MetadataStore,
   CACHE_FILES,
-} from './index/metadata-store.js';
+} from './core/indexer/metadata-store/metadata-store.js';
 export type {
   SnapshotEntry,
   FileSnapshot as CacheSnapshot,
   WeightsData,
   StaleNodes,
-} from './index/metadata-store.js';
+} from './core/indexer/metadata-store/metadata-store.js';
 
 export {
   computeChangeSet as computeIncrementalChangeSet,
@@ -134,30 +134,30 @@ export {
   computeIncrementalScope,
   createSnapshot as createIncrementalSnapshot,
   IncrementalTracker,
-} from './index/incremental-tracker.js';
+} from './core/indexer/incremental-tracker/incremental-tracker.js';
 export type {
   ChangeSet as IncrementalChangeSet,
   IncrementalScope,
   CurrentFileInfo,
-} from './index/incremental-tracker.js';
+} from './core/indexer/incremental-tracker/incremental-tracker.js';
 
 // MCP modules
-export { createServer, startServer } from './mcp/server.js';
+export { createServer, startServer } from './mcp/server/server.js';
 export {
   removeBacklinks,
   getBacklinks,
   toolResult,
   toolError,
   mapReplacer,
-} from './mcp/shared.js';
-export { handleMaencofCreate } from './mcp/tools/maencof-create.js';
-export { handleMaencofRead } from './mcp/tools/maencof-read.js';
-export { handleMaencofUpdate } from './mcp/tools/maencof-update.js';
-export { handleMaencofDelete } from './mcp/tools/maencof-delete.js';
-export { handleMaencofMove } from './mcp/tools/maencof-move.js';
-export { handleKgSearch } from './mcp/tools/kg-search.js';
-export { handleKgNavigate } from './mcp/tools/kg-navigate.js';
-export { handleKgContext } from './mcp/tools/kg-context.js';
-export { handleKgStatus } from './mcp/tools/kg-status.js';
-export { handleKgBuild } from './mcp/tools/kg-build.js';
-export type { KgBuildInput, KgBuildResult } from './mcp/tools/kg-build.js';
+} from './mcp/shared/shared.js';
+export { handleMaencofCreate } from './mcp/tools/maencof-create/maencof-create.js';
+export { handleMaencofRead } from './mcp/tools/maencof-read/maencof-read.js';
+export { handleMaencofUpdate } from './mcp/tools/maencof-update/maencof-update.js';
+export { handleMaencofDelete } from './mcp/tools/maencof-delete/maencof-delete.js';
+export { handleMaencofMove } from './mcp/tools/maencof-move/maencof-move.js';
+export { handleKgSearch } from './mcp/tools/kg-search/kg-search.js';
+export { handleKgNavigate } from './mcp/tools/kg-navigate/kg-navigate.js';
+export { handleKgContext } from './mcp/tools/kg-context/kg-context.js';
+export { handleKgStatus } from './mcp/tools/kg-status/kg-status.js';
+export { handleKgBuild } from './mcp/tools/kg-build/kg-build.js';
+export type { KgBuildInput, KgBuildResult } from './mcp/tools/kg-build/kg-build.js';

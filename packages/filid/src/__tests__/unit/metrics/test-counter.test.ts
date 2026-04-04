@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   type RawTestFile,
   countTestCases,
-} from '../../../metrics/test-counter.js';
+} from '../../../metrics/test-counter/test-counter.js';
 
 describe('test-counter', () => {
   it('should count top-level it() calls as basic tests', () => {

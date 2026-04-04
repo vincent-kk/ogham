@@ -6,7 +6,7 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleReviewManage } from '../../../mcp/tools/review-manage.js';
+import { handleReviewManage } from '../../../mcp/tools/review-manage/review-manage.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { validatePreToolUse } from '../../../hooks/pre-tool-validator.js';
+import { validatePreToolUse } from '../../../hooks/pre-tool-validator/pre-tool-validator.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 import {
   generateClaudeMdContent,

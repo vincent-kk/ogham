@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { injectContext } from '../../../hooks/context-injector.js';
+import { injectContext } from '../../../hooks/context-injector/context-injector.js';
 import { generateUserPromptInput } from '../fixtures/generator.js';
 
 // pre-generate inputs per tier

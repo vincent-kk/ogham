@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeTreeDiff } from '../../../ast/tree-diff.js';
+import { computeTreeDiff } from '../../../ast/tree-diff/tree-diff.js';
 
 describe('tree-diff', () => {
   it('should detect no changes for identical source', async () => {

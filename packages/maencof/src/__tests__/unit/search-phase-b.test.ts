@@ -4,11 +4,11 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { buildAdjacencyList } from '../../core/graph-builder.js';
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
-import { handleKgContext } from '../../mcp/tools/kg-context.js';
-import { extractBestSnippet } from '../../search/context-assembler.js';
-import { query, resolveSeedNodes } from '../../search/query-engine.js';
+import { buildAdjacencyList } from '../../core/graph-builder/graph-builder.js';
+import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
+import { handleKgContext } from '../../mcp/tools/kg-context/kg-context.js';
+import { extractBestSnippet } from '../../search/context-assembler/context-assembler.js';
+import { query, resolveSeedNodes } from '../../search/query-engine/query-engine.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -374,13 +374,13 @@ describe('B6: Turn Context Directive', () => {
   it('buildTurnContext에 kg_context snippet 언급이 포함되어야 한다', async () => {
     // We test the directive text directly from the module
     const { buildTurnContext } =
-      await import('../../hooks/turn-context-builder.js');
+      await import('../../hooks/turn-context-builder/turn-context-builder.js');
     // buildTurnContext needs a CWD with .maencof — mock by using a non-vault dir
     // The directive text is hardcoded so we can verify it from the source
     const fs = await import('node:fs');
     const source = fs.readFileSync(
       new URL(
-        '../../hooks/turn-context-builder.ts',
+        '../../hooks/turn-context-builder/turn-context-builder.ts',
         import.meta.url,
       ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
       'utf-8',
@@ -393,7 +393,7 @@ describe('B6: Turn Context Directive', () => {
     const fs = await import('node:fs');
     const source = fs.readFileSync(
       new URL(
-        '../../hooks/context-injector.ts',
+        '../../hooks/context-injector/context-injector.ts',
         import.meta.url,
       ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
       'utf-8',

@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   readFractalMap,
   writeFractalMap,
-} from '../../../core/infra/cache-manager.js';
-import { handleUserPromptSubmit } from '../../../hooks/user-prompt-submit.js';
+} from '../../../core/infra/cache-manager/cache-manager.js';
+import { handleUserPromptSubmit } from '../../../hooks/user-prompt-submit/user-prompt-submit.js';
 import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 
 let tempDir: string;

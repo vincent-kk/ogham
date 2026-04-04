@@ -11,7 +11,7 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { enforceAgentRole } = await import('../../../hooks/agent-enforcer.js');
+const { enforceAgentRole } = await import('../../../hooks/agent-enforcer/agent-enforcer.js');
 const { existsSync } = await import('node:fs');
 
 const baseInput: SubagentStartInput = {

@@ -9,18 +9,18 @@ import {
   getSessionCaptureCount,
   incrementInsightStats,
   readInsightConfig,
-} from '../../core/insight-stats.js';
-import { handleCaptureInsight } from '../../mcp/tools/maencof-capture-insight.js';
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
+} from '../../core/insight-stats/insight-stats.js';
+import { handleCaptureInsight } from '../../mcp/tools/maencof-capture-insight/maencof-capture-insight.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
 import { DEFAULT_INSIGHT_CONFIG } from '../../types/insight.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
-vi.mock('../../mcp/tools/maencof-create.js', () => ({
+vi.mock('../../mcp/tools/maencof-create/maencof-create.js', () => ({
   handleMaencofCreate: vi.fn(),
 }));
 
-vi.mock('../../core/insight-stats.js', () => ({
+vi.mock('../../core/insight-stats/insight-stats.js', () => ({
   readInsightConfig: vi.fn(),
   getSessionCaptureCount: vi.fn(),
   incrementInsightStats: vi.fn(),

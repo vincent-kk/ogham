@@ -5,11 +5,11 @@ import os from 'node:os';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { StoriesManifestSchema, DevplanManifestSchema } from '../../types/manifest.js';
-import { handleRunCreate } from '../../mcp/tools/run-create.js';
-import { handleRunTransition } from '../../mcp/tools/run-transition.js';
-import { handleManifestSave } from '../../mcp/tools/manifest-save.js';
-import { handleManifestValidate } from '../../mcp/tools/manifest-validate.js';
-import { handleManifestGet } from '../../mcp/tools/manifest-get.js';
+import { handleRunCreate } from '../../mcp/tools/run-create/run-create.js';
+import { handleRunTransition } from '../../mcp/tools/run-transition/run-transition.js';
+import { handleManifestSave } from '../../mcp/tools/manifest-save/manifest-save.js';
+import { handleManifestValidate } from '../../mcp/tools/manifest-validate/manifest-validate.js';
+import { handleManifestGet } from '../../mcp/tools/manifest-get/manifest-get.js';
 
 const require = createRequire(import.meta.url);
 const goldenStories = require('./fixtures/golden-stories-manifest.json');

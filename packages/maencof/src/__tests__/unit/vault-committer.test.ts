@@ -9,12 +9,12 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { generateCommitMessage } from '../../hooks/git-utils.js';
+import { generateCommitMessage } from '../../hooks/git-utils/git-utils.js';
 import {
   isClearCommand,
   readVaultCommitConfig,
   runVaultCommitter,
-} from '../../hooks/vault-committer.js';
+} from '../../hooks/vault-committer/vault-committer.js';
 
 // ── Mock child_process ───────────────────────────────────────────────
 

@@ -22,10 +22,10 @@ import {
   MAENCOF_START_MARKER,
   mergeMaencofSection,
   readMaencofSection,
-} from '../../core/claude-md-merger.js';
-import { handleKgBuild } from '../../mcp/tools/kg-build.js';
-import { handleKgStatus } from '../../mcp/tools/kg-status.js';
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
+import { handleKgBuild } from '../../mcp/tools/kg-build/kg-build.js';
+import { handleKgStatus } from '../../mcp/tools/kg-status/kg-status.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
 import type { SetupProgress, SetupStep } from '../../types/setup.js';
 
 async function makeTempVault(): Promise<string> {

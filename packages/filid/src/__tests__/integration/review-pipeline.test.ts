@@ -4,12 +4,12 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { validatePreToolUse } from '../../hooks/pre-tool-validator.js';
-import { guardStructure } from '../../hooks/structure-guard.js';
-import { decide } from '../../metrics/decision-tree.js';
-import { checkPromotionEligibility } from '../../metrics/promotion-tracker.js';
-import { countTestCases } from '../../metrics/test-counter.js';
-import { check312Rule } from '../../metrics/three-plus-twelve.js';
+import { validatePreToolUse } from '../../hooks/pre-tool-validator/pre-tool-validator.js';
+import { guardStructure } from '../../hooks/structure-guard/structure-guard.js';
+import { decide } from '../../metrics/decision-tree/decision-tree.js';
+import { checkPromotionEligibility } from '../../metrics/promotion-tracker/promotion-tracker.js';
+import { countTestCases } from '../../metrics/test-counter/test-counter.js';
+import { check312Rule } from '../../metrics/three-plus-twelve/three-plus-twelve.js';
 import type { PreToolUseInput } from '../../types/hooks.js';
 
 describe('review pipeline', () => {
@@ -144,7 +144,7 @@ describe('review pipeline', () => {
       expect(result.continue).toBe(false);
     });
 
-    it('should block INTENT.md in organ directories', () => {
+    it('should allow INTENT.md in organ directories with reclassification info', () => {
       const input: PreToolUseInput = {
         tool_name: 'Write',
         tool_input: {
@@ -157,7 +157,10 @@ describe('review pipeline', () => {
       };
 
       const result = guardStructure(input);
-      expect(result.continue).toBe(false);
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput?.additionalContext).toContain(
+        'reclassified from organ to fractal',
+      );
     });
 
     it('should allow valid INTENT.md writes', () => {

@@ -27,7 +27,7 @@ const zodPath = dirname(require.resolve('zod/package.json'));
 const banner = '';
 
 await esbuild.build({
-  entryPoints: [resolve(root, 'src/mcp/server-entry.ts')],
+  entryPoints: [resolve(root, 'src/mcp/server-entry/server-entry.ts')],
   bundle: true,
   platform: 'node',
   target: 'node20',

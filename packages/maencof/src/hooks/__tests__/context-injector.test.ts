@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { readTurnContext } from '../cache-manager.js';
-import { injectContext } from '../context-injector.js';
+import { readTurnContext } from '../cache-manager/cache-manager.js';
+import { injectContext } from '../context-injector/context-injector.js';
 
 let vaultDir: string;
 let cacheTestDir: string;

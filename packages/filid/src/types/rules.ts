@@ -62,20 +62,7 @@ export interface RuleEvaluationResult {
   duration: number;
 }
 
-/** 내장 규칙 ID 상수. */
-export const BUILTIN_RULE_IDS = {
-  NAMING_CONVENTION: 'naming-convention',
-  ORGAN_NO_INTENTMD: 'organ-no-intentmd',
-  INDEX_BARREL_PATTERN: 'index-barrel-pattern',
-  MODULE_ENTRY_POINT: 'module-entry-point',
-  MAX_DEPTH: 'max-depth',
-  CIRCULAR_DEPENDENCY: 'circular-dependency',
-  PURE_FUNCTION_ISOLATION: 'pure-function-isolation',
-  ZERO_PEER_FILE: 'zero-peer-file',
-} as const;
-
-export type BuiltinRuleId =
-  (typeof BUILTIN_RULE_IDS)[keyof typeof BUILTIN_RULE_IDS];
+export { BUILTIN_RULE_IDS, type BuiltinRuleId } from '../constants/builtin-rule-ids.js';
 
 /** 프로젝트별 규칙 오버라이드. `.filid/config.json`의 rules 섹션에서 사용. */
 export interface RuleOverride {

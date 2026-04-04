@@ -5,7 +5,7 @@ import {
   buildKnowledgeNode,
   inferSubLayerFromPath,
   parseDocument,
-} from '../../../core/document-parser.js';
+} from '../../../core/document-parser/document-parser.js';
 
 function toYaml(obj: Record<string, unknown>, indent = 0): string {
   const pad = '  '.repeat(indent);

@@ -7,8 +7,8 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { runChangelogGate } from '../../hooks/changelog-gate.js';
-import { isMaencofVault, metaPath } from '../../hooks/shared.js';
+import { runChangelogGate } from '../../hooks/changelog-gate/changelog-gate.js';
+import { isMaencofVault, metaPath } from '../../hooks/shared/shared.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ vi.mock('node:child_process', () => ({
   execSync: vi.fn(),
 }));
 
-vi.mock('../../hooks/shared.js', () => ({
+vi.mock('../../hooks/shared/shared.js', () => ({
   isMaencofVault: vi.fn(),
   metaPath: vi.fn(),
 }));

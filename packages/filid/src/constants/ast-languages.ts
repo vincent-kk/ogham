@@ -1,0 +1,80 @@
+import type { NapiLang } from '../types/ast.js';
+
+export const SUPPORTED_LANGUAGES: [string, ...string[]] = [
+  'javascript',
+  'typescript',
+  'tsx',
+  'python',
+  'ruby',
+  'go',
+  'rust',
+  'java',
+  'kotlin',
+  'swift',
+  'c',
+  'cpp',
+  'csharp',
+  'html',
+  'css',
+  'json',
+  'yaml',
+];
+
+export const EXT_TO_LANG: Record<string, string> = {
+  '.js': 'javascript',
+  '.mjs': 'javascript',
+  '.cjs': 'javascript',
+  '.jsx': 'javascript',
+  '.ts': 'typescript',
+  '.mts': 'typescript',
+  '.cts': 'typescript',
+  '.tsx': 'tsx',
+  '.py': 'python',
+  '.rb': 'ruby',
+  '.go': 'go',
+  '.rs': 'rust',
+  '.java': 'java',
+  '.kt': 'kotlin',
+  '.kts': 'kotlin',
+  '.swift': 'swift',
+  '.c': 'c',
+  '.h': 'c',
+  '.cpp': 'cpp',
+  '.cc': 'cpp',
+  '.cxx': 'cpp',
+  '.hpp': 'cpp',
+  '.cs': 'csharp',
+  '.html': 'html',
+  '.htm': 'html',
+  '.css': 'css',
+  '.json': 'json',
+  '.yaml': 'yaml',
+  '.yml': 'yaml',
+};
+
+export const AST_SKIP_DIRS = [
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '__pycache__',
+  '.venv',
+  'venv',
+];
+
+export const AST_MAX_FILES = 1000;
+
+export const FALLBACK_LANG_MAP: Record<string, NapiLang> = {
+  python: 'Python',
+  ruby: 'Ruby',
+  go: 'Go',
+  rust: 'Rust',
+  java: 'Java',
+  kotlin: 'Kotlin',
+  swift: 'Swift',
+  c: 'C',
+  cpp: 'Cpp',
+  csharp: 'CSharp',
+  json: 'Json',
+  yaml: 'Yaml',
+};

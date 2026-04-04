@@ -8,8 +8,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { formatDate, getDailynotePath } from '../../core/dailynote-writer.js';
-import { handleDailynoteRead } from '../../mcp/tools/dailynote-read.js';
+import { formatDate, getDailynotePath } from '../../core/dailynote-writer/dailynote-writer.js';
+import { handleDailynoteRead } from '../../mcp/tools/dailynote-read/dailynote-read.js';
 
 function createTempVault(): string {
   const dir = join(tmpdir(), `maencof-dnread-test-${Date.now()}`);

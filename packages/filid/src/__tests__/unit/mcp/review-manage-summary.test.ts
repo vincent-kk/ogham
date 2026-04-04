@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handleReviewManage } from '../../../mcp/tools/review-manage.js';
+import { handleReviewManage } from '../../../mcp/tools/review-manage/review-manage.js';
 
 // Mock fs for file I/O
 vi.mock('node:fs/promises', async () => {

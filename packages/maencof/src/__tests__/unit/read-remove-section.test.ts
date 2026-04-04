@@ -2,7 +2,12 @@
  * @file read-remove-section.test.ts
  * @description readMaencofSection, removeMaencofSection, ClaudeMdMerger 클래스 단위 테스트
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -14,15 +19,14 @@ import {
   MAENCOF_START_MARKER,
   readMaencofSection,
   removeMaencofSection,
-} from '../../core/claude-md-merger.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
 
 /** 테스트용 임시 디렉토리 */
 let testDir: string;
 let claudeMdPath: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-test-${Date.now()}`);
-  mkdirSync(testDir, { recursive: true });
+  testDir = mkdtempSync(join(tmpdir(), 'maencof-test-'));
   claudeMdPath = join(testDir, 'CLAUDE.md');
 });
 

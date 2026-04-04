@@ -5,7 +5,7 @@ import {
   detectCycles,
   getDirectDependencies,
   topologicalSort,
-} from '../../../core/analysis/dependency-graph.js';
+} from '../../../core/analysis/dependency-graph/dependency-graph.js';
 import type { DependencyEdge } from '../../../types/fractal.js';
 
 describe('dependency-graph', () => {

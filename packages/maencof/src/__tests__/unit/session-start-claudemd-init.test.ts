@@ -17,8 +17,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
-} from '../../core/claude-md-merger.js';
-import { runSessionStart } from '../../hooks/session-start.js';
+} from '../../core/claude-md-merger/claude-md-merger.js';
+import { runSessionStart } from '../../hooks/session-start/session-start.js';
 import { VERSION } from '../../version.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */

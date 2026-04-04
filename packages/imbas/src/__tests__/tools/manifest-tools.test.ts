@@ -3,10 +3,10 @@ import { join } from 'node:path';
 import os from 'node:os';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { handleManifestGet } from '../../mcp/tools/manifest-get.js';
-import { handleManifestSave } from '../../mcp/tools/manifest-save.js';
-import { handleManifestValidate } from '../../mcp/tools/manifest-validate.js';
-import { handleManifestPlan } from '../../mcp/tools/manifest-plan.js';
+import { handleManifestGet } from '../../mcp/tools/manifest-get/manifest-get.js';
+import { handleManifestSave } from '../../mcp/tools/manifest-save/manifest-save.js';
+import { handleManifestValidate } from '../../mcp/tools/manifest-validate/manifest-validate.js';
+import { handleManifestPlan } from '../../mcp/tools/manifest-plan/manifest-plan.js';
 
 // --- helpers ---
 

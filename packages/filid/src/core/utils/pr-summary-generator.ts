@@ -10,6 +10,13 @@ import type {
   SummaryItem,
   SummaryItemSeverity,
 } from '../../types/summary.js';
+import {
+  RULE_ERROR_PROBABILITY,
+  SEVERITY_FALLBACK,
+  DEFAULT_ERROR_PROBABILITY,
+  AUTO_FIXABLE_RULES,
+  MAX_REVIEW_ITEMS,
+} from '../../constants/review-probabilities.js';
 
 /** generateHumanSummary 입력. 각 파일의 내용을 문자열 또는 null로 전달한다. */
 export interface GenerateSummaryInput {
@@ -25,43 +32,7 @@ export interface GenerateSummaryInput {
   branch: string;
 }
 
-/**
- * 규칙 ID별 에러 확률 매핑.
- * BUILTIN_RULE_IDS (src/types/rules.ts) 기반.
- * RULE_TO_SEVERITY (src/core/drift-detector.ts)와 일관된 순서.
- * 값은 튜닝 가능한 초기값.
- */
-export const RULE_ERROR_PROBABILITY: Record<string, number> = {
-  'circular-dependency': 0.95,
-  'pure-function-isolation': 0.9,
-  'organ-no-intentmd': 0.85,
-  'max-depth': 0.8,
-  'zero-peer-file': 0.75, // RULE_TO_SEVERITY에 없음, 신규 할당
-  'index-barrel-pattern': 0.6,
-  'module-entry-point': 0.55,
-  'naming-convention': 0.2,
-};
-
-/** fix-requests.md의 Severity 필드 기반 에러 확률 fallback. */
-const SEVERITY_FALLBACK: Record<string, number> = {
-  CRITICAL: 0.95,
-  HIGH: 0.85,
-  MEDIUM: 0.5,
-  LOW: 0.2,
-};
-
-/** 알 수 없는 규칙/분류 불가 항목의 기본 에러 확률. */
-const DEFAULT_ERROR_PROBABILITY = 0.5;
-
-/** 자동 수정 가능 규칙 ID 목록 (drift-detector RULE_TO_ACTION 기반). */
-const AUTO_FIXABLE_RULES = new Set([
-  'naming-convention',
-  'index-barrel-pattern',
-  'module-entry-point',
-]);
-
-/** reviewItems 최대 개수. */
-const MAX_REVIEW_ITEMS = 5;
+export { RULE_ERROR_PROBABILITY };
 
 /** structure-check.md YAML frontmatter 파싱 결과. */
 interface StructureCheckFrontmatter {

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { deduplicateContent } from '../../core/content-dedup.js';
+import { deduplicateContent } from '../../core/content-dedup/content-dedup.js';
 import { AUTO_GENERATED_FM_KEYS } from '../../types/frontmatter.js';
 
 const GENERATED_KEYS = [...AUTO_GENERATED_FM_KEYS];
