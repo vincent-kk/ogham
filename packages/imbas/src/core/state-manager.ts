@@ -6,12 +6,15 @@
 
 import { join } from 'node:path';
 import { readJson, writeJson } from '../lib/file-io.js';
-import { STATE_FILENAME, PHASE_ORDER } from '../constants/index.js';
+import { STATE_FILENAME } from '../constants/index.js';
 import {
   RunStateSchema,
   createInitialRunState,
 } from '../types/state.js';
-import type { RunState, RunTransition, PhaseName } from '../types/state.js';
+import type { RunState, RunTransition } from '../types/state.js';
+import { validateStartPhase } from './utils/validate-start-phase.js';
+import { handleCompletePhase } from './utils/handle-complete-phase.js';
+import { advancePhase } from './utils/advance-phase.js';
 
 /** Create a new initial RunState (delegates to factory in types) */
 export function createRunState(params: {
@@ -93,109 +96,4 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
       throw new Error(`Unknown action: ${JSON.stringify(_exhaustive)}`);
     }
   }
-}
-
-// --- Helpers ---
-
-function applyCompletePhaseFields(
-  updated: RunState,
-  phase: PhaseName,
-  action: Extract<RunTransition, { action: 'complete_phase' }>,
-): void {
-  if (phase === 'validate') {
-    if (action.result !== undefined) {
-      updated.phases.validate.result = action.result;
-    }
-    if (action.blocking_issues !== undefined) {
-      updated.phases.validate.blocking_issues = action.blocking_issues;
-    }
-    if (action.warning_issues !== undefined) {
-      updated.phases.validate.warning_issues = action.warning_issues;
-    }
-  } else if (phase === 'split') {
-    if (action.stories_created !== undefined) {
-      updated.phases.split.stories_created = action.stories_created;
-    }
-    if (action.pending_review !== undefined) {
-      updated.phases.split.pending_review = action.pending_review;
-    }
-  } else if (phase === 'devplan') {
-    if (action.pending_review !== undefined) {
-      updated.phases.devplan.pending_review = action.pending_review;
-    }
-  }
-}
-
-function handleCompletePhase(
-  state: RunState,
-  action: Extract<RunTransition, { action: 'complete_phase' }>,
-  now: string,
-): RunState {
-  const phase = action.phase;
-  if (state.phases[phase].status !== 'in_progress') {
-    throw new Error(
-      `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
-    );
-  }
-  const updated = structuredClone(state);
-  updated.phases[phase].status = 'completed';
-  updated.phases[phase].completed_at = now;
-  updated.updated_at = now;
-
-  // Apply phase-specific fields
-  applyCompletePhaseFields(updated, phase, action);
-
-  // Advance current_phase to next
-  updated.current_phase = advancePhase(phase);
-  return updated;
-}
-
-function validateStartPhase(state: RunState, phase: PhaseName): void {
-  if (phase === 'validate') {
-    // always allowed
-    return;
-  }
-
-  if (phase === 'split') {
-    const validate = state.phases.validate;
-    if (validate.status !== 'completed') {
-      throw new Error(
-        `Cannot start phase "split": validate phase status is "${validate.status}", expected "completed"`,
-      );
-    }
-    if (
-      validate.result !== 'PASS' &&
-      validate.result !== 'PASS_WITH_WARNINGS'
-    ) {
-      throw new Error(
-        `Cannot start phase "split": validate result is "${validate.result}", expected PASS or PASS_WITH_WARNINGS`,
-      );
-    }
-    return;
-  }
-
-  if (phase === 'devplan') {
-    const split = state.phases.split;
-    const normalPath =
-      split.status === 'completed' && !split.pending_review;
-    const escapePath =
-      split.status === 'escaped' && split.escape_code === 'E2-3';
-
-    if (!normalPath && !escapePath) {
-      throw new Error(
-        `Cannot start phase "devplan": split status is "${split.status}", ` +
-          `pending_review=${split.pending_review}, escape_code=${split.escape_code}. ` +
-          `Expected: split completed+not pending_review, or split escaped with E2-3`,
-      );
-    }
-    return;
-  }
-}
-
-function advancePhase(current: PhaseName): PhaseName {
-  const idx = PHASE_ORDER.indexOf(current);
-  if (idx < PHASE_ORDER.length - 1) {
-    return PHASE_ORDER[idx + 1]!;
-  }
-  return current;
 }
