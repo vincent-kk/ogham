@@ -15,18 +15,12 @@ import type {
 } from '../../../types/fractal.js';
 
 import { extractModuleExports } from '../index-analyzer/index-analyzer.js';
-
-const ENTRY_CANDIDATES = [
-  'index.ts',
-  'index.js',
-  'main.ts',
-  'main.js',
-] as const;
-
-const RE_IMPORT =
-  /^(?:import|export)\s+(?:type\s+)?(?:\{[^}]*\}|\*(?:\s+as\s+\w+)?|\w+(?:\s*,\s*\{[^}]*\})?)\s+from\s+['"]([^'"]+)['"]/gm;
-const RE_DYNAMIC_IMPORT = /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/gm;
-const RE_REQUIRE = /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/gm;
+import {
+  ENTRY_CANDIDATES,
+  RE_IMPORT,
+  RE_DYNAMIC_IMPORT,
+  RE_REQUIRE,
+} from '../../../constants/entry-candidates.js';
 
 /**
  * 파일 존재 여부 확인

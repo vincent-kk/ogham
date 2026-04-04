@@ -1,0 +1,9 @@
+export const HEALTH_BASE_SCORE = 100;
+export const ERROR_PENALTY = 5;
+export const ERROR_PENALTY_CAP = 50;
+export const WARNING_PENALTY = 2;
+export const WARNING_PENALTY_CAP = 20;
+export const CRITICAL_DRIFT_PENALTY = 10;
+export const CRITICAL_DRIFT_CAP = 30;
+export const HIGH_DRIFT_PENALTY = 5;
+export const HIGH_DRIFT_CAP = 20;

@@ -1,7 +1,5 @@
 import type { PromotionCandidate } from '../../types/metrics.js';
-
-/** Default stability threshold in days (3 months) */
-const DEFAULT_STABILITY_DAYS = 90;
+import { DEFAULT_STABILITY_DAYS } from '../../constants/quality-thresholds.js';
 
 /** Input for promotion eligibility check */
 export interface PromotionInput {

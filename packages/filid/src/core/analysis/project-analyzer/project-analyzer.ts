@@ -19,6 +19,17 @@ import { analyzeModule } from '../../module/module-main-analyzer/module-main-ana
 import { detectDrift, generateSyncPlan } from '../../rules/drift-detector/drift-detector.js';
 import { validateStructure } from '../../rules/fractal-validator/fractal-validator.js';
 import { scanProject } from '../../tree/fractal-tree/fractal-tree.js';
+import {
+  HEALTH_BASE_SCORE,
+  ERROR_PENALTY,
+  ERROR_PENALTY_CAP,
+  WARNING_PENALTY,
+  WARNING_PENALTY_CAP,
+  CRITICAL_DRIFT_PENALTY,
+  CRITICAL_DRIFT_CAP,
+  HIGH_DRIFT_PENALTY,
+  HIGH_DRIFT_CAP,
+} from '../../../constants/health-score.js';
 
 /**
  * 프로젝트 루트에서 시작하여 전체 분석 파이프라인을 실행한다.
@@ -117,7 +128,7 @@ export async function analyzeProject(
  * 최솟값: 0
  */
 export function calculateHealthScore(report: AnalysisReport): number {
-  let score = 100;
+  let score = HEALTH_BASE_SCORE;
 
   const { violations } = report.validation.result;
   let errorCount = 0;
@@ -127,12 +138,12 @@ export function calculateHealthScore(report: AnalysisReport): number {
     else if (v.severity === 'warning') warningCount++;
   }
 
-  score -= Math.min(errorCount * 5, 50);
-  score -= Math.min(warningCount * 2, 20);
+  score -= Math.min(errorCount * ERROR_PENALTY, ERROR_PENALTY_CAP);
+  score -= Math.min(warningCount * WARNING_PENALTY, WARNING_PENALTY_CAP);
 
   const { bySeverity } = report.drift.drift;
-  score -= Math.min((bySeverity.critical ?? 0) * 10, 30);
-  score -= Math.min((bySeverity.high ?? 0) * 5, 20);
+  score -= Math.min((bySeverity.critical ?? 0) * CRITICAL_DRIFT_PENALTY, CRITICAL_DRIFT_CAP);
+  score -= Math.min((bySeverity.high ?? 0) * HIGH_DRIFT_PENALTY, HIGH_DRIFT_CAP);
 
   return Math.max(0, score);
 }

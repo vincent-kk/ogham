@@ -1,12 +1,3 @@
-/**
- * @file peer-file-registry.ts
- * @description Zero Peer File 규칙에서 사용하는 상수 레지스트리.
- *
- * fractal-tree.ts(스캐너)와 rule-engine.ts(규칙) 모두에서 참조하므로
- * 별도 모듈로 분리하여 의존 방향을 유지한다.
- */
-
-/** Fractal root에서 항상 허용되는 파일 목록 (entry point + 문서). */
 export const ALLOWED_FRACTAL_ROOT_FILES = new Set([
   'index.ts',
   'index.js',
@@ -19,7 +10,6 @@ export const ALLOWED_FRACTAL_ROOT_FILES = new Set([
   'DETAIL.md',
 ]);
 
-/** Framework별 예약 파일 목록. package.json 의존성에서 프레임워크를 감지하여 적용한다. */
 export const FRAMEWORK_RESERVED_FILES: Record<string, string[]> = {
   next: [
     'layout.tsx',
@@ -64,7 +54,6 @@ export const FRAMEWORK_RESERVED_FILES: Record<string, string[]> = {
   ],
 };
 
-/** package.json 의존성 이름 → 프레임워크 식별자 매핑. */
 export const FRAMEWORK_PACKAGES: Record<string, string> = {
   next: 'next',
   remix: 'remix',

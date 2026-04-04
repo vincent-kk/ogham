@@ -15,35 +15,13 @@ import type {
 } from '../../../types/drift.js';
 import type { FractalTree } from '../../../types/fractal.js';
 import type { RuleEvaluationResult, RuleViolation } from '../../../types/rules.js';
+import {
+  RULE_TO_ACTION,
+  RULE_TO_SEVERITY,
+  SEVERITY_ORDER,
+} from '../../../constants/drift-mappings.js';
 
-/** RuleViolation의 ruleId → SyncAction 매핑 */
-const RULE_TO_ACTION: Record<string, SyncAction> = {
-  'naming-convention': 'rename',
-  'organ-no-intentmd': 'move',
-  'index-barrel-pattern': 'create-index',
-  'module-entry-point': 'create-index',
-  'max-depth': 'merge',
-  'circular-dependency': 'move',
-  'pure-function-isolation': 'move',
-};
-
-/** RuleViolation의 ruleId → DriftSeverity 매핑 */
-const RULE_TO_SEVERITY: Record<string, DriftSeverity> = {
-  'circular-dependency': 'critical',
-  'pure-function-isolation': 'critical',
-  'max-depth': 'high',
-  'organ-no-intentmd': 'high',
-  'index-barrel-pattern': 'medium',
-  'module-entry-point': 'medium',
-  'naming-convention': 'low',
-};
-
-export const SEVERITY_ORDER: Record<DriftSeverity, number> = {
-  critical: 0,
-  high: 1,
-  medium: 2,
-  low: 3,
-};
+export { SEVERITY_ORDER };
 
 /**
  * RuleViolation의 심각도를 DriftSeverity로 변환한다.

@@ -14,6 +14,7 @@ import { buildChain } from '../../core/tree/boundary-detector/boundary-detector.
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 
 import { isFcaProject } from '../shared/shared.js';
+import { GUIDE_BLOCK } from '../../constants/agent-context.js';
 
 export type { FractalMap };
 
@@ -126,18 +127,6 @@ function buildCtxBlock(
   return lines.join('\n');
 }
 
-/**
- * One-time guide block injected on the very first [filid:ctx] of a session.
- * Teaches the LLM what the injected tokens mean and how to act on them.
- */
-const GUIDE_BLOCK = [
-  '[filid:guide]',
-  '[filid:ctx] — module boundary rules for the current directory.',
-  '  intent: INTENT.md path. --- ... --- is its inline content. Obey these rules.',
-  '  chain: parent INTENT.md paths (nearest > root). Each is a readable file — read to learn parent rules.',
-  '  detail: DETAIL.md path. Read BEFORE writing code in this module.',
-  '[filid:map] — visited directories this session. /* = current working directory. unread-intent: directories with INTENT.md not yet surfaced — read their INTENT.md before modifying.',
-].join('\n');
 
 /**
  * Build [filid:map] line from visited reads list.

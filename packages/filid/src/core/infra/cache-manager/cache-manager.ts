@@ -13,6 +13,12 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import { createLogger } from '../../../lib/logger.js';
+import {
+  SESSION_TTL_MS,
+  STALE_CACHE_TTL_MS,
+  MAX_SESSION_FILES_BEFORE_PRUNE,
+  MAX_CACHE_DIRS_BEFORE_PRUNE,
+} from '../../../constants/infra-defaults.js';
 
 const log = createLogger('cache');
 
@@ -108,13 +114,12 @@ export function pruneOldSessions(cwd: string): void {
     const dir = getCacheDir(cwd);
     const files = readdirSync(dir);
     const sessionFiles = files.filter((f) => f.startsWith('session-context-'));
-    if (sessionFiles.length <= 10) return;
+    if (sessionFiles.length <= MAX_SESSION_FILES_BEFORE_PRUNE) return;
     const now = Date.now();
-    const TTL_MS = 24 * 60 * 60 * 1000;
     for (const file of sessionFiles) {
       const fp = join(dir, file);
       try {
-        if (now - statSync(fp).mtimeMs > TTL_MS) {
+        if (now - statSync(fp).mtimeMs > SESSION_TTL_MS) {
           unlinkSync(fp);
           // also remove paired cache files (aligned with removeSessionFiles)
           const hash = file.replace('session-context-', '');
@@ -154,9 +159,8 @@ export function pruneStaleCacheDirs(): void {
     if (!existsSync(pluginDir)) return;
 
     const dirs = readdirSync(pluginDir);
-    if (dirs.length <= 5) return;
+    if (dirs.length <= MAX_CACHE_DIRS_BEFORE_PRUNE) return;
 
-    const STALE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
     const now = Date.now();
 
     const staleDirs: string[] = [];
@@ -174,7 +178,7 @@ export function pruneStaleCacheDirs(): void {
         }
         const allStale = files.every((f) => {
           try {
-            return now - statSync(join(dirPath, f)).mtimeMs > STALE_TTL_MS;
+            return now - statSync(join(dirPath, f)).mtimeMs > STALE_CACHE_TTL_MS;
           } catch (e) {
             log.debug(`pruneStaleCacheDirs: statSync failed for ${f}:`, e);
             return true;

@@ -17,6 +17,8 @@ import { join } from 'node:path';
 import { createLogger } from '../../../lib/logger.js';
 import { BUILTIN_RULE_IDS, type RuleOverride } from '../../../types/rules.js';
 
+import { CONFIG_DIR, CONFIG_FILE } from '../../../constants/infra-defaults.js';
+
 const log = createLogger('config-loader');
 
 /** Schema of .filid/config.json */
@@ -28,9 +30,6 @@ export interface FilidConfig {
   /** Additional file names allowed as peer files in fractal roots (zero-peer-file rule). */
   'additional-allowed'?: string[];
 }
-
-const CONFIG_DIR = '.filid';
-const CONFIG_FILE = 'config.json';
 
 /** Read .filid/config.json from the given project root (resolves git root). Returns null if not found or invalid. */
 export function loadConfig(projectRoot: string): FilidConfig | null {

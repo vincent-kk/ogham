@@ -3,16 +3,7 @@ import type {
   DocumentViolation,
   IntentMdValidation,
 } from '../../../types/documents.js';
-
-/** Maximum line count for INTENT.md */
-const INTENT_MD_LINE_LIMIT = 50;
-
-/** 3-tier boundary keywords */
-const BOUNDARY_KEYWORDS = {
-  alwaysDo: /^###?\s*(always\s*do)/im,
-  askFirst: /^###?\s*(ask\s*first)/im,
-  neverDo: /^###?\s*(never\s*do)/im,
-} as const;
+import { INTENT_MD_LINE_LIMIT, BOUNDARY_KEYWORDS } from '../../../constants/document-validation.js';
 
 /**
  * Count the actual number of lines in a string.

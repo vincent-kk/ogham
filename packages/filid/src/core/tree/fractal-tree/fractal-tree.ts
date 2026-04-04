@@ -11,7 +11,7 @@ import { DEFAULT_SCAN_OPTIONS } from '../../../types/scan.js';
 import {
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
-} from '../../utils/peer-file-registry.js';
+} from '../../../constants/allowed-peer-files.js';
 
 import { classifyNode } from '../organ-classifier/organ-classifier.js';
 

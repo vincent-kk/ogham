@@ -1,33 +1,7 @@
 import type { CategoryType } from '../../../types/fractal.js';
+import { KNOWN_ORGAN_DIR_NAMES } from '../../../constants/organ-names.js';
 
-/** Internal base list of UI/shared organ directory names (not exported). */
-const ORGAN_BASE_NAMES: readonly string[] = [
-  'components',
-  'utils',
-  'types',
-  'hooks',
-  'helpers',
-  'lib',
-  'styles',
-  'assets',
-  'constants',
-] as const;
-
-/**
- * Well-known directory names that are always classified as organ regardless of structure.
- *
- * Note: __*__ and .* naming patterns are handled separately by
- * isInfraOrgDirectoryByPattern and are intentionally not duplicated here.
- */
-export const KNOWN_ORGAN_DIR_NAMES: readonly string[] = [
-  ...ORGAN_BASE_NAMES,
-  'test',
-  'tests',
-  'spec',
-  'specs',
-  'fixtures',
-  'e2e',
-] as const;
+export { KNOWN_ORGAN_DIR_NAMES };
 
 /** Input for classifyNode */
 export interface ClassifyInput {

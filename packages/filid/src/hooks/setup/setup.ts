@@ -23,20 +23,9 @@ import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 
 import { isFcaProject } from '../shared/shared.js';
+import { SCAN_SKIP_DIRS } from '../../constants/scan-defaults.js';
 
 const log = createLogger('setup');
-
-/** Directories to skip during INTENT.md scan */
-const SCAN_SKIP_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'build',
-  'coverage',
-  '.next',
-  '.omc',
-  '.claude',
-]);
 
 /**
  * Shallow BFS scan for INTENT.md in the project tree.

@@ -123,7 +123,7 @@ export {
   ALLOWED_FRACTAL_ROOT_FILES,
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
-} from './utils/peer-file-registry.js';
+} from '../constants/allowed-peer-files.js';
 export {
   RULE_ERROR_PROBABILITY,
   generateHumanSummary,

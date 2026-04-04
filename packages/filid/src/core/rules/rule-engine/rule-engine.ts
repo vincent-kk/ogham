@@ -16,12 +16,8 @@ import type {
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { ScanOptions } from '../../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../types/scan.js';
-import { ALLOWED_FRACTAL_ROOT_FILES } from '../../utils/peer-file-registry.js';
-
-// kebab-case: 소문자, 숫자, 하이픈으로만 구성
-const KEBAB_CASE_RE = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-// camelCase: 소문자로 시작, 대문자 혼용 가능
-const CAMEL_CASE_RE = /^[a-z][a-zA-Z0-9]*$/;
+import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../constants/allowed-peer-files.js';
+import { KEBAB_CASE_RE, CAMEL_CASE_RE } from '../../../constants/naming-patterns.js';
 
 function isValidNaming(name: string): boolean {
   return KEBAB_CASE_RE.test(name) || CAMEL_CASE_RE.test(name);

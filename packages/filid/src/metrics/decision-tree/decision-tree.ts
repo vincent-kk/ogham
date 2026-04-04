@@ -1,13 +1,9 @@
 import type { DecisionResult } from '../../types/metrics.js';
-
-/** 3+12 rule threshold */
-const TEST_THRESHOLD = 15;
-
-/** Cyclomatic complexity threshold */
-const CC_THRESHOLD = 15;
-
-/** LCOM4 threshold for split */
-const LCOM4_SPLIT_THRESHOLD = 2;
+import {
+  THREE_PLUS_TWELVE_THRESHOLD,
+  CC_THRESHOLD,
+  LCOM4_SPLIT_THRESHOLD,
+} from '../../constants/quality-thresholds.js';
 
 /** Input metrics for the decision tree */
 export interface DecisionInput {
@@ -30,7 +26,7 @@ export function decide(input: DecisionInput): DecisionResult {
   const metrics = { testCount, lcom4, cyclomaticComplexity };
 
   // Phase 1: Check if threshold is exceeded
-  if (testCount <= TEST_THRESHOLD) {
+  if (testCount <= THREE_PLUS_TWELVE_THRESHOLD) {
     return {
       action: 'ok',
       reason: `Test count (${testCount}) is within the 3+12 limit.`,

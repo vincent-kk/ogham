@@ -1,0 +1,4 @@
+export const THREE_PLUS_TWELVE_THRESHOLD = 15;
+export const CC_THRESHOLD = 15;
+export const LCOM4_SPLIT_THRESHOLD = 2;
+export const DEFAULT_STABILITY_DAYS = 90;

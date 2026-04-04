@@ -1,7 +1,5 @@
 import type { TestCaseCount, ThreePlusTwelveResult } from '../../types/metrics.js';
-
-/** 3+12 rule threshold: max 15 test cases per spec file */
-const THRESHOLD = 15;
+import { THREE_PLUS_TWELVE_THRESHOLD } from '../../constants/quality-thresholds.js';
 
 /**
  * Check the 3+12 rule across spec.ts files.
@@ -11,7 +9,7 @@ const THRESHOLD = 15;
 export function check312Rule(files: TestCaseCount[]): ThreePlusTwelveResult {
   const specFiles = files.filter((f) => f.fileType === 'spec');
   const violatingFiles = specFiles
-    .filter((f) => f.total > THRESHOLD)
+    .filter((f) => f.total > THREE_PLUS_TWELVE_THRESHOLD)
     .map((f) => f.filePath);
 
   return {

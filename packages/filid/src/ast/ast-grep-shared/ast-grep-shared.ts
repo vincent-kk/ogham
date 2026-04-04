@@ -17,6 +17,14 @@ import { extname, join, resolve } from 'node:path';
 // In the MCP server plugin context, @ast-grep/napi is installed globally and resolved
 // via NODE_PATH set in the bundle's startup banner.
 import type * as AstGrepNapi from '@ast-grep/napi';
+import {
+  SUPPORTED_LANGUAGES,
+  EXT_TO_LANG,
+  AST_SKIP_DIRS,
+  AST_MAX_FILES,
+} from '../../constants/ast-languages.js';
+
+export { SUPPORTED_LANGUAGES, EXT_TO_LANG };
 
 type SgModule = typeof AstGrepNapi;
 /** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
@@ -94,71 +102,12 @@ export function toLangEnum(sg: SgModule, language: string): NapiLang {
 }
 
 /**
- * Supported languages for AST analysis
- * Maps to ast-grep language identifiers
- */
-export const SUPPORTED_LANGUAGES: [string, ...string[]] = [
-  'javascript',
-  'typescript',
-  'tsx',
-  'python',
-  'ruby',
-  'go',
-  'rust',
-  'java',
-  'kotlin',
-  'swift',
-  'c',
-  'cpp',
-  'csharp',
-  'html',
-  'css',
-  'json',
-  'yaml',
-];
-
-/**
- * Map file extensions to ast-grep language identifiers
- */
-export const EXT_TO_LANG: Record<string, string> = {
-  '.js': 'javascript',
-  '.mjs': 'javascript',
-  '.cjs': 'javascript',
-  '.jsx': 'javascript',
-  '.ts': 'typescript',
-  '.mts': 'typescript',
-  '.cts': 'typescript',
-  '.tsx': 'tsx',
-  '.py': 'python',
-  '.rb': 'ruby',
-  '.go': 'go',
-  '.rs': 'rust',
-  '.java': 'java',
-  '.kt': 'kotlin',
-  '.kts': 'kotlin',
-  '.swift': 'swift',
-  '.c': 'c',
-  '.h': 'c',
-  '.cpp': 'cpp',
-  '.cc': 'cpp',
-  '.cxx': 'cpp',
-  '.hpp': 'cpp',
-  '.cs': 'csharp',
-  '.html': 'html',
-  '.htm': 'html',
-  '.css': 'css',
-  '.json': 'json',
-  '.yaml': 'yaml',
-  '.yml': 'yaml',
-};
-
-/**
  * Get files matching the language in a directory
  */
 export function getFilesForLanguage(
   dirPath: string,
   language: string,
-  maxFiles = 1000,
+  maxFiles = AST_MAX_FILES,
 ): string[] {
   const files: string[] = [];
   const extensions = Object.entries(EXT_TO_LANG)
@@ -177,17 +126,7 @@ export function getFilesForLanguage(
 
         // Skip common non-source directories
         if (entry.isDirectory()) {
-          if (
-            ![
-              'node_modules',
-              '.git',
-              'dist',
-              'build',
-              '__pycache__',
-              '.venv',
-              'venv',
-            ].includes(entry.name)
-          ) {
+          if (!AST_SKIP_DIRS.includes(entry.name)) {
             walk(fullPath);
           }
         } else if (entry.isFile()) {
