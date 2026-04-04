@@ -120,7 +120,7 @@ For each accepted `restructure` item:
   "SKIP — restructure not applicable" and continue. This is non-blocking.
 
 > **Important**: Structural fix failures MUST NOT block the pipeline.
-> Log the result and continue to Step 5. The revalidate stage will
+> Log the result and continue to Step 5. The `filid:revalidate` stage will
 > catch any remaining issues.
 
 **→ After all fixes (code + structural) complete, immediately proceed to Step 5.**
@@ -171,7 +171,7 @@ Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
 `resolve_commit_sha`. Do NOT run `git rev-parse HEAD` here — the base SHA
 was already captured before any code changes.
 
-> **Why**: `revalidate` computes `git diff resolve_commit_sha..HEAD`.
+> **Why**: `filid:revalidate` computes `git diff resolve_commit_sha..HEAD`.
 > After the auto-commit in Step 6.5, HEAD moves to the fix commit, so the
 > delta correctly contains only the fix changes.
 
@@ -200,7 +200,7 @@ If there were accepted fixes (files modified by code-surgeon):
    `git add <file1> <file2> ... <debt files if any>`
    - Include: files modified by code-surgeon + any debt files in `.filid/debt/` created in Step 5.
    - **Do NOT stage `justifications.md`** — it lives in `.filid/review/<branch>/` which is
-     gitignored. It is an inter-stage communication file read by `revalidate` from local
+     gitignored. It is an inter-stage communication file read by `filid:revalidate` from local
      disk. Explicitly adding it via `git add` overrides `.gitignore` and pollutes the git tree.
    - **Do NOT stage any file under `.filid/review/`** — all review session artifacts are
      local-only and excluded by `.gitignore`.
@@ -237,7 +237,7 @@ If there were **NO** accepted fixes (all rejected):
    - On "Continue to revalidate anyway": **→ Immediately proceed to Step 7.**
    - On "Stop here": **END execution.**
 
-### Step 7 — Offer to Run revalidate
+### Step 7 — Offer to Run `filid:revalidate`
 
 > If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
 > `/filid:revalidate`.** Then end execution.
@@ -256,12 +256,12 @@ If there were accepted fixes:
 
 If there were NO accepted fixes (all rejected):
   Automatically invoke /filid:revalidate — no pending code changes needed.
-  revalidate will find zero accepted items, evaluate only the rejected-item
+  `filid:revalidate` will find zero accepted items, evaluate only the rejected-item
   justifications and debt records, and return PASS if all justifications are
   constitutionally compliant.
 ```
 
-**After revalidate is invoked (or skipped), execution is COMPLETE.**
+**After `filid:revalidate` is invoked (or skipped), execution is COMPLETE.**
 
 ## Available MCP Tools
 

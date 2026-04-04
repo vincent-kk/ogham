@@ -103,8 +103,8 @@ for assigning IDs sequentially across both sources.
 
 Type classification:
 - `code-fix`: standard inline code patches (default when omitted)
-- `promote`: 3+12 rule violations → resolved by test file promotion/splitting
-- `restructure`: LCOM4 >= 2 or structural drift → resolved by module reorganization
+- `filid:promote`: 3+12 rule violations → resolved by test file promotion/splitting
+- `filid:restructure`: LCOM4 >= 2 or structural drift → resolved by module reorganization
 ````
 
 ---

@@ -39,7 +39,7 @@ rejected: <rejected count>
 
 > **Note**: `justifications.md` is a local inter-stage communication file. It is
 > NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored.
-> `revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
+> `filid:revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
 > Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
 
 ## ADR Refinement Guidelines
@@ -63,7 +63,7 @@ Consequences: <technical debt created, future impact, estimated resolution>
 ## Fix Item Types
 
 Each fix item in `fix-requests.md` has an optional `type` field that determines
-how the resolve skill processes it:
+how the `filid:resolve` skill processes it:
 
 | Type | Default | Handler | Description |
 |------|---------|---------|-------------|
@@ -109,7 +109,7 @@ When `type` is absent, the item is treated as `code-fix`.
 ### Dispatch Sequence
 
 1. **Phase 4a**: All `code-fix` items dispatched to `code-surgeon` in parallel
-2. **Phase 4b**: After code fixes complete, `promote` and `restructure` items
+2. **Phase 4b**: After code fixes complete, `filid:promote` and `filid:restructure` items
    processed sequentially via their respective skills
 3. Structural fix failures are **non-blocking** — logged and skipped
 

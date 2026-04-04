@@ -59,7 +59,7 @@ drift_detect({ path: "<target-path>", severity: "high" })
 
 ### Severity Normalization Table
 
-`scan` and `sync` use different severity vocabularies. This table maps
+`filid:scan` and `filid:sync` use different severity vocabularies. This table maps
 scan violations to Stage 2 gate conditions:
 
 | scan Violation Type               | Stage 2 Gate                      |

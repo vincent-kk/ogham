@@ -83,7 +83,7 @@ Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Use
 
 Scans the **entire project** across 6 stages: boundary check → document validation → dependency analysis → test metrics → complexity assessment → final verdict.
 
-> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `review` instead.
+> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:review` instead.
 
 ### AI Code Review (per PR)
 
@@ -114,10 +114,10 @@ The most powerful feature. A multi-persona consensus committee reviews only the 
 
 Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 
-> **`structure-review` vs `review` at a glance:**
+> **`filid:structure-review` vs `filid:review` at a glance:**
 >
-> - `structure-review` — full project scan (periodic health check)
-> - `review` — changed files only + multi-persona review (use on every PR)
+> - `filid:structure-review` — full project scan (periodic health check)
+> - `filid:review` — changed files only + multi-persona review (use on every PR)
 
 ### Learn About FCA-AI
 

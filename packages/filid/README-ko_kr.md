@@ -114,10 +114,10 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 
 산출물은 `.filid/review/<branch>/`에, 기술 부채는 `.filid/debt/`에 저장됩니다.
 
-> **`structure-review` vs `review` 요약:**
+> **`filid:structure-review` vs `filid:review` 요약:**
 >
-> - `structure-review` — 전체 프로젝트 스캔 (주기적 점검용)
-> - `review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
+> - `filid:structure-review` — 전체 프로젝트 스캔 (주기적 점검용)
+> - `filid:review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
 
 ### FCA-AI가 뭔지 잘 모르겠을 때
 

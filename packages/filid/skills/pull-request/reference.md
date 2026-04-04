@@ -55,16 +55,16 @@ gh auth status
 Skill("filid:update")
 ```
 
-update internally runs Stage 0 (Change Detection) → Stage 1 (Scan) →
+`filid:update` internally runs Stage 0 (Change Detection) → Stage 1 (Scan) →
 Stage 2 (Sync) → Stage 3 (Doc & Test Update) → Stage 4 (Finalize).
-pull-request only checks the overall success/failure of this flow.
+`filid:pull-request` only checks the overall success/failure of this flow.
 
-- **Input**: None (update auto-detects from the current branch)
-- **Success condition**: update completes without errors
+- **Input**: None (`filid:update` auto-detects from the current branch)
+- **Success condition**: `filid:update` completes without errors
 - **Failure handling**: Print the following and block PR creation
 
 ```
-## pull-request — BLOCKED
+## `filid:pull-request` — BLOCKED
 
 FCA context document sync failed.
 
@@ -216,7 +216,7 @@ Pattern:
 
 Examples:
 
-- `feat(filid): add pull-request skill for automated PR generation`
+- `feat(filid): add "filid:pull-request" skill for automated PR generation`
 - `fix(syncpoint): resolve backup path resolution on macOS`
 
 Falls back to first commit message line (truncated to 70 chars) when prefix
@@ -340,7 +340,7 @@ mkdir -p .filid/pr-draft
 Then write the generated body to `.filid/pr-draft/<branch>.md` and display:
 
 ```
-## pull-request — Manual PR Required
+## `filid:pull-request` — Manual PR Required
 
 GitHub CLI authentication not verified. PR body saved locally.
 
@@ -410,7 +410,7 @@ EOF
 ### 4.5 Final Report
 
 ```
-## pull-request — Complete
+## `filid:pull-request` — Complete
 
 **PR**: <PR URL>
 **Title**: <title>
@@ -451,7 +451,7 @@ EOF
 ### Common Error Output Format
 
 ```
-## pull-request — ERROR
+## `filid:pull-request` — ERROR
 
 **Stage**: <N> (<Stage Name>)
 **Error**: <error description>

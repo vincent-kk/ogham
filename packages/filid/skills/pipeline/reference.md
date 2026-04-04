@@ -49,7 +49,7 @@ Check signals:
 
 ## Flag Passthrough Matrix
 
-Flags provided to `pipeline` are forwarded to the appropriate stage.
+Flags provided to `filid:pipeline` are forwarded to the appropriate stage.
 Unrecognized flags are ignored.
 
 | Flag                   | pr-create | review | resolve | revalidate |
@@ -175,7 +175,7 @@ For each stage in pipeline:
 1. **Context isolation for review**: The review stage consumes ~100k tokens
    (multi-persona consensus with 5+ tool-heavy phases). Running it in the
    main context would risk compaction and degraded output quality.
-2. **Reliable execution for procedural stages**: `resolve` and `revalidate`
+2. **Reliable execution for procedural stages**: `filid:resolve` and `filid:revalidate`
    are sequential, procedural workflows that spawn their own internal
    subagents (code-surgeon, parallel verifiers). Wrapping them in a
    pipeline-level subagent creates a fragile three-level nesting chain

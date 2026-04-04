@@ -13,9 +13,9 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
 >
-> **HYBRID EXECUTION**: Only the `review` stage runs in a subagent (context
+> **HYBRID EXECUTION**: Only the `filid:review` stage runs in a subagent (context
 > isolation for its ~100k token consumption). All other stages (`pr-create`,
-> `resolve`, `revalidate`) execute directly in the main context via `Skill()`.
+> `filid:resolve`, `filid:revalidate`) execute directly in the main context via `Skill()`.
 >
 > **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
 > pipelines most commonly stall. Resolve ends with commit + push, which
@@ -25,9 +25,9 @@ plugin: filid
 # pipeline — End-to-End Review Pipeline
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
-in a single command. Uses a **hybrid execution model**: the `review` stage
+in a single command. Uses a **hybrid execution model**: the `filid:review` stage
 runs in an independent subagent for context isolation (~100k tokens), while
-`pr-create`, `resolve`, and `revalidate` execute directly in the main
+`pr-create`, `filid:resolve`, and `filid:revalidate` execute directly in the main
 context via `Skill()`. Stages communicate via `.filid/review/<branch>/` files.
 
 > **References**: `reference.md` (auto-detection algorithm edge cases, flag passthrough
@@ -98,17 +98,17 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 Execute stages sequentially from the determined entry point. The pipeline
 uses a **hybrid execution model**:
 
-- **Subagent stage** (`review`): Delegated to an independent `general-purpose`
+- **Subagent stage** (`filid:review`): Delegated to an independent `general-purpose`
   Task subagent for context isolation. The review stage consumes ~100k tokens
   and would degrade the main context if run inline.
-- **Main context stages** (`pr-create`, `resolve`, `revalidate`): Executed
+- **Main context stages** (`pr-create`, `filid:resolve`, `filid:revalidate`): Executed
   directly via `Skill()` in the orchestrator's context. These stages are
   lightweight and procedural — subagent delegation adds fragile two-level
   indirection (Agent → Skill() → internal subagents) that causes premature
   termination.
 
 > **Note**: Some main-context stages still spawn their own internal subagents
-> (e.g., `resolve` uses `code-surgeon` subagents, `revalidate` uses parallel
+> (e.g., `filid:resolve` uses `code-surgeon` subagents, `filid:revalidate` uses parallel
 > verification subagents). "Main context execution" means the *pipeline-level*
 > delegation is direct — internal skill behavior is unchanged.
 
@@ -136,10 +136,10 @@ uses a **hybrid execution model**:
   This is a silent fallback — no error reporting needed. If `gh` is not
   authenticated, skip quietly.
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
-  is generated → skip `resolve` + `revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
+  is generated → skip `filid:resolve` + `filid:revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
   If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — delete the empty `fix-requests.md` and skip resolve + revalidate.
-- **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `resolve` +
-  `revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:pipeline --from=review --force`." and END execution.
+- **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:resolve` +
+  `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:pipeline --from=review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"
 - **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
@@ -149,7 +149,7 @@ uses a **hybrid execution model**:
 - **Execute**: `Skill("filid:resolve", "--auto")`
 - **Always passes `--auto`** (pipeline implies full automation)
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
-- **Zero accepted fixes**: proceed to `revalidate` normally
+- **Zero accepted fixes**: proceed to `filid:revalidate` normally
   (`justifications.md` will exist with all-rejected entries)
 - **Failure**: END execution with error — "Resolve failed: `<error>`"
 - **Output**: `justifications.md`, committed + pushed changes
@@ -241,7 +241,7 @@ All other operations are delegated to existing skills via `Skill()` tool.
 
 Pipeline:  [pr-create] → [review] → [resolve --auto] → [revalidate]
 Execution: review = subagent (context isolation), others = main context (direct Skill())
-Skills:    pull-request, review (--scope=pr), resolve (--auto), revalidate
+Skills:    filid:pull-request, filid:review (--scope=pr), filid:resolve (--auto), filid:revalidate
 Files:     .filid/review/<branch>/ (inter-stage communication)
 Resolve:   Always --auto (accept all, commit, push, auto-revalidate)
 Resume:    On failure, re-run — auto-detection picks up from the right stage

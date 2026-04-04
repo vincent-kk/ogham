@@ -65,7 +65,7 @@ ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
 ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
 ```
 
-Thresholds: LCOM4 >= 2 → FAIL (split needed, fix type: `restructure`), CC > 15 → FAIL (compress needed, fix type: `code-fix`).
+Thresholds: LCOM4 >= 2 → FAIL (split needed, fix type: `filid:restructure`), CC > 15 → FAIL (compress needed, fix type: `code-fix`).
 
 ### C.4 — Test Compliance
 
@@ -75,7 +75,7 @@ For each changed `*.spec.ts` or `*.test.ts` file:
 test_metrics(action: "check-312", files: [{ filePath, content }])
 ```
 
-Threshold: total > 15 cases per file → FAIL (3+12 rule violation, fix type: `promote`).
+Threshold: total > 15 cases per file → FAIL (3+12 rule violation, fix type: `filid:promote`).
 
 ### C.4.5 — Shared Dependency Test Coverage
 

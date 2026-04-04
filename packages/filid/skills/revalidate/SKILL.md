@@ -169,7 +169,7 @@ remaining unresolved items.
 | `test_metrics`       | `check-312`        | Verify 3+12 rule PASS after accepted fix                        |
 | `structure_validate` | —                  | Verify structure violation resolved after accepted fix          |
 | `debt_manage`        | `list`             | Retrieve existing debt items to check for resolution            |
-| `debt_manage`        | `resolve`          | Mark a debt item as resolved when its rule is now satisfied     |
+| `debt_manage`        | `filid:resolve`          | Mark a debt item as resolved when its rule is now satisfied     |
 | `review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment |
 
 ## Options
