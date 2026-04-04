@@ -19,6 +19,10 @@ await mkdir(resolve(root, 'bridge'), { recursive: true });
 
 const hookEntries = [
   'setup',
+  'pre-tool-use',
+  'context-injector',
+  'agent-enforcer',
+  'session-cleanup',
 ];
 
 await Promise.all(
