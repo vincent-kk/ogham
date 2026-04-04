@@ -7,38 +7,36 @@ export * from './types/index.js';
 export { VERSION } from './version.js';
 
 // MCP modules
-export { createServer, startServer } from './mcp/server.js';
-export { toolResult, toolError, mapReplacer, wrapHandler } from './mcp/shared.js';
-export { handleImbasPing } from './mcp/tools/imbas-ping.js';
-export { handleRunCreate } from './mcp/tools/run-create.js';
-export { handleRunGet } from './mcp/tools/run-get.js';
-export { handleRunTransition } from './mcp/tools/run-transition.js';
-export { handleRunList } from './mcp/tools/run-list.js';
-export { handleManifestGet } from './mcp/tools/manifest-get.js';
-export { handleManifestSave } from './mcp/tools/manifest-save.js';
-export { handleManifestValidate } from './mcp/tools/manifest-validate.js';
-export { handleManifestPlan } from './mcp/tools/manifest-plan.js';
-export { handleConfigGet } from './mcp/tools/config-get.js';
-export { handleConfigSet } from './mcp/tools/config-set.js';
-export { handleCacheGet } from './mcp/tools/cache-get.js';
-export { handleCacheSet } from './mcp/tools/cache-set.js';
-export { handleAstSearch } from './mcp/tools/ast-search.js';
-export { handleAstAnalyze } from './mcp/tools/ast-analyze.js';
+export { createServer, startServer } from './mcp/index.js';
+export { toolResult, toolError, mapReplacer, wrapHandler } from './mcp/index.js';
+export {
+  handleImbasPing, handleRunCreate, handleRunGet, handleRunTransition, handleRunList,
+  handleManifestGet, handleManifestSave, handleManifestValidate, handleManifestPlan,
+  handleConfigGet, handleConfigSet, handleCacheGet, handleCacheSet,
+  handleAstSearch, handleAstAnalyze,
+} from './mcp/tools/index.js';
 
 // Core modules
-export { createRunState, loadRunState, saveRunState, applyTransition } from './core/state-manager.js';
-export { loadConfig, saveConfig, getConfigValue, setConfigValue, applyConfigUpdates } from './core/config-manager.js';
-export { loadCache, saveCache, isCacheExpired, clearCache } from './core/cache-manager.js';
-export { loadManifest, getManifestSummary } from './core/manifest-parser.js';
-export { validateManifest } from './core/manifest-validator.js';
-export { planExecution } from './core/execution-planner.js';
-export { getImbasRoot, getProjectDir, getCacheDir, getRunsDir, getRunDir, getTempDir, getMediaDir } from './core/paths.js';
-export { generateRunId } from './core/run-id-generator.js';
+export {
+  createRunState, loadRunState, saveRunState, applyTransition,
+  loadConfig, saveConfig, getConfigValue, setConfigValue, applyConfigUpdates,
+  loadCache, saveCache, isCacheExpired, clearCache,
+  loadManifest, getManifestSummary,
+  validateManifest,
+  planExecution,
+  getImbasRoot, getProjectDir, getCacheDir, getRunsDir, getRunDir, getTempDir, getMediaDir,
+  generateRunId,
+} from './core/index.js';
 
 // AST modules
-export { getSgModule, isSgAvailable, getSgLoadError, collectFiles } from './ast/ast-grep-shared.js';
-export { extractDependencies } from './ast/dependency-extractor.js';
-export { calculateComplexity } from './ast/cyclomatic-complexity.js';
+export {
+  getSgModule, isSgAvailable, getSgLoadError, collectFiles,
+  extractDependencies,
+  calculateComplexity,
+} from './ast/index.js';
+export type { SgModule } from './ast/index.js';
+export type { ImportInfo, ExportInfo, CallInfo, DependencyInfo, DependencyError } from './ast/index.js';
+export type { CyclomaticResult, CyclomaticError } from './ast/index.js';
 
 // Hook modules
 export { processSetup } from './hooks/setup.js';

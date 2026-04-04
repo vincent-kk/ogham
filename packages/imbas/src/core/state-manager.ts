@@ -48,44 +48,7 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
     }
 
     case 'complete_phase': {
-      const phase = action.phase;
-      if (state.phases[phase].status !== 'in_progress') {
-        throw new Error(
-          `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
-        );
-      }
-      const updated = structuredClone(state);
-      updated.phases[phase].status = 'completed';
-      updated.phases[phase].completed_at = now;
-      updated.updated_at = now;
-
-      // Apply phase-specific fields
-      if (phase === 'validate') {
-        if (action.result !== undefined) {
-          updated.phases.validate.result = action.result;
-        }
-        if (action.blocking_issues !== undefined) {
-          updated.phases.validate.blocking_issues = action.blocking_issues;
-        }
-        if (action.warning_issues !== undefined) {
-          updated.phases.validate.warning_issues = action.warning_issues;
-        }
-      } else if (phase === 'split') {
-        if (action.stories_created !== undefined) {
-          updated.phases.split.stories_created = action.stories_created;
-        }
-        if (action.pending_review !== undefined) {
-          updated.phases.split.pending_review = action.pending_review;
-        }
-      } else if (phase === 'devplan') {
-        if (action.pending_review !== undefined) {
-          updated.phases.devplan.pending_review = action.pending_review;
-        }
-      }
-
-      // Advance current_phase to next
-      updated.current_phase = advancePhase(phase);
-      return updated;
+      return handleCompletePhase(state, action, now);
     }
 
     case 'escape_phase': {
@@ -133,6 +96,59 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
 }
 
 // --- Helpers ---
+
+function applyCompletePhaseFields(
+  updated: RunState,
+  phase: PhaseName,
+  action: Extract<RunTransition, { action: 'complete_phase' }>,
+): void {
+  if (phase === 'validate') {
+    if (action.result !== undefined) {
+      updated.phases.validate.result = action.result;
+    }
+    if (action.blocking_issues !== undefined) {
+      updated.phases.validate.blocking_issues = action.blocking_issues;
+    }
+    if (action.warning_issues !== undefined) {
+      updated.phases.validate.warning_issues = action.warning_issues;
+    }
+  } else if (phase === 'split') {
+    if (action.stories_created !== undefined) {
+      updated.phases.split.stories_created = action.stories_created;
+    }
+    if (action.pending_review !== undefined) {
+      updated.phases.split.pending_review = action.pending_review;
+    }
+  } else if (phase === 'devplan') {
+    if (action.pending_review !== undefined) {
+      updated.phases.devplan.pending_review = action.pending_review;
+    }
+  }
+}
+
+function handleCompletePhase(
+  state: RunState,
+  action: Extract<RunTransition, { action: 'complete_phase' }>,
+  now: string,
+): RunState {
+  const phase = action.phase;
+  if (state.phases[phase].status !== 'in_progress') {
+    throw new Error(
+      `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
+    );
+  }
+  const updated = structuredClone(state);
+  updated.phases[phase].status = 'completed';
+  updated.phases[phase].completed_at = now;
+  updated.updated_at = now;
+
+  // Apply phase-specific fields
+  applyCompletePhaseFields(updated, phase, action);
+
+  // Advance current_phase to next
+  updated.current_phase = advancePhase(phase);
+  return updated;
+}
 
 function validateStartPhase(state: RunState, phase: PhaseName): void {
   if (phase === 'validate') {

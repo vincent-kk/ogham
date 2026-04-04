@@ -112,6 +112,76 @@ function isAncestorPath(
   return fileAbsolute.startsWith(resolvedImport + path.sep);
 }
 
+function checkIntentMdReclassification(
+  toolName: string,
+  filePath: string,
+  cwd: string,
+  segments: string[],
+): string[] {
+  // INTENT.md Write → organ directory reclassification notice.
+  // FCA: "Fractal nodes CAN exist inside organ directories."
+  // classifyNode priority 1 (hasIntentMd → fractal) guarantees reclassification.
+  if (toolName !== 'Write' || !isIntentMd(filePath)) {
+    return [];
+  }
+  const info: string[] = [];
+  let dirSoFar = cwd;
+  for (const segment of segments) {
+    dirSoFar = path.join(dirSoFar, segment);
+    if (isOrganByStructure(dirSoFar)) {
+      info.push(
+        `"${segment}" has been reclassified from organ to fractal by INTENT.md creation.`,
+      );
+      break;
+    }
+  }
+  return info;
+}
+
+function checkOrganSubdirectory(segments: string[], cwd: string): string[] {
+  // 검사 2: organ 내부 하위 디렉토리 생성 (organ은 flat이어야 한다)
+  let organIdx = -1;
+  let organSegment = '';
+  let dirSoFar = cwd;
+  for (let i = 0; i < segments.length; i++) {
+    dirSoFar = path.join(dirSoFar, segments[i]);
+    if (isOrganByStructure(dirSoFar)) {
+      organIdx = i;
+      organSegment = segments[i];
+      break;
+    }
+  }
+  if (organIdx !== -1 && organIdx < segments.length - 1) {
+    return [
+      `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
+        `Organ directories should remain flat leaf compartments without nested subdirectories.`,
+    ];
+  }
+  return [];
+}
+
+function checkCircularImports(
+  filePath: string,
+  content: string,
+  cwd: string,
+): string[] {
+  // 검사 3: 잠재적 순환 의존
+  if (!content) {
+    return [];
+  }
+  const importPaths = extractImportPaths(content);
+  const circularCandidates = importPaths.filter((p) =>
+    isAncestorPath(filePath, p, cwd),
+  );
+  if (circularCandidates.length > 0) {
+    return [
+      `The following imports reference ancestor modules (potential circular dependency): ` +
+        circularCandidates.map((p) => `"${p}"`).join(', '),
+    ];
+  }
+  return [];
+}
+
 export function guardStructure(input: PreToolUseInput): HookOutput {
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
     return { continue: true };
@@ -124,61 +194,13 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
 
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
-
-  const warnings: string[] = [];
-  const info: string[] = [];
-
-  // INTENT.md Write → organ directory reclassification notice.
-  // FCA: "Fractal nodes CAN exist inside organ directories."
-  // classifyNode priority 1 (hasIntentMd → fractal) guarantees reclassification.
-  if (input.tool_name === 'Write' && isIntentMd(filePath)) {
-    let dirSoFar = cwd;
-    for (const segment of segments) {
-      dirSoFar = path.join(dirSoFar, segment);
-      if (isOrganByStructure(dirSoFar)) {
-        info.push(
-          `"${segment}" has been reclassified from organ to fractal by INTENT.md creation.`,
-        );
-        break;
-      }
-    }
-  }
-
-  // 검사 2: organ 내부 하위 디렉토리 생성 (organ은 flat이어야 한다)
-  let organIdx = -1;
-  let organSegment = '';
-  {
-    let dirSoFar = cwd;
-    for (let i = 0; i < segments.length; i++) {
-      dirSoFar = path.join(dirSoFar, segments[i]);
-      if (isOrganByStructure(dirSoFar)) {
-        organIdx = i;
-        organSegment = segments[i];
-        break;
-      }
-    }
-  }
-  if (organIdx !== -1 && organIdx < segments.length - 1) {
-    warnings.push(
-      `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
-        `Organ directories should remain flat leaf compartments without nested subdirectories.`,
-    );
-  }
-
-  // 검사 3: 잠재적 순환 의존
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
-  if (content) {
-    const importPaths = extractImportPaths(content);
-    const circularCandidates = importPaths.filter((p) =>
-      isAncestorPath(filePath, p, cwd),
-    );
-    if (circularCandidates.length > 0) {
-      warnings.push(
-        `The following imports reference ancestor modules (potential circular dependency): ` +
-          circularCandidates.map((p) => `"${p}"`).join(', '),
-      );
-    }
-  }
+
+  const info = checkIntentMdReclassification(input.tool_name, filePath, cwd, segments);
+  const warnings = [
+    ...checkOrganSubdirectory(segments, cwd),
+    ...checkCircularImports(filePath, content, cwd),
+  ];
 
   if (warnings.length === 0 && info.length === 0) {
     return { continue: true };
