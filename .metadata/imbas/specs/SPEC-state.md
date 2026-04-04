@@ -14,7 +14,7 @@
 | **워크플로우 복잡도** | Phase 1→2→3 선형 흐름, 게이트 3개 | 단순 — 파일 기반으로 충분 |
 | **동시성** | 단일 사용자, 단일 런 | 락 불필요 |
 | **상태 크기** | phase + manifest(JSON) | 경량 — MCP 오버헤드 부적합 |
-| **멱등성** | manifest의 status + jira_key로 해결 | 파일 기반으로 완전히 해결 |
+| **멱등성** | manifest의 status + issue_ref로 해결 | 파일 기반으로 완전히 해결 |
 | **장애 복구** | manifest 재실행으로 해결 | MCP 불필요 |
 | **배포 비용** | MCP 서버 추가 = 설치/유지 부담 | 파일 기반이 zero-cost |
 
@@ -23,7 +23,7 @@
 **파일 기반 상태 관리** 채택. 이유:
 1. 워크플로우가 선형이므로 FSM 엔진 불필요
 2. 스킬이 state.json을 읽어 진입 조건 검증 → 충분한 게이트 역할
-3. manifest의 status/jira_key 필드가 멱등성 보장
+3. manifest의 status/issue_ref 필드가 멱등성 보장
 4. 추가 프로세스(MCP 서버) 없이 순수 파일 I/O로 동작
 
 ---

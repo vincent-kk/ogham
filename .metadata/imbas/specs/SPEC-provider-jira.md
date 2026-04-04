@@ -207,3 +207,6 @@ All values are configurable — different Jira instances may have different type
 - [SPEC-provider.md](./SPEC-provider.md) — Abstract provider interface
 - [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub provider comparison
 - [SPEC-state.md](./SPEC-state.md) — Config & state schemas
+- [SPEC-skills.md](./SPEC-skills.md) — Provider를 호출하는 스킬 정의
+- [SPEC-tools.md](./SPEC-tools.md) — imbas MCP 도구 정의
+- [BLUEPRINT.md](../BLUEPRINT.md) — Architecture overview

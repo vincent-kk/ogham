@@ -1,6 +1,8 @@
 # SPEC-atlassian-tools — Atlassian MCP 도구 검토
 
-> Status: Draft v1.0 (2026-04-04)
+> **DEPRECATED** — [SPEC-provider-jira.md](./SPEC-provider-jira.md)로 대체. 구현 완료 시 삭제 예정.
+
+> Status: Draft v1.0 (2026-04-04) — **DEPRECATED**
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---

@@ -225,4 +225,7 @@ Cache file contents differ by provider but serve the same purpose:
 - [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub-specific implementation
 - [SPEC-state.md](./SPEC-state.md) — Config & state schemas
 - [SPEC-skills.md](./SPEC-skills.md) — Skills that dispatch to providers
+- [SPEC-tools.md](./SPEC-tools.md) — imbas MCP 도구 정의
 - [BLUEPRINT.md](../BLUEPRINT.md) — Architecture overview
+
+> **Implementation Note:** Provider 구현 시 `src/constants/pipeline.ts` (phase 순서, agent 이름)와 `src/utils/` (findDuplicates, setNested)를 활용할 수 있다.

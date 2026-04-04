@@ -55,7 +55,7 @@ plugin: imbas
 /imbas:validate <source>  [--project <KEY>] [--supplements <path,...>]
 
 <source>       : 기획 문서 경로 (로컬 md/txt) 또는 Confluence URL
---project      : Jira 프로젝트 키 (config.defaults.project_key 대체)
+--project      : 프로젝트 참조 (config.defaults.project_ref 대체)
 --supplements  : 보조 자료 경로 (콤마 구분)
 ```
 
@@ -230,7 +230,7 @@ Step 1 — 런 로드 & 매니페스트 확인
   1. state.json 로드 + stories-manifest.json 로드
   2. split 완료 + 리뷰 승인 확인
   3. stories-manifest.json의 Story 항목 상태 확인:
-     - 모든 Story가 `created` (jira_key 존재) → 정상 진행
+     - 모든 Story가 `created` (issue_ref 존재) → 정상 진행
      - `pending` 항목 존재 → "imbas:manifest stories 먼저 실행 필요" 안내 + 블로킹
   4. state.json: current_phase = "devplan", devplan.status = "in_progress"
 
@@ -398,14 +398,16 @@ Step 4 — 배치 실행
          link.status = "created"
          save manifest
        ```
-  - 각 항목 생성 후 즉시 manifest에 jira_key + status 기록 (복구용)
+  - 각 항목 생성 후 즉시 manifest에 issue_ref + status 기록 (복구용)
 
 Step 5 — 결과 리포트
   - 생성된 이슈 수, 실패 수
   - 실패 항목 목록 + 재시도 안내
 ```
 
-**멱등성:** jira_key가 이미 있는 항목은 스킵. 중단 후 재실행 안전.
+**멱등성:** issue_ref가 이미 있는 항목은 스킵. 중단 후 재실행 안전.
+
+> **Provider별 실행 경로:** manifest 스킬의 provider 분기 상세는 [SPEC-provider.md](./SPEC-provider.md) §4 참조.
 
 ---
 
@@ -578,7 +580,7 @@ plugin: imbas
 imbas:cache <action> [--project <KEY>]
 
 <action>  : "ensure" | "refresh" | "clear"
---project : 프로젝트 키 (없으면 config.defaults.project_key)
+--project : 프로젝트 참조 (없으면 config.defaults.project_ref)
 ```
 
 | Action | 동작 |
@@ -751,7 +753,8 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 
 ### 8.3 실패 복구
 
-- 매니페스트의 status + jira_key로 재실행 시 자동 스킵
+- 매니페스트의 status + issue_ref로 재실행 시 자동 스킵
+- `skip_phases` action으로 특정 phase를 건너뛸 수 있음 (코드: `state.ts:112`, `state-manager.ts:106`)
 - state.json으로 중단된 Phase 감지 → `imbas:status resume` 안내
 
 ### 8.4 단일 턴 실행

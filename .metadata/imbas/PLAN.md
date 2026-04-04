@@ -194,7 +194,7 @@
 - [ ] 결과 리포트
 
 **Spec:** [SPEC-skills.md §4.1](./specs/SPEC-skills.md) — imbas:manifest
-**Spec:** [SPEC-atlassian-tools.md §3](./specs/SPEC-atlassian-tools.md) — 도구별 사용 패턴
+**Spec:** [SPEC-provider-jira.md §4](./specs/SPEC-provider-jira.md) — 도구별 실행 패턴
 
 ### 5.2 imbas:digest 구현
 - [ ] SKILL.md 작성
