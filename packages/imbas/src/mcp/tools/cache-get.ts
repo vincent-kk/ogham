@@ -8,6 +8,7 @@ import { getCacheDir } from '../../core/paths.js';
 import { loadCache, isCacheExpired } from '../../core/cache-manager.js';
 import { readJson } from '../../lib/file-io.js';
 import { join } from 'node:path';
+import { CACHED_AT_FILENAME } from '../../constants/index.js';
 import { CachedAtSchema } from '../../types/cache.js';
 import type { CacheType } from '../../types/cache.js';
 
@@ -36,7 +37,7 @@ export async function handleCacheGet(input: CacheGetInput) {
 
   let cached_at: string | null = null;
   try {
-    const meta = await readJson(join(cacheDir, 'cached_at.json'), CachedAtSchema);
+    const meta = await readJson(join(cacheDir, CACHED_AT_FILENAME), CachedAtSchema);
     cached_at = meta.cached_at;
   } catch {
     // no cached_at.json yet

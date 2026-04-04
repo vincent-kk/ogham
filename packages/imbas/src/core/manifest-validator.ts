@@ -4,6 +4,7 @@
  */
 
 import { loadManifest } from './manifest-parser.js';
+import { findDuplicates } from '../utils/index.js';
 import type { StoriesManifest, DevplanManifest } from '../types/manifest.js';
 
 export interface ValidationResult {
@@ -144,14 +145,3 @@ function validateDevplanManifest(
   }
 }
 
-// --- Helpers ---
-
-function findDuplicates(arr: string[]): string[] {
-  const seen = new Set<string>();
-  const dupes = new Set<string>();
-  for (const item of arr) {
-    if (seen.has(item)) dupes.add(item);
-    else seen.add(item);
-  }
-  return Array.from(dupes);
-}

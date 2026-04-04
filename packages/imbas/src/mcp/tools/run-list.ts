@@ -4,10 +4,9 @@
  */
 
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
 
 import { loadConfig } from '../../core/config-manager.js';
-import { getProjectDir, getRunDir } from '../../core/paths.js';
+import { getRunsDir, getRunDir } from '../../core/paths.js';
 import { loadRunState } from '../../core/state-manager.js';
 
 export interface RunListInput {
@@ -26,7 +25,7 @@ export async function handleRunList(input: RunListInput) {
     }
   }
 
-  const runsDir = join(getProjectDir(cwd, project_key), 'runs');
+  const runsDir = getRunsDir(cwd, project_key);
   if (!existsSync(runsDir)) {
     return { runs: [] };
   }

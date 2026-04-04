@@ -6,6 +6,7 @@
 
 import { join } from 'node:path';
 import { readJson } from '../lib/file-io.js';
+import { MANIFEST_FILE_MAP } from '../constants/index.js';
 import {
   StoriesManifestSchema,
   DevplanManifestSchema,
@@ -15,11 +16,6 @@ import type {
   DevplanManifest,
   ManifestSummary,
 } from '../types/manifest.js';
-
-const MANIFEST_FILE_MAP = {
-  stories: 'stories-manifest.json',
-  devplan: 'devplan-manifest.json',
-} as const;
 
 /** Load and validate a manifest file from runDir */
 export async function loadManifest(

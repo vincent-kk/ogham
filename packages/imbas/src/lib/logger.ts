@@ -14,10 +14,12 @@
 import { appendFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { DEBUG_ENV_VAR, DEBUG_LOG_FILENAME, LOGGER_PREFIX } from '../constants/index.js';
+
 let _logDir: string | undefined;
 
 function isDebug(): boolean {
-  return process.env['IMBAS_DEBUG'] === '1';
+  return process.env[DEBUG_ENV_VAR] === '1';
 }
 
 function formatArg(arg: unknown): string {
@@ -42,7 +44,7 @@ function writeToFile(
     const ts = new Date().toISOString();
     const argsStr = args.length > 0 ? ' ' + args.map(formatArg).join(' ') : '';
     appendFileSync(
-      join(_logDir, 'debug.log'),
+      join(_logDir, DEBUG_LOG_FILENAME),
       `${ts} ${level} ${tag} ${msg}${argsStr}\n`,
     );
   } catch {
@@ -80,7 +82,7 @@ export interface Logger {
  * the existing silent degradation behavior.
  */
 export function createLogger(component: string): Logger {
-  const tag = `[imbas:${component}]`;
+  const tag = `[${LOGGER_PREFIX}:${component}]`;
 
   return {
     debug(msg: string, ...args: unknown[]): void {

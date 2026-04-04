@@ -32,7 +32,7 @@ export { loadCache, saveCache, isCacheExpired, clearCache } from './core/cache-m
 export { loadManifest, getManifestSummary } from './core/manifest-parser.js';
 export { validateManifest } from './core/manifest-validator.js';
 export { planExecution } from './core/execution-planner.js';
-export { getImbasRoot, getProjectDir, getCacheDir, getRunDir, getTempDir, getMediaDir } from './core/paths.js';
+export { getImbasRoot, getProjectDir, getCacheDir, getRunsDir, getRunDir, getTempDir, getMediaDir } from './core/paths.js';
 export { generateRunId } from './core/run-id-generator.js';
 
 // AST modules

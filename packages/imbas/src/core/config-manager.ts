@@ -6,17 +6,17 @@
 
 import { join } from 'node:path';
 import { readJson, writeJson } from '../lib/file-io.js';
+import { CONFIG_FILENAME, IMBAS_ROOT_DIRNAME } from '../constants/index.js';
+import { setNested } from '../utils/index.js';
 import { ImbasConfigSchema } from '../types/config.js';
 import type { ImbasConfig } from '../types/config.js';
-
-const CONFIG_FILE = 'config.json';
 
 /**
  * Load config.json from cwd/.imbas/config.json.
  * Returns validated defaults if the file does not exist.
  */
 export async function loadConfig(cwd: string): Promise<ImbasConfig> {
-  const filePath = join(cwd, '.imbas', CONFIG_FILE);
+  const filePath = join(cwd, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME);
   try {
     return await readJson(filePath, ImbasConfigSchema);
   } catch (err) {
@@ -31,7 +31,7 @@ export async function loadConfig(cwd: string): Promise<ImbasConfig> {
 
 /** Atomically write config.json */
 export async function saveConfig(cwd: string, config: ImbasConfig): Promise<void> {
-  await writeJson(join(cwd, '.imbas', CONFIG_FILE), config);
+  await writeJson(join(cwd, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME), config);
 }
 
 /**
@@ -75,22 +75,3 @@ export function applyConfigUpdates(
   return result;
 }
 
-// --- Helpers ---
-
-function setNested(
-  obj: unknown,
-  parts: string[],
-  value: unknown,
-): unknown {
-  if (parts.length === 0) return value;
-
-  const [head, ...rest] = parts as [string, ...string[]];
-  const current = (obj !== null && typeof obj === 'object')
-    ? (obj as Record<string, unknown>)
-    : {};
-
-  return {
-    ...current,
-    [head]: setNested(current[head], rest, value),
-  };
-}

@@ -6,9 +6,10 @@
 import { mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
 import { join, basename } from 'node:path';
 
-import { getProjectDir, getRunDir } from '../../core/paths.js';
+import { getRunsDir } from '../../core/paths.js';
 import { generateRunId } from '../../core/run-id-generator.js';
 import { createRunState, saveRunState } from '../../core/state-manager.js';
+import { SOURCE_FILENAME, SUPPLEMENTS_DIRNAME, DEVPLAN_PIPELINE_SOURCE } from '../../constants/index.js';
 
 export interface RunCreateInput {
   project_key: string;
@@ -18,17 +19,16 @@ export interface RunCreateInput {
 
 export async function handleRunCreate(input: RunCreateInput) {
   const cwd = process.cwd();
-  const projectDir = getProjectDir(cwd, input.project_key);
-  const runsDir = join(projectDir, 'runs');
+  const runsDir = getRunsDir(cwd, input.project_key);
 
   const run_id = generateRunId(runsDir);
-  const run_dir = getRunDir(cwd, input.project_key, run_id);
+  const run_dir = join(runsDir, run_id);
 
   mkdirSync(run_dir, { recursive: true });
 
   // Copy source file — or create placeholder for devplan-pipeline mode
-  const destSource = join(run_dir, 'source.md');
-  if (input.source_file === 'devplan-pipeline') {
+  const destSource = join(run_dir, SOURCE_FILENAME);
+  if (input.source_file === DEVPLAN_PIPELINE_SOURCE) {
     writeFileSync(destSource, '', 'utf-8');
   } else {
     copyFileSync(input.source_file, destSource);
@@ -36,7 +36,7 @@ export async function handleRunCreate(input: RunCreateInput) {
 
   // Copy supplements
   if (input.supplements && input.supplements.length > 0) {
-    const suppDir = join(run_dir, 'supplements');
+    const suppDir = join(run_dir, SUPPLEMENTS_DIRNAME);
     mkdirSync(suppDir, { recursive: true });
     for (const supp of input.supplements) {
       copyFileSync(supp, join(suppDir, basename(supp)));

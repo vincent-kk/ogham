@@ -5,9 +5,11 @@
 
 import { join } from 'node:path';
 
+import { IMBAS_ROOT_DIRNAME, RUNS_DIRNAME } from '../constants/index.js';
+
 /** Returns root .imbas/ directory */
 export function getImbasRoot(cwd: string): string {
-  return join(cwd, '.imbas');
+  return join(cwd, IMBAS_ROOT_DIRNAME);
 }
 
 /** Returns .imbas/<KEY>/ */
@@ -20,9 +22,14 @@ export function getCacheDir(cwd: string, projectKey: string): string {
   return join(getProjectDir(cwd, projectKey), 'cache');
 }
 
+/** Returns .imbas/<KEY>/runs/ */
+export function getRunsDir(cwd: string, projectKey: string): string {
+  return join(getProjectDir(cwd, projectKey), RUNS_DIRNAME);
+}
+
 /** Returns .imbas/<KEY>/runs/<runId>/ */
 export function getRunDir(cwd: string, projectKey: string, runId: string): string {
-  return join(getProjectDir(cwd, projectKey), 'runs', runId);
+  return join(getRunsDir(cwd, projectKey), runId);
 }
 
 /** Returns .imbas/.temp/ */

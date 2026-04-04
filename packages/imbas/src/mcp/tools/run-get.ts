@@ -7,8 +7,9 @@ import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { loadConfig } from '../../core/config-manager.js';
-import { getRunDir, getProjectDir } from '../../core/paths.js';
+import { getRunDir, getRunsDir } from '../../core/paths.js';
 import { loadRunState } from '../../core/state-manager.js';
+import { MANIFEST_FILE_MAP } from '../../constants/index.js';
 
 export interface RunGetInput {
   project_key?: string;
@@ -29,7 +30,7 @@ export async function handleRunGet(input: RunGetInput) {
 
   let run_id = input.run_id;
   if (!run_id) {
-    const runsDir = join(getProjectDir(cwd, project_key), 'runs');
+    const runsDir = getRunsDir(cwd, project_key);
     if (!existsSync(runsDir)) {
       throw new Error(`No runs directory found for project: ${project_key}`);
     }
@@ -44,9 +45,9 @@ export async function handleRunGet(input: RunGetInput) {
   const state = await loadRunState(run_dir);
 
   const manifests_available: string[] = [];
-  for (const filename of ['stories-manifest.json', 'devplan-manifest.json']) {
+  for (const [key, filename] of Object.entries(MANIFEST_FILE_MAP)) {
     if (existsSync(join(run_dir, filename))) {
-      manifests_available.push(filename.replace('-manifest.json', ''));
+      manifests_available.push(key);
     }
   }
 

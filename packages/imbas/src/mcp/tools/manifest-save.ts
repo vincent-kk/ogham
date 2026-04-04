@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { getRunDir } from '../../core/paths.js';
 import { getManifestSummary } from '../../core/manifest-parser.js';
 import { writeJson } from '../../lib/file-io.js';
+import { MANIFEST_FILE_MAP } from '../../constants/index.js';
 import { StoriesManifestSchema, DevplanManifestSchema } from '../../types/manifest.js';
 
 export interface ManifestSaveInput {
@@ -16,11 +17,6 @@ export interface ManifestSaveInput {
   type: 'stories' | 'devplan';
   manifest?: unknown;
 }
-
-const MANIFEST_FILE_MAP = {
-  stories: 'stories-manifest.json',
-  devplan: 'devplan-manifest.json',
-} as const;
 
 export async function handleManifestSave(input: ManifestSaveInput) {
   const cwd = process.cwd();

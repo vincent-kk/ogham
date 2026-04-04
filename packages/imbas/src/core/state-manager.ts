@@ -6,13 +6,12 @@
 
 import { join } from 'node:path';
 import { readJson, writeJson } from '../lib/file-io.js';
+import { STATE_FILENAME, PHASE_ORDER } from '../constants/index.js';
 import {
   RunStateSchema,
   createInitialRunState,
 } from '../types/state.js';
 import type { RunState, RunTransition, PhaseName } from '../types/state.js';
-
-const STATE_FILE = 'state.json';
 
 /** Create a new initial RunState (delegates to factory in types) */
 export function createRunState(params: {
@@ -25,12 +24,12 @@ export function createRunState(params: {
 
 /** Load and validate state.json from runDir */
 export async function loadRunState(runDir: string): Promise<RunState> {
-  return readJson(join(runDir, STATE_FILE), RunStateSchema);
+  return readJson(join(runDir, STATE_FILENAME), RunStateSchema);
 }
 
 /** Atomically write state.json to runDir */
 export async function saveRunState(runDir: string, state: RunState): Promise<void> {
-  await writeJson(join(runDir, STATE_FILE), state);
+  await writeJson(join(runDir, STATE_FILENAME), state);
 }
 
 /** Apply a validated transition to the state, returning the new state */
@@ -40,7 +39,7 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
   switch (action.action) {
     case 'start_phase': {
       validateStartPhase(state, action.phase);
-      const updated = deepClone(state);
+      const updated = structuredClone(state);
       updated.current_phase = action.phase;
       updated.phases[action.phase].status = 'in_progress';
       updated.phases[action.phase].started_at = now;
@@ -55,7 +54,7 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
           `Cannot complete phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
         );
       }
-      const updated = deepClone(state);
+      const updated = structuredClone(state);
       updated.phases[phase].status = 'completed';
       updated.phases[phase].completed_at = now;
       updated.updated_at = now;
@@ -96,7 +95,7 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
           `Cannot escape phase "${phase}": current status is "${state.phases[phase].status}", expected "in_progress"`,
         );
       }
-      const updated = deepClone(state);
+      const updated = structuredClone(state);
       updated.phases.split.status = 'escaped';
       updated.phases.split.completed_at = now;
       updated.phases.split.escape_code = action.escape_code;
@@ -105,7 +104,7 @@ export function applyTransition(state: RunState, action: RunTransition): RunStat
     }
 
     case 'skip_phases': {
-      const updated = deepClone(state);
+      const updated = structuredClone(state);
       for (const phase of action.phases) {
         updated.phases[phase].status = 'completed';
         updated.phases[phase].completed_at = now;
@@ -178,14 +177,9 @@ function validateStartPhase(state: RunState, phase: PhaseName): void {
 }
 
 function advancePhase(current: PhaseName): PhaseName {
-  const order: PhaseName[] = ['validate', 'split', 'devplan'];
-  const idx = order.indexOf(current);
-  if (idx < order.length - 1) {
-    return order[idx + 1]!;
+  const idx = PHASE_ORDER.indexOf(current);
+  if (idx < PHASE_ORDER.length - 1) {
+    return PHASE_ORDER[idx + 1]!;
   }
   return current;
-}
-
-function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj)) as T;
 }

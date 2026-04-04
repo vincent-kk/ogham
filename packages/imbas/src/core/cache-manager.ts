@@ -3,21 +3,17 @@
  * @description Cache CRUD + TTL management for Jira metadata
  * @see SPEC-state.md §5
  */
-
+import { readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { rmSync, readdirSync } from 'node:fs';
+
+import {
+  CACHED_AT_FILENAME,
+  CACHE_FILE_MAP,
+  DEFAULT_CACHE_TTL_HOURS,
+} from '../constants/index.js';
 import { readJson, writeJson } from '../lib/file-io.js';
 import { CachedAtSchema } from '../types/cache.js';
 import type { CacheType } from '../types/cache.js';
-
-const CACHED_AT_FILE = 'cached_at.json';
-
-const CACHE_FILE_MAP: Record<string, string> = {
-  'project-meta': 'project-meta.json',
-  'issue-types': 'issue-types.json',
-  'link-types': 'link-types.json',
-  'workflows': 'workflows.json',
-};
 
 /** Load a specific cache file. For 'all', merges all available cache files. */
 export async function loadCache(
@@ -57,15 +53,18 @@ export async function saveCache(
   await writeJson(join(cacheDir, filename), data);
 
   // Update cached_at.json
-  let ttlHours = 24;
+  let ttlHours = DEFAULT_CACHE_TTL_HOURS;
   try {
-    const existing = await readJson(join(cacheDir, CACHED_AT_FILE), CachedAtSchema);
-    ttlHours = existing.ttl_hours ?? 24;
+    const existing = await readJson(
+      join(cacheDir, CACHED_AT_FILENAME),
+      CachedAtSchema,
+    );
+    ttlHours = existing.ttl_hours ?? DEFAULT_CACHE_TTL_HOURS;
   } catch {
     // use defaults
   }
 
-  await writeJson(join(cacheDir, CACHED_AT_FILE), {
+  await writeJson(join(cacheDir, CACHED_AT_FILENAME), {
     cached_at: new Date().toISOString(),
     ttl_hours: ttlHours,
   });
@@ -75,11 +74,12 @@ export async function saveCache(
 export async function isCacheExpired(cacheDir: string): Promise<boolean> {
   try {
     const cachedAt = await readJson(
-      join(cacheDir, CACHED_AT_FILE),
+      join(cacheDir, CACHED_AT_FILENAME),
       CachedAtSchema,
     );
     const cachedTime = new Date(cachedAt.cached_at).getTime();
-    const ttlMs = (cachedAt.ttl_hours ?? 24) * 60 * 60 * 1000;
+    const ttlMs =
+      (cachedAt.ttl_hours ?? DEFAULT_CACHE_TTL_HOURS) * 60 * 60 * 1000;
     return Date.now() - cachedTime > ttlMs;
   } catch {
     return true;
@@ -88,7 +88,7 @@ export async function isCacheExpired(cacheDir: string): Promise<boolean> {
 
 /** Remove all cache files from cacheDir */
 export async function clearCache(cacheDir: string): Promise<void> {
-  let entries: string[] = [];
+  let entries: string[];
   try {
     entries = readdirSync(cacheDir);
   } catch {
