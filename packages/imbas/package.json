@@ -53,6 +53,7 @@
     "version:sync": "node scripts/inject-version.mjs"
   },
   "dependencies": {
+    "@ast-grep/napi": "^0.42.0",
     "@modelcontextprotocol/sdk": "~1.22.0",
     "zod": "^3.23.8"
   },

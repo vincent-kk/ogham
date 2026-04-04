@@ -59,7 +59,7 @@
     "version:sync": "node scripts/inject-version.mjs"
   },
   "dependencies": {
-    "@ast-grep/napi": "^0.31.0",
+    "@ast-grep/napi": "^0.42.0",
     "@modelcontextprotocol/sdk": "~1.22.0",
     "fast-glob": "^3.0.0",
     "zod": "^3.23.8"
