@@ -63,6 +63,14 @@ Classify each item by type:
 - `promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
 
+> **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
+> the review phase and may carry a leading `filid:` prefix on type values
+> (e.g., `filid:promote`). Strip the `filid:` prefix before enum matching —
+> treat `filid:promote` and `promote` as identical. Unknown tokens after
+> stripping fall back to `code-fix` (the default). This normalization is
+> permanent, not a migration grace period. See `src/types/handoff.ts`
+> `normalizeFixRequestType` for the canonical implementation.
+
 **→ Immediately proceed to Step 3.**
 
 ### Step 3 — Present Select List
@@ -172,16 +180,16 @@ Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
 was already captured before any code changes.
 
 > **Why**: `filid:revalidate` computes `git diff resolve_commit_sha..HEAD`.
-> After the auto-commit in Step 6.5, HEAD moves to the fix commit, so the
+> After the auto-commit in Step 7, HEAD moves to the fix commit, so the
 > delta correctly contains only the fix changes.
 
 Write `.filid/review/<branch>/justifications.md` with frontmatter
 containing `resolve_commit_sha` (= `base_sha`). See `reference.md` for
 the full output template.
 
-**→ Immediately proceed to Step 6.5.**
+**→ Immediately proceed to Step 7.**
 
-### Step 6.5 — Typecheck, Stage & Commit
+### Step 7 — Typecheck, Stage & Commit
 
 If there were accepted fixes (files modified by code-surgeon):
 
@@ -222,22 +230,22 @@ If there were **NO** accepted fixes (all rejected):
    `.filid/review/<branch>/`.
 3. Skip typecheck (no code changes).
 
-**→ Immediately proceed to Step 6.6.**
+**→ Immediately proceed to Step 8.**
 
-### Step 6.6 — Push
+### Step 8 — Push
 
 1. **Check upstream**: `git rev-parse --abbrev-ref @{upstream}` (Bash)
    - If no upstream (exit code != 0): skip push, inform user
-     "No upstream branch. Push manually when ready." Then proceed to Step 7.
+     "No upstream branch. Push manually when ready." Then proceed to Step 9.
 2. **Execute**: `git push` (Bash)
-3. On **success**: **→ Immediately proceed to Step 7.**
+3. On **success**: **→ Immediately proceed to Step 9.**
 4. On **failure**: notify user via `AskUserQuestion`:
    - "Push failed: <error>. Resolve manually, then run /filid:revalidate."
    - Options: "Continue to revalidate anyway" / "Stop here"
-   - On "Continue to revalidate anyway": **→ Immediately proceed to Step 7.**
+   - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
    - On "Stop here": **END execution.**
 
-### Step 7 — Offer to Run `filid:revalidate`
+### Step 9 — Offer to Run `filid:revalidate`
 
 > If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
 > `/filid:revalidate`.** Then end execution.
@@ -296,12 +304,13 @@ Prereq:   /filid:review must have completed
 Next:     /filid:revalidate (auto-chained or manual)
 
 Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surgeon + base SHA)
-          → 5 (Rejected items) → 6 (justifications.md) → 6.5 (Typecheck + commit)
-          → 6.6 (Push) → 7 (Revalidate)
+          → 5 (Rejected items) → 6 (justifications.md) → 7 (Typecheck + commit)
+          → 8 (Push) → 9 (Revalidate)
 
-Agents:    code-surgeon (Step 4a — parallel code-fix), promote (Step 4b), restructure (Step 4b)
+Agents:    code-surgeon (Step 4a — parallel code-fix)
+Skills:    filid:promote (Step 4b), filid:restructure (Step 4b)
 MCP tools: review_manage(normalize-branch), debt_manage(create)
 
---auto:   Skips Steps 3 (accept all), 5 (no rejections), 7 prompt (auto-revalidate)
+--auto:   Skips Steps 3 (accept all), 5 (no rejections), 9 prompt (auto-revalidate)
           Aborts on: dirty working tree, typecheck failure
 ```

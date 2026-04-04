@@ -49,6 +49,10 @@ context via `Skill()`. Stages communicate via `.filid/review/<branch>/` files.
 Each stage delegates to an existing skill via `Skill()`. The pipeline is an
 orchestrator — it does not modify individual skill behavior.
 
+> **Stage alias SSoT**: `stages.md` in this directory is the canonical table
+> of stage alias → skill invocation mapping and documents the bare-word token
+> policy. This SKILL.md references but does not duplicate that table.
+
 ## Core Workflow
 
 ### Step 1 — Determine Entry Point
@@ -123,7 +127,7 @@ uses a **hybrid execution model**:
 
 #### Stage: review (subagent)
 
-- **Subagent invokes**: `Skill("filid:review --scope=pr")`
+- **Subagent invokes**: `Skill("filid:review", "--scope=pr")`
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
 - **Success signal**: `review-report.md` exists (written by Phase D regardless of verdict)
 - **PR comment fallback**: After the review subagent returns and `review-report.md`

@@ -109,22 +109,9 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ## Quick Reference
 
-```bash
-# Default run (incremental)
-/filid:update
+> **Internal skill** (`user_invocable: false`) — invoked by orchestrator skills such as `pull-request`, `pipeline`, `resolve`. Not intended for direct user invocation.
 
-# Target a specific path
-/filid:update src/core
-
-# Force full re-run ignoring cache
-/filid:update --force
-
-# Scan only (no doc/test modifications)
-/filid:update --scan-only
-
-# Doc/test update only (skip structure sync)
-/filid:update --no-sync
-
+```
 Stages:   Change Detection → Scan → Sync (conditional) → Doc & Test Update → Finalize
 Agents:   qa-reviewer (Stage 1), drift-analyzer+restructurer (Stage 2), context-manager+implementer (Stage 3)
 Cache:    ~/.claude/plugins/filid/{cwdHash}/run-update.hash

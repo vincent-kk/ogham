@@ -84,19 +84,9 @@ See [reference.md Section 4](./reference.md#section-4--validation).
 
 ## Quick Reference
 
-```bash
-# Restructure current project
-/filid:restructure
+> **Internal skill** (`user_invocable: false`) — invoked by orchestrator skills such as `resolve` and `sync`. Not intended for direct user invocation.
 
-# Restructure a specific path
-/filid:restructure src/features
-
-# Preview changes without applying them
-/filid:restructure --dry-run
-
-# Automated approval for CI environments
-/filid:restructure --auto-approve
-
+```
 Stages:  Analysis → Plan → Execute → Validate
          Stage 1: fractal_scan + drift_detect + rule_query run in parallel;
                   lca_resolve runs after drift_detect

@@ -21,7 +21,7 @@ within a strict 3-Prompt Limit.
 
 - Looking up boundary rules for a specific module before making a change
 - Identifying which fractal node owns a particular concern or file
-- Checking what a INTENT.md says without manually reading the tree
+- Checking what an INTENT.md says without manually reading the tree
 - Understanding the context chain between a leaf module and the project root
 - Any focused question answerable from INTENT.md content alone
 

@@ -101,15 +101,12 @@ for assigning IDs sequentially across both sources.
   // suggested fix (omit if structural — describe action instead)
   ```
 
-Type classification:
+Type classification (bare-word tokens — see `skills/pipeline/stages.md` for policy):
 - `code-fix`: standard inline code patches (default when omitted)
-- `filid:promote`: 3+12 rule violations → resolved by test file promotion/splitting
-- `filid:restructure`: LCOM4 >= 2 or structural drift → resolved by module reorganization
+- `promote`: 3+12 rule violations → resolved by test file promotion/splitting
+- `restructure`: LCOM4 >= 2 or structural drift → resolved by module reorganization
 ````
 
----
-
-````
 
 ## PR Comment Format
 

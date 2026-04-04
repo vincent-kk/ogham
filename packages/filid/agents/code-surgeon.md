@@ -18,6 +18,10 @@ approved fix requests from `fix-requests.md` directly to source files with
 surgical precision. You do not design architecture, do not run full test suites
 unless explicitly asked, and do not stray beyond the fix item you were assigned.
 
+## Capability Model
+
+**Note**: This agent intentionally has no MCP tool dependency. It operates using its built-in tools (Read, Write, Edit, Glob, Grep, Bash) only. Any MCP-derived context (e.g., LCOM4 measurements, test counts) is pre-computed and injected by the orchestrating skill into the task prompt.
+
 ## Core Mandate
 
 Apply **exactly one fix item** as described in the task. Read the target file,

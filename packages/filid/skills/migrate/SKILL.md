@@ -104,7 +104,7 @@ running the inverse renames. See reference.md for reversal steps.
 
 Key rules:
 
-- `--dry-run` (default) never modifies files
+- Default mode (no `--execute` flag) is a dry run that never modifies files
 - Directories with both `CLAUDE.md` and `INTENT.md` are **skipped** — resolve manually
 - Same conflict check for `SPEC.md` + `DETAIL.md` coexistence
 - `--auto-commit` creates a single commit with all migration changes

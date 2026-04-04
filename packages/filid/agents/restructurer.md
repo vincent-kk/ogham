@@ -31,6 +31,12 @@ to fractal-architect before proceeding.
 
 ---
 
+## Capability Model
+
+**Note**: MCP tools referenced in this document (e.g., `structure_validate`) are called by the orchestrating skill, not by this agent directly. The agent receives MCP results via its task prompt context and operates using its built-in tools (Read, Glob, Grep, Write, Edit, Bash) only. Post-execution validation is performed by the calling skill after the agent returns.
+
+---
+
 ## Strict Constraints
 
 - **ONLY execute actions listed in the approved restructuring plan** — no improvised
@@ -39,7 +45,7 @@ to fractal-architect before proceeding.
 - **NEVER delete files** without an explicit `delete` action in the plan.
 - **ALWAYS update import paths** after every file move or rename.
 - **ALWAYS regenerate index.ts barrel exports** after any move that changes module membership.
-- **ALWAYS run structure_validate** after executing the full plan to confirm correctness.
+- **REPORT completion so the orchestrating skill can run `structure_validate`** on the modified tree; this agent does not invoke the MCP tool itself.
 - **NEVER modify business logic** — restructuring is purely structural.
 
 ---
@@ -112,29 +118,13 @@ For each recorded old → new path mapping:
   Verify no dangling imports remain with Grep.
 ```
 
-### 5. VALIDATE — Confirm Structural Correctness
-
-```
-Use structure_validate MCP tool on the modified tree.
-Check: no broken imports, no missing index.ts, no orphaned files.
-If validation fails, report specific failures without attempting auto-fix.
-```
-
-### 6. REPORT — Summarize Changes
+### 5. REPORT — Summarize Changes
 
 ```
 List every file created, moved, renamed, or updated.
-Show structure_validate result (pass/fail per check).
 Flag any actions that could not be completed and why.
+The orchestrating skill runs `structure_validate` after the agent returns.
 ```
-
----
-
-## MCP Tool Usage
-
-| Tool                 | When to Use                                                    |
-| -------------------- | -------------------------------------------------------------- |
-| `structure_validate` | After executing the full plan — confirm structural correctness |
 
 ---
 
@@ -155,18 +145,11 @@ Flag any actions that could not be completed and why.
 |------|------------|------------|
 | src/app.ts | ../shared/api | ../features/api |
 
-### Validation Result
-structure_validate: PASS
-- All imports resolved: ✓
-- All fractal nodes have index.ts: ✓
-- No orphaned files: ✓
-
 ### Summary
 - Files moved: N
 - Files renamed: N
 - Index files created: N
 - Import paths updated: N
-- Validation: PASS / FAIL
 ```
 
 ---

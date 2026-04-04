@@ -81,9 +81,9 @@ See [reference.md Section 4](./reference.md#section-4--guide-document-output).
 # Guide for a specific sub-directory
 /filid:guide src/features
 
-# Category classification criteria
-fractal       = Holds state, contains fractal children, or is the default classification
-organ         = Leaf directory with no fractal children (structure-based, not name-based)
+# Category classification criteria (priority order per .claude/rules/fca.md)
+fractal       = INTENT.md or DETAIL.md present, or default when no organ/pure rule applies
+organ         = Directory name in KNOWN_ORGAN_DIR_NAMES (priority 2, name-based), or __wrapped__, or .dot-prefixed, or leaf dir with no fractal children
 pure-function = Stateless, no side effects, no I/O
 hybrid        = Mix of fractal children and organ-like files
 ```

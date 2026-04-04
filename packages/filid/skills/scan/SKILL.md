@@ -135,4 +135,6 @@ INTENT_MD_LINE_LIMIT = 50 lines
 TEST_THRESHOLD       = 15 test cases per spec file
 ORGAN_DIR_NAMES      = components | utils | types | hooks | helpers
                        | lib | styles | assets | constants
+                       | __tests__ | __mocks__ | __fixtures__
+                       | test | tests | spec | specs | fixtures | e2e
 ```

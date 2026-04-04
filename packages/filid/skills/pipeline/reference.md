@@ -4,6 +4,11 @@ Detailed reference for the pipeline orchestrator skill, including
 auto-detection algorithm, flag passthrough, file contracts, and
 stage execution patterns.
 
+> **Canonical stage alias table**: see `stages.md` in this directory for
+> the SSoT mapping between stage aliases (`pr-create`, `review`, `resolve`,
+> `revalidate`) and the skills they delegate to. The bare-word token policy
+> for action/type/stage tokens is also defined there.
+
 ## Auto-Detection Algorithm
 
 When `--from` is omitted, the pipeline determines the entry point by

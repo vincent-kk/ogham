@@ -76,7 +76,7 @@ For each file in `CHANGED_CLAUDE_MDS`:
 
 - Line count must be <= 50
 - Must contain all three tier sections: "Always do", "Ask first", "Never do"
-- If line count >= 90: record as LOW severity warning (approaching limit; `doc_compress` recommended)
+- If line count >= 40 AND <= 50: record as LOW severity warning (approaching the 50-line limit; `doc_compress` recommended)
 
 For each file in `CHANGED_SPEC_MDS`:
 
@@ -103,8 +103,8 @@ Skip this stage if `CHANGED_SPEC_FILES` is empty.
 
 Severity mapping:
 
-- Total cases > 15 → HIGH (fix type: `filid:promote`)
-- Distribution violation (too many basic) → MEDIUM (fix type: `filid:promote`)
+- Total cases > 15 → HIGH (fix type: `promote`)
+- Distribution violation (too many basic) → MEDIUM (fix type: `promote`)
 
 ### A.4 — Stage 4: Code Metrics (LCOM4 and CC)
 
@@ -125,8 +125,8 @@ Skip this stage if `CHANGED_FILES` is empty.
 
 Severity mapping:
 
-- LCOM4 >= 2 on a module with 5+ exports → HIGH (fix type: `filid:restructure`)
-- LCOM4 >= 2 on smaller module → MEDIUM (fix type: `filid:restructure`)
+- LCOM4 >= 2 on a module with 5+ exports → HIGH (fix type: `restructure`)
+- LCOM4 >= 2 on smaller module → MEDIUM (fix type: `restructure`)
 - CC > 15 → MEDIUM (fix type: `code-fix`)
 
 ### A.5 — Stage 5: Dependency Verification (DAG)

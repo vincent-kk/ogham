@@ -142,7 +142,7 @@ KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helper
                                      | lib | styles | assets | constants
 KNOWN_ORGAN_DIR_NAMES (test/infra) = __tests__ | __mocks__ | __fixtures__
                                      | test | tests | spec | specs | fixtures | e2e
-CLAUDE_MD_LIMIT   = 50 lines
+INTENT_MD_LINE_LIMIT = 50 lines
 3-TIER SECTIONS   = "Always do" | "Ask first" | "Never do"
 DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tree.nodes)
 ```

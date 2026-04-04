@@ -271,7 +271,6 @@ When `--scope=pr`:
 | `review_manage`  | `content-hash`     | Compute and persist content hash for cache       |
 | `review_manage`  | `check-cache`      | Check if review can be skipped (cache hit)       |
 | `review_manage`  | `format-pr-comment` | Format review results into collapsible PR comment |
-| `review_manage`  | `format-revalidate-comment` | Format re-validation results (used by revalidate) |
 | `debt_manage`    | `calculate-bias`    | Compute debt bias level for Phase C analysis      |
 
 ## Options

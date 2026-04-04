@@ -79,7 +79,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 `fractal-architect`, `qa-reviewer` (읽기 전용) · `implementer`, `restructurer` (구현) · `context-manager` (문서) · `drift-analyzer` (드리프트) · `code-surgeon` (패치)
 
-### Skills (16)
+### Skills (17)
 
 `review` (다중 페르소나 리뷰), `scan` (위반 스캔), `init`, `sync`, `structure-review`, `promote`, `restructure`, `resolve`, `revalidate`, `guide`, `context-query`, `update` (문서/테스트 동기화), `pull-request` (FCA-aware PR 자동 생성), `pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `ast-fallback` (LLM AST 패턴 매칭), `config` (설정 관리)
 

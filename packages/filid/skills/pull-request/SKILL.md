@@ -148,5 +148,5 @@ Key rules:
 - update failure blocks PR creation (`--skip-update` to bypass)
 - Existing PR body is fully replaced after user confirmation
 - If `gh` auth fails, PR body is saved locally to `.filid/pr-draft/<branch>.md`
-- PR title written in English; PR body written in Korean; technical terms and code identifiers remain in original form
+- PR title written in English; PR body language follows the `[filid:lang]` tag configured in `.filid/config.json` (default: English); technical terms and code identifiers remain in original form
 - File-level detail for ≤30 changed files; directory-level summary for >30 files
