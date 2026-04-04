@@ -243,6 +243,11 @@ When [trigger], the [system] shall [action].
 | Level 0 | **Story** | 사용자 가치 단위 (문제 공간) | 사용자 가치 명확, INVEST 준수 |
 | Level 0 | **Task** | 크로스-Story 공통 기술 작업 | [컴포넌트] + 기술 작업 내용 |
 
+#### 3.8 도메인 컨텍스트 유지 및 블로킹 매핑
+
+1. **원본 병행 참조**: `validation-report.md`를 주 앵커로 삼되, 기획적 배경(Why) 유실을 막기 위해 `source.md`를 항상 읽기 전용으로 참조한다.
+2. **Story 선후 관계(`blocks`) 판단**: 분할 과정에서 기획 내 의존성을 스스로 판단하여, API 구현이 UI보다 선행되어야 하는 등의 **Story ↔ Story 간 `blocks` 매핑**을 매니페스트에 선제적으로 추가한다.
+
 ### Tools
 
 ```yaml
@@ -319,10 +324,11 @@ When [trigger], the [system] shall [action].
 #### 4.3 코드 탐색 프로토콜
 
 1. Story의 domain 태그와 I/O 정보에서 **도메인 키워드** 추출
-2. 키워드 기반 **코드 진입점** 탐색 (Grep/Glob)
+2. 키워드 기반 **코드 진입점** 탐색 (Grep/Glob) (도메인 이해를 위해 `source.md` 병행 참조)
 3. 진입점에서 **관련 영역 순회** (import/export, call graph)
 4. 아키텍처 문서 참조 (존재 시)
 5. **전체 무차별 순회 금지** — 도메인 시드 기반 스코핑
+6. **탈출 경로 (Blocked Report)** — 탐색 중 선행 핵심 종속성 누락이나 구조적 제약으로 구현이 불가하다고 판단될 경우, 억지로 Task를 만들지 않고 즉시 중단 후 `devplan-blocked-report.md`를 생성한다.
 
 #### 4.4 Task 추출 규칙 (N:M 합류점 프로토콜)
 

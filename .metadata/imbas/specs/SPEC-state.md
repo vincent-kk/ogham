@@ -194,10 +194,10 @@
       "escape_code": null               // null | "E2-1" | "E2-2" | "E2-3" | "EC-1" | "EC-2"
     },
     "devplan": {
-      "status": "pending",
+      "status": "pending",              // "pending" | "in_progress" | "completed" | "escaped"
       "started_at": null,
       "completed_at": null,
-      "output": "devplan-manifest.json",
+      "output": "devplan-manifest.json",// 또는 "devplan-blocked-report.md"
       "pending_review": true
     }
   }
@@ -434,4 +434,6 @@ devplan.status == "completed" && devplan.pending_review == false
 - [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub provider 구현
 - [SPEC-skills.md](./SPEC-skills.md) — 상태를 읽고 쓰는 스킬 정의
 - [SPEC-agents.md](./SPEC-agents.md) — 상태 기반으로 동작하는 에이전트
+- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
+��전트
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처

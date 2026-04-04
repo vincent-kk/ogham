@@ -237,21 +237,21 @@ Step 1 — 런 로드 & 매니페스트 확인
 Step 2 — imbas-engineer 호출
   - Agent 호출: imbas-engineer
   - 입력:
-    - stories-manifest.json (Story Description들)
+    - stories-manifest.json (주 앵커)
+    - source.md (읽기 전용 참조 컨텍스트)
     - 로컬 코드베이스 루트 경로
     - (선택) 아키텍처 문서 경로
     - config.json의 subtask_limits
   - 지시:
-    Step 2a. Story별 코드 탐색
-      - domain 키워드 추출 → 코드 진입점 → 관련 영역 순회
+    Step 2a. Story별 코드 탐색 (의존성 누락/구조적 제약 발견 시 즉시 탈출)
     Step 2b. Story별 Subtask 초안 (EARS)
       - 종료조건 4개 모두 충족 확인
     Step 2c. 전체 Subtask 풀 중복 감지
       - 코드 경로 기반 유사도 비교
     Step 2d. Task 후보 추출
       - 임계값 초과 중복 → Task + blocks 링크
-    Step 2e. devplan-manifest.json 생성
-  - 출력: devplan-manifest.json
+    Step 2e. devplan-manifest.json 생성 (또는 진행 불가 시 devplan-blocked-report.md 생성)
+  - 출력: devplan-manifest.json 또는 devplan-blocked-report.md
 
 Step 3 — B→A 피드백 수집
   - Story 정의 ≠ 코드 현실인 경우 → devplan-manifest.json의 feedback_comments 필드에 기록
@@ -398,7 +398,7 @@ Step 4 — 배치 실행
          link.status = "created"
          save manifest
        ```
-  - 각 항목 생성 후 즉시 manifest에 issue_ref + status 기록 (복구용)
+  - 각 항목 생성(API 성공) 즉시 manifest JSON 파일을 디스크에 덮어쓰기(Unit Save) 하여 네트워크 단절 시 티켓 중복 생성 방지 및 멱등성 보장
 
 Step 5 — 결과 리포트
   - 생성된 이슈 수, 실패 수
@@ -771,4 +771,11 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 - [SPEC-state.md](./SPEC-state.md) — 스킬이 읽고 쓰는 상태
 - [SPEC-media.md](./SPEC-media.md) — fetch-media 상세
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
+- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
+.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
+- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
+PEC-media.md) — fetch-media 상세
+- [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
+- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
+.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
