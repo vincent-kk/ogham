@@ -8,8 +8,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runIndexInvalidator } from '../../hooks/index-invalidator.js';
-import { runLayerGuard } from '../../hooks/layer-guard.js';
+import { runIndexInvalidator } from '../../hooks/index-invalidator/index-invalidator.js';
+import { runLayerGuard } from '../../hooks/layer-guard/layer-guard.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {

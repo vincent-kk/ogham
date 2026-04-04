@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
+import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 

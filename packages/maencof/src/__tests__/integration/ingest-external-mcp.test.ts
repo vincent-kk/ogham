@@ -15,12 +15,12 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleKgBuild } from '../../mcp/tools/kg-build.js';
-import { handleKgContext } from '../../mcp/tools/kg-context.js';
-import { handleKgSearch } from '../../mcp/tools/kg-search.js';
-import { handleKgStatus } from '../../mcp/tools/kg-status.js';
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
-import { handleMaencofRead } from '../../mcp/tools/maencof-read.js';
+import { handleKgBuild } from '../../mcp/tools/kg-build/kg-build.js';
+import { handleKgContext } from '../../mcp/tools/kg-context/kg-context.js';
+import { handleKgSearch } from '../../mcp/tools/kg-search/kg-search.js';
+import { handleKgStatus } from '../../mcp/tools/kg-status/kg-status.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
+import { handleMaencofRead } from '../../mcp/tools/maencof-read/maencof-read.js';
 
 async function makeTempVault(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'maencof-ingest-'));
@@ -187,7 +187,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     expect(buildResult.success).toBe(true);
 
     // 그래프 로드
-    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
     expect(graph).toBeTruthy();
@@ -217,7 +217,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     const buildResult = await handleKgBuild(vault, { force: true });
     expect(buildResult.success).toBe(true);
 
-    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 
@@ -272,7 +272,7 @@ describe('ingest 스킬 외부 MCP 시뮬레이션 통합 테스트', () => {
     expect(buildResult.nodeCount).toBeGreaterThanOrEqual(5);
 
     // Step 5: 검색
-    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 

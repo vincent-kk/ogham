@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { handleKgNavigate } from '../../mcp/tools/kg-navigate.js';
+import { handleKgNavigate } from '../../mcp/tools/kg-navigate/kg-navigate.js';
 import { toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser.js';
+} from '../../../core/document-parser/document-parser.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

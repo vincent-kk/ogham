@@ -9,7 +9,7 @@ import {
   type ScannedFile,
   buildSnapshot,
   computeChangeSet,
-} from '../../../core/vault-scanner.js';
+} from '../../../core/vault-scanner/vault-scanner.js';
 
 // ScannedFile 헬퍼
 function makeFile(relativePath: string, mtime: number): ScannedFile {

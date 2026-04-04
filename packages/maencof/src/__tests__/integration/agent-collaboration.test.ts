@@ -15,12 +15,12 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleKgBuild } from '../../mcp/tools/kg-build.js';
-import { handleKgSearch } from '../../mcp/tools/kg-search.js';
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
-import { handleMaencofDelete } from '../../mcp/tools/maencof-delete.js';
-import { handleMaencofMove } from '../../mcp/tools/maencof-move.js';
-import { handleMaencofRead } from '../../mcp/tools/maencof-read.js';
+import { handleKgBuild } from '../../mcp/tools/kg-build/kg-build.js';
+import { handleKgSearch } from '../../mcp/tools/kg-search/kg-search.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
+import { handleMaencofDelete } from '../../mcp/tools/maencof-delete/maencof-delete.js';
+import { handleMaencofMove } from '../../mcp/tools/maencof-move/maencof-move.js';
+import { handleMaencofRead } from '../../mcp/tools/maencof-read/maencof-read.js';
 import type {
   AgentExecutionResult,
   AgentRole,
@@ -199,7 +199,7 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     actions.push(`인덱스 빌드: ${buildResult.nodeCount}개 노드`);
 
     // 지식 그래프 로드
-    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
     expect(graph).toBeTruthy();

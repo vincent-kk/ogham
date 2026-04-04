@@ -23,7 +23,7 @@ import {
   readGraphNodeCount,
   readStaleNodeCount,
   runIndexInvalidator,
-} from '../../hooks/index-invalidator.js';
+} from '../../hooks/index-invalidator/index-invalidator.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

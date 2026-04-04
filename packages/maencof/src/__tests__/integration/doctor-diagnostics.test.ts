@@ -19,11 +19,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../core/document-parser.js';
-import { scanVault } from '../../core/vault-scanner.js';
-import { handleKgBuild } from '../../mcp/tools/kg-build.js';
-import { handleKgStatus } from '../../mcp/tools/kg-status.js';
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create.js';
+} from '../../core/document-parser/document-parser.js';
+import { scanVault } from '../../core/vault-scanner/vault-scanner.js';
+import { handleKgBuild } from '../../mcp/tools/kg-build/kg-build.js';
+import { handleKgStatus } from '../../mcp/tools/kg-status/kg-status.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-create.js';
 import type { DiagnosticItem, DiagnosticResult } from '../../types/doctor.js';
 
 async function makeTempVault(): Promise<string> {
@@ -266,7 +266,7 @@ describe('Doctor 진단 통합 테스트', () => {
     );
 
     // graph 로드 후 status 확인
-    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 

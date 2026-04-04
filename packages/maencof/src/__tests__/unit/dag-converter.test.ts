@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyLayerDirectionality,
   convertToDAG,
-} from '../../core/dag-converter.js';
+} from '../../core/dag-converter/dag-converter.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

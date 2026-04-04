@@ -12,8 +12,8 @@ import {
   formatDate,
   getDailynotePath,
   parseDailynote,
-} from '../../core/dailynote-writer.js';
-import { runDailynoteRecorder } from '../../hooks/dailynote-recorder.js';
+} from '../../core/dailynote-writer/dailynote-writer.js';
+import { runDailynoteRecorder } from '../../hooks/dailynote-recorder/dailynote-recorder.js';
 
 function createTempVault(): string {
   const dir = join(tmpdir(), `maencof-dnr-test-${Date.now()}`);

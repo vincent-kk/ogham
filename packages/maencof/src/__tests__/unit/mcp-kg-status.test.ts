@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleKgStatus } from '../../mcp/tools/kg-status.js';
+import { handleKgStatus } from '../../mcp/tools/kg-status/kg-status.js';
 import { toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

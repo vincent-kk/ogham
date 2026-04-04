@@ -4,14 +4,14 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { writePinnedNodes } from '../cache-manager.js';
-import type { PinnedNode } from '../cache-manager.js';
+import { writePinnedNodes } from '../cache-manager/cache-manager.js';
+import type { PinnedNode } from '../cache-manager/cache-manager.js';
 import {
   buildTurnContext,
   readCompanionIdentity,
   readIndexMetadata,
   readStaleCount,
-} from '../turn-context-builder.js';
+} from '../turn-context-builder/turn-context-builder.js';
 
 let vaultDir: string;
 let cacheTestDir: string;

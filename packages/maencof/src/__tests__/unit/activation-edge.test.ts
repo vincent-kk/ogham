@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { runSpreadingActivation } from '../../core/spreading-activation.js';
+import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
 import { Layer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type {

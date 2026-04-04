@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EDGE_TYPE_MULTIPLIER,
   runSpreadingActivation,
-} from '../../core/spreading-activation.js';
+} from '../../core/spreading-activation/spreading-activation.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   EdgeTypeMap,
