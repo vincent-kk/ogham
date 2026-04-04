@@ -3,9 +3,115 @@
  * @description Central type exports for @ogham/imbas
  */
 
+// MCP types
 export type { McpToolInput, McpToolResult } from './mcp.js';
+
+// Hook types
 export type {
   HookBaseInput,
   HookOutput,
   SessionStartInput,
+  PreToolUseInput,
+  SubagentStartInput,
+  UserPromptSubmitInput,
+  SessionEndInput,
 } from './hooks.js';
+
+// State types
+export {
+  PhaseStatusSchema,
+  PhaseNameSchema,
+  ValidateResultSchema,
+  EscapeCodeSchema,
+  ValidatePhaseSchema,
+  SplitPhaseSchema,
+  DevplanPhaseSchema,
+  PhasesSchema,
+  RunStateSchema,
+  StartPhaseActionSchema,
+  CompletePhaseActionSchema,
+  EscapePhaseActionSchema,
+  RunTransitionSchema,
+  createInitialRunState,
+} from './state.js';
+export type {
+  PhaseStatus,
+  PhaseName,
+  ValidateResult,
+  EscapeCode,
+  ValidatePhase,
+  SplitPhase,
+  DevplanPhase,
+  Phases,
+  RunState,
+  RunTransition,
+} from './state.js';
+
+// Config types
+export {
+  LanguageConfigSchema,
+  LlmModelConfigSchema,
+  SubtaskLimitsSchema,
+  DefaultsConfigSchema,
+  JiraConfigSchema,
+  MediaConfigSchema,
+  ImbasConfigSchema,
+} from './config.js';
+export type {
+  LanguageConfig,
+  LlmModelConfig,
+  SubtaskLimits,
+  DefaultsConfig,
+  JiraConfig,
+  MediaConfig,
+  ImbasConfig,
+} from './config.js';
+
+// Manifest types
+export {
+  ManifestItemStatusSchema,
+  LinkStatusSchema,
+  StoryVerificationSchema,
+  StoryItemSchema,
+  StoryLinkSchema,
+  StoriesManifestSchema,
+  SubtaskItemSchema,
+  TaskItemSchema,
+  StorySubtasksSchema,
+  FeedbackCommentSchema,
+  ExecutionStepSchema,
+  DevplanManifestSchema,
+} from './manifest.js';
+export type {
+  ManifestItemStatus,
+  LinkStatus,
+  StoryVerification,
+  StoryItem,
+  StoryLink,
+  StoriesManifest,
+  SubtaskItem,
+  TaskItem,
+  StorySubtasks,
+  FeedbackComment,
+  ExecutionStep,
+  DevplanManifest,
+  ManifestSummary,
+} from './manifest.js';
+
+// Cache types
+export {
+  ProjectMetaSchema,
+  IssueTypeCacheSchema,
+  LinkTypeCacheSchema,
+  WorkflowCacheSchema,
+  CachedAtSchema,
+  CacheTypeSchema,
+} from './cache.js';
+export type {
+  ProjectMeta,
+  IssueTypeCache,
+  LinkTypeCache,
+  WorkflowCache,
+  CachedAt,
+  CacheType,
+} from './cache.js';
