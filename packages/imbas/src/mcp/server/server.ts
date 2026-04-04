@@ -8,7 +8,6 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 
 import { VERSION } from '../../version.js';
-import { RunTransitionSchema } from '../../types/state.js';
 import { CacheTypeSchema } from '../../types/cache.js';
 
 import { wrapHandler } from '../shared/shared.js';
@@ -82,8 +81,22 @@ export function createServer(): McpServer {
   server.registerTool(
     'imbas_run_transition',
     {
-      description: 'Typed phase transition (start/complete/escape)',
-      inputSchema: RunTransitionSchema,
+      // Flat leaf-primitive schema to avoid zod-to-json-schema $ref dedup.
+      // Handler validates via RunTransitionSchema.parse(). See imbas_manifest_save above.
+      description: 'Typed phase transition (start/complete/escape/skip)',
+      inputSchema: z.object({
+        project_ref: z.string(),
+        run_id: z.string(),
+        action: z.string(),
+        phase: z.string().optional(),
+        phases: z.array(z.string()).optional(),
+        escape_code: z.string().optional(),
+        result: z.string().optional(),
+        blocking_issues: z.number().int().nonnegative().optional(),
+        warning_issues: z.number().int().nonnegative().optional(),
+        pending_review: z.boolean().optional(),
+        stories_created: z.number().int().nonnegative().optional(),
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     wrapHandler(handleRunTransition),

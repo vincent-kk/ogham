@@ -290,7 +290,7 @@ plugin: imbas
 
 | Command | 동작 |
 |---------|------|
-| `init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
+| `filid:init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
 | `show` | config.json + 캐시 상태 표시 |
 | `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
 | `set-language <field> <lang>` | 언어 설정 변경 |
