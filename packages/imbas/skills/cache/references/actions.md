@@ -38,9 +38,14 @@ Force-refresh all cache types regardless of TTL status.
    b. Find matching project by key
    c. Call imbas_cache_set(project_ref, "project-meta", <data>)
 
-5. Fetch workflow data:
-   a. Call Atlassian MCP: getTransitionsForJiraIssue(issueKey: <any existing issue key>)
-   b. Call imbas_cache_set(project_ref, "workflows", <data>)
+5. Fetch workflow data (optional — requires existing issue):
+   a. Call Atlassian MCP: searchJiraIssuesUsingJql(jql: "project = <KEY> ORDER BY created DESC", maxResults: 1)
+   b. If result is empty (no issues exist in project):
+      → Skip workflows cache. Log: "No issues in project — workflows cache deferred."
+      → workflows.json will be lazy-filled on first imbas:manifest execution.
+   c. If result has an issue:
+      → Call Atlassian MCP: getTransitionsForJiraIssue(issueKey: <returned key>)
+      → Call imbas_cache_set(project_ref, "workflows", <data>)
 
 6. cached_at.json is automatically updated by imbas_cache_set:
    { "cached_at": "<ISO8601 now>", "ttl_hours": 24 }

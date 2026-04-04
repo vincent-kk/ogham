@@ -1,7 +1,7 @@
 /**
  * @file types/manifest.ts
  * @description Zod schemas for imbas manifests (stories + devplan)
- * @see SPEC-state.md §6
+ * @see agents/imbas-planner.md (stories-manifest), agents/imbas-engineer.md (devplan-manifest)
  */
 
 import { z } from 'zod';

@@ -1,7 +1,7 @@
 /**
  * @file types/cache.ts
  * @description Zod schemas for Jira metadata cache
- * @see SPEC-state.md §5
+ * @see skills/cache/references/cache-structure.md
  */
 
 import { z } from 'zod';

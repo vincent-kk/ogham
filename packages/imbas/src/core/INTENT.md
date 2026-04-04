@@ -20,7 +20,7 @@ imbas 파이프라인의 비즈니스 로직 계층. .imbas/ 디렉토리의 상
 ### Always do
 
 - 모든 파일 I/O는 lib/file-io.ts 경유
-- 상태 전이는 SPEC-tools.md §2.3 규칙 준수
+- 상태 전이는 skills/*/references/state-transitions.md 규칙 준수
 
 ### Ask first
 

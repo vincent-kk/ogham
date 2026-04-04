@@ -170,7 +170,7 @@ For each entry in manifest.story_subtasks:
 #### Step 5 — add_feedback_comments
 For each comment in manifest.feedback_comments where status == "pending":
   1. Call Atlassian MCP: addCommentToJiraIssue(
-       issueIdOrKey: comment.target_key,
+       issueIdOrKey: comment.target_ref,
        body: comment.comment
      )
   2. Update comment: status = "created"

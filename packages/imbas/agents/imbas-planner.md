@@ -218,7 +218,7 @@ not by creating Epic objects.
     "split_into": []
   }],
   "links": [
-    { "type": "split", "from": "S1", "to": ["S2", "S3"], "status": "pending" }
+    { "type": "is split into", "from": "S1", "to": ["S2", "S3"], "status": "pending" }
   ]
 }
 ```

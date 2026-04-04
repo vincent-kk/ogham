@@ -303,7 +303,8 @@ Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
      }
      All Stories have status "created" with valid jira_key (they already exist in Jira).
   4. Call imbas_manifest_save(type: "stories", manifest)
-  5. Mark validate + split as completed in state (skip transitions — these phases were not needed)
+  5. Call imbas_run_transition: action "skip_phases", phases ["validate", "split"]
+     → Sets both phases to status "completed", records in metadata.skipped_phases
   6. Proceed to Step 3.1
 
   Note: When multiple Stories are provided, imbas-engineer performs cross-Story
@@ -393,7 +394,7 @@ Step 3.5.2 — Batch Execution (follows execution_order)
 
   Step 5 — add_feedback_comments:
     For each feedback_comment where status == "pending":
-    - addCommentToJiraIssue(issueIdOrKey: target_key, body: comment)
+    - addCommentToJiraIssue(issueIdOrKey: target_ref, body: comment)
     - Update: status = "created"
     - Save manifest
 

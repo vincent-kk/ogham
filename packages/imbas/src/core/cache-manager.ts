@@ -1,7 +1,7 @@
 /**
  * @file core/cache-manager.ts
  * @description Cache CRUD + TTL management for Jira metadata
- * @see SPEC-state.md §5
+ * @see skills/cache/references/cache-structure.md
  */
 import { readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';

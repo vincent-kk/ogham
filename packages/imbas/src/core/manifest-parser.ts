@@ -1,7 +1,7 @@
 /**
  * @file core/manifest-parser.ts
  * @description Manifest loading + summary generation
- * @see SPEC-state.md §6
+ * @see agents/imbas-planner.md (stories-manifest), agents/imbas-engineer.md (devplan-manifest)
  */
 
 import { join } from 'node:path';

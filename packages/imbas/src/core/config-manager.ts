@@ -1,7 +1,7 @@
 /**
  * @file core/config-manager.ts
  * @description Config.json CRUD with dot-path access
- * @see SPEC-state.md §3
+ * @see skills/setup/references/init-workflow.md
  */
 
 import { join } from 'node:path';

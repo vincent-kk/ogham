@@ -12,10 +12,13 @@ escape with a structured report ("escape is a report" principle):
 | EC-2 | Source defect discovered | Generate defect report (recommend Phase 1 re-validation) |
 
 On escape:
-1. Call imbas_run_transition:
+1. For E2-3 only: generate a single-Story stories-manifest.json wrapping the
+   original document as one Story (the document is already appropriate size).
+   Call imbas_manifest_save to persist it before escaping.
+2. Call imbas_run_transition:
    - action: "escape_phase", phase: "split", escape_code: "<code>"
    → Sets split.status = "escaped", split.escape_code = "<code>"
-2. Display structured escape report to user.
-3. For E2-3: inform user that /imbas:devplan can proceed directly.
-4. For E2-1, E2-2, EC-1, EC-2: inform user that human intervention is required
+3. Display structured escape report to user.
+4. For E2-3: inform user that /imbas:devplan can proceed directly.
+5. For E2-1, E2-2, EC-1, EC-2: inform user that human intervention is required
    before pipeline can continue.

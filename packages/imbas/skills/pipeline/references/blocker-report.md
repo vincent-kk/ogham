@@ -123,7 +123,7 @@ Emit when pipeline finishes all phases successfully.
 
 ### B→A Feedback
 <feedback_comments summary, if any>
-- <target_key>: <comment summary> (type: <mapping_divergence|story_split_issue>)
+- <target_ref>: <comment summary> (type: <mapping_divergence|story_split_issue>)
 
 ### AST Mode
 <native | fallback ("@ast-grep/napi not installed — results approximate")>

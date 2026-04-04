@@ -18,6 +18,7 @@
 | `getJiraProjectIssueTypesMetadata` | Fetch issue types for the project |
 | `getJiraIssueTypeMetaWithFields` | Fetch required fields for each issue type |
 | `getIssueLinkTypes` | Fetch all available issue link types |
+| `getTransitionsForJiraIssue` | Fetch workflow transitions for an existing issue (workflows cache) |
 
 ## Agent Spawn
 

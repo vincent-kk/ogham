@@ -71,7 +71,7 @@ Step 2 — imbas-engineer Agent Spawn
 Step 3 — B→A Feedback Collection
   - When Story definition ≠ code reality, record in feedback_comments:
     - target_story: Story ID
-    - target_key: Story Jira key
+    - target_ref: Story Jira key
     - comment: description of divergence
     - type: "mapping_divergence" (Story↔code mismatch) or "story_split_issue" (split problem)
   - IMPORTANT: "Problem space tree unchanged" principle — Stories themselves are

@@ -1,7 +1,7 @@
 /**
  * @file core/state-manager.ts
  * @description State.json CRUD + transition validation
- * @see SPEC-tools.md §2.3
+ * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
  */
 
 import { join } from 'node:path';
