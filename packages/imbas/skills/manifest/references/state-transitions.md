@@ -13,7 +13,7 @@ The manifest itself tracks per-item state via status field:
 
 ```
 "pending"  → item not yet created in Jira
-"created"  → item created, jira_key populated
+"created"  → item created, issue_ref populated
 "failed"   → creation attempted but failed (retryable)
 "skipped"  → intentionally skipped (e.g., umbrella Story)
 ```

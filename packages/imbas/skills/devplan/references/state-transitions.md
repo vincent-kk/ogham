@@ -26,4 +26,10 @@ Exit states:
   complete_phase("devplan", pending_review=true):
     → devplan.status = "completed", devplan.pending_review = true
     → manifest execution DENIED until review approved
+
+### Blocked Exit
+  complete_phase("devplan", result="BLOCKED")
+    → devplan.status = "completed", devplan.result = "BLOCKED"
+    → Output: devplan-blocked-report.md (in run directory)
+    → User guidance: "Phase 3 blocked. Review blocked report and resolve dependencies."
 ```

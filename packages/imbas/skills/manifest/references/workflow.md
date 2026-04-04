@@ -21,8 +21,8 @@ Before loading the manifest, verify pipeline state:
    - "stories" → call imbas_manifest_get(project_ref, run_id, type: "stories")
    - "devplan" → call imbas_manifest_get(project_ref, run_id, type: "devplan")
 3. Calculate pending items:
-   - Count items where status == "pending" (no jira_key)
-   - Items with existing jira_key are SKIPPED (idempotency)
+   - Count items where status == "pending" (no issue_ref)
+   - Items with existing issue_ref are SKIPPED (idempotency)
 4. If pending count == 0:
    Display: "All items already created. Nothing to execute."
    → Exit.
@@ -31,7 +31,7 @@ Before loading the manifest, verify pipeline state:
 
 For "stories" type:
   Display planned actions:
-  1. Epic creation (if manifest has epic entry without jira_key)
+  1. Epic creation (if manifest has epic entry without issue_ref)
   2. Story creation (list: id, title, type)
   3. Link creation (list: type, from → to)
   → Exit after display.
@@ -45,6 +45,37 @@ For "devplan" type:
   4. Story Subtasks to create (id, title, parent story)
   5. Feedback comments to post (target story, type)
   → Exit after display.
+
+## Step 2.5 — Drift Check (State Reconciliation)
+
+  For manifests with existing issue_ref values (resume/re-run scenarios):
+  1. Collect all items where status == "created" (have issue_ref).
+  2. For each issue_ref, verify remote state:
+
+     [jira] provider:
+       - Call getJiraIssue(issue_ref) for each created item.
+       - Check: issue exists, not deleted, status matches expectation.
+
+     [github] provider:
+       - Run: gh issue view <number> --repo <repo> --json state,labels
+       - Check: issue exists, not deleted, labels intact.
+
+  3. Classify results:
+     - MATCH: Remote state consistent with manifest → proceed normally.
+     - DRIFT_DELETED: issue_ref exists in manifest but issue deleted remotely
+       → WARN user: "Issue <ref> was deleted externally. Reset to pending? [y/N]"
+       → If yes: clear issue_ref, set status = "pending" (will be re-created)
+       → If no: skip item, mark status = "skipped"
+     - DRIFT_STATE: issue exists but in unexpected state (e.g., already Done)
+       → WARN user: "Issue <ref> is already in '<state>' state. Skip? [y/N]"
+       → If yes: mark status = "skipped"
+       → If no: proceed with planned action
+
+  4. If any DRIFT detected:
+     - Display drift summary table before proceeding to Step 3.
+     - Save reconciled manifest via imbas_manifest_save.
+
+  5. If no items have issue_ref (fresh run): skip this step entirely.
 
 ## Step 3 — User Confirmation
 
@@ -62,7 +93,7 @@ Ask: "Proceed with Jira issue creation? (y/n)"
 ## Step 4 — Batch Execution
 
 CRITICAL: After EACH item creation, immediately save the manifest
-with updated status/jira_key via imbas_manifest_save. This enables
+with updated status/issue_ref via imbas_manifest_save. This enables
 crash recovery — re-running skips already-created items.
 
 ### For "stories" type
@@ -70,9 +101,9 @@ crash recovery — re-running skips already-created items.
 Execution order (fixed):
 
 #### Phase 4a — Epic Creation (if needed)
-- If manifest has epic_key == null and Epic entry exists:
+- If manifest has epic_ref == null and Epic entry exists:
   1. Call Atlassian MCP: createJiraIssue(project: KEY, type: "Epic", summary, description)
-  2. Store returned jira_key in manifest epic_key
+  2. Store returned issue_ref in manifest epic_ref
   3. Save manifest immediately
 
 #### Phase 4b — Story Creation
@@ -82,16 +113,16 @@ For each story in manifest.stories where status == "pending":
        type: "Story",
        summary: story.title,
        description: story.description,
-       parent: epic_key (if available)
+       parent: epic_ref (if available)
      )
-  2. Update story: status = "created", jira_key = <returned key>
+  2. Update story: status = "created", issue_ref = <returned key>
   3. Save manifest immediately
 
 #### Phase 4c — Link Creation (1:N Expansion)
 For each link in manifest.links where status == "pending":
-  - Resolve "from" ID to jira_key (lookup in stories array)
+  - Resolve "from" ID to issue_ref (lookup in stories array)
   - For EACH target in link.to array (1:N expansion):
-    1. Resolve target ID to jira_key
+    1. Resolve target ID to issue_ref
     2. Call Atlassian MCP: createIssueLink(
          type: link.type,
          inwardIssue: resolve(link.from),
@@ -112,7 +143,7 @@ When a link has multiple targets (`to` is an array) and some targets fail:
    - "created"  — all targets succeeded
    - "partial"  — some targets succeeded, some failed
    - "failed"   — all targets failed
-5. On re-run (imbas:manifest re-execution), only retry targets without jira_key confirmation
+5. On re-run (imbas:manifest re-execution), only retry targets without issue_ref confirmation
 ```
 
 ### For "devplan" type
@@ -127,7 +158,7 @@ For each task in manifest.tasks where status == "pending":
        summary: task.title,
        description: task.description
      )
-  2. Update task: status = "created", jira_key = <returned key>
+  2. Update task: status = "created", issue_ref = <returned key>
   3. Save manifest immediately
 
 #### Step 2 — create_task_subtasks
@@ -138,19 +169,19 @@ For each task in manifest.tasks:
          type: "Sub-task",
          summary: subtask.title,
          description: subtask.description,
-         parent: task.jira_key
+         parent: task.issue_ref
        )
-    2. Update subtask: status = "created", jira_key = <returned key>
+    2. Update subtask: status = "created", issue_ref = <returned key>
     3. Save manifest immediately
 
 #### Step 3 — create_links
 For each task in manifest.tasks:
   For each blocked_story_id in task.blocks:
-    1. Resolve story_id to jira_key from stories-manifest.json
+    1. Resolve story_id to issue_ref from stories-manifest.json
     2. Call Atlassian MCP: createIssueLink(
          type: "Blocks",
-         inwardIssue: task.jira_key,
-         outwardIssue: story_jira_key
+         inwardIssue: task.issue_ref,
+         outwardIssue: story_issue_ref
        )
 Save manifest after all links created
 
@@ -164,7 +195,7 @@ For each entry in manifest.story_subtasks:
          description: subtask.description,
          parent: entry.story_key
        )
-    2. Update subtask: status = "created", jira_key = <returned key>
+    2. Update subtask: status = "created", issue_ref = <returned key>
     3. Save manifest immediately
 
 #### Step 5 — add_feedback_comments
@@ -176,8 +207,8 @@ For each comment in manifest.feedback_comments where status == "pending":
   2. Update comment: status = "created"
   3. Save manifest immediately
 
-IDEMPOTENCY: For every item, check status and jira_key before creating.
-If jira_key already exists → skip. This makes re-execution safe after
+IDEMPOTENCY: For every item, check status and issue_ref before creating.
+If issue_ref already exists → skip. This makes re-execution safe after
 partial failures.
 
 ## Step 5 — Result Report

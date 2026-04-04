@@ -122,7 +122,7 @@ Phase 2: SPLIT
 
 Phase 2.5: MANIFEST STORIES
   Batch-create Epic + Stories + Links in Jira
-  >>> Failed items → STOP (devplan requires all jira_keys)
+  >>> Failed items → STOP (devplan requires all issue_refs)
 
 Phase 3: DEVPLAN
   Spawn imbas-engineer → codebase exploration + EARS Subtask generation

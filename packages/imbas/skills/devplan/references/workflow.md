@@ -12,7 +12,7 @@ Step 1 — Load Run & Manifest Checks
   3. Call imbas_manifest_get(project_ref, run_id, type: "stories")
      to load stories-manifest.json.
   4. Check Story statuses:
-     - All "created" (jira_key present) → proceed.
+     - All "created" (issue_ref present) → proceed.
      - Any "pending" → block: "Execute stories manifest first: /imbas:manifest stories"
   5. Call imbas_run_transition:
      - action: "start_phase", phase: "devplan"
@@ -22,7 +22,8 @@ Step 2 — imbas-engineer Agent Spawn
   - Spawn agent: imbas-engineer
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input provided to agent:
-    - stories-manifest.json (Story descriptions with jira_keys)
+    - stories-manifest.json (Story descriptions with issue_refs)
+    - source.md (read-only reference — original planning document for domain context)
     - Local codebase root path (project working directory)
     - Architecture documents path (if available)
     - config.json subtask_limits:
@@ -60,11 +61,19 @@ Step 2 — imbas-engineer Agent Spawn
       - Generate "blocks" links: Task → [Story1, Story2, ...]
       - Remove redundant Subtasks from individual Stories
 
-    Step 2e — devplan-manifest.json Generation
-      - Compile: tasks[], story_subtasks[], feedback_comments[], execution_order[]
+    Step 2e — Output Generation (Branch)
+      - IF all Stories can proceed:
+        → Generate devplan-manifest.json (full manifest)
+      - IF some Stories are blocked (missing dependencies, structural constraints):
+        → Generate devplan-manifest.json for unblocked Stories
+        → Generate devplan-blocked-report.md for blocked Stories
+      - IF ALL Stories are blocked:
+        → Generate devplan-blocked-report.md only (no manifest)
+        → Agent returns blocked report content
+      - Compile (when manifest generated): tasks[], story_subtasks[], feedback_comments[], execution_order[]
       - execution_order follows dependency: Tasks → Task Subtasks → Links → Story Subtasks → Feedback
 
-  - Agent returns: devplan-manifest.json content
+  - Agent returns: devplan-manifest.json content (or devplan-blocked-report.md if blocked)
 
   See [ast-fallback.md](./ast-fallback.md) for AST fallback detection details.
 

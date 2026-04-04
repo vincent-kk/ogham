@@ -32,7 +32,7 @@ Epic, Story, Task, Sub-task, 링크, 댓글을 Jira에 일괄 생성한다.
 | 상태 | 설명 |
 |------|------|
 | `pending` | 아직 생성되지 않음 |
-| `created` | 생성 완료, `jira_key` 할당됨 |
+| `created` | 생성 완료, `issue_ref` 할당됨 |
 | `failed` | 생성 시도 실패 (재시도 가능) |
 | `skipped` | 의도적으로 스킵됨 |
 

@@ -40,7 +40,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 |-------|--------|
 | Atlassian MCP not connected | STOP: "Atlassian MCP server is not available. Connect it first." |
 | createJiraIssue fails (single item) | Log error on item (status: "pending"), continue with next. Report at end. |
-| Any Story status remains "pending" after batch | STOP: "Manifest stories partially failed. Devplan requires all jira_keys. Re-run: /imbas:manifest stories --run \<run-id\>" |
+| Any Story status remains "pending" after batch | STOP: "Manifest stories partially failed. Devplan requires all issue_refs. Re-run: /imbas:manifest stories --run \<run-id\>" |
 | createIssueLink fails | Log error, continue. Note in final report. |
 | Epic creation fails | STOP: "Epic creation failed. Check Jira project settings." |
 
@@ -60,7 +60,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 |-------|--------|
 | Atlassian MCP not connected | STOP: "Atlassian MCP server is not available." |
 | createJiraIssue fails (single item) | Log error on item, continue with next. Report at end. |
-| ID resolution fails (no jira_key for reference) | Skip item, log: "Cannot resolve \<ID\> — parent not yet created." |
+| ID resolution fails (no issue_ref for reference) | Skip item, log: "Cannot resolve \<ID\> — parent not yet created." |
 | addCommentToJiraIssue fails | Log error, continue. Note in final report. |
 | Partial failure after batch | NON-BLOCKING report: list failures + "/imbas:manifest devplan --run \<run-id\> to retry." |
 
@@ -110,7 +110,7 @@ When pipeline stops after some phases completed, continue manually from the stop
 
 ### Idempotency
 
-Manifest execution is idempotent: items with existing jira_key are skipped on re-run.
+Manifest execution is idempotent: items with existing issue_ref are skipped on re-run.
 This makes retry-after-failure safe — already-created items are not duplicated.
 
 ---
@@ -128,4 +128,4 @@ These errors only occur in pipeline context (not in individual skills):
 | Story key is not a Story (devplan mode) | Issue type is not Story | STOP: "\<KEY\> is a \<type\>, not a Story." |
 | Mixed project keys in Story input | PROJ-42,OTHER-10 have different projects | STOP: "All Story keys must belong to the same project." |
 | --stop-at value invalid | Not one of: validate, split, manifest-stories, devplan | STOP: "Invalid --stop-at value." |
-| Phase 2.5 Story failure blocks Phase 3 | Any Story creation failed | STOP: devplan requires all jira_keys |
+| Phase 2.5 Story failure blocks Phase 3 | Any Story creation failed | STOP: devplan requires all issue_refs |

@@ -155,6 +155,25 @@ When splitting creates many related Stories, group under an **Epic** (umbrella p
 
 ---
 
+## Dependency Mapping
+
+During decomposition, identify execution dependencies between Stories. When one Story must
+be implemented before another (e.g., API backend before UI frontend, data model before
+business logic), create `blocks` links in the manifest.
+
+**Detection heuristics**:
+- Story A provides data/API that Story B consumes → A blocks B
+- Story A creates infrastructure that Story B depends on → A blocks B
+- Story A defines interfaces that Story B implements against → A blocks B
+
+**Rules**:
+- Only create `blocks` links when there is a genuine implementation dependency
+- Do not create links for conceptual grouping — use `relates_to` for that
+- Circular dependencies are prohibited — if detected, restructure the Stories
+- Document the reason for each `blocks` link in the link entry
+
+---
+
 ## Escape Conditions
 
 When decomposition cannot proceed normally, stop and return a structured escape report
@@ -218,7 +237,8 @@ not by creating Epic objects.
     "split_into": []
   }],
   "links": [
-    { "type": "is split into", "from": "S1", "to": ["S2", "S3"], "status": "pending" }
+    { "type": "is split into", "from": "S1", "to": ["S2", "S3"], "status": "pending" },
+    { "type": "blocks", "from": "S4", "to": ["S5"], "status": "pending" }
   ]
 }
 ```
@@ -227,6 +247,24 @@ Every Story must have `verification` results and a unique ID. `type` is always `
 `issue_ref` is set by the pipeline after Jira creation (starts as `null`).
 Split Stories use `split_from`/`split_into` (`split_into` defaults to `[]`). Status starts as `"pending"`.
 `epic_ref` is set by the pipeline/skill layer (not the planner). `links` uses `{ type, from, to[], status }` shape.
+
+---
+
+## Read-Only Reference Context
+
+When spawned by the split skill, you receive `source.md` (the original planning document copy)
+as read-only reference alongside the validation report.
+
+- **Primary anchor**: `validation-report.md` — your main input for decomposition decisions
+- **Read-only reference**: `source.md` — consult for domain context, background reasoning, and
+  nuances that may not appear in the validation report
+- **Purpose**: Prevents context loss when the validation report summarizes away important
+  business rationale or subtle requirements from the original document
+- **Rule**: Never cite source.md as the authoritative input — it supplements, not replaces,
+  the validation report
+
+When in doubt about the intent behind a requirement, check source.md for the original phrasing
+before making decomposition decisions.
 
 ---
 

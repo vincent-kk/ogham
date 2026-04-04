@@ -14,7 +14,7 @@ Step 1 — Load Run & Verify Preconditions
 Step 2 — Epic Decision Flow
   - If --epic provided:
     1. Call Atlassian MCP: getJiraIssue(epicKey) to verify existence.
-    2. If found: store epic_key in state.json via imbas_run_transition context.
+    2. If found: store epic_ref in state.json via imbas_run_transition context.
     3. If not found: error: "Epic <KEY> not found in Jira."
   - If --epic NOT provided:
     1. Ask user: "Create a new Epic for this split, or use an existing one?"
@@ -104,6 +104,10 @@ Step 6 — stories-manifest.json Generation
   2. Compile links array:
      - Split links ("is split into", "split from")
      - Umbrella links ("relates to")
+     - Dependency links:
+       - Detect Story-to-Story execution dependencies (e.g., API before UI)
+       - Add "blocks" links to manifest: { type: "blocks", from: <blocking-story-id>, to: [<blocked-story-ids>], status: "pending" }
+       - No circular dependencies allowed
   3. Call imbas_manifest_save:
      - project_ref, run_id, type: "stories", manifest: <full manifest>
   4. Call imbas_manifest_validate:

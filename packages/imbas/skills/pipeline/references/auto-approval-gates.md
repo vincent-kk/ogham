@@ -176,7 +176,7 @@ because Jira writes are irreversible — already-created items cannot be undone.
 
 ```
 SUCCESS:
-  All items have status "created" with valid jira_key
+  All items have status "created" with valid issue_ref
   → Include in final success report
 
 PARTIAL:
@@ -186,7 +186,7 @@ PARTIAL:
 
 EXCEPTION — Phase 2.5 (manifest-stories) failure:
   If ANY Story fails to create in Phase 2.5, this IS a pipeline stop.
-  Reason: Phase 3 (devplan) requires all Stories to have valid jira_keys.
+  Reason: Phase 3 (devplan) requires all Stories to have valid issue_refs.
   → STOP with blocker report
   → Resume: "/imbas:manifest stories --run <run-id>" then manual devplan
 ```

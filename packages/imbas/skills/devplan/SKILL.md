@@ -34,7 +34,7 @@ batch Jira issue creation.
 ## References
 
 - [preconditions.md](./references/preconditions.md) — state.json and stories-manifest preconditions
-- [workflow.md](./references/workflow.md) — Steps 1–4: load, agent spawn, feedback, user review
+- [workflow.md](./references/workflow.md) — Steps 1–4: load, agent spawn, feedback, user review; Step 2e Blocked Report branch when dependencies missing
 - [ast-fallback.md](./references/ast-fallback.md) — AST fallback logic is handled internally by imbas-engineer agent
 - [tools.md](./references/tools.md) — imbas and Atlassian MCP tools, agent spawn instructions
 - [errors.md](./references/errors.md) — error conditions and responses

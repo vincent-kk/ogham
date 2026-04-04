@@ -95,7 +95,7 @@ Emit when pipeline finishes all phases successfully.
 |-------|--------|---------|
 | 1. Validate | <PASS\|PASS_WITH_WARNINGS> | <blocking_issues> blocking, <warning_issues> warnings |
 | 2. Split | Auto-approved | <N> Stories |
-| 2.5. Manifest Stories | <Created\|Dry-run> | <jira_keys list or "preview only"> |
+| 2.5. Manifest Stories | <Created\|Dry-run> | <issue_refs list or "preview only"> |
 | 3. Devplan | Auto-approved | <N> Tasks, <M> Subtasks |
 | 3.5. Manifest Devplan | <Created\|Dry-run> | <N> Tasks, <M> Subtasks, <L> Links |
 

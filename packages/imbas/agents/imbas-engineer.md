@@ -120,6 +120,47 @@ Note approximate results in exploration log.
 
 ---
 
+## Blocked Report Protocol
+
+During code exploration (Step 2a), if you discover that implementation is fundamentally blocked — missing
+critical dependencies, structural constraints that prevent the Stories from being implemented, or
+prerequisite architectural work not yet in place — do NOT force fake Tasks or Subtasks.
+
+Instead:
+
+1. **Stop exploration** for the blocked scope immediately
+2. **Generate `devplan-blocked-report.md`** instead of `devplan-manifest.json`:
+
+```markdown
+# imbas Devplan Blocked Report
+run_id: <run-id>
+date: YYYY-MM-DD
+status: BLOCKED
+
+## Blocking Dependencies (N items)
+### B-001: [Title]
+- Story affected: [Story ID + title]
+- Missing dependency: [what is missing]
+- Why blocking: [cannot proceed because...]
+- Suggested resolution: [what needs to happen first]
+
+## Structural Constraints (N items)
+### SC-001: [Title]
+- Story affected: [Story ID + title]
+- Constraint: [architectural limitation]
+- Impact: [why Subtasks cannot be created]
+- Suggested resolution: [refactoring or prerequisite work]
+
+## Unblocked Stories
+[List of Stories that CAN proceed — generate manifest for these only]
+```
+
+3. **Partial output is allowed**: If some Stories are blocked but others are not, generate
+   `devplan-manifest.json` for unblocked Stories AND `devplan-blocked-report.md` for blocked ones
+4. Report language follows `config.language.reports` setting
+
+---
+
 ## Output: devplan-manifest.json
 
 ```json
@@ -174,6 +215,23 @@ Note approximate results in exploration log.
 ```
 
 **Rules**: Tasks first → Task Subtasks → Links → Story Subtasks → Feedback. Every Task lists `blocks`. Every Subtask references its parent via `id` prefix. Links are implicit via `tasks[].blocks`.
+
+---
+
+## Read-Only Reference Context
+
+When spawned by the devplan skill, you receive `source.md` (the original planning document copy)
+as read-only reference alongside the stories manifest.
+
+- **Primary anchor**: `stories-manifest.json` — your main input for Subtask/Task generation
+- **Read-only reference**: `source.md` — consult for domain context and business rationale
+  that may not be fully captured in Story descriptions
+- **Purpose**: Prevents domain context loss during code exploration. When Story descriptions
+  are concise, source.md provides the "why" behind requirements.
+- **Rule**: Never cite source.md as authoritative — it supplements Story definitions
+
+When exploring code and uncertain about the business intent of a requirement, check source.md
+for the original phrasing to guide your Subtask design.
 
 ---
 

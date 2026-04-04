@@ -40,11 +40,12 @@ Step 3 — imbas-analyst Agent Spawn
     - supplements/*.md (all supplement files)
     - config.json language settings
   - Agent instructions:
-    "Perform 4-type validation on the provided planning document:
+    "Perform 5-type validation on the provided planning document:
      1. Contradictions (모순): statements that conflict with each other
      2. Divergences (이격): requirements that drift from stated goals
      3. Omissions (누락): missing requirements implied but not stated
      4. Logical infeasibilities (논리적 불능): technically impossible requirements
+     5. Testability (테스트 가능성): requirements lacking measurable acceptance criteria
 
      For each issue found, classify as BLOCKING or WARNING:
      - BLOCKING: prevents meaningful story splitting (must be resolved first)

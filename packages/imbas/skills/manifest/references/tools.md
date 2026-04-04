@@ -21,7 +21,7 @@
 
 ## Output
 
-Updated manifest file with jira_key and status fields populated for each created item.
+Updated manifest file with issue_ref and status fields populated for each created item.
 
 ## Agent Spawn
 
