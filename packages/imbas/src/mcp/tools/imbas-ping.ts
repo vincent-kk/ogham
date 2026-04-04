@@ -4,12 +4,7 @@
  */
 
 import { VERSION } from '../../version.js';
-import { toolResult } from '../shared.js';
 
 export async function handleImbasPing() {
-  return toolResult({
-    status: 'ok',
-    version: VERSION,
-    timestamp: new Date().toISOString(),
-  });
+  return { status: 'ok', version: VERSION, timestamp: new Date().toISOString() };
 }

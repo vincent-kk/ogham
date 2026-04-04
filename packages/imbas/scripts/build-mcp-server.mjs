@@ -35,7 +35,7 @@ await esbuild.build({
   sourcemap: false,
   treeShaking: true,
   mainFields: ['module', 'main'],
-  external: [],
+  external: ['@ast-grep/napi'],
   alias: {
     'zod': zodPath,
   },

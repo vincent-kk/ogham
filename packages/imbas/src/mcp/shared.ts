@@ -30,3 +30,21 @@ export function toolError(error: unknown) {
     isError: true as const,
   };
 }
+
+/** Wrap a tool handler with standard try/catch + optional error-field detection */
+export function wrapHandler<T>(
+  fn: (args: T) => unknown | Promise<unknown>,
+  options?: { checkErrorField?: boolean },
+) {
+  return async (args: T) => {
+    try {
+      const result = await fn(args);
+      if (options?.checkErrorField && result && typeof result === 'object' && 'error' in result) {
+        return { content: [{ type: 'text' as const, text: String((result as { error: unknown }).error) }] };
+      }
+      return toolResult(result);
+    } catch (error) {
+      return toolError(error);
+    }
+  };
+}
