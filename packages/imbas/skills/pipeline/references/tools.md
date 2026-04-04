@@ -48,7 +48,7 @@ validate, split, manifest, and devplan skills.
 
 | Agent | Phase | Model | Purpose | Spawned By |
 |-------|-------|-------|---------|------------|
-| `imbas-analyst` | 1 | sonnet | 4-type document validation (contradictions, divergences, omissions, infeasibilities) | Phase 1 Step 1.3 |
+| `imbas-analyst` | 1 | sonnet | 5-type document validation (contradictions, divergences, omissions, infeasibilities, testability) | Phase 1 Step 1.3 |
 | `imbas-planner` | 2 | sonnet | INVEST-compliant Story splitting with User Story + AC | Phase 2 Step 2.3 |
 | `imbas-analyst` | 2 | sonnet | Reverse-inference verification (reassemble Stories vs original) | Phase 2 Step 2.4[2] |
 | `imbas-engineer` | 3 | opus | Codebase exploration, EARS Subtask generation, Task extraction | Phase 3 Step 3.2 |

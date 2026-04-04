@@ -21,7 +21,7 @@
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `imbas-analyst` | config.defaults.llm_model.validate | Perform 4-type validation (contradictions, divergences, omissions, infeasibilities) |
+| `imbas-analyst` | config.defaults.llm_model.validate | Perform 5-type validation (contradictions, divergences, omissions, infeasibilities, testability) |
 
 Spawn instructions:
 - Provide source.md + all supplements as input context

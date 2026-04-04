@@ -77,6 +77,20 @@ Step 2 — imbas-engineer Agent Spawn
 
   See [ast-fallback.md](./ast-fallback.md) for AST fallback detection details.
 
+  IF agent returns devplan-blocked-report.md (all Stories blocked):
+    1. Save devplan-blocked-report.md to run directory
+    2. Call imbas_run_transition:
+       - action: "complete_phase", phase: "devplan", result: "BLOCKED"
+       → Sets devplan.status = "completed", devplan.result = "BLOCKED"
+    3. Display blocked report to user with guidance:
+       "Phase 3 blocked. Review blocked report and resolve dependencies."
+    4. STOP — do not proceed to Step 3 or Step 4
+
+  IF agent returns partial output (some blocked, some unblocked):
+    1. Save devplan-blocked-report.md to run directory
+    2. Save devplan-manifest.json (unblocked Stories only) to run directory
+    3. Continue to Step 3 with the partial manifest
+
 Step 3 — B→A Feedback Collection
   - When Story definition ≠ code reality, record in feedback_comments:
     - target_story: Story ID

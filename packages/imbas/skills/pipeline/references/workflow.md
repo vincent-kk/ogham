@@ -63,7 +63,7 @@ Step 0.5 — Confirmation Banner
     imbas pipeline — configuration
       Input:    <source>
       Mode:     document pipeline (validate → split → devplan → Jira)
-      Project:  <KEY> (from <source>)
+      Project:  <KEY> (from --project or config)
       Parent:   <new Epic | existing PROJ-100 | none>
       Jira:     <live | dry-run>
       Proceeding...
@@ -115,7 +115,7 @@ Step 1.3 — imbas-analyst Agent Spawn
   - Spawn agent: imbas-analyst
   - Model: config.defaults.llm_model.validate (default: "sonnet")
   - Input: source.md + supplements/*.md + config.json language settings
-  - Instructions: Perform 4-type validation (contradictions, divergences, omissions, infeasibilities).
+  - Instructions: Perform 5-type validation (contradictions, divergences, omissions, infeasibilities, testability).
     Classify each issue as BLOCKING or WARNING.
   - Agent returns: validation-report.md content. Skill saves to run directory.
 
@@ -202,6 +202,8 @@ Step 2.5 — Escape Condition Detection
   - Emit blocker report with escape details
 
   On E2-3:
+  - Generate a single-Story stories-manifest.json wrapping the original document as one Story
+  - Call imbas_manifest_save to persist it
   - Call imbas_run_transition: action "escape_phase", phase "split", escape_code "E2-3"
   - Skip Phase 2.5 (manifest-stories), proceed directly to Phase 3
 
@@ -268,6 +270,7 @@ Step 2.5.2 — Batch Execution
     4. Save manifest
 
 Step 2.5.3 — Execution Verification
+  >>> GATE 4: Execution Result (see auto-approval-gates.md)
   - Check: all Stories have status "created" with valid issue_ref
   - Any "failed" items → STOP: "Manifest stories partially failed. Fix and re-run:
     /imbas:manifest stories --run <run-id>"
@@ -344,6 +347,15 @@ Step 3.4 — Manifest Validation
   1. Call imbas_manifest_save(project_ref, run_id, type: "devplan", manifest)
   2. Call imbas_manifest_validate(project_ref, run_id, type: "devplan")
 
+  IF agent returns devplan-blocked-report.md (all Stories blocked):
+  - Save blocked report to run directory
+  - Call imbas_run_transition(complete_phase, devplan, result: "BLOCKED")
+  - STOP: emit blocked report with dependency resolution guidance
+
+  IF agent returns partial output (some blocked, some unblocked):
+  - Save blocked report + partial manifest to run directory
+  - Continue gate evaluation with partial manifest only
+
 >>> GATE 3: Devplan Quality (see auto-approval-gates.md)
   - All criteria pass → call imbas_run_transition(complete_phase, devplan, pending_review: false)
   - Validation errors or needs_review flags → STOP with blocker report
@@ -399,6 +411,7 @@ Step 3.5.2 — Batch Execution (follows execution_order)
     - Save manifest
 
 Step 3.5.3 — Execution Result
+  >>> GATE 4: Execution Result (see auto-approval-gates.md)
   - Count: created, failed, skipped items
   - Any failures → note in final report (NON-BLOCKING — items already created are irreversible)
   - Suggest: "/imbas:manifest devplan --run <run-id>" to retry failed items
