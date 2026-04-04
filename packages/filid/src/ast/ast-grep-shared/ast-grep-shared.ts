@@ -8,27 +8,17 @@ import { readdirSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { extname, join, resolve } from 'node:path';
 
-// Dynamic import for @ast-grep/napi
-// Graceful degradation: if the module is not available (e.g., in bundled/plugin context),
-// tools will return a helpful error message instead of crashing
-//
-// IMPORTANT: Uses createRequire() (CJS resolution) instead of dynamic import() (ESM resolution)
-// because ESM resolution does NOT respect NODE_PATH or Module._initPaths().
-// In the MCP server plugin context, @ast-grep/napi is installed globally and resolved
-// via NODE_PATH set in the bundle's startup banner.
-import type * as AstGrepNapi from '@ast-grep/napi';
 import {
-  SUPPORTED_LANGUAGES,
-  EXT_TO_LANG,
-  AST_SKIP_DIRS,
   AST_MAX_FILES,
+  AST_SKIP_DIRS,
+  EXT_TO_LANG,
+  SUPPORTED_LANGUAGES,
 } from '../../constants/ast-languages.js';
+import type { NapiLang, SgModule } from '../../types/index.js';
+
+import { getMappedLang } from './utils/getMappedLang.js';
 
 export { SUPPORTED_LANGUAGES, EXT_TO_LANG };
-
-type SgModule = typeof AstGrepNapi;
-/** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
-type NapiLang = Parameters<SgModule['parse']>[0];
 
 let sgModule: SgModule | null = null;
 let sgLoadFailed = false;
@@ -74,28 +64,8 @@ export function getSgLoadError(): string {
 export function toLangEnum(sg: SgModule, language: string): NapiLang {
   // Lang enum only contains built-in languages (Html, JavaScript, Tsx, Css, TypeScript).
   // All others (Python, Go, Rust, etc.) are CustomLang strings passed directly.
-  const langMap: Record<string, NapiLang> = {
-    javascript: sg.Lang.JavaScript,
-    typescript: sg.Lang.TypeScript,
-    tsx: sg.Lang.Tsx,
-    html: sg.Lang.Html,
-    css: sg.Lang.Css,
-    python: 'Python',
-    ruby: 'Ruby',
-    go: 'Go',
-    rust: 'Rust',
-    java: 'Java',
-    kotlin: 'Kotlin',
-    swift: 'Swift',
-    c: 'C',
-    cpp: 'Cpp',
-    csharp: 'CSharp',
-    json: 'Json',
-    yaml: 'Yaml',
-  };
-
-  const lang = langMap[language];
-  if (!lang) {
+  const lang = getMappedLang(sg, language);
+  if (lang === undefined) {
     throw new Error(`Unsupported language: ${language}`);
   }
   return lang;

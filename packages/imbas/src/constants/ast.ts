@@ -2,6 +2,7 @@
  * @file constants/ast.ts
  * @description AST 파일 탐색 및 언어 지원 관련 상수
  */
+import type { NapiLang } from '../types/index.js';
 
 /** 탐색당 최대 수집 파일 수 */
 export const AST_MAX_FILES = 1000;
@@ -51,3 +52,18 @@ export const EXT_TO_LANG: Record<string, string> = Object.entries(
   },
   {} as Record<string, string>,
 );
+
+export const FALLBACK_LANG_MAP: Record<string, NapiLang> = {
+  python: 'Python',
+  ruby: 'Ruby',
+  go: 'Go',
+  rust: 'Rust',
+  java: 'Java',
+  kotlin: 'Kotlin',
+  swift: 'Swift',
+  c: 'C',
+  cpp: 'Cpp',
+  csharp: 'CSharp',
+  json: 'Json',
+  yaml: 'Yaml',
+};

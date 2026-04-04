@@ -1,3 +1,5 @@
+import type { NapiLang } from '../types/ast.js';
+
 export const SUPPORTED_LANGUAGES: [string, ...string[]] = [
   'javascript',
   'typescript',
@@ -61,3 +63,18 @@ export const AST_SKIP_DIRS = [
 ];
 
 export const AST_MAX_FILES = 1000;
+
+export const FALLBACK_LANG_MAP: Record<string, NapiLang> = {
+  python: 'Python',
+  ruby: 'Ruby',
+  go: 'Go',
+  rust: 'Rust',
+  java: 'Java',
+  kotlin: 'Kotlin',
+  swift: 'Swift',
+  c: 'C',
+  cpp: 'Cpp',
+  csharp: 'CSharp',
+  json: 'Json',
+  yaml: 'Yaml',
+};

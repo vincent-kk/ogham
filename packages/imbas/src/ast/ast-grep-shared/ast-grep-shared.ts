@@ -13,18 +13,15 @@ import { readdirSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { extname, join, resolve } from 'node:path';
 
-import type * as AstGrepNapi from '@ast-grep/napi';
-
 import {
   AST_EXCLUDED_DIRS,
   AST_MAX_FILES,
   EXT_TO_LANG,
   SUPPORTED_LANGUAGES,
 } from '../../constants/ast.js';
+import type { NapiLang, SgModule } from '../../types/index.js';
 
-export type SgModule = typeof AstGrepNapi;
-/** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
-export type NapiLang = Parameters<SgModule['parse']>[0];
+import { getMappedLang } from './utils/getMappedLang.js';
 
 export {
   AST_MAX_FILES as MAX_FILES,
@@ -87,26 +84,7 @@ export function getSgLoadError(): string {
 export function toLangEnum(sg: SgModule, language: string): NapiLang {
   // Lang enum only contains built-in languages (Html, JavaScript, Tsx, Css, TypeScript).
   // All others (Python, Go, Rust, etc.) are CustomLang strings passed directly.
-  const langMap: Record<string, NapiLang> = {
-    javascript: sg.Lang.JavaScript,
-    typescript: sg.Lang.TypeScript,
-    tsx: sg.Lang.Tsx,
-    html: sg.Lang.Html,
-    css: sg.Lang.Css,
-    python: 'Python',
-    ruby: 'Ruby',
-    go: 'Go',
-    rust: 'Rust',
-    java: 'Java',
-    kotlin: 'Kotlin',
-    swift: 'Swift',
-    c: 'C',
-    cpp: 'Cpp',
-    csharp: 'CSharp',
-    json: 'Json',
-    yaml: 'Yaml',
-  };
-  const lang: NapiLang | undefined = langMap[language];
+  const lang = getMappedLang(sg, language);
   if (lang === undefined) {
     throw new Error(`Unsupported language: ${language}`);
   }

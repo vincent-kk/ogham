@@ -3,6 +3,9 @@
  * @description Central type exports for @ogham/imbas
  */
 
+// AST types
+export type { SgModule, NapiLang } from './ast.js';
+
 // MCP types
 export type { McpToolInput, McpToolResult } from './mcp.js';
 
