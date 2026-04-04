@@ -251,7 +251,7 @@ Split Stories use `split_from`/`split_into` (`split_into` defaults to `[]`). Sta
 
 ## Read-Only Reference Context
 
-When spawned by the split skill, you receive `source.md` (the original planning document copy)
+When spawned by the `imbas:split` skill, you receive `source.md` (the original planning document copy)
 as read-only reference alongside the validation report.
 
 - **Primary anchor**: `validation-report.md` — your main input for decomposition decisions

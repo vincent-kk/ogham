@@ -32,8 +32,8 @@ ogham (사전 가이드 시스템)
        │    ├── Core:  validate, split, devplan
        │    ├── Infra: setup, status
        │    ├── Exec:  manifest, digest
-       │    ├── Util:  fetch-media
-       │    └── Internal: read-issue, cache
+       │    ├── Util:  `imbas:fetch-media`
+       │    └── Internal: `imbas:read-issue`, cache
        │
        ├── Agents (4개)
        │    ├── imbas-analyst   — 문서 정합성 검증
@@ -48,7 +48,7 @@ ogham (사전 가이드 시스템)
        │
        ├── State (.imbas/)
        │    ├── config.json     — 글로벌 설정 (provider 포함)
-       │    ├── <PROJECT>/cache — 이슈 트래커 메타데이터 캐시
+       │    ├── <PROJECT>/imbas:cache — 이슈 트래커 메타데이터 캐시
        │    ├── <PROJECT>/runs  — 실행 기록 + 매니페스트
        │    └── .temp/          — 미디어 임시 파일
        │
@@ -174,14 +174,14 @@ ogham (사전 가이드 시스템)
 | 4 | devplan | Core | `/imbas:devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
 | 5 | manifest | Exec | `/imbas:manifest` | — | *-manifest.json | Jira 이슈 |
 | 6 | status | Infra | `/imbas:status` | — | — | 상태 표시 |
-| 7 | fetch-media | Util | `/imbas:fetch-media` | imbas-media | URL/경로 | analysis.json |
+| 7 | `imbas:fetch-media` | Util | `/imbas:fetch-media` | imbas-media | URL/경로 | analysis.json |
 | 8 | digest | Exec | `/imbas:digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)
 
 | # | Skill | 호출자 | 역할 | 출력 |
 |---|-------|--------|------|------|
-| 9 | read-issue | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
+| 9 | `imbas:read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
 | 10 | cache | setup, core skills | Jira 메타데이터 캐시 자동 갱신 | cache/*.json |
 
 → 상세: [SPEC-skills.md](./specs/SPEC-skills.md)
@@ -197,7 +197,7 @@ ogham (사전 가이드 시스템)
 | 1 | imbas-analyst | sonnet | 정합성 검증, 역추론 | validate, split |
 | 2 | imbas-planner | sonnet | Story 분할, INVEST 평가 | split |
 | 3 | imbas-engineer | opus | 코드 탐색, EARS Subtask, Task 추출 | devplan |
-| 4 | imbas-media | sonnet | 키프레임 의미 분석 | fetch-media |
+| 4 | imbas-media | sonnet | 키프레임 의미 분석 | `imbas:fetch-media` |
 
 → 상세: [SPEC-agents.md](./specs/SPEC-agents.md)
 

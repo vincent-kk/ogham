@@ -85,7 +85,7 @@ Step 0.6 — Route
 
 ## Phase 1 — VALIDATE
 
-Replicates validate skill workflow with automatic gate evaluation.
+Replicates `imbas:validate` skill workflow with automatic gate evaluation.
 Skipped in devplan pipeline mode (input is Story keys).
 
 ```
@@ -145,7 +145,7 @@ Step 1.5 — State Update
 
 ## Phase 2 — SPLIT
 
-Replicates split skill workflow (Steps 1-7) with auto-approval gate replacing Step 7 user review.
+Replicates `imbas:split` skill workflow (Steps 1-7) with auto-approval gate replacing Step 7 user review.
 
 ```
 Step 2.1 — Start Phase
@@ -239,7 +239,7 @@ Step 2.7 — Manifest Generation
 
 ## Phase 2.5 — MANIFEST STORIES
 
-Replicates manifest skill workflow for "stories" type. No user confirmation — pipeline invocation is implicit consent.
+Replicates `imbas:manifest` skill workflow for "stories" type. No user confirmation — pipeline invocation is implicit consent.
 
 ```
 Step 2.5.1 — Dry-Run Check
@@ -283,7 +283,7 @@ Step 2.5.3 — Execution Verification
 
 ## Phase 3 — DEVPLAN
 
-Replicates devplan skill workflow (Steps 1-4) with auto-approval gate replacing Step 4 user review.
+Replicates `imbas:devplan` skill workflow (Steps 1-4) with auto-approval gate replacing Step 4 user review.
 
 **Two entry paths:**
 - FULL PIPELINE: arrives here after Phase 2.5 with stories-manifest populated
@@ -368,7 +368,7 @@ Step 3.4 — Manifest Validation
 
 ## Phase 3.5 — MANIFEST DEVPLAN
 
-Replicates manifest skill workflow for "devplan" type. Follows execution_order from manifest.
+Replicates `imbas:manifest` skill workflow for "devplan" type. Follows execution_order from manifest.
 
 ```
 Step 3.5.1 — Dry-Run Check

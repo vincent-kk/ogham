@@ -28,7 +28,7 @@ No behavioral change from the individual skill — validate PASS/PASS_WITH_WARNI
 
 ## GATE 2: Split Quality
 
-Replaces split skill Step 7 (interactive user review). This is the key pipeline innovation.
+Replaces `imbas:split` skill Step 7 (interactive user review). This is the key pipeline innovation.
 
 ### Auto-Approve Criteria
 
@@ -119,7 +119,7 @@ A human reviewer would typically approve when all these fields are PASS. The pip
 
 ## GATE 3: Devplan Quality
 
-Replaces devplan skill Step 4 (interactive user review).
+Replaces `imbas:devplan` skill Step 4 (interactive user review).
 
 ### Auto-Approve Criteria
 

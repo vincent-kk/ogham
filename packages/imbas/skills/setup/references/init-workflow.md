@@ -56,7 +56,7 @@ Step 3 — config.json creation
   3. Confirm config.json created.
 
 Step 4 — Cache population
-  1. Create .imbas/<KEY>/cache/ directory.
+  1. Create `.imbas/<KEY>/cache/` directory.
   2. Fetch issue types:
      - Call Atlassian MCP: getJiraProjectIssueTypesMetadata(projectKey)
      - For each issue type, call: getJiraIssueTypeMetaWithFields(issueTypeId)

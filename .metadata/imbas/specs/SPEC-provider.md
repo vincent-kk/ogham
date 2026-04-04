@@ -138,7 +138,7 @@ Step N — [Operation Name]
 | **devplan** | Story lookup, duplicate search | Step 1 (manifest check), Step 2 (search) |
 | **manifest** | Issue creation, linking, transitions | Step 4 (entire batch execution) |
 | **digest** | Comment posting | Step 6 (publish) |
-| **read-issue** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
+| **`imbas:read-issue`** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
 | **cache** | Metadata refresh | Entire workflow |
 
 ### 4.3 Which Skills Don't Branch
@@ -146,7 +146,7 @@ Step N — [Operation Name]
 | Skill | Reason |
 |-------|--------|
 | **status** | Only reads `.imbas/` state files |
-| **fetch-media** | Local file + scene-sieve (provider-agnostic) |
+| **`imbas:fetch-media`** | Local file + scene-sieve (provider-agnostic) |
 
 ### 4.4 Agent Tool Lists
 
@@ -188,7 +188,7 @@ Added field:
 
 ## 6. Cache Abstraction
 
-Provider metadata cache lives under `.imbas/<project-dir>/cache/`. The directory name is derived from `project_ref`:
+Provider metadata cache lives under `.imbas/<project-dir>/imbas:cache/`. The directory name is derived from `project_ref`:
 
 | Provider | project_ref | Directory Name |
 |----------|-------------|----------------|

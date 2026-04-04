@@ -1,4 +1,4 @@
-# imbas-status — Subcommand Behaviors
+# status — Subcommand Behaviors
 
 ## (default) — Current Run Status
 

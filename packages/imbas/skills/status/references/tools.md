@@ -1,4 +1,4 @@
-# imbas-status — Tools Used & Agent Spawn
+# status — Tools Used & Agent Spawn
 
 ## Tools Used
 

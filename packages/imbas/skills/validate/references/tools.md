@@ -1,4 +1,4 @@
-# imbas-validate — Tools Used & Agent Spawn
+# validate — Tools Used & Agent Spawn
 
 ## Tools Used
 

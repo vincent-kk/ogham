@@ -1,4 +1,4 @@
-# imbas-validate — Error Handling
+# validate — Error Handling
 
 ## Error Handling
 

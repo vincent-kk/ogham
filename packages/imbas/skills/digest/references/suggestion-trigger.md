@@ -2,7 +2,7 @@
 
 ## Trigger Conditions
 
-The digest skill is suggested (not auto-executed) when all conditions are met:
+The `imbas:digest` skill is suggested (not auto-executed) when all conditions are met:
 
 1. **Done transition**: imbas:manifest calls `transitionJiraIssue` to move an issue to Done status
 2. **Comment threshold**: the issue has >= 3 comments

@@ -1,5 +1,5 @@
 ---
-name: imbas-pipeline
+name: pipeline
 user_invocable: true
 description: >
   End-to-end pipeline orchestration. Runs validate, split, manifest-stories,
@@ -11,7 +11,7 @@ complexity: complex
 plugin: imbas
 ---
 
-# imbas-pipeline — End-to-End Pipeline Orchestration
+# pipeline — End-to-End Pipeline Orchestration
 
 Run the entire imbas pipeline from document to Jira tickets in a single command.
 Auto-approves at each phase boundary when all quality gates pass.

@@ -507,7 +507,7 @@ Same as Jira: `issue_ref` already set → skip. Resume-safe.
 
 ---
 
-## 8. read-issue (GitHub)
+## 8. `imbas:read-issue` (GitHub)
 
 ```bash
 # Full issue with comments

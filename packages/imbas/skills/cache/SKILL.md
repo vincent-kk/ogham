@@ -1,5 +1,5 @@
 ---
-name: imbas-cache
+name: cache
 user_invocable: false
 description: >
   Internal skill. Manages Jira project metadata cache (issue types, link types,
@@ -9,7 +9,7 @@ complexity: simple
 plugin: imbas
 ---
 
-# imbas-cache — Jira Metadata Cache Management (Internal)
+# cache — Jira Metadata Cache Management (Internal)
 
 Internal skill that manages Jira project metadata cache. Stores issue types, link types,
 and workflow definitions locally to avoid repeated Atlassian API calls. Auto-refreshes

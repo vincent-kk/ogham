@@ -55,7 +55,7 @@ validate, split, manifest, and devplan skills.
 
 ### Agent Access Control
 
-Agents do NOT have access to pipeline state tools. The pipeline skill handles all state updates:
+Agents do NOT have access to pipeline state tools. The `imbas:pipeline` skill handles all state updates:
 
 - Agents produce output (reports, manifests, verification results)
 - Pipeline skill interprets output and calls imbas_run_transition / imbas_manifest_save
@@ -86,4 +86,4 @@ Pipeline reads these settings and spawns agents with the configured models.
 Pipeline does NOT spawn agents for:
 - Manifest execution (Phase 2.5, 3.5) — direct Atlassian MCP tool calls
 - Epic/parent decision — deterministic from --parent argument (resolved in Phase 0)
-- Gate evaluation — pipeline skill evaluates fields directly
+- Gate evaluation — `imbas:pipeline` skill evaluates fields directly

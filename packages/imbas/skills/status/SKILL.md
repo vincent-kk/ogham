@@ -1,5 +1,5 @@
 ---
-name: imbas-status
+name: status
 user_invocable: true
 description: >
   Show current or historical imbas run status, including phase progress,
@@ -10,7 +10,7 @@ complexity: simple
 plugin: imbas
 ---
 
-# imbas-status — Run Status & History
+# status — Run Status & History
 
 Display current or historical imbas run status including phase progress,
 manifest summaries, and blocking issues. Supports resuming interrupted runs.

@@ -2,14 +2,14 @@
 
 ```
 Step 1 — Read issue (full depth)
-  1. Call internal skill: read-issue(issue-key, depth: full)
+  1. Call internal skill: `imbas:read-issue`(issue-key, depth: full)
   2. Receive structured JSON with:
      - Issue metadata (summary, type, status, assignee, reporter)
      - Full comment thread (authors, timestamps, bodies)
      - Participants with role hints
      - Existing decisions and open questions
   3. Detect attached media (images, videos, GIFs) in description or comments
-     - If media found → call fetch-media for each attachment
+     - If media found → call `imbas:fetch-media` for each attachment
      - Include visual analysis in digest context
 
 Step 2 — State Tracking (timeline construction)

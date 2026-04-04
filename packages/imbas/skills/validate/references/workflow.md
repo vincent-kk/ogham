@@ -1,4 +1,4 @@
-# imbas-validate — Workflow
+# validate — Workflow
 
 ```
 Step 1 — Run Initialization
