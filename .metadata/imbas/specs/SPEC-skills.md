@@ -79,7 +79,7 @@ Step 2 — 문서 소스 해석
 Step 3 — imbas-analyst 호출
   - Agent 호출: imbas-analyst
   - 입력: source.md + supplements/
-  - 지시: 4종 검증 (모순/이격/누락/논리적 불능) 수행
+  - 지시: 5종 검증 (모순/이격/누락/논리적 불능/테스트 가능성) 수행
   - 출력: validation-report.md
 
 Step 4 — 결과 평가 & 게이트
