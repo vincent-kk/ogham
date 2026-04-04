@@ -1,0 +1,38 @@
+# Tools Used
+
+## imbas MCP Tools
+
+| Tool | Usage |
+|------|-------|
+| `imbas_run_get` | Load run state, verify preconditions |
+| `imbas_run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
+| `imbas_manifest_save` | Save stories-manifest.json |
+| `imbas_manifest_validate` | Validate manifest structural integrity |
+
+## Atlassian MCP Tools
+
+| Tool | Usage |
+|------|-------|
+| `getJiraIssue` | Verify Epic existence when --epic provided |
+| `searchJiraIssuesUsingJql` | Search for existing related Stories/Epics |
+
+## Agent Spawn
+
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `imbas-planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
+| `imbas-analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
+
+### imbas-planner Spawn Instructions
+
+- Provide source.md + supplements + Epic info as input context
+- Set output language per config.language.jira_content
+- Agent returns JSON Story array — skill handles manifest creation
+- Agent does NOT have pipeline/manifest tool access
+
+### imbas-analyst Spawn Instructions (Reverse-Inference)
+
+- Provide ALL split Stories reassembled as a single document
+- Provide original source.md for comparison
+- Agent returns mismatch report — skill interprets results and sets flags
+- Agent does NOT modify Stories directly

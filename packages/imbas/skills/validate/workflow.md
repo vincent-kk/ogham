@@ -1,0 +1,91 @@
+# imbas-validate — Workflow
+
+```
+Step 1 — Run Initialization
+  1. Load config.json via imbas_config_get.
+  2. Determine project key: --project argument > config.defaults.project_key.
+     If neither available → error: "No project key. Run /imbas:setup or pass --project."
+  3. Call imbas_run_create with:
+     - project_key: <determined key>
+     - source_file: <source path>
+     - supplements: <supplement paths array> (if provided)
+     → Returns: run_id, run_dir, initial state
+  4. Side effects of imbas_run_create:
+     - Creates .imbas/<KEY>/runs/<YYYYMMDD-NNN>/ directory
+     - Copies source document → source.md (immutable copy principle)
+     - Copies supplements → supplements/ directory
+     - Initializes state.json (current_phase: "validate", all phases: "pending")
+  5. Call imbas_run_transition with:
+     - project_key, run_id, action: "start_phase", phase: "validate"
+     → Sets validate.status = "in_progress", validate.started_at = now()
+
+Step 2 — Document Source Resolution
+  - Local file (*.md, *.txt):
+    - Already copied to source.md by imbas_run_create. Read directly.
+  - Confluence URL:
+    - Call Atlassian MCP: getConfluencePage(pageId extracted from URL)
+    - Convert response to markdown and save as source.md in run directory.
+    - If page contains embedded media (images, videos):
+      → Display: "Media attachments detected. Run /imbas:fetch-media to include visual context."
+      → Do NOT auto-invoke fetch-media.
+  - If source contains references to other Confluence pages:
+    - Call Atlassian MCP: searchConfluenceUsingCql to resolve references.
+    - Save referenced content as supplements.
+
+Step 3 — imbas-analyst Agent Spawn
+  - Spawn agent: imbas-analyst
+  - Model: config.defaults.llm_model.validate (default: "sonnet")
+  - Input provided to agent:
+    - source.md (full content)
+    - supplements/*.md (all supplement files)
+    - config.json language settings
+  - Agent instructions:
+    "Perform 4-type validation on the provided planning document:
+     1. Contradictions (모순): statements that conflict with each other
+     2. Divergences (이격): requirements that drift from stated goals
+     3. Omissions (누락): missing requirements implied but not stated
+     4. Logical infeasibilities (논리적 불능): technically impossible requirements
+
+     For each issue found, classify as BLOCKING or WARNING:
+     - BLOCKING: prevents meaningful story splitting (must be resolved first)
+     - WARNING: can proceed but should be addressed
+
+     Output: validation-report.md in the run directory."
+  - Agent writes: validation-report.md to the run directory
+
+Step 4 — Result Evaluation Gate
+  Parse validation-report.md and determine result:
+
+  - BLOCKING issues exist (count > 0):
+    → result = "BLOCKED"
+    → Display blocking issues list to user
+    → Message: "Validation BLOCKED. Resolve the above issues in the source document, then re-run /imbas:validate."
+
+  - No BLOCKING, but WARNING issues exist:
+    → result = "PASS_WITH_WARNINGS"
+    → Display warning issues list to user
+    → Message: "Validation PASSED with warnings. Review the warnings above. You may proceed to Phase 2 (/imbas:split)."
+
+  - No issues found:
+    → result = "PASS"
+    → Message: "Validation PASSED. Proceed to Phase 2: /imbas:split [--run <run-id>]"
+
+Step 5 — State Update
+  Call imbas_run_transition with:
+  - project_key, run_id
+  - action: "complete_phase"
+  - phase: "validate"
+  - result: "PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"
+  - blocking_issues: <count>
+  - warning_issues: <count>
+
+  → Sets validate.status = "completed", validate.completed_at = now()
+  → Advances current_phase based on result
+
+  Display run summary:
+  - Run ID: <run-id>
+  - Project: <KEY>
+  - Result: <result>
+  - Blocking: <count>, Warnings: <count>
+  - Next step guidance based on result
+```
