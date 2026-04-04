@@ -458,7 +458,7 @@ plugin: imbas
 ```
 imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
 
-<issue-key>  : Jira 이슈 키 (e.g., PROJ-123)
+<issue-key>  : 이슈 참조 (Jira: PROJ-123, GitHub: #42)
 --no-cache   : 캐시 무시, 강제 재조회
 --depth      : shallow = 본문+메타만, full = 코멘트 포함 (default: full)
 ```
@@ -611,7 +611,7 @@ plugin: imbas
 ```
 /imbas:digest <issue-key> [--preview]
 
-<issue-key>  : Jira 이슈 키 (e.g., PROJ-123)
+<issue-key>  : 이슈 참조 (Jira: PROJ-123, GitHub: #42)
 --preview    : Jira에 코멘트 게시하지 않고 미리보기만
 ```
 

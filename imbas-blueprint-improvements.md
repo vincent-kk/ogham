@@ -9,7 +9,7 @@
 
 ## 2. Phase 4 (`manifest`) - 멱등성 보장을 위한 단건 처리 즉시 저장 (Unit Save to Disk)
 
-*   **상황 및 문제**: `manifest` 단계는 설계 3.2항에 따라 매니페스트 자체의 `status` + `jira_key` 필드로 멱등성과 장애 복구를 보장합니다. 하지만 일괄 티켓 생성 중(예: 10개 중 4개째 생성) 네트워크 단절이나 스크립트 중단 시, 파일에 기록하지 않았다면 이미 생성된 티켓의 ID가 매니페스트에 남지 않습니다. 재실행 시 티켓 중복 생성이 발생할 위험이 있습니다.
+*   **상황 및 문제**: `manifest` 단계는 설계 3.2항에 따라 매니페스트 자체의 `status` + `issue_ref` 필드로 멱등성과 장애 복구를 보장합니다. 하지만 일괄 티켓 생성 중(예: 10개 중 4개째 생성) 네트워크 단절이나 스크립트 중단 시, 파일에 기록하지 않았다면 이미 생성된 티켓의 ID가 매니페스트에 남지 않습니다. 재실행 시 티켓 중복 생성이 발생할 위험이 있습니다.
 *   **개선 제안**: `manifest` 스킬 코드 구현 시 루프 종료 후 한 번만 저장하는 것이 아니라, 각 이슈/서브태스크에 대한 외부 API(Jira/GitHub) 호출이 성공할 때마다 즉시 해당 매니페스트 JSON 파일을 디스크에 덮어쓰기(Write) 하도록 강제해야 합니다.
 
 ## 3. Phase 2 & 3 (`split`, `devplan`) - 원본(source.md) 참조를 통한 컨텍스트 유실 방지
@@ -30,9 +30,16 @@
 ## 6. Phase 4 (`manifest`) - 원격 상태 변경(Drift) 감지 및 조정(Reconciliation)
 
 *   **상황 및 문제**: 매니페스트(`status: created`)를 기반으로 멱등성을 보장하는 구조이나, Jira/GitHub은 다중 사용자 환경입니다. `imbas`가 티켓을 생성한 후 누군가 웹에서 티켓을 삭제하거나 상태를 변경하면 로컬 매니페스트와 원격 상태 간에 괴리(State Drift)가 발생합니다.
-*   **개선 제안**: 일괄 실행 전이나 별도 스킬(예: `/imbas:sync`)을 통해, 매니페스트에 기록된 `jira_key`들의 현재 원격 상태를 1회 Fetch(조회)하여 불일치(Drift)가 발견되면 사용자에게 경고하고 매니페스트를 동기화(Reconcile)하는 로직이 필요합니다.
+*   **개선 제안**: 일괄 실행 전이나 별도 스킬(예: `/imbas:sync`)을 통해, 매니페스트에 기록된 `issue_ref`들의 현재 원격 상태를 1회 Fetch(조회)하여 불일치(Drift)가 발견되면 사용자에게 경고하고 매니페스트를 동기화(Reconcile)하는 로직이 필요합니다.
 
 ## 7. Phase 4 (`manifest`) - 대화형 Dry-Run 및 최종 승인(Approval) 단계 도입
 
 *   **상황 및 문제**: Blueprint 3.3항에 "dry-run 지원"이 언급되어 있으나, `/imbas:manifest` 실행 시 수십 개의 이슈와 링크가 한 번에 Jira에 쏟아지는 방식은 실수가 발생했을 때 되돌리기(Undo)가 매우 까다롭습니다.
 *   **개선 제안**: `/imbas:manifest` 명령어는 기본적으로 **항상 Dry-Run 모드**로 동작하여 생성될 티켓 수, 링크 수 등의 **요약 테이블(Summary Table)**을 터미널에 먼저 출력해야 합니다. 그 후 사용자에게 CLI 프롬프트(예: `진행하시겠습니까? [y/N]`)로 명시적인 최종 승인을 받은 직후에만 실제 API 쓰기 작업이 수행되도록 안전 장치(Safety Catch)를 마련해야 합니다.
+
+## 8. Provider Abstraction 기반 구현체(Agent/Skill) 정합성 패치 필요
+
+*   **상황 및 문제**: 스펙 문서(Blueprint 및 SPEC-*.md)는 Provider-Agnostic(Jira/GitHub 모두 지원) 구조로 업데이트되었으나, 실제 구현체(`packages/imbas/agents/`, `packages/imbas/skills/`)에는 여전히 레거시 용어(`jira_key`)가 남아있거나 GitHub Provider를 위한 툴 권한이 누락된 부분이 존재합니다.
+*   **개선 제안**: 
+    1. **에이전트 권한 확장**: `packages/imbas/agents/imbas-analyst.md`와 `imbas-planner.md` 파일의 `tools` 목록에 `Bash` 툴을 추가하여, GitHub 프로바이더 환경에서 `gh` CLI 명령어를 통한 이슈 조회가 가능하도록 권한을 부여해야 합니다. (현재 `imbas-engineer.md`에만 존재)
+    2. **구현체 용어 통일**: `packages/imbas/skills/` 하위의 스킬 구현부(`manifest`, `devplan`, `pipeline` 등) 워크플로우 및 상태 관리 코드에 하드코딩된 `jira_key`, `epic_key`, `project_key` 변수와 참조를 모두 프로바이더 중립적인 `issue_ref`, `epic_ref`, `project_ref`로 일괄 리팩토링해야 합니다.

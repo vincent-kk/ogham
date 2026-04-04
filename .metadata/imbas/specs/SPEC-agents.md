@@ -113,6 +113,7 @@ tools:
   - Read          # 문서 읽기
   - Grep          # 문서 내 패턴 검색
   - Glob          # 파일 탐색
+  - Bash          # GitHub provider (gh CLI)
   # Atlassian MCP
   - getConfluencePage
   - searchConfluenceUsingCql
