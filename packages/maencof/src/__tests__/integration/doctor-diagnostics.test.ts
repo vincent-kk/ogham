@@ -266,7 +266,7 @@ describe('Doctor 진단 통합 테스트', () => {
     );
 
     // graph 로드 후 status 확인
-    const { MetadataStore } = await import('../../index/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
 

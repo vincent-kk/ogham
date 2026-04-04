@@ -19,7 +19,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-import { MetadataStore } from '../index/metadata-store.js';
+import { MetadataStore } from '../core/indexer/metadata-store.js';
 import { invalidateQueryCache } from '../search/query-engine.js';
 import type { KnowledgeGraph } from '../types/graph.js';
 import { VERSION } from '../version.js';

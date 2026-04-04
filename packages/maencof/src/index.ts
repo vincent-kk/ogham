@@ -120,13 +120,13 @@ export {
   deserializeGraph,
   MetadataStore,
   CACHE_FILES,
-} from './index/metadata-store.js';
+} from './core/indexer/metadata-store.js';
 export type {
   SnapshotEntry,
   FileSnapshot as CacheSnapshot,
   WeightsData,
   StaleNodes,
-} from './index/metadata-store.js';
+} from './core/indexer/metadata-store.js';
 
 export {
   computeChangeSet as computeIncrementalChangeSet,
@@ -134,12 +134,12 @@ export {
   computeIncrementalScope,
   createSnapshot as createIncrementalSnapshot,
   IncrementalTracker,
-} from './index/incremental-tracker.js';
+} from './core/indexer/incremental-tracker.js';
 export type {
   ChangeSet as IncrementalChangeSet,
   IncrementalScope,
   CurrentFileInfo,
-} from './index/incremental-tracker.js';
+} from './core/indexer/incremental-tracker.js';
 
 // MCP modules
 export { createServer, startServer } from './mcp/server.js';

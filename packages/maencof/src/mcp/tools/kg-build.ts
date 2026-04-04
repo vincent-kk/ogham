@@ -18,8 +18,8 @@ import {
   computeChangeSet,
   computeIncrementalScope,
   createSnapshot,
-} from '../../index/incremental-tracker.js';
-import { MetadataStore } from '../../index/metadata-store.js';
+} from '../../core/indexer/incremental-tracker.js';
+import { MetadataStore } from '../../core/indexer/metadata-store.js';
 import type { NodeId } from '../../types/common.js';
 import type {
   AdjacencyList,

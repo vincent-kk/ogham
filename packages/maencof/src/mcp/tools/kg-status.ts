@@ -2,7 +2,7 @@
  * @file kg-status.ts
  * @description kg_status 도구 핸들러 — 인덱스 상태 조회
  */
-import { MetadataStore } from '../../index/metadata-store.js';
+import { MetadataStore } from '../../core/indexer/metadata-store.js';
 import type { KnowledgeGraph } from '../../types/graph.js';
 import type { KgStatusInput, KgStatusResult } from '../../types/mcp.js';
 

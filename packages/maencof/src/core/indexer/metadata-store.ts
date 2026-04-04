@@ -9,13 +9,13 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { NodeId } from '../types/common.js';
+import type { NodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
   KnowledgeNode,
   SerializedGraph,
-} from '../types/graph.js';
+} from '../../types/graph.js';
 
 /** .maencof/ 파일 이름 상수 */
 export const CACHE_FILES = {

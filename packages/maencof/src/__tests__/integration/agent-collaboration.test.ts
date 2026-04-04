@@ -199,7 +199,7 @@ describe('에이전트 협업 시퀀스 통합 테스트', () => {
     actions.push(`인덱스 빌드: ${buildResult.nodeCount}개 노드`);
 
     // 지식 그래프 로드
-    const { MetadataStore } = await import('../../index/metadata-store.js');
+    const { MetadataStore } = await import('../../core/indexer/metadata-store.js');
     const store = new MetadataStore(vault);
     const graph = await store.loadGraph();
     expect(graph).toBeTruthy();
