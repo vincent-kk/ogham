@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapReplacer, toolError, toolResult, wrapHandler } from '../mcp/shared.js';
+import { mapReplacer, toolError, toolResult, wrapHandler } from '../mcp/shared/shared.js';
 
 describe('MCP shared utilities', () => {
   describe('toolResult', () => {

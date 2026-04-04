@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
-import { validateManifest } from '../core/manifest-validator.js';
+import { validateManifest } from '../core/manifest-validator/manifest-validator.js';
 import type { StoriesManifest, DevplanManifest } from '../types/manifest.js';
 
 const dirs: string[] = [];

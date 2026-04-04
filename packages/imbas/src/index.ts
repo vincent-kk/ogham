@@ -39,7 +39,7 @@ export type { ImportInfo, ExportInfo, CallInfo, DependencyInfo, DependencyError 
 export type { CyclomaticResult, CyclomaticError } from './ast/index.js';
 
 // Hook modules
-export { processSetup } from './hooks/setup.js';
+export { processSetup } from './hooks/index.js';
 
 // Lib modules
 export { createLogger, setLogDir, resetLogger } from './lib/logger.js';

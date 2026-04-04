@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { planExecution } from '../core/execution-planner.js';
+import { planExecution } from '../core/execution-planner/execution-planner.js';
 import type { DevplanManifest } from '../types/manifest.js';
 
 function makeManifest(overrides?: Partial<DevplanManifest>): DevplanManifest {

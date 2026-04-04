@@ -3,10 +3,10 @@ import { join } from 'node:path';
 import os from 'node:os';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { handleConfigGet } from '../../mcp/tools/config-get.js';
-import { handleConfigSet } from '../../mcp/tools/config-set.js';
-import { handleCacheGet } from '../../mcp/tools/cache-get.js';
-import { handleCacheSet } from '../../mcp/tools/cache-set.js';
+import { handleConfigGet } from '../../mcp/tools/config-get/config-get.js';
+import { handleConfigSet } from '../../mcp/tools/config-set/config-set.js';
+import { handleCacheGet } from '../../mcp/tools/cache-get/cache-get.js';
+import { handleCacheSet } from '../../mcp/tools/cache-set/cache-set.js';
 
 // --- helpers ---
 

@@ -8,7 +8,7 @@ import {
   getRunDir,
   getTempDir,
   getMediaDir,
-} from '../core/paths.js';
+} from '../core/paths/paths.js';
 
 describe('paths', () => {
   const cwd = '/home/user/myproject';

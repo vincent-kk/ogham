@@ -3,10 +3,10 @@ import { join } from 'node:path';
 import os from 'node:os';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { handleRunCreate } from '../../mcp/tools/run-create.js';
-import { handleRunGet } from '../../mcp/tools/run-get.js';
-import { handleRunList } from '../../mcp/tools/run-list.js';
-import { handleRunTransition } from '../../mcp/tools/run-transition.js';
+import { handleRunCreate } from '../../mcp/tools/run-create/run-create.js';
+import { handleRunGet } from '../../mcp/tools/run-get/run-get.js';
+import { handleRunList } from '../../mcp/tools/run-list/run-list.js';
+import { handleRunTransition } from '../../mcp/tools/run-transition/run-transition.js';
 
 // --- helpers ---
 

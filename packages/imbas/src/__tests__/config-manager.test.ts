@@ -9,7 +9,7 @@ import {
   setConfigValue,
   applyConfigUpdates,
   loadConfig,
-} from '../core/config-manager.js';
+} from '../core/config-manager/config-manager.js';
 import { ImbasConfigSchema } from '../types/config.js';
 import type { ImbasConfig } from '../types/config.js';
 

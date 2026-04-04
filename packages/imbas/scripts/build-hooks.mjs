@@ -28,7 +28,7 @@ const hookEntries = [
 await Promise.all(
   hookEntries.map((name) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/entries/${name}.entry.ts`)],
+      entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
       bundle: true,
       platform: 'node',
       target: 'node20',
