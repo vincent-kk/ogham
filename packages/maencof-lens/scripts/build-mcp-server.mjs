@@ -21,7 +21,7 @@ const require = createRequire(resolve(root, 'node_modules/@modelcontextprotocol/
 const zodPath = dirname(require.resolve('zod/package.json'));
 
 await esbuild.build({
-  entryPoints: [resolve(root, 'src/mcp/server-entry.ts')],
+  entryPoints: [resolve(root, 'src/mcp/server-entry/server-entry.ts')],
   bundle: true,
   platform: 'node',
   target: 'node20',

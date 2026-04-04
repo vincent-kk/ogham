@@ -1,7 +1,7 @@
 import { handleKgSearch } from '@ogham/maencof';
 import type { KnowledgeGraph, SubLayer } from '@ogham/maencof';
 
-import { computeEffectiveLayers } from '../filter/layer-guard.js';
+import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
 
 export interface LensSearchInput {
   vault?: string;

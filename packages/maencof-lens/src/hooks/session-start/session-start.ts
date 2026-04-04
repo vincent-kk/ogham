@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-import { loadConfig } from "../config/config-loader.js";
-import { CONFIG_DIR, CONFIG_FILE } from "../config/defaults.js";
-import { detectStale } from "../vault/stale-detector.js";
+import { loadConfig } from "../../config/config-loader/config-loader.js";
+import { CONFIG_DIR, CONFIG_FILE } from "../../config/defaults/defaults.js";
+import { detectStale } from "../../vault/stale-detector/stale-detector.js";
 
 export interface LensSessionStartResult {
   continue: boolean;

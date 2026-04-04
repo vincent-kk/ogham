@@ -3,7 +3,7 @@
  * @description esbuild entry point for SessionStart hook.
  * Bundled to bridge/session-start.mjs.
  */
-import { runSessionStart } from '../session-start.js';
+import { runSessionStart } from './session-start.js';
 
 async function main() {
   const cwd = process.cwd();

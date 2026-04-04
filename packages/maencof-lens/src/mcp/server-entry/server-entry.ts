@@ -5,7 +5,7 @@
  */
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { createLensServer } from './server.js';
+import { createLensServer } from '../server/server.js';
 
 async function main() {
   const configRoot = process.cwd();

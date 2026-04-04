@@ -1,6 +1,6 @@
 import { handleMaencofRead } from '@ogham/maencof';
 
-import { computeEffectiveLayers } from '../filter/layer-guard.js';
+import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
 
 export interface LensReadInput {
   vault?: string;

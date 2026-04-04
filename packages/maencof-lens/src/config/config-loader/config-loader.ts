@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { LensConfigSchema, type LensConfig } from './config-schema.js';
-import { CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION, DEFAULT_LAYERS } from './defaults.js';
+import { LensConfigSchema, type LensConfig } from '../config-schema/config-schema.js';
+import { CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION, DEFAULT_LAYERS } from '../defaults/defaults.js';
 
 /**
  * Load .maencof-lens/config.json from the given project root.

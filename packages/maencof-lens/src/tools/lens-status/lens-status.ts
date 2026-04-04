@@ -1,7 +1,7 @@
 import { handleKgStatus } from '@ogham/maencof';
 import type { KnowledgeGraph } from '@ogham/maencof';
 
-import { detectStale } from '../vault/stale-detector.js';
+import { detectStale } from '../../vault/stale-detector/stale-detector.js';
 
 export interface LensStatusInput {
   vault?: string;

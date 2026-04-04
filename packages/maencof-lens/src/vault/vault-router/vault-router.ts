@@ -1,4 +1,4 @@
-import type { LensConfig, VaultConfig } from '../config/config-schema.js';
+import type { LensConfig, VaultConfig } from '../../config/config-schema/config-schema.js';
 
 /**
  * Multi-vault name→config resolution.

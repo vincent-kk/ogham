@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { LensConfig } from '../config/config-schema.js';
-import { VaultRouter } from '../vault/vault-router.js';
+import type { LensConfig } from '../config/config-schema/config-schema.js';
+import { VaultRouter } from '../vault/vault-router/vault-router.js';
 
 const twoVaultConfig: LensConfig = {
   version: '1.0',

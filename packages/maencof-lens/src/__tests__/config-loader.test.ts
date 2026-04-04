@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { loadConfig, writeConfig, createDefaultConfig } from '../config/config-loader.js';
-import { LensConfigSchema } from '../config/config-schema.js';
+import { loadConfig, writeConfig, createDefaultConfig } from '../config/config-loader/config-loader.js';
+import { LensConfigSchema } from '../config/config-schema/config-schema.js';
 
 describe('config-loader', () => {
   let testDir: string;
