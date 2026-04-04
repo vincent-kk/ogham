@@ -10,7 +10,6 @@ description: >
   patch", "fix the violation", "parameterize tests", "refactor for 3+12".
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
-permissionMode: default
 maxTurns: 30
 ---
 

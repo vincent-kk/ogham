@@ -15,7 +15,6 @@ description: >
   "should I split this module", "what are the organ boundaries", "review structure".
 tools: Read, Glob, Grep
 model: opus
-permissionMode: default
 maxTurns: 40
 ---
 

@@ -14,7 +14,6 @@ tools:
   - mcp__plugin_imbas_atlassian__searchConfluenceUsingCql
   - mcp__plugin_imbas_atlassian__getJiraIssue
   - mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql
-permissionMode: default
 maxTurns: 50
 ---
 

@@ -3,7 +3,6 @@ name: implementer
 description: "FCA-AI Implementer — writes and modifies source code strictly within DETAIL.md-defined scope using TDD (Red-Green-Refactor). Delegate when: implementing a feature, fixing a bug, writing tests, or performing any code change approved by the architect. Trigger phrases: 'implement', 'write code for', 'add feature', 'fix bug', 'create test', 'code this'. Use proactively for all code authoring tasks."
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
-permissionMode: default
 maxTurns: 50
 ---
 

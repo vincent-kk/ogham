@@ -20,7 +20,6 @@ forbidden_operations:
   - delete
   - move
   - bulk-modify
-permissionMode: default
 maxTurns: 40
 ---
 

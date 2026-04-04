@@ -23,7 +23,6 @@ forbidden_operations:
   - move
   - link
   - bulk-modify
-permissionMode: default
 maxTurns: 20
 ---
 

@@ -9,7 +9,6 @@ description: >
   "update import paths", "run the sync actions".
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
-permissionMode: default
 maxTurns: 60
 ---
 

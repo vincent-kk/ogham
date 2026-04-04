@@ -11,7 +11,6 @@ tools:
   - Glob
   - mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql
   - mcp__plugin_imbas_atlassian__getJiraIssue
-permissionMode: default
 maxTurns: 60
 ---
 

@@ -14,7 +14,6 @@ tools:
   - mcp__plugin_imbas_tools__imbas_ast_analyze
   - mcp__plugin_imbas_atlassian__getJiraIssue
   - mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql
-permissionMode: default
 maxTurns: 80
 ---
 

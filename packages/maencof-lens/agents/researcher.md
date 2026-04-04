@@ -15,7 +15,6 @@ tools:
   - mcp__plugin_maencof-lens_t__lens_navigate
   - mcp__plugin_maencof-lens_t__lens_read
   - mcp__plugin_maencof-lens_t__lens_status
-permissionMode: default
 maxTurns: 30
 ---
 

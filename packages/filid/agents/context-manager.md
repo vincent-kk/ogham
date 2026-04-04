@@ -3,7 +3,6 @@ name: context-manager
 description: "FCA-AI Context Manager — maintains INTENT.md and DETAIL.md documents, compresses context, and synchronizes documentation with code changes. Delegate when: INTENT.md or DETAIL.md needs updating, docs are approaching the 50-line limit, or AST changes require doc sync. Trigger phrases: 'update docs', 'sync documentation', 'compress context', 'update INTENT.md', 'update DETAIL.md', 'document this change'. Use proactively after code changes that alter module contracts or architecture."
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
-permissionMode: plan
 maxTurns: 40
 ---
 

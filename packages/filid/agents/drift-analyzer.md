@@ -9,7 +9,6 @@ description: >
   "what is drifted", "generate correction plan", "sync health report".
 tools: Read, Glob, Grep
 model: sonnet
-permissionMode: default
 maxTurns: 30
 ---
 

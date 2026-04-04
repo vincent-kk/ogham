@@ -14,7 +14,6 @@ tools:
   - Grep
   - Bash
   - AskUserQuestion
-permissionMode: default
 maxTurns: 50
 ---
 

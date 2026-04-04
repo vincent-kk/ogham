@@ -9,7 +9,6 @@ tools:
   - Read
   - Write
   - Glob
-permissionMode: default
 maxTurns: 30
 ---
 

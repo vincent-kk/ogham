@@ -11,7 +11,6 @@ description: >
   "are there any issues", "promote readiness check".
 tools: Read, Glob, Grep
 model: sonnet
-permissionMode: default
 maxTurns: 40
 ---
 

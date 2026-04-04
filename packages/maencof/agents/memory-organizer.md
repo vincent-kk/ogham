@@ -22,7 +22,6 @@ forbidden_operations:
   - delete
   - bulk-modify
   - layer1-write
-permissionMode: default
 maxTurns: 30
 ---
 
