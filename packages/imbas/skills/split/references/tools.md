@@ -26,7 +26,7 @@
 ### imbas-planner Spawn Instructions
 
 - Provide source.md + supplements + Epic info as input context
-- Set output language per config.language.jira_content
+- Set output language per config.language.issue_content
 - Agent returns JSON Story array — skill handles manifest creation
 - Agent does NOT have pipeline/manifest tool access
 

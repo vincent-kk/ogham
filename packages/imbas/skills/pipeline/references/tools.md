@@ -11,12 +11,14 @@ validate, split, manifest, and devplan skills.
 |------|-------|-------|
 | `imbas_config_get` | 1 | Load config.json for project key and settings |
 | `imbas_run_create` | 1 | Create run directory, copy source, initialize state.json |
-| `imbas_run_get` | all | Read current run state (precondition checks) |
+| `imbas_run_get` | all | Read current run state for precondition checks (declared-only) |
 | `imbas_run_transition` | all | Phase transitions: start, complete, escape |
 | `imbas_manifest_get` | 3 | Load stories-manifest.json for devplan input |
 | `imbas_manifest_save` | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation |
 | `imbas_manifest_validate` | 2, 3 | Validate manifest structural integrity (gate input) |
 | `imbas_manifest_plan` | 2.5, 3.5 | Generate execution plan for dry-run preview |
+| `imbas_ast_search` | 3 | AST pattern search via imbas-engineer spawn; referenced in workflow for sgLoadError handling (declared-only) |
+| `imbas_ast_analyze` | 3 | Dependency graph / complexity analysis via imbas-engineer spawn (declared-only) |
 
 ---
 

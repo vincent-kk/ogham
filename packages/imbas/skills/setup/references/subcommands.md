@@ -17,7 +17,7 @@
 
 ## set-language <field> <lang>
 
-1. Validate field is one of: `documents`, `skills`, `jira_content`, `reports`.
+1. Validate field is one of: `documents`, `skills`, `issue_content`, `reports`.
 2. Call `imbas_config_set` with `{ "language.<field>": "<lang>" }`.
 3. Display updated language settings.
 

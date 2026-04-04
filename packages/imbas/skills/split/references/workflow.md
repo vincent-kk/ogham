@@ -35,7 +35,7 @@ Step 3 — imbas-planner Agent Spawn (Story Splitting)
   - Agent instructions:
     "Split the planning document into INVEST-compliant Jira Stories.
      For each Story:
-     - Title: concise summary (in config.language.jira_content language)
+     - Title: concise summary (in config.language.issue_content language)
      - Description: User Story format + Acceptance Criteria (Given/When/Then or EARS)
      - Anchor link: explicit reference to source document section/quote
      - Each Story must be Independent, Negotiable, Valuable, Estimable, Small, Testable

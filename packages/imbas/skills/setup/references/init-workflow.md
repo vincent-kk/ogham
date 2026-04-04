@@ -24,7 +24,7 @@ Step 3 — config.json creation
        "language": {
          "documents": "ko",
          "skills": "en",
-         "jira_content": "ko",
+         "issue_content": "ko",
          "reports": "ko"
        },
        "defaults": {

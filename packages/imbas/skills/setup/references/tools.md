@@ -6,6 +6,7 @@
 |------|-------|
 | `imbas_config_get` | Read current config.json (show subcommand) |
 | `imbas_config_set` | Create or update config.json fields |
+| `imbas_cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
 | `imbas_cache_set` | Write Jira metadata to cache files |
 
 ## Atlassian MCP Tools

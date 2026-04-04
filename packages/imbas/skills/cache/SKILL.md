@@ -13,7 +13,9 @@ plugin: imbas
 
 Internal skill that manages Jira project metadata cache. Stores issue types, link types,
 and workflow definitions locally to avoid repeated Atlassian API calls. Auto-refreshes
-when the TTL (24 hours) expires. Called by setup, validate, split, and devplan skills.
+when the TTL (24 hours) expires. Called by the `setup` skill (init, show, set-project,
+refresh-cache subcommands). Other skills consume cached metadata indirectly via
+Atlassian MCP calls seeded by setup; they do not invoke `imbas:cache` directly.
 
 ## Arguments
 

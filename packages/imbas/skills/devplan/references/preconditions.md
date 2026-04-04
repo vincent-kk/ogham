@@ -10,3 +10,11 @@ From stories-manifest.json:
 - All Stories must have `status: "created"` with valid `issue_ref`
 - If any Story has `status: "pending"` → block with message:
   "Run /imbas:manifest stories first to create Jira issues."
+
+### Exception — E2-3 escape upstream
+
+When `split.escape_code == "E2-3"`, the upstream `pipeline` skill generates a
+single-Story `stories-manifest.json` representing the source document as-is
+(no Jira issues created). In this specific case, devplan accepts the pending
+Story as a valid input state — the document itself is passed as context to
+`imbas-engineer`, bypassing the normal issue-creation prerequisite.

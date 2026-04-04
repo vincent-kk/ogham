@@ -9,7 +9,7 @@ Step 1 — Read issue (full depth)
      - Participants with role hints
      - Existing decisions and open questions
   3. Detect attached media (images, videos, GIFs) in description or comments
-     - If media found → call `imbas:fetch-media` for each attachment
+     - If media found → call `/imbas:fetch-media` for each attachment
      - Include visual analysis in digest context
 
 Step 2 — State Tracking (timeline construction)

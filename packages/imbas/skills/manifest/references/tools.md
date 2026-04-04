@@ -4,6 +4,7 @@
 
 | Tool | Usage |
 |------|-------|
+| `imbas_run_get` | Read current run state (preconditions + run selection via --run or most recent) |
 | `imbas_manifest_get` | Load manifest file with summary (pending/created counts) |
 | `imbas_manifest_save` | Save manifest after each item creation (crash recovery) |
 | `imbas_manifest_plan` | Generate execution plan for devplan manifest (dry-run) |
