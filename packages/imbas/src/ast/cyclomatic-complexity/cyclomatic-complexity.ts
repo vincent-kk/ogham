@@ -30,7 +30,7 @@ export interface CyclomaticError {
 // ---------------------------------------------------------------------------
 
 /** Decision-point node kinds that unconditionally add +1 to CC */
-const DECISION_KINDS = new Set([
+const DECISION_KINDS: ReadonlySet<string | number> = new Set([
   'if_statement',
   'for_statement',
   'for_in_statement',
@@ -53,7 +53,7 @@ function computeCC(bodyNode: SgNode): number {
   walk(bodyNode, (node: SgNode) => {
     const kind = node.kind();
 
-    if (DECISION_KINDS.has(kind as string)) {
+    if (DECISION_KINDS.has(kind)) {
       cc++;
       return;
     }
@@ -158,7 +158,7 @@ export async function calculateComplexity(
     const ext = filePath.includes('.') ? '.' + filePath.split('.').pop() : '.ts';
     const langStr = EXT_TO_LANG[ext] ?? 'typescript';
     const lang = toLangEnum(sg, langStr);
-    const root = sg.parse(lang as never, source).root();
+    const root = sg.parse(lang, source).root();
 
     const perFunction = new Map<string, number>();
 

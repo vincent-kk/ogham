@@ -46,7 +46,7 @@ export async function handleAstSearch(input: AstSearchInput) {
       if (matches.length >= maxResults) break;
       try {
         const source = readFileSync(file, 'utf-8');
-        const root = sg.parse(lang as never, source).root();
+        const root = sg.parse(lang, source).root();
         const found = root.findAll({ rule: { pattern: input.pattern } });
         for (const node of found) {
           if (matches.length >= maxResults) break;

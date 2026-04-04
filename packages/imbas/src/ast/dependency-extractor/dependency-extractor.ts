@@ -191,7 +191,7 @@ export async function extractDependencies(
     const ext = filePath.includes('.') ? '.' + filePath.split('.').pop() : '.ts';
     const langStr = EXT_TO_LANG[ext] ?? 'typescript';
     const lang = toLangEnum(sg, langStr);
-    const root = sg.parse(lang as never, source).root();
+    const root = sg.parse(lang, source).root();
 
     const imports: ImportInfo[] = [];
     const exports: ExportInfo[] = [];

@@ -16,6 +16,8 @@ import { extname, join, resolve } from 'node:path';
 import type * as AstGrepNapi from '@ast-grep/napi';
 
 export type SgModule = typeof AstGrepNapi;
+/** Type accepted by sg.parse() — built-in Lang enum values or CustomLang strings */
+export type NapiLang = Parameters<SgModule['parse']>[0];
 
 let sgModule: SgModule | null = null;
 let sgLoadFailed = false;
@@ -117,10 +119,10 @@ export function getSgLoadError(): string {
  * Convert a lowercase language string to the ast-grep Lang enum value.
  * Throws for unsupported languages.
  */
-export function toLangEnum(sg: SgModule, language: string): unknown {
+export function toLangEnum(sg: SgModule, language: string): NapiLang {
   // Lang enum only contains built-in languages (Html, JavaScript, Tsx, Css, TypeScript).
   // All others (Python, Go, Rust, etc.) are CustomLang strings passed directly.
-  const langMap: Record<string, unknown> = {
+  const langMap: Record<string, NapiLang> = {
     javascript: sg.Lang.JavaScript,
     typescript: sg.Lang.TypeScript,
     tsx: sg.Lang.Tsx,
@@ -139,7 +141,7 @@ export function toLangEnum(sg: SgModule, language: string): unknown {
     json: 'Json',
     yaml: 'Yaml',
   };
-  const lang = langMap[language];
+  const lang: NapiLang | undefined = langMap[language];
   if (lang === undefined) {
     throw new Error(`Unsupported language: ${language}`);
   }
