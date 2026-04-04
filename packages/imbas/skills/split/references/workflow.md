@@ -47,21 +47,21 @@ Step 4 — 3→1→2 Verification (per Story)
 
   [3] Anchor Link Check
     - Verify the Story has an explicit reference to a source document section.
-    - Missing anchor → set review_escalation flag on this Story.
-    - Present anchor → continue to [1].
+    - Missing anchor → set verification.anchor_link = false on this Story.
+    - Present anchor → set verification.anchor_link = true, continue to [1].
 
   [1] Coherence Check (upper-context consistency, low-cost)
     - Verify the Story content aligns with the overall document goals and context.
-    - Deviation detected → set review_escalation flag.
-    - Coherent → continue to [2].
+    - Deviation detected → set verification.coherence = "FAIL" (or "REVIEW" if ambiguous).
+    - Coherent → set verification.coherence = "PASS", continue to [2].
 
   [2] Reverse-Inference Verification — imbas-analyst spawn
     - Spawn agent: imbas-analyst
     - Input: ALL split Stories reassembled as a whole
     - Instructions: "Compare the reassembled Stories against the original source.md.
       Identify any requirements lost, distorted, or fabricated during splitting."
-    - Mismatch detected → set review_escalation flag on affected Stories.
-    - Match → autonomous pass.
+    - Mismatch detected → set verification.reverse_inference = "FAIL" (or "REVIEW") on affected Stories.
+    - Match → set verification.reverse_inference = "PASS".
 
   Autonomous vs Review decision criteria:
     - Criterion A: Split result admits only one interpretation → autonomous pass
@@ -100,7 +100,7 @@ Step 6 — stories-manifest.json Generation
      - verification results: anchor_link, coherence, reverse_inference
      - size_check result
      - split_from / split_into references
-     - review_escalation flags
+     - Stories with any verification field not PASS (flagged for review)
   2. Compile links array:
      - Split links ("is split into", "split from")
      - Umbrella links ("relates to")
@@ -117,7 +117,7 @@ Step 6 — stories-manifest.json Generation
 Step 7 — User Review Flow
   1. Display manifest summary:
      - Total Story count
-     - Stories requiring review (review_escalation flagged)
+     - Stories requiring review (any verification field not PASS)
      - Split history (which Stories were horizontally split)
      - Umbrella patterns applied
      - Verification results overview

@@ -257,7 +257,7 @@ Step 2.5.2 — Batch Execution
 
   Phase B — Story Creation:
     For each story where status == "pending":
-    1. Call Atlassian MCP: createJiraIssue(project, type: "Story", summary, description, parent: epic_ref)
+    1. Call Atlassian MCP: createJiraIssue(project, type: "Story", summary, description, parent: epic_ref (if set))
     2. Update story: status = "created", issue_ref = <returned key>
     3. Save manifest
 
