@@ -1,12 +1,12 @@
 #!/bin/sh
-# maencof Node.js Finder (find-node.sh)
+# Node.js Finder (find-node.sh)
 #
 # Locates the Node.js binary and executes it with the provided arguments.
 # Designed for nvm/fnm users where `node` is not on PATH in non-interactive
 # shells (e.g. Claude Code hook invocations).
 #
 # Priority:
-#   0. Cached path in ~/.claude/plugins/maencof-lens/node-path-cache (skip full search)
+#   0. Cached path in ~/.claude/plugins/${PLUGIN_NAME}/node-path-cache (skip full search)
 #   1. nvm default alias → matching version, fallback to highest version
 #   2. fnm default alias → matching version, fallback to highest version
 #   3. `command -v node` (node is on PATH — fallback for non-nvm/fnm setups)
@@ -15,14 +15,17 @@
 # Exits 0 on failure so it never blocks Claude Code hook processing.
 
 # ---------------------------------------------------------------------------
+# Constants — override these per plugin
+# ---------------------------------------------------------------------------
+PLUGIN_NAME="${PLUGIN_NAME:-ogham}"
+MIN_NODE_MAJOR=20
+
+# ---------------------------------------------------------------------------
 # Helper: extract major version number from a node binary path containing vX.Y.Z
 # ---------------------------------------------------------------------------
 extract_major_version() {
-  # Strip everything up to and including the last "/v"
   _ver="${1##*/v}"
-  # Strip from first dot onward: "20.11.0/bin/node" -> "20"
   _ver="${_ver%%.*}"
-  # Return only if numeric
   case "$_ver" in
     *[!0-9]*) echo 0 ;;
     '') echo 0 ;;
@@ -33,21 +36,19 @@ extract_major_version() {
 # ---------------------------------------------------------------------------
 # 0. Check cached path — if valid, exec immediately
 # ---------------------------------------------------------------------------
-CACHE_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/maencof-lens/node-path-cache"
+CACHE_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/${PLUGIN_NAME}/node-path-cache"
 
 if [ -f "$CACHE_FILE" ]; then
   CACHED_LINE=$(cat "$CACHE_FILE")
-  # Parse "path:major" format using parameter expansion only
   CACHED="${CACHED_LINE%%:*}"
   _cached_major="${CACHED_LINE##*:}"
-  # Validate cached major is numeric and >= 20
   case "$_cached_major" in
     *[!0-9]*|'') _cached_major=0 ;;
   esac
-  if [ -x "$CACHED" ] && [ "$_cached_major" -ge 20 ]; then
+  if [ -x "$CACHED" ] && [ "$_cached_major" -ge "$MIN_NODE_MAJOR" ]; then
     exec "$CACHED" "$@"
   fi
-  rm -f "$CACHE_FILE"  # stale or invalid cache — remove and fall through
+  rm -f "$CACHE_FILE"
 fi
 
 NODE_BIN=""
@@ -56,24 +57,20 @@ NODE_BIN=""
 # 1. nvm: prefer default alias, fall back to highest major version
 # ---------------------------------------------------------------------------
 if [ -z "$NODE_BIN" ] && [ -d "$HOME/.nvm/versions/node" ]; then
-  # 1a. Try nvm default alias
   if [ -f "$HOME/.nvm/alias/default" ]; then
     _nvm_alias=$(cat "$HOME/.nvm/alias/default")
-    # Resolve lts/* or lts/{name} alias chain
     case "$_nvm_alias" in
       lts/*)
         _lts_name="${_nvm_alias#lts/}"
         [ -f "$HOME/.nvm/alias/lts/$_lts_name" ] && _nvm_alias=$(cat "$HOME/.nvm/alias/lts/$_lts_name")
         ;;
     esac
-    # Extract target major version from resolved alias
     _target_major=""
     case "$_nvm_alias" in
-      *[!0-9.]*) ;;                                # non-numeric, skip
-      *.*) _target_major="${_nvm_alias%%.*}" ;;     # semver or partial: 20.11.0 -> 20
-      *)   _target_major="$_nvm_alias" ;;           # major only: 20
+      *[!0-9.]*) ;;
+      *.*) _target_major="${_nvm_alias%%.*}" ;;
+      *)   _target_major="$_nvm_alias" ;;
     esac
-    # Find matching node binary for the default major version
     if [ -n "$_target_major" ]; then
       # shellcheck disable=SC2231
       for _path in "$HOME/.nvm/versions/node/v${_target_major}."*/bin/node; do
@@ -82,7 +79,6 @@ if [ -z "$NODE_BIN" ] && [ -d "$HOME/.nvm/versions/node" ]; then
     fi
   fi
 
-  # 1b. Fallback: highest major version (if default not resolved)
   if [ -z "$NODE_BIN" ]; then
     _best_major=0
     # shellcheck disable=SC2231
@@ -107,10 +103,9 @@ if [ -z "$NODE_BIN" ]; then
     "$HOME/Library/Application Support/fnm" \
     "$HOME/.local/share/fnm"; do
     if [ -d "$_fnm_base/node-versions" ]; then
-      # 2a. Try fnm default alias
       if [ -f "$_fnm_base/aliases/default" ]; then
         _fnm_alias=$(cat "$_fnm_base/aliases/default")
-        _fnm_alias="${_fnm_alias#v}"  # strip leading 'v'
+        _fnm_alias="${_fnm_alias#v}"
         _target_major=""
         case "$_fnm_alias" in
           *[!0-9.]*) ;;
@@ -125,7 +120,6 @@ if [ -z "$NODE_BIN" ]; then
         fi
       fi
 
-      # 2b. Fallback: highest major version
       if [ -z "$NODE_BIN" ]; then
         _best_major=0
         # shellcheck disable=SC2231
@@ -167,20 +161,19 @@ if [ -z "$NODE_BIN" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Validate minimum version (Node.js >= 20)
+# Validate minimum version
 # ---------------------------------------------------------------------------
 if [ -n "$NODE_BIN" ]; then
-  _node_version=$("$NODE_BIN" --version 2>/dev/null)  # e.g. "v20.11.0"
-  # Parameter expansion only — no sed/cut
-  _node_major="${_node_version#v}"    # "20.11.0"
-  _node_major="${_node_major%%.*}"    # "20"
+  _node_version=$("$NODE_BIN" --version 2>/dev/null)
+  _node_major="${_node_version#v}"
+  _node_major="${_node_major%%.*}"
   case "$_node_major" in
     *[!0-9]*) _node_major=0 ;;
     '') _node_major=0 ;;
   esac
-  if [ "$_node_major" -lt 20 ]; then
-    printf '[maencof-lens] Warning: Found node %s (%s) but require >= 20. Skipping.\n' \
-      "$_node_version" "$NODE_BIN" >&2
+  if [ "$_node_major" -lt "$MIN_NODE_MAJOR" ]; then
+    printf '[%s] Warning: Found node %s (%s) but require >= %d. Skipping.\n' \
+      "$PLUGIN_NAME" "$_node_version" "$NODE_BIN" "$MIN_NODE_MAJOR" >&2
     NODE_BIN=""
   fi
 fi
@@ -189,9 +182,8 @@ fi
 # Invoke node with all provided arguments
 # ---------------------------------------------------------------------------
 if [ -z "$NODE_BIN" ]; then
-  printf '[maencof-lens] Error: Could not find node binary. Ensure Node.js >= 20 is installed.\n' >&2
-  # MCP server mode: exit 1 to report failure explicitly
-  # Hook mode: exit 0 so this hook does not block Claude Code
+  printf '[%s] Error: Could not find node binary. Ensure Node.js >= %d is installed.\n' \
+    "$PLUGIN_NAME" "$MIN_NODE_MAJOR" >&2
   case "$1" in
     */mcp-server*) exit 1 ;;
     *) exit 0 ;;
