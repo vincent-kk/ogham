@@ -1,69 +1,37 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ogham",
   "owner": {
     "name": "Vincent K. Kelvin"
   },
   "metadata": {
-    "description": "AI-powered developer tool plugins — FCA-AI structure management and fractal context architecture",
-    "version": "0.0.1"
+    "description": "AI-powered developer tool plugins for Claude Code agent workflows",
+    "repository": "https://github.com/vincent-kk/ogham",
+    "license": "MIT"
   },
   "plugins": [
     {
       "name": "filid",
-      "description": "FCA-AI rule enforcement + fractal structure management plugin for Claude Code agent workflows. Automated CLAUDE.md governance, multi-persona code review, structural drift detection.",
-      "version": "0.0.1",
-      "author": {
-        "name": "Vincent K. Kelvin"
-      },
       "source": "./packages/filid",
       "category": "productivity",
-      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/filid",
-      "tags": [
-        "fca-ai",
-        "fractal",
-        "structure",
-        "code-review",
-        "governance",
-        "documentation"
-      ]
+      "tags": ["fca-ai", "fractal", "structure", "code-review", "governance", "documentation"]
     },
     {
       "name": "maencof",
-      "description": "Personal knowledge space manager with markdown-based knowledge graph, spreading activation search, and memory lifecycle management",
-      "version": "0.0.1",
-      "author": {
-        "name": "Vincent K. Kelvin"
-      },
       "source": "./packages/maencof",
       "category": "productivity",
-      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/maencof",
-      "tags": [
-        "knowledge-graph",
-        "memory",
-        "spreading-activation",
-        "markdown",
-        "personal-knowledge"
-      ]
+      "tags": ["knowledge-graph", "memory", "spreading-activation", "markdown"]
     },
     {
       "name": "maencof-lens",
-      "description": "Read-only vault knowledge access plugin for Claude Code — wraps maencof knowledge graph with multi-vault routing and layer filtering",
-      "version": "0.0.1",
-      "author": {
-        "name": "Vincent K. Kelvin"
-      },
       "source": "./packages/maencof-lens",
       "category": "productivity",
-      "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/maencof-lens",
-      "tags": [
-        "knowledge-graph",
-        "read-only",
-        "lens",
-        "vault",
-        "mcp",
-        "claude-code"
-      ]
+      "tags": ["knowledge-graph", "read-only", "lens", "vault"]
+    },
+    {
+      "name": "imbas",
+      "source": "./packages/imbas",
+      "category": "productivity",
+      "tags": ["claude-code", "plugin"]
     }
   ]
 }

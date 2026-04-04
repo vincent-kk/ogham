@@ -13,6 +13,7 @@ Thumbs.db
 *.log
 npm-debug.log*
 .omc/
+.claude/worktrees/
 .filid/review
 .maencof-lens/
 

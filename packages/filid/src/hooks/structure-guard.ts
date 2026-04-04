@@ -1,116 +1,11 @@
-import { existsSync, readdirSync } from 'node:fs';
-import * as path from 'node:path';
-
-import {
-  KNOWN_ORGAN_DIR_NAMES,
-  classifyNode,
-} from '../core/tree/organ-classifier.js';
 import type { HookOutput, PreToolUseInput } from '../types/hooks.js';
 
-import { isIntentMd } from './shared.js';
+import { getParentSegments } from './utils/get-parent-segments.js';
+import { checkIntentMdReclassification } from './utils/check-intent-md-reclassification.js';
+import { checkOrganSubdirectory } from './utils/check-organ-subdirectory.js';
+import { checkCircularImports } from './utils/check-circular-imports.js';
 
-/**
- * Per-invocation cache for isOrganByStructure to avoid redundant readdirSync calls.
- * Lifecycle: module-scope — lives for the duration of the process.
- * In hook mode (bridge scripts), each invocation spawns a fresh process,
- * so this cache is effectively per-invocation.
- * In MCP server / test environments, call clearOrganCache() to invalidate.
- */
-const organCache = new Map<string, boolean>();
-
-/** Clear the organ classification cache. Useful in tests or long-lived processes. */
-export function clearOrganCache(): void {
-  organCache.clear();
-}
-
-/**
- * 디렉토리 경로를 기반으로 organ 여부를 판별.
- * classifyNode()를 사용하여 구조 기반 분류를 수행하고,
- * 파일시스템 접근 실패 시 false를 반환한다.
- * 결과는 프로세스 내 캐시에 저장하여 동일 경로 반복 검사를 방지한다.
- *
- * Performance: Uses readdirSync for the target dir and each child dir.
- * For a directory with N subdirs, this makes N+1 sync filesystem calls
- * on the first invocation (subsequent calls are cached via organCache).
- * Acceptable for hook usage where directories are few; for large trees,
- * prefer fractal_scan MCP tool results instead.
- */
-function isOrganByStructure(dirPath: string): boolean {
-  const cached = organCache.get(dirPath);
-  if (cached !== undefined) return cached;
-  try {
-    if (!existsSync(dirPath)) {
-      // 파일시스템에 없으면 레거시 이름 기반 폴백
-      const fallback = KNOWN_ORGAN_DIR_NAMES.includes(path.basename(dirPath));
-      organCache.set(dirPath, fallback);
-      return fallback;
-    }
-    const entries = readdirSync(dirPath, { withFileTypes: true });
-    const hasIntentMd = entries.some(
-      (e) => e.isFile() && e.name === 'INTENT.md',
-    );
-    const hasDetailMd = entries.some(
-      (e) => e.isFile() && e.name === 'DETAIL.md',
-    );
-    const subDirs = entries.filter((e) => e.isDirectory());
-    const hasFractalChildren = subDirs.some((d) => {
-      const childPath = path.join(dirPath, d.name);
-      try {
-        const childEntries = readdirSync(childPath, { withFileTypes: true });
-        return childEntries.some(
-          (ce) =>
-            ce.isFile() && (ce.name === 'INTENT.md' || ce.name === 'DETAIL.md'),
-        );
-      } catch {
-        return false;
-      }
-    });
-    const isLeafDirectory = subDirs.length === 0;
-    const category = classifyNode({
-      dirName: path.basename(dirPath),
-      hasIntentMd,
-      hasDetailMd,
-      hasFractalChildren,
-      isLeafDirectory,
-    });
-    const result = category === 'organ';
-    organCache.set(dirPath, result);
-    return result;
-  } catch {
-    organCache.set(dirPath, false);
-    return false;
-  }
-}
-
-function getParentSegments(filePath: string): string[] {
-  const normalized = filePath.replace(/\\/g, '/');
-  const parts = normalized.split('/').filter((p) => p.length > 0);
-  return parts.slice(0, -1);
-}
-
-// isIntentMd imported from shared.ts
-
-function extractImportPaths(content: string): string[] {
-  const importRegex = /from\s+['"]([^'"]+)['"]/g;
-  const paths: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = importRegex.exec(content)) !== null) {
-    paths.push(match[1]);
-  }
-  return paths;
-}
-
-function isAncestorPath(
-  filePath: string,
-  importPath: string,
-  cwd: string,
-): boolean {
-  if (!importPath.startsWith('.')) return false;
-  const fileDir = path.dirname(path.resolve(cwd, filePath));
-  const resolvedImport = path.resolve(fileDir, importPath);
-  const fileAbsolute = path.resolve(cwd, filePath);
-  return fileAbsolute.startsWith(resolvedImport + path.sep);
-}
+export { clearOrganCache } from './utils/organ-structure-checker.js';
 
 export function guardStructure(input: PreToolUseInput): HookOutput {
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
@@ -124,74 +19,34 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
 
   const cwd = input.cwd;
   const segments = getParentSegments(filePath);
-
-  // [기존 로직 보존] organ 디렉토리 내 INTENT.md Write → 차단 (continue: false)
-  if (input.tool_name === 'Write' && isIntentMd(filePath)) {
-    let dirSoFar = cwd;
-    for (const segment of segments) {
-      dirSoFar = path.join(dirSoFar, segment);
-      if (isOrganByStructure(dirSoFar)) {
-        return {
-          continue: false,
-          hookSpecificOutput: {
-            additionalContext:
-              `BLOCKED: Cannot create INTENT.md inside organ directory "${segment}". ` +
-              `Organ directories are leaf-level compartments and should not have their own INTENT.md.`,
-          },
-        };
-      }
-    }
-  }
-
-  // [추가 검증] 경고만 수집 (continue: true)
-  const warnings: string[] = [];
-
-  // 검사 2: organ 내부 하위 디렉토리 생성 (organ은 flat이어야 한다)
-  let organIdx = -1;
-  let organSegment = '';
-  {
-    let dirSoFar = cwd;
-    for (let i = 0; i < segments.length; i++) {
-      dirSoFar = path.join(dirSoFar, segments[i]);
-      if (isOrganByStructure(dirSoFar)) {
-        organIdx = i;
-        organSegment = segments[i];
-        break;
-      }
-    }
-  }
-  if (organIdx !== -1 && organIdx < segments.length - 1) {
-    warnings.push(
-      `organ 디렉토리 "${organSegment}" 내부에 하위 디렉토리를 생성하려 합니다. ` +
-        `Organ 디렉토리는 flat leaf 구획으로 중첩 디렉토리를 가져서는 안 됩니다.`,
-    );
-  }
-
-  // 검사 3: 잠재적 순환 의존
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
-  if (content) {
-    const importPaths = extractImportPaths(content);
-    const circularCandidates = importPaths.filter((p) =>
-      isAncestorPath(filePath, p, cwd),
-    );
-    if (circularCandidates.length > 0) {
-      warnings.push(
-        `다음 import가 현재 파일의 조상 모듈을 참조합니다 (순환 의존 위험): ` +
-          circularCandidates.map((p) => `"${p}"`).join(', '),
-      );
-    }
-  }
 
-  if (warnings.length === 0) {
+  const info = checkIntentMdReclassification(input.tool_name, filePath, cwd, segments);
+  const warnings = [
+    ...checkOrganSubdirectory(segments, cwd),
+    ...checkCircularImports(filePath, content, cwd),
+  ];
+
+  if (warnings.length === 0 && info.length === 0) {
     return { continue: true };
   }
 
-  const additionalContext =
-    `⚠️ Warning from filid structure-guard:\n` +
-    warnings.map((w, i) => `${i + 1}. ${w}`).join('\n');
+  const parts: string[] = [];
+  if (info.length > 0) {
+    parts.push(
+      `[filid:info] structure-guard:\n` +
+        info.map((m, i) => `${i + 1}. ${m}`).join('\n'),
+    );
+  }
+  if (warnings.length > 0) {
+    parts.push(
+      `[filid:warn] structure-guard:\n` +
+        warnings.map((w, i) => `${i + 1}. ${w}`).join('\n'),
+    );
+  }
 
   return {
     continue: true,
-    hookSpecificOutput: { additionalContext },
+    hookSpecificOutput: { additionalContext: parts.join('\n\n') },
   };
 }

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "tools": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/bridge/mcp-server.cjs"
+      ]
+    },
+    "atlassian": {
+      "type": "http",
+      "url": "https://mcp.atlassian.com/v1/mcp"
+    }
+  }
+}
