@@ -2,8 +2,7 @@
  * @file core/run-id-generator.ts
  * @description Generate collision-safe run IDs in YYYYMMDD-NNN format
  */
-
-import { readdirSync, mkdirSync } from 'node:fs';
+import { mkdirSync, readdirSync } from 'node:fs';
 
 /**
  * Generate a run ID in YYYYMMDD-NNN format.
@@ -13,7 +12,7 @@ export function generateRunId(runsDir: string): string {
   const now = new Date();
   const datePart = formatDate(now);
 
-  let entries: string[] = [];
+  let entries: string[];
   try {
     mkdirSync(runsDir, { recursive: true });
     entries = readdirSync(runsDir);
