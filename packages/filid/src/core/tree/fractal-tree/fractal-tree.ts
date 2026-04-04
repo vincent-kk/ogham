@@ -290,73 +290,77 @@ function detectFrameworks(rootPath: string): string[] {
 }
 
 /**
- * Scan a project directory and build a FractalTree.
- * Uses fast-glob to discover directories, then classifies each one.
- *
- * @param rootPath - Absolute path to project root
- * @param options - Scan options (exclude patterns, maxDepth)
- * @returns Completed FractalTree
+ * Detect framework reserved files from the root package.json.
+ * Returns the deduplicated list of reserved filenames.
  */
-export async function scanProject(
-  rootPath: string,
-  options?: ScanOptions,
-): Promise<FractalTree> {
-  const { glob } = await import('fast-glob');
-  const opts = { ...DEFAULT_SCAN_OPTIONS, ...options };
-  const maxDepth = opts.maxDepth;
-
-  // Detect frameworks once per scan (reads root package.json)
+function detectFrameworkReserved(rootPath: string): string[] {
   const detectedFrameworks = detectFrameworks(rootPath);
   const frameworkReservedSet = new Set<string>();
   for (const fw of detectedFrameworks) {
     const files = FRAMEWORK_RESERVED_FILES[fw];
     if (files) for (const f of files) frameworkReservedSet.add(f);
   }
-  const frameworkReservedArr = [...frameworkReservedSet];
+  return [...frameworkReservedSet];
+}
 
-  // Discover all directories
+/**
+ * Discover all directories under rootPath, filtered by ScanOptions.
+ * Returns absolute paths including the root itself.
+ */
+async function discoverDirectories(
+  rootPath: string,
+  opts: Required<ScanOptions>,
+): Promise<string[]> {
+  const { glob } = await import('fast-glob');
   const dirPaths: string[] = await glob('**/', {
     cwd: rootPath,
-    deep: maxDepth,
+    deep: opts.maxDepth,
     ignore: opts.exclude,
     followSymbolicLinks: opts.followSymlinks,
     onlyDirectories: true,
     dot: false,
   });
 
-  // Build DirEntry list — include the root itself
   const allDirs: string[] = [rootPath];
   for (const rel of dirPaths) {
-    // Remove trailing slash
     const clean = rel.replace(/\/$/, '');
     const absPath = join(rootPath, clean);
-    const relForExclude = clean;
-    if (!shouldExclude(relForExclude, opts)) {
+    if (!shouldExclude(clean, opts)) {
       allDirs.push(absPath);
     }
   }
+  return allDirs;
+}
 
-  // For each directory, collect metadata needed for classification
+/**
+ * Build immediate-children map and collect NodeEntry metadata for every directory.
+ */
+function collectNodeMetadata(
+  allDirs: string[],
+  rootPath: string,
+  opts: Required<ScanOptions>,
+  frameworkReservedArr: string[],
+): { nodeEntries: NodeEntry[]; childrenMap: Map<string, string[]> } {
   const dirSet = new Set(allDirs);
 
   // Pre-compute immediate children map: O(n) instead of O(n²) per-entry lookups
-  const immediateChildrenMap = new Map<string, string[]>();
+  const childrenMap = new Map<string, string[]>();
   for (const absPath of allDirs) {
-    immediateChildrenMap.set(absPath, []);
+    childrenMap.set(absPath, []);
   }
   for (const absPath of allDirs) {
     const parentDir = dirname(absPath);
-    if (parentDir && immediateChildrenMap.has(parentDir)) {
-      immediateChildrenMap.get(parentDir)!.push(absPath);
+    if (parentDir && childrenMap.has(parentDir)) {
+      childrenMap.get(parentDir)!.push(absPath);
     }
   }
 
   const nodeEntries: NodeEntry[] = [];
+  const maxDepth = opts.maxDepth;
 
   for (const absPath of allDirs) {
     const rel = relative(rootPath, absPath);
     const depth = rel === '' ? 0 : rel.split('/').length;
-
     if (depth > maxDepth) continue;
 
     const name =
@@ -385,7 +389,7 @@ export async function scanProject(
     const eponymousFile =
       peerFiles.find((f) => f.replace(/\.[^.]+$/, '') === name) ?? null;
 
-    const children = immediateChildrenMap.get(absPath) ?? [];
+    const children = childrenMap.get(absPath) ?? [];
     const hasFractalChildren = children.some((d) => dirSet.has(d));
     const isLeafDirectory = children.length === 0;
 
@@ -412,8 +416,17 @@ export async function scanProject(
     });
   }
 
-  // Post-correction: bottom-up으로 실제 fractal 자손 기반 타입 재확정
-  // 목적: 단일 패스에서 잘못 계산된 hasFractalChildren을 수정
+  return { nodeEntries, childrenMap };
+}
+
+/**
+ * Post-correction pass: bottom-up re-classify nodes based on actual fractal
+ * descendants to fix hasFractalChildren values computed in a single top-down pass.
+ */
+function correctNodeTypes(
+  nodeEntries: NodeEntry[],
+  childrenMap: Map<string, string[]>,
+): NodeEntry[] {
   const typeMap = new Map<string, string>(
     nodeEntries.map((e) => [e.path, e.type]),
   );
@@ -424,7 +437,7 @@ export async function scanProject(
   );
 
   for (const entry of sortedByDepth) {
-    const children = immediateChildrenMap.get(entry.path) ?? [];
+    const children = childrenMap.get(entry.path) ?? [];
 
     const hasFractalChildrenActual = children.some(
       (childPath) =>
@@ -448,5 +461,30 @@ export async function scanProject(
     }
   }
 
-  return buildFractalTree(nodeEntries);
+  return nodeEntries;
+}
+
+/**
+ * Scan a project directory and build a FractalTree.
+ * Uses fast-glob to discover directories, then classifies each one.
+ *
+ * @param rootPath - Absolute path to project root
+ * @param options - Scan options (exclude patterns, maxDepth)
+ * @returns Completed FractalTree
+ */
+export async function scanProject(
+  rootPath: string,
+  options?: ScanOptions,
+): Promise<FractalTree> {
+  const opts = { ...DEFAULT_SCAN_OPTIONS, ...options };
+  const frameworkReservedArr = detectFrameworkReserved(rootPath);
+  const allDirs = await discoverDirectories(rootPath, opts);
+  const { nodeEntries, childrenMap } = collectNodeMetadata(
+    allDirs,
+    rootPath,
+    opts,
+    frameworkReservedArr,
+  );
+  const corrected = correctNodeTypes(nodeEntries, childrenMap);
+  return buildFractalTree(corrected);
 }
