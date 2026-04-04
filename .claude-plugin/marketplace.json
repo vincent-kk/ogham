@@ -13,25 +13,45 @@
       "name": "filid",
       "source": "./packages/filid",
       "category": "productivity",
-      "tags": ["fca-ai", "fractal", "structure", "code-review", "governance", "documentation"]
-    },
-    {
-      "name": "maencof",
-      "source": "./packages/maencof",
-      "category": "productivity",
-      "tags": ["knowledge-graph", "memory", "spreading-activation", "markdown"]
-    },
-    {
-      "name": "maencof-lens",
-      "source": "./packages/maencof-lens",
-      "category": "productivity",
-      "tags": ["knowledge-graph", "read-only", "lens", "vault"]
+      "tags": [
+        "fca-ai",
+        "fractal",
+        "structure",
+        "code-review",
+        "governance",
+        "documentation"
+      ]
     },
     {
       "name": "imbas",
       "source": "./packages/imbas",
       "category": "productivity",
-      "tags": ["claude-code", "plugin"]
+      "tags": [
+        "claude-code",
+        "plugin"
+      ]
+    },
+    {
+      "name": "maencof",
+      "source": "./packages/maencof",
+      "category": "productivity",
+      "tags": [
+        "knowledge-graph",
+        "memory",
+        "spreading-activation",
+        "markdown"
+      ]
+    },
+    {
+      "name": "maencof-lens",
+      "source": "./packages/maencof-lens",
+      "category": "productivity",
+      "tags": [
+        "knowledge-graph",
+        "read-only",
+        "lens",
+        "vault"
+      ]
     }
   ]
 }
