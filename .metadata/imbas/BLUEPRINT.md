@@ -2,7 +2,7 @@
 
 > **이름**: imbas (imbas forosnai — 예언적 통찰)
 > **소속**: ogham 하위 Claude Code 플러그인
-> **Status**: Blueprint v1.0 (2026-04-04)
+> **Status**: Blueprint v1.1 (2026-04-04) — Provider abstraction
 > **설계 기반**: [design-v2.md](tirnanog:04_Action/npdp/imbas/design-v2.md), [imbas-spec-v1.md](tirnanog:04_Action/npdp/imbas/imbas-spec-v1.md)
 
 ---
@@ -41,15 +41,20 @@ ogham (사전 가이드 시스템)
        │    ├── imbas-engineer  — Subtask/Task 생성 (개발 관점)
        │    └── imbas-media     — 미디어 키프레임 분석
        │
+       ├── Provider Abstraction
+       │    ├── config.provider — "jira" | "github"
+       │    ├── Jira Provider   — Atlassian MCP 도구 경유
+       │    └── GitHub Provider — gh CLI (Bash) 경유
+       │
        ├── State (.imbas/)
-       │    ├── config.json     — 글로벌 설정
-       │    ├── <PROJECT>/cache — Jira 메타데이터 캐시
+       │    ├── config.json     — 글로벌 설정 (provider 포함)
+       │    ├── <PROJECT>/cache — 이슈 트래커 메타데이터 캐시
        │    ├── <PROJECT>/runs  — 실행 기록 + 매니페스트
        │    └── .temp/          — 미디어 임시 파일
        │
        └── References
-            ├── Jira/Agile 전문 지식 (에이전트 내장)
-            ├── JQL 패턴
+            ├── Agile 전문 지식 (에이전트 내장)
+            ├── Issue search 패턴 (JQL / gh CLI)
             ├── Epic/Story/Subtask 템플릿
             └── EARS/INVEST/Given-When-Then 가이드
 ```
@@ -117,14 +122,17 @@ ogham (사전 가이드 시스템)
 | **manifest 스킬이 실제 생성** | 쓰기 권한을 단일 스킬로 집중 → 감사/제어 용이 |
 | **dry-run 지원** | 실행 계획 사전 확인 가능 |
 
-### 3.4 Atlassian MCP 도구 선별
+### 3.4 Issue Tracker Provider Abstraction
 
-- **필수 12개**: Jira CRUD + 링크 + 전환 + 캐시용 메타데이터
-- **선택 3개**: Confluence 읽기 + fetchAtlassian (미디어 다운로드)
-- **제외 15개**: Confluence 쓰기, 사용자 조회, 워크로그 등
-- **기존 Skill 5개 중 0개 직접 포함**: spec-to-backlog은 imbas가 대체, 나머지는 범위 밖. 참조 자료(템플릿, JQL 패턴)만 흡수.
+| 결정 | 근거 |
+|------|------|
+| **Provider 추상화** | Jira와 GitHub Issues 모두 지원. `config.provider`로 선택 |
+| **스킬 레벨 분기** | 별도 MCP adapter 없이 스킬이 provider별 도구 직접 호출 |
+| **Jira**: Atlassian MCP 도구 | 필수 12개 + 선택 3개 |
+| **GitHub**: gh CLI via Bash | `gh issue`, `gh api`, `gh label` 등 |
+| **통일 매니페스트** | `issue_ref` (Jira: `PROJ-123`, GitHub: `#42`) |
 
-→ 상세: [SPEC-atlassian-tools.md](./specs/SPEC-atlassian-tools.md)
+→ 상세: [SPEC-provider.md](./specs/SPEC-provider.md), [SPEC-provider-jira.md](./specs/SPEC-provider-jira.md), [SPEC-provider-github.md](./specs/SPEC-provider-github.md)
 
 ### 3.5 미디어 처리
 
@@ -144,7 +152,7 @@ ogham (사전 가이드 시스템)
   "language": {
     "documents": "ko",      // 기획 문서, 검증 리포트
     "skills": "en",          // 스킬/에이전트 파일 (항상 영어)
-    "jira_content": "ko",    // Jira 이슈 title/description
+    "issue_content": "ko",   // 이슈 title/description (provider-agnostic)
     "reports": "ko"          // 매니페스트, 상태 리포트
   }
 }
@@ -228,7 +236,7 @@ ogham (사전 가이드 시스템)
 
 ---
 
-## 7. Jira Issue Architecture
+## 7. Issue Architecture (Provider-Agnostic)
 
 ### 7.1 3계층 매핑
 
@@ -243,6 +251,14 @@ Epic (Level 1)
       ├── Subtask T1-1 (EARS)
       └── Subtask T1-2 (EARS)
 ```
+
+| 계층 | Jira | GitHub |
+|------|------|--------|
+| Epic | Epic 이슈 타입 (네이티브) | Tracking Issue + `type:epic` label + Milestone |
+| Story/Task | Story/Task 타입 (네이티브) | Issue + `type:story`/`type:task` label |
+| Subtask | Sub-task 타입 (parent 필드) | Issue + `type:subtask` label + parent task list |
+| Link | 네이티브 Issue Link | Body meta block (`<!-- imbas:meta -->`) |
+| 상태 | Workflow 전이 | Label swap (`status:*`) + open/closed |
 
 ### 7.2 링크 타입
 
@@ -283,7 +299,10 @@ Epic (Level 1)
 | [SPEC-state.md](./specs/SPEC-state.md) | .imbas/ 구조, config.json, state.json, manifest 스키마 |
 | [SPEC-tools.md](./specs/SPEC-tools.md) | imbas MCP tools 서버 15개 도구 정의, AST 분석, fallback 스킬 |
 | [SPEC-media.md](./specs/SPEC-media.md) | 미디어 다운로드, scene-sieve 통합, 서브에이전트 격리 |
-| [SPEC-atlassian-tools.md](./specs/SPEC-atlassian-tools.md) | Atlassian MCP 도구 검토 (필수/선택/제외) |
+| [SPEC-provider.md](./specs/SPEC-provider.md) | Provider 추상화 인터페이스, 통일 타입, 분기 패턴 |
+| [SPEC-provider-jira.md](./specs/SPEC-provider-jira.md) | Jira provider — Atlassian MCP 도구, 실행 패턴, 접근 제어 |
+| [SPEC-provider-github.md](./specs/SPEC-provider-github.md) | GitHub provider — gh CLI 패턴, 라벨, 마일스톤, body meta block |
+| ~~[SPEC-atlassian-tools.md](./specs/SPEC-atlassian-tools.md)~~ | ~~Deprecated — SPEC-provider-jira.md로 대체~~ |
 
 ## Implementation Plan
 

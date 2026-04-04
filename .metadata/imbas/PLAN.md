@@ -1,6 +1,6 @@
 # imbas Implementation Plan
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.1 (2026-04-04) — Provider abstraction added
 > Blueprint: [BLUEPRINT.md](./BLUEPRINT.md)
 
 ---
@@ -15,11 +15,20 @@
 **Spec:** [SPEC-state.md §2](./specs/SPEC-state.md) — .imbas/ 디렉토리 구조
 
 ### 0.2 config.json 스키마 확정 & 구현
-- [ ] config.json 스키마 최종 확정
+- [ ] config.json 스키마 최종 확정 (provider 필드 포함)
 - [ ] 기본값(defaults) 결정
-- [ ] 언어 설정 구조 확정
+- [ ] 언어 설정 구조 확정 (`issue_content` 통합)
+- [ ] provider별 config 섹션 (jira, github) 구조 확정
 
 **Spec:** [SPEC-state.md §3](./specs/SPEC-state.md) — config.json 스키마
+
+### 0.3 Provider Abstraction 기반
+- [ ] 필드 리네임 확정 (`project_ref`, `issue_ref`, `epic_ref`)
+- [ ] Provider별 프로젝트 디렉토리명 규칙 (Jira: `KEY`, GitHub: `owner--repo`)
+- [ ] GitHub label 스키마 + 자동 생성 로직 정의
+- [ ] Body meta block 파싱 규격 확정
+
+**Spec:** [SPEC-provider.md](./specs/SPEC-provider.md), [SPEC-provider-github.md](./specs/SPEC-provider-github.md)
 
 ---
 

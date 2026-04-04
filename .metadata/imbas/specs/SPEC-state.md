@@ -1,6 +1,6 @@
 # SPEC-state — 상태 관리 & 설정
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.1 (2026-04-04) — Provider abstraction applied
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---
@@ -36,7 +36,7 @@
     ├── config.json                      # 글로벌 설정
     ├── .gitignore                       # auto-generated
     │
-    ├── <PROJECT-KEY>/                   # Jira 프로젝트별 디렉토리
+    ├── <PROJECT-DIR>/                   # 프로젝트별 디렉토리 (Jira: KEY, GitHub: owner--repo)
     │   ├── cache/                       # Jira 메타데이터 캐시
     │   │   ├── project-meta.json        # 프로젝트명, 키, URL
     │   │   ├── issue-types.json         # 이슈 타입 + 필수 필드
@@ -68,15 +68,16 @@
 
 ```json
 {
-  "version": "1.0",
+  "version": "1.1",
+  "provider": "jira",
   "language": {
     "documents": "ko",
     "skills": "en",
-    "jira_content": "ko",
+    "issue_content": "ko",
     "reports": "ko"
   },
   "defaults": {
-    "project_key": null,
+    "project_ref": null,
     "llm_model": {
       "validate": "sonnet",
       "split": "sonnet",
@@ -110,6 +111,23 @@
       "relates_to": "relates to"
     }
   },
+  "github": {
+    "repo": "owner/repo",
+    "labels": {
+      "epic": "type:epic",
+      "story": "type:story",
+      "task": "type:task",
+      "subtask": "type:subtask",
+      "bug": "type:bug",
+      "todo": "status:todo",
+      "ready_for_dev": "status:ready-for-dev",
+      "in_progress": "status:in-progress",
+      "in_review": "status:in-review",
+      "done": "status:done",
+      "imbas_managed": "imbas"
+    },
+    "epic_style": "tracking_issue_with_milestone"
+  },
   "media": {
     "scene_sieve_command": "npx -y @lumy-pack/scene-sieve",
     "temp_dir": ".temp",
@@ -123,15 +141,24 @@
 
 | 필드 | 설명 |
 |------|------|
+| `provider` | **NEW** — 이슈 트래커 백엔드: `"jira"` \| `"github"` |
 | `language.documents` | 기획 문서, 검증 리포트 작성 언어 |
 | `language.skills` | 스킬/에이전트 파일 작성 언어 (항상 en) |
-| `language.jira_content` | Jira 이슈 title/description 언어 |
+| `language.issue_content` | 이슈 title/description 언어 (renamed from `jira_content`) |
 | `language.reports` | 매니페스트, 상태 리포트 언어 |
-| `defaults.project_key` | 기본 Jira 프로젝트 키 (setup에서 설정) |
+| `defaults.project_ref` | 기본 프로젝트 참조 — Jira: `"PROJ"`, GitHub: `"owner/repo"` (renamed from `project_key`) |
 | `defaults.llm_model` | Phase별 사용 LLM 모델 |
 | `defaults.subtask_limits` | Subtask 종료조건 수치 |
-| `jira.*` | Jira 이슈 타입/상태/링크 매핑 (프로젝트별 커스터마이징 가능) |
-| `media.*` | 미디어 처리 설정 |
+| `jira.*` | Jira 이슈 타입/상태/링크 매핑 (provider=jira 일 때 사용) |
+| `github.*` | GitHub 라벨/마일스톤 매핑 (provider=github 일 때 사용). 상세: [SPEC-provider-github.md](./SPEC-provider-github.md) |
+| `media.*` | 미디어 처리 설정 (provider-agnostic) |
+
+### Provider별 필수 섹션
+
+| provider | 필수 config 섹션 | 비고 |
+|----------|-----------------|------|
+| `jira` | `jira` | `github` 섹션 무시 |
+| `github` | `github` | `jira` 섹션 무시 |
 
 ---
 
@@ -140,8 +167,9 @@
 ```json
 {
   "run_id": "20260404-001",
-  "project_key": "PROJ",
-  "epic_key": null,
+  "provider": "jira",
+  "project_ref": "PROJ",
+  "epic_ref": null,
   "source_file": "source.md",
   "created_at": "2026-04-04T10:00:00+09:00",
   "updated_at": "2026-04-04T11:30:00+09:00",
@@ -284,17 +312,18 @@ devplan.status == "completed" && devplan.pending_review == false
 {
   "batch": "imbas-20260404-001",
   "run_id": "20260404-001",
-  "project_key": "PROJ",
-  "epic_key": "PROJ-100",
+  "provider": "jira",
+  "project_ref": "PROJ",
+  "epic_ref": "PROJ-100",
   "created_at": "2026-04-04T10:30:00+09:00",
   "stories": [
     {
       "id": "S1",
       "title": "소셜 로그인으로 신규 가입",
       "description": "## User Story\n\nAs a ...",
-      "type": "Story",
+      "type": "story",
       "status": "pending",
-      "jira_key": null,
+      "issue_ref": null,
       "verification": {
         "anchor_link": true,
         "coherence": "PASS",
@@ -322,17 +351,18 @@ devplan.status == "completed" && devplan.pending_review == false
 {
   "batch": "imbas-20260404-001",
   "run_id": "20260404-001",
-  "project_key": "PROJ",
-  "epic_key": "PROJ-100",
+  "provider": "jira",
+  "project_ref": "PROJ",
+  "epic_ref": "PROJ-100",
   "created_at": "2026-04-04T11:00:00+09:00",
   "tasks": [
     {
       "id": "T1",
       "title": "OAuth provider 추상화 레이어 구현",
       "description": "...",
-      "type": "Task",
+      "type": "task",
       "status": "pending",
-      "jira_key": null,
+      "issue_ref": null,
       "blocks": ["S1-a", "S1-b", "S2"],
       "subtasks": [
         {
@@ -340,7 +370,7 @@ devplan.status == "completed" && devplan.pending_review == false
           "title": "When a new provider is registered, the system shall validate OAuth config",
           "description": "## Spec\n\nWhen ...",
           "status": "pending",
-          "jira_key": null
+          "issue_ref": null
         }
       ]
     }
@@ -348,14 +378,14 @@ devplan.status == "completed" && devplan.pending_review == false
   "story_subtasks": [
     {
       "story_id": "S1-a",
-      "story_key": "PROJ-101",
+      "story_ref": "PROJ-101",
       "subtasks": [
         {
           "id": "S1a-ST1",
           "title": "When OAuth callback returns, the system shall create user account",
           "description": "...",
           "status": "pending",
-          "jira_key": null
+          "issue_ref": null
         }
       ]
     }
@@ -363,7 +393,7 @@ devplan.status == "completed" && devplan.pending_review == false
   "feedback_comments": [
     {
       "target_story": "S1-a",
-      "target_key": "PROJ-101",
+      "target_ref": "PROJ-101",
       "comment": "Story AC의 OAuth scope과 코드의 실제 scope 불일치 — devplan에서 별도 매핑",
       "type": "mapping_divergence",
       "status": "pending"
@@ -399,6 +429,9 @@ devplan.status == "completed" && devplan.pending_review == false
 
 ## Related
 
+- [SPEC-provider.md](./SPEC-provider.md) — Provider 추상화 인터페이스
+- [SPEC-provider-jira.md](./SPEC-provider-jira.md) — Jira provider 구현
+- [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub provider 구현
 - [SPEC-skills.md](./SPEC-skills.md) — 상태를 읽고 쓰는 스킬 정의
 - [SPEC-agents.md](./SPEC-agents.md) — 상태 기반으로 동작하는 에이전트
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
