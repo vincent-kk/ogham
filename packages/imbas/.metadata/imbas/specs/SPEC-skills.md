@@ -12,17 +12,17 @@ Documents per-skill provider divergence, which skills are partitioned vs
 inline-branched, the reference directory layout, and the verbatim
 `SKILL.md` standard block.
 
-## Per-skill divergence (RALPLAN v2 cycle, 2026-04-06)
+## Per-skill divergence (RALPLAN v2 cycle, 2026-04-06; updated v1.2 2026-04-06)
 
 Partitioning threshold: partition when per-provider delta exceeds
 **15 lines**. Below the threshold, handle divergence via inline branching.
 
-| Skill         | Delta (est.) | Status (v1.1)        | Notes |
+| Skill         | Delta        | Status (v1.2)        | Notes |
 |---------------|--------------|----------------------|-------|
-| `manifest`    | ~60 lines    | **PARTITIONED**      | create-issue vs file-write + bidirectional links |
-| `read-issue`  | ~30 lines    | **PARTITIONED**      | `getJiraIssue` vs `Glob+Read+frontmatter` |
-| `digest`      | ~20 lines    | **PARTITIONED**      | comment vs `## Digest` append |
-| `devplan`     | ~12 lines    | **PARTITIONED**      | feedback_comment target_ref + final message |
+| `manifest`    | ~60 lines    | **PARTITIONED** (jira, local, github) | create-issue vs file-write vs gh CLI + bidirectional links + body `## Links` section |
+| `read-issue`  | ~30 lines    | **PARTITIONED** (jira, local, github) | `getJiraIssue` vs `Glob+Read+frontmatter` vs `gh issue view --json` + digest last-wins |
+| `digest`      | ~20 lines    | **PARTITIONED** (jira, local, github) | comment vs `## Digest` append vs `gh issue comment` + HTML marker |
+| `devplan`     | 36 lines     | **PARTITIONED** (jira, local, github) | feedback_comment target_ref + final message; measured 2026-04-06 during v1.2 cycle via `diff -u jira local \| grep -E '^[+-]' \| wc -l` (36 > 15 threshold — partition retained for github) |
 | `status`      | 0 lines      | **INLINE / no split**| Planned ~45 lines, actual 0. Reads only run/manifest state. |
 | `split`       | ~18 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
 | `setup`       | ~22 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
@@ -65,8 +65,9 @@ skills/<skill>/
 
 ### Hard rules
 
-- **No `references/github/**` in v1** — GitHub is a follow-up RALPLAN cycle.
-  See `.omc/plans/imbas-github-provider-handoff.md`.
+- **`references/github/**` partitioning follows the same 15-line threshold**
+  as jira/local (authored during the v1.2 cycle; see the Per-skill divergence
+  table above for current status).
 - **No `references/provider-routing.md`** anywhere. Dispatch logic lives in
   the SKILL.md anchor block only.
 - **Context isolation > DRY**: if shared content is ambiguous, duplicate
@@ -87,8 +88,9 @@ comment is literal; the block text below it is copied verbatim.
 
    | provider | workflow file |
    |---|---|
-   | `jira`  | `references/jira/workflow.md` |
-   | `local` | `references/local/workflow.md` |
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
 
 4. Execute those steps exactly.
 5. Persist outputs via imbas_tools.
@@ -96,7 +98,7 @@ comment is literal; the block text below it is copied verbatim.
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__*, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
+- Provider-specific tools (atlassian__* for jira, `gh issue *` / `gh label *` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
 ```
 
 Individual skills may adapt Steps 1/4/5 wording to their specific inputs
@@ -106,10 +108,15 @@ directives are fixed.
 
 ## Enforcement
 
-- **Test**: `src/__tests__/skill-constraints-block.test.ts` — 16 assertions
+- **Test**: `src/__tests__/skill-constraints-block.test.ts` — 20 assertions
   across the 4 partitioned skills verifying anchor presence, dispatch
-  table rows (`jira`, `local`), Constraints section, and absence of raw
-  tracker tokens in SKILL.md body outside the anchor block.
+  table rows (`jira`, `github`, `local`), Constraints section, and
+  absence of raw tracker tokens in SKILL.md body outside the anchor
+  block. Forbidden tokens cover both Jira MCP (`createJiraIssue`,
+  `getJiraIssue`, `searchJiraIssuesUsingJql`, `addCommentToJiraIssue`,
+  `transitionJiraIssue`) and gh CLI (`gh issue create`, `gh issue view`,
+  `gh issue comment`, `gh issue close`, `gh label create`) — raw tokens
+  must live inside `references/<provider>/**` only.
 - **Deviation note**: skills marked INLINE or UNTOUCHED do NOT carry the
   anchor block. The test suite excludes them from assertions.
 

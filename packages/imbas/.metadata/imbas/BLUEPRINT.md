@@ -30,10 +30,10 @@ partitioning, **not** in TypeScript class hierarchies. See
 
 ## Providers
 
-| Provider | Status (v1.1) | Storage | Tool surface |
+| Provider | Status (v1.2) | Storage | Tool surface |
 |---|---|---|---|
 | `jira`   | Shipping | Atlassian Cloud via `atlassian` MCP server | `mcp__plugin_imbas_atlassian__*` |
-| `github` | Prototype (2-line `gh issue view`) | GitHub via `gh` CLI (planned) | Deferred to next RALPLAN cycle |
+| `github` | Shipping (from v1.2) | GitHub via `gh` CLI (ambient `gh auth`) | `gh issue *`, `gh label *`, `gh api` via Bash |
 | `local`  | Shipping (from v1.1) | Markdown files under `.imbas/<KEY>/issues/` | Read/Write/Edit/Glob (no MCP, no network) |
 
 Default provider is `jira` for backward compatibility. Selection is via
@@ -118,10 +118,24 @@ GitHub column intentionally omitted — see
 
 ## Version History
 
+- **v1.2 (2026-04-06)** — GitHub provider shipping. RALPLAN v2 cycle
+  authored `references/github/**` partitions for all 4 pinned skills
+  (manifest/read-issue/digest/devplan — devplan measured at 36 lines,
+  above the 15-line threshold), added `GithubConfigSchema` to
+  `ImbasConfigSchema`, extended `skill-constraints-block.test.ts` with
+  github dispatch row assertions and 5 new gh forbidden tokens
+  (`gh issue create/view/comment/close`, `gh label create`), migrated
+  the 4-line jira prototype snippet into
+  `manifest/references/github/workflow.md` and deleted the historical
+  preservation block, created the `src/providers/github/` fractal node
+  with a pure `parseLinks` function implementing the `## Links` grammar,
+  added `scripts/test-helpers/gh-shim.mjs` + `github-mode-smoke.mjs`
+  + `check-spec-ref-backlinks.mjs` CI gates. No new MCP tools, no
+  `ManifestStorySchema` changes, agent `tools:` frontmatter baseline
+  unchanged (gh uses ambient Bash).
 - **v1.1 (2026-04-06)** — Local provider shipping. RALPLAN v2 cycle
   partitioned 4 skills (manifest/read-issue/digest/devplan), added
   `ProviderSchema` to `ImbasConfigSchema`, established the
   `<!-- imbas:constraints-v1 -->` anchor protocol, and committed the
   agent tools frontmatter baseline gate.
 - **v1.0 (2026-04-06)** — Initial skeleton during Phase A-thin.
-- **v1.2 (reserved)** — GitHub provider cycle.
