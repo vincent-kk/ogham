@@ -42,7 +42,9 @@
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",
-    "version:sync": "node scripts/inject-version.mjs"
+    "version:sync": "node scripts/inject-version.mjs",
+    "smoke:github": "CI=1 node scripts/github-mode-smoke.mjs",
+    "lint:specs": "node scripts/check-spec-ref-backlinks.mjs"
   },
   "dependencies": {
     "@ast-grep/napi": "^0.42.0",

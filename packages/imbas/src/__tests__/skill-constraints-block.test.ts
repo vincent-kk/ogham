@@ -2,15 +2,17 @@
  * @file skill-constraints-block.spec.ts
  * @description Verifies that every provider-partitioned SKILL.md contains the
  *   literal `<!-- imbas:constraints-v1 -->` anchor followed by a standard
- *   Workflow + Constraints block with a dispatch table routing jira and
- *   local providers to their respective references/<provider>/workflow.md
- *   files.
+ *   Workflow + Constraints block with a dispatch table routing jira, github,
+ *   and local providers to their respective references/<provider>/workflow.md
+ *   files. Covers 3 providers: jira, github, local.
  *
  *   Also asserts that the SKILL.md body (below the frontmatter) does not
  *   contain raw tracker tokens like `createJiraIssue`, `getJiraIssue`,
- *   `Atlassian`, or `gh issue` — those must live inside references/<provider>/**
- *   only. The anchor block is exempt from this token check because it names
- *   `atlassian__*` as part of the Constraints directive.
+ *   `Atlassian`, `gh issue create`, `gh issue view`, `gh issue comment`,
+ *   `gh issue close`, or `gh label create` — those must live inside
+ *   references/<provider>/** only. The anchor block is exempt from this token
+ *   check because it names `atlassian__*` / `gh issue *` as part of the
+ *   Constraints directive.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -47,6 +49,11 @@ const FORBIDDEN_BODY_TOKENS = [
   'searchJiraIssuesUsingJql',
   'addCommentToJiraIssue',
   'transitionJiraIssue',
+  'gh issue create',
+  'gh issue view',
+  'gh issue comment',
+  'gh issue close',
+  'gh label create',
 ] as const;
 
 function readSkillMd(skill: string): string {
@@ -94,6 +101,19 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       expect(block).toMatch(/`local`/);
       expect(block).toMatch(/references\/jira\/workflow\.md/);
       expect(block).toMatch(/references\/local\/workflow\.md/);
+    }
+  );
+
+  it.each(PARTITIONED_SKILLS)(
+    '%s anchor block contains a provider dispatch table with github row',
+    (skill) => {
+      const content = readSkillMd(skill);
+      const block = extractConstraintsBlock(content);
+      expect(block, `no anchor block in ${skill}`).not.toBeNull();
+      if (!block) return;
+      // Dispatch table must mention github provider and its workflow path.
+      expect(block).toMatch(/`github`/);
+      expect(block).toMatch(/references\/github\/workflow\.md/);
     }
   );
 

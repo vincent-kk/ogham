@@ -1,0 +1,4 @@
+{
+  "number": 42,
+  "body": "## User Story\nAs a developer, I want a clean architecture.\n\n## Links\n\n- blocks: #10, #11\n- blocked-by: #5\n- split-from: #3\n- split-into: #20, #21\n- relates: owner/repo#99\n\n<!-- imbas:meta\ntype: story\n-->"
+}

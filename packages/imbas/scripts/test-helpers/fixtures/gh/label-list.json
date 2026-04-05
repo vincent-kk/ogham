@@ -1,0 +1,8 @@
+[
+  { "name": "type:story" },
+  { "name": "type:task" },
+  { "name": "status:todo" },
+  { "name": "status:in-progress" },
+  { "name": "status:done" },
+  { "name": "imbas" }
+]
