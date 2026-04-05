@@ -1,9 +1,3 @@
-/**
- * @file github-digest-collision.test.ts
- * @description Verifies last-wins semantics when multiple `<!-- imbas:digest -->`
- *   markers exist on an issue. Uses the digest-collision-2markers fixture.
- */
-
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -30,24 +24,16 @@ interface DigestComment {
   author: { login: string };
 }
 
-/**
- * Inline helper: find the last comment (by createdAt) that contains the
- * imbas:digest marker. Returns undefined if no marker comment exists.
- */
 function resolveDigest(
   comments: DigestComment[]
 ): DigestComment | undefined {
-  const markerComments = comments.filter((c) =>
-    c.body.includes(DIGEST_MARKER)
+  const marked = comments.filter((c) => c.body.includes(DIGEST_MARKER));
+  if (marked.length === 0) return undefined;
+  return marked.reduce((latest, c) =>
+    new Date(c.createdAt).getTime() > new Date(latest.createdAt).getTime()
+      ? c
+      : latest
   );
-  if (markerComments.length === 0) return undefined;
-
-  // Sort ascending, take last
-  const sorted = [...markerComments].sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  );
-  return sorted[sorted.length - 1];
 }
 
 describe('github-digest-collision — last-wins across 2-marker fixture', () => {

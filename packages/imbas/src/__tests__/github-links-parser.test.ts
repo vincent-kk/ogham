@@ -1,23 +1,11 @@
-/**
- * @file github-links-parser.test.ts
- * @description Unit tests for parseLinks() — the `## Links` section parser
- *   for GitHub issue bodies.
- *
- *   3 basic + 12 complex = 15 cases (3+12 rule cap).
- */
-
 import { describe, expect, it, vi } from 'vitest';
-import { parseLinks, type GithubLinks } from '../providers/github/parse-links.js';
-
-// ---------------------------------------------------------------------------
-// Basic (3 cases)
-// ---------------------------------------------------------------------------
+import { parseLinks } from '../providers/github/parse-links.js';
 
 describe('parseLinks — basic', () => {
   it('parses a single link type', () => {
-    const body = '## Links\n\n- blocks: #10\n';
-    const result = parseLinks(body);
-    expect(result).toEqual({ blocks: ['#10'] });
+    expect(parseLinks('## Links\n\n- blocks: #10\n')).toEqual({
+      blocks: ['#10'],
+    });
   });
 
   it('parses all 5 link types', () => {
@@ -30,8 +18,7 @@ describe('parseLinks — basic', () => {
       '- split-into: #20, #21',
       '- relates: #99',
     ].join('\n');
-    const result = parseLinks(body);
-    expect(result).toEqual({
+    expect(parseLinks(body)).toEqual({
       blocks: ['#10', '#11'],
       'blocked-by': ['#5'],
       'split-from': ['#3'],
@@ -41,91 +28,70 @@ describe('parseLinks — basic', () => {
   });
 
   it('returns {} for an empty ## Links section', () => {
-    const body = '## Links\n\n## Next Section\n';
-    expect(parseLinks(body)).toEqual({});
+    expect(parseLinks('## Links\n\n## Next Section\n')).toEqual({});
   });
 });
 
-// ---------------------------------------------------------------------------
-// Complex (12 cases)
-// ---------------------------------------------------------------------------
-
 describe('parseLinks — complex', () => {
-  it('handles owner/repo#N format', () => {
-    const body = '## Links\n\n- blocks: owner/repo#45\n';
-    expect(parseLinks(body)).toEqual({ blocks: ['owner/repo#45'] });
-  });
-
-  it('merges duplicate linkType keys (union)', () => {
-    const body = [
-      '## Links',
-      '- blocks: #10',
-      '- blocks: #11, #12',
-    ].join('\n');
-    expect(parseLinks(body)).toEqual({ blocks: ['#10', '#11', '#12'] });
-  });
-
-  it('deduplicates refs within a merged duplicate key', () => {
-    const body = [
-      '## Links',
-      '- blocks: #10, #11',
-      '- blocks: #11, #12',
-    ].join('\n');
-    expect(parseLinks(body)).toEqual({ blocks: ['#10', '#11', '#12'] });
-  });
-
-  it('handles comma-separated list with extra whitespace', () => {
-    const body = '## Links\n\n- blocks:  #10 ,  #11 , #12  \n';
-    expect(parseLinks(body)).toEqual({ blocks: ['#10', '#11', '#12'] });
-  });
-
-  it('handles mixed owner/repo#N and #N formats', () => {
-    const body = '## Links\n\n- relates: #12, owner/other-repo#7, #99\n';
-    expect(parseLinks(body)).toEqual({
-      relates: ['#12', 'owner/other-repo#7', '#99'],
-    });
-  });
-
-  it('returns {} when ## Links section is absent', () => {
-    const body = '## Overview\nSome content.\n\n## Acceptance Criteria\n- [ ] done';
-    expect(parseLinks(body)).toEqual({});
+  it.each([
+    {
+      name: 'owner/repo#N format',
+      body: '## Links\n\n- blocks: owner/repo#45\n',
+      expected: { blocks: ['owner/repo#45'] },
+    },
+    {
+      name: 'merges duplicate linkType keys (union)',
+      body: ['## Links', '- blocks: #10', '- blocks: #11, #12'].join('\n'),
+      expected: { blocks: ['#10', '#11', '#12'] },
+    },
+    {
+      name: 'deduplicates refs within a merged duplicate key',
+      body: ['## Links', '- blocks: #10, #11', '- blocks: #11, #12'].join('\n'),
+      expected: { blocks: ['#10', '#11', '#12'] },
+    },
+    {
+      name: 'comma-separated list with extra whitespace',
+      body: '## Links\n\n- blocks:  #10 ,  #11 , #12  \n',
+      expected: { blocks: ['#10', '#11', '#12'] },
+    },
+    {
+      name: 'mixed owner/repo#N and #N formats',
+      body: '## Links\n\n- relates: #12, owner/other-repo#7, #99\n',
+      expected: { relates: ['#12', 'owner/other-repo#7', '#99'] },
+    },
+    {
+      name: '## Links section absent',
+      body: '## Overview\nSome content.\n\n## Acceptance Criteria\n- [ ] done',
+      expected: {},
+    },
+    {
+      name: 'leading/trailing whitespace on item lines',
+      body: '## Links\n\n  - blocks: #10  \n   - relates: #20\n',
+      expected: { blocks: ['#10'], relates: ['#20'] },
+    },
+    {
+      name: 'stops at next h2 boundary',
+      body: ['## Links', '- blocks: #10', '', '## Meta', '- relates: #99'].join('\n'),
+      expected: { blocks: ['#10'] },
+    },
+    { name: 'empty string input', body: '', expected: {} },
+    {
+      name: '## Links section with only blank lines',
+      body: '## Links\n\n   \n\n## Other\n',
+      expected: {},
+    },
+  ])('$name', ({ body, expected }) => {
+    expect(parseLinks(body)).toEqual(expected);
   });
 
   it('warns and skips unknown link types', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const body = '## Links\n\n- references: #5\n- blocks: #10\n';
-    const result = parseLinks(body);
+    const result = parseLinks('## Links\n\n- references: #5\n- blocks: #10\n');
     expect(result).toEqual({ blocks: ['#10'] });
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('unknown linkType "references"')
     );
     warnSpy.mockRestore();
-  });
-
-  it('tolerates leading/trailing whitespace on item lines', () => {
-    const body = '## Links\n\n  - blocks: #10  \n   - relates: #20\n';
-    expect(parseLinks(body)).toEqual({ blocks: ['#10'], relates: ['#20'] });
-  });
-
-  it('stops parsing at next h2 boundary', () => {
-    const body = [
-      '## Links',
-      '- blocks: #10',
-      '',
-      '## Meta',
-      '- relates: #99',
-    ].join('\n');
-    // relates is under ## Meta, not ## Links — must not be included
-    expect(parseLinks(body)).toEqual({ blocks: ['#10'] });
-  });
-
-  it('returns {} for empty string input', () => {
-    expect(parseLinks('')).toEqual({});
-  });
-
-  it('handles body with ## Links section but only blank lines', () => {
-    const body = '## Links\n\n   \n\n## Other\n';
-    expect(parseLinks(body)).toEqual({});
   });
 
   it('handles links-4types fixture data', async () => {
