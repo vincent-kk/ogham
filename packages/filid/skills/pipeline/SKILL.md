@@ -131,12 +131,24 @@ uses a **hybrid execution model**:
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
 - **Success signal**: `review-report.md` exists (written by Phase D regardless of verdict)
 - **PR comment fallback**: After the review subagent returns and `review-report.md`
-  is confirmed, verify that a PR comment was posted. Check via
-  `gh pr view --json comments --jq '.comments[].body'` (Bash) — if no comment
-  contains `Code Review Governance`, the subagent skipped Step 5. In that case,
-  post the comment from the main context:
+  is confirmed, verify that a **properly formatted** PR comment was posted.
+  Header match alone is insufficient — the subagent may hand-write a comment
+  with the correct header but skip the `format-pr-comment` tool, producing
+  output that lacks the collapsible structure. Validate via
+  `gh pr view --json comments --jq '.comments[].body'` (Bash) and check that
+  the most recent `Code Review Governance` comment contains **all** of these
+  structural markers (emitted only by `review_manage format-pr-comment`):
+    1. `<details><summary>Phase A — Structure Compliance</summary>`
+    2. `<details><summary>Review Report (Phase B~D)</summary>`
+    3. The footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``
+  If any marker is missing (or no matching comment exists), the subagent
+  skipped or hand-rolled Step 5. In that case, regenerate and replace from
+  the main context:
   1. `review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)`
-  2. `gh pr comment --body "<markdown>"` (Bash)
+  2. If a malformed `Code Review Governance` comment exists, **edit it in place**
+     via `gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`
+     (obtain numeric `id` via `gh api repos/<owner>/<repo>/issues/<pr>/comments`).
+     Otherwise post fresh via `gh pr comment --body-file <file>`.
   This is a silent fallback — no error reporting needed. If `gh` is not
   authenticated, skip quietly.
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
