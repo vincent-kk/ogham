@@ -1,4 +1,10 @@
-# digest — Digest Marker Specification
+# digest — Digest Marker Specification (Jira only)
+
+> **Provider scope**: This file documents the Jira-only digest marker comment
+> format. Local provider uses append-only `## Digest` section entries with
+> timestamp subheadings instead — see `local/workflow.md`. This file is
+> referenced from `jira/workflow.md` and `SKILL.md` / `README.md`.
+
 
 ## Marker Format
 

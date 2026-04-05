@@ -1,4 +1,10 @@
-# digest — Suggestion Trigger Logic
+# digest — Suggestion Trigger Logic (Jira only)
+
+> **Provider scope**: Suggestion auto-trigger is Jira-only in v1 because it
+> depends on `transitionJiraIssue` events from `imbas:manifest`. Local mode
+> has no equivalent transition signal — users invoke `imbas:digest` manually.
+> See `local/workflow.md` Suggestion Trigger section.
+
 
 ## Trigger Conditions
 

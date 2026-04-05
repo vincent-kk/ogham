@@ -1,116 +1,81 @@
-# digest — Complete Workflow
+# digest Workflow — Provider-agnostic skeleton
 
-```
-Step 1 — Read issue (full depth)
-  1. Call internal skill: `imbas:read-issue`(issue-key, depth: full)
-  2. Receive structured JSON with:
-     - Issue metadata (summary, type, status, assignee, reporter)
-     - Full comment thread (authors, timestamps, bodies)
-     - Participants with role hints
-     - Existing decisions and open questions
-  3. Detect attached media (images, videos, GIFs) in description or comments
-     - If media found AND `--no-media` flag NOT set → call `/imbas:fetch-media`
-       for each attachment (with `--analyze` for video/GIF)
-     - Include visual analysis in digest context
-     - NOTE: digest intentionally auto-invokes fetch-media because its purpose
-       is full-context compression; this differs from `imbas:validate` which
-       deliberately displays a "run fetch-media manually" hint instead of
-       auto-invoking. Use `--no-media` to opt out of media analysis in digest.
+This file owns Steps 1–5. Step 6 (preview / publish) is delegated to the
+provider-specific workflow file selected by `config.provider`:
 
-Step 2 — State Tracking (timeline construction)
-  Read comments chronologically, recording state changes:
+- `jira`  → `jira/workflow.md` Step 6
+- `local` → `local/workflow.md` Step 6
 
-  - t0: Issue creation — initial requirements from description
-    Record: original scope, constraints, acceptance criteria
-  - t1..tN: Each comment — detect state transitions:
-    - Decision made (keywords: "확정", "결정", "합의", "agreed", "let's go with")
-    - New constraint discovered
-    - Question raised
-    - Question answered/resolved
-    - Requirement changed
-    - Alternative rejected
+## Step 0 — Provider routing
 
-  Result: ordered timeline of state changes with attribution (who, when, what)
+Read `config.provider` via `config_get`. Note the target workflow file for
+Step 6, but do not read it yet.
 
-Step 3 — QA-Prompting (quality extraction)
-  Apply 6 structured questions to extract and verify digest quality:
+## Step 1 — Read issue (full depth)
 
-  Q1: What decisions were made?
-      → Extract each decision with: content, decision-maker, date, agreers
+1. Call internal skill: `imbas:read-issue`(issue-ref, depth: full).
+   The read-issue skill itself is provider-routed, so this delegation works
+   uniformly regardless of `config.provider`.
+2. Receive structured JSON with:
+   - Issue metadata (summary, type, status, assignee, reporter)
+   - Full comment thread (Jira) or empty comments + description + digest
+     entries (local)
+   - Participants with role hints (Jira) or empty (local)
+   - Existing decisions and open questions
+3. Detect attached media (images, videos, GIFs) in description or comments.
+   - If media found AND `--no-media` flag NOT set AND provider is `jira` →
+     call `/imbas:fetch-media` for each attachment.
+   - Include visual analysis in digest context.
+   - Local provider skips media auto-invocation in v1.
 
-  Q2: Why were those decisions made? (rationale)
-      → Link each decision to its supporting evidence/reasoning
+## Step 2 — State Tracking (timeline construction)
 
-  Q3: What alternatives were rejected? (outcome + reason only)
-      → Record rejected option + brief rejection reason
-      → Do NOT include full deliberation, only conclusion
+Read comments (Jira) or description + existing digest entries (local)
+chronologically, recording state changes:
 
-  Q4: What technical constraints were discovered?
-      → Extract constraints that affect implementation
+- t0: Issue creation — initial requirements from description.
+  Record: original scope, constraints, acceptance criteria.
+- t1..tN: Each comment or digest entry — detect state transitions:
+  - Decision made (keywords: `확정`, `결정`, `합의`, `agreed`, `let's go with`)
+  - New constraint discovered
+  - Question raised
+  - Question answered/resolved
+  - Requirement changed
+  - Alternative rejected
 
-  Q5: Are there unresolved issues?
-      → Detect unanswered questions, unresolved disagreements
-      → Mark status: unanswered, in_discussion, blocked
+Result: ordered timeline of state changes with attribution (who/when/what).
+In local mode, attribution is "system" since there are no comment authors.
 
-  Q6: Who are the key participants and their roles?
-      → Map participants to roles based on comment patterns
-      → Summarize each participant's key contributions
+## Step 3 — QA-Prompting (quality extraction)
 
-Step 4 — 3-Layer compression
-  Layer 3 (executive): 1-2 sentence final summary
-    → Captures the essence of the entire issue in minimal text
-    → Suitable for scanning in a list view
+Apply 6 structured questions:
 
-  Layer 2 (structured): categorized extraction
-    → decisions[]: each with content, by, date, agreed_by
-    → constraints[]: technical/business constraints discovered
-    → rejected[]: alternatives considered and rejected with reasons
-    → open_questions[]: unresolved items with status
+- Q1: What decisions were made? → content, decision-maker, date, agreers
+- Q2: Why were those decisions made? → link to evidence/reasoning
+- Q3: What alternatives were rejected? → outcome + brief reason
+- Q4: What technical constraints were discovered?
+- Q5: Are there unresolved issues? → unanswered, in_discussion, blocked
+- Q6: Who are the key participants and their roles? → role hints
 
-  Layer 1 (excerpts): source evidence
-    → Minimal original quotes that support key decisions
-    → Only include when the original wording is critical
-    → Reference comment index for traceability
+In local mode, Q6 typically returns an empty list (no multi-participant
+signal) — this is expected, not an error.
 
-Step 5 — Comment formatting
-  Generate a markdown comment with digest marker:
+## Step 4 — 3-Layer Compression
 
-  <!-- imbas:digest v1 | generated: {ISO8601 timestamp} | comments_covered: 1-{N} -->
-  ## imbas Digest
+- **Layer 3 (executive)**: 1-2 sentence final summary.
+- **Layer 2 (structured)**: categorized extraction (decisions[], constraints[],
+  rejected[], open_questions[]).
+- **Layer 1 (excerpts)**: minimal original quotes that support key decisions.
 
-  ### Summary
-  {Layer 3 executive summary}
+## Step 5 — Formatting
 
-  ### Decisions
-  - {decision content} (by {who}, {date}, agreed: {others})
-  - ...
+Build the formatted digest body with sections: Summary, Decisions, Constraints,
+Rejected, Open Questions, Participants.
 
-  ### Constraints
-  - {constraint description}
-  - ...
+The exact framing (marker comment for Jira vs timestamped `### {ISO}` entry for
+local) is chosen by the provider branch in Step 6.
 
-  ### Rejected
-  - {alternative} rejected. Reason: {reason}
-  - ...
+## Step 6 — Preview / Publish — provider-specific
 
-  ### Open Questions
-  - {question} (by {who}, {date}) — {status: unanswered|in_discussion|blocked}
-  - ...
-
-  ### Participants
-  - {name} ({role_hint}): {contribution summary}
-  - ...
-  <!-- /imbas:digest -->
-
-Step 6 — Preview/Publish flow
-  - If --preview flag:
-    → Display formatted digest to user
-    → Do NOT post to Jira
-    → End
-
-  - Default (no --preview):
-    → Display formatted digest to user as preview
-    → Ask: "Post this digest as a comment to {issue-key}?"
-    → If approved: call addCommentToJiraIssue(issue-key, formatted_comment)
-    → If rejected: end without posting
-```
+Now load `jira/workflow.md` or `local/workflow.md` per `config.provider` and
+execute its Step 6 exactly.
