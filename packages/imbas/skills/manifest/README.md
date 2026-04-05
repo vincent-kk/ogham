@@ -40,9 +40,9 @@ Epic, Story, Task, Sub-task, 링크, 댓글을 Jira에 일괄 생성한다.
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `imbas_manifest_get` | imbas MCP | 매니페스트 로드 |
-| `imbas_manifest_save` | imbas MCP | 아이템별 저장 (크래시 복구) |
-| `imbas_manifest_plan` | imbas MCP | dry-run 실행 계획 생성 |
+| `manifest_get` | imbas MCP | 매니페스트 로드 |
+| `manifest_save` | imbas MCP | 아이템별 저장 (크래시 복구) |
+| `manifest_plan` | imbas MCP | dry-run 실행 계획 생성 |
 | `createJiraIssue` | Atlassian MCP | Epic/Story/Task/Sub-task 생성 |
 | `createIssueLink` | Atlassian MCP | 이슈 간 링크 생성 |
 | `editJiraIssue` | Atlassian MCP | 이슈 필드 수정 |

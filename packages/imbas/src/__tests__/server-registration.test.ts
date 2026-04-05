@@ -22,21 +22,21 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
 });
 
 const EXPECTED_TOOLS = [
-  'imbas_ping',
-  'imbas_run_create',
-  'imbas_run_get',
-  'imbas_run_transition',
-  'imbas_run_list',
-  'imbas_manifest_get',
-  'imbas_manifest_save',
-  'imbas_manifest_validate',
-  'imbas_manifest_plan',
-  'imbas_config_get',
-  'imbas_config_set',
-  'imbas_cache_get',
-  'imbas_cache_set',
-  'imbas_ast_search',
-  'imbas_ast_analyze',
+  'ping',
+  'run_create',
+  'run_get',
+  'run_transition',
+  'run_list',
+  'manifest_get',
+  'manifest_save',
+  'manifest_validate',
+  'manifest_plan',
+  'config_get',
+  'config_set',
+  'cache_get',
+  'cache_set',
+  'ast_search',
+  'ast_analyze',
 ];
 
 describe('MCP server tool registration', () => {

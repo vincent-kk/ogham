@@ -5,7 +5,7 @@
 Before loading the manifest, verify pipeline state:
 
 ```
-1. Call imbas_run_get to read current state
+1. Call run_get to read current state
 2. For type "stories":
    - Verify (split.status === "completed" AND split.pending_review === false) OR (split.status === "escaped" AND split.escape_code === "E2-3")
    - Error if not met: "Cannot execute stories manifest: split phase not completed or pending review"
@@ -16,10 +16,10 @@ Before loading the manifest, verify pipeline state:
 
 ## Step 1 — Load Manifest & Pending Count
 
-1. Determine run: --run argument or most recent run via imbas_run_get.
+1. Determine run: --run argument or most recent run via run_get.
 2. Load manifest based on type:
-   - "stories" → call imbas_manifest_get(project_ref, run_id, type: "stories")
-   - "devplan" → call imbas_manifest_get(project_ref, run_id, type: "devplan")
+   - "stories" → call manifest_get(project_ref, run_id, type: "stories")
+   - "devplan" → call manifest_get(project_ref, run_id, type: "devplan")
 3. Calculate pending items:
    - Count items where status == "pending" (no issue_ref)
    - Items with existing issue_ref are SKIPPED (idempotency)
@@ -37,7 +37,7 @@ For "stories" type:
   → Exit after display.
 
 For "devplan" type:
-  Call imbas_manifest_plan(project_ref, run_id) for execution plan.
+  Call manifest_plan(project_ref, run_id) for execution plan.
   Display each step:
   1. Tasks to create (id, title)
   2. Task Subtasks to create (id, title, parent task)
@@ -73,7 +73,7 @@ For "devplan" type:
 
   4. If any DRIFT detected:
      - Display drift summary table before proceeding to Step 3.
-     - Save reconciled manifest via imbas_manifest_save.
+     - Save reconciled manifest via manifest_save.
 
   5. If no items have issue_ref (fresh run): skip this step entirely.
 
@@ -93,7 +93,7 @@ Ask: "Proceed with Jira issue creation? (y/n)"
 ## Step 4 — Batch Execution
 
 CRITICAL: After EACH item creation, immediately save the manifest
-with updated status/issue_ref via imbas_manifest_save. This enables
+with updated status/issue_ref via manifest_save. This enables
 crash recovery — re-running skips already-created items.
 
 ### For "stories" type

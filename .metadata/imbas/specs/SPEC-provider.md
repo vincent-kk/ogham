@@ -116,7 +116,7 @@ Each skill that interacts with the issue tracker follows this pattern:
 
 ```
 Step N — [Operation Name]
-  1. config = imbas_config_get()
+  1. config = config_get()
   2. Branch on config.provider:
 
   [jira]

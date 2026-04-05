@@ -6,9 +6,9 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_config_get` | Load config.json for config.defaults.project_ref fallback in ensure/refresh actions |
-| `imbas_cache_get` | Read cached metadata and check TTL status |
-| `imbas_cache_set` | Write fetched metadata to cache files |
+| `config_get` | Load config.json for config.defaults.project_ref fallback in ensure/refresh actions |
+| `cache_get` | Read cached metadata and check TTL status |
+| `cache_set` | Write fetched metadata to cache files |
 
 ### Atlassian MCP Tools
 

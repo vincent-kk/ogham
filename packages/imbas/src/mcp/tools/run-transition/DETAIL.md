@@ -2,7 +2,7 @@
 
 ## Requirements
 
-`imbas_run_transition` 도구는 run state의 phase 전이를 수행한다. 4가지 action을 지원한다.
+`run_transition` 도구는 run state의 phase 전이를 수행한다. 4가지 action을 지원한다.
 
 - `start_phase`: 필수 필드 `phase` ("validate" | "split" | "devplan").
 - `complete_phase`: 필수 필드 `phase`, `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED"). 선택: `blocking_issues`, `warning_issues`, `pending_review`, `stories_created` (phase="split" 시).

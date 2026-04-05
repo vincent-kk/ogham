@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_run_get` | Load run state, verify preconditions |
-| `imbas_run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
-| `imbas_manifest_save` | Save stories-manifest.json |
-| `imbas_manifest_validate` | Validate manifest structural integrity |
+| `run_get` | Load run state, verify preconditions |
+| `run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
+| `manifest_save` | Save stories-manifest.json |
+| `manifest_validate` | Validate manifest structural integrity |
 
 ## Atlassian MCP Tools
 

@@ -52,7 +52,7 @@ Step 3 — config.json creation
          "default_preset": "medium-video"
        }
      }
-  2. Call imbas_config_set with full config.
+  2. Call config_set with full config.
   3. Confirm config.json created.
 
 Step 4 — Cache population
@@ -60,12 +60,12 @@ Step 4 — Cache population
   2. Fetch issue types:
      - Call Atlassian MCP: getJiraProjectIssueTypesMetadata(projectKey)
      - For each issue type, call: getJiraIssueTypeMetaWithFields(issueTypeId)
-     - Call imbas_cache_set(project_ref, "issue-types", <data>)
+     - Call cache_set(project_ref, "issue-types", <data>)
   3. Fetch link types:
      - Call Atlassian MCP: getIssueLinkTypes
-     - Call imbas_cache_set(project_ref, "link-types", <data>)
+     - Call cache_set(project_ref, "link-types", <data>)
   4. Store project metadata:
-     - Call imbas_cache_set(project_ref, "project-meta", <data>)
+     - Call cache_set(project_ref, "project-meta", <data>)
 
 Step 5 — .gitignore guard
   1. Check if .git directory exists at project root.

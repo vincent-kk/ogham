@@ -51,13 +51,13 @@ const sdkOpts = { strictUnions: true, pipeStrategy: 'input' as const };
 const convert = (s: ZodTypeAny) => zodToJsonSchema(s, sdkOpts);
 
 describe('MCP inputSchema is structurally ref-free', () => {
-  it('imbas_run_transition emits JSON Schema with zero $ref', () => {
-    const entry = captured.find((c) => c.name === 'imbas_run_transition');
-    expect(entry, 'imbas_run_transition not registered').toBeDefined();
+  it('run_transition emits JSON Schema with zero $ref', () => {
+    const entry = captured.find((c) => c.name === 'run_transition');
+    expect(entry, 'run_transition not registered').toBeDefined();
     const json = convert(entry!.inputSchema);
     expect(
       hasRef(json),
-      `imbas_run_transition JSON Schema contains $ref:\n${JSON.stringify(json, null, 2)}`,
+      `run_transition JSON Schema contains $ref:\n${JSON.stringify(json, null, 2)}`,
     ).toBe(false);
   });
 
@@ -72,14 +72,14 @@ describe('MCP inputSchema is structurally ref-free', () => {
     }
   });
 
-  it('snapshot — imbas_run_transition flat JSON Schema', () => {
-    const entry = captured.find((c) => c.name === 'imbas_run_transition');
+  it('snapshot — run_transition flat JSON Schema', () => {
+    const entry = captured.find((c) => c.name === 'run_transition');
     const json = convert(entry!.inputSchema);
     expect(json).toMatchSnapshot();
   });
 
   it('valid start_phase payload parses via flat MCP schema AND RunTransitionSchema', async () => {
-    const entry = captured.find((c) => c.name === 'imbas_run_transition');
+    const entry = captured.find((c) => c.name === 'run_transition');
     expect(entry).toBeDefined();
     const payload = {
       project_ref: 'PROJ',
@@ -96,7 +96,7 @@ describe('MCP inputSchema is structurally ref-free', () => {
   });
 
   it('invalid escape_phase (missing escape_code) passes flat schema but fails RunTransitionSchema', async () => {
-    const entry = captured.find((c) => c.name === 'imbas_run_transition');
+    const entry = captured.find((c) => c.name === 'run_transition');
     expect(entry).toBeDefined();
     const payload = {
       project_ref: 'PROJ',

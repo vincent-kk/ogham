@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MCP inputSchema is structurally ref-free > snapshot — imbas_run_transition flat JSON Schema 1`] = `
+exports[`MCP inputSchema is structurally ref-free > snapshot — run_transition flat JSON Schema 1`] = `
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,

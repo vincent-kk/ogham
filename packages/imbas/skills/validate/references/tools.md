@@ -6,10 +6,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_config_get` | Load config.json for language/default project resolution (Step 1) |
-| `imbas_run_create` | Create run directory, copy source, initialize state.json |
-| `imbas_run_get` | Read current run state for precondition checks (declared-only) |
-| `imbas_run_transition` | start_phase (validate) → complete_phase (validate) with result |
+| `config_get` | Load config.json for language/default project resolution (Step 1) |
+| `run_create` | Create run directory, copy source, initialize state.json |
+| `run_get` | Read current run state for precondition checks (declared-only) |
+| `run_transition` | start_phase (validate) → complete_phase (validate) with result |
 
 ### Atlassian MCP Tools
 

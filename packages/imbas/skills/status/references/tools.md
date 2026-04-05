@@ -6,8 +6,8 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_run_get` | Read state.json for a specific or most recent run |
-| `imbas_run_list` | List all runs for a project |
+| `run_get` | Read state.json for a specific or most recent run |
+| `run_list` | List all runs for a project |
 
 ### Atlassian MCP Tools
 

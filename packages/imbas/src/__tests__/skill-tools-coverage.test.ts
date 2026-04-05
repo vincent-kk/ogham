@@ -1,7 +1,7 @@
 /**
  * @file skill-tools-coverage.test.ts
  * @description G2 guardrail — symmetric-difference check between skills/<name>/references/workflow.md
- *   and the sibling tools.md. Every imbas_* tool name or mcp__plugin_imbas_* fully-qualified name
+ *   and the sibling tools.md. Every imbas MCP tool name (bare or mcp__plugin_imbas_tools__* fully-qualified)
  *   invoked in workflow.md must appear in tools.md. Every tool name listed in tools.md that is NOT
  *   in workflow.md must carry an explicit `(declared-only)` or `(fallback)` marker.
  */
@@ -22,7 +22,22 @@ function skillNames(): string[] {
   });
 }
 
-const TOOL_REGEX = /\b(imbas_[a-z_]+|mcp__plugin_imbas_[a-z_]+__[a-z_]+)\b/g;
+// Bare tool names registered in src/mcp/server/server.ts. Kept in sync with
+// EXPECTED_TOOLS in server-registration.test.ts. The fully-qualified form
+// `mcp__plugin_imbas_tools__<name>` is also matched for agent tool lists.
+const BARE_TOOL_NAMES = [
+  'ping',
+  'run_create', 'run_get', 'run_transition', 'run_list',
+  'manifest_get', 'manifest_save', 'manifest_validate', 'manifest_plan',
+  'config_get', 'config_set',
+  'cache_get', 'cache_set',
+  'ast_search', 'ast_analyze',
+] as const;
+
+const TOOL_REGEX = new RegExp(
+  `\\b(${BARE_TOOL_NAMES.join('|')}|mcp__plugin_imbas_tools__[a-z_]+)\\b`,
+  'g',
+);
 
 /**
  * Extract tool names from markdown text, ignoring tools.md "(declared-only)" / "(fallback)"
