@@ -141,7 +141,7 @@ uses a **hybrid execution model**:
   authenticated, skip quietly.
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
   is generated → skip `filid:resolve` + `filid:revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
-  If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — delete the empty `fix-requests.md` and skip resolve + revalidate.
+  If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — remove the empty file via `Bash(rm "${review_dir}/fix-requests.md")` where `review_dir` is `.filid/review/<normalized-branch>`, then skip resolve + revalidate.
 - **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:resolve` +
   `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:pipeline --from=review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"
@@ -210,7 +210,9 @@ from the appropriate stage.
 
 | Tool             | Action             | Purpose                                          |
 | ---------------- | ------------------ | ------------------------------------------------ |
-| `review_manage`  | `normalize-branch` | Normalize branch name for auto-detection         |
+| `review_manage`  | `normalize-branch`       | Normalize branch name for auto-detection         |
+| `review_manage`  | `format-pr-comment`      | Format review findings as a PR comment           |
+| `review_manage`  | `generate-human-summary` | Generate human-readable summary of review results |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 

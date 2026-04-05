@@ -17,6 +17,7 @@ import {
   classifyNode,
 } from '../../core/tree/organ-classifier/organ-classifier.js';
 import type { HookOutput, PostToolUseInput } from '../../types/hooks.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 interface ChangeLogEntry {
   timestamp: string;
@@ -112,6 +113,9 @@ export function trackChange(
   input: PostToolUseInput,
   queue: ChangeQueue,
 ): HookOutput {
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null) return { continue: true };
+
   // Only track Write and Edit mutations
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
     return { continue: true };
@@ -124,7 +128,7 @@ export function trackChange(
     return { continue: true };
   }
 
-  const cwd = input.cwd;
+  const cwd = safeCwd;
   const toolName = input.tool_name;
 
   // 기존 ChangeQueue enqueue 로직 (변경 없음)

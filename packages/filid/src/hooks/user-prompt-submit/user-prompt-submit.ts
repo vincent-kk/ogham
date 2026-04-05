@@ -3,6 +3,7 @@ import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
 import { injectContext } from '../context-injector/context-injector.js';
 import { isFcaProject } from '../shared/shared.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 /**
  * Unified UserPromptSubmit hook orchestrator.
@@ -14,9 +15,12 @@ import { isFcaProject } from '../shared/shared.js';
 export function handleUserPromptSubmit(
   input: UserPromptSubmitInput,
 ): HookOutput {
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null) return { continue: true };
+
   // 1. Per-turn fmap reset (only for FCA projects)
-  if (isFcaProject(input.cwd)) {
-    removeFractalMap(input.cwd, input.session_id);
+  if (isFcaProject(safeCwd)) {
+    removeFractalMap(safeCwd, input.session_id);
   }
 
   // 2. FCA-AI context injection (session-scoped rules, first prompt only)

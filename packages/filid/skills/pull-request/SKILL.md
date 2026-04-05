@@ -38,7 +38,7 @@ Verify preconditions before PR creation.
 
 1. Confirm git repository
 2. Verify current branch (block direct PR from main/master)
-3. Check for uncommitted changes
+3. Check for uncommitted changes — abort only if non-FCA-document files (other than `INTENT.md`/`DETAIL.md`) are staged or unstaged; a clean worktree or FCA-document-only changes pass through
 4. Verify `gh` CLI authentication
 
 See [reference.md Section 0](./reference.md#section-0--prerequisites--validation).

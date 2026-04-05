@@ -27,7 +27,8 @@ Collect branch diff:
 
 ```bash
 git branch --show-current          # current branch name
-git rev-parse --verify main 2>/dev/null && BASE=main || BASE=master
+BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@') || \
+BASE=$(git rev-parse --verify main 2>/dev/null && echo main || echo master)
 git diff --name-only ${BASE}...HEAD   # list of changed files (auto-detect base branch)
 ```
 

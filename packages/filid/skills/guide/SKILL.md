@@ -92,5 +92,5 @@ Key rules:
 
 - Organ directories must not contain fractal child nodes
 - Fractal nodes must have an index.ts barrel export
-- main.ts is the primary entry point for a fractal node
+- index.ts (barrel) is the primary entry point for a fractal node; main.ts is used for executable/CLI modules
 - Directory naming convention: kebab-case

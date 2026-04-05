@@ -21,6 +21,10 @@ the code change and elect a review committee. Write the results to `session.md`.
 
 ### B.0 — Load Structure Pre-Check Results (if present)
 
+> **NO_STRUCTURE_CHECK skip**: If the execution context contains `NO_STRUCTURE_CHECK: true`,
+> skip this entire step (B.0). Set `STRUCTURE_CRITICAL_COUNT = 0` and proceed directly to B.1.
+> Phase A was intentionally bypassed, so `structure-check.md` will not exist.
+
 Read `<REVIEW_DIR>/structure-check.md` if it exists.
 
 Extract from its frontmatter:

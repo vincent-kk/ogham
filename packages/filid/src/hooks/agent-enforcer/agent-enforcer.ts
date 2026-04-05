@@ -9,6 +9,7 @@ import {
 } from '../../constants/agent-context.js';
 
 import { isFcaProject } from '../shared/shared.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 /** Resolve [filid:lang] tag for injection into agent context. */
 function buildLangTag(cwd: string): string {
@@ -32,10 +33,16 @@ function buildLangTag(cwd: string): string {
 export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   const agentType = input.agent_type ?? '';
 
+  // Security: validate payload cwd before any fs / execSync usage downstream.
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null) {
+    return { continue: true };
+  }
+
   // 1. filid agent role restrictions + language tag
   const restriction = ROLE_RESTRICTIONS[agentType];
   if (restriction) {
-    const langTag = buildLangTag(input.cwd);
+    const langTag = buildLangTag(safeCwd);
     return {
       continue: true,
       hookSpecificOutput: {
@@ -46,12 +53,12 @@ export function enforceAgentRole(input: SubagentStartInput): HookOutput {
   }
 
   // 2. Skip workflow guidance for non-FCA projects
-  if (!isFcaProject(input.cwd)) {
+  if (!isFcaProject(safeCwd)) {
     return { continue: true };
   }
 
   // 3. Planning agents: inject development workflow + language tag
-  const langTag = buildLangTag(input.cwd);
+  const langTag = buildLangTag(safeCwd);
   if (PLANNING_AGENT_RE.test(agentType) || agentType === 'Plan') {
     return {
       continue: true,

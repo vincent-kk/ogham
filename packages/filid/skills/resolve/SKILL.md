@@ -263,7 +263,16 @@ If there were accepted fixes:
   → On "Not now": done
 
 If there were NO accepted fixes (all rejected):
-  Automatically invoke /filid:revalidate — no pending code changes needed.
+  If `--auto` is set: Automatically invoke /filid:revalidate — no pending code changes needed.
+  If interactive mode: AskUserQuestion(
+    question: "All fix items were rejected. Run revalidate now to evaluate justifications?",
+    options: [
+      { label: "Yes — run now", description: "Invoke /filid:revalidate" },
+      { label: "Not now",       description: "Run /filid:revalidate later manually" }
+    ]
+  )
+  → On "Yes — run now": invoke /filid:revalidate
+  → On "Not now": done
   `filid:revalidate` will find zero accepted items, evaluate only the rejected-item
   justifications and debt records, and return PASS if all justifications are
   constitutionally compliant.

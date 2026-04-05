@@ -30,10 +30,13 @@ moves, renames, index.ts creations, and import path updates.
 
 ### Stage 1 — Analysis & Proposal
 
-`fractal-architect` performs analysis using **parallel MCP calls**:
+The skill invokes MCP tools and passes the results to `fractal-architect` for analysis. MCP calls run in **parallel**:
 
-- `fractal_scan`, `drift_detect`, and `rule_query` run **simultaneously**.
-- `lca_resolve` runs after `drift_detect` completes (requires its output).
+- The skill calls `fractal_scan`, `drift_detect`, and `rule_query` **simultaneously**.
+- The skill calls `lca_resolve` after `drift_detect` completes (requires its output).
+- `fractal-architect` receives all MCP results and generates the restructuring proposal.
+
+> `fractal-architect` does not call MCP tools directly — the skill owns all MCP invocations and injects results into the agent's task prompt (consistent with the Capability Model in Stage 4).
 
 After all calls complete, `fractal-architect` generates a concrete restructuring proposal.
 See [reference.md Section 1](./reference.md#section-1--analysis--proposal).

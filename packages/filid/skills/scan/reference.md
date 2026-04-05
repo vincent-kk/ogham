@@ -45,7 +45,7 @@ Verify that all three required headings are present:
 
 | Condition           | Severity | Violation ID                   |
 | ------------------- | -------- | ------------------------------ |
-| Any section missing | high     | `CLAUDE_MD_MISSING_BOUNDARIES` |
+| Any section missing | high     | `INTENT_MD_MISSING_BOUNDARIES` |
 
 Note: The validator matches English headings only (`### Always do`, `### Ask first`,
 `### Never do`). These headings MUST remain in English. Content follows the language specified by the `[filid:lang]` tag; default to English if absent.
@@ -57,10 +57,11 @@ INTENT.md is present inside it.
 
 | Condition                     | Severity | Violation ID              | Auto-fixable |
 | ----------------------------- | -------- | ------------------------- | ------------ |
-| INTENT.md exists in organ dir | critical | `ORGAN_CLAUDE_MD_PRESENT` | Yes (delete) |
+| INTENT.md exists in organ dir | critical | `ORGAN_INTENT_MD_PRESENT` | Yes (delete) |
 
 `ORGAN_DIR_NAMES` = `components`, `utils`, `types`, `hooks`, `helpers`,
-`lib`, `styles`, `assets`, `constants`
+`lib`, `styles`, `assets`, `constants`, `__tests__`, `__mocks__`,
+`__fixtures__`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
 
 ## Section 4 — Test File Validation (3+12 Rule)
 
@@ -94,7 +95,7 @@ Checks run    : <n>
 Total violations: <n>
 
 CRITICAL (<n>)
-  [ORGAN_CLAUDE_MD_PRESENT] src/utils/INTENT.md
+  [ORGAN_INTENT_MD_PRESENT] src/utils/INTENT.md
     Organ directories must not contain INTENT.md.
     Remediation: delete the file or reclassify the directory.
 
@@ -116,8 +117,8 @@ Run with --fix to apply automatic remediations.
 
 | Violation                      | Auto-fix Action                                                         | Agent             |
 | ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
-| `ORGAN_CLAUDE_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `code-surgeon`    |
-| `CLAUDE_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
+| `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `code-surgeon`    |
+| `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
@@ -150,6 +151,6 @@ Skipped : <n> (require manual remediation)
 | ID                             | Severity | Auto-fix | Agent             |
 | ------------------------------ | -------- | -------- | ----------------- |
 | `INTENT_MD_LINE_LIMIT`         | high     | Yes      | `context-manager` |
-| `CLAUDE_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
-| `ORGAN_CLAUDE_MD_PRESENT`      | critical | Yes      | `code-surgeon`    |
+| `INTENT_MD_MISSING_BOUNDARIES` | high     | Yes      | `context-manager` |
+| `ORGAN_INTENT_MD_PRESENT`      | critical | Yes      | `code-surgeon`    |
 | `TEST_312_EXCEEDED`            | high     | Yes      | `code-surgeon`    |

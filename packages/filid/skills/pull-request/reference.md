@@ -34,8 +34,11 @@ CURRENT_BRANCH=$(git branch --show-current)
 git status --porcelain
 ```
 
-- Output present → abort: "Uncommitted changes detected. Commit your changes before running."
-- No output → proceed to next check
+Parse the output to distinguish change types:
+
+- **Non-FCA-document changes present** (files other than `INTENT.md` or `DETAIL.md` are staged or unstaged) → abort: "Uncommitted changes detected. Commit or stash non-FCA changes before running."
+- **Only INTENT.md / DETAIL.md changes present** (every dirty file matches `**/INTENT.md` or `**/DETAIL.md`) → proceed to next check (Stage 1 will commit these after sync)
+- **No output (clean worktree)** → proceed to next check
 
 ### 0.4 GitHub CLI Authentication Check
 
@@ -436,7 +439,7 @@ EOF
 | 0 (Prerequisites) | Not a git repo                 | "Not a git repository" → abort                           |
 | 0                 | On main/master branch          | "Cannot create PR from main/master" → abort              |
 | 0                 | Detached HEAD                  | "Check out a branch first" → abort                       |
-| 0                 | Uncommitted changes            | "Commit changes before running" → abort                  |
+| 0                 | Non-FCA uncommitted changes    | "Commit or stash non-FCA changes before running" → abort |
 | 0                 | gh CLI not authenticated       | Set `GH_AUTH = false`, continue through Stage 3          |
 | 1                 | update failure             | Print BLOCKED message → abort                            |
 | 2                 | `--base` ref not found         | "Specified ref not found" → abort                        |

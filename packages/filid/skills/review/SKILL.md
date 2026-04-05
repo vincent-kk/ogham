@@ -42,7 +42,7 @@ and a state machine.
    - `structure-check.md` only → Phase B
    - `session.md` only → Check `session.md` frontmatter for `no_structure_check` flag:
      - If `no_structure_check: true` → Phase C (Phase A was intentionally skipped)
-     - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md`, **increment `resume_attempts` by 1 in session.md frontmatter**, then restart only Phase A)
+     - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md`, **increment `resume_attempts` by 1 in session.md frontmatter** using Edit tool: Read the session.md file, locate the `resume_attempts: <N>` line in the frontmatter (between `---` markers), then `Edit(old_string: 'resume_attempts: <N>', new_string: 'resume_attempts: <N+1>')`. If the field is absent, add `resume_attempts: 1` inside the frontmatter by editing between the `---` markers. Then restart only Phase A)
      After Phase A completes and writes `structure-check.md`, re-evaluate the checkpoint state against the full table above to determine the next phase (typically Phase C).
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
@@ -219,7 +219,7 @@ The chairperson executes Phase D directly:
 
 1. **Load inputs**: Read `session.md` + `verification.md`
 2. **Load structure context**: Read `structure-check.md` if present
-3. **Load personas**: Read the `elected_committee` list from `session.md` frontmatter (written by Phase B via `review_manage(elect-committee)`), then load only those persona files from `personas/*.md`
+3. **Load personas**: Read the `committee` list from `session.md` frontmatter (written by Phase B via `review_manage(elect-committee)`), then load only those persona files from `personas/*.md`
 4. **Load state machine**: Read `state-machine.md` for transition rules
 5. **Execute deliberation**: Run state machine (PROPOSAL → DEBATE → CONCLUSION)
    - Structure violations from `structure-check.md` are tabled as agenda items
