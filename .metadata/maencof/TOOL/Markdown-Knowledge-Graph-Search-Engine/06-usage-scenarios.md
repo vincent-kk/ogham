@@ -85,7 +85,7 @@
 **상황**: 연구자가 특정 주제와 관련된 문서를 찾고 싶다.
 
 ```
-사용자: /maencof:explore "완벽주의"
+사용자: /maencof:maencof-explore "완벽주의"
 
 1. Skill: 키워드 "완벽주의"를 시드로 확산 활성화 실행
 2. 결과를 마크다운 테이블로 포맷팅:
@@ -106,7 +106,7 @@
 **상황**: 개발자가 특정 문서의 주변 관계를 파악하고 싶다.
 
 ```
-사용자: /maencof:explore /01_Core/values.md
+사용자: /maencof:maencof-explore /01_Core/values.md
 
 1. Skill: kg_navigate로 노드의 전체 연결 맵 조회
 2. 결과를 구조적으로 포맷팅:
@@ -133,7 +133,7 @@
 **상황**: 연구자가 저장소의 구조적 건강 상태를 점검하고 싶다.
 
 ```
-사용자: /maencof:diagnose
+사용자: /maencof:maencof-diagnose
 
 1. Skill: 전체 그래프 분석 실행
 2. 결과:

@@ -27,7 +27,7 @@ claude plugin install maencof
 
 이것으로 끝입니다. 모든 컴포넌트(Skills, MCP 도구, Agents, Hooks)가 자동으로 등록되며, 별도의 설정이 필요 없습니다.
 
-> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:init`을 입력하면 프로젝트에 FCA-AI를 초기화합니다.
+> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:filid-setup`을 입력하면 프로젝트에 FCA-AI를 초기화합니다.
 
 ---
 
@@ -43,7 +43,7 @@ claude plugin install maencof
 
 | 컴포넌트  | 수량 | 예시                                                       |
 | --------- | ---- | ---------------------------------------------------------- |
-| Skills    | 14   | `/filid:init`, `/filid:review`, `/filid:scan` |
+| Skills    | 14   | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan` |
 | MCP 도구  | 14   | 구조 분석, 드리프트 감지, 메트릭                           |
 | Agents    | 7    | Architect, Implementer, QA Reviewer 등                     |
 | Hooks     | 6    | 줄 수 제한 자동 검사, organ 보호, 규칙 주입                |
@@ -57,13 +57,13 @@ claude plugin install maencof
 
 ```
 # 프로젝트에 FCA-AI 초기화
-/filid:init
+/filid:filid-setup
 
 # 규칙 위반 스캔
-/filid:scan
+/filid:filid-scan
 
 # 현재 브랜치에 대해 다중 페르소나 코드 리뷰 실행
-/filid:review
+/filid:filid-review
 ```
 
 자세한 문서는 [filid README (영문)](./packages/filid/README.md) 또는 [filid README (한글)](./packages/filid/README-ko_kr.md)을 참조하세요.
@@ -78,7 +78,7 @@ AI 에이전트는 세션 간에 사용자를 잊습니다. 메모는 여러 도
 
 | 컴포넌트   | 수량 | 예시                                                         |
 | ---------- | ---- | ------------------------------------------------------------ |
-| Skills     | 24   | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`     |
+| Skills     | 24   | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`     |
 | MCP 도구   | 15   | 지식 CRUD, 그래프 검색, 컨텍스트 조립                        |
 | Agents     | 4    | Memory Organizer, Identity Guardian, Doctor 등                |
 | Hooks      | 6    | L1 레이어 보호, 인덱스 무효화, 활동 로깅                     |
@@ -92,13 +92,13 @@ AI 에이전트는 세션 간에 사용자를 잊습니다. 메모는 여러 도
 
 ```
 # 지식 보관소 초기화
-/maencof:setup
+/maencof:maencof-setup
 
 # 새로운 지식 기억하기
-/maencof:remember
+/maencof:maencof-remember
 
 # 지식 검색하기
-/maencof:recall
+/maencof:maencof-recall
 ```
 
 자세한 문서는 [maencof README (영문)](./packages/maencof/README.md) 또는 [maencof README (한글)](./packages/maencof/README-ko_kr.md)을 참조하세요.

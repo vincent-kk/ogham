@@ -360,7 +360,7 @@ inputSchema:
 - [ ] `lens_search` passes effective layers to handler
 - [ ] `lens_context` post-filters assembled items (token budget limitation documented)
 - [ ] `lens_status` includes stale warning when applicable
-- [ ] Error messages do not reference maencof-specific commands (/maencof:build)
+- [ ] Error messages do not reference maencof-specific commands (/maencof:maencof-build)
 - [ ] Each tool accepts `vault` parameter and routes to the correct vault
 - [ ] Omitting `vault` parameter uses the default vault
 

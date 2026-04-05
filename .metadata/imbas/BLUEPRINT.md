@@ -168,14 +168,14 @@ ogham (사전 가이드 시스템)
 
 | # | Skill | Type | Slash Command | Agent | 입력 | 출력 |
 |---|-------|------|--------------|-------|------|------|
-| 1 | setup | Infra | `/imbas:setup` | — | 사용자 입력 | config.json, cache/ |
-| 2 | validate | Core | `/imbas:validate` | imbas-analyst | 기획 문서 | validation-report.md |
-| 3 | split | Core | `/imbas:split` | imbas-planner, imbas-analyst | 검증 통과 문서 | stories-manifest.json |
-| 4 | devplan | Core | `/imbas:devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
-| 5 | manifest | Exec | `/imbas:manifest` | — | *-manifest.json | Jira 이슈 |
-| 6 | status | Infra | `/imbas:status` | — | — | 상태 표시 |
-| 7 | `imbas:fetch-media` | Util | `/imbas:fetch-media` | imbas-media | URL/경로 | analysis.json |
-| 8 | digest | Exec | `/imbas:digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
+| 1 | setup | Infra | `/imbas:imbas-setup` | — | 사용자 입력 | config.json, cache/ |
+| 2 | validate | Core | `/imbas:imbas-validate` | imbas-analyst | 기획 문서 | validation-report.md |
+| 3 | split | Core | `/imbas:imbas-split` | imbas-planner, imbas-analyst | 검증 통과 문서 | stories-manifest.json |
+| 4 | devplan | Core | `/imbas:imbas-devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
+| 5 | manifest | Exec | `/imbas:imbas-manifest` | — | *-manifest.json | Jira 이슈 |
+| 6 | status | Infra | `/imbas:imbas-status` | — | — | 상태 표시 |
+| 7 | `imbas:fetch-media` | Util | `/imbas:imbas-fetch-media` | imbas-media | URL/경로 | analysis.json |
+| 8 | digest | Exec | `/imbas:imbas-digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)
 

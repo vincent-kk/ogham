@@ -216,7 +216,7 @@ Rules:
 └── 비용: hook 실행 ~20ms × N회
 
 PR 생성 시 (1회)
-├── /filid:sync: ChangeQueue drain → 배치 문서 갱신
+├── /filid:filid-sync: ChangeQueue drain → 배치 문서 갱신
 ├── 에이전트: INTENT.md/DETAIL.md 갱신
 └── 비용: MCP 호출 + 문서 재작성 (1회성)
 ```
@@ -262,7 +262,7 @@ Hook 스크립트 특성:
 
 MCP 도구는 에이전트가 명시적으로 호출할 때만 실행:
 
-- TypeScript AST 파싱은 `/filid:review` 또는 `/filid:scan` 시에만 수행
+- TypeScript AST 파싱은 `/filid:filid-review` 또는 `/filid:filid-scan` 시에만 수행
 - 일반 개발 중에는 Hook만 실행 (경량)
 - 불필요한 분석을 자동 트리거하지 않음
 
@@ -276,8 +276,8 @@ MCP 도구는 에이전트가 명시적으로 호출할 때만 실행:
 | 일반 파일 Write   | ~55ms (pre-tool-use) | 0 토큰  | 무시 가능          |
 | INTENT.md Write   | ~120ms (검증 포함) | 0-25 토큰 | 낮음               |
 | 서브에이전트 생성 | ~30ms (enforcer)   | ~35 토큰  | 무시 가능          |
-| /filid:review 실행      | ~1-5초 (AST 분석)  | ~500 토큰 | 중간 (1회성)       |
-| /filid:sync 실행        | ~0.5-2초           | ~200 토큰 | 중간 (PR 시점 1회) |
+| /filid:filid-review 실행      | ~1-5초 (AST 분석)  | ~500 토큰 | 중간 (1회성)       |
+| /filid:filid-sync 실행        | ~0.5-2초           | ~200 토큰 | 중간 (PR 시점 1회) |
 
 ---
 

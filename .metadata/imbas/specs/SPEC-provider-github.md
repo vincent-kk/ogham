@@ -368,7 +368,7 @@ gh issue comment 42 --repo "owner/repo" --body "$(cat <<'COMMENT'
 <!-- imbas:digest v1 | generated: 2026-04-04T11:00:00+09:00 | comments_covered: 1-7 -->
 ## imbas Digest
 ...
-<!-- /imbas:digest -->
+<!-- /imbas:imbas-digest -->
 COMMENT
 )"
 ```

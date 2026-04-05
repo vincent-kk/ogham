@@ -13,14 +13,14 @@
 
 | Skill | Slash Command | 역할 | Agent |
 |-------|-------------|------|-------|
-| **setup** | `/imbas:setup` | 초기화, config, 프로젝트 캐시 | — |
-| **validate** | `/imbas:validate` | Phase 1 — 정합성 검증 | imbas-analyst |
-| **split** | `/imbas:split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
-| **devplan** | `/imbas:devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
-| **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | — |
-| **status** | `/imbas:status` | 런 상태 조회, 이력 | — |
-| **`imbas:fetch-media`** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
-| **digest** | `/imbas:digest` | 이슈 컨텍스트 압축 → Jira 코멘트 | — |
+| **setup** | `/imbas:imbas-setup` | 초기화, config, 프로젝트 캐시 | — |
+| **validate** | `/imbas:imbas-validate` | Phase 1 — 정합성 검증 | imbas-analyst |
+| **split** | `/imbas:imbas-split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
+| **devplan** | `/imbas:imbas-devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
+| **manifest** | `/imbas:imbas-manifest` | 매니페스트 → Jira 배치 생성 | — |
+| **status** | `/imbas:imbas-status` | 런 상태 조회, 이력 | — |
+| **`imbas:fetch-media`** | `/imbas:imbas-fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
+| **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → Jira 코멘트 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
 
@@ -52,7 +52,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:validate <source>  [--project <KEY>] [--supplements <path,...>]
+/imbas:imbas-validate <source>  [--project <KEY>] [--supplements <path,...>]
 
 <source>       : 기획 문서 경로 (로컬 md/txt) 또는 Confluence URL
 --project      : 프로젝트 참조 (config.defaults.project_ref 대체)
@@ -98,7 +98,7 @@ Step 5 — 상태 갱신
 
 ---
 
-### 2.2 imbas:split — Phase 2 Story 분할
+### 2.2 imbas:imbas-split — Phase 2 Story 분할
 
 ```yaml
 name: split
@@ -113,7 +113,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:split [--run <run-id>] [--epic <EPIC-KEY>]
+/imbas:imbas-split [--run <run-id>] [--epic <EPIC-KEY>]
 
 --run    : 기존 런 ID (없으면 가장 최근 PASS된 런 사용)
 --epic   : Epic Jira 키 (없으면 새 Epic 생성 여부 확인)
@@ -200,7 +200,7 @@ Step 7 — 사용자 리뷰
 
 ---
 
-### 2.3 imbas:devplan — Phase 3 Subtask/Task 생성
+### 2.3 imbas:imbas-devplan — Phase 3 Subtask/Task 생성
 
 ```yaml
 name: devplan
@@ -215,7 +215,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:devplan [--run <run-id>] [--stories <S1,S2,...>]
+/imbas:imbas-devplan [--run <run-id>] [--stories <S1,S2,...>]
 
 --run      : 런 ID
 --stories  : 대상 Story ID (콤마 구분, 없으면 전체)
@@ -273,7 +273,7 @@ Step 4 — 사용자 리뷰
 
 ## 3. Infrastructure Skills
 
-### 3.1 imbas:setup — 초기화 & 설정
+### 3.1 imbas:imbas-setup — 초기화 & 설정
 
 ```yaml
 name: setup
@@ -290,7 +290,7 @@ plugin: imbas
 
 | Command | 동작 |
 |---------|------|
-| `filid:init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
+| `init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
 | `show` | config.json + 캐시 상태 표시 |
 | `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
 | `set-language <field> <lang>` | 언어 설정 변경 |
@@ -317,7 +317,7 @@ Step 6 — 결과 표시
 
 ---
 
-### 3.2 imbas:status — 런 상태 조회
+### 3.2 imbas:imbas-status — 런 상태 조회
 
 ```yaml
 name: status
@@ -343,7 +343,7 @@ plugin: imbas
 
 ## 4. Execution Skill
 
-### 4.1 imbas:manifest — 매니페스트 실행
+### 4.1 imbas:imbas-manifest — 매니페스트 실행
 
 ```yaml
 name: manifest
@@ -358,7 +358,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:manifest <type> [--run <run-id>] [--dry-run]
+/imbas:imbas-manifest <type> [--run <run-id>] [--dry-run]
 
 <type>    : "stories" | "devplan"
 --run     : 런 ID (없으면 최근)
@@ -413,7 +413,7 @@ Step 5 — 결과 리포트
 
 ## 5. Utility Skills
 
-### 5.1 imbas:fetch-media — 미디어 다운로드 & 분석
+### 5.1 imbas:imbas-fetch-media — 미디어 다운로드 & 분석
 
 ```yaml
 name: fetch-media
@@ -428,7 +428,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:fetch-media <url-or-path> [--analyze] [--preset <name>]
+/imbas:imbas-fetch-media <url-or-path> [--analyze] [--preset <name>]
 
 <url-or-path>  : Confluence 첨부 URL, Jira 첨부 URL, 또는 로컬 파일 경로
 --analyze      : 비디오/GIF인 경우 scene-sieve + imbas-media 분석 실행
@@ -589,11 +589,11 @@ imbas:cache <action> [--project <KEY>]
 | `refresh` | 강제 갱신 |
 | `clear` | 캐시 삭제 |
 
-**사용자 접근 경로:** `/imbas:setup show` (캐시 상태 확인) / `/imbas:setup refresh-cache` (갱신)
+**사용자 접근 경로:** `/imbas:imbas-setup show` (캐시 상태 확인) / `/imbas:imbas-setup refresh-cache` (갱신)
 
 ---
 
-### 6.3 imbas:digest — 이슈 컨텍스트 압축 (사용자 호출)
+### 6.3 imbas:imbas-digest — 이슈 컨텍스트 압축 (사용자 호출)
 
 ```yaml
 name: digest
@@ -609,7 +609,7 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:digest <issue-key> [--preview]
+/imbas:imbas-digest <issue-key> [--preview]
 
 <issue-key>  : 이슈 참조 (Jira: PROJ-123, GitHub: #42)
 --preview    : Jira에 코멘트 게시하지 않고 미리보기만
@@ -665,7 +665,7 @@ Step 5 — 코멘트 포맷팅
 
   ### Participants
   - {name} ({role_hint}): {contribution summary}
-  <!-- /imbas:digest -->
+  <!-- /imbas:imbas-digest -->
 
 Step 6 — 게시
   - --preview → 사용자에게 미리보기 표시, 종료
@@ -677,7 +677,7 @@ Step 6 — 게시
 ```
 <!-- imbas:digest v{version} | generated: {ISO8601} | comments_covered: {start}-{end} -->
 ...
-<!-- /imbas:digest -->
+<!-- /imbas:imbas-digest -->
 ```
 - `comments_covered`: digest가 분석한 코멘트 인덱스 범위
 - `imbas:read-issue`가 이 마커를 감지하면 Fast Path 활성화
@@ -686,7 +686,7 @@ Step 6 — 게시
 **제안 트리거:**
 - manifest가 transitionJiraIssue로 Done 전환 시
 - 해당 이슈의 코멘트 >= 3개 AND 작성자 >= 2명
-- 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:digest {key}` 로 정리할까요?"
+- 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:imbas-digest {key}` 로 정리할까요?"
 - 자동 실행 아님 — 제안만
 
 **교차 이슈 합성:**
@@ -700,32 +700,32 @@ Step 6 — 게시
 ```
 사용자 (user_invocable: true — 8개)
   │
-  ├── /imbas:setup ─────────── config.json + 캐시 초기화
+  ├── /imbas:imbas-setup ─────────── config.json + 캐시 초기화
   │         └── (내부) cache ensure
   │
-  ├── /imbas:status ────────── 런 상태 조회
+  ├── /imbas:imbas-status ────────── 런 상태 조회
   │
-  ├── /imbas:validate ─────── state.json 생성 → validation-report.md
+  ├── /imbas:imbas-validate ─────── state.json 생성 → validation-report.md
   │         ├── (내부) cache ensure
   │         └── (내부) `imbas:read-issue` (관련 기존 이슈 참조 시)
   │
-  ├── /imbas:split ────────── state.json 갱신 → stories-manifest.json
+  ├── /imbas:imbas-split ────────── state.json 갱신 → stories-manifest.json
   │         ├── (내부) cache ensure
   │         ├── (내부) `imbas:read-issue` (Epic/기존 Story 맥락 파악 시)
   │         └── (안내) `imbas:fetch-media` (미디어 발견 시)
   │
-  ├── /imbas:manifest stories ── stories-manifest → Jira Story 생성
+  ├── /imbas:imbas-manifest stories ── stories-manifest → Jira Story 생성
   │
-  ├── /imbas:devplan ──────── state.json 갱신 → devplan-manifest.json
+  ├── /imbas:imbas-devplan ──────── state.json 갱신 → devplan-manifest.json
   │         ├── (내부) cache ensure
   │         └── (내부) `imbas:read-issue` (Story 코멘트 추가 논의 확인)
   │
-  ├── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+  ├── /imbas:imbas-manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
-  ├── /imbas:fetch-media ──── 미디어 다운로드 + 분석
+  ├── /imbas:imbas-fetch-media ──── 미디어 다운로드 + 분석
   │
-  └── /imbas:digest ────────── 이슈 컨텍스트 압축 → Jira 코멘트 게시
+  └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → Jira 코멘트 게시
             ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
             └── (내부) `imbas:fetch-media` → 첨부 미디어 분석 (있을 경우)
 

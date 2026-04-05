@@ -73,7 +73,7 @@ WAL 기록 → 대상 디렉토리에 복사 → Frontmatter 갱신
 - 불일치 감지 시 자동 재구축 트리거
 
 ### .maencof/ 캐시 보호
-- `.maencof/` 전체가 파생물. 삭제 후 `/maencof:build`로 완전 복구
+- `.maencof/` 전체가 파생물. 삭제 후 `/maencof:maencof-build`로 완전 복구
 - `.maencof/.lock` 파일로 동시 빌드 방지
 
 ---

@@ -25,7 +25,7 @@ layer: meta
 상세: [22-autonomy-levels.md](./22-autonomy-levels.md)
 
 ### 원칙 3 — 비개발자 포용
-/maencof:setup 한 번으로 시작 가능. 내부 구현은 사용자에게 노출하지 않는다.
+/maencof:maencof-setup 한 번으로 시작 가능. 내부 구현은 사용자에게 노출하지 않는다.
 
 ### 원칙 4 — 런타임 제약 준수
 [Phase 0 go/no-go](./00-runtime-constraints.md) 결과를 설계의 하드 경계로 삼는다.

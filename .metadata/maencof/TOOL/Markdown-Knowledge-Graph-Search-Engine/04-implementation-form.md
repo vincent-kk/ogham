@@ -87,8 +87,8 @@ Claude Code 외부에서 실행 가능한 독립 커맨드라인 도구이다.
 +----------------------------------------------------------+
 |                    사용자 / AI 에이전트                     |
 |                                                           |
-|  Skill (/maencof:build)    Hook (UserPromptSubmit)        |
-|  Skill (/maencof:explore)  Hook (PostToolUse:Write)       |
+|  Skill (/maencof:maencof-build)    Hook (UserPromptSubmit)        |
+|  Skill (/maencof:maencof-explore)  Hook (PostToolUse:Write)       |
 |         |                         |                       |
 |         v                         v                       |
 |  +-------------+          +----------------+              |
@@ -146,10 +146,10 @@ Hook, MCP, Skill이 동일한 인덱스에 접근해야 하므로 상태 공유 
 
 | 스킬 | 설명 | Phase |
 |------|------|-------|
-| `/maencof:build` | 전체/증분 인덱스 구축 | 1 |
-| `/maencof:explore` | 대화형 지식 탐색 세션 | 1 |
-| `/maencof:diagnose` | 인덱스 건강도 진단 (고아 문서, 깨진 링크) | 1 |
-| `/maencof:rebuild` | 인덱스 강제 전체 재구축 | 1 |
+| `/maencof:maencof-build` | 전체/증분 인덱스 구축 | 1 |
+| `/maencof:maencof-explore` | 대화형 지식 탐색 세션 | 1 |
+| `/maencof:maencof-diagnose` | 인덱스 건강도 진단 (고아 문서, 깨진 링크) | 1 |
+| `/maencof:maencof-rebuild` | 인덱스 강제 전체 재구축 | 1 |
 
 ## Hook 후보 목록
 

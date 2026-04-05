@@ -20,11 +20,11 @@ layer: design-area-4
 
 | 스킬 | 호출 | 역할 | context_layers |
 |------|------|------|----------------|
-| setup | `/maencof:setup` | 초기 온보딩, Core Identity 수집 | L1 |
-| remember | `/maencof:remember` | 새 지식 기록 | L2, L3, L4, L5 |
-| recall | `/maencof:recall` | 지식 검색/회상 | L1, L2, L3 |
-| organize | `/maencof:organize` | 기억 정리/전이 | L2, L4 |
-| reflect | `/maencof:reflect` | 지식 연결/통찰 | L1, L2, L3 |
+| setup | `/maencof:maencof-setup` | 초기 온보딩, Core Identity 수집 | L1 |
+| remember | `/maencof:maencof-remember` | 새 지식 기록 | L2, L3, L4, L5 |
+| recall | `/maencof:maencof-recall` | 지식 검색/회상 | L1, L2, L3 |
+| organize | `/maencof:maencof-organize` | 기억 정리/전이 | L2, L4 |
+| reflect | `/maencof:maencof-reflect` | 지식 연결/통찰 | L1, L2, L3 |
 
 ---
 
@@ -32,10 +32,10 @@ layer: design-area-4
 
 | 스킬 | 호출 | 역할 | Phase |
 |------|------|------|-------|
-| build | `/maencof:build` | 전체/증분 인덱스 구축 | 1 |
-| explore | `/maencof:explore` | 대화형 SA 기반 지식 탐색 | 1 |
-| diagnose | `/maencof:diagnose` | 인덱스 건강도 진단 (고아, 깨진 링크) | 1 |
-| rebuild | `/maencof:rebuild` | 인덱스 강제 전체 재구축 | 1 |
+| build | `/maencof:maencof-build` | 전체/증분 인덱스 구축 | 1 |
+| explore | `/maencof:maencof-explore` | 대화형 SA 기반 지식 탐색 | 1 |
+| diagnose | `/maencof:maencof-diagnose` | 인덱스 건강도 진단 (고아, 깨진 링크) | 1 |
+| rebuild | `/maencof:maencof-rebuild` | 인덱스 강제 전체 재구축 | 1 |
 
 ---
 
@@ -43,11 +43,11 @@ layer: design-area-4
 
 | 스킬 | 호출 | 역할 |
 |------|------|------|
-| doctor | `/maencof:doctor` | 6개 진단 + 자동 수정 |
-| ingest | `/maencof:ingest` | 외부 데이터 가져오기 |
-| connect | `/maencof:connect` | 외부 데이터 소스 등록 |
-| mcp-setup | `/maencof:mcp-setup` | 외부 MCP 서버 설치 |
-| manage | `/maencof:manage` | 스킬/에이전트 활성화 관리 |
+| doctor | `/maencof:maencof-checkup` | 6개 진단 + 자동 수정 |
+| ingest | `/maencof:maencof-ingest` | 외부 데이터 가져오기 |
+| connect | `/maencof:maencof-connect` | 외부 데이터 소스 등록 |
+| mcp-setup | `/maencof:maencof-mcp-setup` | 외부 MCP 서버 설치 |
+| manage | `/maencof:maencof-manage` | 스킬/에이전트 활성화 관리 |
 
 ---
 
@@ -55,13 +55,13 @@ layer: design-area-4
 
 | 스킬 | 호출 | 역할 | orchestrator |
 |------|------|------|-------------|
-| configure | `/maencof:configure` | 통합 환경 설정 진입점 (router) | configurator |
-| bridge | `/maencof:bridge` | MCP 설치+등록+워크플로우 스킬 생성 | configurator |
-| craft-skill | `/maencof:craft-skill` | 커스텀 스킬 생성기 | configurator |
-| craft-agent | `/maencof:craft-agent` | 커스텀 에이전트 생성기 | configurator |
-| instruct | `/maencof:instruct` | CLAUDE.md 관리 | configurator |
-| rule | `/maencof:rule` | 규칙 관리 | configurator |
-| lifecycle | `/maencof:lifecycle` | 라이프사이클 관리 | configurator |
+| configure | `/maencof:maencof-configure` | 통합 환경 설정 진입점 (router) | configurator |
+| bridge | `/maencof:maencof-bridge` | MCP 설치+등록+워크플로우 스킬 생성 | configurator |
+| craft-skill | `/maencof:maencof-craft-skill` | 커스텀 스킬 생성기 | configurator |
+| craft-agent | `/maencof:maencof-craft-agent` | 커스텀 에이전트 생성기 | configurator |
+| instruct | `/maencof:maencof-instruct` | CLAUDE.md 관리 | configurator |
+| rule | `/maencof:maencof-rule` | 규칙 관리 | configurator |
+| lifecycle | `/maencof:maencof-lifecycle` | 라이프사이클 관리 | configurator |
 
 설정 스킬은 `context_layers: []` — 지식 Layer를 사용하지 않고 프로젝트 설정 파일만 다룸.
 

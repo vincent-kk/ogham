@@ -74,7 +74,7 @@ All 5 handlers that lens wraps are **pure functions** (take inputs, return outpu
 - **No change needed**
 
 ### 3.5 Error message references to maencof
-- **Concern**: Handlers return errors like `"Index not built. Please run /maencof:build first."`
+- **Concern**: Handlers return errors like `"Index not built. Please run /maencof:maencof-build first."`
 - **Resolution**: lens can override error messages in its wrapper layer (e.g., change to "Vault index not available. Run kg_build in a maencof session.")
 - **No change to maencof needed** — lens handles this post-hoc
 
@@ -108,5 +108,5 @@ all-layer results before filtering, wasting budget on excluded-layer content.
 **Zero refactoring of maencof is required for lens v1 launch.**
 One enhancement is recommended for v1.1: adding `layer_filter` passthrough to `handleKgContext`.
 
-Additional note: handler error messages (e.g., "Please run /maencof:build first") should be
+Additional note: handler error messages (e.g., "Please run /maencof:maencof-build first") should be
 rewritten in lens wrappers to use lens-appropriate language (e.g., "Run kg_build in a maencof session").

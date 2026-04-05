@@ -5,7 +5,7 @@ tags: [onboarding, setup, core-identity, interview, index-build]
 layer: design-area-5
 ---
 
-# 온보딩 플로우 — /maencof:setup + 초기 인덱스 빌드
+# 온보딩 플로우 — /maencof:maencof-setup + 초기 인덱스 빌드
 
 ## 개요
 
@@ -16,7 +16,7 @@ layer: design-area-5
 
 ---
 
-## 1. /maencof:setup 플로우
+## 1. /maencof:maencof-setup 플로우
 
 ```
 1단계: 환영 메시지 + 기억공간 경로 설정

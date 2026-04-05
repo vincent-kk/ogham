@@ -9,7 +9,7 @@ Architecture Pass (v0.2.0) — structural cleanup and breaking changes per
 
 - **`structure_validate` MCP tool**: `fix` input field removed. The no-op
   placeholder is eliminated; structural remediation must be performed via the
-  `restructurer` agent under `/filid:restructure` or `/filid:sync`. Callers
+  `restructurer` agent under `/filid:filid-restructure` or `/filid:filid-sync`. Callers
   passing `fix: true` will now fail Zod validation.
 - **Library public API**: `formatPrComment`, `formatRevalidateComment`,
   `formatHumanSummary`, `normalizeBranch`, `resolveReviewDir`, `tryReadFile`
@@ -30,7 +30,7 @@ Architecture Pass (v0.2.0) — structural cleanup and breaking changes per
   descriptions rewritten to eliminate LCOM4/CC overlap — architect owns
   pre-implementation design; qa-reviewer owns post-implementation measurement
   (INT-017).
-- **Skill-owned MCP orchestration**: `/filid:restructure` Stage 4 now
+- **Skill-owned MCP orchestration**: `/filid:filid-restructure` Stage 4 now
   explicitly invokes `structure_validate` from the skill and passes the
   report to `fractal-architect`, enforcing the capability boundary that
   agents do not call MCP tools directly (T4b).

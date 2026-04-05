@@ -51,7 +51,7 @@ layer: design-area-3
 4. 전이 후보 목록 생성
 5a. [Level 0-1] 사용자에게 제시, 승인 후 실행
 5b. [Level 2-3] L3→L2 자동, 파괴적 삭제만 확인
-6. fallback: /maencof:organize 수동 스킬 안내
+6. fallback: /maencof:maencof-organize 수동 스킬 안내
 ```
 
 Hook 타임아웃 내 불가 시: 목록 생성만 수행, 실행은 연기.

@@ -27,7 +27,7 @@ claude plugin install maencof
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:init` to initialize FCA-AI in your project.
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:filid-setup` to initialize FCA-AI in your project.
 
 ---
 
@@ -43,7 +43,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 | Component        | Count | Examples                                            |
 | ---------------- | ----- | --------------------------------------------------- |
-| Skills           | 14    | `/filid:init`, `/filid:review`, `/filid:scan` |
+| Skills           | 14    | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan` |
 | MCP Tools        | 14    | Structure analysis, drift detection, metrics        |
 | Agents           | 7     | Architect, Implementer, QA Reviewer, etc.           |
 | Hooks            | 6     | Auto line-limit check, organ protection, rule injection |
@@ -57,13 +57,13 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 ```
 # Initialize FCA-AI in your project
-/filid:init
+/filid:filid-setup
 
 # Scan for rule violations
-/filid:scan
+/filid:filid-scan
 
 # Run multi-persona code review on current branch
-/filid:review
+/filid:filid-review
 ```
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
@@ -78,7 +78,7 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 | Component  | Count | Examples                                                     |
 | ---------- | ----- | ------------------------------------------------------------ |
-| Skills     | 24    | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`     |
+| Skills     | 24    | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`     |
 | MCP Tools  | 15    | Knowledge CRUD, graph search, context assembly               |
 | Agents     | 4     | Memory Organizer, Identity Guardian, Doctor, etc.            |
 | Hooks      | 6     | L1 layer guard, index invalidation, activity logging         |
@@ -92,13 +92,13 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 ```
 # Initialize your knowledge vault
-/maencof:setup
+/maencof:maencof-setup
 
 # Remember something new
-/maencof:remember
+/maencof:maencof-remember
 
 # Search your knowledge
-/maencof:recall
+/maencof:maencof-recall
 ```
 
 For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
