@@ -1,7 +1,7 @@
 /**
  * Cross-layer handoff token types — SSoT for action / type / stage enums
  * passed between Skills, MCP tools, and Agents. See
- * `skills/pipeline/stages.md` for the token policy.
+ * `skills/filid-pipeline/stages.md` for the token policy.
  */
 
 export const FIX_REQUEST_TYPES = [

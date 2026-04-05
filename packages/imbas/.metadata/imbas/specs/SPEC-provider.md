@@ -35,10 +35,10 @@ workflow/tools/errors. Below the threshold, inline branching in the flat
 file is preferred.
 
 **Precedent acknowledgement**: inline branching predates this spec. The
-file `skills/manifest/references/workflow.md` historically carried a
+file `skills/imbas-manifest/references/workflow.md` historically carried a
 `[jira]` / `[github]` inline block at the drift-check step. That block
 was preserved during Phase C1 copy-then-delete and now lives in
-`skills/manifest/references/jira/workflow.md` under the
+`skills/imbas-manifest/references/jira/workflow.md` under the
 "GitHub prototype (preserved)" section, anchoring the follow-up GitHub
 RALPLAN cycle.
 
@@ -65,8 +65,8 @@ Rejected as a universal strategy. For HIGH-divergence skills (manifest,
 read-issue, digest, devplan), inline branching would inflate a single
 `workflow.md` beyond 500 lines and force the LLM to load all provider text
 per run, violating the context-isolation principle. Retained for
-LOW-divergence skills (`validate`, `cache`, `fetch-media`, `pipeline`,
-`status`) where the 15-line threshold is not crossed.
+LOW-divergence skills (`imbas-validate`, `imbas-cache`, `imbas-fetch-media`, `imbas-pipeline`,
+`imbas-status`) where the 15-line threshold is not crossed.
 
 ### Option D — Per-provider agent files
 

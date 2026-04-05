@@ -34,4 +34,4 @@ maencof 플러그인 라이브러리 진입점. 모든 공개 API를 index.ts에
 
 ## Hook Notes
 - `session-end`는 `.maencof-meta/sessions/`에 세션 요약을 저장하되, `skills_used`, `files_modified`, 누적 usage stats, stale nodes 중 하나라도 있을 때만 파일을 남긴다.
-- 활동/상태 정보가 전혀 없는 빈 세션은 요약 파일을 생성하지 않는다. 세션 종료 자체는 계속 `dailynote`에 기록되어 빈 세션 여부를 간접적으로 추론할 수 있다.
+- 활동/상태 정보가 전혀 없는 빈 세션은 요약 파일을 생성하지 않는다. 세션 종료 자체는 계속 `maencof-dailynote`에 기록되어 빈 세션 여부를 간접적으로 추론할 수 있다.

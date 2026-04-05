@@ -1,7 +1,7 @@
 /**
  * @file types/config.ts
  * @description Zod schemas for imbas config.json
- * @see skills/setup/references/init-workflow.md
+ * @see skills/imbas-setup/references/init-workflow.md
  */
 
 import { z } from 'zod';

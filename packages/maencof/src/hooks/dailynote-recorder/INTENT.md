@@ -1,4 +1,4 @@
-# dailynote-recorder
+# maencof-dailynote-recorder
 
 ## Purpose
 

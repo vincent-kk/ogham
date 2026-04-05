@@ -1,4 +1,4 @@
-# manifest-validator
+# imbas-manifest-validator
 
 ## Purpose
 매니페스트 스키마 검증 및 참조 무결성 검사.

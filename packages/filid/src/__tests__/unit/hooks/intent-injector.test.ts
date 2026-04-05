@@ -451,7 +451,7 @@ describe('injectIntent', () => {
     // Turn 1: first ctx ever → should include guide
     const turn1 = injectIntent(input);
     expect(turn1.hookSpecificOutput?.additionalContext).toContain(
-      '[filid:guide]',
+      '[filid:filid-guide]',
     );
 
     // Simulate turn boundary
@@ -463,7 +463,7 @@ describe('injectIntent', () => {
       '[filid:ctx]',
     );
     expect(turn2.hookSpecificOutput?.additionalContext).not.toContain(
-      '[filid:guide]',
+      '[filid:filid-guide]',
     );
   });
 });

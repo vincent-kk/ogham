@@ -1,4 +1,4 @@
-# review-manage -- 코드 리뷰 세션 관리 도구
+# filid-review-manage -- 코드 리뷰 세션 관리 도구
 
 ## Purpose
 

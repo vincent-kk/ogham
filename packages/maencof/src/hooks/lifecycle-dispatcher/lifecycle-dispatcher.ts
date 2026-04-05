@@ -144,7 +144,7 @@ function executeAction(action: LifecycleAction): string | null {
   switch (action.type) {
     case 'echo': {
       const message = (action.config as { message?: string }).message;
-      return message ? `[maencof:lifecycle] ${message}` : null;
+      return message ? `[maencof:maencof-lifecycle] ${message}` : null;
     }
 
     case 'remind': {
@@ -153,7 +153,7 @@ function executeAction(action: LifecycleAction): string | null {
         condition?: string;
       };
       // v1: condition is reserved for future use, always trigger
-      return config.message ? `[maencof:lifecycle] ${config.message}` : null;
+      return config.message ? `[maencof:maencof-lifecycle] ${config.message}` : null;
     }
 
     default:

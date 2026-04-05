@@ -16,15 +16,15 @@ overall abstraction.
 
 Jira-specific content lives inside each partitioned skill's
 `references/jira/**` directory. A skill without a `references/jira/`
-subdirectory is either not provider-aware (e.g. `pipeline`, `fetch-media`)
+subdirectory is either not provider-aware (e.g. `imbas-pipeline`, `imbas-fetch-media`)
 or has divergence below the 15-line threshold and handles Jira through
 inline branching in a flat file.
 
 Currently partitioned skills (RALPLAN v2 Phase C1-C5):
-- `skills/manifest/references/jira/{workflow,tools,errors}.md`
-- `skills/read-issue/references/jira/{workflow,tools,errors}.md`
-- `skills/digest/references/jira/{workflow,tools,errors}.md`
-- `skills/devplan/references/jira/{workflow,tools,errors}.md`
+- `skills/imbas-manifest/references/jira/{workflow,tools,errors}.md`
+- `skills/imbas-read-issue/references/jira/{workflow,tools,errors}.md`
+- `skills/imbas-digest/references/jira/{workflow,tools,errors}.md`
+- `skills/imbas-devplan/references/jira/{workflow,tools,errors}.md`
 
 ## Network path
 

@@ -1,4 +1,4 @@
-# manifest-plan
+# imbas-manifest-plan
 
 ## Purpose
 매니페스트 기반 실행 계획 생성 도구 핸들러.

@@ -6,7 +6,7 @@ description: >
   matching, and connection density, then generates TransitionDirectives and executes them
   via the maencof_move tool.
   Trigger phrases: "organize memory", "organize knowledge", "move document", "Layer transition",
-  "organize memory", "memory organizer", "/maencof:organize".
+  "organize memory", "memory organizer", "/maencof:maencof-organize".
 model: sonnet
 tools:
   - Read
@@ -141,5 +141,5 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Skill Participation
 
-- `/maencof:organize` — full workflow entry point
-- `/maencof:reflect` — judge module result report only (execute not run)
+- `/maencof:maencof-organize` — full workflow entry point
+- `/maencof:maencof-reflect` — judge module result report only (execute not run)

@@ -120,8 +120,8 @@ imbas skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 ### Initial Setup
 
 ```
-/imbas:setup
-/imbas:setup --project PROJ
+/imbas:imbas-setup
+/imbas:imbas-setup --project PROJ
 ```
 
 Creates `.imbas/`, sets up `config.json`, and caches your Jira project metadata (issue types, link types, workflows).
@@ -129,8 +129,8 @@ Creates `.imbas/`, sets up `config.json`, and caches your Jira project metadata 
 ### Run the Full Pipeline
 
 ```
-/imbas:pipeline ./spec.md
-/imbas:pipeline ./spec.md --project PROJ
+/imbas:imbas-pipeline ./spec.md
+/imbas:imbas-pipeline ./spec.md --project PROJ
 ```
 
 Runs validate → split → manifest-stories → devplan → manifest-devplan end-to-end with auto-approval at quality gates. This is the primary entry point for most users.
@@ -141,13 +141,13 @@ For more control, run each phase separately:
 
 ```
 # Phase 1: Validate the document
-/imbas:validate
+/imbas:imbas-validate
 
 # Phase 2: Split into Stories
-/imbas:split
+/imbas:imbas-split
 
 # Phase 3: Generate dev plan
-/imbas:devplan
+/imbas:imbas-devplan
 ```
 
 Each phase reads from the previous phase's output and writes its own manifest.
@@ -155,9 +155,9 @@ Each phase reads from the previous phase's output and writes its own manifest.
 ### Execute Manifests to Jira
 
 ```
-/imbas:manifest stories     # Create Story issues
-/imbas:manifest devplan     # Create Tasks, Subtasks, and links
-/imbas:manifest stories --dry-run   # Preview without creating
+/imbas:imbas-manifest stories     # Create Story issues
+/imbas:imbas-manifest devplan     # Create Tasks, Subtasks, and links
+/imbas:imbas-manifest stories --dry-run   # Preview without creating
 ```
 
 Manifest execution is idempotent — re-running skips already-created issues (tracked by `issue_ref` in the manifest).
@@ -165,19 +165,19 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 ### Check Pipeline Status
 
 ```
-/imbas:status              # Current run status
-/imbas:status list         # All runs for a project
-/imbas:status resume       # Resume an interrupted run
+/imbas:imbas-status              # Current run status
+/imbas:imbas-status list         # All runs for a project
+/imbas:imbas-status resume       # Resume an interrupted run
 ```
 
 ### Additional Tools
 
 ```
 # Compress a Jira issue into a structured summary comment
-/imbas:digest PROJ-123
+/imbas:imbas-digest PROJ-123
 
 # Analyze media attachments (images, videos, GIFs)
-/imbas:fetch-media <url-or-path>
+/imbas:imbas-fetch-media <url-or-path>
 ```
 
 ---
@@ -215,17 +215,17 @@ With the plugin active, these hooks fire **without user intervention**:
 
 | Skill | User-invocable | What it does |
 |-------|---------------|--------------|
-| `/imbas:setup` | Yes | Initialize `.imbas/`, configure project and Jira settings |
-| `/imbas:pipeline` | Yes | End-to-end pipeline execution with auto-approval gates |
-| `/imbas:validate` | Yes | Phase 1: Validate document for contradictions and gaps |
-| `/imbas:split` | Yes | Phase 2: Decompose document into INVEST Stories |
-| `/imbas:devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
-| `/imbas:manifest` | Yes | Execute manifests to batch-create Jira issues |
-| `/imbas:status` | Yes | View run status, list runs, resume interrupted runs |
-| `/imbas:digest` | Yes | Compress a Jira issue into a structured summary |
-| `/imbas:fetch-media` | Yes | Download and analyze media attachments |
-| `/imbas:cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
-| `/imbas:read-issue` | No | Internal: Read and structure Jira issue context |
+| `/imbas:imbas-setup` | Yes | Initialize `.imbas/`, configure project and Jira settings |
+| `/imbas:imbas-pipeline` | Yes | End-to-end pipeline execution with auto-approval gates |
+| `/imbas:imbas-validate` | Yes | Phase 1: Validate document for contradictions and gaps |
+| `/imbas:imbas-split` | Yes | Phase 2: Decompose document into INVEST Stories |
+| `/imbas:imbas-devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
+| `/imbas:imbas-manifest` | Yes | Execute manifests to batch-create Jira issues |
+| `/imbas:imbas-status` | Yes | View run status, list runs, resume interrupted runs |
+| `/imbas:imbas-digest` | Yes | Compress a Jira issue into a structured summary |
+| `/imbas:imbas-fetch-media` | Yes | Download and analyze media attachments |
+| `/imbas:imbas-cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
+| `/imbas:imbas-read-issue` | No | Internal: Read and structure Jira issue context |
 
 ---
 
@@ -295,8 +295,8 @@ During devplan:
 Modify via:
 
 ```
-/imbas:setup set-language documents=en
-/imbas:setup set-project NEWPROJ
+/imbas:imbas-setup set-language documents=en
+/imbas:imbas-setup set-project NEWPROJ
 ```
 
 ---

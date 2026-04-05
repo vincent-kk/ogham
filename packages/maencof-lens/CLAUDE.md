@@ -17,7 +17,7 @@ yarn test:run       # single run (CI)
 
 **MCP Tools (5)**: `lens_search`, `lens_context`, `lens_navigate`, `lens_read`, `lens_status`
 
-**Skills (3)**: `setup-lens` (config), `lookup` (search + read + summarize), `context` (token-budgeted assembly)
+**Skills (3)**: `maencof-lens-setup` (config), `maencof-lens-lookup` (search + read + summarize), `maencof-lens-context` (token-budgeted assembly)
 
 **Agents (1)**: `researcher` — autonomous multi-tool vault exploration
 

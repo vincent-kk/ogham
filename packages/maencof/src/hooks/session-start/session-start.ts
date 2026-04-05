@@ -56,7 +56,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     return {
       continue: true,
       message:
-        '[maencof] Vault is not initialized. Run `/maencof:setup` to get started.',
+        '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.',
     };
   }
 
@@ -96,7 +96,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath)) {
     messages.push(
-      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:checkup` to diagnose.',
+      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:maencof-checkup` to diagnose.',
     );
   }
 
@@ -109,7 +109,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       };
       if (log.pending && log.pending.length > 0) {
         messages.push(
-          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`,
+          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:maencof-organize\` to process.`,
         );
       }
     } catch {
@@ -133,12 +133,12 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     const dataSources = JSON.parse(dataSourcesRaw) as { sources?: unknown[] };
     if (!dataSources.sources || dataSources.sources.length === 0) {
       messages.push(
-        '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
+        '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
       );
     }
   } catch {
     messages.push(
-      '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
+      '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
     );
   }
 
@@ -159,7 +159,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         .join('\n');
 
       messages.push(
-        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:insight --recent 로 확인하세요.`,
+        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:maencof-insight --recent 로 확인하세요.`,
       );
 
       deletePendingNotification(cwd);
@@ -325,7 +325,7 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
       messages.push(
         `[maencof] Architecture update available (${archVersion} → ${EXPECTED_ARCHITECTURE_VERSION}).` +
           '\nL3 sub-layers (relational/structural/topical) and L5 sub-layers (buffer/boundary) are now supported.' +
-          '\nRun `/maencof:migrate` to upgrade your vault structure.',
+          '\nRun `/maencof:maencof-migrate` to upgrade your vault structure.',
       );
     }
   } catch {
@@ -343,7 +343,7 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
     if (vaultVersion !== null && vaultVersion !== VERSION) {
       messages.push(
         `[maencof] Plugin updated (${vaultVersion} → ${VERSION}).` +
-          '\nRun `/maencof:setup` to complete the migration.',
+          '\nRun `/maencof:maencof-setup` to complete the migration.',
       );
     }
   } catch {
@@ -385,7 +385,7 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 ## Memory Routing (CRITICAL)
 
 - NEVER use Claude's built-in auto-memory (<remember> tags or MEMORY.md) for knowledge the user asks to remember.
-- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:remember\` skill or \`maencof_create\` tool.
+- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:maencof-remember\` skill or \`maencof_create\` tool.
 - Claude's auto-memory is ONLY for Claude's own operational notes (tool preferences, workflow settings). All user knowledge MUST go to the maencof vault.
 
 ## Tool Mapping
@@ -407,18 +407,18 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 
 | Skill | Purpose |
 |---|---|
-| /maencof:remember | Record new knowledge |
-| /maencof:recall | Search past knowledge |
-| /maencof:explore | Explore knowledge graph |
-| /maencof:organize | Organize/review knowledge |
-| /maencof:reflect | Reflect on knowledge |
-| /maencof:insight | Manage auto-insight capture |
+| /maencof:maencof-remember | Record new knowledge |
+| /maencof:maencof-recall | Search past knowledge |
+| /maencof:maencof-explore | Explore knowledge graph |
+| /maencof:maencof-organize | Organize/review knowledge |
+| /maencof:maencof-reflect | Reflect on knowledge |
+| /maencof:maencof-insight | Manage auto-insight capture |
 
 ## Auto-Insight Capture
 
 When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
 When you detect a meaningful insight during conversation, call \`maencof_capture_insight\` to record it.
-Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:insight --recent\`.
+Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:maencof-insight --recent\`.
 After capture, display: 💡 Insight recorded to L{layer}: "{title}"
 Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
@@ -436,7 +436,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - After creating a document via \`maencof_create\`, check whether concept documents exist for each tag used.
 - A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
 - If a tag has been used 3+ times across documents but has no concept document, suggest creating one:
-  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
+  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:maencof-remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
 - Use \`kg_search\` with the tag as seed to check for existing concept documents before suggesting.
 - Do NOT auto-create concept documents — always suggest and wait for user confirmation.
 

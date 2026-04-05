@@ -123,7 +123,7 @@ describe('session-start version.json 관리', () => {
     expect(content).toContain('## Memory Routing');
     expect(content).toContain('기억해줘');
     expect(content).toContain('기억해');
-    expect(content).toContain('/maencof:remember');
+    expect(content).toContain('/maencof:maencof-remember');
     expect(content).toMatch(
       /FORBIDDEN.*built-in memory.*<remember>.*MEMORY\.md/s,
     );
@@ -153,8 +153,8 @@ describe('session-start version.json 관리', () => {
 
     const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
     expect(content).toContain('## Skills');
-    expect(content).toContain('/maencof:remember');
-    expect(content).toContain('/maencof:recall');
-    expect(content).toContain('/maencof:explore');
+    expect(content).toContain('/maencof:maencof-remember');
+    expect(content).toContain('/maencof:maencof-recall');
+    expect(content).toContain('/maencof:maencof-explore');
   });
 });

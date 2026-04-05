@@ -126,7 +126,7 @@ run_id: 20260406-001
 
 - `id` matches `^(S|T|ST)-\d+$`.
 - `type` is literal `Story`, `Task`, or `Subtask` — English anchors for parsers.
-- `status` one of five workflow states listed above.
+- `imbas-status` one of five workflow states listed above.
 - `parent` required for Subtask; null for Story/Task.
 - `epic` Story-only; omit the key entirely for Task/Subtask.
 - `links[]` array of `{type, to}` objects; see Link handling below.
@@ -143,7 +143,7 @@ run_id: 20260406-001
 (original description body, language per config.language.issue_content)
 
 ## Digest
-<!-- initially empty; /imbas:digest appends append-only entries -->
+<!-- initially empty; /imbas:imbas-digest appends append-only entries -->
 ```
 
 - `## Description` and `## Digest` are English literal section headings.
@@ -204,15 +204,15 @@ Per-target failure is tracked in the manifest link status:
   machine-readable boundary.
 
 ### status (local)
-- No change. `status` skill is provider-agnostic (0-line divergence) and
+- No change. `imbas-status` skill is provider-agnostic (0-line divergence) and
   reads `run_get`/`run_list`/`manifest_get` identically for all providers.
 
 ### cache (local)
-- **No-op.** `/imbas:setup refresh-cache` in local mode returns
+- **No-op.** `/imbas:imbas-setup refresh-cache` in local mode returns
   "cache is not applicable to local provider" and exits.
 
 ### setup (local)
-- Provider selection step added to `/imbas:setup init`.
+- Provider selection step added to `/imbas:imbas-setup init`.
 - On `local` selection: create
   `.imbas/<KEY>/issues/{stories,tasks,subtasks}/`; skip Jira metadata cache.
 - Banner warning: "Switching provider away from `local` will strand the

@@ -5,8 +5,8 @@ description: >
   for fractal architecture. Use proactively when: deciding how to split or merge
   modules based on metric evidence (LCOM4 >= 2, CC > 15), proposing restructuring
   plans, classifying directories, drafting DETAIL.md content, answering
-  /filid:context-query about structure, leading /filid:restructure Stage 1 & 4,
-  reference role for /filid:init, /filid:guide, /filid:structure-review.
+  /filid:filid-context-query about structure, leading /filid:filid-restructure Stage 1 & 4,
+  reference role for /filid:filid-init, /filid:filid-guide, /filid:filid-structure-review.
   **Delegation axis**: this agent decides the *target structure* ("what should
   change and why") — metric *measurement* during PR gates belongs to qa-reviewer.
   Trigger phrases: "design the restructure plan", "should this be split or merged",
@@ -174,7 +174,7 @@ Score: 72/100
 - Nodes requiring reclassification: N
 - Missing index files: N
 - Rule violations: N (errors: X, warnings: Y)
-- Next step: hand off proposal to restructurer / run /filid:sync
+- Next step: hand off proposal to restructurer / run /filid:filid-sync
 ```
 
 ---
@@ -211,9 +211,9 @@ Score: 72/100
 
 ## Skill Participation
 
-- `/filid:init` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate) without delegating to this agent. Invoke this agent manually for complex classification decisions.
-- `/filid:guide` — Reference role: this skill runs directly via MCP tools (fractal_scan, rule_query) without delegating to this agent. Invoke this agent manually for structural guidance.
-- `/filid:structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for deep structural or dependency analysis.
-- `/filid:context-query` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate, doc_compress) without delegating to this agent. Invoke this agent for deep architectural queries.
-- `/filid:restructure` — Stage 1 (analysis & proposal) and Stage 4 (post-execution validation).
-- `/filid:sync` — Stage 3 analysis phase: review drift-analyzer output, refine correction plan using lca_resolve.
+- `/filid:filid-init` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate) without delegating to this agent. Invoke this agent manually for complex classification decisions.
+- `/filid:filid-guide` — Reference role: this skill runs directly via MCP tools (fractal_scan, rule_query) without delegating to this agent. Invoke this agent manually for structural guidance.
+- `/filid:filid-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for deep structural or dependency analysis.
+- `/filid:filid-context-query` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate, doc_compress) without delegating to this agent. Invoke this agent for deep architectural queries.
+- `/filid:filid-restructure` — Stage 1 (analysis & proposal) and Stage 4 (post-execution validation).
+- `/filid:filid-sync` — Stage 3 analysis phase: review drift-analyzer output, refine correction plan using lca_resolve.

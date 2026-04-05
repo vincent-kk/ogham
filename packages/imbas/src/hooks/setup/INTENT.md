@@ -1,4 +1,4 @@
-# setup
+# imbas-setup
 
 ## Purpose
 SessionStart hook. 세션 시작 시 imbas 환경 초기화 및 로거 설정.

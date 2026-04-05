@@ -105,7 +105,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('/maencof:connect');
+    expect(result.message).toContain('/maencof:maencof-connect');
   });
 
   it('data-sources.json이 있고 sources에 항목이 있으면 connect 안내를 포함하지 않는다', () => {
@@ -118,7 +118,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message ?? '').not.toContain('/maencof:connect');
+    expect(result.message ?? '').not.toContain('/maencof:maencof-connect');
   });
 
   it('data-sources.json이 손상된 JSON이면 connect 안내를 포함한다', () => {
@@ -128,7 +128,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('/maencof:connect');
+    expect(result.message).toContain('/maencof:maencof-connect');
   });
 
   it('needsProvisioning=false일 때도 stale config가 migration된다', () => {

@@ -1,4 +1,4 @@
-# manifest-parser
+# imbas-manifest-parser
 
 ## Purpose
 stories/devplan 매니페스트 파일 로드 및 요약 생성.

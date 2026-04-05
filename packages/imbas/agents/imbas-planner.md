@@ -155,7 +155,7 @@ Criteria 1 or 4 failure → MUST split horizontally. Criteria 2 or 3 → refine 
 
 1. **Choose axis**: by user action, data scope, user persona, or acceptance criteria
 2. **Create new Stories**: each with own User Story/AC/Context, must independently pass INVEST + size check
-3. **Link**: original → status `split`; new Stories → `split_from` original ID; original → `split_into` new IDs
+3. **Link**: original → status `imbas-split`; new Stories → `split_from` original ID; original → `split_into` new IDs
 4. **Re-validate**: all new Stories through INVEST + size check; split again recursively if needed
 
 When splitting creates many related Stories, group under an **Epic** (umbrella pattern).

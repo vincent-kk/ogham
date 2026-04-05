@@ -13,8 +13,8 @@ var bg=Object.create;var Oo=Object.defineProperty;var Sg=Object.getOwnPropertyDe
 </vaults>
 
 <capabilities>
-- /maencof-lens:lookup <keyword> \u2014 single-doc retrieval + summary
-- /maencof-lens:context <query> \u2014 token-budgeted multi-doc assembly
+- /maencof-lens:maencof-lens-lookup <keyword> \u2014 single-doc retrieval + summary
+- /maencof-lens:maencof-lens-context <query> \u2014 token-budgeted multi-doc assembly
 - "vault research" or "vault explore" \u2014 autonomous researcher agent
 </capabilities>
 

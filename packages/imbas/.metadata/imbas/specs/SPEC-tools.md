@@ -54,7 +54,7 @@ Source: `packages/imbas/src/mcp/server/server.ts` (`EXPECTED_TOOLS`).
 | `cache_get` | Read Jira metadata cache (issue types, link types, workflows) |
 | `cache_set` | Write/refresh Jira metadata cache |
 
-Local provider treats cache as a no-op; `/imbas:setup refresh-cache`
+Local provider treats cache as a no-op; `/imbas:imbas-setup refresh-cache`
 short-circuits in local mode.
 
 ### AST analysis

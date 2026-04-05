@@ -1,4 +1,4 @@
-# insight-stats
+# maencof-insight-stats
 
 ## Purpose
 

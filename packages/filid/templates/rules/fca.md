@@ -180,6 +180,6 @@ Before any implementation that touches a fractal module:
 2. Update DETAIL.md with new or changed requirements.
 3. Update INTENT.md if the module's public interface or boundaries change.
 4. Implement the change.
-5. Run `/filid:scan` to confirm no new violations.
+5. Run `/filid:filid-scan` to confirm no new violations.
 
-Use `/filid:sync` for structural drift, `/filid:init` for project initialization, `/filid:review` for architectural review.
+Use `/filid:filid-sync` for structural drift, `/filid:filid-init` for project initialization, `/filid:filid-review` for architectural review.

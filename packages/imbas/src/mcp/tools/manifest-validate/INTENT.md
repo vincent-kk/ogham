@@ -1,4 +1,4 @@
-# manifest-validate
+# imbas-manifest-validate
 
 ## Purpose
 매니페스트 검증 도구 핸들러.

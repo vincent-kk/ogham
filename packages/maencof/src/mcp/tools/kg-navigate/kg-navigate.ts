@@ -144,7 +144,7 @@ export async function handleKgNavigate(
 ): Promise<KgNavigateResult | { error: string }> {
   if (!graph) {
     return {
-      error: 'Index not built. Please run /maencof:build first.',
+      error: 'Index not built. Please run /maencof:maencof-build first.',
     };
   }
 

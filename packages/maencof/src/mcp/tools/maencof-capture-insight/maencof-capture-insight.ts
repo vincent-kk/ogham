@@ -42,7 +42,7 @@ export async function handleCaptureInsight(
       return {
         success: false,
         path: '',
-        message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:insight --max N to increase.`,
+        message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:maencof-insight --max N to increase.`,
       };
     }
   }

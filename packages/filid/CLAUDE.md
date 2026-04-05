@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
 Layer 2 (도구)  → MCP Server (16개 분석/관리 도구)
 Layer 3 (에이전트) → 7개 특화 에이전트 (architect, implementer, QA 등)
-Layer 4 (사용자) → 17개 Skills (/filid:init, /filid:review 등)
+Layer 4 (사용자) → 17개 Skills (/filid:filid-init, /filid:filid-review 등)
 ```
 
 ## Commands
@@ -81,7 +81,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ### Skills (17)
 
-`review` (다중 페르소나 리뷰), `scan` (위반 스캔), `init`, `sync`, `structure-review`, `promote`, `restructure`, `resolve`, `revalidate`, `guide`, `context-query`, `update` (문서/테스트 동기화), `pull-request` (FCA-aware PR 자동 생성), `pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `ast-fallback` (LLM AST 패턴 매칭), `config` (설정 관리)
+`filid-review` (다중 페르소나 리뷰), `filid-scan` (위반 스캔), `filid-init`, `filid-sync`, `filid-structure-review`, `filid-promote`, `filid-restructure`, `filid-resolve`, `filid-revalidate`, `filid-guide`, `filid-context-query`, `filid-update` (문서/테스트 동기화), `filid-pull-request` (FCA-aware PR 자동 생성), `filid-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `filid-migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `filid-ast-fallback` (LLM AST 패턴 매칭), `filid-config` (설정 관리)
 
 ## References
 

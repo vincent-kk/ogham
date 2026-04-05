@@ -1,4 +1,4 @@
-# cache-manager
+# imbas-cache-manager
 
 ## Purpose
 Jira 메타데이터 캐시 관리. TTL 기반 만료 검사 및 캐시 CRUD 제공.

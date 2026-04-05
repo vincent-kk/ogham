@@ -112,10 +112,10 @@ Claude Code **project-scope** configuration specialist. Identifies user intent t
 
 ## Skill Participation
 
-- `/maencof:configure` — Unified configuration entry point
-- `/maencof:bridge` — MCP bridge workflow
-- `/maencof:craft-skill` — Skill creation
-- `/maencof:craft-agent` — Agent creation
-- `/maencof:instruct` — CLAUDE.md management
-- `/maencof:rule` — Rule management
-- `/maencof:lifecycle` — Lifecycle management
+- `/maencof:maencof-configure` — Unified configuration entry point
+- `/maencof:maencof-bridge` — MCP bridge workflow
+- `/maencof:maencof-craft-skill` — Skill creation
+- `/maencof:maencof-craft-agent` — Agent creation
+- `/maencof:maencof-instruct` — CLAUDE.md management
+- `/maencof:maencof-rule` — Rule management
+- `/maencof:maencof-lifecycle` — Lifecycle management

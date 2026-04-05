@@ -1,4 +1,4 @@
-# dailynote-writer
+# maencof-dailynote-writer
 
 ## Purpose
 

@@ -1,4 +1,4 @@
-# dailynote-read
+# maencof-dailynote-read
 
 ## Purpose
 

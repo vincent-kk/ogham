@@ -1,4 +1,4 @@
-# insight-injector
+# maencof-insight-injector
 
 ## Purpose
 

@@ -168,6 +168,6 @@ Never make out-of-scope structural decisions as a shortcut.
 
 ## Skill Participation
 
-- `/filid:restructure` — Stage 3 (execution of approved plan: file moves, renames, index.ts creation, import path updates).
-- `/filid:sync` — Stage 4 (correction execution after drift-analyzer + fractal-architect approval).
-- `/filid:update` — Stage 2: correction execution when critical/high violations are detected.
+- `/filid:filid-restructure` — Stage 3 (execution of approved plan: file moves, renames, index.ts creation, import path updates).
+- `/filid:filid-sync` — Stage 4 (correction execution after drift-analyzer + fractal-architect approval).
+- `/filid:filid-update` — Stage 2: correction execution when critical/high violations are detected.

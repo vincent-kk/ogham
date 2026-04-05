@@ -69,7 +69,7 @@ ImbasConfigSchema = z.object({
   ambient `gh auth` — no token field. On `gh label create` 403, the
   manifest skill fails fast with a scoped error and calls
   `run_transition` to the `blocked` state; see `SPEC-provider-github.md`.
-- **`media`**: `scene-sieve` configuration for `/imbas:fetch-media`. Jira
+- **`media`**: `scene-sieve` configuration for `/imbas:imbas-fetch-media`. Jira
   mode only in v1.
 
 ## Example: local-mode config.json

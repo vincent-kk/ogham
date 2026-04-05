@@ -1,4 +1,4 @@
-# config-loader -- .filid/config.json 로딩, 프로젝트 초기화
+# filid-config-loader -- .filid/config.json 로딩, 프로젝트 초기화
 
 ## Purpose
 

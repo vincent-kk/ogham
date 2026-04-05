@@ -358,7 +358,7 @@ export function removeFractalMap(cwd: string, sessionId: string): void {
 }
 
 /**
- * Check if [filid:guide] has been injected in this session.
+ * Check if [filid:filid-guide] has been injected in this session.
  */
 export function hasGuideInjected(sessionId: string, cwd: string): boolean {
   const filePath = join(getCacheDir(cwd), `guide-${sessionIdHash(sessionId)}`);
@@ -370,7 +370,7 @@ export function hasGuideInjected(sessionId: string, cwd: string): boolean {
 }
 
 /**
- * Mark [filid:guide] as injected for this session.
+ * Mark [filid:filid-guide] as injected for this session.
  */
 export function markGuideInjected(sessionId: string, cwd: string): void {
   const cacheDir = getCacheDir(cwd);

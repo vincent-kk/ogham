@@ -43,17 +43,17 @@ Default provider is `jira` for backward compatibility. Selection is via
 
 Five skills form the core pipeline:
 
-1. `validate` — document coherence/consistency/feasibility check
-2. `split` — decompose into Stories
-3. `devplan` — generate EARS Subtasks + extract cross-Story Tasks
-4. `manifest` — batch-create tracker entities from stories/devplan manifests
-5. `digest` / `status` — compress discussion context / show run progress
+1. `imbas-validate` — document coherence/consistency/feasibility check
+2. `imbas-split` — decompose into Stories
+3. `imbas-devplan` — generate EARS Subtasks + extract cross-Story Tasks
+4. `imbas-manifest` — batch-create tracker entities from stories/devplan manifests
+5. `imbas-digest` / `imbas-status` — compress discussion context / show run progress
 
-Provider-aware skills (`manifest`, `read-issue`, `digest`, `devplan`) carry
+Provider-aware skills (`imbas-manifest`, `imbas-read-issue`, `imbas-digest`, `imbas-devplan`) carry
 the `<!-- imbas:constraints-v1 -->` anchor block in their `SKILL.md` and
 partition their `references/` directory into `jira/` and `local/`
-subdirectories. Skills with <15-line provider divergence (`validate`, `cache`,
-`fetch-media`, `pipeline`, `status`) are NOT partitioned and handle any
+subdirectories. Skills with <15-line provider divergence (`imbas-validate`, `imbas-cache`,
+`imbas-fetch-media`, `imbas-pipeline`, `imbas-status`) are NOT partitioned and handle any
 divergence via inline branching in prose. See `specs/SPEC-skills.md` for the
 per-skill divergence table.
 

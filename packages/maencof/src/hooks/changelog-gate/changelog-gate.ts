@@ -124,7 +124,7 @@ export function runChangelogGate(
       changeList,
       '',
       '세션을 종료하기 전에 changelog를 기록해주세요:',
-      '1. /maencof:changelog 스킬을 실행하여 변경사항을 기록하세요',
+      '1. /maencof:maencof-changelog 스킬을 실행하여 변경사항을 기록하세요',
       '2. 변경사항을 commit하세요',
       '3. 마커 파일이 자동 생성되면 세션을 종료할 수 있습니다',
     ].join('\n');

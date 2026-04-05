@@ -110,7 +110,7 @@ Parser implementation: `src/providers/github/parse-links.ts`.
 
 ### `<!-- imbas:digest -->` comment marker (§1.8)
 
-`/imbas:digest` posts to GitHub via `gh issue comment` with a leading
+`/imbas:imbas-digest` posts to GitHub via `gh issue comment` with a leading
 HTML comment marker:
 
 ```markdown
@@ -120,7 +120,7 @@ HTML comment marker:
 ```
 
 **Collision policy: last-wins.** When multiple marked comments exist,
-`read-issue` treats the comment with the most recent `created_at` as
+`imbas-read-issue` treats the comment with the most recent `created_at` as
 canonical. `digest --update` PATCHes the last marked comment via
 `gh issue comment --edit-last` (or resolved comment id).
 
@@ -207,7 +207,7 @@ The `repo` field is required at parse time only when
 
 - `gh issue comment <n> --body-file -` with body starting with
   `<!-- imbas:digest -->\n...`.
-- `/imbas:digest --update` uses `gh issue comment <n> --edit-last ...`
+- `/imbas:imbas-digest --update` uses `gh issue comment <n> --edit-last ...`
   (edits the most recent comment from the same author — the imbas
   marker guarantees it is the canonical digest).
 

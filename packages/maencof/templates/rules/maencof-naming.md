@@ -56,7 +56,7 @@ Knowledge nodes should remain atomic to improve graph traversal efficiency.
 ```
 ⚠️ Document exceeds 100 lines (current: {lines} lines)
    Target: {path}
-   Consider splitting: auto-split available via /maencof:organize
+   Consider splitting: auto-split available via /maencof:maencof-organize
 ```
 
 ### R4. Directory Naming Rules
@@ -77,7 +77,7 @@ Layer root directories are fixed: `01_Core`, `02_Derived`, `03_External`, `04_Ac
 ## Auto-fix
 
 - **R1/R2 violations**: Automatically convert filename to kebab-case (after user confirmation)
-- **R3 violations**: Auto-fix not available; guided splitting via `/maencof:organize` skill
+- **R3 violations**: Auto-fix not available; guided splitting via `/maencof:maencof-organize` skill
 - **R4 violations**: Automatically convert directory name to kebab-case (after user confirmation)
 
 ## Exceptions

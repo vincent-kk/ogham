@@ -1,7 +1,7 @@
 /**
  * @file core/config-manager.ts
  * @description Config.json CRUD with dot-path access
- * @see skills/setup/references/init-workflow.md
+ * @see skills/imbas-setup/references/init-workflow.md
  */
 
 import { join } from 'node:path';

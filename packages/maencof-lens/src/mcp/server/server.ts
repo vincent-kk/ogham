@@ -25,7 +25,7 @@ export function createLensServer(configRoot: string) {
   }
 
   const resolveVault = (vaultName?: string) => {
-    if (!router) throw new Error('No .maencof-lens/config.json found. Run /maencof-lens:setup-lens to configure.');
+    if (!router) throw new Error('No .maencof-lens/config.json found. Run /maencof-lens:maencof-lens-setup to configure.');
     return router.resolve(vaultName);
   };
 

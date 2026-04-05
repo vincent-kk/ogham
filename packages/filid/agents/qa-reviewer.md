@@ -6,7 +6,7 @@ description: >
   LCOM4 / cyclomatic complexity against PR gate thresholds, checking 3+12 test
   rule compliance, validating INTENT.md line limits and 3-tier structure,
   detecting organ boundary violations, performing security/lint review,
-  reference role for /filid:scan and /filid:structure-review.
+  reference role for /filid:filid-scan and /filid:filid-structure-review.
   **Delegation axis**: this agent *measures* metrics on implemented code and
   emits pass/fail verdicts — metric-driven redesign ("should this be split")
   belongs to fractal-architect.
@@ -217,7 +217,7 @@ Date: <ISO 8601>
 
 ## Skill Participation
 
-- `/filid:scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
-- `/filid:structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for extended QA analysis across the 6 stages.
-- `/filid:promote` — Phase 1 (discovery), Phase 2 (eligibility), Phase 3 (analysis), Phase 5 (validation)
-- `/filid:update` — Stage 1: branch diff-based violation scan.
+- `/filid:filid-scan` — Reference role: this skill runs directly via MCP tools (fractal_scan, test_metrics) without delegating to this agent. Invoke manually for extended QA analysis.
+- `/filid:filid-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for extended QA analysis across the 6 stages.
+- `/filid:filid-promote` — Phase 1 (discovery), Phase 2 (eligibility), Phase 3 (analysis), Phase 5 (validation)
+- `/filid:filid-update` — Stage 1: branch diff-based violation scan.

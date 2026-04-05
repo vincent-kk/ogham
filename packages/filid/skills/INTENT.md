@@ -8,23 +8,23 @@
 
 | 경로 | 역할 |
 |------|------|
-| `init/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
-| `review/` | 다중 페르소나 합의 기반 코드 리뷰 |
-| `scan/` | FCA-AI 규칙 위반 스캔 |
-| `resolve/` | 리뷰 Fix Request 해결 워크플로우 |
-| `revalidate/` | 수정 후 델타 기반 재검증 |
-| `update/` | 코드-문서-테스트 동기화 |
-| `pull-request/` | FCA-aware PR 자동 생성 |
-| `pipeline/` | PR→리뷰→리졸브→재검증 파이프라인 |
-| `sync/` | 구조 드리프트 감지 및 보정 |
-| `restructure/` | 프랙탈 원칙 기반 구조 재편 |
-| `structure-review/` | 6단계 PR 구조 검증 |
-| `guide/` | 디렉토리별 프랙탈 가이드 생성 |
-| `context-query/` | FCA-AI 컨텍스트 모듈/규칙 조회 |
-| `promote/` | test.ts → spec.ts 승격 |
-| `migrate/` | CLAUDE.md → INTENT.md 마이그레이션 |
-| `ast-fallback/` | LLM AST 패턴 매칭 폴백 |
-| `config/` | `.filid/config.json` 설정 관리 (show/set/reset) |
+| `filid-init/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
+| `filid-review/` | 다중 페르소나 합의 기반 코드 리뷰 |
+| `filid-scan/` | FCA-AI 규칙 위반 스캔 |
+| `filid-resolve/` | 리뷰 Fix Request 해결 워크플로우 |
+| `filid-revalidate/` | 수정 후 델타 기반 재검증 |
+| `filid-update/` | 코드-문서-테스트 동기화 |
+| `filid-pull-request/` | FCA-aware PR 자동 생성 |
+| `filid-pipeline/` | PR→리뷰→리졸브→재검증 파이프라인 |
+| `filid-sync/` | 구조 드리프트 감지 및 보정 |
+| `filid-restructure/` | 프랙탈 원칙 기반 구조 재편 |
+| `filid-structure-review/` | 6단계 PR 구조 검증 |
+| `filid-guide/` | 디렉토리별 프랙탈 가이드 생성 |
+| `filid-context-query/` | FCA-AI 컨텍스트 모듈/규칙 조회 |
+| `filid-promote/` | test.ts → spec.ts 승격 |
+| `filid-migrate/` | CLAUDE.md → INTENT.md 마이그레이션 |
+| `filid-ast-fallback/` | LLM AST 패턴 매칭 폴백 |
+| `filid-config/` | `.filid/config.json` 설정 관리 (show/set/reset) |
 
 ## Conventions
 

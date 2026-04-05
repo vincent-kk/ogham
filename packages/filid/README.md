@@ -48,8 +48,8 @@ filid skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 ### Initialize a Project
 
 ```
-/filid:init
-/filid:init ./packages/my-app
+/filid:filid-init
+/filid:filid-init ./packages/my-app
 ```
 
 Scans directories and generates `INTENT.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
@@ -57,9 +57,9 @@ Scans directories and generates `INTENT.md` boundary documents for each module. 
 ### Find and Fix Violations
 
 ```
-/filid:scan
-/filid:scan src/core 쪽만 봐줘
-/filid:scan 고칠 수 있는 건 고쳐줘
+/filid:filid-scan
+/filid:filid-scan src/core 쪽만 봐줘
+/filid:filid-scan 고칠 수 있는 건 고쳐줘
 ```
 
 Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in organ directories, etc.
@@ -67,9 +67,9 @@ Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in or
 ### Sync Documentation After Code Changes
 
 ```
-/filid:sync
-/filid:sync 바뀌는 것만 미리 보여줘
-/filid:sync critical 이상만 처리해줘
+/filid:filid-sync
+/filid:filid-sync 바뀌는 것만 미리 보여줘
+/filid:filid-sync critical 이상만 처리해줘
 ```
 
 Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Uses `drift-detect` MCP tool internally.
@@ -77,8 +77,8 @@ Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Use
 ### Full Project Structure Check
 
 ```
-/filid:structure-review
-/filid:structure-review 3단계만 실행해줘
+/filid:filid-structure-review
+/filid:filid-structure-review 3단계만 실행해줘
 ```
 
 Scans the **entire project** across 6 stages: boundary check → document validation → dependency analysis → test metrics → complexity assessment → final verdict.
@@ -91,26 +91,26 @@ The most powerful feature. A multi-persona consensus committee reviews only the 
 
 ```
 # Review current branch
-/filid:review
+/filid:filid-review
 
 # Review a specific PR
-/filid:review https://github.com/owner/repo/pull/123
+/filid:filid-review https://github.com/owner/repo/pull/123
 
 # Force restart (discard previous review)
-/filid:review 처음부터 다시 해줘
+/filid:filid-review 처음부터 다시 해줘
 
 # After review — handle fix requests
-/filid:resolve
+/filid:filid-resolve
 
 # After fixes — final verdict
-/filid:revalidate
+/filid:filid-revalidate
 ```
 
 **Flow:**
 
-1. **`/filid:review`** — Structure check (diff) → committee election → technical verification → consensus → review report
-2. **`/filid:resolve`** — Accept or reject each fix request (with justification for rejections)
-3. **`/filid:revalidate`** — Final PASS/FAIL verdict after fixes
+1. **`/filid:filid-review`** — Structure check (diff) → committee election → technical verification → consensus → review report
+2. **`/filid:filid-resolve`** — Accept or reject each fix request (with justification for rejections)
+3. **`/filid:filid-revalidate`** — Final PASS/FAIL verdict after fixes
 
 Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 
@@ -122,16 +122,16 @@ Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 ### Learn About FCA-AI
 
 ```
-/filid:guide
-/filid:guide fractal 구조에 대해 알려줘
-/filid:context-query organ 디렉토리에서 뭘 할 수 있어?
+/filid:filid-guide
+/filid:filid-guide fractal 구조에 대해 알려줘
+/filid:filid-context-query organ 디렉토리에서 뭘 할 수 있어?
 ```
 
 ### Improve Module Structure
 
 ```
-/filid:restructure ./src/core
-/filid:promote
+/filid:filid-restructure ./src/core
+/filid:filid-promote
 ```
 
 ---
@@ -155,17 +155,17 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 | Skill                         | Scope             | What it does                                               |
 | ----------------------------- | ----------------- | ---------------------------------------------------------- |
-| `/filid:init`             | —                 | Initialize FCA-AI in a project                             |
-| `/filid:scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
-| `/filid:sync`             | Full project      | Sync documentation with code changes                       |
-| `/filid:structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
-| `/filid:promote`          | —                 | Promote stable tests to spec                               |
-| `/filid:context-query`    | —                 | Q&A about project structure                                |
-| `/filid:guide`            | —                 | FCA-AI guidance on any topic                               |
-| `/filid:restructure`      | —                 | Module refactoring guide with migration steps              |
-| `/filid:review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
-| `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
-| `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
+| `/filid:filid-init`             | —                 | Initialize FCA-AI in a project                             |
+| `/filid:filid-scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
+| `/filid:filid-sync`             | Full project      | Sync documentation with code changes                       |
+| `/filid:filid-structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
+| `/filid:filid-promote`          | —                 | Promote stable tests to spec                               |
+| `/filid:filid-context-query`    | —                 | Q&A about project structure                                |
+| `/filid:filid-guide`            | —                 | FCA-AI guidance on any topic                               |
+| `/filid:filid-restructure`      | —                 | Module refactoring guide with migration steps              |
+| `/filid:filid-review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
+| `/filid:filid-resolve`          | —                 | Resolve fix requests from a review                         |
+| `/filid:filid-revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
 
 ---
 

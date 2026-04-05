@@ -19,26 +19,26 @@ Partitioning threshold: partition when per-provider delta exceeds
 
 | Skill         | Delta        | Status (v1.2)        | Notes |
 |---------------|--------------|----------------------|-------|
-| `manifest`    | ~60 lines    | **PARTITIONED** (jira, local, github) | create-issue vs file-write vs gh CLI + bidirectional links + body `## Links` section |
-| `read-issue`  | ~30 lines    | **PARTITIONED** (jira, local, github) | `getJiraIssue` vs `Glob+Read+frontmatter` vs `gh issue view --json` + digest last-wins |
-| `digest`      | ~20 lines    | **PARTITIONED** (jira, local, github) | comment vs `## Digest` append vs `gh issue comment` + HTML marker |
-| `devplan`     | 36 lines     | **PARTITIONED** (jira, local, github) | feedback_comment target_ref + final message; measured 2026-04-06 during v1.2 cycle via `diff -u jira local \| grep -E '^[+-]' \| wc -l` (36 > 15 threshold — partition retained for github) |
-| `status`      | 0 lines      | **INLINE / no split**| Planned ~45 lines, actual 0. Reads only run/manifest state. |
-| `split`       | ~18 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
-| `setup`       | ~22 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
-| `validate`    | ~8 lines     | **INLINE**           | Below threshold |
-| `cache`       | ~5 lines     | **INLINE**           | Local is a one-line no-op guard |
-| `fetch-media` | 0 lines      | **UNTOUCHED**        | Confluence-specific, Jira-only in v1 |
-| `pipeline`    | 0 lines      | **UNTOUCHED**        | Orchestrator; propagates `config.provider` |
+| `imbas-manifest`    | ~60 lines    | **PARTITIONED** (jira, local, github) | create-issue vs file-write vs gh CLI + bidirectional links + body `## Links` section |
+| `imbas-read-issue`  | ~30 lines    | **PARTITIONED** (jira, local, github) | `getJiraIssue` vs `Glob+Read+frontmatter` vs `gh issue view --json` + digest last-wins |
+| `imbas-digest`      | ~20 lines    | **PARTITIONED** (jira, local, github) | comment vs `## Digest` append vs `gh issue comment` + HTML marker |
+| `imbas-devplan`     | 36 lines     | **PARTITIONED** (jira, local, github) | feedback_comment target_ref + final message; measured 2026-04-06 during v1.2 cycle via `diff -u jira local \| grep -E '^[+-]' \| wc -l` (36 > 15 threshold — partition retained for github) |
+| `imbas-status`      | 0 lines      | **INLINE / no split**| Planned ~45 lines, actual 0. Reads only run/manifest state. |
+| `imbas-split`       | ~18 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
+| `imbas-setup`       | ~22 lines    | **INLINE** (borderline) | Re-evaluate if divergence grows |
+| `imbas-validate`    | ~8 lines     | **INLINE**           | Below threshold |
+| `imbas-cache`       | ~5 lines     | **INLINE**           | Local is a one-line no-op guard |
+| `imbas-fetch-media` | 0 lines      | **UNTOUCHED**        | Confluence-specific, Jira-only in v1 |
+| `imbas-pipeline`    | 0 lines      | **UNTOUCHED**        | Orchestrator; propagates `config.provider` |
 
 ### Deviation from plan
 
-The plan's Phase C table estimated `status` at ~45-line divergence.
+The plan's Phase C table estimated `imbas-status` at ~45-line divergence.
 Inspection during Phase C4 showed the actual delta is 0 lines because
-`status` reads only `run_get`, `run_list`, `manifest_get` — all
+`imbas-status` reads only `run_get`, `run_list`, `manifest_get` — all
 provider-agnostic — and displays counts derived from `issue_ref`
 presence, which is provider-agnostic by schema. Documented at the top of
-`skills/status/references/subcommands.md` as an honest deviation.
+`skills/imbas-status/references/subcommands.md` as an honest deviation.
 Partitioning was skipped for this skill.
 
 ## Reference directory layout — standard (partitioned skills)
@@ -122,10 +122,10 @@ directives are fixed.
 
 ## Partitioned skill list (pinned)
 
-- `manifest`
-- `read-issue`
-- `digest`
-- `devplan`
+- `imbas-manifest`
+- `imbas-read-issue`
+- `imbas-digest`
+- `imbas-devplan`
 
 Any change to this list (promoting a borderline skill, demoting a
 partitioned skill, or adding GitHub) requires updating both the test's

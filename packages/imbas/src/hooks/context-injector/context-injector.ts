@@ -39,7 +39,7 @@ export function processContextInjector(input: UserPromptSubmitInput): HookOutput
       continue: true,
       hookSpecificOutput: {
         hookEventName: 'UserPromptSubmit',
-        additionalContext: `[imbas] Active run: ${latestRun} (project: ${projectKey}, phase: ${phase}, status: ${phaseStatus}). Use /imbas:status for details.`,
+        additionalContext: `[imbas] Active run: ${latestRun} (project: ${projectKey}, phase: ${phase}, status: ${phaseStatus}). Use /imbas:imbas-status for details.`,
       },
     };
   } catch {

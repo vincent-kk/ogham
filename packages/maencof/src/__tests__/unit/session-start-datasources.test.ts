@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { runSessionStart } from '../../hooks/session-start/session-start.js';
 
 const CONNECT_MSG =
-  '[maencof] No external data sources connected. Run `/maencof:connect` to set up.';
+  '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.';
 
 function createTempVault(): string {
   const dir = join(tmpdir(), `maencof-ds-test-${Date.now()}`);
