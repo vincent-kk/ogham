@@ -1,6 +1,6 @@
 {
   "name": "imbas",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "Imbas — Jira pipeline planning plugin for Claude Code. Validates documents, splits into Stories, generates Subtasks, and batch-creates Jira issues.",
   "author": {
     "name": "Vincent K. Kelvin"
