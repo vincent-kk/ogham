@@ -48,6 +48,7 @@ ImbasConfigSchema = z.object({
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
   jira:     JiraConfigSchema.default({}),
+  github:   GithubConfigSchema.optional(),                          // ← since v1.2
   media:    MediaConfigSchema.default({}),
 });
 ```
@@ -61,7 +62,13 @@ ImbasConfigSchema = z.object({
 - **`language`**: issue content / documents / reports / skill language
   defaults. Provider-agnostic.
 - **`jira`**: issue types, workflow states, link types. Used only in Jira
-  mode; ignored by the local provider.
+  mode; ignored by the local/github providers.
+- **`github`** (added by v1.2 cycle, optional): `repo` (`owner/name`),
+  `defaultLabels` (array, default `[]`), `linkTypes` (enum array, default
+  all 5). Required when `provider === "github"`. Authentication uses
+  ambient `gh auth` — no token field. On `gh label create` 403, the
+  manifest skill fails fast with a scoped error and calls
+  `run_transition` to the `blocked` state; see `SPEC-provider-github.md`.
 - **`media`**: `scene-sieve` configuration for `/imbas:fetch-media`. Jira
   mode only in v1.
 
@@ -96,6 +103,26 @@ Result: issues are stored under `.imbas/MYPROJ/issues/{stories,tasks,subtasks}/`
 
 When the `provider` field is omitted, `ImbasConfigSchema.parse()` fills in
 `"jira"` by default — existing v1.0 configs work unchanged.
+
+## Example: github-mode config.json (since v1.2)
+
+```json
+{
+  "version": "1.0",
+  "provider": "github",
+  "language": { "documents": "ko", "issue_content": "ko" },
+  "defaults": { "project_ref": "ogham-org/ogham-app" },
+  "github": {
+    "repo": "ogham-org/ogham-app",
+    "defaultLabels": ["imbas"],
+    "linkTypes": ["blocks", "blocked-by", "split-from", "split-into", "relates"]
+  }
+}
+```
+
+Result: issues are created in `ogham-org/ogham-app`, tagged with
+`imbas` + auto-managed `type:*` / `status:*` labels. No files are
+written under `.imbas/<KEY>/issues/` — that tree is local-provider only.
 
 ## `config_get` / `config_set` tools
 

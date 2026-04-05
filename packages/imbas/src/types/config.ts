@@ -78,6 +78,37 @@ export const JiraConfigSchema = z.object({
 });
 export type JiraConfig = z.infer<typeof JiraConfigSchema>;
 
+export const GithubLinkTypeSchema = z.enum([
+  'blocks',
+  'blocked-by',
+  'split-from',
+  'split-into',
+  'relates',
+]);
+export type GithubLinkType = z.infer<typeof GithubLinkTypeSchema>;
+
+/**
+ * GitHub provider config. Only consulted when `provider === 'github'`.
+ * Authentication is delegated to ambient `gh auth` — no token field.
+ *
+ * - `repo`: `owner/name` target repository for all imbas-managed issues.
+ * - `defaultLabels`: extra labels applied to every created issue on top
+ *   of the auto-managed `type:*` and `status:*` labels.
+ * - `linkTypes`: allowed link type keys for the body `## Links` section.
+ */
+export const GithubConfigSchema = z.object({
+  repo: z.string(),
+  defaultLabels: z.array(z.string()).default([]),
+  linkTypes: z.array(GithubLinkTypeSchema).default([
+    'blocks',
+    'blocked-by',
+    'split-from',
+    'split-into',
+    'relates',
+  ]),
+});
+export type GithubConfig = z.infer<typeof GithubConfigSchema>;
+
 export const MediaConfigSchema = z.object({
   scene_sieve_command: z.string().default('npx -y @lumy-pack/scene-sieve'),
   temp_dir: z.string().default('.imbas/.temp'),
@@ -92,6 +123,7 @@ export const ImbasConfigSchema = z.object({
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
+  github: GithubConfigSchema.optional(),
   media: MediaConfigSchema.default({}),
 });
 export type ImbasConfig = z.infer<typeof ImbasConfigSchema>;

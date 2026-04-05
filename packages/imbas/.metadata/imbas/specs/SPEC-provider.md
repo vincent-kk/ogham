@@ -113,8 +113,7 @@ content):
 
 - Jira executor content → each skill's `references/jira/**` (see `SPEC-provider-jira.md`)
 - Local executor content → each skill's `references/local/**` (see `SPEC-provider-local.md`)
-- GitHub executor content → deferred; see
-  `.omc/plans/imbas-github-provider-handoff.md`
+- GitHub executor content → each skill's `references/github/**` (see `SPEC-provider-github.md`)
 
 ## Enforcement
 
