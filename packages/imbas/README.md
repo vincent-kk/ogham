@@ -36,7 +36,7 @@ claude --plugin-dir ./packages/imbas
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (16 pipeline tools)
+- `bridge/mcp-server.cjs` — MCP server (15 pipeline tools)
 - `bridge/*.mjs` — 5 hook scripts (automatic lifecycle management)
 
 ---
@@ -207,7 +207,7 @@ With the plugin active, these hooks fire **without user intervention**:
 | Read/Write/Edit a file | Validates tool inputs | Prevents invalid operations on `.imbas/` state files |
 | Sub-agent starting | Injects role restrictions | Prevents agents from overstepping assigned phase |
 | User submits a prompt | Injects run/manifest context | Agents are aware of current pipeline state |
-| Session ends | Cleans up temp files | Removes `.imbas/.temp/` working directory |
+| Session ends | Placeholder (no auto-cleanup) | `.imbas/.temp/` persists; clean manually if needed |
 
 ---
 

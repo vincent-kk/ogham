@@ -14,6 +14,9 @@ Step 1 — Load Run & Manifest Checks
   4. Check Story statuses:
      - All "created" (issue_ref present) → proceed.
      - Any "pending" → block: "Execute stories manifest first: /imbas:manifest stories"
+     - Exception (E2-3): if split.status == "escaped" && split.escape_code == "E2-3",
+       a single pending Story is the expected upstream state (no Jira writes yet).
+       Proceed without blocking. See preconditions.md "Exception — E2-3 escape upstream".
   5. Call run_transition:
      - action: "start_phase", phase: "devplan"
      → Sets devplan.status = "in_progress", current_phase = "devplan"
