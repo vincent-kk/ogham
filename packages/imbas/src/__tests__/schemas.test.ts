@@ -6,7 +6,7 @@ import {
   EscapeCodeSchema,
   PhaseStatusSchema,
 } from '../types/state.js';
-import { ImbasConfigSchema } from '../types/config.js';
+import { ImbasConfigSchema, ProviderSchema } from '../types/config.js';
 import { StoriesManifestSchema, DevplanManifestSchema } from '../types/manifest.js';
 import { CachedAtSchema } from '../types/cache.js';
 
@@ -143,6 +143,45 @@ describe('ImbasConfigSchema', () => {
   it('rejects negative max_frames', () => {
     const result = ImbasConfigSchema.safeParse({ media: { max_frames: -1 } });
     expect(result.success).toBe(false);
+  });
+
+  it('defaults provider to jira', () => {
+    const result = ImbasConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.provider).toBe('jira');
+  });
+
+  it('accepts provider: local', () => {
+    const result = ImbasConfigSchema.safeParse({ provider: 'local' });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.provider).toBe('local');
+  });
+
+  it('accepts provider: github', () => {
+    const result = ImbasConfigSchema.safeParse({ provider: 'github' });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects unknown provider', () => {
+    const result = ImbasConfigSchema.safeParse({ provider: 'bitbucket' });
+    expect(result.success).toBe(false);
+  });
+});
+
+// --- ProviderSchema ---
+
+describe('ProviderSchema', () => {
+  it('accepts exactly jira, github, local', () => {
+    expect(ProviderSchema.safeParse('jira').success).toBe(true);
+    expect(ProviderSchema.safeParse('github').success).toBe(true);
+    expect(ProviderSchema.safeParse('local').success).toBe(true);
+  });
+
+  it('rejects case-sensitive mismatch', () => {
+    expect(ProviderSchema.safeParse('Jira').success).toBe(false);
+    expect(ProviderSchema.safeParse('LOCAL').success).toBe(false);
   });
 });
 

@@ -52,6 +52,7 @@ export type {
 
 // Config types
 export {
+  ProviderSchema,
   LanguageConfigSchema,
   LlmModelConfigSchema,
   SubtaskLimitsSchema,
@@ -61,6 +62,7 @@ export {
   ImbasConfigSchema,
 } from './config.js';
 export type {
+  Provider,
   LanguageConfig,
   LlmModelConfig,
   SubtaskLimits,

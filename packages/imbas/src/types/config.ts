@@ -6,6 +6,19 @@
 
 import { z } from 'zod';
 
+/**
+ * Issue-tracking provider. Selects where Story/Task/Subtask entities are stored
+ * and how skill workflows route their tracker operations.
+ *
+ * - `jira`   : Atlassian Cloud via the `atlassian` MCP server (shipping)
+ * - `github` : GitHub via `gh` CLI (prototype — 2-line read path only)
+ * - `local`  : Markdown files under `.imbas/<KEY>/issues/` (shipping from v1.1)
+ *
+ * Default is `jira` for backward compatibility with existing configs.
+ */
+export const ProviderSchema = z.enum(['jira', 'github', 'local']);
+export type Provider = z.infer<typeof ProviderSchema>;
+
 export const LanguageConfigSchema = z.object({
   documents: z.string().default('ko'),
   skills: z.string().default('en'),
@@ -75,6 +88,7 @@ export type MediaConfig = z.infer<typeof MediaConfigSchema>;
 
 export const ImbasConfigSchema = z.object({
   version: z.string().default('1.0'),
+  provider: ProviderSchema.default('jira'),
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
