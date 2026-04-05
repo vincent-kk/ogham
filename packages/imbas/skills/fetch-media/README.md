@@ -68,7 +68,7 @@ fetch-media/
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `imbas_config_get` | imbas MCP | temp_dir, scene_sieve_command 설정 읽기 |
+| `config_get` | imbas MCP | temp_dir, scene_sieve_command 설정 읽기 |
 | `getConfluencePage` | Atlassian MCP | Confluence 페이지에서 첨부파일 URL 확인 |
 | `fetchAtlassian` | Atlassian MCP | 바이너리 첨부파일 다운로드 |
 | `imbas-media` | 에이전트 | 키프레임 순차 읽기 및 장면 분석 |

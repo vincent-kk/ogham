@@ -1,8 +1,3 @@
-/**
- * MCP tool handler: review-manage
- * Manages review session lifecycle: branch normalization, directory creation,
- * checkpoint detection, committee election, cleanup, content hashing, and cache checking.
- */
 import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -17,13 +12,13 @@ import type {
   ReviewCacheResult,
   ReviewContentHash,
 } from '../../../types/review.js';
-
+import { MAX_RESUME_RETRIES } from '../../../types/review.js';
 import {
   formatPrComment,
   formatRevalidateComment,
   handleGenerateHumanSummary,
-} from '../review-format/review-format.js';
-import { normalizeBranch } from '../review-utils/review-utils.js';
+} from './format/review-format.js';
+import { normalizeBranch } from './utils/review-utils.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -47,9 +42,6 @@ export interface ReviewManageInput {
   hasInterfaceChanges?: boolean;
 }
 
-/**
- * Execute a git command safely. Uses execFile (no shell) to prevent injection.
- */
 async function gitExec(cwd: string, args: string[]): Promise<string> {
   try {
     const { stdout } = await execFileAsync('git', args, {
@@ -60,14 +52,11 @@ async function gitExec(cwd: string, args: string[]): Promise<string> {
     return stdout.trimEnd();
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`git ${args[0]} failed in ${cwd}: ${msg}`);
+    throw new Error(`git ${args[0]} failed in ${cwd}: ${msg}`, { cause: error });
   }
 }
 
-/**
- * Compute content hash for a review session.
- * Uses git ls-tree for committed state (not working tree).
- */
+/** Compute content hash from committed (HEAD) blob state, not working tree. */
 async function computeContentHash(
   projectRoot: string,
   baseCommit: string,
@@ -76,7 +65,6 @@ async function computeContentHash(
   const fileHashes: Record<string, string> = {};
 
   if (changedFiles.length > 0) {
-    // Get blob hashes for files at HEAD
     let lsTreeOutput = '';
     try {
       lsTreeOutput = await gitExec(projectRoot, [
@@ -87,10 +75,10 @@ async function computeContentHash(
         ...changedFiles,
       ]);
     } catch {
-      // ls-tree may fail if all files are deleted; that's fine
+      // ls-tree may fail if all files are deleted; proceed with empty output.
     }
 
-    // Parse ls-tree output: "<mode> <type> <hash>\t<path>"
+    // Parse "<mode> <type> <hash>\t<path>" lines.
     const headBlobs = new Map<string, string>();
     if (lsTreeOutput) {
       for (const line of lsTreeOutput.split('\n')) {
@@ -98,19 +86,16 @@ async function computeContentHash(
         const tabIdx = line.indexOf('\t');
         if (tabIdx === -1) continue;
         const filePath = line.slice(tabIdx + 1);
-        const parts = line.slice(0, tabIdx).split(' ');
-        const blobHash = parts[2];
+        const blobHash = line.slice(0, tabIdx).split(' ')[2];
         headBlobs.set(filePath, blobHash);
       }
     }
 
-    // Build fileHashes: present in HEAD → blob hash, absent → DELETED
     for (const file of changedFiles) {
       fileHashes[file] = headBlobs.get(file) ?? 'DELETED';
     }
   }
 
-  // Build hash input: baseCommit + sorted path:hash entries
   const sortedEntries = Object.keys(fileHashes)
     .sort()
     .map((p) => `${p}:${fileHashes[p]}`)
@@ -121,8 +106,6 @@ async function computeContentHash(
 
   return { sessionHash, fileHashes };
 }
-
-// normalizeBranch imported from review-utils.ts
 
 async function handleNormalizeBranch(
   input: ReviewManageInput,
@@ -172,7 +155,7 @@ async function handleCheckpoint(
   try {
     dirEntries = await fs.readdir(reviewDir);
   } catch {
-    // directory does not exist
+    // directory missing — treat as empty
   }
   const checkFiles = new Set([
     'structure-check.md',
@@ -187,38 +170,46 @@ async function handleCheckpoint(
   const hasVerification = existingFiles.includes('verification.md');
   const hasReport = existingFiles.includes('review-report.md');
 
+  // Parse session.md frontmatter once for no_structure_check + resume_attempts.
+  let noStructureCheck = false;
+  let resumeAttempts = 0;
+  if (hasSession) {
+    const sessionPath = path.join(reviewDir, 'session.md');
+    try {
+      const content = await fs.readFile(sessionPath, 'utf-8');
+      noStructureCheck = /^no_structure_check:\s*(true)/m.test(content);
+      const attemptsMatch = content.match(/^resume_attempts:\s*(\d+)/m);
+      if (attemptsMatch) {
+        resumeAttempts = Number.parseInt(attemptsMatch[1], 10);
+      }
+    } catch {
+      // read error — treat flags as absent
+    }
+  }
+
   let phase: CheckpointStatus['phase'];
   if (!hasStructureCheck && !hasSession) {
     phase = 'A';
   } else if (!hasSession) {
-    // Phase A done (structure-check.md exists), Phase B pending
     phase = 'B';
   } else if (!hasStructureCheck && hasSession && !hasVerification) {
-    // session.md only (no structure-check.md) — check no_structure_check flag
-    const sessionPath = path.join(reviewDir, 'session.md');
-    let noStructureCheck = false;
-    try {
-      const content = await fs.readFile(sessionPath, 'utf-8');
-      const match = content.match(/^no_structure_check:\s*(true)/m);
-      noStructureCheck = !!match;
-    } catch {
-      // file read error — treat as flag absent
-    }
-    // If Phase A was intentionally skipped, proceed to C; otherwise restart A
+    // session.md only: C if Phase A was intentionally skipped, else restart A.
+    // Skill must increment resume_attempts and honor resumeExhausted.
     phase = noStructureCheck ? 'C' : 'A';
   } else if (!hasVerification) {
     phase = 'C';
   } else if (!hasReport) {
-    // NOTE: Returns 'C' here intentionally — Phase D is resolved by skill-level
-    // resume logic. Phase C is idempotent when verification.md already exists.
-    // See fca-review SKILL.md:41 for full resume mapping.
-    // TODO: Add 'D' to CheckpointPhase type in a separate PR for full alignment.
-    phase = 'C';
+    phase = 'D';
   } else {
     phase = 'DONE';
   }
 
-  const result: CheckpointStatus = { phase, files: existingFiles };
+  const result: CheckpointStatus = {
+    phase,
+    files: existingFiles,
+    resumeAttempts,
+    resumeExhausted: resumeAttempts >= MAX_RESUME_RETRIES,
+  };
   return result as unknown as Record<string, unknown>;
 }
 
@@ -242,7 +233,6 @@ async function handleElectCommittee(
   const { changedFilesCount, changedFractalsCount, hasInterfaceChanges } =
     input;
 
-  // Determine complexity
   let complexity: Complexity;
   if (
     changedFilesCount <= 3 &&
@@ -256,7 +246,6 @@ async function handleElectCommittee(
     complexity = 'MEDIUM';
   }
 
-  // Select committee based on complexity
   let committee: PersonaId[];
   if (complexity === 'LOW') {
     committee = ['engineering-architect', 'operations-sre'];
@@ -278,7 +267,6 @@ async function handleElectCommittee(
     ];
   }
 
-  // Build adversarial pairs from selected committee members
   const adversarialPairs: [PersonaId, PersonaId[]][] = [];
 
   if (committee.includes('business-driver')) {
@@ -332,7 +320,7 @@ async function handleCleanup(
     normalized,
   );
 
-  // Validate the resolved path stays under projectRoot/.filid/review/
+  // Guard against path traversal: reviewDir MUST stay under projectRoot/.filid/review/.
   const resolvedReview = path.resolve(reviewDir);
   const expectedPrefix = path.resolve(
     path.join(input.projectRoot, '.filid', 'review'),
@@ -382,7 +370,6 @@ async function handleContentHash(
     computedAt: new Date().toISOString(),
   };
 
-  // Ensure review dir exists and write content-hash.json
   const normalized = normalizeBranch(input.branchName);
   const reviewDir = path.join(
     input.projectRoot,
@@ -418,7 +405,6 @@ async function handleCheckCache(
   );
   const hashFilePath = path.join(reviewDir, 'content-hash.json');
 
-  // Compute current hash
   const baseCommit = await gitExec(input.projectRoot, [
     'merge-base',
     input.baseRef,
@@ -436,14 +422,12 @@ async function handleCheckCache(
     changedFiles,
   );
 
-  // Read cached hash
-  let cachedHash: string | null = null;
+  let cachedHash: string | undefined;
   try {
     const raw = await fs.readFile(hashFilePath, 'utf-8');
     const cached = JSON.parse(raw) as ReviewContentHash;
     cachedHash = cached.sessionHash;
   } catch {
-    // No cached hash — cache miss
     const result: ReviewCacheResult = {
       cacheHit: false,
       action: 'proceed-full-review',
@@ -456,7 +440,6 @@ async function handleCheckCache(
     return result as unknown as Record<string, unknown>;
   }
 
-  // Compare hashes
   if (currentHash !== cachedHash) {
     const result: ReviewCacheResult = {
       cacheHit: false,
@@ -471,7 +454,7 @@ async function handleCheckCache(
     return result as unknown as Record<string, unknown>;
   }
 
-  // Hash matches — check if review-report.md exists
+  // Hash matches — confirm review-report.md still exists before serving cache.
   const reportPath = path.join(reviewDir, 'review-report.md');
   try {
     await fs.access(reportPath);
@@ -489,14 +472,13 @@ async function handleCheckCache(
     return result as unknown as Record<string, unknown>;
   }
 
-  // Cache hit
   const fixRequestsPath = path.join(reviewDir, 'fix-requests.md');
   let fixRequestsExists = false;
   try {
     await fs.access(fixRequestsPath);
     fixRequestsExists = true;
   } catch {
-    // fix-requests.md is optional
+    // optional
   }
 
   const result: ReviewCacheResult = {
@@ -511,9 +493,6 @@ async function handleCheckCache(
   return result as unknown as Record<string, unknown>;
 }
 
-/**
- * Handle review-manage MCP tool calls.
- */
 export async function handleReviewManage(
   args: unknown,
 ): Promise<Record<string, unknown>> {

@@ -10,7 +10,6 @@ import type { ValidationReport } from '../../../types/report.js';
 export interface StructureValidateInput {
   path: string;
   rules?: string[];
-  fix?: boolean;
 }
 
 export interface StructureValidateResult {
@@ -21,11 +20,9 @@ export interface StructureValidateResult {
 }
 
 /**
- * Handle structure-validate MCP tool calls.
- *
- * Runs a comprehensive fractal structure validation against the project
- * at the given path. When fix=true, safe-grade violations are auto-remediated
- * and the remaining violations are re-reported.
+ * Read-only fractal structure validation. Auto-remediation is not supported —
+ * structural fixes go through the `restructurer` agent under `/filid:restructure`
+ * or `/filid:sync`.
  */
 export async function handleStructureValidate(
   args: unknown,
@@ -52,13 +49,6 @@ export async function handleStructureValidate(
 
   const tree = await scanProject(input.path);
   const report = validateStructure(tree, rulesToApply);
-
-  // fix=true: auto-remediate 'safe' violations (currently a no-op placeholder,
-  // as actual file mutation requires restructurer agent approval)
-  if (input.fix) {
-    // Safe remediations would be applied here in a future implementation.
-    // For now, report remains unchanged to avoid unintended file mutations.
-  }
 
   return {
     report,

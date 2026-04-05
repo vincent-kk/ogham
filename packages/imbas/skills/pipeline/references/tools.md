@@ -9,14 +9,16 @@ validate, split, manifest, and devplan skills.
 
 | Tool | Phase | Usage |
 |------|-------|-------|
-| `imbas_config_get` | 1 | Load config.json for project key and settings |
-| `imbas_run_create` | 1 | Create run directory, copy source, initialize state.json |
-| `imbas_run_get` | all | Read current run state (precondition checks) |
-| `imbas_run_transition` | all | Phase transitions: start, complete, escape |
-| `imbas_manifest_get` | 3 | Load stories-manifest.json for devplan input |
-| `imbas_manifest_save` | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation |
-| `imbas_manifest_validate` | 2, 3 | Validate manifest structural integrity (gate input) |
-| `imbas_manifest_plan` | 2.5, 3.5 | Generate execution plan for dry-run preview |
+| `config_get` | 1 | Load config.json for project key and settings |
+| `run_create` | 1 | Create run directory, copy source, initialize state.json |
+| `run_get` | all | Read current run state for precondition checks (declared-only) |
+| `run_transition` | all | Phase transitions: start, complete, escape |
+| `manifest_get` | 3 | Load stories-manifest.json for devplan input |
+| `manifest_save` | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation |
+| `manifest_validate` | 2, 3 | Validate manifest structural integrity (gate input) |
+| `manifest_plan` | 2.5, 3.5 | Generate execution plan for dry-run preview |
+| `ast_search` | 3 | AST pattern search via imbas-engineer spawn; referenced in workflow for sgLoadError handling (declared-only) |
+| `ast_analyze` | 3 | Dependency graph / complexity analysis via imbas-engineer spawn (declared-only) |
 
 ---
 
@@ -55,10 +57,10 @@ validate, split, manifest, and devplan skills.
 
 ### Agent Access Control
 
-Agents do NOT have access to pipeline state tools. The pipeline skill handles all state updates:
+Agents do NOT have access to pipeline state tools. The `imbas:pipeline` skill handles all state updates:
 
 - Agents produce output (reports, manifests, verification results)
-- Pipeline skill interprets output and calls imbas_run_transition / imbas_manifest_save
+- Pipeline skill interprets output and calls run_transition / manifest_save
 - This preserves Plan-then-Execute: agents plan, pipeline executes
 
 ### Model Configuration
@@ -86,4 +88,4 @@ Pipeline reads these settings and spawns agents with the configured models.
 Pipeline does NOT spawn agents for:
 - Manifest execution (Phase 2.5, 3.5) — direct Atlassian MCP tool calls
 - Epic/parent decision — deterministic from --parent argument (resolved in Phase 0)
-- Gate evaluation — pipeline skill evaluates fields directly
+- Gate evaluation — `imbas:pipeline` skill evaluates fields directly

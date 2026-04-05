@@ -1,5 +1,5 @@
 ---
-name: imbas-setup
+name: setup
 user_invocable: true
 description: >
   Initialize .imbas/ directory, create config.json, and cache Jira project metadata.
@@ -10,7 +10,7 @@ complexity: simple
 plugin: imbas
 ---
 
-# imbas-setup — Initialization & Configuration
+# setup — Initialization & Configuration
 
 Initialize the `.imbas/` working directory, configure project settings, and populate
 Jira metadata caches. Entry point for all imbas workflows.

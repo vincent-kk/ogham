@@ -1,5 +1,5 @@
 ---
-name: imbas-read-issue
+name: read-issue
 user_invocable: false
 description: >
   Internal skill. Reads a Jira issue with its full comment thread, reconstructs
@@ -9,7 +9,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-# imbas-read-issue — Issue Context Reconstruction (Internal)
+# read-issue — Issue Context Reconstruction (Internal)
 
 Internal skill that reads a Jira issue with its full comment thread, reconstructs
 the conversation context (who said what, decisions made, latest state), and returns

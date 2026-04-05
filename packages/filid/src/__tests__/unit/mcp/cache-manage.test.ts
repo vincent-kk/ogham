@@ -45,12 +45,12 @@ describe('handleCacheManage', () => {
       const result = (await handleCacheManage({
         action: 'save-hash',
         cwd: '/my/repo',
-        skillName: 'fca-review',
+        skillName: 'review',
         hash: 'deadbeef',
       })) as SaveHashResult;
 
       expect(result.saved).toBe(true);
-      expect(result.skillName).toBe('fca-review');
+      expect(result.skillName).toBe('review');
       expect(result.hash).toBe('deadbeef');
     });
 
@@ -58,13 +58,13 @@ describe('handleCacheManage', () => {
       await handleCacheManage({
         action: 'save-hash',
         cwd: '/my/repo',
-        skillName: 'fca-scan',
+        skillName: 'scan',
         hash: 'cafebabe',
       });
 
       expect(saveRunHash).toHaveBeenCalledWith(
         '/my/repo',
-        'fca-scan',
+        'scan',
         'cafebabe',
       );
     });
@@ -88,7 +88,7 @@ describe('handleCacheManage', () => {
       const result = (await handleCacheManage({
         action: 'get-hash',
         cwd: '/my/repo',
-        skillName: 'fca-review',
+        skillName: 'review',
       })) as GetHashResult;
 
       expect(result.hash).toBe('cached-hash');
@@ -101,7 +101,7 @@ describe('handleCacheManage', () => {
       const result = (await handleCacheManage({
         action: 'get-hash',
         cwd: '/my/repo',
-        skillName: 'fca-review',
+        skillName: 'review',
       })) as GetHashResult;
 
       expect(result.hash).toBeNull();
@@ -112,10 +112,10 @@ describe('handleCacheManage', () => {
       await handleCacheManage({
         action: 'get-hash',
         cwd: '/project/path',
-        skillName: 'fca-scan',
+        skillName: 'scan',
       });
 
-      expect(getLastRunHash).toHaveBeenCalledWith('/project/path', 'fca-scan');
+      expect(getLastRunHash).toHaveBeenCalledWith('/project/path', 'scan');
     });
   });
 
@@ -141,7 +141,7 @@ describe('handleCacheManage', () => {
         handleCacheManage({
           action: 'save-hash',
           cwd: '/my/repo',
-          skillName: 'fca-review',
+          skillName: 'review',
         }),
       ).rejects.toThrow('hash is required');
     });

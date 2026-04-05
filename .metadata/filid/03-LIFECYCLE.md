@@ -10,7 +10,7 @@
 
 ```
 ┌──────────┐    ┌───────────┐    ┌───────────┐    ┌──────────────────┐    ┌─────────┐    ┌───────────────┐
-│ /fca-init │───→│ /fca-scan │───→│ /fca-sync │───→│ /fca-review       │───→│ /fca-promote │───→│ /fca-query    │
+│ /filid:init │───→│ /filid:scan │───→│ /filid:sync │───→│ /filid:review       │───→│ /filid:promote │───→│ /filid:context-query    │
 │          │    │           │    │           │    │                  │    │             │    │               │
 │ 초기화    │    │ 검증       │    │ 동기화     │    │ PR 구조 리뷰     │    │ 테스트      │    │ 질의           │
 │          │    │           │    │           │    │                  │    │ 승격        │    │               │
@@ -22,7 +22,7 @@
 
 ```
 ┌────────────────┐    ┌───────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│ /fca-pipeline   │───→│ /fca-review   │───→│ /fca-resolve      │───→│ /fca-revalidate   │
+│ /filid:pipeline   │───→│ /filid:review   │───→│ /filid:resolve      │───→│ /filid:revalidate   │
 │                │    │               │    │                  │    │                  │
 │ 전체 파이프라인  │    │ 다중 페르소나  │    │ 수정 해결/소명     │    │ Delta 재검증      │
 │ 오케스트레이션  │    │ 합의 리뷰      │    │ + 부채 관리       │    │ + PASS/FAIL      │
@@ -34,7 +34,7 @@
 
 ```
 ┌───────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌──────────────┐
-│ /guide     │    │ /restructure  │    │ /fca-migrate │    │ /fca-pull-request│    │ /fca-update      │    │ /fca-revalidate│
+│ /filid:guide     │    │ /filid:restructure  │    │ /filid:migrate │    │ /filid:pull-request│    │ /filid:update      │    │ /filid:revalidate│
 │           │    │              │    │             │    │                 │    │                 │    │ (단독 실행)   │
 │ 구조 가이드 │    │ 프랙탈 구조   │    │ 구조 마이그  │    │ PR 생성         │    │ 문서/구조 갱신   │    │ Delta 재검증   │
 │ 생성       │    │ 리팩토링      │    │ 레이션      │    │ 자동화          │    │                 │    │               │
@@ -44,12 +44,12 @@
 
 ---
 
-## 단계 1: /fca-init — 프로젝트 초기화
+## 단계 1: /filid:init — 프로젝트 초기화
 
 ### 트리거 조건
 
 - 프로젝트에 FCA-AI 구조가 없을 때 (최초 1회)
-- 사용자가 `/fca-init [path]` 명령 실행
+- 사용자가 `/filid:init [path]` 명령 실행
 
 ### 관여 에이전트
 
@@ -99,12 +99,12 @@
 
 ---
 
-## 단계 2: /fca-scan — 규칙 위반 검출
+## 단계 2: /filid:scan — 규칙 위반 검출
 
 ### 트리거 조건
 
 - 개발 중 수시로 실행
-- 사용자가 `/fca-scan [path] [--fix]` 명령 실행
+- 사용자가 `/filid:scan [path] [--fix]` 명령 실행
 
 ### 관여 에이전트
 
@@ -147,12 +147,12 @@
 
 ---
 
-## 단계 3: /fca-sync — 구조 Drift 감지 & 동기화
+## 단계 3: /filid:sync — 구조 Drift 감지 & 동기화
 
 ### 트리거 조건
 
 - 구조적 이탈이 의심될 때
-- 사용자가 `/fca-sync [--dry-run] [--severity=<level>]` 명령 실행
+- 사용자가 `/filid:sync [--dry-run] [--severity=<level>]` 명령 실행
 
 ### 관여 에이전트
 
@@ -205,12 +205,12 @@
 
 ---
 
-## 단계 4: /fca-review — 6단계 PR 검증 파이프라인
+## 단계 4: /filid:review — 6단계 PR 검증 파이프라인
 
 ### 트리거 조건
 
 - PR 제출 시
-- 사용자가 `/fca-review [--stage=1-6] [--verbose]` 명령 실행
+- 사용자가 `/filid:review [--stage=1-6] [--verbose]` 명령 실행
 
 ### 관여 에이전트
 
@@ -277,12 +277,12 @@
 
 ---
 
-## 단계 5: /fca-promote — 테스트 승격
+## 단계 5: /filid:promote — 테스트 승격
 
 ### 트리거 조건
 
 - 안정화 기간(90일) 경과 후
-- 사용자가 `/fca-promote [path] [--days=90]` 명령 실행
+- 사용자가 `/filid:promote [path] [--days=90]` 명령 실행
 
 ### 관여 에이전트
 
@@ -318,12 +318,12 @@
 
 ---
 
-## 단계 6: /fca-query — 인터랙티브 질의
+## 단계 6: /filid:context-query — 인터랙티브 질의
 
 ### 트리거 조건
 
 - 개발 중 수시로 실행
-- 사용자가 `/fca-query <question>` 명령 실행
+- 사용자가 `/filid:context-query <question>` 명령 실행
 
 ### 관여 에이전트
 
@@ -441,11 +441,11 @@ T5  에이전트가 서브에이전트 생성
 ## 거버넌스 라이프사이클: 코드 리뷰 → 해결 → 재검증
 
 기존 6단계 라이프사이클과 독립적으로 동작하는 거버넌스 파이프라인.
-`/fca-pipeline`으로 전체 흐름을 오케스트레이션하거나 각 단계를 개별 실행 가능.
+`/filid:pipeline`으로 전체 흐름을 오케스트레이션하거나 각 단계를 개별 실행 가능.
 
 ```
 ┌────────────────┐    ┌──────────────┐    ┌────────────────┐    ┌──────────────────┐
-│ /fca-pipeline   │    │ /fca-review   │───→│ /fca-resolve    │───→│ /fca-revalidate   │
+│ /filid:pipeline   │    │ /filid:review   │───→│ /filid:resolve    │───→│ /filid:revalidate   │
 │                │───→│               │    │                │    │                  │
 │ 전체 오케스트레이 │    │ Phase A: 분석  │    │ 수용/거부 선택  │    │ Delta 추출        │
 │ 션 (선택)      │    │ Phase B: 검증  │    │ 소명 수집       │    │ 수정 확인         │
@@ -455,7 +455,7 @@ T5  에이전트가 서브에이전트 생성
   PR 시점               PR 시점              리뷰 완료 후            수정 적용 후
 ```
 
-### /fca-review — 3-Phase 위임 패턴
+### /filid:review — 3-Phase 위임 패턴
 
 ```
 Phase A (haiku subagent)
@@ -476,7 +476,7 @@ Phase C (의장 직접)
 └── 출력: review-report.md, fix-requests.md
 ```
 
-### /fca-resolve — 수정 사항 해결
+### /filid:resolve — 수정 사항 해결
 
 ```
 1. 브랜치 감지 + fix-requests.md 로딩
@@ -486,7 +486,7 @@ Phase C (의장 직접)
 5. justifications.md 출력 (resolve_commit_sha 포함)
 ```
 
-### /fca-revalidate — Delta 재검증
+### /filid:revalidate — Delta 재검증
 
 ```
 1. resolve_commit_sha 기반 Delta 추출
@@ -505,9 +505,9 @@ Phase C (의장 직접)
 │ (create) │     │ (bias)    │     │ (resolve) │
 └─────────┘     └───────────┘     └──────────┘
 
-발생: /fca-resolve에서 거부 시 debt_manage(create)
+발생: /resolve에서 거부 시 debt_manage(create)
 누적: 이후 리뷰에서 동일 프랙탈 수정 시 touch_count++ → 가중치 2배
-해소: /fca-revalidate에서 규칙 충족 시 debt_manage(resolve)
+해소: /revalidate에서 규칙 충족 시 debt_manage(resolve)
 ```
 
 ### .filid/ 디렉토리 구조
@@ -519,8 +519,8 @@ Phase C (의장 직접)
 │   ├── verification.md       # Phase B 출력
 │   ├── review-report.md      # Phase C 출력 (최종 보고서)
 │   ├── fix-requests.md       # Phase C 출력 (수정 요청)
-│   ├── justifications.md     # /fca-resolve 출력
-│   └── re-validate.md        # /fca-revalidate 출력
+│   ├── justifications.md     # /filid:resolve 출력
+│   └── re-validate.md        # /filid:revalidate 출력
 └── debt/                  # 기술 부채 파일 (전체 공유)
     └── <debt-id>.md          # 개별 부채 항목
 ```

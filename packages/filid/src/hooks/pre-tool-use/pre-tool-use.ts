@@ -7,6 +7,7 @@ import { injectIntent } from '../intent-injector/intent-injector.js';
 import { validatePreToolUse } from '../pre-tool-validator/pre-tool-validator.js';
 import { isDetailMd } from '../shared/shared.js';
 import { guardStructure } from '../structure-guard/structure-guard.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 /**
  * Unified PreToolUse hook orchestrator.
@@ -16,6 +17,9 @@ import { guardStructure } from '../structure-guard/structure-guard.js';
 export async function handlePreToolUse(
   input: PreToolUseInput,
 ): Promise<HookOutput> {
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null) return { continue: true };
+
   const results: HookOutput[] = [];
 
   // 1. INTENT.md context injection (Read|Write|Edit)
@@ -27,7 +31,7 @@ export async function handlePreToolUse(
     let oldDetailContent: string | undefined;
     if (isDetailMd(filePath)) {
       try {
-        oldDetailContent = readFileSync(resolve(input.cwd, filePath), 'utf-8');
+        oldDetailContent = readFileSync(resolve(safeCwd, filePath), 'utf-8');
       } catch {
         /* new file */
       }

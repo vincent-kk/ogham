@@ -20,6 +20,7 @@ import { loadBuiltinRules } from '../../core/rules/rule-engine/rule-engine.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
 import { isFcaProject } from '../shared/shared.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 /**
  * Build minimal FCA-AI context: a pointer to the rules file + any disabled rules.
@@ -59,7 +60,13 @@ function buildMinimalContext(cwd: string): string {
  * Never blocks user prompts (always continue: true).
  */
 export function injectContext(input: UserPromptSubmitInput): HookOutput {
-  const { cwd, session_id } = input;
+  const { session_id } = input;
+
+  // Security: validate payload cwd before any fs / execSync usage downstream.
+  const cwd = validateCwd(input.cwd);
+  if (cwd === null) {
+    return { continue: true };
+  }
 
   // Gate 1: skip if not an FCA-AI project
   if (!isFcaProject(cwd)) {

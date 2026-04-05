@@ -8,7 +8,6 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 
 import { VERSION } from '../../version.js';
-import { RunTransitionSchema } from '../../types/state.js';
 import { CacheTypeSchema } from '../../types/cache.js';
 
 import { wrapHandler } from '../shared/shared.js';
@@ -41,7 +40,7 @@ export function createServer(): McpServer {
   // --- Pipeline: ping ---
 
   server.registerTool(
-    'imbas_ping',
+    'ping',
     {
       description: 'Health check — returns server status and version',
       inputSchema: z.object({}),
@@ -53,7 +52,7 @@ export function createServer(): McpServer {
   // --- Pipeline: run ---
 
   server.registerTool(
-    'imbas_run_create',
+    'run_create',
     {
       description: 'Create run directory and state.json',
       inputSchema: z.object({
@@ -67,7 +66,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_run_get',
+    'run_get',
     {
       description: 'Read state.json for a run',
       inputSchema: z.object({
@@ -80,17 +79,31 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_run_transition',
+    'run_transition',
     {
-      description: 'Typed phase transition (start/complete/escape)',
-      inputSchema: RunTransitionSchema,
+      // Flat leaf-primitive schema to avoid zod-to-json-schema $ref dedup.
+      // Handler validates via RunTransitionSchema.parse(). See manifest_save above.
+      description: 'Typed phase transition (start/complete/escape/skip)',
+      inputSchema: z.object({
+        project_ref: z.string(),
+        run_id: z.string(),
+        action: z.string(),
+        phase: z.string().optional(),
+        phases: z.array(z.string()).optional(),
+        escape_code: z.string().optional(),
+        result: z.string().optional(),
+        blocking_issues: z.number().int().nonnegative().optional(),
+        warning_issues: z.number().int().nonnegative().optional(),
+        pending_review: z.boolean().optional(),
+        stories_created: z.number().int().nonnegative().optional(),
+      }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     wrapHandler(handleRunTransition),
   );
 
   server.registerTool(
-    'imbas_run_list',
+    'run_list',
     {
       description: 'List runs for a project',
       inputSchema: z.object({
@@ -104,7 +117,7 @@ export function createServer(): McpServer {
   // --- Manifest tools ---
 
   server.registerTool(
-    'imbas_manifest_get',
+    'manifest_get',
     {
       description: 'Load manifest with summary',
       inputSchema: z.object({
@@ -118,7 +131,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_manifest_save',
+    'manifest_save',
     {
       description: 'Save manifest (full replace)',
       inputSchema: z.object({
@@ -136,7 +149,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_manifest_validate',
+    'manifest_validate',
     {
       description: 'Validate manifest structure',
       inputSchema: z.object({
@@ -150,7 +163,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_manifest_plan',
+    'manifest_plan',
     {
       description: 'Execution plan from devplan manifest',
       inputSchema: z.object({
@@ -165,7 +178,7 @@ export function createServer(): McpServer {
   // --- Config tools ---
 
   server.registerTool(
-    'imbas_config_get',
+    'config_get',
     {
       description: 'Read config.json',
       inputSchema: z.object({
@@ -177,7 +190,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_config_set',
+    'config_set',
     {
       description: 'Update config.json fields',
       inputSchema: z.object({
@@ -193,7 +206,7 @@ export function createServer(): McpServer {
   // --- Cache tools ---
 
   server.registerTool(
-    'imbas_cache_get',
+    'cache_get',
     {
       description: 'Read Jira metadata cache',
       inputSchema: z.object({
@@ -206,7 +219,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_cache_set',
+    'cache_set',
     {
       description: 'Write Jira metadata cache',
       inputSchema: z.object({
@@ -224,7 +237,7 @@ export function createServer(): McpServer {
   // --- AST tools ---
 
   server.registerTool(
-    'imbas_ast_search',
+    'ast_search',
     {
       description: 'AST pattern search via @ast-grep/napi',
       inputSchema: z.object({
@@ -240,7 +253,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'imbas_ast_analyze',
+    'ast_analyze',
     {
       description: 'Dependency graph / cyclomatic complexity',
       inputSchema: z.object({

@@ -122,3 +122,15 @@ export type {
   SummaryItem,
   HumanSummary,
 } from './summary.js';
+
+export type {
+  FixRequestType,
+  DebtAction,
+  PipelineStage,
+} from './handoff.js';
+export {
+  FIX_REQUEST_TYPES,
+  DEBT_ACTIONS,
+  PIPELINE_STAGES,
+  normalizeFixRequestType,
+} from './handoff.js';

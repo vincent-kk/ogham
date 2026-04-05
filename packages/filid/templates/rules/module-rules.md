@@ -68,4 +68,4 @@ When a fractal module grows large, filid uses additional metrics to signal when 
 | Cyclomatic Complexity | > 15 | Compress or abstract |
 | File size | > 500 lines | Consider splitting |
 
-These are reported by the `fca-scan` skill and the `module-split-decision` MCP tool.
+These are reported by the `filid:scan` skill and the `module-split-decision` MCP tool.

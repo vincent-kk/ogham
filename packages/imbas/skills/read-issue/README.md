@@ -1,4 +1,4 @@
-# read-issue
+# `imbas:read-issue`
 
 Jira 이슈를 전체 댓글 스레드와 함께 읽어 구조화된 JSON 요약을 반환하는 내부 스킬.
 
@@ -6,14 +6,13 @@ Jira 이슈를 전체 댓글 스레드와 함께 읽어 구조화된 JSON 요약
 
 Jira 이슈의 메타데이터, 설명, 댓글을 읽어 대화 맥락을 재구성하고,
 의사결정, 미해결 질문, 참여자 역할 등을 추출하여 구조화된 JSON으로 반환한다.
-validate, split, devplan, digest 스킬 및 각 에이전트에서 내부적으로 호출한다.
+validate, split, devplan, `imbas:digest` 스킬 및 각 에이전트에서 내부적으로 호출한다.
 
 ## 사용법
 
 ```
-imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
+imbas:read-issue <issue-key> [--depth shallow|full]
 
---no-cache   : 캐시 무시, Jira에서 직접 재조회
 --depth      : shallow = 메타데이터 + 설명만 / full = 댓글 포함 (기본: full)
 ```
 

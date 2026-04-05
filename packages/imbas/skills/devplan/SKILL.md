@@ -1,16 +1,17 @@
 ---
-name: imbas-devplan
+name: devplan
 user_invocable: true
 description: >
   Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts
-  cross-Story Tasks by exploring the local codebase. Operates on approved Stories only.
+  cross-Story Tasks by exploring the local codebase. Operates on approved Stories
+  or E2-3 escaped splits (single-Story documents that bypass decomposition).
   Trigger: "create devplan", "dev 계획", "Phase 3", "subtask 생성"
 version: "1.0.0"
 complexity: complex
 plugin: imbas
 ---
 
-# imbas-devplan — Phase 3 Development Plan Generation
+# devplan — Phase 3 Development Plan Generation
 
 Generates EARS-format Subtasks per Story and extracts cross-Story Tasks
 by exploring the local codebase. Produces a devplan-manifest.json for

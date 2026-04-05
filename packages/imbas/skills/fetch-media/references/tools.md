@@ -6,7 +6,7 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_config_get` | Read media.temp_dir and media.scene_sieve_command from config |
+| `config_get` | Read media.temp_dir and media.scene_sieve_command from config |
 
 ### Atlassian MCP Tools
 

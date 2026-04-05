@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   formatPrComment,
   formatRevalidateComment,
-} from '../../../mcp/tools/review-format/review-format.js';
+} from '../../../mcp/tools/review-manage/format/review-format.js';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 

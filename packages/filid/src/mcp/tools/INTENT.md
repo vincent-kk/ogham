@@ -18,7 +18,7 @@
 - 기존 도구 입력 스키마 변경
 
 ### Never do
-- 도구 간 직접 의존 (review-format↔review-manage 제외)
+- 도구 간 직접 의존 (fractal 내부 organ 예외)
 
 ## Dependencies
 - `../../core/`, `../../ast/`, `../../metrics/`, `../../compress/`, `../../types/`

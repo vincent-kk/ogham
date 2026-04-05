@@ -1,5 +1,5 @@
 ---
-name: imbas-fetch-media
+name: fetch-media
 user_invocable: true
 description: >
   Download images, videos, and GIFs from Confluence/Jira. For video/GIF files,
@@ -10,7 +10,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-# imbas-fetch-media — Media Download & Analysis
+# fetch-media — Media Download & Analysis
 
 Download images, videos, and GIFs from Atlassian sources or local paths. For video/GIF files,
 extracts visually meaningful keyframes via scene-sieve and runs semantic analysis through

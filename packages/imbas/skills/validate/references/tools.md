@@ -1,4 +1,4 @@
-# imbas-validate — Tools Used & Agent Spawn
+# validate — Tools Used & Agent Spawn
 
 ## Tools Used
 
@@ -6,9 +6,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_run_create` | Create run directory, copy source, initialize state.json |
-| `imbas_run_get` | Read current run state (for precondition checks) |
-| `imbas_run_transition` | start_phase (validate) → complete_phase (validate) with result |
+| `config_get` | Load config.json for language/default project resolution (Step 1) |
+| `run_create` | Create run directory, copy source, initialize state.json |
+| `run_get` | Read current run state for precondition checks (declared-only) |
+| `run_transition` | start_phase (validate) → complete_phase (validate) with result |
 
 ### Atlassian MCP Tools
 

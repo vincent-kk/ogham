@@ -485,7 +485,7 @@ Create the `setup-lens` skill for managing `.maencof-lens/config.json` interacti
 - `set-default <name>` — Change default vault
 - `set-layers <name> <layers>` — Update layer filter for a vault
 
-**Workflow** (follows fca-config pattern):
+**Workflow** (follows config pattern):
 1. Resolve config path: `<cwd>/.maencof-lens/config.json`
 2. For `init`: check if config exists → if yes, show current + ask to overwrite
 3. For mutations: load → validate → mutate → write → read-back verify

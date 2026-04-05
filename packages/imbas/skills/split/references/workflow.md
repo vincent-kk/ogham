@@ -2,19 +2,19 @@
 
 ```
 Step 1 — Load Run & Verify Preconditions
-  1. If --run provided: call imbas_run_get(project_ref, run_id).
-     If not provided: call imbas_run_get(project_ref) → returns most recent run.
+  1. If --run provided: call run_get(project_ref, run_id).
+     If not provided: call run_get(project_ref) → returns most recent run.
   2. Verify validate.status == "completed" and validate.result in ["PASS", "PASS_WITH_WARNINGS"].
      - If PASS_WITH_WARNINGS: display warning list from validation-report.md.
      - If not met: error with guidance.
-  3. Call imbas_run_transition:
+  3. Call run_transition:
      - action: "start_phase", phase: "split"
      → Sets split.status = "in_progress", current_phase = "split"
 
 Step 2 — Epic Decision Flow
   - If --epic provided:
     1. Call Atlassian MCP: getJiraIssue(epicKey) to verify existence.
-    2. If found: store epic_ref in state.json via imbas_run_transition context.
+    2. If found: store epic_ref in state.json via run_transition context.
     3. If not found: error: "Epic <KEY> not found in Jira."
   - If --epic NOT provided:
     1. Ask user: "Create a new Epic for this split, or use an existing one?"
@@ -35,7 +35,7 @@ Step 3 — imbas-planner Agent Spawn (Story Splitting)
   - Agent instructions:
     "Split the planning document into INVEST-compliant Jira Stories.
      For each Story:
-     - Title: concise summary (in config.language.jira_content language)
+     - Title: concise summary (in config.language.issue_content language)
      - Description: User Story format + Acceptance Criteria (Given/When/Then or EARS)
      - Anchor link: explicit reference to source document section/quote
      - Each Story must be Independent, Negotiable, Valuable, Estimable, Small, Testable
@@ -108,9 +108,9 @@ Step 6 — stories-manifest.json Generation
        - Detect Story-to-Story execution dependencies (e.g., API before UI)
        - Add "blocks" links to manifest: { type: "blocks", from: <blocking-story-id>, to: [<blocked-story-ids>], status: "pending" }
        - No circular dependencies allowed
-  3. Call imbas_manifest_save:
+  3. Call manifest_save:
      - project_ref, run_id, type: "stories", manifest: <full manifest>
-  4. Call imbas_manifest_validate:
+  4. Call manifest_validate:
      - project_ref, run_id, type: "stories"
      - If validation errors: fix and re-save.
 
@@ -124,7 +124,7 @@ Step 7 — User Review Flow
   2. Wait for user decision:
 
   Option A — Approve:
-    1. Call imbas_run_transition:
+    1. Call run_transition:
        - action: "complete_phase", phase: "split"
        - pending_review: false
        - stories_created: <count>

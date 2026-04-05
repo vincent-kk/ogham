@@ -1,6 +1,7 @@
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 
 import { getParentSegments } from '../utils/get-parent-segments.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 import { checkIntentMdReclassification } from '../utils/check-intent-md-reclassification.js';
 import { checkOrganSubdirectory } from '../utils/check-organ-subdirectory.js';
 import { checkCircularImports } from '../utils/check-circular-imports.js';
@@ -17,7 +18,8 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
     return { continue: true };
   }
 
-  const cwd = input.cwd;
+  const cwd = validateCwd(input.cwd);
+  if (cwd === null) return { continue: true };
   const segments = getParentSegments(filePath);
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
 

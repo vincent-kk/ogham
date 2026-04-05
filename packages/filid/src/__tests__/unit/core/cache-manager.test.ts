@@ -51,13 +51,13 @@ describe('cache-manager', () => {
     delete process.env.CLAUDE_CONFIG_DIR;
   });
 
-  // Test 1: cwdHash — same input returns same 12-char hash
-  it('cwdHash: returns consistent 12-char hash for same input', async () => {
+  // Test 1: cwdHash — same input returns same 16-char hash
+  it('cwdHash: returns consistent 16-char hash for same input', async () => {
     const { cwdHash } = await import('../../../core/infra/cache-manager/cache-manager.js');
     const h1 = cwdHash('/some/path');
     const h2 = cwdHash('/some/path');
     expect(h1).toBe(h2);
-    expect(h1).toHaveLength(12);
+    expect(h1).toHaveLength(16);
   });
 
   // Test 2: getCacheDir — returns ~/.claude/plugins/filid/{hash}/ shaped path
@@ -83,8 +83,8 @@ describe('cache-manager', () => {
 
     const { saveRunHash, getLastRunHash } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
-    saveRunHash('/proj', 'fca-review', 'abc123');
-    const result = getLastRunHash('/proj', 'fca-review');
+    saveRunHash('/proj', 'review', 'abc123');
+    const result = getLastRunHash('/proj', 'review');
     expect(result).toBe('abc123');
   });
 
@@ -148,7 +148,7 @@ describe('cache-manager', () => {
     const h1 = sessionIdHash('session-abc');
     const h2 = sessionIdHash('session-abc');
     expect(h1).toBe(h2);
-    expect(h1).toHaveLength(12);
+    expect(h1).toHaveLength(16);
   });
 
   // Test 9: isFirstInSession — returns true when marker absent
@@ -212,7 +212,7 @@ describe('cache-manager', () => {
     });
     const { getLastRunHash } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
-    expect(getLastRunHash('/proj', 'fca-scan')).toBeNull();
+    expect(getLastRunHash('/proj', 'scan')).toBeNull();
   });
 
   // Test 15: computeProjectHash — deterministic hash for same fast-glob result

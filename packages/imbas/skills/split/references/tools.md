@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_run_get` | Load run state, verify preconditions |
-| `imbas_run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
-| `imbas_manifest_save` | Save stories-manifest.json |
-| `imbas_manifest_validate` | Validate manifest structural integrity |
+| `run_get` | Load run state, verify preconditions |
+| `run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
+| `manifest_save` | Save stories-manifest.json |
+| `manifest_validate` | Validate manifest structural integrity |
 
 ## Atlassian MCP Tools
 
@@ -26,7 +26,7 @@
 ### imbas-planner Spawn Instructions
 
 - Provide source.md + supplements + Epic info as input context
-- Set output language per config.language.jira_content
+- Set output language per config.language.issue_content
 - Agent returns JSON Story array — skill handles manifest creation
 - Agent does NOT have pipeline/manifest tool access
 

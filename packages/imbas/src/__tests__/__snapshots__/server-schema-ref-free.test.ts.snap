@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MCP inputSchema is structurally ref-free > snapshot — run_transition flat JSON Schema 1`] = `
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "type": "string",
+    },
+    "blocking_issues": {
+      "minimum": 0,
+      "type": "integer",
+    },
+    "escape_code": {
+      "type": "string",
+    },
+    "pending_review": {
+      "type": "boolean",
+    },
+    "phase": {
+      "type": "string",
+    },
+    "phases": {
+      "items": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "project_ref": {
+      "type": "string",
+    },
+    "result": {
+      "type": "string",
+    },
+    "run_id": {
+      "type": "string",
+    },
+    "stories_created": {
+      "minimum": 0,
+      "type": "integer",
+    },
+    "warning_issues": {
+      "minimum": 0,
+      "type": "integer",
+    },
+  },
+  "required": [
+    "project_ref",
+    "run_id",
+    "action",
+  ],
+  "type": "object",
+}
+`;

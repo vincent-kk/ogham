@@ -19,7 +19,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 
 | Error | Action |
 |-------|--------|
-| imbas_run_create fails | STOP: display error. Common: "Run directory already exists." |
+| run_create fails | STOP: display error. Common: "Run directory already exists." |
 | imbas-analyst agent fails | STOP: set validate.result = "BLOCKED". Note: "Agent error during validation." |
 | validation-report.md parse error | STOP: treat as BLOCKED. "Could not parse validation report." |
 
@@ -32,7 +32,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 | imbas-planner agent fails | STOP: save partial state. "Planner agent error. Check source document format." |
 | imbas-analyst reverse-inference fails | STOP: save partial state. "Reverse-inference verification failed." |
 | Manifest validation errors (auto-fix fails) | STOP: list errors. "Manifest validation failed. Review stories manually." |
-| imbas_run_transition precondition fail | STOP: "Cannot transition: \<error from tool\>." |
+| run_transition precondition fail | STOP: "Cannot transition: \<error from tool\>." |
 
 ### Phase 2.5 — Manifest Stories Errors
 

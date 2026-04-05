@@ -226,7 +226,7 @@ describe('handleReviewManage – checkpoint', () => {
     expect(result.files).not.toContain('verification.md');
   });
 
-  it('returns phase C when session.md and verification.md exist', async () => {
+  it('returns phase D when session.md and verification.md exist but review-report.md is absent', async () => {
     await fs.writeFile(path.join(reviewDir, 'session.md'), '');
     await fs.writeFile(path.join(reviewDir, 'verification.md'), '');
     const result = await handleReviewManage({
@@ -234,10 +234,38 @@ describe('handleReviewManage – checkpoint', () => {
       projectRoot: tmpDir,
       branchName: branch,
     });
-    expect(result.phase).toBe('C');
+    expect(result.phase).toBe('D');
     expect(result.files).toContain('session.md');
     expect(result.files).toContain('verification.md');
     expect(result.files).not.toContain('review-report.md');
+  });
+
+  it('reports resume_attempts and resumeExhausted from session.md frontmatter', async () => {
+    await fs.writeFile(
+      path.join(reviewDir, 'session.md'),
+      'resume_attempts: 3\n\n# Session',
+    );
+    const result = (await handleReviewManage({
+      action: 'checkpoint',
+      projectRoot: tmpDir,
+      branchName: branch,
+    })) as { phase: string; resumeAttempts?: number; resumeExhausted?: boolean };
+    expect(result.resumeAttempts).toBe(3);
+    expect(result.resumeExhausted).toBe(true);
+  });
+
+  it('reports resumeExhausted=false when attempts are below MAX_RESUME_RETRIES', async () => {
+    await fs.writeFile(
+      path.join(reviewDir, 'session.md'),
+      'resume_attempts: 1\n\n# Session',
+    );
+    const result = (await handleReviewManage({
+      action: 'checkpoint',
+      projectRoot: tmpDir,
+      branchName: branch,
+    })) as { resumeAttempts?: number; resumeExhausted?: boolean };
+    expect(result.resumeAttempts).toBe(1);
+    expect(result.resumeExhausted).toBe(false);
   });
 
   it('returns phase DONE when all three files exist', async () => {

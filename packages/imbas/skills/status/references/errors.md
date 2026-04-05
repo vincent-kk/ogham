@@ -1,4 +1,4 @@
-# imbas-status — Error Handling & State Transitions
+# status — Error Handling & State Transitions
 
 ## Error Handling
 

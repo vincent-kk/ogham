@@ -15,6 +15,7 @@ import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 
 import { isFcaProject } from '../shared/shared.js';
 import { GUIDE_BLOCK } from '../../constants/agent-context.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 export type { FractalMap };
 
@@ -152,7 +153,10 @@ function buildMapBlock(
  * Returns additional context to inject into the agent.
  */
 export function injectIntent(input: PreToolUseInput): HookOutput {
-  if (!isFcaProject(input.cwd)) {
+  const safeCwd = validateCwd(input.cwd);
+  if (safeCwd === null) return { continue: true };
+
+  if (!isFcaProject(safeCwd)) {
     return { continue: true };
   }
 
@@ -164,15 +168,15 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   // Resolve absolute file path
   const filePath = path.isAbsolute(rawPath)
     ? rawPath
-    : path.resolve(input.cwd, rawPath);
+    : path.resolve(safeCwd, rawPath);
 
   const fileDir = path.dirname(filePath);
 
   const sessionId = input.session_id;
-  const fcaMap = readFractalMap(input.cwd, sessionId);
+  const fcaMap = readFractalMap(safeCwd, sessionId);
 
   // Build context chain to determine boundary (with boundary cache)
-  const cachedBoundary = readBoundary(input.cwd, sessionId, fileDir);
+  const cachedBoundary = readBoundary(safeCwd, sessionId, fileDir);
 
   // Skip full buildChain when boundary is cached and dir was already visited
   if (cachedBoundary !== null) {
@@ -184,7 +188,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
         fcaMap.reads.push(relDir);
       }
       const mapBlock = buildMapBlock(fcaMap.reads, relDir, fcaMap.intents);
-      writeFractalMap(input.cwd, sessionId, fcaMap);
+      writeFractalMap(safeCwd, sessionId, fcaMap);
       return mapBlock.trim()
         ? {
             continue: true,
@@ -203,7 +207,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
 
   // Cache boundary if not already cached
   if (cachedBoundary === null) {
-    writeBoundary(input.cwd, sessionId, fileDir, boundary);
+    writeBoundary(safeCwd, sessionId, fileDir, boundary);
   }
 
   // Relative paths for display
@@ -216,7 +220,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   }
 
   const isFirstVisit = !fcaMap.intents.includes(relDir);
-  const guideNeeded = !hasGuideInjected(sessionId, input.cwd);
+  const guideNeeded = !hasGuideInjected(sessionId, safeCwd);
 
   const blocks: string[] = [];
 
@@ -273,7 +277,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
       // Inject guide once per session, before the very first ctx block
       if (guideNeeded) {
         blocks.push(GUIDE_BLOCK);
-        markGuideInjected(sessionId, input.cwd);
+        markGuideInjected(sessionId, safeCwd);
       }
       blocks.push(
         buildCtxBlock(
@@ -292,7 +296,7 @@ export function injectIntent(input: PreToolUseInput): HookOutput {
   // Always append map block
   blocks.push(buildMapBlock(fcaMap.reads, relDir, fcaMap.intents));
 
-  writeFractalMap(input.cwd, sessionId, fcaMap);
+  writeFractalMap(safeCwd, sessionId, fcaMap);
 
   const additionalContext = blocks.join('\n');
   if (!additionalContext.trim()) {

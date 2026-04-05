@@ -1,5 +1,5 @@
 ---
-name: imbas-pipeline
+name: pipeline
 user_invocable: true
 description: >
   End-to-end pipeline orchestration. Runs validate, split, manifest-stories,
@@ -11,7 +11,7 @@ complexity: complex
 plugin: imbas
 ---
 
-# imbas-pipeline — End-to-End Pipeline Orchestration
+# pipeline — End-to-End Pipeline Orchestration
 
 Run the entire imbas pipeline from document to Jira tickets in a single command.
 Auto-approves at each phase boundary when all quality gates pass.
@@ -36,6 +36,8 @@ Stops immediately with a structured blocker report when any gate fails.
 --supplements       : Supplementary material paths (comma-separated)
 --parent            : Parent Epic key or "new" or "none" (default: "new"; only for document mode)
 --stop-at           : Stop after phase: validate | split | manifest-stories | devplan
+                      (manifest-devplan is the terminal phase; stopping after it is
+                      equivalent to full completion and is therefore not accepted)
 --dry-run           : Run all phases but skip Jira issue creation (manifest shows preview only)
 ```
 
@@ -131,7 +133,7 @@ Phase 3: DEVPLAN
 
 Phase 3.5: MANIFEST DEVPLAN
   Batch-create Tasks + Subtasks + Links + Feedback comments in Jira
-  >>> Partial failure → report (non-blocking)
+  >>> GATE 4: Execution Result — all items created → success report | partial failure → non-blocking report (see references/auto-approval-gates.md for full gate criteria)
 
 FINAL: Pipeline completion report
 ```
@@ -148,7 +150,7 @@ Phase 3: DEVPLAN
 
 Phase 3.5: MANIFEST DEVPLAN
   Batch-create Tasks + Subtasks + Links + Feedback comments in Jira
-  >>> Partial failure → report (non-blocking)
+  >>> GATE 4: Execution Result — all items created → success report | partial failure → non-blocking report (see references/auto-approval-gates.md for full gate criteria)
 
 FINAL: Pipeline completion report
 ```

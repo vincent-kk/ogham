@@ -35,7 +35,7 @@ export interface FractalMap {
 //   {cwdHash}/run-{skillName}.hash     — Layer 4: skill run hash for incremental mode
 
 export function cwdHash(cwd: string): string {
-  return createHash('sha256').update(cwd).digest('hex').slice(0, 12);
+  return createHash('sha256').update(cwd).digest('hex').slice(0, 16);
 }
 
 export function getCacheDir(cwd: string): string {
@@ -93,7 +93,7 @@ export function hasPromptContext(sessionId: string, cwd: string): boolean {
 }
 
 export function sessionIdHash(sessionId: string): string {
-  return createHash('sha256').update(sessionId).digest('hex').slice(0, 12);
+  return createHash('sha256').update(sessionId).digest('hex').slice(0, 16);
 }
 
 export function isFirstInSession(sessionId: string, cwd: string): boolean {

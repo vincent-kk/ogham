@@ -23,6 +23,9 @@ export function applyCompletePhaseFields(
       updated.phases.split.pending_review = action.pending_review;
     }
   } else if (phase === 'devplan') {
+    if (action.result !== undefined) {
+      updated.phases.devplan.result = action.result;
+    }
     if (action.pending_review !== undefined) {
       updated.phases.devplan.pending_review = action.pending_review;
     }

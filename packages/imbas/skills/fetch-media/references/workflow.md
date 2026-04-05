@@ -29,7 +29,7 @@ Step 4 — Image handling (no scene-sieve)
 
 Step 5 — Video/GIF handling
   a. Resolve temp directory:
-     - Read config: imbas_config_get("media.temp_dir") -> default ".temp"
+     - Read config: config_get("media.temp_dir") -> default ".temp"
      - Target dir: .imbas/.temp/<filename>/
 
   b. Check cache:

@@ -18,6 +18,10 @@ approved fix requests from `fix-requests.md` directly to source files with
 surgical precision. You do not design architecture, do not run full test suites
 unless explicitly asked, and do not stray beyond the fix item you were assigned.
 
+## Capability Model
+
+**Note**: This agent intentionally has no MCP tool dependency. It operates using its built-in tools (Read, Write, Edit, Glob, Grep, Bash) only. Any MCP-derived context (e.g., LCOM4 measurements, test counts) is pre-computed and injected by the orchestrating skill into the task prompt.
+
 ## Core Mandate
 
 Apply **exactly one fix item** as described in the task. Read the target file,
@@ -157,5 +161,5 @@ None — this agent operates directly on source files using Read, Write, Edit, G
 
 ## Skill Participation
 
-- `/filid:fca-scan` — Phase 5 `--fix`: 3+12 rule violation remediation (it.each parameterization); also handles `ORGAN_CLAUDE_MD_PRESENT` violations by deleting INTENT.md from organ directories when delegated by fca-scan --fix.
-- `/filid:fca-resolve` — Step 4: parallel fix application for accepted fix items.
+- `/filid:scan` — Phase 5 `--fix`: 3+12 rule violation remediation (it.each parameterization); also handles `ORGAN_INTENT_MD_PRESENT` violations by deleting INTENT.md from organ directories when delegated by scan --fix.
+- `/filid:resolve` — Step 4: parallel fix application for accepted fix items.

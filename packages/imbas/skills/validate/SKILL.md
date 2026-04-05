@@ -1,5 +1,5 @@
 ---
-name: imbas-validate
+name: validate
 user_invocable: true
 description: >
   Phase 1 of the imbas pipeline. Validates a planning document for contradictions,
@@ -10,7 +10,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-# imbas-validate — Phase 1 Document Validation
+# validate — Phase 1 Document Validation
 
 Validates a planning document for internal consistency, producing a structured
 validation report that gates entry to Phase 2 (split).

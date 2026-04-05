@@ -1,5 +1,5 @@
 ---
-name: imbas-manifest
+name: manifest
 user_invocable: true
 description: >
   Execute a stories-manifest or devplan-manifest to batch-create Jira issues.
@@ -10,7 +10,7 @@ complexity: moderate
 plugin: imbas
 ---
 
-# imbas-manifest — Manifest Execution (Jira Batch Creation)
+# manifest — Manifest Execution (Jira Batch Creation)
 
 Executes a stories-manifest or devplan-manifest to batch-create Jira issues,
 links, and comments. Supports dry-run preview, crash recovery via per-item save,

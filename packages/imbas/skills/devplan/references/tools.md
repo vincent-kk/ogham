@@ -6,13 +6,13 @@
 
 | Tool | Usage |
 |------|-------|
-| `imbas_run_get` | Load run state, verify preconditions |
-| `imbas_run_transition` | start_phase(devplan), complete_phase(devplan) |
-| `imbas_manifest_get` | Load stories-manifest.json to read Story data |
-| `imbas_manifest_save` | Save devplan-manifest.json |
-| `imbas_manifest_validate` | Validate devplan manifest structural integrity |
-| `imbas_ast_search` | AST pattern search for code exploration (engineer agent) |
-| `imbas_ast_analyze` | Dependency graph and complexity analysis (engineer agent) |
+| `run_get` | Load run state, verify preconditions |
+| `run_transition` | start_phase(devplan), complete_phase(devplan) |
+| `manifest_get` | Load stories-manifest.json to read Story data |
+| `manifest_save` | Save devplan-manifest.json |
+| `manifest_validate` | Validate devplan manifest structural integrity |
+| `ast_search` | AST pattern search for code exploration (engineer agent) |
+| `ast_analyze` | Dependency graph and complexity analysis (engineer agent) |
 
 ### Atlassian MCP Tools
 
@@ -31,7 +31,7 @@
 
 - Provide stories-manifest.json (filtered by --stories if specified)
 - Provide codebase root path for exploration
-- Grant access to imbas_ast_search and imbas_ast_analyze tools
+- Grant access to ast_search and ast_analyze tools
 - Agent also uses Read, Grep, Glob for code exploration
 - Set subtask_limits from config.json
 - Agent returns devplan-manifest.json content — skill handles state updates

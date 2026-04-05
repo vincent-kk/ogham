@@ -1,27 +1,27 @@
-# imbas-validate — Workflow
+# validate — Workflow
 
 ```
 Step 1 — Run Initialization
-  1. Load config.json via imbas_config_get.
+  1. Load config.json via config_get.
   2. Determine project key: --project argument > config.defaults.project_ref.
      If neither available → error: "No project key. Run /imbas:setup or pass --project."
-  3. Call imbas_run_create with:
+  3. Call run_create with:
      - project_ref: <determined key>
      - source_file: <source path>
      - supplements: <supplement paths array> (if provided)
      → Returns: run_id, run_dir, initial state
-  4. Side effects of imbas_run_create:
+  4. Side effects of run_create:
      - Creates .imbas/<KEY>/runs/<YYYYMMDD-NNN>/ directory
      - Copies source document → source.md (immutable copy principle)
      - Copies supplements → supplements/ directory
      - Initializes state.json (current_phase: "validate", all phases: "pending")
-  5. Call imbas_run_transition with:
+  5. Call run_transition with:
      - project_ref, run_id, action: "start_phase", phase: "validate"
      → Sets validate.status = "in_progress", validate.started_at = now()
 
 Step 2 — Document Source Resolution
   - Local file (*.md, *.txt):
-    - Already copied to source.md by imbas_run_create. Read directly.
+    - Already copied to source.md by run_create. Read directly.
   - Confluence URL:
     - Call Atlassian MCP: getConfluencePage(pageId extracted from URL)
     - Convert response to markdown and save as source.md in run directory.
@@ -72,7 +72,7 @@ Step 4 — Result Evaluation Gate
     → Message: "Validation PASSED. Proceed to Phase 2: /imbas:split [--run <run-id>]"
 
 Step 5 — State Update
-  Call imbas_run_transition with:
+  Call run_transition with:
   - project_ref, run_id
   - action: "complete_phase"
   - phase: "validate"

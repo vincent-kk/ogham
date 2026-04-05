@@ -1,17 +1,15 @@
 ---
-name: imbas-digest
+name: digest
 user_invocable: true
 description: >
-  Compresses a Jira issue's full context (description + comment thread + media)
-  into a structured summary and posts it as a Jira comment. Uses State Tracking +
-  QA-Prompting hybrid approach.
-  Trigger: "digest issue", "이슈 정리", "티켓 요약", "imbas digest"
+  Compresses a Jira issue's full context (description + comment thread + media) into a structured summary and posts it as a Jira comment. Uses State Tracking + QA-Prompting hybrid approach.
+  Trigger: "digest issue", "이슈 정리", "이슈 요약", "티켓 정리", "티켓 요약", "imbas digest"
 version: "1.0.0"
 complexity: moderate
 plugin: imbas
 ---
 
-# imbas-digest — Issue Context Compression
+# digest — Issue Context Compression
 
 Compresses a Jira issue's full context (description, comment thread, and attached media)
 into a structured summary and posts it as a Jira comment. Designed for ticket closing

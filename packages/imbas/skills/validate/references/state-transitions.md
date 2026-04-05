@@ -1,4 +1,4 @@
-# imbas-validate — State Transitions & Output
+# validate — State Transitions & Output
 
 ## Output
 

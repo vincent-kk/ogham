@@ -370,13 +370,13 @@ When [trigger], the [system] shall [action].
 
 #### 4.6 AST Fallback 프로토콜
 
-AST 도구(`imbas_ast_search`, `imbas_ast_analyze`)가 `@ast-grep/napi` 미설치 오류를 반환할 경우, LLM 기반 분석으로 대체:
+AST 도구(`ast_search`, `ast_analyze`)가 `@ast-grep/napi` 미설치 오류를 반환할 경우, LLM 기반 분석으로 대체:
 
 | Native Tool | Fallback |
 |-------------|----------|
-| `imbas_ast_search` | 메타변수를 정규식으로 변환 → Grep → LLM이 false positive 필터링 |
-| `imbas_ast_analyze` (dependency-graph) | Read → LLM이 import/export/call 패턴 추출 |
-| `imbas_ast_analyze` (cyclomatic-complexity) | Read → LLM이 분기문 카운트 |
+| `ast_search` | 메타변수를 정규식으로 변환 → Grep → LLM이 false positive 필터링 |
+| `ast_analyze` (dependency-graph) | Read → LLM이 import/export/call 패턴 추출 |
+| `ast_analyze` (cyclomatic-complexity) | Read → LLM이 분기문 카운트 |
 
 **메타변수 변환**: `$NAME`/`$VALUE` → `[\w.]+`, `$TYPE` → `[\w.<>,\[\] ]+`, `$$$ARGS`/`$$$BODY` → `[\s\S]*?`
 
@@ -399,8 +399,8 @@ tools:
   - Glob          # 파일 패턴 탐색
   - Bash          # 빌드/테스트 확인
   # imbas MCP (AST 코드 분석)
-  - imbas_ast_search
-  - imbas_ast_analyze
+  - ast_search
+  - ast_analyze
   # Atlassian MCP (읽기 전용 — Jira 쓰기는 manifest 스킬에서 수행)
   - getJiraIssue
   - searchJiraIssuesUsingJql

@@ -4,17 +4,20 @@
 
 ```
 Step 1 — Load Run & Manifest Checks
-  1. Call imbas_run_get(project_ref, run_id) to load state.json.
+  1. Call run_get(project_ref, run_id) to load state.json.
   2. Verify split phase preconditions:
      - split.status == "completed" && split.pending_review == false
      - OR split.status == "escaped" && split.escape_code == "E2-3"
      - If not met → error with specific guidance.
-  3. Call imbas_manifest_get(project_ref, run_id, type: "stories")
+  3. Call manifest_get(project_ref, run_id, type: "stories")
      to load stories-manifest.json.
   4. Check Story statuses:
      - All "created" (issue_ref present) → proceed.
      - Any "pending" → block: "Execute stories manifest first: /imbas:manifest stories"
-  5. Call imbas_run_transition:
+     - Exception (E2-3): if split.status == "escaped" && split.escape_code == "E2-3",
+       a single pending Story is the expected upstream state (no Jira writes yet).
+       Proceed without blocking. See preconditions.md "Exception — E2-3 escape upstream".
+  5. Call run_transition:
      - action: "start_phase", phase: "devplan"
      → Sets devplan.status = "in_progress", current_phase = "devplan"
 
@@ -37,7 +40,7 @@ Step 2 — imbas-engineer Agent Spawn
       - Extract domain keywords from each Story description
       - Identify code entry points matching keywords
       - Traverse related code areas (imports, exports, call sites)
-      - Tools: imbas_ast_search for pattern matching, imbas_ast_analyze for
+      - Tools: ast_search for pattern matching, ast_analyze for
         dependency graphs and complexity metrics
       - Also uses: Read, Grep, Glob for broader exploration
 
@@ -79,7 +82,7 @@ Step 2 — imbas-engineer Agent Spawn
 
   IF agent returns devplan-blocked-report.md (all Stories blocked):
     1. Save devplan-blocked-report.md to run directory
-    2. Call imbas_run_transition:
+    2. Call run_transition:
        - action: "complete_phase", phase: "devplan", result: "BLOCKED"
        → Sets devplan.status = "completed", devplan.result = "BLOCKED"
     3. Display blocked report to user with guidance:
@@ -99,7 +102,7 @@ Step 3 — B→A Feedback Collection
     - type: "mapping_divergence" (Story↔code mismatch) or "story_split_issue" (split problem)
   - IMPORTANT: "Problem space tree unchanged" principle — Stories themselves are
     NOT modified. Divergences are recorded as Jira comments only.
-  - Call imbas_manifest_save to persist feedback_comments in devplan-manifest.json.
+  - Call manifest_save to persist feedback_comments in devplan-manifest.json.
 
 Step 4 — User Review Flow
   1. Display manifest summary:
@@ -111,9 +114,9 @@ Step 4 — User Review Flow
   2. Wait for user decision:
 
   Option A — Approve:
-    1. Call imbas_manifest_validate(project_ref, run_id, type: "devplan")
+    1. Call manifest_validate(project_ref, run_id, type: "devplan")
        - If validation errors: display and request correction before approval.
-    2. Call imbas_run_transition:
+    2. Call run_transition:
        - action: "complete_phase", phase: "devplan"
        - pending_review: false
        → Sets devplan.status = "completed", devplan.pending_review = false

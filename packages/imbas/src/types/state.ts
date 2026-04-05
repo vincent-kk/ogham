@@ -49,6 +49,7 @@ export const DevplanPhaseSchema = z.object({
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
   output: z.literal('devplan-manifest.json'),
+  result: ValidateResultSchema.nullable().default(null),
   pending_review: z.boolean().default(true),
 });
 export type DevplanPhase = z.infer<typeof DevplanPhaseSchema>;
@@ -161,6 +162,7 @@ export function createInitialRunState(params: {
         started_at: null,
         completed_at: null,
         output: 'devplan-manifest.json',
+        result: null,
         pending_review: true,
       },
     },

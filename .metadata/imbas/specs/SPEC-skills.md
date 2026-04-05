@@ -19,7 +19,7 @@
 | **devplan** | `/imbas:devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
 | **manifest** | `/imbas:manifest` | 매니페스트 → Jira 배치 생성 | — |
 | **status** | `/imbas:status` | 런 상태 조회, 이력 | — |
-| **fetch-media** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
+| **`imbas:fetch-media`** | `/imbas:fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
 | **digest** | `/imbas:digest` | 이슈 컨텍스트 압축 → Jira 코멘트 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
@@ -28,7 +28,7 @@
 
 | Skill | 호출자 | 역할 | Agent |
 |-------|--------|------|-------|
-| **read-issue** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
+| **`imbas:read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
 | **cache** | setup, validate, split, devplan | Jira 메타데이터 캐시 자동 갱신/조회 | — |
 
 **총 10개 스킬** (user-invocable 8 + internal 2).
@@ -40,7 +40,7 @@
 ### 2.1 imbas:validate — Phase 1 정합성 검증
 
 ```yaml
-name: imbas-validate
+name: validate
 user_invocable: true
 description: >
   Phase 1 of the imbas pipeline. Validates a planning document for contradictions,
@@ -101,7 +101,7 @@ Step 5 — 상태 갱신
 ### 2.2 imbas:split — Phase 2 Story 분할
 
 ```yaml
-name: imbas-split
+name: split
 user_invocable: true
 description: >
   Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant
@@ -203,7 +203,7 @@ Step 7 — 사용자 리뷰
 ### 2.3 imbas:devplan — Phase 3 Subtask/Task 생성
 
 ```yaml
-name: imbas-devplan
+name: devplan
 user_invocable: true
 description: >
   Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts
@@ -276,7 +276,7 @@ Step 4 — 사용자 리뷰
 ### 3.1 imbas:setup — 초기화 & 설정
 
 ```yaml
-name: imbas-setup
+name: setup
 user_invocable: true
 description: >
   Initialize .imbas/ directory, create config.json, and cache Jira project metadata.
@@ -290,7 +290,7 @@ plugin: imbas
 
 | Command | 동작 |
 |---------|------|
-| `init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
+| `filid:init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
 | `show` | config.json + 캐시 상태 표시 |
 | `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
 | `set-language <field> <lang>` | 언어 설정 변경 |
@@ -306,7 +306,7 @@ Step 2 — 사용자에게 Jira 프로젝트 키 질의
   - 사용자 선택
 Step 3 — config.json 생성 (기본값 + 사용자 선택)
 Step 4 — 프로젝트 캐시 갱신
-  - .imbas/<KEY>/cache/ 디렉토리 생성
+  - .imbas/<KEY>/imbas:cache/ 디렉토리 생성
   - Jira 메타데이터 수집 (issue-types, link-types, workflows)
 Step 5 — .gitignore 가드 (setup-lens 패턴)
   - git repo 확인 → .imbas/ ignore 등록
@@ -320,7 +320,7 @@ Step 6 — 결과 표시
 ### 3.2 imbas:status — 런 상태 조회
 
 ```yaml
-name: imbas-status
+name: status
 user_invocable: true
 description: >
   Show current or historical imbas run status, including phase progress,
@@ -346,7 +346,7 @@ plugin: imbas
 ### 4.1 imbas:manifest — 매니페스트 실행
 
 ```yaml
-name: imbas-manifest
+name: manifest
 user_invocable: true
 description: >
   Execute a stories-manifest or devplan-manifest to batch-create Jira issues.
@@ -416,7 +416,7 @@ Step 5 — 결과 리포트
 ### 5.1 imbas:fetch-media — 미디어 다운로드 & 분석
 
 ```yaml
-name: imbas-fetch-media
+name: fetch-media
 user_invocable: true
 description: >
   Download images, videos, and GIFs from Confluence/Jira. For video/GIF files,
@@ -444,7 +444,7 @@ plugin: imbas
 ### 6.1 imbas:read-issue — 이슈 컨텍스트 구조화 (내부 전용)
 
 ```yaml
-name: imbas-read-issue
+name: read-issue
 user_invocable: false
 description: >
   Internal skill. Reads a Jira issue with its full comment thread, reconstructs
@@ -566,7 +566,7 @@ Step 5 — 구조화 & 반환
 ### 6.2 imbas:cache — Jira 캐시 관리 (내부 전용)
 
 ```yaml
-name: imbas-cache
+name: cache
 user_invocable: false
 description: >
   Internal skill. Manages Jira project metadata cache (issue types, link types,
@@ -596,7 +596,7 @@ imbas:cache <action> [--project <KEY>]
 ### 6.3 imbas:digest — 이슈 컨텍스트 압축 (사용자 호출)
 
 ```yaml
-name: imbas-digest
+name: digest
 user_invocable: true
 description: >
   Compresses a Jira issue's full context (description + comment thread + media)
@@ -619,8 +619,8 @@ plugin: imbas
 
 ```
 Step 1 — 이슈 읽기
-  - read-issue(issue-key, depth: full) 호출
-  - 첨부 미디어 감지 → 이미지/동영상 있으면 fetch-media 호출하여 시각 정보 포함
+  - `imbas:read-issue`(issue-key, depth: full) 호출
+  - 첨부 미디어 감지 → 이미지/동영상 있으면 `imbas:fetch-media` 호출하여 시각 정보 포함
 
 Step 2 — State Tracking (상태 추적)
   코멘트를 시간순으로 읽으며 상태 변화 기록:
@@ -680,7 +680,7 @@ Step 6 — 게시
 <!-- /imbas:digest -->
 ```
 - `comments_covered`: digest가 분석한 코멘트 인덱스 범위
-- read-issue가 이 마커를 감지하면 Fast Path 활성화
+- `imbas:read-issue`가 이 마커를 감지하면 Fast Path 활성화
 - 동일 이슈에 digest를 재실행하면 기존 digest 이후 코멘트만 추가 분석 → 신규 digest 코멘트 게시 (기존 것은 남겨둠)
 
 **제안 트리거:**
@@ -707,18 +707,18 @@ Step 6 — 게시
   │
   ├── /imbas:validate ─────── state.json 생성 → validation-report.md
   │         ├── (내부) cache ensure
-  │         └── (내부) read-issue (관련 기존 이슈 참조 시)
+  │         └── (내부) `imbas:read-issue` (관련 기존 이슈 참조 시)
   │
   ├── /imbas:split ────────── state.json 갱신 → stories-manifest.json
   │         ├── (내부) cache ensure
-  │         ├── (내부) read-issue (Epic/기존 Story 맥락 파악 시)
-  │         └── (안내) fetch-media (미디어 발견 시)
+  │         ├── (내부) `imbas:read-issue` (Epic/기존 Story 맥락 파악 시)
+  │         └── (안내) `imbas:fetch-media` (미디어 발견 시)
   │
   ├── /imbas:manifest stories ── stories-manifest → Jira Story 생성
   │
   ├── /imbas:devplan ──────── state.json 갱신 → devplan-manifest.json
   │         ├── (내부) cache ensure
-  │         └── (내부) read-issue (Story 코멘트 추가 논의 확인)
+  │         └── (내부) `imbas:read-issue` (Story 코멘트 추가 논의 확인)
   │
   ├── /imbas:manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
@@ -726,12 +726,12 @@ Step 6 — 게시
   ├── /imbas:fetch-media ──── 미디어 다운로드 + 분석
   │
   └── /imbas:digest ────────── 이슈 컨텍스트 압축 → Jira 코멘트 게시
-            ├── (내부) read-issue → 코멘트 대화 맥락
-            └── (내부) fetch-media → 첨부 미디어 분석 (있을 경우)
+            ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
+            └── (내부) `imbas:fetch-media` → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출
-  └── read-issue ─── validate, split, devplan, digest + 에이전트에서 호출
+  └── `imbas:read-issue` ─── validate, split, devplan, digest + 에이전트에서 호출
                       └── digest 코멘트 감지 시 Fast Path (커버된 범위 스킵)
 ```
 
@@ -769,12 +769,12 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 
 - [SPEC-agents.md](./SPEC-agents.md) — 스킬이 호출하는 에이전트
 - [SPEC-state.md](./SPEC-state.md) — 스킬이 읽고 쓰는 상태
-- [SPEC-media.md](./SPEC-media.md) — fetch-media 상세
+- [SPEC-media.md](./SPEC-media.md) — `imbas:fetch-media` 상세
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
 .md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
-PEC-media.md) — fetch-media 상세
+PEC-media.md) — `imbas:fetch-media` 상세
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
 .md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
