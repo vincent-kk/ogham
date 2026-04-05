@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { parseLinks } from '../providers/github/parse-links.js';
+import { parseLinks } from '../providers/github/index.js';
 
 describe('parseLinks — basic', () => {
   it('parses a single link type', () => {
