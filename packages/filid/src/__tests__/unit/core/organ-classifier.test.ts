@@ -67,6 +67,10 @@ describe('organ-classifier', () => {
       expect(KNOWN_ORGAN_DIR_NAMES).not.toContain('__mocks__');
       expect(KNOWN_ORGAN_DIR_NAMES).not.toContain('__fixtures__');
     });
+
+    it('should include docs/reference organ names (Claude Code plugin convention)', () => {
+      expect(KNOWN_ORGAN_DIR_NAMES).toContain('references');
+    });
   });
 
   describe('classifyNode', () => {
