@@ -25,8 +25,28 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 
 ## References
 
-- [Workflow](./references/workflow.md) — Steps 1–5: issue query, digest fast path, comment reconstruction, context synthesis, structured output
+- [Workflow](./references/workflow.md) — Provider-agnostic skeleton (Step 0 routing, Step 5 structured output)
 - [Output Schema](./references/output-schema.md) — JSON example and field reference table
 - [Caching & Usage](./references/caching-and-usage.md) — Caching policy and agent usage patterns
-- [Tools](./references/tools.md) — Atlassian MCP tools and agent spawn
-- [Error Handling](./references/errors.md) — Error conditions and recovery actions
+- [Tools](./references/tools.md) — Shared tools (config_get) and provider delegation
+- [Error Handling](./references/errors.md) — Provider-agnostic error conditions
+
+<!-- imbas:constraints-v1 -->
+## Workflow (Provider-agnostic skeleton)
+
+1. Load inputs (target issue ID) via imbas_tools.
+2. Read `config.provider` via `config_get`.
+3. Load ONLY the provider-specific workflow file matching `config.provider`:
+
+   | provider | workflow file |
+   |---|---|
+   | `jira`  | `references/jira/workflow.md` |
+   | `local` | `references/local/workflow.md` |
+
+4. Execute those steps exactly.
+5. Return the shared structured output (per `output-schema.md`).
+
+## Constraints
+
+- When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
+- Provider-specific tools (atlassian__*, Read/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
