@@ -1,0 +1,20 @@
+{
+  "number": 42,
+  "title": "소셜 로그인으로 신규 가입",
+  "state": "OPEN",
+  "body": "## User Story\nAs a new user,\nI want to sign up via social accounts,\nso that I can authenticate easily.\n\n## Acceptance Criteria\n- [ ] OAuth flow completes successfully\n- [ ] User session is created\n\n## Links\n\n- blocks: #43\n- relates: #50\n\n<!-- imbas:meta\ntype: story\nparent: #10\nblocks: #43\nrelates_to: #50\n-->",
+  "labels": [
+    { "name": "type:story" },
+    { "name": "status:todo" },
+    { "name": "imbas" }
+  ],
+  "createdAt": "2026-04-04T10:00:00Z",
+  "comments": [
+    {
+      "id": "IC_kwDOA1234",
+      "body": "<!-- imbas:digest -->\n\n## Digest\n\n**2026-04-04** — 초기 이슈 생성",
+      "createdAt": "2026-04-04T10:01:00Z",
+      "author": { "login": "imbas-bot" }
+    }
+  ]
+}

@@ -1,17 +1,21 @@
 # digest — Tools Used & Agent Spawn
 
-## Tools Used
+Provider-specific publish tools live in `jira/tools.md` and `local/tools.md`.
+This file lists shared tools and delegated skills.
 
-### Atlassian MCP Tools (via delegated skills)
+## Shared tools (all providers)
 
-| Tool | Usage | Via |
-|------|-------|----|
-| `getJiraIssue` | Read issue with full comment thread | `imbas:read-issue` skill |
-| `addCommentToJiraIssue` | Post digest comment to Jira | direct call |
-| `fetchAtlassian` | Download attached media files | `/imbas:fetch-media` user-invocable skill |
+| Tool | Usage |
+|------|-------|
+| `config_get` | Read `config.provider` to route Step 6 to the correct publish path |
+
+## Delegated skills
+
+| Skill | When | Provider |
+|-------|------|----------|
+| `imbas:read-issue` | Step 1 — load structured issue context | all |
+| `/imbas:fetch-media` | Step 1 — analyze attached images/videos/GIFs | jira only (v1) |
 
 ## Agent Spawn
 
-No direct agent spawn. Digest delegates to other skills:
-- `imbas:read-issue` — for structured issue context (internal skill, `user_invocable: false`)
-- `/imbas:fetch-media` — for attached media analysis (user-invocable skill, `user_invocable: true`)
+No direct agent spawn. Digest delegates to other skills only.

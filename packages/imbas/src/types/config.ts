@@ -6,6 +6,19 @@
 
 import { z } from 'zod';
 
+/**
+ * Issue-tracking provider. Selects where Story/Task/Subtask entities are stored
+ * and how skill workflows route their tracker operations.
+ *
+ * - `jira`   : Atlassian Cloud via the `atlassian` MCP server (shipping)
+ * - `github` : GitHub via `gh` CLI (prototype — 2-line read path only)
+ * - `local`  : Markdown files under `.imbas/<KEY>/issues/` (shipping from v1.1)
+ *
+ * Default is `jira` for backward compatibility with existing configs.
+ */
+export const ProviderSchema = z.enum(['jira', 'github', 'local']);
+export type Provider = z.infer<typeof ProviderSchema>;
+
 export const LanguageConfigSchema = z.object({
   documents: z.string().default('ko'),
   skills: z.string().default('en'),
@@ -65,6 +78,37 @@ export const JiraConfigSchema = z.object({
 });
 export type JiraConfig = z.infer<typeof JiraConfigSchema>;
 
+export const GithubLinkTypeSchema = z.enum([
+  'blocks',
+  'blocked-by',
+  'split-from',
+  'split-into',
+  'relates',
+]);
+export type GithubLinkType = z.infer<typeof GithubLinkTypeSchema>;
+
+/**
+ * GitHub provider config. Only consulted when `provider === 'github'`.
+ * Authentication is delegated to ambient `gh auth` — no token field.
+ *
+ * - `repo`: `owner/name` target repository for all imbas-managed issues.
+ * - `defaultLabels`: extra labels applied to every created issue on top
+ *   of the auto-managed `type:*` and `status:*` labels.
+ * - `linkTypes`: allowed link type keys for the body `## Links` section.
+ */
+export const GithubConfigSchema = z.object({
+  repo: z.string(),
+  defaultLabels: z.array(z.string()).default([]),
+  linkTypes: z.array(GithubLinkTypeSchema).default([
+    'blocks',
+    'blocked-by',
+    'split-from',
+    'split-into',
+    'relates',
+  ]),
+});
+export type GithubConfig = z.infer<typeof GithubConfigSchema>;
+
 export const MediaConfigSchema = z.object({
   scene_sieve_command: z.string().default('npx -y @lumy-pack/scene-sieve'),
   temp_dir: z.string().default('.imbas/.temp'),
@@ -75,9 +119,11 @@ export type MediaConfig = z.infer<typeof MediaConfigSchema>;
 
 export const ImbasConfigSchema = z.object({
   version: z.string().default('1.0'),
+  provider: ProviderSchema.default('jira'),
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
+  github: GithubConfigSchema.optional(),
   media: MediaConfigSchema.default({}),
 });
 export type ImbasConfig = z.infer<typeof ImbasConfigSchema>;

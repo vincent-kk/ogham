@@ -94,15 +94,19 @@ Step 2 — imbas-engineer Agent Spawn
     2. Save devplan-manifest.json (unblocked Stories only) to run directory
     3. Continue to Step 3 with the partial manifest
 
-Step 3 — B→A Feedback Collection
-  - When Story definition ≠ code reality, record in feedback_comments:
-    - target_story: Story ID
-    - target_ref: Story Jira key
-    - comment: description of divergence
-    - type: "mapping_divergence" (Story↔code mismatch) or "story_split_issue" (split problem)
-  - IMPORTANT: "Problem space tree unchanged" principle — Stories themselves are
-    NOT modified. Divergences are recorded as Jira comments only.
-  - Call manifest_save to persist feedback_comments in devplan-manifest.json.
+Step 3 — B→A Feedback Collection — provider-specific
+
+  Provider routing:
+  - jira  → jira/workflow.md Step 3 (target_ref is a Jira key; feedback later
+            posted as Jira comments by manifest skill)
+  - local → local/workflow.md Step 3 (target_ref is a local S-<N> ID; feedback
+            later appended to the file's ## Digest section by manifest skill)
+
+  Both branches share the invariant: "Problem space tree unchanged" — Stories
+  themselves are NOT modified. Divergences become comments (Jira) or digest
+  appends (local).
+
+  Call manifest_save to persist feedback_comments in devplan-manifest.json.
 
 Step 4 — User Review Flow
   1. Display manifest summary:
@@ -120,7 +124,8 @@ Step 4 — User Review Flow
        - action: "complete_phase", phase: "devplan"
        - pending_review: false
        → Sets devplan.status = "completed", devplan.pending_review = false
-    3. Display: "Phase 3 complete. Run /imbas:manifest devplan to create Jira issues."
+    3. Display the provider-specific completion message (see jira/workflow.md
+       or local/workflow.md Step 4).
 
   Option B — Request modifications:
     1. User specifies changes (add/remove/modify Tasks or Subtasks).

@@ -14,12 +14,12 @@
 | `ast_search` | AST pattern search for code exploration (engineer agent) |
 | `ast_analyze` | Dependency graph and complexity analysis (engineer agent) |
 
-### Atlassian MCP Tools
+### Provider-specific tools
 
-| Tool | Usage |
-|------|-------|
-| `getJiraIssue` | Read Story details from Jira (latest state, comments) |
-| `searchJiraIssuesUsingJql` | Search for related existing issues in Jira |
+Provider-specific tool surfaces are in `jira/tools.md` and `local/tools.md`.
+Both are optional during Step 2 exploration — the core imbas-engineer agent
+tool set (`ast_search`, `ast_analyze`, `Read`, `Grep`, `Glob`) is sufficient
+to produce a devplan manifest regardless of provider.
 
 ## Agent Spawn
 

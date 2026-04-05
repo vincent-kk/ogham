@@ -31,8 +31,29 @@ or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approac
 
 ## References
 
-- [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-6): issue reading, state tracking, QA-prompting, 3-layer compression, comment formatting, preview/publish flow
-- [digest-marker.md](./references/digest-marker.md) — Digest Marker Specification: marker format, field descriptions, re-run behavior
-- [suggestion-trigger.md](./references/suggestion-trigger.md) — Suggestion Trigger Logic: trigger conditions, display format, cross-issue synthesis scope
-- [tools.md](./references/tools.md) — Tools Used & Agent Spawn: Atlassian MCP tools, internal skill dependencies
-- [errors.md](./references/errors.md) — Error Handling: error cases and recovery actions
+- [workflow.md](./references/workflow.md) — Provider-agnostic skeleton (Steps 0–5); Step 6 publish is provider-specific
+- [digest-marker.md](./references/digest-marker.md) — (Jira only) Digest Marker Specification for posted comments
+- [suggestion-trigger.md](./references/suggestion-trigger.md) — (Jira only) Suggestion Trigger Logic
+- [tools.md](./references/tools.md) — Shared tools (config_get) and delegated skills
+- [errors.md](./references/errors.md) — Provider-agnostic error handling
+
+<!-- imbas:constraints-v1 -->
+## Workflow (Provider-agnostic skeleton)
+
+1. Load inputs (issue reference) via imbas_tools.
+2. Read `config.provider` via `config_get`.
+3. Load ONLY the provider-specific workflow file matching `config.provider`:
+
+   | provider | workflow file |
+   |---|---|
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
+
+4. Execute Steps 0–5 from the shared skeleton, then the provider's Step 6 publish.
+5. Persist outputs via the provider's publish path (Jira comment or local `## Digest` append).
+
+## Constraints
+
+- When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
+- Provider-specific tools (atlassian__* for jira, `gh issue comment` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.

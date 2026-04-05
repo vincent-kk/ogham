@@ -1,0 +1,34 @@
+{
+  "_note": "Baseline snapshot of agent `tools:` frontmatter arrays. Used by scripts/check-agent-tools-frontmatter.mjs to detect silent tool-grant expansion. Update this file only when intentionally changing agent permissions.",
+  "_captured_at": "2026-04-06",
+  "_captured_in": "RALPLAN v2 local-provider cycle Phase E",
+  "agents": {
+    "imbas-engineer": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash",
+      "mcp__plugin_imbas_tools__ast_search",
+      "mcp__plugin_imbas_tools__ast_analyze",
+      "mcp__plugin_imbas_atlassian__getJiraIssue",
+      "mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql"
+    ],
+    "imbas-planner": [
+      "Read",
+      "Grep",
+      "Glob",
+      "mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql",
+      "mcp__plugin_imbas_atlassian__getJiraIssue"
+    ],
+    "imbas-analyst": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash",
+      "mcp__plugin_imbas_atlassian__getConfluencePage",
+      "mcp__plugin_imbas_atlassian__searchConfluenceUsingCql",
+      "mcp__plugin_imbas_atlassian__getJiraIssue",
+      "mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql"
+    ]
+  }
+}

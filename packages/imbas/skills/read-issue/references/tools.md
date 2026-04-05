@@ -1,11 +1,14 @@
-# Tools Used
+# Tools Used — Provider-agnostic
 
-## Atlassian MCP Tools
+Provider-specific tools are in `jira/tools.md` and `local/tools.md`.
+
+## imbas MCP Tools (all providers)
 
 | Tool | Usage |
 |------|-------|
-| `getJiraIssue` | Query issue metadata, description, and comments |
+| `config_get` | Read `config.provider` to route Step 0 dispatch to the correct provider workflow file |
 
 ## Agent Spawn
 
-No agent spawn. This skill executes directly and returns structured data to the caller.
+No agent spawn. This skill executes directly and returns structured data to
+the caller, regardless of provider.
