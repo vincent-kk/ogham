@@ -1,24 +1,17 @@
-/**
- * MCP tool handler: review-format
- * Formats review output files into collapsible GitHub PR comment markdown.
- * Used by `filid:review` (`format-pr-comment`) and `filid:revalidate` (`format-revalidate-comment`).
- */
 import path from 'node:path';
 
-import { parseStructureCheckFrontmatter } from '../../../core/utils/pr-summary-generator.js';
-import type { HumanSummary } from '../../../types/summary.js';
-import type { ReviewManageInput } from '../review-manage/review-manage.js';
+import { parseStructureCheckFrontmatter } from '../../../../core/utils/pr-summary-generator.js';
+import type { HumanSummary } from '../../../../types/summary.js';
+import type { ReviewManageInput } from '../review-manage.js';
 import {
   extractRevalidateVerdict,
   extractVerdict,
   normalizeBranch,
   tryReadFile,
-} from '../review-utils/review-utils.js';
+} from '../utils/review-utils.js';
 
-/** Maximum PR comment size before falling back to summary-only */
 const MAX_COMMENT_SIZE = 50_000;
 
-/** Stage key → display name mapping */
 const STAGE_DISPLAY_NAMES: Record<string, string> = {
   structure: 'Structure',
   documents: 'Documents',
@@ -33,10 +26,6 @@ function resultEmoji(result: string): string {
   return '⏭️';
 }
 
-/**
- * Transform structure-check.md content: replace YAML frontmatter with a
- * human-readable summary table while keeping the markdown body intact.
- */
 function transformStructureContent(content: string): string {
   const fm = parseStructureCheckFrontmatter(content);
   if (!fm) return content;
@@ -62,17 +51,10 @@ function transformStructureContent(content: string): string {
   return summaryTable + (bodyContent ? '\n\n' + bodyContent : '');
 }
 
-/**
- * Wrap content in a collapsible <details> block.
- */
 function collapsible(summary: string, content: string): string {
   return `<details><summary>${summary}</summary>\n\n${content}\n\n</details>`;
 }
 
-/**
- * Format review results into a collapsible PR comment markdown.
- * Reads review-report.md (required), structure-check.md (optional), fix-requests.md (optional).
- */
 export async function formatPrComment(
   args: unknown,
 ): Promise<Record<string, unknown>> {
@@ -93,7 +75,6 @@ export async function formatPrComment(
     normalized,
   );
 
-  // Read required file
   const reportContent = await tryReadFile(
     path.join(reviewDir, 'review-report.md'),
   );
@@ -103,7 +84,6 @@ export async function formatPrComment(
     );
   }
 
-  // Read optional files
   const structureContent = await tryReadFile(
     path.join(reviewDir, 'structure-check.md'),
   );
@@ -113,7 +93,6 @@ export async function formatPrComment(
 
   const verdict = extractVerdict(reportContent);
 
-  // Build collapsible sections
   const sections: string[] = [];
 
   if (structureContent) {
@@ -131,14 +110,12 @@ export async function formatPrComment(
     sections.push(collapsible('Fix Requests', fixRequestsContent));
   }
 
-  // Assemble full comment
   const header = `## Code Review Governance — ${verdict}\n`;
   const body = sections.join('\n\n');
   const footer = `\n\n> Full report: \`.filid/review/${normalized}/review-report.md\``;
 
   let markdown = header + '\n' + body + footer;
 
-  // Size guard
   if (markdown.length > MAX_COMMENT_SIZE) {
     markdown =
       `## Code Review Governance — ${verdict}\n\n` +
@@ -149,10 +126,6 @@ export async function formatPrComment(
   return { markdown, verdict, normalized };
 }
 
-/**
- * Format re-validation results into a collapsible PR comment markdown.
- * Reads re-validate.md (required).
- */
 export async function formatRevalidateComment(
   args: unknown,
 ): Promise<Record<string, unknown>> {
@@ -187,8 +160,6 @@ export async function formatRevalidateComment(
   }
 
   const verdict = extractRevalidateVerdict(revalidateContent);
-
-  // Build collapsible section
   const section = collapsible('Re-validation Details', revalidateContent);
 
   const verdictEmoji = verdict === 'PASS' ? '✅' : '❌';
@@ -197,7 +168,6 @@ export async function formatRevalidateComment(
 
   let markdown = header + '\n' + section + footer;
 
-  // Size guard
   if (markdown.length > MAX_COMMENT_SIZE) {
     markdown =
       `## Re-validation — ${verdictEmoji} ${verdict}\n\n` +
@@ -208,24 +178,15 @@ export async function formatRevalidateComment(
   return { markdown, verdict, normalized };
 }
 
-/**
- * Format a HumanSummary into markdown string.
- * The summary is pre-rendered by generateHumanSummary(), but this function
- * can be used when a standalone markdown rendering is needed.
- */
 export function formatHumanSummary(summary: HumanSummary): string {
   return summary.markdown;
 }
 
-/**
- * Handle generate-human-summary action.
- * Reads review session files and delegates to generateHumanSummary() from core.
- */
 export async function handleGenerateHumanSummary(
   args: unknown,
 ): Promise<Record<string, unknown>> {
   const { generateHumanSummary } =
-    await import('../../../core/utils/pr-summary-generator.js');
+    await import('../../../../core/utils/pr-summary-generator.js');
 
   const input = args as ReviewManageInput;
 
