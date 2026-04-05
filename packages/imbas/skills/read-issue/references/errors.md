@@ -1,8 +1,8 @@
-# Error Handling
+# Error Handling — Provider-agnostic
+
+Provider-specific errors live in `jira/errors.md` and `local/errors.md`.
 
 | Error | Action |
 |-------|--------|
-| Issue not found | Return error: "Issue {key} not found in Jira" |
-| Atlassian MCP not connected | Return error: "Atlassian MCP not available" |
-| Malformed comment body | Log warning, skip malformed comment, continue processing |
-| Digest marker parse failure | Log warning, fall back to Full Path (ignore malformed digest) |
+| Depth parameter invalid (not `shallow`/`full`) | Return error: "Invalid depth: expected `shallow` or `full`". |
+| Output schema assembly failure | Log the assembly error and return a degraded result with whatever fields were successfully populated. |

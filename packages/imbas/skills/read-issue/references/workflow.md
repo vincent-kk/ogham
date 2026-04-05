@@ -1,86 +1,40 @@
-# Complete Workflow
+# read-issue Workflow — Provider-agnostic skeleton
 
-## Step 1 — Issue query
+This file defines the overall flow. Steps 1–4 are delegated to the
+provider-specific workflow file (`jira/workflow.md` or `local/workflow.md`),
+selected by `config.provider`. Step 5 (structured output) is shared.
 
-1. Call Atlassian MCP: getJiraIssue(issueIdOrKey: <issue-key>)
-2. Extract from response:
-   - key, summary, type, status
-   - assignee, reporter
-   - created, updated timestamps
-   - description (full body)
-   - comments array (if present)
-3. If depth == "shallow":
-   → Skip comment processing
-   → Build output with metadata + description only
-   → Jump to Step 5
+## Step 0 — Provider routing
 
-## Step 2 — Digest comment Fast Path detection
+Read `config.provider` via `config_get`. Load ONLY the matching workflow:
+- `jira`  → `jira/workflow.md`
+- `local` → `local/workflow.md`
 
-Scan comments for imbas:digest marker:
-  <!-- imbas:digest v1 | generated: ... | comments_covered: 1-N -->
+Do NOT read other provider files. See `SKILL.md` Constraints block.
 
-If digest marker found → Fast Path:
-  a. Parse digest comment body:
-     - Extract structured sections: decisions, constraints, rejected, open_questions
-     - Extract participants and summary
-  b. Read comments_covered range (e.g., "1-15")
-  c. Count comments after the covered range (e.g., comment 16 onwards)
-  d. If no new comments after digest:
-     → Use digest content as the complete context
-     → Set digest_found: true, new_comments_after_digest: 0
-     → Jump to Step 5
-  e. If new comments exist after digest:
-     → Process only new comments through Step 3-4
-     → Merge new analysis with digest content
-     → Set digest_found: true, new_comments_after_digest: <count>
+## Steps 1-4 — Provider-specific
 
-If no digest marker found → Full Path: proceed to Step 3
+The loaded provider workflow handles:
+1. Issue query / file lookup.
+2. Digest fast-path detection or digest section parsing.
+3. Conversation reconstruction (full in Jira, degraded in local).
+4. Context synthesis (decisions, open questions, participants where available).
 
-## Step 3 — Comment conversation reconstruction (Full Path)
+Each provider returns a result object with the same shape so Step 5 can build
+the structured output identically.
 
-1. Sort comments chronologically by created timestamp
-2. For each comment, extract:
-   - author: displayName of the comment author
-   - created: timestamp (ISO 8601)
-   - body: comment body text (markdown)
-3. Analyze conversation flow patterns:
-   - Question → Answer: detect interrogative patterns followed by responses
-   - Proposal → Agreement/Disagreement: detect suggestions and reactions
-   - @mention-based: identify directed conversations between participants
-4. Build threaded conversation model from flat comment list
+## Step 5 — Structured output (shared)
 
-## Step 4 — Context synthesis
+Build and return the complete JSON result per `output-schema.md`.
 
-1. Decision extraction:
-   - Scan for decision signal keywords:
-     Korean: "확정", "결정", "합의", "최종", "으로 하자", "으로 갑시다"
-     English: "agreed", "decided", "let's go with", "confirmed", "final"
-   - For each decision, record:
-     - date: when the decision was made
-     - by: who made/proposed it
-     - content: what was decided
-     - agreed_by: who explicitly agreed (from subsequent comments)
-     - source_comment_index: comment position for traceability
+Provider-specific notes:
+- Jira: all fields populated; `participants`, `decisions`, `open_questions`
+  fully analyzed from the comment thread.
+- Local: `participants: []`; `decisions` / `open_questions` are scanned from
+  description + digest bodies only; `comment_count` = digest entry count.
 
-2. Latest state determination:
-   - When description and comments conflict → latest comment takes precedence
-   - Detect superseded requirements (older statements overridden by newer ones)
+The `key` field holds the provider's native identifier:
+- Jira: issue key (e.g., `PROJ-123`)
+- Local: prefix-by-type ID (e.g., `S-1`, `T-3`, `ST-42`)
 
-3. Open question detection:
-   - Questions with no subsequent answer
-   - Opposing opinions with no resolution
-   - Explicit "TBD", "TODO", "미정", "추후 결정" markers
-
-4. Participant profiling:
-   - Comment frequency analysis per author
-   - Role inference based on comment patterns:
-     - Frequent requirement statements → PO/PM
-     - Technical implementation details → Developer
-     - Test scenarios, edge cases → QA
-     - Visual/interaction feedback → Designer
-   - Record: name, role_hint, comment_count
-
-## Step 5 — Structured output
-
-Build and return the complete JSON result (schema in output-schema.md).
-No caching — issue content changes frequently, so every call queries Jira directly.
+No caching. Issue content is re-read on every call.
