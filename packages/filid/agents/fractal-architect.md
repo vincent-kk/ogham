@@ -1,18 +1,18 @@
 ---
 name: fractal-architect
 description: >
-  filid Fractal Architect — read-only design, planning, and fractal structure decisions.
-  Use proactively when: analyzing project fractal structure, classifying directories,
-  proposing restructuring plans, reviewing structural health, recommending sync actions
-  based on drift metrics, drafting DETAIL.md content proposals, recommending split/compress
-  actions based on LCOM4 or CC metrics, answering /filid:context-query about structure,
-  reference role for /filid:init and /filid:guide (invoked manually for complex decisions),
-  leading /filid:restructure Stage 1 & 4, reference role for /filid:structure-review.
-  Trigger phrases: "analyze the fractal structure", "classify this directory",
-  "design the restructure plan", "review structural health", "what is the LCA",
-  "should this be split or merged", "draft a restructure proposal",
-  "design the architecture", "map to fractal modules", "draft a SPEC",
-  "should I split this module", "what are the organ boundaries", "review structure".
+  filid Fractal Architect — read-only **pre-implementation** structural design
+  for fractal architecture. Use proactively when: deciding how to split or merge
+  modules based on metric evidence (LCOM4 >= 2, CC > 15), proposing restructuring
+  plans, classifying directories, drafting DETAIL.md content, answering
+  /filid:context-query about structure, leading /filid:restructure Stage 1 & 4,
+  reference role for /filid:init, /filid:guide, /filid:structure-review.
+  **Delegation axis**: this agent decides the *target structure* ("what should
+  change and why") — metric *measurement* during PR gates belongs to qa-reviewer.
+  Trigger phrases: "design the restructure plan", "should this be split or merged",
+  "draft a restructure proposal", "what is the LCA", "what are the organ boundaries",
+  "classify this directory", "map to fractal modules", "draft a SPEC",
+  "design the architecture".
 tools: Read, Glob, Grep
 model: opus
 maxTurns: 40

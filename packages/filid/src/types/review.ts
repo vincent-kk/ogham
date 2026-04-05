@@ -1,8 +1,3 @@
-/**
- * @file review.ts
- * @description 코드 리뷰 거버넌스 시스템의 핵심 데이터 모델 정의.
- */
-
 /** 변경 사항의 복잡도 등급 */
 export type Complexity = 'LOW' | 'MEDIUM' | 'HIGH';
 
@@ -16,7 +11,10 @@ export type PersonaId =
   | 'design-hci';
 
 /** 체크포인트 Phase */
-export type CheckpointPhase = 'A' | 'B' | 'C' | 'DONE';
+export type CheckpointPhase = 'A' | 'B' | 'C' | 'D' | 'DONE';
+
+/** 무한 resume 루프 방지를 위한 최대 재시도 횟수 */
+export const MAX_RESUME_RETRIES = 3;
 
 /** 체크포인트 상태 */
 export interface CheckpointStatus {
@@ -26,6 +24,10 @@ export interface CheckpointStatus {
   files: string[];
   /** Content hash from last completed review (if content-hash.json exists) */
   contentHash?: string;
+  /** session.md 의 resume_attempts 카운터 (무한 루프 방지용, Phase A 재시작 시 skill 이 증가) */
+  resumeAttempts?: number;
+  /** resumeAttempts 가 MAX_RESUME_RETRIES 에 도달했는지 — skill 은 true 시 INCONCLUSIVE 로 종결해야 함 */
+  resumeExhausted?: boolean;
 }
 
 /** 위원회 선출 결과 */

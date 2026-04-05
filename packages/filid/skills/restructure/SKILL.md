@@ -54,8 +54,17 @@ See [reference.md Section 3](./reference.md#section-3--execution).
 
 ### Stage 4 — Validation
 
-`fractal-architect` validates the result using `structure_validate` and reports any
-remaining violations. `--dry-run` skips this stage.
+**The skill (not the agent) invokes `structure_validate`** on the modified tree
+after `restructurer` returns, then passes the validation report to
+`fractal-architect` for interpretation and remediation recommendations.
+Per the agent Capability Model (`agents/INTENT.md`-equivalent policy), agents
+do not call MCP tools directly — orchestrating skills own all MCP invocations.
+
+1. Skill calls `structure_validate({ path, rules })` with the modified tree root.
+2. Skill forwards the `ValidationReport` to `fractal-architect` in the task prompt.
+3. `fractal-architect` reads the report and reports any remaining violations.
+
+`--dry-run` skips this stage.
 See [reference.md Section 4](./reference.md#section-4--validation).
 
 ## Available MCP Tools

@@ -167,21 +167,13 @@ export { handleLcaResolve } from './mcp/tools/lca-resolve/lca-resolve.js';
 export { handleRuleQuery } from './mcp/tools/rule-query/rule-query.js';
 export { handleStructureValidate } from './mcp/tools/structure-validate/structure-validate.js';
 export { handleReviewManage } from './mcp/tools/review-manage/review-manage.js';
-export {
-  formatPrComment,
-  formatRevalidateComment,
-  formatHumanSummary,
-} from './mcp/tools/review-format/review-format.js';
 export { handleDebtManage } from './mcp/tools/debt-manage/debt-manage.js';
 export { handleCacheManage } from './mcp/tools/cache-manage/cache-manage.js';
 export { handleCoverageVerify } from './mcp/tools/coverage-verify/coverage-verify.js';
 
-// Review shared utilities
-export {
-  normalizeBranch,
-  resolveReviewDir,
-  tryReadFile,
-} from './mcp/tools/review-utils/review-utils.js';
+// Note: format/* and utils/* helpers under review-manage are internal organs
+// (Stage 3 / v0.2.0 — see .omc/plans/filid-structural-fix-round1.md T7). They
+// are no longer re-exported from the public barrel.
 
 // MCP server
 export { createServer, startServer } from './mcp/server/server.js';

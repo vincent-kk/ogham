@@ -42,11 +42,13 @@ and a state machine.
    - `structure-check.md` only → Phase B
    - `session.md` only → Check `session.md` frontmatter for `no_structure_check` flag:
      - If `no_structure_check: true` → Phase C (Phase A was intentionally skipped)
-     - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md` and restart only Phase A)
+     - If `no_structure_check: false` or absent → Phase A only (Phase A likely failed while Phase B succeeded in parallel; preserve existing `session.md`, **increment `resume_attempts` by 1 in session.md frontmatter**, then restart only Phase A)
      After Phase A completes and writes `structure-check.md`, re-evaluate the checkpoint state against the full table above to determine the next phase (typically Phase C).
    - `structure-check.md` + `session.md` (no `verification.md`) → Phase C
    - `session.md` + `verification.md` → Phase D
    - All complete (`review-report.md` exists) → "Review complete"
+
+> **Max-retry guard (LOGIC-011)**: When the checkpoint response has `resumeExhausted: true` (`resume_attempts >= 3`), the skill MUST terminate with verdict `INCONCLUSIVE` instead of restarting Phase A. Report: "Resume exhausted after 3 Phase A retries — manual intervention required. Inspect `.filid/review/<branch>/session.md` and re-run with `--force` to start fresh." Then END execution. Do not enter any further phase.
 
 If `--force`: call `review_manage(action: "cleanup", projectRoot: <project_root>, branchName: <branch>)` first, then restart from Phase A (or Phase B if `--no-structure-check`).
 

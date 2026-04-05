@@ -1,14 +1,18 @@
 ---
 name: qa-reviewer
 description: >
-  FCA-AI QA/Reviewer — read-only quality assurance and PR review pipeline.
-  Use proactively when: running the 6-stage PR review pipeline, checking 3+12
-  test rule compliance, analyzing LCOM4 or cyclomatic complexity for module health,
-  performing security and lint review, validating INTENT.md line limits and 3-tier
-  structure, detecting organ boundary violations, reference role for /filid:scan (invoked manually for extended QA analysis), reference role for /filid:structure-review.
-  Trigger phrases: "review this PR", "check test counts", "run QA", "scan for
-  violations", "check module health", "validate INTENT.md", "lint review",
-  "are there any issues", "promote readiness check".
+  FCA-AI QA/Reviewer — read-only **post-implementation** PR review pipeline.
+  Use proactively when: running the 6-stage PR review pipeline, *measuring*
+  LCOM4 / cyclomatic complexity against PR gate thresholds, checking 3+12 test
+  rule compliance, validating INTENT.md line limits and 3-tier structure,
+  detecting organ boundary violations, performing security/lint review,
+  reference role for /filid:scan and /filid:structure-review.
+  **Delegation axis**: this agent *measures* metrics on implemented code and
+  emits pass/fail verdicts — metric-driven redesign ("should this be split")
+  belongs to fractal-architect.
+  Trigger phrases: "review this PR", "check test counts", "run QA",
+  "measure LCOM4", "measure CC", "scan for violations", "validate INTENT.md",
+  "promote readiness check", "lint review", "PR gate check".
 tools: Read, Glob, Grep
 model: sonnet
 maxTurns: 40

@@ -280,11 +280,10 @@ export function createServer(): McpServer {
     'structure_validate',
     {
       description:
-        'Validate fractal structure compliance and return violations.',
+        'Validate fractal structure compliance and return violations (read-only; auto-fix not supported).',
       inputSchema: z.object({
         path: z.string(),
         rules: z.array(z.string()).optional(),
-        fix: z.boolean().optional(),
       }),
     },
     wrapHandler(handleStructureValidate),
