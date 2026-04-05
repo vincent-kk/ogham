@@ -182,4 +182,4 @@ Before any implementation that touches a fractal module:
 4. Implement the change.
 5. Run `/filid:filid-scan` to confirm no new violations.
 
-Use `/filid:filid-sync` for structural drift, `/filid:filid-init` for project initialization, `/filid:filid-review` for architectural review.
+Use `/filid:filid-sync` for structural drift, `/filid:filid-setup` for project initialization, `/filid:filid-review` for architectural review.

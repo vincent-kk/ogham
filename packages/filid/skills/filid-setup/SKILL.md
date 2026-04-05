@@ -1,7 +1,7 @@
 ---
-name: filid-init
+name: filid-setup
 user_invocable: true
-description: "[filid:filid-init] Initialize FCA-AI fractal architecture by scanning the directory tree, classifying every directory as fractal, organ, or pure-function, and generating missing INTENT.md and DETAIL.md files."
+description: "[filid:filid-setup] Initialize FCA-AI fractal architecture by scanning the directory tree, classifying every directory as fractal, organ, or pure-function, and generating missing INTENT.md and DETAIL.md files."
 version: "1.0.0"
 complexity: medium
 plugin: filid
@@ -13,7 +13,7 @@ plugin: filid
 > Large tool responses (e.g., fractal_scan) are internal working data —
 > do NOT summarize them to the user. Skip phases with no work silently.
 
-# filid-init — FCA-AI Initialization
+# filid-setup — FCA-AI Initialization
 
 Initialize the FCA-AI fractal context architecture in a project. Scans the
 directory tree, classifies every directory by node type, generates missing
@@ -121,7 +121,7 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 > Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well.
 
 ```
-/filid:filid-init [path]
+/filid:filid-setup [path]
 ```
 
 | Parameter | Type   | Default                   | Description                  |
@@ -132,10 +132,10 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 
 ```bash
 # Initialize current project
-/filid:filid-init
+/filid:filid-setup
 
 # Initialize a specific sub-directory
-/filid:filid-init src/payments
+/filid:filid-setup src/payments
 
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers

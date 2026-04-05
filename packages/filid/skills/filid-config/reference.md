@@ -137,7 +137,7 @@ Report validation failures inline after the operation output.
 
 | Scenario | Response |
 |---|---|
-| No `.filid/config.json` + `show` | "No config found. Run `/filid:filid-init` to initialize." |
+| No `.filid/config.json` + `show` | "No config found. Run `/filid:filid-setup` to initialize." |
 | No `.filid/config.json` + `set` | Create default config, then apply the set operation |
 | Invalid JSON in existing config | "Config file contains invalid JSON. Run `/filid:filid-config reset` to fix." |
 | Invalid dot-path | "Invalid path: cannot traverse into non-object at `<segment>`" |

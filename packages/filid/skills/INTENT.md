@@ -8,7 +8,7 @@
 
 | 경로 | 역할 |
 |------|------|
-| `filid-init/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
+| `filid-setup/` | 프로젝트 초기화 (Phase 0 설정 + 디렉토리 분류) |
 | `filid-review/` | 다중 페르소나 합의 기반 코드 리뷰 |
 | `filid-scan/` | FCA-AI 규칙 위반 스캔 |
 | `filid-resolve/` | 리뷰 Fix Request 해결 워크플로우 |

@@ -1,4 +1,4 @@
-# filid-init — Reference Documentation
+# filid-setup — Reference Documentation
 
 Detailed workflow, templates, and rules for the FCA-AI initialization skill.
 For the quick-start guide, see [SKILL.md](./SKILL.md).

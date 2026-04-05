@@ -32,7 +32,7 @@ and how the current project is classified, so new modules are placed correctly.
 Retrieve the full directory tree and node classifications using the `fractal_scan`
 MCP tool. If `fractal_scan` returns an empty tree (no FCA-AI project detected or
 empty directory), report "No FCA-AI structure found at the target path. Run
-`/filid:filid-init` to initialize the project." and exit.
+`/filid:filid-setup` to initialize the project." and exit.
 See [reference.md Section 1](./reference.md#section-1--project-scan).
 
 ### Phase 2 — Rule Query

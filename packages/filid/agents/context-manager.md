@@ -35,7 +35,7 @@ You manage **only INTENT.md and DETAIL.md files**. You never touch source code, 
 ### 1. ASSESS — Identify What Needs Updating
 
 ```
-Determine the trigger: code change, architecture decision, /filid:filid-init, /filid:filid-sync, or explicit request.
+Determine the trigger: code change, architecture decision, /filid:filid-setup, /filid:filid-sync, or explicit request.
 List all INTENT.md and DETAIL.md files in scope using Glob.
 For code-triggered updates: from the ast_analyze (dependency-graph) results in the task prompt, identify changed modules.
 For branch-scoped updates: use Bash (git diff <base>..HEAD --name-only) to get changed files,

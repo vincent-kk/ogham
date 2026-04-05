@@ -48,8 +48,8 @@ filid skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 ### Initialize a Project
 
 ```
-/filid:filid-init
-/filid:filid-init ./packages/my-app
+/filid:filid-setup
+/filid:filid-setup ./packages/my-app
 ```
 
 Scans directories and generates `INTENT.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
@@ -155,7 +155,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 | Skill                         | Scope             | What it does                                               |
 | ----------------------------- | ----------------- | ---------------------------------------------------------- |
-| `/filid:filid-init`             | —                 | Initialize FCA-AI in a project                             |
+| `/filid:filid-setup`             | —                 | Initialize FCA-AI in a project                             |
 | `/filid:filid-scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
 | `/filid:filid-sync`             | Full project      | Sync documentation with code changes                       |
 | `/filid:filid-structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |

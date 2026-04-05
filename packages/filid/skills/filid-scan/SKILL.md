@@ -21,7 +21,7 @@ violation report and, with `--fix`, applies automatic remediation.
 
 - Auditing the project before opening a pull request
 - Checking for regressions after a large-scale refactor
-- Verifying that `/filid:filid-init` produced a fully compliant structure
+- Verifying that `/filid:filid-setup` produced a fully compliant structure
 - Running a periodic governance health check
 - Preparing a baseline report before `/filid:filid-structure-review` or `/filid:filid-promote`
 

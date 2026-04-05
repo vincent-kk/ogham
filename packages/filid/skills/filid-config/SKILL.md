@@ -38,7 +38,7 @@ preferences, rule overrides, and project-level FCA-AI configuration.
 ### `show` (default)
 
 Display the current `.filid/config.json` contents in a readable table format.
-If no config file exists, report that and suggest running `/filid:filid-init`.
+If no config file exists, report that and suggest running `/filid:filid-setup`.
 
 ### `set <key> <value>`
 
@@ -72,7 +72,7 @@ Reset the config to defaults. Preserves the `language` field if currently set
 1. Determine the git repository root from the current working directory.
 2. Config path: `<git_root>/.filid/config.json`.
 3. If `.filid/config.json` does not exist and the subcommand is `show`,
-   report "No config found" and suggest `/filid:filid-init`.
+   report "No config found" and suggest `/filid:filid-setup`.
 4. If `.filid/config.json` does not exist and the subcommand is `set`,
    create a default config first, then apply the change.
 

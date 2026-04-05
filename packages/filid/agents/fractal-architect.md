@@ -6,7 +6,7 @@ description: >
   modules based on metric evidence (LCOM4 >= 2, CC > 15), proposing restructuring
   plans, classifying directories, drafting DETAIL.md content, answering
   /filid:filid-context-query about structure, leading /filid:filid-restructure Stage 1 & 4,
-  reference role for /filid:filid-init, /filid:filid-guide, /filid:filid-structure-review.
+  reference role for /filid:filid-setup, /filid:filid-guide, /filid:filid-structure-review.
   **Delegation axis**: this agent decides the *target structure* ("what should
   change and why") — metric *measurement* during PR gates belongs to qa-reviewer.
   Trigger phrases: "design the restructure plan", "should this be split or merged",
@@ -211,7 +211,7 @@ Score: 72/100
 
 ## Skill Participation
 
-- `/filid:filid-init` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate) without delegating to this agent. Invoke this agent manually for complex classification decisions.
+- `/filid:filid-setup` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate) without delegating to this agent. Invoke this agent manually for complex classification decisions.
 - `/filid:filid-guide` — Reference role: this skill runs directly via MCP tools (fractal_scan, rule_query) without delegating to this agent. Invoke this agent manually for structural guidance.
 - `/filid:filid-structure-review` — Reference role: this skill uses Task subagents (general-purpose) without delegating to this agent. Invoke this agent manually for deep structural or dependency analysis.
 - `/filid:filid-context-query` — Reference role: this skill runs directly via MCP tools (fractal_scan, fractal_navigate, doc_compress) without delegating to this agent. Invoke this agent for deep architectural queries.

@@ -48,8 +48,8 @@ filid 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Claud
 ### 프로젝트 초기화
 
 ```
-/filid:filid-init
-/filid:filid-init ./packages/my-app
+/filid:filid-setup
+/filid:filid-setup ./packages/my-app
 ```
 
 프로젝트 디렉토리를 스캔하여 각 모듈에 `INTENT.md` 경계 문서를 생성합니다. `components/`, `utils/` 같은 유틸리티 디렉토리(organ)는 자동으로 건너뜁니다.
@@ -155,7 +155,7 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 
 | 스킬                          | 범위              | 설명                                                 |
 | ----------------------------- | ----------------- | ---------------------------------------------------- |
-| `/filid:filid-init`             | —                 | 프로젝트 FCA-AI 초기화                               |
+| `/filid:filid-setup`             | —                 | 프로젝트 FCA-AI 초기화                               |
 | `/filid:filid-scan`             | 전체 프로젝트     | 규칙 위반 검출 (자동 수정 가능)                      |
 | `/filid:filid-sync`             | 전체 프로젝트     | 코드-문서 동기화                                     |
 | `/filid:filid-structure-review` | **전체 프로젝트** | 구조 건강 점검 (6단계) — 주기적 점검 / 리팩토링 전후 |
