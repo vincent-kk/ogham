@@ -1,7 +1,7 @@
 ---
 name: mcp-setup
 user_invocable: true
-description: Installs and configures MCP servers for GitHub, Atlassian, Slack, or Notion by updating .mcp.json and .claude/settings.json. Runs standalone or as part of the maencof onboarding workflow.
+description: "[maencof:mcp-setup] Installs and configures MCP servers for GitHub, Atlassian, Slack, or Notion by updating .mcp.json and .claude/settings.json. Runs standalone or as part of the maencof onboarding workflow."
 version: "1.0.0"
 complexity: medium
 context_layers: []

@@ -1,10 +1,7 @@
 ---
 name: manifest
 user_invocable: true
-description: >
-  Execute a stories-manifest or devplan-manifest to batch-create Jira issues.
-  Supports dry-run, resume from failure, and selective execution.
-  Trigger: "execute manifest", "매니페스트 실행", "jira 생성"
+description: "[imbas:manifest] Execute a stories-manifest or devplan-manifest to batch-create Jira issues. Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\""
 version: "1.0.0"
 complexity: moderate
 plugin: imbas

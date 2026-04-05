@@ -1,7 +1,7 @@
 ---
 name: instruct
 user_invocable: true
-description: Adds or modifies AI instructions in CLAUDE.md, splits oversized files into @import modules, and manages CLAUDE.local.md overrides while enforcing the 200-line limit with automatic backups.
+description: "[maencof:instruct] Adds or modifies AI instructions in CLAUDE.md, splits oversized files into @import modules, and manages CLAUDE.local.md overrides while enforcing the 200-line limit with automatic backups."
 version: "1.1.0"
 complexity: medium
 context_layers: []

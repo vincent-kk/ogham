@@ -1,7 +1,7 @@
 ---
 name: pipeline
 user_invocable: true
-description: Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support.
+description: "[filid:pipeline] Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support."
 version: "1.0.0"
 complexity: medium
 plugin: filid

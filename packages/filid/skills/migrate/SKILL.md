@@ -1,7 +1,7 @@
 ---
 name: migrate
 user_invocable: true
-description: Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a shell script for batch git-mv renames, reference updates, and optional auto-commit.
+description: "[filid:migrate] Migrate legacy CLAUDE.md and SPEC.md files to INTENT.md and DETAIL.md naming using a shell script for batch git-mv renames, reference updates, and optional auto-commit."
 version: "2.0.0"
 complexity: simple
 plugin: filid

@@ -1,7 +1,7 @@
 ---
 name: dailynote
 user_invocable: true
-description: Displays the daily maencof activity log for today or a past date, showing tool calls, document changes, and session lifecycle events to review knowledge management history.
+description: "[maencof:dailynote] Displays the daily maencof activity log for today or a past date, showing tool calls, document changes, and session lifecycle events to review knowledge management history."
 version: "1.0.0"
 complexity: simple
 context_layers: []

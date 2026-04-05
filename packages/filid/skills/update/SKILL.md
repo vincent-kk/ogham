@@ -1,7 +1,7 @@
 ---
 name: update
 user_invocable: false
-description: Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs.
+description: "[filid:update] Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs."
 version: "1.0.0"
 complexity: complex
 plugin: filid

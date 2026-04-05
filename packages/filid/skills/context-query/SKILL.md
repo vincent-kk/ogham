@@ -1,7 +1,7 @@
 ---
 name: context-query
 user_invocable: true
-description: Answer targeted questions about module boundaries, ownership, and rules by navigating the fractal hierarchy and loading the minimal INTENT.md chain within a strict 3-prompt budget.
+description: "[filid:context-query] Answer targeted questions about module boundaries, ownership, and rules by navigating the fractal hierarchy and loading the minimal INTENT.md chain within a strict 3-prompt budget."
 version: "1.0.0"
 complexity: simple
 plugin: filid

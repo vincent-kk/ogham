@@ -1,10 +1,7 @@
 ---
 name: validate
 user_invocable: true
-description: >
-  Phase 1 of the imbas pipeline. Validates a planning document for contradictions,
-  divergences, omissions, and logical infeasibilities. Produces a markdown validation report.
-  Trigger: "validate spec", "check document", "정합성 검증", "문서 검증"
+description: "[imbas:validate] Phase 1 of the imbas pipeline. Validates a planning document for contradictions, divergences, omissions, and logical infeasibilities. Produces a markdown validation report. Trigger: \"validate spec\", \"check document\", \"정합성 검증\", \"문서 검증\""
 version: "1.0.0"
 complexity: moderate
 plugin: imbas

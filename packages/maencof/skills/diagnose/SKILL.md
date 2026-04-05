@@ -1,7 +1,7 @@
 ---
 name: diagnose
 user_invocable: true
-description: Quickly checks knowledge graph index status — freshness, stale node ratio, and rebuild recommendation — without running a full diagnostic scan like checkup.
+description: "[maencof:diagnose] Quickly checks knowledge graph index status — freshness, stale node ratio, and rebuild recommendation — without running a full diagnostic scan like checkup."
 version: "1.0.0"
 complexity: simple
 context_layers: []

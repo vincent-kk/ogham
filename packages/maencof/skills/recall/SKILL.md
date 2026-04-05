@@ -1,7 +1,7 @@
 ---
 name: recall
 user_invocable: true
-description: Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers.
+description: "[maencof:recall] Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers."
 version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]

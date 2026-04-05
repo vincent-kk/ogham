@@ -1,7 +1,7 @@
 ---
 name: insight
 user_invocable: true
-description: Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, views recent insights, and edits the meta-prompt governing what gets recorded.
+description: "[maencof:insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, views recent insights, and edits the meta-prompt governing what gets recorded."
 version: "1.0.0"
 complexity: simple
 context_layers: []

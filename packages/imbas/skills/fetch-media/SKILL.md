@@ -1,10 +1,7 @@
 ---
 name: fetch-media
 user_invocable: true
-description: >
-  Download images, videos, and GIFs from Confluence/Jira. For video/GIF files,
-  extracts keyframes using scene-sieve and runs semantic analysis via imbas-media agent.
-  Trigger: "download media", "미디어 다운로드", "fetch attachment", "영상 분석"
+description: "[imbas:fetch-media] Download images, videos, and GIFs from Confluence/Jira. For video/GIF files, extracts keyframes using scene-sieve and runs semantic analysis via imbas-media agent. Trigger: \"download media\", \"미디어 다운로드\", \"fetch attachment\", \"영상 분석\""
 version: "1.1.0"
 complexity: moderate
 plugin: imbas

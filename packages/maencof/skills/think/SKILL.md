@@ -1,7 +1,7 @@
 ---
 name: think
 user_invocable: true
-description: Resolves ambiguous requirements using Tree of Thoughts: generates 3-5 interpretations, scores each on feasibility and alignment, and selects the optimal approach with full rationale.
+description: "[maencof:think] Resolves ambiguous requirements using Tree of Thoughts: generates 3-5 interpretations, scores each on feasibility and alignment, and selects the optimal approach with full rationale."
 version: "1.0.0"
 complexity: medium
 context_layers: []

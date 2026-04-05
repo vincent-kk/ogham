@@ -1,9 +1,7 @@
 ---
 name: read-issue
 user_invocable: false
-description: >
-  Internal skill. Reads a Jira issue with its full comment thread, reconstructs
-  the conversation context, and returns a structured JSON summary.
+description: "[imbas:read-issue] Internal skill. Reads a Jira issue with its full comment thread, reconstructs the conversation context, and returns a structured JSON summary."
 version: "1.0.0"
 complexity: moderate
 plugin: imbas

@@ -1,7 +1,7 @@
 ---
 name: guide
 user_invocable: true
-description: Scan the project hierarchy and query all active rules to generate a human-readable fractal structure guide with node classifications and new-module placement guidance for teams.
+description: "[filid:guide] Scan the project hierarchy and query all active rules to generate a human-readable fractal structure guide with node classifications and new-module placement guidance for teams."
 version: "1.0.0"
 complexity: simple
 plugin: filid

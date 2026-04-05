@@ -1,9 +1,7 @@
 ---
 name: cache
 user_invocable: false
-description: >
-  Internal skill. Manages Jira project metadata cache (issue types, link types,
-  workflows). Auto-refreshes when TTL expires.
+description: "[imbas:cache] Internal skill. Manages Jira project metadata cache (issue types, link types, workflows). Auto-refreshes when TTL expires."
 version: "1.0.0"
 complexity: simple
 plugin: imbas

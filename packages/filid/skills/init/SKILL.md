@@ -1,7 +1,7 @@
 ---
 name: init
 user_invocable: true
-description: Initialize FCA-AI fractal architecture by scanning the directory tree, classifying every directory as fractal, organ, or pure-function, and generating missing INTENT.md and DETAIL.md files.
+description: "[filid:init] Initialize FCA-AI fractal architecture by scanning the directory tree, classifying every directory as fractal, organ, or pure-function, and generating missing INTENT.md and DETAIL.md files."
 version: "1.0.0"
 complexity: medium
 plugin: filid

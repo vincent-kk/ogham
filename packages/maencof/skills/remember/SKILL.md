@@ -1,7 +1,7 @@
 ---
 name: remember
 user_invocable: true
-description: Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter.
+description: "[maencof:remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter."
 version: "1.0.0"
 complexity: medium
 context_layers: [2, 3, 4, 5]

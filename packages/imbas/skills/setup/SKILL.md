@@ -1,10 +1,7 @@
 ---
 name: setup
 user_invocable: true
-description: >
-  Initialize .imbas/ directory, create config.json, and cache Jira project metadata.
-  Supports subcommands: init, show, set-project, set-language, refresh-cache, clear-temp.
-  Trigger: "setup imbas", "imbas 설정", "imbas init"
+description: "[imbas:setup] Initialize .imbas/ directory, create config.json, and cache Jira project metadata. Supports subcommands: init, show, set-project, set-language, refresh-cache, clear-temp. Trigger: \"setup imbas\", \"imbas 설정\", \"imbas init\""
 version: "1.0.0"
 complexity: simple
 plugin: imbas

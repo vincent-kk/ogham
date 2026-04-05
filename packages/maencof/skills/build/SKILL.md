@@ -1,7 +1,7 @@
 ---
 name: build
 user_invocable: true
-description: Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, or performs a full rebuild when explicitly specified.
+description: "[maencof:build] Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, or performs a full rebuild when explicitly specified."
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

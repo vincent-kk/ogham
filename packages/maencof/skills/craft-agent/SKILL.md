@@ -1,7 +1,7 @@
 ---
 name: craft-agent
 user_invocable: true
-description: Creates, edits, validates, or lists Claude Code subagent definitions. Supports four modes: CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management.
+description: "[maencof:craft-agent] Creates, edits, validates, or lists Claude Code subagent definitions. Supports four modes: CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management."
 version: "2.0.0"
 complexity: complex
 context_layers: []
