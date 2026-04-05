@@ -46,8 +46,9 @@ batch Jira issue creation.
 
    | provider | workflow file |
    |---|---|
-   | `jira`  | `references/jira/workflow.md` |
-   | `local` | `references/local/workflow.md` |
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
 
 4. Execute Steps 1, 2 (imbas-engineer agent spawn), and 4 from the shared skeleton; use the provider file for Step 3 target_ref semantics and the Step 4 completion message.
 5. Persist devplan-manifest.json via manifest_save.
@@ -55,4 +56,4 @@ batch Jira issue creation.
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__*, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The imbas-engineer agent's core exploration tools (ast_search, ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.
+- Provider-specific tools (atlassian__* for jira, `gh issue view/list` via Bash for github, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The imbas-engineer agent's core exploration tools (ast_search, ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.

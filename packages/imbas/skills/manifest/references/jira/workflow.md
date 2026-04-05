@@ -91,27 +91,3 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
 IDEMPOTENCY: for every item, check `status` and `issue_ref` before creating.
 If `issue_ref` already exists → skip. Re-execution is safe after partial failure.
 
----
-
-## GitHub prototype (preserved — do NOT execute from this file)
-
-Before the RALPLAN v2 local-provider cycle, the previous flat `workflow.md`
-contained an inline `[jira]` / `[github]` branch at Step 2.5 for drift check:
-
-```
-[github] provider:
-  - Run: gh issue view <number> --repo <repo> --json state,labels
-  - Check: issue exists, not deleted, labels intact.
-```
-
-This two-line prototype is the entire GitHub provider surface in imbas as of
-the local-provider cycle. It is preserved here **as a historical anchor** so
-the follow-up GitHub provider cycle (`.omc/plans/imbas-github-provider-handoff.md`)
-can extract it into a real `references/github/workflow.md`. Until that cycle
-runs, GitHub is not a supported provider at runtime — `config.provider = "github"`
-will route to this file and find no executable workflow.
-
-When the GitHub cycle begins, move this block out of this file into
-`references/github/workflow.md`, expand it into a full create/read/update/link
-flow per the handoff doc §1 design decisions, and remove this preserved
-section.

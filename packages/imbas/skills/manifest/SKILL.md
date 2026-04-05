@@ -46,8 +46,9 @@ and idempotent re-execution.
 
    | provider | workflow file |
    |---|---|
-   | `jira`  | `references/jira/workflow.md` |
-   | `local` | `references/local/workflow.md` |
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
 
 4. Execute those steps exactly.
 5. Persist outputs via imbas_tools (`manifest_save`, `run_transition`, etc.).
@@ -55,4 +56,4 @@ and idempotent re-execution.
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__*, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
+- Provider-specific tools (atlassian__* for jira, `gh issue *` / `gh label *` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.

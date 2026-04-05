@@ -153,4 +153,16 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
 IDEMPOTENCY: check `status` and `issue_ref` before creating. If `issue_ref`
 already exists → run drift check and skip if confirmed present.
 
-<!-- phase-3: insert jira snippet here -->
+## Drift check snippet (migrated from jira prototype)
+
+Historical provenance: the following 3-line drift check was preserved in
+`references/jira/workflow.md:101-105` during the v1.1 local-provider
+cycle and migrated here in v1.2:
+
+```bash
+gh issue view <number> --repo <owner/repo> --json state,labels
+# Check: issue exists, not deleted, labels intact.
+```
+
+Use in Step 2.5 of the manifest workflow to verify an existing
+`issue_ref` is still valid before skipping creation (idempotency guard).

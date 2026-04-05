@@ -40,8 +40,9 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 
    | provider | workflow file |
    |---|---|
-   | `jira`  | `references/jira/workflow.md` |
-   | `local` | `references/local/workflow.md` |
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
 
 4. Execute those steps exactly.
 5. Return the shared structured output (per `output-schema.md`).
@@ -49,4 +50,4 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__*, Read/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
+- Provider-specific tools (atlassian__* for jira, `gh issue view` via Bash for github, Read/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
