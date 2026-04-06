@@ -1,6 +1,6 @@
 # SPEC-provider-github — GitHub Issues Provider
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.2 (2026-04-06)
 > Parent: [SPEC-provider.md](./SPEC-provider.md)
 
 ---
@@ -69,7 +69,15 @@ GitHub has no native parent-child. imbas uses **task lists** in parent body:
 
 When a child issue is closed, GitHub automatically checks the task list item.
 
-### 2.4 Hierarchy Example
+### 2.4 `issue_ref` Storage Convention
+
+In manifests and feedback targets, GitHub issue references are stored in
+fully-qualified form:
+
+- `owner/repo#42` : canonical stored `issue_ref`
+- `#42` : allowed only as shorthand in same-repo body text or user-facing prose
+
+### 2.5 Hierarchy Example
 
 ```
 Issue #10 [type:epic, status:todo, imbas]
@@ -173,31 +181,26 @@ gh label create "type:story" --color "1D76DB" --description "imbas Story" --forc
 
 `--force` flag updates existing labels without error.
 
-### 3.4 Label Mapping in Config
+### 3.4 GitHub Config
 
-All label names are configurable via `config.github.labels`:
+GitHub provider settings live under `config.github`:
 
 ```json
 {
   "github": {
-    "labels": {
-      "epic": "type:epic",
-      "story": "type:story",
-      "task": "type:task",
-      "subtask": "type:subtask",
-      "bug": "type:bug",
-      "todo": "status:todo",
-      "ready_for_dev": "status:ready-for-dev",
-      "in_progress": "status:in-progress",
-      "in_review": "status:in-review",
-      "done": "status:done",
-      "imbas_managed": "imbas"
-    }
+    "repo": "owner/repo",
+    "defaultLabels": ["imbas"],
+    "linkTypes": ["blocks", "blocked-by", "split-from", "split-into", "relates"]
   }
 }
 ```
 
-Skills resolve label names via config, never hardcode.
+- `repo`: target repository for imbas-managed issues
+- `defaultLabels`: extra labels added to every created issue
+- `linkTypes`: allowed keys in the GitHub `## Links` section
+
+Core workflow labels such as `type:*` and `status:*` remain fixed conventions
+defined by the provider spec and label bootstrap step.
 
 ---
 
@@ -236,7 +239,8 @@ relates_to: #30
 
 1. Find `<!-- imbas:meta` ... `-->` block in body
 2. Parse as YAML-like key-value pairs
-3. Issue refs: `#N` format, comma-separated for lists
+3. Issue refs in body/meta blocks may use `#N` shorthand or `owner/repo#N`,
+   comma-separated for lists
 4. Missing fields = not applicable (no default values)
 
 ### 4.4 Body Update Protocol
@@ -288,7 +292,7 @@ BODY
 **Output parsing**: `gh issue create` returns the issue URL. Extract number:
 ```bash
 # Returns: https://github.com/owner/repo/issues/42
-# Parse: #42
+# Store as: owner/repo#42
 ```
 
 ### 5.2 Issue Query
@@ -453,12 +457,12 @@ Step 1 — Create Milestone (if Epic is new)
 
 Step 2 — Create Epic Tracking Issue
   gh issue create --label type:epic --label status:todo --label imbas --milestone "..."
-  → issue_ref: #10
+  → issue_ref: owner/repo#10
 
 Step 3 — Create Stories (sequential, with immediate state save)
   for each story where status == "pending":
     gh issue create --label type:story --label status:todo --label imbas --milestone "..."
-    → story.issue_ref = "#11"
+    → story.issue_ref = "owner/repo#11"
     → story.status = "created"
     → save manifest
 
@@ -503,7 +507,7 @@ Step 6 — Update Epic tracking issue task list (add Tasks)
 
 ### 7.3 Idempotency
 
-Same as Jira: `issue_ref` already set → skip. Resume-safe.
+Same as Jira: fully qualified `issue_ref` already set → skip. Resume-safe.
 
 ---
 

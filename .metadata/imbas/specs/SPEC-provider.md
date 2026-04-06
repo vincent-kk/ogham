@@ -1,20 +1,20 @@
 # SPEC-provider — Issue Tracker Provider Abstraction
 
-> Status: Draft v1.0 (2026-04-04)
+> Status: Draft v1.1 (2026-04-06)
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---
 
 ## 1. Overview
 
-imbas supports multiple issue tracker backends (Jira, GitHub Issues) through a provider abstraction. The core pipeline (validate → split → devplan → manifest) is provider-agnostic. Provider-specific behavior is isolated at the **skill dispatch level** — skills read `config.provider` and branch tool calls accordingly.
+imbas supports multiple issue tracker backends (Jira, GitHub Issues, and local markdown files) through a provider abstraction. The core pipeline (validate → split → devplan → manifest) is provider-agnostic. Provider-specific behavior is isolated at the **skill dispatch level** — skills read `config.provider` and branch tool calls accordingly.
 
 ### Design Principles
 
 1. **No separate MCP server for providers** — Jira uses existing Atlassian MCP tools. GitHub uses `gh` CLI via Bash. No additional MCP adapter layer.
 2. **Skill-level dispatch** — Skills contain provider-aware branching. Agents remain provider-agnostic (they produce manifests, not issue tracker mutations).
 3. **Unified manifest schema** — Provider-agnostic field names (`issue_ref`, `project_ref`) across all manifests.
-4. **Config-driven** — `config.provider` determines which backend is active. Provider-specific settings live under `config.jira` or `config.github`.
+4. **Config-driven** — `config.provider` determines which backend is active. Provider-specific settings live under `config.jira` or `config.github`; the `local` provider is file-based and primarily uses `defaults.project_ref`.
 
 ---
 
@@ -43,7 +43,7 @@ Conceptual operations that every provider must support. Not a TypeScript interfa
 
 | Operation | Description | Jira | GitHub |
 |-----------|-------------|------|--------|
-| `create_link` | Typed link between issues | `createIssueLink` | Body meta block edit + `#N` reference |
+| `create_link` | Typed link between issues | `createIssueLink` | Body/meta section edit + `#N` or `owner/repo#N` reference |
 
 ### 2.4 Metadata Operations
 
@@ -93,9 +93,13 @@ Mapped via config:
 | Provider | Format | Example |
 |----------|--------|---------|
 | Jira | `PROJECT-NNN` | `PROJ-123` |
-| GitHub | `#NNN` | `#42` |
+| GitHub | `owner/repo#NNN` | `acme/backend#42` |
+| Local | `PREFIX-NNN` | `S-42` |
 
 In manifests, the field is always `issue_ref` (replaces former `jira_key`).
+GitHub may display `#42` in same-repo prose, but the canonical stored
+reference in manifests and feedback targets is the fully qualified
+`owner/repo#42` form.
 
 ### 3.5 Project Reference Format
 
@@ -103,6 +107,7 @@ In manifests, the field is always `issue_ref` (replaces former `jira_key`).
 |----------|--------|---------|
 | Jira | Project key | `PROJ` |
 | GitHub | `owner/repo` | `acme/backend` |
+| Local | Project key / fallback directory key | `LOCAL` |
 
 In config/state, the field is always `project_ref` (replaces former `project_key`).
 
@@ -177,13 +182,13 @@ All manifests use provider-agnostic field names:
 | Former (Jira-only) | Current (Provider-agnostic) | Description |
 |--------------------|-----------------------------|-------------|
 | `project_key` | `project_ref` | `"PROJ"` or `"owner/repo"` |
-| `epic_key` | `epic_ref` | `"PROJ-100"` or `"#10"` |
-| `jira_key` | `issue_ref` | `"PROJ-101"` or `"#11"` |
+| `epic_key` | `epic_ref` | `"PROJ-100"` or `"acme/backend#10"` |
+| `jira_key` | `issue_ref` | `"PROJ-101"` or `"acme/backend#11"` or `"S-11"` |
 
 Added field:
 | Field | Description |
 |-------|-------------|
-| `provider` | `"jira"` or `"github"` — records which provider created the manifest |
+| `provider` | `"jira"` or `"github"` or `"local"` — records which provider created the manifest |
 
 ---
 
@@ -224,6 +229,7 @@ Cache file contents differ by provider but serve the same purpose:
 
 - [SPEC-provider-jira.md](./SPEC-provider-jira.md) — Jira-specific implementation
 - [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub-specific implementation
+- [SPEC-provider-local.md](./SPEC-provider-local.md) — Local file-based implementation
 - [SPEC-state.md](./SPEC-state.md) — Config & state schemas
 - [SPEC-skills.md](./SPEC-skills.md) — Skills that dispatch to providers
 - [SPEC-tools.md](./SPEC-tools.md) — imbas MCP 도구 정의

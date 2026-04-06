@@ -1,6 +1,6 @@
 # SPEC-skills — imbas Skill 정의
 
-> Status: Draft v1.1 (2026-04-04)
+> Status: Draft v1.2 (2026-04-06)
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)
 
 ---
@@ -9,7 +9,7 @@
 
 ### 1.1 User-invocable Skills (사용자 직접 호출, 8개)
 
-사용자에게 slash command로 노출되는 스킬. 플러그인 설치 시 이 7개만 사용자에게 보임.
+사용자에게 slash command로 노출되는 스킬. 플러그인 설치 시 아래 8개가 사용자에게 보임.
 
 | Skill | Slash Command | 역할 | Agent |
 |-------|-------------|------|-------|
@@ -17,10 +17,10 @@
 | **validate** | `/imbas:imbas-validate` | Phase 1 — 정합성 검증 | imbas-analyst |
 | **split** | `/imbas:imbas-split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
 | **devplan** | `/imbas:imbas-devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
-| **manifest** | `/imbas:imbas-manifest` | 매니페스트 → Jira 배치 생성 | — |
+| **manifest** | `/imbas:imbas-manifest` | 매니페스트 → provider별 이슈 배치 생성 | — |
 | **status** | `/imbas:imbas-status` | 런 상태 조회, 이력 | — |
 | **`imbas:fetch-media`** | `/imbas:imbas-fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
-| **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → Jira 코멘트 | — |
+| **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → provider별 코멘트/다이제스트 기록 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
 
@@ -29,7 +29,7 @@
 | Skill | 호출자 | 역할 | Agent |
 |-------|--------|------|-------|
 | **`imbas:read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
-| **cache** | setup, validate, split, devplan | Jira 메타데이터 캐시 자동 갱신/조회 | — |
+| **cache** | setup, validate, split, devplan | provider 메타데이터 캐시 자동 갱신/조회 | — |
 
 **총 10개 스킬** (user-invocable 8 + internal 2).
 
@@ -105,7 +105,7 @@ name: split
 user_invocable: true
 description: >
   Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant
-  Jira Stories. Applies 3→1→2 verification, size checks, and horizontal splitting.
+  Stories. Applies 3→1→2 verification, size checks, and horizontal splitting.
   Trigger: "split stories", "story 분할", "Phase 2", "imbas split"
 complexity: complex
 plugin: imbas
@@ -116,7 +116,7 @@ plugin: imbas
 /imbas:imbas-split [--run <run-id>] [--epic <EPIC-KEY>]
 
 --run    : 기존 런 ID (없으면 가장 최근 PASS된 런 사용)
---epic   : Epic Jira 키 (없으면 새 Epic 생성 여부 확인)
+--epic   : 상위 Epic/parent 참조 (없으면 생성 또는 기존 참조 여부 확인)
 ```
 
 **전제조건:** state.json에서 `validate.status == "completed"` && `validate.result in ["PASS", "PASS_WITH_WARNINGS"]`
@@ -279,8 +279,9 @@ Step 4 — 사용자 리뷰
 name: setup
 user_invocable: true
 description: >
-  Initialize .imbas/ directory, create config.json, and cache Jira project metadata.
-  Supports subcommands: init, show, set-project, set-language, refresh-cache.
+  Initialize .imbas/ directory, select provider, create config.json, and cache
+  provider metadata. Supports subcommands: init, show, set-project, set-provider,
+  set-language, refresh-cache, clear-temp.
   Trigger: "setup imbas", "imbas 설정", "imbas init"
 complexity: simple
 plugin: imbas
@@ -290,27 +291,32 @@ plugin: imbas
 
 | Command | 동작 |
 |---------|------|
-| `init` (default) | 대화형 초기화 — 프로젝트 키, 언어 설정 → config.json 생성 + 캐시 |
+| `init` (default) | 대화형 초기화 — provider, 프로젝트 참조, 언어 설정 → config.json 생성 + 캐시 |
 | `show` | config.json + 캐시 상태 표시 |
 | `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
+| `set-provider <PROVIDER>` | provider 변경 + health check 재실행 |
 | `set-language <field> <lang>` | 언어 설정 변경 |
-| `refresh-cache [KEY]` | 캐시 강제 갱신 |
+| `refresh-cache [KEY]` | provider별 캐시 강제 갱신 |
 | `clear-temp` | `.imbas/.temp/` 디렉토리 삭제 (미디어 임시 파일 정리) |
 
 **Init Workflow:**
 
 ```
 Step 1 — .imbas/ 디렉토리 생성
-Step 2 — 사용자에게 Jira 프로젝트 키 질의
-  - [OP: get_projects]로 사용 가능 프로젝트 목록 표시
-  - 사용자 선택
-Step 3 — config.json 생성 (기본값 + 사용자 선택)
-Step 4 — 프로젝트 캐시 갱신
-  - .imbas/<KEY>/imbas:cache/ 디렉토리 생성
-  - Jira 메타데이터 수집 (issue-types, link-types, workflows)
-Step 5 — .gitignore 가드 (setup-lens 패턴)
+Step 2 — provider 선택
+  - `jira` | `github` | `local`
+  - 원격 provider 선택 시 health check 수행
+Step 3 — 프로젝트 참조 결정
+  - Jira: 프로젝트 키
+  - GitHub: `owner/repo`
+  - Local: 프로젝트 키 또는 기본 `LOCAL`
+Step 4 — config.json 생성 (기본값 + 사용자 선택)
+Step 5 — provider별 캐시/디렉토리 초기화
+  - Jira/GitHub: `.imbas/<KEY>/imbas:cache/` + 메타데이터 수집
+  - Local: `.imbas/<KEY>/issues/{stories,tasks,subtasks}/` 생성
+Step 6 — .gitignore 가드 (setup-lens 패턴)
   - git repo 확인 → .imbas/ ignore 등록
-Step 6 — 결과 표시
+Step 7 — 결과 표시
 ```
 
 **참고:** setup-lens 패턴 (`/Users/Vincent/Workspace/ogham/packages/maencof-lens/skills/setup-lens/SKILL.md`) 구조를 따름.
@@ -349,9 +355,9 @@ plugin: imbas
 name: manifest
 user_invocable: true
 description: >
-  Execute a stories-manifest or devplan-manifest to batch-create Jira issues.
-  Supports dry-run, resume from failure, and selective execution.
-  Trigger: "execute manifest", "매니페스트 실행", "jira 생성"
+  Execute a stories-manifest or devplan-manifest to batch-create provider-specific
+  issues. Supports dry-run, resume from failure, and selective execution.
+  Trigger: "execute manifest", "매니페스트 실행", "jira 생성", "issue 생성"
 complexity: moderate
 plugin: imbas
 ```
@@ -447,19 +453,19 @@ plugin: imbas
 name: read-issue
 user_invocable: false
 description: >
-  Internal skill. Reads a Jira issue with its full comment thread, reconstructs
-  the conversation context (who said what, decisions made, latest state), and
-  returns a structured JSON summary. Caches results per project for reuse across phases.
+  Internal skill. Reads an issue with its full context (Jira comment thread,
+  GitHub issue thread, or local digest entries), reconstructs the conversation
+  context (who said what, decisions made, latest state), and returns a
+  structured JSON summary.
 complexity: moderate
 plugin: imbas
 ```
 
 **호출 인터페이스:**
 ```
-imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
+imbas:read-issue <issue-ref> [--depth shallow|full]
 
-<issue-key>  : 이슈 참조 (Jira: PROJ-123, GitHub: #42)
---no-cache   : 캐시 무시, 강제 재조회
+<issue-ref>  : 이슈 참조 (Jira: PROJ-123, GitHub: owner/repo#42, local: S-1)
 --depth      : shallow = 본문+메타만, full = 코멘트 포함 (default: full)
 ```
 
@@ -467,11 +473,15 @@ imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
 
 ```
 Step 1 — 이슈 조회
-  - [OP: get_issue] issue_ref=<issueIdOrKey> → 본문, 메타데이터, 코멘트
-  - depth == "shallow" → 코멘트 파싱 스킵 → Step 5
+  - `config.provider` 기준으로 provider-specific branch 선택
+  - Jira: [OP: get_issue] issue_ref=<issueIdOrKey>
+  - GitHub: `gh issue view --json ...`
+  - local: frontmatter + `## Description` / `## Digest` 파싱
+  - depth == "shallow" → 코멘트/다이제스트 파싱 스킵 → Step 5
 
-Step 2 — digest 코멘트 탐색 (Fast Path)
-  - 코멘트에서 imbas:digest 마커 검색:
+Step 2 — digest 탐색 (Fast Path)
+  - Jira/GitHub: 코멘트에서 imbas:digest 마커 검색
+  - local: `## Digest` 섹션의 timestamp entry 탐색
     <!-- imbas:digest v1 | generated: ... | comments_covered: 1-N -->
   - 발견 시 → Fast Path:
     a. digest 코멘트 파싱 → 구조화된 decisions/constraints/rejected/summary 추출
@@ -504,7 +514,7 @@ Step 4 — 맥락 종합
 
 Step 5 — 구조화 & 반환
   - 결과 JSON 생성 (아래 스키마)
-  - 호출자에게 반환 (캐싱 없음 — 이슈 내용은 수시로 변경됨)
+  - 호출자에게 반환 (이슈 내용은 provider별로 수시 변경될 수 있으므로 캐싱하지 않음)
 ```
 
 **Output Schema:**
@@ -552,14 +562,14 @@ Step 5 — 구조화 & 반환
 ```
 
 **캐싱 정책:**
-- 이슈 내용은 **캐싱하지 않음** — 코멘트가 수시로 변경되므로 매 호출마다 Jira에서 조회
+- 이슈 내용은 **캐싱하지 않음** — 코멘트/다이제스트가 수시로 변경되므로 매 호출마다 최신 상태를 재조회
 - digest 코멘트가 존재하면 Fast Path로 처리 비용 절감 (전체 파싱 불필요)
 - 프로젝트 메타데이터(이슈 타입, 링크 타입 등)만 cache 스킬을 통해 캐싱 (거의 변경되지 않는 정보)
 
 **에이전트에서의 사용 패턴:**
 - imbas-analyst: Phase 1에서 기존 관련 이슈 참조 시
 - imbas-planner: Phase 2에서 Epic이나 기존 Story 맥락 파악 시
-- imbas-engineer: Phase 3에서 Story의 Jira 코멘트(추가 논의) 확인 시
+- imbas-engineer: Phase 3에서 Story의 최신 논의(코멘트/다이제스트) 확인 시
 
 ---
 
@@ -569,7 +579,7 @@ Step 5 — 구조화 & 반환
 name: cache
 user_invocable: false
 description: >
-  Internal skill. Manages Jira project metadata cache (issue types, link types,
+  Internal skill. Manages provider metadata cache (issue types, link types,
   workflows). Auto-refreshes when TTL expires. Called by setup and core workflow skills.
 complexity: simple
 plugin: imbas
@@ -589,7 +599,7 @@ imbas:cache <action> [--project <KEY>]
 | `refresh` | 강제 갱신 |
 | `clear` | 캐시 삭제 |
 
-**사용자 접근 경로:** `/imbas:imbas-setup show` (캐시 상태 확인) / `/imbas:imbas-setup refresh-cache` (갱신)
+**사용자 접근 경로:** `/imbas:imbas-setup show` (캐시 상태 확인) / `/imbas:imbas-setup refresh-cache` (provider별 갱신)
 
 ---
 
@@ -599,9 +609,10 @@ imbas:cache <action> [--project <KEY>]
 name: digest
 user_invocable: true
 description: >
-  Compresses a Jira issue's full context (description + comment thread + media)
-  into a structured summary and posts it as a Jira comment. Uses State Tracking +
-  QA-Prompting hybrid approach. Designed for ticket closing or pre-analysis compression.
+  Compresses an issue's full context (description + comment thread + media)
+  into a structured summary and posts it as a provider-specific comment or
+  digest entry. Uses State Tracking + QA-Prompting hybrid approach. Designed
+  for ticket closing or pre-analysis compression.
   Trigger: "digest issue", "이슈 정리", "티켓 요약", "imbas digest"
 complexity: moderate
 plugin: imbas
@@ -609,18 +620,19 @@ plugin: imbas
 
 **Arguments:**
 ```
-/imbas:imbas-digest <issue-key> [--preview]
+/imbas:imbas-digest <issue-ref> [--preview] [--no-media]
 
-<issue-key>  : 이슈 참조 (Jira: PROJ-123, GitHub: #42)
---preview    : Jira에 코멘트 게시하지 않고 미리보기만
+<issue-ref>  : 이슈 참조 (Jira: PROJ-123, GitHub: owner/repo#42, local: S-1)
+--preview    : provider에 게시하지 않고 미리보기만
+--no-media   : Jira 첨부 미디어 자동 분석 생략
 ```
 
 **Workflow:**
 
 ```
 Step 1 — 이슈 읽기
-  - `imbas:read-issue`(issue-key, depth: full) 호출
-  - 첨부 미디어 감지 → 이미지/동영상 있으면 `imbas:fetch-media` 호출하여 시각 정보 포함
+  - `imbas:read-issue`(issue-ref, depth: full) 호출
+  - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `imbas:fetch-media` 호출하여 시각 정보 포함
 
 Step 2 — State Tracking (상태 추적)
   코멘트를 시간순으로 읽으며 상태 변화 기록:
@@ -669,8 +681,8 @@ Step 5 — 코멘트 포맷팅
 
 Step 6 — 게시
   - --preview → 사용자에게 미리보기 표시, 종료
-  - 기본 → 사용자에게 미리보기 + "이 내용을 코멘트로 게시할까요?" 확인
-  - 승인 → [OP: add_comment]로 게시
+  - 기본 → 사용자에게 미리보기 + "이 내용을 게시할까요?" 확인
+  - 승인 → Jira/GitHub는 코멘트 게시, local은 `## Digest`에 append
 ```
 
 **digest 마커 규격:**
@@ -714,18 +726,18 @@ Step 6 — 게시
   │         ├── (내부) `imbas:read-issue` (Epic/기존 Story 맥락 파악 시)
   │         └── (안내) `imbas:fetch-media` (미디어 발견 시)
   │
-  ├── /imbas:imbas-manifest stories ── stories-manifest → Jira Story 생성
+  ├── /imbas:imbas-manifest stories ── stories-manifest → provider별 Story 생성
   │
   ├── /imbas:imbas-devplan ──────── state.json 갱신 → devplan-manifest.json
   │         ├── (내부) cache ensure
   │         └── (내부) `imbas:read-issue` (Story 코멘트 추가 논의 확인)
   │
-  ├── /imbas:imbas-manifest devplan ── devplan-manifest → Jira Subtask/Task 생성
+  ├── /imbas:imbas-manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
   ├── /imbas:imbas-fetch-media ──── 미디어 다운로드 + 분석
   │
-  └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → Jira 코멘트 게시
+  └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → provider별 게시
             ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
             └── (내부) `imbas:fetch-media` → 첨부 미디어 분석 (있을 경우)
 
@@ -748,7 +760,7 @@ Step 6 — 게시
 ### 8.2 Plan-then-Execute
 
 Phase 1-3은 **매니페스트만 생성** (읽기 전용).
-실제 Jira 쓰기는 `imbas:manifest`에서만 수행.
+실제 provider 쓰기(Jira/GitHub/local issue write)는 `imbas:manifest`에서만 수행.
 → 사용자가 항상 실행 전 검토 가능.
 
 ### 8.3 실패 복구
