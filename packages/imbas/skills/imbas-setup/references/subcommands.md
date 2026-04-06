@@ -27,6 +27,19 @@
 2. Execute cache population flow (Step 4 of Init Workflow) with force refresh.
 3. Display refreshed cache summary.
 
+## set-provider <PROVIDER>
+
+1. Validate provider is one of: `jira`, `github`, `local`.
+2. Run health check for the target provider's dependencies.
+   - If dependencies not met → display warning and confirm with user.
+3. Call `config_set` with `{ "provider": "<PROVIDER>" }`.
+4. If switching to `local` from a remote provider:
+   - Display banner: "Switching to local will not migrate existing remote issues.
+     Export manually before changing provider."
+5. If switching to a remote provider:
+   - Execute cache population for the new provider (Step 5 of Init Workflow).
+6. Display updated provider setting.
+
 ## clear-temp
 
 1. Delete the `.imbas/.temp/` directory and all contents.

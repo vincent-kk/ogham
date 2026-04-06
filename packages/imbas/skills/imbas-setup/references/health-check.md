@@ -107,6 +107,23 @@ Guide user through GitHub CLI authentication:
 4. Note: Authentication requires interactive browser flow — cannot be automated.
 ```
 
+## Provider Availability Mapping
+
+Health check results determine which providers can be offered in Step 1:
+
+| Tool status | Provider unlocked | Notes |
+|-------------|-------------------|-------|
+| Atlassian ✓ | `jira` | Full Jira Cloud/Server access |
+| Atlassian △/✗ | — | jira provider not available |
+| GitHub CLI ✓ | `github` | GitHub Issues via gh CLI |
+| GitHub CLI △ | — | Installed but not authenticated; offer auth-gh setup |
+| GitHub CLI ✗ | — | Not installed; offer install-gh setup |
+| (always) | `local` | No remote dependency; always available |
+
+After auto-setup actions complete, re-evaluate availability before proceeding
+to provider selection. For example, if the user installs and authenticates gh
+during Step 0, `github` becomes available for Step 1.
+
 ## Status Icons
 
 | Icon | Meaning |

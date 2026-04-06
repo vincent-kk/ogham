@@ -2,8 +2,7 @@
 
 ```
 Step 0 — Environment Health Check (non-blocking)
-  Check remote tool availability. Results are informational only —
-  init always proceeds to Step 1 regardless of outcome.
+  Check remote tool availability and determine available providers.
   See: references/health-check.md for full procedure.
 
   0-1. Atlassian MCP check
@@ -19,25 +18,50 @@ Step 0 — Environment Health Check (non-blocking)
       - On success → "✓ GitHub CLI authenticated (user: <login>)"
       - On failure → "△ GitHub CLI installed but not authenticated"
 
-  0-3. Result display
-    Show status summary, then:
-    - If all tools available → "All remote tools ready." → proceed to Step 1.
-    - If any tool missing →
-        "⚠ Remote ticket management requires at least one of the above.
-         Local-only workflows are fully supported without them."
+  0-3. Result display & provider availability
+    Show status summary:
 
-        Show numbered list of missing/failed items:
-          [1] Atlassian MCP — register in .mcp.json
-          [2] GitHub CLI (gh) — install via npm
+      Remote Tool Status:
+        <icon> Atlassian MCP — <status>
+        <icon> GitHub CLI — <status>
 
-        Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"
+    Derive available providers from results:
+      - Atlassian ✓ → jira available
+      - GitHub ✓   → github available
+      - local       → always available
 
-        - On skip → proceed to Step 1.
-        - On selection → execute auto-setup for each selected item
-          (see references/health-check.md § Auto-Setup Actions),
-          then proceed to Step 1.
+    If any tool missing, show:
+      "⚠ Remote ticket management requires at least one remote tool.
+       Local-only workflows are fully supported without them."
 
-Step 1 — .imbas/ directory creation
+      Show numbered list of missing/failed items:
+        [1] Atlassian MCP — register in .mcp.json
+        [2] GitHub CLI (gh) — install via npm
+
+      Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"
+
+      - On skip → proceed to Step 1 with current availability.
+      - On selection → execute auto-setup for each selected item
+        (see references/health-check.md § Auto-Setup Actions),
+        then re-evaluate available providers before Step 1.
+
+Step 1 — Provider selection
+  Present available providers as numbered options based on Step 0 results:
+
+    Available providers:
+      [1] jira   — Jira Cloud/Server via Atlassian MCP    (requires: Atlassian MCP ✓)
+      [2] github — GitHub Issues via gh CLI                (requires: GitHub CLI ✓)
+      [3] local  — Local markdown files (no remote needed) (always available)
+
+  Rules:
+  - Only show providers whose dependencies were confirmed in Step 0.
+  - `local` is always shown.
+  - If only `local` is available, still show selection but note:
+    "Only local provider is available. Select [3] or set up a remote tool first."
+  - If exactly one remote provider is available, recommend it but do not auto-select.
+  - Store selected provider for Step 3.
+
+Step 2 — .imbas/ directory creation
   1. Check if .imbas/ exists at project root.
   2. If not, create:
      - .imbas/
@@ -46,17 +70,36 @@ Step 1 — .imbas/ directory creation
      # imbas auto-generated — do not edit
      *
 
-Step 2 — Interactive project key selection
-  1. [OP: get_projects]
-     → Returns list of projects with key, name, projectType.
-  2. Present project list to user as numbered options.
-  3. User selects a project (or enters a key manually).
-  4. Store selected project key for Step 3.
+Step 3 — Project reference selection (provider-specific)
 
-Step 3 — config.json creation
-  1. Build default config object:
+  [jira]
+    1. [OP: get_projects]
+       → Returns list of projects with key, name, projectType.
+    2. Present project list to user as numbered options.
+    3. User selects a project (or enters a key manually).
+    4. Store selected project key as project_ref.
+
+  [github]
+    1. Detect current repo: gh repo view --json nameWithOwner
+    2. If in a git repo with remote → suggest detected "owner/repo".
+    3. User confirms or enters a different owner/repo.
+    4. Store as project_ref (e.g. "ogham-org/ogham-app").
+
+  [local]
+    1. Suggest project key from directory name (uppercase, e.g. "OGHAM").
+    2. User confirms or enters a custom key.
+    3. If key is empty, default to "LOCAL".
+    4. Store as project_ref.
+    5. Create issue directories:
+       - .imbas/<KEY>/issues/stories/
+       - .imbas/<KEY>/issues/tasks/
+       - .imbas/<KEY>/issues/subtasks/
+
+Step 4 — config.json creation
+  1. Build config object (provider-aware):
      {
        "version": "1.0",
+       "provider": "<selected provider>",      ← NEW
        "language": {
          "documents": "ko",
          "skills": "en",
@@ -64,7 +107,7 @@ Step 3 — config.json creation
          "reports": "ko"
        },
        "defaults": {
-         "project_ref": "<selected key>",
+         "project_ref": "<selected key or owner/repo>",
          "llm_model": {
            "validate": "sonnet",
            "split": "sonnet",
@@ -76,45 +119,77 @@ Step 3 — config.json creation
            "review_hours": 1
          }
        },
-       "jira": {
-         "issue_types": { "epic": "Epic", "story": "Story", "task": "Task", "subtask": "Sub-task", "bug": "Bug" },
-         "workflow_states": { "todo": "To Do", "ready_for_dev": "Ready for Dev", "in_progress": "In Progress", "in_review": "In Review", "done": "Done" },
-         "link_types": { "blocks": "Blocks", "split_into": "is split into", "split_from": "split from", "relates_to": "relates to" }
-       },
-       "media": {
-         "scene_sieve_command": "npx -y @lumy-pack/scene-sieve",
-         "temp_dir": ".temp",
-         "max_frames": 20,
-         "default_preset": "medium-video"
-       }
+       // provider-specific section (only one present):
+       "jira": { ... },       // when provider = jira
+       "github": { ... },     // when provider = github
+       // no extra section     // when provider = local
      }
+
+  [jira] section:
+     "jira": {
+       "issue_types": { "epic": "Epic", "story": "Story", "task": "Task", "subtask": "Sub-task", "bug": "Bug" },
+       "workflow_states": { "todo": "To Do", "ready_for_dev": "Ready for Dev", "in_progress": "In Progress", "in_review": "In Review", "done": "Done" },
+       "link_types": { "blocks": "Blocks", "split_into": "is split into", "split_from": "split from", "relates_to": "relates to" }
+     }
+
+  [github] section (see SPEC-provider-github.md § Config keys):
+     "github": {
+       "repo": "<owner/repo>",
+       "defaultLabels": [],
+       "linkTypes": ["blocks", "blocked-by", "split-from", "split-into", "relates"]
+     }
+
+  [local] — no provider-specific section.
+
+  Common section (all providers):
+     "media": {
+       "scene_sieve_command": "npx -y @lumy-pack/scene-sieve",
+       "temp_dir": ".temp",
+       "max_frames": 20,
+       "default_preset": "medium-video"
+     }
+
   2. Call config_set with full config.
   3. Confirm config.json created.
 
-Step 4 — Cache population
-  1. Create `.imbas/<KEY>/cache/` directory.
-  2. Fetch issue types:
-     - [OP: get_issue_types] project=<projectKey>
-     - For each issue type, call: [OP: get_issue_type_fields] issue_type_id=<issueTypeId>
-     - Call cache_set(project_ref, "issue-types", <data>)
-  3. Fetch link types:
-     - [OP: get_link_types]
-     - Call cache_set(project_ref, "link-types", <data>)
-  4. Store project metadata:
-     - Call cache_set(project_ref, "project-meta", <data>)
+Step 5 — Cache population (provider-specific)
 
-Step 5 — .gitignore guard
+  [jira]
+    1. Create `.imbas/<KEY>/cache/` directory.
+    2. Fetch issue types:
+       - [OP: get_issue_types] project=<projectKey>
+       - For each issue type: [OP: get_issue_type_fields] issue_type_id=<id>
+       - Call cache_set(project_ref, "issue-types", <data>)
+    3. Fetch link types:
+       - [OP: get_link_types]
+       - Call cache_set(project_ref, "link-types", <data>)
+    4. Store project metadata:
+       - Call cache_set(project_ref, "project-meta", <data>)
+
+  [github]
+    1. Bootstrap labels: gh label list --repo <owner/repo> --json name
+    2. Create missing type/status labels if needed (see SPEC-provider-github.md § Cache).
+    3. Cache label inventory via cache_set.
+
+  [local]
+    No cache needed. Display: "Local provider — no remote cache required."
+
+Step 6 — .gitignore guard
   1. Check if .git directory exists at project root.
   2. If yes, run: git check-ignore -q .imbas
   3. If .imbas is NOT ignored:
      - Append ".imbas/" to project root .gitignore
      - Create .gitignore if it does not exist
 
-Step 6 — Result display
+Step 7 — Result display
   1. Show summary:
-     - Project: <KEY> (<project name>)
+     - Provider: <provider>
+     - Project: <project_ref>
      - Config: .imbas/config.json created
-     - Cache: issue-types, link-types, project-meta populated
+     - Cache:
+       [jira]   issue-types, link-types, project-meta populated
+       [github]  label inventory cached
+       [local]   N/A (local provider)
      - .gitignore: updated (if applicable)
   2. Suggest next step: "Run /imbas:imbas-validate <source> to start Phase 1."
 ```
