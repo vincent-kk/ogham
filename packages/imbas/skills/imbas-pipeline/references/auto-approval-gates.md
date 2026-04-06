@@ -171,8 +171,14 @@ needs_review flagged items:
 
 ## GATE 4: Execution Result
 
-Evaluated after manifest execution (Phase 2.5 and Phase 3.5). This gate does NOT stop the pipeline
-because Jira writes are irreversible — already-created items cannot be undone.
+Evaluated after manifest execution (Phase 2.5 and Phase 3.5).
+
+**General rule (Phase 3.5 / devplan manifest)**: This gate does NOT stop the pipeline because
+issue writes are irreversible — already-created items cannot be undone. Partial failures are
+reported and the user is guided to retry via `/imbas:imbas-manifest devplan`.
+
+**Exception (Phase 2.5 / stories manifest)**: Failures here DO stop the pipeline because Phase 3
+(devplan) requires all Stories to have valid issue_refs. See the EXCEPTION block below.
 
 ```
 SUCCESS:

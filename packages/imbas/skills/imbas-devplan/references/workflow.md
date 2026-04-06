@@ -97,10 +97,12 @@ Step 2 — imbas-engineer Agent Spawn
 Step 3 — B→A Feedback Collection — provider-specific
 
   Provider routing:
-  - jira  → jira/workflow.md Step 3 (target_ref is a Jira key; feedback later
-            posted as Jira comments by manifest skill)
-  - local → local/workflow.md Step 3 (target_ref is a local S-<N> ID; feedback
-            later appended to the file's ## Digest section by manifest skill)
+  - jira   → jira/workflow.md Step 3 (target_ref is a Jira key; feedback later
+             posted as Jira comments by manifest skill)
+  - github → github/workflow.md Step 3 (target_ref is owner/repo#N; feedback
+             later posted as GitHub issue comments by manifest skill)
+  - local  → local/workflow.md Step 3 (target_ref is a local S-<N> ID; feedback
+             later appended to the file's ## Digest section by manifest skill)
 
   Both branches share the invariant: "Problem space tree unchanged" — Stories
   themselves are NOT modified. Divergences become comments (Jira) or digest

@@ -2,7 +2,7 @@
 
 This file contains the shared steps that run identically for every provider.
 Provider-specific execution (Step 2.5 drift check and Step 4 batch execution)
-lives in `jira/workflow.md` or `local/workflow.md`, selected by `config.provider`.
+lives in `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`, selected by `config.provider`.
 
 ## Preconditions
 
@@ -23,7 +23,7 @@ Before loading the manifest, verify pipeline state:
 1. Determine run: `--run` argument or most recent run via `run_get`.
 2. Load manifest based on type:
    - `stories` → `manifest_get(project_ref, run_id, type: "stories")`
-   - `imbas-devplan` → `manifest_get(project_ref, run_id, type: "devplan")`
+   - `devplan` → `manifest_get(project_ref, run_id, type: "devplan")`
 3. Calculate pending items:
    - Count items where `status == "pending"` (no `issue_ref`).
    - Items with existing `issue_ref` are SKIPPED (idempotency).
@@ -40,7 +40,7 @@ For `stories` type:
   3. Link creation (list: type, from → to)
   → Exit after display.
 
-For `imbas-devplan` type:
+For `devplan` type:
   Call `manifest_plan(project_ref, run_id)` for execution plan.
   Display each step:
   1. Tasks to create (id, title)
@@ -53,8 +53,9 @@ For `imbas-devplan` type:
 ## Step 2.5 — Drift Check (State Reconciliation) — provider-specific
 
 Provider routing:
-- `jira`  → `jira/workflow.md` Step 2.5
-- `local` → `local/workflow.md` Step 2.5
+- `jira`    → `jira/workflow.md` Step 2.5
+- `github`  → `github/workflow.md` Step 2.5
+- `local`   → `local/workflow.md` Step 2.5
 
 Both branches must return one of:
 - MATCH: remote state consistent → proceed.
@@ -82,8 +83,9 @@ Ask: "Proceed with issue creation? (y/n)"
 ## Step 4 — Batch Execution — provider-specific
 
 Provider routing:
-- `jira`  → `jira/workflow.md` Step 4 (Phases 4a/4b/4c for stories; Steps 1-5 for devplan)
-- `local` → `local/workflow.md` Step 4 (same structure, file-based)
+- `jira`   → `jira/workflow.md` Step 4 (Phases 4a/4b/4c for stories; Steps 1-5 for devplan)
+- `github` → `github/workflow.md` Step 4 (label-based issue creation via gh CLI)
+- `local`  → `local/workflow.md` Step 4 (same structure, file-based)
 
 Both branches must honor:
 - **Per-item save**: after EACH item, immediately `manifest_save` so re-runs

@@ -1,7 +1,7 @@
 ---
 name: imbas-read-issue
 user_invocable: false
-description: "[imbas:imbas-read-issue] Internal skill. Reads a Jira issue with its full comment thread, reconstructs the conversation context, and returns a structured JSON summary."
+description: "[imbas:imbas-read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary."
 version: "1.0.0"
 complexity: moderate
 plugin: imbas
@@ -9,17 +9,18 @@ plugin: imbas
 
 # imbas-read-issue — Issue Context Reconstruction (Internal)
 
-Internal skill that reads a Jira issue with its full comment thread, reconstructs
-the conversation context (who said what, decisions made, latest state), and returns
-a structured JSON summary. Called by validate, split, devplan, digest skills and
-by imbas-analyst, imbas-planner, imbas-engineer agents.
+Internal skill that reads an issue with its full context (Jira comment thread,
+GitHub issue thread, or local digest entries), reconstructs the conversation
+context (who said what, decisions made, latest state), and returns a structured
+JSON summary. Called by validate, split, devplan, digest skills and by
+imbas-analyst, imbas-planner, imbas-engineer agents.
 
 ## Arguments
 
 ```
-imbas:read-issue <issue-key> [--depth shallow|full]
+imbas:read-issue <issue-ref> [--depth shallow|full]
 
-<issue-key>  : Jira issue key (e.g., PROJ-123)
+<issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
 --depth      : shallow = metadata + description only, full = include comments (default: full)
 ```
 

@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 /**
  * Read a JSON file and optionally validate with a Zod schema.
@@ -21,14 +21,18 @@ export async function readJson<T>(
   try {
     raw = readFileSync(filePath, 'utf-8');
   } catch (err) {
-    throw new Error(`Failed to read file: ${filePath}: ${(err as Error).message}`);
+    throw new Error(`Failed to read file: ${filePath}: ${(err as Error).message}`, {
+      cause: err,
+    });
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(`Invalid JSON in file: ${filePath}: ${(err as Error).message}`);
+    throw new Error(`Invalid JSON in file: ${filePath}: ${(err as Error).message}`, {
+      cause: err,
+    });
   }
 
   if (schema) {
@@ -60,6 +64,8 @@ export async function writeJson(filePath: string, data: unknown): Promise<void> 
     writeFileSync(tempPath, json, 'utf-8');
     renameSync(tempPath, filePath);
   } catch (err) {
-    throw new Error(`Failed to write file: ${filePath}: ${(err as Error).message}`);
+    throw new Error(`Failed to write file: ${filePath}: ${(err as Error).message}`, {
+      cause: err,
+    });
   }
 }

@@ -11,7 +11,7 @@ import { z } from 'zod';
  * and how skill workflows route their tracker operations.
  *
  * - `jira`   : Atlassian Cloud via the `atlassian` MCP server (shipping)
- * - `github` : GitHub via `gh` CLI (prototype — 2-line read path only)
+ * - `github` : GitHub via `gh` CLI (shipping)
  * - `local`  : Markdown files under `.imbas/<KEY>/issues/` (shipping from v1.1)
  *
  * Default is `jira` for backward compatibility with existing configs.

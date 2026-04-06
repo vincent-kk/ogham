@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock ast-grep-shared module — default: napi unavailable
 vi.mock('../../ast/ast-grep-shared/ast-grep-shared.js', () => ({

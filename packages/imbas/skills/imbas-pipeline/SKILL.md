@@ -35,6 +35,8 @@ Stops immediately with a structured blocker report when any gate fails.
                       (manifest-devplan is the terminal phase; stopping after it is
                       equivalent to full completion and is therefore not accepted)
 --dry-run           : Run all phases but skip Jira issue creation (manifest shows preview only)
+--strict-drift      : Convert DRIFT_* resolutions in Phase 2.5 into blocker STOP instead of
+                      auto-resolving (default: auto-resolve; only applies to document pipeline)
 ```
 
 Minimal invocations:

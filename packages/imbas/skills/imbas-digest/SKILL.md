@@ -1,7 +1,7 @@
 ---
 name: imbas-digest
 user_invocable: true
-description: "[imbas:imbas-digest] Compresses a Jira issue's full context (description + comment thread + media) into a structured summary and posts it as a Jira comment. Uses State Tracking + QA-Prompting hybrid approach. Trigger: \"digest issue\", \"이슈 정리\", \"이슈 요약\", \"티켓 정리\", \"티켓 요약\", \"imbas digest\""
+description: "[imbas:imbas-digest] Compresses an issue's full context (description + comment thread + media) into a structured summary and posts it as a comment or digest entry (Jira comment, GitHub comment, or local ## Digest append). Uses State Tracking + QA-Prompting hybrid approach. Trigger: \"digest issue\", \"이슈 정리\", \"이슈 요약\", \"티켓 정리\", \"티켓 요약\", \"imbas digest\""
 version: "1.0.0"
 complexity: moderate
 plugin: imbas
@@ -9,9 +9,10 @@ plugin: imbas
 
 # imbas-digest — Issue Context Compression
 
-Compresses a Jira issue's full context (description, comment thread, and attached media)
-into a structured summary and posts it as a Jira comment. Designed for ticket closing
-or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approach.
+Compresses an issue's full context (description, comment thread, and attached media)
+into a structured summary and posts it as a comment or digest entry. Supports Jira,
+GitHub, and local providers. Designed for ticket closing or pre-analysis compression.
+Uses a State Tracking + QA-Prompting hybrid approach.
 
 ## When to Use This Skill
 
@@ -23,10 +24,11 @@ or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approac
 ## Arguments
 
 ```
-/imbas:imbas-digest <issue-key> [--preview]
+/imbas:imbas-digest <issue-ref> [--preview] [--no-media]
 
-<issue-key>  : Jira issue key (e.g., PROJ-123)
---preview    : Show digest without posting to Jira (dry run)
+<issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
+--preview    : Show digest without posting (dry run)
+--no-media   : Skip automatic media fetching for Jira attachments (suppresses imbas-fetch-media invocation)
 ```
 
 ## References
@@ -51,7 +53,7 @@ or pre-analysis compression. Uses a State Tracking + QA-Prompting hybrid approac
    | `local`  | `references/local/workflow.md` |
 
 4. Execute Steps 0–5 from the shared skeleton, then the provider's Step 6 publish.
-5. Persist outputs via the provider's publish path (Jira comment or local `## Digest` append).
+5. Persist outputs via the provider's publish path (Jira comment, GitHub issue comment, or local `## Digest` append).
 
 ## Constraints
 

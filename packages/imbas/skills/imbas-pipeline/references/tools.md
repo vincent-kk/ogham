@@ -9,7 +9,7 @@ validate, split, manifest, and devplan skills.
 
 | Tool | Phase | Usage |
 |------|-------|-------|
-| `config_get` | 1 | Load config.json for project key and settings |
+| `config_get` | 0 | Load config.json for project key and settings (Phase 0 Step 0.2) |
 | `run_create` | 1 | Create run directory, copy source, initialize state.json |
 | `run_get` | all | Read current run state for precondition checks (declared-only) |
 | `run_transition` | all | Phase transitions: start, complete, escape |

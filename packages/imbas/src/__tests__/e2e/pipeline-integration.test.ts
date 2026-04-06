@@ -90,7 +90,7 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id, run_dir } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
 
       await handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'validate' });
       await handleRunTransition({

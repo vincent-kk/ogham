@@ -1,17 +1,17 @@
 ---
 name: imbas-manifest
 user_invocable: true
-description: "[imbas:imbas-manifest] Execute a stories-manifest or devplan-manifest to batch-create Jira issues. Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\""
+description: "[imbas:imbas-manifest] Execute a stories-manifest or devplan-manifest to batch-create issues (Jira, GitHub, or local). Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\", \"issue 생성\""
 version: "1.0.0"
 complexity: moderate
 plugin: imbas
 ---
 
-# imbas-manifest — Manifest Execution (Jira Batch Creation)
+# imbas-manifest — Manifest Execution (Batch Issue Creation)
 
-Executes a stories-manifest or devplan-manifest to batch-create Jira issues,
-links, and comments. Supports dry-run preview, crash recovery via per-item save,
-and idempotent re-execution.
+Executes a stories-manifest or devplan-manifest to batch-create issues,
+links, and comments across providers (Jira, GitHub, or local). Supports dry-run
+preview, crash recovery via per-item save, and idempotent re-execution.
 
 ## When to Use This Skill
 
@@ -27,7 +27,7 @@ and idempotent re-execution.
 
 <type>    : "stories" | "devplan"
 --run     : Run ID (if omitted, uses most recent eligible run)
---dry-run : Preview execution plan without creating any Jira issues
+--dry-run : Preview execution plan without creating any issues
 ```
 
 ## References

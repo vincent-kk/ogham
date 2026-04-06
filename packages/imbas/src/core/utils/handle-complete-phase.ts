@@ -1,6 +1,7 @@
 import type { RunState, RunTransition } from '../../types/state.js';
-import { applyCompletePhaseFields } from './apply-complete-phase-fields.js';
+
 import { advancePhase } from './advance-phase.js';
+import { applyCompletePhaseFields } from './apply-complete-phase-fields.js';
 
 export function handleCompletePhase(
   state: RunState,
@@ -21,7 +22,9 @@ export function handleCompletePhase(
   // Apply phase-specific fields
   applyCompletePhaseFields(updated, phase, action);
 
-  // Advance current_phase to next
-  updated.current_phase = advancePhase(phase);
+  // Advance current_phase to next only when not BLOCKED
+  // BLOCKED result means the phase must be remediated before proceeding
+  if (action.result !== 'BLOCKED') updated.current_phase = advancePhase(phase);
+
   return updated;
 }

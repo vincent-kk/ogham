@@ -1,14 +1,15 @@
 # read-issue Workflow — Provider-agnostic skeleton
 
 This file defines the overall flow. Steps 1–4 are delegated to the
-provider-specific workflow file (`jira/workflow.md` or `local/workflow.md`),
-selected by `config.provider`. Step 5 (structured output) is shared.
+provider-specific workflow file (`jira/workflow.md`, `github/workflow.md`, or
+`local/workflow.md`), selected by `config.provider`. Step 5 (structured output) is shared.
 
 ## Step 0 — Provider routing
 
 Read `config.provider` via `config_get`. Load ONLY the matching workflow:
-- `jira`  → `jira/workflow.md`
-- `local` → `local/workflow.md`
+- `jira`   → `jira/workflow.md`
+- `github` → `github/workflow.md`
+- `local`  → `local/workflow.md`
 
 Do NOT read other provider files. See `SKILL.md` Constraints block.
 

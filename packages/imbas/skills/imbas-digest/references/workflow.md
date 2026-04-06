@@ -3,8 +3,9 @@
 This file owns Steps 1–5. Step 6 (preview / publish) is delegated to the
 provider-specific workflow file selected by `config.provider`:
 
-- `jira`  → `jira/workflow.md` Step 6
-- `local` → `local/workflow.md` Step 6
+- `jira`   → `jira/workflow.md` Step 6
+- `github` → `github/workflow.md` Step 6
+- `local`  → `local/workflow.md` Step 6
 
 ## Step 0 — Provider routing
 
@@ -77,5 +78,5 @@ local) is chosen by the provider branch in Step 6.
 
 ## Step 6 — Preview / Publish — provider-specific
 
-Now load `jira/workflow.md` or `local/workflow.md` per `config.provider` and
-execute its Step 6 exactly.
+Now load `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md` per
+`config.provider` and execute its Step 6 exactly.
