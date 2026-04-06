@@ -255,7 +255,7 @@ During validation:
 - **Infeasibilities** — requirements that conflict with technical constraints
 
 During split:
-- **INVEST violations** — Stories that are too large, not independently deliverable, or missing testability
+- **Functional violations** — Stories that are not independently testable at the E2E level, or missing testability
 - **Semantic loss** — reverse inference verifies no requirements were dropped during decomposition
 
 During devplan:
@@ -309,6 +309,18 @@ yarn test           # Vitest watch
 yarn test:run       # Single run
 yarn typecheck      # Type checking only
 yarn build          # tsc + MCP server + hooks bundling
+```
+
+### Tech Stack
+
+TypeScript 5.7, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
+
+---
+
+## License
+
+MIT
+ tsc + MCP server + hooks bundling
 ```
 
 ### Tech Stack
