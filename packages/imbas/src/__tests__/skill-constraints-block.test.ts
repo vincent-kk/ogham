@@ -11,7 +11,7 @@
  *   `Atlassian`, `gh issue create`, `gh issue view`, `gh issue comment`,
  *   `gh issue close`, or `gh label create` — those must live inside
  *   references/<provider>/** only. The anchor block is exempt from this token
- *   check because it names `atlassian__*` / `gh issue *` as part of the
+ *   check because it names `[OP:]` / `gh issue *` as part of the
  *   Constraints directive.
  */
 
@@ -30,10 +30,10 @@ const SKILLS_DIR = join(PKG_ROOT, 'skills');
  * .metadata/imbas/specs/SPEC-skills.md.
  */
 const PARTITIONED_SKILLS = [
-  'manifest',
-  'read-issue',
-  'digest',
-  'devplan',
+  'imbas-manifest',
+  'imbas-read-issue',
+  'imbas-digest',
+  'imbas-devplan',
 ] as const;
 
 const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';
@@ -41,7 +41,7 @@ const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';
 /**
  * Tokens that must not appear in SKILL.md body. They belong inside
  * references/<provider>/** only. Checked OUTSIDE the anchor block because
- * the anchor block itself references `atlassian__*` as a negative example.
+ * the anchor block itself references `[OP:]` notation as a provider example.
  */
 const FORBIDDEN_BODY_TOKENS = [
   'createJiraIssue',

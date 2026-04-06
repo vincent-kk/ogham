@@ -45,7 +45,7 @@ imbas:read-issue <issue-key> [--depth shallow|full]
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `getJiraIssue` | Atlassian MCP | 이슈 메타데이터, 설명, 댓글 조회 |
+| `[OP: get_issue]` | Jira ([OP:]) | 이슈 메타데이터, 설명, 댓글 조회 |
 
 에이전트 스폰 없음. 스킬이 직접 실행하고 구조화된 데이터를 반환한다.
 

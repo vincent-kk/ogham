@@ -8,12 +8,12 @@
 |------|-------|
 | `config_get` | Read media.temp_dir and media.scene_sieve_command from config |
 
-### Atlassian MCP Tools
+### Jira Operations ([OP:])
 
 | Tool | Usage |
 |------|-------|
-| `getConfluencePage` | Resolve Confluence page to find attachment URLs |
-| `fetchAtlassian` | Download binary attachments from Confluence/Jira URLs |
+| `[OP: get_confluence]` | Resolve Confluence page to find attachment URLs |
+| `[OP: fetch_attachment]` | Download binary attachments from Confluence/Jira URLs |
 
 ## Agent Spawn
 

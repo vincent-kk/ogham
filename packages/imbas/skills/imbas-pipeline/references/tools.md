@@ -22,27 +22,29 @@ validate, split, manifest, and devplan skills.
 
 ---
 
-## Atlassian MCP Tools
+## Jira Operations ([OP:])
+
+The LLM resolves which tool to use at runtime based on the session's available tools.
 
 ### Read Operations
 
-| Tool | Phase | Usage |
-|------|-------|-------|
-| `getConfluencePage` | 1 | Fetch Confluence page when source is a URL |
-| `searchConfluenceUsingCql` | 1 | Resolve references to other Confluence pages |
-| `getJiraIssue` | 0, 2 | Verify --parent issue existence and detect type (Epic/Story) |
-| `searchJiraIssuesUsingJql` | 2, 3 | Search for existing related Stories/Epics |
-| `getTransitionsForJiraIssue` | 2.5 | Get available transitions for Done processing |
+| Operation | Phase | Usage |
+|-----------|-------|-------|
+| `[OP: get_confluence]` | 1 | Fetch Confluence page when source is a URL |
+| `[OP: search_confluence]` | 1 | Resolve references to other Confluence pages |
+| `[OP: get_issue]` | 0, 2 | Verify --parent issue existence and detect type (Epic/Story) |
+| `[OP: search_jql]` | 2, 3 | Search for existing related Stories/Epics |
+| `[OP: get_transitions]` | 2.5 | Get available transitions for Done processing |
 
 ### Write Operations
 
-| Tool | Phase | Usage |
-|------|-------|-------|
-| `createJiraIssue` | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues |
-| `createIssueLink` | 2.5, 3.5 | Create blocks, split-into, relates-to links |
-| `editJiraIssue` | 2.5 | Update issue fields after creation (if needed) |
-| `transitionJiraIssue` | 2.5 | Transition status (horizontal split: original → Done) |
-| `addCommentToJiraIssue` | 3.5 | Post B→A feedback comments to Story issues |
+| Operation | Phase | Usage |
+|-----------|-------|-------|
+| `[OP: create_issue]` | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues |
+| `[OP: create_link]` | 2.5, 3.5 | Create blocks, split-into, relates-to links |
+| `[OP: edit_issue]` | 2.5 | Update issue fields after creation (if needed) |
+| `[OP: transition_issue]` | 2.5 | Transition status (horizontal split: original → Done) |
+| `[OP: add_comment]` | 3.5 | Post B→A feedback comments to Story issues |
 
 ---
 
@@ -86,6 +88,6 @@ Pipeline reads these settings and spawns agents with the configured models.
 ## No Agent Spawn
 
 Pipeline does NOT spawn agents for:
-- Manifest execution (Phase 2.5, 3.5) — direct Atlassian MCP tool calls
+- Manifest execution (Phase 2.5, 3.5) — direct Jira operations via [OP:] notation
 - Epic/parent decision — deterministic from --parent argument (resolved in Phase 0)
 - Gate evaluation — `imbas:pipeline` skill evaluates fields directly

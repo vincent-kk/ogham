@@ -6,7 +6,7 @@ Loaded when `config.provider === 'jira'`. The shared skeleton
 
 ## Step 1 — Issue query
 
-1. Call Atlassian MCP: `getJiraIssue(issueIdOrKey: <issue-key>)`.
+1. Call `[OP: get_issue] issue_ref=<issue-key>`.
 2. Extract from response:
    - `key`, `summary`, `type`, `imbas-status`
    - `assignee`, `reporter`

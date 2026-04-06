@@ -23,28 +23,28 @@ Force-refresh all cache types regardless of TTL status.
 ```
 1. Determine project key
 2. Fetch issue types:
-   a. Call Atlassian MCP: getJiraProjectIssueTypesMetadata(projectKey)
+   a. [OP: get_issue_types] project=<projectKey>
    b. For each issue type returned:
-      - Call Atlassian MCP: getJiraIssueTypeMetaWithFields(issueTypeId)
+      - [OP: get_issue_type_fields] issue_type_id=<issueTypeId>
       - Collect required fields per issue type
    c. Call cache_set(project_ref, "issue-types", <aggregated data>)
 
 3. Fetch link types:
-   a. Call Atlassian MCP: getIssueLinkTypes
+   a. [OP: get_link_types]
    b. Call cache_set(project_ref, "link-types", <data>)
 
 4. Fetch project metadata:
-   a. Call Atlassian MCP: getVisibleJiraProjects
+   a. [OP: get_projects]
    b. Find matching project by key
    c. Call cache_set(project_ref, "project-meta", <data>)
 
 5. Fetch workflow data (optional — requires existing issue):
-   a. Call Atlassian MCP: searchJiraIssuesUsingJql(jql: "project = <KEY> ORDER BY created DESC", maxResults: 1)
+   a. [OP: search_jql] jql="project = <KEY> ORDER BY created DESC", maxResults=1
    b. If result is empty (no issues exist in project):
       → Skip workflows cache. Log: "No issues in project — workflows cache deferred."
       → workflows.json will be lazy-filled on first imbas:manifest execution.
    c. If result has an issue:
-      → Call Atlassian MCP: getTransitionsForJiraIssue(issueKey: <returned key>)
+      → [OP: get_transitions] issue_ref=<returned key>
       → Call cache_set(project_ref, "workflows", <data>)
 
 6. cached_at.json is automatically updated by cache_set:

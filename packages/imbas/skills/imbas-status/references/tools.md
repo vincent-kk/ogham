@@ -9,7 +9,7 @@
 | `run_get` | Read state.json for a specific or most recent run |
 | `run_list` | List all runs for a project |
 
-### Atlassian MCP Tools
+### Jira Operations ([OP:])
 
 None. This skill only reads local imbas state.
 

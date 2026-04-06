@@ -56,4 +56,4 @@ batch Jira issue creation.
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__* for jira, `gh issue view/list` via Bash for github, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The imbas-engineer agent's core exploration tools (ast_search, ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.
+- Provider-specific operations (`[OP:]` notation for jira, `gh issue view/list` via Bash for github, Read/Grep/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow. The imbas-engineer agent's core exploration tools (ast_search, ast_analyze, Read, Grep, Glob) are shared and provider-agnostic.

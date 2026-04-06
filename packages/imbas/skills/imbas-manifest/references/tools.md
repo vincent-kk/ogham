@@ -1,6 +1,6 @@
 # Tools Used — Provider-agnostic
 
-Provider-specific tools (Atlassian MCP for jira, Read/Write/Edit/Glob for local)
+Provider-specific tools (Jira operations ([OP:]) for jira, Read/Write/Edit/Glob for local)
 are documented in `jira/tools.md` and `local/tools.md`. This file lists the
 shared imbas MCP tools used by every provider.
 

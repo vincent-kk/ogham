@@ -35,7 +35,7 @@ the imbas-media subagent to produce a structured analysis.json.
 
 - [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
 - [preset-selection.md](./references/preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
-- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: imbas/Atlassian MCP tools, imbas-media agent details, cache behavior
+- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: imbas/Jira operations ([OP:]), imbas-media agent details, cache behavior
 - [scripts/probe.mjs](./scripts/probe.mjs) — Video probe + preset auto-selection script (run before extraction, cross-platform)
 - [presets/index.md](./presets/index.md) — Decision matrix and summary table for preset selection
   - [short-clip.md](./presets/short-clip.md) — <= 30s clips

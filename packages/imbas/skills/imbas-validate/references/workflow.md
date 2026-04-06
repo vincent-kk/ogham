@@ -23,13 +23,13 @@ Step 2 — Document Source Resolution
   - Local file (*.md, *.txt):
     - Already copied to source.md by run_create. Read directly.
   - Confluence URL:
-    - Call Atlassian MCP: getConfluencePage(pageId extracted from URL)
+    - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.
     - If page contains embedded media (images, videos):
       → Display: "Media attachments detected. Run /imbas:imbas-fetch-media to include visual context."
       → Do NOT auto-invoke fetch-media.
   - If source contains references to other Confluence pages:
-    - Call Atlassian MCP: searchConfluenceUsingCql to resolve references.
+    - [OP: search_confluence] to resolve references.
     - Save referenced content as supplements.
 
 Step 3 — imbas-analyst Agent Spawn

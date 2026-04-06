@@ -56,4 +56,4 @@ and idempotent re-execution.
 ## Constraints
 
 - When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
-- Provider-specific tools (atlassian__* for jira, `gh issue *` / `gh label *` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.
+- Provider-specific operations (`[OP:]` notation for jira, `gh issue *` / `gh label *` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.

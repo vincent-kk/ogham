@@ -73,7 +73,7 @@ Step 1 — Run 초기화
 
 Step 2 — 문서 소스 해석
   - 로컬 파일: 직접 읽기
-  - Confluence URL: getConfluencePage로 마크다운 변환 후 저장
+  - Confluence URL: [OP: get_confluence]로 마크다운 변환 후 저장
   - 첨부 미디어 감지 → imbas:fetch-media 호출 안내 (자동 호출 안 함)
 
 Step 3 — imbas-analyst 호출
@@ -130,7 +130,7 @@ Step 1 — 런 로드 & 전제조건 확인
   3. state.json: current_phase = "split", split.status = "in_progress"
 
 Step 2 — Epic 결정
-  - --epic 제공 → getJiraIssue로 존재 확인
+  - --epic 제공 → [OP: get_issue]로 존재 확인
   - 미제공 → 사용자에게 Epic 생성 여부 질의
     - 생성 → 매니페스트에 Epic 추가 (manifest 실행 시 생성)
     - 기존 사용 → 키 입력
@@ -302,7 +302,7 @@ plugin: imbas
 ```
 Step 1 — .imbas/ 디렉토리 생성
 Step 2 — 사용자에게 Jira 프로젝트 키 질의
-  - getVisibleJiraProjects로 사용 가능 프로젝트 목록 표시
+  - [OP: get_projects]로 사용 가능 프로젝트 목록 표시
   - 사용자 선택
 Step 3 — config.json 생성 (기본값 + 사용자 선택)
 Step 4 — 프로젝트 캐시 갱신
@@ -386,7 +386,7 @@ Step 4 — 배치 실행
     2. Task Subtask 생성
     3. Story↔Task 블로킹 링크 생성
     4. Story Subtask 생성
-    5. B→A 피드백 코멘트 (feedback_comments → addCommentToJiraIssue)
+    5. B→A 피드백 코멘트 (feedback_comments → [OP: add_comment])
   - stories일 경우:
     1. Epic 생성 (필요 시)
     2. Story 생성
@@ -467,7 +467,7 @@ imbas:read-issue <issue-key> [--no-cache] [--depth shallow|full]
 
 ```
 Step 1 — 이슈 조회
-  - getJiraIssue(issueIdOrKey) → 본문, 메타데이터, 코멘트
+  - [OP: get_issue] issue_ref=<issueIdOrKey> → 본문, 메타데이터, 코멘트
   - depth == "shallow" → 코멘트 파싱 스킵 → Step 5
 
 Step 2 — digest 코멘트 탐색 (Fast Path)
@@ -670,7 +670,7 @@ Step 5 — 코멘트 포맷팅
 Step 6 — 게시
   - --preview → 사용자에게 미리보기 표시, 종료
   - 기본 → 사용자에게 미리보기 + "이 내용을 코멘트로 게시할까요?" 확인
-  - 승인 → addCommentToJiraIssue로 게시
+  - 승인 → [OP: add_comment]로 게시
 ```
 
 **digest 마커 규격:**
@@ -684,7 +684,7 @@ Step 6 — 게시
 - 동일 이슈에 digest를 재실행하면 기존 digest 이후 코멘트만 추가 분석 → 신규 digest 코멘트 게시 (기존 것은 남겨둠)
 
 **제안 트리거:**
-- manifest가 transitionJiraIssue로 Done 전환 시
+- manifest가 [OP: transition_issue]로 Done 전환 시
 - 해당 이슈의 코멘트 >= 3개 AND 작성자 >= 2명
 - 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:imbas-digest {key}` 로 정리할까요?"
 - 자동 실행 아님 — 제안만
@@ -770,12 +770,5 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 - [SPEC-agents.md](./SPEC-agents.md) — 스킬이 호출하는 에이전트
 - [SPEC-state.md](./SPEC-state.md) — 스킬이 읽고 쓰는 상태
 - [SPEC-media.md](./SPEC-media.md) — `imbas:fetch-media` 상세
-- [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
-- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
-.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
-- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
-PEC-media.md) — `imbas:fetch-media` 상세
-- [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
-- [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
-.md](./SPEC-atlassian-tools.md) — 사용하는 MCP 도구
+- [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — Jira 도구 매핑 (deprecated)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처

@@ -28,32 +28,35 @@ Currently partitioned skills (RALPLAN v2 Phase C1-C5):
 
 ## Network path
 
-Every Jira API call goes through the `atlassian` MCP server registered in
-`packages/imbas/.mcp.json`. imbas TypeScript code has no HTTP client for
+Jira API calls are resolved at runtime by the LLM based on `[OP:]`
+semantic notation in skill workflows. The LLM selects the appropriate
+tool from the session's available tools (Atlassian Cloud MCP, on-premise
+MCP, or custom plugin). imbas TypeScript code has no HTTP client for
 Jira and MUST NOT acquire one — that would invert the LLM-orchestrated
 architecture invariant in `BLUEPRINT.md`.
 
-## Tool surface
+## Tool surface (Semantic Operations v0.2.0)
 
-| Tool | Used by |
-|------|---------|
-| `mcp__plugin_imbas_atlassian__createJiraIssue` | manifest (batch create) |
-| `mcp__plugin_imbas_atlassian__createIssueLink` | manifest (link creation, including 1:N expansion) |
-| `mcp__plugin_imbas_atlassian__addCommentToJiraIssue` | manifest (feedback comments), digest (publish) |
-| `mcp__plugin_imbas_atlassian__transitionJiraIssue` | manifest (split-source Story Done), digest (suggestion trigger upstream) |
-| `mcp__plugin_imbas_atlassian__getJiraIssue` | read-issue, devplan (optional), manifest (drift check) |
-| `mcp__plugin_imbas_atlassian__searchJiraIssuesUsingJql` | devplan (optional enrichment), agents |
-| `mcp__plugin_imbas_atlassian__getConfluencePage` | imbas-analyst (validate references) |
-| `mcp__plugin_imbas_atlassian__searchConfluenceUsingCql` | imbas-analyst (related context) |
+Skill workflows declare intent via `[OP:]` notation. The table below
+maps operations to their Jira tool implementations for reference.
 
-## Agent tool grants
+| Operation | Jira Tool | Used by |
+|-----------|-----------|---------|
+| `[OP: create_issue]` | `createJiraIssue` | manifest (batch create) |
+| `[OP: create_link]` | `createIssueLink` | manifest (link creation, including 1:N expansion) |
+| `[OP: add_comment]` | `addCommentToJiraIssue` | manifest (feedback comments), digest (publish) |
+| `[OP: transition_issue]` | `transitionJiraIssue` | manifest (split-source Story Done), digest (suggestion trigger upstream) |
+| `[OP: get_issue]` | `getJiraIssue` | read-issue, devplan (optional), manifest (drift check) |
+| `[OP: search_jql]` | `searchJiraIssuesUsingJql` | devplan (optional enrichment), agents |
+| `[OP: get_confluence]` | `getConfluencePage` | imbas-analyst (validate references) |
+| `[OP: search_confluence]` | `searchConfluenceUsingCql` | imbas-analyst (related context) |
 
-All three imbas agents (`imbas-planner`, `imbas-engineer`, `imbas-analyst`)
-carry at least some of the Atlassian tools in their `tools:` frontmatter.
-In local mode these grants become inert (the skill workflow directs the
-agent to file-based operations only) but the grants remain in place.
-Hard enforcement via per-provider agent files is a tracked follow-up
-(see `SPEC-provider.md` Option D).
+## Agent tool grants (v0.2.0)
+
+As of v0.2.0, agent `tools:` frontmatter no longer includes Jira/Atlassian
+tools. Agents interact with Jira through `[OP:]` semantic operations
+declared in skill workflows. The LLM resolves the appropriate tool at
+runtime based on the session's available tools.
 
 Current baseline is pinned in
 `packages/imbas/scripts/baselines/agent-tools-frontmatter.json` and

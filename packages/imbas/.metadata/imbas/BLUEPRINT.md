@@ -32,7 +32,7 @@ partitioning, **not** in TypeScript class hierarchies. See
 
 | Provider | Status (v1.2) | Storage | Tool surface |
 |---|---|---|---|
-| `jira`   | Shipping | Atlassian Cloud via `atlassian` MCP server | `mcp__plugin_imbas_atlassian__*` |
+| `jira`   | Shipping | Any Jira-capable tool (Atlassian Cloud MCP, on-premise, custom plugin) | `[OP:]` semantic notation — LLM resolves at runtime |
 | `github` | Shipping (from v1.2) | GitHub via `gh` CLI (ambient `gh auth`) | `gh issue *`, `gh label *`, `gh api` via Bash |
 | `local`  | Shipping (from v1.1) | Markdown files under `.imbas/<KEY>/issues/` | Read/Write/Edit/Glob (no MCP, no network) |
 

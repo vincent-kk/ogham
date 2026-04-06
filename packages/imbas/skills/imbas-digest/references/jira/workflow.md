@@ -16,7 +16,7 @@ digest marker protocol specific to Jira.
 1. Display formatted digest to user as preview.
 2. Ask: "Post this digest as a comment to `{issue-key}`?"
 3. If approved:
-   - Call `addCommentToJiraIssue(issueIdOrKey: <issue-key>, body: formatted_comment)`.
+   - Call `[OP: add_comment] issue_ref=<issue-key>, body=<formatted_comment>`.
    - The comment body begins with the digest marker (see below).
 4. If rejected: end without posting.
 
@@ -50,7 +50,7 @@ When re-running digest on the same issue:
 
 The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
 
-1. `imbas:manifest` calls `transitionJiraIssue` to move an issue to Done.
+1. `imbas:manifest` calls `[OP: transition_issue]` to move an issue to Done.
 2. The issue has ≥ 3 comments.
 3. Comments are from ≥ 2 distinct authors.
 

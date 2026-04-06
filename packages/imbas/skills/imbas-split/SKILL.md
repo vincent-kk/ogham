@@ -32,6 +32,6 @@ Splits a validated planning document into INVEST-compliant Jira Stories with
 - [Preconditions](./references/preconditions.md) — state.json requirements before running
 - [Workflow](./references/workflow.md) — Steps 1–7 (Epic decision, agent spawn, verification, manifest, review)
 - [Escape Conditions](./references/escape-conditions.md) — E2-1, E2-2, E2-3, EC-1, EC-2 escape logic
-- [Tools Used](./references/tools.md) — imbas MCP tools, Atlassian MCP tools, agent spawn instructions
+- [Tools Used](./references/tools.md) — imbas MCP tools, Jira operations ([OP:]), agent spawn instructions
 - [Error Handling](./references/errors.md) — error table
 - [State Transitions & Output](./references/state-transitions.md) — entry/exit states and output artifact

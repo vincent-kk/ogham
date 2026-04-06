@@ -2,8 +2,8 @@
 
 | Error | Action |
 |-------|--------|
-| Atlassian MCP not connected | Display: "Atlassian MCP server is not available. Connect it first, then run /imbas:imbas-setup again." |
-| getVisibleJiraProjects returns empty | Display: "No Jira projects found. Check your Atlassian permissions." |
+| No Jira-capable tool available | Display: "No Jira-capable tool detected. Register a Jira MCP server or plugin, then run /imbas:imbas-setup again." |
+| [OP: get_projects] returns empty | Display: "No Jira projects found. Check your Jira permissions." |
 | .imbas/ already exists (on init) | Ask user: "Existing .imbas/ found. Overwrite config? (y/n)" — only overwrites config.json, preserves runs/ |
 | Cache fetch partial failure | Log warning for failed cache type, continue with others. Display which caches failed. |
 | Invalid project key | Display: "Project <KEY> not found in Jira. Available projects: ..." |

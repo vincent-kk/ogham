@@ -8,7 +8,7 @@
 ## 1. 개요
 
 imbas `tools` MCP 서버의 15개 도구 정의. 내부 전용 — 스킬/에이전트만 호출.
-Atlassian 도구는 외부 HTTP MCP(`https://mcp.atlassian.com/v1/mcp`)가 제공.
+Jira 도구는 세션에 등록된 Jira 호환 도구(Atlassian Cloud MCP, 온프레미스 MCP, 커스텀 플러그인 등)가 제공. 스킬 워크플로우는 `[OP:]` 의미론적 표기로 의도를 선언하고, LLM이 런타임에 적절한 도구를 선택한다.
 
 ### 설계 원칙
 
@@ -605,7 +605,7 @@ Output: { "status": "ok", "version": "<package version>" }
 
 ### 8.1 스킬별
 
-| Skill | imbas tools | Atlassian tools |
+| Skill | imbas tools | Jira operations ([OP:]) |
 |-------|------------|-----------------|
 | setup | config_get, config_set, cache_set | getVisibleJiraProjects, getJiraProjectIssueTypesMetadata, getJiraIssueTypeMetaWithFields, getIssueLinkTypes |
 | cache | cache_get, cache_set | (setup과 동일) |
@@ -622,12 +622,14 @@ Output: { "status": "ok", "version": "<package version>" }
 
 | Agent | imbas tools | 비고 |
 |-------|------------|------|
-| imbas-analyst | — | Read/Grep/Glob + Atlassian 읽기만 |
-| imbas-planner | — | Read/Grep/Glob + Atlassian 읽기만 |
-| imbas-engineer | ast_search, ast_analyze | 코드 탐색 + AST 분석. napi 없으면 fallback |
+| imbas-analyst | — | Read/Grep/Glob/Bash. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
+| imbas-planner | — | Read/Grep/Glob. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
+| imbas-engineer | ast_search, ast_analyze | ast_search, ast_analyze + 코드 탐색. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
 | imbas-media | — | Read(멀티모달) + Write(analysis.json) |
 
 **핵심:** 에이전트는 pipeline/manifest 도구 미사용. 스킬이 에이전트 결과를 받아 도구로 상태 갱신.
+
+> **v0.2.0**: 에이전트 `tools:` 프론트매터에서 Atlassian MCP 도구가 제거됨. Jira 상호작용은 스킬 워크플로우의 `[OP:]` 선언을 통해 이루어지며, LLM이 세션의 도구 목록에서 적절한 도구를 런타임에 선택한다.
 
 ---
 

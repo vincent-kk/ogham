@@ -39,7 +39,7 @@ Step 0.3 — Story Validation (DEVPLAN PIPELINE only)
     - If mixed prefixes detected (e.g., PROJ-42 + OTHER-10) → STOP: "Mixed project keys in Story input."
 
   For each key in story_keys[]:
-    1. Call Atlassian MCP: getJiraIssue(key)
+    1. [OP: get_issue] issue_ref=<key>
     2. Verify issue type is "Story"
        - Not a Story → STOP: "<KEY> is a <type>, not a Story."
        - Not found → STOP: "Issue <KEY> not found in Jira."
@@ -49,7 +49,7 @@ Step 0.3 — Story Validation (DEVPLAN PIPELINE only)
 
 Step 0.4 — Parent Issue Detection (DOCUMENT PIPELINE only)
   If --parent is a Jira issue key:
-    1. Call Atlassian MCP: getJiraIssue(parentKey)
+    1. [OP: get_issue] issue_ref=<parentKey>
     2. Read issue type:
        - Epic → use as parent Epic for Stories
        - Other → STOP: "<KEY> is a <type>. --parent accepts Epic key, 'new', or 'none'."
@@ -102,13 +102,13 @@ Step 1.1 — Run Initialization
 Step 1.2 — Document Source Resolution
   - Local file (*.md, *.txt): Already copied to source.md by run_create. Read directly.
   - Confluence URL:
-    - Call Atlassian MCP: getConfluencePage(pageId extracted from URL)
+    - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.
     - If page contains embedded media (images, videos):
       → Display: "Media attachments detected. Run /imbas:imbas-fetch-media to include visual context."
       → Do NOT auto-invoke fetch-media.
   - If source contains references to other Confluence pages:
-    - Call Atlassian MCP: searchConfluenceUsingCql to resolve references.
+    - [OP: search_confluence] to resolve references.
     - Save referenced content as supplements.
 
 Step 1.3 — imbas-analyst Agent Spawn
@@ -275,13 +275,13 @@ Step 2.5.2 — Batch Execution
   CRITICAL: After EACH item creation, immediately save manifest via manifest_save.
 
   Phase A — Epic Creation (if --parent "new" and manifest has Epic entry):
-    1. Call Atlassian MCP: createJiraIssue(project, type: "Epic", summary, description)
+    1. [OP: create_issue] project=<KEY>, type="Epic", summary=<summary>, description=<description>
     2. Store issue_ref in manifest epic_ref
     3. Save manifest
 
   Phase B — Story Creation:
     For each story where status == "pending":
-    1. Call Atlassian MCP: createJiraIssue(project, type: "Story", summary, description, parent: epic_ref (if set))
+    1. [OP: create_issue] project=<KEY>, type="Story", summary=<summary>, description=<description>, parent=<epic_ref (if set)>
     2. Update story: status = "created", issue_ref = <returned key>
     3. Save manifest
 
@@ -289,7 +289,7 @@ Step 2.5.2 — Batch Execution
     For each link where status == "pending":
     1. Resolve from/to IDs to issue_refs
     2. For EACH target in link.to array:
-       Call Atlassian MCP: createIssueLink(type, inwardIssue, outwardIssue)
+       [OP: create_link] type=<type>, inward=<inwardIssue>, outward=<outwardIssue>
     3. Update link: status = "created"
     4. Save manifest
 
@@ -319,7 +319,7 @@ Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
   1. Call run_create(project_ref, source_file: "devplan-pipeline", supplements: [])
      (sentinel value — not a file path; run_create skips file copy when source_file does not point to an existing file)
      → Creates run directory + state.json
-  2. Story details already loaded in Phase 0 Step 0.3 (getJiraIssue per key)
+  2. Story details already loaded in Phase 0 Step 0.3 ([OP: get_issue] per key)
   3. Build stories-manifest.json from collected Stories:
      {
        stories: [
@@ -406,31 +406,31 @@ Step 3.5.2 — Batch Execution (follows execution_order)
 
   Step 1 — create_tasks:
     For each task where status == "pending":
-    - createJiraIssue(project, type: "Task", summary, description)
+    - [OP: create_issue] project=<KEY>, type="Task", summary=<summary>, description=<description>
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
   Step 2 — create_task_subtasks:
     For each task's subtasks where status == "pending":
-    - createJiraIssue(project, type: "Sub-task", summary, description, parent: task.issue_ref)
+    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<task.issue_ref>
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
   Step 3 — create_links:
     For each task, for each blocked_story_id in task.blocks:
     - Resolve story_id to issue_ref from stories-manifest.json
-    - createIssueLink(type: "Blocks", inwardIssue: task.issue_ref, outwardIssue: story_issue_ref)
+    - [OP: create_link] type="Blocks", inward=<task.issue_ref>, outward=<story_issue_ref>
     - Save manifest
 
   Step 4 — create_story_subtasks:
     For each story_subtasks entry, for each subtask where status == "pending":
-    - createJiraIssue(project, type: "Sub-task", summary, description, parent: story_key)
+    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<story_key>
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
   Step 5 — add_feedback_comments:
     For each feedback_comment where status == "pending":
-    - addCommentToJiraIssue(issueIdOrKey: target_ref, body: comment)
+    - [OP: add_comment] issue_ref=<target_ref>, body=<comment>
     - Update: status = "created"
     - Save manifest
 

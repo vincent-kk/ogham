@@ -9,7 +9,7 @@ Step 1 — Resolve input
   - Validate file exists (URL or path)
 
 Step 2 — Download (if Atlassian URL)
-  - Call Atlassian MCP: fetchAtlassian(url)
+  - [OP: fetch_attachment] url=<url>
   - Save binary to .imbas/.temp/<filename>
   - If download fails -> error with auth check guidance
 

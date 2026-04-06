@@ -80,7 +80,7 @@ is the machine-readable boundary.
 
 ## Suggestion Trigger (Local)
 
-Local mode has no `transitionJiraIssue` equivalent to trigger suggestions on.
+Local mode has no `[OP: transition_issue]` equivalent to trigger suggestions on.
 In v1, `imbas:digest` for local is always invoked manually by the user. Future
 work may add a trigger when a local issue's `imbas-status` frontmatter field
 transitions to `Done`.

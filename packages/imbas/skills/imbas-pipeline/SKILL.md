@@ -137,7 +137,7 @@ FINAL: Pipeline completion report
 ### Devplan Pipeline (Mode B)
 
 ```
-Phase 0: Load Stories from Jira (getJiraIssue per key)
+Phase 0: Load Stories from Jira ([OP: get_issue] per key)
 
 Phase 3: DEVPLAN
   Spawn imbas-engineer → codebase exploration + EARS Subtask generation

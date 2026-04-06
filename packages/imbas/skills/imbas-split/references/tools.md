@@ -9,12 +9,14 @@
 | `manifest_save` | Save stories-manifest.json |
 | `manifest_validate` | Validate manifest structural integrity |
 
-## Atlassian MCP Tools
+## Jira Operations ([OP:])
 
 | Tool | Usage |
 |------|-------|
-| `getJiraIssue` | Verify Epic existence when --epic provided |
-| `searchJiraIssuesUsingJql` | Search for existing related Stories/Epics |
+| `[OP: get_issue]` | Verify Epic existence when --epic provided |
+| `[OP: search_jql]` | Search for existing related Stories/Epics |
+
+The LLM resolves which tool to use at runtime based on the session's available tools.
 
 ## Agent Spawn
 

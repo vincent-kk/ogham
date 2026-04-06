@@ -5,9 +5,9 @@ error cases triggered inside `workflow.md` (this directory).
 
 | Error | Action |
 |-------|--------|
-| `createJiraIssue` fails | Log error on the item (status remains `pending`), continue with next item. Report at end. |
-| `createIssueLink` fails | Log error, continue. Common cause: target issue not found (check `issue_ref` resolution). |
-| Atlassian MCP not connected | Display: "Atlassian MCP server is not available. Connect it first." |
+| `[OP: create_issue]` fails | Log error on the item (status remains `pending`), continue with next item. Report at end. |
+| `[OP: create_link]` fails | Log error, continue. Common cause: target issue not found (check `issue_ref` resolution). |
+| No Jira-capable tool available | Display: "No Jira-capable tool available. Connect an Atlassian-compatible tool first." |
 | Remote issue deleted (drift) | WARN: "Issue `<ref>` deleted externally." Offer to reset status to pending for re-creation, or skip. |
 | Remote issue in unexpected state (drift) | WARN: "Issue `<ref>` in '`<state>`' — expected '`<expected>`'." Offer to skip or proceed. |
 | Drift check API failure | NON-BLOCKING: log "Could not verify `<ref>` — proceeding with manifest state." Continue execution. |

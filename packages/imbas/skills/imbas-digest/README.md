@@ -40,9 +40,9 @@ State Tracking + QA-Prompting 하이브리드 방식을 사용한다.
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `getJiraIssue` | Atlassian MCP | 이슈 읽기 (`imbas:read-issue` 경유) |
-| `addCommentToJiraIssue` | Atlassian MCP | digest 댓글 게시 |
-| `fetchAtlassian` | Atlassian MCP | 첨부 미디어 다운로드 |
+| `[OP: get_issue]` | Jira ([OP:]) | 이슈 읽기 (`imbas:read-issue` 경유) |
+| `[OP: add_comment]` | Jira ([OP:]) | digest 댓글 게시 |
+| `[OP: fetch_attachment]` | Jira ([OP:]) | 첨부 미디어 다운로드 |
 | `imbas:read-issue` | 내부 스킬 | 구조화된 이슈 컨텍스트 |
 | `imbas:fetch-media` | 내부 스킬 | 첨부 미디어 분석 |
 

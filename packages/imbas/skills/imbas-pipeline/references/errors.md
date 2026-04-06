@@ -38,10 +38,10 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 
 | Error | Action |
 |-------|--------|
-| Atlassian MCP not connected | STOP: "Atlassian MCP server is not available. Connect it first." |
-| createJiraIssue fails (single item) | Log error on item (status: "pending"), continue with next. Report at end. |
+| No Jira-capable tool available | STOP: "No Jira-capable tool detected. Register a Jira MCP server or plugin first." |
+| [OP: create_issue] fails (single item) | Log error on item (status: "pending"), continue with next. Report at end. |
 | Any Story status remains "pending" after batch | STOP: "Manifest stories partially failed. Devplan requires all issue_refs. Re-run: /imbas:imbas-manifest stories --run \<run-id\>" |
-| createIssueLink fails | Log error, continue. Note in final report. |
+| [OP: create_link] fails | Log error, continue. Note in final report. |
 | Epic creation fails | STOP: "Epic creation failed. Check Jira project settings." |
 
 ### Phase 3 — Devplan Errors
@@ -58,10 +58,10 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 
 | Error | Action |
 |-------|--------|
-| Atlassian MCP not connected | STOP: "Atlassian MCP server is not available." |
-| createJiraIssue fails (single item) | Log error on item, continue with next. Report at end. |
+| No Jira-capable tool available | STOP: "No Jira-capable tool detected. Register a Jira MCP server or plugin first." |
+| [OP: create_issue] fails (single item) | Log error on item, continue with next. Report at end. |
 | ID resolution fails (no issue_ref for reference) | Skip item, log: "Cannot resolve \<ID\> — parent not yet created." |
-| addCommentToJiraIssue fails | Log error, continue. Note in final report. |
+| [OP: add_comment] fails | Log error, continue. Note in final report. |
 | Partial failure after batch | NON-BLOCKING report: list failures + "/imbas:imbas-manifest devplan --run \<run-id\> to retry." |
 
 ---
@@ -124,7 +124,7 @@ These errors only occur in pipeline context (not in individual skills):
 | Gate auto-approval failed | Verification fields not all PASS | STOP: list specific failures with Story/item IDs |
 | --parent argument invalid | Not a valid Jira key, "new", or "none" | STOP: "Invalid --parent value. Use Epic key, 'new', or 'none'." |
 | --parent is unsupported issue type | Issue exists but is not Epic | STOP: "\<KEY\> is a \<type\>. --parent accepts Epic key, 'new', or 'none'." |
-| Story key not found (devplan mode) | getJiraIssue returns not found | STOP: "Issue \<KEY\> not found in Jira." |
+| Story key not found (devplan mode) | [OP: get_issue] returns not found | STOP: "Issue \<KEY\> not found in Jira." |
 | Story key is not a Story (devplan mode) | Issue type is not Story | STOP: "\<KEY\> is a \<type\>, not a Story." |
 | Mixed project keys in Story input | PROJ-42,OTHER-10 have different projects | STOP: "All Story keys must belong to the same project." |
 | --stop-at value invalid | Not one of: validate, split, manifest-stories, devplan | STOP: "Invalid --stop-at value." |

@@ -38,5 +38,5 @@ Subcommands:
 
 - [Subcommand Behaviors](./references/subcommands.md) — show, set-project, set-language, refresh-cache, clear-temp
 - [Init Workflow](./references/init-workflow.md) — Steps 1–6 of interactive initialization
-- [Tools Used](./references/tools.md) — imbas MCP tools, Atlassian MCP tools, agent spawn
+- [Tools Used](./references/tools.md) — imbas MCP tools, Jira operations ([OP:]), agent spawn
 - [Error Handling & State Transitions](./references/errors.md) — error table and state notes

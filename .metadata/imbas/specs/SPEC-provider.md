@@ -148,24 +148,25 @@ Step N — [Operation Name]
 | **status** | Only reads `.imbas/` state files |
 | **`imbas:fetch-media`** | Local file + scene-sieve (provider-agnostic) |
 
-### 4.4 Agent Tool Lists
+### 4.4 Agent Tool Lists (Semantic Operations)
 
-Agents don't branch. Their tool lists include both provider options, and the **skill prompt** controls which tools are actually invoked:
+Agents do not list provider-specific tools in their `tools:` frontmatter. Instead,
+skill workflows declare intent via `[OP:]` semantic notation, and the LLM resolves
+which tool to call at runtime based on available session tools.
 
 ```yaml
-# imbas-analyst tools (example)
+# imbas-analyst tools (v0.2.0)
 tools:
-  - Read, Grep, Glob
-  # Jira provider (used when config.provider == "jira")
-  - getConfluencePage
-  - searchConfluenceUsingCql
-  - getJiraIssue
-  - searchJiraIssuesUsingJql
-  # GitHub provider (used when config.provider == "github")
-  - Bash    # for gh CLI calls
+  - Read
+  - Grep
+  - Glob
+  - Bash
+# No Jira/GitHub tools listed — resolved at runtime via [OP:] notation
 ```
 
-The agent prompt includes a provider directive section that specifies which tools to use based on the provider context passed by the calling skill.
+This approach eliminates the need for provider-specific tool grants and supports
+any Jira-compatible tool (Atlassian Cloud MCP, on-premise MCP, custom plugins)
+without plugin configuration changes.
 
 ---
 

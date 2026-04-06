@@ -28,7 +28,7 @@
   │
   ▼
 [Step 1: 다운로드]
-  ├── Atlassian URL → fetchAtlassian MCP 도구로 바이너리 다운로드
+  ├── Atlassian URL → [OP: fetch_attachment]로 바이너리 다운로드
   └── 로컬 파일 → 그대로 사용
   │
   ▼

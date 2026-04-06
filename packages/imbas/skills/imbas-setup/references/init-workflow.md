@@ -1,6 +1,42 @@
 # Init Workflow
 
 ```
+Step 0 — Environment Health Check (non-blocking)
+  Check remote tool availability. Results are informational only —
+  init always proceeds to Step 1 regardless of outcome.
+  See: references/health-check.md for full procedure.
+
+  0-1. Atlassian MCP check
+    - Attempt to call atlassianUserInfo (or equivalent identity endpoint).
+    - On success → "✓ Atlassian connected (user: <displayName>)"
+    - On tool-not-found → "✗ Atlassian MCP — not connected"
+    - On auth/network error → "✗ Atlassian MCP — connection failed (<reason>)"
+
+  0-2. GitHub CLI check
+    - Run: which gh
+    - If not found → "✗ GitHub CLI — not installed"
+    - If found, run: gh auth status
+      - On success → "✓ GitHub CLI authenticated (user: <login>)"
+      - On failure → "△ GitHub CLI installed but not authenticated"
+
+  0-3. Result display
+    Show status summary, then:
+    - If all tools available → "All remote tools ready." → proceed to Step 1.
+    - If any tool missing →
+        "⚠ Remote ticket management requires at least one of the above.
+         Local-only workflows are fully supported without them."
+
+        Show numbered list of missing/failed items:
+          [1] Atlassian MCP — register in .mcp.json
+          [2] GitHub CLI (gh) — install via npm
+
+        Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"
+
+        - On skip → proceed to Step 1.
+        - On selection → execute auto-setup for each selected item
+          (see references/health-check.md § Auto-Setup Actions),
+          then proceed to Step 1.
+
 Step 1 — .imbas/ directory creation
   1. Check if .imbas/ exists at project root.
   2. If not, create:
@@ -11,7 +47,7 @@ Step 1 — .imbas/ directory creation
      *
 
 Step 2 — Interactive project key selection
-  1. Call Atlassian MCP: getVisibleJiraProjects
+  1. [OP: get_projects]
      → Returns list of projects with key, name, projectType.
   2. Present project list to user as numbered options.
   3. User selects a project (or enters a key manually).
@@ -58,11 +94,11 @@ Step 3 — config.json creation
 Step 4 — Cache population
   1. Create `.imbas/<KEY>/cache/` directory.
   2. Fetch issue types:
-     - Call Atlassian MCP: getJiraProjectIssueTypesMetadata(projectKey)
-     - For each issue type, call: getJiraIssueTypeMetaWithFields(issueTypeId)
+     - [OP: get_issue_types] project=<projectKey>
+     - For each issue type, call: [OP: get_issue_type_fields] issue_type_id=<issueTypeId>
      - Call cache_set(project_ref, "issue-types", <data>)
   3. Fetch link types:
-     - Call Atlassian MCP: getIssueLinkTypes
+     - [OP: get_link_types]
      - Call cache_set(project_ref, "link-types", <data>)
   4. Store project metadata:
      - Call cache_set(project_ref, "project-meta", <data>)

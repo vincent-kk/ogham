@@ -122,11 +122,12 @@ tools:
   - Grep          # 문서 내 패턴 검색
   - Glob          # 파일 탐색
   - Bash          # GitHub provider (gh CLI)
-  # Atlassian MCP
-  - getConfluencePage
-  - searchConfluenceUsingCql
-  - getJiraIssue
-  - searchJiraIssuesUsingJql
+  # Jira Operations ([OP:])
+  # v0.2.0: agent tools: frontmatter에 더 이상 포함되지 않음 — 런타임에 [OP:] 표기로 해석됨
+  - "[OP: get_confluence]"
+  - "[OP: search_confluence]"
+  - "[OP: get_issue]"
+  - "[OP: search_jql]"
 ```
 
 ### Permission Mode
@@ -264,9 +265,10 @@ tools:
   - Read
   - Grep
   - Glob
-  # Atlassian MCP (읽기 전용 — Jira 쓰기는 manifest 스킬에서 수행)
-  - searchJiraIssuesUsingJql
-  - getJiraIssue
+  # Jira Operations ([OP:]) — 읽기 전용, Jira 쓰기는 manifest 스킬에서 수행
+  # v0.2.0: agent tools: frontmatter에 더 이상 포함되지 않음 — 런타임에 [OP:] 표기로 해석됨
+  - "[OP: search_jql]"
+  - "[OP: get_issue]"
 ```
 
 ### Permission Mode
@@ -401,9 +403,10 @@ tools:
   # imbas MCP (AST 코드 분석)
   - ast_search
   - ast_analyze
-  # Atlassian MCP (읽기 전용 — Jira 쓰기는 manifest 스킬에서 수행)
-  - getJiraIssue
-  - searchJiraIssuesUsingJql
+  # Jira Operations ([OP:]) — 읽기 전용, Jira 쓰기는 manifest 스킬에서 수행
+  # v0.2.0: agent tools: frontmatter에 더 이상 포함되지 않음 — 런타임에 [OP:] 표기로 해석됨
+  - "[OP: get_issue]"
+  - "[OP: search_jql]"
 ```
 
 ### Permission Mode

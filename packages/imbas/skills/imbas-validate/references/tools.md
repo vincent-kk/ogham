@@ -11,12 +11,12 @@
 | `run_get` | Read current run state for precondition checks (declared-only) |
 | `run_transition` | start_phase (validate) → complete_phase (validate) with result |
 
-### Atlassian MCP Tools
+### Jira Operations ([OP:])
 
 | Tool | Usage |
 |------|-------|
-| `getConfluencePage` | Fetch Confluence page content when source is a URL |
-| `searchConfluenceUsingCql` | Resolve references to other Confluence pages |
+| `[OP: get_confluence]` | Fetch Confluence page content when source is a URL |
+| `[OP: search_confluence]` | Resolve references to other Confluence pages |
 
 ## Agent Spawn
 

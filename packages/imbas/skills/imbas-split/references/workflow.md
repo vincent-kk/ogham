@@ -13,7 +13,7 @@ Step 1 — Load Run & Verify Preconditions
 
 Step 2 — Epic Decision Flow
   - If --epic provided:
-    1. Call Atlassian MCP: getJiraIssue(epicKey) to verify existence.
+    1. [OP: get_issue] issue_ref=<epicKey> to verify existence.
     2. If found: store epic_ref in state.json via run_transition context.
     3. If not found: error: "Epic <KEY> not found in Jira."
   - If --epic NOT provided:
@@ -21,7 +21,7 @@ Step 2 — Epic Decision Flow
        Options:
        a) "Create new Epic" → Add Epic entry to stories-manifest.json
           (Epic will be created when manifest is executed)
-       b) "Use existing Epic" → User enters Epic key → verify with getJiraIssue
+       b) "Use existing Epic" → User enters Epic key → verify with [OP: get_issue]
        c) "No Epic" → Stories created without parent Epic
 
 Step 3 — imbas-planner Agent Spawn (Story Splitting)

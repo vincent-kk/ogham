@@ -12,7 +12,7 @@ Jira provider implementation for imbas. Uses Atlassian MCP server tools for all 
 
 ### Prerequisites
 
-- Atlassian MCP server configured and authenticated
+- A Jira-capable tool available in the session (Atlassian Cloud MCP, on-premise MCP, or custom plugin)
 - Jira project access (issue create, edit, transition)
 
 ---
@@ -32,6 +32,11 @@ Jira provider implementation for imbas. Uses Atlassian MCP server tools for all 
 ---
 
 ## 3. Tool Inventory
+
+> **Semantic Operations (v0.2.0)**: Skill workflows and agent prompts reference
+> Jira operations via `[OP:]` notation instead of concrete tool names. The LLM
+> resolves which tool to use at runtime. The table below maps provider operations
+> to their Jira tool implementations for reference.
 
 ### 3.1 Required â€” Core Workflow (8)
 
@@ -157,6 +162,10 @@ Note: Jira workflow may restrict transitions. If target transition unavailable â
 | imbas-planner | searchJiraIssuesUsingJql, getJiraIssue | (none) | Skill controls via prompt |
 | imbas-engineer | getJiraIssue, searchJiraIssuesUsingJql | (none) | Skill controls via prompt |
 | imbas-media | (none) | (none) | No Jira interaction |
+
+> **Note (v0.2.0)**: Agent `tools:` frontmatter no longer includes Atlassian MCP
+> tools. Agents interact with Jira through `[OP:]` semantic operations declared
+> in skill workflows. The LLM selects the appropriate tool at runtime.
 
 ---
 
