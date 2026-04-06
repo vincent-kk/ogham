@@ -1,8 +1,8 @@
 ---
 name: imbas-engineer
 description: >
-  Explores codebases and generates EARS-format Subtasks from approved Stories.
-  Detects cross-Story code overlaps to extract shared Tasks.
+  Explores codebases and generates EARS-format Subtasks from approved issues (Stories, Tasks, Bugs).
+  Detects cross-issue code overlaps to extract shared Tasks.
   Operates from a developer/architect perspective with deep code understanding.
 model: opus
 tools:
