@@ -59,6 +59,7 @@ export function createServer(): McpServer {
         project_ref: z.string(),
         source_file: z.string(),
         supplements: z.array(z.string()).optional(),
+        source_issue_ref: z.string().optional(),
       }),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },

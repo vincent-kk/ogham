@@ -27,7 +27,7 @@ export const StoryItemSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
-  type: z.literal('Story'),
+  type: z.string(),
   status: ManifestItemStatusSchema.default('pending'),
   issue_ref: z.string().nullable().default(null),
   verification: StoryVerificationSchema,

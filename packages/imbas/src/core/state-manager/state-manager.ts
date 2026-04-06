@@ -21,6 +21,7 @@ export function createRunState(params: {
   run_id: string;
   project_ref: string;
   source_file: string;
+  source_issue_ref?: string | null;
 }): RunState {
   return createInitialRunState(params);
 }

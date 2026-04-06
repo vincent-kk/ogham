@@ -135,14 +135,15 @@ Step 2 — Epic 결정
     - 생성 → 매니페스트에 Epic 추가 (manifest 실행 시 생성)
     - 기존 사용 → 키 입력
 
-Step 3 — imbas-planner 호출 (Story 분할)
+Step 3 — imbas-planner 호출 (Story/Task 분할)
   - Agent 호출: imbas-planner
-  - 입력: source.md + supplements/ + Epic 정보
+  - 입력: source.md + supplements/ + Epic 정보 + 원본 이슈 정보(source_issue_ref) + config.json의 이슈 타입 설정
   - 지시:
-    - INVEST 기준으로 Story 분할
-    - Story Description = User Story + AC (Given/When/Then or EARS)
-    - 각 Story에 원본 문서 근거 링크(섹션/인용) 명시
-  - 출력: Story 목록 (JSON)
+    - 분할되는 각 이슈의 내용과 성격(예: 사용자 가치 제공은 Story, 기술적 작업은 Task, 결함 수정은 Bug 등)을 분석하여, 환경 설정(config)에 정의된 사용 가능한 이슈 타입 중 가장 적절한 것을 선택. 원본 이슈의 타입을 맹목적으로 상속하지 말 것.
+    - INVEST 기준으로 이슈 분할
+    - Description = User Story/작업 목표 + AC (Given/When/Then or EARS)
+    - 각 이슈에 원본 문서 근거 링크(섹션/인용) 명시
+  - 출력: 이슈 목록 (JSON)
 
 Step 4 — 3→1→2 검증 (각 Story에 대해)
   [3] 근거 링크 확인
@@ -784,3 +785,4 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 - [SPEC-media.md](./SPEC-media.md) — `imbas:fetch-media` 상세
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — Jira 도구 매핑 (deprecated)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
+� 아키텍처

@@ -222,15 +222,6 @@ describe('StoriesManifestSchema', () => {
     const result = StoriesManifestSchema.safeParse(bad);
     expect(result.success).toBe(false);
   });
-
-  it('rejects story with invalid type', () => {
-    const bad = {
-      ...validManifest,
-      stories: [{ ...validManifest.stories[0], type: 'Epic' }],
-    };
-    const result = StoriesManifestSchema.safeParse(bad);
-    expect(result.success).toBe(false);
-  });
 });
 
 // --- DevplanManifestSchema ---

@@ -15,6 +15,7 @@ export interface RunCreateInput {
   project_ref: string;
   source_file: string;
   supplements?: string[];
+  source_issue_ref?: string;
 }
 
 export async function handleRunCreate(input: RunCreateInput) {
@@ -48,6 +49,7 @@ export async function handleRunCreate(input: RunCreateInput) {
     run_id,
     project_ref: input.project_ref,
     source_file: input.source_file,
+    source_issue_ref: input.source_issue_ref,
   });
   await saveRunState(run_dir, state);
 

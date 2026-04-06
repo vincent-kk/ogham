@@ -67,6 +67,7 @@ export const RunStateSchema = z.object({
   run_id: z.string(),
   project_ref: z.string(),
   epic_ref: z.string().nullable().default(null),
+  source_issue_ref: z.string().nullable().default(null),
   source_file: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
@@ -128,12 +129,14 @@ export function createInitialRunState(params: {
   run_id: string;
   project_ref: string;
   source_file: string;
+  source_issue_ref?: string | null;
 }): RunState {
   const now = new Date().toISOString();
   return {
     run_id: params.run_id,
     project_ref: params.project_ref,
     epic_ref: null,
+    source_issue_ref: params.source_issue_ref ?? null,
     source_file: params.source_file,
     created_at: now,
     updated_at: now,

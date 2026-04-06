@@ -31,14 +31,16 @@ Step 3 — imbas-planner Agent Spawn (Story Splitting)
     - source.md (full planning document)
     - supplements/*.md (all supplement files)
     - Epic information (key or "new Epic" marker)
-    - config.json language settings (for Story title/description language)
+    - Source Issue information (if state.source_issue_ref is present)
+    - config.json (including available issue types via `config.jira.issue_types`)
   - Agent instructions:
-    "Split the planning document into INVEST-compliant Jira Stories.
-     For each Story:
+    "Split the planning document into INVEST-compliant Jira issues.
+     For each issue:
+     - Determine type: Select the most appropriate issue type based on the content (e.g., use 'Story' for user-facing features, 'Task' for technical/chore work, 'Bug' for defects). Do NOT blindly inherit the source issue type. Choose from the available issue types provided in the config.
      - Title: concise summary (in config.language.issue_content language)
      - Description: User Story format + Acceptance Criteria (Given/When/Then or EARS)
      - Anchor link: explicit reference to source document section/quote
-     - Each Story must be Independent, Negotiable, Valuable, Estimable, Small, Testable
+     - Each issue must be Independent, Negotiable, Valuable, Estimable, Small, Testable
      Output: JSON array of Story objects."
   - Agent returns: Story list as JSON
 
@@ -103,6 +105,7 @@ Step 6 — stories-manifest.json Generation
      - Stories with any verification field not PASS (flagged for review)
   2. Compile links array:
      - Split links ("is split into", "split from")
+     - Source split links: If state.source_issue_ref is present, add "split from" link from new issues to the source_issue_ref, and "split into" link from source_issue_ref to new issues (or vice versa depending on Jira setup).
      - Umbrella links ("relates to")
      - Dependency links:
        - Detect Story-to-Story execution dependencies (e.g., API before UI)
