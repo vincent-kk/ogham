@@ -50,7 +50,7 @@ All remote tools ready.
 ⚠ Remote ticket management requires at least one of the above.
   Local-only workflows are fully supported without them.
 
-  [1] Atlassian MCP — register in .mcp.json
+  [1] Atlassian MCP — register in .mcp.json (scope selection)
   [2] GitHub CLI (gh) — install via npm
 
 Set up now? Enter numbers (e.g. 1,2) or [skip]:
@@ -60,7 +60,10 @@ Set up now? Enter numbers (e.g. 1,2) or [skip]:
 
 ### register-atlassian-mcp
 
-Add Atlassian MCP server entry to the project's `.mcp.json`:
+Add Atlassian MCP server entry to a `.mcp.json` file.
+See [MCP Config Scopes](./mcp-config-scopes.md) for scope details.
+
+Server entry:
 
 ```json
 {
@@ -74,12 +77,25 @@ Add Atlassian MCP server entry to the project's `.mcp.json`:
 ```
 
 Steps:
-1. Read existing `.mcp.json` (or create if absent).
-2. Merge `atlassian` key into `mcpServers`.
-3. Write updated `.mcp.json`.
-4. Display: "Atlassian MCP registered in .mcp.json."
-5. Display: "⚠ Restart Claude Code or reload MCP servers to activate."
-6. Display: "On first use, Atlassian will prompt for OAuth authentication in your browser."
+1. Ask user to select scope:
+   ```
+   Where should the Atlassian MCP server be registered?
+     [1] project — .mcp.json (team-shared, git-tracked)
+     [2] user    — ~/.mcp.json (all projects, personal)
+     [3] local   — .mcp.json.local (this project only, gitignored)
+   Select [1]:
+   ```
+   Default: `project` (most common for team tooling).
+2. Resolve target file path:
+   - `project` → `<cwd>/.mcp.json`
+   - `user` → `~/.mcp.json`
+   - `local` → `<cwd>/.mcp.json.local`
+3. Read existing target file (or create if absent).
+4. Merge `atlassian` key into `mcpServers`.
+5. Write updated file.
+6. Display: "Atlassian MCP registered in `<target-path>`."
+7. Display: "⚠ Restart Claude Code or reload MCP servers to activate."
+8. Display: "On first use, Atlassian will prompt for OAuth authentication in your browser."
 
 ### install-gh
 

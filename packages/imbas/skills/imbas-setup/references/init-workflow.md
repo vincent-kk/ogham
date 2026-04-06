@@ -35,7 +35,7 @@ Step 0 — Environment Health Check (non-blocking)
        Local-only workflows are fully supported without them."
 
       Show numbered list of missing/failed items:
-        [1] Atlassian MCP — register in .mcp.json
+        [1] Atlassian MCP — register in .mcp.json (scope selection)
         [2] GitHub CLI (gh) — install via npm
 
       Prompt: "Set up now? Enter numbers (e.g. 1,2) or [skip]:"

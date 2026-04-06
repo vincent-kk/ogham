@@ -70,5 +70,6 @@ imbas를 사용하기 위한 최초 설정을 담당한다.
 - `references/init-workflow.md` — 초기화 워크플로우 상세
 - `references/subcommands.md` — 서브커맨드별 동작
 - `references/health-check.md` — 환경 헬스 체크 절차 및 자동 설정
+- `references/mcp-config-scopes.md` — MCP 설정 파일 scope 체계 (user/project/local)
 - `references/errors.md` — 에러 처리
 - `references/tools.md` — 사용 도구 상세

@@ -43,4 +43,5 @@ Subcommands:
 - [Init Workflow](./references/init-workflow.md) — Steps 0–7 of interactive initialization (provider-aware)
 - [Health Check](./references/health-check.md) — Step 0 remote tool checks, auto-setup actions, output format
 - [Tools Used](./references/tools.md) — imbas MCP tools, Jira operations ([OP:]), health check tools
+- [MCP Config Scopes](./references/mcp-config-scopes.md) — user / project / local scope hierarchy and file locations
 - [Error Handling & State Transitions](./references/errors.md) — error table and state notes
