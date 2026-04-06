@@ -131,14 +131,13 @@ shall process all notifications within 5 minutes without dropping any.
 ```
 
 ---
-
 ## Size Check
 
 Evaluate each Story after writing:
 
 | # | Criterion | Action if Failed |
 |---|-----------|-----------------|
-| 1 | Expected Subtask count in 3-8 range | > 8 → horizontal split |
+| 1 | Functionally complete & E2E testable on its own branch | Split only if multiple unrelated E2E flows are combined (Do NOT split arbitrarily based on Subtask count) |
 | 2 | Description sufficient for decomposition without questions | Refine AC or add Context |
 | 3 | Can start without waiting for another Story | Redefine scope or document dependency |
 | 4 | Single domain concern | Split into separate Stories per domain |
@@ -149,10 +148,12 @@ Criteria 1 or 4 failure → MUST split horizontally. Criteria 2 or 3 → refine 
 
 ## Horizontal Split
 
-1. **Choose axis**: by user action, data scope, user persona, or acceptance criteria
-2. **Create new Stories**: each with own User Story/AC/Context, must independently pass INVEST + size check
-3. **Link**: original → status `imbas-split`; new Stories → `split_from` original ID; original → `split_into` new IDs
-4. **Re-validate**: all new Stories through INVEST + size check; split again recursively if needed
+Break down a Story that is too broad into smaller, peer-level Stories.
+
+1. **Rule**: Every resulting Story must remain independently testable at the E2E level. If splitting breaks testability, stop splitting and keep it as a single Story (even if it has many Subtasks).
+2. **Create new Stories**: each with own User Story/AC/Context, must independently pass INVEST + size check.
+3. **Link**: original → status `imbas-split`; new Stories → `split_from` original ID; original → `split_into` new IDs.
+4. **Re-validate**: all new Stories through INVEST + size check; split again recursively if needed.
 
 When splitting creates many related Stories, group under an **Epic** (umbrella pattern).
 
