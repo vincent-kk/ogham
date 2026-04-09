@@ -2,6 +2,7 @@
 name: filid-update
 user_invocable: false
 description: "[filid:filid-update] Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs."
+argument-hint: "[path] [--force] [--scan-only] [--no-sync] [--auto-approve]"
 version: "1.0.0"
 complexity: complex
 plugin: filid

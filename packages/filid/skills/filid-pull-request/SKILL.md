@@ -2,6 +2,7 @@
 name: filid-pull-request
 user_invocable: true
 description: "[filid:filid-pull-request] Sync INTENT.md and DETAIL.md via update, then automatically generate a structured GitHub PR with Architecture, Code, and Test sections from the current branch changes."
+argument-hint: "[--base REF] [--skip-update] [--draft] [--title TITLE]"
 version: "1.1.0"
 complexity: medium
 plugin: filid

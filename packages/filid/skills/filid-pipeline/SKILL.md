@@ -2,6 +2,7 @@
 name: filid-pipeline
 user_invocable: true
 description: "[filid:filid-pipeline] Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support."
+argument-hint: "[--from STAGE] [--base REF] [--draft] [--skip-update] [--force] [--no-structure-check] [--title TITLE]"
 version: "1.0.0"
 complexity: medium
 plugin: filid

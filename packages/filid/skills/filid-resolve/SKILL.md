@@ -2,6 +2,7 @@
 name: filid-resolve
 user_invocable: true
 description: "[filid:filid-resolve] Resolve review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing."
+argument-hint: "[--auto]"
 version: "2.0.0"
 complexity: medium
 plugin: filid

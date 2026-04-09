@@ -2,6 +2,7 @@
 name: filid-scan
 user_invocable: true
 description: "[filid:filid-scan] Scan the entire project for FCA-AI rule violations across INTENT.md documents, organ boundaries, and test file structure, then produce a prioritized report with optional --fix auto-remediation."
+argument-hint: "[path] [--fix]"
 version: "1.0.0"
 complexity: medium
 plugin: filid

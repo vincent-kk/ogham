@@ -2,6 +2,7 @@
 name: filid-sync
 user_invocable: true
 description: "[filid:filid-sync] Detect deviations between the current project structure and fractal principles, then apply targeted corrections with severity filtering, dry-run preview, and auto-approve support for CI pipelines."
+argument-hint: "[path] [--severity critical|high|medium|low] [--dry-run] [--auto-approve]"
 version: "1.0.0"
 complexity: complex
 plugin: filid

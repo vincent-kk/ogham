@@ -2,6 +2,7 @@
 name: filid-restructure
 user_invocable: false
 description: "[filid:filid-restructure] Analyze project directory structure and apply fractal principle restructuring through a proposal, user approval, execution, and validation workflow with optional dry-run and auto-approve modes."
+argument-hint: "[path] [--dry-run] [--auto-approve]"
 version: "1.0.0"
 complexity: complex
 plugin: filid

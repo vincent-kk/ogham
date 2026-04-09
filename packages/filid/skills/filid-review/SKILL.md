@@ -2,6 +2,7 @@
 name: filid-review
 user_invocable: true
 description: "[filid:filid-review] Run multi-persona consensus code review governance across 4 phases: structure check, committee election, technical verification, and chairperson-led deliberation with up to 5 rounds producing fix requests."
+argument-hint: "[--scope branch|pr|commit] [--base REF] [--force] [--verbose] [--no-structure-check]"
 version: "1.0.0"
 complexity: complex
 plugin: filid

@@ -2,6 +2,7 @@
 name: filid-structure-review
 user_invocable: true
 description: "[filid:filid-structure-review] Run the 6-stage PR verification pipeline that validates structure, document compliance, test rules, code metrics, and dependency acyclicity in parallel before emitting a consolidated pass or fail verdict."
+argument-hint: "[--stage=1-6] [--verbose]"
 version: "1.0.0"
 complexity: complex
 plugin: filid

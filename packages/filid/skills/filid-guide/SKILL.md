@@ -2,6 +2,7 @@
 name: filid-guide
 user_invocable: true
 description: "[filid:filid-guide] Scan the project hierarchy and query all active rules to generate a human-readable fractal structure guide with node classifications and new-module placement guidance for teams."
+argument-hint: "[path]"
 version: "1.0.0"
 complexity: simple
 plugin: filid

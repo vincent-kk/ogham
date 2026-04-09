@@ -2,6 +2,7 @@
 name: filid-promote
 user_invocable: false
 description: "[filid:filid-promote] Promote stable test.ts files (unchanged for at least `--days=N` days, default 90) into parameterized spec.ts files satisfying the FCA-AI 3+12 rule of maximum 15 test cases."
+argument-hint: "[path] [--days=N]"
 version: "1.0.0"
 complexity: medium
 plugin: filid

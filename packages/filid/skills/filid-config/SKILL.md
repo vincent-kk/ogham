@@ -2,6 +2,7 @@
 name: filid-config
 user_invocable: true
 description: "[filid:filid-config] View and modify .filid/config.json interactively using show, set, and reset subcommands with dot-notation paths for language, rule enablement, and severity settings."
+argument-hint: "[show | set KEY VALUE | reset [--full]]"
 version: "1.0.0"
 complexity: simple
 plugin: filid

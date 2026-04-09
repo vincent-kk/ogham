@@ -2,6 +2,7 @@
 name: filid-ast-fallback
 user_invocable: false
 description: "[filid:filid-ast-fallback] LLM-based AST pattern search and replace fallback using Grep, Read, and Edit when the @ast-grep/napi native module is unavailable. Supports 17 languages with meta-variable approximation."
+argument-hint: "<pattern> [--language LANG] [--path DIR] [--replace REPLACEMENT]"
 version: "1.0.0"
 complexity: simple
 plugin: filid
