@@ -93,8 +93,8 @@ export function runIndexInvalidator(
   }
 
   // Extract affected node path
-  // maencof_update/delete/move: path exists in tool_input
-  // maencof_create: no path in tool_input → extract from tool_response
+  // `update`/`delete`/`move`: path exists in tool_input
+  // `create`: no path in tool_input → extract from tool_response
   const affectedPath =
     (input.tool_input?.path as string) ??
     (input.tool_input?.file_path as string) ??
@@ -106,8 +106,8 @@ export function runIndexInvalidator(
     appendStaleNode(cwd, affectedPath);
   }
 
-  // maencof_move: also track target path
-  if (toolName === 'maencof_move') {
+  // `move`: also track target path
+  if (toolName === 'move') {
     const targetPath = extractPathFromResponse(input.tool_response);
     if (targetPath && targetPath !== affectedPath) {
       appendStaleNode(cwd, targetPath);
@@ -177,7 +177,7 @@ function incrementUsageStat(cwd: string, toolName: string): void {
 
 /**
  * Extract MaencofCrudResult.path from MCP tool_response.
- * For tools like maencof_create where path is not in tool_input.
+ * For tools like create where path is not in tool_input.
  *
  * Handles two response formats defensively:
  * - Format 1 (Flat): Claude Code strips MCP wrapper { path: string, ... }

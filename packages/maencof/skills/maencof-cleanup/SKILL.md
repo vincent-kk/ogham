@@ -39,9 +39,9 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 ### document mode — Vault Document Deletion
 
 1. **Identify target** — resolve from path, keyword search (`kg_search`), or ask user
-2. **Preview** — read target with `maencof_read`, show Frontmatter summary
+2. **Preview** — read target with `read`, show Frontmatter summary
 3. **Safety checks** — L1 (01_Core/) deletion is forbidden; backlink check via `kg_navigate`
-4. **Execute** — `maencof_delete` after user confirmation (or `--force`)
+4. **Execute** — `delete` after user confirmation (or `--force`)
 5. **Report** — show deleted path and recommend `/maencof:maencof-rebuild`
 
 > See **reference.md § Document Mode** for detailed safety check flows and report format.
@@ -51,7 +51,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 1. **Scan** `05_Context/buffer/` for documents older than `--max-age` days (default: 30)
 2. **List** stale buffer items with creation date, tags, and connection count
 3. **Recommend action** per item: promote (to L2/L3 with sub-layer), archive, or delete
-4. **Execute** after user confirmation — uses `maencof_move` (promote) or `maencof_delete` (delete)
+4. **Execute** after user confirmation — uses `move` (promote) or `delete` (delete)
 
 ### claudemd mode — CLAUDE.md Section Management
 
@@ -64,11 +64,11 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 | Tool | Purpose |
 |------|---------|
-| `maencof_delete` | Delete vault document (document mode) |
-| `maencof_read` | Preview document before deletion (document mode) |
+| `delete` | Delete vault document (document mode) |
+| `read` | Preview document before deletion (document mode) |
 | `kg_search` | Keyword search to identify deletion target (document mode) |
 | `kg_navigate` | Check inbound links / backlink warnings (document mode) |
-| `maencof_move` | Promote buffer items to target layer (buffer-cleanup mode) |
+| `move` | Promote buffer items to target layer (buffer-cleanup mode) |
 | `claudemd_read` | Read CLAUDE.md maencof section (claudemd mode) |
 | `claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode) |
 

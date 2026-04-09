@@ -1,6 +1,6 @@
 /**
  * @file maencof-read.ts
- * @description maencof_read 도구 핸들러 — 문서 읽기 + 관련 컨텍스트
+ * @description `read` 도구 핸들러 — 문서 읽기 + 관련 컨텍스트
  */
 import { readFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
@@ -14,7 +14,7 @@ import { isLayer1Path } from '../../../types/layer.js';
 import type { MaencofReadInput, MaencofReadResult } from '../../../types/mcp.js';
 
 /**
- * maencof_read 핸들러
+ * `read` 핸들러
  */
 export async function handleMaencofRead(
   vaultPath: string,

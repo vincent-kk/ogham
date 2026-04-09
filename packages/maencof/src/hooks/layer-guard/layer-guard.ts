@@ -48,7 +48,7 @@ export function runLayerGuard(input: PreToolUseInput): PreToolUseResult {
         ``,
         `Layer 1 requires structured verification. To modify:`,
         `  1. Invoke identity-guardian agent for impact analysis + approval recommendation`,
-        `  2. Or use maencof_update with change_reason + justification (min 20 chars) + confirm_l1: true`,
+        `  2. Or use update with change_reason + justification (min 20 chars) + confirm_l1: true`,
         `  Valid change_reason: identity_evolution, error_correction, info_update, consolidation, reinterpretation`,
       ].join('\n'),
     };

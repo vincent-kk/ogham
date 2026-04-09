@@ -1,6 +1,6 @@
 /**
  * @file maencof-delete.ts
- * @description maencof_delete 도구 핸들러 — 문서 삭제 (Layer 1 삭제 금지, backlink 경고)
+ * @description `delete` 도구 핸들러 — 문서 삭제 (Layer 1 삭제 금지, backlink 경고)
  */
 import { unlink } from 'node:fs/promises';
 import { readFile, stat } from 'node:fs/promises';
@@ -15,7 +15,7 @@ import type { MaencofCrudResult, MaencofDeleteInput } from '../../../types/mcp.j
 import { getBacklinks, removeBacklinks } from '../../shared/shared.js';
 
 /**
- * maencof_delete 핸들러
+ * `delete` 핸들러
  * Layer 1 문서 삭제는 항상 금지.
  */
 export async function handleMaencofDelete(

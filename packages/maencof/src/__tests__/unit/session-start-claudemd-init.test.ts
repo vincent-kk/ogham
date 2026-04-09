@@ -67,8 +67,8 @@ describe('session-start CLAUDE.md 초기화', () => {
     expect(content).toContain('## Required Rules (MUST)');
     expect(content).toContain('## Forbidden Rules (FORBIDDEN)');
     expect(content).toContain('MUST use `kg_search`');
-    expect(content).toContain('MUST use `maencof_read`');
-    expect(content).toContain('MUST use `maencof_create`');
+    expect(content).toContain('MUST use `read`');
+    expect(content).toContain('MUST use `create`');
     expect(content).toContain('FORBIDDEN:');
   });
 
@@ -80,7 +80,7 @@ describe('session-start CLAUDE.md 초기화', () => {
     expect(content).toContain('| Search vault documents |');
     expect(content).toContain('| Read vault documents |');
     expect(content).toContain('kg_search');
-    expect(content).toContain('maencof_read');
+    expect(content).toContain('read');
   });
 
   it('기존 CLAUDE.md에 maencof 섹션이 없으면 추가한다', () => {

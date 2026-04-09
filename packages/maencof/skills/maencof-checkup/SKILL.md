@@ -43,7 +43,7 @@ orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontm
 
 ### Step 1 — Run Diagnostics
 
-Delegate to the checkup agent. The agent runs `kg_status`, `kg_navigate`, `maencof_read` across all vault documents to perform 6 diagnostic checks.
+Delegate to the checkup agent. The agent runs `kg_status`, `kg_navigate`, `read` across all vault documents to perform 6 diagnostic checks.
 
 ### Step 2 — Generate Report
 
@@ -55,7 +55,7 @@ Display summary (Errors / Warnings / Info counts, auto-fixable count) and detail
 
 After user confirmation, execute AutoFixAction:
 
-- Fill missing Frontmatter fields (`maencof_update`)
+- Fill missing Frontmatter fields (`update`)
 - Rebuild stale index (`/maencof:maencof-rebuild`)
 - **L1 (01_Core/) exception**: auto-fix forbidden — guide to `/maencof:maencof-setup --step 4`
 
@@ -64,8 +64,8 @@ After user confirmation, execute AutoFixAction:
 | Tool | Purpose |
 |------|---------|
 | `kg_status` | Index status, stale/orphan nodes (D1, D2) |
-| `maencof_read` | Frontmatter validation (D4, D6) |
-| `maencof_update` | Auto-fix Frontmatter (D4, D6) |
+| `read` | Frontmatter validation (D4, D6) |
+| `update` | Auto-fix Frontmatter (D4, D6) |
 | `kg_navigate` | Verify link validity, detect broken links (D3) |
 | `kg_search` | Tag-based search for duplicate detection (D5) |
 

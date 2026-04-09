@@ -1,6 +1,6 @@
 /**
  * @file maencof-create.ts
- * @description maencof_create 도구 핸들러 — 새 기억 문서 생성
+ * @description `create` 도구 핸들러 — 새 기억 문서 생성
  */
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -117,7 +117,7 @@ async function updateBacklinkIndex(
 }
 
 /**
- * maencof_create 핸들러
+ * `create` 핸들러
  *
  * @param vaultPath - vault 루트 절대 경로
  * @param input - 도구 입력

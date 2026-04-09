@@ -76,7 +76,7 @@ Check if a changelog file for today's date already exists.
 
 ### Step 4 — Write Changelog
 
-Write the changelog using the `maencof_create` tool or direct file creation.
+Write the changelog using the `create` tool or direct file creation.
 
 **File format:**
 
@@ -165,6 +165,6 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 
 | Tool | Type | Purpose |
 |------|------|---------|
-| `maencof_create` | MCP | Create new vault document (alternative to direct file write) |
-| `maencof_read` | MCP | Read existing vault document |
+| `create` | MCP | Create new vault document (alternative to direct file write) |
+| `read` | MCP | Read existing vault document |
 | `Bash` | Native | Run git commands (status, add, commit) |

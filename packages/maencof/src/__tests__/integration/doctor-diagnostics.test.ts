@@ -54,7 +54,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
         path: file.relativePath,
         message: `Frontmatter 누락: ${file.relativePath}`,
         autoFix: {
-          description: 'maencof_update로 Frontmatter 추가',
+          description: 'update로 Frontmatter 추가',
           fixable: true,
         },
       });
@@ -68,7 +68,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
         path: file.relativePath,
         message: `만료된 문서: ${file.relativePath} (만료일: ${fm.expires})`,
         autoFix: {
-          description: 'maencof_delete로 만료 문서 삭제',
+          description: 'delete로 만료 문서 삭제',
           fixable: true,
         },
       });
@@ -113,7 +113,7 @@ async function runDiagnostics(vaultPath: string): Promise<DiagnosticResult> {
             path: file.relativePath,
             message: `Layer 불일치: 파일은 ${dirName}에 있지만 frontmatter는 Layer ${nodeResult.node.layer}`,
             autoFix: {
-              description: 'maencof_move로 올바른 Layer로 이동',
+              description: 'move로 올바른 Layer로 이동',
               fixable: true,
             },
           });

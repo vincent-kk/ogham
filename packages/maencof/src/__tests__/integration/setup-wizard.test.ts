@@ -7,7 +7,7 @@
  * 2. vault-path — vault 경로 설정
  * 3. core-identity-interview — Core Identity 인터뷰
  * 4. companion-identity — AI 동반자 생성
- * 5. scaffold-tree — 디렉토리 구조 생성 + maencof_create로 핵심 문서 생성
+ * 5. scaffold-tree — 디렉토리 구조 생성 + create로 핵심 문서 생성
  * 6. index-build — kg_build로 인덱스 빌드
  * 7. guide — CLAUDE.md 통합
  */
@@ -187,7 +187,7 @@ vault 경로: ${vault}
 ### 주요 명령
 - \`kg_build\` — 인덱스 빌드
 - \`kg_search\` — 지식 그래프 검색
-- \`maencof_create\` — 새 문서 생성
+- \`create\` — 새 문서 생성
 
 ### Layer 구조
 - Layer 1 (01_Core): 핵심 정체성

@@ -10,8 +10,8 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof_t__maencof_read
-  - mcp__plugin_maencof_t__maencof_update
+  - mcp__plugin_maencof_t__read
+  - mcp__plugin_maencof_t__update
   - mcp__plugin_maencof_t__kg_status
   - mcp__plugin_maencof_t__kg_navigate
   - mcp__plugin_maencof_t__kg_search
@@ -63,7 +63,7 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
            and the Frontmatter layer field
 Severity: error
-Auto-fixable: update Frontmatter layer field to match path (maencof_update)
+Auto-fixable: update Frontmatter layer field to match path (`update`)
 ```
 
 ### D5. Duplicate Document (duplicate)
@@ -90,7 +90,7 @@ Auto-fixable:
 ```
 1. kg_status → check D2 (stale), D1 (orphan)
 2. Glob "**/*.md" → collect full file list
-3. maencof_read each file → check D6 (Frontmatter), D4 (Layer violation)
+3. `read` each file → check D6 (Frontmatter), D4 (Layer violation)
 4. Read backlink-index.json → check D3 (broken links)
 5. Tag similarity analysis → detect D5 (duplicates)
 6. Generate DiagnosticResult
@@ -121,7 +121,7 @@ Auto-fixable:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| All Layers | allowed | restricted | read, update (Frontmatter only) | delete, move, bulk-modify |
+| All Layers | allowed | restricted | `read`, `update` (Frontmatter only) | `delete`, `move`, bulk-modify |
 
 Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requires confirmation)
 
@@ -133,7 +133,7 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 - **Bulk modification forbidden** — auto-fixes are applied file by file
 - **D3 (broken link) auto-fix forbidden** — requires manual review
 - **D5 (duplicate) auto-merge forbidden** — decision belongs to the user
-- **Layer 1 (01_Core/) auto-fix via maencof_update is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually
+- **Layer 1 (01_Core/) auto-fix via `update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually
 
 ---
 

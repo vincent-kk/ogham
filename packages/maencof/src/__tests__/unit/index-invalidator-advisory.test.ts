@@ -5,7 +5,7 @@
  * 테스트 대상:
  * - runIndexInvalidator: advisory message 반환 로직
  * - readStaleNodeCount / readGraphNodeCount: graceful fallback
- * - maencof_move 듀얼 패스 추적
+ * - move 듀얼 패스 추적
  */
 import {
   existsSync,
@@ -153,7 +153,7 @@ describe('runIndexInvalidator advisory message', () => {
     mkdirSync(nonVaultDir, { recursive: true });
     try {
       const result = runIndexInvalidator({
-        tool_name: 'maencof_create',
+        tool_name: 'create',
         cwd: nonVaultDir,
       });
       expect(result.continue).toBe(true);
@@ -167,7 +167,7 @@ describe('runIndexInvalidator advisory message', () => {
     writeGraphJson(vaultDir, 100);
     // stale-nodes.json 없음
     const result = runIndexInvalidator({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       cwd: vaultDir,
       tool_response: { path: '02_Derived/note.md' },
     });
@@ -184,7 +184,7 @@ describe('runIndexInvalidator advisory message', () => {
     );
     writeGraphJson(vaultDir, 50);
     const result = runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/extra.md' },
       cwd: vaultDir,
     });
@@ -202,7 +202,7 @@ describe('runIndexInvalidator advisory message', () => {
     );
     writeGraphJson(vaultDir, 100);
     const result = runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/extra.md' },
       cwd: vaultDir,
     });
@@ -219,7 +219,7 @@ describe('runIndexInvalidator advisory message', () => {
     );
     writeGraphJson(vaultDir, 50);
     const result = runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/extra.md' },
       cwd: vaultDir,
     });
@@ -231,7 +231,7 @@ describe('runIndexInvalidator advisory message', () => {
     writeGraphJson(vaultDir, 50);
     // stale-nodes.json 없음 — appendStaleNode가 새로 생성
     const result = runIndexInvalidator({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       cwd: vaultDir,
       tool_response: { path: '02_Derived/new.md' },
     });
@@ -244,7 +244,7 @@ describe('runIndexInvalidator advisory message', () => {
     writeStaleNodes(vaultDir, ['02_Derived/a.md']);
     // index.json 없음 → totalCount=0 → percent=100 > 10 → rebuild advisory
     const result = runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/b.md' },
       cwd: vaultDir,
     });
@@ -252,13 +252,13 @@ describe('runIndexInvalidator advisory message', () => {
     expect(result.hookMessage).toBeDefined();
   });
 
-  it('maencof_move가 source와 target 양쪽을 stale로 추적한다', () => {
+  it('move가 source와 target 양쪽을 stale로 추적한다', () => {
     writeGraphJson(vaultDir, 100);
     const sourcePath = '02_Derived/old.md';
     const targetPath = '03_External/new.md';
 
     runIndexInvalidator({
-      tool_name: 'maencof_move',
+      tool_name: 'move',
       tool_input: { path: sourcePath },
       tool_response: { path: targetPath },
       cwd: vaultDir,

@@ -64,17 +64,17 @@ export function writeResult(result: unknown): void {
  * Set of maencof MCP tool names.
  * SYNC: Must stay in sync with hooks/hooks.json PostToolUse.matcher
  *
- * Excluded tools: maencof_read, kg_search, kg_navigate, kg_context, kg_status have no
+ * Excluded tools: read, kg_search, kg_navigate, kg_context, kg_status have no
  * write side effects. kg_build writes to .maencof/ (index rebuild) but is excluded because
  * it clears stale-nodes on completion — tracking it here would be contradictory.
  * hooks.json PostToolUse.matcher must contain the same set.
  */
 export const MAENCOF_MCP_TOOLS = new Set([
-  'maencof_create',
-  'maencof_update',
-  'maencof_delete',
-  'maencof_move',
-  'maencof_capture_insight',
+  'create',
+  'update',
+  'delete',
+  'move',
+  'capture_insight',
   'boundary_create',
   'claudemd_merge',
   'claudemd_remove',

@@ -142,7 +142,7 @@ export function buildMetaPrompt(config: InsightConfig): string {
   const criteria =
     SENSITIVITY_CRITERIA[config.sensitivity] ?? SENSITIVITY_CRITERIA.medium;
   return `<auto-insight enabled="${config.enabled}" sensitivity="${config.sensitivity}" max="${config.max_captures_per_session}">
-Detect user insights. Call maencof_capture_insight on detection. No confirmation.
+Detect user insights. Call capture_insight on detection. No confirmation.
 Notify: 💡 Insight recorded to L{layer}: "{title}"
 
 ${config.sensitivity}: ${criteria}

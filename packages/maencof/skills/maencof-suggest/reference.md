@@ -59,7 +59,7 @@ Enter a number to view document details, or 'q' to finish.
 
 After reviewing suggestions:
 
-- If user selects a suggestion → read the document with `maencof_read` and show content
+- If user selects a suggestion → read the document with `read` and show content
 - Guide user to manually add links in the source document if desired
 - Suggest running `/maencof:maencof-explore {path}` for deeper exploration of a specific result
 

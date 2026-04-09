@@ -188,16 +188,16 @@ describe('appendDailynoteEntry', () => {
 });
 
 describe('buildToolDescription', () => {
-  it('maencof_create를 설명한다', () => {
-    const desc = buildToolDescription('maencof_create', {
+  it('create를 설명한다', () => {
+    const desc = buildToolDescription('create', {
       layer: 2,
       tags: ['ts', 'design'],
     });
     expect(desc).toBe('Document created (L2, tags: ts, design)');
   });
 
-  it('maencof_move를 설명한다', () => {
-    const desc = buildToolDescription('maencof_move', { target_layer: 3 });
+  it('move를 설명한다', () => {
+    const desc = buildToolDescription('move', { target_layer: 3 });
     expect(desc).toBe('Document moved (→ L3)');
   });
 

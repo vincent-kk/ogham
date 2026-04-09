@@ -21,7 +21,7 @@ Delegated to the checkup agent:
 
 - `kg_status` → detect D1 (orphan), D2 (stale)
 - `Glob "**/*.md"` → collect full file list
-- `maencof_read` per file → verify D6 (Frontmatter), D4 (Layer violation)
+- `read` per file → verify D6 (Frontmatter), D4 (Layer violation)
 - `kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
 - Tag similarity analysis → detect D5 (duplicate)
 
@@ -55,12 +55,12 @@ Execute AutoFixAction after user confirmation:
 
 | Action | Tool | Condition |
 |--------|------|-----------|
-| Fill missing Frontmatter fields | `maencof_update` | D6 items |
+| Fill missing Frontmatter fields | `update` | D6 items |
 | Rebuild stale index | `/maencof:maencof-rebuild` | D2 items |
-| Fix layer field based on path | `maencof_update` | D4 items |
+| Fix layer field based on path | `update` | D4 items |
 | Suggest links for orphan nodes | `/maencof:maencof-suggest` | D1 items |
 
-**Layer 1 (01_Core/) exception**: Auto-fix via `maencof_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually.
+**Layer 1 (01_Core/) exception**: Auto-fix via `update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually.
 
 ## Error Handling
 

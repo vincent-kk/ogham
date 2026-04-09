@@ -41,7 +41,7 @@ Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
 | knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 생성만 (미구현) |
 | schedule-runner | - | - | - | - | - | 폐기됨 |
 | identity-guardian | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 전용 (L1 보호/갱신 안내) |
-| doctor | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단 + Frontmatter 자동수정 (maencof_update) |
+| doctor | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단 + Frontmatter 자동수정 (update) |
 | configurator | - | - | - | - | - | 프로젝트 설정 파일만 (MCP 관할 외) |
 
 ---

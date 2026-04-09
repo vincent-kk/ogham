@@ -48,7 +48,7 @@ describe('runCacheUpdater', () => {
   it('skips non-vault directories', () => {
     const result = runCacheUpdater({
       cwd: '/nonexistent',
-      tool_name: 'maencof_create',
+      tool_name: 'create',
     });
     expect(result.continue).toBe(true);
   });
@@ -62,7 +62,7 @@ describe('runCacheUpdater', () => {
 
   it('rebuilds turn-context cache after mutation tool call', () => {
     writeIndex([{ layer: 1 }, { layer: 3 }]);
-    runCacheUpdater({ cwd: vaultDir, tool_name: 'maencof_create' });
+    runCacheUpdater({ cwd: vaultDir, tool_name: 'create' });
     const cached = readTurnContext(vaultDir);
     expect(cached).not.toBeNull();
     expect(cached).toContain('<kg-core');
@@ -72,7 +72,7 @@ describe('runCacheUpdater', () => {
   it('updated turn context reflects new stale-nodes count', () => {
     writeIndex(Array.from({ length: 10 }, () => ({ layer: 1 })));
     writeStaleNodes(['/a.md', '/b.md', '/c.md']); // 3/10 = 30%
-    runCacheUpdater({ cwd: vaultDir, tool_name: 'maencof_update' });
+    runCacheUpdater({ cwd: vaultDir, tool_name: 'update' });
     const cached = readTurnContext(vaultDir);
     expect(cached).toContain('stale="3"');
     expect(cached).toContain('<kg-stale-advisory');

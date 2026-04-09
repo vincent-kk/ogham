@@ -54,7 +54,7 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
 
 // 도구별 안내 메시지 매핑
 const TOOL_GUIDANCE: Record<string, string> = {
-  Read: 'maencof_read',
+  Read: 'read',
   Grep: 'kg_search',
   Glob: 'kg_search or kg_navigate',
 };

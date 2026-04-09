@@ -29,7 +29,7 @@ The judge module evaluates candidates, then the execute module performs the actu
                                              |
                                    user confirmation (AutonomyLevel 1)
                                              |
-              -> [memory-organizer.execute] -> maencof_move execution
+              -> [memory-organizer.execute] -> move execution
                                              |
                                [index-invalidator hook] -> stale-nodes update
 ```
@@ -65,10 +65,10 @@ The user can type "proceed" or select/exclude individual items.
 ### Step 4 — execute stage (memory-organizer delegation)
 
 Run the execute module for approved TransitionDirectives:
-- Call `maencof_move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
+- Call `move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
 - Update the Frontmatter `layer` and `sub_layer` fields
 - Update link paths
-- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `maencof_move` automatically strips buffer-specific metadata
+- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `move` automatically strips buffer-specific metadata
 
 ### Step 5 — Result Summary
 
@@ -82,16 +82,16 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 | Tool | Used by | Purpose |
 |------|---------|---------|
 | `kg_status` | skill (Step 1) | Check vault status and stale-nodes |
-| `maencof_read` | memory-organizer agent (judge module) | Read document Frontmatter |
+| `read` | memory-organizer agent (judge module) | Read document Frontmatter |
 | `kg_navigate` | memory-organizer agent | Traverse link relationships |
-| `maencof_move` | memory-organizer agent (execute module) | Execute file move |
-| `maencof_update` | memory-organizer agent (execute module) | Update Frontmatter |
+| `move` | memory-organizer agent (execute module) | Execute file move |
+| `update` | memory-organizer agent (execute module) | Update Frontmatter |
 
 ## Error Handling
 
 - **No index**: "No index found. Please run `/maencof:maencof-build` first."
 - **memory-organizer unavailable**: abort and guide to retry
-- **maencof_move failure**: skip the failed item, report it, and continue with remaining transitions
+- **move failure**: skip the failed item, report it, and continue with remaining transitions
 - **User cancels confirmation**: abort execute stage; no filesystem changes made
 - **No transition candidates found**: "No transition candidates found at the current confidence threshold. Try `--min-confidence 0.5` to lower the threshold."
 
@@ -108,7 +108,7 @@ Buffer documents are temporary holding areas. During organization:
 1. **Scan** `05_Context/buffer/` for documents older than 7 days
 2. **Evaluate** each document's connections, tags, and content type
 3. **Recommend target**: L2 (internalized), L3 with sub-layer (external reference), or archive
-4. **Execute** via `maencof_move` with `target_sub_layer` — buffer metadata is auto-stripped
+4. **Execute** via `move` with `target_sub_layer` — buffer metadata is auto-stripped
 
 ## Options
 

@@ -2,7 +2,7 @@
  * @file dailynote-recorder.ts
  * @description PostToolUse Hook — write 도구 호출 시 dailynote에 자동 기록
  *
- * matcher: maencof_create|maencof_update|maencof_delete|maencof_move|maencof_capture_insight|claudemd_merge|claudemd_remove (write 도구 7개)
+ * matcher: `create`|`update`|`delete`|`move`|`capture_insight`|`claudemd_merge`|`claudemd_remove` (write 도구 7개)
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
 import {
@@ -69,7 +69,7 @@ export function runDailynoteRecorder(
 
 /**
  * tool_response에서 결과 path를 추출한다.
- * maencof_create 등에서 path가 tool_input이 아닌 response에 있을 수 있음.
+ * create 등에서 path가 tool_input이 아닌 response에 있을 수 있음.
  */
 function extractPathFromResponse(
   response: Record<string, unknown> | undefined,

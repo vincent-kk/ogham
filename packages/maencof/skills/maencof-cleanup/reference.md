@@ -17,7 +17,7 @@ Determine the deletion target from user input:
 Read the target document to show content before deletion:
 
 ```
-maencof_read(path: target path)
+read(path: target path)
 ```
 
 Display Frontmatter summary (title, layer, tags) and content preview.
@@ -59,7 +59,7 @@ Proceed anyway? (y/n) or use --force to skip this warning.
 After user confirmation:
 
 ```
-maencof_delete(path: target path, force: --force flag)
+delete(path: target path, force: --force flag)
 ```
 
 ### Step 6 — Completion Report

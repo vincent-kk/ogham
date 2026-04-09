@@ -27,7 +27,7 @@ Upgrades the vault directory structure from v1 (flat 5-Layer) to v2 (L3 sub-laye
 
 ## Important Constraints
 
-- **Migration assumes exclusive vault access.** Do not run other maencof tools (`kg_build`, `maencof_create`, `maencof_update`, etc.) concurrently during migration.
+- **Migration assumes exclusive vault access.** Do not run other maencof tools (`kg_build`, `create`, `update`, etc.) concurrently during migration.
 - Migration is always explicit — never auto-triggered.
 - All operations are WAL-based and individually reversible.
 

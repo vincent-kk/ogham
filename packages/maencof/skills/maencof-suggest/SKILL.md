@@ -49,7 +49,7 @@ Show suggestions in a table with Document, Layer, Score, Reason columns.
 
 ### Step 5 — User Action
 
-User selects a suggestion to view details via `maencof_read`, or manually adds links.
+User selects a suggestion to view details via `read`, or manually adds links.
 
 > See **reference.md** for detailed step logic, display format, and target determination rules.
 
@@ -59,7 +59,7 @@ User selects a suggestion to view details via `maencof_read`, or manually adds l
 |------|---------|
 | `kg_status` | Check index status (stale check) |
 | `kg_suggest_links` | SA + Jaccard based link suggestion (primary tool) |
-| `maencof_read` | Read suggested document content (optional detail view) |
+| `read` | Read suggested document content (optional detail view) |
 
 ## Options
 

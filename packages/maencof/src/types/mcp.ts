@@ -9,7 +9,7 @@ import type { L1ChangeReason } from './l1-amendment.js';
 
 // ─── CRUD 도구 입력 스키마 ───────────────────────────────────────────
 
-/** maencof_create 입력 */
+/** `create` 입력 */
 export interface MaencofCreateInput {
   /** 문서 Layer (1-5) */
   layer: Layer;
@@ -31,7 +31,7 @@ export interface MaencofCreateInput {
   mentioned_persons?: string[];
 }
 
-/** maencof_read 입력 */
+/** `read` 입력 */
 export interface MaencofReadInput {
   /** 문서 경로 (vault 상대 경로) */
   path: string;
@@ -41,7 +41,7 @@ export interface MaencofReadInput {
   include_related?: boolean;
 }
 
-/** maencof_update 입력 */
+/** `update` 입력 */
 export interface MaencofUpdateInput {
   /** 문서 경로 */
   path: string;
@@ -64,7 +64,7 @@ export interface MaencofUpdateInput {
   confirm_l1?: boolean;
 }
 
-/** maencof_delete 입력 */
+/** `delete` 입력 */
 export interface MaencofDeleteInput {
   /** 문서 경로 */
   path: string;
@@ -72,7 +72,7 @@ export interface MaencofDeleteInput {
   force?: boolean;
 }
 
-/** maencof_move 입력 (Layer 간 전이) */
+/** `move` 입력 (Layer 간 전이) */
 export interface MaencofMoveInput {
   /** 문서 경로 */
   path: string;
@@ -144,7 +144,7 @@ export interface MaencofCrudResult {
   warnings?: string[];
 }
 
-/** maencof_read 응답 */
+/** read 응답 */
 export interface MaencofReadResult extends MaencofCrudResult {
   /** 문서 내용 */
   content: string;

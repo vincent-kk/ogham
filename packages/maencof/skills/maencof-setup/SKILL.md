@@ -99,8 +99,8 @@ Generate Layer 1 documents from the collected interview answers.
 | `01_Core/boundaries.md` | Absolute boundaries |
 | `01_Core/preferences.md` | Communication preferences |
 
-Create the 4 markdown documents above with the `maencof_create` MCP tool (layer=1, tags required).
-Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `maencof_create` (which requires layer/tags and always generates Frontmatter markdown).
+Create the 4 markdown documents above with the `create` MCP tool (layer=1, tags required).
+Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `create` (which requires layer/tags and always generates Frontmatter markdown).
 
 Also create the Layer directories and sub-layer subdirectories:
 - `02_Derived/`
@@ -108,7 +108,7 @@ Also create the Layer directories and sub-layer subdirectories:
 - `04_Action/`
 - `05_Context/`, `05_Context/buffer/`, `05_Context/boundary/`
 
-Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via maencof_read.
+Delegate to the identity-guardian agent to verify Frontmatter rule compliance for the generated L1 documents via read.
 
 ### Stage 5 — Progressive Autonomy Level 0 Setup
 
@@ -154,8 +154,8 @@ setup skill starts
 
 | Tool | Purpose |
 |------|---------|
-| `maencof_create` | Create L1 documents (Stage 4) |
-| `maencof_read` | Verify existing L1 documents (Stage 4, via identity-guardian) |
+| `create` | Create L1 documents (Stage 4) |
+| `read` | Verify existing L1 documents (Stage 4, via identity-guardian) |
 | `kg_status` | Check index status (Stage 6) |
 
 ## Available Native Tools
@@ -181,7 +181,7 @@ setup skill starts
 ## Error Handling
 
 - **Vault path does not exist**: ask user to confirm creation before proceeding
-- **maencof_create failure**: report error and skip to next document; resume at failed stage on retry
+- **create failure**: report error and skip to next document; resume at failed stage on retry
 - **identity-guardian unavailable**: proceed without L1 Frontmatter verification and note in completion summary
 - **Already initialized**: warn that re-running will overwrite existing Core Identity documents; require explicit `--reset` confirmation
 

@@ -1,6 +1,6 @@
 /**
  * @file maencof-update.ts
- * @description maencof_update 도구 핸들러 — 기존 문서 수정
+ * @description `update` 도구 핸들러 — 기존 문서 수정
  */
 import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -91,7 +91,7 @@ function updateFrontmatter(
 }
 
 /**
- * maencof_update 핸들러
+ * `update` 핸들러
  */
 export async function handleMaencofUpdate(
   vaultPath: string,

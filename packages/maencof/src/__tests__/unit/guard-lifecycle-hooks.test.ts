@@ -89,7 +89,7 @@ describe('runIndexInvalidator', () => {
 
   it('maencof MCP 도구 호출 시 stale-nodes.json을 업데이트한다', () => {
     const result = runIndexInvalidator({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       tool_input: { path: '02_Derived/new-note.md' },
       cwd: vaultDir,
     });
@@ -106,12 +106,12 @@ describe('runIndexInvalidator', () => {
 
   it('usage-stats.json 카운트를 증가한다', () => {
     runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/note.md' },
       cwd: vaultDir,
     });
     runIndexInvalidator({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/note.md' },
       cwd: vaultDir,
     });
@@ -120,7 +120,7 @@ describe('runIndexInvalidator', () => {
     const stats = JSON.parse(
       require('node:fs').readFileSync(statsPath, 'utf-8'),
     );
-    expect(stats['maencof_update']).toBe(2);
+    expect(stats['update']).toBe(2);
   });
 
   it('비maencof 도구는 무시한다', () => {
@@ -134,9 +134,9 @@ describe('runIndexInvalidator', () => {
     expect(existsSync(stalePath)).toBe(false);
   });
 
-  it('maencof_move 시 path로 소스 경로를 stale에 추가한다', () => {
+  it('move 시 path로 소스 경로를 stale에 추가한다', () => {
     runIndexInvalidator({
-      tool_name: 'maencof_move',
+      tool_name: 'move',
       tool_input: { path: '03_External/a.md', target_layer: 2 },
       cwd: vaultDir,
     });

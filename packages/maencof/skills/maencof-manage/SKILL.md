@@ -117,7 +117,7 @@ Generate a new custom skill/agent template:
 > Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/`
 > (not vault documents). They are accessed with Read/Write tools, not maencof MCP tools.
 >
-> Note: `maencof_create` is intentionally excluded here. It creates vault knowledge documents
+> Note: `create` is intentionally excluded here. It creates vault knowledge documents
 > (requires Layer + tags + Frontmatter) and is not suitable for generating plugin structure files
 > such as SKILL.md or agent definitions. Use the `Write` tool for those.
 

@@ -44,7 +44,7 @@ describe('runDailynoteRecorder', () => {
     mkdirSync(tmpDir, { recursive: true });
     try {
       const result = runDailynoteRecorder({
-        tool_name: 'maencof_create',
+        tool_name: 'create',
         cwd: tmpDir,
       });
       expect(result.continue).toBe(true);
@@ -57,7 +57,7 @@ describe('runDailynoteRecorder', () => {
 
   it('maencof write 도구 호출 시 dailynote에 기록한다', () => {
     const result = runDailynoteRecorder({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       tool_input: { layer: 2, tags: ['test'] },
       cwd: vaultDir,
     });
@@ -85,7 +85,7 @@ describe('runDailynoteRecorder', () => {
 
   it('tool_input에서 path를 추출한다', () => {
     runDailynoteRecorder({
-      tool_name: 'maencof_update',
+      tool_name: 'update',
       tool_input: { path: '02_Derived/test.md' },
       cwd: vaultDir,
     });
@@ -96,9 +96,9 @@ describe('runDailynoteRecorder', () => {
     expect(entries[0].path).toBe('02_Derived/test.md');
   });
 
-  it('tool_response에서 path를 추출한다 (maencof_create)', () => {
+  it('tool_response에서 path를 추출한다 (create)', () => {
     runDailynoteRecorder({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       tool_input: { layer: 2, tags: ['test'] },
       tool_response: { path: '02_Derived/new.md' },
       cwd: vaultDir,
@@ -113,7 +113,7 @@ describe('runDailynoteRecorder', () => {
   it('에러 발생 시 graceful degradation으로 continue: true 반환', () => {
     // cwd를 존재하지 않는 경로로 설정하되 vault처럼 보이게 하지 않음
     const result = runDailynoteRecorder({
-      tool_name: 'maencof_create',
+      tool_name: 'create',
       tool_input: {},
       cwd: '/nonexistent/path',
     });

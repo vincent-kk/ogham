@@ -20,11 +20,11 @@ maencof의 MCP 도구는 지식 트리 CRUD와 그래프 검색을 통합한다.
 
 | 도구 | 설명 | 주요 파라미터 |
 |------|------|-------------|
-| `maencof_create` | 새 기억 문서 생성 | layer, tags, content |
-| `maencof_read` | 문서 읽기 + 관련 컨텍스트 | path, depth (SA 홉) |
-| `maencof_update` | 기존 문서 수정 | path, content |
-| `maencof_delete` | 문서 삭제 (backlink 경고 포함) | path, force |
-| `maencof_move` | Layer 간 문서 이동 (전이) | path, target_layer |
+| `create` | 새 기억 문서 생성 | layer, tags, content |
+| `read` | 문서 읽기 + 관련 컨텍스트 | path, depth (SA 홉) |
+| `update` | 기존 문서 수정 | path, content |
+| `delete` | 문서 삭제 (backlink 경고 포함) | path, force |
+| `move` | Layer 간 문서 이동 (전이) | path, target_layer |
 
 ### CRUD 공통 사후 처리
 - backlink-index.json 자동 갱신

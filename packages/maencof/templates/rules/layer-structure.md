@@ -77,7 +77,7 @@ function validateLayerStructure(node: KnowledgeNode): DiagnosticItem[] {
 
 ## Auto-fix
 
-- **R2 violations**: Automatically update Frontmatter `layer` field to the path-inferred value (`maencof_update`)
+- **R2 violations**: Automatically update Frontmatter `layer` field to the path-inferred value (`update`)
 - **R1/R3/R4 violations**: Auto-fix not available; manual link removal required
 
 ## Exceptions

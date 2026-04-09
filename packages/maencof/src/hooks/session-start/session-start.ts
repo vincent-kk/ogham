@@ -368,12 +368,12 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 ## Required Rules (MUST)
 
 - When searching vault documents MUST use \`kg_search\` or \`kg_navigate\`. Do not search vault files directly with Grep or Read.
-- When reading vault documents MUST use \`maencof_read\`. Do not read vault markdown files directly with the Read tool.
-- When recording new knowledge to vault MUST use \`maencof_create\`. Do not create files directly in the vault with the Write tool.
-- When modifying vault documents MUST use \`maencof_update\`. Do not edit vault markdown files directly with the Edit tool.
+- When reading vault documents MUST use \`read\`. Do not read vault markdown files directly with the Read tool.
+- When recording new knowledge to vault MUST use \`create\`. Do not create files directly in the vault with the Write tool.
+- When modifying vault documents MUST use \`update\`. Do not edit vault markdown files directly with the Edit tool.
 - When learning new information MUST use \`kg_suggest_links\` to check for connection possibilities with existing knowledge.
 - When creating documents MUST specify layer and tags.
-- When creating documents about interactions with people (meetings, conversations, collaborations), MUST include \`mentioned_persons\` parameter in \`maencof_create\` with the names of people mentioned. This is separate from \`person_ref\` (L3A-only, identifies who a profile document is about). \`mentioned_persons\` captures anyone mentioned in any document at any layer.
+- When creating documents about interactions with people (meetings, conversations, collaborations), MUST include \`mentioned_persons\` parameter in \`create\` with the names of people mentioned. This is separate from \`person_ref\` (L3A-only, identifies who a profile document is about). \`mentioned_persons\` captures anyone mentioned in any document at any layer.
 
 ## Forbidden Rules (FORBIDDEN)
 
@@ -385,7 +385,7 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 ## Memory Routing (CRITICAL)
 
 - NEVER use Claude's built-in auto-memory (<remember> tags or MEMORY.md) for knowledge the user asks to remember.
-- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:maencof-remember\` skill or \`maencof_create\` tool.
+- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:maencof-remember\` skill or \`create\` tool.
 - Claude's auto-memory is ONLY for Claude's own operational notes (tool preferences, workflow settings). All user knowledge MUST go to the maencof vault.
 
 ## Tool Mapping
@@ -393,14 +393,14 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 | Action | Use | Do NOT Use |
 |---|---|---|
 | Search vault documents | kg_search, kg_navigate | Grep, Glob |
-| Read vault documents | maencof_read | Read |
-| Create vault documents | maencof_create | Write |
-| Update vault documents | maencof_update | Edit |
-| Delete vault documents | maencof_delete | Bash rm |
-| Move vault documents | maencof_move | Bash mv |
+| Read vault documents | read | Read |
+| Create vault documents | create | Write |
+| Update vault documents | update | Edit |
+| Delete vault documents | delete | Bash rm |
+| Move vault documents | move | Bash mv |
 | Check vault status | kg_status | ls, find |
 | Assemble context | kg_context | Manual file assembly |
-| Capture insight | maencof_capture_insight | maencof_create (use dedicated tool) |
+| Capture insight | capture_insight | create (use dedicated tool) |
 | Modify CLAUDE.md | claudemd_merge | Edit (MAENCOF section) |
 
 ## Skills
@@ -417,15 +417,15 @@ function buildDefaultDirective(cwd: string, companionName?: string): string {
 ## Auto-Insight Capture
 
 When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
-When you detect a meaningful insight during conversation, call \`maencof_capture_insight\` to record it.
+When you detect a meaningful insight during conversation, call \`capture_insight\` to record it.
 Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:maencof-insight --recent\`.
 After capture, display: 💡 Insight recorded to L{layer}: "{title}"
 Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
 ## Auto-Document Lifecycle (MUST)
 
-- When learning new factual information during conversation, MUST create a vault document using \`maencof_create\` with appropriate layer and tags.
-- When discovering that existing vault information is outdated, MUST update the document using \`maencof_update\`.
+- When learning new factual information during conversation, MUST create a vault document using \`create\` with appropriate layer and tags.
+- When discovering that existing vault information is outdated, MUST update the document using \`update\`.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
 - When the system advises running \`kg_build\` (stale index advisory), follow the advice promptly.
@@ -433,7 +433,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 
 ## Concept Document Lifecycle
 
-- After creating a document via \`maencof_create\`, check whether concept documents exist for each tag used.
+- After creating a document via \`create\`, check whether concept documents exist for each tag used.
 - A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
 - If a tag has been used 3+ times across documents but has no concept document, suggest creating one:
   "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:maencof-remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"

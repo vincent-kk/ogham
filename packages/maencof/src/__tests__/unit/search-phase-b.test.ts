@@ -386,7 +386,7 @@ describe('B6: Turn Context Directive', () => {
       'utf-8',
     );
     expect(source).toContain('content snippets from top documents');
-    expect(source).toContain('Prefer kg_context over kg_search + maencof_read');
+    expect(source).toContain('Prefer kg_context over kg_search + read');
   });
 
   it('context-injector에 kg_context snippet directive가 포함되어야 한다', async () => {

@@ -101,10 +101,10 @@ function validateLinkIntegrity(
 
 | Event | Action |
 |-------|--------|
-| `maencof_create` | Add new outbound links to the index |
-| `maencof_update` | Re-analyze changed links and rebuild |
-| `maencof_delete` | Remove entries where this document is the source |
-| `maencof_move` | Update paths and rebuild the index |
+| `create` | Add new outbound links to the index |
+| `update` | Re-analyze changed links and rebuild |
+| `delete` | Remove entries where this document is the source |
+| `move` | Update paths and rebuild the index |
 
 ## Auto-fix
 

@@ -97,18 +97,18 @@ export function buildToolDescription(
   const category = TOOL_CATEGORY_MAP[toolName];
 
   switch (toolName) {
-    case 'maencof_create': {
+    case 'create': {
       const layer = toolInput['layer'] ?? '?';
       const tags = Array.isArray(toolInput['tags'])
         ? (toolInput['tags'] as string[]).join(', ')
         : '';
       return `Document created (L${layer}${tags ? `, tags: ${tags}` : ''})`;
     }
-    case 'maencof_update':
+    case 'update':
       return 'Document updated';
-    case 'maencof_delete':
+    case 'delete':
       return 'Document deleted';
-    case 'maencof_move': {
+    case 'move': {
       const target = toolInput['target_layer'] ?? '?';
       return `Document moved (→ L${target})`;
     }

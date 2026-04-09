@@ -1,6 +1,6 @@
 /**
  * @file maencof-move.ts
- * @description maencof_move 도구 핸들러 — 문서 Layer 간 이동 (전이)
+ * @description `move` 도구 핸들러 — 문서 Layer 간 이동 (전이)
  */
 import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
@@ -60,7 +60,7 @@ function updateLayerInFrontmatter(
 }
 
 /**
- * maencof_move 핸들러 — Layer 간 문서 전이
+ * `move` 핸들러 — Layer 간 문서 전이
  * WAL 기반 원자적 이동: 쓰기 → 확인 → 삭제 순서
  */
 export async function handleMaencofMove(

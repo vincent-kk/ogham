@@ -3,8 +3,8 @@
  * @description maencof MCP server — registers 18 tools + routing
  *
  * Tool list:
- * CRUD x5: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
- * Insight x1: maencof_capture_insight
+ * CRUD x5: `create`, `read`, `update`, `delete`, `move`
+ * Insight x1: `capture_insight`
  * Search x5: kg_search, kg_navigate, kg_context, kg_status, kg_suggest_links
  * Build x1: kg_build
  * Boundary x1: boundary_create
@@ -160,12 +160,12 @@ export function createServer(): McpServer {
 }
 
 /**
- * Registers 5 CRUD tools: maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move
+ * Registers 5 CRUD tools: `create`, `read`, `update`, `delete`, `move`
  */
 function registerCrudTools(server: McpServer): void {
-  // ─── maencof_create ───────────────────────────────────────────────
+  // ─── create ───────────────────────────────────────────────
   server.registerTool(
-    'maencof_create',
+    'create',
     {
       description:
         'Creates a new memory document in the knowledge tree. Frontmatter and H1 title are auto-generated — do NOT include them in the content field.',
@@ -226,9 +226,9 @@ function registerCrudTools(server: McpServer): void {
     },
   );
 
-  // ─── maencof_capture_insight ──────────────────────────────────────
+  // ─── capture_insight ──────────────────────────────────────
   server.registerTool(
-    'maencof_capture_insight',
+    'capture_insight',
     {
       description:
         'Captures a conversation insight as a knowledge document. Auto-adds auto-insight tag, tracks stats, and handles session capture limits. Use this when you detect a meaningful insight in conversation.',
@@ -247,9 +247,9 @@ function registerCrudTools(server: McpServer): void {
     },
   );
 
-  // ─── maencof_read ────────────────────────────────────────────────
+  // ─── read ────────────────────────────────────────────────
   server.registerTool(
-    'maencof_read',
+    'read',
     {
       description:
         'Reads a document and returns Frontmatter + body. When include_related=true, also includes SA-based related documents.',
@@ -279,9 +279,9 @@ function registerCrudTools(server: McpServer): void {
     },
   );
 
-  // ─── maencof_update ──────────────────────────────────────────────
+  // ─── update ──────────────────────────────────────────────
   server.registerTool(
-    'maencof_update',
+    'update',
     {
       description:
         'Updates an existing document. The updated field in Frontmatter is automatically refreshed.',
@@ -360,9 +360,9 @@ function registerCrudTools(server: McpServer): void {
     },
   );
 
-  // ─── maencof_delete ──────────────────────────────────────────────
+  // ─── delete ──────────────────────────────────────────────
   server.registerTool(
-    'maencof_delete',
+    'delete',
     {
       description:
         'Deletes a document. Layer 1 documents cannot be deleted. Requires force=true if backlinks exist.',
@@ -386,9 +386,9 @@ function registerCrudTools(server: McpServer): void {
     },
   );
 
-  // ─── maencof_move ────────────────────────────────────────────────
+  // ─── move ────────────────────────────────────────────────
   server.registerTool(
-    'maencof_move',
+    'move',
     {
       description:
         'Moves a document to a different Layer (transition). Layer 1 documents cannot be moved.',

@@ -243,7 +243,7 @@ export function buildTurnContext(cwd: string): string {
 
   // <kg-directive> tag
   parts.push(
-    '<kg-directive>When encountering ambiguous or domain-specific terms, autonomously search the knowledge graph using kg_search before responding. For topics beyond L1 core knowledge, use kg_navigate to explore L2+ layers. Use kg_context for complex queries — it returns relevant content snippets from top documents. Prefer kg_context over kg_search + maencof_read when you need content from multiple related documents.</kg-directive>',
+    '<kg-directive>When encountering ambiguous or domain-specific terms, autonomously search the knowledge graph using kg_search before responding. For topics beyond L1 core knowledge, use kg_navigate to explore L2+ layers. Use kg_context for complex queries — it returns relevant content snippets from top documents. Prefer kg_context over kg_search + read when you need content from multiple related documents.</kg-directive>',
   );
 
   // <kg-stale-advisory> if threshold exceeded

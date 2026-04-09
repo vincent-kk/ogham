@@ -43,7 +43,7 @@ Identify the data source type and content from input:
 
 ### Step 3 — Auto-generate Frontmatter
 
-Determine the Frontmatter fields to pass to `maencof_create`. The `created` and `updated` timestamps are set automatically by `maencof_create` and do not need to be specified manually.
+Determine the Frontmatter fields to pass to `create`. The `created` and `updated` timestamps are set automatically by `create` and do not need to be specified manually.
 
 ```yaml
 tags: [auto-extracted tags]
@@ -53,10 +53,10 @@ source: {original URL}
 
 Tags are auto-extracted as core keywords from the content.
 
-### Step 4 — Call maencof_create
+### Step 4 — Call `create`
 
 ```
-maencof_create({
+create({
   layer: 3, 4, or 5,
   tags: [auto-extracted tags],
   content: {converted markdown},
@@ -76,9 +76,9 @@ and suggest adding links.
 
 | Tool | Type | Purpose |
 |------|------|---------|
-| `maencof_create` | MCP | Create document |
+| `create` | MCP | Create document |
 | `kg_search` | MCP | Search for related documents |
-| `maencof_update` | MCP | Add links |
+| `update` | MCP | Add links |
 | `WebFetch` | Native | Fetch web page content from URL |
 
 ## Error Handling
@@ -86,8 +86,8 @@ and suggest adding links.
 - **maencof not initialized**: "Please run `/maencof:maencof-setup` first."
 - **URL fetch failure**: report error and offer to save the URL as an L3 stub document with the source field set
 - **GitHub URL but no GitHub MCP**: guide to run `/maencof:maencof-mcp-setup` to install the GitHub MCP server
-- **maencof_create failure**: report error; no partial document created
-- **Duplicate detected via kg_search**: ask whether to create new or update existing document
+- **`create` failure**: report error; no partial document created
+- **Duplicate detected via kg_search**: ask whether to `create` new or `update` existing document
 
 ## Options
 

@@ -7,8 +7,8 @@ MCP 서버 구현. 17개 도구를 stdio 전송으로 제공. vault 경로는 `M
 
 | Group | Tools |
 |-------|-------|
-| CRUD (5) | maencof_create, maencof_read, maencof_update, maencof_delete, maencof_move |
-| Insight (1) | maencof_capture_insight |
+| CRUD (5) | `create`, `read`, `update`, `delete`, `move` |
+| Insight (1) | `capture_insight` |
 | Graph (5) | kg_search, kg_navigate, kg_context, kg_status, kg_build |
 | Boundary (1) | boundary_create |
 | Link (1) | kg_suggest_links |
@@ -19,7 +19,7 @@ MCP 서버 구현. 17개 도구를 stdio 전송으로 제공. vault 경로는 `M
 
 - `ensureFreshGraph`: read-path 자동 증분 리빌드 (stale 노드 감지 시)
 - `loadGraphIfNeeded`: kg_status 전용 (진단 도구, 자동 리빌드 없음)
-- 캐시 무효화 트리거: maencof_create/update/delete/move, maencof_capture_insight, boundary_create, kg_build
+- 캐시 무효화 트리거: `create`/`update`/`delete`/`move`, `capture_insight`, `boundary_create`, `kg_build`
 - 리빌드 뮤텍스로 중복 동시 리빌드 방지
 
 ## Security

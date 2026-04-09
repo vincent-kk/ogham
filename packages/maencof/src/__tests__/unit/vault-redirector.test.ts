@@ -65,7 +65,7 @@ describe('runVaultRedirector', () => {
     rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
   });
 
-  it('vault 내부 Read에 대해 maencof_read를 안내한다', () => {
+  it('vault 내부 Read에 대해 read를 안내한다', () => {
     const result = runVaultRedirector({
       tool_name: 'Read',
       tool_input: { file_path: '01_Core/values.md' },
@@ -73,7 +73,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'maencof_read',
+      'read',
     );
     expect(result.hookSpecificOutput?.additionalContext).toContain('[maencof]');
   });
@@ -154,7 +154,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'maencof_read',
+      'read',
     );
   });
 

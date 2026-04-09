@@ -114,7 +114,7 @@ When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately
 When `--detail` is specified or the user requests full content, read the document body:
 
 ```
-maencof_read(path: selected node path)
+read(path: selected node path)
 ```
 
 To assemble token-optimized context for multiple activated nodes, use:
@@ -136,7 +136,7 @@ After 3 rounds: "Exploration depth limit reached."
 | `kg_search` | SA-based related document search |
 | `kg_navigate` | Look up a node's neighbors (inbound/outbound links, hierarchy) |
 | `kg_context` | Assemble token-optimized context blocks |
-| `maencof_read` | Read the full content of a selected document |
+| `read` | Read the full content of a selected document |
 
 ## Options
 

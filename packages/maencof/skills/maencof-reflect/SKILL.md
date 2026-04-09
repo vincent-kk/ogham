@@ -87,7 +87,7 @@ Execute memory-organizer judge logic:
 |------|---------|
 | `kg_status` | Query vault status |
 | `kg_navigate` | Traverse link relationships |
-| `maencof_read` | Read document Frontmatter |
+| `read` | Read document Frontmatter |
 
 ## Error Handling
 
