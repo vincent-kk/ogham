@@ -76,7 +76,7 @@ Check if a changelog file for today's date already exists.
 
 ### Step 4 — Write Changelog
 
-Write the changelog using the `create` tool or direct file creation.
+Write the changelog using the `create` tool (new file) or `update` tool (existing file).
 
 **File format:**
 
