@@ -124,9 +124,9 @@ Create and initialize `01_Core/trust-level.json` at Level 0:
 }
 ```
 
-**Creation method** (layer-guard considerations):
-- **Initial setup** (first run): Use the Write tool. The vault structure does not exist yet, so `isMaencofVault(cwd)` returns `false` and the layer-guard hook is inactive.
-- **`--reset` mode**: Use the Bash tool (`echo '{"current_level":0,...}' > 01_Core/trust-level.json`). The vault already exists, so the layer-guard would block Write/Edit on `01_Core/`. Bash bypasses the `Write|Edit` matcher in hooks.json.
+**Creation method**: Use the Bash tool to write trust-level.json directly (`echo '{"current_level":0,...}' > 01_Core/trust-level.json`). The layer-guard hook matches only `Write|Edit` tools, so Bash is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
+
+> Note: This Bash pattern applies only to trust-level.json (a JSON config file that cannot use the `create` MCP tool). Markdown L1 documents must always go through the identity-guardian agent.
 
 ### Stage 6 — Initial Index Build
 

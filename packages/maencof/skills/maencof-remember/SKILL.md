@@ -62,7 +62,7 @@ When creating an L3 document, determine the appropriate sub-layer:
 | L3B Structural | Organizations, teams, systems, processes | `03_External/structural/` |
 | L3C Topical | Concepts, technologies, external knowledge | `03_External/topical/` |
 
-Pass `sub_layer` to `create`. If the content doesn't clearly fit a sub-layer, create it in `03_External/` root (no sub-layer).
+Pass `sub_layer` to `create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:maencof-migrate`.
 
 #### L5 Sub-Layer Selection
 
@@ -124,7 +124,7 @@ title: auto-generated or user-provided
 **L3 Frontmatter** (fields written into the document by `create`):
 ```yaml
 layer: 3
-sub_layer: relational | structural | topical  # omit if unclear
+sub_layer: relational | structural | topical  # defaults to topical if unclear
 tags: [extracted tags]
 source: "original source URL (if available)"
 confidence: 0.3  # document-level metadata, not a create parameter; initial value, increases after validation
