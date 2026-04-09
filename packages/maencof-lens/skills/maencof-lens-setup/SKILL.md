@@ -64,6 +64,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 2. Validate vault name is unique and path exists with `.maencof/index.json`
 3. Append vault entry with default layers `[2, 3, 4, 5]`
 4. Write back
+5. Run `.gitignore` guard (see Step 3)
 
 **`remove`**:
 1. Load config, find vault by name (error if not found)

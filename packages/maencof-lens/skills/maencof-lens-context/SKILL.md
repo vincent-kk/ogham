@@ -34,7 +34,7 @@ Extract query and options from user input:
 - Natural-language query → search keywords
 - `--budget <N>` → token budget (default: 2000)
 - `--vault <name>` → target vault (default: config default)
-- `--layer <N>` → layer filter ceiling (default: vault config)
+- `--layer <N,N,...>` → layer filter as comma-separated list (default: vault config)
 - `--full` → include full document text instead of snippets
 
 ### Step 2 — Call `context` (single tool call)

@@ -49,7 +49,7 @@ export async function runSessionStart(
   const config = loadConfig(cwd);
   if (!config) {
     return makeResult(
-      "[maencof:lens] Warning: Invalid config at .maencof-lens/config.json",
+      "[maencof-lens] Warning: Invalid config at .maencof-lens/config.json",
     );
   }
 

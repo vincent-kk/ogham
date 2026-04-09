@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/maencof-lens
 
-Read-only vault knowledge access plugin (v0.0.1). Wraps maencof's knowledge graph tools for use in development contexts.
+Read-only vault knowledge access plugin (v0.1.0). Wraps maencof's knowledge graph tools for use in development contexts.
 
 ## Commands
 
