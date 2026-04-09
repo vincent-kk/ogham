@@ -2,6 +2,7 @@
 name: maencof-configure
 user_invocable: true
 description: "[maencof:maencof-configure] Health-checks the full Claude Code environment — MCP servers, skills, agents, rules, hooks, and CLAUDE.md — then routes automatically to the appropriate configuration sub-skill."
+argument-hint: "[component to configure]"
 version: "1.1.0"
 complexity: medium
 context_layers: []

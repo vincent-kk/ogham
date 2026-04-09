@@ -2,6 +2,7 @@
 name: maencof-remember
 user_invocable: true
 description: "[maencof:maencof-remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter."
+argument-hint: "[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE]"
 version: "1.0.0"
 complexity: medium
 context_layers: [2, 3, 4, 5]

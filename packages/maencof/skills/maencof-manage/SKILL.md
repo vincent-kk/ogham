@@ -2,6 +2,7 @@
 name: maencof-manage
 user_invocable: true
 description: "[maencof:maencof-manage] Audits, enables, disables, or deletes maencof skills and agents. Reports usage frequency to identify obsolete entries and supports bulk lifecycle operations across the registry."
+argument-hint: "<list|report|disable|enable|delete|create> [name] [--skills|--agents|--all] [--days N] [--force] [--type skill|agent]"
 version: "1.0.0"
 complexity: medium
 context_layers: []

@@ -2,6 +2,7 @@
 name: maencof-craft-skill
 user_invocable: true
 description: "[maencof:maencof-craft-skill] Creates, refactors, improves, or fixes Claude Code skills. Supports four modes: CREATE with complexity-aware scaffolding, REFACTOR, IMPROVE, and FIX with automated validation."
+argument-hint: "[request describing what to create/refactor/improve/fix]"
 version: "2.0.0"
 complexity: complex
 context_layers: []

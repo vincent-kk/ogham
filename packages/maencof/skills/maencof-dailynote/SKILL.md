@@ -2,6 +2,7 @@
 name: maencof-dailynote
 user_invocable: true
 description: "[maencof:maencof-dailynote] Displays the daily maencof activity log for today or a past date, showing tool calls, document changes, and session lifecycle events to review knowledge management history."
+argument-hint: "[--date YYYY-MM-DD] [--days N]"
 version: "1.0.0"
 complexity: simple
 context_layers: []

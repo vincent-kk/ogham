@@ -2,6 +2,7 @@
 name: maencof-lifecycle
 user_invocable: true
 description: "[maencof:maencof-lifecycle] Attaches custom actions to Claude Code lifecycle events (session start, stop, tool use) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally."
+argument-hint: "[mode] [id]"
 version: "1.1.0"
 complexity: medium
 context_layers: []

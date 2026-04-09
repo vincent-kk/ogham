@@ -2,6 +2,7 @@
 name: maencof-diagnose
 user_invocable: true
 description: "[maencof:maencof-diagnose] Quickly checks knowledge graph index status — freshness, stale node ratio, and rebuild recommendation — without running a full diagnostic scan like checkup."
+argument-hint: "[--verbose]"
 version: "1.0.0"
 complexity: simple
 context_layers: []

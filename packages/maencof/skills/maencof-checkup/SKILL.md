@@ -2,6 +2,7 @@
 name: maencof-checkup
 user_invocable: true
 description: "[maencof:maencof-checkup] Runs 6 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, and structural inconsistencies, then provides prioritized auto-fix suggestions."
+argument-hint: "[--fix] [--check ITEM]"
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

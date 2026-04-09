@@ -2,6 +2,7 @@
 name: maencof-lens-context
 user_invocable: true
 description: "[maencof-lens:maencof-lens-context] Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering."
+argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full]"
 version: 1.1.0
 complexity: simple
 plugin: maencof-lens

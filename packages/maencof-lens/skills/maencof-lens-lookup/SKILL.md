@@ -2,6 +2,7 @@
 name: maencof-lens-lookup
 user_invocable: true
 description: "[maencof-lens:maencof-lens-lookup] Search vault knowledge graph via Spreading Activation, read the top result document, and return a structured summary. Single-document quick reference pipeline for targeted knowledge retrieval from development contexts. Use when a specific topic needs a quick answer from vault — design docs, architecture references, or technical knowledge lookup."
+argument-hint: "<query> [--vault NAME] [--layer N,...] [--detail]"
 version: 1.1.0
 complexity: simple
 plugin: maencof-lens

@@ -2,6 +2,7 @@
 name: maencof-suggest
 user_invocable: true
 description: "[maencof:maencof-suggest] Identifies missing knowledge graph connections using Spreading Activation and Jaccard similarity, recommending new edges to fill structural gaps rather than general graph traversal."
+argument-hint: "[path|tags|text] [--max 1-20] [--min-score 0.0-1.0]"
 version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]

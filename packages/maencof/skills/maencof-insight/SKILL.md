@@ -2,6 +2,7 @@
 name: maencof-insight
 user_invocable: true
 description: "[maencof:maencof-insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, views recent insights, and edits the meta-prompt governing what gets recorded."
+argument-hint: "[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable] [--max N]"
 version: "1.0.0"
 complexity: simple
 context_layers: []

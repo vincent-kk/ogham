@@ -2,6 +2,7 @@
 name: maencof-explore
 user_invocable: true
 description: "[maencof:maencof-explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers."
+argument-hint: "[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail]"
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

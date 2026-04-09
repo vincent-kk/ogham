@@ -2,6 +2,7 @@
 name: maencof-reflect
 user_invocable: true
 description: "[maencof:maencof-reflect] Generates a read-only vault analysis report identifying layer transition candidates and duplicate documents, without making any filesystem changes. Run before organize to preview recommendations."
+argument-hint: "[--layer 3|4|5] [--show-all]"
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]

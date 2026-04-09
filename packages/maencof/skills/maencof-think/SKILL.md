@@ -2,6 +2,7 @@
 name: maencof-think
 user_invocable: true
 description: "[maencof:maencof-think] Resolves ambiguous requirements using Tree of Thoughts: generates 3-5 interpretations, scores each on feasibility and alignment, and selects the optimal approach with full rationale."
+argument-hint: "[requirement or feature request]"
 version: "1.0.0"
 complexity: medium
 context_layers: []

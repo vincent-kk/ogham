@@ -2,6 +2,7 @@
 name: maencof-connect
 user_invocable: true
 description: "[maencof:maencof-connect] Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json."
+argument-hint: "[list|add|remove|disable|enable] [sourceId]"
 version: "1.0.0"
 complexity: medium
 context_layers: []

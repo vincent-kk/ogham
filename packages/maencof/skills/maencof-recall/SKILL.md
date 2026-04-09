@@ -2,6 +2,7 @@
 name: maencof-recall
 user_invocable: true
 description: "[maencof:maencof-recall] Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers."
+argument-hint: "<query> [--layer N] [--sub-layer NAME] [--detail]"
 version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]

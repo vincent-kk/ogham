@@ -2,6 +2,7 @@
 name: maencof-ingest
 user_invocable: true
 description: "[maencof:maencof-ingest] Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3 or 4 documents with frontmatter, tags, and graph connections."
+argument-hint: "[source] [--layer 3|4|5] [--tags TAGS] [--path PATH]"
 version: "1.0.0"
 complexity: medium
 context_layers: [3, 4, 5]

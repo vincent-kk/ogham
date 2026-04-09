@@ -2,6 +2,7 @@
 name: maencof-setup
 user_invocable: true
 description: "[maencof:maencof-setup] Runs the 7-stage maencof onboarding wizard covering personal values, boundaries, preferences, and AI persona generation. Each stage is skippable and re-runnable via the --step flag."
+argument-hint: "[--step STAGE] [--reset]"
 version: "2.0.0"
 complexity: complex
 context_layers: [1]

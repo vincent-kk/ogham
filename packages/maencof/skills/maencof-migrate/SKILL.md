@@ -2,6 +2,7 @@
 name: maencof-migrate
 user_invocable: true
 description: "[maencof:maencof-migrate] Upgrades the vault from v1 flat 5-Layer layout to v2 with L3 sub-layers and L5 Buffer/Boundary separation, safely preserving and relocating all existing documents."
+argument-hint: "[--dry-run] [--rollback]"
 version: "1.0.0"
 complexity: medium
 context_layers: []

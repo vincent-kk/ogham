@@ -2,6 +2,7 @@
 name: maencof-changelog
 user_invocable: true
 description: "[maencof:maencof-changelog] Records daily self-change entries to the vault changelog. Detects git changes, writes the dated entry, commits it, and unblocks the changelog-gate Stop hook."
+argument-hint: ""
 version: "1.0.0"
 complexity: medium
 context_layers: [2]

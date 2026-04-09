@@ -2,6 +2,7 @@
 name: maencof-rebuild
 user_invocable: true
 description: "[maencof:maencof-rebuild] Discards the existing .maencof cache and rebuilds the knowledge graph index from scratch. Use when the index is corrupted or incremental repair via the build skill is insufficient."
+argument-hint: "[--force]"
 version: "1.0.0"
 complexity: simple
 context_layers: []
