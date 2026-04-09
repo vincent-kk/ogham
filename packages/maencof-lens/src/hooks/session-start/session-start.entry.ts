@@ -13,8 +13,8 @@ async function main() {
     process.stdout.write(
       JSON.stringify({
         hookSpecificOutput: {
-          hookEventName: 'SessionStart',
           ...result.hookSpecificOutput,
+          hookEventName: 'SessionStart',
         },
       }),
     );

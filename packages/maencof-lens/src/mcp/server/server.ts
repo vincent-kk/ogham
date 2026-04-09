@@ -30,18 +30,20 @@ export function createLensServer(configRoot: string) {
   };
 
   // --- lens_search ---
-  server.tool(
+  server.registerTool(
     'lens_search',
-    'Search vault knowledge via Spreading Activation from seed keywords.',
     {
-      vault: z.optional(z.string()),
-      seed: z.array(z.string()).min(1),
-      max_results: z.optional(z.number()),
-      decay: z.optional(z.number()),
-      threshold: z.optional(z.number()),
-      max_hops: z.optional(z.number()),
-      layer_filter: z.optional(z.array(z.number())),
-      sub_layer: z.optional(z.string()),
+      description: 'Search vault knowledge via Spreading Activation from seed keywords.',
+      inputSchema: z.object({
+        vault: z.optional(z.string()),
+        seed: z.array(z.string()).min(1),
+        max_results: z.optional(z.number()),
+        decay: z.optional(z.number()),
+        threshold: z.optional(z.number()),
+        max_hops: z.optional(z.number()),
+        layer_filter: z.optional(z.array(z.number())),
+        sub_layer: z.optional(z.string()),
+      }),
     },
     async (args) => {
       try {
@@ -56,15 +58,17 @@ export function createLensServer(configRoot: string) {
   );
 
   // --- lens_context ---
-  server.tool(
+  server.registerTool(
     'lens_context',
-    'Assemble a token-budgeted context block from vault documents matching a query.',
     {
-      vault: z.optional(z.string()),
-      query: z.string(),
-      token_budget: z.optional(z.number()),
-      include_full: z.optional(z.boolean()),
-      layer_filter: z.optional(z.array(z.number())),
+      description: 'Assemble a token-budgeted context block from vault documents matching a query.',
+      inputSchema: z.object({
+        vault: z.optional(z.string()),
+        query: z.string(),
+        token_budget: z.optional(z.number()),
+        include_full: z.optional(z.boolean()),
+        layer_filter: z.optional(z.array(z.number())),
+      }),
     },
     async (args) => {
       try {
@@ -79,15 +83,17 @@ export function createLensServer(configRoot: string) {
   );
 
   // --- lens_navigate ---
-  server.tool(
+  server.registerTool(
     'lens_navigate',
-    'Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.',
     {
-      vault: z.optional(z.string()),
-      path: z.string(),
-      include_inbound: z.optional(z.boolean()),
-      include_outbound: z.optional(z.boolean()),
-      include_hierarchy: z.optional(z.boolean()),
+      description: 'Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.',
+      inputSchema: z.object({
+        vault: z.optional(z.string()),
+        path: z.string(),
+        include_inbound: z.optional(z.boolean()),
+        include_outbound: z.optional(z.boolean()),
+        include_hierarchy: z.optional(z.boolean()),
+      }),
     },
     async (args) => {
       try {
@@ -102,12 +108,14 @@ export function createLensServer(configRoot: string) {
   );
 
   // --- lens_read ---
-  server.tool(
+  server.registerTool(
     'lens_read',
-    'Read a single vault document by path.',
     {
-      vault: z.optional(z.string()),
-      path: z.string(),
+      description: 'Read a single vault document by path.',
+      inputSchema: z.object({
+        vault: z.optional(z.string()),
+        path: z.string(),
+      }),
     },
     async (args) => {
       try {
@@ -122,11 +130,13 @@ export function createLensServer(configRoot: string) {
   );
 
   // --- lens_status ---
-  server.tool(
+  server.registerTool(
     'lens_status',
-    'Check vault index status including node count, staleness, and health.',
     {
-      vault: z.optional(z.string()),
+      description: 'Check vault index status including node count, staleness, and health.',
+      inputSchema: z.object({
+        vault: z.optional(z.string()),
+      }),
     },
     async (args) => {
       try {
