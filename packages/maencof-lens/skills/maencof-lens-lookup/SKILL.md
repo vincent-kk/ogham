@@ -26,12 +26,12 @@ For multi-doc context assembly, use `/maencof-lens:maencof-lens-context` instead
 
 ## Workflow
 
-### Step 1 — Search (lens_search)
+### Step 1 — Search (`search`)
 
 Extract keywords from user input and search the vault knowledge graph.
 
 ```
-lens_search(seed: [keyword1, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
+search(seed: [keyword1, keyword2, ...], max_results: 5, vault?: name, layer_filter?: layers)
 ```
 
 Optional SA tuning parameters — pass only when user explicitly specifies:
@@ -39,10 +39,10 @@ Optional SA tuning parameters — pass only when user explicitly specifies:
 
 No results → suggest different keywords.
 
-### Step 2 — Read Top Result (lens_read)
+### Step 2 — Read Top Result (`read`)
 
 ```
-lens_read(path: top_result.path, vault: same_vault)
+read(path: top_result.path, vault: same_vault)
 ```
 
 - Default: read top 1 result
@@ -74,8 +74,8 @@ For deeper exploration: `/maencof-lens:maencof-lens-lookup {keyword} --detail`
 
 | Tool | Purpose |
 |------|---------|
-| `lens_search` | SA-based keyword search across vault graph |
-| `lens_read` | Read document content by path |
+| `search` | SA-based keyword search across vault graph |
+| `read` | Read document content by path |
 
 ## Options
 
@@ -104,4 +104,4 @@ For deeper exploration: `/maencof-lens:maencof-lens-lookup {keyword} --detail`
 - **No lens config** → guide to `/maencof-lens:maencof-lens-setup`
 - **No index** → guide to run `kg_build` in maencof session
 - **No results** → suggest different keywords
-- **Read failure** → show error and suggest alternative results from `lens_search`
+- **Read failure** → show error and suggest alternative results from `search`

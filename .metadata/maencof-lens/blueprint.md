@@ -269,11 +269,11 @@ Result: intersection             effective: [3]
 
 | Tool | Pre-filter (input mutation) | Post-filter (result filter) |
 |------|---------------------------|----------------------------|
-| `lens_search` | Set `input.layer_filter = effectiveLayers` | None (handler respects layerFilter) |
-| `lens_context` | None (handler lacks layerFilter param) | Filter assembled items by layer ⚠️ |
-| `lens_navigate` | None | Filter inbound/outbound/children by layer |
-| `lens_read` | None (handler takes vaultPath, not graph) | Check result node.layer ∈ effectiveLayers |
-| `lens_status` | None | None (status is metadata, not content) |
+| `search` | Set `input.layer_filter = effectiveLayers` | None (handler respects layerFilter) |
+| `context` | None (handler lacks layerFilter param) | Filter assembled items by layer ⚠️ |
+| `navigate` | None | Filter inbound/outbound/children by layer |
+| `read` | None (handler takes vaultPath, not graph) | Check result node.layer ∈ effectiveLayers |
+| `status` | None | None (status is metadata, not content) |
 
 ### 6.3 Edge case: Empty intersection
 
@@ -282,10 +282,10 @@ When `intersection(vault.layers, tool.layer_filter) = []`:
 - Rationale: Better to return vault-allowed results than nothing
 - Log warning so users notice their filter was ignored
 
-### 6.4 Known Limitation: lens_context token budget accuracy
+### 6.4 Known Limitation: `context` token budget accuracy
 
 `handleKgContext` internally calls `query()` with hardcoded options and **no `layerFilter` support**.
-This means `lens_context` can only post-filter assembled results, not pre-filter the SA query.
+This means `context` can only post-filter assembled results, not pre-filter the SA query.
 
 **Impact**: Token budget is consumed by ALL-layer results before filtering. For vaults with many
 excluded-layer documents, effective token utilization drops proportionally.
@@ -303,11 +303,11 @@ MCP 도구는 직접 사용자 호출 대신 **스킬/에이전트를 경유**�
 
 | Tool | Access Level | Consumers |
 |------|-------------|-----------|
-| `lens_search` | Skill/Agent mediated | `lookup` skill, `context` skill, `researcher` agent |
-| `lens_context` | Skill/Agent mediated | `context` skill, `researcher` agent |
-| `lens_navigate` | Agent only | `researcher` agent |
-| `lens_read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
-| `lens_status` | Agent/Hook only | `researcher` agent, SessionStart hook |
+| `search` | Skill/Agent mediated | `lookup` skill, `context` skill, `researcher` agent |
+| `context` | Skill/Agent mediated | `context` skill, `researcher` agent |
+| `navigate` | Agent only | `researcher` agent |
+| `read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
+| `status` | Agent/Hook only | `researcher` agent, SessionStart hook |
 
 **Rationale**: 사용자가 MCP 도구를 직접 호출하는 대신 스킬을 통해 접근하면:
 1. 더 자연스러운 인터페이스 (키워드 → 자동 검색 → 요약)
@@ -325,10 +325,10 @@ MCP 도구는 직접 사용자 호출 대신 **스킬/에이전트를 경유**�
 ```
 User: /maencof-lens:lookup <keyword>
   │
-  ├─ 1. lens_search(seed: [keywords])
+  ├─ 1. search(seed: [keywords])
   │     Find top relevant documents
   │
-  ├─ 2. lens_read(path: top_result.path)
+  ├─ 2. read(path: top_result.path)
   │     Read document content
   │
   └─ 3. Summarize
@@ -342,10 +342,10 @@ User: /maencof-lens:lookup <keyword>
 ```
 User: /maencof-lens:context <query> [--budget N]
   │
-  ├─ 1. lens_search(seed: [query keywords])
+  ├─ 1. search(seed: [query keywords])
   │     Identify relevant documents
   │
-  ├─ 2. lens_context(query, token_budget)
+  ├─ 2. context(query, token_budget)
   │     Assemble token-budgeted context block
   │
   └─ 3. Format + present
@@ -359,11 +359,11 @@ User: /maencof-lens:context <query> [--budget N]
 ```
 User: "vault에서 FCA 아키텍처 관련 자료 조사해줘"
   │
-  ├─ lens_search  → seed discovery
-  ├─ lens_read    → document deep-read
-  ├─ lens_navigate → graph neighbor exploration
-  ├─ lens_context  → context assembly
-  └─ lens_status   → vault health check (if needed)
+  ├─ search   → seed discovery
+  ├─ read     → document deep-read
+  ├─ navigate → graph neighbor exploration
+  ├─ context  → context assembly
+  └─ status   → vault health check (if needed)
 ```
 
 Multi-round exploration: search → read → navigate neighbors → read more → assemble context.
@@ -382,10 +382,10 @@ Multi-round exploration: search → read → navigate neighbors → read more �
 | D6 | SessionStart hook for prompt injection | Matches maencof's pattern; lightweight detection |
 | D7 | Skills as primary user interface | Tools are internal; skills provide natural-language entry points |
 | D8 | `.maencof-lens/` config dir in dev context | Separate from vault; project-specific lens settings |
-| D9 | lens_context post-filter only (v1) | handleKgContext lacks layerFilter; accept token waste; fix in v1.1 |
+| D9 | `context` post-filter only (v1) | handleKgContext lacks layerFilter; accept token waste; fix in v1.1 |
 | D10 | Graph cache stale-on-hit check | Compare index.json mtime vs loadedAt; reload (not rebuild) if stale |
 | D11 | researcher agent for deep exploration | Autonomous multi-tool orchestration beyond what single skills provide |
-| D12 | lens_navigate agent-only access | Navigation requires graph traversal judgment; not suitable for simple skill pipeline |
+| D12 | `navigate` agent-only access | Navigation requires graph traversal judgment; not suitable for simple skill pipeline |
 
 ---
 

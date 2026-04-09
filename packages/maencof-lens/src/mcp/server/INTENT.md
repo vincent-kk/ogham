@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP 서버 팩토리. 5개 읽기 전용 툴(lens_search, lens_context, lens_navigate, lens_read, lens_status)을 등록한다.
+MCP 서버 팩토리. 5개 읽기 전용 툴(`search`, `context`, `navigate`, `read`, `status`)을 등록한다.
 
 ## Boundaries
 

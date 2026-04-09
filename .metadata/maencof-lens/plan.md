@@ -17,7 +17,7 @@ All design documents are located in [`../../.metadata/maencof-lens/`](../../.met
 ## Key Decisions
 
 - **Approach**: Thin wrapper (Option A) — import maencof handlers directly via workspace dependency
-- **Tools**: 5 read-only MCP tools (`lens_search`, `lens_context`, `lens_navigate`, `lens_read`, `lens_status`)
+- **Tools**: 5 read-only MCP tools (`search`, `context`, `navigate`, `read`, `status`)
 - **Access Model**: Tools are skill/agent-mediated, not direct user access
 - **Skills (3)**: `setup-lens` (config), `lookup` (search→read→summarize), `context` (token-budgeted assembly)
 - **Agent (1)**: `researcher` — autonomous multi-tool vault exploration
@@ -52,14 +52,14 @@ Phase 1-6 are complete. Phase 7 adds the extended interface layer.
 
 | Tool | Access Level | Consumers |
 |------|-------------|-----------|
-| `lens_search` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
-| `lens_context` | Skill/Agent mediated | `context` skill, `researcher` agent |
-| `lens_navigate` | Agent only | `researcher` agent |
-| `lens_read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
-| `lens_status` | Agent/Hook only | `researcher` agent, SessionStart hook |
+| `search` | Skill/Agent mediated | `lookup` skill, `context` skill, `researcher` agent |
+| `context` | Skill/Agent mediated | `context` skill, `researcher` agent |
+| `navigate` | Agent only | `researcher` agent |
+| `read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
+| `status` | Agent/Hook only | `researcher` agent, SessionStart hook |
 
-**Note**: `context` skill uses `lens_context` only (NOT `lens_search`).
-`lens_context` internally runs its own SA query via `handleKgContext` — a separate `lens_search` would be redundant.
+**Note**: `context` skill uses `context` only (NOT `search`).
+`context` internally runs its own SA query via `handleKgContext` — a separate `search` would be redundant.
 
 ### Task Flow
 
@@ -87,7 +87,7 @@ T3 (researcher.md)     ─┘
 
 **Before**:
 ```
-Available tools: lens_search, lens_context, lens_navigate, lens_read, lens_status
+Available tools: search, context, navigate, read, status
 ```
 
 **After**:
@@ -101,20 +101,20 @@ Usage:
 ### Architect Review Notes (incorporated)
 
 - ~~T5 (plugin.json agents field)~~ removed — agents discovered by convention, not manifest field. maencof (4 agents) and filid (7 agents) have no `agents` field.
-- T2 context skill — removed redundant `lens_search` step. `lens_context` handles search internally.
+- T2 context skill — removed redundant `search` step. `context` handles search internally.
 - Researcher agent — added `allowed_layers: [2,3,4,5]` and `forbidden_operations` for pattern consistency with maencof agents.
 - Prompt — added researcher agent trigger hint for discoverability.
 
 ### Acceptance Criteria
 
 - [ ] `skills/lookup/SKILL.md` — complete workflow (search → read → summarize), `user_invocable: true`
-- [ ] `skills/context/SKILL.md` — complete workflow (`lens_context` only, no redundant search), `user_invocable: true`
+- [ ] `skills/context/SKILL.md` — complete workflow (`context` only, no redundant search), `user_invocable: true`
 - [ ] `agents/researcher.md` — 5 MCP tools, `allowed_layers`, trigger phrases (Korean + English)
 - [ ] `session-start.ts` — skill usage + researcher hint, no raw tool names
 - [ ] `CLAUDE.md` — Skills (3) + Agents (1) reflected
 - [ ] `INTENT.md` — structure updated, under 50 lines
 - [ ] `DETAIL.md` — public API contracts for skills/agent/tools
-- [ ] `phase-specs.md` 7.2 — context skill workflow synced (lens_search removed)
+- [ ] `phase-specs.md` 7.2 — context skill workflow synced (`search` removed)
 - [ ] `yarn build` and `yarn typecheck` pass
 
 ## Execution Order (full)
@@ -133,7 +133,7 @@ Phase 7    Skills (lookup, context) + Agent (researcher)  ⬜ Next
 
 ## Known Limitations (v1)
 
-- `lens_context` token budget accuracy degrades with excluded-layer content (post-filter only)
+- `context` token budget accuracy degrades with excluded-layer content (post-filter only)
 - No cross-vault unified search
 - No remote vault support
 - No sub-layer filtering

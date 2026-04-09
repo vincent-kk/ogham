@@ -93,7 +93,7 @@ query(graph, queryTerms, { maxResults: 20, decay: 0.7, threshold: 0.05, maxHops:
 ```
 No `layerFilter` is passed, despite `query()` supporting it via `QueryOptions.layerFilter`.
 
-**Impact**: lens_context can only post-filter assembled results. Token budget is consumed by
+**Impact**: `context` can only post-filter assembled results. Token budget is consumed by
 all-layer results before filtering, wasting budget on excluded-layer content.
 
 **Recommended fix** (3 lines in maencof):

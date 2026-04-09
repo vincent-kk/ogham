@@ -15,7 +15,7 @@ yarn test:run       # single run (CI)
 
 **Read-Only Wrapper**: Imports 5 handlers from `@ogham/maencof` (workspace dep) and wraps them with multi-vault routing + layer filtering.
 
-**MCP Tools (5)**: `lens_search`, `lens_context`, `lens_navigate`, `lens_read`, `lens_status`
+**MCP Tools (5)**: `search`, `context`, `navigate`, `read`, `status`
 
 **Skills (3)**: `maencof-lens-setup` (config), `maencof-lens-lookup` (search + read + summarize), `maencof-lens-context` (token-budgeted assembly)
 

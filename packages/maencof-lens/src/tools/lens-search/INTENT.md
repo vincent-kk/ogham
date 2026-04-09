@@ -1,6 +1,6 @@
 ## Purpose
 
-`lens_search` 툴 핸들러. Spreading Activation 기반으로 시드 키워드에서 볼트 지식을 검색한다.
+`search` 툴 핸들러. Spreading Activation 기반으로 시드 키워드에서 볼트 지식을 검색한다.
 
 ## Boundaries
 

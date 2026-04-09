@@ -37,14 +37,14 @@ Extract query and options from user input:
 - `--layer <N>` → layer filter ceiling (default: vault config)
 - `--full` → include full document text instead of snippets
 
-### Step 2 — Call lens_context (single tool call)
+### Step 2 — Call `context` (single tool call)
 
 ```
-lens_context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
+context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool)
 ```
 
-`lens_context` internally runs SA search + context assembly via `handleKgContext`.
-Do NOT call `lens_search` separately — it is redundant.
+`context` internally runs SA search + context assembly via `handleKgContext`.
+Do NOT call `search` separately — it is redundant.
 
 No results → suggest different query or broader keywords.
 
@@ -66,7 +66,7 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 
 | Tool | Purpose |
 |------|---------|
-| `lens_context` | SA search + token-budgeted context assembly (internally performs search) |
+| `context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 

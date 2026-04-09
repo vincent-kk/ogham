@@ -64,11 +64,11 @@ Phase 4, 5, 6 can run in parallel after Phase 3 is complete.
 | # | Task | Files | Acceptance |
 |---|------|-------|------------|
 | 3.1 | Implement layer guard | `src/filter/layer-guard.ts` | Correct intersection, empty-intersection fallback |
-| 3.2 | Implement lens_search | `src/tools/lens-search.ts` | Delegates to handleKgSearch with effective layers |
-| 3.3 | Implement lens_context | `src/tools/lens-context.ts` | Delegates to handleKgContext, post-filters items |
-| 3.4 | Implement lens_navigate | `src/tools/lens-navigate.ts` | Delegates to handleKgNavigate, filters neighbors |
-| 3.5 | Implement lens_read | `src/tools/lens-read.ts` | Delegates to handleMaencofRead, checks layer access |
-| 3.6 | Implement lens_status | `src/tools/lens-status.ts` | Delegates to handleKgStatus, adds stale warning |
+| 3.2 | Implement `search` | `src/tools/lens-search.ts` | Delegates to handleKgSearch with effective layers |
+| 3.3 | Implement `context` | `src/tools/lens-context.ts` | Delegates to handleKgContext, post-filters items |
+| 3.4 | Implement `navigate` | `src/tools/lens-navigate.ts` | Delegates to handleKgNavigate, filters neighbors |
+| 3.5 | Implement `read` | `src/tools/lens-read.ts` | Delegates to handleMaencofRead, checks layer access |
+| 3.6 | Implement `status` | `src/tools/lens-status.ts` | Delegates to handleKgStatus, adds stale warning |
 | 3.7 | Register all tools in server.ts | `src/mcp/server.ts` | All 5 tools available via MCP |
 | 3.8 | Write tests | `src/__tests__/unit/tools/*.test.ts`, `src/__tests__/unit/filter/*.test.ts` | Layer guard + each tool wrapper |
 
@@ -149,7 +149,7 @@ No code implementation needed for skills (they are LLM-interpreted SKILL.md file
 | maencof handler signatures change | Medium | Both packages in same repo; CI catches breakage |
 | StaleDetector false positives | Low | Conservative detection; warn but don't block |
 | Graph deserialization from external vault path | Medium | Test with real vault early; MetadataStore accepts any path |
-| lens_context token budget waste from post-only layer filtering | Medium | Document as v1 limitation; plan handleKgContext enhancement in v1.1 |
+| `context` token budget waste from post-only layer filtering | Medium | Document as v1 limitation; plan handleKgContext enhancement in v1.1 |
 
 ---
 
@@ -161,7 +161,7 @@ This is a 3-line change in `packages/maencof/src/mcp/tools/kg-context.ts`:
 2. Pass `layerFilter: input.layer_filter` to the `query()` options
 3. Export updated type from `KgContextInput`
 
-**Impact**: Without this, `lens_context` token budget accuracy degrades proportionally to excluded-layer content.
+**Impact**: Without this, `context` token budget accuracy degrades proportionally to excluded-layer content.
 **When**: Can be done as a fast-follow after lens v1, or as Phase 0 before lens implementation.
 
 ---
@@ -173,9 +173,9 @@ Unit tests per phase are defined in phase-specs. Additionally, the following end
 | # | Test | Description | Phase |
 |---|------|-------------|-------|
 | E2E-1 | MCP server startup | Start server with real config → verify `initialize` response | After Phase 2 |
-| E2E-2 | lens_search with real vault | Call lens_search against a real vault with built index → verify results respect layer filter | After Phase 3 |
+| E2E-2 | `search` with real vault | Call `search` against a real vault with built index → verify results respect layer filter | After Phase 3 |
 | E2E-3 | Multi-vault routing | Config with 2 vaults → call tools targeting each → verify correct vault used | After Phase 3 |
-| E2E-4 | Stale index warning | Point to vault with outdated index → verify stale warning in lens_status | After Phase 3 |
+| E2E-4 | Stale index warning | Point to vault with outdated index → verify stale warning in `status` | After Phase 3 |
 | E2E-5 | SessionStart prompt injection | Start with valid config → verify system prompt contains vault list | After Phase 4 |
 | E2E-6 | Full build + plugin load | `yarn build` → verify bridge/ artifacts → validate plugin.json | After Phase 6 |
 

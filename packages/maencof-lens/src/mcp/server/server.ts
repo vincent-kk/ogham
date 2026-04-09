@@ -29,9 +29,9 @@ export function createLensServer(configRoot: string) {
     return router.resolve(vaultName);
   };
 
-  // --- lens_search ---
+  // --- search ---
   server.registerTool(
-    'lens_search',
+    'search',
     {
       description: 'Search vault knowledge via Spreading Activation from seed keywords.',
       inputSchema: z.object({
@@ -57,9 +57,9 @@ export function createLensServer(configRoot: string) {
     },
   );
 
-  // --- lens_context ---
+  // --- context ---
   server.registerTool(
-    'lens_context',
+    'context',
     {
       description: 'Assemble a token-budgeted context block from vault documents matching a query.',
       inputSchema: z.object({
@@ -82,9 +82,9 @@ export function createLensServer(configRoot: string) {
     },
   );
 
-  // --- lens_navigate ---
+  // --- navigate ---
   server.registerTool(
-    'lens_navigate',
+    'navigate',
     {
       description: 'Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.',
       inputSchema: z.object({
@@ -107,9 +107,9 @@ export function createLensServer(configRoot: string) {
     },
   );
 
-  // --- lens_read ---
+  // --- read ---
   server.registerTool(
-    'lens_read',
+    'read',
     {
       description: 'Read a single vault document by path.',
       inputSchema: z.object({
@@ -129,9 +129,9 @@ export function createLensServer(configRoot: string) {
     },
   );
 
-  // --- lens_status ---
+  // --- status ---
   server.registerTool(
-    'lens_status',
+    'status',
     {
       description: 'Check vault index status including node count, staleness, and health.',
       inputSchema: z.object({
