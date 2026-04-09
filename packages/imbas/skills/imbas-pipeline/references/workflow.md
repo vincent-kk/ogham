@@ -23,12 +23,16 @@ Step 0.2 — Option Resolution
 
   DOCUMENT PIPELINE:
     - project_ref: --project argument > config.defaults.project_ref > STOP
+    - codebase: --codebase argument > config.defaults.codebase > null
+      (null = planning-only mode — pipeline stops after manifest-stories)
     - parent: --parent argument > "new" (auto-create Epic)
-    - stop_at: --stop-at argument > none (full pipeline)
+    - stop_at: --stop-at argument > none (full pipeline if codebase present)
     - dry_run: --dry-run flag > false
 
   DEVPLAN PIPELINE:
     - project_ref: extracted from story_keys (e.g., "PROJ" from "PROJ-42") > --project > config
+    - codebase: --codebase argument > config.defaults.codebase > STOP
+      (required — devplan pipeline cannot proceed without codebase)
     - parent: N/A (Stories already exist in Jira)
     - stop_at: --stop-at argument > none (devplan + manifest)
     - dry_run: --dry-run flag > false
@@ -59,10 +63,21 @@ Step 0.4 — Parent Issue Detection (DOCUMENT PIPELINE only)
   If --parent is "none" → Stories created without parent Epic
 
 Step 0.5 — Confirmation Banner
-  DOCUMENT PIPELINE:
+  DOCUMENT PIPELINE (full):
     imbas pipeline — configuration
       Input:    <source>
-      Mode:     document pipeline (validate → split → devplan → Jira)
+      Mode:     document pipeline — full (validate → split → devplan → Jira)
+      Codebase: <path>
+      Project:  <KEY> (from --project or config)
+      Parent:   <new Epic | existing PROJ-100 | none>
+      Jira:     <live | dry-run>
+      Proceeding...
+
+  DOCUMENT PIPELINE (planning-only):
+    imbas pipeline — configuration
+      Input:    <source>
+      Mode:     document pipeline — planning only (validate → split → Stories)
+      Codebase: (none — stops after manifest-stories)
       Project:  <KEY> (from --project or config)
       Parent:   <new Epic | existing PROJ-100 | none>
       Jira:     <live | dry-run>
@@ -72,13 +87,17 @@ Step 0.5 — Confirmation Banner
     imbas pipeline — configuration
       Input:    PROJ-42, PROJ-43 (N Stories)
       Mode:     devplan pipeline (devplan → Jira)
+      Codebase: <path>
       Project:  PROJ (from Story keys)
       Jira:     <live | dry-run>
       Proceeding...
 
 Step 0.6 — Route
   DOCUMENT PIPELINE → Phase 1 (validate)
-  DEVPLAN PIPELINE → Phase 3 (devplan), with story_keys[] as input
+  DEVPLAN PIPELINE (codebase resolved) → Phase 3 (devplan), with story_keys[] as input
+  DEVPLAN PIPELINE (codebase null) → STOP: "Devplan pipeline requires --codebase.
+    Subtask generation needs a codebase to explore.
+    Usage: /imbas:imbas-pipeline PROJ-42 --codebase /path/to/repo"
 ```
 
 ---
@@ -300,6 +319,20 @@ Step 2.5.3 — Execution Verification
     (devplan requires all Story issue_refs to be present)
 
 >>> --stop-at manifest-stories? → emit progress report, exit
+
+>>> CODEBASE CHECK (Document Pipeline only):
+  IF codebase is null (not resolved in Phase 0):
+    → Pipeline stops here (planning-only mode).
+    → Call run_transition: action "complete_pipeline", result: "planning_only"
+    → Emit planning-only report:
+      "Planning pipeline complete. N Stories created in <PROJECT>.
+       Subtask generation requires a codebase path.
+       Resume with codebase:
+         /imbas:imbas-pipeline <source> --codebase /path/to/repo
+       Or run devplan individually:
+         /imbas:imbas-devplan --run <run-id> --codebase /path/to/repo"
+    → EXIT
+  IF codebase is present → continue to Phase 3
 ```
 
 ---
@@ -346,7 +379,7 @@ Step 3.2 — imbas-engineer Agent Spawn
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input:
     - stories-manifest.json (Story descriptions with issue_refs)
-    - Local codebase root path
+    - Codebase root path (resolved --codebase value from Phase 0)
     - config.json subtask_limits (max_lines: 200, max_files: 10, review_hours: 1)
   - Agent execution:
     a. Per-Story code exploration (domain keywords → entry points → related areas)

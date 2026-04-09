@@ -2,6 +2,7 @@
 name: imbas-devplan
 user_invocable: true
 description: "[imbas:imbas-devplan] Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts cross-Story Tasks by exploring the local codebase. Operates on approved Stories or E2-3 escaped splits (single-Story documents that bypass decomposition). Trigger: \"create devplan\", \"dev plan\", \"Phase 3\", \"subtask creation\"."
+argument-hint: "[--run RUN_ID] [--stories S1,S2,...] [--codebase PATH]"
 version: "1.0.0"
 complexity: complex
 plugin: imbas
@@ -22,10 +23,13 @@ batch Jira issue creation.
 ## Arguments
 
 ```
-/imbas:imbas-devplan [--run <run-id>] [--stories <S1,S2,...>]
+/imbas:imbas-devplan [--run <run-id>] [--stories <S1,S2,...>] [--codebase <path>]
 
 --run      : Run ID (if omitted, uses most recent eligible run)
 --stories  : Target Story IDs (comma-separated; if omitted, processes all Stories)
+--codebase : Path to the codebase for code exploration. Required.
+             If omitted, resolved from config.defaults.codebase.
+             STOP if neither provided.
 ```
 
 ## References

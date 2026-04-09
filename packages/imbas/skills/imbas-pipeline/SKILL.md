@@ -2,6 +2,7 @@
 name: imbas-pipeline
 user_invocable: true
 description: "[imbas:imbas-pipeline] End-to-end pipeline orchestration. Runs validate, split, manifest-stories, devplan, manifest-devplan in a single command with auto-approval at quality gates. Stops with structured blocker report on any gate failure. Trigger: \"pipeline\", \"full pipeline\", \"전체 파이프라인\", \"자동 실행\", \"한번에 실행\""
+argument-hint: "<source-or-stories> [--project KEY] [--codebase PATH] [--supplements PATHS] [--parent KEY|new|none] [--stop-at PHASE] [--dry-run] [--strict-drift]"
 version: "1.0.0"
 complexity: complex
 plugin: imbas
@@ -29,6 +30,10 @@ Stops immediately with a structured blocker report when any gate fails.
                       - Document path (local md/txt) or Confluence URL → full pipeline
                       - Jira Story key(s), comma-separated (e.g., PROJ-42 or PROJ-42,PROJ-43) → devplan pipeline
 --project           : Jira project key (overrides config.defaults.project_ref)
+--codebase          : Path to the codebase for Phase 3 code exploration.
+                      If omitted, resolved from config.defaults.codebase.
+                      Document pipeline: when absent, pipeline stops after manifest-stories
+                      (planning-only mode). Devplan pipeline: required — STOP at Phase 0 if absent.
 --supplements       : Supplementary material paths (comma-separated)
 --parent            : Parent Epic key or "new" or "none" (default: "new"; only for document mode)
 --stop-at           : Stop after phase: validate | split | manifest-stories | devplan
@@ -42,35 +47,50 @@ Stops immediately with a structured blocker report when any gate fails.
 Minimal invocations:
 
 ```bash
-# Full pipeline — document to Jira tickets
+# Full pipeline — document to Jira tickets (codebase exploration included)
+/imbas:imbas-pipeline requirements.md --codebase /path/to/repo
+
+# Planning-only — Stories created, no Subtask generation
 /imbas:imbas-pipeline requirements.md
 
-# Devplan pipeline — existing Stories to Subtasks/Tasks
-/imbas:imbas-pipeline PROJ-42
-/imbas:imbas-pipeline PROJ-42,PROJ-43,PROJ-44
+# Devplan pipeline — existing Stories to Subtasks/Tasks (--codebase required)
+/imbas:imbas-pipeline PROJ-42 --codebase /path/to/repo
+/imbas:imbas-pipeline PROJ-42,PROJ-43,PROJ-44 --codebase /path/to/repo
 ```
 
-## Two Pipeline Modes
+## Three Pipeline Modes
 
-### Mode A: Document Pipeline (full)
+### Mode A: Document Pipeline — Full (with `--codebase`)
 
-Input is a document path or Confluence URL. Runs all 5 phases:
+Input is a document path or Confluence URL. `--codebase` provided. Runs all 5 phases:
 
 ```
 document → validate → split → manifest-stories → devplan → manifest-devplan
 ```
 
-### Mode B: Devplan Pipeline (from Stories)
+### Mode A-planning: Document Pipeline — Planning Only (without `--codebase`)
 
-Input is one or more Jira Story keys. Skips validate+split, starts at devplan:
+Input is a document path or Confluence URL. `--codebase` absent. Stops after manifest-stories:
+
+```
+document → validate → split → manifest-stories → STOP (planning complete)
+```
+
+No codebase means the document still needs refinement at the planning level.
+Subtask generation is deferred until a codebase is provided.
+
+### Mode B: Devplan Pipeline (from Stories, `--codebase` required)
+
+Input is one or more Jira Story keys. Skips validate+split, starts at devplan.
+`--codebase` is required — STOP at Phase 0 if absent.
 
 ```
 Story keys → devplan → manifest-devplan
 ```
 
 Mode is auto-detected from the first argument — no flag needed:
-- Looks like a file path or URL → Document Pipeline
-- Looks like Jira key(s) (PROJ-NNN pattern) → Devplan Pipeline
+- Looks like a file path or URL → Document Pipeline (full or planning-only based on `--codebase`)
+- Looks like Jira key(s) (PROJ-NNN pattern) → Devplan Pipeline (`--codebase` required)
 
 ### Smart Defaults (Phase 0)
 
@@ -80,7 +100,19 @@ a confirmation banner:
 ```
 imbas pipeline — configuration
   Input:    requirements.md
-  Mode:     document pipeline (validate → split → devplan → Jira)
+  Mode:     document pipeline — full (validate → split → devplan → Jira)
+  Codebase: /path/to/repo
+  Project:  PROJ (from config)
+  Parent:   new Epic (auto)
+  Jira:     live
+  Proceeding...
+```
+
+```
+imbas pipeline — configuration
+  Input:    requirements.md
+  Mode:     document pipeline — planning only (validate → split → Stories)
+  Codebase: (none — stops after manifest-stories)
   Project:  PROJ (from config)
   Parent:   new Epic (auto)
   Jira:     live
@@ -91,6 +123,7 @@ imbas pipeline — configuration
 imbas pipeline — configuration
   Input:    PROJ-42, PROJ-43 (2 Stories)
   Mode:     devplan pipeline (devplan → Jira)
+  Codebase: /path/to/repo
   Project:  PROJ (from Story keys)
   Jira:     live
   Proceeding...
@@ -101,13 +134,14 @@ Resolution order for each option:
 | Option | Document Mode | Devplan Mode |
 |--------|--------------|--------------|
 | `--project` | argument → config default → STOP | extracted from Story keys → argument → config |
+| `--codebase` | argument → config default → null (planning-only) | argument → config default → STOP |
 | `--parent` | argument → "new" | N/A (Stories already exist) |
 | `--stop-at` | argument → none (full) | argument → none (full) |
 | `--dry-run` | argument → false | argument → false |
 
 ## Pipeline Flow
 
-### Document Pipeline (Mode A)
+### Document Pipeline (Mode A / A-planning)
 
 ```
 Phase 1: VALIDATE
@@ -124,7 +158,14 @@ Phase 2.5: MANIFEST STORIES
   Batch-create Epic + Stories + Links in Jira
   >>> Failed items → STOP (devplan requires all issue_refs)
 
-Phase 3: DEVPLAN
+  >>> CODEBASE CHECK: --codebase resolved?
+      NO  → STOP (planning-only complete). Emit planning report with resume guidance:
+            "Planning pipeline complete. N Stories created.
+             To generate Subtasks: /imbas:imbas-pipeline <source> --codebase /path/to/repo
+             Or individually: /imbas:imbas-devplan --run <run-id> --codebase /path/to/repo"
+      YES → continue to Phase 3
+
+Phase 3: DEVPLAN (requires --codebase)
   Spawn imbas-engineer → codebase exploration + EARS Subtask generation
   Cross-Story Task extraction + B→A feedback
   >>> GATE 3: Manifest valid + no needs_review → auto-approve | Any flag → STOP
@@ -136,10 +177,15 @@ Phase 3.5: MANIFEST DEVPLAN
 FINAL: Pipeline completion report
 ```
 
-### Devplan Pipeline (Mode B)
+### Devplan Pipeline (Mode B, `--codebase` required)
 
 ```
 Phase 0: Load Stories from Jira ([OP: get_issue] per key)
+  >>> CODEBASE CHECK: --codebase resolved?
+      NO  → STOP at Phase 0: "Devplan pipeline requires --codebase.
+             Subtask generation needs a codebase to explore.
+             Usage: /imbas:imbas-pipeline PROJ-42 --codebase /path/to/repo"
+      YES → continue
 
 Phase 3: DEVPLAN
   Spawn imbas-engineer → codebase exploration + EARS Subtask generation

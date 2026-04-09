@@ -12,6 +12,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 |-------|--------|
 | No config.json found | STOP: "imbas not initialized. Run /imbas:imbas-setup first." |
 | No project key (argument or config) | STOP: "No project key. Run /imbas:imbas-setup or pass --project KEY." |
+| No codebase path in devplan mode | STOP: "Devplan pipeline requires --codebase. Subtask generation needs a codebase to explore." |
 | Source file not found | STOP: "Source file not found: \<path\>. Check the path and try again." |
 | Confluence URL invalid / page not found | STOP: "Could not fetch Confluence page. Verify the URL and your permissions." |
 
@@ -78,6 +79,19 @@ When pipeline stops at a gate, the safest recovery is fixing the issue and re-ru
 
 This creates a NEW run (new run_id). Previous run state is preserved and can be inspected with `/imbas:imbas-status <old-run-id>`.
 
+### Resume After Planning-Only
+
+When pipeline completed in planning-only mode (no `--codebase`), resume with codebase:
+
+```
+# Re-run full pipeline with codebase:
+/imbas:imbas-pipeline <source> --codebase /path/to/repo
+
+# Or run devplan individually on the existing run:
+/imbas:imbas-devplan --run <run-id> --codebase /path/to/repo
+/imbas:imbas-manifest devplan --run <run-id>
+```
+
 ### Manual Continuation
 
 When pipeline stops after some phases completed, continue manually from the stop point:
@@ -129,3 +143,4 @@ These errors only occur in pipeline context (not in individual skills):
 | Mixed project keys in Story input | PROJ-42,OTHER-10 have different projects | STOP: "All Story keys must belong to the same project." |
 | --stop-at value invalid | Not one of: validate, split, manifest-stories, devplan | STOP: "Invalid --stop-at value." |
 | Phase 2.5 Story failure blocks Phase 3 | Any Story creation failed | STOP: devplan requires all issue_refs |
+| No codebase — planning-only stop | Document pipeline, --codebase not resolved | Normal exit after manifest-stories with planning-only report and resume guidance |

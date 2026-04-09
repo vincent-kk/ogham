@@ -2,6 +2,7 @@
 name: imbas-digest
 user_invocable: true
 description: "[imbas:imbas-digest] Compresses an issue's full context (description + comment thread + media) into a structured summary and posts it as a comment or digest entry (Jira comment, GitHub comment, or local ## Digest append). Uses State Tracking + QA-Prompting hybrid approach. Trigger: \"digest issue\", \"이슈 정리\", \"이슈 요약\", \"티켓 정리\", \"티켓 요약\", \"imbas digest\""
+argument-hint: "<issue-ref> [--preview] [--no-media]"
 version: "1.0.0"
 complexity: moderate
 plugin: imbas

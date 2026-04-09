@@ -21,13 +21,19 @@ Step 1 — Load Run & Manifest Checks
      - action: "start_phase", phase: "devplan"
      → Sets devplan.status = "in_progress", current_phase = "devplan"
 
+Step 1.5 — Codebase Resolution
+  Resolve codebase path: --codebase argument > config.defaults.codebase > STOP
+  IF codebase is null:
+    → STOP: "Devplan requires --codebase. Subtask generation needs a codebase to explore.
+       Usage: /imbas:imbas-devplan --run <run-id> --codebase /path/to/repo"
+
 Step 2 — imbas-engineer Agent Spawn
   - Spawn agent: imbas-engineer
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input provided to agent:
     - stories-manifest.json (Story descriptions with issue_refs)
     - source.md (read-only reference — original planning document for domain context)
-    - Local codebase root path (project working directory)
+    - Codebase root path (resolved --codebase value from Step 1.5)
     - Architecture documents path (if available)
     - config.json subtask_limits:
       - max_lines: 200 (max lines of code per Subtask)

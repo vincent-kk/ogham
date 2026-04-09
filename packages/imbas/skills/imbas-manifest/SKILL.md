@@ -2,6 +2,7 @@
 name: imbas-manifest
 user_invocable: true
 description: "[imbas:imbas-manifest] Execute a stories-manifest or devplan-manifest to batch-create issues (Jira, GitHub, or local). Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\", \"issue 생성\""
+argument-hint: "<stories|devplan> [--run RUN_ID] [--dry-run]"
 version: "1.0.0"
 complexity: moderate
 plugin: imbas

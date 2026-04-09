@@ -2,6 +2,7 @@
 name: imbas-split
 user_invocable: true
 description: "[imbas:imbas-split] Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant Jira Stories. Applies 3→1→2 verification, size checks, and horizontal splitting. Trigger: \"split stories\", \"story 분할\", \"Phase 2\", \"imbas split\""
+argument-hint: "[--run RUN_ID] [--epic EPIC-KEY]"
 version: "1.0.0"
 complexity: complex
 plugin: imbas

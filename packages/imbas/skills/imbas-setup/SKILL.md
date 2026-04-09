@@ -2,6 +2,7 @@
 name: imbas-setup
 user_invocable: true
 description: "[imbas:imbas-setup] Initialize .imbas/ directory, select provider (jira/github/local), create config.json, and cache project metadata. Supports subcommands: init, show, set-project, set-provider, set-language, refresh-cache, clear-temp. Trigger: \"setup imbas\", \"imbas 설정\", \"imbas init\""
+argument-hint: "[init | show | set-project KEY | set-provider PROVIDER | set-language FIELD LANG | refresh-cache [KEY] | clear-temp]"
 version: "1.0.0"
 complexity: simple
 plugin: imbas

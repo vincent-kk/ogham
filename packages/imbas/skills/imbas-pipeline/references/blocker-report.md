@@ -174,6 +174,61 @@ Remove --dry-run flag:
 
 ---
 
+## Planning-Only Report
+
+Emit when pipeline completes manifest-stories but `--codebase` was not provided.
+Not an error — intentional scope boundary. The document has been refined into Stories;
+Subtask generation is deferred until a codebase is available.
+
+```markdown
+# imbas Pipeline — PLANNING COMPLETE
+
+## Run
+- Run ID: <run-id>
+- Project: <KEY>
+- Source: <source>
+- Mode: planning-only (no --codebase provided)
+
+## Results
+
+| Phase | Result | Details |
+|-------|--------|---------|
+| 1. Validate | <PASS\|PASS_WITH_WARNINGS> | <blocking_issues> blocking, <warning_issues> warnings |
+| 2. Split | Auto-approved | <N> Stories |
+| 2.5. Manifest Stories | <Created\|Dry-run> | <issue_refs list or "preview only"> |
+| 3. Devplan | Skipped | No codebase provided |
+| 3.5. Manifest Devplan | Skipped | — |
+
+## Created Issues
+
+### Epic
+- <EPIC-KEY>: <title> (or "none" or "existing: <KEY>")
+
+### Stories
+- <STORY-KEY>: <title>
+- <STORY-KEY>: <title>
+- ...
+
+## Notes
+
+### Warnings
+<accumulated warnings from Phase 1, if any>
+
+## Resume with Codebase
+
+### Option A — Re-run full pipeline with codebase
+`/imbas:imbas-pipeline <source> --codebase /path/to/repo --project <KEY>`
+
+### Option B — Run devplan individually
+`/imbas:imbas-devplan --run <run-id> --codebase /path/to/repo`
+`/imbas:imbas-manifest devplan --run <run-id>`
+
+### Option C — Check current state
+`/imbas:imbas-status <run-id>`
+```
+
+---
+
 ## Progress Report
 
 Emit when `--stop-at` halts the pipeline at a specified phase. Not an error — intentional stop.

@@ -4,6 +4,7 @@
 
 | Error | Action |
 |-------|--------|
+| No codebase path (argument or config) | STOP: "Devplan requires --codebase. Subtask generation needs a codebase to explore. Usage: /imbas:imbas-devplan --run \<run-id\> --codebase /path/to/repo" |
 | Split not completed/reviewed | Display: "Phase 2 must be completed and reviewed. Run /imbas:imbas-split first." |
 | Stories not in Jira (pending) | Display: "Stories must exist in Jira. Run /imbas:imbas-manifest stories first." |
 | AST tools unavailable (sgLoadError) | Log warning once, switch to LLM fallback mode. Continue execution. |
