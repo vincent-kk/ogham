@@ -22,7 +22,7 @@ var bg=Object.create;var Oo=Object.defineProperty;var Sg=Object.getOwnPropertyDe
 - Read-only. Vault writes require a maencof session.
 - Layer filter: L2-L5 (L1 excluded).
 </constraints>`;function gg(t){return{continue:!0,hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:t}}}async function yg(t){let e=hg(t,yn,_n);if(!Iu(e))return{continue:!0};let r=Bu(t);if(!r)return gg("[maencof:lens] Warning: Invalid config at .maencof-lens/config.json");let n=[];for(let s of r.vaults){let o=Iu(s.path),i=o&&Iu(hg(s.path,".maencof","index.json")),a=Hr.READY;if(!o)a=Hr.PATH_NOT_FOUND;else if(!i)a=Hr.INDEX_NOT_BUILT;else try{let l=await mg(s.path);l.isStale&&(a=`${Hr.STALE} (${l.staleSince??"unknown"})`)}catch{a=Hr.READY}let u=s.default?" [default]":"";n.push(`- ${s.name} (${s.path})${u} \u2014 ${a}`)}return gg(cC.replace("{{vaults}}",n.join(`
-`)))}async function uC(){let t=process.cwd(),e=await yg(t);e.hookSpecificOutput?.additionalContext&&process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:"SessionStart",...e.hookSpecificOutput}}))}uC().catch(()=>{process.exit(0)});
+`)))}async function uC(){let t=process.cwd(),e=await yg(t);e.hookSpecificOutput?.additionalContext&&process.stdout.write(JSON.stringify({hookSpecificOutput:{...e.hookSpecificOutput,hookEventName:"SessionStart"}}))}uC().catch(()=>{process.exit(0)});
 /*! Bundled license information:
 
 is-extglob/index.js:
