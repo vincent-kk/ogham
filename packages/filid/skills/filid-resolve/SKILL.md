@@ -8,10 +8,25 @@ complexity: medium
 plugin: filid
 ---
 
-> **EXECUTION MODEL**: Execute all steps as a SINGLE CONTINUOUS OPERATION.
-> After each step completes, IMMEDIATELY proceed to the next.
-> NEVER yield the turn after subagent results return, MCP tools complete,
-> or git operations finish. In --auto mode, no user interaction at any point.
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all steps as a
+> SINGLE CONTINUOUS OPERATION EXCEPT at steps explicitly marked
+> `<!-- [INTERACTIVE] -->` or invoking `AskUserQuestion`. At THOSE EXACT
+> steps, yielding is REQUIRED. At all other steps, NEVER yield.
+>
+> **Under `--auto` mode**: ALL `AskUserQuestion` invocations are skipped by
+> design (see Step 2/3 auto branches). EXECUTION MODEL applies to every
+> step without exception.
+>
+> **Valid reasons to yield**:
+> 1. Interactive mode active AND current step is `[INTERACTIVE]`
+> 2. User decision genuinely required (outside `--auto`)
+> 3. Terminal stage marker emitted: `Resolve complete — N accepted` or `Resolve aborted`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After `code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
+> - After git commit+push — immediately chain `Skill("filid:filid-revalidate")` in the same turn (this is the primary stall point)
+> - Interactive step completion (user responded) — chain next non-interactive step without delay
+> - Justification collection loop — batch all rejections in the same turn when possible
 
 # filid-resolve — Fix Request Resolution
 
@@ -38,6 +53,7 @@ them into ADRs, create technical debt records, and auto-commit/push changes.
      - In `--auto` mode: **ABORT** with error "Working tree has uncommitted changes.
        Stash or commit them before running resolve --auto."
      - In interactive mode: warn and `AskUserQuestion`:
+       <!-- [INTERACTIVE] AskUserQuestion: dirty worktree warning -->
        - "Working tree has uncommitted changes. These will be included in the
          auto-commit. Continue anyway?"
        - Options: "Continue anyway" / "Abort"
@@ -79,6 +95,7 @@ Classify each item by type:
 > If `--auto` is set: **Accept ALL fix items. Skip `AskUserQuestion`.
 > Proceed directly to Step 4.**
 
+<!-- [INTERACTIVE] AskUserQuestion: per-fix accept/reject decision -->
 Use `AskUserQuestion` to present each fix item for decision:
 
 ```
@@ -141,6 +158,7 @@ For each accepted `filid-restructure` item:
 
 For each rejected fix:
 
+<!-- [INTERACTIVE] AskUserQuestion: rejection justification collection -->
 1. **Collect justification**: Use `AskUserQuestion` with free text input
    to collect the developer's reason for rejection.
 
@@ -200,6 +218,7 @@ If there were accepted fixes (files modified by code-surgeon):
      - In `--auto` mode: **ABORT** with error "Typecheck failed after
        applying fixes. Review code-surgeon output."
      - In interactive mode: warn and `AskUserQuestion`:
+       <!-- [INTERACTIVE] AskUserQuestion: typecheck failure warning -->
        - "Typecheck failed after applying fixes. Commit anyway?"
        - Options: "Commit anyway" / "Abort and review"
        - On "Abort and review": stop here, do not commit.

@@ -8,6 +8,24 @@ complexity: complex
 plugin: filid
 ---
 
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a
+> SINGLE CONTINUOUS OPERATION EXCEPT at Stage 3 (Plan & Approval) when
+> `--auto-approve` is absent. At that EXACT step, `AskUserQuestion` yield
+> is REQUIRED. At all other stages, NEVER yield.
+>
+> **Under `--auto-approve` mode**: Stage 3 approval is skipped; EXECUTION
+> MODEL applies to every stage without exception.
+>
+> **Valid reasons to yield**:
+> 1. Stage 3 interactive approval active (no `--auto-approve`)
+> 2. Terminal stage marker emitted: `Sync complete: N corrections applied` or `Sync dry-run complete`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After Stage 1 `drift-analyzer` returns scan results — immediately chain Stage 2 classification
+> - After Stage 2 severity classification — chain Stage 3 plan generation or `--auto-approve` execution in the same turn
+> - Stage 4 `restructurer` execution — do NOT pause between corrections; continue until batch complete
+> - `--dry-run` preview — emit preview AND end in the same turn
+
 # filid-sync — Structural Drift Synchronization
 
 Detect deviations between the current project structure and fractal principles,

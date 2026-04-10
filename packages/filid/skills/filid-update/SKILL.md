@@ -8,6 +8,20 @@ complexity: complex
 plugin: filid
 ---
 
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
+> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after `cache_manage` gate, `qa-reviewer` subagent return,
+> `context-manager` delegation, or `implementer` completion.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required (absent `--auto-approve`, Stage 2 sync may prompt)
+> 2. Terminal stage marker emitted: `Update complete` or `No changes since last run` (Stage 0 early-exit)
+>
+> **HIGH-RISK YIELD POINTS**:
+> - Stage 0 incremental gate result — after reporting "no changes", end in the same turn; after "changes detected", immediately chain Stage 1
+> - Stage 1 qa-reviewer return → Stage 2 sync decision — no yield between severity check and `filid:filid-sync` delegation
+> - Stage 3 context-manager / implementer agent returns — chain validation immediately
+
 # filid-update — Code-Docs-Tests Synchronization
 
 Analyze files changed in the current branch to:

@@ -8,6 +8,24 @@ complexity: complex
 plugin: filid
 ---
 
+> **EXECUTION MODEL (Tier-2b interactive-aware)**: Execute all stages as a
+> SINGLE CONTINUOUS OPERATION EXCEPT at Stage 2 (Plan Review & Approval)
+> when `--auto-approve` is absent. At that EXACT step, `AskUserQuestion`
+> yield is REQUIRED. At all other stages, NEVER yield.
+>
+> **Under `--auto-approve` mode**: Stage 2 approval is skipped; EXECUTION
+> MODEL applies to every stage without exception.
+>
+> **Valid reasons to yield**:
+> 1. Stage 2 interactive approval active (no `--auto-approve`)
+> 2. Terminal stage marker emitted: `Restructure complete: N moves applied` or `Restructure dry-run complete`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After parallel MCP calls (`fractal_scan`, `drift_detect`, `rule_query`) — chain `lca_resolve` and `fractal-architect` delegation without pause
+> - After `fractal-architect` returns proposal — chain Stage 2 approval or `--auto-approve` execution in the same turn
+> - Stage 3 `restructurer` execution — do NOT pause between file moves, renames, or index.ts creations
+> - Stage 4 validation — emit final verdict AND end in the same turn
+
 # filid-restructure — Fractal Structure Restructuring
 
 Analyze the current project directory structure and restructure it according to

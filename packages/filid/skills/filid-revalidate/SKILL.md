@@ -12,6 +12,14 @@ plugin: filid
 > After each step completes, IMMEDIATELY proceed to the next.
 > NEVER yield the turn after parallel subagents return or MCP tools complete.
 > Large diff outputs are internal working data — do NOT summarize to the user.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Revalidate verdict: (PASS|FAIL)`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After parallel verification subagents return — chain verdict aggregation and `re-validate.md` write in the same turn
+> - After PR comment post — emit final verdict in the same turn
 
 # filid-revalidate — Delta Re-validation
 

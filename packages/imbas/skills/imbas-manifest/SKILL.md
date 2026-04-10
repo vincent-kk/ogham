@@ -8,6 +8,19 @@ complexity: moderate
 plugin: imbas
 ---
 
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, subagent returns, or [OP:] provider operations.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required (ambiguity only the user can resolve)
+> 2. Terminal stage marker emitted: `Manifest execution complete` or `Manifest partial failure`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - Provider [OP:] loops — after EACH item creation, save manifest via `manifest_save` and chain the next item in the same turn (do NOT pause to report partial progress)
+> - Dry-run preview display — do NOT pause after rendering the plan; continue to the final report
+> - Per-item failure — log on the item and chain to the next; never stop mid-batch
+
 # imbas-manifest — Manifest Execution (Batch Issue Creation)
 
 Executes a stories-manifest or devplan-manifest to batch-create issues,

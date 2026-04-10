@@ -8,6 +8,20 @@ complexity: medium
 plugin: filid
 ---
 
+> **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
+> After each phase completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after `fractal_scan` result, parallel rule evaluations, or
+> violation aggregation.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Scan complete: N violations` or `Scan complete: no violations found`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After Phase 1 `fractal_scan` returns — chain Phases 2–4 in the same response (existing "CRITICAL — No-Yield Execution" directive at line ~37 is authoritative)
+> - `--fix` auto-remediation loop — do NOT pause between fixes; continue until all applicable violations are addressed
+> - Final violation report — emit consolidated report AND end in the same turn
+
 # filid-scan — FCA-AI Rule Scanner
 
 Scan the project for FCA-AI rule violations across INTENT.md documents,

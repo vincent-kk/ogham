@@ -8,6 +8,20 @@ complexity: complex
 plugin: filid
 ---
 
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
+> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after parallel subagent returns, MCP tool completion, or
+> cross-stage aggregation.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Structure Review verdict: (PASS|FAIL)` with consolidated Stage 6 output
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After Stages 1–5 parallel subagents return — immediately invoke Stage 6 aggregator in the same turn (do NOT summarize intermediate results first)
+> - `--stage=N` mode completion — emit the single-stage verdict AND end in the same turn
+> - Stage-level failure — propagate to Stage 6 consolidation; do NOT early-exit with partial report
+
 # filid-structure-review — 6-Stage PR Verification
 
 Execute the FCA-AI 6-stage PR verification pipeline. Validate structure,

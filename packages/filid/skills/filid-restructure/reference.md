@@ -66,6 +66,7 @@ In `--dry-run` mode, print the plan and exit without changes:
 No changes applied. Remove --dry-run to execute.
 ```
 
+<!-- [INTERACTIVE] AskUserQuestion: Stage 2 restructure plan approval -->
 Without `--auto-approve`, request explicit user confirmation:
 
 ```

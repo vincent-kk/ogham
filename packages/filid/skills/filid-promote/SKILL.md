@@ -8,6 +8,21 @@ complexity: medium
 plugin: filid
 ---
 
+> **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
+> After each phase completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after `qa-reviewer` returns, `implementer` agent completion, or
+> `test_metrics` MCP results.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Promotion complete: N files promoted` or `No eligible test.ts files found`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - Phase 2 eligibility early-exit — emit "no eligible files" message AND end in the same turn
+> - After Phase 3 pattern analysis — immediately chain Phase 4 `implementer` delegation
+> - Phase 4 `implementer` returns spec.ts — chain Phase 5 validation without pause
+> - Phase 6 migration (test.ts → spec.ts rename) — complete the migration AND emit final report in the same turn
+
 # filid-promote — Test Promotion
 
 Promote stable `test.ts` files to parameterized `spec.ts` files satisfying the

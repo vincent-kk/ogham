@@ -8,6 +8,21 @@ complexity: complex
 plugin: imbas
 ---
 
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, subagent returns, or during the 3→1→2
+> verification loop.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Split complete` or `Escape code: E[0-9C]-[0-9]`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After `imbas-planner` subagent returns Story list — immediately proceed to 3→1→2 verification
+> - Reverse-inference `imbas-analyst` subagent return — chain gate evaluation in the same turn
+> - Horizontal split recursion (Phase 2.6) — recursive Story re-verification MUST NOT yield between iterations
+> - Escape condition detection (E2-1/E2-2/EC-1/EC-2) — emit blocker report AND end execution in the same turn
+
 # imbas-split — Phase 2 Story Splitting
 
 Splits a validated planning document into INVEST-compliant Jira Stories with

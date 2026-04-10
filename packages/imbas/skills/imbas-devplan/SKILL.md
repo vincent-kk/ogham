@@ -8,6 +8,24 @@ complexity: complex
 plugin: imbas
 ---
 
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, subagent returns, or manifest validation.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Devplan manifest generated` or `Devplan BLOCKED`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After `imbas-engineer` subagent returns `devplan-manifest.json` — chain `manifest_save` and `manifest_validate` in the same turn
+> - B→A feedback collection — do NOT pause to report feedback; continue to gate evaluation
+> - AST fallback mode detection — log once and continue; do not pause
+> - Devplan-blocked report generation — emit AND end execution in the same turn
+>
+> **LIMITATION**: `imbas-engineer` (opus, maxTurns: 80) may exhaust its
+> subagent-internal turn budget on large codebases. This preamble cannot
+> mitigate internal exhaustion — see follow-up issue for checkpoint contract.
+
 # imbas-devplan — Phase 3 Development Plan Generation
 
 Generates EARS-format Subtasks per Story and extracts cross-Story Tasks

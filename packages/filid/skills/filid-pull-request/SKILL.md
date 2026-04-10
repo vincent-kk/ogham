@@ -8,6 +8,21 @@ complexity: medium
 plugin: filid
 ---
 
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
+> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after `Skill("filid:filid-update")` delegation returns, git
+> command completion, or `gh` CLI operations.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: GitHub PR URL (`https://github.com/<owner>/<repo>/pull/<N>`) or abort message
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After Stage 1 `filid:filid-update` delegation — chain Stage 2 branch analysis in the same turn
+> - After `git diff` / `git log` analysis — do NOT pause to summarize; continue to PR body composition
+> - After `gh pr create` returns PR URL — emit PR URL in the final report (this is the natural terminal; further yield is permitted)
+> - `--skip-update` path — proceed directly to Stage 2 without intermediate summary
+
 # filid-pull-request — FCA-Aware Pull Request Generator
 
 Synchronize FCA context documents (INTENT.md/DETAIL.md) with the latest code,

@@ -93,6 +93,7 @@ sync-plan:
 No changes applied. Remove --dry-run to execute.
 ```
 
+<!-- [INTERACTIVE] AskUserQuestion: Stage 3 correction plan approval -->
 Without `--auto-approve`, request explicit user confirmation:
 
 ```

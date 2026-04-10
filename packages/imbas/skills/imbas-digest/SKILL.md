@@ -8,6 +8,20 @@ complexity: moderate
 plugin: imbas
 ---
 
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, media fetch delegation, or provider
+> publish operations.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required
+> 2. Terminal stage marker emitted: `Digest posted to <target>` or `Digest preview (dry-run)`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - After `imbas-fetch-media` delegation returns — immediately continue to QA-Prompting compression
+> - State Tracking intermediate results — do NOT pause between tracker rounds
+> - Provider publish operation (Jira/GitHub/local) — chain the final confirmation in the same turn
+
 # imbas-digest — Issue Context Compression
 
 Compresses an issue's full context (description, comment thread, and attached media)

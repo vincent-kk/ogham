@@ -93,3 +93,15 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - **훅 수정**: `src/hooks/entries/*.entry.ts` 수정 후 `yarn build:plugin`으로 재빌드
 - **버전**: `src/version.ts` 직접 수정 금지 → `yarn version:sync` 사용
 - **테스트**: `src/**/__tests__/**/*.test.ts`, 벤치마크는 `**/*.bench.ts`
+
+## Anti-Yield Discipline
+
+다단계 skill은 LLM이 phase 경계에서 턴을 끊으면 중단된다. Tier 분류와 3-layer 방어:
+
+- **Tier-1** (파이프라인): `filid-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts
+- **Tier-2a** (다단계 비상호작용): `filid-review`, `filid-revalidate`, `filid-scan`, `filid-structure-review`, `filid-update`, `filid-pull-request`, `filid-promote` — 동일 3-layer
+- **Tier-2b** (상호작용 escape hatch): `filid-resolve`, `filid-sync`, `filid-restructure` — step-level escape hatch preamble + `<!-- [INTERACTIVE] -->` 마커 (AskUserQuestion/[y/N] 지점)
+- **Tier-3** (단일 phase): `filid-setup`, `filid-config`, `filid-guide`, `filid-context-query`, `filid-ast-fallback`, `filid-migrate` — preamble 추가 금지 (과잉 체이닝 유발)
+
+신규 skill 추가 시 Tier-1/2a/2b에 해당하면 `packages/filid/skills/filid-pipeline/SKILL.md:11-24`의 3-layer 패턴을 복제할 것. Terminal stage marker는 `.omc/research/terminal-markers.json`에 등록.
+
