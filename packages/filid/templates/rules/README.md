@@ -51,18 +51,3 @@ Fields:
    in the checkbox list, pre-unchecked.
 5. If the rule is selected, the file is copied to `.claude/rules/<filename>`.
    If later unselected on a re-run of the skill, the file is removed.
-
-## Reference files (not deployed)
-
-The following files in this directory are internal references for plugin
-maintainers, not deployment targets. They are NOT listed in `manifest.json`
-and will never be copied to any project:
-
-- `naming-convention.md`
-- `structure-rules.md`
-- `index-rules.md`
-- `module-rules.md`
-- `dependency-rules.md`
-- `documentation-rules.md`
-
-To promote one of them to a deployable rule doc, add it to `manifest.json`.
