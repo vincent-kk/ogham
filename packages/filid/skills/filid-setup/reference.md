@@ -15,10 +15,11 @@ Phase 0d persists the decision and synchronises `.claude/rules/`.
 Call `project_init({ path })`. The handler:
 - Resolves the git repository root from `path`
 - Creates `.filid/config.json` if absent, with the default 8-rule config
-  and an empty `injected-rules: {}` map
 - Never overwrites an existing config
 
-`project_init` does NOT touch `.claude/rules/` in any way.
+`project_init` does NOT touch `.claude/rules/` in any way. Rule doc state
+is tracked on the filesystem only (`.claude/rules/*.md`), never mirrored
+into `.filid/config.json`.
 
 Default config shape:
 
@@ -34,8 +35,7 @@ Default config shape:
     "circular-dependency": { "enabled": true, "severity": "error" },
     "pure-function-isolation": { "enabled": true, "severity": "error" },
     "zero-peer-file": { "enabled": true, "severity": "warning" }
-  },
-  "injected-rules": {}
+  }
 }
 ```
 
@@ -56,7 +56,7 @@ Call `rule_docs_sync({ action: "status", path })`. Response shape:
       title: string;         // checkbox label
       description: string;   // checkbox description
       deployed: boolean;     // file currently exists under .claude/rules/
-      selected: boolean;     // config opts it in (required ⇒ always true)
+      selected: boolean;     // required || deployed (filesystem-derived)
     }>;
   };
 }
@@ -108,7 +108,6 @@ Response shape:
 ```ts
 {
   action: "sync";
-  configWritten: boolean;
   selections: Record<string, boolean>;
   result: {
     copied: string[];     // filenames that were freshly deployed
@@ -119,11 +118,12 @@ Response shape:
 }
 ```
 
-The handler first persists `selections` into `.filid/config.json`
-(`injected-rules` field), then walks the manifest and performs the
-filesystem diff. Existing rule doc files are never overwritten — if a
-user edited `.claude/rules/fca.md` locally, re-running the skill with
-`fca` still selected will leave their edits untouched.
+The handler walks the manifest and performs the filesystem diff under
+`.claude/rules/`. No rule doc state is stored in `.filid/config.json`.
+
+Existing rule doc files are never overwritten — if a user edited
+`.claude/rules/fca.md` locally, re-running the skill with `fca` still
+selected will leave their edits untouched.
 
 Print a one-line summary:
 ```
@@ -151,12 +151,29 @@ should be committed to version control.
 `/filid:filid-setup` is safe to run repeatedly. On a second or later
 invocation in the same project:
 - Phase 0a is a no-op (config already exists)
-- Phase 0b returns `selected` reflecting the current `injected-rules`
-- Phase 0c pre-fills the checkbox with the saved selection
+- Phase 0b returns `selected` derived from the filesystem
+  (`required || deployed`)
+- Phase 0c pre-fills the checkbox with the current filesystem state —
+  rule docs that already exist under `.claude/rules/` appear pre-checked
 - Phase 0d applies only the diff (add newly-checked, remove newly-unchecked)
 
 This makes the skill the **single management entry point** for optional
 rule doc toggling.
+
+### Rules-only Mode (`--rules`)
+
+When the user passes `--rules`, the skill runs Phase 0a → Phase 0d and
+then stops. This is useful when:
+- The user wants to enable/disable an optional rule doc without
+  triggering a full project scan
+- A project is already initialised and only the rule doc selection has
+  drifted from the user's intent
+- CI or a script needs a fast, idempotent path to reconcile
+  `.claude/rules/` with the manifest
+
+The skill prints a short completion line after Phase 0d in this mode and
+emits nothing from Phase 1–5. All interactive behaviour in Phase 0c is
+preserved — the user still confirms selections via the checkbox UI.
 
 ---
 

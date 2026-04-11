@@ -19,7 +19,6 @@ import {
   loadRuleOverrides,
   resolveLanguage,
   resolveMaxDepth,
-  resolveRuleDocSelection,
   syncRuleDocs,
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
@@ -448,12 +447,7 @@ describe('config-loader', () => {
         'utf8',
       );
 
-      // config with extra opted in
-      const config = createDefaultConfig();
-      config['injected-rules'] = { extra: true };
-      writeConfig(tmpDir, config);
-
-      // deploy fca only
+      // deploy fca only — filesystem is the single source of truth.
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
       writeFileSync(
         join(tmpDir, '.claude', 'rules', 'fca.md'),
@@ -469,13 +463,69 @@ describe('config-loader', () => {
       expect(fca).toBeDefined();
       expect(fca!.required).toBe(true);
       expect(fca!.deployed).toBe(true);
-      expect(fca!.selected).toBe(true);
+      expect(fca!.selected).toBe(true); // required → always selected
 
       const extra = status.entries.find((e) => e.id === 'extra');
       expect(extra).toBeDefined();
       expect(extra!.required).toBe(false);
       expect(extra!.deployed).toBe(false);
-      expect(extra!.selected).toBe(true); // opted in via injected-rules
+      expect(extra!.selected).toBe(false); // not deployed → not selected
+    });
+
+    it('marks an optional entry as selected when its file is deployed', () => {
+      const pluginRoot = join(tmpDir, 'plugin');
+      mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'fca.md'),
+        '# FCA',
+        'utf8',
+      );
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'extra.md'),
+        '# Extra',
+        'utf8',
+      );
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'manifest.json'),
+        JSON.stringify({
+          version: '1.0',
+          rules: [
+            {
+              id: 'fca',
+              filename: 'fca.md',
+              required: true,
+              title: 'FCA',
+              description: 'required',
+            },
+            {
+              id: 'extra',
+              filename: 'extra.md',
+              required: false,
+              title: 'Extra',
+              description: 'optional',
+            },
+          ],
+        }),
+        'utf8',
+      );
+
+      // Deploy both files — optional entry should light up via filesystem.
+      mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        '# Deployed FCA',
+        'utf8',
+      );
+      writeFileSync(
+        join(tmpDir, '.claude', 'rules', 'extra.md'),
+        '# Deployed Extra',
+        'utf8',
+      );
+
+      const status = getRuleDocsStatus(tmpDir, pluginRoot);
+      const extra = status.entries.find((e) => e.id === 'extra');
+      expect(extra!.deployed).toBe(true);
+      expect(extra!.selected).toBe(true);
     });
 
     it('returns pluginRootResolved=false when env is unset and no arg', () => {
@@ -488,49 +538,6 @@ describe('config-loader', () => {
       } finally {
         if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
       }
-    });
-  });
-
-  describe('resolveRuleDocSelection', () => {
-    const manifest = {
-      version: '1.0',
-      rules: [
-        {
-          id: 'fca',
-          filename: 'fca.md',
-          required: true,
-          title: 'FCA',
-          description: '',
-        },
-        {
-          id: 'style',
-          filename: 'style.md',
-          required: false,
-          title: 'Style',
-          description: '',
-        },
-      ],
-    };
-
-    it('always includes required ids', () => {
-      const selection = resolveRuleDocSelection(manifest, null);
-      expect(selection.has('fca')).toBe(true);
-      expect(selection.has('style')).toBe(false);
-    });
-
-    it('honours injected-rules for optional ids', () => {
-      const config = createDefaultConfig();
-      config['injected-rules'] = { style: true };
-      const selection = resolveRuleDocSelection(manifest, config);
-      expect(selection.has('fca')).toBe(true);
-      expect(selection.has('style')).toBe(true);
-    });
-
-    it('excludes optional ids set to false', () => {
-      const config = createDefaultConfig();
-      config['injected-rules'] = { style: false };
-      const selection = resolveRuleDocSelection(manifest, config);
-      expect(selection.has('style')).toBe(false);
     });
   });
 

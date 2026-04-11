@@ -107,7 +107,6 @@ export {
   loadRuleDocsManifest,
   loadRuleOverrides,
   resolveLanguage,
-  resolveRuleDocSelection,
   syncRuleDocs,
   writeConfig,
 } from './infra/config-loader/config-loader.js';

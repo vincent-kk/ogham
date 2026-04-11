@@ -34,9 +34,9 @@ Fields:
 
 | Field | Meaning |
 |---|---|
-| `id` | Stable identifier used as the key in `.filid/config.json`'s `injected-rules` map |
+| `id` | Stable identifier for the rule doc (used in logs and the sync response) |
 | `filename` | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`) |
-| `required` | `true` → always deployed, UI pre-checks and disables the checkbox. `false` → opt-in |
+| `required` | `true` → always deployed, UI pre-checks and disables the checkbox. `false` → opt-in (pre-checked iff already deployed) |
 | `title` | Short label shown in the `filid-setup` checkbox UI |
 | `description` | One-line summary shown underneath the checkbox |
 

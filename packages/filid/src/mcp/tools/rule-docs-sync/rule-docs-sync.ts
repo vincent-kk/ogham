@@ -4,10 +4,10 @@
  * filid-setup skill. Three actions wrap the core functions in
  * `config-loader.ts`:
  *
- *   - `status` — inspect current state (config + filesystem), returned as a
+ *   - `status` — inspect current filesystem state, returned as a
  *     checkbox-ready snapshot.
- *   - `sync`   — write the provided selection into `.filid/config.json`
- *     (`injected-rules`) and synchronise `.claude/rules/` accordingly.
+ *   - `sync`   — synchronise `.claude/rules/` to match the provided selection
+ *     (filesystem is the single source of truth; no config-side tracking).
  *   - `manifest` — return the raw manifest (id/filename/required/title/desc)
  *     for skill UI rendering.
  *
@@ -15,12 +15,8 @@
  */
 import {
   getRuleDocsStatus,
-  loadConfig,
   loadRuleDocsManifest,
   syncRuleDocs,
-  writeConfig,
-  createDefaultConfig,
-  type FilidConfig,
   type RuleDocSyncResult,
   type RuleDocsManifest,
   type RuleDocsStatus,
@@ -45,7 +41,6 @@ export type RuleDocsSyncOutput =
   | {
       action: 'sync';
       result: RuleDocSyncResult;
-      configWritten: boolean;
       selections: Record<string, boolean>;
     };
 
@@ -86,26 +81,14 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
     case 'sync': {
       const selections = input.selections ?? {};
 
-      // Persist the user selection to the root .filid/config.json before
-      // touching the filesystem so the config-loader remains the single
-      // source of truth for "desired state".
-      const existing = loadConfig(input.path);
-      const config: FilidConfig = existing ?? createDefaultConfig();
+      // Normalise selection input. The filesystem under `.claude/rules/`
+      // is the single source of truth for rule doc state — no config-side
+      // tracking and no legacy cleanup.
       const normalized: Record<string, boolean> = {};
       for (const [key, value] of Object.entries(selections)) {
         normalized[key] = value === true;
       }
-      config['injected-rules'] = normalized;
 
-      let configWritten: boolean;
-      try {
-        writeConfig(input.path, config);
-        configWritten = true;
-      } catch {
-        configWritten = false;
-      }
-
-      // Build only the optional user selection set here.
       // Required rules are enforced downstream by syncRuleDocs() from the
       // manifest, regardless of whether they appear in `normalized`.
       const selectedIds = new Set<string>();
@@ -117,7 +100,6 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
       return {
         action: 'sync',
         result,
-        configWritten,
         selections: normalized,
       };
     }

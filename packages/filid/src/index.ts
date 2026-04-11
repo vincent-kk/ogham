@@ -88,7 +88,6 @@ export {
   loadRuleDocsManifest,
   loadRuleOverrides,
   resolveLanguage,
-  resolveRuleDocSelection,
   syncRuleDocs,
   writeConfig,
   // coverage

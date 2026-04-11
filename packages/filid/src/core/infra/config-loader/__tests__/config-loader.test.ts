@@ -28,7 +28,7 @@ describe('writeConfig', () => {
     mkdirSync(nestedDir, { recursive: true });
 
     const config = createDefaultConfig();
-    config['injected-rules'] = { rfx: true };
+    config.language = 'ko';
 
     writeConfig(nestedDir, config);
 
@@ -39,8 +39,8 @@ describe('writeConfig', () => {
     expect(() => readFileSync(nestedConfigPath, 'utf8')).toThrow();
 
     const written = JSON.parse(readFileSync(rootConfigPath, 'utf8')) as {
-      'injected-rules'?: Record<string, boolean>;
+      language?: string;
     };
-    expect(written['injected-rules']).toEqual({ rfx: true });
+    expect(written.language).toBe('ko');
   });
 });

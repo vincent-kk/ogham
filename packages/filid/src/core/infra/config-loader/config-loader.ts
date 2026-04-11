@@ -19,7 +19,6 @@ export type { FilidConfig, InitResult } from './loaders/filid-config.js';
 export {
   getRuleDocsStatus,
   loadRuleDocsManifest,
-  resolveRuleDocSelection,
   syncRuleDocs,
 } from './loaders/rule-docs-manifest.js';
 export type {

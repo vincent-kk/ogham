@@ -23,13 +23,6 @@ export interface FilidConfig {
   /** Additional file names allowed as peer files in fractal roots (zero-peer-file rule). */
   'additional-allowed'?: string[];
   /**
-   * User-selected optional rule docs that should be deployed to `.claude/rules/`.
-   * Keys match `RuleDocEntry.id` in `templates/rules/manifest.json`.
-   * `true` → deploy on next filid-setup run; `false` or absent → remove.
-   * Required rules (e.g. `fca`) ignore this map and are always deployed.
-   */
-  'injected-rules'?: Record<string, boolean>;
-  /**
    * Optional scan option overrides. Missing fields fall back to DEFAULT_SCAN_OPTIONS.
    * Currently only `maxDepth` is honoured; additional fields may be added later.
    */
@@ -132,7 +125,6 @@ export function createDefaultConfig(): FilidConfig {
       },
       [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: { enabled: true, severity: 'warning' },
     },
-    'injected-rules': {},
   };
 }
 

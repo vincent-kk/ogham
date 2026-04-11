@@ -1,9 +1,9 @@
 ---
 name: filid-setup
 user_invocable: true
-description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, deploy selected rule docs via checkbox UI, scan the directory tree, and generate missing INTENT.md and DETAIL.md files."
-argument-hint: "[path]"
-version: "1.1.0"
+description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, deploy selected rule docs via checkbox UI, scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
+argument-hint: "[path] [--rules]"
+version: "1.2.0"
 complexity: medium
 plugin: filid
 ---
@@ -39,6 +39,18 @@ validation report.
 - Regenerating INTENT.md files after a large-scale refactor removed them
 - Creating DETAIL.md scaffolds for modules that lack formal specifications
 - Auditing which directories are correctly classified before running `/filid:filid-scan`
+
+## Argument Parsing
+
+Before Phase 0a, inspect the invocation arguments:
+
+- If the arguments contain `--rules`, enter **rules-only mode**: execute
+  Phase 0a → Phase 0d, then STOP (skip Phase 1–5 entirely). This is the
+  lightweight path for toggling which `.claude/rules/*.md` files are
+  deployed without re-scanning or regenerating INTENT.md/DETAIL.md.
+- Otherwise run the full workflow (Phase 0a → Phase 5).
+- Any non-flag token is treated as the target `path` (default: current
+  working directory).
 
 ## Prerequisites — Environment Check
 
@@ -86,8 +98,8 @@ The response `status.entries[]` is a list of:
 { id, filename, required, title, description, deployed, selected }
 ```
 where `deployed` reflects filesystem state under `.claude/rules/` and
-`selected` reflects the desired state recorded in
-`.filid/config.json`'s `injected-rules` map.
+`selected` mirrors the filesystem (`required || deployed`) — there is
+no config-side tracking. The filesystem is the single source of truth.
 
 Build an internal map `currentSelection: Record<string, boolean>` from
 these entries (`selected` field). Required rules are always `true`.
@@ -126,10 +138,12 @@ rule_docs_sync({
 })
 ```
 
-The handler writes `injected-rules` into `.filid/config.json` and then
-copies/removes files under `.claude/rules/` to match. Inspect
-`result.copied`, `result.removed`, `result.unchanged`, `result.skipped`
-and surface a one-line summary to the user
+The handler copies/removes files under `.claude/rules/` to match the
+requested selection. No rule doc state is stored in `.filid/config.json`
+— the filesystem is authoritative.
+
+Inspect `result.copied`, `result.removed`, `result.unchanged`,
+`result.skipped` and surface a one-line summary to the user
 (e.g., `"규칙 문서: copied=fca.md, removed=0, unchanged=0"`).
 
 If `result.skipped` is non-empty, print each `{ id, reason }` as a
@@ -139,7 +153,9 @@ warning but DO NOT abort — continue with the remaining phases.
 > should be committed to version control. `.filid/review/` and
 > `.filid/cache/` should be gitignored (transient data).
 
-**→ Immediately proceed to Phase 1.**
+**→ If the invocation passed `--rules`, STOP here and emit a short
+completion line (`"규칙 문서 업데이트 완료 — Phase 1–5 생략"`). Otherwise
+immediately proceed to Phase 1.**
 
 ### Phase 1 — Directory Scan
 
@@ -199,12 +215,13 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 > Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well.
 
 ```
-/filid:filid-setup [path]
+/filid:filid-setup [path] [--rules]
 ```
 
-| Parameter | Type   | Default                   | Description                  |
-| --------- | ------ | ------------------------- | ---------------------------- |
-| `path`    | string | Current working directory | Root directory to initialize |
+| Parameter | Type   | Default                   | Description                                                  |
+| --------- | ------ | ------------------------- | ------------------------------------------------------------ |
+| `path`    | string | Current working directory | Root directory to initialize                                 |
+| `--rules` | flag   | off                       | Rules-only mode: run Phase 0a–0d, then stop (skip Phase 1–5) |
 
 ## Quick Reference
 
@@ -215,8 +232,11 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Initialize a specific sub-directory
 /filid:filid-setup src/payments
 
-# Re-run to toggle optional rule docs without re-scanning
-# (checkbox pre-fills with the current config state)
+# Update rule docs only — no scan, no INTENT.md/DETAIL.md generation
+/filid:filid-setup --rules
+
+# Re-run to toggle optional rule docs; the checkbox pre-fills from the
+# current filesystem state (already-deployed rules are pre-checked).
 
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers

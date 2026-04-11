@@ -10,7 +10,6 @@ import { join } from 'node:path';
 import { createLogger } from '../../../../lib/logger.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
 import { resolvePluginRoot } from '../utils/resolve-plugin-root.js';
-import { loadConfig, type FilidConfig } from './filid-config.js';
 
 const log = createLogger('config-loader');
 
@@ -46,7 +45,11 @@ export interface RuleDocStatusEntry {
   description: string;
   /** File currently exists on disk under `.claude/rules/`. */
   deployed: boolean;
-  /** Config opts this rule in. Always `true` for required rules. */
+  /**
+   * Desired state for the checkbox UI. Derived from the filesystem:
+   * `true` when the rule is required or the doc is currently deployed.
+   * Filesystem is the single source of truth — no config-side tracking.
+   */
   selected: boolean;
 }
 
@@ -75,30 +78,15 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
 }
 
 /**
- * Resolve the desired selection set for a given project.
- * Required rules are always selected. Optional rules honour
- * `config['injected-rules'][id] === true`.
- */
-export function resolveRuleDocSelection(
-  manifest: RuleDocsManifest,
-  config: FilidConfig | null,
-): Set<string> {
-  const injected = config?.['injected-rules'] ?? {};
-  const selected = new Set<string>();
-  for (const entry of manifest.rules) {
-    if (entry.required || injected[entry.id] === true) {
-      selected.add(entry.id);
-    }
-  }
-  return selected;
-}
-
-/**
- * Inspect the current rule doc state (filesystem + config) without mutating
+ * Inspect the current rule doc state from the filesystem without mutating
  * anything. Used by the filid-setup skill to render a checkbox UI.
  *
- * Depends on `loadConfig` from filid-config (sibling organ import — no cycle:
- * rule-docs-manifest → filid-config, direction is one-way).
+ * The filesystem (`.claude/rules/<filename>`) is the SINGLE source of truth:
+ * - `deployed` → file exists on disk
+ * - `selected` → `required || deployed` (used to pre-check the checkbox UI)
+ *
+ * No `.filid/config.json` inspection is performed — rule doc state is never
+ * mirrored into the config.
  */
 export function getRuleDocsStatus(
   projectRoot: string,
@@ -119,8 +107,6 @@ export function getRuleDocsStatus(
   }
 
   const resolvedRoot = resolveGitRoot(projectRoot);
-  const config = loadConfig(resolvedRoot);
-  const injected = config?.['injected-rules'] ?? {};
 
   const entries: RuleDocStatusEntry[] = manifest.rules.map((entry) => {
     const destPath = join(
@@ -130,7 +116,7 @@ export function getRuleDocsStatus(
       entry.filename,
     );
     const deployed = existsSync(destPath);
-    const selected = entry.required || injected[entry.id] === true;
+    const selected = entry.required || deployed;
     return {
       id: entry.id,
       filename: entry.filename,
