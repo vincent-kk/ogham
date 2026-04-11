@@ -2,31 +2,32 @@
 
 ## Purpose
 
-FCA-AI 핵심 알고리즘 구현. 20개 모듈: 프랙탈 트리 구축, 드리프트 감지, 규칙 평가, 커버리지 검증 등.
+FCA-AI 핵심 알고리즘 구현. 트리 구축, 규칙 평가, 드리프트 감지, 의존성 분석, 커버리지 검증, PR 요약 생성을 7개 sub-fractal로 분리하여 제공한다.
 
 ## Structure
 
-| 카테고리 | 모듈 |
-|----------|------|
-| 트리/분류 | `fractal-tree`, `organ-classifier`, `boundary-detector` |
-| 규칙/검증 | `rule-engine`(8규칙), `fractal-validator`, `document-validator`, `drift-detector` |
-| 분석/그래프 | `project-analyzer`, `dependency-graph`, `lca-calculator` |
-| 모듈 분석 | `index-analyzer`, `module-main-analyzer` |
-| 인프라 | `cache-manager`, `project-hash`, `change-queue` |
-| 커버리지 | `usage-tracker`, `test-coverage-checker`, `import-resolver` |
-| 유틸리티 | `peer-file-registry`, `pr-summary-generator` |
+| sub-fractal | 포함 모듈 |
+|---|---|
+| `tree/` | `fractal-tree`, `organ-classifier`, `boundary-detector` |
+| `rules/` | `rule-engine` (8 규칙), `fractal-validator`, `document-validator`, `drift-detector` |
+| `analysis/` | `project-analyzer`, `dependency-graph`, `lca-calculator` |
+| `module/` | `index-analyzer`, `module-main-analyzer` |
+| `infra/` | `cache-manager`, `project-hash`, `change-queue`, `config-loader` |
+| `coverage-verify/` | `usage-tracker`, `test-coverage-checker`, `import-resolver` |
+| `pr-summary/` | PR 요약 parsers/aggregators/renderers |
 
 ## Conventions
 
-- 외부 I/O: `fractal-tree`, `rule-engine`, `cache-manager`, `project-hash`, `import-resolver`, `usage-tracker`, `test-coverage-checker`에만 허용
-- 나머지 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
+- 외부 I/O 허용: `fractal-tree`, `rule-engine`, `cache-manager`, `project-hash`, `config-loader`, `import-resolver`, `usage-tracker`, `test-coverage-checker`
+- 그 외 모듈은 순수 함수 지향 (입력 → 출력, 사이드 이펙트 없음)
+- sub-fractal 간 직접 import 금지: `core/index.ts` 배럴 경유
 
 ## Boundaries
 
 ### Always do
 
-- 새 규칙 추가 시 `rule-engine.ts`의 `loadBuiltinRules`에 등록
-- 공개 함수는 `src/index.ts`에 re-export
+- 새 규칙 추가 시 `rules/rule-engine/rule-engine.ts`의 `loadBuiltinRules`에 등록
+- 공개 함수는 `core/index.ts`와 `src/index.ts`에 모두 re-export
 
 ### Ask first
 
@@ -35,7 +36,9 @@ FCA-AI 핵심 알고리즘 구현. 20개 모듈: 프랙탈 트리 구축, 드리
 
 ### Never do
 
-- `mcp/`, `hooks/`, `ast/` 모듈 직접 import (역방향 금지)
-- `ORGAN_DIR_NAMES` 이름 기반 분류를 신규 코드에 사용
+- `mcp/`, `hooks/`, `ast/`, `metrics/`, `compress/` 모듈 역방향 import
+- `KNOWN_ORGAN_DIR_NAMES` 이름 기반 분류를 신규 코드 기본 전략으로 사용
 
-**Dependencies**: `../types/`, `../ast/`, `fast-glob`
+## Dependencies
+
+- `../types/`, `../ast/`, `../constants/`, `fast-glob`
