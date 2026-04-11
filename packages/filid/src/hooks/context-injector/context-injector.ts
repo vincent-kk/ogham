@@ -62,11 +62,13 @@ export function buildMinimalContext(cwd: string): string {
     );
   }
 
-  try {
-    const lang = resolveLanguage(config);
-    lines.push(`[filid:lang] ${lang}`);
+  // resolveLanguage is pure and never throws; emit the lang tag
+  // unconditionally so the hook contract always carries exactly one
+  // [filid:lang] line.
+  lines.push(`[filid:lang] ${resolveLanguage(config)}`);
 
-    if (config) {
+  if (config) {
+    try {
       const overrides = config.rules ?? {};
       const allRules = loadBuiltinRules(overrides, config['additional-allowed']);
       const disabledRules = allRules.filter((r) => !r.enabled);
@@ -75,10 +77,10 @@ export function buildMinimalContext(cwd: string): string {
           `[filid] Disabled rules: ${disabledRules.map((r) => r.id).join(', ')}`,
         );
       }
+    } catch {
+      // rule-engine load failure — skip the disabled-rules line silently;
+      // the pointer + lang tag above are already in place.
     }
-  } catch {
-    // on rule load failure, still inject default language
-    lines.push('[filid:lang] en');
   }
 
   return lines.join('\n');
