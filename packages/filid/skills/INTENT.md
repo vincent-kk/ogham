@@ -2,14 +2,14 @@
 
 ## Purpose
 
-17개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
+18개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
 
 ## Structure (grouped by role)
 
 | 그룹 | 스킬 |
 |------|------|
 | 파이프라인/리뷰 | `filid-pipeline`, `filid-review`, `filid-resolve`, `filid-revalidate`, `filid-structure-review` |
-| 문서/동기화 | `filid-update`, `filid-pull-request`, `filid-sync`, `filid-restructure`, `filid-migrate` |
+| 문서/동기화 | `filid-update`, `filid-enrich-docs`, `filid-pull-request`, `filid-sync`, `filid-restructure`, `filid-migrate` |
 | 스캔/설정 | `filid-setup`, `filid-scan`, `filid-guide`, `filid-context-query`, `filid-config` |
 | 테스트/폴백 | `filid-promote`, `filid-ast-fallback` |
 
