@@ -6,6 +6,11 @@
  *   2. Auto-detect — if no .filid marker, scan for INTENT.md and create .filid/
  *   3. Maintenance — prune expired session cache files
  *
+ * The hook intentionally does NOT touch `.claude/rules/` or
+ * `.filid/config.json`. Rule doc deployment and config creation are handled
+ * exclusively by the `/filid:filid-setup` skill so every change to
+ * `.claude/rules/` is the result of an explicit user action.
+ *
  * Note: run.cjs spawns this via spawnSync with stdio:'inherit',
  * so stdin is inherited from the parent (Claude Code), which
  * delivers EOF when the hook input is fully written.
@@ -18,7 +23,6 @@ import {
   pruneOldSessions,
   pruneStaleCacheDirs,
 } from '../../core/infra/cache-manager/cache-manager.js';
-import { ensureFcaRules } from '../../core/infra/config-loader/config-loader.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 
@@ -92,16 +96,9 @@ export function processSetup(input: SessionStartInput): HookOutput {
     pruneOldSessions(cwd);
     pruneStaleCacheDirs();
 
-    // Ensure .claude/rules/fca.md exists for FCA projects
-    if (isFca) {
-      try {
-        ensureFcaRules(cwd);
-      } catch (e) {
-        log.debug('ensureFcaRules failed:', e);
-      }
-    }
-
-    // Only inject context for FCA projects to minimize token usage
+    // Only inject context for FCA projects to minimize token usage.
+    // Rule doc deployment is intentionally skipped here — the filid-setup
+    // skill is the single source of writes to `.claude/rules/`.
     if (isFca) {
       return {
         continue: true,

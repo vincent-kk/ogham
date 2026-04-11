@@ -12,6 +12,7 @@ import type {
   RuleEvaluationResult,
   RuleViolation,
 } from '../../../types/rules.js';
+import type { ScanOptions } from '../../../types/scan.js';
 
 import { loadBuiltinRules } from '../rule-engine/rule-engine.js';
 
@@ -20,11 +21,13 @@ import { loadBuiltinRules } from '../rule-engine/rule-engine.js';
  *
  * @param tree - 검증할 프랙탈 트리
  * @param rules - 적용할 규칙 목록 (미제공 시 rule-engine의 내장 규칙 사용)
+ * @param options - 스캔 옵션 (max-depth 규칙 등이 참조)
  * @returns 검증 보고서 (규칙 평가 결과 + 타임스탬프)
  */
 export function validateStructure(
   tree: FractalTree,
   rules?: Rule[],
+  options?: ScanOptions,
 ): ValidationReport {
   const start = Date.now();
   let ruleList: Rule[];
@@ -41,7 +44,7 @@ export function validateStructure(
   let skipped = 0;
 
   for (const [, node] of tree.nodes) {
-    const context: RuleContext = { node, tree };
+    const context: RuleContext = { node, tree, scanOptions: options };
     for (const rule of ruleList) {
       if (!rule.enabled) {
         skipped++;

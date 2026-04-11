@@ -202,18 +202,18 @@ TypeScript 5.7 (+ Compiler API), @modelcontextprotocol/sdk, fast-glob, esbuild, 
 
 ## Documentation
 
-For technical details, see the [`.metadata/`](./.metadata/) directory:
+For technical details, see the [`.metadata/`](../../.metadata/filid/) directory:
 
 | Document                                             | Content                                                        |
 | ---------------------------------------------------- | -------------------------------------------------------------- |
-| [ARCHITECTURE](./.metadata/01-ARCHITECTURE.md)       | Design philosophy, 4-layer architecture, ADRs                  |
-| [BLUEPRINT](./.metadata/02-BLUEPRINT.md)             | Technical blueprint for 30+ modules                            |
-| [LIFECYCLE](./.metadata/03-LIFECYCLE.md)             | Skill workflows, agent collaboration, hook timeline            |
-| [USAGE](./.metadata/04-USAGE.md)                     | Config file structure, MCP/Hook JSON examples, troubleshooting |
-| [COST-ANALYSIS](./.metadata/05-COST-ANALYSIS.md)     | Hook overhead, bundle size, context token costs                |
-| [HOW-IT-WORKS](./.metadata/06-HOW-IT-WORKS.md)       | AST engine, decision tree, MCP routing                         |
-| [RULES-REFERENCE](./.metadata/07-RULES-REFERENCE.md) | Full rule catalog with constants and thresholds                |
-| [API-SURFACE](./.metadata/08-API-SURFACE.md)         | Public API reference (33 functions + 30 types)                 |
+| [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | Design philosophy, 4-layer architecture, ADRs                  |
+| [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | Technical blueprint for 30+ modules                            |
+| [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | Skill workflows, agent collaboration, hook timeline            |
+| [USAGE](../../.metadata/filid/04-USAGE.md)                     | Config file structure, MCP/Hook JSON examples, troubleshooting |
+| [COST-ANALYSIS](../../.metadata/filid/05-COST-ANALYSIS.md)     | Hook overhead, bundle size, context token costs                |
+| [HOW-IT-WORKS](../../.metadata/filid/06-HOW-IT-WORKS.md)       | AST engine, decision tree, MCP routing                         |
+| [RULES-REFERENCE](../../.metadata/filid/07-RULES-REFERENCE.md) | Full rule catalog with constants and thresholds                |
+| [API-SURFACE](../../.metadata/filid/08-API-SURFACE.md)         | Public API reference (33 functions + 30 types)                 |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
 

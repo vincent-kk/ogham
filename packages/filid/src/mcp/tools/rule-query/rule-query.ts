@@ -1,6 +1,9 @@
 import { resolve } from 'node:path';
 
-import { loadConfig } from '../../../core/infra/config-loader/config-loader.js';
+import {
+  loadConfig,
+  resolveMaxDepth,
+} from '../../../core/infra/config-loader/config-loader.js';
 import {
   evaluateRules,
   getActiveRules,
@@ -106,8 +109,9 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
         throw new Error("targetPath is required for action='check'");
       }
 
-      const tree = await scanProject(input.path);
-      const result = evaluateRules(tree, activeRules);
+      const maxDepth = resolveMaxDepth(config);
+      const tree = await scanProject(input.path, { maxDepth });
+      const result = evaluateRules(tree, activeRules, { maxDepth });
       const absTargetPath = resolve(input.path, input.targetPath);
       const filteredViolations = result.violations.filter(
         (v) =>

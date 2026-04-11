@@ -18,6 +18,7 @@ import { handleFractalScan } from '../tools/fractal-scan/fractal-scan.js';
 import { handleLcaResolve } from '../tools/lca-resolve/lca-resolve.js';
 import { handleProjectInit } from '../tools/project-init/project-init.js';
 import { handleReviewManage } from '../tools/review-manage/review-manage.js';
+import { handleRuleDocsSync } from '../tools/rule-docs-sync/rule-docs-sync.js';
 import { handleRuleQuery } from '../tools/rule-query/rule-query.js';
 import { handleStructureValidate } from '../tools/structure-validate/structure-validate.js';
 import { handleTestMetrics } from '../tools/test-metrics/test-metrics.js';
@@ -201,12 +202,26 @@ export function createServer(): McpServer {
     'project_init',
     {
       description:
-        'Initialize FCA-AI project with .filid/config.json and .claude/rules/fca.md.',
+        'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the filid-setup skill.',
       inputSchema: z.object({
         path: z.string(),
       }),
     },
     wrapHandler(handleProjectInit),
+  );
+
+  server.registerTool(
+    'rule_docs_sync',
+    {
+      description:
+        'Filid-setup skill only: inspect or synchronise `.claude/rules/*.md` deployment against the user selection. Actions: status | sync | manifest.',
+      inputSchema: z.object({
+        action: z.enum(['status', 'sync', 'manifest']),
+        path: z.string(),
+        selections: z.record(z.string(), z.boolean()).optional(),
+      }),
+    },
+    wrapHandler(handleRuleDocsSync),
   );
 
   server.registerTool(

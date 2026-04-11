@@ -2,7 +2,21 @@
 
 ## Purpose
 
-.filid/config.json 로딩, 프로젝트 초기화.
+.filid/config.json 로딩, 프로젝트 초기화, 규칙 문서 동기화.
+
+## Structure
+
+```
+config-loader/
+  config-loader.ts      facade (loaders/ 재수출)
+  index.ts              barrel (config-loader.ts 재수출)
+  loaders/              organ — 두 가지 로더 관심사
+    filid-config.ts     config I/O + initProject
+    rule-docs-manifest.ts  규칙 문서 sync (filid-setup 전용)
+  utils/                organ — 공유 private 헬퍼
+    resolve-git-root.ts
+    resolve-plugin-root.ts
+```
 
 ## Boundaries
 
@@ -14,3 +28,4 @@
 
 ### Never do
 - 모듈 경계 외부 로직 인라인
+- loaders/ 또는 utils/ 내부에 INTENT.md 추가

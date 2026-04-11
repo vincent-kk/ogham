@@ -82,11 +82,14 @@ export {
   ChangeQueue,
   // config
   createDefaultConfig,
-  ensureFcaRules,
+  getRuleDocsStatus,
   initProject,
   loadConfig,
+  loadRuleDocsManifest,
   loadRuleOverrides,
   resolveLanguage,
+  resolveRuleDocSelection,
+  syncRuleDocs,
   writeConfig,
   // coverage
   findSubtreeUsages,

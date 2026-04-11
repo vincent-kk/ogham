@@ -44,8 +44,7 @@
   "init": {
     "files": [
       "INTENT.md",
-      ".filid/config.json",
-      ".claude/rules/fca.md"
+      ".filid/config.json"
     ],
     "minSize": 100,
     "requiredSections": [
@@ -53,7 +52,7 @@
       "## Ask first",
       "## Never do"
     ],
-    "note": "Initial FCA-AI project setup. INTENT.md must include 3-tier boundary sections. .claude/rules/fca.md provides native Claude Code rule enforcement."
+    "note": "Initial FCA-AI project setup. INTENT.md must include 3-tier boundary sections. Rule docs under .claude/rules/ are deployed by the filid-setup skill via the rule_docs_sync MCP tool — not by session hooks, and not by project_init. Their presence is therefore not a required init deliverable."
   },
   "review": {
     "files": [

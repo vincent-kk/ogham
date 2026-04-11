@@ -2,10 +2,26 @@
  * context-injector.ts — UserPromptSubmit hook for FCA-AI context injection.
  *
  * Injects a minimal FCA-AI pointer on the session's first prompt.
- * Full rules are in .claude/rules/fca.md (deployed by setup.ts at SessionStart).
+ *
+ * Output contract (session first prompt only):
+ *   1. Action-path pointer to the active rule doc, OR a warning when the
+ *      rule doc is not yet deployed / the project is not initialised.
+ *   2. `[filid:lang] <lang>` language tag.
+ *   3. Optional `[filid] Disabled rules: <ids>` line when overrides disabled
+ *      any built-in rule.
+ *
+ * Deployed rule docs under `.claude/rules/` are auto-injected by Claude Code
+ * as project instructions at session start — the hook MUST NOT duplicate
+ * their content, only point to their location so the LLM can re-read them.
+ *
+ * Policy: session hooks never write to `.claude/rules/`. Validation always
+ * uses the plugin's internal built-in rules plus project config overrides.
  *
  * Cache functions are provided by src/core/cache-manager.ts.
  */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import {
   hasPromptContext,
   isFirstInSession,
@@ -23,29 +39,48 @@ import { isFcaProject } from '../shared/shared.js';
 import { validateCwd } from '../utils/validate-cwd.js';
 
 /**
- * Build minimal FCA-AI context: a pointer to the rules file + any disabled rules.
+ * Build minimal FCA-AI context.
+ *
+ * Validation state is derived from the plugin's internal rules and the
+ * project's `.filid/config.json`. The deployed `.claude/rules/fca.md` file
+ * is only probed with a single `existsSync` call to decide between the
+ * pointer line and the "rules not deployed" warning.
  */
-function buildMinimalContext(cwd: string): string {
-  const lines: string[] = [
-    '[filid] FCA-AI active. Rules: .claude/rules/fca.md',
-  ];
+export function buildMinimalContext(cwd: string): string {
+  const lines: string[] = [];
+  const config = loadConfig(cwd);
 
-  try {
-    const config = loadConfig(cwd);
-    const lang = resolveLanguage(config);
-    lines.push(`[filid:lang] ${lang}`);
+  if (!config) {
+    lines.push(
+      '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json.',
+    );
+  } else if (existsSync(join(cwd, '.claude', 'rules', 'fca.md'))) {
+    lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
+  } else {
+    lines.push(
+      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to deploy .claude/rules/fca.md.',
+    );
+  }
 
-    const overrides = config?.rules ?? {};
-    const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
-    const disabledRules = allRules.filter((r) => !r.enabled);
-    if (disabledRules.length > 0) {
-      lines.push(
-        `[filid] Disabled rules: ${disabledRules.map((r) => r.id).join(', ')}`,
-      );
+  // resolveLanguage is pure and never throws; emit the lang tag
+  // unconditionally so the hook contract always carries exactly one
+  // [filid:lang] line.
+  lines.push(`[filid:lang] ${resolveLanguage(config)}`);
+
+  if (config) {
+    try {
+      const overrides = config.rules ?? {};
+      const allRules = loadBuiltinRules(overrides, config['additional-allowed']);
+      const disabledRules = allRules.filter((r) => !r.enabled);
+      if (disabledRules.length > 0) {
+        lines.push(
+          `[filid] Disabled rules: ${disabledRules.map((r) => r.id).join(', ')}`,
+        );
+      }
+    } catch {
+      // rule-engine load failure — skip the disabled-rules line silently;
+      // the pointer + lang tag above are already in place.
     }
-  } catch {
-    // on rule load failure, still inject default language
-    lines.push('[filid:lang] en');
   }
 
   return lines.join('\n');

@@ -91,7 +91,7 @@ export const MY_CONSTANT = 'value';
 
 - Fractal tree depth MUST NOT exceed `maxDepth`.
 - Fix: flatten structure, extract deeply nested modules to top-level, or increase `maxDepth` in
-  `.filid/config.json` only when genuinely justified.
+  `.filid/config.json` (`scan.maxDepth`) only when genuinely justified.
 
 ### circular-dependency
 

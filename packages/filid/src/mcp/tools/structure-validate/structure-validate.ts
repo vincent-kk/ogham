@@ -1,4 +1,7 @@
-import { loadConfig } from '../../../core/infra/config-loader/config-loader.js';
+import {
+  loadConfig,
+  resolveMaxDepth,
+} from '../../../core/infra/config-loader/config-loader.js';
 import { validateStructure } from '../../../core/rules/fractal-validator/fractal-validator.js';
 import {
   getActiveRules,
@@ -47,8 +50,9 @@ export async function handleStructureValidate(
     rulesSkipped = activeRules.length - rulesToApply.length;
   }
 
-  const tree = await scanProject(input.path);
-  const report = validateStructure(tree, rulesToApply);
+  const maxDepth = resolveMaxDepth(config);
+  const tree = await scanProject(input.path, { maxDepth });
+  const report = validateStructure(tree, rulesToApply, { maxDepth });
 
   return {
     report,

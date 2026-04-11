@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { parseStructureCheckFrontmatter } from '../../../../core/utils/pr-summary-generator.js';
+import { parseStructureCheckFrontmatter } from '../../../../core/pr-summary/index.js';
 import type { HumanSummary } from '../../../../types/summary.js';
 import type { ReviewManageInput } from '../review-manage.js';
 import {
@@ -186,7 +186,7 @@ export async function handleGenerateHumanSummary(
   args: unknown,
 ): Promise<Record<string, unknown>> {
   const { generateHumanSummary } =
-    await import('../../../../core/utils/pr-summary-generator.js');
+    await import('../../../../core/pr-summary/index.js');
 
   const input = args as ReviewManageInput;
 

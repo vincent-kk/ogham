@@ -1,42 +1,53 @@
-# filid Built-in Rules Reference
+# filid Rule Docs Templates
 
-filid ships 8 built-in rules that are automatically evaluated against the FractalTree of any scanned project.
-Rules are defined in `src/core/rules/rule-engine.ts` and loaded via `loadBuiltinRules(overrides?)`.
+This directory ships rule documentation templates that the `/filid:filid-setup`
+skill deploys into a target project's `.claude/rules/` directory.
 
-## Rule Summary
+> **Important — deployment is skill-only.** SessionStart hooks do NOT copy or
+> remove these files. The only code path that writes to `.claude/rules/` is
+> `syncRuleDocs()` in `src/core/infra/config-loader/config-loader.ts`, which
+> is invoked exclusively by the `rule_docs_sync` MCP tool from the
+> `filid-setup` skill after the user confirms a checkbox selection.
 
-| ID | Name | Category | Severity | Description |
-|---|---|---|---|---|
-| `naming-convention` | Naming Convention | naming | warning | Directory/file names must follow kebab-case or camelCase |
-| `organ-no-intentmd` | Organ No INTENT.md | structure | error | Organ nodes must not contain INTENT.md |
-| `index-barrel-pattern` | Index Barrel Pattern | index | warning | fractal/hybrid index.ts must be a pure barrel (re-exports only) |
-| `module-entry-point` | Module Entry Point | module | warning | All fractal nodes must have index.ts or main.ts |
-| `max-depth` | Max Depth | structure | error | Fractal tree depth must not exceed the configured maximum |
-| `circular-dependency` | Circular Dependency | dependency | error | No circular dependencies between modules (Phase 2 placeholder) |
-| `pure-function-isolation` | Pure Function Isolation | dependency | error | pure-function nodes must not import from fractal modules |
-| `zero-peer-file` | Zero Peer File | structure | warning | Fractal roots must not contain peer files outside allowed categories |
+## manifest.json
 
-## Rule Files
-
-- [naming-convention.md](./naming-convention.md)
-- [structure-rules.md](./structure-rules.md) — covers `organ-no-intentmd` and `max-depth`
-- [index-rules.md](./index-rules.md) — covers `index-barrel-pattern`
-- [module-rules.md](./module-rules.md) — covers `module-entry-point`
-- [dependency-rules.md](./dependency-rules.md) — covers `circular-dependency` and `pure-function-isolation`
-- [documentation-rules.md](./documentation-rules.md) — INTENT.md / DETAIL.md document conventions
-- [fca.md](./fca.md) — comprehensive FCA architecture + all rules guide (copied to `.claude/rules/fca.md` at init)
-
-## Configuring Rules
-
-Rules are enabled by default. To disable or customize a rule, add a `rules` section to `.filid/config.json`:
+`manifest.json` is the single source of truth for which rule docs exist and
+which are required:
 
 ```json
 {
-  "rules": {
-    "naming-convention": { "enabled": false },
-    "max-depth": { "enabled": true }
-  }
+  "_comment": "...",
+  "version": "1.0",
+  "rules": [
+    {
+      "id": "fca",
+      "filename": "fca.md",
+      "required": true,
+      "title": "FCA-AI Architecture Rules",
+      "description": "..."
+    }
+  ]
 }
 ```
 
-Custom rules can be registered by passing additional `Rule[]` objects to `evaluateRules()`.
+Fields:
+
+| Field | Meaning |
+|---|---|
+| `id` | Stable identifier used as the key in `.filid/config.json`'s `injected-rules` map |
+| `filename` | Source file (under `templates/rules/`) and destination basename (under `.claude/rules/`) |
+| `required` | `true` → always deployed, UI pre-checks and disables the checkbox. `false` → opt-in |
+| `title` | Short label shown in the `filid-setup` checkbox UI |
+| `description` | One-line summary shown underneath the checkbox |
+
+## Adding a new rule doc
+
+1. Write the markdown under `templates/rules/<your-rule>.md`.
+2. Append an entry to `manifest.json` with `required: false` so the user can
+   opt in via the checkbox.
+3. Rebuild the plugin (`yarn build:plugin`) so the bundled MCP server picks
+   up the new handler context.
+4. Run `/filid:filid-setup` on a test project — the new rule should appear
+   in the checkbox list, pre-unchecked.
+5. If the rule is selected, the file is copied to `.claude/rules/<filename>`.
+   If later unselected on a re-run of the skill, the file is removed.

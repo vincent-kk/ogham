@@ -8,11 +8,14 @@ export interface ProjectInitInput {
 /**
  * Handle project_init MCP tool calls.
  *
- * Initializes FCA-AI project infrastructure:
- * - Creates .filid/config.json with default rule configuration
- * - Copies templates/rules/fca.md to .claude/rules/fca.md
+ * Initializes FCA-AI project infrastructure — config only:
+ * - Creates .filid/config.json with default rule configuration.
  *
- * Existing files are never overwritten.
+ * Rule doc deployment (`.claude/rules/*.md`) is NOT performed here; the
+ * filid-setup skill drives that through the rule_docs_sync tool so users
+ * always make an explicit checkbox choice about optional rule files.
+ *
+ * Existing config.json is never overwritten.
  */
 export function handleProjectInit(args: unknown): InitResult {
   const input = args as ProjectInitInput;

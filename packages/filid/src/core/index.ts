@@ -101,14 +101,25 @@ export { ChangeQueue } from './infra/change-queue/change-queue.js';
 export type { ChangeRecord } from './infra/change-queue/change-queue.js';
 export {
   createDefaultConfig,
-  ensureFcaRules,
+  getRuleDocsStatus,
   initProject,
   loadConfig,
+  loadRuleDocsManifest,
   loadRuleOverrides,
   resolveLanguage,
+  resolveRuleDocSelection,
+  syncRuleDocs,
   writeConfig,
 } from './infra/config-loader/config-loader.js';
-export type { FilidConfig, InitResult } from './infra/config-loader/config-loader.js';
+export type {
+  FilidConfig,
+  InitResult,
+  RuleDocEntry,
+  RuleDocStatusEntry,
+  RuleDocSyncResult,
+  RuleDocsManifest,
+  RuleDocsStatus,
+} from './infra/config-loader/config-loader.js';
 
 // coverage
 export { findSubtreeUsages, getModuleName } from './coverage/usage-tracker/usage-tracker.js';
@@ -129,5 +140,5 @@ export {
   generateHumanSummary,
   parseFixRequests,
   parseStructureCheckFrontmatter,
-} from './utils/pr-summary-generator.js';
-export type { GenerateSummaryInput } from './utils/pr-summary-generator.js';
+} from './pr-summary/index.js';
+export type { GenerateSummaryInput } from './pr-summary/index.js';
