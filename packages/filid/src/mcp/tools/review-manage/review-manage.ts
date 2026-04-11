@@ -40,6 +40,14 @@ export interface ReviewManageInput {
   changedFilesCount?: number;
   changedFractalsCount?: number;
   hasInterfaceChanges?: boolean;
+  /**
+   * When true, bypass adversarial committee election and return the
+   * integrated `adjudicator` fast-path agent as the sole committee
+   * member. Triggered by the `--solo` review flag. The adjudicator
+   * internally covers all six committee perspectives in a single
+   * context and skips the state machine.
+   */
+  adjudicatorMode?: boolean;
 }
 
 async function gitExec(cwd: string, args: string[]): Promise<string> {
@@ -230,11 +238,32 @@ async function handleElectCommittee(
     );
   }
 
-  const { changedFilesCount, changedFractalsCount, hasInterfaceChanges } =
-    input;
+  const {
+    changedFilesCount,
+    changedFractalsCount,
+    hasInterfaceChanges,
+    adjudicatorMode,
+  } = input;
+
+  // Solo mode short-circuits complexity calculation and returns the
+  // integrated adjudicator fast-path agent.
+  if (adjudicatorMode) {
+    const result: CommitteeElection = {
+      complexity: 'TRIVIAL',
+      committee: ['adjudicator'],
+      adversarialPairs: [],
+    };
+    return result as unknown as Record<string, unknown>;
+  }
 
   let complexity: Complexity;
   if (
+    changedFilesCount <= 1 &&
+    changedFractalsCount <= 1 &&
+    !hasInterfaceChanges
+  ) {
+    complexity = 'TRIVIAL';
+  } else if (
     changedFilesCount <= 3 &&
     changedFractalsCount <= 1 &&
     !hasInterfaceChanges
@@ -247,7 +276,12 @@ async function handleElectCommittee(
   }
 
   let committee: PersonaId[];
-  if (complexity === 'LOW') {
+  if (complexity === 'TRIVIAL') {
+    // TRIVIAL auto-tier also uses the integrated adjudicator — the
+    // diff is small enough that adversarial multi-persona debate has
+    // no marginal value over a single fast-path pass.
+    committee = ['adjudicator'];
+  } else if (complexity === 'LOW') {
     committee = ['engineering-architect', 'operations-sre'];
   } else if (complexity === 'MEDIUM') {
     committee = [

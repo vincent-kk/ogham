@@ -1,8 +1,9 @@
 /** 변경 사항의 복잡도 등급 */
-export type Complexity = 'LOW' | 'MEDIUM' | 'HIGH';
+export type Complexity = 'TRIVIAL' | 'LOW' | 'MEDIUM' | 'HIGH';
 
 /** 페르소나 식별자 */
 export type PersonaId =
+  | 'adjudicator'
   | 'engineering-architect'
   | 'knowledge-manager'
   | 'operations-sre'

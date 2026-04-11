@@ -8,10 +8,6 @@ complexity: simple
 plugin: filid
 ---
 
-> **EXECUTION MODEL**: Execute the requested subcommand as a SINGLE CONTINUOUS
-> OPERATION. Read config, apply changes, validate, and report — all in one turn.
-> NEVER yield the turn between steps.
-
 # filid-config — Project Configuration Manager
 
 View and modify `.filid/config.json` settings interactively. Manages language

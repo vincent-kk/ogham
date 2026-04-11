@@ -26,7 +26,7 @@ batch processing — the LLM only reads the script output and reports to the use
 ### Relationship with Other Skills
 
 - **`filid:scan`**: May report legacy `CLAUDE.md` files as violations — run this skill to fix them.
-- **`filid:init`**: Generates `INTENT.md`/`DETAIL.md` for new projects. This skill migrates old projects to the same convention.
+- **`filid:setup`**: Generates `INTENT.md`/`DETAIL.md` for new projects. This skill migrates old projects to the same convention.
 - **`filid:update`**: After migration, use `filid:update` to verify INTENT.md/DETAIL.md content is current.
 
 ## Core Workflow

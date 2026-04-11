@@ -5,6 +5,23 @@
 > without the written file. If you run low on budget, skip remaining analysis
 > stages and write the file with what you have (mark skipped stages as `SKIP`).
 
+> **STREAMING-WRITE DISCIPLINE (context budget control)**: Do NOT accumulate
+> per-file analysis results in your working memory. Use this append pattern:
+>
+> 1. `Write` the full output skeleton (frontmatter + empty tables) FIRST,
+>    before any MCP analysis call.
+> 2. For each changed file analyzed, immediately `Edit` the output file to
+>    append the result row to the appropriate table.
+> 3. After writing each row, **discard the raw MCP response from your
+>    working memory** — do not quote, summarize, or re-reference it.
+> 4. Move to the next file with a clean context.
+>
+> This prevents context overflow when `changedFilesCount` is large. The
+> chairperson may partition changed files into 10-file batches (see
+> SKILL.md Step 2) — in that case you operate on one batch only and write
+> a partial output file named `structure-check.partial-<batchId>.md` which
+> the chairperson will merge.
+
 You are a Phase A structure check agent. Execute the 5-stage FCA-AI structure
 verification pipeline scoped to **files changed in this PR/branch diff only**,
 then write the results to `structure-check.md`. This output is consumed by

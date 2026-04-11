@@ -1,7 +1,112 @@
-# code-review — Reference Documentation
+# filid-review — Reference Documentation
 
-Detailed output format templates, MCP tool usage map, and workflow
-reference for the multi-persona code review governance pipeline.
+Detailed output format templates, Opinion Frontmatter Contract, MCP tool
+usage map, committee → agent mapping, and workflow reference for the
+multi-persona code review governance pipeline.
+
+## Committee → Agent File Mapping
+
+Phase D spawns committee members as real Claude Code subagents. Each
+`PersonaId` from `src/types/review.ts` corresponds to exactly one agent
+file under `packages/filid/agents/`:
+
+| PersonaId (MCP + session.md) | Agent file                          | Role / Branch                       | Election tier     |
+| ---------------------------- | ----------------------------------- | ----------------------------------- | ----------------- |
+| `adjudicator`              | `agents/adjudicator.md`           | Integrated fast-path (6 lenses)     | `TRIVIAL` / `--solo` only |
+| `engineering-architect`      | `agents/engineering-architect.md`   | Legislative — Structure             | LOW / MEDIUM / HIGH |
+| `knowledge-manager`          | `agents/knowledge-manager.md`       | Judicial — Documentation            | MEDIUM / HIGH     |
+| `operations-sre`             | `agents/operations-sre.md`          | Judicial — Stability                | LOW / MEDIUM / HIGH |
+| `business-driver`            | `agents/business-driver.md`         | Executive — Velocity                | MEDIUM / HIGH     |
+| `product-manager`            | `agents/product-manager.md`         | Translator — User value             | HIGH              |
+| `design-hci`                 | `agents/design-hci.md`              | Humanist — Cognitive load           | HIGH              |
+
+All seven agents are **read-only** (Read, Glob, Grep, Bash only — no
+Write/Edit). They are spawned via `Task(subagent_type: filid:<id>)`
+exclusively by `phase-d-deliberation.md`.
+
+- **`adjudicator`** is a standalone `Task` (NO `team_name`). It runs
+  when the committee is `['adjudicator']` — either TRIVIAL auto-tier
+  or `--solo` manual flag. It internalizes all six specialist
+  perspectives in a single pass, skips the state machine, and emits one
+  `round-1-adjudicator.md` opinion that maps directly to the verdict.
+- **Six specialist agents** run as team workers inside the
+  `review-<normalized-branch>` team when committee size >= 2. They
+  participate in the multi-round state machine deliberation.
+
+Adding a new specialist persona requires a coordinated edit in three places:
+
+1. `src/types/review.ts` — add the ID to the `PersonaId` union
+2. `src/mcp/tools/review-manage/review-manage.ts` — add to committee
+   arrays (LOW / MEDIUM / HIGH) and adversarial pair logic as appropriate
+3. `packages/filid/agents/<id>.md` — create the agent file with the
+   Team Worker Protocol and Round Output Contract
+
+Do NOT add new personas to the TRIVIAL tier — that tier is reserved for
+the integrated `adjudicator` fast path.
+
+## Opinion Frontmatter Contract
+
+Every `<REVIEW_DIR>/rounds/round-<N>-<persona-id>.md` file MUST begin with
+a YAML frontmatter block matching the schema below. The chairperson grep-
+parses these fields during state machine evaluation.
+
+```yaml
+---
+round: <integer, 1..5>
+persona: <PersonaId>
+state: SYNTHESIS | VETO | ABSTAIN
+confidence: <0.0-1.0>
+rebuttal_targets: [<PersonaId>, ...]   # Round >= 2 only
+fix_items:
+  - id: <FIX-candidate-id or null>
+    severity: CRITICAL | HIGH | MEDIUM | LOW
+    source: structure | code-quality
+    type: code-fix | filid-promote | filid-restructure
+    path: <file path>
+    rule: <violated rule id>
+    current: <measured value>
+    recommended_action: <short imperative>
+    evidence: <verification line reference or stage reference>
+compromise_accepted: <true|false>   # Optional — set when re-evaluating a VETO compromise
+reasoning_gaps: [<free-form strings>]   # Metrics the persona needed but could not find
+---
+```
+
+### Field semantics
+
+- **`round`** — 1-indexed round number. Must match the file name suffix.
+- **`persona`** — MUST equal the `name` in the agent's frontmatter.
+- **`state`** — drives Lead's state machine transition:
+  - `SYNTHESIS` — agreement (with or without fix_items)
+  - `VETO` — hard rejection; requires veto reason in body
+  - `ABSTAIN` — excluded from effective denominator in quorum math
+  - Solo deliberation prohibits `ABSTAIN`.
+- **`confidence`** — 0.0-1.0 self-reported certainty. Used as tiebreaker
+  when aggregating fix_items from multiple personas.
+- **`rebuttal_targets`** — list of PersonaIds whose prior-round opinion
+  this persona explicitly disagrees with. Round 1 MUST leave this empty.
+- **`fix_items`** — structured fixes that will be promoted to FIX-XXX
+  entries in `fix-requests.md`. The chairperson deduplicates by
+  `path + rule` across all personas.
+- **`compromise_accepted`** — only set in VETO re-evaluation rounds. If
+  `true`, the opinion's `state` should transition from prior VETO to
+  SYNTHESIS with an acknowledgement in the body.
+- **`reasoning_gaps`** — free-form list of measurements the persona
+  needed but could not find in the verification artifacts. Does NOT
+  block a SYNTHESIS verdict by itself; contributes to ABSTAIN rationale
+  when the gap is structural.
+
+### Special cases
+
+- **Forced ABSTAIN** from the recovery plan: the chairperson writes a
+  synthetic opinion file with `state: ABSTAIN`, `confidence: 0`, and
+  `reasoning_gaps: ["worker unrecoverable after 2 respawn attempts"]`.
+  The Deliberation Log MUST note `recovery: forced-abstain` for that
+  persona.
+- **Business Driver compromise file**: when Business Driver writes
+  `round-<N>-business-driver-compromise.md` in response to a VETO, the
+  frontmatter is extended with a `compromise_proposals` array (see
+  `agents/business-driver.md` for the schema).
 
 ## Review Report Format (`review-report.md`)
 
@@ -174,26 +279,83 @@ without access to local files.
 | `fractal_navigate` | `classify`         | Classify changed directories         |
 | `fractal_scan`     | —                  | Build full fractal tree              |
 
-### Phase C (Verification Agent, sonnet)
+### Phase C1 (Metrics Agent, sonnet) — changed files only
 
-| Tool                 | Action                  | Purpose                               |
-| -------------------- | ----------------------- | ------------------------------------- |
-| `ast_analyze`        | `lcom4`                 | Cohesion verification (split needed?) |
-| `ast_analyze`        | `cyclomatic-complexity` | Complexity verification               |
-| `ast_analyze`        | `dependency-graph`      | Circular dependency check             |
-| `ast_analyze`        | `tree-diff`             | Semantic change analysis              |
-| `test_metrics`       | `check-312`             | 3+12 rule validation                  |
-| `test_metrics`       | `count`                 | Test case counting                    |
-| `test_metrics`       | `decide`                | Split/compress/parameterize decision  |
-| `structure_validate` | —                       | FCA-AI structure rules                |
-| `drift_detect`       | —                       | Structure drift detection             |
-| `doc_compress`       | `auto`                  | Document compression state            |
-| `rule_query`         | `list`                  | Active rules listing                  |
-| `debt_manage`        | `calculate-bias`        | Debt bias level determination         |
+| Tool            | Action                  | Purpose                                         |
+| --------------- | ----------------------- | ----------------------------------------------- |
+| `ast_analyze`   | `lcom4`                 | Cohesion verification (split needed?)           |
+| `ast_analyze`   | `cyclomatic-complexity` | Complexity verification                         |
+| `test_metrics`  | `check-312`             | 3+12 rule validation                            |
+| `test_metrics`  | `count`                 | Test case counting                              |
+| `test_metrics`  | `decide`                | Split/compress/parameterize decision            |
+| `coverage_verify` | —                     | Shared dependency test coverage (WARN only)     |
 
-### Phase D (Chairperson, direct)
+Phase C1 writes `verification-metrics.md`.
 
-No MCP tool calls. Reads `session.md` + `verification.md` + `structure-check.md` only.
+### Phase C2 (Structure Agent, sonnet) — diff-focused
+
+| Tool                 | Action             | Purpose                               |
+| -------------------- | ------------------ | ------------------------------------- |
+| `structure_validate` | —                  | FCA-AI fractal boundary rules         |
+| `ast_analyze`        | `dependency-graph` | Circular dependency check             |
+| `ast_analyze`        | `tree-diff`        | Semantic change / interface analysis  |
+| `drift_detect`       | —                  | Structure drift detection             |
+| `doc_compress`       | `auto`             | Document compression state            |
+| `rule_query`         | `list`             | Active rules listing                  |
+| `debt_manage`        | `list`             | Existing debt load                    |
+| `debt_manage`        | `calculate-bias`   | Debt bias level determination         |
+
+Phase C2 writes `verification-structure.md`.
+
+### Phase D (Chairperson, direct team orchestration)
+
+No MCP measurement tool calls. The chairperson reads `session.md`,
+`verification.md` (merged from C1 + C2 in Step D.0),
+`verification-metrics.md`, `verification-structure.md`, and
+`structure-check.md`.
+
+**Solo path** (committee is `['adjudicator']`): spawn a standalone
+`Task(subagent_type: filid:adjudicator)` — no Team infrastructure is
+used. Read `round-1-adjudicator.md` and write `review-report.md` /
+`fix-requests.md`.
+
+**Team path** (committee size >= 2): uses Claude Code's native team
+tools:
+
+| Tool                         | Purpose                                            |
+| ---------------------------- | -------------------------------------------------- |
+| `TeamCreate`                 | Create `review-<normalized-branch>` team           |
+| `TeamDelete`                 | Dismantle team after CONCLUSION                    |
+| `TaskCreate` + `TaskUpdate`  | Round task creation and owner assignment           |
+| `TaskList`                   | Monitor round progress                             |
+| `Task` (with `team_name`)    | Spawn committee members as team workers            |
+| `SendMessage`                | Round triggers, probes, shutdown requests          |
+
+**Phase C batch team** (optional): when Phase C is team-promoted
+(`changedFilesCount > 30`), a separate `review-c-<normalized-branch>`
+team is created to parallelize C1/C2 batches. This team is
+dismantled before Phase D begins.
+
+### Subagent Context Budget Controls (Phase A / C1 / C2)
+
+All three diff-analysis phases enforce **streaming-write discipline**: the
+subagent writes the output skeleton first, then appends one result row
+per file immediately after each MCP call, dropping the raw response from
+its working memory before moving to the next file. This prevents context
+accumulation on large diffs.
+
+In addition, the chairperson applies threshold-based partitioning in
+SKILL.md Step 2 / Step 3:
+
+| Changed files | Phase A                          | Phase C1 / C2                     |
+| ------------- | -------------------------------- | --------------------------------- |
+| `<= 15`       | 1 subagent                       | 1 C1 + 1 C2 subagent              |
+| `> 15, <= 30` | N parallel subagents (10/batch)  | N C1 batches + N C2 per-file batches + 1 C2 global |
+| `> 30`        | N parallel subagents (10/batch)  | Team-promoted: `review-c-<branch>` team with one worker per batch |
+
+Partial output files use `<base>.partial-<batchId>.md` naming. The
+chairperson merges partials into the canonical output file before Phase
+D begins.
 
 ### Checkpoint (SKILL.md, before phases)
 
@@ -205,15 +367,18 @@ No MCP tool calls. Reads `session.md` + `verification.md` + `structure-check.md`
 
 **Checkpoint resume order** (based on files present in `REVIEW_DIR`):
 
-| Files present                                                      | Resume from |
-| ------------------------------------------------------------------ | ----------- |
-| None                                                               | Phase A     |
-| `structure-check.md` only                                         | Phase B     |
-| `session.md` only (`no_structure_check: true` in frontmatter)     | Phase C     |
-| `session.md` only (`no_structure_check: false` or absent)         | Phase A     |
-| `structure-check.md` + `session.md` (no `verification.md`)        | Phase C     |
-| `session.md` + `verification.md`                                   | Phase D     |
-| `session.md` + `verification.md` + `review-report.md`             | Complete    |
+| Files present                                                                                        | Resume from |
+| ---------------------------------------------------------------------------------------------------- | ----------- |
+| None                                                                                                 | Phase A     |
+| `structure-check.md` only                                                                           | Phase B     |
+| `session.md` only (`no_structure_check: true` in frontmatter)                                       | Phase C1+C2 |
+| `session.md` only (`no_structure_check: false` or absent)                                           | Phase A     |
+| `structure-check.md` + `session.md` (neither verification file)                                     | Phase C1+C2 |
+| `session.md` + one of verification-metrics.md / verification-structure.md                           | Resume missing C-half |
+| `session.md` + `verification-metrics.md` + `verification-structure.md` (no `verification.md`)       | Phase D (Step D.0 merge) |
+| `session.md` + `verification.md` (merged)                                                           | Phase D (Step D.1 branch) |
+| `session.md` + `verification.md` + `rounds/round-N-*.md` (no `review-report.md`)                    | Phase D (Step D.3 round N+1) |
+| `session.md` + `verification.md` + `review-report.md` + `fix-requests.md`                           | Complete    |
 
 When `--no-structure-check` is active, Phase A is skipped and resume starts
 from Phase B even when no checkpoint files exist.

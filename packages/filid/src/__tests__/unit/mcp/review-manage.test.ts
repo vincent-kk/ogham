@@ -361,8 +361,8 @@ describe('handleReviewManage – elect-committee', () => {
     const result = await handleReviewManage({
       action: 'elect-committee',
       projectRoot: '/tmp',
-      changedFilesCount: 1,
-      changedFractalsCount: 0,
+      changedFilesCount: 2,
+      changedFractalsCount: 1,
       hasInterfaceChanges: false,
     });
     expect(result.complexity).toBe('LOW');
@@ -370,6 +370,72 @@ describe('handleReviewManage – elect-committee', () => {
     const pairs = result.adversarialPairs as [string, string[]][];
     const businessDriverPair = pairs.find(([p]) => p === 'business-driver');
     expect(businessDriverPair).toBeUndefined();
+  });
+
+  it('selects TRIVIAL complexity with adjudicator for minimal changes', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 1,
+      changedFractalsCount: 1,
+      hasInterfaceChanges: false,
+    });
+    expect(result.complexity).toBe('TRIVIAL');
+    expect(result.committee).toEqual(['adjudicator']);
+    expect(result.adversarialPairs).toEqual([]);
+  });
+
+  it('selects TRIVIAL complexity when zero files / fractals changed', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 0,
+      changedFractalsCount: 0,
+      hasInterfaceChanges: false,
+    });
+    expect(result.complexity).toBe('TRIVIAL');
+    expect(result.committee).toEqual(['adjudicator']);
+  });
+
+  it('TRIVIAL escalates past interface changes (not TRIVIAL when interface touched)', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 1,
+      changedFractalsCount: 1,
+      hasInterfaceChanges: true,
+    });
+    // Interface changes disqualify TRIVIAL / LOW shortcuts.
+    expect(result.complexity).toBe('MEDIUM');
+    expect(result.committee).not.toContain('adjudicator');
+  });
+
+  it('adjudicatorMode short-circuits complexity and returns adjudicator', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 50,
+      changedFractalsCount: 10,
+      hasInterfaceChanges: true,
+      adjudicatorMode: true,
+    });
+    expect(result.complexity).toBe('TRIVIAL');
+    expect(result.committee).toEqual(['adjudicator']);
+    expect(result.adversarialPairs).toEqual([]);
+  });
+
+  it('adjudicatorMode=false behaves as if absent (normal committee election)', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 5,
+      changedFractalsCount: 2,
+      hasInterfaceChanges: false,
+      adjudicatorMode: false,
+    });
+    // Not TRIVIAL — should go through normal tier detection → MEDIUM
+    expect(result.complexity).toBe('MEDIUM');
+    expect(result.committee).not.toContain('adjudicator');
   });
 
   it('MEDIUM committee includes adversarial pair for business-driver', async () => {
