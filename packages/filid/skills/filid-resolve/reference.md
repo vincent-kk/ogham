@@ -109,7 +109,7 @@ When `type` is absent, the item is treated as `code-fix`.
 ### Dispatch Sequence
 
 1. **Phase 4a**: All `code-fix` items dispatched to `code-surgeon` in parallel
-2. **Phase 4b**: After code fixes complete, `filid:promote` and `filid:restructure` items
+2. **Phase 4b**: After code fixes complete, `filid:filid-promote` and `filid:filid-restructure` items
    processed sequentially via their respective skills
 3. Structural fix failures are **non-blocking** — logged and skipped
 

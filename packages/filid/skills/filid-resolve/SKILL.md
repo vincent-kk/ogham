@@ -268,7 +268,7 @@ If there were **NO** accepted fixes (all rejected):
      - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
      - On "Stop here": **END execution.**
 
-### Step 9 — Offer to Run `filid:revalidate`
+### Step 9 — Offer to Run `filid:revalidate` <!-- [INTERACTIVE] AskUserQuestion: revalidate offer (accepted / all-rejected branches) -->
 
 > If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
 > `/filid:filid-revalidate`.** Then end execution.
@@ -340,7 +340,7 @@ Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surg
           → 8 (Push) → 9 (Revalidate)
 
 Agents:    code-surgeon (Step 4a — parallel code-fix)
-Skills:    filid:promote (Step 4b), filid:restructure (Step 4b)
+Skills:    filid:filid-promote (Step 4b), filid:filid-restructure (Step 4b)
 MCP tools: review_manage(normalize-branch), debt_manage(create)
 
 --auto:   Skips Steps 3 (accept all), 5 (no rejections), 9 prompt (auto-revalidate)

@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
 Layer 2 (도구)  → MCP Server (17개 분석/관리 도구)
 Layer 3 (에이전트) → 14개 특화 에이전트 (architect, implementer, QA, review committee 등)
-Layer 4 (사용자) → 17개 Skills (/filid:filid-setup, /filid:filid-review 등)
+Layer 4 (사용자) → 18개 Skills (/filid:filid-setup, /filid:filid-review 등)
 ```
 
 ## Commands
@@ -81,9 +81,9 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 **Review committee (7)**: `adjudicator` (fast-path 통합 리뷰) · `engineering-architect`, `knowledge-manager`, `operations-sre` (judicial/legislative) · `business-driver` (executive) · `product-manager`, `design-hci` (translator/humanist) — `/filid:filid-review` Phase D 페르소나
 
-### Skills (17)
+### Skills (18)
 
-`filid-review` (다중 페르소나 리뷰), `filid-scan` (위반 스캔), `filid-setup`, `filid-sync`, `filid-structure-review`, `filid-promote`, `filid-restructure`, `filid-resolve`, `filid-revalidate`, `filid-guide`, `filid-context-query`, `filid-update` (문서/테스트 동기화), `filid-pull-request` (FCA-aware PR 자동 생성), `filid-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `filid-migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `filid-ast-fallback` (LLM AST 패턴 매칭), `filid-config` (설정 관리)
+`filid-review` (다중 페르소나 리뷰), `filid-scan` (위반 스캔), `filid-setup`, `filid-sync`, `filid-structure-review`, `filid-promote`, `filid-restructure`, `filid-resolve`, `filid-revalidate`, `filid-guide`, `filid-context-query`, `filid-update` (문서/테스트 동기화), `filid-enrich-docs` (INTENT.md 품질 감사 및 enrichment), `filid-pull-request` (FCA-aware PR 자동 생성), `filid-pipeline` (PR→리뷰→리졸브→재검증 파이프라인), `filid-migrate` (레거시 CLAUDE.md→INTENT.md 마이그레이션), `filid-ast-fallback` (LLM AST 패턴 매칭), `filid-config` (설정 관리)
 
 ## References
 
@@ -102,7 +102,7 @@ LLM이 turn을 yield할 수 있는 지점(AskUserQuestion, `[y/N]` 프롬프트,
 
 - **Tier-1** (파이프라인): `filid-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts
 - **Tier-2a** (다단계 비상호작용): `filid-review`, `filid-revalidate`, `filid-scan`, `filid-structure-review`, `filid-update`, `filid-pull-request`, `filid-promote` — 동일 3-layer
-- **Tier-2b** (상호작용 escape hatch): `filid-resolve`, `filid-sync`, `filid-restructure`, `filid-setup` — step-level escape hatch preamble + `<!-- [INTERACTIVE] -->` 마커 (AskUserQuestion/[y/N] 지점). `filid-setup`은 Phase 0c (rule docs 체크박스)에서 사용자 응답 대기.
+- **Tier-2b** (상호작용 escape hatch): `filid-resolve`, `filid-sync`, `filid-restructure`, `filid-setup`, `filid-enrich-docs` — step-level escape hatch preamble + `<!-- [INTERACTIVE] -->` 마커 (AskUserQuestion/[y/N] 지점). `filid-setup`은 Phase 0c (rule docs 체크박스)에서 사용자 응답 대기. `filid-enrich-docs`는 Stage 5 (approval gate)에서 `--auto-approve` 없을 때 대기.
 - **Tier-3** (yield 지점 없음): `filid-config`, `filid-guide`, `filid-context-query`, `filid-ast-fallback`, `filid-migrate` — 내부 Phase 개수와 무관하게 AskUserQuestion·interactive gate가 없어 LLM이 turn을 끊을 지점 자체가 존재하지 않는 스킬. preamble 추가 금지 (과잉 체이닝 유발).
 
 신규 skill 추가 시 Tier-1/2a/2b에 해당하면 `packages/filid/skills/filid-pipeline/SKILL.md:11-24`의 3-layer 패턴을 복제할 것. Terminal stage marker는 `.omc/research/terminal-markers.json`에 등록.
