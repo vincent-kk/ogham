@@ -48,7 +48,7 @@ Applied after the Lead has collected every Round N opinion file:
 | Any opinion has `state: VETO`                        | Enter VETO branch               | COMPROMISE round              |
 | `S / (M - A) >= 2/3`, no VETO                        | CONCLUSION                      | Verdict derivation            |
 | `S / (M - A) < 2/3`, no VETO, `N < 5`                | Start re-DEBATE                 | Create Round N+1 tasks        |
-| `N >= 5`                                             | Forced CONCLUSION               | Verdict = `INCONCLUSIVE`      |
+| `V == 0`, `S / (M - A) < 2/3`, `N >= 5`              | Forced CONCLUSION               | Verdict = `INCONCLUSIVE`      |
 | Compromise accepted by all vetoing personas          | CONCLUSION                      | Verdict = `REQUEST_CHANGES`   |
 | Compromise rejected by any vetoing persona           | Forced CONCLUSION (FAIL)        | Verdict = `REQUEST_CHANGES`   |
 

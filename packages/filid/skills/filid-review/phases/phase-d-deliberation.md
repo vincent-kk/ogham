@@ -278,8 +278,11 @@ Let `V` = count of VETO.
 Let `A` = count of ABSTAIN.
 Let `effective_denominator` = `M - A`.
 
+Evaluate rules in order — first match wins:
+
 | Condition                                             | Action                          |
 | ----------------------------------------------------- | ------------------------------- |
+| `effective_denominator == 0` (everyone abstained)     | CONCLUSION (INCONCLUSIVE) → D.6 |
 | `V >= 1`                                              | Enter VETO branch (Step D.4)    |
 | `effective_denominator > 0 && S / effective_denominator >= 2/3` | CONCLUSION → Step D.6 |
 | `S / effective_denominator < 2/3 && V == 0 && N < 5`  | Next round → Step D.3.3         |
@@ -318,6 +321,14 @@ Triggered when any worker returns `state: VETO` in Round N.
 List all workers whose Round N opinion has `state: VETO`.
 
 ### D.4.2 — Dispatch a compromise task to Business Driver (if elected)
+
+> **Guard**: If `business-driver` is NOT in the committee (e.g., LOW tier
+> committees of `['engineering-architect', 'operations-sre']`), SKIP Steps
+> D.4.2 and D.4.3 entirely and proceed directly to Step D.4.4
+> (Irreconcilable VETO → `REQUEST_CHANGES`). The compromise round requires
+> Business Driver as its sole author — without that persona there is no
+> one to write `round-<N>-business-driver-compromise.md`, and D.4.3 would
+> deadlock waiting for a file that will never appear.
 
 ```
 TaskCreate({
