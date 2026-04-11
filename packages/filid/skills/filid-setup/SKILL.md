@@ -134,9 +134,14 @@ Call `rule_docs_sync` with `action: "sync"` and the computed selection:
 rule_docs_sync({
   action: "sync",
   path: "<target-path>",
-  selections: <nextSelection>
+  selections: { fca: true, rfx: false }
 })
 ```
+
+`selections` MUST be passed as a raw object map (`Record<string, boolean>`),
+not as a JSON string. For example, use
+`selections: { fca: true, rfx: false }`, NOT
+`selections: "{\"fca\":true,\"rfx\":false}"`.
 
 The handler copies/removes files under `.claude/rules/` to match the
 requested selection. No rule doc state is stored in `.filid/config.json`

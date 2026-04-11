@@ -218,7 +218,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         action: z.enum(['status', 'sync', 'manifest']),
         path: z.string(),
-        selections: z.record(z.string(), z.boolean()).optional(),
+        selections: z.union([z.record(z.string(), z.boolean()), z.string()]).optional(),
       }),
     },
     wrapHandler(handleRuleDocsSync),

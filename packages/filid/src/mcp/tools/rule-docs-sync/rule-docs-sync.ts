@@ -21,6 +21,7 @@ import {
   type RuleDocsManifest,
   type RuleDocsStatus,
 } from '../../../core/infra/config-loader/config-loader.js';
+import { normalizeSelections } from './utils/normalizeSelections.js';
 
 export type RuleDocsAction = 'status' | 'sync' | 'manifest';
 
@@ -31,8 +32,12 @@ export interface RuleDocsSyncInput {
    * Required when `action === 'sync'`. Map of rule id → user selection.
    * `true` opts the rule in, `false` or absence opts out. Required rules
    * (manifest `required: true`) ignore this map.
+   *
+   * The expected shape is a raw object map. Some LLM-driven callers may
+   * accidentally stringify the object before invoking the MCP tool; the
+   * handler recovers from that form defensively.
    */
-  selections?: Record<string, boolean>;
+  selections?: Record<string, boolean> | string;
 }
 
 export type RuleDocsSyncOutput =
@@ -79,15 +84,10 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
     }
 
     case 'sync': {
-      const selections = input.selections ?? {};
-
       // Normalise selection input. The filesystem under `.claude/rules/`
       // is the single source of truth for rule doc state — no config-side
       // tracking and no legacy cleanup.
-      const normalized: Record<string, boolean> = {};
-      for (const [key, value] of Object.entries(selections)) {
-        normalized[key] = value === true;
-      }
+      const normalized = normalizeSelections(input.selections);
 
       // Required rules are enforced downstream by syncRuleDocs() from the
       // manifest, regardless of whether they appear in `normalized`.

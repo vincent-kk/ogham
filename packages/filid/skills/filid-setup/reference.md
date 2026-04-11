@@ -103,6 +103,7 @@ one-liner `"규칙 문서: 변경 없음"`.
 ### Phase 0d — Sync
 
 Call `rule_docs_sync({ action: "sync", path, selections: nextSelection })`.
+`selections` MUST be a raw object map, not a JSON string.
 Response shape:
 
 ```ts
@@ -116,6 +117,27 @@ Response shape:
     skipped: Array<{ id: string; reason: string }>;
   };
 }
+```
+
+Valid call shape:
+
+```ts
+rule_docs_sync({
+  action: "sync",
+  path,
+  selections: { fca: true, rfx: false },
+});
+```
+
+Do NOT stringify the map. This is invalid and will trigger MCP input
+validation unless the handler explicitly recovers it:
+
+```ts
+rule_docs_sync({
+  action: "sync",
+  path,
+  selections: '{"fca":true,"rfx":false}',
+});
 ```
 
 The handler walks the manifest and performs the filesystem diff under
