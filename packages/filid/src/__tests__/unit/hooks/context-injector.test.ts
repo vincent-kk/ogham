@@ -8,6 +8,12 @@ import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 //   .claude/rules/fca.md      → true  (rules deployed, active pointer)
 //   /prompt-context-*         → false (no cached context = triggers fresh build)
 //   others                    → false
+//
+// readFileSync returns a valid minimal config when `.filid/config.json` is
+// requested so loadConfig resolves to a non-null value; everything else
+// throws (unexpected reads are test errors).
+const MOCK_CONFIG_JSON = JSON.stringify({ version: '1.0', rules: {} });
+
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
   return {
@@ -23,7 +29,12 @@ vi.mock('node:fs', async (importOriginal) => {
     statSync: vi.fn(() => {
       throw new Error('no cache');
     }),
-    readFileSync: actual.readFileSync,
+    readFileSync: vi.fn((p: unknown) => {
+      if (typeof p === 'string' && p.endsWith('.filid/config.json')) {
+        return MOCK_CONFIG_JSON;
+      }
+      throw new Error(`unexpected readFileSync: ${String(p)}`);
+    }),
     writeFileSync: vi.fn(),
     mkdirSync: vi.fn(),
     readdirSync: vi.fn(() => []),

@@ -3,13 +3,25 @@
  *
  * Injects a minimal FCA-AI pointer on the session's first prompt.
  *
+ * Output contract (session first prompt only):
+ *   1. Action-path pointer to the active rule doc, OR a warning when the
+ *      rule doc is not yet deployed / the project is not initialised.
+ *   2. `[filid:lang] <lang>` language tag.
+ *   3. Optional `[filid] Disabled rules: <ids>` line when overrides disabled
+ *      any built-in rule.
+ *
+ * Deployed rule docs under `.claude/rules/` are auto-injected by Claude Code
+ * as project instructions at session start — the hook MUST NOT duplicate
+ * their content, only point to their location so the LLM can re-read them.
+ *
  * Policy: session hooks never write to `.claude/rules/`. Validation always
  * uses the plugin's internal built-in rules plus project config overrides.
- * Deployed rule docs under the target project's `.claude/rules/` are only a
- * user-facing reference surface and may be absent, partial, or fully synced.
  *
  * Cache functions are provided by src/core/cache-manager.ts.
  */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import {
   hasPromptContext,
   isFirstInSession,
@@ -17,7 +29,6 @@ import {
   writePromptContext,
 } from '../../core/infra/cache-manager/cache-manager.js';
 import {
-  getRuleDocsStatus,
   loadConfig,
   resolveLanguage,
 } from '../../core/infra/config-loader/config-loader.js';
@@ -31,8 +42,9 @@ import { validateCwd } from '../utils/validate-cwd.js';
  * Build minimal FCA-AI context.
  *
  * Validation state is derived from the plugin's internal rules and the
- * project's `.filid/config.json`, never from deployed rule doc files.
- * Deployed rule docs are reported separately as optional reference docs.
+ * project's `.filid/config.json`. The deployed `.claude/rules/fca.md` file
+ * is only probed with a single `existsSync` call to decide between the
+ * pointer line and the "rules not deployed" warning.
  */
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
@@ -42,35 +54,27 @@ export function buildMinimalContext(cwd: string): string {
     lines.push(
       '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json.',
     );
+  } else if (existsSync(join(cwd, '.claude', 'rules', 'fca.md'))) {
+    lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
   } else {
     lines.push(
-      '[filid] FCA-AI active. Validation rules: internal built-ins with project overrides.',
+      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to deploy .claude/rules/fca.md.',
     );
-
-    const ruleDocsStatus = getRuleDocsStatus(cwd);
-    if (ruleDocsStatus.pluginRootResolved) {
-      const deployedRuleDocs = ruleDocsStatus.entries
-        .filter((entry) => entry.deployed)
-        .map((entry) => entry.filename);
-      lines.push(
-        `[filid] Project rule docs: ${
-          deployedRuleDocs.length > 0 ? deployedRuleDocs.join(', ') : 'none'
-        }`,
-      );
-    }
   }
 
   try {
     const lang = resolveLanguage(config);
     lines.push(`[filid:lang] ${lang}`);
 
-    const overrides = config?.rules ?? {};
-    const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
-    const disabledRules = allRules.filter((r) => !r.enabled);
-    if (disabledRules.length > 0) {
-      lines.push(
-        `[filid] Disabled rules: ${disabledRules.map((r) => r.id).join(', ')}`,
-      );
+    if (config) {
+      const overrides = config.rules ?? {};
+      const allRules = loadBuiltinRules(overrides, config['additional-allowed']);
+      const disabledRules = allRules.filter((r) => !r.enabled);
+      if (disabledRules.length > 0) {
+        lines.push(
+          `[filid] Disabled rules: ${disabledRules.map((r) => r.id).join(', ')}`,
+        );
+      }
     }
   } catch {
     // on rule load failure, still inject default language
