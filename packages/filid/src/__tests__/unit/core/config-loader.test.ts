@@ -13,10 +13,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createDefaultConfig,
+  getRuleDocsStatus,
   initProject,
   loadConfig,
   loadRuleOverrides,
   resolveLanguage,
+  resolveRuleDocSelection,
+  syncRuleDocs,
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
@@ -148,11 +151,11 @@ describe('config-loader', () => {
     expect(resolveLanguage(null)).toBe('en');
   });
 
-  // --- initProject ---
+  // --- initProject (config only) ---
 
   describe('initProject', () => {
     it('creates .filid/config.json when it does not exist', () => {
-      const result = initProject(tmpDir, tmpDir);
+      const result = initProject(tmpDir);
       expect(result.configCreated).toBe(true);
       expect(existsSync(join(tmpDir, '.filid', 'config.json'))).toBe(true);
     });
@@ -161,66 +164,283 @@ describe('config-loader', () => {
       const custom = createDefaultConfig();
       custom.rules['naming-convention'] = { enabled: false, severity: 'error' };
       writeConfig(tmpDir, custom);
-      const result = initProject(tmpDir, tmpDir);
+      const result = initProject(tmpDir);
       expect(result.configCreated).toBe(false);
       const loaded = loadConfig(tmpDir);
       expect(loaded?.rules['naming-convention'].enabled).toBe(false);
     });
 
-    it('copies fca.md when template exists in pluginRoot', () => {
-      // Create a fake plugin root with template
-      const fakePluginRoot = join(tmpDir, 'plugin');
-      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), {
-        recursive: true,
-      });
-      writeFileSync(
-        join(fakePluginRoot, 'templates', 'rules', 'fca.md'),
-        '# FCA Rules',
-        'utf8',
-      );
-
-      const result = initProject(tmpDir, fakePluginRoot);
-      expect(result.fcaRulesCopied).toBe(true);
-      expect(existsSync(join(tmpDir, '.claude', 'rules', 'fca.md'))).toBe(true);
+    it('never touches .claude/rules/ — that is the filid-setup skill job', () => {
+      initProject(tmpDir);
+      expect(existsSync(join(tmpDir, '.claude', 'rules'))).toBe(false);
     });
 
-    it('does not overwrite existing .claude/rules/fca.md', () => {
+    it('exposes only config path in InitResult.filePath', () => {
+      const result = initProject(tmpDir);
+      expect(result.filePath.config).toBe(
+        join(tmpDir, '.filid', 'config.json'),
+      );
+      // fcaRules field intentionally removed — belongs to syncRuleDocs now
+      expect('fcaRules' in result.filePath).toBe(false);
+    });
+  });
+
+  // --- Rule doc sync framework ---
+
+  describe('syncRuleDocs', () => {
+    function setupFakePluginRoot(extraRuleFiles: string[] = []): string {
+      const pluginRoot = join(tmpDir, 'plugin');
+      mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'fca.md'),
+        '# FCA Rules Template',
+        'utf8',
+      );
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'manifest.json'),
+        JSON.stringify({
+          version: '1.0',
+          rules: [
+            {
+              id: 'fca',
+              filename: 'fca.md',
+              required: true,
+              title: 'FCA-AI Architecture Rules',
+              description: 'Mandatory FCA rules',
+            },
+            ...extraRuleFiles.map((name) => ({
+              id: name,
+              filename: `${name}.md`,
+              required: false,
+              title: `${name} rules`,
+              description: `optional ${name}`,
+            })),
+          ],
+        }),
+        'utf8',
+      );
+      for (const name of extraRuleFiles) {
+        writeFileSync(
+          join(pluginRoot, 'templates', 'rules', `${name}.md`),
+          `# ${name} template`,
+          'utf8',
+        );
+      }
+      return pluginRoot;
+    }
+
+    it('deploys required rule doc regardless of selection', () => {
+      const pluginRoot = setupFakePluginRoot();
+      const result = syncRuleDocs(tmpDir, [], pluginRoot);
+      expect(result.copied).toContain('fca.md');
+      expect(
+        existsSync(join(tmpDir, '.claude', 'rules', 'fca.md')),
+      ).toBe(true);
+    });
+
+    it('preserves existing files (no overwrite)', () => {
+      const pluginRoot = setupFakePluginRoot();
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
       writeFileSync(
         join(tmpDir, '.claude', 'rules', 'fca.md'),
-        '# Custom',
+        '# Custom user edits',
         'utf8',
       );
-
-      const fakePluginRoot = join(tmpDir, 'plugin');
-      mkdirSync(join(fakePluginRoot, 'templates', 'rules'), {
-        recursive: true,
-      });
-      writeFileSync(
-        join(fakePluginRoot, 'templates', 'rules', 'fca.md'),
-        '# FCA Rules',
-        'utf8',
-      );
-
-      const result = initProject(tmpDir, fakePluginRoot);
-      expect(result.fcaRulesCopied).toBe(false);
+      const result = syncRuleDocs(tmpDir, [], pluginRoot);
+      expect(result.copied).not.toContain('fca.md');
+      expect(result.unchanged).toContain('fca.md');
       const content = readFileSync(
         join(tmpDir, '.claude', 'rules', 'fca.md'),
         'utf8',
       );
-      expect(content).toBe('# Custom');
+      expect(content).toBe('# Custom user edits');
     });
 
-    it('reports fcaRulesCopied=false when pluginRoot is not provided and env is unset', () => {
+    it('copies optional rule doc when selected', () => {
+      const pluginRoot = setupFakePluginRoot(['extra']);
+      const result = syncRuleDocs(tmpDir, ['extra'], pluginRoot);
+      expect(result.copied).toContain('extra.md');
+      expect(
+        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
+      ).toBe(true);
+    });
+
+    it('removes optional rule doc when unselected', () => {
+      const pluginRoot = setupFakePluginRoot(['extra']);
+      // First deploy
+      syncRuleDocs(tmpDir, ['extra'], pluginRoot);
+      expect(
+        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
+      ).toBe(true);
+      // Then unselect
+      const result = syncRuleDocs(tmpDir, [], pluginRoot);
+      expect(result.removed).toContain('extra.md');
+      expect(
+        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
+      ).toBe(false);
+      // Required rule is still there
+      expect(
+        existsSync(join(tmpDir, '.claude', 'rules', 'fca.md')),
+      ).toBe(true);
+    });
+
+    it('skips with error reason when pluginRoot cannot be resolved', () => {
       const origEnv = process.env.CLAUDE_PLUGIN_ROOT;
       delete process.env.CLAUDE_PLUGIN_ROOT;
       try {
-        const result = initProject(tmpDir);
-        expect(result.fcaRulesCopied).toBe(false);
-        expect(result.configCreated).toBe(true);
+        const result = syncRuleDocs(tmpDir, ['fca']);
+        expect(result.skipped.length).toBe(1);
+        expect(result.skipped[0].id).toBe('*');
       } finally {
         if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
       }
+    });
+
+    it('skips individual rule when template file is missing', () => {
+      const pluginRoot = setupFakePluginRoot();
+      // Point manifest at a file that doesn't exist
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'manifest.json'),
+        JSON.stringify({
+          version: '1.0',
+          rules: [
+            {
+              id: 'ghost',
+              filename: 'ghost.md',
+              required: false,
+              title: 'ghost',
+              description: 'missing template',
+            },
+          ],
+        }),
+        'utf8',
+      );
+      const result = syncRuleDocs(tmpDir, ['ghost'], pluginRoot);
+      expect(result.skipped.some((s) => s.id === 'ghost')).toBe(true);
+    });
+  });
+
+  describe('getRuleDocsStatus', () => {
+    it('returns entries with deployed/selected flags', () => {
+      const pluginRoot = join(tmpDir, 'plugin');
+      mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'fca.md'),
+        '# FCA',
+        'utf8',
+      );
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'extra.md'),
+        '# Extra',
+        'utf8',
+      );
+      writeFileSync(
+        join(pluginRoot, 'templates', 'rules', 'manifest.json'),
+        JSON.stringify({
+          version: '1.0',
+          rules: [
+            {
+              id: 'fca',
+              filename: 'fca.md',
+              required: true,
+              title: 'FCA',
+              description: 'required',
+            },
+            {
+              id: 'extra',
+              filename: 'extra.md',
+              required: false,
+              title: 'Extra',
+              description: 'optional',
+            },
+          ],
+        }),
+        'utf8',
+      );
+
+      // config with extra opted in
+      const config = createDefaultConfig();
+      config['injected-rules'] = { extra: true };
+      writeConfig(tmpDir, config);
+
+      // deploy fca only
+      mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        '# Deployed FCA',
+        'utf8',
+      );
+
+      const status = getRuleDocsStatus(tmpDir, pluginRoot);
+      expect(status.pluginRootResolved).toBe(true);
+      expect(status.entries).toHaveLength(2);
+
+      const fca = status.entries.find((e) => e.id === 'fca');
+      expect(fca).toBeDefined();
+      expect(fca!.required).toBe(true);
+      expect(fca!.deployed).toBe(true);
+      expect(fca!.selected).toBe(true);
+
+      const extra = status.entries.find((e) => e.id === 'extra');
+      expect(extra).toBeDefined();
+      expect(extra!.required).toBe(false);
+      expect(extra!.deployed).toBe(false);
+      expect(extra!.selected).toBe(true); // opted in via injected-rules
+    });
+
+    it('returns pluginRootResolved=false when env is unset and no arg', () => {
+      const origEnv = process.env.CLAUDE_PLUGIN_ROOT;
+      delete process.env.CLAUDE_PLUGIN_ROOT;
+      try {
+        const status = getRuleDocsStatus(tmpDir);
+        expect(status.pluginRootResolved).toBe(false);
+        expect(status.entries).toEqual([]);
+      } finally {
+        if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
+      }
+    });
+  });
+
+  describe('resolveRuleDocSelection', () => {
+    const manifest = {
+      version: '1.0',
+      rules: [
+        {
+          id: 'fca',
+          filename: 'fca.md',
+          required: true,
+          title: 'FCA',
+          description: '',
+        },
+        {
+          id: 'style',
+          filename: 'style.md',
+          required: false,
+          title: 'Style',
+          description: '',
+        },
+      ],
+    };
+
+    it('always includes required ids', () => {
+      const selection = resolveRuleDocSelection(manifest, null);
+      expect(selection.has('fca')).toBe(true);
+      expect(selection.has('style')).toBe(false);
+    });
+
+    it('honours injected-rules for optional ids', () => {
+      const config = createDefaultConfig();
+      config['injected-rules'] = { style: true };
+      const selection = resolveRuleDocSelection(manifest, config);
+      expect(selection.has('fca')).toBe(true);
+      expect(selection.has('style')).toBe(true);
+    });
+
+    it('excludes optional ids set to false', () => {
+      const config = createDefaultConfig();
+      config['injected-rules'] = { style: false };
+      const selection = resolveRuleDocSelection(manifest, config);
+      expect(selection.has('style')).toBe(false);
     });
   });
 
@@ -238,7 +458,7 @@ describe('config-loader', () => {
         throw new Error('unexpected command');
       }) as typeof execSync);
 
-      const result = initProject(subDir, subDir);
+      const result = initProject(subDir);
       expect(result.configCreated).toBe(true);
       expect(result.filePath.config).toBe(
         join(fakeGitRoot, '.filid', 'config.json'),
@@ -278,7 +498,7 @@ describe('config-loader', () => {
       }) as typeof execSync);
 
       // init from subdirectory writes config at repo root
-      initProject(subDir, subDir);
+      initProject(subDir);
 
       // loadRuleOverrides from same subdirectory should find it
       const overrides = loadRuleOverrides(subDir);
@@ -290,7 +510,7 @@ describe('config-loader', () => {
         throw new Error('not a git repository');
       }) as unknown as typeof execSync);
 
-      const result = initProject(tmpDir, tmpDir);
+      const result = initProject(tmpDir);
       expect(result.configCreated).toBe(true);
       // Config should be at tmpDir itself (fallback)
       expect(result.filePath.config).toBe(

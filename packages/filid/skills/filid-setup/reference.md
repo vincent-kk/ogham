@@ -5,17 +5,22 @@ For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 0 — Environment Setup Details
 
-Before starting the scanning workflow, ensure the FCA-AI project infrastructure is in place.
+Section 0 is split into four sub-phases. Phase 0a creates the config,
+Phase 0b inspects current rule doc state, Phase 0c asks the user which
+rule docs to deploy (the ONLY interactive checkpoint in this skill), and
+Phase 0d persists the decision and synchronises `.claude/rules/`.
 
-### Step 1: Create `.filid/` directory
+### Phase 0a — Config Initialization
 
-```bash
-mkdir -p .filid
-```
+Call `project_init({ path })`. The handler:
+- Resolves the git repository root from `path`
+- Creates `.filid/config.json` if absent, with the default 8-rule config
+  and an empty `injected-rules: {}` map
+- Never overwrites an existing config
 
-### Step 2: Initialize `.filid/config.json`
+`project_init` does NOT touch `.claude/rules/` in any way.
 
-If `.filid/config.json` does not exist, create it with the default rule configuration:
+Default config shape:
 
 ```json
 {
@@ -29,21 +34,106 @@ If `.filid/config.json` does not exist, create it with the default rule configur
     "circular-dependency": { "enabled": true, "severity": "error" },
     "pure-function-isolation": { "enabled": true, "severity": "error" },
     "zero-peer-file": { "enabled": true, "severity": "warning" }
+  },
+  "injected-rules": {}
+}
+```
+
+### Phase 0b — Rule Docs Status Query
+
+Call `rule_docs_sync({ action: "status", path })`. Response shape:
+
+```ts
+{
+  action: "status";
+  status: {
+    pluginRootResolved: boolean;
+    manifestPath: string | null;
+    entries: Array<{
+      id: string;
+      filename: string;      // e.g. "fca.md"
+      required: boolean;     // true → pre-checked & disabled in UI
+      title: string;         // checkbox label
+      description: string;   // checkbox description
+      deployed: boolean;     // file currently exists under .claude/rules/
+      selected: boolean;     // config opts it in (required ⇒ always true)
+    }>;
+  };
+}
+```
+
+If `pluginRootResolved` is `false`, fail fast: the plugin is running
+without `CLAUDE_PLUGIN_ROOT` set, which means `rule_docs_sync` cannot
+locate the manifest. Surface an error message and skip Phase 0c/0d.
+
+Build `currentSelection: Record<string, boolean>` by mapping each entry
+to `entry.selected`.
+
+### Phase 0c — Checkbox Prompt <!-- [INTERACTIVE] -->
+
+Use `AskUserQuestion` to render a multi-select question.
+
+- **Header**: `"배포할 규칙 문서를 선택하세요 (필수 항목은 해제할 수 없습니다)"`
+- **Options**: one per entry from Phase 0b
+  - Label: `entry.title` (append ` (필수)` when `required === true`)
+  - Description: `entry.description`
+  - Pre-checked: `entry.selected === true`
+  - Required entries MUST remain checked — if the user somehow
+    unchecks a required entry in the response, coerce it back to `true`
+    before computing `nextSelection`.
+
+After the user answers:
+
+```ts
+const nextSelection: Record<string, boolean> = {};
+for (const entry of status.entries) {
+  if (entry.required) {
+    nextSelection[entry.id] = true;
+  } else {
+    nextSelection[entry.id] = userAnswer.includes(entry.id);
   }
 }
 ```
 
-Do NOT overwrite an existing `config.json` — the user may have customized rule settings.
+Short-circuit optimization: if `nextSelection` is deep-equal to
+`currentSelection` AND every entry already has `deployed === selected`,
+there is nothing to do. Skip Phase 0d and proceed to Phase 1 with a
+one-liner `"규칙 문서: 변경 없음"`.
 
-### Step 3: Create `.claude/rules/fca.md`
+### Phase 0d — Sync
 
-If `.claude/rules/fca.md` does not exist, copy the FCA architecture and rules guide.
-The template source is `templates/rules/fca.md` in the filid plugin directory.
+Call `rule_docs_sync({ action: "sync", path, selections: nextSelection })`.
+Response shape:
 
-This file is loaded natively by Claude Code as a system rule, ensuring strong adherence
-to FCA-AI architectural principles. Do NOT overwrite an existing file.
+```ts
+{
+  action: "sync";
+  configWritten: boolean;
+  selections: Record<string, boolean>;
+  result: {
+    copied: string[];     // filenames that were freshly deployed
+    removed: string[];    // filenames that were unlinked
+    unchanged: string[];  // filenames that matched the desired state already
+    skipped: Array<{ id: string; reason: string }>;
+  };
+}
+```
 
-### Step 4: Gitignore recommendation
+The handler first persists `selections` into `.filid/config.json`
+(`injected-rules` field), then walks the manifest and performs the
+filesystem diff. Existing rule doc files are never overwritten — if a
+user edited `.claude/rules/fca.md` locally, re-running the skill with
+`fca` still selected will leave their edits untouched.
+
+Print a one-line summary:
+```
+규칙 문서 동기화: copied=<n>, removed=<n>, unchanged=<n>, skipped=<n>
+```
+
+If `skipped` is non-empty, print each entry as a warning line but do
+NOT abort — continue with Phase 1.
+
+### Step: Gitignore Recommendation
 
 If `.filid/review/` or `.filid/cache/` are not in `.gitignore`, inform the user:
 
@@ -53,7 +143,20 @@ If `.filid/review/` or `.filid/cache/` are not in `.gitignore`, inform the user:
   .filid/cache/
 ```
 
-`.filid/config.json` and `.claude/rules/fca.md` should be committed to version control.
+`.filid/config.json` and every deployed `.claude/rules/*.md` file
+should be committed to version control.
+
+### Re-entry Behaviour
+
+`/filid:filid-setup` is safe to run repeatedly. On a second or later
+invocation in the same project:
+- Phase 0a is a no-op (config already exists)
+- Phase 0b returns `selected` reflecting the current `injected-rules`
+- Phase 0c pre-fills the checkbox with the saved selection
+- Phase 0d applies only the diff (add newly-checked, remove newly-unchecked)
+
+This makes the skill the **single management entry point** for optional
+rule doc toggling.
 
 ---
 

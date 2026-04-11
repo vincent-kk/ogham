@@ -3,16 +3,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 
 // Default existsSync behavior:
-//   .filid path          → true  (passes isFcaProject gate)
-//   /prompt-context-*    → false (no cached context = triggers fresh build)
-//   others               → false
+//   .filid path               → true  (passes isFcaProject gate)
+//   .filid/config.json        → true  (config present)
+//   .claude/rules/fca.md      → true  (rules deployed, active pointer)
+//   /prompt-context-*         → false (no cached context = triggers fresh build)
+//   others                    → false
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
   return {
     ...actual,
     existsSync: vi.fn((p: unknown) => {
-      if (typeof p === 'string' && p.endsWith('.filid')) return true;
-      if (typeof p === 'string' && p.includes('/prompt-context-')) return false;
+      if (typeof p !== 'string') return false;
+      if (p.endsWith('.filid')) return true;
+      if (p.endsWith('.filid/config.json')) return true;
+      if (p.endsWith('.claude/rules/fca.md')) return true;
+      if (p.includes('/prompt-context-')) return false;
       return false;
     }),
     statSync: vi.fn(() => {
@@ -42,9 +47,11 @@ describe('context-injector', () => {
     // restore default existsSync behavior so each test runs independently
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('.filid')) return true;
-        if (typeof p === 'string' && p.includes('/prompt-context-'))
-          return false;
+        if (typeof p !== 'string') return false;
+        if (p.endsWith('.filid')) return true;
+        if (p.endsWith('.filid/config.json')) return true;
+        if (p.endsWith('.claude/rules/fca.md')) return true;
+        if (p.includes('/prompt-context-')) return false;
         return false;
       },
     );
@@ -82,6 +89,44 @@ describe('context-injector', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
+  it('warns when .filid/config.json is missing (not initialized)', async () => {
+    (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
+      (p: unknown) => {
+        if (typeof p !== 'string') return false;
+        if (p.endsWith('.filid')) return true; // FCA gate passes
+        if (p.endsWith('.filid/config.json')) return false; // config missing
+        if (p.endsWith('.claude/rules/fca.md')) return false;
+        if (p.includes('/prompt-context-')) return false;
+        return false;
+      },
+    );
+
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('Not initialized');
+    expect(ctx).toContain('/filid:filid-setup');
+    expect(ctx).not.toContain('FCA-AI active');
+  });
+
+  it('warns when fca.md is missing but config is present (rules not deployed)', async () => {
+    (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
+      (p: unknown) => {
+        if (typeof p !== 'string') return false;
+        if (p.endsWith('.filid')) return true;
+        if (p.endsWith('.filid/config.json')) return true;
+        if (p.endsWith('.claude/rules/fca.md')) return false; // not deployed
+        if (p.includes('/prompt-context-')) return false;
+        return false;
+      },
+    );
+
+    const result = await injectContext(baseInput);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('Rules not deployed');
+    expect(ctx).toContain('/filid:filid-setup');
+    expect(ctx).not.toContain('FCA-AI active');
+  });
+
   // === Session-based inject tests ===
 
   it('should not inject when prompt-context exists', async () => {
@@ -106,9 +151,11 @@ describe('context-injector', () => {
     // prompt-context missing → rebuild regardless of session-context state
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('.filid')) return true;
-        if (typeof p === 'string' && p.includes('/prompt-context-'))
-          return false;
+        if (typeof p !== 'string') return false;
+        if (p.endsWith('.filid')) return true;
+        if (p.endsWith('.filid/config.json')) return true;
+        if (p.endsWith('.claude/rules/fca.md')) return true;
+        if (p.includes('/prompt-context-')) return false;
         return false;
       },
     );
