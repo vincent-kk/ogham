@@ -52,7 +52,7 @@ function toolError(error: unknown) {
 
 /**
  * Wrap a tool handler with standard try/catch error handling.
- * Reduces repetitive boilerplate across all 16 registerTool callbacks.
+ * Reduces repetitive boilerplate across all 17 registerTool callbacks.
  */
 function wrapHandler<T>(
   fn: (args: T) => unknown | Promise<unknown>,

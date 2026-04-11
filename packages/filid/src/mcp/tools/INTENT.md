@@ -2,7 +2,7 @@
 
 ## Purpose
 
-16개 FCA-AI MCP 도구의 비즈니스 로직 핸들러를 구현한다. `server.ts`에서 등록되어 MCP 프로토콜을 통해 호출된다.
+17개 FCA-AI MCP 도구의 비즈니스 로직 핸들러를 구현한다. `server.ts`에서 등록되어 MCP 프로토콜을 통해 호출된다.
 
 ## Structure
 

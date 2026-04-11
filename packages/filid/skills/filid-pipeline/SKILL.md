@@ -156,7 +156,7 @@ uses a **hybrid execution model**:
   is generated → skip `filid:resolve` + `filid:revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
   If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — remove the empty file via `Bash(rm "${review_dir}/fix-requests.md")` where `review_dir` is `.filid/review/<normalized-branch>`, then skip resolve + revalidate.
 - **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:resolve` +
-  `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:filid-pipeline --from=review --force`." and END execution.
+  `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:filid-pipeline --from=filid-review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"
 - **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
@@ -206,7 +206,7 @@ Read the final verdict from `.filid/review/<branch>/re-validate.md`
 | -------------------------------------- | -------------------------------------------------------- |
 | review `APPROVED` (no fix-requests)    | Skip resolve + revalidate → pipeline **PASS**, END      |
 | review `REQUEST_CHANGES`               | Proceed to resolve immediately                           |
-| review `INCONCLUSIVE`                  | Skip resolve + revalidate → pipeline **FAIL**, report "consensus not reached", suggest `--from=review --force`, END |
+| review `INCONCLUSIVE`                  | Skip resolve + revalidate → pipeline **FAIL**, report "consensus not reached", suggest `--from=filid-review --force`, END |
 | resolve completes (0 accepted fixes)   | Proceed to revalidate immediately (justifications.md exists) |
 | resolve completes (N accepted fixes)   | Proceed to revalidate immediately (code committed + pushed) |
 | revalidate `PASS`                      | Pipeline **PASS**, report summary, END                   |
@@ -233,7 +233,7 @@ All other operations are delegated to existing skills via `Skill()` tool.
 
 > Options are LLM-interpreted hints, not strict CLI flags. Natural language
 > works equally well (e.g., "run the full pipeline from review" instead of
-> `--from=review`).
+> `--from=filid-review`).
 
 ```
 /filid:filid-pipeline [--from=<stage>] [--base=<ref>] [--draft] [--skip-update] [--force] [--no-structure-check] [--title=<title>]
@@ -254,13 +254,13 @@ All other operations are delegated to existing skills via `Skill()` tool.
 ```
 /filid:filid-pipeline                        # Auto-detect entry point, run to completion
 /filid:filid-pipeline --from=pr-create       # Full cycle: PR → review → resolve → revalidate
-/filid:filid-pipeline --from=review          # Review → resolve → revalidate
-/filid:filid-pipeline --from=resolve         # Resolve → revalidate
-/filid:filid-pipeline --from=revalidate      # Revalidate only
+/filid:filid-pipeline --from=filid-review    # Review → resolve → revalidate
+/filid:filid-pipeline --from=filid-resolve   # Resolve → revalidate
+/filid:filid-pipeline --from=filid-revalidate # Revalidate only
 
 Pipeline:  [pr-create] → [review] → [resolve --auto] → [revalidate]
 Execution: review = subagent (context isolation), others = main context (direct Skill())
-Skills:    filid:pull-request, filid:review (--scope=pr), filid:resolve (--auto), filid:revalidate
+Skills:    filid:filid-pull-request, filid:filid-review (--scope=pr), filid:filid-resolve (--auto), filid:filid-revalidate
 Files:     .filid/review/<branch>/ (inter-stage communication)
 Resolve:   Always --auto (accept all, commit, push, auto-revalidate)
 Resume:    On failure, re-run — auto-detection picks up from the right stage

@@ -13,6 +13,7 @@ export * from './fractal-scan/fractal-scan.js';
 export * from './lca-resolve/lca-resolve.js';
 export * from './project-init/project-init.js';
 export * from './review-manage/review-manage.js';
+export * from './rule-docs-sync/rule-docs-sync.js';
 export * from './rule-query/rule-query.js';
 export * from './structure-validate/structure-validate.js';
 export * from './test-metrics/test-metrics.js';

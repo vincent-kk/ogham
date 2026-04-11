@@ -153,7 +153,7 @@ For each stage in pipeline:
     # Subagent delegation — context isolation required
     result = Agent(
       subagent_type: "general-purpose",
-      prompt: "Read and execute the following skill: Skill('filid:review', '--scope=pr <flags>').
+      prompt: "Read and execute the following skill: Skill('filid:filid-review', '--scope=pr <flags>').
                Project root: <project_root>. Branch: <branch>.
                CRITICAL: This skill has 5 steps. You MUST complete ALL steps including
                Step 5 (PR Comment). Do NOT stop after writing review-report.md and

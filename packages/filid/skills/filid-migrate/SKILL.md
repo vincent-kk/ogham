@@ -21,13 +21,13 @@ batch processing — the LLM only reads the script output and reports to the use
 
 - Upgrading a project initialized with filid < 0.1.0 that uses `CLAUDE.md`/`SPEC.md`
 - After updating the filid plugin and wanting to adopt the new naming convention
-- When `filid:scan` reports `CLAUDE.md` files that should be `INTENT.md`
+- When `filid:filid-scan` reports `CLAUDE.md` files that should be `INTENT.md`
 
 ### Relationship with Other Skills
 
-- **`filid:scan`**: May report legacy `CLAUDE.md` files as violations — run this skill to fix them.
-- **`filid:setup`**: Generates `INTENT.md`/`DETAIL.md` for new projects. This skill migrates old projects to the same convention.
-- **`filid:update`**: After migration, use `filid:update` to verify INTENT.md/DETAIL.md content is current.
+- **`filid:filid-scan`**: May report legacy `CLAUDE.md` files as violations — run this skill to fix them.
+- **`filid:filid-setup`**: Generates `INTENT.md`/`DETAIL.md` for new projects. This skill migrates old projects to the same convention.
+- **`filid:filid-update`**: After migration, use `filid:filid-update` to verify INTENT.md/DETAIL.md content is current.
 
 ## Core Workflow
 

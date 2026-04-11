@@ -259,11 +259,14 @@ If there were **NO** accepted fixes (all rejected):
      "No upstream branch. Push manually when ready." Then proceed to Step 9.
 2. **Execute**: `git push` (Bash)
 3. On **success**: **→ Immediately proceed to Step 9.**
-4. On **failure**: notify user via `AskUserQuestion`:
-   - "Push failed: <error>. Resolve manually, then run /filid:filid-revalidate."
-   - Options: "Continue to revalidate anyway" / "Stop here"
-   - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
-   - On "Stop here": **END execution.**
+4. On **failure**:
+   - In `--auto` mode: **ABORT** with error "Push failed: `<error>`. Push manually and re-run `/filid:filid-pipeline --from=filid-revalidate`." Then END execution. Do NOT invoke `AskUserQuestion` (skipped by design in `--auto`).
+   - In interactive mode: notify user via `AskUserQuestion`:
+     <!-- [INTERACTIVE] AskUserQuestion: push failure warning -->
+     - "Push failed: <error>. Resolve manually, then run /filid:filid-revalidate."
+     - Options: "Continue to revalidate anyway" / "Stop here"
+     - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
+     - On "Stop here": **END execution.**
 
 ### Step 9 — Offer to Run `filid:revalidate`
 
