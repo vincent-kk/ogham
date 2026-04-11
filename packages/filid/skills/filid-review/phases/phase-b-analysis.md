@@ -16,6 +16,8 @@ the code change and elect a review committee. Write the results to `session.md`.
 - `BASE_REF`: Comparison base reference
 - `SCOPE`: Review scope (branch|pr|commit)
 - `PROJECT_ROOT`: Project root directory
+- `ADJUDICATOR_MODE`: `true` or `false` (from `--solo` flag; when true,
+  elect-committee returns the integrated `adjudicator` agent)
 
 ## Steps
 
@@ -76,16 +78,34 @@ review_manage(
   projectRoot: <PROJECT_ROOT>,
   changedFilesCount: <count>,
   changedFractalsCount: <count>,
-  hasInterfaceChanges: <boolean>
+  hasInterfaceChanges: <boolean>,
+  adjudicatorMode: <ADJUDICATOR_MODE from context, true or false>
 )
 ```
 
 Result contains: `complexity`, `committee`, `adversarialPairs`.
 
-**Structure-bias adjustment**: If `STRUCTURE_CRITICAL_COUNT >= 3`, escalate
-`complexity` by one level (LOW → MEDIUM, MEDIUM → HIGH). This ensures that
-severe structural violations trigger a more rigorous committee composition
-even when the diff is small.
+**Solo mode**: When `ADJUDICATOR_MODE=true` (user passed `--solo`), the MCP
+handler short-circuits complexity calculation and returns:
+`{ complexity: 'TRIVIAL', committee: ['adjudicator'], adversarialPairs: [] }`.
+Skip the structure-bias adjustment below when `adjudicatorMode` is true.
+
+**Complexity tiers** (without solo mode):
+- `TRIVIAL` — 1 member (`adjudicator`) when
+  `changedFilesCount <= 1 && changedFractalsCount <= 1 && !hasInterfaceChanges`.
+  The auto-selected TRIVIAL tier uses the same integrated fast-path agent
+  as `--solo`, because the diff is too small for adversarial multi-persona
+  debate to add value.
+- `LOW` — 2 specialist members
+- `MEDIUM` — 4 specialist members
+- `HIGH` — 6 specialist members
+
+**Structure-bias adjustment**: If `STRUCTURE_CRITICAL_COUNT >= 3` AND
+`adjudicatorMode` is false, escalate `complexity` by one level (TRIVIAL → LOW,
+LOW → MEDIUM, MEDIUM → HIGH). This promotes TRIVIAL diffs with severe
+structural violations out of the adjudicator fast path into the
+adversarial specialist committee. When `adjudicatorMode: true`, the user has
+explicitly asked for the fast path — do not escalate.
 
 ### B.4 — Ensure Review Directory
 
@@ -116,6 +136,7 @@ changed_fractals:
   - ...
 interface_changes: <true|false>
 no_structure_check: <true if --no-structure-check was set, false otherwise>
+adjudicator_mode: <true|false>   # true if --solo flag was set
 structure_critical_count: <STRUCTURE_CRITICAL_COUNT>
 structure_overall: <PASS|FAIL|N/A>
 created_at: <ISO 8601>
@@ -140,6 +161,7 @@ Adversarial pairs: <persona A> ↔ <persona B list>
 ## Important Notes
 
 - Use MCP tools for deterministic operations (committee election, branch normalization)
-- Do NOT load persona files — that happens in Phase D only
+- Do NOT load persona agent definitions — Phase D spawns them as real
+  subagents via `Task(subagent_type: filid:<persona-id>)` when needed
 - Write ONLY `session.md` — no other files
 - If `fractal_navigate` fails for a path, classify it as "unknown" and continue
