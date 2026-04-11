@@ -4,7 +4,7 @@ import {
   RULE_ERROR_PROBABILITY,
   parseFixRequests,
   parseStructureCheckFrontmatter,
-} from '../../../core/utils/pr-summary-generator.js';
+} from '../../../core/pr-summary/index.js';
 
 // --- Test fixtures ---
 

@@ -140,5 +140,5 @@ export {
   generateHumanSummary,
   parseFixRequests,
   parseStructureCheckFrontmatter,
-} from './utils/pr-summary-generator.js';
-export type { GenerateSummaryInput } from './utils/pr-summary-generator.js';
+} from './pr-summary/index.js';
+export type { GenerateSummaryInput } from './pr-summary/index.js';
