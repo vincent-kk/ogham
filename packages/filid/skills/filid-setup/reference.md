@@ -86,60 +86,112 @@ from `status.entries` (optional only) to `entry.selected`. Do NOT
 include any required entries — they are enforced server-side and must
 not appear in the UI.
 
-### Phase 0c — Checkbox Prompt <!-- [INTERACTIVE] -->
+### Phase 0c — Prompt <!-- [INTERACTIVE] -->
 
-Use `AskUserQuestion` to render a multi-select question listing only
-the optional rules in `status.entries`. Required rules from
-`status.autoDeployed` MUST NOT appear as options — they are already
-enforced by the sync handler and the user cannot opt out.
+`AskUserQuestion` requires a **minimum of 2 options per question**.
+Because `status.entries.length` can be 0, 1, or more, Phase 0c MUST
+dispatch on this count. Required rules from `status.autoDeployed` are
+NEVER shown — they are enforced server-side by `syncRuleDocs`.
+
+Compute `nextSelection: Record<string, boolean>` keyed by optional rule
+`id` (required rules MUST NOT appear). Dispatch on `N`:
+
+#### Case A — `N === 0`
+
+No optional rules. Skip `AskUserQuestion` entirely. Set
+`nextSelection = {}` and proceed to Phase 0d.
+
+#### Case B — `N === 1`
+
+A single-item multi-select is invalid (min 2 options). Render a
+**single-select Yes/No prompt** whose two options represent the two
+possible states of that single rule.
+
+```ts
+const entry = status.entries[0];
+const on = entry.deployed;
+
+AskUserQuestion({
+  questions: [
+    {
+      question: `Deploy rule doc "${entry.title}"?`,
+      multiSelect: false,
+      header: "Rule docs",
+      options: [
+        {
+          label: on ? `[ON] Keep: ${entry.title}` : `Deploy: ${entry.title}`,
+          description: entry.description,
+        },
+        {
+          label: on ? `Remove: ${entry.title}` : `Skip: ${entry.title}`,
+          description: "Do not deploy this rule doc.",
+        },
+      ],
+    },
+  ],
+});
+```
+
+Map the user's answer to `nextSelection`:
+- First option → `nextSelection[entry.id] = true`
+- Second option → `nextSelection[entry.id] = false`
+
+The `[ON]` prefix is a literal English token marking current deployment
+state — do NOT translate it.
+
+#### Case C — `N >= 2`
+
+Render a **multi-select checkbox prompt** with exactly one option per
+optional entry.
+
+**Hard rules** (any violation breaks the UI):
+- `multiSelect: true` is MANDATORY in Case C.
+- Exactly ONE option per optional rule. Never pair an entry with a
+  "keep"/"remove" companion option — one entry → one option.
+- Required rules MUST NOT appear in the option list.
 
 **Note**: `AskUserQuestion` does not support pre-checking or default
 selection. To represent the current deployment state (from Phase 0b
-`entry.deployed`), you MUST prepend a literal `[ON] ` prefix (note the
-trailing space) to each deployed option's `label`. Do NOT use a
+`entry.deployed`), prepend a literal `[ON] ` prefix (note the trailing
+space) to each deployed option's `label`. Do NOT use a
 `[V]` / `[ ]` / `[X]` / `[✓]` checkbox-style prefix — it collides with
 the UI's own checkbox column.
 
-- **Header** (English default; translate to `[filid:lang]` at runtime):
-  `"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
-- **Options**: one per entry in `status.entries` (optional rules only).
-  - Label — prepend `[ON] ` when `entry.deployed === true`; otherwise
-    use the bare `title`. The `[ON]` marker is a literal English token
-    — do NOT translate it, so the `title` portion remains stable for
-    later matching:
-    - `deployed === true` → `"[ON] title"`
-    - `deployed === false` → `"title"`
-  - Description: `entry.description`
-  - `[ON]` is the ONLY allowed bracketed prefix; do NOT add `[V]` / `[ ]`
-    / `[X]` / `[✓]` checkbox-style markers. `AskUserQuestion` renders
-    its own checkbox column, and a checkbox-style prefix is visually
-    indistinguishable from the real checkbox — users cannot tell which
-    one is authoritative.
-  - Because `AskUserQuestion` cannot pre-check options, the `[ON]`
-    prefix is the ONLY cue for current state. The user MUST re-select
-    every option they want to keep deployed; an optional entry left
-    unchecked will be removed in Phase 0d.
+```ts
+AskUserQuestion({
+  questions: [
+    {
+      question: "Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them.",
+      multiSelect: true,
+      header: "Rule docs",
+      options: status.entries.map((entry) => ({
+        label: entry.deployed ? `[ON] ${entry.title}` : entry.title,
+        description: entry.description,
+      })),
+    },
+  ],
+});
+```
 
-After the user answers, map the labels back to rule `id`s:
+Map the user's answer to `nextSelection`:
 
 ```ts
 const nextSelection: Record<string, boolean> = {};
-// Iterate optional entries only — required rules are enforced by
-// `syncRuleDocs` from the manifest and must not appear in the map.
 for (const entry of status.entries) {
-  // AskUserQuestion returns labels only for items the user checked.
-  // Match back to the entry by substring on the stable `title` portion
-  // (the literal `[ON] ` prefix does not disturb the match because
-  // `entry.title` is a substring of the label).
+  // AskUserQuestion returns only labels of items the user checked.
+  // Match back by substring on the stable `title` portion — the literal
+  // `[ON] ` prefix does not disturb the match.
   nextSelection[entry.id] = userAnswer.some((answerLabel) =>
     answerLabel.includes(entry.title),
   );
 }
 ```
 
-If `nextSelection` is deep-equal to `currentSelection` AND every entry
-in `status.autoDeployed` already has `deployed === true`, skip Phase 0d
-and proceed to Phase 1.
+#### After the prompt
+
+Always proceed to Phase 0d with `nextSelection`. The sync handler is
+idempotent — calling it when nothing changes is cheap and guarantees
+required rules stay deployed on first-run projects.
 
 ### Phase 0d — Sync
 
@@ -216,11 +268,13 @@ invocation in the same project:
 - Phase 0a is a no-op (config already exists)
 - Phase 0b returns `selected` derived from the filesystem
   (`required || deployed`)
-- Phase 0c surfaces the current filesystem state via a literal `[ON] `
-  label prefix on already-deployed items. `AskUserQuestion` itself
-  cannot pre-check boxes, so the user MUST re-select every optional
-  rule doc they want to keep — omitting an `[ON]` item causes it to
-  be removed in Phase 0d.
+- Phase 0c dispatches on `status.entries.length`:
+    - `N === 0`: no prompt, `nextSelection = {}`.
+    - `N === 1`: single-select Yes/No with two state-reflecting options.
+    - `N >= 2`: multi-select checkbox with `[ON]` state markers.
+  `AskUserQuestion` cannot pre-check boxes, so in Case C the user MUST
+  re-select every optional rule doc they want to keep — omitting an
+  `[ON]` item causes it to be removed in Phase 0d.
 - Phase 0d applies only the diff (add newly-checked, remove newly-unchecked)
 
 This makes the skill the **single management entry point** for optional

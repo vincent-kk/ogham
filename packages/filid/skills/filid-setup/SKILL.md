@@ -1,9 +1,9 @@
 ---
 name: filid-setup
 user_invocable: true
-description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, deploy selected rule docs via checkbox UI, scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
+description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, deploy selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
 argument-hint: "[path] [--rules]"
-version: "1.2.0"
+version: "1.3.0"
 complexity: medium
 plugin: filid
 ---
@@ -15,8 +15,9 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call returns or between non-interactive phases.
 > Large tool responses (e.g., fractal_scan) are internal working data —
 > do NOT summarize them to the user. Skip phases with no work silently.
-> At `<!-- [INTERACTIVE] -->` markers, present the checkbox prompt, wait
-> for the user's answer, then resume the chain in the same response.
+> At `<!-- [INTERACTIVE] -->` markers, present the appropriate prompt
+> shape for `status.entries.length` (see Phase 0c), wait for the user's
+> answer, then resume the chain in the same response.
 
 # filid-setup — FCA-AI Initialization
 
@@ -113,44 +114,104 @@ entries — they are implicit and must not appear in the UI.
 
 **→ Immediately proceed to Phase 0c.**
 
-### Phase 0c — Rule Docs Checkbox <!-- [INTERACTIVE] -->
+### Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
 
-Present a checkbox prompt listing every entry from `status.entries[]`
-(optional rules only) using `AskUserQuestion`. Required rules from
-`status.autoDeployed[]` MUST NOT appear as options — they are already
-enforced by the sync handler and the user cannot opt out.
+Dispatch on `N = status.entries.length` (number of **optional** rules only).
+Required rules from `status.autoDeployed[]` are enforced by the sync handler
+and MUST NEVER appear in the option list in any case.
 
-Note: `AskUserQuestion` does not support pre-checking; therefore, you
-MUST reflect the current deployment state in the `label` text.
+`AskUserQuestion` requires a **minimum of 2 options per question**, so the
+prompt shape depends on `N`. Compute `nextSelection: Record<string, boolean>`
+keyed by optional rule `id` (required rules MUST NOT appear in it):
 
-- Question (English default; translate to `[filid:lang]` at runtime):
-  `"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
-- Options: one per entry in `status.entries[]` (optional rules only).
-  - Label — prepend a `[ON] ` prefix (note the trailing space) when
-    `entry.deployed === true`; otherwise use the bare `title`. The
-    `[ON]` marker is a literal English token — do NOT translate it,
-    so the `title` portion remains stable for later matching:
-    - `deployed === true` → `"[ON] title"`
-    - `deployed === false` → `"title"`
-    `[ON]` is the only allowed bracketed prefix; do NOT add `[V]` / `[ ]`
-    / `[X]` / `[✓]` checkbox-style markers — they collide visually with
-    the UI's own checkbox column and are indistinguishable from the
-    authoritative checkbox.
-  - Description: `entry.description`
+#### Case A — `N === 0` (no optional rules)
 
-After the user answers, compute `nextSelection: Record<string, boolean>`
-from `status.entries[]` only:
-- For every optional entry, set `true` if the user checked it, otherwise
-  `false`.
-- Required rules MUST NOT appear in `nextSelection` — they are enforced
-  server-side by `syncRuleDocs` from the manifest.
-- **Note**: Since `AskUserQuestion` returns a new list of labels, map
-  the user's choice back to the original `id` based on the optional
-  entries from Phase 0b.
+Skip `AskUserQuestion` entirely. Set `nextSelection = {}` and proceed to
+Phase 0d. Required rules still get auto-deployed by `syncRuleDocs`.
 
-If `nextSelection` is deep-equal to `currentSelection` AND every entry
-in `status.autoDeployed[]` already has `deployed === true`, skip
-Phase 0d (no-op) and proceed to Phase 1.
+#### Case B — `N === 1` (exactly one optional rule)
+
+A one-item multi-select is invalid (min 2 options). Render a
+**single-select Yes/No prompt** whose two options represent the two
+possible states of that single rule.
+
+```ts
+const entry = status.entries[0];
+const on = entry.deployed;
+
+AskUserQuestion({
+  questions: [
+    {
+      question: "<translate `Deploy rule doc "${entry.title}"?` to [filid:lang]>",
+      multiSelect: false,
+      header: "Rule docs",
+      options: [
+        {
+          label: on ? `[ON] Keep: ${entry.title}` : `Deploy: ${entry.title}`,
+          description: entry.description,
+        },
+        {
+          label: on ? `Remove: ${entry.title}` : `Skip: ${entry.title}`,
+          description: "<translate `Do not deploy this rule doc.` to [filid:lang]>",
+        },
+      ],
+    },
+  ],
+});
+```
+
+Map the user's answer to `nextSelection`:
+- First option chosen → `nextSelection[entry.id] = true`
+- Second option chosen → `nextSelection[entry.id] = false`
+
+The `[ON]` prefix is a literal English token marking current deployment
+state — do NOT translate it.
+
+#### Case C — `N >= 2` (two or more optional rules)
+
+Render a **multi-select checkbox prompt** with exactly one option per
+optional entry.
+
+```ts
+AskUserQuestion({
+  questions: [
+    {
+      question: "<translate the header below to [filid:lang]>",
+      multiSelect: true,
+      header: "Rule docs",
+      options: status.entries.map((entry) => ({
+        label: entry.deployed ? `[ON] ${entry.title}` : entry.title,
+        description: entry.description,
+      })),
+    },
+  ],
+});
+```
+
+**Header** (English default; translate surrounding text but keep `[ON]`
+untranslated):
+`"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
+
+**Hard rules**:
+1. `multiSelect: true` is MANDATORY in Case C.
+2. Exactly ONE option per optional entry — NEVER pair an entry with a
+   "keep"/"remove" companion option.
+3. Required rules MUST NOT appear as options.
+4. `[ON]` is the ONLY allowed bracketed prefix; do NOT add
+   `[V]` / `[ ]` / `[X]` / `[✓]` markers — they collide with the UI's
+   own checkbox column.
+
+Map the user's answer to `nextSelection`:
+- For every `entry` in `status.entries`, set
+  `nextSelection[entry.id] = userAnswer.some((label) => label.includes(entry.title))`.
+- `AskUserQuestion` returns only the labels the user checked, so any
+  entry whose title is NOT found in the answer list is `false`.
+
+#### Proceed to Phase 0d
+
+Always proceed to Phase 0d with the computed `nextSelection`. The sync
+handler is idempotent — calling it when nothing changes is cheap and
+guarantees required rules stay deployed.
 
 **→ Proceed to Phase 0d with `nextSelection` in the same response.**
 
@@ -270,9 +331,11 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Update rule docs only — no scan, no INTENT.md/DETAIL.md generation
 /filid:filid-setup --rules
 
-# Re-run to toggle optional rule docs. The current deployment state is shown
-# via an "[ON]" label prefix on already-deployed items. AskUserQuestion cannot
-# pre-check options — you MUST re-select every item you want to keep deployed;
+# Re-run to toggle optional rule docs. Phase 0c dispatches on the number
+# of optional rules: N=0 skips the prompt, N=1 shows a single-select Yes/No,
+# N>=2 shows a multi-select checkbox where the "[ON]" label prefix marks
+# already-deployed items. AskUserQuestion cannot pre-check options — in the
+# N>=2 case you MUST re-select every item you want to keep deployed;
 # unchecked optional items are removed.
 
 # Constants
@@ -288,7 +351,7 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 Key rules:
 
 - `.claude/rules/*.md` files are ONLY written or removed inside this skill
-- Required rule docs (manifest `required: true`) are always deployed — the checkbox for them is pre-checked and non-togglable
+- Required rule docs (manifest `required: true`) are always auto-deployed — they NEVER appear in the prompt UI and the user cannot opt out
 - Session hooks never touch `.claude/rules/` or `.filid/config.json`
 - Organ directories must never receive an INTENT.md
 - INTENT.md must not exceed 50 lines

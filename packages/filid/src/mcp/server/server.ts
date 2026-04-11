@@ -218,7 +218,13 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         action: z.enum(['status', 'sync', 'manifest']),
         path: z.string(),
-        selections: z.union([z.record(z.string(), z.boolean()), z.string()]).optional(),
+        // `.nullish()` accepts `undefined` OR `null`. Some LLM callers
+        // spuriously emit `selections: null` when the field is absent;
+        // without `nullish` the generated JSON Schema rejects that shape
+        // and the call fails with "Invalid tool parameters".
+        selections: z
+          .union([z.record(z.string(), z.boolean()), z.string()])
+          .nullish(),
       }),
     },
     wrapHandler(handleRuleDocsSync),

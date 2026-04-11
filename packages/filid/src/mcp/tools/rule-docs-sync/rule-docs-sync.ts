@@ -34,10 +34,11 @@ export interface RuleDocsSyncInput {
    * (manifest `required: true`) ignore this map.
    *
    * The expected shape is a raw object map. Some LLM-driven callers may
-   * accidentally stringify the object before invoking the MCP tool; the
-   * handler recovers from that form defensively.
+   * accidentally stringify the object, or emit `null` when the field is
+   * absent — the handler recovers from both forms defensively, and the
+   * registered JSON Schema accepts `null` via `.nullish()`.
    */
-  selections?: Record<string, boolean> | string;
+  selections?: Record<string, boolean> | string | null;
 }
 
 export type RuleDocsSyncOutput =

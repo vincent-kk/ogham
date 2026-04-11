@@ -3,7 +3,9 @@ import type { RuleDocsSyncInput } from '../rule-docs-sync.js';
 export function normalizeSelections(
   selections: RuleDocsSyncInput['selections'],
 ): Record<string, boolean> {
-  if (selections === undefined) {
+  // Both `undefined` (field absent) and `null` (LLM explicitly passed null)
+  // are treated as an empty selection map.
+  if (selections === undefined || selections === null) {
     return {};
   }
 
