@@ -86,9 +86,9 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
     case 'sync': {
       const selections = input.selections ?? {};
 
-      // Persist the user selection to .filid/config.json before touching
-      // the filesystem so the config-loader remains the single source of
-      // truth for "desired state".
+      // Persist the user selection to the root .filid/config.json before
+      // touching the filesystem so the config-loader remains the single
+      // source of truth for "desired state".
       const existing = loadConfig(input.path);
       const config: FilidConfig = existing ?? createDefaultConfig();
       const normalized: Record<string, boolean> = {};
@@ -105,7 +105,9 @@ export function handleRuleDocsSync(args: unknown): RuleDocsSyncOutput {
         configWritten = false;
       }
 
-      // Build the full selection set: required rules + opted-in rules.
+      // Build only the optional user selection set here.
+      // Required rules are enforced downstream by syncRuleDocs() from the
+      // manifest, regardless of whether they appear in `normalized`.
       const selectedIds = new Set<string>();
       for (const [id, flag] of Object.entries(normalized)) {
         if (flag) selectedIds.add(id);

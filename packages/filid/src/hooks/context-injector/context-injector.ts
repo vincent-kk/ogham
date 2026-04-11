@@ -3,16 +3,13 @@
  *
  * Injects a minimal FCA-AI pointer on the session's first prompt.
  *
- * Policy: session hooks never write to `.claude/rules/`. This injector only
- * READS the current state and reports it to the LLM so the user is guided
- * to run `/filid:filid-setup` when rule docs are missing. Full rules live
- * in `.claude/rules/fca.md` once the skill has deployed them.
+ * Policy: session hooks never write to `.claude/rules/`. Validation always
+ * uses the plugin's internal built-in rules plus project config overrides.
+ * Deployed rule docs under the target project's `.claude/rules/` are only a
+ * user-facing reference surface and may be absent, partial, or fully synced.
  *
  * Cache functions are provided by src/core/cache-manager.ts.
  */
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-
 import {
   hasPromptContext,
   isFirstInSession,
@@ -20,6 +17,7 @@ import {
   writePromptContext,
 } from '../../core/infra/cache-manager/cache-manager.js';
 import {
+  getRuleDocsStatus,
   loadConfig,
   resolveLanguage,
 } from '../../core/infra/config-loader/config-loader.js';
@@ -32,34 +30,37 @@ import { validateCwd } from '../utils/validate-cwd.js';
 /**
  * Build minimal FCA-AI context.
  *
- * The first line always describes the current state so the LLM and user
- * agree on whether the rules are loaded:
- * - config missing          → "not initialized, run /filid:filid-setup"
- * - config present, fca.md missing → "rules not deployed, run /filid:filid-setup"
- * - both present            → "active" pointer
+ * Validation state is derived from the plugin's internal rules and the
+ * project's `.filid/config.json`, never from deployed rule doc files.
+ * Deployed rule docs are reported separately as optional reference docs.
  */
-function buildMinimalContext(cwd: string): string {
+export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
+  const config = loadConfig(cwd);
 
-  const configExists = existsSync(join(cwd, '.filid', 'config.json'));
-  const fcaRulesExists = existsSync(
-    join(cwd, '.claude', 'rules', 'fca.md'),
-  );
-
-  if (!configExists) {
+  if (!config) {
     lines.push(
-      '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json and deploy rule docs.',
-    );
-  } else if (!fcaRulesExists) {
-    lines.push(
-      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to install .claude/rules/fca.md.',
+      '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json.',
     );
   } else {
-    lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
+    lines.push(
+      '[filid] FCA-AI active. Validation rules: internal built-ins with project overrides.',
+    );
+
+    const ruleDocsStatus = getRuleDocsStatus(cwd);
+    if (ruleDocsStatus.pluginRootResolved) {
+      const deployedRuleDocs = ruleDocsStatus.entries
+        .filter((entry) => entry.deployed)
+        .map((entry) => entry.filename);
+      lines.push(
+        `[filid] Project rule docs: ${
+          deployedRuleDocs.length > 0 ? deployedRuleDocs.join(', ') : 'none'
+        }`,
+      );
+    }
   }
 
   try {
-    const config = loadConfig(cwd);
     const lang = resolveLanguage(config);
     lines.push(`[filid:lang] ${lang}`);
 

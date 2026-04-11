@@ -62,9 +62,10 @@ export function loadConfig(projectRoot: string): FilidConfig | null {
   }
 }
 
-/** Write .filid/config.json with the given config. Creates .filid/ directory if needed. */
+/** Write .filid/config.json with the given config. Resolves git root and creates .filid/ if needed. */
 export function writeConfig(projectRoot: string, config: FilidConfig): void {
-  const configDir = join(projectRoot, CONFIG_DIR);
+  const resolvedRoot = resolveGitRoot(projectRoot);
+  const configDir = join(resolvedRoot, CONFIG_DIR);
   mkdirSync(configDir, { recursive: true });
   const configPath = join(configDir, CONFIG_FILE);
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
@@ -339,7 +340,7 @@ export function getRuleDocsStatus(
  * safe to call repeatedly (idempotent relative to the selection input).
  *
  * @param projectRoot - Target project (git root resolved internally)
- * @param selection - Rule ids the user has opted into (plus required rules)
+ * @param selection - Rule ids the user has explicitly opted into; required rules are enforced from the manifest
  * @param pluginRoot - Plugin root directory (defaults to CLAUDE_PLUGIN_ROOT)
  */
 export function syncRuleDocs(
