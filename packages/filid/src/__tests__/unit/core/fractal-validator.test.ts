@@ -164,6 +164,42 @@ describe('fractal-validator', () => {
 
       expect(report.result.duration).toBeGreaterThanOrEqual(0);
     });
+
+    it('should propagate scanOptions.maxDepth to max-depth rule', () => {
+      // buildFractalTree does not accept a depth input; we construct the tree
+      // manually so the root sits at depth 2 — beyond an override of maxDepth=1.
+      const tree = {
+        root: '/root/app',
+        nodes: new Map(),
+        depth: 2,
+        totalNodes: 1,
+      };
+      tree.nodes.set('/root/app', {
+        path: '/root/app',
+        name: 'app',
+        type: 'fractal' as const,
+        parent: null,
+        children: [],
+        organs: [],
+        hasIntentMd: true,
+        hasDetailMd: false,
+        hasIndex: true,
+        hasMain: false,
+        depth: 2,
+        metadata: {},
+      });
+
+      const withOption = validateStructure(tree, undefined, { maxDepth: 1 });
+      expect(
+        withOption.result.violations.some((v) => v.ruleId === 'max-depth'),
+      ).toBe(true);
+
+      const withoutOption = validateStructure(tree);
+      // default maxDepth is 10 → depth=2 should not violate
+      expect(
+        withoutOption.result.violations.some((v) => v.ruleId === 'max-depth'),
+      ).toBe(false);
+    });
   });
 
   describe('validateNode', () => {

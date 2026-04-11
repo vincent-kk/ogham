@@ -8,6 +8,7 @@ import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
 import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
 import { BUILTIN_RULE_IDS, type RuleOverride } from '../../../../types/rules.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
 
@@ -28,6 +29,14 @@ export interface FilidConfig {
    * Required rules (e.g. `fca`) ignore this map and are always deployed.
    */
   'injected-rules'?: Record<string, boolean>;
+  /**
+   * Optional scan option overrides. Missing fields fall back to DEFAULT_SCAN_OPTIONS.
+   * Currently only `maxDepth` is honoured; additional fields may be added later.
+   */
+  scan?: {
+    /** Maximum fractal tree depth. Shared by the scanner traversal cap and the max-depth rule. */
+    maxDepth?: number;
+  };
 }
 
 /** Result of initProject. */
@@ -49,12 +58,36 @@ export function loadConfig(projectRoot: string): FilidConfig | null {
   try {
     const raw = readFileSync(configPath, 'utf8');
     const parsed = JSON.parse(raw) as FilidConfig;
+    // Light-weight guard: reject non-numeric, negative, or non-finite scan.maxDepth
+    // so downstream consumers can rely on `resolveMaxDepth` returning a sane number.
+    if (parsed.scan && 'maxDepth' in parsed.scan) {
+      const v = parsed.scan.maxDepth;
+      if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) {
+        log.error('invalid scan.maxDepth — ignoring and using fallback', v);
+        delete parsed.scan.maxDepth;
+      }
+    }
     log.debug('config loaded', configPath);
     return parsed;
   } catch (err) {
     log.error('failed to parse config', err);
     return null;
   }
+}
+
+/**
+ * Resolve the effective fractal tree maxDepth from the priority chain:
+ *   override (MCP input) → config.scan.maxDepth → DEFAULT_SCAN_OPTIONS.maxDepth
+ *
+ * Explicit `0` is honoured (early termination is allowed).
+ * Invalid values are filtered at `loadConfig` time, so `config.scan.maxDepth`
+ * reaching here is already validated.
+ */
+export function resolveMaxDepth(
+  config: FilidConfig | null,
+  override?: number,
+): number {
+  return override ?? config?.scan?.maxDepth ?? DEFAULT_SCAN_OPTIONS.maxDepth;
 }
 
 /** Write .filid/config.json with the given config. Resolves git root and creates .filid/ if needed. */

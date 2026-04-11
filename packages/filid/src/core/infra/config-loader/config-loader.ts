@@ -11,6 +11,7 @@ export {
   loadConfig,
   loadRuleOverrides,
   resolveLanguage,
+  resolveMaxDepth,
   writeConfig,
 } from './loaders/filid-config.js';
 export type { FilidConfig, InitResult } from './loaders/filid-config.js';

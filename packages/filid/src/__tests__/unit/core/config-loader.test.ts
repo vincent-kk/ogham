@@ -18,10 +18,12 @@ import {
   loadConfig,
   loadRuleOverrides,
   resolveLanguage,
+  resolveMaxDepth,
   resolveRuleDocSelection,
   syncRuleDocs,
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
 import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 
 vi.mock('node:child_process', async () => {
@@ -149,6 +151,94 @@ describe('config-loader', () => {
 
   it('resolveLanguage returns "en" when config is null', () => {
     expect(resolveLanguage(null)).toBe('en');
+  });
+
+  // --- resolveMaxDepth + scan.maxDepth round-trip ---
+
+  describe('resolveMaxDepth', () => {
+    it('returns default when config is null and no override', () => {
+      expect(resolveMaxDepth(null)).toBe(DEFAULT_SCAN_OPTIONS.maxDepth);
+    });
+
+    it('returns default when config has no scan field', () => {
+      expect(resolveMaxDepth(createDefaultConfig())).toBe(
+        DEFAULT_SCAN_OPTIONS.maxDepth,
+      );
+    });
+
+    it('returns config.scan.maxDepth when set and no override', () => {
+      const config = createDefaultConfig();
+      config.scan = { maxDepth: 6 };
+      expect(resolveMaxDepth(config)).toBe(6);
+    });
+
+    it('override takes precedence over config', () => {
+      const config = createDefaultConfig();
+      config.scan = { maxDepth: 6 };
+      expect(resolveMaxDepth(config, 3)).toBe(3);
+    });
+
+    it('override of 0 is honoured (explicit early termination)', () => {
+      expect(resolveMaxDepth(null, 0)).toBe(0);
+    });
+
+    it('config.scan.maxDepth of 0 is honoured', () => {
+      const config = createDefaultConfig();
+      config.scan = { maxDepth: 0 };
+      expect(resolveMaxDepth(config)).toBe(0);
+    });
+
+    it('writeConfig + loadConfig preserves scan.maxDepth', () => {
+      const config = createDefaultConfig();
+      config.scan = { maxDepth: 4 };
+      writeConfig(tmpDir, config);
+      const loaded = loadConfig(tmpDir);
+      expect(loaded?.scan?.maxDepth).toBe(4);
+      expect(resolveMaxDepth(loaded)).toBe(4);
+    });
+  });
+
+  describe('scan.maxDepth validation', () => {
+    function writeRawConfig(raw: unknown): void {
+      const dir = join(tmpDir, '.filid');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(
+        join(dir, 'config.json'),
+        JSON.stringify(raw),
+        'utf8',
+      );
+    }
+
+    it('loadConfig strips negative scan.maxDepth and falls back', () => {
+      writeRawConfig({ version: '1.0', rules: {}, scan: { maxDepth: -1 } });
+      const loaded = loadConfig(tmpDir);
+      expect(loaded).not.toBeNull();
+      expect(loaded?.scan?.maxDepth).toBeUndefined();
+      expect(resolveMaxDepth(loaded)).toBe(DEFAULT_SCAN_OPTIONS.maxDepth);
+    });
+
+    it('loadConfig strips non-numeric scan.maxDepth', () => {
+      writeRawConfig({
+        version: '1.0',
+        rules: {},
+        scan: { maxDepth: 'deep' },
+      });
+      const loaded = loadConfig(tmpDir);
+      expect(loaded?.scan?.maxDepth).toBeUndefined();
+    });
+
+    it('loadConfig strips non-finite scan.maxDepth (Infinity)', () => {
+      // JSON.stringify(Infinity) → "null", so we write the raw string manually
+      const dir = join(tmpDir, '.filid');
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(
+        join(dir, 'config.json'),
+        '{"version":"1.0","rules":{},"scan":{"maxDepth":null}}',
+        'utf8',
+      );
+      const loaded = loadConfig(tmpDir);
+      expect(loaded?.scan?.maxDepth).toBeUndefined();
+    });
   });
 
   // --- initProject (config only) ---

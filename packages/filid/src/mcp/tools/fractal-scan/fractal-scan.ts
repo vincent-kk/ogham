@@ -1,3 +1,7 @@
+import {
+  loadConfig,
+  resolveMaxDepth,
+} from '../../../core/infra/config-loader/config-loader.js';
 import { analyzeModule } from '../../../core/module/module-main-analyzer/module-main-analyzer.js';
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { FractalTree, ModuleInfo } from '../../../types/fractal.js';
@@ -25,9 +29,9 @@ export async function handleFractalScan(args: unknown): Promise<ScanReport> {
 
   const startTime = Date.now();
 
-  const tree: FractalTree = await scanProject(input.path, {
-    maxDepth: input.depth ?? 10,
-  });
+  const config = loadConfig(input.path);
+  const maxDepth = resolveMaxDepth(config, input.depth);
+  const tree: FractalTree = await scanProject(input.path, { maxDepth });
 
   let modules: ModuleInfo[] = [];
   if (input.includeModuleInfo) {
