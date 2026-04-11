@@ -43,7 +43,7 @@ Before starting the main workflow, check ast-grep availability by calling
   ```
   [INFO] ast-grep이 설치되지 않았습니다.
   AST 패턴 매칭 기능을 사용하려면: npm install -g @ast-grep/napi
-  (선택사항 — 설치 없이도 init은 정상 동작합니다)
+  (선택사항 — 설치 없이도 /filid:filid-setup은 정상 동작합니다)
   ```
   The absence of ast-grep does NOT block any phase below.
 
