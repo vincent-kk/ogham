@@ -130,7 +130,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
 1. Resolve story `issue_ref` from `stories-manifest.json`.
 2. PATCH task body `## Links`: append `- blocks: <story_ref>`.
 3. PATCH story body `## Links`: append `- blocked-by: <task_ref>`.
-Save manifest after all links created.
+4. `manifest_save` immediately.
 
 #### Step 4 — create_story_subtasks
 

@@ -120,7 +120,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
   1. Resolve `story_id` to `S-<N>` from `stories-manifest.json`.
   2. `Edit` the task file to append `{type: blocks, to: S-<N>}` to `links[]`.
   3. `Edit` the story file to append `{type: is blocked by, to: T-<N>}` to `links[]`.
-Save manifest after all links created.
+  4. `manifest_save` immediately.
 
 #### Step 4 — create_story_subtasks
 For each entry in `manifest.story_subtasks`, for each subtask where `status == "pending"`:

@@ -15,7 +15,7 @@ plugin: imbas
 >
 > **Existing CRITICAL directives are authoritative** (do not duplicate):
 > - `references/workflow.md:293` — After EACH item creation, save manifest via `manifest_save` (Phase 2.5)
-> - `references/workflow.md:437` — After EACH item creation, save manifest via `manifest_save` (Phase 3.5)
+> - `references/workflow.md:438` — After EACH item creation, save manifest via `manifest_save` (Phase 3.5)
 >
 > **Valid reasons to yield**:
 > 1. User decision genuinely required (ambiguity only the user can resolve)
@@ -25,7 +25,7 @@ plugin: imbas
 > - Phase 0 confirmation banner — do NOT pause after displaying; immediately invoke the first tool (`run_create` / `get_issue`)
 > - GATE 1–4 decision points — after judging PASS, immediately chain the next phase's tool call
 > - Phase 2.5 → Phase 3 boundary — manifest-stories success is NOT pipeline completion; immediately spawn `imbas-engineer` if `--codebase` present
-> - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md:293,437` CRITICAL; do not add duplicate directives
+> - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md:293,438` CRITICAL; do not add duplicate directives
 >
 > **⚠️ DO NOT STOP HERE**: Phase 2.5 → Phase 3 boundary is the highest-stall
 > risk point. When manifest-stories completes successfully and `--codebase`

@@ -53,7 +53,7 @@ yarn format && yarn lint  # 포맷 + 린트
 
 imbas 파이프라인은 다단계 + Task subagent spawn + Jira `[OP:]` 루프로 turn 끊김에 취약하다. Tier 분류와 3-layer 방어:
 
-- **Tier-1** (파이프라인): `imbas-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts (Phase 2.5 → Phase 3 경계 + `workflow.md:293,437` 기존 CRITICAL 참조)
+- **Tier-1** (파이프라인): `imbas-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts (Phase 2.5 → Phase 3 경계 + `workflow.md:293,438` 기존 CRITICAL 참조)
 - **Tier-2a** (다단계 비상호작용): `imbas-validate`, `imbas-split`, `imbas-devplan`, `imbas-manifest`, `imbas-digest` — 3-layer 동일 적용
 - **Tier-3** (단일 phase): `imbas-setup`, `imbas-status`, `imbas-cache`, `imbas-read-issue`, `imbas-fetch-media`, `imbas-scaffold-pr` — preamble 추가 금지
 

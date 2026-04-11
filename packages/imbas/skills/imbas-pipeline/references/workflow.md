@@ -323,7 +323,8 @@ Step 2.5.3 — Execution Verification
 >>> CODEBASE CHECK (Document Pipeline only):
   IF codebase is null (not resolved in Phase 0):
     → Pipeline stops here (planning-only mode).
-    → Call run_transition: action "complete_pipeline", result: "planning_only"
+    → No state transition required — `split` is already `completed` and
+      `devplan` remains `pending`, which accurately reflects the planning-only exit.
     → Emit planning-only report:
       "Planning pipeline complete. N Stories created in <PROJECT>.
        Subtask generation requires a codebase path.

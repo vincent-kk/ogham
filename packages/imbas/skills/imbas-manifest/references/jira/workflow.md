@@ -73,7 +73,7 @@ For each task, for each subtask in `task.subtasks` where `status == "pending"`:
 For each task, for each `blocked_story_id` in `task.blocks`:
   1. Resolve `story_id` to `issue_ref` from `stories-manifest.json`.
   2. `[OP: create_link] type="Blocks", inward=<task.issue_ref>, outward=<story_issue_ref>`.
-Save manifest after all links created.
+  3. Save manifest immediately.
 
 #### Step 4 — create_story_subtasks
 For each entry in `manifest.story_subtasks`, for each subtask in `entry.subtasks`

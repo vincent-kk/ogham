@@ -82,7 +82,13 @@ Ref: https://jira.example.com/browse/PROJ-123
    git push -u origin <branch-name>
    ```
 
-2. Build PR body from template:
+2. Check if a PR already exists for this branch:
+   ```bash
+   gh pr list --head <branch-name> --json url --jq '.[0].url'
+   ```
+   - If PR exists → output existing PR URL and STOP (do not create duplicate).
+
+3. Build PR body from template:
 
    ```markdown
    ## Issue
@@ -98,26 +104,15 @@ Ref: https://jira.example.com/browse/PROJ-123
 
    If no sub-tasks: replace checklist with `_No sub-tasks found._`
 
-3. PR title: use issue summary directly.
+4. PR title: use issue summary directly.
 
-4. Determine draft flag:
+5. Determine draft flag:
    - If `--draft false` → omit `--draft`.
    - Otherwise (default) → include `--draft`.
 
-5. Create PR:
+6. Create PR:
    ```bash
    gh pr create --base <base> --title "<issue-summary>" --draft --body "<body>"
    ```
 
-6. Check if PR already exists for this branch:
-   ```bash
-   gh pr list --head <branch-name> --json url --jq '.[0].url'
-   ```
-   - If PR exists → output existing PR URL and STOP (do not create duplicate).
-
 7. Output the PR URL to the user.
-
-## Step ordering note
-
-Step 4.6 (existing PR check) MUST run BEFORE Step 4.5 (PR creation).
-Execute in this order: push → check existing → build body → create PR.
