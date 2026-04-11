@@ -17,11 +17,7 @@ import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
 import type { ScanOptions } from '../../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../types/scan.js';
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../constants/allowed-peer-files.js';
-import { KEBAB_CASE_RE, CAMEL_CASE_RE } from '../../../constants/naming-patterns.js';
-
-function isValidNaming(name: string): boolean {
-  return KEBAB_CASE_RE.test(name) || CAMEL_CASE_RE.test(name);
-}
+import { isValidNaming } from './utils/is-valid-naming.js';
 
 /**
  * 프로젝트별 오버라이드를 내장 규칙에 적용한다.
