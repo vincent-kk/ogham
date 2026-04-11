@@ -1,7 +1,7 @@
 ---
 name: filid-setup
 user_invocable: true
-description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, deploy selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
+description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, apply selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
 argument-hint: "[path] [--rules]"
 version: "1.3.0"
 complexity: medium
@@ -22,7 +22,7 @@ plugin: filid
 # filid-setup — FCA-AI Initialization
 
 Initialize the FCA-AI fractal context architecture in a project. Creates
-the config, asks the user which rule docs to deploy via a checkbox UI,
+the config, asks the user which rule docs to apply via a checkbox UI,
 scans the directory tree, classifies every directory by node type,
 generates missing INTENT.md files for fractal nodes, and produces a
 validation report.
@@ -35,7 +35,7 @@ validation report.
 
 - Starting a new project that will follow FCA-AI conventions
 - Onboarding an existing codebase into the fractal context system
-- **Managing rule doc deployment** — this skill is the single entry point
+- **Managing rule doc application** — this skill is the single entry point
   for adding or removing `.claude/rules/*.md` files
 - Regenerating INTENT.md files after a large-scale refactor removed them
 - Creating DETAIL.md scaffolds for modules that lack formal specifications
@@ -48,7 +48,7 @@ Before Phase 0a, inspect the invocation arguments:
 - If the arguments contain `--rules`, enter **rules-only mode**: execute
   Phase 0a → Phase 0d, then STOP (skip Phase 1–5 entirely). This is the
   lightweight path for toggling which `.claude/rules/*.md` files are
-  deployed without re-scanning or regenerating INTENT.md/DETAIL.md.
+  applied without re-scanning or regenerating INTENT.md/DETAIL.md.
 - Otherwise run the full workflow (Phase 0a → Phase 5).
 - Any non-flag token is treated as the target `path` (default: current
   working directory).
@@ -62,9 +62,9 @@ Before starting the main workflow, check ast-grep availability by calling
 - **Unavailable** (response contains "@ast-grep/napi is not available"):
   Display a non-blocking informational message and continue:
   ```
-  [INFO] ast-grep이 설치되지 않았습니다.
-  AST 패턴 매칭 기능을 사용하려면: npm install -g @ast-grep/napi
-  (선택사항 — 설치 없이도 /filid:filid-setup은 정상 동작합니다)
+  [INFO] ast-grep is not installed.
+  To use AST pattern matching, run: npm install -g @ast-grep/napi
+  (optional — /filid:filid-setup works without installation)
   ```
   The absence of ast-grep does NOT block any phase below.
 
@@ -127,7 +127,7 @@ keyed by optional rule `id` (required rules MUST NOT appear in it):
 #### Case A — `N === 0` (no optional rules)
 
 Skip `AskUserQuestion` entirely. Set `nextSelection = {}` and proceed to
-Phase 0d. Required rules still get auto-deployed by `syncRuleDocs`.
+Phase 0d. Required rules still get auto-applied by `syncRuleDocs`.
 
 #### Case B — `N === 1` (exactly one optional rule)
 
@@ -142,17 +142,17 @@ const on = entry.deployed;
 AskUserQuestion({
   questions: [
     {
-      question: "<translate `Deploy rule doc "${entry.title}"?` to [filid:lang]>",
+      question: "<translate `Apply rule doc "${entry.title}"?` to [filid:lang]>",
       multiSelect: false,
       header: "Rule docs",
       options: [
         {
-          label: on ? `[ON] Keep: ${entry.title}` : `Deploy: ${entry.title}`,
+          label: on ? `[ON] Keep: ${entry.title}` : `Apply: ${entry.title}`,
           description: entry.description,
         },
         {
           label: on ? `Remove: ${entry.title}` : `Skip: ${entry.title}`,
-          description: "<translate `Do not deploy this rule doc.` to [filid:lang]>",
+          description: "<translate `Do not apply this rule doc.` to [filid:lang]>",
         },
       ],
     },
@@ -164,7 +164,7 @@ Map the user's answer to `nextSelection`:
 - First option chosen → `nextSelection[entry.id] = true`
 - Second option chosen → `nextSelection[entry.id] = false`
 
-The `[ON]` prefix is a literal English token marking current deployment
+The `[ON]` prefix is a literal English token marking the currently applied
 state — do NOT translate it.
 
 #### Case C — `N >= 2` (two or more optional rules)
@@ -190,7 +190,7 @@ AskUserQuestion({
 
 **Header** (English default; translate surrounding text but keep `[ON]`
 untranslated):
-`"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
+`"Select rule docs to apply. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
 
 **Hard rules**:
 1. `multiSelect: true` is MANDATORY in Case C.
@@ -211,7 +211,7 @@ Map the user's answer to `nextSelection`:
 
 Always proceed to Phase 0d with the computed `nextSelection`. The sync
 handler is idempotent — calling it when nothing changes is cheap and
-guarantees required rules stay deployed.
+guarantees required rules stay applied.
 
 **→ Proceed to Phase 0d with `nextSelection` in the same response.**
 
@@ -244,7 +244,7 @@ translate to `[filid:lang]` at runtime, e.g.,
 If `result.skipped` is non-empty, print each `{ id, reason }` as a
 warning but DO NOT abort — continue with the remaining phases.
 
-> **Note**: `.filid/config.json` and deployed `.claude/rules/*.md` files
+> **Note**: `.filid/config.json` and applied `.claude/rules/*.md` files
 > should be committed to version control. `.filid/review/` and
 > `.filid/cache/` should be gitignored (transient data).
 
@@ -334,8 +334,8 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Re-run to toggle optional rule docs. Phase 0c dispatches on the number
 # of optional rules: N=0 skips the prompt, N=1 shows a single-select Yes/No,
 # N>=2 shows a multi-select checkbox where the "[ON]" label prefix marks
-# already-deployed items. AskUserQuestion cannot pre-check options — in the
-# N>=2 case you MUST re-select every item you want to keep deployed;
+# already-applied items. AskUserQuestion cannot pre-check options — in the
+# N>=2 case you MUST re-select every item you want to keep applied;
 # unchecked optional items are removed.
 
 # Constants
@@ -351,7 +351,7 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 Key rules:
 
 - `.claude/rules/*.md` files are ONLY written or removed inside this skill
-- Required rule docs (manifest `required: true`) are always auto-deployed — they NEVER appear in the prompt UI and the user cannot opt out
+- Required rule docs (manifest `required: true`) are always auto-applied — they NEVER appear in the prompt UI and the user cannot opt out
 - Session hooks never touch `.claude/rules/` or `.filid/config.json`
 - Organ directories must never receive an INTENT.md
 - INTENT.md must not exceed 50 lines

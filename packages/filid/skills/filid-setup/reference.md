@@ -7,7 +7,7 @@ For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 Section 0 is split into four sub-phases. Phase 0a creates the config,
 Phase 0b inspects current rule doc state, Phase 0c asks the user which
-rule docs to deploy (the ONLY interactive checkpoint in this skill), and
+rule docs to apply (the ONLY interactive checkpoint in this skill), and
 Phase 0d persists the decision and synchronises `.claude/rules/`.
 
 ### Phase 0a — Config Initialization
@@ -114,17 +114,17 @@ const on = entry.deployed;
 AskUserQuestion({
   questions: [
     {
-      question: `Deploy rule doc "${entry.title}"?`,
+      question: `Apply rule doc "${entry.title}"?`,
       multiSelect: false,
       header: "Rule docs",
       options: [
         {
-          label: on ? `[ON] Keep: ${entry.title}` : `Deploy: ${entry.title}`,
+          label: on ? `[ON] Keep: ${entry.title}` : `Apply: ${entry.title}`,
           description: entry.description,
         },
         {
           label: on ? `Remove: ${entry.title}` : `Skip: ${entry.title}`,
-          description: "Do not deploy this rule doc.",
+          description: "Do not apply this rule doc.",
         },
       ],
     },
@@ -136,7 +136,7 @@ Map the user's answer to `nextSelection`:
 - First option → `nextSelection[entry.id] = true`
 - Second option → `nextSelection[entry.id] = false`
 
-The `[ON]` prefix is a literal English token marking current deployment
+The `[ON]` prefix is a literal English token marking the currently applied
 state — do NOT translate it.
 
 #### Case C — `N >= 2`
@@ -151,9 +151,9 @@ optional entry.
 - Required rules MUST NOT appear in the option list.
 
 **Note**: `AskUserQuestion` does not support pre-checking or default
-selection. To represent the current deployment state (from Phase 0b
+selection. To represent the currently applied state (from Phase 0b
 `entry.deployed`), prepend a literal `[ON] ` prefix (note the trailing
-space) to each deployed option's `label`. Do NOT use a
+space) to each applied option's `label`. Do NOT use a
 `[V]` / `[ ]` / `[X]` / `[✓]` checkbox-style prefix — it collides with
 the UI's own checkbox column.
 
@@ -161,7 +161,7 @@ the UI's own checkbox column.
 AskUserQuestion({
   questions: [
     {
-      question: "Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them.",
+      question: "Select rule docs to apply. Items prefixed with '[ON]' will be REMOVED if you do not re-check them.",
       multiSelect: true,
       header: "Rule docs",
       options: status.entries.map((entry) => ({
@@ -191,7 +191,7 @@ for (const entry of status.entries) {
 
 Always proceed to Phase 0d with `nextSelection`. The sync handler is
 idempotent — calling it when nothing changes is cheap and guarantees
-required rules stay deployed on first-run projects.
+required rules stay applied on first-run projects.
 
 ### Phase 0d — Sync
 
@@ -204,7 +204,7 @@ Response shape:
   action: "sync";
   selections: Record<string, boolean>;
   result: {
-    copied: string[];     // filenames that were freshly deployed
+    copied: string[];     // filenames that were freshly applied
     removed: string[];    // filenames that were unlinked
     unchanged: string[];  // filenames that matched the desired state already
     skipped: Array<{ id: string; reason: string }>;
@@ -258,7 +258,7 @@ If `.filid/review/` or `.filid/cache/` are not in `.gitignore`, inform the user:
   .filid/cache/
 ```
 
-`.filid/config.json` and every deployed `.claude/rules/*.md` file
+`.filid/config.json` and every applied `.claude/rules/*.md` file
 should be committed to version control.
 
 ### Re-entry Behaviour
