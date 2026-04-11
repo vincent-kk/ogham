@@ -20,9 +20,12 @@ vi.mock('../../../core/tree/fractal-tree/fractal-tree.js', () => ({
   getFractalsUnderOrgans: vi.fn(() => []),
 }));
 
-vi.mock('../../../core/coverage/import-resolver/import-resolver.js', () => ({
-  resolveImportPath: vi.fn(() => null),
-}));
+vi.mock(
+  '../../../core/coverage-verify/import-resolver/import-resolver.js',
+  () => ({
+    resolveImportPath: vi.fn(() => null),
+  }),
+);
 
 vi.mock('../../../metrics/test-counter/test-counter.js', () => ({
   countTestCases: vi.fn(() => ({
@@ -41,7 +44,7 @@ const { extractDependencies } =
 const { scanProject, getDescendants, getFractalsUnderOrgans } =
   await import('../../../core/tree/fractal-tree/fractal-tree.js');
 const { resolveImportPath } =
-  await import('../../../core/coverage/import-resolver/import-resolver.js');
+  await import('../../../core/coverage-verify/import-resolver/import-resolver.js');
 
 const mockExtractDeps = vi.mocked(extractDependencies);
 const mockScanProject = vi.mocked(scanProject);

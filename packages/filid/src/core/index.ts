@@ -17,7 +17,10 @@ export {
   KNOWN_ORGAN_DIR_NAMES,
 } from './tree/organ-classifier/organ-classifier.js';
 export type { ClassifyInput } from './tree/organ-classifier/organ-classifier.js';
-export { buildChain, findBoundary } from './tree/boundary-detector/boundary-detector.js';
+export {
+  buildChain,
+  findBoundary,
+} from './tree/boundary-detector/boundary-detector.js';
 export type { ChainResult } from './tree/boundary-detector/boundary-detector.js';
 
 // rules
@@ -66,7 +69,10 @@ export {
 } from './analysis/lca-calculator/lca-calculator.js';
 
 // module
-export { analyzeIndex, extractModuleExports } from './module/index-analyzer/index-analyzer.js';
+export {
+  analyzeIndex,
+  extractModuleExports,
+} from './module/index-analyzer/index-analyzer.js';
 export {
   analyzeModule,
   extractImports,
@@ -121,12 +127,15 @@ export type {
 } from './infra/config-loader/config-loader.js';
 
 // coverage
-export { findSubtreeUsages, getModuleName } from './coverage/usage-tracker/usage-tracker.js';
+export {
+  findSubtreeUsages,
+  getModuleName,
+} from './coverage-verify/usage-tracker/usage-tracker.js';
 export {
   checkTestCoverage,
   generateCoverageWarnings,
-} from './coverage/test-coverage-checker/test-coverage-checker.js';
-export { resolveImportPath } from './coverage/import-resolver/import-resolver.js';
+} from './coverage-verify/test-coverage-checker/test-coverage-checker.js';
+export { resolveImportPath } from './coverage-verify/import-resolver/import-resolver.js';
 
 // utils
 export {

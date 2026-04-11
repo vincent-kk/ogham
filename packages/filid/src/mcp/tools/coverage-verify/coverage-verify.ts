@@ -9,8 +9,8 @@ import { extractDependencies } from '../../../ast/dependency-extractor/dependenc
 import {
   checkTestCoverage,
   generateCoverageWarnings,
-} from '../../../core/coverage/test-coverage-checker/test-coverage-checker.js';
-import { findSubtreeUsages } from '../../../core/coverage/usage-tracker/usage-tracker.js';
+} from '../../../core/coverage-verify/test-coverage-checker/test-coverage-checker.js';
+import { findSubtreeUsages } from '../../../core/coverage-verify/usage-tracker/usage-tracker.js';
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CoverageVerifyResult } from '../../../types/coverage.js';
 
