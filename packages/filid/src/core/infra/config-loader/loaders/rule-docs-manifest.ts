@@ -46,16 +46,28 @@ export interface RuleDocStatusEntry {
   /** File currently exists on disk under `.claude/rules/`. */
   deployed: boolean;
   /**
-   * Desired state for the checkbox UI. Derived from the filesystem:
-   * `true` when the rule is required or the doc is currently deployed.
-   * Filesystem is the single source of truth — no config-side tracking.
+   * Desired state for the checkbox UI. For optional entries this equals
+   * `deployed`; required entries are never rendered in the checkbox UI
+   * (they live in `RuleDocsStatus.autoDeployed`), so this field is
+   * always `true` for entries in `autoDeployed`.
    */
   selected: boolean;
 }
 
 /** Result of getRuleDocsStatus. */
 export interface RuleDocsStatus {
+  /**
+   * Optional rule entries — the ONLY list rendered as checkboxes in the
+   * filid-setup UI. Required entries are filtered out because they are
+   * auto-synced regardless of user input.
+   */
   entries: RuleDocStatusEntry[];
+  /**
+   * Required rule entries — auto-deployed by `syncRuleDocs` regardless
+   * of user selection. Surfaced here so the skill can include them in
+   * the summary report, but NEVER rendered in the checkbox UI.
+   */
+  autoDeployed: RuleDocStatusEntry[];
   pluginRootResolved: boolean;
   manifestPath: string | null;
 }
@@ -83,7 +95,11 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
  *
  * The filesystem (`.claude/rules/<filename>`) is the SINGLE source of truth:
  * - `deployed` → file exists on disk
- * - `selected` → `required || deployed` (used to pre-check the checkbox UI)
+ * - `selected` → `deployed` for optional entries; always `true` for required
+ *
+ * Required entries are partitioned into `autoDeployed` and are NEVER
+ * rendered in the checkbox UI — they are auto-synced by `syncRuleDocs`
+ * regardless of user input. Optional entries go into `entries`.
  *
  * No `.filid/config.json` inspection is performed — rule doc state is never
  * mirrored into the config.
@@ -94,7 +110,12 @@ export function getRuleDocsStatus(
 ): RuleDocsStatus {
   const root = resolvePluginRoot(pluginRoot);
   if (root === null) {
-    return { entries: [], pluginRootResolved: false, manifestPath: null };
+    return {
+      entries: [],
+      autoDeployed: [],
+      pluginRootResolved: false,
+      manifestPath: null,
+    };
   }
 
   const manifestPath = join(root, 'templates', 'rules', 'manifest.json');
@@ -103,12 +124,20 @@ export function getRuleDocsStatus(
     manifest = loadRuleDocsManifest(root);
   } catch (err) {
     log.error('failed to load rule docs manifest', err);
-    return { entries: [], pluginRootResolved: true, manifestPath };
+    return {
+      entries: [],
+      autoDeployed: [],
+      pluginRootResolved: true,
+      manifestPath,
+    };
   }
 
   const resolvedRoot = resolveGitRoot(projectRoot);
 
-  const entries: RuleDocStatusEntry[] = manifest.rules.map((entry) => {
+  const entries: RuleDocStatusEntry[] = [];
+  const autoDeployed: RuleDocStatusEntry[] = [];
+
+  for (const entry of manifest.rules) {
     const destPath = join(
       resolvedRoot,
       '.claude',
@@ -116,19 +145,23 @@ export function getRuleDocsStatus(
       entry.filename,
     );
     const deployed = existsSync(destPath);
-    const selected = entry.required || deployed;
-    return {
+    const statusEntry: RuleDocStatusEntry = {
       id: entry.id,
       filename: entry.filename,
       required: entry.required,
       title: entry.title,
       description: entry.description,
       deployed,
-      selected,
+      selected: entry.required ? true : deployed,
     };
-  });
+    if (entry.required) {
+      autoDeployed.push(statusEntry);
+    } else {
+      entries.push(statusEntry);
+    }
+  }
 
-  return { entries, pluginRootResolved: true, manifestPath };
+  return { entries, autoDeployed, pluginRootResolved: true, manifestPath };
 }
 
 /**

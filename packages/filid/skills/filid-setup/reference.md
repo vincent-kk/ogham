@@ -49,14 +49,29 @@ Call `rule_docs_sync({ action: "status", path })`. Response shape:
   status: {
     pluginRootResolved: boolean;
     manifestPath: string | null;
+    /** Optional rules ONLY — the checkbox-facing list. */
     entries: Array<{
       id: string;
-      filename: string;      // e.g. "fca.md"
-      required: boolean;     // true → pre-checked & disabled in UI
+      filename: string;      // e.g. "rfx.md"
+      required: false;       // always false for this list
       title: string;         // checkbox label
       description: string;   // checkbox description
       deployed: boolean;     // file currently exists under .claude/rules/
-      selected: boolean;     // required || deployed (filesystem-derived)
+      selected: boolean;     // === deployed for optional rules
+    }>;
+    /**
+     * Required rules — auto-synced regardless of user input. NEVER
+     * rendered in the checkbox UI; surfaced here only so the skill can
+     * list them in the Phase 0d summary.
+     */
+    autoDeployed: Array<{
+      id: string;
+      filename: string;
+      required: true;
+      title: string;
+      description: string;
+      deployed: boolean;
+      selected: true;
     }>;
   };
 }
@@ -67,38 +82,64 @@ without `CLAUDE_PLUGIN_ROOT` set, which means `rule_docs_sync` cannot
 locate the manifest. Surface an error message and skip Phase 0c/0d.
 
 Build `currentSelection: Record<string, boolean>` by mapping each entry
-to `entry.selected`.
+from `status.entries` (optional only) to `entry.selected`. Do NOT
+include any required entries — they are enforced server-side and must
+not appear in the UI.
 
 ### Phase 0c — Checkbox Prompt <!-- [INTERACTIVE] -->
 
-Use `AskUserQuestion` to render a multi-select question.
+Use `AskUserQuestion` to render a multi-select question listing only
+the optional rules in `status.entries`. Required rules from
+`status.autoDeployed` MUST NOT appear as options — they are already
+enforced by the sync handler and the user cannot opt out.
 
-- **Header**: `"배포할 규칙 문서를 선택하세요 (필수 항목은 해제할 수 없습니다)"`
-- **Options**: one per entry from Phase 0b
-  - Label: `entry.title` (append ` (필수)` when `required === true`)
+**Note**: `AskUserQuestion` does not support pre-checking or default
+selection. To represent the current deployment state (from Phase 0b
+`entry.deployed`), you MUST prepend a literal `[ON] ` prefix (note the
+trailing space) to each deployed option's `label`. Do NOT use a
+`[V]` / `[ ]` / `[X]` / `[✓]` checkbox-style prefix — it collides with
+the UI's own checkbox column.
+
+- **Header** (English default; translate to `[filid:lang]` at runtime):
+  `"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
+- **Options**: one per entry in `status.entries` (optional rules only).
+  - Label — prepend `[ON] ` when `entry.deployed === true`; otherwise
+    use the bare `title`. The `[ON]` marker is a literal English token
+    — do NOT translate it, so the `title` portion remains stable for
+    later matching:
+    - `deployed === true` → `"[ON] title"`
+    - `deployed === false` → `"title"`
   - Description: `entry.description`
-  - Pre-checked: `entry.selected === true`
-  - Required entries MUST remain checked — if the user somehow
-    unchecks a required entry in the response, coerce it back to `true`
-    before computing `nextSelection`.
+  - `[ON]` is the ONLY allowed bracketed prefix; do NOT add `[V]` / `[ ]`
+    / `[X]` / `[✓]` checkbox-style markers. `AskUserQuestion` renders
+    its own checkbox column, and a checkbox-style prefix is visually
+    indistinguishable from the real checkbox — users cannot tell which
+    one is authoritative.
+  - Because `AskUserQuestion` cannot pre-check options, the `[ON]`
+    prefix is the ONLY cue for current state. The user MUST re-select
+    every option they want to keep deployed; an optional entry left
+    unchecked will be removed in Phase 0d.
 
-After the user answers:
+After the user answers, map the labels back to rule `id`s:
 
 ```ts
 const nextSelection: Record<string, boolean> = {};
+// Iterate optional entries only — required rules are enforced by
+// `syncRuleDocs` from the manifest and must not appear in the map.
 for (const entry of status.entries) {
-  if (entry.required) {
-    nextSelection[entry.id] = true;
-  } else {
-    nextSelection[entry.id] = userAnswer.includes(entry.id);
-  }
+  // AskUserQuestion returns labels only for items the user checked.
+  // Match back to the entry by substring on the stable `title` portion
+  // (the literal `[ON] ` prefix does not disturb the match because
+  // `entry.title` is a substring of the label).
+  nextSelection[entry.id] = userAnswer.some((answerLabel) =>
+    answerLabel.includes(entry.title),
+  );
 }
 ```
 
-Short-circuit optimization: if `nextSelection` is deep-equal to
-`currentSelection` AND every entry already has `deployed === selected`,
-there is nothing to do. Skip Phase 0d and proceed to Phase 1 with a
-one-liner `"규칙 문서: 변경 없음"`.
+If `nextSelection` is deep-equal to `currentSelection` AND every entry
+in `status.autoDeployed` already has `deployed === true`, skip Phase 0d
+and proceed to Phase 1.
 
 ### Phase 0d — Sync
 
@@ -147,9 +188,9 @@ Existing rule doc files are never overwritten — if a user edited
 `.claude/rules/fca.md` locally, re-running the skill with `fca` still
 selected will leave their edits untouched.
 
-Print a one-line summary:
+Print a one-line summary (English default; translate to `[filid:lang]` at runtime):
 ```
-규칙 문서 동기화: copied=<n>, removed=<n>, unchanged=<n>, skipped=<n>
+Rule docs synced: copied=<n>, removed=<n>, unchanged=<n>, skipped=<n>
 ```
 
 If `skipped` is non-empty, print each entry as a warning line but do
@@ -175,8 +216,11 @@ invocation in the same project:
 - Phase 0a is a no-op (config already exists)
 - Phase 0b returns `selected` derived from the filesystem
   (`required || deployed`)
-- Phase 0c pre-fills the checkbox with the current filesystem state —
-  rule docs that already exist under `.claude/rules/` appear pre-checked
+- Phase 0c surfaces the current filesystem state via a literal `[ON] `
+  label prefix on already-deployed items. `AskUserQuestion` itself
+  cannot pre-check boxes, so the user MUST re-select every optional
+  rule doc they want to keep — omitting an `[ON]` item causes it to
+  be removed in Phase 0d.
 - Phase 0d applies only the diff (add newly-checked, remove newly-unchecked)
 
 This makes the skill the **single management entry point** for optional

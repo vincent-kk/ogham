@@ -457,13 +457,19 @@ describe('config-loader', () => {
 
       const status = getRuleDocsStatus(tmpDir, pluginRoot);
       expect(status.pluginRootResolved).toBe(true);
-      expect(status.entries).toHaveLength(2);
+      // entries contains optional rules only — required rules live in
+      // `autoDeployed` and are never rendered in the checkbox UI.
+      expect(status.entries).toHaveLength(1);
+      expect(status.autoDeployed).toHaveLength(1);
 
-      const fca = status.entries.find((e) => e.id === 'fca');
+      const fca = status.autoDeployed.find((e) => e.id === 'fca');
       expect(fca).toBeDefined();
       expect(fca!.required).toBe(true);
       expect(fca!.deployed).toBe(true);
       expect(fca!.selected).toBe(true); // required → always selected
+
+      // Required entry must NOT leak into the checkbox-facing list.
+      expect(status.entries.find((e) => e.id === 'fca')).toBeUndefined();
 
       const extra = status.entries.find((e) => e.id === 'extra');
       expect(extra).toBeDefined();
@@ -535,6 +541,7 @@ describe('config-loader', () => {
         const status = getRuleDocsStatus(tmpDir);
         expect(status.pluginRootResolved).toBe(false);
         expect(status.entries).toEqual([]);
+        expect(status.autoDeployed).toEqual([]);
       } finally {
         if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
       }

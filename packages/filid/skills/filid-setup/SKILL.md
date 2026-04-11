@@ -93,36 +93,64 @@ of every rule doc declared in the plugin manifest:
 rule_docs_sync({ action: "status", path: "<target-path>" })
 ```
 
-The response `status.entries[]` is a list of:
-```
-{ id, filename, required, title, description, deployed, selected }
-```
-where `deployed` reflects filesystem state under `.claude/rules/` and
-`selected` mirrors the filesystem (`required || deployed`) — there is
-no config-side tracking. The filesystem is the single source of truth.
+The response partitions rules into two disjoint lists:
+
+- `status.entries[]` — **optional** rules only. This is the ONLY list
+  rendered as checkboxes in Phase 0c. Each entry:
+  ```
+  { id, filename, required: false, title, description, deployed, selected }
+  ```
+  `deployed` reflects filesystem state under `.claude/rules/` and
+  `selected === deployed` for optional rules (no config-side tracking).
+- `status.autoDeployed[]` — **required** rules. Always auto-synced by
+  `rule_docs_sync({ action: "sync" })` regardless of user input. Use
+  this list ONLY for the Phase 0d summary line — NEVER render these
+  entries as checkboxes. The user cannot opt out of required rules.
 
 Build an internal map `currentSelection: Record<string, boolean>` from
-these entries (`selected` field). Required rules are always `true`.
+`status.entries` only (`selected` field). Do NOT include any required
+entries — they are implicit and must not appear in the UI.
 
 **→ Immediately proceed to Phase 0c.**
 
 ### Phase 0c — Rule Docs Checkbox <!-- [INTERACTIVE] -->
 
-Present a checkbox prompt listing every entry from Phase 0b using
-`AskUserQuestion`. Use a single multi-select question:
+Present a checkbox prompt listing every entry from `status.entries[]`
+(optional rules only) using `AskUserQuestion`. Required rules from
+`status.autoDeployed[]` MUST NOT appear as options — they are already
+enforced by the sync handler and the user cannot opt out.
 
-- Question: `"배포할 규칙 문서를 선택하세요 (필수 항목은 해제할 수 없습니다)"`
-- Options: one per manifest entry, with the label `title` and description
-  `description`. Pre-check any entry where `selected === true`. Mark
-  required entries as non-togglable in the prompt text
-  (e.g., `"(필수)"` suffix).
+Note: `AskUserQuestion` does not support pre-checking; therefore, you
+MUST reflect the current deployment state in the `label` text.
 
-After the user answers, compute `nextSelection: Record<string, boolean>`:
-- For every required entry, force `true`.
-- For every optional entry, set `true` if the user checked it, otherwise `false`.
+- Question (English default; translate to `[filid:lang]` at runtime):
+  `"Select rule docs to deploy. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
+- Options: one per entry in `status.entries[]` (optional rules only).
+  - Label — prepend a `[ON] ` prefix (note the trailing space) when
+    `entry.deployed === true`; otherwise use the bare `title`. The
+    `[ON]` marker is a literal English token — do NOT translate it,
+    so the `title` portion remains stable for later matching:
+    - `deployed === true` → `"[ON] title"`
+    - `deployed === false` → `"title"`
+    `[ON]` is the only allowed bracketed prefix; do NOT add `[V]` / `[ ]`
+    / `[X]` / `[✓]` checkbox-style markers — they collide visually with
+    the UI's own checkbox column and are indistinguishable from the
+    authoritative checkbox.
+  - Description: `entry.description`
 
-If `nextSelection` is deep-equal to `currentSelection` AND every entry's
-`deployed === selected`, skip Phase 0d (no-op) and proceed to Phase 1.
+After the user answers, compute `nextSelection: Record<string, boolean>`
+from `status.entries[]` only:
+- For every optional entry, set `true` if the user checked it, otherwise
+  `false`.
+- Required rules MUST NOT appear in `nextSelection` — they are enforced
+  server-side by `syncRuleDocs` from the manifest.
+- **Note**: Since `AskUserQuestion` returns a new list of labels, map
+  the user's choice back to the original `id` based on the optional
+  entries from Phase 0b.
+
+If `nextSelection` is deep-equal to `currentSelection` AND every entry
+in `status.autoDeployed[]` already has `deployed === true`, skip
+Phase 0d (no-op) and proceed to Phase 1.
 
 **→ Proceed to Phase 0d with `nextSelection` in the same response.**
 
@@ -148,8 +176,9 @@ requested selection. No rule doc state is stored in `.filid/config.json`
 — the filesystem is authoritative.
 
 Inspect `result.copied`, `result.removed`, `result.unchanged`,
-`result.skipped` and surface a one-line summary to the user
-(e.g., `"규칙 문서: copied=fca.md, removed=0, unchanged=0"`).
+`result.skipped` and surface a one-line summary to the user (English default;
+translate to `[filid:lang]` at runtime, e.g.,
+`"Rule docs: copied=fca.md, removed=0, unchanged=0"`).
 
 If `result.skipped` is non-empty, print each `{ id, reason }` as a
 warning but DO NOT abort — continue with the remaining phases.
@@ -159,8 +188,9 @@ warning but DO NOT abort — continue with the remaining phases.
 > `.filid/cache/` should be gitignored (transient data).
 
 **→ If the invocation passed `--rules`, STOP here and emit a short
-completion line (`"규칙 문서 업데이트 완료 — Phase 1–5 생략"`). Otherwise
-immediately proceed to Phase 1.**
+completion line (English default; translate to `[filid:lang]` at runtime,
+e.g., `"Rule docs updated — Phase 1–5 skipped"`). Otherwise immediately
+proceed to Phase 1.**
 
 ### Phase 1 — Directory Scan
 
@@ -240,8 +270,10 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Update rule docs only — no scan, no INTENT.md/DETAIL.md generation
 /filid:filid-setup --rules
 
-# Re-run to toggle optional rule docs; the checkbox pre-fills from the
-# current filesystem state (already-deployed rules are pre-checked).
+# Re-run to toggle optional rule docs. The current deployment state is shown
+# via an "[ON]" label prefix on already-deployed items. AskUserQuestion cannot
+# pre-check options — you MUST re-select every item you want to keep deployed;
+# unchecked optional items are removed.
 
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers
