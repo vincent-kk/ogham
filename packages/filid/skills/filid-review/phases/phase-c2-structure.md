@@ -21,7 +21,7 @@
 > 4. Never batch-accumulate dependency graphs or tree-diffs across
 >    multiple files.
 >
-> When the chairperson uses batch partitioning (SKILL.md Step 3), you
+> When the chairperson uses batch partitioning (../SKILL.md Step 3), you
 > operate on a 10-file batch for per-file checks only — project-wide
 > scans still run once globally. Partial output file name:
 > `verification-structure.partial-<batchId>.md`.

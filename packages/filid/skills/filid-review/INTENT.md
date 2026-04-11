@@ -8,16 +8,16 @@
 
 | 경로 | 역할 |
 |------|------|
-| `SKILL.md` | 리뷰 워크플로우 메인 프롬프트 (5단계) |
-| `reference.md` | 출력 템플릿, Opinion Frontmatter Contract, MCP 도구 맵, committee→agent 매핑 |
-| `state-machine.md` | 의장의 라운드 판정 규칙 (최대 5라운드, SYNTHESIS/VETO/ABSTAIN 집계) |
-| `phases/phase-a-structure.md` | Phase A 서브에이전트 프롬프트 (구조 사전 검사) |
-| `phases/phase-b-analysis.md` | Phase B 서브에이전트 프롬프트 (분석 + 위원회 선출) |
-| `phases/phase-c1-metrics.md` | Phase C1 서브에이전트 프롬프트 (LCOM4, CC, 3+12) |
-| `phases/phase-c2-structure.md` | Phase C2 서브에이전트 프롬프트 (구조/의존성/드리프트/debt) |
-| `phases/phase-d-deliberation.md` | Phase D 팀 오케스트레이션 절차 (solo / team branch) |
+| `SKILL.md` | 5단계 워크플로우 메인 프롬프트 |
+| `reference.md` | 분할된 참조 문서 인덱스 |
+| `templates.md` | review-report / fix-requests / PR comment 출력 포맷 |
+| `contracts.md` | committee→agent 매핑, opinion frontmatter, 서브에이전트 프롬프트 규칙, post-completion 검증 |
+| `mcp-map.md` | MCP 도구 맵, 배치 파티셔닝, 체크포인트 resume, debt bias |
+| `prompt-templates.md` | Phase A/B/C1/C2 서브에이전트 프롬프트 리터럴 템플릿 |
+| `state-machine.md` | 의장 라운드 판정 규칙 (5라운드, SYNTHESIS/VETO/ABSTAIN) |
+| `phases/phase-{a,b,c1,c2,d}-*.md` | 단계별 서브에이전트 지침 |
 
-페르소나는 별도 디렉토리가 아닌 `packages/filid/agents/<persona-id>.md` 로 정의된다.
+페르소나는 `packages/filid/agents/<persona-id>.md` 로 정의된다.
 
 ## Conventions
 
@@ -31,7 +31,7 @@
 
 - 신규 specialist 페르소나 추가 시 세 곳 동시 수정: `src/types/review.ts` + `review-manage.ts` (LOW/MEDIUM/HIGH 배열) + `agents/<id>.md`
 - 상태 전이 규칙 변경 시 `state-machine.md` 와 `phase-d-deliberation.md` Step D.3 동시 갱신
-- Phase D 산출물 포맷 변경 시 `reference.md` Opinion Frontmatter Contract 동기화
+- Phase D 산출물 포맷 변경 시 `templates.md` + `contracts.md` Opinion Frontmatter Contract 동기화
 
 ### Ask first
 

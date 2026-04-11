@@ -18,7 +18,7 @@
 >    context.
 >
 > This is a hard requirement for large diffs. When the chairperson uses
-> batch partitioning (SKILL.md Step 3), you operate on a 10-file batch
+> batch partitioning (../SKILL.md Step 3), you operate on a 10-file batch
 > and write to `verification-metrics.partial-<batchId>.md`.
 
 You are a Phase C1 verification agent. Execute the **metrics-focused** half
@@ -168,7 +168,7 @@ created_at: <ISO 8601>
 ## Batch / Team-Promoted Execution
 
 When the chairperson dispatches Phase C1 as a batch worker (file count >
-15) or a team-promoted worker (file count > 30, see SKILL.md Step 3), the
+15) or a team-promoted worker (file count > 30, see ../SKILL.md Step 3), the
 execution context is slightly different:
 
 ### Batch mode (> 15, <= 30 files)

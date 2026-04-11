@@ -1,6 +1,6 @@
 # Phase D — Political Consensus (Team Deliberation)
 
-> **EXECUTION MODEL (Tier-2a Anti-Yield — inherits SKILL.md:11-36)**: The
+> **EXECUTION MODEL (Tier-2a Anti-Yield — inherits ../SKILL.md:11-36)**: The
 > chairperson (main session) executes this phase directly as a SINGLE
 > CONTINUOUS OPERATION. Every round transition MUST chain the next tool
 > call in the same response — never yield the turn between round wait →
@@ -10,7 +10,7 @@
 > **Valid reasons to yield in Phase D**:
 > 1. Unrecoverable error requiring human intervention
 > 2. Terminal stage marker emitted (only after Step D.6 completes AND
->    Step 4.5 content-hash is persisted in SKILL.md)
+>    Step 4.5 content-hash is persisted in ../SKILL.md)
 >
 > **HIGH-RISK YIELD POINTS in Phase D**:
 > 1. After Step D.0 verification.md merge → chain D.1 immediately.
@@ -23,7 +23,7 @@
 >    + SendMessage for every worker without yielding between them.
 > 6. After VETO compromise file is written → chain D.4.3 re-eval task
 >    creation immediately.
-> 7. After TeamDelete returns → chain SKILL.md Step 4.5 (content-hash)
+> 7. After TeamDelete returns → chain ../SKILL.md Step 4.5 (content-hash)
 >    in the same response.
 >
 > Phase D completes when `review-report.md` and `fix-requests.md` are
@@ -34,7 +34,7 @@ deliberation** using Claude Code's native team tools. Committee members
 elected by `review_manage(elect-committee)` are spawned as team workers,
 each in their own context, emitting structured opinion files per round.
 The chairperson (Lead) orchestrates rounds and applies the state machine
-defined in `state-machine.md`.
+defined in `../state-machine.md`.
 
 ## Execution Context (read by chairperson before starting)
 
@@ -270,7 +270,7 @@ frontmatter `state` field: `SYNTHESIS | VETO | ABSTAIN`.
 Use `Grep` with pattern `^state:` and the file glob
 `<REVIEW_DIR>/rounds/round-<N>-*.md` to fetch all states in one call.
 
-### D.3.2 — Apply quorum rules (from state-machine.md)
+### D.3.2 — Apply quorum rules (from ../state-machine.md)
 
 Let `M` = committee length.
 Let `S` = count of SYNTHESIS.
@@ -486,7 +486,7 @@ Phase A`.
 ### D.6.3 — Write review-report.md
 
 Path: `<REVIEW_DIR>/review-report.md`
-Format: see `reference.md` → "Review Report Format"
+Format: see `../templates.md` → "Review Report Format"
 
 Required sections:
 
@@ -501,7 +501,7 @@ Required sections:
 ### D.6.4 — Write fix-requests.md
 
 Path: `<REVIEW_DIR>/fix-requests.md`
-Format: see `reference.md` → "Fix Requests Format"
+Format: see `../templates.md` → "Fix Requests Format"
 
 One section per fix item, each with: Severity, Source, Type, Path, Rule,
 Current, Raised by, Recommended Action, Code Patch (if applicable).
@@ -525,7 +525,7 @@ For team deliberation:
    confirmed and timed-out members.
 4. `TeamDelete({ team_name: "review-<normalized-branch>" })`.
 
-**→ After TeamDelete returns (or solo path completes), immediately proceed to Step 4.5 in SKILL.md (persist content hash). Do NOT yield.**
+**→ After TeamDelete returns (or solo path completes), immediately proceed to Step 4.5 in ../SKILL.md (persist content hash). Do NOT yield.**
 
 ---
 

@@ -18,7 +18,7 @@
 >
 > This prevents context overflow when `changedFilesCount` is large. The
 > chairperson may partition changed files into 10-file batches (see
-> SKILL.md Step 2) — in that case you operate on one batch only and write
+> ../SKILL.md Step 2) — in that case you operate on one batch only and write
 > a partial output file named `structure-check.partial-<batchId>.md` which
 > the chairperson will merge.
 
