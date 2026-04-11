@@ -13,7 +13,14 @@ plugin: filid
 > the next tool call in the same response. NEVER yield the turn after
 > subagent results return, MCP tools complete, or team messages arrive.
 > Checkpoint resume decisions are internal — do NOT ask the user which
-> phase to start from.
+> phase to start from. Large subagent outputs and round opinion files are
+> internal working data — do NOT summarize them to the user mid-execution.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required (unrecoverable error only)
+> 2. Terminal stage marker emitted: `Review verdict: (APPROVED|REQUEST_CHANGES|INCONCLUSIVE)`
+>    — after `review-report.md` + `fix-requests.md` are written, Step 4.5
+>    content-hash is persisted, and any Phase D team has been deleted.
 >
 > **HIGH-RISK YIELD POINTS** (strengthen vigilance here):
 > 1. After Phase A/B background tasks complete → chain Step 3 immediately.
@@ -24,10 +31,9 @@ plugin: filid
 > 4. Between deliberation rounds → parse opinion frontmatter and create
 >    Round N+1 tasks without yielding.
 > 5. After TeamDelete → chain Step 4.5 (content-hash) immediately.
->
-> The only permitted yield points are: (a) user-confirmed terminal state
-> (review-report.md written + team deleted), (b) unrecoverable error that
-> requires human intervention.
+> 6. After Step 4.5 content-hash persistence → chain Step 5 (PR comment)
+>    in the same response; emit the terminal verdict marker only after
+>    Step 5 completes or is skipped.
 
 # filid-review — AI Code Review Governance
 

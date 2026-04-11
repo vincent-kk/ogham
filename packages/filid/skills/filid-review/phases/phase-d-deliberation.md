@@ -1,10 +1,33 @@
 # Phase D — Political Consensus (Team Deliberation)
 
-> **EXECUTION MODEL**: The chairperson (main session) executes this phase
-> directly. Every round transition MUST chain the next tool call in the same
-> response — never yield the turn between round wait → opinion parse →
-> next-round task creation. Phase D completes when `review-report.md` and
-> `fix-requests.md` are written AND the team is fully shut down.
+> **EXECUTION MODEL (Tier-2a Anti-Yield — inherits SKILL.md:11-36)**: The
+> chairperson (main session) executes this phase directly as a SINGLE
+> CONTINUOUS OPERATION. Every round transition MUST chain the next tool
+> call in the same response — never yield the turn between round wait →
+> opinion parse → next-round task creation. Large opinion files and team
+> messages are internal working data; do NOT summarize them mid-round.
+>
+> **Valid reasons to yield in Phase D**:
+> 1. Unrecoverable error requiring human intervention
+> 2. Terminal stage marker emitted (only after Step D.6 completes AND
+>    Step 4.5 content-hash is persisted in SKILL.md)
+>
+> **HIGH-RISK YIELD POINTS in Phase D**:
+> 1. After Step D.0 verification.md merge → chain D.1 immediately.
+> 2. After adjudicator Task returns (solo path) → chain D.6 write.
+> 3. After TeamCreate + parallel Task spawns return → chain D.2.5 wait
+>    without yielding.
+> 4. After all Round N SendMessage deliveries arrive → chain D.3.1 (grep
+>    state frontmatter) + D.3.2 quorum decision in the same response.
+> 5. When creating Round N+1 tasks → chain lead-brief write + TaskCreate
+>    + SendMessage for every worker without yielding between them.
+> 6. After VETO compromise file is written → chain D.4.3 re-eval task
+>    creation immediately.
+> 7. After TeamDelete returns → chain SKILL.md Step 4.5 (content-hash)
+>    in the same response.
+>
+> Phase D completes when `review-report.md` and `fix-requests.md` are
+> written AND (team mode) the team is fully shut down via `TeamDelete`.
 
 Phase D produces the final review verdict through a **real multi-agent
 deliberation** using Claude Code's native team tools. Committee members
