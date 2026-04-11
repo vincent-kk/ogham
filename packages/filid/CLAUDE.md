@@ -98,12 +98,12 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 ## Anti-Yield Discipline
 
-다단계 skill은 LLM이 phase 경계에서 턴을 끊으면 중단된다. Tier 분류와 3-layer 방어:
+LLM이 turn을 yield할 수 있는 지점(AskUserQuestion, `[y/N]` 프롬프트, subagent return, 외부 명령 대기 등)이 있는 skill은 중간에 중단될 위험이 있다. Tier 분류는 phase 개수가 아니라 **yield 지점의 유무와 성격**을 기준으로 한다:
 
 - **Tier-1** (파이프라인): `filid-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts
 - **Tier-2a** (다단계 비상호작용): `filid-review`, `filid-revalidate`, `filid-scan`, `filid-structure-review`, `filid-update`, `filid-pull-request`, `filid-promote` — 동일 3-layer
 - **Tier-2b** (상호작용 escape hatch): `filid-resolve`, `filid-sync`, `filid-restructure`, `filid-setup` — step-level escape hatch preamble + `<!-- [INTERACTIVE] -->` 마커 (AskUserQuestion/[y/N] 지점). `filid-setup`은 Phase 0c (rule docs 체크박스)에서 사용자 응답 대기.
-- **Tier-3** (단일 phase): `filid-config`, `filid-guide`, `filid-context-query`, `filid-ast-fallback`, `filid-migrate` — preamble 추가 금지 (과잉 체이닝 유발)
+- **Tier-3** (yield 지점 없음): `filid-config`, `filid-guide`, `filid-context-query`, `filid-ast-fallback`, `filid-migrate` — 내부 Phase 개수와 무관하게 AskUserQuestion·interactive gate가 없어 LLM이 turn을 끊을 지점 자체가 존재하지 않는 스킬. preamble 추가 금지 (과잉 체이닝 유발).
 
 신규 skill 추가 시 Tier-1/2a/2b에 해당하면 `packages/filid/skills/filid-pipeline/SKILL.md:11-24`의 3-layer 패턴을 복제할 것. Terminal stage marker는 `.omc/research/terminal-markers.json`에 등록.
 
