@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { isPrivateIp, validateUrl } from '../core/http-client/ssrf-guard.js';
+import { isPrivateIp } from '../utils/index.js';
+import { validateUrl } from '../core/http-client/ssrf-guard.js';
 
 describe('ssrf-guard', () => {
   describe('isPrivateIp', () => {

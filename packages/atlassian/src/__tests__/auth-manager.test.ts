@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { encrypt, decrypt, getEncryptionKey } from '../core/auth-manager/credential-store.js';
-import { loadCredentials, saveCredentials, buildAuthHeader } from '../core/auth-manager/index.js';
+import { encrypt, decrypt, getEncryptionKey, buildAuthHeader } from '../utils/index.js';
+import { loadCredentials, saveCredentials } from '../core/auth-manager/index.js';
 import type { ServiceCredentials } from '../types/index.js';
 
 const TEST_DIR = join(tmpdir(), 'atlassian-test-auth-' + Date.now());
