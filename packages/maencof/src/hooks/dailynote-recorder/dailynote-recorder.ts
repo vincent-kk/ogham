@@ -12,6 +12,7 @@ import {
 } from '../../core/dailynote-writer/dailynote-writer.js';
 import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { isMaencofVault } from '../shared/shared.js';
 
 export interface DailynoteRecorderInput {
@@ -60,8 +61,8 @@ export function runDailynoteRecorder(
       description,
       path,
     });
-  } catch {
-    // Graceful degradation — dailynote 기록 실패는 원래 동작에 영향 없음
+  } catch (e) {
+    appendErrorLogSafe(input.cwd ?? process.cwd(), { hook: 'dailynote-recorder', error: String(e), timestamp: new Date().toISOString() });
   }
 
   return { continue: true };

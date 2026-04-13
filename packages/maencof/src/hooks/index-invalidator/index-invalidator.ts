@@ -5,6 +5,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import {
   MAENCOF_MCP_TOOLS,
   isMaencofVault,
@@ -34,7 +35,8 @@ export function readStaleNodeCount(cwd: string): number {
     const raw = readFileSync(stalePath, 'utf-8');
     const parsed = JSON.parse(raw) as { paths?: unknown };
     return Array.isArray(parsed.paths) ? parsed.paths.length : 0;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
     return 0;
   }
 }
@@ -53,7 +55,8 @@ export function readGraphNodeCount(cwd: string): number {
       return Object.keys(parsed.nodes).length;
     }
     return 0;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
     return 0;
   }
 }
@@ -139,7 +142,8 @@ function appendStaleNode(cwd: string, nodePath: string): void {
   if (existsSync(stalePath)) {
     try {
       stale = JSON.parse(readFileSync(stalePath, 'utf-8')) as typeof stale;
-    } catch {
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
       stale = { paths: [], updatedAt: new Date().toISOString() };
     }
   }
@@ -165,7 +169,8 @@ function incrementUsageStat(cwd: string, toolName: string): void {
         string,
         number
       >;
-    } catch {
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
       stats = {};
     }
   }

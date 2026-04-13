@@ -17,6 +17,7 @@ import {
   writePromptContext,
   writeTurnContext,
 } from '../cache-manager/cache-manager.js';
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { isMaencofVault } from '../shared/shared.js';
 import {
   buildTurnContext,
@@ -132,7 +133,8 @@ function readTopDomains(cwd: string, limit: number): DomainCount[] {
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
       .map(([domain, count]) => ({ domain, count }));
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'context-injector', error: String(e), timestamp: new Date().toISOString() });
     return [];
   }
 }

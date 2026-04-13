@@ -21,6 +21,7 @@ import {
 import { CHANGELOG_GATE_MARKER } from '../../constants/markers.js';
 import { EXEC_TIMEOUT_MS } from '../../constants/performance.js';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { isMaencofVault, metaPath } from '../shared/shared.js';
 
 export interface ChangelogGateInput {
@@ -60,7 +61,8 @@ export function detectWatchedChanges(cwd: string): string[] {
         const filePath = line.slice(3); // "M  path" or "?? path"
         return !filePath.startsWith(CHANGELOG_EXCLUDE);
       });
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
     return [];
   }
 }
@@ -105,8 +107,8 @@ export function runChangelogGate(
           return { continue: true };
         }
         // TTL 초과 또는 세션 불일치 → 무시하고 계속
-      } catch {
-        // parse 실패 → graceful degradation
+      } catch (e) {
+        appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
       }
     }
 
@@ -130,8 +132,9 @@ export function runChangelogGate(
     ].join('\n');
 
     return { continue: false, reason };
-  } catch {
-    // Graceful degradation — 에러 시 세션 종료 차단하지 않음
+  } catch (e) {
+    const cwd = input.cwd ?? process.cwd();
+    appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
     return { continue: true };
   }
 }

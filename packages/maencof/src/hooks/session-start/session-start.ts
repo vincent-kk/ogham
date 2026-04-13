@@ -18,6 +18,7 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../../core/insight-stats/insight-stats.js';
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../types/common.js';
 import type { CompanionIdentityMinimal } from '../../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../../types/companion-guard.js';
@@ -83,8 +84,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         `[maencof] Config schemas updated: ${provision.migrated.join(', ')}`,
       );
     }
-  } catch {
-    // Silent fallback — provisioning failure must not block session start
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 
   // 2.6. 아키텍처 버전 체크 (L3 서브레이어 + L5 Buffer/Boundary)
@@ -113,8 +114,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
           `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:maencof-organize\` to process.`,
         );
       }
-    } catch {
-      // Ignore schedule-log.json parse failures
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
     }
   }
 
@@ -137,7 +138,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
       );
     }
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
     );
@@ -149,8 +151,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     if (adjustment.message) {
       messages.push(`[maencof] ${adjustment.message}`);
     }
-  } catch {
-    // Silent fallback — sensitivity adjustment failure must not block session start
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 
   // 6.5. Auto-Insight: meta-prompt injection + pending notification
@@ -175,8 +177,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
       deletePendingNotification(cwd);
     }
-  } catch {
-    // Silent — insight injection failure must not block session start
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 
   // 7. Record session start in dailynote
@@ -187,8 +189,8 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       category: 'session',
       description: `Session started (session_id: ${sessionId})`,
     });
-  } catch {
-    // Silent fallback — dailynote 기록 실패는 세션 시작에 영향 없음
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 
   return {
@@ -212,7 +214,8 @@ function loadCompanionIdentity(
     return isValidCompanionIdentity(raw)
       ? { name: raw.name, greeting: raw.greeting }
       : null;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
     return null;
   }
 }
@@ -261,8 +264,8 @@ function initClaudeMdSection(
       needsProvisioning = true;
     }
     // 마커 있음 + 같은 버전 → 스킵 (idempotent)
-  } catch {
-    // Silent fallback — hook 실패로 전파하지 않음
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
   return needsProvisioning;
 }
@@ -279,7 +282,8 @@ function readVaultVersion(cwd: string): string | null {
       readFileSync(versionPath, 'utf-8'),
     ) as VaultVersionInfo;
     return data.version ?? null;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
     return null;
   }
 }
@@ -305,7 +309,8 @@ function updateVaultVersion(cwd: string, previousVersion: string): void {
   let info: VaultVersionInfo;
   try {
     info = JSON.parse(readFileSync(versionPath, 'utf-8')) as VaultVersionInfo;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
     info = {
       version: previousVersion,
       installedAt: new Date().toISOString(),
@@ -339,8 +344,8 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
           '\nRun `/maencof:maencof-migrate` to upgrade your vault structure.',
       );
     }
-  } catch {
-    // Silent fallback
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 }
 
@@ -357,8 +362,8 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
           '\nRun `/maencof:maencof-setup` to complete the migration.',
       );
     }
-  } catch {
-    // Silent fallback
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 }
 

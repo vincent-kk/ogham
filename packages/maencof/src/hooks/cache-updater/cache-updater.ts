@@ -5,6 +5,7 @@
  * turn context reflects the latest stale count.
  */
 import { writeTurnContext } from '../cache-manager/cache-manager.js';
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { MAENCOF_MCP_TOOLS, isMaencofVault } from '../shared/shared.js';
 import { buildTurnContext } from '../turn-context-builder/turn-context-builder.js';
 
@@ -41,8 +42,8 @@ export function runCacheUpdater(input: PostToolUseInput): PostToolUseResult {
   try {
     const turnContext = buildTurnContext(cwd);
     writeTurnContext(cwd, turnContext);
-  } catch {
-    // Silent — cache update failure must not block PostToolUse pipeline
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'cache-updater', error: String(e), timestamp: new Date().toISOString() });
   }
 
   return { continue: true };
