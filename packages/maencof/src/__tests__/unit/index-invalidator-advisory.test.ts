@@ -172,12 +172,12 @@ describe('runIndexInvalidator advisory message', () => {
       tool_response: { path: '02_Derived/note.md' },
     });
     expect(result.continue).toBe(true);
-    // appendStaleNode 후 stale 1개, graph 100개 → 1% → info message
-    expect(result.hookMessage).toContain('pending change');
+    // appendStaleNode 후 stale 1개, graph 100개 → 1% < 10% → suppressed
+    expect(result.hookMessage).toBeUndefined();
   });
 
-  it('stale ratio > 10% 시 rebuild warning advisory를 반환한다', () => {
-    // 11개 stale, 50개 전체 → 22% > 10%
+  it('stale ratio >= 15% 시 rebuild warning advisory를 반환한다', () => {
+    // 11개 stale, 50개 전체 → 22% >= 15%
     writeStaleNodes(
       vaultDir,
       Array.from({ length: 11 }, (_, i) => `02_Derived/note-${i}.md`),
@@ -194,11 +194,11 @@ describe('runIndexInvalidator advisory message', () => {
     expect(result.hookMessage).toMatch(/\d+%/);
   });
 
-  it('stale ratio <= 10% 시 soft info advisory를 반환한다', () => {
-    // 5개 stale, 100개 전체 → 5% <= 10%
+  it('stale ratio 10-15% 시 soft info advisory를 반환한다', () => {
+    // 11개 stale, 100개 전체 → 11% (10-15% range)
     writeStaleNodes(
       vaultDir,
-      Array.from({ length: 5 }, (_, i) => `02_Derived/note-${i}.md`),
+      Array.from({ length: 11 }, (_, i) => `02_Derived/note-${i}.md`),
     );
     writeGraphJson(vaultDir, 100);
     const result = runIndexInvalidator({
@@ -211,8 +211,37 @@ describe('runIndexInvalidator advisory message', () => {
     expect(result.hookMessage).toContain('kg_build');
   });
 
+  it('stale ratio < 10% 시 advisory를 suppress한다', () => {
+    // 5개 stale, 100개 전체 → 5% < 10% → suppressed
+    writeStaleNodes(
+      vaultDir,
+      Array.from({ length: 5 }, (_, i) => `02_Derived/note-${i}.md`),
+    );
+    writeGraphJson(vaultDir, 100);
+    const result = runIndexInvalidator({
+      tool_name: 'update',
+      tool_input: { path: '02_Derived/extra.md' },
+      cwd: vaultDir,
+    });
+    expect(result.continue).toBe(true);
+    expect(result.hookMessage).toBeUndefined();
+  });
+
+  it('staleCount <= 2 AND percent < 10% 시 suppress한다', () => {
+    // 1개 stale, 50개 전체 → 2% → suppressed
+    writeStaleNodes(vaultDir, ['02_Derived/note-0.md']);
+    writeGraphJson(vaultDir, 50);
+    const result = runIndexInvalidator({
+      tool_name: 'update',
+      tool_input: { path: '02_Derived/extra.md' },
+      cwd: vaultDir,
+    });
+    expect(result.continue).toBe(true);
+    expect(result.hookMessage).toBeUndefined();
+  });
+
   it('advisory message에 stale count와 percentage가 포함된다', () => {
-    // 11개 stale, 50개 전체 → 22%
+    // 11개 stale, 50개 전체 → 22% >= 15%
     writeStaleNodes(
       vaultDir,
       Array.from({ length: 11 }, (_, i) => `02_Derived/note-${i}.md`),
@@ -236,8 +265,8 @@ describe('runIndexInvalidator advisory message', () => {
       tool_response: { path: '02_Derived/new.md' },
     });
     expect(result.continue).toBe(true);
-    // 1개 stale / 50개 → 2% → soft advisory
-    expect(result.hookMessage).toContain('pending change');
+    // 1개 stale / 50개 → 2% < 10% → suppressed
+    expect(result.hookMessage).toBeUndefined();
   });
 
   it('index.json이 없을 때 graceful하게 처리한다 (percent=100으로 advisory 반환)', () => {
