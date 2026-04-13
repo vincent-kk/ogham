@@ -132,6 +132,57 @@ export function getSessionCaptureCount(cwd: string): number {
   return pending?.captures.length ?? 0;
 }
 
+// ─── Promotion Stats ───────────────────────────────────────────────
+
+export function updatePromotionStats(
+  cwd: string,
+  action: 'promoted' | 'archived',
+): void {
+  const stats = readInsightStats(cwd);
+  if (action === 'promoted') stats.l5_promoted += 1;
+  else stats.l5_archived += 1;
+  stats.updatedAt = new Date().toISOString();
+
+  const statsPath = metaPath(cwd, 'auto-insight-stats.json');
+  ensureDir(statsPath);
+  writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf-8');
+}
+
+export function calculatePrecision(
+  stats: InsightStats,
+): number | null {
+  const denominator = stats.l5_promoted + stats.l5_archived;
+  if (denominator === 0) return null;
+  return stats.l5_promoted / denominator;
+}
+
+export function autoAdjustSensitivity(cwd: string): {
+  adjusted: boolean;
+  message: string | null;
+} {
+  const stats = readInsightStats(cwd);
+  const precision = calculatePrecision(stats);
+  if (precision === null) {
+    return { adjusted: false, message: null };
+  }
+
+  const config = readInsightConfig(cwd);
+  let target: InsightConfig['sensitivity'] | null = null;
+
+  if (precision < 0.3 && config.sensitivity !== 'low') {
+    target = config.sensitivity === 'high' ? 'medium' : 'low';
+  } else if (precision > 0.8 && config.sensitivity !== 'high') {
+    target = config.sensitivity === 'low' ? 'medium' : 'high';
+  }
+
+  if (target === null) {
+    return { adjusted: false, message: null };
+  }
+
+  const message = `Insight precision is ${(precision * 100).toFixed(0)}%. Sensitivity adjustment recommended: ${config.sensitivity} → ${target}`;
+  return { adjusted: false, message };
+}
+
 // ─── Meta-Prompt (code-generated, no disk file) ────────────────────
 
 /**

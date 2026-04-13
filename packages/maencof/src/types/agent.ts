@@ -61,6 +61,17 @@ export interface TransitionDirective {
   requestedAt: string;
   /** 전이 요청 주체 */
   requestedBy: AgentRole | 'user' | 'system';
+  /** 전이 실행 결과 */
+  outcome?: 'executed' | 'rejected' | 'failed';
+  /** 결과 확정 시간 */
+  resolvedAt?: string;
+}
+
+/** 전이 이력 항목 */
+export interface TransitionHistoryEntry {
+  directive: TransitionDirective;
+  sessionId: string;
+  timestamp: string;
 }
 
 /** 에이전트 실행 결과 */

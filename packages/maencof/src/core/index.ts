@@ -9,6 +9,7 @@ export * from './document-parser/index.js';
 export * from './graph-builder/index.js';
 export * from './insight-stats/index.js';
 export * from './spreading-activation/index.js';
+export * from './transition-history/index.js';
 export * from './tag-similarity/index.js';
 export * from './vault-scanner/index.js';
 export * from './weight-calculator/index.js';
