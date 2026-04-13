@@ -10,7 +10,7 @@ plugin: imbas
 
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
 > After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after MCP tool calls, subagent (imbas-analyst) returns, or
+> NEVER yield after MCP tool calls, subagent (`analyst`) returns, or
 > [OP: get_confluence] / [OP: search_confluence] operations.
 >
 > **Valid reasons to yield**:
@@ -18,7 +18,7 @@ plugin: imbas
 > 2. Terminal stage marker emitted: `Validation result: (PASS|PASS_WITH_WARNINGS|BLOCKED)`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After `imbas-analyst` subagent returns `validation-report.md` content — chain `run_transition(complete_phase)` in the same turn
+> - After `analyst` subagent returns `validation-report.md` content — chain `run_transition(complete_phase)` in the same turn
 > - After Confluence page fetch — continue to markdown conversion without pause
 > - After gate evaluation (BLOCKED → STOP) — emit blocker report AND end execution in the same turn
 

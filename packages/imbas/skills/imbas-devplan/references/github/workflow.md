@@ -34,7 +34,7 @@ When the user approves the devplan manifest, display:
 
 ## Delegated reads (optional)
 
-During Step 2 exploration, the imbas-engineer agent MAY additionally query
+During Step 2 exploration, the `engineer` agent MAY additionally query
 existing GitHub issues to enrich its understanding of current state:
 
 ```bash

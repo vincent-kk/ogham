@@ -7,7 +7,7 @@ Each gate evaluates specific fields and either auto-approves or stops the pipeli
 
 ## GATE 1: Validate Result
 
-Evaluates the validation-report.md output from imbas-analyst.
+Evaluates the validation-report.md output from `analyst`.
 
 ```
 AUTO-PROCEED when:
@@ -59,7 +59,7 @@ When all criteria pass:
 
 ### Special Case: E2-3 (Split Unnecessary)
 
-When imbas-planner determines the document is already at appropriate Story size:
+When `planner` determines the document is already at appropriate Story size:
 - Call run_transition(escape_phase, split, escape_code: "E2-3")
 - SKIP Phase 2.5 (manifest-stories) entirely
 - Proceed directly to Phase 3 (devplan)

@@ -43,7 +43,7 @@ Step 5 — Video/GIF handling
      - Parse output: check ok field, collect outputFiles list
      - Results: frame_*.jpg files + .metadata.json in frames/ directory
 
-  d. Spawn imbas-media agent for analysis (if --analyze flag):
+  d. Spawn `media` agent for analysis (if --analyze flag):
      - Pass to agent:
        - frames directory absolute path
        - .metadata.json absolute path

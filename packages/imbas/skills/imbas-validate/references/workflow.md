@@ -32,8 +32,8 @@ Step 2 — Document Source Resolution
     - [OP: search_confluence] to resolve references.
     - Save referenced content as supplements.
 
-Step 3 — imbas-analyst Agent Spawn
-  - Spawn agent: imbas-analyst
+Step 3 — analyst Agent Spawn
+  - Spawn agent: `analyst`
   - Model: config.defaults.llm_model.validate (default: "sonnet")
   - Input provided to agent:
     - source.md (full content)

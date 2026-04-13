@@ -6,7 +6,7 @@ Confluence/Jira에서 이미지, 비디오, GIF를 다운로드하고, 비디오
 
 Atlassian 첨부파일을 다운로드한 뒤 파일 종류에 따라 처리:
 - **이미지**: 바로 반환 (멀티모달 Read로 시각 분석)
-- **비디오/GIF**: scene-sieve로 키프레임 추출 → `imbas-media` 에이전트가 장면별 시맨틱 분석
+- **비디오/GIF**: scene-sieve로 키프레임 추출 → `media` 에이전트가 장면별 시맨틱 분석
 
 10가지 프리셋으로 파일 특성(길이, 의도, 확장자)에 맞는 최적의 추출 설정을 자동 선택한다.
 
@@ -39,7 +39,7 @@ Atlassian 첨부파일을 다운로드한 뒤 파일 종류에 따라 처리:
 2. **다운로드** — Atlassian URL이면 `[OP: fetch_attachment]`으로 바이너리 다운로드
 3. **프로브 및 프리셋 선택** — `probe.mjs`로 파일 정보 확인, 자동 프리셋 결정
 4. **이미지 처리** — scene-sieve 없이 파일 경로 반환
-5. **비디오/GIF 처리** — 캐시 확인 → scene-sieve 키프레임 추출 → `imbas-media` 에이전트 분석
+5. **비디오/GIF 처리** — 캐시 확인 → scene-sieve 키프레임 추출 → `media` 에이전트 분석
 
 ## 캐싱
 
@@ -71,4 +71,4 @@ fetch-media/
 | `config_get` | imbas MCP | temp_dir, scene_sieve_command 설정 읽기 |
 | `[OP: get_confluence]` | Jira ([OP:]) | Confluence 페이지에서 첨부파일 URL 확인 |
 | `[OP: fetch_attachment]` | Jira ([OP:]) | 바이너리 첨부파일 다운로드 |
-| `imbas-media` | 에이전트 | 키프레임 순차 읽기 및 장면 분석 |
+| `media` | 에이전트 | 키프레임 순차 읽기 및 장면 분석 |

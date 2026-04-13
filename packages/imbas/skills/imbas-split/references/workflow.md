@@ -24,8 +24,8 @@ Step 2 — Epic Decision Flow
        b) "Use existing Epic" → User enters Epic key → verify with [OP: get_issue]
        c) "No Epic" → Stories created without parent Epic
 
-Step 3 — imbas-planner Agent Spawn (Story Splitting)
-  - Spawn agent: imbas-planner
+Step 3 — planner Agent Spawn (Story Splitting)
+  - Spawn agent: `planner`
   - Model: config.defaults.llm_model.split (default: "sonnet")
   - Input provided to agent:
     - source.md (full planning document)
@@ -45,7 +45,7 @@ Step 3 — imbas-planner Agent Spawn (Story Splitting)
   - Agent returns: Story list as JSON
 
 Step 4 — 3→1→2 Verification (per Story)
-  For each Story produced by imbas-planner:
+  For each Story produced by `planner`:
 
   [3] Anchor Link Check
     - Verify the Story has an explicit reference to a source document section.
@@ -57,8 +57,8 @@ Step 4 — 3→1→2 Verification (per Story)
     - Deviation detected → set verification.coherence = "FAIL" (or "REVIEW" if ambiguous).
     - Coherent → set verification.coherence = "PASS", continue to [2].
 
-  [2] Reverse-Inference Verification — imbas-analyst spawn
-    - Spawn agent: imbas-analyst
+  [2] Reverse-Inference Verification — analyst spawn
+    - Spawn agent: `analyst`
     - Input: ALL split Stories reassembled as a whole
     - Instructions: "Compare the reassembled Stories against the original source.md.
       Identify any requirements lost, distorted, or fabricated during splitting."
@@ -83,7 +83,7 @@ Step 5 — Size Check
   If any criterion fails, branch by cause:
 
   (a) Size exceeded → Horizontal Split
-    1. Re-invoke imbas-planner for the oversized Story only.
+    1. Re-invoke `planner` for the oversized Story only.
     2. Original Story marked for "Done" processing + links:
        - "is split into" link from original to new Stories
        - "split from" link from new Stories to original

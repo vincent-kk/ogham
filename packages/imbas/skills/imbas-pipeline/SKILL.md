@@ -24,15 +24,15 @@ plugin: imbas
 > **HIGH-RISK YIELD POINTS**:
 > - Phase 0 confirmation banner — do NOT pause after displaying; immediately invoke the first tool (`run_create` / `get_issue`)
 > - GATE 1–4 decision points — after judging PASS, immediately chain the next phase's tool call
-> - Phase 2.5 → Phase 3 boundary — manifest-stories success is NOT pipeline completion; immediately spawn `imbas-engineer` if `--codebase` present
+> - Phase 2.5 → Phase 3 boundary — manifest-stories success is NOT pipeline completion; immediately spawn `engineer` if `--codebase` present
 > - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md:293,438` CRITICAL; do not add duplicate directives
 >
 > **⚠️ DO NOT STOP HERE**: Phase 2.5 → Phase 3 boundary is the highest-stall
 > risk point. When manifest-stories completes successfully and `--codebase`
-> is resolved, you MUST chain `imbas-engineer` spawn in the same turn.
+> is resolved, you MUST chain `engineer` spawn in the same turn.
 > Emitting a "Stories created" summary without continuing is a FAILURE mode.
 >
-> **LIMITATION**: `imbas-engineer` (model: opus, maxTurns: 80) subagent-internal
+> **LIMITATION**: `engineer` (model: opus, maxTurns: 80) subagent-internal
 > context exhaustion cannot be mitigated by this preamble. The agent may
 > exhaust its own turn budget mid-exploration on large codebases. See
 > follow-up issue for checkpoint file contract.
@@ -174,12 +174,12 @@ Resolution order for each option:
 
 ```
 Phase 1: VALIDATE
-  Spawn imbas-analyst → validation-report.md
+  Spawn `analyst` → validation-report.md
   >>> GATE 1: PASS/PASS_WITH_WARNINGS → continue | BLOCKED → STOP
 
 Phase 2: SPLIT
-  Spawn imbas-planner → Story splitting
-  Spawn imbas-analyst → reverse-inference verification
+  Spawn `planner` → Story splitting
+  Spawn `analyst` → reverse-inference verification
   Auto horizontal split if needed
   >>> GATE 2: All verification fields PASS → auto-approve | Any failure → STOP
 
@@ -195,7 +195,7 @@ Phase 2.5: MANIFEST STORIES
       YES → continue to Phase 3
 
 Phase 3: DEVPLAN (requires --codebase)
-  Spawn imbas-engineer → codebase exploration + EARS Subtask generation
+  Spawn `engineer` → codebase exploration + EARS Subtask generation
   Cross-Story Task extraction + B→A feedback
   >>> GATE 3: Manifest valid + no needs_review → auto-approve | Any flag → STOP
 
@@ -217,7 +217,7 @@ Phase 0: Load Stories from Jira ([OP: get_issue] per key)
       YES → continue
 
 Phase 3: DEVPLAN
-  Spawn imbas-engineer → codebase exploration + EARS Subtask generation
+  Spawn `engineer` → codebase exploration + EARS Subtask generation
   Cross-Story Task extraction (if multiple Stories) + B→A feedback
   >>> GATE 3: Manifest valid + no needs_review → auto-approve | Any flag → STOP
 

@@ -61,15 +61,15 @@ Document → [Validate] → [Split] → [Devplan] → Jira Issues
          Report.md    Stories.json  Devplan.json
 ```
 
-**Phase 1 — Validate:** The `imbas-analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
+**Phase 1 — Validate:** The `analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
 
-**Phase 2 — Split:** The `imbas-planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
+**Phase 2 — Split:** The `planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
 - User Story syntax ("As a... I want... So that...")
 - Given/When/Then acceptance criteria
 - A 3-step verification: anchor link back to source → coherence check → reverse inference (can you reconstruct the original requirement from the Stories alone?)
 - Size check — Stories too large get split horizontally
 
-**Phase 3 — Devplan:** The `imbas-engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
+**Phase 3 — Devplan:** The `engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
 - EARS-format Subtasks per Story (scoped to max 200 lines / 10 files / 1 hour review)
 - Cross-Story shared Tasks (extracted via N:M merge-point detection)
 - Dependency links and execution order
@@ -188,10 +188,10 @@ imbas uses 4 specialized subagents, each with constrained roles:
 
 | Agent | Model | Role | Phase |
 |-------|-------|------|-------|
-| `imbas-analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
-| `imbas-planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
-| `imbas-engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
-| `imbas-media` | Sonnet | Media analysis (keyframe extraction, visual description) | Fetch-media |
+| `analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
+| `planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
+| `engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
+| `media` | Sonnet | Media analysis (keyframe extraction, visual description) | Fetch-media |
 
 Agent roles are enforced at runtime via the `SubagentStart` hook — agents cannot overstep their assigned responsibilities.
 

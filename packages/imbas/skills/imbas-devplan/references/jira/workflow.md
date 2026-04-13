@@ -32,7 +32,7 @@ When the user approves the devplan manifest, display:
 
 ## Delegated reads (optional)
 
-During Step 2 exploration, the imbas-engineer agent MAY additionally use
+During Step 2 exploration, the `engineer` agent MAY additionally use
 Jira operations to enrich its understanding of existing Jira state:
 
 - `[OP: get_issue]` — read latest Story state + comments

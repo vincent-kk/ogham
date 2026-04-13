@@ -19,9 +19,9 @@
 
 | Agent | When | Purpose |
 |-------|------|---------|
-| `imbas-media` | After scene-sieve extraction, when `--analyze` flag is set | Read frames sequentially (multimodal), classify scenes, generate analysis.json |
+| `media` | After scene-sieve extraction, when `--analyze` flag is set | Read frames sequentially (multimodal), classify scenes, generate analysis.json |
 
-The imbas-media agent receives:
+The `media` agent receives:
 - Absolute path to frames/ directory
 - Absolute path to .metadata.json
 - Analysis purpose context from caller

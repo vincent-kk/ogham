@@ -3,7 +3,7 @@
   "_captured_at": "2026-04-06",
   "_captured_in": "Semantic Operations Layer migration (plan.md)",
   "agents": {
-    "imbas-engineer": [
+    "engineer": [
       "Read",
       "Grep",
       "Glob",
@@ -11,12 +11,12 @@
       "mcp__plugin_imbas_tools__ast_search",
       "mcp__plugin_imbas_tools__ast_analyze"
     ],
-    "imbas-planner": [
+    "planner": [
       "Read",
       "Grep",
       "Glob"
     ],
-    "imbas-analyst": [
+    "analyst": [
       "Read",
       "Grep",
       "Glob",

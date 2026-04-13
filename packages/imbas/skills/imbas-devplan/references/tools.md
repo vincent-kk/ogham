@@ -17,7 +17,7 @@
 ### Provider-specific tools
 
 Provider-specific tool surfaces are in `jira/tools.md` and `local/tools.md`.
-Both are optional during Step 2 exploration — the core imbas-engineer agent
+Both are optional during Step 2 exploration — the core `engineer` agent
 tool set (`ast_search`, `ast_analyze`, `Read`, `Grep`, `Glob`) is sufficient
 to produce a devplan manifest regardless of provider.
 
@@ -25,9 +25,9 @@ to produce a devplan manifest regardless of provider.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `imbas-engineer` | config.defaults.llm_model.devplan (opus) | Codebase exploration, EARS Subtask generation, Task extraction |
+| `engineer` | config.defaults.llm_model.devplan (opus) | Codebase exploration, EARS Subtask generation, Task extraction |
 
-### imbas-engineer Spawn Instructions
+### engineer Spawn Instructions
 
 - Provide stories-manifest.json (filtered by --stories if specified)
 - Provide codebase root path for exploration

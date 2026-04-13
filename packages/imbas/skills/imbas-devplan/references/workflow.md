@@ -27,8 +27,8 @@ Step 1.5 — Codebase Resolution
     → STOP: "Devplan requires --codebase. Subtask generation needs a codebase to explore.
        Usage: /imbas:imbas-devplan --run <run-id> --codebase /path/to/repo"
 
-Step 2 — imbas-engineer Agent Spawn
-  - Spawn agent: imbas-engineer
+Step 2 — engineer Agent Spawn
+  - Spawn agent: `engineer`
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input provided to agent:
     - stories-manifest.json (Story descriptions with issue_refs)

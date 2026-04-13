@@ -8,5 +8,5 @@
 | Source file not found | Display: "Source file not found: <path>. Check the path and try again." |
 | Confluence URL invalid / page not found | Display: "Could not fetch Confluence page. Verify the URL and your permissions." |
 | run_create fails | Display error from tool. Common: "Run directory already exists" → suggest new run or specify different source. |
-| imbas-analyst agent fails | Set validate.result = "BLOCKED" with note: "Agent error during validation. Check source document format." |
+| `analyst` agent fails | Set validate.result = "BLOCKED" with note: "Agent error during validation. Check source document format." |
 | run_transition precondition fail | Display: "Cannot transition: <error message from tool>." |

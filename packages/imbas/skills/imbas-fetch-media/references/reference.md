@@ -96,7 +96,7 @@ Use `timestampMs` to describe when events happen in the video.
 
 ### analysis.json schema
 
-Produced by the imbas-media subagent after frame analysis:
+Produced by the `media` subagent after frame analysis:
 
 ```json
 {

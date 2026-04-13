@@ -22,17 +22,17 @@ The LLM resolves which tool to use at runtime based on the session's available t
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `imbas-planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
-| `imbas-analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
+| `planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
+| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
 
-### imbas-planner Spawn Instructions
+### planner Spawn Instructions
 
 - Provide source.md + supplements + Epic info as input context
 - Set output language per config.language.issue_content
 - Agent returns JSON Story array — skill handles manifest creation
 - Agent does NOT have pipeline/manifest tool access
 
-### imbas-analyst Spawn Instructions (Reverse-Inference)
+### analyst Spawn Instructions (Reverse-Inference)
 
 - Provide ALL split Stories reassembled as a single document
 - Provide original source.md for comparison

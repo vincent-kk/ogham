@@ -17,5 +17,5 @@ When `split.escape_code == "E2-3"`, the upstream skill (`imbas-split` when run
 standalone, or `imbas-pipeline` in pipeline mode) generates a single-Story
 `stories-manifest.json` representing the source document as-is (no issues created).
 In this specific case, devplan accepts the pending Story as a valid input state —
-the document itself is passed as context to `imbas-engineer`, bypassing the
+the document itself is passed as context to `engineer`, bypassing the
 normal issue-creation prerequisite.

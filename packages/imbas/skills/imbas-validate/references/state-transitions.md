@@ -5,7 +5,7 @@
 `validation-report.md` saved in the run directory at:
 `.imbas/<KEY>/runs/<run-id>/validation-report.md`
 
-Report format is defined by the imbas-analyst agent (see `agents/imbas-analyst.md`).
+Report format is defined by the `analyst` agent (see `agents/analyst.md`).
 
 ## State Transitions
 

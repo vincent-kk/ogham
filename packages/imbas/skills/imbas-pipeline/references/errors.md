@@ -21,7 +21,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 | Error | Action |
 |-------|--------|
 | run_create fails | STOP: display error. Common: "Run directory already exists." |
-| imbas-analyst agent fails | STOP: set validate.result = "BLOCKED". Note: "Agent error during validation." |
+| `analyst` agent fails | STOP: set validate.result = "BLOCKED". Note: "Agent error during validation." |
 | validation-report.md parse error | STOP: treat as BLOCKED. "Could not parse validation report." |
 
 ### Phase 2 — Split Errors
@@ -29,9 +29,9 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 | Error | Action |
 |-------|--------|
 | Parent issue not found (--parent KEY) | STOP: "Issue \<KEY\> not found. Check the key or use --parent new." |
-| imbas-planner produces no Stories | Check: if document is atomic → escape E2-3. Otherwise → escape E2-1. |
-| imbas-planner agent fails | STOP: save partial state. "Planner agent error. Check source document format." |
-| imbas-analyst reverse-inference fails | STOP: save partial state. "Reverse-inference verification failed." |
+| `planner` produces no Stories | Check: if document is atomic → escape E2-3. Otherwise → escape E2-1. |
+| `planner` agent fails | STOP: save partial state. "Planner agent error. Check source document format." |
+| `analyst` reverse-inference fails | STOP: save partial state. "Reverse-inference verification failed." |
 | Manifest validation errors (auto-fix fails) | STOP: list errors. "Manifest validation failed. Review stories manually." |
 | run_transition precondition fail | STOP: "Cannot transition: \<error from tool\>." |
 
@@ -50,7 +50,7 @@ Consolidated error table from all pipeline phases, plus pipeline-specific errors
 | Error | Action |
 |-------|--------|
 | Stories not in Jira (any pending) | STOP: "Stories must exist in Jira. Run /imbas:imbas-manifest stories --run \<run-id\> first." |
-| imbas-engineer agent fails | Save partial manifest if available. STOP: "Engineer agent error. Partial results saved." |
+| `engineer` agent fails | Save partial manifest if available. STOP: "Engineer agent error. Partial results saved." |
 | AST tools unavailable (sgLoadError) | Non-blocking. Log warning once, agent uses LLM fallback. Note in final report. |
 | No Subtasks generated for a Story | Flag Story in report. Non-blocking for pipeline (Story may legitimately have no technical work). |
 | Manifest validation errors | STOP: list errors. "Devplan manifest validation failed." |
