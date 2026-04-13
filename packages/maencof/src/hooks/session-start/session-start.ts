@@ -12,6 +12,7 @@ import {
 } from '../../core/claude-md-merger/claude-md-merger.js';
 import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/dailynote-writer.js';
 import {
+  autoAdjustSensitivity,
   buildMetaPrompt,
   deletePendingNotification,
   readInsightConfig,
@@ -140,6 +141,16 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
     );
+  }
+
+  // 6.4. Precision-based sensitivity auto-adjustment
+  try {
+    const adjustment = autoAdjustSensitivity(cwd);
+    if (adjustment.message) {
+      messages.push(`[maencof] ${adjustment.message}`);
+    }
+  } catch {
+    // Silent fallback — sensitivity adjustment failure must not block session start
   }
 
   // 6.5. Auto-Insight: meta-prompt injection + pending notification

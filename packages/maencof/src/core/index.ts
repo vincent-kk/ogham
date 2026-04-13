@@ -1,4 +1,5 @@
 export * from './architecture-migrator/index.js';
+export * from './autonomy/index.js';
 export * from './changelog-writer/index.js';
 export * from './claude-md-merger/index.js';
 export * from './community-detector/index.js';
