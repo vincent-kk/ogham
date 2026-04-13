@@ -1,0 +1,79 @@
+---
+name: atlassian-confluence
+description: "Confluence API domain router. Routes Confluence operations to the correct domain tool schema. Covers 8 domains: page, search, space, comment, attachment, label, analytics, user."
+---
+
+# atlassian-confluence
+
+Confluence REST API domain router for Claude Code agents. Resolves the correct endpoint, parameters, and MCP tool for any Confluence operation.
+
+## When to Use
+
+- Create, read, update, or delete Confluence pages
+- Search Confluence content with CQL
+- Manage spaces, comments, attachments, and labels
+- Look up user information or page analytics
+
+## Tool Domains
+
+| Domain | Description |
+|---|---|
+| `page` | Page CRUD, hierarchy navigation, and version management |
+| `search` | CQL-based full-text and metadata search across spaces |
+| `space` | Space listing, metadata retrieval, and space lookup |
+| `comment` | Footer comments and inline comments (inline is Cloud-only via V2) |
+| `attachment` | Upload and download file attachments on pages |
+| `label` | Add, list, and remove labels on pages |
+| `analytics` | Page view statistics — Cloud only |
+| `user` | Current user info and user search by account ID or query |
+
+## MCP Tools Available
+
+| Tool | Purpose |
+|---|---|
+| `get` | Read operations (GET requests) |
+| `post` | Create operations (POST requests) |
+| `put` | Update operations (PUT requests) |
+| `delete` | Delete operations (DELETE requests) |
+| `convert` | ADF / Storage Format ↔ Markdown conversion |
+
+## Routing Protocol
+
+1. Identify the domain from the user's request (page / search / space / etc.)
+2. Read `tools/<domain>/schema.md` ONLY when needed — do not preload all schemas
+3. Select the correct endpoint variant: Cloud V2 preferred, fall back to V1 if V2 unavailable
+4. Call the appropriate MCP tool with resolved parameters
+5. On HTTP 401: invoke `atlassian-setup` skill, then retry once
+
+## Cloud vs Server/DC
+
+- Detect environment: `*.atlassian.net` → Cloud; otherwise → Server/DC
+- Cloud prefers V2 endpoints (`/api/v2/...`) where available
+- Server/DC uses V1 endpoints (`/rest/api/...`) exclusively
+- Inline comments are Cloud-only (V2 only); use footer comments on Server/DC
+
+## Error Handling
+
+| HTTP Status | Action |
+|---|---|
+| 401 Unauthorized | Invoke `atlassian-setup` skill, retry once |
+| 403 Forbidden | Report permission error, do not retry |
+| 404 Not Found | Report resource not found, verify ID/key |
+| 429 Too Many Requests | Wait for `Retry-After` header value, then retry |
+| 500 / 503 | Report server error, suggest retry |
+
+## Permission Boundaries
+
+- Read operations: require `read:confluence-content.all` scope (Cloud) or View permission (Server/DC)
+- Write operations: require `write:confluence-content` scope (Cloud) or Edit permission (Server/DC)
+- Admin operations (space management): require `manage:confluence-configuration` (Cloud)
+- Analytics: Cloud only — requires analytics feature enabled on instance
+
+## Lazy Reference Loading
+
+Read `tools/<domain>/schema.md` ONLY when the domain is needed. Do not load all schemas upfront.
+
+Supplementary references for complex domains:
+- `tools/page/hierarchy.md` — ancestors, descendants, page tree traversal
+- `tools/page/version.md` — version management rules (mandatory `version.number` on update)
+- `tools/search/cql-guide.md` — CQL syntax, operators, and examples

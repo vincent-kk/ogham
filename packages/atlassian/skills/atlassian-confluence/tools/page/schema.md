@@ -1,0 +1,32 @@
+## Endpoints
+
+| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
+|---|---|---|---|---|
+| Get page | GET | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+| Create page | POST | `/rest/api/content` | `/api/v2/pages` | `/rest/api/content` |
+| Update page | PUT | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+| Delete page | DELETE | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+
+## Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| spaceKey/spaceId | string | Y (create) | Space identifier |
+| title | string | Y (create) | Page title |
+| body | object | Y (create/update) | Page content (Storage Format) |
+| version.number | number | Y (update) | Current version + 1 |
+| ancestors | array | N | Parent page for hierarchy |
+
+## Cloud vs Server Branching
+
+- **Cloud**: V2 preferred (`/api/v2/pages/`). Falls back to V1.
+- **Server**: V1 only (`/rest/api/content/`)
+
+## MCP Tool Mapping
+
+| Operation | MCP Tool | Notes |
+|---|---|---|
+| Get | `get` | expand=body.storage,version |
+| Create | `post` | content_format: "markdown" |
+| Update | `put` | Must include version.number |
+| Delete | `delete` | Confirm if child pages exist |
