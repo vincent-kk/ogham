@@ -13,16 +13,6 @@ tools:
   - Grep
   - mcp__plugin_maencof_t__read
   - mcp__plugin_maencof_t__kg_navigate
-allowed_layers: [1, 2, 3, 4, 5]
-allowed_operations:
-  - read
-forbidden_operations:
-  - create
-  - update
-  - delete
-  - move
-  - link
-  - bulk-modify
 maxTurns: 20
 ---
 
@@ -163,15 +153,6 @@ kg_navigate({ path: "01_Core/{filename}.md", include_inbound: true, include_outb
 Glob 01_Core/**/*.md to collect file list
 → Output structure summary
 ```
-
----
-
-## Access Count Update (AutonomyLevel >= 2) — Not Implemented
-
-> **Note**: This feature is not yet implemented.
-> Currently, index-invalidator updates only `usage-stats.json` (tool call statistics);
-> automatic increment of Frontmatter `accessed_count` is not yet implemented.
-> Planned for a future version.
 
 ---
 

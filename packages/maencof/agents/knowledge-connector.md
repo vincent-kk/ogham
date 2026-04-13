@@ -17,11 +17,6 @@ tools:
   - mcp__plugin_maencof_t__kg_search
   - mcp__plugin_maencof_t__kg_suggest_links
   - mcp__plugin_maencof_t__kg_status
-allowed_layers: [1, 2, 3, 4, 5]
-forbidden_operations:
-  - delete
-  - bulk-modify
-  - layer1-write
 maxTurns: 30
 ---
 
@@ -96,6 +91,25 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 | `kg_search` | Find semantically related documents across Layers |
 | `kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
 | `kg_status` | Check vault graph density and orphan node count |
+
+---
+
+## Connection Strength Criteria
+
+| Strength | Condition | Action |
+|----------|-----------|--------|
+| HIGH | >= 3 shared tags + semantic co-reference | Immediately propose to user |
+| MEDIUM | 2 shared tags OR semantic co-reference | Propose with context explanation |
+| LOW | 1 shared tag only | Propose only when no higher candidates exist |
+
+---
+
+## Failure Modes
+
+- **`kg_suggest_links` returns empty array**: No system-suggested links available. Inform the user that the vault may need more tag enrichment or manual connections. Suggest running `/maencof:maencof-suggest` for tag-based discovery.
+- **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `update`. Report the failure to the user with both document paths.
+- **Target document deleted or moved**: If a link candidate references a document that no longer exists at the expected path, skip the proposal silently and proceed to the next candidate. Log the stale reference for the user's final report.
+- **Session link limit reached**: When 10 link operations are completed in the current session, stop proposing new links and present the session summary. Guide the user to start a new session for additional connections.
 
 ---
 

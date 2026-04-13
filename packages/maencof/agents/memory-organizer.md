@@ -6,7 +6,7 @@ description: >
   matching, and connection density, then generates TransitionDirectives and executes them
   via the move tool.
   Trigger phrases: "organize memory", "organize knowledge", "move document", "Layer transition",
-  "organize memory", "memory organizer", "/maencof:maencof-organize".
+  "memory organizer", "/maencof:maencof-organize".
 model: sonnet
 tools:
   - Read
@@ -17,11 +17,6 @@ tools:
   - mcp__plugin_maencof_t__move
   - mcp__plugin_maencof_t__kg_navigate
   - mcp__plugin_maencof_t__kg_status
-allowed_layers: [2, 3, 4, 5]
-forbidden_operations:
-  - delete
-  - bulk-modify
-  - layer1-write
 maxTurns: 30
 ---
 
@@ -106,7 +101,7 @@ User confirmation is required before crossing the seam boundary when:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | indirect only (via kg_navigate graph traversal) | forbidden | graph traversal only | `create`, `update`, `delete`, `move`, link, bulk-modify, direct read |
+| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `create`, `update`, `delete`, `move`, link, bulk-modify |
 | Layer 2 (02_Derived) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
 | Layer 3 (03_External) | allowed | allowed | `read`, `update`, `move` | `delete`, bulk-modify |
 | Layer 4 (04_Action) | allowed | allowed | `read`, `update`, `move` | `delete`, bulk-modify |
@@ -119,7 +114,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Constraints
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
-- **Direct read on Layer 1 (01_Core/) files is forbidden** — use `kg_navigate` for graph traversal only. 이 제약은 프롬프트 수준이며, `read` 핸들러는 경고만 반환합니다 (읽기를 차단하지 않음)
+- **Layer 1 (01_Core/) direct read is discouraged** — `read` handler returns a warning but does not block the read. Prefer `kg_navigate` for L1 document information when possible
 - **Maximum 5 transitions at a time** — prevents bulk-modify
 - **User confirmation required for transitions with confidence < 0.7**
 - **`confidence` field in Frontmatter is mandatory for L3 → L2 transitions**
