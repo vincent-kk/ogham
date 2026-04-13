@@ -91,7 +91,7 @@ description: >
 ```
 
 **Criteria:**
-- Minimum 50 words (recommended 100-150 words)
+- Minimum 20 characters (recommended under 250 characters)
 - USE CASE specified ("Use this skill when...")
 - CAPABILITIES explained ("It provides...")
 - SCENARIOS listed ("Typical scenarios:")
@@ -104,7 +104,7 @@ description: >
 description: >
   Converts Markdown to PDF with custom styling and templates.
 ```
-- Less than 50 words
+- Less than 20 characters
 - Missing trigger scenarios
 
 ❌ **Fail (0 points):**
@@ -115,26 +115,26 @@ description: <Generate PDFs>  # angle brackets
 
 ---
 
-#### Version & Complexity Requirements (5 points)
+#### Frontmatter Field Requirements (5 points)
 
 ✅ **Perfect (5 points):**
 ```yaml
-version: 1.0.0       # Semantic versioning
-complexity: medium   # Matches actual complexity
-created: 2026-02-12
-updated: 2026-02-12
+name: my-skill                # Lowercase, hyphens only, max 64 chars
+description: >                # Specific trigger scenarios, 20-250 chars
+  Use this skill when...
+user-invocable: true          # Explicit visibility setting
 ```
 
 ⚠️ **Partial (3 points):**
 ```yaml
-version: 1.0         # Missing patch version
-complexity: simple   # Mismatch with actual
+name: my-skill
+description: Does stuff       # Too vague, too short
 ```
 
 ❌ **Fail (0 points):**
 ```yaml
-version: v1          # Invalid format
-# complexity field missing
+name: MySkill                 # Invalid casing
+# description field missing
 ```
 
 ---
@@ -151,8 +151,8 @@ version: v1          # Invalid format
 
 **Validation Script:**
 ```bash
-# Run enhanced_validator.py
-python scripts/enhanced_validator.py /path/to/skill
+# Run enhanced_validator.mjs
+node scripts/enhanced_validator.mjs /path/to/skill
 
 # 10 points if all checks pass
 ```
@@ -501,7 +501,7 @@ skill/
 - [ ] No leading/trailing/consecutive hyphens
 
 ✅ **Description:**
-- [ ] 50+ words (recommended 100-150)
+- [ ] 20+ chars (recommended under 250 chars)
 - [ ] USE CASE: "Use this skill when..."
 - [ ] CAPABILITIES: "It provides..."
 - [ ] SCENARIOS: "Typical scenarios:"
@@ -860,10 +860,10 @@ main "$@"
 ### Automated Validation
 ```bash
 # 1. Structure validation
-python scripts/enhanced_validator.py /path/to/skill
+node scripts/enhanced_validator.mjs /path/to/skill
 
 # 2. Code style (Python)
-pylint scripts/*.py
+node --check scripts/*.mjs
 black --check scripts/
 mypy scripts/
 

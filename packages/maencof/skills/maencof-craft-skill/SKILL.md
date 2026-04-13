@@ -12,6 +12,8 @@ plugin: maencof
 
 # Skill Constructor
 
+Intelligent skill engineering system that transforms skill creation from manual scaffolding into a systematic workflow with mode-based operation, complexity-aware structuring, and automated validation.
+
 ## When to Use
 
 ### Auto-trigger Conditions
@@ -23,15 +25,16 @@ Claude automatically invokes this skill when:
 - A skill needs new features, capabilities, or enhancements added (IMPROVE)
 - A skill has bugs, validation failures, or behavioral issues to fix (FIX)
 
-### Manual Invocation
-
-```
-/maencof:maencof-craft-skill [request describing what to create/refactor/improve/fix]
-```
-
 ## Overview
 
-Intelligent skill engineering system that transforms skill creation from manual scaffolding into a systematic workflow with mode-based operation, complexity-aware structuring, and automated validation.
+skill-constructor provides four specialized operating modes for different skill development scenarios:
+
+- **CREATE**: Build new skills from requirements to deployment
+- **REFACTOR**: Restructure existing skills for better organization
+- **IMPROVE**: Add features and enhance capabilities
+- **FIX**: Debug and repair skill issues
+
+Each mode follows a 6-phase workflow optimized for its specific purpose, with automatic complexity evaluation and structure generation.
 
 ## Four Operating Modes
 
@@ -191,14 +194,13 @@ Load knowledge/ files when designing complex skills or establishing architectura
 
 Automation tools for skill construction:
 
-- **mode_detector.py**: Detect CREATE/REFACTOR/IMPROVE/FIX from context
-- **complexity_scorer.py**: Calculate complexity and recommend structure
-- **structure_generator.py**: Generate directory hierarchy
-- **enhanced_validator.py**: Comprehensive validation checks
-- **init_skill.py**: Enhanced skill initialization
-- **package_skill.py**: Validation + packaging
-- **deployment_helper.py**: Intelligent deployment support
-- **quick_validate.py**: Quick validation shortcut
+- **mode_detector.mjs**: Detect CREATE/REFACTOR/IMPROVE/FIX from context
+- **complexity_scorer.mjs**: Calculate complexity and recommend structure
+- **structure_generator.mjs**: Generate directory hierarchy
+- **enhanced_validator.mjs**: Comprehensive validation checks
+- **init_skill.mjs**: Enhanced skill initialization
+- **package_skill.mjs**: Validation + packaging
+- **deployment_helper.mjs**: Intelligent deployment support
 
 Execute scripts directly without loading into context for efficiency.
 
@@ -220,11 +222,11 @@ Load docs/ when handling special cases or troubleshooting.
 
 ```
 1. Gather 3-5 concrete usage examples
-2. Run: scripts/complexity_scorer.py --interactive
-3. Run: scripts/structure_generator.py --name <name> --complexity <level> --path ./
+2. Run: scripts/complexity_scorer.mjs --interactive
+3. Run: scripts/structure_generator.mjs --name <name> --complexity <level> --path ./
 4. Implement: SKILL.md, scripts, references (based on complexity)
-5. Validate: scripts/enhanced_validator.py <skill-path>
-6. Package: scripts/package_skill.py <skill-path>
+5. Validate: scripts/enhanced_validator.mjs <skill-path>
+6. Package: scripts/package_skill.mjs <skill-path>
 ```
 
 ### Restructuring a Skill (REFACTOR Mode)
@@ -285,12 +287,33 @@ Keep SKILL.md under 5k words by moving detailed content to reference.md and exam
 
 Before packaging, ensure:
 
-- **YAML Frontmatter**: Starts with `---`, contains name (hyphen-case) and description (>50 words), no angle brackets in description
-- **File Structure**: SKILL.md exists and is <5k words, referenced files exist, scripts are executable
-- **Content Quality**: Imperative/infinitive writing style, clear workflow structure, valid resource references, complete examples
-- **Organization**: Proper directory hierarchy, no duplicate information, clear separation of concerns
+✅ **YAML Frontmatter**
 
-Run `scripts/enhanced_validator.py <skill-path>` for automated validation.
+- Starts with `---`
+- Contains name (hyphen-case) and description (>20 chars, <=250 chars recommended)
+- No angle brackets in description
+- `argument-hint` present if skill body references `$ARGUMENTS` or supports subcommands/flags
+
+✅ **File Structure**
+
+- SKILL.md exists and is <5k words
+- Referenced files exist (reference.md, examples.md, etc.)
+- Scripts are executable (chmod +x)
+
+✅ **Content Quality**
+
+- Imperative/infinitive writing style
+- Clear workflow structure
+- Valid resource references
+- Complete examples
+
+✅ **Organization**
+
+- Proper directory hierarchy
+- No duplicate information
+- Clear separation of concerns
+
+Run `scripts/enhanced_validator.mjs <skill-path>` for automated validation.
 
 ## Quality Standards
 
@@ -304,9 +327,9 @@ Run `scripts/enhanced_validator.py <skill-path>` for automated validation.
 **Script Requirements**:
 
 - Executable permissions (chmod +x)
-- Docstrings for all functions
+- JSDoc comments for all functions
 - Error handling
-- Type hints (Python 3.8+)
+- ESM modules (.mjs) with Node.js built-in imports
 
 **Documentation Requirements**:
 
@@ -327,9 +350,9 @@ See **knowledge/quality-standards.md** for comprehensive standards.
 
 **Automated assistance**:
 
-- Mode detection: `scripts/mode_detector.py --request "<request>" [--skill-path <path>]`
-- Complexity scoring: `scripts/complexity_scorer.py --interactive`
-- Validation: `scripts/enhanced_validator.py <skill-path>`
-- Packaging: `scripts/package_skill.py <skill-path>`
+- Mode detection: `scripts/mode_detector.mjs --request "<request>" [--skill-path <path>]`
+- Complexity scoring: `scripts/complexity_scorer.mjs --interactive`
+- Validation: `scripts/enhanced_validator.mjs <skill-path>`
+- Packaging: `scripts/package_skill.mjs <skill-path>`
 
 All scripts provide JSON output for programmatic use and human-readable reports for manual review.

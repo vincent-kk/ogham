@@ -38,28 +38,73 @@ Enable easy updates and extensions through clear structure:
 
 Defines skill identity and discoverability.
 
-**Required Fields:**
+**Example:**
 ```yaml
 ---
-name: skill-name              # Lowercase, hyphens only
-description: >                # 50+ words, specific trigger scenarios
+name: skill-name
+description: >
   Use this skill when you need to [specific trigger].
   It provides [specific capabilities] by [method].
   Typical scenarios: [examples].
-version: 1.0.0               # Semantic versioning
-complexity: simple           # simple | medium | complex
+user-invocable: true
+allowed-tools: "Bash,Read,Write"
 ---
 ```
 
-**Optional Fields:**
-```yaml
-created: 2026-02-12          # Creation date
-updated: 2026-02-12          # Last modified
-author: Your Name            # Author
-tags: [automation, pdf, generation]  # Search tags
-changelog: CHANGELOG.md      # Change history file
-deprecated: false            # Deprecation status
-```
+#### Field Reference
+
+**Identity Fields (recommended):**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `name` | No | directory name | Skill display name. Lowercase, digits, hyphens only. Max 64 characters. |
+| `description` | Recommended | — | What the skill does and when to trigger it. Claude uses this to decide auto-activation. Descriptions over 250 characters are auto-truncated in the skill list. |
+
+**Visibility & Invocation Fields:**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `user-invocable` | No | `true` | Whether the skill appears in the `/` menu. Set to `false` for background knowledge skills that users should not invoke directly. |
+| `disable-model-invocation` | No | `false` | When `true`, prevents Claude from auto-loading this skill. Use for manual-only workflows that should only trigger via `/name`. |
+| `argument-hint` | No | — | Hint shown during autocomplete to indicate expected arguments. Example: `"[issue-number]"`, `"[filename] [format]"`. |
+
+**Execution Control Fields:**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `allowed-tools` | No | — | Comma-separated list of tools Claude can use without permission prompt when this skill is active. Example: `"Bash,Read,Write"`. |
+| `model` | No | session model | Model override when this skill is active. Example: `sonnet`, `opus`, `haiku`. |
+| `effort` | No | session effort | Effort level override. Options: `low`, `medium`, `high`, `max` (max is Opus 4.6 only). |
+| `shell` | No | `bash` | Shell for inline `!command` blocks. Options: `bash`, `powershell`. PowerShell requires `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`. |
+
+**Context & Delegation Fields:**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `context` | No | — | Set to `fork` to run the skill in a forked subagent context with isolated conversation. |
+| `agent` | No | — | Subagent type to use when `context: fork` is set. |
+
+**Scope & Filtering Fields:**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `paths` | No | — | Glob patterns to restrict when Claude auto-activates this skill. Comma-separated string or YAML list. When set, skill only auto-loads when working with files matching the patterns. Example: `"src/**/*.ts,lib/**"`. |
+
+**Lifecycle Fields:**
+
+| Field | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `hooks` | No | — | Lifecycle hooks scoped to this skill. Same structure as settings.json hooks but only active when the skill is loaded. See [Hooks in skills and agents](https://docs.anthropic.com/en/docs/hooks#hooks-in-skills-and-agents). |
+
+**String Substitutions (available in skill body):**
+
+| Variable | Description |
+|----------|-------------|
+| `$ARGUMENTS` | All arguments passed when invoking the skill |
+| `$ARGUMENTS[N]` | Access specific argument by 0-based index |
+| `$N` | Shorthand for `$ARGUMENTS[N]` (e.g., `$0`, `$1`) |
+| `${CLAUDE_SESSION_ID}` | Current session ID |
+| `${CLAUDE_SKILL_DIR}` | Directory containing the skill's SKILL.md file |
 
 **Naming Rules:**
 - ✅ **Correct**: `pdf-generator`, `api-client-builder`, `test-runner`
@@ -68,7 +113,7 @@ deprecated: false            # Deprecation status
 **Description Guidelines:**
 - **Specificity**: "helps with tasks" → "generates PDF reports from Markdown with custom templates"
 - **Trigger Scenarios**: "Use when converting documentation to printable format"
-- **Length**: Minimum 50 words, recommended 100-150 words
+- **Length**: 20-250 characters recommended (>250 auto-truncated in skill list)
 - **Forbidden Characters**: No angle brackets (`<`, `>`)
 
 ---
@@ -432,7 +477,7 @@ Verify anatomical structure is correct:
 
 ✅ **Metadata Quality**
 - [ ] Name follows hyphen-case rules
-- [ ] Description 50+ words with specific triggers
+- [ ] Description with specific triggers (20-250 chars)
 - [ ] Version follows semantic versioning
 - [ ] Complexity matches actual complexity
 

@@ -687,7 +687,7 @@ description: >
 - [ ] WHO it's for (target users)
 - [ ] KEY features (main capabilities)
 - [ ] DEPENDENCIES (if any)
-- [ ] 50-150 words (adequate detail)
+- [ ] 20-250 chars (concise and specific)
 
 ---
 
@@ -927,7 +927,7 @@ def process_file(path):
 - [ ] Clear file naming and placement
 
 **Documentation:**
-- [ ] Specific, concrete description (>50 words)
+- [ ] Specific, concrete description (20-250 chars)
 - [ ] Trigger scenarios listed
 - [ ] 5+ real examples provided
 - [ ] SKILL.md <5k words

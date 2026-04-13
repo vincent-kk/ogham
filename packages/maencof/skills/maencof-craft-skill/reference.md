@@ -215,7 +215,7 @@ skill-name/
     └── ...
 ```
 
-**Execute:** `scripts/structure_generator.py --name <skill-name> --complexity <category> --path <output>`
+**Execute:** `scripts/structure_generator.mjs --name <skill-name> --complexity <category> --path <output>`
 
 #### Phase 4: Implementation
 
@@ -252,14 +252,51 @@ Assets:
 
 **Step 4.2: Write SKILL.md**
 
+**Step 4.2.1: Determine `argument-hint`**
+
+Before writing frontmatter, analyze whether the skill accepts arguments or flags:
+
+```
+IF skill uses $ARGUMENTS, $0, $1, or $ARGUMENTS[N] in body THEN
+    argument-hint IS REQUIRED
+ELSE IF skill supports subcommands, modes, or run-IDs THEN
+    argument-hint IS REQUIRED
+ELSE
+    argument-hint MAY BE OMITTED
+END IF
+```
+
+Compose the hint string using these conventions:
+
+| Notation | Meaning | Example |
+|----------|---------|---------|
+| `<value>` | Required positional argument | `<issue-number>` |
+| `[value]` | Optional positional argument | `[filename]` |
+| `value1 \| value2` | Mutually exclusive choices | `list \| status` |
+| `--flag` | Optional flag | `--verbose` |
+| Combined | Mix as needed | `[list \| <run-id> \| resume <run-id>]` |
+
+Examples:
+```yaml
+# Single required argument
+argument-hint: "<issue-number>"
+
+# Optional argument with format
+argument-hint: "[filename] [format]"
+
+# Subcommand pattern with alternatives
+argument-hint: "[list | <run-id> | resume <run-id>]"
+
+# Flag-based
+argument-hint: "<path> [--strict] [--fix]"
+```
+
 Structure:
 ```markdown
 ---
 name: skill-name
-description: [50+ words, specific trigger scenarios]
-version: 1.0.0
-complexity: simple|medium|complex
-created: YYYY-MM-DD
+description: [specific trigger scenarios, 20-250 chars]
+argument-hint: [compose from Step 4.2.1 if applicable]
 ---
 
 # Skill Name
@@ -344,25 +381,26 @@ docs/*:
 
 **Purpose:** Ensure quality through automated validation
 
-**Execute:** `scripts/enhanced_validator.py <skill-directory> [--strict]`
+**Execute:** `scripts/enhanced_validator.mjs <skill-directory> [--strict]`
 
-**Validation Items (15 checks):**
+**Validation Items (16 checks):**
 
 1. ✅ YAML frontmatter starts with `---`
 2. ✅ `name:` field exists
 3. ✅ `description:` field exists
 4. ✅ Name is hyphen-case format
 5. ✅ Name matches directory name
-6. ✅ Description is 50+ words
+6. ✅ Description is 20+ chars and <=250 chars
 7. ✅ No angle brackets in description
-8. ✅ SKILL.md size <5k words
-9. ✅ scripts/ directory exists (or justified absence)
-10. ✅ Scripts have execute permissions (chmod +x)
-11. ✅ Referenced files actually exist
-12. ✅ Proper directory hierarchy
-13. ✅ No TODOs in production files
-14. ✅ Example completeness
-15. ✅ Cross-reference validity
+8. ✅ `argument-hint` present if skill uses `$ARGUMENTS`/`$0`/`$1`
+9. ✅ SKILL.md size <5k words
+10. ✅ scripts/ directory exists (or justified absence)
+11. ✅ Scripts have execute permissions (chmod +x)
+12. ✅ Referenced files actually exist
+13. ✅ Proper directory hierarchy
+14. ✅ No TODOs in production files
+15. ✅ Example completeness
+16. ✅ Cross-reference validity
 
 **Result Handling:**
 ```
@@ -378,10 +416,10 @@ ELSE
 
 **Purpose:** Create deployable package
 
-**Execute:** `scripts/deployment_helper.py --analyze <skill-path>`
+**Execute:** `scripts/deployment_helper.mjs --analyze <skill-path>`
 
 **Tasks:**
-1. **Packaging:** `scripts/package_skill.py <skill-path>`
+1. **Packaging:** `scripts/package_skill.mjs <skill-path>`
    - Create skill-name.zip
    - Maintain directory structure
    - Include .skill-metadata.json
@@ -643,7 +681,7 @@ assert_backward_compatible(original_skill, refactored_skill)
 **Validation:**
 ```bash
 # 1. Automated validation
-scripts/enhanced_validator.py refactored-skill-path --strict
+scripts/enhanced_validator.mjs refactored-skill-path --strict
 
 # 2. Script executability
 for script in scripts/*; do
@@ -1365,13 +1403,13 @@ ELSE
 
 ## 3. Validation System
 
-### 3.1 15-Point Checklist
+### 3.1 16-Point Checklist
 
 Automated validation checklist to ensure skill quality.
 
 #### Validation Categories
 
-**A. YAML Frontmatter (5 checks)**
+**A. YAML Frontmatter (6 checks)**
 
 1. **✅ Frontmatter Format**
    - Check: SKILL.md starts with `---`
@@ -1394,62 +1432,67 @@ Automated validation checklist to ensure skill quality.
    - Error: "Frontmatter name 'X' doesn't match directory 'Y'"
 
 5. **✅ Description Quality**
-   - Check: Description length >= 50 words
+   - Check: Description length >= 20 chars
    - Check: No angle brackets `< >`
    - Check: Includes trigger scenarios
    - Warning: "Description is short (<10 words)"
    - Error: "Description cannot contain angle brackets"
 
+6. **✅ Argument Hint Consistency**
+   - Check: If skill body references `$ARGUMENTS`, `$0`, `$1`, or `$ARGUMENTS[N]`, then `argument-hint` SHOULD be present
+   - Check: Hint uses correct notation (`<required>`, `[optional]`, `|` for alternatives)
+   - Warning: "Skill uses $ARGUMENTS but no argument-hint in frontmatter"
+
 **B. File Structure (4 checks)**
 
-6. **✅ SKILL.md Exists**
+7. **✅ SKILL.md Exists**
    - Check: `SKILL.md` file present
    - Error: "SKILL.md not found"
 
-7. **✅ SKILL.md Size**
+8. **✅ SKILL.md Size**
    - Check: Word count <= 5000
    - Warning: Word count > 4500 (approaching limit)
    - Error: "SKILL.md too large (N words, max 5000)"
 
-8. **✅ Scripts Directory**
+9. **✅ Scripts Directory**
    - Check: `scripts/` exists OR justified absence
    - Warning: "No scripts/ directory - consider if automation helpful"
 
-9. **✅ Script Executability**
-   - Check: All `.py`, `.sh` files have execute permissions
-   - Warning: "Script X is not executable (chmod +x needed)"
+10. **✅ Script Executability**
+    - Check: All `.py`, `.sh` files have execute permissions
+    - Warning: "Script X is not executable (chmod +x needed)"
 
 **C. Content Quality (3 checks)**
 
-10. **✅ Resource References Valid**
+11. **✅ Resource References Valid**
     - Check: Mentioned files exist
     - Files: reference.md, examples.md, knowledge/, docs/
     - Error: "SKILL.md references X but file doesn't exist"
 
-11. **✅ No TODOs in Production**
+12. **✅ No TODOs in Production**
     - Check: No `TODO`, `FIXME`, `XXX` in SKILL.md
     - Check: No placeholder content
     - Error: "Production file contains TODO placeholders"
 
-12. **✅ Example Completeness**
+13. **✅ Example Completeness**
     - Check: If examples.md exists, has >= 3 examples
     - Check: Each example has requirements, execution, output
     - Warning: "examples.md has fewer than 3 examples"
 
 **D. Organization (3 checks)**
 
-13. **✅ Directory Hierarchy**
+14. **✅ Directory Hierarchy**
     - Check: Proper directory structure
     - Check: No files in wrong locations
     - Error: "File X should be in Y directory"
 
-14. **✅ Logical File Placement**
+15. **✅ Logical File Placement**
     - Check: Scripts in `scripts/`
     - Check: References in `references/`
     - Check: Assets in `assets/`
     - Warning: "Unusual file placement detected"
 
-15. **✅ No Duplication**
+16. **✅ No Duplication**
     - Check: Content not duplicated across SKILL.md/reference.md
     - Check: Clear separation of concerns
     - Warning: "Possible content duplication detected"
@@ -1586,7 +1629,7 @@ manual_fix_guidance = {
 
     "description_too_short": """
         Current length: {current_length} words
-        Required: >= 50 words
+        Required: >= 20 chars
 
         Improvement suggestions:
         1. Add specific trigger scenarios
@@ -1680,13 +1723,13 @@ Iteration 3:
 
 ```python
 # Strict mode disabled (development only)
-scripts/enhanced_validator.py skill-path  # warnings allowed
+scripts/enhanced_validator.mjs skill-path  # warnings allowed
 
 # Skip specific checks (only with justification)
-scripts/enhanced_validator.py skill-path --skip-checks "scripts_directory,example_completeness"
+scripts/enhanced_validator.mjs skill-path --skip-checks "scripts_directory,example_completeness"
 
 # Force packaging (risky - not recommended)
-scripts/package_skill.py skill-path --force  # Skip validation
+scripts/package_skill.mjs skill-path --force  # Skip validation
 ```
 
 **Fallback Usage Conditions:**
@@ -1962,14 +2005,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [2.1.3] - 2026-02-12
 
 ### Fixed
-- Corrected validation logic in enhanced_validator.py
+- Corrected validation logic in enhanced_validator.mjs
 - Fixed broken reference to examples.md in SKILL.md
 
 ## [2.1.0] - 2026-02-10
 
 ### Added
 - IMPROVE mode workflow
-- complexity_scorer.py script
+- complexity_scorer.mjs script
 - examples.md with 5 real-world examples
 
 ### Changed
@@ -1977,7 +2020,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Moved detailed workflows to reference.md
 
 ### Deprecated
-- old_init.py script (use init_skill.py instead)
+- old_init.py script (use init_skill.mjs instead)
 
 ## [2.0.0] - 2026-02-01
 
@@ -2036,17 +2079,9 @@ def update_changelog(version, changes, increment_type):
 
 #### Version Metadata
 
-**Frontmatter:**
+**Version Tracking:**
 
-```yaml
----
-name: skill-name
-version: 2.1.3
-created: 2026-01-15
-updated: 2026-02-12
-changelog: CHANGELOG.md
----
-```
+Use git tags and CHANGELOG.md for version management instead of frontmatter fields.
 
 **Git Tagging:**
 
@@ -2151,7 +2186,7 @@ M scripts/init.py
 
 🗑️ FILES TO DELETE
 × scripts/deprecated_init.py
-  Reason: Replaced by init_skill.py
+  Reason: Replaced by init_skill.mjs
 
 📊 IMPACT SUMMARY
 Size Impact:
@@ -2398,8 +2433,8 @@ api-client-builder/
 ## ✅ Quality Impact
 
 ### Validation Scores
-- Before: 0.65 (10/15 checks passed, 3 errors, 2 warnings)
-- After: 1.0 (15/15 checks passed, 0 errors, 0 warnings)
+- Before: 0.65 (10/16 checks passed, 3 errors, 2 warnings)
+- After: 1.0 (16/16 checks passed, 0 errors, 0 warnings)
 - **Improvement: +54%**
 
 ### Issues Resolved
@@ -2606,14 +2641,14 @@ This file tracks deprecated features in skill-constructor.
 - **Deprecated in:** v2.1.0
 - **Will be removed in:** v2.3.0 (2 minor versions)
 - **Reason:** Replaced by enhanced init with mode detection
-- **Alternative:** Use `scripts/init_skill.py` with `--mode` flag
+- **Alternative:** Use `scripts/init_skill.mjs` with `--mode` flag
 - **Migration:**
   ```bash
   # Old
   scripts/old_init.py skill-name
 
   # New
-  scripts/init_skill.py skill-name --mode create
+  scripts/init_skill.mjs skill-name --mode create
   ```
 - **Timeline:**
   - v2.1.0: Deprecated, warnings added
@@ -2669,7 +2704,7 @@ import warnings
 def deprecated_function():
     warnings.warn(
         "old_init.py is deprecated since v2.1.0 and will be removed in v2.3.0. "
-        "Use init_skill.py with --mode flag instead. "
+        "Use init_skill.mjs with --mode flag instead. "
         "See DEPRECATED.md for migration guide.",
         DeprecationWarning,
         stacklevel=2
@@ -2683,7 +2718,7 @@ if __name__ == "__main__":
     print("⚠️  WARNING: This script is DEPRECATED")
     print("   Deprecated in: v2.1.0")
     print("   Will be removed in: v2.3.0")
-    print("   Alternative: scripts/init_skill.py --mode create")
+    print("   Alternative: scripts/init_skill.mjs --mode create")
     print("   See DEPRECATED.md for details")
     print()
 
@@ -2744,13 +2779,11 @@ Efficient context management using 3-layer loading system.
 ---
 name: api-client-builder
 description: Generate API client code from OpenAPI/Swagger specs. Use this skill when building REST or GraphQL API clients, creating SDK wrappers, or automating API integration code. Supports authentication flows, request/response handling, and error management.
-version: 2.1.0
-complexity: medium
 ---
 ```
 
 **Optimization Tips:**
-- Description: 50-150 words (sweet spot: 80-100)
+- Description: 20-250 chars (keep concise, >250 auto-truncated)
 - Include specific trigger scenarios
 - State core capabilities
 - Use concise, searchable keywords
@@ -3120,7 +3153,7 @@ def assess_description_quality(description: str) -> float:
     0-100 quality score
 
     Criteria:
-    - Length: 50-150 words (optimal 80-100)
+    - Length: 20-250 chars (keep concise)
     - Specificity: Concrete triggers and capabilities
     - Clarity: No jargon, clear language
     - Completeness: What, when, how

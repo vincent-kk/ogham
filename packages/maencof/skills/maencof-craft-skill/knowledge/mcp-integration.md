@@ -672,8 +672,6 @@ description: >
   with screenshot capture and video recording. Typical scenarios: User
   journey validation, regression testing, cross-browser compatibility.
   Requires Playwright MCP server.
-version: 1.0.0
-complexity: complex
 ---
 
 # E2E Testing
