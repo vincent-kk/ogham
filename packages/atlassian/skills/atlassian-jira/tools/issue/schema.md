@@ -78,11 +78,11 @@ Issue CRUD, bulk create, and changelog operations.
 
 | Operation | MCP Tool | Notes |
 |---|---|---|
-| Get issue | `getJiraIssue` | Dedicated tool available |
-| Create issue | `createJiraIssue` | Dedicated tool available |
-| Update issue | `editJiraIssue` | Dedicated tool available |
-| Delete issue | `fetchAtlassian` | Use DELETE method |
-| Bulk create | `fetchAtlassian` | POST to `/issue/bulk` |
-| Get changelog | `fetchAtlassian` | GET to `/issue/{key}/changelog` |
-| Get create metadata | `getJiraIssueTypeMetaWithFields` | Dedicated tool available |
-| Assign issue | `fetchAtlassian` | PUT to `/issue/{key}/assignee` |
+| Get issue | `get` | |
+| Create issue | `post` | |
+| Update issue | `put` | |
+| Delete issue | `delete` | |
+| Bulk create | `post` | POST to `/issue/bulk` |
+| Get changelog | `get` | GET to `/issue/{key}/changelog` |
+| Get create metadata | `get` | GET to `/issue/createmeta` |
+| Assign issue | `put` | PUT to `/issue/{key}/assignee` |

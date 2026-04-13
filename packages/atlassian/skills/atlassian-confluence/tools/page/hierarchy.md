@@ -4,21 +4,21 @@
 
 ```
 Tool: get
-Endpoint: /rest/api/content/{id}?expand=ancestors
+Endpoint: /wiki/rest/api/content/{id}?expand=ancestors
 ```
 
 ## Get Descendants
 
 ```
 Tool: get
-Endpoint: /rest/api/content/{id}/descendant/page
+Endpoint: /wiki/rest/api/content/{id}/descendant/page
 ```
 
 ## Get Child Pages (Direct)
 
 ```
 Tool: get
-Cloud V1: /rest/api/content/{id}/child/page
+Cloud V1: /wiki/rest/api/content/{id}/child/page
 Cloud V2: /api/v2/pages/{id}/children
 ```
 
@@ -26,7 +26,7 @@ Cloud V2: /api/v2/pages/{id}/children
 
 ```
 Tool: put
-Endpoint: /rest/api/content/{id}/move/{position}/{targetId}
+Endpoint: /wiki/rest/api/content/{id}/move/{position}/{targetId}
 ```
 
 Positions: `before`, `after`, `append` (as child)

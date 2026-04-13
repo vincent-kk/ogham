@@ -406,7 +406,7 @@ skills/atlassian-confluence/
 | Inline comments | Not supported | `/api/v2/inline-comments` | Cloud only |
 | Attachments | `/rest/api/content/{id}/child/attachment` | `/api/v2/pages/{id}/attachments` | V2 has improved metadata |
 | Page properties | `/rest/api/content/{id}/property` | `/api/v2/pages/{id}/properties` | |
-| Analytics | Not supported | `/rest/api/analytics/content/{id}/views` | Cloud only |
+| Analytics | `/wiki/rest/api/analytics/content/{id}/views` | — | Cloud only (V1 path) |
 | Page move | `/rest/api/content/{id}/move/{position}` | Same (V1 only) | V2 exception |
 
 **Selection rule**: Skill auto-selects V2 when available on Cloud, falls back to V1 on Server/DC or when V2 endpoint doesn't exist.

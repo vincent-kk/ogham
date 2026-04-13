@@ -1,6 +1,10 @@
 ---
 name: atlassian-jira
-description: "Jira API domain router. Routes Jira operations to the appropriate tool domain based on the requested action."
+user_invocable: false
+description: "Domain router for Jira REST API operations — issue CRUD, JQL search, sprint/board/epic management, workflow transitions, comments, worklogs, attachments, links, watchers, JSM queues/SLA, dev info, and time metrics across 15 tool domains. Trigger: agent-dispatched only (via jira agent or direct skill invocation)."
+version: "0.1.0"
+complexity: complex
+plugin: atlassian
 ---
 
 # atlassian-jira
@@ -44,29 +48,6 @@ Domain-based routing layer for all Jira REST API operations.
 Read `tools/<domain>/schema.md` ONLY when you need endpoint details for that domain.
 Do not preload all schema files — load on demand per operation.
 
-Example: for an issue create operation, read `tools/issue/schema.md`.
-For JQL search, read `tools/search/schema.md` and optionally `tools/search/jql-guide.md`.
-
-## Environment Detection
-
-Before calling any endpoint, determine the environment:
-
-- URL matches `*.atlassian.net` → **Cloud** (use v3 API where available)
-- All other URLs → **Server/Data Center** (use v2 API)
-
-The correct endpoint column is selected automatically once the environment is known.
-
-## Error Handling
-
-| HTTP Status | Action |
-|---|---|
-| 400 | Inspect error body — usually field validation failure; check schema.md for required fields |
-| 401 | Trigger `atlassian-setup` skill for re-authentication |
-| 403 | Permission denied — check project role or JSM agent access |
-| 404 | Resource not found — verify issue key, project key, or resource ID |
-| 429 | Rate limited — back off and retry with exponential delay |
-| 500/503 | Atlassian service error — retry once, then report to user |
-
 ## Permission Boundaries
 
 - **Read operations**: require Browse Project permission
@@ -75,38 +56,16 @@ The correct endpoint column is selected automatically once the environment is kn
 - **JSM operations**: require Service Desk Agent role for queue/SLA access
 - **Development info**: requires Connect app or Forge app with `read:jira-work` scope
 
-## MCP Tools Available
-
-All operations route through these MCP tools:
-
-- `get` — Read operations (GET endpoints)
-- `post` — Create operations (POST endpoints)
-- `put` — Full update operations (PUT endpoints)
-- `delete` — Delete operations (DELETE endpoints)
-
-Use `fetchAtlassian` for raw API access when no dedicated MCP tool covers the operation.
-
 ## References
 
-- `tools/issue/schema.md` — Issue endpoints, parameters, Cloud vs Server branching
+- `../_shared/error-handling.md` — HTTP error handling protocol
+- `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
+- `../_shared/mcp-tools.md` — Available MCP tools and usage
+- `tools/<domain>/schema.md` — Domain-specific endpoint schemas (lazy load on demand)
 - `tools/issue/field-formatting.md` — ADF vs Wiki markup, user/date/select field formatting
 - `tools/issue/examples.md` — Issue create and update examples
-- `tools/search/schema.md` — Search endpoints and parameters
 - `tools/search/jql-guide.md` — JQL syntax reference
-- `tools/transition/schema.md` — Transition endpoints and workflow state management
-- `tools/comment/schema.md` — Comment endpoints and parameters
 - `tools/comment/jsm-comment.md` — JSM internal comment handling
-- `tools/agile/schema.md` — Agile board, sprint, epic endpoints
-- `tools/project/schema.md` — Project metadata endpoints
-- `tools/field/schema.md` — Field metadata endpoints
 - `tools/field/custom-field-options.md` — Cloud-only custom field options API
-- `tools/link/schema.md` — Issue link endpoints
-- `tools/worklog/schema.md` — Worklog endpoints
-- `tools/attachment/schema.md` — Attachment endpoints
-- `tools/user/schema.md` — User search and profile endpoints
-- `tools/watcher/schema.md` — Watcher management endpoints
-- `tools/jsm/schema.md` — JSM SLA, queues, ProForma endpoints
 - `tools/jsm/sla-calculation.md` — SLA working hours configuration
 - `tools/jsm/forms.md` — ProForma form handling
-- `tools/development-info/schema.md` — Dev info endpoints
-- `tools/metrics/schema.md` — Time metrics calculation

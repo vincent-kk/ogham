@@ -1,6 +1,10 @@
 ---
 name: atlassian-confluence
-description: "Confluence API domain router. Routes Confluence operations to the correct domain tool schema. Covers 8 domains: page, search, space, comment, attachment, label, analytics, user."
+user_invocable: false
+description: "Domain router for Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management across Cloud V2, Cloud V1, and Server/DC. Trigger: agent-dispatched only (via confluence agent or direct skill invocation)."
+version: "0.1.0"
+complexity: complex
+plugin: atlassian
 ---
 
 # atlassian-confluence
@@ -27,16 +31,6 @@ Confluence REST API domain router for Claude Code agents. Resolves the correct e
 | `analytics` | Page view statistics — Cloud only |
 | `user` | Current user info and user search by account ID or query |
 
-## MCP Tools Available
-
-| Tool | Purpose |
-|---|---|
-| `get` | Read operations (GET requests) |
-| `post` | Create operations (POST requests) |
-| `put` | Update operations (PUT requests) |
-| `delete` | Delete operations (DELETE requests) |
-| `convert` | ADF / Storage Format ↔ Markdown conversion |
-
 ## Routing Protocol
 
 1. Identify the domain from the user's request (page / search / space / etc.)
@@ -45,23 +39,6 @@ Confluence REST API domain router for Claude Code agents. Resolves the correct e
 4. Call the appropriate MCP tool with resolved parameters
 5. On HTTP 401: invoke `atlassian-setup` skill, then retry once
 
-## Cloud vs Server/DC
-
-- Detect environment: `*.atlassian.net` → Cloud; otherwise → Server/DC
-- Cloud prefers V2 endpoints (`/api/v2/...`) where available
-- Server/DC uses V1 endpoints (`/rest/api/...`) exclusively
-- Inline comments are Cloud-only (V2 only); use footer comments on Server/DC
-
-## Error Handling
-
-| HTTP Status | Action |
-|---|---|
-| 401 Unauthorized | Invoke `atlassian-setup` skill, retry once |
-| 403 Forbidden | Report permission error, do not retry |
-| 404 Not Found | Report resource not found, verify ID/key |
-| 429 Too Many Requests | Wait for `Retry-After` header value, then retry |
-| 500 / 503 | Report server error, suggest retry |
-
 ## Permission Boundaries
 
 - Read operations: require `read:confluence-content.all` scope (Cloud) or View permission (Server/DC)
@@ -69,11 +46,12 @@ Confluence REST API domain router for Claude Code agents. Resolves the correct e
 - Admin operations (space management): require `manage:confluence-configuration` (Cloud)
 - Analytics: Cloud only — requires analytics feature enabled on instance
 
-## Lazy Reference Loading
+## References
 
-Read `tools/<domain>/schema.md` ONLY when the domain is needed. Do not load all schemas upfront.
-
-Supplementary references for complex domains:
-- `tools/page/hierarchy.md` — ancestors, descendants, page tree traversal
-- `tools/page/version.md` — version management rules (mandatory `version.number` on update)
+- `../_shared/error-handling.md` — HTTP error handling protocol
+- `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
+- `../_shared/mcp-tools.md` — Available MCP tools and usage
+- `tools/<domain>/schema.md` — Domain-specific endpoint schemas (lazy load on demand)
+- `tools/page/hierarchy.md` — Ancestors, descendants, page tree traversal
+- `tools/page/version.md` — Version management rules (mandatory `version.number` on update)
 - `tools/search/cql-guide.md` — CQL syntax, operators, and examples

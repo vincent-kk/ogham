@@ -2,10 +2,10 @@
 
 | Operation | HTTP | Cloud V1 | Cloud V2 | Server |
 |---|---|---|---|---|
-| Get page | GET | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
-| Create page | POST | `/rest/api/content` | `/api/v2/pages` | `/rest/api/content` |
-| Update page | PUT | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
-| Delete page | DELETE | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+| Get page | GET | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+| Create page | POST | `/wiki/rest/api/content` | `/api/v2/pages` | `/rest/api/content` |
+| Update page | PUT | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+| Delete page | DELETE | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
 
 ## Parameters
 

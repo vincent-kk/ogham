@@ -10,14 +10,14 @@
 
 ```
 Tool: get
-Endpoint: /rest/api/content/{id}/version
+Endpoint: /wiki/rest/api/content/{id}/version
 ```
 
 ## Restore Version
 
 ```
 Tool: post
-Endpoint: /rest/api/content/{id}/version
+Endpoint: /wiki/rest/api/content/{id}/version
 Body: { "operationKey": "restore", "params": { "versionNumber": N } }
 ```
 

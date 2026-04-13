@@ -2,7 +2,7 @@
 
 | Operation | HTTP | Cloud Endpoint | Server Endpoint |
 |---|---|---|---|
-| Page views | GET | `/rest/api/analytics/content/{id}/views` | Not supported |
+| Page views | GET | `/wiki/rest/api/analytics/content/{id}/views` | Not supported |
 
 ## Parameters
 

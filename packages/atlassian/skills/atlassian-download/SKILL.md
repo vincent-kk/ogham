@@ -1,6 +1,11 @@
 ---
 name: atlassian-download
-description: "Download attachments and images from Jira issues and Confluence pages. Supports direct URL and metadata-based download."
+user_invocable: true
+description: "[atlassian:atlassian-download] Download and upload file attachments from Jira issues and Confluence pages by direct URL or issue key/page ID metadata lookup. Trigger: \"download attachment\", \"첨부파일 다운로드\", \"파일 받기\", \"atlassian download\""
+argument-hint: "<issue-key|page-id|url> [--filename <name>]"
+version: "0.1.0"
+complexity: simple
+plugin: atlassian
 ---
 
 # atlassian-download
@@ -13,10 +18,6 @@ Unified attachment download for both Jira and Confluence.
 - Download attachment by issue key/page ID + filename
 - Retrieve image attachment metadata
 - Save attachments to local filesystem
-
-## MCP Tools Used
-
-- `get` — HTTP GET with `accept_format: "raw"` for binary downloads
 
 ## Operations
 
@@ -43,7 +44,7 @@ Params:
 ```
 Tool: get
 Params:
-  endpoint: /rest/api/content/{pageId}/child/attachment
+  endpoint: /wiki/rest/api/content/{pageId}/child/attachment
 ```
 
 ## Download Flow
@@ -54,13 +55,9 @@ Params:
 4. Save to file (target path or temp directory)
 5. Return: file path, size, MIME type
 
-## Multipart Upload Headers
-
-For upload operations (via `post` tool):
-- `X-Atlassian-Token: nocheck` — CSRF bypass (required)
-- `Content-Type: multipart/form-data` — boundary auto-set
-
 ## References
 
+- `../_shared/error-handling.md` — HTTP error handling protocol
+- `../_shared/mcp-tools.md` — Available MCP tools (uses `get` with `accept_format: "raw"`)
 - `references/download-flow.md` — Detailed download and upload specs
 - `references/errors.md` — Download-specific error handling
