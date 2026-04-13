@@ -201,6 +201,7 @@ Automation tools for skill construction:
 - **init_skill.mjs**: Enhanced skill initialization
 - **package_skill.mjs**: Validation + packaging
 - **deployment_helper.mjs**: Intelligent deployment support
+- **quick_validate.mjs**: Fast validation during development
 
 Execute scripts directly without loading into context for efficiency.
 

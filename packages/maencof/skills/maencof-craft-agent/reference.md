@@ -705,13 +705,15 @@ Subagent definitions from any scope (project, user, plugin, CLI) are also availa
 
 ```
 Phase 1: Gather requirements → purpose, scope, constraints
-Phase 2: Design persona → role, boundaries, workflow, output format
+Phase 2: Design persona → role, judgment criteria, boundaries, failure modes
          (Load knowledge/persona-crafting.md for guidance)
-Phase 3: Select template → match to templates/
-Phase 4: Configure frontmatter → set all relevant fields
-Phase 5: Write system prompt → build focused instructions
-Phase 6: Validate → run 12-point check
-Phase 7: Deploy → write to target scope directory
+Phase 3: Separate concerns → keep perspective in agent; extract reusable procedures into skills
+         (See knowledge/persona-crafting.md Section 6 and knowledge/design-patterns.md Pattern 10)
+Phase 4: Select template → match to templates/
+Phase 5: Configure frontmatter → set all relevant fields
+Phase 6: Write system prompt → build focused instructions
+Phase 7: Validate → run compliance checks against specification
+Phase 8: Deploy → write to target scope directory
 ```
 
 ### EDIT Workflow
