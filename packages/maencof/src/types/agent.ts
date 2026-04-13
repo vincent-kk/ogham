@@ -9,7 +9,8 @@ export type AgentRole =
   | 'memory-organizer'
   | 'identity-guardian'
   | 'checkup'
-  | 'knowledge-connector';
+  | 'knowledge-connector'
+  | 'configurator';
 
 /** Layer별 허용 작업 */
 export interface LayerPermission {

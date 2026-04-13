@@ -1,5 +1,5 @@
 ---
-name: maencof-checkup
+name: checkup
 description: >
   maencof Checkup — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions.
   Detects orphan nodes, stale indexes, broken links, Layer violations, duplicate documents, and

@@ -77,7 +77,7 @@ Show current status: enabled/disabled, sensitivity, session captures, max captur
 
 ## Error Handling
 
-- **insight-config.json missing**: treat as default config (enabled: true, sensitivity: medium, max_captures_per_session: 5)
+- **insight-config.json missing**: treat as default config (enabled: true, sensitivity: medium, max_captures_per_session: 10)
 - **auto-insight-stats.json missing**: display zeros for all stats
 - **pending-insight-notification.json missing**: treat as empty (no pending captures)
 - **Invalid sensitivity value**: "Valid sensitivity values are high, medium, low."
