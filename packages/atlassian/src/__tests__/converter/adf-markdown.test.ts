@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { adfToMarkdown } from '../../converter/adf-to-markdown.js';
-import { markdownToAdf } from '../../converter/markdown-to-adf.js';
+import { adfToMarkdown, markdownToAdf } from '../../converter/index.js';
 
 describe('adf-to-markdown', () => {
   it('returns null for null/undefined input', () => {

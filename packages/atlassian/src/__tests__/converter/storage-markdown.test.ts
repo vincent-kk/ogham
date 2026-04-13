@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { storageToMarkdown } from '../../converter/storage-to-markdown.js';
-import { markdownToStorage } from '../../converter/markdown-to-storage.js';
+import { markdownToStorage, storageToMarkdown } from '../../converter/index.js';
 
 describe('storage-to-markdown', () => {
   it('returns empty string for empty input', () => {
