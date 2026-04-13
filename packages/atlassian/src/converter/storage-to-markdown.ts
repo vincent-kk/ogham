@@ -51,15 +51,13 @@ function parseHtml(html: string): Array<HtmlElement | string> {
 
     // Closing tag?
     if (html[tagStart + 1] === '/') {
-      const tagEnd = html.indexOf('>', tagStart);
-      pos = tagEnd === -1 ? html.length : tagEnd + 1;
-      // Return — closing tag handled by caller
+      // Return: closing tag handled by caller
       break;
     }
 
     // Opening tag
     const tagEnd = html.indexOf('>', tagStart);
-    if (tagEnd === -1) { pos = html.length; break; }
+    if (tagEnd === -1) break;
 
     const tagContent = html.slice(tagStart + 1, tagEnd);
     const selfClosing = tagContent.endsWith('/');
@@ -100,7 +98,7 @@ function parseHtml(html: string): Array<HtmlElement | string> {
         const nextOpen = html.indexOf(`<${tagName}`, searchPos);
         const nextClose = html.indexOf(closeTag, searchPos);
 
-        if (nextClose === -1) { searchPos = html.length; break; }
+        if (nextClose === -1) break;
 
         if (nextOpen !== -1 && nextOpen < nextClose) {
           // Check it's actually an opening tag (not a prefix match like <table vs <tbody)
