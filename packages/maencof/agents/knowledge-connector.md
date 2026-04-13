@@ -116,4 +116,3 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Skill Participation
 
 - `/maencof:maencof-connect` — full workflow entry point
-- `/maencof:maencof-suggest` — discovery phase only (no link creation)

@@ -167,4 +167,5 @@ Changelog 기록 완료: 02_Derived/changelog/YYYY-MM-DD.md
 |------|------|---------|
 | `create` | MCP | Create new vault document (alternative to direct file write) |
 | `read` | MCP | Read existing vault document |
+| `update` | MCP | Update existing vault document (when today's entry already exists) |
 | `Bash` | Native | Run git commands (status, add, commit) |
