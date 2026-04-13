@@ -1,14 +1,7 @@
 /**
  * Markdown → Confluence Storage Format (XHTML) converter.
- * Uses unified + remark-parse to parse Markdown AST, then custom visitor to emit Storage Format.
+ * Line-by-line regex parser following the same pattern as markdown-to-adf.ts.
  */
-
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
-import type { Root, Content, PhrasingContent, Text, InlineCode, Strong, Emphasis, Delete, Link, Image, Heading, Paragraph, Blockquote, List, ListItem, Code, Table, TableRow, TableCell, Html } from 'mdast';
-
-type MdastNode = Root | Content;
 
 function escapeXml(text: string): string {
   return text
@@ -18,121 +11,172 @@ function escapeXml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function convertInline(node: PhrasingContent): string {
-  switch (node.type) {
-    case 'text':
-      return escapeXml((node as Text).value);
+const INLINE_RE =
+  /`([^`]+)`|\*\*(.+?)\*\*|~~(.+?)~~|!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)|(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g;
 
-    case 'inlineCode':
-      return `<code>${escapeXml((node as InlineCode).value)}</code>`;
+function parseInline(text: string): string {
+  if (!text) return '';
 
-    case 'strong':
-      return `<strong>${(node as Strong).children.map(convertInline).join('')}</strong>`;
+  let result = '';
+  let pos = 0;
 
-    case 'emphasis':
-      return `<em>${(node as Emphasis).children.map(convertInline).join('')}</em>`;
+  INLINE_RE.lastIndex = 0;
 
-    case 'delete':
-      return `<del>${(node as Delete).children.map(convertInline).join('')}</del>`;
-
-    case 'link': {
-      const link = node as Link;
-      const children = link.children.map(convertInline).join('');
-      return `<a href="${escapeXml(link.url)}">${children}</a>`;
+  let match: RegExpExecArray | null;
+  while ((match = INLINE_RE.exec(text)) !== null) {
+    if (match.index > pos) {
+      result += escapeXml(text.slice(pos, match.index));
     }
 
-    case 'image': {
-      const img = node as Image;
-      return `<ac:image><ri:url ri:value="${escapeXml(img.url)}" /></ac:image>`;
+    const [, code, bold, strike, imgAlt, imgUrl, linkText, linkHref, italic] = match;
+
+    if (code !== undefined) {
+      result += `<code>${escapeXml(code)}</code>`;
+    } else if (bold !== undefined) {
+      result += `<strong>${escapeXml(bold)}</strong>`;
+    } else if (strike !== undefined) {
+      result += `<del>${escapeXml(strike)}</del>`;
+    } else if (imgAlt !== undefined) {
+      result += `<ac:image><ri:url ri:value="${escapeXml(imgUrl!)}" /></ac:image>`;
+    } else if (linkText !== undefined) {
+      result += `<a href="${escapeXml(linkHref!)}">${escapeXml(linkText)}</a>`;
+    } else if (italic !== undefined) {
+      result += `<em>${escapeXml(italic)}</em>`;
     }
 
-    case 'break':
-      return '<br />';
-
-    case 'html':
-      return (node as Html).value;
-
-    default:
-      return '';
+    pos = match.index + match[0].length;
   }
-}
 
-function convertBlock(node: MdastNode): string {
-  switch (node.type) {
-    case 'root':
-      return (node as Root).children.map(convertBlock).join('');
-
-    case 'heading': {
-      const h = node as Heading;
-      const tag = `h${h.depth}`;
-      const content = h.children.map(convertInline).join('');
-      return `<${tag}>${content}</${tag}>`;
-    }
-
-    case 'paragraph': {
-      const p = node as Paragraph;
-      const content = p.children.map(convertInline).join('');
-      return `<p>${content}</p>`;
-    }
-
-    case 'blockquote': {
-      const bq = node as Blockquote;
-      const content = bq.children.map(convertBlock).join('');
-      return `<blockquote>${content}</blockquote>`;
-    }
-
-    case 'list': {
-      const list = node as List;
-      const tag = list.ordered ? 'ol' : 'ul';
-      const items = list.children.map(convertBlock).join('');
-      return `<${tag}>${items}</${tag}>`;
-    }
-
-    case 'listItem': {
-      const li = node as ListItem;
-      const content = li.children.map(convertBlock).join('');
-      return `<li>${content}</li>`;
-    }
-
-    case 'code': {
-      const code = node as Code;
-      return `<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">${escapeXml(code.lang ?? '')}</ac:parameter><ac:plain-text-body><![CDATA[${code.value}]]></ac:plain-text-body></ac:structured-macro>`;
-    }
-
-    case 'thematicBreak':
-      return '<hr />';
-
-    case 'table': {
-      const table = node as Table;
-      const rows = table.children.map((row, idx) => {
-        const tr = row as TableRow;
-        const cells = tr.children.map((cell) => {
-          const tc = cell as TableCell;
-          const tag = idx === 0 ? 'th' : 'td';
-          const content = tc.children.map(convertInline).join('');
-          return `<${tag}>${content}</${tag}>`;
-        }).join('');
-        return `<tr>${cells}</tr>`;
-      }).join('');
-      return `<table><tbody>${rows}</tbody></table>`;
-    }
-
-    case 'html':
-      return (node as Html).value;
-
-    default:
-      return '';
+  if (pos < text.length) {
+    result += escapeXml(text.slice(pos));
   }
+
+  return result;
 }
 
 /** Convert Markdown to Confluence Storage Format XHTML */
 export function markdownToStorage(markdown: string): string {
   if (!markdown || !markdown.trim()) return '';
 
-  const tree = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .parse(markdown);
+  const lines = markdown.split('\n');
+  const parts: string[] = [];
+  let i = 0;
 
-  return convertBlock(tree);
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Fenced code block
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim();
+      const codeLines: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length) i++; // skip closing ```
+      parts.push(
+        `<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">${escapeXml(lang)}</ac:parameter><ac:plain-text-body><![CDATA[${codeLines.join('\n')}]]></ac:plain-text-body></ac:structured-macro>`,
+      );
+      continue;
+    }
+
+    const stripped = line.trim();
+
+    // Horizontal rule
+    if (/^[-*_]{3,}$/.test(stripped) && !line.startsWith('- ') && !line.startsWith('* ')) {
+      parts.push('<hr />');
+      i++;
+      continue;
+    }
+
+    // Heading
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      parts.push(`<h${level}>${parseInline(headingMatch[2])}</h${level}>`);
+      i++;
+      continue;
+    }
+
+    // Blockquote
+    if (line.startsWith('> ')) {
+      const quoteLines: string[] = [];
+      while (i < lines.length && lines[i].startsWith('> ')) {
+        quoteLines.push(lines[i].slice(2));
+        i++;
+      }
+      const inner = quoteLines.map((l) => `<p>${parseInline(l)}</p>`).join('');
+      parts.push(`<blockquote>${inner}</blockquote>`);
+      continue;
+    }
+
+    // Unordered list
+    if (/^[-*]\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+        const itemText = lines[i].replace(/^[-*]\s+/, '');
+        items.push(`<li><p>${parseInline(itemText)}</p></li>`);
+        i++;
+      }
+      parts.push(`<ul>${items.join('')}</ul>`);
+      continue;
+    }
+
+    // Ordered list
+    if (/^\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+        const itemText = lines[i].replace(/^\d+\.\s+/, '');
+        items.push(`<li><p>${parseInline(itemText)}</p></li>`);
+        i++;
+      }
+      parts.push(`<ol>${items.join('')}</ol>`);
+      continue;
+    }
+
+    // Table
+    if (line.startsWith('|') && line.indexOf('|', 1) > 0) {
+      const tableRows: string[] = [];
+      while (i < lines.length && lines[i].startsWith('|')) {
+        tableRows.push(lines[i]);
+        i++;
+      }
+
+      const dataRows: string[][] = [];
+      for (const rowLine of tableRows) {
+        const cells = rowLine
+          .replace(/^\||\|$/g, '')
+          .split('|')
+          .map((c) => c.trim());
+        // Skip separator row
+        if (cells.every((c) => /^:?-+:?$/.test(c))) continue;
+        dataRows.push(cells);
+      }
+
+      if (dataRows.length > 0) {
+        const rows = dataRows
+          .map((cells, idx) => {
+            const tag = idx === 0 ? 'th' : 'td';
+            const cellsHtml = cells.map((c) => `<${tag}>${parseInline(c)}</${tag}>`).join('');
+            return `<tr>${cellsHtml}</tr>`;
+          })
+          .join('');
+        parts.push(`<table><tbody>${rows}</tbody></table>`);
+      }
+      continue;
+    }
+
+    // Empty line
+    if (!stripped) {
+      i++;
+      continue;
+    }
+
+    // Paragraph (default)
+    parts.push(`<p>${parseInline(line)}</p>`);
+    i++;
+  }
+
+  return parts.join('');
 }
