@@ -17,7 +17,7 @@ yarn format && yarn lint
 
 **MCP Tools (18)**: `create/read/update/delete/move`, `capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`, `context_cache_manage`
 
-**Agents (4)**: `memory-organizer`, `identity-guardian`, `maencof-checkup`, `configurator`
+**Agents (5)**: `memory-organizer`, `identity-guardian`, `checkup`, `configurator`, `knowledge-connector`
 
 **Skills (29)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-rebuild`, `maencof-ingest`, `maencof-diagnose`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-dailynote`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
 

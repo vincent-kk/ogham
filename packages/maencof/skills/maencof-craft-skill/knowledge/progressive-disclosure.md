@@ -19,8 +19,7 @@ Progressive Disclosure is a design principle that organizes information hierarch
 ---
 name: skill-name
 description: Complete description with specific trigger scenarios...
-version: 1.0.0
-complexity: medium
+user-invocable: true
 ---
 ```
 
@@ -35,7 +34,7 @@ complexity: medium
 **Optimization Strategy**:
 - Write descriptions with maximum information density
 - Include clear trigger keywords
-- Recommend 100-150 words (too short reduces matching quality)
+- Keep under 250 characters (longer descriptions are auto-truncated in skill list)
 
 ---
 

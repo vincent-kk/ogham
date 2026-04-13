@@ -91,8 +91,6 @@ image-rotator/
 ---
 name: image-rotator
 description: Rotate and flip images (PNG, JPG) with simple operations. Use when user requests image rotation (90°, 180°, 270°) or flipping (horizontal, vertical). Provides quick image transformation without complex editing tools.
-version: 1.0.0
-complexity: simple
 ---
 
 # Image Rotator
@@ -223,8 +221,6 @@ api-client-builder/
 ---
 name: api-client-builder
 description: Generate API client code from OpenAPI/GraphQL specifications with authentication support. Use when user needs to integrate external APIs, wants type-safe client libraries, or requires automated client generation from spec files. Supports REST, GraphQL, OAuth2, API keys, and JWT authentication.
-version: 1.0.0
-complexity: medium
 ---
 
 # API Client Builder
@@ -392,9 +388,6 @@ full-stack-generator/
 ---
 name: full-stack-generator
 description: Generate production-ready full-stack applications from requirements with frontend (React/Vue/Angular), backend (Node.js/Python/Go), database (PostgreSQL/MongoDB/MySQL), complete testing suite, Docker containerization, and Kubernetes deployment manifests. Use when starting new projects, prototyping MVPs, or standardizing microservice architectures. Includes authentication, API design, CI/CD pipelines, and monitoring setup.
-version: 1.0.0
-complexity: complex
-mcp_integration: playwright, context7
 ---
 
 # Full Stack Generator
@@ -601,7 +594,6 @@ Refactoring complete!
 ---
 name: api-integration-helper
 description: ...
-version: 1.5.0
 ---
 
 # API Integration Helper
@@ -643,8 +635,6 @@ version: 1.5.0
 ---
 name: api-integration-helper
 description: ...
-version: 2.0.0
-complexity: medium
 ---
 
 # API Integration Helper
@@ -830,8 +820,6 @@ web-scraper/
 ---
 name: web-scraper
 description: Scrape static HTML content...
-version: 1.0.0
-complexity: simple
 ---
 
 # Web Scraper
@@ -847,9 +835,6 @@ complexity: simple
 ---
 name: web-scraper
 description: Scrape static and dynamic web content with optional JavaScript rendering via Playwright MCP. Use for static HTML scraping (fast) or JavaScript-heavy sites (browser automation). Supports screenshots, authentication, and dynamic content waiting.
-version: 2.0.0
-complexity: medium
-mcp_integration: playwright
 ---
 
 # Web Scraper
@@ -977,16 +962,16 @@ Complexity Check:
 
 **Mode:** FIX
 **Complexity:** Unchanged
-**Scenario:** Fixing bug in enhanced_validator.py
+**Scenario:** Fixing bug in enhanced_validator.mjs
 
 ### Input
 
 **Bug Report:**
-> "Bug: enhanced_validator.py incorrectly flags valid hyphen-case names as errors when they contain numbers (e.g., 'api-v2-client' is valid but gets rejected)."
+> "Bug: enhanced_validator.mjs incorrectly flags valid hyphen-case names as errors when they contain numbers (e.g., 'api-v2-client' is valid but gets rejected)."
 
 **Current Code (buggy):**
 ```python
-# scripts/enhanced_validator.py line 1527
+# scripts/enhanced_validator.mjs line 1527
 if not re.match(r'^[a-z-]+$', name):
     result.add_error(f"Name '{name}' must be hyphen-case (lowercase, hyphens only)")
 ```
@@ -1008,14 +993,14 @@ Impact:
 - Severity: Medium (workflow blocker for some users)
 
 Files Affected:
-- scripts/enhanced_validator.py (line 1527)
+- scripts/enhanced_validator.mjs (line 1527)
 ```
 
 **Phase 2: Minimal Fix Design**
 ```
 Fix Specification:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-File: scripts/enhanced_validator.py
+File: scripts/enhanced_validator.mjs
 Line: 1527
 Change: ^[a-z-]+$ → ^[a-z0-9-]+$
 
@@ -1030,7 +1015,7 @@ Breaking Changes: None
 
 **Before:**
 ```python
-# scripts/enhanced_validator.py (buggy)
+# scripts/enhanced_validator.mjs (buggy)
 def validate_yaml_frontmatter(skill_path: Path, result: ValidationResult):
     """Validate YAML frontmatter in SKILL.md"""
     # ... [previous code]
@@ -1049,7 +1034,7 @@ def validate_yaml_frontmatter(skill_path: Path, result: ValidationResult):
 
 **After:**
 ```python
-# scripts/enhanced_validator.py (fixed)
+# scripts/enhanced_validator.mjs (fixed)
 def validate_yaml_frontmatter(skill_path: Path, result: ValidationResult):
     """Validate YAML frontmatter in SKILL.md"""
     # ... [previous code unchanged]
@@ -1116,12 +1101,12 @@ All tests pass! ✅
 ## [2.0.1] - 2026-02-12
 
 ### Fixed
-- Fixed validation regex in `enhanced_validator.py` to allow numbers in skill names
+- Fixed validation regex in `enhanced_validator.mjs` to allow numbers in skill names
 - Names like 'api-v2-client', 'oauth2-helper' now correctly pass validation
 - Updated troubleshooting documentation with valid name format examples
 
 ### Technical Details
-- File: `scripts/enhanced_validator.py` line 1527
+- File: `scripts/enhanced_validator.mjs` line 1527
 - Change: Regex pattern `^[a-z-]+$` → `^[a-z0-9-]+$`
 - Impact: Single-line fix, no breaking changes
 ```
@@ -1191,9 +1176,6 @@ documentation-generator/
 ---
 name: documentation-generator
 description: Generate comprehensive project documentation with official framework patterns via Context7 MCP. Analyzes code structure, fetches official docs, generates README, API references, and usage guides. Use when starting new projects, open-sourcing code, or improving existing documentation. Supports React, Vue, Angular, Express, Django, Flask, and more.
-version: 1.0.0
-complexity: medium
-mcp_integration: context7
 ---
 
 # Documentation Generator
@@ -1784,7 +1766,7 @@ After reviewing these examples:
 
 1. **Practice**: Try creating your own skill following Example 1 or 2
 2. **Reference**: Use PRD and reference.md for detailed workflows
-3. **Validate**: Run `enhanced_validator.py` on your skills
+3. **Validate**: Run `enhanced_validator.mjs` on your skills
 4. **Iterate**: Use multi-turn refinement for quality improvement
 
 For detailed mode workflows, see [reference.md](reference.md).

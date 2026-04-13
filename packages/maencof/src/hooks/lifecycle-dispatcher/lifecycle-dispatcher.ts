@@ -13,6 +13,7 @@ import type {
   LifecycleEvent,
 } from '../../types/lifecycle.js';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { isMaencofVault, metaPath } from '../shared/shared.js';
 
 /** Input received from Claude Code hook stdin */
@@ -105,7 +106,8 @@ function loadLifecycleConfig(cwd: string): LifecycleConfig | null {
     }
 
     return parsed;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'lifecycle-dispatcher', error: String(e), timestamp: new Date().toISOString() });
     return null;
   }
 }

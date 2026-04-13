@@ -20,7 +20,7 @@ skill-constructor 2.0 introduces a **layered file structure** with progressive d
 **Analyze complexity:**
 ```bash
 cd /path/to/skill-constructor
-python scripts/complexity_scorer.py --interactive
+node scripts/complexity_scorer.mjs --interactive
 ```
 
 **Check SKILL.md size:**
@@ -54,22 +54,19 @@ my-skill/
 ```yaml
 ---
 name: my-skill
-description: [Existing description - ensure >50 words with specific triggers]
-version: 2.0.0  # ← ADD THIS
-complexity: simple  # ← ADD THIS
-created: 2026-01-15  # ← ADD THIS
-updated: 2026-02-12  # ← ADD THIS
+description: [Existing description - ensure 20-250 chars with specific triggers]
+user-invocable: true  # ← ADD if needed
 ---
 ```
 
 2. **Validate:**
 ```bash
-python /path/to/skill-constructor/scripts/enhanced_validator.py /path/to/my-skill
+node /path/to/skill-constructor/scripts/enhanced_validator.mjs /path/to/my-skill
 ```
 
 3. **Package:**
 ```bash
-python /path/to/skill-constructor/scripts/package_skill.py /path/to/my-skill
+node /path/to/skill-constructor/scripts/package_skill.mjs /path/to/my-skill
 ```
 
 **After:**
@@ -152,10 +149,7 @@ See `examples.md` for 5+ real-world usage examples.
 ---
 name: my-skill
 description: [Updated with specific triggers]
-version: 2.0.0
-complexity: medium
-created: 2026-01-15
-updated: 2026-02-12
+user-invocable: true
 ---
 ```
 
@@ -176,7 +170,7 @@ Automation tools: [list scripts with brief descriptions]
 5. **Validate and measure impact:**
 ```bash
 # Validate
-python scripts/enhanced_validator.py /path/to/my-skill
+node scripts/enhanced_validator.mjs /path/to/my-skill
 
 # Check size reduction
 echo "Before: 6.5k words"
@@ -329,11 +323,7 @@ scripts/
 ---
 name: my-skill
 description: [Comprehensive description with specific triggers]
-version: 2.0.0
-complexity: complex
-created: 2026-01-15
-updated: 2026-02-12
-changelog: CHANGELOG.md
+user-invocable: true
 ---
 
 # My Skill
@@ -406,7 +396,7 @@ See docs/migration-guide.md for upgrading from v1.x
 
 ```bash
 # Validate structure
-python scripts/enhanced_validator.py /path/to/my-skill
+node scripts/enhanced_validator.mjs /path/to/my-skill
 
 # Analyze impact
 echo "=== Impact Analysis ==="
@@ -487,7 +477,7 @@ python scripts/migrate_to_v2.py --rollback /path/to/my-skill
 - [ ] Update cross-references
 
 ### After Migration
-- [ ] Run enhanced_validator.py
+- [ ] Run enhanced_validator.mjs
 - [ ] Test all scripts
 - [ ] Verify resource references
 - [ ] Check examples work
@@ -521,7 +511,7 @@ python scripts/migrate_to_v2.py --rollback /path/to/my-skill
 **Migration:** Rename to hyphen-case (e.g., `mySkill` → `my-skill`)
 
 ### 5. Description Quality
-**Change:** Descriptions must be >50 words with specific triggers
+**Change:** Descriptions should be 20-250 chars with specific triggers
 **Impact:** Vague descriptions fail validation
 **Migration:** Expand description with concrete use cases
 
@@ -542,7 +532,7 @@ python scripts/migrate_to_v2.py --rollback /path/to/my-skill
 cp -r /path/to/my-skill.backup/* /path/to/my-skill/
 
 # Verify restoration
-python scripts/enhanced_validator.py /path/to/my-skill --v1-mode
+node scripts/enhanced_validator.mjs /path/to/my-skill --v1-mode
 ```
 
 ### 3. Partial Rollback
@@ -596,7 +586,7 @@ cp /path/to/my-skill.backup/SKILL.md /path/to/my-skill/
 ### 2. Validate Regularly
 ```bash
 # Run validation after any changes
-python scripts/enhanced_validator.py /path/to/my-skill
+node scripts/enhanced_validator.mjs /path/to/my-skill
 ```
 
 ### 3. Monitor Performance
@@ -682,7 +672,7 @@ Track these metrics post-migration:
 - [ ] Compressed SKILL.md to <5k words
 - [ ] Added resource references
 - [ ] Created CHANGELOG.md
-- [ ] Ran enhanced_validator.py (passed)
+- [ ] Ran enhanced_validator.mjs (passed)
 - [ ] Tested all functionality
 - [ ] Measured performance improvement
 - [ ] Documented migration in CHANGELOG

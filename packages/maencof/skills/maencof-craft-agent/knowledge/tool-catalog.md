@@ -1,154 +1,112 @@
-# Tool Catalog
+# Tool Catalog — Deep Dive
 
-Complete catalog of tools available to Claude Code subagents.
+Advanced tool restriction patterns, context-dependent availability, and common combinations.
 
----
-
-## Core Tools
-
-### Read-Only Tools
-
-| Tool | Description | Common Use |
-|------|-------------|------------|
-| `Read` | Read file contents from local filesystem | View source code, configs, docs |
-| `Grep` | Search file contents with regex patterns | Find code patterns, symbols, references |
-| `Glob` | Find files by name/path pattern matching | Locate files, discover project structure |
-| `WebFetch` | Fetch and process web content via URL | Read documentation, API references |
-| `WebSearch` | Search the web for information | Find current docs, solutions, references |
-
-### Write Tools
-
-| Tool | Description | Common Use |
-|------|-------------|------------|
-| `Write` | Create or overwrite files | Generate new files, configs |
-| `Edit` | Make targeted string replacements in files | Modify existing code, fix bugs |
-| `NotebookEdit` | Edit Jupyter notebook cells | Modify data analysis notebooks |
-
-### Execution Tools
-
-| Tool | Description | Common Use |
-|------|-------------|------------|
-| `Bash` | Run shell commands with optional timeout | Build, test, git operations, CLI tools |
-| `Task` | Spawn subagents for delegated work | Orchestrate multi-agent workflows |
-
-### Interaction Tools
-
-| Tool | Description | Common Use |
-|------|-------------|------------|
-| `AskUserQuestion` | Present questions to user with options | Gather decisions, clarify requirements |
+For the complete tool list, see **reference.md Section 2**.
 
 ---
 
 ## Tool Restriction Patterns
 
-### Read-Only Agent
+### Pattern 1: Pure Read-Only
+
+No modifications, no execution. Safe for analysis tasks.
+
 ```yaml
 tools: Read, Grep, Glob
 ```
-Safest configuration. Cannot modify files, run commands, or interact. Suitable for pure analysis.
 
-### Read-Only with Bash
+Use case: code review, documentation analysis, codebase exploration.
+
+### Pattern 2: Read-Only with Shell
+
+Read-only analysis plus shell access for running read commands (git log, test results, etc.).
+
 ```yaml
 tools: Read, Grep, Glob, Bash
 ```
-Can run commands (git diff, test suites) but cannot modify files directly. Common for reviewers.
 
-### Implementation Agent
+Use case: code review needing git history, test output analysis. Note: Bash can still modify files — consider hooks for enforcement.
+
+### Pattern 3: Full Modification
+
+Complete read-write access for implementation tasks.
+
 ```yaml
 tools: Read, Write, Edit, Bash, Grep, Glob
 ```
-Full development capability. Can read, write, edit files and run commands. For builders and debuggers.
 
-### Minimal Data Agent
-```yaml
-tools: Bash, Read, Write
-```
-Focused on command execution and file I/O. For data analysis, scripting tasks.
+Use case: feature implementation, refactoring, bug fixing.
 
-### Documentation Agent
-```yaml
-tools: Read, Write, Grep, Glob, WebFetch
-```
-Can read codebase and web resources, write documentation. No command execution.
+### Pattern 4: Scoped MCP Access
 
-### Orchestrator Agent
+Read-only with specific MCP server tools.
+
 ```yaml
-tools: Task(agent-a, agent-b), Read, Bash
+tools: Read, Grep, Glob, mcp__database__query, mcp__database__list_tables
 ```
-Can spawn specific subagents and read results. For coordination patterns.
+
+Use case: data analysis, database inspection without write access.
+
+### Pattern 5: Restricted Subagent Spawning
+
+Allow spawning only specific subagent types.
+
+```yaml
+tools: Agent(code-reviewer, test-runner), Read, Grep, Bash
+```
+
+Use case: orchestrator agents that delegate to known specialists.
+
+### Pattern 6: Network-Enabled Research
+
+Read access plus web capabilities for research tasks.
+
+```yaml
+tools: Read, Grep, Glob, WebFetch, WebSearch
+```
+
+Use case: documentation research, API exploration, dependency analysis.
 
 ---
 
-## Task Tool Special Syntax
+## Tool Availability by Context
 
-The `Task` tool has special syntax for controlling subagent spawning:
+| Tool | Foreground | Background | Plugin |
+| --- | --- | --- | --- |
+| Read, Grep, Glob | Yes | Yes | Yes |
+| Edit, Write | Yes | Yes | Yes |
+| Bash | Yes | Yes (auto-deny unapproved) | Yes |
+| AskUserQuestion | Yes | **No** (fails silently) | Yes |
+| Agent | Yes | Yes | Yes |
+| WebFetch, WebSearch | Yes | Yes (auto-deny unapproved) | Yes |
+| MCP tools | Yes | **No** (unavailable) | **No** |
+| SendMessage | Yes | Yes | No |
+| TaskCreate/Update/etc. | Yes | Yes | Yes |
 
-### Allow All Subagents
-```yaml
-tools: Task, Read, Bash
-```
+### Background Agent Implications
 
-### Allow Specific Subagents Only
-```yaml
-tools: Task(code-reviewer, debugger), Read, Bash
-```
-This is an allowlist. Only named agents can be spawned.
+- Cannot prompt users → design for full autonomy
+- Permission-requiring tools auto-denied unless pre-approved
+- MCP tools unavailable — use only core tools
+- AskUserQuestion fails silently — avoid in background agent tool lists
 
-### Prevent All Subagent Spawning
-```yaml
-# Simply omit Task from tools
-tools: Read, Bash
-```
+### Plugin Agent Restrictions
 
-### Important Limitations
-- `Task(agent-name)` only works for agents running as main thread (`claude --agent`)
-- Subagents cannot spawn other subagents regardless of `Task` in their tools
-- If an agent tries to spawn a non-allowed agent, the request fails
-
----
-
-## Using disallowedTools
-
-Use `disallowedTools` when you want to inherit most tools but block specific ones:
-
-### Block File Modification
-```yaml
-disallowedTools: Write, Edit, NotebookEdit
-```
-
-### Block Command Execution
-```yaml
-disallowedTools: Bash
-```
-
-### Block Subagent Spawning
-```yaml
-disallowedTools: Task
-```
-
-### Block Specific Subagent
-In `settings.json` permissions:
-```json
-{
-  "permissions": {
-    "deny": ["Task(agent-name)"]
-  }
-}
-```
+- `hooks`, `mcpServers`, `permissionMode` fields ignored
+- MCP tools unavailable
+- All other tools function normally
 
 ---
 
-## Tool Availability in Different Contexts
+## Common Tool Combinations by Archetype
 
-| Context | Tools Available |
-|---------|----------------|
-| Foreground subagent | All configured tools, including MCP |
-| Background subagent | Configured tools except MCP tools |
-| Resumed subagent | Same tools as original invocation |
-| CLI-defined agent | Tools specified in JSON config |
-
-### Background Subagent Restrictions
-- MCP tools are NOT available
-- `AskUserQuestion` calls fail (but agent continues)
-- Permissions must be pre-approved before launch
-- Auto-denies anything not pre-approved
+| Archetype | Tools | Notes |
+| --- | --- | --- |
+| Code Reviewer | `Read, Grep, Glob` | Pure analysis |
+| Test Runner | `Read, Grep, Glob, Bash` | Needs shell for test execution |
+| Implementer | `Read, Write, Edit, Bash, Grep, Glob` | Full modification |
+| Researcher | `Read, Grep, Glob, WebFetch, WebSearch` | Web-enabled analysis |
+| Data Analyst | `Read, Grep, Glob, mcp__db__query` | MCP database access |
+| Orchestrator | `Agent(worker-a, worker-b), Read, Grep` | Delegates to specialists |
+| Documenter | `Read, Write, Grep, Glob` | Read code, write docs |

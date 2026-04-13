@@ -1,278 +1,178 @@
-# YAML Frontmatter Specification
+# Frontmatter Specification — Deep Dive
 
-Complete field-by-field specification for Claude Code subagent frontmatter.
+Advanced field interaction rules, validation logic, and edge cases not covered in the main reference.
 
-## File Format
-
-Subagent files are Markdown with YAML frontmatter delimited by `---` lines:
-
-```markdown
----
-name: agent-name
-description: When Claude should delegate to this agent
-tools: Read, Grep, Glob
-model: sonnet
----
-
-System prompt content here (markdown body).
-```
-
-The frontmatter defines configuration. The markdown body becomes the system prompt. Subagents receive only this system prompt plus basic environment details (working directory), NOT the full Claude Code system prompt.
+For field definitions, see **reference.md Section 1**.
 
 ---
 
-## Required Fields
-
-### `name`
-
-| Property | Value |
-|----------|-------|
-| Type | String |
-| Required | Yes |
-| Format | `[a-z][a-z0-9-]*` (lowercase letters, digits, hyphens) |
-| Uniqueness | Must be unique within its scope directory |
-
-**Valid**: `code-reviewer`, `data-scientist`, `db-reader`, `my-agent-v2`
-**Invalid**: `Code_Reviewer`, `dataScientist`, `my agent`, `123-agent`
-
-### `description`
-
-| Property | Value |
-|----------|-------|
-| Type | String |
-| Required | Yes |
-| Purpose | Claude uses this to decide when to delegate tasks |
-| Min Length | 20 characters (recommended) |
-
-**Writing effective descriptions**:
-- Be specific about WHEN to delegate, not just WHAT the agent does
-- Include trigger phrases that match user intent
-- Add "use proactively" to enable auto-delegation
-- Mention the domain explicitly
-
-**Good examples**:
-```yaml
-description: "Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code."
-
-description: "Debugging specialist for errors, test failures, and unexpected behavior. Use proactively when encountering any issues."
-
-description: "Data analysis expert for SQL queries, BigQuery operations, and data insights. Use proactively for data analysis tasks and queries."
-```
-
-**Bad examples**:
-```yaml
-description: "Reviews code"  # Too vague
-description: "Helps with stuff"  # No delegation trigger
-description: "A really amazing and wonderful code analysis tool"  # Marketing fluff
-```
-
----
-
-## Optional Fields
-
-### `tools`
-
-| Property | Value |
-|----------|-------|
-| Type | Comma-separated string or YAML list |
-| Default | Inherits all tools from main conversation |
-| Behavior | Allowlist - only listed tools are available |
-
-**Format options**:
-```yaml
-# String format
-tools: Read, Grep, Glob, Bash
-
-# List format
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
-```
-
-**Special Task syntax** (main thread agents only):
-```yaml
-# Allow spawning any subagent
-tools: Task, Read, Bash
-
-# Allow spawning only specific subagents
-tools: Task(worker, researcher), Read, Bash
-
-# Omit Task to prevent subagent spawning
-tools: Read, Bash
-```
-
-Note: `Task(agent-name)` restriction only applies to agents running as main thread via `claude --agent`. Subagents cannot spawn other subagents regardless.
-
-### `disallowedTools`
-
-| Property | Value |
-|----------|-------|
-| Type | Comma-separated string or YAML list |
-| Default | None |
-| Behavior | Denylist - removes from inherited or specified set |
-
-```yaml
-# Inherit all tools except Write and Edit
-disallowedTools: Write, Edit
-```
-
-**Conflict rule**: A tool cannot appear in both `tools` and `disallowedTools`.
-
-### `model`
-
-| Property | Value |
-|----------|-------|
-| Type | String enum |
-| Values | `sonnet`, `opus`, `haiku`, `inherit` |
-| Default | `inherit` |
-
-### `permissionMode`
-
-| Property | Value |
-|----------|-------|
-| Type | String enum |
-| Values | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, `plan` |
-| Default | `default` |
-
-**Inheritance rule**: If parent uses `bypassPermissions`, it takes precedence and cannot be overridden by the subagent.
-
-### `maxTurns`
-
-| Property | Value |
-|----------|-------|
-| Type | Positive integer |
-| Default | Unlimited |
-| Purpose | Cap agentic turns to prevent runaway execution |
-
-### `skills`
-
-| Property | Value |
-|----------|-------|
-| Type | YAML list of skill names |
-| Default | None |
-| Behavior | Full skill content injected into context at startup |
-
-```yaml
-skills:
-  - api-conventions
-  - error-handling-patterns
-```
-
-Subagents do NOT inherit skills from parent conversation. Must be listed explicitly.
-
-### `mcpServers`
-
-| Property | Value |
-|----------|-------|
-| Type | YAML mapping |
-| Default | Inherits MCP servers from main conversation |
-
-```yaml
-# Reference already-configured server
-mcpServers:
-  slack: {}
-
-# Inline definition
-mcpServers:
-  custom-api:
-    command: node
-    args: ["./mcp-server.js"]
-    env:
-      API_KEY: "${API_KEY}"
-```
-
-**Limitation**: MCP tools are NOT available in background subagents.
-
-### `hooks`
-
-| Property | Value |
-|----------|-------|
-| Type | YAML mapping of hook events |
-| Events | `PreToolUse`, `PostToolUse`, `Stop` |
-
-```yaml
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "./scripts/validate.sh"
-  PostToolUse:
-    - matcher: "Edit|Write"
-      hooks:
-        - type: command
-          command: "./scripts/post-edit.sh"
-  Stop:
-    - hooks:
-        - type: command
-          command: "./scripts/cleanup.sh"
-```
-
-`Stop` hooks are automatically converted to `SubagentStop` at runtime.
-
-### `memory`
-
-| Property | Value |
-|----------|-------|
-| Type | String enum |
-| Values | `user`, `project`, `local` |
-| Default | Disabled |
-
-| Scope | Directory | Use Case |
-|-------|-----------|----------|
-| `user` | `~/.claude/agent-memory/<name>/` | Cross-project learnings |
-| `project` | `.claude/agent-memory/<name>/` | Project-specific, shareable via VCS |
-| `local` | `.claude/agent-memory-local/<name>/` | Project-specific, private |
-
-When enabled:
-- Read, Write, Edit tools are auto-enabled
-- First 200 lines of `MEMORY.md` injected into system prompt
-- Agent can create additional files in memory directory
-
----
-
-## Field Interactions
+## Field Interaction Rules
 
 ### tools + disallowedTools
-- If `tools` is set: `disallowedTools` removes from that explicit list
-- If `tools` is omitted: `disallowedTools` removes from inherited set
-- A tool cannot appear in both (validation error)
+
+When both are specified, `disallowedTools` is applied first to remove tools from the inherited/specified set, then `tools` is resolved against the remaining pool. A tool listed in both is removed:
+
+```yaml
+tools: Read, Write, Edit, Bash    # Allowlist
+disallowedTools: Bash              # Remove from allowlist
+# Result: Read, Write, Edit
+```
+
+When only `disallowedTools` is set, the agent inherits all parent tools minus the denied ones:
+
+```yaml
+disallowedTools: Write, Edit
+# Result: all parent tools except Write and Edit
+```
 
 ### memory + tools
-- When `memory` is set: Read, Write, Edit are auto-enabled even if not in `tools`
-- This ensures the agent can manage its memory files
+
+When `memory` is enabled, Read, Write, and Edit are **automatically added** to the tool set even if not listed in `tools`:
+
+```yaml
+tools: Grep, Glob
+memory: project
+# Effective tools: Grep, Glob, Read, Write, Edit
+```
 
 ### permissionMode + parent
-- If parent uses `bypassPermissions`: subagent's `permissionMode` is ignored
-- Otherwise: subagent's `permissionMode` overrides parent's mode
+
+Permission inheritance follows a strict hierarchy:
+
+```
+Parent: bypassPermissions → subagent permissionMode IGNORED (parent wins)
+Parent: auto              → subagent inherits auto (frontmatter ignored)
+Parent: default           → subagent uses its own permissionMode
+```
 
 ### model + inherit
-- `inherit` uses whatever model the user's main conversation is using
-- Explicit model (`haiku`/`sonnet`/`opus`) always overrides regardless of parent
+
+`inherit` resolves at spawn time, not at definition time. If the parent switches models mid-conversation, the next spawned subagent inherits the new model.
+
+Resolution chain:
+```
+CLAUDE_CODE_SUBAGENT_MODEL env var
+  → Agent tool call `model` parameter
+    → Frontmatter `model` field
+      → Parent's current model
+```
+
+### background + AskUserQuestion
+
+Background agents cannot interact with the user. `AskUserQuestion` will fail silently. Design background agents to be fully autonomous:
+
+```yaml
+background: true
+tools: Read, Grep, Glob, Bash, Write   # No AskUserQuestion
+```
+
+### effort + model
+
+The `max` effort level is only supported on Opus 4.6. Using it with other models has no additional effect beyond `high`:
+
+```yaml
+model: opus
+effort: max     # Full extended thinking
+```
+
+```yaml
+model: sonnet
+effort: high    # Maximum supported level for sonnet
+```
+
+### isolation + background
+
+Worktree isolation works with both foreground and background agents. The worktree is created fresh for each agent invocation:
+
+```yaml
+isolation: worktree
+background: true
+# Agent runs in isolated worktree, non-blocking
+```
+
+If the agent makes changes, the worktree path and branch name are returned to the parent for review/merge.
+
+---
+
+## Validation Logic
+
+### Name Validation
+
+```
+Pattern: /^[a-z][a-z0-9-]*$/
+Min length: 2
+Max length: 64
+Reserved: "default", "inherit", "none"
+```
+
+### Description Validation
+
+```
+Min length: 10 characters
+Must contain at least one action verb
+Should not start with "A" or "An" (article)
+Should describe WHEN to delegate, not WHAT the agent is
+```
+
+### Tool Name Resolution
+
+```
+1. Check against core tool catalog (exact match)
+2. Check Agent(<names>) pattern
+3. Check mcp__<server>__<tool> pattern
+4. Check MCP server is configured (warning only)
+```
 
 ---
 
 ## CLI Agent Format
 
-Agents can be defined via `--agents` CLI flag as JSON:
+For `--agents` flag, use JSON instead of YAML:
 
-```bash
-claude --agents '{
+```json
+{
   "agent-name": {
     "description": "When to delegate",
     "prompt": "System prompt content",
-    "tools": ["Read", "Grep", "Glob", "Bash"],
+    "tools": ["Read", "Grep", "Glob"],
     "model": "sonnet",
-    "permissionMode": "default",
-    "maxTurns": 10,
-    "skills": ["skill-name"],
-    "mcpServers": {},
-    "hooks": {},
-    "memory": "user"
+    "permissionMode": "default"
   }
-}'
+}
 ```
 
-The `prompt` field replaces the markdown body. All other fields map 1:1 to frontmatter fields.
+Fields map to frontmatter fields. `prompt` replaces the markdown body (system prompt).
+
+---
+
+## Edge Cases
+
+### Empty tools field
+
+```yaml
+tools:
+```
+
+An empty `tools` field means NO tools available. This is different from omitting it (which inherits all).
+
+### Multiple agents with same name
+
+Higher priority source wins. No merge — complete override. Check with `LIST` mode to detect conflicts.
+
+### Subagent spawning restricted subagents
+
+```yaml
+tools: Agent(code-reviewer), Read, Grep
+```
+
+This agent can ONLY spawn `code-reviewer` type subagents. Attempting to spawn other types fails silently.
+
+### initialPrompt with skills
+
+```yaml
+initialPrompt: "/my-custom-skill --flag"
+skills:
+  - my-custom-skill
+```
+
+The initial prompt can reference preloaded skills. The skill must be in the `skills` list to be available.

@@ -4,267 +4,231 @@ Proven patterns and anti-patterns for building effective Claude Code subagents.
 
 ---
 
-## Pattern 1: Single Responsibility Agent
+## Design Patterns
 
-**Principle**: Each subagent excels at one specific task.
+### Pattern 1: Single Responsibility
 
-### Good
-```yaml
-name: typescript-type-checker
-description: Reviews TypeScript code specifically for type safety issues. Use after writing TypeScript.
-tools: Read, Grep, Glob, Bash
-model: sonnet
+Each subagent does ONE thing well. Resist the urge to combine capabilities.
+
+```
+Good: "typescript-type-checker" — checks TypeScript type safety
+Bad:  "code-quality-checker" — checks types, style, performance, security
 ```
 
-### Bad
+Why: Focused agents produce deeper analysis. Broad agents produce shallow results.
+
+### Pattern 2: Least Privilege
+
+Grant only the tools needed for the task. Start minimal, add only when required.
+
 ```yaml
-name: everything-agent
-description: Reviews code, writes tests, deploys, manages database, and handles customer support.
-tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Task
+# Security reviewer — needs to READ, not WRITE
+tools: Read, Grep, Glob
+
+# NOT: tools: Read, Write, Edit, Bash, Grep, Glob
 ```
 
-**Why**: Focused agents produce better results. Claude can chain multiple focused agents for complex tasks.
+Why: Prevents accidental modifications. Reduces permission prompts. Limits blast radius.
 
----
+### Pattern 3: Descriptive Delegation Triggers
 
-## Pattern 2: Least Privilege
+The `description` field is how Claude decides to delegate. Make it specific.
 
-**Principle**: Grant only the tools necessary for the task.
-
-### Good
 ```yaml
-# Reviewer doesn't need to edit
-name: code-reviewer
-tools: Read, Grep, Glob, Bash
+# Good — clear trigger condition
+description: Reviews Python code for security vulnerabilities including SQL injection, XSS, and authentication bypass. Use proactively after writing Python files that handle user input.
+
+# Bad — when would Claude ever delegate to this?
+description: Helps with code review.
 ```
 
-### Bad
-```yaml
-# Reviewer with write access is dangerous
-name: code-reviewer
-tools: Read, Write, Edit, Bash, Grep, Glob
-```
+"Use proactively" tells Claude to delegate without being asked. Without it, delegation only happens on explicit user request.
 
-**Why**: Prevents accidental modifications. Forces the agent to stay in its lane.
+### Pattern 4: Structured Workflow Prompt
 
----
+System prompts with numbered steps produce more consistent results than free-form instructions.
 
-## Pattern 3: Descriptive Delegation Triggers
-
-**Principle**: Write descriptions that help Claude decide when to delegate.
-
-### Good
-```yaml
-description: "Security vulnerability scanner for Python applications. Use proactively when reviewing security-sensitive code, authentication flows, or data handling."
-```
-
-### Bad
-```yaml
-description: "Scans code for security stuff"
-```
-
-**Key elements**:
-- What it does (specific domain)
-- When to use it (trigger conditions)
-- "Use proactively" (enables auto-delegation)
-
----
-
-## Pattern 4: Structured Workflow Prompt
-
-**Principle**: System prompts should define a clear numbered workflow.
-
-### Good
 ```markdown
-When invoked:
-1. Run git diff to identify changed files
-2. Scan each changed file for security issues
-3. Check for OWASP Top 10 vulnerabilities
-4. Verify input validation on boundaries
-5. Report findings by severity
+You are a database migration reviewer.
 
-For each finding:
-- Severity: Critical / High / Medium / Low
-- Location: File and line number
-- Description: What the vulnerability is
-- Remediation: How to fix it
+Review process:
+1. Read the migration file
+2. Check for reversibility — verify both up() and down() methods
+3. Analyze data safety — flag destructive operations (DROP, TRUNCATE)
+4. Verify index impact — check if new indexes affect query performance
+5. Produce a structured report
+
+Report format:
+- Migration: [filename]
+- Reversible: Yes/No
+- Destructive operations: [list or "None"]
+- Index changes: [list or "None"]
+- Risk level: Low/Medium/High
+- Recommendation: Approve/Request Changes
 ```
 
-### Bad
+### Pattern 5: Context Isolation Awareness
+
+Subagents receive ONLY their system prompt + task description. Design prompts that work without parent context.
+
 ```markdown
-You are a security expert. Please review the code and find security issues. Be thorough and helpful.
+<!-- Good — self-contained instructions -->
+You are a test coverage analyzer. When given a directory path,
+scan all test files and produce a coverage report.
+
+<!-- Bad — assumes parent context -->
+Look at the file I was just editing and check if it has tests.
 ```
 
-**Why**: Structured prompts produce consistent, actionable output.
+### Pattern 6: Defense in Depth
 
----
-
-## Pattern 5: Context Isolation
-
-**Principle**: Use subagents to keep verbose operations out of main context.
-
-### Good Use Cases
-- Running test suites (verbose output stays in subagent)
-- Scanning large codebases (search results stay isolated)
-- Processing log files (raw logs stay contained)
-- Fetching documentation (full docs stay in subagent, summary returns)
-
-### When NOT to Use Subagents
-- Quick, targeted changes (overhead not worth it)
-- Tasks needing iterative user feedback
-- Tasks sharing significant context with main conversation
-
----
-
-## Pattern 6: Defense in Depth
-
-**Principle**: Combine tool restrictions with hooks and prompt instructions.
+Combine tool restrictions with hooks for layered security.
 
 ```yaml
-name: db-reader
-description: Read-only database queries for reporting.
 tools: Bash
 hooks:
   PreToolUse:
     - matcher: "Bash"
       hooks:
         - type: command
-          command: "./scripts/validate-readonly.sh"
+          command: "./scripts/validate-readonly-sql.sh"
 ```
 
-```markdown
-You have read-only database access. Only execute SELECT queries.
-If asked to modify data, explain that you only have read access.
-```
+The `tools` field limits what's available. The hook validates HOW it's used. Together they enforce both "which tools" and "which operations."
 
-Three layers of protection:
-1. **Tool restriction**: Only Bash (no file modification)
-2. **Hook validation**: Script blocks write SQL operations
-3. **Prompt instruction**: Agent understands its limitations
+### Pattern 7: Memory-Driven Learning
 
----
-
-## Pattern 7: Memory-Driven Learning
-
-**Principle**: Use persistent memory for agents that benefit from cross-session knowledge.
+Enable `memory` for agents that improve through accumulated experience.
 
 ```yaml
-name: project-navigator
 memory: project
 ```
 
-```markdown
-Before starting:
-1. Check your agent memory for previously mapped codepaths
-2. Review known architectural patterns from past sessions
+The agent builds knowledge across sessions: learned project conventions, discovered patterns, previously resolved issues. Useful for: code reviewers, debuggers, documentation writers.
 
-After completing:
-1. Update memory with new discoveries
-2. Record key file locations and their purposes
-3. Note architectural patterns and conventions
+### Pattern 8: Parallel Research
 
-Your memory grows with each session, making you more effective over time.
-```
-
-**Best for**: Agents that repeatedly work with the same codebase.
-
----
-
-## Pattern 8: Parallel Research
-
-**Principle**: Spawn multiple focused subagents for independent investigations.
+Spawn multiple read-only agents simultaneously for faster analysis.
 
 ```
-Research the authentication, database, and API modules in parallel using separate subagents
+Parent spawns in parallel:
+  - security-reviewer → scans for vulnerabilities
+  - performance-analyzer → scans for bottlenecks
+  - dependency-checker → scans for outdated packages
 ```
 
-Each subagent explores independently, then results are synthesized.
+All three run concurrently, each in its own context window. Parent aggregates results.
 
-**Requirements**:
-- Investigations must be independent (no shared state)
-- Each returns a focused summary
-- Main context handles synthesis
+### Pattern 9: Model-Task Alignment
 
-**Warning**: Many subagents returning detailed results can consume main context.
+Match model to task complexity for cost and speed optimization.
 
----
+```yaml
+# Simple, repetitive scan → haiku (fast, cheap)
+model: haiku
 
-## Pattern 9: Chained Subagents
+# Standard code review → sonnet (balanced)
+model: sonnet
 
-**Principle**: Use sequential subagent invocation for multi-step workflows.
-
-```
-1. Use code-reviewer to find issues
-2. Use debugger to fix critical issues
-3. Use test-runner to verify fixes
+# Architecture analysis → opus (deep reasoning)
+model: opus
+effort: high
 ```
 
-Each agent completes before the next starts. Claude passes relevant context between them.
+### Pattern 10: Perspective/Behavior Separation
+
+An agent's system prompt defines WHO it is — perspective, judgment criteria, values. Reusable procedural workflows belong in skills injected via the `skills` field.
+
+**Test:** If two agents with different roles would follow a procedure identically, extract it into a skill. If the instructions encode values, priorities, or judgment calls specific to this agent's role, keep them in the agent prompt.
+
+```yaml
+# Agent keeps: perspective, judgment, failure modes
+---
+name: code-reviewer
+tools: Read, Grep, Glob
+skills:
+  - git-workflow
+  - coding-standards
+---
+You are a senior code reviewer. Your judgment prioritizes correctness over style.
+
+<judgment>
+When correctness and convention conflict, flag the correctness issue.
+Do not report style violations alongside logic bugs — it dilutes severity.
+</judgment>
+
+<failure-modes>
+- Bikeshedding: Spending review time on naming while missing logic errors.
+- Rubber-stamping: Approving without verifying file references.
+</failure-modes>
+```
+
+```yaml
+# Skill holds: reusable procedure (shared by code-reviewer, api-developer, etc.)
+# skills/git-workflow/SKILL.md
+Git commit workflow:
+1. Stage only related files...
+2. Write conventional commit message...
+3. Run pre-commit hooks...
+```
+
+Why: Perspective makes each agent's judgment unique. Behavior is commodity — duplicating it across agents wastes context and creates maintenance drift. See `knowledge/persona-crafting.md` Section 6 for the full principle.
 
 ---
 
-## Anti-Pattern: Kitchen Sink Agent
+## Anti-Patterns
 
-**Problem**: Agent with too many responsibilities and all tools.
+### The Kitchen Sink Agent
 
-**Symptoms**:
-- Description mentions 5+ different tasks
-- All tools enabled
-- System prompt is 500+ lines
-- Agent produces unfocused output
+```yaml
+tools: Read, Write, Edit, Bash, Grep, Glob, WebFetch, WebSearch, Agent, AskUserQuestion
+```
 
-**Fix**: Split into multiple focused agents.
+Problem: too many tools = unfocused behavior, excessive permission prompts, unpredictable actions. Start with the minimum set.
 
----
+### The Vague Description
 
-## Anti-Pattern: Vague Description
+```yaml
+description: A helpful agent for various tasks.
+```
 
-**Problem**: Description too generic for delegation decisions.
+Problem: Claude cannot determine when to delegate. The agent is never used, or used incorrectly.
 
-**Symptoms**:
-- "Helps with code"
-- "General purpose helper"
-- Claude never auto-delegates to it
+### The Monolithic Prompt
 
-**Fix**: Be specific about domain, trigger conditions, and include "use proactively".
+```yaml
+# Same git workflow duplicated in code-reviewer, api-developer, and test-runner
+Git workflow:
+1. Stage changed files...
+2. Write conventional commit message...
+```
 
----
+Problem: reusable procedures embedded in agent prompts get duplicated across agents, waste context, and drift out of sync. Extract shared procedures into skills; keep only perspective in the agent prompt.
 
-## Anti-Pattern: Bloated System Prompt
+### The Bloated System Prompt
 
-**Problem**: Prompt tries to cover every possible scenario.
+A 3000-word system prompt that covers every edge case. Claude spends tokens processing instructions instead of doing work.
 
-**Symptoms**:
-- Lists every programming language
-- Includes generic best practices paragraphs
-- Repeats obvious instructions
-- 500+ words of general advice
+Fix: keep prompts under 500 words. Move detailed references to skills injection or let the agent read reference files.
 
-**Fix**: Focus on one domain, define clear workflow, keep prompt under 200 words.
+### The Over-Privileged Background Agent
 
----
+```yaml
+background: true
+tools: Read, Write, Edit, Bash, AskUserQuestion
+```
 
-## Anti-Pattern: Over-Privileged Agent
-
-**Problem**: Agent has more tool access than needed.
-
-**Symptoms**:
-- Read-only task with Write/Edit tools
-- Analysis agent with Bash access when not needed
-- Reviewer that can modify code
-
-**Fix**: Start with zero tools, add only what's needed for each workflow step.
+Problem: `AskUserQuestion` fails silently in background. `Bash` and `Write` auto-denied without pre-approval. The agent silently fails on most operations. Design background agents for autonomy with pre-approvable tools only.
 
 ---
 
-## Decision Matrix: Choosing the Right Pattern
+## Decision Matrix
 
-| Scenario | Pattern | Template |
-|----------|---------|----------|
-| Code analysis without changes | Read-Only + Structured Workflow | `read-only-agent` |
-| Bug fixing or implementation | Least Privilege + Structured Workflow | `full-capability-agent` |
-| Specialized domain (data, security) | Single Responsibility + Model Selection | `domain-specialist` |
-| Sensitive operations (DB, deploy) | Defense in Depth + Hooks | `hook-validated-agent` |
-| Repeated codebase exploration | Memory-Driven Learning | Any + `memory: project` |
-| Multi-area investigation | Parallel Research | Multiple focused agents |
-| Multi-step workflows | Chained Subagents | Sequential invocation |
+| Scenario | Template | Model | Key Tools |
+| --- | --- | --- | --- |
+| Code review / analysis | read-only-agent | sonnet | Read, Grep, Glob |
+| Full implementation | full-capability-agent | sonnet/opus | Read, Write, Edit, Bash, Grep, Glob |
+| Domain expertise | domain-specialist | sonnet | Domain-specific subset |
+| Controlled access | hook-validated-agent | inherit | Bash + validation hooks |
+| Background research | read-only-agent | haiku | Read, Grep, Glob + background: true |
+| Deep architecture | full-capability-agent | opus | All tools + effort: high |

@@ -1,13 +1,23 @@
 # src
 
+## Purpose
+
 maencof 플러그인 소스 루트. 5-Layer Knowledge Model v2 기반 개인 지식 공간 관리자.
+
+## Structure
+
+- `core/` — 순수 비즈니스 로직 모듈 (I/O 예외: vault-scanner, insight-stats, transition-history, error-log, autonomy)
+- `hooks/` — Claude Code 훅 진입점 (esbuild 번들 대상)
+- `mcp/` — MCP 도구 핸들러
+- `types/` — 중앙 타입 정의
+- `constants/` — 공유 상수
 
 ## Boundaries
 
 ### Always do
 
 - types/ 중앙 타입을 import하여 사용
-- core/ 모듈은 순수 함수로 유지 (VaultScanner I/O 예외)
+- core/ 모듈은 순수 함수로 유지 (I/O 예외: vault-scanner, insight-stats, transition-history, error-log, autonomy)
 - index.ts barrel export를 통해 외부 공개
 - hooks/ 추가 시 config-registry.ts에 등록하고 bridge/ 스크립트 빌드 확인
 

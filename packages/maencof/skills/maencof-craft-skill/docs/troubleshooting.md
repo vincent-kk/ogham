@@ -6,10 +6,10 @@
 
 ```bash
 # Run enhanced validator
-python scripts/enhanced_validator.py /path/to/your-skill
+node scripts/enhanced_validator.mjs /path/to/your-skill
 
 # Check complexity score
-python scripts/complexity_scorer.py --interactive
+node scripts/complexity_scorer.mjs --interactive
 
 # Verify file structure
 ls -R /path/to/your-skill
@@ -82,16 +82,12 @@ description: >
   This skill helps with specific task X when condition Y is met.
   Use it for scenarios A, B, and C. It provides capabilities
   including feature 1, feature 2, and feature 3.
-version: 1.0.0
-complexity: medium
-created: 2026-02-12
-updated: 2026-02-12
 ---
 ```
 
 **Verification:**
 ```bash
-python scripts/enhanced_validator.py /path/to/skill | grep "Required field"
+node scripts/enhanced_validator.mjs /path/to/skill | grep "Required field"
 # Should show: ✅ PASS: Required field 'name' present
 ```
 
@@ -201,7 +197,7 @@ description: >
 ```
 
 **Requirements:**
-- Minimum 50 words (recommended 75-150)
+- Minimum 20 characters (recommended under 250 chars)
 - Explain WHAT the skill does
 - List WHEN to use it (trigger scenarios)
 - Describe key capabilities
@@ -501,7 +497,7 @@ Actual: 0.68 (Medium)
 
 **Diagnosis:**
 ```bash
-python scripts/complexity_scorer.py --spec skill-spec.json --verbose
+node scripts/complexity_scorer.mjs --spec skill-spec.json --verbose
 ```
 
 **Example output:**
@@ -598,13 +594,13 @@ Error: Validation failed, cannot package skill
 **Solution:**
 ```bash
 # 1. Run validation
-python scripts/enhanced_validator.py /path/to/skill
+node scripts/enhanced_validator.mjs /path/to/skill
 
 # 2. Fix all errors
 # (See validation failures section above)
 
 # 3. Re-run packaging
-python scripts/package_skill.py /path/to/skill
+node scripts/package_skill.mjs /path/to/skill
 
 # Should succeed if all errors fixed
 ```
@@ -642,7 +638,7 @@ rmdir ~/.claude/skills/my-skill/my-skill
 **Cause 2: Invalid YAML frontmatter**
 ```bash
 # Run validator
-python scripts/enhanced_validator.py ~/.claude/skills/my-skill
+node scripts/enhanced_validator.mjs ~/.claude/skills/my-skill
 
 # Fix any YAML errors
 ```
@@ -721,16 +717,12 @@ cat .skill-metadata.json | grep version
 head -20 CHANGELOG.md
 ```
 
-**Solution:** Synchronize all versions
+**Solution:** Use git tags and CHANGELOG.md for version tracking
 ```bash
-# Update all to same version
-# 1. SKILL.md frontmatter
-version: 2.1.0
-
-# 2. CHANGELOG.md
+# 1. CHANGELOG.md
 ## [2.1.0] - 2026-02-12
 
-# 3. Git tag
+# 2. Git tag
 git tag -a v2.1.0 -m "Release v2.1.0"
 ```
 
@@ -806,7 +798,7 @@ from utils.helper import function  # Correct for new structure
 
 ```bash
 # Run with verbose output
-python scripts/enhanced_validator.py /path/to/skill --verbose
+node scripts/enhanced_validator.mjs /path/to/skill --verbose
 
 # Shows detailed checks:
 # - Checking YAML frontmatter...
@@ -873,7 +865,7 @@ ls -R
 find scripts/ -name "*.py" -exec file {} \;
 
 # Step 4: Full validation
-python scripts/enhanced_validator.py .
+node scripts/enhanced_validator.mjs .
 ```
 
 ---
@@ -894,7 +886,7 @@ python scripts/enhanced_validator.py .
 
 | Warning | Cause | Priority |
 |---------|-------|----------|
-| Description is very short | <50 words | 🟡 Medium |
+| Description is very short | <20 chars | 🟡 Medium |
 | No scripts/ directory | Missing automation | 🟡 Medium |
 | Script not executable | Missing chmod +x | 🟡 Medium |
 | Approaching size limit | 4500-5000 words | 🟡 Medium |
@@ -921,13 +913,13 @@ python scripts/enhanced_validator.py .
 
 ```bash
 # Full diagnostic
-python scripts/enhanced_validator.py /path/to/skill --verbose > diagnostic.txt
+node scripts/enhanced_validator.mjs /path/to/skill --verbose > diagnostic.txt
 
 # Include in support request:
 cat diagnostic.txt
 tree /path/to/skill
 wc -w SKILL.md
-python scripts/complexity_scorer.py --spec skill-spec.json
+node scripts/complexity_scorer.mjs --spec skill-spec.json
 ```
 
 ### Common Quick Fixes

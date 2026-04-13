@@ -14,6 +14,7 @@ import {
 import { join } from 'node:path';
 
 import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/dailynote-writer.js';
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 
 import { removeSessionFiles } from '../cache-manager/cache-manager.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/shared.js';
@@ -55,8 +56,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
 
     try {
       writeFileSync(filePath, summary, 'utf-8');
-    } catch {
-      // Ignore write failure (must not block session exit)
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
     }
   }
 
@@ -66,8 +67,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     if (sessionId) {
       removeSessionFiles(sessionId, cwd);
     }
-  } catch {
-    // Silent — cache cleanup failure must not block session end
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
   }
 
   // Clean up old session files
@@ -87,8 +88,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
       category: 'session',
       description: `Session ended${detail}`,
     });
-  } catch {
-    // Silent fallback — dailynote 기록 실패는 세션 종료에 영향 없음
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
   }
 
   return { continue: true };

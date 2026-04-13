@@ -1,5 +1,5 @@
 ---
-name: maencof-checkup
+name: checkup
 description: >
   maencof Checkup — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions.
   Detects orphan nodes, stale indexes, broken links, Layer violations, duplicate documents, and
@@ -15,11 +15,6 @@ tools:
   - mcp__plugin_maencof_t__kg_status
   - mcp__plugin_maencof_t__kg_navigate
   - mcp__plugin_maencof_t__kg_search
-allowed_layers: [1, 2, 3, 4, 5]
-forbidden_operations:
-  - delete
-  - move
-  - bulk-modify
 maxTurns: 40
 ---
 

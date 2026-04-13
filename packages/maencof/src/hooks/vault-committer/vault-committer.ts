@@ -16,6 +16,7 @@ import {
   isGitRepo,
   isIndexLocked,
 } from '../git-utils/git-utils.js';
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { isMaencofVault, metaPath } from '../shared/shared.js';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -62,7 +63,8 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
       return parsed as VaultCommitConfig;
     }
     return null;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
     return null;
   }
 }
@@ -120,8 +122,9 @@ export function runVaultCommitter(
 
     // 6. Stage and commit
     commitVaultChanges(cwd, generateCommitMessage());
-  } catch {
-    // Swallow all errors — must never block session exit
+  } catch (e) {
+    const cwd = input.cwd ?? process.cwd();
+    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
   }
 
   return { continue: true };

@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import { CONFIG_REGISTRY } from '../config-registry/config-registry.js';
 import { metaPath } from '../shared/shared.js';
 
@@ -59,7 +60,8 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
         } else {
           result.skipped.push(entry.filename);
         }
-      } catch {
+      } catch (e) {
+        appendErrorLogSafe(cwd, { hook: 'config-provisioner', error: String(e), timestamp: new Date().toISOString() });
         result.skipped.push(entry.filename); // corrupted -> skip
       }
     } else {

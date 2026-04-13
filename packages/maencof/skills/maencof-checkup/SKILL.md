@@ -6,7 +6,7 @@ argument-hint: "[--fix] [--check ITEM]"
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: maencof-checkup
+orchestrator: checkup
 plugin: maencof
 ---
 

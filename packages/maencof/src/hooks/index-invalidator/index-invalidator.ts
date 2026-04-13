@@ -5,6 +5,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
 import {
   MAENCOF_MCP_TOOLS,
   isMaencofVault,
@@ -34,7 +35,8 @@ export function readStaleNodeCount(cwd: string): number {
     const raw = readFileSync(stalePath, 'utf-8');
     const parsed = JSON.parse(raw) as { paths?: unknown };
     return Array.isArray(parsed.paths) ? parsed.paths.length : 0;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
     return 0;
   }
 }
@@ -53,14 +55,17 @@ export function readGraphNodeCount(cwd: string): number {
       return Object.keys(parsed.nodes).length;
     }
     return 0;
-  } catch {
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
     return 0;
   }
 }
 
 /**
  * Build an advisory message based on stale ratio.
- * >10% stale → rebuild warning; otherwise → soft advisory.
+ * Suppressed when stale count is low (≤2 and <10%).
+ * ≥15% → kg_build rebuild warning.
+ * 10-15% → soft advisory.
  */
 function buildAdvisoryMessage(
   staleCount: number,
@@ -69,7 +74,12 @@ function buildAdvisoryMessage(
   if (staleCount === 0) return null;
   const percent =
     totalCount > 0 ? Math.round((staleCount / totalCount) * 100) : 100;
-  if (totalCount > 0 && percent > 10) {
+
+  // Suppress low-stale-ratio advisories to reduce context noise
+  if (staleCount <= 2 && percent < 10) return null;
+  if (percent < 10) return null;
+
+  if (percent >= 15) {
     return `[maencof] ${staleCount} stale nodes detected (${percent}% of index). Run \`kg_build\` to rebuild the knowledge graph.`;
   }
   return `[maencof] Index has ${staleCount} pending change(s). The graph will auto-update on next search, or run \`kg_build\` manually.`;
@@ -139,7 +149,8 @@ function appendStaleNode(cwd: string, nodePath: string): void {
   if (existsSync(stalePath)) {
     try {
       stale = JSON.parse(readFileSync(stalePath, 'utf-8')) as typeof stale;
-    } catch {
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
       stale = { paths: [], updatedAt: new Date().toISOString() };
     }
   }
@@ -165,7 +176,8 @@ function incrementUsageStat(cwd: string, toolName: string): void {
         string,
         number
       >;
-    } catch {
+    } catch (e) {
+      appendErrorLogSafe(cwd, { hook: 'index-invalidator', error: String(e), timestamp: new Date().toISOString() });
       stats = {};
     }
   }
