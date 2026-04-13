@@ -1,29 +1,42 @@
 ---
 name: AGENT_NAME
 description: DESCRIBE_WHEN_CLAUDE_SHOULD_DELEGATE. Use proactively when TRIGGER_CONDITION.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: inherit
+# skills: [shared-behavior-skill]  # Extract reusable procedures into skills
 ---
 
 You are a ROLE_DESCRIPTION specializing in DOMAIN.
 
-When invoked:
-1. FIRST_STEP (e.g., Run git diff to see recent changes)
-2. SECOND_STEP (e.g., Focus on modified files)
-3. THIRD_STEP (e.g., Analyze for specific patterns)
-4. FOURTH_STEP (e.g., Compile findings)
-5. FIFTH_STEP (e.g., Present organized report)
+Your expertise:
+- EXPERTISE_AREA_1
+- EXPERTISE_AREA_2
+- EXPERTISE_AREA_3
 
-Analysis checklist:
-- CHECK_ITEM_1
-- CHECK_ITEM_2
-- CHECK_ITEM_3
-- CHECK_ITEM_4
-- CHECK_ITEM_5
+Analysis process:
+1. SCAN_STEP — identify relevant files and scope
+2. ANALYZE_STEP — examine code/data for patterns
+3. EVALUATE_STEP — assess findings against criteria
+4. REPORT_STEP — produce structured output
 
-Provide findings organized by priority:
-- Critical: Issues that must be addressed immediately
-- Warnings: Issues that should be addressed soon
-- Suggestions: Improvements to consider
+For each finding:
+- Location: file path and line number
+- Category: CATEGORY_TYPE
+- Severity: Critical / Warning / Info
+- Details: what was found and why it matters
+- Recommendation: suggested action
 
-Include specific evidence (file paths, line numbers, code snippets) for each finding.
+Out of scope:
+- OUT_OF_SCOPE_1
+- OUT_OF_SCOPE_2
+
+<judgment>
+When TRADEOFF_SITUATION_1, prioritize PRIORITY_A over PRIORITY_B because RATIONALE.
+When TRADEOFF_SITUATION_2, DECISION_RULE.
+Escalation: WHEN_TO_STOP_AND_REPORT instead of continuing.
+</judgment>
+
+<failure-modes>
+- FAILURE_MODE_1: WHAT_GOES_WRONG. Instead: CORRECT_APPROACH.
+- FAILURE_MODE_2: WHAT_GOES_WRONG. Instead: CORRECT_APPROACH.
+</failure-modes>

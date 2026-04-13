@@ -1,173 +1,106 @@
-# Hooks Integration
+# Hooks Integration — Deep Dive
 
-Configure lifecycle hooks for conditional validation and event-driven behavior in subagents.
+Practical hook patterns and testing methods for subagent lifecycle control.
 
----
-
-## Hook Events in Subagent Frontmatter
-
-Hooks defined in subagent frontmatter only run while that specific subagent is active.
-
-| Event | Matcher Input | When It Fires |
-|-------|--------------|---------------|
-| `PreToolUse` | Tool name | Before subagent uses a tool |
-| `PostToolUse` | Tool name | After subagent uses a tool |
-| `Stop` | (none) | When subagent finishes |
-
-`Stop` hooks are automatically converted to `SubagentStop` at runtime.
+For event types, handler types, and exit codes, see **reference.md Section 4**.
 
 ---
 
-## Hook Structure
-
-### Basic Format
-```yaml
-hooks:
-  EventName:
-    - matcher: "ToolNamePattern"
-      hooks:
-        - type: command
-          command: "./path/to/script.sh"
-```
-
-### Multiple Matchers
-```yaml
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "./scripts/validate-bash.sh"
-    - matcher: "Write|Edit"
-      hooks:
-        - type: command
-          command: "./scripts/validate-write.sh"
-```
-
-### Matcher Patterns
-- Exact match: `"Bash"` matches only Bash tool
-- OR pattern: `"Edit|Write"` matches Edit or Write
-- No matcher: hook fires for all tool uses
-
----
-
-## Hook Input
-
-Hooks receive JSON via stdin. The structure depends on the event type.
-
-### PreToolUse / PostToolUse Input
-```json
-{
-  "tool_name": "Bash",
-  "tool_input": {
-    "command": "SELECT * FROM users WHERE id = 1"
-  },
-  "session_id": "abc-123",
-  "cwd": "/path/to/project",
-  "hook_event_name": "PreToolUse"
-}
-```
-
-The `tool_input` contents vary by tool:
-- **Bash**: `{ "command": "..." }`
-- **Write**: `{ "file_path": "...", "content": "..." }`
-- **Edit**: `{ "file_path": "...", "old_string": "...", "new_string": "..." }`
-- **Read**: `{ "file_path": "..." }`
-
----
-
-## Exit Codes
-
-| Code | Behavior | Use Case |
-|------|----------|----------|
-| 0 | Allow - proceed normally | Validation passed |
-| 1 | Error - hook failed (tool still proceeds) | Script error (non-blocking) |
-| 2 | Block - prevent tool execution | Validation failed, feed stderr to Claude |
-
-**Exit code 2** is the key mechanism for conditional tool blocking. The stderr output is sent back to Claude as feedback.
-
----
-
-## Common Patterns
+## Practical Hook Patterns
 
 ### Pattern 1: Read-Only SQL Validator
 
-Block write SQL operations, allow only SELECT.
+Ensure a database agent only runs SELECT statements.
 
-**Subagent frontmatter**:
 ```yaml
 name: db-reader
+description: Read-only database query agent. Use for data analysis without modification risk.
 tools: Bash
 hooks:
   PreToolUse:
     - matcher: "Bash"
       hooks:
         - type: command
-          command: "./scripts/validate-readonly-query.sh"
+          command: "./scripts/validate-readonly-sql.sh"
 ```
 
-**Validation script**:
+**validate-readonly-sql.sh:**
 ```bash
 #!/bin/bash
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-if [ -z "$COMMAND" ]; then
-  exit 0
-fi
-
-if echo "$COMMAND" | grep -iE '\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|REPLACE|MERGE)\b' > /dev/null; then
-  echo "Blocked: Write operations not allowed. Use SELECT queries only." >&2
+if echo "$COMMAND" | grep -iqE '(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|CREATE)'; then
+  echo "Blocked: Only SELECT queries are allowed" >&2
   exit 2
 fi
-
 exit 0
 ```
 
 ### Pattern 2: File Path Validator
 
-Restrict file operations to specific directories.
+Restrict file modifications to specific directories.
 
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "./scripts/validate-file-path.sh"
+```
+
+**validate-file-path.sh:**
 ```bash
 #!/bin/bash
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
 
-if [ -z "$FILE_PATH" ]; then
+if [[ -z "$FILE_PATH" ]]; then
   exit 0
 fi
 
-# Only allow operations in src/ directory
 if [[ "$FILE_PATH" != */src/* ]]; then
-  echo "Blocked: Operations only allowed in src/ directory." >&2
+  echo "Blocked: Can only modify files in src/ directory" >&2
   exit 2
 fi
-
 exit 0
 ```
 
 ### Pattern 3: Command Allowlist
 
-Only allow specific commands.
+Restrict shell commands to a known-safe set.
 
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-command.sh"
+```
+
+**validate-command.sh:**
 ```bash
 #!/bin/bash
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-ALLOWED_COMMANDS="^(git diff|git log|git status|npm test|npm run lint)"
+ALLOWED_PREFIXES=("git " "npm " "npx " "node " "cat " "ls " "echo ")
 
-if ! echo "$COMMAND" | grep -E "$ALLOWED_COMMANDS" > /dev/null; then
-  echo "Blocked: Only git and npm test/lint commands are allowed." >&2
-  exit 2
-fi
+for prefix in "${ALLOWED_PREFIXES[@]}"; do
+  if [[ "$COMMAND" == "$prefix"* ]]; then
+    exit 0
+  fi
+done
 
-exit 0
+echo "Blocked: Command not in allowlist" >&2
+exit 2
 ```
 
 ### Pattern 4: Post-Edit Linter
 
-Run linting after file edits.
+Auto-lint files after modification.
 
 ```yaml
 hooks:
@@ -178,52 +111,128 @@ hooks:
           command: "./scripts/run-linter.sh"
 ```
 
+**run-linter.sh:**
 ```bash
 #!/bin/bash
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
 
-if [ -z "$FILE_PATH" ]; then
-  exit 0
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+  npx eslint --fix "$FILE_PATH" 2>/dev/null
+elif [[ "$FILE_PATH" == *.py ]]; then
+  python3 -m black "$FILE_PATH" 2>/dev/null
 fi
-
-# Run appropriate linter based on file extension
-case "$FILE_PATH" in
-  *.ts|*.tsx) npx eslint "$FILE_PATH" --fix ;;
-  *.py) python -m ruff check "$FILE_PATH" --fix ;;
-  *.go) gofmt -w "$FILE_PATH" ;;
-esac
 
 exit 0
 ```
 
+### Pattern 5: Prompt-Based Validation
+
+Use Claude itself to evaluate tool input before execution.
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: prompt
+          prompt: "Evaluate if this command is safe and appropriate for the task. Return JSON with {\"decision\": \"allow\"} or {\"decision\": \"block\", \"reason\": \"...\"}"
+          timeout: 15
+```
+
+### Pattern 6: Agent-Based Review
+
+Spawn a reviewer subagent to validate complex operations.
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Write"
+      hooks:
+        - type: agent
+          agent: code-safety-reviewer
+          timeout: 30
+```
+
+### Pattern 7: JSON Decision Response
+
+Use the full JSON response schema to control tool execution with context injection.
+
+**validate-with-context.sh:**
+```bash
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if echo "$COMMAND" | grep -q 'rm -rf'; then
+  jq -n '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: "Destructive command blocked by hook"
+    }
+  }'
+else
+  jq -n --arg ctx "Environment: $(hostname)" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow",
+      additionalContext: $ctx
+    }
+  }'
+fi
+```
+
+### Pattern 8: Input Modification
+
+Modify tool input before execution (e.g., enforce flags).
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if [[ "$COMMAND" == npm\ test* ]] && [[ "$COMMAND" != *--coverage* ]]; then
+  jq -n --arg cmd "$COMMAND --coverage" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow",
+      updatedInput: { command: $cmd }
+    }
+  }'
+else
+  exit 0
+fi
+```
+
 ---
 
-## Project-Level Subagent Events
+## Project-Level Subagent Hooks
 
-Configure in `settings.json` to respond to subagent lifecycle in the main session.
+Monitor subagent lifecycle from the project settings level (not inside the subagent):
 
-| Event | Matcher Input | When It Fires |
-|-------|--------------|---------------|
-| `SubagentStart` | Agent type name | When subagent begins |
-| `SubagentStop` | Agent type name | When subagent completes |
-
-### Example: Setup/Teardown
 ```json
 {
   "hooks": {
     "SubagentStart": [
       {
-        "matcher": "db-agent",
+        "matcher": "security-scanner",
         "hooks": [
-          { "type": "command", "command": "./scripts/setup-db-connection.sh" }
+          {
+            "type": "command",
+            "command": "echo 'Security scan started' >> /tmp/audit.log"
+          }
         ]
       }
     ],
     "SubagentStop": [
       {
+        "matcher": "security-scanner",
         "hooks": [
-          { "type": "command", "command": "./scripts/cleanup.sh" }
+          {
+            "type": "command",
+            "command": "echo 'Security scan completed' >> /tmp/audit.log"
+          }
         ]
       }
     ]
@@ -233,46 +242,49 @@ Configure in `settings.json` to respond to subagent lifecycle in the main sessio
 
 ---
 
-## Script Requirements
+## Hook Script Requirements
 
-### Make Scripts Executable
-```bash
-chmod +x ./scripts/validate-readonly-query.sh
-```
-
-### Dependencies
-- `jq` for JSON parsing (install: `brew install jq` or `apt install jq`)
-- Scripts receive JSON via stdin
-- Scripts should handle empty/missing fields gracefully
-
-### Error Handling
-```bash
-#!/bin/bash
-# Always read stdin even if not needed
-INPUT=$(cat)
-
-# Safely extract fields with defaults
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
-
-# Handle jq not available
-if ! command -v jq &> /dev/null; then
-  echo "Warning: jq not installed, skipping validation" >&2
-  exit 0
-fi
-```
+1. **Executable permission**: `chmod +x scripts/*.sh`
+2. **Read JSON from stdin**: Use `INPUT=$(cat)` then `jq` to parse
+3. **Exit code discipline**: 0 = allow, 2 = block, other = warning
+4. **stderr for messages**: Error messages go to stderr, JSON responses to stdout
+5. **Timeout awareness**: Default 600s for command type. Keep scripts fast.
+6. **No interactive input**: Scripts must run non-interactively
 
 ---
 
 ## Testing Hooks
 
-### Test PreToolUse Hook
+### Test PreToolUse hook locally
+
 ```bash
-echo '{"tool_name":"Bash","tool_input":{"command":"SELECT * FROM users"},"hook_event_name":"PreToolUse"}' | ./scripts/validate-readonly-query.sh
+# Simulate Bash tool input
+echo '{"tool_name": "Bash", "tool_input": {"command": "SELECT * FROM users"}}' | ./scripts/validate-readonly-sql.sh
+echo "Exit code: $?"
+
+# Expect: exit 0 (SELECT is allowed)
+```
+
+```bash
+# Simulate blocked command
+echo '{"tool_name": "Bash", "tool_input": {"command": "DROP TABLE users"}}' | ./scripts/validate-readonly-sql.sh
+echo "Exit code: $?"
+
+# Expect: exit 2 (destructive command blocked)
+```
+
+### Test PostToolUse hook
+
+```bash
+echo '{"tool_name": "Edit", "tool_input": {"file_path": "/project/src/app.ts"}}' | ./scripts/run-linter.sh
 echo "Exit code: $?"
 ```
 
-### Test with Blocked Command
+### Debug with verbose mode
+
+Run Claude Code with `--verbose` flag to see hook execution details:
 ```bash
-echo '{"tool_name":"Bash","tool_input":{"command":"DROP TABLE users"},"hook_event_name":"PreToolUse"}' | ./scripts/validate-readonly-query.sh
-echo "Exit code: $?"  # Should be 2
+claude --verbose
 ```
+
+Hook stderr output appears in verbose logs, helping diagnose why hooks block or allow.
