@@ -491,9 +491,9 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
         <div class="tab-panel" data-panel="cloud">
           <div class="form-section">
             <div class="form-group">
-              <label>Base URL <span class="required">*</span></label>
-              <input type="url" data-field="cloud.jira.base_url"
-                placeholder="https://your-domain.atlassian.net" autocomplete="off">
+              <label>Site Name <span class="required">*</span></label>
+              <input type="text" data-field="cloud.jira.base_url"
+                placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">
               <span class="field-error" hidden></span>
             </div>
 
@@ -946,8 +946,28 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       }
     }
 
-    function validateService(prefix, svc) {
-      requireUrl(prefix + '.base_url', svc.base_url);
+    function requireCloudSite(fieldPath, value) {
+      if (!value || !value.trim()) {
+        showError(fieldPath, 'This field is required.');
+        valid = false;
+      } else {
+        var v = value.trim();
+        // Accept full URL or bare site name (alphanumeric + hyphens)
+        var isUrl = /^https?:\\/\\//i.test(v);
+        var isSiteName = /^[a-zA-Z0-9][a-zA-Z0-9-]*\$/.test(v);
+        if (!isUrl && !isSiteName) {
+          showError(fieldPath, 'Enter a site name (e.g. my-company) or full URL (https://my-company.atlassian.net)');
+          valid = false;
+        }
+      }
+    }
+
+    function validateService(prefix, svc, isCloud) {
+      if (isCloud) {
+        requireCloudSite(prefix + '.base_url', svc.base_url);
+      } else {
+        requireUrl(prefix + '.base_url', svc.base_url);
+      }
       if (svc.auth_type === 'basic') {
         requireField(prefix + '.username', svc.username);
         requireField(prefix + '.api_token', svc.api_token);
@@ -961,10 +981,10 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     }
 
     if (data.deployment_type === 'cloud') {
-      validateService('cloud.jira', data.jira);
+      validateService('cloud.jira', data.jira, true);
     } else {
-      validateService('onprem.jira', data.jira);
-      validateService('onprem.confluence', data.confluence);
+      validateService('onprem.jira', data.jira, false);
+      validateService('onprem.confluence', data.confluence, false);
     }
 
     return valid;
@@ -1018,8 +1038,16 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       };
     }
 
+    function normalizeCloudUrl(value) {
+      if (!value) return value;
+      var v = value.trim();
+      if (/^https?:\\/\\//i.test(v)) return v.replace(/\\/+\$/, '');
+      return 'https://' + v + '.atlassian.net';
+    }
+
     if (isCloud) {
       var jira = getServiceData('cloud.jira');
+      jira.base_url = normalizeCloudUrl(jira.base_url);
       return { deployment_type: deployType, jira: jira, confluence: jira };
     } else {
       return {
