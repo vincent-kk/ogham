@@ -17,3 +17,9 @@ export async function writeJson(path: string, data: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, JSON.stringify(data, null, 2) + '\n', 'utf-8');
 }
+
+/** Write binary data to file, creating parent directories as needed */
+export async function writeBinary(path: string, data: ArrayBuffer): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, Buffer.from(data));
+}

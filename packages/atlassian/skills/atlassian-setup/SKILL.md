@@ -21,7 +21,7 @@ Authentication and connection management for Atlassian products.
 
 ## Pre-flight
 
-작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
 
 ## Setup Flow
 

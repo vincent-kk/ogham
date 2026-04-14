@@ -140,6 +140,70 @@ describe('adf-to-markdown', () => {
     ] }] };
     expect(adfToMarkdown(adf)).toContain('line 1\nline 2');
   });
+
+  it('converts mediaSingle with image child', () => {
+    const adf = { type: 'doc', content: [{ type: 'mediaSingle', content: [
+      { type: 'media', attrs: { id: 'abc-123', type: 'image', fileName: 'photo.png' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('![photo.png](attachment:abc-123)');
+  });
+
+  it('converts mediaSingle with non-image child', () => {
+    const adf = { type: 'doc', content: [{ type: 'mediaSingle', content: [
+      { type: 'media', attrs: { id: 'def-456', type: 'file', fileName: 'document.pdf' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('[document.pdf](attachment:def-456)');
+  });
+
+  it('converts mediaGroup with multiple children', () => {
+    const adf = { type: 'doc', content: [{ type: 'mediaGroup', content: [
+      { type: 'media', attrs: { id: 'a1', type: 'image', fileName: 'img1.png' } },
+      { type: 'media', attrs: { id: 'a2', type: 'file', fileName: 'doc.pdf' } },
+    ] }] };
+    const md = adfToMarkdown(adf)!;
+    expect(md).toContain('![img1.png](attachment:a1)');
+    expect(md).toContain('[doc.pdf](attachment:a2)');
+  });
+
+  it('falls back to [media] for empty mediaSingle', () => {
+    const adf = { type: 'doc', content: [{ type: 'mediaSingle', content: [] }] };
+    expect(adfToMarkdown(adf)).toBe('[media]');
+  });
+
+  it('falls back to [media] for media child with no attrs', () => {
+    const adf = { type: 'doc', content: [{ type: 'mediaSingle', content: [
+      { type: 'media' },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('[media]');
+  });
+
+  it('normalizes mention without @ prefix', () => {
+    const adf = { type: 'doc', content: [{ type: 'paragraph', content: [
+      { type: 'mention', attrs: { text: 'Jane Doe' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('@Jane Doe');
+  });
+
+  it('preserves mention with @ prefix', () => {
+    const adf = { type: 'doc', content: [{ type: 'paragraph', content: [
+      { type: 'mention', attrs: { text: '@John Doe' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('@John Doe');
+  });
+
+  it('uses displayName fallback for mention', () => {
+    const adf = { type: 'doc', content: [{ type: 'paragraph', content: [
+      { type: 'mention', attrs: { displayName: 'Bob Smith' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('@Bob Smith');
+  });
+
+  it('uses id fallback for mention without text', () => {
+    const adf = { type: 'doc', content: [{ type: 'paragraph', content: [
+      { type: 'mention', attrs: { id: 'account123' } },
+    ] }] };
+    expect(adfToMarkdown(adf)).toBe('@account123');
+  });
 });
 
 describe('markdown-to-adf', () => {

@@ -27,3 +27,10 @@
 | Add | `fetch` | POST | Use content_format: "markdown" |
 | Update | `fetch` | PUT | |
 | Delete | `fetch` | DELETE | |
+
+## URL Patterns
+
+| URL Pattern | Route To |
+|---|---|
+| `...atlassian.net/browse/KAN-27?focusedCommentId=10110` | `GET /rest/api/3/issue/KAN-27/comment/10110` |
+| `...atlassian.net/browse/KAN-27?focusedId=10110` | `GET /rest/api/3/issue/KAN-27/comment/10110` |

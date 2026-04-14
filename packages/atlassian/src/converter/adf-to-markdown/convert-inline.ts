@@ -9,7 +9,9 @@ export function convertInline(node: AdfNode): string {
       return '\n';
     case 'mention': {
       const attrs = node.attrs ?? {};
-      return (attrs.text as string) ?? `@${(attrs.id as string) ?? 'unknown'}`;
+      const text = (attrs.text as string) ?? (attrs.displayName as string);
+      if (text) return text.startsWith('@') ? text : `@${text}`;
+      return `@${(attrs.id as string) ?? 'unknown'}`;
     }
     case 'emoji': {
       const attrs = node.attrs ?? {};

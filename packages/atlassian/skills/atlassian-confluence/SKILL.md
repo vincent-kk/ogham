@@ -48,7 +48,7 @@ Confluence REST API domain router for Claude Code agents. Resolves the correct e
 
 ## Pre-flight
 
-작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
 
 ## References
 

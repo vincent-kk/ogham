@@ -38,8 +38,22 @@ export function convertBlock(node: AdfNode, indent: string = ''): string {
     case 'listItem':
       return content.map((child) => convertBlock(child)).join('\n');
     case 'mediaSingle':
-    case 'mediaGroup':
-      return '[media]';
+    case 'mediaGroup': {
+      const mediaNodes = content.filter(child => child.type === 'media');
+      if (mediaNodes.length === 0) return '[media]';
+      return mediaNodes.map(media => {
+        const attrs = media.attrs ?? {};
+        const fileName = (attrs.fileName as string) ?? (attrs.alt as string);
+        const id = (attrs.id as string) ?? '';
+        const mediaType = (attrs.type as string) ?? 'file';
+        if (!fileName && !id) return '[media]';
+        const label = fileName ?? id;
+        if (mediaType === 'image') {
+          return `![${label}](attachment:${id})`;
+        }
+        return `[${label}](attachment:${id})`;
+      }).join('\n');
+    }
     case 'panel': {
       const panelType = (node.attrs?.panelType as string) ?? 'info';
       const body = content.map((child) => convertBlock(child)).join('\n');

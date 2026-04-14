@@ -2,6 +2,8 @@ import { executeRequest } from '../../../core/http-client/index.js';
 import type { HttpClientConfig } from '../../../core/http-client/index.js';
 import type { McpResponse } from '../../../types/index.js';
 import { adfToMarkdown, markdownToAdf, markdownToStorage } from '../../../converter/index.js';
+import { validateSavePath } from '../../../utils/index.js';
+import { writeBinary } from '../../../lib/file-io.js';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -15,6 +17,7 @@ interface FetchParams {
   accept_format?: 'json' | 'raw';
   content_type?: string;
   content_format?: 'json' | 'markdown';
+  save_to_path?: string;
 }
 
 /** Detect ADF content in a response and convert to Markdown */
@@ -129,10 +132,23 @@ export async function handleFetch(
         endpoint,
         query_params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
         headers: params.headers,
+        acceptBinary: !!params.save_to_path,
       });
 
-      if (response.success && params.accept_format !== 'raw') {
-        response.data = autoConvertAdf(response.data);
+      if (response.success && response.data) {
+        const data = response.data as Record<string, unknown>;
+        if (data._binary === true) {
+          const validPath = validateSavePath(params.save_to_path!);
+          const buffer = data.buffer as ArrayBuffer;
+          await writeBinary(validPath, buffer);
+          response.data = {
+            saved_to: validPath,
+            size_bytes: buffer.byteLength,
+            content_type: data.contentType,
+          };
+        } else if (params.accept_format !== 'raw') {
+          response.data = autoConvertAdf(response.data);
+        }
       }
 
       return response;

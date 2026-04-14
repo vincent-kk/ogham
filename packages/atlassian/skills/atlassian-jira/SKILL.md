@@ -48,6 +48,18 @@ Domain-based routing layer for all Jira REST API operations.
 Read `tools/<domain>/schema.md` ONLY when you need endpoint details for that domain.
 Do not preload all schema files — load on demand per operation.
 
+## URL Routing
+
+When the user provides a Jira URL instead of an API endpoint:
+
+1. Extract issue key from path: `/browse/{issueKey}` or `/jira/browse/{issueKey}`
+2. Check query parameters for routing hints:
+   - `focusedCommentId={id}` → Route to single comment: `GET /rest/api/3/issue/{issueKey}/comment/{id}`
+   - `focusedId={id}` → Same as focusedCommentId
+3. Without routing hints: fetch issue normally
+
+This prevents fetching the entire issue (100K+ chars) when only a specific comment is needed.
+
 ## Permission Boundaries
 
 - **Read operations**: require Browse Project permission
@@ -58,7 +70,7 @@ Do not preload all schema files — load on demand per operation.
 
 ## Pre-flight
 
-작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
 
 ## References
 

@@ -28,6 +28,7 @@ Tool: fetch (method: GET)
 Params:
   endpoint: <attachment URL or API path>
   accept_format: "raw"
+  save_to_path: "/path/to/save/filename.ext"
 ```
 
 ### Get Attachment Metadata (Jira)
@@ -51,13 +52,13 @@ Params:
 
 1. Resolve attachment URL (direct URL or metadata lookup)
 2. Auth header injected automatically by MCP layer
-3. HTTP GET with `accept_format: "raw"`
-4. Save to file (target path or temp directory)
-5. Return: file path, size, MIME type
+3. HTTP GET with `accept_format: "raw"` and `save_to_path` for binary files
+4. File saved automatically by MCP layer when `save_to_path` provided
+5. Return: `{ saved_to, size_bytes, content_type }`
 
 ## Pre-flight
 
-작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
 
 ## References
 

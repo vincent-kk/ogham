@@ -26,6 +26,7 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   query_params?: Record<string, string>;
   timeout?: number;
+  acceptBinary?: boolean;
 }
 
 function getErrorCode(status: number): string {
@@ -55,7 +56,7 @@ export async function executeRequest(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    'Accept': options.acceptBinary ? '*/*' : 'application/json',
     ...options.headers,
   };
 
@@ -92,7 +93,10 @@ export async function executeRequest(
       if (status >= 200 && status < 300) {
         let data: unknown = null;
         const contentType = response.headers.get('content-type') ?? '';
-        if (contentType.includes('application/json')) {
+        if (options.acceptBinary && !contentType.includes('application/json')) {
+          const buffer = await response.arrayBuffer();
+          data = { _binary: true, buffer, contentType };
+        } else if (contentType.includes('application/json')) {
           data = await response.json();
         } else if (status !== 204) {
           data = await response.text();
