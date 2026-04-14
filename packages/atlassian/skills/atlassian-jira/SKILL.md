@@ -68,9 +68,9 @@ This prevents fetching the entire issue (100K+ chars) when only a specific comme
 - **JSM operations**: require Service Desk Agent role for queue/SLA access
 - **Development info**: requires Connect app or Forge app with `read:jira-work` scope
 
-## Pre-flight
+## Auth Recovery
 
-Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
+No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../_shared/auth-check.md).
 
 ## References
 

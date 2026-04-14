@@ -1,6 +1,6 @@
 # Auth Check
 
-Pre-flight authentication check using the `auth-check` MCP tool.
+Authentication check using the `auth-check` MCP tool.
 
 ## Tool
 
@@ -10,11 +10,15 @@ Pre-flight authentication check using the `auth-check` MCP tool.
 
 ## General Skills Flow (atlassian-jira, atlassian-confluence, atlassian-download)
 
-1. Call `auth-check` with `connection_test: false`
-2. If `authenticated: true` → proceed with the original operation
-3. If `authenticated: false` →
-   - Inform user: "Atlassian 인증 정보가 설정되어 있지 않습니다. 설정을 진행하시겠습니까?"
+Optimistic execution — skip pre-flight auth check and attempt the operation directly.
+Handle authentication errors only when they occur (HTTP 401 with `reauth_required: true`).
+
+1. Proceed with the requested operation immediately (no upfront `auth-check` call)
+2. If the operation succeeds → done
+3. If HTTP 401 (`reauth_required: true`) →
+   - Inform user: "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?"
    - User agrees → invoke `/atlassian:atlassian-setup`
+   - After setup completes → retry the failed operation once
    - User declines → abort skill execution with guidance message
 
 ## Setup Skill Flow (atlassian-setup)

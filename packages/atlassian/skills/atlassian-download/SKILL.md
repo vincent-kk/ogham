@@ -56,9 +56,9 @@ Params:
 4. File saved automatically by MCP layer when `save_to_path` provided
 5. Return: `{ saved_to, size_bytes, content_type }`
 
-## Pre-flight
+## Auth Recovery
 
-Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
+No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../_shared/auth-check.md).
 
 ## References
 
