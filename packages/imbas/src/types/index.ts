@@ -35,7 +35,6 @@ export {
   CompletePhaseActionSchema,
   EscapePhaseActionSchema,
   RunTransitionSchema,
-  createInitialRunState,
 } from './state.js';
 export type {
   PhaseStatus,

@@ -23,13 +23,6 @@ import type { NapiLang, SgModule } from '../../types/index.js';
 
 import { getMappedLang } from './utils/getMappedLang.js';
 
-export {
-  AST_MAX_FILES as MAX_FILES,
-  AST_EXCLUDED_DIRS as EXCLUDED_DIRS,
-  SUPPORTED_LANGUAGES,
-  EXT_TO_LANG,
-};
-
 let sgModule: SgModule | null = null;
 let sgLoadFailed = false;
 let sgLoadError = '';

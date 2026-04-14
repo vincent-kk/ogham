@@ -7,23 +7,58 @@
 import { join } from 'node:path';
 import { readJson, writeJson } from '../../lib/file-io.js';
 import { STATE_FILENAME } from '../../constants/index.js';
-import {
-  RunStateSchema,
-  createInitialRunState,
-} from '../../types/state.js';
+import { RunStateSchema } from '../../types/state.js';
 import type { RunState, RunTransition } from '../../types/state.js';
 import { validateStartPhase } from '../utils/validate-start-phase.js';
 import { handleCompletePhase } from '../utils/handle-complete-phase.js';
 import { advancePhase } from '../utils/advance-phase.js';
 
-/** Create a new initial RunState (delegates to factory in types) */
+/** Create a new initial RunState */
 export function createRunState(params: {
   run_id: string;
   project_ref: string;
   source_file: string;
   source_issue_ref?: string | null;
 }): RunState {
-  return createInitialRunState(params);
+  const now = new Date().toISOString();
+  return {
+    run_id: params.run_id,
+    project_ref: params.project_ref,
+    epic_ref: null,
+    source_issue_ref: params.source_issue_ref ?? null,
+    source_file: params.source_file,
+    created_at: now,
+    updated_at: now,
+    current_phase: 'validate',
+    phases: {
+      validate: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        output: 'validation-report.md',
+        result: null,
+        blocking_issues: 0,
+        warning_issues: 0,
+      },
+      split: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        output: 'stories-manifest.json',
+        stories_created: 0,
+        pending_review: true,
+        escape_code: null,
+      },
+      devplan: {
+        status: 'pending',
+        started_at: null,
+        completed_at: null,
+        output: 'devplan-manifest.json',
+        result: null,
+        pending_review: true,
+      },
+    },
+  };
 }
 
 /** Load and validate state.json from runDir */
