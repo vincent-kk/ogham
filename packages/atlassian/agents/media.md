@@ -58,7 +58,7 @@ Each scene: `scene_id` (sequential from 1), `start_ms`/`end_ms`, `description`, 
 
 ### 6. Write analysis.json
 
-Compile and write to the specified path within `.atlassian-temp/`.
+Compile and write to the specified path within `.temp/`.
 
 ---
 
@@ -106,7 +106,7 @@ Do not assume pruned frames contain important content — they were removed as v
 
 ## Constraints
 
-- **Write only to `.atlassian-temp/`** for analysis output
+- **Write only to `.temp/`** for analysis output
 - **Read-only for all other paths** — frames, metadata, and context files
 - **Sequential frame processing** — chronological order required for change detection
 - **Metadata timestamps only** — never estimate from visual content or frame numbers

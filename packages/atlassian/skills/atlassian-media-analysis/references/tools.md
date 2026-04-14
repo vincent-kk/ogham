@@ -17,7 +17,7 @@ Tool: fetch (method: GET)
 Params:
   url: <attachment-content-url>
   accept_format: "raw"
-  save_to_path: ".atlassian-temp/<filename>"
+  save_to_path: ".temp/<filename>"
 ```
 
 See [download-flow.md](../../atlassian-download/references/download-flow.md) for Jira/Confluence attachment URL resolution patterns.
@@ -42,5 +42,5 @@ frame image data — only the text summary is returned.
 
 - Same file path with existing analysis.json -> return cached result (skip extraction)
 - Use `--force` flag to bypass cache and re-analyze
-- `.atlassian-temp/` directory is gitignored
+- `.temp/` directory is gitignored
 - No automatic cleanup (no deletion without user consent)

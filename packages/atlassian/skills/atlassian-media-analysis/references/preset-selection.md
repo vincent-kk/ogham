@@ -24,7 +24,7 @@ See [presets/index.md](../presets/index.md) for the full decision matrix and all
 ## File Structure
 
 ```
-.atlassian-temp/
+.temp/
 └── login-demo.mp4/
     ├── frames/
     │   ├── frame_0001.jpg

@@ -10,7 +10,7 @@ Step 1 — Resolve input
 
 Step 2 — Download (if Atlassian URL)
   - See [download-flow.md](../../atlassian-download/references/download-flow.md) for full download protocol
-  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw", save_to_path=".atlassian-temp/<filename>"
+  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw", save_to_path=".temp/<filename>"
   - If download fails -> error with auth check guidance
 
 Step 3 — Probe and select preset
@@ -21,19 +21,19 @@ Step 3 — Probe and select preset
   - See presets/index.md for the full decision matrix
 
 Step 4 — Image handling (no scene-sieve)
-  - If Atlassian URL: file already in .atlassian-temp/<filename>/
-  - If local file: copy to .atlassian-temp/<filename>/
+  - If Atlassian URL: file already in .temp/<filename>/
+  - If local file: copy to .temp/<filename>/
   - Return file path to caller
   - Caller reads the image directly via Read tool (multimodal)
   - No subagent needed. Skill completes here.
 
 Step 5 — Video/GIF handling
   a. Resolve temp directory:
-     - Default temp dir: ".atlassian-temp"
-     - Target dir: .atlassian-temp/<filename>/
+     - Default temp dir: ".temp"
+     - Target dir: .temp/<filename>/
 
   b. Check cache:
-     - If .atlassian-temp/<filename>/analysis.json exists AND no --force flag
+     - If .temp/<filename>/analysis.json exists AND no --force flag
        -> Return cached analysis summary
        -> Skip extraction and analysis
 
@@ -48,7 +48,7 @@ Step 5 — Video/GIF handling
        - frames directory absolute path
        - .metadata.json absolute path
        - analysis purpose/context from caller
-       - analysis.json save path: .atlassian-temp/<filename>/analysis.json
+       - analysis.json save path: .temp/<filename>/analysis.json
      - Agent performs:
        1. Read .metadata.json -> frame list + timestamps
        2. Read frames sequentially (multimodal image recognition)
