@@ -1,7 +1,7 @@
 ---
 name: atlassian-jira
 user_invocable: false
-description: "Domain router for Jira REST API operations — issue CRUD, JQL search, sprint/board/epic management, workflow transitions, comments, worklogs, attachments, links, watchers, JSM queues/SLA, dev info, and time metrics across 15 tool domains. Trigger: agent-dispatched only (via jira agent or direct skill invocation)."
+description: "Domain router for Jira REST API operations — issue CRUD, JQL search, sprint/board/epic management, workflow transitions, comments, worklogs, attachments, links, watchers, JSM queues/SLA, dev info, and time metrics across 15 tool domains. Main agent executes directly for simple operations; jira agent spawned only for complex multi-step workflows."
 version: "0.1.0"
 complexity: complex
 plugin: atlassian
@@ -10,6 +10,28 @@ plugin: atlassian
 # atlassian-jira
 
 Domain-based routing layer for all Jira REST API operations.
+
+## Execution Model
+
+**Main agent executes directly** for simple operations:
+- Single issue read (`GET /rest/api/3/issue/{key}`)
+- Single JQL search
+- Single comment read/add
+- Single transition
+- Single worklog add
+
+**Spawn `jira` agent** only for complex multi-step workflows:
+- Bulk issue creation/updates (>3 issues)
+- Multi-domain chained operations (create + comment + transition + link)
+- Operations requiring field metadata lookup before execution
+- Error recovery chains requiring multiple retries with corrected parameters
+
+### Direct Execution Steps (Main Agent)
+
+1. Read `tools/<domain>/schema.md` for the needed domain
+2. Call `mcp__plugin_atlassian_tools__fetch` with the correct HTTP method and endpoint
+3. Use `content_format: "markdown"` when sending description/body content
+4. On 401: invoke `atlassian-setup` skill, then retry once
 
 ## When to Use
 

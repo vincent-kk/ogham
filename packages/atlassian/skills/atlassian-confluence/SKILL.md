@@ -1,7 +1,7 @@
 ---
 name: atlassian-confluence
 user_invocable: false
-description: "Domain router for Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management across Cloud V2, Cloud V1, and Server/DC. Trigger: agent-dispatched only (via confluence agent or direct skill invocation)."
+description: "Domain router for Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management across Cloud V2, Cloud V1, and Server/DC. Main agent executes directly for simple operations; confluence agent spawned only for complex multi-step workflows."
 version: "0.1.0"
 complexity: complex
 plugin: atlassian
@@ -9,7 +9,29 @@ plugin: atlassian
 
 # atlassian-confluence
 
-Confluence REST API domain router for Claude Code agents. Resolves the correct endpoint, parameters, and MCP tool for any Confluence operation.
+Confluence REST API domain router. Resolves the correct endpoint, parameters, and MCP tool for any Confluence operation.
+
+## Execution Model
+
+**Main agent executes directly** for simple operations:
+- Single page read (`GET /api/v2/pages/{id}` or `/rest/api/content/{id}`)
+- Single CQL search
+- Single comment read/add
+- Single label add/remove
+- Single attachment download
+
+**Spawn `confluence` agent** only for complex multi-step workflows:
+- Multi-page operations (bulk create/update, page tree manipulation)
+- Version conflict resolution chains (fetch → increment → retry on 409)
+- Cross-domain chained operations (create page + attach + label + comment)
+- Storage format troubleshooting (400 errors from malformed XHTML)
+
+### Direct Execution Steps (Main Agent)
+
+1. Read `tools/<domain>/schema.md` for the needed domain
+2. Call `mcp__plugin_atlassian_tools__fetch` with the correct HTTP method and endpoint
+3. Use `content_format: "markdown"` when sending page body content (auto-converts to Storage Format)
+4. On 401: invoke `atlassian-setup` skill, then retry once
 
 ## When to Use
 
