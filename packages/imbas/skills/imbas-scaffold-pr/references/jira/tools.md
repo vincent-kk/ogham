@@ -1,19 +1,15 @@
 # Tools Used — Jira Provider
 
-## Atlassian MCP Tools
+## Jira Operations
 
-| Tool | Usage |
-|------|-------|
-| `getJiraIssue` | Fetch issue details including `subtasks` array |
+| Operation | Usage |
+|-----------|-------|
+| [`[OP: get_issue]`](../../../_shared/operations/get_issue.md) | Fetch issue details including `subtasks` array |
+
+The LLM resolves which tool to use at runtime. Read the linked operation file for REST fallback details.
 
 ## imbas MCP Tools
 
 | Tool | Usage |
 |------|-------|
 | `mcp_tools_config_get` | Read `config.jira.base_url` for URL construction |
-
-## Operation Notation
-
-| Operation | MCP Tool | Parameters |
-|-----------|----------|------------|
-| `[OP: get_issue]` | `getJiraIssue` | `issueIdOrKey=<key>` |

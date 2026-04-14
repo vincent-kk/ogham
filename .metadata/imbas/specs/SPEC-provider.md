@@ -24,35 +24,38 @@ Conceptual operations that every provider must support. Not a TypeScript interfa
 
 ### 2.1 Issue Operations
 
-| Operation | Description | Jira Implementation | GitHub Implementation |
-|-----------|-------------|--------------------|-----------------------|
-| `create_issue` | Create issue with type, title, body, parent | `createJiraIssue` | `gh issue create` |
-| `get_issue` | Fetch issue details | `getJiraIssue` | `gh issue view --json` |
-| `edit_issue` | Update issue fields | `editJiraIssue` | `gh issue edit` |
-| `search_issues` | Query issues by criteria | `searchJiraIssuesUsingJql` | `gh issue list --label --search --json` |
-| `add_comment` | Post comment to issue | `addCommentToJiraIssue` | `gh issue comment` |
+| Operation | Description | Jira REST Endpoint | GitHub Implementation |
+|-----------|-------------|-------------------|----------------------|
+| `[OP: create_issue]` | Create issue with type, title, body, parent | `POST /rest/api/3/issue` | `gh issue create` |
+| `[OP: get_issue]` | Fetch issue details | `GET /rest/api/3/issue/{key}` | `gh issue view --json` |
+| `[OP: edit_issue]` | Update issue fields | `PUT /rest/api/3/issue/{key}` | `gh issue edit` |
+| `[OP: search_jql]` | Query issues by criteria | `POST /rest/api/3/search/jql` | `gh issue list --label --search --json` |
+| `[OP: add_comment]` | Post comment to issue | `POST /rest/api/3/issue/{key}/comment` | `gh issue comment` |
 
 ### 2.2 State Transitions
 
-| Operation | Description | Jira | GitHub |
-|-----------|-------------|------|--------|
-| `transition_issue` | Change workflow state | `getTransitionsForJiraIssue` + `transitionJiraIssue` | Label swap + `gh issue close` (for done) |
-| `get_transitions` | Available next states | `getTransitionsForJiraIssue` | All states always available (label-based) |
+| Operation | Description | Jira REST Endpoint | GitHub |
+|-----------|-------------|-------------------|--------|
+| `[OP: transition_issue]` | Change workflow state | `POST /rest/api/3/issue/{key}/transitions` | Label swap + `gh issue close` (for done) |
+| `[OP: get_transitions]` | Available next states | `GET /rest/api/3/issue/{key}/transitions` | All states always available (label-based) |
 
 ### 2.3 Link Operations
 
-| Operation | Description | Jira | GitHub |
-|-----------|-------------|------|--------|
-| `create_link` | Typed link between issues | `createIssueLink` | Body/meta section edit + `#N` or `owner/repo#N` reference |
+| Operation | Description | Jira REST Endpoint | GitHub |
+|-----------|-------------|-------------------|--------|
+| `[OP: create_link]` | Typed link between issues | `POST /rest/api/3/issueLink` | Body/meta section edit + `#N` or `owner/repo#N` reference |
 
 ### 2.4 Metadata Operations
 
-| Operation | Description | Jira | GitHub |
-|-----------|-------------|------|--------|
-| `get_project_meta` | Project/repo info | `getVisibleJiraProjects` | `gh repo view --json` |
-| `get_issue_types` | Available types | `getJiraProjectIssueTypesMetadata` | `gh label list --json` (type: labels) |
-| `get_link_types` | Available link types | `getIssueLinkTypes` | Fixed set (meta block convention) |
-| `validate_setup` | Auth + config check | Cache meta validation | `gh auth status` + label check |
+| Operation | Description | Jira REST Endpoint | GitHub |
+|-----------|-------------|-------------------|--------|
+| `[OP: get_projects]` | Project/repo info | `GET /rest/api/3/project` | `gh repo view --json` |
+| `[OP: get_issue_types]` | Available types | `GET /rest/api/3/issuetype/project?projectId={id}` | `gh label list --json` (type: labels) |
+| `[OP: get_link_types]` | Available link types | `GET /rest/api/3/issueLinkType` | Fixed set (meta block convention) |
+| `[OP: auth_check]` | Auth + config check | `GET /rest/api/3/myself` | `gh auth status` + label check |
+
+The LLM resolves each `[OP:]` to an available session tool at runtime. REST endpoints
+serve as fallback for generic HTTP tools when no dedicated tool is available.
 
 ---
 
@@ -125,8 +128,8 @@ Step N — [Operation Name]
   2. Branch on config.provider:
 
   [jira]
-    - Use Atlassian MCP tool: <specific tool>(<params>)
-    - Parse Jira response format
+    - Use [OP: <operation>] — resolved to available session tool at runtime
+    - REST fallback: see SPEC-provider-jira.md §3 for endpoint mapping
 
   [github]
     - Use Bash: gh <command> <flags> --json <fields>
@@ -218,7 +221,7 @@ Cache file contents differ by provider but serve the same purpose:
 | Scenario | Jira | GitHub |
 |----------|------|--------|
 | Auth failure | Atlassian MCP error → "Check Atlassian token" | `gh auth status` failure → "Run `gh auth login`" |
-| Issue not found | `getJiraIssue` error | `gh issue view` exit code 1 |
+| Issue not found | `[OP: get_issue]` error | `gh issue view` exit code 1 |
 | Rate limit | HTTP 429 | `gh` CLI auto-retries (built-in) |
 | Permission denied | HTTP 403 | `gh` CLI error → "Check repo access" |
 | Label missing | N/A (types are native) | Auto-create missing labels (setup or on-demand) |

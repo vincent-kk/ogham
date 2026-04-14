@@ -8,11 +8,13 @@ Verifies remote tool availability and offers optional auto-setup for missing ite
 ### Atlassian MCP
 
 ```
-1. Call atlassianUserInfo tool.
+1. [OP: auth_check] — Verify Atlassian connectivity.
+   Use any available Atlassian identity/authentication tool,
+   or fall back to GET /rest/api/3/myself via a generic HTTP tool.
 2. On success:
    - Extract displayName (or emailAddress as fallback).
    - Status: ✓ Atlassian connected (user: <displayName>)
-3. On tool-not-found (tool does not exist in session):
+3. On tool-not-found (no Atlassian-capable tool in session):
    - Status: ✗ Atlassian MCP — not connected
    - Setup action: register-atlassian-mcp
 4. On error (tool exists but call fails):

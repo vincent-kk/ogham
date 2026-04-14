@@ -13,10 +13,12 @@
 
 ### Jira Operations ([OP:])
 
-| Tool | Usage |
-|------|-------|
-| `[OP: get_confluence]` | Fetch Confluence page content when source is a URL |
-| `[OP: search_confluence]` | Resolve references to other Confluence pages |
+| Operation | Usage |
+|-----------|-------|
+| [`[OP: get_confluence]`](../../_shared/operations/get_confluence.md) | Fetch Confluence page content when source is a URL |
+| [`[OP: search_confluence]`](../../_shared/operations/search_confluence.md) | Resolve references to other Confluence pages |
+
+The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
 ## Agent Spawn
 

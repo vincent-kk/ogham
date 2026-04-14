@@ -62,7 +62,7 @@ imbas를 사용하기 위한 최초 설정을 담당한다.
 | `[OP: get_issue_types]` | Jira ([OP:]) | 이슈 타입 조회 |
 | `[OP: get_issue_type_fields]` | Jira ([OP:]) | 타입별 필수 필드 조회 |
 | `[OP: get_link_types]` | Jira ([OP:]) | 링크 타입 조회 |
-| `mcp_tools_atlassianUserInfo` | Atlassian MCP | 연결 상태 확인 (헬스 체크) |
+| `[OP: auth_check]` | Atlassian ([OP:]) | 연결 상태 확인 (헬스 체크) |
 | `which gh` / `gh auth status` | Bash | GitHub CLI 설치/인증 확인 (헬스 체크) |
 
 ## 참고 파일

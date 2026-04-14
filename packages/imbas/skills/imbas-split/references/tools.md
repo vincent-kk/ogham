@@ -11,12 +11,12 @@
 
 ## Jira Operations ([OP:])
 
-| Tool | Usage |
-|------|-------|
-| `[OP: get_issue]` | Verify Epic existence when --epic provided |
-| `[OP: search_jql]` | Search for existing related Stories/Epics |
+| Operation | Usage |
+|-----------|-------|
+| [`[OP: get_issue]`](../../_shared/operations/get_issue.md) | Verify Epic existence when --epic provided |
+| [`[OP: search_jql]`](../../_shared/operations/search_jql.md) | Search for existing related Stories/Epics |
 
-The LLM resolves which tool to use at runtime based on the session's available tools.
+The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
 ## Agent Spawn
 

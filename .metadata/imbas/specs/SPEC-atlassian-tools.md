@@ -1,6 +1,8 @@
 # SPEC-atlassian-tools — Atlassian MCP 도구 검토
 
-> **DEPRECATED** — [SPEC-provider-jira.md](./SPEC-provider-jira.md)로 대체. 구현 완료 시 삭제 예정.
+> **⚠ DEPRECATED** — 이 문서의 도구 이름(`getJiraIssue`, `createJiraIssue` 등)은
+> 레거시 Python `mcp-atlassian` 서버 기준입니다. 현재 `[OP:]` 매핑은
+> [SPEC-provider-jira.md](./SPEC-provider-jira.md)를 참조하세요.
 
 > Status: Draft v1.0 (2026-04-04) — **DEPRECATED**
 > Parent: [BLUEPRINT.md](../BLUEPRINT.md)

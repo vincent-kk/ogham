@@ -6,7 +6,8 @@ Step 0 — Environment Health Check (non-blocking)
   See: references/health-check.md for full procedure.
 
   0-1. Atlassian MCP check
-    - Attempt to call atlassianUserInfo (or equivalent identity endpoint).
+    - [OP: auth_check] — use any Atlassian identity/auth-check tool,
+      or GET /rest/api/3/myself via a generic HTTP tool.
     - On success → "✓ Atlassian connected (user: <displayName>)"
     - On tool-not-found → "✗ Atlassian MCP — not connected"
     - On auth/network error → "✗ Atlassian MCP — connection failed (<reason>)"

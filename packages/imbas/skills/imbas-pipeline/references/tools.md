@@ -24,27 +24,27 @@ validate, split, manifest, and devplan skills.
 
 ## Jira Operations ([OP:])
 
-The LLM resolves which tool to use at runtime based on the session's available tools.
+The LLM resolves which tool to use at runtime. Read the linked operation files for REST fallback details.
 
 ### Read Operations
 
 | Operation | Phase | Usage |
 |-----------|-------|-------|
-| `[OP: get_confluence]` | 1 | Fetch Confluence page when source is a URL |
-| `[OP: search_confluence]` | 1 | Resolve references to other Confluence pages |
-| `[OP: get_issue]` | 0, 2 | Verify --parent issue existence and detect type (Epic/Story) |
-| `[OP: search_jql]` | 2, 3 | Search for existing related Stories/Epics |
-| `[OP: get_transitions]` | 2.5 | Get available transitions for Done processing |
+| [`[OP: get_confluence]`](../../_shared/operations/get_confluence.md) | 1 | Fetch Confluence page when source is a URL |
+| [`[OP: search_confluence]`](../../_shared/operations/search_confluence.md) | 1 | Resolve references to other Confluence pages |
+| [`[OP: get_issue]`](../../_shared/operations/get_issue.md) | 0, 2 | Verify --parent issue existence and detect type (Epic/Story) |
+| [`[OP: search_jql]`](../../_shared/operations/search_jql.md) | 2, 3 | Search for existing related Stories/Epics |
+| [`[OP: get_transitions]`](../../_shared/operations/get_transitions.md) | 2.5 | Get available transitions for Done processing |
 
 ### Write Operations
 
 | Operation | Phase | Usage |
 |-----------|-------|-------|
-| `[OP: create_issue]` | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues |
-| `[OP: create_link]` | 2.5, 3.5 | Create blocks, split-into, relates-to links |
-| `[OP: edit_issue]` | 2.5 | Update issue fields after creation (if needed) |
-| `[OP: transition_issue]` | 2.5 | Transition status (horizontal split: original → Done) |
-| `[OP: add_comment]` | 3.5 | Post B→A feedback comments to Story issues |
+| [`[OP: create_issue]`](../../_shared/operations/create_issue.md) | 2.5, 3.5 | Create Epic, Story, Task, Sub-task issues |
+| [`[OP: create_link]`](../../_shared/operations/create_link.md) | 2.5, 3.5 | Create blocks, split-into, relates-to links |
+| [`[OP: edit_issue]`](../../_shared/operations/edit_issue.md) | 2.5 | Update issue fields after creation (if needed) |
+| [`[OP: transition_issue]`](../../_shared/operations/transition_issue.md) | 2.5 | Transition status (horizontal split: original → Done) |
+| [`[OP: add_comment]`](../../_shared/operations/add_comment.md) | 3.5 | Post B→A feedback comments to Story issues |
 
 ---
 
