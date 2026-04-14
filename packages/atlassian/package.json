@@ -1,6 +1,6 @@
 {
   "name": "@ogham/atlassian",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Atlassian — Jira and Confluence integration plugin for Claude Code",
   "keywords": [
     "claude-code",
@@ -37,6 +37,9 @@
     "test:coverage": "vitest run --coverage",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
     "version:sync": "node scripts/inject-version.mjs"
   },
   "dependencies": {
