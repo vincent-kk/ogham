@@ -10,7 +10,13 @@ Step 1 — Resolve input
 
 Step 2 — Download (if Atlassian URL)
   - See [download-flow.md](../../atlassian-download/references/download-flow.md) for full download protocol
-  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw", save_to_path=".temp/<filename>"
+  - Derive namespace from source context:
+    - Jira issue KAN-27: namespace = "KAN-27"
+    - Jira issue KAN-27 + comment 10110: namespace = "KAN-27_comment-10110"
+    - Confluence page 12345: namespace = "confluence-12345"
+  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw",
+    save_to_path=".temp/<namespace>/<filename>"
+  - fetch tool auto-skips download if file already exists (returns cached: true)
   - If download fails -> error with auth check guidance
 
 Step 3 — Probe and select preset
@@ -30,7 +36,8 @@ Step 4 — Image handling (no scene-sieve)
 Step 5 — Video/GIF handling
   a. Resolve temp directory:
      - Default temp dir: ".temp"
-     - Target dir: .temp/<filename>/
+     - Target dir: .temp/<namespace>/<filename>/
+     - (namespace from Step 2; if local file, use filename as namespace)
 
   b. Check cache:
      - If .temp/<filename>/analysis.json exists AND no --force flag

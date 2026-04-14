@@ -1,3 +1,4 @@
+import { stat as fsStat } from 'node:fs/promises';
 import { executeRequest } from '../../../core/http-client/index.js';
 import type { HttpClientConfig } from '../../../core/http-client/index.js';
 import type { McpResponse } from '../../../types/index.js';
@@ -18,6 +19,7 @@ interface FetchParams {
   content_type?: string;
   content_format?: 'json' | 'markdown';
   save_to_path?: string;
+  force?: boolean;
 }
 
 /** Detect ADF content in a response and convert to Markdown */
@@ -105,6 +107,41 @@ function convertBodyForUpdate(body: unknown, endpoint: string): unknown {
   return obj;
 }
 
+/** Download binary asset with filesystem caching */
+async function handleAssetFetch(
+  params: FetchParams,
+  config: HttpClientConfig,
+): Promise<McpResponse> {
+  const savePath = validateSavePath(params.save_to_path!);
+
+  // Cache check: return existing file without HTTP request
+  if (!params.force) {
+    try {
+      const s = await fsStat(savePath);
+      return { success: true, status: 200, data: { saved_to: savePath, size_bytes: s.size, cached: true } };
+    } catch { /* not cached, proceed with download */ }
+  }
+
+  const response = await executeRequest(config, {
+    method: 'GET',
+    endpoint: params.endpoint,
+    query_params: params.query_params,
+    headers: params.headers,
+    acceptBinary: true,
+  });
+
+  if (response.success && response.data) {
+    const data = response.data as Record<string, unknown>;
+    if (data._binary === true) {
+      const buffer = data.buffer as ArrayBuffer;
+      await writeBinary(savePath, buffer);
+      response.data = { saved_to: savePath, size_bytes: buffer.byteLength, content_type: data.contentType };
+    }
+  }
+
+  return response;
+}
+
 /** Unified HTTP tool handler */
 export async function handleFetch(
   params: FetchParams,
@@ -122,6 +159,12 @@ export async function handleFetch(
 
   switch (method) {
     case 'GET': {
+      // Asset fetch: binary download with caching
+      if (params.save_to_path) {
+        return handleAssetFetch(params, config);
+      }
+
+      // Document fetch: JSON API with ADF conversion
       const queryParams = { ...params.query_params };
       if (params.expand && params.expand.length > 0) {
         queryParams['expand'] = params.expand.join(',');
@@ -132,23 +175,10 @@ export async function handleFetch(
         endpoint,
         query_params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
         headers: params.headers,
-        acceptBinary: !!params.save_to_path,
       });
 
-      if (response.success && response.data) {
-        const data = response.data as Record<string, unknown>;
-        if (data._binary === true) {
-          const validPath = validateSavePath(params.save_to_path!);
-          const buffer = data.buffer as ArrayBuffer;
-          await writeBinary(validPath, buffer);
-          response.data = {
-            saved_to: validPath,
-            size_bytes: buffer.byteLength,
-            content_type: data.contentType,
-          };
-        } else if (params.accept_format !== 'raw') {
-          response.data = autoConvertAdf(response.data);
-        }
+      if (response.success && response.data && params.accept_format !== 'raw') {
+        response.data = autoConvertAdf(response.data);
       }
 
       return response;

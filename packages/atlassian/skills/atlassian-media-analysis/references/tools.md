@@ -17,8 +17,10 @@ Tool: fetch (method: GET)
 Params:
   url: <attachment-content-url>
   accept_format: "raw"
-  save_to_path: ".temp/<filename>"
+  save_to_path: ".temp/<namespace>/<filename>"
 ```
+
+Namespace derivation: see [download-flow.md](../../atlassian-download/references/download-flow.md#namespace-path-convention).
 
 See [download-flow.md](../../atlassian-download/references/download-flow.md) for Jira/Confluence attachment URL resolution patterns.
 
@@ -40,7 +42,10 @@ frame image data — only the text summary is returned.
 
 ## Caching
 
-- Same file path with existing analysis.json -> return cached result (skip extraction)
-- Use `--force` flag to bypass cache and re-analyze
+Two complementary cache layers:
+
+1. **Download cache** (fetch tool): if the target file at `save_to_path` already exists, the fetch tool returns it without HTTP request. Pass `force: true` to re-download.
+2. **Analysis cache** (skill level): if `.temp/<namespace>/<filename>/analysis.json` exists, skip extraction and analysis. Use `--force` flag to re-analyze.
+
 - `.temp/` directory is gitignored
 - No automatic cleanup (no deletion without user consent)

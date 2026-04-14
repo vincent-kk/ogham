@@ -48,13 +48,25 @@ Params:
   endpoint: /wiki/rest/api/content/{pageId}/child/attachment
 ```
 
+## Namespace Path Convention
+
+Organize downloads by source context. The directory structure serves as a cache — if the target file already exists, the fetch tool returns it immediately without re-downloading.
+
+| Source | save_to_path pattern |
+|--------|---------------------|
+| Jira issue `KAN-27` | `.temp/KAN-27/<filename>` |
+| Jira issue + comment `10110` | `.temp/KAN-27_comment-10110/<filename>` |
+| Confluence page ID `12345` | `.temp/confluence-12345/<filename>` |
+
+To force re-download when a cached file exists, pass `force: true`.
+
 ## Download Flow
 
-1. Resolve attachment URL (direct URL or metadata lookup)
-2. Auth header injected automatically by MCP layer
-3. HTTP GET with `accept_format: "raw"` and `save_to_path` for binary files
-4. File saved automatically by MCP layer when `save_to_path` provided
-5. Return: `{ saved_to, size_bytes, content_type }`
+1. Derive namespace from source context (issue key, comment ID, page ID)
+2. Construct `save_to_path`: `.temp/<namespace>/<filename>`
+3. Call fetch — tool auto-checks cache (skips download if file exists)
+4. If cached: returns `{ saved_to, size_bytes, cached: true }`
+5. If not cached: downloads, saves, returns `{ saved_to, size_bytes, content_type }`
 
 ## Auth Recovery
 

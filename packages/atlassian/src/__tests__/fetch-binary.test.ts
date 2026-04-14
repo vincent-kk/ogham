@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleFetch } from '../mcp/tools/fetch/index.js';
 import type { HttpClientConfig } from '../core/http-client/index.js';
 
+// Mock node:fs/promises — vi.hoisted ensures the variable is available during mock hoisting
+const { mockStat } = vi.hoisted(() => ({
+  mockStat: vi.fn().mockImplementation(() => Promise.reject(new Error('ENOENT'))),
+}));
+vi.mock('node:fs/promises', () => ({
+  stat: mockStat,
+}));
+
 // Mock executeRequest
 vi.mock('../core/http-client/index.js', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../core/http-client/index.js')>();
@@ -35,7 +43,9 @@ const config: HttpClientConfig = {
 
 describe('fetch binary download (save_to_path)', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    // Restore default: file not found
+    mockStat.mockImplementation(() => Promise.reject(new Error('ENOENT')));
   });
 
   it('saves binary response to file and returns metadata', async () => {
@@ -98,6 +108,76 @@ describe('fetch binary download (save_to_path)', () => {
     expect(executeRequest).toHaveBeenCalledWith(config, expect.objectContaining({
       acceptBinary: true,
     }));
+  });
+
+  it('returns cached response when file already exists', async () => {
+    const { executeRequest } = await import('../core/http-client/index.js');
+
+    mockStat.mockResolvedValueOnce({ size: 2048 });
+
+    const result = await handleFetch({
+      method: 'GET',
+      endpoint: '/rest/api/3/attachment/content/456',
+      save_to_path: '.temp/KAN-27_comment-10110/image.png',
+    }, config);
+
+    expect(executeRequest).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      success: true,
+      status: 200,
+      data: {
+        saved_to: '/resolved/.temp/KAN-27_comment-10110/image.png',
+        size_bytes: 2048,
+        cached: true,
+      },
+    });
+  });
+
+  it('downloads normally when force is true even if file exists', async () => {
+    const { executeRequest } = await import('../core/http-client/index.js');
+    const buffer = new ArrayBuffer(64);
+
+    mockStat.mockResolvedValueOnce({ size: 2048 });
+    (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
+      status: 200,
+      data: { _binary: true, buffer, contentType: 'image/png' },
+    });
+
+    const result = await handleFetch({
+      method: 'GET',
+      endpoint: '/rest/api/3/attachment/content/456',
+      save_to_path: '.temp/KAN-27/image.png',
+      force: true,
+    }, config);
+
+    expect(executeRequest).toHaveBeenCalled();
+    expect((result.data as Record<string, unknown>).cached).toBeUndefined();
+  });
+
+  it('downloads when file does not exist at save_to_path', async () => {
+    const { executeRequest } = await import('../core/http-client/index.js');
+    const buffer = new ArrayBuffer(50);
+
+    // mockStat already rejects by default (ENOENT)
+    (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
+      status: 200,
+      data: { _binary: true, buffer, contentType: 'video/mp4' },
+    });
+
+    const result = await handleFetch({
+      method: 'GET',
+      endpoint: '/rest/api/3/attachment/content/789',
+      save_to_path: '.temp/KAN-27_comment-10110/demo.mp4',
+    }, config);
+
+    expect(executeRequest).toHaveBeenCalled();
+    expect(result.data).toEqual({
+      saved_to: '/resolved/.temp/KAN-27_comment-10110/demo.mp4',
+      size_bytes: 50,
+      content_type: 'video/mp4',
+    });
   });
 
   it('still applies ADF conversion when no save_to_path', async () => {
