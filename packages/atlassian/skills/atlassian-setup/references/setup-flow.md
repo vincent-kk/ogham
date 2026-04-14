@@ -2,7 +2,7 @@
 
 ## Normal Flow
 
-1. Call MCP `setup` tool with `mode: "new"` (first setup) or `mode: "edit"` (reconfiguration)
+1. Call MCP `mcp_tools_setup` tool with `mode: "new"` (first setup) or `mode: "edit"` (reconfiguration)
 2. The tool starts a local HTTP server on `127.0.0.1` and opens the browser automatically
 3. The web UI handles: instance URL input, environment detection, auth method selection, credential collection, connection testing, and saving
 4. Server auto-shuts down after successful save or 5 minutes of inactivity

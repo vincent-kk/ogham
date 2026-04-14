@@ -15,4 +15,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| All operations | `fetch` | GET | Read-only metadata queries |
+| All operations | `mcp_tools_fetch` | GET | Read-only metadata queries |

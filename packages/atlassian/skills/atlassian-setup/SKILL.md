@@ -25,7 +25,7 @@ Before starting the work, perform an authentication check. See [`auth-check.md`]
 
 ## Setup Flow
 
-1. Call MCP `setup` tool immediately (mode: `new` for first setup, `edit` for reconfiguration)
+1. Call MCP `mcp_tools_setup` tool immediately (mode: `new` for first setup, `edit` for reconfiguration)
 2. The tool launches a local web server and opens the browser automatically
 3. The web UI handles the entire flow: URL input, environment detection, auth method selection, credential collection, connection testing, and saving
 4. Report the result to the user based on the MCP tool response
@@ -52,7 +52,7 @@ Authoritative recovery protocol — router skills (`atlassian-jira`, `atlassian-
 
 - `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection
-- `../_shared/mcp-tools.md` — Available MCP tools (uses `setup` tool)
+- `../_shared/mcp-tools.md` — Available MCP tools (uses `mcp_tools_setup` tool)
 - `references/auth-types.md` — Detailed auth type comparison and selection guide
 - `references/setup-flow.md` — Step-by-step setup wizard
 - `references/errors.md` — Setup-specific error handling and troubleshooting

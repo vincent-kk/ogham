@@ -17,4 +17,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| All operations | `fetch` | GET | Read-only. Requires issue ID, not key. |
+| All operations | `mcp_tools_fetch` | GET | Read-only. Requires issue ID, not key. |

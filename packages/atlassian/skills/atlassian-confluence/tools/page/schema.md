@@ -26,7 +26,7 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `fetch` | GET | expand=body.storage,version |
-| Create | `fetch` | POST | content_format: "markdown" |
-| Update | `fetch` | PUT | Must include version.number |
-| Delete | `fetch` | DELETE | Confirm if child pages exist |
+| Get | `mcp_tools_fetch` | GET | expand=body.storage,version |
+| Create | `mcp_tools_fetch` | POST | content_format: "markdown" |
+| Update | `mcp_tools_fetch` | PUT | Must include version.number |
+| Delete | `mcp_tools_fetch` | DELETE | Confirm if child pages exist |

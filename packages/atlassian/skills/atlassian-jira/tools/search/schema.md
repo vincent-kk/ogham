@@ -24,5 +24,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Search (Cloud) | `fetch` | POST | JQL in request body |
-| Search (Server) | `fetch` | GET | JQL in query_params |
+| Search (Cloud) | `mcp_tools_fetch` | POST | JQL in request body |
+| Search (Server) | `mcp_tools_fetch` | GET | JQL in query_params |

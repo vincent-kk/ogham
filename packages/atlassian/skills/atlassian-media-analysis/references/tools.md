@@ -6,11 +6,11 @@
 
 | Tool | Usage |
 |------|-------|
-| `fetch` | Download binary attachments with `accept_format: "raw"` and `save_to_path` parameter |
+| `mcp_tools_fetch` | Download binary attachments with `accept_format: "raw"` and `save_to_path` parameter |
 
 ### Download Protocol
 
-For Atlassian URL downloads, use the `fetch` MCP tool:
+For Atlassian URL downloads, use the `mcp_tools_fetch` MCP tool:
 
 ```
 Tool: fetch (method: GET)

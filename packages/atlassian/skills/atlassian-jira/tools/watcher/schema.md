@@ -10,6 +10,6 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `fetch` | GET | |
-| Add | `fetch` | POST | Body: accountId string (Cloud) or username (Server) |
-| Remove | `fetch` | DELETE | Via query parameter |
+| Get | `mcp_tools_fetch` | GET | |
+| Add | `mcp_tools_fetch` | POST | Body: accountId string (Cloud) or username (Server) |
+| Remove | `mcp_tools_fetch` | DELETE | Via query parameter |

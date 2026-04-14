@@ -11,7 +11,7 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List | `fetch` | GET | |
-| Upload | `fetch` | POST | content_type: "multipart/form-data" |
-| Delete | `fetch` | DELETE | |
-| Download | `fetch` | GET | accept_format: "raw", use atlassian-download |
+| List | `mcp_tools_fetch` | GET | |
+| Upload | `mcp_tools_fetch` | POST | content_type: "multipart/form-data" |
+| Delete | `mcp_tools_fetch` | DELETE | |
+| Download | `mcp_tools_fetch` | GET | accept_format: "raw", use atlassian-download |

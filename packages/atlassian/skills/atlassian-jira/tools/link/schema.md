@@ -12,6 +12,6 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get types/remote | `fetch` | GET | |
-| Create | `fetch` | POST | |
-| Delete | `fetch` | DELETE | |
+| Get types/remote | `mcp_tools_fetch` | GET | |
+| Create | `mcp_tools_fetch` | POST | |
+| Delete | `mcp_tools_fetch` | DELETE | |

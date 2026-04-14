@@ -17,4 +17,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Search | `fetch` | GET | CQL in query_params |
+| Search | `mcp_tools_fetch` | GET | CQL in query_params |

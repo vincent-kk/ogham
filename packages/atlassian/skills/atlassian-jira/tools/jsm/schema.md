@@ -11,5 +11,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `fetch` | GET | |
-| Submit form | `fetch` | PUT | |
+| List/Get | `mcp_tools_fetch` | GET | |
+| Submit form | `mcp_tools_fetch` | PUT | |

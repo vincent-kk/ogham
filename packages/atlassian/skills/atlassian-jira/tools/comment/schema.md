@@ -23,10 +23,10 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `fetch` | GET | |
-| Add | `fetch` | POST | Use content_format: "markdown" |
-| Update | `fetch` | PUT | |
-| Delete | `fetch` | DELETE | |
+| List/Get | `mcp_tools_fetch` | GET | |
+| Add | `mcp_tools_fetch` | POST | Use content_format: "markdown" |
+| Update | `mcp_tools_fetch` | PUT | |
+| Delete | `mcp_tools_fetch` | DELETE | |
 
 ## URL Patterns
 

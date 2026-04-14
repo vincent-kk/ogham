@@ -27,7 +27,7 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List/Get | `fetch` | GET | |
-| Create | `fetch` | POST | |
-| Update sprint | `fetch` | PATCH | Partial update |
-| Move issues | `fetch` | POST | Issues array in body |
+| List/Get | `mcp_tools_fetch` | GET | |
+| Create | `mcp_tools_fetch` | POST | |
+| Update sprint | `mcp_tools_fetch` | PATCH | Partial update |
+| Move issues | `mcp_tools_fetch` | POST | Issues array in body |

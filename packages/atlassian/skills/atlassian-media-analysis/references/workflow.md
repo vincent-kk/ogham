@@ -14,7 +14,7 @@ Step 2 — Download (if Atlassian URL)
     - Jira issue KAN-27: namespace = "KAN-27"
     - Jira issue KAN-27 + comment 10110: namespace = "KAN-27_comment-10110"
     - Confluence page 12345: namespace = "confluence-12345"
-  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw",
+  - Use atlassian MCP `mcp_tools_fetch` tool: method=GET, accept_format="raw",
     save_to_path=".temp/<namespace>/<filename>"
   - fetch tool auto-skips download if file already exists (returns cached: true)
   - If download fails -> error with auth check guidance

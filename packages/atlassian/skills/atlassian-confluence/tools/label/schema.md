@@ -10,6 +10,6 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `fetch` | GET | |
-| Add | `fetch` | POST | Body: [{ "name": "label" }] |
-| Remove | `fetch` | DELETE | |
+| Get | `mcp_tools_fetch` | GET | |
+| Add | `mcp_tools_fetch` | POST | Body: [{ "name": "label" }] |
+| Remove | `mcp_tools_fetch` | DELETE | |

@@ -17,5 +17,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| List | `fetch` | GET | |
-| Add | `fetch` | POST | |
+| List | `mcp_tools_fetch` | GET | |
+| Add | `mcp_tools_fetch` | POST | |

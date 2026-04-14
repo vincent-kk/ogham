@@ -76,6 +76,6 @@ No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`
 
 - `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/error-handling.md` — HTTP error handling protocol
-- `../_shared/mcp-tools.md` — Available MCP tools (uses `fetch` with `method: "GET"` and `accept_format: "raw"`)
+- `../_shared/mcp-tools.md` — Available MCP tools (uses `mcp_tools_fetch` with `method: "GET"` and `accept_format: "raw"`)
 - `references/download-flow.md` — Detailed download and upload specs
 - `references/errors.md` — Download-specific error handling

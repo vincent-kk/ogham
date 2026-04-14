@@ -17,4 +17,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get views | `fetch` | GET | Cloud only |
+| Get views | `mcp_tools_fetch` | GET | Cloud only |

@@ -18,5 +18,5 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get transitions | `fetch` | GET | Query available transitions first |
-| Do transition | `fetch` | POST | Must include transition.id |
+| Get transitions | `mcp_tools_fetch` | GET | Query available transitions first |
+| Do transition | `mcp_tools_fetch` | POST | Must include transition.id |
