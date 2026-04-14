@@ -2,19 +2,19 @@
 
 ```
 Step 1 — Load Run & Verify Preconditions
-  1. If --run provided: call run_get(project_ref, run_id).
-     If not provided: call run_get(project_ref) → returns most recent run.
+  1. If --run provided: call mcp_tools_run_get(project_ref, run_id).
+     If not provided: call mcp_tools_run_get(project_ref) → returns most recent run.
   2. Verify validate.status == "completed" and validate.result in ["PASS", "PASS_WITH_WARNINGS"].
      - If PASS_WITH_WARNINGS: display warning list from validation-report.md.
      - If not met: error with guidance.
-  3. Call run_transition:
+  3. Call mcp_tools_run_transition:
      - action: "start_phase", phase: "split"
      → Sets split.status = "in_progress", current_phase = "split"
 
 Step 2 — Epic Decision Flow
   - If --epic provided:
     1. [OP: get_issue] issue_ref=<epicKey> to verify existence.
-    2. If found: store epic_ref in state.json via run_transition context.
+    2. If found: store epic_ref in state.json via mcp_tools_run_transition context.
     3. If not found: error: "Epic <KEY> not found in Jira."
   - If --epic NOT provided:
     1. Ask user: "Create a new Epic for this split, or use an existing one?"
@@ -24,8 +24,8 @@ Step 2 — Epic Decision Flow
        b) "Use existing Epic" → User enters Epic key → verify with [OP: get_issue]
        c) "No Epic" → Stories created without parent Epic
 
-Step 3 — imbas-planner Agent Spawn (Story Splitting)
-  - Spawn agent: imbas-planner
+Step 3 — planner Agent Spawn (Story Splitting)
+  - Spawn agent: `planner`
   - Model: config.defaults.llm_model.split (default: "sonnet")
   - Input provided to agent:
     - source.md (full planning document)
@@ -45,7 +45,7 @@ Step 3 — imbas-planner Agent Spawn (Story Splitting)
   - Agent returns: Story list as JSON
 
 Step 4 — 3→1→2 Verification (per Story)
-  For each Story produced by imbas-planner:
+  For each Story produced by `planner`:
 
   [3] Anchor Link Check
     - Verify the Story has an explicit reference to a source document section.
@@ -57,8 +57,8 @@ Step 4 — 3→1→2 Verification (per Story)
     - Deviation detected → set verification.coherence = "FAIL" (or "REVIEW" if ambiguous).
     - Coherent → set verification.coherence = "PASS", continue to [2].
 
-  [2] Reverse-Inference Verification — imbas-analyst spawn
-    - Spawn agent: imbas-analyst
+  [2] Reverse-Inference Verification — analyst spawn
+    - Spawn agent: `analyst`
     - Input: ALL split Stories reassembled as a whole
     - Instructions: "Compare the reassembled Stories against the original source.md.
       Identify any requirements lost, distorted, or fabricated during splitting."
@@ -83,7 +83,7 @@ Step 5 — Size Check
   If any criterion fails, branch by cause:
 
   (a) Size exceeded → Horizontal Split
-    1. Re-invoke imbas-planner for the oversized Story only.
+    1. Re-invoke `planner` for the oversized Story only.
     2. Original Story marked for "Done" processing + links:
        - "is split into" link from original to new Stories
        - "split from" link from new Stories to original
@@ -111,9 +111,9 @@ Step 6 — stories-manifest.json Generation
        - Detect Story-to-Story execution dependencies (e.g., API before UI)
        - Add "blocks" links to manifest: { type: "blocks", from: <blocking-story-id>, to: [<blocked-story-ids>], status: "pending" }
        - No circular dependencies allowed
-  3. Call manifest_save:
+  3. Call mcp_tools_manifest_save:
      - project_ref, run_id, type: "stories", manifest: <full manifest>
-  4. Call manifest_validate:
+  4. Call mcp_tools_manifest_validate:
      - project_ref, run_id, type: "stories"
      - If validation errors: fix and re-save.
 
@@ -127,7 +127,7 @@ Step 7 — User Review Flow
   2. Wait for user decision:
 
   Option A — Approve:
-    1. Call run_transition:
+    1. Call mcp_tools_run_transition:
        - action: "complete_phase", phase: "split"
        - pending_review: false
        - stories_created: <count>

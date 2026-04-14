@@ -16,20 +16,20 @@ starting point. Otherwise proceed to Phase 2.
 
 ## Section 2 — Navigation Details
 
-Use `fractal_scan` to retrieve the full project tree, then find the node matching the target:
+Use `mcp_t_fractal_scan` to retrieve the full project tree, then find the node matching the target:
 
 ```
-fractal_scan({ path: "<project-root>" })
+mcp_t_fractal_scan({ path: "<project-root>" })
 ```
 
 Scan `tree.nodesList` (array) or `tree.nodes` (path-keyed object) for the node whose name or path best matches the target.
 
 > **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.** Use `tree.nodesList` for iteration.
-If the match is ambiguous, use `fractal_navigate(classify)` with the node's
+If the match is ambiguous, use `mcp_t_fractal_navigate(classify)` with the node's
 known children from the scan result:
 
 ```
-fractal_navigate({ action: "classify", path: "<candidate-path>", entries: [/* nodes from scan */] })
+mcp_t_fractal_navigate({ action: "classify", path: "<candidate-path>", entries: [/* nodes from scan */] })
 ```
 
 This counts as **Prompt 1** of the 3-Prompt budget.
@@ -51,10 +51,10 @@ target node. Do not load sibling or cousin nodes.
 ## Section 4 — Compression Strategy
 
 If the combined INTENT.md chain exceeds working context limits, call
-`doc_compress` before generating the response:
+`mcp_t_doc_compress` before generating the response:
 
 ```
-doc_compress({ mode: "auto", filePath: "<INTENT.md path>", content: "<file content>" })
+mcp_t_doc_compress({ mode: "auto", filePath: "<INTENT.md path>", content: "<file content>" })
 ```
 
 `auto` mode selects `reversible` compression for structured documents
@@ -68,7 +68,7 @@ Apply compression only when necessary. Skip if the chain fits in context.
 
 | Prompt      | Purpose                                                     |
 | ----------- | ----------------------------------------------------------- |
-| 1           | Module location via `fractal_navigate`                      |
+| 1           | Module location via `mcp_t_fractal_navigate`                |
 | 2           | Detailed analysis or additional context loading if required |
 | 3 (maximum) | Final response generation                                   |
 

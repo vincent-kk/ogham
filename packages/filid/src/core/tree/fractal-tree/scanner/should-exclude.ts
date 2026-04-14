@@ -1,5 +1,5 @@
 import type { ScanOptions } from '../../../../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../../../../types/scan.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
 
 /**
  * Determine if a relative path should be excluded based on ScanOptions.

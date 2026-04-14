@@ -9,8 +9,8 @@
 > per-file analysis results in working memory.
 >
 > 1. `Write` the full skeleton (frontmatter + empty result tables) FIRST.
-> 2. For each file you analyze with `ast_analyze(lcom4)`,
->    `ast_analyze(cyclomatic-complexity)`, or `test_metrics`, immediately
+> 2. For each file you analyze with `mcp_t_ast_analyze(lcom4)`,
+>    `mcp_t_ast_analyze(cyclomatic-complexity)`, or `mcp_t_test_metrics`, immediately
 >    `Edit` the output file to append the result row.
 > 3. **Drop the raw MCP response from working memory** before moving to
 >    the next file.
@@ -54,8 +54,8 @@ For each changed source file containing classes/modules (skip `index.ts`,
 `*.d.ts`, `*.spec.ts`, `*.test.ts`):
 
 ```
-ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
-ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
+mcp_t_ast_analyze(source: <file content>, analysisType: "lcom4", className: <class>)
+mcp_t_ast_analyze(source: <file content>, analysisType: "cyclomatic-complexity")
 ```
 
 Thresholds:
@@ -68,9 +68,9 @@ Thresholds:
 For each changed `*.spec.ts` or `*.test.ts` file:
 
 ```
-test_metrics(action: "check-312", files: [{ filePath, content }])
-test_metrics(action: "count", files: [...])
-test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
+mcp_t_test_metrics(action: "check-312", files: [{ filePath, content }])
+mcp_t_test_metrics(action: "count", files: [...])
+mcp_t_test_metrics(action: "decide", decisionInput: { testCount, lcom4, cyclomaticComplexity })
 ```
 
 Threshold: total > 15 cases per file → FAIL (3+12 rule violation, fix type:
@@ -82,7 +82,7 @@ For each shared module identified in `changed_fractals` (modules imported by
 2+ sibling fractals):
 
 ```
-coverage_verify(
+mcp_t_coverage_verify(
   projectRoot: <PROJECT_ROOT>,
   targetPath: <shared module path>
 )
@@ -102,12 +102,12 @@ session_ref: session.md
 scope: metrics-half
 structure_check_ref: structure-check.md   # present if Phase A ran
 tools_executed:
-  - ast_analyze(lcom4)
-  - ast_analyze(cyclomatic-complexity)
-  - test_metrics(check-312)
-  - test_metrics(count)
-  - test_metrics(decide)
-  - coverage_verify
+  - mcp_t_ast_analyze(lcom4)
+  - mcp_t_ast_analyze(cyclomatic-complexity)
+  - mcp_t_test_metrics(check-312)
+  - mcp_t_test_metrics(count)
+  - mcp_t_test_metrics(decide)
+  - mcp_t_coverage_verify
 metrics_passed: <true|false>
 lcom4_failures: <count>
 cc_failures: <count>
@@ -123,7 +123,7 @@ created_at: <ISO 8601>
 | LCOM4               | PASS/WARN/FAIL | <failing modules + measured values>      |
 | Cyclomatic (CC)     | PASS/WARN/FAIL | <failing files + measured values>        |
 | 3+12 rule           | PASS/WARN/FAIL | <failing spec files + test counts>       |
-| test_metrics decide | INFO           | <split / compress / parameterize hints>  |
+| mcp_t_test_metrics decide | INFO           | <split / compress / parameterize hints>  |
 | Shared dep coverage | PASS/WARN      | <N/M usage sites covered + warning list> |
 
 ## Findings
@@ -157,12 +157,12 @@ created_at: <ISO 8601>
 
 - Scope is **changed files only** (from session.md) — do not scan the whole
   project.
-- If an `ast_analyze` call fails for a file, record as SKIP with the reason
+- If an `mcp_t_ast_analyze` call fails for a file, record as SKIP with the reason
   (e.g., unsupported language, parse error).
 - The chairperson merges `verification-metrics.md` with `verification-structure.md`
   into a single `verification.md` before Phase D.
-- Do NOT call `structure_validate`, `dependency-graph`, `drift_detect`,
-  `doc_compress`, or `debt_manage` — those belong to Phase C2.
+- Do NOT call `mcp_t_structure_validate`, `dependency-graph`, `mcp_t_drift_detect`,
+  `mcp_t_doc_compress`, or `mcp_t_debt_manage` — those belong to Phase C2.
 - Write ONLY `verification-metrics.md` — no other files.
 
 ## Batch / Team-Promoted Execution

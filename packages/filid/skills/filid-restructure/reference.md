@@ -9,22 +9,22 @@ fractal structure restructuring skill. For the quick-start overview, see [SKILL.
 
 ```
 // Parallel batch — fire all three simultaneously:
-fractal_scan({ path: "<target-path>" })
+mcp_t_fractal_scan({ path: "<target-path>" })
 // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: ModuleInfo[], timestamp, duration }
 
-drift_detect({ path: "<target-path>" })
+mcp_t_drift_detect({ path: "<target-path>" })
 // Returns: { drifts: DriftItem[], total: number }
 
-rule_query({ action: "list", path: "<target-path>" })
+mcp_t_rule_query({ action: "list", path: "<target-path>" })
 // Returns: { rules: Rule[] }
 ```
 
-After `drift_detect` completes, call `lca_resolve` for each move candidate
+After `mcp_t_drift_detect` completes, call `mcp_t_lca_resolve` for each move candidate
 (requires drift_detect output to identify reclassification targets):
 
 ```
 // Sequential — after drift_detect:
-lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
+mcp_t_lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
 // Returns: { lcaPath: string, recommendedParent: string, confidence: number }
 ```
 
@@ -107,10 +107,10 @@ export type { AuthUser, AuthState } from './types';
 
 ## Section 4 — Validation
 
-After `restructurer` completes, `fractal-architect` validates with `structure_validate`.
+After `restructurer` completes, `fractal-architect` validates with `mcp_t_structure_validate`.
 
 ```
-structure_validate({ path: "<target-path>" })
+mcp_t_structure_validate({ path: "<target-path>" })
 // Returns: { passed: boolean, checks: ValidationCheck[], violations: Violation[] }
 ```
 
@@ -141,7 +141,7 @@ Validation checks:
 | src/app.ts | ../components/AuthModal | ../features/auth/components/AuthModal |
 
 ### Validation Result
-structure_validate: PASS
+mcp_t_structure_validate: PASS
 - All imports resolvable: ✓
 - No orphaned files: ✓
 - All fractal nodes have index.ts: ✓

@@ -52,6 +52,16 @@
         "lens",
         "vault"
       ]
+    },
+    {
+      "name": "atlassian",
+      "source": "./packages/atlassian",
+      "category": "productivity",
+      "tags": [
+        "jira",
+        "confluence",
+        "integration"
+      ]
     }
   ]
 }

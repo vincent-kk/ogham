@@ -28,7 +28,7 @@
 
 ### Ask first
 
-- 기존 템플릿 파일 경로 변경 (`filid-setup` / `project_init` 로직 수정 필요)
+- 기존 템플릿 파일 경로 변경 (`filid-setup` / `mcp_t_project_init` 로직 수정 필요)
 - 새 템플릿 카테고리 추가 (디렉토리 구조 확장)
 
 ### Never do

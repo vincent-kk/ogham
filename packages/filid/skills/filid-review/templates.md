@@ -2,7 +2,7 @@
 
 Canonical output file templates for Phase D artifacts and the PR comment
 format. The chairperson reads this file before writing `review-report.md`
-and `fix-requests.md`; the `review_manage(format-pr-comment)` MCP tool
+and `fix-requests.md`; the `mcp_t_review_manage(format-pr-comment)` MCP tool
 consumes these conventions when assembling PR comments.
 
 ## Review Report Format (`review-report.md`)
@@ -121,7 +121,7 @@ for the dispatch policy):
 
 ## PR Comment Format
 
-Use `review_manage(action: "format-pr-comment")` to generate the PR
+Use `mcp_t_review_manage(action: "format-pr-comment")` to generate the PR
 comment. The tool reads `review-report.md`, `structure-check.md`, and
 `fix-requests.md`, wraps each in collapsible `<details>` sections, and
 returns a ready-to-post markdown string in the `markdown` field. Post it

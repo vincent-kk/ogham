@@ -5,7 +5,7 @@ from the shared skeleton (`../workflow.md`).
 
 ## Step 1 — Fetch sub-tasks
 
-1. Read `config.jira.base_url` via `config_get` to build issue URLs.
+1. Read `config.jira.base_url` via `mcp_tools_config_get` to build issue URLs.
 
 2. Call `[OP: get_issue] issue_ref=<issue-key>` with subtask fields.
    The Jira issue response includes a `subtasks` array for direct sub-task

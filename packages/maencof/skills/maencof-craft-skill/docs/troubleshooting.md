@@ -856,7 +856,7 @@ Validate in steps:
 
 ```bash
 # Step 1: YAML only
-python -c "import yaml; yaml.safe_load(open('SKILL.md').read().split('---')[1])"
+python -c "import yaml; yaml.safe_load(open('SKILL.md').mcp_t_read().split('---')[1])"
 
 # Step 2: File structure
 ls -R

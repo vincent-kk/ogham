@@ -29,7 +29,7 @@ This is the force mode of `/maencof:maencof-build`.
 Query the current index status and save a snapshot before rebuilding.
 
 ```
-kg_status()
+mcp_t_kg_status()
 ```
 
 Record previous state:
@@ -60,10 +60,10 @@ If `--force` is specified, proceed immediately without confirmation.
 
 ### Step 4 — Run Full Rebuild
 
-Call `kg_build` with `force=true`.
+Call `mcp_t_kg_build` with `force=true`.
 
 ```
-kg_build(force=true)
+mcp_t_kg_build(force=true)
 ```
 
 Display progress in real time:
@@ -91,7 +91,7 @@ Report results comparing before and after the rebuild.
 Build time: {duration}s
 ```
 
-> Note: Layer-by-layer node distribution is not available from `kg_status`/`kg_build` responses.
+> Note: Layer-by-layer node distribution is not available from `mcp_t_kg_status`/`mcp_t_kg_build` responses.
 > To inspect layer distribution, use `/maencof:maencof-diagnose --verbose`.
 
 If the change is large (nodes ±20% or more), display a warning and recommend investigating the cause.
@@ -100,8 +100,8 @@ If the change is large (nodes ±20% or more), display a warning and recommend in
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Query status before and after rebuild |
-| `kg_build` | Run full rebuild (force=true) |
+| `mcp_t_kg_status` | Query status before and after rebuild |
+| `mcp_t_kg_build` | Run full rebuild (force=true) |
 
 ## Options
 

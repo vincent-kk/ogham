@@ -34,8 +34,8 @@ Jira 프로젝트의 이슈 타입, 링크 타입, 워크플로우 등 메타데
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `cache_get` | imbas MCP | 캐시 읽기 및 TTL 상태 확인 |
-| `cache_set` | imbas MCP | 조회된 메타데이터를 캐시에 저장 |
+| `mcp_tools_cache_get` | imbas MCP | 캐시 읽기 및 TTL 상태 확인 |
+| `mcp_tools_cache_set` | imbas MCP | 조회된 메타데이터를 캐시에 저장 |
 | `[OP: get_projects]` | Jira ([OP:]) | 프로젝트 목록 조회 |
 | `[OP: get_issue_types]` | Jira ([OP:]) | 이슈 타입 조회 |
 | `[OP: get_issue_type_fields]` | Jira ([OP:]) | 타입별 필수 필드 조회 |

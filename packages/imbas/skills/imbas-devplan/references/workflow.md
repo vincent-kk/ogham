@@ -4,12 +4,12 @@
 
 ```
 Step 1 — Load Run & Manifest Checks
-  1. Call run_get(project_ref, run_id) to load state.json.
+  1. Call mcp_tools_run_get(project_ref, run_id) to load state.json.
   2. Verify split phase preconditions:
      - split.status == "completed" && split.pending_review == false
      - OR split.status == "escaped" && split.escape_code == "E2-3"
      - If not met → error with specific guidance.
-  3. Call manifest_get(project_ref, run_id, type: "stories")
+  3. Call mcp_tools_manifest_get(project_ref, run_id, type: "stories")
      to load stories-manifest.json.
   4. Check Story statuses:
      - All "created" (issue_ref present) → proceed.
@@ -17,7 +17,7 @@ Step 1 — Load Run & Manifest Checks
      - Exception (E2-3): if split.status == "escaped" && split.escape_code == "E2-3",
        a single pending Story is the expected upstream state (no Jira writes yet).
        Proceed without blocking. See preconditions.md "Exception — E2-3 escape upstream".
-  5. Call run_transition:
+  5. Call mcp_tools_run_transition:
      - action: "start_phase", phase: "devplan"
      → Sets devplan.status = "in_progress", current_phase = "devplan"
 
@@ -27,8 +27,8 @@ Step 1.5 — Codebase Resolution
     → STOP: "Devplan requires --codebase. Subtask generation needs a codebase to explore.
        Usage: /imbas:imbas-devplan --run <run-id> --codebase /path/to/repo"
 
-Step 2 — imbas-engineer Agent Spawn
-  - Spawn agent: imbas-engineer
+Step 2 — engineer Agent Spawn
+  - Spawn agent: `engineer`
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input provided to agent:
     - stories-manifest.json (Story descriptions with issue_refs)
@@ -46,7 +46,7 @@ Step 2 — imbas-engineer Agent Spawn
       - Extract domain keywords from each Story description
       - Identify code entry points matching keywords
       - Traverse related code areas (imports, exports, call sites)
-      - Tools: ast_search for pattern matching, ast_analyze for
+      - Tools: mcp_tools_ast_search for pattern matching, mcp_tools_ast_analyze for
         dependency graphs and complexity metrics
       - Also uses: Read, Grep, Glob for broader exploration
 
@@ -88,7 +88,7 @@ Step 2 — imbas-engineer Agent Spawn
 
   IF agent returns devplan-blocked-report.md (all Stories blocked):
     1. Save devplan-blocked-report.md to run directory
-    2. Call run_transition:
+    2. Call mcp_tools_run_transition:
        - action: "complete_phase", phase: "devplan", result: "BLOCKED"
        → Sets devplan.status = "completed", devplan.result = "BLOCKED"
     3. Display blocked report to user with guidance:
@@ -114,7 +114,7 @@ Step 3 — B→A Feedback Collection — provider-specific
   themselves are NOT modified. Divergences become comments (Jira) or digest
   appends (local).
 
-  Call manifest_save to persist feedback_comments in devplan-manifest.json.
+  Call mcp_tools_manifest_save to persist feedback_comments in devplan-manifest.json.
 
 Step 4 — User Review Flow
   1. Display manifest summary:
@@ -126,9 +126,9 @@ Step 4 — User Review Flow
   2. Wait for user decision:
 
   Option A — Approve:
-    1. Call manifest_validate(project_ref, run_id, type: "devplan")
+    1. Call mcp_tools_manifest_validate(project_ref, run_id, type: "devplan")
        - If validation errors: display and request correction before approval.
-    2. Call run_transition:
+    2. Call mcp_tools_run_transition:
        - action: "complete_phase", phase: "devplan"
        - pending_review: false
        → Sets devplan.status = "completed", devplan.pending_review = false

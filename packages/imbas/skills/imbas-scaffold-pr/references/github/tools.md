@@ -11,4 +11,4 @@
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Read `config.github.repo` for bare `#N` resolution |
+| `mcp_tools_config_get` | Read `config.github.repo` for bare `#N` resolution |

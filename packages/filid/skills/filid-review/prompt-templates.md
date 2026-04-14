@@ -67,7 +67,7 @@ partial results (mark skipped stages as SKIP).
 **Output**: `session.md`
 
 `haiku` is chosen for speed; committee quality is ensured by the
-structured `review_manage(elect-committee)` MCP tool rather than LLM
+structured `mcp_t_review_manage(elect-committee)` MCP tool rather than LLM
 reasoning depth.
 
 ```
@@ -84,7 +84,7 @@ Context:
 - SCOPE: <actual scope>
 - PROJECT_ROOT: <actual project root>
 - NO_STRUCTURE_CHECK: <true|false>
-- ADJUDICATOR_MODE: <true|false>   # from --solo flag; passed to review_manage(elect-committee) as adjudicatorMode
+- ADJUDICATOR_MODE: <true|false>   # from --solo flag; passed to mcp_t_review_manage(elect-committee) as adjudicatorMode
 
 Language: Write all output in the language specified by the `[filid:lang]` tag in system context. If no tag is present, follow the system's language setting. Default: English.
 Technical terms, code identifiers, rule IDs, and file paths remain in original form.
@@ -142,7 +142,7 @@ Context:
 - BATCH_FILES: <newline-separated file paths or empty>
 - SCOPE_OVERRIDE: <per-file | global | empty>
   # C2 only: "global" means skip per-file checks and run only
-  # structure_validate / drift_detect / debt_manage, writing
+  # mcp_t_structure_validate / mcp_t_drift_detect / mcp_t_debt_manage, writing
   # verification-structure.global.md.
 
 Input: Read `<REVIEW_DIR>/session.md` for session context.

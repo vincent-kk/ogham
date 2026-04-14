@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { CONFIG_REGISTRY } from '../config-registry/config-registry.js';
-import { metaPath } from '../shared/shared.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { CONFIG_REGISTRY } from '../config-registry/index.js';
+import { metaPath } from '../shared/index.js';
 
 export interface ProvisionResult {
   /** Filenames that were newly created */

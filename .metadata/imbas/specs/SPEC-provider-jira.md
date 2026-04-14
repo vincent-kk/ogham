@@ -161,7 +161,7 @@ Note: Jira workflow may restrict transitions. If target transition unavailable �
 | imbas-analyst | getConfluencePage, searchConfluenceUsingCql, getJiraIssue, searchJiraIssuesUsingJql | (none) | Validation + reverse inference |
 | imbas-planner | searchJiraIssuesUsingJql, getJiraIssue | (none) | Skill controls via prompt |
 | imbas-engineer | getJiraIssue, searchJiraIssuesUsingJql | (none) | Skill controls via prompt |
-| imbas-media | (none) | (none) | No Jira interaction |
+| ~~imbas-media~~ | — | — | *migrated to `@ogham/atlassian`* |
 
 > **Note (v0.2.0)**: Agent `tools:` frontmatter no longer includes Atlassian MCP
 > tools. Agents interact with Jira through `[OP:]` semantic operations declared

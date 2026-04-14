@@ -26,14 +26,14 @@ Energy spreads from a seed node, uncovering unexpected connections along the way
 
 - The maencof index must be built (`.maencof/index.json` must exist)
 - If no index: "No index found. Please run `/maencof:maencof-build` first."
-- Check index status first with `kg_status`
+- Check index status first with `mcp_t_kg_status`
 
 ## Workflow
 
 ### Step 1 — Check Index Status
 
 ```
-kg_status()
+mcp_t_kg_status()
 ```
 
 - No index -> "No index found. Please run `/maencof:maencof-build` first." (abort)
@@ -45,17 +45,17 @@ kg_status()
 Determine the seed from user input:
 
 - Direct file path (contains `.md` or `/`) -> that node becomes the seed
-- Keyword -> pass to `kg_search` in Step 3; the top result becomes the seed node
+- Keyword -> pass to `mcp_t_kg_search` in Step 3; the top result becomes the seed node
 - Not specified -> ask user to enter a topic to explore
 
 If a Layer filter (`--layer`) is specified, only documents in that Layer are allowed as seed candidates.
 
 ### Step 3 — SA-Based Spreading Exploration
 
-Run SA via the `kg_search` MCP tool:
+Run SA via the `mcp_t_kg_search` MCP tool:
 
 ```
-kg_search(
+mcp_t_kg_search(
   seed: [seed path or keyword],
   max_results: 10,
   decay: 0.7,
@@ -97,10 +97,10 @@ Enter a number for more detail. Enter 'q' to exit.
 
 ### Step 5 — Neighbor Node Lookup (Optional Deep Exploration)
 
-When the user selects a number, look up neighbors with `kg_navigate`:
+When the user selects a number, look up neighbors with `mcp_t_kg_navigate`:
 
 ```
-kg_navigate(
+mcp_t_kg_navigate(
   path: selected node path,
   include_inbound: true,
   include_outbound: true,
@@ -114,13 +114,13 @@ When the node has CROSS_LAYER edges (via L5-Boundary), highlight them separately
 When `--detail` is specified or the user requests full content, read the document body:
 
 ```
-read(path: selected node path)
+mcp_t_read(path: selected node path)
 ```
 
 To assemble token-optimized context for multiple activated nodes, use:
 
 ```
-kg_context(query: current seed or keyword, token_budget: 2000)
+mcp_t_kg_context(query: current seed or keyword, token_budget: 2000)
 ```
 
 ### Step 6 — Interactive Expansion (Up to 3 Rounds)
@@ -132,11 +132,11 @@ After 3 rounds: "Exploration depth limit reached."
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Check index status (stale check) |
-| `kg_search` | SA-based related document search |
-| `kg_navigate` | Look up a node's neighbors (inbound/outbound links, hierarchy) |
-| `kg_context` | Assemble token-optimized context blocks |
-| `read` | Read the full content of a selected document |
+| `mcp_t_kg_status` | Check index status (stale check) |
+| `mcp_t_kg_search` | SA-based related document search |
+| `mcp_t_kg_navigate` | Look up a node's neighbors (inbound/outbound links, hierarchy) |
+| `mcp_t_kg_context` | Assemble token-optimized context blocks |
+| `mcp_t_read` | Read the full content of a selected document |
 
 ## Options
 

@@ -9,7 +9,7 @@ provider-specific workflow file selected by `config.provider`:
 
 ## Step 0 — Provider routing
 
-Read `config.provider` via `config_get`. Note the target workflow file for
+Read `config.provider` via `mcp_tools_config_get`. Note the target workflow file for
 Step 6, but do not read it yet.
 
 ## Step 1 — Read issue (full depth)
@@ -25,7 +25,7 @@ Step 6, but do not read it yet.
    - Existing decisions and open questions
 3. Detect attached media (images, videos, GIFs) in description or comments.
    - If media found AND `--no-media` flag NOT set AND provider is `jira` →
-     call `/imbas:imbas-fetch-media` for each attachment.
+     call `/atlassian:atlassian-media-analysis` for each attachment.
    - Include visual analysis in digest context.
    - Local provider skips media auto-invocation in v1.
 

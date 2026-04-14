@@ -9,7 +9,7 @@
  */
 import type { SgNode } from '@ast-grep/napi';
 
-import { EXT_TO_LANG, getSgLoadError, getSgModule, toLangEnum } from '../ast-grep-shared/ast-grep-shared.js';
+import { EXT_TO_LANG, getSgLoadError, getSgModule, toLangEnum } from '../ast-grep-shared/index.js';
 
 export interface CyclomaticResult {
   /** Max CC across all functions in the file */

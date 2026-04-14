@@ -31,7 +31,7 @@
 
 Phase D produces the final review verdict through a **real multi-agent
 deliberation** using Claude Code's native team tools. Committee members
-elected by `review_manage(elect-committee)` are spawned as team workers,
+elected by `mcp_t_review_manage(elect-committee)` are spawned as team workers,
 each in their own context, emitting structured opinion files per round.
 The chairperson (Lead) orchestrates rounds and applies the state machine
 defined in `../state-machine.md`.

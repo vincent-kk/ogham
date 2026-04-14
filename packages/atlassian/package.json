@@ -1,0 +1,58 @@
+{
+  "name": "@ogham/atlassian",
+  "version": "0.0.6",
+  "description": "Atlassian — Jira and Confluence integration plugin for Claude Code",
+  "keywords": [
+    "claude-code",
+    "plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "directory": "packages/atlassian"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vincent K. Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "agents",
+    "bridge",
+    "skills",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn version:sync && node scripts/build-setup-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs",
+    "build:plugin": "node scripts/build-mcp-server.mjs",
+    "clean": "rm -rf bridge",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
+    "version:sync": "node scripts/inject-version.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "~1.22.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

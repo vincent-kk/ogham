@@ -9,10 +9,10 @@ import { join } from 'node:path';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser/document-parser.js';
+} from '../../../core/document-parser/index.js';
 import { Layer } from '../../../types/common.js';
 import type { MaencofCrudResult, MaencofDeleteInput } from '../../../types/mcp.js';
-import { getBacklinks, removeBacklinks } from '../../shared/shared.js';
+import { getBacklinks, removeBacklinks } from '../../shared/index.js';
 
 /**
  * `delete` 핸들러

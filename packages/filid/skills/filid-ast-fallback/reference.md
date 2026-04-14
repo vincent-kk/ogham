@@ -54,7 +54,7 @@ user confirmation.
 
 ### Error String
 
-The exact error returned by both `ast_grep_search` and `ast_grep_replace`:
+The exact error returned by both `mcp_t_ast_grep_search` and `mcp_t_ast_grep_replace`:
 
 ```
 @ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi

@@ -9,7 +9,7 @@ Detailed mode workflows, safety checks, and error handling.
 Determine the deletion target from user input:
 
 - Direct file path → use as target
-- Keyword/title → search with `kg_search` and confirm with user
+- Keyword/title → search with `mcp_t_kg_search` and confirm with user
 - Not specified → ask "Which document would you like to delete?"
 
 ### Step 2 — Preview Document
@@ -17,7 +17,7 @@ Determine the deletion target from user input:
 Read the target document to show content before deletion:
 
 ```
-read(path: target path)
+mcp_t_read(path: target path)
 ```
 
 Display Frontmatter summary (title, layer, tags) and content preview.
@@ -40,7 +40,7 @@ Abort the operation.
 Check for documents that reference the target:
 
 ```
-kg_navigate(path: target path, include_inbound: true)
+mcp_t_kg_navigate(path: target path, include_inbound: true)
 ```
 
 If inbound links exist:

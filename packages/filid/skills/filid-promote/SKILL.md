@@ -11,7 +11,7 @@ plugin: filid
 > **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
 > After each phase completes, IMMEDIATELY proceed to the next in the SAME TURN.
 > NEVER yield after `qa-reviewer` returns, `implementer` agent completion, or
-> `test_metrics` MCP results.
+> `mcp_t_test_metrics` MCP results.
 >
 > **Valid reasons to yield**:
 > 1. User decision genuinely required
@@ -45,7 +45,7 @@ eligibility, analysis, generation, validation, and migration in one pass.
 
 ### Phase 1 — Discovery (`qa-reviewer`)
 
-Locate all `test.ts` files and analyze metrics via `test_metrics(action: "count")`.
+Locate all `test.ts` files and analyze metrics via `mcp_t_test_metrics(action: "count")`.
 See [reference.md Section 1](./reference.md#section-1--discovery-details).
 
 ### Phase 2 — Eligibility Check (`qa-reviewer`)
@@ -67,7 +67,7 @@ See [reference.md Section 4](./reference.md#section-4--spec-generation-312-rule)
 
 ### Phase 5 — Validation (`qa-reviewer`)
 
-Verify generated specs pass `test_metrics(action: "check-312")` before writing.
+Verify generated specs pass `mcp_t_test_metrics(action: "check-312")` before writing.
 
 - **PASS**: Proceed to Phase 6.
 - **FAIL**: Abort migration for that file; report which cases exceed the 3+12 limit and skip Phase 6 for the failing file.
@@ -83,8 +83,8 @@ See [reference.md Section 5 — Migration subsection](./reference.md#section-5--
 
 | Tool           | Action      | Purpose                                                  |
 | -------------- | ----------- | -------------------------------------------------------- |
-| `test_metrics` | `count`     | Analyze test case counts, stability, and failure history |
-| `test_metrics` | `check-312` | Validate generated spec.ts against 3+12 rule             |
+| `mcp_t_test_metrics` | `count`     | Analyze test case counts, stability, and failure history |
+| `mcp_t_test_metrics` | `check-312` | Validate generated spec.ts against 3+12 rule             |
 
 ## Options
 

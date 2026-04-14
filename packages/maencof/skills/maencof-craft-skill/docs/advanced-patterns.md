@@ -820,7 +820,7 @@ This skill processes data using advanced algorithms.
 def load_template():
     # Hardcoded absolute path
     with open("/Users/alice/skills/my-skill/assets/template.html") as f:
-        return f.read()
+        return f.mcp_t_read()
 ```
 
 **Issues:**
@@ -841,7 +841,7 @@ def load_template():
     template_path = skill_dir / "assets" / "template.html"
 
     with open(template_path) as f:
-        return f.read()
+        return f.mcp_t_read()
 ```
 
 **Rule:** Always use relative paths or environment variables.

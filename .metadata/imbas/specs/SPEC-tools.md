@@ -632,7 +632,7 @@ GitHub/local provider는 동일한 semantic intent를 각 provider branch에서
 | imbas-analyst | — | Read/Grep/Glob/Bash. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
 | imbas-planner | — | Read/Grep/Glob. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
 | imbas-engineer | ast_search, ast_analyze | ast_search, ast_analyze + 코드 탐색. Jira 도구는 [OP:] 의미론적 표기로 스킬이 지시 |
-| imbas-media | — | Read(멀티모달) + Write(analysis.json) |
+| ~~imbas-media~~ | — | *migrated to `@ogham/atlassian` as `media` agent* |
 
 **핵심:** 에이전트는 pipeline/manifest 도구 미사용. 스킬이 에이전트 결과를 받아 도구로 상태 갱신.
 

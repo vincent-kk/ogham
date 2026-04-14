@@ -8,15 +8,15 @@ the phase files point here rather than duplicating the mappings.
 
 | Tool             | Action              | Purpose                                                 |
 | ---------------- | ------------------- | ------------------------------------------------------- |
-| `review_manage`  | `normalize-branch`  | Normalize branch name for review directory path         |
-| `review_manage`  | `ensure-dir`        | Create `.filid/review/<branch>/` directory              |
-| `review_manage`  | `elect-committee`   | Deterministic committee election (Phase B). Accepts optional `adjudicatorMode: boolean` to force the integrated `adjudicator` fast-path agent. Emits TRIVIAL/LOW/MEDIUM/HIGH complexity with committees of 1/2/4/6 members. |
-| `review_manage`  | `checkpoint`        | Check existing review progress for resume               |
-| `review_manage`  | `cleanup`           | Delete review session files (--force or on pass)        |
-| `review_manage`  | `content-hash`      | Compute and persist content hash for cache              |
-| `review_manage`  | `check-cache`       | Check if review can be skipped (cache hit)              |
-| `review_manage`  | `format-pr-comment` | Format review results into collapsible PR comment       |
-| `debt_manage`    | `calculate-bias`    | Compute debt bias level for Phase C2 + D deliberation   |
+| `mcp_t_review_manage`  | `normalize-branch`  | Normalize branch name for review directory path         |
+| `mcp_t_review_manage`  | `ensure-dir`        | Create `.filid/review/<branch>/` directory              |
+| `mcp_t_review_manage`  | `elect-committee`   | Deterministic committee election (Phase B). Accepts optional `adjudicatorMode: boolean` to force the integrated `adjudicator` fast-path agent. Emits TRIVIAL/LOW/MEDIUM/HIGH complexity with committees of 1/2/4/6 members. |
+| `mcp_t_review_manage`  | `checkpoint`        | Check existing review progress for resume               |
+| `mcp_t_review_manage`  | `cleanup`           | Delete review session files (--force or on pass)        |
+| `mcp_t_review_manage`  | `content-hash`      | Compute and persist content hash for cache              |
+| `mcp_t_review_manage`  | `check-cache`       | Check if review can be skipped (cache hit)              |
+| `mcp_t_review_manage`  | `format-pr-comment` | Format review results into collapsible PR comment       |
+| `mcp_t_debt_manage`    | `calculate-bias`    | Compute debt bias level for Phase C2 + D deliberation   |
 
 Phase D (deliberation) uses Claude Code's native team tools —
 `TeamCreate`, `TeamDelete`, `TaskCreate`, `TaskUpdate`, `TaskList`,
@@ -30,35 +30,35 @@ protocol.
 
 | Tool                 | Action / Parameters                     | Stage | Purpose                                          |
 | -------------------- | --------------------------------------- | ----- | ------------------------------------------------ |
-| `fractal_navigate`   | `action: "classify"`                    | 1     | Classify changed dirs for boundary check         |
-| `structure_validate` | `path: <changed dir>`                   | 1     | Fractal/organ boundary validation (diff only)    |
-| `doc_compress`       | `mode: "auto"`                          | 2     | INTENT.md line count (changed INTENT.md only)    |
-| `test_metrics`       | `action: "check-312"`                   | 3     | 3+12 rule on changed spec.ts files only          |
-| `ast_analyze`        | `analysisType: "lcom4"`                 | 4     | Module cohesion on changed source files          |
-| `ast_analyze`        | `analysisType: "cyclomatic-complexity"` | 4     | Complexity on changed source files               |
-| `test_metrics`       | `action: "decide"`                      | 4     | Split/compress recommendation                    |
-| `ast_analyze`        | `analysisType: "dependency-graph"`      | 5     | DAG + cycle detection on changed files           |
+| `mcp_t_fractal_navigate`   | `action: "classify"`                    | 1     | Classify changed dirs for boundary check         |
+| `mcp_t_structure_validate` | `path: <changed dir>`                   | 1     | Fractal/organ boundary validation (diff only)    |
+| `mcp_t_doc_compress`       | `mode: "auto"`                          | 2     | INTENT.md line count (changed INTENT.md only)    |
+| `mcp_t_test_metrics`       | `action: "check-312"`                   | 3     | 3+12 rule on changed spec.ts files only          |
+| `mcp_t_ast_analyze`        | `analysisType: "lcom4"`                 | 4     | Module cohesion on changed source files          |
+| `mcp_t_ast_analyze`        | `analysisType: "cyclomatic-complexity"` | 4     | Complexity on changed source files               |
+| `mcp_t_test_metrics`       | `action: "decide"`                      | 4     | Split/compress recommendation                    |
+| `mcp_t_ast_analyze`        | `analysisType: "dependency-graph"`      | 5     | DAG + cycle detection on changed files           |
 
 ### Phase B (Analysis Agent, haiku)
 
 | Tool               | Action             | Purpose                              |
 | ------------------ | ------------------ | ------------------------------------ |
-| `review_manage`    | `normalize-branch` | Branch name → filesystem-safe string |
-| `review_manage`    | `ensure-dir`       | Create `.filid/review/<branch>/`     |
-| `review_manage`    | `elect-committee`  | Deterministic committee election     |
-| `fractal_navigate` | `classify`         | Classify changed directories         |
-| `fractal_scan`     | —                  | Build full fractal tree              |
+| `mcp_t_review_manage`    | `normalize-branch` | Branch name → filesystem-safe string |
+| `mcp_t_review_manage`    | `ensure-dir`       | Create `.filid/review/<branch>/`     |
+| `mcp_t_review_manage`    | `elect-committee`  | Deterministic committee election     |
+| `mcp_t_fractal_navigate` | `classify`         | Classify changed directories         |
+| `mcp_t_fractal_scan`     | —                  | Build full fractal tree              |
 
 ### Phase C1 (Metrics Agent, sonnet) — changed files only
 
 | Tool              | Action                  | Purpose                                         |
 | ----------------- | ----------------------- | ----------------------------------------------- |
-| `ast_analyze`     | `lcom4`                 | Cohesion verification (split needed?)           |
-| `ast_analyze`     | `cyclomatic-complexity` | Complexity verification                         |
-| `test_metrics`    | `check-312`             | 3+12 rule validation                            |
-| `test_metrics`    | `count`                 | Test case counting                              |
-| `test_metrics`    | `decide`                | Split/compress/parameterize decision            |
-| `coverage_verify` | —                       | Shared dependency test coverage (WARN only)     |
+| `mcp_t_ast_analyze`     | `lcom4`                 | Cohesion verification (split needed?)           |
+| `mcp_t_ast_analyze`     | `cyclomatic-complexity` | Complexity verification                         |
+| `mcp_t_test_metrics`    | `check-312`             | 3+12 rule validation                            |
+| `mcp_t_test_metrics`    | `count`                 | Test case counting                              |
+| `mcp_t_test_metrics`    | `decide`                | Split/compress/parameterize decision            |
+| `mcp_t_coverage_verify` | —                       | Shared dependency test coverage (WARN only)     |
 
 Phase C1 writes `verification-metrics.md`.
 
@@ -66,14 +66,14 @@ Phase C1 writes `verification-metrics.md`.
 
 | Tool                 | Action             | Purpose                               |
 | -------------------- | ------------------ | ------------------------------------- |
-| `structure_validate` | —                  | FCA-AI fractal boundary rules         |
-| `ast_analyze`        | `dependency-graph` | Circular dependency check             |
-| `ast_analyze`        | `tree-diff`        | Semantic change / interface analysis  |
-| `drift_detect`       | —                  | Structure drift detection             |
-| `doc_compress`       | `auto`             | Document compression state            |
-| `rule_query`         | `list`             | Active rules listing                  |
-| `debt_manage`        | `list`             | Existing debt load                    |
-| `debt_manage`        | `calculate-bias`   | Debt bias level determination         |
+| `mcp_t_structure_validate` | —                  | FCA-AI fractal boundary rules         |
+| `mcp_t_ast_analyze`        | `dependency-graph` | Circular dependency check             |
+| `mcp_t_ast_analyze`        | `tree-diff`        | Semantic change / interface analysis  |
+| `mcp_t_drift_detect`       | —                  | Structure drift detection             |
+| `mcp_t_doc_compress`       | `auto`             | Document compression state            |
+| `mcp_t_rule_query`         | `list`             | Active rules listing                  |
+| `mcp_t_debt_manage`        | `list`             | Existing debt load                    |
+| `mcp_t_debt_manage`        | `calculate-bias`   | Debt bias level determination         |
 
 Phase C2 writes `verification-structure.md`.
 
@@ -143,7 +143,7 @@ Context:
   # <base>.partial-<BATCH_ID>.md instead of the consolidated file.
 - SCOPE_OVERRIDE: <per-file | global | empty>
   # C2 only: "global" means skip per-file checks and run only
-  # structure_validate / drift_detect / debt_manage, writing
+  # mcp_t_structure_validate / mcp_t_drift_detect / mcp_t_debt_manage, writing
   # verification-structure.global.md.
 ```
 
@@ -166,7 +166,7 @@ the same batch boundaries apply to both halves.
 
 ## Checkpoint Resume Table
 
-The chairperson calls `review_manage(action: "checkpoint", ...)` before
+The chairperson calls `mcp_t_review_manage(action: "checkpoint", ...)` before
 entering Phase A. The response indicates which files exist in
 `<REVIEW_DIR>`; the chairperson then selects the next phase from the
 table below (based on files present):

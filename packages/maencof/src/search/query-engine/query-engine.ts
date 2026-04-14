@@ -5,13 +5,13 @@
  * 온라인 검색 계층: 사전 계산된 가중치 + SA로 실시간 검색 수행.
  * 시간 제약: MCP 도구 호출 컨텍스트에서 100ms 이하 목표.
  */
-import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
-import type { SpreadingActivationParams } from '../../core/spreading-activation/spreading-activation.js';
+import { runSpreadingActivation } from '../../core/spreading-activation/index.js';
+import type { SpreadingActivationParams } from '../../core/spreading-activation/index.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type { ActivationResult, KnowledgeGraph } from '../../types/graph.js';
 
-import { QueryCache } from '../query-cache/query-cache.js';
+import { QueryCache } from '../query-cache/index.js';
 
 /** 시드 매칭 유형 */
 export type MatchType =

@@ -10,7 +10,7 @@ import {
   getSgLoadError,
   collectFiles,
   toLangEnum,
-} from '../../../ast/ast-grep-shared/ast-grep-shared.js';
+} from '../../../ast/index.js';
 import { AST_SEARCH_MAX_RESULTS } from '../../../constants/defaults.js';
 
 export interface AstSearchInput {

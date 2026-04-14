@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import type { PostToolUseInput } from './cache-updater.js';
 import { runCacheUpdater } from './cache-updater.js';
-import { readStdin, writeResult } from '../shared/shared.js';
+import { readStdin, writeResult } from '../shared/index.js';
 
 const raw = await readStdin();
 let result;

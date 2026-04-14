@@ -10,8 +10,8 @@ import { join } from 'node:path';
 import type { CompanionIdentityMinimal } from '../../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 
-import type { PinnedNode } from '../cache-manager/cache-manager.js';
-import { readPinnedNodes } from '../cache-manager/cache-manager.js';
+import type { PinnedNode } from '../cache-manager/index.js';
+import { readPinnedNodes } from '../cache-manager/index.js';
 
 import { STALE_THRESHOLD_PERCENT } from '../../constants/thresholds.js';
 

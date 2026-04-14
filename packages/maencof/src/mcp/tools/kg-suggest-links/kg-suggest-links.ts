@@ -7,13 +7,13 @@
  * 2단계: SA 엔진으로 간접 연결 노드에 보강 점수 부여
  * 종합: tag_score + sa_bonus → 정렬 → 상위 N개 반환
  */
-import { runSpreadingActivation } from '../../../core/spreading-activation/spreading-activation.js';
+import { runSpreadingActivation } from '../../../core/spreading-activation/index.js';
 import {
   commonTags,
   extractKeywords,
   jaccardSimilarity,
   normalizeTags,
-} from '../../../core/tag-similarity/tag-similarity.js';
+} from '../../../core/tag-similarity/index.js';
 import { EDGE_TYPE } from '../../../types/common.js';
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../../types/graph.js';

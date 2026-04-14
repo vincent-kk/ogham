@@ -23,7 +23,7 @@ import {
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
-import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 
 vi.mock('node:child_process', async () => {
   const actual =

@@ -52,7 +52,7 @@ If `SCOPE=pr`, also run `gh pr view --json title,body` for intent context.
 First, scan the full project hierarchy to obtain node entries:
 
 ```
-fractal_scan(path: <PROJECT_ROOT>)
+mcp_t_fractal_scan(path: <PROJECT_ROOT>)
 // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, ... }
 ```
 
@@ -62,7 +62,7 @@ Store `tree.nodesList` (array) as `SCAN_NODES` for use in classify calls below.
 For each changed file directory, call:
 
 ```
-fractal_navigate(action: "classify", path: <directory>, entries: SCAN_NODES)
+mcp_t_fractal_navigate(action: "classify", path: <directory>, entries: SCAN_NODES)
 ```
 
 Build a list of unique fractal paths affected by the change.
@@ -73,7 +73,7 @@ Detect whether any interface files (index.ts, public API) are modified.
 Call the deterministic committee election MCP tool:
 
 ```
-review_manage(
+mcp_t_review_manage(
   action: "elect-committee",
   projectRoot: <PROJECT_ROOT>,
   changedFilesCount: <count>,
@@ -110,7 +110,7 @@ explicitly asked for the fast path — do not escalate.
 ### B.4 — Ensure Review Directory
 
 ```
-review_manage(
+mcp_t_review_manage(
   action: "ensure-dir",
   projectRoot: <PROJECT_ROOT>,
   branchName: <BRANCH>
@@ -164,4 +164,4 @@ Adversarial pairs: <persona A> ↔ <persona B list>
 - Do NOT load persona agent definitions — Phase D spawns them as real
   subagents via `Task(subagent_type: filid:<persona-id>)` when needed
 - Write ONLY `session.md` — no other files
-- If `fractal_navigate` fails for a path, classify it as "unknown" and continue
+- If `mcp_t_fractal_navigate` fails for a path, classify it as "unknown" and continue

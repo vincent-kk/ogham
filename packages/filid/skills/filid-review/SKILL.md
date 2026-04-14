@@ -64,8 +64,8 @@ using elected committee personas and a state machine.
 ### Step 1 — Branch Detection & Checkpoint Resume
 
 1. `git branch --show-current` (Bash) → `<branch>`
-2. `review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
-3. `review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
+2. `mcp_t_review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
+3. `mcp_t_review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
 4. Resume from the phase indicated by the checkpoint response. See
    `mcp-map.md` → "Checkpoint Resume Table" for the full file-presence
    → next-phase mapping, the `no_structure_check` frontmatter rule, and
@@ -78,11 +78,11 @@ using elected committee personas and a state machine.
 > `.filid/review/<branch>/session.md` and re-run with `--force` to
 > start fresh." Then END execution. Do not enter any further phase.
 
-If `--force`: call `review_manage(action: "cleanup", projectRoot, branchName)`
+If `--force`: call `mcp_t_review_manage(action: "cleanup", projectRoot, branchName)`
 first, then restart from Phase A (or Phase B if `--no-structure-check`).
 
 5. Cache check (skip when `--force` is set or when no prior review exists):
-   `review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
+   `mcp_t_review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
    - `"skip-to-existing-results"` → read existing `review-report.md`
      and `fix-requests.md` from the paths in the response. Done.
    - `"proceed-full-review"` → continue to Step 2.
@@ -207,7 +207,7 @@ defines:
    `packages/filid/agents/<id>.md` (e.g.,
    `agents/engineering-architect.md`).
 5. `--solo` (when provided by the user) is passed to Phase B as
-   `adjudicatorMode: true` input to `review_manage(elect-committee)`,
+   `adjudicatorMode: true` input to `mcp_t_review_manage(elect-committee)`,
    which returns `committee: ['adjudicator']` regardless of
    complexity. Phase D Step D.2-solo then spawns the `adjudicator`
    agent as a standalone `Task` (no Team infrastructure). The same
@@ -223,7 +223,7 @@ the team (if any) has been deleted.**
 After Phase D outputs are written, persist the content hash for future
 cache lookups:
 
-`review_manage(action: "content-hash", projectRoot, branchName, baseRef)`
+`mcp_t_review_manage(action: "content-hash", projectRoot, branchName, baseRef)`
 
 This writes `content-hash.json` alongside the review outputs.
 
@@ -233,7 +233,7 @@ This writes `content-hash.json` alongside the review outputs.
 
 When `--scope=pr`:
 
-1. `review_manage(action: "format-pr-comment", projectRoot, branchName)`
+1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot, branchName)`
    → returns formatted markdown.
 2. `gh auth status` (Bash).
 3. If authenticated: `gh pr comment --body "<markdown>"` (Bash) — use

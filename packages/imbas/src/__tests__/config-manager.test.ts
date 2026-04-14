@@ -144,7 +144,7 @@ describe('loadConfig', () => {
     mkdirSync(join(cwd, '.imbas'), { recursive: true });
     writeFileSync(
       join(cwd, '.imbas', 'config.json'),
-      JSON.stringify({ media: { max_frames: -99 } }),
+      JSON.stringify({ provider: 'invalid_provider' }),
       'utf-8',
     );
     await expect(loadConfig(cwd)).rejects.toThrow();

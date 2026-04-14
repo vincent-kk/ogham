@@ -18,7 +18,7 @@ Step 0.1 — Input Mode Detection
     → Argument is <source> (document path or Confluence URL)
 
 Step 0.2 — Option Resolution
-  1. Call config_get to load config.json.
+  1. Call mcp_tools_config_get to load config.json.
   2. Resolve each option by mode:
 
   DOCUMENT PIPELINE:
@@ -110,28 +110,28 @@ Skipped in devplan pipeline mode (input is Story keys).
 ```
 Step 1.1 — Run Initialization
   1. Determine project key (already resolved in Phase 0).
-  2. Call run_create with:
+  2. Call mcp_tools_run_create with:
      - project_ref: <determined key>
      - source_file: <source argument>
      - supplements: <--supplements paths array> (if provided)
      → Returns: run_id, run_dir, initial state
-  3. Call run_transition:
+  3. Call mcp_tools_run_transition:
      - project_ref, run_id, action: "start_phase", phase: "validate"
 
 Step 1.2 — Document Source Resolution
-  - Local file (*.md, *.txt): Already copied to source.md by run_create. Read directly.
+  - Local file (*.md, *.txt): Already copied to source.md by mcp_tools_run_create. Read directly.
   - Confluence URL:
     - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.
     - If page contains embedded media (images, videos):
-      → Display: "Media attachments detected. Run /imbas:imbas-fetch-media to include visual context."
-      → Do NOT auto-invoke fetch-media.
+      → Display: "Media attachments detected. Run /atlassian:atlassian-media-analysis to include visual context."
+      → Do NOT auto-invoke media-analysis.
   - If source contains references to other Confluence pages:
     - [OP: search_confluence] to resolve references.
     - Save referenced content as supplements.
 
-Step 1.3 — imbas-analyst Agent Spawn
-  - Spawn agent: imbas-analyst
+Step 1.3 — analyst Agent Spawn
+  - Spawn agent: `analyst`
   - Model: config.defaults.llm_model.validate (default: "sonnet")
   - Input: source.md + supplements/*.md + config.json language settings
   - Instructions: Perform 5-type validation (contradictions, divergences, omissions, infeasibilities, testability).
@@ -148,7 +148,7 @@ Step 1.4 — Result Evaluation
     - blocking_issues == 0, warning_issues == 0 → result = "PASS"
 
 Step 1.5 — State Update
-  Call run_transition:
+  Call mcp_tools_run_transition:
   - action: "complete_phase", phase: "validate"
   - result, blocking_issues, warning_issues
 
@@ -168,7 +168,7 @@ Replicates `imbas:split` skill workflow (Steps 1-7) with auto-approval gate repl
 
 ```
 Step 2.1 — Start Phase
-  Call run_transition:
+  Call mcp_tools_run_transition:
   - action: "start_phase", phase: "split"
 
 Step 2.2 — Parent Resolution (already resolved in Phase 0)
@@ -177,8 +177,8 @@ Step 2.2 — Parent Resolution (already resolved in Phase 0)
   - "new": add Epic entry to stories-manifest.json (created in Phase 2.5).
   - "none": Stories created without parent Epic.
 
-Step 2.3 — imbas-planner Agent Spawn
-  - Spawn agent: imbas-planner
+Step 2.3 — planner Agent Spawn
+  - Spawn agent: `planner`
   - Model: config.defaults.llm_model.split (default: "sonnet")
   - Input: source.md + supplements/*.md + Epic information + config.json language settings
   - Instructions: Split into INVEST-compliant Stories with User Story + AC (Given/When/Then or EARS).
@@ -186,7 +186,7 @@ Step 2.3 — imbas-planner Agent Spawn
   - Agent returns: Story list as JSON
 
 Step 2.4 — 3→1→2 Verification (per Story)
-  For each Story produced by imbas-planner:
+  For each Story produced by `planner`:
 
   [3] Anchor Link Check
     - Story has explicit reference to source document section?
@@ -199,7 +199,7 @@ Step 2.4 — 3→1→2 Verification (per Story)
     - Coherent → set verification.coherence = "PASS", continue
 
   [2] Reverse-Inference Verification
-    - Spawn agent: imbas-analyst
+    - Spawn agent: `analyst`
     - Input: ALL split Stories reassembled + original source.md
     - Instructions: Compare reassembled Stories against original. Identify semantic loss, mutation, addition.
     - Match → set verification.reverse_inference = "PASS"
@@ -217,13 +217,13 @@ Step 2.5 — Escape Condition Detection
   | EC-2 | Source defect | STOP: recommend re-validate |
 
   On escape (except E2-3):
-  - Call run_transition: action "escape_phase", phase "split", escape_code
+  - Call mcp_tools_run_transition: action "escape_phase", phase "split", escape_code
   - Emit blocker report with escape details
 
   On E2-3:
   - Generate a single-Story stories-manifest.json wrapping the original document as one Story
-  - Call manifest_save to persist it
-  - Call run_transition: action "escape_phase", phase "split", escape_code "E2-3"
+  - Call mcp_tools_manifest_save to persist it
+  - Call mcp_tools_run_transition: action "escape_phase", phase "split", escape_code "E2-3"
   - Skip Phase 2.5 (manifest-stories), proceed directly to Phase 3
 
 Step 2.6 — Size Check + Horizontal Split / Umbrella
@@ -235,7 +235,7 @@ Step 2.6 — Size Check + Horizontal Split / Umbrella
   If any criterion fails, branch by cause (mirrors split Step 5):
 
   (a) Size exceeded (criterion 1 or 4) → Horizontal Split
-    - Re-invoke imbas-planner for the oversized Story only
+    - Re-invoke `planner` for the oversized Story only
     - Original Story marked for "Done" processing + links:
       "is split into" from original → new Stories
       "split from" from new Stories → original
@@ -252,18 +252,18 @@ Step 2.6 — Size Check + Horizontal Split / Umbrella
       umbrella structure) → refine content within same Story
 
   Pipeline auto-selection heuristic between (a) and (b):
-    - If imbas-planner can define ≥2 cohesive child Stories with distinct
+    - If `planner` can define ≥2 cohesive child Stories with distinct
       domains under one conceptual parent → (b) Umbrella
     - Otherwise → (a) Horizontal Split
 
 Step 2.7 — Manifest Generation
   1. Compile stories-manifest.json with all Stories, verification results, links
-  2. Call manifest_save(project_ref, run_id, type: "stories", manifest)
-  3. Call manifest_validate(project_ref, run_id, type: "stories")
+  2. Call mcp_tools_manifest_save(project_ref, run_id, type: "stories", manifest)
+  3. Call mcp_tools_manifest_validate(project_ref, run_id, type: "stories")
      - If validation errors: attempt auto-fix (dedup, link resolution), re-validate
 
 >>> GATE 2: Split Quality (see auto-approval-gates.md)
-  - All criteria pass → call run_transition(complete_phase, split, pending_review: false)
+  - All criteria pass → call mcp_tools_run_transition(complete_phase, split, pending_review: false)
   - Any criterion fails → STOP with blocker report detailing which Stories/fields failed
 
 >>> --stop-at split? → emit progress report, exit
@@ -290,7 +290,7 @@ Step 2.5.1 — Dry-Run Check
   - Skip execution, continue to Phase 3 (if not --stop-at manifest-stories)
 
 Step 2.5.2 — Batch Execution
-  CRITICAL: After EACH item creation, immediately save manifest via manifest_save.
+  CRITICAL: After EACH item creation, immediately save manifest via mcp_tools_manifest_save.
 
   Phase A — Epic Creation (if --parent "new" and manifest has Epic entry):
     1. [OP: create_issue] project=<KEY>, type="Epic", summary=<summary>, description=<description>
@@ -349,8 +349,8 @@ Replicates `imbas:devplan` skill workflow (Steps 1-4) with auto-approval gate re
 ```
 Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
   When Phase 0 detected DEVPLAN PIPELINE mode (story_keys[] from input):
-  1. Call run_create(project_ref, source_file: "devplan-pipeline", supplements: [])
-     (sentinel value — not a file path; run_create skips file copy when source_file does not point to an existing file)
+  1. Call mcp_tools_run_create(project_ref, source_file: "devplan-pipeline", supplements: [])
+     (sentinel value — not a file path; mcp_tools_run_create skips file copy when source_file does not point to an existing file)
      → Creates run directory + state.json
   2. Story details already loaded in Phase 0 Step 0.3 ([OP: get_issue] per key)
   3. Build stories-manifest.json from collected Stories:
@@ -362,21 +362,21 @@ Step 3.0 — DEVPLAN PIPELINE Mode Setup (only when input is Story keys)
        ]
      }
      All Stories have status "created" with valid issue_ref (they already exist in Jira).
-  4. Call manifest_save(type: "stories", manifest)
-  5. Call run_transition: action "skip_phases", phases ["validate", "split"]
+  4. Call mcp_tools_manifest_save(type: "stories", manifest)
+  5. Call mcp_tools_run_transition: action "skip_phases", phases ["validate", "split"]
      → Sets both phases to status "completed", records in metadata.skipped_phases
   6. Proceed to Step 3.1
 
-  Note: When multiple Stories are provided, imbas-engineer performs cross-Story
+  Note: When multiple Stories are provided, `engineer` performs cross-Story
   duplicate detection (Step 3.2c) and Task extraction (Step 3.2d) across ALL Stories.
   This is where shared Tasks with "blocks" links are generated.
 
 Step 3.1 — Start Phase
-  1. Call run_transition: action "start_phase", phase "devplan"
-  2. Call manifest_get(project_ref, run_id, type: "stories") to load stories-manifest
+  1. Call mcp_tools_run_transition: action "start_phase", phase "devplan"
+  2. Call mcp_tools_manifest_get(project_ref, run_id, type: "stories") to load stories-manifest
 
-Step 3.2 — imbas-engineer Agent Spawn
-  - Spawn agent: imbas-engineer
+Step 3.2 — engineer Agent Spawn
+  - Spawn agent: `engineer`
   - Model: config.defaults.llm_model.devplan (default: "opus")
   - Input:
     - stories-manifest.json (Story descriptions with issue_refs)
@@ -391,22 +391,22 @@ Step 3.2 — imbas-engineer Agent Spawn
   - Agent returns: devplan-manifest.json content
 
   AST FALLBACK:
-  If ast_search or ast_analyze returns sgLoadError:
+  If mcp_tools_ast_search or mcp_tools_ast_analyze returns sgLoadError:
   - Note in pipeline report: "AST fallback mode — results approximate"
   - Agent handles fallback internally (meta-variable → regex → Grep → LLM filtering)
 
 Step 3.3 — B→A Feedback Collection
   - Divergences between Story definitions and code reality → feedback_comments[]
   - "Problem space tree unchanged" principle: Stories are NOT modified
-  - Call manifest_save to persist feedback_comments in devplan-manifest.json
+  - Call mcp_tools_manifest_save to persist feedback_comments in devplan-manifest.json
 
 Step 3.4 — Manifest Validation
-  1. Call manifest_save(project_ref, run_id, type: "devplan", manifest)
-  2. Call manifest_validate(project_ref, run_id, type: "devplan")
+  1. Call mcp_tools_manifest_save(project_ref, run_id, type: "devplan", manifest)
+  2. Call mcp_tools_manifest_validate(project_ref, run_id, type: "devplan")
 
   IF agent returns devplan-blocked-report.md (all Stories blocked):
   - Save blocked report to run directory
-  - Call run_transition(complete_phase, devplan, result: "BLOCKED")
+  - Call mcp_tools_run_transition(complete_phase, devplan, result: "BLOCKED")
   - STOP: emit blocked report with dependency resolution guidance
 
   IF agent returns partial output (some blocked, some unblocked):
@@ -414,7 +414,7 @@ Step 3.4 — Manifest Validation
   - Continue gate evaluation with partial manifest only
 
 >>> GATE 3: Devplan Quality (see auto-approval-gates.md)
-  - All criteria pass → call run_transition(complete_phase, devplan, pending_review: false)
+  - All criteria pass → call mcp_tools_run_transition(complete_phase, devplan, pending_review: false)
   - Validation errors or needs_review flags → STOP with blocker report
   - B→A feedback_comments → non-blocking, included in final report
 
@@ -430,12 +430,12 @@ Replicates `imbas:manifest` skill workflow for "devplan" type. Follows execution
 ```
 Step 3.5.1 — Dry-Run Check
   If --dry-run flag is set:
-  - Call manifest_plan(project_ref, run_id) for execution plan preview
+  - Call mcp_tools_manifest_plan(project_ref, run_id) for execution plan preview
   - Display each step: Tasks, Task Subtasks, Links, Story Subtasks, Feedback Comments
   - Skip execution, proceed to final report
 
 Step 3.5.2 — Batch Execution (follows execution_order)
-  CRITICAL: After EACH item creation, immediately save manifest via manifest_save.
+  CRITICAL: After EACH item creation, immediately save manifest via mcp_tools_manifest_save.
 
   Step 1 — create_tasks:
     For each task where status == "pending":

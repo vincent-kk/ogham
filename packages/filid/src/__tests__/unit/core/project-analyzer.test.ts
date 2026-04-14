@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  calculateHealthScore,
-  generateReport,
-} from '../../../core/analysis/project-analyzer/project-analyzer.js';
+import { calculateHealthScore } from '../../../core/analysis/project-analyzer/project-analyzer.js';
+import { generateReport } from '../../../core/analysis/project-analyzer/renderers/report-renderer.js';
 import { buildFractalTree } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { NodeEntry } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';

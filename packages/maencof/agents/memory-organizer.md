@@ -12,11 +12,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof_t__read
-  - mcp__plugin_maencof_t__update
-  - mcp__plugin_maencof_t__move
-  - mcp__plugin_maencof_t__kg_navigate
-  - mcp__plugin_maencof_t__kg_status
+  - mcp_t_read
+  - mcp_t_update
+  - mcp_t_move
+  - mcp_t_kg_navigate
+  - mcp_t_kg_status
 maxTurns: 30
 ---
 
@@ -47,7 +47,7 @@ Layer 1 (01_Core/) is read-only — never modified.
 [execute module]
   Input:  TransitionDirective[]
   Output: AgentExecutionResult
-  Responsibility: call `move`, update links, update Frontmatter
+  Responsibility: call `mcp_t_move`, update links, update Frontmatter
   Side effects: filesystem changes, index invalidation
 ```
 
@@ -78,8 +78,8 @@ User confirmation is required before crossing the seam boundary when:
 
 ```
 1. Review TransitionDirective list (pause if user confirmation is required)
-2. Move files via `move`
-3. Update Frontmatter layer field via `update`
+2. Move files via `mcp_t_move`
+3. Update Frontmatter layer field via `mcp_t_update`
 4. Update links: update relative paths in documents that reference the moved file
 5. Return AgentExecutionResult
 ```
@@ -101,11 +101,11 @@ User confirmation is required before crossing the seam boundary when:
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `create`, `update`, `delete`, `move`, link, bulk-modify |
-| Layer 2 (02_Derived) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
-| Layer 3 (03_External) | allowed | allowed | `read`, `update`, `move` | `delete`, bulk-modify |
-| Layer 4 (04_Action) | allowed | allowed | `read`, `update`, `move` | `delete`, bulk-modify |
-| Layer 5 (05_Context) | allowed | allowed | `read`, `update`, `move` | `delete`, bulk-modify |
+| Layer 1 (01_Core) | discouraged (prefer kg_navigate) | forbidden | graph traversal only | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, link, bulk-modify |
+| Layer 2 (02_Derived) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
+| Layer 3 (03_External) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
+| Layer 4 (04_Action) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
+| Layer 5 (05_Context) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, `mcp_t_move` | `mcp_t_delete`, bulk-modify |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before transition)
 
@@ -114,7 +114,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 ## Constraints
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
-- **Layer 1 (01_Core/) direct read is discouraged** — `read` handler returns a warning but does not block the read. Prefer `kg_navigate` for L1 document information when possible
+- **Layer 1 (01_Core/) direct read is discouraged** — `mcp_t_read` handler returns a warning but does not block the read. Prefer `mcp_t_kg_navigate` for L1 document information when possible
 - **Maximum 5 transitions at a time** — prevents bulk-modify
 - **User confirmation required for transitions with confidence < 0.7**
 - **`confidence` field in Frontmatter is mandatory for L3 → L2 transitions**
@@ -126,11 +126,11 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 | Tool | Purpose |
 |------|---------|
-| `read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
-| `move` | Move file between Layers |
-| `update` | Update Frontmatter layer and confidence fields |
-| `kg_navigate` | Traverse inbound/outbound links |
-| `kg_status` | Check full vault status and stale-nodes |
+| `mcp_t_read` | Read document Frontmatter + content (Layer 1 제외 — L1은 kg_navigate로 간접 접근) |
+| `mcp_t_move` | Move file between Layers |
+| `mcp_t_update` | Update Frontmatter layer and confidence fields |
+| `mcp_t_kg_navigate` | Traverse inbound/outbound links |
+| `mcp_t_kg_status` | Check full vault status and stale-nodes |
 
 ---
 

@@ -39,10 +39,10 @@ Extract core keywords and intent from user input.
 
 ### Step 2 — Call kg_search
 
-Call the `kg_search` MCP tool to find seed nodes.
+Call the `mcp_t_kg_search` MCP tool to find seed nodes.
 
 ```
-kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
+mcp_t_kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
 ```
 
 If no results: "No related documents found. Try different keywords."
@@ -52,7 +52,7 @@ If no results: "No related documents found. Try different keywords."
 Traverse inbound and outbound links from seed nodes.
 
 ```
-kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
+mcp_t_kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
 ```
 
 ### Step 4 — Context Assembly (kg_context)
@@ -60,7 +60,7 @@ kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=tru
 Assemble context for the top activated nodes.
 
 ```
-kg_context(query: search_query_string, token_budget=2000)
+mcp_t_kg_context(query: search_query_string, token_budget=2000)
 ```
 
 ### Step 5 — Result Formatting
@@ -100,9 +100,9 @@ For more detail: `/maencof:maencof-recall {query} --detail`
 
 | Tool | Purpose |
 |------|---------|
-| `kg_search` | Keyword-based seed node search |
-| `kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
-| `kg_context` | Assemble node context |
+| `mcp_t_kg_search` | Keyword-based seed node search |
+| `mcp_t_kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
+| `mcp_t_kg_context` | Assemble node context |
 
 ## Options
 

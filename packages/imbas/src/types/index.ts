@@ -35,7 +35,6 @@ export {
   CompletePhaseActionSchema,
   EscapePhaseActionSchema,
   RunTransitionSchema,
-  createInitialRunState,
 } from './state.js';
 export type {
   PhaseStatus,
@@ -58,7 +57,6 @@ export {
   SubtaskLimitsSchema,
   DefaultsConfigSchema,
   JiraConfigSchema,
-  MediaConfigSchema,
   ImbasConfigSchema,
 } from './config.js';
 export type {
@@ -68,7 +66,6 @@ export type {
   SubtaskLimits,
   DefaultsConfig,
   JiraConfig,
-  MediaConfig,
   ImbasConfig,
 } from './config.js';
 

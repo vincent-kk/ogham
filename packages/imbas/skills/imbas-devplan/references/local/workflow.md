@@ -23,7 +23,7 @@ skill to the target local issue file's `## Digest` section via `Edit`
 modified. Divergences become `## Digest` appends in the local file, mirroring
 the Jira-side "comments only" invariant.
 
-Call `manifest_save` to persist feedback_comments in devplan-manifest.json.
+Call `mcp_tools_manifest_save` to persist feedback_comments in devplan-manifest.json.
 
 ## Step 4 — Final user guidance (Local)
 
@@ -33,6 +33,6 @@ When the user approves the devplan manifest, display:
 
 ## Delegated reads
 
-During Step 2 exploration, the imbas-engineer agent does NOT query external
+During Step 2 exploration, the `engineer` agent does NOT query external
 trackers. Local Stories are read directly from their markdown files via the
 `imbas:read-issue` skill's local branch (Glob + Read + frontmatter parse).

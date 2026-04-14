@@ -26,7 +26,7 @@ Uses incremental build by default, reprocessing only changed files.
 
 ### Step 1 — Status Check
 
-Check the current index status with the `kg_status` MCP tool.
+Check the current index status with the `mcp_t_kg_status` MCP tool.
 - No index -> run a full build
 - Stale < 10% -> run an incremental build
 - Stale >= 10% -> recommend a full build and ask for user confirmation
@@ -58,8 +58,8 @@ Build type: incremental (12 files updated)
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Check current index status |
-| `kg_build` | Run index build (incremental: `force=false`, full: `force=true`) |
+| `mcp_t_kg_status` | Check current index status |
+| `mcp_t_kg_build` | Run index build (incremental: `force=false`, full: `force=true`) |
 
 ## Error Handling
 

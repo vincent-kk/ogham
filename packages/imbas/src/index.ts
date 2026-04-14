@@ -7,14 +7,13 @@ export * from './types/index.js';
 export { VERSION } from './version.js';
 
 // MCP modules
-export { createServer, startServer } from './mcp/index.js';
 export {
+  createServer,
+  startServer,
   toolResult,
   toolError,
   mapReplacer,
   wrapHandler,
-} from './mcp/index.js';
-export {
   handleImbasPing,
   handleRunCreate,
   handleRunGet,
@@ -30,7 +29,7 @@ export {
   handleCacheSet,
   handleAstSearch,
   handleAstAnalyze,
-} from './mcp/tools/index.js';
+} from './mcp/index.js';
 
 // Core modules
 export {
@@ -56,8 +55,6 @@ export {
   getCacheDir,
   getRunsDir,
   getRunDir,
-  getTempDir,
-  getMediaDir,
   generateRunId,
 } from './core/index.js';
 
@@ -83,7 +80,12 @@ export type { CyclomaticResult, CyclomaticError } from './ast/index.js';
 export { processSetup } from './hooks/index.js';
 
 // Lib modules
-export { createLogger, setLogDir, resetLogger } from './lib/logger.js';
-export type { Logger } from './lib/logger.js';
-export { readStdin } from './lib/stdin.js';
-export { readJson, writeJson } from './lib/file-io.js';
+export {
+  createLogger,
+  setLogDir,
+  resetLogger,
+  readStdin,
+  readJson,
+  writeJson,
+} from './lib/index.js';
+export type { Logger } from './lib/index.js';

@@ -13,8 +13,8 @@ import type {
   KnowledgeGraph,
 } from '../../types/graph.js';
 
-import { buildAdjacencyList } from '../graph-builder/graph-builder.js';
-import { getLayerDecay } from '../weight-calculator/weight-calculator.js';
+import { buildAdjacencyList } from '../graph-builder/index.js';
+import { getLayerDecay } from '../weight-calculator/index.js';
 
 /** 엣지 타입별 SA 활성화 멀티플라이어 */
 export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {

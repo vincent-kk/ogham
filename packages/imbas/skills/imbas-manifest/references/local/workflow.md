@@ -40,7 +40,7 @@ and `issue_ref` is non-null:
      - Yes → clear `issue_ref`, set `status = "pending"`.
      - No → mark `status = "skipped"`.
 4. If any drift detected, display summary table and save reconciled manifest via
-   `manifest_save` before Step 3.
+   `mcp_tools_manifest_save` before Step 3.
 5. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (Local)
@@ -52,7 +52,7 @@ before any file is written. For every item:
   3. `Write` the file immediately with full frontmatter + `## Description` body
      + empty `## Digest` section (see `file-format.md`).
   4. Update manifest item: `status = "created"`, `issue_ref = <ID>`.
-  5. `manifest_save` immediately.
+  5. `mcp_tools_manifest_save` immediately.
 
 This ensures crash recovery leaves no orphan IDs. A mid-batch kill means the
 next run's Glob will pick up from the highest written file.
@@ -78,7 +78,7 @@ For each story in `manifest.stories` where `status == "pending"`:
      - `## Description` body from `story.description`.
      - Empty `## Digest` section.
   3. Update story: `status = "created"`, `issue_ref = "S-<N>"`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 #### Phase 4c — Link Creation (bidirectional)
 See `link-handling.md`. For each link in `manifest.links` where `status == "pending"`:
@@ -104,7 +104,7 @@ For each task in `manifest.tasks` where `status == "pending"`:
      - `title`, `description`
      - `links[]` initially empty (blocks relations recorded in Step 3).
   3. Update task: `status = "created"`, `issue_ref = "T-<N>"`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 #### Step 2 — create_task_subtasks
 For each task, for each subtask in `task.subtasks` where `status == "pending"`:
@@ -113,21 +113,21 @@ For each task, for each subtask in `task.subtasks` where `status == "pending"`:
      - `type: Subtask`
      - `parent: task.issue_ref` (the `T-<N>` allocated in Step 1).
   3. Update subtask: `status = "created"`, `issue_ref = "ST-<N>"`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 #### Step 3 — create_links (task.blocks relations)
 For each task, for each `blocked_story_id` in `task.blocks`:
   1. Resolve `story_id` to `S-<N>` from `stories-manifest.json`.
   2. `Edit` the task file to append `{type: blocks, to: S-<N>}` to `links[]`.
   3. `Edit` the story file to append `{type: is blocked by, to: T-<N>}` to `links[]`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 #### Step 4 — create_story_subtasks
 For each entry in `manifest.story_subtasks`, for each subtask where `status == "pending"`:
   1. Allocate next `ST-<N>`.
   2. `Write .imbas/<KEY>/issues/subtasks/ST-<N>.md` with `parent: entry.story_key`.
   3. Update subtask: `status = "created"`, `issue_ref = "ST-<N>"`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 #### Step 5 — add_feedback_comments
 For each comment in `manifest.feedback_comments` where `status == "pending"`:
@@ -139,7 +139,7 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
      <comment body>
      ```
   3. Update comment: `status = "created"`.
-  4. `manifest_save` immediately.
+  4. `mcp_tools_manifest_save` immediately.
 
 IDEMPOTENCY: for every item, check `imbas-status` and `issue_ref` before writing.
 If `issue_ref` already exists, re-verify the file exists (Glob) and skip.

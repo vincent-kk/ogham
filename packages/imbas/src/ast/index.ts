@@ -3,6 +3,8 @@ export {
   isSgAvailable,
   getSgLoadError,
   collectFiles,
+  EXT_TO_LANG,
+  toLangEnum,
 } from './ast-grep-shared/index.js';
 export { extractDependencies } from './dependency-extractor/index.js';
 export type {

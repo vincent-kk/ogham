@@ -75,7 +75,7 @@ If a prerequisite is missing: **ABORT** with "Cannot start from `<stage>`:
 order — first match wins. If no match, immediately check the next signal.
 
 1. Detect branch: `git branch --show-current` (Bash)
-2. Normalize: `review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
+2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
 | Priority | Signal | Entry stage |
@@ -145,7 +145,7 @@ uses a **hybrid execution model**:
   If any marker is missing (or no matching comment exists), the subagent
   skipped or hand-rolled Step 5. In that case, regenerate and replace from
   the main context:
-  1. `review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)`
+  1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)`
   2. If a malformed `Code Review Governance` comment exists, **edit it in place**
      via `gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`
      (obtain numeric `id` via `gh api repos/<owner>/<repo>/issues/<pr>/comments`).
@@ -223,9 +223,9 @@ from the appropriate stage.
 
 | Tool             | Action             | Purpose                                          |
 | ---------------- | ------------------ | ------------------------------------------------ |
-| `review_manage`  | `normalize-branch`       | Normalize branch name for auto-detection         |
-| `review_manage`  | `format-pr-comment`      | Format review findings as a PR comment           |
-| `review_manage`  | `generate-human-summary` | Generate human-readable summary of review results |
+| `mcp_t_review_manage`  | `normalize-branch`       | Normalize branch name for auto-detection         |
+| `mcp_t_review_manage`  | `format-pr-comment`      | Format review findings as a PR comment           |
+| `mcp_t_review_manage`  | `generate-human-summary` | Generate human-readable summary of review results |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 

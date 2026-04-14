@@ -8,25 +8,27 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 
 import { VERSION } from '../../version.js';
-import { CacheTypeSchema } from '../../types/cache.js';
+import { CacheTypeSchema } from '../../types/index.js';
 
-import { wrapHandler } from '../shared/shared.js';
+import { wrapHandler } from '../shared/index.js';
 
-import { handleImbasPing } from '../tools/imbas-ping/imbas-ping.js';
-import { handleRunCreate } from '../tools/run-create/run-create.js';
-import { handleRunGet } from '../tools/run-get/run-get.js';
-import { handleRunTransition } from '../tools/run-transition/run-transition.js';
-import { handleRunList } from '../tools/run-list/run-list.js';
-import { handleManifestGet } from '../tools/manifest-get/manifest-get.js';
-import { handleManifestSave } from '../tools/manifest-save/manifest-save.js';
-import { handleManifestValidate } from '../tools/manifest-validate/manifest-validate.js';
-import { handleManifestPlan } from '../tools/manifest-plan/manifest-plan.js';
-import { handleConfigGet } from '../tools/config-get/config-get.js';
-import { handleConfigSet } from '../tools/config-set/config-set.js';
-import { handleCacheGet } from '../tools/cache-get/cache-get.js';
-import { handleCacheSet } from '../tools/cache-set/cache-set.js';
-import { handleAstSearch } from '../tools/ast-search/ast-search.js';
-import { handleAstAnalyze } from '../tools/ast-analyze/ast-analyze.js';
+import {
+  handleImbasPing,
+  handleRunCreate,
+  handleRunGet,
+  handleRunTransition,
+  handleRunList,
+  handleManifestGet,
+  handleManifestSave,
+  handleManifestValidate,
+  handleManifestPlan,
+  handleConfigGet,
+  handleConfigSet,
+  handleCacheGet,
+  handleCacheSet,
+  handleAstSearch,
+  handleAstAnalyze,
+} from '../tools/index.js';
 
 /**
  * Create and configure the MCP server with all tool registrations.

@@ -1,0 +1,52 @@
+---
+name: atlassian-media-analysis
+user_invocable: true
+description: "[atlassian:atlassian-media-analysis] Analyze media attachments from Confluence/Jira. Downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis via `media` agent. Trigger: \"analyze media\", \"media analysis\", \"미디어 분석\", \"영상 분석\", \"키프레임 추출\""
+argument-hint: "<url-or-path> [--analyze] [--preset NAME] [--force]"
+version: "1.0.0"
+complexity: moderate
+plugin: atlassian
+---
+
+# atlassian-media-analysis — Media Download & Analysis
+
+Download images, videos, and GIFs from Atlassian sources or local paths. For video/GIF files,
+extracts visually meaningful keyframes via scene-sieve and runs semantic analysis through
+the `media` subagent to produce a structured analysis.json.
+
+## When to Use This Skill
+
+- User wants to understand visual content attached to Confluence pages or Jira issues
+- Downloading and analyzing screen recordings, demo videos, or GIF animations
+- Extracting keyframes from video attachments for LLM comprehension
+- Pre-processing media before running digest or validation workflows
+
+## Arguments
+
+```
+/atlassian:atlassian-media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
+
+<url-or-path>  : Confluence attachment URL, Jira attachment URL, or local file path
+--analyze      : For video/GIF, run scene-sieve extraction + `media` analysis
+--preset       : scene-sieve preset override (default: auto-detect from extension/duration)
+--force        : Force re-analysis even if cached analysis.json exists
+```
+
+## References
+
+- [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
+- [preset-selection.md](./references/preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
+- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: atlassian MCP tools, `media` agent details, cache behavior
+- [scripts/probe.mjs](./scripts/probe.mjs) — Video probe + preset auto-selection script (run before extraction, cross-platform)
+- [presets/index.md](./presets/index.md) — Decision matrix and summary table for preset selection
+  - [short-clip.md](./presets/short-clip.md) — <= 30s clips
+  - [medium-video.md](./presets/medium-video.md) — 30s-5min videos
+  - [long-video.md](./presets/long-video.md) — 5-30min videos
+  - [very-long.md](./presets/very-long.md) — > 30min videos
+  - [gif.md](./presets/gif.md) — GIF animations
+  - [quick-glance.md](./presets/quick-glance.md) — Fast summary
+  - [detailed.md](./presets/detailed.md) — Thorough analysis
+  - [hq-capture.md](./presets/hq-capture.md) — High-quality screenshots
+  - [inspection.md](./presets/inspection.md) — Visual bug detection
+  - [screen-recording.md](./presets/screen-recording.md) — UI walkthroughs
+- [reference.md](./references/reference.md) — Complete flag reference (14 flags), JSON output schemas, error codes, troubleshooting

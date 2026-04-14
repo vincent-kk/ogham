@@ -18,7 +18,7 @@ import type {
 } from '../../types/frontmatter.js';
 import type { KnowledgeNode } from '../../types/graph.js';
 
-import { parseYamlFrontmatter } from '../yaml-parser/yaml-parser.js';
+import { parseYamlFrontmatter } from '../yaml-parser/index.js';
 import {
   ABSOLUTE_HREF_REGEX,
   FRONTMATTER_REGEX,
@@ -26,7 +26,7 @@ import {
   WIKILINK_REGEX,
 } from '../../constants/regexes.js';
 
-export { parseScalarValue, parseYamlFrontmatter } from '../yaml-parser/yaml-parser.js';
+export { parseScalarValue, parseYamlFrontmatter } from '../yaml-parser/index.js';
 
 /** 마크다운 링크 정보 */
 export interface MarkdownLink {

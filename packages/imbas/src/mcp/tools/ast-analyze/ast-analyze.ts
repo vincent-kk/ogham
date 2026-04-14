@@ -3,8 +3,7 @@
  * @description Dependency graph / cyclomatic complexity analysis
  */
 
-import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
-import { calculateComplexity } from '../../../ast/cyclomatic-complexity/cyclomatic-complexity.js';
+import { extractDependencies, calculateComplexity } from '../../../ast/index.js';
 import { DEFAULT_ANONYMOUS_PATH } from '../../../constants/defaults.js';
 
 export interface AstAnalyzeInput {

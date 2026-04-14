@@ -39,7 +39,7 @@ in the PR body. No code changes — empty commit only.
 ## Workflow (Provider-agnostic skeleton)
 
 1. Read issue via `/imbas:imbas-read-issue <issue> --depth shallow`.
-2. Read `config.provider` via `config_get`.
+2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
    | provider | workflow file |

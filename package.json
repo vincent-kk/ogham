@@ -25,6 +25,7 @@
     "maencof": "yarn workspace @ogham/maencof",
     "imbas": "yarn workspace @ogham/imbas",
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
+    "atlassian": "yarn workspace @ogham/atlassian",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
     "run:all": "yarn workspaces foreach -A run",
     "sort:packages": "npx sort-package-json '**/package.json'",

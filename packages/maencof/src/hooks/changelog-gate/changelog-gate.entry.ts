@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import type { ChangelogGateInput } from './changelog-gate.js';
 import { runChangelogGate } from './changelog-gate.js';
-import { readStdin, writeResult } from '../shared/shared.js';
+import { readStdin, writeResult } from '../shared/index.js';
 
 const raw = await readStdin();
 let result;

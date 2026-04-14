@@ -10,7 +10,7 @@ State Tracking + QA-Prompting 하이브리드 방식을 사용한다.
 
 ## 워크플로우
 
-1. **이슈 읽기** — `imbas:read-issue` 스킬로 전체 이슈 로드, 첨부 미디어는 `imbas:fetch-media`로 분석
+1. **이슈 읽기** — `imbas:read-issue` 스킬로 전체 이슈 로드, 첨부 미디어는 `atlassian:atlassian-media-analysis`로 분석
 2. **State Tracking** — 타임라인 구성 (t0: 이슈 생성 → tN: 각 댓글의 상태 전이)
 3. **QA-Prompting** — 6가지 질문으로 핵심 추출
    - 어떤 결정이 내려졌는가? / 왜? / 거부된 대안은? / 기술적 제약은? / 미해결 이슈? / 주요 참여자와 역할?
@@ -44,7 +44,7 @@ State Tracking + QA-Prompting 하이브리드 방식을 사용한다.
 | `[OP: add_comment]` | Jira ([OP:]) | digest 댓글 게시 |
 | `[OP: fetch_attachment]` | Jira ([OP:]) | 첨부 미디어 다운로드 |
 | `imbas:read-issue` | 내부 스킬 | 구조화된 이슈 컨텍스트 |
-| `imbas:fetch-media` | 내부 스킬 | 첨부 미디어 분석 |
+| `atlassian:atlassian-media-analysis` | 외부 스킬 (atlassian) | 첨부 미디어 분석 |
 
 ## 참고 파일
 

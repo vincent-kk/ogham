@@ -1,7 +1,7 @@
 # Tools Used — GitHub Provider (devplan skill)
 
 Loaded when `config.provider === 'github'`. Provider-agnostic imbas MCP tools
-(`run_get`, `manifest_get`, `manifest_save`, `manifest_plan`) are documented in
+(`mcp_tools_run_get`, `mcp_tools_manifest_get`, `mcp_tools_manifest_save`, `mcp_tools_manifest_plan`) are documented in
 `../tools.md` and are used by all providers.
 
 ## gh CLI Subcommands

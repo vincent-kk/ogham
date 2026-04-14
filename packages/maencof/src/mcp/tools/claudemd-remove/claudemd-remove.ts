@@ -4,7 +4,7 @@
  */
 import { join } from 'node:path';
 
-import { removeMaencofSection } from '../../../core/claude-md-merger/claude-md-merger.js';
+import { removeMaencofSection } from '../../../core/claude-md-merger/index.js';
 import type {
   ClaudeMdRemoveInput,
   ClaudeMdRemoveResult,

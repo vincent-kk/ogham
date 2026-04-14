@@ -4,7 +4,7 @@
  *
  * 무효화: graph builtAt 변경 시 전체 캐시 클리어.
  */
-import type { QueryOptions, QueryResult } from '../query-engine/query-engine.js';
+import type { QueryOptions, QueryResult } from '../query-engine/index.js';
 
 /** 캐시 항목 */
 interface CacheEntry {

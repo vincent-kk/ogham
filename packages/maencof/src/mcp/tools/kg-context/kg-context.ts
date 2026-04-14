@@ -2,12 +2,12 @@
  * @file kg-context.ts
  * @description kg_context 도구 핸들러 — 토큰 최적화 컨텍스트 블록 반환
  */
-import { readVaultFile } from '../../../core/vault-scanner/vault-scanner.js';
+import { readVaultFile } from '../../../core/vault-scanner/index.js';
 import {
   assembleContext,
   extractBestSnippet,
-} from '../../../search/context-assembler/context-assembler.js';
-import { query } from '../../../search/query-engine/query-engine.js';
+} from '../../../search/context-assembler/index.js';
+import { query } from '../../../search/query-engine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type { KgContextInput, KgContextResult } from '../../../types/mcp.js';
 

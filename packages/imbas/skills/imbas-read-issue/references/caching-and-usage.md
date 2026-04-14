@@ -9,6 +9,6 @@
 
 | Agent | When | Purpose |
 |-------|------|---------|
-| imbas-analyst | Phase 1 (validate) | Reference existing related issues for context |
-| imbas-planner | Phase 2 (split) | Understand Epic or existing Story context |
-| imbas-engineer | Phase 3 (devplan) | Check Story comments for additional implementation discussion |
+| `analyst` | Phase 1 (validate) | Reference existing related issues for context |
+| `planner` | Phase 2 (split) | Understand Epic or existing Story context |
+| `engineer` | Phase 3 (devplan) | Check Story comments for additional implementation discussion |

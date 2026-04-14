@@ -47,10 +47,10 @@ validate → split → manifest-stories → devplan → manifest-devplan 전체 
 
 | 에이전트 | 모델 | 단계 | 역할 |
 |----------|------|------|------|
-| `imbas-analyst` | sonnet | Phase 1 | 문서 검증 |
-| `imbas-planner` | sonnet | Phase 2 | Story 분할 |
-| `imbas-analyst` | sonnet | Phase 2 | 역추론 검증 |
-| `imbas-engineer` | opus | Phase 3 | 개발 계획 생성 |
+| `analyst` | sonnet | Phase 1 | 문서 검증 |
+| `planner` | sonnet | Phase 2 | Story 분할 |
+| `analyst` | sonnet | Phase 2 | 역추론 검증 |
+| `engineer` | opus | Phase 3 | 개발 계획 생성 |
 
 ## 참고 파일
 

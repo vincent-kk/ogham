@@ -1180,6 +1180,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ogham/atlassian@workspace:packages/atlassian":
+  version: 0.0.0-use.local
+  resolution: "@ogham/atlassian@workspace:packages/atlassian"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@types/node": "npm:^20.11.0"
+    "@vitest/coverage-v8": "npm:^3.2.4"
+    esbuild: "npm:^0.24.0"
+    typescript: "npm:^5.7.2"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
 "@ogham/filid@workspace:packages/filid":
   version: 0.0.0-use.local
   resolution: "@ogham/filid@workspace:packages/filid"

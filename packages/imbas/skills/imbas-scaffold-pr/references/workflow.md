@@ -8,7 +8,7 @@ selected by `config.provider`. Steps 2–4 are shared.
 
 1. Invoke `/imbas:imbas-read-issue <issue> --depth shallow`.
 2. Extract from result: `key`, `summary`, `type`, `status`.
-3. Read `config.provider` via `config_get`.
+3. Read `config.provider` via `mcp_tools_config_get`.
 4. If `config.provider === "local"` → STOP with error: "local provider does not support PR creation."
 5. Load the matching provider workflow file for Step 1.
 

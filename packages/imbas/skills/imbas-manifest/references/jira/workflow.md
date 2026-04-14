@@ -16,13 +16,13 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
    - DRIFT_DELETED → offer to reset to pending.
    - DRIFT_STATE → offer to skip or proceed.
 5. If any drift detected, display summary table and save reconciled manifest via
-   `manifest_save` before Step 3.
+   `mcp_tools_manifest_save` before Step 3.
 6. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (Jira)
 
 CRITICAL: after EACH item creation, immediately save the manifest with the
-updated `imbas-status` / `issue_ref` via `manifest_save`. This is the crash-recovery
+updated `imbas-status` / `issue_ref` via `mcp_tools_manifest_save`. This is the crash-recovery
 invariant — re-runs skip already-created items.
 
 ### Stories type

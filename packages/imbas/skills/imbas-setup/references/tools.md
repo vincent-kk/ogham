@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Read current config.json (show subcommand) |
-| `config_set` | Create or update config.json fields |
-| `cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
-| `cache_set` | Write Jira metadata to cache files |
+| `mcp_tools_config_get` | Read current config.json (show subcommand) |
+| `mcp_tools_config_set` | Create or update config.json fields |
+| `mcp_tools_cache_get` | Read Jira metadata cache (show subcommand — displays cache status alongside config) |
+| `mcp_tools_cache_set` | Write Jira metadata to cache files |
 
 ## Jira Operations ([OP:])
 
@@ -32,7 +32,7 @@ The LLM resolves which tool to use at runtime based on the session's available t
 
 | Tool | Source | Usage |
 |------|--------|-------|
-| `atlassianUserInfo` | Atlassian MCP | Verify Atlassian connectivity and retrieve user identity |
+| `mcp_tools_atlassianUserInfo` | Atlassian MCP | Verify Atlassian connectivity and retrieve user identity |
 | `which gh` | Bash | Check if GitHub CLI is installed |
 | `gh auth status` | Bash | Check GitHub CLI authentication status |
 

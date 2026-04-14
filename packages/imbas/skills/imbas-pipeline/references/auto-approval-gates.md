@@ -7,7 +7,7 @@ Each gate evaluates specific fields and either auto-approves or stops the pipeli
 
 ## GATE 1: Validate Result
 
-Evaluates the validation-report.md output from imbas-analyst.
+Evaluates the validation-report.md output from `analyst`.
 
 ```
 AUTO-PROCEED when:
@@ -40,7 +40,7 @@ ALL conditions must be true for auto-approval:
     - E2-3 is handled separately (see Special Case below)
 
 [ ] Manifest validation passes
-    - manifest_validate(project_ref, run_id, type: "stories") returns 0 errors
+    - mcp_tools_manifest_validate(project_ref, run_id, type: "stories") returns 0 errors
 
 [ ] Every Story passes ALL verification checks:
     [ ] verification.anchor_link == true
@@ -54,13 +54,13 @@ ALL conditions must be true for auto-approval:
 ```
 
 When all criteria pass:
-- Call run_transition(complete_phase, split, pending_review: false, stories_created: N)
+- Call mcp_tools_run_transition(complete_phase, split, pending_review: false, stories_created: N)
 - Proceed to Phase 2.5 (manifest-stories)
 
 ### Special Case: E2-3 (Split Unnecessary)
 
-When imbas-planner determines the document is already at appropriate Story size:
-- Call run_transition(escape_phase, split, escape_code: "E2-3")
+When `planner` determines the document is already at appropriate Story size:
+- Call mcp_tools_run_transition(escape_phase, split, escape_code: "E2-3")
 - SKIP Phase 2.5 (manifest-stories) entirely
 - Proceed directly to Phase 3 (devplan)
 - This is permitted by existing state transition rules (split escaped with E2-3 allows devplan entry)
@@ -101,7 +101,7 @@ Verification field failures:
     → List affected Story IDs: "S-004 size_check=FAIL (too large)"
 
 Manifest validation errors:
-  → List all validation errors from manifest_validate
+  → List all validation errors from mcp_tools_manifest_validate
 ```
 
 ### Why This Gate is Safe
@@ -127,7 +127,7 @@ ALL conditions must be true:
 
 ```
 [ ] Manifest validation passes
-    - manifest_validate(project_ref, run_id, type: "devplan") returns 0 errors
+    - mcp_tools_manifest_validate(project_ref, run_id, type: "devplan") returns 0 errors
 
 [ ] No items flagged for review
     - Every Task: needs_review is absent or false
@@ -135,7 +135,7 @@ ALL conditions must be true:
 ```
 
 When all criteria pass:
-- Call run_transition(complete_phase, devplan, pending_review: false)
+- Call mcp_tools_run_transition(complete_phase, devplan, pending_review: false)
 - Proceed to Phase 3.5 (manifest-devplan)
 
 ### Non-Blocking Notes

@@ -5,7 +5,7 @@
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { quoteYamlValue } from '../../../core/yaml-parser/yaml-parser.js';
+import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import { L5_SUBDIR, LAYER_DIR, Layer } from '../../../types/common.js';
 
 /** boundary_create input */

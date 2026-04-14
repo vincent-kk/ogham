@@ -56,7 +56,7 @@ Before Phase 0a, inspect the invocation arguments:
 ## Prerequisites — Environment Check
 
 Before starting the main workflow, check ast-grep availability by calling
-`ast_grep_search` with a trivial pattern (e.g., `pattern: "$X"`, `language: "typescript"`, `path: "."`).
+`mcp_t_ast_grep_search` with a trivial pattern (e.g., `pattern: "$X"`, `language: "typescript"`, `path: "."`).
 
 - **Available**: Proceed silently — no message needed.
 - **Unavailable** (response contains "@ast-grep/napi is not available"):
@@ -72,26 +72,26 @@ Before starting the main workflow, check ast-grep availability by calling
 
 ### Phase 0a — Config Initialization
 
-Call `project_init` to ensure `.filid/config.json` exists at the git root:
+Call `mcp_t_project_init` to ensure `.filid/config.json` exists at the git root:
 
 ```
-project_init({ path: "<target-path>" })
+mcp_t_project_init({ path: "<target-path>" })
 ```
 
 This creates `.filid/config.json` with the default rule configuration
 (all 8 built-in rules enabled). Existing config is never overwritten.
-`project_init` does NOT touch `.claude/rules/` — that is handled by
+`mcp_t_project_init` does NOT touch `.claude/rules/` — that is handled by
 Phase 0b below.
 
 **→ Immediately proceed to Phase 0b.**
 
 ### Phase 0b — Rule Docs Status
 
-Call `rule_docs_sync` with `action: "status"` to inspect the current state
+Call `mcp_t_rule_docs_sync` with `action: "status"` to inspect the current state
 of every rule doc declared in the plugin manifest:
 
 ```
-rule_docs_sync({ action: "status", path: "<target-path>" })
+mcp_t_rule_docs_sync({ action: "status", path: "<target-path>" })
 ```
 
 The response partitions rules into two disjoint lists:
@@ -104,7 +104,7 @@ The response partitions rules into two disjoint lists:
   `deployed` reflects filesystem state under `.claude/rules/` and
   `selected === deployed` for optional rules (no config-side tracking).
 - `status.autoDeployed[]` — **required** rules. Always auto-synced by
-  `rule_docs_sync({ action: "sync" })` regardless of user input. Use
+  `mcp_t_rule_docs_sync({ action: "sync" })` regardless of user input. Use
   this list ONLY for the Phase 0d summary line — NEVER render these
   entries as checkboxes. The user cannot opt out of required rules.
 
@@ -217,10 +217,10 @@ guarantees required rules stay applied.
 
 ### Phase 0d — Rule Docs Sync
 
-Call `rule_docs_sync` with `action: "sync"` and the computed selection:
+Call `mcp_t_rule_docs_sync` with `action: "sync"` and the computed selection:
 
 ```
-rule_docs_sync({
+mcp_t_rule_docs_sync({
   action: "sync",
   path: "<target-path>",
   selections: { fca: true, rfx: false }
@@ -255,16 +255,16 @@ proceed to Phase 1.**
 
 ### Phase 1 — Directory Scan
 
-Retrieve the complete project hierarchy using `fractal_scan`.
+Retrieve the complete project hierarchy using `mcp_t_fractal_scan`.
 Build a working list of all directories from `tree.nodes` for classification.
 See [reference.md Section 1](./reference.md#section-1--directory-scan-details).
 
-**→ After `fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
+**→ After `mcp_t_fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
 
 ### Phase 2 — Node Classification
 
 Classify each directory as fractal, organ, or pure-function using
-`fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
+`mcp_t_fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
 See [reference.md Section 2](./reference.md#section-2--node-classification-rules).
 
 **→ After classifying all directories, immediately proceed to Phase 3.**
@@ -298,13 +298,13 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 
 | Tool               | Action     | Purpose                                                            |
 | ------------------ | ---------- | ------------------------------------------------------------------ |
-| `project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)               |
-| `rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                          |
-| `rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)    |
-| `rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering              |
-| `fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy  |
-| `fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function     |
-| `ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)          |
+| `mcp_t_project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)               |
+| `mcp_t_rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                          |
+| `mcp_t_rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)    |
+| `mcp_t_rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering              |
+| `mcp_t_fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy  |
+| `mcp_t_fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function     |
+| `mcp_t_ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)          |
 
 ## Options
 

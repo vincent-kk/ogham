@@ -5,7 +5,7 @@
 `devplan-manifest.json` saved in the run directory at:
 `.imbas/<KEY>/runs/<run-id>/devplan-manifest.json`
 
-Schema defined in `agents/imbas-engineer.md` (devplan-manifest.json output section).
+Schema defined in `agents/engineer.md` (devplan-manifest.json output section).
 
 ## State Transitions
 

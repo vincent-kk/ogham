@@ -56,10 +56,10 @@ Collection steps:
    };
    ```
 
-3. Resolve classification for each `moduleRoot` via a single `fractal_scan`:
+3. Resolve classification for each `moduleRoot` via a single `mcp_t_fractal_scan`:
 
    ```
-   fractal_scan({ path: "<target-path>" })
+   mcp_t_fractal_scan({ path: "<target-path>" })
    // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: [...], ... }
    ```
 
@@ -273,10 +273,10 @@ and relax the 50-line rule per project configuration.
 For every file the agent reports as `written`:
 
 ```
-doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
+mcp_t_doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
 // Returns: { needsCompression: boolean, suggestedContent?: string, lineCount: number }
 
-structure_validate({ path: "<moduleRoot>" })
+mcp_t_structure_validate({ path: "<moduleRoot>" })
 // Returns: { passed: boolean, violations: Violation[] }
 ```
 
@@ -285,7 +285,7 @@ Decision logic:
 - `needsCompression === true` → dispatch a second-pass `context-manager` with
   the `suggestedContent` and instruction "compress to 50 lines preserving all
   four rewritten axes"; retry limit = 1.
-- `structure_validate` reports a missing tier section → mark file as
+- `mcp_t_structure_validate` reports a missing tier section → mark file as
   `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8.
 - Both checks pass → mark as `ACCEPTED`.
 

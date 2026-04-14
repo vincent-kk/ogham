@@ -2,7 +2,7 @@
 
 ## Purpose
 
-@ast-grep/napi 기반 AST 코드 분석. Phase 3(devplan)에서 imbas-engineer가 코드 구조 파악에 사용.
+@ast-grep/napi 기반 AST 코드 분석. Phase 3(devplan)에서 `engineer`가 코드 구조 파악에 사용.
 
 ## Structure
 

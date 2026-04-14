@@ -5,7 +5,7 @@
  * 이 파일은 bridge/mcp-server.cjs 로 번들된다.
  * Claude Code .mcp.json에서 `node bridge/mcp-server.cjs` 로 실행.
  */
-import { startServer } from '../server/server.js';
+import { startServer } from '../server/index.js';
 
 startServer().catch((err: unknown) => {
   process.stderr.write(`maencof MCP server error: ${String(err)}\n`);

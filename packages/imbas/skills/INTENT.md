@@ -2,7 +2,7 @@
 
 ## Purpose
 
-12개 imbas 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 references/ (상세 참조) 쌍으로 구성되며, 프로바이더 독립적 스킬은 `references/<provider>/` 하위 폴더를 통해 프로바이더별 워크플로우를 분리한다.
+11개 imbas 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 references/ (상세 참조) 쌍으로 구성되며, 프로바이더 독립적 스킬은 `references/<provider>/` 하위 폴더를 통해 프로바이더별 워크플로우를 분리한다.
 
 ## Structure
 
@@ -14,7 +14,7 @@
 | `imbas-devplan/` | Phase 3 개발 계획 (EARS Subtask 생성) |
 | `imbas-manifest/` | Phase 2.5/3.5 매니페스트 배치 실행 |
 | `imbas-digest/` | 이슈 컨텍스트 압축 |
-| `imbas-fetch-media/` | Jira/Confluence 미디어 다운로드 |
+
 | `imbas-read-issue/` | 이슈 + 댓글 스레드 복원 (internal) |
 | `imbas-scaffold-pr/` | 이슈 기반 Draft PR 생성 |
 | `imbas-setup/` | `.imbas/` 초기화 |

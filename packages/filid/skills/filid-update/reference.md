@@ -8,10 +8,10 @@ code-docs-tests synchronization skill. For the quick-start overview, see [SKILL.
 Stage 0 MCP calls:
 
 ```
-cache_manage({ action: "compute-hash", cwd: "<target-path>" })
+mcp_t_cache_manage({ action: "compute-hash", cwd: "<target-path>" })
 // Returns: { hash: string, cwd: string }
 
-cache_manage({ action: "get-hash", cwd: "<target-path>", skillName: "update" })
+mcp_t_cache_manage({ action: "get-hash", cwd: "<target-path>", skillName: "update" })
 // Returns: { hash: string | null, skillName: string, found: boolean }
 ```
 
@@ -35,10 +35,10 @@ git diff --name-only ${BASE}...HEAD   # list of changed files (auto-detect base 
 Restrict scan to changed files only:
 
 ```
-fractal_scan({ path: "<target-path>" })
+mcp_t_fractal_scan({ path: "<target-path>" })
 // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: ModuleInfo[], timestamp, duration }
 
-test_metrics({ action: "check-312", files: [{ filePath, content }] })
+mcp_t_test_metrics({ action: "check-312", files: [{ filePath, content }] })
 // Returns: { violations: TestViolation[], summary: { total, passing, failing } }
 ```
 
@@ -54,7 +54,7 @@ Scan result categories:
 **Execution condition**: runs only when Stage 1 detects `critical` or `high` severity violations.
 
 ```
-drift_detect({ path: "<target-path>", severity: "high" })
+mcp_t_drift_detect({ path: "<target-path>", severity: "high" })
 // Returns: { drifts: DriftItem[], bySeverity: { critical, high, medium, low } }
 ```
 
@@ -79,10 +79,10 @@ sync DriftSeverity ordering: `critical > high > medium > low`
 Correction calls:
 
 ```
-lca_resolve({ path: "<target-path>", moduleA: "...", moduleB: "..." })
+mcp_t_lca_resolve({ path: "<target-path>", moduleA: "...", moduleB: "..." })
 // Returns: { lcaPath: string, suggestedPlacement: string }
 
-structure_validate({ path: "<target-path>" })
+mcp_t_structure_validate({ path: "<target-path>" })
 // Returns: { passed: boolean, violations: Violation[] }
 ```
 
@@ -125,7 +125,7 @@ For each fractal node containing changed files:
 3. **Update INTENT.md if present**: reflect implemented changes; compress if > 50 lines
 
 ```
-doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
+mcp_t_doc_compress({ mode: "auto", filePath: "<path>", content: "<content>", exports: [...] })
 // Suggests compression when content exceeds 50 lines
 ```
 
@@ -139,10 +139,10 @@ For each changed source file:
 2. **Create if missing**: scaffold 3 basic tests + 12 extended test slots
 
 ```
-ast_analyze({ source: "<source>", analysisType: "full" })
+mcp_t_ast_analyze({ source: "<source>", analysisType: "full" })
 // Checks LCOM4, CC metrics → recommends module split or compression
 
-test_metrics({ action: "check-312", files: [...] })
+mcp_t_test_metrics({ action: "check-312", files: [...] })
 // Validates 3+12 rule compliance
 ```
 
@@ -153,7 +153,7 @@ test_metrics({ action: "check-312", files: [...] })
 Save run hash:
 
 ```
-cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: "<currentHash>" })
+mcp_t_cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: "<currentHash>" })
 // Returns: { saved: true, skillName: "update", hash: "..." }
 ```
 

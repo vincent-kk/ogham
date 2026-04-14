@@ -86,7 +86,7 @@ or `restructurer` to apply. You never write them to disk yourself.
 - **vs drift-analyzer**: Drift-analyzer detects deviations from the
   expected state. You consume drift-analyzer's output during
   `/filid:filid-sync` Stage 3 and refine the correction plan using
-  `lca_resolve` context.
+  `mcp_t_lca_resolve` context.
 - **vs restructurer**: You design; restructurer executes. If
   restructurer discovers an out-of-scope change mid-execution, you
   revise the proposal.
@@ -94,7 +94,7 @@ or `restructurer` to apply. You never write them to disk yourself.
 ## Skill Participation
 
 - `/filid:filid-setup` — Reference role: skill runs directly via MCP
-  tools (fractal_scan, fractal_navigate). Invoke manually for complex
+  tools (mcp_t_fractal_scan, mcp_t_fractal_navigate). Invoke manually for complex
   classification decisions.
 - `/filid:filid-guide` — Reference role: skill runs directly via MCP
   tools (fractal_scan, rule_query). Invoke manually for structural

@@ -1,9 +1,9 @@
 import {
   getSessionCaptureCount,
   readInsightConfig,
-} from '../../core/insight-stats/insight-stats.js';
+} from '../../core/insight-stats/index.js';
 
-import { isMaencofVault } from '../shared/shared.js';
+import { isMaencofVault } from '../shared/index.js';
 
 export interface InsightInjectorInput {
   session_id?: string;

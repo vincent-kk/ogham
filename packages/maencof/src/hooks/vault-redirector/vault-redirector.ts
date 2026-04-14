@@ -5,7 +5,7 @@
  */
 import { resolve } from 'node:path';
 
-import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from '../shared/shared.js';
+import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from '../shared/index.js';
 
 export interface VaultRedirectorInput {
   tool_name?: string;

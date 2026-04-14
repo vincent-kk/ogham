@@ -34,10 +34,10 @@ Parse query conditions from user input.
 
 ### Step 2 — Call dailynote_read
 
-Call the MCP tool `dailynote_read` to fetch results.
+Call the MCP tool `mcp_t_dailynote_read` to fetch results.
 
 ```
-dailynote_read({
+mcp_t_dailynote_read({
   date: "<parsed date or undefined>",
   last_days: <parsed days or undefined>,
   category: "<parsed category or undefined>"
@@ -70,7 +70,7 @@ Display results in a readable format.
 
 | Tool | Purpose |
 |------|---------|
-| `dailynote_read` | Read daily activity log entries |
+| `mcp_t_dailynote_read` | Read daily activity log entries |
 
 ## Error Handling
 

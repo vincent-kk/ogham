@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `run_get` | Load run state, verify preconditions |
-| `run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
-| `manifest_save` | Save stories-manifest.json |
-| `manifest_validate` | Validate manifest structural integrity |
+| `mcp_tools_run_get` | Load run state, verify preconditions |
+| `mcp_tools_run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
+| `mcp_tools_manifest_save` | Save stories-manifest.json |
+| `mcp_tools_manifest_validate` | Validate manifest structural integrity |
 
 ## Jira Operations ([OP:])
 
@@ -22,17 +22,17 @@ The LLM resolves which tool to use at runtime based on the session's available t
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `imbas-planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
-| `imbas-analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
+| `planner` | config.defaults.llm_model.split | INVEST-compliant Story splitting from source document |
+| `analyst` | config.defaults.llm_model.split | Reverse-inference verification (Step 4 [2]) |
 
-### imbas-planner Spawn Instructions
+### planner Spawn Instructions
 
 - Provide source.md + supplements + Epic info as input context
 - Set output language per config.language.issue_content
 - Agent returns JSON Story array — skill handles manifest creation
 - Agent does NOT have pipeline/manifest tool access
 
-### imbas-analyst Spawn Instructions (Reverse-Inference)
+### analyst Spawn Instructions (Reverse-Inference)
 
 - Provide ALL split Stories reassembled as a single document
 - Provide original source.md for comparison

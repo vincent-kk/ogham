@@ -1,1 +1,1 @@
-export { getImbasRoot, getProjectDir, getCacheDir, getRunsDir, getRunDir, getTempDir, getMediaDir } from './paths.js';
+export { getImbasRoot, getProjectDir, getCacheDir, getRunsDir, getRunDir } from './paths.js';

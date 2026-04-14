@@ -6,7 +6,7 @@ argument-hint: "[--layer 3|4|5] [--show-all]"
 version: "1.0.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: maencof-reflect skill
+orchestrator: memory-organizer
 plugin: maencof
 ---
 
@@ -37,7 +37,7 @@ Equivalent to `/maencof:maencof-organize --dry-run` but generates a more detaile
 
 ### Step 1 — Query Vault Status
 
-Query the current index status, node count, and stale node list via `kg_status`.
+Query the current index status, node count, and stale node list via `mcp_t_kg_status`.
 
 ### Step 2 — Run judge Module
 
@@ -85,9 +85,9 @@ Execute memory-organizer judge logic:
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Query vault status |
-| `kg_navigate` | Traverse link relationships |
-| `read` | Read document Frontmatter |
+| `mcp_t_kg_status` | Query vault status |
+| `mcp_t_kg_navigate` | Traverse link relationships |
+| `mcp_t_read` | Read document Frontmatter |
 
 ## Error Handling
 

@@ -6,7 +6,7 @@ argument-hint: "[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]"
 version: "1.0.0"
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: maencof-organize skill
+orchestrator: memory-organizer
 plugin: maencof
 ---
 
@@ -41,7 +41,7 @@ Calls the memory-organizer agent sequentially through judge -> (confirmation) ->
 
 ### Step 1 — Pre-check Index Status
 
-Check vault status and stale nodes with the `kg_status` MCP tool before delegating to the agent.
+Check vault status and stale nodes with the `mcp_t_kg_status` MCP tool before delegating to the agent.
 If no index is found, abort with: "No index found. Please run `/maencof:maencof-build` first."
 
 ### Step 2 — judge stage (memory-organizer delegation)
@@ -65,10 +65,10 @@ The user can type "proceed" or select/exclude individual items.
 ### Step 4 — execute stage (memory-organizer delegation)
 
 Run the execute module for approved TransitionDirectives:
-- Call `move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
+- Call `mcp_t_move` (with `target_sub_layer` when moving to L3 or L5 sub-directories)
 - Update the Frontmatter `layer` and `sub_layer` fields
 - Update link paths
-- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `move` automatically strips buffer-specific metadata
+- **Buffer auto-strip**: When moving from L5-Buffer to another layer, `mcp_t_move` automatically strips buffer-specific metadata
 
 ### Step 5 — Result Summary
 
@@ -81,11 +81,11 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 | Tool | Used by | Purpose |
 |------|---------|---------|
-| `kg_status` | skill (Step 1) | Check vault status and stale-nodes |
-| `read` | memory-organizer agent (judge module) | Read document Frontmatter |
-| `kg_navigate` | memory-organizer agent | Traverse link relationships |
-| `move` | memory-organizer agent (execute module) | Execute file move |
-| `update` | memory-organizer agent (execute module) | Update Frontmatter |
+| `mcp_t_kg_status` | skill (Step 1) | Check vault status and stale-nodes |
+| `mcp_t_read` | memory-organizer agent (judge module) | Read document Frontmatter |
+| `mcp_t_kg_navigate` | memory-organizer agent | Traverse link relationships |
+| `mcp_t_move` | memory-organizer agent (execute module) | Execute file move |
+| `mcp_t_update` | memory-organizer agent (execute module) | Update Frontmatter |
 
 ## Error Handling
 
@@ -108,7 +108,7 @@ Buffer documents are temporary holding areas. During organization:
 1. **Scan** `05_Context/buffer/` for documents older than 7 days
 2. **Evaluate** each document's connections, tags, and content type
 3. **Recommend target**: L2 (internalized), L3 with sub-layer (external reference), or archive
-4. **Execute** via `move` with `target_sub_layer` — buffer metadata is auto-stripped
+4. **Execute** via `mcp_t_move` with `target_sub_layer` — buffer metadata is auto-stripped
 
 ## Options
 

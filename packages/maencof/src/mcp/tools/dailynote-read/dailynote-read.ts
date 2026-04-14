@@ -9,7 +9,7 @@ import {
   getDailynoteDir,
   getDailynotePath,
   parseDailynote,
-} from '../../../core/dailynote-writer/dailynote-writer.js';
+} from '../../../core/dailynote-writer/index.js';
 import type {
   DailynoteCategory,
   DailynoteReadInput,

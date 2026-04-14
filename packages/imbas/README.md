@@ -61,15 +61,15 @@ Document → [Validate] → [Split] → [Devplan] → Jira Issues
          Report.md    Stories.json  Devplan.json
 ```
 
-**Phase 1 — Validate:** The `imbas-analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
+**Phase 1 — Validate:** The `analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
 
-**Phase 2 — Split:** The `imbas-planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
+**Phase 2 — Split:** The `planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
 - User Story syntax ("As a... I want... So that...")
 - Given/When/Then acceptance criteria
 - A 3-step verification: anchor link back to source → coherence check → reverse inference (can you reconstruct the original requirement from the Stories alone?)
 - Size check — Stories too large get split horizontally
 
-**Phase 3 — Devplan:** The `imbas-engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
+**Phase 3 — Devplan:** The `engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
 - EARS-format Subtasks per Story (scoped to max 200 lines / 10 files / 1 hour review)
 - Cross-Story shared Tasks (extracted via N:M merge-point detection)
 - Dependency links and execution order
@@ -172,26 +172,28 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 
 ### Additional Tools
 
-```
+```bash
 # Compress a Jira issue into a structured summary comment
 /imbas:imbas-digest PROJ-123
 
-# Analyze media attachments (images, videos, GIFs)
-/imbas:imbas-fetch-media <url-or-path>
+# Scaffold a Draft PR from a Jira Story with sub-task checklist
+/imbas:imbas-scaffold-pr PROJ-123
+
+# Analyze media attachments (images, videos, GIFs) — requires @ogham/atlassian
+/atlassian:atlassian-media-analysis <url-or-path>
 ```
 
 ---
 
 ## Agents
 
-imbas uses 4 specialized subagents, each with constrained roles:
+imbas uses 3 specialized subagents, each with constrained roles:
 
 | Agent | Model | Role | Phase |
 |-------|-------|------|-------|
-| `imbas-analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
-| `imbas-planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
-| `imbas-engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
-| `imbas-media` | Sonnet | Media analysis (keyframe extraction, visual description) | Fetch-media |
+| `analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
+| `planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
+| `engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
 
 Agent roles are enforced at runtime via the `SubagentStart` hook — agents cannot overstep their assigned responsibilities.
 
@@ -223,7 +225,8 @@ With the plugin active, these hooks fire **without user intervention**:
 | `/imbas:imbas-manifest` | Yes | Execute manifests to batch-create Jira issues |
 | `/imbas:imbas-status` | Yes | View run status, list runs, resume interrupted runs |
 | `/imbas:imbas-digest` | Yes | Compress a Jira issue into a structured summary |
-| `/imbas:imbas-fetch-media` | Yes | Download and analyze media attachments |
+| `/imbas:imbas-scaffold-pr` | Yes | Create a Draft PR from a Jira Story with sub-tasks |
+
 | `/imbas:imbas-cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
 | `/imbas:imbas-read-issue` | No | Internal: Read and structure Jira issue context |
 

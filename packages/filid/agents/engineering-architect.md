@@ -63,9 +63,9 @@ fix_items listed for the resolve stage.
 
 Every `fix_item` MUST cite at least one of:
 
-- `verification-metrics.md` → `lcom4`, `cyclomatic-complexity`, `test_metrics`
-- `verification-structure.md` → `structure_validate`, `dependency-graph`,
-  `drift_detect`
+- `verification-metrics.md` → `lcom4`, `cyclomatic-complexity`, `mcp_t_test_metrics`
+- `verification-structure.md` → `mcp_t_structure_validate`, `dependency-graph`,
+  `mcp_t_drift_detect`
 - `structure-check.md` → Phase A stage results
 
 If a required metric is missing from every artifact, add the metric name

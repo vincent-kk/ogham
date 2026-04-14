@@ -9,11 +9,11 @@ import {
   appendDailynoteEntry,
   buildToolDescription,
   formatTime,
-} from '../../core/dailynote-writer/dailynote-writer.js';
+} from '../../core/dailynote-writer/index.js';
 import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
 
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { isMaencofVault } from '../shared/shared.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { isMaencofVault } from '../shared/index.js';
 
 export interface DailynoteRecorderInput {
   tool_name?: string;

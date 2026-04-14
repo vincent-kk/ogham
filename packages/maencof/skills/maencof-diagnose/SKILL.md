@@ -15,7 +15,7 @@ plugin: maencof
 A lightweight version of `/maencof:maencof-checkup`. Performs a quick status check only without auto-fix.
 Reports index freshness, stale node ratio, and whether a rebuild is recommended.
 
-> **Difference from `/maencof:maencof-checkup`**: diagnose is read-only and fast (calls `kg_status` only). checkup runs a full scan with auto-fix suggestions.
+> **Difference from `/maencof:maencof-checkup`**: diagnose is read-only and fast (calls `mcp_t_kg_status` only). checkup runs a full scan with auto-fix suggestions.
 
 ## When to Use This Skill
 
@@ -32,7 +32,7 @@ Reports index freshness, stale node ratio, and whether a rebuild is recommended.
 
 ### Step 1 — Query Index Status
 
-Call `kg_status()` to retrieve nodeCount, edgeCount, lastBuiltAt, staleNodeCount, freshnessPercent, rebuildRecommended.
+Call `mcp_t_kg_status()` to retrieve nodeCount, edgeCount, lastBuiltAt, staleNodeCount, freshnessPercent, rebuildRecommended.
 
 ### Step 2 — Generate Report
 
@@ -42,7 +42,7 @@ Format results based on health state:
 - **Caution** (stale 10-30%): display stats, recommend `/maencof:maencof-rebuild`
 - **Critical** (stale > 30% or no index): recommend `/maencof:maencof-build --full` or `/maencof:maencof-checkup`
 
-Include **sub-layer distribution** from `kg_status` response (`subLayerDistribution` field):
+Include **sub-layer distribution** from `mcp_t_kg_status` response (`subLayerDistribution` field):
 ```
 Sub-Layer Distribution:
   L3: relational (N), structural (N), topical (N), unclassified (N)
@@ -66,7 +66,7 @@ Sub-Layer Consistency Issues:
 
 | Tool | Purpose |
 |------|---------|
-| `kg_status` | Query index status (primary tool) |
+| `mcp_t_kg_status` | Query index status (primary tool) |
 
 ## Options
 

@@ -19,7 +19,7 @@
 | **devplan** | `/imbas:imbas-devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
 | **manifest** | `/imbas:imbas-manifest` | 매니페스트 → provider별 이슈 배치 생성 | — |
 | **status** | `/imbas:imbas-status` | 런 상태 조회, 이력 | — |
-| **`imbas:fetch-media`** | `/imbas:imbas-fetch-media` | 미디어 다운로드 + 분석 | imbas-media |
+| ~~**`imbas:fetch-media`**~~ | `/atlassian:atlassian-media-analysis` | *migrated to `@ogham/atlassian`* | — |
 | **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → provider별 코멘트/다이제스트 기록 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
@@ -420,29 +420,11 @@ Step 5 — 결과 리포트
 
 ## 5. Utility Skills
 
-### 5.1 imbas:imbas-fetch-media — 미디어 다운로드 & 분석
+### 5.1 ~~imbas:imbas-fetch-media~~ → `atlassian:atlassian-media-analysis`
 
-```yaml
-name: fetch-media
-user_invocable: true
-description: >
-  Download images, videos, and GIFs from Confluence/Jira. For video/GIF files,
-  extracts keyframes using scene-sieve and runs semantic analysis via imbas-media agent.
-  Trigger: "download media", "미디어 다운로드", "fetch attachment", "영상 분석"
-complexity: moderate
-plugin: imbas
-```
-
-**Arguments:**
-```
-/imbas:imbas-fetch-media <url-or-path> [--analyze] [--preset <name>]
-
-<url-or-path>  : Confluence 첨부 URL, Jira 첨부 URL, 또는 로컬 파일 경로
---analyze      : 비디오/GIF인 경우 scene-sieve + imbas-media 분석 실행
---preset       : scene-sieve 프리셋 오버라이드 (default: auto-detect)
-```
-
-**상세 설계는 [SPEC-media.md](./SPEC-media.md) 참조.**
+> **Migrated** — 이 스킬은 `@ogham/atlassian` 패키지로 이전되었습니다.
+> 새 경로: `/atlassian:atlassian-media-analysis`
+> 커밋: 9c2c45c
 
 ---
 
@@ -736,11 +718,11 @@ Step 6 — 게시
   ├── /imbas:imbas-manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
-  ├── /imbas:imbas-fetch-media ──── 미디어 다운로드 + 분석
+  ├── /atlassian:atlassian-media-analysis ── 미디어 다운로드 + 분석 (migrated to @ogham/atlassian)
   │
   └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → provider별 게시
             ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
-            └── (내부) `imbas:fetch-media` → 첨부 미디어 분석 (있을 경우)
+            └── (외부) `/atlassian:atlassian-media-analysis` → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출

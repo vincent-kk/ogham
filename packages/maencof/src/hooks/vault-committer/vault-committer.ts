@@ -15,9 +15,9 @@ import {
   hasVaultChanges,
   isGitRepo,
   isIndexLocked,
-} from '../git-utils/git-utils.js';
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { isMaencofVault, metaPath } from '../shared/shared.js';
+} from '../git-utils/index.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { isMaencofVault, metaPath } from '../shared/index.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 

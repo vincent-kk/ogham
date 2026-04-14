@@ -10,7 +10,7 @@
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Read `config.jira.base_url` for URL construction |
+| `mcp_tools_config_get` | Read `config.jira.base_url` for URL construction |
 
 ## Operation Notation
 

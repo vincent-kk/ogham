@@ -43,4 +43,4 @@ Exit states:
 `stories-manifest.json` saved in the run directory at:
 `.imbas/<KEY>/runs/<run-id>/stories-manifest.json`
 
-Schema defined in `agents/imbas-planner.md` (stories-manifest.json output section).
+Schema defined in `agents/planner.md` (stories-manifest.json output section).

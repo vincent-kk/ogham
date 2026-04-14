@@ -178,4 +178,17 @@ export { handleCoverageVerify } from './mcp/tools/coverage-verify/coverage-verif
 // are no longer re-exported from the public barrel.
 
 // MCP server
-export { createServer, startServer } from './mcp/server/server.js';
+export { createServer, startServer } from './mcp/index.js';
+
+// Constants (runtime values moved from types/ organ)
+export { BUILTIN_RULE_IDS } from './constants/builtin-rule-ids.js';
+export { DEFAULT_SCAN_OPTIONS } from './constants/scan-defaults.js';
+export { DEBT_WEIGHT_CAP, DEBT_BASE_WEIGHT } from './constants/debt-defaults.js';
+export {
+  FIX_REQUEST_TYPES,
+  DEBT_ACTIONS,
+  PIPELINE_STAGES,
+} from './constants/handoff-tokens.js';
+
+// Lib utilities
+export { normalizeFixRequestType } from './lib/normalize-fix-request.js';

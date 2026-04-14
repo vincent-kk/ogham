@@ -163,7 +163,7 @@ The LLM should:
 1. **Dry-run first**: Always run without `--execute` first
 2. **Report**: Show the script output to the user
 3. **Confirm**: Ask the user before running with `--execute`
-4. **Post-validate** (optional): Run `structure_validate` MCP tool after execution
+4. **Post-validate** (optional): Run `mcp_t_structure_validate` MCP tool after execution
 
 ### Resolving the script path
 

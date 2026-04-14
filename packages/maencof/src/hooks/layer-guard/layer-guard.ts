@@ -3,7 +3,7 @@
  * @description PreToolUse Hook — Warn when modifying Layer 1 (01_Core/) files
  * Guides modification through the identity-guardian agent
  */
-import { isLayer1Path, isMaencofVault } from '../shared/shared.js';
+import { isLayer1Path, isMaencofVault } from '../shared/index.js';
 
 export interface PreToolUseInput {
   tool_name?: string;

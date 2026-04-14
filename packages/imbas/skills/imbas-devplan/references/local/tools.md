@@ -5,8 +5,8 @@ Loaded when `config.provider === 'local'`. Shared imbas MCP tools are in
 
 ## Local-only tools
 
-The imbas-engineer agent uses the same tool set regardless of provider:
-`ast_search`, `ast_analyze`, `Read`, `Grep`, `Glob`. No provider-specific tool
+The `engineer` agent uses the same tool set regardless of provider:
+`mcp_tools_ast_search`, `mcp_tools_ast_analyze`, `Read`, `Grep`, `Glob`. No provider-specific tool
 is required in local mode.
 
 For optional enrichment (reading existing Story context for pattern matching),

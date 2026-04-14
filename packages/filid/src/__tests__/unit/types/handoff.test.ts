@@ -4,8 +4,8 @@ import {
   DEBT_ACTIONS,
   FIX_REQUEST_TYPES,
   PIPELINE_STAGES,
-  normalizeFixRequestType,
-} from '../../../types/handoff.js';
+} from '../../../constants/handoff-tokens.js';
+import { normalizeFixRequestType } from '../../../lib/normalize-fix-request.js';
 
 describe('handoff token enums', () => {
   it('exposes the three fix request types in canonical order', () => {

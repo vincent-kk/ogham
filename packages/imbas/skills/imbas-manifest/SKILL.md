@@ -17,7 +17,7 @@ plugin: imbas
 > 2. Terminal stage marker emitted: `Manifest execution complete` or `Manifest partial failure`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - Provider [OP:] loops — after EACH item creation, save manifest via `manifest_save` and chain the next item in the same turn (do NOT pause to report partial progress)
+> - Provider [OP:] loops — after EACH item creation, save manifest via `mcp_tools_manifest_save` and chain the next item in the same turn (do NOT pause to report partial progress)
 > - Dry-run preview display — do NOT pause after rendering the plan; continue to the final report
 > - Per-item failure — log on the item and chain to the next; never stop mid-batch
 
@@ -55,7 +55,7 @@ preview, crash recovery via per-item save, and idempotent re-execution.
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (manifest, run state) via imbas_tools.
-2. Read `config.provider` via `config_get`.
+2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
    | provider | workflow file |
@@ -65,7 +65,7 @@ preview, crash recovery via per-item save, and idempotent re-execution.
    | `local`  | `references/local/workflow.md` |
 
 4. Execute those steps exactly.
-5. Persist outputs via imbas_tools (`manifest_save`, `run_transition`, etc.).
+5. Persist outputs via imbas_tools (`mcp_tools_manifest_save`, `mcp_tools_run_transition`, etc.).
 
 ## Constraints
 

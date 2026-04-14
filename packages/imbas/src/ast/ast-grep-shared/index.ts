@@ -3,6 +3,6 @@ export {
   isSgAvailable,
   getSgLoadError,
   collectFiles,
-  EXT_TO_LANG,
   toLangEnum,
 } from './ast-grep-shared.js';
+export { EXT_TO_LANG } from '../../constants/ast.js';

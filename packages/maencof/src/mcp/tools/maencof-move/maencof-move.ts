@@ -10,7 +10,7 @@ import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser/document-parser.js';
+} from '../../../core/document-parser/index.js';
 import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR, Layer } from '../../../types/common.js';
 import type { MaencofCrudResult, MaencofMoveInput } from '../../../types/mcp.js';

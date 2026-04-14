@@ -16,7 +16,7 @@ checking signals in strict priority order. First match wins.
 
 ```
 1. Detect branch: git branch --show-current
-2. Normalize: review_manage(normalize-branch)
+2. Normalize: mcp_t_review_manage(normalize-branch)
 3. Set review_dir = .filid/review/<normalized>/
 
 Check signals:
@@ -158,7 +158,7 @@ For each stage in pipeline:
                CRITICAL: This skill has 5 steps. You MUST complete ALL steps including
                Step 5 (PR Comment). Do NOT stop after writing review-report.md and
                fix-requests.md — those are Step 4 outputs. Step 5 posts the review
-               as a PR comment via review_manage(format-pr-comment) + gh pr comment.
+               as a PR comment via mcp_t_review_manage(format-pr-comment) + gh pr comment.
                The task is incomplete until Step 5 executes.",
       description: "FCA review stage execution (phases A-D + PR comment)"
     )

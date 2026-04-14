@@ -10,11 +10,11 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof-lens_t__search
-  - mcp__plugin_maencof-lens_t__context
-  - mcp__plugin_maencof-lens_t__navigate
-  - mcp__plugin_maencof-lens_t__read
-  - mcp__plugin_maencof-lens_t__status
+  - mcp_t_search
+  - mcp_t_context
+  - mcp_t_navigate
+  - mcp_t_read
+  - mcp_t_status
 maxTurns: 30
 ---
 

@@ -13,9 +13,9 @@ import type {
   RuleOverride,
   RuleViolation,
 } from '../../../types/rules.js';
-import { BUILTIN_RULE_IDS } from '../../../types/rules.js';
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { ScanOptions } from '../../../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../../../types/scan.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../constants/allowed-peer-files.js';
 import { isValidNaming } from './utils/is-valid-naming.js';
 

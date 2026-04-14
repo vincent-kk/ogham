@@ -154,10 +154,10 @@ Options:
 
 | Tool            | Action             | When                               |
 | --------------- | ------------------ | ---------------------------------- |
-| `review_manage` | `normalize-branch` | Step 1: branch detection           |
-| `debt_manage`   | `create`           | Step 5: for each rejected fix item |
+| `mcp_t_review_manage` | `normalize-branch` | Step 1: branch detection           |
+| `mcp_t_debt_manage`   | `create`           | Step 5: for each rejected fix item |
 
-## debt_manage(create) Input Schema
+## mcp_t_debt_manage(create) Input Schema
 
 ```json
 {
