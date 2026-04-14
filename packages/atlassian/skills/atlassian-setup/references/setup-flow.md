@@ -1,40 +1,20 @@
 # Setup Flow Reference
 
-## Step 1: Instance URL
+## Normal Flow
 
-Ask user for their Atlassian instance URL:
-- Cloud: `https://yourcompany.atlassian.net`
-- Server/DC: `https://jira.yourcompany.com` or `https://confluence.yourcompany.com`
+1. Call MCP `setup` tool with `mode: "new"` (first setup) or `mode: "edit"` (reconfiguration)
+2. The tool starts a local HTTP server on `127.0.0.1` and opens the browser automatically
+3. The web UI handles: instance URL input, environment detection, auth method selection, credential collection, connection testing, and saving
+4. Server auto-shuts down after successful save or 5 minutes of inactivity
+5. Report the MCP tool result to the user
 
-## Step 2: Environment Detection
+**Important**: Do NOT ask the user for URL, auth type, or credentials via chat. The web UI handles the entire setup flow.
 
-- If hostname ends with `.atlassian.net` → Cloud
-- Otherwise → Server/DC
-- Inform user of detected environment
+## Arguments
 
-## Step 3: Auth Method Selection
+- `--test`: Test existing connection status only (do not launch setup wizard)
+- `--reset`: Clear existing configuration and start fresh (mode: `new`)
 
-Present options based on environment:
+## Credentials Storage
 
-**Cloud options:**
-1. Basic Auth (email + API token) — Recommended for personal use
-2. OAuth 2.0 — For multi-user or granular access
-
-**Server/DC options:**
-1. PAT (Personal Access Token) — Recommended
-2. Basic Auth (username + password)
-3. OAuth 2.0
-
-## Step 4: Credential Collection
-
-Use the `setup` MCP tool to launch the local web server form.
-
-## Step 5: Connection Test
-
-Test both Jira and Confluence if configured:
-- Jira: `GET /rest/api/{version}/myself`
-- Confluence: `GET /rest/api/user/current` or `GET /api/v2/users/current`
-
-## Step 6: Save
-
-On success, credentials are encrypted and stored in `~/.claude/plugins/atlassian/`.
+On success, configuration is stored in `~/.claude/plugins/atlassian/`.

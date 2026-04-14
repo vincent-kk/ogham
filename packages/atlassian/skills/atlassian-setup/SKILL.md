@@ -21,16 +21,12 @@ Authentication and connection management for Atlassian products.
 
 ## Setup Flow
 
-1. Get Atlassian instance URL from user
-2. Auto-detect environment (see `_shared/environment-detection.md`)
-3. Suggest auth method:
-   - **Cloud**: Basic (email + API token) or OAuth 2.0
-   - **Server/DC**: Basic (username + password), PAT, or OAuth 2.0
-4. Collect credentials via `setup` MCP tool
-5. Test connection:
-   - Jira: `GET /rest/api/*/myself`
-   - Confluence: `GET /wiki/rest/api/user/current`
-6. Save to secure storage on success
+1. Call MCP `setup` tool immediately (mode: `new` for first setup, `edit` for reconfiguration)
+2. The tool launches a local web server and opens the browser automatically
+3. The web UI handles the entire flow: URL input, environment detection, auth method selection, credential collection, connection testing, and saving
+4. Report the result to the user based on the MCP tool response
+
+**Do NOT** ask the user for URL, auth type, or credentials via chat — the web UI handles all of this.
 
 ## Auth Types
 
