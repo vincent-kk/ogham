@@ -56,7 +56,11 @@
   }
 
   function closeModal(overlay) {
-    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (!overlay || !overlay.parentNode) return;
+    overlay.classList.add('is-closing');
+    overlay.addEventListener('animationend', function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, { once: true });
   }
 
   // --- Parse input (JSON or .env) ---
@@ -263,7 +267,17 @@
     var toast = document.getElementById('toast');
     if (!toast) return;
     toast.textContent = msg;
+    toast.classList.remove('is-hidden', 'is-exiting');
     toast.hidden = false;
-    setTimeout(function () { toast.hidden = true; }, 2500);
+    toast.style.animation = 'none';
+    toast.offsetHeight;
+    toast.style.animation = '';
+    setTimeout(function () {
+      toast.classList.add('is-exiting');
+      toast.addEventListener('animationend', function () {
+        toast.classList.add('is-hidden');
+        toast.classList.remove('is-exiting');
+      }, { once: true });
+    }, 2500);
   }
 })();

@@ -29,6 +29,9 @@ export const SETUP_HTML = `
   --radius: 4px;
   --shadow: 0 1px 3px rgba(9,30,66,.13), 0 0 0 1px rgba(9,30,66,.08);
   --t: .15s ease;
+  --t-enter: .2s ease-out;
+  --t-exit: .14s ease-in;
+  --t-page: .35s ease-out;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,18 +47,27 @@ body {
 
 .container { max-width: 640px; margin: 0 auto; }
 
+/* Visibility */
+.is-hidden { display: none; }
+
+/* Page Load Animation */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
 .card {
   background: var(--white);
   border-radius: 8px;
   box-shadow: var(--shadow);
   padding: 28px;
+  animation: card-enter var(--t-page) both;
 }
 
 .page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
 
 /* Warning Banner */
 .warning-banner {
-  display: none;
+  display: flex;
   align-items: center;
   gap: 8px;
   background: var(--warning-bg);
@@ -65,7 +77,11 @@ body {
   margin-bottom: 20px;
   font-size: 13px;
   color: #6b4c00;
+  transition: opacity var(--t-enter), transform var(--t-enter);
 }
+
+.warning-banner.is-hidden { display: none; }
+.warning-banner.is-entering { opacity: 0; transform: translateY(-8px); }
 
 /* Tabs */
 .tab-bar {
@@ -113,13 +129,31 @@ body {
   transition: border-color var(--t), box-shadow var(--t);
 }
 
+@keyframes focus-glow {
+  from { box-shadow: 0 0 0 0 rgba(0,82,204,.3); }
+  to   { box-shadow: 0 0 0 2px rgba(0,82,204,.2); }
+}
+
 .form-group input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(0,82,204,.2);
+  animation: focus-glow var(--t) ease-out forwards;
+}
+
+.form-group input:not(:focus) {
+  box-shadow: none;
+  transition: box-shadow var(--t-exit), border-color var(--t-exit);
 }
 
 .form-group input.error { border-color: var(--danger); }
-.field-error { font-size: 12px; color: var(--danger); }
+
+.field-error {
+  font-size: 12px;
+  color: var(--danger);
+  transition: opacity var(--t-enter), transform var(--t-enter);
+}
+
+.field-error.is-entering { opacity: 0; transform: translateY(-4px); }
+
 .required { color: var(--danger); }
 .optional { color: var(--gray-400); font-weight: 400; font-size: 12px; }
 
@@ -150,7 +184,23 @@ body {
 }
 
 /* Auth Fields */
-.auth-fields { display: flex; flex-direction: column; gap: 14px; }
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity var(--t-enter);
+}
+
+.auth-fields.is-hidden { display: none; }
+.auth-fields.is-entering { opacity: 0; }
+
+/* Tab Panels */
+.tab-panel {
+  transition: opacity var(--t-enter);
+}
+
+.tab-panel.is-hidden { display: none; }
+.tab-panel.is-entering { opacity: 0; }
 
 /* Advanced Accordion */
 .advanced-accordion {
@@ -174,9 +224,13 @@ body {
 }
 
 .advanced-toggle::-webkit-details-marker { display: none; }
-.advanced-toggle::after { content: '▸'; font-size: 11px; transition: transform var(--t); }
+.advanced-toggle::after { content: '\\25B8'; font-size: 11px; transition: transform var(--t); }
 details[open] .advanced-toggle::after { transform: rotate(90deg); }
 .advanced-toggle:hover { background: var(--gray-100); }
+
+@keyframes accordion-open {
+  from { opacity: 0; transform: translateY(-6px); }
+}
 
 .advanced-body {
   padding: 14px;
@@ -184,6 +238,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   flex-direction: column;
   gap: 14px;
   border-top: 1px solid var(--gray-200);
+  animation: accordion-open var(--t-enter) both;
 }
 
 /* Checkbox */
@@ -234,9 +289,12 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   border: none;
   transition: all var(--t);
   white-space: nowrap;
+  transform: translateZ(0);
 }
 
 .btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0) scale(.97); transition-duration: .08s; }
 .btn-primary { background: var(--primary); color: var(--white); }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn-secondary { background: var(--white); color: var(--gray-800); border: 1px solid var(--gray-200); }
@@ -261,7 +319,16 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 .test-result.error { color: var(--danger); background: #FFEBE6; }
 
 /* Success Screen */
+@keyframes success-icon-enter {
+  from { opacity: 0; transform: scale(.5); }
+}
+
+@keyframes success-text-enter {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
 .success-screen { text-align: center; padding: 48px 24px; }
+.success-screen.is-hidden { display: none; }
 
 .success-icon {
   display: inline-flex;
@@ -275,11 +342,21 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 16px;
+  animation: success-icon-enter .3s ease-out both;
 }
 
-.success-screen p { font-size: 15px; color: var(--gray-600); }
+.success-screen p {
+  font-size: 15px;
+  color: var(--gray-600);
+  animation: success-text-enter .25s ease-out .1s both;
+}
 
 /* Modal */
+@keyframes modal-backdrop-enter { from { opacity: 0; } }
+@keyframes modal-card-enter { from { opacity: 0; transform: scale(.95) translateY(8px); } }
+@keyframes modal-backdrop-exit { to { opacity: 0; } }
+@keyframes modal-card-exit { to { opacity: 0; transform: scale(.97) translateY(4px); } }
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -288,6 +365,19 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: modal-backdrop-enter var(--t-enter) both;
+}
+
+.modal-overlay .modal-card {
+  animation: modal-card-enter var(--t-enter) both;
+}
+
+.modal-overlay.is-closing {
+  animation: modal-backdrop-exit var(--t-exit) both;
+}
+
+.modal-overlay.is-closing .modal-card {
+  animation: modal-card-exit var(--t-exit) both;
 }
 
 .modal-card {
@@ -332,6 +422,16 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
 
 /* Toast */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(8px); }
+}
+
 .toast {
   position: fixed;
   bottom: 24px;
@@ -344,13 +444,11 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   font-size: 13px;
   z-index: 2000;
   white-space: nowrap;
-  animation: toast-in .2s ease;
+  animation: toast-in .2s ease-out both;
 }
 
-@keyframes toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
+.toast.is-hidden { display: none; }
+.toast.is-exiting { animation: toast-out var(--t-exit) both; }
 
 .tab-panel[hidden], .auth-fields[hidden] { display: none; }
 
@@ -361,6 +459,15 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   .tab-btn { font-size: 12px; padding: 8px 10px; }
 }
 
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -368,7 +475,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     <div class="card">
       <h1 class="page-title">Atlassian Configuration</h1>
 
-      <div class="warning-banner" id="warning-banner" hidden>
+      <div class="warning-banner is-hidden" id="warning-banner">
         <span class="warning-icon">&#9888;</span>
         Existing configuration found. Changes will overwrite current settings.
       </div>
@@ -418,7 +525,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="cloud-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="cloud-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="cloud.jira.personal_token" autocomplete="off">
@@ -426,7 +533,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="cloud-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="cloud-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="cloud.jira.client_id" autocomplete="off">
@@ -467,7 +574,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
         </div>
 
         <!-- On-premise Tab -->
-        <div class="tab-panel" data-panel="on-premise" hidden>
+        <div class="tab-panel is-hidden" data-panel="on-premise">
 
           <fieldset class="endpoint-section">
             <legend>Jira</legend>
@@ -507,7 +614,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-jira-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="onprem.jira.personal_token" autocomplete="off">
@@ -515,7 +622,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-jira-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="onprem.jira.client_id" autocomplete="off">
@@ -592,7 +699,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-conf-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="onprem.confluence.personal_token" autocomplete="off">
@@ -600,7 +707,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-conf-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="onprem.confluence.client_id" autocomplete="off">
@@ -652,7 +759,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       </form>
 
       <!-- Success Screen -->
-      <div class="success-screen" id="success-screen" hidden>
+      <div class="success-screen is-hidden" id="success-screen">
         <div class="success-icon">&#10003;</div>
         <p>Configuration saved successfully. You may close this window.</p>
       </div>
@@ -676,6 +783,14 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     editMode: false,
     loading: false,
   };
+
+  // --- Animation Helper ---
+  function animateIn(el) {
+    el.classList.remove('is-hidden');
+    el.classList.add('is-entering');
+    el.offsetHeight;
+    el.classList.remove('is-entering');
+  }
 
   // --- Init ---
   document.addEventListener('DOMContentLoaded', function () {
@@ -706,7 +821,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 
   function showWarningBanner() {
     var banner = document.getElementById('warning-banner');
-    if (banner) banner.style.display = 'flex';
+    if (banner) animateIn(banner);
   }
 
   function prefillForm(data) {
@@ -763,7 +878,11 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
     document.querySelectorAll('.tab-panel').forEach(function (panel) {
-      panel.hidden = panel.dataset.panel !== tabName;
+      if (panel.dataset.panel === tabName) {
+        animateIn(panel);
+      } else {
+        panel.classList.add('is-hidden');
+      }
     });
   }
 
@@ -786,7 +905,12 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   function showAuthPanel(prefix, authType) {
     ['basic', 'pat', 'oauth'].forEach(function (type) {
       var panel = document.querySelector('[data-auth-panel="' + prefix + '-' + type + '"]');
-      if (panel) panel.hidden = type !== authType;
+      if (!panel) return;
+      if (type === authType) {
+        animateIn(panel);
+      } else {
+        panel.classList.add('is-hidden');
+      }
     });
   }
 
@@ -854,6 +978,9 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     if (err && err.classList.contains('field-error')) {
       err.textContent = msg;
       err.hidden = false;
+      err.classList.add('is-entering');
+      err.offsetHeight;
+      err.classList.remove('is-entering');
     }
   }
 
@@ -916,7 +1043,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     el.hidden = true;
   }
 
-  // --- Save (validate → test connection → save) ---
+  // --- Save (validate -> test connection -> save) ---
   function onSave() {
     if (!validateForm()) return;
 
@@ -952,10 +1079,11 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   }
 
   function showSuccessScreen() {
-    document.getElementById('setup-form').hidden = true;
-    document.getElementById('success-screen').hidden = false;
+    document.getElementById('setup-form').classList.add('is-hidden');
+    var screen = document.getElementById('success-screen');
+    screen.classList.remove('is-hidden');
     var banner = document.getElementById('warning-banner');
-    if (banner) banner.hidden = true;
+    if (banner) banner.classList.add('is-hidden');
   }
 
   // --- Status Check ---
@@ -1087,7 +1215,11 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   }
 
   function closeModal(overlay) {
-    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (!overlay || !overlay.parentNode) return;
+    overlay.classList.add('is-closing');
+    overlay.addEventListener('animationend', function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, { once: true });
   }
 
   // --- Parse input (JSON or .env) ---
@@ -1294,8 +1426,18 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     var toast = document.getElementById('toast');
     if (!toast) return;
     toast.textContent = msg;
+    toast.classList.remove('is-hidden', 'is-exiting');
     toast.hidden = false;
-    setTimeout(function () { toast.hidden = true; }, 2500);
+    toast.style.animation = 'none';
+    toast.offsetHeight;
+    toast.style.animation = '';
+    setTimeout(function () {
+      toast.classList.add('is-exiting');
+      toast.addEventListener('animationend', function () {
+        toast.classList.add('is-hidden');
+        toast.classList.remove('is-exiting');
+      }, { once: true });
+    }, 2500);
   }
 })();
 

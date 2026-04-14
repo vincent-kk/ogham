@@ -11,7 +11,7 @@
     <div class="card">
       <h1 class="page-title">Atlassian Configuration</h1>
 
-      <div class="warning-banner" id="warning-banner" hidden>
+      <div class="warning-banner is-hidden" id="warning-banner">
         <span class="warning-icon">&#9888;</span>
         Existing configuration found. Changes will overwrite current settings.
       </div>
@@ -61,7 +61,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="cloud-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="cloud-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="cloud.jira.personal_token" autocomplete="off">
@@ -69,7 +69,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="cloud-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="cloud-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="cloud.jira.client_id" autocomplete="off">
@@ -110,7 +110,7 @@
         </div>
 
         <!-- On-premise Tab -->
-        <div class="tab-panel" data-panel="on-premise" hidden>
+        <div class="tab-panel is-hidden" data-panel="on-premise">
 
           <fieldset class="endpoint-section">
             <legend>Jira</legend>
@@ -150,7 +150,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-jira-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="onprem.jira.personal_token" autocomplete="off">
@@ -158,7 +158,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-jira-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="onprem.jira.client_id" autocomplete="off">
@@ -235,7 +235,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-conf-pat" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-pat">
               <div class="form-group">
                 <label>Personal Token <span class="required">*</span></label>
                 <input type="password" data-field="onprem.confluence.personal_token" autocomplete="off">
@@ -243,7 +243,7 @@
               </div>
             </div>
 
-            <div class="auth-fields" data-auth-panel="onprem-conf-oauth" hidden>
+            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-oauth">
               <div class="form-group">
                 <label>Client ID <span class="required">*</span></label>
                 <input type="text" data-field="onprem.confluence.client_id" autocomplete="off">
@@ -295,7 +295,7 @@
       </form>
 
       <!-- Success Screen -->
-      <div class="success-screen" id="success-screen" hidden>
+      <div class="success-screen is-hidden" id="success-screen">
         <div class="success-icon">&#10003;</div>
         <p>Configuration saved successfully. You may close this window.</p>
       </div>

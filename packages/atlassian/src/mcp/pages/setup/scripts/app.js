@@ -9,6 +9,14 @@
     loading: false,
   };
 
+  // --- Animation Helper ---
+  function animateIn(el) {
+    el.classList.remove('is-hidden');
+    el.classList.add('is-entering');
+    el.offsetHeight;
+    el.classList.remove('is-entering');
+  }
+
   // --- Init ---
   document.addEventListener('DOMContentLoaded', function () {
     initApp();
@@ -38,7 +46,7 @@
 
   function showWarningBanner() {
     var banner = document.getElementById('warning-banner');
-    if (banner) banner.style.display = 'flex';
+    if (banner) animateIn(banner);
   }
 
   function prefillForm(data) {
@@ -95,7 +103,11 @@
       btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
     document.querySelectorAll('.tab-panel').forEach(function (panel) {
-      panel.hidden = panel.dataset.panel !== tabName;
+      if (panel.dataset.panel === tabName) {
+        animateIn(panel);
+      } else {
+        panel.classList.add('is-hidden');
+      }
     });
   }
 
@@ -118,7 +130,12 @@
   function showAuthPanel(prefix, authType) {
     ['basic', 'pat', 'oauth'].forEach(function (type) {
       var panel = document.querySelector('[data-auth-panel="' + prefix + '-' + type + '"]');
-      if (panel) panel.hidden = type !== authType;
+      if (!panel) return;
+      if (type === authType) {
+        animateIn(panel);
+      } else {
+        panel.classList.add('is-hidden');
+      }
     });
   }
 
@@ -186,6 +203,9 @@
     if (err && err.classList.contains('field-error')) {
       err.textContent = msg;
       err.hidden = false;
+      err.classList.add('is-entering');
+      err.offsetHeight;
+      err.classList.remove('is-entering');
     }
   }
 
@@ -248,7 +268,7 @@
     el.hidden = true;
   }
 
-  // --- Save (validate → test connection → save) ---
+  // --- Save (validate -> test connection -> save) ---
   function onSave() {
     if (!validateForm()) return;
 
@@ -284,10 +304,11 @@
   }
 
   function showSuccessScreen() {
-    document.getElementById('setup-form').hidden = true;
-    document.getElementById('success-screen').hidden = false;
+    document.getElementById('setup-form').classList.add('is-hidden');
+    var screen = document.getElementById('success-screen');
+    screen.classList.remove('is-hidden');
     var banner = document.getElementById('warning-banner');
-    if (banner) banner.hidden = true;
+    if (banner) banner.classList.add('is-hidden');
   }
 
   // --- Status Check ---
