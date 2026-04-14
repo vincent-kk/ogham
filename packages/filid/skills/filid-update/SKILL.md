@@ -10,7 +10,7 @@ plugin: filid
 
 > **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
 > After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `cache_manage` gate, `qa-reviewer` subagent return,
+> NEVER yield after `mcp_t_cache_manage` gate, `qa-reviewer` subagent return,
 > `context-manager` delegation, or `implementer` completion.
 >
 > **Valid reasons to yield**:
@@ -46,8 +46,8 @@ An incremental gate (Stage 0) skips execution when no changes have occurred sinc
 
 Without `--force`, exits immediately if no changes have occurred since the last run.
 
-1. `cache_manage({ action: "compute-hash", cwd: "<path>" })` → `currentHash`
-2. `cache_manage({ action: "get-hash", cwd: "<path>", skillName: "update" })` → `lastHash`
+1. `mcp_t_cache_manage({ action: "compute-hash", cwd: "<path>" })` → `currentHash`
+2. `mcp_t_cache_manage({ action: "get-hash", cwd: "<path>", skillName: "update" })` → `lastHash`
 3. `currentHash === lastHash` and no `--force` → output "No changes since last run. Use --force to override." and exit
 4. Changes detected → proceed to Stage 1
 
@@ -66,7 +66,7 @@ Runs only when Stage 1 detects `critical` or `high` severity violations.
 See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
 
 Agents: `drift-analyzer` (sonnet) → `restructurer` (sonnet)
-MCP: `drift_detect`, `lca_resolve`, `structure_validate`
+MCP: `mcp_t_drift_detect`, `mcp_t_lca_resolve`, `mcp_t_structure_validate`
 See [reference.md Section 2](./reference.md#section-2--sync).
 
 ### Stage 3 — Doc & Test Update (Parallel)
@@ -88,7 +88,7 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 1. Verify all prior stages completed without errors. If any stage reported an
    error, skip hash save and report the error — this ensures the next incremental
    run re-processes the failed work.
-2. `cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
+2. `mcp_t_cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
 3. Output consolidated report
    See [reference.md Section 4](./reference.md#section-4--finalize).
 
@@ -96,15 +96,15 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 | Tool                 | Stage | Purpose                                            |
 | -------------------- | ----- | -------------------------------------------------- |
-| `cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
-| `fractal_scan`       | 1     | Project structure scan                             |
-| `fractal_navigate`   | 1     | Tree traversal and classification                  |
-| `test_metrics`       | 1, 3  | 3+12 rule validation                               |
-| `drift_detect`       | 2     | Drift detection                                    |
-| `lca_resolve`        | 2     | Determine correct placement for reclassification   |
-| `structure_validate` | 2     | Structure validity check                           |
-| `doc_compress`       | 3     | Document size check                                |
-| `ast_analyze`        | 3     | LCOM4, CC metrics                                  |
+| `mcp_t_cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
+| `mcp_t_fractal_scan`       | 1     | Project structure scan                             |
+| `mcp_t_fractal_navigate`   | 1     | Tree traversal and classification                  |
+| `mcp_t_test_metrics`       | 1, 3  | 3+12 rule validation                               |
+| `mcp_t_drift_detect`       | 2     | Drift detection                                    |
+| `mcp_t_lca_resolve`        | 2     | Determine correct placement for reclassification   |
+| `mcp_t_structure_validate` | 2     | Structure validity check                           |
+| `mcp_t_doc_compress`       | 3     | Document size check                                |
+| `mcp_t_ast_analyze`        | 3     | LCOM4, CC metrics                                  |
 
 ## Options
 

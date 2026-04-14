@@ -13,7 +13,7 @@ models. Use this table to pick the right one.
 
 | Skill                | Trigger                | Detection                 | Incremental gate         | Invocation                       |
 | -------------------- | ---------------------- | ------------------------- | ------------------------ | -------------------------------- |
-| `filid-update`       | Branch git diff        | Rule violations           | Hash-based (cache_manage) | Internal (`user_invocable: false`) |
+| `filid-update`       | Branch git diff        | Rule violations           | Hash-based (mcp_t_cache_manage) | Internal (`user_invocable: false`) |
 | `filid-enrich-docs`  | Target directory path  | Quality smell (heuristic) | None (quality re-eval)   | User-facing (`user_invocable: true`) |
 
 Practical guidance:
@@ -30,9 +30,9 @@ its own reads via the Read/Glob tools — they are not documented here.
 
 | Tool                 | Stage | Purpose                                          | Signature summary                           |
 | -------------------- | ----- | ------------------------------------------------ | ------------------------------------------- |
-| `fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReport`                   |
-| `doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ needsCompression, suggestedContent? }` |
-| `structure_validate` | 7     | 3-tier boundary section verification             | `{ path }` → `{ passed, violations[] }`     |
+| `mcp_t_fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReport`                   |
+| `mcp_t_doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ needsCompression, suggestedContent? }` |
+| `mcp_t_structure_validate` | 7     | 3-tier boundary section verification             | `{ path }` → `{ passed, violations[] }`     |
 
 Full tool signatures and return-type schemas live in
 [reference.md Sections 2 and 7](./reference.md#section-2--discovery).

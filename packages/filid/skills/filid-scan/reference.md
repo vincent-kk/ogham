@@ -5,10 +5,10 @@ rule scanner. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Tree Construction
 
-Call `fractal_scan` to build the complete hierarchy by scanning the filesystem.
+Call `mcp_t_fractal_scan` to build the complete hierarchy by scanning the filesystem.
 
 ```
-fractal_scan({ path: "<target-path>" })
+mcp_t_fractal_scan({ path: "<target-path>" })
 ```
 
 The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode)
@@ -65,10 +65,10 @@ INTENT.md is present inside it.
 
 ## Section 4 — Test File Validation (3+12 Rule)
 
-Collect all spec files and call `test_metrics` with `action: "check-312"`.
+Collect all spec files and call `mcp_t_test_metrics` with `action: "check-312"`.
 
 ```
-test_metrics({
+mcp_t_test_metrics({
   action: "check-312",
   files: [{ filePath: "<path>", content: "<source>" }, ...]
 })
@@ -119,7 +119,7 @@ Run with --fix to apply automatic remediations.
 | ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
 | `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `code-surgeon`    |
 | `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
-| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `doc_compress`) | `context-manager` |
+| `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp_t_doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
 Each fixable violation is delegated to the appropriate agent as a **foreground**

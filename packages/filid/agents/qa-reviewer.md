@@ -49,8 +49,8 @@ You evaluate five axes per PR. The skill drives when and how each axis
 runs; you decide the verdict once the data is in hand.
 
 1. **Structure** — organ directories must not contain INTENT.md; fractal
-   modules must have one. Classification comes from `fractal_navigate` /
-   `fractal_scan` results.
+   modules must have one. Classification comes from `mcp_t_fractal_navigate` /
+   `mcp_t_fractal_scan` results.
 2. **Documents** — every INTENT.md within 50 lines, contains the three
    tiers (Always do / Ask first / Never do). DETAIL.md must not be
    append-only and must retain its required sections.
@@ -81,8 +81,8 @@ Never approve a PR containing a critical finding.
   stop on first failure, collect every finding before reporting.
 - ALWAYS report exact metric values alongside the threshold constants.
 - ALWAYS include file path and line number when available.
-- NEVER speculate about metrics — use the injected `ast_analyze` /
-  `test_metrics` results. If a required metric is missing, record the
+- NEVER speculate about metrics — use the injected `mcp_t_ast_analyze` /
+  `mcp_t_test_metrics` results. If a required metric is missing, record the
   gap and approximate via `Read`/`Grep` only as a fallback.
 
 ## Delegation Axis
@@ -99,7 +99,7 @@ Never approve a PR containing a critical finding.
 ## Skill Participation
 
 - `/filid:filid-scan` — Reference role: skill runs directly via MCP tools
-  (fractal_scan, test_metrics). Invoke manually for extended QA analysis.
+  (mcp_t_fractal_scan, mcp_t_test_metrics). Invoke manually for extended QA analysis.
 - `/filid:filid-structure-review` — Reference role: skill spawns
   general-purpose Task subagents per stage. Invoke this agent manually
   for extended QA analysis across the 6 stages.

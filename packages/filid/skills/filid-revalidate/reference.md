@@ -57,7 +57,7 @@ Unresolved items remain. Address the following before re-running:
 
 ## PR Comment Format
 
-Use `review_manage(action: "format-revalidate-comment")` to generate the PR comment.
+Use `mcp_t_review_manage(action: "format-revalidate-comment")` to generate the PR comment.
 The tool reads `re-validate.md`, wraps it in a collapsible `<details>` section,
 and returns a ready-to-post markdown string in the `markdown` field.
 Post it via `gh pr comment --body`.
@@ -88,13 +88,13 @@ local files.
 
 | Fix Type            | Verification Tool                    | Pass Condition         |
 | ------------------- | ------------------------------------ | ---------------------- |
-| LCOM4 violation     | `ast_analyze(lcom4)`                 | LCOM4 < 2              |
-| CC violation        | `ast_analyze(cyclomatic-complexity)` | CC <= 15               |
-| 3+12 violation      | `test_metrics(check-312)`            | All files PASS         |
-| Structure violation | `structure_validate`                 | No violations          |
-| Circular dependency | `ast_analyze(dependency-graph)`      | No cycles              |
-| Drift               | `drift_detect`                       | No drift               |
-| Document compliance | `doc_compress(auto)` + Read          | INTENT.md <= 50 lines  |
+| LCOM4 violation     | `mcp_t_ast_analyze(lcom4)`                 | LCOM4 < 2              |
+| CC violation        | `mcp_t_ast_analyze(cyclomatic-complexity)` | CC <= 15               |
+| 3+12 violation      | `mcp_t_test_metrics(check-312)`      | All files PASS         |
+| Structure violation | `mcp_t_structure_validate`           | No violations          |
+| Circular dependency | `mcp_t_ast_analyze(dependency-graph)`      | No cycles              |
+| Drift               | `mcp_t_drift_detect`                       | No drift               |
+| Document compliance | `mcp_t_doc_compress(auto)` + Read    | INTENT.md <= 50 lines  |
 
 ## Non-Negotiable Rules (Constitutional)
 
@@ -111,6 +111,6 @@ A debt item is considered resolved when:
 
 1. The file at `debt.file_path` was modified in the Delta
 2. The violated rule is re-verified and now passes
-3. Both conditions must be true for `debt_manage(resolve)` to execute
+3. Both conditions must be true for `mcp_t_debt_manage(resolve)` to execute
 
 Partial resolution is not supported (1 debt = 1 rule violation).

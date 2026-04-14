@@ -5,10 +5,10 @@ fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.
 
 ## Section 1 — Project Scan
 
-Call `fractal_scan` to retrieve the complete directory tree and node classifications.
+Call `mcp_t_fractal_scan` to retrieve the complete directory tree and node classifications.
 
 ```
-fractal_scan({ path: "<target-path>" })
+mcp_t_fractal_scan({ path: "<target-path>" })
 ```
 
 The response is a `ScanReport` containing:
@@ -29,10 +29,10 @@ Build three working sets from `tree.nodesList` (or `tree.nodes.values()`):
 
 ## Section 2 — Rule Query
 
-Call `rule_query` to retrieve the full list of active rules.
+Call `mcp_t_rule_query` to retrieve the full list of active rules.
 
 ```
-rule_query({ action: "list", path: "<target-path>" })
+mcp_t_rule_query({ action: "list", path: "<target-path>" })
 ```
 
 Response fields:

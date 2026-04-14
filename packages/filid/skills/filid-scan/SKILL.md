@@ -10,7 +10,7 @@ plugin: filid
 
 > **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION.
 > After each phase completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `fractal_scan` result, parallel rule evaluations, or
+> NEVER yield after `mcp_t_fractal_scan` result, parallel rule evaluations, or
 > violation aggregation.
 >
 > **Valid reasons to yield**:
@@ -18,7 +18,7 @@ plugin: filid
 > 2. Terminal stage marker emitted: `Scan complete: N violations` or `Scan complete: no violations found`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After Phase 1 `fractal_scan` returns — chain Phases 2–4 in the same response (existing "CRITICAL — No-Yield Execution" directive at line ~37 is authoritative)
+> - After Phase 1 `mcp_t_fractal_scan` returns — chain Phases 2–4 in the same response (existing "CRITICAL — No-Yield Execution" directive at line ~37 is authoritative)
 > - `--fix` auto-remediation loop — do NOT pause between fixes; continue until all applicable violations are addressed
 > - Final violation report — emit consolidated report AND end in the same turn
 
@@ -54,11 +54,11 @@ with direct MCP calls. This standalone skill (`/filid:filid-scan`) always scans 
 
 ### Phase 1 — Tree Construction
 
-Build the project hierarchy using `fractal_scan` and partition into fractal
+Build the project hierarchy using `mcp_t_fractal_scan` and partition into fractal
 nodes, organ nodes, and spec files.
 See [reference.md Section 1](./reference.md#section-1--tree-construction).
 
-**Immediately after** receiving `fractal_scan` results, proceed to Phase 2–4
+**Immediately after** receiving `mcp_t_fractal_scan` results, proceed to Phase 2–4
 in the same response — do NOT summarize or report Phase 1 results first.
 
 ### Phases 2–4 (Inline Parallel — same response as Phase 1 result)
@@ -68,7 +68,7 @@ Do NOT use background agents or subagents — call the tools directly:
 
 - **Phase 2** — Read each INTENT.md (parallel Read calls) and check line count + boundary sections
 - **Phase 3** — Filter organ nodes from Phase 1 results and check for INTENT.md presence (no extra tool calls needed if Phase 1 data suffices; use Glob only if needed)
-- **Phase 4** — Call `test_metrics` with `action: "check-312"` for all spec files
+- **Phase 4** — Call `mcp_t_test_metrics` with `action: "check-312"` for all spec files
 
 Launch all independent Read/Glob/MCP calls for Phases 2–4 as **parallel tool
 calls in one response**. Then proceed directly to Phase 5.
@@ -80,12 +80,12 @@ See [reference.md Section 2](./reference.md#section-2--intentmd-validation).
 
 ### Phase 3 — Organ Directory Validation
 
-Verify no organ directory contains a INTENT.md file using `fractal_scan` results from Phase 1.
+Verify no organ directory contains a INTENT.md file using `mcp_t_fractal_scan` results from Phase 1.
 See [reference.md Section 3](./reference.md#section-3--organ-directory-validation).
 
 ### Phase 4 — Test File Validation (3+12 Rule)
 
-Validate all `*.spec.ts` files against the 15-case limit using `test_metrics`.
+Validate all `*.spec.ts` files against the 15-case limit using `mcp_t_test_metrics`.
 See [reference.md Section 4](./reference.md#section-4--test-file-validation-312-rule).
 
 ### Phase 5 — Report Generation (Immediately after Phases 2–4)
@@ -114,9 +114,9 @@ See [reference.md Section 5](./reference.md#section-5--report-formats).
 
 | Tool           | Action      | Purpose                                              |
 | -------------- | ----------- | ---------------------------------------------------- |
-| `fractal_scan` | —           | Build complete project hierarchy for scan            |
-| `test_metrics` | `check-312` | Validate 3+12 rule across all spec files             |
-| `doc_compress` | `auto`      | (`--fix`) Compress INTENT.md via context-manager agent |
+| `mcp_t_fractal_scan` | —           | Build complete project hierarchy for scan            |
+| `mcp_t_test_metrics` | `check-312` | Validate 3+12 rule across all spec files             |
+| `mcp_t_doc_compress` | `auto`      | (`--fix`) Compress INTENT.md via context-manager agent |
 
 ## Options
 

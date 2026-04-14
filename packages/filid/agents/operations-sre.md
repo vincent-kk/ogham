@@ -56,10 +56,10 @@ Each fix_item in your opinion SHOULD include a `blast_radius` field
 
 Every `fix_item` MUST cite at least one of:
 
-- `verification-structure.md` → `ast_analyze(dependency-graph)` →
+- `verification-structure.md` → `mcp_t_ast_analyze(dependency-graph)` →
   dependency surface area
-- `verification-structure.md` → `structure_validate` → boundary compliance
-- `verification-structure.md` → `drift_detect` → unplanned structural
+- `verification-structure.md` → `mcp_t_structure_validate` → boundary compliance
+- `verification-structure.md` → `mcp_t_drift_detect` → unplanned structural
   changes
 - `session.md` → changed files count and fractal count
 - Direct `git log` / `git diff` via `Bash` for additional context

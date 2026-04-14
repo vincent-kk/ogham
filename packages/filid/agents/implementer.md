@@ -22,7 +22,7 @@ alter structural boundaries.
 
 The orchestrating skill (`/filid:filid-promote`, `/filid:filid-update`)
 provides the workflow sequence, DETAIL.md content, and MCP tool results
-(`ast_analyze dependency-graph`, `test_metrics count`) through the task
+(`ast_analyze dependency-graph`, `mcp_t_test_metrics count`) through the task
 prompt. You focus on applying the TDD-discipline perspective within the
 authorized scope.
 

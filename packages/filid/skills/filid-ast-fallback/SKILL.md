@@ -19,7 +19,7 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 
 ## When to Use This Skill
 
-- `ast_grep_search` or `ast_grep_replace` MCP tools return `@ast-grep/napi is not available`
+- `mcp_t_ast_grep_search` or `mcp_t_ast_grep_replace` MCP tools return `@ast-grep/napi is not available`
 - The environment cannot install native dependencies (sandboxed, CI, etc.)
 - Quick one-off pattern searches where exact AST precision is not critical
 - Searching across multiple languages in a single pass
@@ -31,7 +31,7 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 
 ### Phase 1 — Attempt Native Tool
 
-Call `ast_grep_search` (or `ast_grep_replace`) MCP tool with the user's
+Call `mcp_t_ast_grep_search` (or `mcp_t_ast_grep_replace`) MCP tool with the user's
 pattern. If it succeeds, return the result directly. No fallback needed.
 See [reference.md Section 1](./reference.md#section-1--native-tool-attempt).
 
@@ -60,8 +60,8 @@ See [reference.md Section 4](./reference.md#section-4--llm-replace-fallback).
 
 | Tool               | Purpose                                      | Fallback          |
 | ------------------ | -------------------------------------------- | ----------------- |
-| `ast_grep_search`  | Native AST pattern search (Phase 1 attempt)  | Grep + Read + LLM |
-| `ast_grep_replace` | Native AST pattern replace (Phase 1 attempt) | Edit + LLM        |
+| `mcp_t_ast_grep_search`  | Native AST pattern search (Phase 1 attempt)  | Grep + Read + LLM |
+| `mcp_t_ast_grep_replace` | Native AST pattern replace (Phase 1 attempt) | Edit + LLM        |
 
 ## Options
 

@@ -6,11 +6,11 @@
 > (mark skipped checks as `SKIP`).
 
 > **STREAMING-WRITE DISCIPLINE (context budget control)**: Some C2 steps
-> are project-wide single calls (`structure_validate`, `drift_detect`,
-> `debt_manage(list)`) — record their results into the output file
+> are project-wide single calls (`mcp_t_structure_validate`, `mcp_t_drift_detect`,
+> `mcp_t_debt_manage(list)`) — record their results into the output file
 > immediately after each call, then drop the response from memory. Other
-> steps are per-file (`ast_analyze(dependency-graph)`,
-> `ast_analyze(tree-diff)`, per-file doc compliance) — apply the same
+> steps are per-file (`mcp_t_ast_analyze(dependency-graph)`,
+> `mcp_t_ast_analyze(tree-diff)`, per-file doc compliance) — apply the same
 > incremental append pattern used by Phase C1:
 >
 > 1. `Write` the full skeleton FIRST.
@@ -54,13 +54,13 @@ Read `<REVIEW_DIR>/structure-check.md` if it exists and store:
 - All CRITICAL/HIGH findings from the Findings section
 
 **Scope rule**: When PHASEA_STRUCTURE is PASS, skip full-project
-`drift_detect` and only verify the changed fractals. When PHASEA_DOCUMENTS is
+`mcp_t_drift_detect` and only verify the changed fractals. When PHASEA_DOCUMENTS is
 PASS, skip independent doc-compliance scans.
 
 ### C2.1 — Fractal Boundary Verification
 
 ```
-structure_validate(path: <PROJECT_ROOT>)
+mcp_t_structure_validate(path: <PROJECT_ROOT>)
 ```
 
 Record PASS/WARN/FAIL for fractal boundary compliance. Limit reporting to
@@ -71,7 +71,7 @@ nodes that intersect `changed_fractals`.
 For each changed source file:
 
 ```
-ast_analyze(source: <file content>, analysisType: "dependency-graph")
+mcp_t_ast_analyze(source: <file content>, analysisType: "dependency-graph")
 ```
 
 Record any circular dependencies as FAIL.
@@ -81,7 +81,7 @@ Record any circular dependencies as FAIL.
 For files with both old and new versions:
 
 ```
-ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
+mcp_t_ast_analyze(source: <new>, oldSource: <old>, analysisType: "tree-diff")
 ```
 
 Use to detect interface-level changes (exported symbol additions/removals).
@@ -89,7 +89,7 @@ Use to detect interface-level changes (exported symbol additions/removals).
 ### C2.4 — Structure Drift
 
 ```
-drift_detect(path: <PROJECT_ROOT>)
+mcp_t_drift_detect(path: <PROJECT_ROOT>)
 ```
 
 Skip if `PHASEA_STRUCTURE === PASS`. Otherwise record drift findings.
@@ -108,13 +108,13 @@ If `PHASEA_DOCUMENTS === PASS`, reference Phase A instead of re-scanning.
 Load existing debts and calculate bias:
 
 ```
-debt_manage(action: "list", projectRoot: <PROJECT_ROOT>)
+mcp_t_debt_manage(action: "list", projectRoot: <PROJECT_ROOT>)
 ```
 
 If debts exist for changed fractals:
 
 ```
-debt_manage(
+mcp_t_debt_manage(
   action: "calculate-bias",
   projectRoot: <PROJECT_ROOT>,
   debts: <debt list>,
@@ -136,13 +136,13 @@ session_ref: session.md
 scope: structure-half
 structure_check_ref: structure-check.md   # present if Phase A ran
 tools_executed:
-  - structure_validate
-  - ast_analyze(dependency-graph)
-  - ast_analyze(tree-diff)
+  - mcp_t_structure_validate
+  - mcp_t_ast_analyze(dependency-graph)
+  - mcp_t_ast_analyze(tree-diff)
   - drift_detect
-  - doc_compress
-  - debt_manage(list)
-  - debt_manage(calculate-bias)
+  - mcp_t_doc_compress
+  - mcp_t_debt_manage(list)
+  - mcp_t_debt_manage(calculate-bias)
 structure_passed: <true|false>
 critical_failures: <count>
 debt_count: <existing debt count>
@@ -177,8 +177,8 @@ created_at: <ISO 8601>
 ## Important Notes
 
 - Scope is changed fractals + changed files (from session.md).
-- Do NOT call `ast_analyze(lcom4)`, `ast_analyze(cyclomatic-complexity)`,
-  `test_metrics`, or `coverage_verify` — those belong to Phase C1.
+- Do NOT call `mcp_t_ast_analyze(lcom4)`, `mcp_t_ast_analyze(cyclomatic-complexity)`,
+  `mcp_t_test_metrics`, or `mcp_t_coverage_verify` — those belong to Phase C1.
 - Always include `debt_bias_level` even when no debts exist — Phase D's
   Business Driver persona requires this field.
 - Write ONLY `verification-structure.md` — no other files.
@@ -186,9 +186,9 @@ created_at: <ISO 8601>
 ## Batch / Team-Promoted Execution
 
 Phase C2 has two kinds of work: **project-wide scans**
-(`structure_validate`, `drift_detect`, `debt_manage(list, calculate-bias)`)
+(`mcp_t_structure_validate`, `mcp_t_drift_detect`, `mcp_t_debt_manage(list, calculate-bias)`)
 that must run once globally, and **per-file checks**
-(`ast_analyze(dependency-graph)`, `ast_analyze(tree-diff)`, per-file doc
+(`mcp_t_ast_analyze(dependency-graph)`, `mcp_t_ast_analyze(tree-diff)`, per-file doc
 compliance). The chairperson partitions only the per-file work when batch
 mode is active.
 
@@ -198,7 +198,7 @@ You receive `BATCH_ID`, `BATCH_FILES`, and `SCOPE_OVERRIDE` in the context
 block. Behavior depends on `SCOPE_OVERRIDE`:
 
 - **`per-file`**: Run ONLY the per-file checks on `BATCH_FILES`. Skip
-  `structure_validate` / `drift_detect` / `debt_manage`. Write output to
+  `mcp_t_structure_validate` / `mcp_t_drift_detect` / `mcp_t_debt_manage`. Write output to
   `<REVIEW_DIR>/verification-structure.partial-<BATCH_ID>.md` with
   `scope: partial-per-file-<BATCH_ID>` in the frontmatter.
 - **`global`**: Run ONLY the project-wide scans. Skip per-file checks.

@@ -6,7 +6,7 @@ skill deploys into a target project's `.claude/rules/` directory.
 > **Important — deployment is skill-only.** SessionStart hooks do NOT copy or
 > remove these files. The only code path that writes to `.claude/rules/` is
 > `syncRuleDocs()` in `src/core/infra/config-loader/config-loader.ts`, which
-> is invoked exclusively by the `rule_docs_sync` MCP tool from the
+> is invoked exclusively by the `mcp_t_rule_docs_sync` MCP tool from the
 > `filid-setup` skill after the user confirms a checkbox selection.
 
 ## manifest.json

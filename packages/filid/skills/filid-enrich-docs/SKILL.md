@@ -24,7 +24,7 @@ plugin: filid
 > - After Stage 2 Discovery returns the INTENT.md list — immediately chain Stage 3 scoring in the same turn
 > - After Stage 3 Quality Audit classification — chain Stage 4 plan generation without pause
 > - After Stage 5 approval (or `--auto-approve`) — immediately dispatch Stage 6 parallel `context-manager` delegations
-> - After parallel `context-manager` returns — chain Stage 7 validation (`doc_compress`, `structure_validate`) in the same turn
+> - After parallel `context-manager` returns — chain Stage 7 validation (`mcp_t_doc_compress`, `mcp_t_structure_validate`) in the same turn
 > - Stage 8 report — emit final summary AND end in the same turn
 
 # filid-enrich-docs — INTENT.md Quality Enrichment
@@ -73,7 +73,7 @@ Collect every `INTENT.md` under the target directory with `Glob`, then for
 each file capture: absolute path, content, line count, owning directory, and
 immediate child directories. When `--include-detail` is set, DETAIL.md files
 are collected alongside INTENT.md entries. Classify every module root via
-`fractal_scan` and drop `organ` nodes (INTENT.md is prohibited there).
+`mcp_t_fractal_scan` and drop `organ` nodes (INTENT.md is prohibited there).
 See [reference.md Section 2](./reference.md#section-2--discovery).
 
 ### Stage 3 — Quality Audit
@@ -118,8 +118,8 @@ for the full delegation template.
 
 ### Stage 7 — Validate
 
-For every rewritten file, call `doc_compress` (50-line enforcement) and then
-`structure_validate` (3-tier boundary sections present). A `doc_compress`
+For every rewritten file, call `mcp_t_doc_compress` (50-line enforcement) and then
+`mcp_t_structure_validate` (3-tier boundary sections present). A `mcp_t_doc_compress`
 failure triggers one second-pass retry via `context-manager`; any other
 validation failure reverts the on-disk content and marks the file as
 `NEEDS_REWORK`.

@@ -21,7 +21,7 @@ plugin: filid
 > 2. Terminal stage marker emitted: `Restructure complete: N moves applied` or `Restructure dry-run complete`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After parallel MCP calls (`fractal_scan`, `drift_detect`, `rule_query`) — chain `lca_resolve` and `fractal-architect` delegation without pause
+> - After parallel MCP calls (`mcp_t_fractal_scan`, `mcp_t_drift_detect`, `mcp_t_rule_query`) — chain `mcp_t_lca_resolve` and `fractal-architect` delegation without pause
 > - After `fractal-architect` returns proposal — chain Stage 2 approval or `--auto-approve` execution in the same turn
 > - Stage 3 `restructurer` execution — do NOT pause between file moves, renames, or index.ts creations
 > - Stage 4 validation — emit final verdict AND end in the same turn
@@ -51,8 +51,8 @@ moves, renames, index.ts creations, and import path updates.
 
 The skill invokes MCP tools and passes the results to `fractal-architect` for analysis. MCP calls run in **parallel**:
 
-- The skill calls `fractal_scan`, `drift_detect`, and `rule_query` **simultaneously**.
-- The skill calls `lca_resolve` after `drift_detect` completes (requires its output).
+- The skill calls `mcp_t_fractal_scan`, `mcp_t_drift_detect`, and `mcp_t_rule_query` **simultaneously**.
+- The skill calls `mcp_t_lca_resolve` after `mcp_t_drift_detect` completes (requires its output).
 - `fractal-architect` receives all MCP results and generates the restructuring proposal.
 
 > `fractal-architect` does not call MCP tools directly — the skill owns all MCP invocations and injects results into the agent's task prompt (consistent with the Capability Model in Stage 4).
@@ -76,13 +76,13 @@ See [reference.md Section 3](./reference.md#section-3--execution).
 
 ### Stage 4 — Validation
 
-**The skill (not the agent) invokes `structure_validate`** on the modified tree
+**The skill (not the agent) invokes `mcp_t_structure_validate`** on the modified tree
 after `restructurer` returns, then passes the validation report to
 `fractal-architect` for interpretation and remediation recommendations.
 Per the agent Capability Model (`agents/INTENT.md`-equivalent policy), agents
 do not call MCP tools directly — orchestrating skills own all MCP invocations.
 
-1. Skill calls `structure_validate({ path, rules })` with the modified tree root.
+1. Skill calls `mcp_t_structure_validate({ path, rules })` with the modified tree root.
 2. Skill forwards the `ValidationReport` to `fractal-architect` in the task prompt.
 3. `fractal-architect` reads the report and reports any remaining violations.
 
@@ -93,11 +93,11 @@ See [reference.md Section 4](./reference.md#section-4--validation).
 
 | Tool                 | Stage | Purpose                             |
 | -------------------- | ----- | ----------------------------------- |
-| `fractal_scan`       | 1     | Full structure scan                 |
-| `drift_detect`       | 1     | Detect fractal principle deviations |
-| `lca_resolve`        | 1     | Resolve move targets via LCA        |
-| `rule_query`         | 1     | Fetch active rules                  |
-| `structure_validate` | 4     | Validate post-execution structure   |
+| `mcp_t_fractal_scan`       | 1     | Full structure scan                 |
+| `mcp_t_drift_detect`       | 1     | Detect fractal principle deviations |
+| `mcp_t_lca_resolve`        | 1     | Resolve move targets via LCA        |
+| `mcp_t_rule_query`         | 1     | Fetch active rules                  |
+| `mcp_t_structure_validate` | 4     | Validate post-execution structure   |
 
 ## Options
 

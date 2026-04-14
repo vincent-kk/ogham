@@ -12,12 +12,12 @@ Phase 0d persists the decision and synchronises `.claude/rules/`.
 
 ### Phase 0a — Config Initialization
 
-Call `project_init({ path })`. The handler:
+Call `mcp_t_project_init({ path })`. The handler:
 - Resolves the git repository root from `path`
 - Creates `.filid/config.json` if absent, with the default 8-rule config
 - Never overwrites an existing config
 
-`project_init` does NOT touch `.claude/rules/` in any way. Rule doc state
+`mcp_t_project_init` does NOT touch `.claude/rules/` in any way. Rule doc state
 is tracked on the filesystem only (`.claude/rules/*.md`), never mirrored
 into `.filid/config.json`.
 
@@ -41,7 +41,7 @@ Default config shape:
 
 ### Phase 0b — Rule Docs Status Query
 
-Call `rule_docs_sync({ action: "status", path })`. Response shape:
+Call `mcp_t_rule_docs_sync({ action: "status", path })`. Response shape:
 
 ```ts
 {
@@ -78,7 +78,7 @@ Call `rule_docs_sync({ action: "status", path })`. Response shape:
 ```
 
 If `pluginRootResolved` is `false`, fail fast: the plugin is running
-without `CLAUDE_PLUGIN_ROOT` set, which means `rule_docs_sync` cannot
+without `CLAUDE_PLUGIN_ROOT` set, which means `mcp_t_rule_docs_sync` cannot
 locate the manifest. Surface an error message and skip Phase 0c/0d.
 
 Build `currentSelection: Record<string, boolean>` by mapping each entry
@@ -195,7 +195,7 @@ required rules stay applied on first-run projects.
 
 ### Phase 0d — Sync
 
-Call `rule_docs_sync({ action: "sync", path, selections: nextSelection })`.
+Call `mcp_t_rule_docs_sync({ action: "sync", path, selections: nextSelection })`.
 `selections` MUST be a raw object map, not a JSON string.
 Response shape:
 
@@ -215,7 +215,7 @@ Response shape:
 Valid call shape:
 
 ```ts
-rule_docs_sync({
+mcp_t_rule_docs_sync({
   action: "sync",
   path,
   selections: { fca: true, rfx: false },
@@ -226,7 +226,7 @@ Do NOT stringify the map. This is invalid and will trigger MCP input
 validation unless the handler explicitly recovers it:
 
 ```ts
-rule_docs_sync({
+mcp_t_rule_docs_sync({
   action: "sync",
   path,
   selections: '{"fca":true,"rfx":false}',
@@ -299,10 +299,10 @@ preserved — the user still confirms selections via the checkbox UI.
 
 ## Section 1 — Directory Scan Details
 
-Call `fractal_scan` to retrieve the complete project hierarchy by scanning the filesystem.
+Call `mcp_t_fractal_scan` to retrieve the complete project hierarchy by scanning the filesystem.
 
 ```
-fractal_scan({ path: "<target-path>" })
+mcp_t_fractal_scan({ path: "<target-path>" })
 ```
 
 The response is a `ScanReport` containing:
@@ -316,20 +316,20 @@ The response is a `ScanReport` containing:
 
 Build an internal working list of all directories from `tree.nodesList` (or `tree.nodes`) for Phase 2 classification.
 
-> **Note**: Do NOT use `fractal_navigate(action: "tree")` for scanning — that tool
+> **Note**: Do NOT use `mcp_t_fractal_navigate(action: "tree")` for scanning — that tool
 > builds a tree only from a pre-supplied `entries` array and does not read the filesystem.
 
-> **Important**: `tree.nodes` in the `fractal_scan` response contains **all**
+> **Important**: `tree.nodes` in the `mcp_t_fractal_scan` response contains **all**
 > directories, including those nested inside organ nodes. In Phase 2, always
 > iterate over the full `tree.nodes.values()`. Traversing only `children` from
 > `tree.root` will miss fractal nodes that live inside organ boundaries.
 
 ## Section 2 — Node Classification Rules
 
-For each directory, call `fractal_navigate` with `action: "classify"`:
+For each directory, call `mcp_t_fractal_navigate` with `action: "classify"`:
 
 ```
-fractal_navigate({
+mcp_t_fractal_navigate({
   action: "classify",
   path: "<directory-path>",
   entries: [/* child entries from tree */]
