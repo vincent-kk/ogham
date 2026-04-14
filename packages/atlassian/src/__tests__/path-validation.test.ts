@@ -2,10 +2,23 @@ import { describe, it, expect } from 'vitest';
 import { resolve } from 'node:path';
 import { validateSavePath } from '../utils/index.js';
 
+const tmpBase = resolve(process.cwd(), '.temp');
+
 describe('validateSavePath', () => {
-  it('accepts path under cwd', () => {
+  it('resolves relative path under .temp/', () => {
     const result = validateSavePath('output/file.png');
-    expect(result).toBe(resolve('output/file.png'));
+    expect(result).toBe(resolve(tmpBase, 'output/file.png'));
+  });
+
+  it('strips .temp/ prefix from relative path to avoid double nesting', () => {
+    const result = validateSavePath('.temp/KAN-27/file.png');
+    expect(result).toBe(resolve(tmpBase, 'KAN-27/file.png'));
+  });
+
+  it('accepts absolute path already under .temp/', () => {
+    const abs = resolve(tmpBase, 'downloads/img.png');
+    const result = validateSavePath(abs);
+    expect(result).toBe(abs);
   });
 
   it('rejects path with .. traversal', () => {
@@ -16,13 +29,12 @@ describe('validateSavePath', () => {
     expect(() => validateSavePath('output/../../../etc/passwd')).toThrow('path traversal');
   });
 
-  it('rejects path outside cwd and tmpdir', () => {
-    expect(() => validateSavePath('/etc/cron.d/evil')).toThrow('must be under working directory');
+  it('rejects absolute path outside working directory', () => {
+    expect(() => validateSavePath('/etc/cron.d/evil')).toThrow('absolute paths must be under working directory');
   });
 
-  it('returns normalized absolute path', () => {
-    const result = validateSavePath('./downloads/img.png');
-    expect(result).toBe(resolve('./downloads/img.png'));
-    expect(result.startsWith('/')).toBe(true);
+  it('resolves bare filename under .temp/', () => {
+    const result = validateSavePath('file.png');
+    expect(result).toBe(resolve(tmpBase, 'file.png'));
   });
 });

@@ -12,3 +12,6 @@ export const CREDENTIALS_PATH = join(PLUGIN_DATA_DIR, 'credentials.json');
 
 /** Runtime state file path */
 export const STATE_PATH = join(PLUGIN_DATA_DIR, 'state.json');
+
+/** Temporary download directory name (relative to cwd) */
+export const TEMP_DIR_NAME = '.temp';

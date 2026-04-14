@@ -3,6 +3,7 @@ export {
   CONFIG_PATH,
   CREDENTIALS_PATH,
   STATE_PATH,
+  TEMP_DIR_NAME,
 } from './paths.js';
 
 export {
