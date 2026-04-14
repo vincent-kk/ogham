@@ -155,7 +155,7 @@ for each link in manifest.links where status == "pending":
 | imbas-analyst | getConfluencePage, searchConfluenceUsingCql, getJiraIssue, searchJiraIssuesUsingJql | (없음) | Phase 1 검증 + Phase 2 역추론 |
 | imbas-planner | searchJiraIssuesUsingJql, getJiraIssue, getJiraProjectIssueTypesMetadata | createJiraIssue, createIssueLink | 스킬이 매니페스트 생성만 지시 |
 | imbas-engineer | getJiraIssue, getJiraIssueTypeMetaWithFields, searchJiraIssuesUsingJql | createJiraIssue, createIssueLink, addCommentToJiraIssue | 스킬이 매니페스트 생성만 지시 |
-| imbas-media | (없음) | (없음) | Atlassian MCP 도구 불필요 |
+| ~~imbas-media~~ | — | — | *migrated to `@ogham/atlassian`* |
 
 **핵심 원칙**: Phase 1-3 스킬은 원격 tracker에 쓰지 않음. 매니페스트만 생성. 실제 provider 쓰기(Jira/GitHub/local)는 `imbas:manifest`에서만 수행한다 (Plan-then-Execute 패턴). 에이전트가 쓰기 도구를 보유하더라도, 스킬 프롬프트가 매니페스트 생성만 지시하여 사용 시점을 제어함.
 

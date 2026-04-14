@@ -32,14 +32,12 @@ ogham (사전 가이드 시스템)
        │    ├── Core:  validate, split, devplan
        │    ├── Infra: setup, status
        │    ├── Exec:  manifest, digest
-       │    ├── Util:  `imbas:fetch-media`
        │    └── Internal: `imbas:read-issue`, cache
        │
-       ├── Agents (4개)
+       ├── Agents (3개)
        │    ├── imbas-analyst   — 문서 정합성 검증
        │    ├── imbas-planner   — Story 분할 (기획 관점)
-       │    ├── imbas-engineer  — Subtask/Task 생성 (개발 관점)
-       │    └── imbas-media     — 미디어 키프레임 분석
+       │    └── imbas-engineer  — Subtask/Task 생성 (개발 관점)
        │
        ├── Provider Abstraction
        │    ├── config.provider — "jira" | "github"
@@ -139,8 +137,8 @@ ogham (사전 가이드 시스템)
 | 결정 | 근거 |
 |------|------|
 | **scene-sieve CLI 통합** | `npx -y @lumy-pack/scene-sieve` — 설치 불필요, 자동 다운로드 |
-| **probe → extract → analyze 3단계** | probe로 최적 프리셋 결정 → extract로 키프레임 추출 → imbas-media로 의미 분석 |
-| **서브에이전트 격리** | 프레임 이미지(대용량)는 imbas-media 컨텍스트에서만 로드. 메인 에이전트는 analysis.json 텍스트만 소비 |
+| **probe → extract → analyze 3단계** | probe로 최적 프리셋 결정 → extract로 키프레임 추출 → atlassian media 에이전트로 의미 분석 (migrated to `@ogham/atlassian`) |
+| **서브에이전트 격리** | 프레임 이미지(대용량)는 atlassian media 에이전트 컨텍스트에서만 로드. 메인 에이전트는 analysis.json 텍스트만 소비 |
 | **프레임 경로 매핑** | analysis.json에 frame path 포함 → 특정 장면의 원본 프레임 직접 확인 가능 |
 
 → 상세: [SPEC-media.md](./specs/SPEC-media.md)
@@ -174,8 +172,8 @@ ogham (사전 가이드 시스템)
 | 4 | devplan | Core | `/imbas:imbas-devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
 | 5 | manifest | Exec | `/imbas:imbas-manifest` | — | *-manifest.json | Jira 이슈 |
 | 6 | status | Infra | `/imbas:imbas-status` | — | — | 상태 표시 |
-| 7 | `imbas:fetch-media` | Util | `/imbas:imbas-fetch-media` | imbas-media | URL/경로 | analysis.json |
-| 8 | digest | Exec | `/imbas:imbas-digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
+| ~~7~~ | ~~`imbas:fetch-media`~~ | — | `/atlassian:atlassian-media-analysis` | — | — | *migrated to `@ogham/atlassian`* |
+| 7 | digest | Exec | `/imbas:imbas-digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)
 
@@ -197,7 +195,7 @@ ogham (사전 가이드 시스템)
 | 1 | imbas-analyst | sonnet | 정합성 검증, 역추론 | validate, split |
 | 2 | imbas-planner | sonnet | Story 분할, INVEST 평가 | split |
 | 3 | imbas-engineer | opus | 코드 탐색, EARS Subtask, Task 추출 | devplan |
-| 4 | imbas-media | sonnet | 키프레임 의미 분석 | `imbas:fetch-media` |
+| ~~4~~ | ~~imbas-media~~ | — | *migrated to `@ogham/atlassian` as `media` agent* | — |
 
 → 상세: [SPEC-agents.md](./specs/SPEC-agents.md)
 

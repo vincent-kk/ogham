@@ -30,7 +30,7 @@ imbas 파이프라인은 **문제 공간**(Phase 1-2)과 **해법 공간**(Phase
 | **imbas-analyst** | 문서 정합성 검증, 역추론 검증 | Phase 1, Phase 2(검증) | sonnet |
 | **imbas-planner** | Story 분할, 사용자 가치 기반 서술 | Phase 2(분할) | sonnet |
 | **imbas-engineer** | 코드 탐색, Subtask/Task 생성 | Phase 3 | opus |
-| **imbas-media** | 미디어 키프레임 분석, 의미 추출 | 유틸리티 | sonnet |
+| ~~**imbas-media**~~ | *migrated to `@ogham/atlassian` as `media` agent* | — | — |
 
 ---
 
@@ -418,24 +418,12 @@ mode: default  # Plan-then-Execute: 에이전트는 매니페스트만 생성, p
 
 ---
 
-## 5. imbas-media — 미디어 분석 전문가
+## 5. ~~imbas-media~~ → `@ogham/atlassian` media agent
 
-### Identity
-
-```yaml
-name: imbas-media
-description: >
-  Analyzes extracted video/GIF keyframes using multimodal LLM capabilities.
-  Receives frame images from scene-sieve extraction, generates semantic descriptions
-  with frame path mappings, and returns structured analysis to the calling agent.
-model: sonnet
-```
-
-### Design Rationale
-
-- 동영상/GIF 분석은 **컨텍스트 집약적** — 수십 장의 프레임 이미지를 읽어야 함
-- main agent의 컨텍스트를 오염시키지 않기 위해 **서브에이전트로 격리**
-- 호출 패턴: `imbas:fetch-media` skill → scene-sieve 실행 → imbas-media 호출 → 분석 결과 반환
+> **Migrated** — 이 에이전트는 `@ogham/atlassian` 패키지로 이전되었습니다.
+> 새 위치: `packages/atlassian/agents/media.md`
+> 호출 스킬: `/atlassian:atlassian-media-analysis`
+> 커밋: 9c2c45c
 
 ### Workflow
 
@@ -532,9 +520,9 @@ mode: default  # 격리된 서브에이전트이지만, bypassPermissions는 권
     └── spawns imbas-engineer
          └── returns: devplan-manifest.json
 
-[imbas:fetch-media skill]
+[atlassian:atlassian-media-analysis skill] (migrated to @ogham/atlassian)
     ├── (skill 자체에서) scene-sieve 실행
-    └── spawns imbas-media (키프레임 분석)
+    └── spawns atlassian media agent (키프레임 분석)
          └── returns: analysis.json
 ```
 
@@ -543,5 +531,5 @@ mode: default  # 격리된 서브에이전트이지만, bypassPermissions는 권
 ## Related
 
 - [SPEC-skills.md](./SPEC-skills.md) — 에이전트를 호출하는 스킬 정의
-- [SPEC-media.md](./SPEC-media.md) — imbas-media 상세 워크플로우
+- [SPEC-media.md](./SPEC-media.md) — 미디어 분석 워크플로우 (migrated to @ogham/atlassian)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
