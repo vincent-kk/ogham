@@ -24,7 +24,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"",
-            "timeout": 3
+            "timeout": 2
           }
         ]
       },
@@ -34,7 +34,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/lifecycle-dispatcher.mjs\" UserPromptSubmit",
-            "timeout": 3
+            "timeout": 2
           }
         ]
       },
@@ -44,7 +44,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/vault-committer.mjs\" UserPromptSubmit",
-            "timeout": 5
+            "timeout": 3
           }
         ]
       },
@@ -54,7 +54,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/insight-injector.mjs\"",
-            "timeout": 3
+            "timeout": 2
           }
         ]
       }

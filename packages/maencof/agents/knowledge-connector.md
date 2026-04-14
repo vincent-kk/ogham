@@ -5,7 +5,7 @@ description: >
   across Layers. Analyzes semantic similarity, shared tags, and co-reference patterns to
   suggest and establish inter-document links that strengthen the knowledge graph.
   Trigger phrases: "connect knowledge", "find connections", "link documents", "suggest links",
-  "knowledge connector", "/maencof:maencof-connect".
+  "knowledge connector", "/maencof:maencof-suggest".
 model: sonnet
 tools:
   - Read
@@ -115,4 +115,4 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Skill Participation
 
-- `/maencof:maencof-connect` — full workflow entry point
+- `/maencof:maencof-suggest` — full workflow entry point
