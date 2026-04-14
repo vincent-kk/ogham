@@ -1,6 +1,6 @@
 ## Purpose
 
-Atlassian plugin source root. 6 MCP tools (HTTP + convert + setup), core infrastructure, and format converter.
+Atlassian plugin source root. 3 MCP tools (fetch + convert + setup), core infrastructure, and format converter.
 
 ## Structure
 
@@ -10,7 +10,7 @@ Atlassian plugin source root. 6 MCP tools (HTTP + convert + setup), core infrast
 | `constants/` | Paths, defaults, config constants |
 | `core/` | Config, auth, environment, HTTP client |
 | `converter/` | ADF/Storage Format ↔ Markdown |
-| `mcp/` | MCP server and 6 tool handlers |
+| `mcp/` | MCP server and 3 tool handlers |
 | `setup-ui/` | Local web server for auth setup |
 | `lib/` | Logger, file I/O |
 | `utils/` | URL helpers |

@@ -17,6 +17,6 @@ Metrics are calculated from issue changelog data, not a dedicated API.
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get changelog | `get` | Use expand=changelog for inline data |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get changelog | `fetch` | GET | Use expand=changelog for inline data |

@@ -9,7 +9,7 @@
 | Get sprint | GET | `/rest/agile/1.0/sprint/{sprintId}` |
 | Sprint issues | GET | `/rest/agile/1.0/sprint/{sprintId}/issue` |
 | Create sprint | POST | `/rest/agile/1.0/sprint` |
-| Update sprint | PUT | `/rest/agile/1.0/sprint/{sprintId}` |
+| Update sprint | PATCH | `/rest/agile/1.0/sprint/{sprintId}` |
 | Move to sprint | POST | `/rest/agile/1.0/sprint/{sprintId}/issue` |
 | Get epic | GET | `/rest/agile/1.0/epic/{epicId}` |
 | Epic issues | GET | `/rest/agile/1.0/epic/{epicId}/issue` |
@@ -25,9 +25,9 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List/Get | `get` | |
-| Create | `post` | |
-| Update | `put` | |
-| Move issues | `post` | Issues array in body |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List/Get | `fetch` | GET | |
+| Create | `fetch` | POST | |
+| Update sprint | `fetch` | PATCH | Partial update |
+| Move issues | `fetch` | POST | Issues array in body |

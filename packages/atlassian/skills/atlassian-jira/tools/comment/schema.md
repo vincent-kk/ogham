@@ -21,9 +21,9 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List/Get | `get` | |
-| Add | `post` | Use content_format: "markdown" |
-| Update | `put` | |
-| Delete | `delete` | |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List/Get | `fetch` | GET | |
+| Add | `fetch` | POST | Use content_format: "markdown" |
+| Update | `fetch` | PUT | |
+| Delete | `fetch` | DELETE | |

@@ -31,7 +31,7 @@
 ### Jira Attachment Upload
 
 ```
-Tool: post
+Tool: fetch (method: POST)
 Params:
   endpoint: /rest/api/{version}/issue/{key}/attachments
   content_type: "multipart/form-data"
@@ -41,7 +41,7 @@ Params:
 ### Confluence Attachment Upload
 
 ```
-Tool: post
+Tool: fetch (method: POST)
 Params:
   endpoint: /rest/api/content/{pageId}/child/attachment
   content_type: "multipart/form-data"
@@ -52,4 +52,4 @@ Params:
 
 - Max file size: 50MB (configurable per instance)
 - MIME type: auto-detected
-- `X-Atlassian-Token: nocheck` header auto-added by post tool for multipart
+- `X-Atlassian-Token: nocheck` header auto-added by fetch tool for multipart

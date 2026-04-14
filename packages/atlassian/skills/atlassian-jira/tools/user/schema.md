@@ -13,6 +13,6 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| All operations | `get` | Read-only |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| All operations | `fetch` | GET | Read-only |

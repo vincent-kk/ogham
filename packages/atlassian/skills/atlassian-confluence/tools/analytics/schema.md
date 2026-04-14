@@ -15,6 +15,6 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get views | `get` | Cloud only |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get views | `fetch` | GET | Cloud only |

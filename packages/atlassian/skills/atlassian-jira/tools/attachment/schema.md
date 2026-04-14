@@ -14,8 +14,8 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get metadata | `get` | Via issue fields |
-| Upload | `post` | content_type: "multipart/form-data" |
-| Download | `get` | accept_format: "raw", use atlassian-download skill |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get metadata | `fetch` | GET | Via issue fields |
+| Upload | `fetch` | POST | content_type: "multipart/form-data" |
+| Download | `fetch` | GET | accept_format: "raw", use atlassian-download skill |

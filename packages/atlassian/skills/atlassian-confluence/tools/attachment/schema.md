@@ -9,9 +9,9 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List | `get` | |
-| Upload | `post` | content_type: "multipart/form-data" |
-| Delete | `delete` | |
-| Download | `get` | accept_format: "raw", use atlassian-download |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List | `fetch` | GET | |
+| Upload | `fetch` | POST | content_type: "multipart/form-data" |
+| Delete | `fetch` | DELETE | |
+| Download | `fetch` | GET | accept_format: "raw", use atlassian-download |

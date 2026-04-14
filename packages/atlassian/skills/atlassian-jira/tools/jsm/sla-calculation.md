@@ -3,7 +3,7 @@
 ## Get SLA Info
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /rest/servicedeskapi/request/{issueIdOrKey}/sla
 ```
 

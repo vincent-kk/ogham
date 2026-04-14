@@ -12,7 +12,7 @@ This plugin fully replaces the existing `mcp-atlassian` Python MCP server with a
 
 | Problem (Python Server) | Solution (This Plugin) |
 |---|---|
-| 50+ individual MCP tools cause tool bloat and waste LLM context | 4 generic HTTP tools (`get`, `post`, `put`, `delete`) + `convert` utility + `setup` tool |
+| 50+ individual MCP tools cause tool bloat and waste LLM context | 1 generic HTTP tool (`fetch` with method param) + `convert` utility + `setup` tool |
 | No domain knowledge — LLM must reconstruct complex workflows every time | Agent layer embeds domain expertise (Jira/Confluence) |
 | Cloud/Server branching leaks into caller | MCP layer absorbs all environment differences |
 | Format conversion (ADF/Wiki/Storage) exposed to caller | MCP layer handles all bidirectional Markdown conversion |
@@ -33,10 +33,7 @@ Claude Code Main Agent (= Dispatcher, no separate implementation)
     +-- Skill: atlassian-confluence   (Confluence API domain router)
     |
     +-- MCP Server "tools"
-            +-- get       (HTTP GET)
-            +-- post      (HTTP POST)
-            +-- put       (HTTP PUT)
-            +-- delete    (HTTP DELETE)
+            +-- fetch     (HTTP GET/POST/PUT/PATCH/DELETE)
             +-- convert   (ADF/Storage/Wiki <-> Markdown)
             +-- setup     (local web server auth setup)
 ```
@@ -89,7 +86,7 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 | Agent | No prefix | `jira`, `confluence` |
 | Skill | Plugin name prefix | `atlassian-setup`, `atlassian-jira`, `atlassian-confluence`, `atlassian-download` |
 | MCP server name | `tools` | `.mcp.json` key: `"tools"` |
-| MCP tool name | No prefix | `get`, `post`, `put`, `delete`, `convert`, `setup` |
+| MCP tool name | No prefix | `fetch`, `convert`, `setup` |
 
 ---
 
@@ -115,7 +112,7 @@ Read documents in the following order for a complete understanding:
 | 1 | [INDEX.md](INDEX.md) | ARCH | This file — overview and reading guide |
 | 2 | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure |
 | 3 | [auth-ui.md](auth-ui.md) | ARCH | Setup web server + HTML form design |
-| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 6 MCP tools (get/post/put/delete/convert/setup) |
+| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 3 MCP tools (fetch/convert/setup) |
 | 5 | [dev/skills.md](dev/skills.md) | DEV | 4 Skills + tools/ reference mapping |
 | 6 | [dev/agents.md](dev/agents.md) | DEV | 2 Agents (jira, confluence) |
 

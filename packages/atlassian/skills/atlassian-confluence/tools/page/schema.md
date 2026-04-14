@@ -24,9 +24,9 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get | `get` | expand=body.storage,version |
-| Create | `post` | content_format: "markdown" |
-| Update | `put` | Must include version.number |
-| Delete | `delete` | Confirm if child pages exist |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get | `fetch` | GET | expand=body.storage,version |
+| Create | `fetch` | POST | content_format: "markdown" |
+| Update | `fetch` | PUT | Must include version.number |
+| Delete | `fetch` | DELETE | Confirm if child pages exist |

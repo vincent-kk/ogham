@@ -3,14 +3,14 @@
 ## Get Forms for Request
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /rest/servicedeskapi/request/{issueIdOrKey}/form
 ```
 
 ## Submit Form Answer
 
 ```
-Tool: put
+Tool: fetch (method: PUT)
 Endpoint: /rest/servicedeskapi/request/{issueIdOrKey}/form/{formId}
 Body: { "answers": { "questionId": "answer value" } }
 ```

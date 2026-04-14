@@ -22,7 +22,7 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Search (Cloud) | `post` | JQL in request body |
-| Search (Server) | `get` | JQL in query_params |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Search (Cloud) | `fetch` | POST | JQL in request body |
+| Search (Server) | `fetch` | GET | JQL in query_params |

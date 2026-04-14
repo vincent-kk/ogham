@@ -1,13 +1,10 @@
 # MCP Tools
 
-All Atlassian operations route through these 6 MCP tools:
+All Atlassian operations route through these 3 MCP tools:
 
 | Tool | HTTP Method | Purpose |
 |---|---|---|
-| `get` | GET | Read operations — retrieve resources, search, list |
-| `post` | POST | Create operations — new resources, bulk create |
-| `put` | PUT | Update operations — modify existing resources |
-| `delete` | DELETE | Delete operations — remove resources |
+| `fetch` | GET/POST/PUT/PATCH/DELETE | HTTP requests — resource retrieval, creation, modification, deletion |
 | `convert` | — | ADF / Storage Format ↔ Markdown conversion |
 | `setup` | — | Authentication and connection configuration |
 
@@ -15,13 +12,13 @@ All Atlassian operations route through these 6 MCP tools:
 
 | Skill | Tools Used |
 |---|---|
-| `atlassian-jira` | `get`, `post`, `put`, `delete` |
-| `atlassian-confluence` | `get`, `post`, `put`, `delete`, `convert` |
-| `atlassian-download` | `get` (with `accept_format: "raw"` for binary) |
+| `atlassian-jira` | `fetch` |
+| `atlassian-confluence` | `fetch`, `convert` |
+| `atlassian-download` | `fetch` (with `method: "GET"` and `accept_format: "raw"`) |
 | `atlassian-setup` | `setup` |
 
 ## Multipart Upload
 
-For attachment uploads via `post`:
+For attachment uploads via `fetch` with `method: "POST"`:
 - `content_type: "multipart/form-data"` — set in tool params
-- `X-Atlassian-Token: nocheck` — auto-added by the post tool for multipart requests (not caller responsibility)
+- `X-Atlassian-Token: nocheck` — auto-added by the fetch tool for multipart requests (not caller responsibility)

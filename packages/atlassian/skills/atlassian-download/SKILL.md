@@ -24,7 +24,7 @@ Unified attachment download for both Jira and Confluence.
 ### Download Attachment
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Params:
   endpoint: <attachment URL or API path>
   accept_format: "raw"
@@ -33,7 +33,7 @@ Params:
 ### Get Attachment Metadata (Jira)
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Params:
   endpoint: /rest/api/{version}/issue/{issueKey}
   query_params: { fields: "attachment" }
@@ -42,7 +42,7 @@ Params:
 ### Get Attachment Metadata (Confluence)
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Params:
   endpoint: /wiki/rest/api/content/{pageId}/child/attachment
 ```
@@ -58,6 +58,6 @@ Params:
 ## References
 
 - `../_shared/error-handling.md` — HTTP error handling protocol
-- `../_shared/mcp-tools.md` — Available MCP tools (uses `get` with `accept_format: "raw"`)
+- `../_shared/mcp-tools.md` — Available MCP tools (uses `fetch` with `method: "GET"` and `accept_format: "raw"`)
 - `references/download-flow.md` — Detailed download and upload specs
 - `references/errors.md` — Download-specific error handling

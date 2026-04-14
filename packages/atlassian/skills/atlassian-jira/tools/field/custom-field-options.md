@@ -3,14 +3,14 @@
 ## List Options
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /rest/api/3/field/{fieldId}/context/{contextId}/option
 ```
 
 ## Create Option
 
 ```
-Tool: post
+Tool: fetch (method: POST)
 Endpoint: /rest/api/3/field/{fieldId}/context/{contextId}/option
 Body: { "options": [{ "value": "New Option" }] }
 ```

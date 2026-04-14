@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { encrypt, decrypt, getEncryptionKey, buildAuthHeader } from '../utils/index.js';
+import { buildAuthHeader } from '../utils/index.js';
 import { loadCredentials, saveCredentials } from '../core/auth-manager/index.js';
 import type { ServiceCredentials } from '../types/index.js';
 
 const TEST_DIR = join(tmpdir(), 'atlassian-test-auth-' + Date.now());
-const CRED_PATH = join(TEST_DIR, 'credentials.enc');
+const CRED_PATH = join(TEST_DIR, 'credentials.json');
 
 beforeEach(async () => {
   await mkdir(TEST_DIR, { recursive: true });
@@ -17,35 +17,29 @@ afterEach(async () => {
   await rm(TEST_DIR, { recursive: true, force: true });
 });
 
-describe('credential-store', () => {
-  it('encrypts and decrypts data round-trip', () => {
-    const key = getEncryptionKey();
-    const plaintext = '{"token": "secret-value"}';
-    const encrypted = encrypt(plaintext, key);
-    const decrypted = decrypt(encrypted, key);
-    expect(decrypted).toBe(plaintext);
+describe('credential-store (plain JSON)', () => {
+  it('saves and reads plain JSON credentials', async () => {
+    const data = { jira: { basic: { api_token: 'test-token' } } };
+    await saveCredentials(data, CRED_PATH);
+    const loaded = await loadCredentials(CRED_PATH);
+    expect(loaded).toEqual(data);
   });
 
-  it('produces different ciphertext for same plaintext (random IV)', () => {
-    const key = getEncryptionKey();
-    const plaintext = 'same data';
-    const a = encrypt(plaintext, key);
-    const b = encrypt(plaintext, key);
-    expect(a.equals(b)).toBe(false);
+  it('produces human-readable JSON file', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const data = { jira: { basic: { api_token: 'readable' } } };
+    await saveCredentials(data, CRED_PATH);
+    const raw = await readFile(CRED_PATH, 'utf-8');
+    expect(JSON.parse(raw)).toEqual(data);
+    expect(raw).toContain('"api_token": "readable"');
   });
 
-  it('fails to decrypt with wrong key', () => {
-    const key = getEncryptionKey();
-    const wrongKey = Buffer.alloc(32, 0xff);
-    const encrypted = encrypt('secret', key);
-    expect(() => decrypt(encrypted, wrongKey)).toThrow();
-  });
 });
 
 describe('auth-manager', () => {
   describe('loadCredentials / saveCredentials', () => {
     it('returns empty object when file does not exist', async () => {
-      const creds = await loadCredentials(join(TEST_DIR, 'missing.enc'));
+      const creds = await loadCredentials(join(TEST_DIR, 'missing.json'));
       expect(creds).toEqual({});
     });
 

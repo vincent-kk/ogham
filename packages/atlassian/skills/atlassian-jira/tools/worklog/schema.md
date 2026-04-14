@@ -15,7 +15,7 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List | `get` | |
-| Add | `post` | |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List | `fetch` | GET | |
+| Add | `fetch` | POST | |

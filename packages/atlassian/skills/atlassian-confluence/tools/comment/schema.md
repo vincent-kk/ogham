@@ -13,7 +13,7 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List | `get` | |
-| Add | `post` | content_format: "markdown" |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List | `fetch` | GET | |
+| Add | `fetch` | POST | content_format: "markdown" |

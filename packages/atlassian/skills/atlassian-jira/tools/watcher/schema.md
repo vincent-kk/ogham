@@ -8,8 +8,8 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get | `get` | |
-| Add | `post` | Body: accountId string (Cloud) or username (Server) |
-| Remove | `delete` | Via query parameter |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get | `fetch` | GET | |
+| Add | `fetch` | POST | Body: accountId string (Cloud) or username (Server) |
+| Remove | `fetch` | DELETE | Via query parameter |

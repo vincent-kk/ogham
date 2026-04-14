@@ -3,21 +3,21 @@
 ## Get Ancestors (Breadcrumb)
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /wiki/rest/api/content/{id}?expand=ancestors
 ```
 
 ## Get Descendants
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /wiki/rest/api/content/{id}/descendant/page
 ```
 
 ## Get Child Pages (Direct)
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Cloud V1: /wiki/rest/api/content/{id}/child/page
 Cloud V2: /api/v2/pages/{id}/children
 ```
@@ -25,7 +25,7 @@ Cloud V2: /api/v2/pages/{id}/children
 ## Move Page
 
 ```
-Tool: put
+Tool: fetch (method: PUT)
 Endpoint: /wiki/rest/api/content/{id}/move/{position}/{targetId}
 ```
 

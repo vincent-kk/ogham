@@ -76,13 +76,13 @@ Issue CRUD, bulk create, and changelog operations.
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get issue | `get` | |
-| Create issue | `post` | |
-| Update issue | `put` | |
-| Delete issue | `delete` | |
-| Bulk create | `post` | POST to `/issue/bulk` |
-| Get changelog | `get` | GET to `/issue/{key}/changelog` |
-| Get create metadata | `get` | GET to `/issue/createmeta` |
-| Assign issue | `put` | PUT to `/issue/{key}/assignee` |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get issue | `fetch` | GET | |
+| Create issue | `fetch` | POST | |
+| Update issue | `fetch` | PUT | |
+| Delete issue | `fetch` | DELETE | |
+| Bulk create | `fetch` | POST | POST to `/issue/bulk` |
+| Get changelog | `fetch` | GET | GET to `/issue/{key}/changelog` |
+| Get create metadata | `fetch` | GET | GET to `/issue/createmeta` |
+| Assign issue | `fetch` | PUT | PUT to `/issue/{key}/assignee` |

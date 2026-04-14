@@ -10,8 +10,8 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get types/remote | `get` | |
-| Create | `post` | |
-| Delete | `delete` | |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get types/remote | `fetch` | GET | |
+| Create | `fetch` | POST | |
+| Delete | `fetch` | DELETE | |

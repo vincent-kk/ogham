@@ -15,6 +15,6 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Search | `get` | CQL in query_params |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Search | `fetch` | GET | CQL in query_params |

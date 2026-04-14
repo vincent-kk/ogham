@@ -9,7 +9,7 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| List/Get | `get` | |
-| Submit form | `put` | |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| List/Get | `fetch` | GET | |
+| Submit form | `fetch` | PUT | |

@@ -16,7 +16,7 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get transitions | `get` | Query available transitions first |
-| Do transition | `post` | Must include transition.id |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get transitions | `fetch` | GET | Query available transitions first |
+| Do transition | `fetch` | POST | Must include transition.id |

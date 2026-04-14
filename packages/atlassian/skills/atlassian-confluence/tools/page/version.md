@@ -9,14 +9,14 @@
 ## Get Version History
 
 ```
-Tool: get
+Tool: fetch (method: GET)
 Endpoint: /wiki/rest/api/content/{id}/version
 ```
 
 ## Restore Version
 
 ```
-Tool: post
+Tool: fetch (method: POST)
 Endpoint: /wiki/rest/api/content/{id}/version
 Body: { "operationKey": "restore", "params": { "versionNumber": N } }
 ```

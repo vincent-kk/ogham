@@ -112,18 +112,9 @@ packages/atlassian/
 │   │   │   └── server-entry.ts  # CJS entry point
 │   │   └── tools/
 │   │       ├── index.ts
-│   │       ├── get/
+│   │       ├── fetch/
 │   │       │   ├── index.ts
-│   │       │   └── get.ts       # HTTP GET tool
-│   │       ├── post/
-│   │       │   ├── index.ts
-│   │       │   └── post.ts      # HTTP POST tool
-│   │       ├── put/
-│   │       │   ├── index.ts
-│   │       │   └── put.ts       # HTTP PUT/PATCH tool
-│   │       ├── delete/
-│   │       │   ├── index.ts
-│   │       │   └── delete.ts    # HTTP DELETE tool
+│   │       │   └── fetch.ts     # HTTP GET/POST/PUT/PATCH/DELETE tool
 │   │       ├── convert/
 │   │       │   ├── index.ts
 │   │       │   └── convert.ts   # Format conversion tool
@@ -214,7 +205,7 @@ packages/atlassian/
 ```
 
 **Notes**:
-- Single MCP server named `"tools"` — all 6 tools (get, post, put, delete, convert, setup) are registered under this server
+- Single MCP server named `"tools"` — all 3 tools (fetch, convert, setup) are registered under this server
 - Uses CJS bundle via bridge for Node.js compatibility
 - `${CLAUDE_PLUGIN_ROOT}` is resolved by Claude Code at runtime
 
@@ -225,7 +216,7 @@ packages/atlassian/
 ```
 ~/.claude/plugins/atlassian/
 ├── config.json          # Non-secret settings (base_url, auth_type, is_cloud)
-├── credentials.enc      # Encrypted credential storage
+├── credentials.json     # Credential storage (plain JSON, user-editable)
 └── state.json           # Runtime state (OAuth token cache, API version detection)
 ```
 
@@ -253,7 +244,7 @@ packages/atlassian/
 }
 ```
 
-### credentials.enc (Decrypted Structure)
+### credentials.json
 
 ```json
 {
@@ -275,7 +266,7 @@ packages/atlassian/
 ```
 
 **Security**:
-- Encryption via platform keychain (macOS Keychain, Windows Credential Manager, Linux Secret Service) or AES-256 symmetric encryption
+- Plain JSON stored locally — user-editable for manual configuration
 - Secrets (`api_token`, `password`, `personal_token`, `access_token`, `refresh_token`, `client_secret`) are NEVER stored in `config.json`
 - Tokens are NEVER exposed to LLM context
 

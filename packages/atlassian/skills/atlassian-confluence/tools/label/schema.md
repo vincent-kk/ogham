@@ -8,8 +8,8 @@
 
 ## MCP Tool Mapping
 
-| Operation | MCP Tool | Notes |
-|---|---|---|
-| Get | `get` | |
-| Add | `post` | Body: [{ "name": "label" }] |
-| Remove | `delete` | |
+| Operation | MCP Tool | Method | Notes |
+|---|---|---|---|
+| Get | `fetch` | GET | |
+| Add | `fetch` | POST | Body: [{ "name": "label" }] |
+| Remove | `fetch` | DELETE | |

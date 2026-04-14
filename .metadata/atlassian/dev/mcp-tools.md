@@ -8,14 +8,11 @@
 
 ## 1. Overview
 
-The MCP layer exposes 6 tools under a single server named `"tools"`:
+The MCP layer exposes 3 tools under a single server named `"tools"`:
 
 | Tool | Type | Description |
 |---|---|---|
-| `get` | HTTP | Resource retrieval, GET-based search (CQL) |
-| `post` | HTTP | Resource creation, POST-based search (JQL Cloud), file upload |
-| `put` | HTTP | Resource modification (PUT or PATCH) |
-| `delete` | HTTP | Resource deletion |
+| `fetch` | HTTP | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
 | `convert` | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion |
 | `setup` | Local | Local web server for auth/connection setup |
 
@@ -52,78 +49,38 @@ interface McpResponse {
 
 ## 3. Tool Definitions
 
-### 3.1 `get` — HTTP GET
+### 3.1 `fetch` — HTTP Request
+
+Unified HTTP tool supporting all methods via the `method` parameter.
 
 | Category | Parameter | Type | Required | Description |
 |---|---|---|---|---|
-| **Skill-injected** | `endpoint` | `string` | Y | API path (e.g., `/rest/api/3/issue/PROJ-123`) |
+| **Skill-injected** | `method` | `"GET" \| "POST" \| "PUT" \| "PATCH" \| "DELETE"` | Y | HTTP method |
+| | `endpoint` | `string` | Y | API path (e.g., `/rest/api/3/issue/PROJ-123`) |
+| | `body` | `object` | N | Request body (POST/PUT/PATCH only) |
 | | `query_params` | `Record<string, string>` | N | URL query parameters |
-| | `expand` | `string[]` | N | Response expansion fields |
+| | `expand` | `string[]` | N | Response expansion fields (GET only) |
 | | `headers` | `Record<string, string>` | N | Additional request headers |
-| | `accept_format` | `"json" \| "raw"` | N | Response format (default: `"json"`) |
+| | `accept_format` | `"json" \| "raw"` | N | Response format (default: `"json"`, GET only) |
+| | `content_type` | `string` | N | Body content type override (POST only) |
+| | `content_format` | `"json" \| "markdown"` | N | Body content format hint (POST/PUT/PATCH only) |
 | **MCP auto-injected** | `base_url` | `string` | — | From config, prepended to endpoint |
 | | `Authorization` | `string` | — | From stored credentials |
-| | `Content-Type` | `string` | — | `application/json` (default) |
 
-**Response processing**:
-- If response body contains ADF content and `accept_format` is `"json"`, automatically convert to Markdown
-- If `accept_format` is `"raw"`, return original body (binary downloads, etc.)
-- `expand` parameter is joined as `expand=field1,field2` in query string
+**Method-specific behavior**:
 
----
+- **GET**: `expand` joined as `expand=field1,field2` in query string. ADF auto-converted to Markdown unless `accept_format: "raw"`.
+- **POST**: If `content_format: "markdown"`, body Markdown fields converted to ADF. If `content_type: "multipart/form-data"`, `X-Atlassian-Token: nocheck` auto-added. POST-based searches (JQL Cloud: `POST /rest/api/3/search/jql`) use this method.
+- **PUT/PATCH**: If `content_format: "markdown"`, body converted to ADF (Jira) or Storage Format (Confluence, detected by endpoint).
+- **DELETE**: Returns `{ success: true, status: 204, data: null }` on success.
 
-### 3.2 `post` — HTTP POST
+**Validation**: `body` on GET/DELETE throws an error. Invalid method+param combinations are rejected early.
 
-| Category | Parameter | Type | Required | Description |
-|---|---|---|---|---|
-| **Skill-injected** | `endpoint` | `string` | Y | API path (e.g., `/rest/api/3/issue`) |
-| | `body` | `object` | Y | Request body (JSON) |
-| | `headers` | `Record<string, string>` | N | Additional request headers |
-| | `content_type` | `string` | N | Body content type override |
-| | `content_format` | `"json" \| "markdown"` | N | Body content format hint |
-| **MCP auto-injected** | `base_url` | `string` | — | From config |
-| | `Authorization` | `string` | — | From stored credentials |
-
-**Body processing**:
-- If `content_format: "markdown"` hint is present, MCP converts Markdown content in body to ADF before sending
-- If `content_type` is `multipart/form-data`, operates in file upload mode with automatic `X-Atlassian-Token: nocheck` header
-- POST-based searches (JQL Cloud: `POST /rest/api/3/search/jql`) use this tool
+**Annotations**: `readOnlyHint: false, destructiveHint: false, idempotentHint: false` (conservative — behavior varies by method).
 
 ---
 
-### 3.3 `put` — HTTP PUT/PATCH
-
-| Category | Parameter | Type | Required | Description |
-|---|---|---|---|---|
-| **Skill-injected** | `endpoint` | `string` | Y | API path |
-| | `body` | `object` | Y | Fields to update (JSON) |
-| | `method` | `"PUT" \| "PATCH"` | N | HTTP method (default: `"PUT"`) |
-| | `headers` | `Record<string, string>` | N | Additional request headers |
-| | `content_format` | `"json" \| "markdown"` | N | Body content format hint |
-| **MCP auto-injected** | `base_url` | `string` | — | From config |
-| | `Authorization` | `string` | — | From stored credentials |
-
-**Body processing**:
-- If `content_format: "markdown"`, converts Markdown content to ADF or Storage Format
-- Confluence page updates: Skill includes `version.number` in body; MCP passes it through
-
----
-
-### 3.4 `delete` — HTTP DELETE
-
-| Category | Parameter | Type | Required | Description |
-|---|---|---|---|---|
-| **Skill-injected** | `endpoint` | `string` | Y | API path |
-| | `query_params` | `Record<string, string>` | N | Delete options (e.g., `deleteSubtasks=true`) |
-| | `headers` | `Record<string, string>` | N | Additional request headers |
-| **MCP auto-injected** | `base_url` | `string` | — | From config |
-| | `Authorization` | `string` | — | From stored credentials |
-
-**Response**: Success: `{ success: true, status: 204, data: null }`, Failure: standard error envelope
-
----
-
-### 3.5 `convert` — Format Conversion Utility
+### 3.2 `convert` — Format Conversion Utility
 
 **Not an HTTP tool.** Pure local conversion function.
 
@@ -150,7 +107,7 @@ interface McpResponse {
 
 ---
 
-### 3.6 `setup` — Auth/Connection Setup
+### 3.3 `setup` — Auth/Connection Setup
 
 **Not an HTTP tool.** Launches a local web server for auth configuration.
 
@@ -186,7 +143,7 @@ interface PaginationConfig {
 ```
 
 **Flow**:
-1. Skill optionally includes `pagination` parameter in `get`/`post` call
+1. Skill optionally includes `pagination` parameter in `fetch` call
 2. `mode: "auto"` → MCP decides based on `is_cloud` config
 3. MCP extracts `nextPageToken`, `startAt`, `total` from response
 4. Normalized into standard `pagination` response field
@@ -249,7 +206,7 @@ interface RetryPolicy {
 
 ### Read-Only Mode
 
-When `READ_ONLY_MODE` is enabled, `post`, `put`, `delete` calls return:
+When `READ_ONLY_MODE` is enabled, `fetch` calls with POST/PUT/PATCH/DELETE methods return:
 
 ```json
 {
@@ -281,7 +238,7 @@ Error responses that might contain token information must mask all credential va
 
 ### `search` Tool Non-existence
 
-There is NO dedicated `search` tool. Search operations use existing HTTP tools:
-- Jira search (Cloud): `post` — `POST /rest/api/3/search/jql` with JQL in body
-- Jira search (Server): `get` — `GET /rest/api/2/search?jql=...`
-- Confluence search: `get` — `GET /wiki/rest/api/content/search?cql=...`
+There is NO dedicated `search` tool. Search operations use the `fetch` tool:
+- Jira search (Cloud): `fetch` (method: POST) — `POST /rest/api/3/search/jql` with JQL in body
+- Jira search (Server): `fetch` (method: GET) — `GET /rest/api/2/search?jql=...`
+- Confluence search: `fetch` (method: GET) — `GET /wiki/rest/api/content/search?cql=...`

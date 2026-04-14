@@ -13,10 +13,7 @@ import { loadConfig } from "../../core/config-manager/index.js";
 import { getAuthHeader } from "../../core/auth-manager/index.js";
 import type { HttpClientConfig } from "../../core/http-client/index.js";
 import { wrapHandler } from "../shared/shared.js";
-import { handleGet } from "../tools/get/index.js";
-import { handlePost } from "../tools/post/index.js";
-import { handlePut } from "../tools/put/index.js";
-import { handleDelete } from "../tools/delete/index.js";
+import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
 
@@ -59,52 +56,20 @@ export function createServer(): McpServer {
     version: VERSION,
   });
 
-  // --- get ---
+  // --- fetch ---
   server.registerTool(
-    "get",
+    "fetch",
     {
-      description: "HTTP GET — resource retrieval, search",
+      description:
+        "HTTP request — supports GET, POST, PUT, PATCH, DELETE for Atlassian REST APIs",
       inputSchema: z.object({
+        method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
         endpoint: z.string(),
+        body: z.unknown().optional(),
         query_params: z.record(z.string()).optional(),
         expand: z.array(z.string()).optional(),
         headers: z.record(z.string()).optional(),
         accept_format: z.enum(["json", "raw"]).optional(),
-      }),
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-      },
-    },
-    wrapHandler(
-      async (args: {
-        endpoint: string;
-        query_params?: Record<string, string>;
-        expand?: string[];
-        headers?: Record<string, string>;
-        accept_format?: "json" | "raw";
-      }) => {
-        const service = detectService(args.endpoint);
-        const config = await buildClientConfig(service);
-        if (!config)
-          throw new Error(
-            `No ${service} configuration found. Run setup first.`,
-          );
-        return handleGet(args, config);
-      },
-    ),
-  );
-
-  // --- post ---
-  server.registerTool(
-    "post",
-    {
-      description: "HTTP POST — resource creation, search (JQL)",
-      inputSchema: z.object({
-        endpoint: z.string(),
-        body: z.unknown(),
-        headers: z.record(z.string()).optional(),
         content_type: z.string().optional(),
         content_format: z.enum(["json", "markdown"]).optional(),
       }),
@@ -116,9 +81,13 @@ export function createServer(): McpServer {
     },
     wrapHandler(
       async (args: {
+        method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
         endpoint: string;
         body?: unknown;
+        query_params?: Record<string, string>;
+        expand?: string[];
         headers?: Record<string, string>;
+        accept_format?: "json" | "raw";
         content_type?: string;
         content_format?: "json" | "markdown";
       }) => {
@@ -128,77 +97,7 @@ export function createServer(): McpServer {
           throw new Error(
             `No ${service} configuration found. Run setup first.`,
           );
-        return handlePost({ ...args, body: args.body }, config);
-      },
-    ),
-  );
-
-  // --- put ---
-  server.registerTool(
-    "put",
-    {
-      description: "HTTP PUT/PATCH — resource modification",
-      inputSchema: z.object({
-        endpoint: z.string(),
-        body: z.unknown(),
-        method: z.enum(["PUT", "PATCH"]).optional(),
-        headers: z.record(z.string()).optional(),
-        content_format: z.enum(["json", "markdown"]).optional(),
-      }),
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-      },
-    },
-    wrapHandler(
-      async (args: {
-        endpoint: string;
-        body?: unknown;
-        method?: "PUT" | "PATCH";
-        headers?: Record<string, string>;
-        content_format?: "json" | "markdown";
-      }) => {
-        const service = detectService(args.endpoint);
-        const config = await buildClientConfig(service);
-        if (!config)
-          throw new Error(
-            `No ${service} configuration found. Run setup first.`,
-          );
-        return handlePut({ ...args, body: args.body }, config);
-      },
-    ),
-  );
-
-  // --- delete ---
-  server.registerTool(
-    "delete",
-    {
-      description: "HTTP DELETE — resource deletion",
-      inputSchema: z.object({
-        endpoint: z.string(),
-        query_params: z.record(z.string()).optional(),
-        headers: z.record(z.string()).optional(),
-      }),
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        idempotentHint: false,
-      },
-    },
-    wrapHandler(
-      async (args: {
-        endpoint: string;
-        query_params?: Record<string, string>;
-        headers?: Record<string, string>;
-      }) => {
-        const service = detectService(args.endpoint);
-        const config = await buildClientConfig(service);
-        if (!config)
-          throw new Error(
-            `No ${service} configuration found. Run setup first.`,
-          );
-        return handleDelete(args, config);
+        return handleFetch(args, config);
       },
     ),
   );
