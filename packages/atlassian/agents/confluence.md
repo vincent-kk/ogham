@@ -3,7 +3,10 @@ name: confluence
 description: "Confluence domain expert — page CRUD, CQL search, comments, attachments, and version management. Orchestrates atlassian-confluence and atlassian-download skills."
 model: sonnet
 tools:
-  - mcp: tools
+  - mcp_tools_fetch
+  - mcp_tools_convert
+  - mcp_tools_auth-check
+  - mcp_tools_setup
 maxTurns: 30
 ---
 

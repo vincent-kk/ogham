@@ -3,7 +3,10 @@ name: jira
 description: "Jira domain expert — issue CRUD, JQL search, transitions, sprints, comments, and field formatting. Orchestrates atlassian-jira and atlassian-download skills."
 model: sonnet
 tools:
-  - mcp: tools
+  - mcp_tools_fetch
+  - mcp_tools_convert
+  - mcp_tools_auth-check
+  - mcp_tools_setup
 maxTurns: 30
 ---
 
