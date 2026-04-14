@@ -33,7 +33,11 @@ export type {
   McpError,
   Pagination,
   McpResponse,
+  HttpClientConfig,
+  RequestOptions,
 } from './http.js';
+
+export type { FetchParams, AssetFetchParams } from './fetch.js';
 
 export { TokenPayloadSchema } from './auth.js';
 export type { TokenPayload } from './auth.js';
@@ -55,6 +59,9 @@ export type {
   SetupStatus,
   ConnectionTestResult,
   SetupServerHandle,
+  TestConnectionParams,
+  SetupParams,
+  SetupResult,
 } from './setup.js';
 
 export {

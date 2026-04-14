@@ -17,4 +17,5 @@ export {
   ERROR_CODE_MAP,
   SERVER_ERROR_CODE,
   CLOUD_HOSTNAME_PATTERN,
+  CONNECTION_TEST_TIMEOUT,
 } from './defaults.js';

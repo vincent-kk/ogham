@@ -1,14 +1,10 @@
 import { loadConfig } from '../../../core/config-manager/index.js';
 import { loadCredentials } from '../../../core/auth-manager/index.js';
-import { testConnection } from '../../shared/index.js';
+import { testConnection } from '../../../core/index.js';
 import type { AuthCheckResult, AuthCheckServiceEntry } from '../../../types/index.js';
 
-interface AuthCheckParams {
-  connection_test?: boolean;
-}
-
 /** Auth-check tool handler — reports auth configuration status and optionally tests connectivity */
-export async function handleAuthCheck(params: AuthCheckParams): Promise<AuthCheckResult> {
+export async function handleAuthCheck(params: { connection_test?: boolean }): Promise<AuthCheckResult> {
   const connectionTest = params.connection_test ?? false;
 
   const config = await loadConfig();
@@ -31,8 +27,8 @@ export async function handleAuthCheck(params: AuthCheckParams): Promise<AuthChec
       auth_type: serviceConfig.auth_type,
     };
 
-    if (connectionTest) {
-      const serviceCredentials = credentials![service] ?? {};
+    if (connectionTest && credentials) {
+      const serviceCredentials = credentials[service] ?? {};
 
       const result = await testConnection({
         base_url: serviceConfig.base_url,
@@ -49,7 +45,7 @@ export async function handleAuthCheck(params: AuthCheckParams): Promise<AuthChec
         latency_ms: result.latency_ms,
       };
 
-      if (service === 'jira' && result.success && result.response_body) {
+      if (service === 'jira' && result.success && typeof result.response_body === 'object' && result.response_body !== null) {
         const body = result.response_body as Record<string, unknown>;
         entry.user = {
           displayName: typeof body.displayName === 'string' ? body.displayName : undefined,

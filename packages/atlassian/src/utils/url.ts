@@ -24,3 +24,11 @@ export function buildUrl(
 export function extractHostname(url: string): string {
   return new URL(url).hostname;
 }
+
+/** Detect Atlassian service type from endpoint path */
+export function detectService(endpoint: string): 'jira' | 'confluence' {
+  if (endpoint.includes('/wiki/') || endpoint.startsWith('/api/v2/')) {
+    return 'confluence';
+  }
+  return 'jira';
+}

@@ -3,4 +3,4 @@ export { loadCredentials, saveCredentials, getAuthHeader } from './auth-manager/
 export { resolveEnvironment, getApiVersion } from './environment-resolver/index.js';
 export type { EnvironmentInfo } from './environment-resolver/index.js';
 export { executeRequest, validateUrl } from './http-client/index.js';
-export type { HttpClientConfig, RequestOptions } from './http-client/index.js';
+export { testConnection } from './connection-tester/index.js';

@@ -9,10 +9,11 @@ import { z } from "zod";
 
 import { VERSION } from "../../version.js";
 import { ConvertFormatSchema } from "../../types/index.js";
+import type { HttpClientConfig } from "../../types/index.js";
 import { loadConfig } from "../../core/config-manager/index.js";
 import { getAuthHeader } from "../../core/auth-manager/index.js";
-import type { HttpClientConfig } from "../../core/http-client/index.js";
-import { wrapHandler } from "../shared/shared.js";
+import { detectService } from "../../utils/index.js";
+import { wrapHandler } from "../shared/index.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
@@ -38,14 +39,6 @@ async function buildClientConfig(
     ssl_verify: serviceConfig.ssl_verify,
     timeout: serviceConfig.timeout,
   };
-}
-
-/** Detect service from endpoint path */
-function detectService(endpoint: string): "jira" | "confluence" {
-  if (endpoint.includes("/wiki/") || endpoint.startsWith("/api/v2/")) {
-    return "confluence";
-  }
-  return "jira";
 }
 
 /**
@@ -74,6 +67,7 @@ export function createServer(): McpServer {
         content_type: z.string().optional(),
         content_format: z.enum(["json", "markdown"]).optional(),
         save_to_path: z.string().optional(),
+        force: z.boolean().optional(),
       }),
       annotations: {
         readOnlyHint: false,
@@ -93,6 +87,7 @@ export function createServer(): McpServer {
         content_type?: string;
         content_format?: "json" | "markdown";
         save_to_path?: string;
+        force?: boolean;
       }) => {
         const service = detectService(args.endpoint);
         const config = await buildClientConfig(service);

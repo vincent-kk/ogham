@@ -3,8 +3,18 @@ import { dirname } from 'node:path';
 import type { ZodType } from 'zod';
 
 /** Read and parse a JSON file with optional Zod validation */
-export async function readJson<T>(path: string, schema?: ZodType<T>): Promise<T> {
-  const content = await readFile(path, 'utf-8');
+export async function readJson<T>(path: string, schema?: ZodType<T>): Promise<T>;
+export async function readJson<T>(path: string, schema: ZodType<T> | undefined, fallback: T): Promise<T>;
+export async function readJson<T>(path: string, schema?: ZodType<T>, fallback?: T): Promise<T> {
+  let content: string;
+  try {
+    content = await readFile(path, 'utf-8');
+  } catch (error) {
+    if (fallback !== undefined && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return fallback;
+    }
+    throw error;
+  }
   const data = JSON.parse(content);
   if (schema) {
     return schema.parse(data);

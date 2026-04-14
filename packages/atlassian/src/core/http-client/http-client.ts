@@ -1,4 +1,4 @@
-import type { McpResponse, HttpMethod } from '../../types/index.js';
+import type { McpResponse, HttpClientConfig, RequestOptions } from '../../types/index.js';
 import {
   RETRY_MAX_RETRIES,
   RETRY_BASE_DELAY_MS,
@@ -11,23 +11,6 @@ import {
 } from '../../constants/index.js';
 import { buildUrl, extractHostname } from '../../utils/index.js';
 import { validateUrl } from './ssrf-guard.js';
-
-export interface HttpClientConfig {
-  base_url: string;
-  auth_header?: string;
-  ssl_verify?: boolean;
-  timeout?: number;
-}
-
-export interface RequestOptions {
-  method: HttpMethod;
-  endpoint: string;
-  body?: unknown;
-  headers?: Record<string, string>;
-  query_params?: Record<string, string>;
-  timeout?: number;
-  acceptBinary?: boolean;
-}
 
 function getErrorCode(status: number): string {
   return ERROR_CODE_MAP[status] ?? (status >= 500 ? SERVER_ERROR_CODE : 'UNKNOWN_ERROR');

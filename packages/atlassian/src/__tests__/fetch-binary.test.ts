@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleFetch } from '../mcp/tools/fetch/index.js';
-import type { HttpClientConfig } from '../core/http-client/index.js';
+import type { HttpClientConfig } from '../types/index.js';
 
 // Mock node:fs/promises — vi.hoisted ensures the variable is available during mock hoisting
 const { mockStat } = vi.hoisted(() => ({

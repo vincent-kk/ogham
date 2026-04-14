@@ -8,7 +8,7 @@ MCP server and 3 generic HTTP/utility tools. Zero domain knowledge — executes 
 |---|---|
 | `server/` | MCP server creation and tool registration |
 | `server-entry/` | esbuild CJS bundle entry point |
-| `shared/` | toolResult, toolError, wrapHandler helpers |
+| `shared/` | MCP tool response formatting (toolResult, toolError, wrapHandler) |
 | `tools/` | 3 tool handlers (fetch, convert, setup) |
 | `pages/` | Browser-side UI pages served by tools |
 

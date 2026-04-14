@@ -6,14 +6,15 @@ vi.mock('../../../../core/config-manager/index.js', () => ({
 vi.mock('../../../../core/auth-manager/index.js', () => ({
   loadCredentials: vi.fn(),
 }));
-vi.mock('../../../shared/index.js', () => ({
-  testConnection: vi.fn(),
-}));
+vi.mock('../../../../core/index.js', async (importOriginal) => {
+  const original = await importOriginal<Record<string, unknown>>();
+  return { ...original, testConnection: vi.fn() };
+});
 
 import { handleAuthCheck } from '../auth-check.js';
 import { loadConfig } from '../../../../core/config-manager/index.js';
 import { loadCredentials } from '../../../../core/auth-manager/index.js';
-import { testConnection } from '../../../shared/index.js';
+import { testConnection } from '../../../../core/index.js';
 
 const mockLoadConfig = vi.mocked(loadConfig);
 const mockLoadCredentials = vi.mocked(loadCredentials);

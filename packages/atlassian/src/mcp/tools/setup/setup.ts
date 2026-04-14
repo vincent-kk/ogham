@@ -4,21 +4,11 @@ import {
   saveConfig,
   saveCredentials,
 } from "../../../core/index.js";
-import type { SetupServerHandle } from "../../../types/index.js";
+import type { SetupServerHandle, SetupParams, SetupResult } from "../../../types/index.js";
 import { SETUP_HTML } from "./__generated__/setup-html.js";
-import { testConnection } from "../../shared/index.js";
+import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "./utils/openBrowser.js";
 import { startSetupServer } from "./web-server/web-server.js";
-
-interface SetupParams {
-  mode?: "new" | "edit";
-}
-
-interface SetupResult {
-  success: boolean;
-  message: string;
-  url?: string;
-}
 
 /** Setup tool handler — launches local web server for auth configuration */
 export async function handleSetup(params: SetupParams): Promise<SetupResult> {

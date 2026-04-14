@@ -44,3 +44,22 @@ export const McpResponseSchema = z.object({
   pagination: PaginationSchema.optional(),
 });
 export type McpResponse = z.infer<typeof McpResponseSchema>;
+
+// --- HTTP client config (internal, no runtime validation needed) ---
+
+export interface HttpClientConfig {
+  base_url: string;
+  auth_header?: string;
+  ssl_verify?: boolean;
+  timeout?: number;
+}
+
+export interface RequestOptions {
+  method: HttpMethod;
+  endpoint: string;
+  body?: unknown;
+  headers?: Record<string, string>;
+  query_params?: Record<string, string>;
+  timeout?: number;
+  acceptBinary?: boolean;
+}

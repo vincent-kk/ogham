@@ -26,5 +26,8 @@ export const ERROR_CODE_MAP: Record<number, string> = {
 /** Default error code for 5xx responses */
 export const SERVER_ERROR_CODE = 'SERVER_ERROR';
 
+/** Connection test timeout in milliseconds */
+export const CONNECTION_TEST_TIMEOUT = 10_000;
+
 /** Cloud hostname pattern */
 export const CLOUD_HOSTNAME_PATTERN = /\.atlassian\.net$/;

@@ -10,6 +10,7 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 | `auth-manager/` | Credential storage (plain JSON), header injection |
 | `environment-resolver/` | Cloud/Server detection, URL normalization |
 | `http-client/` | Fetch wrapper with retry, SSRF guard, auth injection |
+| `connection-tester/` | Jira/Confluence connectivity test via core modules |
 
 ## Boundaries
 

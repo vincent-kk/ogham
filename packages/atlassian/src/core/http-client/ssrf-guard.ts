@@ -1,8 +1,6 @@
 import { resolve as dnsResolve } from 'node:dns/promises';
 import { isPrivateIp } from '../../utils/index.js';
 
-export { isPrivateIp };
-
 /** Validate a URL against SSRF attack vectors */
 export async function validateUrl(url: string, allowedHostname: string): Promise<void> {
   // Path traversal check on raw string (before URL normalization strips ..)

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AuthTypeSchema } from './config.js';
+import type { AuthType, ServiceCredentials } from './config.js';
 
 // --- Deployment type ---
 
@@ -68,6 +69,29 @@ export const SetupStatusSchema = z.object({
   }).optional(),
 });
 export type SetupStatus = z.infer<typeof SetupStatusSchema>;
+
+// --- Test connection params ---
+
+export interface TestConnectionParams {
+  base_url: string;
+  auth_type: AuthType;
+  credentials: ServiceCredentials;
+  username?: string;
+  service: 'jira' | 'confluence';
+  include_body?: boolean;
+}
+
+// --- Setup tool params ---
+
+export interface SetupParams {
+  mode?: 'new' | 'edit';
+}
+
+export interface SetupResult {
+  success: boolean;
+  message: string;
+  url?: string;
+}
 
 // --- Connection test result ---
 

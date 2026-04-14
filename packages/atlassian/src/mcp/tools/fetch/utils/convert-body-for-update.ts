@@ -1,11 +1,12 @@
 import { markdownToAdf, markdownToStorage } from '../../../../converter/index.js';
+import { detectService } from '../../../../utils/index.js';
 
 /** Convert markdown in body to ADF or Storage Format (endpoint-aware) */
 export function convertBodyForUpdate(body: unknown, endpoint: string): unknown {
   if (!body || typeof body !== 'object') return body;
   const obj = { ...(body as Record<string, unknown>) };
 
-  const isConfluence = endpoint.includes('/wiki/') || endpoint.includes('/api/v2/pages');
+  const isConfluence = detectService(endpoint) === 'confluence';
 
   for (const key of ['description', 'body']) {
     if (typeof obj[key] === 'string') {

@@ -1,6 +1,6 @@
 import type { AuthType, Credentials } from '../../types/index.js';
 import { CREDENTIALS_PATH } from '../../constants/index.js';
-import { readCredentials, writeCredentials } from './credential-store.js';
+import { readJson, writeJson } from '../../lib/file-io.js';
 import { buildAuthHeader } from '../../utils/index.js';
 
 type ServiceName = 'jira' | 'confluence';
@@ -9,8 +9,7 @@ type ServiceName = 'jira' | 'confluence';
 export async function loadCredentials(
   path: string = CREDENTIALS_PATH,
 ): Promise<Credentials> {
-  const credentials = await readCredentials<Credentials>(path);
-  return credentials ?? {};
+  return readJson<Credentials>(path, undefined, {});
 }
 
 /** Save credentials to JSON storage */
@@ -18,7 +17,7 @@ export async function saveCredentials(
   credentials: Credentials,
   path: string = CREDENTIALS_PATH,
 ): Promise<void> {
-  await writeCredentials(path, credentials);
+  await writeJson(path, credentials);
 }
 
 /** Get the auth header for a specific service */

@@ -1,26 +1,9 @@
 import { executeRequest } from '../../../core/http-client/index.js';
-import type { HttpClientConfig } from '../../../core/http-client/index.js';
-import type { McpResponse } from '../../../types/index.js';
+import type { HttpClientConfig, McpResponse, FetchParams } from '../../../types/index.js';
 import { autoConvertAdf } from './utils/auto-convert-adf.js';
 import { convertBodyToAdf } from './utils/convert-body-to-adf.js';
 import { convertBodyForUpdate } from './utils/convert-body-for-update.js';
 import { handleAssetFetch } from './utils/asset-fetch.js';
-
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-
-interface FetchParams {
-  method: HttpMethod;
-  endpoint: string;
-  body?: unknown;
-  query_params?: Record<string, string>;
-  expand?: string[];
-  headers?: Record<string, string>;
-  accept_format?: 'json' | 'raw';
-  content_type?: string;
-  content_format?: 'json' | 'markdown';
-  save_to_path?: string;
-  force?: boolean;
-}
 
 /** Unified HTTP tool handler */
 export async function handleFetch(

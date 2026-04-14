@@ -1,18 +1,7 @@
-import type { AuthType, ServiceCredentials, ConnectionTestResult } from '../../types/index.js';
-import { resolveEnvironment, getApiVersion, executeRequest } from '../../core/index.js';
-import type { HttpClientConfig } from '../../core/index.js';
+import type { ConnectionTestResult, HttpClientConfig, TestConnectionParams } from '../../types/index.js';
+import { CONNECTION_TEST_TIMEOUT } from '../../constants/index.js';
+import { resolveEnvironment, getApiVersion, executeRequest } from '../index.js';
 import { buildAuthHeader } from '../../utils/index.js';
-
-export interface TestConnectionParams {
-  base_url: string;
-  auth_type: AuthType;
-  credentials: ServiceCredentials;
-  username?: string;
-  service: 'jira' | 'confluence';
-  include_body?: boolean;
-}
-
-const CONNECTION_TEST_TIMEOUT = 10_000;
 
 function getTestEndpoint(service: 'jira' | 'confluence', isCloud: boolean): string {
   if (service === 'jira') {
@@ -45,7 +34,6 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
   const clientConfig: HttpClientConfig = {
     base_url: env.base_url,
     auth_header: authPayload.value,
-    timeout: CONNECTION_TEST_TIMEOUT,
   };
 
   const start = Date.now();

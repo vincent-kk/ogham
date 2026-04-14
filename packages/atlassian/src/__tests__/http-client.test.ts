@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { executeRequest } from '../core/http-client/http-client.js';
-import type { HttpClientConfig, RequestOptions } from '../core/http-client/index.js';
+import type { HttpClientConfig, RequestOptions } from '../types/index.js';
 
 // Mock ssrf-guard to skip DNS resolution in tests
 vi.mock('../core/http-client/ssrf-guard.js', () => ({
