@@ -67,10 +67,8 @@ export type {
   RuleOverride,
   BuiltinRuleId,
 } from './rules.js';
-export { BUILTIN_RULE_IDS } from './rules.js';
 
 export type { ScanOptions } from './scan.js';
-export { DEFAULT_SCAN_OPTIONS } from './scan.js';
 
 export type {
   DriftSeverity,
@@ -109,7 +107,6 @@ export type {
   DebtItemCreate,
   BiasResult,
 } from './debt.js';
-export { DEBT_WEIGHT_CAP, DEBT_BASE_WEIGHT } from './debt.js';
 
 export type {
   UsageSite,
@@ -127,10 +124,4 @@ export type {
   FixRequestType,
   DebtAction,
   PipelineStage,
-} from './handoff.js';
-export {
-  FIX_REQUEST_TYPES,
-  DEBT_ACTIONS,
-  PIPELINE_STAGES,
-  normalizeFixRequestType,
 } from './handoff.js';

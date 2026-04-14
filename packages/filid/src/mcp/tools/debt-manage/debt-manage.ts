@@ -8,7 +8,7 @@ import type {
   DebtItem,
   DebtItemCreate,
 } from '../../../types/debt.js';
-import { DEBT_BASE_WEIGHT, DEBT_WEIGHT_CAP } from '../../../types/debt.js';
+import { DEBT_BASE_WEIGHT, DEBT_WEIGHT_CAP } from '../../../constants/debt-defaults.js';
 import { assertUnder } from '../utils/fs-guard.js';
 
 export interface DebtManageInput {

@@ -17,5 +17,3 @@ export interface ScanOptions {
   /** 심볼릭 링크 추적 여부. 기본값: false */
   followSymlinks?: boolean;
 }
-
-export { DEFAULT_SCAN_OPTIONS } from '../constants/scan-defaults.js';

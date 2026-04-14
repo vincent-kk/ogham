@@ -6,7 +6,8 @@
 
 ## Structure
 
-- `project-analyzer.ts` — `analyzeProject`, `calculateHealthScore`, `generateReport`, `renderTextReport`, `renderMarkdownReport`
+- `project-analyzer.ts` — `analyzeProject`, `calculateHealthScore`
+- `renderers/` organ — `generateReport`, `renderTextReport`, `renderMarkdownReport`
 
 ## Conventions
 

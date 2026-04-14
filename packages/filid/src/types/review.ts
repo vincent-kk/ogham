@@ -14,9 +14,6 @@ export type PersonaId =
 /** 체크포인트 Phase */
 export type CheckpointPhase = 'A' | 'B' | 'C' | 'D' | 'DONE';
 
-/** 무한 resume 루프 방지를 위한 최대 재시도 횟수 */
-export const MAX_RESUME_RETRIES = 3;
-
 /** 체크포인트 상태 */
 export interface CheckpointStatus {
   /** 현재 Phase */

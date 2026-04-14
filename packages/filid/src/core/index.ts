@@ -54,8 +54,8 @@ export {
 export {
   analyzeProject,
   calculateHealthScore,
-  generateReport,
 } from './analysis/project-analyzer/project-analyzer.js';
+export { generateReport } from './analysis/project-analyzer/renderers/index.js';
 export {
   buildDAG,
   detectCycles,

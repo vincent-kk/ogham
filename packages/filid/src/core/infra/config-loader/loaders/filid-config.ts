@@ -9,7 +9,8 @@ import { join } from 'node:path';
 import { createLogger } from '../../../../lib/logger.js';
 import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
-import { BUILTIN_RULE_IDS, type RuleOverride } from '../../../../types/rules.js';
+import { BUILTIN_RULE_IDS } from '../../../../constants/builtin-rule-ids.js';
+import type { RuleOverride } from '../../../../types/rules.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
 
 const log = createLogger('config-loader');
