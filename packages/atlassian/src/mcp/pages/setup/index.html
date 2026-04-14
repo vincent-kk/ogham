@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlassian Configuration</title>
+  <link href="./styles/styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="page-title">Atlassian Configuration</h1>
+
+      <div class="warning-banner" id="warning-banner" hidden>
+        <span class="warning-icon">&#9888;</span>
+        Existing configuration found. Changes will overwrite current settings.
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="cloud">Cloud (Single Endpoint)</button>
+        <button class="tab-btn" data-tab="on-premise">On-premise (Separate Endpoints)</button>
+      </div>
+
+      <form id="setup-form" novalidate>
+
+        <!-- Cloud Tab -->
+        <div class="tab-panel" data-panel="cloud">
+          <div class="form-section">
+            <div class="form-group">
+              <label>Base URL <span class="required">*</span></label>
+              <input type="url" data-field="cloud.jira.base_url"
+                placeholder="https://your-domain.atlassian.net" autocomplete="off">
+              <span class="field-error" hidden></span>
+            </div>
+
+            <div class="form-group">
+              <label>Auth Type</label>
+              <div class="auth-type-group">
+                <label class="radio-pill">
+                  <input type="radio" name="cloud-auth" value="basic" checked> Basic
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="cloud-auth" value="pat"> PAT
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="cloud-auth" value="oauth"> OAuth 2.0
+                </label>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="cloud-basic">
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input type="text" data-field="cloud.jira.username" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input type="password" data-field="cloud.jira.api_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="cloud-pat" hidden>
+              <div class="form-group">
+                <label>Personal Token <span class="required">*</span></label>
+                <input type="password" data-field="cloud.jira.personal_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="cloud-oauth" hidden>
+              <div class="form-group">
+                <label>Client ID <span class="required">*</span></label>
+                <input type="text" data-field="cloud.jira.client_id" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Client Secret <span class="required">*</span></label>
+                <input type="password" data-field="cloud.jira.client_secret" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Access Token <span class="required">*</span></label>
+                <input type="password" data-field="cloud.jira.access_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Refresh Token <span class="optional">(optional)</span></label>
+                <input type="password" data-field="cloud.jira.refresh_token" autocomplete="off">
+              </div>
+            </div>
+
+            <details class="advanced-accordion">
+              <summary class="advanced-toggle">Advanced</summary>
+              <div class="advanced-body">
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" data-field="cloud.jira.ssl_verify" checked>
+                    SSL Verify
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Timeout (ms)</label>
+                  <input type="number" data-field="cloud.jira.timeout" placeholder="30000">
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- On-premise Tab -->
+        <div class="tab-panel" data-panel="on-premise" hidden>
+
+          <fieldset class="endpoint-section">
+            <legend>Jira</legend>
+
+            <div class="form-group">
+              <label>Base URL <span class="required">*</span></label>
+              <input type="url" data-field="onprem.jira.base_url"
+                placeholder="https://jira.your-company.com" autocomplete="off">
+              <span class="field-error" hidden></span>
+            </div>
+
+            <div class="form-group">
+              <label>Auth Type</label>
+              <div class="auth-type-group">
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-jira-auth" value="basic" checked> Basic
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-jira-auth" value="pat"> PAT
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-jira-auth" value="oauth"> OAuth 2.0
+                </label>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-jira-basic">
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input type="text" data-field="onprem.jira.username" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.jira.api_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-jira-pat" hidden>
+              <div class="form-group">
+                <label>Personal Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.jira.personal_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-jira-oauth" hidden>
+              <div class="form-group">
+                <label>Client ID <span class="required">*</span></label>
+                <input type="text" data-field="onprem.jira.client_id" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Client Secret <span class="required">*</span></label>
+                <input type="password" data-field="onprem.jira.client_secret" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Access Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.jira.access_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Refresh Token <span class="optional">(optional)</span></label>
+                <input type="password" data-field="onprem.jira.refresh_token" autocomplete="off">
+              </div>
+            </div>
+
+            <details class="advanced-accordion">
+              <summary class="advanced-toggle">Advanced</summary>
+              <div class="advanced-body">
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" data-field="onprem.jira.ssl_verify" checked>
+                    SSL Verify
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Timeout (ms)</label>
+                  <input type="number" data-field="onprem.jira.timeout" placeholder="30000">
+                </div>
+              </div>
+            </details>
+          </fieldset>
+
+          <fieldset class="endpoint-section">
+            <legend>Confluence</legend>
+
+            <div class="form-group">
+              <label>Base URL <span class="required">*</span></label>
+              <input type="url" data-field="onprem.confluence.base_url"
+                placeholder="https://confluence.your-company.com" autocomplete="off">
+              <span class="field-error" hidden></span>
+            </div>
+
+            <div class="form-group">
+              <label>Auth Type</label>
+              <div class="auth-type-group">
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-conf-auth" value="basic" checked> Basic
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-conf-auth" value="pat"> PAT
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="onprem-conf-auth" value="oauth"> OAuth 2.0
+                </label>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-conf-basic">
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input type="text" data-field="onprem.confluence.username" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.confluence.api_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-conf-pat" hidden>
+              <div class="form-group">
+                <label>Personal Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.confluence.personal_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+            </div>
+
+            <div class="auth-fields" data-auth-panel="onprem-conf-oauth" hidden>
+              <div class="form-group">
+                <label>Client ID <span class="required">*</span></label>
+                <input type="text" data-field="onprem.confluence.client_id" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Client Secret <span class="required">*</span></label>
+                <input type="password" data-field="onprem.confluence.client_secret" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Access Token <span class="required">*</span></label>
+                <input type="password" data-field="onprem.confluence.access_token" autocomplete="off">
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>Refresh Token <span class="optional">(optional)</span></label>
+                <input type="password" data-field="onprem.confluence.refresh_token" autocomplete="off">
+              </div>
+            </div>
+
+            <details class="advanced-accordion">
+              <summary class="advanced-toggle">Advanced</summary>
+              <div class="advanced-body">
+                <div class="form-group checkbox-group">
+                  <label>
+                    <input type="checkbox" data-field="onprem.confluence.ssl_verify" checked>
+                    SSL Verify
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>Timeout (ms)</label>
+                  <input type="number" data-field="onprem.confluence.timeout" placeholder="30000">
+                </div>
+              </div>
+            </details>
+          </fieldset>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button type="button" class="btn btn-secondary" id="btn-import">Import from JSON</button>
+          <div class="action-right">
+            <span class="test-result" id="test-result" hidden></span>
+            <button type="submit" class="btn btn-primary" id="btn-save">Save</button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Success Screen -->
+      <div class="success-screen" id="success-screen" hidden>
+        <div class="success-icon">&#10003;</div>
+        <p>Configuration saved successfully. You may close this window.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script>
+    window.__SETUP_STATE__ = '__SETUP_STATE__';
+  </script>
+  <script src="./__mocks__/mock-api.js"></script>
+  <script src="./scripts/app.js"></script>
+  <script src="./scripts/json-import.js"></script>
+</body>
+</html>

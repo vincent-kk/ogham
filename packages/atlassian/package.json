@@ -27,7 +27,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/build-setup-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs",
     "build:plugin": "node scripts/build-mcp-server.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",

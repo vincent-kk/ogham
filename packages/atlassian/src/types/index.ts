@@ -40,3 +40,19 @@ export type { TokenPayload } from './auth.js';
 
 export { ConvertFormatSchema, ConvertDirectionSchema } from './convert.js';
 export type { ConvertFormat, ConvertDirection } from './convert.js';
+
+export {
+  DeploymentTypeSchema,
+  SetupFormDataSchema,
+  SetupResponseSchema,
+  SetupStatusSchema,
+  ConnectionTestResultSchema,
+} from './setup.js';
+export type {
+  DeploymentType,
+  SetupFormData,
+  SetupResponse,
+  SetupStatus,
+  ConnectionTestResult,
+  SetupServerHandle,
+} from './setup.js';
