@@ -4,10 +4,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `run_get` | Load run state, verify preconditions |
-| `run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
-| `manifest_save` | Save stories-manifest.json |
-| `manifest_validate` | Validate manifest structural integrity |
+| `mcp_tools_run_get` | Load run state, verify preconditions |
+| `mcp_tools_run_transition` | start_phase(split), complete_phase(split), escape_phase(split) |
+| `mcp_tools_manifest_save` | Save stories-manifest.json |
+| `mcp_tools_manifest_validate` | Validate manifest structural integrity |
 
 ## Jira Operations ([OP:])
 

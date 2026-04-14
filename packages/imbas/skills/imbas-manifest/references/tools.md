@@ -8,10 +8,10 @@ shared imbas MCP tools used by every provider.
 
 | Tool | Usage |
 |------|-------|
-| `run_get` | Read current run state (preconditions + run selection via `--run` or most recent) |
-| `manifest_get` | Load manifest file with summary (pending/created counts) |
-| `manifest_save` | Save manifest after each item creation (crash recovery) |
-| `manifest_plan` | Generate execution plan for devplan manifest (dry-run) |
+| `mcp_tools_run_get` | Read current run state (preconditions + run selection via `--run` or most recent) |
+| `mcp_tools_manifest_get` | Load manifest file with summary (pending/created counts) |
+| `mcp_tools_manifest_save` | Save manifest after each item creation (crash recovery) |
+| `mcp_tools_manifest_plan` | Generate execution plan for devplan manifest (dry-run) |
 
 ## Output
 

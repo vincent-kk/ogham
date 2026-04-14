@@ -22,7 +22,7 @@ key (not a local path) so the manifest skill can dispatch directly.
 **Principle**: "Problem space tree unchanged" — Stories themselves are NOT
 modified. Divergences become Jira comments only.
 
-Call `manifest_save` to persist feedback_comments in devplan-manifest.json.
+Call `mcp_tools_manifest_save` to persist feedback_comments in devplan-manifest.json.
 
 ## Step 4 — Final user guidance (Jira)
 
@@ -39,4 +39,4 @@ Jira operations to enrich its understanding of existing Jira state:
 - `[OP: search_jql]` — find related existing issues for pattern matching
 
 These are optional, not required. The core exploration (Step 2a-2e) relies on
-`ast_search`, `ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic.
+`mcp_tools_ast_search`, `mcp_tools_ast_analyze`, `Read`, `Grep`, `Glob` which are provider-agnostic.

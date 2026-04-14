@@ -7,7 +7,7 @@ error cases triggered inside the manifest `workflow.md` (this directory).
 
 | Error ID | Trigger condition | Detection | Remediation |
 |----------|------------------|-----------|-------------|
-| `LABEL_BOOTSTRAP_FORBIDDEN` | `gh label create` exits non-zero with HTTP 403 or "resource not accessible" | Check exit code + stderr contains "403" or "resource not accessible" | Emit human-readable error (see below), call `run_transition → blocked`, STOP. |
+| `LABEL_BOOTSTRAP_FORBIDDEN` | `gh label create` exits non-zero with HTTP 403 or "resource not accessible" | Check exit code + stderr contains "403" or "resource not accessible" | Emit human-readable error (see below), call `mcp_tools_run_transition → blocked`, STOP. |
 | `GH_CLI_MISSING` | `gh` binary not found in PATH | `which gh` exits non-zero | Abort; display: "gh CLI not found. Install from https://cli.github.com and retry." |
 | `AUTH_MISSING` | `gh auth status` fails or any command returns "authentication required" | Stderr contains "authentication" or "auth" | Abort; display: "Run 'gh auth login' to authenticate, then retry." |
 | `ISSUE_NOT_FOUND` | `gh issue view <N>` returns 404 or 410 | Exit code non-zero + stderr contains "404" or "Could not resolve" | WARN; offer to reset manifest item to pending for re-creation. |
@@ -24,7 +24,7 @@ gh label create failed: insufficient scopes. Run 'gh auth refresh -s repo' and r
 ```
 
 After emitting this message:
-1. Call `run_transition` → `blocked` state.
+1. Call `mcp_tools_run_transition` → `blocked` state.
 2. Do NOT call `gh issue create`.
 3. Do NOT create any issues in degraded (unlabeled) mode.
 

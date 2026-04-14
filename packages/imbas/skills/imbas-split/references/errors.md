@@ -7,4 +7,4 @@
 | Epic key not found | Display: "Epic <KEY> not found. Check the key or choose 'Create new Epic'." |
 | `planner` produces no Stories | Trigger escape E2-3 if document is already atomic; otherwise E2-1. |
 | Manifest validation fails | Log errors, attempt auto-fix (ID dedup, link resolution), re-validate. |
-| run_transition fails | Display precondition error from tool. |
+| mcp_tools_run_transition fails | Display precondition error from tool. |

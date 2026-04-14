@@ -23,7 +23,7 @@ skill to the target local issue file's `## Digest` section via `Edit`
 modified. Divergences become `## Digest` appends in the local file, mirroring
 the Jira-side "comments only" invariant.
 
-Call `manifest_save` to persist feedback_comments in devplan-manifest.json.
+Call `mcp_tools_manifest_save` to persist feedback_comments in devplan-manifest.json.
 
 ## Step 4 — Final user guidance (Local)
 

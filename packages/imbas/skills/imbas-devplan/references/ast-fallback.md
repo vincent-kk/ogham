@@ -2,7 +2,7 @@
 
 ## AST Fallback Detection
 
-If ast_search or ast_analyze returns a response containing
+If mcp_tools_ast_search or mcp_tools_ast_analyze returns a response containing
 "sgLoadError" field:
 1. Log warning ONCE per session:
    "[WARN] @ast-grep/napi not installed. Using LLM fallback — results may be approximate."
@@ -11,9 +11,9 @@ If ast_search or ast_analyze returns a response containing
 
    | Native Tool | Fallback Method |
    |-------------|-----------------|
-   | ast_search | Convert meta-variables to regex → Grep search → LLM false-positive filtering |
-   | ast_analyze (dependency-graph) | Read source → LLM extracts import/export/call patterns |
-   | ast_analyze (cyclomatic-complexity) | Read source → LLM counts branch statements (if/for/while/switch/catch/&&/||/?) |
+   | mcp_tools_ast_search | Convert meta-variables to regex → Grep search → LLM false-positive filtering |
+   | mcp_tools_ast_analyze (dependency-graph) | Read source → LLM extracts import/export/call patterns |
+   | mcp_tools_ast_analyze (cyclomatic-complexity) | Read source → LLM counts branch statements (if/for/while/switch/catch/&&/||/?) |
 
    Meta-variable → Regex conversion rules:
    | Meta-Variable | Regex | Matches |

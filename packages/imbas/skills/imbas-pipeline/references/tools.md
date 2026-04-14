@@ -9,16 +9,16 @@ validate, split, manifest, and devplan skills.
 
 | Tool | Phase | Usage |
 |------|-------|-------|
-| `config_get` | 0 | Load config.json for project key and settings (Phase 0 Step 0.2) |
-| `run_create` | 1 | Create run directory, copy source, initialize state.json |
-| `run_get` | all | Read current run state for precondition checks (declared-only) |
-| `run_transition` | all | Phase transitions: start, complete, escape |
-| `manifest_get` | 3 | Load stories-manifest.json for devplan input |
-| `manifest_save` | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation |
-| `manifest_validate` | 2, 3 | Validate manifest structural integrity (gate input) |
-| `manifest_plan` | 2.5, 3.5 | Generate execution plan for dry-run preview |
-| `ast_search` | 3 | AST pattern search via `engineer` spawn; referenced in workflow for sgLoadError handling (declared-only) |
-| `ast_analyze` | 3 | Dependency graph / complexity analysis via `engineer` spawn (declared-only) |
+| `mcp_tools_config_get` | 0 | Load config.json for project key and settings (Phase 0 Step 0.2) |
+| `mcp_tools_run_create` | 1 | Create run directory, copy source, initialize state.json |
+| `mcp_tools_run_get` | all | Read current run state for precondition checks (declared-only) |
+| `mcp_tools_run_transition` | all | Phase transitions: start, complete, escape |
+| `mcp_tools_manifest_get` | 3 | Load stories-manifest.json for devplan input |
+| `mcp_tools_manifest_save` | 2, 3, 2.5, 3.5 | Save manifest after generation and after each Jira item creation |
+| `mcp_tools_manifest_validate` | 2, 3 | Validate manifest structural integrity (gate input) |
+| `mcp_tools_manifest_plan` | 2.5, 3.5 | Generate execution plan for dry-run preview |
+| `mcp_tools_ast_search` | 3 | AST pattern search via `engineer` spawn; referenced in workflow for sgLoadError handling (declared-only) |
+| `mcp_tools_ast_analyze` | 3 | Dependency graph / complexity analysis via `engineer` spawn (declared-only) |
 
 ---
 
@@ -62,7 +62,7 @@ The LLM resolves which tool to use at runtime based on the session's available t
 Agents do NOT have access to pipeline state tools. The `imbas:pipeline` skill handles all state updates:
 
 - Agents produce output (reports, manifests, verification results)
-- Pipeline skill interprets output and calls run_transition / manifest_save
+- Pipeline skill interprets output and calls mcp_tools_run_transition / mcp_tools_manifest_save
 - This preserves Plan-then-Execute: agents plan, pipeline executes
 
 ### Model Configuration

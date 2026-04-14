@@ -10,8 +10,8 @@ tools:
   - Grep
   - Glob
   - Bash
-  - mcp__plugin_imbas_tools__ast_search
-  - mcp__plugin_imbas_tools__ast_analyze
+  - mcp_tools_ast_search
+  - mcp_tools_ast_analyze
 maxTurns: 80
 ---
 
@@ -109,9 +109,9 @@ If AST tools return `@ast-grep/napi` unavailable errors, fall back to LLM-assist
 
 | Native Tool | Fallback |
 |-------------|----------|
-| `ast_search` | Convert meta-variables to regex → Grep → LLM filters false positives |
-| `ast_analyze` (dependency-graph) | Read source → LLM extracts import/export/call patterns |
-| `ast_analyze` (cyclomatic-complexity) | Read source → LLM counts branching statements |
+| `mcp_tools_ast_search` | Convert meta-variables to regex → Grep → LLM filters false positives |
+| `mcp_tools_ast_analyze` (dependency-graph) | Read source → LLM extracts import/export/call patterns |
+| `mcp_tools_ast_analyze` (cyclomatic-complexity) | Read source → LLM counts branching statements |
 
 **Meta-variable conversion**: `$NAME`/`$VALUE` → `[\w.]+`, `$TYPE` → `[\w.<>,\[\] ]+`,
 `$$$ARGS`/`$$$BODY` → `[\s\S]*?`. Print one-time `[WARN]` when activating.

@@ -9,7 +9,7 @@ provider-specific workflow file selected by `config.provider`:
 
 ## Step 0 — Provider routing
 
-Read `config.provider` via `config_get`. Note the target workflow file for
+Read `config.provider` via `mcp_tools_config_get`. Note the target workflow file for
 Step 6, but do not read it yet.
 
 ## Step 1 — Read issue (full depth)

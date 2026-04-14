@@ -66,7 +66,7 @@ If `gh label create` exits non-zero AND stderr contains "403" or
    ```
    gh label create failed: insufficient scopes. Run 'gh auth refresh -s repo' and retry.
    ```
-2. Call `run_transition` → `blocked` state.
+2. Call `mcp_tools_run_transition` → `blocked` state.
 3. STOP execution immediately. Do NOT proceed to `gh issue create`.
 
 **No degraded mode.** Issues MUST NOT be created without the required labels.
@@ -88,5 +88,5 @@ first (Step B1) and skip creation if already present.
 ## Cache note
 
 The label inventory from Step B1 can be cached in the imbas run state for the
-duration of the session via `cache_set`. This avoids redundant `gh label list`
+duration of the session via `mcp_tools_cache_set`. This avoids redundant `gh label list`
 calls when processing large manifests with many issues.

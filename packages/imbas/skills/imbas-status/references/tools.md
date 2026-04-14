@@ -6,8 +6,8 @@
 
 | Tool | Usage |
 |------|-------|
-| `run_get` | Read state.json for a specific or most recent run |
-| `run_list` | List all runs for a project |
+| `mcp_tools_run_get` | Read state.json for a specific or most recent run |
+| `mcp_tools_run_list` | List all runs for a project |
 
 ### Jira Operations ([OP:])
 

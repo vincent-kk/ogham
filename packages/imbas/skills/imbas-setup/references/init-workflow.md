@@ -141,7 +141,7 @@ Step 4 — config.json creation
 
   [local] — no provider-specific section.
 
-  2. Call config_set with full config.
+  2. Call mcp_tools_config_set with full config.
   3. Confirm config.json created.
 
 Step 5 — Cache population (provider-specific)
@@ -151,17 +151,17 @@ Step 5 — Cache population (provider-specific)
     2. Fetch issue types:
        - [OP: get_issue_types] project=<projectKey>
        - For each issue type: [OP: get_issue_type_fields] issue_type_id=<id>
-       - Call cache_set(project_ref, "issue-types", <data>)
+       - Call mcp_tools_cache_set(project_ref, "issue-types", <data>)
     3. Fetch link types:
        - [OP: get_link_types]
-       - Call cache_set(project_ref, "link-types", <data>)
+       - Call mcp_tools_cache_set(project_ref, "link-types", <data>)
     4. Store project metadata:
-       - Call cache_set(project_ref, "project-meta", <data>)
+       - Call mcp_tools_cache_set(project_ref, "project-meta", <data>)
 
   [github]
     1. Bootstrap labels: gh label list --repo <owner/repo> --json name
     2. Create missing type/status labels if needed (see SPEC-provider-github.md § Cache).
-    3. Cache label inventory via cache_set.
+    3. Cache label inventory via mcp_tools_cache_set.
 
   [local]
     No cache needed. Display: "Local provider — no remote cache required."

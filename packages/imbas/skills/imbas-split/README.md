@@ -53,10 +53,10 @@ Phase 1(validate)에서 통과한 기획 문서를 `planner` 에이전트가 INV
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `run_get` | imbas MCP | 런 상태 로드 |
-| `run_transition` | imbas MCP | 단계 전이 (시작/완료/이스케이프) |
-| `manifest_save` | imbas MCP | stories-manifest 저장 |
-| `manifest_validate` | imbas MCP | 매니페스트 유효성 검증 |
+| `mcp_tools_run_get` | imbas MCP | 런 상태 로드 |
+| `mcp_tools_run_transition` | imbas MCP | 단계 전이 (시작/완료/이스케이프) |
+| `mcp_tools_manifest_save` | imbas MCP | stories-manifest 저장 |
+| `mcp_tools_manifest_validate` | imbas MCP | 매니페스트 유효성 검증 |
 | `[OP: get_issue]` | Jira ([OP:]) | Epic 존재 확인 |
 | `planner` | 에이전트(sonnet) | INVEST Story 분할 |
 | `analyst` | 에이전트(sonnet) | 역추론 검증 |

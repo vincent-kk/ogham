@@ -6,7 +6,7 @@ Provider-specific tools are in `jira/tools.md` and `local/tools.md`.
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Read `config.provider` to route Step 0 dispatch to the correct provider workflow file |
+| `mcp_tools_config_get` | Read `config.provider` to route Step 0 dispatch to the correct provider workflow file |
 
 ## Agent Spawn
 

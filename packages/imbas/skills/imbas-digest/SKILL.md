@@ -53,14 +53,14 @@ Uses a State Tracking + QA-Prompting hybrid approach.
 - [workflow.md](./references/workflow.md) — Provider-agnostic skeleton (Steps 0–5); Step 6 publish is provider-specific
 - [digest-marker.md](./references/digest-marker.md) — (Jira only) Digest Marker Specification for posted comments
 - [suggestion-trigger.md](./references/suggestion-trigger.md) — (Jira only) Suggestion Trigger Logic
-- [tools.md](./references/tools.md) — Shared tools (config_get) and delegated skills
+- [tools.md](./references/tools.md) — Shared tools (mcp_tools_config_get) and delegated skills
 - [errors.md](./references/errors.md) — Provider-agnostic error handling
 
 <!-- imbas:constraints-v1 -->
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (issue reference) via imbas_tools.
-2. Read `config.provider` via `config_get`.
+2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
    | provider | workflow file |

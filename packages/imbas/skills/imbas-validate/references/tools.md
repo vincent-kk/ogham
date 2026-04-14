@@ -6,10 +6,10 @@
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Load config.json for language/default project resolution (Step 1) |
-| `run_create` | Create run directory, copy source, initialize state.json |
-| `run_get` | Read current run state for precondition checks (declared-only) |
-| `run_transition` | start_phase (validate) → complete_phase (validate) with result |
+| `mcp_tools_config_get` | Load config.json for language/default project resolution (Step 1) |
+| `mcp_tools_run_create` | Create run directory, copy source, initialize state.json |
+| `mcp_tools_run_get` | Read current run state for precondition checks (declared-only) |
+| `mcp_tools_run_transition` | start_phase (validate) → complete_phase (validate) with result |
 
 ### Jira Operations ([OP:])
 

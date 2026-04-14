@@ -30,14 +30,14 @@ imbas:read-issue <issue-ref> [--depth shallow|full]
 - [Workflow](./references/workflow.md) — Provider-agnostic skeleton (Step 0 routing, Step 5 structured output)
 - [Output Schema](./references/output-schema.md) — JSON example and field reference table
 - [Caching & Usage](./references/caching-and-usage.md) — Caching policy and agent usage patterns
-- [Tools](./references/tools.md) — Shared tools (config_get) and provider delegation
+- [Tools](./references/tools.md) — Shared tools (mcp_tools_config_get) and provider delegation
 - [Error Handling](./references/errors.md) — Provider-agnostic error conditions
 
 <!-- imbas:constraints-v1 -->
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (target issue ID) via imbas_tools.
-2. Read `config.provider` via `config_get`.
+2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
    | provider | workflow file |
