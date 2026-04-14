@@ -5,13 +5,13 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import {
   MAENCOF_MCP_TOOLS,
   isMaencofVault,
   maencofPath,
   metaPath,
-} from '../shared/shared.js';
+} from '../shared/index.js';
 
 export interface PostToolUseInput {
   tool_name?: string;

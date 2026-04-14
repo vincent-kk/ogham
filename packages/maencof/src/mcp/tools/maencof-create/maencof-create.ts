@@ -5,8 +5,8 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { deduplicateContent } from '../../../core/content-dedup/content-dedup.js';
-import { quoteYamlValue } from '../../../core/yaml-parser/yaml-parser.js';
+import { deduplicateContent } from '../../../core/content-dedup/index.js';
+import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
 import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../../types/common.js';
 import { AUTO_GENERATED_FM_KEYS } from '../../../types/frontmatter.js';

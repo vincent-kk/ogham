@@ -5,10 +5,10 @@ import {
   getSessionCaptureCount,
   incrementInsightStats,
   readInsightConfig,
-} from '../../../core/insight-stats/insight-stats.js';
+} from '../../../core/insight-stats/index.js';
 import type { MaencofCrudResult } from '../../../types/mcp.js';
 
-import { handleMaencofCreate } from '../maencof-create/maencof-create.js';
+import { handleMaencofCreate } from '../maencof-create/index.js';
 
 export const captureInsightInputSchema = z.object({
   title: z.string().describe('Concise title summarizing the insight'),

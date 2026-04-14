@@ -16,15 +16,15 @@ import {
   readTurnContext,
   writePromptContext,
   writeTurnContext,
-} from '../cache-manager/cache-manager.js';
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { isMaencofVault } from '../shared/shared.js';
+} from '../cache-manager/index.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { isMaencofVault } from '../shared/index.js';
 import {
   buildTurnContext,
   readCompanionIdentity,
   readIndexMetadata,
   readStaleCount,
-} from '../turn-context-builder/turn-context-builder.js';
+} from '../turn-context-builder/index.js';
 
 export interface UserPromptSubmitInput {
   session_id?: string;

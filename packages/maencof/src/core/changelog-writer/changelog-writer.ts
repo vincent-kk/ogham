@@ -21,7 +21,7 @@ import {
   CHANGELOG_DIR,
 } from '../../types/changelog.js';
 
-import { formatDate } from '../dailynote-writer/dailynote-writer.js';
+import { formatDate } from '../dailynote-writer/index.js';
 
 /**
  * changelog 디렉토리 경로를 반환한다.

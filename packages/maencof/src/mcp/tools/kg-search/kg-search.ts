@@ -2,7 +2,7 @@
  * @file kg-search.ts
  * @description kg_search 도구 핸들러 — SA 기반 관련 문서 검색
  */
-import { query } from '../../../search/query-engine/query-engine.js';
+import { query } from '../../../search/query-engine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type { KgSearchInput, KgSearchResult } from '../../../types/mcp.js';
 

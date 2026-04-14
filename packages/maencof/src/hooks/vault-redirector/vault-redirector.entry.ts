@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readStdin, writeResult } from '../shared/shared.js';
+import { readStdin, writeResult } from '../shared/index.js';
 import type { VaultRedirectorInput } from './vault-redirector.js';
 import { runVaultRedirector } from './vault-redirector.js';
 

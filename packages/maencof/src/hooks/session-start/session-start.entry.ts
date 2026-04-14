@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import type { SessionStartInput } from './session-start.js';
 import { runSessionStart } from './session-start.js';
-import { readStdin, writeResult } from '../shared/shared.js';
+import { readStdin, writeResult } from '../shared/index.js';
 
 const raw = await readStdin();
 let result;

@@ -13,11 +13,11 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/dailynote-writer.js';
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
+import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/index.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 
-import { removeSessionFiles } from '../cache-manager/cache-manager.js';
-import { isMaencofVault, maencofPath, metaPath } from '../shared/shared.js';
+import { removeSessionFiles } from '../cache-manager/index.js';
+import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
 import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
 
 export interface SessionEndInput {

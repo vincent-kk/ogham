@@ -8,18 +8,18 @@ import { posix } from 'node:path';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser/document-parser.js';
-import { buildGraph } from '../../../core/graph-builder/graph-builder.js';
-import type { ScannedFile } from '../../../core/vault-scanner/vault-scanner.js';
-import { scanVault } from '../../../core/vault-scanner/vault-scanner.js';
-import { calculateWeights } from '../../../core/weight-calculator/weight-calculator.js';
+} from '../../../core/document-parser/index.js';
+import { buildGraph } from '../../../core/graph-builder/index.js';
+import type { ScannedFile } from '../../../core/vault-scanner/index.js';
+import { scanVault } from '../../../core/vault-scanner/index.js';
+import { calculateWeights } from '../../../core/weight-calculator/index.js';
 import {
   type CurrentFileInfo,
   computeChangeSet,
   computeIncrementalScope,
   createSnapshot,
-} from '../../../core/indexer/incremental-tracker/incremental-tracker.js';
-import { MetadataStore } from '../../../core/indexer/metadata-store/metadata-store.js';
+} from '../../../core/indexer/incremental-tracker/index.js';
+import { MetadataStore } from '../../../core/indexer/metadata-store/index.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   AdjacencyList,

@@ -21,8 +21,8 @@ import {
 import { CHANGELOG_GATE_MARKER } from '../../constants/markers.js';
 import { EXEC_TIMEOUT_MS } from '../../constants/performance.js';
 
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { isMaencofVault, metaPath } from '../shared/shared.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { isMaencofVault, metaPath } from '../shared/index.js';
 
 export interface ChangelogGateInput {
   session_id?: string;

@@ -11,7 +11,7 @@ import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import { FULL_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
 
-import type { FileSnapshot, SnapshotEntry } from '../metadata-store/metadata-store.js';
+import type { FileSnapshot, SnapshotEntry } from '../metadata-store/index.js';
 
 /** 변경 세트 */
 export interface ChangeSet {

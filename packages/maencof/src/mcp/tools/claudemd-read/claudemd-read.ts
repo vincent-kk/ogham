@@ -5,7 +5,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { readMaencofSection } from '../../../core/claude-md-merger/claude-md-merger.js';
+import { readMaencofSection } from '../../../core/claude-md-merger/index.js';
 import type { ClaudeMdReadResult } from '../../../types/mcp.js';
 
 /**

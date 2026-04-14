@@ -4,10 +4,10 @@
  * Runs AFTER index-invalidator (which updates stale-nodes.json) so the rebuilt
  * turn context reflects the latest stale count.
  */
-import { writeTurnContext } from '../cache-manager/cache-manager.js';
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { MAENCOF_MCP_TOOLS, isMaencofVault } from '../shared/shared.js';
-import { buildTurnContext } from '../turn-context-builder/turn-context-builder.js';
+import { writeTurnContext } from '../cache-manager/index.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { MAENCOF_MCP_TOOLS, isMaencofVault } from '../shared/index.js';
+import { buildTurnContext } from '../turn-context-builder/index.js';
 
 export interface PostToolUseInput {
   tool_name?: string;

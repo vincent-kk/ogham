@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import type { InsightInjectorInput } from './insight-injector.js';
 import { runInsightInjector } from './insight-injector.js';
-import { readStdin, writeResult } from '../shared/shared.js';
+import { readStdin, writeResult } from '../shared/index.js';
 
 const raw = await readStdin();
 let result;

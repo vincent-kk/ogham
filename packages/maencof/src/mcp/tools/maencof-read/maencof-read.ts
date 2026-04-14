@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser/document-parser.js';
+} from '../../../core/document-parser/index.js';
 import { isLayer1Path } from '../../../types/layer.js';
 import type { MaencofReadInput, MaencofReadResult } from '../../../types/mcp.js';
 

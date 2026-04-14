@@ -6,12 +6,12 @@ import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { FRONTMATTER_REGEX, FRONTMATTER_STRIP_REGEX } from '../../../constants/regexes.js';
-import { deduplicateContent } from '../../../core/content-dedup/content-dedup.js';
+import { deduplicateContent } from '../../../core/content-dedup/index.js';
 import {
   buildKnowledgeNode,
   parseDocument,
-} from '../../../core/document-parser/document-parser.js';
-import { quoteYamlValue } from '../../../core/yaml-parser/yaml-parser.js';
+} from '../../../core/document-parser/index.js';
+import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import { Layer } from '../../../types/common.js';
 import { AUTO_GENERATED_FM_KEYS } from '../../../types/frontmatter.js';
 import type { L1AmendmentRecord } from '../../../types/l1-amendment.js';

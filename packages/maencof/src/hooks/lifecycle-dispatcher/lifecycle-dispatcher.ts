@@ -13,8 +13,8 @@ import type {
   LifecycleEvent,
 } from '../../types/lifecycle.js';
 
-import { appendErrorLogSafe } from '../../core/error-log/error-log.js';
-import { isMaencofVault, metaPath } from '../shared/shared.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { isMaencofVault, metaPath } from '../shared/index.js';
 
 /** Input received from Claude Code hook stdin */
 export interface LifecycleDispatcherInput {
