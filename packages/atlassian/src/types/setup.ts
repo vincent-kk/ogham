@@ -76,6 +76,7 @@ export const ConnectionTestResultSchema = z.object({
   success: z.boolean(),
   message: z.string(),
   latency_ms: z.number().optional(),
+  response_body: z.unknown().optional(),
 });
 export type ConnectionTestResult = z.infer<typeof ConnectionTestResultSchema>;
 

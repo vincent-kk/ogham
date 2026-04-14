@@ -16,6 +16,7 @@ import { wrapHandler } from "../shared/shared.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
+import { handleAuthCheck } from "../tools/auth-check/index.js";
 
 /** Build HttpClientConfig from stored config for a service */
 async function buildClientConfig(
@@ -119,6 +120,24 @@ export function createServer(): McpServer {
       },
     },
     wrapHandler(handleConvert),
+  );
+
+  // --- auth-check ---
+  server.registerTool(
+    "auth-check",
+    {
+      description:
+        "Check authentication status and optionally test connectivity",
+      inputSchema: z.object({
+        connection_test: z.boolean().optional(),
+      }),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
+    },
+    wrapHandler(handleAuthCheck),
   );
 
   // --- setup ---

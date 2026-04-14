@@ -46,8 +46,13 @@ Confluence REST API domain router for Claude Code agents. Resolves the correct e
 - Admin operations (space management): require `manage:confluence-configuration` (Cloud)
 - Analytics: Cloud only — requires analytics feature enabled on instance
 
+## Pre-flight
+
+작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+
 ## References
 
+- `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/error-handling.md` — HTTP error handling protocol
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
 - `../_shared/mcp-tools.md` — Available MCP tools and usage

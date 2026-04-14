@@ -19,6 +19,10 @@ Authentication and connection management for Atlassian products.
 - Changing connection settings (URL, auth type, credentials)
 - Testing connection status
 
+## Pre-flight
+
+작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+
 ## Setup Flow
 
 1. Call MCP `setup` tool immediately (mode: `new` for first setup, `edit` for reconfiguration)
@@ -46,6 +50,7 @@ Authoritative recovery protocol — router skills (`atlassian-jira`, `atlassian-
 
 ## References
 
+- `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection
 - `../_shared/mcp-tools.md` — Available MCP tools (uses `setup` tool)
 - `references/auth-types.md` — Detailed auth type comparison and selection guide

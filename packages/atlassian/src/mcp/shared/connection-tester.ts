@@ -1,14 +1,15 @@
-import type { AuthType, ServiceCredentials, ConnectionTestResult } from '../../../../types/index.js';
-import { resolveEnvironment, getApiVersion, executeRequest } from '../../../../core/index.js';
-import type { HttpClientConfig } from '../../../../core/index.js';
-import { buildAuthHeader } from '../../../../utils/index.js';
+import type { AuthType, ServiceCredentials, ConnectionTestResult } from '../../types/index.js';
+import { resolveEnvironment, getApiVersion, executeRequest } from '../../core/index.js';
+import type { HttpClientConfig } from '../../core/index.js';
+import { buildAuthHeader } from '../../utils/index.js';
 
-interface TestConnectionParams {
+export interface TestConnectionParams {
   base_url: string;
   auth_type: AuthType;
   credentials: ServiceCredentials;
   username?: string;
   service: 'jira' | 'confluence';
+  include_body?: boolean;
 }
 
 const CONNECTION_TEST_TIMEOUT = 10_000;
@@ -27,7 +28,7 @@ function getTestEndpoint(service: 'jira' | 'confluence', isCloud: boolean): stri
 
 /** Test connection to a Jira or Confluence instance */
 export async function testConnection(params: TestConnectionParams): Promise<ConnectionTestResult> {
-  const { base_url, auth_type, credentials, username, service } = params;
+  const { base_url, auth_type, credentials, username, service, include_body = false } = params;
 
   const env = resolveEnvironment(base_url);
   const endpoint = getTestEndpoint(service, env.is_cloud);
@@ -58,12 +59,16 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
   const latency_ms = Date.now() - start;
 
   if (response.success) {
-    return {
+    const result: ConnectionTestResult = {
       service,
       success: true,
       message: `Connected to ${service} (${env.is_cloud ? 'Cloud' : 'Server'})`,
       latency_ms,
     };
+    if (include_body) {
+      result.response_body = response.data;
+    }
+    return result;
   }
 
   const errorMessage = response.error?.code === 'UNAUTHORIZED'

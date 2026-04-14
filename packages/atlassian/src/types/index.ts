@@ -56,3 +56,18 @@ export type {
   ConnectionTestResult,
   SetupServerHandle,
 } from './setup.js';
+
+export {
+  AuthCheckServiceStatusSchema,
+  AuthCheckConnectionStatusSchema,
+  AuthCheckUserInfoSchema,
+  AuthCheckServiceEntrySchema,
+  AuthCheckResultSchema,
+} from './auth-check.js';
+export type {
+  AuthCheckServiceStatus,
+  AuthCheckConnectionStatus,
+  AuthCheckUserInfo,
+  AuthCheckServiceEntry,
+  AuthCheckResult,
+} from './auth-check.js';

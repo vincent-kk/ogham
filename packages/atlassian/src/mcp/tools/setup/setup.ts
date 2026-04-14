@@ -6,7 +6,7 @@ import {
 } from "../../../core/index.js";
 import type { SetupServerHandle } from "../../../types/index.js";
 import { SETUP_HTML } from "./__generated__/setup-html.js";
-import { testConnection } from "./utils/connection-tester.js";
+import { testConnection } from "../../shared/index.js";
 import { openBrowser } from "./utils/openBrowser.js";
 import { startSetupServer } from "./web-server/web-server.js";
 

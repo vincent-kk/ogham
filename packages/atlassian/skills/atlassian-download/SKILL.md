@@ -55,8 +55,13 @@ Params:
 4. Save to file (target path or temp directory)
 5. Return: file path, size, MIME type
 
+## Pre-flight
+
+작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+
 ## References
 
+- `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/error-handling.md` — HTTP error handling protocol
 - `../_shared/mcp-tools.md` — Available MCP tools (uses `fetch` with `method: "GET"` and `accept_format: "raw"`)
 - `references/download-flow.md` — Detailed download and upload specs

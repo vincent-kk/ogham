@@ -56,8 +56,13 @@ Do not preload all schema files — load on demand per operation.
 - **JSM operations**: require Service Desk Agent role for queue/SLA access
 - **Development info**: requires Connect app or Forge app with `read:jira-work` scope
 
+## Pre-flight
+
+작업 시작 전 인증 확인을 수행한다. [`auth-check.md`](../_shared/auth-check.md) 참조.
+
 ## References
 
+- `../_shared/auth-check.md` — Pre-flight authentication check
 - `../_shared/error-handling.md` — HTTP error handling protocol
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
 - `../_shared/mcp-tools.md` — Available MCP tools and usage

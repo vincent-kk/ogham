@@ -9,7 +9,7 @@ vi.mock('../../../../utils/index.js', () => ({
   buildAuthHeader: vi.fn(),
 }));
 
-import { testConnection } from '../connection-tester/connection-tester.js';
+import { testConnection } from '../../../shared/connection-tester.js';
 import { resolveEnvironment, getApiVersion, executeRequest } from '../../../../core/index.js';
 import { buildAuthHeader } from '../../../../utils/index.js';
 
