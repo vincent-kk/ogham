@@ -7,7 +7,7 @@ Detailed workflow steps, display format, and error handling.
 ### Step 1 — Check Index Status
 
 ```
-kg_status()
+mcp_t_kg_status()
 ```
 
 - No index → "No index found. Please run `/maencof:maencof-build` first." (abort)
@@ -28,7 +28,7 @@ Determine the target from user input:
 ### Step 3 — Run Link Suggestion
 
 ```
-kg_suggest_links(
+mcp_t_kg_suggest_links(
   path: target document path (if specified),
   tags: [tag list] (if specified),
   content_hint: "free text" (if specified),
@@ -59,7 +59,7 @@ Enter a number to view document details, or 'q' to finish.
 
 After reviewing suggestions:
 
-- If user selects a suggestion → read the document with `read` and show content
+- If user selects a suggestion → read the document with `mcp_t_read` and show content
 - Guide user to manually add links in the source document if desired
 - Suggest running `/maencof:maencof-explore {path}` for deeper exploration of a specific result
 

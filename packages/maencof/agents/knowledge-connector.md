@@ -11,12 +11,12 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof_t__read
-  - mcp__plugin_maencof_t__update
-  - mcp__plugin_maencof_t__kg_navigate
-  - mcp__plugin_maencof_t__kg_search
-  - mcp__plugin_maencof_t__kg_suggest_links
-  - mcp__plugin_maencof_t__kg_status
+  - mcp_t_read
+  - mcp_t_update
+  - mcp_t_kg_navigate
+  - mcp_t_kg_search
+  - mcp_t_kg_suggest_links
+  - mcp_t_kg_status
 maxTurns: 30
 ---
 
@@ -61,11 +61,11 @@ to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-
 
 | Layer | Read | Write | Allowed Operations | Forbidden Operations |
 |-------|------|-------|--------------------|----------------------|
-| Layer 1 (01_Core) | allowed (read-only) | forbidden | `read`, graph traversal | `create`, `update`, `delete`, `move`, bulk-modify |
-| Layer 2 (02_Derived) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
-| Layer 3 (03_External) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
-| Layer 4 (04_Action) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
-| Layer 5 (05_Context) | allowed | allowed | `read`, `update`, link | `delete`, bulk-modify |
+| Layer 1 (01_Core) | allowed (read-only) | forbidden | `mcp_t_read`, graph traversal | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, bulk-modify |
+| Layer 2 (02_Derived) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
+| Layer 3 (03_External) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
+| Layer 4 (04_Action) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
+| Layer 5 (05_Context) | allowed | allowed | `mcp_t_read`, `mcp_t_update`, link | `mcp_t_delete`, bulk-modify |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before linking)
 
@@ -85,12 +85,12 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 | Tool | Purpose |
 |------|---------|
-| `read` | Read document Frontmatter and content for semantic analysis |
-| `update` | Update Frontmatter links field to establish connections |
-| `kg_navigate` | Traverse existing links to detect gaps and verify new links |
-| `kg_search` | Find semantically related documents across Layers |
-| `kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
-| `kg_status` | Check vault graph density and orphan node count |
+| `mcp_t_read` | Read document Frontmatter and content for semantic analysis |
+| `mcp_t_update` | Update Frontmatter links field to establish connections |
+| `mcp_t_kg_navigate` | Traverse existing links to detect gaps and verify new links |
+| `mcp_t_kg_search` | Find semantically related documents across Layers |
+| `mcp_t_kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
+| `mcp_t_kg_status` | Check vault graph density and orphan node count |
 
 ---
 
@@ -106,8 +106,8 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Failure Modes
 
-- **`kg_suggest_links` returns empty array**: No system-suggested links available. Inform the user that the vault may need more tag enrichment or manual connections. Suggest running `/maencof:maencof-suggest` for tag-based discovery.
-- **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `update`. Report the failure to the user with both document paths.
+- **`mcp_t_kg_suggest_links` returns empty array**: No system-suggested links available. Inform the user that the vault may need more tag enrichment or manual connections. Suggest running `/maencof:maencof-suggest` for tag-based discovery.
+- **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `mcp_t_update`. Report the failure to the user with both document paths.
 - **Target document deleted or moved**: If a link candidate references a document that no longer exists at the expected path, skip the proposal silently and proceed to the next candidate. Log the stale reference for the user's final report.
 - **Session link limit reached**: When 10 link operations are completed in the current session, stop proposing new links and present the session summary. Guide the user to start a new session for additional connections.
 

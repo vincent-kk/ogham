@@ -99,8 +99,8 @@ Generate Layer 1 documents from the collected interview answers.
 | `01_Core/boundaries.md` | Absolute boundaries |
 | `01_Core/preferences.md` | Communication preferences |
 
-Create the 4 markdown documents above with the `create` MCP tool (layer=1, tags required).
-Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `create` (which requires layer/tags and always generates Frontmatter markdown).
+Create the 4 markdown documents above with the `mcp_t_create` MCP tool (layer=1, tags required).
+Note: `01_Core/trust-level.json` is created separately in Stage 5 — it is a pure JSON file and cannot use `mcp_t_create` (which requires layer/tags and always generates Frontmatter markdown).
 
 Also create the Layer directories and sub-layer subdirectories:
 - `02_Derived/`
@@ -126,11 +126,11 @@ Create and initialize `01_Core/trust-level.json` at Level 0:
 
 **Creation method**: Use the Bash tool to write trust-level.json directly (`echo '{"current_level":0,...}' > 01_Core/trust-level.json`). The layer-guard hook matches only `Write|Edit` tools, so Bash is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
 
-> Note: This Bash pattern applies only to trust-level.json (a JSON config file that cannot use the `create` MCP tool). Markdown L1 documents must always go through the identity-guardian agent.
+> Note: This Bash pattern applies only to trust-level.json (a JSON config file that cannot use the `mcp_t_create` MCP tool). Markdown L1 documents must always go through the identity-guardian agent.
 
 ### Stage 6 — Initial Index Build
 
-Check index status with the `kg_status` MCP tool.
+Check index status with the `mcp_t_kg_status` MCP tool.
 → Use templates T6-1, T6-2 from reference.md.
 
 - If an existing markdown vault is present: suggest a full build and run `/maencof:maencof-build` after user confirmation
@@ -154,9 +154,9 @@ setup skill starts
 
 | Tool | Purpose |
 |------|---------|
-| `create` | Create L1 documents (Stage 4) |
-| `read` | Verify existing L1 documents (Stage 4, via identity-guardian) |
-| `kg_status` | Check index status (Stage 6) |
+| `mcp_t_create` | Create L1 documents (Stage 4) |
+| `mcp_t_read` | Verify existing L1 documents (Stage 4, via identity-guardian) |
+| `mcp_t_kg_status` | Check index status (Stage 6) |
 
 ## Available Native Tools
 

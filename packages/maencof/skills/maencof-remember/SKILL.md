@@ -62,7 +62,7 @@ When creating an L3 document, determine the appropriate sub-layer:
 | L3B Structural | Organizations, teams, systems, processes | `03_External/structural/` |
 | L3C Topical | Concepts, technologies, external knowledge | `03_External/topical/` |
 
-Pass `sub_layer` to `create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:maencof-migrate`.
+Pass `sub_layer` to `mcp_t_create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:maencof-migrate`.
 
 #### L5 Sub-Layer Selection
 
@@ -92,10 +92,10 @@ Extract 3–5 relevant tags from the content. Rules:
 
 ### Step 4 — Pre-creation Duplicate Check
 
-Search for similar documents with `kg_search` to prevent duplicates:
+Search for similar documents with `mcp_t_kg_search` to prevent duplicates:
 
 ```
-kg_search(
+mcp_t_kg_search(
   seed: [1-2 core tags],
   max_results: 3,
   threshold: 0.3
@@ -112,7 +112,7 @@ Would you like to create a new document or update the existing one? (Create new 
 
 ### Step 5 — Document Creation
 
-Create the document with the `create` MCP tool:
+Create the document with the `mcp_t_create` MCP tool:
 
 **L2 Frontmatter**:
 ```yaml
@@ -121,7 +121,7 @@ tags: [extracted tags]
 title: auto-generated or user-provided
 ```
 
-**L3 Frontmatter** (fields written into the document by `create`):
+**L3 Frontmatter** (fields written into the document by `mcp_t_create`):
 ```yaml
 layer: 3
 sub_layer: relational | structural | topical  # defaults to topical if unclear
@@ -172,10 +172,10 @@ To explore related documents: /maencof:maencof-explore {tag}
 
 | Tool | Purpose |
 |------|---------|
-| `create` | Create document (primary tool) |
-| `kg_search` | Pre-creation duplicate check |
-| `update` | Update existing document (when duplicate found) |
-| `read` | Read existing document content (when duplicate found) |
+| `mcp_t_create` | Create document (primary tool) |
+| `mcp_t_kg_search` | Pre-creation duplicate check |
+| `mcp_t_update` | Update existing document (when duplicate found) |
+| `mcp_t_read` | Read existing document content (when duplicate found) |
 
 ## Options
 

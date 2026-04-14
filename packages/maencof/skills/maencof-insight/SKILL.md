@@ -28,7 +28,7 @@ Manage the auto-insight capture system.
 Show recent auto-captured insights (from current session's pending captures and vault search).
 
 1. Read `.maencof-meta/pending-insight-notification.json` for current session captures
-2. Use `kg_search` with tags `["auto-insight"]` and `max_results: 10` for recent vault entries
+2. Use `mcp_t_kg_search` with tags `["auto-insight"]` and `max_results: 10` for recent vault entries
 3. Display list with path, title, layer, and creation date
 
 ### --stats
@@ -71,7 +71,7 @@ Show current status: enabled/disabled, sensitivity, session captures, max captur
 
 | Tool | Purpose |
 |------|---------|
-| `kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
+| `mcp_t_kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
 
 > Note: Config file operations (`.maencof-meta/insight-config.json`, `.maencof-meta/auto-insight-stats.json`, `.maencof-meta/pending-insight-notification.json`) use filesystem Read/Write tools, not maencof MCP tools.
 

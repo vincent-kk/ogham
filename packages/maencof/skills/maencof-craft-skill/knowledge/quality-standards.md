@@ -446,7 +446,7 @@ def parse_markdown(content: str) -> dict:
 # ❌ Hard to test
 def parse_markdown_from_file():
     """File read, parse, write all included"""
-    content = open("input.md").read()
+    content = open("input.md").mcp_t_read()
     parsed = parse(content)
     open("output.json", "w").write(json.dumps(parsed))
 ```

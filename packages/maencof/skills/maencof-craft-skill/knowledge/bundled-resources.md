@@ -720,7 +720,7 @@ HTML report template with header, main, footer.
 
 **Usage:**
 ```python
-template = open("assets/templates/report.html").read()
+template = open("assets/templates/report.html").mcp_t_read()
 report = template.replace("{{REPORT_TITLE}}", "My Report")
 ```
 
