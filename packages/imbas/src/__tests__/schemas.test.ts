@@ -123,7 +123,6 @@ describe('ImbasConfigSchema', () => {
     expect(result.data.language.documents).toBe('ko');
     expect(result.data.defaults.llm_model.devplan).toBe('opus');
     expect(result.data.jira.issue_types.epic).toBe('Epic');
-    expect(result.data.media.max_frames).toBe(20);
   });
 
   it('preserves custom values', () => {
@@ -138,11 +137,6 @@ describe('ImbasConfigSchema', () => {
     expect(result.data.version).toBe('2.0');
     expect(result.data.defaults.project_ref).toBe('MYPROJ');
     expect(result.data.defaults.llm_model.validate).toBe('haiku');
-  });
-
-  it('rejects negative max_frames', () => {
-    const result = ImbasConfigSchema.safeParse({ media: { max_frames: -1 } });
-    expect(result.success).toBe(false);
   });
 
   it('defaults provider to jira', () => {

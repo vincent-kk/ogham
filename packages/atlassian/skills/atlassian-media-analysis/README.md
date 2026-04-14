@@ -1,4 +1,4 @@
-# imbas-fetch-media
+# atlassian-media-analysis
 
 Confluence/Jira에서 이미지, 비디오, GIF를 다운로드하고, 비디오/GIF는 scene-sieve로 키프레임을 추출하여 시맨틱 분석을 수행한다.
 
@@ -36,7 +36,7 @@ Atlassian 첨부파일을 다운로드한 뒤 파일 종류에 따라 처리:
 ## 워크플로우
 
 1. **입력 해석** — URL 패턴 감지 (Confluence/Jira/로컬)
-2. **다운로드** — Atlassian URL이면 `[OP: fetch_attachment]`으로 바이너리 다운로드
+2. **다운로드** — Atlassian URL이면 atlassian `fetch` 도구로 바이너리 다운로드
 3. **프로브 및 프리셋 선택** — `probe.mjs`로 파일 정보 확인, 자동 프리셋 결정
 4. **이미지 처리** — scene-sieve 없이 파일 경로 반환
 5. **비디오/GIF 처리** — 캐시 확인 → scene-sieve 키프레임 추출 → `media` 에이전트 분석
@@ -48,7 +48,7 @@ Atlassian 첨부파일을 다운로드한 뒤 파일 종류에 따라 처리:
 ## 디렉토리 구조
 
 ```
-fetch-media/
+atlassian-media-analysis/
 ├── SKILL.md
 ├── README.md
 ├── scripts/
@@ -68,7 +68,5 @@ fetch-media/
 
 | 도구 | 출처 | 용도 |
 |------|------|------|
-| `config_get` | imbas MCP | temp_dir, scene_sieve_command 설정 읽기 |
-| `[OP: get_confluence]` | Jira ([OP:]) | Confluence 페이지에서 첨부파일 URL 확인 |
-| `[OP: fetch_attachment]` | Jira ([OP:]) | 바이너리 첨부파일 다운로드 |
+| `atlassian_tools.fetch` | atlassian MCP | Atlassian REST API + 바이너리 다운로드 |
 | `media` | 에이전트 | 키프레임 순차 읽기 및 장면 분석 |

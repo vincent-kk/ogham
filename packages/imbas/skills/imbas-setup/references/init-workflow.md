@@ -141,14 +141,6 @@ Step 4 — config.json creation
 
   [local] — no provider-specific section.
 
-  Common section (all providers):
-     "media": {
-       "scene_sieve_command": "npx -y @lumy-pack/scene-sieve",
-       "temp_dir": ".temp",
-       "max_frames": 20,
-       "default_preset": "medium-video"
-     }
-
   2. Call config_set with full config.
   3. Confirm config.json created.
 

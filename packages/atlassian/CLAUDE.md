@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## What is atlassian?
 
-`@ogham/atlassian` is a Claude Code plugin that replaces the Python `mcp-atlassian` MCP server with a native TypeScript plugin. It provides 3 MCP tools (fetch, convert, setup), 4 domain skills, and 2 domain-expert agents for Jira and Confluence integration.
+`@ogham/atlassian` is a Claude Code plugin that replaces the Python `mcp-atlassian` MCP server with a native TypeScript plugin. It provides 3 MCP tools (fetch, convert, setup), 5 skills, and 3 agents for Jira and Confluence integration.
 
 ## Architecture
 
@@ -12,10 +12,12 @@ This file provides guidance to Claude Code when working with code in this reposi
 Dispatcher (Claude Code main agent)
     ├── Agent: jira        (Jira domain expert)
     ├── Agent: confluence   (Confluence domain expert)
-    ├── Skill: atlassian-setup      (auth/connection setup)
-    ├── Skill: atlassian-download   (attachment download)
-    ├── Skill: atlassian-jira       (Jira API domain router, 15 tool domains)
-    ├── Skill: atlassian-confluence (Confluence API domain router, 8 tool domains)
+    ├── Agent: media        (multimodal keyframe analysis)
+    ├── Skill: atlassian-setup           (auth/connection setup)
+    ├── Skill: atlassian-download        (attachment download)
+    ├── Skill: atlassian-media-analysis  (media keyframe extraction + analysis)
+    ├── Skill: atlassian-jira            (Jira API domain router, 15 tool domains)
+    ├── Skill: atlassian-confluence      (Confluence API domain router, 8 tool domains)
     └── MCP Server "tools"
             ├── fetch     (HTTP GET/POST/PUT/PATCH/DELETE)
             ├── convert   (ADF/Storage ↔ Markdown)
@@ -51,16 +53,16 @@ yarn format && yarn lint  # format + lint
 | `src/mcp/` | MCP server and 3 tool handlers |
 | `src/lib/` | Logger, file I/O |
 | `src/utils/` | URL helpers |
-| `agents/` | 2 domain-expert agents (jira, confluence) |
-| `skills/` | 4 skills with lazy reference loading |
+| `agents/` | 3 agents (jira, confluence, media) |
+| `skills/` | 5 skills with lazy reference loading |
 
-## Skills (4)
+## Skills (5)
 
-`atlassian-setup`, `atlassian-download`, `atlassian-jira`, `atlassian-confluence`
+`atlassian-setup`, `atlassian-download`, `atlassian-media-analysis`, `atlassian-jira`, `atlassian-confluence`
 
-## Agents (2)
+## Agents (3)
 
-`jira` (sonnet), `confluence` (sonnet)
+`jira` (sonnet), `confluence` (sonnet), `media` (sonnet, multimodal keyframe analysis)
 
 ## Development Notes
 

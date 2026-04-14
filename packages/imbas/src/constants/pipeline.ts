@@ -22,8 +22,6 @@ export const AGENT_CONSTRAINTS: Record<string, string> = {
     '[imbas:planner] Plan-then-Execute mode. Generate stories-manifest.json only — do NOT create Jira issues directly. All Jira writes go through /imbas:imbas-manifest.',
   engineer:
     '[imbas:engineer] Code exploration mode. Generate devplan-manifest.json only — do NOT modify source code or create Jira issues directly.',
-  media:
-    '[imbas:media] Media analysis mode. Read frame images, write analysis.json to .imbas/.temp/ only.',
 };
 
 /** Environment variable name for debug mode */

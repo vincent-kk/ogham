@@ -176,22 +176,21 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 # Compress a Jira issue into a structured summary comment
 /imbas:imbas-digest PROJ-123
 
-# Analyze media attachments (images, videos, GIFs)
-/imbas:imbas-fetch-media <url-or-path>
+# Analyze media attachments (images, videos, GIFs) — requires @ogham/atlassian
+/atlassian:atlassian-media-analysis <url-or-path>
 ```
 
 ---
 
 ## Agents
 
-imbas uses 4 specialized subagents, each with constrained roles:
+imbas uses 3 specialized subagents, each with constrained roles:
 
 | Agent | Model | Role | Phase |
 |-------|-------|------|-------|
 | `analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
 | `planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
 | `engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
-| `media` | Sonnet | Media analysis (keyframe extraction, visual description) | Fetch-media |
 
 Agent roles are enforced at runtime via the `SubagentStart` hook — agents cannot overstep their assigned responsibilities.
 
@@ -223,7 +222,7 @@ With the plugin active, these hooks fire **without user intervention**:
 | `/imbas:imbas-manifest` | Yes | Execute manifests to batch-create Jira issues |
 | `/imbas:imbas-status` | Yes | View run status, list runs, resume interrupted runs |
 | `/imbas:imbas-digest` | Yes | Compress a Jira issue into a structured summary |
-| `/imbas:imbas-fetch-media` | Yes | Download and analyze media attachments |
+
 | `/imbas:imbas-cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
 | `/imbas:imbas-read-issue` | No | Internal: Read and structure Jira issue context |
 

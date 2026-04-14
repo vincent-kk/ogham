@@ -1,4 +1,4 @@
-# imbas-fetch-media — Reference
+# atlassian-media-analysis — Reference
 
 ## Complete CLI Flag Reference
 

@@ -1,19 +1,26 @@
-# imbas-fetch-media — Tools Used, Agent Spawn & Caching
+# atlassian-media-analysis — Tools Used, Agent Spawn & Caching
 
 ## Tools Used
 
-### imbas MCP Tools
+### Atlassian MCP Tools
 
 | Tool | Usage |
 |------|-------|
-| `config_get` | Read media.temp_dir and media.scene_sieve_command from config |
+| `fetch` | Download binary attachments with `accept_format: "raw"` and `save_to_path` parameter |
 
-### Jira Operations ([OP:])
+### Download Protocol
 
-| Tool | Usage |
-|------|-------|
-| `[OP: get_confluence]` | Resolve Confluence page to find attachment URLs |
-| `[OP: fetch_attachment]` | Download binary attachments from Confluence/Jira URLs |
+For Atlassian URL downloads, use the `fetch` MCP tool:
+
+```
+Tool: fetch (method: GET)
+Params:
+  url: <attachment-content-url>
+  accept_format: "raw"
+  save_to_path: ".atlassian-temp/<filename>"
+```
+
+See [download-flow.md](../../atlassian-download/references/download-flow.md) for Jira/Confluence attachment URL resolution patterns.
 
 ## Agent Spawn
 
@@ -35,6 +42,5 @@ frame image data — only the text summary is returned.
 
 - Same file path with existing analysis.json -> return cached result (skip extraction)
 - Use `--force` flag to bypass cache and re-analyze
-- `.temp/` directory is gitignored
-- Manual cleanup via `/imbas:imbas-setup clear-temp`
+- `.atlassian-temp/` directory is gitignored
 - No automatic cleanup (no deletion without user consent)

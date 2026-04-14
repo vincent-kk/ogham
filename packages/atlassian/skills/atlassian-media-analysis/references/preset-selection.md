@@ -1,4 +1,4 @@
-# imbas-fetch-media — Preset Auto-Selection & File Structure
+# atlassian-media-analysis — Preset Auto-Selection & File Structure
 
 ## Preset Auto-Selection
 
@@ -24,7 +24,7 @@ See [presets/index.md](../presets/index.md) for the full decision matrix and all
 ## File Structure
 
 ```
-.imbas/.temp/
+.atlassian-temp/
 └── login-demo.mp4/
     ├── frames/
     │   ├── frame_0001.jpg

@@ -1,14 +1,14 @@
 ---
-name: imbas-fetch-media
+name: atlassian-media-analysis
 user_invocable: true
-description: "[imbas:imbas-fetch-media] Download images, videos, and GIFs from Confluence/Jira. For video/GIF files, extracts keyframes using scene-sieve and runs semantic analysis via `media` agent. Trigger: \"download media\", \"미디어 다운로드\", \"fetch attachment\", \"영상 분석\""
+description: "[atlassian:atlassian-media-analysis] Analyze media attachments from Confluence/Jira. Downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis via `media` agent. Trigger: \"analyze media\", \"media analysis\", \"미디어 분석\", \"영상 분석\", \"키프레임 추출\""
 argument-hint: "<url-or-path> [--analyze] [--preset NAME] [--force]"
-version: "1.1.0"
+version: "1.0.0"
 complexity: moderate
-plugin: imbas
+plugin: atlassian
 ---
 
-# imbas-fetch-media — Media Download & Analysis
+# atlassian-media-analysis — Media Download & Analysis
 
 Download images, videos, and GIFs from Atlassian sources or local paths. For video/GIF files,
 extracts visually meaningful keyframes via scene-sieve and runs semantic analysis through
@@ -19,12 +19,12 @@ the `media` subagent to produce a structured analysis.json.
 - User wants to understand visual content attached to Confluence pages or Jira issues
 - Downloading and analyzing screen recordings, demo videos, or GIF animations
 - Extracting keyframes from video attachments for LLM comprehension
-- Pre-processing media before running imbas:digest or imbas:validate
+- Pre-processing media before running digest or validation workflows
 
 ## Arguments
 
 ```
-/imbas:imbas-fetch-media <url-or-path> [--analyze] [--preset <name>] [--force]
+/atlassian:atlassian-media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
 
 <url-or-path>  : Confluence attachment URL, Jira attachment URL, or local file path
 --analyze      : For video/GIF, run scene-sieve extraction + `media` analysis
@@ -36,7 +36,7 @@ the `media` subagent to produce a structured analysis.json.
 
 - [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
 - [preset-selection.md](./references/preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
-- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: imbas/Jira operations ([OP:]), `media` agent details, cache behavior
+- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: atlassian MCP tools, `media` agent details, cache behavior
 - [scripts/probe.mjs](./scripts/probe.mjs) — Video probe + preset auto-selection script (run before extraction, cross-platform)
 - [presets/index.md](./presets/index.md) — Decision matrix and summary table for preset selection
   - [short-clip.md](./presets/short-clip.md) — <= 30s clips

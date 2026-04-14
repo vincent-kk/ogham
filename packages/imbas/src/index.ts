@@ -56,8 +56,6 @@ export {
   getCacheDir,
   getRunsDir,
   getRunDir,
-  getTempDir,
-  getMediaDir,
   generateRunId,
 } from './core/index.js';
 

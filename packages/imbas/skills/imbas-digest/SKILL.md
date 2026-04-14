@@ -18,7 +18,7 @@ plugin: imbas
 > 2. Terminal stage marker emitted: `Digest posted to <target>` or `Digest preview (dry-run)`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After `imbas-fetch-media` delegation returns — immediately continue to QA-Prompting compression
+> - After `atlassian-media-analysis` delegation returns — immediately continue to QA-Prompting compression
 > - State Tracking intermediate results — do NOT pause between tracker rounds
 > - Provider publish operation (Jira/GitHub/local) — chain the final confirmation in the same turn
 
@@ -28,6 +28,8 @@ Compresses an issue's full context (description, comment thread, and attached me
 into a structured summary and posts it as a comment or digest entry. Supports Jira,
 GitHub, and local providers. Designed for ticket closing or pre-analysis compression.
 Uses a State Tracking + QA-Prompting hybrid approach.
+
+> **Prerequisite**: Media analysis requires the `@ogham/atlassian` plugin. If not installed, media analysis steps are skipped with a warning.
 
 ## When to Use This Skill
 
@@ -43,7 +45,7 @@ Uses a State Tracking + QA-Prompting hybrid approach.
 
 <issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
 --preview    : Show digest without posting (dry run)
---no-media   : Skip automatic media fetching for Jira attachments (suppresses imbas-fetch-media invocation)
+--no-media   : Skip automatic media fetching for Jira attachments (suppresses atlassian-media-analysis invocation)
 ```
 
 ## References

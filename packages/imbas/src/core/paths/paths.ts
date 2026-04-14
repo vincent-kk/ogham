@@ -32,12 +32,3 @@ export function getRunDir(cwd: string, projectKey: string, runId: string): strin
   return join(getRunsDir(cwd, projectKey), runId);
 }
 
-/** Returns .imbas/.temp/ */
-export function getTempDir(cwd: string): string {
-  return join(getImbasRoot(cwd), '.temp');
-}
-
-/** Returns .imbas/.temp/<filename>/ */
-export function getMediaDir(cwd: string, filename: string): string {
-  return join(getTempDir(cwd), filename);
-}

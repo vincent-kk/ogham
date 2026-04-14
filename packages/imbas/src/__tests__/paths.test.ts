@@ -6,8 +6,6 @@ import {
   getProjectDir,
   getCacheDir,
   getRunDir,
-  getTempDir,
-  getMediaDir,
 } from '../core/paths/paths.js';
 
 describe('paths', () => {
@@ -28,16 +26,6 @@ describe('paths', () => {
   it('getRunDir returns cwd/.imbas/<projectKey>/runs/<runId>', () => {
     expect(getRunDir(cwd, 'PROJ', '20240101-001')).toBe(
       join(cwd, '.imbas', 'PROJ', 'runs', '20240101-001'),
-    );
-  });
-
-  it('getTempDir returns cwd/.imbas/.temp', () => {
-    expect(getTempDir(cwd)).toBe(join(cwd, '.imbas', '.temp'));
-  });
-
-  it('getMediaDir returns cwd/.imbas/.temp/<filename>', () => {
-    expect(getMediaDir(cwd, 'video.mp4')).toBe(
-      join(cwd, '.imbas', '.temp', 'video.mp4'),
     );
   });
 

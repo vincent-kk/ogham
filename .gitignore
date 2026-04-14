@@ -16,6 +16,7 @@ npm-debug.log*
 .claude/worktrees/
 .filid/review
 .maencof-lens/
+.atlassian-temp/
 
 # Yarn
 .yarn/*

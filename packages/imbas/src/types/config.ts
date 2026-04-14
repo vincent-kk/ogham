@@ -109,14 +109,6 @@ export const GithubConfigSchema = z.object({
 });
 export type GithubConfig = z.infer<typeof GithubConfigSchema>;
 
-export const MediaConfigSchema = z.object({
-  scene_sieve_command: z.string().default('npx -y @lumy-pack/scene-sieve'),
-  temp_dir: z.string().default('.imbas/.temp'),
-  max_frames: z.number().int().positive().default(20),
-  default_preset: z.string().default('medium-video'),
-});
-export type MediaConfig = z.infer<typeof MediaConfigSchema>;
-
 export const ImbasConfigSchema = z.object({
   version: z.string().default('1.0'),
   provider: ProviderSchema.default('jira'),
@@ -124,6 +116,5 @@ export const ImbasConfigSchema = z.object({
   defaults: DefaultsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
   github: GithubConfigSchema.optional(),
-  media: MediaConfigSchema.default({}),
 });
 export type ImbasConfig = z.infer<typeof ImbasConfigSchema>;

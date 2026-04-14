@@ -1,4 +1,4 @@
-# imbas-fetch-media — Complete Workflow
+# atlassian-media-analysis — Complete Workflow
 
 ```
 Step 1 — Resolve input
@@ -9,8 +9,8 @@ Step 1 — Resolve input
   - Validate file exists (URL or path)
 
 Step 2 — Download (if Atlassian URL)
-  - [OP: fetch_attachment] url=<url>
-  - Save binary to .imbas/.temp/<filename>
+  - See [download-flow.md](../../atlassian-download/references/download-flow.md) for full download protocol
+  - Use atlassian MCP `fetch` tool: method=GET, accept_format="raw", save_to_path=".atlassian-temp/<filename>"
   - If download fails -> error with auth check guidance
 
 Step 3 — Probe and select preset
@@ -21,19 +21,19 @@ Step 3 — Probe and select preset
   - See presets/index.md for the full decision matrix
 
 Step 4 — Image handling (no scene-sieve)
-  - If Atlassian URL: file already in .imbas/.temp/<filename>/
-  - If local file: copy to .imbas/.temp/<filename>/
+  - If Atlassian URL: file already in .atlassian-temp/<filename>/
+  - If local file: copy to .atlassian-temp/<filename>/
   - Return file path to caller
   - Caller reads the image directly via Read tool (multimodal)
   - No subagent needed. Skill completes here.
 
 Step 5 — Video/GIF handling
   a. Resolve temp directory:
-     - Read config: config_get("media.temp_dir") -> default ".temp"
-     - Target dir: .imbas/.temp/<filename>/
+     - Default temp dir: ".atlassian-temp"
+     - Target dir: .atlassian-temp/<filename>/
 
   b. Check cache:
-     - If .imbas/.temp/<filename>/analysis.json exists AND no --force flag
+     - If .atlassian-temp/<filename>/analysis.json exists AND no --force flag
        -> Return cached analysis summary
        -> Skip extraction and analysis
 
@@ -48,7 +48,7 @@ Step 5 — Video/GIF handling
        - frames directory absolute path
        - .metadata.json absolute path
        - analysis purpose/context from caller
-       - analysis.json save path: .imbas/.temp/<filename>/analysis.json
+       - analysis.json save path: .atlassian-temp/<filename>/analysis.json
      - Agent performs:
        1. Read .metadata.json -> frame list + timestamps
        2. Read frames sequentially (multimodal image recognition)
