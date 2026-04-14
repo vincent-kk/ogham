@@ -12,8 +12,8 @@ const ServiceFormFieldsSchema = z.object({
   base_url: z.string().url(),
   auth_type: AuthTypeSchema,
   username: z.string().optional(),
-  ssl_verify: z.boolean().optional(),
-  timeout: z.number().int().positive().optional(),
+  ssl_verify: z.boolean().nullable().optional(),
+  timeout: z.number().int().positive().nullable().optional(),
 });
 
 // --- Credential fields (form submission) ---
