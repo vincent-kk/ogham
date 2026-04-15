@@ -39,66 +39,61 @@ describe('handleAuthCheck', () => {
 
   it('Jira만 설정, connection_test:false — connection/user 필드 없이 서비스 정보 반환', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         username: 'user@test.com',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
 
     const result = await handleAuthCheck({ connection_test: false });
 
     expect(result.authenticated).toBe(true);
-    expect(result.services.jira).toEqual({
+    expect(result.services.jira).toEqual([{
       configured: true,
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
-    });
-    expect(result.services.jira).not.toHaveProperty('connection');
-    expect(result.services.jira).not.toHaveProperty('user');
+    }]);
+    expect(result.services.jira![0]).not.toHaveProperty('connection');
+    expect(result.services.jira![0]).not.toHaveProperty('user');
     expect(result.services.confluence).toBeUndefined();
   });
 
   it('Jira + Confluence 설정, connection_test:false — 두 서비스 모두 반환', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://jira.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
-      confluence: {
+      }],
+      confluence: [{
         base_url: 'https://confluence.atlassian.net',
-        auth_type: 'pat',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
 
     const result = await handleAuthCheck({ connection_test: false });
 
     expect(result.authenticated).toBe(true);
-    expect(result.services.jira).toMatchObject({ configured: true, base_url: 'https://jira.atlassian.net' });
-    expect(result.services.confluence).toMatchObject({ configured: true, base_url: 'https://confluence.atlassian.net' });
+    expect(result.services.jira![0]).toMatchObject({ configured: true, base_url: 'https://jira.atlassian.net' });
+    expect(result.services.confluence![0]).toMatchObject({ configured: true, base_url: 'https://confluence.atlassian.net' });
   });
 
   // --- complex ---
 
   it('Jira 연결 테스트 성공 — user.displayName/emailAddress 포함', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         username: 'user@test.com',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockLoadCredentials.mockResolvedValue({ jira: { basic: { api_token: 'secret' } } });
     mockTestConnection.mockResolvedValue({
@@ -111,8 +106,8 @@ describe('handleAuthCheck', () => {
 
     const result = await handleAuthCheck({ connection_test: true });
 
-    expect(result.services.jira?.connection?.success).toBe(true);
-    expect(result.services.jira?.user).toEqual({
+    expect(result.services.jira![0]?.connection?.success).toBe(true);
+    expect(result.services.jira![0]?.user).toEqual({
       displayName: 'Test User',
       emailAddress: 'test@example.com',
     });
@@ -120,14 +115,13 @@ describe('handleAuthCheck', () => {
 
   it('Confluence 연결 테스트 성공 — user는 null', async () => {
     mockLoadConfig.mockResolvedValue({
-      confluence: {
+      confluence: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         username: 'user@test.com',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockLoadCredentials.mockResolvedValue({ confluence: { basic: { api_token: 'secret' } } });
     mockTestConnection.mockResolvedValue({
@@ -139,19 +133,18 @@ describe('handleAuthCheck', () => {
 
     const result = await handleAuthCheck({ connection_test: true });
 
-    expect(result.services.confluence?.connection?.success).toBe(true);
-    expect(result.services.confluence?.user).toBeNull();
+    expect(result.services.confluence![0]?.connection?.success).toBe(true);
+    expect(result.services.confluence![0]?.user).toBeNull();
   });
 
   it('연결 테스트 실패 — connection.success:false, user:null', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockTestConnection.mockResolvedValue({
       service: 'jira',
@@ -161,20 +154,19 @@ describe('handleAuthCheck', () => {
 
     const result = await handleAuthCheck({ connection_test: true });
 
-    expect(result.services.jira?.connection?.success).toBe(false);
-    expect(result.services.jira?.connection?.message).toBe('Auth failed');
-    expect(result.services.jira?.user).toBeNull();
+    expect(result.services.jira![0]?.connection?.success).toBe(false);
+    expect(result.services.jira![0]?.connection?.message).toBe('Auth failed');
+    expect(result.services.jira![0]?.user).toBeNull();
   });
 
   it('자격 증명 없음 — testConnection이 빈 credentials로 호출됨', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockLoadCredentials.mockResolvedValue({});
     mockTestConnection.mockResolvedValue({
@@ -190,15 +182,14 @@ describe('handleAuthCheck', () => {
     );
   });
 
-  it('자격 증명 안전성 — 응답에 api_token/password/personal_token 값 노출 없음', async () => {
+  it('자격 증명 안전성 — 응답에 api_token/password 값 노출 없음', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockLoadCredentials.mockResolvedValue({
       jira: { basic: { api_token: 'super-secret-token', password: 'my-password' } },
@@ -218,13 +209,12 @@ describe('handleAuthCheck', () => {
 
   it('connection_test 기본값 false — testConnection 호출 안 됨', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
 
     await handleAuthCheck({});
@@ -234,13 +224,12 @@ describe('handleAuthCheck', () => {
 
   it('Jira response_body에 displayName 없음 — user.displayName은 undefined', async () => {
     mockLoadConfig.mockResolvedValue({
-      jira: {
+      jira: [{
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         is_cloud: true,
         ssl_verify: true,
         timeout: 30000,
-      },
+      }],
     });
     mockTestConnection.mockResolvedValue({
       service: 'jira',
@@ -251,7 +240,23 @@ describe('handleAuthCheck', () => {
 
     const result = await handleAuthCheck({ connection_test: true });
 
-    expect(result.services.jira?.user?.displayName).toBeUndefined();
-    expect(result.services.jira?.user?.emailAddress).toBe('only@email.com');
+    expect(result.services.jira![0]?.user?.displayName).toBeUndefined();
+    expect(result.services.jira![0]?.user?.emailAddress).toBe('only@email.com');
+  });
+
+  it('다중 사이트 — 여러 사이트 각각에 대한 엔트리 반환', async () => {
+    mockLoadConfig.mockResolvedValue({
+      jira: [
+        { base_url: 'https://site1.atlassian.net', is_cloud: true, ssl_verify: true, timeout: 30000 },
+        { base_url: 'https://site2.atlassian.net', is_cloud: true, ssl_verify: true, timeout: 30000 },
+      ],
+    });
+
+    const result = await handleAuthCheck({ connection_test: false });
+
+    expect(result.authenticated).toBe(true);
+    expect(result.services.jira).toHaveLength(2);
+    expect(result.services.jira![0]?.base_url).toBe('https://site1.atlassian.net');
+    expect(result.services.jira![1]?.base_url).toBe('https://site2.atlassian.net');
   });
 });

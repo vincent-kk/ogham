@@ -7,8 +7,6 @@
     'JIRA_URL', 'CONFLUENCE_URL',
     'JIRA_USERNAME', 'CONFLUENCE_USERNAME',
     'JIRA_API_TOKEN', 'CONFLUENCE_API_TOKEN',
-    'JIRA_PERSONAL_TOKEN', 'CONFLUENCE_PERSONAL_TOKEN',
-    'ATLASSIAN_OAUTH_CLIENT_ID', 'ATLASSIAN_OAUTH_CLIENT_SECRET',
     'JIRA_SSL_VERIFY', 'CONFLUENCE_SSL_VERIFY',
     'JIRA_TIMEOUT', 'CONFLUENCE_TIMEOUT',
   ];
@@ -189,56 +187,21 @@
 
   function fillCloudFields(env, app) {
     var jiraUrl = env['JIRA_URL'] || env['CONFLUENCE_URL'] || '';
-    app.setField('cloud.jira.base_url', jiraUrl);
-
-    var authType = detectAuthType(env, 'JIRA');
-    app.setRadio('cloud-auth', authType);
-    app.showAuthPanel('cloud', authType);
-
-    if (authType === 'basic') {
-      app.setField('cloud.jira.username', env['JIRA_USERNAME'] || env['CONFLUENCE_USERNAME'] || '');
-      app.setField('cloud.jira.api_token', env['JIRA_API_TOKEN'] || env['CONFLUENCE_API_TOKEN'] || '');
-    } else if (authType === 'pat') {
-      app.setField('cloud.jira.personal_token', env['JIRA_PERSONAL_TOKEN'] || env['CONFLUENCE_PERSONAL_TOKEN'] || '');
-    } else if (authType === 'oauth') {
-      app.setField('cloud.jira.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('cloud.jira.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
-
-    fillAdvanced(env, 'cloud.jira', 'JIRA', app);
+    app.setField('cloud.sites.0.base_url', jiraUrl);
+    app.setField('cloud.username', env['JIRA_USERNAME'] || env['CONFLUENCE_USERNAME'] || '');
+    app.setField('cloud.api_token', env['JIRA_API_TOKEN'] || env['CONFLUENCE_API_TOKEN'] || '');
+    fillAdvanced(env, 'cloud', 'JIRA', app);
   }
 
   function fillOnPremFields(env, app) {
     app.setField('onprem.jira.base_url', env['JIRA_URL'] || '');
-    var jiraAuth = detectAuthType(env, 'JIRA');
-    app.setRadio('onprem-jira-auth', jiraAuth);
-    app.showAuthPanel('onprem-jira', jiraAuth);
-
-    if (jiraAuth === 'basic') {
-      app.setField('onprem.jira.username', env['JIRA_USERNAME'] || '');
-      app.setField('onprem.jira.api_token', env['JIRA_API_TOKEN'] || '');
-    } else if (jiraAuth === 'pat') {
-      app.setField('onprem.jira.personal_token', env['JIRA_PERSONAL_TOKEN'] || '');
-    } else if (jiraAuth === 'oauth') {
-      app.setField('onprem.jira.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('onprem.jira.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
+    app.setField('onprem.jira.username', env['JIRA_USERNAME'] || '');
+    app.setField('onprem.jira.api_token', env['JIRA_API_TOKEN'] || '');
     fillAdvanced(env, 'onprem.jira', 'JIRA', app);
 
     app.setField('onprem.confluence.base_url', env['CONFLUENCE_URL'] || '');
-    var confAuth = detectAuthType(env, 'CONFLUENCE');
-    app.setRadio('onprem-conf-auth', confAuth);
-    app.showAuthPanel('onprem-conf', confAuth);
-
-    if (confAuth === 'basic') {
-      app.setField('onprem.confluence.username', env['CONFLUENCE_USERNAME'] || '');
-      app.setField('onprem.confluence.api_token', env['CONFLUENCE_API_TOKEN'] || '');
-    } else if (confAuth === 'pat') {
-      app.setField('onprem.confluence.personal_token', env['CONFLUENCE_PERSONAL_TOKEN'] || '');
-    } else if (confAuth === 'oauth') {
-      app.setField('onprem.confluence.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('onprem.confluence.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
+    app.setField('onprem.confluence.username', env['CONFLUENCE_USERNAME'] || '');
+    app.setField('onprem.confluence.api_token', env['CONFLUENCE_API_TOKEN'] || '');
     fillAdvanced(env, 'onprem.confluence', 'CONFLUENCE', app);
   }
 
@@ -254,12 +217,6 @@
         app.setField(prefix + '.timeout', String(secs * 1000));
       }
     }
-  }
-
-  function detectAuthType(env, service) {
-    if (env['ATLASSIAN_OAUTH_CLIENT_ID']) return 'oauth';
-    if (env[service + '_PERSONAL_TOKEN']) return 'pat';
-    return 'basic';
   }
 
   // --- Toast ---

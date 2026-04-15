@@ -7,6 +7,7 @@
     tab: 'cloud',
     editMode: false,
     loading: false,
+    cloudSiteCount: 1,
   };
 
   // --- Animation Helper ---
@@ -21,8 +22,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     initApp();
     bindTabs();
-    bindAuthTypeRadios();
     bindButtons();
+    bindAddSite();
     loadStatus();
   });
 
@@ -54,39 +55,39 @@
     activateTab(dt === 'on_premise' ? 'on-premise' : 'cloud');
 
     if (dt === 'cloud' && data.jira) {
-      fillServiceFields('cloud.jira', data.jira);
+      // Multi-site: jira is an array of { base_url, is_cloud }
+      var sites = Array.isArray(data.jira) ? data.jira : [data.jira];
+      for (var i = 0; i < sites.length; i++) {
+        if (i > 0) addSiteEntry();
+        setField('cloud.sites.' + i + '.base_url', sites[i].base_url || '');
+      }
+      // Credentials are account-level (first site has them)
+      var first = sites[0] || {};
+      setField('cloud.username', first.username || '');
+      setField('cloud.api_token', first.api_token ? MASK : '');
+      if (first.ssl_verify !== undefined) setCheckbox('cloud.ssl_verify', first.ssl_verify);
+      if (first.timeout) setField('cloud.timeout', String(first.timeout));
     } else if (dt === 'on_premise') {
-      if (data.jira) fillServiceFields('onprem.jira', data.jira);
-      if (data.confluence) fillServiceFields('onprem.confluence', data.confluence);
+      if (data.jira) {
+        var jira = Array.isArray(data.jira) ? data.jira[0] : data.jira;
+        if (jira) fillOnPremFields('onprem.jira', jira);
+      }
+      if (data.confluence) {
+        var conf = Array.isArray(data.confluence) ? data.confluence[0] : data.confluence;
+        if (conf) fillOnPremFields('onprem.confluence', conf);
+      }
     }
   }
 
-  function fillServiceFields(prefix, svc) {
+  function fillOnPremFields(prefix, svc) {
     setField(prefix + '.base_url', svc.base_url || '');
     setField(prefix + '.username', svc.username || '');
     setField(prefix + '.api_token', svc.api_token ? MASK : '');
-    setField(prefix + '.personal_token', svc.personal_token ? MASK : '');
-    setField(prefix + '.client_id', svc.client_id || '');
-    setField(prefix + '.client_secret', svc.client_secret ? MASK : '');
-    setField(prefix + '.access_token', svc.access_token ? MASK : '');
-    setField(prefix + '.refresh_token', svc.refresh_token ? MASK : '');
     if (svc.ssl_verify !== undefined) setCheckbox(prefix + '.ssl_verify', svc.ssl_verify);
     if (svc.timeout) setField(prefix + '.timeout', String(svc.timeout));
-
-    var authType = svc.auth_type || detectAuthType(svc);
-    var radioPrefix = prefix === 'cloud.jira' ? 'cloud' :
-      prefix === 'onprem.jira' ? 'onprem-jira' : 'onprem-conf';
-    setRadio(radioPrefix + '-auth', authType);
-    showAuthPanel(radioPrefix, authType);
   }
 
   var MASK = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
-
-  function detectAuthType(svc) {
-    if (svc.client_id) return 'oauth';
-    if (svc.personal_token) return 'pat';
-    return 'basic';
-  }
 
   // --- Tab Switching ---
   function bindTabs() {
@@ -111,31 +112,32 @@
     });
   }
 
-  // --- Auth Type Radios ---
-  function bindAuthTypeRadios() {
-    var groups = [
-      { name: 'cloud-auth', prefix: 'cloud' },
-      { name: 'onprem-jira-auth', prefix: 'onprem-jira' },
-      { name: 'onprem-conf-auth', prefix: 'onprem-conf' },
-    ];
-    groups.forEach(function (g) {
-      document.querySelectorAll('input[name="' + g.name + '"]').forEach(function (radio) {
-        radio.addEventListener('change', function () {
-          showAuthPanel(g.prefix, radio.value);
-        });
-      });
-    });
+  // --- Multi-site Cloud ---
+  function bindAddSite() {
+    var btn = document.getElementById('btn-add-site');
+    if (btn) btn.addEventListener('click', addSiteEntry);
   }
 
-  function showAuthPanel(prefix, authType) {
-    ['basic', 'pat', 'oauth'].forEach(function (type) {
-      var panel = document.querySelector('[data-auth-panel="' + prefix + '-' + type + '"]');
-      if (!panel) return;
-      if (type === authType) {
-        animateIn(panel);
-      } else {
-        panel.classList.add('is-hidden');
-      }
+  function addSiteEntry() {
+    var container = document.getElementById('cloud-sites-container');
+    if (!container) return;
+    var idx = state.cloudSiteCount++;
+    var entry = document.createElement('div');
+    entry.className = 'site-entry';
+    entry.dataset.siteIndex = String(idx);
+    entry.innerHTML = [
+      '<div class="form-group">',
+      '  <label>Site Name <span class="required">*</span>',
+      '    <button type="button" class="btn-remove-site" data-remove-index="' + idx + '">&times;</button>',
+      '  </label>',
+      '  <input type="text" data-field="cloud.sites.' + idx + '.base_url"',
+      '    placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">',
+      '  <span class="field-error" hidden></span>',
+      '</div>',
+    ].join('\n');
+    container.appendChild(entry);
+    entry.querySelector('.btn-remove-site').addEventListener('click', function () {
+      entry.remove();
     });
   }
 
@@ -154,6 +156,13 @@
     var data = collectFormData();
     var valid = true;
 
+    function requireField(fieldPath, value) {
+      if (!value || !value.trim()) {
+        showError(fieldPath, 'This field is required.');
+        valid = false;
+      }
+    }
+
     function requireUrl(fieldPath, value) {
       if (!value || !value.trim()) {
         showError(fieldPath, 'This field is required.');
@@ -164,20 +173,12 @@
       }
     }
 
-    function requireField(fieldPath, value) {
-      if (!value || !value.trim()) {
-        showError(fieldPath, 'This field is required.');
-        valid = false;
-      }
-    }
-
     function requireCloudSite(fieldPath, value) {
       if (!value || !value.trim()) {
         showError(fieldPath, 'This field is required.');
         valid = false;
       } else {
         var v = value.trim();
-        // Accept full URL or bare site name (alphanumeric + hyphens)
         var isUrl = /^https?:\/\//i.test(v);
         var isSiteName = /^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(v);
         if (!isUrl && !isSiteName) {
@@ -187,29 +188,23 @@
       }
     }
 
-    function validateService(prefix, svc, isCloud) {
-      if (isCloud) {
-        requireCloudSite(prefix + '.base_url', svc.base_url);
-      } else {
-        requireUrl(prefix + '.base_url', svc.base_url);
-      }
-      if (svc.auth_type === 'basic') {
-        requireField(prefix + '.username', svc.username);
-        requireField(prefix + '.api_token', svc.api_token);
-      } else if (svc.auth_type === 'pat') {
-        requireField(prefix + '.personal_token', svc.personal_token);
-      } else if (svc.auth_type === 'oauth') {
-        requireField(prefix + '.client_id', svc.client_id);
-        requireField(prefix + '.client_secret', svc.client_secret);
-        requireField(prefix + '.access_token', svc.access_token);
-      }
-    }
-
     if (data.deployment_type === 'cloud') {
-      validateService('cloud.jira', data.jira, true);
+      // Validate each site URL
+      var siteEntries = document.querySelectorAll('#cloud-sites-container .site-entry');
+      siteEntries.forEach(function (entry) {
+        var idx = entry.dataset.siteIndex;
+        var fieldPath = 'cloud.sites.' + idx + '.base_url';
+        requireCloudSite(fieldPath, getField(fieldPath));
+      });
+      requireField('cloud.username', data.jira ? data.jira.username : '');
+      requireField('cloud.api_token', data.jira ? data.jira.api_token : '');
     } else {
-      validateService('onprem.jira', data.jira, false);
-      validateService('onprem.confluence', data.confluence, false);
+      requireUrl('onprem.jira.base_url', data.jira ? data.jira.base_url : '');
+      requireField('onprem.jira.username', data.jira ? data.jira.username : '');
+      requireField('onprem.jira.api_token', data.jira ? data.jira.api_token : '');
+      requireUrl('onprem.confluence.base_url', data.confluence ? data.confluence.base_url : '');
+      requireField('onprem.confluence.username', data.confluence ? data.confluence.username : '');
+      requireField('onprem.confluence.api_token', data.confluence ? data.confluence.api_token : '');
     }
 
     return valid;
@@ -244,25 +239,6 @@
     var isCloud = state.tab === 'cloud';
     var deployType = isCloud ? 'cloud' : 'on_premise';
 
-    function getServiceData(prefix) {
-      var radioName = prefix === 'cloud.jira' ? 'cloud-auth' :
-        prefix === 'onprem.jira' ? 'onprem-jira-auth' : 'onprem-conf-auth';
-      var authType = getRadioValue(radioName) || 'basic';
-      return {
-        base_url: getField(prefix + '.base_url'),
-        auth_type: authType,
-        username: getField(prefix + '.username'),
-        api_token: getField(prefix + '.api_token'),
-        personal_token: getField(prefix + '.personal_token'),
-        client_id: getField(prefix + '.client_id'),
-        client_secret: getField(prefix + '.client_secret'),
-        access_token: getField(prefix + '.access_token'),
-        refresh_token: getField(prefix + '.refresh_token'),
-        ssl_verify: getCheckbox(prefix + '.ssl_verify'),
-        timeout: getNumberField(prefix + '.timeout'),
-      };
-    }
-
     function normalizeCloudUrl(value) {
       if (!value) return value;
       var v = value.trim();
@@ -271,14 +247,55 @@
     }
 
     if (isCloud) {
-      var jira = getServiceData('cloud.jira');
-      jira.base_url = normalizeCloudUrl(jira.base_url);
-      return { deployment_type: deployType, jira: jira, confluence: jira };
+      // Collect all site URLs
+      var siteUrls = [];
+      var siteEntries = document.querySelectorAll('#cloud-sites-container .site-entry');
+      siteEntries.forEach(function (entry) {
+        var idx = entry.dataset.siteIndex;
+        var url = getField('cloud.sites.' + idx + '.base_url');
+        if (url) siteUrls.push(normalizeCloudUrl(url));
+      });
+
+      var username = getField('cloud.username');
+      var apiToken = getField('cloud.api_token');
+      var sslVerify = getCheckbox('cloud.ssl_verify');
+      var timeout = getNumberField('cloud.timeout');
+
+      return {
+        deployment_type: deployType,
+        cloud_sites: siteUrls,
+        jira: {
+          base_url: siteUrls[0] || '',
+          username: username,
+          api_token: apiToken,
+          ssl_verify: sslVerify,
+          timeout: timeout,
+        },
+        confluence: {
+          base_url: siteUrls[0] || '',
+          username: username,
+          api_token: apiToken,
+          ssl_verify: sslVerify,
+          timeout: timeout,
+        },
+      };
     } else {
       return {
         deployment_type: deployType,
-        jira: getServiceData('onprem.jira'),
-        confluence: getServiceData('onprem.confluence'),
+        jira: {
+          base_url: getField('onprem.jira.base_url'),
+          username: getField('onprem.jira.username'),
+          api_token: getField('onprem.jira.api_token'),
+          ssl_verify: getCheckbox('onprem.jira.ssl_verify'),
+          timeout: getNumberField('onprem.jira.timeout'),
+        },
+        confluence: {
+          base_url: getField('onprem.confluence.base_url'),
+          username: getField('onprem.confluence.username'),
+          api_token: getField('onprem.confluence.api_token'),
+          ssl_verify: getCheckbox('onprem.confluence.ssl_verify'),
+          timeout: getNumberField('onprem.confluence.timeout'),
+        },
       };
     }
   }
@@ -388,22 +405,11 @@
     return isNaN(n) ? null : n;
   }
 
-  function getRadioValue(name) {
-    var el = document.querySelector('input[name="' + name + '"]:checked');
-    return el ? el.value : null;
-  }
-
-  function setRadio(name, value) {
-    var el = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (el) el.checked = true;
-  }
-
   // Expose fill helpers for json-import.js
   window.__setupApp = {
     setField: setField,
     setCheckbox: setCheckbox,
-    setRadio: setRadio,
-    showAuthPanel: showAuthPanel,
     activateTab: activateTab,
+    addSiteEntry: addSiteEntry,
   };
 })();

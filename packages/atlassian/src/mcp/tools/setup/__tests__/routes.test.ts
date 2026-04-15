@@ -15,7 +15,6 @@ const VALID_JIRA_FORM = {
   deployment_type: 'cloud',
   jira: {
     base_url: 'https://test.atlassian.net',
-    auth_type: 'basic',
     username: 'user@test.com',
     api_token: 'mytoken',
   },
@@ -152,7 +151,7 @@ describe('createRouteHandler', () => {
 
     const res = await postJson(baseUrl + '/submit', {
       deployment_type: 'cloud',
-      jira: { base_url: 'not-a-url', auth_type: 'basic' },
+      jira: { base_url: 'not-a-url' },
     });
     expect(res.status).toBe(400);
     const data = await res.json();
@@ -167,7 +166,7 @@ describe('createRouteHandler', () => {
 
     const res = await postJson(baseUrl + '/test', {
       deployment_type: 'cloud',
-      jira: { base_url: 'bad-url', auth_type: 'invalid-type' },
+      jira: { base_url: 'bad-url' },
     });
     expect(res.status).toBe(400);
     const data = await res.json();
@@ -189,7 +188,6 @@ describe('createRouteHandler', () => {
       deployment_type: 'cloud',
       jira: {
         base_url: 'https://test.atlassian.net',
-        auth_type: 'basic',
         username: 'user@test.com',
         api_token: MASK,
       },
@@ -203,13 +201,12 @@ describe('createRouteHandler', () => {
   it('GET /status — config 있으면 configured:true와 서비스 상세 반환', async () => {
     const ctx = makeContext({
       loadConfig: vi.fn().mockResolvedValue({
-        jira: {
+        jira: [{
           base_url: 'https://test.atlassian.net',
-          auth_type: 'basic',
           is_cloud: true,
           ssl_verify: true,
           timeout: 30000,
-        },
+        }],
       }),
     });
     const { server: s, baseUrl } = await startTestServer(ctx);
@@ -218,7 +215,7 @@ describe('createRouteHandler', () => {
     const res = await fetch(baseUrl + '/status');
     const data = await res.json();
     expect(data.configured).toBe(true);
-    expect(data.jira?.base_url).toBe('https://test.atlassian.net');
+    expect(data.jira?.[0]?.base_url).toBe('https://test.atlassian.net');
   });
 
   it('POST /submit 성공 — closeServer 호출됨', async () => {
@@ -242,5 +239,17 @@ describe('createRouteHandler', () => {
     expect(res.status).toBe(404);
     const data = await res.json();
     expect(data.success).toBe(false);
+  });
+
+  it('POST /submit — config가 배열로 저장됨', async () => {
+    const ctx = makeContext();
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    await postJson(baseUrl + '/submit', VALID_JIRA_FORM);
+
+    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
+    expect(Array.isArray(savedConfig?.jira)).toBe(true);
+    expect(savedConfig?.jira?.[0]?.base_url).toBe('https://test.atlassian.net');
   });
 });

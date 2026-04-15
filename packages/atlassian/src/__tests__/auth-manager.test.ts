@@ -60,37 +60,15 @@ describe('auth-manager', () => {
       const creds: ServiceCredentials = {
         basic: { api_token: 'my-token' },
       };
-      const result = buildAuthHeader('basic', creds, 'user@test.com');
+      const result = buildAuthHeader(creds, 'user@test.com');
       expect(result).not.toBeNull();
       expect(result!.type).toBe('basic');
       const decoded = Buffer.from(result!.value.replace('Basic ', ''), 'base64').toString();
       expect(decoded).toBe('user@test.com:my-token');
     });
 
-    it('builds PAT bearer header', () => {
-      const creds: ServiceCredentials = {
-        pat: { personal_token: 'NjM2-pat-token' },
-      };
-      const result = buildAuthHeader('pat', creds);
-      expect(result).not.toBeNull();
-      expect(result!.value).toBe('Bearer NjM2-pat-token');
-    });
-
-    it('builds OAuth bearer header', () => {
-      const creds: ServiceCredentials = {
-        oauth: {
-          client_id: 'abc',
-          client_secret: 'secret',
-          access_token: 'eyJ-access',
-        },
-      };
-      const result = buildAuthHeader('oauth', creds);
-      expect(result).not.toBeNull();
-      expect(result!.value).toBe('Bearer eyJ-access');
-    });
-
     it('returns null when credentials are missing', () => {
-      const result = buildAuthHeader('basic', {}, 'user@test.com');
+      const result = buildAuthHeader({}, 'user@test.com');
       expect(result).toBeNull();
     });
 
@@ -98,8 +76,18 @@ describe('auth-manager', () => {
       const creds: ServiceCredentials = {
         basic: { api_token: 'my-token' },
       };
-      const result = buildAuthHeader('basic', creds);
+      const result = buildAuthHeader(creds);
       expect(result).toBeNull();
+    });
+
+    it('uses password when api_token is absent', () => {
+      const creds: ServiceCredentials = {
+        basic: { password: 'my-password' },
+      };
+      const result = buildAuthHeader(creds, 'user@test.com');
+      expect(result).not.toBeNull();
+      const decoded = Buffer.from(result!.value.replace('Basic ', ''), 'base64').toString();
+      expect(decoded).toBe('user@test.com:my-password');
     });
   });
 });

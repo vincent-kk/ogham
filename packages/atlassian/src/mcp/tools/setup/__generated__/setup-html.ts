@@ -481,7 +481,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       </div>
 
       <div class="tab-bar">
-        <button class="tab-btn active" data-tab="cloud">Cloud (Single Endpoint)</button>
+        <button class="tab-btn active" data-tab="cloud">Cloud</button>
         <button class="tab-btn" data-tab="on-premise">On-premise (Separate Endpoints)</button>
       </div>
 
@@ -490,69 +490,29 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
         <!-- Cloud Tab -->
         <div class="tab-panel" data-panel="cloud">
           <div class="form-section">
+
+            <div id="cloud-sites-container">
+              <div class="site-entry" data-site-index="0">
+                <div class="form-group">
+                  <label>Site Name <span class="required">*</span></label>
+                  <input type="text" data-field="cloud.sites.0.base_url"
+                    placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">
+                  <span class="field-error" hidden></span>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-link" id="btn-add-site">+ Add another site</button>
+
             <div class="form-group">
-              <label>Site Name <span class="required">*</span></label>
-              <input type="text" data-field="cloud.jira.base_url"
-                placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">
+              <label>Username (Email) <span class="required">*</span></label>
+              <input type="text" data-field="cloud.username" autocomplete="off">
               <span class="field-error" hidden></span>
             </div>
-
             <div class="form-group">
-              <label>Auth Type</label>
-              <div class="auth-type-group">
-                <label class="radio-pill">
-                  <input type="radio" name="cloud-auth" value="basic" checked> Basic
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="cloud-auth" value="pat"> PAT
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="cloud-auth" value="oauth"> OAuth 2.0
-                </label>
-              </div>
-            </div>
-
-            <div class="auth-fields" data-auth-panel="cloud-basic">
-              <div class="form-group">
-                <label>Username <span class="required">*</span></label>
-                <input type="text" data-field="cloud.jira.username" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>API Token <span class="required">*</span></label>
-                <input type="password" data-field="cloud.jira.api_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="cloud-pat">
-              <div class="form-group">
-                <label>Personal Token <span class="required">*</span></label>
-                <input type="password" data-field="cloud.jira.personal_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="cloud-oauth">
-              <div class="form-group">
-                <label>Client ID <span class="required">*</span></label>
-                <input type="text" data-field="cloud.jira.client_id" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Client Secret <span class="required">*</span></label>
-                <input type="password" data-field="cloud.jira.client_secret" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Access Token <span class="required">*</span></label>
-                <input type="password" data-field="cloud.jira.access_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Refresh Token <span class="optional">(optional)</span></label>
-                <input type="password" data-field="cloud.jira.refresh_token" autocomplete="off">
-              </div>
+              <label>API Token <span class="required">*</span></label>
+              <input type="password" data-field="cloud.api_token" autocomplete="off">
+              <span class="field-error" hidden></span>
             </div>
 
             <details class="advanced-accordion">
@@ -560,13 +520,13 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
               <div class="advanced-body">
                 <div class="form-group checkbox-group">
                   <label>
-                    <input type="checkbox" data-field="cloud.jira.ssl_verify" checked>
+                    <input type="checkbox" data-field="cloud.ssl_verify" checked>
                     SSL Verify
                   </label>
                 </div>
                 <div class="form-group">
                   <label>Timeout (ms)</label>
-                  <input type="number" data-field="cloud.jira.timeout" placeholder="30000">
+                  <input type="number" data-field="cloud.timeout" placeholder="30000">
                 </div>
               </div>
             </details>
@@ -587,61 +547,14 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
             </div>
 
             <div class="form-group">
-              <label>Auth Type</label>
-              <div class="auth-type-group">
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-jira-auth" value="basic" checked> Basic
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-jira-auth" value="pat"> PAT
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-jira-auth" value="oauth"> OAuth 2.0
-                </label>
-              </div>
+              <label>Username <span class="required">*</span></label>
+              <input type="text" data-field="onprem.jira.username" autocomplete="off">
+              <span class="field-error" hidden></span>
             </div>
-
-            <div class="auth-fields" data-auth-panel="onprem-jira-basic">
-              <div class="form-group">
-                <label>Username <span class="required">*</span></label>
-                <input type="text" data-field="onprem.jira.username" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>API Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.jira.api_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-pat">
-              <div class="form-group">
-                <label>Personal Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.jira.personal_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="onprem-jira-oauth">
-              <div class="form-group">
-                <label>Client ID <span class="required">*</span></label>
-                <input type="text" data-field="onprem.jira.client_id" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Client Secret <span class="required">*</span></label>
-                <input type="password" data-field="onprem.jira.client_secret" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Access Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.jira.access_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Refresh Token <span class="optional">(optional)</span></label>
-                <input type="password" data-field="onprem.jira.refresh_token" autocomplete="off">
-              </div>
+            <div class="form-group">
+              <label>API Token <span class="required">*</span></label>
+              <input type="password" data-field="onprem.jira.api_token" autocomplete="off">
+              <span class="field-error" hidden></span>
             </div>
 
             <details class="advanced-accordion">
@@ -672,61 +585,14 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
             </div>
 
             <div class="form-group">
-              <label>Auth Type</label>
-              <div class="auth-type-group">
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-conf-auth" value="basic" checked> Basic
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-conf-auth" value="pat"> PAT
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="onprem-conf-auth" value="oauth"> OAuth 2.0
-                </label>
-              </div>
+              <label>Username <span class="required">*</span></label>
+              <input type="text" data-field="onprem.confluence.username" autocomplete="off">
+              <span class="field-error" hidden></span>
             </div>
-
-            <div class="auth-fields" data-auth-panel="onprem-conf-basic">
-              <div class="form-group">
-                <label>Username <span class="required">*</span></label>
-                <input type="text" data-field="onprem.confluence.username" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>API Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.confluence.api_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-pat">
-              <div class="form-group">
-                <label>Personal Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.confluence.personal_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-            </div>
-
-            <div class="auth-fields is-hidden" data-auth-panel="onprem-conf-oauth">
-              <div class="form-group">
-                <label>Client ID <span class="required">*</span></label>
-                <input type="text" data-field="onprem.confluence.client_id" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Client Secret <span class="required">*</span></label>
-                <input type="password" data-field="onprem.confluence.client_secret" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Access Token <span class="required">*</span></label>
-                <input type="password" data-field="onprem.confluence.access_token" autocomplete="off">
-                <span class="field-error" hidden></span>
-              </div>
-              <div class="form-group">
-                <label>Refresh Token <span class="optional">(optional)</span></label>
-                <input type="password" data-field="onprem.confluence.refresh_token" autocomplete="off">
-              </div>
+            <div class="form-group">
+              <label>API Token <span class="required">*</span></label>
+              <input type="password" data-field="onprem.confluence.api_token" autocomplete="off">
+              <span class="field-error" hidden></span>
             </div>
 
             <details class="advanced-accordion">
@@ -782,6 +648,7 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     tab: 'cloud',
     editMode: false,
     loading: false,
+    cloudSiteCount: 1,
   };
 
   // --- Animation Helper ---
@@ -796,8 +663,8 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
   document.addEventListener('DOMContentLoaded', function () {
     initApp();
     bindTabs();
-    bindAuthTypeRadios();
     bindButtons();
+    bindAddSite();
     loadStatus();
   });
 
@@ -829,39 +696,39 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     activateTab(dt === 'on_premise' ? 'on-premise' : 'cloud');
 
     if (dt === 'cloud' && data.jira) {
-      fillServiceFields('cloud.jira', data.jira);
+      // Multi-site: jira is an array of { base_url, is_cloud }
+      var sites = Array.isArray(data.jira) ? data.jira : [data.jira];
+      for (var i = 0; i < sites.length; i++) {
+        if (i > 0) addSiteEntry();
+        setField('cloud.sites.' + i + '.base_url', sites[i].base_url || '');
+      }
+      // Credentials are account-level (first site has them)
+      var first = sites[0] || {};
+      setField('cloud.username', first.username || '');
+      setField('cloud.api_token', first.api_token ? MASK : '');
+      if (first.ssl_verify !== undefined) setCheckbox('cloud.ssl_verify', first.ssl_verify);
+      if (first.timeout) setField('cloud.timeout', String(first.timeout));
     } else if (dt === 'on_premise') {
-      if (data.jira) fillServiceFields('onprem.jira', data.jira);
-      if (data.confluence) fillServiceFields('onprem.confluence', data.confluence);
+      if (data.jira) {
+        var jira = Array.isArray(data.jira) ? data.jira[0] : data.jira;
+        if (jira) fillOnPremFields('onprem.jira', jira);
+      }
+      if (data.confluence) {
+        var conf = Array.isArray(data.confluence) ? data.confluence[0] : data.confluence;
+        if (conf) fillOnPremFields('onprem.confluence', conf);
+      }
     }
   }
 
-  function fillServiceFields(prefix, svc) {
+  function fillOnPremFields(prefix, svc) {
     setField(prefix + '.base_url', svc.base_url || '');
     setField(prefix + '.username', svc.username || '');
     setField(prefix + '.api_token', svc.api_token ? MASK : '');
-    setField(prefix + '.personal_token', svc.personal_token ? MASK : '');
-    setField(prefix + '.client_id', svc.client_id || '');
-    setField(prefix + '.client_secret', svc.client_secret ? MASK : '');
-    setField(prefix + '.access_token', svc.access_token ? MASK : '');
-    setField(prefix + '.refresh_token', svc.refresh_token ? MASK : '');
     if (svc.ssl_verify !== undefined) setCheckbox(prefix + '.ssl_verify', svc.ssl_verify);
     if (svc.timeout) setField(prefix + '.timeout', String(svc.timeout));
-
-    var authType = svc.auth_type || detectAuthType(svc);
-    var radioPrefix = prefix === 'cloud.jira' ? 'cloud' :
-      prefix === 'onprem.jira' ? 'onprem-jira' : 'onprem-conf';
-    setRadio(radioPrefix + '-auth', authType);
-    showAuthPanel(radioPrefix, authType);
   }
 
   var MASK = '\\u2022\\u2022\\u2022\\u2022\\u2022\\u2022\\u2022\\u2022\\u2022\\u2022';
-
-  function detectAuthType(svc) {
-    if (svc.client_id) return 'oauth';
-    if (svc.personal_token) return 'pat';
-    return 'basic';
-  }
 
   // --- Tab Switching ---
   function bindTabs() {
@@ -886,31 +753,32 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     });
   }
 
-  // --- Auth Type Radios ---
-  function bindAuthTypeRadios() {
-    var groups = [
-      { name: 'cloud-auth', prefix: 'cloud' },
-      { name: 'onprem-jira-auth', prefix: 'onprem-jira' },
-      { name: 'onprem-conf-auth', prefix: 'onprem-conf' },
-    ];
-    groups.forEach(function (g) {
-      document.querySelectorAll('input[name="' + g.name + '"]').forEach(function (radio) {
-        radio.addEventListener('change', function () {
-          showAuthPanel(g.prefix, radio.value);
-        });
-      });
-    });
+  // --- Multi-site Cloud ---
+  function bindAddSite() {
+    var btn = document.getElementById('btn-add-site');
+    if (btn) btn.addEventListener('click', addSiteEntry);
   }
 
-  function showAuthPanel(prefix, authType) {
-    ['basic', 'pat', 'oauth'].forEach(function (type) {
-      var panel = document.querySelector('[data-auth-panel="' + prefix + '-' + type + '"]');
-      if (!panel) return;
-      if (type === authType) {
-        animateIn(panel);
-      } else {
-        panel.classList.add('is-hidden');
-      }
+  function addSiteEntry() {
+    var container = document.getElementById('cloud-sites-container');
+    if (!container) return;
+    var idx = state.cloudSiteCount++;
+    var entry = document.createElement('div');
+    entry.className = 'site-entry';
+    entry.dataset.siteIndex = String(idx);
+    entry.innerHTML = [
+      '<div class="form-group">',
+      '  <label>Site Name <span class="required">*</span>',
+      '    <button type="button" class="btn-remove-site" data-remove-index="' + idx + '">&times;</button>',
+      '  </label>',
+      '  <input type="text" data-field="cloud.sites.' + idx + '.base_url"',
+      '    placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">',
+      '  <span class="field-error" hidden></span>',
+      '</div>',
+    ].join('\\n');
+    container.appendChild(entry);
+    entry.querySelector('.btn-remove-site').addEventListener('click', function () {
+      entry.remove();
     });
   }
 
@@ -929,6 +797,13 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     var data = collectFormData();
     var valid = true;
 
+    function requireField(fieldPath, value) {
+      if (!value || !value.trim()) {
+        showError(fieldPath, 'This field is required.');
+        valid = false;
+      }
+    }
+
     function requireUrl(fieldPath, value) {
       if (!value || !value.trim()) {
         showError(fieldPath, 'This field is required.');
@@ -939,20 +814,12 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       }
     }
 
-    function requireField(fieldPath, value) {
-      if (!value || !value.trim()) {
-        showError(fieldPath, 'This field is required.');
-        valid = false;
-      }
-    }
-
     function requireCloudSite(fieldPath, value) {
       if (!value || !value.trim()) {
         showError(fieldPath, 'This field is required.');
         valid = false;
       } else {
         var v = value.trim();
-        // Accept full URL or bare site name (alphanumeric + hyphens)
         var isUrl = /^https?:\\/\\//i.test(v);
         var isSiteName = /^[a-zA-Z0-9][a-zA-Z0-9-]*\$/.test(v);
         if (!isUrl && !isSiteName) {
@@ -962,29 +829,23 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
       }
     }
 
-    function validateService(prefix, svc, isCloud) {
-      if (isCloud) {
-        requireCloudSite(prefix + '.base_url', svc.base_url);
-      } else {
-        requireUrl(prefix + '.base_url', svc.base_url);
-      }
-      if (svc.auth_type === 'basic') {
-        requireField(prefix + '.username', svc.username);
-        requireField(prefix + '.api_token', svc.api_token);
-      } else if (svc.auth_type === 'pat') {
-        requireField(prefix + '.personal_token', svc.personal_token);
-      } else if (svc.auth_type === 'oauth') {
-        requireField(prefix + '.client_id', svc.client_id);
-        requireField(prefix + '.client_secret', svc.client_secret);
-        requireField(prefix + '.access_token', svc.access_token);
-      }
-    }
-
     if (data.deployment_type === 'cloud') {
-      validateService('cloud.jira', data.jira, true);
+      // Validate each site URL
+      var siteEntries = document.querySelectorAll('#cloud-sites-container .site-entry');
+      siteEntries.forEach(function (entry) {
+        var idx = entry.dataset.siteIndex;
+        var fieldPath = 'cloud.sites.' + idx + '.base_url';
+        requireCloudSite(fieldPath, getField(fieldPath));
+      });
+      requireField('cloud.username', data.jira ? data.jira.username : '');
+      requireField('cloud.api_token', data.jira ? data.jira.api_token : '');
     } else {
-      validateService('onprem.jira', data.jira, false);
-      validateService('onprem.confluence', data.confluence, false);
+      requireUrl('onprem.jira.base_url', data.jira ? data.jira.base_url : '');
+      requireField('onprem.jira.username', data.jira ? data.jira.username : '');
+      requireField('onprem.jira.api_token', data.jira ? data.jira.api_token : '');
+      requireUrl('onprem.confluence.base_url', data.confluence ? data.confluence.base_url : '');
+      requireField('onprem.confluence.username', data.confluence ? data.confluence.username : '');
+      requireField('onprem.confluence.api_token', data.confluence ? data.confluence.api_token : '');
     }
 
     return valid;
@@ -1019,25 +880,6 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     var isCloud = state.tab === 'cloud';
     var deployType = isCloud ? 'cloud' : 'on_premise';
 
-    function getServiceData(prefix) {
-      var radioName = prefix === 'cloud.jira' ? 'cloud-auth' :
-        prefix === 'onprem.jira' ? 'onprem-jira-auth' : 'onprem-conf-auth';
-      var authType = getRadioValue(radioName) || 'basic';
-      return {
-        base_url: getField(prefix + '.base_url'),
-        auth_type: authType,
-        username: getField(prefix + '.username'),
-        api_token: getField(prefix + '.api_token'),
-        personal_token: getField(prefix + '.personal_token'),
-        client_id: getField(prefix + '.client_id'),
-        client_secret: getField(prefix + '.client_secret'),
-        access_token: getField(prefix + '.access_token'),
-        refresh_token: getField(prefix + '.refresh_token'),
-        ssl_verify: getCheckbox(prefix + '.ssl_verify'),
-        timeout: getNumberField(prefix + '.timeout'),
-      };
-    }
-
     function normalizeCloudUrl(value) {
       if (!value) return value;
       var v = value.trim();
@@ -1046,14 +888,55 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     }
 
     if (isCloud) {
-      var jira = getServiceData('cloud.jira');
-      jira.base_url = normalizeCloudUrl(jira.base_url);
-      return { deployment_type: deployType, jira: jira, confluence: jira };
+      // Collect all site URLs
+      var siteUrls = [];
+      var siteEntries = document.querySelectorAll('#cloud-sites-container .site-entry');
+      siteEntries.forEach(function (entry) {
+        var idx = entry.dataset.siteIndex;
+        var url = getField('cloud.sites.' + idx + '.base_url');
+        if (url) siteUrls.push(normalizeCloudUrl(url));
+      });
+
+      var username = getField('cloud.username');
+      var apiToken = getField('cloud.api_token');
+      var sslVerify = getCheckbox('cloud.ssl_verify');
+      var timeout = getNumberField('cloud.timeout');
+
+      return {
+        deployment_type: deployType,
+        cloud_sites: siteUrls,
+        jira: {
+          base_url: siteUrls[0] || '',
+          username: username,
+          api_token: apiToken,
+          ssl_verify: sslVerify,
+          timeout: timeout,
+        },
+        confluence: {
+          base_url: siteUrls[0] || '',
+          username: username,
+          api_token: apiToken,
+          ssl_verify: sslVerify,
+          timeout: timeout,
+        },
+      };
     } else {
       return {
         deployment_type: deployType,
-        jira: getServiceData('onprem.jira'),
-        confluence: getServiceData('onprem.confluence'),
+        jira: {
+          base_url: getField('onprem.jira.base_url'),
+          username: getField('onprem.jira.username'),
+          api_token: getField('onprem.jira.api_token'),
+          ssl_verify: getCheckbox('onprem.jira.ssl_verify'),
+          timeout: getNumberField('onprem.jira.timeout'),
+        },
+        confluence: {
+          base_url: getField('onprem.confluence.base_url'),
+          username: getField('onprem.confluence.username'),
+          api_token: getField('onprem.confluence.api_token'),
+          ssl_verify: getCheckbox('onprem.confluence.ssl_verify'),
+          timeout: getNumberField('onprem.confluence.timeout'),
+        },
       };
     }
   }
@@ -1163,23 +1046,12 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     return isNaN(n) ? null : n;
   }
 
-  function getRadioValue(name) {
-    var el = document.querySelector('input[name="' + name + '"]:checked');
-    return el ? el.value : null;
-  }
-
-  function setRadio(name, value) {
-    var el = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (el) el.checked = true;
-  }
-
   // Expose fill helpers for json-import.js
   window.__setupApp = {
     setField: setField,
     setCheckbox: setCheckbox,
-    setRadio: setRadio,
-    showAuthPanel: showAuthPanel,
     activateTab: activateTab,
+    addSiteEntry: addSiteEntry,
   };
 })();
 
@@ -1194,8 +1066,6 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
     'JIRA_URL', 'CONFLUENCE_URL',
     'JIRA_USERNAME', 'CONFLUENCE_USERNAME',
     'JIRA_API_TOKEN', 'CONFLUENCE_API_TOKEN',
-    'JIRA_PERSONAL_TOKEN', 'CONFLUENCE_PERSONAL_TOKEN',
-    'ATLASSIAN_OAUTH_CLIENT_ID', 'ATLASSIAN_OAUTH_CLIENT_SECRET',
     'JIRA_SSL_VERIFY', 'CONFLUENCE_SSL_VERIFY',
     'JIRA_TIMEOUT', 'CONFLUENCE_TIMEOUT',
   ];
@@ -1376,56 +1246,21 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 
   function fillCloudFields(env, app) {
     var jiraUrl = env['JIRA_URL'] || env['CONFLUENCE_URL'] || '';
-    app.setField('cloud.jira.base_url', jiraUrl);
-
-    var authType = detectAuthType(env, 'JIRA');
-    app.setRadio('cloud-auth', authType);
-    app.showAuthPanel('cloud', authType);
-
-    if (authType === 'basic') {
-      app.setField('cloud.jira.username', env['JIRA_USERNAME'] || env['CONFLUENCE_USERNAME'] || '');
-      app.setField('cloud.jira.api_token', env['JIRA_API_TOKEN'] || env['CONFLUENCE_API_TOKEN'] || '');
-    } else if (authType === 'pat') {
-      app.setField('cloud.jira.personal_token', env['JIRA_PERSONAL_TOKEN'] || env['CONFLUENCE_PERSONAL_TOKEN'] || '');
-    } else if (authType === 'oauth') {
-      app.setField('cloud.jira.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('cloud.jira.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
-
-    fillAdvanced(env, 'cloud.jira', 'JIRA', app);
+    app.setField('cloud.sites.0.base_url', jiraUrl);
+    app.setField('cloud.username', env['JIRA_USERNAME'] || env['CONFLUENCE_USERNAME'] || '');
+    app.setField('cloud.api_token', env['JIRA_API_TOKEN'] || env['CONFLUENCE_API_TOKEN'] || '');
+    fillAdvanced(env, 'cloud', 'JIRA', app);
   }
 
   function fillOnPremFields(env, app) {
     app.setField('onprem.jira.base_url', env['JIRA_URL'] || '');
-    var jiraAuth = detectAuthType(env, 'JIRA');
-    app.setRadio('onprem-jira-auth', jiraAuth);
-    app.showAuthPanel('onprem-jira', jiraAuth);
-
-    if (jiraAuth === 'basic') {
-      app.setField('onprem.jira.username', env['JIRA_USERNAME'] || '');
-      app.setField('onprem.jira.api_token', env['JIRA_API_TOKEN'] || '');
-    } else if (jiraAuth === 'pat') {
-      app.setField('onprem.jira.personal_token', env['JIRA_PERSONAL_TOKEN'] || '');
-    } else if (jiraAuth === 'oauth') {
-      app.setField('onprem.jira.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('onprem.jira.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
+    app.setField('onprem.jira.username', env['JIRA_USERNAME'] || '');
+    app.setField('onprem.jira.api_token', env['JIRA_API_TOKEN'] || '');
     fillAdvanced(env, 'onprem.jira', 'JIRA', app);
 
     app.setField('onprem.confluence.base_url', env['CONFLUENCE_URL'] || '');
-    var confAuth = detectAuthType(env, 'CONFLUENCE');
-    app.setRadio('onprem-conf-auth', confAuth);
-    app.showAuthPanel('onprem-conf', confAuth);
-
-    if (confAuth === 'basic') {
-      app.setField('onprem.confluence.username', env['CONFLUENCE_USERNAME'] || '');
-      app.setField('onprem.confluence.api_token', env['CONFLUENCE_API_TOKEN'] || '');
-    } else if (confAuth === 'pat') {
-      app.setField('onprem.confluence.personal_token', env['CONFLUENCE_PERSONAL_TOKEN'] || '');
-    } else if (confAuth === 'oauth') {
-      app.setField('onprem.confluence.client_id', env['ATLASSIAN_OAUTH_CLIENT_ID'] || '');
-      app.setField('onprem.confluence.client_secret', env['ATLASSIAN_OAUTH_CLIENT_SECRET'] || '');
-    }
+    app.setField('onprem.confluence.username', env['CONFLUENCE_USERNAME'] || '');
+    app.setField('onprem.confluence.api_token', env['CONFLUENCE_API_TOKEN'] || '');
     fillAdvanced(env, 'onprem.confluence', 'CONFLUENCE', app);
   }
 
@@ -1441,12 +1276,6 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
         app.setField(prefix + '.timeout', String(secs * 1000));
       }
     }
-  }
-
-  function detectAuthType(env, service) {
-    if (env['ATLASSIAN_OAUTH_CLIENT_ID']) return 'oauth';
-    if (env[service + '_PERSONAL_TOKEN']) return 'pat';
-    return 'basic';
   }
 
   // --- Toast ---

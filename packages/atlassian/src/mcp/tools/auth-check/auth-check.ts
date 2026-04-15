@@ -16,47 +16,50 @@ export async function handleAuthCheck(params: { connection_test?: boolean }): Pr
   const credentials = connectionTest ? await loadCredentials() : undefined;
 
   for (const service of serviceNames) {
-    const serviceConfig = config[service];
-    if (!serviceConfig) continue;
+    const sites = config[service];
+    if (!sites || sites.length === 0) continue;
 
     hasAnyService = true;
+    const entries: AuthCheckServiceEntry[] = [];
 
-    const entry: AuthCheckServiceEntry = {
-      configured: true,
-      base_url: serviceConfig.base_url,
-      auth_type: serviceConfig.auth_type,
-    };
-
-    if (connectionTest && credentials) {
-      const serviceCredentials = credentials[service] ?? {};
-
-      const result = await testConnection({
-        base_url: serviceConfig.base_url,
-        auth_type: serviceConfig.auth_type,
-        credentials: serviceCredentials,
-        username: serviceConfig.username,
-        service,
-        include_body: true,
-      });
-
-      entry.connection = {
-        success: result.success,
-        message: result.message,
-        latency_ms: result.latency_ms,
+    for (const siteConfig of sites) {
+      const entry: AuthCheckServiceEntry = {
+        configured: true,
+        base_url: siteConfig.base_url,
       };
 
-      if (service === 'jira' && result.success && typeof result.response_body === 'object' && result.response_body !== null) {
-        const body = result.response_body as Record<string, unknown>;
-        entry.user = {
-          displayName: typeof body.displayName === 'string' ? body.displayName : undefined,
-          emailAddress: typeof body.emailAddress === 'string' ? body.emailAddress : undefined,
+      if (connectionTest && credentials) {
+        const serviceCredentials = credentials[service] ?? {};
+
+        const result = await testConnection({
+          base_url: siteConfig.base_url,
+          credentials: serviceCredentials,
+          username: siteConfig.username,
+          service,
+          include_body: true,
+        });
+
+        entry.connection = {
+          success: result.success,
+          message: result.message,
+          latency_ms: result.latency_ms,
         };
-      } else {
-        entry.user = null;
+
+        if (service === 'jira' && result.success && typeof result.response_body === 'object' && result.response_body !== null) {
+          const body = result.response_body as Record<string, unknown>;
+          entry.user = {
+            displayName: typeof body.displayName === 'string' ? body.displayName : undefined,
+            emailAddress: typeof body.emailAddress === 'string' ? body.emailAddress : undefined,
+          };
+        } else {
+          entry.user = null;
+        }
       }
+
+      entries.push(entry);
     }
 
-    services[service] = entry;
+    services[service] = entries;
   }
 
   return {

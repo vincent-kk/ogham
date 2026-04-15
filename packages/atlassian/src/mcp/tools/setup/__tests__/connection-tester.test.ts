@@ -33,7 +33,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: { basic: { api_token: 'token' } },
       username: 'user@test.com',
       service: 'jira',
@@ -51,7 +50,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: { basic: { api_token: 'token' } },
       username: 'user@test.com',
       service: 'confluence',
@@ -69,7 +67,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: {},
       service: 'jira',
     });
@@ -87,8 +84,7 @@ describe('testConnection', () => {
 
     await testConnection({
       base_url: 'https://jira.internal.com',
-      auth_type: 'pat',
-      credentials: { pat: { personal_token: 'mytoken' } },
+      credentials: { basic: { api_token: 'token' } },
       service: 'jira',
     });
 
@@ -101,8 +97,7 @@ describe('testConnection', () => {
 
     await testConnection({
       base_url: 'https://confluence.internal.com',
-      auth_type: 'pat',
-      credentials: { pat: { personal_token: 'mytoken' } },
+      credentials: { basic: { api_token: 'token' } },
       service: 'confluence',
     });
 
@@ -120,7 +115,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: { basic: { api_token: 'wrong' } },
       service: 'jira',
     });
@@ -139,7 +133,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: { basic: { api_token: 'token' } },
       service: 'jira',
     });
@@ -154,7 +147,6 @@ describe('testConnection', () => {
 
     const result = await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'basic',
       credentials: { basic: { api_token: 'token' } },
       service: 'jira',
     });
@@ -163,37 +155,20 @@ describe('testConnection', () => {
     expect(result.latency_ms).toBeGreaterThanOrEqual(0);
   });
 
-  it('PAT 인증 — buildAuthHeader가 "pat" 타입으로 호출됨', async () => {
+  it('buildAuthHeader가 credentials와 username으로 호출됨', async () => {
     mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
     mockGetApiVersion.mockReturnValue('3');
 
     await testConnection({
       base_url: 'https://test.atlassian.net',
-      auth_type: 'pat',
-      credentials: { pat: { personal_token: 'mypattoken' } },
+      credentials: { basic: { api_token: 'mytoken' } },
+      username: 'user@test.com',
       service: 'jira',
     });
 
-    expect(mockBuildAuthHeader).toHaveBeenCalledWith('pat', expect.anything(), undefined);
-  });
-
-  it('OAuth 인증 — buildAuthHeader가 "oauth" 타입으로 호출됨', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
-    mockGetApiVersion.mockReturnValue('3');
-
-    await testConnection({
-      base_url: 'https://test.atlassian.net',
-      auth_type: 'oauth',
-      credentials: {
-        oauth: {
-          client_id: 'cid',
-          client_secret: 'csec',
-          access_token: 'atoken',
-        },
-      },
-      service: 'jira',
-    });
-
-    expect(mockBuildAuthHeader).toHaveBeenCalledWith('oauth', expect.anything(), undefined);
+    expect(mockBuildAuthHeader).toHaveBeenCalledWith(
+      { basic: { api_token: 'mytoken' } },
+      'user@test.com',
+    );
   });
 });

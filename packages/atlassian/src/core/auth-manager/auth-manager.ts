@@ -1,4 +1,4 @@
-import type { AuthType, Credentials } from '../../types/index.js';
+import type { Credentials } from '../../types/index.js';
 import { CREDENTIALS_PATH } from '../../constants/index.js';
 import { readJson, writeJson } from '../../lib/file-io.js';
 import { buildAuthHeader } from '../../utils/index.js';
@@ -20,10 +20,9 @@ export async function saveCredentials(
   await writeJson(path, credentials);
 }
 
-/** Get the auth header for a specific service */
+/** Get the Basic auth header for a specific service */
 export async function getAuthHeader(
   service: ServiceName,
-  authType: AuthType,
   username?: string,
   credentialsPath?: string,
 ): Promise<string | null> {
@@ -31,6 +30,6 @@ export async function getAuthHeader(
   const serviceCredentials = credentials[service];
   if (!serviceCredentials) return null;
 
-  const payload = buildAuthHeader(authType, serviceCredentials, username);
+  const payload = buildAuthHeader(serviceCredentials, username);
   return payload?.value ?? null;
 }

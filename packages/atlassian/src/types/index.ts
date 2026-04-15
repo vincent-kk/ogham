@@ -1,16 +1,12 @@
 export {
-  AuthTypeSchema,
   ServiceConfigSchema,
   AtlassianConfigSchema,
   BasicCredentialSchema,
-  PatCredentialSchema,
-  OAuthCredentialSchema,
   ServiceCredentialsSchema,
   CredentialsSchema,
   ConnectionInfoSchema,
 } from './config.js';
 export type {
-  AuthType,
   ServiceConfig,
   AtlassianConfig,
   ServiceCredentials,

@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { SetupFormData, SetupStatus, ConnectionTestResult } from '../../../../types/index.js';
 import { SetupFormDataSchema } from '../../../../types/index.js';
-import type { AtlassianConfig, Credentials, AuthType, ServiceCredentials } from '../../../../types/index.js';
+import type { AtlassianConfig, Credentials, ServiceCredentials } from '../../../../types/index.js';
 import { resolveEnvironment } from '../../../../core/index.js';
 
 export interface RouteContext {
@@ -12,7 +12,6 @@ export interface RouteContext {
   saveCredentials: (credentials: Credentials) => Promise<void>;
   testConnection: (params: {
     base_url: string;
-    auth_type: AuthType;
     credentials: ServiceCredentials;
     username?: string;
     service: 'jira' | 'confluence';
@@ -50,24 +49,9 @@ function parseBody(req: IncomingMessage): Promise<unknown> {
 
 function buildCredentials(
   svc: SetupFormData['jira'],
-  authType: AuthType,
 ): ServiceCredentials {
   if (!svc) return {};
-  switch (authType) {
-    case 'basic':
-      return { basic: { api_token: svc.api_token, password: svc.password } };
-    case 'pat':
-      return { pat: { personal_token: svc.personal_token! } };
-    case 'oauth':
-      return {
-        oauth: {
-          client_id: svc.client_id!,
-          client_secret: svc.client_secret!,
-          access_token: svc.access_token!,
-          refresh_token: svc.refresh_token,
-        },
-      };
-  }
+  return { basic: { api_token: svc.api_token, password: svc.password } };
 }
 
 /** Restore masked values from existing credentials */
@@ -78,25 +62,19 @@ function restoreMaskedValues(
   if (!existing) return;
   if (svc.api_token === MASK) svc.api_token = existing.basic?.api_token;
   if (svc.password === MASK) svc.password = existing.basic?.password;
-  if (svc.personal_token === MASK) svc.personal_token = existing.pat?.personal_token;
-  if (svc.client_secret === MASK) svc.client_secret = existing.oauth?.client_secret;
-  if (svc.access_token === MASK) svc.access_token = existing.oauth?.access_token;
-  if (svc.refresh_token === MASK) svc.refresh_token = existing.oauth?.refresh_token;
 }
 
 function buildStatus(config: AtlassianConfig): SetupStatus {
   return {
-    configured: !!(config.jira || config.confluence),
-    jira: config.jira ? {
-      base_url: config.jira.base_url,
-      auth_type: config.jira.auth_type,
-      is_cloud: config.jira.is_cloud,
-    } : undefined,
-    confluence: config.confluence ? {
-      base_url: config.confluence.base_url,
-      auth_type: config.confluence.auth_type,
-      is_cloud: config.confluence.is_cloud,
-    } : undefined,
+    configured: !!(config.jira?.length || config.confluence?.length),
+    jira: config.jira?.map((s) => ({
+      base_url: s.base_url,
+      is_cloud: s.is_cloud,
+    })),
+    confluence: config.confluence?.map((s) => ({
+      base_url: s.base_url,
+      is_cloud: s.is_cloud,
+    })),
   };
 }
 
@@ -106,33 +84,31 @@ async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<vo
   const status = buildStatus(config);
 
   // Add masked credential indicators for edit mode
+  const jiraSites = config.jira ?? [];
+  const confSites = config.confluence ?? [];
+  const hasJira = jiraSites.length > 0;
+  const hasConf = confSites.length > 0;
+
   const stateData = {
     ...status,
-    ...(config.jira && credentials.jira ? {
-      jira: {
-        ...status.jira,
-        username: config.jira.username,
+    ...(hasJira && credentials.jira ? {
+      jira: jiraSites.map((s) => ({
+        base_url: s.base_url,
+        is_cloud: s.is_cloud,
+        username: s.username,
         api_token: credentials.jira?.basic?.api_token ? true : undefined,
-        personal_token: credentials.jira?.pat?.personal_token ? true : undefined,
-        client_id: credentials.jira?.oauth?.client_id,
-        client_secret: credentials.jira?.oauth?.client_secret ? true : undefined,
-        access_token: credentials.jira?.oauth?.access_token ? true : undefined,
-        refresh_token: credentials.jira?.oauth?.refresh_token ? true : undefined,
-      },
+      })),
     } : {}),
-    ...(config.confluence && credentials.confluence ? {
-      confluence: {
-        ...status.confluence,
-        username: config.confluence.username,
+    ...(hasConf && credentials.confluence ? {
+      confluence: confSites.map((s) => ({
+        base_url: s.base_url,
+        is_cloud: s.is_cloud,
+        username: s.username,
         api_token: credentials.confluence?.basic?.api_token ? true : undefined,
-        personal_token: credentials.confluence?.pat?.personal_token ? true : undefined,
-        client_id: credentials.confluence?.oauth?.client_id,
-        client_secret: credentials.confluence?.oauth?.client_secret ? true : undefined,
-        access_token: credentials.confluence?.oauth?.access_token ? true : undefined,
-        refresh_token: credentials.confluence?.oauth?.refresh_token ? true : undefined,
-      },
+      })),
     } : {}),
-    deployment_type: config.jira && config.confluence ? 'on_premise' : 'cloud',
+    deployment_type: hasJira && hasConf && jiraSites[0]?.base_url !== confSites[0]?.base_url
+      ? 'on_premise' : 'cloud',
   };
 
   const html = ctx.setupHtml.replace('__SETUP_STATE__', JSON.stringify(stateData));
@@ -168,10 +144,9 @@ async function handleTest(
   const results: ConnectionTestResult[] = [];
 
   if (data.jira) {
-    const creds = buildCredentials(data.jira, data.jira.auth_type);
+    const creds = buildCredentials(data.jira);
     results.push(await ctx.testConnection({
       base_url: data.jira.base_url,
-      auth_type: data.jira.auth_type,
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
@@ -179,10 +154,9 @@ async function handleTest(
   }
 
   if (data.confluence) {
-    const creds = buildCredentials(data.confluence, data.confluence.auth_type);
+    const creds = buildCredentials(data.confluence);
     results.push(await ctx.testConnection({
       base_url: data.confluence.base_url,
-      auth_type: data.confluence.auth_type,
       credentials: creds,
       username: data.confluence.username,
       service: 'confluence',
@@ -202,8 +176,10 @@ async function handleSubmit(
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
-  const body = await parseBody(req);
-  const parsed = SetupFormDataSchema.safeParse(body);
+  const rawBody = await parseBody(req) as Record<string, unknown>;
+  const cloudSites = (rawBody.cloud_sites as string[] | undefined) ?? [];
+
+  const parsed = SetupFormDataSchema.safeParse(rawBody);
   if (!parsed.success) {
     sendJson(res, 400, {
       success: false,
@@ -224,21 +200,19 @@ async function handleSubmit(
   const testResults: ConnectionTestResult[] = [];
 
   if (data.jira) {
-    const creds = buildCredentials(data.jira, data.jira.auth_type);
+    const creds = buildCredentials(data.jira);
     testResults.push(await ctx.testConnection({
       base_url: data.jira.base_url,
-      auth_type: data.jira.auth_type,
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
     }));
   }
 
-  if (data.confluence) {
-    const creds = buildCredentials(data.confluence, data.confluence.auth_type);
+  if (data.confluence && data.deployment_type === 'onprem') {
+    const creds = buildCredentials(data.confluence);
     testResults.push(await ctx.testConnection({
       base_url: data.confluence.base_url,
-      auth_type: data.confluence.auth_type,
       credentials: creds,
       username: data.confluence.username,
       service: 'confluence',
@@ -255,34 +229,53 @@ async function handleSubmit(
     return;
   }
 
-  // Build config and credentials
+  // Build config and credentials as arrays
   const newConfig: AtlassianConfig = {};
   const newCredentials: Credentials = {};
 
-  if (data.jira) {
-    const env = resolveEnvironment(data.jira.base_url);
-    newConfig.jira = {
-      base_url: env.base_url,
-      auth_type: data.jira.auth_type,
-      is_cloud: env.is_cloud,
-      username: data.jira.username,
-      ssl_verify: data.jira.ssl_verify ?? true,
-      timeout: data.jira.timeout ?? 30000,
-    };
-    newCredentials.jira = buildCredentials(data.jira, data.jira.auth_type);
-  }
+  if (data.deployment_type === 'cloud' && data.jira) {
+    // Cloud mode: create array entries from cloud_sites
+    const urls = cloudSites.length > 0 ? cloudSites : [data.jira.base_url];
+    const sites = urls.map((url) => {
+      const env = resolveEnvironment(url);
+      return {
+        base_url: env.base_url,
+        is_cloud: env.is_cloud,
+        username: data.jira!.username,
+        ssl_verify: data.jira!.ssl_verify ?? true,
+        timeout: data.jira!.timeout ?? 30000,
+      };
+    });
+    // Both jira and confluence share Cloud sites
+    newConfig.jira = sites;
+    newConfig.confluence = sites;
+    newCredentials.jira = buildCredentials(data.jira);
+    newCredentials.confluence = buildCredentials(data.jira);
+  } else {
+    // On-premise: separate jira/confluence with single entry each
+    if (data.jira) {
+      const env = resolveEnvironment(data.jira.base_url);
+      newConfig.jira = [{
+        base_url: env.base_url,
+        is_cloud: env.is_cloud,
+        username: data.jira.username,
+        ssl_verify: data.jira.ssl_verify ?? true,
+        timeout: data.jira.timeout ?? 30000,
+      }];
+      newCredentials.jira = buildCredentials(data.jira);
+    }
 
-  if (data.confluence) {
-    const env = resolveEnvironment(data.confluence.base_url);
-    newConfig.confluence = {
-      base_url: env.base_url,
-      auth_type: data.confluence.auth_type,
-      is_cloud: env.is_cloud,
-      username: data.confluence.username,
-      ssl_verify: data.confluence.ssl_verify ?? true,
-      timeout: data.confluence.timeout ?? 30000,
-    };
-    newCredentials.confluence = buildCredentials(data.confluence, data.confluence.auth_type);
+    if (data.confluence) {
+      const env = resolveEnvironment(data.confluence.base_url);
+      newConfig.confluence = [{
+        base_url: env.base_url,
+        is_cloud: env.is_cloud,
+        username: data.confluence.username,
+        ssl_verify: data.confluence.ssl_verify ?? true,
+        timeout: data.confluence.timeout ?? 30000,
+      }];
+      newCredentials.confluence = buildCredentials(data.confluence);
+    }
   }
 
   await ctx.saveConfig(newConfig);

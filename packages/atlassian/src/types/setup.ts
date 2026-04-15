@@ -1,6 +1,5 @@
 import { z } from 'zod';
-import { AuthTypeSchema } from './config.js';
-import type { AuthType, ServiceCredentials } from './config.js';
+import type { ServiceCredentials } from './config.js';
 
 // --- Deployment type ---
 
@@ -11,7 +10,6 @@ export type DeploymentType = z.infer<typeof DeploymentTypeSchema>;
 
 const ServiceFormFieldsSchema = z.object({
   base_url: z.string().url(),
-  auth_type: AuthTypeSchema,
   username: z.string().optional(),
   ssl_verify: z.boolean().nullable().optional(),
   timeout: z.number().int().positive().nullable().optional(),
@@ -22,18 +20,13 @@ const ServiceFormFieldsSchema = z.object({
 const FormCredentialsSchema = z.object({
   api_token: z.string().optional(),
   password: z.string().optional(),
-  personal_token: z.string().optional(),
-  client_id: z.string().optional(),
-  client_secret: z.string().optional(),
-  access_token: z.string().optional(),
-  refresh_token: z.string().optional(),
 });
 
 // --- Setup form data ---
 
 export const SetupFormDataSchema = z.object({
   deployment_type: DeploymentTypeSchema,
-  // Cloud: single endpoint (jira field used for both)
+  // Cloud: multiple sites (array of URLs)
   // On-premise: separate jira/confluence
   jira: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
   confluence: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
@@ -57,16 +50,14 @@ export type SetupResponse = z.infer<typeof SetupResponseSchema>;
 export const SetupStatusSchema = z.object({
   configured: z.boolean(),
   deployment_type: DeploymentTypeSchema.optional(),
-  jira: z.object({
+  jira: z.array(z.object({
     base_url: z.string(),
-    auth_type: AuthTypeSchema,
     is_cloud: z.boolean(),
-  }).optional(),
-  confluence: z.object({
+  })).optional(),
+  confluence: z.array(z.object({
     base_url: z.string(),
-    auth_type: AuthTypeSchema,
     is_cloud: z.boolean(),
-  }).optional(),
+  })).optional(),
 });
 export type SetupStatus = z.infer<typeof SetupStatusSchema>;
 
@@ -74,7 +65,6 @@ export type SetupStatus = z.infer<typeof SetupStatusSchema>;
 
 export interface TestConnectionParams {
   base_url: string;
-  auth_type: AuthType;
   credentials: ServiceCredentials;
   username?: string;
   service: 'jira' | 'confluence';

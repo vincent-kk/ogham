@@ -1,12 +1,10 @@
 import { z } from 'zod';
-import { AuthTypeSchema } from './config.js';
 
 // --- Service status (config-only, no credentials) ---
 
 export const AuthCheckServiceStatusSchema = z.object({
   configured: z.boolean(),
   base_url: z.string().optional(),
-  auth_type: AuthTypeSchema.optional(),
 });
 export type AuthCheckServiceStatus = z.infer<typeof AuthCheckServiceStatusSchema>;
 
@@ -35,13 +33,13 @@ export const AuthCheckServiceEntrySchema = AuthCheckServiceStatusSchema.extend({
 });
 export type AuthCheckServiceEntry = z.infer<typeof AuthCheckServiceEntrySchema>;
 
-// --- Top-level result ---
+// --- Top-level result (per-service is an array for multi-site) ---
 
 export const AuthCheckResultSchema = z.object({
   authenticated: z.boolean(),
   services: z.object({
-    jira: AuthCheckServiceEntrySchema.optional(),
-    confluence: AuthCheckServiceEntrySchema.optional(),
+    jira: z.array(AuthCheckServiceEntrySchema).optional(),
+    confluence: z.array(AuthCheckServiceEntrySchema).optional(),
   }),
 });
 export type AuthCheckResult = z.infer<typeof AuthCheckResultSchema>;

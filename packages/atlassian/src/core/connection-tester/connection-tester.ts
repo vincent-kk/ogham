@@ -17,17 +17,17 @@ function getTestEndpoint(service: 'jira' | 'confluence', isCloud: boolean): stri
 
 /** Test connection to a Jira or Confluence instance */
 export async function testConnection(params: TestConnectionParams): Promise<ConnectionTestResult> {
-  const { base_url, auth_type, credentials, username, service, include_body = false } = params;
+  const { base_url, credentials, username, service, include_body = false } = params;
 
   const env = resolveEnvironment(base_url);
   const endpoint = getTestEndpoint(service, env.is_cloud);
 
-  const authPayload = buildAuthHeader(auth_type, credentials, username);
+  const authPayload = buildAuthHeader(credentials, username);
   if (!authPayload) {
     return {
       service,
       success: false,
-      message: 'Invalid or missing credentials for the selected auth type',
+      message: 'Invalid or missing credentials',
     };
   }
 

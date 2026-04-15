@@ -12,32 +12,32 @@ import { ConvertFormatSchema } from "../../types/index.js";
 import type { HttpClientConfig } from "../../types/index.js";
 import { loadConfig } from "../../core/config-manager/index.js";
 import { getAuthHeader } from "../../core/auth-manager/index.js";
-import { detectService } from "../../utils/index.js";
+import { detectService, resolveSiteConfig } from "../../utils/index.js";
 import { wrapHandler } from "../shared/index.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
 import { handleAuthCheck } from "../tools/auth-check/index.js";
 
-/** Build HttpClientConfig from stored config for a service */
+/** Build HttpClientConfig from stored config for a service, resolving multi-site */
 async function buildClientConfig(
   service: "jira" | "confluence",
+  baseUrl?: string,
+  endpoint?: string,
 ): Promise<HttpClientConfig | null> {
   const config = await loadConfig();
-  const serviceConfig = config[service];
-  if (!serviceConfig) return null;
+  const sites = config[service];
+  if (!sites || sites.length === 0) return null;
 
-  const authHeader = await getAuthHeader(
-    service,
-    serviceConfig.auth_type,
-    serviceConfig.username,
-  );
+  const siteConfig = resolveSiteConfig(service, sites, baseUrl, endpoint);
+
+  const authHeader = await getAuthHeader(service, siteConfig.username);
 
   return {
-    base_url: serviceConfig.base_url,
+    base_url: siteConfig.base_url,
     auth_header: authHeader ?? undefined,
-    ssl_verify: serviceConfig.ssl_verify,
-    timeout: serviceConfig.timeout,
+    ssl_verify: siteConfig.ssl_verify,
+    timeout: siteConfig.timeout,
   };
 }
 
@@ -55,10 +55,11 @@ export function createServer(): McpServer {
     "fetch",
     {
       description:
-        "HTTP request — supports GET, POST, PUT, PATCH, DELETE for Atlassian REST APIs",
+        "[Internal] Do not call directly. Used by atlassian skills only. HTTP request for Atlassian REST APIs.",
       inputSchema: z.object({
         method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
         endpoint: z.string(),
+        base_url: z.string().url().optional(),
         body: z.unknown().optional(),
         query_params: z.record(z.string()).optional(),
         expand: z.array(z.string()).optional(),
@@ -79,6 +80,7 @@ export function createServer(): McpServer {
       async (args: {
         method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
         endpoint: string;
+        base_url?: string;
         body?: unknown;
         query_params?: Record<string, string>;
         expand?: string[];
@@ -90,7 +92,7 @@ export function createServer(): McpServer {
         force?: boolean;
       }) => {
         const service = detectService(args.endpoint);
-        const config = await buildClientConfig(service);
+        const config = await buildClientConfig(service, args.base_url, args.endpoint);
         if (!config)
           throw new Error(
             `No ${service} configuration found. Run setup first.`,
@@ -104,7 +106,7 @@ export function createServer(): McpServer {
   server.registerTool(
     "convert",
     {
-      description: "Format conversion: ADF/Storage/Wiki ↔ Markdown",
+      description: "[Internal] Do not call directly. Used by atlassian skills only. Format conversion: ADF/Storage/Wiki ↔ Markdown.",
       inputSchema: z.object({
         from: ConvertFormatSchema,
         to: ConvertFormatSchema,
@@ -124,7 +126,7 @@ export function createServer(): McpServer {
     "auth-check",
     {
       description:
-        "Check authentication status and optionally test connectivity",
+        "[Internal] Do not call directly. Used by atlassian skills only. Check authentication status and test connectivity.",
       inputSchema: z.object({
         connection_test: z.boolean().optional(),
       }),
@@ -141,7 +143,7 @@ export function createServer(): McpServer {
   server.registerTool(
     "setup",
     {
-      description: "Auth/connection setup wizard",
+      description: "[Internal] Do not call directly. Used by atlassian skills only. Auth/connection setup wizard.",
       inputSchema: z.object({
         mode: z.enum(["new", "edit"]).optional(),
         prefill: z.record(z.unknown()).optional(),
