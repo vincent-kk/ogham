@@ -17,6 +17,13 @@
       "required": false,
       "title": "Reuse-First Implementation Rules",
       "description": "Implementation guidance for FCA-AI projects: solution selection priority, safe extension, file authoring, and naming heuristics."
+    },
+    {
+      "id": "filid_cognitive-discipline",
+      "filename": "filid_cognitive-discipline.md",
+      "required": false,
+      "title": "Cognitive Discipline Rules",
+      "description": "Epistemic standards that block LLM rationalization: evidence over confidence, anti-rationalization principles, and intellectual honesty requirements."
     }
   ]
 }
