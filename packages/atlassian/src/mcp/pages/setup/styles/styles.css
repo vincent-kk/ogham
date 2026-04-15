@@ -234,6 +234,48 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 .checkbox-group label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; }
 .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
 
+/* Site Entry - input with inline remove button */
+#cloud-sites-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-with-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-with-action input { flex: 1; }
+
+.btn-remove-site {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--gray-400);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--t);
+}
+
+.btn-remove-site:hover {
+  border-color: var(--danger);
+  background: #FFEBE6;
+  color: var(--danger);
+}
+
+.btn-remove-site:active {
+  transform: scale(.95);
+  transition-duration: .08s;
+}
+
 /* On-premise sections */
 .endpoint-section {
   border: 1px solid var(--gray-200);
@@ -288,6 +330,21 @@ details[open] .advanced-toggle::after { transform: rotate(90deg); }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
 .btn-secondary { background: var(--white); color: var(--gray-800); border: 1px solid var(--gray-200); }
 .btn-secondary:hover:not(:disabled) { background: var(--gray-50); border-color: var(--gray-400); }
+
+.btn-link {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 10px 14px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-600);
+  font-size: 13px;
+}
+
+.btn-link:hover:not(:disabled) {
+  background: var(--gray-100);
+  transform: none;
+}
 
 .btn-spinner::after {
   content: '';
