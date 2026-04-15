@@ -12,6 +12,18 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 | `http-client/` | Fetch wrapper with retry, SSRF guard, auth injection |
 | `connection-tester/` | Jira/Confluence connectivity test via core modules |
 
+## Conventions
+
+- 각 인프라 관심사는 독립 sub-fractal로 분리
+- 인증 헤더는 `auth-manager`만 생성, 직접 조합 금지
+- HTTP 요청은 반드시 `http-client`를 통해 실행
+
+## Dependencies
+
+- Node.js `fs`, `path` — 설정/자격증명 파일 I/O
+- `zod` — 설정 스키마 검증
+- `node-fetch` 또는 Node.js `fetch` — HTTP 클라이언트
+
 ## Boundaries
 
 ### Always do

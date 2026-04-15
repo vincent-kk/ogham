@@ -11,6 +11,17 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 | `storage-to-markdown.ts` | Confluence Storage XHTML → Markdown |
 | `markdown-to-storage.ts` | Markdown → Confluence Storage XHTML |
 
+## Conventions
+
+- 각 변환 방향은 독립 파일로 분리 (`adf-to-markdown.ts` 등)
+- 순수 함수만 허용 — 부수 효과 없음
+- Python `adf.py` 레퍼런스 구현을 기준으로 포팅
+
+## Dependencies
+
+- 외부 라이브러리 없음 (zero external deps)
+- Node.js 내장 모듈만 허용
+
 ## Boundaries
 
 ### Always do
