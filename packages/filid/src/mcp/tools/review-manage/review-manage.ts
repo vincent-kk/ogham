@@ -10,6 +10,7 @@ import {
   formatRevalidateComment,
   handleGenerateHumanSummary,
 } from './format/review-format.js';
+import { resolveGitRoot } from '../../../core/infra/config-loader/utils/resolve-git-root.js';
 
 export interface ReviewManageInput {
   action:
@@ -50,6 +51,9 @@ export async function handleReviewManage(
   if (!input.projectRoot) {
     throw new Error('projectRoot is required');
   }
+
+  // Resolve to git root so monorepo sub-paths are normalized
+  input.projectRoot = resolveGitRoot(input.projectRoot);
 
   const handlers: Record<
     string,
