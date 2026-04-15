@@ -8,6 +8,7 @@ model: sonnet
 tools:
   - Read
   - Write
+  - Grep
   - Glob
 maxTurns: 30
 ---
@@ -71,19 +72,23 @@ Compile and write to the specified path within `.temp/`.
   "total_frames": 12,
   "duration_ms": 19218,
   "resolution": "1920x1080",
-  "scenes": [{
-    "scene_id": 1,
-    "start_ms": 0,
-    "end_ms": 3200,
-    "description": "Login screen — email/password fields with social login buttons",
-    "frames": [{
-      "path": "frames/frame_0001.jpg",
-      "timestamp_ms": 0,
-      "description": "Initial login form — empty fields, Google/Kakao/Apple buttons"
-    }],
-    "ui_elements": ["email_input", "password_input", "login_button"],
-    "interaction_type": "form_input"
-  }],
+  "scenes": [
+    {
+      "scene_id": 1,
+      "start_ms": 0,
+      "end_ms": 3200,
+      "description": "Login screen — email/password fields with social login buttons",
+      "frames": [
+        {
+          "path": "frames/frame_0001.jpg",
+          "timestamp_ms": 0,
+          "description": "Initial login form — empty fields, Google/Kakao/Apple buttons"
+        }
+      ],
+      "ui_elements": ["email_input", "password_input", "login_button"],
+      "interaction_type": "form_input"
+    }
+  ],
   "summary": "One-line narrative of the full video content",
   "key_observations": [
     "Notable timing issues, UX concerns, or interaction patterns"
