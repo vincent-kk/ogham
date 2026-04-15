@@ -1,22 +1,12 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const ROOT = join(__dirname, '..');
+const ROOT = process.cwd();
 
-/**
- * Semantic version regex (https://semver.org/)
- * Matches: 0.0.1, 1.2.3, 1.0.0-beta.1, 2.0.0+build.123, etc.
- */
 const SEMVER_REGEX =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
-/**
- * Read and validate package.json version
- */
 function readPackageVersion() {
   const packageJsonPath = join(ROOT, 'package.json');
 
@@ -32,9 +22,6 @@ function readPackageVersion() {
     if (!SEMVER_REGEX.test(pkg.version)) {
       console.error(
         `❌ Error: Invalid semantic version "${pkg.version}" in package.json`,
-      );
-      console.error(
-        '   Expected format: MAJOR.MINOR.PATCH (e.g., 1.2.3, 1.0.0-beta.1)',
       );
       process.exit(1);
     }
@@ -52,9 +39,6 @@ function readPackageVersion() {
   }
 }
 
-/**
- * Generate src/version.ts with current version
- */
 function generateVersionFile(version) {
   const versionFilePath = join(ROOT, 'src', 'version.ts');
 
@@ -67,11 +51,11 @@ function generateVersionFile(version) {
         currentVersion = match[1];
       }
     } catch {
-      // File doesn't exist yet, that's fine
+      // File doesn't exist yet
     }
 
     if (currentVersion === version) {
-      console.log(`✓ src/version.ts already up to date: ${version}`);
+      console.log(`  ✓ src/version.ts already up to date: ${version}`);
       return false;
     }
 
@@ -88,9 +72,9 @@ export const VERSION = '${version}';
     writeFileSync(versionFilePath, content, 'utf-8');
 
     if (currentVersion) {
-      console.log(`✓ src/version.ts updated: ${currentVersion} → ${version}`);
+      console.log(`  ✓ src/version.ts updated: ${currentVersion} → ${version}`);
     } else {
-      console.log(`✓ src/version.ts created: ${version}`);
+      console.log(`  ✓ src/version.ts created: ${version}`);
     }
     return true;
   } catch (error) {
@@ -99,9 +83,6 @@ export const VERSION = '${version}';
   }
 }
 
-/**
- * Sync version into .claude-plugin/plugin.json
- */
 function syncPluginJson(version) {
   const pluginJsonPath = join(ROOT, '.claude-plugin', 'plugin.json');
 
@@ -110,7 +91,7 @@ function syncPluginJson(version) {
     const plugin = JSON.parse(content);
 
     if (plugin.version === version) {
-      console.log(`✓ .claude-plugin/plugin.json already up to date: ${version}`);
+      console.log(`  ✓ .claude-plugin/plugin.json already up to date: ${version}`);
       return false;
     }
 
@@ -118,7 +99,7 @@ function syncPluginJson(version) {
     plugin.version = version;
 
     writeFileSync(pluginJsonPath, JSON.stringify(plugin, null, 2) + '\n', 'utf-8');
-    console.log(`✓ .claude-plugin/plugin.json updated: ${prevVersion} → ${version}`);
+    console.log(`  ✓ .claude-plugin/plugin.json updated: ${prevVersion} → ${version}`);
     return true;
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -132,7 +113,6 @@ function syncPluginJson(version) {
   }
 }
 
-// Main execution
 try {
   const version = readPackageVersion();
   console.log(`\n🔄 Syncing version: ${version}\n`);

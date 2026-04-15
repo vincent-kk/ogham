@@ -51,7 +51,7 @@
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",
-    "version:sync": "node scripts/inject-version.mjs"
+    "version:sync": "node ../../scripts/inject-version.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",
