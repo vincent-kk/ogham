@@ -35,7 +35,7 @@
 | # | file:line | function | path expression | containment status |
 |---|---|---|---|---|
 | 1 | `project-init.ts` | `initProject` | `writeFile(join(projectRoot, '.filid', 'config.json'), ...)` | **SAFE** — fixed filename under `<projectRoot>/.filid/`. `projectRoot` is not itself caller-supplied at the MCP boundary in a traversal-exploitable way (it identifies the target project). |
-| 2 | `project-init.ts` | `initProject` | `copyFile(templateSrc, join(projectRoot, '.claude', 'rules', 'fca.md'))` | **SAFE** — fixed destination path, fixed template source. |
+| 2 | `project-init.ts` | `initProject` | `copyFile(templateSrc, join(projectRoot, '.claude', 'rules', 'filid_fca-policy.md'))` | **SAFE** — fixed destination path, fixed template source. |
 | 3 | `project-init.ts` | `initProject` | `mkdir(..., { recursive: true })` for `.filid/`, `.claude/rules/` | **SAFE** — fixed directory structure. |
 
 ## Summary

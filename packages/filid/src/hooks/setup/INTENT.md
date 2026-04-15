@@ -33,7 +33,7 @@
 
 ### Never do
 
-- `.claude/rules/fca.md` 등 rule doc 파일을 write
+- `.claude/rules/filid_fca-policy.md` 등 rule doc 파일을 write
 - `.filid/config.json` 자동 생성 (setup 스킬 전담)
 - 매 세션마다 O(projects * files) pruning 없이 throttle 추가 없이 확장
 

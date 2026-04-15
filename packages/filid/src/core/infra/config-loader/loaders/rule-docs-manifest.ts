@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   unlinkSync,
 } from 'node:fs';
 import { join } from 'node:path';
@@ -17,6 +18,8 @@ const log = createLogger('config-loader');
 export interface RuleDocEntry {
   id: string;
   filename: string;
+  /** Previous filename before the filid_ prefix rename. Used for migration. */
+  legacyFilename?: string;
   required: boolean;
   title: string;
   description: string;
@@ -144,7 +147,12 @@ export function getRuleDocsStatus(
       'rules',
       entry.filename,
     );
-    const deployed = existsSync(destPath);
+    // Also check legacy filename for transition period — a legacy file
+    // counts as "deployed" until the user runs filid-setup to migrate.
+    const legacyPath = entry.legacyFilename
+      ? join(resolvedRoot, '.claude', 'rules', entry.legacyFilename)
+      : null;
+    const deployed = existsSync(destPath) || (legacyPath !== null && existsSync(legacyPath));
     const statusEntry: RuleDocStatusEntry = {
       id: entry.id,
       filename: entry.filename,
@@ -215,6 +223,24 @@ export function syncRuleDocs(
   const resolvedRoot = resolveGitRoot(projectRoot);
   const rulesDir = join(resolvedRoot, '.claude', 'rules');
   const selectionSet = new Set(selection);
+
+  // --- Legacy filename migration ---
+  // Rename old-named files (e.g. fca.md → filid_fca-policy.md)
+  // so the main loop sees them under the current name. User edits are preserved
+  // because renameSync is a metadata-only operation (no content rewrite).
+  for (const entry of manifest.rules) {
+    if (!entry.legacyFilename) continue;
+    const legacyPath = join(rulesDir, entry.legacyFilename);
+    const newPath = join(rulesDir, entry.filename);
+    if (existsSync(legacyPath) && !existsSync(newPath)) {
+      try {
+        renameSync(legacyPath, newPath);
+        log.debug(`migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`);
+      } catch (err) {
+        log.error(`failed to migrate ${entry.legacyFilename}`, err);
+      }
+    }
+  }
 
   for (const entry of manifest.rules) {
     const desired = entry.required || selectionSet.has(entry.id);

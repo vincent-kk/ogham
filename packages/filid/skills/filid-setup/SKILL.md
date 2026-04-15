@@ -223,14 +223,14 @@ Call `mcp_t_rule_docs_sync` with `action: "sync"` and the computed selection:
 mcp_t_rule_docs_sync({
   action: "sync",
   path: "<target-path>",
-  selections: { fca: true, rfx: false }
+  selections: { "filid_fca-policy": true, "filid_reuse-first": false }
 })
 ```
 
 `selections` MUST be passed as a raw object map (`Record<string, boolean>`),
 not as a JSON string. For example, use
-`selections: { fca: true, rfx: false }`, NOT
-`selections: "{\"fca\":true,\"rfx\":false}"`.
+`selections: { "filid_fca-policy": true, "filid_reuse-first": false }`, NOT
+`selections: "{\"filid_fca-policy\":true,\"filid_reuse-first\":false}"`.
 
 The handler copies/removes files under `.claude/rules/` to match the
 requested selection. No rule doc state is stored in `.filid/config.json`
@@ -239,7 +239,7 @@ requested selection. No rule doc state is stored in `.filid/config.json`
 Inspect `result.copied`, `result.removed`, `result.unchanged`,
 `result.skipped` and surface a one-line summary to the user (English default;
 translate to `[filid:lang]` at runtime, e.g.,
-`"Rule docs: copied=fca.md, removed=0, unchanged=0"`).
+`"Rule docs: copied=filid_fca-policy.md, removed=0, unchanged=0"`).
 
 If `result.skipped` is non-empty, print each `{ id, reason }` as a
 warning but DO NOT abort — continue with the remaining phases.

@@ -277,11 +277,15 @@ describe('config-loader', () => {
   // --- Rule doc sync framework ---
 
   describe('syncRuleDocs', () => {
+    const REQUIRED_ID = 'filid_fca-policy';
+    const REQUIRED_FILE = 'filid_fca-policy.md';
+    const LEGACY_FILE = 'fca.md';
+
     function setupFakePluginRoot(extraRuleFiles: string[] = []): string {
       const pluginRoot = join(tmpDir, 'plugin');
       mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
       writeFileSync(
-        join(pluginRoot, 'templates', 'rules', 'fca.md'),
+        join(pluginRoot, 'templates', 'rules', REQUIRED_FILE),
         '# FCA Rules Template',
         'utf8',
       );
@@ -291,8 +295,9 @@ describe('config-loader', () => {
           version: '1.0',
           rules: [
             {
-              id: 'fca',
-              filename: 'fca.md',
+              id: REQUIRED_ID,
+              filename: REQUIRED_FILE,
+              legacyFilename: LEGACY_FILE,
               required: true,
               title: 'FCA-AI Architecture Rules',
               description: 'Mandatory FCA rules',
@@ -321,9 +326,9 @@ describe('config-loader', () => {
     it('deploys required rule doc regardless of selection', () => {
       const pluginRoot = setupFakePluginRoot();
       const result = syncRuleDocs(tmpDir, [], pluginRoot);
-      expect(result.copied).toContain('fca.md');
+      expect(result.copied).toContain(REQUIRED_FILE);
       expect(
-        existsSync(join(tmpDir, '.claude', 'rules', 'fca.md')),
+        existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE)),
       ).toBe(true);
     });
 
@@ -331,15 +336,15 @@ describe('config-loader', () => {
       const pluginRoot = setupFakePluginRoot();
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
       writeFileSync(
-        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        join(tmpDir, '.claude', 'rules', REQUIRED_FILE),
         '# Custom user edits',
         'utf8',
       );
       const result = syncRuleDocs(tmpDir, [], pluginRoot);
-      expect(result.copied).not.toContain('fca.md');
-      expect(result.unchanged).toContain('fca.md');
+      expect(result.copied).not.toContain(REQUIRED_FILE);
+      expect(result.unchanged).toContain(REQUIRED_FILE);
       const content = readFileSync(
-        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        join(tmpDir, '.claude', 'rules', REQUIRED_FILE),
         'utf8',
       );
       expect(content).toBe('# Custom user edits');
@@ -369,7 +374,7 @@ describe('config-loader', () => {
       ).toBe(false);
       // Required rule is still there
       expect(
-        existsSync(join(tmpDir, '.claude', 'rules', 'fca.md')),
+        existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE)),
       ).toBe(true);
     });
 
@@ -377,12 +382,35 @@ describe('config-loader', () => {
       const origEnv = process.env.CLAUDE_PLUGIN_ROOT;
       delete process.env.CLAUDE_PLUGIN_ROOT;
       try {
-        const result = syncRuleDocs(tmpDir, ['fca']);
+        const result = syncRuleDocs(tmpDir, [REQUIRED_ID]);
         expect(result.skipped.length).toBe(1);
         expect(result.skipped[0].id).toBe('*');
       } finally {
         if (origEnv) process.env.CLAUDE_PLUGIN_ROOT = origEnv;
       }
+    });
+
+    it('migrates legacy filename to new name during sync', () => {
+      const pluginRoot = setupFakePluginRoot();
+      // Simulate a project that was set up with the old filename
+      mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
+      writeFileSync(
+        join(tmpDir, '.claude', 'rules', LEGACY_FILE),
+        '# User-customized FCA rules',
+        'utf8',
+      );
+      const result = syncRuleDocs(tmpDir, [], pluginRoot);
+      // Legacy file should have been renamed, not overwritten
+      expect(existsSync(join(tmpDir, '.claude', 'rules', LEGACY_FILE))).toBe(false);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE))).toBe(true);
+      // Content preserved (user edits intact)
+      const content = readFileSync(
+        join(tmpDir, '.claude', 'rules', REQUIRED_FILE),
+        'utf8',
+      );
+      expect(content).toBe('# User-customized FCA rules');
+      // Treated as unchanged (already deployed under new name after migration)
+      expect(result.unchanged).toContain(REQUIRED_FILE);
     });
 
     it('skips individual rule when template file is missing', () => {
@@ -410,11 +438,14 @@ describe('config-loader', () => {
   });
 
   describe('getRuleDocsStatus', () => {
-    it('returns entries with deployed/selected flags', () => {
+    const STATUS_REQUIRED_ID = 'filid_fca-policy';
+    const STATUS_REQUIRED_FILE = 'filid_fca-policy.md';
+
+    function setupStatusPluginRoot(): string {
       const pluginRoot = join(tmpDir, 'plugin');
       mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
       writeFileSync(
-        join(pluginRoot, 'templates', 'rules', 'fca.md'),
+        join(pluginRoot, 'templates', 'rules', STATUS_REQUIRED_FILE),
         '# FCA',
         'utf8',
       );
@@ -429,8 +460,8 @@ describe('config-loader', () => {
           version: '1.0',
           rules: [
             {
-              id: 'fca',
-              filename: 'fca.md',
+              id: STATUS_REQUIRED_ID,
+              filename: STATUS_REQUIRED_FILE,
               required: true,
               title: 'FCA',
               description: 'required',
@@ -446,11 +477,16 @@ describe('config-loader', () => {
         }),
         'utf8',
       );
+      return pluginRoot;
+    }
 
-      // deploy fca only — filesystem is the single source of truth.
+    it('returns entries with deployed/selected flags', () => {
+      const pluginRoot = setupStatusPluginRoot();
+
+      // deploy required rule only — filesystem is the single source of truth.
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
       writeFileSync(
-        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        join(tmpDir, '.claude', 'rules', STATUS_REQUIRED_FILE),
         '# Deployed FCA',
         'utf8',
       );
@@ -462,14 +498,14 @@ describe('config-loader', () => {
       expect(status.entries).toHaveLength(1);
       expect(status.autoDeployed).toHaveLength(1);
 
-      const fca = status.autoDeployed.find((e) => e.id === 'fca');
+      const fca = status.autoDeployed.find((e) => e.id === STATUS_REQUIRED_ID);
       expect(fca).toBeDefined();
       expect(fca!.required).toBe(true);
       expect(fca!.deployed).toBe(true);
       expect(fca!.selected).toBe(true); // required → always selected
 
       // Required entry must NOT leak into the checkbox-facing list.
-      expect(status.entries.find((e) => e.id === 'fca')).toBeUndefined();
+      expect(status.entries.find((e) => e.id === STATUS_REQUIRED_ID)).toBeUndefined();
 
       const extra = status.entries.find((e) => e.id === 'extra');
       expect(extra).toBeDefined();
@@ -479,46 +515,12 @@ describe('config-loader', () => {
     });
 
     it('marks an optional entry as selected when its file is deployed', () => {
-      const pluginRoot = join(tmpDir, 'plugin');
-      mkdirSync(join(pluginRoot, 'templates', 'rules'), { recursive: true });
-      writeFileSync(
-        join(pluginRoot, 'templates', 'rules', 'fca.md'),
-        '# FCA',
-        'utf8',
-      );
-      writeFileSync(
-        join(pluginRoot, 'templates', 'rules', 'extra.md'),
-        '# Extra',
-        'utf8',
-      );
-      writeFileSync(
-        join(pluginRoot, 'templates', 'rules', 'manifest.json'),
-        JSON.stringify({
-          version: '1.0',
-          rules: [
-            {
-              id: 'fca',
-              filename: 'fca.md',
-              required: true,
-              title: 'FCA',
-              description: 'required',
-            },
-            {
-              id: 'extra',
-              filename: 'extra.md',
-              required: false,
-              title: 'Extra',
-              description: 'optional',
-            },
-          ],
-        }),
-        'utf8',
-      );
+      const pluginRoot = setupStatusPluginRoot();
 
       // Deploy both files — optional entry should light up via filesystem.
       mkdirSync(join(tmpDir, '.claude', 'rules'), { recursive: true });
       writeFileSync(
-        join(tmpDir, '.claude', 'rules', 'fca.md'),
+        join(tmpDir, '.claude', 'rules', STATUS_REQUIRED_FILE),
         '# Deployed FCA',
         'utf8',
       );

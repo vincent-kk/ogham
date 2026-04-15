@@ -3,15 +3,17 @@
   "version": "1.0",
   "rules": [
     {
-      "id": "fca",
-      "filename": "fca.md",
+      "id": "filid_fca-policy",
+      "filename": "filid_fca-policy.md",
+      "legacyFilename": "fca.md",
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project."
     },
     {
-      "id": "rfx",
-      "filename": "rfx.md",
+      "id": "filid_reuse-first",
+      "filename": "filid_reuse-first.md",
+      "legacyFilename": "rfx.md",
       "required": false,
       "title": "Reuse-First Implementation Rules",
       "description": "Implementation guidance for FCA-AI projects: solution selection priority, safe extension, file authoring, and naming heuristics."

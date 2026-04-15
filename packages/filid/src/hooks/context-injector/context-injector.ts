@@ -42,9 +42,9 @@ import { validateCwd } from '../utils/validate-cwd.js';
  * Build minimal FCA-AI context.
  *
  * Validation state is derived from the plugin's internal rules and the
- * project's `.filid/config.json`. The deployed `.claude/rules/fca.md` file
- * is only probed with a single `existsSync` call to decide between the
- * pointer line and the "rules not deployed" warning.
+ * project's `.filid/config.json`. The deployed rule doc file is probed
+ * with `existsSync` calls (new name then legacy fallback) to decide
+ * between the pointer line and the "rules not deployed" warning.
  */
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
@@ -54,11 +54,14 @@ export function buildMinimalContext(cwd: string): string {
     lines.push(
       '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json.',
     );
+  } else if (existsSync(join(cwd, '.claude', 'rules', 'filid_fca-policy.md'))) {
+    lines.push('[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md');
   } else if (existsSync(join(cwd, '.claude', 'rules', 'fca.md'))) {
+    // Legacy filename — still functional, will be migrated on next filid-setup run.
     lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
   } else {
     lines.push(
-      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to deploy .claude/rules/fca.md.',
+      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to deploy .claude/rules/filid_fca-policy.md.',
     );
   }
 

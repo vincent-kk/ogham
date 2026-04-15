@@ -20,8 +20,8 @@ which are required:
   "version": "1.0",
   "rules": [
     {
-      "id": "fca",
-      "filename": "fca.md",
+      "id": "filid_fca-policy",
+      "filename": "filid_fca-policy.md",
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "..."

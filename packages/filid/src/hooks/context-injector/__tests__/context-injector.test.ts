@@ -20,32 +20,47 @@ describe('buildMinimalContext', () => {
     }
   });
 
-  function makeProject(options: { deployFca: boolean }): string {
+  const RULE_FILE = 'filid_fca-policy.md';
+  const LEGACY_FILE = 'fca.md';
+
+  function makeProject(options: { deployFca: boolean; legacy?: boolean }): string {
     const projectRoot = mkdtempSync(join(tmpdir(), 'filid-context-injector-'));
     tempDirs.push(projectRoot);
     writeConfig(projectRoot, createDefaultConfig());
     if (options.deployFca) {
       const rulesDir = join(projectRoot, '.claude', 'rules');
       mkdirSync(rulesDir, { recursive: true });
-      writeFileSync(join(rulesDir, 'fca.md'), '# fca\n', 'utf8');
+      const filename = options.legacy ? LEGACY_FILE : RULE_FILE;
+      writeFileSync(join(rulesDir, filename), '# fca\n', 'utf8');
     }
     return projectRoot;
   }
 
-  it('emits the action-path pointer when fca.md is deployed', () => {
+  it('emits the action-path pointer when rule doc is deployed', () => {
     const projectRoot = makeProject({ deployFca: true });
 
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain(
-      '[filid] FCA-AI active. Rules: .claude/rules/fca.md',
+      `[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`,
     );
     expect(context).not.toContain('Rules not deployed');
     expect(context).not.toContain('Validation rules: internal built-ins');
     expect(context).not.toContain('Project rule docs');
   });
 
-  it('warns with a Rules not deployed message when fca.md is missing', () => {
+  it('falls back to legacy fca.md when new filename is absent', () => {
+    const projectRoot = makeProject({ deployFca: true, legacy: true });
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain(
+      `[filid] FCA-AI active. Rules: .claude/rules/${LEGACY_FILE}`,
+    );
+    expect(context).not.toContain('Rules not deployed');
+  });
+
+  it('warns with a Rules not deployed message when rule doc is missing', () => {
     const projectRoot = makeProject({ deployFca: false });
 
     const context = buildMinimalContext(projectRoot);
@@ -81,7 +96,7 @@ describe('buildMinimalContext', () => {
       const context = buildMinimalContext(projectRoot);
 
       expect(context.match(/\[filid:lang\]/g) ?? []).toHaveLength(1);
-      expect(context).toContain('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
+      expect(context).toContain(`[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`);
       // Disabled-rules line is silently skipped on rule-engine failure.
       expect(context).not.toContain('Disabled rules');
     } finally {

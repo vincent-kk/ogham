@@ -52,7 +52,7 @@ Call `mcp_t_rule_docs_sync({ action: "status", path })`. Response shape:
     /** Optional rules ONLY — the checkbox-facing list. */
     entries: Array<{
       id: string;
-      filename: string;      // e.g. "rfx.md"
+      filename: string;      // e.g. "filid_reuse-first.md"
       required: false;       // always false for this list
       title: string;         // checkbox label
       description: string;   // checkbox description
@@ -218,7 +218,7 @@ Valid call shape:
 mcp_t_rule_docs_sync({
   action: "sync",
   path,
-  selections: { fca: true, rfx: false },
+  selections: { 'filid_fca-policy': true, 'filid_reuse-first': false },
 });
 ```
 
@@ -229,7 +229,7 @@ validation unless the handler explicitly recovers it:
 mcp_t_rule_docs_sync({
   action: "sync",
   path,
-  selections: '{"fca":true,"rfx":false}',
+  selections: '{"filid_fca-policy":true,"filid_reuse-first":false}',
 });
 ```
 
@@ -237,7 +237,7 @@ The handler walks the manifest and performs the filesystem diff under
 `.claude/rules/`. No rule doc state is stored in `.filid/config.json`.
 
 Existing rule doc files are never overwritten — if a user edited
-`.claude/rules/fca.md` locally, re-running the skill with `fca` still
+`.claude/rules/filid_fca-policy.md` locally, re-running the skill with the rule still
 selected will leave their edits untouched.
 
 Print a one-line summary (English default; translate to `[filid:lang]` at runtime):

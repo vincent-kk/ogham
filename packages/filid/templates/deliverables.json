@@ -33,7 +33,7 @@
     "minSize": 200,
     "requiredPatterns": [
       "\\b(PASS|FAIL)\\b",
-      "\\bfca\\b|\\bfractal\\b|\\bfca-ai\\b"
+      "\\bfca\\b|\\bfractal\\b|\\bfca-ai\\b|\\bfilid_fca-policy\\b"
     ],
     "note": "QA report must include FCA-AI rule compliance status."
   },

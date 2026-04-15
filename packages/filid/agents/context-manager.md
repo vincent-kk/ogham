@@ -80,7 +80,7 @@ Before completing, every modified file MUST satisfy:
 
 The canonical INTENT.md / DETAIL.md structure (section headings,
 boundary tiers, line limit, language policy) is defined in
-`.claude/rules/fca.md` → "Documentation Constraints". Apply that
+`.claude/rules/filid_fca-policy.md` → "Documentation Constraints". Apply that
 specification as the single source of truth — keep English section
 anchors (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`,
 `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`)

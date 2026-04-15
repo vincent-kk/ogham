@@ -63,7 +63,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 - `src/index.ts` — 94개 함수/상수 + 전체 타입 re-export
 - `src/core/rule-engine.ts` — 8개 내장 규칙 (naming, structure, dependency, documentation, index, module)
 - `src/mcp/server.ts` — MCP 서버 초기화 + 17개 도구 등록
-- `src/hooks/context-injector.ts` — UserPromptSubmit 시 최소 FCA-AI 포인터 주입 (규칙은 .claude/rules/fca.md에 위임)
+- `src/hooks/context-injector.ts` — UserPromptSubmit 시 최소 FCA-AI 포인터 주입 (규칙은 .claude/rules/filid_fca-policy.md에 위임)
 - `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
 - `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
 - `scripts/build-mcp-server.mjs` — MCP 서버 esbuild 번들러

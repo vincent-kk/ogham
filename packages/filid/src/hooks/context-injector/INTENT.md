@@ -2,7 +2,7 @@
 
 ## Purpose
 
-세션의 첫 프롬프트에 한 번 FCA-AI 포인터(`.claude/rules/fca.md`) + 언어 태그 + 비활성화 규칙 목록을 주입한다. 규칙 본문은 Claude Code가 프로젝트 지시사항으로 자동 로드하므로 훅은 위치만 가리키고 본문은 복제하지 않는다.
+세션의 첫 프롬프트에 한 번 FCA-AI 포인터(`.claude/rules/filid_fca-policy.md`) + 언어 태그 + 비활성화 규칙 목록을 주입한다. 규칙 본문은 Claude Code가 프로젝트 지시사항으로 자동 로드하므로 훅은 위치만 가리키고 본문은 복제하지 않는다.
 
 ## Structure
 
@@ -34,7 +34,7 @@
 
 ### Never do
 
-- `.claude/rules/fca.md`에 파일 write
+- `.claude/rules/filid_fca-policy.md`에 파일 write
 - `continue: false` 반환
 
 ## Dependencies
