@@ -7,6 +7,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { transform } from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -17,10 +18,19 @@ async function readPageFile(...segments) {
   return readFile(join(pagesDir, ...segments), 'utf-8');
 }
 
+async function minifyAsset(source, loader) {
+  const result = await transform(source, {
+    loader,
+    minify: true,
+  });
+
+  return result.code.trim();
+}
+
 let html = await readPageFile('index.html');
-const css = await readPageFile('styles', 'styles.css');
-const appJs = await readPageFile('scripts', 'app.js');
-const jsonImportJs = await readPageFile('scripts', 'json-import.js');
+const css = await minifyAsset(await readPageFile('styles', 'styles.css'), 'css');
+const appJs = await minifyAsset(await readPageFile('scripts', 'app.js'), 'js');
+const jsonImportJs = await minifyAsset(await readPageFile('scripts', 'json-import.js'), 'js');
 
 // Inline CSS
 html = html.replace(
@@ -43,15 +53,12 @@ html = html.replace(
 // Remove mock-api.js
 html = html.replace(/\s*<script\s+src="\.\/__mocks__\/mock-api\.js"\s*><\/script>/, '');
 
-// Escape for template literal
-const escaped = html.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+const serializedHtml = JSON.stringify(html);
 
 const moduleContent = `// GENERATED FILE — do not edit manually.
 // Run: node scripts/build-setup-html.mjs
 
-export const SETUP_HTML = \`
-${escaped}
-\`;
+export const SETUP_HTML = ${serializedHtml};
 `;
 
 await writeFile(outputPath, moduleContent, 'utf-8');

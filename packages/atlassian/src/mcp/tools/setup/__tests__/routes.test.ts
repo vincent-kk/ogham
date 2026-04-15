@@ -22,7 +22,7 @@ const VALID_JIRA_FORM = {
 
 function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
   return {
-    setupHtml: '<html>__SETUP_STATE__</html>',
+    setupHtml: "<html><script>window.__SETUP_STATE__ = '__SETUP_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
     saveConfig: vi.fn().mockResolvedValue(undefined),
     loadCredentials: vi.fn().mockResolvedValue({}),
@@ -63,6 +63,15 @@ async function postJson(url: string, body: unknown): Promise<Response> {
   });
 }
 
+function extractSetupState(html: string): Record<string, unknown> {
+  const match = html.match(/window\.__SETUP_STATE__\s*=\s*(\{[\s\S]*\});/);
+  if (!match) {
+    throw new Error('SETUP_STATE payload not found');
+  }
+
+  return JSON.parse(match[1]);
+}
+
 let server: Server | null = null;
 
 afterEach(async () => {
@@ -83,8 +92,92 @@ describe('createRouteHandler', () => {
     const res = await fetch(baseUrl + '/');
     expect(res.status).toBe(200);
     const text = await res.text();
-    expect(text).not.toContain('__SETUP_STATE__');
+    expect(text).toContain('window.__SETUP_STATE__ = {');
+    expect(text).not.toContain("'__SETUP_STATE__'");
     expect(text).toContain('<html>');
+  });
+
+  it('GET / — edit mode payload에 저장된 고급 설정과 마스킹 정보가 포함됨', async () => {
+    const ctx = makeContext({
+      loadConfig: vi.fn().mockResolvedValue({
+        jira: [{
+          base_url: 'https://test.atlassian.net',
+          is_cloud: true,
+          username: 'user@test.com',
+          ssl_verify: false,
+          timeout: 45000,
+        }],
+      }),
+      loadCredentials: vi.fn().mockResolvedValue({
+        jira: { basic: { api_token: 'secret-token' } },
+      }),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await fetch(baseUrl + '/');
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    const state = extractSetupState(text);
+    const jira = (state.jira as Array<Record<string, unknown>>)[0];
+
+    expect(state.configured).toBe(true);
+    expect(jira.base_url).toBe('https://test.atlassian.net');
+    expect(jira.username).toBe('user@test.com');
+    expect(jira.ssl_verify).toBe(false);
+    expect(jira.timeout).toBe(45000);
+    expect(jira.api_token).toBe(true);
+  });
+
+  it('GET / — cloud 다중 site가 있으면 모든 site가 payload에 포함됨', async () => {
+    const ctx = makeContext({
+      loadConfig: vi.fn().mockResolvedValue({
+        jira: [
+          {
+            base_url: 'https://alpha.atlassian.net',
+            is_cloud: true,
+            username: 'user@test.com',
+            ssl_verify: true,
+            timeout: 30000,
+          },
+          {
+            base_url: 'https://beta.atlassian.net',
+            is_cloud: true,
+            username: 'user@test.com',
+            ssl_verify: true,
+            timeout: 30000,
+          },
+        ],
+        confluence: [
+          {
+            base_url: 'https://alpha.atlassian.net',
+            is_cloud: true,
+            username: 'user@test.com',
+            ssl_verify: true,
+            timeout: 30000,
+          },
+          {
+            base_url: 'https://beta.atlassian.net',
+            is_cloud: true,
+            username: 'user@test.com',
+            ssl_verify: true,
+            timeout: 30000,
+          },
+        ],
+      }),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await fetch(baseUrl + '/');
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    const state = extractSetupState(text);
+    const jiraSites = state.jira as Array<Record<string, unknown>>;
+
+    expect(jiraSites).toHaveLength(2);
+    expect(jiraSites[0].base_url).toBe('https://alpha.atlassian.net');
+    expect(jiraSites[1].base_url).toBe('https://beta.atlassian.net');
   });
 
   it('GET /status — config 없으면 configured:false 반환', async () => {

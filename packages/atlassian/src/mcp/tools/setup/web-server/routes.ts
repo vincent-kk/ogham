@@ -78,6 +78,22 @@ function buildStatus(config: AtlassianConfig): SetupStatus {
   };
 }
 
+function buildEditableSitesState(
+  sites: AtlassianConfig['jira'] | undefined,
+  credentials: ServiceCredentials | undefined,
+) {
+  if (!sites || sites.length === 0) return undefined;
+
+  return sites.map((site) => ({
+    base_url: site.base_url,
+    is_cloud: site.is_cloud,
+    username: site.username,
+    ssl_verify: site.ssl_verify,
+    timeout: site.timeout,
+    api_token: credentials?.basic?.api_token ? true : undefined,
+  }));
+}
+
 async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<void> {
   const config = await ctx.loadConfig();
   const credentials = await ctx.loadCredentials();
@@ -91,27 +107,13 @@ async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<vo
 
   const stateData = {
     ...status,
-    ...(hasJira && credentials.jira ? {
-      jira: jiraSites.map((s) => ({
-        base_url: s.base_url,
-        is_cloud: s.is_cloud,
-        username: s.username,
-        api_token: credentials.jira?.basic?.api_token ? true : undefined,
-      })),
-    } : {}),
-    ...(hasConf && credentials.confluence ? {
-      confluence: confSites.map((s) => ({
-        base_url: s.base_url,
-        is_cloud: s.is_cloud,
-        username: s.username,
-        api_token: credentials.confluence?.basic?.api_token ? true : undefined,
-      })),
-    } : {}),
+    ...(hasJira ? { jira: buildEditableSitesState(jiraSites, credentials.jira) } : {}),
+    ...(hasConf ? { confluence: buildEditableSitesState(confSites, credentials.confluence) } : {}),
     deployment_type: hasJira && hasConf && jiraSites[0]?.base_url !== confSites[0]?.base_url
       ? 'on_premise' : 'cloud',
   };
 
-  const html = ctx.setupHtml.replace('__SETUP_STATE__', JSON.stringify(stateData));
+  const html = ctx.setupHtml.replace("'__SETUP_STATE__'", JSON.stringify(stateData));
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Content-Length': Buffer.byteLength(html),
