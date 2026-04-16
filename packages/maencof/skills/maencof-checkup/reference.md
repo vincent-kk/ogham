@@ -72,9 +72,7 @@ Execute AutoFixAction after user confirmation:
 
 ## --quick Mode
 
-Short-circuits to `mcp_t_kg_status` only. No file-level scan, no auto-fix, no agent delegation.
-Absorbs the former `maencof-diagnose` skill. Intended as a pre-flight status check
-before search/exploration or a simple pre-check before running the full `checkup`.
+> Behavior and semantics live in SKILL.md § `--quick Mode`. This section owns the report-format templates, action matrix, and kg_status response fields.
 
 ### Report Format
 
