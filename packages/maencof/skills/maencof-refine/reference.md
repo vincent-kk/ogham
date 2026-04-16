@@ -44,6 +44,42 @@ Proceed to Phase 3 when ANY of these are true:
 - Frame questions around decisions, not open-ended exploration.
 - Never repeat a question already answered.
 
+## Phase 2.5: Socratic Elenchus Layer
+
+Inserted between Phase 2 exit and Phase 3 entry. Skipped when input < 50 chars AND only Immutable Objects are present (`socratic.skipped="trivial"`).
+
+### 2.5.a Assumption Surfacing
+
+Name 3 implicit premises that the refined requirement rests on. Ask ONE consolidation question: "이 요건은 다음 3개 전제에 기반합니다. 맞습니까?" Exit when all 3 are confirmed OR at least 1 is corrected.
+
+### 2.5.b Elenchus (Counter-example probing)
+
+Present 1-2 boundary counter-examples against the confirmed premises. See [knowledge/socratic-elenchus.md](knowledge/socratic-elenchus.md) for boundary / null-empty / scale-inversion techniques.
+
+- Counter-example accepted → back-edge to Phase 2 (see Back-edge Rules below).
+- Counter-example rejected → continue to 2.5.c.
+
+### 2.5.c Contradiction Check
+
+Verify the adjusted requirement does not contradict Immutable Objects or declared Constraints. Proceed to Phase 3 when no contradictions remain.
+
+### Back-edge Rules (2.5.b → Phase 2)
+
+1. **Variable preservation.** Goal, Context, Constraints, Immutable Objects, and prior answers persist. The back-edge is NOT a Phase 2 restart.
+2. **Re-query limit.** Only variables changed by the accepted counter-example may be re-queried. Reusing answered questions is forbidden (see Phase 2: "Never repeat a question already answered").
+3. **Total question cap.** Phase 2.5 may add at most **3 questions** (1 consolidation in 2.5.a + up to 2 in 2.5.b). Combined with Phase 2's 2-5 target, total session cap is **5-8 turns**. On cap hit, apply convergence criterion 3 ("unchanged requirement across loops") as early exit.
+4. **Back-edge count cap.** Phase 2.5.b → Phase 2 back-edge is allowed **once**. A 2nd accepted counter-example forces skip to 2.5.c (contradiction check only) then Phase 3. Prevents infinite loops.
+
+### Convergence Criteria (Phase 2.5 whole)
+
+1. 3+ premise iterations with zero new contradictions/counter-examples.
+2. Explicit user termination.
+3. Previous loop's revision matches current revision.
+4. Total question cap (5-8 turns) reached.
+5. Back-edge count cap (>1) exceeded.
+
+Satisfying ANY criterion advances to Phase 3.
+
 ## Phase 3: Final Generation
 
 Construct the optimized prompt incorporating all gathered requirements.
