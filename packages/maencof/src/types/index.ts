@@ -183,13 +183,7 @@ export type {
 
 export {
   DialogueConfigSchema,
-  DialogueInjectionSchema,
-  DialogueSessionRecapSchema,
   DEFAULT_DIALOGUE_CONFIG,
   DIALOGUE_DISABLE_ENV,
 } from './dialogue-config.js';
-export type {
-  DialogueConfig,
-  DialogueInjectionConfig,
-  DialogueSessionRecapConfig,
-} from './dialogue-config.js';
+export type { DialogueConfig } from './dialogue-config.js';

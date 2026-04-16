@@ -127,11 +127,12 @@ function buildSessionRecap(
   cwd: string,
 ): string | null {
   const files = input.files_modified ?? [];
-  const pending = readPendingNotificationSafe(cwd);
-  const tentativePrinciples = pending
+  const pending = readPendingNotification(cwd);
+  const captures = pending?.captures ?? [];
+  const tentativePrinciples = captures
     .filter((c) => c.layer === 2)
     .map((c) => `  - ${c.title}`);
-  const agreedPremises = pending
+  const agreedPremises = captures
     .filter((c) => c.layer === 5)
     .map((c) => `  - ${c.title}`);
 
@@ -152,23 +153,6 @@ function buildSessionRecap(
   lines.push('- Unresolved tensions: (none)');
   lines.push('To save this recap, run /maencof:maencof-remember.');
   return lines.join('\n');
-}
-
-/**
- * Read pending-insight-notification.json captures, returning [] on any failure.
- */
-function readPendingNotificationSafe(
-  cwd: string,
-): { title: string; layer: 2 | 5 }[] {
-  try {
-    const pending = readPendingNotification(cwd);
-    if (pending && Array.isArray(pending.captures)) {
-      return pending.captures.map((c) => ({ title: c.title, layer: c.layer }));
-    }
-  } catch {
-    // fall through
-  }
-  return [];
 }
 
 /**
