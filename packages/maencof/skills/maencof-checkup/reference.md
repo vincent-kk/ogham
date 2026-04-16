@@ -7,7 +7,7 @@ Detailed diagnostic items, report format, and auto-fix rules.
 | # | Item | ID | Severity | Auto-fixable |
 |---|------|----|----------|-------------|
 | 1 | **Orphan Node**: nodes with 0 inbound and 0 outbound links | orphan-node | warning | partially (`/maencof:maencof-suggest` to discover and add links) |
-| 2 | **Stale Index** | stale-index | warning | yes (`/maencof:maencof-rebuild`) |
+| 2 | **Stale Index** | stale-index | warning | yes (`/maencof:maencof-build --force --reset-cache`) |
 | 3 | **Broken Link** | broken-link | error | no (manual review required) |
 | 4 | **Layer Violation**: mismatch between path directory and Frontmatter layer field | layer-mismatch | error | partially |
 | 5 | **Duplicate Document**: document pairs sharing 3+ identical tags with high title similarity | duplicate | warning | partially |
@@ -45,7 +45,7 @@ Delegated to the checkup agent:
 - {file}: no inbound/outbound links
 
 ### Recommended Actions
-1. /maencof:maencof-rebuild — rebuild stale index
+1. /maencof:maencof-build --force --reset-cache — rebuild stale index
 2. N broken links require manual fix
 ```
 
@@ -56,7 +56,7 @@ Execute AutoFixAction after user confirmation:
 | Action | Tool | Condition |
 |--------|------|-----------|
 | Fill missing Frontmatter fields | `mcp_t_update` | D6 items |
-| Rebuild stale index | `/maencof:maencof-rebuild` | D2 items |
+| Rebuild stale index | `/maencof:maencof-build --force --reset-cache` | D2 items |
 | Fix layer field based on path | `mcp_t_update` | D4 items |
 | Suggest links for orphan nodes | `/maencof:maencof-suggest` | D1 items |
 

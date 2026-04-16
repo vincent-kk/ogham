@@ -56,7 +56,7 @@ Display summary (Errors / Warnings / Info counts, auto-fixable count) and detail
 After user confirmation, execute AutoFixAction:
 
 - Fill missing Frontmatter fields (`mcp_t_update`)
-- Rebuild stale index (`/maencof:maencof-rebuild`)
+- Rebuild stale index (`/maencof:maencof-build --force --reset-cache`)
 - **L1 (01_Core/) exception**: auto-fix forbidden — guide to `/maencof:maencof-setup --step 4`
 
 ## Available MCP Tools

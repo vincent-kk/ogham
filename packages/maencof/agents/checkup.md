@@ -48,7 +48,7 @@ Auto-fix: suggest calling /maencof:maencof-suggest skill (discover related docum
 Detection: .maencof/stale-nodes.json is non-empty
            OR .maencof/index.json builtAt is older than 24 hours
 Severity: warning
-Auto-fixable: call /maencof:maencof-rebuild
+Auto-fixable: call /maencof:maencof-build --force --reset-cache
 ```
 
 ### D3. Broken Link (broken-link)

@@ -30,7 +30,7 @@ Stale ratio:   {N}% ({staleCount}) — Caution
 Freshness:     {freshnessPercent}%
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 Status: Caution
-Recommended: Run /maencof:maencof-rebuild.
+Recommended: Run /maencof:maencof-build --force --reset-cache.
 ```
 
 ### Critical (stale > 30% or no index)
@@ -48,7 +48,7 @@ Recommended: Run /maencof:maencof-build --full or /maencof:maencof-checkup
 | Status | Condition | Recommended Action |
 |--------|-----------|-------------------|
 | OK | stale < 10% | none |
-| Caution | stale 10-30% | `/maencof:maencof-rebuild` |
+| Caution | stale 10-30% | `/maencof:maencof-build --force --reset-cache` |
 | Critical | stale > 30% | `/maencof:maencof-build --full` |
 | No index | index missing | `/maencof:maencof-build` |
 | Structural issue | — | `/maencof:maencof-checkup` full diagnosis |

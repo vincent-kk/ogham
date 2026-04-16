@@ -101,11 +101,10 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 
 ```
 /maencof:maencof-build
-/maencof:maencof-rebuild
+/maencof:maencof-build --force --reset-cache
 ```
 
-- **`maencof-build`** — Auto-selects full or incremental mode based on index state.
-- **`maencof-rebuild`** — Forces a complete re-index from scratch.
+- **`maencof-build`** — Auto-selects full or incremental mode based on index state. Pass `--force` for an unconditional full rebuild, or `--force --reset-cache` to discard the `.maencof/` cache entirely before rebuilding (recovery / migration mode; absorbs the former `maencof-rebuild` skill).
 
 ### External Data Ingestion
 
@@ -190,8 +189,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-organize`    | Core     | Agent-guided document reorganization           |
 | `/maencof:maencof-reflect`     | Core     | Read-only knowledge health analysis            |
 | `/maencof:maencof-suggest`     | Core     | SA + Jaccard similarity link suggestions       |
-| `/maencof:maencof-build`       | Index    | Build index (auto full/incremental)            |
-| `/maencof:maencof-rebuild`     | Index    | Force full re-index                            |
+| `/maencof:maencof-build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
 | `/maencof:maencof-diagnose`    | Health   | Lightweight status check                       |
 | `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix                       |
 | `/maencof:maencof-cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |

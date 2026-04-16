@@ -101,11 +101,10 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 
 ```
 /maencof:maencof-build
-/maencof:maencof-rebuild
+/maencof:maencof-build --force --reset-cache
 ```
 
-- **`maencof-build`** — 인덱스 상태에 따라 full/incremental 모드를 자동 선택합니다.
-- **`maencof-rebuild`** — 전체 인덱스를 처음부터 강제 재빌드합니다.
+- **`maencof-build`** — 인덱스 상태에 따라 full/incremental 모드를 자동 선택합니다. `--force` 는 조건 없는 full rebuild, `--force --reset-cache` 는 `.maencof/` 캐시를 제거한 뒤 재빌드합니다 (복구 / 마이그레이션 모드, 기존 `maencof-rebuild` 스킬을 흡수).
 
 ### 외부 데이터 수집
 
@@ -190,8 +189,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-organize`    | 핵심     | 에이전트 기반 문서 재구성                  |
 | `/maencof:maencof-reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                 |
 | `/maencof:maencof-suggest`     | 핵심     | SA + Jaccard 유사도 기반 링크 추천         |
-| `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental)        |
-| `/maencof:maencof-rebuild`     | 인덱스   | 강제 전체 재인덱스                         |
+| `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
 | `/maencof:maencof-diagnose`    | 건강     | 가벼운 상태 확인                           |
 | `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정                       |
 | `/maencof:maencof-cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리          |

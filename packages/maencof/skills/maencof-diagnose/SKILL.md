@@ -39,7 +39,7 @@ Call `mcp_t_kg_status()` to retrieve nodeCount, edgeCount, lastBuiltAt, staleNod
 Format results based on health state:
 
 - **OK** (stale < 10%): display stats, status OK
-- **Caution** (stale 10-30%): display stats, recommend `/maencof:maencof-rebuild`
+- **Caution** (stale 10-30%): display stats, recommend `/maencof:maencof-build --force --reset-cache`
 - **Critical** (stale > 30% or no index): recommend `/maencof:maencof-build --full` or `/maencof:maencof-checkup`
 
 Include **sub-layer distribution** from `mcp_t_kg_status` response (`subLayerDistribution` field):
