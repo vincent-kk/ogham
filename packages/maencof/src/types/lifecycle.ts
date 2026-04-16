@@ -60,10 +60,35 @@ export interface LifecycleConfig {
   actions: LifecycleAction[];
 }
 
+/**
+ * Claude Code hook JSON envelope used by the dispatcher.
+ *
+ * Per Claude Code's hook output spec:
+ * - `SessionStart` / `UserPromptSubmit` / `PreToolUse` / `PostToolUse` support
+ *   `hookSpecificOutput.additionalContext` (Claude-visible context).
+ * - `Stop` / `SessionEnd` do NOT support `additionalContext`; only `systemMessage`
+ *   (user-visible warning) is honored alongside `continue` / `suppressOutput`.
+ * - Top-level `message` and `hookMessage` are NOT supported for any event and
+ *   are silently dropped if emitted.
+ */
+export interface LifecycleHookSpecificOutput {
+  hookEventName: LifecycleEvent;
+  additionalContext: string;
+}
+
 /** Result of executing lifecycle actions for a given event */
 export interface LifecycleDispatchResult {
   /** Whether Claude Code should continue processing */
   continue: boolean;
-  /** Aggregated messages from echo/remind actions */
-  message?: string;
+  /**
+   * Event-scoped payload. Populated only for events that support
+   * `additionalContext` (SessionStart / UserPromptSubmit / PreToolUse / PostToolUse).
+   */
+  hookSpecificOutput?: LifecycleHookSpecificOutput;
+  /**
+   * User-visible warning. Used for Stop / SessionEnd (which do not support
+   * `additionalContext`) and as a fallback channel for any event where a
+   * human-visible banner is desirable. Claude itself does not see this field.
+   */
+  systemMessage?: string;
 }

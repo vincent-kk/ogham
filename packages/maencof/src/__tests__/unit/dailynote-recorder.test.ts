@@ -133,4 +133,36 @@ describe('runDailynoteRecorder', () => {
     expect(entries[0].category).toBe('config');
     expect(entries[0].description).toContain('CLAUDE.md');
   });
+
+  // P4: self-reference guard — maencof 자체 관리 경로는 기록하지 않는다
+  it.each([
+    ['02_Derived/changelog/2026-04-16.md'],
+    ['02_Derived/dailynotes/2026-04-16.md'],
+    ['.maencof/stale-nodes.json'],
+    ['.maencof-meta/usage-stats.json'],
+  ])('exclusion 경로 %s 에 대한 write 는 dailynote 에 기록하지 않는다', (path) => {
+    const result = runDailynoteRecorder({
+      tool_name: 'update',
+      tool_input: { path },
+      cwd: vaultDir,
+    });
+
+    expect(result.continue).toBe(true);
+    const today = formatDate(new Date());
+    expect(existsSync(getDailynotePath(vaultDir, today))).toBe(false);
+  });
+
+  it('exclusion 외 경로 (03_External/topical/foo.md) 는 정상 기록된다', () => {
+    runDailynoteRecorder({
+      tool_name: 'update',
+      tool_input: { path: '03_External/topical/foo.md' },
+      cwd: vaultDir,
+    });
+
+    const today = formatDate(new Date());
+    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
+    const entries = parseDailynote(content);
+    expect(entries).toHaveLength(1);
+    expect(entries[0].path).toBe('03_External/topical/foo.md');
+  });
 });

@@ -81,9 +81,37 @@ export function runLifecycleDispatcher(
     }
   }
 
+  if (messages.length === 0) {
+    return { continue: true };
+  }
+
+  return buildDispatchResult(lifecycleEvent, messages.join('\n'));
+}
+
+/**
+ * Build an event-appropriate Claude Code hook envelope.
+ *
+ * - Context-capable events (`SessionStart` / `UserPromptSubmit` / `PreToolUse` /
+ *   `PostToolUse`) receive the payload via `hookSpecificOutput.additionalContext`
+ *   so Claude can act on the message.
+ * - Terminal events (`Stop` / `SessionEnd`) do not support `additionalContext`.
+ *   The payload is surfaced to the user via `systemMessage` only.
+ *
+ * Source: OQ-1 research — `.omc/research/maencof-v030-hook-schema.md`.
+ */
+function buildDispatchResult(
+  event: LifecycleEvent,
+  payload: string,
+): LifecycleDispatchResult {
+  if (event === 'Stop' || event === 'SessionEnd') {
+    return { continue: true, systemMessage: payload };
+  }
   return {
     continue: true,
-    message: messages.length > 0 ? messages.join('\n') : undefined,
+    hookSpecificOutput: {
+      hookEventName: event,
+      additionalContext: payload,
+    },
   };
 }
 

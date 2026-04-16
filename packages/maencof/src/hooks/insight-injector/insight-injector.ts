@@ -11,9 +11,30 @@ export interface InsightInjectorInput {
   prompt?: string;
 }
 
+/**
+ * UserPromptSubmit hook envelope. Claude Code surfaces the status banner to
+ * the model via `hookSpecificOutput.additionalContext`; the top-level
+ * `hookMessage` / `message` keys are silently dropped (see
+ * `.omc/research/maencof-v030-hook-schema.md`).
+ */
 export interface InsightInjectorResult {
   continue: boolean;
-  hookMessage?: string;
+  hookSpecificOutput?: {
+    hookEventName: 'UserPromptSubmit';
+    additionalContext: string;
+  };
+}
+
+function buildInjectorResult(
+  additionalContext: string,
+): InsightInjectorResult {
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext,
+    },
+  };
 }
 
 export function runInsightInjector(
@@ -36,14 +57,12 @@ export function runInsightInjector(
     .join(',');
 
   if (max > 0 && captured >= max) {
-    return {
-      continue: true,
-      hookMessage: `<auto-insight status="limit-reached" captured="${captured}/${max}" />`,
-    };
+    return buildInjectorResult(
+      `<auto-insight status="limit-reached" captured="${captured}/${max}" />`,
+    );
   }
 
-  return {
-    continue: true,
-    hookMessage: `<auto-insight status="active" sensitivity="${sensitivity}" captured="${captured}/${max}" allowed-categories="${allowedCategories}" />`,
-  };
+  return buildInjectorResult(
+    `<auto-insight status="active" sensitivity="${sensitivity}" captured="${captured}/${max}" allowed-categories="${allowedCategories}" />`,
+  );
 }

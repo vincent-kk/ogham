@@ -36,13 +36,22 @@ describe('runSessionStart', () => {
     });
   });
 
-  it('maencof vault가 아닌 경우 setup 안내 메시지를 반환한다', () => {
+  /**
+   * Helper — all Claude-visible session-start content now lives in
+   * `hookSpecificOutput.additionalContext`. Tests that previously asserted on
+   * `result.message` must read through this accessor.
+   */
+  function ctxOf(result: ReturnType<typeof runSessionStart>): string {
+    return result.hookSpecificOutput?.additionalContext ?? '';
+  }
+
+  it('maencof vault가 아닌 경우 setup 안내를 additionalContext에 반환한다', () => {
     const tmpDir = join(tmpdir(), `non-vault-${Date.now()}`);
     mkdirSync(tmpDir, { recursive: true });
     try {
       const result = runSessionStart({ cwd: tmpDir });
       expect(result.continue).toBe(true);
-      expect(result.message).toContain('setup');
+      expect(ctxOf(result)).toContain('setup');
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
     }
@@ -53,21 +62,21 @@ describe('runSessionStart', () => {
     expect(result.continue).toBe(true);
   });
 
-  it('WAL 파일이 있으면 복구 안내 메시지를 포함한다', () => {
+  it('WAL 파일이 있으면 복구 안내를 additionalContext에 포함한다', () => {
     writeFileSync(join(vaultDir, '.maencof-meta', 'wal.json'), '{}');
     const result = runSessionStart({ cwd: vaultDir });
     expect(result.continue).toBe(true);
-    expect(result.message).toContain('WAL');
+    expect(ctxOf(result)).toContain('WAL');
   });
 
-  it('pending 스케줄이 있으면 organize 안내 메시지를 포함한다', () => {
+  it('pending 스케줄이 있으면 organize 안내를 additionalContext에 포함한다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'schedule-log.json'),
       JSON.stringify({ pending: ['task1', 'task2'] }),
     );
     const result = runSessionStart({ cwd: vaultDir });
     expect(result.continue).toBe(true);
-    expect(result.message).toContain('organize');
+    expect(ctxOf(result)).toContain('organize');
   });
 
   it('pending이 없으면 organize 메시지를 포함하지 않는다', () => {
@@ -76,10 +85,10 @@ describe('runSessionStart', () => {
       JSON.stringify({ pending: [] }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message ?? '').not.toContain('organize');
+    expect(ctxOf(result)).not.toContain('organize');
   });
 
-  it('companion-identity.json이 있으면 [maencof:이름] 인사말을 포함한다', () => {
+  it('companion-identity.json이 있으면 [maencof:이름] 인사말을 additionalContext에 포함한다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),
       JSON.stringify({
@@ -89,13 +98,14 @@ describe('runSessionStart', () => {
       }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('[maencof:Mochi]');
-    expect(result.message).toContain('오늘도 함께 정리해볼까요?');
+    const ctx = ctxOf(result);
+    expect(ctx).toContain('[maencof:Mochi]');
+    expect(ctx).toContain('오늘도 함께 정리해볼까요?');
   });
 
   it('companion-identity.json이 없으면 기존 동작 유지', () => {
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message ?? '').not.toContain('[maencof:');
+    expect(ctxOf(result)).not.toContain('[maencof:');
   });
 
   it('data-sources.json이 있지만 sources가 빈 배열이면 connect 안내를 포함한다', () => {
@@ -105,7 +115,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('/maencof:maencof-connect');
+    expect(ctxOf(result)).toContain('/maencof:maencof-connect');
   });
 
   it('data-sources.json이 있고 sources에 항목이 있으면 connect 안내를 포함하지 않는다', () => {
@@ -118,7 +128,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message ?? '').not.toContain('/maencof:maencof-connect');
+    expect(ctxOf(result)).not.toContain('/maencof:maencof-connect');
   });
 
   it('data-sources.json이 손상된 JSON이면 connect 안내를 포함한다', () => {
@@ -128,7 +138,7 @@ describe('runSessionStart', () => {
       'utf-8',
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('/maencof:maencof-connect');
+    expect(ctxOf(result)).toContain('/maencof:maencof-connect');
   });
 
   it('needsProvisioning=false일 때도 stale config가 migration된다', () => {
@@ -164,7 +174,7 @@ describe('runSessionStart', () => {
     // Session start should complete without error
     expect(result.continue).toBe(true);
     // Migration message should appear since configs were migrated
-    expect(result.message).toContain('Config schemas updated');
+    expect(ctxOf(result)).toContain('Config schemas updated');
   });
 
   it('손상된 companion-identity.json은 graceful하게 무시한다', () => {
@@ -174,7 +184,7 @@ describe('runSessionStart', () => {
     );
     const result = runSessionStart({ cwd: vaultDir });
     expect(result.continue).toBe(true);
-    expect(result.message ?? '').not.toContain('[maencof:');
+    expect(ctxOf(result)).not.toContain('[maencof:');
   });
 
   it('스키마 불일치 companion-identity.json은 무시한다', () => {
@@ -183,7 +193,7 @@ describe('runSessionStart', () => {
       JSON.stringify({ schema_version: 1, name: '', greeting: 'hi' }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message ?? '').not.toContain('[maencof:');
+    expect(ctxOf(result)).not.toContain('[maencof:');
   });
 
   it('schema_version 2도 name/greeting을 추출한다 (미래 호환)', () => {
@@ -197,8 +207,18 @@ describe('runSessionStart', () => {
       }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('[maencof:FutureMochi]');
-    expect(result.message).toContain('미래에서 왔어요!');
+    const ctx = ctxOf(result);
+    expect(ctx).toContain('[maencof:FutureMochi]');
+    expect(ctx).toContain('미래에서 왔어요!');
+  });
+
+  it('top-level message 필드를 방출하지 않는다 (schema compliance)', () => {
+    writeFileSync(join(vaultDir, '.maencof-meta', 'wal.json'), '{}');
+    const result = runSessionStart({ cwd: vaultDir }) as unknown as Record<
+      string,
+      unknown
+    >;
+    expect('message' in result).toBe(false);
   });
 });
 

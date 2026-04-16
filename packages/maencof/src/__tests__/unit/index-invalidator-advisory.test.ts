@@ -148,7 +148,7 @@ describe('runIndexInvalidator advisory message', () => {
     rmSync(vaultDir, { recursive: true, force: true });
   });
 
-  it('maencof vault가 아닌 경우 hookMessage 없이 continue: true를 반환한다', () => {
+  it('maencof vault가 아닌 경우 hookSpecificOutput 없이 continue: true를 반환한다', () => {
     const nonVaultDir = join(tmpdir(), `non-vault-${Date.now()}`);
     mkdirSync(nonVaultDir, { recursive: true });
     try {
@@ -157,13 +157,13 @@ describe('runIndexInvalidator advisory message', () => {
         cwd: nonVaultDir,
       });
       expect(result.continue).toBe(true);
-      expect(result.hookMessage).toBeUndefined();
+      expect(result.hookSpecificOutput).toBeUndefined();
     } finally {
       rmSync(nonVaultDir, { recursive: true, force: true });
     }
   });
 
-  it('stale nodes가 없을 때 hookMessage를 반환하지 않는다', () => {
+  it('stale nodes가 없을 때 hookSpecificOutput을 반환하지 않는다', () => {
     writeGraphJson(vaultDir, 100);
     // stale-nodes.json 없음
     const result = runIndexInvalidator({
@@ -173,10 +173,10 @@ describe('runIndexInvalidator advisory message', () => {
     });
     expect(result.continue).toBe(true);
     // appendStaleNode 후 stale 1개, graph 100개 → 1% < 10% → suppressed
-    expect(result.hookMessage).toBeUndefined();
+    expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('stale ratio >= 15% 시 rebuild warning advisory를 반환한다', () => {
+  it('stale ratio >= 15% 시 rebuild warning advisory를 additionalContext에 반환한다', () => {
     // 11개 stale, 50개 전체 → 22% >= 15%
     writeStaleNodes(
       vaultDir,
@@ -189,9 +189,11 @@ describe('runIndexInvalidator advisory message', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookMessage).toContain('kg_build');
-    expect(result.hookMessage).toContain('stale nodes detected');
-    expect(result.hookMessage).toMatch(/\d+%/);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PostToolUse');
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('kg_build');
+    expect(ctx).toContain('stale nodes detected');
+    expect(ctx).toMatch(/\d+%/);
   });
 
   it('stale ratio 10-15% 시 soft info advisory를 반환한다', () => {
@@ -207,8 +209,9 @@ describe('runIndexInvalidator advisory message', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookMessage).toContain('pending change');
-    expect(result.hookMessage).toContain('kg_build');
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('pending change');
+    expect(ctx).toContain('kg_build');
   });
 
   it('stale ratio < 10% 시 advisory를 suppress한다', () => {
@@ -224,7 +227,7 @@ describe('runIndexInvalidator advisory message', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookMessage).toBeUndefined();
+    expect(result.hookSpecificOutput).toBeUndefined();
   });
 
   it('staleCount <= 2 AND percent < 10% 시 suppress한다', () => {
@@ -237,7 +240,7 @@ describe('runIndexInvalidator advisory message', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookMessage).toBeUndefined();
+    expect(result.hookSpecificOutput).toBeUndefined();
   });
 
   it('advisory message에 stale count와 percentage가 포함된다', () => {
@@ -252,8 +255,9 @@ describe('runIndexInvalidator advisory message', () => {
       tool_input: { path: '02_Derived/extra.md' },
       cwd: vaultDir,
     });
-    expect(result.hookMessage).toMatch(/\d+ stale nodes? detected/);
-    expect(result.hookMessage).toMatch(/\d+%/);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toMatch(/\d+ stale nodes? detected/);
+    expect(ctx).toMatch(/\d+%/);
   });
 
   it('stale-nodes.json이 없을 때 graceful하게 처리한다', () => {
@@ -266,7 +270,7 @@ describe('runIndexInvalidator advisory message', () => {
     });
     expect(result.continue).toBe(true);
     // 1개 stale / 50개 → 2% < 10% → suppressed
-    expect(result.hookMessage).toBeUndefined();
+    expect(result.hookSpecificOutput).toBeUndefined();
   });
 
   it('index.json이 없을 때 graceful하게 처리한다 (percent=100으로 advisory 반환)', () => {
@@ -278,7 +282,22 @@ describe('runIndexInvalidator advisory message', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-    expect(result.hookMessage).toBeDefined();
+    expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
+  });
+
+  it('top-level hookMessage / message 필드를 방출하지 않는다 (schema compliance)', () => {
+    writeStaleNodes(
+      vaultDir,
+      Array.from({ length: 11 }, (_, i) => `02_Derived/note-${i}.md`),
+    );
+    writeGraphJson(vaultDir, 50);
+    const result = runIndexInvalidator({
+      tool_name: 'update',
+      tool_input: { path: '02_Derived/extra.md' },
+      cwd: vaultDir,
+    }) as unknown as Record<string, unknown>;
+    expect('hookMessage' in result).toBe(false);
+    expect('message' in result).toBe(false);
   });
 
   it('move가 source와 target 양쪽을 stale로 추적한다', () => {

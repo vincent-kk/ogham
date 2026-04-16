@@ -81,7 +81,7 @@ Procedure:
 1. Read config, set `category_filter.<key> = (--accept ? true : false)`, write config
 2. Confirm: "Category {key} set to {accept|reject}."
 
-**Live status.** Active filtering requires the `insight-injector` / `capture_insight` bridge to consume `config.category_filter`. Until the bridge lands (follow-up session 3), the field is recorded but has no runtime effect. Check `maencof-changelog` for activation status.
+**Live status.** Active filtering is enforced at capture time by the `capture_insight` MCP tool. When `config.category_filter.<key> = false`, matching `capture_insight` calls are rejected with an explanatory error (see `src/mcp/tools/maencof-capture-insight/maencof-capture-insight.ts` lines 63-71). The `insight-injector` hook surfaces the current `allowed-categories` list to Claude each turn for transparency, but does not drop injections itself.
 
 ## Default (no options)
 

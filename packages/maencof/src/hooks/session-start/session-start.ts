@@ -52,12 +52,18 @@ export interface SessionStartHookSpecificOutput {
 export interface SessionStartResult {
   continue: boolean;
   suppressOutput?: boolean;
-  /** Message to display to the user */
-  message?: string;
+  /**
+   * User-visible warning. Claude does not see `systemMessage`; reserve it for
+   * advisories that the operator should notice (e.g., setup required,
+   * provisioning errors). Claude-facing context MUST go through
+   * `hookSpecificOutput.additionalContext`.
+   */
+  systemMessage?: string;
   /**
    * Claude Code SessionStart hook contract field. When present, `additionalContext`
-   * is injected into the model's system context. Used here to deliver the
-   * dialogue meta-skill body unless the dialogue off-switch is active.
+   * is injected into the model's system context. Carries both the dialogue
+   * meta-skill body and the aggregated advisories (WAL, schedule, companion,
+   * etc.) so Claude can act on them.
    */
   hookSpecificOutput?: SessionStartHookSpecificOutput;
 }
@@ -77,10 +83,14 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 1. Check maencof vault
   if (!isMaencofVault(cwd)) {
+    const notice =
+      '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.';
     return {
       continue: true,
-      message:
-        '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.',
+      hookSpecificOutput: {
+        hookEventName: 'SessionStart',
+        additionalContext: notice,
+      },
     };
   }
 
@@ -239,14 +249,15 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     });
   }
 
-  const result: SessionStartResult = {
-    continue: true,
-    message: messages.length > 0 ? messages.join('\n\n') : undefined,
-  };
+  const result: SessionStartResult = { continue: true };
 
-  // 8. meta-skill SKILL.md injection (off-switch honored)
+  // 8. Compose `additionalContext` — the only channel Claude actually sees.
+  //    Combines the dialogue meta-skill body (if active) with aggregated
+  //    advisories so neither channel silently drops the other's payload.
   try {
-    const additionalContext = buildMetaSkillContext(cwd);
+    const metaBody = buildMetaSkillContext(cwd);
+    const advisories = messages.length > 0 ? messages.join('\n\n') : null;
+    const additionalContext = joinSessionContext(metaBody, advisories);
     if (additionalContext !== null) {
       result.hookSpecificOutput = {
         hookEventName: 'SessionStart',
@@ -262,6 +273,19 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   }
 
   return result;
+}
+
+/**
+ * Combine the meta-skill body and advisories into a single
+ * `additionalContext` string. Returns null when both inputs are empty so the
+ * caller can omit `hookSpecificOutput` entirely.
+ */
+function joinSessionContext(
+  metaBody: string | null,
+  advisories: string | null,
+): string | null {
+  if (metaBody && advisories) return `${metaBody}\n\n${advisories}`;
+  return metaBody ?? advisories;
 }
 
 /**

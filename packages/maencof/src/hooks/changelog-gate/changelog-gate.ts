@@ -5,13 +5,15 @@
  * 동작 흐름:
  * 1. 마커 파일(.omc/.changelog-gate-passed) 존재 → 통과
  * 2. maencof vault 확인 → 아니면 통과
- * 3. git 감시 경로에 변경 확인 → 없으면 통과
- * 4. 변경 있으면 차단 (exit 2) + changelog 기록 유도 메시지 출력
+ * 3. migration.lock orphan cleanup (TTL 만료 또는 session 불일치 lock 제거)
+ * 4. 유효한 migration 진행 중이면 통과
+ * 5. git 감시 경로에 변경 확인 → 없으면 통과
+ * 6. 변경 있으면 차단 (exit 2) + changelog 기록 유도 메시지 출력
  *
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -75,8 +77,62 @@ export function hasGateMarker(cwd: string): boolean {
 }
 
 /**
+ * Check whether the migration lock indicates an active in-progress migration
+ * for the current session. If the lock is orphaned (TTL expired or sessionId
+ * mismatch), it is unlinked from disk so future gate entries don't trip over
+ * stale state. Returns `true` only when the lock is valid AND owned by the
+ * current session.
+ *
+ * Contract (P2, OQ-6): cleanup venue is `changelog-gate` entry — NOT
+ * SessionStart. Running on every entry keeps the session-boot path cheap and
+ * guarantees orphan locks disappear by the first Stop event of the next
+ * session.
+ */
+function isMigrationInProgress(
+  lockPath: string,
+  sessionId: string | undefined,
+  cwd: string,
+): boolean {
+  if (!existsSync(lockPath)) return false;
+
+  try {
+    const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
+    const startedAt = new Date(lock.startedAt).getTime();
+    const ttlMs = (lock.ttlMinutes ?? 30) * 60 * 1000;
+    const ttlOk = Number.isFinite(startedAt) && Date.now() - startedAt < ttlMs;
+    const sessionOk = !lock.sessionId || lock.sessionId === sessionId;
+
+    if (ttlOk && sessionOk) {
+      return true;
+    }
+
+    // Orphan lock — TTL expired or session mismatch. Drop it so it cannot
+    // block unrelated future sessions. Failure to unlink is non-fatal; the
+    // next entry will attempt cleanup again.
+    try {
+      unlinkSync(lockPath);
+    } catch (e) {
+      appendErrorLogSafe(cwd, {
+        hook: 'changelog-gate',
+        error: `orphan-lock-cleanup: ${String(e)}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+    return false;
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'changelog-gate',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
+    return false;
+  }
+}
+
+/**
  * Changelog Gate Hook handler.
  * Stop 이벤트에서 감시 경로의 변경을 감지하고 changelog 기록을 유도한다.
+ * migration.lock 의 orphan cleanup 도 수행한다 (P2 / OQ-6 cleanup venue).
  */
 export function runChangelogGate(
   input: ChangelogGateInput,
@@ -94,22 +150,10 @@ export function runChangelogGate(
       return { continue: true };
     }
 
-    // 2.5. migration 진행 중이면 통과
+    // 2.5. migration 진행 중이면 통과 (이 호출이 orphan lock cleanup 도 수행)
     const lockPath = metaPath(cwd, 'migration.lock');
-    if (existsSync(lockPath)) {
-      try {
-        const lock = JSON.parse(readFileSync(lockPath, 'utf-8'));
-        const startedAt = new Date(lock.startedAt).getTime();
-        const ttlMs = (lock.ttlMinutes ?? 30) * 60 * 1000;
-        const sessionMatch =
-          !lock.sessionId || lock.sessionId === input.session_id;
-        if (Date.now() - startedAt < ttlMs && sessionMatch) {
-          return { continue: true };
-        }
-        // TTL 초과 또는 세션 불일치 → 무시하고 계속
-      } catch (e) {
-        appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
-      }
+    if (isMigrationInProgress(lockPath, input.session_id, cwd)) {
+      return { continue: true };
     }
 
     // 3. 감시 경로에 git 변경 확인
