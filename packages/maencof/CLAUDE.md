@@ -25,7 +25,27 @@ yarn format && yarn lint
 
 ## Auto-invocation
 
-Auto-invoke without user request: ambiguous requirement → `maencof-think`; vague input → `maencof-refine`; skill create/modify → `maencof-craft-skill`; agent create/modify → `maencof-craft-agent`. `maencof-refine` and `maencof-think` can chain.
+6 cognitive roles → skill mapping:
+
+- Brainstorm / ideation: `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
+- Insight capture management: `maencof-insight` (capture itself happens via `capture_insight` MCP tool and the `insight-injector` bridge)
+- Spec refinement: `maencof-refine` (Phase 2.5 Socratic included)
+- Interview convergence: `maencof-refine` Phase 2.5
+- Plan review: `maencof-think --mode review`
+
+Automatic invocation chain:
+
+- vague input → `maencof-refine`
+- refine completed but alternatives remain → `maencof-think --mode default`
+- ambiguous requirement (multiple interpretations) → `maencof-think --mode default`
+- ideation signals ("아이디어" / "막막") → `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
+- plan/spec path ref + "검토" signals → `maencof-think --mode review`
+- skill create/modify → `maencof-craft-skill`
+- agent create/modify → `maencof-craft-agent`
+
+Session recap: the SessionEnd hook automatically surfaces `[maencof] Session Recap` at session termination (no explicit invocation). `maencof-reflect` remains a standalone vault judge reporter and is NOT mapped to session-wide recap.
+
+Meta-skill `using-maencof`: the SessionStart hook emits the full SKILL.md body wrapped in `<maencof-meta-skill>` via `hookSpecificOutput.additionalContext`, injecting it into the model's system context each session. Off-switch: `MAENCOF_DISABLE_DIALOGUE=1` env OR `.maencof-meta/dialogue-config.json::injection.enabled=false` → SessionStart emit skipped (skill becomes invisible; discovery loss accepted).
 
 ## Always do
 

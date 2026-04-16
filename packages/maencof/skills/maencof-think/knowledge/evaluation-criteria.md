@@ -1,10 +1,14 @@
 # ToT Evaluation Criteria
 
-## Evaluation Framework Overview
+Mode-specific axis definitions. Total per mode = 100 points. See [tot-methodology.md](./tot-methodology.md) for mode selection (Table B-2 heuristic + `--mode` override).
 
-Five axes are evaluated out of a total of 100 points.
+---
 
-## 1. Implementation Complexity (30 points)
+## Default Mode Criteria
+
+Entry signals: "어떻게 해석" / "여러 방법 중" / ambiguous requirement. Axis weights: Implementation Complexity 30 / Requirements Coverage 30 / UX Quality 20 / Maintainability 10 / Team Capability Fit 10.
+
+### 1. Implementation Complexity (30 points)
 
 **Definition**: The difficulty of implementing the given interpretation as actual code
 
@@ -204,54 +208,86 @@ Experience rate: 2/4 = 50% → 9 pts
 - **Within 1 month**: Requires tutorials and examples → 6 pts
 - **3+ months**: Requires specialized training, mentoring → 4 pts
 
-## Score Interpretation Guide
-
-### Meaning by Total Score Range
+## Default Mode Score Interpretation
 
 | Total Score | Rating | Meaning | Recommended Action |
 |-------------|--------|---------|-------------------|
-| **85-100 pts** | Definitely | Strongly recommended, can proceed immediately | Start implementation right after selection |
-| **75-84 pts** | Highly Feasible | Safe choice, low risk | Proceed after additional validation |
+| **85-100 pts** | Certain | Strongly recommended, can proceed immediately | Start implementation right after selection |
+| **75-84 pts** | Very Feasible | Safe choice, low risk | Proceed after additional validation |
 | **70-74 pts** | Feasible | Executable, caution required | Establish risk mitigation plan |
 | **60-69 pts** | Caution | Risk exists, careful review needed | Preparing alternatives is mandatory |
-| **50-59 pts** | Not Recommended | High risk | Consider other interpretations |
-| **<50 pts** | Not Viable | High probability of failure | Never select |
+| **<60 pts** | Not Recommended | High risk | Consider other interpretations |
 
-### Weight Adjustment by Domain
+---
 
-Evaluation criteria weights can be adjusted based on project characteristics.
+## Divergent Mode Criteria
 
-#### Startup/MVP
-```yaml
-Implementation Complexity: 40 pts (↑ +10)  # Fast release is important
-Requirements Satisfaction: 25 pts (↓ -5)  # Minimum features only
-UX Quality: 15 pts (↓ -5)
-Maintainability: 10 pts (↓ 0)
-Team Capability: 10 pts (↓ 0)
-```
+Entry signals: "아이디어" / "brainstorm" / "막막" / "뭐 할지" with no candidate count specified. Candidate range: 5-8. Axis weights: Novelty 30 / Feasibility 25 / Requirements Coverage 15 / UX Quality 15 / Team Capability Fit 15. Output: candidate list + top 3 rationale.
 
-#### Enterprise
-```yaml
-Implementation Complexity: 20 pts (↓ -10)  # Quality first
-Requirements Satisfaction: 30 pts (↓ 0)
-UX Quality: 20 pts (↓ 0)
-Maintainability: 15 pts (↑ +5)  # Long-term maintenance
-Team Capability: 15 pts (↑ +5)  # Team stability
-```
+### Novelty (30 points)
 
-#### User-Centric Product
-```yaml
-Implementation Complexity: 25 pts (↓ -5)
-Requirements Satisfaction: 30 pts (↓ 0)
-UX Quality: 30 pts (↑ +10)  # UX is top priority
-Maintainability: 10 pts (↓ 0)
-Team Capability: 5 pts (↓ -5)
-```
+Measures the degree to which a candidate departs from known patterns in this codebase / domain.
+
+| Score | Level | Rubric |
+|-------|-------|--------|
+| **10 pts** | 기존 패턴 답습 | Duplicate of an existing solution in the repo or direct copy of a standard tutorial |
+| **20 pts** | 조합 신규 | Combines 2+ existing patterns in a way not previously seen in this codebase |
+| **30 pts** | 완전 신규 | Departs from repo precedent; requires original synthesis or cross-domain transfer |
+
+### Feasibility (25 points)
+
+Same rubric as Default "Implementation Complexity" but rescaled to 25-point maximum (multiply Default score by 25/30 and round). Penalizes candidates that cannot be prototyped within reasonable effort.
+
+### Requirements Coverage / UX Quality / Team Capability Fit
+
+Reuse Default definitions, rescaled to 15-point maximums. Round to integers.
+
+### Divergent Mode Score Interpretation
+
+| Total Score | Rating | Meaning |
+|-------------|--------|---------|
+| **85-100** | Bold & Feasible | Prototype-worthy; high novelty AND feasible |
+| **75-84** | Novel & Actionable | Experiment-ready; accept with 1-sprint pilot |
+| **70-74** | Derivative but safe | Variation on known solutions |
+| **60-69** | Uncertain novelty | Regenerate or clarify the novelty axis |
+| **<60** | Weak | Discard |
+
+---
+
+## Review Mode Criteria
+
+Entry signals: plan/spec path reference + "검토" / "리뷰" / "괜찮아?" / "뭐가 빠졌어?". Candidate range: 3-5 risks or alternatives. Axis weights: Risk Exposure 30 / Requirements Coverage 25 / Maintainability 20 / Implementation Complexity 15 / Team Capability Fit 10. Output: risk table + mitigation alternatives + minimum 3 alternatives.
+
+**Inverted interpretation warning.** In Review mode, Risk Exposure uses inverted polarity: **higher score = higher risk**. This is opposite to all other axes and modes. 85-100 total means "critical risk, mandatory alternative", not "best candidate". See the mode-specific interpretation table below.
+
+### Risk Exposure (30 points, inverted polarity)
+
+| Score | Level | Rubric |
+|-------|-------|--------|
+| **10 pts** | Mitigated | Risk identified AND a viable mitigation already exists in the plan |
+| **20 pts** | Partially mitigated | Mitigation identified but incomplete or conditional |
+| **30 pts** | Unmitigated | Risk identified AND no mitigation plan exists — requires alternative |
+
+### Requirements Coverage / Maintainability / Implementation Complexity / Team Capability Fit
+
+Reuse Default definitions, rescaled to Review weights (25 / 20 / 15 / 10). Round to integers.
+
+### Review Mode Score Interpretation (inverted)
+
+| Total Score | Rating | Meaning |
+|-------------|--------|---------|
+| **85-100** | Critical risk | Alternative adoption is **mandatory** |
+| **75-84** | Major risk | Mitigation must be specified before proceeding |
+| **70-74** | Moderate | Monitoring / conditional acceptance |
+| **60-69** | Minor | Proceed with note |
+| **<60** | Negligible | Acceptable as-is |
+
+---
 
 ## Maintaining Evaluation Consistency
 
 ### Applying the Same Standards
-- Score all candidates using the **same evaluation rubric**
+- Score all candidates using the **same evaluation rubric** within a mode
 - Minimize evaluator bias
 - Assign scores based on objective evidence
 
@@ -268,3 +304,4 @@ Team Capability: 5 pts (↓ -5)
 
 > **Core Principle**: Evaluation based on objective criteria, minimizing subjective judgment
 > **Quality Assurance**: All scores must be measurable and verifiable
+> **Mode discipline**: Never mix axis definitions across modes — each mode defines its own 100-point distribution

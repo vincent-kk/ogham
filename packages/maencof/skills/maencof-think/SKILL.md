@@ -1,9 +1,9 @@
 ---
 name: maencof-think
 user_invocable: true
-description: "[maencof:maencof-think] Resolves ambiguous requirements using Tree of Thoughts: generates 3-5 interpretations, scores each on feasibility and alignment, and selects the optimal approach with full rationale."
-argument-hint: "[requirement or feature request]"
-version: "1.0.0"
+description: "[maencof:maencof-think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale."
+argument-hint: "[--mode default|divergent|review] [requirement or feature request]"
+version: "1.1.0"
 complexity: medium
 context_layers: []
 orchestrator: maencof-think skill
@@ -18,15 +18,28 @@ plugin: maencof
 
 Claude automatically invokes this skill when:
 
-- A feature request can be interpreted in multiple distinct ways
-- Requirements have ambiguous scope requiring comparative evaluation of candidates
-- An architectural decision needs trade-off analysis across multiple approaches
-- The user provides a broad goal without specifying the implementation path
+- A feature request can be interpreted in multiple distinct ways → **default**
+- Requirements have ambiguous scope requiring comparative evaluation of candidates → **default**
+- An architectural decision needs trade-off analysis across multiple approaches → **default**
+- The user provides a broad goal without specifying the implementation path → **default**
+- User input contains ideation signals ("아이디어", "brainstorm", "막막", "뭐 할지") with no candidate count specified → **divergent**
+- User input contains a plan/spec path reference + review signals ("검토", "리뷰", "괜찮아?", "뭐가 빠졌어?") → **review**
+
+### Mode Selection (Table B-2 heuristic)
+
+| Signal | Mode |
+|---|---|
+| "아이디어" / "brainstorm" / "막막" / "뭐 할지" + no candidate count specified | divergent |
+| plan/spec path ref + "검토" / "리뷰" / "괜찮아?" / "뭐가 빠졌어?" | review |
+| miss above + "어떻게 해석" / "여러 방법 중" | default |
+| all miss | default (fallback) |
+
+**Override:** `--mode <default|divergent|review>` on the invocation bypasses heuristics.
 
 ### Manual Invocation
 
 ```
-/maencof:maencof-think [requirement or feature request]
+/maencof:maencof-think [--mode default|divergent|review] [requirement or feature request]
 ```
 
 ## Role
@@ -57,6 +70,10 @@ You are an expert requirements analyst using the Tree of Thoughts (ToT) methodol
 
 ## Evaluation Criteria
 
+Axis definitions are **mode-specific**. Never mix axes across modes. Full rubrics in `knowledge/evaluation-criteria.md`.
+
+### Default mode (weights)
+
 | Criterion                 | Points | Description                                   |
 | ------------------------- | ------ | --------------------------------------------- |
 | Implementation Complexity | 30     | Lower complexity earns higher score           |
@@ -65,13 +82,48 @@ You are an expert requirements analyst using the Tree of Thoughts (ToT) methodol
 | Maintainability           | 10     | Ease of future modification                   |
 | Team Capability Fit       | 10     | Alignment with existing team skills and stack |
 
-## Score Interpretation
+### Divergent mode (weights)
 
-- **85-100** - Certain: strong recommendation, proceed immediately
-- **75-84** - Very Feasible: safe choice, low risk
-- **70-74** - Feasible: viable, proceed with care
-- **60-69** - Caution: risk present, mitigation plan required
-- **Below 60** - Not Recommended: seek alternative or redesign
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| Novelty | 30 | Departure from repo precedent (답습 10 / 조합 신규 20 / 완전 신규 30) |
+| Feasibility | 25 | Prototyping cost (reuses Default complexity rubric rescaled) |
+| Requirements Coverage | 15 | Core need alignment |
+| UX Quality | 15 | Interaction quality |
+| Team Capability Fit | 15 | Stack alignment |
+
+### Review mode (weights; inverted Risk Exposure)
+
+| Criterion | Points | Description |
+|-----------|--------|-------------|
+| Risk Exposure | 30 | **Higher score = higher risk.** 완화 있음 10 / 부분적 20 / 완화 없음 30 |
+| Requirements Coverage | 25 | Plan coverage of stated needs |
+| Maintainability | 20 | Long-term change cost |
+| Implementation Complexity | 15 | Buildability |
+| Team Capability Fit | 10 | Stack alignment |
+
+## Score Interpretation (mode-specific)
+
+### Default
+- **85-100** Certain — proceed immediately
+- **75-84** Very Feasible — safe
+- **70-74** Feasible — proceed with care
+- **60-69** Caution — mitigation required
+- **<60** Not Recommended
+
+### Divergent
+- **85-100** Bold & Feasible — prototype-worthy
+- **75-84** Novel & Actionable — experiment
+- **70-74** Derivative but safe
+- **60-69** Uncertain novelty — regenerate
+- **<60** Weak — discard
+
+### Review (inverted — higher = worse)
+- **85-100** Critical risk — **mandatory alternative adoption**
+- **75-84** Major risk — mitigation must be specified
+- **70-74** Moderate — monitoring / conditional
+- **60-69** Minor — proceed with note
+- **<60** Negligible — acceptable as-is
 
 ## Output
 
