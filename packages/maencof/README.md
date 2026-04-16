@@ -213,6 +213,21 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 ---
 
+## Vault Auto-Commit Policy
+
+The `vault-committer` hook can automatically commit changes under `.maencof/` and `.maencof-meta/` when a session ends or when the user types `/clear`. The feature is **opt-in only** — it activates only when `.maencof-meta/vault-commit.json` contains `{"enabled": true}`.
+
+When enabled, the committer invokes `git commit --no-verify`, bypassing your repository's pre-commit hooks for these automatic commits. This is an explicit, documented exception to the general "never skip hooks" principle:
+
+- **Why** — If a user pre-commit hook writes to or reads from the vault directories, running it as part of a vault auto-commit creates a recursion loop (hook modifies vault → vault-committer runs → pre-commit runs again → …). `--no-verify` breaks that loop.
+- **Who is affected** — Only vault auto-commits produced by this hook. Your own `git commit` invocations, CI commits, and any other committer continue to run pre-commit hooks normally.
+- **How to opt out** — Set `"enabled": false` (or delete the file) in `.maencof-meta/vault-commit.json`. No vault auto-commits will be produced. Your pre-commit hooks remain untouched regardless.
+- **Customizing prompt triggers** — Add a `skip_patterns` array (regex sources) to the same config file. The default is `/clear` only; extending the list lets you wire additional trigger prompts without touching source.
+
+See `src/hooks/vault-committer/DETAIL.md` for the full contract and the v0.4.0 roadmap item that will revisit this policy once a loop-detector implementation is available.
+
+---
+
 ## Key Rules
 
 Core rules enforced by maencof:

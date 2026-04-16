@@ -213,6 +213,21 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 ---
 
+## Vault 자동 커밋 정책
+
+`vault-committer` 훅은 세션 종료 시 또는 사용자가 `/clear` 를 입력했을 때 `.maencof/` 와 `.maencof-meta/` 디렉토리의 변경을 자동으로 커밋할 수 있습니다. 이 기능은 **opt-in 전용** 이며, `.maencof-meta/vault-commit.json` 에 `{"enabled": true}` 가 있을 때만 활성화됩니다.
+
+활성화되면 `git commit --no-verify` 를 사용하여 저장소의 pre-commit hook 을 건너뜁니다. 이는 글로벌 CLAUDE.md 의 "Never skip hooks" 원칙에 대한 **명시적 예외** 이며, 다음 근거에 기반합니다:
+
+- **근거** — 사용자의 pre-commit hook 이 vault 디렉토리(`.maencof/`, `.maencof-meta/`) 를 쓰거나 읽을 경우, vault auto-commit 의 일부로 pre-commit 이 실행되면 재귀 루프(hook 이 vault 수정 → vault-committer 재실행 → pre-commit 재실행 → …) 가 발생합니다. `--no-verify` 는 그 루프를 끊습니다.
+- **영향 범위** — 이 훅이 생성하는 vault auto-commit 에만 적용됩니다. 사용자가 직접 수행하는 `git commit`, CI 커밋, 기타 커밋 주체는 여전히 pre-commit 을 정상 실행합니다.
+- **Opt-out 방법** — `.maencof-meta/vault-commit.json` 의 `"enabled"` 를 `false` 로 두거나 파일을 삭제하면 vault auto-commit 은 더 이상 발생하지 않습니다. pre-commit hook 은 어떤 경우에도 건드리지 않습니다.
+- **프롬프트 트리거 커스터마이징** — 같은 config 파일에 `skip_patterns` 배열(regex source) 을 추가하면 기본 `/clear` 외 사용자 지정 프롬프트로 트리거할 수 있습니다.
+
+전체 contract 와 `loop-detector` 구현 이후 이 정책을 재검토하는 v0.4.0 follow-up 로드맵은 `src/hooks/vault-committer/DETAIL.md` 를 참조하세요.
+
+---
+
 ## 핵심 규칙 요약
 
 maencof이 시행하는 주요 규칙입니다:
