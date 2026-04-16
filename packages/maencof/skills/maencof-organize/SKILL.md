@@ -22,6 +22,18 @@ The judge module evaluates candidates, then the execute module performs the actu
 - When you want to clean up expired Layer 4 documents
 - "memory organization", "knowledge organization", "document move"
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-organize`** — judge + execute. Mutates the vault via `mcp_t_move`
+  after explicit user confirmation. Use when you are ready to apply transitions.
+- **`maencof-reflect`** — read-only judge. Produces an analysis report with
+  zero filesystem changes. Use to preview candidates before committing.
+- **`maencof-suggest`** — link discovery via SA + tag Jaccard. Complements
+  organize by proposing new edges (not layer promotions).
+
+Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose
+new links → `suggest`.
+
 ## Agent Collaboration Sequence
 
 ```

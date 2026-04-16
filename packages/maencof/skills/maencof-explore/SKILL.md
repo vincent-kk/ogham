@@ -23,6 +23,16 @@ Energy spreads from a seed node, uncovering unexpected connections along the way
 - When deeper exploration than `/maencof:maencof-recall` is needed
 - **Brainstorm seed supply** (`--for-brainstorm`): generate 5-8 candidate seeds and hand them to `maencof-think --mode divergent` for ideation. Meta-skill Priority chain: ideation signals → `explore --for-brainstorm` → `think --mode divergent`.
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-explore`** — interactive, up to 3 rounds. Select a node, inspect
+  neighbors (inbound/outbound/hierarchy), optionally re-seed. Best when you
+  expect to pivot.
+- **`maencof-recall`** — one-shot Spreading Activation. Returns a ranked list
+  in a single turn; no drill-down. Best when the query is specific.
+
+Rule of thumb: want to wander → `explore`. Know what you want → `recall`.
+
 ## Prerequisites
 
 - The maencof index must be built (`.maencof/index.json` must exist)

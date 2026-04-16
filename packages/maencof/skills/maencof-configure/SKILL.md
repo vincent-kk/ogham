@@ -23,6 +23,19 @@ Scan, diagnose, and manage the entire Claude Code project environment from a sin
 
 > This skill is a **router** — it scans and delegates. It does not directly modify files.
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-configure`** — ongoing configuration router. Scans, health-checks,
+  and delegates to 7 sub-skills (bridge, instruct, rule, lifecycle,
+  craft-skill, craft-agent, checkup). Call whenever environment drift or a
+  specific config component needs attention after initial onboarding.
+- **`maencof-setup`** — one-time onboarding wizard. Creates the vault, Core
+  Identity, AI companion, Layer directories, and initial index in a fixed
+  7-step sequence. Call once per project; `configure` takes over afterwards.
+
+Rule of thumb: vault does not yet exist → `setup`. Vault exists and something
+needs tuning → `configure`.
+
 ## Scope
 
 | Area | Path | Access |

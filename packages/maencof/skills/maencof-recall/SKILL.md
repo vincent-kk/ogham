@@ -22,6 +22,16 @@ finds related documents, assembles context, and returns it.
 - When loading context from the knowledge space
 - When a lightweight single-query alternative to `/maencof:maencof-explore` is needed
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-recall`** — one-shot Spreading Activation search. Returns a ranked
+  list + optional excerpts in a single turn; no follow-up rounds.
+- **`maencof-explore`** — interactive multi-round graph traversal (up to 3 rounds).
+  Selects a node, inspects neighbors, optionally re-seeds from a neighbor. Use
+  when you expect to drill down or pivot several times.
+
+Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
+
 ## Prerequisites
 
 - The maencof index must be built (`.maencof/index.json` must exist)
