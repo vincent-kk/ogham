@@ -5,6 +5,11 @@ export const DEFAULT_INSIGHT_CONFIG: InsightConfig = {
   sensitivity: 'medium',
   max_captures_per_session: 10,
   notify: true,
+  category_filter: {
+    principle: true,
+    refuted_premise: false,
+    ephemeral_candidate: false,
+  },
 };
 
 export const DEFAULT_INSIGHT_STATS: InsightStats = {

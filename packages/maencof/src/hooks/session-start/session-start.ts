@@ -4,13 +4,15 @@
  * C1 constraint: Must complete within 5 seconds. Heavy index builds are delegated to Skills.
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../../core/claude-md-merger/index.js';
 import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/index.js';
+import { isDialogueInjectionDisabled } from '../../core/dialogue-config/index.js';
 import {
   autoAdjustSensitivity,
   buildMetaPrompt,
@@ -29,9 +31,20 @@ import { provisionMissingConfigs } from '../config-provisioner/index.js';
 import { buildDefaultDirective } from '../../constants/directive-template.js';
 import { claudeMdPath, isMaencofVault, metaPath } from '../shared/index.js';
 
+/** Hard upper bound (Unicode code points) for SKILL.md body before silent skip. */
+const META_SKILL_MAX_CHARS = 2500;
+const META_SKILL_TAG = 'maencof-meta-skill';
+const META_SKILL_RELATIVE_PATH = '../../../skills/using-maencof/SKILL.md';
+
 export interface SessionStartInput {
   session_id?: string;
   cwd?: string;
+}
+
+export interface SessionStartHookSpecificOutput {
+  hookEventName: 'SessionStart';
+  /** Body injected into the model's system context. Wrapped in `<maencof-meta-skill>` tag. */
+  additionalContext: string;
 }
 
 export interface SessionStartResult {
@@ -39,6 +52,12 @@ export interface SessionStartResult {
   suppressOutput?: boolean;
   /** Message to display to the user */
   message?: string;
+  /**
+   * Claude Code SessionStart hook contract field. When present, `additionalContext`
+   * is injected into the model's system context. Used here to deliver the
+   * `using-maencof` meta-skill body unless the dialogue off-switch is active.
+   */
+  hookSpecificOutput?: SessionStartHookSpecificOutput;
 }
 
 /**
@@ -194,10 +213,67 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
   }
 
-  return {
+  const result: SessionStartResult = {
     continue: true,
     message: messages.length > 0 ? messages.join('\n\n') : undefined,
   };
+
+  // 8. meta-skill SKILL.md injection (off-switch honored)
+  try {
+    const additionalContext = buildMetaSkillContext(cwd);
+    if (additionalContext !== null) {
+      result.hookSpecificOutput = {
+        hookEventName: 'SessionStart',
+        additionalContext,
+      };
+    }
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+  }
+
+  return result;
+}
+
+/**
+ * Build the `additionalContext` string carrying the using-maencof meta-skill body.
+ *
+ * Returns `null` when:
+ *   - the dialogue off-switch is active (env or config)
+ *   - the SKILL.md file is missing or unreadable
+ *   - the body exceeds META_SKILL_MAX_CHARS (silent skip per plan §4.5)
+ *
+ * Otherwise wraps the SKILL.md body in `<maencof-meta-skill>` tags.
+ */
+function buildMetaSkillContext(cwd: string): string | null {
+  if (isDialogueInjectionDisabled(cwd)) return null;
+  const body = readMetaSkillBody();
+  if (body === null) return null;
+  if ([...body].length > META_SKILL_MAX_CHARS) return null;
+  return `<${META_SKILL_TAG}>\n${body}\n</${META_SKILL_TAG}>`;
+}
+
+/**
+ * Read the using-maencof SKILL.md body relative to the bundled hook location.
+ * Returns null on any read failure.
+ */
+function readMetaSkillBody(): string | null {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url));
+    const candidates = [
+      // Production: bundled at packages/maencof/bridge/session-start.mjs
+      join(here, '..', 'skills', 'using-maencof', 'SKILL.md'),
+      // Source / tests: src/hooks/session-start/session-start.ts
+      join(here, META_SKILL_RELATIVE_PATH),
+    ];
+    for (const candidate of candidates) {
+      if (existsSync(candidate)) {
+        return readFileSync(candidate, 'utf-8');
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**

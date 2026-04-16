@@ -2,11 +2,26 @@ import { z } from 'zod';
 
 // ─── Configuration ──────────────────────────────────────────────────
 
+export const InsightCategoryFilterSchema = z
+  .object({
+    principle: z.boolean().default(true),
+    refuted_premise: z.boolean().default(false),
+    ephemeral_candidate: z.boolean().default(false),
+  })
+  .default({
+    principle: true,
+    refuted_premise: false,
+    ephemeral_candidate: false,
+  });
+
+export type InsightCategoryFilter = z.infer<typeof InsightCategoryFilterSchema>;
+
 export const InsightConfigSchema = z.object({
   enabled: z.boolean().default(true),
   sensitivity: z.enum(['high', 'medium', 'low']).default('medium'),
   max_captures_per_session: z.number().int().min(0).default(10),
   notify: z.boolean().default(true),
+  category_filter: InsightCategoryFilterSchema,
 });
 
 export type InsightConfig = z.infer<typeof InsightConfigSchema>;

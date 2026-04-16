@@ -14,7 +14,9 @@ import {
 import { join } from 'node:path';
 
 import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/index.js';
+import { isSessionRecapDisabled } from '../../core/dialogue-config/index.js';
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { readPendingNotification } from '../../core/insight-stats/index.js';
 
 import { removeSessionFiles } from '../cache-manager/index.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
@@ -31,6 +33,11 @@ export interface SessionEndInput {
 
 export interface SessionEndResult {
   continue: boolean;
+  /**
+   * Optional human-facing recap shown at session termination.
+   * Populated when `dialogue-config.json::session_recap.enabled !== false`.
+   */
+  message?: string;
 }
 
 /**
@@ -92,7 +99,76 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
   }
 
-  return { continue: true };
+  // Build session recap (off-switch honored)
+  const result: SessionEndResult = { continue: true };
+  try {
+    if (!isSessionRecapDisabled(cwd)) {
+      const recap = buildSessionRecap(input, cwd);
+      if (recap !== null) result.message = recap;
+    }
+  } catch (e) {
+    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
+  }
+
+  return result;
+}
+
+/**
+ * Build a human-facing session recap message.
+ *
+ * Surfaces the count of refined specs (files modified), agreed premises,
+ * tentative principles, and unresolved tensions. Pending insight captures
+ * are reused as a proxy for "principles" when no richer source exists.
+ *
+ * Returns null when there is no meaningful content to report (avoids noise).
+ */
+function buildSessionRecap(
+  input: SessionEndInput,
+  cwd: string,
+): string | null {
+  const files = input.files_modified ?? [];
+  const pending = readPendingNotificationSafe(cwd);
+  const tentativePrinciples = pending
+    .filter((c) => c.layer === 2)
+    .map((c) => `  - ${c.title}`);
+  const agreedPremises = pending
+    .filter((c) => c.layer === 5)
+    .map((c) => `  - ${c.title}`);
+
+  const hasContent =
+    files.length > 0 ||
+    tentativePrinciples.length > 0 ||
+    agreedPremises.length > 0;
+  if (!hasContent) return null;
+
+  const lines: string[] = ['[maencof] Session Recap'];
+  lines.push(`- Refined specs this session: ${files.length}`);
+  lines.push(
+    `- Agreed premises:${agreedPremises.length > 0 ? '\n' + agreedPremises.join('\n') : ' (none)'}`,
+  );
+  lines.push(
+    `- Tentative principles:${tentativePrinciples.length > 0 ? '\n' + tentativePrinciples.join('\n') : ' (none)'}`,
+  );
+  lines.push('- Unresolved tensions: (none)');
+  lines.push('To save this recap, run /maencof:maencof-remember.');
+  return lines.join('\n');
+}
+
+/**
+ * Read pending-insight-notification.json captures, returning [] on any failure.
+ */
+function readPendingNotificationSafe(
+  cwd: string,
+): { title: string; layer: 2 | 5 }[] {
+  try {
+    const pending = readPendingNotification(cwd);
+    if (pending && Array.isArray(pending.captures)) {
+      return pending.captures.map((c) => ({ title: c.title, layer: c.layer }));
+    }
+  } catch {
+    // fall through
+  }
+  return [];
 }
 
 /**
