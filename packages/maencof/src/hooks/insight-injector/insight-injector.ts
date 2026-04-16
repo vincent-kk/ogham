@@ -30,6 +30,10 @@ export function runInsightInjector(
   const captured = getSessionCaptureCount(cwd);
   const max = config.max_captures_per_session;
   const sensitivity = config.sensitivity;
+  const allowedCategories = Object.entries(config.category_filter)
+    .filter(([, allowed]) => allowed === true)
+    .map(([key]) => key)
+    .join(',');
 
   if (max > 0 && captured >= max) {
     return {
@@ -40,6 +44,6 @@ export function runInsightInjector(
 
   return {
     continue: true,
-    hookMessage: `<auto-insight status="active" sensitivity="${sensitivity}" captured="${captured}/${max}" />`,
+    hookMessage: `<auto-insight status="active" sensitivity="${sensitivity}" captured="${captured}/${max}" allowed-categories="${allowedCategories}" />`,
   };
 }

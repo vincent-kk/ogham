@@ -6,9 +6,21 @@ import {
   incrementInsightStats,
   readInsightConfig,
 } from '../../../core/insight-stats/index.js';
+import type { InsightCategoryFilter } from '../../../types/insight.js';
 import type { MaencofCrudResult } from '../../../types/mcp.js';
 
 import { handleMaencofCreate } from '../maencof-create/index.js';
+
+/** Capture-insight category — maps to InsightCategoryFilter keys. */
+export const InsightCategoryEnum = z
+  .enum(['principle', 'refuted_premise', 'ephemeral_candidate'])
+  .describe(
+    'Capture category — controls which config.category_filter flag gates this capture. ' +
+      'principle (default, accept on by default), refuted_premise (rejected Socratic premise, default reject), ' +
+      'ephemeral_candidate (discarded ToT candidate, default reject).',
+  );
+
+export type InsightCategory = z.infer<typeof InsightCategoryEnum>;
 
 export const captureInsightInputSchema = z.object({
   title: z.string().describe('Concise title summarizing the insight'),
@@ -25,6 +37,7 @@ export const captureInsightInputSchema = z.object({
     .string()
     .optional()
     .describe('Brief conversation context that triggered this insight'),
+  category: InsightCategoryEnum.optional(),
 });
 
 export type CaptureInsightArgs = z.infer<typeof captureInsightInputSchema>;
@@ -45,6 +58,16 @@ export async function handleCaptureInsight(
         message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:maencof-insight --max N to increase.`,
       };
     }
+  }
+
+  // 1.5. Check category_filter — reject if the requested category is not allowed
+  const category: keyof InsightCategoryFilter = args.category ?? 'principle';
+  if (config.category_filter[category] === false) {
+    return {
+      success: false,
+      path: '',
+      message: `Category "${category}" is rejected by config.category_filter. Use /maencof:maencof-insight --category ${categoryFlag(category)} --accept to allow.`,
+    };
   }
 
   // 2. Auto-inject auto-insight tag
@@ -77,4 +100,19 @@ export async function handleCaptureInsight(
   }
 
   return result;
+}
+
+/**
+ * Map an internal category key to the user-facing `--category` flag value
+ * used by `/maencof:maencof-insight`.
+ */
+function categoryFlag(category: keyof InsightCategoryFilter): string {
+  switch (category) {
+    case 'principle':
+      return 'principle';
+    case 'refuted_premise':
+      return 'refuted';
+    case 'ephemeral_candidate':
+      return 'ephemeral';
+  }
 }
