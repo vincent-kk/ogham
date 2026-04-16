@@ -83,7 +83,7 @@ when the prior index existed (from `mcp_t_kg_status` snapshot taken in Step 1 be
 If the change is large (nodes ±20% or more), warn and recommend investigating the cause.
 
 > Note: Layer-by-layer node distribution is not available from `mcp_t_kg_status` / `mcp_t_kg_build` responses.
-> To inspect layer distribution, use `/maencof:maencof-diagnose --verbose`.
+> To inspect layer distribution, use `/maencof:maencof-checkup --quick --verbose`.
 
 ## Available MCP Tools
 

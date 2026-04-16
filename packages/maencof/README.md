@@ -89,12 +89,12 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 ### Health Check
 
 ```
-/maencof:maencof-diagnose
+/maencof:maencof-checkup --quick
 /maencof:maencof-checkup
 /maencof:maencof-checkup --fix
 ```
 
-- **`maencof-diagnose`** — Lightweight status check (index freshness, basic stats).
+- **`maencof-checkup --quick`** — Lightweight read-only status check (index freshness, stale ratio, sub-layer distribution). Absorbs the former `maencof-diagnose` skill.
 - **`maencof-checkup`** — 6 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues.
 
 ### Index Management
@@ -190,8 +190,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-reflect`     | Core     | Read-only knowledge health analysis            |
 | `/maencof:maencof-suggest`     | Core     | SA + Jaccard similarity link suggestions       |
 | `/maencof:maencof-build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
-| `/maencof:maencof-diagnose`    | Health   | Lightweight status check                       |
-| `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix                       |
+| `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
 | `/maencof:maencof-cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
 | `/maencof:maencof-ingest`      | Advanced | Import from URL, GitHub, or text               |
 | `/maencof:maencof-connect`     | Advanced | Register external data sources                 |

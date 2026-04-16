@@ -19,8 +19,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = join(__dirname, '..', '..', '..');
 const SKILLS_DIR = join(PACKAGE_ROOT, 'skills');
 
-const REMOVED_SKILLS = ['maencof-rebuild'];
-const EXPECTED_COUNT = 28;
+const REMOVED_SKILLS = ['maencof-rebuild', 'maencof-diagnose'];
+const EXPECTED_COUNT = 27;
 
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} maencof-* directories`, () => {

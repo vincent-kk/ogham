@@ -1,6 +1,6 @@
 # maencof-checkup — Reference
 
-Detailed diagnostic items, report format, and auto-fix rules.
+Detailed diagnostic items, report format, auto-fix rules, and the lightweight `--quick` mode.
 
 ## 6 Diagnostic Items
 
@@ -67,3 +67,104 @@ Execute AutoFixAction after user confirmation:
 - **Checkup agent failure**: return partial results, list failed items
 - **MCP server connection failure**: guide to check `.mcp.json` configuration
 - **Empty vault**: "No documents found. Run `/maencof:maencof-setup` first."
+
+---
+
+## --quick Mode
+
+Short-circuits to `mcp_t_kg_status` only. No file-level scan, no auto-fix, no agent delegation.
+Absorbs the former `maencof-diagnose` skill. Intended as a pre-flight status check
+before search/exploration or a simple pre-check before running the full `checkup`.
+
+### Report Format
+
+#### Healthy (stale < 10%)
+
+```
+maencof Index Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nodes:         {N}
+Edges:         {N}
+Last built:    {time ago / YYYY-MM-DD HH:mm}
+Stale ratio:   {N}% ({staleCount}) — OK
+Freshness:     {freshnessPercent}%
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Status: OK
+```
+
+#### Caution (stale 10-30%)
+
+```
+maencof Index Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nodes:         {N}
+Edges:         {N}
+Last built:    {time ago / YYYY-MM-DD HH:mm}
+Stale ratio:   {N}% ({staleCount}) — Caution
+Freshness:     {freshnessPercent}%
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Status: Caution
+Recommended: Run /maencof:maencof-build --force --reset-cache.
+```
+
+#### Critical (stale > 30% or no index)
+
+```
+maencof Index Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Index: missing / critically stale
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Recommended: Run /maencof:maencof-build --full or /maencof:maencof-checkup
+```
+
+### Sub-Layer Distribution
+
+Always include sub-layer distribution from the `mcp_t_kg_status` response
+(`subLayerDistribution` field) after the status banner:
+
+```
+Sub-Layer Distribution:
+  L3: relational (N), structural (N), topical (N), unclassified (N)
+  L5: buffer (N), boundary (N), unclassified (N)
+```
+
+### --verbose Additions
+
+When `--verbose` is specified together with `--quick`, additionally display:
+
+- List of stale node paths (up to 10)
+- Number of files modified since last build
+- Node distribution by Layer
+- **Sub-layer consistency check** — detect mismatches between directory path and frontmatter `sub_layer` field:
+  ```
+  Sub-Layer Consistency Issues:
+    - 03_External/relational/doc.md has sub_layer: "topical" (expected: "relational")
+    - 05_Context/buffer/old.md has sub_layer: "boundary" (expected: "buffer")
+  ```
+
+### Recommended Action Matrix (--quick)
+
+| Status | Condition | Recommended Action |
+|--------|-----------|-------------------|
+| OK | stale < 10% | none |
+| Caution | stale 10-30% | `/maencof:maencof-build --force --reset-cache` |
+| Critical | stale > 30% | `/maencof:maencof-build --full` |
+| No index | index missing | `/maencof:maencof-build` |
+| Structural issue | — | `/maencof:maencof-checkup` (full 6-check diagnosis) |
+
+### kg_status Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `nodeCount` | number | Total node count |
+| `edgeCount` | number | Total edge count |
+| `lastBuiltAt` | string | Last build timestamp |
+| `staleNodeCount` | number | Stale node count |
+| `freshnessPercent` | number | Index freshness (%) |
+| `rebuildRecommended` | boolean | Whether full rebuild is recommended |
+| `subLayerDistribution` | object | L3 (relational/structural/topical) and L5 (buffer/boundary) node counts |
+
+### --quick Error Handling
+
+- **kg_status failure**: "MCP server connection failed. Check your `.mcp.json` configuration."
+- **No index**: report as unbuilt state and guide to `/maencof:maencof-build`

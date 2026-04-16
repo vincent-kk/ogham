@@ -89,12 +89,12 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 ### 건강 점검
 
 ```
-/maencof:maencof-diagnose
+/maencof:maencof-checkup --quick
 /maencof:maencof-checkup
 /maencof:maencof-checkup --fix
 ```
 
-- **`maencof-diagnose`** — 가벼운 상태 확인 (인덱스 신선도, 기본 통계).
+- **`maencof-checkup --quick`** — 가벼운 읽기 전용 상태 확인 (인덱스 신선도, stale 비율, sub-layer 분포). 기존 `maencof-diagnose` 스킬을 흡수합니다.
 - **`maencof-checkup`** — 6개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제.
 
 ### 인덱스 관리
@@ -190,8 +190,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                 |
 | `/maencof:maencof-suggest`     | 핵심     | SA + Jaccard 유사도 기반 링크 추천         |
 | `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
-| `/maencof:maencof-diagnose`    | 건강     | 가벼운 상태 확인                           |
-| `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정                       |
+| `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수) |
 | `/maencof:maencof-cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리          |
 | `/maencof:maencof-ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기           |
 | `/maencof:maencof-connect`     | 고급     | 외부 데이터 소스 등록                      |

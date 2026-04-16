@@ -148,4 +148,4 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 ## Skill Participation
 
 - `/maencof:maencof-checkup` — full workflow entry point
-- `/maencof:maencof-diagnose` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)
+- `/maencof:maencof-checkup --quick` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)
