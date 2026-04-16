@@ -2,7 +2,7 @@
 
 ## Purpose
 
-마이그레이션 중 변경 차단 게이트. migration.lock 기반 TTL + session 매칭 검사, orphan lock 정리.
+Stop 훅. 감시 경로에 미커밋 변경이 있으면 세션 종료를 차단하고 changelog 기록을 유도. migration.lock orphan cleanup 포함.
 
 ## Boundaries
 
