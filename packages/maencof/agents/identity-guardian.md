@@ -107,6 +107,13 @@ Produce a structured report:
 | Layer 1 (01_Core) | allowed | **forbidden** | `mcp_t_read`, analyze, recommend | `mcp_t_create`, `mcp_t_update`, `mcp_t_delete`, `mcp_t_move`, link, bulk-modify |
 | Layer 2~5 | read only | forbidden | read | all write operations |
 
+> **Footnote.** "Forbidden Operations" in this matrix describes operations the
+> identity-guardian agent itself never invokes. It is NOT a categorical ban on
+> the operations — other agents (memory-organizer, checkup with explicit
+> confirmation, the user via direct MCP calls, etc.) may perform them through
+> their own access matrices subject to their own rules. The guardian's role
+> is to recommend, not to police global vault policy.
+
 Minimum required AutonomyLevel: **0** (active at all levels)
 
 ---

@@ -37,10 +37,14 @@ describe('session-start data-sources.json 체크', () => {
     });
   });
 
+  /** Claude-visible context accessor — session-start now uses `additionalContext`. */
+  const ctxOf = (result: ReturnType<typeof runSessionStart>): string =>
+    result.hookSpecificOutput?.additionalContext ?? '';
+
   it('data-sources.json 파일이 없으면 connect 안내 메시지를 출력한다', () => {
     const result = runSessionStart({ cwd: vaultDir });
 
-    expect(result.message).toContain(CONNECT_MSG);
+    expect(ctxOf(result)).toContain(CONNECT_MSG);
   });
 
   it('data-sources.json에 sources가 빈 배열이면 connect 안내 메시지를 출력한다', () => {
@@ -52,7 +56,7 @@ describe('session-start data-sources.json 체크', () => {
 
     const result = runSessionStart({ cwd: vaultDir });
 
-    expect(result.message).toContain(CONNECT_MSG);
+    expect(ctxOf(result)).toContain(CONNECT_MSG);
   });
 
   it('data-sources.json에 sources가 있으면 connect 안내 메시지를 출력하지 않는다', () => {
@@ -67,7 +71,7 @@ describe('session-start data-sources.json 체크', () => {
 
     const result = runSessionStart({ cwd: vaultDir });
 
-    expect(result.message ?? '').not.toContain(CONNECT_MSG);
+    expect(ctxOf(result)).not.toContain(CONNECT_MSG);
   });
 
   it('data-sources.json에 sources 키가 없으면 connect 안내 메시지를 출력한다', () => {
@@ -79,7 +83,7 @@ describe('session-start data-sources.json 체크', () => {
 
     const result = runSessionStart({ cwd: vaultDir });
 
-    expect(result.message).toContain(CONNECT_MSG);
+    expect(ctxOf(result)).toContain(CONNECT_MSG);
   });
 
   it('data-sources.json이 잘못된 JSON이면 connect 안내 메시지를 출력한다', () => {
@@ -91,6 +95,6 @@ describe('session-start data-sources.json 체크', () => {
 
     const result = runSessionStart({ cwd: vaultDir });
 
-    expect(result.message).toContain(CONNECT_MSG);
+    expect(ctxOf(result)).toContain(CONNECT_MSG);
   });
 });

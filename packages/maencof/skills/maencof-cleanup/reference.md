@@ -69,7 +69,7 @@ Deleted: {title}
 Path: {path}
 Layer: {layer_name}
 
-Note: Run `/maencof:maencof-rebuild` to update the index.
+Note: Run `/maencof:maencof-build --force --reset-cache` to update the index.
 ```
 
 If backlinks were broken, list the affected documents.

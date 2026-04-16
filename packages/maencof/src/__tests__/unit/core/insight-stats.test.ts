@@ -121,6 +121,11 @@ describe('writeInsightConfig', () => {
       sensitivity: 'low' as const,
       max_captures_per_session: 3,
       notify: false,
+      category_filter: {
+        principle: true,
+        refuted_premise: false,
+        ephemeral_candidate: false,
+      },
     };
 
     writeInsightConfig(cwd, config);

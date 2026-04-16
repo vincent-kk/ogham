@@ -20,9 +20,18 @@ export interface PostToolUseInput {
   cwd?: string;
 }
 
+/**
+ * PostToolUse hook envelope. Advisory text is surfaced to the model via
+ * `hookSpecificOutput.additionalContext`; legacy `hookMessage` / `message`
+ * top-level keys are silently dropped by Claude Code
+ * (see `.omc/research/maencof-v030-hook-schema.md`).
+ */
 export interface PostToolUseResult {
   continue: boolean;
-  hookMessage?: string;
+  hookSpecificOutput?: {
+    hookEventName: 'PostToolUse';
+    additionalContext: string;
+  };
 }
 
 /**
@@ -130,9 +139,19 @@ export function runIndexInvalidator(
   // Build advisory message based on stale ratio
   const staleCount = readStaleNodeCount(cwd);
   const totalCount = readGraphNodeCount(cwd);
-  const hookMessage = buildAdvisoryMessage(staleCount, totalCount) ?? undefined;
+  const advisory = buildAdvisoryMessage(staleCount, totalCount);
 
-  return { continue: true, ...(hookMessage ? { hookMessage } : {}) };
+  if (!advisory) {
+    return { continue: true };
+  }
+
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'PostToolUse',
+      additionalContext: advisory,
+    },
+  };
 }
 
 /**

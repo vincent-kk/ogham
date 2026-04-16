@@ -11,7 +11,7 @@ mcp_t_kg_status()
 ```
 
 - No index → "No index found. Please run `/maencof:maencof-build` first." (abort)
-- `rebuildRecommended: true` → warn: "The index is stale. Suggestions may be inaccurate. `/maencof:maencof-rebuild` is recommended."
+- `rebuildRecommended: true` → warn: "The index is stale. Suggestions may be inaccurate. `/maencof:maencof-build --force --reset-cache` is recommended."
 - Ask user whether to continue if stale
 
 ### Step 2 — Determine Suggestion Target

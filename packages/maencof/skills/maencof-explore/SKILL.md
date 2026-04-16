@@ -1,9 +1,9 @@
 ---
 name: maencof-explore
 user_invocable: true
-description: "[maencof:maencof-explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers."
-argument-hint: "[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail]"
-version: "1.0.0"
+description: "[maencof:maencof-explore] Traverses the knowledge graph from a seed topic using Spreading Activation, progressively uncovering hidden connections and surprising associations across all knowledge layers. Supports --for-brainstorm to hand off candidate seeds to maencof-think --mode divergent."
+argument-hint: "[seed] [--hops 1-10] [--layer 1-5] [--sub-layer NAME] [--detail] [--for-brainstorm]"
+version: "1.1.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: maencof-explore skill
@@ -21,6 +21,17 @@ Energy spreads from a seed node, uncovering unexpected connections along the way
 - When you want to discover hidden connections between pieces of knowledge
 - Divergent exploration in the form of "what is related to this?"
 - When deeper exploration than `/maencof:maencof-recall` is needed
+- **Brainstorm seed supply** (`--for-brainstorm`): generate 5-8 candidate seeds and hand them to `maencof-think --mode divergent` for ideation. Meta-skill Priority chain: ideation signals → `explore --for-brainstorm` → `think --mode divergent`.
+
+## When to Use vs Adjacent Skills
+
+- **`maencof-explore`** — interactive, up to 3 rounds. Select a node, inspect
+  neighbors (inbound/outbound/hierarchy), optionally re-seed. Best when you
+  expect to pivot.
+- **`maencof-recall`** — one-shot Spreading Activation. Returns a ranked list
+  in a single turn; no drill-down. Best when the query is specific.
+
+Rule of thumb: want to wander → `explore`. Know what you want → `recall`.
 
 ## Prerequisites
 
@@ -37,7 +48,7 @@ mcp_t_kg_status()
 ```
 
 - No index -> "No index found. Please run `/maencof:maencof-build` first." (abort)
-- `rebuildRecommended: true` -> warn before exploration: "The index is stale. Results may be inaccurate. `/maencof:maencof-rebuild` is recommended."
+- `rebuildRecommended: true` -> warn before exploration: "The index is stale. Results may be inaccurate. `/maencof:maencof-build --force --reset-cache` is recommended."
 - Ask user whether to continue if stale
 
 ### Step 2 — Determine Exploration Starting Point
@@ -143,7 +154,7 @@ After 3 rounds: "Exploration depth limit reached."
 > Options are interpreted by the LLM in natural language. Not strict CLI parsing.
 
 ```
-/maencof:maencof-explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail]
+/maencof:maencof-explore [seed] [--hops <1-10>] [--layer <1-5>] [--sub-layer <name>] [--detail] [--for-brainstorm]
 ```
 
 | Option | Default | Description |
@@ -153,6 +164,7 @@ After 3 rounds: "Exploration depth limit reached."
 | `--layer` | all | Layer filter (1-5, multiple allowed) |
 | `--sub-layer` | none | Sub-layer filter: relational/structural/topical (L3), buffer/boundary (L5) |
 | `--detail` | false | Include document body excerpts in results |
+| `--for-brainstorm` | false | Emit 5-8 candidate seeds (title + path + 1-line summary) as ephemeral output for handoff to `maencof-think --mode divergent`. Skips Step 5 deep-expansion and Step 6 interactive expansion. No vault writes. |
 
 ## Usage Examples
 

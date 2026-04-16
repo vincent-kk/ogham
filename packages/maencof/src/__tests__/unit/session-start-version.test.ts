@@ -91,8 +91,10 @@ describe('session-start version.json 관리', () => {
     expect(data.migrationHistory).toContain('0.0.0-old -> ' + VERSION);
     expect(data.lastMigratedAt).toBeTruthy();
 
-    // 업데이트 메시지 포함
-    expect(result.message).toContain('updated');
+    // 업데이트 메시지 포함 (이제 additionalContext로 라우팅됨)
+    expect(result.hookSpecificOutput?.additionalContext ?? '').toContain(
+      'updated',
+    );
   });
 
   it('동일 버전이면 CLAUDE.md를 건드리지 않는다 (idempotent)', () => {

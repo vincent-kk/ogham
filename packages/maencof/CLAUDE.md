@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/maencof
 
-Personal knowledge space management plugin (v0.0.14). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
+Personal knowledge space management plugin (v0.3.0). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
 
 ## Commands
 
@@ -19,13 +19,35 @@ yarn format && yarn lint
 
 **Agents (5)**: `memory-organizer`, `identity-guardian`, `checkup`, `configurator`, `knowledge-connector`
 
-**Skills (29)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-rebuild`, `maencof-ingest`, `maencof-diagnose`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-dailynote`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
+**Skills (26)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-ingest`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
+
+> Dialogue discipline meta-prompt (`session-start/meta-skill-body.md`) is inlined into the `session-start` hook bundle via esbuild `.md → text` loader and injected as `hookSpecificOutput.additionalContext`. It is not a user-invocable skill.
 
 > Detailed docs: `../../.metadata/maencof/` (5-Layer spec, MCP contracts, agent/skill definitions, hook event mappings)
 
 ## Auto-invocation
 
-Auto-invoke without user request: ambiguous requirement → `maencof-think`; vague input → `maencof-refine`; skill create/modify → `maencof-craft-skill`; agent create/modify → `maencof-craft-agent`. `maencof-refine` and `maencof-think` can chain.
+6 cognitive roles → skill mapping:
+
+- Brainstorm / ideation: `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
+- Insight capture management: `maencof-insight` (capture itself happens via `capture_insight` MCP tool and the `insight-injector` bridge)
+- Spec refinement: `maencof-refine` (Phase 2.5 Socratic included)
+- Interview convergence: `maencof-refine` Phase 2.5
+- Plan review: `maencof-think --mode review`
+
+Automatic invocation chain:
+
+- vague input → `maencof-refine`
+- refine completed but alternatives remain → `maencof-think --mode default`
+- ambiguous requirement (multiple interpretations) → `maencof-think --mode default`
+- ideation signals ("아이디어" / "막막") → `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
+- plan/spec path ref + "검토" signals → `maencof-think --mode review`
+- skill create/modify → `maencof-craft-skill`
+- agent create/modify → `maencof-craft-agent`
+
+Session recap: the SessionEnd hook automatically surfaces `[maencof] Session Recap` at session termination (no explicit invocation). `maencof-reflect` remains a standalone vault judge reporter and is NOT mapped to session-wide recap.
+
+Dialogue meta-prompt injection: the SessionStart hook emits the contents of `src/hooks/session-start/meta-skill-body.md` (bundled inline at build time) wrapped in `<maencof-meta-skill>` via `hookSpecificOutput.additionalContext`, injecting it into the model's system context each session. Off-switch: `MAENCOF_DISABLE_DIALOGUE=1` env OR `.maencof-meta/dialogue-config.json::injection.enabled=false` → SessionStart emit skipped (meta-prompt becomes invisible).
 
 ## Always do
 

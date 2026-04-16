@@ -22,6 +22,18 @@ The judge module evaluates candidates, then the execute module performs the actu
 - When you want to clean up expired Layer 4 documents
 - "memory organization", "knowledge organization", "document move"
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-organize`** — judge + execute. Mutates the vault via `mcp_t_move`
+  after explicit user confirmation. Use when you are ready to apply transitions.
+- **`maencof-reflect`** — read-only judge. Produces an analysis report with
+  zero filesystem changes. Use to preview candidates before committing.
+- **`maencof-suggest`** — link discovery via SA + tag Jaccard. Complements
+  organize by proposing new edges (not layer promotions).
+
+Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose
+new links → `suggest`.
+
 ## Agent Collaboration Sequence
 
 ```
@@ -31,8 +43,14 @@ The judge module evaluates candidates, then the execute module performs the actu
                                              |
               -> [memory-organizer.execute] -> move execution
                                              |
-                               [index-invalidator hook] -> stale-nodes update
+        [index-invalidator hook: auto-fires on PostToolUse] -> stale-nodes update
 ```
+
+> **Note.** `[index-invalidator hook]` is not invoked by this skill. Claude Code
+> fires it automatically on the `PostToolUse` event for every `mcp_t_move` /
+> `mcp_t_update` call the agent makes. The hook writes the affected paths to
+> `.maencof/stale-nodes.json` and never interacts with the organize workflow
+> directly.
 
 **Orchestrator**: the organize skill coordinates the entire flow.
 Calls the memory-organizer agent sequentially through judge -> (confirmation) -> execute stages.
@@ -118,6 +136,6 @@ Buffer documents are temporary holding areas. During organization:
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--dry-run` | false | Run judge only, skip execute stage (equivalent to `/maencof:maencof-reflect` but without the detailed report format) |
+| `--dry-run` | false | Run judge only, skip execute stage. Plain TransitionDirective preview; use `/maencof:maencof-reflect` for a deeper diagnostic report. |
 | `--layer` | 3,4,5 | Target Layer(s) to scan (3, 4, or 5) |
 | `--min-confidence` | 0.7 | Minimum confidence threshold |

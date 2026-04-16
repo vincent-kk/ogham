@@ -166,9 +166,10 @@ describe('session-start CLAUDE.md 초기화', () => {
     expect(content).toContain('maencof Knowledge Space (Mochi)');
   });
 
-  it('초기화 메시지가 반환된다', () => {
+  it('초기화 메시지가 반환된다 (additionalContext로 라우팅됨)', () => {
     const result = runSessionStart({ cwd: vaultDir });
-    expect(result.message).toContain('CLAUDE.md');
-    expect(result.message).toContain('initialized');
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('CLAUDE.md');
+    expect(ctx).toContain('initialized');
   });
 });

@@ -53,26 +53,9 @@ Generate and display a migration plan WITHOUT executing:
 
 Present the plan to the user for review.
 
-### Step 2.5 — Create Migration Lock
-
-After displaying the plan to the user, create the migration lock file.
-
-Write `.maencof-meta/migration.lock`:
-```json
-{
-  "startedAt": "<current ISO timestamp>",
-  "ttlMinutes": 30,
-  "sessionId": "<input.session_id or null>"
-}
-```
-
-When this file exists, the changelog-gate Stop hook recognizes that a migration is in progress and allows session termination.
-
-If the `.maencof-meta/migration.lock` pattern is not in the vault root `.gitignore`, add it.
-
 ### Step 3 — User Confirmation
 
-**STOP HERE. Do NOT proceed to Step 4 until the user explicitly responds.**
+**STOP HERE. Do NOT proceed to Step 3.5 until the user explicitly responds.**
 
 Present the plan summary and ask for confirmation. Show:
 
@@ -87,10 +70,33 @@ Then use the `AskUserQuestion` tool to ask:
 
 Wait for the user's answer before taking any action.
 
-- If user confirms ("yes"): proceed to Step 4.
-- If user declines ("no") or does not explicitly confirm:
-  1. Delete `.maencof-meta/migration.lock` if it exists.
-  2. Exit immediately without any file changes.
+- If user confirms ("yes"): proceed to Step 3.5 (create lock) then Step 4 (execute).
+- If user declines ("no") or does not explicitly confirm: exit immediately without any file changes. **No lock was created, so nothing to clean up.**
+
+### Step 3.5 — Create Migration Lock (post-approval)
+
+**Only enter this step after Step 3 returns "Yes, execute".** Creating the lock
+before approval is forbidden because an aborted session would leave a stale
+`migration.lock` that blocks unrelated future sessions from completing their
+changelog-gate check.
+
+Write `.maencof-meta/migration.lock`:
+```json
+{
+  "startedAt": "<current ISO timestamp>",
+  "ttlMinutes": 30,
+  "sessionId": "<input.session_id or null>"
+}
+```
+
+When this file exists, the changelog-gate Stop hook recognizes that a migration
+is in progress and allows session termination. The `changelog-gate` hook also
+cleans up orphan locks (TTL expired **or** sessionId absent from the current
+session) on every entry, so even an unexpected crash between Step 3.5 and
+Step 5 will self-heal on the next session's first Stop event.
+
+If the `.maencof-meta/migration.lock` pattern is not in the vault root
+`.gitignore`, add it.
 
 ### Step 4 — Execute Migration
 

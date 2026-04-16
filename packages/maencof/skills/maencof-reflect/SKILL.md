@@ -22,6 +22,17 @@ Generates a pure analysis report with no filesystem changes.
 - When you only want to see the duplicate document detection results
 - "reflection", "knowledge status", "check transition candidates"
 
+## When to Use vs Adjacent Skills
+
+- **`maencof-reflect`** — read-only judge. No filesystem changes, ever. Use for
+  diagnostic reports and dry-run-style previews of organize candidates.
+- **`maencof-organize`** — judge + execute. Mutates the vault via `mcp_t_move`
+  after user confirmation. Use when you are ready to apply the transitions
+  `reflect` surfaced.
+
+Rule of thumb: inspect without side effects → `reflect`; apply transitions →
+`organize`.
+
 ## Agent Collaboration Sequence
 
 ```
@@ -30,8 +41,7 @@ Generates a pure analysis report with no filesystem changes.
                                generate analysis report (no file changes)
 ```
 
-**Orchestrator**: the reflect skill calls only the judge module and skips execute.
-Equivalent to `/maencof:maencof-organize --dry-run` but generates a more detailed report.
+**Orchestrator**: the reflect skill calls only the judge module and skips execute. Use `reflect` for a diagnostic report (L5-Boundary health, sub-layer distribution, duplicates, auto-insight stats); use `organize --dry-run` for a plain directive preview immediately before executing.
 
 ## Workflow
 

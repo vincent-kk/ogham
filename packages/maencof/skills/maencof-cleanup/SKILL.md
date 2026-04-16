@@ -42,7 +42,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 2. **Preview** — read target with `mcp_t_read`, show Frontmatter summary
 3. **Safety checks** — L1 (01_Core/) deletion is forbidden; backlink check via `mcp_t_kg_navigate`
 4. **Execute** — `mcp_t_delete` after user confirmation (or `--force`)
-5. **Report** — show deleted path and recommend `/maencof:maencof-rebuild`
+5. **Report** — show deleted path and recommend `/maencof:maencof-build --force --reset-cache`
 
 > See **reference.md § Document Mode** for detailed safety check flows and report format.
 

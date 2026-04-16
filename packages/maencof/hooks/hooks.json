@@ -54,7 +54,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/insight-injector.mjs\"",
-            "timeout": 2
+            "timeout": 3
           }
         ]
       }
@@ -163,7 +163,12 @@
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-end.mjs\"",
             "timeout": 3
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/lifecycle-dispatcher.mjs\" SessionEnd",

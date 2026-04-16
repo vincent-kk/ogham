@@ -15,10 +15,33 @@ Tree of Thoughts (ToT) is a decision-making framework that systematically explor
 - **Complexity Spectrum**: Include methods ranging from simple to complex
 - **Feasibility Verification**: All candidates must be actually implementable
 
-**Number of Candidates**:
+**Number of Candidates** (default mode):
 - Simple problems: 3
 - Medium complexity: 4
 - Complex problems: 5
+
+#### Mode-specific Generation
+
+| Mode | Candidate Range | Generation Focus | Output |
+|------|-----------------|-------------------|--------|
+| **default** | 3-5 | Implementable interpretations across a complexity spectrum | evaluation table + Decision Record YAML |
+| **divergent** | 5-8 | Maximize novelty and cross-domain variation; include speculative prototypes | candidate list + top 3 rationale (remaining summarized) |
+| **review** | 3-5 (risks/alternatives) | Surface risks in the referenced plan/spec and pair each with a mitigation alternative | risk table + mitigation alternatives + minimum 3 alternatives |
+
+#### Application by Entry Mode
+
+- **default**: apply Strategies A/B/C below. Evaluate with Default Mode rubric in `evaluation-criteria.md`.
+- **divergent**: apply Strategy D (Novelty-first, see below). Evaluate with Divergent Mode rubric (Novelty 30 / Feasibility 25 / Requirements 15 / UX 15 / Team 15).
+- **review**: apply Strategy E (Risk-first, see below). Evaluate with Review Mode rubric (Risk Exposure 30 / Requirements 25 / Maintainability 20 / Complexity 15 / Team 10). **Inverted polarity**: higher Risk Exposure score = higher risk.
+
+Mode selection (Table B-2 heuristic; `--mode` overrides):
+
+| Signal | Mode |
+|--------|------|
+| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent |
+| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?" | review |
+| miss above + "how to interpret" / "among multiple methods" | default |
+| all miss | default (fallback) |
 
 **Generation Strategies**:
 
@@ -44,6 +67,32 @@ Candidate 2: Drag-based interaction
 Candidate 3: Keyboard-first interaction
 Candidate 4: Voice/gesture interaction
 ```
+
+#### Strategy D: Novelty-first (divergent mode)
+
+Generate 5-8 candidates ranked by departure from repo / domain precedent. Include at least 1 purely-speculative prototype.
+
+```
+Candidate 1: Standard known pattern (baseline, low Novelty)
+Candidate 2-3: Composed / hybrid patterns not seen in this repo
+Candidate 4-5: Cross-domain transfer (e.g., import an interaction pattern from a different product vertical)
+Candidate 6-7: Contrarian / adversarial angle (intentionally violate one assumption)
+Candidate 8 (optional): Prototype-only — acceptable if Feasibility ≥ 15/25
+```
+
+#### Strategy E: Risk-first (review mode)
+
+Generate 3-5 candidates framed as **(risk, mitigation alternative)** pairs against the referenced plan/spec.
+
+```
+Risk 1: Failure mode in the plan (unmitigated / partially mitigated / mitigated)
+  Alternative 1a: Concrete mitigation with cost estimate
+  Alternative 1b: Fallback if 1a is rejected
+Risk 2: …
+Risk 3: …
+```
+
+Minimum 3 risks. Each risk MUST carry at least 1 mitigation alternative; unmitigated-only risks earn 30/30 Risk Exposure (mandatory alternative adoption).
 
 ### Step 2: Thought Evaluation
 

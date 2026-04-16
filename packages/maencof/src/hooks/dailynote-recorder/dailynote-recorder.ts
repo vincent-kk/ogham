@@ -4,6 +4,10 @@
  *
  * matcher: `create`|`update`|`delete`|`move`|`capture_insight`|`claudemd_merge`|`claudemd_remove` (write 도구 7개)
  * graceful degradation: 모든 에러 catch → { continue: true }
+ *
+ * P4 — self-reference guard: 자기 자신(dailynote)이나 changelog 등 maencof 가 자동
+ * 관리하는 경로에 대한 write 는 dailynote 에 기록하지 않는다. 기록하면 매 dailynote
+ * append 가 또 다른 dailynote 이벤트를 유발해 엔트리가 무한 복제된다.
  */
 import {
   appendDailynoteEntry,
@@ -14,6 +18,28 @@ import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
 
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault } from '../shared/index.js';
+
+/**
+ * Paths whose writes MUST NOT be recorded in dailynote — maencof 자체 관리 영역.
+ *
+ * - `02_Derived/changelog/` : changelog 디렉토리 (self-reference 방지)
+ * - `02_Derived/dailynotes/` : dailynote 디렉토리 자체 (무한 재귀 방지)
+ * - `.maencof/` : 그래프 인덱스, stale-nodes 등
+ * - `.maencof-meta/` : 운영 메타데이터 (session, config, dailynote 원본 포함)
+ *
+ * startsWith 매칭이므로 경로는 prefix 로 사용된다.
+ */
+const EXCLUSION_PATH_PREFIXES: readonly string[] = [
+  '02_Derived/changelog/',
+  '02_Derived/dailynotes/',
+  '.maencof/',
+  '.maencof-meta/',
+];
+
+function isExcludedPath(path: string | undefined): boolean {
+  if (!path) return false;
+  return EXCLUSION_PATH_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
 
 export interface DailynoteRecorderInput {
   tool_name?: string;
@@ -54,6 +80,12 @@ export function runDailynoteRecorder(
       (toolInput['file_path'] as string) ??
       extractPathFromResponse(input.tool_response) ??
       undefined;
+
+    // P4: maencof 자체 관리 경로(dailynote/changelog/.maencof-meta/.maencof)에
+    // 대한 write 는 skip — 그렇지 않으면 append 자체가 재귀적으로 append 를 유발한다.
+    if (isExcludedPath(path)) {
+      return { continue: true };
+    }
 
     appendDailynoteEntry(cwd, {
       time: formatTime(new Date()),

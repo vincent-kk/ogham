@@ -6,11 +6,17 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { buildDefaultDirective } from '../../constants/directive-template.js';
 import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../../core/claude-md-merger/index.js';
-import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/index.js';
+import {
+  appendDailynoteEntry,
+  formatTime,
+} from '../../core/dailynote-writer/index.js';
+import { isDialogueInjectionDisabled } from '../../core/dialogue-config/index.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import {
   autoAdjustSensitivity,
   buildMetaPrompt,
@@ -18,27 +24,48 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../../core/insight-stats/index.js';
-import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../types/common.js';
 import type { CompanionIdentityMinimal } from '../../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 import type { VaultVersionInfo } from '../../types/setup.js';
 import { VERSION } from '../../version.js';
-
 import { provisionMissingConfigs } from '../config-provisioner/index.js';
-import { buildDefaultDirective } from '../../constants/directive-template.js';
 import { claudeMdPath, isMaencofVault, metaPath } from '../shared/index.js';
+
+import META_SKILL_BODY from './meta-skill-body.md';
+
+/** Hard upper bound (Unicode code points) for meta-skill body before silent skip. */
+const META_SKILL_MAX_CHARS = 2500;
+const META_SKILL_TAG = 'maencof-meta-skill';
 
 export interface SessionStartInput {
   session_id?: string;
   cwd?: string;
 }
 
+export interface SessionStartHookSpecificOutput {
+  hookEventName: 'SessionStart';
+  /** Body injected into the model's system context. Wrapped in `<maencof-meta-skill>` tag. */
+  additionalContext: string;
+}
+
 export interface SessionStartResult {
   continue: boolean;
   suppressOutput?: boolean;
-  /** Message to display to the user */
-  message?: string;
+  /**
+   * User-visible warning. Claude does not see `systemMessage`; reserve it for
+   * advisories that the operator should notice (e.g., setup required,
+   * provisioning errors). Claude-facing context MUST go through
+   * `hookSpecificOutput.additionalContext`.
+   */
+  systemMessage?: string;
+  /**
+   * Claude Code SessionStart hook contract field. When present, `additionalContext`
+   * is injected into the model's system context. Carries both the dialogue
+   * meta-skill body and the aggregated advisories (WAL, schedule, companion,
+   * etc.) so Claude can act on them.
+   */
+  hookSpecificOutput?: SessionStartHookSpecificOutput;
 }
 
 /**
@@ -56,10 +83,14 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
 
   // 1. Check maencof vault
   if (!isMaencofVault(cwd)) {
+    const notice =
+      '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.';
     return {
       continue: true,
-      message:
-        '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.',
+      hookSpecificOutput: {
+        hookEventName: 'SessionStart',
+        additionalContext: notice,
+      },
     };
   }
 
@@ -86,7 +117,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       );
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // 2.6. 아키텍처 버전 체크 (L3 서브레이어 + L5 Buffer/Boundary)
@@ -116,7 +151,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         );
       }
     } catch (e) {
-      appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+      appendErrorLogSafe(cwd, {
+        hook: 'session-start',
+        error: String(e),
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 
@@ -140,7 +179,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       );
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     messages.push(
       '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
     );
@@ -153,7 +196,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       messages.push(`[maencof] ${adjustment.message}`);
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // 6.5. Auto-Insight: meta-prompt injection + pending notification
@@ -179,7 +226,11 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       deletePendingNotification(cwd);
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // 7. Record session start in dailynote
@@ -191,13 +242,66 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       description: `Session started (session_id: ${sessionId})`,
     });
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
-  return {
-    continue: true,
-    message: messages.length > 0 ? messages.join('\n\n') : undefined,
-  };
+  const result: SessionStartResult = { continue: true };
+
+  // 8. Compose `additionalContext` — the only channel Claude actually sees.
+  //    Combines the dialogue meta-skill body (if active) with aggregated
+  //    advisories so neither channel silently drops the other's payload.
+  try {
+    const metaBody = buildMetaSkillContext(cwd);
+    const advisories = messages.length > 0 ? messages.join('\n\n') : null;
+    const additionalContext = joinSessionContext(metaBody, advisories);
+    if (additionalContext !== null) {
+      result.hookSpecificOutput = {
+        hookEventName: 'SessionStart',
+        additionalContext,
+      };
+    }
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Combine the meta-skill body and advisories into a single
+ * `additionalContext` string. Returns null when both inputs are empty so the
+ * caller can omit `hookSpecificOutput` entirely.
+ */
+function joinSessionContext(
+  metaBody: string | null,
+  advisories: string | null,
+): string | null {
+  if (metaBody && advisories) return `${metaBody}\n\n${advisories}`;
+  return metaBody ?? advisories;
+}
+
+/**
+ * Build the `additionalContext` string carrying the maencof dialogue meta-skill body.
+ *
+ * Returns `null` when:
+ *   - the dialogue off-switch is active (env or config)
+ *   - the body exceeds META_SKILL_MAX_CHARS (silent skip per plan §4.5)
+ *
+ * Otherwise wraps the body (bundled inline via esbuild `.md -> text`) in `<maencof-meta-skill>` tags.
+ */
+function buildMetaSkillContext(cwd: string): string | null {
+  if (isDialogueInjectionDisabled(cwd)) return null;
+  const body = META_SKILL_BODY;
+  if ([...body].length > META_SKILL_MAX_CHARS) return null;
+  return `<${META_SKILL_TAG}>\n${body}\n</${META_SKILL_TAG}>`;
 }
 
 /**
@@ -216,7 +320,11 @@ function loadCompanionIdentity(
       ? { name: raw.name, greeting: raw.greeting }
       : null;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return null;
   }
 }
@@ -266,7 +374,11 @@ function initClaudeMdSection(
     }
     // 마커 있음 + 같은 버전 → 스킵 (idempotent)
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
   return needsProvisioning;
 }
@@ -284,7 +396,11 @@ function readVaultVersion(cwd: string): string | null {
     ) as VaultVersionInfo;
     return data.version ?? null;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return null;
   }
 }
@@ -311,7 +427,11 @@ function updateVaultVersion(cwd: string, previousVersion: string): void {
   try {
     info = JSON.parse(readFileSync(versionPath, 'utf-8')) as VaultVersionInfo;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     info = {
       version: previousVersion,
       installedAt: new Date().toISOString(),
@@ -346,7 +466,11 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
       );
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 }
 
@@ -364,10 +488,13 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
       );
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-start', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 }
-
 
 /**
  * Load the most recent session summary from the sessions/ directory.

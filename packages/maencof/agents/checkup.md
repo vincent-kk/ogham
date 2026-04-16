@@ -24,7 +24,13 @@ maxTurns: 40
 
 Diagnoses the health of the knowledge vault across 6 categories and generates AutoFixActions
 for items that can be repaired automatically.
-**Deletion, relocation, and bulk modification are strictly forbidden** — proposals only.
+
+**Write scope:**
+- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp_t_update`
+  — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
+- **Strictly forbidden**: deletion (`mcp_t_delete`), relocation (`mcp_t_move`), and bulk
+  modification. These are reported as AutoFixAction proposals only — execution belongs
+  to the user or a different agent (e.g., memory-organizer for relocation).
 
 ---
 
@@ -42,7 +48,7 @@ Auto-fix: suggest calling /maencof:maencof-suggest skill (discover related docum
 Detection: .maencof/stale-nodes.json is non-empty
            OR .maencof/index.json builtAt is older than 24 hours
 Severity: warning
-Auto-fixable: call /maencof:maencof-rebuild
+Auto-fixable: call /maencof:maencof-build --force --reset-cache
 ```
 
 ### D3. Broken Link (broken-link)
@@ -56,7 +62,10 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 ### D4. Layer Violation (layer-mismatch)
 ```
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
-           and the Frontmatter layer field
+           and the Frontmatter layer field. Frontmatter is loaded via
+           `mcp_t_read` which reads raw disk bytes, BYPASSING any
+           graph-index cache. Results therefore reflect on-disk truth
+           even when the graph index is stale or pending rebuild.
 Severity: error
 Auto-fixable: update Frontmatter layer field to match path (`mcp_t_update`)
 ```
@@ -70,7 +79,11 @@ Auto-fix: not possible — reports duplicate pairs and suggests /maencof:maencof
 
 ### D6. Frontmatter Validation (invalid-frontmatter)
 ```
-Detection: items that fail FrontmatterSchema (Zod) validation
+Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
+           Frontmatter is re-parsed from raw disk via `mcp_t_read` rather
+           than read from the graph index, so the validator catches on-disk
+           drift that has not yet been indexed (e.g., external editor
+           changes made outside a maencof session).
 Severity: error
 Auto-fixable:
   - missing created/updated → auto-populate from file mtime
@@ -135,4 +148,4 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 ## Skill Participation
 
 - `/maencof:maencof-checkup` — full workflow entry point
-- `/maencof:maencof-diagnose` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)
+- `/maencof:maencof-checkup --quick` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)

@@ -36,8 +36,10 @@ claude --plugin-dir ./packages/maencof
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 17개)
+- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 18개)
 - `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+
+> **성능 안내**: maencof는 `UserPromptSubmit`에서 4개 hook을 순차 실행합니다 (context-injector → lifecycle-dispatcher → vault-committer → insight-injector). 모두 fast-path 최적화되어 있으며 일반 프롬프트의 hook 오버헤드는 약 60ms (세션 첫 프롬프트는 컨텍스트 캐시 빌드로 ~110ms) 수준입니다. `hooks.json`의 timeout 값 (2–3s) 은 kill-switch이지 expected latency가 아닙니다. git을 실제로 실행하는 경로는 `vault-committer` 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
 
 ---
 
@@ -87,23 +89,22 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 ### 건강 점검
 
 ```
-/maencof:maencof-diagnose
+/maencof:maencof-checkup --quick
 /maencof:maencof-checkup
 /maencof:maencof-checkup --fix
 ```
 
-- **`maencof-diagnose`** — 가벼운 상태 확인 (인덱스 신선도, 기본 통계).
+- **`maencof-checkup --quick`** — 가벼운 읽기 전용 상태 확인 (인덱스 신선도, stale 비율, sub-layer 분포). 기존 `maencof-diagnose` 스킬을 흡수합니다.
 - **`maencof-checkup`** — 6개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제.
 
 ### 인덱스 관리
 
 ```
 /maencof:maencof-build
-/maencof:maencof-rebuild
+/maencof:maencof-build --force --reset-cache
 ```
 
-- **`maencof-build`** — 인덱스 상태에 따라 full/incremental 모드를 자동 선택합니다.
-- **`maencof-rebuild`** — 전체 인덱스를 처음부터 강제 재빌드합니다.
+- **`maencof-build`** — 인덱스 상태에 따라 full/incremental 모드를 자동 선택합니다. `--force` 는 조건 없는 full rebuild, `--force --reset-cache` 는 `.maencof/` 캐시를 제거한 뒤 재빌드합니다 (복구 / 마이그레이션 모드, 기존 `maencof-rebuild` 스킬을 흡수).
 
 ### 외부 데이터 수집
 
@@ -188,16 +189,13 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-organize`    | 핵심     | 에이전트 기반 문서 재구성                  |
 | `/maencof:maencof-reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                 |
 | `/maencof:maencof-suggest`     | 핵심     | SA + Jaccard 유사도 기반 링크 추천         |
-| `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental)        |
-| `/maencof:maencof-rebuild`     | 인덱스   | 강제 전체 재인덱스                         |
-| `/maencof:maencof-diagnose`    | 건강     | 가벼운 상태 확인                           |
-| `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정                       |
+| `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
+| `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수) |
 | `/maencof:maencof-cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리          |
 | `/maencof:maencof-ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기           |
 | `/maencof:maencof-connect`     | 고급     | 외부 데이터 소스 등록                      |
 | `/maencof:maencof-mcp-setup`   | 고급     | 외부 MCP 서버 설치                         |
 | `/maencof:maencof-manage`      | 고급     | 스킬/에이전트 활성화 및 사용 리포트        |
-| `/maencof:maencof-dailynote`   | 고급     | 일일 활동 로그 조회                        |
 | `/maencof:maencof-insight`     | 고급     | 자동 인사이트 캡처 관리                    |
 | `/maencof:maencof-changelog`   | 고급     | 자기 변경 기록 (일별 changelog)            |
 | `/maencof:maencof-migrate`     | 고급     | Vault 아키텍처 마이그레이션                |
@@ -210,6 +208,21 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-lifecycle`   | 환경설정 | 라이프사이클 액션 관리                     |
 | `/maencof:maencof-think`       | 분석     | Tree of Thoughts 요구사항 분석             |
 | `/maencof:maencof-refine`      | 분석     | 모호한 입력 정제 인터뷰 루프               |
+
+---
+
+## Vault 자동 커밋 정책
+
+`vault-committer` 훅은 세션 종료 시 또는 사용자가 `/clear` 를 입력했을 때 `.maencof/` 와 `.maencof-meta/` 디렉토리의 변경을 자동으로 커밋할 수 있습니다. 이 기능은 **opt-in 전용** 이며, `.maencof-meta/vault-commit.json` 에 `{"enabled": true}` 가 있을 때만 활성화됩니다.
+
+활성화되면 `git commit --no-verify` 를 사용하여 저장소의 pre-commit hook 을 건너뜁니다. 이는 글로벌 CLAUDE.md 의 "Never skip hooks" 원칙에 대한 **명시적 예외** 이며, 다음 근거에 기반합니다:
+
+- **근거** — 사용자의 pre-commit hook 이 vault 디렉토리(`.maencof/`, `.maencof-meta/`) 를 쓰거나 읽을 경우, vault auto-commit 의 일부로 pre-commit 이 실행되면 재귀 루프(hook 이 vault 수정 → vault-committer 재실행 → pre-commit 재실행 → …) 가 발생합니다. `--no-verify` 는 그 루프를 끊습니다.
+- **영향 범위** — 이 훅이 생성하는 vault auto-commit 에만 적용됩니다. 사용자가 직접 수행하는 `git commit`, CI 커밋, 기타 커밋 주체는 여전히 pre-commit 을 정상 실행합니다.
+- **Opt-out 방법** — `.maencof-meta/vault-commit.json` 의 `"enabled"` 를 `false` 로 두거나 파일을 삭제하면 vault auto-commit 은 더 이상 발생하지 않습니다. pre-commit hook 은 어떤 경우에도 건드리지 않습니다.
+- **프롬프트 트리거 커스터마이징** — 같은 config 파일에 `skip_patterns` 배열(regex source) 을 추가하면 기본 `/clear` 외 사용자 지정 프롬프트로 트리거할 수 있습니다.
+
+전체 contract 와 `loop-detector` 구현 이후 이 정책을 재검토하는 v0.4.0 follow-up 로드맵은 `src/hooks/vault-committer/DETAIL.md` 를 참조하세요.
 
 ---
 
@@ -245,14 +258,14 @@ TypeScript 5.7, @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
 
 ## 상세 문서
 
-기술적 세부사항은 [`.metadata/`](./.metadata/) 디렉토리를 참조하세요:
+기술적 세부사항은 모노레포 루트의 [`.metadata/maencof/`](../../.metadata/maencof/) 디렉토리를 참조하세요:
 
-| 문서 세트                                                                                                                 | 내용                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26개)                                                | 플러그인 아키텍처, 지식 레이어, 검색 엔진, 모듈, 라이프사이클, 온보딩 |
-| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6개) | 연구 배경, 이중 구조 설계, 이론적 기반, 계층 모델                     |
-| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)       | Knowledge Graph 인덱싱, 순환 감지, Spreading Activation 모델          |
-| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                   | 시스템 구성요소, 데이터 흐름, 메타데이터 전략, 검색 구현              |
+| 문서 세트                                                                                                                       | 내용                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [Claude-Code-Plugin-Design](../../.metadata/maencof/Claude-Code-Plugin-Design/) (26개)                                          | 플러그인 아키텍처, 지식 레이어, 검색 엔진, 모듈, 라이프사이클, 온보딩 |
+| [Tree-Graph-Hybrid-Knowledge-Architecture](../../.metadata/maencof/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6개) | 연구 배경, 이중 구조 설계, 이론적 기반, 계층 모델                     |
+| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](../../.metadata/maencof/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/) | Knowledge Graph 인덱싱, 순환 감지, Spreading Activation 모델          |
+| [TOOL/Markdown-Knowledge-Graph-Search-Engine](../../.metadata/maencof/TOOL/Markdown-Knowledge-Graph-Search-Engine/)             | 시스템 구성요소, 데이터 흐름, 메타데이터 전략, 검색 구현              |
 
 [English documentation (README.md)](./README.md) is also available.
 

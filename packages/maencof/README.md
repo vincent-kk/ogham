@@ -39,6 +39,8 @@ Building produces two outputs:
 - `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
 - `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
+> **Performance note**: maencof chains 4 hooks on `UserPromptSubmit` (context-injector → lifecycle-dispatcher → vault-committer → insight-injector), all fast-path optimized. Typical per-prompt overhead is ~60ms (~110ms on the first prompt of a session due to context cache build). The hook timeouts in `hooks.json` (2–3s) are kill-switches, not expected latency. The only path that runs git is `vault-committer`, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
+
 ---
 
 ## How to Use
@@ -87,23 +89,22 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 ### Health Check
 
 ```
-/maencof:maencof-diagnose
+/maencof:maencof-checkup --quick
 /maencof:maencof-checkup
 /maencof:maencof-checkup --fix
 ```
 
-- **`maencof-diagnose`** — Lightweight status check (index freshness, basic stats).
+- **`maencof-checkup --quick`** — Lightweight read-only status check (index freshness, stale ratio, sub-layer distribution). Absorbs the former `maencof-diagnose` skill.
 - **`maencof-checkup`** — 6 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues.
 
 ### Index Management
 
 ```
 /maencof:maencof-build
-/maencof:maencof-rebuild
+/maencof:maencof-build --force --reset-cache
 ```
 
-- **`maencof-build`** — Auto-selects full or incremental mode based on index state.
-- **`maencof-rebuild`** — Forces a complete re-index from scratch.
+- **`maencof-build`** — Auto-selects full or incremental mode based on index state. Pass `--force` for an unconditional full rebuild, or `--force --reset-cache` to discard the `.maencof/` cache entirely before rebuilding (recovery / migration mode; absorbs the former `maencof-rebuild` skill).
 
 ### External Data Ingestion
 
@@ -188,16 +189,13 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-organize`    | Core     | Agent-guided document reorganization           |
 | `/maencof:maencof-reflect`     | Core     | Read-only knowledge health analysis            |
 | `/maencof:maencof-suggest`     | Core     | SA + Jaccard similarity link suggestions       |
-| `/maencof:maencof-build`       | Index    | Build index (auto full/incremental)            |
-| `/maencof:maencof-rebuild`     | Index    | Force full re-index                            |
-| `/maencof:maencof-diagnose`    | Health   | Lightweight status check                       |
-| `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix                       |
+| `/maencof:maencof-build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
+| `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
 | `/maencof:maencof-cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
 | `/maencof:maencof-ingest`      | Advanced | Import from URL, GitHub, or text               |
 | `/maencof:maencof-connect`     | Advanced | Register external data sources                 |
 | `/maencof:maencof-mcp-setup`   | Advanced | Install external MCP servers                   |
 | `/maencof:maencof-manage`      | Advanced | Skill/agent activation and usage reports       |
-| `/maencof:maencof-dailynote`   | Advanced | View daily activity log                        |
 | `/maencof:maencof-insight`     | Advanced | Auto-insight capture management                |
 | `/maencof:maencof-changelog`   | Advanced | Self-change daily changelog recorder           |
 | `/maencof:maencof-migrate`     | Advanced | Vault architecture migration                   |
@@ -210,6 +208,21 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-lifecycle`   | Config   | Lifecycle action management                    |
 | `/maencof:maencof-think`       | Analysis | Tree of Thoughts requirement analysis          |
 | `/maencof:maencof-refine`      | Analysis | Ambiguous input refinement interview loop      |
+
+---
+
+## Vault Auto-Commit Policy
+
+The `vault-committer` hook can automatically commit changes under `.maencof/` and `.maencof-meta/` when a session ends or when the user types `/clear`. The feature is **opt-in only** — it activates only when `.maencof-meta/vault-commit.json` contains `{"enabled": true}`.
+
+When enabled, the committer invokes `git commit --no-verify`, bypassing your repository's pre-commit hooks for these automatic commits. This is an explicit, documented exception to the general "never skip hooks" principle:
+
+- **Why** — If a user pre-commit hook writes to or reads from the vault directories, running it as part of a vault auto-commit creates a recursion loop (hook modifies vault → vault-committer runs → pre-commit runs again → …). `--no-verify` breaks that loop.
+- **Who is affected** — Only vault auto-commits produced by this hook. Your own `git commit` invocations, CI commits, and any other committer continue to run pre-commit hooks normally.
+- **How to opt out** — Set `"enabled": false` (or delete the file) in `.maencof-meta/vault-commit.json`. No vault auto-commits will be produced. Your pre-commit hooks remain untouched regardless.
+- **Customizing prompt triggers** — Add a `skip_patterns` array (regex sources) to the same config file. The default is `/clear` only; extending the list lets you wire additional trigger prompts without touching source.
+
+See `src/hooks/vault-committer/DETAIL.md` for the full contract and the v0.4.0 roadmap item that will revisit this policy once a loop-detector implementation is available.
 
 ---
 
@@ -245,14 +258,14 @@ TypeScript 5.7, @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
 
 ## Documentation
 
-For technical details, see the [`.metadata/`](./.metadata/) directory:
+For technical details, see the [`.metadata/maencof/`](../../.metadata/maencof/) directory at the monorepo root:
 
-| Document Set                                                                                                                 | Content                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26 docs)                                                | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
-| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model    |
-| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)          | Knowledge graph indexing, cycle detection, Spreading Activation model                |
-| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                      | System components, data flow, metadata strategy, search implementation               |
+| Document Set                                                                                                                       | Content                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [Claude-Code-Plugin-Design](../../.metadata/maencof/Claude-Code-Plugin-Design/) (26 docs)                                          | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
+| [Tree-Graph-Hybrid-Knowledge-Architecture](../../.metadata/maencof/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model    |
+| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](../../.metadata/maencof/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)    | Knowledge graph indexing, cycle detection, Spreading Activation model                |
+| [TOOL/Markdown-Knowledge-Graph-Search-Engine](../../.metadata/maencof/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                | System components, data flow, metadata strategy, search implementation               |
 
 [한국어 문서 (README-ko_kr.md)](./README-ko_kr.md)도 제공됩니다.
 

@@ -1,7 +1,7 @@
 ---
 created: 2026-02-28
-updated: 2026-03-04
-tags: [memory, lifecycle, transition, internalization]
+updated: 2026-04-16
+tags: [memory, lifecycle, transition, internalization, session-recap]
 layer: design-area-3
 ---
 
@@ -69,3 +69,44 @@ confidence ≥ 0.7 AND accessed_count ≥ 5
 ```
 
 롤백: WAL 기반 복구 ([크래시 복구](./15-crash-recovery.md) 참조).
+
+---
+
+## 5. Session Recap — 비전이 경로
+
+SessionEnd 훅은 세션 내 다음 4요소를 집계해 `[maencof] Session Recap` 메시지로 노출한다:
+
+| 요소 | 원천 | 설명 |
+|------|------|------|
+| 수렴 요건 | refine Phase 4 통과 항목 | 확정된 스펙 수 |
+| 합의 전제 | refine Phase 2.5.a surfacing 후 유지된 전제 | 검증된 가정 |
+| 잠정 원리 | think 산출 중 `category=principle`로 캡처된 후보 | 장기 보존 후보 원칙 |
+| 미해결 긴장 | `category=refuted_premise` 중 재검토 표시된 전제 | Phase 2.5.b 기각 전제 |
+
+이 recap 자체는 **전이(Layer 간 이동)가 아니며, 지식 트리에 자동 영속화되지 않는다**. 이유:
+- 4요소는 세션 중 `.maencof-meta/pending-insights/`에 임시 적재됨
+- 사용자가 명시적으로 영속화를 선언해야 Layer 이동이 발생함
+
+### 명시 영속화 경로
+
+| 요소 | 영속화 경로 | 결과 Layer |
+|------|-----------|-----------|
+| principle | `capture_insight(category=principle)` | L2-Derived |
+| 운영 메모 | `dailynote_writer` | L5-Buffer |
+| refuted_premise | (기본 폐기) | — |
+| ephemeral_candidate | (기본 폐기) | — |
+
+`refuted_premise`와 `ephemeral_candidate`는 `InsightCategoryFilter` 기본 정책에서 거부된다.
+사용자가 `/maencof:maencof-insight --category refuted --accept`로 필터를 연 경우에만 L5-Buffer에 기록된다.
+
+### 제어 스위치
+
+- `.maencof-meta/dialogue-config.json::session_recap.enabled=false` → recap 메시지 미노출
+- `env: MAENCOF_DISABLE_DIALOGUE`는 **meta-skill 주입에만** 영향하며 recap에는 영향 없음 (독립 축)
+
+### 관련 구분
+
+- `maencof-reflect` 스킬은 **볼트 관점 저지먼트 리포터**이며 session recap과 **직교**.
+  reflect는 볼트 전체를 대상으로 판정 리포트를 생성하고, session recap은 현재 세션 내 pending 상태를 요약한다.
+
+관련: [16 §5 대화 규율 통합 뷰](./16-plugin-architecture.md) | [17 §3 capture_insight](./17-mcp-tools.md) | [18 §7 비호출 Meta-skill](./18-skills.md)

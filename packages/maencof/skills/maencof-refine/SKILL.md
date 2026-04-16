@@ -68,12 +68,13 @@ Transform vague or incomplete user inputs into precise, logical, and executable 
 
 ## Process Overview
 
-Execute the 3-phase algorithm. For detailed steps and decision logic, see [reference.md](reference.md).
+Execute the 5-phase algorithm. For detailed steps and decision logic, see [reference.md](reference.md).
 
 1. **Phase 1 — Input Analysis:** Decompose input into Goal, Context, Constraints, and Immutable Objects. Detect whether input originated from a document (file/IDE) or direct text.
 2. **Phase 2 — Inquiry Loop:** Iteratively resolve ambiguities one question at a time. Exit when core requirements are defined or user signals completion.
-3. **Phase 3 — Final Generation:** Construct the optimized prompt with logic explanation.
-4. **Phase 4 — Document Auto-Update:** If input was from a document, write the refined prompt back to the source file without confirmation. See [reference.md](reference.md).
+3. **Phase 2.5 — Socratic Elenchus Layer:** Surface assumptions (2.5.a), probe counter-examples (2.5.b), check contradictions against Immutable Objects (2.5.c). Back-edge to Phase 2 max 1 round; total question budget capped at 5-8 turns. See [knowledge/socratic-elenchus.md](knowledge/socratic-elenchus.md).
+4. **Phase 3 — Final Generation:** Construct the optimized prompt with logic explanation.
+5. **Phase 4 — Document Auto-Update:** If input was from a document, write the refined prompt back to the source file without confirmation. See [reference.md](reference.md).
 
 ## Output Format
 
@@ -92,3 +93,4 @@ Execute the 3-phase algorithm. For detailed steps and decision logic, see [refer
 - For detailed process algorithm and policies, see [reference.md](reference.md)
 - For usage examples, see [examples.md](examples.md)
 - For immutable object handling rules, see [knowledge/immutable-objects.md](knowledge/immutable-objects.md)
+- For Socratic Elenchus layer (Phase 2.5), see [knowledge/socratic-elenchus.md](knowledge/socratic-elenchus.md)

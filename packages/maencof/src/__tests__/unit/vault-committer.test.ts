@@ -14,6 +14,7 @@ import {
   isClearCommand,
   readVaultCommitConfig,
   runVaultCommitter,
+  shouldCommitOnPrompt,
 } from '../../hooks/vault-committer/vault-committer.js';
 
 // ── Mock child_process ───────────────────────────────────────────────
@@ -130,6 +131,68 @@ describe('readVaultCommitConfig', () => {
       JSON.stringify({ active: true }),
     );
     expect(readVaultCommitConfig(vaultDir)).toBeNull();
+  });
+
+  it('Y3: picks up skip_patterns string[] from config', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({
+        enabled: true,
+        skip_patterns: ['^/resetthing\\b', '^/wrap\\s*$'],
+      }),
+    );
+    const config = readVaultCommitConfig(vaultDir);
+    expect(config?.skip_patterns).toEqual(['^/resetthing\\b', '^/wrap\\s*$']);
+  });
+
+  it('Y3: drops non-string skip_patterns entries', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({
+        enabled: true,
+        skip_patterns: ['^/ok$', 42, null, '', '^/ok2$'],
+      }),
+    );
+    const config = readVaultCommitConfig(vaultDir);
+    expect(config?.skip_patterns).toEqual(['^/ok$', '^/ok2$']);
+  });
+
+  it('Y3: empty skip_patterns array falls back to default (absent field)', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'vault-commit.json'),
+      JSON.stringify({ enabled: true, skip_patterns: [] }),
+    );
+    const config = readVaultCommitConfig(vaultDir);
+    expect(config?.skip_patterns).toBeUndefined();
+  });
+});
+
+describe('shouldCommitOnPrompt (Y3)', () => {
+  it('기본 config(skip_patterns 없음) 에서는 /clear 만 매칭한다', () => {
+    expect(shouldCommitOnPrompt('/clear', null)).toBe(true);
+    expect(shouldCommitOnPrompt('/clear ', null)).toBe(true);
+    expect(shouldCommitOnPrompt('  /clear  ', null)).toBe(true);
+    expect(shouldCommitOnPrompt('/CLEAR', null)).toBe(true);
+    expect(shouldCommitOnPrompt('fix the bug', null)).toBe(false);
+    expect(shouldCommitOnPrompt('/clear something', null)).toBe(false);
+  });
+
+  it('사용자 custom skip_patterns 로 /resetthing 을 등록하면 매칭한다', () => {
+    const config = {
+      enabled: true,
+      skip_patterns: ['^\\s*/resetthing\\s*$'],
+    };
+    expect(shouldCommitOnPrompt('/resetthing', config)).toBe(true);
+    expect(shouldCommitOnPrompt('/clear', config)).toBe(false);
+  });
+
+  it('malformed regex 는 조용히 skip 되고 나머지 패턴만 사용한다', () => {
+    const config = {
+      enabled: true,
+      skip_patterns: ['[invalid', '^/wrap\\s*$'],
+    };
+    expect(shouldCommitOnPrompt('/wrap', config)).toBe(true);
+    expect(shouldCommitOnPrompt('[invalid', config)).toBe(false);
   });
 });
 

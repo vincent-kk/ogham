@@ -44,6 +44,7 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      loader: { '.md': 'text' },
     }),
   ),
 );

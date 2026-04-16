@@ -168,13 +168,22 @@ export type {
 
 export {
   InsightConfigSchema,
+  InsightCategoryFilterSchema,
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,
 } from './insight.js';
 export type {
   InsightConfig,
+  InsightCategoryFilter,
   InsightStats,
   CaptureInsightInput,
   PendingInsightCapture,
   PendingInsightNotification,
 } from './insight.js';
+
+export {
+  DialogueConfigSchema,
+  DEFAULT_DIALOGUE_CONFIG,
+  DIALOGUE_DISABLE_ENV,
+} from './dialogue-config.js';
+export type { DialogueConfig } from './dialogue-config.js';
