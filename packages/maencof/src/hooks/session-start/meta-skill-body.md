@@ -1,6 +1,6 @@
 # Using maencof — Dialogue Discipline
 
-**This discipline must be observed during every session.** If it conflicts with user instructions in CLAUDE.md / AGENTS.md, the user instructions take precedence.
+Observe every session. CLAUDE.md / AGENTS.md user instructions override this meta-skill.
 
 ## 1. Instruction Priority
 
@@ -19,41 +19,28 @@
 | Plan review | `maencof-think --mode review` |
 | Session retrospective | SessionEnd hook automatic recap (no explicit invocation) |
 
-## 3. Invocation Rule
+## 3. Flow & Priority
 
-- Vague input → `maencof-refine` first.
-- Multiple interpretations → `maencof-think --mode default`.
-- Ideation signals ("idea", "stuck", "brainstorm") → `explore --for-brainstorm` → `think --mode divergent`.
-- Plan/spec path ref + "review"/"check" → `think --mode review`.
-- Session termination → SessionEnd recap surfaces automatically. Persist only when the user explicitly requests it.
-- Auto-insight is observed by `capture_insight` + `insight-injector`. Direct invocation not required.
+1. Vague / ambiguous input → `maencof-refine` first. If alternatives still remain, then `maencof-think --mode default`.
+2. Ideation signals ("idea", "stuck", "brainstorm") → `maencof-explore --for-brainstorm` (seed first) → `maencof-think --mode divergent`. Never invoke `think` without a sufficient seed — run `explore` beforehand.
+3. Plan / spec path ref + "review" / "check" → `maencof-think --mode review`.
+4. Session termination → SessionEnd recap surfaces automatically. Persist only when the user explicitly requests it. `reflect` is reserved for the vault judge, not session recap.
+5. Auto-insight capture runs via `capture_insight` MCP + `insight-injector` hook; direct invocation not required.
 
-## 4. Priority Rules
-
-1. Ambiguous → refine first. If alternatives remain, then think.
-2. Insufficient seed before think → run explore beforehand.
-3. Termination → SessionEnd recap path (reflect is reserved for the vault judge).
-4. Insight classification → `insight.category_filter` (principle defaults to accept; refuted_premise / ephemeral_candidate default to reject).
-
-## 5. Red Flags
+## 4. Red Flags
 
 | Rationalization | Correction |
 |---|---|
 | "Too simple, skill not needed" | Simple tasks carry the greatest risk — apply discipline |
 | "Just implement directly" | Route through refine; confirm scope first |
-| "Ask everything at once" | One question at a time (Prime Directive 2) |
+| "Ask everything at once" | One question at a time (refine Prime Directive 2) |
 | "Save ToT candidates" | Ephemeral — do NOT persist (explicit approval only) |
 | "User said 'proceed' so OK" | Verify Phase 2.5 convergence criteria |
 | "I already know this" | Re-invoke — observe rather than rely on memory |
 
-## 6. Off-switch
+## 5. Persistence Rules
 
-- env `MAENCOF_DISABLE_DIALOGUE=1` → SessionStart emit skipped.
-- `.maencof-meta/dialogue-config.json::injection.enabled=false` → same skip.
-- When off, the meta-skill body becomes completely invisible (discovery loss accepted).
-
-## 7. Vault Write Boundaries
-
-- E (ephemeral): refine Phase 1/2, think intermediate candidates, explore results → do NOT persist.
-- D (durable): refine Phase 4, think selected interpretation (explicit approval), review risks.
-- P (principle): Phase 2.5 premises, Lookahead principles → `capture_insight(category=principle)`.
+- **Ephemeral (do NOT persist)**: refine Phase 1/2 output, think intermediate candidates, explore raw results.
+- **Durable (explicit approval required)**: refine Phase 4 output, think selected interpretation, review risks.
+- **Principle (`capture_insight`)**: refine Phase 2.5 premises, think Lookahead predictions → `capture_insight(category=principle)`.
+- **Insight category filter defaults**: `principle` accept · `refuted_premise` reject · `ephemeral_candidate` reject.
