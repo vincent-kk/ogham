@@ -1,9 +1,9 @@
 # mcp SPEC
 
 ## Purpose
-MCP 서버 구현. 17개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
+MCP 서버 구현. 18개 도구를 stdio 전송으로 제공. vault 경로는 `MAENCOF_VAULT_PATH` 환경변수 또는 CWD에서 읽음.
 
-## Tools (17)
+## Tools (18)
 
 | Group | Tools |
 |-------|-------|
@@ -14,6 +14,7 @@ MCP 서버 구현. 17개 도구를 stdio 전송으로 제공. vault 경로는 `M
 | Link (1) | kg_suggest_links |
 | INTENT.md (3) | claudemd_merge, claudemd_read, claudemd_remove |
 | Dailynote (1) | dailynote_read |
+| Cache (1) | context_cache_manage |
 
 ## Graph Cache
 

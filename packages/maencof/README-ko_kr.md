@@ -36,7 +36,7 @@ claude --plugin-dir ./packages/maencof
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 17개)
+- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 18개)
 - `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 ---

@@ -163,8 +163,7 @@ setup skill starts
 | Tool | Purpose |
 |------|---------|
 | `AskUserQuestion` | Collect user input during interview (Stages 1–3) |
-| `Write` | Create `trust-level.json` during initial setup (Stage 5, first run only) |
-| `Bash` | Overwrite `trust-level.json` in `--reset` mode to bypass layer-guard (Stage 5) |
+| `Bash` | Create/overwrite `trust-level.json` (Stage 5; used for both initial setup and `--reset`). Bypasses the layer-guard PreToolUse hook, which matches only `Write`/`Edit`. |
 
 ## Options
 
