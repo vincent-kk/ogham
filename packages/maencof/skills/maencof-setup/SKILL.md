@@ -124,7 +124,13 @@ Create and initialize `01_Core/trust-level.json` at Level 0:
 }
 ```
 
-**Creation method**: Use the Bash tool to write trust-level.json directly (`echo '{"current_level":0,...}' > 01_Core/trust-level.json`). The layer-guard hook matches only `Write|Edit` tools, so Bash is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
+**Creation method**: Use the Bash tool to write trust-level.json directly to the **absolute vault root path collected in Stage 1** (NOT a CWD-relative path — Stage 5 may run from any subdirectory of the vault). Substitute the literal absolute path; do not rely on CWD. Example with `<vault-root>` resolved to the Stage 1 value:
+
+```bash
+echo '{"current_level":0,...}' > "<vault-root>/01_Core/trust-level.json"
+```
+
+If `MAENCOF_VAULT_PATH` is set in the env, prefer it as a fallback (`"${MAENCOF_VAULT_PATH:-<vault-root>}/01_Core/trust-level.json"`). The layer-guard hook matches only `Write|Edit` tools, so Bash is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
 
 > Note: This Bash pattern applies only to trust-level.json (a JSON config file that cannot use the `mcp_t_create` MCP tool). Markdown L1 documents must always go through the identity-guardian agent.
 

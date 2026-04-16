@@ -39,6 +39,8 @@ Building produces two outputs:
 - `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
 - `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
+> **Performance note**: maencof chains 4 hooks on `UserPromptSubmit` (context-injector → lifecycle-dispatcher → vault-committer → insight-injector), all fast-path optimized. Typical per-prompt overhead is ~60ms (~110ms on the first prompt of a session due to context cache build). The hook timeouts in `hooks.json` (2–3s) are kill-switches, not expected latency. The only path that runs git is `vault-committer`, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
+
 ---
 
 ## How to Use
@@ -260,14 +262,14 @@ TypeScript 5.7, @modelcontextprotocol/sdk, fast-glob, esbuild, Vitest, Zod
 
 ## Documentation
 
-For technical details, see the [`.metadata/`](./.metadata/) directory:
+For technical details, see the [`.metadata/maencof/`](../../.metadata/maencof/) directory at the monorepo root:
 
-| Document Set                                                                                                                 | Content                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [Claude-Code-Plugin-Design](./.metadata/Claude-Code-Plugin-Design/) (26 docs)                                                | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
-| [Tree-Graph-Hybrid-Knowledge-Architecture](./.metadata/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model    |
-| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](./.metadata/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)          | Knowledge graph indexing, cycle detection, Spreading Activation model                |
-| [TOOL/Markdown-Knowledge-Graph-Search-Engine](./.metadata/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                      | System components, data flow, metadata strategy, search implementation               |
+| Document Set                                                                                                                       | Content                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [Claude-Code-Plugin-Design](../../.metadata/maencof/Claude-Code-Plugin-Design/) (26 docs)                                          | Plugin architecture, knowledge layers, search engine, modules, lifecycle, onboarding |
+| [Tree-Graph-Hybrid-Knowledge-Architecture](../../.metadata/maencof/Tree-Graph-Hybrid-Knowledge-Architecture-Research-Proposal/) (6 docs) | Research background, dual structure design, theoretical foundation, layered model    |
+| [TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm](../../.metadata/maencof/TOOL/Markdown-Graph-Knowledge-Discovery-Algorithm/)    | Knowledge graph indexing, cycle detection, Spreading Activation model                |
+| [TOOL/Markdown-Knowledge-Graph-Search-Engine](../../.metadata/maencof/TOOL/Markdown-Knowledge-Graph-Search-Engine/)                | System components, data flow, metadata strategy, search implementation               |
 
 [한국어 문서 (README-ko_kr.md)](./README-ko_kr.md)도 제공됩니다.
 

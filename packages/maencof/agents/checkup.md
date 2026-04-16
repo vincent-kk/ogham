@@ -24,7 +24,13 @@ maxTurns: 40
 
 Diagnoses the health of the knowledge vault across 6 categories and generates AutoFixActions
 for items that can be repaired automatically.
-**Deletion, relocation, and bulk modification are strictly forbidden** — proposals only.
+
+**Write scope:**
+- **Allowed (after user confirmation)**: Frontmatter field auto-fixes via `mcp_t_update`
+  — covers D4 layer mismatch and D6 missing/invalid Frontmatter fields.
+- **Strictly forbidden**: deletion (`mcp_t_delete`), relocation (`mcp_t_move`), and bulk
+  modification. These are reported as AutoFixAction proposals only — execution belongs
+  to the user or a different agent (e.g., memory-organizer for relocation).
 
 ---
 

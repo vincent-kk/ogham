@@ -6,7 +6,7 @@ argument-hint: "[path|tags|text] [--max 1-20] [--min-score 0.0-1.0]"
 version: "1.0.0"
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
-orchestrator: knowledge-connector
+orchestrator: maencof-suggest skill
 plugin: maencof
 ---
 
