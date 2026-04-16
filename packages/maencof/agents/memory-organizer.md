@@ -115,7 +115,14 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 - **Layer 1 modification strictly forbidden** — blocked after `isLayer1Path()` check
 - **Layer 1 (01_Core/) direct read is discouraged** — `mcp_t_read` handler returns a warning but does not block the read. Prefer `mcp_t_kg_navigate` for L1 document information when possible
-- **Maximum 5 transitions at a time** — prevents bulk-modify
+- **Maximum 5 transitions at a time** — prevents bulk-modify.
+  The "5" counter applies to **user-visible document transitions** (distinct
+  `mcp_t_move` calls that relocate a source document). Consequential writes
+  required to keep the graph consistent — `mcp_t_update` on the moved file's
+  frontmatter (layer/sub_layer fields) and link-rewrite `mcp_t_update` calls
+  on documents that reference the moved file — are NOT counted against the
+  limit. They are treated as bookkeeping for the primary move and share its
+  approval.
 - **User confirmation required for transitions with confidence < 0.7**
 - **`confidence` field in Frontmatter is mandatory for L3 → L2 transitions**
 - Display TransitionDirectives to the user before making any filesystem changes

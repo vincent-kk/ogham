@@ -31,8 +31,14 @@ The judge module evaluates candidates, then the execute module performs the actu
                                              |
               -> [memory-organizer.execute] -> move execution
                                              |
-                               [index-invalidator hook] -> stale-nodes update
+        [index-invalidator hook: auto-fires on PostToolUse] -> stale-nodes update
 ```
+
+> **Note.** `[index-invalidator hook]` is not invoked by this skill. Claude Code
+> fires it automatically on the `PostToolUse` event for every `mcp_t_move` /
+> `mcp_t_update` call the agent makes. The hook writes the affected paths to
+> `.maencof/stale-nodes.json` and never interacts with the organize workflow
+> directly.
 
 **Orchestrator**: the organize skill coordinates the entire flow.
 Calls the memory-organizer agent sequentially through judge -> (confirmation) -> execute stages.
@@ -118,6 +124,6 @@ Buffer documents are temporary holding areas. During organization:
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--dry-run` | false | Run judge only, skip execute stage (equivalent to `/maencof:maencof-reflect` but without the detailed report format) |
+| `--dry-run` | false | Run judge only, skip execute stage. Plain TransitionDirective preview; use `/maencof:maencof-reflect` for a deeper diagnostic report. |
 | `--layer` | 3,4,5 | Target Layer(s) to scan (3, 4, or 5) |
 | `--min-confidence` | 0.7 | Minimum confidence threshold |

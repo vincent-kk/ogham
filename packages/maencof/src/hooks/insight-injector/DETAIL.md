@@ -41,6 +41,22 @@ interface InsightInjectorResult {
 - `captured`: `"<n>/<max>"`
 - `allowed-categories`: `config.category_filter` 의 true 키들만 콤마 구분 (active 일 때). 이 값은 정보 표시용이며 차단 동작은 capture-time 에서 수행됨.
 
+## Cross-event handoff invariant (G5)
+
+이 훅은 `pending-insight-notification.json` 을 읽지도 쓰지도 삭제하지도 않는다.
+해당 파일의 수명 주기는 다음과 같다:
+
+1. **Turn N, `capture_insight` MCP call** → `pending-insight-notification.json` 에 append.
+2. **Turn N+1 이후 첫 SessionStart** → `session-start.ts` 가 읽어 Claude 에게
+   surface 하고 파일을 삭제한다.
+3. **Turn N 과 consumption 사이에 크래시** → 파일은 디스크에 남으며, 다음 세션의
+   SessionStart 가 다시 pick up 한다. TTL 없음; one-shot + self-cleaning.
+
+`insight-injector` 는 `config.category_filter` 에서 `allowed-categories` 만 읽어
+배너에 투영할 뿐, 위 파이프라인과는 독립적이다. 이 분리가 깨지면 (예: 인젝터가
+pending 파일을 읽거나 삭제) SessionStart 소비자와 레이스 컨디션이 생기므로 절대
+도입하지 말 것.
+
 ## Last Updated
 
-2026-04-16 (PR α — P1 hook schema fix + P3 surface-only role 명시)
+2026-04-16 (PR γ — G5 cross-event handoff invariant 문서화)

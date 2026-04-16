@@ -56,7 +56,10 @@ Auto-fix: not possible (requires manual review) — reports broken link list
 ### D4. Layer Violation (layer-mismatch)
 ```
 Detection: mismatch between file path directory (01_Core, 02_Derived, etc.)
-           and the Frontmatter layer field
+           and the Frontmatter layer field. Frontmatter is loaded via
+           `mcp_t_read` which reads raw disk bytes, BYPASSING any
+           graph-index cache. Results therefore reflect on-disk truth
+           even when the graph index is stale or pending rebuild.
 Severity: error
 Auto-fixable: update Frontmatter layer field to match path (`mcp_t_update`)
 ```
@@ -70,7 +73,11 @@ Auto-fix: not possible — reports duplicate pairs and suggests /maencof:maencof
 
 ### D6. Frontmatter Validation (invalid-frontmatter)
 ```
-Detection: items that fail FrontmatterSchema (Zod) validation
+Detection: items that fail FrontmatterSchema (Zod) validation. Each file's
+           Frontmatter is re-parsed from raw disk via `mcp_t_read` rather
+           than read from the graph index, so the validator catches on-disk
+           drift that has not yet been indexed (e.g., external editor
+           changes made outside a maencof session).
 Severity: error
 Auto-fixable:
   - missing created/updated → auto-populate from file mtime

@@ -30,8 +30,7 @@ Generates a pure analysis report with no filesystem changes.
                                generate analysis report (no file changes)
 ```
 
-**Orchestrator**: the reflect skill calls only the judge module and skips execute.
-Equivalent to `/maencof:maencof-organize --dry-run` but generates a more detailed report.
+**Orchestrator**: the reflect skill calls only the judge module and skips execute. Use `reflect` for a diagnostic report (L5-Boundary health, sub-layer distribution, duplicates, auto-insight stats); use `organize --dry-run` for a plain directive preview immediately before executing.
 
 ## Workflow
 
