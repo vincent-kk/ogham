@@ -65,7 +65,7 @@ Style: concise, scannable, developer-friendly. Use code blocks for all examples.
 
 ### User Input
 ```
-/recursive-requirement-refine /pr 커맨드로 PR을 만들어주는 프롬프트를 개선해줘. ./src/utils/pr-generator.ts 파일을 참고해야 해.
+/recursive-requirement-refine Improve the prompt that generates PRs via the /pr command. It must reference the ./src/utils/pr-generator.ts file.
 ```
 
 ### Phase 1 — Analysis
@@ -79,12 +79,12 @@ Style: concise, scannable, developer-friendly. Use code blocks for all examples.
 ### Phase 2 — Inquiry Loop
 
 **Q1 (Goal specificity):**
-> 현재 `/pr` 프롬프트의 어떤 점이 부족한가요? (a) 생성되는 PR 설명이 너무 간략함, (b) 커밋 분류가 부정확함, (c) 특정 포맷/컨벤션을 따르지 않음?
+> What is lacking in the current `/pr` prompt? (a) generated PR descriptions are too brief, (b) commit categorization is inaccurate, (c) it doesn't follow a specific format/convention?
 
-*User: (a)와 (c). 우리 팀 PR 템플릿을 따라야 해.*
+*User: (a) and (c). It must follow our team's PR template.*
 
 **Q2 (Constraints):**
-> 팀 PR 템플릿의 필수 섹션은 무엇인가요? (예: Summary, Changes, Test Plan 등)
+> What are the required sections of your team's PR template? (e.g., Summary, Changes, Test Plan, etc.)
 
 *User: Summary, Changes (bullet), Breaking Changes, Test Plan*
 
@@ -93,30 +93,30 @@ Style: concise, scannable, developer-friendly. Use code blocks for all examples.
 ```markdown
 ---
 ## Refined Prompt
-`/pr` 커맨드로 Pull Request를 생성할 때 다음 규칙을 따르세요.
+When generating a Pull Request via the `/pr` command, follow these rules.
 
-참조 파일: `./src/utils/pr-generator.ts`
+Reference file: `./src/utils/pr-generator.ts`
 
-1. git diff와 커밋 히스토리를 분석하여 변경 내용을 파악합니다.
-2. 다음 템플릿에 맞춰 PR 본문을 생성합니다:
+1. Analyze the git diff and commit history to identify the changes.
+2. Generate the PR body using the following template:
 
 ```
 ## Summary
-(변경의 목적과 배경을 2-3문장으로 설명)
+(Describe the purpose and background of the change in 2-3 sentences)
 
 ## Changes
-- (구체적인 변경사항을 bullet point로 나열)
-- (파일명과 함께 주요 변경 설명)
+- (List concrete changes as bullet points)
+- (Describe major changes together with the file name)
 
 ## Breaking Changes
-- (하위 호환성을 깨는 변경이 있으면 명시, 없으면 "None")
+- (Specify any backward-incompatible changes; write "None" if there are none)
 
 ## Test Plan
-- (테스트 방법 또는 검증 계획)
+- (Test method or verification plan)
 ```
 
-3. Summary는 "왜" 변경했는지에 초점. Changes는 "무엇을" 변경했는지에 초점.
-4. Breaking Changes가 없으면 섹션을 유지하되 "None"으로 표기.
+3. Summary focuses on "why" the change was made. Changes focus on "what" was changed.
+4. If there are no Breaking Changes, keep the section but mark it as "None".
 
 ## Logic & Strategy
 - Immutable objects `/pr` and `./src/utils/pr-generator.ts` preserved exactly as provided.
@@ -173,13 +173,13 @@ Export the function as a named export.
 
 ### User Input
 ```
-/recursive-requirement-refine API 문서를 만들고 싶어
+/recursive-requirement-refine I want to create API documentation
 ```
 
 ### Phase 2 — Inquiry Loop
 
 **Q1:**
-> 어떤 종류의 API 문서인가요? (a) REST API 엔드포인트 레퍼런스, (b) SDK/라이브러리 사용 가이드, (c) 내부 팀용 API 스펙?
+> What kind of API documentation? (a) REST API endpoint reference, (b) SDK/library usage guide, (c) internal team API spec?
 
 *User: Auto*
 

@@ -22,16 +22,16 @@ Claude automatically invokes this skill when:
 - Requirements have ambiguous scope requiring comparative evaluation of candidates → **default**
 - An architectural decision needs trade-off analysis across multiple approaches → **default**
 - The user provides a broad goal without specifying the implementation path → **default**
-- User input contains ideation signals ("아이디어", "brainstorm", "막막", "뭐 할지") with no candidate count specified → **divergent**
-- User input contains a plan/spec path reference + review signals ("검토", "리뷰", "괜찮아?", "뭐가 빠졌어?") → **review**
+- User input contains ideation signals ("idea", "brainstorm", "stuck", "what to do") with no candidate count specified → **divergent**
+- User input contains a plan/spec path reference + review signals ("review", "check", "is it okay?", "what's missing?") → **review**
 
 ### Mode Selection (Table B-2 heuristic)
 
 | Signal | Mode |
 |---|---|
-| "아이디어" / "brainstorm" / "막막" / "뭐 할지" + no candidate count specified | divergent |
-| plan/spec path ref + "검토" / "리뷰" / "괜찮아?" / "뭐가 빠졌어?" | review |
-| miss above + "어떻게 해석" / "여러 방법 중" | default |
+| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent |
+| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?" | review |
+| miss above + "how to interpret" / "among multiple methods" | default |
 | all miss | default (fallback) |
 
 **Override:** `--mode <default|divergent|review>` on the invocation bypasses heuristics.
@@ -86,7 +86,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 | Criterion | Points | Description |
 |-----------|--------|-------------|
-| Novelty | 30 | Departure from repo precedent (답습 10 / 조합 신규 20 / 완전 신규 30) |
+| Novelty | 30 | Departure from repo precedent (imitation 10 / combinatorial novelty 20 / fully novel 30) |
 | Feasibility | 25 | Prototyping cost (reuses Default complexity rubric rescaled) |
 | Requirements Coverage | 15 | Core need alignment |
 | UX Quality | 15 | Interaction quality |
@@ -96,7 +96,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 | Criterion | Points | Description |
 |-----------|--------|-------------|
-| Risk Exposure | 30 | **Higher score = higher risk.** 완화 있음 10 / 부분적 20 / 완화 없음 30 |
+| Risk Exposure | 30 | **Higher score = higher risk.** mitigated 10 / partial 20 / unmitigated 30 |
 | Requirements Coverage | 25 | Plan coverage of stated needs |
 | Maintainability | 20 | Long-term change cost |
 | Implementation Complexity | 15 | Buildability |

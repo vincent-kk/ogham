@@ -17,7 +17,7 @@ Goal: surface the 3 implicit premises that the Phase 2 refined requirement rests
 Procedure:
 
 1. Name 3 premises concisely. Each premise must be falsifiable in principle.
-2. Ask ONE consolidation question: "이 요건은 다음 3개 전제에 기반합니다. 맞습니까?" (followed by the 3 premises).
+2. Ask ONE consolidation question: "This requirement rests on the following 3 premises. Is this correct?" (followed by the 3 premises).
 3. Wait for the user response.
 
 Exit conditions:
@@ -86,23 +86,23 @@ Phase 2.5 as a whole converges when ANY of the following hold:
 
 If all convergence criteria fail AND the 5-8 turn cap is exceeded, emit a warning in the Logic & Strategy section and proceed to Phase 3 with the best-effort requirement. Do NOT block the user.
 
-## 8. Worked Example: "메모 검색 기능 추가"
+## 8. Worked Example: "Add memo search feature"
 
 Phase 2 exit state:
 
-- Goal: 메모 앱에 검색 기능 추가.
-- Context: 기존 iOS 네이티브 앱.
-- Constraints: SQLite FTS5 사용.
+- Goal: Add a search feature to the memo app.
+- Context: Existing iOS native app.
+- Constraints: Use SQLite FTS5.
 
 Phase 2.5.a surfaces 3 premises:
 
-1. 검색 대상은 텍스트 본문뿐이다.
-2. 정렬 기준은 최신순이다.
-3. 대소문자 구분하지 않는다.
+1. The search target is only the text body.
+2. The sort order is most recent first.
+3. The search is case-insensitive.
 
-Consolidation question: "이 요건은 위 3개 전제에 기반합니다. 맞습니까?" User corrects premise 1: "첨부 이미지의 OCR 텍스트도 검색 대상이다."
+Consolidation question: "This requirement rests on the above 3 premises. Is this correct?" User corrects premise 1: "OCR text from attached images is also a search target."
 
-Phase 2.5.b: scale-inversion counter-example: "10만 개의 이미지가 첨부된 계정에서 검색 응답 시간 상한은?" User accepts: "300ms." Back-edge once to Phase 2 to integrate response time budget into Constraints.
+Phase 2.5.b: scale-inversion counter-example: "What is the upper bound on search response time for an account with 100,000 attached images?" User accepts: "300ms." Back-edge once to Phase 2 to integrate response time budget into Constraints.
 
 Phase 2.5.c: check against Immutable Objects (FTS5). No contradiction. Advance to Phase 3.
 

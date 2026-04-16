@@ -50,7 +50,7 @@ Inserted between Phase 2 exit and Phase 3 entry. Skipped when input < 50 chars A
 
 ### 2.5.a Assumption Surfacing
 
-Name 3 implicit premises that the refined requirement rests on. Ask ONE consolidation question: "이 요건은 다음 3개 전제에 기반합니다. 맞습니까?" Exit when all 3 are confirmed OR at least 1 is corrected.
+Name 3 implicit premises that the refined requirement rests on. Ask ONE consolidation question: "This requirement rests on the following 3 premises. Is this correct?" Exit when all 3 are confirmed OR at least 1 is corrected.
 
 ### 2.5.b Elenchus (Counter-example probing)
 

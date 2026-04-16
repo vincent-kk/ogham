@@ -38,9 +38,9 @@ Mode selection (Table B-2 heuristic; `--mode` overrides):
 
 | Signal | Mode |
 |--------|------|
-| "아이디어" / "brainstorm" / "막막" / "뭐 할지" + no candidate count specified | divergent |
-| plan/spec path ref + "검토" / "리뷰" / "괜찮아?" / "뭐가 빠졌어?" | review |
-| miss above + "어떻게 해석" / "여러 방법 중" | default |
+| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent |
+| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?" | review |
+| miss above + "how to interpret" / "among multiple methods" | default |
 | all miss | default (fallback) |
 
 **Generation Strategies**:

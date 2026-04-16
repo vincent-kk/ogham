@@ -12,60 +12,60 @@ plugin: maencof
 
 # Using maencof — Dialogue Discipline
 
-**이 규율은 세션 중 반드시 준수합니다.** CLAUDE.md / AGENTS.md 사용자 지시와 충돌하면 사용자 지시가 우선한다.
+**This discipline must be observed during every session.** If it conflicts with user instructions in CLAUDE.md / AGENTS.md, the user instructions take precedence.
 
 ## 1. Instruction Priority
 
-1. CLAUDE.md / AGENTS.md 사용자 지시
-2. maencof 대화 규율 (본 skill)
-3. 기본 system prompt
+1. CLAUDE.md / AGENTS.md user instructions
+2. maencof dialogue discipline (this skill)
+3. Default system prompt
 
 ## 2. 6 Role → Skill Mapping
 
-| 역할 | Skill |
+| Role | Skill |
 |---|---|
-| 브레인스토밍 / 아이디에이션 | `maencof-explore --for-brainstorm` → `maencof-think --mode divergent` |
-| 인사이트 포획 관리 | `maencof-insight` + `capture_insight` MCP tool |
-| 스펙 구체화 | `maencof-refine` (Phase 2.5 Socratic 포함) |
-| 인터뷰 수렴 | `maencof-refine` Phase 2.5 |
-| 계획 검토 | `maencof-think --mode review` |
-| 세션 회고 | SessionEnd hook 자동 recap (명시 호출 없음) |
+| Brainstorming / ideation | `maencof-explore --for-brainstorm` → `maencof-think --mode divergent` |
+| Insight capture management | `maencof-insight` + `capture_insight` MCP tool |
+| Spec refinement | `maencof-refine` (Phase 2.5 Socratic included) |
+| Interview convergence | `maencof-refine` Phase 2.5 |
+| Plan review | `maencof-think --mode review` |
+| Session retrospective | SessionEnd hook automatic recap (no explicit invocation) |
 
 ## 3. Invocation Rule
 
-- Vague input → `maencof-refine` 먼저.
-- 다중 해석 → `maencof-think --mode default`.
-- Ideation 신호 ("아이디어", "막막", "brainstorm") → `explore --for-brainstorm` → `think --mode divergent`.
-- Plan/spec path ref + "검토"/"리뷰" → `think --mode review`.
-- 세션 종결 → SessionEnd recap 자동 노출. 저장은 사용자 명시 시에만.
-- Auto-insight 는 `capture_insight` + `insight-injector` 가 관찰. 직접 호출 불필요.
+- Vague input → `maencof-refine` first.
+- Multiple interpretations → `maencof-think --mode default`.
+- Ideation signals ("idea", "stuck", "brainstorm") → `explore --for-brainstorm` → `think --mode divergent`.
+- Plan/spec path ref + "review"/"check" → `think --mode review`.
+- Session termination → SessionEnd recap surfaces automatically. Persist only when the user explicitly requests it.
+- Auto-insight is observed by `capture_insight` + `insight-injector`. Direct invocation not required.
 
-## 4. Priority 규칙
+## 4. Priority Rules
 
-1. 모호 → refine 먼저. 대안이 여전하면 think.
-2. Think 전 seed 부족 → explore 를 선행.
-3. 종결 → SessionEnd recap 경로 (reflect 는 vault judge 전용).
-4. 통찰 분류 → `insight.category_filter` (principle 기본 accept, refuted_premise / ephemeral_candidate 기본 reject).
+1. Ambiguous → refine first. If alternatives remain, then think.
+2. Insufficient seed before think → run explore beforehand.
+3. Termination → SessionEnd recap path (reflect is reserved for the vault judge).
+4. Insight classification → `insight.category_filter` (principle defaults to accept; refuted_premise / ephemeral_candidate default to reject).
 
 ## 5. Red Flags
 
-| 합리화 | 교정 |
+| Rationalization | Correction |
 |---|---|
-| "간단해 skill 불필요" | 단순 task 가 가장 위험 — 규율 적용 |
-| "바로 구현부터" | refine 경유, scope 확정 |
-| "한번에 다 묻자" | 한 번에 한 질문 (Prime Directive 2) |
-| "ToT 후보 저장" | ephemeral — 저장 X (명시 승인만) |
-| "'진행' 하니 OK" | Phase 2.5 수렴 조건 확인 |
-| "이미 안다" | 재invoke — 기억 대신 관찰 |
+| "Too simple, skill not needed" | Simple tasks carry the greatest risk — apply discipline |
+| "Just implement directly" | Route through refine; confirm scope first |
+| "Ask everything at once" | One question at a time (Prime Directive 2) |
+| "Save ToT candidates" | Ephemeral — do NOT persist (explicit approval only) |
+| "User said 'proceed' so OK" | Verify Phase 2.5 convergence criteria |
+| "I already know this" | Re-invoke — observe rather than rely on memory |
 
 ## 6. Off-switch
 
-- env `MAENCOF_DISABLE_DIALOGUE=1` → SessionStart emit skip.
-- `.maencof-meta/dialogue-config.json::injection.enabled=false` → 동일 skip.
-- Off 시 skill 완전 invisible (discovery 손실 수용).
+- env `MAENCOF_DISABLE_DIALOGUE=1` → SessionStart emit skipped.
+- `.maencof-meta/dialogue-config.json::injection.enabled=false` → same skip.
+- When off, the skill becomes completely invisible (discovery loss accepted).
 
-## 7. Vault Write 경계
+## 7. Vault Write Boundaries
 
-- E (ephemeral): refine Phase 1/2, think 중간 후보, explore 결과 → 저장 금지.
-- D (durable): refine Phase 4, think 선택 해석 (명시 승인), review 리스크.
-- P (principle): Phase 2.5 전제, Lookahead 원리 → `capture_insight(category=principle)`.
+- E (ephemeral): refine Phase 1/2, think intermediate candidates, explore results → do NOT persist.
+- D (durable): refine Phase 4, think selected interpretation (explicit approval), review risks.
+- P (principle): Phase 2.5 premises, Lookahead principles → `capture_insight(category=principle)`.

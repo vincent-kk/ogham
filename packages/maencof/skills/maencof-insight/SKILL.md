@@ -72,9 +72,9 @@ Field mapping:
 
 | `--category` argument | `config.category_filter` key | Default |
 |-----------------------|-------------------------------|---------|
-| `principle` | `principle` | `accept` (true) — 원리/전제 통찰, 장기 보존 가치 |
-| `refuted` | `refuted_premise` | `reject` (false) — Socratic Phase 2.5.b 에서 기각된 전제 |
-| `ephemeral` | `ephemeral_candidate` | `reject` (false) — ToT 버려진 후보, 중간 산출물 |
+| `principle` | `principle` | `accept` (true) — principle/premise insights, long-term preservation value |
+| `refuted` | `refuted_premise` | `reject` (false) — premises rejected in Socratic Phase 2.5.b |
+| `ephemeral` | `ephemeral_candidate` | `reject` (false) — ToT discarded candidates, intermediate outputs |
 
 Procedure:
 

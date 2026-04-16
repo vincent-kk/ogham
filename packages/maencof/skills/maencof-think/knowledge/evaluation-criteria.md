@@ -6,7 +6,7 @@ Mode-specific axis definitions. Total per mode = 100 points. See [tot-methodolog
 
 ## Default Mode Criteria
 
-Entry signals: "어떻게 해석" / "여러 방법 중" / ambiguous requirement. Axis weights: Implementation Complexity 30 / Requirements Coverage 30 / UX Quality 20 / Maintainability 10 / Team Capability Fit 10.
+Entry signals: "how to interpret" / "among multiple methods" / ambiguous requirement. Axis weights: Implementation Complexity 30 / Requirements Coverage 30 / UX Quality 20 / Maintainability 10 / Team Capability Fit 10.
 
 ### 1. Implementation Complexity (30 points)
 
@@ -222,7 +222,7 @@ Experience rate: 2/4 = 50% → 9 pts
 
 ## Divergent Mode Criteria
 
-Entry signals: "아이디어" / "brainstorm" / "막막" / "뭐 할지" with no candidate count specified. Candidate range: 5-8. Axis weights: Novelty 30 / Feasibility 25 / Requirements Coverage 15 / UX Quality 15 / Team Capability Fit 15. Output: candidate list + top 3 rationale.
+Entry signals: "idea" / "brainstorm" / "stuck" / "what to do" with no candidate count specified. Candidate range: 5-8. Axis weights: Novelty 30 / Feasibility 25 / Requirements Coverage 15 / UX Quality 15 / Team Capability Fit 15. Output: candidate list + top 3 rationale.
 
 ### Novelty (30 points)
 
@@ -230,9 +230,9 @@ Measures the degree to which a candidate departs from known patterns in this cod
 
 | Score | Level | Rubric |
 |-------|-------|--------|
-| **10 pts** | 기존 패턴 답습 | Duplicate of an existing solution in the repo or direct copy of a standard tutorial |
-| **20 pts** | 조합 신규 | Combines 2+ existing patterns in a way not previously seen in this codebase |
-| **30 pts** | 완전 신규 | Departs from repo precedent; requires original synthesis or cross-domain transfer |
+| **10 pts** | Imitation of existing patterns | Duplicate of an existing solution in the repo or direct copy of a standard tutorial |
+| **20 pts** | Combinatorial novelty | Combines 2+ existing patterns in a way not previously seen in this codebase |
+| **30 pts** | Fully novel | Departs from repo precedent; requires original synthesis or cross-domain transfer |
 
 ### Feasibility (25 points)
 
@@ -256,7 +256,7 @@ Reuse Default definitions, rescaled to 15-point maximums. Round to integers.
 
 ## Review Mode Criteria
 
-Entry signals: plan/spec path reference + "검토" / "리뷰" / "괜찮아?" / "뭐가 빠졌어?". Candidate range: 3-5 risks or alternatives. Axis weights: Risk Exposure 30 / Requirements Coverage 25 / Maintainability 20 / Implementation Complexity 15 / Team Capability Fit 10. Output: risk table + mitigation alternatives + minimum 3 alternatives.
+Entry signals: plan/spec path reference + "review" / "check" / "is it okay?" / "what's missing?". Candidate range: 3-5 risks or alternatives. Axis weights: Risk Exposure 30 / Requirements Coverage 25 / Maintainability 20 / Implementation Complexity 15 / Team Capability Fit 10. Output: risk table + mitigation alternatives + minimum 3 alternatives.
 
 **Inverted interpretation warning.** In Review mode, Risk Exposure uses inverted polarity: **higher score = higher risk**. This is opposite to all other axes and modes. 85-100 total means "critical risk, mandatory alternative", not "best candidate". See the mode-specific interpretation table below.
 
