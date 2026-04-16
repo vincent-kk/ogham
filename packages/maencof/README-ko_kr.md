@@ -196,7 +196,6 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-connect`     | 고급     | 외부 데이터 소스 등록                      |
 | `/maencof:maencof-mcp-setup`   | 고급     | 외부 MCP 서버 설치                         |
 | `/maencof:maencof-manage`      | 고급     | 스킬/에이전트 활성화 및 사용 리포트        |
-| `/maencof:maencof-dailynote`   | 고급     | 일일 활동 로그 조회                        |
 | `/maencof:maencof-insight`     | 고급     | 자동 인사이트 캡처 관리                    |
 | `/maencof:maencof-changelog`   | 고급     | 자기 변경 기록 (일별 changelog)            |
 | `/maencof:maencof-migrate`     | 고급     | Vault 아키텍처 마이그레이션                |

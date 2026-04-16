@@ -196,7 +196,6 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-connect`     | Advanced | Register external data sources                 |
 | `/maencof:maencof-mcp-setup`   | Advanced | Install external MCP servers                   |
 | `/maencof:maencof-manage`      | Advanced | Skill/agent activation and usage reports       |
-| `/maencof:maencof-dailynote`   | Advanced | View daily activity log                        |
 | `/maencof:maencof-insight`     | Advanced | Auto-insight capture management                |
 | `/maencof:maencof-changelog`   | Advanced | Self-change daily changelog recorder           |
 | `/maencof:maencof-migrate`     | Advanced | Vault architecture migration                   |

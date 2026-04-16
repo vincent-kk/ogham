@@ -93,7 +93,7 @@ export function registerDailynoteTools(server: McpServer): void {
     'dailynote_read',
     {
       description:
-        'Queries the dailynote (daily activity log). Supports date, category filter, and last N days lookup.',
+        'Queries the dailynote (daily activity log). Supports date, category filter, and last N days lookup. Returns time-grouped entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
       inputSchema: z.object({
         date: z
           .string()
