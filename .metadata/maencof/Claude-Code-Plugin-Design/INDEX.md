@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-03-04
+updated: 2026-04-16
 tags: [index, overview, navigation]
 layer: meta
 ---
@@ -75,5 +75,8 @@ Part 6: 24 → 25 → 26
 | 스킬/에이전트 추가 | 17, 18, 19, 20 |
 | 플러그인 아키텍처 변경 | 16, INDEX |
 | Layer 3 확장/L5 재정의 | 02, 05, 06, 08, 10, 12, 13 |
+| Hook 이벤트/훅 타입 변경 | 16 |
+| 대화 규율/meta-skill/dialogue-config 변경 | 13, 16, 17, 18 |
+| MCP 도구 카테고리 추가 | 16, 17, 20 |
 
 문서 추가 시 이 INDEX의 문서 목록과 갱신 규칙 테이블을 함께 업데이트한다.

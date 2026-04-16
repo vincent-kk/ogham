@@ -1,6 +1,6 @@
 ---
 created: 2026-02-28
-updated: 2026-03-01
+updated: 2026-04-16
 tags: [agent, access-control, layer-restriction]
 layer: design-area-4
 ---
@@ -21,11 +21,10 @@ layer: design-area-4
 ```
 packages/maencof/agents/
 ├── memory-organizer.md
-├── knowledge-connector.md   # 미구현 (향후 추가 예정)
-├── schedule-runner.md       # 폐기됨
 ├── identity-guardian.md
-├── doctor.md
-└── configurator.md
+├── checkup.md
+├── configurator.md
+└── knowledge-connector.md
 ```
 
 Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
@@ -38,10 +37,9 @@ Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
 | 에이전트 | L1 | L2 | L3 | L4 | L5 | 쓰기 범위 |
 |---------|----|----|----|----|-----|----------|
 | memory-organizer | 읽기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 읽기/쓰기 | 전이/정리 |
-| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 생성만 (미구현) |
-| schedule-runner | - | - | - | - | - | 폐기됨 |
 | identity-guardian | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 전용 (L1 보호/갱신 안내) |
-| doctor | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단 + Frontmatter 자동수정 (update) |
+| checkup | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 진단 + Frontmatter 자동수정 (update) |
+| knowledge-connector | 읽기 | 읽기 | 읽기 | 읽기 | 읽기 | 링크 제안 (`kg_suggest_links` 경유), L5-Boundary 커넥터 관리 |
 | configurator | - | - | - | - | - | 프로젝트 설정 파일만 (MCP 관할 외) |
 
 ---
@@ -50,7 +48,7 @@ Frontmatter에 `allowed_layers`, `allowed_operations` 명시.
 
 에이전트 유형에 따라 접근 방식이 다르다:
 
-### 지식 그래프 에이전트 (memory-organizer, identity-guardian, doctor)
+### 지식 그래프 에이전트 (memory-organizer, identity-guardian, checkup, knowledge-connector)
 
 지식 문서 조작은 **MCP 도구 경유 원칙**. 직접 파일 시스템 접근 금지.
 단, 진단/탐색 목적의 Read/Glob/Grep은 예외 허용.
@@ -87,7 +85,7 @@ configurator → 직접 파일 접근 → Never Modify 목록 검증 → 설정 
 | Level | 실행 방식 |
 |-------|---------|
 | Level 0-1 | 모든 에이전트 실행 전 승인 필요 |
-| Level 2 | doctor 자율. 나머지 승인 |
+| Level 2 | checkup 자율. 나머지 승인 |
 | Level 3 | 파괴적 작업(대량 삭제/구조 변경)만 승인. 나머지 자율 |
 
 긴급 잠금 시 Level 0 복귀. 상세: [22-autonomy-levels.md](./22-autonomy-levels.md)
