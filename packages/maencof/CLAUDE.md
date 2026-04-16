@@ -19,7 +19,9 @@ yarn format && yarn lint
 
 **Agents (5)**: `memory-organizer`, `identity-guardian`, `checkup`, `configurator`, `knowledge-connector`
 
-**Skills (29)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-rebuild`, `maencof-ingest`, `maencof-diagnose`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-dailynote`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
+**Skills (28)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-rebuild`, `maencof-ingest`, `maencof-diagnose`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-dailynote`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
+
+> Dialogue discipline meta-prompt (`session-start/meta-skill-body.md`) is inlined into the `session-start` hook bundle via esbuild `.md → text` loader and injected as `hookSpecificOutput.additionalContext`. It is not a user-invocable skill.
 
 > Detailed docs: `../../.metadata/maencof/` (5-Layer spec, MCP contracts, agent/skill definitions, hook event mappings)
 
@@ -45,7 +47,7 @@ Automatic invocation chain:
 
 Session recap: the SessionEnd hook automatically surfaces `[maencof] Session Recap` at session termination (no explicit invocation). `maencof-reflect` remains a standalone vault judge reporter and is NOT mapped to session-wide recap.
 
-Meta-skill `using-maencof`: the SessionStart hook emits the full SKILL.md body wrapped in `<maencof-meta-skill>` via `hookSpecificOutput.additionalContext`, injecting it into the model's system context each session. Off-switch: `MAENCOF_DISABLE_DIALOGUE=1` env OR `.maencof-meta/dialogue-config.json::injection.enabled=false` → SessionStart emit skipped (skill becomes invisible; discovery loss accepted).
+Dialogue meta-prompt injection: the SessionStart hook emits the contents of `src/hooks/session-start/meta-skill-body.md` (bundled inline at build time) wrapped in `<maencof-meta-skill>` via `hookSpecificOutput.additionalContext`, injecting it into the model's system context each session. Off-switch: `MAENCOF_DISABLE_DIALOGUE=1` env OR `.maencof-meta/dialogue-config.json::injection.enabled=false` → SessionStart emit skipped (meta-prompt becomes invisible).
 
 ## Always do
 

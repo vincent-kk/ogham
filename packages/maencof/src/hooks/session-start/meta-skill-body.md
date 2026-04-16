@@ -1,15 +1,3 @@
----
-name: using-maencof
-user_invocable: false
-description: "[maencof:using-maencof] Meta-skill that governs maencof dialogue discipline: maps 6 cognitive roles to skills, enforces one-question-at-a-time Socratic rules, defines ephemeral/durable/principle vault-write boundaries, and flags common rationalization red flags during session-wide interactions."
-argument-hint: ""
-version: "1.0.0"
-complexity: low
-context_layers: []
-orchestrator: maencof dialogue governance
-plugin: maencof
----
-
 # Using maencof — Dialogue Discipline
 
 **This discipline must be observed during every session.** If it conflicts with user instructions in CLAUDE.md / AGENTS.md, the user instructions take precedence.
@@ -17,7 +5,7 @@ plugin: maencof
 ## 1. Instruction Priority
 
 1. CLAUDE.md / AGENTS.md user instructions
-2. maencof dialogue discipline (this skill)
+2. maencof dialogue discipline (this meta-skill)
 3. Default system prompt
 
 ## 2. 6 Role → Skill Mapping
@@ -62,7 +50,7 @@ plugin: maencof
 
 - env `MAENCOF_DISABLE_DIALOGUE=1` → SessionStart emit skipped.
 - `.maencof-meta/dialogue-config.json::injection.enabled=false` → same skip.
-- When off, the skill becomes completely invisible (discovery loss accepted).
+- When off, the meta-skill body becomes completely invisible (discovery loss accepted).
 
 ## 7. Vault Write Boundaries
 

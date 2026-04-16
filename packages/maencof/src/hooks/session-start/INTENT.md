@@ -11,7 +11,7 @@
 - claude-md-merger로 CLAUDE.md 섹션 관리
 - 아키텍처 버전 검증 및 마이그레이션 트리거
 - companion identity 검증
-- meta-skill SKILL.md 본문을 `hookSpecificOutput.additionalContext` 로 주입 (off-switch 해제 시)
+- meta-skill-body.md 내용을 `hookSpecificOutput.additionalContext` 로 주입 (off-switch 해제 시)
 
 ### Ask first
 
