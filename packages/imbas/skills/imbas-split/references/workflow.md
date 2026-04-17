@@ -84,9 +84,12 @@ Step 5 — Size Check
 
   (a) Size exceeded → Horizontal Split
     1. Re-invoke `planner` for the oversized Story only.
-    2. Original Story marked for "Done" processing + links:
+    2. Original Story added to manifest.transitions array with reason "horizontal_split" + links:
+       - Transition: { issue_ref: <original_story_id>, target_status: <config workflow Done state>, reason: "horizontal_split", status: "pending" }
+         Note: issue_ref here is the manifest-internal Story ID; it will be resolved to the actual issue_ref during manifest execution (Phase 4d).
        - "is split into" link from original to new Stories
        - "split from" link from new Stories to original
+       - Umbrella stories (pattern b) are EXCLUDED from transitions — they stay open by design.
     3. New Stories undergo full 3→1→2 verification + size check (loop).
 
   (b) Conceptually needs sub-Stories → Umbrella Pattern
@@ -111,6 +114,13 @@ Step 6 — stories-manifest.json Generation
        - Detect Story-to-Story execution dependencies (e.g., API before UI)
        - Add "blocks" links to manifest: { type: "blocks", from: <blocking-story-id>, to: [<blocked-story-ids>], status: "pending" }
        - No circular dependencies allowed
+  2.5. Compile transitions array:
+     - Horizontal split: For each Story that was horizontally split in Step 5(a),
+       add { issue_ref: <original_story_id>, target_status: <config workflow Done state>, reason: "horizontal_split", status: "pending" }.
+       Note: issue_ref here is the manifest-internal Story ID; it will be resolved to the actual issue_ref during manifest execution (Phase 4d).
+     - Source issue: If state.source_issue_ref is present,
+       add { issue_ref: <source_issue_ref>, target_status: <config workflow Done state>, reason: "source_split", status: "pending" }.
+     - Umbrella patterns: do NOT add transitions (umbrella Stories stay open by design).
   3. Call mcp_tools_manifest_save:
      - project_ref, run_id, type: "stories", manifest: <full manifest>
   4. Call mcp_tools_manifest_validate:

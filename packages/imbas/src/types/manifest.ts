@@ -46,6 +46,14 @@ export const StoryLinkSchema = z.object({
 });
 export type StoryLink = z.infer<typeof StoryLinkSchema>;
 
+export const TransitionItemSchema = z.object({
+  issue_ref: z.string(),
+  target_status: z.string(),
+  reason: z.enum(['horizontal_split', 'source_split']),
+  status: ManifestItemStatusSchema.default('pending'),
+});
+export type TransitionItem = z.infer<typeof TransitionItemSchema>;
+
 export const StoriesManifestSchema = z.object({
   batch: z.string(),
   run_id: z.string(),
@@ -54,6 +62,7 @@ export const StoriesManifestSchema = z.object({
   created_at: z.string(),
   stories: z.array(StoryItemSchema),
   links: z.array(StoryLinkSchema).default([]),
+  transitions: z.array(TransitionItemSchema).default([]),
 });
 export type StoriesManifest = z.infer<typeof StoriesManifestSchema>;
 

@@ -236,7 +236,7 @@ Step 2.6 — Size Check + Horizontal Split / Umbrella
 
   (a) Size exceeded (criterion 1 or 4) → Horizontal Split
     - Re-invoke `planner` for the oversized Story only
-    - Original Story marked for "Done" processing + links:
+    - Original Story added to manifest.transitions array with reason "horizontal_split" + links:
       "is split into" from original → new Stories
       "split from" from new Stories → original
     - New Stories undergo full 3→1→2 verification + size check (recursive loop)
@@ -313,6 +313,15 @@ Step 2.5.2 — Batch Execution
        [OP: create_link] type=<type>, inward=<inwardIssue>, outward=<outwardIssue>
     3. Update link: status = "created"
     4. Save manifest
+
+  Phase D — Source Issue Transitions (runs after Phase C):
+    See imbas-manifest/references/<provider>/workflow.md Phase 4d for provider-specific execution.
+    For each transition in manifest.transitions where status == "pending":
+    - Resolve issue_ref (manifest Story ID → external ref, or use external ref directly)
+    - Idempotency guard: if already at target_status → set status = "skipped"
+    - Execute provider-specific transition command
+    - On failure: log warning, set status = "failed", save manifest, continue (non-blocking)
+    - On success: set status = "created", save manifest
 
 Step 2.5.3 — Execution Verification
   >>> GATE 4: Execution Result (see auto-approval-gates.md)

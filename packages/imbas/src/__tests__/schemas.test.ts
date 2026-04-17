@@ -7,7 +7,7 @@ import {
   PhaseStatusSchema,
 } from '../types/state.js';
 import { ImbasConfigSchema, ProviderSchema, LabelsConfigSchema } from '../types/config.js';
-import { StoriesManifestSchema, DevplanManifestSchema, StoryItemSchema, TaskItemSchema, SubtaskItemSchema } from '../types/manifest.js';
+import { StoriesManifestSchema, DevplanManifestSchema, StoryItemSchema, TaskItemSchema, SubtaskItemSchema, TransitionItemSchema } from '../types/manifest.js';
 import { CachedAtSchema } from '../types/cache.js';
 
 // --- RunStateSchema ---
@@ -306,6 +306,82 @@ describe('StoriesManifestSchema', () => {
     const { run_id: _runId, ...bad } = validManifest;
     const result = StoriesManifestSchema.safeParse(bad);
     expect(result.success).toBe(false);
+  });
+
+  it('defaults transitions to empty array when omitted (backward compat)', () => {
+    const result = StoriesManifestSchema.safeParse(validManifest);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.transitions).toEqual([]);
+  });
+
+  it('parses manifest with transitions array', () => {
+    const withTransitions = {
+      ...validManifest,
+      transitions: [
+        { issue_ref: 'S-001', target_status: 'Done', reason: 'horizontal_split' },
+      ],
+    };
+    const result = StoriesManifestSchema.safeParse(withTransitions);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.transitions).toHaveLength(1);
+    expect(result.data.transitions[0]!.target_status).toBe('Done');
+    expect(result.data.transitions[0]!.reason).toBe('horizontal_split');
+    expect(result.data.transitions[0]!.status).toBe('pending');
+  });
+});
+
+// --- TransitionItemSchema ---
+
+describe('TransitionItemSchema', () => {
+  it('parses valid transition item with horizontal_split reason', () => {
+    const result = TransitionItemSchema.safeParse({
+      issue_ref: 'S-001',
+      target_status: 'Done',
+      reason: 'horizontal_split',
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.status).toBe('pending');
+  });
+
+  it('defaults status to pending when omitted (source_split)', () => {
+    const result = TransitionItemSchema.safeParse({
+      issue_ref: 'PROJ-123',
+      target_status: 'Done',
+      reason: 'source_split',
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.status).toBe('pending');
+  });
+
+  it('rejects invalid reason enum value', () => {
+    const result = TransitionItemSchema.safeParse({
+      issue_ref: 'S-001',
+      target_status: 'Done',
+      reason: 'invalid_reason',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing issue_ref', () => {
+    const result = TransitionItemSchema.safeParse({
+      target_status: 'Done',
+      reason: 'horizontal_split',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts skipped status from ManifestItemStatusSchema', () => {
+    const result = TransitionItemSchema.safeParse({
+      issue_ref: 'S-001',
+      target_status: 'Done',
+      reason: 'horizontal_split',
+      status: 'skipped',
+    });
+    expect(result.success).toBe(true);
   });
 });
 

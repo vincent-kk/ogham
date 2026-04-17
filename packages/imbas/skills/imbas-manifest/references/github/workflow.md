@@ -98,6 +98,22 @@ For each link in `manifest.links` where `status == "pending"`:
 
 See `link-handling.md` for the full `## Links` grammar and bidirectional write protocol.
 
+#### Phase 4d — Source Issue Transitions
+For each transition in `manifest.transitions` where `status == "pending"`:
+  1. Resolve `issue_ref`:
+     - If it matches a manifest Story ID → lookup `issue_ref` from stories array.
+     - If it is already an external ref (e.g., source_issue_ref) → use directly.
+  2. Parse `owner/repo#N` from resolved ref.
+  3. ```bash
+     gh issue view <N> --repo <owner/repo> --json state
+     ```
+     - If `state == "closed"` → set transition `status = "skipped"`, save manifest immediately. Continue to next.
+  4. ```bash
+     gh issue close <N> --repo <owner/repo> --reason completed
+     ```
+     - On failure → set transition `status = "failed"`, log warning: "Cannot close <ref>: <error>. Manual action may be required." Save manifest immediately. Continue to next (do NOT block pipeline).
+  5. Set transition `status = "created"`. Save manifest immediately.
+
 ### Devplan type
 
 Follow `execution_order` from manifest (dependency-ordered).

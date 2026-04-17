@@ -53,6 +53,19 @@ For each link in `manifest.links` where `status == "pending"`:
     - `"failed"`   — all failed
   - Save manifest immediately.
 
+#### Phase 4d — Source Issue Transitions
+For each transition in `manifest.transitions` where `status == "pending"`:
+  1. Resolve `issue_ref`:
+     - If it matches a manifest Story ID → lookup `issue_ref` from stories array.
+     - If it is already an external ref (e.g., source_issue_ref) → use directly.
+  2. `[OP: get_issue] issue_ref=<resolved_ref>` → check current status.
+     - If already at `target_status` → set transition `status = "skipped"`, save manifest immediately. Continue to next.
+  3. `[OP: get_transitions] issue_ref=<resolved_ref>` → find transition ID matching `target_status`.
+     - If no matching transition available → set transition `status = "failed"`, log warning: "Cannot transition <ref> to <target_status>: no available transition. Manual action may be required." Save manifest immediately. Continue to next (do NOT block pipeline).
+  4. `[OP: transition_issue] issue_ref=<resolved_ref>, transition.id=<matched_id>`.
+     - On failure → set transition `status = "failed"`, log warning. Save manifest immediately. Continue to next (do NOT block pipeline).
+  5. Set transition `status = "created"`. Save manifest immediately.
+
 ### Devplan type
 
 Follow `execution_order` from manifest (dependency-ordered).

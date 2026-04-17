@@ -38,6 +38,7 @@ For `stories` type:
   1. Epic creation (if manifest has epic entry without `issue_ref`)
   2. Story creation (list: id, title, type)
   3. Link creation (list: type, from → to)
+  4. Source issue transitions (list: issue_ref → target_status, reason)
   → Exit after display.
 
 For `devplan` type:
@@ -115,6 +116,7 @@ Display execution results:
 - Successfully created: `<count>`
 - Skipped (already existed): `<count>`
 - Failed: `<count>`
+- Transitions: `<created>` succeeded, `<failed>` failed, `<skipped>` skipped (already at target status)
 
 If failures exist:
 - List failed items with error details.
