@@ -34,6 +34,7 @@ export const StoryItemSchema = z.object({
   size_check: z.enum(['PASS', 'FAIL', 'REVIEW']),
   split_from: z.string().nullable().default(null),
   split_into: z.array(z.string()).default([]),
+  labels: z.array(z.string()).default([]),
 });
 export type StoryItem = z.infer<typeof StoryItemSchema>;
 
@@ -64,6 +65,7 @@ export const SubtaskItemSchema = z.object({
   description: z.string(),
   status: ManifestItemStatusSchema.default('pending'),
   issue_ref: z.string().nullable().default(null),
+  labels: z.array(z.string()).default([]),
 });
 export type SubtaskItem = z.infer<typeof SubtaskItemSchema>;
 
@@ -76,6 +78,7 @@ export const TaskItemSchema = z.object({
   issue_ref: z.string().nullable().default(null),
   blocks: z.array(z.string()),
   subtasks: z.array(SubtaskItemSchema).default([]),
+  labels: z.array(z.string()).default([]),
 });
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 

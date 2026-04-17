@@ -47,6 +47,7 @@ preview, crash recovery via per-item save, and idempotent re-execution.
 ## References
 
 - [Workflow](./references/workflow.md) — Steps 1–5: load, dry-run, confirm, batch execution, result report
+- [Label Transitions](./references/label-transitions.md) — Lifecycle label apply/remove at phase boundaries (Step 6)
 - [Tools](./references/tools.md) — imbas MCP tools, output, agent spawn
 - [Error Handling](./references/errors.md) — Error conditions and recovery actions
 - [State Transitions](./references/state-transitions.md) — Preconditions and manifest item status spec

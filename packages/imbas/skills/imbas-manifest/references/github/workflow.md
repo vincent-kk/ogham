@@ -14,6 +14,7 @@ Before any `gh issue create` call, verify the required labels exist.
    - `type:epic`, `type:story`, `type:task`, `type:subtask`
    - `status:todo`, `status:ready-for-dev`, `status:in-progress`, `status:in-review`, `status:done`
    - Any entries in `config.github.defaultLabels`
+   - All values from `config.labels` (6 lifecycle labels — load via `mcp_tools_config_get` field `"labels"`)
 3. For each missing label:
    ```bash
    gh label create <name> --repo <owner/repo> --color <rrggbb>
@@ -62,7 +63,8 @@ If manifest has `epic_ref == null` and an Epic entry exists:
    gh issue create --repo <owner/repo> \
      --title "[Epic] <title>" \
      --body "<description>\n\n## Sub-tasks\n\n## Links" \
-     --label type:epic --label status:todo
+     --label type:epic --label status:todo \
+     --label <config.labels.managed>
    ```
 2. Parse returned issue URL to extract number. Store `owner/repo#<N>` in `epic_ref`.
 3. `mcp_tools_manifest_save` immediately.
@@ -74,7 +76,8 @@ For each story in `manifest.stories` where `status == "pending"`:
    gh issue create --repo <owner/repo> \
      --title "[Story] <title>" \
      --body "<description>\n\n## Sub-tasks\n\n## Links" \
-     --label type:story --label status:todo
+     --label type:story --label status:todo \
+     --label <config.labels.managed>
    ```
 2. If epic exists, update epic body to append `- [ ] <story_ref>` under `## Sub-tasks`
    via `gh api` PATCH (see `link-handling.md` §Task-list maintenance).
@@ -106,7 +109,8 @@ For each task in `manifest.tasks` where `status == "pending"`:
    gh issue create --repo <owner/repo> \
      --title "[Task] <title>" \
      --body "<description>\n\n## Sub-tasks\n\n## Links" \
-     --label type:task --label status:todo
+     --label type:task --label status:todo \
+     --label <config.labels.managed>
    ```
 2. Update task: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
 3. `mcp_tools_manifest_save` immediately.
@@ -118,7 +122,8 @@ For each task, for each subtask where `status == "pending"`:
    gh issue create --repo <owner/repo> \
      --title "[Subtask] <title>" \
      --body "<description>\n\n## Links" \
-     --label type:subtask --label status:todo
+     --label type:subtask --label status:todo \
+     --label <config.labels.managed>
    ```
 2. PATCH parent task body to append `- [ ] <subtask_ref>` under `## Sub-tasks`.
 3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
@@ -135,7 +140,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
 #### Step 4 — create_story_subtasks
 
 For each entry in `manifest.story_subtasks`, for each subtask where `status == "pending"`:
-1. `gh issue create` with `type:subtask` label, parent ref in body.
+1. `gh issue create` with `type:subtask` + `<config.labels.managed>` labels, parent ref in body.
 2. PATCH parent story body `## Sub-tasks`: append `- [ ] <subtask_ref>`.
 3. Update subtask: `status = "created"`, `issue_ref = "owner/repo#<N>"`.
 4. `mcp_tools_manifest_save` immediately.
@@ -166,3 +171,33 @@ gh issue view <number> --repo <owner/repo> --json state,labels
 
 Use in Step 2.5 of the manifest workflow to verify an existing
 `issue_ref` is still valid before skipping creation (idempotency guard).
+
+## Step 6 — Post-Execution Label Transitions
+
+After all items in Step 4 are created successfully, apply lifecycle labels.
+See `../label-transitions.md` for the full transition table and idempotency rules.
+
+### Stories type (Phase 2.5)
+
+1. Load run state via `mcp_tools_run_get`.
+2. Load label config via `mcp_tools_config_get` with field `"labels"`.
+3. For each created `issue_ref` in manifest (stories + epic):
+   - If `split.pending_review === true`:
+     ```bash
+     gh issue edit <N> --repo <owner/repo> --add-label <config.labels.review_pending>
+     ```
+   - If `split.pending_review === false`:
+     ```bash
+     gh issue edit <N> --repo <owner/repo> --add-label <config.labels.review_complete>
+     ```
+
+### Devplan type (Phase 3.5)
+
+1. Load label config via `mcp_tools_config_get` with field `"labels"`.
+2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
+3. For each parent story `issue_ref`:
+   ```bash
+   gh issue edit <N> --repo <owner/repo> \
+     --remove-label <config.labels.review_complete> \
+     --add-label <config.labels.dev_waiting>
+   ```

@@ -96,6 +96,43 @@ Step 3 — Project reference selection (provider-specific)
        - .imbas/<KEY>/issues/tasks/
        - .imbas/<KEY>/issues/subtasks/
 
+Step 3.5 — Label Configuration
+  1. Load default labels from LabelsConfigSchema defaults.
+  2. Display default label table:
+
+     Key              | Value            | Applied When
+     -----------------+------------------+-------------------------------
+     managed          | imbas-managed    | Issue creation (all types)
+     review_pending   | review-pending   | Phase 2 complete
+     review_complete  | review-complete  | Review approved
+     dev_waiting      | 개발대기          | Phase 3.5 complete
+     dev_in_progress  | 개발중            | (external trigger only)
+     dev_done         | 개발완료          | (external trigger only)
+
+  3. Prompt: "이 기본 라벨로 진행하시겠습니까? [Yes / Customize]"
+     - Yes → use defaults, proceed to Step 3.6
+     - Customize → for each label key, show current default and accept new value
+       via AskUserQuestion (or equivalent interactive prompt).
+       Store customized values for config.labels section.
+
+  Step 3.6 — GitHub Label Provisioning (GitHub provider only)
+  [github]
+    1. Display: "GitHub 레포에 이 라벨들을 생성하시겠습니까?"
+    2. Prompt: "<owner/repo>에 라벨 provisioning? [Yes / Skip]"
+       - Yes → for each label value in config.labels:
+         - Run: gh label list --repo <owner/repo> --json name
+         - If label value NOT in existing list:
+           gh label create "<value>" --repo <owner/repo> --color c5def5
+         - If label already exists: skip (idempotent)
+         Report: "N개 생성, M개 이미 존재."
+       - Skip → display: "`imbas-setup labels provision`으로 나중에 생성할 수 있습니다."
+
+  [jira]
+    Display: "Jira labels는 free-form으로 별도 provisioning이 필요하지 않습니다."
+
+  [local]
+    No label provisioning needed.
+
 Step 4 — config.json creation
   1. Build config object (provider-aware):
      {

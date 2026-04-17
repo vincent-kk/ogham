@@ -6,8 +6,8 @@ import {
   EscapeCodeSchema,
   PhaseStatusSchema,
 } from '../types/state.js';
-import { ImbasConfigSchema, ProviderSchema } from '../types/config.js';
-import { StoriesManifestSchema, DevplanManifestSchema } from '../types/manifest.js';
+import { ImbasConfigSchema, ProviderSchema, LabelsConfigSchema } from '../types/config.js';
+import { StoriesManifestSchema, DevplanManifestSchema, StoryItemSchema, TaskItemSchema, SubtaskItemSchema } from '../types/manifest.js';
 import { CachedAtSchema } from '../types/cache.js';
 
 // --- RunStateSchema ---
@@ -161,6 +161,97 @@ describe('ImbasConfigSchema', () => {
   it('rejects unknown provider', () => {
     const result = ImbasConfigSchema.safeParse({ provider: 'bitbucket' });
     expect(result.success).toBe(false);
+  });
+});
+
+// --- LabelsConfigSchema ---
+
+describe('LabelsConfigSchema', () => {
+  it('fills all 6 default labels from empty object (AC1)', () => {
+    const result = LabelsConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.managed).toBe('imbas-managed');
+    expect(result.data.review_pending).toBe('review-pending');
+    expect(result.data.review_complete).toBe('review-complete');
+    expect(result.data.dev_waiting).toBe('개발대기');
+    expect(result.data.dev_in_progress).toBe('개발중');
+    expect(result.data.dev_done).toBe('개발완료');
+  });
+
+  it('preserves partial override while keeping other defaults (AC2)', () => {
+    const result = LabelsConfigSchema.safeParse({ managed: 'custom-managed' });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.managed).toBe('custom-managed');
+    expect(result.data.review_pending).toBe('review-pending');
+    expect(result.data.dev_waiting).toBe('개발대기');
+  });
+});
+
+describe('ImbasConfigSchema labels integration', () => {
+  it('auto-fills labels section from empty config (AC1)', () => {
+    const result = ImbasConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.labels.managed).toBe('imbas-managed');
+    expect(result.data.labels.dev_done).toBe('개발완료');
+  });
+
+  it('defaults jira.phase_to_workflow.pipeline_exit to ready_for_dev (AC3)', () => {
+    const result = ImbasConfigSchema.safeParse({});
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.jira.phase_to_workflow.pipeline_exit).toBe('ready_for_dev');
+  });
+
+  it('allows custom phase_to_workflow.pipeline_exit', () => {
+    const result = ImbasConfigSchema.safeParse({
+      jira: { phase_to_workflow: { pipeline_exit: 'Ready' } },
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.jira.phase_to_workflow.pipeline_exit).toBe('Ready');
+  });
+});
+
+// --- Manifest labels field (AC18) ---
+
+describe('Manifest schemas labels field', () => {
+  const storyBase = {
+    id: 'S-001', title: 'T', description: 'D', type: 'Story',
+    verification: { anchor_link: true, coherence: 'PASS' as const, reverse_inference: 'PASS' as const },
+    size_check: 'PASS' as const,
+  };
+
+  it('StoryItemSchema defaults labels to empty array', () => {
+    const result = StoryItemSchema.safeParse(storyBase);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.labels).toEqual([]);
+  });
+
+  it('StoryItemSchema preserves provided labels', () => {
+    const result = StoryItemSchema.safeParse({ ...storyBase, labels: ['imbas-managed'] });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.labels).toEqual(['imbas-managed']);
+  });
+
+  it('SubtaskItemSchema defaults labels to empty array', () => {
+    const result = SubtaskItemSchema.safeParse({ id: 'ST-1', title: 'T', description: 'D' });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.labels).toEqual([]);
+  });
+
+  it('TaskItemSchema defaults labels to empty array', () => {
+    const result = TaskItemSchema.safeParse({
+      id: 'T-1', title: 'T', description: 'D', type: 'Task', blocks: [],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.labels).toEqual([]);
   });
 });
 

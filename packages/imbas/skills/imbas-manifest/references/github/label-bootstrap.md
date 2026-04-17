@@ -27,6 +27,20 @@ The following labels are always required:
 
 Plus any entries in `config.github.defaultLabels` (user-defined).
 
+Additionally, all values from `config.labels` are required (lifecycle labels):
+
+| Label | Color (hex) | Category |
+|-------|------------|----------|
+| `<config.labels.managed>` | `c5def5` | lifecycle |
+| `<config.labels.review_pending>` | `c5def5` | lifecycle |
+| `<config.labels.review_complete>` | `c5def5` | lifecycle |
+| `<config.labels.dev_waiting>` | `c5def5` | lifecycle |
+| `<config.labels.dev_in_progress>` | `c5def5` | lifecycle |
+| `<config.labels.dev_done>` | `c5def5` | lifecycle |
+
+Load these values via `mcp_tools_config_get` with field `"labels"` at the start
+of Step B1. If `config.labels` is absent (legacy config), Zod defaults apply.
+
 ## Bootstrap protocol
 
 Run at the start of every manifest execution (Step 0), before Step 2.5 drift check.
@@ -43,7 +57,7 @@ Extract name strings into a set.
 ### Step B2 — Compute missing labels
 
 Diff the existing set against the required set defined above plus
-`config.github.defaultLabels`. Collect missing names.
+`config.github.defaultLabels` plus all `config.labels` values. Collect missing names.
 
 If the missing set is empty, bootstrap is complete — proceed to Step 2.5.
 

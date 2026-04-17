@@ -56,7 +56,9 @@ export {
   LlmModelConfigSchema,
   SubtaskLimitsSchema,
   DefaultsConfigSchema,
+  JiraPhaseToWorkflowSchema,
   JiraConfigSchema,
+  LabelsConfigSchema,
   ImbasConfigSchema,
 } from './config.js';
 export type {
@@ -65,7 +67,9 @@ export type {
   LlmModelConfig,
   SubtaskLimits,
   DefaultsConfig,
+  JiraPhaseToWorkflow,
   JiraConfig,
+  LabelsConfig,
   ImbasConfig,
 } from './config.js';
 

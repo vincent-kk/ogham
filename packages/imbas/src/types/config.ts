@@ -71,10 +71,16 @@ export const JiraLinkTypesSchema = z.object({
   relates_to: z.string().default('relates to'),
 });
 
+export const JiraPhaseToWorkflowSchema = z.object({
+  pipeline_exit: z.string().default('ready_for_dev'),
+});
+export type JiraPhaseToWorkflow = z.infer<typeof JiraPhaseToWorkflowSchema>;
+
 export const JiraConfigSchema = z.object({
   issue_types: JiraIssueTypesSchema.default({}),
   workflow_states: JiraWorkflowStatesSchema.default({}),
   link_types: JiraLinkTypesSchema.default({}),
+  phase_to_workflow: JiraPhaseToWorkflowSchema.default({}),
 });
 export type JiraConfig = z.infer<typeof JiraConfigSchema>;
 
@@ -109,11 +115,22 @@ export const GithubConfigSchema = z.object({
 });
 export type GithubConfig = z.infer<typeof GithubConfigSchema>;
 
+export const LabelsConfigSchema = z.object({
+  managed: z.string().default('imbas-managed'),
+  review_pending: z.string().default('review-pending'),
+  review_complete: z.string().default('review-complete'),
+  dev_waiting: z.string().default('개발대기'),
+  dev_in_progress: z.string().default('개발중'),
+  dev_done: z.string().default('개발완료'),
+});
+export type LabelsConfig = z.infer<typeof LabelsConfigSchema>;
+
 export const ImbasConfigSchema = z.object({
   version: z.string().default('1.0'),
   provider: ProviderSchema.default('jira'),
   language: LanguageConfigSchema.default({}),
   defaults: DefaultsConfigSchema.default({}),
+  labels: LabelsConfigSchema.default({}),
   jira: JiraConfigSchema.default({}),
   github: GithubConfigSchema.optional(),
 });

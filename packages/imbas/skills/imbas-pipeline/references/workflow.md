@@ -264,6 +264,9 @@ Step 2.7 — Manifest Generation
 
 >>> GATE 2: Split Quality (see auto-approval-gates.md)
   - All criteria pass → call mcp_tools_run_transition(complete_phase, split, pending_review: false)
+    → IMMEDIATELY AFTER: apply review approval label swap per label-transitions.md:
+      For each story issue_ref in stories-manifest (if already created):
+        Remove config.labels.review_pending, add config.labels.review_complete.
   - Any criterion fails → STOP with blocker report detailing which Stories/fields failed
 
 >>> --stop-at split? → emit progress report, exit
@@ -293,13 +296,13 @@ Step 2.5.2 — Batch Execution
   CRITICAL: After EACH item creation, immediately save manifest via mcp_tools_manifest_save.
 
   Phase A — Epic Creation (if --parent "new" and manifest has Epic entry):
-    1. [OP: create_issue] project=<KEY>, type="Epic", summary=<summary>, description=<description>
+    1. [OP: create_issue] project=<KEY>, type="Epic", summary=<summary>, description=<description>, labels=[<config.labels.managed>]
     2. Store issue_ref in manifest epic_ref
     3. Save manifest
 
   Phase B — Story Creation:
     For each story where status == "pending":
-    1. [OP: create_issue] project=<KEY>, type="Story", summary=<summary>, description=<description>, parent=<epic_ref (if set)>
+    1. [OP: create_issue] project=<KEY>, type="Story", summary=<summary>, description=<description>, parent=<epic_ref (if set)>, labels=[<config.labels.managed>]
     2. Update story: status = "created", issue_ref = <returned key>
     3. Save manifest
 
@@ -317,6 +320,15 @@ Step 2.5.3 — Execution Verification
   - Any "failed" items → STOP: "Manifest stories partially failed. Fix and re-run:
     /imbas:imbas-manifest stories --run <run-id>"
     (devplan requires all Story issue_refs to be present)
+
+Step 2.5.4 — Post-Execution Label Transitions (stories type)
+  Apply lifecycle labels to all created issues per label-transitions.md.
+  1. Load config.labels via mcp_tools_config_get field "labels".
+  2. Load run state via mcp_tools_run_get.
+  3. For each created issue_ref in stories-manifest:
+     - Apply config.labels.review_pending (if split.pending_review === true)
+     - Apply config.labels.review_complete (if split.pending_review === false)
+  Provider commands: see imbas-manifest/references/<provider>/workflow.md Step 6.
 
 >>> --stop-at manifest-stories? → emit progress report, exit
 
@@ -439,13 +451,13 @@ Step 3.5.2 — Batch Execution (follows execution_order)
 
   Step 1 — create_tasks:
     For each task where status == "pending":
-    - [OP: create_issue] project=<KEY>, type="Task", summary=<summary>, description=<description>
+    - [OP: create_issue] project=<KEY>, type="Task", summary=<summary>, description=<description>, labels=[<config.labels.managed>]
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
   Step 2 — create_task_subtasks:
     For each task's subtasks where status == "pending":
-    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<task.issue_ref>
+    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<task.issue_ref>, labels=[<config.labels.managed>]
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
@@ -457,7 +469,7 @@ Step 3.5.2 — Batch Execution (follows execution_order)
 
   Step 4 — create_story_subtasks:
     For each story_subtasks entry, for each subtask where status == "pending":
-    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<story_key>
+    - [OP: create_issue] project=<KEY>, type="Sub-task", summary=<summary>, description=<description>, parent=<story_key>, labels=[<config.labels.managed>]
     - Update: status = "created", issue_ref = <key>
     - Save manifest
 
@@ -472,6 +484,17 @@ Step 3.5.3 — Execution Result
   - Count: created, failed, skipped items
   - Any failures → note in final report (NON-BLOCKING — items already created are irreversible)
   - Suggest: "/imbas:imbas-manifest devplan --run <run-id>" to retry failed items
+
+Step 3.5.4 — Post-Execution Label Transitions (devplan type)
+  Apply lifecycle labels to parent stories per label-transitions.md.
+  1. Load config.labels via mcp_tools_config_get field "labels".
+  2. Collect parent story issue_refs from stories-manifest.
+  3. For each parent story issue_ref:
+     - Remove config.labels.review_complete, add config.labels.dev_waiting.
+  4. [jira only] For each parent story issue_ref:
+     - Transition status to config.jira.workflow_states[config.jira.phase_to_workflow.pipeline_exit].
+     - On failure: log warning, continue (AC16 graceful degradation).
+  Provider commands: see imbas-manifest/references/<provider>/workflow.md Step 6.
 ```
 
 ---

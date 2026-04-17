@@ -31,13 +31,13 @@ Execution order is fixed:
 
 #### Phase 4a — Epic Creation (if needed)
 - If manifest has `epic_ref == null` and an Epic entry exists:
-  1. Call `[OP: create_issue] project=KEY, type="Epic", summary=<summary>, description=<description>`.
+  1. Call `[OP: create_issue] project=KEY, type="Epic", summary=<summary>, description=<description>, labels=[<config.labels.managed>]`.
   2. Store returned ref in manifest `epic_ref`.
   3. Save manifest immediately.
 
 #### Phase 4b — Story Creation
 For each story in `manifest.stories` where `status == "pending"`:
-  1. Call `[OP: create_issue] project=KEY, type="Story", summary=<story.title>, description=<story.description>, parent=<epic_ref>`.
+  1. Call `[OP: create_issue] project=KEY, type="Story", summary=<story.title>, description=<story.description>, parent=<epic_ref>, labels=[<config.labels.managed>]`.
   2. Update story: `status = "created"`, `issue_ref = <returned key>`.
   3. Save manifest immediately.
 
@@ -59,13 +59,13 @@ Follow `execution_order` from manifest (dependency-ordered).
 
 #### Step 1 — create_tasks
 For each task in `manifest.tasks` where `status == "pending"`:
-  1. `[OP: create_issue] project=KEY, type="Task", summary=<task.title>, description=<task.description>`.
+  1. `[OP: create_issue] project=KEY, type="Task", summary=<task.title>, description=<task.description>, labels=[<config.labels.managed>]`.
   2. Update task: `status = "created"`, `issue_ref = <returned key>`.
   3. Save manifest immediately.
 
 #### Step 2 — create_task_subtasks
 For each task, for each subtask in `task.subtasks` where `status == "pending"`:
-  1. `[OP: create_issue] project=KEY, type="Sub-task", summary=<summary>, description=<description>, parent=<task.issue_ref>`.
+  1. `[OP: create_issue] project=KEY, type="Sub-task", summary=<summary>, description=<description>, parent=<task.issue_ref>, labels=[<config.labels.managed>]`.
   2. Update subtask: `status = "created"`, `issue_ref = <returned key>`.
   3. Save manifest immediately.
 
@@ -78,7 +78,7 @@ For each task, for each `blocked_story_id` in `task.blocks`:
 #### Step 4 — create_story_subtasks
 For each entry in `manifest.story_subtasks`, for each subtask in `entry.subtasks`
 where `status == "pending"`:
-  1. `[OP: create_issue] project=KEY, type="Sub-task", summary=<summary>, description=<description>, parent=<entry.story_key>`.
+  1. `[OP: create_issue] project=KEY, type="Sub-task", summary=<summary>, description=<description>, parent=<entry.story_key>, labels=[<config.labels.managed>]`.
   2. Update subtask: `status = "created"`, `issue_ref = <returned key>`.
   3. Save manifest immediately.
 
@@ -90,3 +90,29 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
 
 IDEMPOTENCY: for every item, check `imbas-status` and `issue_ref` before creating.
 If `issue_ref` already exists → skip. Re-execution is safe after partial failure.
+
+## Step 6 — Post-Execution Label Transitions
+
+After all items in Step 4 are created successfully, apply lifecycle labels.
+See `../label-transitions.md` for the full transition table and idempotency rules.
+
+### Stories type (Phase 2.5)
+
+1. Load run state via `mcp_tools_run_get`.
+2. Load label config via `mcp_tools_config_get` with field `"labels"`.
+3. For each created `issue_ref` in manifest (stories + epic):
+   - If `split.pending_review === true`:
+     `[OP: editJiraIssue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
+   - If `split.pending_review === false`:
+     `[OP: editJiraIssue] issue_ref=<ref>`, add `<config.labels.review_complete>` to labels.
+
+### Devplan type (Phase 3.5)
+
+1. Load label config via `mcp_tools_config_get` with field `"labels"`.
+2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
+3. For each parent story `issue_ref`:
+   a. `[OP: editJiraIssue] issue_ref=<ref>`, remove `<config.labels.review_complete>`, add `<config.labels.dev_waiting>`.
+   b. `[OP: transitionJiraIssue] issue_ref=<ref>, transition=<config.jira.workflow_states[config.jira.phase_to_workflow.pipeline_exit]>`
+      - On failure (HTTP 400/403/404):
+        Log: `"WARNING: Jira transition to '<status>' failed for <ref>: <error>. Label '<dev_waiting>' was applied. Transition may require manual action."`
+        Continue pipeline — do NOT block. (AC16)
