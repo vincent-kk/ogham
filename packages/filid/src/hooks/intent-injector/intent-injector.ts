@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { GUIDE_BLOCK } from '../../constants/agent-context.js';
 import {
   hasGuideInjected,
   markGuideInjected,
@@ -12,82 +13,13 @@ import {
 import type { FractalMap } from '../../core/infra/cache-manager/cache-manager.js';
 import { buildChain } from '../../core/tree/boundary-detector/boundary-detector.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-
 import { isFcaProject } from '../shared/shared.js';
-import { GUIDE_BLOCK } from '../../constants/agent-context.js';
 import { validateCwd } from '../utils/validate-cwd.js';
 
-import { compressPaths } from './utils/compress-paths.js';
+import { buildCtxBlock } from './utils/build-ctx-block.js';
+import { buildMapBlock } from './utils/build-map-block.js';
 
 export type { FractalMap };
-export { compressPaths } from './utils/compress-paths.js';
-
-/**
- * Build the [filid:ctx] injection text for first visit to a directory.
- */
-function buildCtxBlock(
-  relFile: string,
-  intentContent: string | undefined,
-  chain: string[],
-  intents: Map<string, boolean>,
-  details: Map<string, boolean>,
-  boundary: string,
-  ownerDir: string,
-): string {
-  const lines: string[] = [];
-  lines.push(`[filid:ctx] ${relFile}`);
-
-  // Intent line — point to owning fractal's INTENT.md, not organ's
-  const ownerRelDir =
-    path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
-  const intentPath = path.join(ownerRelDir, 'INTENT.md');
-  lines.push(`intent: ${intentPath}`);
-
-  if (intentContent !== undefined) {
-    lines.push('---');
-    lines.push(intentContent.trimEnd());
-    lines.push('---');
-  }
-
-  // Chain: ancestor directories with INTENT.md, skip ownerDir (already inlined)
-  const chainIntents = chain
-    .filter((d) => d !== ownerDir && intents.get(d))
-    .map((d) =>
-      path.join(path.relative(boundary, d), 'INTENT.md').replace(/\\/g, '/'),
-    );
-
-  if (chainIntents.length > 0) {
-    lines.push(`chain: ${chainIntents.join(' > ')}`);
-  }
-
-  // Detail hint (check owning fractal for DETAIL.md too)
-  if (details.get(ownerDir)) {
-    const detailPath = path.join(ownerRelDir, 'DETAIL.md');
-    lines.push(`detail: ${detailPath}`);
-  }
-
-  return lines.join('\n');
-}
-
-
-/**
- * Build [filid:map] line from visited reads list.
- */
-function buildMapBlock(
-  reads: string[],
-  currentDir: string,
-  intents: string[],
-): string {
-  const compressed = compressPaths(reads, currentDir);
-  // Unread = in reads but NOT in intents, excluding currentDir (always has active context)
-  const unread = reads.filter(
-    (r) => r !== currentDir && intents.indexOf(r) === -1,
-  );
-  if (unread.length === 0) {
-    return `[filid:map] ${compressed}`;
-  }
-  return `[filid:map] ${compressed}\n  unread-intent: ${unread.join(', ')}`;
-}
 
 /**
  * Inject INTENT.md context for PreToolUse (Read|Write|Edit).
