@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-
 import { injectIntent } from '../intent-injector/intent-injector.js';
 import { validatePreToolUse } from '../pre-tool-validator/pre-tool-validator.js';
 import { isDetailMd } from '../shared/shared.js';
@@ -11,7 +10,7 @@ import { validateCwd } from '../utils/validate-cwd.js';
 
 /**
  * Unified PreToolUse hook orchestrator.
- * Runs intent injection for all tools (Read|Write|Edit),
+ * Runs intent injection for Read,
  * plus validation and structure guard for Write|Edit only.
  */
 export async function handlePreToolUse(
@@ -22,8 +21,8 @@ export async function handlePreToolUse(
 
   const results: HookOutput[] = [];
 
-  // 1. INTENT.md context injection (Read|Write|Edit)
-  results.push(injectIntent(input));
+  // 1. INTENT.md context injection (Read)
+  if (input.tool_name === 'Read') results.push(injectIntent(input));
 
   // 2. Write|Edit-only validation
   if (input.tool_name === 'Write' || input.tool_name === 'Edit') {
@@ -49,7 +48,7 @@ export async function handlePreToolUse(
  * - additionalContext: concatenate non-empty with \n\n
  * - On block (continue=false): use first blocker's output
  */
-export function mergeResults(results: HookOutput[]): HookOutput {
+function mergeResults(results: HookOutput[]): HookOutput {
   let combinedContinue = true;
   const contexts: string[] = [];
   let blockOutput: HookOutput['hookSpecificOutput'] | undefined;
