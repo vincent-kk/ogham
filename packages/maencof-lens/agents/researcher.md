@@ -1,10 +1,6 @@
 ---
 name: researcher
-description: >
-  maencof-lens Researcher — Autonomous vault exploration agent for deep knowledge discovery.
-  Read-only: never writes to vault filesystem.
-  Trigger phrases: "vault에서 조사해줘", "vault 탐색", "vault research", "vault explore",
-  "관련 자료 찾아줘", "vault knowledge search", "vault investigation".
+description: "Read-only research agent focused on deep vault exploration, discovery, and contextual synthesis."
 model: sonnet
 tools:
   - Read
