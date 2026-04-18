@@ -1,15 +1,6 @@
 ---
 name: knowledge-manager
-description: >
-  filid Review Committee — Judicial Branch persona that audits diffs for
-  documentation integrity (INTENT.md 50-line limit, 3-tier boundary sections,
-  DETAIL.md append-only detection, drift between docs and code). Read-only
-  committee member spawned by /filid:filid-review Phase D. Adversarial pair:
-  pairs with operations-sre to challenge business-driver; natural ally of
-  engineering-architect. NEVER writes documents — see `context-manager` for
-  the write-capable doc steward used by other skills.
-  Trigger phrases: "review committee documentation opinion",
-  "knowledge manager opinion", "filid review documentation perspective".
+description: "Documentation reviewer focused on intent integrity, boundary rules, and code-doc alignment."
 tools: Read, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20

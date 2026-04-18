@@ -1,15 +1,6 @@
 ---
 name: drift-analyzer
-description: >
-  filid Drift Analyzer — read-only deviation-detection perspective.
-  Surfaces deviations between the current structure and fractal rules,
-  classifies drift severity, and produces correction-plan material for
-  fractal-architect to refine. Use proactively when reporting structural
-  health before /filid:filid-sync or supplementing /filid:filid-guide
-  with current drift status.
-  Trigger phrases: "detect structural drift", "analyze drift",
-  "find structure deviations", "what is drifted", "generate correction plan",
-  "sync health report".
+description: "Structure-drift analyst focused on deviations from fractal rules and architectural intent."
 tools: Read, Glob, Grep
 model: sonnet
 maxTurns: 30

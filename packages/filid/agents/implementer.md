@@ -1,12 +1,6 @@
 ---
 name: implementer
-description: >
-  FCA-AI Implementer — the sole code-authoring agent. Writes and modifies
-  source and test files strictly within DETAIL.md-defined scope using
-  TDD (Red-Green-Refactor). Delegate when: implementing a feature,
-  fixing a bug, writing tests, or performing any code change approved
-  by the architect. Trigger phrases: 'implement', 'write code for',
-  'add feature', 'fix bug', 'create test', 'code this'.
+description: "Code author focused on implementing approved changes in source and tests within defined scope."
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
 maxTurns: 50

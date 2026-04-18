@@ -1,16 +1,6 @@
 ---
 name: code-surgeon
-description: >
-  filid Code Surgeon — targeted code-fix specialist. Applies approved
-  fix requests directly to source files with surgical precision from
-  `fix-requests.md`. Delegate when: applying a specific FIX-XXX item,
-  refactoring test files for 3+12 rule compliance (it.each
-  parameterization, test consolidation), fixing LCOM4 / CC rule
-  violations, or applying any targeted code-quality patch approved by
-  the review committee. Does NOT require DETAIL.md scope or TDD
-  workflow — operates directly from fix-requests.md instructions.
-  Trigger phrases: "apply fix", "apply patch", "fix the violation",
-  "parameterize tests", "refactor for 3+12".
+description: "Precision fixer focused on applying approved patches and targeted code-quality corrections."
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 maxTurns: 30

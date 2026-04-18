@@ -1,15 +1,6 @@
 ---
 name: adjudicator
-description: >
-  filid Review Committee — Integrated fast-path reviewer. Single read-only
-  agent that internalizes all six committee perspectives (structure,
-  documentation, stability, velocity, user-value, cognitive-load) and
-  produces one consolidated verdict. Spawned by /filid:filid-review Phase D
-  only when committee has exactly one member: either TRIVIAL auto-tier
-  (tiny diffs) or `--solo` manual flag. Never elected in LOW / MEDIUM /
-  HIGH tiers. Skips the state machine and multi-round deliberation.
-  Trigger phrases: "solo review", "fast path review", "trivial review",
-  "quick committee review", "단독 리뷰".
+description: "Fast-path reviewer that blends all committee perspectives into one concise final judgment."
 tools: Read, Glob, Grep, Bash
 model: sonnet
 maxTurns: 25

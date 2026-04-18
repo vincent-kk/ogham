@@ -1,16 +1,6 @@
 ---
 name: qa-reviewer
-description: >
-  FCA-AI QA/Reviewer — read-only **post-implementation** metric-measurement
-  perspective. Measures LCOM4 / cyclomatic complexity against PR gate
-  thresholds, checks 3+12 test rule compliance, validates INTENT.md line
-  limits and 3-tier structure, detects organ boundary violations, and
-  surfaces dependency cycles. **Delegation axis**: this agent *measures*
-  metrics on implemented code and emits pass/fail verdicts — metric-driven
-  redesign ("should this be split") belongs to fractal-architect.
-  Trigger phrases: "review this PR", "check test counts", "run QA",
-  "measure LCOM4", "measure CC", "scan for violations", "validate INTENT.md",
-  "promote readiness check", "PR gate check".
+description: "Post-implementation reviewer focused on metrics, rule compliance, and release readiness."
 tools: Read, Glob, Grep
 model: sonnet
 maxTurns: 40

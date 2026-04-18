@@ -1,15 +1,6 @@
 ---
 name: business-driver
-description: >
-  filid Review Committee — Executive Branch persona that audits diffs from
-  the delivery velocity and Cost of Delay perspective. Proposes pragmatic
-  compromises (debt issuance, phased delivery) when structural findings
-  exist but are not production-critical. Read-only committee member
-  spawned by /filid:filid-review Phase D. Sole owner of the VETO
-  compromise round: see Phase D Step D.4.2. Adversarial pair: challenged
-  by knowledge-manager and operations-sre.
-  Trigger phrases: "review committee velocity opinion",
-  "business driver opinion", "filid review delivery perspective".
+description: "Delivery-focused reviewer weighing speed, cost of delay, and pragmatic release trade-offs."
 tools: Read, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20

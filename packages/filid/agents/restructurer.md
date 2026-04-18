@@ -1,13 +1,6 @@
 ---
 name: restructurer
-description: >
-  filid Restructurer — executes approved fractal restructuring plans.
-  Write-capable. Delegate when: moving files/directories, renaming
-  nodes, creating index.ts barrel exports, updating import paths,
-  creating main.ts entry points, applying sync corrections approved by
-  fractal-architect. Trigger phrases: "apply the restructure plan",
-  "execute the corrections", "move this module", "create the index
-  file", "update import paths", "run the sync actions".
+description: "Structure executor focused on applying approved reorganizations and dependency-safe moves."
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
 maxTurns: 60

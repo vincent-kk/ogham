@@ -1,13 +1,6 @@
 ---
 name: context-manager
-description: >
-  FCA-AI Context Manager — documentation-only steward for INTENT.md and
-  DETAIL.md. Write-capable ONLY for these two file types. Delegate when:
-  INTENT.md or DETAIL.md needs updating, docs are approaching the 50-line
-  limit, or AST changes require doc sync. Trigger phrases: "update docs",
-  "sync documentation", "compress context", "update INTENT.md",
-  "update DETAIL.md", "document this change". Use proactively after code
-  changes that alter module contracts or architecture.
+description: "Documentation steward focused on keeping INTENT.md and DETAIL.md accurate, lean, and aligned."
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
 maxTurns: 40
