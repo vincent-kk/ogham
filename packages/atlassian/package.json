@@ -1,6 +1,6 @@
 {
   "name": "@ogham/atlassian",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Atlassian — Jira and Confluence integration plugin for Claude Code",
   "keywords": [
     "claude-code",
