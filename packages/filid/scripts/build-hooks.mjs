@@ -20,7 +20,7 @@ await mkdir(resolve(root, 'bridge'), { recursive: true });
 const hookEntries = [
   'pre-tool-use',
   'agent-enforcer',
-  'context-injector',
+  'user-prompt-submit',
   'session-cleanup',
   'setup',
 ];

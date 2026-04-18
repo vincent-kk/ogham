@@ -1,28 +1,29 @@
 import { removeFractalMap } from '../../core/infra/cache-manager/cache-manager.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
-
-import { injectContext } from '../context-injector/context-injector.js';
 import { isFcaProject } from '../shared/shared.js';
 import { validateCwd } from '../utils/validate-cwd.js';
 
+import { injectContext } from './utils/inject-context.js';
+
 /**
- * Unified UserPromptSubmit hook orchestrator.
- * Runs per-turn state reset + context injection in a single process.
+ * UserPromptSubmit hook orchestrator.
  *
- * 1. Clears per-turn fmap state (so INTENT.md is re-injected on next PreToolUse)
- * 2. Delegates to injectContext for session-scoped FCA-AI rules injection
+ * 1. Per-turn fmap reset (so INTENT.md is re-injected on next PreToolUse).
+ * 2. Session-first FCA-AI rules pointer injection.
+ *
+ * Validation (validateCwd + isFcaProject) runs exactly once here; the
+ * collaborator `injectContext` trusts the validated cwd/session_id pair.
+ *
+ * Never blocks user prompts (always { continue: true }).
  */
 export function handleUserPromptSubmit(
   input: UserPromptSubmitInput,
 ): HookOutput {
-  const safeCwd = validateCwd(input.cwd);
-  if (safeCwd === null) return { continue: true };
-
-  // 1. Per-turn fmap reset (only for FCA projects)
-  if (isFcaProject(safeCwd)) {
-    removeFractalMap(safeCwd, input.session_id);
+  const cwd = validateCwd(input.cwd);
+  if (cwd === null || !isFcaProject(cwd)) {
+    return { continue: true };
   }
 
-  // 2. FCA-AI context injection (session-scoped rules, first prompt only)
-  return injectContext(input);
+  removeFractalMap(cwd, input.session_id);
+  return injectContext(cwd, input.session_id);
 }

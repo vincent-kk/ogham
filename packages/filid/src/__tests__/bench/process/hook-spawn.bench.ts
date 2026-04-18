@@ -12,7 +12,7 @@ const DIST_DIR = join(import.meta.dirname, '../../../../..', 'dist');
 const HOOK_SCRIPTS = {
   preToolUse: join(DIST_DIR, 'hooks', 'pre-tool-use.mjs'),
   agentEnforcer: join(DIST_DIR, 'hooks', 'agent-enforcer.mjs'),
-  contextInjector: join(DIST_DIR, 'hooks', 'context-injector.mjs'),
+  userPromptSubmit: join(DIST_DIR, 'hooks', 'user-prompt-submit.mjs'),
 };
 
 const PRE_TOOL_INPUT = JSON.stringify({
@@ -70,9 +70,9 @@ if (scriptsExist) {
     );
 
     bench(
-      'context-injector spawn',
+      'user-prompt-submit spawn',
       async () => {
-        await spawnHook(HOOK_SCRIPTS.contextInjector, USER_PROMPT_INPUT);
+        await spawnHook(HOOK_SCRIPTS.userPromptSubmit, USER_PROMPT_INPUT);
       },
       { time: 2000 },
     );

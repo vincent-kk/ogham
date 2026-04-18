@@ -17,6 +17,7 @@ npm-debug.log*
 .filid/review
 .maencof-lens/
 .temp/
+docs/superpowers/
 
 # Yarn
 .yarn/*

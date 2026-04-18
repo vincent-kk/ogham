@@ -135,14 +135,10 @@ export { calculateCC } from './ast/cyclomatic-complexity/cyclomatic-complexity.j
 export { computeTreeDiff } from './ast/tree-diff/tree-diff.js';
 
 // Hooks
-export { handlePreToolUse, mergeResults } from './hooks/pre-tool-use/pre-tool-use.js';
-export { injectIntent, compressPaths } from './hooks/intent-injector/intent-injector.js';
-export { validatePreToolUse } from './hooks/pre-tool-validator/pre-tool-validator.js';
-export { guardStructure } from './hooks/structure-guard/structure-guard.js';
-/** @deprecated Disabled in hooks.json. Entry stub uses no-op queue. */
-export { trackChange } from './hooks/change-tracker/change-tracker.js';
+export { handlePreToolUse } from './hooks/pre-tool-use/pre-tool-use.js';
+
 export { enforceAgentRole } from './hooks/agent-enforcer/agent-enforcer.js';
-export { injectContext } from './hooks/context-injector/context-injector.js';
+export { handleUserPromptSubmit } from './hooks/user-prompt-submit/user-prompt-submit.js';
 export { processSetup } from './hooks/setup/setup.js';
 
 // AST Grep tools (pattern matching via @ast-grep/napi)
@@ -183,7 +179,10 @@ export { createServer, startServer } from './mcp/index.js';
 // Constants (runtime values moved from types/ organ)
 export { BUILTIN_RULE_IDS } from './constants/builtin-rule-ids.js';
 export { DEFAULT_SCAN_OPTIONS } from './constants/scan-defaults.js';
-export { DEBT_WEIGHT_CAP, DEBT_BASE_WEIGHT } from './constants/debt-defaults.js';
+export {
+  DEBT_WEIGHT_CAP,
+  DEBT_BASE_WEIGHT,
+} from './constants/debt-defaults.js';
 export {
   FIX_REQUEST_TYPES,
   DEBT_ACTIONS,

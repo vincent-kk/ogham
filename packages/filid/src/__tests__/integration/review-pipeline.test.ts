@@ -4,8 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { validatePreToolUse } from '../../hooks/pre-tool-validator/pre-tool-validator.js';
-import { guardStructure } from '../../hooks/structure-guard/structure-guard.js';
+import { validatePreToolUse } from '../../hooks/pre-tool-use/helpers/pre-tool-validator/pre-tool-validator.js';
+import { guardStructure } from '../../hooks/pre-tool-use/helpers/structure-guard/structure-guard.js';
 import { decide } from '../../metrics/decision-tree/decision-tree.js';
 import { checkPromotionEligibility } from '../../metrics/promotion-tracker/promotion-tracker.js';
 import { countTestCases } from '../../metrics/test-counter/test-counter.js';

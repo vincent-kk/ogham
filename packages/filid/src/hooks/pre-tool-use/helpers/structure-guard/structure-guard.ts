@@ -1,12 +1,9 @@
-import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-
-import { getParentSegments } from '../utils/get-parent-segments.js';
-import { validateCwd } from '../utils/validate-cwd.js';
-import { checkIntentMdReclassification } from '../utils/check-intent-md-reclassification.js';
-import { checkOrganSubdirectory } from '../utils/check-organ-subdirectory.js';
-import { checkCircularImports } from '../utils/check-circular-imports.js';
-
-export { clearOrganCache } from '../utils/organ-structure-checker.js';
+import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
+import { checkCircularImports } from '../../../utils/check-circular-imports.js';
+import { checkIntentMdReclassification } from '../../../utils/check-intent-md-reclassification.js';
+import { checkOrganSubdirectory } from '../../../utils/check-organ-subdirectory.js';
+import { getParentSegments } from '../../../utils/get-parent-segments.js';
+import { validateCwd } from '../../../utils/validate-cwd.js';
 
 export function guardStructure(input: PreToolUseInput): HookOutput {
   if (input.tool_name !== 'Write' && input.tool_name !== 'Edit') {
@@ -23,7 +20,12 @@ export function guardStructure(input: PreToolUseInput): HookOutput {
   const segments = getParentSegments(filePath);
   const content = input.tool_input.content ?? input.tool_input.new_string ?? '';
 
-  const info = checkIntentMdReclassification(input.tool_name, filePath, cwd, segments);
+  const info = checkIntentMdReclassification(
+    input.tool_name,
+    filePath,
+    cwd,
+    segments,
+  );
   const warnings = [
     ...checkOrganSubdirectory(segments, cwd),
     ...checkCircularImports(filePath, content, cwd),

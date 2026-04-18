@@ -1,25 +1,15 @@
-import { loadConfig, resolveLanguage } from '../../core/infra/config-loader/config-loader.js';
-import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
 import {
-  ROLE_RESTRICTIONS,
-  PLANNING_GUIDANCE,
+  EXECUTOR_AGENT_RE,
   IMPLEMENTATION_REMINDER,
   PLANNING_AGENT_RE,
-  EXECUTOR_AGENT_RE,
+  PLANNING_GUIDANCE,
+  ROLE_RESTRICTIONS,
 } from '../../constants/agent-context.js';
-
+import type { HookOutput, SubagentStartInput } from '../../types/hooks.js';
 import { isFcaProject } from '../shared/shared.js';
 import { validateCwd } from '../utils/validate-cwd.js';
 
-/** Resolve [filid:lang] tag for injection into agent context. */
-function buildLangTag(cwd: string): string {
-  try {
-    const config = loadConfig(cwd);
-    return `[filid:lang] ${resolveLanguage(config)}`;
-  } catch {
-    return '[filid:lang] en';
-  }
-}
+import { buildLangTag } from './utils/build-lang-tag.js';
 
 /**
  * SubagentStart hook: inject role-based tool restrictions and FCA-AI workflow guidance.

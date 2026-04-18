@@ -9,7 +9,7 @@ import {
   writeBoundary,
   writeFractalMap,
 } from '../../../core/infra/cache-manager/cache-manager.js';
-import { injectIntent } from '../../../hooks/intent-injector/intent-injector.js';
+import { injectIntent } from '../../../hooks/pre-tool-use/helpers/intent-injector/intent-injector.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
