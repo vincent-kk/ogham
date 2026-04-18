@@ -137,8 +137,6 @@ export { computeTreeDiff } from './ast/tree-diff/tree-diff.js';
 // Hooks
 export { handlePreToolUse } from './hooks/pre-tool-use/pre-tool-use.js';
 
-/** @deprecated Disabled in hooks.json. Entry stub uses no-op queue. */
-export { trackChange } from './hooks/change-tracker/change-tracker.js';
 export { enforceAgentRole } from './hooks/agent-enforcer/agent-enforcer.js';
 export { injectContext } from './hooks/context-injector/context-injector.js';
 export { processSetup } from './hooks/setup/setup.js';

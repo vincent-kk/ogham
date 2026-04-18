@@ -15,7 +15,7 @@
  * so stdin is inherited from the parent (Claude Code), which
  * delivers EOF when the hook input is fully written.
  */
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import {
@@ -25,44 +25,11 @@ import {
 } from '../../core/infra/cache-manager/cache-manager.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
-
 import { isFcaProject } from '../shared/shared.js';
-import { SCAN_SKIP_DIRS } from '../../constants/scan-defaults.js';
+
+import { hasIntentMdInTree } from './utils/hasIntentMdInTree.js';
 
 const log = createLogger('setup');
-
-/**
- * Shallow BFS scan for INTENT.md in the project tree.
- * Returns true on first match, false if none found within maxDepth.
- */
-function hasIntentMdInTree(rootDir: string, maxDepth: number = 4): boolean {
-  const queue: Array<{ dir: string; depth: number }> = [
-    { dir: rootDir, depth: 0 },
-  ];
-
-  while (queue.length > 0) {
-    const { dir, depth } = queue.shift()!;
-    if (depth > maxDepth) continue;
-
-    if (existsSync(join(dir, 'INTENT.md'))) return true;
-
-    if (depth === maxDepth) continue;
-
-    try {
-      const entries = readdirSync(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
-        if (SCAN_SKIP_DIRS.has(entry.name)) continue;
-        if (entry.name.startsWith('.')) continue;
-        queue.push({ dir: join(dir, entry.name), depth: depth + 1 });
-      }
-    } catch {
-      // Permission denied or other FS error — skip silently
-    }
-  }
-
-  return false;
-}
 
 export function processSetup(input: SessionStartInput): HookOutput {
   try {
