@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-import { injectIntent } from '../intent-injector/intent-injector.js';
-import { validatePreToolUse } from '../pre-tool-validator/pre-tool-validator.js';
 import { isDetailMd } from '../shared/shared.js';
-import { guardStructure } from '../structure-guard/structure-guard.js';
 import { validateCwd } from '../utils/validate-cwd.js';
+
+import { injectIntent } from './helpers/intent-injector/intent-injector.js';
+import { validatePreToolUse } from './helpers/pre-tool-validator';
+import { guardStructure } from './helpers/structure-guard/structure-guard.js';
+import { mergeResults } from './utils/merge-results.js';
 
 /**
  * Unified PreToolUse hook orchestrator.
@@ -40,53 +42,4 @@ export async function handlePreToolUse(
   }
 
   return mergeResults(results);
-}
-
-/**
- * Merge multiple HookOutput results:
- * - continue: AND (all must be true)
- * - additionalContext: concatenate non-empty with \n\n
- * - On block (continue=false): use first blocker's output
- */
-function mergeResults(results: HookOutput[]): HookOutput {
-  let combinedContinue = true;
-  const contexts: string[] = [];
-  let blockOutput: HookOutput['hookSpecificOutput'] | undefined;
-
-  for (const r of results) {
-    if (r.continue === false) {
-      combinedContinue = false;
-      if (!blockOutput && r.hookSpecificOutput) {
-        blockOutput = r.hookSpecificOutput;
-      }
-    }
-    const ctx = r.hookSpecificOutput?.additionalContext;
-    if (ctx) {
-      contexts.push(ctx);
-    }
-  }
-
-  if (!combinedContinue) {
-    return {
-      continue: false,
-      hookSpecificOutput: blockOutput
-        ? { ...blockOutput, hookEventName: 'PreToolUse' }
-        : {
-            hookEventName: 'PreToolUse',
-            additionalContext: contexts.join('\n\n'),
-          },
-    };
-  }
-
-  if (contexts.length > 0) {
-    return {
-      continue: true,
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        additionalContext: contexts.join('\n\n'),
-      },
-    };
-  }
-
-  return { continue: true };
 }

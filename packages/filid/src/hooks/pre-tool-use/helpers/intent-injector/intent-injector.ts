@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
-import { GUIDE_BLOCK } from '../../constants/agent-context.js';
+import { GUIDE_BLOCK } from '../../../../constants/agent-context.js';
 import {
   hasGuideInjected,
   markGuideInjected,
@@ -9,12 +9,12 @@ import {
   readFractalMap,
   writeBoundary,
   writeFractalMap,
-} from '../../core/infra/cache-manager/cache-manager.js';
-import type { FractalMap } from '../../core/infra/cache-manager/cache-manager.js';
-import { buildChain } from '../../core/tree/boundary-detector/boundary-detector.js';
-import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-import { isFcaProject } from '../shared/shared.js';
-import { validateCwd } from '../utils/validate-cwd.js';
+} from '../../../../core/infra/cache-manager/cache-manager.js';
+import type { FractalMap } from '../../../../core/infra/cache-manager/cache-manager.js';
+import { buildChain } from '../../../../core/tree/boundary-detector/boundary-detector.js';
+import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
+import { isFcaProject } from '../../../shared/shared.js';
+import { validateCwd } from '../../../utils/validate-cwd.js';
 
 import { buildCtxBlock } from './utils/build-ctx-block.js';
 import { buildMapBlock } from './utils/build-map-block.js';

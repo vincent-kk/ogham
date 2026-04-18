@@ -136,9 +136,7 @@ export { computeTreeDiff } from './ast/tree-diff/tree-diff.js';
 
 // Hooks
 export { handlePreToolUse } from './hooks/pre-tool-use/pre-tool-use.js';
-export { injectIntent } from './hooks/intent-injector/intent-injector.js';
-export { validatePreToolUse } from './hooks/pre-tool-validator/pre-tool-validator.js';
-export { guardStructure } from './hooks/structure-guard/structure-guard.js';
+
 /** @deprecated Disabled in hooks.json. Entry stub uses no-op queue. */
 export { trackChange } from './hooks/change-tracker/change-tracker.js';
 export { enforceAgentRole } from './hooks/agent-enforcer/agent-enforcer.js';
