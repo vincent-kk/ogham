@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { guardStructure } from '../../../hooks/structure-guard/structure-guard.js';
+import { guardStructure } from '../../../hooks/pre-tool-use/helpers/structure-guard/structure-guard.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
 
 const baseInput: PreToolUseInput = {

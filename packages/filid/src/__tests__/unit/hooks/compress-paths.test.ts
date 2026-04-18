@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { compressPaths } from '../../../hooks/intent-injector/intent-injector.js';
+import { compressPaths } from '../../../hooks/pre-tool-use/helpers/intent-injector/utils/compress-paths.js';
 
 describe('compressPaths', () => {
   // --- Extracted from intent-injector.test.ts (6 existing tests) ---

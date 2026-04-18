@@ -4,7 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { handlePreToolUse, mergeResults } from '../../../hooks/pre-tool-use/pre-tool-use.js';
+import { handlePreToolUse } from '../../../hooks/pre-tool-use/pre-tool-use.js';
+import { mergeResults } from '../../../hooks/pre-tool-use/utils/merge-results.js';
 import type { HookOutput, PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
