@@ -1,9 +1,6 @@
 ---
 name: analyst
-description: >
-  Validates planning documents for coherence, consistency, and feasibility.
-  Detects contradictions, divergences, omissions, and infeasibilities.
-  Also performs reverse-inference verification after Story decomposition.
+description: "Planning reviewer for coherence, feasibility, and contradictions across decomposition outputs."
 model: sonnet
 tools:
   - Read

@@ -1,9 +1,6 @@
 ---
 name: planner
-description: >
-  Decomposes planning documents into Jira Stories from a product/business perspective.
-  Writes User Stories with INVEST criteria, acceptance criteria (Given/When/Then),
-  and evaluates story sizing for horizontal splitting.
+description: "Product planner focused on decomposing goals into well-scoped stories with clear user value."
 model: sonnet
 tools:
   - Read

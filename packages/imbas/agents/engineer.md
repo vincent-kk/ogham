@@ -1,9 +1,6 @@
 ---
 name: engineer
-description: >
-  Explores codebases and generates EARS-format Subtasks from approved issues (Stories, Tasks, Bugs).
-  Detects cross-issue code overlaps to extract shared Tasks.
-  Operates from a developer/architect perspective with deep code understanding.
+description: "Engineering planner focused on code-aware subtasks, shared work, and implementation structure."
 model: opus
 tools:
   - Read
