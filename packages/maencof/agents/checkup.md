@@ -1,10 +1,7 @@
 ---
 name: checkup
 description: >
-  maencof Checkup — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions.
-  Detects orphan nodes, stale indexes, broken links, Layer violations, duplicate documents, and
-  Frontmatter errors, then generates AutoFixActions.
-  Trigger phrases: "checkup", "health check", "vault check", "/maencof:maencof-checkup".
+  maencof Checkup — Runs 6 diagnostic checks on the knowledge vault and proposes auto-fix actions. Detects orphan nodes, stale indexes, broken links, Layer violations, duplicate documents, and Frontmatter errors, then generates AutoFixActions. Trigger phrases: "checkup", "health check", "vault check", "/maencof:maencof-checkup".
 model: sonnet
 tools:
   - Read

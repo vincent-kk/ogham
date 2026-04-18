@@ -1,11 +1,7 @@
 ---
 name: identity-guardian
 description: >
-  maencof Identity Guardian — Protects Layer 1 (01_Core/) Core Identity documents.
-  Allows only read and access count updates; blocks deletion, Layer relocation, and structural changes.
-  Outputs a warning and guides the user to safe alternatives when a Layer 1 modification is requested.
-  Trigger phrases: "Layer 1 modification", "Core Identity change", "identity-guardian",
-  "protect core documents", "01_Core modification".
+  maencof Identity Guardian — Protects Layer 1 (01_Core/) Core Identity documents. Allows only read and access count updates; blocks deletion, Layer relocation, and structural changes. Outputs a warning and guides the user to safe alternatives when a Layer 1 modification is requested. Trigger phrases: "Layer 1 modification", "Core Identity change", "identity-guardian", "protect core documents", "01_Core modification".
 model: sonnet
 tools:
   - Read
