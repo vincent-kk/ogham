@@ -1,7 +1,7 @@
 # server
 
 ## Purpose
-MCP 서버 생성 및 15개 도구 등록. registerTool 패턴 사용.
+MCP 서버 생성 및 16개 도구 등록. registerTool 패턴 사용.
 
 ## Boundaries
 ### Always do

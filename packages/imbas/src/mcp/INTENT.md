@@ -2,11 +2,11 @@
 
 ## Purpose
 
-imbas MCP 서버. 15개 도구(ping 포함)를 registerTool 패턴으로 등록.
+imbas MCP 서버. 16개 도구(ping 포함)를 registerTool 패턴으로 등록.
 
 ## Structure
 
-- `server.ts` — 서버 생성 + 15개 도구 등록
+- `server.ts` — 서버 생성 + 16개 도구 등록
 - `server-entry.ts` — stdio 전송 진입점
 - `shared.ts` — toolResult, toolError, wrapHandler 공통 유틸
 - `tools/` — 개별 도구 핸들러 (thin wrapper → core/ast)

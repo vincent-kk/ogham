@@ -36,7 +36,7 @@ claude --plugin-dir ./packages/imbas
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (15 pipeline tools)
+- `bridge/mcp-server.cjs` — MCP server (16 pipeline tools)
 - `bridge/*.mjs` — 5 hook scripts (automatic lifecycle management)
 
 ---
@@ -222,6 +222,7 @@ With the plugin active, these hooks fire **without user intervention**:
 | `/imbas:imbas-validate` | Yes | Phase 1: Validate document for contradictions and gaps |
 | `/imbas:imbas-split` | Yes | Phase 2: Decompose document into INVEST Stories |
 | `/imbas:imbas-devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
+| `/imbas:imbas-implement-plan` | Yes | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
 | `/imbas:imbas-manifest` | Yes | Execute manifests to batch-create Jira issues |
 | `/imbas:imbas-status` | Yes | View run status, list runs, resume interrupted runs |
 | `/imbas:imbas-digest` | Yes | Compress a Jira issue into a structured summary |
@@ -312,18 +313,6 @@ yarn test           # Vitest watch
 yarn test:run       # Single run
 yarn typecheck      # Type checking only
 yarn build          # tsc + MCP server + hooks bundling
-```
-
-### Tech Stack
-
-TypeScript 5.7, @modelcontextprotocol/sdk, @ast-grep/napi, esbuild, Vitest, Zod
-
----
-
-## License
-
-MIT
- tsc + MCP server + hooks bundling
 ```
 
 ### Tech Stack
