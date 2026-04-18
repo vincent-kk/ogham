@@ -59,7 +59,7 @@ The LLM resolves which tool to use at runtime. Read the linked operation files f
 
 ### Agent Access Control
 
-Agents do NOT have access to pipeline state tools. The `imbas:pipeline` skill handles all state updates:
+Agents do NOT have access to pipeline state tools. The `imbas:imbas-pipeline` skill handles all state updates:
 
 - Agents produce output (reports, manifests, verification results)
 - Pipeline skill interprets output and calls mcp_tools_run_transition / mcp_tools_manifest_save
@@ -90,4 +90,4 @@ Pipeline reads these settings and spawns agents with the configured models.
 Pipeline does NOT spawn agents for:
 - Manifest execution (Phase 2.5, 3.5) — direct Jira operations via [OP:] notation
 - Epic/parent decision — deterministic from --parent argument (resolved in Phase 0)
-- Gate evaluation — `imbas:pipeline` skill evaluates fields directly
+- Gate evaluation — `imbas:imbas-pipeline` skill evaluates fields directly

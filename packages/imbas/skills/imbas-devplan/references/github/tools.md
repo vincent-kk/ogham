@@ -7,7 +7,7 @@ Loaded when `config.provider === 'github'`. Provider-agnostic imbas MCP tools
 ## gh CLI Subcommands
 
 The devplan skill does NOT create GitHub issues itself. It emits a
-`devplan-manifest.json` that the `imbas:manifest devplan` skill executes.
+`devplan-manifest.json` that the `imbas:imbas-manifest devplan` skill executes.
 The GitHub queries listed here are **optional** supplemental reads during
 Step 2 exploration.
 
@@ -40,7 +40,7 @@ gh issue view 42 \
 
 The primary output of the devplan skill is a `devplan-manifest.json` containing
 `feedback_comments` with `target_ref: "owner/repo#N"`. These are consumed by
-`imbas:manifest devplan` which calls `gh issue comment` for each entry.
+`imbas:imbas-manifest devplan` which calls `gh issue comment` for each entry.
 
 See `manifest/references/github/workflow.md` Step 5 for the execution protocol.
 

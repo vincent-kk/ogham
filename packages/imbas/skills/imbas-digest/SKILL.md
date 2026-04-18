@@ -35,8 +35,8 @@ Uses a State Tracking + QA-Prompting hybrid approach.
 
 - Before closing a ticket with extensive discussion history
 - When onboarding someone to a long-running issue
-- When imbas:manifest transitions an issue to Done (suggestion trigger)
-- Pre-processing an issue before imbas:validate or imbas:split references it
+- When imbas:imbas-manifest transitions an issue to Done (suggestion trigger)
+- Pre-processing an issue before imbas:imbas-validate or imbas:imbas-split references it
 
 ## Arguments
 

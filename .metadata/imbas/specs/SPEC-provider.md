@@ -146,7 +146,7 @@ Step N — [Operation Name]
 | **devplan** | Story lookup, duplicate search | Step 1 (manifest check), Step 2 (search) |
 | **manifest** | Issue creation, linking, transitions | Step 4 (entire batch execution) |
 | **digest** | Comment posting | Step 6 (publish) |
-| **`imbas:read-issue`** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
+| **`imbas:imbas-read-issue`** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
 | **cache** | Metadata refresh | Entire workflow |
 
 ### 4.3 Which Skills Don't Branch
@@ -154,7 +154,6 @@ Step N — [Operation Name]
 | Skill | Reason |
 |-------|--------|
 | **status** | Only reads `.imbas/` state files |
-| **`imbas:fetch-media`** | Local file + scene-sieve (provider-agnostic) |
 
 ### 4.4 Agent Tool Lists (Semantic Operations)
 
@@ -233,7 +232,6 @@ Cache file contents differ by provider but serve the same purpose:
 - [SPEC-provider-jira.md](./SPEC-provider-jira.md) — Jira-specific implementation
 - [SPEC-provider-github.md](./SPEC-provider-github.md) — GitHub-specific implementation
 - [SPEC-provider-local.md](./SPEC-provider-local.md) — Local file-based implementation
-- [SPEC-state.md](./SPEC-state.md) — Config & state schemas
 - [SPEC-skills.md](./SPEC-skills.md) — Skills that dispatch to providers
 - [SPEC-tools.md](./SPEC-tools.md) — imbas MCP 도구 정의
 - [BLUEPRINT.md](../BLUEPRINT.md) — Architecture overview

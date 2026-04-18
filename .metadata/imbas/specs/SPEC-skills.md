@@ -28,7 +28,7 @@
 
 | Skill | 호출자 | 역할 | Agent |
 |-------|--------|------|-------|
-| **`imbas:read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
+| **`imbas:imbas-read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
 | **cache** | setup, validate, split, devplan | provider 메타데이터 캐시 자동 갱신/조회 | — |
 
 **총 10개 스킬** (user-invocable 8 + internal 2).
@@ -37,7 +37,7 @@
 
 ## 2. Core Workflow Skills
 
-### 2.1 imbas:validate — Phase 1 정합성 검증
+### 2.1 imbas:imbas-validate — Phase 1 정합성 검증
 
 ```yaml
 name: validate
@@ -74,7 +74,7 @@ Step 1 — Run 초기화
 Step 2 — 문서 소스 해석
   - 로컬 파일: 직접 읽기
   - Confluence URL: [OP: get_confluence]로 마크다운 변환 후 저장
-  - 첨부 미디어 감지 → imbas:fetch-media 호출 안내 (자동 호출 안 함)
+  - 첨부 미디어 감지 → `/atlassian:atlassian-media-analysis` 호출 안내 (자동 호출 안 함)
 
 Step 3 — imbas-analyst 호출
   - Agent 호출: imbas-analyst
@@ -197,7 +197,7 @@ Step 7 — 사용자 리뷰
   - 수정 요청 → Step 3으로 재진입 (해당 Story만)
 ```
 
-**Output:** `stories-manifest.json` (스키마는 SPEC-state.md §6 참조)
+**Output:** `stories-manifest.json`
 
 ---
 
@@ -232,7 +232,7 @@ Step 1 — 런 로드 & 매니페스트 확인
   2. split 완료 + 리뷰 승인 확인
   3. stories-manifest.json의 Story 항목 상태 확인:
      - 모든 Story가 `created` (issue_ref 존재) → 정상 진행
-     - `pending` 항목 존재 → "imbas:manifest stories 먼저 실행 필요" 안내 + 블로킹
+     - `pending` 항목 존재 → "imbas:imbas-manifest stories 먼저 실행 필요" 안내 + 블로킹
   4. state.json: current_phase = "devplan", devplan.status = "in_progress"
 
 Step 2 — imbas-engineer 호출
@@ -268,7 +268,7 @@ Step 4 — 사용자 리뷰
   - 승인 → state.json: devplan.status = "completed", devplan.pending_review = false
 ```
 
-**Output:** `devplan-manifest.json` (스키마는 SPEC-state.md §6 참조)
+**Output:** `devplan-manifest.json`
 
 ---
 
@@ -430,7 +430,7 @@ Step 5 — 결과 리포트
 
 ## 6. Internal Skills
 
-### 6.1 imbas:read-issue — 이슈 컨텍스트 구조화 (내부 전용)
+### 6.1 imbas:imbas-read-issue — 이슈 컨텍스트 구조화 (내부 전용)
 
 ```yaml
 name: read-issue
@@ -446,7 +446,7 @@ plugin: imbas
 
 **호출 인터페이스:**
 ```
-imbas:read-issue <issue-ref> [--depth shallow|full]
+imbas:imbas-read-issue <issue-ref> [--depth shallow|full]
 
 <issue-ref>  : 이슈 참조 (Jira: PROJ-123, GitHub: owner/repo#42, local: S-1)
 --depth      : shallow = 본문+메타만, full = 코멘트 포함 (default: full)
@@ -556,7 +556,7 @@ Step 5 — 구조화 & 반환
 
 ---
 
-### 6.2 imbas:cache — Jira 캐시 관리 (내부 전용)
+### 6.2 imbas:imbas-cache — Jira 캐시 관리 (내부 전용)
 
 ```yaml
 name: cache
@@ -570,7 +570,7 @@ plugin: imbas
 
 **호출 인터페이스:**
 ```
-imbas:cache <action> [--project <KEY>]
+imbas:imbas-cache <action> [--project <KEY>]
 
 <action>  : "ensure" | "refresh" | "clear"
 --project : 프로젝트 참조 (없으면 config.defaults.project_ref)
@@ -614,8 +614,8 @@ plugin: imbas
 
 ```
 Step 1 — 이슈 읽기
-  - `imbas:read-issue`(issue-ref, depth: full) 호출
-  - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `imbas:fetch-media` 호출하여 시각 정보 포함
+  - `imbas:imbas-read-issue`(issue-ref, depth: full) 호출
+  - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `/atlassian:atlassian-media-analysis` 호출하여 시각 정보 포함
 
 Step 2 — State Tracking (상태 추적)
   코멘트를 시간순으로 읽으며 상태 변화 기록:
@@ -675,7 +675,7 @@ Step 6 — 게시
 <!-- /imbas:imbas-digest -->
 ```
 - `comments_covered`: digest가 분석한 코멘트 인덱스 범위
-- `imbas:read-issue`가 이 마커를 감지하면 Fast Path 활성화
+- `imbas:imbas-read-issue`가 이 마커를 감지하면 Fast Path 활성화
 - 동일 이슈에 digest를 재실행하면 기존 digest 이후 코멘트만 추가 분석 → 신규 digest 코멘트 게시 (기존 것은 남겨둠)
 
 **제안 트리거:**
@@ -702,18 +702,17 @@ Step 6 — 게시
   │
   ├── /imbas:imbas-validate ─────── state.json 생성 → validation-report.md
   │         ├── (내부) cache ensure
-  │         └── (내부) `imbas:read-issue` (관련 기존 이슈 참조 시)
+  │         └── (내부) `imbas:imbas-read-issue` (관련 기존 이슈 참조 시)
   │
   ├── /imbas:imbas-split ────────── state.json 갱신 → stories-manifest.json
   │         ├── (내부) cache ensure
-  │         ├── (내부) `imbas:read-issue` (Epic/기존 Story 맥락 파악 시)
-  │         └── (안내) `imbas:fetch-media` (미디어 발견 시)
+  │         └── (내부) `imbas:imbas-read-issue` (Epic/기존 Story 맥락 파악 시)
   │
   ├── /imbas:imbas-manifest stories ── stories-manifest → provider별 Story 생성
   │
   ├── /imbas:imbas-devplan ──────── state.json 갱신 → devplan-manifest.json
   │         ├── (내부) cache ensure
-  │         └── (내부) `imbas:read-issue` (Story 코멘트 추가 논의 확인)
+  │         └── (내부) `imbas:imbas-read-issue` (Story 코멘트 추가 논의 확인)
   │
   ├── /imbas:imbas-manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
@@ -721,12 +720,12 @@ Step 6 — 게시
   ├── /atlassian:atlassian-media-analysis ── 미디어 다운로드 + 분석 (migrated to @ogham/atlassian)
   │
   └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → provider별 게시
-            ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
+            ├── (내부) `imbas:imbas-read-issue` → 코멘트 대화 맥락
             └── (외부) `/atlassian:atlassian-media-analysis` → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출
-  └── `imbas:read-issue` ─── validate, split, devplan, digest + 에이전트에서 호출
+  └── `imbas:imbas-read-issue` ─── validate, split, devplan, digest + 에이전트에서 호출
                       └── digest 코멘트 감지 시 Fast Path (커버된 범위 스킵)
 ```
 
@@ -743,14 +742,14 @@ Step 6 — 게시
 ### 8.2 Plan-then-Execute
 
 Phase 1-3은 **매니페스트만 생성** (읽기 전용).
-실제 provider 쓰기(Jira/GitHub/local issue write)는 `imbas:manifest`에서만 수행.
+실제 provider 쓰기(Jira/GitHub/local issue write)는 `imbas:imbas-manifest`에서만 수행.
 → 사용자가 항상 실행 전 검토 가능.
 
 ### 8.3 실패 복구
 
 - 매니페스트의 status + issue_ref로 재실행 시 자동 스킵
 - `skip_phases` action으로 특정 phase를 건너뛸 수 있음 (코드: `state.ts:112`, `state-manager.ts:106`)
-- state.json으로 중단된 Phase 감지 → `imbas:status resume` 안내
+- state.json으로 중단된 Phase 감지 → `imbas:imbas-status resume` 안내
 
 ### 8.4 단일 턴 실행
 
@@ -763,8 +762,7 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 ## Related
 
 - [SPEC-agents.md](./SPEC-agents.md) — 스킬이 호출하는 에이전트
-- [SPEC-state.md](./SPEC-state.md) — 스킬이 읽고 쓰는 상태
-- [SPEC-media.md](./SPEC-media.md) — `imbas:fetch-media` 상세
+- [SPEC-media.md](./SPEC-media.md) — 미디어 분석 상세 (`/atlassian:atlassian-media-analysis`로 이전)
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — Jira 도구 매핑 (deprecated)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
 � 아키텍처

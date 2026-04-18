@@ -15,7 +15,7 @@ comment:       "<divergence description>"
 type:          "mapping_divergence" | "story_split_issue"
 ```
 
-These feedback_comments are later appended by the `imbas:manifest devplan`
+These feedback_comments are later appended by the `imbas:imbas-manifest devplan`
 skill to the target local issue file's `## Digest` section via `Edit`
 (see `skills/imbas-manifest/references/local/workflow.md` Step 5 — add_feedback_comments).
 
@@ -35,4 +35,4 @@ When the user approves the devplan manifest, display:
 
 During Step 2 exploration, the `engineer` agent does NOT query external
 trackers. Local Stories are read directly from their markdown files via the
-`imbas:read-issue` skill's local branch (Glob + Read + frontmatter parse).
+`imbas:imbas-read-issue` skill's local branch (Glob + Read + frontmatter parse).

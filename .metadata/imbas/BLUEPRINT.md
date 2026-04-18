@@ -32,7 +32,7 @@ ogham (사전 가이드 시스템)
        │    ├── Core:  validate, split, devplan
        │    ├── Infra: setup, status
        │    ├── Exec:  manifest, digest
-       │    └── Internal: `imbas:read-issue`, cache
+       │    └── Internal: `imbas:imbas-read-issue`, cache
        │
        ├── Agents (3개)
        │    ├── imbas-analyst   — 문서 정합성 검증
@@ -110,8 +110,6 @@ ogham (사전 가이드 시스템)
 | **매니페스트 = 상태 저장소** | status + issue_ref 필드로 멱등성 + 장애 복구 완전 해결 |
 | **추가 프로세스 불필요** | MCP 서버 = 설치/유지 비용. 파일 I/O = zero-cost |
 
-→ 상세: [SPEC-state.md](./specs/SPEC-state.md)
-
 ### 3.3 Plan-then-Execute 패턴
 
 | 결정 | 근거 |
@@ -156,8 +154,6 @@ ogham (사전 가이드 시스템)
 }
 ```
 
-→ 상세: [SPEC-state.md](./specs/SPEC-state.md)
-
 ---
 
 ## 4. Skill Map
@@ -179,7 +175,7 @@ ogham (사전 가이드 시스템)
 
 | # | Skill | 호출자 | 역할 | 출력 |
 |---|-------|--------|------|------|
-| 9 | `imbas:read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
+| 9 | `imbas:imbas-read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
 | 10 | cache | setup, core skills | Jira 메타데이터 캐시 자동 갱신 | cache/*.json |
 
 → 상세: [SPEC-skills.md](./specs/SPEC-skills.md)
@@ -229,8 +225,6 @@ ogham (사전 가이드 시스템)
         │   └── .metadata.json
         └── analysis.json
 ```
-
-→ 상세: [SPEC-state.md](./specs/SPEC-state.md)
 
 ---
 
@@ -296,7 +290,6 @@ Epic (Level 1)
 |-----|------|
 | [SPEC-agents.md](./specs/SPEC-agents.md) | 에이전트 4개 정의, reference material, 도구, 호출 관계 |
 | [SPEC-skills.md](./specs/SPEC-skills.md) | 스킬 10개 정의 (user 8 + internal 2), 인터페이스, 워크플로우, 호출 관계 |
-| [SPEC-state.md](./specs/SPEC-state.md) | .imbas/ 구조, config.json, state.json, manifest 스키마 |
 | [SPEC-tools.md](./specs/SPEC-tools.md) | imbas MCP tools 서버 15개 도구 정의, AST 분석, fallback 스킬 |
 | [SPEC-media.md](./specs/SPEC-media.md) | 미디어 다운로드, scene-sieve 통합, 서브에이전트 격리 |
 | [SPEC-provider.md](./specs/SPEC-provider.md) | Provider 추상화 인터페이스, 통일 타입, 분기 패턴 |

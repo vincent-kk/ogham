@@ -104,7 +104,7 @@ Step 0.6 — Route
 
 ## Phase 1 — VALIDATE
 
-Replicates `imbas:validate` skill workflow with automatic gate evaluation.
+Replicates `imbas:imbas-validate` skill workflow with automatic gate evaluation.
 Skipped in devplan pipeline mode (input is Story keys).
 
 ```
@@ -164,7 +164,7 @@ Step 1.5 — State Update
 
 ## Phase 2 — SPLIT
 
-Replicates `imbas:split` skill workflow (Steps 1-7) with auto-approval gate replacing Step 7 user review.
+Replicates `imbas:imbas-split` skill workflow (Steps 1-7) with auto-approval gate replacing Step 7 user review.
 
 ```
 Step 2.1 — Start Phase
@@ -276,10 +276,10 @@ Step 2.7 — Manifest Generation
 
 ## Phase 2.5 — MANIFEST STORIES
 
-Replicates `imbas:manifest` skill workflow for "stories" type. No user confirmation — pipeline invocation is implicit consent.
+Replicates `imbas:imbas-manifest` skill workflow for "stories" type. No user confirmation — pipeline invocation is implicit consent.
 
 **Drift auto-resolution policy** (pipeline-specific override of manifest Step 2.5):
-Interactive [y/N] prompts from `imbas:manifest` Step 2.5 (Idempotency Check) are
+Interactive [y/N] prompts from `imbas:imbas-manifest` Step 2.5 (Idempotency Check) are
 replaced by deterministic auto-answers on pipeline resume:
   - DRIFT_DELETED → auto-answer "yes" (clear issue_ref, set status "pending", re-create)
   - DRIFT_STATE   → auto-answer "yes" (mark status "skipped", do not re-create)
@@ -361,7 +361,7 @@ Step 2.5.4 — Post-Execution Label Transitions (stories type)
 
 ## Phase 3 — DEVPLAN
 
-Replicates `imbas:devplan` skill workflow (Steps 1-4) with auto-approval gate replacing Step 4 user review.
+Replicates `imbas:imbas-devplan` skill workflow (Steps 1-4) with auto-approval gate replacing Step 4 user review.
 
 **Two entry paths:**
 - FULL PIPELINE: arrives here after Phase 2.5 with stories-manifest populated
@@ -446,7 +446,7 @@ Step 3.4 — Manifest Validation
 
 ## Phase 3.5 — MANIFEST DEVPLAN
 
-Replicates `imbas:manifest` skill workflow for "devplan" type. Follows execution_order from manifest.
+Replicates `imbas:imbas-manifest` skill workflow for "devplan" type. Follows execution_order from manifest.
 
 ```
 Step 3.5.1 — Dry-Run Check

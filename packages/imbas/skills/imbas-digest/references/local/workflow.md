@@ -7,7 +7,7 @@ append protocol for the local `## Digest` section.
 
 ## Degraded input
 
-Local issues do not have a multi-participant comment thread. `imbas:read-issue`
+Local issues do not have a multi-participant comment thread. `imbas:imbas-read-issue`
 in local mode returns a degraded conversation model with `participants: []`.
 Steps 2–4 in the shared workflow still run but produce simpler output:
 - Decisions / open questions are extracted from description + prior digest
@@ -81,6 +81,6 @@ is the machine-readable boundary.
 ## Suggestion Trigger (Local)
 
 Local mode has no `[OP: transition_issue]` equivalent to trigger suggestions on.
-In v1, `imbas:digest` for local is always invoked manually by the user. Future
+In v1, `imbas:imbas-digest` for local is always invoked manually by the user. Future
 work may add a trigger when a local issue's `imbas-status` frontmatter field
 transitions to `Done`.

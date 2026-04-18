@@ -21,7 +21,7 @@
 | `comments_covered` | Range of comment indices analyzed (e.g., `1-15`) |
 
 The digest marker serves two purposes:
-1. **Machine-readable** — `imbas:read-issue` skill detects this marker for Fast Path optimization
+1. **Machine-readable** — `imbas:imbas-read-issue` skill detects this marker for Fast Path optimization
 2. **Human-readable** — clearly marks AI-generated content with coverage scope
 
 ## Re-run Behavior

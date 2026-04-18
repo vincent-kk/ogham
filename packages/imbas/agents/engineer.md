@@ -222,7 +222,7 @@ status: BLOCKED
 
 ## Read-Only Reference Context
 
-When spawned by the `imbas:devplan` skill, you receive `source.md` (the original planning document copy)
+When spawned by the `imbas:imbas-devplan` skill, you receive `source.md` (the original planning document copy)
 as read-only reference alongside the stories manifest.
 
 - **Primary anchor**: `stories-manifest.json` — your main input for Subtask/Task generation

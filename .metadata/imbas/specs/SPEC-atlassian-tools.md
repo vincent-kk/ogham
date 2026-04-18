@@ -42,23 +42,23 @@ search-company-knowledge에서:
 
 | 도구 | 사용 Phase/Skill | 용도 |
 |------|-----------------|------|
-| `createJiraIssue` | Phase 2, 3 / imbas:manifest | Epic, Story, Task, Subtask 생성 |
-| `createIssueLink` | Phase 2, 3 / imbas:manifest | blocks, split-into 링크 생성 |
+| `createJiraIssue` | Phase 2, 3 / imbas:imbas-manifest | Epic, Story, Task, Subtask 생성 |
+| `createIssueLink` | Phase 2, 3 / imbas:imbas-manifest | blocks, split-into 링크 생성 |
 | `getJiraIssue` | Phase 2, 3 | 기존 이슈 조회, 검증 |
-| `editJiraIssue` | Phase 2 / imbas:manifest | 수평 분할 시 원본 Story 상태 변경 |
+| `editJiraIssue` | Phase 2 / imbas:imbas-manifest | 수평 분할 시 원본 Story 상태 변경 |
 | `searchJiraIssuesUsingJql` | Phase 3, cache | 중복 감지, 관련 이슈 탐색 |
 | `addCommentToJiraIssue` | Phase 3 | B→A 피드백 코멘트 |
-| `getTransitionsForJiraIssue` | imbas:manifest | 워크플로우 전환 가능 상태 조회 |
-| `transitionJiraIssue` | imbas:manifest | 상태 전환 (수평 분할 시 Done) |
+| `getTransitionsForJiraIssue` | imbas:imbas-manifest | 워크플로우 전환 가능 상태 조회 |
+| `transitionJiraIssue` | imbas:imbas-manifest | 상태 전환 (수평 분할 시 Done) |
 
 ### 필수 (Setup & Cache)
 
 | 도구 | 사용 Skill | 용도 |
 |------|-----------|------|
-| `getVisibleJiraProjects` | imbas:setup | 프로젝트 목록 조회 |
-| `getJiraProjectIssueTypesMetadata` | imbas:setup, cache | 이슈 타입 메타데이터 |
-| `getJiraIssueTypeMetaWithFields` | imbas:setup, cache | 이슈 타입별 필수 필드 |
-| `getIssueLinkTypes` | imbas:setup, cache | 링크 타입 목록 |
+| `getVisibleJiraProjects` | imbas:imbas-setup | 프로젝트 목록 조회 |
+| `getJiraProjectIssueTypesMetadata` | imbas:imbas-setup, cache | 이슈 타입 메타데이터 |
+| `getJiraIssueTypeMetaWithFields` | imbas:imbas-setup, cache | 이슈 타입별 필수 필드 |
+| `getIssueLinkTypes` | imbas:imbas-setup, cache | 링크 타입 목록 |
 
 ### 선택 (Document Source)
 
@@ -66,7 +66,7 @@ search-company-knowledge에서:
 |------|-----------------|------|
 | `getConfluencePage` | Phase 1 | Confluence 기획 문서 읽기 |
 | `searchConfluenceUsingCql` | Phase 1 | 관련 스펙 문서 탐색 |
-| `fetchAtlassian` | imbas:fetch-media | 첨부 파일/이미지 다운로드 |
+| `fetchAtlassian` | `/atlassian:atlassian-media-analysis` (migrated) | 첨부 파일/이미지 다운로드 |
 
 ### 불필요
 
@@ -141,12 +141,11 @@ for each link in manifest.links where status == "pending":
 
 | Skill | 읽기 도구 | 쓰기 도구 |
 |-------|----------|----------|
-| imbas:setup | getVisibleJiraProjects, getJiraProjectIssueTypesMetadata, getJiraIssueTypeMetaWithFields, getIssueLinkTypes | (없음) |
-| imbas:validate | getConfluencePage, searchConfluenceUsingCql, getJiraIssue | (없음) |
-| imbas:split | getJiraIssue, searchJiraIssuesUsingJql | (없음 — 매니페스트만 생성) |
-| imbas:devplan | getJiraIssue, searchJiraIssuesUsingJql | (없음 — 매니페스트만 생성) |
-| imbas:manifest | getJiraIssue, getTransitionsForJiraIssue | createJiraIssue, createIssueLink, editJiraIssue, transitionJiraIssue, addCommentToJiraIssue |
-| imbas:fetch-media | getConfluencePage, fetchAtlassian | (없음) |
+| imbas:imbas-setup | getVisibleJiraProjects, getJiraProjectIssueTypesMetadata, getJiraIssueTypeMetaWithFields, getIssueLinkTypes | (없음) |
+| imbas:imbas-validate | getConfluencePage, searchConfluenceUsingCql, getJiraIssue | (없음) |
+| imbas:imbas-split | getJiraIssue, searchJiraIssuesUsingJql | (없음 — 매니페스트만 생성) |
+| imbas:imbas-devplan | getJiraIssue, searchJiraIssuesUsingJql | (없음 — 매니페스트만 생성) |
+| imbas:imbas-manifest | getJiraIssue, getTransitionsForJiraIssue | createJiraIssue, createIssueLink, editJiraIssue, transitionJiraIssue, addCommentToJiraIssue |
 
 ### 4.2 에이전트 수준 — 에이전트가 보유하는 도구
 
@@ -159,7 +158,7 @@ for each link in manifest.links where status == "pending":
 | imbas-engineer | getJiraIssue, getJiraIssueTypeMetaWithFields, searchJiraIssuesUsingJql | createJiraIssue, createIssueLink, addCommentToJiraIssue | 스킬이 매니페스트 생성만 지시 |
 | ~~imbas-media~~ | — | — | *migrated to `@ogham/atlassian`* |
 
-**핵심 원칙**: Phase 1-3 스킬은 원격 tracker에 쓰지 않음. 매니페스트만 생성. 실제 provider 쓰기(Jira/GitHub/local)는 `imbas:manifest`에서만 수행한다 (Plan-then-Execute 패턴). 에이전트가 쓰기 도구를 보유하더라도, 스킬 프롬프트가 매니페스트 생성만 지시하여 사용 시점을 제어함.
+**핵심 원칙**: Phase 1-3 스킬은 원격 tracker에 쓰지 않음. 매니페스트만 생성. 실제 provider 쓰기(Jira/GitHub/local)는 `imbas:imbas-manifest`에서만 수행한다 (Plan-then-Execute 패턴). 에이전트가 쓰기 도구를 보유하더라도, 스킬 프롬프트가 매니페스트 생성만 지시하여 사용 시점을 제어함.
 
 ---
 

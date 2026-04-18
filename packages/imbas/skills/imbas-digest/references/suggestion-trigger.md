@@ -1,16 +1,16 @@
 # imbas-digest — Suggestion Trigger Logic (Jira only)
 
 > **Provider scope**: Suggestion auto-trigger is Jira-only in v1 because it
-> depends on `[OP: transition_issue]` events from `imbas:manifest`. Local mode
-> has no equivalent transition signal — users invoke `imbas:digest` manually.
+> depends on `[OP: transition_issue]` events from `imbas:imbas-manifest`. Local mode
+> has no equivalent transition signal — users invoke `imbas:imbas-digest` manually.
 > See `local/workflow.md` Suggestion Trigger section.
 
 
 ## Trigger Conditions
 
-The `imbas:digest` skill is suggested (not auto-executed) when all conditions are met:
+The `imbas:imbas-digest` skill is suggested (not auto-executed) when all conditions are met:
 
-1. **Done transition**: imbas:manifest calls `[OP: transition_issue]` to move an issue to Done status
+1. **Done transition**: imbas:imbas-manifest calls `[OP: transition_issue]` to move an issue to Done status
 2. **Comment threshold**: the issue has >= 3 comments
 3. **Author threshold**: comments are from >= 2 distinct authors
 

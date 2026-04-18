@@ -81,11 +81,11 @@ Each phase writes its output to a manifest file. Manifests are then executed aga
 
 Every run is tracked by a state machine (`state.json`) with strict transition rules:
 
-- `imbas:validate` → always starts
-- `imbas:split` → only after validate passes (PASS or PASS_WITH_WARNINGS)
-- `imbas:devplan` → only after split completes and Stories are reviewed
+- `imbas:imbas-validate` → always starts
+- `imbas:imbas-split` → only after validate passes (PASS or PASS_WITH_WARNINGS)
+- `imbas:imbas-devplan` → only after split completes and Stories are reviewed
 
-Phases can be escaped (abnormal termination with a reason code) or skipped. The pipeline is resume-friendly — if interrupted, `imbas:status resume` picks up where it left off.
+Phases can be escaped (abnormal termination with a reason code) or skipped. The pipeline is resume-friendly — if interrupted, `imbas:imbas-status resume` picks up where it left off.
 
 ### Working Directory
 

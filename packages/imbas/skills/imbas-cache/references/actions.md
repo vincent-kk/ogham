@@ -42,7 +42,7 @@ Force-refresh all cache types regardless of TTL status.
    a. [OP: search_jql] jql="project = <KEY> ORDER BY created DESC", maxResults=1
    b. If result is empty (no issues exist in project):
       → Skip workflows cache. Log: "No issues in project — workflows cache deferred."
-      → workflows.json will be lazy-filled on first imbas:manifest execution.
+      → workflows.json will be lazy-filled on first imbas:imbas-manifest execution.
    c. If result has an issue:
       → [OP: get_transitions] issue_ref=<returned key>
       → Call mcp_tools_cache_set(project_ref, "workflows", <data>)

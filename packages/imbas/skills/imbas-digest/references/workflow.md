@@ -14,7 +14,7 @@ Step 6, but do not read it yet.
 
 ## Step 1 — Read issue (full depth)
 
-1. Call internal skill: `imbas:read-issue`(issue-ref, depth: full).
+1. Call internal skill: `imbas:imbas-read-issue`(issue-ref, depth: full).
    The read-issue skill itself is provider-routed, so this delegation works
    uniformly regardless of `config.provider`.
 2. Receive structured JSON with:

@@ -37,4 +37,4 @@ GET /rest/api/3/issue/{issueIdOrKey}
 - `imbas-manifest` — Drift check to verify remote state
 - `imbas-split` — Verify Epic existence when `--epic` provided
 - `imbas-devplan` — Optional enrichment during code exploration
-- `imbas-digest` — Transitively via `imbas:read-issue`
+- `imbas-digest` — Transitively via `imbas:imbas-read-issue`

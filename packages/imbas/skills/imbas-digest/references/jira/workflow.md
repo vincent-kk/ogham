@@ -48,9 +48,9 @@ When re-running digest on the same issue:
 
 ## Suggestion Trigger (Jira)
 
-The `imbas:digest` skill is suggested (never auto-executed) when ALL of:
+The `imbas:imbas-digest` skill is suggested (never auto-executed) when ALL of:
 
-1. `imbas:manifest` calls `[OP: transition_issue]` to move an issue to Done.
+1. `imbas:imbas-manifest` calls `[OP: transition_issue]` to move an issue to Done.
 2. The issue has ≥ 3 comments.
 3. Comments are from ≥ 2 distinct authors.
 

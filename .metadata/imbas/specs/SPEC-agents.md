@@ -506,17 +506,17 @@ mode: default  # 격리된 서브에이전트이지만, bypassPermissions는 권
 ## 6. 에이전트 간 호출 관계
 
 ```
-[imbas:validate skill]
+[imbas:imbas-validate skill]
     └── spawns imbas-analyst
          └── returns: validation-report.md
 
-[imbas:split skill]
+[imbas:imbas-split skill]
     ├── spawns imbas-planner (Story 분할)
     │    └── returns: stories-manifest.json
     └── spawns imbas-analyst (역추론 검증)
          └── returns: verification result (PASS/FAIL + 사유)
 
-[imbas:devplan skill]
+[imbas:imbas-devplan skill]
     └── spawns imbas-engineer
          └── returns: devplan-manifest.json
 

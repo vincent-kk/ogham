@@ -15,7 +15,7 @@ comment:       "<divergence description>"
 type:          "mapping_divergence" | "story_split_issue"
 ```
 
-These feedback_comments are later posted to Jira by the `imbas:manifest
+These feedback_comments are later posted to Jira by the `imbas:imbas-manifest
 devplan` skill via `[OP: add_comment]`. The `target_ref` MUST be the Jira
 key (not a local path) so the manifest skill can dispatch directly.
 

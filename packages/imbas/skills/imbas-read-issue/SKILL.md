@@ -19,7 +19,7 @@ JSON summary. Called by validate, split, devplan, digest skills and by
 ## Arguments
 
 ```
-imbas:read-issue <issue-ref> [--depth shallow|full]
+imbas:imbas-read-issue <issue-ref> [--depth shallow|full]
 
 <issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
 --depth      : shallow = metadata + description only, full = include comments (default: full)

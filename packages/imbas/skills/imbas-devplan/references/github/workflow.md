@@ -15,7 +15,7 @@ comment:       "<divergence description>"
 type:          "mapping_divergence" | "story_split_issue"
 ```
 
-These feedback_comments are later posted to GitHub by the `imbas:manifest
+These feedback_comments are later posted to GitHub by the `imbas:imbas-manifest
 devplan` skill via `gh issue comment`. The `target_ref` MUST be the fully
 qualified `owner/repo#N` format so the manifest skill can dispatch directly
 without re-resolving the repo.

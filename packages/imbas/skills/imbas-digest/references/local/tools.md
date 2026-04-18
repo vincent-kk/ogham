@@ -10,7 +10,7 @@ Loaded when `config.provider === 'local'`.
 | `Read` | Read existing file including `## Digest` section |
 | `Edit` | Append a new timestamped entry to the `## Digest` section |
 
-No MCP server. No network. `imbas:read-issue` local branch handles the initial
+No MCP server. No network. `imbas:imbas-read-issue` local branch handles the initial
 file read; this skill only edits the `## Digest` section at publish time.
 
 Media attachments are not supported for local issues in v1 (local files are

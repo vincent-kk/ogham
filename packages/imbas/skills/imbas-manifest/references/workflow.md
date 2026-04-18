@@ -106,7 +106,7 @@ When a link has multiple targets (`to` is an array) and some targets fail:
    - "created"  — all targets succeeded
    - "partial"  — some targets succeeded, some failed
    - "failed"   — all targets failed
-5. On re-run (imbas:manifest re-execution), only retry targets without issue_ref confirmation
+5. On re-run (imbas:imbas-manifest re-execution), only retry targets without issue_ref confirmation
 ```
 
 ## Step 5 — Result Report

@@ -171,7 +171,7 @@ Issue #15 [type:task, status:todo, imbas]
 
 ### 3.3 Label Auto-Creation
 
-`imbas:setup init` (GitHub provider) creates all labels if missing:
+`imbas:imbas-setup init` (GitHub provider) creates all labels if missing:
 
 ```bash
 gh label create "type:epic" --color "0E8A16" --description "imbas Epic" --force
@@ -411,7 +411,7 @@ gh label list --repo "owner/repo" --json name -q '.[].name' | grep -q "type:stor
 
 ## 6. Setup Workflow (GitHub)
 
-`imbas:setup init` for GitHub provider:
+`imbas:imbas-setup init` for GitHub provider:
 
 ```
 Step 1 — Verify gh CLI
@@ -447,7 +447,7 @@ Step 7 — Result display
 
 ---
 
-## 7. Execution Patterns (imbas:manifest)
+## 7. Execution Patterns (imbas:imbas-manifest)
 
 ### 7.1 stories-manifest Execution (GitHub)
 
@@ -511,7 +511,7 @@ Same as Jira: fully qualified `issue_ref` already set → skip. Resume-safe.
 
 ---
 
-## 8. `imbas:read-issue` (GitHub)
+## 8. `imbas:imbas-read-issue` (GitHub)
 
 ```bash
 # Full issue with comments
@@ -542,7 +542,6 @@ gh issue view 42 --repo "owner/repo" --json number,title,body,labels,state,miles
 
 - [SPEC-provider.md](./SPEC-provider.md) — Abstract provider interface
 - [SPEC-provider-jira.md](./SPEC-provider-jira.md) — Jira provider comparison
-- [SPEC-state.md](./SPEC-state.md) — Config & state schemas
 - [SPEC-skills.md](./SPEC-skills.md) — Provider를 호출하는 스킬 정의
 - [SPEC-tools.md](./SPEC-tools.md) — imbas MCP 도구 정의
 - [BLUEPRINT.md](../BLUEPRINT.md) — Architecture overview

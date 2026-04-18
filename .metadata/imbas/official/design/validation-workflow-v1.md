@@ -18,9 +18,9 @@ expires: 2026-06-30
 
 ```
 복수 비정형 문서
-  → [imbas:classify] 합치기 + 정형화 (내부 로직)
+  → [classify] 합치기 + 정형화 (내부 로직)
   → 단일 정형 문서
-  → [imbas:validate] 정합성 판정
+  → [imbas:imbas-validate] 정합성 판정
   → 검증 리포트 (마크다운)
   → 이슈 있음 → 🧑 블로킹 (인간이 원본 수정)
   → 이슈 없음 → Phase 2 진입
@@ -101,7 +101,7 @@ date: 2026-04-04
 ## 블로킹 정책
 
 - Phase 1 검증 이슈 발견 → **Phase 2 진입 블로킹**
-- 인간이 원본 수정 후 재검증 (imbas:validate 재실행)
+- 인간이 원본 수정 후 재검증 (imbas:imbas-validate 재실행)
 - Phase 2 이후 발견된 검증 오류 → **해당 단계에서 블로킹**
 
 ---
