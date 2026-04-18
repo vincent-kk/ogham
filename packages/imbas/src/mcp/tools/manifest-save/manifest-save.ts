@@ -6,15 +6,22 @@
 import { join } from 'node:path';
 
 import { getRunDir } from '../../../core/paths/paths.js';
-import { getManifestSummary } from '../../../core/manifest-parser/manifest-parser.js';
+import {
+  getManifestSummary,
+  getImplementPlanSummary,
+} from '../../../core/manifest-parser/manifest-parser.js';
 import { writeJson } from '../../../lib/file-io.js';
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
-import { StoriesManifestSchema, DevplanManifestSchema } from '../../../types/manifest.js';
+import {
+  StoriesManifestSchema,
+  DevplanManifestSchema,
+  ImplementPlanManifestSchema,
+} from '../../../types/manifest.js';
 
 export interface ManifestSaveInput {
   project_ref: string;
   run_id: string;
-  type: 'stories' | 'devplan';
+  type: 'stories' | 'devplan' | 'implement-plan';
   manifest?: unknown;
 }
 
@@ -34,9 +41,13 @@ export async function handleManifestSave(input: ManifestSaveInput) {
     return { path, summary: getManifestSummary(validated) };
   }
 
-  const validated = DevplanManifestSchema.parse(input.manifest);
-  await writeJson(path, validated);
-  const summary = getManifestSummary(validated);
+  if (input.type === 'devplan') {
+    const validated = DevplanManifestSchema.parse(input.manifest);
+    await writeJson(path, validated);
+    return { path, summary: getManifestSummary(validated) };
+  }
 
-  return { path, summary };
+  const validated = ImplementPlanManifestSchema.parse(input.manifest);
+  await writeJson(path, validated);
+  return { path, summary: getImplementPlanSummary(validated) };
 }

@@ -22,6 +22,7 @@ import {
   handleManifestSave,
   handleManifestValidate,
   handleManifestPlan,
+  handleManifestImplementPlan,
   handleConfigGet,
   handleConfigSet,
   handleCacheGet,
@@ -126,7 +127,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
-        type: z.enum(['stories', 'devplan']),
+        type: z.enum(['stories', 'devplan', 'implement-plan']),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
     },
@@ -140,7 +141,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
-        type: z.enum(['stories', 'devplan']),
+        type: z.enum(['stories', 'devplan', 'implement-plan']),
         // Type-dependent schema (stories vs devplan) — cannot express conditional
         // validation in a single MCP inputSchema. Handler validates internally via
         // StoriesManifestSchema.parse() / DevplanManifestSchema.parse().
@@ -158,7 +159,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string(),
         run_id: z.string(),
-        type: z.enum(['stories', 'devplan']),
+        type: z.enum(['stories', 'devplan', 'implement-plan']),
       }),
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
     },
@@ -176,6 +177,23 @@ export function createServer(): McpServer {
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
     },
     wrapHandler(handleManifestPlan),
+  );
+
+  server.registerTool(
+    'manifest_implement_plan',
+    {
+      description:
+        'Build DAG-based implementation schedule (groups with parallel+order) from stories/devplan manifests',
+      inputSchema: z.object({
+        project_ref: z.string(),
+        run_id: z.string(),
+        batch: z.string().optional(),
+        source: z.enum(['stories', 'devplan']).optional(),
+        max_parallel: z.number().int().positive().optional(),
+      }),
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+    },
+    wrapHandler(handleManifestImplementPlan),
   );
 
   // --- Config tools ---

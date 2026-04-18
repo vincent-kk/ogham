@@ -9,7 +9,7 @@ import { validateManifest } from '../../../core/manifest-validator/manifest-vali
 export interface ManifestValidateInput {
   project_ref: string;
   run_id: string;
-  type: 'stories' | 'devplan';
+  type: 'stories' | 'devplan' | 'implement-plan';
 }
 
 export async function handleManifestValidate(input: ManifestValidateInput) {

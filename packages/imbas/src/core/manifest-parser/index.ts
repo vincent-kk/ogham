@@ -1,1 +1,6 @@
-export { loadManifest, getManifestSummary } from './manifest-parser.js';
+export {
+  loadManifest,
+  getManifestSummary,
+  getImplementPlanSummary,
+} from './manifest-parser.js';
+export type { ManifestType } from './manifest-parser.js';

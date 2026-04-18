@@ -133,6 +133,67 @@ export const DevplanManifestSchema = z.object({
 });
 export type DevplanManifest = z.infer<typeof DevplanManifestSchema>;
 
+// --- Implement Plan Manifest ---
+
+export const BatchItemKindSchema = z.enum(['Story', 'Task']);
+export type BatchItemKind = z.infer<typeof BatchItemKindSchema>;
+
+export const BatchItemRefSchema = z.object({
+  id: z.string(),
+  kind: BatchItemKindSchema,
+  issue_ref: z.string().nullable(),
+  rationale: z.string(),
+});
+export type BatchItemRef = z.infer<typeof BatchItemRefSchema>;
+
+export const BatchGroupSchema = z.object({
+  group_id: z.string(),
+  level: z.number().int().nonnegative(),
+  can_parallel: z.boolean(),
+  items: z.array(BatchItemRefSchema).min(1),
+  depends_on_groups: z.array(z.string()).default([]),
+});
+export type BatchGroup = z.infer<typeof BatchGroupSchema>;
+
+export const BatchEdgeSourceSchema = z.enum([
+  'story_link',
+  'task_blocks',
+  'code_overlap',
+  'manual',
+]);
+export type BatchEdgeSource = z.infer<typeof BatchEdgeSourceSchema>;
+
+export const BatchEdgeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  source: BatchEdgeSourceSchema,
+  weight: z.number().default(1),
+});
+export type BatchEdge = z.infer<typeof BatchEdgeSchema>;
+
+export const BatchCycleBrokenSchema = z.object({
+  nodes: z.array(z.string()),
+  resolution: z.string(),
+});
+export type BatchCycleBroken = z.infer<typeof BatchCycleBrokenSchema>;
+
+export const ImplementPlanSourceSchema = z.enum(['stories', 'devplan']);
+export type ImplementPlanSource = z.infer<typeof ImplementPlanSourceSchema>;
+
+export const ImplementPlanManifestSchema = z.object({
+  batch: z.string(),
+  run_id: z.string(),
+  project_ref: z.string(),
+  created_at: z.string(),
+  source_manifest: ImplementPlanSourceSchema,
+  groups: z.array(BatchGroupSchema).default([]),
+  edges: z.array(BatchEdgeSchema).default([]),
+  cycles_broken: z.array(BatchCycleBrokenSchema).default([]),
+  unresolved: z.array(z.string()).default([]),
+  degraded: z.boolean().default(false),
+});
+export type ImplementPlanManifest = z.infer<typeof ImplementPlanManifestSchema>;
+
 // --- Manifest Summary ---
 
 export interface ManifestSummary {
@@ -140,4 +201,13 @@ export interface ManifestSummary {
   pending: number;
   created: number;
   failed: number;
+}
+
+export interface ImplementPlanSummary {
+  total_groups: number;
+  total_items: number;
+  max_level: number;
+  unresolved: number;
+  cycles_broken: number;
+  degraded: boolean;
 }

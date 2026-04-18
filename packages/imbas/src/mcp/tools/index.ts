@@ -7,6 +7,7 @@ export { handleManifestGet } from './manifest-get/index.js';
 export { handleManifestSave } from './manifest-save/index.js';
 export { handleManifestValidate } from './manifest-validate/index.js';
 export { handleManifestPlan } from './manifest-plan/index.js';
+export { handleManifestImplementPlan } from './manifest-implement-plan/index.js';
 export { handleConfigGet } from './config-get/index.js';
 export { handleConfigSet } from './config-set/index.js';
 export { handleCacheGet } from './cache-get/index.js';

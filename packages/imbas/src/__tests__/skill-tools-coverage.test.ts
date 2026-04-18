@@ -29,6 +29,7 @@ const BARE_TOOL_NAMES = [
   'ping',
   'run_create', 'run_get', 'run_transition', 'run_list',
   'manifest_get', 'manifest_save', 'manifest_validate', 'manifest_plan',
+  'manifest_implement_plan',
   'config_get', 'config_set',
   'cache_get', 'cache_set',
   'ast_search', 'ast_analyze',

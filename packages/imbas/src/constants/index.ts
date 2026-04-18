@@ -9,6 +9,7 @@ export {
   RUNS_DIRNAME,
   DEBUG_LOG_FILENAME,
   MANIFEST_FILE_MAP,
+  REPORT_FILE_MAP,
   CACHE_FILE_MAP,
 } from './files.js';
 

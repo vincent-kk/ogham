@@ -34,6 +34,12 @@ export const DEBUG_LOG_FILENAME = 'debug.log';
 export const MANIFEST_FILE_MAP = {
   stories: 'stories-manifest.json',
   devplan: 'devplan-manifest.json',
+  'implement-plan': 'implement-plan.json',
+} as const;
+
+/** Report file mapping by manifest type */
+export const REPORT_FILE_MAP = {
+  'implement-plan': 'implement-plan-report.md',
 } as const;
 
 /** Cache file mapping by type */

@@ -31,6 +31,7 @@ const EXPECTED_TOOLS = [
   'manifest_save',
   'manifest_validate',
   'manifest_plan',
+  'manifest_implement_plan',
   'config_get',
   'config_set',
   'cache_get',
@@ -45,7 +46,7 @@ describe('MCP server tool registration', () => {
     toolCallCount = 0;
   });
 
-  it('registers all 15 expected tools via registerTool', async () => {
+  it('registers all expected tools via registerTool', async () => {
     const { createServer } = await import('../mcp/server/server.js');
     createServer();
     expect(registeredTools).toHaveLength(EXPECTED_TOOLS.length);
