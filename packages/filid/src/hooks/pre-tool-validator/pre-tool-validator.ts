@@ -6,11 +6,8 @@ import {
   validateIntentMd,
 } from '../../core/rules/document-validator/document-validator.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
-
 import { isDetailMd, isIntentMd } from '../shared/shared.js';
 import { validateCwd } from '../utils/validate-cwd.js';
-
-export { isDetailMd } from '../shared/shared.js';
 
 const INTENT_MD_LINE_LIMIT = 50;
 
