@@ -6,7 +6,7 @@ import { isDetailMd } from '../shared/shared.js';
 import { validateCwd } from '../utils/validate-cwd.js';
 
 import { injectIntent } from './helpers/intent-injector/intent-injector.js';
-import { validatePreToolUse } from './helpers/pre-tool-validator';
+import { validatePreToolUse } from './helpers/pre-tool-validator/pre-tool-validator.js';
 import { guardStructure } from './helpers/structure-guard/structure-guard.js';
 import { mergeResults } from './utils/merge-results.js';
 

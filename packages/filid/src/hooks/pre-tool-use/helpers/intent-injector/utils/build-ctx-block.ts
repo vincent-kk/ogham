@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'node:path';
 
 /**
  * Build the [filid:ctx] injection text for first visit to a directory.

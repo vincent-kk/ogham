@@ -1,4 +1,4 @@
-import { compressPaths } from './compress-paths';
+import { compressPaths } from './compress-paths.js';
 
 /**
  * Build [filid:map] line from visited reads list.
