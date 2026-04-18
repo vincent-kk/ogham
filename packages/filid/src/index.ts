@@ -138,7 +138,7 @@ export { computeTreeDiff } from './ast/tree-diff/tree-diff.js';
 export { handlePreToolUse } from './hooks/pre-tool-use/pre-tool-use.js';
 
 export { enforceAgentRole } from './hooks/agent-enforcer/agent-enforcer.js';
-export { injectContext } from './hooks/context-injector/context-injector.js';
+export { handleUserPromptSubmit } from './hooks/user-prompt-submit/user-prompt-submit.js';
 export { processSetup } from './hooks/setup/setup.js';
 
 // AST Grep tools (pattern matching via @ast-grep/napi)

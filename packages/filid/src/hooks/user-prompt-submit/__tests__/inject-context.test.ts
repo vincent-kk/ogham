@@ -9,7 +9,7 @@ import {
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
 import * as ruleEngine from '../../../core/rules/rule-engine/rule-engine.js';
-import { buildMinimalContext } from '../context-injector.js';
+import { buildMinimalContext } from '../utils/build-minimal-context.js';
 
 describe('buildMinimalContext', () => {
   const tempDirs: string[] = [];
@@ -23,8 +23,11 @@ describe('buildMinimalContext', () => {
   const RULE_FILE = 'filid_fca-policy.md';
   const LEGACY_FILE = 'fca.md';
 
-  function makeProject(options: { deployFca: boolean; legacy?: boolean }): string {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'filid-context-injector-'));
+  function makeProject(options: {
+    deployFca: boolean;
+    legacy?: boolean;
+  }): string {
+    const projectRoot = mkdtempSync(join(tmpdir(), 'filid-inject-context-'));
     tempDirs.push(projectRoot);
     writeConfig(projectRoot, createDefaultConfig());
     if (options.deployFca) {
@@ -96,7 +99,9 @@ describe('buildMinimalContext', () => {
       const context = buildMinimalContext(projectRoot);
 
       expect(context.match(/\[filid:lang\]/g) ?? []).toHaveLength(1);
-      expect(context).toContain(`[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`);
+      expect(context).toContain(
+        `[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`,
+      );
       // Disabled-rules line is silently skipped on rule-engine failure.
       expect(context).not.toContain('Disabled rules');
     } finally {

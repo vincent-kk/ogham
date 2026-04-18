@@ -9,8 +9,7 @@ Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초
 | 모듈 | 이벤트 | 역할 |
 |------|--------|------|
 | `setup` | SessionStart | 캐시 초기화 + INTENT.md 자동 감지 + pruning |
-| `context-injector` | UserPromptSubmit (내부) | 세션 첫 프롬프트에 FCA 포인터 주입 |
-| `user-prompt-submit` | UserPromptSubmit | 턴당 fmap reset + `context-injector` 위임 |
+| `user-prompt-submit` | UserPromptSubmit | 턴당 fmap reset + 세션 첫 프롬프트 FCA 포인터 주입 |
 | `intent-injector` | PreToolUse (내부) | INTENT.md 체인·map 주입 |
 | `pre-tool-validator` | PreToolUse (내부) | INTENT.md 50줄·DETAIL.md append-only 블록 |
 | `structure-guard` | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고 |

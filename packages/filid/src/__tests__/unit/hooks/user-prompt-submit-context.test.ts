@@ -42,7 +42,9 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { injectContext } = await import('../../../hooks/context-injector/context-injector.js');
+const { handleUserPromptSubmit } = await import(
+  '../../../hooks/user-prompt-submit/user-prompt-submit.js'
+);
 const { existsSync, readdirSync } = await import('node:fs');
 
 const baseInput: UserPromptSubmitInput = {
@@ -52,10 +54,9 @@ const baseInput: UserPromptSubmitInput = {
   prompt: 'test prompt',
 };
 
-describe('context-injector', () => {
+describe('user-prompt-submit context injection', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // restore default existsSync behavior so each test runs independently
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
@@ -68,8 +69,8 @@ describe('context-injector', () => {
     );
   });
 
-  it('should inject minimal FCA-AI pointer', async () => {
-    const result = await injectContext(baseInput);
+  it('injects minimal FCA-AI pointer', () => {
+    const result = handleUserPromptSubmit(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
     expect(result.hookSpecificOutput?.additionalContext).toContain(
@@ -77,71 +78,68 @@ describe('context-injector', () => {
     );
   });
 
-  it('should not contain verbose rules content', async () => {
-    const result = await injectContext(baseInput);
+  it('does not contain verbose rules content', () => {
+    const result = handleUserPromptSubmit(baseInput);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
-    // These were in the old buildFcaContext — should no longer be present
     expect(ctx).not.toContain('Directory Structure');
     expect(ctx).not.toContain('Development Workflow');
     expect(ctx).not.toContain('Category Classification');
     expect(ctx).not.toContain('nearest common ancestor');
   });
 
-  it('should always continue (never block user prompts)', async () => {
-    const result = await injectContext(baseInput);
-    expect(result.continue).toBe(true);
+  it('always continues (never blocks user prompts)', () => {
+    expect(handleUserPromptSubmit(baseInput).continue).toBe(true);
   });
 
-  it('should skip context injection for non-FCA projects', async () => {
+  it('skips context injection for non-FCA projects', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
-    const result = await injectContext(baseInput);
+    const result = handleUserPromptSubmit(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('warns when .filid/config.json is missing (not initialized)', async () => {
+  it('warns when .filid/config.json is missing (not initialized)', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
-        if (p.endsWith('.filid')) return true; // FCA gate passes
-        if (p.endsWith('.filid/config.json')) return false; // config missing
+        if (p.endsWith('.filid')) return true;
+        if (p.endsWith('.filid/config.json')) return false;
         if (p.endsWith('.claude/rules/filid_fca-policy.md')) return false;
         if (p.includes('/prompt-context-')) return false;
         return false;
       },
     );
 
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    const ctx =
+      handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
+      '';
     expect(ctx).toContain('Not initialized');
     expect(ctx).toContain('/filid:filid-setup');
     expect(ctx).not.toContain('FCA-AI active');
   });
 
-  it('warns when rule doc is missing but config is present (rules not deployed)', async () => {
+  it('warns when rule doc is missing but config is present', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
         if (p.endsWith('.filid')) return true;
         if (p.endsWith('.filid/config.json')) return true;
-        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return false; // not deployed
+        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return false;
         if (p.includes('/prompt-context-')) return false;
         return false;
       },
     );
 
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    const ctx =
+      handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
+      '';
     expect(ctx).toContain('Rules not deployed');
     expect(ctx).toContain('/filid:filid-setup');
     expect(ctx).not.toContain('FCA-AI active');
   });
 
-  // === Session-based inject tests ===
-
-  it('should not inject when prompt-context exists', async () => {
-    // both session-context AND prompt-context exist → skip injection
+  it('does not inject when prompt-context exists', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p === 'string' && p.endsWith('.filid')) return true;
@@ -153,43 +151,24 @@ describe('context-injector', () => {
       },
     );
 
-    const result = await injectContext(baseInput);
+    const result = handleUserPromptSubmit(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it('should re-inject when prompt-context is missing', async () => {
-    // prompt-context missing → rebuild regardless of session-context state
-    (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
-      (p: unknown) => {
-        if (typeof p !== 'string') return false;
-        if (p.endsWith('.filid')) return true;
-        if (p.endsWith('.filid/config.json')) return true;
-        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return true;
-        if (p.includes('/prompt-context-')) return false;
-        return false;
-      },
-    );
-
-    const result = await injectContext(baseInput);
-    expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
+  it('re-injects when prompt-context is missing', () => {
+    const result = handleUserPromptSubmit(baseInput);
     expect(result.hookSpecificOutput?.additionalContext).toContain('FCA-AI');
   });
 
-  it('should inject independently for different session IDs', async () => {
-    const input1 = { ...baseInput, session_id: 'session-alpha' };
-    const input2 = { ...baseInput, session_id: 'session-beta' };
-
-    const result1 = await injectContext(input1);
-    const result2 = await injectContext(input2);
-
-    expect(result1.hookSpecificOutput?.additionalContext).toBeDefined();
-    expect(result2.hookSpecificOutput?.additionalContext).toBeDefined();
+  it('injects independently for different session IDs', () => {
+    const r1 = handleUserPromptSubmit({ ...baseInput, session_id: 'a' });
+    const r2 = handleUserPromptSubmit({ ...baseInput, session_id: 'b' });
+    expect(r1.hookSpecificOutput?.additionalContext).toBeDefined();
+    expect(r2.hookSpecificOutput?.additionalContext).toBeDefined();
   });
 
-  it('should safely inject when prompt-context I/O fails', async () => {
-    // existsSync throws on prompt-context check → hasPromptContext returns false (safe fallback)
+  it('safely injects when prompt-context I/O fails', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p === 'string' && p.endsWith('.filid')) return true;
@@ -199,34 +178,38 @@ describe('context-injector', () => {
       },
     );
 
-    const result = await injectContext(baseInput);
+    const result = handleUserPromptSubmit(baseInput);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBeDefined();
   });
 
-  it('should call readdirSync after markSessionInjected (pruneOldSessions invoked)', async () => {
-    await injectContext(baseInput);
+  it('calls readdirSync after markSessionInjected (pruneOldSessions invoked)', () => {
+    handleUserPromptSubmit(baseInput);
     expect(readdirSync).toHaveBeenCalled();
   });
 
-  it('should output at most 3 lines for default config (pointer + lang, no disabled rules)', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+  it('outputs at most 3 lines for default config', () => {
+    const ctx =
+      handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
+      '';
     const lines = ctx.split('\n').filter((l: string) => l.trim() !== '');
-    // Default config: all rules enabled → pointer + lang tag = 2 lines
     expect(lines.length).toBeLessThanOrEqual(3);
-    expect(lines[0]).toBe('[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md');
+    expect(lines[0]).toBe(
+      '[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md',
+    );
   });
 
-  it('should include [filid:lang] tag in injected context', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+  it('includes [filid:lang] tag in injected context', () => {
+    const ctx =
+      handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
+      '';
     expect(ctx).toContain('[filid:lang]');
   });
 
-  it('should default [filid:lang] to en when no config language is set', async () => {
-    const result = await injectContext(baseInput);
-    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+  it('defaults [filid:lang] to en when no config language is set', () => {
+    const ctx =
+      handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
+      '';
     expect(ctx).toContain('[filid:lang] en');
   });
 });

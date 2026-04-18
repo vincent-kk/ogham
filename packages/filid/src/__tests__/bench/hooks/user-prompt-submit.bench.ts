@@ -1,6 +1,6 @@
 import { bench, describe } from 'vitest';
 
-import { injectContext } from '../../../hooks/context-injector/context-injector.js';
+import { handleUserPromptSubmit } from '../../../hooks/user-prompt-submit/user-prompt-submit.js';
 import { generateUserPromptInput } from '../fixtures/generator.js';
 
 // pre-generate inputs per tier
@@ -31,45 +31,45 @@ const cwdInputs = [
   },
 }));
 
-describe('context-injector: project size tiers', () => {
+describe('user-prompt-submit: project size tiers', () => {
   bench('S: short prompt', () => {
-    injectContext(inputS);
+    handleUserPromptSubmit(inputS);
   });
 
   bench('M: medium prompt', () => {
-    injectContext(inputM);
+    handleUserPromptSubmit(inputM);
   });
 
   bench('L: long prompt', () => {
-    injectContext(inputL);
+    handleUserPromptSubmit(inputL);
   });
 
   bench('XL: very long prompt', () => {
-    injectContext(inputXL);
+    handleUserPromptSubmit(inputXL);
   });
 });
 
-describe('context-injector: cwd path depth', () => {
+describe('user-prompt-submit: cwd path depth', () => {
   for (const { label, input } of cwdInputs) {
     bench(label, () => {
-      injectContext(input);
+      handleUserPromptSubmit(input);
     });
   }
 });
 
-describe('context-injector: sustained injection', () => {
+describe('user-prompt-submit: sustained injection', () => {
   // same session: 1 inject on first call + 99 session gate early returns
   bench('100 calls, same session (1 inject + 99 gate checks)', () => {
     const sessionInput = { ...inputS, session_id: 'bench-sustained' };
     for (let i = 0; i < 100; i++) {
-      injectContext(sessionInput);
+      handleUserPromptSubmit(sessionInput);
     }
   });
 
   // unique sessions: new session on every call (100 injects)
   bench('100 calls, unique sessions (100 injects)', () => {
     for (let i = 0; i < 100; i++) {
-      injectContext({ ...inputS, session_id: `bench-unique-${i}` });
+      handleUserPromptSubmit({ ...inputS, session_id: `bench-unique-${i}` });
     }
   });
 });
