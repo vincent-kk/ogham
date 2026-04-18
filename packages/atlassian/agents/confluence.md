@@ -1,6 +1,6 @@
 ---
 name: confluence
-description: "Complex multi-step Confluence workflows requiring chained API calls, version conflict resolution, or cross-domain operations. Simple single-resource reads (get page, CQL search, get comments) should be handled directly by the main agent via atlassian-confluence skill — do NOT spawn this agent for those."
+description: "Confluence workflow specialist focused on complex multi-step content and space operations."
 model: sonnet
 tools:
   - Read

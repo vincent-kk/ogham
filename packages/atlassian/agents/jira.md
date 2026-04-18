@@ -1,6 +1,6 @@
 ---
 name: jira
-description: "Complex multi-step Jira workflows requiring chained API calls, bulk operations, or error recovery across multiple domains. Simple single-resource reads (get issue, search, get comments) should be handled directly by the main agent via atlassian-jira skill — do NOT spawn this agent for those."
+description: "Jira workflow specialist focused on complex multi-step issue operations and recovery paths."
 model: sonnet
 tools:
   - Read

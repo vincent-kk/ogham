@@ -1,9 +1,6 @@
 ---
 name: media
-description: >
-  Analyzes extracted video/GIF keyframes using multimodal capabilities.
-  Receives frame images from scene-sieve extraction and returns structured
-  scene analysis with semantic descriptions and frame path mappings.
+description: "Media analyst focused on interpreting extracted frames into structured scene understanding."
 model: sonnet
 tools:
   - Read
