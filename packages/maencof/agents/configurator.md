@@ -1,7 +1,6 @@
 ---
 name: configurator
-description: >
-  maencof Knowledge Vault Configuration Specialist — maencof 지식 공간의 프로젝트 설정, 라이프사이클 정책, MCP 서버 등록을 관리. Manages .claude/ directory, CLAUDE.md, rules, skills, agents, hooks, and MCP servers in the maencof plugin context. Follows the latest Claude Code spec with migration and auto-recovery support. Trigger: "configure", "setup environment", "add MCP", "create skill", "add rule", "maencof configure", "/maencof:maencof-configure".
+description: "Vault configuration specialist focused on environment setup, rules, agents, and MCP integration."
 model: sonnet
 tools:
   - Read

@@ -1,7 +1,6 @@
 ---
 name: memory-organizer
-description: >
-  maencof Memory Organizer — Evaluates and executes document transitions (inter-Layer moves) within the knowledge vault. Selects transition candidates based on access frequency, tag matching, and connection density, then generates TransitionDirectives and executes them via the move tool. Trigger phrases: "organize memory", "organize knowledge", "move document", "Layer transition", "memory organizer", "/maencof:maencof-organize".
+description: "Knowledge organizer focused on moving documents across layers based on usage and relevance."
 model: sonnet
 tools:
   - Read

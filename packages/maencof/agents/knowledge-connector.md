@@ -1,7 +1,6 @@
 ---
 name: knowledge-connector
-description: >
-  maencof Knowledge Connector — Discovers and creates connections between knowledge nodes across Layers. Analyzes semantic similarity, shared tags, and co-reference patterns to suggest and establish inter-document links that strengthen the knowledge graph. Trigger phrases: "connect knowledge", "find connections", "link documents", "suggest links", "knowledge connector", "/maencof:maencof-suggest".
+description: "Graph enrichment agent focused on discovering meaningful links between knowledge nodes."
 model: sonnet
 tools:
   - Read
