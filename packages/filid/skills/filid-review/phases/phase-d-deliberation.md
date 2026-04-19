@@ -29,7 +29,7 @@
 > Phase D completes when `review-report.md` and `fix-requests.md` are
 > written AND (team mode) the team is fully shut down via `TeamDelete`.
 
-## Main Pull-Up Contract (Refs: ADR-0001)
+## Main Pull-Up Contract
 
 Phase D runs **only in the main orchestrator**, never inside the A/B/C
 subagent. The subagent MUST NOT call `TeamCreate`, `SendMessage`, or otherwise
@@ -62,8 +62,8 @@ synthesis.
 Each Phase D dispatch MUST append one entry to `<REVIEW_DIR>/session.md`
 under a `phase_d_token_usage:` block recording the main-context token
 consumption for this phase. This establishes the measurement baseline for
-the ADR-0002 re-evaluation trigger (Phase D main tokens ≥ 40% of pipeline
-budget across ≥ 3 PRs):
+the re-evaluation trigger (Phase D main tokens ≥ 40% of pipeline budget
+across ≥ 3 PRs):
 
 ```
 phase_d_token_usage:
@@ -614,8 +614,8 @@ round-5 exhaust after the team was spawned.
    verdict without a live team or adjudicator Task — is a protocol violation
    and MUST NOT occur.
 4. **Token counter**: append the Phase D token counter entry to
-   `session.md` with `dispatch: fail` so the ADR-0002 trigger baseline
-   remains consistent across team / solo / fail dispatches.
+   `session.md` with `dispatch: fail` so the trigger baseline remains
+   consistent across team / solo / fail dispatches.
 5. Proceed to Step 4.5 in `../SKILL.md` (persist content hash) carrying the
    `INCONCLUSIVE` verdict.
 

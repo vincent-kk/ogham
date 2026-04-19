@@ -1,7 +1,5 @@
 # filid-review — Public Contract Specification
 
-> Refs: ADR-0001
-
 ## Requirements
 
 - Phase sequence (A → B → C1/C2 → D) MUST match `SKILL.md`. Phase A/B/C run inside an isolated subagent (~100k token budget); Phase D runs in the pipeline main orchestrator.

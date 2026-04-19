@@ -143,8 +143,6 @@ them in.
 
 ## Post-Completion Verification Fallback (A/B/C1/C2 only — Phase D excluded)
 
-> Refs: ADR-0001
-
 This fallback applies **only** to Phase A, B, C1, and C2. **Phase D is
 excluded** from the chairperson-direct fallback path — main MUST NOT
 fabricate a Phase D verdict when the A/B/C subagent fails. Instead, route
