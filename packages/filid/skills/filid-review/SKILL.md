@@ -34,6 +34,16 @@ plugin: filid
 > 6. After Step 4.5 content-hash persistence → chain Step 5 (PR comment)
 >    in the same response; emit the terminal verdict marker only after
 >    Step 5 completes or is skipped.
+>
+> **PIPELINE SUBAGENT MODE**: When invoked from the
+> pipeline orchestrator as an A/B/C-only subagent (signalled via
+> `--pipeline-mode=abc-only` or the `PIPELINE_MODE=abc-only` context
+> key), this skill STOPS after Step 3 (Phase C). Step 4 (Phase D), Step
+> 4.5 (content-hash), and Step 5 (PR comment) MUST NOT execute inside
+> the subagent — they run in the pipeline main after the subagent
+> returns. The skill emits the Subagent Return Contract as its final
+> assistant message (see Step 3.9) and terminates. In user-invoked mode
+> (no pipeline flag) the skill runs all five steps as before.
 
 # filid-review — AI Code Review Governance
 
@@ -167,9 +177,64 @@ team as soon as all C1/C2 workers complete — before entering Phase D.
 the same post-completion verification as Step 2 (see `contracts.md`).
 
 **→ After both Phase C halves complete and outputs are verified,
-IMMEDIATELY proceed to Step 4 in the same response. Do NOT yield.**
+IMMEDIATELY proceed to Step 3.9 (pipeline subagent mode) or Step 4
+(user-invoked mode) in the same response. Do NOT yield.**
+
+### Step 3.9 — Pipeline Subagent Mode Exit
+
+**Skip this step entirely when neither `--pipeline-mode=abc-only` nor
+the `PIPELINE_MODE=abc-only` context key is set** — in user-invoked
+mode proceed directly to Step 4.
+
+When invoked from the pipeline orchestrator as an A/B/C-only subagent,
+this skill MUST NOT execute Step 4 (Phase D), Step 4.5 (content-hash),
+or Step 5 (PR comment). Instead, emit the Subagent Return Contract
+defined in `DETAIL.md` → `## API Contracts` as the final assistant
+message and terminate.
+
+1. Read `<REVIEW_DIR>/session.md` frontmatter to extract `committee`,
+   `deliberation_mode`, and `failure_reason`. If `deliberation_mode` is
+   missing (legacy session.md without the field), derive it locally:
+   - `committee == ['adjudicator']` → `solo-adjudicator`
+   - `committee.length >= 2` → `team`
+   If `failure_reason` is missing, default to `none`.
+2. Verify the A/B/C artifacts exist at the expected paths (`session.md`,
+   `verification-metrics.md`, `verification-structure.md`; and
+   `structure-check.md` when Phase A ran). Any missing required artifact
+   MUST set `deliberation_mode: chairperson-forbidden` and
+   `failure_reason: team-incomplete` so the pipeline main blocks the
+   merge via `verdict_gate`.
+3. Emit the following fenced block verbatim as the terminal assistant
+   message, substituting real values for every placeholder:
+
+   ```yaml
+   SubagentReturn:
+     committee: [<persona-id>, ...]
+     deliberation_mode: <team | solo-adjudicator | chairperson-forbidden>
+     failure_reason: <none | phase-d-team-spawn-unavailable | team-incomplete | round5-exhaust | veto-deadlock>
+     paths_to_artifacts:
+       structure_check: <REVIEW_DIR>/structure-check.md | null
+       session: <REVIEW_DIR>/session.md
+       verification_metrics: <REVIEW_DIR>/verification-metrics.md
+       verification_structure: <REVIEW_DIR>/verification-structure.md
+   ```
+4. Terminate. Do NOT read Phase D's phase file, do NOT call `TeamCreate`,
+   do NOT write `review-report.md` or `fix-requests.md`. The pipeline
+   main will dispatch Phase D via the `verdict_gate` rule and write
+   those artifacts itself.
+
+**→ After SubagentReturn is emitted, execution is COMPLETE for the
+subagent. Return control to the pipeline main.**
 
 ### Step 4 — Phase D: Political Consensus (Team Deliberation)
+
+> **Pipeline Subagent Mode guard**: If
+> `--pipeline-mode=abc-only` was set, Step 3.9 already terminated this
+> skill — execution MUST NOT reach Step 4 in that mode. This step runs
+> only in the user-invoked (standalone) path, or in the pipeline main
+> context after the A/B/C subagent returns (where the pipeline
+> orchestrator drives Phase D Dispatch per
+> `filid-pipeline/SKILL.md` → "Stage: Phase D Dispatch").
 
 Phase D executes the full multi-persona deliberation via Claude Code's
 native team tools (when `committee.length >= 2`) or a single Task
@@ -220,6 +285,11 @@ the team (if any) has been deleted.**
 
 ### Step 4.5 — Persist Content Hash
 
+> **Pipeline Subagent Mode guard**: Skipped in pipeline
+> subagent mode (the subagent exits at Step 3.9). Content-hash
+> persistence runs in the pipeline main as part of the "finalize
+> review" stage (`filid-pipeline/SKILL.md`).
+
 After Phase D outputs are written, persist the content hash for future
 cache lookups:
 
@@ -230,6 +300,11 @@ This writes `content-hash.json` alongside the review outputs.
 **→ After content hash is persisted, immediately proceed to Step 5.**
 
 ### Step 5 — PR Comment (Optional)
+
+> **Pipeline Subagent Mode guard**: Skipped in pipeline
+> subagent mode (the subagent exits at Step 3.9). PR-comment emission
+> runs in the pipeline main as part of the "finalize review" stage
+> (`filid-pipeline/SKILL.md`).
 
 When `--scope=pr`:
 

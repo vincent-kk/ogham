@@ -39,7 +39,7 @@ rejected: <rejected count>
 
 > **Note**: `justifications.md` is a local inter-stage communication file. It is
 > NOT committed to git. It lives in `.filid/review/<branch>/` which is gitignored.
-> `filid:revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
+> `filid:filid-revalidate` reads it from local disk via `resolve_commit_sha` in the frontmatter.
 > Explicitly `git add`-ing a gitignored path overrides the exclusion — never stage this file.
 
 ## ADR Refinement Guidelines
@@ -63,7 +63,7 @@ Consequences: <technical debt created, future impact, estimated resolution>
 ## Fix Item Types
 
 Each fix item in `fix-requests.md` has an optional `type` field that determines
-how the `filid:resolve` skill processes it:
+how the `filid:filid-resolve` skill processes it:
 
 | Type | Default | Handler | Description |
 |------|---------|---------|-------------|

@@ -23,7 +23,7 @@ plugin: filid
 > 3. Terminal stage marker emitted: `Resolve complete — N accepted` or `Resolve aborted`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After `code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
+> - After `filid:code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
 > - After git commit+push — immediately chain `Skill("filid:filid-revalidate")` in the same turn (this is the primary stall point)
 > - Interactive step completion (user responded) — chain next non-interactive step without delay
 > - Justification collection loop — batch all rejections in the same turn when possible
@@ -76,14 +76,14 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - **Type** (one of `code-fix`, `filid-promote`, `filid-restructure`; defaults to `code-fix` if absent)
 
 Classify each item by type:
-- `code-fix` — standard code patch (applied by code-surgeon)
+- `code-fix` — standard code patch (applied by `filid:code-surgeon`)
 - `filid-promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `filid-restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
 
 > **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
 > the review phase and may carry a leading `filid:` prefix on type values
-> (e.g., `filid:promote`). Strip the `filid:` prefix before enum matching —
-> treat `filid:promote` and `filid-promote` as identical. Unknown tokens after
+> (e.g., `filid:filid-promote`). Strip the `filid:` prefix before enum matching —
+> treat `filid:filid-promote` and `filid-promote` as identical. Unknown tokens after
 > stripping fall back to `code-fix` (the default). This normalization is
 > permanent, not a migration grace period. See `src/types/handoff.ts`
 > `normalizeFixRequestType` for the canonical implementation.
@@ -122,7 +122,7 @@ For each fix item:
 #### Phase 4a — Code Fixes (parallel)
 
 Delegate all accepted `code-fix` items **in parallel** as separate Task
-subagents (`code-surgeon`, model: `sonnet`, `run_in_background: true`).
+subagents (`subagent_type: "filid:code-surgeon"`, `model: "sonnet"`, `run_in_background: true`).
 
 For each accepted code-fix, spawn one subagent with:
 - The target file path
@@ -146,7 +146,7 @@ For each accepted `filid-restructure` item:
   "SKIP — restructure not applicable" and continue. This is non-blocking.
 
 > **Important**: Structural fix failures MUST NOT block the pipeline.
-> Log the result and continue to Step 5. The `filid:revalidate` stage will
+> Log the result and continue to Step 5. The `filid:filid-revalidate` stage will
 > catch any remaining issues.
 
 **→ After all fixes (code + structural) complete, immediately proceed to Step 5.**
@@ -198,7 +198,7 @@ Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
 `resolve_commit_sha`. Do NOT run `git rev-parse HEAD` here — the base SHA
 was already captured before any code changes.
 
-> **Why**: `filid:revalidate` computes `git diff resolve_commit_sha..HEAD`.
+> **Why**: `filid:filid-revalidate` computes `git diff resolve_commit_sha..HEAD`.
 > After the auto-commit in Step 7, HEAD moves to the fix commit, so the
 > delta correctly contains only the fix changes.
 
@@ -228,7 +228,7 @@ If there were accepted fixes (files modified by code-surgeon):
    `git add <file1> <file2> ... <debt files if any>`
    - Include: files modified by code-surgeon + any debt files in `.filid/debt/` created in Step 5.
    - **Do NOT stage `justifications.md`** — it lives in `.filid/review/<branch>/` which is
-     gitignored. It is an inter-stage communication file read by `filid:revalidate` from local
+     gitignored. It is an inter-stage communication file read by `filid:filid-revalidate` from local
      disk. Explicitly adding it via `git add` overrides `.gitignore` and pollutes the git tree.
    - **Do NOT stage any file under `.filid/review/`** — all review session artifacts are
      local-only and excluded by `.gitignore`.
@@ -268,7 +268,7 @@ If there were **NO** accepted fixes (all rejected):
      - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
      - On "Stop here": **END execution.**
 
-### Step 9 — Offer to Run `filid:revalidate` <!-- [INTERACTIVE] AskUserQuestion: revalidate offer (accepted / all-rejected branches) -->
+### Step 9 — Offer to Run `filid:filid-revalidate` <!-- [INTERACTIVE] AskUserQuestion: revalidate offer (accepted / all-rejected branches) -->
 
 > If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
 > `/filid:filid-revalidate`.** Then end execution.
@@ -296,12 +296,12 @@ If there were NO accepted fixes (all rejected):
   )
   → On "Yes — run now": invoke /filid:filid-revalidate
   → On "Not now": done
-  `filid:revalidate` will find zero accepted items, evaluate only the rejected-item
+  `filid:filid-revalidate` will find zero accepted items, evaluate only the rejected-item
   justifications and debt records, and return PASS if all justifications are
   constitutionally compliant.
 ```
 
-**After `filid:revalidate` is invoked (or skipped), execution is COMPLETE.**
+**After `filid:filid-revalidate` is invoked (or skipped), execution is COMPLETE.**
 
 ## Available MCP Tools
 
@@ -339,7 +339,7 @@ Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surg
           → 5 (Rejected items) → 6 (justifications.md) → 7 (Typecheck + commit)
           → 8 (Push) → 9 (Revalidate)
 
-Agents:    code-surgeon (Step 4a — parallel code-fix)
+Agents:    filid:code-surgeon (Step 4a — parallel code-fix)
 Skills:    filid:filid-promote (Step 4b), filid:filid-restructure (Step 4b)
 MCP tools: mcp_t_review_manage(normalize-branch), mcp_t_debt_manage(create)
 

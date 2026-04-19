@@ -107,6 +107,26 @@ structural violations out of the adjudicator fast path into the
 adversarial specialist committee. When `adjudicatorMode: true`, the user has
 explicitly asked for the fast path — do not escalate.
 
+### B.3.5 — Derive Deliberation Mode
+
+After committee election (and any structure-bias adjustment), derive
+the Phase D dispatch hint the pipeline main will consume via the
+`verdict_gate` rule
+(`packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`):
+
+- `committee == ['adjudicator']` (TRIVIAL auto-tier or
+  `adjudicator_mode: true`) → `deliberation_mode: solo-adjudicator`
+- `committee.length >= 2` (LOW / MEDIUM / HIGH) → `deliberation_mode: team`
+
+Set `failure_reason: none`. The A/B/C subagent boundary never emits a
+non-`none` value — Phase D main-context execution is the only place
+`phase-d-team-spawn-unavailable`, `team-incomplete`, `round5-exhaust`,
+or `veto-deadlock` can surface. `chairperson-forbidden` is a
+runtime-only marker produced when a subagent attempts a Phase D
+protocol violation; it is never written to `session.md`. The pipeline
+main's `verdict_gate` treats a missing frontmatter `deliberation_mode`
+identically to `chairperson-forbidden`.
+
 ### B.4 — Ensure Review Directory
 
 ```
@@ -130,6 +150,8 @@ complexity: <complexity from B.3 after structure-bias adjustment>
 committee:
   - <persona-id>
   - ...
+deliberation_mode: <solo-adjudicator|team>   # from B.3.5; consumed by verdict_gate in filid-pipeline
+failure_reason: none                          # A/B/C boundary is always "none"; Phase D may surface other values
 changed_files_count: <count>
 changed_fractals:
   - <fractal path>

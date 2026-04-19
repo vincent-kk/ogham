@@ -14,9 +14,14 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
 >
-> **HYBRID EXECUTION**: Only the `filid:review` stage runs in a subagent (context
-> isolation for its ~100k token consumption). All other stages (`pr-create`,
-> `filid:resolve`, `filid:revalidate`) execute directly in the main context via `Skill()`.
+> **HYBRID EXECUTION**: Only Phase A/B/C of the `filid:filid-review`
+> stage runs in a subagent (context isolation for its ~100k token consumption).
+> Phase D of `filid:filid-review` runs **in the main orchestrator** — the A/B/C
+> subagent returns `{ committee, deliberation_mode, failure_reason,
+> paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
+> fail via the `verdict_gate` rule. All other stages (`pr-create`,
+> `filid:filid-resolve`, `filid:filid-revalidate`) also execute directly in the main
+> context via `Skill()`.
 >
 > **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
 > pipelines most commonly stall. Resolve ends with commit + push, which
@@ -26,10 +31,11 @@ plugin: filid
 # filid-pipeline — End-to-End Review Pipeline
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
-in a single command. Uses a **hybrid execution model**: the `filid:review` stage
-runs in an independent subagent for context isolation (~100k tokens), while
-`pr-create`, `filid:resolve`, and `filid:revalidate` execute directly in the main
-context via `Skill()`. Stages communicate via `.filid/review/<branch>/` files.
+in a single command. Uses a **hybrid execution model**: only Phase A/B/C of
+`filid:filid-review` runs in an independent subagent for context isolation (~100k
+tokens). Phase D of `filid:filid-review` runs in the main orchestrator, as do
+`pr-create`, `filid:filid-resolve`, and `filid:filid-revalidate`. Stages communicate via
+`.filid/review/<branch>/` files.
 
 > **References**: `reference.md` (auto-detection algorithm edge cases, flag passthrough
 > matrix, file contracts, stage execution pattern). All execution-critical
@@ -103,17 +109,24 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 Execute stages sequentially from the determined entry point. The pipeline
 uses a **hybrid execution model**:
 
-- **Subagent stage** (`filid:review`): Delegated to an independent `general-purpose`
-  Task subagent for context isolation. The review stage consumes ~100k tokens
-  and would degrade the main context if run inline.
-- **Main context stages** (`pr-create`, `filid:resolve`, `filid:revalidate`): Executed
-  directly via `Skill()` in the orchestrator's context. These stages are
-  lightweight and procedural — subagent delegation adds fragile two-level
-  indirection (Agent → Skill() → internal subagents) that causes premature
-  termination.
+- **Subagent stage** (Phase A/B/C of `filid:filid-review` only): Delegated to an
+  independent `general-purpose` Task subagent for context isolation. Phase
+  A/B/C consume ~100k tokens and would degrade the main context if run
+  inline. The subagent MUST NOT execute Phase D internally — nested
+  `TeamCreate` spawns from a subagent context are unsupported and leak
+  orphan workers. On exit the subagent returns
+  `{ committee, deliberation_mode, failure_reason, paths_to_artifacts }` and
+  the pipeline main dispatches Phase D itself (see Phase D Dispatch below).
+- **Main context stages** (Phase D of `filid:filid-review`, plus `pr-create`,
+  `filid:filid-resolve`, `filid:filid-revalidate`): Executed directly via `Skill()` in
+  the orchestrator's context. These stages are lightweight and procedural —
+  subagent delegation adds fragile two-level indirection (Agent → Skill() →
+  internal subagents) that causes premature termination. Phase D
+  additionally requires main-context team orchestration that a subagent
+  cannot provide.
 
 > **Note**: Some main-context stages still spawn their own internal subagents
-> (e.g., `filid:resolve` uses `code-surgeon` subagents, `filid:revalidate` uses parallel
+> (e.g., `filid:filid-resolve` uses `code-surgeon` subagents, `filid:filid-revalidate` uses parallel
 > verification subagents). "Main context execution" means the *pipeline-level*
 > delegation is direct — internal skill behavior is unchanged.
 
@@ -126,47 +139,123 @@ uses a **hybrid execution model**:
 - **Output**: GitHub PR created/updated
 - **→ After Skill() completes, immediately proceed to review stage.**
 
-#### Stage: review (subagent)
+#### Stage: review A/B/C (subagent — Phase D pulled up to main)
 
-- **Subagent invokes**: `Skill("filid:filid-review", "--scope=pr")`
+- **Subagent invokes**: `Skill("filid:filid-review", "--scope=pr", "--pipeline-mode=abc-only")`
+  - The `--pipeline-mode=abc-only` hint (alias: `PIPELINE_MODE=abc-only`
+    context key) tells the review skill to stop after Phase C and emit
+    the Subagent Return Contract instead of executing Phase D / Step 4.5
+    / Step 5 inline. Without this hint the subagent would run Phase D
+    inside its own context — a nested `TeamCreate` spawn that leaks
+    orphan workers and breaks the Phase-D main pull-up contract.
 - **Pass through flags**: `--base`, `--force`, `--no-structure-check`
-- **Success signal**: `review-report.md` exists (written by Phase D regardless of verdict)
-- **PR comment fallback**: After the review subagent returns and `review-report.md`
-  is confirmed, verify that a **properly formatted** PR comment was posted.
-  Header match alone is insufficient — the subagent may hand-write a comment
-  with the correct header but skip the `format-pr-comment` tool, producing
-  output that lacks the collapsible structure. Validate via
-  `gh pr view --json comments --jq '.comments[].body'` (Bash) and check that
-  the most recent `Code Review Governance` comment contains **all** of these
-  structural markers (emitted only by `review_manage format-pr-comment`):
-    1. `<details><summary>Phase A — Structure Compliance</summary>`
-    2. `<details><summary>Review Report (Phase B~D)</summary>`
-    3. The footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``
-  If any marker is missing (or no matching comment exists), the subagent
-  skipped or hand-rolled Step 5. In that case, regenerate and replace from
-  the main context:
-  1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)`
-  2. If a malformed `Code Review Governance` comment exists, **edit it in place**
-     via `gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`
-     (obtain numeric `id` via `gh api repos/<owner>/<repo>/issues/<pr>/comments`).
-     Otherwise post fresh via `gh pr comment --body-file <file>`.
-  This is a silent fallback — no error reporting needed. If `gh` is not
-  authenticated, skip quietly.
-- **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
-  is generated → skip `filid:resolve` + `filid:revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
-  If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — remove the empty file via `Bash(rm "${review_dir}/fix-requests.md")` where `review_dir` is `.filid/review/<normalized-branch>`, then skip resolve + revalidate.
-- **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:resolve` +
-  `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:filid-pipeline --from=filid-review --force`." and END execution.
-- **Failure**: END execution with error — "Review failed: `<error>`"
-- **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
-- **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
+- **Success signal**: the subagent's final assistant message contains a
+  fenced `SubagentReturn` YAML block with `committee`,
+  `deliberation_mode`, `failure_reason`, and `paths_to_artifacts` (spec:
+  `packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`).
+  Cross-check that `session.md`, `verification-metrics.md`, and
+  `verification-structure.md` exist at the returned paths before
+  dispatching Phase D.
+- **Null / missing return handling**: if the subagent exits without a
+  parseable `SubagentReturn` block, treat the payload as
+  `deliberation_mode: null` and let the `verdict_gate` resolve to `fail`
+  → verdict `INCONCLUSIVE` in the Phase D Dispatch stage below. Do NOT
+  synthesize a verdict locally.
+- **Failure**: END execution with error — "Review A/B/C failed: `<error>`"
+- **Output**: `structure-check.md` (if Phase A ran), `session.md`,
+  `verification-metrics.md`, `verification-structure.md`. Phase D
+  artifacts (`review-report.md`, `fix-requests.md`, PR comment) are
+  written later by the Phase D Dispatch and finalize review stages.
+- **→ After SubagentReturn is received and A/B/C artifacts are verified, IMMEDIATELY proceed to Phase D Dispatch. Do NOT yield.**
+
+#### Stage: Phase D Dispatch (main context — within `filid:filid-review`)
+
+After the A/B/C subagent exits, the pipeline main reads the return payload
+and dispatches Phase D itself — the subagent does NOT execute Phase D. Main
+MUST consume two dispatch fields from the return:
+
+- `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
+- `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
+  round5-exhaust, veto-deadlock}`
+
+Apply the `verdict_gate` rule (spec:
+`packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`) in
+priority order — first match wins:
+
+| Condition                                                 | Dispatch | Verdict                                   |
+| --------------------------------------------------------- | -------- | ----------------------------------------- |
+| `deliberation_mode` is `chairperson-forbidden` or `null`  | fail     | `INCONCLUSIVE`                            |
+| `failure_reason != "none"`                                | fail     | `INCONCLUSIVE` (rationale = failure_reason) |
+| `deliberation_mode == "solo-adjudicator"`                 | solo     | from the single adjudicator Task          |
+| `deliberation_mode == "team"` AND `committee.length >= 2` | team     | from Phase D quorum result                |
+
+Dispatch actions (see `filid-review/phases/phase-d-deliberation.md` Step D.1):
+
+- **team** → `TeamCreate(review-<branch>)` + one `Task` per persona; run the
+  round state machine; ALWAYS `TeamDelete` inside try/finally.
+- **solo** → single standalone `Task(filid:adjudicator)` (no TeamCreate).
+- **fail** → write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if a
+  team was already created before the failure, `TeamDelete` inside
+  try/finally (orphan-log on teardown failure).
+
+`chairperson-direct` synthesis — main writing a verdict without running
+team or solo dispatch — is a **protocol violation** blocked by `verdict_gate`.
+Phase D then writes `review-report.md` / `fix-requests.md` per
+`filid-review/phases/phase-d-deliberation.md` Step D.6 (team/solo) or
+D.7 (fail).
+
+- **→ After Phase D dispatch completes and review-report.md is confirmed, immediately proceed to the finalize review stage below. Do NOT yield.**
+
+#### Stage: finalize review (main context — within `filid:filid-review`)
+
+After Phase D has written `review-report.md` (and `fix-requests.md` when
+applicable) via Step D.6 or D.7, the pipeline main finalizes the review
+skill in its own context. These steps used to live inside the subagent
+as filid-review Step 4.5 and Step 5; they now run main-side because the
+subagent exits before Phase D.
+
+1. **Persist content hash** (filid-review Step 4.5):
+   `mcp_t_review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>)`.
+2. **PR comment** (filid-review Step 5, `--scope=pr` only):
+   1. `mcp_t_review_manage(action: "format-pr-comment", projectRoot: <project_root>, branchName: <branch>)` — returns formatted markdown.
+   2. `gh auth status` (Bash). If not authenticated, skip the PR comment
+      quietly — no error reporting.
+   3. Query existing comments via `gh pr view --json comments --jq '.comments[].body'` (Bash).
+      If a `Code Review Governance` comment already exists, check that
+      its body contains ALL three structural markers emitted only by
+      `review_manage format-pr-comment`:
+      1. `<details><summary>Phase A — Structure Compliance</summary>`
+      2. `<details><summary>Review Report (Phase B~D)</summary>`
+      3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``
+      If any marker is missing OR the comment was hand-rolled, **edit it
+      in place** via `gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`
+      (obtain numeric `id` via `gh api repos/<owner>/<repo>/issues/<pr>/comments`).
+   4. Otherwise post fresh via `gh pr comment --body-file <file>`.
+3. **Verdict decision** (read `verdict` from `review-report.md`
+   frontmatter):
+   - **APPROVED**: skip `filid:filid-resolve` + `filid:filid-revalidate`.
+     Report "Review approved — no fixes needed." and END execution. If
+     `fix-requests.md` exists with 0 items, remove it via
+     `Bash(rm "${review_dir}/fix-requests.md")` where `review_dir` is
+     `.filid/review/<normalized-branch>`, then END.
+   - **INCONCLUSIVE**: skip `filid:filid-resolve` + `filid:filid-revalidate`.
+     Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus
+     not reached. Inspect `.filid/review/<branch>/review-report.md` and
+     re-run `/filid:filid-pipeline --from=filid-review --force`." and END
+     execution.
+   - **REQUEST_CHANGES** (`fix-requests.md` exists and is non-empty):
+     proceed to the resolve stage.
+
+- **Output**: `content-hash.json`, PR comment (if `--scope=pr` and `gh`
+  authenticated), verdict-dependent control-flow decision.
+- **→ APPROVED / INCONCLUSIVE → END execution. REQUEST_CHANGES → immediately invoke `Skill("filid:filid-resolve", "--auto")` in the next response.**
 
 #### Stage: resolve (main context)
 
 - **Execute**: `Skill("filid:filid-resolve", "--auto")`
 - **Always passes `--auto`** (pipeline implies full automation)
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
-- **Zero accepted fixes**: proceed to `filid:revalidate` normally
+- **Zero accepted fixes**: proceed to `filid:filid-revalidate` normally
   (`justifications.md` will exist with all-rejected entries)
 - **Failure**: END execution with error — "Resolve failed: `<error>`"
 - **Output**: `justifications.md`, committed + pushed changes
@@ -258,8 +347,8 @@ All other operations are delegated to existing skills via `Skill()` tool.
 /filid:filid-pipeline --from=filid-resolve   # Resolve → revalidate
 /filid:filid-pipeline --from=filid-revalidate # Revalidate only
 
-Pipeline:  [pr-create] → [review] → [resolve --auto] → [revalidate]
-Execution: review = subagent (context isolation), others = main context (direct Skill())
+Pipeline:  [pr-create] → [review A/B/C] → [Phase D dispatch] → [finalize review] → [resolve --auto] → [revalidate]
+Execution: review A/B/C = subagent (context isolation); Phase D dispatch, finalize review, and all other stages = main context (direct Skill())
 Skills:    filid:filid-pull-request, filid:filid-review (--scope=pr), filid:filid-resolve (--auto), filid:filid-revalidate
 Files:     .filid/review/<branch>/ (inter-stage communication)
 Resolve:   Always --auto (accept all, commit, push, auto-revalidate)
