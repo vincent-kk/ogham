@@ -14,9 +14,14 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
 >
-> **HYBRID EXECUTION**: Only the `filid:review` stage runs in a subagent (context
-> isolation for its ~100k token consumption). All other stages (`pr-create`,
-> `filid:resolve`, `filid:revalidate`) execute directly in the main context via `Skill()`.
+> **HYBRID EXECUTION (Refs: ADR-0001)**: Only Phase A/B/C of the `filid:review`
+> stage runs in a subagent (context isolation for its ~100k token consumption).
+> Phase D of `filid:review` runs **in the main orchestrator** — the A/B/C
+> subagent returns `{ committee, deliberation_mode, failure_reason,
+> paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
+> fail via the `verdict_gate` rule. All other stages (`pr-create`,
+> `filid:resolve`, `filid:revalidate`) also execute directly in the main
+> context via `Skill()`.
 >
 > **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
 > pipelines most commonly stall. Resolve ends with commit + push, which
@@ -26,10 +31,11 @@ plugin: filid
 # filid-pipeline — End-to-End Review Pipeline
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
-in a single command. Uses a **hybrid execution model**: the `filid:review` stage
-runs in an independent subagent for context isolation (~100k tokens), while
-`pr-create`, `filid:resolve`, and `filid:revalidate` execute directly in the main
-context via `Skill()`. Stages communicate via `.filid/review/<branch>/` files.
+in a single command. Uses a **hybrid execution model**: only Phase A/B/C of
+`filid:review` runs in an independent subagent for context isolation (~100k
+tokens). Phase D of `filid:review` runs in the main orchestrator, as do
+`pr-create`, `filid:resolve`, and `filid:revalidate`. Stages communicate via
+`.filid/review/<branch>/` files.
 
 > **References**: `reference.md` (auto-detection algorithm edge cases, flag passthrough
 > matrix, file contracts, stage execution pattern). All execution-critical
@@ -103,14 +109,21 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 Execute stages sequentially from the determined entry point. The pipeline
 uses a **hybrid execution model**:
 
-- **Subagent stage** (`filid:review`): Delegated to an independent `general-purpose`
-  Task subagent for context isolation. The review stage consumes ~100k tokens
-  and would degrade the main context if run inline.
-- **Main context stages** (`pr-create`, `filid:resolve`, `filid:revalidate`): Executed
-  directly via `Skill()` in the orchestrator's context. These stages are
-  lightweight and procedural — subagent delegation adds fragile two-level
-  indirection (Agent → Skill() → internal subagents) that causes premature
-  termination.
+- **Subagent stage** (Phase A/B/C of `filid:review` only): Delegated to an
+  independent `general-purpose` Task subagent for context isolation. Phase
+  A/B/C consume ~100k tokens and would degrade the main context if run
+  inline. The subagent MUST NOT execute Phase D internally — nested
+  `TeamCreate` spawns from a subagent context are unsupported and leak
+  orphan workers. On exit the subagent returns
+  `{ committee, deliberation_mode, failure_reason, paths_to_artifacts }` and
+  the pipeline main dispatches Phase D itself (see Phase D Dispatch below).
+- **Main context stages** (Phase D of `filid:review`, plus `pr-create`,
+  `filid:resolve`, `filid:revalidate`): Executed directly via `Skill()` in
+  the orchestrator's context. These stages are lightweight and procedural —
+  subagent delegation adds fragile two-level indirection (Agent → Skill() →
+  internal subagents) that causes premature termination. Phase D
+  additionally requires main-context team orchestration that a subagent
+  cannot provide.
 
 > **Note**: Some main-context stages still spawn their own internal subagents
 > (e.g., `filid:resolve` uses `code-surgeon` subagents, `filid:revalidate` uses parallel
@@ -160,6 +173,44 @@ uses a **hybrid execution model**:
 - **Failure**: END execution with error — "Review failed: `<error>`"
 - **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
+
+#### Stage: Phase D Dispatch (main context — within `filid:review`)
+
+After the A/B/C subagent exits, the pipeline main reads the return payload
+and dispatches Phase D itself — the subagent does NOT execute Phase D. Main
+MUST consume two dispatch fields from the return:
+
+- `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
+- `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
+  round5-exhaust, veto-deadlock}`
+
+Apply the `verdict_gate` rule (spec:
+`packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`) in
+priority order — first match wins:
+
+| Condition                                                 | Dispatch | Verdict                                   |
+| --------------------------------------------------------- | -------- | ----------------------------------------- |
+| `deliberation_mode` is `chairperson-forbidden` or `null`  | fail     | `INCONCLUSIVE`                            |
+| `failure_reason != "none"`                                | fail     | `INCONCLUSIVE` (rationale = failure_reason) |
+| `deliberation_mode == "solo-adjudicator"`                 | solo     | from the single adjudicator Task          |
+| `deliberation_mode == "team"` AND `committee.length >= 2` | team     | from Phase D quorum result                |
+
+Dispatch actions (see `filid-review/phases/phase-d-deliberation.md` Step D.1):
+
+- **team** → `TeamCreate(review-<branch>)` + one `Task` per persona; run the
+  round state machine; ALWAYS `TeamDelete` inside try/finally.
+- **solo** → single standalone `Task(filid:adjudicator)` (no TeamCreate).
+- **fail** → write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if a
+  team was already created before the failure, `TeamDelete` inside
+  try/finally (orphan-log on teardown failure).
+
+`chairperson-direct` synthesis — main writing a verdict without running
+team or solo dispatch — is a **protocol violation** blocked by `verdict_gate`.
+Phase D then writes `review-report.md` / `fix-requests.md` per
+`filid-review/phases/phase-d-deliberation.md` Step D.6 (team/solo) or
+D.7 (fail).
+
+- **→ After Phase D dispatch completes and review-report.md is confirmed, continue the review-stage early-exit checks (APPROVED / INCONCLUSIVE / REQUEST_CHANGES) above.**
 
 #### Stage: resolve (main context)
 
