@@ -141,19 +141,29 @@ them in.
    language. Technical terms, code identifiers, rule IDs, and file paths
    remain in original form.
 
-## Post-Completion Verification
+## Post-Completion Verification Fallback (A/B/C1/C2 only — Phase D excluded)
 
-After each subagent completes, verify its output file exists before
+> Refs: ADR-0001
+
+This fallback applies **only** to Phase A, B, C1, and C2. **Phase D is
+excluded** from the chairperson-direct fallback path — main MUST NOT
+fabricate a Phase D verdict when the A/B/C subagent fails. Instead, route
+the failure through the `verdict_gate` rule in
+`packages/filid/skills/filid-review/DETAIL.md` (`## API Contracts`) with
+dispatch `fail` and verdict `INCONCLUSIVE`. See
+`packages/filid/skills/filid-review/phases/phase-d-deliberation.md` Step D.7.
+
+After each A/B/C subagent completes, verify its output file exists before
 proceeding:
 
 1. Check: Does `<REVIEW_DIR>/<expected_file>` exist? (Read or Glob)
 2. If **yes** → proceed to next step.
-3. If **no** → the subagent failed to write its deliverable. Do NOT
-   re-launch a subagent. Instead, read the phase instructions file
+3. If **no** → the subagent failed to write its A/B/C deliverable. Do NOT
+   re-launch a subagent. Instead, read the A/B/C phase instructions file
    yourself and execute the steps directly as the chairperson. This is
    faster and more reliable than re-delegating.
 
-Apply this verification to every delegated phase:
+Apply this verification to every delegated A/B/C phase (and no further):
 
 | Phase | Expected output                  |
 | ----- | -------------------------------- |
@@ -162,7 +172,18 @@ Apply this verification to every delegated phase:
 | C1    | `verification-metrics.md`        |
 | C2    | `verification-structure.md`      |
 
-For batched phases (`changedFilesCount > 15`), verify every
-`<base>.partial-<batchId>.md` file exists before merging. Missing
-partials trigger the same chairperson-direct fallback on the missing
-batch only — do not re-run successful batches.
+For batched A/B/C phases (`changedFilesCount > 15`), verify every
+`<base>.partial-<batchId>.md` file exists before merging. Missing partials
+trigger the same chairperson-direct fallback on the missing batch only — do
+not re-run successful batches. This batched fallback, too, applies only to
+A/B/C1/C2.
+
+### Phase D protocol violation (chairperson-direct synthesis forbidden)
+
+A `chairperson-direct` Phase D synthesis — main writing a SYNTHESIS verdict
+without running either the `team` dispatch (`TeamCreate` + N `Task`s) or the
+`solo-adjudicator` dispatch (single `Task(filid:adjudicator)`) — is a
+**protocol violation** (프로토콜 위반). Phase D runs only in the main
+orchestrator, and only via one of those two sanctioned dispatches. Any
+deviation yields `deliberation_mode == "chairperson-forbidden"` and the
+`verdict_gate` MUST block the merge with `verdict: INCONCLUSIVE`.
