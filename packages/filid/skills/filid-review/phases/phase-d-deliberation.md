@@ -29,6 +29,52 @@
 > Phase D completes when `review-report.md` and `fix-requests.md` are
 > written AND (team mode) the team is fully shut down via `TeamDelete`.
 
+## Main Pull-Up Contract (Refs: ADR-0001)
+
+Phase D runs **only in the main orchestrator**, never inside the A/B/C
+subagent. The subagent MUST NOT call `TeamCreate`, `SendMessage`, or otherwise
+attempt Phase D internally — nested team spawns from a subagent context are
+unsupported and leak orphan workers. The subagent's sole Phase-D obligation
+is to emit the Subagent Return Contract on exit (see
+`packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`) with two
+dispatch fields:
+
+- `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
+- `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
+  round5-exhaust, veto-deadlock}`
+
+Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
+
+| Dispatch | Trigger                                                           | Main action                                                                                      |
+| -------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| team     | `deliberation_mode == team` AND `committee.length >= 2`           | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally         |
+| solo     | `deliberation_mode == solo-adjudicator`                           | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                  |
+| fail     | `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`, OR TeamCreate error, OR VETO deadlock, OR round-5 exhaust | Step D.7 — write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure) |
+
+`chairperson-direct` Phase D synthesis — main writing a verdict without
+running either the team branch or the solo-adjudicator branch — is a
+**protocol violation**. Main MUST block the merge with `verdict: INCONCLUSIVE`
+via the `verdict_gate` rule in DETAIL.md rather than emitting an ad-hoc
+synthesis.
+
+### Token counter baseline
+
+Each Phase D dispatch MUST append one entry to `<REVIEW_DIR>/session.md`
+under a `phase_d_token_usage:` block recording the main-context token
+consumption for this phase. This establishes the measurement baseline for
+the ADR-0002 re-evaluation trigger (Phase D main tokens ≥ 40% of pipeline
+budget across ≥ 3 PRs):
+
+```
+phase_d_token_usage:
+  run_id: <review-run identifier>
+  dispatch: team | solo | fail
+  tokens_main: <integer>
+  recorded_at: <ISO-8601 timestamp>
+```
+
+---
+
 Phase D produces the final review verdict through a **real multi-agent
 deliberation** using Claude Code's native team tools. Committee members
 elected by `mcp_t_review_manage(elect-committee)` are spawned as team workers,
@@ -62,20 +108,26 @@ into a single `verification.md` file that committee members will read:
 
 **→ After verification.md is written, immediately proceed to Step D.1. Do NOT yield.**
 
-## Step D.1 — Committee Size Branch
+## Step D.1 — Dispatch Branch (team / solo / fail)
 
-Parse `committee` from `<REVIEW_DIR>/session.md` frontmatter.
+Parse `committee`, `deliberation_mode`, and `failure_reason` from the
+subagent return payload. Cross-check `committee` against
+`<REVIEW_DIR>/session.md` frontmatter, then dispatch in this priority order —
+first match wins:
 
 ```
-committee == ['adjudicator']   →  Solo Deliberation (Step D.2-solo)
-committee.length >= 2            →  Team Deliberation (Step D.2-team)
+deliberation_mode in {"chairperson-forbidden", null}
+  OR failure_reason != "none"                           →  fail (Step D.7)
+deliberation_mode == "solo-adjudicator"                 →  solo (Step D.2-solo)
+deliberation_mode == "team" AND committee.length >= 2   →  team (Step D.2-team)
 ```
 
 The TRIVIAL auto-tier and the `--solo` manual flag both produce
-`committee: ['adjudicator']`. Both paths converge on Step D.2-solo.
-The specialist personas (`engineering-architect`, `knowledge-manager`,
-etc.) are never elected as a single-member committee — they only
-appear in LOW / MEDIUM / HIGH committees of size >= 2.
+`committee: ['adjudicator']` with `deliberation_mode == "solo-adjudicator"`.
+Both paths converge on Step D.2-solo. The specialist personas
+(`engineering-architect`, `knowledge-manager`, etc.) are never elected as a
+single-member committee — they only appear in LOW / MEDIUM / HIGH committees
+of size >= 2 under `deliberation_mode == "team"`.
 
 ---
 
@@ -510,7 +562,9 @@ Current, Raised by, Recommended Action, Code Patch (if applicable).
 
 Skip for solo deliberation — no team exists.
 
-For team deliberation:
+For team deliberation, wrap the shutdown in a **try/finally** so
+`TeamDelete` ALWAYS runs — even when `shutdown_request` throws, times out, or
+an earlier step in this block raises:
 
 1. Verify all tasks completed via `TaskList`.
 2. Send `shutdown_request` to every committee member in parallel:
@@ -523,9 +577,47 @@ For team deliberation:
    ```
 3. Wait up to 30 seconds per member for `shutdown_response`. Track
    confirmed and timed-out members.
-4. `TeamDelete({ team_name: "review-<normalized-branch>" })`.
+4. `TeamDelete({ team_name: "review-<normalized-branch>" })` — placed in the
+   `finally` arm. Any exception from steps 1–3 MUST still allow this call to
+   execute. On `TeamDelete` failure, append an `orphan_workers:` entry to
+   `<REVIEW_DIR>/session.md` listing the team name and surviving workers so
+   the next run can reap them.
 
 **→ After TeamDelete returns (or solo path completes), immediately proceed to Step 4.5 in ../SKILL.md (persist content hash). Do NOT yield.**
+
+---
+
+## Step D.7 — Failure Branch (fail dispatch)
+
+Entered when Step D.1 selects the fail dispatch — `deliberation_mode` is
+`chairperson-forbidden` or `null`, OR `failure_reason != "none"` — OR when an
+in-flight team dispatch raises a TeamCreate error, VETO deadlock, or
+round-5 exhaust after the team was spawned.
+
+1. **Team teardown (if applicable)**: if a team was already created before
+   the failure surfaced, run `TeamDelete({ team_name: "review-<normalized-branch>" })`
+   inside a try/finally block. On `TeamDelete` exception, append an
+   `orphan_workers:` entry to `<REVIEW_DIR>/session.md` (team name +
+   surviving worker list) so the next run can reap them.
+2. **Write failure record**: emit `<REVIEW_DIR>/rounds/failure.md` with
+   frontmatter capturing the dispatch and reason:
+   ```
+   ---
+   verdict: INCONCLUSIVE
+   dispatch: fail
+   failure_reason: <from subagent return | "phase-d-team-spawn-unavailable" | "veto-deadlock" | "round5-exhaust" | "team-incomplete">
+   rationale: <one-line rationale>
+   ---
+   ```
+3. **Skip Step D.6 aggregation**: the verdict is already `INCONCLUSIVE`.
+   `chairperson-direct` synthesis in this branch — main writing a SYNTHESIS
+   verdict without a live team or adjudicator Task — is a protocol violation
+   and MUST NOT occur.
+4. **Token counter**: append the Phase D token counter entry to
+   `session.md` with `dispatch: fail` so the ADR-0002 trigger baseline
+   remains consistent across team / solo / fail dispatches.
+5. Proceed to Step 4.5 in `../SKILL.md` (persist content hash) carrying the
+   `INCONCLUSIVE` verdict.
 
 ---
 
