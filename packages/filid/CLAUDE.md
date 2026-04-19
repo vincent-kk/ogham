@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `@ogham/filid`는 **Fractal Context Architecture (FCA-AI)** 규칙을 강제하는 Claude Code 플러그인이다. 4계층 아키텍처로 작동한다:
 
 ```
-Layer 1 (자동)  → Hooks (PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
+Layer 1 (자동)  → Hooks (SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd)
 Layer 2 (도구)  → MCP Server (17개 분석/관리 도구)
 Layer 3 (에이전트) → 14개 특화 에이전트 (architect, implementer, QA, review committee 등)
 Layer 4 (사용자) → 18개 Skills (/filid:filid-setup, /filid:filid-review 등)

@@ -10,8 +10,8 @@ plugin: filid
 
 > **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
 > After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
-> NEVER yield after `mcp_t_cache_manage` gate, `qa-reviewer` subagent return,
-> `context-manager` delegation, or `implementer` completion.
+> NEVER yield after `mcp_t_cache_manage` gate, `filid:qa-reviewer` subagent return,
+> `filid:context-manager` delegation, or `filid:implementer` completion.
 >
 > **Valid reasons to yield**:
 > 1. User decision genuinely required (absent `--auto-approve`, Stage 2 sync may prompt)
@@ -19,8 +19,8 @@ plugin: filid
 >
 > **HIGH-RISK YIELD POINTS**:
 > - Stage 0 incremental gate result — after reporting "no changes", end in the same turn; after "changes detected", immediately chain Stage 1
-> - Stage 1 qa-reviewer return → Stage 2 sync decision — no yield between severity check and `filid:filid-sync` delegation
-> - Stage 3 context-manager / implementer agent returns — chain validation immediately
+> - Stage 1 `filid:qa-reviewer` return → Stage 2 sync decision — no yield between severity check and `filid:filid-sync` delegation
+> - Stage 3 `filid:context-manager` / `filid:implementer` agent returns — chain validation immediately
 
 # filid-update — Code-Docs-Tests Synchronization
 
@@ -57,7 +57,7 @@ See [reference.md Section 0](./reference.md#section-0--change-detection).
 
 Scan only files changed in this branch for FCA-AI rule violations.
 
-Agent: `qa-reviewer` (sonnet)
+Agent: `filid:qa-reviewer` (sonnet)
 See [reference.md Section 1](./reference.md#section-1--scan).
 
 ### Stage 2 — Sync (Conditional Structure Correction)
@@ -65,7 +65,7 @@ See [reference.md Section 1](./reference.md#section-1--scan).
 Runs only when Stage 1 detects `critical` or `high` severity violations.
 See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
 
-Agents: `drift-analyzer` (sonnet) → `restructurer` (sonnet)
+Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet)
 MCP: `mcp_t_drift_detect`, `mcp_t_lca_resolve`, `mcp_t_structure_validate`
 See [reference.md Section 2](./reference.md#section-2--sync).
 
@@ -74,10 +74,10 @@ See [reference.md Section 2](./reference.md#section-2--sync).
 Update INTENT.md/DETAIL.md and organize test.ts/spec.ts based on changed files.
 Two independent agents run in parallel on non-overlapping file sets.
 
-Agent: `context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
-Agent: `implementer` (sonnet) — test organization (test.ts / spec.ts)
+Agent: `filid:context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
+Agent: `filid:implementer` (sonnet) — test organization (test.ts / spec.ts)
 
-If either agent (`context-manager` or `implementer`) fails, the orchestrator
+If either agent (`filid:context-manager` or `filid:implementer`) fails, the orchestrator
 marks the stage as failed. Stage 4 (cache hash save) is skipped when any prior
 stage reported an error, ensuring the failed operation is retried on next run.
 
@@ -128,7 +128,7 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ```
 Stages:   Change Detection → Scan → Sync (conditional) → Doc & Test Update → Finalize
-Agents:   qa-reviewer (Stage 1), drift-analyzer+restructurer (Stage 2), context-manager+implementer (Stage 3)
+Agents:   filid:qa-reviewer (Stage 1), filid:drift-analyzer+filid:restructurer (Stage 2), filid:context-manager+filid:implementer (Stage 3)
 Cache:    ~/.claude/plugins/filid/{cwdHash}/run-update.hash
 ```
 

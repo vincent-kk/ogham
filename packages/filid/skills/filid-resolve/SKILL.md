@@ -23,7 +23,7 @@ plugin: filid
 > 3. Terminal stage marker emitted: `Resolve complete — N accepted` or `Resolve aborted`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After `code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
+> - After `filid:code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
 > - After git commit+push — immediately chain `Skill("filid:filid-revalidate")` in the same turn (this is the primary stall point)
 > - Interactive step completion (user responded) — chain next non-interactive step without delay
 > - Justification collection loop — batch all rejections in the same turn when possible
@@ -76,7 +76,7 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - **Type** (one of `code-fix`, `filid-promote`, `filid-restructure`; defaults to `code-fix` if absent)
 
 Classify each item by type:
-- `code-fix` — standard code patch (applied by code-surgeon)
+- `code-fix` — standard code patch (applied by `filid:code-surgeon`)
 - `filid-promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `filid-restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
 
@@ -122,7 +122,7 @@ For each fix item:
 #### Phase 4a — Code Fixes (parallel)
 
 Delegate all accepted `code-fix` items **in parallel** as separate Task
-subagents (`code-surgeon`, model: `sonnet`, `run_in_background: true`).
+subagents (`subagent_type: "filid:code-surgeon"`, `model: "sonnet"`, `run_in_background: true`).
 
 For each accepted code-fix, spawn one subagent with:
 - The target file path
@@ -339,7 +339,7 @@ Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surg
           → 5 (Rejected items) → 6 (justifications.md) → 7 (Typecheck + commit)
           → 8 (Push) → 9 (Revalidate)
 
-Agents:    code-surgeon (Step 4a — parallel code-fix)
+Agents:    filid:code-surgeon (Step 4a — parallel code-fix)
 Skills:    filid:filid-promote (Step 4b), filid:filid-restructure (Step 4b)
 MCP tools: mcp_t_review_manage(normalize-branch), mcp_t_debt_manage(create)
 
