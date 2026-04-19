@@ -1,7 +1,7 @@
 # filid-promote — Reference Documentation
 
 Detailed workflow, eligibility rules, and spec generation logic for the
-`filid:promote` skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
+`filid:filid-promote` skill. For the quick-start guide, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Discovery Details
 

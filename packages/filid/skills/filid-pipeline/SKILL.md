@@ -14,13 +14,13 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
 >
-> **HYBRID EXECUTION (Refs: ADR-0001)**: Only Phase A/B/C of the `filid:review`
+> **HYBRID EXECUTION (Refs: ADR-0001)**: Only Phase A/B/C of the `filid:filid-review`
 > stage runs in a subagent (context isolation for its ~100k token consumption).
-> Phase D of `filid:review` runs **in the main orchestrator** — the A/B/C
+> Phase D of `filid:filid-review` runs **in the main orchestrator** — the A/B/C
 > subagent returns `{ committee, deliberation_mode, failure_reason,
 > paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
 > fail via the `verdict_gate` rule. All other stages (`pr-create`,
-> `filid:resolve`, `filid:revalidate`) also execute directly in the main
+> `filid:filid-resolve`, `filid:filid-revalidate`) also execute directly in the main
 > context via `Skill()`.
 >
 > **HIGH-RISK YIELD POINT**: The resolve → revalidate transition is where
@@ -32,9 +32,9 @@ plugin: filid
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
 in a single command. Uses a **hybrid execution model**: only Phase A/B/C of
-`filid:review` runs in an independent subagent for context isolation (~100k
-tokens). Phase D of `filid:review` runs in the main orchestrator, as do
-`pr-create`, `filid:resolve`, and `filid:revalidate`. Stages communicate via
+`filid:filid-review` runs in an independent subagent for context isolation (~100k
+tokens). Phase D of `filid:filid-review` runs in the main orchestrator, as do
+`pr-create`, `filid:filid-resolve`, and `filid:filid-revalidate`. Stages communicate via
 `.filid/review/<branch>/` files.
 
 > **References**: `reference.md` (auto-detection algorithm edge cases, flag passthrough
@@ -109,7 +109,7 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 Execute stages sequentially from the determined entry point. The pipeline
 uses a **hybrid execution model**:
 
-- **Subagent stage** (Phase A/B/C of `filid:review` only): Delegated to an
+- **Subagent stage** (Phase A/B/C of `filid:filid-review` only): Delegated to an
   independent `general-purpose` Task subagent for context isolation. Phase
   A/B/C consume ~100k tokens and would degrade the main context if run
   inline. The subagent MUST NOT execute Phase D internally — nested
@@ -117,8 +117,8 @@ uses a **hybrid execution model**:
   orphan workers. On exit the subagent returns
   `{ committee, deliberation_mode, failure_reason, paths_to_artifacts }` and
   the pipeline main dispatches Phase D itself (see Phase D Dispatch below).
-- **Main context stages** (Phase D of `filid:review`, plus `pr-create`,
-  `filid:resolve`, `filid:revalidate`): Executed directly via `Skill()` in
+- **Main context stages** (Phase D of `filid:filid-review`, plus `pr-create`,
+  `filid:filid-resolve`, `filid:filid-revalidate`): Executed directly via `Skill()` in
   the orchestrator's context. These stages are lightweight and procedural —
   subagent delegation adds fragile two-level indirection (Agent → Skill() →
   internal subagents) that causes premature termination. Phase D
@@ -126,7 +126,7 @@ uses a **hybrid execution model**:
   cannot provide.
 
 > **Note**: Some main-context stages still spawn their own internal subagents
-> (e.g., `filid:resolve` uses `code-surgeon` subagents, `filid:revalidate` uses parallel
+> (e.g., `filid:filid-resolve` uses `code-surgeon` subagents, `filid:filid-revalidate` uses parallel
 > verification subagents). "Main context execution" means the *pipeline-level*
 > delegation is direct — internal skill behavior is unchanged.
 
@@ -166,15 +166,15 @@ uses a **hybrid execution model**:
   This is a silent fallback — no error reporting needed. If `gh` is not
   authenticated, skip quietly.
 - **Early exit (APPROVED)**: If review verdict is `APPROVED` and no `fix-requests.md`
-  is generated → skip `filid:resolve` + `filid:revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
+  is generated → skip `filid:filid-resolve` + `filid:filid-revalidate`. Report "Review approved — no fixes needed." and END execution. Do not ask the user anything.
   If review verdict is `APPROVED` but `fix-requests.md` exists with 0 items, treat as APPROVED — remove the empty file via `Bash(rm "${review_dir}/fix-requests.md")` where `review_dir` is `.filid/review/<normalized-branch>`, then skip resolve + revalidate.
-- **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:resolve` +
-  `filid:revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:filid-pipeline --from=filid-review --force`." and END execution.
+- **Early exit (INCONCLUSIVE)**: If review verdict is `INCONCLUSIVE` → skip `filid:filid-resolve` +
+  `filid:filid-revalidate`. Pipeline verdict is **FAIL**. Report "Review inconclusive — consensus not reached. Inspect `.filid/review/<branch>/review-report.md` and re-run `/filid:filid-pipeline --from=filid-review --force`." and END execution.
 - **Failure**: END execution with error — "Review failed: `<error>`"
 - **Output**: `review-report.md`, `fix-requests.md` (if `REQUEST_CHANGES`), PR comment
 - **→ After fix-requests.md is confirmed (REQUEST_CHANGES verdict), immediately proceed to resolve stage.**
 
-#### Stage: Phase D Dispatch (main context — within `filid:review`)
+#### Stage: Phase D Dispatch (main context — within `filid:filid-review`)
 
 After the A/B/C subagent exits, the pipeline main reads the return payload
 and dispatches Phase D itself — the subagent does NOT execute Phase D. Main
@@ -217,7 +217,7 @@ D.7 (fail).
 - **Execute**: `Skill("filid:filid-resolve", "--auto")`
 - **Always passes `--auto`** (pipeline implies full automation)
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
-- **Zero accepted fixes**: proceed to `filid:revalidate` normally
+- **Zero accepted fixes**: proceed to `filid:filid-revalidate` normally
   (`justifications.md` will exist with all-rejected entries)
 - **Failure**: END execution with error — "Resolve failed: `<error>`"
 - **Output**: `justifications.md`, committed + pushed changes

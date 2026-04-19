@@ -1,7 +1,7 @@
 # filid-guide — Reference Documentation
 
 Detailed workflow, MCP tool call signatures, and output format templates for the
-fractal structure `filid:guide` skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
+fractal structure `filid:filid-guide` skill. For the quick-start overview, see [SKILL.md](./SKILL.md).
 
 ## Section 1 — Project Scan
 

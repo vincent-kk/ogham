@@ -28,7 +28,7 @@ When passing arguments to a skill, use the **two-argument** form —
 `Skill("filid:<name>", "<args>")` — not a single string with embedded flags.
 
 - CORRECT: `Skill("filid:filid-review", "--scope=pr")`
-- WRONG: `Skill("filid:review --scope=pr")` (flag leaks into skill name)
+- WRONG: `Skill("filid:filid-review --scope=pr")` (flag leaks into skill name)
 
 ## Ordering
 
@@ -46,7 +46,7 @@ Each stage's output is the next stage's input:
 ## Notes
 
 - `pr-create` is a stage alias, **not** a skill name. The actual skill is
-  `filid:pull-request`. The alias exists because "create" describes the
+  `filid:filid-pull-request`. The alias exists because "create" describes the
   pipeline's intent (creating a new review cycle) while `filid-pull-request`
   describes the skill's concrete output.
 - Fix-request type values (`code-fix`, `filid-promote`, `filid-restructure`) follow the

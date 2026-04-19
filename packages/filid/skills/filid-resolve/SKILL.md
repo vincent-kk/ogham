@@ -82,8 +82,8 @@ Classify each item by type:
 
 > **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
 > the review phase and may carry a leading `filid:` prefix on type values
-> (e.g., `filid:promote`). Strip the `filid:` prefix before enum matching —
-> treat `filid:promote` and `filid-promote` as identical. Unknown tokens after
+> (e.g., `filid:filid-promote`). Strip the `filid:` prefix before enum matching —
+> treat `filid:filid-promote` and `filid-promote` as identical. Unknown tokens after
 > stripping fall back to `code-fix` (the default). This normalization is
 > permanent, not a migration grace period. See `src/types/handoff.ts`
 > `normalizeFixRequestType` for the canonical implementation.
@@ -146,7 +146,7 @@ For each accepted `filid-restructure` item:
   "SKIP — restructure not applicable" and continue. This is non-blocking.
 
 > **Important**: Structural fix failures MUST NOT block the pipeline.
-> Log the result and continue to Step 5. The `filid:revalidate` stage will
+> Log the result and continue to Step 5. The `filid:filid-revalidate` stage will
 > catch any remaining issues.
 
 **→ After all fixes (code + structural) complete, immediately proceed to Step 5.**
@@ -198,7 +198,7 @@ Use the `base_sha` captured at the start of Step 4 (pre-fix HEAD) as
 `resolve_commit_sha`. Do NOT run `git rev-parse HEAD` here — the base SHA
 was already captured before any code changes.
 
-> **Why**: `filid:revalidate` computes `git diff resolve_commit_sha..HEAD`.
+> **Why**: `filid:filid-revalidate` computes `git diff resolve_commit_sha..HEAD`.
 > After the auto-commit in Step 7, HEAD moves to the fix commit, so the
 > delta correctly contains only the fix changes.
 
@@ -228,7 +228,7 @@ If there were accepted fixes (files modified by code-surgeon):
    `git add <file1> <file2> ... <debt files if any>`
    - Include: files modified by code-surgeon + any debt files in `.filid/debt/` created in Step 5.
    - **Do NOT stage `justifications.md`** — it lives in `.filid/review/<branch>/` which is
-     gitignored. It is an inter-stage communication file read by `filid:revalidate` from local
+     gitignored. It is an inter-stage communication file read by `filid:filid-revalidate` from local
      disk. Explicitly adding it via `git add` overrides `.gitignore` and pollutes the git tree.
    - **Do NOT stage any file under `.filid/review/`** — all review session artifacts are
      local-only and excluded by `.gitignore`.
@@ -268,7 +268,7 @@ If there were **NO** accepted fixes (all rejected):
      - On "Continue to revalidate anyway": **→ Immediately proceed to Step 9.**
      - On "Stop here": **END execution.**
 
-### Step 9 — Offer to Run `filid:revalidate` <!-- [INTERACTIVE] AskUserQuestion: revalidate offer (accepted / all-rejected branches) -->
+### Step 9 — Offer to Run `filid:filid-revalidate` <!-- [INTERACTIVE] AskUserQuestion: revalidate offer (accepted / all-rejected branches) -->
 
 > If `--auto` is set: **Skip `AskUserQuestion`. Automatically invoke
 > `/filid:filid-revalidate`.** Then end execution.
@@ -296,12 +296,12 @@ If there were NO accepted fixes (all rejected):
   )
   → On "Yes — run now": invoke /filid:filid-revalidate
   → On "Not now": done
-  `filid:revalidate` will find zero accepted items, evaluate only the rejected-item
+  `filid:filid-revalidate` will find zero accepted items, evaluate only the rejected-item
   justifications and debt records, and return PASS if all justifications are
   constitutionally compliant.
 ```
 
-**After `filid:revalidate` is invoked (or skipped), execution is COMPLETE.**
+**After `filid:filid-revalidate` is invoked (or skipped), execution is COMPLETE.**
 
 ## Available MCP Tools
 
