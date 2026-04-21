@@ -1,5 +1,5 @@
 {
-  "$schema": "Deliverable requirements per FCA-AI team pipeline stage. Used by verify-deliverables.mjs hook.",
+  "$notes": "Deliverable requirements per FCA-AI team pipeline stage. Used by verify-deliverables.mjs hook.",
   "team-plan": {
     "files": [
       "DESIGN.md"
