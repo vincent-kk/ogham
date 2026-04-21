@@ -91,7 +91,7 @@ Provider routing:
 Both branches must honor:
 - **Per-item save**: after EACH item, immediately `mcp_tools_manifest_save` so re-runs
   resume cleanly.
-- **Idempotency**: check `imbas-status` and `issue_ref` before acting; skip if
+- **Idempotency**: check `status` and `issue_ref` before acting; skip if
   `issue_ref` already set.
 
 ### Partial Failure Handling (1:N Links)
@@ -119,9 +119,10 @@ Display execution results:
 - Transitions: `<created>` succeeded, `<failed>` failed, `<skipped>` skipped (already at target status)
 
 If failures exist:
+- Emit terminal marker with retry guidance:
+  "Manifest partial failure: <created_count> created, <failed_count> failed. Re-run `/imbas:imbas-manifest <type> --run <run-id>` to retry failed items."
 - List failed items with error details.
-- Display: "Re-run `/imbas:imbas-manifest <type> --run <run-id>` to retry failed items."
 
-If all succeeded:
-- For stories: "All Stories created. Proceed to `/imbas:imbas-devplan` for Phase 3."
-- For devplan: "All Tasks, Subtasks, and links created. Pipeline complete."
+If all succeeded, emit terminal marker with next-step guidance:
+- For stories: "Manifest execution complete: <count> Stories created. Proceed to `/imbas:imbas-devplan` for Phase 3."
+- For devplan: "Manifest execution complete: <count> items created. Pipeline complete."

@@ -15,7 +15,12 @@
      max_parallel: <number | undefined>
    }
    ```
-3. **Inspect result**:
+2a. **If the call returns a precondition error** (`E-IP-3` missing/wrong source
+   manifest, `E-IP-4` schema validation failure, `E-IP-5` invalid `--max-parallel`):
+   - Emit terminal marker `Implement plan BLOCKED: <error_code> — <reason>`
+     (see `errors.md` for the full table).
+   - End execution. Do NOT continue to Step 3.
+3. **Inspect result** (only when the call succeeded):
    - `summary.total_groups`, `summary.total_items`, `summary.max_level`
    - `summary.cycles_broken` (> 0 means the DAG had cycles, resolved deterministically)
    - `summary.unresolved` (> 0 means some nodes could not be leveled — rare)

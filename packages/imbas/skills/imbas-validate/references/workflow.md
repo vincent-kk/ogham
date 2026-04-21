@@ -60,16 +60,16 @@ Step 4 — Result Evaluation Gate
   - BLOCKING issues exist (count > 0):
     → result = "BLOCKED"
     → Display blocking issues list to user
-    → Message: "Validation BLOCKED. Resolve the above issues in the source document, then re-run /imbas:imbas-validate."
+    → Message: "Validation result: BLOCKED. Resolve the above issues in the source document, then re-run /imbas:imbas-validate."
 
   - No BLOCKING, but WARNING issues exist:
     → result = "PASS_WITH_WARNINGS"
     → Display warning issues list to user
-    → Message: "Validation PASSED with warnings. Review the warnings above. You may proceed to Phase 2 (/imbas:imbas-split)."
+    → Message: "Validation result: PASS_WITH_WARNINGS. Review the warnings above. You may proceed to Phase 2 (/imbas:imbas-split)."
 
   - No issues found:
     → result = "PASS"
-    → Message: "Validation PASSED. Proceed to Phase 2: /imbas:imbas-split [--run <run-id>]"
+    → Message: "Validation result: PASS. Proceed to Phase 2: /imbas:imbas-split [--run <run-id>]"
 
 Step 5 — State Update
   Call mcp_tools_run_transition with:

@@ -23,7 +23,7 @@ Input: an issue ID string like `S-1`, `T-3`, or `ST-42`.
    object. Parse body sections `## Description` and `## Digest` independently.
 
 Extract from frontmatter:
-- `id`, `type`, `title`, `imbas-status`
+- `id`, `type`, `title`, `status`
 - `parent`, `epic`
 - `links[]`
 - `verification`, `size_check`, `split_from`, `split_into` (Story only)

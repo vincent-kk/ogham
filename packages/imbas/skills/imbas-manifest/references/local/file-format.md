@@ -39,7 +39,7 @@ run_id: 20260406-001
 
 - `id` is a string matching `^(S|T|ST)-\d+$`.
 - `type` is literal `Story`, `Task`, or `Subtask` (English anchors — parser-stable).
-- `imbas-status` is one of `To Do`, `Ready for Dev`, `In Progress`, `In Review`, `Done`.
+- `status` is one of `To Do`, `Ready for Dev`, `In Progress`, `In Review`, `Done`.
 - `parent` is `null` for Story/Task; required for Subtask (points to parent `T-<N>` or `S-<N>`).
 - `epic` is `null` or a string identifier, Story only.
 - `links[]` is an array of `{type, to}` objects. See `link-handling.md` for bidirectional maintenance.

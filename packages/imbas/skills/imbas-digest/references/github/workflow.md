@@ -10,6 +10,7 @@ digest marker protocol specific to GitHub.
 ### `--preview` flag set
 - Display formatted digest to user.
 - Do NOT post to GitHub.
+- Emit terminal marker: "Digest preview (dry-run)".
 - End.
 
 ### Default (no `--preview`)
@@ -20,7 +21,10 @@ digest marker protocol specific to GitHub.
    - ```bash
      echo "<comment body>" | gh issue comment <N> --repo <owner/repo> --body-file -
      ```
+   - Emit terminal marker: "Digest posted to <owner/repo#N>".
 4. If rejected: end without posting.
+   (This is the other valid yield reason — "User decision genuinely required" —
+   so no terminal marker is emitted on the rejected branch.)
 
 ## Digest Marker Protocol (GitHub-specific)
 

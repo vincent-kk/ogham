@@ -21,6 +21,7 @@ Steps 2–4 in the shared workflow still run but produce simpler output:
 ### `--preview` flag set
 - Display formatted digest to user.
 - Do NOT write to the file.
+- Emit terminal marker: "Digest preview (dry-run)".
 - End.
 
 ### Default (no `--preview`)
@@ -32,7 +33,10 @@ Steps 2–4 in the shared workflow still run but produce simpler output:
    - `Read` the file to locate the `## Digest` section.
    - `Edit` to append a new entry (see Append Protocol below). **Never
      replace** the section — always append.
+   - Emit terminal marker: "Digest posted to <local-id>".
 4. If rejected: end without writing.
+   (This is the other valid yield reason — "User decision genuinely required" —
+   so no terminal marker is emitted on the rejected branch.)
 
 ## Append Protocol
 
@@ -82,5 +86,5 @@ is the machine-readable boundary.
 
 Local mode has no `[OP: transition_issue]` equivalent to trigger suggestions on.
 In v1, `imbas:imbas-digest` for local is always invoked manually by the user. Future
-work may add a trigger when a local issue's `imbas-status` frontmatter field
+work may add a trigger when a local issue's `status` frontmatter field
 transitions to `Done`.

@@ -11,13 +11,10 @@ plugin: imbas
 # imbas-cache — Jira Metadata Cache Management (Internal)
 
 Internal skill that manages Jira project metadata cache. Stores issue types, link types,
-and workflow definitions locally to avoid repeated Atlassian API calls. Auto-refreshes
-when the TTL (24 hours) expires. Invoked only by internal flows via
-`imbas:imbas-cache <action>` (`ensure`, `refresh`, `clear`); not user-invocable. The `imbas-setup` skill implements its
-own init-time cache population (issue-types, link-types, project-meta) and does NOT
-delegate to `imbas:imbas-cache`; `setup refresh-cache` is the user-facing entry point that
-forwards to `imbas:imbas-cache refresh`. Other skills consume cached metadata indirectly
-and do not invoke `imbas:imbas-cache` directly.
+and workflow definitions locally to avoid repeated Atlassian API calls. Provides
+`ensure`, `refresh`, and `clear` actions; auto-refreshes when the TTL (24 hours) expires.
+Invoked by internal flows only — `imbas-setup refresh-cache` forwards here for the
+user-facing refresh path.
 
 ## Arguments
 

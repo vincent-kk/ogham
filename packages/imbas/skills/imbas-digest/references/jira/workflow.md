@@ -10,6 +10,7 @@ digest marker protocol specific to Jira.
 ### `--preview` flag set
 - Display formatted digest to user.
 - Do NOT post to Jira.
+- Emit terminal marker: "Digest preview (dry-run)".
 - End.
 
 ### Default (no `--preview`)
@@ -18,7 +19,10 @@ digest marker protocol specific to Jira.
 3. If approved:
    - Call `[OP: add_comment] issue_ref=<issue-key>, body=<formatted_comment>`.
    - The comment body begins with the digest marker (see below).
+   - Emit terminal marker: "Digest posted to <issue-key>".
 4. If rejected: end without posting.
+   (This is the other valid yield reason — "User decision genuinely required" —
+   so no terminal marker is emitted on the rejected branch.)
 
 ## Digest Marker Protocol (Jira-specific)
 

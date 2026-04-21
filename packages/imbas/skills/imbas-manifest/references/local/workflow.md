@@ -152,6 +152,6 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
   3. Update comment: `status = "created"`.
   4. `mcp_tools_manifest_save` immediately.
 
-IDEMPOTENCY: for every item, check `imbas-status` and `issue_ref` before writing.
+IDEMPOTENCY: for every item, check `status` and `issue_ref` before writing.
 If `issue_ref` already exists, re-verify the file exists (Glob) and skip.
 Re-execution is safe after partial failure.

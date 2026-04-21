@@ -15,7 +15,7 @@ shared imbas MCP tools used by every provider.
 
 ## Output
 
-Updated manifest file with `issue_ref` and `imbas-status` fields populated for each
+Updated manifest file with `issue_ref` and `status` fields populated for each
 created item. The storage location for created entities is provider-specific:
 
 - `jira`  → Atlassian Cloud (external, referenced by key)

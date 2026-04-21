@@ -91,8 +91,8 @@ Step 2 — engineer Agent Spawn
     2. Call mcp_tools_run_transition:
        - action: "complete_phase", phase: "devplan", result: "BLOCKED"
        → Sets devplan.status = "completed", devplan.result = "BLOCKED"
-    3. Display blocked report to user with guidance:
-       "Phase 3 blocked. Review blocked report and resolve dependencies."
+    3. Emit terminal marker with guidance, then display the full blocked report:
+       "Devplan BLOCKED: <short reason>. Review the blocked report and resolve dependencies."
     4. STOP — do not proceed to Step 3 or Step 4
 
   IF agent returns partial output (some blocked, some unblocked):
@@ -132,7 +132,8 @@ Step 4 — User Review Flow
        - action: "complete_phase", phase: "devplan"
        - pending_review: false
        → Sets devplan.status = "completed", devplan.pending_review = false
-    3. Display the provider-specific completion message (see jira/workflow.md
+    3. Emit terminal marker: "Devplan manifest generated: <N> Tasks, <M> Subtasks."
+    4. Display the provider-specific next-step command (see jira/workflow.md
        or local/workflow.md Step 4).
 
   Option B — Request modifications:

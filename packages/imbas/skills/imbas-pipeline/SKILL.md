@@ -1,7 +1,7 @@
 ---
 name: imbas-pipeline
 user_invocable: true
-description: "[imbas:imbas-pipeline] End-to-end pipeline orchestration. Runs validate, split, manifest-stories, devplan, manifest-devplan in a single command with auto-approval at quality gates. Stops with structured blocker report on any gate failure. Trigger: \"pipeline\", \"full pipeline\", \"전체 파이프라인\", \"자동 실행\", \"한번에 실행\""
+description: "[imbas:imbas-pipeline] End-to-end pipeline orchestration. Accepts a document/URL (full pipeline: validate → split → manifest-stories → devplan → manifest-devplan) or Jira Story keys (devplan-only: devplan → manifest-devplan), with auto-approval at quality gates. Stops with structured blocker report on any gate failure. Trigger: \"pipeline\", \"full pipeline\", \"전체 파이프라인\", \"자동 실행\", \"한번에 실행\""
 argument-hint: "<source-or-stories> [--project KEY] [--codebase PATH] [--supplements PATHS] [--parent KEY|new|none] [--stop-at PHASE] [--dry-run] [--strict-drift]"
 version: "1.0.0"
 complexity: complex

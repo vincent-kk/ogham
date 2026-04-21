@@ -11,7 +11,7 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 
 1. Collect all items where `status == "created"` (have `issue_ref`).
 2. For each `issue_ref`, call `[OP: get_issue] issue_ref=<issue_ref>`.
-3. Verify: issue exists, not deleted, `imbas-status` matches expectation.
+3. Verify: issue exists, not deleted, `status` matches expectation.
 4. Classify as MATCH / DRIFT_DELETED / DRIFT_STATE per the shared skeleton, then:
    - DRIFT_DELETED → offer to reset to pending.
    - DRIFT_STATE → offer to skip or proceed.
@@ -22,7 +22,7 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 ## Step 4 — Batch Execution (Jira)
 
 CRITICAL: after EACH item creation, immediately save the manifest with the
-updated `imbas-status` / `issue_ref` via `mcp_tools_manifest_save`. This is the crash-recovery
+updated `status` / `issue_ref` via `mcp_tools_manifest_save`. This is the crash-recovery
 invariant — re-runs skip already-created items.
 
 ### Stories type
@@ -47,7 +47,7 @@ For each link in `manifest.links` where `status == "pending"`:
   - For EACH target in `link.to`:
     1. Resolve target ID to `issue_ref`.
     2. Call `[OP: create_link] type=<link.type>, inward=<resolve(link.from)>, outward=<resolve(target)>`.
-  - Update link `imbas-status`:
+  - Update link `status`:
     - `"created"`  — all targets succeeded
     - `"partial"`  — some succeeded, some failed
     - `"failed"`   — all failed
@@ -101,7 +101,7 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
   2. Update comment: `status = "created"`.
   3. Save manifest immediately.
 
-IDEMPOTENCY: for every item, check `imbas-status` and `issue_ref` before creating.
+IDEMPOTENCY: for every item, check `status` and `issue_ref` before creating.
 If `issue_ref` already exists → skip. Re-execution is safe after partial failure.
 
 ## Step 6 — Post-Execution Label Transitions
@@ -115,17 +115,20 @@ See `../label-transitions.md` for the full transition table and idempotency rule
 2. Load label config via `mcp_tools_config_get` with field `"labels"`.
 3. For each created `issue_ref` in manifest (stories + epic):
    - If `split.pending_review === true`:
-     `[OP: editJiraIssue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
+     `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
    - If `split.pending_review === false`:
-     `[OP: editJiraIssue] issue_ref=<ref>`, add `<config.labels.review_complete>` to labels.
+     `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_complete>` to labels.
 
 ### Devplan type (Phase 3.5)
 
 1. Load label config via `mcp_tools_config_get` with field `"labels"`.
 2. Collect all parent story `issue_ref`s from `stories-manifest.json`.
 3. For each parent story `issue_ref`:
-   a. `[OP: editJiraIssue] issue_ref=<ref>`, remove `<config.labels.review_complete>`, add `<config.labels.dev_waiting>`.
-   b. `[OP: transitionJiraIssue] issue_ref=<ref>, transition=<config.jira.workflow_states[config.jira.phase_to_workflow.pipeline_exit]>`
+   a. `[OP: edit_issue] issue_ref=<ref>`, remove `<config.labels.review_complete>`, add `<config.labels.dev_waiting>`.
+   b. Resolve the exit-status transition id:
+      `[OP: get_transitions] issue_ref=<ref>` → find the id whose target matches
+      `<config.jira.workflow_states[config.jira.phase_to_workflow.pipeline_exit]>`.
+   c. `[OP: transition_issue] issue_ref=<ref>, transition.id=<matched_id>`.
       - On failure (HTTP 400/403/404):
         Log: `"WARNING: Jira transition to '<status>' failed for <ref>: <error>. Label '<dev_waiting>' was applied. Transition may require manual action."`
         Continue pipeline — do NOT block. (AC16)

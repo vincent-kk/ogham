@@ -27,9 +27,13 @@ commands IMMEDIATELY AFTER in the same turn.
 
 ### Jira
 
-- **Add/Remove labels**: `[OP: editJiraIssue] issue_ref=<ref>`, update `labels` field.
-  If `editJiraIssue` does full-replace, read existing labels first via `[OP: getJiraIssue]`.
-- **Transition status**: `[OP: transitionJiraIssue] issue_ref=<ref>, transition=<status>`
+- **Add/Remove labels**: `[OP: edit_issue] issue_ref=<ref>`, update `labels` field.
+  If `edit_issue` does full-replace, read existing labels first via `[OP: get_issue]`.
+- **Transition status** (two-step — transition IDs must not be hardcoded, see
+  `_shared/operations/transition_issue.md`):
+  1. `[OP: get_transitions] issue_ref=<ref>` → find the transition id whose target
+     matches `<status>`.
+  2. `[OP: transition_issue] issue_ref=<ref>, transition.id=<matched_id>`.
   - On failure (HTTP 400/403/404): log warning, continue pipeline. Label is still applied.
   - Message: `"WARNING: Jira transition to '<status>' failed for <ref>: <error>. Label '<dev_waiting>' was applied. Transition may require manual action."`
 
@@ -37,7 +41,7 @@ commands IMMEDIATELY AFTER in the same turn.
 
 On re-run (resume scenario), check if label already exists before adding:
 - GitHub: `gh issue view <N> --repo <owner/repo> --json labels` → check label present.
-- Jira: `[OP: getJiraIssue] issue_ref=<ref>` → check `labels` array.
+- Jira: `[OP: get_issue] issue_ref=<ref>` → check `labels` array.
 
 Skip add/remove if target state already matches.
 

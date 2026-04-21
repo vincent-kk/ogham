@@ -8,7 +8,7 @@ Loaded when `config.provider === 'jira'`. The shared skeleton
 
 1. Call `[OP: get_issue] issue_ref=<issue-key>`.
 2. Extract from response:
-   - `key`, `summary`, `type`, `imbas-status`
+   - `key`, `summary`, `type`, `status`
    - `assignee`, `reporter`
    - `created`, `updated` timestamps
    - `description` (full body)

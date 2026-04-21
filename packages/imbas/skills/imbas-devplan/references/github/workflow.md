@@ -28,9 +28,10 @@ Call `mcp_tools_manifest_save` to persist feedback_comments in devplan-manifest.
 
 ## Step 4 — Final user guidance (GitHub)
 
-When the user approves the devplan manifest, display:
+After the shared workflow.md emits the terminal marker (Step 4 Option A Step 3),
+display the next-step command:
 
-> "Phase 3 complete. Run /imbas:imbas-manifest devplan to create GitHub issues in `<owner/repo>`."
+> "Run /imbas:imbas-manifest devplan to create GitHub issues in `<owner/repo>`."
 
 ## Delegated reads (optional)
 

@@ -18,7 +18,9 @@ On escape:
 2. Call mcp_tools_run_transition:
    - action: "escape_phase", phase: "split", escape_code: "<code>"
    → Sets split.status = "escaped", split.escape_code = "<code>"
-3. Display structured escape report to user.
-4. For E2-3: inform user that /imbas:imbas-devplan can proceed directly.
-5. For E2-1, E2-2, EC-1, EC-2: inform user that human intervention is required
+3. Emit terminal marker: "Escape code: <code>" (literal `<code>` is one of
+   `E2-1`, `E2-2`, `E2-3`, `EC-1`, `EC-2`).
+4. Display structured escape report to user.
+5. For E2-3: inform user that /imbas:imbas-devplan can proceed directly.
+6. For E2-1, E2-2, EC-1, EC-2: inform user that human intervention is required
    before pipeline can continue.

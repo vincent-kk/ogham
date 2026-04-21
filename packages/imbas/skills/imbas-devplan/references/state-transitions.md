@@ -31,5 +31,5 @@ Exit states:
   complete_phase("devplan", result="BLOCKED")
     → devplan.status = "completed", devplan.result = "BLOCKED"
     → Output: devplan-blocked-report.md (in run directory)
-    → User guidance: "Phase 3 blocked. Review blocked report and resolve dependencies."
+    → Terminal marker: "Devplan BLOCKED: <short reason>. Review the blocked report and resolve dependencies."
 ```

@@ -1,14 +1,10 @@
 # imbas-status — Subcommand Behaviors
 
 > **Provider scope**: This skill is fully provider-agnostic and is NOT
-> partitioned. It reads only imbas run state (`mcp_tools_run_get`, `mcp_tools_run_list`) and
-> manifest summary counts. Issue-count displays work identically for every
+> partitioned. It reads only imbas run state (`mcp_tools_run_get`, `mcp_tools_run_list`)
+> and manifest summary counts. Issue-count displays work identically for every
 > provider because they count `issue_ref` presence, which is provider-agnostic
-> by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`). During
-> the RALPLAN v2 local-provider cycle the divergence was estimated at ~45
-> lines, but on inspection it turned out to be 0 lines. Recorded as an
-> honest deviation from the per-skill divergence table in
-> `.metadata/imbas/specs/SPEC-skills.md`.
+> by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
 
 
 ## (default) — Current Run Status

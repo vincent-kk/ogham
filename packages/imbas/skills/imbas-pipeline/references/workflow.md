@@ -228,7 +228,8 @@ Step 2.5 — Escape Condition Detection
 
 Step 2.6 — Size Check + Horizontal Split / Umbrella
   Aligned with split skill Step 5. For each Story, verify 4 criteria:
-  1. Appropriate scope — Represents a functionally complete unit that can be E2E tested on its own branch. (Do NOT split arbitrarily based on Subtask count)  2. Sufficient specification — AC detailed enough for development
+  1. Appropriate scope — Represents a functionally complete unit that can be E2E tested on its own branch. (Do NOT split arbitrarily based on Subtask count)
+  2. Sufficient specification — AC detailed enough for development
   3. Independence — minimal coupling with other Stories
   4. Single responsibility — addresses one coherent concern
 

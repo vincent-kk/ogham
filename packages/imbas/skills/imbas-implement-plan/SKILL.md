@@ -52,6 +52,10 @@ Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
 
 1. Resolve `run_id` via `mcp_tools_run_get` (omit for latest).
 2. Call `mcp_tools_manifest_implement_plan` with `{project_ref, run_id, source, max_parallel}`.
+2a. If the call fails on a precondition (`E-IP-3` missing/wrong source manifest,
+   `E-IP-4` schema validation, `E-IP-5` invalid `--max-parallel`), emit terminal
+   marker `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md)
+   and end. Do NOT continue.
 3. On success, read the summary (`total_groups`, `total_items`, `max_level`, `cycles_broken`).
 4. If `cycles_broken.length > 0` or `unresolved.length > 0`, surface them in the
    completion message; do NOT pause — the plan is still saved.

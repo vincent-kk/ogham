@@ -51,7 +51,7 @@
 | `key` | string | Jira issue key |
 | `summary` | string | Issue title |
 | `type` | string | Issue type (Story, Task, Bug, etc.) |
-| `imbas-status` | string | Current workflow status |
+| `status` | string | Current workflow status |
 | `assignee` | string | Current assignee display name |
 | `reporter` | string | Issue reporter display name |
 | `created` | string | Issue creation date |

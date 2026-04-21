@@ -40,7 +40,7 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 4. Classify:
    - MATCH: issue exists, `state` open, expected `type:*` label present → proceed.
    - DRIFT_DELETED: command exits 404/410 → WARN "Issue `<ref>` deleted externally."
-     Offer to reset `imbas-status` to pending for re-creation, or skip.
+     Offer to reset `status` to pending for re-creation, or skip.
    - DRIFT_STATE: closed unexpectedly → WARN "Issue `<ref>` is closed — expected open."
      Offer to skip or proceed.
 5. If any drift detected, display summary table and save reconciled manifest via
@@ -50,7 +50,7 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 ## Step 4 — Batch Execution (GitHub)
 
 CRITICAL: after EACH item creation, immediately save the manifest with the
-updated `imbas-status` / `issue_ref` via `mcp_tools_manifest_save`. Crash-recovery invariant.
+updated `status` / `issue_ref` via `mcp_tools_manifest_save`. Crash-recovery invariant.
 
 `issue_ref` format is always `owner/repo#<number>` (§1.3).
 
@@ -93,7 +93,7 @@ For each link in `manifest.links` where `status == "pending"`:
   2. Write `## Links` section on source issue via `gh api` PATCH
      appending `- <linkType>: <target_ref>`.
   3. Write reverse entry on target issue (see `link-handling.md` §Mapping table).
-- Update link `imbas-status`: `created` / `partial` / `failed`.
+- Update link `status`: `created` / `partial` / `failed`.
 - `mcp_tools_manifest_save` immediately.
 
 See `link-handling.md` for the full `## Links` grammar and bidirectional write protocol.
@@ -171,7 +171,7 @@ For each comment in `manifest.feedback_comments` where `status == "pending"`:
 3. Update comment: `status = "created"`.
 4. `mcp_tools_manifest_save` immediately.
 
-IDEMPOTENCY: check `imbas-status` and `issue_ref` before creating. If `issue_ref`
+IDEMPOTENCY: check `status` and `issue_ref` before creating. If `issue_ref`
 already exists → run drift check and skip if confirmed present.
 
 ## Drift check snippet (migrated from jira prototype)

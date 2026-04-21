@@ -142,7 +142,8 @@ Step 7 — User Review Flow
        - pending_review: false
        - stories_created: <count>
        → Sets split.status = "completed", split.pending_review = false
-    2. Display: "Phase 2 complete. Next: /imbas:imbas-manifest stories to create Jira issues,
+    2. Emit terminal marker with next-step guidance:
+       "Split complete: <N> Stories. Next: /imbas:imbas-manifest stories to create Jira issues,
        then /imbas:imbas-devplan for Phase 3."
 
   Option B — Request modifications:
