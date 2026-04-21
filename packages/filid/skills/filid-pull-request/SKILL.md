@@ -54,7 +54,7 @@ Verify preconditions before PR creation.
 
 1. Confirm git repository
 2. Verify current branch (block direct PR from main/master)
-3. Check for uncommitted changes — abort only if non-FCA-document files (other than `INTENT.md`/`DETAIL.md`) are staged or unstaged; a clean worktree or FCA-document-only changes pass through
+3. Check for uncommitted changes — abort only if non-FCA-document files (other than `INTENT.md`/`DETAIL.md`) are staged or unstaged; a clean worktree or FCA-document-only changes pass through. When `--skip-update` is active, the FCA-document pass-through is **disabled** — a clean worktree is required (Stage 1 is the sole committer of `INTENT.md`/`DETAIL.md`).
 4. Verify `gh` CLI authentication
 
 See [reference.md Section 0](./reference.md#section-0--prerequisites--validation).
@@ -68,9 +68,11 @@ current codebase.
 - **Failure**: Block PR creation, report failure reason, and exit
 - **`--skip-update`**: Skip Stage 1 entirely and proceed directly to Stage 2
 
-After `filid:filid-update` completes, check for uncommitted changes (`git status --porcelain`).
-If changes exist (from INTENT.md/DETAIL.md updates or structural corrections),
-stage and commit them before proceeding to Stage 2.
+After `filid:filid-update` completes, if `git status --porcelain` reports
+changes, **stage only `INTENT.md` / `DETAIL.md` paths** and create one
+commit: `docs(filid): sync INTENT.md / DETAIL.md via filid-update`. Non-FCA
+modifications from update (structural corrections) surface as a Stage 0
+abort on next run — treat this as the expected contract.
 
 See [reference.md Section 1](./reference.md#section-1--fca-context-sync).
 

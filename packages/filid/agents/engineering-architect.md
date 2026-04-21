@@ -1,7 +1,7 @@
 ---
 name: engineering-architect
 description: "Structural reviewer focused on architecture quality, complexity limits, and boundary integrity."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

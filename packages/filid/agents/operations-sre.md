@@ -1,7 +1,7 @@
 ---
 name: operations-sre
 description: "Operations reviewer focused on production risk, rollback safety, and system resilience."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

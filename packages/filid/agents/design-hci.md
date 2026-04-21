@@ -1,7 +1,7 @@
 ---
 name: design-hci
 description: "Usability reviewer focused on cognitive load, API ergonomics, and human-friendly clarity."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

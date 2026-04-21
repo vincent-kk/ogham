@@ -91,10 +91,16 @@ using elected committee personas and a state machine.
 If `--force`: call `mcp_t_review_manage(action: "cleanup", projectRoot, branchName)`
 first, then restart from Phase A (or Phase B if `--no-structure-check`).
 
-5. Cache check (skip when `--force` is set or when no prior review exists):
+5. Cache check (skip when `--force`):
    `mcp_t_review_manage(action: "check-cache", projectRoot, branchName, baseRef)`
    - `"skip-to-existing-results"` → read existing `review-report.md`
-     and `fix-requests.md` from the paths in the response. Done.
+     and `fix-requests.md` from the paths in the response. In user-invoked
+     mode: Done. In **Pipeline Subagent Mode** (`--pipeline-mode=abc-only`):
+     parse `verdict` from `review-report.md` frontmatter, read `committee`
+     / `deliberation_mode` from `session.md`, then emit the Step 3.9
+     `SubagentReturn` block with `failure_reason: none` and the existing
+     artifact paths — pipeline main will reuse the cached verdict and skip
+     Phase D dispatch.
    - `"proceed-full-review"` → continue to Step 2.
 
 **→ After entry point is determined, immediately proceed to Step 2.**
@@ -135,10 +141,13 @@ the full threshold table and merge protocol.
 **Await both** background agents before proceeding. If `--no-structure-check`,
 only await Phase B.
 
-**Race handling**: Phase B may complete before Phase A. If
-`structure-check.md` does not exist when Phase B reads it, Phase B sets
-`STRUCTURE_CRITICAL_COUNT = 0`. The chairperson still awaits both
-phases before Phase C, ensuring Phase C and D always have complete data.
+**Structure-bias escalation (main)**: After both phases complete, read
+`structure-check.md` frontmatter `critical_count` (treat as 0 when Phase
+A was skipped). If `critical_count >= 3` AND `adjudicator_mode == false`,
+escalate complexity by one level (TRIVIAL→LOW, LOW→MEDIUM, MEDIUM→HIGH)
+and overwrite `session.md` frontmatter `committee` / `complexity` /
+`deliberation_mode` using the canonical table in `contracts.md` →
+"Complexity → Committee Mapping". Adjudicator mode is never escalated.
 
 **Post-completion verification**: After each subagent completes, verify
 its output file exists before proceeding. If missing, execute the phase
@@ -198,12 +207,12 @@ message and terminate.
    - `committee == ['adjudicator']` → `solo-adjudicator`
    - `committee.length >= 2` → `team`
    If `failure_reason` is missing, default to `none`.
-2. Verify the A/B/C artifacts exist at the expected paths (`session.md`,
-   `verification-metrics.md`, `verification-structure.md`; and
-   `structure-check.md` when Phase A ran). Any missing required artifact
-   MUST set `deliberation_mode: chairperson-forbidden` and
-   `failure_reason: team-incomplete` so the pipeline main blocks the
-   merge via `verdict_gate`.
+2. Verify required artifacts exist. Always required: `session.md`,
+   `verification-metrics.md`, `verification-structure.md`. Required only
+   when Phase A ran (`NO_STRUCTURE_CHECK=false`): `structure-check.md`.
+   Any missing required artifact → set `deliberation_mode:
+   chairperson-forbidden`, `failure_reason: team-incomplete` so the
+   pipeline main blocks the merge via `verdict_gate`.
 3. Emit the following fenced block verbatim as the terminal assistant
    message, substituting real values for every placeholder:
 

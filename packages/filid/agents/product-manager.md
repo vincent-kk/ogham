@@ -1,7 +1,7 @@
 ---
 name: product-manager
 description: "Product reviewer focused on user value, product risk, feasibility, and expected outcomes."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

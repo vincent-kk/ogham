@@ -98,7 +98,10 @@ order — first match wins. If no match, immediately check the next signal.
 - **All pushed**: Enter `filid-revalidate` directly.
 - **No upstream tracking ref** (command fails): Skip push, enter `filid-revalidate` directly.
   The user may not have set up the remote yet — do not attempt `git push -u`.
-- **Push fails**: Pipeline **ERROR** — report "Push failed: `<error>`. Push manually and re-run." and END execution.
+- **Push fails**: Pipeline **ERROR** — report "Push failed: `<error>`."
+  After manual `git push`, re-run `/filid:filid-pipeline` to resume at
+  `filid-revalidate`. If push cannot succeed (permissions), use
+  `--from=filid-revalidate` directly. END execution.
 
 See `reference.md` for the full auto-detection algorithm with edge cases.
 
@@ -132,6 +135,9 @@ uses a **hybrid execution model**:
 
 #### Stage: pr-create (main context)
 
+- **Pre-check**: If `gh pr list --head <branch> --state open` returns a PR,
+  skip this stage and re-enter auto-detect Signal 5 (`filid-review`).
+  Pipeline never invokes `AskUserQuestion`.
 - **Execute**: `Skill("filid:filid-pull-request")`
 - **Pass through flags**: `--base`, `--draft`, `--skip-update`, `--title`
 - **Success signal**: Skill completes without error
@@ -141,7 +147,7 @@ uses a **hybrid execution model**:
 
 #### Stage: review A/B/C (subagent — Phase D pulled up to main)
 
-- **Subagent invokes**: `Skill("filid:filid-review", "--scope=pr", "--pipeline-mode=abc-only")`
+- **Subagent invokes**: `Skill("filid:filid-review", "--scope=pr --pipeline-mode=abc-only")`
   - The `--pipeline-mode=abc-only` hint (alias: `PIPELINE_MODE=abc-only`
     context key) tells the review skill to stop after Phase C and emit
     the Subagent Return Contract instead of executing Phase D / Step 4.5
@@ -178,16 +184,36 @@ MUST consume two dispatch fields from the return:
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
   round5-exhaust, veto-deadlock}`
 
+**Pre-dispatch steps** (execute in order before evaluating the
+`verdict_gate` table below):
+
+1. **Cached-verdict short-circuit**: if
+   `.filid/review/<normalized-branch>/review-report.md` already exists
+   and contains a `verdict:` frontmatter field, the pipeline main adopts
+   that verdict, skips every dispatch branch, and proceeds directly to
+   the finalize review stage. This realizes the first row of the
+   `verdict_gate` table and is independent of
+   `SubagentReturn.paths_to_artifacts` (the cache path does not include
+   `review-report.md` there).
+2. **D.0 merge**: otherwise, perform Step D.0 of
+   `filid-review/phases/phase-d-deliberation.md` — merge
+   `verification-metrics.md` + `verification-structure.md` into
+   `verification.md`. Team and solo worker preambles both require
+   `verification.md` in their `== INPUTS ==` block; skipping this step
+   silently strips their primary evidence source. The `fail` dispatch
+   skips merging (no worker is spawned).
+
 Apply the `verdict_gate` rule (spec:
 `packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`) in
 priority order — first match wins:
 
-| Condition                                                 | Dispatch | Verdict                                   |
-| --------------------------------------------------------- | -------- | ----------------------------------------- |
-| `deliberation_mode` is `chairperson-forbidden` or `null`  | fail     | `INCONCLUSIVE`                            |
+| Condition                                                 | Dispatch | Verdict                                     |
+| --------------------------------------------------------- | -------- | ------------------------------------------- |
+| existing `review-report.md` contains a `verdict:` field   | skip     | cached verdict (no Phase D dispatch)        |
+| `deliberation_mode` is `chairperson-forbidden` or `null`  | fail     | `INCONCLUSIVE`                              |
 | `failure_reason != "none"`                                | fail     | `INCONCLUSIVE` (rationale = failure_reason) |
-| `deliberation_mode == "solo-adjudicator"`                 | solo     | from the single adjudicator Task          |
-| `deliberation_mode == "team"` AND `committee.length >= 2` | team     | from Phase D quorum result                |
+| `deliberation_mode == "solo-adjudicator"`                 | solo     | from the single adjudicator Task            |
+| `deliberation_mode == "team"` AND `committee.length >= 2` | team     | from Phase D quorum result                  |
 
 Dispatch actions (see `filid-review/phases/phase-d-deliberation.md` Step D.1):
 
@@ -253,7 +279,9 @@ subagent exits before Phase D.
 #### Stage: resolve (main context)
 
 - **Execute**: `Skill("filid:filid-resolve", "--auto")`
-- **Always passes `--auto`** (pipeline implies full automation)
+- **Always passes `--auto`** (pipeline implies full automation). `--auto`
+  MUST bypass every `AskUserQuestion` / `[y/N]` gate inside `filid-resolve`;
+  changing this requires a pipeline version bump.
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
 - **Zero accepted fixes**: proceed to `filid:filid-revalidate` normally
   (`justifications.md` will exist with all-rejected entries)

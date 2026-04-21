@@ -77,12 +77,19 @@ These files serve as the inter-stage communication interface.
 
 ### Files Written by Each Stage
 
-| Stage       | Files written                                              |
-| ----------- | ---------------------------------------------------------- |
-| pr-create   | _(none in review dir — creates GitHub PR)_                 |
-| review      | `structure-check.md`, `session.md`, `verification.md`, `review-report.md`, `fix-requests.md`, `content-hash.json`, PR comment (via `gh pr comment`) |
-| resolve     | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
-| revalidate  | `re-validate.md`                                           |
+| Stage                    | Files written                                              |
+| ------------------------ | ---------------------------------------------------------- |
+| pr-create                | _(none in review dir — creates GitHub PR)_                 |
+| review — A/B/C subagent  | `structure-check.md` (if Phase A ran), `session.md`, `verification-metrics.md`, `verification-structure.md` |
+| review — Phase D + finalize (main) | `verification.md` (merged), `rounds/round-<N>-<persona>.md` (team) or `rounds/round-1-adjudicator.md` (solo) or `rounds/failure.md` (fail), `review-report.md`, `fix-requests.md` (team/solo non-approved paths only), `content-hash.json`, PR comment (via `gh pr comment` / edit-in-place) |
+| resolve                  | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
+| revalidate               | `re-validate.md`                                           |
+
+> Fail dispatch path: `rounds/failure.md` **and** a minimal `review-report.md`
+> (Failure Variant template in `filid-review/templates.md`) are both written
+> so `mcp_t_review_manage(format-pr-comment)` and the verdict decision step
+> have a consistent frontmatter to read. `fix-requests.md` is NOT written on
+> the fail path.
 
 ### Files Read by Each Stage
 
@@ -98,7 +105,8 @@ These files serve as the inter-stage communication interface.
 | Stage       | Success signal                                             |
 | ----------- | ---------------------------------------------------------- |
 | pr-create   | Skill completes without error                              |
-| review      | `review-report.md` exists + PR comment posted (Step 5)     |
+| review — A/B/C subagent | Subagent emits fenced `SubagentReturn` YAML block on exit; referenced artifacts (`session.md`, `verification-metrics.md`, `verification-structure.md`) exist on disk |
+| review — Phase D + finalize (main) | `review-report.md` exists (standard or Failure Variant frontmatter), `content-hash.json` written, PR comment posted/edited (Step 5, `--scope=pr` only) |
 | resolve     | `justifications.md` exists                                 |
 | revalidate  | `re-validate.md` exists                                    |
 
@@ -140,28 +148,55 @@ with delegation reliability.
 | Stage       | Mode         | Reason                                                    |
 | ----------- | ------------ | --------------------------------------------------------- |
 | pr-create   | Main context | Lightweight, procedural — direct `Skill()` is reliable    |
-| review      | Subagent     | ~100k tokens — must isolate to prevent main context bloat |
+| review — A/B/C | Subagent  | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested TeamCreate leaks orphan workers). Exits with `SubagentReturn` YAML. |
+| review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (`TeamCreate`/solo `Task`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter. |
 | resolve     | Main context | Procedural with internal subagents (code-surgeon)         |
 | revalidate  | Main context | Lightweight with internal subagents (parallel verifiers)  |
 
 ### Pseudocode
 
+The review stage is split: Phase A/B/C runs inside a `general-purpose`
+subagent via `Skill("filid:filid-review", "--pipeline-mode=abc-only ...")`,
+then Phase D + finalize (Step 4.5 content-hash, Step 5 PR comment) run in
+the pipeline main. The subagent MUST NOT call `TeamCreate` internally —
+nested Phase D from a subagent leaks orphan workers and violates the
+`verdict_gate` contract.
+
 ```
 For each stage in pipeline:
 
   if stage == "review":
-    # Subagent delegation — context isolation required
-    result = Agent(
+    # Subagent delegation — A/B/C only, context isolation required
+    subagent_output = Agent(
       subagent_type: "general-purpose",
-      prompt: "Read and execute the following skill: Skill('filid:filid-review', '--scope=pr <flags>').
+      prompt: "Read and execute the following skill:
+               Skill('filid:filid-review', '--scope=pr --pipeline-mode=abc-only <flags>').
                Project root: <project_root>. Branch: <branch>.
-               CRITICAL: This skill has 5 steps. You MUST complete ALL steps including
-               Step 5 (PR Comment). Do NOT stop after writing review-report.md and
-               fix-requests.md — those are Step 4 outputs. Step 5 posts the review
-               as a PR comment via mcp_t_review_manage(format-pr-comment) + gh pr comment.
-               The task is incomplete until Step 5 executes.",
-      description: "FCA review stage execution (phases A-D + PR comment)"
+               CRITICAL: This is PIPELINE SUBAGENT MODE. You MUST stop after
+               Phase C (Step 3) completes. Do NOT execute Phase D, Step 4.5
+               (content-hash), or Step 5 (PR comment) — those run in the
+               pipeline main after you return. Your terminal output MUST
+               be a fenced YAML block containing the SubagentReturn contract
+               (committee, deliberation_mode, failure_reason,
+               paths_to_artifacts) as specified in
+               packages/filid/skills/filid-review/DETAIL.md (## API Contracts).",
+      description: "FCA review stage — Phase A/B/C only (context isolation)"
     )
+
+    # Main-side Phase D dispatch + finalize
+    return_payload = parse_fenced_yaml(subagent_output, "SubagentReturn")
+    verify_artifacts_exist(return_payload.paths_to_artifacts)
+    dispatch = apply_verdict_gate(
+      return_payload.deliberation_mode,
+      return_payload.failure_reason,
+      return_payload.committee
+    )  # → "team" | "solo" | "fail" per DETAIL.md verdict_gate
+    execute_phase_d(dispatch, return_payload)  # team / solo / fail branch
+    mcp_t_review_manage("content-hash", ...)    # Step 4.5 in main
+    if --scope=pr:
+      post_or_edit_pr_comment(...)              # Step 5 in main
+    decide_next_stage(verdict)                   # APPROVED|REQUEST_CHANGES|INCONCLUSIVE
+
   else:
     # Main context execution — direct Skill() call
     Skill("filid:<skill-name>", "<flags>")
@@ -204,10 +239,20 @@ $ /filid:filid-pipeline --from=pr-create --base=main --draft
   → PR #42 created (draft)
   ✓ Success
 
-[2/4] review (subagent)
-  → Agent → Skill("filid:filid-review", "--scope=pr --base=main")
+[2/4] review — A/B/C (subagent)
+  → Agent(general-purpose) → Skill("filid:filid-review",
+      "--scope=pr --pipeline-mode=abc-only --base=main")
+  → SubagentReturn: { committee: [engineering-architect, ...],
+      deliberation_mode: team, failure_reason: none, paths_to_artifacts: {...} }
+  ✓ session.md, verification-metrics.md, verification-structure.md verified
+
+[2/4] review — Phase D + finalize (main)
+  → verdict_gate(team, none) → dispatch: team
+  → TeamCreate(review-<branch>) + 4 persona Tasks, 2 rounds → SYNTHESIS
+  → TeamDelete (try/finally)
   → Verdict: REQUEST_CHANGES (5 fix items)
-  ✓ fix-requests.md written
+  → mcp_t_review_manage(content-hash) + gh pr comment
+  ✓ review-report.md, fix-requests.md, content-hash.json written
 
 [3/4] resolve (main context)
   → Skill("filid:filid-resolve", "--auto")

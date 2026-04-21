@@ -34,7 +34,7 @@ Extract from its frontmatter:
 - `stage_results`: per-stage PASS/FAIL map
 - `overall`: overall PASS/FAIL
 
-Store as `STRUCTURE_CRITICAL_COUNT` for use in B.3 and B.5.
+Store as `STRUCTURE_CRITICAL_COUNT` for session.md recording (B.5).
 If `structure-check.md` does not exist, set `STRUCTURE_CRITICAL_COUNT = 0`.
 
 ### B.1 — Collect Git Diff
@@ -88,7 +88,6 @@ Result contains: `complexity`, `committee`, `adversarialPairs`.
 **Solo mode**: When `ADJUDICATOR_MODE=true` (user passed `--solo`), the MCP
 handler short-circuits complexity calculation and returns:
 `{ complexity: 'TRIVIAL', committee: ['adjudicator'], adversarialPairs: [] }`.
-Skip the structure-bias adjustment below when `adjudicatorMode` is true.
 
 **Complexity tiers** (without solo mode):
 - `TRIVIAL` — 1 member (`adjudicator`) when
@@ -100,17 +99,14 @@ Skip the structure-bias adjustment below when `adjudicatorMode` is true.
 - `MEDIUM` — 4 specialist members
 - `HIGH` — 6 specialist members
 
-**Structure-bias adjustment**: If `STRUCTURE_CRITICAL_COUNT >= 3` AND
-`adjudicatorMode` is false, escalate `complexity` by one level (TRIVIAL → LOW,
-LOW → MEDIUM, MEDIUM → HIGH). This promotes TRIVIAL diffs with severe
-structural violations out of the adjudicator fast path into the
-adversarial specialist committee. When `adjudicatorMode: true`, the user has
-explicitly asked for the fast path — do not escalate.
+Structure-bias escalation is performed main-side after Phase A completes
+(see `SKILL.md` Step 2 → "Structure-bias escalation"). Do not adjust
+complexity here.
 
 ### B.3.5 — Derive Deliberation Mode
 
-After committee election (and any structure-bias adjustment), derive
-the Phase D dispatch hint the pipeline main will consume via the
+After committee election, derive the Phase D dispatch hint the pipeline
+main will consume via the
 `verdict_gate` rule
 (`packages/filid/skills/filid-review/DETAIL.md` → `## API Contracts`):
 
@@ -146,7 +142,7 @@ Write the following to `<REVIEW_DIR>/session.md`:
 branch: <BRANCH>
 normalized_branch: <NORMALIZED>
 base_ref: <BASE_REF>
-complexity: <complexity from B.3 after structure-bias adjustment>
+complexity: <complexity from B.3; chairperson may overwrite after structure-bias escalation>
 committee:
   - <persona-id>
   - ...

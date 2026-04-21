@@ -1,7 +1,7 @@
 ---
 name: knowledge-manager
 description: "Documentation reviewer focused on intent integrity, boundary rules, and code-doc alignment."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

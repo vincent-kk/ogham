@@ -21,9 +21,14 @@ file under `packages/filid/agents/`:
 | `product-manager`            | `agents/product-manager.md`         | Translator — User value             | HIGH              |
 | `design-hci`                 | `agents/design-hci.md`              | Humanist — Cognitive load           | HIGH              |
 
-All seven agents are **read-only** (Read, Glob, Grep, Bash only — no
-Write/Edit). They are spawned via `Task(subagent_type: filid:<id>)`
-exclusively by `phases/phase-d-deliberation.md`.
+All seven agents have scoped tool access (`Read, Write, Glob, Grep, Bash`).
+`Write` is used **exclusively** to author their
+`rounds/round-<N>-<persona-id>.md` opinion file; modifying source files,
+INTENT.md, DETAIL.md, or anything outside the review session's `rounds/`
+subtree is prohibited by each agent's in-body `Hard Rules` section. `Edit`
+is deliberately absent so no agent can rewrite existing files. They are
+spawned via `Task(subagent_type: filid:<id>)` exclusively by
+`phases/phase-d-deliberation.md`.
 
 - **`adjudicator`** is a standalone `Task` (NO `team_name`). It runs
   when the committee is `['adjudicator']` — either TRIVIAL auto-tier or
@@ -45,6 +50,20 @@ places:
 
 Do NOT add new personas to the TRIVIAL tier — that tier is reserved for
 the integrated `adjudicator` fast path.
+
+## Complexity → Committee Mapping
+
+| Complexity | Committee (canonical)                                                                                      |
+| ---------- | ---------------------------------------------------------------------------------------------------------- |
+| TRIVIAL    | `[adjudicator]`                                                                                            |
+| LOW        | `[engineering-architect, operations-sre]`                                                                  |
+| MEDIUM     | `[engineering-architect, knowledge-manager, business-driver, operations-sre]`                              |
+| HIGH       | `[engineering-architect, knowledge-manager, operations-sre, business-driver, product-manager, design-hci]` |
+
+This table mirrors `mcp_t_review_manage(elect-committee)` output and is
+the sole reference for chairperson-side committee rewrites (e.g.,
+structure-bias escalation). Keep in sync with
+`src/mcp/tools/review-manage/handlers/elect-committee.ts`.
 
 ## Opinion Frontmatter Contract
 

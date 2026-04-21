@@ -49,7 +49,14 @@ Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 | -------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | team     | `deliberation_mode == team` AND `committee.length >= 2`           | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally         |
 | solo     | `deliberation_mode == solo-adjudicator`                           | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                  |
-| fail     | `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`, OR TeamCreate error, OR VETO deadlock, OR round-5 exhaust | Step D.7 — write `rounds/failure.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure) |
+| fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error, or irreconcilable VETO deadlock surfacing during D.4. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
+
+> **Round-5 exhaust and all-ABSTAIN quorum failures are NOT Step D.7.**
+> Those surface during in-team round evaluation (Step D.3.2) and route to
+> Step D.6, which writes the standard `review-report.md` with
+> `verdict: INCONCLUSIVE` via the normal aggregation path. Step D.7 is
+> reserved for cases where deliberation never ran to a full round (pre-dispatch
+> failure or TeamCreate/VETO in-flight failure).
 
 `chairperson-direct` Phase D synthesis — main writing a verdict without
 running either the team branch or the solo-adjudicator branch — is a
@@ -98,10 +105,13 @@ into a single `verification.md` file that committee members will read:
 
 1. Read `<REVIEW_DIR>/verification-metrics.md` and
    `<REVIEW_DIR>/verification-structure.md`.
-2. Concatenate with a unified frontmatter that combines both scopes. The
-   merged frontmatter MUST preserve `debt_bias_level` and
-   `critical_failures` fields exactly.
-3. Write `<REVIEW_DIR>/verification.md` with sections:
+2. Write `<REVIEW_DIR>/verification.md` with frontmatter keys
+   `scope: combined`, `session_ref: session.md`, `structure_check_ref:
+   structure-check.md` (if present). Preserve exactly from sub-files:
+   `debt_bias_level`, `critical_failures`, `metrics_passed`,
+   `structure_passed`. Drop `tools_executed` / `created_at`
+   (reproducible from sub-files).
+3. Body sections:
    - `## Code Metrics Results` (from C1 body)
    - `## Structure & Dependency Verification` (from C2 body)
    - `## Debt Status` (from C2 body)
@@ -403,23 +413,18 @@ SendMessage({
 
 ### D.4.3 — Share compromise with vetoing personas
 
-Once `round-<N>-business-driver-compromise.md` exists:
+Once `round-<N>-business-driver-compromise.md` exists, create **all**
+Round N+1 tasks in parallel, then wait on all responses:
 
-1. For each vetoing persona, create a new task:
-   ```
-   TaskCreate({
-     subject: "Round <N+1> VETO re-eval: <persona-id>",
-     description: "Read business-driver-compromise.md. Decide whether to
-       accept the compromise (→ SYNTHESIS with compromise_accepted: true),
-       reject it (→ VETO again), or abstain. Write
-       round-<N+1>-<persona-id>.md.",
-     activeForm: "Re-evaluating after compromise"
-   })
-   TaskUpdate({ taskId, owner: "<persona-id>" })
-   SendMessage({ recipient: "<persona-id>", ... })
-   ```
-2. Other (non-vetoing) personas also write round N+1 opinions as usual.
-3. Wait for all Round N+1 opinions and return to Step D.3.1.
+- **Vetoing personas** — task description: "Read
+  business-driver-compromise.md. Decide whether to accept the compromise
+  (→ SYNTHESIS with compromise_accepted: true), reject it (→ VETO again),
+  or abstain. Write round-<N+1>-<persona-id>.md."
+- **Non-vetoing personas** — standard re-DEBATE task referencing both
+  `lead-brief-round-<N+1>.md` and the compromise file.
+
+For each task: `TaskCreate` → `TaskUpdate({ owner })` → `SendMessage`.
+After all opinions arrive, return to Step D.3.1.
 
 ### D.4.4 — Irreconcilable VETO
 
@@ -436,10 +441,9 @@ serial step — it runs alongside D.2.5 / D.3 whenever a worker stalls.
 
 ### D.5.1 — Detection
 
-A worker is considered **stuck** when:
-
-- Its round task has `status: in_progress` AND
-- No `SendMessage` has arrived from the worker for > 120 seconds
+A worker is considered **stuck** when two consecutive `TaskList` polls
+(separated by any intervening tool call) show the round task as
+`status: in_progress` with no new `SendMessage` delivered in between.
 
 ### D.5.2 — Probe
 
@@ -452,7 +456,7 @@ SendMessage({
 })
 ```
 
-Wait 30 seconds for a response.
+After the probe, run one more `TaskList` poll; no reply → declared dead.
 
 ### D.5.3 — Respawn (max 2 attempts per persona)
 
@@ -589,10 +593,16 @@ an earlier step in this block raises:
 
 ## Step D.7 — Failure Branch (fail dispatch)
 
-Entered when Step D.1 selects the fail dispatch — `deliberation_mode` is
-`chairperson-forbidden` or `null`, OR `failure_reason != "none"` — OR when an
-in-flight team dispatch raises a TeamCreate error, VETO deadlock, or
-round-5 exhaust after the team was spawned.
+Entered in two cases:
+
+- **Pre-dispatch fail**: Step D.1 selects fail because `deliberation_mode` is
+  `chairperson-forbidden` or `null`, OR `failure_reason != "none"`.
+- **In-flight fail**: during D.2-team execution a TeamCreate error surfaces,
+  or D.4 cannot reconcile a VETO deadlock.
+
+Round-5 exhaust and all-ABSTAIN quorum failures are NOT this branch — they
+complete at least one round and route through D.3.2 → D.6, which writes the
+standard `review-report.md` with `verdict: INCONCLUSIVE`.
 
 1. **Team teardown (if applicable)**: if a team was already created before
    the failure surfaced, run `TeamDelete({ team_name: "review-<normalized-branch>" })`
@@ -605,14 +615,22 @@ round-5 exhaust after the team was spawned.
    ---
    verdict: INCONCLUSIVE
    dispatch: fail
-   failure_reason: <from subagent return | "phase-d-team-spawn-unavailable" | "veto-deadlock" | "round5-exhaust" | "team-incomplete">
+   failure_reason: <from subagent return | "phase-d-team-spawn-unavailable" | "veto-deadlock" | "team-incomplete">
    rationale: <one-line rationale>
    ---
    ```
-3. **Skip Step D.6 aggregation**: the verdict is already `INCONCLUSIVE`.
-   `chairperson-direct` synthesis in this branch — main writing a SYNTHESIS
-   verdict without a live team or adjudicator Task — is a protocol violation
-   and MUST NOT occur.
+3. **Write minimal `review-report.md`**: D.6 aggregation is skipped, but
+   `<REVIEW_DIR>/review-report.md` MUST still exist so the pipeline
+   finalize stage (`filid-pipeline/SKILL.md` → "finalize review") and
+   `mcp_t_review_manage(format-pr-comment)` can read a consistent verdict
+   field. Use the **Failure Variant** template in `../templates.md`
+   (`## Review Report Format` → "Failure Variant (Step D.7 fail dispatch)").
+   Required frontmatter fields: `verdict: INCONCLUSIVE`, `dispatch: fail`,
+   `failure_reason: <same value as step 2>`. Include a single Deliberation
+   Log entry summarizing the trigger and one-line rationale.
+   `chairperson-direct` SYNTHESIS — main writing an APPROVED or
+   REQUEST_CHANGES verdict without a live team or adjudicator Task —
+   remains a protocol violation and MUST NOT occur.
 4. **Token counter**: append the Phase D token counter entry to
    `session.md` with `dispatch: fail` so the trigger baseline remains
    consistent across team / solo / fail dispatches.

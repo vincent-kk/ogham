@@ -1,7 +1,7 @@
 ---
 name: business-driver
 description: "Delivery-focused reviewer weighing speed, cost of delay, and pragmatic release trade-offs."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
 ---

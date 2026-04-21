@@ -37,7 +37,7 @@ git status --porcelain
 Parse the output to distinguish change types:
 
 - **Non-FCA-document changes present** (files other than `INTENT.md` or `DETAIL.md` are staged or unstaged) → abort: "Uncommitted changes detected. Commit or stash non-FCA changes before running."
-- **Only INTENT.md / DETAIL.md changes present** (every dirty file matches `**/INTENT.md` or `**/DETAIL.md`) → proceed to next check (Stage 1 will commit these after sync)
+- **Only INTENT.md / DETAIL.md changes present** (every dirty file matches `**/INTENT.md` or `**/DETAIL.md`) → proceed to next check (Stage 1 will commit these after sync). **Exception**: when `--skip-update` is active, treat this as "non-FCA-document changes present" and abort with "Uncommitted FCA-document changes detected; drop `--skip-update` or commit them first." — Stage 1 is the only step that commits these files.
 - **No output (clean worktree)** → proceed to next check
 
 ### 0.4 GitHub CLI Authentication Check
@@ -99,58 +99,27 @@ git rev-parse --verify <ref>
 
 ### 2.2 Auto-Detection Algorithm
 
-When `--base` is unspecified, the following fallback chain determines the base
-branch.
+When `--base` is unspecified, resolve the base branch as follows:
 
 ```bash
-# Step 1: Check remote default branch
-DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}')
-
-# Step 2: Fallback chain (when DEFAULT_BRANCH is empty)
-# → Check "main" exists: git rev-parse --verify origin/main
-# → Check "master" exists: git rev-parse --verify origin/master
-# → Both fail: abort with error
-
-# Step 3: Build candidate list (default branch only)
-CANDIDATES=()
-[ -n "$DEFAULT_BRANCH" ] && CANDIDATES+=("origin/$DEFAULT_BRANCH")
-
-# Step 4: Compute merge-base distance for each candidate
-for CANDIDATE in "${CANDIDATES[@]}"; do
-  MERGE_BASE=$(git merge-base HEAD "$CANDIDATE" 2>/dev/null)
-  if [ -n "$MERGE_BASE" ]; then
-    DISTANCE=$(git rev-list --count "$MERGE_BASE"..HEAD)
-    # Record (CANDIDATE, DISTANCE) pair
+DEFAULT_BRANCH=$(git remote show origin 2>/dev/null | awk '/HEAD branch/ {print $NF}')
+# Fallback: empty or "(unknown)" → probe origin/main then origin/master
+if [ -z "$DEFAULT_BRANCH" ] || [ "$DEFAULT_BRANCH" = "(unknown)" ]; then
+  if   git rev-parse --verify origin/main   >/dev/null 2>&1; then DEFAULT_BRANCH=main
+  elif git rev-parse --verify origin/master >/dev/null 2>&1; then DEFAULT_BRANCH=master
+  else abort "Cannot auto-detect base branch. Specify --base explicitly."
   fi
-done
-
-# Step 5: Select candidate with minimum distance
-```
-
-### Decision Logic
-
-```
-candidates = [origin/DEFAULT_BRANCH].filter(exists && has_merge_base)
-
-if candidates.empty:
-  → ERROR: "Cannot auto-detect base branch. Specify `--base` explicitly."
-
-for each candidate:
-  merge_base = git merge-base HEAD candidate
-  distance = git rev-list --count merge_base..HEAD
-
-BASE_REF = candidate with minimum distance
+fi
+BASE_REF="origin/$DEFAULT_BRANCH"
 ```
 
 ### Edge Cases
 
-| Scenario                                    | Handling                                  |
-| ------------------------------------------- | ----------------------------------------- |
-| Single candidate only                       | Use that branch                           |
-| All candidates share same merge-base        | First candidate in priority order wins    |
-| No candidates (orphan branch)               | Error: "Specify `--base` explicitly"      |
-| `git merge-base` fails (no common ancestor) | Exclude candidate, proceed with remaining |
-| Remote (origin) not configured              | Error: "No remote repository configured"  |
+| Scenario                                    | Handling                                   |
+| ------------------------------------------- | ------------------------------------------ |
+| No main / master on origin                  | Error: "Specify `--base` explicitly"       |
+| `git merge-base` fails (no common ancestor) | Error: "No common ancestor with $BASE_REF" |
+| Remote (origin) not configured              | Error: "No remote repository configured"   |
 
 ### 2.3 Output
 
@@ -354,6 +323,8 @@ GitHub CLI authentication not verified. PR body saved locally.
 2. Re-run `/filid:filid-pull-request`
 
 Or copy the file contents and create the PR manually on GitHub web.
+
+→ END execution (Stages 4.2~4.4 skipped).
 ```
 
 ### 4.2 Existing PR Check

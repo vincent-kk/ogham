@@ -1,7 +1,7 @@
 ---
 name: adjudicator
 description: "Fast-path reviewer that blends all committee perspectives into one concise final judgment."
-tools: Read, Glob, Grep, Bash
+tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 25
 ---

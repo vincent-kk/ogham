@@ -80,6 +80,51 @@ mirroring the six committee lenses (structure, documentation, stability,
 velocity, user-value, cognitive load) so per-perspective coverage is
 still surfaced.
 
+### Failure Variant (Step D.7 fail dispatch)
+
+When Phase D enters the fail dispatch (Step D.7 in `phases/phase-d-deliberation.md`),
+the chairperson MUST still write `review-report.md` so that the pipeline
+finalize stage and `mcp_t_review_manage(format-pr-comment)` can read a
+consistent verdict field. Use this minimal variant alongside
+`rounds/failure.md`:
+
+```markdown
+# Code Review Report — <branch name>
+
+**Date**: <ISO 8601>
+**Scope**: <branch|pr|commit>
+**Base**: <base ref>
+**Verdict**: INCONCLUSIVE
+**Dispatch**: fail
+**Failure Reason**: <from SubagentReturn or in-flight error>
+
+## Committee Composition
+
+| Persona    | Election Basis         | Final Position |
+| ---------- | ---------------------- | -------------- |
+| <persona>  | <from session.md>      | N/A (fail)     |
+
+## Deliberation Log
+
+### Fail Dispatch
+
+- **Trigger**: <chairperson-forbidden | phase-d-team-spawn-unavailable | team-incomplete | veto-deadlock | team-in-flight-error>
+- **Rationale**: <one-line rationale — mirrors rounds/failure.md>
+- **Deliberation executed**: no (merge blocked by verdict_gate)
+
+## Final Verdict
+
+**INCONCLUSIVE** — Phase D deliberation could not produce a quorum verdict.
+See `rounds/failure.md` for the raw failure record.
+```
+
+Sections omitted relative to the standard template:
+- `## Structure Compliance (Phase A)` — include only if `structure-check.md` exists
+- `## Technical Verification Results` — omit (no C1/C2 ingestion performed)
+- `fix-requests.md` — NOT written in the fail path; reviewers inspect
+  `rounds/failure.md` + `verification-metrics.md` / `verification-structure.md`
+  directly
+
 ## Fix Requests Format (`fix-requests.md`)
 
 Structure violations (CRITICAL/HIGH findings from `structure-check.md`)
