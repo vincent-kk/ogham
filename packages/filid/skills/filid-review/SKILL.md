@@ -103,6 +103,8 @@ first, then restart from Phase A (or Phase B if `--no-structure-check`).
      Phase D dispatch.
    - `"proceed-full-review"` → continue to Step 2.
 
+> `mcp_t_review_manage(action: "cache-check", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
+
 **→ After entry point is determined, immediately proceed to Step 2.**
 
 ### Step 2 — Phase A + B: Parallel Delegation
@@ -160,6 +162,8 @@ its output file exists before proceeding. If missing, execute the phase
 instructions directly as chairperson rather than re-delegating. See
 `contracts.md` → "Post-Completion Verification" for the full fallback
 procedure.
+
+> **Terminology**: "fallback" in filid-review refers to COVERAGE FALLBACK (when a Phase A/B/C1/C2 subagent output is missing, main-context chairperson executes the phase instructions directly). This is distinct from `filid-ast-fallback`, which is DEGRADATION FALLBACK (LLM-based AST pattern matching when `@ast-grep/napi` native module is unavailable).
 
 **→ After both background agents complete and outputs are verified,
 immediately proceed to Step 3.**

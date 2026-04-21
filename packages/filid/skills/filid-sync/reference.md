@@ -47,6 +47,8 @@ Each `DriftItem` fields:
 - `medium`: naming convention violations or incomplete barrel exports
 - `low`: style/convention drift with no functional impact
 
+> Note: `DriftSeverity` (lowercase `critical|high|medium|low`) is one of THREE severity scales in filid. It is distinct from `RuleSeverity` (`error|warning|info`, for rule definitions) AND `DebtSeverity` (UPPERCASE `CRITICAL|HIGH|MEDIUM|LOW`, for filid-review fix_items / debt.md). See `templates/rules/filid_fca-policy.md` → **Severity Vocabulary** for all three scales and their advisory mapping. The `--severity` flag on `/filid:filid-sync` accepts ONLY the lowercase drift values; it does NOT accept rule-severity or review-severity values.
+
 ## Section 3 — Plan & Approval
 
 `drift-analyzer` generates the correction plan. For reclassification candidates,

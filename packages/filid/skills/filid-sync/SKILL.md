@@ -105,6 +105,8 @@ See [reference.md Section 4](./reference.md#section-4--correction-execution).
 | `--dry-run`      | flag                          | off                       | Print detection results and plan without applying changes |
 | `--auto-approve` | flag                          | off                       | Skip user approval step                                   |
 
+> `--severity` accepts the lowercase drift-severity values only (`critical|high|medium|low`). It does NOT accept rule-severity values (`error|warning|info`) nor review-severity values (`CRITICAL|HIGH|MEDIUM|LOW`). See `templates/rules/filid_fca-policy.md` → **Severity Vocabulary** for the three-scale taxonomy.
+
 ## Quick Reference
 
 ```bash

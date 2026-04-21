@@ -306,6 +306,8 @@ If there were NO accepted fixes (all rejected):
   constitutionally compliant.
 ```
 
+**→ After AskUserQuestion returns "Yes — run now", immediately invoke `Skill("filid:filid-revalidate")` in the same response. Do NOT yield the turn. On "Not now", execution is COMPLETE.**
+
 **After `filid:filid-revalidate` is invoked (or skipped), execution is COMPLETE.**
 
 ## Available MCP Tools

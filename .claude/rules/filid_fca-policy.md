@@ -29,7 +29,14 @@ Classification is determined by directory inspection in this strict priority ord
 6. **No observable side effects, stateless** → `pure-function`
 7. **Default** → `fractal` (generate INTENT.md)
 
-**Known organ names**: `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`, `__tests__`, `__mocks__`, `__fixtures__`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+**Known organ names** (name-matched, priority 2 — from `src/constants/organ-names.ts`):
+- **Base** (shared/UI): `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
+- **Test/infra** (name-based): `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+- **Docs**: `references`
+
+**Pattern-matched organs** (priority 3 — NOT members of the name list):
+- `__name__` (double-underscore wrapped): classifies `__tests__`, `__mocks__`, `__fixtures__`, or any custom `__X__` directory as `organ` by pattern, not by membership.
+- `.name` (dot-prefixed): classifies `.config`, `.hidden`, etc. as `organ` by pattern.
 
 Fractal nodes CAN exist inside organ directories. The scanner MUST traverse into organs and
 re-classify any subdirectory that does not match organ rules.
@@ -91,7 +98,7 @@ export const MY_CONSTANT = 'value';
 
 - Fractal tree depth MUST NOT exceed `maxDepth`.
 - Fix: flatten structure, extract deeply nested modules to top-level, or increase `maxDepth` in
-  `.filid/config.json` only when genuinely justified.
+  `.filid/config.json` (`scan.maxDepth`) only when genuinely justified.
 
 ### circular-dependency
 
@@ -118,6 +125,54 @@ export const MY_CONSTANT = 'value';
   - **Eponymous file** (max 1): file whose base name matches the directory name (e.g., `auth/auth.ts`)
   - **Framework reserved**: auto-detected from `package.json` dependencies (Next.js, Remix, Nuxt, SvelteKit) at scan time
 - Fix: promote peer file to a subdirectory, or add to `.filid/config.json` `additional-allowed`.
+
+---
+
+## Severity Vocabulary
+
+FCA-AI uses **three** distinct severity scales for its rule pipeline. Each has its own case convention; none is a renaming of another.
+
+> Scope: this section enumerates the scales emitted by the rule/drift/review pipelines. Presentation-only derived types (e.g., `SummaryItemSeverity` in `src/types/summary.ts`, used only by `generateHumanSummary()` for PR-summary rendering) are out of scope — they are mapped from the scales below, never authored directly.
+
+| Layer | Values | Case | SSoT | Used by |
+|---|---|---|---|---|
+| Rule definition (static) | `error` \| `warning` \| `info` | lowercase | `src/types/rules.ts` → `RuleSeverity` | `.filid/config.json`, `/filid:filid-config set rules.<id>.severity`, rule-engine output |
+| Drift detection (runtime) | `critical` \| `high` \| `medium` \| `low` | **lowercase** | `src/types/drift.ts` → `DriftSeverity` | `/filid:filid-sync` CLI `--severity`, `drifts[].severity`, drift-detector |
+| Review / debt output (runtime) | `CRITICAL` \| `HIGH` \| `MEDIUM` \| `LOW` | **UPPERCASE** | `src/types/debt.ts` → `DebtSeverity` (reused for review fix_items) | `/filid:filid-review`, `/filid:filid-resolve`, `/filid:filid-structure-review`, `fix_items[].severity`, `debt.md` |
+
+### Advisory mapping (not enforced by code)
+
+| RuleSeverity | Drift (lowercase) | Review (UPPERCASE) | Rationale |
+|---|---|---|---|
+| `error` | `critical` or `high` | `CRITICAL` or `HIGH` | Blocking; escalation is runtime-dependent |
+| `warning` | `medium` | `MEDIUM` | Non-blocking, correctable |
+| `info` | `low` | `LOW` | Advisory |
+
+### Scale-selection rules
+
+- When a rule violation is surfaced through the SCAN / SYNC pipeline (drift-detector), handlers emit LOWERCASE drift severity (`DriftSeverity`).
+- When a rule violation is surfaced through the REVIEW pipeline (fix_items / debt), handlers emit UPPERCASE review severity (`DebtSeverity`).
+- The two runtime scales are semantically equivalent; case is the discriminator. Do NOT mechanically cross-cast; choose the scale matching the producing pipeline.
+- CLI filters:
+  - `/filid:filid-sync --severity critical|high|medium|low` (lowercase only).
+  - Review output filters (if any) use the UPPERCASE form.
+- None of the runtime filters accept `error|warning|info`.
+
+---
+
+## Review Committee Personas
+
+The filid-review skill uses a fixed roster of personas (SSoT: `src/types/review.ts` → `PersonaId`):
+`adjudicator`, `engineering-architect`, `knowledge-manager`, `operations-sre`, `business-driver`, `product-manager`, `design-hci`.
+See `skills/filid-review/SKILL.md` for phase wiring and `agents/<persona>.md` for per-persona agent instructions.
+
+---
+
+## State Machine (Phase D)
+
+Phase D deliberation states (SSoT: `src/types/review.ts` → `StateMachineState`):
+`PROPOSAL`, `DEBATE`, `VETO`, `SYNTHESIS`, `ABSTAIN`, `CONCLUSION`.
+Transition rules and quorum math: `skills/filid-review/state-machine.md`.
 
 ---
 
@@ -156,7 +211,7 @@ export const MY_CONSTANT = 'value';
 |---|---|---|
 | LCOM4 (Lack of Cohesion) | >= 2 | Split into separate modules |
 | Cyclomatic Complexity | > 15 | Compress or abstract |
-| File size | > 500 lines | Consider splitting |
+| File size | > 500 lines (advisory; no code constant) | Consider splitting |
 
 **Test file conventions (3+12 rule)**: max **3 basic** (happy path) + **12 complex** (edge cases) = **15 total** per spec file. Exceeding 15 signals the module should be split.
 

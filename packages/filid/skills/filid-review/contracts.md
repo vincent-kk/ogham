@@ -93,6 +93,8 @@ reasoning_gaps: [<free-form strings>]   # Metrics the persona needed but could n
 ---
 ```
 
+> **Note**: `severity` on fix_items uses the UPPERCASE review/debt scale `CRITICAL|HIGH|MEDIUM|LOW` (SSoT: `src/types/debt.ts` → `DebtSeverity`). This is distinct from (a) rule severity `error|warning|info` (`src/types/rules.ts` → `RuleSeverity`, for static rule definitions) and (b) drift severity lowercase `critical|high|medium|low` (`src/types/drift.ts` → `DriftSeverity`, for filid-sync output). See `templates/rules/filid_fca-policy.md` → **Severity Vocabulary** for all three scales and their advisory mapping.
+
 ### Field semantics
 
 - **`round`** — 1-indexed round number. Must match the file name suffix.
@@ -161,6 +163,8 @@ them in.
    remain in original form.
 
 ## Post-Completion Verification Fallback (A/B/C1/C2 only — Phase D excluded)
+
+> **Terminology**: "fallback" in filid-review refers to COVERAGE FALLBACK (when Phase D is skipped, main-context chairperson writes the minimal review-report.md). This is distinct from `filid-ast-fallback`, which is DEGRADATION FALLBACK (LLM-based AST pattern matching when `@ast-grep/napi` native module is unavailable).
 
 This fallback applies **only** to Phase A, B, C1, and C2. **Phase D is
 excluded** from the chairperson-direct fallback path — main MUST NOT

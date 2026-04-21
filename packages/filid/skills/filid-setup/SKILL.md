@@ -341,8 +341,9 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers
                                      | lib | styles | assets | constants
-KNOWN_ORGAN_DIR_NAMES (test/infra) = __tests__ | __mocks__ | __fixtures__
-                                     | test | tests | spec | specs | fixtures | e2e
+KNOWN_ORGAN_DIR_NAMES (test/infra) = test | tests | spec | specs | fixtures | e2e
+# __tests__, __mocks__, __fixtures__ are pattern-matched (priority 3), NOT list-matched.
+KNOWN_ORGAN_DIR_NAMES (docs)       = references
 INTENT_MD_LINE_LIMIT = 50 lines
 3-TIER SECTIONS   = "Always do" | "Ask first" | "Never do"
 DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tree.nodes)

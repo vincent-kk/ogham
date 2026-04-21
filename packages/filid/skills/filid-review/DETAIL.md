@@ -71,6 +71,21 @@ verdict_gate:
 
 A missing or `null` `deliberation_mode` is handled identically to `chairperson-forbidden` — the subagent failed to emit the handoff and the merge MUST be blocked.
 
+### review-report.md frontmatter (mandatory)
+
+| Field | Type | Required | Consumer |
+|---|---|---|---|
+| `verdict` | `APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE` | yes | filid-pipeline cached-verdict short-circuit |
+| `branch` | string | yes | filid-revalidate |
+| `base_ref` | string | yes | filid-revalidate |
+| `content_hash` | string | conditional | cache lookup on next review |
+| `committee` | `PersonaId[]` | yes | audit trail |
+| `deliberation_mode` | `team \| solo-adjudicator \| chairperson-forbidden` | yes | replayability |
+| `generated_at` | ISO-8601 string | yes | freshness check |
+
+Writers MUST emit all required fields. Readers (filid-pipeline main, filid-revalidate) grep-parse these fields; missing required fields trigger an `INCONCLUSIVE` fallback.
+
 ## Last Updated
 
 - 2026-04-20 — initial authoring. Codifies the A/B/C subagent ↔ main handoff required by PR-2 (emit in `phases/phase-d-deliberation.md`) and PR-3 (consume in `filid-pipeline/SKILL.md`), and blocks `chairperson-direct` Phase D synthesis via `verdict_gate`.
+- 2026-04-21 — add `review-report.md` frontmatter schema (Round 3 F-10).

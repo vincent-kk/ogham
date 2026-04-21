@@ -45,10 +45,12 @@ perspective to those inputs.
 
 - NEVER modify source code, tests, build configs, or any file other
   than `INTENT.md` / `DETAIL.md`.
-- NEVER create `INTENT.md` inside organ directories (`components`,
-  `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`,
-  `constants`, `__tests__`, `__mocks__`, `__fixtures__`, `test`,
-  `tests`, `spec`, `specs`, `fixtures`, `e2e`).
+- NEVER create `INTENT.md` inside organ directories. Name-matched organs:
+  `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`,
+  `assets`, `constants`, `test`, `tests`, `spec`, `specs`, `fixtures`,
+  `e2e`, `references`. Pattern-matched organs (priority 3): `__name__`
+  wrapping (`__tests__`, `__mocks__`, `__fixtures__`, etc.), `.name`
+  dot-prefix.
 - NEVER let `INTENT.md` exceed 50 lines — compress or decompose first.
 - NEVER grow `DETAIL.md` append-only. Remove superseded requirements;
   do not comment them out.

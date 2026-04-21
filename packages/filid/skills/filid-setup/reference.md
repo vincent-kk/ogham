@@ -350,7 +350,8 @@ Apply the following decision logic in order:
 `KNOWN_ORGAN_DIR_NAMES` (name-based, always organ regardless of structure):
 
 - **UI/shared**: `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
-- **Test/infra**: `__tests__`, `__mocks__`, `__fixtures__`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+- **Test/infra** (name-matched): `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`. `__tests__`, `__mocks__`, `__fixtures__` are **pattern-matched** (priority 3), not list members.
+- **Docs**: `references`
 
 Pattern-based organ rules (applied before name list, after INTENT.md/DETAIL.md check):
 

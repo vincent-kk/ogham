@@ -59,9 +59,11 @@ INTENT.md is present inside it.
 | ----------------------------- | -------- | ------------------------- | ------------ |
 | INTENT.md exists in organ dir | critical | `ORGAN_INTENT_MD_PRESENT` | Yes (delete) |
 
-`ORGAN_DIR_NAMES` = `components`, `utils`, `types`, `hooks`, `helpers`,
-`lib`, `styles`, `assets`, `constants`, `__tests__`, `__mocks__`,
-`__fixtures__`, `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+`ORGAN_DIR_NAMES` (name-matched) = `components`, `utils`, `types`, `hooks`, `helpers`,
+`lib`, `styles`, `assets`, `constants`, `test`, `tests`, `spec`, `specs`,
+`fixtures`, `e2e`, `references`.
+
+Pattern-matched (priority 3, NOT list members): `__name__` wrapping (e.g., `__tests__`, `__mocks__`, `__fixtures__`), `.name` dot-prefix — see `templates/rules/filid_fca-policy.md` → **Node Classification Priority**.
 
 ## Section 4 — Test File Validation (3+12 Rule)
 
