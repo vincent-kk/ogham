@@ -17,6 +17,13 @@ with Read, Glob, Grep, and Edit tools when `@ast-grep/napi` is unavailable.
 > conversion rules, and exact MCP error detection strings, read the
 > `reference.md` file in this skill's directory (same location as this SKILL.md).
 
+> **Internal skill** (`user_invocable: false`) — orchestrator skills (or the
+> plugin host) invoke this fallback when `mcp_t_ast_grep_search` /
+> `mcp_t_ast_grep_replace` reports `@ast-grep/napi is not available`. Not
+> intended for direct user invocation via `/filid:filid-ast-fallback`. The
+> syntax examples below document the invocation shape for callers, not
+> end users.
+
 ## When to Use This Skill
 
 - `mcp_t_ast_grep_search` or `mcp_t_ast_grep_replace` MCP tools return `@ast-grep/napi is not available`

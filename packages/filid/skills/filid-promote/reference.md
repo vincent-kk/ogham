@@ -5,6 +5,11 @@ Detailed workflow, eligibility rules, and spec generation logic for the
 
 ## Section 1 — Discovery Details
 
+> **Subject attribution**: All `Glob` / MCP / Bash calls below are executed
+> by the orchestrating skill. The `qa-reviewer` Task receives the aggregated
+> output and analyzes it. Agents never invoke MCP or Bash directly (per the
+> Capability Model).
+
 Locate all `test.ts` files and analyze their content:
 
 ```
@@ -17,6 +22,11 @@ for each file in testFiles:
 ```
 
 ## Section 2 — Eligibility Rules
+
+> **Subject attribution**: The skill owns the `git log` / Read calls that
+> produce the `stableDays` / `lastFailure` values. The `qa-reviewer` Task
+> then evaluates the `checkPromotionEligibility` predicate on the
+> skill-supplied data.
 
 Apply promotion eligibility criteria:
 
@@ -83,7 +93,12 @@ for each eligible file:
 
 ## Section 5 — Validation and Migration
 
-### Validation
+> **Subject attribution**: Validation MCP calls are issued by the skill; the
+> `qa-reviewer` Task interprets the result. Migration Write/Bash operations
+> are executed by the `implementer` Task (Write/Edit/Bash are part of its
+> toolset).
+
+### Validation (skill → `qa-reviewer`)
 
 ```
 for each generated spec:
@@ -94,7 +109,7 @@ for each generated spec:
         adjustAndRetry(spec, result)   // Trim lowest-value cases until compliant
 ```
 
-### Migration
+### Migration (`implementer`)
 
 ```
 for each validated spec:

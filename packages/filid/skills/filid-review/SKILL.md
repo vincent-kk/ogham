@@ -145,9 +145,15 @@ only await Phase B.
 `structure-check.md` frontmatter `critical_count` (treat as 0 when Phase
 A was skipped). If `critical_count >= 3` AND `adjudicator_mode == false`,
 escalate complexity by one level (TRIVIAL→LOW, LOW→MEDIUM, MEDIUM→HIGH)
-and overwrite `session.md` frontmatter `committee` / `complexity` /
-`deliberation_mode` using the canonical table in `contracts.md` →
-"Complexity → Committee Mapping". Adjudicator mode is never escalated.
+and overwrite `session.md` frontmatter `committee` / `complexity` using
+the canonical table in `contracts.md` → "Complexity → Committee Mapping".
+Additionally, overwrite `deliberation_mode` per the derivation rule in
+`phases/phase-b-analysis.md` → §B.3.5:
+
+- `committee == ['adjudicator']` → `deliberation_mode: solo-adjudicator`
+- `committee.length >= 2` → `deliberation_mode: team`
+
+Adjudicator mode is never escalated.
 
 **Post-completion verification**: After each subagent completes, verify
 its output file exists before proceeding. If missing, execute the phase
@@ -220,7 +226,7 @@ message and terminate.
    SubagentReturn:
      committee: [<persona-id>, ...]
      deliberation_mode: <team | solo-adjudicator | chairperson-forbidden>
-     failure_reason: <none | phase-d-team-spawn-unavailable | team-incomplete | round5-exhaust | veto-deadlock>
+     failure_reason: <none | phase-d-team-spawn-unavailable | team-incomplete | round5-exhaust>
      paths_to_artifacts:
        structure_check: <REVIEW_DIR>/structure-check.md | null
        session: <REVIEW_DIR>/session.md
@@ -237,13 +243,20 @@ subagent. Return control to the pipeline main.**
 
 ### Step 4 — Phase D: Political Consensus (Team Deliberation)
 
-> **Pipeline Subagent Mode guard**: If
-> `--pipeline-mode=abc-only` was set, Step 3.9 already terminated this
-> skill — execution MUST NOT reach Step 4 in that mode. This step runs
-> only in the user-invoked (standalone) path, or in the pipeline main
-> context after the A/B/C subagent returns (where the pipeline
-> orchestrator drives Phase D Dispatch per
-> `filid-pipeline/SKILL.md` → "Stage: Phase D Dispatch").
+> **Pipeline Subagent Mode guard**: If `--pipeline-mode=abc-only` was set,
+> Step 3.9 already terminated this skill — execution MUST NOT reach Step 4
+> in that mode.
+>
+> Step 4 (Phase D) executes in two mutually exclusive contexts, and this
+> SKILL.md file is only one of them:
+>
+> 1. **User-invoked (standalone) path** — this skill runs all five steps
+>    end-to-end; Step 4 executes here verbatim.
+> 2. **Pipeline main context** — the pipeline orchestrator does NOT
+>    re-invoke `filid-review`. It reads `phases/phase-d-deliberation.md`
+>    directly and drives Phase D Dispatch per `filid-pipeline/SKILL.md` →
+>    "Stage: Phase D Dispatch". In this case the present SKILL.md Step 4
+>    is a documentation reference, not an entry point.
 
 Phase D executes the full multi-persona deliberation via Claude Code's
 native team tools (when `committee.length >= 2`) or a single Task

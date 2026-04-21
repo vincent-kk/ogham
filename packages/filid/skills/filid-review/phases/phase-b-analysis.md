@@ -116,8 +116,8 @@ main will consume via the
 
 Set `failure_reason: none`. The A/B/C subagent boundary never emits a
 non-`none` value — Phase D main-context execution is the only place
-`phase-d-team-spawn-unavailable`, `team-incomplete`, `round5-exhaust`,
-or `veto-deadlock` can surface. `chairperson-forbidden` is a
+`phase-d-team-spawn-unavailable`, `team-incomplete`, or `round5-exhaust`
+can surface. `chairperson-forbidden` is a
 runtime-only marker produced when a subagent attempts a Phase D
 protocol violation; it is never written to `session.md`. The pipeline
 main's `verdict_gate` treats a missing frontmatter `deliberation_mode`

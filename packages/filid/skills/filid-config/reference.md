@@ -5,16 +5,21 @@ and validation logic.
 
 ## Schema Source
 
-The authoritative config schema is the `FilidConfig` interface in
-`src/core/infra/config-loader.ts`:
+The authoritative `FilidConfig` interface lives in the filid plugin's
+internal source file `src/core/infra/config-loader/loaders/filid-config.ts`.
+That file is **not** distributed to user projects (the plugin ships as a
+bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read
+it at runtime — any such Read resolves against CWD and fails.
 
-```
-Read src/core/infra/config-loader.ts and locate the FilidConfig interface
-to discover all available top-level fields and their types.
-```
+Discover field names the safe way:
+1. `Read .filid/config.json` to see what the current project already stores.
+2. If you need the default shape (e.g., for `reset`), rely on
+   `mcp_t_project_init` — the handler writes `createDefaultConfig()` output
+   onto disk when no config file is present. Delete first, then call the MCP
+   tool (see `SKILL.md` → Step 3 `reset`).
 
-Do NOT hardcode field lists in this skill. Always read the interface
-definition dynamically to support future schema extensions.
+Do NOT hardcode field lists in this skill. Do NOT embed `Read
+src/core/infra/...` instructions anywhere.
 
 ## Dot-Notation Path Resolution
 

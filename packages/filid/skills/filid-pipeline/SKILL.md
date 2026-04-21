@@ -137,7 +137,13 @@ uses a **hybrid execution model**:
 
 - **Pre-check**: If `gh pr list --head <branch> --state open` returns a PR,
   skip this stage and re-enter auto-detect Signal 5 (`filid-review`).
-  Pipeline never invokes `AskUserQuestion`.
+  The pipeline orchestrator itself does not invoke `AskUserQuestion`
+  directly, but downstream skills may prompt when their interactive
+  gates are not suppressed: `Skill("filid:filid-pull-request")` invokes
+  `Skill("filid:filid-update")`, whose Stage 2 Sync will prompt unless
+  `--auto-approve` is forwarded. Pass `--skip-update` (already in the
+  pipeline flag list) to bypass update entirely, or rely on interactive
+  approval as the intended default for non-`--auto` flows.
 - **Execute**: `Skill("filid:filid-pull-request")`
 - **Pass through flags**: `--base`, `--draft`, `--skip-update`, `--title`
 - **Success signal**: Skill completes without error
@@ -182,7 +188,7 @@ MUST consume two dispatch fields from the return:
 
 - `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
-  round5-exhaust, veto-deadlock}`
+  round5-exhaust}`
 
 **Pre-dispatch steps** (execute in order before evaluating the
 `verdict_gate` table below):

@@ -108,7 +108,7 @@ consistent verdict field. Use this minimal variant alongside
 
 ### Fail Dispatch
 
-- **Trigger**: <chairperson-forbidden | phase-d-team-spawn-unavailable | team-incomplete | veto-deadlock | team-in-flight-error>
+- **Trigger**: <chairperson-forbidden | phase-d-team-spawn-unavailable | team-incomplete | team-in-flight-error>
 - **Rationale**: <one-line rationale — mirrors rounds/failure.md>
 - **Deliberation executed**: no (merge blocked by verdict_gate)
 

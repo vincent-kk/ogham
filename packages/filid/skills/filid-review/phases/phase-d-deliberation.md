@@ -41,7 +41,7 @@ dispatch fields:
 
 - `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
-  round5-exhaust, veto-deadlock}`
+  round5-exhaust}`
 
 Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 
@@ -49,14 +49,16 @@ Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 | -------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | team     | `deliberation_mode == team` AND `committee.length >= 2`           | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally         |
 | solo     | `deliberation_mode == solo-adjudicator`                           | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                  |
-| fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error, or irreconcilable VETO deadlock surfacing during D.4. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
+| fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error (nested spawn refused) surfacing before any round completes. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
 
-> **Round-5 exhaust and all-ABSTAIN quorum failures are NOT Step D.7.**
-> Those surface during in-team round evaluation (Step D.3.2) and route to
-> Step D.6, which writes the standard `review-report.md` with
-> `verdict: INCONCLUSIVE` via the normal aggregation path. Step D.7 is
-> reserved for cases where deliberation never ran to a full round (pre-dispatch
-> failure or TeamCreate/VETO in-flight failure).
+> **Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT Step D.7.**
+> Those surface during in-team round evaluation (Step D.3.2 or D.4) and route to
+> Step D.6, which writes the standard `review-report.md` via the normal
+> aggregation path. Round-5 exhaust and all-ABSTAIN map to `verdict: INCONCLUSIVE`;
+> irreconcilable VETO (D.4.4) maps to `verdict: REQUEST_CHANGES` per
+> `state-machine.md` → "VETO Branch (COMPROMISE) Rules". Step D.7 is reserved
+> for cases where deliberation never ran to a full round (pre-dispatch failure
+> or TeamCreate in-flight failure).
 
 `chairperson-direct` Phase D synthesis — main writing a verdict without
 running either the team branch or the solo-adjudicator branch — is a
@@ -597,12 +599,13 @@ Entered in two cases:
 
 - **Pre-dispatch fail**: Step D.1 selects fail because `deliberation_mode` is
   `chairperson-forbidden` or `null`, OR `failure_reason != "none"`.
-- **In-flight fail**: during D.2-team execution a TeamCreate error surfaces,
-  or D.4 cannot reconcile a VETO deadlock.
+- **In-flight fail**: during D.2-team execution a TeamCreate error surfaces
+  (nested spawn refused) before any round completes.
 
-Round-5 exhaust and all-ABSTAIN quorum failures are NOT this branch — they
-complete at least one round and route through D.3.2 → D.6, which writes the
-standard `review-report.md` with `verdict: INCONCLUSIVE`.
+Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT
+this branch — they complete at least one round and route through D.3.2 / D.4
+→ D.6. D.3.2 round-limit / all-ABSTAIN writes `verdict: INCONCLUSIVE`; D.4.4
+irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 
 1. **Team teardown (if applicable)**: if a team was already created before
    the failure surfaced, run `TeamDelete({ team_name: "review-<normalized-branch>" })`
@@ -615,7 +618,7 @@ standard `review-report.md` with `verdict: INCONCLUSIVE`.
    ---
    verdict: INCONCLUSIVE
    dispatch: fail
-   failure_reason: <from subagent return | "phase-d-team-spawn-unavailable" | "veto-deadlock" | "team-incomplete">
+   failure_reason: <from subagent return | "phase-d-team-spawn-unavailable" | "team-incomplete">
    rationale: <one-line rationale>
    ---
    ```

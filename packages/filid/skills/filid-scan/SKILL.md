@@ -18,7 +18,7 @@ plugin: filid
 > 2. Terminal stage marker emitted: `Scan complete: N violations` or `Scan complete: no violations found`
 >
 > **HIGH-RISK YIELD POINTS**:
-> - After Phase 1 `mcp_t_fractal_scan` returns — chain Phases 2–4 in the same response (existing "CRITICAL — No-Yield Execution" directive at line ~37 is authoritative)
+> - After Phase 1 `mcp_t_fractal_scan` returns — chain Phases 2–4 in the same response (the "CRITICAL — No-Yield Execution" directive under the "## Core Workflow" section heading is authoritative)
 > - `--fix` auto-remediation loop — do NOT pause between fixes; continue until all applicable violations are addressed
 > - Final violation report — emit consolidated report AND end in the same turn
 

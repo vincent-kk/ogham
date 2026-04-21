@@ -45,13 +45,12 @@ deliberation_mode:
 ```yaml
 failure_reason:
   type: enum
-  values: ["none", "phase-d-team-spawn-unavailable", "team-incomplete", "round5-exhaust", "veto-deadlock"]
+  values: ["none", "phase-d-team-spawn-unavailable", "team-incomplete", "round5-exhaust"]
   semantics:
     none: healthy handoff; verdict derived from Phase D quorum result.
     phase-d-team-spawn-unavailable: TeamCreate errored or the runtime refused the spawn call.
     team-incomplete: workers spawned but quorum was unreachable (crashes, timeouts, or forced-ABSTAIN past the recovery budget).
     round5-exhaust: deliberation hit the 5-round cap without reaching SYNTHESIS.
-    veto-deadlock: an active VETO could not be reconciled within the allowed rounds.
 ```
 
 ### verdict_gate rule

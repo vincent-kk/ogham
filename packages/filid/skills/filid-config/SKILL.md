@@ -13,10 +13,13 @@ plugin: filid
 View and modify `.filid/config.json` settings interactively. Manages language
 preferences, rule overrides, and project-level FCA-AI configuration.
 
-> **Schema Reference**: The authoritative config schema is defined in
-> `src/core/infra/config-loader.ts` (`FilidConfig` interface). This skill
-> MUST NOT hardcode config keys — always read the interface definition and
-> the actual config file to discover available fields.
+> **Schema Source**: The authoritative `FilidConfig` shape is defined in the
+> filid plugin's internal source (`src/core/infra/config-loader/loaders/filid-config.ts`).
+> That source is NOT distributed to user projects, so this skill MUST NOT
+> hardcode config keys AND MUST NOT attempt to read that source file at
+> runtime. Observe the actual `.filid/config.json` on disk with Read; when
+> the default shape is needed (e.g., `reset`), rely on `mcp_t_project_init`
+> to emit it (see Step 3 `reset`).
 >
 > **Detail Reference**: For dot-notation path resolution, validation rules,
 > and output format templates, read the `reference.md` file in this skill's
@@ -99,13 +102,19 @@ Parse the user's input to determine the subcommand and arguments.
 6. Report the change: `Set <key> = <value>`.
 
 **For `reset`**:
-1. Read the current config to check for `language` field.
-2. Read `src/core/infra/config-loader.ts` to find `createDefaultConfig()` output
-   structure — use this as the reset baseline.
-3. If not `--full`, preserve the existing `language` value.
-4. Write the reset config with the Write tool.
-5. Read back and verify.
-6. Report: "Config reset to defaults" (with note about preserved language if applicable).
+1. Read the current `.filid/config.json`. If `--full` is absent, capture the
+   existing `language` field (may be undefined).
+2. Delete the current config via Bash: `rm <git_root>/.filid/config.json`.
+3. Call `mcp_t_project_init({ path: <git_root> })`. Because the file no longer
+   exists, the handler writes the output of `createDefaultConfig()` (defined
+   in the plugin's internal `src/core/infra/config-loader/loaders/filid-config.ts`
+   — referenced here only as documentation; do NOT attempt to Read it).
+4. If `--full` is absent AND the captured `language` is defined, re-apply it
+   by reading the freshly written config, setting `config.language = <captured>`,
+   and writing it back with the Write tool (pretty-printed, 2-space indent).
+5. Read back and verify per Step 4 (Validation).
+6. Report: "Config reset to defaults". If `--full` is absent, append
+   "Language preserved: <value>" on the next line.
 
 ### Step 4 — Validation
 
