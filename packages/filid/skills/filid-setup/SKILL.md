@@ -3,7 +3,7 @@ name: filid-setup
 user_invocable: true
 description: "[filid:filid-setup] Initialize FCA-AI fractal architecture: create config, apply selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
 argument-hint: "[path] [--rules]"
-version: "1.3.0"
+version: "1.4.0"
 complexity: medium
 plugin: filid
 ---
@@ -27,9 +27,16 @@ scans the directory tree, classifies every directory by node type,
 generates missing INTENT.md files for fractal nodes, and produces a
 validation report.
 
-> **Detail Reference**: For detailed workflow steps, MCP tool examples,
-> and output format templates, read the `reference.md` file in this
-> skill's directory (same location as this SKILL.md).
+> **Detail References**: Each phase's detail lives in a separate file under
+> `./sections/`. Load ONLY the section for the phase you're currently
+> executing — do not pre-load the whole set.
+>
+> - Phase 0 (rule docs): [sections/section-0-rule-docs.md](./sections/section-0-rule-docs.md)
+> - Phase 1 (scan): [sections/section-1-directory-scan.md](./sections/section-1-directory-scan.md)
+> - Phase 2 (classify): [sections/section-2-node-classification.md](./sections/section-2-node-classification.md)
+> - Phase 3 (INTENT.md): [sections/section-3-intent-md-template.md](./sections/section-3-intent-md-template.md)
+> - Phase 4 (DETAIL.md): [sections/section-4-detail-md-scaffolding.md](./sections/section-4-detail-md-scaffolding.md)
+> - Phase 5 (validate): [sections/section-5-validation-report.md](./sections/section-5-validation-report.md)
 
 ## When to Use This Skill
 
@@ -72,195 +79,38 @@ Before starting the main workflow, check ast-grep availability by calling
 
 ### Phase 0a — Config Initialization
 
-Call `mcp_t_project_init` to ensure `.filid/config.json` exists at the git root:
-
-```
-mcp_t_project_init({ path: "<target-path>" })
-```
-
-This creates `.filid/config.json` with the default rule configuration
-(all 8 built-in rules enabled). Existing config is never overwritten.
-`mcp_t_project_init` does NOT touch `.claude/rules/` — that is handled by
-Phase 0b below.
+Call `mcp_t_project_init({ path })` to ensure `.filid/config.json` exists at
+the git root with the default 8-rule configuration. Existing config is never
+overwritten. `mcp_t_project_init` does NOT touch `.claude/rules/` — that is
+Phase 0b's job.
+See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-docs.md#phase-0a--config-initialization).
 
 **→ Immediately proceed to Phase 0b.**
 
 ### Phase 0b — Rule Docs Status
 
-Call `mcp_t_rule_docs_sync` with `action: "status"` to inspect the current state
-of every rule doc declared in the plugin manifest:
-
-```
-mcp_t_rule_docs_sync({ action: "status", path: "<target-path>" })
-```
-
-The response partitions rules into two disjoint lists:
-
-- `status.entries[]` — **optional** rules only. This is the ONLY list
-  rendered as checkboxes in Phase 0c. Each entry:
-  ```
-  {
-    id, filename, required: false, title, description,
-    deployed, selected,
-    templateHash, deployedHash, inSync
-  }
-  ```
-  `deployed` reflects filesystem state under `.claude/rules/` and
-  `selected === deployed` for optional rules (no config-side tracking).
-  `templateHash` is the SHA-256 of the plugin-shipped template;
-  `deployedHash` is the SHA-256 of the file on disk (or `null` when the
-  file is absent or unreadable); `inSync === (deployed && deployedHash === templateHash)`.
-  A deployed entry with `inSync === false` signals template drift — the
-  plugin shipped a newer version than what the user has on disk.
-- `status.autoDeployed[]` — **required** rules. Always auto-synced by
-  `mcp_t_rule_docs_sync({ action: "sync" })` regardless of user input.
-  Drifted required rules are overwritten unconditionally; the user cannot
-  opt out and no confirmation is required. Use this list for the Phase 0d
-  summary line — NEVER render these entries as checkboxes.
-
-Build an internal map `currentSelection: Record<string, boolean>` from
-`status.entries` only (`selected` field). Do NOT include any required
-entries — they are implicit and must not appear in the UI.
+Call `mcp_t_rule_docs_sync({ action: "status", path })` to inspect deployed
+rule docs and template drift. The response partitions rules into
+`status.entries[]` (optional — feeds Phase 0c UI) and `status.autoDeployed[]`
+(required — auto-synced silently). Each optional entry carries
+`templateHash` / `deployedHash` / `inSync` so drift can be surfaced in the UI.
+If `status.pluginRootResolved === false`, fail fast and skip Phase 0c/0d.
+See [sections/section-0-rule-docs.md — Phase 0b](./sections/section-0-rule-docs.md#phase-0b--rule-docs-status).
 
 **→ Immediately proceed to Phase 0c.**
 
 ### Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
 
-Dispatch on `N = status.entries.length` (number of **optional** rules only).
-Required rules from `status.autoDeployed[]` are enforced by the sync handler
-and MUST NEVER appear in the option list in any case.
+Dispatch on `N = status.entries.length` (number of **optional** rules only):
 
-`AskUserQuestion` requires a **minimum of 2 options per question**, so the
-prompt shape depends on `N`. Compute `nextSelection: Record<string, boolean>`
-keyed by optional rule `id` (required rules MUST NOT appear in it):
+- `N === 0`: skip `AskUserQuestion`, `nextSelection = {}`
+- `N === 1`: single-select Yes/No with three label states
+  (`Apply:` / `[ON] Keep:` / `[UPDATE] Apply latest:`)
+- `N >= 2`: multi-select checkbox, exactly ONE option per optional entry,
+  prefixed with `[ON]` (applied + in-sync) or `[UPDATE]` (applied + drift).
+  Required rules from `status.autoDeployed[]` MUST NOT appear in the UI.
 
-#### Case A — `N === 0` (no optional rules)
-
-Skip `AskUserQuestion` entirely. Set `nextSelection = {}` and proceed to
-Phase 0d. Required rules still get auto-applied by `syncRuleDocs`.
-
-#### Case B — `N === 1` (exactly one optional rule)
-
-A one-item multi-select is invalid (min 2 options). Render a
-**single-select Yes/No prompt** whose two options represent the two
-possible states of that single rule. Three label states are possible,
-driven by `deployed` and `inSync`:
-
-- `!deployed` → `Apply: ${entry.title}`
-- `deployed && inSync` → `[ON] Keep: ${entry.title}`
-- `deployed && !inSync` → `[UPDATE] Apply latest: ${entry.title}`
-  (signals the plugin template has changed; re-applying overwrites the
-  deployed copy, discarding any local edits)
-
-```ts
-const entry = status.entries[0];
-const firstLabel = !entry.deployed
-  ? `Apply: ${entry.title}`
-  : entry.inSync
-    ? `[ON] Keep: ${entry.title}`
-    : `[UPDATE] Apply latest: ${entry.title}`;
-const firstDescription = !entry.deployed
-  ? entry.description
-  : entry.inSync
-    ? `<translate \`[현재 적용됨 — 체크 해제 시 삭제됩니다]\` to [filid:lang]> ${entry.description}`
-    : `<translate \`[로컬 편집이 덮어씌워집니다]\` to [filid:lang]> ${entry.description}`;
-const secondLabel = entry.deployed
-  ? `Remove: ${entry.title}`
-  : `Skip: ${entry.title}`;
-
-AskUserQuestion({
-  questions: [
-    {
-      question: "<translate `Apply rule doc "${entry.title}"?` to [filid:lang]>",
-      multiSelect: false,
-      header: "Rule docs",
-      options: [
-        { label: firstLabel, description: firstDescription },
-        {
-          label: secondLabel,
-          description: "<translate `Do not apply this rule doc.` to [filid:lang]>",
-        },
-      ],
-    },
-  ],
-});
-```
-
-Map the user's answer to `nextSelection`:
-- First option chosen → `nextSelection[entry.id] = true`
-- Second option chosen → `nextSelection[entry.id] = false`
-
-`[ON]` and `[UPDATE]` are literal English tokens marking the current state —
-do NOT translate either. See Phase 0c post-processing below for how
-`[UPDATE]` entries feed the Phase 0d `resync` list.
-
-#### Case C — `N >= 2` (two or more optional rules)
-
-Render a **multi-select checkbox prompt** with exactly one option per
-optional entry. Three label states are possible:
-
-- `!deployed` → `${entry.title}` (no prefix)
-- `deployed && inSync` → `[ON] ${entry.title}`
-- `deployed && !inSync` → `[UPDATE] ${entry.title}` (plugin template differs
-  from the deployed copy; re-checking means "keep AND accept the newer
-  template", overwriting any local edits)
-
-```ts
-function labelFor(entry) {
-  if (!entry.deployed) return entry.title;
-  return entry.inSync ? `[ON] ${entry.title}` : `[UPDATE] ${entry.title}`;
-}
-function descriptionFor(entry) {
-  if (!entry.deployed) return entry.description;
-  if (entry.inSync)
-    return `<translate \`[현재 적용됨 — 체크 해제 시 삭제됩니다]\` to [filid:lang]> ${entry.description}`;
-  return `<translate \`[로컬 편집이 덮어씌워집니다]\` to [filid:lang]> ${entry.description}`;
-}
-
-AskUserQuestion({
-  questions: [
-    {
-      question: "<translate the header below to [filid:lang]>",
-      multiSelect: true,
-      header: "Rule docs",
-      options: status.entries.map((entry) => ({
-        label: labelFor(entry),
-        description: descriptionFor(entry),
-      })),
-    },
-  ],
-});
-```
-
-**Header** (English default; translate surrounding text but keep `[ON]` and
-`[UPDATE]` untranslated):
-`"Select rule docs to apply. **[ON] 항목도 계속 유지하려면 반드시 다시 선택하세요. 선택하지 않은 [ON] 항목은 삭제됩니다.** Items prefixed with '[UPDATE]' have a newer plugin template — re-checking accepts the update and overwrites the deployed file."`
-
-**Hard rules**:
-1. `multiSelect: true` is MANDATORY in Case C.
-2. Exactly ONE option per optional entry — NEVER pair an entry with a
-   "keep"/"remove" companion option.
-3. Required rules MUST NOT appear as options.
-4. `[ON]` and `[UPDATE]` are the ONLY allowed bracketed prefixes; do NOT
-   add `[V]` / `[ ]` / `[X]` / `[✓]` markers — they collide with the UI's
-   own checkbox column. Both tokens are literal English — do NOT translate.
-
-Map the user's answer to `nextSelection`:
-- For every `entry` in `status.entries`, set
-  `nextSelection[entry.id] = userAnswer.some((label) => label.includes(entry.title))`.
-- `AskUserQuestion` returns only the labels the user checked, so any
-  entry whose title is NOT found in the answer list is `false`.
-
-#### Proceed to Phase 0d
-
-Always proceed to Phase 0d with the computed `nextSelection`. The sync
-handler is idempotent — calling it when nothing changes is cheap and
-guarantees required rules stay applied.
-
-Before calling Phase 0d, derive `resyncIds` from the drift signal carried
-by `status.entries`: every optional rule that was drifted AND is kept on
-by the user becomes a resync target. Required rules are NEVER included —
-the sync handler auto-resyncs them.
+Then derive `resyncIds` from drifted optional rules that the user kept on:
 
 ```ts
 const resyncIds = status.entries
@@ -268,65 +118,30 @@ const resyncIds = status.entries
   .map((e) => e.id);
 ```
 
-`resyncIds` MAY be empty and that is the common case.
+See [sections/section-0-rule-docs.md — Phase 0c](./sections/section-0-rule-docs.md#phase-0c--rule-docs-prompt)
+for Case A/B/C `AskUserQuestion` call shapes, header copy, hard rules, and
+response-mapping logic.
 
 **→ Proceed to Phase 0d with `nextSelection` and `resyncIds` in the same response.**
 
 ### Phase 0d — Rule Docs Sync
 
-Call `mcp_t_rule_docs_sync` with `action: "sync"`, the computed selection,
-and the `resync` array from Phase 0c:
+Call `mcp_t_rule_docs_sync({ action: "sync", path, selections, resync })`.
+`selections` MUST be a raw `Record<string, boolean>` map (never a JSON string);
+`resync` MUST be a raw string array (or omitted). Surface a one-line summary
+from `result.copied / removed / updated / drift / unchanged / skipped`. When
+`result.drift` is non-empty, append TWO hint lines (status + action).
+See [sections/section-0-rule-docs.md — Phase 0d](./sections/section-0-rule-docs.md#phase-0d--rule-docs-sync).
 
-```
-mcp_t_rule_docs_sync({
-  action: "sync",
-  path: "<target-path>",
-  selections: { "filid_fca-policy": true, "filid_reuse-first": false },
-  resync: ["filid_reuse-first"]
-})
-```
-
-`selections` MUST be passed as a raw object map (`Record<string, boolean>`),
-not as a JSON string. For example, use
-`selections: { "filid_fca-policy": true, "filid_reuse-first": false }`, NOT
-`selections: "{\"filid_fca-policy\":true,\"filid_reuse-first\":false}"`.
-
-`resync` MUST be passed as a raw string array (or omitted / `null` when
-there is nothing to resync). Unknown ids are silently rejected by the
-handler and recorded in `result.skipped`.
-
-The handler copies/removes/updates files under `.claude/rules/` to match
-the requested selection. No rule doc state is stored in `.filid/config.json`
-— the filesystem is authoritative. Required rules that show drift are
-overwritten unconditionally, regardless of whether they appear in `resync`.
-
-Inspect `result.copied`, `result.removed`, `result.updated`, `result.drift`,
-`result.unchanged`, `result.skipped` and surface a one-line summary to the
-user (English default; translate to `[filid:lang]` at runtime, e.g.,
-`"Rule docs: copied=1, updated=1, removed=0, drift=0, unchanged=0"`).
-
-When `result.drift` is non-empty, append TWO hint lines (translate each to
-`[filid:lang]`):
-- Line 1 (status): `"drift 감지: ${result.drift.join(', ')}"`
-- Line 2 (action): `"→ 템플릿 업데이트 수락: /filid:filid-setup --rules 재실행 후 [UPDATE] 항목 재선택. 로컬 편집 유지: 무시."`
-
-If `result.skipped` is non-empty, print each `{ id, reason }` as a
-warning but DO NOT abort — continue with the remaining phases.
-
-> **Note**: `.filid/config.json` and applied `.claude/rules/*.md` files
-> should be committed to version control. `.filid/review/` and
-> `.filid/cache/` should be gitignored (transient data).
-
-**→ If the invocation passed `--rules`, STOP here and emit a short
-completion line (English default; translate to `[filid:lang]` at runtime,
-e.g., `"Rule docs updated — Phase 1–5 skipped"`). Otherwise immediately
+**→ If the invocation passed `--rules`, STOP here and emit a short completion
+line (e.g., `"Rule docs updated — Phase 1–5 skipped"`). Otherwise immediately
 proceed to Phase 1.**
 
 ### Phase 1 — Directory Scan
 
 Retrieve the complete project hierarchy using `mcp_t_fractal_scan`.
 Build a working list of all directories from `tree.nodes` for classification.
-See [reference.md Section 1](./reference.md#section-1--directory-scan-details).
+See [sections/section-1-directory-scan.md](./sections/section-1-directory-scan.md).
 
 **→ After `mcp_t_fractal_scan` returns — regardless of response size — extract `tree.nodes` as internal working data and immediately proceed to Phase 2. Do NOT summarize scan results to the user.**
 
@@ -334,7 +149,7 @@ See [reference.md Section 1](./reference.md#section-1--directory-scan-details).
 
 Classify each directory as fractal, organ, or pure-function using
 `mcp_t_fractal_navigate(action: "classify", path, entries)` (entries from Phase 1 scan) and priority-ordered decision rules.
-See [reference.md Section 2](./reference.md#section-2--node-classification-rules).
+See [sections/section-2-node-classification.md](./sections/section-2-node-classification.md).
 
 **→ After classifying all directories, immediately proceed to Phase 3.**
 
@@ -343,7 +158,7 @@ See [reference.md Section 2](./reference.md#section-2--node-classification-rules
 Generate INTENT.md (≤50 lines, 3-tier boundaries) for each fractal directory
 that lacks one. Organ directories are skipped. This phase delegates INTENT.md
 generation to the `context-manager` agent (subagent_type: `filid:context-manager`).
-See [reference.md Section 3](./reference.md#section-3--intentmd-generation-template).
+See [sections/section-3-intent-md-template.md](./sections/section-3-intent-md-template.md).
 
 **→ After generating all INTENT.md files (or if none needed), immediately proceed to Phase 4.**
 
@@ -351,7 +166,7 @@ See [reference.md Section 3](./reference.md#section-3--intentmd-generation-templ
 
 Create DETAIL.md scaffolds for fractal modules with public APIs that lack
 formal specifications.
-See [reference.md Section 4](./reference.md#section-4--detailmd-scaffolding).
+See [sections/section-4-detail-md-scaffolding.md](./sections/section-4-detail-md-scaffolding.md).
 
 **→ After generating all DETAIL.md scaffolds (or if none needed), immediately proceed to Phase 5.**
 
@@ -359,14 +174,14 @@ See [reference.md Section 4](./reference.md#section-4--detailmd-scaffolding).
 
 Validate all generated files against FCA-AI rules and emit a summary report
 that includes the rule doc sync summary from Phase 0d.
-See [reference.md Section 5](./reference.md#section-5--validation-and-report-format).
+See [sections/section-5-validation-report.md](./sections/section-5-validation-report.md).
 
 **After printing the summary report, execution is COMPLETE. Do not ask the user any follow-up questions.**
 
 ## Available MCP Tools
 
-| Tool               | Action     | Purpose                                                            |
-| ------------------ | ---------- | ------------------------------------------------------------------ |
+| Tool                     | Action     | Purpose                                                            |
+| ------------------------ | ---------- | ------------------------------------------------------------------ |
 | `mcp_t_project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)               |
 | `mcp_t_rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                          |
 | `mcp_t_rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)    |
