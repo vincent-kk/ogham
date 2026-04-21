@@ -29,17 +29,16 @@ Classification is determined by directory inspection in this strict priority ord
 6. **No observable side effects, stateless** → `pure-function`
 7. **Default** → `fractal` (generate INTENT.md)
 
-**Known organ names** (name-matched, priority 2 — from `src/constants/organ-names.ts`):
+**Known organ names** (priority 2):
 - **Base** (shared/UI): `components`, `utils`, `types`, `hooks`, `helpers`, `lib`, `styles`, `assets`, `constants`
-- **Test/infra** (name-based): `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
+- **Test/infra**: `test`, `tests`, `spec`, `specs`, `fixtures`, `e2e`
 - **Docs**: `references`
 
-**Pattern-matched organs** (priority 3 — NOT members of the name list):
-- `__name__` (double-underscore wrapped): classifies `__tests__`, `__mocks__`, `__fixtures__`, or any custom `__X__` directory as `organ` by pattern, not by membership.
-- `.name` (dot-prefixed): classifies `.config`, `.hidden`, etc. as `organ` by pattern.
+**Pattern-matched organs** (priorities 3–4, not listed by name):
+- `__name__` (double-underscore wrapped): e.g. `__tests__`, `__mocks__`, `__fixtures__`.
+- `.name` (dot-prefixed): e.g. `.config`, `.hidden`.
 
-Fractal nodes CAN exist inside organ directories. The scanner MUST traverse into organs and
-re-classify any subdirectory that does not match organ rules.
+Fractal nodes MAY exist inside organ directories; traversal MUST re-classify subdirectories that don't match organ rules.
 
 ---
 
@@ -105,7 +104,6 @@ export const MY_CONSTANT = 'value';
 **Severity**: error | **Applies to**: all modules
 
 - The dependency graph MUST be a DAG. Circular dependencies are prohibited.
-- Detected at project-analyzer level (`detectCycles()`), not per-node evaluation.
 - Fix: extract shared logic to a new node, invert dependency via interface/event, or merge tightly coupled modules.
 
 ### pure-function-isolation
@@ -128,54 +126,6 @@ export const MY_CONSTANT = 'value';
 
 ---
 
-## Severity Vocabulary
-
-FCA-AI uses **three** distinct severity scales for its rule pipeline. Each has its own case convention; none is a renaming of another.
-
-> Scope: this section enumerates the scales emitted by the rule/drift/review pipelines. Presentation-only derived types (e.g., `SummaryItemSeverity` in `src/types/summary.ts`, used only by `generateHumanSummary()` for PR-summary rendering) are out of scope — they are mapped from the scales below, never authored directly.
-
-| Layer | Values | Case | SSoT | Used by |
-|---|---|---|---|---|
-| Rule definition (static) | `error` \| `warning` \| `info` | lowercase | `src/types/rules.ts` → `RuleSeverity` | `.filid/config.json`, `/filid:filid-config set rules.<id>.severity`, rule-engine output |
-| Drift detection (runtime) | `critical` \| `high` \| `medium` \| `low` | **lowercase** | `src/types/drift.ts` → `DriftSeverity` | `/filid:filid-sync` CLI `--severity`, `drifts[].severity`, drift-detector |
-| Review / debt output (runtime) | `CRITICAL` \| `HIGH` \| `MEDIUM` \| `LOW` | **UPPERCASE** | `src/types/debt.ts` → `DebtSeverity` (reused for review fix_items) | `/filid:filid-review`, `/filid:filid-resolve`, `/filid:filid-structure-review`, `fix_items[].severity`, `debt.md` |
-
-### Advisory mapping (not enforced by code)
-
-| RuleSeverity | Drift (lowercase) | Review (UPPERCASE) | Rationale |
-|---|---|---|---|
-| `error` | `critical` or `high` | `CRITICAL` or `HIGH` | Blocking; escalation is runtime-dependent |
-| `warning` | `medium` | `MEDIUM` | Non-blocking, correctable |
-| `info` | `low` | `LOW` | Advisory |
-
-### Scale-selection rules
-
-- When a rule violation is surfaced through the SCAN / SYNC pipeline (drift-detector), handlers emit LOWERCASE drift severity (`DriftSeverity`).
-- When a rule violation is surfaced through the REVIEW pipeline (fix_items / debt), handlers emit UPPERCASE review severity (`DebtSeverity`).
-- The two runtime scales are semantically equivalent; case is the discriminator. Do NOT mechanically cross-cast; choose the scale matching the producing pipeline.
-- CLI filters:
-  - `/filid:filid-sync --severity critical|high|medium|low` (lowercase only).
-  - Review output filters (if any) use the UPPERCASE form.
-- None of the runtime filters accept `error|warning|info`.
-
----
-
-## Review Committee Personas
-
-The filid-review skill uses a fixed roster of personas (SSoT: `src/types/review.ts` → `PersonaId`):
-`adjudicator`, `engineering-architect`, `knowledge-manager`, `operations-sre`, `business-driver`, `product-manager`, `design-hci`.
-See `skills/filid-review/SKILL.md` for phase wiring and `agents/<persona>.md` for per-persona agent instructions.
-
----
-
-## State Machine (Phase D)
-
-Phase D deliberation states (SSoT: `src/types/review.ts` → `StateMachineState`):
-`PROPOSAL`, `DEBATE`, `VETO`, `SYNTHESIS`, `ABSTAIN`, `CONCLUSION`.
-Transition rules and quorum math: `skills/filid-review/state-machine.md`.
-
----
-
 ## Documentation Constraints
 
 ### INTENT.md
@@ -188,10 +138,8 @@ Transition rules and quorum math: `skills/filid-review/state-machine.md`.
 - Approaching 50 lines signals the module MUST be decomposed into smaller fractal nodes.
 - MUST NOT increase the limit; restructure the module instead.
 - Section headings (`## Purpose`, `## Structure`, `## Conventions`, `## Boundaries`,
-  `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English
-  — they are machine-readable anchors for the validator.
-  All descriptive content MUST follow the language specified by the `[filid:lang]` tag
-  (configured in `.filid/config.json`). If no tag is present, follow the system's language setting; default to English.
+  `### Always do`, `### Ask first`, `### Never do`, `## Dependencies`) MUST remain in English — machine-readable anchors for the validator.
+- Descriptive content MUST follow the language specified by `[filid:lang]`; default to English if absent.
 
 ### DETAIL.md
 
@@ -199,9 +147,8 @@ Transition rules and quorum math: `skills/filid-review/state-machine.md`.
 - Defines public API contract, acceptance criteria, and scope boundaries.
 - MUST reflect current intended behavior, not historical evolution.
 - Update DETAIL.md **before** code changes. Update INTENT.md when boundaries change.
-- Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English.
-  All descriptive content MUST follow the language specified by the `[filid:lang]` tag
-  (configured in `.filid/config.json`). If no tag is present, follow the system's language setting; default to English.
+- Section headings (`## Requirements`, `## API Contracts`, `## Last Updated`) MUST remain in English — machine-readable anchors for the validator.
+- Descriptive content MUST follow the language specified by `[filid:lang]`; default to English if absent.
 
 ---
 
@@ -236,5 +183,3 @@ Before any implementation that touches a fractal module:
 3. Update INTENT.md if the module's public interface or boundaries change.
 4. Implement the change.
 5. Run `/filid:filid-scan` to confirm no new violations.
-
-Use `/filid:filid-sync` for structural drift, `/filid:filid-setup` for project initialization, `/filid:filid-review` for architectural review.
