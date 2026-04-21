@@ -124,6 +124,7 @@ export type {
   RuleDocSyncResult,
   RuleDocsManifest,
   RuleDocsStatus,
+  SyncRuleDocsOptions,
 } from './infra/config-loader/config-loader.js';
 
 // coverage

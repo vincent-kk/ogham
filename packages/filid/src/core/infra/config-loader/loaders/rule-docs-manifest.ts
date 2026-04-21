@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   copyFileSync,
   existsSync,
@@ -23,6 +24,13 @@ export interface RuleDocEntry {
   required: boolean;
   title: string;
   description: string;
+  /**
+   * SHA-256 hex digest of the template file shipped in
+   * `templates/rules/<filename>`. Injected by
+   * `packages/filid/scripts/sync-rule-hashes.mjs` at build time; the runtime
+   * uses it to detect drift against `.claude/rules/<filename>`.
+   */
+  templateHash: string;
 }
 
 /** Envelope for templates/rules/manifest.json. */
@@ -36,6 +44,14 @@ export interface RuleDocSyncResult {
   copied: string[];
   removed: string[];
   unchanged: string[];
+  /** Files whose content matched an older template and were overwritten
+   * with the current template (required rules auto-update; optional rules
+   * require an explicit id in the `resync` set). */
+  updated: string[];
+  /** Files whose deployed content disagrees with the current template but
+   * were left untouched — either the rule is optional and the caller did
+   * not request resync, or the hash could not be computed. */
+  drift: string[];
   skipped: Array<{ id: string; reason: string }>;
 }
 
@@ -55,6 +71,12 @@ export interface RuleDocStatusEntry {
    * always `true` for entries in `autoDeployed`.
    */
   selected: boolean;
+  /** SHA-256 hex of the plugin-shipped template. Mirrors manifest value. */
+  templateHash: string;
+  /** SHA-256 hex of the deployed file, or null when not deployed or unreadable. */
+  deployedHash: string | null;
+  /** True iff `deployed` and `deployedHash === templateHash`. */
+  inSync: boolean;
 }
 
 /** Result of getRuleDocsStatus. */
@@ -76,8 +98,43 @@ export interface RuleDocsStatus {
 }
 
 /**
+ * Atomically write `srcPath` to `destPath` via a tmp-file + rename.
+ * On POSIX, `renameSync` within the same filesystem is atomic, preventing
+ * partial writes from leaving `destPath` in a corrupt state.
+ */
+function writeFileAtomically(srcPath: string, destPath: string): void {
+  const tmpPath = `${destPath}.tmp`;
+  copyFileSync(srcPath, tmpPath);
+  renameSync(tmpPath, destPath);
+}
+
+/** Options for `syncRuleDocs`. */
+export interface SyncRuleDocsOptions {
+  /** Rule ids whose drifted deployed files should be overwritten with the
+   *  current template. Required rules auto-resync regardless of this set. */
+  resync?: Iterable<string>;
+  /** Override for the plugin root (defaults to CLAUDE_PLUGIN_ROOT). */
+  pluginRoot?: string;
+}
+
+/**
+ * Compute the SHA-256 hex digest of a file's raw bytes.
+ * Returns `null` when the file is missing or unreadable so callers can
+ * treat it as "no deployed hash" without defensive try/catch.
+ */
+function computeFileSha256(path: string): string | null {
+  try {
+    const bytes = readFileSync(path);
+    return createHash('sha256').update(bytes).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Load and validate the rule docs manifest shipped with the filid plugin.
- * Throws if the manifest is missing or malformed.
+ * Throws if the manifest is missing, malformed, or any entry is missing a
+ * `templateHash` (which indicates `scripts/sync-rule-hashes.mjs` was skipped).
  */
 export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
   const manifestPath = join(pluginRoot, 'templates', 'rules', 'manifest.json');
@@ -88,6 +145,17 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
   const parsed = JSON.parse(raw) as RuleDocsManifest;
   if (!parsed || !Array.isArray(parsed.rules)) {
     throw new Error(`rule docs manifest has invalid shape at ${manifestPath}`);
+  }
+  for (const entry of parsed.rules) {
+    if (!entry.templateHash || typeof entry.templateHash !== 'string') {
+      // Pre-0.3.5 manifests lack `templateHash`. Upgraders MUST run
+      // `yarn filid build` (which triggers scripts/sync-rule-hashes.mjs) to
+      // repopulate the manifest before invoking /filid:filid-setup. The
+      // `syncRuleDocs()` caller wraps this throw into `skipped: [{id: '*', ...}]`.
+      throw new Error(
+        `rule docs manifest entry "${entry.id}" is missing templateHash — run \`node scripts/sync-rule-hashes.mjs\``,
+      );
+    }
   }
   return parsed;
 }
@@ -141,18 +209,25 @@ export function getRuleDocsStatus(
   const autoDeployed: RuleDocStatusEntry[] = [];
 
   for (const entry of manifest.rules) {
-    const destPath = join(
-      resolvedRoot,
-      '.claude',
-      'rules',
-      entry.filename,
-    );
+    const destPath = join(resolvedRoot, '.claude', 'rules', entry.filename);
     // Also check legacy filename for transition period — a legacy file
     // counts as "deployed" until the user runs filid-setup to migrate.
     const legacyPath = entry.legacyFilename
       ? join(resolvedRoot, '.claude', 'rules', entry.legacyFilename)
       : null;
-    const deployed = existsSync(destPath) || (legacyPath !== null && existsSync(legacyPath));
+
+    const destExists = existsSync(destPath);
+    const legacyExists = legacyPath !== null && existsSync(legacyPath);
+    const deployed = destExists || legacyExists;
+
+    let deployedHash: string | null = null;
+    if (destExists) deployedHash = computeFileSha256(destPath);
+    else if (legacyExists && legacyPath !== null)
+      deployedHash = computeFileSha256(legacyPath);
+
+    const inSync =
+      deployed && deployedHash !== null && deployedHash === entry.templateHash;
+
     const statusEntry: RuleDocStatusEntry = {
       id: entry.id,
       filename: entry.filename,
@@ -161,6 +236,9 @@ export function getRuleDocsStatus(
       description: entry.description,
       deployed,
       selected: entry.required ? true : deployed,
+      templateHash: entry.templateHash,
+      deployedHash,
+      inSync,
     };
     if (entry.required) {
       autoDeployed.push(statusEntry);
@@ -177,30 +255,35 @@ export function getRuleDocsStatus(
  *
  * Behaviour per entry:
  * - required OR selected + file absent → copy from plugin template
- * - required OR selected + file present → unchanged (user edits preserved)
+ * - required OR selected + file present + hash matches template → unchanged
+ * - required + file present + hash differs → overwrite with template (auto-update)
+ * - optional selected + file present + hash differs + id ∈ resync → overwrite (updated)
+ * - optional selected + file present + hash differs + id ∉ resync → drift reported, file untouched
  * - not selected + file present → removed
  * - not selected + file absent → unchanged
  *
  * This function MUST be invoked exclusively from the filid-setup skill. It is
- * safe to call repeatedly (idempotent relative to the selection input).
+ * safe to call repeatedly (idempotent relative to the selection + resync inputs).
  *
  * @param projectRoot - Target project (git root resolved internally)
  * @param selection - Rule ids the user has explicitly opted into; required rules are enforced from the manifest
- * @param pluginRoot - Plugin root directory (defaults to CLAUDE_PLUGIN_ROOT)
+ * @param opts - Optional resync ids and plugin root override
  */
 export function syncRuleDocs(
   projectRoot: string,
   selection: Iterable<string>,
-  pluginRoot?: string,
+  opts: SyncRuleDocsOptions = {},
 ): RuleDocSyncResult {
   const result: RuleDocSyncResult = {
     copied: [],
     removed: [],
     unchanged: [],
+    updated: [],
+    drift: [],
     skipped: [],
   };
 
-  const root = resolvePluginRoot(pluginRoot);
+  const root = resolvePluginRoot(opts.pluginRoot);
   if (root === null) {
     result.skipped.push({
       id: '*',
@@ -223,6 +306,7 @@ export function syncRuleDocs(
   const resolvedRoot = resolveGitRoot(projectRoot);
   const rulesDir = join(resolvedRoot, '.claude', 'rules');
   const selectionSet = new Set(selection);
+  const resyncSet = new Set(opts.resync ?? []);
 
   // --- Legacy filename migration ---
   // Rename old-named files (e.g. fca.md → filid_fca-policy.md)
@@ -235,7 +319,9 @@ export function syncRuleDocs(
     if (existsSync(legacyPath) && !existsSync(newPath)) {
       try {
         renameSync(legacyPath, newPath);
-        log.debug(`migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`);
+        log.debug(
+          `migrated rule doc: ${entry.legacyFilename} → ${entry.filename}`,
+        );
       } catch (err) {
         log.error(`failed to migrate ${entry.legacyFilename}`, err);
       }
@@ -249,8 +335,38 @@ export function syncRuleDocs(
     const destExists = existsSync(destPath);
 
     if (desired) {
-      if (destExists) {
+      if (!destExists) {
+        if (!existsSync(templatePath)) {
+          result.skipped.push({
+            id: entry.id,
+            reason: `template missing at ${templatePath}`,
+          });
+          continue;
+        }
+        try {
+          mkdirSync(rulesDir, { recursive: true });
+          writeFileAtomically(templatePath, destPath);
+          result.copied.push(entry.filename);
+        } catch (err) {
+          result.skipped.push({
+            id: entry.id,
+            reason: `copy failed: ${(err as Error).message}`,
+          });
+        }
+        continue;
+      }
+
+      // Deployed — check for drift against the template hash.
+      const deployedHash = computeFileSha256(destPath);
+      if (deployedHash !== null && deployedHash === entry.templateHash) {
         result.unchanged.push(entry.filename);
+        continue;
+      }
+
+      // Drift detected (or deployedHash unreadable → treat as drift).
+      const shouldResync = entry.required || resyncSet.has(entry.id);
+      if (!shouldResync) {
+        result.drift.push(entry.filename);
         continue;
       }
       if (!existsSync(templatePath)) {
@@ -261,13 +377,12 @@ export function syncRuleDocs(
         continue;
       }
       try {
-        mkdirSync(rulesDir, { recursive: true });
-        copyFileSync(templatePath, destPath);
-        result.copied.push(entry.filename);
+        writeFileAtomically(templatePath, destPath);
+        result.updated.push(entry.filename);
       } catch (err) {
         result.skipped.push({
           id: entry.id,
-          reason: `copy failed: ${(err as Error).message}`,
+          reason: `update failed: ${(err as Error).message}`,
         });
       }
       continue;

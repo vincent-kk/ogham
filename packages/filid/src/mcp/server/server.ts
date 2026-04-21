@@ -225,6 +225,11 @@ export function createServer(): McpServer {
         selections: z
           .union([z.record(z.string(), z.boolean()), z.string()])
           .nullish(),
+        // Rule ids whose drifted deployed files should be overwritten with
+        // the current template. Accepts a string array, a JSON-encoded
+        // string array, or null/undefined for none. Ignored for required
+        // rules — they auto-resync on drift.
+        resync: z.union([z.array(z.string()), z.string()]).nullish(),
       }),
     },
     wrapHandler(handleRuleDocsSync),

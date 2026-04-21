@@ -22,6 +22,7 @@ config-loader/
 
 ### Always do
 - 변경 후 관련 테스트 업데이트
+- 공개 API 시그니처 또는 `RuleDoc*` 타입 변경 시 `DETAIL.md`를 먼저 갱신할 것
 
 ### Ask first
 - 공개 API 시그니처 변경

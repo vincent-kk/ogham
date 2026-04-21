@@ -21,10 +21,12 @@ export {
   loadRuleDocsManifest,
   syncRuleDocs,
 } from './loaders/rule-docs-manifest.js';
+export { resolvePluginRoot } from './utils/resolve-plugin-root.js';
 export type {
   RuleDocEntry,
   RuleDocStatusEntry,
   RuleDocSyncResult,
   RuleDocsManifest,
   RuleDocsStatus,
+  SyncRuleDocsOptions,
 } from './loaders/rule-docs-manifest.js';

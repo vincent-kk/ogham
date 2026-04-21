@@ -99,14 +99,24 @@ The response partitions rules into two disjoint lists:
 - `status.entries[]` — **optional** rules only. This is the ONLY list
   rendered as checkboxes in Phase 0c. Each entry:
   ```
-  { id, filename, required: false, title, description, deployed, selected }
+  {
+    id, filename, required: false, title, description,
+    deployed, selected,
+    templateHash, deployedHash, inSync
+  }
   ```
   `deployed` reflects filesystem state under `.claude/rules/` and
   `selected === deployed` for optional rules (no config-side tracking).
+  `templateHash` is the SHA-256 of the plugin-shipped template;
+  `deployedHash` is the SHA-256 of the file on disk (or `null` when the
+  file is absent or unreadable); `inSync === (deployed && deployedHash === templateHash)`.
+  A deployed entry with `inSync === false` signals template drift — the
+  plugin shipped a newer version than what the user has on disk.
 - `status.autoDeployed[]` — **required** rules. Always auto-synced by
-  `mcp_t_rule_docs_sync({ action: "sync" })` regardless of user input. Use
-  this list ONLY for the Phase 0d summary line — NEVER render these
-  entries as checkboxes. The user cannot opt out of required rules.
+  `mcp_t_rule_docs_sync({ action: "sync" })` regardless of user input.
+  Drifted required rules are overwritten unconditionally; the user cannot
+  opt out and no confirmation is required. Use this list for the Phase 0d
+  summary line — NEVER render these entries as checkboxes.
 
 Build an internal map `currentSelection: Record<string, boolean>` from
 `status.entries` only (`selected` field). Do NOT include any required
@@ -133,11 +143,30 @@ Phase 0d. Required rules still get auto-applied by `syncRuleDocs`.
 
 A one-item multi-select is invalid (min 2 options). Render a
 **single-select Yes/No prompt** whose two options represent the two
-possible states of that single rule.
+possible states of that single rule. Three label states are possible,
+driven by `deployed` and `inSync`:
+
+- `!deployed` → `Apply: ${entry.title}`
+- `deployed && inSync` → `[ON] Keep: ${entry.title}`
+- `deployed && !inSync` → `[UPDATE] Apply latest: ${entry.title}`
+  (signals the plugin template has changed; re-applying overwrites the
+  deployed copy, discarding any local edits)
 
 ```ts
 const entry = status.entries[0];
-const on = entry.deployed;
+const firstLabel = !entry.deployed
+  ? `Apply: ${entry.title}`
+  : entry.inSync
+    ? `[ON] Keep: ${entry.title}`
+    : `[UPDATE] Apply latest: ${entry.title}`;
+const firstDescription = !entry.deployed
+  ? entry.description
+  : entry.inSync
+    ? `<translate \`[현재 적용됨 — 체크 해제 시 삭제됩니다]\` to [filid:lang]> ${entry.description}`
+    : `<translate \`[로컬 편집이 덮어씌워집니다]\` to [filid:lang]> ${entry.description}`;
+const secondLabel = entry.deployed
+  ? `Remove: ${entry.title}`
+  : `Skip: ${entry.title}`;
 
 AskUserQuestion({
   questions: [
@@ -146,12 +175,9 @@ AskUserQuestion({
       multiSelect: false,
       header: "Rule docs",
       options: [
+        { label: firstLabel, description: firstDescription },
         {
-          label: on ? `[ON] Keep: ${entry.title}` : `Apply: ${entry.title}`,
-          description: entry.description,
-        },
-        {
-          label: on ? `Remove: ${entry.title}` : `Skip: ${entry.title}`,
+          label: secondLabel,
           description: "<translate `Do not apply this rule doc.` to [filid:lang]>",
         },
       ],
@@ -164,15 +190,33 @@ Map the user's answer to `nextSelection`:
 - First option chosen → `nextSelection[entry.id] = true`
 - Second option chosen → `nextSelection[entry.id] = false`
 
-The `[ON]` prefix is a literal English token marking the currently applied
-state — do NOT translate it.
+`[ON]` and `[UPDATE]` are literal English tokens marking the current state —
+do NOT translate either. See Phase 0c post-processing below for how
+`[UPDATE]` entries feed the Phase 0d `resync` list.
 
 #### Case C — `N >= 2` (two or more optional rules)
 
 Render a **multi-select checkbox prompt** with exactly one option per
-optional entry.
+optional entry. Three label states are possible:
+
+- `!deployed` → `${entry.title}` (no prefix)
+- `deployed && inSync` → `[ON] ${entry.title}`
+- `deployed && !inSync` → `[UPDATE] ${entry.title}` (plugin template differs
+  from the deployed copy; re-checking means "keep AND accept the newer
+  template", overwriting any local edits)
 
 ```ts
+function labelFor(entry) {
+  if (!entry.deployed) return entry.title;
+  return entry.inSync ? `[ON] ${entry.title}` : `[UPDATE] ${entry.title}`;
+}
+function descriptionFor(entry) {
+  if (!entry.deployed) return entry.description;
+  if (entry.inSync)
+    return `<translate \`[현재 적용됨 — 체크 해제 시 삭제됩니다]\` to [filid:lang]> ${entry.description}`;
+  return `<translate \`[로컬 편집이 덮어씌워집니다]\` to [filid:lang]> ${entry.description}`;
+}
+
 AskUserQuestion({
   questions: [
     {
@@ -180,26 +224,26 @@ AskUserQuestion({
       multiSelect: true,
       header: "Rule docs",
       options: status.entries.map((entry) => ({
-        label: entry.deployed ? `[ON] ${entry.title}` : entry.title,
-        description: entry.description,
+        label: labelFor(entry),
+        description: descriptionFor(entry),
       })),
     },
   ],
 });
 ```
 
-**Header** (English default; translate surrounding text but keep `[ON]`
-untranslated):
-`"Select rule docs to apply. Items prefixed with '[ON]' will be REMOVED if you do not re-check them."`
+**Header** (English default; translate surrounding text but keep `[ON]` and
+`[UPDATE]` untranslated):
+`"Select rule docs to apply. **[ON] 항목도 계속 유지하려면 반드시 다시 선택하세요. 선택하지 않은 [ON] 항목은 삭제됩니다.** Items prefixed with '[UPDATE]' have a newer plugin template — re-checking accepts the update and overwrites the deployed file."`
 
 **Hard rules**:
 1. `multiSelect: true` is MANDATORY in Case C.
 2. Exactly ONE option per optional entry — NEVER pair an entry with a
    "keep"/"remove" companion option.
 3. Required rules MUST NOT appear as options.
-4. `[ON]` is the ONLY allowed bracketed prefix; do NOT add
-   `[V]` / `[ ]` / `[X]` / `[✓]` markers — they collide with the UI's
-   own checkbox column.
+4. `[ON]` and `[UPDATE]` are the ONLY allowed bracketed prefixes; do NOT
+   add `[V]` / `[ ]` / `[X]` / `[✓]` markers — they collide with the UI's
+   own checkbox column. Both tokens are literal English — do NOT translate.
 
 Map the user's answer to `nextSelection`:
 - For every `entry` in `status.entries`, set
@@ -213,17 +257,32 @@ Always proceed to Phase 0d with the computed `nextSelection`. The sync
 handler is idempotent — calling it when nothing changes is cheap and
 guarantees required rules stay applied.
 
-**→ Proceed to Phase 0d with `nextSelection` in the same response.**
+Before calling Phase 0d, derive `resyncIds` from the drift signal carried
+by `status.entries`: every optional rule that was drifted AND is kept on
+by the user becomes a resync target. Required rules are NEVER included —
+the sync handler auto-resyncs them.
+
+```ts
+const resyncIds = status.entries
+  .filter((e) => e.deployed && !e.inSync && nextSelection[e.id] === true)
+  .map((e) => e.id);
+```
+
+`resyncIds` MAY be empty and that is the common case.
+
+**→ Proceed to Phase 0d with `nextSelection` and `resyncIds` in the same response.**
 
 ### Phase 0d — Rule Docs Sync
 
-Call `mcp_t_rule_docs_sync` with `action: "sync"` and the computed selection:
+Call `mcp_t_rule_docs_sync` with `action: "sync"`, the computed selection,
+and the `resync` array from Phase 0c:
 
 ```
 mcp_t_rule_docs_sync({
   action: "sync",
   path: "<target-path>",
-  selections: { "filid_fca-policy": true, "filid_reuse-first": false }
+  selections: { "filid_fca-policy": true, "filid_reuse-first": false },
+  resync: ["filid_reuse-first"]
 })
 ```
 
@@ -232,14 +291,24 @@ not as a JSON string. For example, use
 `selections: { "filid_fca-policy": true, "filid_reuse-first": false }`, NOT
 `selections: "{\"filid_fca-policy\":true,\"filid_reuse-first\":false}"`.
 
-The handler copies/removes files under `.claude/rules/` to match the
-requested selection. No rule doc state is stored in `.filid/config.json`
-— the filesystem is authoritative.
+`resync` MUST be passed as a raw string array (or omitted / `null` when
+there is nothing to resync). Unknown ids are silently rejected by the
+handler and recorded in `result.skipped`.
 
-Inspect `result.copied`, `result.removed`, `result.unchanged`,
-`result.skipped` and surface a one-line summary to the user (English default;
-translate to `[filid:lang]` at runtime, e.g.,
-`"Rule docs: copied=filid_fca-policy.md, removed=0, unchanged=0"`).
+The handler copies/removes/updates files under `.claude/rules/` to match
+the requested selection. No rule doc state is stored in `.filid/config.json`
+— the filesystem is authoritative. Required rules that show drift are
+overwritten unconditionally, regardless of whether they appear in `resync`.
+
+Inspect `result.copied`, `result.removed`, `result.updated`, `result.drift`,
+`result.unchanged`, `result.skipped` and surface a one-line summary to the
+user (English default; translate to `[filid:lang]` at runtime, e.g.,
+`"Rule docs: copied=1, updated=1, removed=0, drift=0, unchanged=0"`).
+
+When `result.drift` is non-empty, append TWO hint lines (translate each to
+`[filid:lang]`):
+- Line 1 (status): `"drift 감지: ${result.drift.join(', ')}"`
+- Line 2 (action): `"→ 템플릿 업데이트 수락: /filid:filid-setup --rules 재실행 후 [UPDATE] 항목 재선택. 로컬 편집 유지: 무시."`
 
 If `result.skipped` is non-empty, print each `{ id, reason }` as a
 warning but DO NOT abort — continue with the remaining phases.
@@ -331,12 +400,15 @@ See [reference.md Section 5](./reference.md#section-5--validation-and-report-for
 # Update rule docs only — no scan, no INTENT.md/DETAIL.md generation
 /filid:filid-setup --rules
 
-# Re-run to toggle optional rule docs. Phase 0c dispatches on the number
-# of optional rules: N=0 skips the prompt, N=1 shows a single-select Yes/No,
-# N>=2 shows a multi-select checkbox where the "[ON]" label prefix marks
-# already-applied items. AskUserQuestion cannot pre-check options — in the
-# N>=2 case you MUST re-select every item you want to keep applied;
-# unchecked optional items are removed.
+# Re-run to toggle optional rule docs or accept template updates. Phase 0c
+# dispatches on the number of optional rules: N=0 skips the prompt, N=1
+# shows a single-select Yes/No, N>=2 shows a multi-select checkbox where
+# "[ON]" marks already-applied items whose content matches the plugin
+# template, and "[UPDATE]" marks already-applied items whose plugin
+# template has changed (re-checking an [UPDATE] item overwrites local
+# edits with the new template). AskUserQuestion cannot pre-check options
+# — in the N>=2 case you MUST re-select every item you want to keep
+# applied; unchecked optional items are removed.
 
 # Constants
 KNOWN_ORGAN_DIR_NAMES (UI/shared)  = components | utils | types | hooks | helpers
@@ -352,7 +424,8 @@ DEEP_SCAN_RULE    = fractal nodes inside organ dirs are targets (iterate full tr
 Key rules:
 
 - `.claude/rules/*.md` files are ONLY written or removed inside this skill
-- Required rule docs (manifest `required: true`) are always auto-applied — they NEVER appear in the prompt UI and the user cannot opt out
+- Required rule docs (manifest `required: true`) are always auto-applied and auto-updated — they NEVER appear in the prompt UI, the user cannot opt out, and drift is overwritten without confirmation
+- Optional rule docs showing drift are labeled with `[UPDATE]` in the Phase 0c checkbox UI; re-checking accepts the template update, unchecking removes the file, leaving the box in its previous state preserves the local copy until the next `--rules` run
 - Session hooks never touch `.claude/rules/` or `.filid/config.json`
 - Organ directories must never receive an INTENT.md
 - INTENT.md must not exceed 50 lines

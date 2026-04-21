@@ -43,7 +43,7 @@
   "scripts": {
     "bench": "vitest bench",
     "bench:run": "vitest bench --run",
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/sync-rule-hashes.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
