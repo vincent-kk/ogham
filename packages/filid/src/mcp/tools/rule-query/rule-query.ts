@@ -59,7 +59,7 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     throw new Error('action and path are required');
   }
 
-  const config = loadConfig(input.path);
+  const { config } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
   const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);

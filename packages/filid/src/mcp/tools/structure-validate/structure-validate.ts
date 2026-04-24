@@ -36,7 +36,7 @@ export async function handleStructureValidate(
     throw new Error('path is required');
   }
 
-  const config = loadConfig(input.path);
+  const { config } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
   const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);

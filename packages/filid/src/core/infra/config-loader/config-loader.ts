@@ -21,6 +21,7 @@ export type {
   AllowedEntry,
   FilidConfig,
   InitResult,
+  LoadConfigResult,
 } from './loaders/filid-config.js';
 
 export {

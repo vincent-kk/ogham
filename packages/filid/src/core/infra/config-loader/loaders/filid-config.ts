@@ -19,7 +19,8 @@ const log = createLogger('config-loader');
 
 /**
  * Single RuleOverride entry schema. Strict — unknown keys are surfaced as
- * zod issues so the loader (Commit C) can warn + drop them.
+ * zod issues so `loadConfig` can warn + physically drop them (never
+ * pass-through).
  */
 export const RuleOverrideSchema = z
   .object({
@@ -33,7 +34,6 @@ export const RuleOverrideSchema = z
  * Entry accepted inside the top-level `additional-allowed` array.
  * Either a bare basename string (applied globally) or an object restricting
  * the basename to specific path globs. Consumed by the `zero-peer-file` rule.
- * The object-entry branch in rule-engine is wired in Commit B.
  */
 export const AllowedEntrySchema = z.union([
   z.string(),
@@ -79,41 +79,265 @@ export interface InitResult {
   };
 }
 
-/** Read .filid/config.json from the given project root (resolves git root). Returns null if not found or invalid. */
-export function loadConfig(projectRoot: string): FilidConfig | null {
+/**
+ * Result of `loadConfig` — the config itself plus any structural warnings
+ * raised during zod parsing or waiver sanitisation. Consumers that want to
+ * surface warnings (e.g. MCP `configWarnings` field) destructure both;
+ * consumers that only care about the config ignore `warnings`.
+ */
+export interface LoadConfigResult {
+  config: FilidConfig | null;
+  warnings: string[];
+}
+
+type PathSegment = string | number;
+
+function formatIssuePath(path: ReadonlyArray<PathSegment>): string {
+  if (path.length === 0) return '<root>';
+  return path
+    .map((seg, idx) =>
+      typeof seg === 'number' ? `[${seg}]` : idx === 0 ? seg : `.${seg}`,
+    )
+    .join('');
+}
+
+function getAt(
+  root: unknown,
+  path: ReadonlyArray<PathSegment>,
+): unknown {
+  let cur: unknown = root;
+  for (const seg of path) {
+    if (cur === null || cur === undefined) return undefined;
+    if (typeof seg === 'number') {
+      if (!Array.isArray(cur)) return undefined;
+      cur = cur[seg];
+    } else {
+      if (typeof cur !== 'object' || cur === null) return undefined;
+      cur = (cur as Record<string, unknown>)[seg];
+    }
+  }
+  return cur;
+}
+
+function deleteAt(
+  root: unknown,
+  path: ReadonlyArray<PathSegment>,
+): void {
+  if (path.length === 0) return;
+  const parent = getAt(root, path.slice(0, -1));
+  const leaf = path[path.length - 1];
+  if (parent === null || parent === undefined || leaf === undefined) return;
+  if (Array.isArray(parent) && typeof leaf === 'number') {
+    parent.splice(leaf, 1);
+    return;
+  }
+  if (typeof parent === 'object' && typeof leaf === 'string') {
+    delete (parent as Record<string, unknown>)[leaf];
+  }
+}
+
+function pushWarn(list: string[], msg: string): void {
+  list.push(msg);
+  log.warn(msg);
+}
+
+/**
+ * Strict-sanitize fallback for `FilidConfigSchema.safeParse` failures.
+ * Walks each ZodIssue:
+ *   - `unrecognized_keys`   → drop each named key from the parent object.
+ *   - any other issue code  → drop the offending leaf value so a retry
+ *                             yields a type-correct object.
+ * The sanitised object is returned alongside the collected warnings. Pass
+ * the result back through `FilidConfigSchema.safeParse` to get a typed
+ * `FilidConfig`. Pass-through of unknown values is forbidden (plan §4 P1).
+ */
+function parseWithAllowlistWarn(
+  parsed: unknown,
+  error: z.ZodError,
+): { sanitized: unknown; warnings: string[] } {
+  const warnings: string[] = [];
+  const root: unknown =
+    typeof structuredClone === 'function'
+      ? structuredClone(parsed)
+      : JSON.parse(JSON.stringify(parsed)) as unknown;
+
+  for (const issue of error.issues) {
+    const pathStr = formatIssuePath(issue.path);
+    if (issue.code === 'unrecognized_keys') {
+      const parent = getAt(root, issue.path);
+      if (
+        parent === null ||
+        parent === undefined ||
+        typeof parent !== 'object' ||
+        Array.isArray(parent)
+      ) {
+        pushWarn(
+          warnings,
+          `config validation failed at ${pathStr}: ${issue.message} (ignored, non-fatal; see migration guide)`,
+        );
+        continue;
+      }
+      for (const key of issue.keys) {
+        pushWarn(
+          warnings,
+          `unknown key in ${pathStr}: "${key}" (dropped, non-fatal; see migration guide)`,
+        );
+        delete (parent as Record<string, unknown>)[key];
+      }
+      continue;
+    }
+    if (issue.path.length === 0) {
+      pushWarn(
+        warnings,
+        `config validation failed: ${issue.message} (ignored, non-fatal; see migration guide)`,
+      );
+      continue;
+    }
+    pushWarn(
+      warnings,
+      `invalid value at ${pathStr}: ${issue.message} (dropped, non-fatal; see migration guide)`,
+    );
+    deleteAt(root, issue.path);
+  }
+
+  return { sanitized: root, warnings };
+}
+
+function isValidGlobSyntax(pattern: string): boolean {
+  if (typeof pattern !== 'string' || pattern.length === 0) return false;
+  let brackets = 0;
+  let braces = 0;
+  let escaped = false;
+  for (const ch of pattern) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+    if (ch === '[') brackets++;
+    else if (ch === ']') brackets--;
+    else if (ch === '{') braces++;
+    else if (ch === '}') braces--;
+    if (brackets < 0 || braces < 0) return false;
+  }
+  return brackets === 0 && braces === 0;
+}
+
+/**
+ * Dry-validate each `rules[*].exempt[]` glob pattern. Invalid syntax and the
+ * pre-mortem-2 bare `**` wildcard are warn+dropped from the override; the
+ * sanitised config is returned alongside the collected warnings.
+ */
+function sanitizeExemptPatterns(
+  config: FilidConfig,
+  warnings: string[],
+): FilidConfig {
+  const rules = { ...config.rules };
+  let mutated = false;
+  for (const [ruleId, override] of Object.entries(rules)) {
+    if (!override.exempt || override.exempt.length === 0) continue;
+    const kept: string[] = [];
+    let dropped = false;
+    for (const pattern of override.exempt) {
+      if (pattern === '**') {
+        pushWarn(
+          warnings,
+          `rules["${ruleId}"].exempt: bare "**" pattern dropped — use a concrete scope such as "packages/**" instead`,
+        );
+        dropped = true;
+        continue;
+      }
+      if (!isValidGlobSyntax(pattern)) {
+        pushWarn(
+          warnings,
+          `rules["${ruleId}"].exempt: invalid glob syntax "${pattern}" (dropped)`,
+        );
+        dropped = true;
+        continue;
+      }
+      kept.push(pattern);
+    }
+    if (dropped) {
+      rules[ruleId] = { ...override, exempt: kept };
+      mutated = true;
+    }
+  }
+  return mutated ? { ...config, rules } : config;
+}
+
+/**
+ * Read `.filid/config.json` from the given project root (resolves git root).
+ *
+ * BREAKING (v0.4.0): returns `{ config, warnings }` rather than the bare
+ * `FilidConfig | null`. Zod-based strict validation is applied; unknown
+ * top-level or rule-override keys are warn+dropped (never pass-through), and
+ * invalid `rules[*].exempt` globs (including the bare `**` wildcard) are
+ * rejected at load time. Consumers that ignored warnings previously can
+ * continue to destructure only `{ config }`.
+ */
+export function loadConfig(projectRoot: string): LoadConfigResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
+  const warnings: string[] = [];
   if (!existsSync(configPath)) {
     log.debug('config not found', configPath);
-    return null;
+    return { config: null, warnings };
   }
+
+  let raw: string;
   try {
-    const raw = readFileSync(configPath, 'utf8');
-    const parsed = JSON.parse(raw) as FilidConfig;
-    // Light-weight guard: reject non-numeric, negative, or non-finite scan.maxDepth
-    // so downstream consumers can rely on `resolveMaxDepth` returning a sane number.
-    if (parsed.scan && 'maxDepth' in parsed.scan) {
-      const v = parsed.scan.maxDepth;
-      if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) {
-        log.error('invalid scan.maxDepth — ignoring and using fallback', v);
-        delete parsed.scan.maxDepth;
-      }
-    }
-    log.debug('config loaded', configPath);
-    return parsed;
+    raw = readFileSync(configPath, 'utf8');
   } catch (err) {
-    log.error('failed to parse config', err);
-    return null;
+    log.error('failed to read config', err);
+    pushWarn(warnings, `failed to read ${configPath}: ${String(err)}`);
+    return { config: null, warnings };
   }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    log.error('failed to parse config JSON', err);
+    pushWarn(warnings, `failed to parse JSON at ${configPath}: ${String(err)}`);
+    return { config: null, warnings };
+  }
+
+  const strict = FilidConfigSchema.safeParse(parsed);
+  if (strict.success) {
+    log.debug('config loaded (strict)', configPath);
+    return { config: sanitizeExemptPatterns(strict.data, warnings), warnings };
+  }
+
+  const { sanitized, warnings: sanitizeWarnings } = parseWithAllowlistWarn(
+    parsed,
+    strict.error,
+  );
+  for (const w of sanitizeWarnings) warnings.push(w);
+
+  const retry = FilidConfigSchema.safeParse(sanitized);
+  if (retry.success) {
+    log.debug('config loaded (sanitized)', configPath);
+    return { config: sanitizeExemptPatterns(retry.data, warnings), warnings };
+  }
+
+  for (const issue of retry.error.issues) {
+    pushWarn(
+      warnings,
+      `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
+    );
+  }
+  return { config: null, warnings };
 }
 
 /**
  * Resolve the effective fractal tree maxDepth from the priority chain:
  *   override (MCP input) → config.scan.maxDepth → DEFAULT_SCAN_OPTIONS.maxDepth
  *
- * Explicit `0` is honoured (early termination is allowed).
- * Invalid values are filtered at `loadConfig` time, so `config.scan.maxDepth`
- * reaching here is already validated.
+ * Explicit `0` is honoured (early termination is allowed). `scan.maxDepth`
+ * reaching here is already validated by zod, so no runtime type guard is needed.
  */
 export function resolveMaxDepth(
   config: FilidConfig | null,
@@ -171,7 +395,7 @@ export function createDefaultConfig(): FilidConfig {
 export function loadRuleOverrides(
   projectRoot: string,
 ): Record<string, RuleOverride> {
-  const config = loadConfig(projectRoot);
+  const { config } = loadConfig(projectRoot);
   return config?.rules ?? {};
 }
 

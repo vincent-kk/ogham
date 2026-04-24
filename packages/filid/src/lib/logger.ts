@@ -73,13 +73,17 @@ export function resetLogger(): void {
 
 export interface Logger {
   debug(msg: string, ...args: unknown[]): void;
+  warn(msg: string, ...args: unknown[]): void;
   error(msg: string, ...args: unknown[]): void;
 }
 
 /**
  * Create a component-tagged logger.
- * Both debug() and error() are gated by FILID_DEBUG=1 to preserve
- * the existing silent degradation behavior.
+ *
+ * `debug()` and `error()` remain gated by `FILID_DEBUG=1` to preserve the
+ * existing silent-degradation behavior. `warn()` is always emitted — config
+ * sanitisation relies on warnings reaching operators via stderr so they
+ * mirror the MCP `configWarnings` response field (AC-Obs).
  */
 export function createLogger(component: string): Logger {
   const tag = `[filid:${component}]`;
@@ -93,6 +97,14 @@ export function createLogger(component: string): Logger {
         // never throw
       }
       writeToFile('DEBUG', tag, msg, args);
+    },
+    warn(msg: string, ...args: unknown[]): void {
+      try {
+        console.error(tag, msg, ...args);
+      } catch {
+        // never throw
+      }
+      writeToFile('WARN', tag, msg, args);
     },
     error(msg: string, ...args: unknown[]): void {
       if (!isDebug()) return;

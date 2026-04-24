@@ -29,7 +29,7 @@ export async function handleFractalScan(args: unknown): Promise<ScanReport> {
 
   const startTime = Date.now();
 
-  const config = loadConfig(input.path);
+  const { config } = loadConfig(input.path);
   const maxDepth = resolveMaxDepth(config, input.depth);
   const tree: FractalTree = await scanProject(input.path, { maxDepth });
 

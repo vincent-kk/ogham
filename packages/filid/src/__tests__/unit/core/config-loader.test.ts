@@ -80,7 +80,9 @@ describe('config-loader', () => {
   // --- Basic: loadConfig / writeConfig ---
 
   it('loadConfig returns null when .filid/config.json does not exist', () => {
-    expect(loadConfig(tmpDir)).toBeNull();
+    const { config, warnings } = loadConfig(tmpDir);
+    expect(config).toBeNull();
+    expect(warnings).toEqual([]);
   });
 
   // --- Complex ---
@@ -94,7 +96,7 @@ describe('config-loader', () => {
   it('writeConfig + loadConfig round-trips correctly', () => {
     const config = createDefaultConfig();
     writeConfig(tmpDir, config);
-    const loaded = loadConfig(tmpDir);
+    const { config: loaded } = loadConfig(tmpDir);
     expect(loaded).toEqual(config);
   });
 
@@ -102,7 +104,9 @@ describe('config-loader', () => {
     const configDir = join(tmpDir, '.filid');
     mkdirSync(configDir, { recursive: true });
     writeFileSync(join(configDir, 'config.json'), 'not-json', 'utf8');
-    expect(loadConfig(tmpDir)).toBeNull();
+    const { config, warnings } = loadConfig(tmpDir);
+    expect(config).toBeNull();
+    expect(warnings.length).toBeGreaterThan(0);
   });
 
   it('loadRuleOverrides returns empty object when no config exists', () => {
@@ -133,7 +137,7 @@ describe('config-loader', () => {
     const config = createDefaultConfig();
     config.rules['custom-rule'] = { enabled: true, severity: 'info' };
     writeConfig(tmpDir, config);
-    const loaded = loadConfig(tmpDir);
+    const { config: loaded } = loadConfig(tmpDir);
     expect(loaded?.rules['custom-rule']).toEqual({
       enabled: true,
       severity: 'info',
@@ -196,7 +200,7 @@ describe('config-loader', () => {
       const config = createDefaultConfig();
       config.scan = { maxDepth: 4 };
       writeConfig(tmpDir, config);
-      const loaded = loadConfig(tmpDir);
+      const { config: loaded } = loadConfig(tmpDir);
       expect(loaded?.scan?.maxDepth).toBe(4);
       expect(resolveMaxDepth(loaded)).toBe(4);
     });
@@ -215,10 +219,11 @@ describe('config-loader', () => {
 
     it('loadConfig strips negative scan.maxDepth and falls back', () => {
       writeRawConfig({ version: '1.0', rules: {}, scan: { maxDepth: -1 } });
-      const loaded = loadConfig(tmpDir);
+      const { config: loaded, warnings } = loadConfig(tmpDir);
       expect(loaded).not.toBeNull();
       expect(loaded?.scan?.maxDepth).toBeUndefined();
       expect(resolveMaxDepth(loaded)).toBe(DEFAULT_SCAN_OPTIONS.maxDepth);
+      expect(warnings.some((w) => w.includes('maxDepth'))).toBe(true);
     });
 
     it('loadConfig strips non-numeric scan.maxDepth', () => {
@@ -227,8 +232,9 @@ describe('config-loader', () => {
         rules: {},
         scan: { maxDepth: 'deep' },
       });
-      const loaded = loadConfig(tmpDir);
+      const { config: loaded, warnings } = loadConfig(tmpDir);
       expect(loaded?.scan?.maxDepth).toBeUndefined();
+      expect(warnings.some((w) => w.includes('maxDepth'))).toBe(true);
     });
 
     it('loadConfig strips non-finite scan.maxDepth (Infinity)', () => {
@@ -240,7 +246,7 @@ describe('config-loader', () => {
         '{"version":"1.0","rules":{},"scan":{"maxDepth":null}}',
         'utf8',
       );
-      const loaded = loadConfig(tmpDir);
+      const { config: loaded } = loadConfig(tmpDir);
       expect(loaded?.scan?.maxDepth).toBeUndefined();
     });
   });
@@ -260,8 +266,8 @@ describe('config-loader', () => {
       writeConfig(tmpDir, custom);
       const result = initProject(tmpDir);
       expect(result.configCreated).toBe(false);
-      const loaded = loadConfig(tmpDir);
-      expect(loaded?.rules['naming-convention'].enabled).toBe(false);
+      const { config: loaded } = loadConfig(tmpDir);
+      expect(loaded?.rules['naming-convention']?.enabled).toBe(false);
     });
 
     it('never touches .claude/rules/ — that is the filid-setup skill job', () => {
@@ -777,7 +783,7 @@ describe('config-loader', () => {
       writeConfig(fakeGitRoot, createDefaultConfig());
 
       // Load from subdirectory — should find it at repo root
-      const config = loadConfig(subDir);
+      const { config } = loadConfig(subDir);
       expect(config).not.toBeNull();
       expect(config?.version).toBe('1.0');
     });
