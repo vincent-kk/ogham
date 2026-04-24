@@ -1,26 +1,12 @@
-import type { DriftItem, DriftSeverity, SyncAction, SyncPlan, SyncPlanAction } from '../../../types/drift.js';
+import type {
+  DriftItem,
+  SyncAction,
+  SyncPlan,
+  SyncPlanAction,
+} from '../../../types/drift.js';
 import { SEVERITY_ORDER } from '../../../constants/drift-mappings.js';
-
-function isReversible(action: SyncAction): boolean {
-  switch (action) {
-    case 'rename':
-    case 'create-index':
-    case 'create-main':
-    case 'reclassify':
-      return true;
-    case 'move':
-    case 'split':
-    case 'merge':
-      return false;
-  }
-}
-
-function computeOverallRisk(drifts: DriftItem[]): DriftSeverity {
-  if (drifts.some((d) => d.severity === 'critical')) return 'critical';
-  if (drifts.some((d) => d.severity === 'high')) return 'high';
-  if (drifts.some((d) => d.severity === 'medium')) return 'medium';
-  return 'low';
-}
+import { computeOverallRisk } from './utils/compute-overall-risk.js';
+import { isReversible } from './utils/is-reversible.js';
 
 /**
  * DriftItem 목록을 분석하여 실행 가능한 SyncPlan을 생성한다.
