@@ -1,10 +1,12 @@
-import {
-  type ToolCallEntry,
-  type ToolCallSummary,
-  summarizeLossy,
+import type {
+  ToolCallEntry,
+  ToolCallSummary,
 } from '../../../compress/lossy-summarizer/lossy-summarizer.js';
-import { compactReversible } from '../../../compress/reversible-compactor/reversible-compactor.js';
 import type { CompressionMeta } from '../../../types/documents.js';
+
+import { handleLossy } from './utils/handle-lossy.js';
+import { handleReversible } from './utils/handle-reversible.js';
+import { inferMode } from './utils/infer-mode.js';
 
 /** Input for doc-compress tool */
 export interface DocCompressInput {
@@ -51,40 +53,4 @@ export function handleDocCompress(input: DocCompressInput): DocCompressOutput {
     default:
       return { error: `Cannot determine compression mode` };
   }
-}
-
-function inferMode(input: DocCompressInput): 'reversible' | 'lossy' {
-  if (input.content !== undefined && input.filePath) return 'reversible';
-  if (input.toolCallEntries && input.toolCallEntries.length > 0) return 'lossy';
-  return 'reversible';
-}
-
-function handleReversible(input: DocCompressInput): DocCompressOutput {
-  if (!input.content || !input.filePath) {
-    return { error: 'Reversible mode requires filePath and content' };
-  }
-
-  const result = compactReversible({
-    filePath: input.filePath,
-    content: input.content,
-    metadata: {
-      exports: input.exports ?? [],
-      lineCount: input.content.split('\n').filter((l) => l.length > 0).length,
-    },
-  });
-
-  return {
-    compacted: result.compacted,
-    meta: result.meta,
-  };
-}
-
-function handleLossy(input: DocCompressInput): DocCompressOutput {
-  const entries = input.toolCallEntries ?? [];
-  const result = summarizeLossy(entries);
-
-  return {
-    summary: result.summary,
-    meta: result.meta,
-  };
 }

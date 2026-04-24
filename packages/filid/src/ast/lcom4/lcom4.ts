@@ -15,23 +15,7 @@ import type { ClassInfo, MethodInfo } from '../../types/ast.js';
 import type { LCOM4Result } from '../../types/metrics.js';
 
 import { parseSource, walk } from '../parser/parser.js';
-
-function findThisAccesses(bodyNode: SgNode): string[] {
-  const accessed = new Set<string>();
-  walk(bodyNode, (node: SgNode) => {
-    if (node.kind() === 'member_expression') {
-      const children = node.children();
-      const obj = children.find((c: SgNode) => c.kind() === 'this');
-      const prop = children.find(
-        (c: SgNode) => c.kind() === 'property_identifier',
-      );
-      if (obj && prop) {
-        accessed.add(prop.text());
-      }
-    }
-  });
-  return [...accessed];
-}
+import { findThisAccesses } from './utils/find-this-accesses.js';
 
 export async function extractClassInfo(
   source: string,

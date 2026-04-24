@@ -12,27 +12,8 @@ import type {
 } from '../../types/ast.js';
 
 import { parseSource, walk } from '../parser/parser.js';
-
-function getCallee(node: SgNode): string | null {
-  const kind = node.kind();
-  if (kind === 'identifier') return node.text();
-  if (kind === 'member_expression') {
-    const children = node.children();
-    const obj = children[0];
-    const prop = children.find(
-      (c: SgNode) => c.kind() === 'property_identifier',
-    );
-    if (obj && prop) {
-      const objName = getCallee(obj);
-      return objName ? `${objName}.${prop.text()}` : null;
-    }
-  }
-  return null;
-}
-
-function stripQuotes(s: string): string {
-  return s.replace(/^['"]|['"]$/g, '');
-}
+import { getCallee } from './utils/get-callee.js';
+import { stripQuotes } from './utils/strip-quotes.js';
 
 export async function extractDependencies(
   source: string,
