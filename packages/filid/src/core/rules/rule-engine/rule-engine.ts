@@ -11,6 +11,7 @@ import type {
   RuleContext,
   RuleEvaluationResult,
   RuleOverride,
+  RuleSeverity,
   RuleViolation,
 } from '../../../types/rules.js';
 import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
@@ -22,25 +23,39 @@ import { isExempt } from './utils/is-exempt.js';
 import { isValidNaming } from './utils/is-valid-naming.js';
 
 /**
- * Wrap a rule's check so that violations for nodes matching `override.exempt`
- * globs are suppressed. Applied exactly once inside `applyOverrides` — rule
- * bodies never see the exempt mechanism, preserving `Rule.check` purity.
+ * Remap every violation's severity to `severity`. `innerCheck` is whatever
+ * check function is currently on the rule — may itself be a wrapper.
  */
-function withExempt(rule: Rule, override: RuleOverride): Rule {
-  const exempt = override.exempt;
-  if (!exempt || exempt.length === 0) return rule;
-  const originalCheck = rule.check;
-  return {
-    ...rule,
-    check: (ctx: RuleContext): RuleViolation[] =>
-      isExempt(ctx.node, exempt) ? [] : originalCheck(ctx),
-  };
+function remapSeverity(
+  innerCheck: Rule['check'],
+  severity: RuleSeverity,
+): Rule['check'] {
+  return (ctx: RuleContext): RuleViolation[] =>
+    innerCheck(ctx).map((v) => ({ ...v, severity }));
+}
+
+/**
+ * Short-circuit the check when the node matches any exempt glob. `innerCheck`
+ * may itself be a severity-remap wrapper from {@link remapSeverity} — that is
+ * intended; exempt wraps whatever check the rule currently exposes, so the
+ * outermost wrapper runs first and skips the inner pipeline on a match.
+ */
+function wrapExempt(
+  innerCheck: Rule['check'],
+  exempt: string[],
+): Rule['check'] {
+  return (ctx: RuleContext): RuleViolation[] =>
+    isExempt(ctx.node, exempt) ? [] : innerCheck(ctx);
 }
 
 /**
  * 프로젝트별 오버라이드를 내장 규칙에 적용한다.
- * Rule 객체의 enabled/severity 필드와 check() 내부 violation severity,
- * 그리고 `exempt` glob에 따른 노드-단위 면제를 모두 동기화한다.
+ *
+ * Composes check wrappers in this order: `rule.check` → (optional) severity
+ * remap → (optional) exempt wrap. The linear chain makes the sequential
+ * composition explicit — each wrapper takes the previous check as input and
+ * returns the next one. Rule bodies never see either mechanism, preserving
+ * `Rule.check` purity.
  */
 export function applyOverrides(
   rules: Rule[],
@@ -59,18 +74,10 @@ export function applyOverrides(
     ) {
       return rule;
     }
-    const originalCheck = rule.check;
-    const remapped: Rule = {
-      ...rule,
-      enabled: newEnabled,
-      severity: newSeverity,
-      check:
-        newSeverity !== rule.severity
-          ? (ctx: RuleContext): RuleViolation[] =>
-              originalCheck(ctx).map((v) => ({ ...v, severity: newSeverity }))
-          : originalCheck,
-    };
-    return hasExempt ? withExempt(remapped, override) : remapped;
+    let check = rule.check;
+    if (newSeverity !== rule.severity) check = remapSeverity(check, newSeverity);
+    if (hasExempt) check = wrapExempt(check, override.exempt!);
+    return { ...rule, enabled: newEnabled, severity: newSeverity, check };
   });
 }
 

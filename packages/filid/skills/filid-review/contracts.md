@@ -221,13 +221,6 @@ Dispatch rules are encoded in `phase-d-deliberation.md` Step D.6.4:
 - `valid == false ∧ suggestion == undefined` → mark the fix
   `Type: blocked`, body = `errors`, `Raised by: D.6.4 schema gate`.
 
-Personas participating in this gate:
-`engineering-architect`, `knowledge-manager`, `operations-sre`,
-`adjudicator`. Each of these four agent files carries a
-`## Config Proposal Discipline` section reiterating the schema-citation
-requirement. `business-driver`, `product-manager`, and `design-hci` are
-out of scope — they have no causal link to config patches.
-
 ### Phase D protocol violation (chairperson-direct synthesis forbidden)
 
 A `chairperson-direct` Phase D synthesis — main writing a SYNTHESIS verdict

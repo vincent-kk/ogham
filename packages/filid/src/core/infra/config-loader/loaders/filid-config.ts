@@ -13,7 +13,12 @@ import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js
 import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtin-rule-ids.js';
 import type { RuleOverride } from '../../../../types/rules.js';
+import { sanitizeExemptPatterns } from '../utils/exempt-sanitize.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
+import {
+  formatIssuePath,
+  parseWithAllowlistWarn,
+} from '../utils/zod-sanitize.js';
 
 const log = createLogger('config-loader');
 
@@ -90,184 +95,6 @@ export interface LoadConfigResult {
   warnings: string[];
 }
 
-type PathSegment = string | number;
-
-function formatIssuePath(path: ReadonlyArray<PathSegment>): string {
-  if (path.length === 0) return '<root>';
-  return path
-    .map((seg, idx) =>
-      typeof seg === 'number' ? `[${seg}]` : idx === 0 ? seg : `.${seg}`,
-    )
-    .join('');
-}
-
-function getAt(
-  root: unknown,
-  path: ReadonlyArray<PathSegment>,
-): unknown {
-  let cur: unknown = root;
-  for (const seg of path) {
-    if (cur === null || cur === undefined) return undefined;
-    if (typeof seg === 'number') {
-      if (!Array.isArray(cur)) return undefined;
-      cur = cur[seg];
-    } else {
-      if (typeof cur !== 'object' || cur === null) return undefined;
-      cur = (cur as Record<string, unknown>)[seg];
-    }
-  }
-  return cur;
-}
-
-function deleteAt(
-  root: unknown,
-  path: ReadonlyArray<PathSegment>,
-): void {
-  if (path.length === 0) return;
-  const parent = getAt(root, path.slice(0, -1));
-  const leaf = path[path.length - 1];
-  if (parent === null || parent === undefined || leaf === undefined) return;
-  if (Array.isArray(parent) && typeof leaf === 'number') {
-    parent.splice(leaf, 1);
-    return;
-  }
-  if (typeof parent === 'object' && typeof leaf === 'string') {
-    delete (parent as Record<string, unknown>)[leaf];
-  }
-}
-
-function pushWarn(list: string[], msg: string): void {
-  list.push(msg);
-  log.warn(msg);
-}
-
-/**
- * Strict-sanitize fallback for `FilidConfigSchema.safeParse` failures.
- * Walks each ZodIssue:
- *   - `unrecognized_keys`   → drop each named key from the parent object.
- *   - any other issue code  → drop the offending leaf value so a retry
- *                             yields a type-correct object.
- * The sanitised object is returned alongside the collected warnings. Pass
- * the result back through `FilidConfigSchema.safeParse` to get a typed
- * `FilidConfig`. Pass-through of unknown values is forbidden.
- */
-function parseWithAllowlistWarn(
-  parsed: unknown,
-  error: z.ZodError,
-): { sanitized: unknown; warnings: string[] } {
-  const warnings: string[] = [];
-  const root: unknown =
-    typeof structuredClone === 'function'
-      ? structuredClone(parsed)
-      : JSON.parse(JSON.stringify(parsed)) as unknown;
-
-  for (const issue of error.issues) {
-    const pathStr = formatIssuePath(issue.path);
-    if (issue.code === 'unrecognized_keys') {
-      const parent = getAt(root, issue.path);
-      if (
-        parent === null ||
-        parent === undefined ||
-        typeof parent !== 'object' ||
-        Array.isArray(parent)
-      ) {
-        pushWarn(
-          warnings,
-          `config validation failed at ${pathStr}: ${issue.message} (ignored, non-fatal; see migration guide)`,
-        );
-        continue;
-      }
-      for (const key of issue.keys) {
-        pushWarn(
-          warnings,
-          `unknown key in ${pathStr}: "${key}" (dropped, non-fatal; see migration guide)`,
-        );
-        delete (parent as Record<string, unknown>)[key];
-      }
-      continue;
-    }
-    if (issue.path.length === 0) {
-      pushWarn(
-        warnings,
-        `config validation failed: ${issue.message} (ignored, non-fatal; see migration guide)`,
-      );
-      continue;
-    }
-    pushWarn(
-      warnings,
-      `invalid value at ${pathStr}: ${issue.message} (dropped, non-fatal; see migration guide)`,
-    );
-    deleteAt(root, issue.path);
-  }
-
-  return { sanitized: root, warnings };
-}
-
-function isValidGlobSyntax(pattern: string): boolean {
-  if (typeof pattern !== 'string' || pattern.length === 0) return false;
-  let brackets = 0;
-  let braces = 0;
-  let escaped = false;
-  for (const ch of pattern) {
-    if (escaped) {
-      escaped = false;
-      continue;
-    }
-    if (ch === '\\') {
-      escaped = true;
-      continue;
-    }
-    if (ch === '[') brackets++;
-    else if (ch === ']') brackets--;
-    else if (ch === '{') braces++;
-    else if (ch === '}') braces--;
-    if (brackets < 0 || braces < 0) return false;
-  }
-  return brackets === 0 && braces === 0;
-}
-
-/**
- * Dry-validate each `rules[*].exempt[]` glob pattern. Invalid syntax and the
- * pre-mortem-2 bare `**` wildcard are warn+dropped from the override; the
- * sanitised config is returned alongside the collected warnings.
- */
-function sanitizeExemptPatterns(
-  config: FilidConfig,
-  warnings: string[],
-): FilidConfig {
-  const rules = { ...config.rules };
-  let mutated = false;
-  for (const [ruleId, override] of Object.entries(rules)) {
-    if (!override.exempt || override.exempt.length === 0) continue;
-    const kept: string[] = [];
-    let dropped = false;
-    for (const pattern of override.exempt) {
-      if (pattern === '**') {
-        pushWarn(
-          warnings,
-          `rules["${ruleId}"].exempt: bare "**" pattern dropped — use a concrete scope such as "packages/**" instead`,
-        );
-        dropped = true;
-        continue;
-      }
-      if (!isValidGlobSyntax(pattern)) {
-        pushWarn(
-          warnings,
-          `rules["${ruleId}"].exempt: invalid glob syntax "${pattern}" (dropped)`,
-        );
-        dropped = true;
-        continue;
-      }
-      kept.push(pattern);
-    }
-    if (dropped) {
-      rules[ruleId] = { ...override, exempt: kept };
-      mutated = true;
-    }
-  }
-  return mutated ? { ...config, rules } : config;
-}
-
 /**
  * Read `.filid/config.json` from the given project root (resolves git root).
  *
@@ -281,6 +108,10 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
   const warnings: string[] = [];
+  const addWarning = (msg: string): void => {
+    warnings.push(msg);
+    log.warn(msg);
+  };
   if (!existsSync(configPath)) {
     log.debug('config not found', configPath);
     return { config: null, warnings };
@@ -291,7 +122,7 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
     raw = readFileSync(configPath, 'utf8');
   } catch (err) {
     log.error('failed to read config', err);
-    pushWarn(warnings, `failed to read ${configPath}: ${String(err)}`);
+    addWarning(`failed to read ${configPath}: ${String(err)}`);
     return { config: null, warnings };
   }
 
@@ -300,31 +131,30 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
     parsed = JSON.parse(raw);
   } catch (err) {
     log.error('failed to parse config JSON', err);
-    pushWarn(warnings, `failed to parse JSON at ${configPath}: ${String(err)}`);
+    addWarning(`failed to parse JSON at ${configPath}: ${String(err)}`);
     return { config: null, warnings };
   }
 
   const strict = FilidConfigSchema.safeParse(parsed);
   if (strict.success) {
     log.debug('config loaded (strict)', configPath);
-    return { config: sanitizeExemptPatterns(strict.data, warnings), warnings };
+    return { config: sanitizeExemptPatterns(strict.data, addWarning), warnings };
   }
 
-  const { sanitized, warnings: sanitizeWarnings } = parseWithAllowlistWarn(
+  const { sanitized } = parseWithAllowlistWarn(
     parsed,
     strict.error,
+    addWarning,
   );
-  for (const w of sanitizeWarnings) warnings.push(w);
 
   const retry = FilidConfigSchema.safeParse(sanitized);
   if (retry.success) {
     log.debug('config loaded (sanitized)', configPath);
-    return { config: sanitizeExemptPatterns(retry.data, warnings), warnings };
+    return { config: sanitizeExemptPatterns(retry.data, addWarning), warnings };
   }
 
   for (const issue of retry.error.issues) {
-    pushWarn(
-      warnings,
+    addWarning(
       `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
     );
   }
@@ -447,10 +277,13 @@ export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
     message: issue.message,
   }));
 
-  const { sanitized } = parseWithAllowlistWarn(parsed, strict.error);
+  // `validateConfigPatch` returns diagnostics via `errors[]`; the sanitize
+  // callbacks' free-form warnings are redundant here, so swallow them.
+  const noop = (): void => {};
+  const { sanitized } = parseWithAllowlistWarn(parsed, strict.error, noop);
   const retry = FilidConfigSchema.safeParse(sanitized);
   if (retry.success) {
-    const suggestionObject = sanitizeExemptPatterns(retry.data, []);
+    const suggestionObject = sanitizeExemptPatterns(retry.data, noop);
     return {
       valid: false,
       errors,

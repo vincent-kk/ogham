@@ -3,29 +3,18 @@
  * @description Throw-safe glob matching for `RuleOverride.exempt` patterns
  * and the path-scoping portion of object-form `additional-allowed` entries.
  *
- * Supports minimal picomatch-style glob syntax (`**`, `*`, `?`) and literal
- * path matching. Advanced globs (brace sets, negation, character classes)
- * beyond escape-safety are not supported — the exempt use case is simple
- * path prefixes.
+ * The glob parser lives in `src/lib/glob-to-regexp.ts` and is shared with
+ * `config-loader/utils/exempt-sanitize.ts` so both code paths use identical
+ * syntax semantics.
  *
  * Exceptions raised by fast-glob.isDynamicPattern, RegExp construction, or
  * RegExp.test are swallowed — the function always returns a boolean, so
- * callers can trust it without defensive try/catch. This defeats the
- * rule-engine evaluateRule silent-swallow edge (AC10a).
+ * callers can trust it without defensive try/catch (AC10a).
  */
 import fg from 'fast-glob';
 
+import { globToRegExp } from '../../../../lib/glob-to-regexp.js';
 import type { FractalNode } from '../../../../types/fractal.js';
-
-function globToRegExp(pattern: string): RegExp {
-  const escaped = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*/g, '__DOUBLESTAR__')
-    .replace(/\*/g, '[^/]*')
-    .replace(/__DOUBLESTAR__/g, '.*')
-    .replace(/\?/g, '[^/]');
-  return new RegExp(`^${escaped}$`);
-}
 
 /**
  * Does `target.path` match ANY of the supplied glob patterns?
@@ -40,26 +29,22 @@ export function isExempt(
 ): boolean {
   if (!patterns || patterns.length === 0) return false;
   const targetPath = target.path;
-  try {
-    for (const pattern of patterns) {
-      if (typeof pattern !== 'string' || pattern.length === 0) continue;
-      try {
-        if (!fg.isDynamicPattern(pattern)) {
-          if (targetPath === pattern) return true;
-          continue;
-        }
-      } catch {
+  for (const pattern of patterns) {
+    if (typeof pattern !== 'string' || pattern.length === 0) continue;
+    try {
+      if (!fg.isDynamicPattern(pattern)) {
+        if (targetPath === pattern) return true;
         continue;
       }
-      try {
-        const re = globToRegExp(pattern);
-        if (re.test(targetPath)) return true;
-      } catch {
-        continue;
-      }
+    } catch {
+      continue;
     }
-  } catch {
-    return false;
+    try {
+      const re = globToRegExp(pattern);
+      if (re.test(targetPath)) return true;
+    } catch {
+      continue;
+    }
   }
   return false;
 }

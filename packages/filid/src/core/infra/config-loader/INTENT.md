@@ -16,6 +16,8 @@ config-loader/
   utils/                organ — 공유 private 헬퍼
     resolve-git-root.ts
     resolve-plugin-root.ts
+    zod-sanitize.ts       parseWithAllowlistWarn + formatIssuePath
+    exempt-sanitize.ts    exempt glob 드롭 (bare **, invalid syntax)
 ```
 
 ## Boundaries

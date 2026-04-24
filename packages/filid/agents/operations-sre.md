@@ -98,21 +98,3 @@ operations).
   round opinion on production stability. Tiers: LOW / MEDIUM / HIGH.
   Natural ally of engineering-architect and knowledge-manager.
 
-## Config Proposal Discipline
-
-When proposing a `.filid/config.json` patch inside a round opinion or
-`fix_items` entry:
-
-- MUST cite the exact schema line from `src/types/rules.ts`
-  (`RuleOverride`) or
-  `src/core/infra/config-loader/loaders/filid-config.ts`
-  (`FilidConfigSchema` / `AllowedEntrySchema`) as evidence the proposed
-  key exists.
-- MUST flag `"no waiver mechanism exists"` explicitly when a rule has no
-  config-level escape hatch rather than inventing one — the
-  2026-04-24 no-op-config incident stemmed from hallucinating
-  `rules[*].allowed-no-entry`.
-- Unverifiable config keys (no schema citation) MUST NOT appear in your
-  `fix_items` output. The chairperson's Step D.6.4 schema gate will
-  either rewrite or block them; emitting unverified proposals only
-  wastes committee round budget.

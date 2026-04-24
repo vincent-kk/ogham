@@ -114,22 +114,3 @@ rule.
   — either TRIVIAL auto-tier (tiny diffs) or `--solo` manual flag.
   Emits a single `round-1-adjudicator.md` opinion mapping directly to
   the verdict. Never elected in LOW / MEDIUM / HIGH tiers.
-
-## Config Proposal Discipline
-
-When proposing or evaluating a `.filid/config.json` patch inside the
-single fast-path opinion or `fix_items` entry:
-
-- MUST cite the exact schema line from `src/types/rules.ts`
-  (`RuleOverride`) or
-  `src/core/infra/config-loader/loaders/filid-config.ts`
-  (`FilidConfigSchema` / `AllowedEntrySchema`) as evidence the proposed
-  key exists.
-- MUST flag `"no waiver mechanism exists"` explicitly when a rule has no
-  config-level escape hatch rather than inventing one — the
-  2026-04-24 no-op-config incident stemmed from hallucinating
-  `rules[*].allowed-no-entry`.
-- Unverifiable config keys (no schema citation) MUST NOT appear in your
-  `fix_items` output. The chairperson's Step D.6.4 schema gate will
-  either rewrite or block them; emitting unverified proposals only
-  wastes review round budget.
