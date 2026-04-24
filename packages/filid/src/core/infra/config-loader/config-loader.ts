@@ -17,7 +17,11 @@ export {
   RuleOverrideSchema,
   writeConfig,
 } from './loaders/filid-config.js';
-export type { FilidConfig, InitResult } from './loaders/filid-config.js';
+export type {
+  AllowedEntry,
+  FilidConfig,
+  InitResult,
+} from './loaders/filid-config.js';
 
 export {
   getRuleDocsStatus,

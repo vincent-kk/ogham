@@ -17,11 +17,30 @@ import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { ScanOptions } from '../../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../constants/allowed-peer-files.js';
+import type { AllowedEntry } from '../../infra/config-loader/loaders/filid-config.js';
+import { isExempt } from './utils/is-exempt.js';
 import { isValidNaming } from './utils/is-valid-naming.js';
 
 /**
+ * Wrap a rule's check so that violations for nodes matching `override.exempt`
+ * globs are suppressed. Applied exactly once inside `applyOverrides` — rule
+ * bodies never see the exempt mechanism, preserving `Rule.check` purity.
+ */
+function withExempt(rule: Rule, override: RuleOverride): Rule {
+  const exempt = override.exempt;
+  if (!exempt || exempt.length === 0) return rule;
+  const originalCheck = rule.check;
+  return {
+    ...rule,
+    check: (ctx: RuleContext): RuleViolation[] =>
+      isExempt(ctx.node, exempt) ? [] : originalCheck(ctx),
+  };
+}
+
+/**
  * 프로젝트별 오버라이드를 내장 규칙에 적용한다.
- * Rule 객체의 enabled/severity 필드와 check() 내부 violation severity를 모두 동기화한다.
+ * Rule 객체의 enabled/severity 필드와 check() 내부 violation severity,
+ * 그리고 `exempt` glob에 따른 노드-단위 면제를 모두 동기화한다.
  */
 export function applyOverrides(
   rules: Rule[],
@@ -32,10 +51,16 @@ export function applyOverrides(
     if (!override) return rule;
     const newEnabled = override.enabled ?? rule.enabled;
     const newSeverity = override.severity ?? rule.severity;
-    if (newEnabled === rule.enabled && newSeverity === rule.severity)
+    const hasExempt = !!override.exempt && override.exempt.length > 0;
+    if (
+      newEnabled === rule.enabled &&
+      newSeverity === rule.severity &&
+      !hasExempt
+    ) {
       return rule;
+    }
     const originalCheck = rule.check;
-    return {
+    const remapped: Rule = {
       ...rule,
       enabled: newEnabled,
       severity: newSeverity,
@@ -45,16 +70,18 @@ export function applyOverrides(
               originalCheck(ctx).map((v) => ({ ...v, severity: newSeverity }))
           : originalCheck,
     };
+    return hasExempt ? withExempt(remapped, override) : remapped;
   });
 }
 
 /**
  * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
- * overrides가 전달되면 enabled/severity를 프로젝트별로 재정의한다.
+ * overrides가 전달되면 enabled/severity/exempt를 프로젝트별로 재정의한다.
+ * additionalAllowed의 객체형 엔트리는 `paths` glob이 현재 노드 경로와 일치할 때만 basename을 허용한다.
  */
 export function loadBuiltinRules(
   overrides?: Record<string, RuleOverride>,
-  additionalAllowed?: string[],
+  additionalAllowed?: AllowedEntry[],
 ): Rule[] {
   const rules: Rule[] = [
     // 1. naming-convention: 디렉토리명이 kebab-case 또는 camelCase여야 한다
@@ -293,8 +320,18 @@ export function loadBuiltinRules(
         if (fwFiles) for (const f of fwFiles) allowed.add(f);
 
         // Category: additional-allowed from .filid/config.json
-        if (additionalAllowed)
-          for (const f of additionalAllowed) allowed.add(f);
+        //   string entry  → allowed everywhere (backward-compat).
+        //   object entry  → allowed only when entry.paths glob matches node.path.
+        if (additionalAllowed) {
+          for (const entry of additionalAllowed) {
+            if (typeof entry === 'string') {
+              allowed.add(entry);
+              continue;
+            }
+            if (entry.paths && !isExempt(node, entry.paths)) continue;
+            allowed.add(entry.basename);
+          }
+        }
 
         const disallowed = peerFiles.filter((f) => !allowed.has(f));
         if (disallowed.length === 0) return [];

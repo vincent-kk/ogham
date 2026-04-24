@@ -45,21 +45,20 @@ export const AllowedEntrySchema = z.union([
     .strict(),
 ]);
 
+/** Allowed-entry union type derived from `AllowedEntrySchema`. */
+export type AllowedEntry = z.infer<typeof AllowedEntrySchema>;
+
 /**
  * Top-level `.filid/config.json` schema. `FilidConfig` is derived via
  * `z.infer` — this schema is the single source of truth for the type shape.
  * `.strict()` ensures unknown keys are reported by zod issues.
- *
- * NOTE: in Commit A `additional-allowed` still accepts only bare strings;
- * Commit B swaps the inner element to `AllowedEntrySchema` together with
- * the runtime object-entry branch in zero-peer-file.
  */
 export const FilidConfigSchema = z
   .object({
     version: z.string(),
     rules: z.record(z.string(), RuleOverrideSchema),
     language: z.string().optional(),
-    'additional-allowed': z.array(z.string()).optional(),
+    'additional-allowed': z.array(AllowedEntrySchema).optional(),
     scan: z
       .object({
         maxDepth: z.number().nonnegative().finite().optional(),
