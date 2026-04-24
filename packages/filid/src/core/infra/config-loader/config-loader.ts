@@ -6,12 +6,15 @@
  * rule-docs-manifest: rule doc sync framework (filid-setup skill only).
  */
 export {
+  AllowedEntrySchema,
   createDefaultConfig,
+  FilidConfigSchema,
   initProject,
   loadConfig,
   loadRuleOverrides,
   resolveLanguage,
   resolveMaxDepth,
+  RuleOverrideSchema,
   writeConfig,
 } from './loaders/filid-config.js';
 export type { FilidConfig, InitResult } from './loaders/filid-config.js';

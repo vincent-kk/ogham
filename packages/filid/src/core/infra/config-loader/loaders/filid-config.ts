@@ -6,6 +6,8 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
+import { z } from 'zod';
+
 import { createLogger } from '../../../../lib/logger.js';
 import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
@@ -15,23 +17,60 @@ import { resolveGitRoot } from '../utils/resolve-git-root.js';
 
 const log = createLogger('config-loader');
 
-/** Schema of .filid/config.json */
-export interface FilidConfig {
-  version: string;
-  rules: Record<string, RuleOverride>;
-  /** Output language for documents (INTENT.md, DETAIL.md, reviews, PRs). Falls back to 'en'. */
-  language?: string;
-  /** Additional file names allowed as peer files in fractal roots (zero-peer-file rule). */
-  'additional-allowed'?: string[];
-  /**
-   * Optional scan option overrides. Missing fields fall back to DEFAULT_SCAN_OPTIONS.
-   * Currently only `maxDepth` is honoured; additional fields may be added later.
-   */
-  scan?: {
-    /** Maximum fractal tree depth. Shared by the scanner traversal cap and the max-depth rule. */
-    maxDepth?: number;
-  };
-}
+/**
+ * Single RuleOverride entry schema. Strict — unknown keys are surfaced as
+ * zod issues so the loader (Commit C) can warn + drop them.
+ */
+export const RuleOverrideSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    severity: z.enum(['error', 'warning', 'info']).optional(),
+    exempt: z.array(z.string()).optional(),
+  })
+  .strict();
+
+/**
+ * Entry accepted inside the top-level `additional-allowed` array.
+ * Either a bare basename string (applied globally) or an object restricting
+ * the basename to specific path globs. Consumed by the `zero-peer-file` rule.
+ * The object-entry branch in rule-engine is wired in Commit B.
+ */
+export const AllowedEntrySchema = z.union([
+  z.string(),
+  z
+    .object({
+      basename: z.string(),
+      paths: z.array(z.string()).optional(),
+    })
+    .strict(),
+]);
+
+/**
+ * Top-level `.filid/config.json` schema. `FilidConfig` is derived via
+ * `z.infer` — this schema is the single source of truth for the type shape.
+ * `.strict()` ensures unknown keys are reported by zod issues.
+ *
+ * NOTE: in Commit A `additional-allowed` still accepts only bare strings;
+ * Commit B swaps the inner element to `AllowedEntrySchema` together with
+ * the runtime object-entry branch in zero-peer-file.
+ */
+export const FilidConfigSchema = z
+  .object({
+    version: z.string(),
+    rules: z.record(z.string(), RuleOverrideSchema),
+    language: z.string().optional(),
+    'additional-allowed': z.array(z.string()).optional(),
+    scan: z
+      .object({
+        maxDepth: z.number().nonnegative().finite().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+
+/** Schema of .filid/config.json (derived from FilidConfigSchema via zod). */
+export type FilidConfig = z.infer<typeof FilidConfigSchema>;
 
 /** Result of initProject. */
 export interface InitResult {
