@@ -199,7 +199,7 @@ trigger the same chairperson-direct fallback on the missing batch only — do
 not re-run successful batches. This batched fallback, too, applies only to
 A/B/C1/C2.
 
-### Config Patch Contract (`.filid/config.json` fixes, v0.4.0)
+### Config Patch Contract (`.filid/config.json` fixes)
 
 Every Phase D fix whose Code Patch modifies `.filid/config.json` MUST
 pass through `mcp_t_config_patch_validate` before being written to
@@ -221,13 +221,12 @@ Dispatch rules are encoded in `phase-d-deliberation.md` Step D.6.4:
 - `valid == false ∧ suggestion == undefined` → mark the fix
   `Type: blocked`, body = `errors`, `Raised by: D.6.4 schema gate`.
 
-Personas participating in this gate (plan §4 P5):
+Personas participating in this gate:
 `engineering-architect`, `knowledge-manager`, `operations-sre`,
 `adjudicator`. Each of these four agent files carries a
 `## Config Proposal Discipline` section reiterating the schema-citation
-requirement (v0.4.0 Commit F). `business-driver`, `product-manager`, and
-`design-hci` are out of scope — they have no causal link to config
-patches.
+requirement. `business-driver`, `product-manager`, and `design-hci` are
+out of scope — they have no causal link to config patches.
 
 ### Phase D protocol violation (chairperson-direct synthesis forbidden)
 

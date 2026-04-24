@@ -564,11 +564,11 @@ Format: see `../templates.md` → "Fix Requests Format"
 One section per fix item, each with: Severity, Source, Type, Path, Rule,
 Current, Raised by, Recommended Action, Code Patch (if applicable).
 
-> **Config Patch Validation Gate** (v0.4.0). For every fix whose Code
-> Patch modifies `.filid/config.json`, the chairperson MUST validate the
-> patch against `FilidConfigSchema` **before** emitting it to
-> `fix-requests.md` — never allow an unvalidated `.filid/config.json`
-> patch to reach Phase E (`filid-resolve`).
+> **Config Patch Validation Gate**. For every fix whose Code Patch
+> modifies `.filid/config.json`, the chairperson MUST validate the patch
+> against `FilidConfigSchema` **before** emitting it to `fix-requests.md`
+> — never allow an unvalidated `.filid/config.json` patch to reach
+> Phase E (`filid-resolve`).
 
 For each fix item whose Code Patch targets `.filid/config.json`:
 

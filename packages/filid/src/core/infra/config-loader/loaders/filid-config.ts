@@ -149,7 +149,7 @@ function pushWarn(list: string[], msg: string): void {
  *                             yields a type-correct object.
  * The sanitised object is returned alongside the collected warnings. Pass
  * the result back through `FilidConfigSchema.safeParse` to get a typed
- * `FilidConfig`. Pass-through of unknown values is forbidden (plan §4 P1).
+ * `FilidConfig`. Pass-through of unknown values is forbidden.
  */
 function parseWithAllowlistWarn(
   parsed: unknown,
@@ -271,12 +271,11 @@ function sanitizeExemptPatterns(
 /**
  * Read `.filid/config.json` from the given project root (resolves git root).
  *
- * BREAKING (v0.4.0): returns `{ config, warnings }` rather than the bare
- * `FilidConfig | null`. Zod-based strict validation is applied; unknown
- * top-level or rule-override keys are warn+dropped (never pass-through), and
- * invalid `rules[*].exempt` globs (including the bare `**` wildcard) are
- * rejected at load time. Consumers that ignored warnings previously can
- * continue to destructure only `{ config }`.
+ * Returns `{ config, warnings }`. Zod-based strict validation is applied;
+ * unknown top-level or rule-override keys are warn+dropped (never
+ * pass-through), and invalid `rules[*].exempt` globs (including the bare
+ * `**` wildcard) are rejected at load time. Consumers that do not need
+ * warnings may destructure only `{ config }`.
  */
 export function loadConfig(projectRoot: string): LoadConfigResult {
   const resolvedRoot = resolveGitRoot(projectRoot);

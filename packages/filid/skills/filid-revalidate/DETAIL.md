@@ -46,6 +46,3 @@
 If the ledger cannot be parsed (missing file, malformed row, unexpected
 column count) → verdict pinned to `FAIL` with `reason: verification-ledger.md parse failed`.
 
-## Last Updated
-
-2026-04-24 — v0.4.0 Writer Responsibility contract introduced (plan §3 row E, §4 P4).
