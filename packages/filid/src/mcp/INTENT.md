@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Model Context Protocol 서버를 초기화하고 17개 FCA-AI 분석 도구를 등록·제공한다. Claude Code 에이전트가 MCP 프로토콜을 통해 filid 기능을 호출하는 진입층이다.
+Model Context Protocol 서버를 초기화하고 18개 FCA-AI 분석 도구를 등록·제공한다. Claude Code 에이전트가 MCP 프로토콜을 통해 filid 기능을 호출하는 진입층이다.
 
 ## Structure
 
 | 경로 | 역할 |
 |------|------|
-| `server/` | MCP 서버 생성 + 17개 도구 등록 (`createServer`, `startServer`) |
+| `server/` | MCP 서버 생성 + 18개 도구 등록 (`createServer`, `startServer`) |
 | `server-entry/` | esbuild 번들 진입 fractal (`bridge/mcp-server.cjs` 생성 대상) |
-| `tools/` | 각 도구의 비즈니스 로직 핸들러 (17개 sub-fractal + `utils/` organ) |
+| `tools/` | 각 도구의 비즈니스 로직 핸들러 (18개 sub-fractal + `utils/` organ) |
 
 ## Conventions
 

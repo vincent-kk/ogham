@@ -399,6 +399,69 @@ export function loadRuleOverrides(
   return config?.rules ?? {};
 }
 
+/** Single validation error returned by {@link validateConfigPatch}. */
+export interface ConfigPatchIssue {
+  path: string;
+  message: string;
+}
+
+/**
+ * Result of validating a prospective `.filid/config.json` patch string.
+ * `suggestion` is the sanitised JSON (2-space indent) that would pass strict
+ * validation — present only when the sanitize pipeline recovered a valid
+ * config from the original patch.
+ */
+export interface ConfigPatchValidation {
+  valid: boolean;
+  errors: ConfigPatchIssue[];
+  suggestion?: string;
+}
+
+/**
+ * Validate a prospective `.filid/config.json` patch JSON string against the
+ * shared {@link FilidConfigSchema}. No local schema is defined — this is the
+ * SSoT contract for the `mcp_t_config_patch_validate` MCP tool.
+ */
+export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(patchJson);
+  } catch (err) {
+    return {
+      valid: false,
+      errors: [
+        {
+          path: '<root>',
+          message: `invalid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        },
+      ],
+    };
+  }
+
+  const strict = FilidConfigSchema.safeParse(parsed);
+  if (strict.success) {
+    return { valid: true, errors: [] };
+  }
+
+  const errors: ConfigPatchIssue[] = strict.error.issues.map((issue) => ({
+    path: formatIssuePath(issue.path),
+    message: issue.message,
+  }));
+
+  const { sanitized } = parseWithAllowlistWarn(parsed, strict.error);
+  const retry = FilidConfigSchema.safeParse(sanitized);
+  if (retry.success) {
+    const suggestionObject = sanitizeExemptPatterns(retry.data, []);
+    return {
+      valid: false,
+      errors,
+      suggestion: JSON.stringify(suggestionObject, null, 2),
+    };
+  }
+
+  return { valid: false, errors };
+}
+
 /**
  * Resolve the output language from config.
  * Priority: config.language → 'en' (default).

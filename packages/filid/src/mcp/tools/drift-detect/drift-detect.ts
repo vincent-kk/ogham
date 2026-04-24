@@ -1,3 +1,4 @@
+import { loadConfig } from '../../../core/infra/config-loader/config-loader.js';
 import {
   detectDrift,
   generateSyncPlan,
@@ -19,6 +20,12 @@ export interface McpDriftReport {
   bySeverity: Record<DriftSeverity, number>;
   scanTimestamp: string;
   syncPlan?: SyncPlan;
+  /**
+   * Warnings emitted by `loadConfig` while parsing `.filid/config.json`
+   * (strict schema violations, dropped unknown keys, invalid exempt globs).
+   * Empty when the config is absent or strictly valid.
+   */
+  configWarnings: string[];
 }
 
 /**
@@ -36,6 +43,8 @@ export async function handleDriftDetect(
   if (!input.path) {
     throw new Error('path is required');
   }
+
+  const { warnings: configWarnings } = loadConfig(input.path);
 
   const tree = await scanProject(input.path);
   const validation = validateStructure(tree);
@@ -66,6 +75,7 @@ export async function handleDriftDetect(
     totalDrifts: items.length,
     bySeverity,
     scanTimestamp: new Date().toISOString(),
+    configWarnings,
   };
 
   if (input.generatePlan) {

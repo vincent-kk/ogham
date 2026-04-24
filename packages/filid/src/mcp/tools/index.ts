@@ -4,6 +4,7 @@ export * from './ast-analyze/ast-analyze.js';
 export * from './ast-grep-replace/ast-grep-replace.js';
 export * from './ast-grep-search/ast-grep-search.js';
 export * from './cache-manage/cache-manage.js';
+export * from './config-patch-validate/config-patch-validate.js';
 export * from './coverage-verify/coverage-verify.js';
 export * from './debt-manage/debt-manage.js';
 export * from './doc-compress/doc-compress.js';

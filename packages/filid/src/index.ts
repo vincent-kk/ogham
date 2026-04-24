@@ -156,6 +156,7 @@ export {
 
 // MCP tool handlers
 export { handleAstAnalyze } from './mcp/tools/ast-analyze/ast-analyze.js';
+export { handleConfigPatchValidate } from './mcp/tools/config-patch-validate/config-patch-validate.js';
 export { handleFractalNavigate } from './mcp/tools/fractal-navigate/fractal-navigate.js';
 export { handleDocCompress } from './mcp/tools/doc-compress/doc-compress.js';
 export { handleTestMetrics } from './mcp/tools/test-metrics/test-metrics.js';

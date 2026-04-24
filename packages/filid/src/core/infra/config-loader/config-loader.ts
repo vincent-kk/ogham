@@ -15,10 +15,13 @@ export {
   resolveLanguage,
   resolveMaxDepth,
   RuleOverrideSchema,
+  validateConfigPatch,
   writeConfig,
 } from './loaders/filid-config.js';
 export type {
   AllowedEntry,
+  ConfigPatchIssue,
+  ConfigPatchValidation,
   FilidConfig,
   InitResult,
   LoadConfigResult,

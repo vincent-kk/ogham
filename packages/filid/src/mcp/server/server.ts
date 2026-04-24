@@ -9,6 +9,7 @@ import { handleAstAnalyze } from '../tools/ast-analyze/ast-analyze.js';
 import { handleAstGrepReplace } from '../tools/ast-grep-replace/ast-grep-replace.js';
 import { handleAstGrepSearch } from '../tools/ast-grep-search/ast-grep-search.js';
 import { handleCacheManage } from '../tools/cache-manage/cache-manage.js';
+import { handleConfigPatchValidate } from '../tools/config-patch-validate/config-patch-validate.js';
 import { handleCoverageVerify } from '../tools/coverage-verify/coverage-verify.js';
 import { handleDebtManage } from '../tools/debt-manage/debt-manage.js';
 import { handleDocCompress } from '../tools/doc-compress/doc-compress.js';
@@ -52,7 +53,7 @@ function toolError(error: unknown) {
 
 /**
  * Wrap a tool handler with standard try/catch error handling.
- * Reduces repetitive boilerplate across all 17 registerTool callbacks.
+ * Reduces repetitive boilerplate across all 18 registerTool callbacks.
  */
 function wrapHandler<T>(
   fn: (args: T) => unknown | Promise<unknown>,
@@ -444,6 +445,19 @@ export function createServer(): McpServer {
       }),
     },
     wrapHandler(handleAstGrepReplace, { checkErrorField: true }),
+  );
+
+  server.registerTool(
+    'config_patch_validate',
+    {
+      description:
+        'Validate a prospective .filid/config.json patch against FilidConfigSchema. Returns { valid, errors[], suggestion? } — errors[] is non-empty when the patch breaks strict schema; suggestion is a sanitised JSON string that would pass. Use this before emitting any .filid/config.json code patch in Phase D (filid-review Step D.6.4).',
+      inputSchema: z.object({
+        patch_json: z.string(),
+        source_context: z.string().optional(),
+      }),
+    },
+    wrapHandler(handleConfigPatchValidate),
   );
 
   server.registerTool(
