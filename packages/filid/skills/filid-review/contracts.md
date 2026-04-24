@@ -199,6 +199,36 @@ trigger the same chairperson-direct fallback on the missing batch only — do
 not re-run successful batches. This batched fallback, too, applies only to
 A/B/C1/C2.
 
+### Config Patch Contract (`.filid/config.json` fixes, v0.4.0)
+
+Every Phase D fix whose Code Patch modifies `.filid/config.json` MUST
+pass through `mcp_t_config_patch_validate` before being written to
+`fix-requests.md`. The contract is:
+
+| Field        | Direction            | Shape                                                     | Required |
+| ------------ | -------------------- | --------------------------------------------------------- | -------- |
+| `patch_json` | main → tool (input)  | stringified JSON of the proposed `.filid/config.json`     | yes      |
+| `source_context` | main → tool (input) | free-form trace tag (persona id or FIX-id)               | no       |
+| `valid`      | tool → main (output) | `true` iff the patch passes `FilidConfigSchema` strictly  | yes      |
+| `errors`     | tool → main (output) | `{ path: string; message: string }[]` zod issues          | yes (may be empty) |
+| `suggestion` | tool → main (output) | JSON string of the sanitised patch that would pass        | iff recoverable |
+
+Dispatch rules are encoded in `phase-d-deliberation.md` Step D.6.4:
+
+- `valid == true` → emit the fix unchanged.
+- `valid == false ∧ suggestion != undefined` → rewrite Code Patch to
+  `suggestion`, attach a `Validation Note:` that quotes `errors`.
+- `valid == false ∧ suggestion == undefined` → mark the fix
+  `Type: blocked`, body = `errors`, `Raised by: D.6.4 schema gate`.
+
+Personas participating in this gate (plan §4 P5):
+`engineering-architect`, `knowledge-manager`, `operations-sre`,
+`adjudicator`. Each of these four agent files carries a
+`## Config Proposal Discipline` section reiterating the schema-citation
+requirement (v0.4.0 Commit F). `business-driver`, `product-manager`, and
+`design-hci` are out of scope — they have no causal link to config
+patches.
+
 ### Phase D protocol violation (chairperson-direct synthesis forbidden)
 
 A `chairperson-direct` Phase D synthesis — main writing a SYNTHESIS verdict

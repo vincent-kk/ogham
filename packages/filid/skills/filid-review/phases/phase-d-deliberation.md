@@ -556,13 +556,39 @@ Required sections:
   chairperson mediation, transition)
 - `## Final Verdict` — verdict + fix item count
 
-### D.6.4 — Write fix-requests.md
+### D.6.4 — Write fix-requests.md (with config-patch validation gate)
 
 Path: `<REVIEW_DIR>/fix-requests.md`
 Format: see `../templates.md` → "Fix Requests Format"
 
 One section per fix item, each with: Severity, Source, Type, Path, Rule,
 Current, Raised by, Recommended Action, Code Patch (if applicable).
+
+> **Config Patch Validation Gate** (v0.4.0). For every fix whose Code
+> Patch modifies `.filid/config.json`, the chairperson MUST validate the
+> patch against `FilidConfigSchema` **before** emitting it to
+> `fix-requests.md` — never allow an unvalidated `.filid/config.json`
+> patch to reach Phase E (`filid-resolve`).
+
+For each fix item whose Code Patch targets `.filid/config.json`:
+
+1. **Call the validator** — `mcp_t_config_patch_validate({ patch_json:
+   "<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
+2. **If `valid == true`** → emit the fix unchanged.
+3. **If `valid == false` and `suggestion` is present** → rewrite the
+   fix's Code Patch to the `suggestion` string. Append a
+   `Validation Note:` paragraph quoting the original zod `errors[]` list
+   so future readers can audit the rewrite.
+4. **If `valid == false` and `suggestion` is absent** → DO NOT emit the
+   patch. Instead, mark the fix with `Type: blocked` and write the zod
+   `errors[]` as the body of the `Recommended Action` paragraph so the
+   resolver sees the precise schema violation. Add
+   `Raised by: D.6.4 schema gate` to the fix entry.
+
+This gate covers the incident root cause: hallucinated keys such as
+`rules[*].allowed-no-entry` never reach `filid-resolve`, eliminating the
+no-op config commit class of failures (see
+`packages/filid/docs/incidents/2026-04-24-no-op-config-incident.md`).
 
 ### D.6.5 — Team shutdown (team deliberation only)
 
