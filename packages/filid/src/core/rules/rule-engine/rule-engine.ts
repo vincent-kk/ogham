@@ -18,7 +18,7 @@ import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { ScanOptions } from '../../../types/scan.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../constants/allowed-peer-files.js';
-import type { AllowedEntry } from '../../infra/config-loader/loaders/filid-config.js';
+import type { AllowedEntry } from '../../infra/config-loader/loaders/config-schemas.js';
 import { isExempt } from './utils/is-exempt.js';
 import { isValidNaming } from './utils/is-valid-naming.js';
 

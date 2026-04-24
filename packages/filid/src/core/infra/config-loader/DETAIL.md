@@ -47,7 +47,7 @@
 ## `.filid/config.json` Schema Reference
 
 SSoT: `FilidConfigSchema` / `RuleOverrideSchema` / `AllowedEntrySchema`
-in `loaders/filid-config.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`.
+in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`.
 
 ### Placement rules (most confused)
 

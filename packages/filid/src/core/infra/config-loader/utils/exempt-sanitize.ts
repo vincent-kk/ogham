@@ -9,7 +9,7 @@
  * `configWarnings[]` and `log.warn`.
  */
 import { globToRegExp } from '../../../../lib/glob-to-regexp.js';
-import type { FilidConfig } from '../loaders/filid-config.js';
+import type { FilidConfig } from '../loaders/config-schemas.js';
 
 /**
  * Two-stage validation: (1) bracket/brace balance catches the common
