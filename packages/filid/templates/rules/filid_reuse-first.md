@@ -76,9 +76,9 @@ Before writing new logic, evaluate solutions in this strict priority order:
 
 ### file-naming
 
-- File names SHOULD describe one concrete responsibility and use kebab-case or camelCase according to project conventions.
-- **Exception**: Files primarily exporting UI components (e.g., React) MAY use PascalCase if it is the established framework convention.
-- If FCA naming enforcement is active, this exception applies only when that enforcement is also disabled or overridden for those files.
+- File names SHOULD describe one concrete responsibility.
+- camelCase is the default. Per domain, kebab-case or PascalCase (e.g., React UI component files) MAY be used.
+- When choosing a name, first mirror the style of sibling files in the same directory. If no sibling reference exists, infer the industry-standard form for the language, framework, or library.
 - Prefer singular file names for files that represent one primary unit of behavior or one primary type grouping.
 - Avoid generic names such as `common.ts`, `misc.ts`, `temp.ts`, or `new.ts` unless the directory itself makes the responsibility explicit.
 

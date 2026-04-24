@@ -80,6 +80,16 @@ describe('rule-engine', () => {
   });
 
   describe('naming-convention rule', () => {
+    it('should pass for camelCase name (default)', () => {
+      const rule = loadBuiltinRules().find(
+        (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
+      )!;
+      const node = makeNode({ name: 'myModule', path: '/root/myModule' });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(0);
+    });
+
     it('should pass for kebab-case name', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
@@ -93,24 +103,14 @@ describe('rule-engine', () => {
       expect(rule.check(ctx)).toHaveLength(0);
     });
 
-    it('should pass for camelCase name', () => {
+    it('should pass for PascalCase name', () => {
       const rule = loadBuiltinRules().find(
         (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
       )!;
-      const node = makeNode({ name: 'myModule', path: '/root/myModule' });
+      const node = makeNode({ name: 'MyComponent', path: '/root/MyComponent' });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(0);
-    });
-
-    it('should fail for PascalCase name', () => {
-      const rule = loadBuiltinRules().find(
-        (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
-      )!;
-      const node = makeNode({ name: 'MyModule', path: '/root/MyModule' });
-      const tree = makeTree([node]);
-      const ctx: RuleContext = { node, tree };
-      expect(rule.check(ctx)).toHaveLength(1);
     });
 
     it('should fail for snake_case name', () => {
@@ -118,6 +118,16 @@ describe('rule-engine', () => {
         (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
       )!;
       const node = makeNode({ name: 'my_module', path: '/root/my_module' });
+      const tree = makeTree([node]);
+      const ctx: RuleContext = { node, tree };
+      expect(rule.check(ctx)).toHaveLength(1);
+    });
+
+    it('should fail for SCREAMING_SNAKE_CASE name', () => {
+      const rule = loadBuiltinRules().find(
+        (r) => r.id === BUILTIN_RULE_IDS.NAMING_CONVENTION,
+      )!;
+      const node = makeNode({ name: 'MY_MODULE', path: '/root/MY_MODULE' });
       const tree = makeTree([node]);
       const ctx: RuleContext = { node, tree };
       expect(rule.check(ctx)).toHaveLength(1);

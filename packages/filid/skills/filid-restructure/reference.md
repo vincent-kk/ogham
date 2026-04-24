@@ -40,9 +40,9 @@ restructure-plan:
       target: src/features/auth/components/AuthModal
       reason: fractal module incorrectly placed under organ directory
     - type: rename
-      source: src/utils/UserHelper.ts
-      target: src/utils/user-helper.ts
-      reason: kebab-case naming convention violation (HOL-N001)
+      source: src/utils/user_helper.ts
+      target: src/utils/userHelper.ts
+      reason: naming convention violation — camelCase is the default (HOL-N001)
     - type: create-index
       target: src/features/auth
       reason: fractal node missing index.ts barrel export

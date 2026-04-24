@@ -88,7 +88,7 @@ Current violations: N (error: X, warning: Y, info: Z)
 #### naming rules
 | Rule ID | Severity | Description |
 |---------|----------|-------------|
-| HOL-N001 | error | Directories must use kebab-case naming |
+| HOL-N001 | error | Names must use camelCase (default), kebab-case, or PascalCase |
 
 #### structure rules
 | Rule ID | Severity | Description |
@@ -112,7 +112,7 @@ Current violations: N (error: X, warning: Y, info: Z)
 | hybrid | Contains both fractal children and organ-like files |
 
 ### New Module Checklist
-- [ ] Is the directory name kebab-case?
+- [ ] Does the directory name follow the accepted convention (camelCase by default; kebab-case or PascalCase per domain)?
 - [ ] If classified as organ, does it have no fractal children?
 - [ ] If classified as fractal, does it have an index.ts?
 - [ ] If there is a primary feature, does it have a main.ts?

@@ -27,7 +27,7 @@ const FIX_REQUESTS = `# Fix Requests
 - **Source**: structure
 - **Path**: \`src/Bad.ts\`
 - **Rule**: naming-convention
-- **Recommended Action**: Rename to kebab-case
+- **Recommended Action**: Rename to camelCase
 `;
 
 beforeEach(() => {

@@ -83,7 +83,7 @@ const FIX_REQUESTS_MULTI = `# Fix Requests — feature/test
 - **Source**: structure
 - **Path**: \`src/utils/MyHelper.ts\`
 - **Rule**: naming-convention
-- **Recommended Action**: Rename to kebab-case
+- **Recommended Action**: Rename to camelCase
 
 ## FIX-004: Max depth exceeded
 

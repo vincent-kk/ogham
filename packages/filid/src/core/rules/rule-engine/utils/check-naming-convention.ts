@@ -9,9 +9,9 @@ export function checkNamingConvention(context: RuleContext): RuleViolation[] {
       {
         ruleId: BUILTIN_RULE_IDS.NAMING_CONVENTION,
         severity: 'warning',
-        message: `Directory name "${node.name}" does not follow kebab-case or camelCase conventions.`,
+        message: `Name "${node.name}" does not follow an accepted naming convention (camelCase, kebab-case, or PascalCase).`,
         path: node.path,
-        suggestion: `Rename "${node.name}" to kebab-case (e.g. my-module) or camelCase (e.g. myModule).`,
+        suggestion: `Rename "${node.name}" to camelCase (default, e.g. myModule), or use kebab-case / PascalCase when the sibling structure or domain convention calls for it.`,
       },
     ];
   }

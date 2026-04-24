@@ -51,10 +51,11 @@ Fractal nodes MAY exist inside organ directories; traversal MUST re-classify sub
 
 **Severity**: warning | **Applies to**: all nodes
 
-- Names MUST follow kebab-case (`/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/`, preferred) or camelCase (`/^[a-z][a-zA-Z0-9]*$/`).
-- PascalCase, SCREAMING_SNAKE_CASE, and spaces are violations.
+- camelCase is the default (`/^[a-z][a-zA-Z0-9]*$/`).
+- Per domain, kebab-case (`/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/`) or PascalCase (`/^[A-Z][a-zA-Z0-9]*$/`, typical for React and other UI-component files) MAY be used.
+- snake_case, SCREAMING_SNAKE_CASE, and names containing spaces are violations.
+- When choosing a name, first mirror the naming style of sibling fractals or files. If no sibling reference exists, infer the industry-standard form for the language, framework, or library.
 - Exempt: `INTENT.md`, `DETAIL.md`, `README.md`.
-- Disable in `.filid/config.json` if your project requires PascalCase (e.g., React components).
 
 ### organ-no-intentmd
 

@@ -94,4 +94,4 @@ Key rules:
 - Organ directories must not contain fractal child nodes
 - Fractal nodes must have an index.ts barrel export
 - index.ts (barrel) is the primary entry point for a fractal node; main.ts is used for executable/CLI modules
-- Directory naming convention: kebab-case
+- Naming convention: camelCase (default); kebab-case or PascalCase (e.g., React components) allowed per domain

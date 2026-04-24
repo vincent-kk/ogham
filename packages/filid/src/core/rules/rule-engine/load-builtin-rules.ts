@@ -21,12 +21,12 @@ export function loadBuiltinRules(
   additionalAllowed?: AllowedEntry[],
 ): Rule[] {
   const rules: Rule[] = [
-    // 1. naming-convention: 디렉토리명이 kebab-case 또는 camelCase여야 한다
+    // 1. naming-convention: 이름은 camelCase(기본), kebab-case, 또는 PascalCase 중 하나여야 한다
     {
       id: BUILTIN_RULE_IDS.NAMING_CONVENTION,
       name: 'Naming Convention',
       description:
-        'Directory and file names must follow kebab-case or camelCase.',
+        'Directory and file names must follow camelCase (default), kebab-case, or PascalCase.',
       category: 'naming',
       severity: 'warning',
       enabled: true,
