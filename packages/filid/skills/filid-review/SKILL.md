@@ -103,7 +103,7 @@ first, then restart from Phase A (or Phase B if `--no-structure-check`).
      Phase D dispatch.
    - `"proceed-full-review"` → continue to Step 2.
 
-> `mcp_t_review_manage(action: "cache-check", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
+> `mcp_t_review_manage(action: "check-cache", ...)` returns `{ action: "skip-to-existing-results" | "proceed-full-review", ... }`. On `skip-to-existing-results`, the pipeline short-circuits to the finalize-review stage.
 
 **→ After entry point is determined, immediately proceed to Step 2.**
 
