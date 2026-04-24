@@ -2,11 +2,11 @@
 
 ## Purpose
 
-17개 FCA-AI MCP 도구의 비즈니스 로직 핸들러를 모은 fractal. 각 도구는 독립 sub-fractal로 구현되며 `mcp/server/server.ts`에서 등록되어 MCP 프로토콜을 통해 호출된다.
+18개 FCA-AI MCP 도구의 비즈니스 로직 핸들러를 모은 fractal. 각 도구는 독립 sub-fractal로 구현되며 `mcp/server/server.ts`에서 등록되어 MCP 프로토콜을 통해 호출된다.
 
 ## Structure
 
-- 17개 sub-fractal: `ast-analyze`, `ast-grep-search`, `ast-grep-replace`, `cache-manage`, `coverage-verify`, `debt-manage`, `doc-compress`, `drift-detect`, `fractal-navigate`, `fractal-scan`, `lca-resolve`, `project-init`, `review-manage`, `rule-docs-sync`, `rule-query`, `structure-validate`, `test-metrics`
+- 18개 sub-fractal: `ast-analyze`, `ast-grep-search`, `ast-grep-replace`, `cache-manage`, `config-patch-validate`, `coverage-verify`, `debt-manage`, `doc-compress`, `drift-detect`, `fractal-navigate`, `fractal-scan`, `lca-resolve`, `project-init`, `review-manage`, `rule-docs-sync`, `rule-query`, `structure-validate`, `test-metrics`
 - `utils/` organ: 도구 간 공유되는 파일 시스템 가드(`fs-guard`) 등
 - 각 sub-fractal은 `handle*` 함수 하나를 주요 runtime export로 둔다
 

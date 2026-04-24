@@ -1,10 +1,8 @@
-import { decide } from '../../../metrics/decision-tree/decision-tree.js';
-import {
-  type RawTestFile,
-  countTestCases,
-} from '../../../metrics/test-counter/test-counter.js';
-import { check312Rule } from '../../../metrics/three-plus-twelve/three-plus-twelve.js';
 import type { DecisionResult } from '../../../types/metrics.js';
+
+import { handleCheck312 } from './utils/handle-check312.js';
+import { handleCount } from './utils/handle-count.js';
+import { handleDecide } from './utils/handle-decide.js';
 
 /** File content for test analysis */
 export interface TestFileInput {
@@ -75,63 +73,4 @@ export function handleTestMetrics(input: TestMetricsInput): TestMetricsOutput {
     default:
       return { error: `Unknown action: ${input.action}` };
   }
-}
-
-function handleCount(files: TestFileInput[]): TestMetricsOutput {
-  const counts: TestCountResult[] = files.map((f) => {
-    const raw: RawTestFile = { filePath: f.filePath, content: f.content };
-    const result = countTestCases(raw);
-    return {
-      filePath: f.filePath,
-      total: result.total,
-      basic: result.basic,
-      complex: result.complex,
-    };
-  });
-  return { counts };
-}
-
-function handleCheck312(files: TestFileInput[]): TestMetricsOutput {
-  const testCaseCounts = files.map((f) => {
-    const raw: RawTestFile = { filePath: f.filePath, content: f.content };
-    const count = countTestCases(raw);
-    return {
-      filePath: f.filePath,
-      fileType: f.filePath.includes('.spec.')
-        ? ('spec' as const)
-        : ('test' as const),
-      total: count.total,
-      basic: count.total,
-      complex: 0,
-    };
-  });
-
-  const result = check312Rule(testCaseCounts);
-
-  const violations: ThreePlusTwelveViolation[] = result.violatingFiles.map(
-    (fp) => {
-      const entry = testCaseCounts.find((c) => c.filePath === fp);
-      return {
-        filePath: fp,
-        testCount: entry?.total ?? 0,
-        threshold: 15,
-      };
-    },
-  );
-
-  return { violations };
-}
-
-function handleDecide(params?: DecisionParams): TestMetricsOutput {
-  if (!params) {
-    return { error: 'Decision action requires decisionInput' };
-  }
-
-  const result = decide({
-    testCount: params.testCount,
-    lcom4: params.lcom4,
-    cyclomaticComplexity: params.cyclomaticComplexity,
-  });
-
-  return { decision: result };
 }

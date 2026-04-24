@@ -44,6 +44,60 @@
 - `resync?: Iterable<string>` — drift된 optional rule을 덮어쓸 rule id 목록.
 - `pluginRoot?: string` — `CLAUDE_PLUGIN_ROOT` 환경 변수 대신 사용할 경로.
 
-## Last Updated
+## `.filid/config.json` Schema Reference
 
-2026-04-21 — hash-based drift detection 도입 (commit 748d4a2)
+SSoT: `FilidConfigSchema` / `RuleOverrideSchema` / `AllowedEntrySchema`
+in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>`.
+
+### Placement rules (most confused)
+
+- **`additional-allowed` is a TOP-LEVEL key**, never nested under individual
+  rules. Nested forms (`rules["<id>"].additional-allowed`) are warn+dropped
+  by `loadConfig` via `parseWithAllowlistWarn` — pass-through is forbidden.
+- **`exempt` is a per-rule key** on `RuleOverride`, accepting path globs
+  (`packages/**`, `src/legacy/**`). Invalid glob syntax and the bare `**`
+  wildcard are warn+dropped at load time (use a concrete scope instead).
+
+### Full example
+
+```json
+{
+  "version": "1.0",
+  "language": "en",
+  "rules": {
+    "naming-convention":  { "enabled": true, "severity": "warning" },
+    "zero-peer-file":     { "enabled": true, "severity": "warning" },
+    "module-entry-point": {
+      "enabled": true,
+      "severity": "warning",
+      "exempt": ["packages/**"]
+    }
+  },
+  "additional-allowed": [
+    "type.ts",
+    { "basename": "CLAUDE.md", "paths": ["packages/**"] }
+  ],
+  "scan": { "maxDepth": 10 }
+}
+```
+
+`additional-allowed` entries may be either a bare basename string (applied
+globally) or an object `{ basename, paths? }` that restricts the allowance
+to specific path globs. The object branch is consumed by the
+`zero-peer-file` rule body (`rule-engine.ts`).
+
+### `loadConfig` return
+
+`loadConfig(projectRoot)` returns `{ config: FilidConfig | null, warnings:
+string[] }`. Every MCP tool that loads config also surfaces the warnings
+array as `configWarnings` in its response (`structure-validate`,
+`rule-query`, `drift-detect`).
+
+### Phase D patch validation
+
+Phase D fix-requests that propose `.filid/config.json` patches are
+validated via `mcp_t_config_patch_validate` (calls `validateConfigPatch`
+which uses the shared schema — no local redefinition) before reaching
+`filid-resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
+cannot slip through as no-op commits.
+

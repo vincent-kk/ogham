@@ -20,6 +20,12 @@ export interface StructureValidateResult {
   timestamp: string;
   rulesApplied: number;
   rulesSkipped: number;
+  /**
+   * Warnings emitted by `loadConfig` while parsing `.filid/config.json`
+   * (strict schema violations, dropped unknown keys, invalid exempt globs).
+   * Empty when the config is absent or strictly valid.
+   */
+  configWarnings: string[];
 }
 
 /**
@@ -36,7 +42,7 @@ export async function handleStructureValidate(
     throw new Error('path is required');
   }
 
-  const config = loadConfig(input.path);
+  const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
   const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);
@@ -59,5 +65,6 @@ export async function handleStructureValidate(
     timestamp: new Date().toISOString(),
     rulesApplied: rulesToApply.length,
     rulesSkipped,
+    configWarnings,
   };
 }

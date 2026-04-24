@@ -68,4 +68,6 @@ export type { BuiltinRuleId } from '../constants/builtin-rule-ids.js';
 export interface RuleOverride {
   enabled?: boolean;
   severity?: RuleSeverity;
+  /** Paths (glob or literal) exempt from this rule. Patterns are matched against `FractalNode.path`. */
+  exempt?: string[];
 }

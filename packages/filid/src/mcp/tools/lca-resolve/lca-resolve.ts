@@ -4,6 +4,8 @@ import { findLCA } from '../../../core/analysis/lca-calculator/lca-calculator.js
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CategoryType } from '../../../types/fractal.js';
 
+import { distanceBetween } from './utils/distance-between.js';
+
 export interface LcaResolveInput {
   path: string;
   moduleA: string;
@@ -18,16 +20,6 @@ export interface LcaResolveResult {
   distanceB: number;
   suggestedPlacement: string;
   explanation: string;
-}
-
-function pathDepth(p: string): number {
-  return p.split('/').filter((s) => s.length > 0).length;
-}
-
-function distanceBetween(from: string, to: string): number {
-  const fromDepth = pathDepth(from);
-  const toDepth = pathDepth(to);
-  return Math.abs(fromDepth - toDepth);
 }
 
 /**

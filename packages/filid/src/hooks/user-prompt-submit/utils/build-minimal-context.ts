@@ -16,7 +16,7 @@ import { loadBuiltinRules } from '../../../core/rules/rule-engine/rule-engine.js
  */
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
-  const config = loadConfig(cwd);
+  const { config } = loadConfig(cwd);
 
   if (!config) {
     lines.push(

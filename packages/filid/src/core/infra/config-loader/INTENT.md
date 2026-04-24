@@ -8,14 +8,27 @@
 
 ```
 config-loader/
-  config-loader.ts      facade (loaders/ 재수출)
+  config-loader.ts      facade (loaders/ + utils/ 공개 재수출)
   index.ts              barrel (config-loader.ts 재수출)
-  loaders/              organ — 두 가지 로더 관심사
-    filid-config.ts     config I/O + initProject
-    rule-docs-manifest.ts  규칙 문서 sync (filid-setup 전용)
+  loaders/              organ — 함수별 단일-파일 로더
+    config-schemas.ts        Zod schema SSoT (RuleOverride/AllowedEntry/FilidConfig)
+    config-types.ts          Init/LoadConfig/ConfigPatch 결과 타입
+    manifest-types.ts        RuleDoc* 타입 묶음
+    load-config.ts           loadConfig
+    write-config.ts          writeConfig
+    create-default-config.ts createDefaultConfig
+    load-rule-overrides.ts   loadRuleOverrides
+    validate-config-patch.ts validateConfigPatch
+    resolve-language.ts      resolveLanguage
+    resolve-max-depth.ts     resolveMaxDepth
+    init-project.ts          initProject
+    load-rule-docs-manifest.ts  loadRuleDocsManifest
+    get-rule-docs-status.ts  getRuleDocsStatus
+    sync-rule-docs.ts        syncRuleDocs
   utils/                organ — 공유 private 헬퍼
-    resolve-git-root.ts
-    resolve-plugin-root.ts
+    resolve-git-root.ts, resolve-plugin-root.ts
+    format-issue-path.ts, get-at.ts, delete-at.ts, parse-with-allowlist-warn.ts
+    exempt-sanitize.ts, write-file-atomically.ts, compute-file-sha256.ts
 ```
 
 ## Boundaries

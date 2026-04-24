@@ -1,8 +1,8 @@
-# server -- MCP 서버 초기화 및 17개 도구 등록
+# server -- MCP 서버 초기화 및 18개 도구 등록
 
 ## Purpose
 
-MCP 서버 초기화 및 17개 도구 등록.
+MCP 서버 초기화 및 18개 도구 등록.
 
 ## Boundaries
 

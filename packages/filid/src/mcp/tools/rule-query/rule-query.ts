@@ -37,12 +37,13 @@ export interface RuleListResult {
   rules: RuleSummary[];
   total: number;
   filtered: boolean;
+  configWarnings: string[];
 }
 
 export type RuleQueryResult =
   | RuleListResult
-  | RuleDetail
-  | RuleEvaluationResult;
+  | (RuleDetail & { configWarnings: string[] })
+  | (RuleEvaluationResult & { configWarnings: string[] });
 
 /**
  * Handle rule-query MCP tool calls.
@@ -59,7 +60,7 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     throw new Error('action and path are required');
   }
 
-  const config = loadConfig(input.path);
+  const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
   const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
   const activeRules = getActiveRules(allRules);
@@ -83,7 +84,12 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
         enabled: r.enabled,
       }));
 
-      return { rules: summaries, total: summaries.length, filtered };
+      return {
+        rules: summaries,
+        total: summaries.length,
+        filtered,
+        configWarnings,
+      };
     }
 
     case 'get': {
@@ -101,6 +107,7 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
         severity: rule.severity,
         category: rule.category,
         enabled: rule.enabled,
+        configWarnings,
       };
     }
 
@@ -120,6 +127,7 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
       return {
         ...result,
         violations: filteredViolations,
+        configWarnings,
       };
     }
 

@@ -97,3 +97,4 @@ boundary sections or confirm public-API-to-docs drift).
   round opinion on documentation integrity. Tiers: MEDIUM / HIGH.
   Natural ally of engineering-architect and operations-sre. See
   `context-manager` for the write-capable doc steward used elsewhere.
+

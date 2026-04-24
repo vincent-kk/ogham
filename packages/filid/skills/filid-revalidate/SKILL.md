@@ -75,17 +75,32 @@ subagents (`run_in_background: true`). Each verification step runs as a
 
 **→ After all three subagents complete, immediately proceed to Step 6. Do NOT summarize individual results to the user.**
 
-### Step 3 — Verify Accepted Fixes
+### Step 3 — Emit ledger row per accepted fix (Writer Responsibility)
 
-For each accepted fix item from `justifications.md`:
+> **Writer Responsibility** (see DETAIL.md `## API Contracts`): the Step 3
+> subagent is the writer of the raw ledger row. The main orchestrator in
+> Step 6 is the sole authority for post-fix counts and RESOLVED/UNRESOLVED
+> status. Writing anything other than the literal `TBD` token in
+> `post_count` or `status` is a protocol violation — main will log a
+> warning and discard those fields before re-deriving them.
 
-1. Check if the target file was modified in the Delta
-2. Re-run the relevant MCP tool to confirm the rule is now satisfied:
-   - LCOM4 violation → `mcp_t_ast_analyze(lcom4)` — verify LCOM4 < 2 (when using `analysisType: "lcom4"`, the `className` parameter must be provided; extract class names from the source file by scanning for `class X` declarations)
-   - CC violation → `mcp_t_ast_analyze(cyclomatic-complexity)` — verify CC <= 15
-   - 3+12 violation → `mcp_t_test_metrics(check-312)` — verify PASS
-   - Structure violation → `mcp_t_structure_validate` — verify PASS
-3. Mark each fix as RESOLVED or UNRESOLVED
+For each accepted fix item from `justifications.md`, append one row to
+`<REVIEW_DIR>/verification-ledger.md` using **exactly** this template:
+
+```markdown
+| fix_id | target_path | rule_id | pre_count | post_count | file_was_modified | status |
+| ------ | ----------- | ------- | --------- | ---------- | ----------------- | ------ |
+| FIX-001 | <target_path> | <rule_id> | <integer from review-report> | TBD | <true|false> | TBD |
+```
+
+Fill `pre_count` from `review-report.md` / `fix-requests.md`. Fill
+`file_was_modified` from `git diff <resolve_commit_sha>..HEAD --name-only`.
+**Leave `post_count` and `status` as the literal string `TBD`** — do NOT
+re-run `mcp_t_structure_validate` from this subagent and do NOT judge
+RESOLVED/UNRESOLVED from file diffs. If a row cannot be authored (fix
+metadata incomplete), still write a row with `post_count: TBD`,
+`status: TBD` and a `# incomplete: <reason>` line directly beneath it so
+Step 6 can detect the gap.
 
 ### Step 4 — Verify Justifications (Constitutional Check)
 
@@ -111,22 +126,70 @@ For each debt item whose `file_path` is in the Delta:
 1. Re-run the relevant MCP tool to check if the rule is now satisfied
 2. If satisfied: `mcp_t_debt_manage(action: "resolve", projectRoot: <root>, debtId: <id>)`
 
-### Step 6 — Render Verdict (Sequential — after Steps 3–5)
+### Step 6 — Re-derive ledger + render verdict (Sequential — after Steps 3–5)
+
+> Step 6 runs in the **main orchestrator**, never in a subagent. The
+> subagent-authored rows from Step 3 are treated as untrusted input: main
+> is the writer of truth for `post_count` and `status`.
+
+**Step 6.1 — Parse-fail gate.** Read `<REVIEW_DIR>/verification-ledger.md`.
+If the file is missing, or any row is malformed (column count != 7,
+missing `fix_id`, or `pre_count` not a non-negative integer), pin
+verdict to `FAIL` with reason `verification-ledger.md parse failed`
+and jump to the verdict write step.
+
+**Step 6.2 — Detect tampering.** For each row:
+
+- If `post_count != "TBD"` OR `status != "TBD"`, append
+  `[filid:warn] subagent tampered ledger row <fix_id>: post_count=<...>, status=<...> (discarded)`
+  to `session.md`, then overwrite those fields with `TBD` in memory
+  before moving on.
+
+**Step 6.3 — Detect missing rows.** Compare the ledger row set with the
+accepted fix id set from `justifications.md`. For each accepted fix with
+no row, synthesise a row with `post_count: <main-derived>`,
+`status: UNRESOLVED` and reason `auto-UNRESOLVED: ledger row absent`.
+
+**Step 6.4 — Independently re-derive post_count.** For each row, call
+`mcp_t_structure_validate(path=<target_path>)` (or the category-specific
+MCP tool for LCOM4/CC/3+12 — see table below). Filter violations by
+`ruleId == <rule_id>` and `path starts with <target_path>`. Write the
+integer count into `post_count`.
+
+| rule_id kind             | MCP tool                              | success = |
+| ------------------------ | ------------------------------------- | --------- |
+| structure violation      | `mcp_t_structure_validate`            | 0 matching violations |
+| LCOM4 violation          | `mcp_t_ast_analyze(analysisType: "lcom4", className)` | LCOM4 < 2 |
+| CC violation             | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15 |
+| 3+12 violation           | `mcp_t_test_metrics(action: "check-312")` | PASS |
+
+**Step 6.5 — Derive status.** Apply the DETAIL.md matrix
+`(pre_count, post_count, file_was_modified) → status`. The only path to
+`RESOLVED` is `pre > 0 ∧ post == 0 ∧ file_was_modified` (or the vacuous
+`pre == 0 ∧ post == 0`). File-diff matching the fix-requests patch is
+necessary but NOT sufficient.
+
+**Step 6.6 — Pin verdict on UNRESOLVED.** If any row has
+`status == UNRESOLVED`, verdict is `FAIL` (unoverridable — no subagent
+judgement can flip it).
 
 **PASS conditions** (all must be true):
 
-- All accepted fixes are RESOLVED
-- All justifications are constitutionally valid (DEFERRED, not UNCONSTITUTIONAL)
-- No new critical violations introduced in the Delta
+- Every ledger row has `status == RESOLVED` after Step 6.5 derivation.
+- All justifications are constitutionally valid (DEFERRED, not UNCONSTITUTIONAL).
+- No new critical violations introduced in the Delta.
 
 **FAIL conditions** (any triggers FAIL):
 
-- One or more accepted fixes remain UNRESOLVED
-- A justification is UNCONSTITUTIONAL (non-negotiable rule violated)
-- New critical violations found in Delta changes
+- Ledger parse failed (Step 6.1 gate).
+- One or more derived rows are `UNRESOLVED`.
+- A justification is UNCONSTITUTIONAL (non-negotiable rule violated).
+- New critical violations found in Delta changes.
 
-Write `.filid/review/<branch>/re-validate.md` with the verdict.
-See `reference.md` for the output template.
+Write `.filid/review/<branch>/re-validate.md` with the verdict and the
+fully-derived ledger (including any `[filid:warn] subagent tampered ...`
+lines appended to `session.md` for auditability). See `reference.md` for
+the output template.
 
 **→ Immediately proceed to Step 7.**
 
@@ -156,7 +219,8 @@ mcp_t_review_manage(action: "cleanup", projectRoot: <project_root>, branchName: 
 ```
 
 This deletes the entire `.filid/review/<branch>/` directory (session artifacts,
-review report, fix requests, justifications, re-validate report).
+review report, fix requests, justifications, `verification-ledger.md`,
+re-validate report).
 
 **Debt files are NOT affected** — they live in `.filid/debt/` and are managed
 separately by `mcp_t_debt_manage`.

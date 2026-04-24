@@ -3,6 +3,26 @@
 Output format templates, PR comment format, and detailed verification
 reference for the Delta re-validation skill.
 
+## verification-ledger.md Template (Step 3 subagent writer)
+
+Every accepted fix becomes one row. The Step 3 subagent MUST emit the
+literal `TBD` string in `post_count` and `status`; the main orchestrator
+in Step 6 overwrites those fields with derived values (see DETAIL.md
+`## API Contracts`).
+
+```markdown
+# Verification Ledger — <branch name>
+
+**Resolve Commit**: <resolve_commit_sha>
+**Written By**: filid-revalidate Step 3 subagent
+**Authoritative Writer (post_count / status)**: filid-revalidate Step 6 main
+
+| fix_id  | target_path           | rule_id            | pre_count | post_count | file_was_modified | status |
+| ------- | --------------------- | ------------------ | --------- | ---------- | ----------------- | ------ |
+| FIX-001 | packages/foo/index.ts | module-entry-point | 1         | TBD        | true              | TBD    |
+| FIX-002 | src/legacy/big.ts     | lcom4              | 3         | TBD        | false             | TBD    |
+```
+
 ## re-validate.md Format
 
 ```markdown
