@@ -18,6 +18,5 @@ export * from './lifecycle-dispatcher/index.js';
 export * from './session-end/index.js';
 export * from './session-start/index.js';
 export * from './shared/index.js';
-export * from './turn-context-builder/index.js';
 export * from './vault-committer/index.js';
 export * from './vault-redirector/index.js';
