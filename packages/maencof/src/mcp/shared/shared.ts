@@ -15,7 +15,7 @@ export async function removeBacklinks(
   const metaDir = join(vaultPath, '.maencof-meta');
   const indexPath = join(metaDir, 'backlink-index.json');
 
-  let index: Record<string, string[]> = {};
+  let index: Record<string, string[]>;
   try {
     const raw = await readFile(indexPath, 'utf-8');
     index = JSON.parse(raw) as Record<string, string[]>;
