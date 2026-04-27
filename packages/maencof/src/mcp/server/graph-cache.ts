@@ -1,6 +1,8 @@
 /**
  * @file graph-cache.ts
- * @description Graph lifecycle management: vault path resolution, graph caching, and invalidation.
+ * @description Vault path resolution + in-memory graph cache.
+ * Read-path freshness gating is delegated to middlewares/freshness-guard;
+ * background rebuild lifecycle to middlewares/background-rebuild.
  */
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
@@ -9,7 +11,7 @@ import { MetadataStore } from '../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../search/query-engine/index.js';
 import type { KnowledgeGraph } from '../../types/graph.js';
 
-import { handleKgBuild } from '../tools/kg-build/index.js';
+import { ensureFreshGraphNonBlocking } from './middlewares/freshness-guard.js';
 
 /** Blocked prefixes for global config path access */
 const BLOCKED_PREFIXES = [
@@ -38,9 +40,6 @@ export function getVaultPath(): string {
 let cachedGraph: KnowledgeGraph | null = null;
 let cacheVaultPath: string | null = null;
 
-/** Rebuild mutex — prevents duplicate concurrent rebuilds */
-let rebuildInProgress: Promise<void> | null = null;
-
 export async function loadGraphIfNeeded(
   vaultPath: string,
 ): Promise<KnowledgeGraph | null> {
@@ -56,45 +55,13 @@ export async function loadGraphIfNeeded(
 }
 
 /**
- * Read-path auto-rebuild: stale 노드가 있으면 증분 리빌드 후 fresh 그래프를 반환한다.
- * kg_status는 진단 도구이므로 이 함수를 사용하지 않는다 (loadGraphIfNeeded 사용).
+ * Read-path freshness 가드 thin wrapper.
+ * 절대 in-flight rebuild를 await하지 않는다 — middlewares/freshness-guard가 즉시 그래프 reference를 반환한다.
  */
 export async function ensureFreshGraph(
   vaultPath: string,
 ): Promise<KnowledgeGraph | null> {
-  if (rebuildInProgress) {
-    await rebuildInProgress;
-    return loadGraphIfNeeded(vaultPath);
-  }
-
-  const store = new MetadataStore(vaultPath);
-  const staleNodes = await store.loadStaleNodes();
-
-  if (staleNodes.paths.length === 0) {
-    return loadGraphIfNeeded(vaultPath);
-  }
-
-  let resolveMutex!: () => void;
-  rebuildInProgress = new Promise<void>((r) => {
-    resolveMutex = r;
-  });
-
-  try {
-    const result = await handleKgBuild(vaultPath, { force: false });
-    if (result.success) {
-      const freshGraph = await store.loadGraph();
-      if (freshGraph) {
-        cachedGraph = freshGraph;
-        cacheVaultPath = vaultPath;
-        return freshGraph;
-      }
-    }
-  } finally {
-    rebuildInProgress = null;
-    resolveMutex();
-  }
-
-  return loadGraphIfNeeded(vaultPath);
+  return ensureFreshGraphNonBlocking(vaultPath);
 }
 
 export function invalidateCache(): void {
