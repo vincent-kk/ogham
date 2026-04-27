@@ -33,4 +33,4 @@ MCP 서버 설정 및 도구 등록. stdio 전송으로 Claude Code와 통신.
 - 도구 로직을 server.ts 또는 register-*.ts에 직접 구현
 - graph-cache.ts 외부에서 캐시 상태 직접 조작
 - read 도구 내부에서 await 기반 background rebuild 호출
-- stale 메타정보를 도구 응답에 포함
+- stale 메타정보를 도구 응답에 포함 (단, kg_status 진단 응답은 예외)

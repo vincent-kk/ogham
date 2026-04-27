@@ -18,7 +18,7 @@ import type { KnowledgeEdge, KnowledgeGraph } from '../../../types/graph.js';
 /**
  * Stale path 들을 파싱해 graph nodes Map과 outbound edges에 반영한다 (Hybrid).
  *
- * - node 교체 (같은 id, 새 데이터)
+ * - node 교체 (같은 id, 새 데이터). NodeId == path (toNodeId 가 identity) 이므로 동일 path 재빌드는 graph.nodes 의 기존 엔트리를 자연 덮어쓴다.
  * - outbound edges: source가 stale인 기존 엣지 제거 → freshNode.outboundLinks 중 graph에 존재하는 target만 신규 LINK 엣지로 추가
  * - weights / pageRank / edgeWeightMap / edgeTypeMap / adjacencyList는 갱신하지 않는다
  * - 디스크 미반영. 호출자는 동일 graph reference를 즉시 사용 가능.
