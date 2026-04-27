@@ -36,7 +36,7 @@ Restrict scan to changed files only:
 
 ```
 mcp_t_fractal_scan({ path: "<target-path>" })
-// Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: ModuleInfo[], timestamp, duration }
+// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
 mcp_t_test_metrics({ action: "check-312", files: [{ filePath, content }] })
 // Returns: { violations: TestViolation[], summary: { total, passing, failing } }

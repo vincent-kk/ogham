@@ -1,5 +1,4 @@
 import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
@@ -7,6 +6,7 @@ import {
   MAX_CACHE_DIRS_BEFORE_PRUNE,
   STALE_CACHE_TTL_MS,
 } from '../../../../constants/infra-defaults.js';
+import { getPluginRoot } from './get-plugin-root.js';
 
 const log = createLogger('cache');
 
@@ -19,9 +19,7 @@ const log = createLogger('cache');
  */
 export function pruneStaleCacheDirs(): void {
   try {
-    const configDir =
-      process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
-    const pluginDir = join(configDir, 'plugins', 'filid');
+    const pluginDir = getPluginRoot();
     if (!existsSync(pluginDir)) return;
 
     const dirs = readdirSync(pluginDir);

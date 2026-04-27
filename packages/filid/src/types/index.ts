@@ -2,6 +2,7 @@ export type {
   CategoryType,
   FractalNode,
   FractalTree,
+  FractalTreeDto,
   DependencyEdge,
   DependencyDAG,
   DirEntry,
@@ -82,6 +83,7 @@ export type {
 
 export type {
   ScanReport,
+  ScanReportDto,
   ValidationReport,
   DriftReport,
   AnalysisReport,

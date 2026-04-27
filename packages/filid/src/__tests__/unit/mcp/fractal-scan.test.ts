@@ -17,25 +17,26 @@ vi.mock('node:child_process', async () => {
 
 const mockedExecSync = vi.mocked(execSync);
 
-describe('fractal-scan tool — nodesList', () => {
-  it('should include nodesList as an array in the scan result', async () => {
+describe('fractal-scan tool — DTO shape', () => {
+  it('should expose tree.nodes as a flat array', async () => {
     const result = await handleFractalScan({ path: import.meta.dirname });
 
     expect(result.tree).toBeDefined();
-    expect(result.tree.nodesList).toBeDefined();
-    expect(Array.isArray(result.tree.nodesList)).toBe(true);
+    expect(Array.isArray(result.tree.nodes)).toBe(true);
+    expect(result.tree.nodes.length).toBeGreaterThan(0);
   });
 
-  it('should have nodesList length equal to nodes.size', async () => {
+  it('should NOT serialize tree.nodes as a Map', async () => {
     const result = await handleFractalScan({ path: import.meta.dirname });
 
-    expect(result.tree.nodesList!.length).toBe(result.tree.nodes.size);
+    // DTO uses an array; in-process FractalTree (Map) is not exposed.
+    expect(result.tree.nodes).not.toBeInstanceOf(Map);
   });
 
-  it('should keep nodes as a Map instance', async () => {
+  it('should preserve totalNodes parity with nodes.length', async () => {
     const result = await handleFractalScan({ path: import.meta.dirname });
 
-    expect(result.tree.nodes).toBeInstanceOf(Map);
+    expect(result.tree.nodes.length).toBe(result.tree.totalNodes);
   });
 });
 
@@ -88,7 +89,7 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     writeScanConfig(3);
     const result = await handleFractalScan({ path: tmpRoot, depth: 1 });
     // With depth=1, nodes at depth 2 and 3 must not appear.
-    for (const node of result.tree.nodes.values()) {
+    for (const node of result.tree.nodes) {
       expect(node.depth).toBeLessThanOrEqual(1);
     }
   });
@@ -96,7 +97,7 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
   it('config.scan.maxDepth is used when input.depth is omitted', async () => {
     writeScanConfig(1);
     const result = await handleFractalScan({ path: tmpRoot });
-    for (const node of result.tree.nodes.values()) {
+    for (const node of result.tree.nodes) {
       expect(node.depth).toBeLessThanOrEqual(1);
     }
   });
@@ -105,7 +106,7 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     writeScanConfig(null);
     const result = await handleFractalScan({ path: tmpRoot });
     // All 4 nested dirs (depths 0..3) should fit under the default cap.
-    const depths = Array.from(result.tree.nodes.values()).map((n) => n.depth);
+    const depths = result.tree.nodes.map((n) => n.depth);
     expect(Math.max(...depths)).toBeGreaterThanOrEqual(3);
   });
 });

@@ -20,12 +20,17 @@ import { join } from 'node:path';
 
 import {
   getCacheDir,
+  isPruneDue,
+  isSessionPruneDue,
+  markPruneRun,
+  markSessionPruneRun,
   pruneOldSessions,
   pruneStaleCacheDirs,
 } from '../../core/infra/cache-manager/cache-manager.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import { isFcaProject } from '../shared/shared.js';
+import { validateCwd } from '../utils/validate-cwd.js';
 
 import { hasIntentMdInTree } from './utils/hasIntentMdInTree.js';
 
@@ -33,35 +38,41 @@ const log = createLogger('setup');
 
 export function processSetup(input: SessionStartInput): HookOutput {
   try {
-    const { cwd } = input;
+    const safeCwd = validateCwd(input.cwd);
+    if (safeCwd === null) return { continue: true };
 
     // Phase 1: Init — ensure cache directory + enable file logging
-    const cacheDir = getCacheDir(cwd);
+    const cacheDir = getCacheDir(safeCwd);
     setLogDir(cacheDir);
     if (!existsSync(cacheDir)) {
       mkdirSync(cacheDir, { recursive: true });
     }
 
-    let isFca = isFcaProject(cwd);
+    let isFca = isFcaProject(safeCwd);
 
     // Phase 2: Auto-detect — scan for INTENT.md and create .filid/ marker
     try {
-      if (!isFca && hasIntentMdInTree(cwd)) {
-        mkdirSync(join(cwd, '.filid'), { recursive: true });
+      if (!isFca && hasIntentMdInTree(safeCwd)) {
+        mkdirSync(join(safeCwd, '.filid'), { recursive: true });
         isFca = true;
 
-        log.debug(`Auto-detected FCA project, created .filid/ in ${cwd}`);
+        log.debug(`Auto-detected FCA project, created .filid/ in ${safeCwd}`);
       }
     } catch (e) {
       log.debug('Auto-detect failed:', e);
     }
 
-    log.debug(`cwd=${cwd} fca=${isFca} cache=${cacheDir}`);
+    log.debug(`cwd=${safeCwd} fca=${isFca} cache=${cacheDir}`);
 
-    // Phase 3: Maintenance — prune old session files + stale cache dirs
-    // TODO: Add daily throttle to avoid O(projects * files) scan on every session start
-    pruneOldSessions(cwd);
-    pruneStaleCacheDirs();
+    // Phase 3: Maintenance — daily-throttled prune (independent gates per concern)
+    if (isSessionPruneDue(safeCwd)) {
+      pruneOldSessions(safeCwd);
+      markSessionPruneRun(safeCwd);
+    }
+    if (isPruneDue()) {
+      pruneStaleCacheDirs();
+      markPruneRun();
+    }
 
     // Only inject context for FCA projects to minimize token usage.
     // Rule doc deployment is intentionally skipped here — the filid-setup

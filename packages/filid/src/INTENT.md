@@ -12,7 +12,7 @@
 | `version.ts` | 자동 생성 버전 상수 (직접 수정 금지) |
 | `core/` | 7개 sub-fractal: tree/rules/analysis/module/infra/coverage-verify/pr-summary |
 | `ast/` | `@ast-grep/napi` 기반 AST 분석 (LCOM4, CC, 의존성) |
-| `mcp/` | MCP 서버 + 17개 도구 핸들러 |
+| `mcp/` | MCP 서버 + 18개 도구 핸들러 |
 | `hooks/` | Claude Code 훅 구현체 |
 | `metrics/` | 테스트 밀도 · 모듈 분리 결정 메트릭 |
 | `compress/` | 컨텍스트 압축 (가역/손실) |

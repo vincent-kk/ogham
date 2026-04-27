@@ -45,15 +45,16 @@ fix-request agenda items).
 git diff <BASE_REF>..HEAD --name-only
 ```
 
-Then scan the full project hierarchy (required for `mcp_t_fractal_navigate` entries in A.1):
+Then scan the full project hierarchy (required for node classification lookup in A.1):
 
 ```
 mcp_t_fractal_scan(path: <PROJECT_ROOT>)
-// Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, ... }
+// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, ... }, ... }
 ```
 
-Store `tree.nodesList` (array) as `SCAN_NODES` for use in A.1 classify calls.
-(`tree.nodes` is a path-keyed object in JSON — use `tree.nodesList` for iteration.)
+Store `tree.nodes` (FractalNode array) as `SCAN_NODES`. Each node already carries
+its classified `type`, so A.1 reads the type directly from `SCAN_NODES` — no
+follow-up `mcp_t_fractal_navigate(classify)` call is needed.
 
 Build two lists:
 
@@ -71,7 +72,8 @@ If a list is empty for a given stage, record the stage as `SKIP`.
 For each directory in `CHANGED_DIRS`:
 
 ```
-mcp_t_fractal_navigate(action: "classify", path: <directory>, entries: SCAN_NODES)
+// Read classification directly from SCAN_NODES (no extra MCP call)
+nodeType = SCAN_NODES.find(n => n.path === <directory>)?.type
 mcp_t_structure_validate(path: <directory>)
 ```
 
@@ -79,7 +81,8 @@ Checks:
 
 - If a changed directory is a fractal node → must have a INTENT.md
 - If a changed directory is an organ node → must NOT have a INTENT.md
-- `mcp_t_fractal_navigate(classify)` result must match the directory's actual role
+- The `nodeType` read from `SCAN_NODES` must match the directory's actual role
+  (verified against INTENT.md presence and `mcp_t_structure_validate` output)
 
 Severity mapping:
 

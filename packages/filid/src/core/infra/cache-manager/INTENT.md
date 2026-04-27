@@ -10,7 +10,7 @@
 
 | 파일 | 담당 |
 |------|------|
-| `caches/session-cache.ts` | cwdHash, getCacheDir, sessionIdHash, 세션 마커 관리 |
+| `caches/session-cache.ts` | cwdHash, getCacheDir, getPluginRoot, sessionIdHash, 세션 마커, prune throttle 게이트 (글로벌/세션) |
 | `caches/prompt-context-cache.ts` | 프롬프트 컨텍스트 읽기/쓰기/존재확인 |
 | `caches/boundary-cache.ts` | 경계 캐시 읽기/쓰기 |
 | `caches/fractal-map-cache.ts` | FractalMap 읽기/쓰기/삭제 + FractalMap 타입 |

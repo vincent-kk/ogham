@@ -3,6 +3,12 @@ import type { FractalNavigateInput, FractalNavigateOutput } from '../fractal-nav
 
 export function handleTree(input: FractalNavigateInput): FractalNavigateOutput {
   const tree = buildFractalTree(input.entries);
-  tree.nodesList = Array.from(tree.nodes.values());
-  return { tree };
+  return {
+    tree: {
+      root: tree.root,
+      depth: tree.depth,
+      totalNodes: tree.totalNodes,
+      nodes: Array.from(tree.nodes.values()),
+    },
+  };
 }

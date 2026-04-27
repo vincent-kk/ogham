@@ -10,7 +10,7 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 | `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts` | Unified hook: intent injection + INTENT.md/DETAIL.md validation + organ structure protection |
 | `PreToolUse` (EnterPlanMode) | `plan-gate.entry.ts` | FCA-AI compliance checklist when entering plan mode |
 | `SubagentStart` | `agent-enforcer.entry.ts` | FCA-AI agent role restriction injection |
-| `UserPromptSubmit` | `context-injector.entry.ts` | FCA-AI rules injection on session start |
+| `UserPromptSubmit` | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start |
 | `SessionEnd` | `session-cleanup.entry.ts` | Session cache and marker file cleanup |
 
 Built entry files live in `bridge/` after `yarn build:plugin`.
@@ -21,7 +21,7 @@ Built entry files live in `bridge/` after `yarn build:plugin`.
 
 ### 1. PreToolUse — Unified Pre-Tool-Use Hook
 
-**Entry**: `src/hooks/entries/pre-tool-use.entry.ts`
+**Entry**: `src/hooks/pre-tool-use/pre-tool-use.entry.ts`
 **Built output**: `bridge/pre-tool-use.mjs`
 
 A single consolidated hook that orchestrates three sub-hooks for every `Read`, `Write`, or `Edit` tool call:
@@ -45,7 +45,7 @@ A single consolidated hook that orchestrates three sub-hooks for every `Read`, `
 
 ### 2. SubagentStart — Agent Role Enforcer
 
-**Entry**: `src/hooks/entries/agent-enforcer.entry.ts`
+**Entry**: `src/hooks/agent-enforcer/agent-enforcer.entry.ts`
 **Built output**: `bridge/agent-enforcer.mjs`
 
 Fires when any subagent starts. Injects role-based tool restrictions into the agent's context via `additionalContext`.
@@ -69,8 +69,8 @@ Unrecognized agent types pass through with no restriction.
 
 ### 3. PreToolUse (EnterPlanMode) — Plan Gate
 
-**Entry**: `src/hooks/entries/plan-gate.entry.ts`
-**Built output**: `bridge/plan-gate.mjs`
+**Entry**: `src/hooks/plan-gate/plan-gate.entry.ts` (example only — not currently registered in `hooks/hooks.json`)
+**Built output**: `bridge/plan-gate.mjs` (when enabled)
 
 Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context when entering plan mode.
 
@@ -82,8 +82,8 @@ Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklis
 
 ### 4. UserPromptSubmit — FCA-AI Context Injector
 
-**Entry**: `src/hooks/entries/context-injector.entry.ts`
-**Built output**: `bridge/context-injector.mjs`
+**Entry**: `src/hooks/user-prompt-submit/user-prompt-submit.entry.ts`
+**Built output**: `bridge/user-prompt-submit.mjs`
 
 Fires on each user prompt submission. Injects FCA-AI rules into Claude's context on the first prompt of each session.
 
@@ -110,7 +110,7 @@ Never blocks user prompts (always `continue: true`).
 
 ### 5. SessionEnd — Session Cleanup
 
-**Entry**: `src/hooks/entries/session-cleanup.entry.ts`
+**Entry**: `src/hooks/session-cleanup/session-cleanup.entry.ts`
 **Built output**: `bridge/session-cleanup.mjs`
 
 Fires when a Claude Code session ends. Cleans up session-specific cache and marker files.
@@ -138,15 +138,8 @@ then executes the built `.mjs` file in `bridge/`.
         "hooks": [
           { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"", "timeout": 3 }
         ]
-      },
-      {
-        "matcher": "EnterPlanMode",
-        "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/plan-gate.mjs\"", "timeout": 3 }
-        ]
       }
     ],
-    "PostToolUse": [],
     "SubagentStart": [
       {
         "matcher": "*",
@@ -159,7 +152,7 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/context-injector.mjs\"", "timeout": 5 }
+          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"", "timeout": 5 }
         ]
       }
     ],

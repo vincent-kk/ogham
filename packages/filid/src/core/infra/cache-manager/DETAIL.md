@@ -16,6 +16,11 @@
 | `pruneOldSessions` | session-cache | `(cwd) => void` |
 | `pruneStaleCacheDirs` | session-cache | `() => void` |
 | `removeSessionFiles` | session-cache | `(sessionId, cwd) => void` |
+| `getPluginRoot` | session-cache | `() => string` |
+| `isPruneDue` | session-cache | `() => boolean` |
+| `markPruneRun` | session-cache | `() => void` |
+| `isSessionPruneDue` | session-cache | `(cwd: string) => boolean` |
+| `markSessionPruneRun` | session-cache | `(cwd: string) => void` |
 | `readPromptContext` | prompt-context-cache | `(cwd, sessionId) => string \| null` |
 | `writePromptContext` | prompt-context-cache | `(cwd, context, sessionId) => void` |
 | `hasPromptContext` | prompt-context-cache | `(sessionId, cwd) => boolean` |
@@ -35,4 +40,4 @@
 
 ## Last Updated
 
-2026-04-11
+2026-04-28

@@ -22,9 +22,8 @@ Use `mcp_t_fractal_scan` to retrieve the full project tree, then find the node m
 mcp_t_fractal_scan({ path: "<project-root>" })
 ```
 
-Scan `tree.nodesList` (array) or `tree.nodes` (path-keyed object) for the node whose name or path best matches the target.
+Scan `tree.nodes` (flat FractalNode array) for the node whose name or path best matches the target — e.g. `tree.nodes.find(n => n.path === target)`.
 
-> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.** Use `tree.nodesList` for iteration.
 If the match is ambiguous, use `mcp_t_fractal_navigate(classify)` with the node's
 known children from the scan result:
 

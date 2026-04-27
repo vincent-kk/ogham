@@ -58,6 +58,12 @@ Build the project hierarchy using `mcp_t_fractal_scan` and partition into fracta
 nodes, organ nodes, and spec files.
 See [reference.md Section 1](./reference.md#section-1--tree-construction).
 
+> **Phase 1 result handling**: `mcp_t_fractal_scan` returns ≥50 KB of structured
+> data for any non-trivial project. Treat the full response as INTERNAL working
+> data — do NOT echo `tree.nodes` or `modules` arrays in your response. Extract
+> the three working sets (fractal nodes, organ nodes, spec files) silently and
+> proceed to Phase 2–4 tool calls in the same response.
+
 **Immediately after** receiving `mcp_t_fractal_scan` results, proceed to Phase 2–4
 in the same response — do NOT summarize or report Phase 1 results first.
 
@@ -88,18 +94,24 @@ See [reference.md Section 3](./reference.md#section-3--organ-directory-validatio
 Validate all `*.spec.ts` files against the 15-case limit using `mcp_t_test_metrics`.
 See [reference.md Section 4](./reference.md#section-4--test-file-validation-312-rule).
 
-### Phase 5 — Report Generation (Immediately after Phases 2–4)
+### Phase 5 — Violation Aggregation & Marker Emission (Immediately after Phases 2–4)
 
-Emit the violation report **in the same response** that processes Phase 2–4
-results. With `--fix`, apply auto-remediations using **foreground** agents
-(not background), then re-validate:
+Aggregate Phase 2–4 results into the violation report **in the same response**.
+The report is internal output, not a final user message — emit the terminal
+marker `Scan complete: N violations` (or `Scan complete: no violations found`)
+on the **last line** of the response, then end execution.
+
+With `--fix`, apply auto-remediations using **foreground** agents (not
+background), then re-validate:
 
 - **INTENT.md line-count violations**: delegated to `context-manager` agent
   (trims and compresses to bring within the 50-line limit).
 - **INTENT.md missing boundary sections**: delegated to `context-manager` agent
   (appends skeleton "Always do" / "Ask first" / "Never do" sections).
-- **Organ directory INTENT.md violations**: delegated to `context-manager` agent
-  (removes the forbidden INTENT.md from the organ directory).
+- **Organ directory INTENT.md violations**: delegated to `code-surgeon` agent
+  (deletes the forbidden INTENT.md from the organ directory via Bash). The
+  `context-manager` agent handles INTENT.md authoring/editing only —
+  detection and evaluation, not deletion.
 - **3+12 rule violations in spec files**: delegated to `code-surgeon` agent
   (parameterizes repetitive `it()` blocks into `it.each()` tables).
 - Violations that require architectural decisions (reclassification, missing

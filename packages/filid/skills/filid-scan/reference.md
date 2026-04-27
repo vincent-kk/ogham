@@ -11,13 +11,12 @@ Call `mcp_t_fractal_scan` to build the complete hierarchy by scanning the filesy
 mcp_t_fractal_scan({ path: "<target-path>" })
 ```
 
-The response is a `ScanReport` with `tree.nodes` (Map of path → FractalNode)
-and `tree.nodesList` (flat array of all FractalNode objects).
+The response is a `ScanReportDto` whose `tree.nodes` is a **flat array** of
+`FractalNode` objects. Iterate with `tree.nodes.map(...)` or
+`tree.nodes.filter(...)`. The array is the single source of truth — no
+companion list, no path-keyed dict.
 
-> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.**
-> Use `tree.nodesList` for safe array iteration. Use `tree.nodes["/path"]` for path-based lookup.
-
-Partition into three working sets (iterate `tree.nodesList` or `tree.nodes.values()`):
+Partition into three working sets by filtering `tree.nodes`:
 
 - **fractal nodes** — nodes with `hasIntentMd: true` or `type: "fractal"`
 - **organ nodes** — nodes with `type: "organ"` or names matching `ORGAN_DIR_NAMES`
@@ -113,7 +112,13 @@ MEDIUM (<n>)
 
 Auto-fixable  : <n> of <total>
 Run with --fix to apply automatic remediations.
+
+Scan complete: <N> violations
 ```
+
+The final `Scan complete: <N> violations` line (or
+`Scan complete: no violations found` when N=0) is the **terminal marker** —
+emit it as the last line of the response, then end execution.
 
 ### With `--fix` — apply remediations then re-validate
 
@@ -124,15 +129,54 @@ Run with --fix to apply automatic remediations.
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp_t_doc_compress`) | `context-manager` |
 | `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
 
-Each fixable violation is delegated to the appropriate agent as a **foreground**
-Agent call (not background) with explicit `subagent_type`: `filid:context-manager`
-for document fixes, `filid:code-surgeon` for code/file fixes. Launch independent
-fix agents in **parallel tool calls within a single response**. Do NOT use
-`run_in_background: true` — this causes the LLM to yield the turn.
+### Auto-fix Dispatch — parallel `Task` calls
 
-Agents target non-overlapping file types (`context-manager` edits INTENT.md/DETAIL.md
-content; `code-surgeon` handles file deletion and test refactoring), so parallel
+Launch all applicable fix agents in **a single response, parallel block** of
+`Task` tool calls. Do NOT use `run_in_background: true` — that yields the turn.
+Mix different `subagent_type` values in the same block freely;
+`filid:context-manager` and `filid:code-surgeon` target non-overlapping file
+types (INTENT.md/DETAIL.md vs. file deletion / test refactoring) so parallel
 execution is safe without file locking.
+
+For an `INTENT_MD_LINE_LIMIT` violation:
+
+```
+Task(
+  subagent_type: "filid:context-manager",
+  model: "sonnet",
+  prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Use mcp_t_doc_compress(action: 'auto', mode: 'lossless-first') as the primary tool. Return the final line count and a one-line summary."
+)
+```
+
+For an `INTENT_MD_MISSING_BOUNDARIES` violation:
+
+```
+Task(
+  subagent_type: "filid:context-manager",
+  model: "sonnet",
+  prompt: "Append the three required boundary sections (### Always do, ### Ask first, ### Never do) to <abs path>/INTENT.md if any are missing. Each section gets one bullet placeholder ('- TBD'). Do NOT exceed the 50-line limit. Return the new line count."
+)
+```
+
+For an `ORGAN_INTENT_MD_PRESENT` violation:
+
+```
+Task(
+  subagent_type: "filid:code-surgeon",
+  model: "sonnet",
+  prompt: "Delete the file at <abs path>/INTENT.md. The directory is classified as an organ, which forbids INTENT.md. Return 'deleted' on success."
+)
+```
+
+For a `TEST_312_EXCEEDED` violation:
+
+```
+Task(
+  subagent_type: "filid:code-surgeon",
+  model: "sonnet",
+  prompt: "Refactor <abs path>.spec.ts so that the total `it()` count is ≤15. Parameterize repeated `it()` blocks into `it.each()` tables. Preserve test intent. Return the new test count."
+)
+```
 
 Violations requiring architectural decisions (reclassification, missing index.ts,
 structural drift) are reported but not auto-fixed — run `/filid:filid-sync` or
@@ -146,7 +190,12 @@ Auto-fix Summary
 ----------------
 Fixed   : <n>
 Skipped : <n> (require manual remediation)
+
+Scan complete: <N> violations
 ```
+
+`<N>` here is the count of **remaining** violations after re-validation.
+Use `Scan complete: no violations found` when zero remain.
 
 ## Violation Quick Lookup
 

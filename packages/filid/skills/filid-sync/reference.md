@@ -10,7 +10,7 @@ node classifications.
 
 ```
 mcp_t_fractal_scan({ path: "<target-path>" })
-// Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: ModuleInfo[], timestamp, duration }
+// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 ```
 
 For each node, confirm:

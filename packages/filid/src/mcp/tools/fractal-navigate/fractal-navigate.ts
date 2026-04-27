@@ -1,5 +1,5 @@
 import type { NodeEntry } from '../../../core/tree/fractal-tree/fractal-tree.js';
-import type { FractalTree } from '../../../types/fractal.js';
+import type { FractalTreeDto } from '../../../types/fractal.js';
 
 import { handleClassify } from './utils/handle-classify.js';
 import { handleSiblingList } from './utils/handle-sibling-list.js';
@@ -21,8 +21,8 @@ export interface FractalNavigateOutput {
   classification?: string;
   /** Sibling nodes (for 'sibling-list' action) */
   siblings?: Array<{ name: string; path: string; type: string }>;
-  /** Fractal tree (for 'tree' action) */
-  tree?: FractalTree;
+  /** Fractal tree DTO (for 'tree' action) — `nodes` is a flat array, not a Map. */
+  tree?: FractalTreeDto;
   /** Error message if action failed */
   error?: string;
 }

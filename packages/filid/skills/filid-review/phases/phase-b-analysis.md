@@ -53,17 +53,19 @@ First, scan the full project hierarchy to obtain node entries:
 
 ```
 mcp_t_fractal_scan(path: <PROJECT_ROOT>)
-// Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, ... }
+// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, ... }, ... }
 ```
 
-Store `tree.nodesList` (array) as `SCAN_NODES` for use in classify calls below.
-(`tree.nodes` is a path-keyed object in JSON — use `tree.nodesList` for iteration.)
-
-For each changed file directory, call:
+Store `tree.nodes` (FractalNode array) as `SCAN_NODES`. Each node already carries
+its classified `type`, so the directory classification can be read directly:
 
 ```
-mcp_t_fractal_navigate(action: "classify", path: <directory>, entries: SCAN_NODES)
+// For each changed file directory, look up its classification:
+nodeType = SCAN_NODES.find(n => n.path === <directory>)?.type
 ```
+
+No additional `mcp_t_fractal_navigate(classify)` call is needed — `SCAN_NODES`
+is the single source of truth.
 
 Build a list of unique fractal paths affected by the change.
 Detect whether any interface files (index.ts, public API) are modified.
@@ -182,4 +184,4 @@ Adversarial pairs: <persona A> ↔ <persona B list>
 - Do NOT load persona agent definitions — Phase D spawns them as real
   subagents via `Task(subagent_type: filid:<persona-id>)` when needed
 - Write ONLY `session.md` — no other files
-- If `mcp_t_fractal_navigate` fails for a path, classify it as "unknown" and continue
+- If `SCAN_NODES.find(...)` returns no match for a path, classify it as "unknown" and continue

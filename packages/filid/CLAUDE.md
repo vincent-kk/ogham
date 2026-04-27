@@ -31,8 +31,8 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 1. **TypeScript 컴파일** (`tsconfig.build.json`): `src/` → `dist/` (ESM + `.d.ts`)
 2. **esbuild 번들링** (개별 빌드 스크립트):
-   - `scripts/build-mcp-server.mjs`: `src/mcp/server-entry.ts` → `bridge/mcp-server.cjs` (CJS)
-   - `scripts/build-hooks.mjs`: `src/hooks/entries/*.entry.ts` → `bridge/*.mjs` (ESM, 각 훅)
+   - `scripts/build-mcp-server.mjs`: `src/mcp/server-entry/server-entry.ts` → `bridge/mcp-server.cjs` (CJS)
+   - `scripts/build-hooks.mjs`: `src/hooks/<name>/<name>.entry.ts` → `bridge/*.mjs` (ESM, 각 훅)
 
 `dist/`는 라이브러리 export용, `bridge/`는 MCP 서버 + 훅 런타임용, `libs/`는 런타임 유틸리티(`find-node.sh`). 변경 후 `yarn build`로 재생성.
 
@@ -53,7 +53,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 | `src/core/`     | 핵심 로직 (FractalTree, RuleEngine, DriftDetector 등 12개 모듈) |
 | `src/ast/`      | `@ast-grep/napi` AST 분석 (LCOM4, CC, 의존성)                   |
 | `src/mcp/`      | MCP 서버 + 18개 도구 핸들러                                     |
-| `src/hooks/`    | 훅 구현체 + `entries/` (esbuild 진입점)                         |
+| `src/hooks/`    | 훅 구현체 + 각 훅의 `.entry.ts` (esbuild 진입점)                |
 | `src/metrics/`  | 테스트 밀도, 모듈 분리 결정 메트릭                              |
 | `src/compress/` | 컨텍스트 압축 (가역/비가역)                                     |
 | `src/types/`    | 타입 정의 (index.ts에서 중앙 export)                            |
@@ -62,10 +62,10 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 
 - `src/index.ts` — 94개 함수/상수 + 전체 타입 re-export
 - `src/core/rule-engine.ts` — 8개 내장 규칙 (naming, structure, dependency, documentation, index, module)
-- `src/mcp/server.ts` — MCP 서버 초기화 + 18개 도구 등록
-- `src/hooks/context-injector.ts` — UserPromptSubmit 시 최소 FCA-AI 포인터 주입 (규칙은 .claude/rules/filid_fca-policy.md에 위임)
-- `src/hooks/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
-- `src/hooks/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
+- `src/mcp/server/create-server.ts` — MCP 서버 초기화 + 18개 도구 등록
+- `src/hooks/user-prompt-submit/utils/inject-context.ts` — UserPromptSubmit 시 최소 FCA-AI 포인터 주입 (규칙은 .claude/rules/filid_fca-policy.md에 위임)
+- `src/hooks/session-cleanup/session-cleanup.ts` — SessionEnd 시 세션 캐시 파일 정리
+- `src/hooks/shared/shared.ts` — 훅 공통 유틸리티 (isFcaProject, isIntentMd, isDetailMd)
 - `scripts/build-mcp-server.mjs` — MCP 서버 esbuild 번들러
 - `scripts/build-hooks.mjs` — 훅 스크립트 esbuild 번들러
 
@@ -92,7 +92,7 @@ yarn version:sync   # 버전 동기화 (package.json → src/version.ts)
 ## Development Notes
 
 - **AST**: `@ast-grep/napi` (tree-sitter) 단일 엔진
-- **훅 수정**: `src/hooks/entries/*.entry.ts` 수정 후 `yarn build:plugin`으로 재빌드
+- **훅 수정**: `src/hooks/<name>/<name>.entry.ts` 수정 후 `yarn build:plugin`으로 재빌드
 - **버전**: `src/version.ts` 직접 수정 금지 → `yarn version:sync` 사용
 - **테스트**: `src/**/__tests__/**/*.test.ts`, 벤치마크는 `**/*.bench.ts`
 

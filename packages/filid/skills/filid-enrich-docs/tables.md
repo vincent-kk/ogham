@@ -30,7 +30,7 @@ its own reads via the Read/Glob tools — they are not documented here.
 
 | Tool                 | Stage | Purpose                                          | Signature summary                           |
 | -------------------- | ----- | ------------------------------------------------ | ------------------------------------------- |
-| `mcp_t_fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReport`                   |
+| `mcp_t_fractal_scan`       | 2     | Resolve directory classification (fractal/organ) | `{ path }` → `ScanReportDto`                   |
 | `mcp_t_doc_compress`       | 7     | 50-line limit enforcement                        | `{ mode, filePath, content }` → `{ needsCompression, suggestedContent? }` |
 | `mcp_t_structure_validate` | 7     | 3-tier boundary section verification             | `{ path }` → `{ passed, violations[] }`     |
 

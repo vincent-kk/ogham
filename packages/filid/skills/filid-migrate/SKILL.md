@@ -52,9 +52,11 @@ The script outputs:
 - Phase 3: Cross-file references that would be updated
 - Phase 4: Summary report
 
-Report the output to the user and ask for confirmation before proceeding.
+Report the output to the user. The user re-runs the skill with `--execute`
+to apply the migration; no inline confirmation prompt is issued from this
+skill (the explicit `--execute` flag is the gate).
 
-### Step 2 — Execute (requires user confirmation)
+### Step 2 — Execute (with `--execute` flag)
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/skills/filid-migrate/migrate.sh" <target-path> --execute [--auto-commit]

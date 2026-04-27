@@ -13,7 +13,7 @@
 
 - Phase 1 (Init): `getCacheDir(cwd)` → `setLogDir` → `mkdirSync` (없으면)
 - Phase 2 (Auto-detect): `!isFcaProject && hasIntentMdInTree(cwd)`면 `.filid/` 생성 후 FCA로 승격
-- Phase 3 (Maintenance): `pruneOldSessions(cwd)` + `pruneStaleCacheDirs()` 무조건 실행
+- Phase 3 (Maintenance): `isSessionPruneDue(cwd)` 통과 시 `pruneOldSessions` + `markSessionPruneRun`, `isPruneDue()` 통과 시 `pruneStaleCacheDirs` + `markPruneRun` (독립 게이트)
 - `hasIntentMdInTree`: BFS, `maxDepth=4`, `SCAN_SKIP_DIRS` + `.`으로 시작하는 디렉토리 제외
 - FCA 프로젝트만 `[filid] Session initialized...` `additionalContext` 주입
 - 최상위 try/catch로 모든 예외 포획 → `{ continue: true }` fallthrough
@@ -35,11 +35,11 @@
 
 - `.claude/rules/filid_fca-policy.md` 등 rule doc 파일을 write
 - `.filid/config.json` 자동 생성 (setup 스킬 전담)
-- 매 세션마다 O(projects * files) pruning 없이 throttle 추가 없이 확장
+- daily throttle 게이트 (`isPruneDue` / `isSessionPruneDue`) 우회로 매 세션마다 prune 강제 실행
 
 ## Dependencies
 
-- `../../core/infra/cache-manager/` (`getCacheDir`, `pruneOldSessions`, `pruneStaleCacheDirs`)
+- `../../core/infra/cache-manager/` (`getCacheDir`, `isPruneDue`, `isSessionPruneDue`, `markPruneRun`, `markSessionPruneRun`, `pruneOldSessions`, `pruneStaleCacheDirs`)
 - `../../lib/logger.js` (`createLogger`, `setLogDir`)
 - `../../constants/scan-defaults.js` (`SCAN_SKIP_DIRS`)
 - `../shared/`, `../../types/hooks.js`

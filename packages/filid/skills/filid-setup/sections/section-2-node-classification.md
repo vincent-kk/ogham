@@ -43,7 +43,7 @@ Pattern-based organ rules (applied before name list, after INTENT.md/DETAIL.md c
 ## Deep Scan — Fractal Nodes Inside Organ Directories
 
 Organ nodes are never INTENT.md targets, but fractal nodes can exist inside
-them. Phase 2 must handle this by scanning the full `tree.nodes` map.
+them. Phase 2 must handle this by iterating the full `tree.nodes` array.
 
 **Core rules**:
 
@@ -54,7 +54,7 @@ them. Phase 2 must handle this by scanning the full `tree.nodes` map.
 **Traversal algorithm** (iterate `tree.nodes` directly):
 
 ```
-for each node in tree.nodes.values():
+for each node in tree.nodes:
   if node.type === 'fractal' or 'pure-function':
     → include as a classification target (even if located inside an organ)
   if node.type === 'organ':

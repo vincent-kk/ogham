@@ -6,12 +6,27 @@
  * AnalysisReport를 생성한다.
  */
 import type { DriftResult, SyncPlan } from './drift.js';
-import type { FractalTree, ModuleInfo } from './fractal.js';
+import type { FractalTree, FractalTreeDto, ModuleInfo } from './fractal.js';
 import type { RuleEvaluationResult } from './rules.js';
 import type { ScanOptions } from './scan.js';
 
+/** In-process scan result. `tree.nodes` is a `Map`. Use {@link ScanReportDto} for MCP responses. */
 export interface ScanReport {
   tree: FractalTree;
+  modules: ModuleInfo[];
+  timestamp: string;
+  duration: number;
+}
+
+/**
+ * MCP-response shape for `fractal_scan`.
+ *
+ * Differs from {@link ScanReport} in that `tree` is a {@link FractalTreeDto} with
+ * a flat `nodes: FractalNode[]` array instead of a `Map`. This eliminates the
+ * Map+Array double-serialization that was inflating responses by ~50%.
+ */
+export interface ScanReportDto {
+  tree: FractalTreeDto;
   modules: ModuleInfo[];
   timestamp: string;
   duration: number;

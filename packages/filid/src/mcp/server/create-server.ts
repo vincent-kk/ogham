@@ -175,7 +175,7 @@ export function createServer(): McpServer {
     'fractal_scan',
     {
       description:
-        'Scan project directory to build FractalTree and return ScanReport.',
+        'Scan project directory to build FractalTree and return ScanReportDto.',
       inputSchema: z.object({
         path: z.string(),
         depth: z.number().min(1).max(20).optional(),

@@ -55,8 +55,21 @@ export interface FractalTree {
   depth: number;
   /** Total node count (including root) */
   totalNodes: number;
-  /** Flat array of all nodes for convenient iteration (serialization helper) */
-  nodesList?: FractalNode[];
+}
+
+/**
+ * MCP-response-only flat tree shape.
+ *
+ * `FractalTree.nodes` is a `Map` in process; serializing the Map directly (via
+ * `mapReplacer`) inflated MCP responses. MCP handlers convert to this DTO so
+ * clients see one `nodes: FractalNode[]` array — smaller payloads and a single,
+ * unambiguous iteration path for LLMs.
+ */
+export interface FractalTreeDto {
+  root: string;
+  depth: number;
+  totalNodes: number;
+  nodes: FractalNode[];
 }
 
 /** Dependency edge */

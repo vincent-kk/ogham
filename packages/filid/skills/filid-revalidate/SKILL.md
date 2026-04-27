@@ -133,10 +133,21 @@ For each debt item whose `file_path` is in the Delta:
 > is the writer of truth for `post_count` and `status`.
 
 **Step 6.1 — Parse-fail gate.** Read `<REVIEW_DIR>/verification-ledger.md`.
-If the file is missing, or any row is malformed (column count != 7,
-missing `fix_id`, or `pre_count` not a non-negative integer), pin
-verdict to `FAIL` with reason `verification-ledger.md parse failed`
-and jump to the verdict write step.
+
+- If the file is **missing** AND `accepted_count > 0` (one or more
+  accepted fixes recorded in `justifications.md`), pin verdict to
+  `FAIL` with reason `verification-ledger.md parse failed` and jump
+  to the verdict write step.
+- If the file is **missing** AND `accepted_count == 0` (the
+  all-rejected branch from `filid:filid-resolve`), skip the ledger
+  entirely and proceed to Step 6.2 with an empty ledger row set. The
+  final verdict is derived solely from the constitutional check on
+  rejected justifications (Step 4) — PASS when every justification
+  is constitutionally compliant.
+- If the file is **present** but any row is malformed (column count
+  != 7, missing `fix_id`, or `pre_count` not a non-negative integer),
+  pin verdict to `FAIL` with reason `verification-ledger.md parse
+  failed` and jump to the verdict write step.
 
 **Step 6.2 — Detect tampering.** For each row:
 

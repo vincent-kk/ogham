@@ -101,7 +101,10 @@ performed, and flag any violations found and corrected.
 
 ## Skill Participation
 
-- `/filid:filid-scan` — Phase 5 `--fix`: INTENT.md line-count, missing
-  boundary section, and organ directory INTENT.md violation remediation.
+- `/filid:filid-scan` — Phase 5 `--fix`: INTENT.md line-count and
+  missing boundary section remediation. Organ directory INTENT.md
+  deletion is delegated to `code-surgeon` (Bash); this agent only
+  handles INTENT.md authoring/editing — detection and evaluation, not
+  deletion.
 - `/filid:filid-update` — Stage 3: document updates (INTENT.md /
   DETAIL.md sync after code changes).

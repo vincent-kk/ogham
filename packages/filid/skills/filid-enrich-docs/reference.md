@@ -60,7 +60,7 @@ Collection steps:
 
    ```
    mcp_t_fractal_scan({ path: "<target-path>" })
-   // Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: [...], ... }
+   // Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: [...], ... }
    ```
 
    Skip `organ` nodes — INTENT.md is prohibited there and should be surfaced

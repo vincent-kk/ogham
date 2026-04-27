@@ -76,27 +76,26 @@ describe('fractal-navigate tool', () => {
       });
       expect(result.tree).toBeDefined();
       expect(result.tree!.root).toBe('/app/src');
-      expect(result.tree!.nodes.size).toBeGreaterThan(0);
+      expect(result.tree!.nodes.length).toBeGreaterThan(0);
     });
 
-    it('should include nodesList as an array', () => {
+    it('should expose tree.nodes as a flat array', () => {
       const result = handleFractalNavigate({
         action: 'tree',
         path: '/app',
         entries: sampleEntries,
       });
-      expect(result.tree!.nodesList).toBeDefined();
-      expect(Array.isArray(result.tree!.nodesList)).toBe(true);
-      expect(result.tree!.nodesList!.length).toBe(result.tree!.nodes.size);
+      expect(Array.isArray(result.tree!.nodes)).toBe(true);
+      expect(result.tree!.nodes.length).toBe(result.tree!.totalNodes);
     });
 
-    it('should keep nodes as a Map instance', () => {
+    it('should NOT serialize tree.nodes as a Map', () => {
       const result = handleFractalNavigate({
         action: 'tree',
         path: '/app',
         entries: sampleEntries,
       });
-      expect(result.tree!.nodes).toBeInstanceOf(Map);
+      expect(result.tree!.nodes).not.toBeInstanceOf(Map);
     });
   });
 
@@ -179,7 +178,7 @@ describe('fractal-navigate tool', () => {
         entries: [],
       });
       expect(result.tree).toBeDefined();
-      expect(result.tree!.nodes.size).toBe(0);
+      expect(result.tree!.nodes.length).toBe(0);
     });
   });
 });

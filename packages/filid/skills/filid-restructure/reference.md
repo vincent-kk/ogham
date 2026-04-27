@@ -10,7 +10,7 @@ fractal structure restructuring skill. For the quick-start overview, see [SKILL.
 ```
 // Parallel batch — fire all three simultaneously:
 mcp_t_fractal_scan({ path: "<target-path>" })
-// Returns: ScanReport { tree: { nodes: Map<path, FractalNode>, root: string }, modules: ModuleInfo[], timestamp, duration }
+// Returns: ScanReportDto { tree: { nodes: FractalNode[], root: string, totalNodes: number, depth: number }, modules: ModuleInfo[], timestamp, duration }
 
 mcp_t_drift_detect({ path: "<target-path>" })
 // Returns: { drifts: DriftItem[], total: number }

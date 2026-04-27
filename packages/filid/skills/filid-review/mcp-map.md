@@ -30,7 +30,7 @@ protocol.
 
 | Tool                 | Action / Parameters                     | Stage | Purpose                                          |
 | -------------------- | --------------------------------------- | ----- | ------------------------------------------------ |
-| `mcp_t_fractal_navigate`   | `action: "classify"`                    | 1     | Classify changed dirs for boundary check         |
+| `mcp_t_fractal_scan`       | `path: <PROJECT_ROOT>`                  | 0     | Build full fractal tree → `SCAN_NODES` lookup    |
 | `mcp_t_structure_validate` | `path: <changed dir>`                   | 1     | Fractal/organ boundary validation (diff only)    |
 | `mcp_t_doc_compress`       | `mode: "auto"`                          | 2     | INTENT.md line count (changed INTENT.md only)    |
 | `mcp_t_test_metrics`       | `action: "check-312"`                   | 3     | 3+12 rule on changed spec.ts files only          |
@@ -41,13 +41,12 @@ protocol.
 
 ### Phase B (Analysis Agent, haiku)
 
-| Tool               | Action             | Purpose                              |
-| ------------------ | ------------------ | ------------------------------------ |
-| `mcp_t_review_manage`    | `normalize-branch` | Branch name → filesystem-safe string |
-| `mcp_t_review_manage`    | `ensure-dir`       | Create `.filid/review/<branch>/`     |
-| `mcp_t_review_manage`    | `elect-committee`  | Deterministic committee election     |
-| `mcp_t_fractal_navigate` | `classify`         | Classify changed directories         |
-| `mcp_t_fractal_scan`     | —                  | Build full fractal tree              |
+| Tool               | Action             | Purpose                                          |
+| ------------------ | ------------------ | ------------------------------------------------ |
+| `mcp_t_review_manage` | `normalize-branch` | Branch name → filesystem-safe string             |
+| `mcp_t_review_manage` | `ensure-dir`       | Create `.filid/review/<branch>/`                 |
+| `mcp_t_review_manage` | `elect-committee`  | Deterministic committee election                 |
+| `mcp_t_fractal_scan`  | —                  | Build full fractal tree → `SCAN_NODES` lookup    |
 
 ### Phase C1 (Metrics Agent, sonnet) — changed files only
 

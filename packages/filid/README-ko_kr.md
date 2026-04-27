@@ -36,8 +36,8 @@ claude --plugin-dir ./packages/filid
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (분석 도구 17개)
-- `bridge/*.mjs` — Hook 스크립트 6개 (자동 규칙 시행)
+- `bridge/mcp-server.cjs` — MCP 서버 (분석 도구 18개)
+- `bridge/*.mjs` — Hook 스크립트 5개 (자동 규칙 시행)
 
 ---
 
@@ -191,7 +191,7 @@ yarn dev            # TypeScript watch 모드
 yarn test           # Vitest watch
 yarn test:run       # 1회 실행
 yarn typecheck      # 타입 체크
-yarn build          # tsc + node build-plugin.mjs
+yarn build          # tsc + esbuild (mcp-server + hooks)
 ```
 
 ### 기술 스택

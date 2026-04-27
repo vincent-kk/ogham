@@ -11,17 +11,14 @@ Call `mcp_t_fractal_scan` to retrieve the complete directory tree and node class
 mcp_t_fractal_scan({ path: "<target-path>" })
 ```
 
-The response is a `ScanReport` containing:
+The response is a `ScanReportDto` containing:
 
-- `tree.nodes`: Map of path → FractalNode (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
-- `tree.nodesList`: flat array of all FractalNode objects (for convenient iteration)
+- `tree.nodes`: **flat array** of FractalNode objects (with `name`, `path`, `type`, `hasIntentMd`, `hasDetailMd`, `children`)
 - `tree.root`: root directory path
+- `tree.totalNodes`: total node count
 - `modules`: optional ModuleInfo list (empty unless `includeModuleInfo: true`)
 
-> **Important — `tree.nodes` is an object (dict) in JSON, NOT an array.**
-> Use `tree.nodesList` for safe array iteration. Use `tree.nodes["/path"]` for path-based lookup.
-
-Build three working sets from `tree.nodesList` (or `tree.nodes.values()`):
+Build three working sets from `tree.nodes` (e.g. `tree.nodes.filter(...)`):
 
 - **fractal nodes** — `type === "fractal"` or `hasIntentMd === true`
 - **organ nodes** — `type === "organ"`

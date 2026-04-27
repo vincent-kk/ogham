@@ -59,8 +59,10 @@ If `--replace` is **not** provided, emit the search results and stop here.
 
 ### Phase 4 — LLM Replace Fallback (only when `--replace` is provided)
 
-Perform search (Phase 3), show dry-run preview of proposed changes,
-ask for user confirmation, then apply via Edit tool.
+Perform search (Phase 3), emit a dry-run preview of the proposed changes
+in the response, then apply the replacements via the Edit tool. The
+preview is emitted alongside the Edit calls so the diff stays visible to
+the caller without requiring an interactive confirmation gate.
 See [reference.md Section 4](./reference.md#section-4--llm-replace-fallback).
 
 ## Available MCP Tools

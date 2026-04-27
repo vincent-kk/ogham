@@ -36,8 +36,8 @@ claude --plugin-dir ./packages/filid
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (17 analysis tools)
-- `bridge/*.mjs` — 6 hook scripts (automatic rule enforcement)
+- `bridge/mcp-server.cjs` — MCP server (18 analysis tools)
+- `bridge/*.mjs` — 5 hook scripts (automatic rule enforcement)
 
 ---
 
@@ -191,7 +191,7 @@ yarn dev            # TypeScript watch mode
 yarn test           # Vitest watch
 yarn test:run       # Single run
 yarn typecheck      # Type checking only
-yarn build          # tsc + node build-plugin.mjs
+yarn build          # tsc + esbuild (mcp-server + hooks)
 ```
 
 ### Tech Stack
