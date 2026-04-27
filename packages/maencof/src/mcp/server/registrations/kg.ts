@@ -1,5 +1,5 @@
 /**
- * @file register-kg-tools.ts
+ * @file kg.ts
  * @description Registers 7 KG tools via the wrapper organ:
  * 1 mutate (boundary_create) + 4 fresh reads (kg_search/navigate/context/suggest_links)
  * + 2 plain reads (kg_status, kg_build).
@@ -7,19 +7,19 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { handleBoundaryCreate } from '../tools/boundary-create/index.js';
-import { handleKgBuild } from '../tools/kg-build/index.js';
-import { handleKgContext } from '../tools/kg-context/index.js';
-import { handleKgNavigate } from '../tools/kg-navigate/index.js';
-import { handleKgSearch } from '../tools/kg-search/index.js';
-import { handleKgStatus } from '../tools/kg-status/index.js';
-import { handleKgSuggestLinks } from '../tools/kg-suggest-links/index.js';
+import { handleBoundaryCreate } from '../../tools/boundary-create/index.js';
+import { handleKgBuild } from '../../tools/kg-build/index.js';
+import { handleKgContext } from '../../tools/kg-context/index.js';
+import { handleKgNavigate } from '../../tools/kg-navigate/index.js';
+import { handleKgSearch } from '../../tools/kg-search/index.js';
+import { handleKgStatus } from '../../tools/kg-status/index.js';
+import { handleKgSuggestLinks } from '../../tools/kg-suggest-links/index.js';
 
-import { loadGraphIfNeeded } from './graph-cache.js';
+import { loadGraphIfNeeded } from '../graph-cache/index.js';
 import {
   registerMutateTool,
   registerReadTool,
-} from './middlewares/index.js';
+} from '../middlewares/index.js';
 
 export function registerKgTools(server: McpServer): void {
   // ─── kg_search (fresh read) ──────────────────────────────────────

@@ -7,7 +7,7 @@ import { STALE_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 
-import { loadGraphIfNeeded } from '../graph-cache.js';
+import { loadGraphIfNeeded } from '../graph-cache/index.js';
 
 import { triggerBackgroundRebuild } from './background-rebuild.js';
 import { mergeStaleNodesIntoGraph } from './partial-reindex.js';

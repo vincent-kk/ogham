@@ -17,15 +17,15 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { VERSION } from '../../version.js';
 
-import { getVaultPath } from './graph-cache.js';
+import { getVaultPath } from './graph-cache/index.js';
 import { walkVaultForExternalChanges } from './middlewares/index.js';
-import { registerCrudTools } from './register-crud-tools.js';
-import { registerKgTools } from './register-kg-tools.js';
 import {
   registerCacheTools,
   registerClaudeMdTools,
+  registerCrudTools,
   registerDailynoteTools,
-} from './register-metadata-tools.js';
+  registerKgTools,
+} from './registrations/index.js';
 
 /**
  * Creates the maencof MCP server and registers 18 tools.

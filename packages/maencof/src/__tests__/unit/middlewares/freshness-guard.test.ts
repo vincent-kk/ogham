@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { invalidateCache } from '../../../mcp/server/graph-cache.js';
+import { invalidateCache } from '../../../mcp/server/graph-cache/index.js';
 import { _peekRebuildInProgress } from '../../../mcp/server/middlewares/background-rebuild.js';
 import { ensureFreshGraphNonBlocking } from '../../../mcp/server/middlewares/freshness-guard.js';
 

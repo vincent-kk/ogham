@@ -15,7 +15,7 @@ import {
 import {
   invalidateCache,
   loadGraphIfNeeded,
-} from '../../../mcp/server/graph-cache.js';
+} from '../../../mcp/server/graph-cache/index.js';
 
 let vaultDir: string;
 

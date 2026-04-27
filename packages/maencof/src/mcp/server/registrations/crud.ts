@@ -1,5 +1,5 @@
 /**
- * @file register-crud-tools.ts
+ * @file crud.ts
  * @description Registers 6 CRUD tools via the wrapper organ:
  * 5 mutate (create, capture_insight, update, delete, move) + 1 plain read (read).
  */
@@ -9,17 +9,17 @@ import { z } from 'zod';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
-} from '../tools/maencof-capture-insight/index.js';
-import { handleMaencofCreate } from '../tools/maencof-create/index.js';
-import { handleMaencofDelete } from '../tools/maencof-delete/index.js';
-import { handleMaencofMove } from '../tools/maencof-move/index.js';
-import { handleMaencofRead } from '../tools/maencof-read/index.js';
-import { handleMaencofUpdate } from '../tools/maencof-update/index.js';
+} from '../../tools/maencof-capture-insight/index.js';
+import { handleMaencofCreate } from '../../tools/maencof-create/index.js';
+import { handleMaencofDelete } from '../../tools/maencof-delete/index.js';
+import { handleMaencofMove } from '../../tools/maencof-move/index.js';
+import { handleMaencofRead } from '../../tools/maencof-read/index.js';
+import { handleMaencofUpdate } from '../../tools/maencof-update/index.js';
 
 import {
   registerMutateTool,
   registerReadTool,
-} from './middlewares/index.js';
+} from '../middlewares/index.js';
 
 export function registerCrudTools(server: McpServer): void {
   // ─── create (mutate) ───────────────────────────────────────

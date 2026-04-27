@@ -17,7 +17,7 @@ import {
   buildDomainEdges,
   buildRelationshipEdges,
   buildTreeEdges,
-} from './edge-builders.js';
+} from './builders/index.js';
 
 /** GraphBuilder 옵션 */
 export interface GraphBuilderOptions {

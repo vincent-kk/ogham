@@ -12,7 +12,7 @@ import type { z, ZodObject, ZodRawShape } from 'zod';
 import { toolError, toolResult } from '../../shared/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 
-import { getVaultPath, invalidateCache } from '../graph-cache.js';
+import { getVaultPath, invalidateCache } from '../graph-cache/index.js';
 
 import { ensureFreshGraphNonBlocking } from './freshness-guard.js';
 import { runMutateSideEffects } from './mutate-side-effects.js';

@@ -14,7 +14,7 @@ import { handleKgBuild } from '../../mcp/tools/kg-build/index.js';
 import {
   invalidateCache,
   loadGraphIfNeeded,
-} from '../../mcp/server/graph-cache.js';
+} from '../../mcp/server/graph-cache/index.js';
 import {
   _peekRebuildInProgress,
 } from '../../mcp/server/middlewares/background-rebuild.js';
