@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const GENERATED_PATH = join(__dirname, '..', '__generated__', 'setup-html.ts');
-const PAGES_DIR = join(__dirname, '..', '..', '..', 'pages', 'setup');
 
 describe('build-template output (setup-html.ts)', () => {
   // --- basic ---
@@ -19,17 +18,15 @@ describe('build-template output (setup-html.ts)', () => {
 
   it('CSS 인라인 — <style> 태그 포함, <link> 제거', async () => {
     const content = await readFile(GENERATED_PATH, 'utf-8');
-    const css = await readFile(join(PAGES_DIR, 'styles', 'styles.css'), 'utf-8');
 
-    expect(content).toContain(css.slice(0, 50));
+    expect(content).toContain('.container{');
     expect(content).not.toContain('<link href="./styles/styles.css"');
   });
 
   it('app.js 인라인 — 콘텐츠 포함, <script src> 제거', async () => {
     const content = await readFile(GENERATED_PATH, 'utf-8');
-    const appJs = await readFile(join(PAGES_DIR, 'scripts', 'app.js'), 'utf-8');
 
-    expect(content).toContain(appJs.slice(0, 50));
+    expect(content).toContain('__setupApp');
     expect(content).not.toContain('<script src="./scripts/app.js">');
   });
 
@@ -50,16 +47,15 @@ describe('build-template output (setup-html.ts)', () => {
 
   it('json-import.js 인라인 — 콘텐츠 포함, src 태그 제거', async () => {
     const content = await readFile(GENERATED_PATH, 'utf-8');
-    const jsonImportJs = await readFile(join(PAGES_DIR, 'scripts', 'json-import.js'), 'utf-8');
 
-    expect(content).toContain(jsonImportJs.slice(0, 50));
+    expect(content).toContain('btn-import');
     expect(content).not.toContain('<script src="./scripts/json-import.js">');
   });
 
-  it('SETUP_HTML export — 템플릿 리터럴 포맷', async () => {
+  it('SETUP_HTML export — JSON string 포맷', async () => {
     const content = await readFile(GENERATED_PATH, 'utf-8');
 
-    expect(content).toContain('export const SETUP_HTML = `');
+    expect(content).toContain('export const SETUP_HTML = "');
   });
 
   it('HTML 구조 보존 — <!DOCTYPE html> 시작', async () => {
