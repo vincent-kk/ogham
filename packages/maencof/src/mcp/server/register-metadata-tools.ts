@@ -1,11 +1,12 @@
 /**
  * @file register-metadata-tools.ts
- * @description Registers 5 metadata tools: claudemd_merge, claudemd_read, claudemd_remove, dailynote_read, context_cache_manage
+ * @description Registers 5 metadata tools via the wrapper organ:
+ * 2 mutate (claudemd_merge, claudemd_remove) + 3 plain reads (claudemd_read,
+ * dailynote_read, context_cache_manage).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { toolError, toolResult } from '../shared/index.js';
 import { handleClaudeMdMerge } from '../tools/claudemd-merge/index.js';
 import { handleClaudeMdRead } from '../tools/claudemd-read/index.js';
 import { handleClaudeMdRemove } from '../tools/claudemd-remove/index.js';
@@ -15,91 +16,70 @@ import {
 } from '../tools/context-cache-manage/index.js';
 import { handleDailynoteRead } from '../tools/dailynote-read/index.js';
 
-import { getVaultPath } from './graph-cache.js';
+import {
+  registerMutateTool,
+  registerReadTool,
+} from './middlewares/index.js';
+
+const CLAUDE_MD_RELATIVE_PATH = 'CLAUDE.md';
 
 export function registerClaudeMdTools(server: McpServer): void {
-  // ─── claudemd_merge ───────────────────────────────────────────────
-  server.registerTool(
+  // ─── claudemd_merge (mutate) ───────────────────────────────────────
+  registerMutateTool(
+    server,
     'claudemd_merge',
     {
       description:
         'Inserts or updates the maencof directive section in CLAUDE.md at CWD. Section managed via markers (MAENCOF:START/END).',
       inputSchema: z.object({
-        content: z
-          .string()
-          .describe('maencof directive to insert into CLAUDE.md (markdown)'),
-        dry_run: z
-          .boolean()
-          .optional()
-          .describe('Dry run mode (default false)'),
+        content: z.string().describe(
+          'maencof directive to insert into CLAUDE.md (markdown)',
+        ),
+        dry_run: z.boolean().optional().describe('Dry run mode (default false)'),
       }),
     },
-    (args) => {
-      try {
-        const vaultPath = getVaultPath();
-        const result = handleClaudeMdMerge(vaultPath, args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    async (vaultPath, args) => handleClaudeMdMerge(vaultPath, args),
+    () => CLAUDE_MD_RELATIVE_PATH,
   );
 
-  // ─── claudemd_read ────────────────────────────────────────────────
-  server.registerTool(
+  // ─── claudemd_read (plain read) ────────────────────────────────────
+  registerReadTool(
+    server,
     'claudemd_read',
     {
       description: 'Reads the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({}),
     },
-    (_args) => {
-      try {
-        const vaultPath = getVaultPath();
-        const result = handleClaudeMdRead(vaultPath);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    async (vaultPath) => handleClaudeMdRead(vaultPath),
+    { needsFreshness: false },
   );
 
-  // ─── claudemd_remove ──────────────────────────────────────────────
-  server.registerTool(
+  // ─── claudemd_remove (mutate) ──────────────────────────────────────
+  registerMutateTool(
+    server,
     'claudemd_remove',
     {
-      description:
-        'Removes the maencof directive section from CLAUDE.md at CWD.',
+      description: 'Removes the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({
-        dry_run: z
-          .boolean()
-          .optional()
-          .describe('Dry run mode (default false)'),
+        dry_run: z.boolean().optional().describe('Dry run mode (default false)'),
       }),
     },
-    (args) => {
-      try {
-        const vaultPath = getVaultPath();
-        const result = handleClaudeMdRemove(vaultPath, args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    async (vaultPath, args) => handleClaudeMdRemove(vaultPath, args),
+    () => CLAUDE_MD_RELATIVE_PATH,
   );
 }
 
 export function registerDailynoteTools(server: McpServer): void {
-  server.registerTool(
+  registerReadTool(
+    server,
     'dailynote_read',
     {
       description:
         'Queries the dailynote (daily activity log). Supports date, category filter, and last N days lookup. Returns time-grouped entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
       inputSchema: z.object({
-        date: z
-          .string()
-          .regex(/^\d{4}-\d{2}-\d{2}$/)
-          .optional()
-          .describe('Date to query YYYY-MM-DD (default: today)'),
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe(
+          'Date to query YYYY-MM-DD (default: today)',
+        ),
         category: z
           .enum([
             'document',
@@ -111,43 +91,26 @@ export function registerDailynoteTools(server: McpServer): void {
           ])
           .optional()
           .describe('Category filter'),
-        last_days: z
-          .number()
-          .int()
-          .min(1)
-          .max(30)
-          .optional()
-          .describe('Query last N days (default 1, max 30)'),
+        last_days: z.number().int().min(1).max(30).optional().describe(
+          'Query last N days (default 1, max 30)',
+        ),
       }),
     },
-    (args) => {
-      try {
-        const vaultPath = getVaultPath();
-        const result = handleDailynoteRead(vaultPath, args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    async (vaultPath, args) => Promise.resolve(handleDailynoteRead(vaultPath, args)),
+    { needsFreshness: false },
   );
 }
 
 export function registerCacheTools(server: McpServer): void {
-  server.registerTool(
+  registerReadTool(
+    server,
     'context_cache_manage',
     {
       description:
         'Manage the turn context injection cache. Pin/unpin nodes for persistent inclusion in turn context, force-refresh the cache, or list current cache state.',
       inputSchema: z.object(contextCacheManageInputSchema),
     },
-    async (args) => {
-      try {
-        const vaultPath = getVaultPath();
-        const result = await handleContextCacheManage(vaultPath, args);
-        return toolResult(result);
-      } catch (error) {
-        return toolError(error);
-      }
-    },
+    async (vaultPath, args) => handleContextCacheManage(vaultPath, args),
+    { needsFreshness: false },
   );
 }

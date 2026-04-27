@@ -10,10 +10,7 @@ export {
 } from './register-with-side-effects.js';
 export type {
   AffectedPath,
-  FreshReadHandler,
   GetAffectedPath,
-  MutateCoreHandler,
-  PlainReadHandler,
   ReadOptionsFresh,
   ReadOptionsPlain,
   ToolMeta,

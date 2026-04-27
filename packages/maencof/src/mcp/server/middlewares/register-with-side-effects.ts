@@ -7,7 +7,7 @@ import type {
   McpServer,
   RegisteredTool,
 } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ZodRawShape, ZodType } from 'zod';
+import type { z, ZodObject, ZodRawShape } from 'zod';
 
 import { toolError, toolResult } from '../../shared/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -18,9 +18,9 @@ import { ensureFreshGraphNonBlocking } from './freshness-guard.js';
 import { runMutateSideEffects } from './mutate-side-effects.js';
 import { incrementUsageStat } from './usage-stats.js';
 
-export interface ToolMeta {
+export interface ToolMeta<TShape extends ZodRawShape> {
   description: string;
-  inputSchema: ZodRawShape | ZodType<object>;
+  inputSchema: ZodObject<TShape>;
   title?: string;
 }
 
@@ -29,26 +29,10 @@ export type AffectedPath =
   | null
   | { primary: string | null; also?: string | null };
 
-export type MutateCoreHandler<TArgs, TResult> = (
-  vaultPath: string,
-  args: TArgs,
-) => Promise<TResult>;
-
 export type GetAffectedPath<TArgs, TResult> = (
   args: TArgs,
   result: TResult,
 ) => AffectedPath;
-
-export type FreshReadHandler<TArgs, TResult> = (
-  vaultPath: string,
-  args: TArgs,
-  graph: KnowledgeGraph | null,
-) => Promise<TResult>;
-
-export type PlainReadHandler<TArgs, TResult> = (
-  vaultPath: string,
-  args: TArgs,
-) => Promise<TResult>;
 
 export interface ReadOptionsFresh {
   needsFreshness: true;
@@ -63,15 +47,18 @@ export interface ReadOptionsPlain {
  * - 핸들러 성공(`result.success !== false`) 시 invalidateCache + runMutateSideEffects.
  * - 실패 시에도 usage-stats는 increment.
  */
-export function registerMutateTool<TArgs, TResult>(
+export function registerMutateTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
   name: string,
-  meta: ToolMeta,
-  handler: MutateCoreHandler<TArgs, TResult>,
-  getAffectedPath: GetAffectedPath<TArgs, TResult>,
+  meta: ToolMeta<TShape>,
+  handler: (
+    vaultPath: string,
+    args: z.infer<ZodObject<TShape>>,
+  ) => Promise<TResult>,
+  getAffectedPath: GetAffectedPath<z.infer<ZodObject<TShape>>, TResult>,
 ): RegisteredTool {
   return server.registerTool(name, meta, async (rawArgs: Record<string, unknown>) => {
-    const args = rawArgs as TArgs;
+    const args = rawArgs as z.infer<ZodObject<TShape>>;
     try {
       const vaultPath = getVaultPath();
       const result = await handler(vaultPath, args);
@@ -100,34 +87,48 @@ export function registerMutateTool<TArgs, TResult>(
  * Read 도구 wrapper.
  *
  * - `needsFreshness: true` → ensureFreshGraphNonBlocking 결과 graph reference를 핸들러에 전달.
- * - `needsFreshness: false` → graph 미접근 (read 자체가 그래프 의존이 없을 때).
+ * - `needsFreshness: false` → graph 미접근. 핸들러가 필요하면 loadGraphIfNeeded를 직접 호출 (e.g. kg_status).
  * - 항상 usage-stats increment.
  */
-export function registerReadTool<TArgs, TResult>(
+export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
   name: string,
-  meta: ToolMeta,
-  handler: FreshReadHandler<TArgs, TResult>,
+  meta: ToolMeta<TShape>,
+  handler: (
+    vaultPath: string,
+    args: z.infer<ZodObject<TShape>>,
+    graph: KnowledgeGraph | null,
+  ) => Promise<TResult>,
   options: ReadOptionsFresh,
 ): RegisteredTool;
-export function registerReadTool<TArgs, TResult>(
+export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
   name: string,
-  meta: ToolMeta,
-  handler: PlainReadHandler<TArgs, TResult>,
+  meta: ToolMeta<TShape>,
+  handler: (
+    vaultPath: string,
+    args: z.infer<ZodObject<TShape>>,
+  ) => Promise<TResult>,
   options: ReadOptionsPlain,
 ): RegisteredTool;
-export function registerReadTool<TArgs, TResult>(
+export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
   name: string,
-  meta: ToolMeta,
+  meta: ToolMeta<TShape>,
   handler:
-    | FreshReadHandler<TArgs, TResult>
-    | PlainReadHandler<TArgs, TResult>,
+    | ((
+        vaultPath: string,
+        args: z.infer<ZodObject<TShape>>,
+        graph: KnowledgeGraph | null,
+      ) => Promise<TResult>)
+    | ((
+        vaultPath: string,
+        args: z.infer<ZodObject<TShape>>,
+      ) => Promise<TResult>),
   options: ReadOptionsFresh | ReadOptionsPlain,
 ): RegisteredTool {
   return server.registerTool(name, meta, async (rawArgs: Record<string, unknown>) => {
-    const args = rawArgs as TArgs;
+    const args = rawArgs as z.infer<ZodObject<TShape>>;
     try {
       const vaultPath = getVaultPath();
 
@@ -139,12 +140,19 @@ export function registerReadTool<TArgs, TResult>(
       await incrementUsageStat(vaultPath, name);
 
       const result = options.needsFreshness
-        ? await (handler as FreshReadHandler<TArgs, TResult>)(
-            vaultPath,
-            args,
-            graph,
-          )
-        : await (handler as PlainReadHandler<TArgs, TResult>)(vaultPath, args);
+        ? await (
+            handler as (
+              vp: string,
+              a: z.infer<ZodObject<TShape>>,
+              g: KnowledgeGraph | null,
+            ) => Promise<TResult>
+          )(vaultPath, args, graph)
+        : await (
+            handler as (
+              vp: string,
+              a: z.infer<ZodObject<TShape>>,
+            ) => Promise<TResult>
+          )(vaultPath, args);
 
       return toolResult(result);
     } catch (error) {
