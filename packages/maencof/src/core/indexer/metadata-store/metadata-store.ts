@@ -6,7 +6,7 @@
  * 형식: JSON (외부 의존성 제로, 디버깅 가능)
  * 원칙: .maencof/ 전체 삭제 후 원본 마크다운에서 완전 재빌드 가능
  */
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { NodeId } from '../../../types/common.js';
@@ -16,6 +16,15 @@ import type {
   KnowledgeNode,
   SerializedGraph,
 } from '../../../types/graph.js';
+import { atomicWriteJson } from './atomic-write.js';
+import { withVaultLock } from './file-mutex.js';
+
+const STALE_RETRY_ATTEMPTS = 3;
+const STALE_RETRY_BACKOFF_MS = 50;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /** .maencof/ 파일 이름 상수 */
 export const CACHE_FILES = {
@@ -93,11 +102,16 @@ export function deserializeGraph(data: SerializedGraph): KnowledgeGraph {
 
 /**
  * MetadataStore: .maencof/ 디렉토리에 메타데이터를 읽고 쓴다.
+ *
+ * 모든 쓰기는 atomic-write(tmp + rename) + per-vault mutex로 직렬화된다.
+ * 시그니처는 외부 호환성을 위해 유지한다.
  */
 export class MetadataStore {
+  private readonly vaultPath: string;
   private readonly cacheDir: string;
 
   constructor(vaultPath: string) {
+    this.vaultPath = vaultPath;
     this.cacheDir = join(vaultPath, '.maencof');
   }
 
@@ -121,15 +135,13 @@ export class MetadataStore {
   }
 
   /**
-   * KnowledgeGraph를 index.json에 저장한다.
+   * KnowledgeGraph를 index.json에 atomic write로 저장한다.
    */
   async saveGraph(graph: KnowledgeGraph): Promise<void> {
     await this.ensureCacheDir();
     const serialized = serializeGraph(graph);
-    await writeFile(
-      join(this.cacheDir, CACHE_FILES.INDEX),
-      JSON.stringify(serialized, null, 2),
-      'utf-8',
+    await withVaultLock(this.vaultPath, () =>
+      atomicWriteJson(join(this.cacheDir, CACHE_FILES.INDEX), serialized),
     );
   }
 
@@ -150,14 +162,12 @@ export class MetadataStore {
   }
 
   /**
-   * 가중치 데이터를 weights.json에 저장한다.
+   * 가중치 데이터를 weights.json에 atomic write로 저장한다.
    */
   async saveWeights(data: WeightsData): Promise<void> {
     await this.ensureCacheDir();
-    await writeFile(
-      join(this.cacheDir, CACHE_FILES.WEIGHTS),
-      JSON.stringify(data, null, 2),
-      'utf-8',
+    await withVaultLock(this.vaultPath, () =>
+      atomicWriteJson(join(this.cacheDir, CACHE_FILES.WEIGHTS), data),
     );
   }
 
@@ -177,14 +187,12 @@ export class MetadataStore {
   }
 
   /**
-   * 파일 스냅샷을 snapshot.json에 저장한다.
+   * 파일 스냅샷을 snapshot.json에 atomic write로 저장한다.
    */
   async saveSnapshot(snapshot: FileSnapshot): Promise<void> {
     await this.ensureCacheDir();
-    await writeFile(
-      join(this.cacheDir, CACHE_FILES.SNAPSHOT),
-      JSON.stringify(snapshot, null, 2),
-      'utf-8',
+    await withVaultLock(this.vaultPath, () =>
+      atomicWriteJson(join(this.cacheDir, CACHE_FILES.SNAPSHOT), snapshot),
     );
   }
 
@@ -219,33 +227,45 @@ export class MetadataStore {
   }
 
   /**
-   * stale-nodes.json에 무효화 노드를 추가한다 (append-only).
+   * stale-nodes.json에 무효화 노드를 추가한다 (append-only, 합집합 보존).
+   *
+   * In-process는 vault mutex로 직렬화. 다중 프로세스 환경에서도 atomic rename으로
+   * partial write를 차단하고, 실패 시 최대 3회 × 50ms backoff로 load → merge → write를 재시도한다.
    */
   async appendStaleNodes(paths: string[]): Promise<void> {
     await this.ensureCacheDir();
-    const existing = await this.loadStaleNodes();
-    const merged = Array.from(new Set([...existing.paths, ...paths]));
-    const updated: StaleNodes = {
-      paths: merged,
-      updatedAt: new Date().toISOString(),
-    };
-    await writeFile(
-      join(this.cacheDir, CACHE_FILES.STALE_NODES),
-      JSON.stringify(updated, null, 2),
-      'utf-8',
-    );
+    await withVaultLock(this.vaultPath, async () => {
+      const stalePath = join(this.cacheDir, CACHE_FILES.STALE_NODES);
+      let lastErr: unknown;
+      for (let attempt = 0; attempt < STALE_RETRY_ATTEMPTS; attempt++) {
+        try {
+          const existing = await this.loadStaleNodes();
+          const merged = Array.from(new Set([...existing.paths, ...paths]));
+          const updated: StaleNodes = {
+            paths: merged,
+            updatedAt: new Date().toISOString(),
+          };
+          await atomicWriteJson(stalePath, updated, { retries: 1 });
+          return;
+        } catch (err) {
+          lastErr = err;
+          if (attempt < STALE_RETRY_ATTEMPTS - 1) {
+            await sleep(STALE_RETRY_BACKOFF_MS);
+          }
+        }
+      }
+      throw lastErr;
+    });
   }
 
   /**
-   * stale-nodes.json을 초기화한다 (전체 재빌드 후 호출).
+   * stale-nodes.json을 초기화한다 (전체 재빌드 후 호출). atomic write.
    */
   async clearStaleNodes(): Promise<void> {
     await this.ensureCacheDir();
     const data: StaleNodes = { paths: [], updatedAt: new Date().toISOString() };
-    await writeFile(
-      join(this.cacheDir, CACHE_FILES.STALE_NODES),
-      JSON.stringify(data, null, 2),
-      'utf-8',
+    await withVaultLock(this.vaultPath, () =>
+      atomicWriteJson(join(this.cacheDir, CACHE_FILES.STALE_NODES), data),
     );
   }
 
