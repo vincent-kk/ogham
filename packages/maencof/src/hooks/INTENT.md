@@ -21,3 +21,5 @@ Claude Code 훅 이벤트 핸들러. 세션 시작/종료, 도구 사용 전후 
 
 - core/ 모듈 직접 수정
 - 훅 간 순환 의존
+- stale-node, 캐시 무효화, freshness 가드 등 인덱서 내부 상태를 훅으로 처리 (MCP server middlewares 책임)
+- 사용자 프롬프트나 도구 응답에 인덱서 내부 상태 노출
