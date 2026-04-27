@@ -8,6 +8,7 @@ import { handleKgBuild } from '../../tools/kg-build/index.js';
 
 import { invalidateCache } from '../graph-cache.js';
 
+// 단일 vault 가정. multi-vault 도입 시 Map<vaultPath, Promise<void>>로 전환.
 let rebuildInProgress: Promise<void> | null = null;
 
 /**

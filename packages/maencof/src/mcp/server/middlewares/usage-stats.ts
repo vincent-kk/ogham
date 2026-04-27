@@ -41,6 +41,7 @@ export async function incrementUsageStat(
         }
       }
       stats[toolName] = (stats[toolName] ?? 0) + 1;
+      // 통계 SLA 느슨 — 단일 retry 충분 (성능 우선; atomic-write 기본 3 과 의도적 비대칭).
       await atomicWriteJson(statsPath, stats, { retries: 1 });
     });
   } catch (err) {
