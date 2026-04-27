@@ -18,7 +18,7 @@ import { isSessionRecapDisabled } from '../../core/dialogue-config/index.js';
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { readPendingNotification } from '../../core/insight-stats/index.js';
 
-import { removeSessionFiles } from '../cache-manager/index.js';
+import { removeSessionFiles, removeTurnContext } from '../cache-manager/index.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
 import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
 
@@ -74,6 +74,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     if (sessionId) {
       removeSessionFiles(sessionId, cwd);
     }
+    // turn-context는 session-scope이므로 sessionId와 무관하게 종료 시 폐기
+    removeTurnContext(cwd);
   } catch (e) {
     appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
   }
