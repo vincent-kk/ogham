@@ -37,7 +37,8 @@ export const DEFAULT_DATA_SOURCES_CONFIG_FACTORY =
 
 /**
  * Default usage-stats config. Empty tool call counts.
- * This is the per-tool Record<string, number> used by index-invalidator,
- * NOT the richer UsageStats interface from types/session.ts.
+ * This is the per-tool Record<string, number> written by the MCP server
+ * usage-stats middleware, NOT the richer UsageStats interface from
+ * types/session.ts.
  */
 export const DEFAULT_USAGE_STATS: Record<string, number> = {};

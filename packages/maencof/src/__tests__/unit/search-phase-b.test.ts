@@ -374,13 +374,14 @@ describe('B6: Turn Context Directive', () => {
   it('buildTurnContext에 kg_context snippet 언급이 포함되어야 한다', async () => {
     // We test the directive text directly from the module
     const { buildTurnContext } =
-      await import('../../hooks/turn-context-builder/turn-context-builder.js');
+      await import('../../hooks/context-injector/turn-context/build.js');
+    void buildTurnContext;
     // buildTurnContext needs a CWD with .maencof — mock by using a non-vault dir
     // The directive text is hardcoded so we can verify it from the source
     const fs = await import('node:fs');
     const source = fs.readFileSync(
       new URL(
-        '../../hooks/turn-context-builder/turn-context-builder.ts',
+        '../../hooks/context-injector/turn-context/build.ts',
         import.meta.url,
       ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
       'utf-8',
