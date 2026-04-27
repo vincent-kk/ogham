@@ -1,0 +1,23 @@
+# server
+
+## Requirements
+
+- mutate 1회 → `registerMutateTool` wrapper가 (a) 핵심 핸들러 실행, (b) toolName 에 따른 op 분류로 영향 path 를 `appendStaleEntries` 로 기록 (delete/move-src=delete; 그 외/move-dst=mutate), (c) `incrementUsageStat`, (d) stale 누적이 `STALE_REBUILD_THRESHOLD` 에 도달하면 `triggerBackgroundRebuild` 를 fire-and-forget.
+- freshness 필요 read → `registerReadTool({ needsFreshness: true })` wrapper 가 `ensureFreshGraphNonBlocking` 결과 graph reference 를 핸들러에 전달. 절대 await rebuild.
+- freshness 불필요 read → `registerReadTool({ needsFreshness: false })` wrapper 가 `incrementUsageStat` 만 수행.
+- 부팅 시 `startServer` 는 transport connect 직후 `walkVaultForExternalChanges(getVaultPath())` 를 detach. snapshot 부재 시 no-op.
+- background rebuild 성공 finalize 에서 `invalidateCache()` 를 호출해 다음 read 가 disk reload.
+
+## API Contracts
+
+- `ensureFreshGraph(vaultPath): Promise<KnowledgeGraph | null>` — `freshness-guard.ts::ensureFreshGraphNonBlocking` 의 thin wrapper. graph 부재 시 null.
+- `registerMutateTool(server, name, schema, coreHandler, getAffectedPath)` — mutate tool 등록.
+- `registerReadTool(server, name, schema, coreHandler, { needsFreshness })` — freshness-read 와 plain-read 등록.
+- `triggerBackgroundRebuild(vaultPath): void` — 모듈 레벨 mutex 로 중복 트리거 차단, 절대 await 노출 금지.
+
+## Stale management semantics
+
+- Stale 영속 스키마: `{ entries: { path, op:'mutate'|'delete' }[], updatedAt }`. 레거시 `{ paths }` 는 자동으로 `op='mutate'` 로 승격.
+- partial reindex 는 Hybrid: stale entries 별 분기 — `mutate` 는 `parseDocument`+`buildKnowledgeNode` 로 node 교체 + outbound edge 재계산, `delete` 는 graph.nodes/edges 에서 제거. `nodes`, outbound `LINK` edges, `invertedIndex` 가 partial-maintained 집합. weights / PageRank / edgeWeightMap / edgeTypeMap / adjacencyList 는 background rebuild 의존.
+- read 1회 처리량은 `READ_REINDEX_CAP` 로 제한 (가장 최근 항목 우선 `slice(-N)`; 초과분은 background rebuild 가 흡수). bg rebuild trigger 는 별개 `STALE_REBUILD_THRESHOLD` 로 통제 — 두 상수는 동일 값이라도 의미가 다르므로 항상 별도 import.
+- stale 정보는 인덱서 내부 상태 — LLM 컨텍스트, 도구 응답, 진단 외 표면에 노출 금지.

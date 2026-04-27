@@ -43,13 +43,7 @@ export interface VaultScanOptions {
   followSymlinks?: boolean;
 }
 
-/** 기본 제외 패턴 */
-const DEFAULT_EXCLUDE = [
-  '.maencof/**',
-  '.maencof-meta/**',
-  'node_modules/**',
-  '.git/**',
-];
+import { VAULT_SCAN_DEFAULT_EXCLUDE as DEFAULT_EXCLUDE } from '../../constants/vault-scanner.js';
 
 /**
  * vault 디렉토리에서 모든 마크다운 파일을 스캔한다.

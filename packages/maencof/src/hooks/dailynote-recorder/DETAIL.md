@@ -41,8 +41,10 @@ Recorder 는 path 가 다음 prefix 중 하나로 시작하면 skip 한다:
 
 ### Intentional tool omissions (Y4 / Y5 — documented, not a bug)
 
-다음 MCP 도구들은 `hooks.json` 의 PostToolUse matcher 와 `TOOL_CATEGORY_MAP`
-어디에도 포함되지 않는다. 이는 의도적인 설계 결정이며 버그가 아니다:
+다음 MCP 도구들은 `hooks.json` 의 PostToolUse matcher 에 포함되지 않는다.
+이는 의도적인 설계 결정이며 버그가 아니다 (`kg_build` 의 카테고리는 향후 opt-in
+확장에 대비해 `TOOL_CATEGORY_MAP` 에 등록돼 있으나, matcher 부재로 인해 실제
+기록은 발생하지 않는다):
 
 - **`kg_build`** (Y4): 내부 유지보수 연산. 사용자가 직접 호출할 일이 드물고,
   실행될 때마다 dailynote 에 한 줄씩 추가되면 실제 지식 이벤트 신호 대비 노이즈가

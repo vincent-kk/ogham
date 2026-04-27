@@ -9,7 +9,7 @@ import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type { DailynoteCategory, DailynoteEntry } from '../../types/dailynote.js';
-import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
+import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
 
 import { DAILYNOTES_DIR } from '../../constants/directories.js';
 

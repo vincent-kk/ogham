@@ -12,7 +12,7 @@ import {
   planMigration,
   rollbackMigration,
 } from '../../core/architecture-migrator/architecture-migrator.js';
-import { EXPECTED_ARCHITECTURE_VERSION } from '../../types/common.js';
+import { EXPECTED_ARCHITECTURE_VERSION } from '../../constants/architecture.js';
 
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures', 'v1-vault');
 

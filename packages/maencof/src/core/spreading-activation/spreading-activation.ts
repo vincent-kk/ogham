@@ -6,6 +6,7 @@
  * Layer별 감쇠: L1=0.5, L2=0.7, L3=0.8, L4=0.9, L5=0.95
  * BFS 방식 홉 확산, 임계값 기반 종료
  */
+import { EDGE_TYPE_MULTIPLIER } from '../../constants/spreading-activation.js';
 import type { EdgeType, NodeId } from '../../types/common.js';
 import type {
   ActivationResult,
@@ -16,16 +17,7 @@ import type {
 import { buildAdjacencyList } from '../graph-builder/index.js';
 import { getLayerDecay } from '../weight-calculator/index.js';
 
-/** 엣지 타입별 SA 활성화 멀티플라이어 */
-export const EDGE_TYPE_MULTIPLIER: Record<EdgeType, number> = {
-  LINK: 1.0,
-  PARENT_OF: 0.8,
-  CHILD_OF: 0.8,
-  SIBLING: 0.5,
-  RELATIONSHIP: 0.7,
-  CROSS_LAYER: 0.6,
-  DOMAIN: 0.3,
-};
+export { EDGE_TYPE_MULTIPLIER };
 
 /** 확산 활성화 파라미터 */
 export interface SpreadingActivationParams {

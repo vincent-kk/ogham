@@ -17,7 +17,7 @@ import {
   buildDomainEdges,
   buildRelationshipEdges,
   buildTreeEdges,
-} from './edge-builders.js';
+} from './builders/index.js';
 
 /** GraphBuilder 옵션 */
 export interface GraphBuilderOptions {
@@ -126,43 +126,79 @@ export function buildAdjacencyList(
 }
 
 /**
- * 역 인덱스 구축: 노드 제목(단어 분리)과 태그를 lowercase term → NodeId Set으로 매핑.
- * 키워드 시드 해석 시 prefix matching으로 O(terms) 조회 지원.
+ * 노드의 invertedIndex 토큰을 구성한다 — title 단어 + tags + mentioned_persons (lowercase, 공백 제외).
+ *
+ * 본 함수는 buildInvertedIndex 와 incremental add/remove 헬퍼의 단일 출처로,
+ * tokenization drift 를 차단한다.
+ */
+export function tokenizeForInvertedIndex(node: KnowledgeNode): string[] {
+  const terms: string[] = [];
+  for (const word of node.title.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/)) {
+    const lower = word.toLowerCase();
+    if (lower.length > 0) terms.push(lower);
+  }
+  for (const tag of node.tags) {
+    const lower = tag.toLowerCase();
+    if (lower.length > 0) terms.push(lower);
+  }
+  if (node.mentioned_persons) {
+    for (const person of node.mentioned_persons) {
+      const lower = person.toLowerCase();
+      if (lower.length > 0) terms.push(lower);
+    }
+  }
+  return terms;
+}
+
+/**
+ * 단일 노드를 invertedIndex 에 추가한다 (term Set 에 nodeId 합집합).
+ * `index` 가 undefined 면 no-op.
+ */
+export function addNodeToInvertedIndex(
+  index: InvertedIndex | undefined,
+  node: KnowledgeNode,
+): void {
+  if (!index) return;
+  for (const term of tokenizeForInvertedIndex(node)) {
+    let set = index.get(term);
+    if (!set) {
+      set = new Set();
+      index.set(term, set);
+    }
+    set.add(node.id);
+  }
+}
+
+/**
+ * 단일 노드를 invertedIndex 에서 제거한다. term Set 이 비면 term 자체 삭제 (term 누수 방지).
+ * `index` 가 undefined 면 no-op.
+ */
+export function removeNodeFromInvertedIndex(
+  index: InvertedIndex | undefined,
+  node: KnowledgeNode,
+): void {
+  if (!index) return;
+  for (const term of tokenizeForInvertedIndex(node)) {
+    const set = index.get(term);
+    if (!set) continue;
+    set.delete(node.id);
+    if (set.size === 0) {
+      index.delete(term);
+    }
+  }
+}
+
+/**
+ * 역 인덱스 구축: 노드 제목(단어 분리)과 태그를 lowercase term → NodeId Set 으로 매핑.
+ * 키워드 시드 해석 시 prefix matching 으로 O(terms) 조회 지원.
  */
 export function buildInvertedIndex(
   nodeMap: Map<NodeId, KnowledgeNode>,
 ): InvertedIndex {
   const index: InvertedIndex = new Map();
-
-  function addTerm(term: string, nodeId: NodeId): void {
-    const lower = term.toLowerCase();
-    if (lower.length === 0) return;
-    let set = index.get(lower);
-    if (!set) {
-      set = new Set();
-      index.set(lower, set);
-    }
-    set.add(nodeId);
+  for (const node of nodeMap.values()) {
+    addNodeToInvertedIndex(index, node);
   }
-
-  for (const [nodeId, node] of nodeMap) {
-    // 제목을 단어로 분리하여 인덱싱
-    const titleWords = node.title.split(/[\s\-_/\\.,;:!?()[\]{}'"]+/);
-    for (const word of titleWords) {
-      addTerm(word, nodeId);
-    }
-    // 태그를 통째로 인덱싱
-    for (const tag of node.tags) {
-      addTerm(tag, nodeId);
-    }
-    // mentioned_persons 인덱싱 (프론트매터에서 파싱된 경우)
-    if (node.mentioned_persons) {
-      for (const person of node.mentioned_persons) {
-        addTerm(person, nodeId);
-      }
-    }
-  }
-
   return index;
 }
 

@@ -1,14 +1,13 @@
 /**
  * @file guard-lifecycle-hooks.test.ts
- * @description maencof 레이어 가드 및 인덱스 무효화 훅 유닛 테스트 (runLayerGuard, runIndexInvalidator)
+ * @description maencof 레이어 가드 훅 유닛 테스트 (runLayerGuard).
  */
-import { existsSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runIndexInvalidator } from '../../hooks/index-invalidator/index-invalidator.js';
 import { runLayerGuard } from '../../hooks/layer-guard/layer-guard.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
@@ -73,77 +72,5 @@ describe('runLayerGuard', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
-  });
-});
-
-describe('runIndexInvalidator', () => {
-  let vaultDir: string;
-
-  beforeEach(() => {
-    vaultDir = createTempVault();
-  });
-
-  afterEach(() => {
-    rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
-  });
-
-  it('maencof MCP 도구 호출 시 stale-nodes.json을 업데이트한다', () => {
-    const result = runIndexInvalidator({
-      tool_name: 'create',
-      tool_input: { path: '02_Derived/new-note.md' },
-      cwd: vaultDir,
-    });
-    expect(result.continue).toBe(true);
-    const stalePath = join(vaultDir, '.maencof', 'stale-nodes.json');
-    expect(existsSync(stalePath)).toBe(true);
-    const stale = JSON.parse(
-      require('node:fs').readFileSync(stalePath, 'utf-8'),
-    );
-    expect(stale).toHaveProperty('paths');
-    expect(stale).toHaveProperty('updatedAt');
-    expect(stale.paths).toContain('02_Derived/new-note.md');
-  });
-
-  it('usage-stats.json 카운트를 증가한다', () => {
-    runIndexInvalidator({
-      tool_name: 'update',
-      tool_input: { path: '02_Derived/note.md' },
-      cwd: vaultDir,
-    });
-    runIndexInvalidator({
-      tool_name: 'update',
-      tool_input: { path: '02_Derived/note.md' },
-      cwd: vaultDir,
-    });
-    const statsPath = join(vaultDir, '.maencof-meta', 'usage-stats.json');
-    expect(existsSync(statsPath)).toBe(true);
-    const stats = JSON.parse(
-      require('node:fs').readFileSync(statsPath, 'utf-8'),
-    );
-    expect(stats['update']).toBe(2);
-  });
-
-  it('비maencof 도구는 무시한다', () => {
-    const result = runIndexInvalidator({
-      tool_name: 'Write',
-      tool_input: { path: 'some-file.md' },
-      cwd: vaultDir,
-    });
-    expect(result.continue).toBe(true);
-    const stalePath = join(vaultDir, '.maencof', 'stale-nodes.json');
-    expect(existsSync(stalePath)).toBe(false);
-  });
-
-  it('move 시 path로 소스 경로를 stale에 추가한다', () => {
-    runIndexInvalidator({
-      tool_name: 'move',
-      tool_input: { path: '03_External/a.md', target_layer: 2 },
-      cwd: vaultDir,
-    });
-    const { readFileSync } = require('node:fs');
-    const stalePath = join(vaultDir, '.maencof', 'stale-nodes.json');
-    const stale = JSON.parse(readFileSync(stalePath, 'utf-8'));
-    expect(stale.paths).toContain('03_External/a.md');
-    expect(stale).toHaveProperty('updatedAt');
   });
 });

@@ -1,8 +1,8 @@
 ---
 name: maencof-checkup
 user_invocable: true
-description: "[maencof:maencof-checkup] Runs 6 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, and structural inconsistencies, then provides prioritized auto-fix suggestions. Use --quick for a lightweight read-only status check that short-circuits to mcp_t_kg_status only (absorbs the former maencof-diagnose skill)."
-argument-hint: "[--fix] [--quick] [--verbose] [--check ITEM]"
+description: "[maencof:maencof-checkup] Runs 7 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, structural inconsistencies, and auto-insight system health, then provides prioritized auto-fix suggestions. Use --quick for a lightweight read-only status check that short-circuits to mcp_t_kg_status only (absorbs the former maencof-diagnose skill)."
+argument-hint: "[--fix] [--quick] [--verbose] [--check <item>]"
 version: "1.1.0"
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
@@ -12,7 +12,7 @@ plugin: maencof
 
 # maencof-checkup — Knowledge Vault Diagnosis
 
-Checks knowledge vault health across 6 diagnostic items and suggests auto-fixes.
+Checks knowledge vault health across 7 diagnostic items and suggests auto-fixes.
 Delegates detailed analysis to the checkup agent.
 Also supports a lightweight `--quick` mode that short-circuits to a single
 `mcp_t_kg_status` call and renders a compact health report (absorbs the former
@@ -40,8 +40,8 @@ Also supports a lightweight `--quick` mode that short-circuits to a single
                                  → user confirmation → run auto-fix
 ```
 
-The checkup skill delegates to the checkup agent for 6 diagnostics:
-orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter.
+The checkup skill delegates to the checkup agent for 7 diagnostics:
+orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontmatter, auto-insight-health.
 
 > See **reference.md** for diagnostic item details, severity levels, and auto-fix rules.
 
@@ -49,7 +49,7 @@ orphan-node, stale-index, broken-link, layer-mismatch, duplicate, invalid-frontm
 
 ### Step 1 — Run Diagnostics
 
-Delegate to the checkup agent. The agent runs `mcp_t_kg_status`, `mcp_t_kg_navigate`, `mcp_t_read` across all vault documents to perform 6 diagnostic checks.
+Delegate to the checkup agent. The agent runs `mcp_t_kg_status`, `mcp_t_kg_navigate`, `mcp_t_read` across all vault documents and `.maencof-meta/` to perform 7 diagnostic checks.
 
 ### Step 2 — Generate Report
 
@@ -69,7 +69,7 @@ After user confirmation, execute AutoFixAction:
 
 When `--quick` is specified, checkup short-circuits to a lightweight index status check:
 
-- Skip the 6-check agent delegation entirely (no file-level scan, no auto-fix)
+- Skip the 7-check agent delegation entirely (no file-level scan, no auto-fix)
 - Call only `mcp_t_kg_status`
 - Render a compact health report (Healthy / Caution / Critical) with sub-layer distribution from the `subLayerDistribution` field
 - With `--verbose`: additionally list stale node paths (up to 10), Layer distribution, and sub-layer consistency warnings
@@ -111,15 +111,6 @@ When `--quick` is specified, checkup short-circuits to a lightweight index statu
 /maencof:maencof-checkup --quick --verbose
 ```
 
-### auto-insight-health
-
-Check auto-insight system health:
-- Config file exists and is valid
-- Meta-prompt file exists
-- Stats file integrity
-- Orphaned auto-insight documents (no links, >30 days old)
-- Session capture limits appropriateness
-
 ## Migration Note
 
 The former `maencof-diagnose` skill has been merged into this skill.
@@ -128,4 +119,4 @@ and `maencof-diagnose --verbose` with `/maencof:maencof-checkup --quick --verbos
 
 ## Resources
 
-- **reference.md**: 6 diagnostic items detail, report format template, auto-fix rules, `--quick` mode templates and action matrix
+- **reference.md**: 7 diagnostic items detail, report format template, auto-fix rules, `--quick` mode templates and action matrix

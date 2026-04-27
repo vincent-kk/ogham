@@ -18,7 +18,7 @@ import { isSessionRecapDisabled } from '../../core/dialogue-config/index.js';
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { readPendingNotification } from '../../core/insight-stats/index.js';
 
-import { removeSessionFiles } from '../cache-manager/index.js';
+import { removeSessionFiles, removeTurnContext } from '../cache-manager/index.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
 import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
 
@@ -74,6 +74,8 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     if (sessionId) {
       removeSessionFiles(sessionId, cwd);
     }
+    // turn-context는 session-scope이므로 sessionId와 무관하게 종료 시 폐기
+    removeTurnContext(cwd);
   } catch (e) {
     appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
   }
@@ -201,17 +203,24 @@ function buildSessionSummary(
     metaPath(cwd, 'usage-stats.json'),
   );
 
-  // Read stale-nodes.json
-  const staleNodes = readJsonSafe<{ paths: string[]; updatedAt: string }>(
-    maencofPath(cwd, 'stale-nodes.json'),
-  );
+  // Read stale-nodes.json — supports both legacy { paths } and current { entries } shapes.
+  const staleNodes = readJsonSafe<{
+    paths?: string[];
+    entries?: { path: string; op: 'mutate' | 'delete' }[];
+    updatedAt: string;
+  }>(maencofPath(cwd, 'stale-nodes.json'));
+
+  const stalePaths: string[] = staleNodes
+    ? Array.isArray(staleNodes.entries)
+      ? staleNodes.entries.map((entry) => entry.path)
+      : Array.isArray(staleNodes.paths)
+        ? staleNodes.paths
+        : []
+    : [];
 
   const hasUsageStats =
     usageStats !== null && Object.keys(usageStats).length > 0;
-  const hasStaleNodes =
-    staleNodes !== null &&
-    Array.isArray(staleNodes.paths) &&
-    staleNodes.paths.length > 0;
+  const hasStaleNodes = stalePaths.length > 0;
 
   const hasSessionActivity = skills.length > 0 || files.length > 0;
   const hasMeaningfulSessionData =
@@ -233,7 +242,7 @@ function buildSessionSummary(
   if (hasStaleNodes) {
     lines.push(`## Pending Index Updates (Stale Nodes)`);
     lines.push(``);
-    for (const path of staleNodes!.paths) {
+    for (const path of stalePaths) {
       lines.push(`- ${path}`);
     }
     lines.push(``);

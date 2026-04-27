@@ -49,15 +49,12 @@ export interface VaultCommitterResult {
 
 // ── Constants ────────────────────────────────────────────────────────
 
-const VAULT_COMMIT_CONFIG_FILE = 'vault-commit.json';
+import {
+  DEFAULT_SKIP_PATTERN_SOURCE,
+  VAULT_COMMIT_CONFIG_FILE,
+} from '../../constants/vault-committer.js';
 
-/**
- * Default skip pattern — preserves the v0.2.x behavior of bailing on `/clear`.
- * Y3: users may override / extend via `vault-commit.json::skip_patterns` without
- * touching source code. The default list is injected as a fallback only when
- * the config field is missing or malformed.
- */
-export const DEFAULT_SKIP_PATTERN_SOURCE = '^\\s*/clear\\s*$';
+export { DEFAULT_SKIP_PATTERN_SOURCE };
 
 // ── Config Reader ────────────────────────────────────────────────────
 

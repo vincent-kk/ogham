@@ -37,7 +37,7 @@ claude --plugin-dir ./packages/maencof
 Building produces two outputs:
 
 - `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
-- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, context-injector, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 > **Performance note**: maencof chains 4 hooks on `UserPromptSubmit` (context-injector → lifecycle-dispatcher → vault-committer → insight-injector), all fast-path optimized. Typical per-prompt overhead is ~60ms (~110ms on the first prompt of a session due to context cache build). The hook timeouts in `hooks.json` (2–3s) are kill-switches, not expected latency. The only path that runs git is `vault-committer`, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
 
@@ -95,7 +95,7 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 ```
 
 - **`maencof-checkup --quick`** — Lightweight read-only status check (index freshness, stale ratio, sub-layer distribution). Absorbs the former `maencof-diagnose` skill.
-- **`maencof-checkup`** — 6 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues.
+- **`maencof-checkup`** — 7 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues, auto-insight system health.
 
 ### Index Management
 
@@ -169,9 +169,9 @@ With the plugin active, these hooks fire **without user intervention**:
 | ---------------------- | ----------------------------- | ------------------------------------------------------------------ |
 | Session starts         | Loads Vault context + index   | Agent knows your knowledge from the first turn                     |
 | Writing/editing a file | Layer guard check             | Prevents unauthorized L1 modifications                             |
-| After maencof tool use | Index invalidation            | Keeps the Knowledge Graph in sync                                  |
+| After maencof write    | Daily-note recording          | Tracks vault writes (create/update/move/delete) for change history |
 | Session ends           | Session cleanup + persistence | Saves volatile state, prunes expired entries                       |
-| On every user prompt   | Lifecycle dispatcher          | Executes user-registered actions (echo/remind) from lifecycle.json |
+| On every user prompt   | Context-injection chain (4 hooks) | Loads turn context, fires registered actions, captures insights, gates vault commits |
 | On agent stop          | Lifecycle dispatcher          | Executes registered stop-event actions                             |
 
 When a block occurs, a message explaining the reason is displayed. No action needed.
@@ -190,7 +190,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/maencof:maencof-reflect`     | Core     | Read-only knowledge health analysis            |
 | `/maencof:maencof-suggest`     | Core     | SA + Jaccard similarity link suggestions       |
 | `/maencof:maencof-build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
-| `/maencof:maencof-checkup`     | Health   | 6 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
+| `/maencof:maencof-checkup`     | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
 | `/maencof:maencof-cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
 | `/maencof:maencof-ingest`      | Advanced | Import from URL, GitHub, or text               |
 | `/maencof:maencof-connect`     | Advanced | Register external data sources                 |

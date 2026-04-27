@@ -97,27 +97,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/index-invalidator.mjs\"",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "create|update|delete|move|capture_insight|boundary_create|claudemd_merge|claudemd_remove",
-        "hooks": [
-          {
-            "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/dailynote-recorder.mjs\"",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "matcher": "create|update|delete|move|capture_insight|boundary_create|claudemd_merge|claudemd_remove",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/cache-updater.mjs\"",
             "timeout": 3
           }
         ]

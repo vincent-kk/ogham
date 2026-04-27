@@ -9,6 +9,7 @@
  */
 import { readFile } from 'node:fs/promises';
 
+import { SUBLAYER_DIR_PATTERNS } from '../../constants/document-parser.js';
 import type { Layer, SubLayer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import { FrontmatterSchema } from '../../types/frontmatter.js';
@@ -233,14 +234,7 @@ export function buildKnowledgeNode(doc: ParsedDocument): NodeBuildResult {
   return { success: true, node };
 }
 
-/** L3/L5 서브레이어 디렉토리 패턴 */
-const SUBLAYER_DIR_PATTERNS: Record<string, SubLayer> = {
-  '03_External/relational': 'relational',
-  '03_External/structural': 'structural',
-  '03_External/topical': 'topical',
-  '05_Context/buffer': 'buffer',
-  '05_Context/boundary': 'boundary',
-};
+// SUBLAYER_DIR_PATTERNS — constants/document-parser.ts (단일 출처).
 
 /**
  * 파일 경로에서 서브레이어를 추론한다.

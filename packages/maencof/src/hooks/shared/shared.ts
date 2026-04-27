@@ -7,8 +7,8 @@ import { join } from 'node:path';
 
 export { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
 import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
-// isLayer1Path, LAYER1_PREFIX: moved to types/layer.ts — re-exported for backward compatibility
-export { LAYER1_PREFIX, isLayer1Path } from '../../types/layer.js';
+export { LAYER1_PREFIX } from '../../constants/directories.js';
+export { isLayer1Path } from '../../types/layer.js';
 
 /**
  * Check whether the current working directory is a maencof vault.

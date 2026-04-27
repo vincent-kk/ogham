@@ -23,8 +23,7 @@ import {
   buildTurnContext,
   readCompanionIdentity,
   readIndexMetadata,
-  readStaleCount,
-} from '../turn-context-builder/index.js';
+} from './turn-context/index.js';
 
 export interface UserPromptSubmitInput {
   session_id?: string;
@@ -46,11 +45,6 @@ export interface HookOutput {
  */
 function buildSessionContext(cwd: string): string {
   const { totalNodes, layerCounts } = readIndexMetadata(cwd);
-  const staleCount = readStaleCount(cwd);
-  const freshPercent =
-    totalNodes > 0
-      ? Math.round(((totalNodes - staleCount) / totalNodes) * 100)
-      : 100;
 
   // Top domains from index.json
   const domains = readTopDomains(cwd, 5);
@@ -67,13 +61,10 @@ function buildSessionContext(cwd: string): string {
     `- ${totalNodes} nodes across 5 layers`,
     `- Top domains: ${domainText}`,
     `- Active L4 documents: ${l4Count}`,
-    `- Index freshness: ${freshPercent}% (${staleCount} stale nodes)`,
     '',
     '[maencof] Session Directives',
     '- Vault tool rules are in CLAUDE.md (written at session start). Follow them strictly.',
     '- Turn-by-turn context is injected as XML meta-tags on every prompt.',
-    '- When <kg-core> shows low freshness (<90%), proactively run kg_build.',
-    '- When <kg-stale-advisory> is present, run kg_build IMMEDIATELY before other vault operations.',
     '- When <pinned> contains nodes, prioritize those in context assembly via kg_context.',
     '- kg_context now returns content snippets from top results. Use it as the primary content retrieval tool for multi-document queries.',
   ];

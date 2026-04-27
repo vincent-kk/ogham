@@ -125,7 +125,8 @@ export type {
   SnapshotEntry,
   FileSnapshot as CacheSnapshot,
   WeightsData,
-  StaleNodes,
+  StaleEntry,
+  StaleEntries,
 } from './core/indexer/metadata-store/metadata-store.js';
 
 export {
@@ -142,22 +143,23 @@ export type {
 } from './core/indexer/incremental-tracker/incremental-tracker.js';
 
 // MCP modules
-export { createServer, startServer } from './mcp/server/server.js';
 export {
+  createServer,
+  startServer,
   removeBacklinks,
   getBacklinks,
   toolResult,
   toolError,
   mapReplacer,
-} from './mcp/shared/shared.js';
-export { handleMaencofCreate } from './mcp/tools/maencof-create/maencof-create.js';
-export { handleMaencofRead } from './mcp/tools/maencof-read/maencof-read.js';
-export { handleMaencofUpdate } from './mcp/tools/maencof-update/maencof-update.js';
-export { handleMaencofDelete } from './mcp/tools/maencof-delete/maencof-delete.js';
-export { handleMaencofMove } from './mcp/tools/maencof-move/maencof-move.js';
-export { handleKgSearch } from './mcp/tools/kg-search/kg-search.js';
-export { handleKgNavigate } from './mcp/tools/kg-navigate/kg-navigate.js';
-export { handleKgContext } from './mcp/tools/kg-context/kg-context.js';
-export { handleKgStatus } from './mcp/tools/kg-status/kg-status.js';
-export { handleKgBuild } from './mcp/tools/kg-build/kg-build.js';
-export type { KgBuildInput, KgBuildResult } from './mcp/tools/kg-build/kg-build.js';
+  handleMaencofCreate,
+  handleMaencofRead,
+  handleMaencofUpdate,
+  handleMaencofDelete,
+  handleMaencofMove,
+  handleKgSearch,
+  handleKgNavigate,
+  handleKgContext,
+  handleKgStatus,
+  handleKgBuild,
+} from './mcp/index.js';
+export type { KgBuildInput, KgBuildResult } from './mcp/index.js';

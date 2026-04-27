@@ -2,9 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { MAENCOF_META_DIR } from '../../constants/directories.js';
-
-const LOG_FILE = 'error-log.json';
-const MAX_ENTRIES = 200;
+import {
+  ERROR_LOG_FILE as LOG_FILE,
+  ERROR_LOG_MAX_ENTRIES as MAX_ENTRIES,
+} from '../../constants/error-log.js';
 
 export interface ErrorLogEntry {
   hook: string;

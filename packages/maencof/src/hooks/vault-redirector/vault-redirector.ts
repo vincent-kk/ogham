@@ -5,6 +5,7 @@
  */
 import { resolve } from 'node:path';
 
+import { VAULT_REDIRECTOR_TOOL_GUIDANCE as TOOL_GUIDANCE } from '../../constants/vault-redirector.js';
 import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from '../shared/index.js';
 
 export interface VaultRedirectorInput {
@@ -51,13 +52,6 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
 
   return true;
 }
-
-// 도구별 안내 메시지 매핑
-const TOOL_GUIDANCE: Record<string, string> = {
-  Read: 'read',
-  Grep: 'kg_search',
-  Glob: 'kg_search or kg_navigate',
-};
 
 /**
  * vault 루트 또는 문서 디렉토리인지 판별한다 (내부 관리 디렉토리 제외).

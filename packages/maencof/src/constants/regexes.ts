@@ -11,6 +11,6 @@ export const ABSOLUTE_HREF_REGEX = /^(?:https?:\/\/|\/|#)/;
 
 export const H1_REGEX = /^#\s+(.+)$/m;
 
-export const YAML_UNSAFE_START = /^[#'"{}[\],&*?|<>=!%@`\-]/;
+export const YAML_UNSAFE_START = /^[#'"{}[\],&*?|<>=!%@`-]/;
 
 export const YAML_BOOLEAN_NULL = /^(true|false|null|~|yes|no|on|off)$/i;

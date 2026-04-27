@@ -14,7 +14,8 @@ import {
   jaccardSimilarity,
   normalizeTags,
 } from '../../../core/tag-similarity/index.js';
-import { EDGE_TYPE } from '../../../types/common.js';
+import { EDGE_TYPE } from '../../../constants/architecture.js';
+import { SUB_LAYER_NAMES } from '../../../constants/kg-suggest-links.js';
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph, KnowledgeNode } from '../../../types/graph.js';
 import type {
@@ -208,14 +209,7 @@ function findSeedsByTags(
   return scored.slice(0, maxSeeds).map((s) => s.nodeId);
 }
 
-/** Sub-layer 표시명 매핑 */
-const SUB_LAYER_NAMES: Record<string, string> = {
-  relational: 'L3A-Relational',
-  structural: 'L3B-Structural',
-  topical: 'L3C-Topical',
-  buffer: 'L5-Buffer',
-  boundary: 'L5-Boundary',
-};
+// SUB_LAYER_NAMES — constants/kg-suggest-links.ts (단일 출처).
 
 /** reason 문자열을 생성한다 */
 function buildReason(

@@ -1,10 +1,9 @@
 /**
  * @file layer.ts
- * @description Layer 경로 유틸리티 — 모든 레이어(hooks, mcp, core)에서 의존 가능
+ * @description Layer 경로 유틸리티 — 모든 레이어(hooks, mcp, core)에서 의존 가능.
+ * 상수 LAYER1_PREFIX 는 constants/directories.ts 의 단일 출처에서 import 한다.
  */
-
-/** Layer 1 디렉토리 접두사 */
-export const LAYER1_PREFIX = '01_Core';
+import { LAYER1_PREFIX } from '../constants/directories.js';
 
 /**
  * 파일 경로가 Layer 1 (01_Core/) 내에 있는지 확인한다.

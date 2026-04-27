@@ -4,7 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { LAYER_DIR, Layer } from '../../types/common.js';
+import { LAYER_DIR } from '../../constants/architecture.js';
+import { Layer } from '../../types/common.js';
 
 describe('LAYER_DIR', () => {
   it('L1_CORE는 01_Core 디렉토리에 매핑된다', () => {

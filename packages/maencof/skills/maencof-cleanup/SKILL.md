@@ -2,7 +2,7 @@
 name: maencof-cleanup
 user_invocable: true
 description: "[maencof:maencof-cleanup] Deletes vault documents from Layers 2-5 and removes the maencof-managed section from CLAUDE.md. Handles both document removal and configuration cleanup safely."
-argument-hint: "[document|claudemd|buffer] [path] [--force] [--dry-run] [--max-age DAYS]"
+argument-hint: "[document|claudemd|buffer] [path] [--force] [--dry-run] [--max-age <days>]"
 version: "1.0.0"
 complexity: simple
 context_layers: [2, 3, 4, 5]
@@ -51,7 +51,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 1. **Scan** `05_Context/buffer/` for documents older than `--max-age` days (default: 30)
 2. **List** stale buffer items with creation date, tags, and connection count
 3. **Recommend action** per item: promote (to L2/L3 with sub-layer), archive, or delete
-4. **Execute** after user confirmation — uses `mcp_t_move` (promote) or `mcp_t_delete` (delete)
+4. **Execute** after user confirmation — uses `mcp_t_move` (promote) or `mcp_t_delete` (delete). With `--dry-run`, skip execution and report the planned actions only.
 
 ### claudemd mode — CLAUDE.md Section Management
 
@@ -83,7 +83,7 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 | `mode` | interactive | `document`, `buffer-cleanup`, or `claudemd` |
 | `path` | none | Target document path (document mode only) |
 | `--force` | false | Skip backlink warning (document mode only) |
-| `--dry-run` | false | Preview without executing (claudemd remove only) |
+| `--dry-run` | false | Preview without executing (claudemd remove and buffer-cleanup modes) |
 | `--max-age` | 30 | Max age in days for buffer-cleanup mode |
 
 ## Usage Examples

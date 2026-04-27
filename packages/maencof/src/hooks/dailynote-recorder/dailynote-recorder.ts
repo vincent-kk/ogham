@@ -14,31 +14,17 @@ import {
   buildToolDescription,
   formatTime,
 } from '../../core/dailynote-writer/index.js';
-import { TOOL_CATEGORY_MAP } from '../../types/dailynote.js';
+import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
+import { DAILYNOTE_RECORDER_EXCLUSION_PREFIXES } from '../../constants/dailynote-recorder.js';
 
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault } from '../shared/index.js';
 
-/**
- * Paths whose writes MUST NOT be recorded in dailynote — maencof 자체 관리 영역.
- *
- * - `02_Derived/changelog/` : changelog 디렉토리 (self-reference 방지)
- * - `02_Derived/dailynotes/` : dailynote 디렉토리 자체 (무한 재귀 방지)
- * - `.maencof/` : 그래프 인덱스, stale-nodes 등
- * - `.maencof-meta/` : 운영 메타데이터 (session, config, dailynote 원본 포함)
- *
- * startsWith 매칭이므로 경로는 prefix 로 사용된다.
- */
-const EXCLUSION_PATH_PREFIXES: readonly string[] = [
-  '02_Derived/changelog/',
-  '02_Derived/dailynotes/',
-  '.maencof/',
-  '.maencof-meta/',
-];
-
 function isExcludedPath(path: string | undefined): boolean {
   if (!path) return false;
-  return EXCLUSION_PATH_PREFIXES.some((prefix) => path.startsWith(prefix));
+  return DAILYNOTE_RECORDER_EXCLUSION_PREFIXES.some((prefix) =>
+    path.startsWith(prefix),
+  );
 }
 
 export interface DailynoteRecorderInput {

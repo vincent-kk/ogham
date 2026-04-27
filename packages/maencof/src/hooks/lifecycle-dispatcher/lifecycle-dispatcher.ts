@@ -13,6 +13,7 @@ import type {
   LifecycleEvent,
 } from '../../types/lifecycle.js';
 
+import { VALID_LIFECYCLE_EVENTS as VALID_EVENTS } from '../../constants/lifecycle.js';
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault, metaPath } from '../shared/index.js';
 
@@ -24,15 +25,6 @@ export interface LifecycleDispatcherInput {
   tool_input?: Record<string, unknown>;
   tool_response?: Record<string, unknown>;
 }
-
-const VALID_EVENTS = new Set<LifecycleEvent>([
-  'SessionStart',
-  'UserPromptSubmit',
-  'PreToolUse',
-  'PostToolUse',
-  'Stop',
-  'SessionEnd',
-]);
 
 /**
  * Main dispatcher: reads lifecycle.json, filters matching actions, executes them.

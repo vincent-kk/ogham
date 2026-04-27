@@ -14,7 +14,7 @@ import {
   writePinnedNodes,
   writeTurnContext,
 } from '../../../hooks/cache-manager/index.js';
-import { buildTurnContext } from '../../../hooks/turn-context-builder/index.js';
+import { buildTurnContext } from '../../../hooks/context-injector/index.js';
 import { MAX_PINNED_NODES } from '../../../constants/performance.js';
 
 export const contextCacheManageInputSchema = {

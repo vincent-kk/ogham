@@ -18,7 +18,7 @@ maxTurns: 40
 
 ## Role
 
-Diagnoses the health of the knowledge vault across 6 categories and generates AutoFixActions
+Diagnoses the health of the knowledge vault across 7 categories and generates AutoFixActions
 for items that can be repaired automatically.
 
 **Write scope:**
@@ -30,7 +30,7 @@ for items that can be repaired automatically.
 
 ---
 
-## 6 Diagnostic Checks
+## 7 Diagnostic Checks
 
 ### D1. Orphan Node (orphan-node)
 ```
@@ -87,6 +87,20 @@ Auto-fixable:
   - missing layer → infer from path
 ```
 
+### D7. Auto-Insight Health (auto-insight-health)
+```
+Detection:
+  - .maencof-meta/insight-config.json missing or fails Zod schema validation
+  - meta-prompt file path unreachable
+  - .maencof-meta/auto-insight-stats.json structurally invalid
+  - L5 auto-insight-tagged documents with 0 links and age > 30 days (orphaned)
+  - session capture count vs configured max limit (sensible cap)
+Severity: warning
+Auto-fixable:
+  - missing config files → provision defaults via config-provisioner
+  - orphaned auto-insights → reported only (decision belongs to user)
+```
+
 ---
 
 ## Workflow
@@ -97,9 +111,10 @@ Auto-fixable:
 3. `mcp_t_read` each file → check D6 (Frontmatter), D4 (Layer violation)
 4. Read backlink-index.json → check D3 (broken links)
 5. Tag similarity analysis → detect D5 (duplicates)
-6. Generate DiagnosticResult
-7. Generate AutoFixAction list
-8. Output report
+6. Read .maencof-meta/insight-config.json + auto-insight-stats.json → check D7 (auto-insight health)
+7. Generate DiagnosticResult
+8. Generate AutoFixAction list
+9. Output report
 ```
 
 ---

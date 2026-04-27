@@ -1,7 +1,7 @@
 ---
 name: maencof-ingest
 user_invocable: true
-description: "[maencof:maencof-ingest] Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3 or 4 documents with frontmatter, tags, and graph connections."
+description: "[maencof:maencof-ingest] Imports content from GitHub issues, Slack messages, or web pages into the vault as structured Layer 3, 4, or 5 documents with frontmatter, tags, and graph connections."
 argument-hint: "[source] [--layer 3|4|5] [--tags TAGS] [--path PATH]"
 version: "1.0.0"
 complexity: medium
@@ -13,7 +13,7 @@ plugin: maencof
 # maencof-ingest — External Knowledge Ingestion
 
 Fetches content from external data sources (GitHub issues, Slack messages, web pages, etc.)
-and converts it into maencof documents (Layer 3/4) for storage.
+and converts it into maencof documents (Layer 3, 4, or 5) for storage.
 
 ## When to Use This Skill
 

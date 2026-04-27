@@ -410,7 +410,7 @@ export async function handleKgBuild(
 
     // 그래프 저장
     await store.saveGraph(graph);
-    await store.clearStaleNodes();
+    await store.clearStaleEntries();
 
     // 스냅샷 저장 (빌드 시 스캔한 파일 목록 재사용 — 중복 scanVault 방지)
     const snapshotEntries = await toCurrentFileInfos(scannedFiles);

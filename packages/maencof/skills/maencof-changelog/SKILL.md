@@ -44,10 +44,11 @@ Detects changes in watched paths, categorizes them, and records them in the dail
 
 ### Step 1 — Detect Changes
 
-Detect git changes in watched paths.
+Detect git changes in watched paths. Run from the **absolute vault root path** (`maencof-setup` Stage 1 collected this; fall back to `MAENCOF_VAULT_PATH` env). Do NOT rely on CWD — the changelog-gate Stop hook may fire from a non-vault project directory.
 
 ```bash
-git status --porcelain -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
+VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
+git -C "$VAULT" status --porcelain -- 01_Core/ 02_Derived/ .claude/agents/ .claude/rules/ CLAUDE.md
 ```
 
 - Exclude changes under `02_Derived/changelog/`
@@ -122,11 +123,12 @@ tags: [changelog, growth, daily]
 On commit failure, output the error, skip Step 6 (Gate Marker), and proceed to Step 7 (Report). Do not create the marker file.
 Do not output progress in real time — only show the summary in Step 7 after completion.
 
-Commit the changelog file to git.
+Commit the changelog file to git in the vault repo (substitute the literal absolute path or use `MAENCOF_VAULT_PATH` as a fallback — same pattern as Step 1).
 
 ```bash
-git add 02_Derived/changelog/YYYY-MM-DD.md
-git commit -m "docs(changelog): YYYY-MM-DD 자기 변경 기록"
+VAULT="${MAENCOF_VAULT_PATH:-<vault-root>}"
+git -C "$VAULT" add 02_Derived/changelog/YYYY-MM-DD.md
+git -C "$VAULT" commit -m "docs(changelog): YYYY-MM-DD 자기 변경 기록"
 ```
 
 **Important:** Do not add a co-author.

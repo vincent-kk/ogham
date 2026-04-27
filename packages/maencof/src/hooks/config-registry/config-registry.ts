@@ -3,7 +3,7 @@ import {
   DEFAULT_LIFECYCLE_CONFIG,
   DEFAULT_USAGE_STATS,
   DEFAULT_VAULT_COMMIT_CONFIG,
-} from '../../types/config-defaults.js';
+} from '../../constants/config-defaults.js';
 import {
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,

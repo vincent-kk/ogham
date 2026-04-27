@@ -24,7 +24,7 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../../core/insight-stats/index.js';
-import { EXPECTED_ARCHITECTURE_VERSION } from '../../types/common.js';
+import { EXPECTED_ARCHITECTURE_VERSION } from '../../constants/architecture.js';
 import type { CompanionIdentityMinimal } from '../../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 import type { VaultVersionInfo } from '../../types/setup.js';
@@ -34,9 +34,10 @@ import { claudeMdPath, isMaencofVault, metaPath } from '../shared/index.js';
 
 import META_SKILL_BODY from './meta-skill-body.md';
 
-/** Hard upper bound (Unicode code points) for meta-skill body before silent skip. */
-const META_SKILL_MAX_CHARS = 2500;
-const META_SKILL_TAG = 'maencof-meta-skill';
+import {
+  META_SKILL_MAX_CHARS,
+  META_SKILL_TAG,
+} from '../../constants/session-start.js';
 
 export interface SessionStartInput {
   session_id?: string;

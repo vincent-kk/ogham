@@ -37,7 +37,7 @@ claude --plugin-dir ./packages/maencof
 빌드하면 두 가지 산출물이 생성됩니다:
 
 - `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 18개)
-- `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, index-invalidator, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+- `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, context-injector, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 > **성능 안내**: maencof는 `UserPromptSubmit`에서 4개 hook을 순차 실행합니다 (context-injector → lifecycle-dispatcher → vault-committer → insight-injector). 모두 fast-path 최적화되어 있으며 일반 프롬프트의 hook 오버헤드는 약 60ms (세션 첫 프롬프트는 컨텍스트 캐시 빌드로 ~110ms) 수준입니다. `hooks.json`의 timeout 값 (2–3s) 은 kill-switch이지 expected latency가 아닙니다. git을 실제로 실행하는 경로는 `vault-committer` 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
 
@@ -95,7 +95,7 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 ```
 
 - **`maencof-checkup --quick`** — 가벼운 읽기 전용 상태 확인 (인덱스 신선도, stale 비율, sub-layer 분포). 기존 `maencof-diagnose` 스킬을 흡수합니다.
-- **`maencof-checkup`** — 6개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제.
+- **`maencof-checkup`** — 7개 진단 + 자동 수정: 고아 문서, 오래된 항목, 깨진 링크, Layer 위반, 중복, frontmatter 문제, auto-insight 시스템 건강도.
 
 ### 인덱스 관리
 
@@ -169,9 +169,9 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | ---------------------- | ---------------------------- | ---------------------------------------------- |
 | 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드 | 첫 턴부터 에이전트가 지식을 인지               |
 | 파일을 Write/Edit할 때 | Layer 보호 검사              | L1 문서의 무단 수정 방지                       |
-| maencof 도구 사용 후   | 인덱스 무효화                | Knowledge Graph 동기화 유지                    |
+| maencof 쓰기 도구 후   | 데일리 노트 기록             | Vault 쓰기(create/update/move/delete) 변경 이력 추적 |
 | 세션 종료 시           | 세션 정리 + 영속화           | 휘발성 상태 저장, 만료 항목 정리               |
-| 매 사용자 프롬프트 시  | 라이프사이클 디스패처        | lifecycle.json에 등록된 액션(echo/remind) 실행 |
+| 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 (4개 hook) | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅 |
 | 에이전트 종료 시       | 라이프사이클 디스패처        | 종료 이벤트에 등록된 액션 실행                 |
 
 차단이 발생하면 이유와 함께 메시지가 표시되므로 별도 대응은 필요 없습니다.
@@ -190,7 +190,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | `/maencof:maencof-reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                 |
 | `/maencof:maencof-suggest`     | 핵심     | SA + Jaccard 유사도 기반 링크 추천         |
 | `/maencof:maencof-build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
-| `/maencof:maencof-checkup`     | 건강     | 6개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수) |
+| `/maencof:maencof-checkup`     | 건강     | 7개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수) |
 | `/maencof:maencof-cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리          |
 | `/maencof:maencof-ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기           |
 | `/maencof:maencof-connect`     | 고급     | 외부 데이터 소스 등록                      |

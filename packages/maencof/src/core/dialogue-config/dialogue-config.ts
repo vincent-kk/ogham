@@ -11,12 +11,13 @@ import { dirname, join } from 'node:path';
 import { MAENCOF_META_DIR } from '../../constants/directories.js';
 import {
   DEFAULT_DIALOGUE_CONFIG,
+  DIALOGUE_CONFIG_FILE,
   DIALOGUE_DISABLE_ENV,
+} from '../../constants/dialogue.js';
+import {
   type DialogueConfig,
   DialogueConfigSchema,
 } from '../../types/dialogue-config.js';
-
-const DIALOGUE_CONFIG_FILE = 'dialogue-config.json';
 
 function dialogueConfigPath(cwd: string): string {
   return join(cwd, MAENCOF_META_DIR, DIALOGUE_CONFIG_FILE);

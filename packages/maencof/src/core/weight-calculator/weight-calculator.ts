@@ -2,8 +2,7 @@
  * @file weight-calculator.ts
  * @description 엣지 가중치 계산 — P0: 균일 가중치 1.0, Layer별 감쇠, 정규화
  */
-import { Layer } from '../../types/common.js';
-import type { NodeId, SubLayer } from '../../types/common.js';
+import type { Layer, NodeId, SubLayer } from '../../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,

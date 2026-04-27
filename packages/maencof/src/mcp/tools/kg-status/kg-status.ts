@@ -28,8 +28,8 @@ export async function handleKgStatus(
     };
   }
 
-  const staleNodes = await store.loadStaleNodes();
-  const staleCount = staleNodes.paths.length;
+  const staleNodes = await store.loadStaleEntries();
+  const staleCount = staleNodes.entries.length;
   const totalNodes = graph.nodeCount;
 
   const freshnessPercent =

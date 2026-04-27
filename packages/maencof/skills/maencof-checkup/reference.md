@@ -2,7 +2,7 @@
 
 Detailed diagnostic items, report format, auto-fix rules, and the lightweight `--quick` mode.
 
-## 6 Diagnostic Items
+## 7 Diagnostic Items
 
 | # | Item | ID | Severity | Auto-fixable |
 |---|------|----|----------|-------------|
@@ -12,6 +12,7 @@ Detailed diagnostic items, report format, auto-fix rules, and the lightweight `-
 | 4 | **Layer Violation**: mismatch between path directory and Frontmatter layer field | layer-mismatch | error | partially |
 | 5 | **Duplicate Document**: document pairs sharing 3+ identical tags with high title similarity | duplicate | warning | partially |
 | 6 | **Frontmatter Validation**: items failing FrontmatterSchema (Zod) validation | invalid-frontmatter | error | yes |
+| 7 | **Auto-Insight Health**: insight-config.json/meta-prompt/stats integrity, orphaned auto-insights, session capture limit | auto-insight-health | warning | partially (config provisioning) |
 
 ## Diagnostic Workflow Detail
 
@@ -24,6 +25,7 @@ Delegated to the checkup agent:
 - `mcp_t_read` per file → verify D6 (Frontmatter), D4 (Layer violation)
 - `mcp_t_kg_navigate` → validate backlink-index.json integrity → detect D3 (broken link)
 - Tag similarity analysis → detect D5 (duplicate)
+- Read `.maencof-meta/insight-config.json` + `auto-insight-stats.json` → detect D7 (auto-insight health)
 
 ### Step 2 — Report Format
 
@@ -59,6 +61,7 @@ Execute AutoFixAction after user confirmation:
 | Rebuild stale index | `/maencof:maencof-build --force --reset-cache` | D2 items |
 | Fix layer field based on path | `mcp_t_update` | D4 items |
 | Suggest links for orphan nodes | `/maencof:maencof-suggest` | D1 items |
+| Provision missing auto-insight config | config-provisioner defaults | D7 items |
 
 **Layer 1 (01_Core/) exception**: Auto-fix via `mcp_t_update` is forbidden for L1 files. Report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually.
 
@@ -148,7 +151,7 @@ When `--verbose` is specified together with `--quick`, additionally display:
 | Caution | stale 10-30% | `/maencof:maencof-build --force --reset-cache` |
 | Critical | stale > 30% | `/maencof:maencof-build --full` |
 | No index | index missing | `/maencof:maencof-build` |
-| Structural issue | — | `/maencof:maencof-checkup` (full 6-check diagnosis) |
+| Structural issue | — | `/maencof:maencof-checkup` (full 7-check diagnosis) |
 
 ### kg_status Response Fields
 

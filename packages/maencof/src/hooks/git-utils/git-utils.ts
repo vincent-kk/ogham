@@ -9,10 +9,6 @@ import { join } from 'node:path';
 import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/index.js';
 import { GIT_EXEC_TIMEOUT_MS } from '../../constants/performance.js';
 
-// ── Constants ────────────────────────────────────────────────────────
-
-export const EXEC_TIMEOUT_MS = GIT_EXEC_TIMEOUT_MS;
-
 // ── Helpers ──────────────────────────────────────────────────────────
 
 export const execOpts = (cwd: string) => ({

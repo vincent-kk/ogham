@@ -4,7 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { Layer, dirFromLayer, layerFromDir } from '../../types/common.js';
+import { dirFromLayer, layerFromDir } from '../../constants/architecture.js';
+import { Layer } from '../../types/common.js';
 
 describe('layerFromDir', () => {
   it('01_Core → L1_CORE', () => {

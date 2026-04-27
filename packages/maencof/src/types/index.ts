@@ -13,17 +13,16 @@ export type {
   L5SubLayer,
   SubLayer,
 } from './common.js';
+export { Layer, toNodeId } from './common.js';
 export {
-  Layer,
   LAYER_DIR,
   L3_SUBDIR,
   L5_SUBDIR,
   EDGE_TYPE,
   EXPECTED_ARCHITECTURE_VERSION,
-  toNodeId,
   layerFromDir,
   dirFromLayer,
-} from './common.js';
+} from '../constants/architecture.js';
 
 export type {
   KnowledgeNode,
@@ -101,12 +100,11 @@ export type {
   ManageResult,
 } from './manage.js';
 
-export { LAYER1_PREFIX, isLayer1Path } from './layer.js';
+export { LAYER1_PREFIX } from '../constants/directories.js';
+export { isLayer1Path } from './layer.js';
 
-export {
-  L1ChangeReasonSchema,
-  L1_VERIFICATION_INTENSITY,
-} from './l1-amendment.js';
+export { L1ChangeReasonSchema } from './l1-amendment.js';
+export { L1_VERIFICATION_INTENSITY } from '../constants/l1-amendment.js';
 export type { L1ChangeReason, L1AmendmentRecord } from './l1-amendment.js';
 
 export type {
@@ -130,7 +128,7 @@ export type {
   MigrationAction,
 } from './configurator.js';
 
-export { TOOL_CATEGORY_MAP } from './dailynote.js';
+export { TOOL_CATEGORY_MAP } from '../constants/dailynote.js';
 export type {
   DailynoteEntry,
   DailynoteCategory,
@@ -181,9 +179,9 @@ export type {
   PendingInsightNotification,
 } from './insight.js';
 
+export { DialogueConfigSchema } from './dialogue-config.js';
 export {
-  DialogueConfigSchema,
   DEFAULT_DIALOGUE_CONFIG,
   DIALOGUE_DISABLE_ENV,
-} from './dialogue-config.js';
+} from '../constants/dialogue.js';
 export type { DialogueConfig } from './dialogue-config.js';

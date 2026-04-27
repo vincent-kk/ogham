@@ -30,6 +30,7 @@ Detection categories:
 | CLAUDE.md editing | `/maencof:maencof-instruct` | Safe instruction management |
 | Rule management | `/maencof:maencof-rule` | Conditional rule CRUD |
 | Hook management | `/maencof:maencof-lifecycle` | Dynamic action registration |
+| Vault health check | `/maencof:maencof-checkup` | 7 diagnostic checks + auto-fix |
 | Migration | Handled directly | Legacy format → current spec |
 
 Natural language routing:
@@ -40,6 +41,7 @@ Natural language routing:
 | "Always respond in Korean" | `/maencof:maencof-instruct` |
 | "Create a test agent" | `/maencof:maencof-craft-agent` |
 | "Add a rule for API files" | `/maencof:maencof-rule` |
+| "Run vault health check" | `/maencof:maencof-checkup` |
 | "Something seems broken" | Health report |
 
 ## Detailed Workflow
@@ -72,8 +74,9 @@ What would you like to configure?
   4. Edit CLAUDE.md           → /maencof:maencof-instruct
   5. Manage rules             → /maencof:maencof-rule
   6. Manage lifecycle hooks   → /maencof:maencof-lifecycle
-  7. Run migration            → handled directly
-  8. Auto-fix detected issues
+  7. Run vault health check   → /maencof:maencof-checkup
+  8. Run migration            → handled directly
+  9. Auto-fix detected issues
 ```
 
 ### Step 4 — Route to Sub-Skill
@@ -106,6 +109,7 @@ configurator agent
     → /maencof:maencof-instruct (CLAUDE.md)
     → /maencof:maencof-rule (rules)
     → /maencof:maencof-lifecycle (hooks)
+    → /maencof:maencof-checkup (vault diagnostics)
 ```
 
 ## Usage Examples

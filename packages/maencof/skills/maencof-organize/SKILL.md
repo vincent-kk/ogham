@@ -42,15 +42,11 @@ new links → `suggest`.
                                    user confirmation (AutonomyLevel 1)
                                              |
               -> [memory-organizer.execute] -> move execution
-                                             |
-        [index-invalidator hook: auto-fires on PostToolUse] -> stale-nodes update
 ```
 
-> **Note.** `[index-invalidator hook]` is not invoked by this skill. Claude Code
-> fires it automatically on the `PostToolUse` event for every `mcp_t_move` /
-> `mcp_t_update` call the agent makes. The hook writes the affected paths to
-> `.maencof/stale-nodes.json` and never interacts with the organize workflow
-> directly.
+> **Note.** Stale-node bookkeeping is handled inside the MCP server middleware
+> layer (around `mcp_t_move` / `mcp_t_update` calls and at boot-time via vault
+> scanning). It never interacts with the organize workflow directly.
 
 **Orchestrator**: the organize skill coordinates the entire flow.
 Calls the memory-organizer agent sequentially through judge -> (confirmation) -> execute stages.

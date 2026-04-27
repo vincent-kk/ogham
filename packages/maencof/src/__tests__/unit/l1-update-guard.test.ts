@@ -15,10 +15,8 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleMaencofUpdate } from '../../mcp/tools/maencof-update/maencof-update.js';
-import {
-  type L1AmendmentRecord,
-  L1_VERIFICATION_INTENSITY,
-} from '../../types/l1-amendment.js';
+import { L1_VERIFICATION_INTENSITY } from '../../constants/l1-amendment.js';
+import type { L1AmendmentRecord } from '../../types/l1-amendment.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

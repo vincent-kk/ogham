@@ -19,10 +19,14 @@ import { basename, dirname, join } from 'node:path';
 
 import {
   EXPECTED_ARCHITECTURE_VERSION,
-  type L3SubLayer,
   L3_SUBDIR,
   L5_SUBDIR,
-} from '../../types/common.js';
+} from '../../constants/architecture.js';
+import {
+  ORG_TAGS,
+  PERSON_TAGS,
+} from '../../constants/architecture-migrator.js';
+import type { L3SubLayer } from '../../types/common.js';
 import type {
   MigrationOp,
   MigrationPlan,
@@ -30,17 +34,6 @@ import type {
   MigrationWAL,
 } from '../../types/setup.js';
 import type { VaultVersionInfo } from '../../types/setup.js';
-
-// ─── Tag Heuristics ────────────────────────────────────────────
-
-const PERSON_TAGS = new Set([
-  'person',
-  'people',
-  'friend',
-  'colleague',
-  'mentor',
-]);
-const ORG_TAGS = new Set(['company', 'organization', 'team', 'community']);
 
 // ─── Public API ────────────────────────────────────────────────
 

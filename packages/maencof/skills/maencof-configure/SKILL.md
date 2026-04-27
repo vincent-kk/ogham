@@ -64,7 +64,7 @@ Display issues by severity (error/warning/info). Skip if clean.
 Present sub-skill menu or detect intent from natural language.
 
 ### Step 4 — Route to Sub-Skill
-Delegate to the appropriate skill (bridge, instruct, rule, lifecycle, craft-skill, craft-agent).
+Delegate to the appropriate skill (bridge, instruct, rule, lifecycle, craft-skill, craft-agent, checkup).
 
 ### Step 5 — Migration (when applicable)
 Handle legacy format conversion with diff preview and confirmation.

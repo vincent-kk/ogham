@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { deduplicateContent } from '../../../core/content-dedup/index.js';
 import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
-import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../../types/common.js';
+import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
 import { AUTO_GENERATED_FM_KEYS } from '../../../types/frontmatter.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../../types/mcp.js';
 
