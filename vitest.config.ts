@@ -2,6 +2,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    projects: ["./packages/filid", "./packages/maencof-lens"],
+    projects: [
+      "./packages/atlassian",
+      "./packages/filid",
+      "./packages/imbas",
+      "./packages/maencof",
+      "./packages/maencof-lens",
+    ],
   },
 });
