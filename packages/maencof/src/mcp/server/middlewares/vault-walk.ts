@@ -32,16 +32,13 @@ export async function walkVaultForExternalChanges(
     for (const file of currentFiles) {
       const saved = snapshotByPath.get(file.relativePath);
       if (!saved) continue;
-      if (saved.mtime !== file.mtime) {
-        stalePaths.push(file.relativePath);
-      }
+      if (saved.mtime !== file.mtime) stalePaths.push(file.relativePath);
     }
 
-    if (stalePaths.length > 0) {
+    if (stalePaths.length > 0)
       await store.appendStaleEntries(
         stalePaths.map((path) => ({ path, op: 'mutate' as const })),
       );
-    }
   } catch (err) {
     appendErrorLogSafe(vaultPath, {
       hook: 'vault-walk',

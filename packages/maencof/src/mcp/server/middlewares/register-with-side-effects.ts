@@ -7,11 +7,10 @@ import type {
   McpServer,
   RegisteredTool,
 } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { z, ZodObject, ZodRawShape } from 'zod';
+import type { ZodObject, ZodRawShape, z } from 'zod';
 
-import { toolError, toolResult } from '../../shared/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-
+import { toolError, toolResult } from '../../shared/index.js';
 import { getVaultPath, invalidateCache } from '../graph-cache/index.js';
 
 import { ensureFreshGraphNonBlocking } from './freshness-guard.js';
@@ -57,30 +56,34 @@ export function registerMutateTool<TShape extends ZodRawShape, TResult>(
   ) => Promise<TResult>,
   getAffectedPath: GetAffectedPath<z.infer<ZodObject<TShape>>, TResult>,
 ): RegisteredTool {
-  return server.registerTool(name, meta, async (rawArgs: Record<string, unknown>) => {
-    const args = rawArgs as z.infer<ZodObject<TShape>>;
-    try {
-      const vaultPath = getVaultPath();
-      const result = await handler(vaultPath, args);
+  return server.registerTool(
+    name,
+    meta,
+    async (rawArgs: Record<string, unknown>) => {
+      const args = rawArgs as z.infer<ZodObject<TShape>>;
+      try {
+        const vaultPath = getVaultPath();
+        const result = await handler(vaultPath, args);
 
-      if (isResultSuccess(result)) {
-        invalidateCache();
-        const affected = normalizeAffected(getAffectedPath(args, result));
-        await runMutateSideEffects(
-          vaultPath,
-          name,
-          affected.primary,
-          affected.also,
-        );
-      } else {
-        await incrementUsageStat(vaultPath, name);
+        if (isResultSuccess(result)) {
+          invalidateCache();
+          const affected = normalizeAffected(getAffectedPath(args, result));
+          await runMutateSideEffects(
+            vaultPath,
+            name,
+            affected.primary,
+            affected.also,
+          );
+        } else {
+          await incrementUsageStat(vaultPath, name);
+        }
+
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
       }
-
-      return toolResult(result);
-    } catch (error) {
-      return toolError(error);
-    }
-  });
+    },
+  );
 }
 
 /**
@@ -127,38 +130,41 @@ export function registerReadTool<TShape extends ZodRawShape, TResult>(
       ) => Promise<TResult>),
   options: ReadOptionsFresh | ReadOptionsPlain,
 ): RegisteredTool {
-  return server.registerTool(name, meta, async (rawArgs: Record<string, unknown>) => {
-    const args = rawArgs as z.infer<ZodObject<TShape>>;
-    try {
-      const vaultPath = getVaultPath();
+  return server.registerTool(
+    name,
+    meta,
+    async (rawArgs: Record<string, unknown>) => {
+      const args = rawArgs as z.infer<ZodObject<TShape>>;
+      try {
+        const vaultPath = getVaultPath();
 
-      let graph: KnowledgeGraph | null = null;
-      if (options.needsFreshness) {
-        graph = await ensureFreshGraphNonBlocking(vaultPath);
+        let graph: KnowledgeGraph | null = null;
+        if (options.needsFreshness)
+          graph = await ensureFreshGraphNonBlocking(vaultPath);
+
+        await incrementUsageStat(vaultPath, name);
+
+        const result = options.needsFreshness
+          ? await (
+              handler as (
+                vp: string,
+                a: z.infer<ZodObject<TShape>>,
+                g: KnowledgeGraph | null,
+              ) => Promise<TResult>
+            )(vaultPath, args, graph)
+          : await (
+              handler as (
+                vp: string,
+                a: z.infer<ZodObject<TShape>>,
+              ) => Promise<TResult>
+            )(vaultPath, args);
+
+        return toolResult(result);
+      } catch (error) {
+        return toolError(error);
       }
-
-      await incrementUsageStat(vaultPath, name);
-
-      const result = options.needsFreshness
-        ? await (
-            handler as (
-              vp: string,
-              a: z.infer<ZodObject<TShape>>,
-              g: KnowledgeGraph | null,
-            ) => Promise<TResult>
-          )(vaultPath, args, graph)
-        : await (
-            handler as (
-              vp: string,
-              a: z.infer<ZodObject<TShape>>,
-            ) => Promise<TResult>
-          )(vaultPath, args);
-
-      return toolResult(result);
-    } catch (error) {
-      return toolError(error);
-    }
-  });
+    },
+  );
 }
 
 function isResultSuccess(result: unknown): boolean {
@@ -171,8 +177,7 @@ function normalizeAffected(affected: AffectedPath): {
   primary: string | null;
   also: string | null | undefined;
 } {
-  if (typeof affected === 'string' || affected === null) {
+  if (typeof affected === 'string' || affected === null)
     return { primary: affected, also: undefined };
-  }
   return { primary: affected.primary, also: affected.also };
 }

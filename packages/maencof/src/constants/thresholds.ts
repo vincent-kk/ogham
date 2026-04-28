@@ -11,7 +11,7 @@ export const STALE_THRESHOLD_PERCENT = 10;
  * read-time 1회 처리 상한은 READ_REINDEX_CAP — 의미가 다르므로 동일 값이라도 별도 관리한다.
  * STALE_THRESHOLD_PERCENT(advisory 비율 임계치) 와도 단위가 다르므로 혼동 금지.
  */
-export const STALE_REBUILD_THRESHOLD = 15;
+export const STALE_REBUILD_THRESHOLD = 5;
 
 /**
  * read-path freshness-guard 가 1회 호출에서 처리하는 stale entry 상한 (가장 최근 항목 우선).

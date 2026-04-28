@@ -9,7 +9,6 @@ import {
 } from '../../../constants/thresholds.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-
 import { loadGraphIfNeeded } from '../graph-cache/index.js';
 
 import { triggerBackgroundRebuild } from './background-rebuild.js';
@@ -32,9 +31,7 @@ export async function ensureFreshGraphNonBlocking(
   const store = new MetadataStore(vaultPath);
   const stale = await store.loadStaleEntries();
 
-  if (stale.entries.length === 0) {
-    return graph;
-  }
+  if (stale.entries.length === 0) return graph;
 
   const toProcess =
     stale.entries.length > READ_REINDEX_CAP
@@ -42,9 +39,8 @@ export async function ensureFreshGraphNonBlocking(
       : stale.entries;
   await mergeStaleNodesIntoGraph(vaultPath, graph, toProcess);
 
-  if (stale.entries.length >= STALE_REBUILD_THRESHOLD) {
+  if (stale.entries.length >= STALE_REBUILD_THRESHOLD)
     triggerBackgroundRebuild(vaultPath);
-  }
 
   return graph;
 }

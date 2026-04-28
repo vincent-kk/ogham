@@ -5,7 +5,6 @@
  */
 import { appendErrorLogSafe } from '../../../core/error-log/index.js';
 import { handleKgBuild } from '../../tools/kg-build/index.js';
-
 import { invalidateCache } from '../graph-cache/index.js';
 
 // 단일 vault 가정. multi-vault 도입 시 Map<vaultPath, Promise<void>>로 전환.
@@ -24,9 +23,7 @@ export function triggerBackgroundRebuild(vaultPath: string): void {
   rebuildInProgress = (async () => {
     try {
       const result = await handleKgBuild(vaultPath, { force: false });
-      if (result.success) {
-        invalidateCache();
-      }
+      if (result.success) invalidateCache();
     } catch (err) {
       appendErrorLogSafe(vaultPath, {
         hook: 'background-rebuild',

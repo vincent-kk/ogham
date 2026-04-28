@@ -50,16 +50,13 @@ export async function runMutateSideEffects(
     const store = new MetadataStore(vaultPath);
     const entries = classifyEntries(toolName, affectedPath, alsoAffectedPath);
 
-    if (entries.length > 0) {
-      await store.appendStaleEntries(entries);
-    }
+    if (entries.length > 0) await store.appendStaleEntries(entries);
 
     await incrementUsageStat(vaultPath, toolName);
 
     const stale = await store.loadStaleEntries();
-    if (stale.entries.length >= STALE_REBUILD_THRESHOLD) {
+    if (stale.entries.length >= STALE_REBUILD_THRESHOLD)
       triggerBackgroundRebuild(vaultPath);
-    }
   } catch (err) {
     appendErrorLogSafe(vaultPath, {
       hook: 'mutate-side-effects',

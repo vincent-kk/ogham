@@ -39,9 +39,8 @@ export async function mergeStaleNodesIntoGraph(
   entries?: StaleEntry[],
 ): Promise<KnowledgeGraph> {
   let toProcess: StaleEntry[];
-  if (entries) {
-    toProcess = entries;
-  } else {
+  if (entries) toProcess = entries;
+  else {
     const store = new MetadataStore(vaultPath);
     const stale = await store.loadStaleEntries();
     toProcess = stale.entries;
@@ -49,9 +48,7 @@ export async function mergeStaleNodesIntoGraph(
   if (toProcess.length === 0) return graph;
 
   const pathToNodeId = new Map<string, NodeId>();
-  for (const node of graph.nodes.values()) {
-    pathToNodeId.set(node.path, node.id);
-  }
+  for (const node of graph.nodes.values()) pathToNodeId.set(node.path, node.id);
 
   const replacedSourceIds = new Set<NodeId>();
   let anyDeleted = false;
@@ -70,9 +67,7 @@ export async function mergeStaleNodesIntoGraph(
     );
   }
 
-  if (replacedSourceIds.size === 0 && !anyDeleted) {
-    return graph;
-  }
+  if (replacedSourceIds.size === 0 && !anyDeleted) return graph;
 
   // mutate(replace) source 의 기존 outbound edges 를 제거하고 fresh outbound 로 갈아낀다.
   // delete source 의 모든 incident edges 는 handleDelete 에서 이미 제거됨.
@@ -158,9 +153,8 @@ async function handleMutate(
 
   if (!freshNode) return;
 
-  if (oldNode) {
-    removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
-  }
+  if (oldNode) removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
+
   graph.nodes.set(freshNode.id, freshNode);
   pathToNodeId.set(freshNode.path, freshNode.id);
   addNodeToInvertedIndex(graph.invertedIndex, freshNode);
