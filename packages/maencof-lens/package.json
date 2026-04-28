@@ -43,7 +43,6 @@
     "clean": "rm -rf bridge",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
-    "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:run": "vitest run",

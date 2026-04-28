@@ -86,6 +86,7 @@ export function createESLintConfig(
         "**/node_modules/**",
         "**/libs/**",
         "**/scripts/**",
+        "**/bridge/**",
         "**/*.config.*",
       ],
     },
