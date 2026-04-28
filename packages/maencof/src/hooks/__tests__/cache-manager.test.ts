@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -14,7 +14,6 @@ import {
   readPromptContext,
   readTurnContext,
   removeSessionFiles,
-  sessionIdHash,
   writePinnedNodes,
   writePromptContext,
   writeTurnContext,

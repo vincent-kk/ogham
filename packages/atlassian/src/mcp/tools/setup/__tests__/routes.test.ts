@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import { createRouteHandler } from '../web-server/routes.js';

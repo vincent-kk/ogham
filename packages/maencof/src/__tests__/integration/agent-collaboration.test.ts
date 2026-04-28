@@ -9,7 +9,7 @@
  *
  * 에이전트들은 MCP 도구를 통해 vault에 접근한다.
  */
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 

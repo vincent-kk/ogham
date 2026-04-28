@@ -7,7 +7,7 @@
  * - backlink 경고 및 force 삭제
  * - stale-nodes 업데이트
  */
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 

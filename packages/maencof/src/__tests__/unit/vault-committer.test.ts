@@ -3,13 +3,12 @@
  * @description vault-committer hook unit tests — auto-commit vault changes on SessionEnd
  */
 import { execFileSync, execSync } from 'node:child_process';
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { generateCommitMessage } from '../../hooks/git-utils/git-utils.js';
 import {
   isClearCommand,
   readVaultCommitConfig,

@@ -11,7 +11,7 @@
  * 6. index-build — kg_build로 인덱스 빌드
  * 7. guide — CLAUDE.md 통합
  */
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 

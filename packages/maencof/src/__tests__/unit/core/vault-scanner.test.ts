@@ -2,7 +2,7 @@
  * @file vault-scanner.test.ts
  * @description VaultScanner 단위 테스트
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
   type FileSnapshot,
