@@ -72,6 +72,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'read',
     );
@@ -95,6 +96,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain('kg_search');
   });
 
@@ -105,6 +107,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'kg_navigate',
     );
@@ -153,6 +156,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'read',
     );
@@ -185,6 +189,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'kg_navigate',
     );
@@ -198,6 +203,7 @@ describe('runVaultRedirector', () => {
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'kg_navigate',
     );

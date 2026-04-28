@@ -22,6 +22,7 @@ export interface VaultRedirectorInput {
 export interface VaultRedirectorResult {
   continue: true;
   hookSpecificOutput?: {
+    hookEventName: 'PreToolUse';
     additionalContext?: string;
   };
 }
@@ -117,6 +118,7 @@ export function runVaultRedirector(
   return {
     continue: true,
     hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
       additionalContext: [
         `[maencof] Use ${suggestion} instead of ${toolName} for vault documents.`,
         `Path: ${relPath} → ${suggestion}(path: "${relPath}")`,
@@ -152,6 +154,7 @@ function handleGlobRedirect(
   return {
     continue: true,
     hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
       additionalContext: [
         `[maencof] Use ${suggestion} instead of Glob for vault documents.`,
         `Pattern: ${pattern} → ${suggestion}`,
