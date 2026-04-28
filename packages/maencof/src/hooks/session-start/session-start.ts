@@ -416,7 +416,7 @@ function writeVaultVersion(cwd: string, version: string): void {
     installedAt: new Date().toISOString(),
     migrationHistory: [],
   };
-  writeFileSync(versionPath, JSON.stringify(info, null, 2), 'utf-8');
+  writeFileSync(versionPath, JSON.stringify(info), 'utf-8');
 }
 
 /**
@@ -442,7 +442,7 @@ function updateVaultVersion(cwd: string, previousVersion: string): void {
   info.migrationHistory.push(`${previousVersion} -> ${VERSION}`);
   info.version = VERSION;
   info.lastMigratedAt = new Date().toISOString();
-  writeFileSync(versionPath, JSON.stringify(info, null, 2), 'utf-8');
+  writeFileSync(versionPath, JSON.stringify(info), 'utf-8');
 }
 
 /**

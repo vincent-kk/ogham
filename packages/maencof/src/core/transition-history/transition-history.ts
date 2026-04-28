@@ -45,7 +45,7 @@ export function appendTransition(
 
   const fp = historyPath(cwd);
   ensureDir(fp);
-  writeFileSync(fp, JSON.stringify(entries, null, 2), 'utf-8');
+  writeFileSync(fp, JSON.stringify(entries), 'utf-8');
 }
 
 export function getRejectCount(

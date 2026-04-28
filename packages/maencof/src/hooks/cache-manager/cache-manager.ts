@@ -162,7 +162,7 @@ export function writePinnedNodes(cwd: string, nodes: PinnedNode[]): void {
         )
         .slice(0, MAX_PINNED_NODES);
     }
-    writeFileSync(pinnedFile, JSON.stringify(toWrite, null, 2), 'utf-8');
+    writeFileSync(pinnedFile, JSON.stringify(toWrite), 'utf-8');
   } catch {
     // silently ignore
   }

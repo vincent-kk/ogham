@@ -39,7 +39,7 @@ export function setAutonomyLevel(cwd: string, level: AutonomyLevel): void {
     level,
     updatedAt: new Date().toISOString(),
   };
-  writeFileSync(fp, JSON.stringify(config, null, 2), 'utf-8');
+  writeFileSync(fp, JSON.stringify(config), 'utf-8');
 }
 
 export function canAutoExecute(

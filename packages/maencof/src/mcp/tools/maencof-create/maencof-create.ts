@@ -140,7 +140,7 @@ async function updateBacklinkIndex(
   }
 
   await mkdir(metaDir, { recursive: true });
-  await writeFile(indexPath, JSON.stringify(index, null, 2), 'utf-8');
+  await writeFile(indexPath, JSON.stringify(index), 'utf-8');
 }
 
 /**

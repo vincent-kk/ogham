@@ -47,7 +47,7 @@ export function appendErrorLog(
 
   const fp = logPath(cwd);
   ensureDir(fp);
-  writeFileSync(fp, JSON.stringify(entries, null, 2), 'utf-8');
+  writeFileSync(fp, JSON.stringify(entries), 'utf-8');
 }
 
 /**

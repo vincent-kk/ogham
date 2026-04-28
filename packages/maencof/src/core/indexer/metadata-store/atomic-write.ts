@@ -29,7 +29,7 @@ export async function atomicWriteJson(
 ): Promise<void> {
   const retries = opts.retries ?? DEFAULT_RETRIES;
   const backoffMs = opts.backoffMs ?? DEFAULT_BACKOFF_MS;
-  const payload = JSON.stringify(data, null, 2);
+  const payload = JSON.stringify(data);
 
   let lastErr: unknown;
   for (let attempt = 0; attempt < retries; attempt++) {

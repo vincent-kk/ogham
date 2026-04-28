@@ -52,7 +52,7 @@ export function readDialogueConfig(cwd: string): DialogueConfig {
 export function writeDialogueConfig(cwd: string, config: DialogueConfig): void {
   const configPath = dialogueConfigPath(cwd);
   ensureDir(configPath);
-  writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+  writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
 
 /**

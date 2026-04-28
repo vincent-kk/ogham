@@ -50,7 +50,7 @@ export function readInsightConfig(cwd: string): InsightConfig {
 export function writeInsightConfig(cwd: string, config: InsightConfig): void {
   const configPath = metaPath(cwd, 'insight-config.json');
   ensureDir(configPath);
-  writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+  writeFileSync(configPath, JSON.stringify(config), 'utf-8');
 }
 
 // ─── Stats ──────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ export function incrementInsightStats(cwd: string, layer: 2 | 5): void {
 
   const statsPath = metaPath(cwd, 'auto-insight-stats.json');
   ensureDir(statsPath);
-  writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf-8');
+  writeFileSync(statsPath, JSON.stringify(stats), 'utf-8');
 }
 
 // ─── Pending Notification ───────────────────────────────────────────
@@ -109,7 +109,7 @@ export function appendPendingCapture(
   };
   notification.captures.push(capture);
 
-  writeFileSync(filePath, JSON.stringify(notification, null, 2), 'utf-8');
+  writeFileSync(filePath, JSON.stringify(notification), 'utf-8');
 }
 
 export function deletePendingNotification(cwd: string): void {
@@ -145,7 +145,7 @@ export function updatePromotionStats(
 
   const statsPath = metaPath(cwd, 'auto-insight-stats.json');
   ensureDir(statsPath);
-  writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf-8');
+  writeFileSync(statsPath, JSON.stringify(stats), 'utf-8');
 }
 
 export function calculatePrecision(

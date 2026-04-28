@@ -444,10 +444,10 @@ function updateVersionFile(filePath: string, newVersion: string): void {
     };
   }
   data.architecture_version = newVersion;
-  writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  writeFileSync(filePath, JSON.stringify(data), 'utf-8');
 }
 
 function writeWAL(walPath: string, wal: MigrationWAL): void {
   mkdirSync(dirname(walPath), { recursive: true });
-  writeFileSync(walPath, JSON.stringify(wal, null, 2), 'utf-8');
+  writeFileSync(walPath, JSON.stringify(wal), 'utf-8');
 }

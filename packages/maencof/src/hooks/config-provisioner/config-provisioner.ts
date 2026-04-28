@@ -41,7 +41,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
     if (!existsSync(filePath)) {
       // Provision: create new file
       const value = entry.defaultValue();
-      writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf-8');
+      writeFileSync(filePath, JSON.stringify(value), 'utf-8');
       result.created.push(entry.filename);
     } else if (entry.schemaVersion != null) {
       // Migration: check if stale
@@ -55,7 +55,7 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
         if (currentVersion < entry.schemaVersion) {
           const defaults = entry.defaultValue();
           const merged = additiveMerge(existing, defaults);
-          writeFileSync(filePath, JSON.stringify(merged, null, 2), 'utf-8');
+          writeFileSync(filePath, JSON.stringify(merged), 'utf-8');
           result.migrated.push(entry.filename);
         } else {
           result.skipped.push(entry.filename);

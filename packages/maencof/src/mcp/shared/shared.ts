@@ -36,7 +36,7 @@ export async function removeBacklinks(
   }
 
   if (changed) {
-    await writeFile(indexPath, JSON.stringify(index, null, 2), 'utf-8');
+    await writeFile(indexPath, JSON.stringify(index), 'utf-8');
   }
 }
 
