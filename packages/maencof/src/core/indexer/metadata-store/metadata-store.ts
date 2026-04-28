@@ -6,7 +6,7 @@
  * 형식: JSON (외부 의존성 제로, 디버깅 가능)
  * 원칙: .maencof/ 전체 삭제 후 원본 마크다운에서 완전 재빌드 가능
  */
-import { access, mkdir, readFile } from 'node:fs/promises';
+import { access, mkdir, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { NodeId } from '../../../types/common.js';
@@ -14,7 +14,10 @@ import type {
   KnowledgeEdge,
   KnowledgeGraph,
   KnowledgeNode,
+  SerializedEdges,
   SerializedGraph,
+  SerializedGraphMeta,
+  SerializedNodes,
 } from '../../../types/graph.js';
 import { atomicWriteJson } from './atomic-write.js';
 import { withVaultLock } from './file-mutex.js';
@@ -94,7 +97,7 @@ export function serializeGraph(graph: KnowledgeGraph): SerializedGraph {
 }
 
 /**
- * 직렬화된 그래프를 KnowledgeGraph로 복원한다.
+ * 직렬화된 그래프를 KnowledgeGraph로 복원한다 (legacy index.json 경로).
  */
 export function deserializeGraph(data: SerializedGraph): KnowledgeGraph {
   const nodes = new Map<NodeId, KnowledgeNode>();
@@ -108,6 +111,27 @@ export function deserializeGraph(data: SerializedGraph): KnowledgeGraph {
     builtAt: data.builtAt,
     nodeCount: data.nodeCount,
     edgeCount: data.edgeCount,
+  };
+}
+
+/**
+ * 3-파일 shard(nodes/edges/graph-meta) 를 KnowledgeGraph 로 복원한다.
+ */
+export function deserializeShards(
+  nodesArr: SerializedNodes,
+  edgesArr: SerializedEdges,
+  meta: SerializedGraphMeta,
+): KnowledgeGraph {
+  const nodes = new Map<NodeId, KnowledgeNode>();
+  for (const node of nodesArr) {
+    nodes.set(node.id, node);
+  }
+  return {
+    nodes,
+    edges: edgesArr as KnowledgeEdge[],
+    builtAt: meta.builtAt,
+    nodeCount: meta.nodeCount,
+    edgeCount: meta.edgeCount,
   };
 }
 
@@ -135,8 +159,15 @@ export class MetadataStore {
 
   /**
    * 캐시 디렉토리 존재 여부를 확인한다.
+   * 신규 샤드 commit marker(graph-meta.json) 우선, 없으면 legacy index.json 검사.
    */
   async cacheExists(): Promise<boolean> {
+    try {
+      await access(join(this.cacheDir, CACHE_FILES.GRAPH_META));
+      return true;
+    } catch {
+      // fall through to legacy
+    }
     try {
       await access(join(this.cacheDir, CACHE_FILES.INDEX));
       return true;
@@ -146,29 +177,113 @@ export class MetadataStore {
   }
 
   /**
-   * KnowledgeGraph를 index.json에 atomic write로 저장한다.
+   * KnowledgeGraph를 nodes.json + edges.json + graph-meta.json 3 파일로 저장한다.
+   *
+   * - 단일 vault lock 안에서 nodes/edges 병렬 쓰기 → graph-meta(commit marker)를 마지막에 쓴다.
+   * - 성공 후 legacy index.json 이 남아있으면 best-effort 로 정리한다 (ENOENT swallow).
+   * - 모든 쓰기는 atomicWriteJson(tmp + rename)으로 per-file atomicity 보장.
    */
   async saveGraph(graph: KnowledgeGraph): Promise<void> {
     await this.ensureCacheDir();
-    const serialized = serializeGraph(graph);
-    await withVaultLock(this.vaultPath, () =>
-      atomicWriteJson(join(this.cacheDir, CACHE_FILES.INDEX), serialized),
-    );
+    const nodes: SerializedNodes = Array.from(graph.nodes.values());
+    const edges: SerializedEdges = graph.edges;
+    const meta: SerializedGraphMeta = {
+      builtAt: graph.builtAt,
+      nodeCount: graph.nodeCount,
+      edgeCount: graph.edgeCount,
+      schemaVersion: 2,
+    };
+
+    await withVaultLock(this.vaultPath, async () => {
+      await Promise.all([
+        atomicWriteJson(join(this.cacheDir, CACHE_FILES.NODES), nodes),
+        atomicWriteJson(join(this.cacheDir, CACHE_FILES.EDGES), edges),
+      ]);
+      // commit marker — 이 파일이 존재해야 cache 가 commit 된 것으로 간주
+      await atomicWriteJson(join(this.cacheDir, CACHE_FILES.GRAPH_META), meta);
+      // legacy 정리 — 이전 단일 index.json 이 남아있으면 제거
+      await this.unlinkLegacyIndex();
+    });
   }
 
   /**
-   * index.json에서 KnowledgeGraph를 로드한다.
+   * 3 파일에서 KnowledgeGraph를 로드한다.
+   *
+   * 분기 정책:
+   * - graph-meta.json (commit marker) 부재 → 신규 layout 미commit 상태. legacy 마이그레이션 경로 진입.
+   *   * 이 분기는 fresh vault / partial-shard(nodes/edges 만 있고 commit 미완) / legacy-only 를 모두 포괄한다.
+   *   * partial-shard 의 nodes/edges 는 commit 되지 않았으므로 사용하지 않으며, legacy 가 없으면 null.
+   * - graph-meta.json 존재 → 정상 commit. schemaVersion 검증 후 nodes/edges 병렬 로드.
+   *   * schemaVersion ≠ 2 → 알 수 없는 버전, null (호출자가 재빌드 결정).
+   *   * commit 후 nodes/edges read 실패는 real I/O 오류로 간주, legacy 로 폴백하지 않고 null.
    */
   async loadGraph(): Promise<KnowledgeGraph | null> {
+    let metaRaw: string;
+    try {
+      metaRaw = await readFile(
+        join(this.cacheDir, CACHE_FILES.GRAPH_META),
+        'utf-8',
+      );
+    } catch {
+      // commit marker 부재 — legacy 마이그레이션 트리거 (legacy 도 없으면 null)
+      return this.loadLegacyAndMigrate();
+    }
+
+    try {
+      const meta = JSON.parse(metaRaw) as SerializedGraphMeta;
+      if (meta.schemaVersion !== 2) {
+        // 미래 또는 손상된 schemaVersion — cache miss 로 처리하여 호출자 재빌드 유도
+        return null;
+      }
+      const [nodesRaw, edgesRaw] = await Promise.all([
+        readFile(join(this.cacheDir, CACHE_FILES.NODES), 'utf-8'),
+        readFile(join(this.cacheDir, CACHE_FILES.EDGES), 'utf-8'),
+      ]);
+      const nodesArr = JSON.parse(nodesRaw) as SerializedNodes;
+      const edgesArr = JSON.parse(edgesRaw) as SerializedEdges;
+      return deserializeShards(nodesArr, edgesArr, meta);
+    } catch {
+      // commit marker 는 있으나 부속 파일 read/parse 실패 — legacy 로 폴백하지 않고 cache miss
+      return null;
+    }
+  }
+
+  /**
+   * legacy index.json 을 1회 자동 마이그레이션한다.
+   * 성공 시 신규 샤드를 즉시 saveGraph 로 commit (이 과정에서 legacy 파일은 unlink 됨).
+   * 부재 시 null.
+   *
+   * 잠금 경계:
+   * - legacy read 자체는 vault lock 밖에서 수행 (read-only fast path).
+   * - 신규 샤드 commit + legacy unlink 는 `saveGraph` 가 자체 vault lock 안에서 직렬화.
+   * - read 와 saveGraph 사이에는 잠금이 끊긴 짧은 윈도우가 존재한다. 동일 vault 에 대한 다른 writer 가
+   *   그 윈도우에서 saveGraph 로 신규 데이터를 commit 한 경우, 본 함수의 saveGraph 가 legacy 데이터로
+   *   해당 신규 데이터를 덮어쓸 수 있는 이론적 race 가 있다. legacy v1 layout 은 v2 마이그레이션 후
+   *   1회만 잔존하므로 cold-start 첫 호출에서만 트리거되며, 동시 saveGraph 충돌은 무시 수준이다.
+   *   더 강한 보장이 필요해질 경우 read 를 lock 안으로 옮겨야 한다.
+   */
+  private async loadLegacyAndMigrate(): Promise<KnowledgeGraph | null> {
     try {
       const raw = await readFile(
         join(this.cacheDir, CACHE_FILES.INDEX),
         'utf-8',
       );
       const data = JSON.parse(raw) as SerializedGraph;
-      return deserializeGraph(data);
+      const graph = deserializeGraph(data);
+      // 즉시 신규 layout 으로 재기록 — 다음 호출부터는 fast path
+      await this.saveGraph(graph);
+      return graph;
     } catch {
       return null;
+    }
+  }
+
+  /** Best-effort legacy index.json unlink. ENOENT swallow. */
+  private async unlinkLegacyIndex(): Promise<void> {
+    try {
+      await unlink(join(this.cacheDir, CACHE_FILES.INDEX));
+    } catch {
+      // ENOENT 등 모두 무시
     }
   }
 

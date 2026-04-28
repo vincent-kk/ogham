@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { compressMarkdownBody } from './compress-markdown.js';
+import { readCachedNodesArray } from './read-cached-nodes-array.js';
 
 interface IndexNode {
   layer?: number;
@@ -15,46 +16,30 @@ interface IndexNode {
 }
 
 /**
- * index.json의 L1 노드들을 읽고 "[title]: excerpt | tags:..." 라인으로 직렬화한다.
- * 실패 시 빈 문자열 반환.
+ * L1 노드들을 읽고 "[title]: excerpt | tags:..." 라인으로 직렬화한다.
+ * 부재/오류 시 빈 문자열 반환.
  */
 export function readL1NodesSummary(cwd: string): string {
-  const indexPath = join(cwd, '.maencof', 'index.json');
-  try {
-    if (!existsSync(indexPath)) return '';
-    const parsed = JSON.parse(readFileSync(indexPath, 'utf-8')) as {
-      nodes?: unknown;
-    };
+  const nodes = readCachedNodesArray<IndexNode>(cwd);
+  const l1Nodes = nodes.filter((n) => n.layer === 1);
+  if (l1Nodes.length === 0) return '';
 
-    let nodes: IndexNode[] = [];
-    if (Array.isArray(parsed.nodes)) {
-      nodes = parsed.nodes as IndexNode[];
-    } else if (parsed.nodes && typeof parsed.nodes === 'object') {
-      nodes = Object.values(parsed.nodes) as IndexNode[];
+  const lines: string[] = [];
+  for (const node of l1Nodes) {
+    if (!node.path || !node.title) continue;
+    try {
+      const filePath = join(cwd, node.path);
+      if (!existsSync(filePath)) continue;
+      const content = readFileSync(filePath, 'utf-8');
+      const excerpt = compressMarkdownBody(content);
+      const tagPart =
+        node.tags && node.tags.length > 0
+          ? ` | tags: ${node.tags.slice(0, 3).join(',')}`
+          : '';
+      lines.push(`[${node.title}]: ${excerpt}${tagPart}`);
+    } catch {
+      // skip this node
     }
-
-    const l1Nodes = nodes.filter((n) => n.layer === 1);
-    if (l1Nodes.length === 0) return '';
-
-    const lines: string[] = [];
-    for (const node of l1Nodes) {
-      if (!node.path || !node.title) continue;
-      try {
-        const filePath = join(cwd, node.path);
-        if (!existsSync(filePath)) continue;
-        const content = readFileSync(filePath, 'utf-8');
-        const excerpt = compressMarkdownBody(content);
-        const tagPart =
-          node.tags && node.tags.length > 0
-            ? ` | tags: ${node.tags.slice(0, 3).join(',')}`
-            : '';
-        lines.push(`[${node.title}]: ${excerpt}${tagPart}`);
-      } catch {
-        // skip this node
-      }
-    }
-    return lines.join('\n');
-  } catch {
-    return '';
   }
+  return lines.join('\n');
 }

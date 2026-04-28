@@ -30,9 +30,15 @@ afterEach(() => {
 });
 
 function writeIndex(nodes: Array<{ layer?: number; domain?: string }>): void {
+  // 신규 샤드 layout 으로 fixture 작성. hook readers 는 nodes.json 을 우선 본다.
   writeFileSync(
-    join(vaultDir, '.maencof', 'index.json'),
-    JSON.stringify({ nodes }),
+    join(vaultDir, '.maencof', 'nodes.json'),
+    JSON.stringify(nodes),
+    'utf-8',
+  );
+  writeFileSync(
+    join(vaultDir, '.maencof', 'graph-meta.json'),
+    JSON.stringify({ schemaVersion: 2, builtAt: 'x', nodeCount: nodes.length, edgeCount: 0 }),
     'utf-8',
   );
 }

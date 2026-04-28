@@ -37,6 +37,10 @@ describe('isVaultInternalPath', () => {
   it('.maencof/ 경로는 제외한다', () => {
     expect(isVaultInternalPath(cwd, '.maencof/index.json')).toBe(false);
     expect(isVaultInternalPath(cwd, '.maencof/graph.json')).toBe(false);
+    // 샤드 layout 파일도 동일하게 vault 내부 안내 대상에서 제외된다.
+    expect(isVaultInternalPath(cwd, '.maencof/nodes.json')).toBe(false);
+    expect(isVaultInternalPath(cwd, '.maencof/edges.json')).toBe(false);
+    expect(isVaultInternalPath(cwd, '.maencof/graph-meta.json')).toBe(false);
   });
 
   it('.maencof-meta/ 경로는 제외한다', () => {
@@ -130,13 +134,20 @@ describe('runVaultRedirector', () => {
   });
 
   it('.maencof/ 경로는 hookSpecificOutput이 없다', () => {
-    const result = runVaultRedirector({
-      tool_name: 'Read',
-      tool_input: { file_path: '.maencof/index.json' },
-      cwd: vaultDir,
-    });
-    expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput).toBeUndefined();
+    for (const file of [
+      '.maencof/index.json',
+      '.maencof/nodes.json',
+      '.maencof/edges.json',
+      '.maencof/graph-meta.json',
+    ]) {
+      const result = runVaultRedirector({
+        tool_name: 'Read',
+        tool_input: { file_path: file },
+        cwd: vaultDir,
+      });
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput).toBeUndefined();
+    }
   });
 
   it('.maencof-meta/ 경로는 hookSpecificOutput이 없다', () => {

@@ -27,14 +27,16 @@ function writeMinimalGraph(): void {
     mtime: 0,
     accessed_count: 0,
   };
+  const cacheDir = join(vaultDir, '.maencof');
+  writeFileSync(join(cacheDir, 'nodes.json'), JSON.stringify([node]), 'utf-8');
+  writeFileSync(join(cacheDir, 'edges.json'), JSON.stringify([]), 'utf-8');
   writeFileSync(
-    join(vaultDir, '.maencof', 'index.json'),
+    join(cacheDir, 'graph-meta.json'),
     JSON.stringify({
-      nodes: [node],
-      edges: [],
       builtAt: '2026-01-01T00:00:00Z',
       nodeCount: 1,
       edgeCount: 0,
+      schemaVersion: 2,
     }),
     'utf-8',
   );

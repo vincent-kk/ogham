@@ -7,9 +7,6 @@
  *
  * All injected text MUST be in English.
  */
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import {
   isFirstInSession,
   markSessionInjected,
@@ -21,6 +18,7 @@ import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault } from '../shared/index.js';
 import {
   buildTurnContext,
+  readCachedNodesArray,
   readCompanionIdentity,
   readIndexMetadata,
 } from './turn-context/index.js';
@@ -97,29 +95,17 @@ interface DomainCount {
 }
 
 /**
- * Read top N domains from index.json node tags/domain fields.
+ * Read top N domains from cached node metadata.
  */
 function readTopDomains(cwd: string, limit: number): DomainCount[] {
-  const indexPath = join(cwd, '.maencof', 'index.json');
   try {
-    if (!existsSync(indexPath)) return [];
-    const raw = readFileSync(indexPath, 'utf-8');
-    const parsed = JSON.parse(raw) as { nodes?: unknown };
-
-    let nodes: Array<{ domain?: string }> = [];
-    if (Array.isArray(parsed.nodes)) {
-      nodes = parsed.nodes as Array<{ domain?: string }>;
-    } else if (parsed.nodes && typeof parsed.nodes === 'object') {
-      nodes = Object.values(parsed.nodes) as Array<{ domain?: string }>;
-    }
-
+    const nodes = readCachedNodesArray<{ domain?: string }>(cwd);
     const counts = new Map<string, number>();
     for (const node of nodes) {
       if (typeof node.domain === 'string' && node.domain) {
         counts.set(node.domain, (counts.get(node.domain) ?? 0) + 1);
       }
     }
-
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)

@@ -56,8 +56,8 @@ describe('triggerBackgroundRebuild', () => {
     expect(inflight).not.toBeNull();
     await inflight!;
 
-    // rebuild 후 disk에 index.json이 생겼고, invalidateCache가 호출되었으므로
-    // 다음 loadGraphIfNeeded는 디스크에서 새로 로드한다.
+    // rebuild 후 disk에 nodes.json/edges.json/graph-meta.json 샤드가 생겼고,
+    // invalidateCache가 호출되었으므로 다음 loadGraphIfNeeded는 디스크에서 새로 로드한다.
     const reloaded = await loadGraphIfNeeded(vaultDir);
     expect(reloaded).not.toBeNull();
     expect(reloaded?.nodes.size).toBeGreaterThan(0);

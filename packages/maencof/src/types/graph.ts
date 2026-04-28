@@ -102,11 +102,26 @@ export interface ActivationResult {
   path: NodeId[];
 }
 
-/** 직렬화 가능한 그래프 (JSON 저장용) */
+/** 직렬화 가능한 그래프 (legacy 단일 index.json 저장용 — 자동 마이그레이션 경로에서만 사용) */
 export interface SerializedGraph {
   nodes: KnowledgeNode[];
   edges: KnowledgeEdge[];
   builtAt: string;
   nodeCount: number;
   edgeCount: number;
+}
+
+/** nodes.json 직렬화 형식 — KnowledgeNode 배열 */
+export type SerializedNodes = KnowledgeNode[];
+
+/** edges.json 직렬화 형식 — KnowledgeEdge 배열 */
+export type SerializedEdges = KnowledgeEdge[];
+
+/** graph-meta.json 직렬화 형식 — cross-file commit marker */
+export interface SerializedGraphMeta {
+  builtAt: string;
+  nodeCount: number;
+  edgeCount: number;
+  /** 샤드 스키마 버전 (v1 = 단일 index.json, v2 = 3-파일 분리) */
+  schemaVersion: 2;
 }
