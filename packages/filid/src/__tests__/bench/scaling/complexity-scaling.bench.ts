@@ -1,9 +1,8 @@
 import { bench, describe } from 'vitest';
 
-import { ChangeQueue } from '../../../core/infra/change-queue/change-queue.js';
 import { trackChange } from '../../../hooks/change-tracker/change-tracker.js';
-import { validatePreToolUse } from '../../../hooks/pre-tool-validator/pre-tool-validator.js';
-import { guardStructure } from '../../../hooks/structure-guard/structure-guard.js';
+import { validatePreToolUse } from '../../../hooks/pre-tool-use/helpers/pre-tool-validator/pre-tool-validator.js';
+import { guardStructure } from '../../../hooks/pre-tool-use/helpers/structure-guard/structure-guard.js';
 import type {
   PostToolUseInput,
   PreToolUseInput,
