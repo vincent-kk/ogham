@@ -197,6 +197,42 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
     expect(raw).toMatch(/^sub_layer: topical$/m);
   });
 
+  // ─── 디스크 frontmatter 손상 (2) ───────────────────────────────────────
+  it('content-only update 는 손상된 디스크 frontmatter 위에서 거부된다', async () => {
+    // L4 + sub_layer:topical 은 schema 위반 (sub_layer 는 L3/L5 에서만 허용)
+    await writeFm(vault, '04_Action/corrupt.md', [
+      'created: 2026-01-01',
+      'updated: 2026-01-01',
+      'tags: [t]',
+      'layer: 4',
+      'sub_layer: topical',
+    ]);
+    const result = await handleMaencofUpdate(vault, {
+      path: '04_Action/corrupt.md',
+      content: 'New body content.',
+    });
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('Frontmatter validation failed');
+    expect(result.message).toContain('frontmatter.unset');
+  });
+
+  it('손상된 frontmatter 는 unset 으로 회복 가능하다', async () => {
+    await writeFm(vault, '04_Action/recover.md', [
+      'created: 2026-01-01',
+      'updated: 2026-01-01',
+      'tags: [t]',
+      'layer: 4',
+      'sub_layer: topical',
+    ]);
+    const result = await handleMaencofUpdate(vault, {
+      path: '04_Action/recover.md',
+      frontmatter: { unset: ['sub_layer'] },
+    });
+    expect(result.success).toBe(true);
+    const raw = await readFile(join(vault, '04_Action/recover.md'), 'utf-8');
+    expect(raw).not.toMatch(/^sub_layer:/m);
+  });
+
   // ─── L1 차단 (1) ───────────────────────────────────────────────────────
   it('L1 문서는 unset 자체 차단', async () => {
     await writeFm(vault, '01_Core/identity.md', [

@@ -222,36 +222,34 @@ export async function handleMaencofUpdate(
     : existingBody;
 
   if (fmMatch) {
-    // Frontmatter 업데이트 (updated 자동 갱신 + 선택 필드)
+    // Frontmatter 블록 산출 (선택 필드 머지 또는 updated 자동 갱신)
+    let updatedFmBlock: string;
     if (input.frontmatter) {
       const updatedDoc = updateFrontmatter(existing, input.frontmatter);
-      const updatedFmBlock =
+      updatedFmBlock =
         FRONTMATTER_STRIP_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
-
-      // ─── 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
-      const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedFmBlock);
-      const updatedFmObject = parseYamlFrontmatter(
-        updatedFmYamlMatch?.[1] ?? '',
-      );
-      const validation = validateFrontmatter(updatedFmObject);
-      if (!validation.ok) {
-        return {
-          success: false,
-          path: input.path,
-          message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
-        };
-      }
-
-      newContent = updatedFmBlock + bodyToWrite;
     } else {
-      // updated만 자동 갱신
       const today = new Date().toISOString().slice(0, 10);
-      const updatedFmBlock = fmMatch[0].replace(
-        /^(updated:).*$/m,
-        `$1 ${today}`,
-      );
-      newContent = updatedFmBlock + bodyToWrite;
+      updatedFmBlock = fmMatch[0].replace(/^(updated:).*$/m, `$1 ${today}`);
     }
+
+    // ─── 객체 단계 검증 (양 경로 공통, write-path 비대칭 제거) ───
+    // content-only update 라도 손상된 디스크 frontmatter 가 영속화되지 않도록
+    // 동일 schema 게이트를 통과해야만 write 한다. 회복은 frontmatter.unset 으로.
+    const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedFmBlock);
+    const updatedFmObject = parseYamlFrontmatter(
+      updatedFmYamlMatch?.[1] ?? '',
+    );
+    const validation = validateFrontmatter(updatedFmObject);
+    if (!validation.ok) {
+      return {
+        success: false,
+        path: input.path,
+        message: `Frontmatter validation failed: ${validation.errors.join('; ')}. Use frontmatter.unset to recover corrupted fields.`,
+      };
+    }
+
+    newContent = updatedFmBlock + bodyToWrite;
   } else {
     // Frontmatter 없는 문서 → 내용만 교체
     newContent = bodyToWrite;
