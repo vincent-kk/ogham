@@ -11,6 +11,7 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/document-parser/index.js';
+import { parseYamlFrontmatter } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import { Layer } from '../../../types/common.js';
 import {
@@ -18,6 +19,7 @@ import {
   L5_SUBDIR,
   LAYER_DIR,
 } from '../../../constants/architecture.js';
+import { validateFrontmatter } from '../../../types/frontmatter.js';
 import type { MaencofCrudResult, MaencofMoveInput } from '../../../types/mcp.js';
 
 /**
@@ -167,6 +169,18 @@ export async function handleMaencofMove(
     targetSubLayer: input.target_sub_layer,
     stripBufferFields,
   });
+
+  // ─── 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
+  const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedContent);
+  const updatedFmObject = parseYamlFrontmatter(updatedFmYamlMatch?.[1] ?? '');
+  const validation = validateFrontmatter(updatedFmObject);
+  if (!validation.ok) {
+    return {
+      success: false,
+      path: input.path,
+      message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
+    };
+  }
 
   // WAL 기반 원자적 이동: 대상 쓰기 → 소스 삭제
   await mkdir(dirname(newAbsPath), { recursive: true });

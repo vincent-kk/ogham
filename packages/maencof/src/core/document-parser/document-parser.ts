@@ -12,7 +12,7 @@ import { readFile } from 'node:fs/promises';
 import { SUBLAYER_DIR_PATTERNS } from '../../constants/document-parser.js';
 import type { Layer, SubLayer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
-import { FrontmatterSchema } from '../../types/frontmatter.js';
+import { validateFrontmatter } from '../../types/frontmatter.js';
 import type {
   Frontmatter,
   FrontmatterParseResult,
@@ -91,14 +91,11 @@ export function extractFrontmatter(content: string): {
   const body = content.slice(match[0].length);
 
   const parsed = parseYamlFrontmatter(raw);
-  const validation = FrontmatterSchema.safeParse(parsed);
+  const validation = validateFrontmatter(parsed);
 
-  if (!validation.success) {
-    const errors = validation.error.issues.map(
-      (issue) => `${issue.path.join('.')}: ${issue.message}`,
-    );
+  if (!validation.ok) {
     return {
-      frontmatter: { success: false, errors, raw },
+      frontmatter: { success: false, errors: validation.errors, raw },
       body,
     };
   }

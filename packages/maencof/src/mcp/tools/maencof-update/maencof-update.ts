@@ -11,11 +11,29 @@ import {
   buildKnowledgeNode,
   parseDocument,
 } from '../../../core/document-parser/index.js';
-import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
+import {
+  parseYamlFrontmatter,
+  quoteYamlValue,
+} from '../../../core/yaml-parser/index.js';
 import { Layer } from '../../../types/common.js';
-import { AUTO_GENERATED_FM_KEYS } from '../../../types/frontmatter.js';
+import {
+  AUTO_GENERATED_FM_KEYS,
+  validateFrontmatter,
+} from '../../../types/frontmatter.js';
 import type { L1AmendmentRecord } from '../../../types/l1-amendment.js';
-import type { MaencofCrudResult, MaencofUpdateInput } from '../../../types/mcp.js';
+import type {
+  MaencofCrudResult,
+  MaencofUpdateFrontmatter,
+  MaencofUpdateInput,
+} from '../../../types/mcp.js';
+
+/** unset 거부 대상 — 데이터 무결성 핵심 필드 */
+const PROTECTED_UNSET_FIELDS = new Set([
+  'created',
+  'updated',
+  'layer',
+  'tags',
+]);
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
@@ -34,18 +52,20 @@ function patchFrontmatterField(
 }
 
 /**
+ * Frontmatter 블록에서 키 라인을 제거한다 (unset 처리).
+ * 라인 시작에서 매칭하며 끝의 줄바꿈도 함께 소거한다.
+ */
+function removeFrontmatterField(yaml: string, key: string): string {
+  const regex = new RegExp(`^${key}:[^\\n]*\\n?`, 'gm');
+  return yaml.replace(regex, '');
+}
+
+/**
  * 마크다운 문서의 Frontmatter를 부분 업데이트한다.
  */
 function updateFrontmatter(
   content: string,
-  updates: Partial<{
-    tags: string[];
-    title: string;
-    layer: number;
-    confidence: number;
-    schedule: string;
-    sub_layer: string;
-  }>,
+  updates: MaencofUpdateFrontmatter,
 ): string {
   const match = FRONTMATTER_REGEX.exec(content);
   if (!match) return content;
@@ -55,6 +75,13 @@ function updateFrontmatter(
 
   // updated 자동 갱신
   yaml = patchFrontmatterField(yaml, 'updated', today);
+
+  // unset 먼저 처리 (머지 전 — 동일 키를 set+unset 시 set이 승리)
+  if (updates.unset) {
+    for (const key of updates.unset) {
+      yaml = removeFrontmatterField(yaml, key);
+    }
+  }
 
   if (updates.tags !== undefined) {
     yaml = patchFrontmatterField(
@@ -156,6 +183,28 @@ export async function handleMaencofUpdate(
           'The "layer" field of Layer 1 documents cannot be changed via update.',
       };
     }
+    if (input.frontmatter?.unset && input.frontmatter.unset.length > 0) {
+      return {
+        success: false,
+        path: input.path,
+        message:
+          'Layer 1 documents do not allow frontmatter.unset (use a structured amendment instead).',
+      };
+    }
+  }
+
+  // ─── unset 보호 필드 가드 (모든 레이어) ─────────────────────────
+  if (input.frontmatter?.unset) {
+    const blocked = input.frontmatter.unset.filter((k) =>
+      PROTECTED_UNSET_FIELDS.has(k),
+    );
+    if (blocked.length > 0) {
+      return {
+        success: false,
+        path: input.path,
+        message: `Cannot unset protected frontmatter fields: ${blocked.join(', ')}`,
+      };
+    }
   }
 
   // Frontmatter 보존 + 본문 교체
@@ -178,6 +227,21 @@ export async function handleMaencofUpdate(
       const updatedDoc = updateFrontmatter(existing, input.frontmatter);
       const updatedFmBlock =
         FRONTMATTER_STRIP_REGEX.exec(updatedDoc)?.[0] ?? fmMatch[0];
+
+      // ─── 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
+      const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedFmBlock);
+      const updatedFmObject = parseYamlFrontmatter(
+        updatedFmYamlMatch?.[1] ?? '',
+      );
+      const validation = validateFrontmatter(updatedFmObject);
+      if (!validation.ok) {
+        return {
+          success: false,
+          path: input.path,
+          message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
+        };
+      }
+
       newContent = updatedFmBlock + bodyToWrite;
     } else {
       // updated만 자동 갱신

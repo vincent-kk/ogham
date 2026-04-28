@@ -9,8 +9,35 @@ import { deduplicateContent } from '../../../core/content-dedup/index.js';
 import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
 import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
-import { AUTO_GENERATED_FM_KEYS } from '../../../types/frontmatter.js';
+import {
+  AUTO_GENERATED_FM_KEYS,
+  validateFrontmatter,
+} from '../../../types/frontmatter.js';
 import type { MaencofCreateInput, MaencofCrudResult } from '../../../types/mcp.js';
+
+/**
+ * MaencofCreateInput을 frontmatter 객체로 변환한다.
+ * write 직전 validateFrontmatter 게이트의 입력으로 사용된다.
+ */
+function inputToFrontmatterObject(
+  input: MaencofCreateInput,
+): Record<string, unknown> {
+  const today = new Date().toISOString().slice(0, 10);
+  const fm: Record<string, unknown> = {
+    created: today,
+    updated: today,
+    tags: input.tags,
+    layer: input.layer,
+  };
+  if (input.sub_layer !== undefined) fm.sub_layer = input.sub_layer;
+  if (input.title !== undefined) fm.title = input.title;
+  if (input.source !== undefined) fm.source = input.source;
+  if (input.expires !== undefined) fm.expires = input.expires;
+  if (input.mentioned_persons && input.mentioned_persons.length > 0) {
+    fm.mentioned_persons = input.mentioned_persons;
+  }
+  return fm;
+}
 
 /**
  * 파일명 힌트로부터 안전한 파일명을 생성한다.
@@ -166,6 +193,16 @@ export async function handleMaencofCreate(
     ? `${layerDir}/${subDir}/${filename}`
     : `${layerDir}/${filename}`;
   const absolutePath = join(vaultPath, relativePath);
+
+  // ─── Frontmatter 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
+  const fmValidation = validateFrontmatter(inputToFrontmatterObject(input));
+  if (!fmValidation.ok) {
+    return {
+      success: false,
+      path: '',
+      message: `Frontmatter validation failed: ${fmValidation.errors.join('; ')}`,
+    };
+  }
 
   // 중복 파일 확인
   try {

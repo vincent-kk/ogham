@@ -38,6 +38,22 @@ export interface MaencofReadInput {
   include_related?: boolean;
 }
 
+/** `update` 입력 — frontmatter 부분 업데이트 + 필드 제거 */
+export interface MaencofUpdateFrontmatter {
+  tags?: string[];
+  title?: string;
+  layer?: Layer;
+  confidence?: number;
+  schedule?: string;
+  sub_layer?: SubLayer;
+  /**
+   * 제거할 frontmatter 필드 이름 목록.
+   * 보호 필드(created, updated, layer, tags)는 unset 거부.
+   * L1 경로에서는 unset 자체 차단.
+   */
+  unset?: string[];
+}
+
 /** `update` 입력 */
 export interface MaencofUpdateInput {
   /** 문서 경로 */
@@ -45,14 +61,7 @@ export interface MaencofUpdateInput {
   /** 새 내용 (마크다운, 생략 시 기존 내용 유지) */
   content?: string;
   /** Frontmatter 부분 업데이트 (선택) */
-  frontmatter?: Partial<{
-    tags: string[];
-    title: string;
-    layer: Layer;
-    confidence: number;
-    schedule: string;
-    sub_layer: SubLayer;
-  }>;
+  frontmatter?: MaencofUpdateFrontmatter;
   /** L1 수정 사유 대분류 (L1 경로일 때 필수) */
   change_reason?: L1ChangeReason;
   /** L1 수정 근거 서술 (L1 경로일 때 필수, 최소 20자) */

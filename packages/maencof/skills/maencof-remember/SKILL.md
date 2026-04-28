@@ -54,6 +54,8 @@ Recommend a Layer based on the nature of the content:
 
 #### L3 Sub-Layer Selection
 
+`sub_layer` applies only to L3 and L5. For L1/L2/L4, omit `sub_layer` entirely — passing it on those layers will be rejected by `mcp_t_create` because **sub_layer is only valid for L3 or L5**.
+
 When creating an L3 document, determine the appropriate sub-layer:
 
 | Sub-Layer | Criteria | Directory |

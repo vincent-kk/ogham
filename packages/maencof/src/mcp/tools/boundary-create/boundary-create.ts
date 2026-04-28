@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import { L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
 import { Layer } from '../../../types/common.js';
+import { validateFrontmatter } from '../../../types/frontmatter.js';
 
 /** boundary_create input */
 export interface BoundaryCreateInput {
@@ -73,6 +74,27 @@ export async function handleBoundaryCreate(
   const today = new Date().toISOString().slice(0, 10);
   const tagsYaml = `[${input.tags.map((t) => quoteYamlValue(t)).join(', ')}]`;
   const connectedLayersYaml = `[${input.connected_layers.join(', ')}]`;
+
+  // ─── 객체 단계 검증 (정적 안전 입력의 회귀 방어) ────────────────
+  const fmObject: Record<string, unknown> = {
+    created: today,
+    updated: today,
+    tags: input.tags,
+    layer: 5,
+    sub_layer: 'boundary',
+    boundary_type: input.boundary_type,
+    connected_layers: input.connected_layers,
+    title: input.title,
+  };
+  const validation = validateFrontmatter(fmObject);
+  if (!validation.ok) {
+    return {
+      success: false,
+      path: relativePath,
+      node_id: '',
+      message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
+    };
+  }
 
   const frontmatter = [
     '---',
