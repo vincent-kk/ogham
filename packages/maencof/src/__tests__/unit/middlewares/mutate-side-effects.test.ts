@@ -70,10 +70,10 @@ describe('runMutateSideEffects', () => {
     ]);
   });
 
-  it('임계치(15) 미만에서는 background rebuild 를 트리거하지 않는다', async () => {
+  it('임계치(5) 미만에서는 background rebuild 를 트리거하지 않는다', async () => {
     const store = new MetadataStore(vaultDir);
     await store.appendStaleEntries(
-      Array.from({ length: 13 }, (_, i) => ({
+      Array.from({ length: 3 }, (_, i) => ({
         path: `pre-${i}.md`,
         op: 'mutate' as const,
       })),
@@ -82,10 +82,10 @@ describe('runMutateSideEffects', () => {
     expect(_peekRebuildInProgress()).toBeNull();
   });
 
-  it('임계치(15) 도달 시 background rebuild 를 트리거한다', async () => {
+  it('임계치(5) 도달 시 background rebuild 를 트리거한다', async () => {
     const store = new MetadataStore(vaultDir);
     await store.appendStaleEntries(
-      Array.from({ length: 14 }, (_, i) => ({
+      Array.from({ length: 4 }, (_, i) => ({
         path: `pre-${i}.md`,
         op: 'mutate' as const,
       })),
