@@ -1,4 +1,5 @@
-import { pickBodyFormat, renderByFormat } from './pick-body-format.js';
+import { pickBodyFormat } from './pick-body-format.js';
+import { renderByFormat } from './render-by-format.js';
 
 /** Convert markdown body for PUT/PATCH (update). Selects ADF/Storage/Wiki by service+apiVersion. */
 export function convertBodyForUpdate(

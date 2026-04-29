@@ -35,5 +35,4 @@ Jira Server/DC v2 REST API의 본문 포맷으로 사용된다.
 
 ## Dependencies
 
-- `../markdown-parsing/parse-blocks.ts` — 블록 파싱 (sibling fractal)
-- `../markdown-parsing/tokenize-inline.ts` — 인라인 토큰화 (sibling fractal)
+- `../markdown-parsing/` — 블록 파싱 + 인라인 토큰화 (sibling fractal)
