@@ -1,7 +1,7 @@
 import { executeRequest } from '../../../core/http-client/index.js';
 import type { FetchContext, McpResponse, FetchParams } from '../../../types/index.js';
 import { autoConvertAdf } from './utils/auto-convert-adf.js';
-import { convertBodyToAdf } from './utils/convert-body-to-adf.js';
+import { convertBodyForCreate } from './utils/convert-body-for-create.js';
 import { convertBodyForUpdate } from './utils/convert-body-for-update.js';
 import { handleAssetFetch } from './utils/asset-fetch.js';
 
@@ -70,7 +70,7 @@ export async function handleFetch(
 
       let body = params.body;
       if (params.content_format === 'markdown') {
-        body = convertBodyToAdf(body);
+        body = convertBodyForCreate(body, ctx.service, ctx.apiVersion);
       }
 
       return executeRequest(config, {
@@ -85,7 +85,7 @@ export async function handleFetch(
     case 'PATCH': {
       let body = params.body;
       if (params.content_format === 'markdown') {
-        body = convertBodyForUpdate(body, endpoint);
+        body = convertBodyForUpdate(body, ctx.service, ctx.apiVersion);
       }
 
       return executeRequest(config, {

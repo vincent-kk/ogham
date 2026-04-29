@@ -1,7 +1,7 @@
 import { pickBodyFormat, renderByFormat } from './pick-body-format.js';
 
-/** Convert markdown body for PUT/PATCH (update). Selects ADF/Storage/Wiki by service+apiVersion. */
-export function convertBodyForUpdate(
+/** Convert markdown body for POST (create). Selects ADF/Storage/Wiki by service+apiVersion. */
+export function convertBodyForCreate(
   body: unknown,
   service: 'jira' | 'confluence',
   apiVersion: '2' | '3',
