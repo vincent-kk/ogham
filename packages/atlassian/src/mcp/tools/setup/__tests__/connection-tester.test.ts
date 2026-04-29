@@ -155,6 +155,22 @@ describe('testConnection', () => {
     expect(result.latency_ms).toBeGreaterThanOrEqual(0);
   });
 
+  it("Jira on-prem + api_version_override:'3' — /rest/api/3/myself 엔드포인트 사용", async () => {
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://jira.internal.com', is_cloud: false });
+    mockGetApiVersion.mockReturnValue('3');
+
+    await testConnection({
+      base_url: 'https://jira.internal.com',
+      credentials: { basic: { api_token: 'token' } },
+      service: 'jira',
+      api_version_override: '3',
+    });
+
+    expect(mockGetApiVersion).toHaveBeenCalledWith(false, '3');
+    const callArgs = mockExecuteRequest.mock.calls[0];
+    expect(callArgs[1].endpoint).toBe('/rest/api/3/myself');
+  });
+
   it('buildAuthHeader가 credentials와 username으로 호출됨', async () => {
     mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
     mockGetApiVersion.mockReturnValue('3');

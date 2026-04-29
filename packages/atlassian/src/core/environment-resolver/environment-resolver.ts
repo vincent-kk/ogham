@@ -16,7 +16,8 @@ export function resolveEnvironment(baseUrl: string): EnvironmentInfo {
   return { is_cloud, base_url, hostname };
 }
 
-/** Get the correct API version prefix based on environment */
-export function getApiVersion(is_cloud: boolean): string {
+/** Get the correct API version prefix. `override` takes precedence over `is_cloud` (Jira on-prem only). */
+export function getApiVersion(is_cloud: boolean, override?: '2' | '3'): string {
+  if (override) return override;
   return is_cloud ? '3' : '2';
 }

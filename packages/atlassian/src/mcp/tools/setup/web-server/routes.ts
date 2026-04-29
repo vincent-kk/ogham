@@ -15,6 +15,7 @@ export interface RouteContext {
     credentials: ServiceCredentials;
     username?: string;
     service: 'jira' | 'confluence';
+    api_version_override?: '2' | '3';
   }) => Promise<ConnectionTestResult>;
   resetTimer: () => void;
   closeServer: () => Promise<void>;
@@ -152,6 +153,7 @@ async function handleTest(
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
+      api_version_override: data.jira.api_version_override,
     }));
   }
 
@@ -208,6 +210,7 @@ async function handleSubmit(
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
+      api_version_override: data.jira.api_version_override,
     }));
   }
 
