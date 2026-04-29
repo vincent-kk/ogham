@@ -6,10 +6,11 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 
 | File | Role |
 |---|---|
-| `adf-to-markdown.ts` | ADF JSON → Markdown (port from Python adf.py) |
-| `markdown-to-adf.ts` | Markdown → ADF JSON (port from Python adf.py) |
-| `storage-to-markdown.ts` | Confluence Storage XHTML → Markdown |
-| `markdown-to-storage.ts` | Markdown → Confluence Storage XHTML |
+| `adf-to-markdown/` | ADF JSON → Markdown (port from Python adf.py) |
+| `markdown-to-adf/` | Markdown → ADF JSON (port from Python adf.py) |
+| `storage-to-markdown/` | Confluence Storage XHTML → Markdown |
+| `markdown-to-storage/` | Markdown → Confluence Storage XHTML |
+| `markdown-to-wiki/` | Markdown → Jira Wiki Markup (Server/DC v2) |
 
 ## Conventions
 
@@ -31,7 +32,7 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 
 ### Ask first
 
-- Add new format support (wiki markup is post-MVP)
+- Add new format support
 
 ### Never do
 

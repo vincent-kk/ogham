@@ -3,6 +3,7 @@ import { adfToMarkdown } from "./adf-to-markdown/index.js";
 import { markdownToAdf } from "./markdown-to-adf/index.js";
 import { storageToMarkdown } from "./storage-to-markdown/index.js";
 import { markdownToStorage } from "./markdown-to-storage/index.js";
+import { markdownToWiki } from "./markdown-to-wiki/index.js";
 
 /** Unified conversion function: convert between supported formats */
 export function convert(
@@ -26,6 +27,9 @@ export function convert(
 
     case "markdown>storage":
       return markdownToStorage(content);
+
+    case "markdown>wiki":
+      return markdownToWiki(content);
 
     case "adf>storage": {
       const md = adfToMarkdown(JSON.parse(content)) ?? "";
