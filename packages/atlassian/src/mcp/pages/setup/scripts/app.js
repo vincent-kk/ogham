@@ -52,7 +52,7 @@
 
   function prefillForm(data) {
     var dt = data.deployment_type || "cloud";
-    activateTab(dt === "on_premise" ? "on-premise" : "cloud");
+    activateTab(dt === "onprem" ? "on-premise" : "cloud");
 
     if (dt === "cloud" && data.jira) {
       // Multi-site: jira is an array of { base_url, is_cloud }
@@ -68,10 +68,16 @@
       if (first.ssl_verify !== undefined)
         setCheckbox("cloud.ssl_verify", first.ssl_verify);
       if (first.timeout) setField("cloud.timeout", String(first.timeout));
-    } else if (dt === "on_premise") {
+    } else if (dt === "onprem") {
       if (data.jira) {
         var jira = Array.isArray(data.jira) ? data.jira[0] : data.jira;
-        if (jira) fillOnPremFields("onprem.jira", jira);
+        if (jira) {
+          fillOnPremFields("onprem.jira", jira);
+          setRadioValue(
+            "onprem.jira.api_version_override",
+            jira.api_version_override || "",
+          );
+        }
       }
       if (data.confluence) {
         var conf = Array.isArray(data.confluence)
@@ -346,7 +352,7 @@
   // --- Collect Form Data ---
   function collectFormData() {
     var isCloud = state.tab === "cloud";
-    var deployType = isCloud ? "cloud" : "on_premise";
+    var deployType = isCloud ? "cloud" : "onprem";
 
     function normalizeCloudUrl(value) {
       if (!value) return value;
@@ -399,6 +405,8 @@
           api_token: getField("onprem.jira.api_token"),
           ssl_verify: getCheckbox("onprem.jira.ssl_verify"),
           timeout: getNumberField("onprem.jira.timeout"),
+          api_version_override:
+            getRadioValue("onprem.jira.api_version_override") || undefined,
         },
         confluence: {
           base_url: getField("onprem.confluence.base_url"),
@@ -522,6 +530,22 @@
     var val = getField(dataField);
     var n = parseInt(val, 10);
     return isNaN(n) ? null : n;
+  }
+
+  function getRadioValue(dataField) {
+    var checked = document.querySelector(
+      'input[type="radio"][data-field="' + dataField + '"]:checked',
+    );
+    return checked ? checked.value : "";
+  }
+
+  function setRadioValue(dataField, value) {
+    var radios = document.querySelectorAll(
+      'input[type="radio"][data-field="' + dataField + '"]',
+    );
+    radios.forEach(function (r) {
+      r.checked = r.value === value;
+    });
   }
 
   // Expose fill helpers for json-import.js

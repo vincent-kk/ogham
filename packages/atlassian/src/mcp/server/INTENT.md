@@ -32,8 +32,6 @@ stdio 트랜스포트로 Claude Code와 통신한다.
 ## Dependencies
 
 - `@modelcontextprotocol/sdk` — `McpServer`, `StdioServerTransport`
-- `../../core/config-manager` — 설정 로드
-- `../../core/auth-manager` — 인증 헤더 생성
 - `../../utils` — `detectService`
-- `../shared` — `wrapHandler`
+- `../shared` — `wrapHandler`, `buildFetchContext`
 - `../tools/{fetch,convert,setup,auth-check}` — 도구 핸들러

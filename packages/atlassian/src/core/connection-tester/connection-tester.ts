@@ -3,12 +3,16 @@ import { CONNECTION_TEST_TIMEOUT } from '../../constants/index.js';
 import { resolveEnvironment, getApiVersion, executeRequest } from '../index.js';
 import { buildAuthHeader } from '../../utils/index.js';
 
-function getTestEndpoint(service: 'jira' | 'confluence', isCloud: boolean): string {
+function getTestEndpoint(
+  service: 'jira' | 'confluence',
+  isCloud: boolean,
+  override?: '2' | '3',
+): string {
   if (service === 'jira') {
-    const version = getApiVersion(isCloud);
+    const version = getApiVersion(isCloud, override);
     return `/rest/api/${version}/myself`;
   }
-  // Confluence
+  // Confluence — DC v1 단일 표준이므로 override 미적용
   if (isCloud) {
     return '/wiki/rest/api/space?limit=1';
   }
@@ -17,10 +21,10 @@ function getTestEndpoint(service: 'jira' | 'confluence', isCloud: boolean): stri
 
 /** Test connection to a Jira or Confluence instance */
 export async function testConnection(params: TestConnectionParams): Promise<ConnectionTestResult> {
-  const { base_url, credentials, username, service, include_body = false } = params;
+  const { base_url, credentials, username, service, include_body = false, api_version_override } = params;
 
   const env = resolveEnvironment(base_url);
-  const endpoint = getTestEndpoint(service, env.is_cloud);
+  const endpoint = getTestEndpoint(service, env.is_cloud, api_version_override);
 
   const authPayload = buildAuthHeader(credentials, username);
   if (!authPayload) {

@@ -1,16 +1,16 @@
 import { executeRequest } from '../../../core/http-client/index.js';
-import type { HttpClientConfig, McpResponse, FetchParams } from '../../../types/index.js';
+import type { FetchContext, McpResponse, FetchParams } from '../../../types/index.js';
 import { autoConvertAdf } from './utils/auto-convert-adf.js';
-import { convertBodyToAdf } from './utils/convert-body-to-adf.js';
-import { convertBodyForUpdate } from './utils/convert-body-for-update.js';
+import { convertBody } from './utils/convert-body.js';
 import { handleAssetFetch } from './utils/asset-fetch.js';
 
 /** Unified HTTP tool handler */
 export async function handleFetch(
   params: FetchParams,
-  config: HttpClientConfig,
+  ctx: FetchContext,
 ): Promise<McpResponse> {
   const { method, endpoint } = params;
+  const config = ctx.http;
 
   // Early validation: reject invalid method+param combos
   if (method === 'GET' && params.body !== undefined) {
@@ -69,7 +69,7 @@ export async function handleFetch(
 
       let body = params.body;
       if (params.content_format === 'markdown') {
-        body = convertBodyToAdf(body);
+        body = convertBody(body, ctx.service, ctx.apiVersion);
       }
 
       return executeRequest(config, {
@@ -84,7 +84,7 @@ export async function handleFetch(
     case 'PATCH': {
       let body = params.body;
       if (params.content_format === 'markdown') {
-        body = convertBodyForUpdate(body, endpoint);
+        body = convertBody(body, ctx.service, ctx.apiVersion);
       }
 
       return executeRequest(config, {

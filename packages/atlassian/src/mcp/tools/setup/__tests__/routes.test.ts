@@ -6,7 +6,7 @@ import type { RouteContext } from '../web-server/routes.js';
 
 // core/index.js의 resolveEnvironment는 handleSubmit 내부에서 동적으로 import됨
 vi.mock('../../../../core/index.js', () => ({
-  resolveEnvironment: vi.fn().mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true }),
+  resolveEnvironment: vi.fn().mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' }),
   getApiVersion: vi.fn().mockReturnValue('3'),
   executeRequest: vi.fn().mockResolvedValue({ success: true, data: {} }),
 }));
@@ -180,6 +180,59 @@ describe('createRouteHandler', () => {
     expect(jiraSites[1].base_url).toBe('https://beta.atlassian.net');
   });
 
+  it("GET / — onprem Jira의 api_version_override가 edit-mode payload에 보존됨 (H1 회귀 가드)", async () => {
+    const ctx = makeContext({
+      loadConfig: vi.fn().mockResolvedValue({
+        jira: [{
+          base_url: 'https://jira.internal.com',
+          is_cloud: false,
+          username: 'user',
+          ssl_verify: true,
+          timeout: 30000,
+          api_version_override: '3' as const,
+        }],
+      }),
+      loadCredentials: vi.fn().mockResolvedValue({
+        jira: { basic: { api_token: 'secret-token' } },
+      }),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await fetch(baseUrl + '/');
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    const state = extractSetupState(text);
+    const jira = (state.jira as Array<Record<string, unknown>>)[0];
+
+    expect(jira.api_version_override).toBe('3');
+    expect(state.deployment_type).toBe('onprem');
+  });
+
+  it('GET / — onprem Jira만 등록되어도 deployment_type이 "onprem" (M1 회귀 가드)', async () => {
+    const ctx = makeContext({
+      loadConfig: vi.fn().mockResolvedValue({
+        jira: [{
+          base_url: 'https://jira.internal.com',
+          is_cloud: false,
+          username: 'user',
+          ssl_verify: true,
+          timeout: 30000,
+        }],
+      }),
+    });
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await fetch(baseUrl + '/');
+    expect(res.status).toBe(200);
+    const text = await res.text();
+    const state = extractSetupState(text);
+
+    expect(state.deployment_type).toBe('onprem');
+    expect(state.confluence).toBeUndefined();
+  });
+
   it('GET /status — config 없으면 configured:false 반환', async () => {
     const ctx = makeContext({ loadConfig: vi.fn().mockResolvedValue({}) });
     const { server: s, baseUrl } = await startTestServer(ctx);
@@ -344,5 +397,31 @@ describe('createRouteHandler', () => {
     const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
     expect(Array.isArray(savedConfig?.jira)).toBe(true);
     expect(savedConfig?.jira?.[0]?.base_url).toBe('https://test.atlassian.net');
+  });
+
+  it("POST /submit — on-prem Jira api_version_override:'3'가 ServiceConfig에 저장됨", async () => {
+    const ctx = makeContext();
+    vi.mocked(await import('../../../../core/index.js')).resolveEnvironment.mockReturnValue({
+      base_url: 'https://jira.internal.com',
+      is_cloud: false,
+      hostname: 'jira.internal.com',
+    });
+
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await postJson(baseUrl + '/submit', {
+      deployment_type: 'onprem',
+      jira: {
+        base_url: 'https://jira.internal.com',
+        username: 'user',
+        api_token: 'token',
+        api_version_override: '3',
+      },
+    });
+
+    expect(res.status).toBe(200);
+    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
+    expect(savedConfig?.jira?.[0]?.api_version_override).toBe('3');
   });
 });

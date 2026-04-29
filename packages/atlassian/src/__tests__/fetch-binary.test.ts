@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleFetch } from '../mcp/tools/fetch/index.js';
-import type { HttpClientConfig } from '../types/index.js';
+import type { FetchContext, HttpClientConfig } from '../types/index.js';
 
 // Mock node:fs/promises — vi.hoisted ensures the variable is available during mock hoisting
 const { mockStat } = vi.hoisted(() => ({
@@ -40,6 +40,7 @@ const config: HttpClientConfig = {
   base_url: 'https://test.atlassian.net',
   auth_header: 'Bearer test',
 };
+const ctx: FetchContext = { http: config, service: 'jira', apiVersion: '3' };
 
 describe('fetch binary download (save_to_path)', () => {
   beforeEach(() => {
@@ -63,7 +64,7 @@ describe('fetch binary download (save_to_path)', () => {
       method: 'GET',
       endpoint: '/rest/api/3/attachment/content/123',
       save_to_path: '/tmp/download.png',
-    }, config);
+    }, ctx);
 
     expect(writeBinary).toHaveBeenCalledWith('/resolved/tmp/download.png', buffer);
     expect(result.data).toEqual({
@@ -87,7 +88,7 @@ describe('fetch binary download (save_to_path)', () => {
       method: 'GET',
       endpoint: '/rest/api/3/attachment/content/123',
       save_to_path: '../../etc/passwd',
-    }, config)).rejects.toThrow('path traversal');
+    }, ctx)).rejects.toThrow('path traversal');
   });
 
   it('passes acceptBinary=true when save_to_path provided', async () => {
@@ -103,7 +104,7 @@ describe('fetch binary download (save_to_path)', () => {
       method: 'GET',
       endpoint: '/rest/api/3/issue/TEST-1',
       save_to_path: '/tmp/test.json',
-    }, config);
+    }, ctx);
 
     expect(executeRequest).toHaveBeenCalledWith(config, expect.objectContaining({
       acceptBinary: true,
@@ -119,7 +120,7 @@ describe('fetch binary download (save_to_path)', () => {
       method: 'GET',
       endpoint: '/rest/api/3/attachment/content/456',
       save_to_path: '.temp/KAN-27_comment-10110/image.png',
-    }, config);
+    }, ctx);
 
     expect(executeRequest).not.toHaveBeenCalled();
     expect(result).toEqual({
@@ -149,7 +150,7 @@ describe('fetch binary download (save_to_path)', () => {
       endpoint: '/rest/api/3/attachment/content/456',
       save_to_path: '.temp/KAN-27/image.png',
       force: true,
-    }, config);
+    }, ctx);
 
     expect(executeRequest).toHaveBeenCalled();
     expect((result.data as Record<string, unknown>).cached).toBeUndefined();
@@ -170,7 +171,7 @@ describe('fetch binary download (save_to_path)', () => {
       method: 'GET',
       endpoint: '/rest/api/3/attachment/content/789',
       save_to_path: '.temp/KAN-27_comment-10110/demo.mp4',
-    }, config);
+    }, ctx);
 
     expect(executeRequest).toHaveBeenCalled();
     expect(result.data).toEqual({
@@ -192,7 +193,7 @@ describe('fetch binary download (save_to_path)', () => {
     const result = await handleFetch({
       method: 'GET',
       endpoint: '/rest/api/3/issue/TEST-1',
-    }, config);
+    }, ctx);
 
     const data = result.data as Record<string, unknown>;
     expect(data.description_markdown).toBe('hello');

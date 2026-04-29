@@ -9,37 +9,12 @@ import { z } from "zod";
 
 import { VERSION } from "../../version.js";
 import { ConvertFormatSchema } from "../../types/index.js";
-import type { HttpClientConfig } from "../../types/index.js";
-import { loadConfig } from "../../core/config-manager/index.js";
-import { getAuthHeader } from "../../core/auth-manager/index.js";
-import { detectService, resolveSiteConfig } from "../../utils/index.js";
-import { wrapHandler } from "../shared/index.js";
+import { detectService } from "../../utils/index.js";
+import { wrapHandler, buildFetchContext } from "../shared/index.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
 import { handleAuthCheck } from "../tools/auth-check/index.js";
-
-/** Build HttpClientConfig from stored config for a service, resolving multi-site */
-async function buildClientConfig(
-  service: "jira" | "confluence",
-  baseUrl?: string,
-  endpoint?: string,
-): Promise<HttpClientConfig | null> {
-  const config = await loadConfig();
-  const sites = config[service];
-  if (!sites || sites.length === 0) return null;
-
-  const siteConfig = resolveSiteConfig(service, sites, baseUrl, endpoint);
-
-  const authHeader = await getAuthHeader(service, siteConfig.username);
-
-  return {
-    base_url: siteConfig.base_url,
-    auth_header: authHeader ?? undefined,
-    ssl_verify: siteConfig.ssl_verify,
-    timeout: siteConfig.timeout,
-  };
-}
 
 /**
  * Create and configure the MCP server with all tool registrations.
@@ -92,12 +67,12 @@ export function createServer(): McpServer {
         force?: boolean;
       }) => {
         const service = detectService(args.endpoint);
-        const config = await buildClientConfig(service, args.base_url, args.endpoint);
-        if (!config)
+        const ctx = await buildFetchContext(service, args.base_url, args.endpoint);
+        if (!ctx)
           throw new Error(
             `No ${service} configuration found. Run setup first.`,
           );
-        return handleFetch(args, config);
+        return handleFetch(args, ctx);
       },
     ),
   );

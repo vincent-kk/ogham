@@ -1,0 +1,38 @@
+# markdown-to-wiki
+
+## Purpose
+
+Markdown 텍스트를 Jira Wiki Markup 문자열로 변환하는 순수 함수 모듈.
+Jira Server/DC v2 REST API의 본문 포맷으로 사용된다.
+
+## Structure
+
+| 파일 | 역할 |
+|---|---|
+| `markdown-to-wiki.ts` | 진입점 — `markdownToWiki(md): string` |
+| `render-blocks.ts` | MarkdownBlock 배열을 Wiki 블록 문자열로 변환 |
+| `render-inline.ts` | 인라인 토큰을 Wiki 인라인 마크업으로 변환 |
+| `index.ts` | 배럴 — `markdownToWiki` 단일 재수출 |
+
+## Boundaries
+
+### Always do
+
+- 빈 입력에 대해 빈 문자열을 반환한다
+- 블록 파싱은 `../markdown-parsing/`에 위임한다
+- 알 수 없는 토큰은 throw 없이 raw text로 fallback 처리한다
+
+### Ask first
+
+- 새 Markdown 구문 지원 추가
+- Jira Wiki Markup 매핑 규칙 변경
+
+### Never do
+
+- `core/`, `mcp/` 디렉터리에서 임포트하지 않는다
+- HTTP 호출, 파일 I/O, 인증 로직을 포함하지 않는다
+- Markdown 토큰화/파싱 로직을 이 모듈 내부에 직접 구현하지 않는다
+
+## Dependencies
+
+- `../markdown-parsing/` — 블록 파싱 + 인라인 토큰화 (sibling fractal)

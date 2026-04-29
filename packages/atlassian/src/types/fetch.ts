@@ -1,4 +1,10 @@
-import type { HttpMethod } from './http.js';
+import type { HttpClientConfig, HttpMethod } from './http.js';
+
+export interface FetchContext {
+  http: HttpClientConfig;
+  service: 'jira' | 'confluence';
+  apiVersion: '2' | '3';
+}
 
 export interface FetchParams {
   method: HttpMethod;

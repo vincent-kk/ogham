@@ -15,6 +15,7 @@ export interface RouteContext {
     credentials: ServiceCredentials;
     username?: string;
     service: 'jira' | 'confluence';
+    api_version_override?: '2' | '3';
   }) => Promise<ConnectionTestResult>;
   resetTimer: () => void;
   closeServer: () => Promise<void>;
@@ -90,6 +91,7 @@ function buildEditableSitesState(
     username: site.username,
     ssl_verify: site.ssl_verify,
     timeout: site.timeout,
+    api_version_override: site.api_version_override,
     api_token: credentials?.basic?.api_token ? true : undefined,
   }));
 }
@@ -104,13 +106,14 @@ async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<vo
   const confSites = config.confluence ?? [];
   const hasJira = jiraSites.length > 0;
   const hasConf = confSites.length > 0;
+  const hasOnPremSite = jiraSites.some((s) => !s.is_cloud)
+    || confSites.some((s) => !s.is_cloud);
 
   const stateData = {
     ...status,
     ...(hasJira ? { jira: buildEditableSitesState(jiraSites, credentials.jira) } : {}),
     ...(hasConf ? { confluence: buildEditableSitesState(confSites, credentials.confluence) } : {}),
-    deployment_type: hasJira && hasConf && jiraSites[0]?.base_url !== confSites[0]?.base_url
-      ? 'on_premise' : 'cloud',
+    deployment_type: hasOnPremSite ? 'onprem' : 'cloud',
   };
 
   const html = ctx.setupHtml.replace("'__SETUP_STATE__'", JSON.stringify(stateData));
@@ -152,6 +155,7 @@ async function handleTest(
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
+      api_version_override: data.jira.api_version_override,
     }));
   }
 
@@ -208,6 +212,7 @@ async function handleSubmit(
       credentials: creds,
       username: data.jira.username,
       service: 'jira',
+      api_version_override: data.jira.api_version_override,
     }));
   }
 
@@ -263,6 +268,7 @@ async function handleSubmit(
         username: data.jira.username,
         ssl_verify: data.jira.ssl_verify ?? true,
         timeout: data.jira.timeout ?? 30000,
+        api_version_override: data.jira.api_version_override,
       }];
       newCredentials.jira = buildCredentials(data.jira);
     }
