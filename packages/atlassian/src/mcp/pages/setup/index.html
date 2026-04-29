@@ -1,202 +1,273 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atlassian Configuration</title>
-  <link href="./styles/styles.css" rel="stylesheet">
-</head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h1 class="page-title">Atlassian Configuration</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atlassian Configuration</title>
+    <link href="./styles/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1 class="page-title">Atlassian Configuration</h1>
 
-      <div class="warning-banner is-hidden" id="warning-banner">
-        <span class="warning-icon">&#9888;</span>
-        Existing configuration found. Changes will overwrite current settings.
-      </div>
-
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="cloud">Cloud</button>
-        <button class="tab-btn" data-tab="on-premise">On-premise (Separate Endpoints)</button>
-      </div>
-
-      <form id="setup-form" novalidate>
-
-        <!-- Cloud Tab -->
-        <div class="tab-panel" data-panel="cloud">
-          <div class="form-section">
-
-            <div id="cloud-sites-container">
-              <div class="site-entry" data-site-index="0">
-                <div class="form-group">
-                  <label>Site Name <span class="required">*</span></label>
-                  <input type="text" data-field="cloud.sites.0.base_url"
-                    placeholder="your-site-name or https://your-site-name.atlassian.net" autocomplete="off">
-                  <span class="field-error" hidden></span>
-                </div>
-              </div>
-            </div>
-
-            <button type="button" class="btn btn-link" id="btn-add-site">+ Add another site</button>
-
-            <div class="form-group">
-              <label>Username (Email) <span class="required">*</span></label>
-              <input type="text" data-field="cloud.username" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-            <div class="form-group">
-              <label>API Token <span class="required">*</span></label>
-              <input type="password" data-field="cloud.api_token" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-
-            <details class="advanced-accordion">
-              <summary class="advanced-toggle">Advanced</summary>
-              <div class="advanced-body">
-                <div class="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" data-field="cloud.ssl_verify" checked>
-                    SSL Verify
-                  </label>
-                </div>
-                <div class="form-group">
-                  <label>Timeout (ms)</label>
-                  <input type="number" data-field="cloud.timeout" placeholder="30000">
-                </div>
-              </div>
-            </details>
-          </div>
+        <div class="warning-banner is-hidden" id="warning-banner">
+          <span class="warning-icon">&#9888;</span>
+          Existing configuration found. Changes will overwrite current settings.
         </div>
 
-        <!-- On-premise Tab -->
-        <div class="tab-panel is-hidden" data-panel="on-premise">
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="cloud">Cloud</button>
+          <button class="tab-btn" data-tab="on-premise">
+            On-premise (Separate Endpoints)
+          </button>
+        </div>
 
-          <fieldset class="endpoint-section">
-            <legend>Jira</legend>
-
-            <div class="form-group">
-              <label>Base URL <span class="required">*</span></label>
-              <input type="url" data-field="onprem.jira.base_url"
-                placeholder="https://jira.your-company.com" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-
-            <div class="form-group">
-              <label>Username <span class="required">*</span></label>
-              <input type="text" data-field="onprem.jira.username" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-            <div class="form-group">
-              <label>API Token <span class="required">*</span></label>
-              <input type="password" data-field="onprem.jira.api_token" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-
-            <details class="advanced-accordion">
-              <summary class="advanced-toggle">Advanced</summary>
-              <div class="advanced-body">
-                <div class="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" data-field="onprem.jira.ssl_verify" checked>
-                    SSL Verify
-                  </label>
+        <form id="setup-form" novalidate>
+          <!-- Cloud Tab -->
+          <div class="tab-panel" data-panel="cloud">
+            <div class="form-section">
+              <div id="cloud-sites-container">
+                <div class="site-entry" data-site-index="0">
+                  <div class="form-group">
+                    <label>Site Name <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      data-field="cloud.sites.0.base_url"
+                      placeholder="your-site-name or https://your-site-name.atlassian.net"
+                      autocomplete="off"
+                    />
+                    <span class="field-error" hidden></span>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label>Timeout (ms)</label>
-                  <input type="number" data-field="onprem.jira.timeout" placeholder="30000">
-                </div>
-                <div class="form-group">
-                  <label>Jira API Version</label>
-                  <div class="auth-type-group">
-                    <label class="radio-pill">
-                      <input type="radio" name="onprem-jira-api-ver"
-                             data-field="onprem.jira.api_version_override" value="" checked>
-                      Auto (v2)
-                    </label>
-                    <label class="radio-pill">
-                      <input type="radio" name="onprem-jira-api-ver"
-                             data-field="onprem.jira.api_version_override" value="2">
-                      v2
-                    </label>
-                    <label class="radio-pill">
-                      <input type="radio" name="onprem-jira-api-ver"
-                             data-field="onprem.jira.api_version_override" value="3">
-                      v3
+              </div>
+
+              <button type="button" class="btn btn-link" id="btn-add-site">
+                + Add another site
+              </button>
+
+              <div class="form-group">
+                <label>Username (Email) <span class="required">*</span></label>
+                <input
+                  type="text"
+                  data-field="cloud.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="cloud.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion">
+                <summary class="advanced-toggle">Advanced</summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="cloud.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
                     </label>
                   </div>
-                  <p class="form-help">Choose v3 only if your DC supports it and you need ADF body format.</p>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="cloud.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
                 </div>
-              </div>
-            </details>
-          </fieldset>
-
-          <fieldset class="endpoint-section">
-            <legend>Confluence</legend>
-
-            <div class="form-group">
-              <label>Base URL <span class="required">*</span></label>
-              <input type="url" data-field="onprem.confluence.base_url"
-                placeholder="https://confluence.your-company.com" autocomplete="off">
-              <span class="field-error" hidden></span>
+              </details>
             </div>
-
-            <div class="form-group">
-              <label>Username <span class="required">*</span></label>
-              <input type="text" data-field="onprem.confluence.username" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-            <div class="form-group">
-              <label>API Token <span class="required">*</span></label>
-              <input type="password" data-field="onprem.confluence.api_token" autocomplete="off">
-              <span class="field-error" hidden></span>
-            </div>
-
-            <details class="advanced-accordion">
-              <summary class="advanced-toggle">Advanced</summary>
-              <div class="advanced-body">
-                <div class="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" data-field="onprem.confluence.ssl_verify" checked>
-                    SSL Verify
-                  </label>
-                </div>
-                <div class="form-group">
-                  <label>Timeout (ms)</label>
-                  <input type="number" data-field="onprem.confluence.timeout" placeholder="30000">
-                </div>
-              </div>
-            </details>
-          </fieldset>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-row">
-          <button type="button" class="btn btn-secondary" id="btn-import">Import from JSON</button>
-          <div class="action-right">
-            <span class="test-result" id="test-result" hidden></span>
-            <button type="submit" class="btn btn-primary" id="btn-save">Save</button>
           </div>
+
+          <!-- On-premise Tab -->
+          <div class="tab-panel is-hidden" data-panel="on-premise">
+            <fieldset class="endpoint-section">
+              <legend>Jira</legend>
+
+              <div class="form-group">
+                <label>Base URL <span class="required">*</span></label>
+                <input
+                  type="url"
+                  data-field="onprem.jira.base_url"
+                  placeholder="https://jira.your-company.com"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input
+                  type="text"
+                  data-field="onprem.jira.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="onprem.jira.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion">
+                <summary class="advanced-toggle">Advanced</summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="onprem.jira.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="onprem.jira.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Jira API Version</label>
+                    <div class="auth-type-group">
+                      <label class="radio-pill">
+                        <input
+                          type="radio"
+                          name="onprem-jira-api-ver"
+                          data-field="onprem.jira.api_version_override"
+                          value=""
+                          checked
+                        />
+                        Auto(v2)
+                      </label>
+                      <label class="radio-pill">
+                        <input
+                          type="radio"
+                          name="onprem-jira-api-ver"
+                          data-field="onprem.jira.api_version_override"
+                          value="3"
+                        />
+                        v3
+                      </label>
+                    </div>
+                    <p class="form-help">
+                      Server/DC defaults to v2. <br />
+                      Choose v3 only if your DC supports it and you need ADF
+                      body format.
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </fieldset>
+
+            <fieldset class="endpoint-section">
+              <legend>Confluence</legend>
+
+              <div class="form-group">
+                <label>Base URL <span class="required">*</span></label>
+                <input
+                  type="url"
+                  data-field="onprem.confluence.base_url"
+                  placeholder="https://confluence.your-company.com"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input
+                  type="text"
+                  data-field="onprem.confluence.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="onprem.confluence.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion">
+                <summary class="advanced-toggle">Advanced</summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="onprem.confluence.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="onprem.confluence.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
+                </div>
+              </details>
+            </fieldset>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-row">
+            <button type="button" class="btn btn-secondary" id="btn-import">
+              Import from JSON
+            </button>
+            <div class="action-right">
+              <span class="test-result" id="test-result" hidden></span>
+              <button type="submit" class="btn btn-primary" id="btn-save">
+                Save
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Success Screen -->
+        <div class="success-screen is-hidden" id="success-screen">
+          <div class="success-icon">&#10003;</div>
+          <p>Configuration saved successfully. You may close this window.</p>
         </div>
-
-      </form>
-
-      <!-- Success Screen -->
-      <div class="success-screen is-hidden" id="success-screen">
-        <div class="success-icon">&#10003;</div>
-        <p>Configuration saved successfully. You may close this window.</p>
       </div>
-
     </div>
-  </div>
 
-  <div id="toast" class="toast" hidden></div>
+    <div id="toast" class="toast" hidden></div>
 
-  <script>
-    window.__SETUP_STATE__ = '__SETUP_STATE__';
-  </script>
-  <script src="./__mocks__/mock-api.js"></script>
-  <script src="./scripts/app.js"></script>
-  <script src="./scripts/json-import.js"></script>
-</body>
+    <script>
+      window.__SETUP_STATE__ = "__SETUP_STATE__";
+    </script>
+    <script src="./__mocks__/mock-api.js"></script>
+    <script src="./scripts/app.js"></script>
+    <script src="./scripts/json-import.js"></script>
+  </body>
 </html>
