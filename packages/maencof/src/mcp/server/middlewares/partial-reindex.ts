@@ -17,6 +17,7 @@ import {
 } from '../../../core/graph-builder/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import type { StaleEntry } from '../../../core/indexer/metadata-store/metadata-store.js';
+import { invalidateQueryCache } from '../../../search/query-engine/index.js';
 import type { NodeId } from '../../../types/common.js';
 import { toNodeId } from '../../../types/common.js';
 import type {
@@ -32,6 +33,9 @@ import type {
  * - `op === 'delete'`: graph.nodes 에서 노드 제거 + 해당 노드를 source/target 으로 하는 모든 edges 제거 + invertedIndex 의 term 에서 제거.
  * - weights / pageRank / edgeWeightMap / edgeTypeMap / adjacencyList 는 갱신하지 않는다.
  * - 디스크 미반영. 호출자는 동일 graph reference 를 즉시 사용 가능.
+ *
+ * @sideEffect 변경이 적용되면 (replacedSourceIds.size + anyDeleted > 0) module-level queryCache 를 invalidate. 이는 graph.builtAt 미변경 in-place mutation 의 결과로 동일 builtAt 키에 묶인 SA 캐시 결과가 stale 하게 반환되는 read-path 비일관을 차단한다.
+ * @see invalidateQueryCache
  */
 export async function mergeStaleNodesIntoGraph(
   vaultPath: string,
@@ -90,6 +94,12 @@ export async function mergeStaleNodesIntoGraph(
   }
 
   graph.edgeCount = graph.edges.length;
+
+  // Graph structure changed in place but graph.builtAt was NOT bumped.
+  // Module-level queryCache keys on builtAt; without explicit invalidation
+  // the next call with identical seeds/options would hit a pre-merge
+  // result. Invalidate exactly when at least one delta was applied.
+  invalidateQueryCache();
 
   return graph;
 }
