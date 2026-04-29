@@ -20,15 +20,15 @@ const mockBuildAuthHeader = vi.mocked(buildAuthHeader);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockBuildAuthHeader.mockReturnValue({ type: 'Bearer', value: 'token-value' });
-  mockExecuteRequest.mockResolvedValue({ success: true, data: {} });
+  mockBuildAuthHeader.mockReturnValue({ type: 'bearer', value: 'token-value' });
+  mockExecuteRequest.mockResolvedValue({ status: 200, success: true, data: {} });
 });
 
 describe('testConnection', () => {
   // --- basic ---
 
   it('Jira Cloud 성공 — /rest/api/3/myself 엔드포인트 사용', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
 
     const result = await testConnection({
@@ -45,7 +45,7 @@ describe('testConnection', () => {
   });
 
   it('Confluence Cloud 성공 — /wiki/rest/api/space?limit=1 엔드포인트 사용', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
 
     const result = await testConnection({
@@ -62,7 +62,7 @@ describe('testConnection', () => {
   });
 
   it('자격 증명 없음 — buildAuthHeader가 null 반환하면 success:false', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockBuildAuthHeader.mockReturnValue(null);
 
     const result = await testConnection({
@@ -79,7 +79,7 @@ describe('testConnection', () => {
   // --- complex ---
 
   it('Jira Server — is_cloud:false이면 /rest/api/2/myself 엔드포인트 사용', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://jira.internal.com', is_cloud: false });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://jira.internal.com', is_cloud: false, hostname: 'jira.internal.com' });
     mockGetApiVersion.mockReturnValue('2');
 
     await testConnection({
@@ -93,7 +93,7 @@ describe('testConnection', () => {
   });
 
   it('Confluence Server — is_cloud:false이면 /rest/api/space?limit=1 엔드포인트 사용', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://confluence.internal.com', is_cloud: false });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://confluence.internal.com', is_cloud: false, hostname: 'confluence.internal.com' });
 
     await testConnection({
       base_url: 'https://confluence.internal.com',
@@ -106,11 +106,12 @@ describe('testConnection', () => {
   });
 
   it('401 Unauthorized — "Authentication failed" 메시지 반환', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
     mockExecuteRequest.mockResolvedValue({
+      status: 401,
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Unauthorized' },
+      error: { code: 'UNAUTHORIZED', message: 'Unauthorized', retryable: false },
     });
 
     const result = await testConnection({
@@ -124,11 +125,12 @@ describe('testConnection', () => {
   });
 
   it('네트워크 오류 — NETWORK_ERROR 코드이면 success:false 반환', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
     mockExecuteRequest.mockResolvedValue({
+      status: 500,
       success: false,
-      error: { code: 'NETWORK_ERROR', message: 'timeout' },
+      error: { code: 'NETWORK_ERROR', message: 'timeout', retryable: true },
     });
 
     const result = await testConnection({
@@ -142,7 +144,7 @@ describe('testConnection', () => {
   });
 
   it('지연 시간 측정 — latency_ms는 양수여야 함', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
 
     const result = await testConnection({
@@ -156,7 +158,7 @@ describe('testConnection', () => {
   });
 
   it("Jira on-prem + api_version_override:'3' — /rest/api/3/myself 엔드포인트 사용", async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://jira.internal.com', is_cloud: false });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://jira.internal.com', is_cloud: false, hostname: 'jira.internal.com' });
     mockGetApiVersion.mockReturnValue('3');
 
     await testConnection({
@@ -172,7 +174,7 @@ describe('testConnection', () => {
   });
 
   it('buildAuthHeader가 credentials와 username으로 호출됨', async () => {
-    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true });
+    mockResolveEnvironment.mockReturnValue({ base_url: 'https://test.atlassian.net', is_cloud: true, hostname: 'test.atlassian.net' });
     mockGetApiVersion.mockReturnValue('3');
 
     await testConnection({

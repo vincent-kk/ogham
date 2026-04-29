@@ -91,6 +91,7 @@ function buildEditableSitesState(
     username: site.username,
     ssl_verify: site.ssl_verify,
     timeout: site.timeout,
+    api_version_override: site.api_version_override,
     api_token: credentials?.basic?.api_token ? true : undefined,
   }));
 }
@@ -105,13 +106,14 @@ async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<vo
   const confSites = config.confluence ?? [];
   const hasJira = jiraSites.length > 0;
   const hasConf = confSites.length > 0;
+  const hasOnPremSite = jiraSites.some((s) => !s.is_cloud)
+    || confSites.some((s) => !s.is_cloud);
 
   const stateData = {
     ...status,
     ...(hasJira ? { jira: buildEditableSitesState(jiraSites, credentials.jira) } : {}),
     ...(hasConf ? { confluence: buildEditableSitesState(confSites, credentials.confluence) } : {}),
-    deployment_type: hasJira && hasConf && jiraSites[0]?.base_url !== confSites[0]?.base_url
-      ? 'onprem' : 'cloud',
+    deployment_type: hasOnPremSite ? 'onprem' : 'cloud',
   };
 
   const html = ctx.setupHtml.replace("'__SETUP_STATE__'", JSON.stringify(stateData));
