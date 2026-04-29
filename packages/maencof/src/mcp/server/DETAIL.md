@@ -14,10 +14,12 @@
 - `registerMutateTool(server, name, schema, coreHandler, getAffectedPath)` — mutate tool 등록.
 - `registerReadTool(server, name, schema, coreHandler, { needsFreshness })` — freshness-read 와 plain-read 등록.
 - `triggerBackgroundRebuild(vaultPath): void` — 모듈 레벨 mutex 로 중복 트리거 차단, 절대 await 노출 금지.
+- `mergeStaleNodesIntoGraph(vaultPath, graph, entries?): Promise<KnowledgeGraph>` — Hybrid partial reindex. Side Effects: graph 의 nodes/edges/invertedIndex in-place mutation, 변경 적용 시 module-level queryCache 자동 invalidate.
 
 ## Stale management semantics
 
 - Stale 영속 스키마: `{ entries: { path, op:'mutate'|'delete' }[], updatedAt }`. 레거시 `{ paths }` 는 자동으로 `op='mutate'` 로 승격.
 - partial reindex 는 Hybrid: stale entries 별 분기 — `mutate` 는 `parseDocument`+`buildKnowledgeNode` 로 node 교체 + outbound edge 재계산, `delete` 는 graph.nodes/edges 에서 제거. `nodes`, outbound `LINK` edges, `invertedIndex` 가 partial-maintained 집합. weights / PageRank / edgeWeightMap / edgeTypeMap / adjacencyList 는 background rebuild 의존.
+- `mergeStaleNodesIntoGraph(vaultPath, graph, entries?)` 는 `Promise<KnowledgeGraph>` 시그니처를 유지한다. Side effects: graph 의 nodes/edges/invertedIndex in-place mutation, 그리고 변경이 실제로 적용된 경우 (`replacedSourceIds.size + anyDeleted > 0`) module-level `queryCache` 를 자동 invalidate. graph.builtAt 미변경 in-place mutation 으로 동일 builtAt 키에 묶인 SA 캐시 결과의 stale-read 를 차단한다 — 호출자는 별도 `invalidateQueryCache()` 호출이 불필요하다.
 - read 1회 처리량은 `READ_REINDEX_CAP` 로 제한 (가장 최근 항목 우선 `slice(-N)`; 초과분은 background rebuild 가 흡수). bg rebuild trigger 는 별개 `STALE_REBUILD_THRESHOLD` 로 통제 — 두 상수는 동일 값이라도 의미가 다르므로 항상 별도 import.
 - stale 정보는 인덱서 내부 상태 — LLM 컨텍스트, 도구 응답, 진단 외 표면에 노출 금지.

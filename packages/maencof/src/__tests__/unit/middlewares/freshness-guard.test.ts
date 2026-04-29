@@ -12,6 +12,8 @@ import { READ_REINDEX_CAP } from '../../../constants/thresholds.js';
 import { invalidateCache } from '../../../mcp/server/graph-cache/index.js';
 import { _peekRebuildInProgress } from '../../../mcp/server/middlewares/background-rebuild.js';
 import { ensureFreshGraphNonBlocking } from '../../../mcp/server/middlewares/freshness-guard.js';
+import { invalidateQueryCache, query } from '../../../search/query-engine/query-engine.js';
+import type { NodeId } from '../../../types/common.js';
 
 let vaultDir: string;
 
@@ -140,5 +142,35 @@ describe('ensureFreshGraphNonBlocking', () => {
     invalidateCache();
     const r2 = await ensureFreshGraphNonBlocking(vaultDir);
     expect(r2).not.toBeNull();
+  });
+
+  it('complex-7: graph 가 partial-reindex 로 mutate 된 직후 ensureFreshGraphNonBlocking 가 stale cached query 결과를 반환하지 않는다', async () => {
+    // builtAt 미변경 in-place mutation 이라도 mergeStaleNodesIntoGraph 가 자체적으로
+    // invalidateQueryCache 를 호출 → 같은 builtAt 키에 묶인 SA 캐시가 재사용되지 않는다.
+    writeMinimalGraph();
+    invalidateQueryCache();
+
+    const g1 = await ensureFreshGraphNonBlocking(vaultDir);
+    expect(g1).not.toBeNull();
+    if (!g1) throw new Error('graph null');
+
+    // 사전 query 1회 → cache 저장 (1 node 결과)
+    const before = query(g1, ['t']);
+    void before;
+    expect(g1.nodes.size).toBe(1);
+
+    // delete stale entry 적용
+    writeStaleEntries([{ path: 'doc/a.md', op: 'delete' }]);
+
+    // ensureFreshGraphNonBlocking → 내부 mergeStaleNodesIntoGraph → invalidateQueryCache 자동
+    const g2 = await ensureFreshGraphNonBlocking(vaultDir);
+    expect(g2).not.toBeNull();
+    if (!g2) throw new Error('graph null after merge');
+    expect(g2.nodes.has('doc/a.md' as NodeId)).toBe(false);
+    expect(g2.nodes.size).toBe(0);
+
+    // 같은 seeds 로 query → cache 가 invalidate 되었으므로 post-merge graph 로 재실행
+    const after = query(g2, ['t']);
+    expect(after.results.length).toBe(0);
   });
 });

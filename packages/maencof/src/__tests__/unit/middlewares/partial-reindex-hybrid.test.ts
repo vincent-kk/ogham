@@ -7,10 +7,11 @@ import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MetadataStore } from '../../../core/indexer/metadata-store/metadata-store.js';
 import { mergeStaleNodesIntoGraph } from '../../../mcp/server/middlewares/partial-reindex.js';
+import * as queryEngine from '../../../search/query-engine/query-engine.js';
 import type { InvertedIndex, KnowledgeGraph, KnowledgeNode } from '../../../types/graph.js';
 import type { NodeId } from '../../../types/common.js';
 
@@ -207,5 +208,109 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
       { path: 'a.md', op: 'mutate' },
     ]);
     expect(graph.nodes.has('a.md' as NodeId)).toBe(true);
+  });
+});
+
+describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
+  let invalidateSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    invalidateSpy = vi.spyOn(queryEngine, 'invalidateQueryCache');
+  });
+
+  afterEach(() => {
+    invalidateSpy.mockRestore();
+  });
+
+  it('basic-1: stale entries 0개일 때 invalidateQueryCache 가 호출되지 않는다', async () => {
+    const graph: KnowledgeGraph = {
+      nodes: new Map(),
+      edges: [],
+      builtAt: '2026-01-01',
+      nodeCount: 0,
+      edgeCount: 0,
+    };
+    await mergeStaleNodesIntoGraph(vaultDir, graph, []);
+    expect(invalidateSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('complex-1: mutate 한 건 적용 시 invalidateQueryCache 가 정확히 1회 호출된다', async () => {
+    const aOld = makeNode('a.md', 'OLD');
+    const graph: KnowledgeGraph = {
+      nodes: new Map([[aOld.id, aOld]]),
+      edges: [],
+      builtAt: '2026-01-01',
+      nodeCount: 1,
+      edgeCount: 0,
+    };
+    writeMarkdown(
+      'a.md',
+      `---\nlayer: 2\ntags: [t]\ncreated: 2026-01-01\nupdated: 2026-01-01\n---\n# NEW\nbody\n`,
+    );
+    await mergeStaleNodesIntoGraph(vaultDir, graph, [
+      { path: 'a.md', op: 'mutate' },
+    ]);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('complex-2: delete 한 건 적용 시 invalidateQueryCache 가 정확히 1회 호출된다', async () => {
+    const a = makeNode('a.md', 'Alpha');
+    const graph: KnowledgeGraph = {
+      nodes: new Map([[a.id, a]]),
+      edges: [],
+      builtAt: '2026-01-01',
+      nodeCount: 1,
+      edgeCount: 0,
+    };
+    await mergeStaleNodesIntoGraph(vaultDir, graph, [
+      { path: 'a.md', op: 'delete' },
+    ]);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('complex-3: mutate 가 ENOENT 로 모두 skip 되어 changed=0 인 경우 invalidateQueryCache 호출 0회', async () => {
+    const aOld = makeNode('a.md', 'Alpha');
+    const graph: KnowledgeGraph = {
+      nodes: new Map([[aOld.id, aOld]]),
+      edges: [],
+      builtAt: '2026-01-01',
+      nodeCount: 1,
+      edgeCount: 0,
+    };
+    // 디스크에 파일 없음 → readFile ENOENT → mutate 모두 skip
+    await mergeStaleNodesIntoGraph(vaultDir, graph, [
+      { path: 'a.md', op: 'mutate' },
+    ]);
+    expect(invalidateSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('complex-4: mutate 직후 query 호출이 pre-merge cache 결과를 반환하지 않는다', async () => {
+    // 동일 builtAt 의 in-place mutation 이라도 invalidateQueryCache 가 자동 호출되어
+    // 후속 query 가 post-merge graph 구조로 재실행된다.
+    const aOld = makeNode('a.md', 'Alpha');
+    const graph: KnowledgeGraph = {
+      nodes: new Map([[aOld.id, aOld]]),
+      edges: [],
+      builtAt: '2026-01-01',
+      nodeCount: 1,
+      edgeCount: 0,
+      invertedIndex: new Map([
+        ['alpha', new Set<NodeId>(['a.md' as NodeId])],
+      ]),
+    };
+
+    // 사전 query 1회 → cache 저장
+    const before = queryEngine.query(graph, ['alpha']);
+    expect(before.results.map((r) => r.nodeId)).toContain('a.md' as NodeId);
+
+    // delete entry 적용 → invalidate 호출 기대
+    await mergeStaleNodesIntoGraph(vaultDir, graph, [
+      { path: 'a.md', op: 'delete' },
+    ]);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
+
+    // 두 번째 query — graph 가 비었으므로 결과 0
+    const after = queryEngine.query(graph, ['alpha']);
+    expect(after.results.length).toBe(0);
   });
 });

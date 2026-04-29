@@ -163,3 +163,9 @@ export {
   handleKgBuild,
 } from './mcp/index.js';
 export type { KgBuildInput, KgBuildResult } from './mcp/index.js';
+
+// MCP middlewares
+export { mergeStaleNodesIntoGraph } from './mcp/server/middlewares/index.js';
+
+// Public policy constants
+export { READ_REINDEX_CAP } from './constants/thresholds.js';
