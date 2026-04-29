@@ -9,43 +9,12 @@ import { z } from "zod";
 
 import { VERSION } from "../../version.js";
 import { ConvertFormatSchema } from "../../types/index.js";
-import type { FetchContext, HttpClientConfig } from "../../types/index.js";
-import { loadConfig } from "../../core/config-manager/index.js";
-import { getAuthHeader } from "../../core/auth-manager/index.js";
-import { detectService, resolveSiteConfig } from "../../utils/index.js";
-import { wrapHandler } from "../shared/index.js";
+import { detectService } from "../../utils/index.js";
+import { wrapHandler, buildFetchContext } from "../shared/index.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
 import { handleAuthCheck } from "../tools/auth-check/index.js";
-
-/** Build FetchContext (HttpClientConfig + service + apiVersion) for a fetch call. */
-async function buildFetchContext(
-  service: "jira" | "confluence",
-  baseUrl?: string,
-  endpoint?: string,
-): Promise<FetchContext | null> {
-  const config = await loadConfig();
-  const sites = config[service];
-  if (!sites || sites.length === 0) return null;
-
-  const siteConfig = resolveSiteConfig(service, sites, baseUrl, endpoint);
-
-  const authHeader = await getAuthHeader(service, siteConfig.username);
-
-  const http: HttpClientConfig = {
-    base_url: siteConfig.base_url,
-    auth_header: authHeader ?? undefined,
-    ssl_verify: siteConfig.ssl_verify,
-    timeout: siteConfig.timeout,
-  };
-
-  const apiVersion: '2' | '3' = service === 'jira'
-    ? (siteConfig.api_version_override ?? (siteConfig.is_cloud ? '3' : '2'))
-    : (siteConfig.is_cloud ? '3' : '2');
-
-  return { http, service, apiVersion };
-}
 
 /**
  * Create and configure the MCP server with all tool registrations.

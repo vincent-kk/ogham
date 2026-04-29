@@ -25,13 +25,24 @@ const FormCredentialsSchema = z.object({
 
 // --- Setup form data ---
 
-export const SetupFormDataSchema = z.object({
-  deployment_type: DeploymentTypeSchema,
-  // Cloud: multiple sites (array of URLs)
-  // On-premise: separate jira/confluence
-  jira: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
-  confluence: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
-});
+export const SetupFormDataSchema = z
+  .object({
+    deployment_type: DeploymentTypeSchema,
+    // Cloud: multiple sites (array of URLs)
+    // On-premise: separate jira/confluence
+    jira: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
+    confluence: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
+  })
+  .refine(
+    (data) =>
+      data.deployment_type === 'onprem' ||
+      data.jira?.api_version_override === undefined,
+    {
+      message:
+        'api_version_override is only supported on Jira on-prem; Cloud is always v3',
+      path: ['jira', 'api_version_override'],
+    },
+  );
 export type SetupFormData = z.infer<typeof SetupFormDataSchema>;
 
 // --- Response schemas ---
