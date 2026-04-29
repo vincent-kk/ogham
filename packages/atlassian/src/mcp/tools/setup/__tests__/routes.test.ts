@@ -345,4 +345,29 @@ describe('createRouteHandler', () => {
     expect(Array.isArray(savedConfig?.jira)).toBe(true);
     expect(savedConfig?.jira?.[0]?.base_url).toBe('https://test.atlassian.net');
   });
+
+  it("POST /submit — on-prem Jira api_version_override:'3'가 ServiceConfig에 저장됨", async () => {
+    const ctx = makeContext();
+    vi.mocked(await import('../../../../core/index.js')).resolveEnvironment.mockReturnValue({
+      base_url: 'https://jira.internal.com',
+      is_cloud: false,
+    });
+
+    const { server: s, baseUrl } = await startTestServer(ctx);
+    server = s;
+
+    const res = await postJson(baseUrl + '/submit', {
+      deployment_type: 'onprem',
+      jira: {
+        base_url: 'https://jira.internal.com',
+        username: 'user',
+        api_token: 'token',
+        api_version_override: '3',
+      },
+    });
+
+    expect(res.status).toBe(200);
+    const savedConfig = vi.mocked(ctx.saveConfig).mock.calls[0]?.[0];
+    expect(savedConfig?.jira?.[0]?.api_version_override).toBe('3');
+  });
 });

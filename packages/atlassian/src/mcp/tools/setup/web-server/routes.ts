@@ -266,6 +266,7 @@ async function handleSubmit(
         username: data.jira.username,
         ssl_verify: data.jira.ssl_verify ?? true,
         timeout: data.jira.timeout ?? 30000,
+        api_version_override: data.jira.api_version_override,
       }];
       newCredentials.jira = buildCredentials(data.jira);
     }
