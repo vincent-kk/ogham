@@ -111,7 +111,7 @@ async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Promise<vo
     ...(hasJira ? { jira: buildEditableSitesState(jiraSites, credentials.jira) } : {}),
     ...(hasConf ? { confluence: buildEditableSitesState(confSites, credentials.confluence) } : {}),
     deployment_type: hasJira && hasConf && jiraSites[0]?.base_url !== confSites[0]?.base_url
-      ? 'on_premise' : 'cloud',
+      ? 'onprem' : 'cloud',
   };
 
   const html = ctx.setupHtml.replace("'__SETUP_STATE__'", JSON.stringify(stateData));

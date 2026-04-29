@@ -52,7 +52,7 @@
 
   function prefillForm(data) {
     var dt = data.deployment_type || "cloud";
-    activateTab(dt === "on_premise" ? "on-premise" : "cloud");
+    activateTab(dt === "onprem" ? "on-premise" : "cloud");
 
     if (dt === "cloud" && data.jira) {
       // Multi-site: jira is an array of { base_url, is_cloud }
@@ -68,7 +68,7 @@
       if (first.ssl_verify !== undefined)
         setCheckbox("cloud.ssl_verify", first.ssl_verify);
       if (first.timeout) setField("cloud.timeout", String(first.timeout));
-    } else if (dt === "on_premise") {
+    } else if (dt === "onprem") {
       if (data.jira) {
         var jira = Array.isArray(data.jira) ? data.jira[0] : data.jira;
         if (jira) {
@@ -352,7 +352,7 @@
   // --- Collect Form Data ---
   function collectFormData() {
     var isCloud = state.tab === "cloud";
-    var deployType = isCloud ? "cloud" : "on_premise";
+    var deployType = isCloud ? "cloud" : "onprem";
 
     function normalizeCloudUrl(value) {
       if (!value) return value;
