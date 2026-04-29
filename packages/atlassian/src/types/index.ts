@@ -33,7 +33,7 @@ export type {
   RequestOptions,
 } from './http.js';
 
-export type { FetchParams, AssetFetchParams } from './fetch.js';
+export type { FetchContext, FetchParams, AssetFetchParams } from './fetch.js';
 
 export { TokenPayloadSchema } from './auth.js';
 export type { TokenPayload } from './auth.js';

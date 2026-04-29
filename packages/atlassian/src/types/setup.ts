@@ -13,6 +13,7 @@ const ServiceFormFieldsSchema = z.object({
   username: z.string().optional(),
   ssl_verify: z.boolean().nullable().optional(),
   timeout: z.number().int().positive().nullable().optional(),
+  api_version_override: z.enum(['2', '3']).optional(),
 });
 
 // --- Credential fields (form submission) ---
@@ -69,6 +70,7 @@ export interface TestConnectionParams {
   username?: string;
   service: 'jira' | 'confluence';
   include_body?: boolean;
+  api_version_override?: '2' | '3';
 }
 
 // --- Setup tool params ---

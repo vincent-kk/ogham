@@ -6,6 +6,7 @@ export const ServiceConfigSchema = z.object({
   is_cloud: z.boolean().default(true),
   ssl_verify: z.boolean().default(true),
   timeout: z.number().int().positive().default(30000),
+  api_version_override: z.enum(['2', '3']).optional(),
 });
 export type ServiceConfig = z.infer<typeof ServiceConfigSchema>;
 

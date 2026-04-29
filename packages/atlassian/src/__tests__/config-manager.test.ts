@@ -70,6 +70,21 @@ describe('config-manager', () => {
       const loaded = await loadConfig(CONFIG_PATH);
       expect(loaded.jira?.[0]?.base_url).toBe('https://test.atlassian.net');
     });
+
+    it('round-trips api_version_override on Jira service config', async () => {
+      const config = {
+        jira: [{
+          base_url: 'https://onprem.example.com',
+          is_cloud: false,
+          ssl_verify: true,
+          timeout: 30000,
+          api_version_override: '3' as const,
+        }],
+      };
+      await saveConfig(config, CONFIG_PATH);
+      const loaded = await loadConfig(CONFIG_PATH);
+      expect(loaded.jira?.[0]?.api_version_override).toBe('3');
+    });
   });
 
   describe('mergeConfig', () => {
