@@ -2,13 +2,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   createDefaultConfig,
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
-import * as ruleEngine from '../../../core/rules/rule-engine/rule-engine.js';
 import { buildMinimalContext } from '../utils/build-minimal-context.js';
 
 describe('buildMinimalContext', () => {
@@ -80,32 +79,50 @@ describe('buildMinimalContext', () => {
 
     expect(deployed).toContain('[filid:lang]');
     expect(missing).toContain('[filid:lang]');
-    // Regression guard: an earlier version re-emitted the lang tag from a
-    // catch block when rule-engine loading failed, producing two
-    // [filid:lang] lines that confused downstream lang-tag readers.
     expect(deployed.match(/\[filid:lang\]/g) ?? []).toHaveLength(1);
     expect(missing.match(/\[filid:lang\]/g) ?? []).toHaveLength(1);
   });
 
-  it('still emits exactly one [filid:lang] tag when loadBuiltinRules throws', () => {
+  it('lists disabled rule IDs when config marks rules as disabled', () => {
+    const projectRoot = mkdtempSync(join(tmpdir(), 'filid-inject-context-'));
+    tempDirs.push(projectRoot);
+    mkdirSync(join(projectRoot, '.filid'), { recursive: true });
+    writeFileSync(
+      join(projectRoot, '.filid', 'config.json'),
+      JSON.stringify({
+        version: '1.0',
+        language: 'en',
+        rules: {
+          'naming-convention': { enabled: false },
+          'max-depth': { enabled: true },
+          'circular-dependency': { enabled: false },
+        },
+      }),
+    );
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain(
+      '[filid] Disabled rules: naming-convention, circular-dependency',
+    );
+  });
+
+  it('omits the Disabled rules line when no rule is disabled', () => {
     const projectRoot = makeProject({ deployFca: true });
-    const spy = vi
-      .spyOn(ruleEngine, 'loadBuiltinRules')
-      .mockImplementation(() => {
-        throw new Error('rule-engine load failure (simulated)');
-      });
 
-    try {
-      const context = buildMinimalContext(projectRoot);
+    const context = buildMinimalContext(projectRoot);
 
-      expect(context.match(/\[filid:lang\]/g) ?? []).toHaveLength(1);
-      expect(context).toContain(
-        `[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`,
-      );
-      // Disabled-rules line is silently skipped on rule-engine failure.
-      expect(context).not.toContain('Disabled rules');
-    } finally {
-      spy.mockRestore();
-    }
+    expect(context).not.toContain('Disabled rules');
+  });
+
+  it('falls back to en and emits Not initialized when config is missing', () => {
+    const projectRoot = mkdtempSync(join(tmpdir(), 'filid-inject-context-'));
+    tempDirs.push(projectRoot);
+
+    const context = buildMinimalContext(projectRoot);
+
+    expect(context).toContain('[filid] ⚠ Not initialized');
+    expect(context).toContain('[filid:lang] en');
+    expect(context).not.toContain('Disabled rules');
   });
 });
