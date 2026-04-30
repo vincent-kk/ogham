@@ -9,7 +9,7 @@
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "e3d66542c650edcfafe75b3d3db1a3122aff5cccd20ec84a7a2f72d74bb3d926"
+      "templateHash": "87b594c0d9dfb4772a9ac97802a1ebaef2396504eb2763f48794980cc90b4b1e"
     },
     {
       "id": "filid_reuse-first",
@@ -18,7 +18,7 @@
       "required": false,
       "title": "Reuse-First Implementation Rules",
       "description": "Implementation guidance for FCA-AI projects: solution selection priority, safe extension, file authoring, and naming heuristics.",
-      "templateHash": "4bdcfbf1cdd7d5e23d626e62d1cf2856a784dde8f3a3e38100d35da7fcfb13ac"
+      "templateHash": "cd7f6e3e95c9915b84befbaceb830833e0ef8fab26965db0bcdf9b857ead9358"
     },
     {
       "id": "filid_cognitive-discipline",
@@ -26,7 +26,7 @@
       "required": false,
       "title": "Cognitive Discipline Rules",
       "description": "Epistemic standards that block LLM rationalization: evidence over confidence, anti-rationalization principles, and intellectual honesty requirements.",
-      "templateHash": "cd47cf9612c5e472cf70f4679d121fd8dba0ac748cdf63f321dbb7f4e43a4974"
+      "templateHash": "0f3bb2a7ebbf62f5269a01ef1ee0cd766f7c518b08cf593b8b03fb14cc79f97e"
     }
   ]
 }
