@@ -6,8 +6,9 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 
 ## Structure
 
-- `agent-enforcer.ts` — `enforceAgentRole`, `buildLangTag` (internal)
+- `agent-enforcer.ts` — `enforceAgentRole` (오케스트레이터)
 - `agent-enforcer.entry.ts` — esbuild 번들 진입점 (stdin → `enforceAgentRole` → stdout)
+- `utils/build-lang-tag.ts` — `buildLangTag` (언어 태그 조립)
 
 ## Conventions
 
@@ -35,6 +36,7 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 
 - 역할 제약 문자열을 모듈 내부에 인라인 (상수 분리 필수)
 - `continue: false`로 에이전트 실행 블록
+- 훅 번들에 zod import (번들 크기 예산 초과 — `read-hook-config` 패턴 사용)
 
 ## Dependencies
 
