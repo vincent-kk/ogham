@@ -6,8 +6,8 @@
  * 타입 정의는 config-schema.ts의 Zod 스키마와 동기화 유지할 것.
  */
 
-import { CONFIG_VERSION, DEFAULT_LAYERS } from '../../constants/config.js';
-import type { LensConfig, VaultConfig } from './config-schema.js';
+import { CONFIG_VERSION, DEFAULT_LAYERS } from "../../../constants/config.js";
+import type { LensConfig, VaultConfig } from "../config-schema.js";
 
 /** Vault Config 최소 인터페이스 (hook용). */
 export interface VaultConfigMinimal {
@@ -24,15 +24,15 @@ export interface LensConfigMinimal {
 }
 
 function isNonEmptyString(v: unknown): v is string {
-  return typeof v === 'string' && v.length > 0;
+  return typeof v === "string" && v.length > 0;
 }
 
 function isValidLayer(v: unknown): v is number {
-  return typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 5;
+  return typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= 5;
 }
 
 function isValidVaultRaw(v: unknown): boolean {
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) return false;
+  if (v === null || typeof v !== "object" || Array.isArray(v)) return false;
   const obj = v as Record<string, unknown>;
   return isNonEmptyString(obj.name) && isNonEmptyString(obj.path);
 }
@@ -44,7 +44,8 @@ function isValidVaultRaw(v: unknown): boolean {
  * Zod 유효 → 수동 유효가 항상 성립.
  */
 export function isValidLensConfig(raw: unknown): raw is LensConfigMinimal {
-  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return false;
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw))
+    return false;
   const obj = raw as Record<string, unknown>;
   if (!Array.isArray(obj.vaults) || obj.vaults.length === 0) return false;
   return obj.vaults.every(isValidVaultRaw);
@@ -62,7 +63,7 @@ function normalizeVault(raw: unknown): VaultConfig {
     name: obj.name as string,
     path: obj.path as string,
     layers: normalizeLayers(obj.layers),
-    default: typeof obj.default === 'boolean' ? obj.default : false,
+    default: typeof obj.default === "boolean" ? obj.default : false,
   };
 }
 
