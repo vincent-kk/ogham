@@ -1,14 +1,5 @@
-import {
-  loadConfig,
-  resolveLanguage,
-} from '../../../core/infra/config-loader/config-loader.js';
+import { readHookConfig } from '../../utils/read-hook-config.js';
 
-/** Resolve [filid:lang] tag for injection into agent context. */
 export function buildLangTag(cwd: string): string {
-  try {
-    const { config } = loadConfig(cwd);
-    return `[filid:lang] ${resolveLanguage(config)}`;
-  } catch {
-    return '[filid:lang] en';
-  }
+  return `[filid:lang] ${readHookConfig(cwd)?.language ?? 'en'}`;
 }

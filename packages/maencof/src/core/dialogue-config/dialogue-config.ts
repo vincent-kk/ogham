@@ -1,7 +1,7 @@
 /**
  * @file dialogue-config.ts
  * @description Dialogue discipline configuration loader.
- *   Reads `.maencof-meta/dialogue-config.json` with safeParse fallback to DEFAULT_DIALOGUE_CONFIG.
+ *   Reads `.maencof-meta/dialogue-config.json` with manual guard fallback to DEFAULT_DIALOGUE_CONFIG.
  *   Exposes `isDialogueInjectionDisabled` which combines env `MAENCOF_DISABLE_DIALOGUE=1`
  *   (takes precedence) with `config.injection.enabled=false` OR-fallback.
  */
@@ -15,9 +15,10 @@ import {
   DIALOGUE_DISABLE_ENV,
 } from '../../constants/dialogue.js';
 import {
-  type DialogueConfig,
-  DialogueConfigSchema,
-} from '../../types/dialogue-config.js';
+  isValidDialogueConfig,
+  normalizeDialogueConfig,
+} from '../../types/dialogue-config-guard.js';
+import type { DialogueConfig } from '../../types/dialogue-config.js';
 
 function dialogueConfigPath(cwd: string): string {
   return join(cwd, MAENCOF_META_DIR, DIALOGUE_CONFIG_FILE);
@@ -38,9 +39,10 @@ export function readDialogueConfig(cwd: string): DialogueConfig {
   const configPath = dialogueConfigPath(cwd);
   if (!existsSync(configPath)) return DEFAULT_DIALOGUE_CONFIG;
   try {
-    const raw = readFileSync(configPath, 'utf-8');
-    const result = DialogueConfigSchema.safeParse(JSON.parse(raw));
-    return result.success ? result.data : DEFAULT_DIALOGUE_CONFIG;
+    const parsed: unknown = JSON.parse(readFileSync(configPath, 'utf-8'));
+    return isValidDialogueConfig(parsed)
+      ? normalizeDialogueConfig(parsed)
+      : DEFAULT_DIALOGUE_CONFIG;
   } catch {
     return DEFAULT_DIALOGUE_CONFIG;
   }

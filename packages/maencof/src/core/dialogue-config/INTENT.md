@@ -27,3 +27,4 @@
 - mcp/ 또는 hooks/ 직접 의존
 - meta-skill 내용 자체를 알거나 가공 (호출자가 SKILL.md 를 직접 다룬다)
 - DEFAULT_DIALOGUE_CONFIG 값을 런타임에 변경
+- Zod 스키마(dialogue-config.ts)와 수동 가드(dialogue-config-guard.ts) 간 필드 불일치 허용 금지 — 스키마 수정 시 대응 가드도 같은 PR에서 동기화

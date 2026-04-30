@@ -6,8 +6,9 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 
 ## Structure
 
-- `agent-enforcer.ts` — `enforceAgentRole`, `buildLangTag` (internal)
+- `agent-enforcer.ts` — `enforceAgentRole` (오케스트레이터)
 - `agent-enforcer.entry.ts` — esbuild 번들 진입점 (stdin → `enforceAgentRole` → stdout)
+- `utils/build-lang-tag.ts` — `buildLangTag` (언어 태그 조립)
 
 ## Conventions
 
@@ -16,7 +17,7 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
   2. `!isFcaProject(cwd)` → continue (비-FCA 프로젝트는 워크플로우 가이드 스킵)
   3. `PLANNING_AGENT_RE` 또는 `'Plan'` → `PLANNING_GUIDANCE` + 언어 태그
   4. `EXECUTOR_AGENT_RE` 또는 `'general-purpose'` → `IMPLEMENTATION_REMINDER` + 언어 태그
-- 언어 태그는 `loadConfig` 실패 시 `'en'` 폴백 — 절대 throw 금지
+- 언어 태그는 `config.language ?? 'en'` (`readHookConfig` 실패 시 `'en'`)
 - 모든 상수(`ROLE_RESTRICTIONS` 등)는 `constants/agent-context.ts`에서만 관리
 
 ## Boundaries
@@ -35,9 +36,9 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 
 - 역할 제약 문자열을 모듈 내부에 인라인 (상수 분리 필수)
 - `continue: false`로 에이전트 실행 블록
+- 훅 번들에 zod import (번들 크기 예산 초과 — `read-hook-config` 패턴 사용)
 
 ## Dependencies
 
-- `../../core/infra/config-loader/` (`loadConfig`, `resolveLanguage`)
 - `../../constants/agent-context.js`, `../../types/hooks.js`
-- `../shared/` (`isFcaProject`), `../utils/validate-cwd.js`
+- `../shared/` (`isFcaProject`), `../utils/validate-cwd.js`, `../utils/read-hook-config.js`

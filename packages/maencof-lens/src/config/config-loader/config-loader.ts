@@ -1,7 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { LensConfigSchema, type LensConfig } from '../config-schema/config-schema.js';
+import {
+  isValidLensConfig,
+  normalizeLensConfig,
+} from '../config-schema/guard/config-guard.js';
+import type { LensConfig } from '../config-schema/config-schema.js';
 import { CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION, DEFAULT_LAYERS } from '../defaults/defaults.js';
 
 /**
@@ -13,11 +17,9 @@ export function loadConfig(projectRoot: string): LensConfig | null {
   if (!existsSync(configPath)) return null;
 
   try {
-    const raw = readFileSync(configPath, 'utf8');
-    const parsed = JSON.parse(raw);
-    const result = LensConfigSchema.safeParse(parsed);
-    if (!result.success) return null;
-    return result.data;
+    const parsed: unknown = JSON.parse(readFileSync(configPath, 'utf8'));
+    if (!isValidLensConfig(parsed)) return null;
+    return normalizeLensConfig(parsed);
   } catch {
     return null;
   }

@@ -7,7 +7,7 @@ import {
 import {
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,
-} from '../../types/insight.js';
+} from '../../constants/insight.js';
 
 export interface ConfigEntry {
   /** Filename within .maencof-meta/ */

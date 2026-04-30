@@ -8,7 +8,8 @@
 
 - `user-prompt-submit.ts` — `handleUserPromptSubmit` (오케스트레이터: fmap reset → inject)
 - `user-prompt-submit.entry.ts` — stdin → handler → stdout 파이프
-- `inject-context.ts` — `injectContext`, `buildMinimalContext`
+- `inject-context.ts` — `injectContext`
+- `utils/build-minimal-context.ts` — `buildMinimalContext` (포인터·언어 태그·비활성 규칙 조립)
 - `__tests__/` organ — 단위 테스트
 
 ## Conventions
@@ -16,8 +17,8 @@
 - 오케스트레이터가 `validateCwd` + `isFcaProject`를 단 1회 수행; 비-FCA는 즉시 continue
 - 3줄 output 규약 (첫 프롬프트만):
   1. 포인터: `FCA-AI active` / `Not initialized` / `Rules not deployed` 중 하나
-  2. `[filid:lang] <lang>` (resolveLanguage 항상 성공)
-  3. (선택) `[filid] Disabled rules: ...`
+  2. `[filid:lang] <lang>` (`config.language ?? 'en'`)
+  3. (선택) `[filid] Disabled rules: ...` (`enabled === false`인 키만)
 - `injectContext`의 Gate: `!isFirstInSession && hasPromptContext` → continue
 - 주입 후 `writePromptContext` + `markSessionInjected` 두 캐시 마킹
 - `continue: false` 절대 없음 — 프롬프트 차단 금지
@@ -41,10 +42,9 @@
 - `.claude/rules/filid_fca-policy.md`에 파일 write
 - `continue: false` 반환
 - `inject-context` 로직을 오케스트레이터에 인라인 복제
+- 훅 번들에 zod import (번들 크기 예산 초과 — `read-hook-config` 패턴 사용)
 
 ## Dependencies
 
 - `../../core/infra/cache-manager/` (`hasPromptContext`, `isFirstInSession`, `markSessionInjected`, `removeFractalMap`, `writePromptContext`)
-- `../../core/infra/config-loader/` (`loadConfig`, `resolveLanguage`)
-- `../../core/rules/rule-engine/` (`loadBuiltinRules`)
-- `../shared/`, `../utils/validate-cwd.js`
+- `../shared/`, `../utils/validate-cwd.js`, `../utils/read-hook-config.js`
