@@ -16,7 +16,7 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
   2. `!isFcaProject(cwd)` → continue (비-FCA 프로젝트는 워크플로우 가이드 스킵)
   3. `PLANNING_AGENT_RE` 또는 `'Plan'` → `PLANNING_GUIDANCE` + 언어 태그
   4. `EXECUTOR_AGENT_RE` 또는 `'general-purpose'` → `IMPLEMENTATION_REMINDER` + 언어 태그
-- 언어 태그는 `loadConfig` 실패 시 `'en'` 폴백 — 절대 throw 금지
+- 언어 태그는 `config.language ?? 'en'` (`readHookConfig` 실패 시 `'en'`)
 - 모든 상수(`ROLE_RESTRICTIONS` 등)는 `constants/agent-context.ts`에서만 관리
 
 ## Boundaries
@@ -38,6 +38,5 @@ SubagentStart 이벤트에서 에이전트 타입을 식별해 FCA 역할 제약
 
 ## Dependencies
 
-- `../../core/infra/config-loader/` (`loadConfig`, `resolveLanguage`)
 - `../../constants/agent-context.js`, `../../types/hooks.js`
-- `../shared/` (`isFcaProject`), `../utils/validate-cwd.js`
+- `../shared/` (`isFcaProject`), `../utils/validate-cwd.js`, `../utils/read-hook-config.js`
