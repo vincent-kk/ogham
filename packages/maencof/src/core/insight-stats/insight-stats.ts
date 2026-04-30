@@ -8,11 +8,14 @@ import {
 import { dirname, join } from 'node:path';
 
 import {
-  type InsightConfig,
-  InsightConfigSchema,
-  type InsightStats,
-  type PendingInsightCapture,
-  type PendingInsightNotification,
+  isValidInsightConfig,
+  normalizeInsightConfig,
+} from '../../types/insight-guard.js';
+import type {
+  InsightConfig,
+  InsightStats,
+  PendingInsightCapture,
+  PendingInsightNotification,
 } from '../../types/insight.js';
 import {
   DEFAULT_INSIGHT_CONFIG,
@@ -39,9 +42,10 @@ export function readInsightConfig(cwd: string): InsightConfig {
   const configPath = metaPath(cwd, 'insight-config.json');
   if (!existsSync(configPath)) return DEFAULT_INSIGHT_CONFIG;
   try {
-    const raw = readFileSync(configPath, 'utf-8');
-    const result = InsightConfigSchema.safeParse(JSON.parse(raw));
-    return result.success ? result.data : DEFAULT_INSIGHT_CONFIG;
+    const parsed: unknown = JSON.parse(readFileSync(configPath, 'utf-8'));
+    return isValidInsightConfig(parsed)
+      ? normalizeInsightConfig(parsed)
+      : DEFAULT_INSIGHT_CONFIG;
   } catch {
     return DEFAULT_INSIGHT_CONFIG;
   }
