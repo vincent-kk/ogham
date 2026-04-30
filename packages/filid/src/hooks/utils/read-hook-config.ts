@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export interface HookConfig {
@@ -16,9 +16,10 @@ export interface HookConfig {
  * Callers treat null as "config not initialized" and graceful-degrade.
  */
 export function readHookConfig(cwd: string): HookConfig | null {
+  const path = join(cwd, '.filid', 'config.json');
+  if (!existsSync(path)) return null;
   try {
-    const raw = readFileSync(join(cwd, '.filid', 'config.json'), 'utf8');
-    const parsed: unknown = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
     return typeof parsed === 'object' && parsed !== null
       ? (parsed as HookConfig)
       : null;
