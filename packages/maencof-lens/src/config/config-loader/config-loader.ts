@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import {
   isValidLensConfig,
   normalizeLensConfig,
-} from '../config-schema/config-guard.js';
+} from '../config-schema/guard/config-guard.js';
 import type { LensConfig } from '../config-schema/config-schema.js';
 import { CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION, DEFAULT_LAYERS } from '../defaults/defaults.js';
 

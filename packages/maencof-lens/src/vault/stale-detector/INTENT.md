@@ -18,3 +18,4 @@
 
 - 순환 의존성 도입
 - organ 경계를 넘는 직접 import
+- 외부 패키지 import (`fast-glob` 등) — hook 격리 위해 `node:fs` 빌트인만 사용

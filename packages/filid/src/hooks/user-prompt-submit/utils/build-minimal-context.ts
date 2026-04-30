@@ -28,7 +28,8 @@ export function buildMinimalContext(cwd: string): string {
   if (config) {
     const disabledIds = Object.entries(config.rules ?? {})
       .filter(([, override]) => override?.enabled === false)
-      .map(([id]) => id);
+      .map(([id]) => id)
+      .sort();
     if (disabledIds.length > 0) {
       lines.push(`[filid] Disabled rules: ${disabledIds.join(', ')}`);
     }

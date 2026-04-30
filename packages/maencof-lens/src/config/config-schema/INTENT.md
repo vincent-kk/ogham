@@ -18,3 +18,4 @@ Zod 기반 설정 스키마 정의. `VaultConfig` 및 `LensConfig` 타입과 검
 
 - 순환 의존성 도입
 - organ 경계를 넘는 직접 import
+- Zod 스키마(config-schema.ts)와 수동 가드(config-guard.ts) 간 필드 불일치 허용 금지 — 스키마 수정 시 가드도 같은 PR에서 동기화

@@ -26,3 +26,4 @@
 
 - autoAdjustSensitivity에서 설정 파일 직접 수정
 - mcp/ 또는 hooks/ 직접 의존
+- Zod 스키마(insight-stats.ts)와 수동 가드(insight-guard.ts) 간 필드 불일치 허용 금지 — 스키마 수정 시 대응 가드도 같은 PR에서 동기화

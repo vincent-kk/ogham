@@ -8,7 +8,9 @@
  * Hook isolation guards: hooks must remain thin scripts (Node builtins only).
  * Pulling external runtimes into a hook bundle breaks per-event cold-start
  * budget and has caused production crashes (e.g. v0.4.0 zod / fast-glob
- * regression). MAX_HOOK_BYTES + FORBIDDEN_PATTERNS enforce this at build time.
+ * regression). Tiered per-hook byte caps + FORBIDDEN_PATTERNS enforce this at
+ * build time. Two tiers: HEAVY (15 KB) for guard-heavy hooks, LIGHT (10 KB)
+ * for minimal context/event hooks.
  */
 
 import * as esbuild from 'esbuild';
@@ -21,16 +23,19 @@ const root = resolve(__dirname, '..');
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
+const HEAVY_HOOK_BYTES = 15 * 1024;
+const LIGHT_HOOK_BYTES = 10 * 1024;
+
 const hookEntries = [
-  'pre-tool-use',
-  'agent-enforcer',
-  'user-prompt-submit',
-  'session-cleanup',
-  'setup',
+  { name: 'pre-tool-use', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'agent-enforcer', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'user-prompt-submit', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'session-cleanup', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'setup', maxBytes: HEAVY_HOOK_BYTES },
 ];
 
 await Promise.all(
-  hookEntries.map((name) =>
+  hookEntries.map(({ name }) =>
     esbuild.build({
       entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
       bundle: true,
@@ -47,7 +52,6 @@ await Promise.all(
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
 
-const MAX_HOOK_BYTES = 15 * 1024;
 const FORBIDDEN_PATTERNS = [
   // Glob family
   /\bfast-glob\b/,
@@ -70,16 +74,20 @@ const FORBIDDEN_PATTERNS = [
   /\blodash\b/,
   /\bmoment\b/,
   /\bdate-fns\b/,
+  // MCP server (long-running) belongs in mcp-server.cjs, never in hooks
+  /@modelcontextprotocol\/sdk/,
+  // CJS dynamic-require shim (filid 0.4.0 module-init crash signature)
+  /Dynamic require of/,
 ];
 
 const violations = [];
 
-for (const name of hookEntries) {
+for (const { name, maxBytes } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);
   const { size } = await stat(file);
-  if (size > MAX_HOOK_BYTES) {
+  if (size > maxBytes) {
     violations.push(
-      `  ${name}.mjs: ${size} bytes > ${MAX_HOOK_BYTES} (${(size / 1024).toFixed(1)} KB)`,
+      `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
     );
   }
   const content = await readFile(file, 'utf8');
@@ -96,10 +104,13 @@ if (violations.length > 0) {
   console.error('\nHook bundle isolation violation:');
   for (const v of violations) console.error(v);
   console.error(
-    '\nHooks must stay thin (Node builtins only, <= 15 KB). External modules\n' +
+    '\nHooks must stay thin (Node builtins only). Per-hook caps: heavy <= ' +
+      `${HEAVY_HOOK_BYTES / 1024} KB, light <= ${LIGHT_HOOK_BYTES / 1024} KB. External modules\n` +
       'belong in MCP/Skill paths, not hook bundles.',
   );
   process.exit(1);
 }
 
-console.log(`  Hook bundle guards passed (<= ${MAX_HOOK_BYTES} bytes, no forbidden modules)`);
+console.log(
+  `  Hook bundle guards passed (heavy <= ${HEAVY_HOOK_BYTES} bytes, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+);

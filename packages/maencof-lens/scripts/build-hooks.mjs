@@ -113,8 +113,9 @@ if (violations.length > 0) {
   console.error(
     '\nHooks must stay thin (Node builtins only). External runtimes and\n' +
       'maencof modules belong in mcp-server.cjs / skill paths, not in hook\n' +
-      'bundles. See packages/maencof/src/types/companion-guard.ts and\n' +
-      'config-schema/config-guard.ts for the zod-free guard pattern.',
+      'bundles. See packages/maencof/src/types/dialogue-config-guard.ts and\n' +
+      'maencof-lens/src/config/config-schema/guard/config-guard.ts for the\n' +
+      'zod-free guard pattern.',
   );
   process.exit(1);
 }

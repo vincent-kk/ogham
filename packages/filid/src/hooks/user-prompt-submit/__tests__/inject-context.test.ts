@@ -103,7 +103,7 @@ describe('buildMinimalContext', () => {
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain(
-      '[filid] Disabled rules: naming-convention, circular-dependency',
+      '[filid] Disabled rules: circular-dependency, naming-convention',
     );
   });
 

@@ -114,8 +114,8 @@ if (violations.length > 0) {
   console.error(
     '\nHooks must stay thin (Node builtins only). External runtimes (zod,\n' +
       'fast-glob, MCP SDK, AST tooling) belong in mcp-server.cjs / skill paths,\n' +
-      'not in hook bundles. See packages/maencof/src/types/companion-guard.ts\n' +
-      'and types/insight-guard.ts for the zod-free guard pattern.',
+      'not in hook bundles. See packages/maencof/src/types/dialogue-config-guard.ts\n' +
+      'and insight-guard.ts for the zod-free guard pattern.',
   );
   process.exit(1);
 }
