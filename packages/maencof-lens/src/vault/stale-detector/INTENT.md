@@ -1,6 +1,6 @@
 ## Purpose
 
-볼트 인덱스 만료 감지. `.maencof/index.json`의 mtime과 볼트 파일의 최신 mtime을 비교한다.
+볼트 인덱스 만료 감지. `.maencof/index.json`의 mtime과 볼트 파일의 최신 mtime을 비교한다. Hook 경로 격리를 위해 `node:fs` 빌트인만 사용 (fast-glob 의존 금지); 큰 vault 에서는 정확 stale 판정을 별도 skill 경로에서 수행한다.
 
 ## Boundaries
 
