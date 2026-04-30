@@ -12,53 +12,53 @@ const bridgeDir = resolve(packageRoot, 'bridge');
 
 interface HookCase {
   name: string;
-  input: Record<string, unknown>;
+  buildInput: (cwd: string) => Record<string, unknown>;
 }
 
-const cwdForCase = (cwd: string): HookCase[] => [
+const HOOK_CASES: HookCase[] = [
   {
     name: 'pre-tool-use',
-    input: {
+    buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
       tool_name: 'Read',
       tool_input: { file_path: join(cwd, 'noop.txt') },
       hook_event_name: 'PreToolUse',
-    },
+    }),
   },
   {
     name: 'agent-enforcer',
-    input: {
+    buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
       agent_type: 'general-purpose',
       hook_event_name: 'SubagentStart',
-    },
+    }),
   },
   {
     name: 'user-prompt-submit',
-    input: {
+    buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
       prompt: 'hello',
       hook_event_name: 'UserPromptSubmit',
-    },
+    }),
   },
   {
     name: 'session-cleanup',
-    input: {
+    buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
       hook_event_name: 'SessionEnd',
-    },
+    }),
   },
   {
     name: 'setup',
-    input: {
+    buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',
       hook_event_name: 'SessionStart',
-    },
+    }),
   },
 ];
 
@@ -73,15 +73,14 @@ describe('hook bundle smoke tests', () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  for (const hook of cwdForCase('placeholder')) {
-    const bundle = resolve(bridgeDir, `${hook.name}.mjs`);
+  for (const { name, buildInput } of HOOK_CASES) {
+    const bundle = resolve(bridgeDir, `${name}.mjs`);
 
     it.skipIf(!existsSync(bundle))(
-      `${hook.name}.mjs spawns, exits 0, returns valid JSON, stderr clean`,
+      `${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`,
       () => {
-        const input = { ...hook.input, cwd };
         const result = spawnSync('node', [bundle], {
-          input: JSON.stringify(input),
+          input: JSON.stringify(buildInput(cwd)),
           encoding: 'utf8',
           timeout: 10_000,
         });

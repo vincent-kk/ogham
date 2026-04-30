@@ -4,7 +4,6 @@ import { join } from 'node:path';
 export interface HookConfig {
   language?: string;
   rules?: Record<string, { enabled?: boolean } | undefined>;
-  'additional-allowed'?: string[];
 }
 
 /**
