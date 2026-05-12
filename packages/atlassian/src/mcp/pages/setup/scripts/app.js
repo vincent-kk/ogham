@@ -103,6 +103,11 @@
   function bindTabs() {
     document.querySelectorAll(".tab-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
+        // Clear errors and connection-test result on user-driven tab change.
+        // activateTab itself stays free of side effects so prefillForm's
+        // initial activation does not blow away unrelated state.
+        clearErrors();
+        hideStatusMessage();
         activateTab(btn.dataset.tab);
       });
     });
