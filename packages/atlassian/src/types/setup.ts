@@ -8,9 +8,8 @@ export type DeploymentType = z.infer<typeof DeploymentTypeSchema>;
 
 // --- Service form fields ---
 
-const ServiceFormFieldsSchema = z.object({
+const ServiceFieldsBase = z.object({
   base_url: z.string().url(),
-  username: z.string().optional(),
   ssl_verify: z.boolean().nullable().optional(),
   timeout: z.number().int().positive().nullable().optional(),
   api_version_override: z.enum(['2', '3']).optional(),
@@ -23,15 +22,32 @@ const FormCredentialsSchema = z.object({
   password: z.string().optional(),
 });
 
-// --- Setup form data ---
+const CloudServiceFields = ServiceFieldsBase
+  .merge(FormCredentialsSchema)
+  .merge(z.object({ username: z.string().min(1) }));
 
-export const SetupFormDataSchema = z.object({
-  deployment_type: DeploymentTypeSchema,
-  // Cloud: multiple sites (array of URLs)
-  // On-premise: separate jira/confluence
-  jira: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
-  confluence: ServiceFormFieldsSchema.merge(FormCredentialsSchema).optional(),
+const OnPremServiceFields = ServiceFieldsBase
+  .merge(FormCredentialsSchema)
+  .merge(z.object({ username: z.string().optional() }));
+
+// --- Setup form data (discriminated by deployment_type) ---
+
+const CloudFormSchema = z.object({
+  deployment_type: z.literal('cloud'),
+  jira: CloudServiceFields.optional(),
+  confluence: CloudServiceFields.optional(),
 });
+
+const OnPremFormSchema = z.object({
+  deployment_type: z.literal('onprem'),
+  jira: OnPremServiceFields.optional(),
+  confluence: OnPremServiceFields.optional(),
+});
+
+export const SetupFormDataSchema = z.discriminatedUnion('deployment_type', [
+  CloudFormSchema,
+  OnPremFormSchema,
+]);
 export type SetupFormData = z.infer<typeof SetupFormDataSchema>;
 
 // --- Response schemas ---

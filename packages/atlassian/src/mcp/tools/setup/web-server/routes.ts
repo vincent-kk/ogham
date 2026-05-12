@@ -242,15 +242,16 @@ async function handleSubmit(
 
   if (data.deployment_type === 'cloud' && data.jira) {
     // Cloud mode: create array entries from cloud_sites
-    const urls = cloudSites.length > 0 ? cloudSites : [data.jira.base_url];
+    const jira = data.jira;
+    const urls = cloudSites.length > 0 ? cloudSites : [jira.base_url];
     const sites = urls.map((url) => {
       const env = resolveEnvironment(url);
       return {
         base_url: env.base_url,
         is_cloud: env.is_cloud,
-        username: data.jira!.username,
-        ssl_verify: data.jira!.ssl_verify ?? true,
-        timeout: data.jira!.timeout ?? 30000,
+        username: jira.username,
+        ssl_verify: jira.ssl_verify ?? true,
+        timeout: jira.timeout ?? 30000,
       };
     });
     // Both jira and confluence share Cloud sites
