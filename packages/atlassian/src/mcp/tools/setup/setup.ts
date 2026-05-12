@@ -17,7 +17,6 @@ export async function handleSetup(params: SetupParams): Promise<SetupResult> {
   let handle: SetupServerHandle;
   try {
     handle = await startSetupServer({
-      mode,
       context: {
         setupHtml: SETUP_HTML,
         loadConfig,

@@ -35,14 +35,21 @@ export async function readJson<T>(
   return data as T;
 }
 
-/** Write JSON to file, creating parent directories as needed */
+/** Write JSON to file, creating parent directories as needed. Passes mode to
+ *  writeFile so newly created files are born with the requested permissions —
+ *  this closes the brief time-of-check / time-of-use window where umask
+ *  defaults would otherwise leak between writeFile and chmod. The chmod call
+ *  remains to repair pre-existing files whose permissions drifted. */
 export async function writeJson(
   path: string,
   data: unknown,
   options?: { mode?: number },
 ): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, JSON.stringify(data, null, 2) + "\n", "utf-8");
+  await writeFile(path, JSON.stringify(data, null, 2) + "\n", {
+    encoding: "utf-8",
+    ...(options?.mode !== undefined && { mode: options.mode }),
+  });
   if (options?.mode !== undefined) await chmod(path, options.mode);
 }
 

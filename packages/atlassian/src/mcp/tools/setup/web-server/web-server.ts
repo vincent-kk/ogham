@@ -7,7 +7,6 @@ import type { RouteContext } from './routes.js';
 const AUTO_SHUTDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 export interface SetupServerOptions {
-  mode?: 'new' | 'edit';
   context: Omit<RouteContext, 'resetTimer' | 'closeServer'>;
 }
 

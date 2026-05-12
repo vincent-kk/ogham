@@ -157,14 +157,46 @@ if (intent && PRESETS[intent]) {
 const flags = PRESETS[presetName];
 
 // --- Build command ---
-// Wrap input path in single-quotes with safe escape so attacker-controlled
-// filenames cannot inject `$()`, backticks, or newlines into the shell command.
+// Wrap input path with platform-aware escape so attacker-controlled filenames
+// cannot inject `$()`, backticks, newlines (POSIX) or `&`, `|`, `^` (cmd.exe)
+// into the shell command.
+//   - POSIX (bash/zsh/sh): single-quote everything, close-escape-open for
+//     embedded single quotes.
+//   - Windows cmd.exe: double-quote everything, double embedded quotes; cmd
+//     does not interpret `'` or `\` the way POSIX does.
+// Note: the workflow appends `2>/dev/null` after this command — that
+// redirection is POSIX-only. Windows native users (cmd / PowerShell) should
+// drop the suffix or translate to `2>$null` (PowerShell) / `2>nul` (cmd).
 function shellEscape(s) {
-  return "'" + String(s).replace(/'/g, "'\\''") + "'";
+  const str = String(s);
+  if (process.platform === "win32") {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return "'" + str.replace(/'/g, "'\\''") + "'";
 }
 
+// argv form for spawn / execFile — recommended cross-platform path because
+// it sidesteps shell quoting entirely. Each value is a separate argument.
+const argv = [
+  "npx", "-y", "@lumy-pack/scene-sieve",
+  input,
+  "--json",
+  "-n", String(flags.count),
+  "-t", String(flags.threshold),
+  "--fps", String(flags.fps),
+  "--max-frames", String(flags.maxFrames),
+  "-s", String(flags.scale),
+  "-q", String(flags.quality),
+];
+if (flags.extra) argv.push(...flags.extra.split(/\s+/).filter(Boolean));
+
+// Shell-string form with platform-aware quoting (POSIX or Windows cmd.exe).
 let command = `npx -y @lumy-pack/scene-sieve ${shellEscape(input)} --json -n ${flags.count} -t ${flags.threshold} --fps ${flags.fps} --max-frames ${flags.maxFrames} -s ${flags.scale} -q ${flags.quality}`;
 if (flags.extra) command += ` ${flags.extra}`;
+
+// Platform-specific stderr-null redirect — append to `command` when stderr
+// noise should be silenced. POSIX `/dev/null`; Windows cmd `NUL` device.
+const stderrNull = process.platform === "win32" ? "2>nul" : "2>/dev/null";
 
 // --- Format duration ---
 const durationMin = Math.floor(duration / 60);
@@ -199,4 +231,6 @@ console.log(JSON.stringify({
     },
   },
   command,
+  argv,
+  stderrNull,
 }, null, 2));
