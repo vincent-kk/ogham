@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP 서버 인스턴스 생성 및 3개 도구(fetch, convert, auth-check, setup) 등록·라우팅.
+MCP 서버 인스턴스 생성 및 4개 도구(fetch, convert, auth-check, setup) 등록·라우팅.
 stdio 트랜스포트로 Claude Code와 통신한다.
 
 ## Structure
