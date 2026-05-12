@@ -8,7 +8,7 @@ import type { SetupServerHandle, SetupParams, SetupResult } from "../../../types
 import { SETUP_HTML } from "./__generated__/setup-html.js";
 import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "./utils/openBrowser.js";
-import { startSetupServer } from "./web-server/web-server.js";
+import { startSetupServer } from "./web-server/index.js";
 
 /** Setup tool handler — launches local web server for auth configuration */
 export async function handleSetup(params: SetupParams): Promise<SetupResult> {

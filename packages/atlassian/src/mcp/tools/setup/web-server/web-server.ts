@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import type { SetupServerHandle } from '../../../../types/index.js';
 import { createRouteHandler } from './routes.js';
-import type { RouteContext } from './routes.js';
+import type { RouteContext } from './route-context.js';
 
 const AUTO_SHUTDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
