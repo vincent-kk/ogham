@@ -16,7 +16,7 @@ stdio 트랜스포트로 Claude Code와 통신한다.
 
 - `server.registerTool()`과 Zod 스키마로 도구 등록
 - 도구 핸들러는 `wrapHandler`로 래핑하여 표준 에러 처리 보장
-- 서비스 감지(`detectService`)로 Jira/Confluence 분기 후 core 위임
+- 서비스는 `args.service` 우선 사용, 없으면 `detectService(endpoint)` 폴백으로 분기 후 core 위임
 
 ### Ask first
 

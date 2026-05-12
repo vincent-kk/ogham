@@ -25,12 +25,17 @@ export async function buildFetchContext(
     allow_private_ip: !siteConfig.is_cloud,
   };
 
-  const apiVersion: '2' | '3' =
+  const apiVersion: '2' | '3' | 'v1' | 'v2' =
     service === 'jira'
       ? (siteConfig.api_version_override ?? (siteConfig.is_cloud ? '3' : '2'))
       : siteConfig.is_cloud
-        ? '3'
-        : '2';
+        ? 'v2'
+        : 'v1';
 
-  return { http, service, apiVersion };
+  return {
+    http,
+    service,
+    apiVersion,
+    requires_xsrf_bypass: !siteConfig.is_cloud,
+  };
 }

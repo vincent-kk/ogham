@@ -9,7 +9,7 @@ function getTestEndpoint(
   override?: '2' | '3',
 ): string {
   if (service === 'jira') {
-    const version = getApiVersion(isCloud, override);
+    const version = getApiVersion('jira', isCloud, override);
     return `/rest/api/${version}/myself`;
   }
   // Confluence — DC v1 단일 표준이므로 override 미적용

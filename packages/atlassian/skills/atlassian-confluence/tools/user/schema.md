@@ -1,11 +1,13 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
-|---|---|---|---|---|
-| Current user | GET | `/wiki/rest/api/user/current` | `/api/v2/users/current` | `/rest/api/user/current` |
-| Search users | GET | `/wiki/rest/api/search/user?cql=...` | — | `/rest/api/search/user?cql=...` |
+User endpoint pluralization differs between V2 and V1/DC. Send the appropriate form per target. (No path-mapper entry — these endpoints are simple enough to keep explicit.)
 
-## Cloud vs Server Branching
+| Operation | HTTP | Cloud V2 | V1 / Server-DC |
+|---|---|---|---|
+| Current user | GET | `/users/current` | `/user/current` |
+| Search users | GET | — (use search via CQL) | `/search/user?cql=...` |
+
+## Identifier
 
 - **Cloud**: Users identified by `accountId`
 - **Server**: Users identified by `userKey` or `username`

@@ -1,5 +1,6 @@
 import { executeRequest } from '../../../core/http-client/index.js';
 import type { FetchContext, McpResponse, FetchParams } from '../../../types/index.js';
+import { attachPrefix, transformRequest } from '../../../utils/index.js';
 import { autoConvertAdf } from './utils/auto-convert-adf.js';
 import { convertBody } from './utils/convert-body.js';
 import { handleAssetFetch } from './utils/asset-fetch.js';
@@ -9,8 +10,17 @@ export async function handleFetch(
   params: FetchParams,
   ctx: FetchContext,
 ): Promise<McpResponse> {
-  const { method, endpoint } = params;
+  const { method } = params;
   const config = ctx.http;
+  // V2 logical → V1 physical (Confluence DC), V2-only guard. Pass-through otherwise.
+  const transformed = transformRequest(
+    params.endpoint,
+    params.body,
+    ctx.service,
+    ctx.apiVersion,
+  );
+  // Attach service+version prefix to the (now physical) endpoint.
+  const endpoint = attachPrefix(transformed.endpoint, ctx.service, ctx.apiVersion);
 
   // Early validation: reject invalid method+param combos
   if (method === 'GET' && params.body !== undefined) {
@@ -63,11 +73,14 @@ export async function handleFetch(
         headers['Content-Type'] = params.content_type;
       }
 
-      if (params.content_type === 'multipart/form-data') {
-        headers['X-Atlassian-Token'] = 'nocheck';
+      if (
+        params.content_type === 'multipart/form-data' ||
+        ctx.requires_xsrf_bypass
+      ) {
+        headers['X-Atlassian-Token'] = 'no-check';
       }
 
-      let body = params.body;
+      let body = transformed.body;
       if (params.content_format === 'markdown') {
         body = convertBody(body, ctx.service, ctx.apiVersion);
       }
@@ -82,25 +95,34 @@ export async function handleFetch(
 
     case 'PUT':
     case 'PATCH': {
-      let body = params.body;
+      let body = transformed.body;
       if (params.content_format === 'markdown') {
         body = convertBody(body, ctx.service, ctx.apiVersion);
+      }
+
+      const headers = { ...params.headers };
+      if (ctx.requires_xsrf_bypass) {
+        headers['X-Atlassian-Token'] = 'no-check';
       }
 
       return executeRequest(config, {
         method,
         endpoint,
         body,
-        headers: params.headers,
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
       });
     }
 
     case 'DELETE': {
+      const headers = { ...params.headers };
+      if (ctx.requires_xsrf_bypass) {
+        headers['X-Atlassian-Token'] = 'no-check';
+      }
       return executeRequest(config, {
         method: 'DELETE',
         endpoint,
         query_params: params.query_params,
-        headers: params.headers,
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
       });
     }
   }

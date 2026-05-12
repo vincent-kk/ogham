@@ -61,13 +61,17 @@ Simple operations (single issue read, single JQL search, single comment add) sho
 3. If transition requires fields (e.g., resolution) → auto-detect and ask user
 4. **Never directly set status field** — always use transition API
 
-### Cloud vs Server/DC Differences
+### Endpoint Dispatch
+
+Send version-agnostic paths (`/issue/{key}`, `/search` etc. — no `/rest/api/{2|3}` prefix). MCP automatically attaches `/rest/api/3` (Cloud) or `/rest/api/2` (Server/DC), and adds `X-Atlassian-Token: no-check` to DC non-GET requests. Markdown bodies are converted to ADF (Cloud v3) or Wiki Markup (Server/DC v2) automatically when `content_format: "markdown"` is set.
+
+### Cloud vs Server/DC Capability Gaps
 
 | Aspect               | Cloud (v3)                    | Server/DC (v2)             |
 | -------------------- | ----------------------------- | -------------------------- |
-| Search API           | POST `/rest/api/3/search/jql` | GET `/rest/api/2/search`   |
+| Search API           | POST `/search/jql`            | GET `/search`              |
 | Content format       | ADF                           | Wiki markup                |
-| User ID              | `accountId`                   | `name` / `key`             |
+| User identifier      | `accountId`                   | `name` / `key`             |
 | Custom field options | Available                     | Not available              |
 | JSM comments         | Standard API                  | Dedicated Service Desk API |
 

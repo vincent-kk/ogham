@@ -1,11 +1,19 @@
-export type BodyFormat = 'adf' | 'storage' | 'wiki';
+/**
+ * Wire body format.
+ * - `adf`: Jira Cloud v3 — `{ type: 'doc', ... }` ADF document.
+ * - `wiki`: Jira Server/DC v2 — wiki markup string.
+ * - `storage-v1`: Confluence Cloud V1 / DC — `{ storage: { value, representation } }` (legacy shape).
+ * - `storage-v2`: Confluence Cloud V2 — `{ representation, value }` (flat shape).
+ */
+export type BodyFormat = 'adf' | 'wiki' | 'storage-v1' | 'storage-v2';
 
 /** Decide the wire body format from the resolved service + API version. */
 export function pickBodyFormat(
   service: 'jira' | 'confluence',
-  apiVersion: '2' | '3',
+  apiVersion: '2' | '3' | 'v1' | 'v2',
 ): BodyFormat {
-  // Confluence는 현재 storage API만 지원 (v3 미지원). v3 도입 시 분기 추가.
-  if (service === 'confluence') return 'storage';
+  if (service === 'confluence') {
+    return apiVersion === 'v2' ? 'storage-v2' : 'storage-v1';
+  }
   return apiVersion === '3' ? 'adf' : 'wiki';
 }
