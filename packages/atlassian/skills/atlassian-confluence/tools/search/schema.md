@@ -1,8 +1,10 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud Endpoint | Server Endpoint |
-|---|---|---|---|
-| CQL Search | GET | `/wiki/rest/api/content/search?cql=...` | `/rest/api/content/search?cql=...` |
+CQL search uses the V1 content-search endpoint on both Cloud and Server/DC (Atlassian kept the v1 search alive even after v1 deprecation). Send the V1 path directly — no V2 logical equivalent.
+
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| CQL Search | GET | `/content/search?cql=...` |
 
 ## Parameters
 
@@ -17,4 +19,4 @@
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Search | `mcp_tools_fetch` | GET | CQL in query_params |
+| Search | `mcp_tools_fetch` | GET | CQL in `query_params` |

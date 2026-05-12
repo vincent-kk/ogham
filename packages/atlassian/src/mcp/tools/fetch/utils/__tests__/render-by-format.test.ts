@@ -7,13 +7,23 @@ describe('renderByFormat', () => {
     expect(result).toMatchObject({ type: 'doc' });
   });
 
-  it('renders storage as { storage: { value, representation } }', () => {
-    const result = renderByFormat('# H', 'storage') as {
+  it('renders storage-v1 as { storage: { value, representation } } (V1/DC shape)', () => {
+    const result = renderByFormat('# H', 'storage-v1') as {
       storage: { value: string; representation: string };
     };
     expect(result.storage.representation).toBe('storage');
     expect(typeof result.storage.value).toBe('string');
     expect(result.storage.value.length).toBeGreaterThan(0);
+  });
+
+  it('renders storage-v2 as { representation, value } (Cloud V2 shape)', () => {
+    const result = renderByFormat('# H', 'storage-v2') as {
+      representation: string;
+      value: string;
+    };
+    expect(result.representation).toBe('storage');
+    expect(typeof result.value).toBe('string');
+    expect(result.value.length).toBeGreaterThan(0);
   });
 
   it('renders wiki as a plain string', () => {
@@ -24,9 +34,11 @@ describe('renderByFormat', () => {
     expect(renderByFormat('', 'wiki')).toBe('');
     const adfEmpty = renderByFormat('', 'adf');
     expect(adfEmpty).toMatchObject({ type: 'doc' });
-    const storageEmpty = renderByFormat('', 'storage') as {
+    const v1Empty = renderByFormat('', 'storage-v1') as {
       storage: { value: string };
     };
-    expect(typeof storageEmpty.storage.value).toBe('string');
+    expect(typeof v1Empty.storage.value).toBe('string');
+    const v2Empty = renderByFormat('', 'storage-v2') as { value: string };
+    expect(typeof v2Empty.value).toBe('string');
   });
 });

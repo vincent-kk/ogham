@@ -160,10 +160,15 @@ If this fails, install globally: `npm install -g @lumy-pack/scene-sieve`
 
 ### Processing takes too long (>60s)
 
-For long videos (>5 min), reduce workload:
+For long videos (>5 min), reduce workload. The stderr-null suffix is shell-specific:
+POSIX uses `2>/dev/null`, Windows cmd uses `2>nul`, Windows PowerShell uses `2>$null`.
 
 ```bash
+# POSIX (macOS / Linux / WSL / Git Bash)
 npx -y @lumy-pack/scene-sieve "<input>" --json -n 10 --fps 2 --max-frames 100 -s 480 -o "<output>" 2>/dev/null
+
+# Windows cmd.exe
+npx -y @lumy-pack/scene-sieve "<input>" --json -n 10 --fps 2 --max-frames 100 -s 480 -o "<output>" 2>nul
 ```
 
 ### Out of memory
@@ -171,5 +176,9 @@ npx -y @lumy-pack/scene-sieve "<input>" --json -n 10 --fps 2 --max-frames 100 -s
 Lower concurrency and scale:
 
 ```bash
+# POSIX
 npx -y @lumy-pack/scene-sieve "<input>" --json -n 10 --concurrency 1 -s 480 -o "<output>" 2>/dev/null
+
+# Windows cmd.exe
+npx -y @lumy-pack/scene-sieve "<input>" --json -n 10 --concurrency 1 -s 480 -o "<output>" 2>nul
 ```

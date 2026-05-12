@@ -1,11 +1,13 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
-|---|---|---|---|---|
-| Current user | GET | `/wiki/rest/api/user/current` | `/api/v2/users/current` | `/rest/api/user/current` |
-| Search users | GET | `/wiki/rest/api/search/user?cql=...` | — | `/rest/api/search/user?cql=...` |
+V2-style logical paths — MCP rewrites `/users/current` to `/user/current` on DC.
 
-## Cloud vs Server Branching
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| Current user | GET | `/users/current` |
+| Search users | GET | `/search/user?cql=...` (V1/DC only — Cloud V2 has no equivalent; use CQL search instead) |
+
+## Identifier
 
 - **Cloud**: Users identified by `accountId`
 - **Server**: Users identified by `userKey` or `username`

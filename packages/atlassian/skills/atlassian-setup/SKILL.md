@@ -19,14 +19,13 @@ Authentication and connection management for Atlassian products.
 - Changing connection settings (URL, auth type, credentials)
 - Testing connection status
 
-## Pre-flight
-
-Before starting the work, perform an authentication check. See [`auth-check.md`](../_shared/auth-check.md).
-
 ## Setup Flow
 
-1. Call MCP `mcp_tools_setup` tool immediately (mode: `new` for first setup, `edit` for reconfiguration)
-2. The tool launches a local web server and opens the browser automatically
+1. Parse arguments and dispatch:
+   - `--test` → call `mcp_tools_auth-check` with `connection_test: true` and report status. Skip the wizard.
+   - `--reset` → call `mcp_tools_setup` with `mode: "new"` (overwrites existing configuration).
+   - No flags → call `mcp_tools_auth-check` first; if `authenticated: false` invoke `mcp_tools_setup` with `mode: "new"`, if `authenticated: true` confirm with the user before invoking `mode: "edit"` (see [`auth-check.md`](../_shared/auth-check.md) Setup Skill Flow).
+2. The setup tool launches a local web server and opens the browser automatically (skipped for `--test`)
 3. The web UI handles the entire flow: URL input, environment detection, auth method selection, credential collection, connection testing, and saving
 4. Report the result to the user based on the MCP tool response
 

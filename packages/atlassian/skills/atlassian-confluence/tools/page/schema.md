@@ -1,32 +1,32 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
-|---|---|---|---|---|
-| Get page | GET | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
-| Create page | POST | `/wiki/rest/api/content` | `/api/v2/pages` | `/rest/api/content` |
-| Update page | PUT | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
-| Delete page | DELETE | `/wiki/rest/api/content/{id}` | `/api/v2/pages/{id}` | `/rest/api/content/{id}` |
+V2-style logical paths only — MCP rewrites to `/rest/api/content/...` on Server/DC automatically.
 
-## Parameters
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| Get page | GET | `/pages/{id}` |
+| Create page | POST | `/pages` |
+| Update page | PUT | `/pages/{id}` |
+| Delete page | DELETE | `/pages/{id}` |
 
-| Parameter | Type | Required | Description |
+## Body Fields
+
+V2-style flat field names. MCP rewrites envelope on DC: `spaceId → space.key`, `parentId → ancestors: [{ id }]`, injects `type: 'page'`, strips V2-only `status`.
+
+| Field | Type | Required | Description |
 |---|---|---|---|
-| spaceKey/spaceId | string | Y (create) | Space identifier |
-| title | string | Y (create) | Page title |
-| body | object | Y (create/update) | Page content (Storage Format) |
-| version.number | number | Y (update) | Current version + 1 |
-| ancestors | array | N | Parent page for hierarchy |
-
-## Cloud vs Server Branching
-
-- **Cloud**: V2 preferred (`/api/v2/pages/`). Falls back to V1.
-- **Server**: V1 only (`/rest/api/content/`)
+| `spaceId` | string | Y (create) | Space identifier — numeric ID for Cloud V2, space key for DC |
+| `title` | string | Y (create) | Page title |
+| `body` | string | Y (create/update) | Markdown content — pair with `content_format: "markdown"` to auto-convert to storage |
+| `version.number` | number | Y (update) | Current version + 1 |
+| `parentId` | string | N | Parent page identifier (V2 flat) — auto-converted to V1 `ancestors` on DC |
+| `status` | string | N | `current` (V2 only — stripped on DC) |
 
 ## MCP Tool Mapping
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
-| Get | `mcp_tools_fetch` | GET | expand=body.storage,version |
-| Create | `mcp_tools_fetch` | POST | content_format: "markdown" |
-| Update | `mcp_tools_fetch` | PUT | Must include version.number |
+| Get | `mcp_tools_fetch` | GET | Use V2 query param `body-format=storage` or V1 `expand=body.storage,version` |
+| Create | `mcp_tools_fetch` | POST | `content_format: "markdown"` |
+| Update | `mcp_tools_fetch` | PUT | Must include `version.number` |
 | Delete | `mcp_tools_fetch` | DELETE | Confirm if child pages exist |

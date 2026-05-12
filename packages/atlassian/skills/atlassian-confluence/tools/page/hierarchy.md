@@ -1,34 +1,38 @@
 # Page Hierarchy
 
-## Get Ancestors (Breadcrumb)
-
-```
-Tool: fetch (method: GET)
-Endpoint: /wiki/rest/api/content/{id}?expand=ancestors
-```
-
-## Get Descendants
-
-```
-Tool: fetch (method: GET)
-Endpoint: /wiki/rest/api/content/{id}/descendant/page
-```
+V2-style logical paths only — MCP rewrites to V1/DC form automatically.
 
 ## Get Child Pages (Direct)
 
 ```
 Tool: fetch (method: GET)
-Cloud V1: /wiki/rest/api/content/{id}/child/page
-Cloud V2: /api/v2/pages/{id}/children
+Endpoint: /pages/{id}/children
 ```
+
+## Get Ancestors (Breadcrumb)
+
+V1/DC: fetch the page with `expand=ancestors` query parameter:
+```
+Tool: fetch (method: GET)
+Endpoint: /pages/{id}?expand=ancestors
+```
+
+Cloud V2 returns `parentId` directly on the page object — walk it iteratively for full breadcrumb.
+
+## Get Descendants (V1/DC only)
+
+```
+Tool: fetch (method: GET)
+Endpoint: /pages/{id}/descendants
+```
+
+MCP rewrites to `/content/{id}/descendant/page` on DC. Cloud V2 has no descendants endpoint — recurse via `/pages/{id}/children` instead.
 
 ## Move Page
 
 ```
 Tool: fetch (method: PUT)
-Endpoint: /wiki/rest/api/content/{id}/move/{position}/{targetId}
+Endpoint: /pages/{id}/move/{position}/{targetId}
 ```
 
-Positions: `before`, `after`, `append` (as child)
-
-**Note**: Page move uses V1 API only — V2 does not support move.
+Positions: `before`, `after`, `append` (as child). MCP rewrites to `/content/{id}/move/{position}/{targetId}` on DC. For Cloud V2, prefer updating the page with a new `parentId` instead (move endpoint absent in V2).

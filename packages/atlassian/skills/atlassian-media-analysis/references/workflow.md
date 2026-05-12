@@ -21,14 +21,21 @@ Step 2 — Download (if Atlassian URL)
 
 Step 3 — Probe and select preset
   - Run: node "<skill-dir>/scripts/probe.mjs" "<file>" [intent]
-  - Parse JSON output for: type, duration, resolution, preset, command
+  - Parse JSON output for: type, duration, resolution, preset, command,
+    argv, stderrNull, warning
+    - `command`: shell string with platform-aware quoting (POSIX `'...'` /
+      Windows cmd `"..."`)
+    - `argv`: argument vector for spawn/execFile — shell-independent
+    - `stderrNull`: platform stderr-null redirect (`2>/dev/null` /
+      Windows cmd `2>nul`)
+  - If `warning` is non-null (e.g. ffprobe missing), surface it to the user before proceeding
   - If probe returns type=image -> Step 4 (image path)
   - If probe returns type=video -> Step 5 (video path)
   - See presets/index.md for the full decision matrix
 
 Step 4 — Image handling (no scene-sieve)
-  - If Atlassian URL: file already in .temp/<filename>/
-  - If local file: copy to .temp/<filename>/
+  - If Atlassian URL: file already at .temp/<namespace>/<filename>
+  - If local file: copy to .temp/<namespace>/<filename>
   - Return file path to caller
   - Caller reads the image directly via Read tool (multimodal)
   - No subagent needed. Skill completes here.
@@ -40,22 +47,35 @@ Step 5 — Video/GIF handling
      - (namespace from Step 2; if local file, use filename as namespace)
 
   b. Check cache:
-     - If .temp/<filename>/analysis.json exists AND no --force flag
+     - If .temp/<namespace>/<filename>/analysis.json exists AND no --force flag
        -> Return cached analysis summary
        -> Skip extraction and analysis
 
-  c. Extract keyframes:
-     - Use the `command` field from probe output directly
-     - Append: -o "<temp_dir>/<filename>/frames" 2>/dev/null
-     - Parse output: check ok field, collect outputFiles list
-     - Results: frame_*.jpg files + .metadata.json in frames/ directory
+  c. Extract keyframes — two execution paths, pick by environment:
+
+     Preferred (any shell): use the `argv` array from probe output,
+       append ["-o", "<temp_dir>/<filename>/frames"], then spawn via
+       execFile/spawn. This sidesteps shell quoting on every platform.
+
+     Paste-and-run shell command: use the `command` field (already
+       platform-quoted by probe.mjs), append the output flag with
+       platform-appropriate quoting, and the `stderrNull` suffix.
+         - POSIX (bash/zsh/sh — macOS, Linux, WSL, Git Bash):
+             <command> -o '<temp_dir>/<filename>/frames' 2>/dev/null
+         - Windows cmd.exe:
+             <command> -o "<temp_dir>/<filename>/frames" 2>nul
+         - Windows PowerShell:
+             <command> -o "<temp_dir>/<filename>/frames" 2>$null
+
+     Parse output: check ok field, collect outputFiles list
+     Results: frame_*.jpg files + .metadata.json in frames/ directory
 
   d. Spawn `media` agent for analysis (if --analyze flag):
      - Pass to agent:
        - frames directory absolute path
        - .metadata.json absolute path
        - analysis purpose/context from caller
-       - analysis.json save path: .temp/<filename>/analysis.json
+       - analysis.json save path: .temp/<namespace>/<filename>/analysis.json
      - Agent performs:
        1. Read .metadata.json -> frame list + timestamps
        2. Read frames sequentially (multimodal image recognition)

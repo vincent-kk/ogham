@@ -83,11 +83,11 @@ describe('startSetupServer', () => {
     expect(res.status).toBe(404);
   });
 
-  it('OPTIONS 요청 — 204 반환 (CORS preflight)', async () => {
+  it('OPTIONS 요청 — 404 반환 (서버는 127.0.0.1 전용 same-origin이므로 CORS preflight 핸들러 없음)', async () => {
     handle = await startSetupServer({ context: mockContext });
 
     const res = await fetch(handle.url + '/', { method: 'OPTIONS' });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(404);
   });
 
   it('자동 종료 타이머 — setTimeout이 설정됨', async () => {

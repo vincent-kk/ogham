@@ -1,9 +1,13 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
-|---|---|---|---|---|
-| List spaces | GET | `/wiki/rest/api/space` | `/api/v2/spaces` | `/rest/api/space` |
-| Get space | GET | `/wiki/rest/api/space/{key}` | `/api/v2/spaces/{id}` | `/rest/api/space/{key}` |
+V2-style logical paths only — MCP rewrites to `/space` on Server/DC.
+
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| List spaces | GET | `/spaces` |
+| Get space | GET | `/spaces/{id}` |
+
+In the `{id}` segment, send the **numeric space ID for Cloud V2** or the **space key for Server/DC**. MCP does not auto-translate between the two — the identifier the user already knows is passed verbatim.
 
 ## Parameters
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## What is atlassian?
 
-`@ogham/atlassian` is a Claude Code plugin that replaces the Python `mcp-atlassian` MCP server with a native TypeScript plugin. It provides 3 MCP tools (fetch, convert, setup), 5 skills, and 3 agents for Jira and Confluence integration.
+`@ogham/atlassian` is a Claude Code plugin that replaces the Python `mcp-atlassian` MCP server with a native TypeScript plugin. It provides 4 MCP tools (fetch, convert, auth-check, setup), 5 skills, and 3 agents for Jira and Confluence integration.
 
 ## Architecture
 
@@ -19,9 +19,10 @@ Dispatcher (Claude Code main agent)
     ├── Skill: atlassian-jira            (Jira API domain router, 15 tool domains)
     ├── Skill: atlassian-confluence      (Confluence API domain router, 8 tool domains)
     └── MCP Server "tools"
-            ├── fetch     (HTTP GET/POST/PUT/PATCH/DELETE)
-            ├── convert   (ADF/Storage ↔ Markdown)
-            └── setup     (auth setup wizard)
+            ├── fetch       (HTTP GET/POST/PUT/PATCH/DELETE)
+            ├── convert     (ADF/Storage ↔ Markdown)
+            ├── auth-check  (auth status + connectivity test)
+            └── setup       (auth setup wizard)
 ```
 
 ### Dependency Direction
@@ -50,7 +51,7 @@ yarn format && yarn lint  # format + lint
 | `src/constants/` | Paths, defaults, config constants |
 | `src/core/` | Config, auth, environment, HTTP client |
 | `src/converter/` | ADF/Storage ↔ Markdown (ported from Python) |
-| `src/mcp/` | MCP server and 3 tool handlers |
+| `src/mcp/` | MCP server and 4 tool handlers |
 | `src/lib/` | Logger, file I/O |
 | `src/utils/` | URL helpers |
 | `agents/` | 3 agents (jira, confluence, media) |

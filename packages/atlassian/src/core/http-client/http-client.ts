@@ -32,8 +32,8 @@ export async function executeRequest(
   const url = buildUrl(config.base_url, options.endpoint, options.query_params);
   const allowedHostname = extractHostname(config.base_url);
 
-  // SSRF validation
-  await validateUrl(url, allowedHostname);
+  // SSRF validation — on-prem callers may opt in to private-IP destinations via config.allow_private_ip.
+  await validateUrl(url, allowedHostname, config.allow_private_ip);
 
   const timeout = options.timeout ?? config.timeout ?? DEFAULT_TIMEOUT;
 

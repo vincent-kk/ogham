@@ -14,7 +14,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 ## Execution Model
 
 **Main agent executes directly** for simple operations:
-- Single page read (`GET /api/v2/pages/{id}` or `/rest/api/content/{id}`)
+- Single page read (`GET /pages/{id}`)
 - Single CQL search
 - Single comment read/add
 - Single label add/remove
@@ -29,9 +29,11 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 ### Direct Execution Steps (Main Agent)
 
 1. Read `tools/<domain>/schema.md` for the needed domain
-2. Call `mcp__plugin_atlassian_tools__fetch` with the correct HTTP method and endpoint
+2. Call `mcp_tools_fetch` with the V2-style logical endpoint (no `/wiki/...` or `/rest/api/...` prefix)
 3. Use `content_format: "markdown"` when sending page body content (auto-converts to Storage Format)
-4. On 401: invoke `atlassian-setup` skill, then retry once
+4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `atlassian-setup` skill and retry once; on decline abort with guidance message
+
+**Endpoint dispatch is handled by the MCP layer.** Skills do not branch on Cloud V1/V2/Server. Just send V2-style logical paths (e.g. `/pages/{id}`, `/spaces`, `/footer-comments`) and MCP rewrites to the correct physical path per deployment.
 
 ## When to Use
 
@@ -57,7 +59,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 
 1. Identify the domain from the user's request (page / search / space / etc.)
 2. Read `tools/<domain>/schema.md` ONLY when needed — do not preload all schemas
-3. Select the correct endpoint variant: Cloud V2 preferred, fall back to V1 if V2 unavailable
+3. Compose the V2-style logical endpoint (MCP dispatches to Cloud V2 / V1 / Server/DC automatically)
 4. Call the appropriate MCP tool with resolved parameters
 5. On HTTP 401: invoke `atlassian-setup` skill, then retry once
 

@@ -1,5 +1,7 @@
 # Version Management
 
+V2-style logical paths only — MCP rewrites `/pages/{id}/versions` to `/content/{id}/version` on Server/DC.
+
 ## Rules
 
 1. **Always fetch current page first** to get latest `version.number`
@@ -10,16 +12,18 @@
 
 ```
 Tool: fetch (method: GET)
-Endpoint: /wiki/rest/api/content/{id}/version
+Endpoint: /pages/{id}/versions
 ```
 
-## Restore Version
+## Restore Version (V1/DC only)
 
 ```
 Tool: fetch (method: POST)
-Endpoint: /wiki/rest/api/content/{id}/version
+Endpoint: /pages/{id}/versions
 Body: { "operationKey": "restore", "params": { "versionNumber": N } }
 ```
+
+Cloud V2 has no restore endpoint — the upstream API responds 404 for POST to its versions endpoint.
 
 ## Version Diff
 

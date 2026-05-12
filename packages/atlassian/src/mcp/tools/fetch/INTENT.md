@@ -22,6 +22,8 @@ ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki
 - HTTP 전송은 `core/http-client`의 `executeRequest`에 위임한다
 - GET + `save_to_path` 조합은 `asset-fetch` 유틸로 라우팅한다
 - GET 응답의 ADF 필드는 `autoConvertAdf`로 자동 Markdown 변환한다
+- `transformRequest`로 V2 logical path를 V1/DC physical로 매핑하고, `attachPrefix`로 service+버전 prefix를 부착한다
+- DC(`ctx.requires_xsrf_bypass`) non-GET 요청에는 `X-Atlassian-Token: no-check` 헤더를 주입한다
 
 ### Ask first
 
@@ -40,5 +42,5 @@ ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki
 - `core/http-client` — `executeRequest`
 - `types/index` — `FetchContext`, `McpResponse`, `FetchParams`, `AssetFetchParams`
 - `converter/index` — ADF/Storage/Wiki ↔ Markdown 변환 (utils 경유)
-- `utils/index` — `validateSavePath`, `detectService`
+- `utils/index` — `validateSavePath`, `attachPrefix`, `transformRequest`, `detectService` (폴백)
 - `lib/file-io` — `writeBinary`

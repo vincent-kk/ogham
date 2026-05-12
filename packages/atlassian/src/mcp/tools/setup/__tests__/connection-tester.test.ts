@@ -168,7 +168,7 @@ describe('testConnection', () => {
       api_version_override: '3',
     });
 
-    expect(mockGetApiVersion).toHaveBeenCalledWith(false, '3');
+    expect(mockGetApiVersion).toHaveBeenCalledWith('jira', false, '3');
     const callArgs = mockExecuteRequest.mock.calls[0];
     expect(callArgs[1].endpoint).toBe('/rest/api/3/myself');
   });

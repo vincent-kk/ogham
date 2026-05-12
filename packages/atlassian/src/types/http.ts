@@ -52,6 +52,8 @@ export interface HttpClientConfig {
   auth_header?: string;
   ssl_verify?: boolean;
   timeout?: number;
+  /** On-prem opt-in: skip SSRF private-IP rejection. Default `false`/`undefined` blocks. */
+  allow_private_ip?: boolean;
 }
 
 export interface RequestOptions {

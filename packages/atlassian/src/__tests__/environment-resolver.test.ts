@@ -32,12 +32,30 @@ describe('environment-resolver', () => {
   });
 
   describe('getApiVersion', () => {
-    it('returns 3 for Cloud', () => {
-      expect(getApiVersion(true)).toBe('3');
+    it('returns 3 for Jira Cloud', () => {
+      expect(getApiVersion('jira', true)).toBe('3');
     });
 
-    it('returns 2 for Server', () => {
-      expect(getApiVersion(false)).toBe('2');
+    it('returns 2 for Jira Server', () => {
+      expect(getApiVersion('jira', false)).toBe('2');
+    });
+
+    it('respects override for Jira on-prem', () => {
+      expect(getApiVersion('jira', false, '3')).toBe('3');
+      expect(getApiVersion('jira', false, '2')).toBe('2');
+    });
+
+    it('returns v2 for Confluence Cloud', () => {
+      expect(getApiVersion('confluence', true)).toBe('v2');
+    });
+
+    it('returns v1 for Confluence Server', () => {
+      expect(getApiVersion('confluence', false)).toBe('v1');
+    });
+
+    it('ignores override for Confluence (DC v1 is single standard)', () => {
+      expect(getApiVersion('confluence', false, '3')).toBe('v1');
+      expect(getApiVersion('confluence', true, '2')).toBe('v2');
     });
   });
 });

@@ -34,6 +34,7 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
         endpoint: z.string(),
+        service: z.enum(["jira", "confluence"]).optional(),
         base_url: z.string().url().optional(),
         body: z.unknown().optional(),
         query_params: z.record(z.string()).optional(),
@@ -55,6 +56,7 @@ export function createServer(): McpServer {
       async (args: {
         method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
         endpoint: string;
+        service?: "jira" | "confluence";
         base_url?: string;
         body?: unknown;
         query_params?: Record<string, string>;
@@ -66,7 +68,7 @@ export function createServer(): McpServer {
         save_to_path?: string;
         force?: boolean;
       }) => {
-        const service = detectService(args.endpoint);
+        const service = args.service ?? detectService(args.endpoint);
         const ctx = await buildFetchContext(service, args.base_url, args.endpoint);
         if (!ctx)
           throw new Error(

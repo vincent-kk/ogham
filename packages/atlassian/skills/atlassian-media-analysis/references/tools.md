@@ -15,7 +15,7 @@ For Atlassian URL downloads, use the `mcp_tools_fetch` MCP tool:
 ```
 Tool: fetch (method: GET)
 Params:
-  url: <attachment-content-url>
+  endpoint: <attachment-content-url>
   accept_format: "raw"
   save_to_path: ".temp/<namespace>/<filename>"
 ```

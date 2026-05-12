@@ -5,7 +5,7 @@ import { renderByFormat } from './render-by-format.js';
 export function convertBody(
   body: unknown,
   service: 'jira' | 'confluence',
-  apiVersion: '2' | '3',
+  apiVersion: '2' | '3' | 'v1' | 'v2',
 ): unknown {
   if (!body || typeof body !== 'object') return body;
   const obj = { ...(body as Record<string, unknown>) };

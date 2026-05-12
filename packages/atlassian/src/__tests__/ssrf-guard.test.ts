@@ -1,6 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { isPrivateIp } from '../utils/index.js';
 import { validateUrl } from '../core/http-client/ssrf-guard.js';
+
+vi.mock('node:dns/promises', () => ({
+  resolve: vi.fn(async (host: string) => {
+    if (host === 'jira.internal.corp') return ['10.0.0.42'];
+    throw new Error('not resolvable');
+  }),
+}));
 
 describe('ssrf-guard', () => {
   describe('isPrivateIp', () => {
@@ -67,6 +74,18 @@ describe('ssrf-guard', () => {
     it('allows valid public URL with matching hostname', async () => {
       await expect(
         validateUrl('https://mycompany.atlassian.net/rest/api/3/issue/TEST-1', 'mycompany.atlassian.net'),
+      ).resolves.toBeUndefined();
+    });
+
+    it('allows private-IP DNS resolution when allowPrivateIp is true (on-prem)', async () => {
+      await expect(
+        validateUrl('https://jira.internal.corp/rest/api/2/myself', 'jira.internal.corp', true),
+      ).resolves.toBeUndefined();
+    });
+
+    it('allows direct private-IP hostname when allowPrivateIp is true (on-prem)', async () => {
+      await expect(
+        validateUrl('https://10.0.0.42/rest/api/2/myself', '10.0.0.42', true),
       ).resolves.toBeUndefined();
     });
   });

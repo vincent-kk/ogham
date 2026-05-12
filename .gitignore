@@ -15,6 +15,7 @@ npm-debug.log*
 .omc/
 .claude/worktrees/
 .filid/review
+.filid/pr-draft
 .maencof-lens/
 .temp/
 docs/superpowers/

@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP server and 3 generic HTTP/utility tools. Zero domain knowledge — executes (method, path, params, body) tuples.
+MCP server and 4 generic HTTP/utility tools. Zero domain knowledge — executes (method, path, params, body) tuples.
 
 ## Structure
 
@@ -9,7 +9,7 @@ MCP server and 3 generic HTTP/utility tools. Zero domain knowledge — executes 
 | `server/` | MCP server creation and tool registration |
 | `server-entry/` | esbuild CJS bundle entry point |
 | `shared/` | MCP tool response formatting (toolResult, toolError, wrapHandler) |
-| `tools/` | 3 tool handlers (fetch, convert, setup) |
+| `tools/` | 4 tool handlers (fetch, convert, auth-check, setup) |
 | `pages/` | Browser-side UI pages served by tools |
 
 ## Conventions

@@ -45,26 +45,26 @@ Simple operations (single page read, single CQL search, single comment add) shou
 - Always: fetch current page → get `version.number` → send `version.number + 1` in update body
 - On 409 conflict → re-fetch latest version → retry (max 3 times)
 
-### V1 vs V2 API Branching
+### Endpoint Dispatch
 
-| Feature         | V1 API                   | V2 API                                   | Notes                    |
-| --------------- | ------------------------ | ---------------------------------------- | ------------------------ |
-| Page CRUD       | `/rest/api/content/{id}` | `/api/v2/pages/{id}`                     | V2 preferred on Cloud    |
-| Inline comments | Not supported            | `/api/v2/inline-comments`                | Cloud only               |
-| Analytics       | Not supported            | `/rest/api/analytics/content/{id}/views` | Cloud only               |
-| Attachments     | V1 only on Server        | V1 + V2 on Cloud                         | V2 has improved metadata |
-| Page move       | V1 only                  | Not supported in V2                      | V2 exception             |
+Send V2-style logical paths only (`/pages/{id}`, `/spaces/{id}`, `/footer-comments` etc.). MCP automatically:
 
-Auto-select V2 when available on Cloud; fallback to V1 on Server/DC.
+- attaches the correct prefix (`/wiki/api/v2` for Cloud V2, `/rest/api` for Server/DC, `/rest/api/{2|3}` for Jira)
+- rewrites V2 paths to V1 form for Server/DC (e.g. `/pages/{id}` → `/content/{id}`)
+- maps V2 envelope to V1 envelope (`spaceId` → `space.key`, injects `type: 'page' | 'comment'`)
+- injects `X-Atlassian-Token: no-check` for DC non-GET requests
+- raises an explicit error when a Cloud-V2-only endpoint is invoked against DC
 
-### Cloud vs Server/DC Differences
+### Cloud vs Server/DC Capability Gaps
 
-| Aspect            | Cloud       | Server/DC              |
-| ----------------- | ----------- | ---------------------- |
-| Inline comments   | Supported   | Not supported          |
-| Analytics (views) | Supported   | Not supported          |
-| V2 API            | Available   | Not available          |
-| User ID           | `accountId` | `userKey` / `username` |
+| Feature                       | Cloud V2 | Server/DC               |
+| ----------------------------- | -------- | ----------------------- |
+| Inline comments               | Yes      | No (V2-only)            |
+| Analytics (views)             | Yes      | No (V2-only)            |
+| Whiteboards / Databases       | Yes      | No (V2-only)            |
+| Smart-link embeds             | Yes      | No (V2-only)            |
+| User identifier               | `accountId` | `userKey` / `username` |
+| Page move                     | Via page update (`parentId`) | Yes (`/pages/{id}/move/{position}/{targetId}` — auto-rewritten to V1) |
 
 ### Error Recovery
 

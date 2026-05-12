@@ -22,8 +22,13 @@ export const BasicCredentialSchema = z.object({
   password: z.string().optional(),
 });
 
+export const BearerCredentialSchema = z.object({
+  token: z.string(),
+});
+
 export const ServiceCredentialsSchema = z.object({
   basic: BasicCredentialSchema.optional(),
+  bearer: BearerCredentialSchema.optional(),
 });
 export type ServiceCredentials = z.infer<typeof ServiceCredentialsSchema>;
 

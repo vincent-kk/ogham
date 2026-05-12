@@ -1,19 +1,16 @@
 ## Endpoints
 
-| Operation | HTTP | Cloud V1 | Cloud V2 | Server |
-|---|---|---|---|---|
-| Footer comments | GET | `/wiki/rest/api/content/{id}/child/comment` | `/api/v2/pages/{id}/footer-comments` | `/rest/api/content/{id}/child/comment` |
-| Inline comments | GET | — | `/api/v2/pages/{id}/inline-comments` | Not supported |
-| Add comment | POST | `/wiki/rest/api/content` | `/api/v2/footer-comments` | `/rest/api/content` |
+V2-style logical paths only — MCP rewrites to V1/DC form (including `type: 'comment'` injection on POST).
 
-## Cloud vs Server Branching
-
-- **Inline comments**: Cloud V2 only. Not available on Server.
-- **Footer comments**: Both platforms via V1.
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| List footer comments | GET | `/pages/{id}/footer-comments` |
+| List inline comments | GET | `/pages/{id}/inline-comments` (Cloud V2 only — DC returns explicit error) |
+| Add footer comment | POST | `/footer-comments` |
 
 ## MCP Tool Mapping
 
 | Operation | MCP Tool | Method | Notes |
 |---|---|---|---|
 | List | `mcp_tools_fetch` | GET | |
-| Add | `mcp_tools_fetch` | POST | content_format: "markdown" |
+| Add | `mcp_tools_fetch` | POST | `content_format: "markdown"`. Body: `{ body: "markdown", pageId: "{id}" }` — MCP auto-converts `pageId` → V1 `container: { id, type: 'page' }` on DC, and injects `type: 'comment'` |

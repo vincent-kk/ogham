@@ -17,18 +17,18 @@ describe('convertBody', () => {
       expect(out.description).toBe('h1. H');
     });
 
-    it('renders Confluence body as storage object (apiVersion 3)', () => {
-      const out = convertBody({ body: '# H' }, 'confluence', '3') as {
-        body: { storage: { value: string; representation: string } };
+    it('renders Confluence body as V2 storage shape (Cloud v2)', () => {
+      const out = convertBody({ body: '# H' }, 'confluence', 'v2') as {
+        body: { representation: string; value: string };
       };
-      expect(out.body.storage.representation).toBe('storage');
-      expect(typeof out.body.storage.value).toBe('string');
+      expect(out.body.representation).toBe('storage');
+      expect(typeof out.body.value).toBe('string');
     });
   });
 
   describe('edge', () => {
-    it('renders Confluence body as storage on apiVersion 2 (silent fallback)', () => {
-      const out = convertBody({ body: '# H' }, 'confluence', '2') as {
+    it('renders Confluence body as storage on DC v1', () => {
+      const out = convertBody({ body: '# H' }, 'confluence', 'v1') as {
         body: { storage: { representation: string } };
       };
       expect(out.body.storage.representation).toBe('storage');

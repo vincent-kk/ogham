@@ -9,7 +9,7 @@ function getTestEndpoint(
   override?: '2' | '3',
 ): string {
   if (service === 'jira') {
-    const version = getApiVersion(isCloud, override);
+    const version = getApiVersion('jira', isCloud, override);
     return `/rest/api/${version}/myself`;
   }
   // Confluence — DC v1 단일 표준이므로 override 미적용
@@ -38,6 +38,7 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
   const clientConfig: HttpClientConfig = {
     base_url: env.base_url,
     auth_header: authPayload.value,
+    allow_private_ip: !env.is_cloud,
   };
 
   const start = Date.now();
