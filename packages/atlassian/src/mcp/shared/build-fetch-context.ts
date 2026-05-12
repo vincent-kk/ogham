@@ -22,6 +22,7 @@ export async function buildFetchContext(
     auth_header: authHeader ?? undefined,
     ssl_verify: siteConfig.ssl_verify,
     timeout: siteConfig.timeout,
+    allow_private_ip: !siteConfig.is_cloud,
   };
 
   const apiVersion: '2' | '3' =

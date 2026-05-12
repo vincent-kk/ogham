@@ -2,7 +2,11 @@ import { resolve as dnsResolve } from 'node:dns/promises';
 import { isPrivateIp } from '../../utils/index.js';
 
 /** Validate a URL against SSRF attack vectors */
-export async function validateUrl(url: string, allowedHostname: string): Promise<void> {
+export async function validateUrl(
+  url: string,
+  allowedHostname: string,
+  allowPrivateIp = false,
+): Promise<void> {
   // Path traversal check on raw string (before URL normalization strips ..)
   if (url.includes('..')) {
     throw new Error('SSRF: Path traversal detected in URL.');
@@ -20,6 +24,10 @@ export async function validateUrl(url: string, allowedHostname: string): Promise
     throw new Error(
       `SSRF: Hostname "${parsed.hostname}" does not match allowed hostname "${allowedHostname}".`,
     );
+  }
+
+  if (allowPrivateIp) {
+    return;
   }
 
   // Direct IP check (if hostname looks like an IP)

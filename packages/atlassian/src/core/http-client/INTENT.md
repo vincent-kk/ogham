@@ -29,7 +29,7 @@
 
 - mcp/ 레이어에서 이 모듈을 직접 import (core/ → mcp/ 방향 금지)
 - 인증 자격증명을 응답 데이터나 로그에 노출
-- SSRF 검증 우회 또는 private IP 허용
+- 호출자가 `allow_private_ip` 정책을 명시적으로 전달하지 않은 한 private IP 허용
 
 ## Dependencies
 

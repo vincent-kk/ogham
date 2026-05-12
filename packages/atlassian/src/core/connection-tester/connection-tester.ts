@@ -38,6 +38,7 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
   const clientConfig: HttpClientConfig = {
     base_url: env.base_url,
     auth_header: authPayload.value,
+    allow_private_ip: !env.is_cloud,
   };
 
   const start = Date.now();
