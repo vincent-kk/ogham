@@ -53,11 +53,9 @@ function buildCredentials(
   username?: string,
 ): ServiceCredentials {
   if (!svc) return {};
-  // On-prem PAT: no username + api_token → Bearer slot
   if (!username && svc.api_token) {
     return { bearer: { token: svc.api_token } };
   }
-  // Basic: username present + token → basic slot
   if (username && (svc.api_token || svc.password)) {
     return { basic: { api_token: svc.api_token, password: svc.password } };
   }
