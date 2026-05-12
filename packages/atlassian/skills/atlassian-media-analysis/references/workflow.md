@@ -21,14 +21,15 @@ Step 2 — Download (if Atlassian URL)
 
 Step 3 — Probe and select preset
   - Run: node "<skill-dir>/scripts/probe.mjs" "<file>" [intent]
-  - Parse JSON output for: type, duration, resolution, preset, command
+  - Parse JSON output for: type, duration, resolution, preset, command, warning
+  - If `warning` is non-null (e.g. ffprobe missing), surface it to the user before proceeding
   - If probe returns type=image -> Step 4 (image path)
   - If probe returns type=video -> Step 5 (video path)
   - See presets/index.md for the full decision matrix
 
 Step 4 — Image handling (no scene-sieve)
-  - If Atlassian URL: file already in .temp/<filename>/
-  - If local file: copy to .temp/<filename>/
+  - If Atlassian URL: file already at .temp/<namespace>/<filename>
+  - If local file: copy to .temp/<namespace>/<filename>
   - Return file path to caller
   - Caller reads the image directly via Read tool (multimodal)
   - No subagent needed. Skill completes here.
@@ -40,7 +41,7 @@ Step 5 — Video/GIF handling
      - (namespace from Step 2; if local file, use filename as namespace)
 
   b. Check cache:
-     - If .temp/<filename>/analysis.json exists AND no --force flag
+     - If .temp/<namespace>/<filename>/analysis.json exists AND no --force flag
        -> Return cached analysis summary
        -> Skip extraction and analysis
 
@@ -55,7 +56,7 @@ Step 5 — Video/GIF handling
        - frames directory absolute path
        - .metadata.json absolute path
        - analysis purpose/context from caller
-       - analysis.json save path: .temp/<filename>/analysis.json
+       - analysis.json save path: .temp/<namespace>/<filename>/analysis.json
      - Agent performs:
        1. Read .metadata.json -> frame list + timestamps
        2. Read frames sequentially (multimodal image recognition)

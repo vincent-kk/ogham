@@ -319,19 +319,21 @@ export function createRouteHandler(
   return (req: IncomingMessage, res: ServerResponse) => {
     ctx.resetTimer();
 
-    // CORS headers for local dev
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
+    // Server binds to 127.0.0.1 only; the setup page and its XHR calls share
+    // the same origin, so no CORS headers are needed. A wildcard ACAO would
+    // let any local browser tab POST to /submit during the setup window.
 
     const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
     const path = url.pathname;
+
+    // CSRF defense: POST endpoints (which mutate credentials) require a JSON
+    // Content-Type. A cross-origin text/plain POST (a "simple" CORS request
+    // with no preflight) carrying JSON would otherwise be parsed and saved.
+    if (req.method === 'POST'
+      && !(req.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) {
+      sendJson(res, 415, { success: false, message: 'Content-Type must be application/json' });
+      return;
+    }
 
     const handleError = (err: unknown): void => {
       const message = err instanceof Error ? err.message : 'Internal server error';

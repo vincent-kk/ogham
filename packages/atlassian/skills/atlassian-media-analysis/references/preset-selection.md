@@ -12,7 +12,7 @@ The probe script (`scripts/probe.mjs`) selects a preset by this priority:
    - <= 5min -> `medium-video`
    - <= 30min -> `long-video`
    - > 30min -> `very-long`
-5. Intent override keywords:
+5. Intent override keywords (override duration-based selection — see `presets/index.md` "Intent overrides"):
    - "quick glance" / "summary" -> `quick-glance`
    - "detailed" / "thorough" -> `detailed`
    - "high quality" / "screenshot" -> `hq-capture`

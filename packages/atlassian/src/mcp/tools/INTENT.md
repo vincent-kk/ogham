@@ -1,6 +1,6 @@
 ## Purpose
 
-3 MCP tool handlers: fetch (HTTP GET/POST/PUT/PATCH/DELETE), convert (local format), setup (auth config).
+4 MCP tool handlers: fetch (HTTP GET/POST/PUT/PATCH/DELETE), convert (local format), auth-check (auth status), setup (auth config).
 
 ## Structure
 

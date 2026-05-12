@@ -157,7 +157,13 @@ if (intent && PRESETS[intent]) {
 const flags = PRESETS[presetName];
 
 // --- Build command ---
-let command = `npx -y @lumy-pack/scene-sieve "${input}" --json -n ${flags.count} -t ${flags.threshold} --fps ${flags.fps} --max-frames ${flags.maxFrames} -s ${flags.scale} -q ${flags.quality}`;
+// Wrap input path in single-quotes with safe escape so attacker-controlled
+// filenames cannot inject `$()`, backticks, or newlines into the shell command.
+function shellEscape(s) {
+  return "'" + String(s).replace(/'/g, "'\\''") + "'";
+}
+
+let command = `npx -y @lumy-pack/scene-sieve ${shellEscape(input)} --json -n ${flags.count} -t ${flags.threshold} --fps ${flags.fps} --max-frames ${flags.maxFrames} -s ${flags.scale} -q ${flags.quality}`;
 if (flags.extra) command += ` ${flags.extra}`;
 
 // --- Format duration ---
@@ -167,6 +173,7 @@ const durationSec = Math.floor(duration - durationMin * 60);
 // --- Output ---
 console.log(JSON.stringify({
   ok: true,
+  warning: probeAvailable ? null : "ffprobe not found — duration estimated from file size; preset selection may be inaccurate",
   probe: {
     file: input,
     extension: ext,

@@ -18,13 +18,15 @@ export async function loadConfig(path: string = CONFIG_PATH): Promise<AtlassianC
   }
 }
 
-/** Save config to disk */
+/** Save config to disk with owner-only permissions (0o600). Config holds
+ *  base_url and username (email), which are sensitive identifiers worth
+ *  protecting from other local users. */
 export async function saveConfig(
   config: AtlassianConfig,
   path: string = CONFIG_PATH,
 ): Promise<void> {
   const validated = AtlassianConfigSchema.parse(config);
-  await writeJson(path, validated);
+  await writeJson(path, validated, { mode: 0o600 });
 }
 
 /** Merge partial updates into existing config */
