@@ -23,16 +23,16 @@ Cloud V2 returns `parentId` directly on the page object — walk it iteratively 
 
 ```
 Tool: fetch (method: GET)
-Endpoint: /pages/{id}/descendant/page
+Endpoint: /pages/{id}/descendants
 ```
 
-Cloud V2 has no descendants endpoint — recurse via `/pages/{id}/children`.
+MCP rewrites to `/content/{id}/descendant/page` on DC. Cloud V2 has no descendants endpoint — recurse via `/pages/{id}/children` instead.
 
-## Move Page (V1/DC only)
+## Move Page
 
 ```
 Tool: fetch (method: PUT)
 Endpoint: /pages/{id}/move/{position}/{targetId}
 ```
 
-Positions: `before`, `after`, `append` (as child). Cloud V2 has no move endpoint — set `parentId` via page update instead.
+Positions: `before`, `after`, `append` (as child). MCP rewrites to `/content/{id}/move/{position}/{targetId}` on DC. For Cloud V2, prefer updating the page with a new `parentId` instead (move endpoint absent in V2).

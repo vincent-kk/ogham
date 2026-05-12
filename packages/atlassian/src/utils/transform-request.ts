@@ -20,15 +20,21 @@ interface LogicalRoute {
 
 /** Order matters: more specific routes must come before generic ones. */
 const ROUTES: LogicalRoute[] = [
+  { v2: '/pages/{id}/move/{position}/{targetId}', v1: '/content/{id}/move/{position}/{targetId}' },
   { v2: '/pages/{id}/children', v1: '/content/{id}/child/page' },
+  { v2: '/pages/{id}/descendants', v1: '/content/{id}/descendant/page' },
   { v2: '/pages/{id}/footer-comments', v1: '/content/{id}/child/comment' },
   { v2: '/pages/{id}/attachments', v1: '/content/{id}/child/attachment' },
   { v2: '/pages/{id}/properties', v1: '/content/{id}/property' },
+  { v2: '/pages/{id}/versions', v1: '/content/{id}/version' },
+  { v2: '/pages/{id}/labels', v1: '/content/{id}/label' },
   { v2: '/pages/{id}', v1: '/content/{id}' },
   { v2: '/pages', v1: '/content', contentType: 'page' },
   { v2: '/footer-comments', v1: '/content', contentType: 'comment' },
+  { v2: '/attachments/{id}', v1: '/content/{id}' },
   { v2: '/spaces/{id}', v1: '/space/{id}' },
   { v2: '/spaces', v1: '/space' },
+  { v2: '/users/current', v1: '/user/current' },
 ];
 
 const V2_ONLY_PREFIXES = [
@@ -90,6 +96,18 @@ function mapBodyV2ToV1(body: unknown, route: LogicalRoute): unknown {
   if (obj.spaceId !== undefined) {
     obj.space = { key: String(obj.spaceId) };
     delete obj.spaceId;
+  }
+
+  // V2 `parentId` (flat) → V1 `ancestors: [{ id }]` (array of refs).
+  if (obj.parentId !== undefined) {
+    obj.ancestors = [{ id: String(obj.parentId) }];
+    delete obj.parentId;
+  }
+
+  // V2 comment `pageId` (flat) → V1 `container: { id, type: 'page' }`.
+  if (route.contentType === 'comment' && obj.pageId !== undefined) {
+    obj.container = { id: String(obj.pageId), type: 'page' };
+    delete obj.pageId;
   }
 
   // V1 requires `type` on `/content` collection endpoints.

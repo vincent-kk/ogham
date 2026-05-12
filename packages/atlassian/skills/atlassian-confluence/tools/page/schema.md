@@ -11,13 +11,16 @@ V2-style logical paths only — MCP rewrites to `/rest/api/content/...` on Serve
 
 ## Body Fields
 
+V2-style flat field names. MCP rewrites envelope on DC: `spaceId → space.key`, `parentId → ancestors: [{ id }]`, injects `type: 'page'`, strips V2-only `status`.
+
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `spaceId` | string | Y (create) | Space identifier — numeric ID for Cloud V2, space key for DC |
 | `title` | string | Y (create) | Page title |
 | `body` | string | Y (create/update) | Markdown content — pair with `content_format: "markdown"` to auto-convert to storage |
 | `version.number` | number | Y (update) | Current version + 1 |
-| `parentId` | string | N | Parent page ID (V2) |
+| `parentId` | string | N | Parent page identifier (V2 flat) — auto-converted to V1 `ancestors` on DC |
+| `status` | string | N | `current` (V2 only — stripped on DC) |
 
 ## MCP Tool Mapping
 

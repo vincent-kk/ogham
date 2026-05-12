@@ -1,6 +1,6 @@
 # Version Management
 
-V2-style logical paths only — MCP rewrites to `/content/{id}/version` on Server/DC.
+V2-style logical paths only — MCP rewrites `/pages/{id}/versions` to `/content/{id}/version` on Server/DC.
 
 ## Rules
 
@@ -23,7 +23,7 @@ Endpoint: /pages/{id}/versions
 Body: { "operationKey": "restore", "params": { "versionNumber": N } }
 ```
 
-Cloud V2 has no equivalent restore endpoint — the MCP layer surfaces a 404 from the upstream API.
+Cloud V2 has no restore endpoint — the upstream API responds 404 for POST to its versions endpoint.
 
 ## Version Diff
 

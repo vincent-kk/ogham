@@ -64,7 +64,7 @@ Send V2-style logical paths only (`/pages/{id}`, `/spaces/{id}`, `/footer-commen
 | Whiteboards / Databases       | Yes      | No (V2-only)            |
 | Smart-link embeds             | Yes      | No (V2-only)            |
 | User identifier               | `accountId` | `userKey` / `username` |
-| Page move                     | No       | Yes (V1 `/content/{id}/move/...`) |
+| Page move                     | Via page update (`parentId`) | Yes (`/pages/{id}/move/{position}/{targetId}` — auto-rewritten to V1) |
 
 ### Error Recovery
 

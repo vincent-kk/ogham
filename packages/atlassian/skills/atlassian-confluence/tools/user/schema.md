@@ -1,11 +1,11 @@
 ## Endpoints
 
-User endpoint pluralization differs between V2 and V1/DC. Send the appropriate form per target. (No path-mapper entry — these endpoints are simple enough to keep explicit.)
+V2-style logical paths — MCP rewrites `/users/current` to `/user/current` on DC.
 
-| Operation | HTTP | Cloud V2 | V1 / Server-DC |
-|---|---|---|---|
-| Current user | GET | `/users/current` | `/user/current` |
-| Search users | GET | — (use search via CQL) | `/search/user?cql=...` |
+| Operation | HTTP | Endpoint |
+|---|---|---|
+| Current user | GET | `/users/current` |
+| Search users | GET | `/search/user?cql=...` (V1/DC only — Cloud V2 has no equivalent; use CQL search instead) |
 
 ## Identifier
 

@@ -1,12 +1,12 @@
 ## Endpoints
 
-Labels live on the V1 content endpoint on both Cloud V1 and Server/DC. Cloud V2 exposes read via `/pages/{id}/labels` but no write — send to `/content/{id}/label` for cross-platform parity.
+V2-style logical paths — MCP rewrites `/pages/{id}/labels` to `/content/{id}/label` on DC. Cloud V2 has only GET on the labels endpoint; POST/DELETE writes will surface as 404/405 from the V2 API on Cloud — use update-via-page or call the V1 path directly on Cloud V1 if needed.
 
 | Operation | HTTP | Endpoint |
 |---|---|---|
-| List labels (V2 read) | GET | `/pages/{id}/labels` |
-| Add labels | POST | `/content/{id}/label` |
-| Remove label | DELETE | `/content/{id}/label/{label}` |
+| List labels | GET | `/pages/{id}/labels` |
+| Add labels | POST | `/pages/{id}/labels` (DC only — Cloud V2 has no write) |
+| Remove label | DELETE | `/pages/{id}/labels/{label}` (DC only) |
 
 ## MCP Tool Mapping
 

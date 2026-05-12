@@ -63,13 +63,17 @@ Simple operations (single issue read, single JQL search, single comment add) sho
 
 ### Endpoint Dispatch
 
-Send version-agnostic paths (`/issue/{key}`, `/search` etc. — no `/rest/api/{2|3}` prefix). MCP automatically attaches `/rest/api/3` (Cloud) or `/rest/api/2` (Server/DC), and adds `X-Atlassian-Token: no-check` to DC non-GET requests. Markdown bodies are converted to ADF (Cloud v3) or Wiki Markup (Server/DC v2) automatically when `content_format: "markdown"` is set.
+Send version-agnostic paths (`/issue/{key}`, `/myself` etc. — no `/rest/api/{2|3}` prefix). MCP automatically attaches `/rest/api/3` (Cloud) or `/rest/api/2` (Server/DC), and adds `X-Atlassian-Token: no-check` to DC non-GET requests. Markdown bodies are converted to ADF (Cloud v3) or Wiki Markup (Server/DC v2) automatically when `content_format: "markdown"` is set.
+
+**Search API exception** — V3 and V2 disagree on both path and method, so the MCP layer does NOT auto-translate. Send explicitly:
+- Cloud V3: `POST /search/jql` with body `{ jql, fields, ... }`
+- Server/DC V2: `GET /search?jql=...`
 
 ### Cloud vs Server/DC Capability Gaps
 
 | Aspect               | Cloud (v3)                    | Server/DC (v2)             |
 | -------------------- | ----------------------------- | -------------------------- |
-| Search API           | POST `/search/jql`            | GET `/search`              |
+| Search API path/method | `POST /search/jql`          | `GET /search`              |
 | Content format       | ADF                           | Wiki markup                |
 | User identifier      | `accountId`                   | `name` / `key`             |
 | Custom field options | Available                     | Not available              |

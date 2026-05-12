@@ -1,12 +1,12 @@
 ## Endpoints
 
-V2-style logical paths — MCP rewrites to `/content/{id}/child/attachment` on Server/DC.
+V2-style logical paths — MCP rewrites to V1/DC form automatically.
 
 | Operation | HTTP | Endpoint |
 |---|---|---|
 | List | GET | `/pages/{id}/attachments` |
 | Upload | POST | `/pages/{id}/attachments` |
-| Delete | DELETE | `/attachments/{id}` (Cloud V2). V1/DC: `/content/{attachmentId}` — send directly. |
+| Delete | DELETE | `/attachments/{attachmentId}` (MCP rewrites to `/content/{attachmentId}` on DC) |
 | Download | GET | Via download link returned from list/get |
 
 ## MCP Tool Mapping
