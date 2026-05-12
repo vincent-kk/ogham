@@ -23,7 +23,7 @@ export async function handleGetRoot(ctx: RouteContext, res: ServerResponse): Pro
     deployment_type: hasOnPremSite ? 'onprem' : 'cloud',
   };
 
-  const html = ctx.setupHtml.replace("'__SETUP_STATE__'", escapeJsonForHtml(stateData));
+  const html = ctx.setupHtml.replace(/["']__SETUP_STATE__["']/, escapeJsonForHtml(stateData));
   res.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Content-Length': Buffer.byteLength(html),

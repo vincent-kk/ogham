@@ -58,9 +58,9 @@ describe('build-template output (setup-html.ts)', () => {
     expect(content).toContain('export const SETUP_HTML = "');
   });
 
-  it('HTML 구조 보존 — <!DOCTYPE html> 시작', async () => {
+  it('HTML 구조 보존 — <!doctype html> 시작', async () => {
     const content = await readFile(GENERATED_PATH, 'utf-8');
 
-    expect(content).toContain('<!DOCTYPE html>');
+    expect(content).toContain('<!doctype html>');
   });
 });
