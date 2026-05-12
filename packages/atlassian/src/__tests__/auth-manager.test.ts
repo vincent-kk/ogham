@@ -89,5 +89,42 @@ describe('auth-manager', () => {
       const decoded = Buffer.from(result!.value.replace('Basic ', ''), 'base64').toString();
       expect(decoded).toBe('user@test.com:my-password');
     });
+
+    it('builds bearer header from bearer slot when username is absent (on-prem PAT)', () => {
+      const creds: ServiceCredentials = { bearer: { token: 'pat-secret' } };
+      const result = buildAuthHeader(creds);
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('bearer');
+      expect(result!.value).toBe('Bearer pat-secret');
+    });
+
+    it('prefers bearer over basic when both are set and no username is given', () => {
+      const creds: ServiceCredentials = {
+        basic: { api_token: 'basic-token' },
+        bearer: { token: 'bearer-token' },
+      };
+      const result = buildAuthHeader(creds);
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('bearer');
+      expect(result!.value).toBe('Bearer bearer-token');
+    });
+
+    it('prefers basic over bearer when both slots exist and a username is provided', () => {
+      const creds: ServiceCredentials = {
+        basic: { api_token: 'basic-token' },
+        bearer: { token: 'bearer-token' },
+      };
+      const result = buildAuthHeader(creds, 'user@test.com');
+      expect(result).not.toBeNull();
+      expect(result!.type).toBe('basic');
+      const decoded = Buffer.from(result!.value.replace('Basic ', ''), 'base64').toString();
+      expect(decoded).toBe('user@test.com:basic-token');
+    });
+
+    it('returns null when bearer slot holds an empty token and basic is absent', () => {
+      const creds: ServiceCredentials = { bearer: { token: '' } };
+      const result = buildAuthHeader(creds);
+      expect(result).toBeNull();
+    });
   });
 });
