@@ -68,27 +68,14 @@ describe('transformRequest', () => {
       ).toBe('/space/DEV');
     });
 
-    it('throws on V2-only /inline-comments when targeting DC', () => {
+    it.each([
+      ['/inline-comments'],
+      ['/whiteboards/abc'],
+      ['/databases'],
+      ['/analytics/content/1/views'],
+    ])('throws on V2-only %s when targeting DC', (path) => {
       expect(() =>
-        transformRequest('/inline-comments', undefined, 'confluence', 'v1'),
-      ).toThrow(/Cloud V2 only/);
-    });
-
-    it('throws on V2-only /whiteboards on DC', () => {
-      expect(() =>
-        transformRequest('/whiteboards/abc', undefined, 'confluence', 'v1'),
-      ).toThrow(/Cloud V2 only/);
-    });
-
-    it('throws on V2-only /databases on DC', () => {
-      expect(() =>
-        transformRequest('/databases', undefined, 'confluence', 'v1'),
-      ).toThrow(/Cloud V2 only/);
-    });
-
-    it('throws on V2-only /analytics/* on DC', () => {
-      expect(() =>
-        transformRequest('/analytics/content/1/views', undefined, 'confluence', 'v1'),
+        transformRequest(path, undefined, 'confluence', 'v1'),
       ).toThrow(/Cloud V2 only/);
     });
 

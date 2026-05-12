@@ -21,33 +21,23 @@ describe('attachPrefix', () => {
       expect(attachPrefix('/content/12345', 'confluence', 'v1')).toBe('/rest/api/content/12345');
     });
 
-    it('leaves /wiki/rest/api/... path unchanged (Cloud V1 backward compat)', () => {
-      const path = '/wiki/rest/api/content/12345';
-      expect(attachPrefix(path, 'confluence', 'v2')).toBe(path);
-    });
-
-    it('leaves /rest/api/3/... path unchanged (full Jira path backward compat)', () => {
-      const path = '/rest/api/3/issue/PROJ-1';
-      expect(attachPrefix(path, 'jira', '3')).toBe(path);
-    });
-
-    it('leaves /rest/api/content/... path unchanged (full Confluence DC path)', () => {
-      const path = '/rest/api/content/12345';
-      expect(attachPrefix(path, 'confluence', 'v1')).toBe(path);
+    it.each([
+      ['/wiki/rest/api/content/12345', 'confluence', 'v2'],
+      ['/rest/api/3/issue/PROJ-1',     'jira',        '3'],
+      ['/rest/api/content/12345',      'confluence',  'v1'],
+    ] as const)('leaves %s path unchanged (%s %s)', (path, service, version) => {
+      expect(attachPrefix(path, service, version)).toBe(path);
     });
 
     it('normalizes leading slash when missing', () => {
       expect(attachPrefix('issue/PROJ-1', 'jira', '3')).toBe('/rest/api/3/issue/PROJ-1');
     });
 
-    it('preserves query string after attaching prefix', () => {
-      expect(attachPrefix('/pages/1?body-format=storage', 'confluence', 'v2'))
-        .toBe('/wiki/api/v2/pages/1?body-format=storage');
-    });
-
-    it('preserves Jira v2 query string', () => {
-      expect(attachPrefix('/search?jql=project=DEV', 'jira', '2'))
-        .toBe('/rest/api/2/search?jql=project=DEV');
+    it.each([
+      ['/pages/1?body-format=storage', 'confluence', 'v2', '/wiki/api/v2/pages/1?body-format=storage'],
+      ['/search?jql=project=DEV',      'jira',        '2',  '/rest/api/2/search?jql=project=DEV'],
+    ] as const)('preserves query string after attaching prefix: %s', (path, service, version, expected) => {
+      expect(attachPrefix(path, service, version)).toBe(expected);
     });
 
     it('preserves trailing slash in endpoint', () => {

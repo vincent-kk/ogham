@@ -227,6 +227,8 @@ async function handleSubmit(
     }));
   }
 
+  // Cloud: Jira and Confluence share the same site URL, so the Jira connection
+  // test above also represents Confluence reachability. Skip the redundant probe.
   if (data.confluence && data.deployment_type === 'onprem') {
     const creds = buildCredentials(data.confluence, data.confluence.username);
     testResults.push(await ctx.testConnection({
