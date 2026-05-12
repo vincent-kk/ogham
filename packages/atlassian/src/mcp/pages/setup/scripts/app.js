@@ -301,8 +301,8 @@
       requireField("cloud.username", data.jira ? data.jira.username : "");
       requireField("cloud.api_token", data.jira ? data.jira.api_token : "");
     } else {
+      // On-prem: username is optional (PAT/Bearer auth path).
       requireUrl("onprem.jira.base_url", data.jira ? data.jira.base_url : "");
-      requireField("onprem.jira.username", data.jira ? data.jira.username : "");
       requireField(
         "onprem.jira.api_token",
         data.jira ? data.jira.api_token : "",
@@ -310,10 +310,6 @@
       requireUrl(
         "onprem.confluence.base_url",
         data.confluence ? data.confluence.base_url : "",
-      );
-      requireField(
-        "onprem.confluence.username",
-        data.confluence ? data.confluence.username : "",
       );
       requireField(
         "onprem.confluence.api_token",

@@ -50,9 +50,18 @@ function parseBody(req: IncomingMessage): Promise<unknown> {
 
 function buildCredentials(
   svc: SetupFormData['jira'],
+  username?: string,
 ): ServiceCredentials {
   if (!svc) return {};
-  return { basic: { api_token: svc.api_token, password: svc.password } };
+  // On-prem PAT: no username + api_token → Bearer slot
+  if (!username && svc.api_token) {
+    return { bearer: { token: svc.api_token } };
+  }
+  // Basic: username present + token → basic slot
+  if (username && (svc.api_token || svc.password)) {
+    return { basic: { api_token: svc.api_token, password: svc.password } };
+  }
+  return {};
 }
 
 /** Restore masked values from existing credentials */
@@ -61,7 +70,11 @@ function restoreMaskedValues(
   existing: ServiceCredentials | undefined,
 ): void {
   if (!existing) return;
-  if (svc.api_token === MASK) svc.api_token = existing.basic?.api_token;
+  // api_token MASK can map back to either basic or bearer slot — the
+  // routing decision is re-made by buildCredentials based on current username.
+  if (svc.api_token === MASK) {
+    svc.api_token = existing.basic?.api_token ?? existing.bearer?.token;
+  }
   if (svc.password === MASK) svc.password = existing.basic?.password;
 }
 
@@ -149,7 +162,7 @@ async function handleTest(
   const results: ConnectionTestResult[] = [];
 
   if (data.jira) {
-    const creds = buildCredentials(data.jira);
+    const creds = buildCredentials(data.jira, data.jira.username);
     results.push(await ctx.testConnection({
       base_url: data.jira.base_url,
       credentials: creds,
@@ -160,7 +173,7 @@ async function handleTest(
   }
 
   if (data.confluence) {
-    const creds = buildCredentials(data.confluence);
+    const creds = buildCredentials(data.confluence, data.confluence.username);
     results.push(await ctx.testConnection({
       base_url: data.confluence.base_url,
       credentials: creds,
@@ -206,7 +219,7 @@ async function handleSubmit(
   const testResults: ConnectionTestResult[] = [];
 
   if (data.jira) {
-    const creds = buildCredentials(data.jira);
+    const creds = buildCredentials(data.jira, data.jira.username);
     testResults.push(await ctx.testConnection({
       base_url: data.jira.base_url,
       credentials: creds,
@@ -217,7 +230,7 @@ async function handleSubmit(
   }
 
   if (data.confluence && data.deployment_type === 'onprem') {
-    const creds = buildCredentials(data.confluence);
+    const creds = buildCredentials(data.confluence, data.confluence.username);
     testResults.push(await ctx.testConnection({
       base_url: data.confluence.base_url,
       credentials: creds,
@@ -257,8 +270,8 @@ async function handleSubmit(
     // Both jira and confluence share Cloud sites
     newConfig.jira = sites;
     newConfig.confluence = sites;
-    newCredentials.jira = buildCredentials(data.jira);
-    newCredentials.confluence = buildCredentials(data.jira);
+    newCredentials.jira = buildCredentials(jira, jira.username);
+    newCredentials.confluence = buildCredentials(jira, jira.username);
   } else {
     // On-premise: separate jira/confluence with single entry each
     if (data.jira) {
@@ -271,7 +284,7 @@ async function handleSubmit(
         timeout: data.jira.timeout ?? 30000,
         api_version_override: data.jira.api_version_override,
       }];
-      newCredentials.jira = buildCredentials(data.jira);
+      newCredentials.jira = buildCredentials(data.jira, data.jira.username);
     }
 
     if (data.confluence) {
@@ -283,7 +296,7 @@ async function handleSubmit(
         ssl_verify: data.confluence.ssl_verify ?? true,
         timeout: data.confluence.timeout ?? 30000,
       }];
-      newCredentials.confluence = buildCredentials(data.confluence);
+      newCredentials.confluence = buildCredentials(data.confluence, data.confluence.username);
     }
   }
 
