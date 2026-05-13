@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/__tests__/**/*.test.ts"],
+    include: ["src/**/__tests__/**/*.test.ts", "src/**/*.spec.ts"],
     exclude: ["**/fixtures/**"],
     globals: true,
   },

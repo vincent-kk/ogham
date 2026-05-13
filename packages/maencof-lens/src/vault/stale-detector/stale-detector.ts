@@ -1,11 +1,14 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { findIndexMarker } from './find-marker.js';
 
 export interface StaleInfo {
   isStale: boolean;
   indexMtime: number | null;
   newestFileMtime: number;
   staleSince?: string;
+  markerKind?: 'graph-meta' | 'legacy' | null;
 }
 
 const SKIP_DIRS = new Set([
@@ -45,36 +48,65 @@ function maxMarkdownMtime(root: string): number {
   return max;
 }
 
+function formatSince(diffMs: number): string {
+  const diffMin = Math.round(diffMs / 60_000);
+  return diffMin < 60 ? `${diffMin}m ago` : `${Math.round(diffMin / 60)}h ago`;
+}
+
 /**
- * Compare .maencof/index.json mtime against vault markdown files' max mtime.
- * Walks the vault tree using node:fs builtins only (no fast-glob) so the
- * hook bundle stays free of glob-runtime deps. Hidden directories and
- * known config dirs are skipped.
+ * Compare the v2 commit marker (graph-meta.json) or legacy v1 index against
+ * the vault markdown files' max mtime. Marker discovery is delegated to
+ * findIndexMarker so this module stays focused on stale arithmetic.
+ *
+ * - marker absent -> stale + staleSince='index not found' + markerKind=null
+ * - graph-meta marker -> standard mtime comparison + markerKind='graph-meta'
+ * - legacy marker    -> always stale + staleSince='legacy v1' + markerKind='legacy'
+ *                       (accuracy: never report v1 schema as fresh)
  */
 export async function detectStale(vaultPath: string): Promise<StaleInfo> {
-  const indexPath = join(vaultPath, '.maencof', 'index.json');
+  const marker = findIndexMarker(vaultPath);
 
-  if (!existsSync(indexPath)) {
-    return { isStale: true, indexMtime: null, newestFileMtime: 0, staleSince: 'index not found' };
+  if (marker === null) {
+    return {
+      isStale: true,
+      indexMtime: null,
+      newestFileMtime: 0,
+      staleSince: 'index not found',
+      markerKind: null,
+    };
   }
 
-  const indexMtime = statSync(indexPath).mtimeMs;
+  if (marker.kind === 'legacy') {
+    return {
+      isStale: true,
+      indexMtime: marker.mtimeMs,
+      newestFileMtime: 0,
+      staleSince: 'legacy v1',
+      markerKind: 'legacy',
+    };
+  }
 
   try {
     const newestFileMtime = maxMarkdownMtime(vaultPath);
-    const isStale = newestFileMtime > indexMtime;
-    const result: StaleInfo = { isStale, indexMtime, newestFileMtime };
+    const isStale = newestFileMtime > marker.mtimeMs;
+    const result: StaleInfo = {
+      isStale,
+      indexMtime: marker.mtimeMs,
+      newestFileMtime,
+      markerKind: 'graph-meta',
+    };
 
     if (isStale) {
-      const diffMs = newestFileMtime - indexMtime;
-      const diffMin = Math.round(diffMs / 60_000);
-      result.staleSince = diffMin < 60
-        ? `${diffMin}m ago`
-        : `${Math.round(diffMin / 60)}h ago`;
+      result.staleSince = formatSince(newestFileMtime - marker.mtimeMs);
     }
 
     return result;
   } catch {
-    return { isStale: false, indexMtime, newestFileMtime: 0 };
+    return {
+      isStale: false,
+      indexMtime: marker.mtimeMs,
+      newestFileMtime: 0,
+      markerKind: 'graph-meta',
+    };
   }
 }

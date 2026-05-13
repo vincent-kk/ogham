@@ -12,13 +12,16 @@ export async function handleLensStatus(
   graph: KnowledgeGraph | null,
 ): Promise<Record<string, unknown>> {
   const result = await handleKgStatus(vaultPath, graph, {});
-
-  // Add stale warning
   const staleInfo = await detectStale(vaultPath);
   const output = { ...result } as Record<string, unknown>;
 
   if (staleInfo.isStale) {
-    output.staleWarning = `Vault index is stale (${staleInfo.staleSince ?? 'unknown'}). Run kg_build in a maencof session to refresh.`;
+    if (staleInfo.markerKind === 'legacy') {
+      output.staleWarning =
+        'Vault index is on the legacy v1 schema. Run kg_build in a maencof session to migrate to the v2 sharded layout.';
+    } else {
+      output.staleWarning = `Vault index is stale (${staleInfo.staleSince ?? 'unknown'}). Run kg_build in a maencof session to refresh.`;
+    }
   }
 
   output.readOnly = true;

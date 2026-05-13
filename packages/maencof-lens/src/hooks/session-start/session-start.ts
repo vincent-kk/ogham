@@ -38,6 +38,28 @@ function makeResult(additionalContext: string): LensSessionStartResult {
   };
 }
 
+async function resolveVaultStatus(vaultPath: string): Promise<string> {
+  if (!existsSync(vaultPath)) {
+    return VAULT_STATUS.PATH_NOT_FOUND;
+  }
+
+  try {
+    const staleInfo = await detectStale(vaultPath);
+    if (staleInfo.markerKind === "legacy") {
+      return VAULT_STATUS.LEGACY_V1;
+    }
+    if (staleInfo.markerKind === null) {
+      return VAULT_STATUS.INDEX_NOT_BUILT;
+    }
+    if (staleInfo.isStale) {
+      return `${VAULT_STATUS.STALE} (${staleInfo.staleSince ?? "unknown"})`;
+    }
+    return VAULT_STATUS.READY;
+  } catch {
+    return VAULT_STATUS.READY;
+  }
+}
+
 export async function runSessionStart(
   cwd: string,
 ): Promise<LensSessionStartResult> {
@@ -55,26 +77,7 @@ export async function runSessionStart(
 
   const vaultLines: string[] = [];
   for (const vault of config.vaults) {
-    const pathExists = existsSync(vault.path);
-    const indexExists =
-      pathExists && existsSync(join(vault.path, ".maencof", "index.json"));
-    let status: string = VAULT_STATUS.READY;
-
-    if (!pathExists) {
-      status = VAULT_STATUS.PATH_NOT_FOUND;
-    } else if (!indexExists) {
-      status = VAULT_STATUS.INDEX_NOT_BUILT;
-    } else {
-      try {
-        const staleInfo = await detectStale(vault.path);
-        if (staleInfo.isStale) {
-          status = `${VAULT_STATUS.STALE} (${staleInfo.staleSince ?? "unknown"})`;
-        }
-      } catch {
-        status = VAULT_STATUS.READY;
-      }
-    }
-
+    const status = await resolveVaultStatus(vault.path);
     const defaultTag = vault.default ? " [default]" : "";
     vaultLines.push(`- ${vault.name} (${vault.path})${defaultTag} — ${status}`);
   }
