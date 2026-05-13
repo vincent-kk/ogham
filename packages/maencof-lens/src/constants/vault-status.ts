@@ -1,5 +1,5 @@
 /**
- * @file constants/vault-paths.ts
+ * @file constants/vault-status.ts
  * @description 볼트 상태 라벨 상수. 인덱스 마커 파일명은 @ogham/maencof의 CACHE_FILES를 직접 사용한다.
  */
 
@@ -10,6 +10,7 @@ export const VAULT_STATUS = {
   PATH_NOT_FOUND: 'path not found',
   INDEX_NOT_BUILT: 'index not built',
   LEGACY_V1: 'legacy v1',
+  UNKNOWN: 'status unknown',
 } as const;
 
 /** 볼트 상태 타입 */

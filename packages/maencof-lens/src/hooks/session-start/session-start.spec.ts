@@ -2,12 +2,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createDefaultConfig,
   writeConfig,
 } from '../../config/config-loader/config-loader.js';
+import * as detector from '../../vault/stale-detector/stale-detector.js';
 import { runSessionStart } from './session-start.js';
 
 let workDir: string;
@@ -67,5 +68,20 @@ describe('runSessionStart — complex', () => {
     const result = await runSessionStart(workDir);
     const ctx = result.hookSpecificOutput?.additionalContext ?? '';
     expect(ctx).toContain('[default]');
+  });
+
+  it('renders "status unknown" when detectStale throws', async () => {
+    const dir = maencofDir();
+    writeFileSync(join(dir, 'graph-meta.json'), '{}');
+    const spy = vi
+      .spyOn(detector, 'detectStale')
+      .mockRejectedValue(new Error('boom'));
+    try {
+      const result = await runSessionStart(workDir);
+      const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+      expect(ctx).toMatch(/— status unknown/);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

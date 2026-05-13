@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { loadConfig } from "../../config/config-loader/config-loader.js";
 import { CONFIG_DIR, CONFIG_FILE } from "../../constants/config.js";
-import { VAULT_STATUS } from "../../constants/vault-paths.js";
+import { VAULT_STATUS } from "../../constants/vault-status.js";
 import { detectStale } from "../../vault/stale-detector/stale-detector.js";
 
 export interface LensSessionStartResult {
@@ -56,7 +56,7 @@ async function resolveVaultStatus(vaultPath: string): Promise<string> {
     }
     return VAULT_STATUS.READY;
   } catch {
-    return VAULT_STATUS.READY;
+    return VAULT_STATUS.UNKNOWN;
   }
 }
 

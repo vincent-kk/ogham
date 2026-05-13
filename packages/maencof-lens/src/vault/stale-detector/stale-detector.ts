@@ -8,7 +8,7 @@ export interface StaleInfo {
   indexMtime: number | null;
   newestFileMtime: number;
   staleSince?: string;
-  markerKind?: 'graph-meta' | 'legacy' | null;
+  markerKind: 'graph-meta' | 'legacy' | null;
 }
 
 const SKIP_DIRS = new Set([
@@ -102,10 +102,12 @@ export async function detectStale(vaultPath: string): Promise<StaleInfo> {
 
     return result;
   } catch {
+    // inner walk swallows IO errors; this is the resource-exhaustion guard
     return {
-      isStale: false,
+      isStale: true,
       indexMtime: marker.mtimeMs,
       newestFileMtime: 0,
+      staleSince: 'index scan failed',
       markerKind: 'graph-meta',
     };
   }
