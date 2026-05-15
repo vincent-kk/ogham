@@ -17,20 +17,30 @@ Re-entry behaviour is documented at [Re-entry Behaviour](#re-entry-behaviour).
 Call `mcp_t_project_init` to ensure `.filid/config.json` exists at the git root:
 
 ```
-mcp_t_project_init({ path: "<target-path>" })
+mcp_t_project_init({ path: "<target-path>", language: "<session-language>" })
 ```
+
+Resolve `<session-language>` from the Claude Code session's response language
+— the `# Language` directive in your system context. Use the language's
+English name (e.g. `Korean`, `Japanese`, `English`). Do NOT use `[filid:lang]`
+for this — until the config exists `[filid:lang]` is always `en`, so it cannot
+seed itself. If the session has no explicit language directive, omit the
+`language` argument entirely; the config then defaults to English.
 
 The handler:
 
 - Resolves the git repository root from `path`
 - Creates `.filid/config.json` if absent, with the default 8-rule configuration
+- Records `language` in the config when the argument is provided
 - Never overwrites an existing config
 
-Default config shape:
+Default config shape (the `language` key appears only when the argument is
+provided):
 
 ```json
 {
   "version": "1.0",
+  "language": "Korean",
   "rules": {
     "naming-convention": { "enabled": true, "severity": "warning" },
     "organ-no-intentmd": { "enabled": true, "severity": "error" },

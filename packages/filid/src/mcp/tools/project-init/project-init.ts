@@ -3,6 +3,11 @@ import type { InitResult } from '../../../core/infra/config-loader/config-loader
 
 export interface ProjectInitInput {
   path: string;
+  /**
+   * Output language name (English name, e.g. `'Korean'`). Threaded into the
+   * freshly created `.filid/config.json`; omit for English.
+   */
+  language?: string;
 }
 
 /**
@@ -24,5 +29,5 @@ export function handleProjectInit(args: unknown): InitResult {
     throw new Error('path is required');
   }
 
-  return initProject(input.path);
+  return initProject(input.path, input.language);
 }

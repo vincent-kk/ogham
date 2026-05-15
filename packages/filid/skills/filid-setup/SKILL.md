@@ -79,10 +79,12 @@ Before starting the main workflow, check ast-grep availability by calling
 
 ### Phase 0a — Config Initialization
 
-Call `mcp_t_project_init({ path })` to ensure `.filid/config.json` exists at
-the git root with the default 8-rule configuration. Existing config is never
-overwritten. `mcp_t_project_init` does NOT touch `.claude/rules/` — that is
-Phase 0b's job.
+Call `mcp_t_project_init({ path, language })` to ensure `.filid/config.json`
+exists at the git root with the default 8-rule configuration. Pass the
+session's configured response language as `language` so generated docs and
+`[filid:lang]` match the user's locale (omit for English). Existing config is
+never overwritten. `mcp_t_project_init` does NOT touch `.claude/rules/` — that
+is Phase 0b's job.
 See [sections/section-0-rule-docs.md — Phase 0a](./sections/section-0-rule-docs.md#phase-0a--config-initialization).
 
 **→ Immediately proceed to Phase 0b.**

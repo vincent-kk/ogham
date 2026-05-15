@@ -1,10 +1,16 @@
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtin-rule-ids.js';
 import type { FilidConfig } from './config-schemas.js';
 
-/** Generate the default initial config with all 8 built-in rules. */
-export function createDefaultConfig(): FilidConfig {
+/**
+ * Generate the default initial config with all 8 built-in rules.
+ *
+ * @param language - Output language name (English name, e.g. `'Korean'`).
+ *   When provided, included as a top-level `language` key; omitted otherwise.
+ */
+export function createDefaultConfig(language?: string): FilidConfig {
   return {
     version: '1.0',
+    ...(language ? { language } : {}),
     rules: {
       [BUILTIN_RULE_IDS.NAMING_CONVENTION]: {
         enabled: true,

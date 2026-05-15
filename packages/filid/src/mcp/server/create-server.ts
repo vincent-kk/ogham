@@ -141,6 +141,12 @@ export function createServer(): McpServer {
         'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the filid-setup skill.',
       inputSchema: z.object({
         path: z.string(),
+        language: z
+          .string()
+          .optional()
+          .describe(
+            "Output language name for FCA-AI generated content (e.g. 'Korean'). Omit for English.",
+          ),
       }),
     },
     wrapHandler(handleProjectInit),

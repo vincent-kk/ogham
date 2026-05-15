@@ -18,14 +18,17 @@ const log = createLogger('config-loader');
  * handled exclusively by the `/filid:filid-setup` skill via `syncRuleDocs`.
  *
  * @param projectRoot - Target project directory (git root will be resolved from this)
+ * @param language - Output language name (English name, e.g. `'Korean'`).
+ *   When provided, recorded in the freshly created config; ignored when the
+ *   config already exists (existing config is never overwritten).
  */
-export function initProject(projectRoot: string): InitResult {
+export function initProject(projectRoot: string, language?: string): InitResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
 
   let configCreated = false;
   if (!existsSync(configPath)) {
-    writeConfig(resolvedRoot, createDefaultConfig());
+    writeConfig(resolvedRoot, createDefaultConfig(language));
     configCreated = true;
     log.debug('created default config', configPath);
   }
