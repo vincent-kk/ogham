@@ -16,9 +16,9 @@ PreToolUse 이벤트를 받아 `intent-injector` + `pre-tool-validator` + `struc
   2. Write/Edit이면 `isDetailMd` 판정 후 기존 content 읽기 → `validatePreToolUse`
   3. Write/Edit이면 `guardStructure`
 - `mergeResults` 규칙:
-  - `continue`: 하나라도 false면 false (AND)
-  - `additionalContext`: 비어 있지 않은 문자열을 `\n\n`으로 concat
-  - 블록 발생 시 첫 번째 블로커의 `hookSpecificOutput` 채택
+  - `permissionDecision`: 하나라도 deny면 deny (AND); reason 문자열을 `\n\n`으로 concat
+  - `additionalContext`: 비어 있지 않은 문자열을 `\n\n`으로 concat (deny와 공존 가능; `structure-guard` 경고 등)
+  - deny 발생 시 첫 번째 블로커의 `hookSpecificOutput` 채택
 - 결과 이벤트명은 언제나 `'PreToolUse'`로 고정
 - 엔트리 파일은 비즈니스 로직 추가 금지
 
@@ -37,11 +37,11 @@ PreToolUse 이벤트를 받아 `intent-injector` + `pre-tool-validator` + `struc
 ### Never do
 
 - 오케스트레이터에 검증·가드 로직을 인라인 (하위 모듈 호출만 유지)
-- 블록 결정을 무시하고 `continue: true` 반환
+- `deny` 결정을 무시하고 차단 해제 반환
 
 ## Dependencies
 
 - `../intent-injector/`, `../pre-tool-validator/`, `../structure-guard/`, `../shared/`
 - `../utils/validate-cwd.js`
-- `../../types/hooks.js`
+- `../../types/hooks.js`, `../../constants/hook-defaults.js`
 - `node:fs`, `node:path`

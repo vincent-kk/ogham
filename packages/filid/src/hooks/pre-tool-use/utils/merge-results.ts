@@ -1,50 +1,51 @@
+import { GENERIC_DENY_REASON } from '../../../constants/hook-defaults.js';
 import type { HookOutput } from '../../../types/hooks.js';
 
 /**
  * Merge multiple HookOutput results:
- * - continue: AND (all must be true)
- * - additionalContext: concatenate non-empty with \n\n
- * - On block (continue=false): use first blocker's output
+ * - continue: AND (defensive — a violation deny no longer produces `false`,
+ *   but a future hook could).
+ * - permissionDecision: any `'deny'` input wins; otherwise omitted.
+ * - permissionDecisionReason: deny reasons concatenated with \n\n; a generic
+ *   fallback is used if denied without any reason (never a bare deny).
+ * - additionalContext: concatenated with \n\n, independent of the deny path.
  */
 export function mergeResults(results: HookOutput[]): HookOutput {
   let combinedContinue = true;
+  let denied = false;
+  const reasons: string[] = [];
   const contexts: string[] = [];
-  let blockOutput: HookOutput['hookSpecificOutput'] | undefined;
 
-  for (const r of results) {
-    if (r.continue === false) {
-      combinedContinue = false;
-      if (!blockOutput && r.hookSpecificOutput) {
-        blockOutput = r.hookSpecificOutput;
-      }
+  // Concat order = caller push order (pre-tool-use.ts L40-41:
+  // validatePreToolUse before guardStructure).
+  for (const result of results) {
+    if (result.continue === false) combinedContinue = false;
+    const hookSpecificOutput = result.hookSpecificOutput;
+    if (hookSpecificOutput?.permissionDecision === 'deny') {
+      denied = true;
+      if (hookSpecificOutput.permissionDecisionReason)
+        reasons.push(hookSpecificOutput.permissionDecisionReason);
     }
-    const ctx = r.hookSpecificOutput?.additionalContext;
-    if (ctx) {
-      contexts.push(ctx);
-    }
+    if (hookSpecificOutput?.additionalContext)
+      contexts.push(hookSpecificOutput.additionalContext);
   }
 
-  if (!combinedContinue) {
-    return {
-      continue: false,
-      hookSpecificOutput: blockOutput
-        ? { ...blockOutput, hookEventName: 'PreToolUse' }
-        : {
-            hookEventName: 'PreToolUse',
-            additionalContext: contexts.join('\n\n'),
-          },
-    };
+  const hookSpecificOutput: HookOutput['hookSpecificOutput'] = {};
+  if (denied) {
+    hookSpecificOutput.permissionDecision = 'deny';
+    // Fallback: a deny must always carry a reason.
+    hookSpecificOutput.permissionDecisionReason = reasons.length
+      ? reasons.join('\n\n')
+      : GENERIC_DENY_REASON;
   }
+  if (contexts.length)
+    hookSpecificOutput.additionalContext = contexts.join('\n\n');
 
-  if (contexts.length > 0) {
-    return {
-      continue: true,
-      hookSpecificOutput: {
-        hookEventName: 'PreToolUse',
-        additionalContext: contexts.join('\n\n'),
-      },
-    };
-  }
+  if (Object.keys(hookSpecificOutput).length === 0)
+    return { continue: combinedContinue };
 
-  return { continue: true };
+  return {
+    continue: combinedContinue,
+    hookSpecificOutput: { hookEventName: 'PreToolUse', ...hookSpecificOutput },
+  };
 }

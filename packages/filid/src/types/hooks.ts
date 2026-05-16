@@ -63,7 +63,11 @@ export interface UserPromptSubmitInput extends HookBaseInput {
 
 /** Hook output (stdout JSON) */
 export interface HookOutput {
-  /** Whether to continue (false = block, PreToolUse only) */
+  /**
+   * Whether to continue Claude's turn. `false` STOPS the entire turn and
+   * OVERRIDES any `permissionDecision` — it is not a per-tool block. Keep
+   * `true` for per-tool denies; express the block via `permissionDecision`.
+   */
   continue: boolean;
   /** Hook-specific output */
   hookSpecificOutput?: {
@@ -71,6 +75,10 @@ export interface HookOutput {
     hookEventName?: string;
     /** Additional context to inject into agent */
     additionalContext?: string;
+    /** PreToolUse per-tool gate: "deny" blocks only this call. */
+    permissionDecision?: 'allow' | 'deny' | 'ask' | 'defer';
+    /** Reason delivered to the model when permissionDecision is set. */
+    permissionDecisionReason?: string;
   };
 }
 
@@ -95,7 +103,11 @@ export type HookInput =
   | SessionStartInput
   | SessionEndInput;
 
-/** structure-guard가 출력하는 검증 결과. */
+/**
+ * structure-guard가 출력하는 검증 결과.
+ * 의도적으로 자체 hookSpecificOutput 형태를 재선언하며, deny 필드를 추가해서는
+ * 안 된다 — structure-guard는 절대 deny하지 않는다.
+ */
 export interface StructureGuardOutput extends HookOutput {
   hookSpecificOutput?: {
     additionalContext?: string;

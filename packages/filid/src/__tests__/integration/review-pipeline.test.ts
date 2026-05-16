@@ -141,7 +141,8 @@ describe('review pipeline', () => {
       };
 
       const result = validatePreToolUse(input);
-      expect(result.continue).toBe(false);
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     });
 
     it('should allow INTENT.md in organ directories with reclassification info', () => {

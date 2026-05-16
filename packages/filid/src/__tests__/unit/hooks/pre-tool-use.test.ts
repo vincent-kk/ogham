@@ -5,8 +5,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handlePreToolUse } from '../../../hooks/pre-tool-use/pre-tool-use.js';
-import { mergeResults } from '../../../hooks/pre-tool-use/utils/merge-results.js';
-import type { HookOutput, PreToolUseInput } from '../../../types/hooks.js';
+import type { PreToolUseInput } from '../../../types/hooks.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -52,63 +51,6 @@ afterEach(() => {
   delete process.env.CLAUDE_CONFIG_DIR;
   rmSync(tmpDir, { recursive: true, force: true });
   vi.restoreAllMocks();
-});
-
-// ---------------------------------------------------------------------------
-// mergeResults — pure function tests
-// ---------------------------------------------------------------------------
-
-describe('mergeResults', () => {
-  it('all continue=true → combined true', () => {
-    const results: HookOutput[] = [
-      { continue: true },
-      { continue: true },
-      { continue: true },
-    ];
-    const out = mergeResults(results);
-    expect(out.continue).toBe(true);
-  });
-
-  it('one continue=false → combined false', () => {
-    const results: HookOutput[] = [
-      { continue: true },
-      { continue: false, hookSpecificOutput: { additionalContext: 'blocked' } },
-      { continue: true },
-    ];
-    const out = mergeResults(results);
-    expect(out.continue).toBe(false);
-  });
-
-  it('additionalContext from multiple results concatenated with \\n\\n', () => {
-    const results: HookOutput[] = [
-      { continue: true, hookSpecificOutput: { additionalContext: 'ctx-A' } },
-      { continue: true, hookSpecificOutput: { additionalContext: 'ctx-B' } },
-    ];
-    const out = mergeResults(results);
-    expect(out.continue).toBe(true);
-    expect(out.hookSpecificOutput?.additionalContext).toBe('ctx-A\n\nctx-B');
-  });
-
-  it('no additionalContext → no hookSpecificOutput', () => {
-    const results: HookOutput[] = [{ continue: true }, { continue: true }];
-    const out = mergeResults(results);
-    expect(out.hookSpecificOutput).toBeUndefined();
-  });
-
-  it('block with hookSpecificOutput uses blocker output', () => {
-    const blocker: HookOutput = {
-      continue: false,
-      hookSpecificOutput: { additionalContext: 'violation message' },
-    };
-    const out = mergeResults([{ continue: true }, blocker]);
-    expect(out.continue).toBe(false);
-    expect(out.hookSpecificOutput?.additionalContext).toBe('violation message');
-  });
-
-  it('empty results → continue=true', () => {
-    const out = mergeResults([]);
-    expect(out.continue).toBe(true);
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -189,25 +131,6 @@ describe('handlePreToolUse', () => {
     );
   });
 
-  it('mergeResults: mixed block + context → continue=false with blocker output', () => {
-    const results: HookOutput[] = [
-      {
-        continue: false,
-        hookSpecificOutput: { additionalContext: 'BLOCKED: organ violation' },
-      },
-      {
-        continue: true,
-        hookSpecificOutput: { additionalContext: 'intent context here' },
-      },
-    ];
-    const out = mergeResults(results);
-    expect(out.continue).toBe(false);
-    // Blocker output takes precedence over passing context
-    expect(out.hookSpecificOutput?.additionalContext).toBe(
-      'BLOCKED: organ violation',
-    );
-  });
-
   it('Write DETAIL.md reads existing file content and passes to validator', async () => {
     const detailPath = join(tmpDir, 'DETAIL.md');
     // Existing content: 2 lines
@@ -223,8 +146,27 @@ describe('handlePreToolUse', () => {
     });
 
     const result = await handlePreToolUse(input);
-    // Append-only detection should block
-    expect(result.continue).toBe(false);
+    // Append-only detection should deny via permissionDecision, not stop the turn
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+  });
+
+  it('deny + intent context coexist → continue=true, both permissionDecision and additionalContext present', async () => {
+    // Write INTENT.md with >50 lines: validator denies; injectIntent also runs
+    // and may add additionalContext. Both must be present in the merged output.
+    const content = Array.from({ length: 51 }, (_, i) => `Line ${i + 1}`).join(
+      '\n',
+    );
+    const intentPath = join(tmpDir, 'INTENT.md');
+
+    const input = makeInput({
+      tool_name: 'Write',
+      tool_input: { file_path: intentPath, content },
+    });
+
+    const result = await handlePreToolUse(input);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
   });
 
   it('Write INTENT.md in organ-named dir → allowed, intent context collected', async () => {

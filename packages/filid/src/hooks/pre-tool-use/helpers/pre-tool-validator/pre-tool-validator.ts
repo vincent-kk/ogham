@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
+import { DENY_RETRY_GUIDANCE } from '../../../../constants/hook-defaults.js';
 import {
   validateDetailMd,
   validateIntentMd,
@@ -56,13 +57,14 @@ export function validatePreToolUse(
       const lineCount = projected.split('\n').length;
       if (lineCount > INTENT_MD_LINE_LIMIT) {
         return {
-          continue: false,
+          continue: true,
           hookSpecificOutput: {
-            additionalContext:
-              `BLOCKED: Edit would grow INTENT.md to ${lineCount} lines ` +
-              `(limit ${INTENT_MD_LINE_LIMIT}). ` +
-              'Decompose the module into smaller fractal nodes instead of ' +
-              'expanding INTENT.md.',
+            permissionDecision: 'deny',
+            permissionDecisionReason:
+              `This edit would grow INTENT.md to ${lineCount} lines, over ` +
+              `the ${INTENT_MD_LINE_LIMIT}-line limit. Extract a sub-fractal ` +
+              `(child dir + INTENT.md + index.ts) and move the overflow ` +
+              `into it. ${DENY_RETRY_GUIDANCE}`,
           },
         };
       }
@@ -77,9 +79,10 @@ export function validatePreToolUse(
         continue: true,
         hookSpecificOutput: {
           additionalContext:
-            `Note: Editing INTENT.md via Edit tool with ${lineCount} new lines — ` +
-            `line limit (${INTENT_MD_LINE_LIMIT}) cannot be enforced on partial edits. ` +
-            `Verify the final line count does not exceed ${INTENT_MD_LINE_LIMIT} lines after editing.`,
+            `Note: this Edit adds ${lineCount} new lines to INTENT.md — ` +
+            `line limit (${INTENT_MD_LINE_LIMIT}) can't be checked on ` +
+            `partial edits. Confirm the final file stays within ` +
+            `${INTENT_MD_LINE_LIMIT} lines.`,
         },
       };
     }
@@ -103,9 +106,13 @@ export function validatePreToolUse(
         .map((v) => v.message)
         .join('; ');
       return {
-        continue: false,
+        continue: true,
         hookSpecificOutput: {
-          additionalContext: `BLOCKED: ${errorMessages}`,
+          permissionDecision: 'deny',
+          permissionDecisionReason:
+            `INTENT.md write rejected: ${errorMessages}. Add the missing ` +
+            `3-tier sections (Always do / Ask first / Never do) and keep ` +
+            `it under ${INTENT_MD_LINE_LIMIT} lines. ${DENY_RETRY_GUIDANCE}`,
         },
       };
     }
@@ -134,9 +141,14 @@ export function validatePreToolUse(
         .map((v) => v.message)
         .join('; ');
       return {
-        continue: false,
+        continue: true,
         hookSpecificOutput: {
-          additionalContext: `BLOCKED: ${errorMessages}`,
+          permissionDecision: 'deny',
+          permissionDecisionReason:
+            `DETAIL.md write rejected: ${errorMessages}. Rewrite it to the ` +
+            `current state — keep only the live API contract and ` +
+            `acceptance criteria, drop superseded history, never append. ` +
+            `${DENY_RETRY_GUIDANCE}`,
         },
       };
     }

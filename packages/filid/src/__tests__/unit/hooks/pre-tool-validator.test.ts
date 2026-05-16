@@ -22,7 +22,11 @@ describe('pre-tool-validator', () => {
       tool_input: { file_path: '/app/INTENT.md', content },
     };
     const result = validatePreToolUse(input);
-    expect(result.continue).toBe(false);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toMatch(
+      /restructure|sub-fractal|STOP and ask/,
+    );
   });
 
   it('should allow Write to INTENT.md within 50 lines', () => {
@@ -142,7 +146,11 @@ describe('pre-tool-validator', () => {
       },
     };
     const result = validatePreToolUse(input, 'line1\nline2\n');
-    expect(result.continue).toBe(false);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toMatch(
+      /restructure|RESTRUCTURED|STOP and ask/,
+    );
   });
 
   it('should allow DETAIL.md when content is restructured', () => {

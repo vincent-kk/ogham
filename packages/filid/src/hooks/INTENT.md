@@ -23,7 +23,7 @@ Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초
 ## Conventions
 
 - 모든 훅은 `validateCwd`를 최우선 호출 (payload cwd 보안 가드)
-- `continue: false`는 오직 `pre-tool-validator`의 명시적 블록 시에만 허용
+- `pre-tool-validator`는 위반 시 `permissionDecision: 'deny'`로 해당 도구 호출만 차단 (턴 비중단)
 - 엔트리 파일(`*.entry.ts`)은 stdin→핸들러→stdout 파이프만 — 로직 금지
 - 수정 후 `yarn build:plugin`으로 `bridge/*.mjs` 재생성 필수
 
