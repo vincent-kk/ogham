@@ -96,9 +96,23 @@ export const FRAMEWORK_RESERVED_FILES: Record<string, string[]> = {
  * Framework-invoked entry-point files per framework. A directory holding one
  * of these files satisfies `module-entry-point` the same way an
  * index.ts/main.ts barrel does — the framework invokes the file as the
- * module's execution entry. Conservative subset: auxiliary files (layout,
- * loading, error) and root-level files (middleware) are excluded; a project
- * can extend recognition via `.filid/config.json` `additional-entry-points`.
+ * module's execution entry.
+ *
+ * Conservative subset rationale: only `page.*` and `route.*` are true module
+ * entry points in the `module-entry-point` rule sense. Files such as
+ * `layout.*`, `loading.*`, `error.*`, and `not-found.*` are auxiliary
+ * rendering segments that support a route; `middleware.*` is root-level
+ * infrastructure. None of these act as the primary execution entry for their
+ * containing directory, so they are intentionally excluded.
+ *
+ * Note: this list is NOT a subset of (nor synchronized with)
+ * `FRAMEWORK_RESERVED_FILES`. That constant serves a different rule
+ * (`zero-peer-file` exemption for any framework-owned file); this constant
+ * serves `module-entry-point` exemption for files that act as entry points.
+ * The two lists have different criteria and evolve independently.
+ *
+ * To recognize additional entry-point patterns, use `.filid/config.json`
+ * `additional-entry-points` — do not extend this constant directly.
  */
 export const FRAMEWORK_ENTRY_FILES: Record<string, string[]> = {
   next: ['page.tsx', 'page.ts', 'page.js', 'route.ts', 'route.js'],

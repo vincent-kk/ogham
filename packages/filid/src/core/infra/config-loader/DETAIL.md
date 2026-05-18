@@ -56,6 +56,14 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
 - **`additional-allowed` is a TOP-LEVEL key**, never nested under individual
   rules. Nested forms (`rules["<id>"].additional-allowed`) are warn+dropped
   by `loadConfig` via `parseWithAllowlistWarn` — pass-through is forbidden.
+- **`additional-entry-points` is a TOP-LEVEL key**, never nested under
+  individual rules. Nested forms (`rules["<id>"].additional-entry-points`)
+  are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
+  forbidden.
+- **`additional-route-patterns` is a TOP-LEVEL key**, never nested under
+  individual rules. Nested forms (`rules["<id>"].additional-route-patterns`)
+  are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
+  forbidden.
 - **`exempt` is a per-rule key** on `RuleOverride`, accepting path globs
   (`packages/**`, `src/legacy/**`). Invalid glob syntax and the bare `**`
   wildcard are warn+dropped at load time (use a concrete scope instead).

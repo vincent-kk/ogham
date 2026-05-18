@@ -25,6 +25,10 @@ function frameworksFromPackageJson(pkgPath: string): string[] {
     }
     return detected;
   } catch {
+    // Intentional graceful degradation: both expected absence (ENOENT) and
+    // abnormal failures (permission errors, malformed JSON) return [] so that
+    // framework-exempt rules degrade safely rather than throwing. The caller
+    // (detectFrameworks) treats [] as "no frameworks detected".
     return [];
   }
 }

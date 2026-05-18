@@ -24,6 +24,10 @@ export function checkModuleEntryPoint(
     if (node.type !== 'fractal' && node.type !== 'hybrid') return [];
     if (node.hasIndex || node.hasMain) return [];
 
+    // TODO: `peerFiles` and `frameworkReservedFiles` are cast here because
+    // `FractalNode.metadata` is typed as `Record<string, unknown>`. Once
+    // `FractalNode.metadata` declares these keys explicitly (or a metadata-key
+    // constant is introduced), these `as` casts can be removed.
     const peerFiles = node.metadata['peerFiles'] as string[] | undefined;
     if (peerFiles && peerFiles.length > 0) {
       // Project-configured entry files apply unconditionally.

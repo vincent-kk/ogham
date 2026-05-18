@@ -88,6 +88,17 @@ Notes:
 - `✓` for enabled, `✗` for disabled
 - If `language` is not set, show `(default: en)` as the value
 - Any additional top-level fields should be shown in the first table
+- `additional-entry-points` and `additional-route-patterns` appear in the
+  first table only when set in `.filid/config.json`. Example:
+
+```markdown
+| Key | Value |
+|-----|-------|
+| version | 1.0 |
+| language | ko |
+| additional-entry-points | ["server.ts", "worker.ts"] |
+| additional-route-patterns | ["[locale]", "@sidebar"] |
+```
 
 ## Output Format — `set` Subcommand
 

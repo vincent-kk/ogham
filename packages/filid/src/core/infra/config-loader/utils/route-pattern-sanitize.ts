@@ -37,7 +37,7 @@ export function sanitizeRoutePatterns(
       continue;
     }
     addWarning(
-      `additional-route-patterns: invalid regular expression "${pattern}" (dropped)`,
+      `additional-route-patterns: "${pattern}" is not a valid regular expression and was skipped (dropped). Check for unescaped special characters. Example of a valid pattern: "^\\(app\\)$" (matches route group "(app)")`,
     );
     dropped = true;
   }
