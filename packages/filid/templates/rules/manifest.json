@@ -9,7 +9,7 @@
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "87b594c0d9dfb4772a9ac97802a1ebaef2396504eb2763f48794980cc90b4b1e"
+      "templateHash": "90a53389ce68eece96399ad92f181bf604db2d0dc4599e7f76ebde4def5b9509"
     },
     {
       "id": "filid_reuse-first",

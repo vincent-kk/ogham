@@ -28,7 +28,7 @@ config-loader/
   utils/                organ — 공유 private 헬퍼
     resolve-git-root.ts, resolve-plugin-root.ts
     format-issue-path.ts, get-at.ts, delete-at.ts, parse-with-allowlist-warn.ts
-    exempt-sanitize.ts, write-file-atomically.ts, compute-file-sha256.ts
+    exempt-sanitize.ts, route-pattern-sanitize.ts, write-file-atomically.ts, compute-file-sha256.ts
 ```
 
 ## Boundaries

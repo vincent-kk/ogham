@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { createLogger } from '../../../../lib/logger.js';
 import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { sanitizeExemptPatterns } from '../utils/exempt-sanitize.js';
+import { sanitizeRoutePatterns } from '../utils/route-pattern-sanitize.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
 import { formatIssuePath } from '../utils/format-issue-path.js';
 import { parseWithAllowlistWarn } from '../utils/parse-with-allowlist-warn.js';
@@ -55,7 +56,13 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
   const strict = FilidConfigSchema.safeParse(parsed);
   if (strict.success) {
     log.debug('config loaded (strict)', configPath);
-    return { config: sanitizeExemptPatterns(strict.data, addWarning), warnings };
+    return {
+      config: sanitizeRoutePatterns(
+        sanitizeExemptPatterns(strict.data, addWarning),
+        addWarning,
+      ),
+      warnings,
+    };
   }
 
   const { sanitized } = parseWithAllowlistWarn(
@@ -67,7 +74,13 @@ export function loadConfig(projectRoot: string): LoadConfigResult {
   const retry = FilidConfigSchema.safeParse(sanitized);
   if (retry.success) {
     log.debug('config loaded (sanitized)', configPath);
-    return { config: sanitizeExemptPatterns(retry.data, addWarning), warnings };
+    return {
+      config: sanitizeRoutePatterns(
+        sanitizeExemptPatterns(retry.data, addWarning),
+        addWarning,
+      ),
+      warnings,
+    };
   }
 
   for (const issue of retry.error.issues) {

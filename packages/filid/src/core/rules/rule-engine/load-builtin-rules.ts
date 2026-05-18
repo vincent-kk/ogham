@@ -15,10 +15,14 @@ import { checkZeroPeerFile } from './utils/check-zero-peer-file.js';
  * 8개 내장 규칙 인스턴스를 생성하여 반환한다.
  * overrides가 전달되면 enabled/severity/exempt를 프로젝트별로 재정의한다.
  * additionalAllowed의 객체형 엔트리는 `paths` glob이 현재 노드 경로와 일치할 때만 basename을 허용한다.
+ * additionalEntryPoints는 module-entry-point가 index/main 외에 추가로 인식할 진입 파일명 목록이다.
+ * additionalRoutePatterns는 naming-convention이 예외 처리할 라우트 이름 정규식 문자열 목록이다.
  */
 export function loadBuiltinRules(
   overrides?: Record<string, RuleOverride>,
   additionalAllowed?: AllowedEntry[],
+  additionalEntryPoints?: string[],
+  additionalRoutePatterns?: string[],
 ): Rule[] {
   const rules: Rule[] = [
     // 1. naming-convention: 이름은 camelCase(기본), kebab-case, 또는 PascalCase 중 하나여야 한다
@@ -30,7 +34,7 @@ export function loadBuiltinRules(
       category: 'naming',
       severity: 'warning',
       enabled: true,
-      check: checkNamingConvention,
+      check: checkNamingConvention(additionalRoutePatterns),
     },
 
     // 2. organ-no-intentmd: organ 노드에 INTENT.md가 없어야 한다
@@ -65,7 +69,7 @@ export function loadBuiltinRules(
       category: 'module',
       severity: 'warning',
       enabled: true,
-      check: checkModuleEntryPoint,
+      check: checkModuleEntryPoint(additionalEntryPoints),
     },
 
     // 5. max-depth: 트리 깊이가 maxDepth를 초과하면 안 된다

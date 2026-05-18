@@ -56,6 +56,14 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
 - **`additional-allowed` is a TOP-LEVEL key**, never nested under individual
   rules. Nested forms (`rules["<id>"].additional-allowed`) are warn+dropped
   by `loadConfig` via `parseWithAllowlistWarn` — pass-through is forbidden.
+- **`additional-entry-points` is a TOP-LEVEL key**, never nested under
+  individual rules. Nested forms (`rules["<id>"].additional-entry-points`)
+  are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
+  forbidden.
+- **`additional-route-patterns` is a TOP-LEVEL key**, never nested under
+  individual rules. Nested forms (`rules["<id>"].additional-route-patterns`)
+  are warn+dropped by `RuleOverrideSchema.strict()` — pass-through is
+  forbidden.
 - **`exempt` is a per-rule key** on `RuleOverride`, accepting path globs
   (`packages/**`, `src/legacy/**`). Invalid glob syntax and the bare `**`
   wildcard are warn+dropped at load time (use a concrete scope instead).
@@ -79,6 +87,8 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
     "type.ts",
     { "basename": "CLAUDE.md", "paths": ["packages/**"] }
   ],
+  "additional-entry-points": ["api.tsx"],
+  "additional-route-patterns": ["^@[a-z]+$"],
   "scan": { "maxDepth": 10 }
 }
 ```
@@ -87,6 +97,17 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
 globally) or an object `{ basename, paths? }` that restricts the allowance
 to specific path globs. The object branch is consumed by the
 `zero-peer-file` rule body (`rule-engine.ts`).
+
+`additional-entry-points` is a flat array of filenames that the
+`module-entry-point` rule accepts as valid module entry points alongside
+`index.*`/`main.*` and a detected framework's entry files (Next.js
+`page.*`/`route.*`). Use it for project conventions the framework defaults
+miss (e.g. `api.tsx`).
+
+`additional-route-patterns` is a flat array of regular-expression strings;
+a directory name matching any of them is accepted by `naming-convention`.
+Uncompilable patterns are warn-dropped at config load. Use it for framework
+route-segment naming the built-in framework patterns do not cover.
 
 ### `loadConfig` return
 

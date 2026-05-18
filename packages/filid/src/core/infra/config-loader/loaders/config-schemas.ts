@@ -42,6 +42,8 @@ export const FilidConfigSchema = z
     rules: z.record(z.string(), RuleOverrideSchema),
     language: z.string().optional(),
     'additional-allowed': z.array(AllowedEntrySchema).optional(),
+    'additional-entry-points': z.array(z.string()).optional(),
+    'additional-route-patterns': z.array(z.string()).optional(),
     scan: z
       .object({
         maxDepth: z.number().nonnegative().finite().optional(),

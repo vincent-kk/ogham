@@ -44,7 +44,12 @@ export async function handleStructureValidate(
 
   const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
-  const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
+  const allRules = loadBuiltinRules(
+    overrides,
+    config?.['additional-allowed'],
+    config?.['additional-entry-points'],
+    config?.['additional-route-patterns'],
+  );
   const activeRules = getActiveRules(allRules);
 
   let rulesToApply = activeRules;
