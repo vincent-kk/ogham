@@ -62,7 +62,11 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
 
   const { config, warnings: configWarnings } = loadConfig(input.path);
   const overrides = config?.rules ?? {};
-  const allRules = loadBuiltinRules(overrides, config?.['additional-allowed']);
+  const allRules = loadBuiltinRules(
+    overrides,
+    config?.['additional-allowed'],
+    config?.['additional-entry-points'],
+  );
   const activeRules = getActiveRules(allRules);
 
   switch (input.action) {

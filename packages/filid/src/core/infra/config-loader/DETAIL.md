@@ -79,6 +79,7 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
     "type.ts",
     { "basename": "CLAUDE.md", "paths": ["packages/**"] }
   ],
+  "additional-entry-points": ["api.tsx"],
   "scan": { "maxDepth": 10 }
 }
 ```
@@ -87,6 +88,12 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
 globally) or an object `{ basename, paths? }` that restricts the allowance
 to specific path globs. The object branch is consumed by the
 `zero-peer-file` rule body (`rule-engine.ts`).
+
+`additional-entry-points` is a flat array of filenames that the
+`module-entry-point` rule accepts as valid module entry points alongside
+`index.*`/`main.*` and a detected framework's entry files (Next.js
+`page.*`/`route.*`). Use it for project conventions the framework defaults
+miss (e.g. `api.tsx`).
 
 ### `loadConfig` return
 

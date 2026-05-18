@@ -92,6 +92,18 @@ export const FRAMEWORK_RESERVED_FILES: Record<string, string[]> = {
   ],
 };
 
+/**
+ * Framework-invoked entry-point files per framework. A directory holding one
+ * of these files satisfies `module-entry-point` the same way an
+ * index.ts/main.ts barrel does — the framework invokes the file as the
+ * module's execution entry. Conservative subset: auxiliary files (layout,
+ * loading, error) and root-level files (middleware) are excluded; a project
+ * can extend recognition via `.filid/config.json` `additional-entry-points`.
+ */
+export const FRAMEWORK_ENTRY_FILES: Record<string, string[]> = {
+  next: ['page.tsx', 'page.ts', 'page.js', 'route.ts', 'route.js'],
+};
+
 export const FRAMEWORK_PACKAGES: Record<string, string> = {
   next: 'next',
   remix: 'remix',
