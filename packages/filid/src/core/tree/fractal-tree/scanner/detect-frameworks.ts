@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import {
   FRAMEWORK_PACKAGES,
@@ -7,12 +7,11 @@ import {
 } from '../../../../constants/allowed-peer-files.js';
 
 /**
- * Detect frameworks from the nearest package.json's dependencies.
- * Returns framework identifiers matching keys in FRAMEWORK_RESERVED_FILES.
+ * Parse a package.json file and map its dependencies (and devDependencies)
+ * to framework identifiers from FRAMEWORK_PACKAGES. Returns [] on any read
+ * or parse failure.
  */
-export function detectFrameworks(rootPath: string): string[] {
-  const pkgPath = join(rootPath, 'package.json');
-  if (!existsSync(pkgPath)) return [];
+function frameworksFromPackageJson(pkgPath: string): string[] {
   try {
     const raw = JSON.parse(readFileSync(pkgPath, 'utf-8'));
     const allDeps: Record<string, string> = {
@@ -31,7 +30,30 @@ export function detectFrameworks(rootPath: string): string[] {
 }
 
 /**
- * Detect framework reserved files from the root package.json.
+ * Detect frameworks from the nearest package.json's dependencies.
+ *
+ * Walks upward from `rootPath` to the filesystem root and resolves at the
+ * first package.json found — that file is the package boundary
+ * (nearest-wins), so a sub-path scan (`<repo>/src`, `<repo>/src/app`)
+ * detects the enclosing package's framework rather than returning []. In a
+ * monorepo the package's own package.json wins over the monorepo root.
+ * Returns [] when no package.json exists anywhere up the chain.
+ *
+ * Returns framework identifiers matching keys in FRAMEWORK_RESERVED_FILES.
+ */
+export function detectFrameworks(rootPath: string): string[] {
+  let dir = rootPath;
+  for (;;) {
+    const pkgPath = join(dir, 'package.json');
+    if (existsSync(pkgPath)) return frameworksFromPackageJson(pkgPath);
+    const parent = dirname(dir);
+    if (parent === dir) return [];
+    dir = parent;
+  }
+}
+
+/**
+ * Detect framework reserved files from the nearest package.json.
  * Returns the deduplicated list of reserved filenames.
  */
 export function detectFrameworkReserved(rootPath: string): string[] {
