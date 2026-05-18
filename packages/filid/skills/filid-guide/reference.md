@@ -109,9 +109,9 @@ Current violations: N (error: X, warning: Y, info: Z)
 | hybrid | Contains both fractal children and organ-like files |
 
 ### New Module Checklist
-- [ ] Does the directory name follow the accepted convention (camelCase by default; kebab-case or PascalCase per domain)?
+- [ ] Does the directory name follow the accepted convention (camelCase by default; kebab-case or PascalCase per domain) — or, in a detected framework, a route-segment pattern such as `(app)`/`[id]`?
 - [ ] If classified as organ, does it have no fractal children?
-- [ ] If classified as fractal, does it have an index.ts?
+- [ ] If classified as fractal, does it have an `index.ts` — or, in a detected framework, a framework entry file such as `page.tsx`/`route.ts`?
 - [ ] If there is a primary feature, does it have a main.ts?
 - [ ] Are no fractal children placed under an organ directory?
 
