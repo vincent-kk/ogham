@@ -80,6 +80,7 @@ in `loaders/config-schemas.ts`. `FilidConfig = z.infer<typeof FilidConfigSchema>
     { "basename": "CLAUDE.md", "paths": ["packages/**"] }
   ],
   "additional-entry-points": ["api.tsx"],
+  "additional-route-patterns": ["^@[a-z]+$"],
   "scan": { "maxDepth": 10 }
 }
 ```
@@ -94,6 +95,11 @@ to specific path globs. The object branch is consumed by the
 `index.*`/`main.*` and a detected framework's entry files (Next.js
 `page.*`/`route.*`). Use it for project conventions the framework defaults
 miss (e.g. `api.tsx`).
+
+`additional-route-patterns` is a flat array of regular-expression strings;
+a directory name matching any of them is accepted by `naming-convention`.
+Uncompilable patterns are warn-dropped at config load. Use it for framework
+route-segment naming the built-in framework patterns do not cover.
 
 ### `loadConfig` return
 

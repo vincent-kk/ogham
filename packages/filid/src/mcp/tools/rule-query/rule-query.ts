@@ -66,6 +66,7 @@ export async function handleRuleQuery(args: unknown): Promise<RuleQueryResult> {
     overrides,
     config?.['additional-allowed'],
     config?.['additional-entry-points'],
+    config?.['additional-route-patterns'],
   );
   const activeRules = getActiveRules(allRules);
 

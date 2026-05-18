@@ -48,6 +48,7 @@ export async function handleStructureValidate(
     overrides,
     config?.['additional-allowed'],
     config?.['additional-entry-points'],
+    config?.['additional-route-patterns'],
   );
   const activeRules = getActiveRules(allRules);
 
