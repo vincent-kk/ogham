@@ -61,6 +61,7 @@ Fractal nodes MAY exist inside organ directories; traversal MUST re-classify sub
 - Per domain, kebab-case (`/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/`) or PascalCase (`/^[A-Z][a-zA-Z0-9]*$/`, typical for React and other UI-component files) MAY be used.
 - snake_case, SCREAMING_SNAKE_CASE, and names containing spaces are violations.
 - When choosing a name, first mirror the naming style of sibling fractals or files. If no sibling reference exists, infer the industry-standard form for the language, framework, or library.
+- Framework route-segment directory names (Next.js route groups `(app)`, dynamic `[id]`, catch-all `[...slug]`, parallel slots `@modal`, intercepts `(.)photo`, private `_components`) are exempt when a framework is detected. Projects MAY register more via `.filid/config.json` `additional-route-patterns`.
 - Exempt: `INTENT.md`, `DETAIL.md`, `README.md`.
 
 ### organ-no-intentmd
@@ -94,6 +95,7 @@ export const MY_CONSTANT = 'value';
 **Severity**: warning | **Applies to**: fractal and hybrid nodes
 
 - Every fractal/hybrid node MUST have an entry point: `index.ts` (barrel) or `main.ts` (executable/CLI).
+- A framework-invoked entry file (e.g. Next.js `page.*`/`route.*`) also satisfies the requirement when a framework is detected. Projects MAY register more via `.filid/config.json` `additional-entry-points`.
 - Only symbols exported from the entry point are the module's public contract.
 - Consumers MUST import from the entry point, never from internal files.
 - organ and pure-function nodes do NOT require an entry point.

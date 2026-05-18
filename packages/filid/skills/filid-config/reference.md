@@ -6,7 +6,7 @@ and validation logic.
 ## Schema Source
 
 The authoritative `FilidConfig` interface lives in the filid plugin's
-internal source file `src/core/infra/config-loader/loaders/filid-config.ts`.
+internal source file `src/core/infra/config-loader/loaders/config-schemas.ts`.
 That file is **not** distributed to user projects (the plugin ships as a
 bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read
 it at runtime — any such Read resolves against CWD and fails.
@@ -88,6 +88,17 @@ Notes:
 - `✓` for enabled, `✗` for disabled
 - If `language` is not set, show `(default: en)` as the value
 - Any additional top-level fields should be shown in the first table
+- `additional-entry-points` and `additional-route-patterns` appear in the
+  first table only when set in `.filid/config.json`. Example:
+
+```markdown
+| Key | Value |
+|-----|-------|
+| version | 1.0 |
+| language | ko |
+| additional-entry-points | ["server.ts", "worker.ts"] |
+| additional-route-patterns | ["[locale]", "@sidebar"] |
+```
 
 ## Output Format — `set` Subcommand
 

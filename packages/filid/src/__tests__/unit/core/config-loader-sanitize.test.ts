@@ -218,5 +218,32 @@ describe('config-loader sanitize (Commit C)', () => {
       ]);
       expect(warnings).toEqual([]);
     });
+
+    it('invalid additional-route-patterns entry is warn-dropped, valid ones kept', () => {
+      writeRaw(tmpDir, {
+        version: '1.0',
+        rules: {},
+        'additional-route-patterns': ['[invalid', '^@@'],
+      });
+      const { config, warnings } = loadConfig(tmpDir);
+      expect(config).not.toBeNull();
+      expect(config?.['additional-route-patterns']).toEqual(['^@@']);
+      expect(
+        warnings.some(
+          (w) => w.includes('additional-route-patterns') && w.includes('[invalid'),
+        ),
+      ).toBe(true);
+    });
+
+    it('valid additional-route-patterns pass through with no warnings', () => {
+      writeRaw(tmpDir, {
+        version: '1.0',
+        rules: {},
+        'additional-route-patterns': ['^@@', '^~[a-z]+'],
+      });
+      const { config, warnings } = loadConfig(tmpDir);
+      expect(config?.['additional-route-patterns']).toEqual(['^@@', '^~[a-z]+']);
+      expect(warnings.some((w) => w.includes('additional-route-patterns'))).toBe(false);
+    });
   });
 });

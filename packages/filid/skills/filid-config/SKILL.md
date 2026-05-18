@@ -14,7 +14,7 @@ View and modify `.filid/config.json` settings interactively. Manages language
 preferences, rule overrides, and project-level FCA-AI configuration.
 
 > **Schema Source**: The authoritative `FilidConfig` shape is defined in the
-> filid plugin's internal source (`src/core/infra/config-loader/loaders/filid-config.ts`).
+> filid plugin's internal source (`src/core/infra/config-loader/loaders/config-schemas.ts`).
 > That source is NOT distributed to user projects, so this skill MUST NOT
 > hardcode config keys AND MUST NOT attempt to read that source file at
 > runtime. Observe the actual `.filid/config.json` on disk with Read; when
@@ -107,7 +107,7 @@ Parse the user's input to determine the subcommand and arguments.
 2. Delete the current config via Bash: `rm <git_root>/.filid/config.json`.
 3. Call `mcp_t_project_init({ path: <git_root> })`. Because the file no longer
    exists, the handler writes the output of `createDefaultConfig()` (defined
-   in the plugin's internal `src/core/infra/config-loader/loaders/filid-config.ts`
+   in the plugin's internal `src/core/infra/config-loader/loaders/create-default-config.ts`
    — referenced here only as documentation; do NOT attempt to Read it).
 4. If `--full` is absent AND the captured `language` is defined, re-apply it
    by reading the freshly written config, setting `config.language = <captured>`,
