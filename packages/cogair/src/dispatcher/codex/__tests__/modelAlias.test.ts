@@ -25,21 +25,20 @@ describe('resolveCodexModel', () => {
     process.env[key] = value;
   }
 
-  it('returns the default high model when env is unset', () => {
-    delete process.env.COGAIR_CODEX_HIGH;
-    expect(resolveCodexModel('high')).toBe('gpt-5-codex');
+  it('returns null for every tier when env is unset (lets codex-cli pick)', () => {
+    for (const k of ENV_KEYS) delete process.env[k];
+    expect(resolveCodexModel('high')).toBeNull();
+    expect(resolveCodexModel('mid')).toBeNull();
+    expect(resolveCodexModel('low')).toBeNull();
   });
 
-  it('returns the env-overridden high model when present', () => {
+  it('returns the env-overridden model when present', () => {
     stub('COGAIR_CODEX_HIGH', 'custom-high');
+    stub('COGAIR_CODEX_MID', 'custom-mid');
+    stub('COGAIR_CODEX_LOW', 'custom-low');
     expect(resolveCodexModel('high')).toBe('custom-high');
-  });
-
-  it('returns the default mid/low models when env is unset', () => {
-    delete process.env.COGAIR_CODEX_MID;
-    delete process.env.COGAIR_CODEX_LOW;
-    expect(resolveCodexModel('mid')).toBe('gpt-5.1-codex');
-    expect(resolveCodexModel('low')).toBe('o3');
+    expect(resolveCodexModel('mid')).toBe('custom-mid');
+    expect(resolveCodexModel('low')).toBe('custom-low');
   });
 
   it('returns null for auto so dispatcher omits the -m flag', () => {

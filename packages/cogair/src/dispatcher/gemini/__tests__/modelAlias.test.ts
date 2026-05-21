@@ -25,11 +25,11 @@ describe('resolveGeminiModel', () => {
     process.env[key] = value;
   }
 
-  it('returns the default high/mid/low models when env is unset', () => {
+  it('returns the default high/mid/low aliases when env is unset', () => {
     for (const k of ENV_KEYS) delete process.env[k];
-    expect(resolveGeminiModel('high')).toBe('gemini-2.5-pro');
-    expect(resolveGeminiModel('mid')).toBe('gemini-2.5-flash');
-    expect(resolveGeminiModel('low')).toBe('gemini-2.5-flash-lite');
+    expect(resolveGeminiModel('high')).toBe('pro');
+    expect(resolveGeminiModel('mid')).toBe('flash');
+    expect(resolveGeminiModel('low')).toBe('flash-lite');
   });
 
   it('honors env overrides', () => {

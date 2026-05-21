@@ -53,13 +53,17 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | tier                                                              |
-| ------ | ----------------------------------------------------------------- |
-| `high` | most capable codex model (env override: `COGAIR_CODEX_HIGH`)      |
-| `mid`  | balanced codex model (env override: `COGAIR_CODEX_MID`)           |
-| `low`  | fastest / cheapest codex model (env override: `COGAIR_CODEX_LOW`) |
-| `auto` | codex-cli default (omit `-m`)                                     |
+| alias  | resolves to                                                 |
+| ------ | ----------------------------------------------------------- |
+| `high` | codex-cli default unless `COGAIR_CODEX_HIGH` env var is set |
+| `mid`  | codex-cli default unless `COGAIR_CODEX_MID` env var is set  |
+| `low`  | codex-cli default unless `COGAIR_CODEX_LOW` env var is set  |
+| `auto` | codex-cli default (omit `-m`)                               |
 
-The concrete model IDs each tier resolves to live in the dispatcher
-(`src/dispatcher/codex/modelAlias.ts`) so they can track upstream renames
-without touching this skill.
+codex-cli does not expose stable user-facing model aliases the way
+gemini-cli does — its ChatGPT-account mode whitelist accepts only concrete
+`gpt-5.X` family IDs that change with each upstream release. To avoid
+shipping a version-numbered ID that ages on the next release, every cogair
+tier delegates to codex-cli's own default. Differentiate per tier by
+exporting the env vars to whichever concrete model IDs the active codex
+login can reach. The resolution lives in `src/dispatcher/codex/modelAlias.ts`.
