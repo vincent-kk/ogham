@@ -33,3 +33,13 @@
 
 - 다른 project_hash 의 세션을 탐색하거나 정정
 - 세션 미발견 시 throw — 항상 envelope 로 정규화
+
+## Dependencies
+
+- `../../../core/sessionStore` — `getSession`, `updateSession`
+- `../../../core/counterManager` — `incrementCounter`
+- `../../../core/projectHash` — `getProjectHash`
+- `../../../dispatcher` — `dispatchers`, `buildResponse` (`envelope.js`)
+- `../../../types` — `ConversationResponse`
+- `../../../utils/isoNow.ts` — `isoNow`
+- `node:perf_hooks` — `performance` (경과 시간 측정)

@@ -35,3 +35,8 @@
 - `eval`, `Function('...')`, inline event handler 사용
 - 외부 origin 으로 fetch
 - 빌드 산출물 (`__generated__/`) 을 직접 수정
+
+## Dependencies
+
+- **빌드 시점**: `scripts/buildSettingsHtml.mjs` (`node:fs`, `node:path` 빌트인만 사용)
+- **런타임 의존성 없음**: 브라우저 native API (`fetch`, `FormData`, DOM)만 사용; 외부 CDN 금지

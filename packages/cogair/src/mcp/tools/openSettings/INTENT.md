@@ -37,3 +37,12 @@
 - `127.0.0.1` 외 주소로 바인딩
 - token 발급/검증 로직을 별도 위치에서 재구현 (`core/authToken` 만 사용)
 - state 파일을 직접 수정하거나 다른 프로세스의 핸들을 신뢰
+
+## Dependencies
+
+- `node:fs/promises` — `rm` (state 파일 삭제)
+- `../../../constants/paths` — `SETTINGS_SERVER_PATH`
+- `./__generated__/settingsHtml` — `SETTINGS_HTML` (빌드 시 인라인된 HTML 문자열)
+- `./utils/openBrowser` — `openBrowser` (OS별 브라우저 기동)
+- `./utils/persistState` — `persistState` (state 파일 원자적 기록)
+- `./webServer` — `startSettingsServer`, `SettingsServerInstance`
