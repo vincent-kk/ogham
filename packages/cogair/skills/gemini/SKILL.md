@@ -1,8 +1,8 @@
 ---
 name: gemini
-description: "[cogair] Delegate to Google Gemini CLI via cogair. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude's cutoff. Trigger: \"ask gemini\", \"gemini 호출\", \"제미니에게\""
+description: '[cogair] Delegate to Google Gemini CLI via cogair. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude''s cutoff. Trigger: "ask gemini", "gemini 호출", "제미니에게"'
 user_invocable: true
-argument-hint: "[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- \"prompt\""
+argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- "prompt"'
 ---
 
 # gemini
@@ -53,9 +53,13 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | gemini model                                                   |
-| ------ | -------------------------------------------------------------- |
-| `high` | `gemini-2.5-pro` (env override: `COGAIR_GEMINI_HIGH`)          |
-| `mid`  | `gemini-2.5-flash` (env override: `COGAIR_GEMINI_MID`)         |
-| `low`  | `gemini-2.5-flash-lite` (env override: `COGAIR_GEMINI_LOW`)    |
-| `auto` | gemini-cli default (omit `-m`)                                 |
+| alias  | tier                                                                 |
+| ------ | -------------------------------------------------------------------- |
+| `high` | most capable gemini model (env override: `COGAIR_GEMINI_HIGH`)       |
+| `mid`  | balanced gemini model (env override: `COGAIR_GEMINI_MID`)            |
+| `low`  | fastest / cheapest gemini model (env override: `COGAIR_GEMINI_LOW`)  |
+| `auto` | gemini-cli default (omit `-m`)                                       |
+
+The concrete model IDs each tier resolves to live in the dispatcher
+(`src/dispatcher/gemini/modelAlias.ts`) so they can track upstream renames
+without touching this skill.

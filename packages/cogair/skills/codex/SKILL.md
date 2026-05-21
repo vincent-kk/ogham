@@ -1,8 +1,8 @@
 ---
 name: codex
-description: "[cogair] Delegate to OpenAI Codex CLI via cogair. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: \"ask codex\", \"codex 호출\", \"코덱스에게\""
+description: '[cogair] Delegate to OpenAI Codex CLI via cogair. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: "ask codex", "codex 호출", "코덱스에게"'
 user_invocable: true
-argument-hint: "[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- \"prompt\""
+argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- "prompt"'
 ---
 
 # codex
@@ -11,7 +11,7 @@ Delegate to Codex CLI through the cogair MCP server.
 
 ## When to use
 
-- Heavy code generation, refactoring, or shell-driven automation that benefits from Codex's GPT-5-class models.
+- Heavy code generation, refactoring, or shell-driven automation that benefits from Codex's coding-specialized models.
 - Work that needs an agent able to run shell commands under a sandbox policy.
 - An independent second opinion from a different model family.
 
@@ -53,9 +53,13 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | codex model                                       |
-| ------ | ------------------------------------------------- |
-| `high` | `gpt-5-codex` (env override: `COGAIR_CODEX_HIGH`) |
-| `mid`  | `gpt-5.1-codex` (env override: `COGAIR_CODEX_MID`) |
-| `low`  | `o3` (env override: `COGAIR_CODEX_LOW`)           |
-| `auto` | codex-cli default (omit `-m`)                     |
+| alias  | tier                                                                |
+| ------ | ------------------------------------------------------------------- |
+| `high` | most capable codex model (env override: `COGAIR_CODEX_HIGH`)        |
+| `mid`  | balanced codex model (env override: `COGAIR_CODEX_MID`)             |
+| `low`  | fastest / cheapest codex model (env override: `COGAIR_CODEX_LOW`)   |
+| `auto` | codex-cli default (omit `-m`)                                       |
+
+The concrete model IDs each tier resolves to live in the dispatcher
+(`src/dispatcher/codex/modelAlias.ts`) so they can track upstream renames
+without touching this skill.
