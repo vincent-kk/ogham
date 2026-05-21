@@ -1202,6 +1202,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.2.4"
     esbuild: "npm:^0.24.0"
     typescript: "npm:^5.7.2"
+    vitest: "npm:^4.1.2"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft

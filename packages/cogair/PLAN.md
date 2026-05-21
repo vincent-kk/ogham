@@ -7,18 +7,18 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 ## 스펙 인덱스
 
-| 문서 | 내용 |
-|---|---|
-| [README](../../.metadata/cogair/README.md) | 스펙 인덱스 + 핵심 결정 |
-| [spec](../../.metadata/cogair/spec.md) | 책임 분리, 데이터 흐름, 비채택 사항 |
-| [architecture](../../.metadata/cogair/architecture.md) | 모듈 트리 + 의존 방향 + 빌드 파이프라인 |
-| [mcp-tools](../../.metadata/cogair/mcp-tools.md) | `start_conversation`, `continue_conversation`, `open_settings` |
-| [storage](../../.metadata/cogair/storage.md) | `~/.claude/plugins/cogair/` 디스크 레이아웃 |
-| [hooks](../../.metadata/cogair/hooks.md) | SessionStart / UserPromptSubmit 훅 (filid 패턴) |
-| [skills](../../.metadata/cogair/skills.md) | `setup`, `codex`, `gemini` 스킬 |
-| [web-ui](../../.metadata/cogair/web-ui.md) | 로컬 설정 웹 UI |
-| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli 호출 매핑 |
-| [roadmap](../../.metadata/cogair/roadmap.md) | 단계별 구현 순서 (출처) |
+| 문서                                                             | 내용                                                           |
+| ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| [README](../../.metadata/cogair/README.md)                       | 스펙 인덱스 + 핵심 결정                                        |
+| [spec](../../.metadata/cogair/spec.md)                           | 책임 분리, 데이터 흐름, 비채택 사항                            |
+| [architecture](../../.metadata/cogair/architecture.md)           | 모듈 트리 + 의존 방향 + 빌드 파이프라인                        |
+| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | `start_conversation`, `continue_conversation`, `open_settings` |
+| [storage](../../.metadata/cogair/storage.md)                     | `~/.claude/plugins/cogair/` 디스크 레이아웃                    |
+| [hooks](../../.metadata/cogair/hooks.md)                         | SessionStart / UserPromptSubmit 훅 (filid 패턴)                |
+| [skills](../../.metadata/cogair/skills.md)                       | `setup`, `codex`, `gemini` 스킬                                |
+| [web-ui](../../.metadata/cogair/web-ui.md)                       | 로컬 설정 웹 UI                                                |
+| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli 호출 매핑                               |
+| [roadmap](../../.metadata/cogair/roadmap.md)                     | 단계별 구현 순서 (출처)                                        |
 
 ## Phase 0 — Skeleton
 
@@ -40,21 +40,21 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [architecture.md §src/types, §src/constants, §src/lib, §src/utils](../../.metadata/cogair/architecture.md)
 
-- [ ] `src/types/conversation.ts` — `ConversationResponse`, `ConversationOptions`, `Provider`, `ModelAlias`, `ErrorCode`
-- [ ] `src/types/config.ts` — `Config` + Zod 스키마
-- [ ] `src/types/session.ts` — `SessionMeta`, `ProjectMeta`
-- [ ] `src/types/counter.ts` — `Counter`
-- [ ] `src/types/settingsServer.ts` — `SettingsServer`, `SettingsServerHandle`
-- [ ] `src/types/index.ts` barrel
-- [ ] `src/constants/paths.ts` — `COGAIR_HOME`, 하위 경로 헬퍼
-- [ ] `src/constants/defaults.ts` — `Config` 기본값
-- [ ] `src/constants/errorCodes.ts`
-- [ ] `src/lib/atomicWrite.ts`
-- [ ] `src/lib/logger.ts`
-- [ ] `src/utils/parentPid.ts`
-- [ ] `src/utils/isoNow.ts`
-- [ ] 각 모듈 단위 테스트
-- [ ] `yarn cogair test:run`, `yarn cogair typecheck` 통과
+- [x] `src/types/conversation.ts` — `ConversationResponse`, `ConversationOptions`, `Provider`, `ModelAlias`, `ErrorCode`
+- [x] `src/types/config.ts` — `Config` + Zod 스키마
+- [x] `src/types/session.ts` — `SessionMeta`, `ProjectMeta`
+- [x] `src/types/counter.ts` — `Counter`
+- [x] `src/types/settingsServer.ts` — `SettingsServer`, `SettingsServerHandle`
+- [x] `src/types/index.ts` barrel
+- [x] `src/constants/paths.ts` — `COGAIR_HOME`, 하위 경로 헬퍼
+- [x] `src/constants/defaults.ts` — `Config` 기본값
+- [x] `src/constants/errorCodes.ts`
+- [x] `src/lib/atomicWrite.ts`
+- [x] `src/lib/logger.ts`
+- [x] `src/utils/parentPid.ts`
+- [x] `src/utils/isoNow.ts`
+- [x] 각 모듈 단위 테스트 (10 files / 40 tests)
+- [x] `yarn cogair test:run`, `yarn cogair typecheck` 통과
 
 ## Phase 2 — Core storage
 
