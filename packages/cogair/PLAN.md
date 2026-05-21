@@ -60,14 +60,14 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [storage.md](../../.metadata/cogair/storage.md), [architecture.md §src/core](../../.metadata/cogair/architecture.md)
 
-- [ ] `src/core/configManager/` — `loadConfig`, `saveConfig`
-- [ ] `src/core/counterManager/` — `loadCounter`, `incrementCounter`, `getCounter` (parent-pid 리셋)
-- [ ] `src/core/projectHash/` — `getProjectHash(cwd)`
-- [ ] `src/core/sessionStore/` — `createSession`, `getSession` (project_hash 일치 검사), `updateSession`, `pruneExpired`
-- [ ] `src/core/authToken/` — `generateToken`, `verifyToken`
-- [ ] `src/core/index.ts` barrel
-- [ ] 단위 테스트 (tmp dir 격리)
-- [ ] `yarn cogair test:run`, `yarn cogair typecheck` 통과
+- [x] `src/core/configManager/` — `loadConfig`, `saveConfig`
+- [x] `src/core/counterManager/` — `loadCounter`, `incrementCounter`, `getCounter` (parent-pid 리셋)
+- [x] `src/core/projectHash/` — `getProjectHash(cwd)`
+- [x] `src/core/sessionStore/` — `createSession`, `getSession` (project_hash 일치 검사), `updateSession`, `pruneExpired`
+- [x] `src/core/authToken/` — `generateToken`, `verifyToken`
+- [x] `src/core/index.ts` barrel
+- [x] 단위 테스트 (tmp dir 격리)
+- [x] `yarn cogair test:run`, `yarn cogair typecheck` 통과
 
 ## Phase 3 — Dispatcher
 
