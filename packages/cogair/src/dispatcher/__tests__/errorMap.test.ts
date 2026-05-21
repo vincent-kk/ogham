@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapError } from '../errorMap.js';
+import { mapError } from '../errorMap/index.js';
 
 describe('mapError', () => {
   it('maps exit 127 to cli_error', () => {

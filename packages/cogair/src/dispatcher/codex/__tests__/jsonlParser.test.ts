@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseCodexStream } from '../jsonlParser.js';
+import { parseCodexStream } from '../jsonlParser/index.js';
 
 describe('parseCodexStream', () => {
   it('returns nulls for an empty stream', () => {

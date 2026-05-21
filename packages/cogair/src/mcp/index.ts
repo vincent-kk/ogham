@@ -1,10 +1,5 @@
 export { createServer, startServer } from './server/index.js';
-export {
-  mapReplacer,
-  toolError,
-  toolResult,
-  wrapHandler,
-} from './shared/index.js';
+export { toolError, toolResult, wrapHandler } from './shared/index.js';
 export {
   type ContinueConversationInput,
   handleContinueConversation,

@@ -4,12 +4,14 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 
 ## Structure
 
-| File             | Role                                                                        |
-| ---------------- | --------------------------------------------------------------------------- |
-| `modelAlias.ts`  | `high/mid/low/auto` → 기본 null (codex-cli default 사용), env override 가능 |
-| `jsonlParser.ts` | JSONL 라인 단위 파싱 → `{ threadId, finalMessage, resolvedModel }`          |
-| `spawn.ts`       | `node:child_process.spawn('codex', ...)`, ENOENT 캐치                       |
-| `index.ts`       | `Dispatcher` 구현 + `supportedOptions = new Set()`                          |
+| File / Path          | Role                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `modelAlias.ts`      | `high/mid/low/auto` → 기본 null (codex-cli default 사용), env override 가능                 |
+| `jsonlParser/`       | JSONL 라인 단위 파싱 → `{ threadId, response, resolvedModel }` (utils/constants organ 포함) |
+| `spawn.ts`           | `node:child_process.spawn('codex', ...)`, ENOENT 캐치                                       |
+| `codexDispatcher.ts` | `Dispatcher` 구현 + `supportedOptions = new Set()`                                          |
+| `utils/`             | `buildStartArgs`, `buildResumeArgs`, `dispatch` (`DispatchInternal`)                        |
+| `index.ts`           | `export { codexDispatcher }` barrel                                                         |
 
 ## Conventions
 

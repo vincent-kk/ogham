@@ -4,7 +4,7 @@ import {
   findLatestSession,
   findSessionByUuid,
   parseListSessions,
-} from '../sessionResolver.js';
+} from '../sessionResolver/index.js';
 
 const SAMPLE = `
   1. Initial brainstorm (2026-01-01 12:00:00) [11111111-2222-3333-4444-555566667777]

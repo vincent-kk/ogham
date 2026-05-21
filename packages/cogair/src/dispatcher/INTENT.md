@@ -7,7 +7,8 @@ codex-cli / gemini-cli 호출 본체. MCP 도구 핸들러에서 받은 `Dispatc
 | Path          | Role                                                                     |
 | ------------- | ------------------------------------------------------------------------ |
 | `envelope.ts` | `buildResponse` — DispatchResult + 메타 → ConversationResponse           |
-| `errorMap.ts` | exit code / stderr / Node 에러 → `ErrorCode` 매핑                        |
+| `errorMap/`   | exit code / stderr / Node 에러 → `ErrorCode` 매핑 (utils + constants)    |
+| `utils/`      | `computeIgnoredOptions` — 양쪽 dispatcher 공유 헬퍼                      |
 | `codex/`      | codex-cli 어댑터 (`spawn`, `jsonlParser`, `modelAlias`, dispatcher)      |
 | `gemini/`     | gemini-cli 어댑터 (`spawn`, `sessionResolver`, `modelAlias`, dispatcher) |
 | `index.ts`    | `{ codex: Dispatcher, gemini: Dispatcher }` barrel                       |

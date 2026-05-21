@@ -1,5 +1,6 @@
 import { type Server, createServer } from 'node:http';
 
+import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
 import { generateToken } from '../../../../core/authToken/index.js';
 import {
   loadConfig as loadConfigDefault,
@@ -8,8 +9,6 @@ import {
 import type { Config, SettingsServerHandle } from '../../../../types/index.js';
 
 import { createRouteHandler } from './routes.js';
-
-const DEFAULT_IDLE_MS = 5 * 60 * 1000;
 
 export interface StartSettingsServerOptions {
   settingsHtml: string;
@@ -30,7 +29,7 @@ export async function startSettingsServer(
   let shutdownTimer: ReturnType<typeof setTimeout> | null = null;
   let closed = false;
 
-  const idleMs = options.idleMs ?? DEFAULT_IDLE_MS;
+  const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
   const token = generateToken();
 
   async function closeServer(): Promise<void> {

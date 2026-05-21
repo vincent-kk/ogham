@@ -8,7 +8,7 @@ MCP 서버 (`tools`) 등록부. 3 개 도구 (`start_conversation`, `continue_co
 | ----------------------------- | --------------------------------------------------------------------- |
 | `server/`                     | `createServer` + `startServer` — 도구 3 개 등록, stdio transport 연결 |
 | `serverEntry/`                | esbuild 진입점 (`bridge/mcp-server.cjs` 산출)                         |
-| `shared/`                     | `toolResult`, `toolError`, `wrapHandler`, `mapReplacer` 헬퍼          |
+| `shared/`                     | `toolResult`, `toolError`, `wrapHandler` 헬퍼 organ                   |
 | `tools/startConversation/`    | 새 외부 LLM 세션 시작                                                 |
 | `tools/continueConversation/` | 기존 세션 이어 호출 (project_hash 검증)                               |
 | `tools/openSettings/`         | 설정 웹 UI 기동 (Phase 4 는 placeholder, Phase 5 에서 실제 구현)      |

@@ -1,13 +1,11 @@
 import type { Ratio } from '../../shared/configTypes.js';
 
+import { signed } from './signed.js';
+
 export interface RatioLines {
   current: string;
   target: string;
   drift: string;
-}
-
-function signed(n: number): string {
-  return n > 0 ? `+${n}` : `${n}`;
 }
 
 export function formatRatio(

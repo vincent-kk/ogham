@@ -12,7 +12,7 @@ Delegate to Gemini CLI through the cogair MCP server.
 ## When to use
 
 - Research requiring live web search or grounding outside Claude's knowledge cutoff.
-- 1M+ token context synthesis across many large documents at once.
+- Large-context synthesis across many large documents at once.
 - YouTube or URL ingestion as part of the prompt.
 
 ## When NOT to use

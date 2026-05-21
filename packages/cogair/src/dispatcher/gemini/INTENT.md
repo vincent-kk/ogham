@@ -4,12 +4,14 @@ gemini-cli 어댑터. 세션마다 격리된 `~/.claude/plugins/cogair/runtime/g
 
 ## Structure
 
-| File                 | Role                                                                          |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `modelAlias.ts`      | `high/mid/low/auto` → gemini-cli alias (env override)                         |
-| `sessionResolver.ts` | `gemini --list-sessions` 출력 파싱 + UUID → 현재 integer index 매핑           |
-| `spawn.ts`           | `node:child_process.spawn('gemini', ...)` + `GEMINI_CLI_TRUST_WORKSPACE=true` |
-| `index.ts`           | `Dispatcher` 구현 + `supportedOptions = new Set()`                            |
+| File / Path           | Role                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `modelAlias.ts`       | `high/mid/low/auto` → gemini-cli alias (env override)                                                         |
+| `sessionResolver/`    | `--list-sessions` 출력 파싱 + UUID → 현재 integer index 매핑 (constants organ)                                |
+| `spawn.ts`            | `node:child_process.spawn('gemini', ...)` + `GEMINI_CLI_TRUST_WORKSPACE=true`                                 |
+| `geminiDispatcher.ts` | `Dispatcher` 구현 + `supportedOptions = new Set()`                                                            |
+| `utils/`              | `ensureCwd`, `buildPromptArgs`, `normalizeResponse`, `callGemini`, `captureSessionUuid`, `resolveResumeIndex` |
+| `index.ts`            | `export { geminiDispatcher }` barrel                                                                          |
 
 ## Conventions
 
