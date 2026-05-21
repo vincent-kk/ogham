@@ -116,13 +116,13 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [hooks.md](../../.metadata/cogair/hooks.md)
 
-- [ ] `src/hooks/shared/` — `paths.ts`, `safeReadJson.ts`, `nowIso.ts` (node 빌트인만)
-- [ ] `src/hooks/injectStatic/` — `.ts`, `.entry.ts`, `utils/{loadConfig, tonePhrase, joinKeywords}.ts`
-- [ ] `src/hooks/injectDynamic/` — `.ts`, `.entry.ts`, `utils/{loadCounter, formatRatio}.ts`
-- [ ] `scripts/buildHooks.mjs` (filid 복제 + cogair `hookEntries`)
-- [ ] `hooks/INTENT.md`, `hooks/hooks.json`
-- [ ] `yarn cogair build` 가 `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs` 생성 + 10 KB cap + FORBIDDEN_PATTERNS 가드 통과
-- [ ] Claude Code 플러그인 재로딩 후 SessionStart + UserPromptSubmit 주입 확인
+- [x] `src/hooks/shared/` — `paths.ts`, `safeReadJson.ts`, `nowIso.ts`, `configTypes.ts`, `loadConfig.ts` (node 빌트인만; `loadConfig` 는 LCA 위치로 spec 대비 이동)
+- [x] `src/hooks/injectStatic/` — `injectStatic.ts`, `.entry.ts`, `utils/{tonePhrase, joinKeywords}.ts`, `INTENT.md`, `index.ts`
+- [x] `src/hooks/injectDynamic/` — `injectDynamic.ts`, `.entry.ts`, `utils/{loadCounter, formatRatio}.ts`, `INTENT.md`, `index.ts`
+- [x] `scripts/buildHooks.mjs` (filid 복제 + cogair `hookEntries`)
+- [x] `hooks/INTENT.md`, `hooks/hooks.json`
+- [x] `yarn cogair build` 가 `bridge/injectStatic.mjs` (3.4 KB), `bridge/injectDynamic.mjs` (3.3 KB) 생성 + 10 KB cap + FORBIDDEN_PATTERNS 가드 통과
+- [ ] Claude Code 플러그인 재로딩 후 SessionStart + UserPromptSubmit 주입 확인 (사용자 환경에서 수동 검증)
 
 ## Phase 8 — Polish + release
 
