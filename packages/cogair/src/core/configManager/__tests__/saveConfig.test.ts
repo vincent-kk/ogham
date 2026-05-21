@@ -20,7 +20,10 @@ describe('saveConfig', () => {
   it('writes config.json with the validated payload', async () => {
     const config: Config = {
       ...DEFAULT_CONFIG,
-      ratio: { gemini: 3, codex: 1 },
+      ratio: {
+        gemini: { value: 75, enabled: true },
+        codex: { value: 25, enabled: true },
+      },
     };
     await saveConfig(config);
     const written = JSON.parse(await readFile(CONFIG_PATH, 'utf8'));

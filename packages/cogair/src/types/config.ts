@@ -12,9 +12,16 @@ export const InterventionStrengthSchema = z.union([
 
 export type InterventionStrength = z.infer<typeof InterventionStrengthSchema>;
 
+export const ProviderRatioSchema = z.object({
+  value: z.number().int().min(0).max(100),
+  enabled: z.boolean(),
+});
+
+export type ProviderRatio = z.infer<typeof ProviderRatioSchema>;
+
 export const RatioSchema = z.object({
-  gemini: z.number().int().nonnegative(),
-  codex: z.number().int().nonnegative(),
+  gemini: ProviderRatioSchema,
+  codex: ProviderRatioSchema,
 });
 
 export type Ratio = z.infer<typeof RatioSchema>;

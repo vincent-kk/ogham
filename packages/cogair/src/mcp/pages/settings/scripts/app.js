@@ -17,12 +17,12 @@
   }
 
   var form = $('#form');
-  var ratioGemini = $('#ratio-gemini');
-  var ratioCodex = $('#ratio-codex');
-  var ratioBarGemini = document.querySelector('.ratio-bar-gemini');
-  var ratioBarCodex = document.querySelector('.ratio-bar-codex');
+  var ratioSlider = $('#ratio-slider');
+  var toggleCodex = $('#toggle-codex');
+  var toggleGemini = $('#toggle-gemini');
   var geminiPct = $('#gemini-pct');
   var codexPct = $('#codex-pct');
+  var ratioWarn = $('#ratio-warn');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
   var kwGemini = $('#kw-gemini');
@@ -32,6 +32,15 @@
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
+
+  var ratioState = {
+    gemini: { value: 50, enabled: true },
+    codex: { value: 50, enabled: true },
+  };
+
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
 
   function setStatus(kind, text, details) {
     status.className = 'status' + (kind ? ' ' + kind : '');
@@ -51,25 +60,86 @@
     }
   }
 
-  function updateRatioBar() {
-    var g = Math.max(0, Number(ratioGemini.value) || 0);
-    var c = Math.max(0, Number(ratioCodex.value) || 0);
-    var total = g + c;
-    var gPct = total === 0 ? 50 : (g / total) * 100;
-    var cPct = total === 0 ? 50 : (c / total) * 100;
-    ratioBarGemini.style.flexBasis = gPct + '%';
-    ratioBarCodex.style.flexBasis = cPct + '%';
-    geminiPct.textContent = total === 0 ? '—' : Math.round(gPct) + '%';
-    codexPct.textContent = total === 0 ? '—' : Math.round(cPct) + '%';
+  function renderRatio() {
+    var gEn = ratioState.gemini.enabled;
+    var cEn = ratioState.codex.enabled;
+    var gPct;
+    var cPct;
+
+    if (gEn && cEn) {
+      gPct = ratioState.gemini.value;
+      cPct = ratioState.codex.value;
+    } else if (gEn) {
+      gPct = 100;
+      cPct = ratioState.codex.value;
+    } else if (cEn) {
+      gPct = ratioState.gemini.value;
+      cPct = 100;
+    } else {
+      gPct = 0;
+      cPct = 0;
+    }
+
+    ratioSlider.disabled = !(gEn && cEn);
+    if (gEn && cEn) {
+      ratioSlider.value = String(ratioState.gemini.value);
+    }
+
+    geminiPct.textContent = gEn ? gPct + '%' : 'OFF';
+    codexPct.textContent = cEn ? cPct + '%' : 'OFF';
+
+    toggleGemini.setAttribute('aria-checked', String(gEn));
+    toggleCodex.setAttribute('aria-checked', String(cEn));
+
+    ratioWarn.hidden = gEn || cEn;
+  }
+
+  function onSlider() {
+    if (ratioSlider.disabled) return;
+    var g = clamp(Math.floor(Number(ratioSlider.value) || 0), 0, 100);
+    ratioState.gemini.value = g;
+    ratioState.codex.value = 100 - g;
+    renderRatio();
+  }
+
+  function toggleProvider(name) {
+    var entry = ratioState[name];
+    var other = name === 'gemini' ? ratioState.codex : ratioState.gemini;
+    if (entry.enabled) {
+      entry.enabled = false;
+    } else {
+      entry.enabled = true;
+      if (entry.value <= 0) entry.value = 50;
+      if (other.enabled) {
+        other.value = clamp(100 - entry.value, 0, 100);
+      }
+    }
+    renderRatio();
   }
 
   function updateStrengthLabel() {
     strengthLabel.textContent = STRENGTH_LABELS[strength.value] || 'Neutral';
   }
 
+  function readProviderRatio(raw, fallback) {
+    if (raw && typeof raw === 'object' && 'value' in raw) {
+      return {
+        value: clamp(Math.floor(Number(raw.value) || 0), 0, 100),
+        enabled: Boolean(raw.enabled),
+      };
+    }
+    if (typeof raw === 'number') {
+      var n = clamp(Math.floor(raw), 0, 100);
+      return { value: n, enabled: n > 0 };
+    }
+    return { value: fallback.value, enabled: fallback.enabled };
+  }
+
   function applyConfig(cfg) {
-    ratioGemini.value = cfg.ratio.gemini;
-    ratioCodex.value = cfg.ratio.codex;
+    var r = cfg.ratio || {};
+    ratioState.gemini = readProviderRatio(r.gemini, ratioState.gemini);
+    ratioState.codex = readProviderRatio(r.codex, ratioState.codex);
+
     strength.value = String(cfg.intervention_strength);
     kwGemini.value = cfg.keywords.gemini;
     kwCodex.value = cfg.keywords.codex;
@@ -81,7 +151,8 @@
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
     if (radio) radio.checked = true;
-    updateRatioBar();
+
+    renderRatio();
     updateStrengthLabel();
   }
 
@@ -89,8 +160,14 @@
     var modelEl = document.querySelector('input[name="model"]:checked');
     return {
       ratio: {
-        gemini: Math.max(0, Math.floor(Number(ratioGemini.value) || 0)),
-        codex: Math.max(0, Math.floor(Number(ratioCodex.value) || 0)),
+        gemini: {
+          value: ratioState.gemini.value,
+          enabled: ratioState.gemini.enabled,
+        },
+        codex: {
+          value: ratioState.codex.value,
+          enabled: ratioState.codex.enabled,
+        },
       },
       intervention_strength: Number(strength.value),
       keywords: {
@@ -137,6 +214,10 @@
   }
 
   async function save(closeAfter) {
+    if (!ratioState.gemini.enabled && !ratioState.codex.enabled) {
+      setStatus('error', 'At least one provider must be enabled.');
+      return;
+    }
     var cfg = buildConfig();
     setStatus('', 'Saving…');
     saveBtn.disabled = saveCloseBtn.disabled = true;
@@ -174,8 +255,13 @@
     }
   }
 
-  ratioGemini.addEventListener('input', updateRatioBar);
-  ratioCodex.addEventListener('input', updateRatioBar);
+  ratioSlider.addEventListener('input', onSlider);
+  toggleGemini.addEventListener('click', function () {
+    toggleProvider('gemini');
+  });
+  toggleCodex.addEventListener('click', function () {
+    toggleProvider('codex');
+  });
   strength.addEventListener('input', updateStrengthLabel);
   form.addEventListener('submit', function (e) {
     e.preventDefault();

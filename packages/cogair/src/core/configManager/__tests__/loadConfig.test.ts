@@ -27,7 +27,10 @@ describe('loadConfig', () => {
 
   it('loads a fully-specified config from disk', async () => {
     const stored = {
-      ratio: { gemini: 2, codex: 3 },
+      ratio: {
+        gemini: { value: 40, enabled: true },
+        codex: { value: 60, enabled: true },
+      },
       intervention_strength: 1,
       keywords: { gemini: 'g', codex: 'c' },
       default_model: 'high',
@@ -38,12 +41,30 @@ describe('loadConfig', () => {
     expect(await loadConfig()).toEqual(stored);
   });
 
-  it('merges partial config with defaults', async () => {
+  it('migrates legacy integer ratio with one provider disabled', async () => {
     await writeConfigFile(JSON.stringify({ ratio: { gemini: 5, codex: 0 } }));
     const result = await loadConfig();
-    expect(result.ratio).toEqual({ gemini: 5, codex: 0 });
+    expect(result.ratio).toEqual({
+      gemini: { value: 100, enabled: true },
+      codex: { value: 0, enabled: false },
+    });
     expect(result.keywords).toEqual(DEFAULT_CONFIG.keywords);
     expect(result.session_ttl_hours).toBe(DEFAULT_CONFIG.session_ttl_hours);
+  });
+
+  it('migrates legacy integer ratio with both providers active', async () => {
+    await writeConfigFile(JSON.stringify({ ratio: { gemini: 3, codex: 2 } }));
+    const result = await loadConfig();
+    expect(result.ratio).toEqual({
+      gemini: { value: 60, enabled: true },
+      codex: { value: 40, enabled: true },
+    });
+  });
+
+  it('falls back to defaults when legacy ratio sums to zero', async () => {
+    await writeConfigFile(JSON.stringify({ ratio: { gemini: 0, codex: 0 } }));
+    const result = await loadConfig();
+    expect(result.ratio).toEqual(DEFAULT_CONFIG.ratio);
   });
 
   it('falls back to defaults on JSON syntax error', async () => {
@@ -53,7 +74,12 @@ describe('loadConfig', () => {
 
   it('falls back to defaults when schema validation fails', async () => {
     await writeConfigFile(
-      JSON.stringify({ ratio: { gemini: 'not-a-number', codex: 1 } }),
+      JSON.stringify({
+        ratio: {
+          gemini: { value: 'not-a-number', enabled: true },
+          codex: { value: 50, enabled: true },
+        },
+      }),
     );
     expect(await loadConfig()).toEqual(DEFAULT_CONFIG);
   });

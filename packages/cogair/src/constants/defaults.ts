@@ -1,7 +1,10 @@
 import type { Config } from '../types/index.js';
 
 export const DEFAULT_CONFIG: Config = {
-  ratio: { gemini: 1, codex: 1 },
+  ratio: {
+    gemini: { value: 50, enabled: true },
+    codex: { value: 50, enabled: true },
+  },
   intervention_strength: 0,
   keywords: {
     gemini: 'research, search, youtube, large-context',

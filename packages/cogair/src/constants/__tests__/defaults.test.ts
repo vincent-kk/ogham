@@ -8,8 +8,11 @@ describe('DEFAULT_CONFIG', () => {
     expect(() => ConfigSchema.parse(DEFAULT_CONFIG)).not.toThrow();
   });
 
-  it('uses 1:1 ratio and neutral strength', () => {
-    expect(DEFAULT_CONFIG.ratio).toEqual({ gemini: 1, codex: 1 });
+  it('uses 50:50 enabled ratio and neutral strength', () => {
+    expect(DEFAULT_CONFIG.ratio).toEqual({
+      gemini: { value: 50, enabled: true },
+      codex: { value: 50, enabled: true },
+    });
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
