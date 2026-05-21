@@ -73,12 +73,12 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [provider-dispatch.md](../../.metadata/cogair/provider-dispatch.md)
 
-- [ ] `src/dispatcher/envelope.ts` — `buildResponse`
-- [ ] `src/dispatcher/errorMap.ts`
-- [ ] `src/dispatcher/codex/spawn.ts`, `jsonlParser.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`)
-- [ ] `src/dispatcher/gemini/spawn.ts`, `sessionResolver.ts`, `modelAlias.ts`, `index.ts`
-- [ ] `src/dispatcher/index.ts` barrel
-- [ ] 통합 테스트: 가짜 PATH 의 mock CLI 스크립트로 시나리오 커버 (success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options)
+- [x] `src/dispatcher/envelope.ts` — `buildResponse`
+- [x] `src/dispatcher/errorMap.ts`
+- [x] `src/dispatcher/codex/spawn.ts`, `jsonlParser.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`)
+- [x] `src/dispatcher/gemini/spawn.ts`, `sessionResolver.ts`, `modelAlias.ts`, `index.ts`
+- [x] `src/dispatcher/index.ts` barrel
+- [x] 통합 테스트: 가짜 PATH 의 mock CLI 스크립트로 시나리오 커버 (success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options)
 
 ## Phase 4 — MCP server + 3 tools
 
