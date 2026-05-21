@@ -21,7 +21,7 @@ export function buildDynamicPayload(
     );
     lines.push(`Current ratio:      ${r.current}`);
     lines.push(`Target ratio:       ${r.target}`);
-    lines.push(`Drift:              ${r.drift}   (target − current)`);
+    lines.push(`Drift:              ${r.drift}   (target - current)`);
   }
 
   const noneActive =
