@@ -43,7 +43,7 @@ For each `--option key=value`, infer the value type:
 
 ## Response handling
 
-Always surface the response's `session_id` and `meta.ignored_options` to the user — the session id is needed to continue later, and ignored options signal that some `--option` flags fell outside the v1 whitelist.
+Always surface the response's `session_id` and `meta.ignored_options` to the user — the session id is needed to continue later, and ignored options signal that some `--option` flags fell outside the v1 whitelist. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span.
 
 On `status: 'failure'`, dispatch by `error.code`:
 

@@ -8,7 +8,7 @@
 | ----------------------- | ------------------------------------------------------------------------ |
 | `mapError.ts`           | 단일 진입점 — `DispatchFailure` → `ErrorCode` 결정                       |
 | `constants/codeMaps.ts` | exit code → `ErrorCode` 테이블, stderr 정규식 패턴 목록                  |
-| `utils/classify.ts`     | Node 에러 코드 분류 (`ENOENT` → `cli_error`, `ETIMEDOUT` → `timeout` 등) |
+| `utils/classify.ts`     | Node 에러 코드 분류 (`ENOENT` → `cli_error`, `ETIMEDOUT` → `network` 등) |
 | `index.ts`              | barrel: `mapError`                                                       |
 
 ## Conventions

@@ -43,7 +43,7 @@ For each `--option key=value`, infer the value type:
 
 ## Response handling
 
-Always surface the response's `session_id` and `meta.ignored_options` to the user — the user needs the session id to continue later, and ignored options signal that some `--option` flags fell outside the v1 whitelist.
+Always surface the response's `session_id` and `meta.ignored_options` to the user — the user needs the session id to continue later, and ignored options signal that some `--option` flags fell outside the v1 whitelist. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span.
 
 On `status: 'failure'`, dispatch by `error.code`:
 
@@ -67,3 +67,5 @@ shipping a version-numbered ID that ages on the next release, every cogair
 tier delegates to codex-cli's own default. Differentiate per tier by
 exporting the env vars to whichever concrete model IDs the active codex
 login can reach. The resolution lives in `src/dispatcher/codex/modelAlias.ts`.
+
+When the relevant env var (`COGAIR_CODEX_HIGH` / `_MID` / `_LOW`) is unset, the `high` / `mid` / `low` tiers fall through to the codex-cli default — behaviorally identical to `auto`.

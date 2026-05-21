@@ -43,6 +43,8 @@ export async function startSettingsServer(
       const s = server;
       server = null;
       await new Promise<void>((resolve) => {
+        if (typeof s.closeAllConnections === 'function')
+          s.closeAllConnections();
         s.close(() => resolve());
       });
     }
