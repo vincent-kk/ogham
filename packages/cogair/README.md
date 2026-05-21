@@ -97,26 +97,26 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 
 ### MCP Tools
 
-| Tool                    | Purpose                                                                    |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `start_conversation`    | Spawn `codex` or `gemini` with a prompt and return a normalized envelope.  |
-| `continue_conversation` | Resume an existing session by `session_id` (project-hash-scoped).          |
-| `open_settings`         | Start the local settings UI and return its URL with a one-time token.      |
+| Tool                    | Purpose                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `start_conversation`    | Spawn `codex` or `gemini` with a prompt and return a normalized envelope. |
+| `continue_conversation` | Resume an existing session by `session_id` (project-hash-scoped).         |
+| `open_settings`         | Start the local settings UI and return its URL with a one-time token.     |
 
 ### Skills
 
-| Skill     | Trigger keywords                                |
-| --------- | ----------------------------------------------- |
+| Skill     | Trigger keywords                                   |
+| --------- | -------------------------------------------------- |
 | `/setup`  | "cogair 설정", "open cogair settings", "개입 강도" |
-| `/codex`  | "ask codex", "codex 호출", "코덱스에게"           |
-| `/gemini` | "ask gemini", "gemini 호출", "제미니에게"         |
+| `/codex`  | "ask codex", "codex 호출", "코덱스에게"            |
+| `/gemini` | "ask gemini", "gemini 호출", "제미니에게"          |
 
 ### Hooks
 
-| Event              | Bridge bundle        | Injects                                                                       |
-| ------------------ | -------------------- | ----------------------------------------------------------------------------- |
-| `SessionStart`     | `injectStatic.mjs`   | Provider ratio, tone phrase, keyword map, routing guidance.                   |
-| `UserPromptSubmit` | `injectDynamic.mjs`  | Per-session call counter, current vs. target ratio, drift, parent-PID aware. |
+| Event              | Bridge bundle       | Injects                                                                      |
+| ------------------ | ------------------- | ---------------------------------------------------------------------------- |
+| `SessionStart`     | `injectStatic.mjs`  | Provider ratio, tone phrase, keyword map, routing guidance.                  |
+| `UserPromptSubmit` | `injectDynamic.mjs` | Per-session call counter, current vs. target ratio, drift, parent-PID aware. |
 
 Both hook bundles are < 4 KB minified and use only Node builtins — no zod, no MCP SDK, no glob libs.
 
@@ -145,12 +145,12 @@ Sessions are project-scoped: `continue_conversation` from a different `cwd` retu
 
 Each provider exposes four tier aliases. Concrete model IDs live only in the dispatcher (`src/dispatcher/<provider>/modelAlias.ts`) so upstream CLI renames stay scoped to one file.
 
-| alias  | meaning                                                  |
-| ------ | -------------------------------------------------------- |
-| `high` | provider's most capable model                            |
-| `mid`  | balanced model                                           |
-| `low`  | fastest / cheapest model                                 |
-| `auto` | CLI default (omit `-m`)                                  |
+| alias  | meaning                       |
+| ------ | ----------------------------- |
+| `high` | provider's most capable model |
+| `mid`  | balanced model                |
+| `low`  | fastest / cheapest model      |
+| `auto` | CLI default (omit `-m`)       |
 
 Env overrides: `COGAIR_CODEX_{HIGH,MID,LOW}`, `COGAIR_GEMINI_{HIGH,MID,LOW}`.
 
@@ -176,18 +176,18 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 
 For technical details and design rationale, see [`.metadata/cogair/`](../../.metadata/cogair/):
 
-| Document                                                         | Content                                          |
-| ---------------------------------------------------------------- | ------------------------------------------------ |
-| [README](../../.metadata/cogair/README.md)                       | Spec index + core decisions                      |
-| [spec](../../.metadata/cogair/spec.md)                           | Responsibilities, data flow, non-goals           |
-| [architecture](../../.metadata/cogair/architecture.md)           | Module tree + dependency direction + build flow  |
-| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)   |
-| [skills](../../.metadata/cogair/skills.md)                       | Skill body + tool-call mapping                   |
-| [hooks](../../.metadata/cogair/hooks.md)                         | SessionStart / UserPromptSubmit injection        |
-| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli invocation matrix         |
-| [storage](../../.metadata/cogair/storage.md)                     | Disk layout under `~/.claude/plugins/cogair/`    |
-| [web-ui](../../.metadata/cogair/web-ui.md)                       | Local settings UI design                         |
-| [roadmap](../../.metadata/cogair/roadmap.md)                     | Phase-by-phase implementation plan               |
+| Document                                                         | Content                                         |
+| ---------------------------------------------------------------- | ----------------------------------------------- |
+| [README](../../.metadata/cogair/README.md)                       | Spec index + core decisions                     |
+| [spec](../../.metadata/cogair/spec.md)                           | Responsibilities, data flow, non-goals          |
+| [architecture](../../.metadata/cogair/architecture.md)           | Module tree + dependency direction + build flow |
+| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
+| [skills](../../.metadata/cogair/skills.md)                       | Skill body + tool-call mapping                  |
+| [hooks](../../.metadata/cogair/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
+| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli invocation matrix        |
+| [storage](../../.metadata/cogair/storage.md)                     | Disk layout under `~/.claude/plugins/cogair/`   |
+| [web-ui](../../.metadata/cogair/web-ui.md)                       | Local settings UI design                        |
+| [roadmap](../../.metadata/cogair/roadmap.md)                     | Phase-by-phase implementation plan              |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
 

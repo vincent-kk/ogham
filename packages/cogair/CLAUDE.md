@@ -48,16 +48,16 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 
 ## Key Source Directories
 
-| Path              | Role                                                                |
-| ----------------- | ------------------------------------------------------------------- |
-| `src/types/`      | Zod schemas + TypeScript types (the only zod consumers)             |
-| `src/constants/`  | Paths, defaults, error codes                                        |
-| `src/lib/`        | atomic write, logger                                                |
-| `src/utils/`      | parent-pid, isoNow                                                  |
-| `src/core/`       | config / counter / session / project-hash / auth-token managers    |
-| `src/dispatcher/` | codex-cli / gemini-cli spawn, JSONL parser, model alias, envelope   |
-| `src/mcp/`        | MCP server + 3 tool handlers + settings web UI                       |
-| `src/hooks/`      | injectStatic, injectDynamic, shared organ (esbuild entry points)     |
+| Path              | Role                                                              |
+| ----------------- | ----------------------------------------------------------------- |
+| `src/types/`      | Zod schemas + TypeScript types (the only zod consumers)           |
+| `src/constants/`  | Paths, defaults, error codes                                      |
+| `src/lib/`        | atomic write, logger                                              |
+| `src/utils/`      | parent-pid, isoNow                                                |
+| `src/core/`       | config / counter / session / project-hash / auth-token managers   |
+| `src/dispatcher/` | codex-cli / gemini-cli spawn, JSONL parser, model alias, envelope |
+| `src/mcp/`        | MCP server + 3 tool handlers + settings web UI                    |
+| `src/hooks/`      | injectStatic, injectDynamic, shared organ (esbuild entry points)  |
 
 ## Key Files
 
