@@ -39,8 +39,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
-    "build:plugin": "node scripts/buildMcpServer.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
+    "build:plugin": "node scripts/buildSettingsHtml.mjs && node scripts/buildMcpServer.mjs",
     "clean": "rm -rf bridge dist",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",

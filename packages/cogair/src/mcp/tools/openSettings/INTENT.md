@@ -1,32 +1,39 @@
 ## Purpose
 
-설정용 로컬 웹 UI 기동 진입점. Phase 4 는 placeholder 응답만 반환; Phase 5 에서 실제 HTTP 서버 + token 검증 + 5 분 idle 종료를 추가.
+설정용 로컬 웹 UI 기동 진입점. `127.0.0.1` 전용 HTTP 서버를 띄우고, one-time token 으로 보호된 폼을 브라우저에 노출. 5 분 idle 또는 사용자의 "Save & Close" 액션 시 자동 종료.
 
 ## Structure
 
-| File         | Role                                                                  |
-| ------------ | --------------------------------------------------------------------- |
-| `handler.ts` | `handleOpenSettings` — Phase 4 placeholder (`url=''`, `reused=false`) |
-| `index.ts`   | barrel                                                                |
+| Path                            | Role                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------- |
+| `handler.ts`                    | `handleOpenSettings` — 활성 서버 재사용 또는 신규 기동 + `settings_server.json` 영속화 |
+| `__generated__/settingsHtml.ts` | `scripts/buildSettingsHtml.mjs` 가 inline 한 단일 HTML 문자열                          |
+| `utils/openBrowser.ts`          | OS 별 기본 브라우저 best-effort 오픈                                                   |
+| `webServer/`                    | HTTP 서버, 라우트, 핸들러, token / CSRF 가드                                           |
+| `index.ts`                      | barrel                                                                                 |
 
 ## Conventions
 
-- Phase 4 단계에서는 web server 를 띄우지 않음 — 단순 응답만
-- 응답 스키마는 `{ url, message, reused }` 로 유지 (Phase 5 호환)
-- 입력 스키마는 `z.object({})` (현재 인자 없음)
+- 응답 스키마는 `{ url, message, reused }` 고정
+- 모듈 레벨 `currentServer` 싱글톤 — `onClose` 콜백에서 nullify 후 state 파일 삭제
+- state 파일 (`runtime/settings_server.json`) 은 시작 시 atomicWrite, 종료 시 rm — 외부 가시성 목적
+- 브라우저 오픈은 best-effort: headless 환경에서도 URL 은 반드시 응답
 
 ## Boundaries
 
 ### Always do
 
-- Phase 4 응답 메시지에 "Phase 5" 안내 문구 포함 (호출자가 인지)
-- Phase 5 도입 시 INTENT.md 의 placeholder 표시 제거
+- 동일 MCP 프로세스에서 이미 실행 중인 서버가 있으면 재사용 (`reused: true`)
+- 활성 서버가 종료될 때 `runtime/settings_server.json` 도 함께 삭제
+- 입력 인자 없음 — `z.object({})` 스키마 유지
 
 ### Ask first
 
-- 응답 스키마 변경 (Phase 5 와의 호환성)
+- 응답 스키마 변경
+- 모듈 레벨 싱글톤 제거 (호출자가 핸들을 들고 다니는 방식)
 
 ### Never do
 
-- Phase 4 단계에서 HTTP 서버 기동 (Phase 5 범위)
-- token 발급·검증 로직 추가 (Phase 5 범위)
+- `127.0.0.1` 외 주소로 바인딩
+- token 발급/검증 로직을 별도 위치에서 재구현 (`core/authToken` 만 사용)
+- state 파일을 직접 수정하거나 다른 프로세스의 핸들을 신뢰

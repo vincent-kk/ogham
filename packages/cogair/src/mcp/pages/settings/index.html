@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>cogair · settings</title>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-name">cogair</span>
+          <span class="brand-tag">/ settings</span>
+        </div>
+        <p class="lede">
+          Routing, intervention, and provider defaults for codex / gemini
+          dispatch.
+        </p>
+      </header>
+
+      <form id="form" class="form" novalidate>
+        <section class="section">
+          <h2 class="section-title">Routing ratio</h2>
+          <p class="section-help">
+            Weights for provider selection. 0 disables a provider.
+          </p>
+          <div class="ratio-grid">
+            <label class="field">
+              <span>gemini</span>
+              <input id="ratio-gemini" type="number" min="0" step="1" />
+            </label>
+            <label class="field">
+              <span>codex</span>
+              <input id="ratio-codex" type="number" min="0" step="1" />
+            </label>
+          </div>
+          <div class="ratio-bar" aria-hidden="true">
+            <span class="ratio-bar-gemini"></span>
+            <span class="ratio-bar-codex"></span>
+          </div>
+          <div class="ratio-legend">
+            <span
+              ><i class="dot dot-gem"></i> gemini
+              <output id="gemini-pct">50%</output></span
+            >
+            <span
+              ><i class="dot dot-cod"></i> codex
+              <output id="codex-pct">50%</output></span
+            >
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Intervention strength</h2>
+          <p class="section-help">
+            How aggressively cogair recommends delegation in injected context.
+          </p>
+          <input id="strength" type="range" min="-2" max="2" step="1" />
+          <div class="ticks">
+            <span data-value="-2">Subtle</span>
+            <span data-value="-1">Soft</span>
+            <span data-value="0">Neutral</span>
+            <span data-value="1">Active</span>
+            <span data-value="2">Strong</span>
+          </div>
+          <output id="strength-label" class="strength-current">Neutral</output>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Trigger keywords</h2>
+          <p class="section-help">
+            Comma-separated. The hooks suggest a provider when matching keywords
+            appear in the prompt.
+          </p>
+          <label class="field">
+            <span>gemini keywords</span>
+            <textarea id="kw-gemini" rows="2"></textarea>
+          </label>
+          <label class="field">
+            <span>codex keywords</span>
+            <textarea id="kw-codex" rows="2"></textarea>
+          </label>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Default model</h2>
+          <p class="section-help">
+            Alias applied when <code>start_conversation</code> omits the model.
+          </p>
+          <div class="radio-row">
+            <label class="radio"
+              ><input type="radio" name="model" value="high" /><span
+                >high</span
+              ></label
+            >
+            <label class="radio"
+              ><input type="radio" name="model" value="mid" /><span
+                >mid</span
+              ></label
+            >
+            <label class="radio"
+              ><input type="radio" name="model" value="low" /><span
+                >low</span
+              ></label
+            >
+            <label class="radio"
+              ><input type="radio" name="model" value="auto" /><span
+                >auto</span
+              ></label
+            >
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Default options</h2>
+          <label class="toggle">
+            <input id="multi-agent" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">multi_agent</span>
+          </label>
+          <p class="section-help">
+            v1: not yet supported by either provider — reported via
+            <code>meta.ignored_options</code>.
+          </p>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Session TTL</h2>
+          <p class="section-help">Hours before idle sessions are pruned.</p>
+          <label class="field">
+            <span>hours (1–720)</span>
+            <input id="ttl" type="number" min="1" max="720" step="1" />
+          </label>
+        </section>
+
+        <div class="actions">
+          <button id="save" type="submit" class="btn btn-primary">Save</button>
+          <button id="save-close" type="button" class="btn btn-secondary">
+            Save &amp; Close
+          </button>
+        </div>
+      </form>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </main>
+    <script>
+      window.__COGAIR_STATE__ = '__COGAIR_STATE__';
+    </script>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>

@@ -97,12 +97,12 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [web-ui.md](../../.metadata/cogair/web-ui.md)
 
-- [ ] `src/mcp/pages/settings/index.html`, `styles/styles.css`, `scripts/app.js`
-- [ ] `scripts/buildSettingsHtml.mjs`
-- [ ] `src/mcp/tools/openSettings/webServer/` (handlers, utils, routes, routeContext, webServer)
-- [ ] `src/mcp/tools/openSettings/handler.ts`
-- [ ] token 검증 + 5분 idle 단위 테스트
-- [ ] `server.ts` placeholder → 실제 handler 교체
+- [x] `src/mcp/pages/settings/index.html`, `styles/styles.css`, `scripts/app.js`
+- [x] `scripts/buildSettingsHtml.mjs`
+- [x] `src/mcp/tools/openSettings/webServer/` (handlers, utils, routes, routeContext, webServer)
+- [x] `src/mcp/tools/openSettings/handler.ts`
+- [x] token 검증 + 5분 idle 단위 테스트 (`idleMs` 옵션으로 200ms 단축)
+- [x] `server.ts` placeholder → 실제 handler 교체
 
 ## Phase 6 — Skills
 
