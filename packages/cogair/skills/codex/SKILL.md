@@ -53,12 +53,12 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | tier                                                                |
-| ------ | ------------------------------------------------------------------- |
-| `high` | most capable codex model (env override: `COGAIR_CODEX_HIGH`)        |
-| `mid`  | balanced codex model (env override: `COGAIR_CODEX_MID`)             |
-| `low`  | fastest / cheapest codex model (env override: `COGAIR_CODEX_LOW`)   |
-| `auto` | codex-cli default (omit `-m`)                                       |
+| alias  | tier                                                              |
+| ------ | ----------------------------------------------------------------- |
+| `high` | most capable codex model (env override: `COGAIR_CODEX_HIGH`)      |
+| `mid`  | balanced codex model (env override: `COGAIR_CODEX_MID`)           |
+| `low`  | fastest / cheapest codex model (env override: `COGAIR_CODEX_LOW`) |
+| `auto` | codex-cli default (omit `-m`)                                     |
 
 The concrete model IDs each tier resolves to live in the dispatcher
 (`src/dispatcher/codex/modelAlias.ts`) so they can track upstream renames

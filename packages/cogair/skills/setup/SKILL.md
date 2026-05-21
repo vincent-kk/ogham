@@ -1,8 +1,8 @@
 ---
 name: setup
-description: "[cogair] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: \"cogair 설정\", \"open cogair settings\", \"개입 강도\""
+description: '[cogair] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: "cogair 설정", "open cogair settings", "개입 강도"'
 user_invocable: true
-argument-hint: ""
+argument-hint: ''
 ---
 
 # setup

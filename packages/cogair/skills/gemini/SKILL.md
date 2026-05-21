@@ -53,12 +53,12 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | tier                                                                 |
-| ------ | -------------------------------------------------------------------- |
-| `high` | most capable gemini model (env override: `COGAIR_GEMINI_HIGH`)       |
-| `mid`  | balanced gemini model (env override: `COGAIR_GEMINI_MID`)            |
-| `low`  | fastest / cheapest gemini model (env override: `COGAIR_GEMINI_LOW`)  |
-| `auto` | gemini-cli default (omit `-m`)                                       |
+| alias  | tier                                                                |
+| ------ | ------------------------------------------------------------------- |
+| `high` | most capable gemini model (env override: `COGAIR_GEMINI_HIGH`)      |
+| `mid`  | balanced gemini model (env override: `COGAIR_GEMINI_MID`)           |
+| `low`  | fastest / cheapest gemini model (env override: `COGAIR_GEMINI_LOW`) |
+| `auto` | gemini-cli default (omit `-m`)                                      |
 
 The concrete model IDs each tier resolves to live in the dispatcher
 (`src/dispatcher/gemini/modelAlias.ts`) so they can track upstream renames
