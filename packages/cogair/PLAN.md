@@ -108,9 +108,9 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [skills.md](../../.metadata/cogair/skills.md)
 
-- [ ] `skills/setup/SKILL.md`
-- [ ] `skills/codex/SKILL.md`
-- [ ] `skills/gemini/SKILL.md`
+- [x] `skills/setup/SKILL.md`
+- [x] `skills/codex/SKILL.md`
+- [x] `skills/gemini/SKILL.md`
 
 ## Phase 7 — Hooks
 
