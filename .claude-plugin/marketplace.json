@@ -10,6 +10,26 @@
   },
   "plugins": [
     {
+      "name": "atlassian",
+      "source": "./packages/atlassian",
+      "category": "productivity",
+      "tags": [
+        "jira",
+        "confluence",
+        "integration"
+      ]
+    },
+    {
+      "name": "cogair",
+      "source": "./packages/cogair",
+      "category": "productivity",
+      "tags": [
+        "codex",
+        "gemini",
+        "multi-model"
+      ]
+    },
+    {
       "name": "filid",
       "source": "./packages/filid",
       "category": "productivity",
@@ -51,16 +71,6 @@
         "read-only",
         "lens",
         "vault"
-      ]
-    },
-    {
-      "name": "atlassian",
-      "source": "./packages/atlassian",
-      "category": "productivity",
-      "tags": [
-        "jira",
-        "confluence",
-        "integration"
       ]
     }
   ]

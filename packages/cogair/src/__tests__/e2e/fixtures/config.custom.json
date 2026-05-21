@@ -1,0 +1,14 @@
+{
+  "ratio": {
+    "gemini": { "value": 70, "enabled": true },
+    "codex": { "value": 30, "enabled": true }
+  },
+  "intervention_strength": -2,
+  "keywords": {
+    "gemini": "research, news",
+    "codex": "code, tests"
+  },
+  "default_model": "mid",
+  "default_options": {},
+  "session_ttl_hours": 72
+}

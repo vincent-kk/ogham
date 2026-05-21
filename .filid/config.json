@@ -35,5 +35,25 @@
       "severity": "warning"
     }
   },
-  "additional-allowed": ["version.ts"]
+  "additional-allowed": [
+    "version.ts",
+    "hooks.json",
+    "SKILL.md",
+    "DETAIL.md",
+    "INTENT.md",
+    "README.md",
+    "README-ko_kr.md",
+    "CLAUDE.md",
+    "package.json",
+    "tsconfig.json",
+    "tsconfig.build.json",
+    "tsconfig.tsbuildinfo",
+    "tsconfig.build.tsbuildinfo",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "vitest.e2e.config.ts",
+    "vitest.e2e.setup.ts",
+    "vitest.e2e.globalSetup.ts",
+    "index.html"
+  ]
 }
