@@ -19,6 +19,7 @@
     "changeset:publish": "yarn build:all && changeset publish",
     "changeset:version": "changeset version",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
+    "cogair": "yarn workspace @ogham/cogair",
     "filid": "yarn workspace @ogham/filid",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
