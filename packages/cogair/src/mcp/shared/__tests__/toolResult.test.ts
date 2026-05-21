@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toolResult } from '../toolResult.js';
+import { toolResult } from '../helpers/toolResult.js';
 
 describe('toolResult', () => {
   it('wraps a value in the MCP content envelope as compact JSON', () => {

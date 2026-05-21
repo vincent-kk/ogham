@@ -4,8 +4,7 @@ import { performance } from 'node:perf_hooks';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { createSession } from '../../../core/sessionStore/index.js';
-import { buildResponse } from '../../../dispatcher/envelope.js';
-import { dispatchers } from '../../../dispatcher/index.js';
+import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
 import type {
   ConversationOptions,
   ConversationResponse,

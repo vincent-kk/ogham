@@ -4,7 +4,7 @@ import type {
   ConversationResponse,
   DispatchResult,
   Provider,
-} from '../types/index.js';
+} from '../../types/index.js';
 
 export interface BuildResponseArgs {
   sessionId: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toolError } from '../toolError.js';
+import { toolError } from '../helpers/toolError.js';
 
 describe('toolError', () => {
   it('serializes Error.message and marks isError true', () => {

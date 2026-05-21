@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { wrapHandler } from '../wrapHandler.js';
+import { wrapHandler } from '../helpers/wrapHandler.js';
 
 describe('wrapHandler', () => {
   it('returns toolResult on success', async () => {

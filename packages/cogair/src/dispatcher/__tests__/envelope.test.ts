@@ -3,7 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { describe, expect, it } from 'vitest';
 
 import type { DispatchResult } from '../../types/index.js';
-import { buildResponse } from '../envelope.js';
+import { buildResponse } from '../entities/envelope.js';
 
 function successResult(
   overrides: Partial<DispatchResult> = {},

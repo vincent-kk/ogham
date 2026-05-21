@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import { loadConfig } from '../shared/loadConfig.js';
-import { nowIso } from '../shared/nowIso.js';
-
-import { buildStaticPayload } from './injectStatic.js';
+import { loadConfig } from '../../shared/loadConfig.js';
+import { nowIso } from '../../shared/nowIso.js';
+import { buildStaticPayload } from '../injectStatic.js';
 
 try {
   const payload = buildStaticPayload(loadConfig());

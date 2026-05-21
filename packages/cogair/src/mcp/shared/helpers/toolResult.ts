@@ -1,4 +1,4 @@
-import { mapReplacer } from '../../utils/mapReplacer.js';
+import { mapReplacer } from '../../../utils/mapReplacer.js';
 
 export function toolResult(result: unknown): {
   content: Array<{ type: 'text'; text: string }>;

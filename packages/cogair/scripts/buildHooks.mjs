@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Bundle src/hooks/<name>/<name>.entry.ts -> bridge/<name>.mjs
+ * Bundle src/hooks/<name>/build/<name>.entry.ts -> bridge/<name>.mjs
  *
  * Hooks must remain thin scripts (Node builtins only). Pulling external
  * runtimes into a hook bundle breaks the per-event cold-start budget. A
@@ -28,7 +28,7 @@ const hookEntries = [
 await Promise.all(
   hookEntries.map(({ name }) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
+      entryPoints: [resolve(root, `src/hooks/${name}/build/${name}.entry.ts`)],
       bundle: true,
       platform: 'node',
       target: 'node20',

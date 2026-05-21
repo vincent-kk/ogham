@@ -3,8 +3,7 @@ import { performance } from 'node:perf_hooks';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { getProjectHash } from '../../../core/projectHash/index.js';
 import { getSession, updateSession } from '../../../core/sessionStore/index.js';
-import { buildResponse } from '../../../dispatcher/envelope.js';
-import { dispatchers } from '../../../dispatcher/index.js';
+import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
 import type { ConversationResponse } from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 
