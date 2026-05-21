@@ -111,9 +111,9 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 | `/codex`  | "ask codex", "codex 호출", "코덱스에게"            |
 | `/gemini` | "ask gemini", "gemini 호출", "제미니에게"          |
 
-#### 충돌 정책 (Name collision policy)
+#### Name collision policy
 
-`/setup`, `/codex`, `/gemini`는 플러그인 접두사 없이 전역 등록됩니다. 다른 플러그인이 동일한 이름을 사용할 경우, Claude Code의 스킬 해석 순서(플러그인 등록 순)에 따라 먼저 등록된 스킬이 우선합니다. 충돌이 의심될 때는 `claude config`로 활성 스킬 목록을 확인하거나, 네임스페이스 형식(`cogair:setup` 등)을 사용하십시오.
+`/setup`, `/codex`, and `/gemini` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cogair:setup`).
 
 ### Hooks
 

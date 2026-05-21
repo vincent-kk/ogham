@@ -111,6 +111,10 @@ Claude Code session
 | `/codex`  | "ask codex", "codex 호출", "코덱스에게"            |
 | `/gemini` | "ask gemini", "gemini 호출", "제미니에게"          |
 
+#### 충돌 정책
+
+`/setup`, `/codex`, `/gemini` 는 플러그인 접두사 없이 전역 등록됩니다. 다른 플러그인이 동일한 이름을 사용할 경우, Claude Code 의 스킬 해석 순서(플러그인 등록 순)에 따라 먼저 등록된 스킬이 우선합니다. 충돌이 의심될 때는 `claude config` 로 활성 스킬 목록을 확인하거나, 네임스페이스 형식(`cogair:setup` 등)을 사용하십시오.
+
 ### Hook
 
 | 이벤트             | Bridge 번들         | 주입 내용                                                      |
