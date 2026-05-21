@@ -15,6 +15,7 @@ import { isoNow } from '../../utils/isoNow.js';
 import { getProjectHash } from '../projectHash/index.js';
 
 export interface CreateSessionInput {
+  sessionId?: string;
   provider: Provider;
   cwd: string;
   externalSessionRef: string;
@@ -61,7 +62,7 @@ export async function createSession(
   input: CreateSessionInput,
 ): Promise<SessionMeta> {
   const projectHash = getProjectHash(input.cwd);
-  const sessionId = randomUUID();
+  const sessionId = input.sessionId ?? randomUUID();
   const now = isoNow();
   const meta = SessionMetaSchema.parse({
     session_id: sessionId,

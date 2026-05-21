@@ -84,14 +84,14 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 상세: [mcp-tools.md](../../.metadata/cogair/mcp-tools.md), [architecture.md §src/mcp](../../.metadata/cogair/architecture.md)
 
-- [ ] `src/mcp/shared/toolResponse.ts`
-- [ ] `src/mcp/tools/startConversation/handler.ts`
-- [ ] `src/mcp/tools/continueConversation/handler.ts` (project_hash 검증 → error.code='unknown')
-- [ ] `src/mcp/server/server.ts` — 3 tool 등록
-- [ ] `src/mcp/serverEntry/serverEntry.ts`
-- [ ] `scripts/buildMcpServer.mjs` (filid 패턴)
-- [ ] `yarn cogair build:plugin` → `bridge/mcp-server.cjs` 산출
-- [ ] Claude Code 등록 후 수동 호출 검증
+- [x] `src/mcp/shared/toolResponse.ts`
+- [x] `src/mcp/tools/startConversation/handler.ts`
+- [x] `src/mcp/tools/continueConversation/handler.ts` (project_hash 검증 → error.code='unknown')
+- [x] `src/mcp/server/server.ts` — 3 tool 등록
+- [x] `src/mcp/serverEntry/serverEntry.ts`
+- [x] `scripts/buildMcpServer.mjs` (filid 패턴)
+- [x] `yarn cogair build:plugin` → `bridge/mcp-server.cjs` 산출
+- [x] Stdio smoke test (`initialize` + `tools/list`) 통과 — Claude Code 수동 등록은 사용자 환경에서 검증
 
 ## Phase 5 — Settings web UI (`open_settings`)
 

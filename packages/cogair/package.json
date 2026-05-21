@@ -39,8 +39,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json",
-    "build:plugin": "echo 'build:plugin not yet implemented — Phase 4/7 will wire buildMcpServer.mjs + buildHooks.mjs'",
+    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
+    "build:plugin": "node scripts/buildMcpServer.mjs",
     "clean": "rm -rf bridge dist",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
