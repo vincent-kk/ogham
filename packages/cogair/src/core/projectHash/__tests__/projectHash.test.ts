@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
-import { getProjectHash } from '../getProjectHash.js';
+import { getProjectHash } from '../projectHash.js';
 
 describe('getProjectHash', () => {
   it('returns 12 hex characters', () => {

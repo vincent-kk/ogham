@@ -6,7 +6,7 @@ import {
   COGAIR_HOME,
   SETTINGS_SERVER_PATH,
 } from '../../../../constants/paths.js';
-import { handleOpenSettings } from '../handler.js';
+import { handleOpenSettings } from '../openSettings.js';
 
 async function closeViaHttp(url: string): Promise<void> {
   try {

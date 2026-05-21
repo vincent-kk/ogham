@@ -1,2 +1,2 @@
-export { mapError } from './mapError.js';
+export { mapError } from './errorMap.js';
 export type { MapErrorInput } from './utils/classify.js';

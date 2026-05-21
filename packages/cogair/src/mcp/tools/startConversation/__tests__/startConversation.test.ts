@@ -8,7 +8,7 @@ import {
   installFakeBinary,
   prependToPath,
 } from '../../../../dispatcher/__tests__/fakeBinary.js';
-import { handleStartConversation } from '../handler.js';
+import { handleStartConversation } from '../startConversation.js';
 
 const FAKE_CODEX = `#!/usr/bin/env node
 const mode = process.env.COGAIR_FAKE_CODEX_MODE || 'success';

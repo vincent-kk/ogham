@@ -1,4 +1,4 @@
 export {
   parseCodexStream,
   type ParsedCodexStream,
-} from './parseCodexStream.js';
+} from './jsonlParser.js';

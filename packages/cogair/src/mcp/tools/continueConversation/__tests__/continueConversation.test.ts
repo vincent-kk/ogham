@@ -12,7 +12,7 @@ import {
   installFakeBinary,
   prependToPath,
 } from '../../../../dispatcher/__tests__/fakeBinary.js';
-import { handleContinueConversation } from '../handler.js';
+import { handleContinueConversation } from '../continueConversation.js';
 
 const FAKE_CODEX = `#!/usr/bin/env node
 const args = process.argv.slice(2);

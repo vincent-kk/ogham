@@ -1,1 +1,1 @@
-export { getProjectHash } from './getProjectHash.js';
+export { getProjectHash } from './projectHash.js';
