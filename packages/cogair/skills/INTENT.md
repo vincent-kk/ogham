@@ -6,11 +6,11 @@ holds one user-invokable skill consumed by Claude Code at runtime via the
 
 ## Structure
 
-| Path             | Role                                              |
-| ---------------- | ------------------------------------------------- |
-| `codex/SKILL.md` | `/codex` delegation skill (OpenAI Codex CLI)      |
-| `gemini/SKILL.md`| `/gemini` delegation skill (Google Gemini CLI)    |
-| `setup/SKILL.md` | `/setup` first-run configuration walkthrough      |
+| Path              | Role                                           |
+| ----------------- | ---------------------------------------------- |
+| `codex/SKILL.md`  | `/codex` delegation skill (OpenAI Codex CLI)   |
+| `gemini/SKILL.md` | `/gemini` delegation skill (Google Gemini CLI) |
+| `setup/SKILL.md`  | `/setup` first-run configuration walkthrough   |
 
 ## Conventions
 

@@ -1,10 +1,10 @@
 import type { ConversationError } from '../../../types/index.js';
 import { mapError } from '../../errorMap/index.js';
+import { spawnGemini } from '../operations/spawn.js';
 import {
   findSessionByUuid,
   parseListSessions,
 } from '../sessionResolver/index.js';
-import { spawnGemini } from '../operations/spawn.js';
 
 export async function resolveResumeIndex(
   cwd: string,
