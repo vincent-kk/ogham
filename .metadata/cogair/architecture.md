@@ -1,6 +1,8 @@
 # Architecture — Module Tree & Dependencies
 
-`packages/filid/` 의 패키지 레이아웃과 빌드 파이프라인을 그대로 따른다. atlassian 의 `setup/web-server` 구조는 `open_settings` 도구 한 곳에서만 차용한다.
+`packages/filid/` 의 패키지 레이아웃과 빌드 파이프라인을 그대로 따른다. atlassian 의 `setup/web-server` 구조는 `openSettings` 도구 한 곳에서만 차용한다.
+
+디렉토리와 TypeScript 파일 이름은 **camelCase** 로 통일한다 (filid fca-policy 의 기본값). 단, organ 컨벤션(`__tests__`, `__generated__`, `.claude-plugin` 등)과 디스크 JSON 키(`session_ttl_hours`, `multi_agent` 등 외부 인터페이스)는 영향받지 않는다.
 
 ## 패키지 루트 레이아웃
 
@@ -19,16 +21,16 @@ packages/cogair/
 │   ├── codex/SKILL.md
 │   └── gemini/SKILL.md
 ├── scripts/
-│   ├── build-mcp-server.mjs     # esbuild → bridge/mcp-server.cjs (CJS)
-│   ├── build-hooks.mjs          # esbuild → bridge/<name>.mjs (ESM, thin-script 가드)
-│   └── build-settings-html.mjs  # FE → src/mcp/tools/open-settings/__generated__/settings-html.ts
+│   ├── buildMcpServer.mjs       # esbuild → bridge/mcp-server.cjs (CJS)
+│   ├── buildHooks.mjs           # esbuild → bridge/<name>.mjs (ESM, thin-script 가드)
+│   └── buildSettingsHtml.mjs    # FE → src/mcp/tools/openSettings/__generated__/settingsHtml.ts
 ├── bridge/                      # build artifact (gitignored)
 ├── src/                         # fractal root
 ├── package.json
 ├── tsconfig.json / tsconfig.build.json
 ├── vitest.config.ts
 ├── README.md / README-ko_kr.md
-└── CLAUDE.md (Phase 8 에서 추가)
+└── CLAUDE.md (Phase 8)
 ```
 
 `package.json` 의 `files`:
@@ -37,92 +39,139 @@ packages/cogair/
 ["dist", "bridge", "hooks", "libs", "skills", ".claude-plugin", ".mcp.json", "README.md"]
 ```
 
-(`agents` 미포함 — 본 플러그인은 agent 없음. `templates`/`libs` 등 도메인 무관 자산은 필요해질 때 추가.)
+`scripts/` 파일은 camelCase + `.mjs` 확장자. filid 의 kebab-case 스크립트 이름과 다르지만 cogair 컨벤션 우선.
 
 ## src/ 트리
 
 ```
 src/
 ├── INTENT.md
-├── index.ts                     # public API barrel (라이브러리 소비자는 없지만 dist export 일관성 유지)
+├── index.ts                     # public API barrel
 ├── version.ts                   # scripts/inject-version.mjs 가 갱신, 수정 금지
 ├── types/                       # fractal — Zod 스키마 + 타입
 │   ├── INTENT.md
 │   ├── index.ts
-│   ├── conversation.ts
+│   ├── conversation.ts          # ConversationResponse, ConversationOptions, Provider, ModelAlias, ErrorCode
 │   ├── config.ts
 │   ├── session.ts
 │   ├── counter.ts
-│   └── settings-server.ts
+│   └── settingsServer.ts
 ├── constants/                   # organ
 │   ├── paths.ts
 │   ├── defaults.ts
-│   └── error-codes.ts
-├── core/                        # fractal — 비즈니스 코어
+│   └── errorCodes.ts
+├── core/                        # fractal
 │   ├── INTENT.md
 │   ├── index.ts
-│   ├── config-manager/
-│   ├── counter-manager/
-│   ├── session-store/
-│   ├── project-hash/
-│   └── auth-token/
-├── dispatcher/                  # fractal — provider 호출 본체
+│   ├── configManager/
+│   ├── counterManager/
+│   ├── sessionStore/
+│   ├── projectHash/
+│   └── authToken/
+├── dispatcher/                  # fractal
 │   ├── INTENT.md
 │   ├── index.ts
-│   ├── codex/                   # codex-cli spawn + JSONL parser + model alias
-│   ├── gemini/                  # gemini-cli spawn + session resolver + model alias
+│   ├── codex/
+│   │   ├── INTENT.md
+│   │   ├── index.ts
+│   │   ├── spawn.ts
+│   │   ├── jsonlParser.ts
+│   │   └── modelAlias.ts
+│   ├── gemini/
+│   │   ├── INTENT.md
+│   │   ├── index.ts
+│   │   ├── spawn.ts
+│   │   ├── sessionResolver.ts
+│   │   └── modelAlias.ts
 │   ├── envelope.ts
-│   └── error-map.ts
+│   └── errorMap.ts
 ├── mcp/                         # fractal — MCP server + 3 tools
 │   ├── INTENT.md
 │   ├── index.ts
 │   ├── server/
-│   │   └── server.ts            # createServer, startServer
-│   ├── server-entry/
-│   │   └── server-entry.ts      # esbuild 진입점 → bridge/mcp-server.cjs
+│   │   └── server.ts
+│   ├── serverEntry/
+│   │   └── serverEntry.ts       # esbuild 진입점 → bridge/mcp-server.cjs
 │   ├── shared/
-│   │   ├── tool-response.ts     # toolResult, toolError, wrapHandler, mapReplacer
+│   │   ├── toolResponse.ts      # toolResult, toolError, wrapHandler, mapReplacer
 │   │   └── index.ts
 │   ├── tools/
-│   │   ├── start-conversation/
-│   │   ├── continue-conversation/
-│   │   └── open-settings/
+│   │   ├── startConversation/
+│   │   │   ├── INTENT.md
+│   │   │   ├── index.ts
+│   │   │   └── handler.ts
+│   │   ├── continueConversation/
+│   │   │   ├── INTENT.md
+│   │   │   ├── index.ts
+│   │   │   └── handler.ts
+│   │   └── openSettings/
+│   │       ├── INTENT.md
+│   │       ├── index.ts
 │   │       ├── handler.ts
-│   │       ├── __generated__/   # build-settings-html 산출물
-│   │       ├── web-server/      # atlassian setup 패턴 차용
-│   │       └── utils/open-browser.ts
+│   │       ├── __generated__/
+│   │       │   └── settingsHtml.ts
+│   │       ├── webServer/
+│   │       │   ├── INTENT.md
+│   │       │   ├── index.ts
+│   │       │   ├── webServer.ts
+│   │       │   ├── routes.ts
+│   │       │   ├── routeContext.ts
+│   │       │   ├── handlers/
+│   │       │   │   ├── handleGetRoot.ts
+│   │       │   │   ├── handleGetConfig.ts
+│   │       │   │   ├── handleSave.ts
+│   │       │   │   └── handleClose.ts
+│   │       │   └── utils/
+│   │       │       ├── sendJson.ts
+│   │       │       ├── parseBody.ts
+│   │       │       ├── escapeJsonForHtml.ts
+│   │       │       ├── verifyToken.ts
+│   │       │       └── buildState.ts
+│   │       └── utils/
+│   │           └── openBrowser.ts
 │   └── pages/
 │       └── settings/            # FE 소스 (index.html, styles/, scripts/)
 ├── hooks/                       # fractal — hook 구현체 (esbuild 입력)
 │   ├── INTENT.md
 │   ├── index.ts
-│   ├── inject-static/
+│   ├── injectStatic/
 │   │   ├── INTENT.md
-│   │   ├── inject-static.ts       # main logic
-│   │   ├── inject-static.entry.ts # build-hooks.mjs 가 참조하는 진입점
+│   │   ├── injectStatic.ts
+│   │   ├── injectStatic.entry.ts
 │   │   └── utils/
-│   ├── inject-dynamic/
+│   │       ├── loadConfig.ts
+│   │       ├── tonePhrase.ts
+│   │       └── joinKeywords.ts
+│   ├── injectDynamic/
 │   │   ├── INTENT.md
-│   │   ├── inject-dynamic.ts
-│   │   ├── inject-dynamic.entry.ts
+│   │   ├── injectDynamic.ts
+│   │   ├── injectDynamic.entry.ts
 │   │   └── utils/
-│   └── shared/                  # 공통 헬퍼 (config-read, counter-read, tone-phrase)
-│       └── ...
-├── lib/                         # organ — atomic write, logger
-└── utils/                       # organ — parent-pid, iso-now
+│   │       ├── loadCounter.ts
+│   │       └── formatRatio.ts
+│   └── shared/
+│       ├── paths.ts
+│       ├── safeReadJson.ts
+│       └── nowIso.ts
+├── lib/                         # organ
+│   ├── logger.ts
+│   └── atomicWrite.ts
+└── utils/                       # organ
+    ├── parentPid.ts
+    └── isoNow.ts
 ```
 
 ## 의존 방향 (DAG)
 
 ```
 mcp/server  →  mcp/tools/*  →  dispatcher/*  →  core/*  →  lib, utils, constants
-mcp/server-entry  →  mcp/server
-hooks/inject-*    →  hooks/shared (only)        ← core/ import 금지
+mcp/serverEntry  →  mcp/server
+hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 ```
 
-- `src/hooks/*` 는 `src/core/*` 를 import 하지 않는다. 빌드 가드(`FORBIDDEN_PATTERNS`, byte cap) 위반.
+- `src/hooks/*` 는 `src/core/*` 또는 `src/types/*` 를 import 하지 않는다. 빌드 가드(`FORBIDDEN_PATTERNS`, byte cap) 위반.
 - 디스크 I/O 는 `src/hooks/shared/` 안에 `node:fs` 만 사용해 직접 구현.
-- `dispatcher/` 는 `core/session-store`, `core/counter-manager` 를 단방향 import.
+- `dispatcher/` 는 `core/sessionStore`, `core/counterManager` 를 단방향 import.
 
 ## 빌드 파이프라인 (filid 동일 패턴)
 
@@ -130,8 +179,8 @@ hooks/inject-*    →  hooks/shared (only)        ← core/ import 금지
 
 ```json
 {
-  "build": "yarn clean && yarn version:sync && node scripts/build-settings-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-  "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
+  "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
+  "build:plugin": "node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
   "clean": "rm -rf bridge",
   "version:sync": "node ../../scripts/inject-version.mjs"
 }
@@ -140,52 +189,49 @@ hooks/inject-*    →  hooks/shared (only)        ← core/ import 금지
 | 단계 | 명령 | 산출물 |
 |---|---|---|
 | 1 | `yarn version:sync` | `src/version.ts` |
-| 2 | `node scripts/build-settings-html.mjs` | `src/mcp/tools/open-settings/__generated__/settings-html.ts` |
-| 3 | `tsc -p tsconfig.build.json` | `dist/` (라이브러리 export — 사용처는 없지만 형식 유지) |
-| 4 | `node scripts/build-mcp-server.mjs` | `bridge/mcp-server.cjs` (esbuild CJS 번들) |
-| 5 | `node scripts/build-hooks.mjs` | `bridge/inject-static.mjs`, `bridge/inject-dynamic.mjs` (esbuild ESM, 각각 LIGHT cap 10 KB) |
+| 2 | `node scripts/buildSettingsHtml.mjs` | `src/mcp/tools/openSettings/__generated__/settingsHtml.ts` |
+| 3 | `tsc -p tsconfig.build.json` | `dist/` |
+| 4 | `node scripts/buildMcpServer.mjs` | `bridge/mcp-server.cjs` (esbuild CJS 번들) |
+| 5 | `node scripts/buildHooks.mjs` | `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs` |
 
-### `scripts/build-hooks.mjs` — filid 가드 복제
+`bridge/mcp-server.cjs` 파일명은 filid · atlassian 의 컨벤션을 유지 (외부 `.mcp.json` 에 박혀 있어 변경 비용이 크고, 빌드 산출물 명명은 별도 컨벤션).
+
+### `scripts/buildHooks.mjs` — filid 가드 복제
 
 filid 의 `build-hooks.mjs` 와 동일한 규칙:
 
 - 각 hook 을 `esbuild.build` 로 `format: 'esm'`, `target: 'node20'`, `bundle: true`, `minify: true` 출력.
 - 두 hook 모두 LIGHT cap (`10 * 1024` bytes).
 - `FORBIDDEN_PATTERNS` 검사: `zod`, `@ast-grep/napi`, `@modelcontextprotocol/sdk`, `lodash`, `moment`, glob 패밀리 등을 번들에 포함하면 빌드 실패.
-- 위반 시 `process.exit(1)`.
 
-`hookEntries` 목록 (cogair):
+`hookEntries` 목록:
 
 ```javascript
 const hookEntries = [
-  { name: 'inject-static',  maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'inject-dynamic', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'injectStatic',  maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'injectDynamic', maxBytes: LIGHT_HOOK_BYTES },
 ];
 ```
 
-### `scripts/build-mcp-server.mjs`
+### `scripts/buildMcpServer.mjs`
 
 filid 의 동일 스크립트 단순화 버전 (cogair 는 `@ast-grep/napi` 사용 안 함):
 
-- `entryPoints: src/mcp/server-entry/server-entry.ts`
+- `entryPoints: src/mcp/serverEntry/serverEntry.ts`
 - `format: 'cjs'`, `target: 'node20'`, `platform: 'node'`, `bundle: true`, `minify: true`.
-- `external: []` (네이티브 의존 없음). zod 경로 alias 도 단순 — `node_modules/zod` 직접 사용.
-- 글로벌 모듈 탐색 banner 불필요 (네이티브 모듈 없음).
+- `external: []`. zod 는 node_modules 그대로 번들.
+- 글로벌 모듈 탐색 banner 불필요.
 
-### `scripts/build-settings-html.mjs`
+### `scripts/buildSettingsHtml.mjs`
 
 atlassian `build-setup-html.mjs` 패턴:
 
 - `src/mcp/pages/settings/index.html` + `styles/styles.css` + `scripts/app.js` 를 esbuild `transform` 으로 minify + inline.
-- 결과 HTML 을 `__generated__/settings-html.ts` 의 `export const SETTINGS_HTML = "..."` 로 직렬화.
+- 결과 HTML 을 `__generated__/settingsHtml.ts` 의 `export const SETTINGS_HTML = "..."` 로 직렬화.
 
 ## tsconfig
 
-filid 의 `tsconfig.json`, `tsconfig.build.json` 형태와 동일:
-
-- `module: NodeNext`, `moduleResolution: NodeNext`, `target: ES2022`, `strict: true`.
-- `tsconfig.build.json` 은 `outDir: dist`, `declaration: true`, `noEmitOnError: true`.
-- ESM `.js` 확장자 import 강제.
+filid 의 `tsconfig.json`, `tsconfig.build.json` 형태 동일. ESM `.js` 확장자 import 강제.
 
 ## 외부 의존성
 
@@ -195,7 +241,7 @@ filid 의 `tsconfig.json`, `tsconfig.build.json` 형태와 동일:
 
 ## 메인 진입점 export
 
-`package.json` 의 `exports`/`main`/`types` 도 filid 와 동일하게 dist 기반:
+filid 와 동일 dist 기반:
 
 ```json
 {
@@ -206,5 +252,3 @@ filid 의 `tsconfig.json`, `tsconfig.build.json` 형태와 동일:
   "types": "dist/index.d.ts"
 }
 ```
-
-(실제 소비자는 없지만 모노레포 일관성 유지 + 향후 cross-package import 여지 보존.)
