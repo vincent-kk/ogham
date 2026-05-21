@@ -1,4 +1,4 @@
-import type { ModelAlias } from '../../types/index.js';
+import type { ModelAlias } from '../../../types/index.js';
 
 export function resolveCodexModel(alias: ModelAlias): string | null {
   switch (alias) {

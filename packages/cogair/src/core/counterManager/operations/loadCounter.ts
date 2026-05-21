@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 
-import { COUNTER_PATH } from '../../constants/paths.js';
-import { logger } from '../../lib/logger.js';
-import { type Counter, CounterSchema } from '../../types/index.js';
-import { isFileNotFound } from '../../utils/isFileNotFound.js';
+import { COUNTER_PATH } from '../../../constants/paths.js';
+import { logger } from '../../../lib/logger.js';
+import { type Counter, CounterSchema } from '../../../types/index.js';
+import { isFileNotFound } from '../../../utils/isFileNotFound.js';
 
 export async function loadCounter(): Promise<Counter | null> {
   let raw: unknown;

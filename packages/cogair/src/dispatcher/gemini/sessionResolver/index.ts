@@ -1,6 +1,6 @@
 export {
   parseListSessions,
   type GeminiSessionEntry,
-} from './parseListSessions.js';
-export { findLatestSession } from './findLatestSession.js';
-export { findSessionByUuid } from './findSessionByUuid.js';
+} from './queries/parseListSessions.js';
+export { findLatestSession } from './queries/findLatestSession.js';
+export { findSessionByUuid } from './queries/findSessionByUuid.js';

@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { COGAIR_HOME } from '../../../constants/paths.js';
 import type { SessionMeta } from '../../../types/index.js';
-import { createSession } from '../createSession.js';
-import { getSession } from '../getSession.js';
-import { updateSession } from '../updateSession.js';
+import { createSession } from '../operations/createSession.js';
+import { getSession } from '../operations/getSession.js';
+import { updateSession } from '../operations/updateSession.js';
 
 describe('updateSession', () => {
   beforeEach(async () => {

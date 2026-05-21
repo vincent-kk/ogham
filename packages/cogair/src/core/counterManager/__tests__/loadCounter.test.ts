@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { COGAIR_HOME, COUNTER_PATH } from '../../../constants/paths.js';
-import { loadCounter } from '../loadCounter.js';
+import { loadCounter } from '../operations/loadCounter.js';
 
 async function writeCounterFile(content: string): Promise<void> {
   await mkdir(dirname(COUNTER_PATH), { recursive: true });

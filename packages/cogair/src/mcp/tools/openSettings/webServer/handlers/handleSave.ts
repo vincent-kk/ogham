@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { ConfigSchema } from '../../../../../types/index.js';
-import type { RouteContext } from '../routeContext.js';
+import type { RouteContext } from '../routing/routeContext.js';
 import { parseBody } from '../utils/parseBody.js';
 import { sendJson } from '../utils/sendJson.js';
 

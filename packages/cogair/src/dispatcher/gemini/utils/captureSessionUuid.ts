@@ -4,7 +4,7 @@ import {
   findLatestSession,
   parseListSessions,
 } from '../sessionResolver/index.js';
-import { spawnGemini } from '../spawn.js';
+import { spawnGemini } from '../operations/spawn.js';
 
 export async function captureSessionUuid(
   cwd: string,

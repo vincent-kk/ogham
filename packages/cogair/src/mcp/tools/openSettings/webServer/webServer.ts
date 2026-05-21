@@ -8,7 +8,7 @@ import {
 } from '../../../../core/configManager/index.js';
 import type { Config, SettingsServerHandle } from '../../../../types/index.js';
 
-import { createRouteHandler } from './routes.js';
+import { createRouteHandler } from './routing/routes.js';
 
 export interface StartSettingsServerOptions {
   settingsHtml: string;

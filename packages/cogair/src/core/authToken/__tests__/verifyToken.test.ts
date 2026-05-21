@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateToken } from '../generateToken.js';
-import { verifyToken } from '../verifyToken.js';
+import { generateToken } from '../operations/generateToken.js';
+import { verifyToken } from '../operations/verifyToken.js';
 
 describe('verifyToken', () => {
   it('accepts identical strings', () => {

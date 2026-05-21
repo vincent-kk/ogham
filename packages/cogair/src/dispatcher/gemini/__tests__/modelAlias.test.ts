@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { resolveGeminiModel } from '../modelAlias.js';
+import { resolveGeminiModel } from '../operations/modelAlias.js';
 
 const ENV_KEYS = [
   'COGAIR_GEMINI_HIGH',

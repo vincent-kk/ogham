@@ -4,15 +4,15 @@ import type {
   DispatchResult,
   DispatchResumeOptions,
   Dispatcher,
-} from '../../types/index.js';
-import { computeIgnoredOptions } from '../utils/computeIgnoredOptions.js';
+} from '../../../types/index.js';
+import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
+import { buildPromptArgs } from '../utils/buildPromptArgs.js';
+import { callGemini } from '../utils/callGemini.js';
+import { captureSessionUuid } from '../utils/captureSessionUuid.js';
+import { ensureCwd } from '../utils/ensureCwd.js';
+import { resolveResumeIndex } from '../utils/resolveResumeIndex.js';
 
 import { resolveGeminiModel } from './modelAlias.js';
-import { buildPromptArgs } from './utils/buildPromptArgs.js';
-import { callGemini } from './utils/callGemini.js';
-import { captureSessionUuid } from './utils/captureSessionUuid.js';
-import { ensureCwd } from './utils/ensureCwd.js';
-import { resolveResumeIndex } from './utils/resolveResumeIndex.js';
 
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 

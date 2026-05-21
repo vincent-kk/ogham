@@ -1,5 +1,5 @@
-import type { Counter } from '../../types/index.js';
-import { getParentPid } from '../../utils/parentPid.js';
+import type { Counter } from '../../../types/index.js';
+import { getParentPid } from '../../../utils/parentPid.js';
 
 import { loadCounter } from './loadCounter.js';
 

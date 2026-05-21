@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateToken } from '../generateToken.js';
+import { generateToken } from '../operations/generateToken.js';
 
 describe('generateToken', () => {
   it('returns 32 hex characters (16 bytes)', () => {

@@ -4,11 +4,10 @@ import type {
   DispatchResult,
   DispatchResumeOptions,
   Dispatcher,
-} from '../../types/index.js';
-
-import { buildResumeArgs } from './utils/buildResumeArgs.js';
-import { buildStartArgs } from './utils/buildStartArgs.js';
-import { dispatch } from './utils/dispatch.js';
+} from '../../../types/index.js';
+import { buildResumeArgs } from '../utils/buildResumeArgs.js';
+import { buildStartArgs } from '../utils/buildStartArgs.js';
+import { dispatch } from '../utils/dispatch.js';
 
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 

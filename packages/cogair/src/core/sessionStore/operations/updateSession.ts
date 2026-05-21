@@ -1,6 +1,6 @@
-import { sessionPath } from '../../constants/paths.js';
-import { atomicWrite } from '../../lib/atomicWrite.js';
-import { type SessionMeta, SessionMetaSchema } from '../../types/index.js';
+import { sessionPath } from '../../../constants/paths.js';
+import { atomicWrite } from '../../../lib/atomicWrite.js';
+import { type SessionMeta, SessionMetaSchema } from '../../../types/index.js';
 
 export async function updateSession(meta: SessionMeta): Promise<SessionMeta> {
   const validated = SessionMetaSchema.parse(meta);

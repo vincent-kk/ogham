@@ -5,10 +5,10 @@ import {
   SESSIONS_DIR,
   geminiCwdPath,
   sessionDir,
-} from '../../constants/paths.js';
-import { logger } from '../../lib/logger.js';
-import { SessionMetaSchema } from '../../types/index.js';
-import { isFileNotFound } from '../../utils/isFileNotFound.js';
+} from '../../../constants/paths.js';
+import { logger } from '../../../lib/logger.js';
+import { SessionMetaSchema } from '../../../types/index.js';
+import { isFileNotFound } from '../../../utils/isFileNotFound.js';
 
 export async function pruneExpired(ttlHours: number): Promise<number> {
   let projectHashes: string[];

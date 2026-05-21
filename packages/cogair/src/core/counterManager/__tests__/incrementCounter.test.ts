@@ -3,7 +3,7 @@ import { readFile, rm } from 'node:fs/promises';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { COGAIR_HOME, COUNTER_PATH } from '../../../constants/paths.js';
-import { incrementCounter } from '../incrementCounter.js';
+import { incrementCounter } from '../operations/incrementCounter.js';
 
 const { ppidRef } = vi.hoisted(() => ({
   ppidRef: { value: 0 },

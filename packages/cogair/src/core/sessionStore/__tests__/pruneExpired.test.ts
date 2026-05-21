@@ -9,9 +9,9 @@ import {
   sessionDir,
   sessionPath,
 } from '../../../constants/paths.js';
-import { createSession } from '../createSession.js';
-import { pruneExpired } from '../pruneExpired.js';
-import { updateSession } from '../updateSession.js';
+import { createSession } from '../operations/createSession.js';
+import { pruneExpired } from '../operations/pruneExpired.js';
+import { updateSession } from '../operations/updateSession.js';
 
 async function pathExists(p: string): Promise<boolean> {
   try {

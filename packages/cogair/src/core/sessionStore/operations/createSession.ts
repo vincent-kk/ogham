@@ -1,16 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
-import { sessionPath } from '../../constants/paths.js';
-import { atomicWrite } from '../../lib/atomicWrite.js';
+import { sessionPath } from '../../../constants/paths.js';
+import { atomicWrite } from '../../../lib/atomicWrite.js';
 import {
   type Provider,
   type SessionMeta,
   SessionMetaSchema,
-} from '../../types/index.js';
-import { isoNow } from '../../utils/isoNow.js';
-import { getProjectHash } from '../projectHash/index.js';
-
-import { ensureProjectMeta } from './utils/ensureProjectMeta.js';
+} from '../../../types/index.js';
+import { isoNow } from '../../../utils/isoNow.js';
+import { getProjectHash } from '../../projectHash/index.js';
+import { ensureProjectMeta } from '../utils/ensureProjectMeta.js';
 
 export interface CreateSessionInput {
   sessionId?: string;

@@ -1,5 +1,5 @@
 import type { DispatchOptions } from '../../../types/index.js';
-import { resolveCodexModel } from '../modelAlias.js';
+import { resolveCodexModel } from '../operations/modelAlias.js';
 
 export function buildStartArgs(args: DispatchOptions): string[] {
   const argv = [

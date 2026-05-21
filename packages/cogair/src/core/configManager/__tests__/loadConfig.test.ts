@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { COGAIR_HOME, CONFIG_PATH } from '../../../constants/paths.js';
-import { loadConfig } from '../loadConfig.js';
+import { loadConfig } from '../operations/loadConfig.js';
 
 async function writeConfigFile(content: string): Promise<void> {
   await mkdir(dirname(CONFIG_PATH), { recursive: true });

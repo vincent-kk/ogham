@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { resolveCodexModel } from '../modelAlias.js';
+import { resolveCodexModel } from '../operations/modelAlias.js';
 
 const ENV_KEYS = [
   'COGAIR_CODEX_HIGH',

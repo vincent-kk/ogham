@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 
-import { sessionPath } from '../../constants/paths.js';
-import { logger } from '../../lib/logger.js';
-import { type SessionMeta, SessionMetaSchema } from '../../types/index.js';
-import { isFileNotFound } from '../../utils/isFileNotFound.js';
+import { sessionPath } from '../../../constants/paths.js';
+import { logger } from '../../../lib/logger.js';
+import { type SessionMeta, SessionMetaSchema } from '../../../types/index.js';
+import { isFileNotFound } from '../../../utils/isFileNotFound.js';
 
 export async function getSession(
   projectHash: string,

@@ -5,7 +5,7 @@ import type {
 import { mapError } from '../../errorMap/index.js';
 import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
 import { parseCodexStream } from '../jsonlParser/index.js';
-import { spawnCodex } from '../spawn.js';
+import { spawnCodex } from '../operations/spawn.js';
 
 export interface DispatchInternal {
   argv: string[];

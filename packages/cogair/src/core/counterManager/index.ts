@@ -1,3 +1,3 @@
-export { getCounter } from './getCounter.js';
-export { incrementCounter } from './incrementCounter.js';
-export { loadCounter } from './loadCounter.js';
+export { getCounter } from './operations/getCounter.js';
+export { incrementCounter } from './operations/incrementCounter.js';
+export { loadCounter } from './operations/loadCounter.js';

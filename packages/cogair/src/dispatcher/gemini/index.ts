@@ -1,1 +1,1 @@
-export { geminiDispatcher } from './geminiDispatcher.js';
+export { geminiDispatcher } from './operations/geminiDispatcher.js';

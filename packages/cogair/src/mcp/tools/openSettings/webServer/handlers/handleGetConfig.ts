@@ -1,6 +1,6 @@
 import type { ServerResponse } from 'node:http';
 
-import type { RouteContext } from '../routeContext.js';
+import type { RouteContext } from '../routing/routeContext.js';
 import { sendJson } from '../utils/sendJson.js';
 
 export async function handleGetConfig(

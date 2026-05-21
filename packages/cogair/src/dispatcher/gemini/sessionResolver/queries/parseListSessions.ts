@@ -1,4 +1,4 @@
-import { ENTRY_PATTERN } from './constants/entryPattern.js';
+import { ENTRY_PATTERN } from '../constants/entryPattern.js';
 
 export interface GeminiSessionEntry {
   index: number;

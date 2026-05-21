@@ -1,5 +1,5 @@
 import type { DispatchResumeOptions } from '../../../types/index.js';
-import { resolveCodexModel } from '../modelAlias.js';
+import { resolveCodexModel } from '../operations/modelAlias.js';
 
 export function buildResumeArgs(args: DispatchResumeOptions): string[] {
   const argv = ['exec', 'resume'];

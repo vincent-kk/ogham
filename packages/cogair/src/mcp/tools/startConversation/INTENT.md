@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File         | Role                                                               |
-| ------------ | ------------------------------------------------------------------ |
+| File                   | Role                                                               |
+| ---------------------- | ------------------------------------------------------------------ |
 | `startConversation.ts` | `handleStartConversation` — 입력 → dispatch → 세션 기록 → envelope |
-| `index.ts`   | barrel                                                             |
+| `index.ts`             | barrel                                                             |
 
 ## Conventions
 

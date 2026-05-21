@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { COGAIR_HOME, COUNTER_PATH } from '../../../constants/paths.js';
-import { getCounter } from '../getCounter.js';
+import { getCounter } from '../operations/getCounter.js';
 
 const { ppidRef } = vi.hoisted(() => ({
   ppidRef: { value: 0 },

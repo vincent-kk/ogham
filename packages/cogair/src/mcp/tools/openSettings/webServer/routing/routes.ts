@@ -1,13 +1,13 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { verifyToken } from '../../../../core/authToken/index.js';
+import { verifyToken } from '../../../../../core/authToken/index.js';
+import { handleClose } from '../handlers/handleClose.js';
+import { handleGetConfig } from '../handlers/handleGetConfig.js';
+import { handleGetRoot } from '../handlers/handleGetRoot.js';
+import { handleSave } from '../handlers/handleSave.js';
+import { sendJson } from '../utils/sendJson.js';
 
-import { handleClose } from './handlers/handleClose.js';
-import { handleGetConfig } from './handlers/handleGetConfig.js';
-import { handleGetRoot } from './handlers/handleGetRoot.js';
-import { handleSave } from './handlers/handleSave.js';
 import type { RouteContext } from './routeContext.js';
-import { sendJson } from './utils/sendJson.js';
 
 export function createRouteHandler(
   ctx: RouteContext,

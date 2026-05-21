@@ -1,2 +1,2 @@
-export { loadConfig } from './loadConfig.js';
-export { saveConfig } from './saveConfig.js';
+export { loadConfig } from './operations/loadConfig.js';
+export { saveConfig } from './operations/saveConfig.js';

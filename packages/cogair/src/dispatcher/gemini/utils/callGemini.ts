@@ -1,6 +1,6 @@
 import type { ConversationError } from '../../../types/index.js';
 import { mapError } from '../../errorMap/index.js';
-import { spawnGemini } from '../spawn.js';
+import { spawnGemini } from '../operations/spawn.js';
 
 import { normalizeResponse } from './normalizeResponse.js';
 

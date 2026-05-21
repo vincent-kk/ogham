@@ -1,1 +1,1 @@
-export { codexDispatcher } from './codexDispatcher.js';
+export { codexDispatcher } from './operations/codexDispatcher.js';

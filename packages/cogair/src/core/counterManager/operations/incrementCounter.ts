@@ -1,6 +1,6 @@
-import { COUNTER_PATH } from '../../constants/paths.js';
-import { atomicWrite } from '../../lib/atomicWrite.js';
-import type { Counter, Provider } from '../../types/index.js';
+import { COUNTER_PATH } from '../../../constants/paths.js';
+import { atomicWrite } from '../../../lib/atomicWrite.js';
+import type { Counter, Provider } from '../../../types/index.js';
 
 import { getCounter } from './getCounter.js';
 

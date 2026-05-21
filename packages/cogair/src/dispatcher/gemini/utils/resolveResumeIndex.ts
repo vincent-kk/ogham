@@ -4,7 +4,7 @@ import {
   findSessionByUuid,
   parseListSessions,
 } from '../sessionResolver/index.js';
-import { spawnGemini } from '../spawn.js';
+import { spawnGemini } from '../operations/spawn.js';
 
 export async function resolveResumeIndex(
   cwd: string,

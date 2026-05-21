@@ -1,12 +1,11 @@
 import { readFile } from 'node:fs/promises';
 
-import { DEFAULT_CONFIG } from '../../constants/defaults.js';
-import { CONFIG_PATH } from '../../constants/paths.js';
-import { logger } from '../../lib/logger.js';
-import { type Config, ConfigSchema } from '../../types/index.js';
-import { isFileNotFound } from '../../utils/isFileNotFound.js';
-
-import { mergeWithDefaults } from './utils/mergeWithDefaults.js';
+import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
+import { CONFIG_PATH } from '../../../constants/paths.js';
+import { logger } from '../../../lib/logger.js';
+import { type Config, ConfigSchema } from '../../../types/index.js';
+import { isFileNotFound } from '../../../utils/isFileNotFound.js';
+import { mergeWithDefaults } from '../utils/mergeWithDefaults.js';
 
 export async function loadConfig(): Promise<Config> {
   let raw: unknown;

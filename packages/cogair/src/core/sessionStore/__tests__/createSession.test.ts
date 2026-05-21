@@ -8,7 +8,7 @@ import {
   sessionPath,
 } from '../../../constants/paths.js';
 import { getProjectHash } from '../../projectHash/index.js';
-import { createSession } from '../createSession.js';
+import { createSession } from '../operations/createSession.js';
 
 describe('createSession', () => {
   beforeEach(async () => {

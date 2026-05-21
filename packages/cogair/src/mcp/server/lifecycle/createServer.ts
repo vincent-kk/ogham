@@ -5,12 +5,12 @@ import {
   ConversationOptionsSchema,
   ModelAliasSchema,
   ProviderSchema,
-} from '../../types/conversation.js';
-import { VERSION } from '../../version.js';
-import { wrapHandler } from '../shared/index.js';
-import { handleContinueConversation } from '../tools/continueConversation/index.js';
-import { handleOpenSettings } from '../tools/openSettings/index.js';
-import { handleStartConversation } from '../tools/startConversation/index.js';
+} from '../../../types/conversation.js';
+import { VERSION } from '../../../version.js';
+import { wrapHandler } from '../../shared/index.js';
+import { handleContinueConversation } from '../../tools/continueConversation/index.js';
+import { handleOpenSettings } from '../../tools/openSettings/index.js';
+import { handleStartConversation } from '../../tools/startConversation/index.js';
 
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'tools', version: VERSION });
