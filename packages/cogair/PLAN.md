@@ -126,10 +126,10 @@ Claude Code 플러그인. Gemini CLI / Codex CLI 를 Claude 가 자율 위임으
 
 ## Phase 8 — Polish + release
 
-- [ ] `README.md`, `README-ko_kr.md`
-- [ ] `CLAUDE.md` (filid 패턴, 1-layer 구조 명세)
-- [ ] 루트 `CLAUDE.md` 의 패키지 목록에 cogair 추가
-- [ ] Changeset 생성, version `0.1.0` 릴리즈 후보
+- [x] `README.md`, `README-ko_kr.md`
+- [x] `CLAUDE.md` (filid 패턴, 1-layer 구조 명세)
+- [x] 루트 `CLAUDE.md` 의 패키지 목록에 cogair 추가
+- [x] Changeset 생성, version `0.1.0` 릴리즈 후보 (`.changeset/cogair-initial-release.md`, `yarn changeset status` 확인 통과)
 
 ## v1 비범위 (의도적)
 
