@@ -6,7 +6,7 @@
 
 | File                | Role                                                      |
 | ------------------- | --------------------------------------------------------- |
-| `getProjectHash.ts` | `sha256(cwd).digest('hex').slice(0, 12)` 반환 — 순수 함수 |
+| `projectHash.ts`    | `sha256(cwd).digest('hex').slice(0, 12)` 반환 — 순수 함수 |
 | `index.ts`          | barrel — `getProjectHash` re-export                       |
 
 ## Conventions

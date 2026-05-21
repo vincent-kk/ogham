@@ -6,7 +6,7 @@
 
 | File         | Role                                                               |
 | ------------ | ------------------------------------------------------------------ |
-| `handler.ts` | `handleStartConversation` — 입력 → dispatch → 세션 기록 → envelope |
+| `startConversation.ts` | `handleStartConversation` — 입력 → dispatch → 세션 기록 → envelope |
 | `index.ts`   | barrel                                                             |
 
 ## Conventions

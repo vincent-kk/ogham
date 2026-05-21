@@ -6,7 +6,7 @@
 
 | Path                            | Role                                                                                   |
 | ------------------------------- | -------------------------------------------------------------------------------------- |
-| `handler.ts`                    | `handleOpenSettings` — 활성 서버 재사용 또는 신규 기동 + `settings_server.json` 영속화 |
+| `openSettings.ts`               | `handleOpenSettings` — 활성 서버 재사용 또는 신규 기동 + `settings_server.json` 영속화 |
 | `__generated__/settingsHtml.ts` | `scripts/buildSettingsHtml.mjs` 가 inline 한 단일 HTML 문자열                          |
 | `utils/openBrowser.ts`          | OS 별 기본 브라우저 best-effort 오픈                                                   |
 | `webServer/`                    | HTTP 서버, 라우트, 핸들러, token / CSRF 가드                                           |

@@ -6,7 +6,7 @@
 
 | File         | Role                                                                      |
 | ------------ | ------------------------------------------------------------------------- |
-| `handler.ts` | `handleContinueConversation` — project_hash 검증 → resume → 메타 업데이트 |
+| `continueConversation.ts` | `handleContinueConversation` — project_hash 검증 → resume → 메타 업데이트 |
 | `index.ts`   | barrel                                                                    |
 
 ## Conventions

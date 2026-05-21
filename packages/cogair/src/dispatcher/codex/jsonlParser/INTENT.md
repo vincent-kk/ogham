@@ -7,7 +7,7 @@ codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해
 
 | Path                      | Role                                                           |
 | ------------------------- | -------------------------------------------------------------- |
-| `parseCodexStream.ts`     | 메인 — 라인 split, JSON parse, 이벤트 종류별 분기              |
+| `jsonlParser.ts`          | 메인 — 라인 split, JSON parse, 이벤트 종류별 분기              |
 | `utils/findThreadId.ts`   | `thread.started` / `session_id` 변종 모두 허용해 threadId 추출 |
 | `utils/readObject.ts`     | 안전한 nested object 필드 access                               |
 | `utils/readString.ts`     | 안전한 string 필드 access                                      |
