@@ -4,16 +4,17 @@
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `types/` | Zod 스키마 + TypeScript 타입 |
-| `constants/` | 경로·기본값·에러 코드 organ |
-| `core/` | config / counter / session / project hash / auth token |
-| `dispatcher/` | codex-cli / gemini-cli 호출 본체 |
-| `mcp/` | MCP 서버 + 3 도구 핸들러 + settings web UI |
-| `hooks/` | SessionStart / UserPromptSubmit 훅 구현체 (esbuild 입력) |
-| `lib/` | atomic write, logger organ |
-| `utils/` | parent-pid, iso-now organ |
+| Directory        | Role                                                      |
+| ---------------- | --------------------------------------------------------- |
+| `types/`         | Zod 스키마 + TypeScript 타입                              |
+| `constants/`     | 경로·기본값·에러 코드 organ                               |
+| `core/`          | config / counter / session / project hash / auth token    |
+| `dispatcher/`    | codex-cli / gemini-cli 호출 본체                          |
+| `mcp/`           | MCP 서버 + 3 도구 핸들러 + settings web UI                |
+| `hooks/`         | SessionStart / UserPromptSubmit 훅 구현체 (esbuild 입력)  |
+| `lib/`           | atomic write, logger organ                                |
+| `utils/`         | parent-pid, iso-now organ                                 |
+| `__tests__/e2e/` | E2E 회귀 스위트 (Layer A in-process + Layer B 번들 stdio) |
 
 ## Conventions
 

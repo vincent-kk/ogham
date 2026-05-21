@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
  * surface the URL via stdout.
  */
 export function openBrowser(url: string): void {
+  if (process.env.COGAIR_DISABLE_BROWSER) return;
   const cmd =
     process.platform === 'darwin'
       ? 'open'

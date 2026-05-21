@@ -1,0 +1,11 @@
+{
+  "ratio": { "gemini": 3, "codex": 7 },
+  "intervention_strength": 0,
+  "keywords": {
+    "gemini": "research, search, youtube, large-context",
+    "codex": "code, refactor, sandbox"
+  },
+  "default_model": "auto",
+  "default_options": {},
+  "session_ttl_hours": 72
+}

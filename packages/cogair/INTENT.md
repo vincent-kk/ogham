@@ -21,6 +21,7 @@
 - 빌드 파이프라인은 filid 패턴 — `version:sync → settingsHtml → tsc → mcpServer → hooks`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `gemini`)
 - Agent 없음
+- E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `COGAIR_E2E_REAL_CLI=1` 일 때만 real CLI
 
 ## Boundaries
 
