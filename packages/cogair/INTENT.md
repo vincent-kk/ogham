@@ -14,7 +14,6 @@
 | `bridge/`                    | esbuild 산출물 (gitignored)                   |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트               |
 | `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                 |
-| `PLAN.md`                    | 단계별 개발 체크리스트 + 스펙 링크            |
 
 ## Conventions
 
@@ -27,7 +26,6 @@
 
 ### Always do
 
-- `PLAN.md` 의 체크박스를 단계 종료 시 갱신
 - 모든 디스크 경로는 `~/.claude/plugins/cogair/` 하위
 
 ### Ask first
