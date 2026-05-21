@@ -17,6 +17,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
     default_options: {
       ...DEFAULT_CONFIG.default_options,
       ...(isPlainObject(raw.default_options) ? raw.default_options : {}),
+      multi_agent: false,
     },
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,

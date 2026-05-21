@@ -11,7 +11,7 @@ export const DEFAULT_CONFIG: Config = {
     codex: 'code, refactor, sandbox',
   },
   default_model: 'auto',
-  default_options: {},
+  default_options: { multi_agent: false },
   session_ttl_hours: 72,
 };
 

@@ -34,11 +34,28 @@ describe('loadConfig', () => {
       intervention_strength: 1,
       keywords: { gemini: 'g', codex: 'c' },
       default_model: 'high',
-      default_options: { multi_agent: true },
+      default_options: { multi_agent: false },
       session_ttl_hours: 24,
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
+  });
+
+  it('forces multi_agent to false even when stored as true', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: { gemini: 'g', codex: 'c' },
+      default_model: 'auto',
+      default_options: { multi_agent: true },
+      session_ttl_hours: 72,
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.default_options.multi_agent).toBe(false);
   });
 
   it('migrates legacy integer ratio with one provider disabled', async () => {

@@ -16,9 +16,9 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
-  it('defaults to auto model and empty options', () => {
+  it('defaults to auto model and multi_agent disabled', () => {
     expect(DEFAULT_CONFIG.default_model).toBe('auto');
-    expect(DEFAULT_CONFIG.default_options).toEqual({});
+    expect(DEFAULT_CONFIG.default_options).toEqual({ multi_agent: false });
   });
 
   it('defaults session TTL to 72 hours', () => {

@@ -144,9 +144,7 @@
     kwGemini.value = cfg.keywords.gemini;
     kwCodex.value = cfg.keywords.codex;
     ttl.value = cfg.session_ttl_hours;
-    multiAgent.checked = Boolean(
-      cfg.default_options && cfg.default_options.multi_agent,
-    );
+    multiAgent.checked = false;
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -175,7 +173,7 @@
         codex: kwCodex.value.trim(),
       },
       default_model: modelEl ? modelEl.value : 'auto',
-      default_options: { multi_agent: multiAgent.checked },
+      default_options: { multi_agent: false },
       session_ttl_hours: Math.max(
         1,
         Math.min(720, Math.floor(Number(ttl.value) || 72)),
