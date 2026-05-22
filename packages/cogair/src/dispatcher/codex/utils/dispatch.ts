@@ -13,6 +13,7 @@ export interface DispatchInternal {
   options: ConversationOptions;
   existingRef: string | null;
   supportedOptions: ReadonlySet<keyof ConversationOptions>;
+  spawnTimeoutMs: number;
 }
 
 export async function dispatch(
@@ -22,7 +23,10 @@ export async function dispatch(
     input.options,
     input.supportedOptions,
   );
-  const spawnResult = await spawnCodex(input.argv, { cwd: input.cwd });
+  const spawnResult = await spawnCodex(input.argv, {
+    cwd: input.cwd,
+    timeoutMs: input.spawnTimeoutMs,
+  });
   const parsed = parseCodexStream(spawnResult.stdout);
   const resolvedRef = input.existingRef ?? parsed.threadId ?? '';
   const failed = spawnResult.spawnError !== null || spawnResult.exitCode !== 0;

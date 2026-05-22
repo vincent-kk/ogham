@@ -39,6 +39,7 @@ describe('loadConfig', () => {
         codex: { yolo: false, sandbox: 'workspace-write' },
       },
       session_ttl_hours: 24,
+      spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },
     };
     await writeConfigFile(JSON.stringify(stored));

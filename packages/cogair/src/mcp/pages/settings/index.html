@@ -317,6 +317,25 @@
         </section>
 
         <section class="section">
+          <h2 class="section-title">CLI spawn timeout</h2>
+          <p class="section-help">
+            Hard timeout (ms) for each codex / gemini CLI invocation. Hung
+            processes are killed and surface as
+            <code>error.code: network</code>.
+          </p>
+          <label class="field">
+            <span>ms (1000–1800000)</span>
+            <input
+              id="spawn-timeout-ms"
+              type="number"
+              min="1000"
+              max="1800000"
+              step="1000"
+            />
+          </label>
+        </section>
+
+        <section class="section">
           <h2 class="section-title">Artifacts</h2>
           <p class="section-help">
             Mirror successful responses to disk as markdown files with YAML

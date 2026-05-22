@@ -9,8 +9,9 @@ import {
 export async function resolveResumeIndex(
   cwd: string,
   uuid: string,
+  timeoutMs: number,
 ): Promise<{ index: number | null; error: ConversationError | null }> {
-  const result = await spawnGemini(['--list-sessions'], { cwd });
+  const result = await spawnGemini(['--list-sessions'], { cwd, timeoutMs });
   if (result.spawnError !== null || result.exitCode !== 0) {
     return {
       index: null,

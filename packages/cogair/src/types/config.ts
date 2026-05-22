@@ -59,6 +59,7 @@ export const ConfigSchema = z.object({
   default_model: ModelAliasSchema,
   option_flags: OptionFlagsSchema,
   session_ttl_hours: z.number().int().positive(),
+  spawn_timeout_ms: z.number().int().positive(),
   artifacts: ArtifactsConfigSchema,
 });
 

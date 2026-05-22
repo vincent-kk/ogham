@@ -30,7 +30,10 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
     const callResult = await callGemini(
       cwd,
       buildPromptArgs({ model, prompt: args.prompt, flags: args.flags }),
-      { sandboxBackend: args.flags.sandbox_backend },
+      {
+        sandboxBackend: args.flags.sandbox_backend,
+        timeoutMs: args.spawnTimeoutMs,
+      },
     );
     if (callResult.status === 'failure') {
       return {
@@ -43,7 +46,7 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
       };
     }
 
-    const capture = await captureSessionUuid(cwd);
+    const capture = await captureSessionUuid(cwd, args.spawnTimeoutMs);
     if (capture.uuid === null) {
       return {
         status: 'failure',
@@ -75,7 +78,11 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
     const cwd = await ensureCwd(args.sessionId);
     const model = resolveGeminiModel(args.model);
 
-    const resolved = await resolveResumeIndex(cwd, args.externalSessionRef);
+    const resolved = await resolveResumeIndex(
+      cwd,
+      args.externalSessionRef,
+      args.spawnTimeoutMs,
+    );
     if (resolved.index === null) {
       return {
         status: 'failure',
@@ -95,7 +102,10 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
         flags: args.flags,
         resumeIndex: resolved.index,
       }),
-      { sandboxBackend: args.flags.sandbox_backend },
+      {
+        sandboxBackend: args.flags.sandbox_backend,
+        timeoutMs: args.spawnTimeoutMs,
+      },
     );
     return {
       status: callResult.status,

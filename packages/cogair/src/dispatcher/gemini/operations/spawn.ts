@@ -13,6 +13,7 @@ export interface GeminiSpawnOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   sandboxBackend?: GeminiSandboxBackend;
+  timeoutMs?: number;
 }
 
 export function spawnGemini(
@@ -36,6 +37,14 @@ export function spawnGemini(
     });
     let stdout = '';
     let stderr = '';
+    let timedOut = false;
+    const timer =
+      typeof options.timeoutMs === 'number' && options.timeoutMs > 0
+        ? setTimeout(() => {
+            timedOut = true;
+            child.kill('SIGKILL');
+          }, options.timeoutMs)
+        : null;
     child.stdout.on('data', (chunk: Buffer) => {
       stdout += chunk.toString('utf8');
     });
@@ -43,6 +52,7 @@ export function spawnGemini(
       stderr += chunk.toString('utf8');
     });
     child.on('error', (err) => {
+      if (timer) clearTimeout(timer);
       resolve({
         exitCode: -1,
         stdout,
@@ -51,6 +61,15 @@ export function spawnGemini(
       });
     });
     child.on('close', (code) => {
+      if (timer) clearTimeout(timer);
+      if (timedOut) {
+        const err = new Error(
+          `gemini spawn timed out after ${options.timeoutMs}ms`,
+        ) as NodeJS.ErrnoException;
+        err.code = 'ETIMEDOUT';
+        resolve({ exitCode: -1, stdout, stderr, spawnError: err });
+        return;
+      }
       resolve({
         exitCode: code ?? 0,
         stdout,

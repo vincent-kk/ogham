@@ -16,6 +16,7 @@ export const DEFAULT_CONFIG: Config = {
     codex: { yolo: false, sandbox: 'workspace-write' },
   },
   session_ttl_hours: 72,
+  spawn_timeout_ms: 5 * 60 * 1000,
   artifacts: {
     enabled: false,
     location: 'project',

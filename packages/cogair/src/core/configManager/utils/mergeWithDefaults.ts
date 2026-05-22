@@ -19,6 +19,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
     option_flags: mergeOptionFlags(raw.option_flags),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
+    spawn_timeout_ms: raw.spawn_timeout_ms ?? DEFAULT_CONFIG.spawn_timeout_ms,
     artifacts: mergeArtifacts(raw.artifacts),
   };
 }

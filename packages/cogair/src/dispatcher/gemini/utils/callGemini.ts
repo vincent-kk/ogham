@@ -15,6 +15,7 @@ export interface PromptCallResult {
 
 export interface CallGeminiOptions {
   sandboxBackend?: GeminiSandboxBackend;
+  timeoutMs?: number;
 }
 
 export async function callGemini(
@@ -25,6 +26,7 @@ export async function callGemini(
   const result = await spawnGemini(argv, {
     cwd,
     sandboxBackend: options.sandboxBackend,
+    timeoutMs: options.timeoutMs,
   });
   if (result.spawnError !== null || result.exitCode !== 0) {
     return {

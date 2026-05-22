@@ -48,6 +48,7 @@
   var kwGemini = $('#kw-gemini');
   var kwCodex = $('#kw-codex');
   var ttl = $('#ttl');
+  var spawnTimeoutMs = $('#spawn-timeout-ms');
   var geminiYolo = $('#gemini-yolo');
   var geminiSandbox = $('#gemini-sandbox');
   var geminiBackendWrap = $('#gemini-backend-wrap');
@@ -278,6 +279,7 @@
     kwGemini.value = cfg.keywords.gemini;
     kwCodex.value = cfg.keywords.codex;
     ttl.value = cfg.session_ttl_hours;
+    spawnTimeoutMs.value = cfg.spawn_timeout_ms;
     applyOptionFlags(cfg.option_flags);
     applyArtifacts(cfg.artifacts);
     var radio = document.querySelector(
@@ -345,6 +347,13 @@
       session_ttl_hours: Math.max(
         1,
         Math.min(720, Math.floor(Number(ttl.value) || 72)),
+      ),
+      spawn_timeout_ms: Math.max(
+        1000,
+        Math.min(
+          1800000,
+          Math.floor(Number(spawnTimeoutMs.value) || 300000),
+        ),
       ),
       artifacts: buildArtifacts(),
     };

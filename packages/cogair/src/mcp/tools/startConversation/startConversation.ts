@@ -42,6 +42,7 @@ export async function handleStartConversation(
           sessionId,
           cwd,
           flags: config.option_flags.codex,
+          spawnTimeoutMs: config.spawn_timeout_ms,
         })
       : await dispatchers.gemini.start({
           prompt: input.prompt,
@@ -50,6 +51,7 @@ export async function handleStartConversation(
           sessionId,
           cwd,
           flags: config.option_flags.gemini,
+          spawnTimeoutMs: config.spawn_timeout_ms,
         });
 
   await createSession({

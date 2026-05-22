@@ -38,6 +38,7 @@ export interface DispatchOptions<F = unknown> {
   sessionId: string;
   cwd: string;
   flags: F;
+  spawnTimeoutMs: number;
 }
 
 export interface DispatchResumeOptions<F = unknown> extends DispatchOptions<F> {
