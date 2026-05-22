@@ -12,24 +12,26 @@ interface ConversationOptions {
 
 interface DispatchOptions {
   prompt: string;
-  model: 'high' | 'mid' | 'low' | 'auto';
-  options: ConversationOptions;       // 기본 {}
-  sessionId: string;                  // cogair UUID (메타 키)
+  model: "high" | "mid" | "low" | "auto";
+  options: ConversationOptions; // 기본 {}
+  sessionId: string; // cogair UUID (메타 키)
   cwd: string;
 }
 
 interface Dispatcher {
   readonly supportedOptions: ReadonlySet<keyof ConversationOptions>;
   start(args: DispatchOptions): Promise<DispatchResult>;
-  resume(args: DispatchOptions & { externalSessionRef: string }): Promise<DispatchResult>;
+  resume(
+    args: DispatchOptions & { externalSessionRef: string },
+  ): Promise<DispatchResult>;
 }
 
 interface DispatchResult {
-  status: 'success' | 'failure';
+  status: "success" | "failure";
   response: string | null;
-  error: ConversationResponse['error'];
-  externalSessionRef: string;         // 신규 또는 기존 — 항상 명시
-  ignoredOptions: string[];           // supportedOptions 에 없던 키들
+  error: ConversationResponse["error"];
+  externalSessionRef: string; // 신규 또는 기존 — 항상 명시
+  ignoredOptions: string[]; // supportedOptions 에 없던 키들
 }
 ```
 
@@ -39,10 +41,10 @@ interface DispatchResult {
 
 ```typescript
 // dispatcher/codex/index.ts
-const supportedOptions = new Set<keyof ConversationOptions>([]);   // 비어 있음
+const supportedOptions = new Set<keyof ConversationOptions>([]); // 비어 있음
 
 // dispatcher/gemini/index.ts
-const supportedOptions = new Set<keyof ConversationOptions>([]);   // 비어 있음
+const supportedOptions = new Set<keyof ConversationOptions>([]); // 비어 있음
 ```
 
 v1 에서는 양쪽 모두 비어 있다. 사용자가 `multi_agent: true` 를 보내도 dispatcher 가 `ignoredOptions = ['multi_agent']` 로 보고 + 정상 처리 진행. 후속 이슈에서 각 provider 의 실제 multi-agent 기능을 조사해 화이트리스트에 추가.
@@ -72,10 +74,14 @@ v1 에서는 양쪽 모두 비어 있다. 사용자가 `multi_agent: true` 를 �
 ```typescript
 function resolveCodexModel(alias: ModelAlias): string | null {
   switch (alias) {
-    case 'high': return process.env.COGAIR_CODEX_HIGH ?? null;
-    case 'mid':  return process.env.COGAIR_CODEX_MID  ?? null;
-    case 'low':  return process.env.COGAIR_CODEX_LOW  ?? null;
-    case 'auto': return null;
+    case "high":
+      return process.env.COGAIR_CODEX_HIGH ?? null;
+    case "mid":
+      return process.env.COGAIR_CODEX_MID ?? null;
+    case "low":
+      return process.env.COGAIR_CODEX_LOW ?? null;
+    case "auto":
+      return null;
   }
 }
 // null → -m 플래그 자체 생략 (codex-cli 기본값). env 미설정 시 모든 tier 가 default 로 fallback.
@@ -106,10 +112,14 @@ function resolveCodexModel(alias: ModelAlias): string | null {
 ```typescript
 function resolveGeminiModel(alias: ModelAlias): string | null {
   switch (alias) {
-    case 'high': return process.env.COGAIR_GEMINI_HIGH ?? 'pro';
-    case 'mid':  return process.env.COGAIR_GEMINI_MID  ?? 'flash';
-    case 'low':  return process.env.COGAIR_GEMINI_LOW  ?? 'flash-lite';
-    case 'auto': return null;
+    case "high":
+      return process.env.COGAIR_GEMINI_HIGH ?? "pro";
+    case "mid":
+      return process.env.COGAIR_GEMINI_MID ?? "flash";
+    case "low":
+      return process.env.COGAIR_GEMINI_LOW ?? "flash-lite";
+    case "auto":
+      return null;
   }
 }
 // gemini-cli 가 인식하는 short alias (pro / flash / flash-lite) 를 그대로 전달. 'auto' → -m 생략.
@@ -120,12 +130,12 @@ function resolveGeminiModel(alias: ModelAlias): string | null {
 ```typescript
 function buildResponse(args: {
   sessionId: string;
-  provider: 'gemini' | 'codex';
+  provider: "gemini" | "codex";
   result: DispatchResult;
   turn: number;
   createdAt: string;
-  startedAt: number;       // performance.now()
-}): ConversationResponse
+  startedAt: number; // performance.now()
+}): ConversationResponse;
 ```
 
 - `elapsed_ms` = `Math.round(performance.now() - startedAt)`.
@@ -134,17 +144,17 @@ function buildResponse(args: {
 
 ## Error mapping — `dispatcher/errorMap.ts`
 
-| 신호 | code |
-|---|---|
-| exit 127 / `ENOENT` | `cli_error` (CLI not on PATH) |
-| exit 42 (codex bad args) | `cli_error` |
-| exit 53 (gemini turn limit on resume) | `budget_exhausted`. cogair 매핑 삭제. 외부 CLI 자체 세션 파일은 손대지 않음. |
-| exit 55 (gemini untrusted workspace) | `auth` |
-| exit 73 (lock busy) | `cli_error` |
-| HTTP 401 / 403 in stderr | `auth` |
-| HTTP 429 in stderr | `rate_limit` |
-| `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network` |
-| 그 외 | `unknown` |
+| 신호                                   | code                                                                         |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| exit 127 / `ENOENT`                    | `cli_error` (CLI not on PATH)                                                |
+| exit 42 (codex bad args)               | `cli_error`                                                                  |
+| exit 53 (gemini turn limit on resume)  | `budget_exhausted`. cogair 매핑 삭제. 외부 CLI 자체 세션 파일은 손대지 않음. |
+| exit 55 (gemini untrusted workspace)   | `auth`                                                                       |
+| exit 73 (lock busy)                    | `cli_error`                                                                  |
+| HTTP 401 / 403 in stderr               | `auth`                                                                       |
+| HTTP 429 in stderr                     | `rate_limit`                                                                 |
+| `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network`                                                                    |
+| 그 외                                  | `unknown`                                                                    |
 
 ## 동시성
 

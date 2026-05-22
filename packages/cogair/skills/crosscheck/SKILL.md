@@ -69,7 +69,7 @@ never produced a session, surface only the surviving provider's
 For each provider independently:
 
 - `auth` → tell the user to run `codex login` / `gemini auth login`
-  for the failing side.
+  for each failing provider.
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause or
   invoking only the surviving provider via `/cogair:<provider>`.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
@@ -81,10 +81,13 @@ For each provider independently:
   Do NOT abort. The user still gets value from the single response.
   Use the partial-failure template below.
 - If **both** providers fail → surface both errors and skip synthesis.
-  Apply the per-code remedies above to each provider independently before
-  the user retries.
+  Relay the per-code remedy message (from the Failure dispatch above) for
+  each failing provider independently before the user retries.
 
 ### Partial-failure template
+
+Substitute the actual provider name (`Codex` or `Gemini`) for each
+`<SurvivingProvider>` / `<FailedProvider>` placeholder.
 
 ```
 ## <SurvivingProvider> response
