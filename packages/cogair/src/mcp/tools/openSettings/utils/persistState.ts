@@ -12,7 +12,6 @@ export async function persistState(
     `${JSON.stringify(
       {
         url: handle.url,
-        token: handle.token,
         port: handle.port,
         pid: process.pid,
         started_at: now,

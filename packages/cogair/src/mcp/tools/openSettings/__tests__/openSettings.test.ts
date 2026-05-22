@@ -50,13 +50,13 @@ describe('handleOpenSettings', () => {
     const state = JSON.parse(stateText) as {
       url: string;
       pid: number;
-      token: string;
       port: number;
+      token?: string;
     };
     expect(state.url).toBe(first.url);
     expect(state.pid).toBe(process.pid);
-    expect(state.token).toHaveLength(32);
     expect(state.port).toBeGreaterThan(0);
+    expect(state.token).toBeUndefined();
 
     await closeViaHttp(first.url);
     await expect(readFile(SETTINGS_SERVER_PATH, 'utf8')).rejects.toThrow();
