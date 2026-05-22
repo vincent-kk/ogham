@@ -1,10 +1,14 @@
 import { performance } from 'node:perf_hooks';
 
+import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { getProjectHash } from '../../../core/projectHash/index.js';
 import { getSession, updateSession } from '../../../core/sessionStore/index.js';
 import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
-import type { ConversationResponse } from '../../../types/index.js';
+import type {
+  ConversationResponse,
+  DispatchResult,
+} from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 
 export interface ContinueConversationInput {
@@ -41,14 +45,27 @@ export async function handleContinueConversation(
 
   await incrementCounter(session.provider);
 
-  const result = await dispatchers[session.provider].resume({
-    prompt: input.prompt,
-    model: 'auto',
-    options: {},
-    sessionId: session.session_id,
-    cwd: session.cwd,
-    externalSessionRef: session.external_session_ref,
-  });
+  const config = await loadConfig();
+  const result: DispatchResult =
+    session.provider === 'codex'
+      ? await dispatchers.codex.resume({
+          prompt: input.prompt,
+          model: 'auto',
+          options: {},
+          sessionId: session.session_id,
+          cwd: session.cwd,
+          externalSessionRef: session.external_session_ref,
+          flags: config.option_flags.codex,
+        })
+      : await dispatchers.gemini.resume({
+          prompt: input.prompt,
+          model: 'auto',
+          options: {},
+          sessionId: session.session_id,
+          cwd: session.cwd,
+          externalSessionRef: session.external_session_ref,
+          flags: config.option_flags.gemini,
+        });
 
   const nextTurn = session.turn_count + 1;
   await updateSession({

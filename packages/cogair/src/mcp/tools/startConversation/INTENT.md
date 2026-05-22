@@ -15,7 +15,8 @@
 - 외부 CLI 실패 시에도 `session_id` 디스크 기록 유지 (스펙)
 - `provider` 카운터는 시도 기준으로 +1 (성공/실패 무관)
 - model 미지정 → `config.default_model` 적용 (기본 `auto`)
-- options 미지정 → `config.default_options` 적용 (기본 `{ multi_agent: false }`; `multi_agent` 는 v1 미지원이라 항상 false 로 강제됨)
+- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 MCP input 미노출 — `config.option_flags[provider]` 에서만 결정
+- dispatcher 에 `options` 는 항상 `{}` 로 전달 (MCP-facing layer 분리)
 
 ## Boundaries
 

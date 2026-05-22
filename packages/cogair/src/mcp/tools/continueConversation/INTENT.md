@@ -14,7 +14,8 @@
 - 입력 키 `snake_case`
 - 현재 `process.cwd()` 의 `project_hash` 와 일치하지 않으면 `error.code='unknown'` 반환 (fallback 검색 금지)
 - `provider` 카운터는 시도 기준 +1
-- model / options 는 dispatcher.resume 으로 전달 — model='auto' 기본 (원 세션의 모델 유지)
+- model='auto' 기본 (원 세션의 모델 유지); dispatcher 에 `options` 는 항상 `{}` 전달
+- 권한 플래그는 매 호출 시 현재 `config.option_flags[provider]` 를 다시 읽어 `DispatchOptions.flags` 로 주입
 
 ## Boundaries
 

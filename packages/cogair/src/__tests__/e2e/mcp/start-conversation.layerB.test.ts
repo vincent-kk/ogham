@@ -93,20 +93,20 @@ describe('start_conversation (Layer B)', () => {
     expect(session?.external_session_ref).toBe('tid-layerB-codex');
   });
 
-  it('meta.ignored_options records unsupported keys', async () => {
+  it('meta.ignored_options stays empty — MCP input strips unknown option keys (e.g., permission flags) at the schema boundary', async () => {
     handle = await makeLayerBClient({ env: geminiEnv('success') });
     const result = await handle.client.callTool({
       name: 'start_conversation',
       arguments: {
         provider: 'gemini',
         prompt: 'hi',
-        options: { multi_agent: true },
-      },
+        options: { multi_agent: true, yolo: true, sandbox: 'read-only' },
+      } as Record<string, unknown>,
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'gemini',
       turn: 1,
     });
-    expect(parsed.meta.ignored_options).toContain('multi_agent');
+    expect(parsed.meta.ignored_options).toEqual([]);
   });
 });

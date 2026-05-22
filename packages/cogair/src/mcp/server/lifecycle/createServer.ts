@@ -2,7 +2,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import {
-  ConversationOptionsSchema,
   ModelAliasSchema,
   ProviderSchema,
 } from '../../../types/conversation.js';
@@ -23,7 +22,6 @@ export function createServer(): McpServer {
         provider: ProviderSchema,
         prompt: z.string().min(1),
         model: ModelAliasSchema.optional(),
-        options: ConversationOptionsSchema.optional(),
       },
       annotations: {
         readOnlyHint: false,

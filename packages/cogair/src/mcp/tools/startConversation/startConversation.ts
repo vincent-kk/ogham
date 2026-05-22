@@ -6,8 +6,8 @@ import { incrementCounter } from '../../../core/counterManager/index.js';
 import { createSession } from '../../../core/sessionStore/index.js';
 import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
 import type {
-  ConversationOptions,
   ConversationResponse,
+  DispatchResult,
   ModelAlias,
   Provider,
 } from '../../../types/index.js';
@@ -17,7 +17,6 @@ export interface StartConversationInput {
   provider: Provider;
   prompt: string;
   model?: ModelAlias;
-  options?: ConversationOptions;
 }
 
 export async function handleStartConversation(
@@ -28,17 +27,28 @@ export async function handleStartConversation(
   const sessionId = randomUUID();
   const cwd = process.cwd();
   const model: ModelAlias = input.model ?? config.default_model;
-  const options: ConversationOptions = input.options ?? config.default_options;
+  const options = {};
 
   await incrementCounter(input.provider);
 
-  const result = await dispatchers[input.provider].start({
-    prompt: input.prompt,
-    model,
-    options,
-    sessionId,
-    cwd,
-  });
+  const result: DispatchResult =
+    input.provider === 'codex'
+      ? await dispatchers.codex.start({
+          prompt: input.prompt,
+          model,
+          options,
+          sessionId,
+          cwd,
+          flags: config.option_flags.codex,
+        })
+      : await dispatchers.gemini.start({
+          prompt: input.prompt,
+          model,
+          options,
+          sessionId,
+          cwd,
+          flags: config.option_flags.gemini,
+        });
 
   await createSession({
     sessionId,
