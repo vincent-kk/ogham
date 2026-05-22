@@ -8,12 +8,14 @@ import {
   it,
 } from 'vitest';
 
-import type { DispatchOptions } from '../../../types/index.js';
+import type { CodexFlags, DispatchOptions } from '../../../types/index.js';
 import {
   installFakeBinary,
   prependToPath,
 } from '../../__tests__/fakeBinary.js';
 import { codexDispatcher } from '../index.js';
+
+const FLAGS_READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
 
 const FAKE_SCRIPT = `#!/usr/bin/env node
 const args = process.argv.slice(2);
@@ -66,13 +68,14 @@ beforeEach(() => {
   delete process.env.COGAIR_FAKE_CODEX_THREAD;
 });
 
-function baseOptions(): DispatchOptions {
+function baseOptions(): DispatchOptions<CodexFlags> {
   return {
     prompt: 'hello',
     model: 'auto',
     options: {},
     sessionId: 'cogair-session',
     cwd: process.cwd(),
+    flags: FLAGS_READ_ONLY,
   };
 }
 

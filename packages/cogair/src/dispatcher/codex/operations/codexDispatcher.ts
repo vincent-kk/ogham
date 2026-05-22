@@ -1,4 +1,5 @@
 import type {
+  CodexFlags,
   ConversationOptions,
   DispatchOptions,
   DispatchResult,
@@ -11,9 +12,9 @@ import { dispatch } from '../utils/dispatch.js';
 
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 
-export const codexDispatcher: Dispatcher = {
+export const codexDispatcher: Dispatcher<CodexFlags> = {
   supportedOptions,
-  async start(args: DispatchOptions): Promise<DispatchResult> {
+  async start(args: DispatchOptions<CodexFlags>): Promise<DispatchResult> {
     return dispatch({
       argv: buildStartArgs(args),
       cwd: args.cwd,
@@ -22,7 +23,9 @@ export const codexDispatcher: Dispatcher = {
       supportedOptions,
     });
   },
-  async resume(args: DispatchResumeOptions): Promise<DispatchResult> {
+  async resume(
+    args: DispatchResumeOptions<CodexFlags>,
+  ): Promise<DispatchResult> {
     return dispatch({
       argv: buildResumeArgs(args),
       cwd: args.cwd,
