@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 
 import { isPlainObject } from './isPlainObject.js';
+import { mergeArtifacts } from './mergeArtifacts.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
@@ -18,5 +19,6 @@ export function mergeWithDefaults(raw: unknown): unknown {
     option_flags: mergeOptionFlags(raw.option_flags),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
+    artifacts: mergeArtifacts(raw.artifacts),
   };
 }

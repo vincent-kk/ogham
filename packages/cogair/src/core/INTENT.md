@@ -11,6 +11,7 @@
 | `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                          |
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                            |
 | `authToken/`      | settings web UI 일회용 토큰 발급·검증                                   |
+| `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                       |
 
 ## Conventions
 

@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 
+import { writeArtifact } from '../../../core/artifactWriter/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
+import { getProjectHash } from '../../../core/projectHash/index.js';
 import { createSession } from '../../../core/sessionStore/index.js';
 import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
 import type {
@@ -59,12 +61,35 @@ export async function handleStartConversation(
     options,
   });
 
+  const createdAt = isoNow();
+  let artifactPath: string | undefined;
+  if (
+    config.artifacts.enabled &&
+    result.status === 'success' &&
+    result.response !== null
+  ) {
+    artifactPath = await writeArtifact({
+      artifacts: config.artifacts,
+      cwd,
+      projectHash: getProjectHash(cwd),
+      sessionId,
+      turn: 1,
+      provider: input.provider,
+      model: result.resolvedModel ?? model,
+      createdAt,
+      elapsedMs: Math.round(performance.now() - startedAt),
+      prompt: input.prompt,
+      response: result.response,
+    });
+  }
+
   return buildResponse({
     sessionId,
     provider: input.provider,
     result,
     turn: 1,
-    createdAt: isoNow(),
+    createdAt,
     startedAt,
+    artifactPath,
   });
 }

@@ -39,9 +39,27 @@ describe('loadConfig', () => {
         codex: { yolo: false, sandbox: 'workspace-write' },
       },
       session_ttl_hours: 24,
+      artifacts: { enabled: true, location: 'user' as const },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
+  });
+
+  it('injects artifacts defaults for legacy configs missing the block', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: { gemini: 'g', codex: 'c' },
+      default_model: 'auto',
+      option_flags: DEFAULT_CONFIG.option_flags,
+      session_ttl_hours: 72,
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.artifacts).toEqual(DEFAULT_CONFIG.artifacts);
   });
 
   it('drops legacy default_options and injects option_flags defaults', async () => {

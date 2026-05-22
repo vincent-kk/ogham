@@ -16,6 +16,10 @@ export const DEFAULT_CONFIG: Config = {
     codex: { yolo: false, sandbox: 'workspace-write' },
   },
   session_ttl_hours: 72,
+  artifacts: {
+    enabled: false,
+    location: 'project',
+  },
 };
 
 export const DIR_MODE = 0o700;

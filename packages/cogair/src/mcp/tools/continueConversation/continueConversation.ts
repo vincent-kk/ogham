@@ -1,5 +1,6 @@
 import { performance } from 'node:perf_hooks';
 
+import { writeArtifact } from '../../../core/artifactWriter/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { getProjectHash } from '../../../core/projectHash/index.js';
@@ -74,12 +75,35 @@ export async function handleContinueConversation(
     turn_count: nextTurn,
   });
 
+  const createdAt = isoNow();
+  let artifactPath: string | undefined;
+  if (
+    config.artifacts.enabled &&
+    result.status === 'success' &&
+    result.response !== null
+  ) {
+    artifactPath = await writeArtifact({
+      artifacts: config.artifacts,
+      cwd: session.cwd,
+      projectHash,
+      sessionId: session.session_id,
+      turn: nextTurn,
+      provider: session.provider,
+      model: result.resolvedModel ?? session.model,
+      createdAt,
+      elapsedMs: Math.round(performance.now() - startedAt),
+      prompt: input.prompt,
+      response: result.response,
+    });
+  }
+
   return buildResponse({
     sessionId: session.session_id,
     provider: session.provider,
     result,
     turn: nextTurn,
-    createdAt: isoNow(),
+    createdAt,
     startedAt,
+    artifactPath,
   });
 }

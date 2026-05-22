@@ -46,6 +46,7 @@ export const ConversationResponseSchema = z.object({
   response: z.string().nullable(),
   error: ConversationErrorSchema.nullable(),
   meta: ConversationMetaSchema,
+  artifact_path: z.string().optional(),
 });
 
 export type ConversationResponse = z.infer<typeof ConversationResponseSchema>;

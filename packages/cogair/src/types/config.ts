@@ -41,6 +41,17 @@ export const OptionFlagsSchema = z.object({
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
 
+export const ArtifactLocationSchema = z.enum(['project', 'user']);
+
+export type ArtifactLocation = z.infer<typeof ArtifactLocationSchema>;
+
+export const ArtifactsConfigSchema = z.object({
+  enabled: z.boolean(),
+  location: ArtifactLocationSchema,
+});
+
+export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
+
 export const ConfigSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
@@ -48,6 +59,7 @@ export const ConfigSchema = z.object({
   default_model: ModelAliasSchema,
   option_flags: OptionFlagsSchema,
   session_ttl_hours: z.number().int().positive(),
+  artifacts: ArtifactsConfigSchema,
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

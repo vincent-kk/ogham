@@ -86,4 +86,29 @@ describe('buildResponse', () => {
     });
     expect(Number.isInteger(response.meta.elapsed_ms)).toBe(true);
   });
+
+  it('omits artifact_path when not provided', () => {
+    const response = buildResponse({
+      sessionId: 's',
+      provider: 'codex',
+      result: successResult(),
+      turn: 1,
+      createdAt: '2026-05-22T00:00:00.000Z',
+      startedAt: performance.now(),
+    });
+    expect('artifact_path' in response).toBe(false);
+  });
+
+  it('includes artifact_path when provided', () => {
+    const response = buildResponse({
+      sessionId: 's',
+      provider: 'codex',
+      result: successResult(),
+      turn: 1,
+      createdAt: '2026-05-22T00:00:00.000Z',
+      startedAt: performance.now(),
+      artifactPath: '/tmp/work/.cogair/artifacts/sid-1.md',
+    });
+    expect(response.artifact_path).toBe('/tmp/work/.cogair/artifacts/sid-1.md');
+  });
 });
