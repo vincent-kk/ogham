@@ -132,7 +132,7 @@ Claude Code session
 | `SessionStart`     | `injectStatic.mjs`  | Provider 비율·tone phrase·키워드 맵·라우팅 가이드.             |
 | `UserPromptSubmit` | `injectDynamic.mjs` | 세션별 호출 카운터·현재 비율·목표 비율·drift, parent-PID 감지. |
 
-두 hook 번들 모두 minify 후 < 4 KB 이며, Node 빌트인만 사용합니다 (zod·MCP SDK·glob 라이브러리 없음).
+두 hook 번들 모두 minify 후 현재 약 3.3 KB 이며, Node 빌트인만 사용합니다 (zod·MCP SDK·glob 라이브러리 없음). 빌드 가드가 10 KB LIGHT tier cap 을 강제합니다.
 
 ---
 

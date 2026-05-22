@@ -65,12 +65,14 @@ argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt
 
 ### Body — model alias
 
-| cogair alias | codex 모델                                       |
-| ------------ | ------------------------------------------------ |
-| `high`       | `gpt-5-codex` (env `COGAIR_CODEX_HIGH` override) |
-| `mid`        | `gpt-5.1-codex`                                  |
-| `low`        | `o3`                                             |
-| `auto`       | codex-cli 기본값 (`-m` 생략)                     |
+| cogair alias | codex 모델                                                  |
+| ------------ | ----------------------------------------------------------- |
+| `high`       | codex-cli 기본값 (env `COGAIR_CODEX_HIGH` 설정 시 override) |
+| `mid`        | codex-cli 기본값 (env `COGAIR_CODEX_MID` 설정 시 override)  |
+| `low`        | codex-cli 기본값 (env `COGAIR_CODEX_LOW` 설정 시 override)  |
+| `auto`       | codex-cli 기본값 (`-m` 생략)                                |
+
+env 미설정 시 모든 tier 는 동일한 codex-cli 기본값으로 해결됨. 구체적 model ID 는 `src/dispatcher/codex/modelAlias.ts` 에서만 관리.
 
 ## skill: `gemini`
 
@@ -98,12 +100,14 @@ argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt
 
 ### Body — model alias
 
-| cogair alias | gemini 모델                                          |
-| ------------ | ---------------------------------------------------- |
-| `high`       | `gemini-2.5-pro` (env `COGAIR_GEMINI_HIGH` override) |
-| `mid`        | `gemini-2.5-flash`                                   |
-| `low`        | `gemini-2.5-flash-lite`                              |
-| `auto`       | `-m` 생략                                            |
+| cogair alias | gemini 모델                                                                |
+| ------------ | -------------------------------------------------------------------------- |
+| `high`       | gemini-cli 의 가장 강력한 tier (env `COGAIR_GEMINI_HIGH` 설정 시 override) |
+| `mid`        | gemini-cli 의 균형 tier (env `COGAIR_GEMINI_MID` 설정 시 override)         |
+| `low`        | gemini-cli 의 가장 가벼운 tier (env `COGAIR_GEMINI_LOW` 설정 시 override)  |
+| `auto`       | gemini-cli 기본값 (`-m` 생략)                                              |
+
+구체적 model ID 는 `src/dispatcher/gemini/modelAlias.ts` 에서만 관리.
 
 ## skill: `crosscheck`
 

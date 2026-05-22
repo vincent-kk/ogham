@@ -43,10 +43,10 @@ dispatcher options are managed via `/setup` (settings UI) — they are not
 accepted as skill arguments.
 
 `--continue` is intentionally NOT supported (each crosscheck starts two
-fresh sessions). If the invoker passes `--continue <id>`, ignore the
-flag and tell the user to resume via `/cogair:codex --continue <id>` or
-`/cogair:gemini --continue <id>` (echo back the id they provided) for
-the desired side.
+fresh sessions). If the invoker passes `--continue <id>`, **abort
+immediately — do not issue any MCP calls**, and tell the user to resume
+via `/cogair:codex --continue <id>` or `/cogair:gemini --continue <id>`
+(echo back the id they provided) for the desired side.
 
 ## Call mapping
 
@@ -59,8 +59,10 @@ Omit `model` when alias is `auto` or unspecified.
 
 ## Response handling
 
-Always surface BOTH `session_id` values (each in backticks) so the user
-can `--continue` either side later.
+Surface every available `session_id` (each in backticks) so the user can
+`--continue` either side later. On partial failure where one provider
+never produced a session, surface only the surviving provider's
+`session_id`.
 
 ### Failure dispatch
 
@@ -77,7 +79,22 @@ For each provider independently:
 - If **one** provider fails → present the surviving provider's answer
   AND clearly note the failed provider's `error.code` / `error.message`.
   Do NOT abort. The user still gets value from the single response.
-- If **both** providers fail → surface both errors. Skip synthesis.
+  Use the partial-failure template below.
+- If **both** providers fail → surface both errors and skip synthesis.
+  Apply the per-code remedies above to each provider independently before
+  the user retries.
+
+### Partial-failure template
+
+```
+## <SurvivingProvider> response
+<answer body>
+
+## <FailedProvider> error
+`error.code`: error.message
+
+> <one-line remedy from the failure dispatch above>
+```
 
 ## Synthesis format (success path)
 
@@ -99,8 +116,9 @@ When both responses succeed, render exactly four sections:
 ```
 
 When `artifact_path` is present on either envelope (config opt-in),
-include a `## Artifacts` section linking to both files so the user can
-open the full responses.
+include a `## Artifacts` section linking to each available
+`artifact_path` so the user can open the full responses. List only the
+paths actually present in the envelopes.
 
 ## Model alias
 

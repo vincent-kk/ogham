@@ -7,7 +7,7 @@
 ## Structure
 
 - `injectStatic.ts` — `buildStaticPayload(config)` (payload 텍스트 빌더)
-- `injectStatic.entry.ts` — esbuild 번들 진입점 (loadConfig → buildStaticPayload → stdout)
+- `build/injectStatic.entry.ts` — esbuild 번들 진입점 (loadConfig → buildStaticPayload → stdout)
 - `utils/tonePhrase.ts` — `intervention_strength → tone string`
 - `utils/joinKeywords.ts` — provider keywords 트림 + 비어 있을 때 `(none)`
 

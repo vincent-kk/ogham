@@ -132,7 +132,7 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 | `SessionStart`     | `injectStatic.mjs`  | Provider ratio, tone phrase, keyword map, routing guidance.                  |
 | `UserPromptSubmit` | `injectDynamic.mjs` | Per-session call counter, current vs. target ratio, drift, parent-PID aware. |
 
-Both hook bundles are < 4 KB minified and use only Node builtins — no zod, no MCP SDK, no glob libs.
+Both hook bundles currently land near 3.3 KB minified and use only Node builtins — no zod, no MCP SDK, no glob libs. The build guard enforces a 10 KB LIGHT-tier cap.
 
 ---
 

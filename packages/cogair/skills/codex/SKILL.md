@@ -56,10 +56,13 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 codex-cli does not expose stable user-facing model aliases the way
 gemini-cli does — its ChatGPT-account mode whitelist accepts only concrete
-`gpt-5.X` family IDs that change with each upstream release. To avoid
-shipping a version-numbered ID that ages on the next release, every cogair
-tier delegates to codex-cli's own default. Differentiate per tier by
-exporting the env vars to whichever concrete model IDs the active codex
-login can reach. The resolution lives in `src/dispatcher/codex/modelAlias.ts`.
+model IDs that change with each upstream release. To avoid shipping a
+version-numbered ID that ages on the next release, every cogair tier
+delegates to codex-cli's own default. Differentiate per tier by exporting
+the env vars to whichever concrete model IDs the active codex login can
+reach. The resolution lives in `src/dispatcher/codex/modelAlias.ts`.
 
-When the relevant env var (`COGAIR_CODEX_HIGH` / `_MID` / `_LOW`) is unset, the `high` / `mid` / `low` tiers fall through to the codex-cli default — behaviorally identical to `auto`.
+When the relevant env var (`COGAIR_CODEX_HIGH` / `_MID` / `_LOW`) is unset,
+the `high` / `mid` / `low` tiers fall through to the codex-cli default —
+behaviorally identical to `auto`. Without env var overrides, all tiers
+resolve to the same model.

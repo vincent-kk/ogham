@@ -19,12 +19,13 @@ packages/cogair/
 ├── skills/
 │   ├── setup/SKILL.md
 │   ├── codex/SKILL.md
-│   └── gemini/SKILL.md
+│   ├── gemini/SKILL.md
+│   └── crosscheck/SKILL.md
 ├── scripts/
 │   ├── buildMcpServer.mjs       # esbuild → bridge/mcp-server.cjs (CJS)
 │   ├── buildHooks.mjs           # esbuild → bridge/<name>.mjs (ESM, thin-script 가드)
 │   └── buildSettingsHtml.mjs    # FE → src/mcp/tools/openSettings/__generated__/settingsHtml.ts
-├── bridge/                      # build artifact (gitignored)
+├── bridge/                      # build artifact (committed — package.json:files)
 ├── src/                         # fractal root
 ├── package.json
 ├── tsconfig.json / tsconfig.build.json
@@ -141,7 +142,8 @@ src/
 │   ├── injectStatic/
 │   │   ├── INTENT.md
 │   │   ├── injectStatic.ts
-│   │   ├── injectStatic.entry.ts
+│   │   ├── build/
+│   │   │   └── injectStatic.entry.ts
 │   │   └── utils/
 │   │       ├── loadConfig.ts
 │   │       ├── tonePhrase.ts
@@ -149,7 +151,8 @@ src/
 │   ├── injectDynamic/
 │   │   ├── INTENT.md
 │   │   ├── injectDynamic.ts
-│   │   ├── injectDynamic.entry.ts
+│   │   ├── build/
+│   │   │   └── injectDynamic.entry.ts
 │   │   └── utils/
 │   │       ├── loadCounter.ts
 │   │       └── formatRatio.ts

@@ -7,7 +7,7 @@
 ## Structure
 
 - `injectDynamic.ts` — `buildDynamicPayload(config, counter)`
-- `injectDynamic.entry.ts` — esbuild 번들 진입점
+- `build/injectDynamic.entry.ts` — esbuild 번들 진입점
 - `utils/loadCounter.ts` — fs read + parent-pid 비교
 - `utils/asNonNegInt.ts` — counter 필드 정수 가드
 - `utils/formatRatio.ts` — current/target/drift 텍스트 라인 빌더

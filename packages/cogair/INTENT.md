@@ -11,7 +11,7 @@
 | `hooks/`                     | Claude Code 훅 매핑                           |
 | `skills/`                    | `setup`, `codex`, `gemini`, `crosscheck` 스킬 |
 | `libs/run.cjs`               | cross-platform Node 러너 (filid 동일)         |
-| `bridge/`                    | esbuild 산출물 (gitignored)                   |
+| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)  |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트               |
 | `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                 |
 
@@ -26,7 +26,7 @@
 
 ### Always do
 
-- 모든 디스크 경로는 `~/.claude/plugins/cogair/` 하위
+- 디스크 경로는 `~/.claude/plugins/cogair/` 하위 (opt-in project artifacts: `<cwd>/.cogair/`)
 
 ### Ask first
 
@@ -35,7 +35,7 @@
 
 ### Never do
 
-- `bridge/`, `dist/` 를 커밋
+- `dist/` 를 커밋 (`bridge/` 는 의도적 커밋 — `package.json:files` 포함)
 - `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (inject-version.mjs 만)
 
 ## Dependencies
