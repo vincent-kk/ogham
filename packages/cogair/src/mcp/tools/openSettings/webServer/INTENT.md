@@ -9,7 +9,7 @@
 | `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                |
 | `routes.ts`       | `createRouteHandler` — token + Content-Type 가드 + 경로 디스패치                        |
 | `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                               |
-| `handlers/`       | GET `/`, `/config`, POST `/save`, `/close`                                              |
+| `handlers/`       | GET `/`, `/config`, `/provider-status`, POST `/save`, `/close`                          |
 | `utils/`          | sendJson, parseBody, escapeJsonForHtml, verifyToken (`core/authToken` 위임), buildState |
 
 ## Conventions

@@ -89,7 +89,11 @@ src/
 │   ├── INTENT.md
 │   ├── index.ts
 │   ├── server/
-│   │   └── server.ts
+│   │   ├── INTENT.md
+│   │   ├── index.ts
+│   │   └── lifecycle/
+│   │       ├── createServer.ts
+│   │       └── startServer.ts
 │   ├── serverEntry/
 │   │   └── serverEntry.ts       # esbuild 진입점 → bridge/mcp-server.cjs
 │   ├── shared/
@@ -186,13 +190,13 @@ hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 }
 ```
 
-| 단계 | 명령 | 산출물 |
-|---|---|---|
-| 1 | `yarn version:sync` | `src/version.ts` |
-| 2 | `node scripts/buildSettingsHtml.mjs` | `src/mcp/tools/openSettings/__generated__/settingsHtml.ts` |
-| 3 | `tsc -p tsconfig.build.json` | `dist/` |
-| 4 | `node scripts/buildMcpServer.mjs` | `bridge/mcp-server.cjs` (esbuild CJS 번들) |
-| 5 | `node scripts/buildHooks.mjs` | `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs` |
+| 단계 | 명령                                 | 산출물                                                     |
+| ---- | ------------------------------------ | ---------------------------------------------------------- |
+| 1    | `yarn version:sync`                  | `src/version.ts`                                           |
+| 2    | `node scripts/buildSettingsHtml.mjs` | `src/mcp/tools/openSettings/__generated__/settingsHtml.ts` |
+| 3    | `tsc -p tsconfig.build.json`         | `dist/`                                                    |
+| 4    | `node scripts/buildMcpServer.mjs`    | `bridge/mcp-server.cjs` (esbuild CJS 번들)                 |
+| 5    | `node scripts/buildHooks.mjs`        | `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs`      |
 
 `bridge/mcp-server.cjs` 파일명은 filid · atlassian 의 컨벤션을 유지 (외부 `.mcp.json` 에 박혀 있어 변경 비용이 크고, 빌드 산출물 명명은 별도 컨벤션).
 
@@ -208,8 +212,8 @@ filid 의 `build-hooks.mjs` 와 동일한 규칙:
 
 ```javascript
 const hookEntries = [
-  { name: 'injectStatic',  maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'injectDynamic', maxBytes: LIGHT_HOOK_BYTES },
+  { name: "injectStatic", maxBytes: LIGHT_HOOK_BYTES },
+  { name: "injectDynamic", maxBytes: LIGHT_HOOK_BYTES },
 ];
 ```
 

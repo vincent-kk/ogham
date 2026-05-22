@@ -52,8 +52,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'open_settings',
     {
-      description:
-        'Open the cogair settings UI in a local browser (Phase 4 placeholder).',
+      description: 'Open the cogair settings UI in a local browser.',
       inputSchema: {},
       annotations: {
         readOnlyHint: false,

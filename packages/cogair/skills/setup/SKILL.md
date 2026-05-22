@@ -13,8 +13,8 @@ Open the cogair settings UI in a local browser.
 
 1. Call `mcp_tools_open_settings` with no arguments.
 2. Output the response's `url` field to the user.
-3. If the response's `reused` is `true`, tell the user the existing settings server was reused (5-minute idle window) and ask them to refresh the existing browser tab.
-4. The MCP server attempts to launch the URL in the user's default browser. In headless environments or if the launcher fails, ask the user to open the URL manually.
+3. If the response's `reused` is `true`, tell the user the existing settings server was reused (5-minute idle window) and ask them to refresh the existing browser tab. No browser launch happens on the reused path.
+4. If `reused` is `false`, the MCP server attempts to launch the URL in the user's default browser. In headless environments or if the launcher fails, ask the user to open the URL manually.
 
 ## Do not
 

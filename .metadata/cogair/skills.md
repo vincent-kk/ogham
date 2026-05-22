@@ -1,6 +1,6 @@
-# Skills — `setup`, `codex`, `gemini`
+# Skills — `setup`, `codex`, `gemini`, `crosscheck`
 
-플러그인 prefix 미사용. 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/gemini/`. SKILL.md 의 `name` 도 prefix 없이 `setup` / `codex` / `gemini`. `user_invocable: true`.
+플러그인 prefix 미사용. 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/gemini/`, `skills/crosscheck/`. SKILL.md 의 `name` 도 prefix 없이 `setup` / `codex` / `gemini` / `crosscheck`. `user_invocable: true`.
 
 `plugin.json` 에는 `agents` 필드 추가하지 않는다.
 
@@ -15,16 +15,18 @@
 설정 UI 를 띄운다.
 
 ### Frontmatter
+
 ```yaml
 ---
 name: setup
-description: "[cogair] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: \"cogair 설정\", \"open cogair settings\", \"개입 강도\""
+description: '[cogair] Open the local settings UI for ratio, intervention strength, keywords, and defaults. Trigger: "cogair 설정", "open cogair settings", "개입 강도"'
 user_invocable: true
 argument-hint: ""
 ---
 ```
 
 ### Body
+
 1. `mcp_tools_open_settings` 를 인자 없이 호출.
 2. 응답의 `url` 을 사용자에게 출력.
 3. `reused: true` 면 "기존 설정 서버 재사용" 안내.
@@ -36,74 +38,113 @@ argument-hint: ""
 Codex CLI 위임.
 
 ### Frontmatter
+
 ```yaml
 ---
 name: codex
 description: "[cogair] Delegate to OpenAI Codex CLI via cogair. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family."
 user_invocable: true
-argument-hint: "[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- \"prompt\""
+argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
 ---
 ```
 
 ### When to use / when not
+
 - codex-call SKILL.md 의 "When to use / not" 단락을 압축 (vault 항목 제외).
 
 ### Body — 호출 매핑
+
 - `--continue <session_id>` 있으면 → `mcp_tools_continue_conversation({ session_id, prompt })`.
-- 그 외 → `mcp_tools_start_conversation({ provider: 'codex', prompt, model?, options? })`.
-- `--option key=value` 는 여러 번 누적 가능. parsing 결과를 `options` 객체로 전달.
-  - 예: `--option multi_agent=true` → `options: { multi_agent: true }`.
-  - 값이 `true`/`false`/숫자/JSON 문자열인지 단순 추론.
-- 응답 JSON 의 `session_id` 와 `meta.ignored_options` 를 출력에 노출.
+- 그 외 → `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`.
+- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)와 그 외 dispatcher 옵션은 `/setup` 설정 UI 로만 관리한다 (MCP input 미노출).
+- 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
 - 실패 응답 (`status: 'failure'`):
   - `auth` → 사용자에게 `codex login` 실행 요청.
   - `rate_limit` / `budget_exhausted` → 잠시 후 재시도 또는 다른 provider 선택.
   - `network` / `cli_error` / `unknown` → 메시지 그대로 사용자에게 전달.
 
 ### Body — model alias
-| cogair alias | codex 모델 |
-|---|---|
-| `high` | `gpt-5-codex` (env `COGAIR_CODEX_HIGH` override) |
-| `mid` | `gpt-5.1-codex` |
-| `low` | `o3` |
-| `auto` | codex-cli 기본값 (`-m` 생략) |
+
+| cogair alias | codex 모델                                       |
+| ------------ | ------------------------------------------------ |
+| `high`       | `gpt-5-codex` (env `COGAIR_CODEX_HIGH` override) |
+| `mid`        | `gpt-5.1-codex`                                  |
+| `low`        | `o3`                                             |
+| `auto`       | codex-cli 기본값 (`-m` 생략)                     |
 
 ## skill: `gemini`
 
 Gemini CLI 위임.
 
 ### Frontmatter
+
 ```yaml
 ---
 name: gemini
 description: "[cogair] Delegate to Google Gemini CLI via cogair. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude's cutoff."
 user_invocable: true
-argument-hint: "[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- \"prompt\""
+argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
 ---
 ```
 
 ### When to use / when not
+
 - gemini-call SKILL.md 압축 (vault 항목 제외).
 
 ### Body — 호출 매핑
+
 - codex 와 동일 구조. provider 만 `'gemini'`.
 - 실패 응답 처리: `auth` → `gemini auth login` 안내.
 
 ### Body — model alias
-| cogair alias | gemini 모델 |
-|---|---|
-| `high` | `gemini-2.5-pro` (env `COGAIR_GEMINI_HIGH` override) |
-| `mid` | `gemini-2.5-flash` |
-| `low` | `gemini-2.5-flash-lite` |
-| `auto` | `-m` 생략 |
+
+| cogair alias | gemini 모델                                          |
+| ------------ | ---------------------------------------------------- |
+| `high`       | `gemini-2.5-pro` (env `COGAIR_GEMINI_HIGH` override) |
+| `mid`        | `gemini-2.5-flash`                                   |
+| `low`        | `gemini-2.5-flash-lite`                              |
+| `auto`       | `-m` 생략                                            |
+
+## skill: `crosscheck`
+
+codex + gemini 병렬 위임. 두 응답을 합성.
+
+### Frontmatter
+
+```yaml
+---
+name: crosscheck
+description: '[cogair] Cross-validate a prompt by dispatching to codex AND gemini in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
+user_invocable: true
+argument-hint: '[--model high|mid|low|auto] -- "prompt"'
+---
+```
+
+### When to use / when not
+
+- 두 모델 패밀리의 독립적 second opinion 이 가치 있는 결정 / 설계 리뷰.
+- 단일 provider 가 강점이 명확한 작업, 멀티턴, secret 포함 프롬프트는 비추.
+
+### Body — 호출 매핑
+
+- `--continue` 미지원 (항상 두 fresh 세션). 사용자가 전달하면 `/cogair:codex --continue <id>` 또는 `/cogair:gemini --continue <id>` 로 안내.
+- 두 호출을 **병렬** (단일 메시지 두 tool use):
+  - `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`
+  - `mcp_tools_start_conversation({ provider: 'gemini', prompt, model? })`
+- 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 양쪽 실패: 두 오류 노출 후 합성 skip.
+
+### Body — 합성 포맷 (양쪽 성공)
+
+4개 섹션 — `## Agreed` / `## Conflicting` / `## Final direction` / `## Action checklist`. `artifact_path` 가 있으면 `## Artifacts` 추가.
 
 ## 스킬 ↔ 도구 매트릭스
 
-| Skill | start_conversation | continue_conversation | open_settings |
-|---|---|---|---|
-| setup | — | — | O |
-| codex | O (provider=codex) | O | — |
-| gemini | O (provider=gemini) | O | — |
+| Skill      | start_conversation          | continue_conversation | open_settings |
+| ---------- | --------------------------- | --------------------- | ------------- |
+| setup      | —                           | —                     | O             |
+| codex      | O (provider=codex)          | O                     | —             |
+| gemini     | O (provider=gemini)         | O                     | —             |
+| crosscheck | O × 2 (codex + gemini 병렬) | —                     | —             |
 
 ## 참고 자료 정책
 

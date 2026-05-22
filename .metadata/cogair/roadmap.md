@@ -49,7 +49,7 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 1. `src/mcp/shared/toolResponse.ts`.
 2. `src/mcp/tools/startConversation/handler.ts`.
 3. `src/mcp/tools/continueConversation/handler.ts` (project_hash 검증 → error.code='unknown').
-4. `src/mcp/server/server.ts`: 3 tool 등록.
+4. `src/mcp/server/lifecycle/createServer.ts`: 3 tool 등록.
 5. `src/mcp/serverEntry/serverEntry.ts`.
 6. `scripts/buildMcpServer.mjs` (filid 동일 패턴, native-deps 단순화).
 7. `yarn cogair build:plugin` 으로 `bridge/mcp-server.cjs` 생성 확인.
@@ -62,7 +62,7 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 3. `src/mcp/tools/openSettings/webServer/` 작성.
 4. `src/mcp/tools/openSettings/handler.ts`: 기존 서버 reuse 또는 신규 기동.
 5. token 검증 + 5분 idle 단위 테스트.
-6. `server.ts` 의 placeholder 를 실제 handler 로 교체.
+6. `lifecycle/createServer.ts` 의 placeholder 를 실제 handler 로 교체.
 
 ## Phase 6 — Skills
 

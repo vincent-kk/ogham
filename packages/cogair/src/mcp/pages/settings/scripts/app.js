@@ -10,8 +10,8 @@
   };
 
   var DEFAULT_OPTION_FLAGS = {
-    gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
-    codex: { yolo: false, sandbox: 'read-only' },
+    gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
+    codex: { yolo: false, sandbox: 'workspace-write' },
   };
 
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };

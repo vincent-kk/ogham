@@ -7,7 +7,7 @@ Guidance for Claude Code when working in this package.
 `@ogham/cogair` is a Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI**. It exposes:
 
 - 3 MCP tools — `start_conversation`, `continue_conversation`, `open_settings`.
-- 3 user-invocable skills — `/setup`, `/codex`, `/gemini`.
+- 4 user-invocable skills — `/setup`, `/codex`, `/gemini`, `/crosscheck`.
 - 2 lifecycle hooks — `SessionStart`, `UserPromptSubmit`.
 - No agents. Delegation is the user's call, mediated by skills + hooks.
 
@@ -29,7 +29,7 @@ yarn version:sync       # package.json → src/version.ts
 ## Architecture
 
 ```
-Skills (/setup, /codex, /gemini)        Layer 3 (user) — thin tool-call mappers
+Skills (/setup, /codex, /gemini, /crosscheck)    Layer 3 (user) — thin tool-call mappers
         │
         ▼
 MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
@@ -61,7 +61,7 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 
 ## Key Files
 
-- `src/mcp/server/server.ts` — registers the 3 MCP tools
+- `src/mcp/server/lifecycle/createServer.ts` — registers the 3 MCP tools
 - `src/mcp/tools/openSettings/` — local settings web UI (one-time-token auth, 5-minute idle shutdown)
 - `src/dispatcher/codex/modelAlias.ts`, `src/dispatcher/gemini/modelAlias.ts` — single source of truth for tier → concrete model ID mapping
 - `src/hooks/shared/loadConfig.ts` — hook-scoped config loader (no zod; migrates legacy schemas read-only)
@@ -74,7 +74,7 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 
 ## Plugin Runtime
 
-- Skill names use **no plugin prefix** (`setup`, `codex`, `gemini`) — directory names match skill names.
+- Skill names use **no plugin prefix** (`setup`, `codex`, `gemini`, `crosscheck`) — directory names match skill names.
 - MCP server name is `tools`, so tools are referenced as `mcp_tools_<name>` from skills and other consumers.
 - Hook bundle cap: **10 KB LIGHT tier**. Both injectStatic and injectDynamic land near 3.3 KB minified.
 - Forbidden in hook bundles: zod, MCP SDK, fast-glob, lodash, moment, date-fns — enforced by `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs`.

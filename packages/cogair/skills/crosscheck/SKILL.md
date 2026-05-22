@@ -2,7 +2,7 @@
 name: crosscheck
 description: '[cogair] Cross-validate a prompt by dispatching to codex AND gemini in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
-argument-hint: '[--model high|mid|low|auto] [--option key=value]... -- "prompt"'
+argument-hint: '[--model high|mid|low|auto] -- "prompt"'
 ---
 
 # crosscheck
@@ -36,37 +36,31 @@ Parse the invocation. Recognize:
 
 - `--model high|mid|low|auto` — applied to BOTH providers (defaults to
   config `default_model`).
-- `--option key=value` — repeatable. Same `options` object passed to both
-  providers.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
-For each `--option key=value`, infer the value type:
-
-- `true` / `false` → boolean.
-- Integer or float literal → number.
-- Valid JSON object/array string → parsed JSON.
-- Otherwise → raw string.
+Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other
+dispatcher options are managed via `/setup` (settings UI) — they are not
+accepted as skill arguments.
 
 `--continue` is intentionally NOT supported (each crosscheck starts two
-fresh sessions). If the invoker passes `--continue`, ignore the flag and
-tell the user to resume via `/cogair:codex --continue <id>` or
-`/cogair:gemini --continue <id>` for the desired side.
+fresh sessions). If the invoker passes `--continue <id>`, ignore the
+flag and tell the user to resume via `/cogair:codex --continue <id>` or
+`/cogair:gemini --continue <id>` (echo back the id they provided) for
+the desired side.
 
 ## Call mapping
 
 Issue the two calls **in parallel** (single message, two tool uses):
 
-- `mcp_tools_start_conversation({ provider: 'codex', prompt, model?, options? })`
-- `mcp_tools_start_conversation({ provider: 'gemini', prompt, model?, options? })`
+- `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`
+- `mcp_tools_start_conversation({ provider: 'gemini', prompt, model? })`
 
-Omit `model` when alias is `auto` or unspecified. Omit `options` when no
-`--option` flags were given.
+Omit `model` when alias is `auto` or unspecified.
 
 ## Response handling
 
 Always surface BOTH `session_id` values (each in backticks) so the user
-can `--continue` either side later. Surface `meta.ignored_options` for
-each provider when non-empty.
+can `--continue` either side later.
 
 ### Failure dispatch
 
