@@ -12,8 +12,8 @@ export const DEFAULT_CONFIG: Config = {
   },
   default_model: 'auto',
   option_flags: {
-    gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
-    codex: { yolo: false, sandbox: 'read-only' },
+    gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
+    codex: { yolo: false, sandbox: 'workspace-write' },
   },
   session_ttl_hours: 72,
 };

@@ -22,8 +22,8 @@ describe('DEFAULT_CONFIG', () => {
 
   it('defaults option_flags to safe per-provider sandbox', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
-      gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
-      codex: { yolo: false, sandbox: 'read-only' },
+      gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
+      codex: { yolo: false, sandbox: 'workspace-write' },
     });
   });
 
