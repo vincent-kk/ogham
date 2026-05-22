@@ -352,7 +352,7 @@
         1000,
         Math.min(
           1800000,
-          Math.floor(Number(spawnTimeoutMs.value) || 300000),
+          Math.floor(Number(spawnTimeoutMs.value) || 600000),
         ),
       ),
       artifacts: buildArtifacts(),
