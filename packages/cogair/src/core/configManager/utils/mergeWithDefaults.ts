@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 
 import { isPlainObject } from './isPlainObject.js';
+import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
 export function mergeWithDefaults(raw: unknown): unknown {
@@ -14,11 +15,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
       ...(isPlainObject(raw.keywords) ? raw.keywords : {}),
     },
     default_model: raw.default_model ?? DEFAULT_CONFIG.default_model,
-    default_options: {
-      ...DEFAULT_CONFIG.default_options,
-      ...(isPlainObject(raw.default_options) ? raw.default_options : {}),
-      multi_agent: false,
-    },
+    option_flags: mergeOptionFlags(raw.option_flags),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
   };

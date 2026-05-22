@@ -11,7 +11,10 @@ export const DEFAULT_CONFIG: Config = {
     codex: 'code, refactor, sandbox',
   },
   default_model: 'auto',
-  default_options: { multi_agent: false },
+  option_flags: {
+    gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
+    codex: { yolo: false, sandbox: 'read-only' },
+  },
   session_ttl_hours: 72,
 };
 

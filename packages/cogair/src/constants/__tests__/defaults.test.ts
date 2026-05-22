@@ -16,9 +16,15 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
-  it('defaults to auto model and multi_agent disabled', () => {
+  it('defaults to auto model', () => {
     expect(DEFAULT_CONFIG.default_model).toBe('auto');
-    expect(DEFAULT_CONFIG.default_options).toEqual({ multi_agent: false });
+  });
+
+  it('defaults option_flags to safe per-provider sandbox', () => {
+    expect(DEFAULT_CONFIG.option_flags).toEqual({
+      gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
+      codex: { yolo: false, sandbox: 'read-only' },
+    });
   });
 
   it('defaults session TTL to 72 hours', () => {

@@ -34,14 +34,17 @@ describe('loadConfig', () => {
       intervention_strength: 1,
       keywords: { gemini: 'g', codex: 'c' },
       default_model: 'high',
-      default_options: { multi_agent: false },
+      option_flags: {
+        gemini: { yolo: true, sandbox: true, sandbox_backend: 'docker' },
+        codex: { yolo: false, sandbox: 'workspace-write' },
+      },
       session_ttl_hours: 24,
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
   });
 
-  it('forces multi_agent to false even when stored as true', async () => {
+  it('drops legacy default_options and injects option_flags defaults', async () => {
     const stored = {
       ratio: {
         gemini: { value: 50, enabled: true },
@@ -55,7 +58,34 @@ describe('loadConfig', () => {
     };
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
-    expect(result.default_options.multi_agent).toBe(false);
+    expect(result.option_flags).toEqual(DEFAULT_CONFIG.option_flags);
+    expect(
+      (result as unknown as Record<string, unknown>).default_options,
+    ).toBeUndefined();
+  });
+
+  it('fills missing option_flags fields with defaults', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: { gemini: 'g', codex: 'c' },
+      default_model: 'auto',
+      option_flags: { gemini: { yolo: true } },
+      session_ttl_hours: 72,
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.option_flags.gemini).toEqual({
+      yolo: true,
+      sandbox: DEFAULT_CONFIG.option_flags.gemini.sandbox,
+      sandbox_backend: DEFAULT_CONFIG.option_flags.gemini.sandbox_backend,
+    });
+    expect(result.option_flags.codex).toEqual(
+      DEFAULT_CONFIG.option_flags.codex,
+    );
   });
 
   it('migrates legacy integer ratio with one provider disabled', async () => {
