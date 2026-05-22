@@ -1,4 +1,7 @@
-import type { ConversationError } from '../../../types/index.js';
+import type {
+  ConversationError,
+  GeminiSandboxBackend,
+} from '../../../types/index.js';
 import { mapError } from '../../errorMap/index.js';
 import { spawnGemini } from '../operations/spawn.js';
 
@@ -10,11 +13,19 @@ export interface PromptCallResult {
   error: ConversationError | null;
 }
 
+export interface CallGeminiOptions {
+  sandboxBackend?: GeminiSandboxBackend;
+}
+
 export async function callGemini(
   cwd: string,
   argv: string[],
+  options: CallGeminiOptions = {},
 ): Promise<PromptCallResult> {
-  const result = await spawnGemini(argv, { cwd });
+  const result = await spawnGemini(argv, {
+    cwd,
+    sandboxBackend: options.sandboxBackend,
+  });
   if (result.spawnError !== null || result.exitCode !== 0) {
     return {
       status: 'failure',

@@ -11,12 +11,18 @@ import {
 } from 'vitest';
 
 import { COGAIR_HOME } from '../../../constants/paths.js';
-import type { DispatchOptions } from '../../../types/index.js';
+import type { DispatchOptions, GeminiFlags } from '../../../types/index.js';
 import {
   installFakeBinary,
   prependToPath,
 } from '../../__tests__/fakeBinary.js';
 import { geminiDispatcher } from '../index.js';
+
+const FLAGS_SANDBOX_AUTO: GeminiFlags = {
+  yolo: false,
+  sandbox: true,
+  sandbox_backend: 'auto',
+};
 
 const FAKE_SCRIPT = `#!/usr/bin/env node
 const args = process.argv.slice(2);
@@ -81,13 +87,14 @@ afterAll(async () => {
   await rm(COGAIR_HOME, { recursive: true, force: true });
 });
 
-function baseOptions(): DispatchOptions {
+function baseOptions(): DispatchOptions<GeminiFlags> {
   return {
     prompt: 'hello',
     model: 'auto',
     options: {},
     sessionId: 'cogair-session',
     cwd: process.cwd(),
+    flags: FLAGS_SANDBOX_AUTO,
   };
 }
 

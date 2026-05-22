@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
 
+import type { GeminiSandboxBackend } from '../../../types/index.js';
+
 export interface GeminiSpawnResult {
   exitCode: number;
   stdout: string;
@@ -10,18 +12,24 @@ export interface GeminiSpawnResult {
 export interface GeminiSpawnOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  sandboxBackend?: GeminiSandboxBackend;
 }
 
 export function spawnGemini(
   args: string[],
   options: GeminiSpawnOptions = {},
 ): Promise<GeminiSpawnResult> {
+  const backendEnv =
+    options.sandboxBackend && options.sandboxBackend !== 'auto'
+      ? { GEMINI_SANDBOX: options.sandboxBackend }
+      : {};
   return new Promise((resolve) => {
     const child = spawn('gemini', args, {
       cwd: options.cwd,
       env: {
         ...process.env,
         GEMINI_CLI_TRUST_WORKSPACE: 'true',
+        ...backendEnv,
         ...options.env,
       },
       stdio: ['pipe', 'pipe', 'pipe'],

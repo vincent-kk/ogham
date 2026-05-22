@@ -4,6 +4,7 @@ import type {
   DispatchResult,
   DispatchResumeOptions,
   Dispatcher,
+  GeminiFlags,
 } from '../../../types/index.js';
 import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
 import { buildPromptArgs } from '../utils/buildPromptArgs.js';
@@ -16,9 +17,9 @@ import { resolveGeminiModel } from './modelAlias.js';
 
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 
-export const geminiDispatcher: Dispatcher = {
+export const geminiDispatcher: Dispatcher<GeminiFlags> = {
   supportedOptions,
-  async start(args: DispatchOptions): Promise<DispatchResult> {
+  async start(args: DispatchOptions<GeminiFlags>): Promise<DispatchResult> {
     const ignoredOptions = computeIgnoredOptions(
       args.options,
       supportedOptions,
@@ -28,7 +29,8 @@ export const geminiDispatcher: Dispatcher = {
 
     const callResult = await callGemini(
       cwd,
-      buildPromptArgs(model, args.prompt),
+      buildPromptArgs({ model, prompt: args.prompt, flags: args.flags }),
+      { sandboxBackend: args.flags.sandbox_backend },
     );
     if (callResult.status === 'failure') {
       return {
@@ -63,7 +65,9 @@ export const geminiDispatcher: Dispatcher = {
     };
   },
 
-  async resume(args: DispatchResumeOptions): Promise<DispatchResult> {
+  async resume(
+    args: DispatchResumeOptions<GeminiFlags>,
+  ): Promise<DispatchResult> {
     const ignoredOptions = computeIgnoredOptions(
       args.options,
       supportedOptions,
@@ -85,7 +89,13 @@ export const geminiDispatcher: Dispatcher = {
 
     const callResult = await callGemini(
       cwd,
-      buildPromptArgs(model, args.prompt, resolved.index),
+      buildPromptArgs({
+        model,
+        prompt: args.prompt,
+        flags: args.flags,
+        resumeIndex: resolved.index,
+      }),
+      { sandboxBackend: args.flags.sandbox_backend },
     );
     return {
       status: callResult.status,
