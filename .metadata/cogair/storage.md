@@ -26,18 +26,19 @@
 
 ```typescript
 interface Config {
-  ratio: { gemini: number; codex: number };          // 기본 { gemini: 1, codex: 1 }
-  intervention_strength: -2 | -1 | 0 | 1 | 2;        // 기본 0
+  ratio: { gemini: number; codex: number }; // 기본 { gemini: 1, codex: 1 }
+  intervention_strength: -2 | -1 | 0 | 1 | 2; // 기본 0
   keywords: {
-    gemini: string;                                  // 기본 "research, search, youtube, large-context"
-    codex: string;                                   // 기본 "code, refactor, sandbox"
+    gemini: string; // 기본 "research, search, youtube, large-context"
+    codex: string; // 기본 "code, refactor, sandbox"
   };
-  default_model: 'high' | 'mid' | 'low' | 'auto';    // 기본 'auto'
-  default_options: {                                 // 기본 {}
+  default_model: "high" | "mid" | "low" | "auto"; // 기본 'auto'
+  default_options: {
+    // 기본 {}
     multi_agent?: boolean;
     // 향후 확장
   };
-  session_ttl_hours: number;                         // 기본 72
+  session_ttl_hours: number; // 기본 72
 }
 ```
 
@@ -47,15 +48,15 @@ interface Config {
 
 ```typescript
 interface SessionMeta {
-  session_id: string;             // UUIDv4
-  provider: 'gemini' | 'codex';
-  created_at: string;             // ISO 8601
+  session_id: string; // UUIDv4
+  provider: "gemini" | "codex";
+  created_at: string; // ISO 8601
   last_used_at: string;
   turn_count: number;
-  external_session_ref: string;   // codex: thread UUID, gemini: index → 매핑은 sessionResolver
-  cwd: string;                    // 원본 절대 경로 (project_hash 검증용)
-  project_hash: string;           // sha256(cwd).slice(0, 12) — 빠른 매칭
-  model: string;                  // 해결된 모델 ID
+  external_session_ref: string; // codex: thread UUID, gemini: index → 매핑은 sessionResolver
+  cwd: string; // 원본 절대 경로 (project_hash 검증용)
+  project_hash: string; // sha256(cwd).slice(0, 12) — 빠른 매칭
+  model: string; // 해결된 모델 ID
   options: Record<string, unknown>; // start 시 전달된 options 원본 (감사용)
 }
 ```
@@ -125,3 +126,9 @@ gemini-cli 가 자체 세션 파일을 만드는 작업 디렉토리. cogair 가
 
 - 모든 파일 권한 `0o600`, 디렉토리 `0o700`.
 - `config.json` 에 토큰 없음 — 자격증명은 외부 CLI(`codex login`, `gemini auth`) 가 자체 관리.
+
+## Artifact Mirror 디스크 사용량
+
+`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `~/.claude/plugins/cogair/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ~/.claude/plugins/cogair/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
+
+Retention 자동화는 후속 issue 로 등록 예정.

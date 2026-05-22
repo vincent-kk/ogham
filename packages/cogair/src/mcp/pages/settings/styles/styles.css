@@ -560,6 +560,13 @@ input[type='range']:focus-visible {
   pointer-events: none;
 }
 
+.warning-inline {
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .actions {
   display: flex;
   gap: 12px;

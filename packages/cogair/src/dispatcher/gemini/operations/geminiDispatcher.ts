@@ -1,3 +1,6 @@
+import { rm } from 'node:fs/promises';
+
+import { logger } from '../../../lib/logger.js';
 import type {
   ConversationOptions,
   DispatchOptions,
@@ -14,6 +17,17 @@ import { ensureCwd } from '../utils/ensureCwd.js';
 import { resolveResumeIndex } from '../utils/resolveResumeIndex.js';
 
 import { resolveGeminiModel } from './modelAlias.js';
+
+async function cleanupCwdOnTimeout(cwd: string): Promise<void> {
+  try {
+    await rm(cwd, { recursive: true, force: true });
+  } catch (err) {
+    logger.warn('gemini cwd cleanup failed after timeout', {
+      cwd,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
 
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 
@@ -36,6 +50,9 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
       },
     );
     if (callResult.status === 'failure') {
+      if (callResult.timedOut) {
+        void cleanupCwdOnTimeout(cwd);
+      }
       return {
         status: 'failure',
         response: null,
@@ -107,6 +124,9 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
         timeoutMs: args.spawnTimeoutMs,
       },
     );
+    if (callResult.timedOut) {
+      void cleanupCwdOnTimeout(cwd);
+    }
     return {
       status: callResult.status,
       response: callResult.response,

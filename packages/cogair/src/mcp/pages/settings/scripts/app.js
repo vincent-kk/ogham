@@ -66,6 +66,7 @@
   var codexYolo = $('#codex-yolo');
   var codexSandboxWrap = $('#codex-sandbox-wrap');
   var codexSandboxHint = $('#codex-sandbox-hint');
+  var codexFullAccessWarning = $('#codex-full-access-warning');
   var artifactsEnabled = $('#artifacts-enabled');
   var artifactsLocationWrap = $('#artifacts-location-wrap');
   var status = $('#status');
@@ -186,11 +187,7 @@
   function readProviderRatio(raw, fallback) {
     if (raw && typeof raw === 'object' && 'value' in raw) {
       return {
-        value: clamp(
-          Math.floor(Number(raw.value) || 0),
-          RATIO_MIN,
-          RATIO_MAX,
-        ),
+        value: clamp(Math.floor(Number(raw.value) || 0), RATIO_MIN, RATIO_MAX),
         enabled: Boolean(raw.enabled),
       };
     }
@@ -223,6 +220,15 @@
     }
   }
 
+  function syncCodexFullAccessWarning() {
+    var sel = document.querySelector(
+      '#codex-sandbox-radio input[type="radio"]:checked',
+    );
+    codexFullAccessWarning.hidden = !(
+      sel && sel.value === 'danger-full-access'
+    );
+  }
+
   function syncCodexSandboxInert() {
     var inert = codexYolo.checked;
     var radios = document.querySelectorAll(
@@ -238,6 +244,7 @@
       codexSandboxWrap.classList.remove('is-inert');
       codexSandboxHint.hidden = true;
     }
+    syncCodexFullAccessWarning();
   }
 
   function syncArtifactsLocationInert() {
@@ -274,6 +281,7 @@
     );
     syncGeminiBackendInert();
     syncCodexSandboxInert();
+    syncCodexFullAccessWarning();
   }
 
   function applyArtifacts(raw) {
@@ -374,9 +382,7 @@
         SPAWN_TIMEOUT_MS_MIN,
         Math.min(
           SPAWN_TIMEOUT_MS_MAX,
-          Math.floor(
-            Number(spawnTimeoutMs.value) || DEFAULT_SPAWN_TIMEOUT_MS,
-          ),
+          Math.floor(Number(spawnTimeoutMs.value) || DEFAULT_SPAWN_TIMEOUT_MS),
         ),
       ),
       artifacts: buildArtifacts(),
@@ -485,6 +491,11 @@
   strength.addEventListener('input', updateStrengthLabel);
   geminiSandbox.addEventListener('change', syncGeminiBackendInert);
   codexYolo.addEventListener('change', syncCodexSandboxInert);
+  document
+    .querySelectorAll('#codex-sandbox-radio input[type="radio"]')
+    .forEach(function (r) {
+      r.addEventListener('change', syncCodexFullAccessWarning);
+    });
   artifactsEnabled.addEventListener('change', syncArtifactsLocationInert);
   form.addEventListener('submit', function (e) {
     e.preventDefault();

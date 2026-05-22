@@ -11,6 +11,7 @@ export interface PromptCallResult {
   status: 'success' | 'failure';
   response: string | null;
   error: ConversationError | null;
+  timedOut?: boolean;
 }
 
 export interface CallGeminiOptions {
@@ -37,6 +38,7 @@ export async function callGemini(
         stderr: result.stderr,
         spawnError: result.spawnError,
       }),
+      timedOut: result.spawnError?.code === 'ETIMEDOUT',
     };
   }
   return {

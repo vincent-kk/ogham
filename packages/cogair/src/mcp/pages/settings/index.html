@@ -197,7 +197,7 @@
               <span class="toggle-track"
                 ><span class="toggle-thumb"></span
               ></span>
-              <span class="toggle-label">yolo</span>
+              <span class="toggle-label">Skip approvals (--yolo)</span>
               <span class="flag-desc">skip approval prompts</span>
             </label>
 
@@ -206,12 +206,15 @@
               <span class="toggle-track"
                 ><span class="toggle-thumb"></span
               ></span>
-              <span class="toggle-label">sandbox</span>
+              <span class="toggle-label">Isolated execution (--sandbox)</span>
               <span class="flag-desc">isolated execution environment</span>
             </label>
 
             <div class="flag-field" id="gemini-backend-wrap">
               <span class="flag-field-label">sandbox backend</span>
+              <p class="section-help">
+                Sandbox backend is only configurable when Sandbox is enabled.
+              </p>
               <div class="radio-row" id="gemini-backend-radio">
                 <label class="radio"
                   ><input
@@ -225,6 +228,7 @@
                     type="radio"
                     name="gemini-backend"
                     value="docker"
+                    checked
                   /><span>docker</span></label
                 >
                 <label class="radio"
@@ -266,7 +270,7 @@
               <span class="toggle-track"
                 ><span class="toggle-thumb"></span
               ></span>
-              <span class="toggle-label">yolo</span>
+              <span class="toggle-label">Skip approvals (--yolo)</span>
               <span class="flag-desc">bypass approvals + sandbox (danger)</span>
             </label>
 
@@ -295,7 +299,7 @@
                     type="radio"
                     name="codex-sandbox"
                     value="danger-full-access"
-                  /><span>full-access</span></label
+                  /><span>Full access — danger</span></label
                 >
                 <label class="radio"
                   ><input type="radio" name="codex-sandbox" value="off" /><span
@@ -303,6 +307,10 @@
                   ></label
                 >
               </div>
+              <span class="warning-inline" id="codex-full-access-warning" hidden
+                >&#9888; Full filesystem access — only use in a trusted
+                environment.</span
+              >
             </div>
           </div>
         </section>
