@@ -5,6 +5,7 @@ import { isObj } from './isObj.js';
 import { CONFIG_PATH } from './paths.js';
 import { pickKeywords } from './pickKeywords.js';
 import { pickModel } from './pickModel.js';
+import { pickOptionFlags } from './pickOptionFlags.js';
 import { pickRatio } from './pickRatio.js';
 import { pickStrength } from './pickStrength.js';
 import { safeReadJson } from './safeReadJson.js';
@@ -17,11 +18,6 @@ export function loadConfig(): HookConfig {
     intervention_strength: pickStrength(raw.intervention_strength),
     keywords: pickKeywords(raw.keywords),
     default_model: pickModel(raw.default_model),
-    default_options: {
-      ...(isObj(raw.default_options)
-        ? raw.default_options
-        : DEFAULT_CONFIG.default_options),
-      multi_agent: false,
-    },
+    option_flags: pickOptionFlags(raw.option_flags),
   };
 }

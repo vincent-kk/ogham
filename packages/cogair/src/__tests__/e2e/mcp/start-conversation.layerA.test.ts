@@ -103,20 +103,22 @@ describe('start_conversation (Layer A)', () => {
     expect(counter?.codex).toBe(1);
   });
 
-  it('meta.ignored_options records unsupported keys', async () => {
+  it('meta.ignored_options stays empty — MCP input strips unknown option keys (e.g., permission flags) at the schema boundary', async () => {
     Object.assign(process.env, geminiEnv('success'));
     const result = await handle.client.callTool({
       name: 'start_conversation',
       arguments: {
         provider: 'gemini',
         prompt: 'hi',
-        options: { multi_agent: true },
-      },
+        // The MCP inputSchema for start_conversation does not declare `options`.
+        // Anything passed here is dropped before the handler runs.
+        options: { multi_agent: true, yolo: true, sandbox: 'read-only' },
+      } as Record<string, unknown>,
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'gemini',
       turn: 1,
     });
-    expect(parsed.meta.ignored_options).toContain('multi_agent');
+    expect(parsed.meta.ignored_options).toEqual([]);
   });
 });

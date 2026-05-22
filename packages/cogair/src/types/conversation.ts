@@ -19,11 +19,7 @@ export const ProviderSchema = z.enum(PROVIDERS);
 export const ModelAliasSchema = z.enum(MODEL_ALIASES);
 export const ErrorCodeSchema = z.enum(ERROR_CODES);
 
-export const ConversationOptionsSchema = z
-  .object({
-    multi_agent: z.boolean().optional(),
-  })
-  .passthrough();
+export const ConversationOptionsSchema = z.object({}).passthrough();
 
 export type ConversationOptions = z.infer<typeof ConversationOptionsSchema>;
 
@@ -46,10 +42,11 @@ export type ConversationMeta = z.infer<typeof ConversationMetaSchema>;
 export const ConversationResponseSchema = z.object({
   status: z.enum(['success', 'failure']),
   session_id: z.string().uuid(),
-  provider: ProviderSchema,
+  provider: ProviderSchema.nullable(),
   response: z.string().nullable(),
   error: ConversationErrorSchema.nullable(),
   meta: ConversationMetaSchema,
+  artifact_path: z.string().optional(),
 });
 
 export type ConversationResponse = z.infer<typeof ConversationResponseSchema>;

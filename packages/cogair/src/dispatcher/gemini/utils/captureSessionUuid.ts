@@ -8,8 +8,9 @@ import {
 
 export async function captureSessionUuid(
   cwd: string,
+  timeoutMs: number,
 ): Promise<{ uuid: string | null; error: ConversationError | null }> {
-  const result = await spawnGemini(['--list-sessions'], { cwd });
+  const result = await spawnGemini(['--list-sessions'], { cwd, timeoutMs });
   if (result.spawnError !== null || result.exitCode !== 0) {
     return {
       uuid: null,

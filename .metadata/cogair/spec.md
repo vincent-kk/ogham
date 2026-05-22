@@ -2,16 +2,17 @@
 
 ## 컴포넌트 책임
 
-| 컴포넌트 | 역할 | 위치 |
-|---|---|---|
-| Hooks | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터) | `hooks/` |
-| Claude | provider 선택 및 위임 여부 판단 (판단 주체) | — |
-| Skill `codex` / `gemini` | Claude 결정 → MCP 도구 호출 매핑 | `skills/{codex,gemini}/` |
-| Skill `setup` | `open_settings` 호출 → 브라우저 안내 | `skills/setup/` |
-| MCP Server `tools` | provider 디스패치, config/counter/session 보유 | `src/mcp/` |
-| Provider Dispatcher | `codex-cli`, `gemini-cli` 자식 프로세스 실행 + JSON envelope 정규화 | `src/dispatcher/` |
-| External CLI | 실제 LLM 호출 | 시스템 PATH |
-| Web UI | 사용자 설정 편집 | `src/mcp/pages/settings/` |
+| 컴포넌트                 | 역할                                                                | 위치                      |
+| ------------------------ | ------------------------------------------------------------------- | ------------------------- |
+| Hooks                    | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터)                  | `hooks/`                  |
+| Claude                   | provider 선택 및 위임 여부 판단 (판단 주체)                         | —                         |
+| Skill `codex` / `gemini` | Claude 결정 → MCP 도구 호출 매핑                                    | `skills/{codex,gemini}/`  |
+| Skill `crosscheck`       | codex + gemini 병렬 호출 + 응답 합성                                | `skills/crosscheck/`      |
+| Skill `setup`            | `open_settings` 호출 → 브라우저 안내                                | `skills/setup/`           |
+| MCP Server `tools`       | provider 디스패치, config/counter/session 보유                      | `src/mcp/`                |
+| Provider Dispatcher      | `codex-cli`, `gemini-cli` 자식 프로세스 실행 + JSON envelope 정규화 | `src/dispatcher/`         |
+| External CLI             | 실제 LLM 호출                                                       | 시스템 PATH               |
+| Web UI                   | 사용자 설정 편집                                                    | `src/mcp/pages/settings/` |
 
 ## 디스패치 흐름
 
@@ -28,20 +29,24 @@
 ## 정책 모델
 
 ### Ratio (비율)
+
 - 두 정수. 분모는 합.
 - 호출 분배 의도. 강제 아님.
 - 카운터 기준: 시도 수 (성공/실패 무관).
 - 스코프: 동일 부모 PID 동안 누적. 부모 PID 변경 감지 시 리셋.
 
 ### Intervention strength (개입 강도)
+
 - `-2 | -1 | 0 | +1 | +2`.
 - 메커니즘: 매 턴 훅의 가이드 문구 톤만 조절. 강제 라우팅 없음.
 
 ### Keywords (키워드 매핑)
+
 - provider별 자유 문자열.
 - 훅이 템플릿에 join 하여 주입. Claude 판단 참고용.
 
 ### Options (확장 자리)
+
 - `start_conversation` 의 `options` 객체 — `multi_agent` 등 provider별 지원 옵션.
 - v1 화이트리스트는 비어 있다 (모든 옵션 ignored). 각 dispatcher 가 `supportedOptions` 집합으로 관리하며, 미지원 키는 `meta.ignored_options[]` 로 보고.
 

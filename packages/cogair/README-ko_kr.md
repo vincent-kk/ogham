@@ -1,6 +1,6 @@
 # @ogham/cogair
 
-Claude 가 필요에 따라 **OpenAI Codex CLI** 또는 **Google Gemini CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 3개, 사용자 호출 가능 스킬 3개, 라이프사이클 훅 2개로 구성됩니다.
+Claude 가 필요에 따라 **OpenAI Codex CLI** 또는 **Google Gemini CLI** 로 작업을 위임할 수 있게 해주는 Claude Code 플러그인입니다. MCP 도구 3개, 사용자 호출 가능 스킬 4개, 라이프사이클 훅 2개로 구성됩니다.
 
 `atlassian` 이나 `filid` 가 도메인 지식을 캡슐화한다면, cogair 는 **위임 표면(delegation surface)** 입니다. 다른 모델 패밀리가 더 적합한 작업(무거운 코드 → codex, 실시간 웹 검색 → gemini)에서 Claude 가 위임을 결정하면, 플러그인이 세션 관리·비율 추적·세션별 호출 카운터를 처리합니다.
 
@@ -72,6 +72,15 @@ cogair 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 
 실시간 웹 그라운딩 리서치, 매우 큰 컨텍스트의 다문서 종합, YouTube/URL 입력, 또는 Claude 학습 컷오프 이후의 지식이 필요할 때 사용하세요.
 
+### 양쪽 Provider 교차 검증
+
+```
+/crosscheck -- "이 마이그레이션에 A 와 B 중 무엇이 더 안전한가?"
+/crosscheck --model high -- "이 RFC 를 코드·리서치 양 관점에서 리뷰해줘"
+```
+
+두 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 codex 와 gemini 양쪽에 병렬 전달되며, 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성됩니다. 단일 호출 only — multi-turn follow-up 은 `/codex --continue` 또는 `/gemini --continue` 로 진행하세요.
+
 ---
 
 ## 아키텍처
@@ -79,7 +88,7 @@ cogair 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 ```
 Claude Code session
    │
-   ├── Skills (/setup, /codex, /gemini)        Layer 3 (user) — 얇은 도구 호출 매퍼
+   ├── Skills (/setup, /codex, /gemini, /crosscheck)    Layer 3 (user) — 얇은 도구 호출 매퍼
    │       │
    │       ▼
    ├── MCP "tools" 서버                          Layer 2 (logic) — 3 MCP 도구
@@ -105,15 +114,16 @@ Claude Code session
 
 ### 스킬
 
-| 스킬      | 트리거 키워드                                      |
-| --------- | -------------------------------------------------- |
-| `/setup`  | "cogair 설정", "open cogair settings", "개입 강도" |
-| `/codex`  | "ask codex", "codex 호출", "코덱스에게"            |
-| `/gemini` | "ask gemini", "gemini 호출", "제미니에게"          |
+| 스킬          | 트리거 키워드                                            |
+| ------------- | -------------------------------------------------------- |
+| `/setup`      | "cogair 설정", "open cogair settings", "개입 강도"       |
+| `/codex`      | "ask codex", "codex 호출", "코덱스에게"                  |
+| `/gemini`     | "ask gemini", "gemini 호출", "제미니에게"                |
+| `/crosscheck` | "crosscheck", "cross check", "교차검증", "양쪽에 물어봐" |
 
 #### 충돌 정책
 
-`/setup`, `/codex`, `/gemini` 는 플러그인 접두사 없이 전역 등록됩니다. 다른 플러그인이 동일한 이름을 사용할 경우, Claude Code 의 스킬 해석 순서(플러그인 등록 순)에 따라 먼저 등록된 스킬이 우선합니다. 충돌이 의심될 때는 `claude config` 로 활성 스킬 목록을 확인하거나, 네임스페이스 형식(`cogair:setup` 등)을 사용하십시오.
+`/setup`, `/codex`, `/gemini`, `/crosscheck` 는 플러그인 접두사 없이 전역 등록됩니다. 다른 플러그인이 동일한 이름을 사용할 경우, Claude Code 의 스킬 해석 순서(플러그인 등록 순)에 따라 먼저 등록된 스킬이 우선합니다. 충돌이 의심될 때는 `claude config` 로 활성 스킬 목록을 확인하거나, 네임스페이스 형식(`cogair:setup` 등)을 사용하십시오.
 
 ### Hook
 
@@ -122,7 +132,7 @@ Claude Code session
 | `SessionStart`     | `injectStatic.mjs`  | Provider 비율·tone phrase·키워드 맵·라우팅 가이드.             |
 | `UserPromptSubmit` | `injectDynamic.mjs` | 세션별 호출 카운터·현재 비율·목표 비율·drift, parent-PID 감지. |
 
-두 hook 번들 모두 minify 후 < 4 KB 이며, Node 빌트인만 사용합니다 (zod·MCP SDK·glob 라이브러리 없음).
+두 hook 번들 모두 minify 후 현재 약 3.3 KB 이며, Node 빌트인만 사용합니다 (zod·MCP SDK·glob 라이브러리 없음). 빌드 가드가 10 KB LIGHT tier cap 을 강제합니다.
 
 ---
 

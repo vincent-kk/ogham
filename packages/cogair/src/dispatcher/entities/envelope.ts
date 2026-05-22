@@ -8,15 +8,16 @@ import type {
 
 export interface BuildResponseArgs {
   sessionId: string;
-  provider: Provider;
+  provider: Provider | null;
   result: DispatchResult;
   turn: number;
   createdAt: string;
   startedAt: number;
+  artifactPath?: string;
 }
 
 export function buildResponse(args: BuildResponseArgs): ConversationResponse {
-  return {
+  const response: ConversationResponse = {
     status: args.result.status,
     session_id: args.sessionId,
     provider: args.provider,
@@ -29,4 +30,8 @@ export function buildResponse(args: BuildResponseArgs): ConversationResponse {
       ignored_options: args.result.ignoredOptions,
     },
   };
+  if (args.artifactPath !== undefined) {
+    response.artifact_path = args.artifactPath;
+  }
+  return response;
 }

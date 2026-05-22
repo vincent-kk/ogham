@@ -1,10 +1,15 @@
 import { performance } from 'node:perf_hooks';
 
+import { writeArtifact } from '../../../core/artifactWriter/index.js';
+import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { getProjectHash } from '../../../core/projectHash/index.js';
 import { getSession, updateSession } from '../../../core/sessionStore/index.js';
 import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
-import type { ConversationResponse } from '../../../types/index.js';
+import type {
+  ConversationResponse,
+  DispatchResult,
+} from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 
 export interface ContinueConversationInput {
@@ -24,11 +29,12 @@ export async function handleContinueConversation(
     return {
       status: 'failure',
       session_id: input.session_id,
-      provider: 'codex',
+      provider: null,
       response: null,
       error: {
         code: 'unknown',
-        message: 'Session not found in the current project',
+        message:
+          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember whether it was a codex or gemini session, retry with /cogair:codex --continue <id> or /cogair:gemini --continue <id>; otherwise start a fresh session.',
       },
       meta: {
         turn: 0,
@@ -41,14 +47,29 @@ export async function handleContinueConversation(
 
   await incrementCounter(session.provider);
 
-  const result = await dispatchers[session.provider].resume({
-    prompt: input.prompt,
-    model: 'auto',
-    options: {},
-    sessionId: session.session_id,
-    cwd: session.cwd,
-    externalSessionRef: session.external_session_ref,
-  });
+  const config = await loadConfig();
+  const result: DispatchResult =
+    session.provider === 'codex'
+      ? await dispatchers.codex.resume({
+          prompt: input.prompt,
+          model: 'auto',
+          options: {},
+          sessionId: session.session_id,
+          cwd: session.cwd,
+          externalSessionRef: session.external_session_ref,
+          flags: config.option_flags.codex,
+          spawnTimeoutMs: config.spawn_timeout_ms,
+        })
+      : await dispatchers.gemini.resume({
+          prompt: input.prompt,
+          model: 'auto',
+          options: {},
+          sessionId: session.session_id,
+          cwd: session.cwd,
+          externalSessionRef: session.external_session_ref,
+          flags: config.option_flags.gemini,
+          spawnTimeoutMs: config.spawn_timeout_ms,
+        });
 
   const nextTurn = session.turn_count + 1;
   await updateSession({
@@ -57,12 +78,35 @@ export async function handleContinueConversation(
     turn_count: nextTurn,
   });
 
+  const createdAt = isoNow();
+  let artifactPath: string | undefined;
+  if (
+    config.artifacts.enabled &&
+    result.status === 'success' &&
+    result.response !== null
+  ) {
+    artifactPath = await writeArtifact({
+      artifacts: config.artifacts,
+      cwd: session.cwd,
+      projectHash,
+      sessionId: session.session_id,
+      turn: nextTurn,
+      provider: session.provider,
+      model: result.resolvedModel ?? session.model,
+      createdAt,
+      elapsedMs: Math.round(performance.now() - startedAt),
+      prompt: input.prompt,
+      response: result.response,
+    });
+  }
+
   return buildResponse({
     sessionId: session.session_id,
     provider: session.provider,
     result,
     turn: nextTurn,
-    createdAt: isoNow(),
+    createdAt,
     startedAt,
+    artifactPath,
   });
 }

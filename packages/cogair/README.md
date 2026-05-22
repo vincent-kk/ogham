@@ -1,6 +1,6 @@
 # @ogham/cogair
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI** through three MCP tools, three user-invocable skills, and two lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI** through three MCP tools, four user-invocable skills, and two lifecycle hooks.
 
 Where `atlassian` or `filid` encapsulate domain knowledge, cogair is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → gemini) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
 
@@ -72,6 +72,15 @@ Use codex for heavy code generation, refactoring, sandboxed shell work, or a sec
 
 Use gemini for live web-grounded research, very-large-context synthesis, YouTube/URL ingestion, or knowledge past Claude's cutoff.
 
+### Cross-checking with Both Providers
+
+```
+/crosscheck -- "Is approach A or B safer for this migration?"
+/crosscheck --model high -- "Review this RFC from both code and research angles"
+```
+
+Use crosscheck when independent second opinions from two model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded to BOTH codex and gemini in parallel; the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections. Single-shot only — use `/codex --continue` or `/gemini --continue` for multi-turn follow-ups on either side.
+
 ---
 
 ## Architecture
@@ -79,7 +88,7 @@ Use gemini for live web-grounded research, very-large-context synthesis, YouTube
 ```
 Claude Code session
    │
-   ├── Skills (/setup, /codex, /gemini)        Layer 3 (user) — thin tool-call mappers
+   ├── Skills (/setup, /codex, /gemini, /crosscheck)    Layer 3 (user) — thin tool-call mappers
    │       │
    │       ▼
    ├── MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
@@ -105,15 +114,16 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 
 ### Skills
 
-| Skill     | Trigger keywords                                   |
-| --------- | -------------------------------------------------- |
-| `/setup`  | "cogair 설정", "open cogair settings", "개입 강도" |
-| `/codex`  | "ask codex", "codex 호출", "코덱스에게"            |
-| `/gemini` | "ask gemini", "gemini 호출", "제미니에게"          |
+| Skill         | Trigger keywords                                         |
+| ------------- | -------------------------------------------------------- |
+| `/setup`      | "cogair 설정", "open cogair settings", "개입 강도"       |
+| `/codex`      | "ask codex", "codex 호출", "코덱스에게"                  |
+| `/gemini`     | "ask gemini", "gemini 호출", "제미니에게"                |
+| `/crosscheck` | "crosscheck", "cross check", "교차검증", "양쪽에 물어봐" |
 
 #### Name collision policy
 
-`/setup`, `/codex`, and `/gemini` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cogair:setup`).
+`/setup`, `/codex`, `/gemini`, and `/crosscheck` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cogair:setup`).
 
 ### Hooks
 
@@ -122,7 +132,7 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 | `SessionStart`     | `injectStatic.mjs`  | Provider ratio, tone phrase, keyword map, routing guidance.                  |
 | `UserPromptSubmit` | `injectDynamic.mjs` | Per-session call counter, current vs. target ratio, drift, parent-PID aware. |
 
-Both hook bundles are < 4 KB minified and use only Node builtins — no zod, no MCP SDK, no glob libs.
+Both hook bundles currently land near 3.3 KB minified and use only Node builtins — no zod, no MCP SDK, no glob libs. The build guard enforces a 10 KB LIGHT-tier cap.
 
 ---
 

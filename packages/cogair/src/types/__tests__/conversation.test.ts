@@ -10,21 +10,17 @@ describe('ConversationOptionsSchema', () => {
     expect(ConversationOptionsSchema.parse({})).toEqual({});
   });
 
-  it('accepts multi_agent boolean', () => {
-    expect(ConversationOptionsSchema.parse({ multi_agent: true })).toEqual({
-      multi_agent: true,
-    });
+  it('passes through unknown keys for forward compatibility', () => {
+    const parsed = ConversationOptionsSchema.parse({ future_option: 'value' });
+    expect(parsed).toMatchObject({ future_option: 'value' });
   });
 
-  it('passes through unknown keys for forward compatibility', () => {
+  it('does not strip permission flag keys (passthrough), but MCP handlers must ignore them', () => {
     const parsed = ConversationOptionsSchema.parse({
-      multi_agent: false,
-      future_option: 'value',
+      yolo: true,
+      sandbox: 'read-only',
     });
-    expect(parsed).toMatchObject({
-      multi_agent: false,
-      future_option: 'value',
-    });
+    expect(parsed).toMatchObject({ yolo: true, sandbox: 'read-only' });
   });
 });
 

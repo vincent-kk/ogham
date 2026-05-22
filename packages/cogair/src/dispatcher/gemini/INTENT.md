@@ -8,19 +8,19 @@ gemini-cli 어댑터. 세션마다 격리된 `~/.claude/plugins/cogair/runtime/g
 | --------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `modelAlias.ts`       | `high/mid/low/auto` → gemini-cli alias (env override)                                                         |
 | `sessionResolver/`    | `--list-sessions` 출력 파싱 + UUID → 현재 integer index 매핑 (constants organ)                                |
-| `spawn.ts`            | `node:child_process.spawn('gemini', ...)` + `GEMINI_CLI_TRUST_WORKSPACE=true`                                 |
-| `geminiDispatcher.ts` | `Dispatcher` 구현 + `supportedOptions = new Set()`                                                            |
+| `spawn.ts`            | `node:child_process.spawn('gemini', ...)` + env 주입                                                          |
+| `geminiDispatcher.ts` | `Dispatcher<GeminiFlags>` 구현 + `supportedOptions = new Set()`                                               |
 | `utils/`              | `ensureCwd`, `buildPromptArgs`, `normalizeResponse`, `callGemini`, `captureSessionUuid`, `resolveResumeIndex` |
 | `index.ts`            | `export { geminiDispatcher }` barrel                                                                          |
 
 ## Conventions
 
-- 환경 변수 `GEMINI_CLI_TRUST_WORKSPACE=true` 강제 (exit 55 방지)
+- env: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제, `flags.sandbox && backend!=='auto'` 시 `GEMINI_SANDBOX=<backend>` 추가
 - 세션마다 cwd 격리: `gemini-cwd/<sessionId>/` 생성 후 그 안에서 spawn
-- `start`: `gemini -p "<prompt>" [-m <model>]` 실행 → 직후 `--list-sessions` 로 UUID 캡처
-- `resume`: `--list-sessions` 로 UUID → 현재 integer index 해결 → `gemini --resume <index> -p "<prompt>"`
+- `start`: `gemini [--yolo] [--sandbox] [-m <model>] -p "<prompt>"` → 직후 `--list-sessions` 로 UUID 캡처
+- `resume`: UUID → integer index 해결 → `gemini --resume <index> [--yolo] [--sandbox] [-m] -p "<prompt>"`
+- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `GeminiFlags` 채널 — config 단독 결정
 - `externalSessionRef` 는 항상 UUID (integer index 는 매번 재계산)
-- 응답은 stdout 텍스트 그대로 (output-format json 미사용)
 
 ## Boundaries
 
@@ -33,7 +33,7 @@ gemini-cli 어댑터. 세션마다 격리된 `~/.claude/plugins/cogair/runtime/g
 ### Ask first
 
 - `--output-format json` 도입
-- `supportedOptions` 화이트리스트 변경
+- `GeminiFlags` 스키마 또는 `supportedOptions` 화이트리스트 변경
 
 ### Never do
 

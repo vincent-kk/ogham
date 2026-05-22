@@ -86,13 +86,21 @@ describe('handleStartConversation', () => {
     expect(stored.session_id).toBe(result.session_id);
   });
 
-  it('reports unsupported options in meta.ignored_options', async () => {
+  it('does not accept yolo/sandbox keys on MCP input (StartConversationInput excludes options)', () => {
+    type Input = Parameters<typeof handleStartConversation>[0];
+    // Compile-time assertion: Input must not expose permission keys
+    const inputKeys: Array<keyof Input> = ['provider', 'prompt', 'model'];
+    expect(inputKeys).not.toContain('options' as keyof Input);
+    expect(inputKeys).not.toContain('yolo' as keyof Input);
+    expect(inputKeys).not.toContain('sandbox' as keyof Input);
+  });
+
+  it('emits no ignored_options because MCP input cannot pass extra option keys', async () => {
     process.env.COGAIR_FAKE_CODEX_MODE = 'success';
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
-      options: { multi_agent: true },
     });
-    expect(result.meta.ignored_options).toContain('multi_agent');
+    expect(result.meta.ignored_options).toEqual([]);
   });
 });

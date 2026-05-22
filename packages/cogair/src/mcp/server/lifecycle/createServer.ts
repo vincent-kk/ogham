@@ -2,7 +2,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import {
-  ConversationOptionsSchema,
   ModelAliasSchema,
   ProviderSchema,
 } from '../../../types/conversation.js';
@@ -23,7 +22,6 @@ export function createServer(): McpServer {
         provider: ProviderSchema,
         prompt: z.string().min(1),
         model: ModelAliasSchema.optional(),
-        options: ConversationOptionsSchema.optional(),
       },
       annotations: {
         readOnlyHint: false,
@@ -54,8 +52,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'open_settings',
     {
-      description:
-        'Open the cogair settings UI in a local browser (Phase 4 placeholder).',
+      description: 'Open the cogair settings UI in a local browser.',
       inputSchema: {},
       annotations: {
         readOnlyHint: false,

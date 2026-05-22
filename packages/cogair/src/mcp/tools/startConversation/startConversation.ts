@@ -1,13 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 
+import { writeArtifact } from '../../../core/artifactWriter/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
+import { getProjectHash } from '../../../core/projectHash/index.js';
 import { createSession } from '../../../core/sessionStore/index.js';
 import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
 import type {
-  ConversationOptions,
   ConversationResponse,
+  DispatchResult,
   ModelAlias,
   Provider,
 } from '../../../types/index.js';
@@ -17,7 +19,6 @@ export interface StartConversationInput {
   provider: Provider;
   prompt: string;
   model?: ModelAlias;
-  options?: ConversationOptions;
 }
 
 export async function handleStartConversation(
@@ -28,17 +29,30 @@ export async function handleStartConversation(
   const sessionId = randomUUID();
   const cwd = process.cwd();
   const model: ModelAlias = input.model ?? config.default_model;
-  const options: ConversationOptions = input.options ?? config.default_options;
+  const options = {};
 
   await incrementCounter(input.provider);
 
-  const result = await dispatchers[input.provider].start({
-    prompt: input.prompt,
-    model,
-    options,
-    sessionId,
-    cwd,
-  });
+  const result: DispatchResult =
+    input.provider === 'codex'
+      ? await dispatchers.codex.start({
+          prompt: input.prompt,
+          model,
+          options,
+          sessionId,
+          cwd,
+          flags: config.option_flags.codex,
+          spawnTimeoutMs: config.spawn_timeout_ms,
+        })
+      : await dispatchers.gemini.start({
+          prompt: input.prompt,
+          model,
+          options,
+          sessionId,
+          cwd,
+          flags: config.option_flags.gemini,
+          spawnTimeoutMs: config.spawn_timeout_ms,
+        });
 
   await createSession({
     sessionId,
@@ -49,12 +63,35 @@ export async function handleStartConversation(
     options,
   });
 
+  const createdAt = isoNow();
+  let artifactPath: string | undefined;
+  if (
+    config.artifacts.enabled &&
+    result.status === 'success' &&
+    result.response !== null
+  ) {
+    artifactPath = await writeArtifact({
+      artifacts: config.artifacts,
+      cwd,
+      projectHash: getProjectHash(cwd),
+      sessionId,
+      turn: 1,
+      provider: input.provider,
+      model: result.resolvedModel ?? model,
+      createdAt,
+      elapsedMs: Math.round(performance.now() - startedAt),
+      prompt: input.prompt,
+      response: result.response,
+    });
+  }
+
   return buildResponse({
     sessionId,
     provider: input.provider,
     result,
     turn: 1,
-    createdAt: isoNow(),
+    createdAt,
     startedAt,
+    artifactPath,
   });
 }

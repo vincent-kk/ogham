@@ -1,6 +1,33 @@
 (function () {
   'use strict';
 
+  // Mirror src/constants/defaults.ts (DEFAULT_CONFIG) — keep in sync.
+  var DEFAULT_RATIO_VALUE = 50;
+  var DEFAULT_MODEL = 'auto';
+  var DEFAULT_SESSION_TTL_HOURS = 72;
+  var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
+  var DEFAULT_OPTION_FLAGS = {
+    gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
+    codex: { yolo: false, sandbox: 'workspace-write' },
+  };
+  var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
+
+  var RATIO_MIN = 0;
+  var RATIO_MAX = 100;
+  var SESSION_TTL_HOURS_MIN = 1;
+  var SESSION_TTL_HOURS_MAX = 720;
+  var SPAWN_TIMEOUT_MS_MIN = 1000;
+  var SPAWN_TIMEOUT_MS_MAX = 1800000;
+
+  var GEMINI_BACKENDS = ['auto', 'docker', 'podman', 'sandbox-exec'];
+  var CODEX_SANDBOX_MODES = [
+    'read-only',
+    'workspace-write',
+    'danger-full-access',
+    'off',
+  ];
+  var ARTIFACTS_LOCATIONS = ['project', 'user'];
+
   var STRENGTH_LABELS = {
     '-2': 'Subtle',
     '-1': 'Soft',
@@ -22,21 +49,36 @@
   var toggleGemini = $('#toggle-gemini');
   var geminiPct = $('#gemini-pct');
   var codexPct = $('#codex-pct');
+  var codexHint = $('#codex-hint');
+  var geminiHint = $('#gemini-hint');
+  var codexInstallHint = $('#codex-install-hint');
+  var geminiInstallHint = $('#gemini-install-hint');
   var ratioWarn = $('#ratio-warn');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
   var kwGemini = $('#kw-gemini');
   var kwCodex = $('#kw-codex');
   var ttl = $('#ttl');
-  var multiAgent = $('#multi-agent');
+  var spawnTimeoutMs = $('#spawn-timeout-ms');
+  var geminiYolo = $('#gemini-yolo');
+  var geminiSandbox = $('#gemini-sandbox');
+  var geminiBackendWrap = $('#gemini-backend-wrap');
+  var codexYolo = $('#codex-yolo');
+  var codexSandboxWrap = $('#codex-sandbox-wrap');
+  var codexSandboxHint = $('#codex-sandbox-hint');
+  var codexFullAccessWarning = $('#codex-full-access-warning');
+  var artifactsEnabled = $('#artifacts-enabled');
+  var artifactsLocationWrap = $('#artifacts-location-wrap');
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
 
   var ratioState = {
-    gemini: { value: 50, enabled: true },
-    codex: { value: 50, enabled: true },
+    gemini: { value: DEFAULT_RATIO_VALUE, enabled: true },
+    codex: { value: DEFAULT_RATIO_VALUE, enabled: true },
   };
+
+  var providerAvailable = { codex: true, gemini: true };
 
   function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
@@ -91,27 +133,48 @@
     toggleGemini.setAttribute('aria-checked', String(gEn));
     toggleCodex.setAttribute('aria-checked', String(cEn));
 
+    toggleCodex.setAttribute(
+      'data-unavailable',
+      String(!providerAvailable.codex),
+    );
+    toggleGemini.setAttribute(
+      'data-unavailable',
+      String(!providerAvailable.gemini),
+    );
+
+    codexHint.textContent = providerAvailable.codex
+      ? 'click to toggle'
+      : 'not installed';
+    geminiHint.textContent = providerAvailable.gemini
+      ? 'click to toggle'
+      : 'not installed';
+
     ratioWarn.hidden = gEn || cEn;
   }
 
   function onSlider() {
     if (ratioSlider.disabled) return;
-    var g = clamp(Math.floor(Number(ratioSlider.value) || 0), 0, 100);
+    var g = clamp(
+      Math.floor(Number(ratioSlider.value) || 0),
+      RATIO_MIN,
+      RATIO_MAX,
+    );
     ratioState.gemini.value = g;
-    ratioState.codex.value = 100 - g;
+    ratioState.codex.value = RATIO_MAX - g;
     renderRatio();
   }
 
   function toggleProvider(name) {
+    if (!providerAvailable[name]) return;
     var entry = ratioState[name];
     var other = name === 'gemini' ? ratioState.codex : ratioState.gemini;
     if (entry.enabled) {
       entry.enabled = false;
     } else {
       entry.enabled = true;
-      if (entry.value <= 0) entry.value = 50;
+      if (entry.value <= 0) entry.value = DEFAULT_RATIO_VALUE;
       if (other.enabled) {
-        other.value = clamp(100 - entry.value, 0, 100);
+        other.value = clamp(RATIO_MAX - entry.value, RATIO_MIN, RATIO_MAX);
       }
     }
     renderRatio();
@@ -124,15 +187,114 @@
   function readProviderRatio(raw, fallback) {
     if (raw && typeof raw === 'object' && 'value' in raw) {
       return {
-        value: clamp(Math.floor(Number(raw.value) || 0), 0, 100),
+        value: clamp(Math.floor(Number(raw.value) || 0), RATIO_MIN, RATIO_MAX),
         enabled: Boolean(raw.enabled),
       };
     }
     if (typeof raw === 'number') {
-      var n = clamp(Math.floor(raw), 0, 100);
+      var n = clamp(Math.floor(raw), RATIO_MIN, RATIO_MAX);
       return { value: n, enabled: n > 0 };
     }
     return { value: fallback.value, enabled: fallback.enabled };
+  }
+
+  function setRadio(name, value, allowed) {
+    var radios = document.querySelectorAll('input[name="' + name + '"]');
+    var pick = allowed.indexOf(value) >= 0 ? value : allowed[0];
+    for (var i = 0; i < radios.length; i += 1) {
+      radios[i].checked = radios[i].value === pick;
+    }
+  }
+
+  function readRadio(name, allowed, fallback) {
+    var sel = document.querySelector('input[name="' + name + '"]:checked');
+    if (sel && allowed.indexOf(sel.value) >= 0) return sel.value;
+    return fallback;
+  }
+
+  function syncGeminiBackendInert() {
+    if (geminiSandbox.checked) {
+      geminiBackendWrap.classList.remove('is-inert');
+    } else {
+      geminiBackendWrap.classList.add('is-inert');
+    }
+  }
+
+  function syncCodexFullAccessWarning() {
+    var sel = document.querySelector(
+      '#codex-sandbox-radio input[type="radio"]:checked',
+    );
+    codexFullAccessWarning.hidden = !(
+      sel && sel.value === 'danger-full-access'
+    );
+  }
+
+  function syncCodexSandboxInert() {
+    var inert = codexYolo.checked;
+    var radios = document.querySelectorAll(
+      '#codex-sandbox-radio input[type="radio"]',
+    );
+    for (var i = 0; i < radios.length; i += 1) {
+      radios[i].disabled = inert;
+    }
+    if (inert) {
+      codexSandboxWrap.classList.add('is-inert');
+      codexSandboxHint.hidden = false;
+    } else {
+      codexSandboxWrap.classList.remove('is-inert');
+      codexSandboxHint.hidden = true;
+    }
+    syncCodexFullAccessWarning();
+  }
+
+  function syncArtifactsLocationInert() {
+    if (artifactsEnabled.checked) {
+      artifactsLocationWrap.classList.remove('is-inert');
+    } else {
+      artifactsLocationWrap.classList.add('is-inert');
+    }
+  }
+
+  function applyOptionFlags(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
+    var g = src.gemini && typeof src.gemini === 'object' ? src.gemini : {};
+    var c = src.codex && typeof src.codex === 'object' ? src.codex : {};
+    geminiYolo.checked = Boolean(g.yolo);
+    geminiSandbox.checked =
+      typeof g.sandbox === 'boolean'
+        ? g.sandbox
+        : DEFAULT_OPTION_FLAGS.gemini.sandbox;
+    setRadio(
+      'gemini-backend',
+      typeof g.sandbox_backend === 'string'
+        ? g.sandbox_backend
+        : DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+      GEMINI_BACKENDS,
+    );
+    codexYolo.checked = Boolean(c.yolo);
+    setRadio(
+      'codex-sandbox',
+      typeof c.sandbox === 'string'
+        ? c.sandbox
+        : DEFAULT_OPTION_FLAGS.codex.sandbox,
+      CODEX_SANDBOX_MODES,
+    );
+    syncGeminiBackendInert();
+    syncCodexSandboxInert();
+    syncCodexFullAccessWarning();
+  }
+
+  function applyArtifacts(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_ARTIFACTS;
+    artifactsEnabled.checked = Boolean(src.enabled);
+    setRadio(
+      'artifacts-location',
+      typeof src.location === 'string'
+        ? src.location
+        : DEFAULT_ARTIFACTS.location,
+      ARTIFACTS_LOCATIONS,
+    );
+    syncArtifactsLocationInert();
   }
 
   function applyConfig(cfg) {
@@ -144,7 +306,9 @@
     kwGemini.value = cfg.keywords.gemini;
     kwCodex.value = cfg.keywords.codex;
     ttl.value = cfg.session_ttl_hours;
-    multiAgent.checked = false;
+    spawnTimeoutMs.value = cfg.spawn_timeout_ms;
+    applyOptionFlags(cfg.option_flags);
+    applyArtifacts(cfg.artifacts);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -152,6 +316,39 @@
 
     renderRatio();
     updateStrengthLabel();
+  }
+
+  function buildOptionFlags() {
+    return {
+      gemini: {
+        yolo: Boolean(geminiYolo.checked),
+        sandbox: Boolean(geminiSandbox.checked),
+        sandbox_backend: readRadio(
+          'gemini-backend',
+          GEMINI_BACKENDS,
+          DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+        ),
+      },
+      codex: {
+        yolo: Boolean(codexYolo.checked),
+        sandbox: readRadio(
+          'codex-sandbox',
+          CODEX_SANDBOX_MODES,
+          DEFAULT_OPTION_FLAGS.codex.sandbox,
+        ),
+      },
+    };
+  }
+
+  function buildArtifacts() {
+    return {
+      enabled: Boolean(artifactsEnabled.checked),
+      location: readRadio(
+        'artifacts-location',
+        ARTIFACTS_LOCATIONS,
+        DEFAULT_ARTIFACTS.location,
+      ),
+    };
   }
 
   function buildConfig() {
@@ -172,12 +369,23 @@
         gemini: kwGemini.value.trim(),
         codex: kwCodex.value.trim(),
       },
-      default_model: modelEl ? modelEl.value : 'auto',
-      default_options: { multi_agent: false },
+      default_model: modelEl ? modelEl.value : DEFAULT_MODEL,
+      option_flags: buildOptionFlags(),
       session_ttl_hours: Math.max(
-        1,
-        Math.min(720, Math.floor(Number(ttl.value) || 72)),
+        SESSION_TTL_HOURS_MIN,
+        Math.min(
+          SESSION_TTL_HOURS_MAX,
+          Math.floor(Number(ttl.value) || DEFAULT_SESSION_TTL_HOURS),
+        ),
       ),
+      spawn_timeout_ms: Math.max(
+        SPAWN_TIMEOUT_MS_MIN,
+        Math.min(
+          SPAWN_TIMEOUT_MS_MAX,
+          Math.floor(Number(spawnTimeoutMs.value) || DEFAULT_SPAWN_TIMEOUT_MS),
+        ),
+      ),
+      artifacts: buildArtifacts(),
     };
   }
 
@@ -194,9 +402,28 @@
     return false;
   }
 
+  async function fetchProviderStatus() {
+    try {
+      var res = await fetch(withToken('/provider-status'));
+      if (!res.ok) return;
+      var body = await res.json();
+      providerAvailable.codex = Boolean(body.codex && body.codex.available);
+      providerAvailable.gemini = Boolean(body.gemini && body.gemini.available);
+    } catch (e) {
+      // network/transient — leave defaults (both true) so the user is not locked out
+      return;
+    }
+    if (!providerAvailable.codex) ratioState.codex.enabled = false;
+    if (!providerAvailable.gemini) ratioState.gemini.enabled = false;
+    codexInstallHint.hidden = providerAvailable.codex;
+    geminiInstallHint.hidden = providerAvailable.gemini;
+    renderRatio();
+  }
+
   async function loadConfig() {
     if (tryInlineState()) {
       setStatus('', '');
+      await fetchProviderStatus();
       return;
     }
     setStatus('', 'Loading…');
@@ -209,6 +436,7 @@
     } catch (err) {
       setStatus('error', 'Failed to load config: ' + err.message);
     }
+    await fetchProviderStatus();
   }
 
   async function save(closeAfter) {
@@ -261,6 +489,14 @@
     toggleProvider('codex');
   });
   strength.addEventListener('input', updateStrengthLabel);
+  geminiSandbox.addEventListener('change', syncGeminiBackendInert);
+  codexYolo.addEventListener('change', syncCodexSandboxInert);
+  document
+    .querySelectorAll('#codex-sandbox-radio input[type="radio"]')
+    .forEach(function (r) {
+      r.addEventListener('change', syncCodexFullAccessWarning);
+    });
+  artifactsEnabled.addEventListener('change', syncArtifactsLocationInert);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     save(false);

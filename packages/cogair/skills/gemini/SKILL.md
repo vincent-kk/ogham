@@ -2,7 +2,7 @@
 name: gemini
 description: '[cogair] Delegate to Google Gemini CLI via cogair. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude''s cutoff. Trigger: "ask gemini", "gemini 호출", "제미니에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] [--option key=value]... -- "prompt"'
+argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
 ---
 
 # gemini
@@ -26,24 +26,18 @@ Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cogair session.
 - `--model high|mid|low|auto` — model alias (defaults to config `default_model`).
-- `--option key=value` — repeatable. Accumulate into an `options` object.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
-For each `--option key=value`, infer the value type:
-
-- `true` / `false` → boolean.
-- Integer or float literal → number.
-- Valid JSON object/array string → parsed JSON.
-- Otherwise → raw string.
+Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model` and `options`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, model?, options? })`. Omit `model` when alias is `auto` or unspecified. Omit `options` when no `--option` flags were given.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, model? })`. Omit `model` when alias is `auto` or unspecified.
 
 ## Response handling
 
-Always surface the response's `session_id` and `meta.ignored_options` to the user — the session id is needed to continue later, and ignored options signal that some `--option` flags fell outside the v1 whitelist. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span.
+Always surface the response's `session_id` to the user — the session id is needed to continue later. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span.
 
 On `status: 'failure'`, dispatch by `error.code`:
 

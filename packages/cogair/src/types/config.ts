@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import { ConversationOptionsSchema, ModelAliasSchema } from './conversation.js';
+import { ModelAliasSchema } from './conversation.js';
+import { CodexFlagsSchema, GeminiFlagsSchema } from './dispatch.js';
 
 export const InterventionStrengthSchema = z.union([
   z.literal(-2),
@@ -33,13 +34,33 @@ export const KeywordsSchema = z.object({
 
 export type Keywords = z.infer<typeof KeywordsSchema>;
 
+export const OptionFlagsSchema = z.object({
+  gemini: GeminiFlagsSchema,
+  codex: CodexFlagsSchema,
+});
+
+export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
+
+export const ArtifactLocationSchema = z.enum(['project', 'user']);
+
+export type ArtifactLocation = z.infer<typeof ArtifactLocationSchema>;
+
+export const ArtifactsConfigSchema = z.object({
+  enabled: z.boolean(),
+  location: ArtifactLocationSchema,
+});
+
+export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
+
 export const ConfigSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
   keywords: KeywordsSchema,
   default_model: ModelAliasSchema,
-  default_options: ConversationOptionsSchema,
+  option_flags: OptionFlagsSchema,
   session_ttl_hours: z.number().int().positive(),
+  spawn_timeout_ms: z.number().int().positive(),
+  artifacts: ArtifactsConfigSchema,
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

@@ -7,7 +7,7 @@ Guidance for Claude Code when working in this package.
 `@ogham/cogair` is a Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI**. It exposes:
 
 - 3 MCP tools — `start_conversation`, `continue_conversation`, `open_settings`.
-- 3 user-invocable skills — `/setup`, `/codex`, `/gemini`.
+- 4 user-invocable skills — `/setup`, `/codex`, `/gemini`, `/crosscheck`.
 - 2 lifecycle hooks — `SessionStart`, `UserPromptSubmit`.
 - No agents. Delegation is the user's call, mediated by skills + hooks.
 
@@ -29,7 +29,7 @@ yarn version:sync       # package.json → src/version.ts
 ## Architecture
 
 ```
-Skills (/setup, /codex, /gemini)        Layer 3 (user) — thin tool-call mappers
+Skills (/setup, /codex, /gemini, /crosscheck)    Layer 3 (user) — thin tool-call mappers
         │
         ▼
 MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
@@ -61,7 +61,7 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 
 ## Key Files
 
-- `src/mcp/server/server.ts` — registers the 3 MCP tools
+- `src/mcp/server/lifecycle/createServer.ts` — registers the 3 MCP tools
 - `src/mcp/tools/openSettings/` — local settings web UI (one-time-token auth, 5-minute idle shutdown)
 - `src/dispatcher/codex/modelAlias.ts`, `src/dispatcher/gemini/modelAlias.ts` — single source of truth for tier → concrete model ID mapping
 - `src/hooks/shared/loadConfig.ts` — hook-scoped config loader (no zod; migrates legacy schemas read-only)
@@ -74,9 +74,9 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 
 ## Plugin Runtime
 
-- Skill names use **no plugin prefix** (`setup`, `codex`, `gemini`) — directory names match skill names.
+- Skill names use **no plugin prefix** (`setup`, `codex`, `gemini`, `crosscheck`) — directory names match skill names.
 - MCP server name is `tools`, so tools are referenced as `mcp_tools_<name>` from skills and other consumers.
-- Hook bundle cap: **10 KB LIGHT tier**. Both injectStatic and injectDynamic land near 3.3 KB minified.
+- Hook bundle cap: **10 KB LIGHT tier** (enforced by `scripts/buildHooks.mjs`). Both injectStatic and injectDynamic currently land near 3.3 KB minified.
 - Forbidden in hook bundles: zod, MCP SDK, fast-glob, lodash, moment, date-fns — enforced by `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs`.
 
 ## Development Notes
@@ -85,6 +85,7 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 - **Tests**: `src/**/__tests__/**/*.test.ts`. Use temp dirs via `vitest.setup.ts` for any test that touches `~/.claude/plugins/cogair/`.
 - **Mock CLIs**: dispatcher integration tests use scripted CLIs on a fake `PATH` to cover success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options.
 - **Sessions**: project-hash-scoped (`sha256(cwd).slice(0, 12)`). `continue_conversation` returns `error.code: 'unknown'` when the session belongs to a different cwd — there is no automatic cross-project fallback.
+- **Gemini sandbox**: `GEMINI_CLI_TRUST_WORKSPACE=true` is always injected into gemini spawns (non-interactive agent mode); it is not toggleable via `/setup`. Workspace-restricted gemini execution is not currently supported.
 - **Model IDs**: hard-coded model strings belong **only** in `src/dispatcher/<provider>/modelAlias.ts`. Skills, README, CLAUDE.md, INTENT.md, and DETAIL.md describe **tiers** (`high`/`mid`/`low`/`auto`), never concrete model strings — upstream CLI renames must not ripple beyond one file.
 
 ## References
@@ -99,5 +100,3 @@ Dependency direction is unidirectional. Hooks are isolated thin scripts (Node bu
 [web-ui.md](../../.metadata/cogair/web-ui.md),
 [provider-dispatch.md](../../.metadata/cogair/provider-dispatch.md),
 [roadmap.md](../../.metadata/cogair/roadmap.md).
-
-`PLAN.md` in this directory tracks per-phase implementation status (Phase 0–8).

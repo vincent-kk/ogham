@@ -1,6 +1,6 @@
 # Hooks — filid pattern
 
-filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 전용 노드, 실제 구현은 `src/hooks/<name>/<name>.entry.ts` → esbuild 번들 → `bridge/<name>.mjs`.
+filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 전용 노드, 실제 구현은 `src/hooks/<name>/build/<name>.entry.ts` → esbuild 번들 → `bridge/<name>.mjs`.
 
 `hooks.json` 에서 hook 을 호출할 때는 `libs/run.cjs` cross-platform runner 를 거친다.
 
@@ -55,7 +55,8 @@ src/hooks/
 │   ├── INTENT.md
 │   ├── index.ts                     # barrel
 │   ├── injectStatic.ts              # buildStaticPayload(config) → string
-│   ├── injectStatic.entry.ts        # 진입점 (process.stdout.write + exit 0)
+│   ├── build/
+│   │   └── injectStatic.entry.ts    # 진입점 (process.stdout.write + exit 0)
 │   └── utils/
 │       ├── tonePhrase.ts            # intervention_strength → tone string
 │       └── joinKeywords.ts          # provider keywords → 한 줄 표시
@@ -63,7 +64,8 @@ src/hooks/
 │   ├── INTENT.md
 │   ├── index.ts                     # barrel
 │   ├── injectDynamic.ts             # buildDynamicPayload(config, counter) → string
-│   ├── injectDynamic.entry.ts
+│   ├── build/
+│   │   └── injectDynamic.entry.ts
 │   └── utils/
 │       ├── loadCounter.ts           # fs read + parent-pid 비교 후 0 표시 결정
 │       └── formatRatio.ts           # current vs target ratio + drift

@@ -6,12 +6,40 @@ export type ModelAlias = 'high' | 'mid' | 'low' | 'auto';
 
 export type InterventionStrength = -2 | -1 | 0 | 1 | 2;
 
+export type GeminiSandboxBackend =
+  | 'auto'
+  | 'docker'
+  | 'podman'
+  | 'sandbox-exec';
+
+export type CodexSandboxMode =
+  | 'read-only'
+  | 'workspace-write'
+  | 'danger-full-access'
+  | 'off';
+
+export interface GeminiFlags {
+  yolo: boolean;
+  sandbox: boolean;
+  sandbox_backend: GeminiSandboxBackend;
+}
+
+export interface CodexFlags {
+  yolo: boolean;
+  sandbox: CodexSandboxMode;
+}
+
+export interface OptionFlags {
+  gemini: GeminiFlags;
+  codex: CodexFlags;
+}
+
 export interface HookConfig {
   ratio: Ratio;
   intervention_strength: InterventionStrength;
   keywords: { gemini: string; codex: string };
   default_model: ModelAlias;
-  default_options: Record<string, unknown>;
+  option_flags: OptionFlags;
 }
 
 export interface HookCounter {

@@ -1,9 +1,13 @@
+import { rm } from 'node:fs/promises';
+
+import { logger } from '../../../lib/logger.js';
 import type {
   ConversationOptions,
   DispatchOptions,
   DispatchResult,
   DispatchResumeOptions,
   Dispatcher,
+  GeminiFlags,
 } from '../../../types/index.js';
 import { computeIgnoredOptions } from '../../utils/computeIgnoredOptions.js';
 import { buildPromptArgs } from '../utils/buildPromptArgs.js';
@@ -14,11 +18,22 @@ import { resolveResumeIndex } from '../utils/resolveResumeIndex.js';
 
 import { resolveGeminiModel } from './modelAlias.js';
 
+async function cleanupCwdOnTimeout(cwd: string): Promise<void> {
+  try {
+    await rm(cwd, { recursive: true, force: true });
+  } catch (err) {
+    logger.warn('gemini cwd cleanup failed after timeout', {
+      cwd,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
 const supportedOptions: ReadonlySet<keyof ConversationOptions> = new Set();
 
-export const geminiDispatcher: Dispatcher = {
+export const geminiDispatcher: Dispatcher<GeminiFlags> = {
   supportedOptions,
-  async start(args: DispatchOptions): Promise<DispatchResult> {
+  async start(args: DispatchOptions<GeminiFlags>): Promise<DispatchResult> {
     const ignoredOptions = computeIgnoredOptions(
       args.options,
       supportedOptions,
@@ -28,9 +43,16 @@ export const geminiDispatcher: Dispatcher = {
 
     const callResult = await callGemini(
       cwd,
-      buildPromptArgs(model, args.prompt),
+      buildPromptArgs({ model, prompt: args.prompt, flags: args.flags }),
+      {
+        sandboxBackend: args.flags.sandbox_backend,
+        timeoutMs: args.spawnTimeoutMs,
+      },
     );
     if (callResult.status === 'failure') {
+      if (callResult.timedOut) {
+        void cleanupCwdOnTimeout(cwd);
+      }
       return {
         status: 'failure',
         response: null,
@@ -41,7 +63,7 @@ export const geminiDispatcher: Dispatcher = {
       };
     }
 
-    const capture = await captureSessionUuid(cwd);
+    const capture = await captureSessionUuid(cwd, args.spawnTimeoutMs);
     if (capture.uuid === null) {
       return {
         status: 'failure',
@@ -63,7 +85,9 @@ export const geminiDispatcher: Dispatcher = {
     };
   },
 
-  async resume(args: DispatchResumeOptions): Promise<DispatchResult> {
+  async resume(
+    args: DispatchResumeOptions<GeminiFlags>,
+  ): Promise<DispatchResult> {
     const ignoredOptions = computeIgnoredOptions(
       args.options,
       supportedOptions,
@@ -71,7 +95,11 @@ export const geminiDispatcher: Dispatcher = {
     const cwd = await ensureCwd(args.sessionId);
     const model = resolveGeminiModel(args.model);
 
-    const resolved = await resolveResumeIndex(cwd, args.externalSessionRef);
+    const resolved = await resolveResumeIndex(
+      cwd,
+      args.externalSessionRef,
+      args.spawnTimeoutMs,
+    );
     if (resolved.index === null) {
       return {
         status: 'failure',
@@ -85,8 +113,20 @@ export const geminiDispatcher: Dispatcher = {
 
     const callResult = await callGemini(
       cwd,
-      buildPromptArgs(model, args.prompt, resolved.index),
+      buildPromptArgs({
+        model,
+        prompt: args.prompt,
+        flags: args.flags,
+        resumeIndex: resolved.index,
+      }),
+      {
+        sandboxBackend: args.flags.sandbox_backend,
+        timeoutMs: args.spawnTimeoutMs,
+      },
     );
+    if (callResult.timedOut) {
+      void cleanupCwdOnTimeout(cwd);
+    }
     return {
       status: callResult.status,
       response: callResult.response,

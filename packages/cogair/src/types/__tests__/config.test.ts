@@ -34,4 +34,37 @@ describe('ConfigSchema', () => {
       ConfigSchema.parse({ ...DEFAULT_CONFIG, session_ttl_hours: 0 }),
     ).toThrow();
   });
+
+  it('rejects unknown gemini sandbox_backend', () => {
+    expect(() =>
+      ConfigSchema.parse({
+        ...DEFAULT_CONFIG,
+        option_flags: {
+          ...DEFAULT_CONFIG.option_flags,
+          gemini: {
+            ...DEFAULT_CONFIG.option_flags.gemini,
+            sandbox_backend: 'firejail',
+          },
+        },
+      }),
+    ).toThrow();
+  });
+
+  it('rejects unknown codex sandbox mode', () => {
+    expect(() =>
+      ConfigSchema.parse({
+        ...DEFAULT_CONFIG,
+        option_flags: {
+          ...DEFAULT_CONFIG.option_flags,
+          codex: { yolo: false, sandbox: 'whatever' },
+        },
+      }),
+    ).toThrow();
+  });
+
+  it('rejects missing option_flags', () => {
+    const { option_flags: _omit, ...rest } = DEFAULT_CONFIG;
+    void _omit;
+    expect(() => ConfigSchema.parse(rest)).toThrow();
+  });
 });
