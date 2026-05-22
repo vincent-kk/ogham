@@ -9,6 +9,19 @@
     2: 'Strong',
   };
 
+  var DEFAULT_OPTION_FLAGS = {
+    gemini: { yolo: false, sandbox: true, sandbox_backend: 'auto' },
+    codex: { yolo: false, sandbox: 'read-only' },
+  };
+
+  var GEMINI_BACKENDS = ['auto', 'docker', 'podman', 'sandbox-exec'];
+  var CODEX_SANDBOX_MODES = [
+    'read-only',
+    'workspace-write',
+    'danger-full-access',
+    'off',
+  ];
+
   var params = new URLSearchParams(location.search);
   var token = params.get('token') || '';
 
@@ -28,7 +41,12 @@
   var kwGemini = $('#kw-gemini');
   var kwCodex = $('#kw-codex');
   var ttl = $('#ttl');
-  var multiAgent = $('#multi-agent');
+  var geminiYolo = $('#gemini-yolo');
+  var geminiSandbox = $('#gemini-sandbox');
+  var geminiBackendWrap = $('#gemini-backend-wrap');
+  var codexYolo = $('#codex-yolo');
+  var codexSandboxWrap = $('#codex-sandbox-wrap');
+  var codexSandboxHint = $('#codex-sandbox-hint');
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
@@ -135,6 +153,76 @@
     return { value: fallback.value, enabled: fallback.enabled };
   }
 
+  function setRadio(name, value, allowed) {
+    var radios = document.querySelectorAll('input[name="' + name + '"]');
+    var pick = allowed.indexOf(value) >= 0 ? value : allowed[0];
+    for (var i = 0; i < radios.length; i += 1) {
+      radios[i].checked = radios[i].value === pick;
+    }
+  }
+
+  function readRadio(name, allowed, fallback) {
+    var sel = document.querySelector(
+      'input[name="' + name + '"]:checked',
+    );
+    if (sel && allowed.indexOf(sel.value) >= 0) return sel.value;
+    return fallback;
+  }
+
+  function syncGeminiBackendInert() {
+    if (geminiSandbox.checked) {
+      geminiBackendWrap.classList.remove('is-inert');
+    } else {
+      geminiBackendWrap.classList.add('is-inert');
+    }
+  }
+
+  function syncCodexSandboxInert() {
+    var inert = codexYolo.checked;
+    var radios = document.querySelectorAll(
+      '#codex-sandbox-radio input[type="radio"]',
+    );
+    for (var i = 0; i < radios.length; i += 1) {
+      radios[i].disabled = inert;
+    }
+    if (inert) {
+      codexSandboxWrap.classList.add('is-inert');
+      codexSandboxHint.hidden = false;
+    } else {
+      codexSandboxWrap.classList.remove('is-inert');
+      codexSandboxHint.hidden = true;
+    }
+  }
+
+  function applyOptionFlags(raw) {
+    var src =
+      raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
+    var g = src.gemini && typeof src.gemini === 'object' ? src.gemini : {};
+    var c = src.codex && typeof src.codex === 'object' ? src.codex : {};
+    geminiYolo.checked = Boolean(g.yolo);
+    geminiSandbox.checked =
+      typeof g.sandbox === 'boolean'
+        ? g.sandbox
+        : DEFAULT_OPTION_FLAGS.gemini.sandbox;
+    setRadio(
+      'gemini-backend',
+      typeof g.sandbox_backend === 'string'
+        ? g.sandbox_backend
+        : DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+      GEMINI_BACKENDS,
+    );
+    codexYolo.checked = Boolean(c.yolo);
+    setRadio(
+      'codex-sandbox',
+      typeof c.sandbox === 'string'
+        ? c.sandbox
+        : DEFAULT_OPTION_FLAGS.codex.sandbox,
+      CODEX_SANDBOX_MODES,
+    );
+    syncGeminiBackendInert();
+    syncCodexSandboxInert();
+  }
+
   function applyConfig(cfg) {
     var r = cfg.ratio || {};
     ratioState.gemini = readProviderRatio(r.gemini, ratioState.gemini);
@@ -144,7 +232,7 @@
     kwGemini.value = cfg.keywords.gemini;
     kwCodex.value = cfg.keywords.codex;
     ttl.value = cfg.session_ttl_hours;
-    multiAgent.checked = false;
+    applyOptionFlags(cfg.option_flags);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -152,6 +240,28 @@
 
     renderRatio();
     updateStrengthLabel();
+  }
+
+  function buildOptionFlags() {
+    return {
+      gemini: {
+        yolo: Boolean(geminiYolo.checked),
+        sandbox: Boolean(geminiSandbox.checked),
+        sandbox_backend: readRadio(
+          'gemini-backend',
+          GEMINI_BACKENDS,
+          DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+        ),
+      },
+      codex: {
+        yolo: Boolean(codexYolo.checked),
+        sandbox: readRadio(
+          'codex-sandbox',
+          CODEX_SANDBOX_MODES,
+          DEFAULT_OPTION_FLAGS.codex.sandbox,
+        ),
+      },
+    };
   }
 
   function buildConfig() {
@@ -173,7 +283,7 @@
         codex: kwCodex.value.trim(),
       },
       default_model: modelEl ? modelEl.value : 'auto',
-      default_options: { multi_agent: false },
+      option_flags: buildOptionFlags(),
       session_ttl_hours: Math.max(
         1,
         Math.min(720, Math.floor(Number(ttl.value) || 72)),
@@ -261,6 +371,8 @@
     toggleProvider('codex');
   });
   strength.addEventListener('input', updateStrengthLabel);
+  geminiSandbox.addEventListener('change', syncGeminiBackendInert);
+  codexYolo.addEventListener('change', syncCodexSandboxInert);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     save(false);

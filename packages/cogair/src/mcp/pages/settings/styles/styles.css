@@ -476,6 +476,69 @@ input[type='range']:focus-visible {
   color: var(--fg);
 }
 
+/* ───────────────────── Option flags ───────────────────── */
+
+.flag-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.flag-panel + .flag-panel {
+  margin-top: 12px;
+}
+
+.flag-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.flag-row {
+  width: 100%;
+  min-height: 32px;
+}
+
+.flag-desc {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+
+.flag-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.flag-field-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.flag-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--fg-faint);
+  line-height: 1.6;
+}
+
+.is-inert {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .actions {
   display: flex;
   gap: 12px;

@@ -11,7 +11,7 @@ export function buildStaticPayload(config: HookConfig): string {
   const activeLine =
     active.length === 0 ? 'none — run /setup' : active.join(', ');
 
-  const options = JSON.stringify(config.default_options);
+  const flags = JSON.stringify(config.option_flags);
 
   return [
     '[cogair] Static policy',
@@ -26,7 +26,7 @@ export function buildStaticPayload(config: HookConfig): string {
     '',
     'Routing guidance',
     `- Default model alias: ${config.default_model}`,
-    `- Default options:    ${options}`,
+    `- Option flags:        ${flags}`,
     "- Delegate when (a) a keyword matches the provider's domain,",
     "  (b) the task suits the provider's strength (gemini: live search, large context;",
     '  codex: heavy code, sandboxed shell), or',
