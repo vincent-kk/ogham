@@ -29,11 +29,12 @@ export async function handleContinueConversation(
     return {
       status: 'failure',
       session_id: input.session_id,
-      provider: 'codex',
+      provider: null,
       response: null,
       error: {
         code: 'unknown',
-        message: 'Session not found in the current project',
+        message:
+          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember whether it was a codex or gemini session, retry with /cogair:codex --continue <id> or /cogair:gemini --continue <id>; otherwise start a fresh session.',
       },
       meta: {
         turn: 0,
@@ -57,6 +58,7 @@ export async function handleContinueConversation(
           cwd: session.cwd,
           externalSessionRef: session.external_session_ref,
           flags: config.option_flags.codex,
+          spawnTimeoutMs: config.spawn_timeout_ms,
         })
       : await dispatchers.gemini.resume({
           prompt: input.prompt,
@@ -66,6 +68,7 @@ export async function handleContinueConversation(
           cwd: session.cwd,
           externalSessionRef: session.external_session_ref,
           flags: config.option_flags.gemini,
+          spawnTimeoutMs: config.spawn_timeout_ms,
         });
 
   const nextTurn = session.turn_count + 1;

@@ -42,7 +42,7 @@ export type ConversationMeta = z.infer<typeof ConversationMetaSchema>;
 export const ConversationResponseSchema = z.object({
   status: z.enum(['success', 'failure']),
   session_id: z.string().uuid(),
-  provider: ProviderSchema,
+  provider: ProviderSchema.nullable(),
   response: z.string().nullable(),
   error: ConversationErrorSchema.nullable(),
   meta: ConversationMetaSchema,

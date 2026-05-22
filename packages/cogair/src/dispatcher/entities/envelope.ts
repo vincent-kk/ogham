@@ -8,7 +8,7 @@ import type {
 
 export interface BuildResponseArgs {
   sessionId: string;
-  provider: Provider;
+  provider: Provider | null;
   result: DispatchResult;
   turn: number;
   createdAt: string;
