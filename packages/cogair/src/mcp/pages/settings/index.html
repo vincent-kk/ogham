@@ -46,11 +46,17 @@
                 </span>
                 <span class="provider-meta">
                   <span class="provider-name">codex</span>
-                  <span class="provider-hint">click to toggle</span>
+                  <span class="provider-hint" id="codex-hint"
+                    >click to toggle</span
+                  >
                 </span>
                 <output id="codex-pct" class="provider-pct">50%</output>
               </button>
             </div>
+            <p class="install-hint" id="codex-install-hint" hidden>
+              Install: <code>npm install -g @openai/codex</code> — reload after
+              installing.
+            </p>
 
             <div class="ratio-slider-wrap">
               <input
@@ -82,11 +88,17 @@
                 </span>
                 <span class="provider-meta">
                   <span class="provider-name">gemini</span>
-                  <span class="provider-hint">click to toggle</span>
+                  <span class="provider-hint" id="gemini-hint"
+                    >click to toggle</span
+                  >
                 </span>
                 <output id="gemini-pct" class="provider-pct">50%</output>
               </button>
             </div>
+            <p class="install-hint" id="gemini-install-hint" hidden>
+              Install: <code>npm install -g @google/gemini-cli</code> — reload
+              after installing.
+            </p>
 
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
@@ -302,6 +314,47 @@
             <span>hours (1–720)</span>
             <input id="ttl" type="number" min="1" max="720" step="1" />
           </label>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Artifacts</h2>
+          <p class="section-help">
+            Mirror successful responses to disk as markdown files with YAML
+            front-matter. Useful for PR attachment and session review.
+            <code>artifact_path</code> is added to the envelope on success.
+          </p>
+          <label class="toggle">
+            <input id="artifacts-enabled" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">enabled</span>
+          </label>
+
+          <div class="flag-field" id="artifacts-location-wrap">
+            <span class="flag-field-label">location</span>
+            <div class="radio-row">
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="artifacts-location"
+                  value="project"
+                /><span>project</span></label
+              >
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="artifacts-location"
+                  value="user"
+                /><span>user</span></label
+              >
+            </div>
+            <p class="flag-hint">
+              <code>project</code> →
+              <code>&lt;cwd&gt;/.cogair/artifacts/</code>. <code>user</code> →
+              <code
+                >~/.claude/plugins/cogair/artifacts/&lt;projectHash&gt;/</code
+              >.
+            </p>
+          </div>
         </section>
 
         <div class="actions">

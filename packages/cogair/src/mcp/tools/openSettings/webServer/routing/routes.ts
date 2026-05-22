@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { verifyToken } from '../../../../../core/authToken/index.js';
 import { handleClose } from '../handlers/handleClose.js';
 import { handleGetConfig } from '../handlers/handleGetConfig.js';
+import { handleGetProviderStatus } from '../handlers/handleGetProviderStatus.js';
 import { handleGetRoot } from '../handlers/handleGetRoot.js';
 import { handleSave } from '../handlers/handleSave.js';
 import { sendJson } from '../utils/sendJson.js';
@@ -50,6 +51,8 @@ export function createRouteHandler(
       handleGetRoot(ctx, res).catch(onError);
     } else if (path === '/config' && req.method === 'GET') {
       handleGetConfig(ctx, res).catch(onError);
+    } else if (path === '/provider-status' && req.method === 'GET') {
+      handleGetProviderStatus(res).catch(onError);
     } else if (path === '/save' && req.method === 'POST') {
       handleSave(ctx, req, res).catch(onError);
     } else if (path === '/close' && req.method === 'POST') {

@@ -14,6 +14,8 @@
     codex: { yolo: false, sandbox: 'read-only' },
   };
 
+  var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
+
   var GEMINI_BACKENDS = ['auto', 'docker', 'podman', 'sandbox-exec'];
   var CODEX_SANDBOX_MODES = [
     'read-only',
@@ -21,6 +23,7 @@
     'danger-full-access',
     'off',
   ];
+  var ARTIFACTS_LOCATIONS = ['project', 'user'];
 
   var params = new URLSearchParams(location.search);
   var token = params.get('token') || '';
@@ -35,6 +38,10 @@
   var toggleGemini = $('#toggle-gemini');
   var geminiPct = $('#gemini-pct');
   var codexPct = $('#codex-pct');
+  var codexHint = $('#codex-hint');
+  var geminiHint = $('#gemini-hint');
+  var codexInstallHint = $('#codex-install-hint');
+  var geminiInstallHint = $('#gemini-install-hint');
   var ratioWarn = $('#ratio-warn');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
@@ -47,6 +54,8 @@
   var codexYolo = $('#codex-yolo');
   var codexSandboxWrap = $('#codex-sandbox-wrap');
   var codexSandboxHint = $('#codex-sandbox-hint');
+  var artifactsEnabled = $('#artifacts-enabled');
+  var artifactsLocationWrap = $('#artifacts-location-wrap');
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
@@ -55,6 +64,8 @@
     gemini: { value: 50, enabled: true },
     codex: { value: 50, enabled: true },
   };
+
+  var providerAvailable = { codex: true, gemini: true };
 
   function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
@@ -109,6 +120,22 @@
     toggleGemini.setAttribute('aria-checked', String(gEn));
     toggleCodex.setAttribute('aria-checked', String(cEn));
 
+    toggleCodex.setAttribute(
+      'data-unavailable',
+      String(!providerAvailable.codex),
+    );
+    toggleGemini.setAttribute(
+      'data-unavailable',
+      String(!providerAvailable.gemini),
+    );
+
+    codexHint.textContent = providerAvailable.codex
+      ? 'click to toggle'
+      : 'not installed';
+    geminiHint.textContent = providerAvailable.gemini
+      ? 'click to toggle'
+      : 'not installed';
+
     ratioWarn.hidden = gEn || cEn;
   }
 
@@ -121,6 +148,7 @@
   }
 
   function toggleProvider(name) {
+    if (!providerAvailable[name]) return;
     var entry = ratioState[name];
     var other = name === 'gemini' ? ratioState.codex : ratioState.gemini;
     if (entry.enabled) {
@@ -162,9 +190,7 @@
   }
 
   function readRadio(name, allowed, fallback) {
-    var sel = document.querySelector(
-      'input[name="' + name + '"]:checked',
-    );
+    var sel = document.querySelector('input[name="' + name + '"]:checked');
     if (sel && allowed.indexOf(sel.value) >= 0) return sel.value;
     return fallback;
   }
@@ -194,9 +220,16 @@
     }
   }
 
+  function syncArtifactsLocationInert() {
+    if (artifactsEnabled.checked) {
+      artifactsLocationWrap.classList.remove('is-inert');
+    } else {
+      artifactsLocationWrap.classList.add('is-inert');
+    }
+  }
+
   function applyOptionFlags(raw) {
-    var src =
-      raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
     var g = src.gemini && typeof src.gemini === 'object' ? src.gemini : {};
     var c = src.codex && typeof src.codex === 'object' ? src.codex : {};
     geminiYolo.checked = Boolean(g.yolo);
@@ -223,6 +256,19 @@
     syncCodexSandboxInert();
   }
 
+  function applyArtifacts(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_ARTIFACTS;
+    artifactsEnabled.checked = Boolean(src.enabled);
+    setRadio(
+      'artifacts-location',
+      typeof src.location === 'string'
+        ? src.location
+        : DEFAULT_ARTIFACTS.location,
+      ARTIFACTS_LOCATIONS,
+    );
+    syncArtifactsLocationInert();
+  }
+
   function applyConfig(cfg) {
     var r = cfg.ratio || {};
     ratioState.gemini = readProviderRatio(r.gemini, ratioState.gemini);
@@ -233,6 +279,7 @@
     kwCodex.value = cfg.keywords.codex;
     ttl.value = cfg.session_ttl_hours;
     applyOptionFlags(cfg.option_flags);
+    applyArtifacts(cfg.artifacts);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -264,6 +311,17 @@
     };
   }
 
+  function buildArtifacts() {
+    return {
+      enabled: Boolean(artifactsEnabled.checked),
+      location: readRadio(
+        'artifacts-location',
+        ARTIFACTS_LOCATIONS,
+        DEFAULT_ARTIFACTS.location,
+      ),
+    };
+  }
+
   function buildConfig() {
     var modelEl = document.querySelector('input[name="model"]:checked');
     return {
@@ -288,6 +346,7 @@
         1,
         Math.min(720, Math.floor(Number(ttl.value) || 72)),
       ),
+      artifacts: buildArtifacts(),
     };
   }
 
@@ -304,9 +363,28 @@
     return false;
   }
 
+  async function fetchProviderStatus() {
+    try {
+      var res = await fetch(withToken('/provider-status'));
+      if (!res.ok) return;
+      var body = await res.json();
+      providerAvailable.codex = Boolean(body.codex && body.codex.available);
+      providerAvailable.gemini = Boolean(body.gemini && body.gemini.available);
+    } catch (e) {
+      // network/transient — leave defaults (both true) so the user is not locked out
+      return;
+    }
+    if (!providerAvailable.codex) ratioState.codex.enabled = false;
+    if (!providerAvailable.gemini) ratioState.gemini.enabled = false;
+    codexInstallHint.hidden = providerAvailable.codex;
+    geminiInstallHint.hidden = providerAvailable.gemini;
+    renderRatio();
+  }
+
   async function loadConfig() {
     if (tryInlineState()) {
       setStatus('', '');
+      await fetchProviderStatus();
       return;
     }
     setStatus('', 'Loading…');
@@ -319,6 +397,7 @@
     } catch (err) {
       setStatus('error', 'Failed to load config: ' + err.message);
     }
+    await fetchProviderStatus();
   }
 
   async function save(closeAfter) {
@@ -373,6 +452,7 @@
   strength.addEventListener('input', updateStrengthLabel);
   geminiSandbox.addEventListener('change', syncGeminiBackendInert);
   codexYolo.addEventListener('change', syncCodexSandboxInert);
+  artifactsEnabled.addEventListener('change', syncArtifactsLocationInert);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     save(false);
