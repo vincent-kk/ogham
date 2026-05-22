@@ -1,20 +1,23 @@
 (function () {
   'use strict';
 
-  var STRENGTH_LABELS = {
-    '-2': 'Subtle',
-    '-1': 'Soft',
-    0: 'Neutral',
-    1: 'Active',
-    2: 'Strong',
-  };
-
+  // Mirror src/constants/defaults.ts (DEFAULT_CONFIG) — keep in sync.
+  var DEFAULT_RATIO_VALUE = 50;
+  var DEFAULT_MODEL = 'auto';
+  var DEFAULT_SESSION_TTL_HOURS = 72;
+  var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
   var DEFAULT_OPTION_FLAGS = {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
   };
-
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
+
+  var RATIO_MIN = 0;
+  var RATIO_MAX = 100;
+  var SESSION_TTL_HOURS_MIN = 1;
+  var SESSION_TTL_HOURS_MAX = 720;
+  var SPAWN_TIMEOUT_MS_MIN = 1000;
+  var SPAWN_TIMEOUT_MS_MAX = 1800000;
 
   var GEMINI_BACKENDS = ['auto', 'docker', 'podman', 'sandbox-exec'];
   var CODEX_SANDBOX_MODES = [
@@ -24,6 +27,14 @@
     'off',
   ];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
+
+  var STRENGTH_LABELS = {
+    '-2': 'Subtle',
+    '-1': 'Soft',
+    0: 'Neutral',
+    1: 'Active',
+    2: 'Strong',
+  };
 
   var params = new URLSearchParams(location.search);
   var token = params.get('token') || '';
@@ -62,8 +73,8 @@
   var saveCloseBtn = $('#save-close');
 
   var ratioState = {
-    gemini: { value: 50, enabled: true },
-    codex: { value: 50, enabled: true },
+    gemini: { value: DEFAULT_RATIO_VALUE, enabled: true },
+    codex: { value: DEFAULT_RATIO_VALUE, enabled: true },
   };
 
   var providerAvailable = { codex: true, gemini: true };
@@ -142,9 +153,13 @@
 
   function onSlider() {
     if (ratioSlider.disabled) return;
-    var g = clamp(Math.floor(Number(ratioSlider.value) || 0), 0, 100);
+    var g = clamp(
+      Math.floor(Number(ratioSlider.value) || 0),
+      RATIO_MIN,
+      RATIO_MAX,
+    );
     ratioState.gemini.value = g;
-    ratioState.codex.value = 100 - g;
+    ratioState.codex.value = RATIO_MAX - g;
     renderRatio();
   }
 
@@ -156,9 +171,9 @@
       entry.enabled = false;
     } else {
       entry.enabled = true;
-      if (entry.value <= 0) entry.value = 50;
+      if (entry.value <= 0) entry.value = DEFAULT_RATIO_VALUE;
       if (other.enabled) {
-        other.value = clamp(100 - entry.value, 0, 100);
+        other.value = clamp(RATIO_MAX - entry.value, RATIO_MIN, RATIO_MAX);
       }
     }
     renderRatio();
@@ -171,12 +186,16 @@
   function readProviderRatio(raw, fallback) {
     if (raw && typeof raw === 'object' && 'value' in raw) {
       return {
-        value: clamp(Math.floor(Number(raw.value) || 0), 0, 100),
+        value: clamp(
+          Math.floor(Number(raw.value) || 0),
+          RATIO_MIN,
+          RATIO_MAX,
+        ),
         enabled: Boolean(raw.enabled),
       };
     }
     if (typeof raw === 'number') {
-      var n = clamp(Math.floor(raw), 0, 100);
+      var n = clamp(Math.floor(raw), RATIO_MIN, RATIO_MAX);
       return { value: n, enabled: n > 0 };
     }
     return { value: fallback.value, enabled: fallback.enabled };
@@ -342,17 +361,22 @@
         gemini: kwGemini.value.trim(),
         codex: kwCodex.value.trim(),
       },
-      default_model: modelEl ? modelEl.value : 'auto',
+      default_model: modelEl ? modelEl.value : DEFAULT_MODEL,
       option_flags: buildOptionFlags(),
       session_ttl_hours: Math.max(
-        1,
-        Math.min(720, Math.floor(Number(ttl.value) || 72)),
+        SESSION_TTL_HOURS_MIN,
+        Math.min(
+          SESSION_TTL_HOURS_MAX,
+          Math.floor(Number(ttl.value) || DEFAULT_SESSION_TTL_HOURS),
+        ),
       ),
       spawn_timeout_ms: Math.max(
-        1000,
+        SPAWN_TIMEOUT_MS_MIN,
         Math.min(
-          1800000,
-          Math.floor(Number(spawnTimeoutMs.value) || 600000),
+          SPAWN_TIMEOUT_MS_MAX,
+          Math.floor(
+            Number(spawnTimeoutMs.value) || DEFAULT_SPAWN_TIMEOUT_MS,
+          ),
         ),
       ),
       artifacts: buildArtifacts(),
