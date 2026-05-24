@@ -8,7 +8,7 @@
 
 ## Overview
 
-**Ogham** is a monorepo for Claude Code plugins and AI-powered developer tools. Everything is built with TypeScript. The repo hosts plugins that extend Claude Code agent behavior — from automated project structure management to multi-persona code reviews.
+**Ogham** is a monorepo for Claude Code plugins and AI-powered developer tools. Everything is built with TypeScript. The repo hosts six plugins that extend Claude Code agent behavior — from automated project structure management and personal knowledge graphs to Atlassian integration, multi-model delegation, and planning pipelines.
 
 ---
 
@@ -20,14 +20,14 @@ The easiest way to use Ogham plugins is through the Claude Code plugin marketpla
 # 1. Register this repository as a marketplace source
 claude plugin marketplace add https://github.com/vincent-kk/ogham
 
-# 2. Install a plugin
+# 2. Install a plugin (any of the six listed below)
 claude plugin install filid
 claude plugin install maencof
 ```
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:filid-setup` to initialize FCA-AI in your project.
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:filid-setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
 
 ---
 
@@ -41,19 +41,20 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 **What it provides:**
 
-| Component        | Count | Examples                                            |
-| ---------------- | ----- | --------------------------------------------------- |
-| Skills           | 14    | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan` |
-| MCP Tools        | 14    | Structure analysis, drift detection, metrics        |
-| Agents           | 7     | Architect, Implementer, QA Reviewer, etc.           |
-| Hooks            | 6     | Auto line-limit check, organ protection, rule injection |
+| Component | Count    | Examples                                                                                  |
+| --------- | -------- | ----------------------------------------------------------------------------------------- |
+| Skills    | 18       | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan`, `/filid:filid-pipeline` |
+| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking                           |
+| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee                           |
+| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd                     |
 
 **Key features:**
 
-- **Multi-persona code review** — A committee of specialized reviewers reaches consensus on your PR changes
-- **Automated rule enforcement** — INTENT.md line limits, boundary sections, organ directory protection
-- **Structural drift detection** — Detects when code changes break documented structure and syncs automatically
-- **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular dependency detection
+- **Multi-persona consensus review** — A 7-persona committee (architect, knowledge manager, SRE, business driver, product manager, design/HCI, adjudicator) reaches consensus on PR changes
+- **Automated rule enforcement** — INTENT.md 50-line limit, 3-tier boundary section validation, organ directory protection, naming conventions
+- **Structural drift detection** — Detects when code changes break documented structure and syncs automatically via DAG analysis
+- **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular-dependency detection via `@ast-grep/napi`
+- **End-to-end pipeline** — `filid-pipeline` chains PR creation → multi-persona review → resolve → revalidate
 
 ```
 # Initialize FCA-AI in your project
@@ -64,6 +65,9 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 # Run multi-persona code review on current branch
 /filid:filid-review
+
+# Run the full PR pipeline (review → resolve → revalidate)
+/filid:filid-pipeline
 ```
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
@@ -76,19 +80,19 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 **What it provides:**
 
-| Component  | Count | Examples                                                     |
-| ---------- | ----- | ------------------------------------------------------------ |
-| Skills     | 24    | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`     |
-| MCP Tools  | 15    | Knowledge CRUD, graph search, context assembly               |
-| Agents     | 4     | Memory Organizer, Identity Guardian, Doctor, etc.            |
-| Hooks      | 6     | L1 layer guard, index invalidation, activity logging         |
+| Component | Count       | Examples                                                                                                      |
+| --------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| Skills    | 26          | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`, `/maencof:maencof-organize` |
+| MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture                                           |
+| Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector                               |
+| Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd                                     |
 
 **Key features:**
 
-- **5-Layer Knowledge Model** — Core Identity (L1) through Context (L5), each with distinct decay rates and protection rules
-- **Spreading Activation Search** — Graph-based associative search that finds related knowledge by energy propagation
-- **Memory Lifecycle Management** — Automated knowledge promotion, archival, and cleanup across layers
-- **AI Companion** — Personalized AI persona generated from your core identity, greeting you each session
+- **5-Layer Knowledge Model v2** — `01_Core` (identity, read-only) → `02_Derived` (internalized) → `03_External` (relational / structural / topical sublayers) → `04_Action` (volatile task memory) → `05_Context` (buffer / boundary)
+- **Spreading Activation Search** — Graph-based associative search that finds related knowledge by energy propagation across layer-specific decay rates (0.5–0.95)
+- **Memory Lifecycle Management** — Automated knowledge promotion, archival, and cleanup across the 5 layers
+- **Dialogue Meta-Prompt Injection** — SessionStart hook injects a per-session dialogue discipline meta-prompt; AI companion persona generated from your core identity
 
 ```
 # Initialize your knowledge vault
@@ -97,20 +101,168 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 # Remember something new
 /maencof:maencof-remember
 
-# Search your knowledge
+# Search your knowledge graph
 /maencof:maencof-recall
 ```
 
 For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
 
+### [`@ogham/atlassian`](./packages/atlassian/) — Jira & Confluence Integration
+
+A native TypeScript replacement for the Python `mcp-atlassian` MCP server, providing first-class Jira and Confluence access from Claude Code.
+
+Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat every prompt, and generic MCP tools don't understand domain workflows. atlassian solves this with domain-expert agents that encapsulate the workflow knowledge and load tool schemas lazily.
+
+**What it provides:**
+
+| Component | Count | Examples                                                                                                                                                             |
+| --------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skills    | 5     | `/atlassian:atlassian-setup`, `/atlassian:atlassian-jira`, `/atlassian:atlassian-confluence`, `/atlassian:atlassian-download`, `/atlassian:atlassian-media-analysis` |
+| MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                                                                            |
+| Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                                                                               |
+| Hooks     | 0     | —                                                                                                                                                                    |
+
+**Key features:**
+
+- **Domain-expert agents** — Three specialized agents (jira / confluence / media) encapsulate API knowledge across 15 Jira tool domains + 8 Confluence tool domains, replacing 50+ individual MCP tool schemas
+- **Lazy reference loading** — API capsules load tool schemas only when needed, keeping the context window small
+- **Multi-format conversion** — Built-in ADF / Storage / Wiki ↔ Markdown converter ported from the Python `mcp-atlassian` source
+- **Multimodal media analysis** — Media agent extracts keyframes from images / videos / GIFs and runs semantic scene analysis
+- **Auth coverage** — Basic (email + token), PAT (Server / DC), OAuth 2.0 (3LO) for both Cloud and Server / DC instances
+
+```
+# Configure Jira / Confluence credentials
+/atlassian:atlassian-setup
+
+# Operate on Jira issues
+/atlassian:atlassian-jira
+
+# Operate on Confluence pages
+/atlassian:atlassian-confluence
+```
+
+For full documentation, see the [atlassian README](./packages/atlassian/README.md) ([Korean](./packages/atlassian/README-ko_kr.md)).
+
+### [`@ogham/cogair`](./packages/cogair/) — Codex / Gemini CLI Delegation
+
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI** through MCP tools, skills, and lifecycle hooks.
+
+Different models have different strengths: Codex excels at heavy code generation in a sandboxed shell; Gemini excels at live web-grounded research and very-large-context synthesis. cogair makes that delegation explicit, ratio-aware, and reproducible across sessions.
+
+**What it provides:**
+
+| Component | Count | Examples                                                                 |
+| --------- | ----- | ------------------------------------------------------------------------ |
+| Skills    | 4     | `/cogair:setup`, `/cogair:codex`, `/cogair:gemini`, `/cogair:crosscheck` |
+| MCP Tools | 3     | `start_conversation`, `continue_conversation`, `open_settings`           |
+| Agents    | 0     | (skills delegate directly to external CLIs)                              |
+| Hooks     | 2     | SessionStart, UserPromptSubmit                                           |
+
+**Key features:**
+
+- **Multi-model delegation** — Route code-heavy tasks to Codex (sandboxed shell, refactor) and research-heavy tasks to Gemini (live web search, large context) via keyword-driven routing
+- **Cross-validation** — `/cogair:crosscheck` dispatches the same prompt to both providers in parallel and synthesizes their answers
+- **Local settings UI** — Web UI bound to 127.0.0.1 with one-time-token auth for editing provider ratio, intervention strength (-2 to +2), keyword routing, and default model alias
+- **Session bookkeeping** — Project-hash-scoped sessions with resume capability; SessionStart / UserPromptSubmit hooks inject ratio + drift + counter state into context
+
+```
+# Open the local settings UI
+/cogair:setup
+
+# Delegate to Codex CLI
+/cogair:codex
+
+# Delegate to Gemini CLI
+/cogair:gemini
+
+# Cross-validate a prompt across both providers
+/cogair:crosscheck
+```
+
+For full documentation, see the [cogair README](./packages/cogair/README.md) ([Korean](./packages/cogair/README-ko_kr.md)).
+
+### [`@ogham/imbas`](./packages/imbas/) — Planning → Issue Pipeline
+
+A Claude Code plugin that converts planning documents into Jira or GitHub issues through a 4-phase orchestration pipeline.
+
+Translating a strategy doc into well-formed, EARS-style developer tickets is repetitive and error-prone. imbas automates the entire flow — from validating the source plan to creating Stories, Tasks, and Subtasks — while keeping every step provider-agnostic.
+
+**What it provides:**
+
+| Component | Count | Examples                                                                                                                |
+| --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
+| Skills    | 12    | `/imbas:imbas-pipeline`, `/imbas:imbas-validate`, `/imbas:imbas-split`, `/imbas:imbas-devplan`, `/imbas:imbas-manifest` |
+| MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                                                          |
+| Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                                                       |
+| Hooks     | 3     | pre-tool-use, context-injector, session-cleanup                                                                         |
+
+**Key features:**
+
+- **4-phase pipeline** — validate → split → manifest-stories → devplan → manifest-devplan with checkpoint files between phases
+- **Provider abstraction** — A single skill targets `jira`, `github`, or `local` providers; switching is a config change
+- **Agent separation** — Three role-specialized agents (analyst for validation, planner for splitting, engineer for EARS Subtask generation)
+- **Run-based state** — Each pipeline execution gets a `run_id` and `.imbas/runs/<id>/` directory for resumable, auditable runs
+
+```
+# Initialize imbas configuration
+/imbas:imbas-setup
+
+# Run the full pipeline on a planning doc
+/imbas:imbas-pipeline
+
+# Check pipeline status
+/imbas:imbas-status
+```
+
+For full documentation, see the [imbas README](./packages/imbas/README.md) ([Korean](./packages/imbas/README-ko_kr.md)).
+
+### [`@ogham/maencof-lens`](./packages/maencof-lens/) — Read-Only Vault Access
+
+A read-only wrapper around maencof's knowledge graph for cross-project vault access. Lets development sessions consult your personal vault without risking writes.
+
+If you use maencof to keep design notes, architecture decisions, and personal research, you want those findings reachable from other projects — but only as references. maencof-lens routes multi-vault reads through a layer-filter guard so development contexts can borrow knowledge safely.
+
+**What it provides:**
+
+| Component | Count | Examples                                                                                                      |
+| --------- | ----- | ------------------------------------------------------------------------------------------------------------- |
+| Skills    | 3     | `/maencof-lens:maencof-lens-setup`, `/maencof-lens:maencof-lens-lookup`, `/maencof-lens:maencof-lens-context` |
+| MCP Tools | 5     | `search`, `context`, `navigate`, `read`, `status`                                                             |
+| Agents    | 1     | researcher (autonomous multi-tool vault exploration)                                                          |
+| Hooks     | 1     | SessionStart (config detection + skill usage guide injection)                                                 |
+
+**Key features:**
+
+- **Read-only by design** — Reuses maencof handlers but blocks all mutation paths; layer-filter guard (L1 excluded by default) is enforced on every tool call
+- **Multi-vault routing** — Register multiple vaults in `.maencof-lens/config.json` and switch by name
+- **Token-budgeted context assembly** — `/maencof-lens:maencof-lens-context` assembles relevant vault docs within a target token budget for prompt injection
+- **Autonomous researcher** — The `researcher` agent performs deep multi-step vault exploration via spreading activation
+
+```
+# Register a vault (default vault on first run)
+/maencof-lens:maencof-lens-setup
+
+# Quick lookup of a single topic
+/maencof-lens:maencof-lens-lookup
+
+# Token-budgeted multi-doc context for the current task
+/maencof-lens:maencof-lens-context
+```
+
+For full documentation, see the [maencof-lens package](./packages/maencof-lens/).
+
 ---
 
 ## All Packages
 
-| Package                                  | Type          | Version | Description                                      |
-| ---------------------------------------- | ------------- | ------- | ------------------------------------------------ |
-| **[`filid`](./packages/filid/)**         | Claude plugin | 0.0.2   | FCA-AI rule enforcement and fractal context management |
-| **[`maencof`](./packages/maencof/)**     | Claude plugin | 0.0.2   | Personal knowledge space manager with Knowledge Graph  |
+| Package                                        | Type          | Description                                                       |
+| ---------------------------------------------- | ------------- | ----------------------------------------------------------------- |
+| **[`filid`](./packages/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management            |
+| **[`maencof`](./packages/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph             |
+| **[`atlassian`](./packages/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents           |
+| **[`cogair`](./packages/cogair/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini CLI from Claude Code |
+| **[`imbas`](./packages/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                       |
+| **[`maencof-lens`](./packages/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts   |
 
 ---
 
