@@ -6,12 +6,14 @@
 
 | 파일                         | 역할                                                           |
 | ---------------------------- | -------------------------------------------------------------- |
-| `loadConfig.ts`              | 파일 read + `mergeWithDefaults` + Zod 검증 + defaults fallback |
-| `saveConfig.ts`              | `ConfigSchema.parse` 재검증 후 `atomicWrite` 저장              |
-| `utils/mergeWithDefaults.ts` | raw 객체와 `DEFAULT_CONFIG` deep merge                         |
-| `utils/normalizeRatio.ts`    | legacy 정수 비율 → enabled boolean 정규화                      |
-| `utils/isPlainObject.ts`     | plain-object guard (deep merge 전처리)                         |
-| `index.ts`                   | barrel: `loadConfig`, `saveConfig`                             |
+| `loadConfig.ts`                   | 파일 read + `mergeWithDefaults` + Zod 검증 + defaults fallback |
+| `saveConfig.ts`                   | `ConfigSchema.parse` 재검증 후 `atomicWrite` 저장              |
+| `utils/mergeWithDefaults.ts`      | raw 객체와 `DEFAULT_CONFIG` deep merge                         |
+| `utils/mergePreamble.ts`          | raw → `PreambleConfig` (provider별 문자열, 기본값 fallback)    |
+| `utils/mergeRecencyFactor.ts`     | raw → `RecencyFactorConfig` (`off`/`auto`/`strict` 검증)      |
+| `utils/normalizeRatio.ts`         | legacy 정수 비율 → enabled boolean 정규화                      |
+| `utils/isPlainObject.ts`          | plain-object guard (deep merge 전처리)                         |
+| `index.ts`                        | barrel: `loadConfig`, `saveConfig`                             |
 
 ## Conventions
 
