@@ -298,10 +298,9 @@
   function buildSummaryChips(provider) {
     var chips = [];
     if (provider === 'codex') {
-      chips.push({
-        label: codexYolo.checked ? 'yolo: on' : 'yolo: off',
-        tone: codexYolo.checked ? 'warn' : null,
-      });
+      if (codexYolo.checked) {
+        chips.push({ label: 'yolo: on', tone: 'warn' });
+      }
       var sb = readRadio(
         'codex-sandbox',
         CODEX_SANDBOX_MODES,
@@ -309,21 +308,17 @@
       );
       if (sb === 'danger-full-access') {
         chips.push({ label: 'sandbox: full-access', tone: 'warn' });
-      } else if (sb === 'off') {
-        chips.push({ label: 'sandbox: off', tone: 'warn' });
-      } else {
+      } else if (sb !== 'off') {
         chips.push({ label: 'sandbox: ' + sb });
       }
       var rc = readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex);
-      chips.push({ label: 'rec: ' + rc });
-      if (kwCodex.value && kwCodex.value.trim()) {
-        chips.push({ label: 'kw: ' + kwCodex.value.trim() });
-      }
+      if (rc !== 'off') chips.push({ label: 'rec: ' + rc });
+      var kwc = (kwCodex.value || '').trim();
+      if (kwc) chips.push({ label: 'keyword: on', title: kwc });
     } else {
-      chips.push({
-        label: geminiYolo.checked ? 'yolo: on' : 'yolo: off',
-        tone: geminiYolo.checked ? 'warn' : null,
-      });
+      if (geminiYolo.checked) {
+        chips.push({ label: 'yolo: on', tone: 'warn' });
+      }
       if (geminiSandbox.checked) {
         var be = readRadio(
           'gemini-backend',
@@ -331,18 +326,15 @@
           DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
         );
         chips.push({ label: 'sandbox: ' + be });
-      } else {
-        chips.push({ label: 'sandbox: off', tone: 'warn' });
       }
       var rg = readRadio(
         'recency-gemini',
         RECENCY_LEVELS,
         DEFAULT_RECENCY.gemini,
       );
-      chips.push({ label: 'rec: ' + rg });
-      if (kwGemini.value && kwGemini.value.trim()) {
-        chips.push({ label: 'kw: ' + kwGemini.value.trim() });
-      }
+      if (rg !== 'off') chips.push({ label: 'rec: ' + rg });
+      var kwg = (kwGemini.value || '').trim();
+      if (kwg) chips.push({ label: 'keyword: on', title: kwg });
     }
     return chips;
   }
@@ -356,6 +348,7 @@
       var el = document.createElement('span');
       el.className = 'summary-chip';
       if (chips[i].tone) el.setAttribute('data-tone', chips[i].tone);
+      if (chips[i].title) el.setAttribute('data-tooltip', chips[i].title);
       el.textContent = chips[i].label;
       container.appendChild(el);
     }
