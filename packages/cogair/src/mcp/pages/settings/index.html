@@ -107,18 +107,50 @@
                   >
                 </label>
 
-                <hr class="advanced-divider" />
+                <div class="flag-field">
+                  <span class="flag-field-label">recency factor</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="off"
+                      /><span>off <small class="default-marker">(default)</small></span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                    codex는 캐시 활용을 우선해 기본값을 off로 둡니다.
+                  </p>
+                </div>
 
-                <label class="toggle flag-row">
-                  <input id="codex-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc"
-                    >bypass approvals + sandbox (danger)</span
-                  >
+                <label class="field">
+                  <span>prompt preamble</span>
+                  <textarea
+                    id="preamble-codex"
+                    rows="3"
+                    placeholder="e.g. Prefer TypeScript."
+                  ></textarea>
                 </label>
+
+                <hr class="advanced-divider" />
 
                 <div class="flag-field" id="codex-sandbox-wrap">
                   <span class="flag-field-label">sandbox</span>
@@ -164,46 +196,15 @@
                   >
                 </div>
 
-                <div class="flag-field">
-                  <span class="flag-field-label">recency factor</span>
-                  <div class="radio-row">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-codex"
-                        value="off"
-                      /><span>off</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-codex"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-codex"
-                        value="strict"
-                      /><span>strict</span></label
-                    >
-                  </div>
-                  <p class="flag-hint">
-                    <code>auto</code> recommends source-checking for
-                    time-sensitive facts. <code>strict</code> requires
-                    search-verification with citations or an "unverifiable"
-                    fallback.
-                  </p>
-                </div>
-
-                <label class="field">
-                  <span>prompt preamble</span>
-                  <textarea
-                    id="preamble-codex"
-                    rows="3"
-                    placeholder="e.g. Prefer TypeScript."
-                  ></textarea>
+                <label class="toggle flag-row">
+                  <input id="codex-yolo" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">Skip approvals (--yolo)</span>
+                  <span class="flag-desc"
+                    >bypass approvals + sandbox (danger)</span
+                  >
                 </label>
               </div>
             </div>
@@ -299,16 +300,50 @@
                   >
                 </label>
 
-                <hr class="advanced-divider" />
+                <div class="flag-field">
+                  <span class="flag-field-label">recency factor</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-gemini"
+                        value="off"
+                      /><span>off</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-gemini"
+                        value="auto"
+                      /><span>auto <small class="default-marker">(default)</small></span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-gemini"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                    gemini는 웹 도구 접근이 기본이라 최신성을 auto로 권장합니다.
+                  </p>
+                </div>
 
-                <label class="toggle flag-row">
-                  <input id="gemini-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc">skip approval prompts</span>
+                <label class="field">
+                  <span>prompt preamble</span>
+                  <textarea
+                    id="preamble-gemini"
+                    rows="3"
+                    placeholder="e.g. Always answer in Korean."
+                  ></textarea>
                 </label>
+
+                <hr class="advanced-divider" />
 
                 <label class="toggle flag-row">
                   <input id="gemini-sandbox" type="checkbox" />
@@ -363,46 +398,13 @@
                   </p>
                 </div>
 
-                <div class="flag-field">
-                  <span class="flag-field-label">recency factor</span>
-                  <div class="radio-row">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-gemini"
-                        value="off"
-                      /><span>off</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-gemini"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="recency-gemini"
-                        value="strict"
-                      /><span>strict</span></label
-                    >
-                  </div>
-                  <p class="flag-hint">
-                    <code>auto</code> recommends source-checking for
-                    time-sensitive facts. <code>strict</code> requires
-                    search-verification with citations or an "unverifiable"
-                    fallback.
-                  </p>
-                </div>
-
-                <label class="field">
-                  <span>prompt preamble</span>
-                  <textarea
-                    id="preamble-gemini"
-                    rows="3"
-                    placeholder="e.g. Always answer in Korean."
-                  ></textarea>
+                <label class="toggle flag-row">
+                  <input id="gemini-yolo" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">Skip approvals (--yolo)</span>
+                  <span class="flag-desc">skip approval prompts</span>
                 </label>
               </div>
             </div>

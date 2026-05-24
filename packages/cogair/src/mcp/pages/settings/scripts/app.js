@@ -315,6 +315,8 @@
       if (rc !== 'off') chips.push({ label: 'rec: ' + rc });
       var kwc = (kwCodex.value || '').trim();
       if (kwc) chips.push({ label: 'keyword: on', title: kwc });
+      var prc = (preambleCodex.value || '').trim();
+      if (prc) chips.push({ label: 'preamble: on', title: prc.slice(0, 80) });
     } else {
       if (geminiYolo.checked) {
         chips.push({ label: 'yolo: on', tone: 'warn' });
@@ -335,6 +337,8 @@
       if (rg !== 'off') chips.push({ label: 'rec: ' + rg });
       var kwg = (kwGemini.value || '').trim();
       if (kwg) chips.push({ label: 'keyword: on', title: kwg });
+      var prg = (preambleGemini.value || '').trim();
+      if (prg) chips.push({ label: 'preamble: on', title: prg.slice(0, 80) });
     }
     return chips;
   }
