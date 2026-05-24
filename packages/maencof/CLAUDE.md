@@ -1,70 +1,53 @@
 # CLAUDE.md — @ogham/maencof
 
-Personal knowledge space management plugin (v0.3.0). Provides markdown-based Knowledge Graph, Spreading Activation search, and memory lifecycle management.
+`@ogham/maencof` 패키지 작업 가이드. 패키지 contract 는 [INTENT.md](./INTENT.md), src 내부 구조는 [src/INTENT.md](./src/INTENT.md) 참조.
 
 ## Commands
 
 ```bash
-yarn build          # clean → version:sync → tsc → esbuild (mcp-server + hooks)
-yarn build:plugin   # esbuild bundle only (mcp-server + hooks)
-yarn test:run       # single run (CI)
+yarn build              # clean → version:sync → tsc → esbuild (mcp-server + hooks)
+yarn build:plugin       # esbuild 번들만 (mcp-server + hooks)
+yarn typecheck          # 타입 체크 (emit 없음)
+yarn test:run           # 단일 실행 (CI)
+yarn test               # watch
 yarn format && yarn lint
+yarn version:sync       # package.json → src/version.ts
 ```
 
-## Architecture
+## Build System
 
-**5-Layer Model v2**: `01_Core/` (identity, read-only) | `02_Derived/` (internalized) | `03_External/` (`relational/` L3A, `structural/` L3B, `topical/` L3C) | `04_Action/` (volatile task memory) | `05_Context/` (`buffer/` temp inbox, `boundary/` cross-layer bridge)
+- `scripts/build-mcp-server.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
+- `scripts/build-hooks.mjs`: 각 훅 entry → `bridge/<name>.mjs`
+- SessionStart 훅은 esbuild `.md → text` loader 로 `src/hooks/session-start/meta-skill-body.md` 를 인라인 (dialogue discipline meta-prompt)
 
-**MCP Tools (18)**: `create/read/update/delete/move`, `capture_insight`, `boundary_create`, `kg_build/search/navigate/context/status/suggest_links`, `claudemd_merge/read/remove`, `dailynote_read`, `context_cache_manage`
+## Auto-invocation Mapping
 
-**Agents (5)**: `memory-organizer`, `identity-guardian`, `checkup`, `configurator`, `knowledge-connector`
+6 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
 
-**Skills (26)**: `maencof-setup`, `maencof-configure`, `maencof-remember`, `maencof-recall`, `maencof-organize`, `maencof-reflect`, `maencof-build`, `maencof-explore`, `maencof-suggest`, `maencof-checkup`, `maencof-ingest`, `maencof-connect`, `maencof-bridge`, `maencof-craft-skill`, `maencof-craft-agent`, `maencof-instruct`, `maencof-rule`, `maencof-lifecycle`, `maencof-mcp-setup`, `maencof-manage`, `maencof-cleanup`, `maencof-think`, `maencof-refine`, `maencof-insight`, `maencof-changelog`, `maencof-migrate`
+- **Brainstorm / ideation**: `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
+- **Insight capture management**: `maencof-insight` (capture 자체는 `capture_insight` MCP 도구 + `insight-injector` bridge)
+- **Spec refinement / interview convergence**: `maencof-refine` (Phase 2.5 Socratic 포함)
+- **Plan review**: `maencof-think --mode review`
 
-> Dialogue discipline meta-prompt (`session-start/meta-skill-body.md`) is inlined into the `session-start` hook bundle via esbuild `.md → text` loader and injected as `hookSpecificOutput.additionalContext`. It is not a user-invocable skill.
-
-> Detailed docs: `../../.metadata/maencof/` (5-Layer spec, MCP contracts, agent/skill definitions, hook event mappings)
-
-## Auto-invocation
-
-6 cognitive roles → skill mapping:
-
-- Brainstorm / ideation: `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
-- Insight capture management: `maencof-insight` (capture itself happens via `capture_insight` MCP tool and the `insight-injector` bridge)
-- Spec refinement: `maencof-refine` (Phase 2.5 Socratic included)
-- Interview convergence: `maencof-refine` Phase 2.5
-- Plan review: `maencof-think --mode review`
-
-Automatic invocation chain:
+자동 호출 체인:
 
 - vague input → `maencof-refine`
-- refine completed but alternatives remain → `maencof-think --mode default`
-- ambiguous requirement (multiple interpretations) → `maencof-think --mode default`
+- ambiguous requirement → `maencof-think --mode default`
 - ideation signals ("아이디어" / "막막") → `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
-- plan/spec path ref + "검토" signals → `maencof-think --mode review`
-- skill create/modify → `maencof-craft-skill`
-- agent create/modify → `maencof-craft-agent`
+- plan/spec path ref + "검토" → `maencof-think --mode review`
+- skill / agent create / modify → `maencof-craft-skill` / `maencof-craft-agent`
 
-Session recap: the SessionEnd hook automatically surfaces `[maencof] Session Recap` at session termination (no explicit invocation). `maencof-reflect` remains a standalone vault judge reporter and is NOT mapped to session-wide recap.
+## Session Lifecycle
 
-Dialogue meta-prompt injection: the SessionStart hook emits the contents of `src/hooks/session-start/meta-skill-body.md` (bundled inline at build time) wrapped in `<maencof-meta-skill>` via `hookSpecificOutput.additionalContext`, injecting it into the model's system context each session. Off-switch: `MAENCOF_DISABLE_DIALOGUE=1` env OR `.maencof-meta/dialogue-config.json::injection.enabled=false` → SessionStart emit skipped (meta-prompt becomes invisible).
+- **Session recap**: SessionEnd 훅이 `[maencof] Session Recap` 을 자동 출력 (명시 호출 불필요). `maencof-reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
+- **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/session-start/meta-skill-body.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
 
-## Always do
+## Development Notes
 
-- Read vault path from `MAENCOF_VAULT_PATH` env or CWD; never hardcode
-- Follow 5-Layer model v2 rules (L3 sublayers: relational/structural/topical; L5: buffer/boundary)
-- Validate frontmatter required fields: `id`, `layer`, `created`
-- After hook or bridge changes, rebuild with `yarn build:plugin`; bump version via `yarn version:sync` only
+- **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용
+- **테스트**: `src/**/__tests__/**/*.test.ts`
+- **훅 / bridge 변경**: `yarn build:plugin` 으로 재빌드
 
-## Ask first
+## References
 
-- Before deleting any L1_Core document
-- Before running full graph rebuild (`kg_build` with `force: true`)
-- Before bulk cross-layer document moves
-
-## Never do
-
-- Directly modify `.maencof/` directory
-- Bypass layer validation or sublayer rules
-- Hardcode vault paths in source code
-- Modify `maencof-bridge/` output files directly (generated by esbuild)
+`../../.metadata/maencof/` — 5-Layer 스펙, MCP contract, agent / skill 정의, 훅 이벤트 매핑

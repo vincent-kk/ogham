@@ -1,52 +1,45 @@
 # ogham
 
-Claude Code 플러그인 모노레포. AI 에이전트 워크플로우 확장 도구 모음.
+Claude Code 플러그인 모노레포. 패키지별 작업 가이드는 각 `packages/<pkg>/CLAUDE.md` 와 `packages/<pkg>/INTENT.md` 를 참조하고, 사용자를 위한 패키지 목록과 소개는 [README](./README.md) 참조.
 
-## Project Structure
+## Workspaces
 
 - **Monorepo**: Yarn 4.12 workspaces (`packages/*`)
-- **Package**: `@ogham/filid` (v0.3.7) — FCA-AI rule enforcement Claude Code plugin
-- **Package**: `@ogham/maencof` (v0.3.2) — 개인 지식 공간 관리 plugin (Knowledge Graph + Spreading Activation)
-- **Package**: `@ogham/atlassian` (v0.2.2) — Jira/Confluence 통합 plugin (4 MCP tools, 3 agents, 6 skills)
-- **Package**: `@ogham/cogair` (v0.0.1) — Codex CLI / Gemini CLI 자율 위임 plugin (3 MCP tools, 4 skills, 2 hooks)
-
-```
-packages/filid/      # FCA-AI 프랙탈 구조 규칙 엔진 (18 MCP tools, 14 agents, 18 skills)
-packages/maencof/    # 마크다운 Knowledge Graph 기반 지식 관리 (18 MCP tools, 5 agents, 26 skills)
-packages/atlassian/  # Jira/Confluence REST API 통합 (4 MCP tools, 3 agents, 6 skills)
-packages/cogair/     # Gemini/Codex CLI 자율 위임 (3 MCP tools, 4 skills, 2 hooks)
-```
+- 6 plugins under `packages/*` — 자세한 카탈로그는 [README.md](./README.md) 또는 [.claude-plugin/marketplace.json](./.claude-plugin/marketplace.json)
+- 패키지별 작업: `yarn <pkg> <command>` (예: `yarn filid test:run`)
 
 ## Tech Stack
 
-- TypeScript 5.7.2, Node.js >=20, ESM
-- Build: tsc (ESM) + esbuild (CJS/ESM 번들)
-- Test: Vitest 3.2
-- MCP: @modelcontextprotocol/sdk
-- Validation: Zod
+- TypeScript ^5.7, Node.js ≥ 20, ESM
+- 빌드: tsc (ESM) + esbuild (CJS / ESM 번들) + `scripts/inject-version.mjs`
+- 테스트: Vitest 3.2
+- MCP: `@modelcontextprotocol/sdk ~1.22`
+- Validation: Zod (`zod ^3.23`)
 
-## Commands
+## Monorepo Commands
 
 ```bash
-# 모노레포 전체
-yarn build:all          # 전체 빌드
-yarn test:run           # 전체 테스트
-yarn typecheck          # TypeScript 타입 체크
-yarn lint               # ESLint 검사
-
-# 패키지별 (yarn <pkg> <cmd>)
-yarn filid build        # filid 빌드 (tsc + esbuild)
-yarn filid test:run     # filid 테스트
-yarn maencof build      # maencof 빌드 (tsc + esbuild)
-yarn maencof test:run   # maencof 테스트
-yarn atlassian build    # atlassian 빌드 (tsc + esbuild)
-yarn atlassian test:run # atlassian 테스트
-yarn cogair build       # cogair 빌드 (tsc + esbuild + hooks)
-yarn cogair test:run    # cogair 테스트
+yarn build:all          # 전체 빌드 (workspaces foreach)
+yarn test:run           # 전체 테스트 단일 실행 (CI)
+yarn typecheck          # 전체 typecheck (tsc -b)
+yarn lint               # 전체 ESLint
+yarn clean              # 전체 dist / .tsbuildinfo 제거
 ```
 
-## Conventions
+## Common Build Pipeline
 
-- ESM modules (`"type": "module"`)
-- 버전: `scripts/inject-version.mjs`로 빌드 시 자동 주입
-- 릴리즈: Changesets 기반 (`yarn changeset`)
+각 패키지는 동일 패턴을 따름:
+
+1. `yarn version:sync` — `package.json` → `src/version.ts` + `.claude-plugin/plugin.json` 동기화 (`scripts/inject-version.mjs`)
+2. `tsc -p tsconfig.build.json` — `src/` → `dist/` (ESM + `.d.ts`)
+3. `esbuild` (개별 스크립트) — `bridge/mcp-server.cjs` + `bridge/<hook>.mjs`
+
+`bridge/` 는 플러그인 런타임 산출물로 **커밋 대상** (`package.json:files`). `dist/` 는 라이브러리 export 용.
+
+## Release Workflow
+
+- 릴리즈는 [Changesets](https://github.com/changesets/changesets) 기반
+- `yarn changeset` → 변경 기록 생성
+- `yarn changeset:version` → 버전 bump
+- `yarn changeset:publish` → 빌드 + npm 게시
+- `yarn tag:packages <commit>` → 패키지별 git tag 생성
