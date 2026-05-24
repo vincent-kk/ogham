@@ -1,8 +1,7 @@
 import { RECENCY_PROMPT_TOKEN_TODAY } from './recencyPromptTokens.js';
 
-export const RECENCY_PROMPT_AUTO = `Today is ${RECENCY_PROMPT_TOKEN_TODAY} (user local time).
-If the user's request touches information that can change over time (current state, recent updates, prices, versions, laws/policies, schedules, profiles of people/organisations, etc.), follow these:
+export const RECENCY_PROMPT_AUTO = `Today: ${RECENCY_PROMPT_TOKEN_TODAY}.
 
-- If a search tool is available, verify against the latest official / primary source before answering.
-- Consider each source's publish or last-updated date.
-- When only outdated sources are available, state the as-of date and separately mark the current state as "unverifiable".`;
+If the user's answer materially depends on current or recently changed information (e.g. current status, prices, software/API versions, laws, policies, schedules, current roles), prefer a web search against an official or primary source and note each source's publish/updated date.
+
+Skip search for stable facts, purely local-code work, or information the user already supplied — unless recency would change the answer. When only outdated sources exist, state their date and mark only the current-state portion as "unverifiable".`;

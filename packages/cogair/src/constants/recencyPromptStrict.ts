@@ -1,9 +1,9 @@
 import { RECENCY_PROMPT_TOKEN_TODAY } from './recencyPromptTokens.js';
 
-export const RECENCY_PROMPT_STRICT = `Today is ${RECENCY_PROMPT_TOKEN_TODAY} (user local time).
-If the user's request touches information that can change over time (current state, recent updates, prices, versions, laws/policies, schedules, profiles of people/organisations, etc.), follow these strictly:
+export const RECENCY_PROMPT_STRICT = `Today: ${RECENCY_PROMPT_TOKEN_TODAY}.
 
-1. Run a search tool to verify against the latest official / primary source before answering.
-2. Attach the source and as-of date to every key conclusion, number, date, version, or policy claim.
-3. Prefer official / primary sources. Cross-verify with an independent source only when sources conflict or the fact is high-risk.
-4. If no search tool is available or no reliable up-to-date source can be found, answer "unverifiable" — do not guess.`;
+When the answer depends on facts that may have changed since your training (current status, recent changes, prices, software/API versions, laws or policies, schedules, current roles of people or organizations), follow these strictly:
+
+1. Do not answer from memory. Use a web search tool first and prefer official or authoritative primary sources.
+2. For each material time-sensitive claim, cite the source and its publish/updated date.
+3. If web search is unavailable or yields no reliable recent source, label only that specific claim "unverifiable" — answer stable or source-provided parts normally.`;

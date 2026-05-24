@@ -45,7 +45,7 @@ describe('composePrompt', () => {
       today: FIXED_TODAY,
     });
     expect(out.startsWith('<recency_policy>\n')).toBe(true);
-    expect(out.includes(`Today is ${FIXED_TODAY}`)).toBe(true);
+    expect(out.includes(`Today: ${FIXED_TODAY}`)).toBe(true);
     expect(out.includes('</recency_policy>')).toBe(true);
     expect(out.endsWith('\n\nprice today?')).toBe(true);
     expect(out.includes('{{today}}')).toBe(false);
@@ -81,6 +81,6 @@ describe('composePrompt', () => {
       preamble: '',
       recencyLevel: 'auto',
     });
-    expect(/Today is \d{4}-\d{2}-\d{2}/.test(out)).toBe(true);
+    expect(/Today: \d{4}-\d{2}-\d{2}/.test(out)).toBe(true);
   });
 });
