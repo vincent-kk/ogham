@@ -115,7 +115,10 @@
                         type="radio"
                         name="recency-codex"
                         value="off"
-                      /><span>off <small class="default-marker">(default)</small></span></label
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
                     >
                     <label class="radio"
                       ><input
@@ -136,8 +139,7 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback.
-                    codex는 캐시 활용을 우선해 기본값을 off로 둡니다.
+                    fallback. codex는 캐시 활용을 우선해 기본값을 off로 둡니다.
                   </p>
                 </div>
 
@@ -151,6 +153,17 @@
                 </label>
 
                 <hr class="advanced-divider" />
+
+                <label class="toggle flag-row">
+                  <input id="codex-yolo" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">Skip approvals (--yolo)</span>
+                  <span class="flag-desc"
+                    >bypass approvals + sandbox (danger)</span
+                  >
+                </label>
 
                 <div class="flag-field" id="codex-sandbox-wrap">
                   <span class="flag-field-label">sandbox</span>
@@ -195,17 +208,6 @@
                     environment.</span
                   >
                 </div>
-
-                <label class="toggle flag-row">
-                  <input id="codex-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc"
-                    >bypass approvals + sandbox (danger)</span
-                  >
-                </label>
               </div>
             </div>
 
@@ -315,7 +317,10 @@
                         type="radio"
                         name="recency-gemini"
                         value="auto"
-                      /><span>auto <small class="default-marker">(default)</small></span></label
+                      /><span
+                        >auto
+                        <small class="default-marker">(default)</small></span
+                      ></label
                     >
                     <label class="radio"
                       ><input
@@ -329,8 +334,8 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback.
-                    gemini는 웹 도구 접근이 기본이라 최신성을 auto로 권장합니다.
+                    fallback. gemini는 웹 도구 접근이 기본이라 최신성을 auto로
+                    권장합니다.
                   </p>
                 </div>
 
@@ -344,6 +349,15 @@
                 </label>
 
                 <hr class="advanced-divider" />
+
+                <label class="toggle flag-row">
+                  <input id="gemini-yolo" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">Skip approvals (--yolo)</span>
+                  <span class="flag-desc">skip approval prompts</span>
+                </label>
 
                 <label class="toggle flag-row">
                   <input id="gemini-sandbox" type="checkbox" />
@@ -397,15 +411,6 @@
                     gemini-cli pick; <code>sandbox-exec</code> is macOS only.
                   </p>
                 </div>
-
-                <label class="toggle flag-row">
-                  <input id="gemini-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc">skip approval prompts</span>
-                </label>
               </div>
             </div>
 
