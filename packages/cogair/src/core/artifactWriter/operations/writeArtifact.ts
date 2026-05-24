@@ -15,6 +15,7 @@ export interface WriteArtifactArgs {
   createdAt: string;
   elapsedMs: number;
   prompt: string;
+  composedPrompt?: string;
   response: string;
 }
 
@@ -37,6 +38,7 @@ export async function writeArtifact(
       createdAt: args.createdAt,
       elapsedMs: args.elapsedMs,
       prompt: args.prompt,
+      composedPrompt: args.composedPrompt,
       response: args.response,
     });
     await atomicWrite(path, markdown);

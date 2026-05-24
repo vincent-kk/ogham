@@ -3,6 +3,8 @@ import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { isPlainObject } from './isPlainObject.js';
 import { mergeArtifacts } from './mergeArtifacts.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
+import { mergePreamble } from './mergePreamble.js';
+import { mergeRecencyFactor } from './mergeRecencyFactor.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
 export function mergeWithDefaults(raw: unknown): unknown {
@@ -21,5 +23,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
     spawn_timeout_ms: raw.spawn_timeout_ms ?? DEFAULT_CONFIG.spawn_timeout_ms,
     artifacts: mergeArtifacts(raw.artifacts),
+    preamble: mergePreamble(raw.preamble),
+    recency_factor: mergeRecencyFactor(raw.recency_factor),
   };
 }

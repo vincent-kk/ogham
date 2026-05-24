@@ -52,4 +52,35 @@ describe('renderMarkdown', () => {
     });
     expect(out.endsWith('\n')).toBe(true);
   });
+
+  it('omits Composed Prompt section when composedPrompt equals raw prompt', () => {
+    const out = renderMarkdown({
+      sessionId: 'sid',
+      provider: 'codex',
+      model: 'm',
+      turn: 1,
+      createdAt: 't',
+      elapsedMs: 0,
+      prompt: 'p',
+      composedPrompt: 'p',
+      response: 'r',
+    });
+    expect(out.includes('Composed Prompt')).toBe(false);
+  });
+
+  it('includes Composed Prompt section when composedPrompt differs from raw', () => {
+    const out = renderMarkdown({
+      sessionId: 'sid',
+      provider: 'gemini',
+      model: 'm',
+      turn: 1,
+      createdAt: 't',
+      elapsedMs: 0,
+      prompt: 'raw',
+      composedPrompt: '<recency_policy>\nx\n</recency_policy>\n\nraw',
+      response: 'r',
+    });
+    expect(out.includes('## Composed Prompt (sent to CLI)')).toBe(true);
+    expect(out.includes('<recency_policy>')).toBe(true);
+  });
 });

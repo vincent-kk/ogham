@@ -17,6 +17,7 @@
 - model 미지정 → `config.default_model` 적용 (기본 `auto`)
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 MCP input 미노출 — `config.option_flags[provider]` 에서만 결정
 - dispatcher 에 `options` 는 항상 `{}` 로 전달 (MCP-facing layer 분리)
+- prompt 는 `composePrompt` 로 `config.preamble[provider]` + `config.recency_factor[provider]` 합성 후 dispatcher 에 전달; raw prompt 는 artifactWriter 에 별도 보존
 
 ## Boundaries
 

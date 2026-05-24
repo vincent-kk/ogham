@@ -27,7 +27,10 @@
   alias).
 - `createdAt: string` — `utils/isoNow` 의 ISO 8601 타임스탬프.
 - `elapsedMs: number` — dispatcher 시작 후 경과한 정수 밀리초.
-- `prompt: string` — 사용자 프롬프트 원문.
+- `prompt: string` — 사용자 프롬프트 원문 (raw).
+- `composedPrompt?: string` — recency_policy + preamble prefix 가 합성된
+  실제 CLI 전송 프롬프트. 호출자가 `composePrompt` 결과를 전달. 생략 또는
+  raw 와 동일하면 본문에서 별도 섹션 생략.
 - `response: string` — non-null 응답 텍스트. 호출자는 반드시
   `result.status === 'success' && result.response !== null` 을 사전 확인.
 
@@ -61,7 +64,11 @@
 ```
 ## Prompt
 
-<prompt>
+<prompt (raw)>
+
+## Composed Prompt (sent to CLI)   ← composedPrompt 가 raw 와 다를 때만
+
+<composedPrompt>
 
 ## Response
 

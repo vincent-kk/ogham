@@ -4,14 +4,14 @@ codex-cli / gemini-cli 호출 본체. MCP 도구 핸들러에서 받은 `Dispatc
 
 ## Structure
 
-| Path                   | Role                                                                     |
-| ---------------------- | ------------------------------------------------------------------------ |
-| `entities/envelope.ts` | `buildResponse` — DispatchResult + 메타 → ConversationResponse           |
-| `errorMap/`            | exit code / stderr / Node 에러 → `ErrorCode` 매핑 (utils + constants)    |
-| `utils/`               | `computeIgnoredOptions` — 양쪽 dispatcher 공유 헬퍼                      |
-| `codex/`               | codex-cli 어댑터 (`spawn`, `jsonlParser`, `modelAlias`, dispatcher)      |
-| `gemini/`              | gemini-cli 어댑터 (`spawn`, `sessionResolver`, `modelAlias`, dispatcher) |
-| `index.ts`             | `{ codex: Dispatcher, gemini: Dispatcher }` barrel                       |
+| Path                   | Role                                                                       |
+| ---------------------- | -------------------------------------------------------------------------- |
+| `entities/envelope.ts` | `buildResponse` — DispatchResult + 메타 → ConversationResponse             |
+| `errorMap/`            | exit code / stderr / Node 에러 → `ErrorCode` 매핑 (utils + constants)      |
+| `utils/`               | `computeIgnoredOptions` + `composePrompt` (recency_policy + preamble) 공유 |
+| `codex/`               | codex-cli 어댑터 (`spawn`, `jsonlParser`, `modelAlias`, dispatcher)        |
+| `gemini/`              | gemini-cli 어댑터 (`spawn`, `sessionResolver`, `modelAlias`, dispatcher)   |
+| `index.ts`             | `{ codex: Dispatcher, gemini: Dispatcher }` barrel                         |
 
 ## Conventions
 
@@ -20,6 +20,7 @@ codex-cli / gemini-cli 호출 본체. MCP 도구 핸들러에서 받은 `Dispatc
 - 외부 CLI 호출은 `node:child_process.spawn` 직접 사용 (의존성 추가 없음)
 - 환경 변수: codex 상속만, gemini `GEMINI_CLI_TRUST_WORKSPACE=true` + `flags.sandbox && backend!=='auto'` 시 `GEMINI_SANDBOX=<backend>`
 - 모델 alias `auto` 는 `-m` 플래그 자체를 생략
+- prompt prefix 합성은 MCP tool 진입에서 `composePrompt` 1회 — dispatcher 는 합성 후 문자열만 받음
 
 ## Boundaries
 

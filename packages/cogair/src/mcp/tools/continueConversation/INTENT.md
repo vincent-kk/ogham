@@ -16,6 +16,7 @@
 - `provider` 카운터는 시도 기준 +1
 - model='auto' 기본 (원 세션의 모델 유지); dispatcher 에 `options` 는 항상 `{}` 전달
 - 권한 플래그는 매 호출 시 현재 `config.option_flags[provider]` 를 다시 읽어 `DispatchOptions.flags` 로 주입
+- prompt 는 `composePrompt` 로 `config.preamble[session.provider]` + `config.recency_factor[session.provider]` 합성 후 dispatcher 에 전달; raw prompt 는 artifactWriter 에 별도 보존
 
 ## Boundaries
 

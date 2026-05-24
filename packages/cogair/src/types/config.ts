@@ -52,6 +52,24 @@ export const ArtifactsConfigSchema = z.object({
 
 export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
 
+export const PreambleConfigSchema = z.object({
+  gemini: z.string(),
+  codex: z.string(),
+});
+
+export type PreambleConfig = z.infer<typeof PreambleConfigSchema>;
+
+export const RecencyLevelSchema = z.enum(['off', 'auto', 'strict']);
+
+export type RecencyLevel = z.infer<typeof RecencyLevelSchema>;
+
+export const RecencyFactorConfigSchema = z.object({
+  gemini: RecencyLevelSchema,
+  codex: RecencyLevelSchema,
+});
+
+export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
+
 export const ConfigSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
@@ -61,6 +79,8 @@ export const ConfigSchema = z.object({
   session_ttl_hours: z.number().int().positive(),
   spawn_timeout_ms: z.number().int().positive(),
   artifacts: ArtifactsConfigSchema,
+  preamble: PreambleConfigSchema,
+  recency_factor: RecencyFactorConfigSchema,
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

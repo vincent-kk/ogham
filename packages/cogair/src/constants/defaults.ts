@@ -21,6 +21,14 @@ export const DEFAULT_CONFIG: Config = {
     enabled: false,
     location: 'project',
   },
+  preamble: {
+    gemini: '',
+    codex: '',
+  },
+  recency_factor: {
+    gemini: 'auto',
+    codex: 'off',
+  },
 };
 
 export const DIR_MODE = 0o700;
