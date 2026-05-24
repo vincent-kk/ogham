@@ -6,7 +6,11 @@ import { loadConfig } from '../../../core/configManager/index.js';
 import { incrementCounter } from '../../../core/counterManager/index.js';
 import { getProjectHash } from '../../../core/projectHash/index.js';
 import { createSession } from '../../../core/sessionStore/index.js';
-import { buildResponse, dispatchers } from '../../../dispatcher/index.js';
+import {
+  buildResponse,
+  composePrompt,
+  dispatchers,
+} from '../../../dispatcher/index.js';
 import type {
   ConversationResponse,
   DispatchResult,
@@ -33,10 +37,16 @@ export async function handleStartConversation(
 
   await incrementCounter(input.provider);
 
+  const composedPrompt = composePrompt({
+    prompt: input.prompt,
+    preamble: config.preamble[input.provider],
+    recencyLevel: config.recency_factor[input.provider],
+  });
+
   const result: DispatchResult =
     input.provider === 'codex'
       ? await dispatchers.codex.start({
-          prompt: input.prompt,
+          prompt: composedPrompt,
           model,
           options,
           sessionId,
@@ -45,7 +55,7 @@ export async function handleStartConversation(
           spawnTimeoutMs: config.spawn_timeout_ms,
         })
       : await dispatchers.gemini.start({
-          prompt: input.prompt,
+          prompt: composedPrompt,
           model,
           options,
           sessionId,
@@ -81,6 +91,7 @@ export async function handleStartConversation(
       createdAt,
       elapsedMs: Math.round(performance.now() - startedAt),
       prompt: input.prompt,
+      composedPrompt,
       response: result.response,
     });
   }

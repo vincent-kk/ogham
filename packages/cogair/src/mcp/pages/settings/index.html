@@ -316,6 +316,90 @@
         </section>
 
         <section class="section">
+          <h2 class="section-title">Prompt preamble</h2>
+          <p class="section-help">
+            Per-provider free-text prefix prepended to every dispatched prompt.
+            Used to inject style, tone, or persistent instructions. Leave empty
+            to skip.
+          </p>
+          <label class="field">
+            <span>gemini preamble</span>
+            <textarea
+              id="preamble-gemini"
+              rows="3"
+              placeholder="e.g. Always answer in Korean."
+            ></textarea>
+          </label>
+          <label class="field">
+            <span>codex preamble</span>
+            <textarea
+              id="preamble-codex"
+              rows="3"
+              placeholder="e.g. Prefer TypeScript."
+            ></textarea>
+          </label>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Recency factor</h2>
+          <p class="section-help">
+            Adds a <code>&lt;recency_policy&gt;</code> hint with today's local
+            date to the dispatched prompt for time-sensitive information.
+            <code>off</code> injects nothing. <code>normal</code> recommends
+            checking current sources when relevant. <code>strict</code> requires
+            search-tool verification with citations or "unverifiable" fallback.
+          </p>
+          <div class="flag-panel" id="recency-gemini">
+            <header class="flag-header">
+              <span class="provider-name">gemini</span>
+            </header>
+            <div class="radio-row">
+              <label class="radio"
+                ><input type="radio" name="recency-gemini" value="off" /><span
+                  >off</span
+                ></label
+              >
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="recency-gemini"
+                  value="normal"
+                /><span>normal</span></label
+              >
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="recency-gemini"
+                  value="strict"
+                /><span>strict</span></label
+              >
+            </div>
+          </div>
+          <div class="flag-panel" id="recency-codex">
+            <header class="flag-header">
+              <span class="provider-name">codex</span>
+            </header>
+            <div class="radio-row">
+              <label class="radio"
+                ><input type="radio" name="recency-codex" value="off" /><span
+                  >off</span
+                ></label
+              >
+              <label class="radio"
+                ><input type="radio" name="recency-codex" value="normal" /><span
+                  >normal</span
+                ></label
+              >
+              <label class="radio"
+                ><input type="radio" name="recency-codex" value="strict" /><span
+                  >strict</span
+                ></label
+              >
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
           <h2 class="section-title">Session TTL</h2>
           <p class="section-help">Hours before idle sessions are pruned.</p>
           <label class="field">

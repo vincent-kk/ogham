@@ -34,12 +34,26 @@ export interface OptionFlags {
   codex: CodexFlags;
 }
 
+export type RecencyLevel = 'off' | 'normal' | 'strict';
+
+export interface PreambleConfig {
+  gemini: string;
+  codex: string;
+}
+
+export interface RecencyFactorConfig {
+  gemini: RecencyLevel;
+  codex: RecencyLevel;
+}
+
 export interface HookConfig {
   ratio: Ratio;
   intervention_strength: InterventionStrength;
   keywords: { gemini: string; codex: string };
   default_model: ModelAlias;
   option_flags: OptionFlags;
+  preamble: PreambleConfig;
+  recency_factor: RecencyFactorConfig;
 }
 
 export interface HookCounter {

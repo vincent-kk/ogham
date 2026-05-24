@@ -6,7 +6,9 @@ import { CONFIG_PATH } from './paths.js';
 import { pickKeywords } from './pickKeywords.js';
 import { pickModel } from './pickModel.js';
 import { pickOptionFlags } from './pickOptionFlags.js';
+import { pickPreamble } from './pickPreamble.js';
 import { pickRatio } from './pickRatio.js';
+import { pickRecencyFactor } from './pickRecencyFactor.js';
 import { pickStrength } from './pickStrength.js';
 import { safeReadJson } from './safeReadJson.js';
 
@@ -19,5 +21,7 @@ export function loadConfig(): HookConfig {
     keywords: pickKeywords(raw.keywords),
     default_model: pickModel(raw.default_model),
     option_flags: pickOptionFlags(raw.option_flags),
+    preamble: pickPreamble(raw.preamble),
+    recency_factor: pickRecencyFactor(raw.recency_factor),
   };
 }

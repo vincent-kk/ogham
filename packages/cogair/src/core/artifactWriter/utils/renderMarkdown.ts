@@ -8,6 +8,7 @@ export interface RenderMarkdownArgs {
   createdAt: string;
   elapsedMs: number;
   prompt: string;
+  composedPrompt?: string;
   response: string;
 }
 
@@ -24,5 +25,9 @@ export function renderMarkdown(args: RenderMarkdownArgs): string {
     '---',
     '',
   ].join('\n');
-  return `${frontMatter}\n## Prompt\n\n${args.prompt}\n\n## Response\n\n${args.response}\n`;
+  const composedSection =
+    args.composedPrompt !== undefined && args.composedPrompt !== args.prompt
+      ? `## Composed Prompt (sent to CLI)\n\n${args.composedPrompt}\n\n`
+      : '';
+  return `${frontMatter}\n## Prompt\n\n${args.prompt}\n\n${composedSection}## Response\n\n${args.response}\n`;
 }

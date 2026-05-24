@@ -41,6 +41,8 @@ describe('loadConfig', () => {
       session_ttl_hours: 24,
       spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },
+      preamble: { gemini: 'be terse', codex: 'prefer ts' },
+      recency_factor: { gemini: 'normal' as const, codex: 'strict' as const },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
@@ -61,6 +63,43 @@ describe('loadConfig', () => {
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
     expect(result.artifacts).toEqual(DEFAULT_CONFIG.artifacts);
+  });
+
+  it('injects preamble and recency_factor defaults for legacy configs', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: { gemini: 'g', codex: 'c' },
+      default_model: 'auto',
+      option_flags: DEFAULT_CONFIG.option_flags,
+      session_ttl_hours: 72,
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.preamble).toEqual(DEFAULT_CONFIG.preamble);
+    expect(result.recency_factor).toEqual(DEFAULT_CONFIG.recency_factor);
+  });
+
+  it('drops invalid recency level and falls back to off', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: DEFAULT_CONFIG.keywords,
+      default_model: 'auto',
+      option_flags: DEFAULT_CONFIG.option_flags,
+      session_ttl_hours: 72,
+      recency_factor: { gemini: 'aggressive', codex: 'strict' },
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.recency_factor.gemini).toBe('off');
+    expect(result.recency_factor.codex).toBe('strict');
   });
 
   it('drops legacy default_options and injects option_flags defaults', async () => {

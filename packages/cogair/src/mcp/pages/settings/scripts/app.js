@@ -11,6 +11,8 @@
     codex: { yolo: false, sandbox: 'workspace-write' },
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
+  var DEFAULT_PREAMBLE = { gemini: '', codex: '' };
+  var DEFAULT_RECENCY = { gemini: 'off', codex: 'off' };
 
   var RATIO_MIN = 0;
   var RATIO_MAX = 100;
@@ -27,6 +29,7 @@
     'off',
   ];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
+  var RECENCY_LEVELS = ['off', 'normal', 'strict'];
 
   var STRENGTH_LABELS = {
     '-2': 'Subtle',
@@ -69,6 +72,8 @@
   var codexFullAccessWarning = $('#codex-full-access-warning');
   var artifactsEnabled = $('#artifacts-enabled');
   var artifactsLocationWrap = $('#artifacts-location-wrap');
+  var preambleGemini = $('#preamble-gemini');
+  var preambleCodex = $('#preamble-codex');
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
@@ -297,6 +302,28 @@
     syncArtifactsLocationInert();
   }
 
+  function applyPreamble(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_PREAMBLE;
+    preambleGemini.value =
+      typeof src.gemini === 'string' ? src.gemini : DEFAULT_PREAMBLE.gemini;
+    preambleCodex.value =
+      typeof src.codex === 'string' ? src.codex : DEFAULT_PREAMBLE.codex;
+  }
+
+  function applyRecencyFactor(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_RECENCY;
+    setRadio(
+      'recency-gemini',
+      typeof src.gemini === 'string' ? src.gemini : DEFAULT_RECENCY.gemini,
+      RECENCY_LEVELS,
+    );
+    setRadio(
+      'recency-codex',
+      typeof src.codex === 'string' ? src.codex : DEFAULT_RECENCY.codex,
+      RECENCY_LEVELS,
+    );
+  }
+
   function applyConfig(cfg) {
     var r = cfg.ratio || {};
     ratioState.gemini = readProviderRatio(r.gemini, ratioState.gemini);
@@ -309,6 +336,8 @@
     spawnTimeoutMs.value = cfg.spawn_timeout_ms;
     applyOptionFlags(cfg.option_flags);
     applyArtifacts(cfg.artifacts);
+    applyPreamble(cfg.preamble);
+    applyRecencyFactor(cfg.recency_factor);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -351,6 +380,24 @@
     };
   }
 
+  function buildPreamble() {
+    return {
+      gemini: String(preambleGemini.value || ''),
+      codex: String(preambleCodex.value || ''),
+    };
+  }
+
+  function buildRecencyFactor() {
+    return {
+      gemini: readRadio(
+        'recency-gemini',
+        RECENCY_LEVELS,
+        DEFAULT_RECENCY.gemini,
+      ),
+      codex: readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex),
+    };
+  }
+
   function buildConfig() {
     var modelEl = document.querySelector('input[name="model"]:checked');
     return {
@@ -386,6 +433,8 @@
         ),
       ),
       artifacts: buildArtifacts(),
+      preamble: buildPreamble(),
+      recency_factor: buildRecencyFactor(),
     };
   }
 

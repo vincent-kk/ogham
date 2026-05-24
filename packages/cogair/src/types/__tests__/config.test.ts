@@ -67,4 +67,33 @@ describe('ConfigSchema', () => {
     void _omit;
     expect(() => ConfigSchema.parse(rest)).toThrow();
   });
+
+  it('rejects unknown recency level', () => {
+    expect(() =>
+      ConfigSchema.parse({
+        ...DEFAULT_CONFIG,
+        recency_factor: { gemini: 'aggressive', codex: 'off' },
+      }),
+    ).toThrow();
+  });
+
+  it('rejects non-string preamble', () => {
+    expect(() =>
+      ConfigSchema.parse({
+        ...DEFAULT_CONFIG,
+        preamble: { gemini: 123, codex: '' },
+      }),
+    ).toThrow();
+  });
+
+  it('accepts each recency level value', () => {
+    for (const level of ['off', 'normal', 'strict'] as const) {
+      expect(() =>
+        ConfigSchema.parse({
+          ...DEFAULT_CONFIG,
+          recency_factor: { gemini: level, codex: level },
+        }),
+      ).not.toThrow();
+    }
+  });
 });
