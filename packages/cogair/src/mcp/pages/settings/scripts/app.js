@@ -311,7 +311,11 @@
       } else if (sb !== 'off') {
         chips.push({ label: 'sandbox: ' + sb });
       }
-      var rc = readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex);
+      var rc = readRadio(
+        'recency-codex',
+        RECENCY_LEVELS,
+        DEFAULT_RECENCY.codex,
+      );
       if (rc !== 'off') chips.push({ label: 'rec: ' + rc });
       var kwc = (kwCodex.value || '').trim();
       if (kwc) chips.push({ label: 'keyword: on', title: kwc });
