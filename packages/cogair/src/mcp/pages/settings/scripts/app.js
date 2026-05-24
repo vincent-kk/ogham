@@ -74,6 +74,12 @@
   var artifactsLocationWrap = $('#artifacts-location-wrap');
   var preambleGemini = $('#preamble-gemini');
   var preambleCodex = $('#preamble-codex');
+  var advancedToggleCodex = $('#advanced-toggle-codex');
+  var advancedToggleGemini = $('#advanced-toggle-gemini');
+  var advancedPanelCodex = $('#advanced-panel-codex');
+  var advancedPanelGemini = $('#advanced-panel-gemini');
+  var summaryCodex = $('#summary-codex');
+  var summaryGemini = $('#summary-gemini');
   var status = $('#status');
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
@@ -260,6 +266,127 @@
     }
   }
 
+  function toggleAdvancedPanel(toggleEl, panelEl) {
+    if (toggleEl.disabled) return;
+    var willOpen = toggleEl.getAttribute('aria-expanded') !== 'true';
+    toggleEl.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    if (willOpen) {
+      panelEl.hidden = false;
+      // Force layout so the grid-template-rows transition kicks in.
+      void panelEl.offsetHeight;
+      panelEl.classList.add('is-open');
+      return;
+    }
+    panelEl.classList.remove('is-open');
+    // After collapse transition completes, re-hide so the panel leaves
+    // the a11y tree. transitionend may not fire when reduced motion
+    // collapses the duration to ~0ms — guard with a timeout fallback.
+    var finished = false;
+    var done = function (ev) {
+      if (finished) return;
+      if (ev && ev.propertyName && ev.propertyName !== 'grid-template-rows') {
+        return;
+      }
+      finished = true;
+      panelEl.hidden = true;
+      panelEl.removeEventListener('transitionend', done);
+    };
+    panelEl.addEventListener('transitionend', done);
+    setTimeout(done, 260);
+  }
+
+  function buildSummaryChips(provider) {
+    var chips = [];
+    if (provider === 'codex') {
+      chips.push({
+        label: codexYolo.checked ? 'yolo: on' : 'yolo: off',
+        tone: codexYolo.checked ? 'warn' : null,
+      });
+      var sb = readRadio(
+        'codex-sandbox',
+        CODEX_SANDBOX_MODES,
+        DEFAULT_OPTION_FLAGS.codex.sandbox,
+      );
+      if (sb === 'danger-full-access') {
+        chips.push({ label: 'sandbox: full-access', tone: 'warn' });
+      } else if (sb === 'off') {
+        chips.push({ label: 'sandbox: off', tone: 'warn' });
+      } else {
+        chips.push({ label: 'sandbox: ' + sb });
+      }
+      var rc = readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex);
+      chips.push({ label: 'rec: ' + rc });
+      if (kwCodex.value && kwCodex.value.trim()) {
+        chips.push({ label: 'kw: ' + kwCodex.value.trim() });
+      }
+    } else {
+      chips.push({
+        label: geminiYolo.checked ? 'yolo: on' : 'yolo: off',
+        tone: geminiYolo.checked ? 'warn' : null,
+      });
+      if (geminiSandbox.checked) {
+        var be = readRadio(
+          'gemini-backend',
+          GEMINI_BACKENDS,
+          DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+        );
+        chips.push({ label: 'sandbox: ' + be });
+      } else {
+        chips.push({ label: 'sandbox: off', tone: 'warn' });
+      }
+      var rg = readRadio(
+        'recency-gemini',
+        RECENCY_LEVELS,
+        DEFAULT_RECENCY.gemini,
+      );
+      chips.push({ label: 'rec: ' + rg });
+      if (kwGemini.value && kwGemini.value.trim()) {
+        chips.push({ label: 'kw: ' + kwGemini.value.trim() });
+      }
+    }
+    return chips;
+  }
+
+  function renderProviderSummary(provider) {
+    var container = provider === 'codex' ? summaryCodex : summaryGemini;
+    if (!container) return;
+    var chips = buildSummaryChips(provider);
+    while (container.firstChild) container.removeChild(container.firstChild);
+    for (var i = 0; i < chips.length; i += 1) {
+      var el = document.createElement('span');
+      el.className = 'summary-chip';
+      if (chips[i].tone) el.setAttribute('data-tone', chips[i].tone);
+      el.textContent = chips[i].label;
+      container.appendChild(el);
+    }
+  }
+
+  function renderAllSummaries() {
+    renderProviderSummary('codex');
+    renderProviderSummary('gemini');
+  }
+
+  function syncAdvancedToggleAvailability() {
+    advancedToggleCodex.disabled = !providerAvailable.codex;
+    advancedToggleGemini.disabled = !providerAvailable.gemini;
+    if (
+      !providerAvailable.codex &&
+      advancedToggleCodex.getAttribute('aria-expanded') === 'true'
+    ) {
+      advancedToggleCodex.setAttribute('aria-expanded', 'false');
+      advancedPanelCodex.classList.remove('is-open');
+      advancedPanelCodex.hidden = true;
+    }
+    if (
+      !providerAvailable.gemini &&
+      advancedToggleGemini.getAttribute('aria-expanded') === 'true'
+    ) {
+      advancedToggleGemini.setAttribute('aria-expanded', 'false');
+      advancedPanelGemini.classList.remove('is-open');
+      advancedPanelGemini.hidden = true;
+    }
+  }
+
   function applyOptionFlags(raw) {
     var src = raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
     var g = src.gemini && typeof src.gemini === 'object' ? src.gemini : {};
@@ -345,6 +472,7 @@
 
     renderRatio();
     updateStrengthLabel();
+    renderAllSummaries();
   }
 
   function buildOptionFlags() {
@@ -467,6 +595,7 @@
     codexInstallHint.hidden = providerAvailable.codex;
     geminiInstallHint.hidden = providerAvailable.gemini;
     renderRatio();
+    syncAdvancedToggleAvailability();
   }
 
   async function loadConfig() {
@@ -537,6 +666,12 @@
   toggleCodex.addEventListener('click', function () {
     toggleProvider('codex');
   });
+  advancedToggleCodex.addEventListener('click', function () {
+    toggleAdvancedPanel(advancedToggleCodex, advancedPanelCodex);
+  });
+  advancedToggleGemini.addEventListener('click', function () {
+    toggleAdvancedPanel(advancedToggleGemini, advancedPanelGemini);
+  });
   strength.addEventListener('input', updateStrengthLabel);
   geminiSandbox.addEventListener('change', syncGeminiBackendInert);
   codexYolo.addEventListener('change', syncCodexSandboxInert);
@@ -546,6 +681,8 @@
       r.addEventListener('change', syncCodexFullAccessWarning);
     });
   artifactsEnabled.addEventListener('change', syncArtifactsLocationInert);
+  form.addEventListener('change', renderAllSummaries);
+  form.addEventListener('input', renderAllSummaries);
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     save(false);
@@ -554,5 +691,6 @@
     save(true);
   });
 
+  renderAllSummaries();
   loadConfig();
 })();
