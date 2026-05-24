@@ -1,6 +1,7 @@
 import {
-  RECENCY_PROMPT_NORMAL,
+  RECENCY_PROMPT_AUTO,
   RECENCY_PROMPT_STRICT,
+  RECENCY_PROMPT_TOKEN_TODAY,
 } from '../../constants/index.js';
 import type { RecencyLevel } from '../../types/index.js';
 
@@ -20,10 +21,10 @@ function todayLocal(): string {
 }
 
 function resolveRecencyBody(level: RecencyLevel, today: string): string | null {
-  if (level === 'normal')
-    return RECENCY_PROMPT_NORMAL.replaceAll('{today}', today);
+  if (level === 'auto')
+    return RECENCY_PROMPT_AUTO.replaceAll(RECENCY_PROMPT_TOKEN_TODAY, today);
   if (level === 'strict')
-    return RECENCY_PROMPT_STRICT.replaceAll('{today}', today);
+    return RECENCY_PROMPT_STRICT.replaceAll(RECENCY_PROMPT_TOKEN_TODAY, today);
   return null;
 }
 

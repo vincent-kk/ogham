@@ -37,18 +37,18 @@ describe('composePrompt', () => {
     ).toBe('p');
   });
 
-  it('normal wraps with <recency_policy> and substitutes {today}', () => {
+  it('auto wraps with <recency_policy> and substitutes {today}', () => {
     const out = composePrompt({
       prompt: 'price today?',
       preamble: '',
-      recencyLevel: 'normal',
+      recencyLevel: 'auto',
       today: FIXED_TODAY,
     });
     expect(out.startsWith('<recency_policy>\n')).toBe(true);
-    expect(out.includes(`오늘은 ${FIXED_TODAY}입니다`)).toBe(true);
+    expect(out.includes(`Today is ${FIXED_TODAY}`)).toBe(true);
     expect(out.includes('</recency_policy>')).toBe(true);
     expect(out.endsWith('\n\nprice today?')).toBe(true);
-    expect(out.includes('{today}')).toBe(false);
+    expect(out.includes('{{today}}')).toBe(false);
   });
 
   it('strict uses strict body', () => {
@@ -58,14 +58,14 @@ describe('composePrompt', () => {
       recencyLevel: 'strict',
       today: FIXED_TODAY,
     });
-    expect(out.includes('엄격히 따라주세요')).toBe(true);
+    expect(out.includes('follow these strictly')).toBe(true);
   });
 
   it('combines recency + preamble + prompt in order', () => {
     const out = composePrompt({
       prompt: 'q',
       preamble: 'My preamble',
-      recencyLevel: 'normal',
+      recencyLevel: 'auto',
       today: FIXED_TODAY,
     });
     const idxPolicy = out.indexOf('<recency_policy>');
@@ -79,8 +79,8 @@ describe('composePrompt', () => {
     const out = composePrompt({
       prompt: 'q',
       preamble: '',
-      recencyLevel: 'normal',
+      recencyLevel: 'auto',
     });
-    expect(/오늘은 \d{4}-\d{2}-\d{2}입니다/.test(out)).toBe(true);
+    expect(/Today is \d{4}-\d{2}-\d{2}/.test(out)).toBe(true);
   });
 });

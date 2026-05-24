@@ -34,7 +34,7 @@ export interface OptionFlags {
   codex: CodexFlags;
 }
 
-export type RecencyLevel = 'off' | 'normal' | 'strict';
+export type RecencyLevel = 'off' | 'auto' | 'strict';
 
 export interface PreambleConfig {
   gemini: string;

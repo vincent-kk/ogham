@@ -12,7 +12,7 @@
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '' };
-  var DEFAULT_RECENCY = { gemini: 'off', codex: 'off' };
+  var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off' };
 
   var RATIO_MIN = 0;
   var RATIO_MAX = 100;
@@ -29,7 +29,7 @@
     'off',
   ];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
-  var RECENCY_LEVELS = ['off', 'normal', 'strict'];
+  var RECENCY_LEVELS = ['off', 'auto', 'strict'];
 
   var STRENGTH_LABELS = {
     '-2': 'Subtle',

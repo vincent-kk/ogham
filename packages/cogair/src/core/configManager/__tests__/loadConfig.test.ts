@@ -42,7 +42,7 @@ describe('loadConfig', () => {
       spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },
       preamble: { gemini: 'be terse', codex: 'prefer ts' },
-      recency_factor: { gemini: 'normal' as const, codex: 'strict' as const },
+      recency_factor: { gemini: 'auto' as const, codex: 'strict' as const },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
@@ -83,7 +83,7 @@ describe('loadConfig', () => {
     expect(result.recency_factor).toEqual(DEFAULT_CONFIG.recency_factor);
   });
 
-  it('drops invalid recency level and falls back to off', async () => {
+  it('drops invalid recency level and falls back to default', async () => {
     const stored = {
       ratio: {
         gemini: { value: 50, enabled: true },
@@ -98,7 +98,9 @@ describe('loadConfig', () => {
     };
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
-    expect(result.recency_factor.gemini).toBe('off');
+    expect(result.recency_factor.gemini).toBe(
+      DEFAULT_CONFIG.recency_factor.gemini,
+    );
     expect(result.recency_factor.codex).toBe('strict');
   });
 

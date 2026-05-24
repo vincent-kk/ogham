@@ -174,10 +174,13 @@
         <section class="section">
           <h2 class="section-title">Option flags</h2>
           <p class="section-help">
-            Per-provider runtime flags passed to the CLI.
+            Per-provider runtime flags, preamble, and recency factor. Saved to
+            config and applied by the dispatcher — not exposed to MCP callers.
             <code>yolo</code> skips approvals; <code>sandbox</code> isolates
-            execution. These are saved to config and applied by the dispatcher —
-            they are not exposed to MCP callers.
+            execution; <code>preamble</code> prepends free-text to every prompt;
+            <code>recency factor</code> wraps a
+            <code>&lt;recency_policy&gt;</code>
+            hint for time-sensitive facts.
           </p>
 
           <div class="flag-panel" id="flag-gemini">
@@ -251,6 +254,45 @@
                 gemini-cli pick; <code>sandbox-exec</code> is macOS only.
               </p>
             </div>
+
+            <label class="field">
+              <span>prompt preamble</span>
+              <textarea
+                id="preamble-gemini"
+                rows="3"
+                placeholder="e.g. Always answer in Korean."
+              ></textarea>
+            </label>
+
+            <div class="flag-field">
+              <span class="flag-field-label">recency factor</span>
+              <div class="radio-row">
+                <label class="radio"
+                  ><input type="radio" name="recency-gemini" value="off" /><span
+                    >off</span
+                  ></label
+                >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="recency-gemini"
+                    value="auto"
+                  /><span>auto</span></label
+                >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="recency-gemini"
+                    value="strict"
+                  /><span>strict</span></label
+                >
+              </div>
+              <p class="flag-hint">
+                <code>auto</code> recommends source-checking for time-sensitive
+                facts. <code>strict</code> requires search-verification with
+                citations or an "unverifiable" fallback.
+              </p>
+            </div>
           </div>
 
           <div class="flag-panel" id="flag-codex">
@@ -312,89 +354,42 @@
                 environment.</span
               >
             </div>
-          </div>
-        </section>
 
-        <section class="section">
-          <h2 class="section-title">Prompt preamble</h2>
-          <p class="section-help">
-            Per-provider free-text prefix prepended to every dispatched prompt.
-            Used to inject style, tone, or persistent instructions. Leave empty
-            to skip.
-          </p>
-          <label class="field">
-            <span>gemini preamble</span>
-            <textarea
-              id="preamble-gemini"
-              rows="3"
-              placeholder="e.g. Always answer in Korean."
-            ></textarea>
-          </label>
-          <label class="field">
-            <span>codex preamble</span>
-            <textarea
-              id="preamble-codex"
-              rows="3"
-              placeholder="e.g. Prefer TypeScript."
-            ></textarea>
-          </label>
-        </section>
+            <label class="field">
+              <span>prompt preamble</span>
+              <textarea
+                id="preamble-codex"
+                rows="3"
+                placeholder="e.g. Prefer TypeScript."
+              ></textarea>
+            </label>
 
-        <section class="section">
-          <h2 class="section-title">Recency factor</h2>
-          <p class="section-help">
-            Adds a <code>&lt;recency_policy&gt;</code> hint with today's local
-            date to the dispatched prompt for time-sensitive information.
-            <code>off</code> injects nothing. <code>normal</code> recommends
-            checking current sources when relevant. <code>strict</code> requires
-            search-tool verification with citations or "unverifiable" fallback.
-          </p>
-          <div class="flag-panel" id="recency-gemini">
-            <header class="flag-header">
-              <span class="provider-name">gemini</span>
-            </header>
-            <div class="radio-row">
-              <label class="radio"
-                ><input type="radio" name="recency-gemini" value="off" /><span
-                  >off</span
-                ></label
-              >
-              <label class="radio"
-                ><input
-                  type="radio"
-                  name="recency-gemini"
-                  value="normal"
-                /><span>normal</span></label
-              >
-              <label class="radio"
-                ><input
-                  type="radio"
-                  name="recency-gemini"
-                  value="strict"
-                /><span>strict</span></label
-              >
-            </div>
-          </div>
-          <div class="flag-panel" id="recency-codex">
-            <header class="flag-header">
-              <span class="provider-name">codex</span>
-            </header>
-            <div class="radio-row">
-              <label class="radio"
-                ><input type="radio" name="recency-codex" value="off" /><span
-                  >off</span
-                ></label
-              >
-              <label class="radio"
-                ><input type="radio" name="recency-codex" value="normal" /><span
-                  >normal</span
-                ></label
-              >
-              <label class="radio"
-                ><input type="radio" name="recency-codex" value="strict" /><span
-                  >strict</span
-                ></label
-              >
+            <div class="flag-field">
+              <span class="flag-field-label">recency factor</span>
+              <div class="radio-row">
+                <label class="radio"
+                  ><input type="radio" name="recency-codex" value="off" /><span
+                    >off</span
+                  ></label
+                >
+                <label class="radio"
+                  ><input type="radio" name="recency-codex" value="auto" /><span
+                    >auto</span
+                  ></label
+                >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="recency-codex"
+                    value="strict"
+                  /><span>strict</span></label
+                >
+              </div>
+              <p class="flag-hint">
+                <code>auto</code> recommends source-checking for time-sensitive
+                facts. <code>strict</code> requires search-verification with
+                citations or an "unverifiable" fallback.
+              </p>
             </div>
           </div>
         </section>

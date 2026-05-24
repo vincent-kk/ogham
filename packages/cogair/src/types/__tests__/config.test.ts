@@ -87,7 +87,7 @@ describe('ConfigSchema', () => {
   });
 
   it('accepts each recency level value', () => {
-    for (const level of ['off', 'normal', 'strict'] as const) {
+    for (const level of ['off', 'auto', 'strict'] as const) {
       expect(() =>
         ConfigSchema.parse({
           ...DEFAULT_CONFIG,

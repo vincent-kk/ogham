@@ -26,7 +26,7 @@ export const DEFAULT_CONFIG: Config = {
     codex: '',
   },
   recency_factor: {
-    gemini: 'off',
+    gemini: 'auto',
     codex: 'off',
   },
 };

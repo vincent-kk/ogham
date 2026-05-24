@@ -59,7 +59,7 @@ export const PreambleConfigSchema = z.object({
 
 export type PreambleConfig = z.infer<typeof PreambleConfigSchema>;
 
-export const RecencyLevelSchema = z.enum(['off', 'normal', 'strict']);
+export const RecencyLevelSchema = z.enum(['off', 'auto', 'strict']);
 
 export type RecencyLevel = z.infer<typeof RecencyLevelSchema>;
 

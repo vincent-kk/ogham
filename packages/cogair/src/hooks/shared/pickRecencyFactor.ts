@@ -3,7 +3,7 @@ import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 import type { RecencyFactorConfig, RecencyLevel } from './configTypes.js';
 import { isObj } from './isObj.js';
 
-const VALID: ReadonlySet<RecencyLevel> = new Set(['off', 'normal', 'strict']);
+const VALID: ReadonlySet<RecencyLevel> = new Set(['off', 'auto', 'strict']);
 
 function pickLevel(value: unknown, fallback: RecencyLevel): RecencyLevel {
   return typeof value === 'string' && VALID.has(value as RecencyLevel)

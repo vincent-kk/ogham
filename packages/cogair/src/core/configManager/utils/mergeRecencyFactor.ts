@@ -8,7 +8,7 @@ import { isPlainObject } from './isPlainObject.js';
 
 const VALID_LEVELS: ReadonlySet<RecencyLevel> = new Set([
   'off',
-  'normal',
+  'auto',
   'strict',
 ]);
 
