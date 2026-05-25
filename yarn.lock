@@ -1198,6 +1198,7 @@ __metadata:
   resolution: "@ogham/cogair@workspace:packages/cogair"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/cross-platform": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^3.2.4"
     esbuild: "npm:^0.24.0"
@@ -1207,7 +1208,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ogham/cross-platform@workspace:shared/cross-platform":
+"@ogham/cross-platform@workspace:^, @ogham/cross-platform@workspace:shared/cross-platform":
   version: 0.0.0-use.local
   resolution: "@ogham/cross-platform@workspace:shared/cross-platform"
   dependencies:

@@ -1,4 +1,6 @@
+import { normalizeEol } from '@ogham/cross-platform';
+
 export function normalizeResponse(stdout: string): string | null {
-  const trimmed = stdout.replace(/\n+$/, '');
+  const trimmed = normalizeEol(stdout).replace(/\n+$/, '');
   return trimmed.length > 0 ? trimmed : null;
 }

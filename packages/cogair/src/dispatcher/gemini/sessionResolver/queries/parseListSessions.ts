@@ -1,3 +1,5 @@
+import { normalizeEol } from '@ogham/cross-platform';
+
 import { ENTRY_PATTERN } from '../constants/entryPattern.js';
 
 export interface GeminiSessionEntry {
@@ -9,7 +11,7 @@ export interface GeminiSessionEntry {
 export function parseListSessions(stdout: string): GeminiSessionEntry[] {
   const entries: GeminiSessionEntry[] = [];
   if (!stdout) return entries;
-  for (const line of stdout.split('\n')) {
+  for (const line of normalizeEol(stdout).split('\n')) {
     const match = line.match(ENTRY_PATTERN);
     if (!match) continue;
     entries.push({
