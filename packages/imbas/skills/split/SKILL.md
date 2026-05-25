@@ -1,9 +1,9 @@
 ---
 name: split
 user_invocable: true
-description: "[imbas:split] Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant Jira Stories. Applies 3→1→2 verification, size checks, and horizontal splitting. Trigger: \"split stories\", \"story 분할\", \"Phase 2\", \"imbas split\""
-argument-hint: "[--run RUN_ID] [--epic EPIC-KEY]"
-version: "1.0.0"
+description: '[imbas:split] Phase 2 of the imbas pipeline. Splits a validated document into INVEST-compliant Jira Stories. Applies 3→1→2 verification, size checks, and horizontal splitting. Trigger: "split stories", "story 분할", "Phase 2", "imbas split"'
+argument-hint: '[--run RUN_ID] [--epic EPIC-KEY]'
+version: '1.0.0'
 complexity: complex
 plugin: imbas
 ---
@@ -14,10 +14,12 @@ plugin: imbas
 > verification loop.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Split complete` or `Escape code: E[0-9C]-[0-9]`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After `planner` subagent returns Story list — immediately proceed to 3→1→2 verification
 > - Reverse-inference `analyst` subagent return — chain gate evaluation in the same turn
 > - Horizontal split recursion (Phase 2.6) — recursive Story re-verification MUST NOT yield between iterations

@@ -1,9 +1,9 @@
 ---
 name: validate
 user_invocable: true
-description: "[imbas:validate] Phase 1 of the imbas pipeline. Validates a planning document for contradictions, divergences, omissions, and logical infeasibilities. Produces a markdown validation report. Trigger: \"validate spec\", \"check document\", \"정합성 검증\", \"문서 검증\""
-argument-hint: "<source> [--project KEY] [--supplements PATHS]"
-version: "1.0.0"
+description: '[imbas:validate] Phase 1 of the imbas pipeline. Validates a planning document for contradictions, divergences, omissions, and logical infeasibilities. Produces a markdown validation report. Trigger: "validate spec", "check document", "정합성 검증", "문서 검증"'
+argument-hint: '<source> [--project KEY] [--supplements PATHS]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -14,10 +14,12 @@ plugin: imbas
 > [OP: get_confluence] / [OP: search_confluence] operations.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Validation result: (PASS|PASS_WITH_WARNINGS|BLOCKED)`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After `analyst` subagent returns `validation-report.md` content — chain `mcp_tools_run_transition(complete_phase)` in the same turn
 > - After Confluence page fetch — continue to markdown conversion without pause
 > - After gate evaluation (BLOCKED → STOP) — emit blocker report AND end execution in the same turn

@@ -1,9 +1,9 @@
 ---
 name: read-issue
 user_invocable: false
-description: "[imbas:read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary."
-argument-hint: "<issue-ref> [--depth shallow|full]"
-version: "1.0.0"
+description: '[imbas:read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary.'
+argument-hint: '<issue-ref> [--depth shallow|full]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -34,17 +34,18 @@ imbas:read-issue <issue-ref> [--depth shallow|full]
 - [Error Handling](./references/errors.md) — Provider-agnostic error conditions
 
 <!-- imbas:constraints-v1 -->
+
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (target issue ID) via imbas_tools.
 2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
-   | provider | workflow file |
-   |---|---|
-   | `jira`   | `references/jira/workflow.md` |
+   | provider | workflow file                   |
+   | -------- | ------------------------------- |
+   | `jira`   | `references/jira/workflow.md`   |
    | `github` | `references/github/workflow.md` |
-   | `local`  | `references/local/workflow.md` |
+   | `local`  | `references/local/workflow.md`  |
 
 4. Execute those steps exactly.
 5. Return the shared structured output (per `output-schema.md`).

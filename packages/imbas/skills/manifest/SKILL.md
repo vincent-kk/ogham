@@ -1,9 +1,9 @@
 ---
 name: manifest
 user_invocable: true
-description: "[imbas:manifest] Execute a stories-manifest or devplan-manifest to batch-create issues (Jira, GitHub, or local). Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\", \"issue 생성\""
-argument-hint: "<stories|devplan> [--run RUN_ID] [--dry-run]"
-version: "1.0.0"
+description: '[imbas:manifest] Execute a stories-manifest or devplan-manifest to batch-create issues (Jira, GitHub, or local). Supports dry-run, resume from failure, and selective execution. Trigger: "execute manifest", "매니페스트 실행", "jira 생성", "issue 생성"'
+argument-hint: '<stories|devplan> [--run RUN_ID] [--dry-run]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -13,10 +13,12 @@ plugin: imbas
 > NEVER yield after MCP tool calls, subagent returns, or [OP:] provider operations.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required (ambiguity only the user can resolve)
 > 2. Terminal stage marker emitted: `Manifest execution complete` or `Manifest partial failure`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - Provider [OP:] loops — after EACH item creation, save manifest via `mcp_tools_manifest_save` and chain the next item in the same turn (do NOT pause to report partial progress)
 > - Dry-run preview display — do NOT pause after rendering the plan; continue to the final report
 > - Per-item failure — log on the item and chain to the next; never stop mid-batch
@@ -53,17 +55,18 @@ preview, crash recovery via per-item save, and idempotent re-execution.
 - [State Transitions](./references/state-transitions.md) — Preconditions and manifest item status spec
 
 <!-- imbas:constraints-v1 -->
+
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (manifest, run state) via imbas_tools.
 2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
-   | provider | workflow file |
-   |---|---|
-   | `jira`   | `references/jira/workflow.md` |
+   | provider | workflow file                   |
+   | -------- | ------------------------------- |
+   | `jira`   | `references/jira/workflow.md`   |
    | `github` | `references/github/workflow.md` |
-   | `local`  | `references/local/workflow.md` |
+   | `local`  | `references/local/workflow.md`  |
 
 4. Execute those steps exactly.
 5. Persist outputs via imbas_tools (`mcp_tools_manifest_save`, `mcp_tools_run_transition`, etc.).

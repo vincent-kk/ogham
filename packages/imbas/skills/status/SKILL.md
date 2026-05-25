@@ -1,9 +1,9 @@
 ---
 name: status
 user_invocable: true
-description: "[imbas:status] Show current or historical imbas run status, including phase progress, manifest summaries, and blocking issues. Trigger: \"imbas status\", \"런 상태\", \"imbas 진행상황\""
-argument-hint: "[list | <run-id> | resume <run-id>]"
-version: "1.0.0"
+description: '[imbas:status] Show current or historical imbas run status, including phase progress, manifest summaries, and blocking issues. Trigger: "imbas status", "런 상태", "imbas 진행상황"'
+argument-hint: '[list | <run-id> | resume <run-id>]'
+version: '1.0.0'
 complexity: simple
 plugin: imbas
 ---

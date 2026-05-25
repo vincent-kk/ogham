@@ -1,9 +1,9 @@
 ---
 name: digest
 user_invocable: true
-description: "[imbas:digest] Compresses an issue's full context (description + comment thread + media) into a structured summary and posts it as a comment or digest entry (Jira comment, GitHub comment, or local ## Digest append). Uses State Tracking + QA-Prompting hybrid approach. Trigger: \"digest issue\", \"이슈 정리\", \"이슈 요약\", \"티켓 정리\", \"티켓 요약\", \"imbas digest\""
-argument-hint: "<issue-ref> [--preview] [--no-media]"
-version: "1.0.0"
+description: '[imbas:digest] Compresses an issue''s full context (description + comment thread + media) into a structured summary and posts it as a comment or digest entry (Jira comment, GitHub comment, or local ## Digest append). Uses State Tracking + QA-Prompting hybrid approach. Trigger: "digest issue", "이슈 정리", "이슈 요약", "티켓 정리", "티켓 요약", "imbas digest"'
+argument-hint: '<issue-ref> [--preview] [--no-media]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -14,10 +14,12 @@ plugin: imbas
 > publish operations.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Digest posted to <target>` or `Digest preview (dry-run)`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After `atlassian-media-analysis` delegation returns — immediately continue to QA-Prompting compression
 > - State Tracking intermediate results — do NOT pause between tracker rounds
 > - Provider publish operation (Jira/GitHub/local) — chain the final confirmation in the same turn
@@ -57,17 +59,18 @@ Uses a State Tracking + QA-Prompting hybrid approach.
 - [errors.md](./references/errors.md) — Provider-agnostic error handling
 
 <!-- imbas:constraints-v1 -->
+
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load inputs (issue reference) via imbas_tools.
 2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
-   | provider | workflow file |
-   |---|---|
-   | `jira`   | `references/jira/workflow.md` |
+   | provider | workflow file                   |
+   | -------- | ------------------------------- |
+   | `jira`   | `references/jira/workflow.md`   |
    | `github` | `references/github/workflow.md` |
-   | `local`  | `references/local/workflow.md` |
+   | `local`  | `references/local/workflow.md`  |
 
 4. Execute Steps 0–5 from the shared skeleton, then the provider's Step 6 publish.
 5. Persist outputs via the provider's publish path (Jira comment, GitHub issue comment, or local `## Digest` append).
