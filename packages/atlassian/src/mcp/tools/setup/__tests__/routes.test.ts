@@ -6,13 +6,11 @@ import type { RouteContext } from "../web-server/routes.js";
 
 // core/index.js의 resolveEnvironment는 handleSubmit 내부에서 동적으로 import됨
 vi.mock("../../../../core/index.js", () => ({
-  resolveEnvironment: vi
-    .fn()
-    .mockReturnValue({
-      base_url: "https://test.atlassian.net",
-      is_cloud: true,
-      hostname: "test.atlassian.net",
-    }),
+  resolveEnvironment: vi.fn().mockReturnValue({
+    base_url: "https://test.atlassian.net",
+    is_cloud: true,
+    hostname: "test.atlassian.net",
+  }),
   getApiVersion: vi.fn().mockReturnValue("3"),
   executeRequest: vi.fn().mockResolvedValue({ success: true, data: {} }),
 }));

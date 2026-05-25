@@ -1,3 +1,4 @@
+import { pathForCompare } from '@ogham/cross-platform/paths';
 import { describe, expect, it } from 'vitest';
 
 import { assertUnder } from '../../../mcp/tools/utils/fs-guard.js';
@@ -55,7 +56,12 @@ describe('assertUnder', () => {
       const relParent = './tmp/guard-test';
       const relTarget = './tmp/guard-test/child.md';
       const result = assertUnder(relParent, relTarget);
-      expect(result.endsWith('tmp/guard-test/child.md')).toBe(true);
+      // Relative inputs depend on the host CWD, so the separator is host-native
+      // (forward on POSIX, backslash on Win32). Compare via pathForCompare to
+      // assert the resolved suffix without binding the test to a host flavor.
+      expect(pathForCompare(result).endsWith('tmp/guard-test/child.md')).toBe(
+        true,
+      );
     });
 
     it('returns a resolved Windows path without comparison-only slash normalization', () => {

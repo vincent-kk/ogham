@@ -25,6 +25,12 @@ describe("portable path helpers", () => {
         "C:\\repo\\src\\file.ts",
       );
     });
+
+    it("resolves POSIX absolute paths host-independently", () => {
+      // Explicit POSIX flavor must short-circuit the native fallback so that
+      // the result is identical on Windows, macOS, and Linux runners.
+      expect(portableResolve("/repo", "src/file.ts")).toBe("/repo/src/file.ts");
+    });
   });
 
   describe("samePath", () => {
