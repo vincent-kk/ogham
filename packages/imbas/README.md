@@ -180,7 +180,7 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 /imbas:imbas-scaffold-pr PROJ-123
 
 # Analyze media attachments (images, videos, GIFs) — requires @ogham/atlassian
-/atlassian:atlassian-media-analysis <url-or-path>
+/atlassian:media-analysis <url-or-path>
 ```
 
 ---

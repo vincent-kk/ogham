@@ -13,12 +13,12 @@ All Atlassian operations route through these 4 MCP tools:
 
 | Skill | Tools Used |
 |---|---|
-| `atlassian-jira` | `mcp_tools_fetch` |
-| `atlassian-confluence` | `mcp_tools_fetch`, `mcp_tools_convert` |
-| `atlassian-download` | `mcp_tools_fetch` (with `method: "GET"` and `accept_format: "raw"`) |
-| `atlassian-setup` | `mcp_tools_auth-check`, `mcp_tools_setup` |
+| `jira` | `mcp_tools_fetch` |
+| `confluence` | `mcp_tools_fetch`, `mcp_tools_convert` |
+| `download` | `mcp_tools_fetch` (with `method: "GET"` and `accept_format: "raw"`) |
+| `setup` | `mcp_tools_auth-check`, `mcp_tools_setup` |
 
-The general skills (`atlassian-jira`, `atlassian-confluence`, `atlassian-download`) reach `mcp_tools_auth-check` only transitively when invoking `atlassian-setup` on HTTP 401 — they never call it directly per the [optimistic execution protocol](./auth-check.md#general-skills-flow-atlassian-jira-atlassian-confluence-atlassian-download).
+The general skills (`jira`, `confluence`, `download`) reach `mcp_tools_auth-check` only transitively when invoking `setup` on HTTP 401 — they never call it directly per the [optimistic execution protocol](./auth-check.md#general-skills-flow-jira-confluence-download).
 
 ## Multipart Upload
 

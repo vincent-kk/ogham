@@ -168,7 +168,7 @@ ogham (사전 가이드 시스템)
 | 4 | devplan | Core | `/imbas:imbas-devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
 | 5 | manifest | Exec | `/imbas:imbas-manifest` | — | *-manifest.json | Jira 이슈 |
 | 6 | status | Infra | `/imbas:imbas-status` | — | — | 상태 표시 |
-| ~~7~~ | ~~`imbas:fetch-media`~~ | — | `/atlassian:atlassian-media-analysis` | — | — | *migrated to `@ogham/atlassian`* |
+| ~~7~~ | ~~`imbas:fetch-media`~~ | — | `/atlassian:media-analysis` | — | — | *migrated to `@ogham/atlassian`* |
 | 7 | digest | Exec | `/imbas:imbas-digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)

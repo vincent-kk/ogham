@@ -1,14 +1,14 @@
 ---
-name: atlassian-media-analysis
+name: media-analysis
 user_invocable: true
-description: "[atlassian:atlassian-media-analysis] Analyze media attachments from Confluence/Jira. Downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis via `media` agent. Trigger: \"analyze media\", \"media analysis\", \"미디어 분석\", \"영상 분석\", \"키프레임 추출\""
+description: "[atlassian:media-analysis] Analyze media attachments from Confluence/Jira. Downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis via `media` agent. Trigger: \"analyze media\", \"media analysis\", \"미디어 분석\", \"영상 분석\", \"키프레임 추출\""
 argument-hint: "<url-or-path> [--analyze] [--preset NAME] [--force]"
 version: "1.0.0"
 complexity: moderate
 plugin: atlassian
 ---
 
-# atlassian-media-analysis — Media Download & Analysis
+# media-analysis — Media Download & Analysis
 
 Download images, videos, and GIFs from Atlassian sources or local paths. For video/GIF files,
 extracts visually meaningful keyframes via scene-sieve and runs semantic analysis through
@@ -24,7 +24,7 @@ the `media` subagent to produce a structured analysis.json.
 ## Arguments
 
 ```
-/atlassian:atlassian-media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
+/atlassian:media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
 
 <url-or-path>  : Confluence attachment URL, Jira attachment URL, or local file path
 --analyze      : For video/GIF, run scene-sieve extraction + `media` analysis

@@ -1,4 +1,4 @@
-# atlassian-media-analysis
+# media-analysis
 
 Confluence/Jira에서 이미지, 비디오, GIF를 다운로드하고, 비디오/GIF는 scene-sieve로 키프레임을 추출하여 시맨틱 분석을 수행한다.
 
@@ -48,7 +48,7 @@ Atlassian 첨부파일을 다운로드한 뒤 파일 종류에 따라 처리:
 ## 디렉토리 구조
 
 ```
-atlassian-media-analysis/
+media-analysis/
 ├── SKILL.md
 ├── README.md
 ├── scripts/

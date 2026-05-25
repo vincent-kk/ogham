@@ -24,18 +24,21 @@ This plugin fully replaces the existing `mcp-atlassian` Python MCP server with a
 ```
 Claude Code Main Agent (= Dispatcher, no separate implementation)
     |
-    +-- Agent: jira         (subagent, Jira domain expert)
-    +-- Agent: confluence    (subagent, Confluence domain expert)
+    +-- Agent: jira            (subagent, Jira domain expert)
+    +-- Agent: confluence       (subagent, Confluence domain expert)
+    +-- Agent: media            (subagent, multimodal keyframe analyst)
     |
-    +-- Skill: atlassian-setup        (auth/connection setup)
-    +-- Skill: atlassian-download     (attachment download)
-    +-- Skill: atlassian-jira         (Jira API domain router)
-    +-- Skill: atlassian-confluence   (Confluence API domain router)
+    +-- Skill: setup            (auth/connection setup)
+    +-- Skill: download         (attachment download)
+    +-- Skill: jira             (Jira API domain router)
+    +-- Skill: confluence       (Confluence API domain router)
+    +-- Skill: media-analysis   (media download + multimodal analysis)
     |
     +-- MCP Server "tools"
-            +-- fetch     (HTTP GET/POST/PUT/PATCH/DELETE)
-            +-- convert   (ADF/Storage/Wiki <-> Markdown)
-            +-- setup     (local web server auth setup)
+            +-- fetch       (HTTP GET/POST/PUT/PATCH/DELETE)
+            +-- convert     (ADF/Storage/Wiki <-> Markdown)
+            +-- auth-check  (authentication status + optional connectivity test)
+            +-- setup       (local web server auth setup)
 ```
 
 ### Layer Responsibilities
@@ -62,7 +65,7 @@ Dispatcher --> Agent --> Skill --> MCP --> Atlassian REST API
 Token-efficient pattern where only needed reference docs are loaded:
 
 ```
-1. Skill selected (atlassian-jira / atlassian-confluence)
+1. Skill selected (jira / confluence)
    -> SKILL.md loaded: tool catalog + one-line descriptions
 
 2. LLM decides which tool to use
@@ -83,10 +86,10 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 
 | Target | Rule | Examples |
 |---|---|---|
-| Agent | No prefix | `jira`, `confluence` |
-| Skill | Plugin name prefix | `atlassian-setup`, `atlassian-jira`, `atlassian-confluence`, `atlassian-download` |
+| Agent | No prefix | `jira`, `confluence`, `media` |
+| Skill | No prefix | `setup`, `jira`, `confluence`, `download`, `media-analysis` |
 | MCP server name | `tools` | `.mcp.json` key: `"tools"` |
-| MCP tool name | No prefix | `fetch`, `convert`, `setup` |
+| MCP tool name | No prefix | `fetch`, `convert`, `auth-check`, `setup` |
 
 ---
 
@@ -112,9 +115,9 @@ Read documents in the following order for a complete understanding:
 | 1 | [INDEX.md](INDEX.md) | ARCH | This file — overview and reading guide |
 | 2 | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure |
 | 3 | [auth-ui.md](auth-ui.md) | ARCH | Setup web server + HTML form design |
-| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 3 MCP tools (fetch/convert/setup) |
-| 5 | [dev/skills.md](dev/skills.md) | DEV | 4 Skills + tools/ reference mapping |
-| 6 | [dev/agents.md](dev/agents.md) | DEV | 2 Agents (jira, confluence) |
+| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 4 MCP tools (fetch/convert/auth-check/setup) |
+| 5 | [dev/skills.md](dev/skills.md) | DEV | 5 Skills + tools/ reference mapping |
+| 6 | [dev/agents.md](dev/agents.md) | DEV | 3 Agents (jira, confluence, media) |
 
 **Document types**:
 - **[ARCH]**: Self-contained architectural document. No external references. Usable independently after source repo removal.

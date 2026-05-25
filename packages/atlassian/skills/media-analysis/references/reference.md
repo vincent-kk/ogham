@@ -1,4 +1,4 @@
-# atlassian-media-analysis — Reference
+# media-analysis — Reference
 
 ## Complete CLI Flag Reference
 

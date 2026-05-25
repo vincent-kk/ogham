@@ -19,7 +19,7 @@
 | **devplan** | `/imbas:imbas-devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
 | **manifest** | `/imbas:imbas-manifest` | 매니페스트 → provider별 이슈 배치 생성 | — |
 | **status** | `/imbas:imbas-status` | 런 상태 조회, 이력 | — |
-| ~~**`imbas:fetch-media`**~~ | `/atlassian:atlassian-media-analysis` | *migrated to `@ogham/atlassian`* | — |
+| ~~**`imbas:fetch-media`**~~ | `/atlassian:media-analysis` | *migrated to `@ogham/atlassian`* | — |
 | **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → provider별 코멘트/다이제스트 기록 | — |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
@@ -74,7 +74,7 @@ Step 1 — Run 초기화
 Step 2 — 문서 소스 해석
   - 로컬 파일: 직접 읽기
   - Confluence URL: [OP: get_confluence]로 마크다운 변환 후 저장
-  - 첨부 미디어 감지 → `/atlassian:atlassian-media-analysis` 호출 안내 (자동 호출 안 함)
+  - 첨부 미디어 감지 → `/atlassian:media-analysis` 호출 안내 (자동 호출 안 함)
 
 Step 3 — imbas-analyst 호출
   - Agent 호출: imbas-analyst
@@ -420,10 +420,10 @@ Step 5 — 결과 리포트
 
 ## 5. Utility Skills
 
-### 5.1 ~~imbas:imbas-fetch-media~~ → `atlassian:atlassian-media-analysis`
+### 5.1 ~~imbas:imbas-fetch-media~~ → `atlassian:media-analysis`
 
 > **Migrated** — 이 스킬은 `@ogham/atlassian` 패키지로 이전되었습니다.
-> 새 경로: `/atlassian:atlassian-media-analysis`
+> 새 경로: `/atlassian:media-analysis`
 > 커밋: 9c2c45c
 
 ---
@@ -615,7 +615,7 @@ plugin: imbas
 ```
 Step 1 — 이슈 읽기
   - `imbas:imbas-read-issue`(issue-ref, depth: full) 호출
-  - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `/atlassian:atlassian-media-analysis` 호출하여 시각 정보 포함
+  - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `/atlassian:media-analysis` 호출하여 시각 정보 포함
 
 Step 2 — State Tracking (상태 추적)
   코멘트를 시간순으로 읽으며 상태 변화 기록:
@@ -717,11 +717,11 @@ Step 6 — 게시
   ├── /imbas:imbas-manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
-  ├── /atlassian:atlassian-media-analysis ── 미디어 다운로드 + 분석 (migrated to @ogham/atlassian)
+  ├── /atlassian:media-analysis ── 미디어 다운로드 + 분석 (migrated to @ogham/atlassian)
   │
   └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → provider별 게시
             ├── (내부) `imbas:imbas-read-issue` → 코멘트 대화 맥락
-            └── (외부) `/atlassian:atlassian-media-analysis` → 첨부 미디어 분석 (있을 경우)
+            └── (외부) `/atlassian:media-analysis` → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출
@@ -762,7 +762,7 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 ## Related
 
 - [SPEC-agents.md](./SPEC-agents.md) — 스킬이 호출하는 에이전트
-- [SPEC-media.md](./SPEC-media.md) — 미디어 분석 상세 (`/atlassian:atlassian-media-analysis`로 이전)
+- [SPEC-media.md](./SPEC-media.md) — 미디어 분석 상세 (`/atlassian:media-analysis`로 이전)
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — Jira 도구 매핑 (deprecated)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
 � 아키텍처

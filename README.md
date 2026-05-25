@@ -117,7 +117,7 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 | Component | Count | Examples                                                                                                                                                             |
 | --------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Skills    | 5     | `/atlassian:atlassian-setup`, `/atlassian:atlassian-jira`, `/atlassian:atlassian-confluence`, `/atlassian:atlassian-download`, `/atlassian:atlassian-media-analysis` |
+| Skills    | 5     | `/atlassian:setup`, `/atlassian:jira`, `/atlassian:confluence`, `/atlassian:download`, `/atlassian:media-analysis` |
 | MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                                                                            |
 | Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                                                                               |
 | Hooks     | 0     | —                                                                                                                                                                    |
@@ -132,13 +132,13 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 ```
 # Configure Jira / Confluence credentials
-/atlassian:atlassian-setup
+/atlassian:setup
 
 # Operate on Jira issues
-/atlassian:atlassian-jira
+/atlassian:jira
 
 # Operate on Confluence pages
-/atlassian:atlassian-confluence
+/atlassian:confluence
 ```
 
 For full documentation, see the [atlassian README](./packages/atlassian/README.md) ([Korean](./packages/atlassian/README-ko_kr.md)).
