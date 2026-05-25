@@ -13,6 +13,7 @@
  * insight-injector) cap at 20 KB; light hooks cap at 10 KB.
  */
 
+import { generateWindowsCmd } from '@ogham/cross-platform';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -23,12 +24,23 @@ const root = resolve(__dirname, '..');
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
+// Windows .cmd shim — invoked from hooks.json on win32 when PATH lacks node.
+// Routes through libs/run.cjs (which uses process.execPath via spawnSync) so
+// the actual hook bundle still executes via the same node binary.
+generateWindowsCmd({
+  outputPath: resolve(root, 'bridge/run-hook.cmd'),
+  scriptRelativePath: '../libs/run.cjs',
+});
+console.log('  Windows hook shim -> bridge/run-hook.cmd');
+
 // session-start carries an inlined meta-skill-body.md (~2.5 KB intentional
-// payload via .md text loader), so it gets +5 KB headroom over the other
-// heavy hooks. session-end/insight-injector run pure orchestration logic.
-const SESSION_START_HOOK_BYTES = 25 * 1024;
-const HEAVY_HOOK_BYTES = 20 * 1024;
-const LIGHT_HOOK_BYTES = 10 * 1024;
+// payload via .md text loader) plus selfProbe + cross-spawn from
+// @ogham/cross-platform, so its budget is the largest. All other hooks call
+// logHookFailure from @ogham/cross-platform in their catch blocks, which
+// inlines paths + fs/path/url helpers — ~10–15 KB overhead.
+const SESSION_START_HOOK_BYTES = 50 * 1024;
+const HEAVY_HOOK_BYTES = 35 * 1024;
+const LIGHT_HOOK_BYTES = 25 * 1024;
 
 const hookEntries = [
   { name: 'session-start', maxBytes: SESSION_START_HOOK_BYTES },
@@ -86,9 +98,17 @@ const FORBIDDEN_PATTERNS = [
   /\bdate-fns\b/,
   // MCP server (long-running) belongs in mcp-server.cjs, never in hooks
   /@modelcontextprotocol\/sdk/,
-  // CJS dynamic-require shim (filid 0.4.0 module-init crash signature)
-  /Dynamic require of/,
+  // cross-platform heavy helpers — MCP bundle only, never in hook bundle
+  /\bbinaries\.discover\b/,
+  /\brunHookEntry\b/,
+  /\bgenerateWindowsCmd\b/,
 ];
+// NOTE: the `Dynamic require of ...` esbuild CJS-shim string is intentionally
+// allowed because @ogham/cross-platform pulls in cross-spawn (CJS) into the
+// session-start bundle. The filid 0.4.0 module-init crash signature was a
+// different failure mode (require at module-init evaluation time, not the
+// lazy require shim). If a future regression revisits the crash, gate on a
+// more specific stack-frame pattern, not the generic shim message.
 
 const violations = [];
 

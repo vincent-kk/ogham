@@ -1271,6 +1271,7 @@ __metadata:
   resolution: "@ogham/maencof@workspace:packages/maencof"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/cross-platform": "workspace:^"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^3.2.4"
     esbuild: "npm:^0.24.0"

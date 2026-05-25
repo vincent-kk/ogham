@@ -12,7 +12,7 @@
  *
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
-import { execSync } from 'node:child_process';
+import { spawnCli } from '@ogham/cross-platform';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -41,16 +41,16 @@ export interface ChangelogGateResult {
  * 감시 경로에 대한 git 변경사항을 감지한다.
  * changelog 디렉토리 자체의 변경은 제외한다.
  */
-export function detectWatchedChanges(cwd: string): string[] {
+export async function detectWatchedChanges(cwd: string): Promise<string[]> {
   try {
-    const pathArgs = WATCHED_PATHS.map((p) => `-- ${p}`).join(' ');
-    const output = execSync(`git status --porcelain ${pathArgs}`, {
+    const args = ['status', '--porcelain', '--'];
+    for (const p of WATCHED_PATHS) args.push(p);
+    const result = await spawnCli('git', args, {
       cwd,
-      timeout: EXEC_TIMEOUT_MS,
-      stdio: 'pipe',
-    })
-      .toString()
-      .trim();
+      timeoutMs: EXEC_TIMEOUT_MS,
+    });
+    if (result.code !== 0 || result.spawnError) return [];
+    const output = result.stdout.trim();
 
     if (!output) return [];
 
@@ -134,9 +134,9 @@ function isMigrationInProgress(
  * Stop 이벤트에서 감시 경로의 변경을 감지하고 changelog 기록을 유도한다.
  * migration.lock 의 orphan cleanup 도 수행한다 (P2 / OQ-6 cleanup venue).
  */
-export function runChangelogGate(
+export async function runChangelogGate(
   input: ChangelogGateInput,
-): ChangelogGateResult {
+): Promise<ChangelogGateResult> {
   try {
     const cwd = input.cwd ?? process.cwd();
 
@@ -157,7 +157,7 @@ export function runChangelogGate(
     }
 
     // 3. 감시 경로에 git 변경 확인
-    const changes = detectWatchedChanges(cwd);
+    const changes = await detectWatchedChanges(cwd);
     if (changes.length === 0) {
       return { continue: true };
     }

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { logHookFailure } from '@ogham/cross-platform';
+
 import type { LifecycleDispatcherInput } from './lifecycle-dispatcher.js';
 import { runLifecycleDispatcher } from './lifecycle-dispatcher.js';
 import { readStdin, writeResult } from '../shared/index.js';
@@ -11,7 +13,8 @@ let result;
 try {
   const input = JSON.parse(raw) as LifecycleDispatcherInput;
   result = runLifecycleDispatcher(event, input);
-} catch {
+} catch (e) {
+  logHookFailure('maencof', `lifecycle-dispatcher:${event}`, e);
   result = { continue: true };
 }
 
