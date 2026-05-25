@@ -24,7 +24,7 @@ plugin: filid
 >
 > **HIGH-RISK YIELD POINTS**:
 > - After `filid:code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
-> - After git commit+push — immediately chain `Skill("filid:revalidate")` in the same turn (this is the primary stall point)
+> - After git commit+push (in `--auto` mode) — immediately chain `Skill("filid:revalidate")` in the same turn (primary stall point). In interactive mode, Step 9 `[INTERACTIVE]` gates this with `AskUserQuestion` — yield is permitted there.
 > - Interactive step completion (user responded) — chain next non-interactive step without delay
 > - Justification collection loop — batch all rejections in the same turn when possible
 
