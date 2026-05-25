@@ -2,7 +2,7 @@
   "name": "@ogham/cross-platform",
   "version": "0.0.0",
   "private": true,
-  "description": "ogham 모노레포 내부 전용 — Windows-Unix 호환성 어댑터 (spawn, paths, env, eol, binaries, hooks, shim)",
+  "description": "Internal to the ogham monorepo — Windows-Unix compatibility adapters (spawn, paths, env, eol, binaries, hooks, shim)",
   "license": "MIT",
   "author": {
     "name": "Vincent K. Kelvin",
