@@ -1,4 +1,4 @@
-# filid-resolve-review — Reference Documentation
+# resolve — Reference Documentation
 
 Output format templates and detailed workflow reference for the
 fix request resolution skill.
@@ -65,19 +65,21 @@ Consequences: <technical debt created, future impact, estimated resolution>
 Each fix item in `fix-requests.md` has an optional `type` field that determines
 how the `filid:resolve` skill processes it:
 
-| Type | Default | Handler | Description |
-|------|---------|---------|-------------|
-| `code-fix` | yes | `code-surgeon` subagent | Standard code patch (inline edit) |
-| `promote` | no | `Skill("filid:promote")` | test.ts → spec.ts promotion (3+12 compliance) |
-| `restructure` | no | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2) |
+| Type          | Default | Handler                      | Description                                   |
+| ------------- | ------- | ---------------------------- | --------------------------------------------- |
+| `code-fix`    | yes     | `code-surgeon` subagent      | Standard code patch (inline edit)             |
+| `promote`     | no      | `Skill("filid:promote")`     | test.ts → spec.ts promotion (3+12 compliance) |
+| `restructure` | no      | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2)      |
 
 When `type` is absent, the item is treated as `code-fix`.
 
 ### Fix Item Format by Type
 
 **code-fix** (default):
+
 ```markdown
 ### FIX-001: Unused import in validator.ts
+
 - **Severity**: LOW
 - **Path**: `src/core/validator.ts`
 - **Rule**: zero-peer-file
@@ -87,8 +89,10 @@ When `type` is absent, the item is treated as `code-fix`.
 ```
 
 **promote**:
+
 ```markdown
 ### FIX-002: spec.ts 3+12 rule violation
+
 - **Severity**: MEDIUM
 - **Path**: `src/core/__tests__/unit/parser.test.ts`
 - **Rule**: 3+12 rule (18 test cases, limit 15)
@@ -97,8 +101,10 @@ When `type` is absent, the item is treated as `code-fix`.
 ```
 
 **restructure**:
+
 ```markdown
 ### FIX-003: Module cohesion below threshold
+
 - **Severity**: HIGH
 - **Path**: `src/core/validator.ts`
 - **Rule**: LCOM4 >= 2 (current: 3)
@@ -152,8 +158,8 @@ Options:
 
 ## MCP Tool Usage
 
-| Tool            | Action             | When                               |
-| --------------- | ------------------ | ---------------------------------- |
+| Tool                  | Action             | When                               |
+| --------------------- | ------------------ | ---------------------------------- |
 | `mcp_t_review_manage` | `normalize-branch` | Step 1: branch detection           |
 | `mcp_t_debt_manage`   | `create`           | Step 5: for each rejected fix item |
 
