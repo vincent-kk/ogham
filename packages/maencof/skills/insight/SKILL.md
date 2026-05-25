@@ -1,9 +1,9 @@
 ---
 name: insight
 user_invocable: true
-description: "[maencof:insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, controls per-category allowlist (principle / refuted_premise / ephemeral_candidate), and views recent insights."
-argument-hint: "[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable] [--max N] [--category principle|refuted|ephemeral --accept|--reject]"
-version: "1.1.0"
+description: '[maencof:insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, controls per-category allowlist (principle / refuted_premise / ephemeral_candidate), and views recent insights.'
+argument-hint: '[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable] [--max N] [--category principle|refuted|ephemeral --accept|--reject]'
+version: '1.1.0'
 complexity: simple
 context_layers: []
 orchestrator: insight skill
@@ -25,6 +25,7 @@ Manage the auto-insight capture system.
 ## Options
 
 ### --recent
+
 Show recent auto-captured insights (from current session's pending captures and vault search).
 
 1. Read `.maencof-meta/pending-insight-notification.json` for current session captures
@@ -52,6 +53,7 @@ the next session's SessionStart will pick it up. There is no TTL — the file
 is one-shot and self-cleaning.
 
 ### --stats
+
 Show auto-insight capture statistics.
 
 1. Read `.maencof-meta/auto-insight-stats.json`
@@ -59,6 +61,7 @@ Show auto-insight capture statistics.
 3. Calculate precision estimate: promoted / (promoted + archived) if denominator > 0
 
 ### --sensitivity <high|medium|low>
+
 Adjust capture sensitivity.
 
 1. Read current config from `.maencof-meta/insight-config.json`
@@ -67,18 +70,21 @@ Adjust capture sensitivity.
 4. Confirm: "Insight capture sensitivity changed to {level}."
 
 ### --enable
+
 Enable auto-insight capture.
 
 1. Read config, set `enabled: true`, write config
 2. Confirm: "Auto-insight capture enabled."
 
 ### --disable
+
 Disable auto-insight capture.
 
 1. Read config, set `enabled: false`, write config
 2. Confirm: "Auto-insight capture disabled."
 
 ### --max <N>
+
 Set maximum captures per session.
 
 1. Read config, set `max_captures_per_session` to N, write config
@@ -90,11 +96,11 @@ Control the per-category capture allowlist (`config.category_filter`). Orthogona
 
 Field mapping:
 
-| `--category` argument | `config.category_filter` key | Default |
-|-----------------------|-------------------------------|---------|
-| `principle` | `principle` | `accept` (true) — principle/premise insights, long-term preservation value |
-| `refuted` | `refuted_premise` | `reject` (false) — premises rejected in Socratic Phase 2.5.b |
-| `ephemeral` | `ephemeral_candidate` | `reject` (false) — ToT discarded candidates, intermediate outputs |
+| `--category` argument | `config.category_filter` key | Default                                                                    |
+| --------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| `principle`           | `principle`                  | `accept` (true) — principle/premise insights, long-term preservation value |
+| `refuted`             | `refuted_premise`            | `reject` (false) — premises rejected in Socratic Phase 2.5.b               |
+| `ephemeral`           | `ephemeral_candidate`        | `reject` (false) — ToT discarded candidates, intermediate outputs          |
 
 Procedure:
 
@@ -114,8 +120,8 @@ Show current status in this order:
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
+| Tool              | Purpose                                                         |
+| ----------------- | --------------------------------------------------------------- |
 | `mcp_t_kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
 
 > Note: Config file operations (`.maencof-meta/insight-config.json`, `.maencof-meta/auto-insight-stats.json`, `.maencof-meta/pending-insight-notification.json`) use filesystem Read/Write tools, not maencof MCP tools.
