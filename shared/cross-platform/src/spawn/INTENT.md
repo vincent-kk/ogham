@@ -4,13 +4,14 @@
 
 ## Structure
 
-| File            | Role                                |
-| --------------- | ----------------------------------- |
-| `index.ts`      | barrel                              |
-| `types.ts`      | SpawnOptions / SpawnResult          |
-| `spawn-cli.ts`  | 메인 Promise-based spawn 래퍼       |
-| `exec-cli.ts`   | `spawnCli` thin alias (이름 호환성) |
-| `os-timeout.ts` | win32 ×3, floor 5000ms              |
+| File                | Role                                |
+| ------------------- | ----------------------------------- |
+| `index.ts`          | barrel                              |
+| `types.ts`          | SpawnOptions / SpawnResult          |
+| `spawn-cli.ts`      | 메인 Promise-based spawn 래퍼       |
+| `spawn-cli-sync.ts` | spawn.sync 기반 동기 변형 (블로킹)  |
+| `exec-cli.ts`       | `spawnCli` thin alias (이름 호환성) |
+| `os-timeout.ts`     | win32 ×3, floor 5000ms              |
 
 ## Conventions
 
@@ -22,7 +23,7 @@
 
 ### Always do
 
-- 모든 spawn 호출은 `spawnCli` 경유.
+- 모든 spawn 호출은 `spawnCli` (async) 또는 `spawnCliSync` (sync caller 전용) 경유.
 
 ### Ask first
 
