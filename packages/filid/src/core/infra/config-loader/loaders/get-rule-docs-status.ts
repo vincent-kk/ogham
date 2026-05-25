@@ -16,7 +16,7 @@ const log = createLogger('config-loader');
 
 /**
  * Inspect the current rule doc state from the filesystem without mutating
- * anything. Used by the filid-setup skill to render a checkbox UI.
+ * anything. Used by the setup skill to render a checkbox UI.
  *
  * The filesystem (`.claude/rules/<filename>`) is the SINGLE source of truth:
  * - `deployed` → file exists on disk
@@ -65,7 +65,7 @@ export function getRuleDocsStatus(
   for (const entry of manifest.rules) {
     const destPath = join(resolvedRoot, '.claude', 'rules', entry.filename);
     // Also check legacy filename for transition period — a legacy file
-    // counts as "deployed" until the user runs filid-setup to migrate.
+    // counts as "deployed" until the user runs setup to migrate.
     const legacyPath = entry.legacyFilename
       ? join(resolvedRoot, '.claude', 'rules', entry.legacyFilename)
       : null;

@@ -15,7 +15,7 @@ FCA-AI rules and quantitative metrics, not from opinion. Every verdict you
 issue MUST cite a concrete measurement from the verification artifacts in
 the review directory.
 
-The orchestrating skill (`/filid:filid-review` Phase D) provides the Team
+The orchestrating skill (`/filid:review` Phase D) provides the Team
 Worker Protocol, artifact paths, and Round Output Contract schema through
 the worker preamble. You focus on applying the engineering-architect
 perspective to those inputs.
@@ -35,16 +35,16 @@ perspective to those inputs.
 Apply these rules when classifying fix items and deciding state:
 
 1. **LCOM4 >= 2** → HIGH severity if the module has 5+ exports, MEDIUM
-   otherwise. Fix type: `filid-restructure`. Name candidate sub-modules in
+   otherwise. Fix type: `restructure`. Name candidate sub-modules in
    `recommended_action`.
 2. **CC > 15** → MEDIUM severity. Fix type: `code-fix`. Recommend function
    decomposition or strategy pattern extraction.
 3. **3+12 violation** (total > 15 test cases) → HIGH severity. Fix type:
-   `filid-promote`.
+   `promote`.
 4. **Circular dependency** (cycle detected) → CRITICAL severity and
    automatic VETO. Never issue SYNTHESIS while a cycle exists.
 5. **Fractal boundary violation** (file in wrong fractal scope) → HIGH
-   severity. Fix type: `filid-restructure`.
+   severity. Fix type: `restructure`.
 6. **Missing INTENT.md on a new fractal directory** → MEDIUM severity.
 
 A single CRITICAL finding MUST produce `state: VETO`. If all findings are
@@ -104,7 +104,7 @@ Trace section.
 
 ## Skill Participation
 
-- `/filid:filid-review` — Phase D Step D.2-team: Legislative committee
+- `/filid:review` — Phase D Step D.2-team: Legislative committee
   round opinion on structural integrity. Tiers: LOW / MEDIUM / HIGH.
   Natural ally of knowledge-manager and operations-sre.
 

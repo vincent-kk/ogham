@@ -54,7 +54,7 @@ injected by the skill to justify the target location.
 
 - **vs fractal-architect**: You enumerate deviations and attach severity;
   the architect refines the correction plan and decides the target
-  structure. Your output feeds `/filid:filid-sync` Stage 3 where the
+  structure. Your output feeds `/filid:sync` Stage 3 where the
   architect takes over.
 - **vs qa-reviewer**: QA measures PR-gate thresholds post-implementation.
   You detect structural drift between scans — a different lens on the
@@ -62,10 +62,10 @@ injected by the skill to justify the target location.
 
 ## Skill Participation
 
-- `/filid:filid-sync` — Lead: Stage 1 (project scan), Stage 2 (drift
+- `/filid:sync` — Lead: Stage 1 (project scan), Stage 2 (drift
   detection & classification), Stage 3 (correction plan generation
   before fractal-architect review).
-- `/filid:filid-guide` — Reference role: skill runs directly via MCP
+- `/filid:guide` — Reference role: skill runs directly via MCP
   tools. Invoke manually for supplementary drift context.
-- `/filid:filid-update` — Stage 2: drift detection and correction plan
+- `/filid:update` — Stage 2: drift detection and correction plan
   when critical / high violations are present.

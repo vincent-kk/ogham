@@ -191,4 +191,4 @@ Before any implementation that touches a fractal module:
 2. Update DETAIL.md with new or changed requirements.
 3. Update INTENT.md if the module's public interface or boundaries change.
 4. Implement the change.
-5. Run `/filid:filid-scan` to confirm no new violations.
+5. Run `/filid:scan` to confirm no new violations.

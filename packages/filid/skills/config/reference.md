@@ -1,0 +1,160 @@
+# config — Reference
+
+Detailed specifications for config path resolution, output formatting,
+and validation logic.
+
+## Schema Source
+
+The authoritative `FilidConfig` interface lives in the filid plugin's
+internal source file `src/core/infra/config-loader/loaders/config-schemas.ts`.
+That file is **not** distributed to user projects (the plugin ships as a
+bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read
+it at runtime — any such Read resolves against CWD and fails.
+
+Discover field names the safe way:
+1. `Read .filid/config.json` to see what the current project already stores.
+2. If you need the default shape (e.g., for `reset`), rely on
+   `mcp_t_project_init` — the handler writes `createDefaultConfig()` output
+   onto disk when no config file is present. Delete first, then call the MCP
+   tool (see `SKILL.md` → Step 3 `reset`).
+
+Do NOT hardcode field lists in this skill. Do NOT embed `Read
+src/core/infra/...` instructions anywhere.
+
+## Dot-Notation Path Resolution
+
+The `set` subcommand supports dot-notation paths to modify nested values.
+
+### Algorithm
+
+```
+Input: path = "rules.naming-convention.enabled", value = "false"
+
+1. Split path by '.' → segments = ["rules", "naming-convention", "enabled"]
+2. Start at config root object
+3. For each segment except the last:
+   a. If the key exists and is an object, descend into it
+   b. If the key does not exist, create an empty object and descend
+   c. If the key exists but is NOT an object, report error:
+      "Cannot traverse into non-object value at '<partial_path>'"
+4. Set the final segment's value with type coercion applied
+```
+
+### Type Coercion Rules
+
+| Input string | Coerced type | Coerced value |
+|---|---|---|
+| `"true"` | boolean | `true` |
+| `"false"` | boolean | `false` |
+| `"123"` or `"3.14"` | number | `123` or `3.14` |
+| `"null"` | null | `null` (removes the key) |
+| anything else | string | as-is |
+
+### Examples
+
+| Command | Path segments | Target | Result |
+|---|---|---|---|
+| `set language ko` | `["language"]` | root.language | `"ko"` |
+| `set rules.naming-convention.enabled false` | `["rules","naming-convention","enabled"]` | root.rules["naming-convention"].enabled | `false` |
+| `set rules.max-depth.severity warning` | `["rules","max-depth","severity"]` | root.rules["max-depth"].severity | `"warning"` |
+
+## Output Format — `show` Subcommand
+
+Display config as a structured markdown table:
+
+```markdown
+## .filid/config.json
+
+| Key | Value |
+|-----|-------|
+| version | 1.0 |
+| language | ko |
+
+### Rules
+
+| Rule | Enabled | Severity |
+|------|---------|----------|
+| naming-convention | ✓ | warning |
+| organ-no-intentmd | ✓ | error |
+| index-barrel-pattern | ✓ | warning |
+| module-entry-point | ✓ | warning |
+| max-depth | ✓ | error |
+| circular-dependency | ✓ | error |
+| pure-function-isolation | ✓ | error |
+| zero-peer-file | ✓ | warning |
+```
+
+Notes:
+- `✓` for enabled, `✗` for disabled
+- If `language` is not set, show `(default: en)` as the value
+- Any additional top-level fields should be shown in the first table
+- `additional-entry-points` and `additional-route-patterns` appear in the
+  first table only when set in `.filid/config.json`. Example:
+
+```markdown
+| Key | Value |
+|-----|-------|
+| version | 1.0 |
+| language | ko |
+| additional-entry-points | ["server.ts", "worker.ts"] |
+| additional-route-patterns | ["[locale]", "@sidebar"] |
+```
+
+## Output Format — `set` Subcommand
+
+After a successful set operation:
+
+```
+✓ Set `language` = `ko`
+
+Current config:
+<show format output>
+```
+
+After a failed set operation:
+
+```
+✗ Failed to set `<key>`: <reason>
+```
+
+## Output Format — `reset` Subcommand
+
+```
+✓ Config reset to defaults.
+  Language preserved: ko
+
+Current config:
+<show format output>
+```
+
+Or with `--full`:
+
+```
+✓ Config fully reset to defaults.
+
+Current config:
+<show format output>
+```
+
+## Validation Rules
+
+After any write operation, verify:
+
+1. **Valid JSON**: File parses without error
+2. **Version exists**: `config.version` is a non-empty string
+3. **Rules exist**: `config.rules` is an object with at least one entry
+4. **Rule shape**: Each rule entry has `enabled` (boolean) and `severity` (string)
+5. **Severity values**: Must be one of `"error"`, `"warning"`, `"info"`
+6. **Language value**: If present, must be a non-empty string
+
+Report validation failures inline after the operation output.
+
+## Error Handling
+
+| Scenario | Response |
+|---|---|
+| No `.filid/config.json` + `show` | "No config found. Run `/filid:setup` to initialize." |
+| No `.filid/config.json` + `set` | Create default config, then apply the set operation |
+| Invalid JSON in existing config | "Config file contains invalid JSON. Run `/filid:config reset` to fix." |
+| Invalid dot-path | "Invalid path: cannot traverse into non-object at `<segment>`" |
+| Unknown top-level key | Warn but allow: "Note: `<key>` is not a known FilidConfig field. Set anyway." |

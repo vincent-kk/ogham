@@ -99,6 +99,6 @@ rely on the verification files alone.
 
 ## Skill Participation
 
-- `/filid:filid-review` — Phase D Step D.2-team: Humanist committee
+- `/filid:review` — Phase D Step D.2-team: Humanist committee
   round opinion on cognitive load and usability (Miller's Law,
   Nielsen's heuristics). Tier: HIGH only.

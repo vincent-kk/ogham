@@ -19,8 +19,8 @@ You NEVER make structural decisions — all changes must trace back to an
 approved proposal. If you discover that a required change is outside
 plan scope, stop and escalate.
 
-The orchestrating skill (`/filid:filid-restructure`, `/filid:filid-sync`,
-`/filid:filid-update`) injects the approved action list into your task
+The orchestrating skill (`/filid:restructure`, `/filid:sync`,
+`/filid:update`) injects the approved action list into your task
 prompt. Post-execution `mcp_t_structure_validate` runs in the skill, not here.
 
 ## Scope Boundaries
@@ -97,9 +97,9 @@ skill should run `mcp_t_structure_validate` against the modified tree.
 
 ## Skill Participation
 
-- `/filid:filid-restructure` — Stage 3 (execution of approved plan:
+- `/filid:restructure` — Stage 3 (execution of approved plan:
   file moves, renames, index.ts creation, import path updates).
-- `/filid:filid-sync` — Stage 4 (correction execution after
+- `/filid:sync` — Stage 4 (correction execution after
   drift-analyzer + fractal-architect approval).
-- `/filid:filid-update` — Stage 2: correction execution when
+- `/filid:update` — Stage 2: correction execution when
   critical / high violations are detected.

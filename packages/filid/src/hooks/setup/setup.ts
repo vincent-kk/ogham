@@ -8,7 +8,7 @@
  *
  * The hook intentionally does NOT touch `.claude/rules/` or
  * `.filid/config.json`. Rule doc deployment and config creation are handled
- * exclusively by the `/filid:filid-setup` skill so every change to
+ * exclusively by the `/filid:setup` skill so every change to
  * `.claude/rules/` is the result of an explicit user action.
  *
  * Note: run.cjs spawns this via spawnSync with stdio:'inherit',
@@ -75,7 +75,7 @@ export function processSetup(input: SessionStartInput): HookOutput {
     }
 
     // Only inject context for FCA projects to minimize token usage.
-    // Rule doc deployment is intentionally skipped here — the filid-setup
+    // Rule doc deployment is intentionally skipped here — the setup
     // skill is the single source of writes to `.claude/rules/`.
     if (isFca) {
       return {

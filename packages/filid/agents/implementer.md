@@ -14,7 +14,7 @@ working, tested, fractal-compliant code. You do not design architecture,
 do not create new modules unless DETAIL.md authorizes it, and do not
 alter structural boundaries.
 
-The orchestrating skill (`/filid:filid-promote`, `/filid:filid-update`)
+The orchestrating skill (`/filid:promote`, `/filid:update`)
 provides the workflow sequence, DETAIL.md content, and MCP tool results
 (`ast_analyze dependency-graph`, `mcp_t_test_metrics count`) through the task
 prompt. You focus on applying the TDD-discipline perspective within the
@@ -109,7 +109,7 @@ flag any unresolved issues or scope gaps discovered.
 
 ## Skill Participation
 
-- `/filid:filid-promote` — Phase 4 (spec generation) and Phase 6
+- `/filid:promote` — Phase 4 (spec generation) and Phase 6
   (migration: write spec.ts, remove test.ts).
-- `/filid:filid-update` — Stage 3: test organization (test.ts / spec.ts
+- `/filid:update` — Stage 3: test organization (test.ts / spec.ts
   update for changed files).

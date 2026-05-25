@@ -27,7 +27,7 @@ claude plugin install maencof
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:filid-setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
 
 ---
 
@@ -43,7 +43,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 | Component | Count    | Examples                                                                                  |
 | --------- | -------- | ----------------------------------------------------------------------------------------- |
-| Skills    | 18       | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan`, `/filid:filid-pipeline` |
+| Skills    | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline` |
 | MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking                           |
 | Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee                           |
 | Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd                     |
@@ -54,20 +54,20 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 - **Automated rule enforcement** — INTENT.md 50-line limit, 3-tier boundary section validation, organ directory protection, naming conventions
 - **Structural drift detection** — Detects when code changes break documented structure and syncs automatically via DAG analysis
 - **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular-dependency detection via `@ast-grep/napi`
-- **End-to-end pipeline** — `filid-pipeline` chains PR creation → multi-persona review → resolve → revalidate
+- **End-to-end pipeline** — `pipeline` chains PR creation → multi-persona review → resolve → revalidate
 
 ```
 # Initialize FCA-AI in your project
-/filid:filid-setup
+/filid:setup
 
 # Scan for rule violations
-/filid:filid-scan
+/filid:scan
 
 # Run multi-persona code review on current branch
-/filid:filid-review
+/filid:review
 
 # Run the full PR pipeline (review → resolve → revalidate)
-/filid:filid-pipeline
+/filid:pipeline
 ```
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).

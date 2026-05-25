@@ -138,7 +138,7 @@ export function createServer(): McpServer {
     'project_init',
     {
       description:
-        'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the filid-setup skill.',
+        'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the setup skill.',
       inputSchema: z.object({
         path: z.string(),
         language: z
@@ -392,7 +392,7 @@ export function createServer(): McpServer {
     'config_patch_validate',
     {
       description:
-        'Validate a prospective .filid/config.json patch against FilidConfigSchema. Returns { valid, errors[], suggestion? } — errors[] is non-empty when the patch breaks strict schema; suggestion is a sanitised JSON string that would pass. Use this before emitting any .filid/config.json code patch in Phase D (filid-review Step D.6.4).',
+        'Validate a prospective .filid/config.json patch against FilidConfigSchema. Returns { valid, errors[], suggestion? } — errors[] is non-empty when the patch breaks strict schema; suggestion is a sanitised JSON string that would pass. Use this before emitting any .filid/config.json code patch in Phase D (review Step D.6.4).',
       inputSchema: z.object({
         patch_json: z.string(),
         source_context: z.string().optional(),

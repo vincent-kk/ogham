@@ -12,7 +12,7 @@
 
 | 함수 | 시그니처 | 설명 |
 |---|---|---|
-| `syncRuleDocs` | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | `.claude/rules/`를 선택 상태에 맞게 동기화. filid-setup 전용. |
+| `syncRuleDocs` | `(projectRoot: string, selection: Iterable<string>, opts?: SyncRuleDocsOptions) => RuleDocSyncResult` | `.claude/rules/`를 선택 상태에 맞게 동기화. setup 전용. |
 | `getRuleDocsStatus` | `(projectRoot: string, pluginRoot?: string) => RuleDocsStatus` | 파일시스템을 읽어 rule doc 현황 스냅샷 반환. 뮤테이션 없음. |
 | `loadRuleDocsManifest` | `(pluginRoot: string) => RuleDocsManifest` | `templates/rules/manifest.json` 로드 및 유효성 검사. `templateHash` 누락 시 throw. |
 | `initProject` | `(projectRoot: string, language?: string) => InitResult` | `.filid/config.json`을 git root에 생성(부재 시). `language` 제공 시 config에 기록. 기존 config는 덮어쓰지 않음. |
@@ -121,6 +121,6 @@ array as `configWarnings` in its response (`structure-validate`,
 Phase D fix-requests that propose `.filid/config.json` patches are
 validated via `mcp_t_config_patch_validate` (calls `validateConfigPatch`
 which uses the shared schema — no local redefinition) before reaching
-`filid-resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
+`resolve`. Hallucinated keys such as `rules[*].allowed-no-entry`
 cannot slip through as no-op commits.
 

@@ -15,7 +15,7 @@ const log = createLogger('config-loader');
  *
  * Creates `.filid/config.json` at the git repository root if absent.
  * Rule doc deployment (`.claude/rules/*.md`) is NOT performed here; it is
- * handled exclusively by the `/filid:filid-setup` skill via `syncRuleDocs`.
+ * handled exclusively by the `/filid:setup` skill via `syncRuleDocs`.
  *
  * @param projectRoot - Target project directory (git root will be resolved from this)
  * @param language - Output language name (English name, e.g. `'Korean'`).

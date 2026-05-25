@@ -2,7 +2,7 @@
 
 ## Purpose
 
-filid-setup 스킬이 사용자 선택에 따라 `.claude/rules/` 경로의 규칙 문서를 배포/제거하는 MCP 도구. 세션 훅에서는 호출 금지.
+setup 스킬이 사용자 선택에 따라 `.claude/rules/` 경로의 규칙 문서를 배포/제거하는 MCP 도구. 세션 훅에서는 호출 금지.
 
 ## Boundaries
 

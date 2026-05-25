@@ -270,7 +270,7 @@ describe('config-loader', () => {
       expect(loaded?.rules['naming-convention']?.enabled).toBe(false);
     });
 
-    it('never touches .claude/rules/ — that is the filid-setup skill job', () => {
+    it('never touches .claude/rules/ — that is the setup skill job', () => {
       initProject(tmpDir);
       expect(existsSync(join(tmpDir, '.claude', 'rules'))).toBe(false);
     });

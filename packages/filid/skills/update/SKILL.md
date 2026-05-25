@@ -1,0 +1,140 @@
+---
+name: update
+user_invocable: false
+description: "[filid:update] Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs."
+argument-hint: "[path] [--force] [--scan-only] [--no-sync] [--auto-approve]"
+version: "1.0.0"
+complexity: complex
+plugin: filid
+---
+
+> **EXECUTION MODEL**: Execute all stages as a SINGLE CONTINUOUS OPERATION.
+> After each stage completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after `mcp_t_cache_manage` gate, `filid:qa-reviewer` subagent return,
+> `filid:context-manager` delegation, or `filid:implementer` completion.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required (absent `--auto-approve`, Stage 2 sync may prompt)
+> 2. Terminal stage marker emitted: `Update complete` or `No changes since last run` (Stage 0 early-exit)
+>
+> **HIGH-RISK YIELD POINTS**:
+> - Stage 0 incremental gate result — after reporting "no changes", end in the same turn; after "changes detected", immediately chain Stage 1
+> - Stage 1 `filid:qa-reviewer` return → Stage 2 sync decision — no yield between severity check and `filid:sync` delegation
+> - Stage 3 `filid:context-manager` / `filid:implementer` agent returns — chain validation immediately
+
+# update — Code-Docs-Tests Synchronization
+
+Analyze files changed in the current branch to:
+
+1. Update INTENT.md / DETAIL.md to match the implementation (create if missing)
+2. Organize and update test.ts / spec.ts following FCA-AI principles
+
+An incremental gate (Stage 0) skips execution when no changes have occurred since the last run.
+
+> **Detail Reference**: See `reference.md` for MCP tool call signatures, output formats, and the severity mapping table.
+
+## When to Use This Skill
+
+- Immediately after writing or modifying code, to sync docs and tests
+- Before merging a branch, to verify FCA-AI compliance
+- When INTENT.md/DETAIL.md are out of sync with the implementation
+- When test.ts/spec.ts violate the FCA-AI 3+12 rule
+
+## Core Workflow
+
+### Stage 0 — Change Detection (Incremental Gate)
+
+Without `--force`, exits immediately if no changes have occurred since the last run.
+
+1. `mcp_t_cache_manage({ action: "compute-hash", cwd: "<path>" })` → `currentHash`
+2. `mcp_t_cache_manage({ action: "get-hash", cwd: "<path>", skillName: "update" })` → `lastHash`
+3. `currentHash === lastHash` and no `--force` → output "No changes since last run. Use --force to override." and exit
+4. Changes detected → proceed to Stage 1
+
+See [reference.md Section 0](./reference.md#section-0--change-detection).
+
+### Stage 1 — Scan (Branch Diff-Based)
+
+Scan only files changed in this branch for FCA-AI rule violations.
+
+Agent: `filid:qa-reviewer` (sonnet)
+See [reference.md Section 1](./reference.md#section-1--scan).
+
+### Stage 2 — Sync (Conditional Structure Correction)
+
+Runs only when Stage 1 detects `critical` or `high` severity violations.
+See `reference.md` Section 2 Severity Normalization Table for the mapping from scan violation types to drift severity levels.
+
+Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet)
+MCP: `mcp_t_drift_detect`, `mcp_t_lca_resolve`, `mcp_t_structure_validate`
+See [reference.md Section 2](./reference.md#section-2--sync).
+
+### Stage 3 — Doc & Test Update (Parallel)
+
+Update INTENT.md/DETAIL.md and organize test.ts/spec.ts based on changed files.
+Two independent agents run in parallel on non-overlapping file sets.
+
+Agent: `filid:context-manager` (sonnet) — document updates (INTENT.md / DETAIL.md)
+Agent: `filid:implementer` (sonnet) — test organization (test.ts / spec.ts)
+
+If either agent (`filid:context-manager` or `filid:implementer`) fails, the orchestrator
+marks the stage as failed. Stage 4 (cache hash save) is skipped when any prior
+stage reported an error, ensuring the failed operation is retried on next run.
+
+See [reference.md Section 3](./reference.md#section-3--doc--test-update).
+
+### Stage 4 — Finalize
+
+1. Verify all prior stages completed without errors. If any stage reported an
+   error, skip hash save and report the error — this ensures the next incremental
+   run re-processes the failed work.
+2. `mcp_t_cache_manage({ action: "save-hash", cwd: "<path>", skillName: "update", hash: currentHash })`
+3. Output consolidated report
+   See [reference.md Section 4](./reference.md#section-4--finalize).
+
+## Available MCP Tools
+
+| Tool                 | Stage | Purpose                                            |
+| -------------------- | ----- | -------------------------------------------------- |
+| `mcp_t_cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
+| `mcp_t_fractal_scan`       | 1     | Project structure scan                             |
+| `mcp_t_fractal_navigate`   | 1     | Tree traversal and classification                  |
+| `mcp_t_test_metrics`       | 1, 3  | 3+12 rule validation                               |
+| `mcp_t_drift_detect`       | 2     | Drift detection                                    |
+| `mcp_t_lca_resolve`        | 2     | Determine correct placement for reclassification   |
+| `mcp_t_structure_validate` | 2     | Structure validity check                           |
+| `mcp_t_doc_compress`       | 3     | Document size check                                |
+| `mcp_t_ast_analyze`        | 3     | LCOM4, CC metrics                                  |
+
+## Options
+
+> Options are LLM-interpreted hints, not strict CLI flags. Natural language works equally well (e.g., "just scan" instead of `--scan-only`).
+
+```
+/filid:update [path] [--force] [--scan-only] [--no-sync] [--auto-approve]
+```
+
+| Option           | Type   | Default | Description                                |
+| ---------------- | ------ | ------- | ------------------------------------------ |
+| `path`           | string | cwd     | Target directory                           |
+| `--force`        | flag   | off     | Ignore cache, run full scan                |
+| `--scan-only`    | flag   | off     | Run Stage 1 only (skip sync/update)        |
+| `--no-sync`      | flag   | off     | Skip Stage 2 (scan + doc/test update only) |
+| `--auto-approve` | flag   | off     | Skip user approval in sync stage           |
+
+## Quick Reference
+
+> **Internal skill** (`user_invocable: false`) — invoked by orchestrator skills such as `pull-request`, `pipeline`, `resolve`. Not intended for direct user invocation.
+
+```
+Stages:   Change Detection → Scan → Sync (conditional) → Doc & Test Update → Finalize
+Agents:   filid:qa-reviewer (Stage 1), filid:drift-analyzer+filid:restructurer (Stage 2), filid:context-manager+filid:implementer (Stage 3)
+Cache:    ~/.claude/plugins/filid/{cwdHash}/run-update.hash
+```
+
+Key rules:
+
+- Without `--force`, exits immediately when no changes detected since last run
+- Stage 2 (Sync) runs only when critical/high violations are present
+- INTENT.md must stay within the 50-line limit
+- test.ts/spec.ts must follow the 3+12 rule (max 15 test cases per file)
