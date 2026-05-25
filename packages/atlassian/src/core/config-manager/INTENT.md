@@ -6,10 +6,10 @@ Atlassian 플러그인 설정 파일(config.json)의 로드·저장·병합을 Z
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일                | 역할                                           |
+| ------------------- | ---------------------------------------------- |
 | `config-manager.ts` | `loadConfig`, `saveConfig`, `mergeConfig` 구현 |
-| `index.ts` | 배럴 재내보내기 |
+| `index.ts`          | 배럴 재내보내기                                |
 
 ## Boundaries
 
@@ -34,8 +34,8 @@ Atlassian 플러그인 설정 파일(config.json)의 로드·저장·병합을 Z
 
 ## Dependencies
 
-| 대상 | 이유 |
-|---|---|
-| `../../types/` | `AtlassianConfig`, `AtlassianConfigSchema` |
-| `../../constants/` | `CONFIG_PATH` 기본 경로 |
-| `../../lib/file-io` | `readJson`, `writeJson` |
+| 대상                | 이유                                       |
+| ------------------- | ------------------------------------------ |
+| `../../types/`      | `AtlassianConfig`, `AtlassianConfigSchema` |
+| `../../constants/`  | `CONFIG_PATH` 기본 경로                    |
+| `../../lib/file-io` | `readJson`, `writeJson`                    |

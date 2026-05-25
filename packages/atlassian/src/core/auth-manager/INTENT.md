@@ -6,10 +6,10 @@ Jira/Confluence 자격증명의 JSON 파일 기반 저장·로드와 HTTP 인증
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일              | 역할                                                       |
+| ----------------- | ---------------------------------------------------------- |
 | `auth-manager.ts` | `loadCredentials`, `saveCredentials`, `getAuthHeader` 구현 |
-| `index.ts` | 배럴 재내보내기 |
+| `index.ts`        | 배럴 재내보내기                                            |
 
 ## Boundaries
 
@@ -34,9 +34,9 @@ Jira/Confluence 자격증명의 JSON 파일 기반 저장·로드와 HTTP 인증
 
 ## Dependencies
 
-| 대상 | 이유 |
-|---|---|
-| `../../types/` | `AuthType`, `Credentials` 타입 |
-| `../../constants/` | `CREDENTIALS_PATH` 기본 경로 |
-| `../../lib/file-io` | `readJson`, `writeJson` |
-| `../../utils/` | `buildAuthHeader` |
+| 대상                | 이유                           |
+| ------------------- | ------------------------------ |
+| `../../types/`      | `AuthType`, `Credentials` 타입 |
+| `../../constants/`  | `CREDENTIALS_PATH` 기본 경로   |
+| `../../lib/file-io` | `readJson`, `writeJson`        |
+| `../../utils/`      | `buildAuthHeader`              |
