@@ -1,4 +1,4 @@
-# atlassian-media-analysis — Tools Used, Agent Spawn & Caching
+# media-analysis — Tools Used, Agent Spawn & Caching
 
 ## Tools Used
 
@@ -20,9 +20,9 @@ Params:
   save_to_path: ".temp/<namespace>/<filename>"
 ```
 
-Namespace derivation: see [download-flow.md](../../atlassian-download/references/download-flow.md#namespace-path-convention).
+Namespace derivation: see [download-flow.md](../../download/references/download-flow.md#namespace-path-convention).
 
-See [download-flow.md](../../atlassian-download/references/download-flow.md) for Jira/Confluence attachment URL resolution patterns.
+See [download-flow.md](../../download/references/download-flow.md) for Jira/Confluence attachment URL resolution patterns.
 
 ## Agent Spawn
 

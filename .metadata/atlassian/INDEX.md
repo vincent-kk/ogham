@@ -27,10 +27,10 @@ Claude Code Main Agent (= Dispatcher, no separate implementation)
     +-- Agent: jira         (subagent, Jira domain expert)
     +-- Agent: confluence    (subagent, Confluence domain expert)
     |
-    +-- Skill: atlassian-setup        (auth/connection setup)
-    +-- Skill: atlassian-download     (attachment download)
-    +-- Skill: atlassian-jira         (Jira API domain router)
-    +-- Skill: atlassian-confluence   (Confluence API domain router)
+    +-- Skill: setup        (auth/connection setup)
+    +-- Skill: download     (attachment download)
+    +-- Skill: jira         (Jira API domain router)
+    +-- Skill: confluence   (Confluence API domain router)
     |
     +-- MCP Server "tools"
             +-- fetch     (HTTP GET/POST/PUT/PATCH/DELETE)
@@ -62,7 +62,7 @@ Dispatcher --> Agent --> Skill --> MCP --> Atlassian REST API
 Token-efficient pattern where only needed reference docs are loaded:
 
 ```
-1. Skill selected (atlassian-jira / atlassian-confluence)
+1. Skill selected (jira / confluence)
    -> SKILL.md loaded: tool catalog + one-line descriptions
 
 2. LLM decides which tool to use
@@ -84,7 +84,7 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 | Target | Rule | Examples |
 |---|---|---|
 | Agent | No prefix | `jira`, `confluence` |
-| Skill | Plugin name prefix | `atlassian-setup`, `atlassian-jira`, `atlassian-confluence`, `atlassian-download` |
+| Skill | Plugin name prefix | `setup`, `jira`, `confluence`, `download` |
 | MCP server name | `tools` | `.mcp.json` key: `"tools"` |
 | MCP tool name | No prefix | `fetch`, `convert`, `setup` |
 

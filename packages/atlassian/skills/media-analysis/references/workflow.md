@@ -1,4 +1,4 @@
-# atlassian-media-analysis — Complete Workflow
+# media-analysis — Complete Workflow
 
 ```
 Step 1 — Resolve input
@@ -9,7 +9,7 @@ Step 1 — Resolve input
   - Validate file exists (URL or path)
 
 Step 2 — Download (if Atlassian URL)
-  - See [download-flow.md](../../atlassian-download/references/download-flow.md) for full download protocol
+  - See [download-flow.md](../../download/references/download-flow.md) for full download protocol
   - Derive namespace from source context:
     - Jira issue KAN-27: namespace = "KAN-27"
     - Jira issue KAN-27 + comment 10110: namespace = "KAN-27_comment-10110"

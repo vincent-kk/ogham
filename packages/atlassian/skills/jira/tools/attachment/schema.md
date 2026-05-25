@@ -18,4 +18,4 @@
 |---|---|---|---|
 | Get metadata | `mcp_tools_fetch` | GET | Via issue fields |
 | Upload | `mcp_tools_fetch` | POST | content_type: "multipart/form-data" |
-| Download | `mcp_tools_fetch` | GET | accept_format: "raw", use atlassian-download skill |
+| Download | `mcp_tools_fetch` | GET | accept_format: "raw", use download skill |

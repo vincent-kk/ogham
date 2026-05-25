@@ -45,7 +45,7 @@ Unlike standard MCP servers that dump tools into the LLM context, this plugin us
 ### Initial Setup
 
 ```
-/atlassian-setup
+/setup
 ```
 
 Configures authentication (Basic, PAT, OAuth 2.0) and connection details for your Jira/Confluence Cloud or Server/DC instances. Uses a local web server for a seamless setup experience.
@@ -86,7 +86,7 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 1. **Dispatcher**: Claude Code's built-in agent routing.
 2. **Agent Layer**: Domain experts (`jira`, `confluence`) with embedded knowledge (formatting, workflow rules, error recovery strategies). They orchestrate multi-step tasks.
-3. **Skill Layer**: API spec capsules (`atlassian-jira`, `atlassian-confluence`) that use **Lazy Reference Loading** to keep the context window small. Tool schemas are only loaded when needed.
+3. **Skill Layer**: API spec capsules (`jira`, `confluence`) that use **Lazy Reference Loading** to keep the context window small. Tool schemas are only loaded when needed.
 4. **MCP Layer**: Zero-domain-knowledge utility layer providing generic HTTP execution (`fetch`), bidirectional format conversion (`convert`), and auth setup (`setup`).
 
 ---
@@ -95,10 +95,10 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 | Skill | Scope | What it does |
 | --- | --- | --- |
-| `/atlassian-setup` | Common | Auth and connection management (Basic, PAT, OAuth 2.0) |
-| `/atlassian-download` | Common | Unified attachment download for both platforms |
-| `/atlassian-jira` | Jira | Jira API domain router (15 domains including issue, search, agile, etc.) |
-| `/atlassian-confluence` | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
+| `/setup` | Common | Auth and connection management (Basic, PAT, OAuth 2.0) |
+| `/download` | Common | Unified attachment download for both platforms |
+| `/jira` | Jira | Jira API domain router (15 domains including issue, search, agile, etc.) |
+| `/confluence` | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
 
 ---
 

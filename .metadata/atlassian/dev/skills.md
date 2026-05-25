@@ -30,7 +30,7 @@ This pattern ensures SKILL.md stays lightweight (~token-efficient) while `tools/
 
 ---
 
-## 2. atlassian-setup
+## 2. setup
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 2
 
@@ -41,7 +41,7 @@ Authentication and connection configuration. Prerequisite for all other Skills.
 ### SKILL.md Content Outline
 
 ```
-- Skill name: atlassian-setup
+- Skill name: setup
 - Domain: common
 - MCP tools used: setup (local web server)
 - Description: Atlassian authentication and connection management
@@ -94,7 +94,7 @@ options:
 ### references/ Structure
 
 ```
-skills/atlassian-setup/
+skills/setup/
   SKILL.md
   references/
     auth-types.md        # Detailed auth type comparison
@@ -104,7 +104,7 @@ skills/atlassian-setup/
 
 ---
 
-## 3. atlassian-download
+## 3. download
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 5
 
@@ -115,7 +115,7 @@ Unified attachment download for both Jira and Confluence.
 ### SKILL.md Content Outline
 
 ```
-- Skill name: atlassian-download
+- Skill name: download
 - Domain: common
 - MCP tools used: get
 - Description: Download attachments and images from Jira issues and Confluence pages
@@ -152,7 +152,7 @@ constraints:
 ### references/ Structure
 
 ```
-skills/atlassian-download/
+skills/download/
   SKILL.md
   references/
     download-flow.md     # Download and upload shared specs
@@ -161,7 +161,7 @@ skills/atlassian-download/
 
 ---
 
-## 4. atlassian-jira
+## 4. jira
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 3, `agents.md` Section 2
 
@@ -201,7 +201,7 @@ The SKILL.md must include:
 
 | HTTP Status | Cause | Recovery Strategy |
 |---|---|---|
-| **401** | Auth expired or invalid credentials | Trigger reauth via atlassian-setup -> retry once |
+| **401** | Auth expired or invalid credentials | Trigger reauth via setup -> retry once |
 | **403** | Insufficient permissions | Report required permissions to user. No retry. |
 | **404** | Issue/project not found | Verify identifier (typo check) -> report to user |
 | **409** | Concurrent modification | Re-fetch latest data -> inform user of conflict |
@@ -230,7 +230,7 @@ The SKILL.md must include:
 ### tools/ Subdirectory Structure
 
 ```
-skills/atlassian-jira/
+skills/jira/
   SKILL.md
   tools/
     issue/
@@ -315,13 +315,13 @@ Each `schema.md` follows a consistent structure:
 
 ---
 
-## 5. atlassian-confluence
+## 5. confluence
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 4, `agents.md` Section 3
 
 ### Purpose
 
-Confluence API domain router. Same lazy-loading pattern as atlassian-jira.
+Confluence API domain router. Same lazy-loading pattern as jira.
 
 ### SKILL.md Content Outline
 
@@ -374,7 +374,7 @@ Confluence API domain router. Same lazy-loading pattern as atlassian-jira.
 ### tools/ Subdirectory Structure
 
 ```
-skills/atlassian-confluence/
+skills/confluence/
   SKILL.md
   tools/
     page/

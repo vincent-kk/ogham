@@ -1,4 +1,4 @@
-# atlassian-media-analysis — Preset Auto-Selection & File Structure
+# media-analysis — Preset Auto-Selection & File Structure
 
 ## Preset Auto-Selection
 

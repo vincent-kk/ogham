@@ -26,7 +26,7 @@ Agents are **domain experts** spawned by the Dispatcher (Claude Code main agent)
 | Pattern: `[A-Z]+-\d+` (issue key) | **Jira Agent** | "PROJ-456 코멘트 추가" |
 | Pattern: numeric ID + "page" context | **Confluence Agent** | "페이지 12345 업데이트" |
 | Both domains mentioned | **Cross-domain** (sequential/parallel) | "Jira 이슈 목록을 Confluence에 정리" |
-| Auth/setup related | **atlassian-setup Skill** (direct) | "연결 상태 확인해줘" |
+| Auth/setup related | **setup Skill** (direct) | "연결 상태 확인해줘" |
 
 **Priority**: Explicit domain keyword > Identifier pattern > Context inference. When ambiguous, ask the user.
 
@@ -72,9 +72,9 @@ Based on 22 original Python mixins, covering these domains:
 
 | Skill | Purpose |
 |---|---|
-| `atlassian-jira` | Jira API domain router (15 tool domains) |
-| `atlassian-setup` | Auth/connection management |
-| `atlassian-download` | Attachment download |
+| `jira` | Jira API domain router (15 tool domains) |
+| `setup` | Auth/connection management |
+| `download` | Attachment download |
 
 #### Domain Knowledge
 
@@ -166,9 +166,9 @@ Based on 8 original Python mixins:
 
 | Skill | Purpose |
 |---|---|
-| `atlassian-confluence` | Confluence API domain router (8 tool domains) |
-| `atlassian-setup` | Auth/connection management |
-| `atlassian-download` | Attachment download |
+| `confluence` | Confluence API domain router (8 tool domains) |
+| `setup` | Auth/connection management |
+| `download` | Attachment download |
 
 #### Domain Knowledge
 
@@ -307,5 +307,5 @@ Agent -> Skill -> MCP Tool -> Atlassian API
 
 **Recovery rules**:
 - Auto-retry only for transient errors (429, 503)
-- Auth errors (401): trigger atlassian-setup reauth → retry once
+- Auth errors (401): trigger setup reauth → retry once
 - Data mutation operations (POST/PUT/DELETE): NO auto-retry (idempotency not guaranteed)

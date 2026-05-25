@@ -180,7 +180,7 @@ validate → split → manifest-stories → devplan → manifest-devplan을 품�
 /imbas:imbas-scaffold-pr PROJ-123
 
 # 미디어 첨부파일 분석 (이미지, 동영상, GIF) — @ogham/atlassian 필요
-/atlassian:atlassian-media-analysis <url-or-path>
+/atlassian:media-analysis <url-or-path>
 ```
 
 ---

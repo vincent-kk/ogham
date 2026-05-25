@@ -16,18 +16,18 @@ packages/atlassian/
 │   ├── jira.md                  # Jira domain expert agent
 │   └── confluence.md            # Confluence domain expert agent
 ├── skills/
-│   ├── atlassian-setup/
+│   ├── setup/
 │   │   ├── SKILL.md             # Auth/connection setup skill
 │   │   └── references/
 │   │       ├── auth-types.md
 │   │       ├── setup-flow.md
 │   │       └── errors.md
-│   ├── atlassian-download/
+│   ├── download/
 │   │   ├── SKILL.md             # Attachment download skill
 │   │   └── references/
 │   │       ├── download-flow.md
 │   │       └── errors.md
-│   ├── atlassian-jira/
+│   ├── jira/
 │   │   ├── SKILL.md             # Jira API domain router
 │   │   └── tools/
 │   │       ├── issue/
@@ -67,7 +67,7 @@ packages/atlassian/
 │   │       │   └── schema.md
 │   │       └── metrics/
 │   │           └── schema.md
-│   └── atlassian-confluence/
+│   └── confluence/
 │       ├── SKILL.md             # Confluence API domain router
 │       └── tools/
 │           ├── page/

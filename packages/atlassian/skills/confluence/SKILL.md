@@ -1,5 +1,5 @@
 ---
-name: atlassian-confluence
+name: confluence
 user_invocable: false
 description: "Domain router for Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management across Cloud V2, Cloud V1, and Server/DC. Main agent executes directly for simple operations; confluence agent spawned only for complex multi-step workflows."
 version: "0.1.0"
@@ -7,7 +7,7 @@ complexity: complex
 plugin: atlassian
 ---
 
-# atlassian-confluence
+# confluence
 
 Confluence REST API domain router. Resolves the correct endpoint, parameters, and MCP tool for any Confluence operation.
 
@@ -31,7 +31,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 1. Read `tools/<domain>/schema.md` for the needed domain
 2. Call `mcp_tools_fetch` with the V2-style logical endpoint (no `/wiki/...` or `/rest/api/...` prefix)
 3. Use `content_format: "markdown"` when sending page body content (auto-converts to Storage Format)
-4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `atlassian-setup` skill and retry once; on decline abort with guidance message
+4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
 
 **Endpoint dispatch is handled by the MCP layer.** Skills do not branch on Cloud V1/V2/Server. Just send V2-style logical paths (e.g. `/pages/{id}`, `/spaces`, `/footer-comments`) and MCP rewrites to the correct physical path per deployment.
 
@@ -61,7 +61,7 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 2. Read `tools/<domain>/schema.md` ONLY when needed — do not preload all schemas
 3. Compose the V2-style logical endpoint (MCP dispatches to Cloud V2 / V1 / Server/DC automatically)
 4. Call the appropriate MCP tool with resolved parameters
-5. On HTTP 401: invoke `atlassian-setup` skill, then retry once
+5. On HTTP 401: invoke `setup` skill, then retry once
 
 ## Permission Boundaries
 
