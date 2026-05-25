@@ -61,24 +61,24 @@ PR-G 부터 시작. 각 패키지 적용 일관 절차 (HANDOFF "🔁 적용 절
 
 ## 🛠️ PR 분할 및 진행 상태
 
-| 순서 | PR         | 패키지                                                          | 분량 | 의존   | 상태      | 커밋      |
-| ---- | ---------- | --------------------------------------------------------------- | ---- | ------ | --------- | --------- |
-| 1    | **PR-Z**   | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전         | 0.5d | none   | ✅ 완료   | (이전)    |
-| 2    | **PR-A**   | `shared/cross-platform` 워크스페이스 + 빌드 + CI 매트릭스       | 1d   | PR-Z   | ✅ 완료   | (이전)    |
-| 3    | **PR-B**   | 7 helper 구현 + 단위 테스트 (57 tests passing)                  | 2d   | PR-A   | ✅ 완료   | (이전)    |
-| 4    | **PR-C**   | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃 + light hook 가드) | 2d   | PR-B   | ✅ 완료   | `8c1f6c4` |
-| 5    | **PR-D**   | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)   | 2d   | PR-B   | ✅ 완료   | `9260d5f` |
-| 5.5  | **PR-D.1** | cross-platform 도구별 exports (tree-shaking 회복)               | —    | PR-D   | ✅ 완료   | `5ba0c35` |
-| 6    | **PR-E**   | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리 | 1d   | PR-B   | ✅ 완료   | `4d4c421` |
-| 6.5  | **chore**  | gitattributes + vitest devDeps + esbuild banner + prettier      | —    | PR-D/E | ✅ 완료   | `e7d54c1` |
-| 7    | **PR-F.1** | cross-platform `spawnCliSync` 추가 (sync 호출자 cascade 회피)   | —    | PR-B   | ✅ 완료   | `8f3f36c` |
+| 순서 | PR         | 패키지                                                                        | 분량 | 의존   | 상태      | 커밋      |
+| ---- | ---------- | ----------------------------------------------------------------------------- | ---- | ------ | --------- | --------- |
+| 1    | **PR-Z**   | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전                       | 0.5d | none   | ✅ 완료   | (이전)    |
+| 2    | **PR-A**   | `shared/cross-platform` 워크스페이스 + 빌드 + CI 매트릭스                     | 1d   | PR-Z   | ✅ 완료   | (이전)    |
+| 3    | **PR-B**   | 7 helper 구현 + 단위 테스트 (57 tests passing)                                | 2d   | PR-A   | ✅ 완료   | (이전)    |
+| 4    | **PR-C**   | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃 + light hook 가드)               | 2d   | PR-B   | ✅ 완료   | `8c1f6c4` |
+| 5    | **PR-D**   | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)                 | 2d   | PR-B   | ✅ 완료   | `9260d5f` |
+| 5.5  | **PR-D.1** | cross-platform 도구별 exports (tree-shaking 회복)                             | —    | PR-D   | ✅ 완료   | `5ba0c35` |
+| 6    | **PR-E**   | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리               | 1d   | PR-B   | ✅ 완료   | `4d4c421` |
+| 6.5  | **chore**  | gitattributes + vitest devDeps + esbuild banner + prettier                    | —    | PR-D/E | ✅ 완료   | `e7d54c1` |
+| 7    | **PR-F.1** | cross-platform `spawnCliSync` 추가 (sync 호출자 cascade 회피)                 | —    | PR-B   | ✅ 완료   | `8f3f36c` |
 | 7.5  | **PR-F**   | filid (ast-grep 화이트리스트 OS-aware + git spawnCli{,Sync} + hook bootstrap) | 1d   | PR-F.1 | ✅ 완료   | `5c33286` |
-| 8    | **PR-G**   | imbas (`setup.ts` HOME/basename + npm fallback)                 | 0.5d | PR-B   | ⏳ 다음   | —         |
-| 9    | **PR-H**   | atlassian — docs only (chmod Windows 무시 명기)                 | 0.5d | none   | ⏳ 대기   | —         |
-| 10   | **V1**     | 추가 검증 — CI 매트릭스 push & 결과 확인                        | 0.5d | PR-F/G | ⏳ 대기   | —         |
-| 11   | **V2**     | 추가 검증 — hook bootstrap 실 연결 (hooks.json win32 분기)      | 1d   | V1     | ⏳ 대기   | —         |
-| 12   | **V3**     | 추가 검증 — Windows native dogfood (실 사용자 머신 1회)         | 0.5d | V2     | ⏳ 대기   | —         |
-| 13   | **PR-I**   | repo-wide lint 가드 (eslint custom rules + import resolver)     | 1d   | V3     | ⏳ 마지막 | —         |
+| 8    | **PR-G**   | imbas (`setup.ts` HOME/basename + npm fallback)                               | 0.5d | PR-B   | ⏳ 다음   | —         |
+| 9    | **PR-H**   | atlassian — docs only (chmod Windows 무시 명기)                               | 0.5d | none   | ⏳ 대기   | —         |
+| 10   | **V1**     | 추가 검증 — CI 매트릭스 push & 결과 확인                                      | 0.5d | PR-F/G | ⏳ 대기   | —         |
+| 11   | **V2**     | 추가 검증 — hook bootstrap 실 연결 (hooks.json win32 분기)                    | 1d   | V1     | ⏳ 대기   | —         |
+| 12   | **V3**     | 추가 검증 — Windows native dogfood (실 사용자 머신 1회)                       | 0.5d | V2     | ⏳ 대기   | —         |
+| 13   | **PR-I**   | repo-wide lint 가드 (eslint custom rules + import resolver)                   | 1d   | V3     | ⏳ 마지막 | —         |
 
 - 남은 분량 직렬: **약 5 영업일**
 - PR-F/G/H 병렬 가능
@@ -228,14 +228,14 @@ feat(<pkg>): migrate to @ogham/cross-platform for windows compatibility
 
 ### 패키지별 특수사항
 
-| PR      | 패키지       | 특수사항                                                                                                                                                                                                                                                                                                                    |
-| ------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅ PR-C | cogair       | LIGHT cap 10240 bytes. 3 spawn site + EOL 3곳. hook 에는 cross-platform 미사용 → `/Dynamic require of/` 가드 유지. 결과: 227 tests pass.                                                                                                                                                                                    |
-| ✅ PR-D | maencof      | hook silent failure 본진 — git spawnCli 변환 (vault-committer/changelog-gate async), 모든 entry에 try/catch + logHookFailure + selfProbe (session-start only). 결과: 891 tests pass (banner + sub-exports 도입 후).                                                                                                         |
-| ✅ PR-E | maencof-lens | single session-start hook + selfProbe + logHookFailure. hook-bundles.test 의 `spawnSync('node')` → `process.execPath` 교체. 결과: 54 tests pass.                                                                                                                                                                            |
+| PR      | 패키지       | 특수사항                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅ PR-C | cogair       | LIGHT cap 10240 bytes. 3 spawn site + EOL 3곳. hook 에는 cross-platform 미사용 → `/Dynamic require of/` 가드 유지. 결과: 227 tests pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ✅ PR-D | maencof      | hook silent failure 본진 — git spawnCli 변환 (vault-committer/changelog-gate async), 모든 entry에 try/catch + logHookFailure + selfProbe (session-start only). 결과: 891 tests pass (banner + sub-exports 도입 후).                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ✅ PR-E | maencof-lens | single session-start hook + selfProbe + logHookFailure. hook-bundles.test 의 `spawnSync('node')` → `process.execPath` 교체. 결과: 54 tests pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ✅ PR-F | filid        | `src/mcp/tools/ast-grep-replace/ast-grep-replace.ts:73` 시스템 경로 화이트리스트 OS-aware (Unix `/usr,/bin,/sbin,/etc,/var/lib` + Windows `System32` / `SysWOW64` / `Program Files` / `Program Files (x86)`). `resolve-git-root` 은 sync caller cascade 회피를 위해 새 `spawnCliSync` 사용 (PR-F.1 에서 cross-platform 에 추가); `content-hash.gitExec` 은 `spawnCli` (async). 5 hook entry 에 `logHookFailure`, setup entry 에 `selfProbe` 추가 + ESM CJS banner 적용. HEAVY cap 17 KB 로 상향 (logHookFailure 인라인 시 ~16 KB). pre-existing prune-throttle 경계 테스트 race 1초 buffer 로 수정. 결과: 1012 tests pass. |
-| ⏳ PR-G | imbas        | `setup.ts:21` `process.env.HOME` → `env.home()`. `setup.ts:23` `cwd.split('/').pop()` → `path.basename(cwd)`. `build-mcp-server.mjs:44` `execSync('npm root -g')` fallback → `binaries.ensure('npm')`.                                                                                                                      |
-| ⏳ PR-H | atlassian    | docs only — chmod 0o600 가 Windows 에서 무시되어 ACL 기본값으로 보호됨을 `auth-manager` / `config-manager` INTENT.md + README Security 섹션에 명기.                                                                                                                                                                         |
+| ⏳ PR-G | imbas        | `setup.ts:21` `process.env.HOME` → `env.home()`. `setup.ts:23` `cwd.split('/').pop()` → `path.basename(cwd)`. `build-mcp-server.mjs:44` `execSync('npm root -g')` fallback → `binaries.ensure('npm')`.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ⏳ PR-H | atlassian    | docs only — chmod 0o600 가 Windows 에서 무시되어 ACL 기본값으로 보호됨을 `auth-manager` / `config-manager` INTENT.md + README Security 섹션에 명기.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 ---
 
