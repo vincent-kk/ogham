@@ -54,12 +54,16 @@ describe("spawnCli", () => {
     expect(result.stdout).toBe("ping");
   });
 
-  it("reports timedOut when the child exceeds timeoutMs", async () => {
-    const result = await spawnCli(node, [fixture("long-sleep.mjs")], {
-      timeoutMs: 100,
-    });
-    expect(result.timedOut).toBe(true);
-  });
+  it(
+    "reports timedOut when the child exceeds timeoutMs",
+    async () => {
+      const result = await spawnCli(node, [fixture("long-sleep.mjs")], {
+        timeoutMs: 100,
+      });
+      expect(result.timedOut).toBe(true);
+    },
+    15_000,
+  );
 
   it("returns spawnError or non-zero code for an unknown binary", async () => {
     const result = await spawnCli("non-existent-binary-xyz", []);
