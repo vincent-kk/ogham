@@ -90,12 +90,14 @@ describe('prune-throttle (global)', () => {
     expect(isPruneDue()).toBe(false);
   });
 
-  it('isPruneDue: boundary — exactly PRUNE_THROTTLE_MS old returns false', async () => {
+  it('isPruneDue: boundary — just inside PRUNE_THROTTLE_MS returns false', async () => {
     const { isPruneDue, markPruneRun } = await import(
       '../../../core/infra/cache-manager/cache-manager.js'
     );
     markPruneRun();
-    const past = (Date.now() - PRUNE_THROTTLE_MS) / 1000;
+    // 1s buffer absorbs ms-level drift between Date.now() and isPruneDue();
+    // the impl uses strict `>` so any positive delta past the boundary flips.
+    const past = (Date.now() - PRUNE_THROTTLE_MS + 1000) / 1000;
     utimesSync(markerPath, past, past);
     expect(isPruneDue()).toBe(false);
   });

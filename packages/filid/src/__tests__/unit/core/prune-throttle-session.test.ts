@@ -94,12 +94,14 @@ describe('prune-throttle (session)', () => {
     expect(isSessionPruneDue(cwd)).toBe(false);
   });
 
-  it('isSessionPruneDue: boundary — exactly PRUNE_THROTTLE_MS returns false', async () => {
+  it('isSessionPruneDue: boundary — just inside PRUNE_THROTTLE_MS returns false', async () => {
     const { isSessionPruneDue, markSessionPruneRun } = await import(
       '../../../core/infra/cache-manager/cache-manager.js'
     );
     markSessionPruneRun(cwd);
-    const past = (Date.now() - PRUNE_THROTTLE_MS) / 1000;
+    // 1s buffer absorbs ms-level drift between Date.now() and isSessionPruneDue();
+    // the impl uses strict `>` so any positive delta past the boundary flips.
+    const past = (Date.now() - PRUNE_THROTTLE_MS + 1000) / 1000;
     utimesSync(markerPath, past, past);
     expect(isSessionPruneDue(cwd)).toBe(false);
   });

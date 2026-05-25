@@ -9,21 +9,35 @@
  * Pulling external runtimes into a hook bundle breaks per-event cold-start
  * budget and has caused production crashes (e.g. v0.4.0 zod / fast-glob
  * regression). Tiered per-hook byte caps + FORBIDDEN_PATTERNS enforce this at
- * build time. Two tiers: HEAVY (15 KB) for guard-heavy hooks, LIGHT (10 KB)
- * for minimal context/event hooks.
+ * build time.
  */
-
-import * as esbuild from 'esbuild';
-import { mkdir, readFile, stat } from 'fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { generateWindowsCmd } from '@ogham/cross-platform/shim';
+import * as esbuild from 'esbuild';
+import { mkdir, readFile, stat } from 'fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
-const HEAVY_HOOK_BYTES = 15 * 1024;
+// Windows .cmd shim — invoked from hooks.json on win32 when PATH lacks node.
+// Routes through libs/run.cjs (process.execPath via spawnSync) so the actual
+// hook bundle still executes via the same node binary.
+generateWindowsCmd({
+  outputPath: resolve(root, 'bridge/run-hook.cmd'),
+  scriptRelativePath: '../libs/run.cjs',
+});
+console.log('  Windows hook shim -> bridge/run-hook.cmd');
+
+// Tiers reflect what each hook pulls from @ogham/cross-platform:
+//   LIGHT         — logHookFailure only (no spawn-dependent helper inlined).
+//   HEAVY         — guard-heavy orchestration with logHookFailure (intent-injector + pre-tool-validator + structure-guard).
+//   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
+const SESSION_START_HOOK_BYTES = 40 * 1024;
+const HEAVY_HOOK_BYTES = 17 * 1024;
 const LIGHT_HOOK_BYTES = 10 * 1024;
 
 const hookEntries = [
@@ -31,8 +45,17 @@ const hookEntries = [
   { name: 'agent-enforcer', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'user-prompt-submit', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'session-cleanup', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'setup', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
 ];
+
+// esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
+// of X is not supported"). cross-spawn (CJS, pulled via @ogham/cross-platform/
+// self-probe) calls require('child_process') at load time, so without this
+// banner the bundle crashes on import. createRequire from node:module restores
+// a working require for CJS deps inlined into ESM.
+const ESM_CJS_REQUIRE_BANNER =
+  "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
+  'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
   hookEntries.map(({ name }) =>
@@ -46,6 +69,7 @@ await Promise.all(
       minify: true,
       sourcemap: false,
       treeShaking: true,
+      banner: { js: ESM_CJS_REQUIRE_BANNER },
     }),
   ),
 );
@@ -76,9 +100,16 @@ const FORBIDDEN_PATTERNS = [
   /\bdate-fns\b/,
   // MCP server (long-running) belongs in mcp-server.cjs, never in hooks
   /@modelcontextprotocol\/sdk/,
-  // CJS dynamic-require shim (filid 0.4.0 module-init crash signature)
-  /Dynamic require of/,
+  // cross-platform heavy helpers — MCP bundle only, never in hook bundle
+  /\bbinaries\.discover\b/,
+  /\brunHookEntry\b/,
+  /\bgenerateWindowsCmd\b/,
 ];
+// NOTE: `Dynamic require of ...` esbuild CJS-shim string is intentionally
+// allowed — @ogham/cross-platform/self-probe pulls cross-spawn (CJS) into the
+// setup (SessionStart) bundle, which produces that shim during ESM bundling.
+// The filid 0.4.0 module-init crash signature was a different failure mode
+// (require evaluated at module-init time, not the lazy shim).
 
 const violations = [];
 
@@ -93,9 +124,7 @@ for (const { name, maxBytes } of hookEntries) {
   const content = await readFile(file, 'utf8');
   for (const pattern of FORBIDDEN_PATTERNS) {
     if (pattern.test(content)) {
-      violations.push(
-        `  ${name}.mjs: forbidden pattern ${pattern} matched`,
-      );
+      violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
     }
   }
 }
@@ -104,13 +133,15 @@ if (violations.length > 0) {
   console.error('\nHook bundle isolation violation:');
   for (const v of violations) console.error(v);
   console.error(
-    '\nHooks must stay thin (Node builtins only). Per-hook caps: heavy <= ' +
-      `${HEAVY_HOOK_BYTES / 1024} KB, light <= ${LIGHT_HOOK_BYTES / 1024} KB. External modules\n` +
-      'belong in MCP/Skill paths, not hook bundles.',
+    '\nHooks must stay thin (Node builtins + @ogham/cross-platform light helpers).\n' +
+      `Per-hook caps: session-start <= ${SESSION_START_HOOK_BYTES} bytes,\n` +
+      `heavy <= ${HEAVY_HOOK_BYTES} bytes, light <= ${LIGHT_HOOK_BYTES} bytes.\n` +
+      'External modules and cross-platform heavy helpers (binaries.discover,\n' +
+      'runHookEntry, generateWindowsCmd) belong in MCP / Skill paths.',
   );
   process.exit(1);
 }
 
 console.log(
-  `  Hook bundle guards passed (heavy <= ${HEAVY_HOOK_BYTES} bytes, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+  `  Hook bundle guards passed (session-start <= ${SESSION_START_HOOK_BYTES}, heavy <= ${HEAVY_HOOK_BYTES}, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
 );

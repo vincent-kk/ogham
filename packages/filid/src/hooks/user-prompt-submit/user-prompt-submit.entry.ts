@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { logHookFailure } from '@ogham/cross-platform/error-log';
+
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';
 import type { UserPromptSubmitInput } from '../../types/hooks.js';
@@ -13,6 +15,7 @@ try {
   result = handleUserPromptSubmit(input);
 } catch (e) {
   log.error('hook entry failed', e);
+  logHookFailure('filid', 'user-prompt-submit', e);
   result = { continue: true };
 }
 
