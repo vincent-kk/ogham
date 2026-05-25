@@ -148,8 +148,8 @@ Hook, MCP, Skill이 동일한 인덱스에 접근해야 하므로 상태 공유 
 |------|------|-------|
 | `/maencof:build` | 전체/증분 인덱스 구축 | 1 |
 | `/maencof:explore` | 대화형 지식 탐색 세션 | 1 |
-| `/maencof:maencof-diagnose` | 인덱스 건강도 진단 (고아 문서, 깨진 링크) | 1 |
-| `/maencof:maencof-rebuild` | 인덱스 강제 전체 재구축 | 1 |
+| `/maencof:checkup --quick` | 인덱스 건강도 진단 (고아 문서, 깨진 링크) — 구 `maencof-diagnose` 흡수 | 1 |
+| `/maencof:build --force --reset-cache` | 인덱스 강제 전체 재구축 — 구 `maencof-rebuild` 흡수 | 1 |
 
 ## Hook 후보 목록
 

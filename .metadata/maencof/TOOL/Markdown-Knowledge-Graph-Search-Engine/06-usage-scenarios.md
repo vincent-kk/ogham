@@ -133,7 +133,7 @@
 **상황**: 연구자가 저장소의 구조적 건강 상태를 점검하고 싶다.
 
 ```
-사용자: /maencof:maencof-diagnose
+사용자: /maencof:checkup --quick
 
 1. Skill: 전체 그래프 분석 실행
 2. 결과:

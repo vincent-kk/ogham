@@ -46,7 +46,7 @@ kg_context의 token_budget 파라미터로 엄격한 예산 제어.
 `/maencof:explore /path/to/doc.md` → 연결 맵 (인/아웃 링크, PageRank, WP 유사도).
 
 ### H3: 인덱스 건강도 진단
-`/maencof:maencof-diagnose` → 고아 문서, 깨진 링크, 순환 참조 보고서 + 권장 조치.
+`/maencof:checkup --quick` → 고아 문서, 깨진 링크, 순환 참조 보고서 + 권장 조치.
 
 ---
 
