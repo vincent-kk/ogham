@@ -15,7 +15,7 @@
     "shared/*"
   ],
   "scripts": {
-    "build:all": "yarn workspace @ogham/cross-platform build && yarn workspaces foreach -A --exclude @ogham/cross-platform run build",
+    "build:all": "node scripts/build-all.mjs",
     "changeset": "changeset",
     "changeset:publish": "yarn build:all && changeset publish",
     "changeset:version": "changeset version",
@@ -34,7 +34,7 @@
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "yarn workspace @ogham/cross-platform build && yarn workspaces foreach -A --exclude @ogham/cross-platform run typecheck"
+    "typecheck": "node scripts/typecheck-all.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
