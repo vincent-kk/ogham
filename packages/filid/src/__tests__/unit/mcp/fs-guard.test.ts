@@ -58,6 +58,14 @@ describe('assertUnder', () => {
       expect(result.endsWith('tmp/guard-test/child.md')).toBe(true);
     });
 
+    it('returns a resolved Windows path without comparison-only slash normalization', () => {
+      const result = assertUnder(
+        'C:\\project\\.filid\\debt',
+        'C:\\project\\.filid\\debt\\FIX-001.md',
+      );
+      expect(result).toBe('C:\\project\\.filid\\debt\\FIX-001.md');
+    });
+
     it('error message includes the resolved parent dir', () => {
       try {
         assertUnder(parent, '/etc/passwd');

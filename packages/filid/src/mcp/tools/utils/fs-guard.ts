@@ -20,5 +20,5 @@ export function assertUnder(parentDir: string, targetPath: string): string {
       `Invalid path: traversal detected outside ${resolvedParent}`,
     );
 
-  return targetForCompare;
+  return resolvedTarget;
 }

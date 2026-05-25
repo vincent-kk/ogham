@@ -1,10 +1,19 @@
 import path from 'node:path';
 
+type PathApi = typeof path.win32 | typeof path.posix | typeof path;
+
 export function isPosixLikePath(p: string): boolean {
   return p.startsWith('/') && !/^[A-Za-z]:[\\/]/.test(p);
 }
 
-function apiFor(...paths: string[]): typeof path.posix | typeof path {
+export function isWindowsLikePath(p: string): boolean {
+  return (
+    /^[A-Za-z]:[\\/]/.test(p) || /^\\\\[.?]\\/.test(p) || /^\\\\/.test(p)
+  );
+}
+
+function apiFor(...paths: string[]): PathApi {
+  if (paths.some(isWindowsLikePath)) return path.win32;
   return paths.some(isPosixLikePath) ? path.posix : path;
 }
 
