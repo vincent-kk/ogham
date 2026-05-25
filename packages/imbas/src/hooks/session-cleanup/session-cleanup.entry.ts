@@ -1,7 +1,10 @@
 #!/usr/bin/env node
+import { logHookFailure } from '@ogham/cross-platform/error-log';
+
 import { createLogger } from '../../lib/logger.js';
 import { readStdin } from '../../lib/stdin.js';
 import type { SessionEndInput } from '../../types/hooks.js';
+
 import { processSessionCleanup } from './session-cleanup.js';
 
 const log = createLogger('session-cleanup');
@@ -12,6 +15,7 @@ try {
   result = processSessionCleanup(input);
 } catch (e) {
   log.error('hook entry failed', e);
+  logHookFailure('imbas', 'session-cleanup', e);
   result = { continue: true };
 }
 process.stdout.write(JSON.stringify(result));

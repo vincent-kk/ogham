@@ -6,7 +6,9 @@
  *   2. Emit session context for Claude Code
  */
 import { existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
+
+import { env } from '@ogham/cross-platform/env';
 
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
@@ -18,9 +20,10 @@ const log = createLogger('setup');
  * Uses CLAUDE_CONFIG_DIR or ~/.claude as base.
  */
 function getCacheDir(cwd: string): string {
-  const configDir = process.env['CLAUDE_CONFIG_DIR'] || join(process.env['HOME'] || '', '.claude');
+  const configDir =
+    process.env['CLAUDE_CONFIG_DIR'] || join(env.home(), '.claude');
   // Hash-free simple path: use plugin name + cwd basename
-  const base = cwd.split('/').pop() || 'default';
+  const base = basename(cwd) || 'default';
   return join(configDir, 'plugins', 'imbas', base);
 }
 
