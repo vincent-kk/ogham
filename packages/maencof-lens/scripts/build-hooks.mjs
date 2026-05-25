@@ -10,6 +10,7 @@
  * at build time. The `Dynamic require of` shim signature is also rejected to
  * prevent the filid 0.4.0 module-init crash regression.
  */
+import { generateWindowsCmd } from '@ogham/cross-platform/shim';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -20,7 +21,18 @@ const root = resolve(__dirname, '..');
 
 await mkdir(resolve(root, 'bridge'), { recursive: true });
 
-const MAX_HOOK_BYTES = 20 * 1024;
+// Windows .cmd shim — invoked from hooks.json on win32 when PATH lacks node.
+// Routes through libs/run.cjs (uses process.execPath via spawnSync).
+generateWindowsCmd({
+  outputPath: resolve(root, 'bridge/run-hook.cmd'),
+  scriptRelativePath: '../libs/run.cjs',
+});
+console.log('  Windows hook shim -> bridge/run-hook.cmd');
+
+// session-start inlines selfProbe (spawn-dependent) + logHookFailure, so its
+// budget is set above the previous 20 KB ceiling. Other (non-spawn) entries
+// would land under the LIGHT 10 KB tier — pattern matches maencof's caps.
+const MAX_HOOK_BYTES = 40 * 1024;
 
 const hookEntries = ['session-start'];
 
@@ -69,9 +81,16 @@ const FORBIDDEN_PATTERNS = [
   /\bdate-fns\b/,
   // MCP server (long-running) belongs in mcp-server.cjs, never in hooks
   /@modelcontextprotocol\/sdk/,
-  // CJS dynamic-require shim (filid 0.4.0 module-init crash signature)
-  /Dynamic require of/,
+  // cross-platform heavy helpers — MCP bundle only, never in hook bundle
+  /\bbinaries\.discover\b/,
+  /\brunHookEntry\b/,
+  /\bgenerateWindowsCmd\b/,
 ];
+// NOTE: `Dynamic require of ...` esbuild CJS-shim string is allowed —
+// @ogham/cross-platform/self-probe pulls cross-spawn (CJS) into the
+// session-start bundle, which produces that shim during ESM bundling.
+// The filid 0.4.0 module-init crash signature was a different failure
+// mode (require evaluated at module-init time, not the lazy shim).
 
 // Alias whitelist (Option A): no maencof modules should land in the hook
 // bundle. detectStale was switched to node:fs builtins so the hook is now

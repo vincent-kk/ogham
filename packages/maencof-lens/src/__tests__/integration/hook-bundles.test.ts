@@ -26,10 +26,11 @@ describe('hook bundle smoke tests', () => {
   it.skipIf(!existsSync(bundle))(
     'session-start.mjs spawns, exits 0, stdout is empty or valid JSON, stderr clean',
     () => {
-      const result = spawnSync('node', [bundle], {
+      const result = spawnSync(process.execPath, [bundle], {
         cwd,
         encoding: 'utf8',
         timeout: 10_000,
+        windowsHide: true,
       });
 
       expect(result.status).toBe(0);
