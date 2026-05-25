@@ -1,9 +1,9 @@
 ---
 name: pipeline
 user_invocable: true
-description: "[filid:pipeline] Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support."
-argument-hint: "[--from STAGE] [--base REF] [--draft] [--skip-update] [--force] [--no-structure-check] [--title TITLE]"
-version: "1.0.0"
+description: '[filid:pipeline] Orchestrate the full FCA review cycle from PR creation to final verdict by chaining pr-create, review, resolve, and revalidate stages with automatic entry point detection and --from resume support.'
+argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-update] [--force] [--no-structure-check] [--title TITLE]'
+version: '1.0.0'
 complexity: medium
 plugin: filid
 ---
@@ -67,12 +67,12 @@ orchestrator — it does not modify individual skill behavior.
 **If `--from` is specified**: validate prerequisites for the target stage,
 then start there.
 
-| `--from` value  | Prerequisite check                                             |
-| --------------- | -------------------------------------------------------------- |
-| `pr-create`     | None                                                           |
-| `review`        | PR must exist (`gh pr view` exit code 0)                       |
-| `resolve`       | `.filid/review/<branch>/fix-requests.md` must exist            |
-| `revalidate`    | `.filid/review/<branch>/justifications.md` must exist          |
+| `--from` value | Prerequisite check                                    |
+| -------------- | ----------------------------------------------------- |
+| `pr-create`    | None                                                  |
+| `review`       | PR must exist (`gh pr view` exit code 0)              |
+| `resolve`      | `.filid/review/<branch>/fix-requests.md` must exist   |
+| `revalidate`   | `.filid/review/<branch>/justifications.md` must exist |
 
 If a prerequisite is missing: **ABORT** with "Cannot start from `<stage>`:
 `<missing condition>`. Run the preceding stage first." — then END execution.
@@ -84,16 +84,17 @@ order — first match wins. If no match, immediately check the next signal.
 2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
-| Priority | Signal | Entry stage |
-| -------- | ------ | ----------- |
-| 1 | `.filid/review/<branch>/re-validate.md` exists | Pipeline **complete** — report existing results and END execution |
-| 2 | `.filid/review/<branch>/justifications.md` exists + unpushed commits | Execute `git push` and enter `revalidate` (see details below) |
-| 3 | `.filid/review/<branch>/justifications.md` exists (all pushed) | `revalidate` |
-| 4 | `.filid/review/<branch>/fix-requests.md` exists | `resolve` |
-| 5 | None of the above → check PR: `gh pr view` (Bash) | `review` if PR exists, `pr-create` if not |
+| Priority | Signal                                                               | Entry stage                                                       |
+| -------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 1        | `.filid/review/<branch>/re-validate.md` exists                       | Pipeline **complete** — report existing results and END execution |
+| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits | Execute `git push` and enter `revalidate` (see details below)     |
+| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)       | `revalidate`                                                      |
+| 4        | `.filid/review/<branch>/fix-requests.md` exists                      | `resolve`                                                         |
+| 5        | None of the above → check PR: `gh pr view` (Bash)                    | `review` if PR exists, `pr-create` if not                         |
 
 **Priority 2 details**: Detect unpushed commits via
 `git log @{upstream}..HEAD --oneline 2>/dev/null`.
+
 - **Has unpushed commits**: Execute `git push`, then enter `revalidate`.
 - **All pushed**: Enter `revalidate` directly.
 - **No upstream tracking ref** (command fails): Skip push, enter `revalidate` directly.
@@ -130,7 +131,7 @@ uses a **hybrid execution model**:
 
 > **Note**: Some main-context stages still spawn their own internal subagents
 > (e.g., `filid:resolve` uses `code-surgeon` subagents, `filid:revalidate` uses parallel
-> verification subagents). "Main context execution" means the *pipeline-level*
+> verification subagents). "Main context execution" means the _pipeline-level_
 > delegation is direct — internal skill behavior is unchanged.
 
 #### Stage: pr-create (main context)
@@ -188,7 +189,7 @@ MUST consume two dispatch fields from the return:
 
 - `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
-  round5-exhaust}`
+round5-exhaust}`
 
 **Pre-dispatch steps** (execute in order before evaluating the
 `verdict_gate` table below):
@@ -259,10 +260,8 @@ subagent exits before Phase D.
       `review_manage format-pr-comment`:
       1. `<details><summary>Phase A — Structure Compliance</summary>`
       2. `<details><summary>Review Report (Phase B~D)</summary>`
-      3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``
-      If any marker is missing OR the comment was hand-rolled, **edit it
-      in place** via `gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`
-      (obtain numeric `id` via `gh api repos/<owner>/<repo>/issues/<pr>/comments`).
+      3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``If any marker is missing OR the comment was hand-rolled, **edit it
+in place** via`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`(obtain numeric`id`via`gh api repos/<owner>/<repo>/issues/<pr>/comments`).
    4. Otherwise post fresh via `gh pr comment --body-file <file>`.
 3. **Verdict decision** (read `verdict` from `review-report.md`
    frontmatter):
@@ -326,18 +325,18 @@ Read the final verdict from `.filid/review/<branch>/re-validate.md`
 
 ## Failure Handling
 
-| Situation                              | Pipeline behavior                                        |
-| -------------------------------------- | -------------------------------------------------------- |
-| review `APPROVED` (no fix-requests)    | Skip resolve + revalidate → pipeline **PASS**, END      |
-| review `REQUEST_CHANGES`               | Proceed to resolve immediately                           |
-| review `INCONCLUSIVE`                  | Skip resolve + revalidate → pipeline **FAIL**, report "consensus not reached", suggest `--from=review --force`, END |
-| resolve completes (0 accepted fixes)   | Proceed to revalidate immediately (justifications.md exists) |
-| resolve completes (N accepted fixes)   | Proceed to revalidate immediately (code committed + pushed) |
-| revalidate `PASS`                      | Pipeline **PASS**, report summary, END                   |
-| revalidate `FAIL`                      | Pipeline **FAIL**, report unresolved items, END          |
-| Auto-detect Priority 2 `git push` fails | Pipeline **ERROR**, report push error + manual push instructions, END |
-| Any stage execution error              | Pipeline **ERROR**, report stage + error + resume command, END |
-| `--from` prerequisite missing          | Pipeline **ABORT** before execution, END                 |
+| Situation                               | Pipeline behavior                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| review `APPROVED` (no fix-requests)     | Skip resolve + revalidate → pipeline **PASS**, END                                                                  |
+| review `REQUEST_CHANGES`                | Proceed to resolve immediately                                                                                      |
+| review `INCONCLUSIVE`                   | Skip resolve + revalidate → pipeline **FAIL**, report "consensus not reached", suggest `--from=review --force`, END |
+| resolve completes (0 accepted fixes)    | Proceed to revalidate immediately (justifications.md exists)                                                        |
+| resolve completes (N accepted fixes)    | Proceed to revalidate immediately (code committed + pushed)                                                         |
+| revalidate `PASS`                       | Pipeline **PASS**, report summary, END                                                                              |
+| revalidate `FAIL`                       | Pipeline **FAIL**, report unresolved items, END                                                                     |
+| Auto-detect Priority 2 `git push` fails | Pipeline **ERROR**, report push error + manual push instructions, END                                               |
+| Any stage execution error               | Pipeline **ERROR**, report stage + error + resume command, END                                                      |
+| `--from` prerequisite missing           | Pipeline **ABORT** before execution, END                                                                            |
 
 On any failure, the pipeline stops immediately. The user can fix the issue
 manually and re-run `/filid:pipeline` — auto-detection will resume
@@ -345,11 +344,11 @@ from the appropriate stage.
 
 ## Available MCP Tools
 
-| Tool             | Action             | Purpose                                          |
-| ---------------- | ------------------ | ------------------------------------------------ |
-| `mcp_t_review_manage`  | `normalize-branch`       | Normalize branch name for auto-detection         |
-| `mcp_t_review_manage`  | `format-pr-comment`      | Format review findings as a PR comment           |
-| `mcp_t_review_manage`  | `generate-human-summary` | Generate human-readable summary of review results |
+| Tool                  | Action                   | Purpose                                           |
+| --------------------- | ------------------------ | ------------------------------------------------- |
+| `mcp_t_review_manage` | `normalize-branch`       | Normalize branch name for auto-detection          |
+| `mcp_t_review_manage` | `format-pr-comment`      | Format review findings as a PR comment            |
+| `mcp_t_review_manage` | `generate-human-summary` | Generate human-readable summary of review results |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 
@@ -363,15 +362,15 @@ All other operations are delegated to existing skills via `Skill()` tool.
 /filid:pipeline [--from=<stage>] [--base=<ref>] [--draft] [--skip-update] [--force] [--no-structure-check] [--title=<title>]
 ```
 
-| Option                 | Type   | Default | Description                                         |
-| ---------------------- | ------ | ------- | --------------------------------------------------- |
+| Option                 | Type   | Default | Description                                                 |
+| ---------------------- | ------ | ------- | ----------------------------------------------------------- |
 | `--from`               | string | auto    | Entry stage: `pr-create`, `review`, `resolve`, `revalidate` |
-| `--base`               | string | auto    | Base branch (passed to pr-create and review)        |
-| `--draft`              | flag   | off     | Create PR as draft (passed to pr-create)            |
-| `--skip-update`        | flag   | off     | Skip update in pr-create stage                  |
-| `--force`              | flag   | off     | Force restart review (passed to review)             |
-| `--no-structure-check` | flag   | off     | Skip Phase A in review (passed to review)           |
-| `--title`              | string | auto    | PR title (passed to pr-create)                      |
+| `--base`               | string | auto    | Base branch (passed to pr-create and review)                |
+| `--draft`              | flag   | off     | Create PR as draft (passed to pr-create)                    |
+| `--skip-update`        | flag   | off     | Skip update in pr-create stage                              |
+| `--force`              | flag   | off     | Force restart review (passed to review)                     |
+| `--no-structure-check` | flag   | off     | Skip Phase A in review (passed to review)                   |
+| `--title`              | string | auto    | PR title (passed to pr-create)                              |
 
 ## Quick Reference
 
