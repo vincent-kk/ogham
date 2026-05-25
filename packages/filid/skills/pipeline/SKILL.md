@@ -201,13 +201,14 @@ MUST consume two dispatch fields from the return:
    `verdict_gate` table and is independent of
    `SubagentReturn.paths_to_artifacts` (the cache path does not include
    `review-report.md` there).
-2. **D.0 merge**: otherwise, perform Step D.0 of
-   `review/phases/phase-d-deliberation.md` — merge
-   `verification-metrics.md` + `verification-structure.md` into
-   `verification.md`. Team and solo worker preambles both require
-   `verification.md` in their `== INPUTS ==` block; skipping this step
-   silently strips their primary evidence source. The `fail` dispatch
-   skips merging (no worker is spawned).
+2. **D.0 merge**: otherwise, merge `verification-metrics.md` +
+   `verification-structure.md` into `verification.md` (this is the
+   same merge that `review/phases/phase-d-deliberation.md` performs
+   as its first step before dispatching workers). Team and solo
+   worker preambles both require `verification.md` in their
+   `== INPUTS ==` block; skipping this step silently strips their
+   primary evidence source. The `fail` dispatch skips merging (no
+   worker is spawned).
 
 Apply the `verdict_gate` rule (spec:
 `packages/filid/skills/review/DETAIL.md` → `## API Contracts`) in
