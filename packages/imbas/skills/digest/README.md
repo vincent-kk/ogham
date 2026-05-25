@@ -32,19 +32,20 @@ State Tracking + QA-Prompting 하이브리드 방식을 사용한다.
 ## 자동 제안 트리거
 
 다음 조건을 모두 충족하면 digest를 제안:
+
 - `imbas:manifest`를 통한 Done 전이 발생
 - 댓글 3개 이상
 - 작성자 2명 이상
 
 ## 사용 도구
 
-| 도구 | 출처 | 용도 |
-|------|------|------|
-| `[OP: get_issue]` | Jira ([OP:]) | 이슈 읽기 (`imbas:read-issue` 경유) |
-| `[OP: add_comment]` | Jira ([OP:]) | digest 댓글 게시 |
-| `[OP: fetch_attachment]` | Jira ([OP:]) | 첨부 미디어 다운로드 |
-| `imbas:read-issue` | 내부 스킬 | 구조화된 이슈 컨텍스트 |
-| `atlassian:media-analysis` | 외부 스킬 (atlassian) | 첨부 미디어 분석 |
+| 도구                       | 출처                  | 용도                                |
+| -------------------------- | --------------------- | ----------------------------------- |
+| `[OP: get_issue]`          | Jira ([OP:])          | 이슈 읽기 (`imbas:read-issue` 경유) |
+| `[OP: add_comment]`        | Jira ([OP:])          | digest 댓글 게시                    |
+| `[OP: fetch_attachment]`   | Jira ([OP:])          | 첨부 미디어 다운로드                |
+| `imbas:read-issue`         | 내부 스킬             | 구조화된 이슈 컨텍스트              |
+| `atlassian:media-analysis` | 외부 스킬 (atlassian) | 첨부 미디어 분석                    |
 
 ## 참고 파일
 

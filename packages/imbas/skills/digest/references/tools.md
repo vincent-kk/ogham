@@ -5,15 +5,15 @@ This file lists shared tools and delegated skills.
 
 ## Shared tools (all providers)
 
-| Tool | Usage |
-|------|-------|
+| Tool                   | Usage                                                              |
+| ---------------------- | ------------------------------------------------------------------ |
 | `mcp_tools_config_get` | Read `config.provider` to route Step 6 to the correct publish path |
 
 ## Delegated skills
 
-| Skill | When | Provider |
-|-------|------|----------|
-| `imbas:read-issue` | Step 1 — load structured issue context | all |
+| Skill                       | When                                         | Provider       |
+| --------------------------- | -------------------------------------------- | -------------- |
+| `imbas:read-issue`          | Step 1 — load structured issue context       | all            |
 | `/atlassian:media-analysis` | Step 1 — analyze attached images/videos/GIFs | jira only (v1) |
 
 ## Agent Spawn
