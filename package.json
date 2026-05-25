@@ -11,7 +11,8 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "shared/*"
   ],
   "scripts": {
     "build:all": "yarn workspaces foreach -A run build",
