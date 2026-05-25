@@ -6,116 +6,165 @@
 
 ## TL;DR (한 문단)
 
-ogham 모노레포 6개 플러그인 패키지의 Windows-Unix 호환성 결함을 일괄 해결하기 위해, **`shared/cross-platform` 모노레포 내부 워크스페이스**를 신설하고 모든 플랫폼 분기를 한 곳에 가둘 것. 분석·계획·결정의 대부분은 완료되어 있고, 4가지 미결정 항목만 확정되면 곧바로 PR-Z(메타데이터 이전) → PR-A(워크스페이스 골격) → PR-B(7 helper 구현) → PR-C~H(패키지별 전환, 병렬 가능) → PR-I(lint 가드) 순으로 진행한다. 직렬 11.5d, 병렬 진행 시 약 6.5d 예상.
+ogham 모노레포 6개 플러그인의 Windows-Unix 호환성을 한 곳에 모으기 위해 **`shared/cross-platform` 모노레포 내부 워크스페이스** 신설 + 7 helper (`env`/`eol`/`paths`/`spawn`/`binaries`/`hooks`/`shim`) 구현 + 단위 테스트 57 개까지 완료. 결정 대기 항목 4가지는 모두 확정. 다음 단계는 **PR-C ~ PR-G** (각 플러그인 마이그레이션) — 패키지마다 동일 6단계 절차. **PR-H** 는 atlassian docs-only 로 어느 시점이든 가능. **PR-I** 는 모든 패키지 전환 완료 후 lint 가드. 남은 분량 ≈ 8 영업일, 병렬 진행 시 ≈ 4 영업일.
 
 ---
 
 ## ⏭️ 다음 세션 첫 메시지 템플릿 (복사용)
 
-권장안을 그대로 받아들이는 경우 — 아래를 그대로 복사해 다음 세션 첫 메시지로 보내면 즉시 작업 시작.
+다음 PR 부터 즉시 시작하려면 다음을 그대로 paste:
 
 ```
 /Users/Vincent/Workspace/ogham/HANDOFF.md 읽고 Windows-Unix 호환성 작업 이어서 진행해줘.
 
-결정사항:
-- #3 hook bootstrap: A+E (.cmd shim + self-probe) 권장 채택
-- #4 CI Windows matrix: 매 PR ubuntu/macos/windows × Node 20 + 분기별 full matrix (Node 20+22)
-- #5 외부 바이너리 설치 가이드: winget/brew 자동 제안 + 링크 병기
-- #6 lint 가드 강도: 금지 패턴 = error, 경고 패턴 = warning
-
-PR-Z 부터 순서대로 진행. PR-A 까지 끝나면 멈추고 결과 보고.
+PR-C 부터 시작. 각 패키지 적용 일관 절차 (HANDOFF "🔁 적용 절차" 섹션) 준수. PR 단위로 끝나면 멈추고 결과 보고.
 ```
 
-> 결정을 바꾸고 싶으면 위 4줄 중 해당 줄만 수정해서 보내면 됨. 끝의 "PR-Z 부터 ..." 부분은 진행 범위 조정 (예: "PR-B 까지 진행" 또는 "PR-C 만 먼저 띄워줘").
+> 다른 PR 부터 시작하려면 "PR-D 만 진행" / "PR-C, PR-G 만 병렬 진행" / "PR-H 만 먼저 끼워넣기" 같이 명시.
 
 ---
 
 ## 📂 핵심 입력 문서 (절대 경로)
 
-1. **마스터 플랜** — `/Users/Vincent/Workspace/ogham/report-cross-platform-plan.md` (748줄)
-   - Part 1 패키지별 인벤토리 / Part 2 카테고리 분석 / Part 3 Unix↔Windows 매칭 / Part 4 시스템 설계 / Part 5 Phase + PR 분할표 / Part 6 테스트 / Part 7 합격 기준 / Part 8 결정 항목 / 부록 A·B
-2. **원 bug 리포트** (사용자 실측)
-   - `/Users/Vincent/Workspace/ogham/bug-windows-cogair-checkexec.md`
-   - `/Users/Vincent/Workspace/ogham/bug-windows-cogair-comprehensive.md`
-   - `/Users/Vincent/Workspace/ogham/bug-windows-maencof-hook.md`
-3. **본 핸드오프** — `/Users/Vincent/Workspace/ogham/HANDOFF.md`
+1. **마스터 플랜** — `/Users/Vincent/Workspace/ogham/.metadata/cross-platform/PLAN.md`
+   - Part 1 인벤토리 / Part 2 카테고리 / Part 3 Unix↔Windows / Part 4 시스템 설계 / Part 5 PR 분할 / Part 6 테스트 / Part 7 합격 기준 / Part 8 결정 (모두 확정).
+2. **원 bug 리포트** — `.metadata/cross-platform/bug-windows-{cogair-checkexec,cogair-comprehensive,maencof-hook}.md`
+3. **메타데이터 인덱스** — `.metadata/cross-platform/INTENT.md`
+4. **본 핸드오프** — `HANDOFF.md`
 
-`report-cross-platform-plan.md` 가 단일 진실 소스. 본 핸드오프는 그것의 진입점일 뿐.
+`PLAN.md` 가 단일 진실 소스. 본 핸드오프는 그것의 진입점이며 PR 적용 절차를 표준화한다.
 
 ---
 
 ## 🔒 이미 확정된 결정 (재논의 금지)
 
-| #   | 항목                      | 결정                                                | 근거                                                                                                                                            |
-| --- | ------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | 공유 모듈 위치            | **신규 워크스페이스 `shared/cross-platform`**     | drift 방지, 단일 책임. (a) 채택 / (b)(c) 거부.                                                                                                  |
-| 2   | `cross-spawn` 채택        | **채택** (cross-platform 내부에서만 사용)           | `.cmd`/`.bat` 자동 해석, DEP0190 회피.                                                                                                          |
-| —   | 번들 정책                 | **모노레포 내부 전용 워크스페이스, esbuild inline** | npm publish 안 함. 각 플러그인 `devDependencies` + esbuild inline → 사용자 머신에 별도 디렉토리 0, 추가 다운로드 0, 버전 drift 0. (4.2.0 참조)  |
-| —   | maencof 페르소나 fallback | **미도입**                                          | hook 실패 = MCP/dispatcher/vault 전체 실패. 페르소나만 별도 채널로 살려도 사용자에게 의미 없음. 자원은 hook bootstrap 무결화에 집중. (4.8 참조) |
+| #   | 항목                      | 결정                                                |
+| --- | ------------------------- | --------------------------------------------------- |
+| 1   | 공유 모듈 위치            | **`shared/cross-platform` 신규 워크스페이스**       |
+| 2   | `cross-spawn` 채택        | **채택** (cross-platform 내부에서만)                |
+| 3   | Windows hook bootstrap    | **A + E 병용** (`.cmd` shim + self-probe)           |
+| 4   | CI Windows runner         | **매 PR full matrix** (3 OS × Node 20+22)           |
+| 5   | 외부 바이너리 설치 가이드 | **명령 + 링크 병기** (winget/brew + 공식 링크)      |
+| 6   | lint 가드 강도            | **금지=error / 경고=warning** (PR-I 에서 적용)      |
+| —   | 번들 정책                 | **모노레포 내부 전용 + esbuild inline**             |
+| —   | maencof 페르소나 fallback | **미도입** (hook 무결화로 수렴)                     |
+
+근거 / 세부 디테일은 `PLAN.md` Part 8 + 4.2.0 + 4.8.
 
 ---
 
-## ⏳ 결정 대기 항목 (4가지)
+## 🛠️ PR 분할 및 진행 상태
 
-> 권장안을 받아들이면 위 "다음 세션 첫 메시지 템플릿" 을 그대로 paste.
+| 순서 | PR       | 패키지                                                                | 분량 | 의존   | 상태       |
+| ---- | -------- | --------------------------------------------------------------------- | ---- | ------ | ---------- |
+| 1    | **PR-Z** | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전               | 0.5d | none   | ✅ 완료    |
+| 2    | **PR-A** | `shared/cross-platform` 워크스페이스 + 빌드 + CI 매트릭스             | 1d   | PR-Z   | ✅ 완료    |
+| 3    | **PR-B** | 7 helper 구현 + 단위 테스트 (57 tests passing)                        | 2d   | PR-A   | ✅ 완료    |
+| 4    | **PR-C** | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃 + light hook 가드)       | 2d   | PR-B   | ⏳ 다음    |
+| 5    | **PR-D** | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)         | 2d   | PR-B   | ⏳ 대기    |
+| 6    | **PR-E** | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리       | 1d   | PR-B   | ⏳ 대기    |
+| 7    | **PR-F** | filid (ast-grep 화이트리스트 OS-aware + git spawnCli + run.cjs)       | 1d   | PR-B   | ⏳ 대기    |
+| 8    | **PR-G** | imbas (`setup.ts` HOME/basename + npm fallback)                       | 0.5d | PR-B   | ⏳ 대기    |
+| 9    | **PR-H** | atlassian — docs only (chmod Windows 무시 명기)                       | 0.5d | none   | ⏳ 대기    |
+| 10   | **PR-I** | repo-wide lint 가드 (eslint custom rules)                             | 1d   | PR-C~G | ⏳ 마지막  |
 
-### #3 Windows hook bootstrap 옵션 (Part 4.3.2)
-
-- ☑ **권장: A + E 병용** — `.cmd` shim 자동 생성 (PATH 의존 제거) + self-probe (silent failure 가시화)
-- ☐ B 단독 — hooks.json 분기 매니페스트 (Claude Code 사양 의존성)
-- ☐ C 단독 — PowerShell launcher (macOS/Linux 호환 깨짐)
-- ☐ E 단독 — 진단 강화만 (PATH 추가 사용자 요청, 근본 해결 X)
-
-### #4 CI Windows runner 비용
-
-- ☑ **권장: 매 PR 마다 `ubuntu/macos/windows` × Node 20** + **분기별 full matrix (Node 20+22)**
-- ☐ 매 PR full matrix (3 OS × 2 Node = 6 jobs)
-- ☐ 분기별만 (PR 빠르지만 회귀 늦게 발견)
-- 참고: GitHub Actions 무료 한도 + windows-latest = Linux 의 약 2x 분 소비
-
-### #5 외부 바이너리 설치 가이드 톤
-
-- ☑ **권장: winget(Windows) / brew(macOS) / 배포판별(Linux) 자동 명령 제안 + 공식 링크 병기**
-- ☐ 링크만 (광고성 부담 X, 사용자 자동 진행 어려움)
-- ☐ 명령만 (링크 없음, 직접 실행 어려운 사용자 배제)
-
-### #6 lint 가드 강도 (Phase 5, PR-I)
-
-- ☑ **권장: 금지 패턴 = error / 경고 패턴 = warning**
-  - error: `node:child_process` 의 `spawn`/`exec`/`execSync`/`execFile` 직접 import, `process.env.HOME|USERPROFILE|TMPDIR|TEMP` 직접 사용
-  - warning: `/tmp/`,`/var/`,`/usr/`,`/etc/`,`/bin/` 문자열 리터럴, `.split('/')` 패턴
-- ☐ 모두 error (false positive 시 작업 중단 위험)
-- ☐ 모두 warning (CI gate 없음 → 회귀 위험)
+- 남은 분량 직렬: **8 영업일**
+- PR-C/D/E/F/G 병렬: **약 4 영업일**
+- PR-H 어느 시점이든 끼워넣기 가능
 
 ---
 
-## 🛠️ 결정 후 즉시 시작할 PR 순서 (PR 분할표 요약)
+## 🔁 각 패키지 cross-platform 적용 일관 절차
 
-| 순서 | PR       | 패키지                                                                                        | 분량 | 의존   | 병렬화          |
-| ---- | -------- | --------------------------------------------------------------------------------------------- | ---- | ------ | --------------- |
-| 1    | **PR-Z** | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전                                       | 0.5d | none   | 단독            |
-| 2    | **PR-A** | `shared/cross-platform` 워크스페이스 + 빌드 파이프라인 + CI 매트릭스                        | 1d   | PR-Z   | —               |
-| 3    | **PR-B** | cross-platform 7 helper (`spawn`/`paths`/`env`/`eol`/`binaries`/`hooks`/`shim`) + 단위 테스트 | 2d   | PR-A   | —               |
-| 4    | **PR-C** | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃)                                                 | 2d   | PR-B   | D~G 와 병렬     |
-| 5    | **PR-D** | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)                                 | 2d   | PR-B   | C/E~G 와 병렬   |
-| 6    | **PR-E** | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리                               | 1d   | PR-B   | C/D/F/G 와 병렬 |
-| 7    | **PR-F** | filid (ast-grep 화이트리스트 OS-aware + git spawnCli + run.cjs)                               | 1d   | PR-B   | C~E/G 와 병렬   |
-| 8    | **PR-G** | imbas (`setup.ts` HOME/basename + npm fallback)                                               | 0.5d | PR-B   | C~F 와 병렬     |
-| 9    | **PR-H** | atlassian — docs only (chmod Windows 무시 명기)                                               | 0.5d | none   | 어느 시점이든   |
-| 10   | **PR-I** | repo-wide lint 가드 (eslint custom rules)                                                     | 1d   | PR-C~G | —               |
+cogair / maencof / maencof-lens / filid / imbas 모두 동일 6단계. PR-H (atlassian) 는 코드 변경 없으므로 docs 단계만.
 
-- 직렬 합계: **11.5 영업일**
-- PR-C/D/E/F/G 병렬 진행 시: **약 6.5 영업일**
-- PR-H 는 코드 무수정 — 어느 단계든 끼워넣기 가능
+### Step 1 — `package.json` 의 devDependency 등록
+
+```jsonc
+{
+  "devDependencies": {
+    "@ogham/cross-platform": "workspace:^"
+  }
+}
+```
+
+`dependencies` 가 아닌 `devDependencies` 만. 외부 노출 차단.
+
+### Step 2 — esbuild config 확인
+
+`scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs` 등:
+
+- `external` 배열에서 `@ogham/cross-platform` **제외** (inline 핵심).
+- LIGHT hook cap 가드 (`FORBIDDEN_PATTERNS`) 재검증:
+  - **허용**: `env`, `eol`, `paths`, `spawn` 의 light helper 만 LIGHT 번들에 inline.
+  - **차단**: `binaries.discover`, `hooks.bootstrap`, `selfProbe`, `logHookFailure`, `generateWindowsCmd` 는 MCP 서버 번들 전용.
+
+### Step 3 — src 코드 마이그레이션
+
+| Before (직접 사용)                                                  | After (`@ogham/cross-platform`)                          |
+| ------------------------------------------------------------------- | -------------------------------------------------------- |
+| `import { spawn|exec|execSync|execFile } from "node:child_process"` | `import { spawnCli } from "@ogham/cross-platform"`       |
+| `process.env.HOME ?? process.env.USERPROFILE`                       | `env.home()`                                             |
+| `process.env.TMPDIR ?? process.env.TEMP`                            | `paths.tmp()`                                            |
+| `os.homedir()` / `os.tmpdir()` 직접 호출                            | `paths.home()` / `paths.tmp()`                           |
+| 외부 CLI stdout 의 `.split('\n')` / `.replace(/\n+$/, '')`          | 진입점에서 `normalizeEol(stdout)` 먼저                   |
+| `'/usr'`, `'/bin'` 절대경로 화이트리스트                            | `env.isWindows` 분기 OS-aware 화이트리스트               |
+| 하드코딩 타임아웃 (`1500ms`)                                        | `spawnCli({ timeoutMs: 1500 })` (내부 `osTimeout` 적용)  |
+| `which(bin)` / `where bin` 직접 호출                                | `binaries.discover(bin, { pkg })` / `binaries.ensureXxx` |
+| `cwd.split('/').pop()`                                              | `path.basename(cwd)`                                     |
+
+### Step 4 — hooks.json + Windows shim (hook 보유 패키지만)
+
+- 빌드 단계에서 `generateWindowsCmd({ outputPath: 'bridge/run-hook.cmd', scriptRelativePath: '../libs/run.cjs' })` 호출.
+- `hooks.json` 의 `command` 가 Windows 일 때 `.cmd` shim 경유하도록 분기 (빌드 시 OS-aware 매니페스트 생성).
+- SessionStart 첫 entry 에서 `selfProbe({ writeLog: true, pkg: '<pkg>' })` 호출 — 진단 결과를 `error-log.json` 에 자동 기록.
+- 모든 hook entry 를 try/catch 로 감싸고 실패 시 `logHookFailure('<pkg>', '<hook-name>', err)`.
+
+### Step 5 — 테스트
+
+- 기존 vitest 스위트 통과 (macOS/Linux 회귀 0).
+- 신규 단위 테스트 — `process.platform` mock 으로 win32 분기 검증.
+- 외부 바이너리 호출 경로는 committed fake fixture (예: `tests/fixtures/bin-fake/<bin>` + `.cmd`, `print-hello.mjs` 형태) 로 라우팅 검증.
+
+### Step 6 — 빌드 검증 + 커밋
+
+| 검증                                                    | 통과 기준         |
+| ------------------------------------------------------- | ----------------- |
+| `yarn workspace @ogham/<pkg> build`                     | exit 0            |
+| `yarn workspace @ogham/<pkg> typecheck`                 | no errors         |
+| `yarn workspace @ogham/<pkg> test:run`                  | all green         |
+| Hook bundle size cap (`FORBIDDEN_PATTERNS` + byte cap)  | 통과              |
+| macOS/Linux 회귀                                        | 0 건              |
+
+커밋 메시지 패턴:
+
+```
+feat(<pkg>): migrate to @ogham/cross-platform for windows compatibility
+
+- replace child_process spawn sites with spawnCli (cross-spawn underneath)
+- normalise external CLI stdout via normalizeEol where pipes are parsed
+- ...
+```
+
+### 패키지별 특수사항
+
+| PR   | 패키지       | 특수사항                                                                                                                                                                                                                                            |
+| ---- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PR-C | cogair       | **LIGHT cap 10240 bytes**. 3 spawn site (`checkExecutable` + `dispatcher/codex/operations/spawn` + `dispatcher/gemini/operations/spawn`), EOL 정규화 3 곳, gemini 콜드스타트 타임아웃 ×3 (`spawnCli` 내부 osTimeout 가 자동 처리).                  |
+| PR-D | maencof      | hook silent failure 해결의 본진 — `.cmd` shim + selfProbe + `vault-committer` / `changelog-gate` 의 git execSync → spawnCli. 페르소나 fallback 채널은 결정대로 도입 안 함.                                                                          |
+| PR-E | maencof-lens | hook bootstrap + `libs/run.cjs` path slice 안전화 + `__tests__` 의 `/tmp` 하드코딩을 `paths.tmp()` 로 교체.                                                                                                                                          |
+| PR-F | filid        | `src/mcp/tools/ast-grep-replace/ast-grep-replace.ts:73` 시스템 경로 화이트리스트 OS-aware (Unix `/usr,/bin,/sbin,/etc,/var/lib` + Windows `C:\Windows\System32`, `C:\Program Files`, `C:\Program Files (x86)`). `resolve-git-root` + `content-hash` 의 git execSync → spawnCli. |
+| PR-G | imbas        | `setup.ts:21` `process.env.HOME` → `env.home()`. `setup.ts:23` `cwd.split('/').pop()` → `path.basename(cwd)`. `build-mcp-server.mjs:44` `execSync('npm root -g')` fallback → `binaries.ensure('npm')`.                                              |
+| PR-H | atlassian    | docs only — chmod 0o600 가 Windows 에서 무시되어 ACL 기본값으로 보호됨을 `auth-manager` / `config-manager` INTENT.md + README Security 섹션에 명기.                                                                                                  |
 
 ---
 
 ## 🧭 작업 환경 / 컨벤션
 
-- 모노레포: **yarn 4.12 workspaces** (`packages/*`)
+- 모노레포: **yarn 4.12 workspaces** (`packages/*` + `shared/*`)
 - TypeScript ^5.7, Node.js ≥ 20, ESM
 - 빌드: `tsc -p tsconfig.build.json` + `esbuild` + `scripts/inject-version.mjs`
-- 테스트: **vitest 3.2** (`yarn test:run`)
+- 테스트: **vitest 4.1.2** (`yarn test:run`)
 - Lint: `yarn lint`
 - 현재 브랜치: **`bugfix/win32-support`** (main 에서 분기)
 - 작업 디렉토리: `/Users/Vincent/Workspace/ogham`
@@ -127,38 +176,43 @@ PR-Z 부터 순서대로 진행. PR-A 까지 끝나면 멈추고 결과 보고.
 
 ## ⚠️ 작업 중 절대 잊지 말아야 할 제약 (체크리스트)
 
-- [ ] **cogair 의 10 KB LIGHT hook cap** (`scripts/buildHooks.mjs` `FORBIDDEN_PATTERNS`) — 가벼운 helper 만 hook 번들에 들어가야 함. 무거운 helper (`binaries.discover`, `hooks.bootstrap`) 는 MCP 서버 번들 전용.
+- [ ] **cogair 의 10 KB LIGHT hook cap** (`scripts/buildHooks.mjs` `FORBIDDEN_PATTERNS`) — light helper 만 hook 번들. 무거운 helper (`binaries.discover`, `hooks.bootstrap`, `selfProbe`, `logHookFailure`) 는 MCP 서버 번들 전용.
 - [ ] **cross-platform 은 npm publish 금지** (`private: true`). 각 플러그인의 `devDependencies` 에만 등록.
 - [ ] **esbuild `external` 에 `@ogham/cross-platform` 넣지 말 것** — inline 번들이 핵심.
 - [ ] **모든 외부 CLI stdout 진입점에 `normalizeEol()`** — CRLF 정규화 빠뜨리면 CRLF 환경에서 파싱 실패.
-- [ ] **`process.platform` 분기를 호출 측에 두지 말 것** — 모두 cross-platform 내부에서. 호출자는 `paths.home()`, `env.isWindows` 만 사용.
+- [ ] **`process.platform` 분기를 호출 측에 두지 말 것** — 모두 cross-platform 내부에서. 호출자는 `env.isWindows` 만 사용.
+- [ ] **`process.env.HOME|USERPROFILE|TMPDIR|TEMP` 직접 사용 금지** — `env.home()` / `paths.tmp()` 경유.
 - [ ] **macOS/Linux 회귀 0** — 기존 vitest 스위트 모두 통과 (Acceptance overall).
 - [ ] **페르소나 fallback 채널 시도 금지** — hook 무결화에만 자원 투입.
 
 ---
 
-## 📊 작업 상태 스냅샷 (이 시점 기준)
+## 📊 작업 상태 스냅샷
 
-| 단계                                      | 상태                   |
-| ----------------------------------------- | ---------------------- |
-| 6개 패키지 인벤토리 분석                  | ✅ 완료                |
-| 카테고리 통합 (C1–C8)                     | ✅ 완료                |
-| Unix↔Windows 명령어 매칭표                | ✅ 완료                |
-| `shared/cross-platform` 모듈 설계 (4.2) | ✅ 완료                |
-| 번들 정책 (4.2.0)                         | ✅ 완료                |
-| Hook bootstrap 5 옵션 비교 (4.3)          | ✅ 완료                |
-| Phase 0–6 PR 분할 (Part 5)                | ✅ 완료                |
-| 합격 기준 (Part 7)                        | ✅ 완료                |
-| 결정 #1, #2 + 페르소나 fallback 거부      | ✅ 완료                |
-| 결정 #3, #4, #5, #6                       | ⏳ 사용자 확정 대기    |
-| 코드 수정                                 | ⏳ PR-Z 부터 시작 예정 |
+| 단계                                                 | 상태       |
+| ---------------------------------------------------- | ---------- |
+| 6개 패키지 인벤토리 분석                             | ✅ 완료    |
+| 카테고리 통합 (C1–C8)                                | ✅ 완료    |
+| `shared/cross-platform` 모듈 설계 (PLAN Part 4.2)    | ✅ 완료    |
+| 번들 정책 (PLAN Part 4.2.0)                          | ✅ 완료    |
+| Hook bootstrap 옵션 비교 (PLAN Part 4.3)             | ✅ 완료    |
+| Phase 0–6 PR 분할 (PLAN Part 5)                      | ✅ 완료    |
+| 합격 기준 (PLAN Part 7)                              | ✅ 완료    |
+| 결정 #1 ~ #6 + 번들 / fallback                       | ✅ 완료    |
+| PR-Z 메타데이터 이전                                 | ✅ 완료    |
+| PR-A 워크스페이스 + CI 매트릭스                      | ✅ 완료    |
+| PR-B 7 helper + 57 단위 테스트                       | ✅ 완료    |
+| PR-C cogair 전환                                     | ⏳ 다음    |
+| PR-D / E / F / G / H                                 | ⏳ 대기    |
+| PR-I lint 가드                                       | ⏳ 마지막  |
 
 ---
 
 ## 🚦 다음 세션 진입 시 점검 순서 (Claude 용)
 
 1. 이 핸드오프 파일을 먼저 읽기.
-2. 사용자가 결정 4개를 한 줄로 줬다면 `report-cross-platform-plan.md` 의 Part 8 #3~#6 에 결정을 반영하는 Edit 수행.
-3. PR-Z 부터 시작 (단, 사용자가 "어디까지 진행" 명시했으면 그 범위 준수).
-4. 각 PR 종료 시점에 결과 보고 + 다음 PR 진행 의사 확인.
-5. 사용자 글로벌 룰: Continuous Execution — 작업 중 yield 금지, 결정 필요 시에만 질문.
+2. 결정 4개는 이미 확정 — 재논의 X.
+3. 사용자가 어떤 PR (PR-C/D/E/F/G/H) 부터 진행할지 명시했는지 확인. 미명시 시 권장 = PR-C.
+4. 선택된 PR 의 "🔁 각 패키지 적용 일관 절차" 6단계를 그대로 따름. 패키지별 특수사항 반영.
+5. 각 PR 종료 시 결과 보고 + 다음 PR 진행 의사 확인 (병렬 가능 옵션 포함).
+6. 사용자 글로벌 룰: Continuous Execution — 작업 중 yield 금지, 결정 필요 시에만 질문.
