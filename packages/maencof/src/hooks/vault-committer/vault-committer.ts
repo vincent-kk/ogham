@@ -8,6 +8,13 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 
+// ── Constants ────────────────────────────────────────────────────────
+
+import {
+  DEFAULT_SKIP_PATTERN_SOURCE,
+  VAULT_COMMIT_CONFIG_FILE,
+} from '../../constants/vault-committer.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import {
   commitVaultChanges,
   generateCommitMessage,
@@ -16,7 +23,6 @@ import {
   isGitRepo,
   isIndexLocked,
 } from '../git-utils/index.js';
-import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault, metaPath } from '../shared/index.js';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -46,13 +52,6 @@ export type VaultCommitterEvent = 'SessionEnd' | 'UserPromptSubmit';
 export interface VaultCommitterResult {
   continue: boolean;
 }
-
-// ── Constants ────────────────────────────────────────────────────────
-
-import {
-  DEFAULT_SKIP_PATTERN_SOURCE,
-  VAULT_COMMIT_CONFIG_FILE,
-} from '../../constants/vault-committer.js';
 
 export { DEFAULT_SKIP_PATTERN_SOURCE };
 
@@ -92,7 +91,11 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
     }
     return null;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'vault-committer',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return null;
   }
 }
@@ -190,7 +193,11 @@ export async function runVaultCommitter(
     await commitVaultChanges(cwd, generateCommitMessage());
   } catch (e) {
     const cwd = input.cwd ?? process.cwd();
-    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'vault-committer',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return { continue: true };

@@ -12,18 +12,15 @@
  *
  * graceful degradation: 모든 에러 catch → { continue: true }
  */
-import { spawnCli } from '@ogham/cross-platform';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  CHANGELOG_EXCLUDE,
-  WATCHED_PATHS,
-} from '../../types/changelog.js';
+import { spawnCli } from '@ogham/cross-platform';
+
 import { CHANGELOG_GATE_MARKER } from '../../constants/markers.js';
 import { EXEC_TIMEOUT_MS } from '../../constants/performance.js';
-
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
+import { CHANGELOG_EXCLUDE, WATCHED_PATHS } from '../../types/changelog.js';
 import { isMaencofVault, metaPath } from '../shared/index.js';
 
 export interface ChangelogGateInput {
@@ -64,7 +61,11 @@ export async function detectWatchedChanges(cwd: string): Promise<string[]> {
         return !filePath.startsWith(CHANGELOG_EXCLUDE);
       });
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'changelog-gate',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return [];
   }
 }
@@ -178,7 +179,11 @@ export async function runChangelogGate(
     return { continue: false, reason };
   } catch (e) {
     const cwd = input.cwd ?? process.cwd();
-    appendErrorLogSafe(cwd, { hook: 'changelog-gate', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'changelog-gate',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return { continue: true };
   }
 }

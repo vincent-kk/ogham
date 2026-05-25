@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { paths } from "../paths/index.js";
 
 const SIZE_CAP_BYTES = 256 * 1024;
 
@@ -8,6 +8,10 @@ interface ErrorEntry {
   timestamp: string;
   hook: string;
   error: string;
+}
+
+function defaultLogPath(pkg: string): string {
+  return join(homedir(), ".claude", "plugins", pkg, "error-log.json");
 }
 
 function serialize(error: unknown): string {
@@ -31,7 +35,7 @@ export function logHookFailure(
   error: unknown,
   opts: LogHookFailureOptions = {},
 ): void {
-  const file = opts.logFile ?? join(paths.pluginCache(pkg), "error-log.json");
+  const file = opts.logFile ?? defaultLogPath(pkg);
   mkdirSync(dirname(file), { recursive: true });
 
   let entries: ErrorEntry[] = [];

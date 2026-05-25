@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform';
+import { logHookFailure } from '@ogham/cross-platform/error-log';
+
+import { readStdin, writeResult } from '../shared/index.js';
 
 import type { LifecycleDispatcherInput } from './lifecycle-dispatcher.js';
 import { runLifecycleDispatcher } from './lifecycle-dispatcher.js';
-import { readStdin, writeResult } from '../shared/index.js';
 
 // Event name is passed as CLI argument: lifecycle-dispatcher.mjs <EventName>
 const event = process.argv[2] ?? '';

@@ -9,10 +9,47 @@
     "email": "lunox273@gmail.com"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./env": {
+      "types": "./dist/env/index.d.ts",
+      "import": "./dist/env/index.js"
+    },
+    "./eol": {
+      "types": "./dist/eol/index.d.ts",
+      "import": "./dist/eol/index.js"
+    },
+    "./paths": {
+      "types": "./dist/paths/index.d.ts",
+      "import": "./dist/paths/index.js"
+    },
+    "./spawn": {
+      "types": "./dist/spawn/index.d.ts",
+      "import": "./dist/spawn/index.js"
+    },
+    "./binaries": {
+      "types": "./dist/binaries/index.d.ts",
+      "import": "./dist/binaries/index.js"
+    },
+    "./shim": {
+      "types": "./dist/shim/index.d.ts",
+      "import": "./dist/shim/index.js"
+    },
+    "./error-log": {
+      "types": "./dist/hooks/error-log.d.ts",
+      "import": "./dist/hooks/error-log.js"
+    },
+    "./self-probe": {
+      "types": "./dist/hooks/self-probe.d.ts",
+      "import": "./dist/hooks/self-probe.js"
+    },
+    "./bootstrap": {
+      "types": "./dist/hooks/bootstrap.d.ts",
+      "import": "./dist/hooks/bootstrap.js"
     }
   },
   "main": "dist/index.js",

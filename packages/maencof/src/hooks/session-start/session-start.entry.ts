@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-import { logHookFailure, selfProbe } from '@ogham/cross-platform';
+import { logHookFailure } from '@ogham/cross-platform/error-log';
+import { selfProbe } from '@ogham/cross-platform/self-probe';
+
+import { readStdin, writeResult } from '../shared/index.js';
 
 import type { SessionStartInput } from './session-start.js';
 import { runSessionStart } from './session-start.js';
-import { readStdin, writeResult } from '../shared/index.js';
 
 // SessionStart first hook entry — diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT.
 // Errors are appended to ~/.claude/plugins/maencof/error-log.json so silent

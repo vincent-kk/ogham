@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { logHookFailure } from '@ogham/cross-platform';
+import { logHookFailure } from '@ogham/cross-platform/error-log';
 
 import { readStdin, writeResult } from '../shared/index.js';
+
 import type {
   VaultCommitterEvent,
   VaultCommitterInput,

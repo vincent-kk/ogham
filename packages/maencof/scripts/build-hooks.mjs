@@ -12,12 +12,12 @@
  * payload so it gets a higher cap; other heavy hooks (session-end /
  * insight-injector) cap at 20 KB; light hooks cap at 10 KB.
  */
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { generateWindowsCmd } from '@ogham/cross-platform';
 import * as esbuild from 'esbuild';
 import { mkdir, readFile, stat } from 'fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -33,23 +33,27 @@ generateWindowsCmd({
 });
 console.log('  Windows hook shim -> bridge/run-hook.cmd');
 
-// session-start carries an inlined meta-skill-body.md (~2.5 KB intentional
-// payload via .md text loader) plus selfProbe + cross-spawn from
-// @ogham/cross-platform, so its budget is the largest. All other hooks call
-// logHookFailure from @ogham/cross-platform in their catch blocks, which
-// inlines paths + fs/path/url helpers — ~10–15 KB overhead.
-const SESSION_START_HOOK_BYTES = 50 * 1024;
-const HEAVY_HOOK_BYTES = 35 * 1024;
-const LIGHT_HOOK_BYTES = 25 * 1024;
+// Tiers reflect what each hook pulls from @ogham/cross-platform:
+//   LIGHT    — logHookFailure only (error-log entry; no spawn).
+//   MEDIUM   — spawnCli from cross-platform/spawn — adds cross-spawn (~5 KB).
+//   HEAVY    — session-end / insight-injector run pure orchestration but carry
+//              extra src code (recap composer, insight stats).
+//   SESSION_START — selfProbe (spawn-dependent) + inlined meta-skill-body.md.
+const SESSION_START_HOOK_BYTES = 40 * 1024;
+const HEAVY_HOOK_BYTES = 12 * 1024;
+const MEDIUM_HOOK_BYTES = 15 * 1024;
+const LIGHT_HOOK_BYTES = 10 * 1024;
 
 const hookEntries = [
   { name: 'session-start', maxBytes: SESSION_START_HOOK_BYTES },
   { name: 'session-end', maxBytes: HEAVY_HOOK_BYTES },
   { name: 'insight-injector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'context-injector', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'context-injector', maxBytes: HEAVY_HOOK_BYTES },
   { name: 'dailynote-recorder', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'vault-committer', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'changelog-gate', maxBytes: LIGHT_HOOK_BYTES },
+  // spawnCli (git) callers — cross-spawn inlined
+  { name: 'vault-committer', maxBytes: MEDIUM_HOOK_BYTES },
+  { name: 'changelog-gate', maxBytes: MEDIUM_HOOK_BYTES },
+  // logHookFailure only
   { name: 'lifecycle-dispatcher', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'vault-redirector', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'layer-guard', maxBytes: LIGHT_HOOK_BYTES },
@@ -141,5 +145,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  `  Hook bundle guards passed (session-start <= ${SESSION_START_HOOK_BYTES} bytes, heavy <= ${HEAVY_HOOK_BYTES} bytes, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+  `  Hook bundle guards passed (session-start <= ${SESSION_START_HOOK_BYTES}, heavy <= ${HEAVY_HOOK_BYTES}, medium <= ${MEDIUM_HOOK_BYTES}, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
 );

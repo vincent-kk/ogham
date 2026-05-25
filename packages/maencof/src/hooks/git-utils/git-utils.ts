@@ -2,21 +2,21 @@
  * @file git-utils.ts
  * @description Git helper utilities for vault-committer hook — repo detection, status, commit
  */
-import { spawnCli } from '@ogham/cross-platform';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/index.js';
+import { spawnCli } from '@ogham/cross-platform';
+
 import { GIT_EXEC_TIMEOUT_MS } from '../../constants/performance.js';
+import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/index.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
 export async function isGitRepo(cwd: string): Promise<boolean> {
-  const result = await spawnCli(
-    'git',
-    ['rev-parse', '--is-inside-work-tree'],
-    { cwd, timeoutMs: GIT_EXEC_TIMEOUT_MS },
-  );
+  const result = await spawnCli('git', ['rev-parse', '--is-inside-work-tree'], {
+    cwd,
+    timeoutMs: GIT_EXEC_TIMEOUT_MS,
+  });
   return result.code === 0 && !result.spawnError;
 }
 
