@@ -1213,6 +1213,7 @@ __metadata:
   dependencies:
     "@types/cross-spawn": "npm:^6.0.6"
     "@types/node": "npm:^20.11.0"
+    "@types/which": "npm:^3.0.4"
     cross-spawn: "npm:^7.0.6"
     env-paths: "npm:^3.0.0"
     typescript: "npm:^5.7.2"
@@ -1711,6 +1712,13 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/a1a6234a2b6fa577fbb1ccc471e5e54a79c6e1a51be10a67b034461b752a50017854810e943494f20b3c3c6d14df84c93757e0a2ec57aa81c830d6faeab72cf2
+  languageName: node
+  linkType: hard
+
+"@types/which@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "@types/which@npm:3.0.4"
+  checksum: 10c0/036e4cb243ebfd5cf4893be2ab3b9a60a22368811c1f1c78fb8fc70cadc274024282d04b8d7c0948268372600003252d84e2d3a5e064014a543a5da235c5989d
   languageName: node
   linkType: hard
 
