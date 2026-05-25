@@ -1,7 +1,7 @@
 ---
 name: insight
 user_invocable: true
-description: "[maencof:insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, controls per-category allowlist (principle / refuted_premise / ephemeral_candidate), views recent insights, and edits the meta-prompt governing what gets recorded."
+description: "[maencof:insight] Manages the auto-insight capture system: enables or disables capture, adjusts sensitivity thresholds, controls per-category allowlist (principle / refuted_premise / ephemeral_candidate), and views recent insights."
 argument-hint: "[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable] [--max N] [--category principle|refuted|ephemeral --accept|--reject]"
 version: "1.1.0"
 complexity: simple
