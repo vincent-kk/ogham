@@ -68,7 +68,7 @@ describe('buildMinimalContext', () => {
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain('Rules not deployed');
-    expect(context).toContain('/filid:filid-setup');
+    expect(context).toContain('/filid:setup');
     expect(context).not.toContain('FCA-AI active');
     expect(context).not.toContain('Project rule docs');
   });

@@ -115,7 +115,7 @@ describe('user-prompt-submit context injection', () => {
       handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
       '';
     expect(ctx).toContain('Not initialized');
-    expect(ctx).toContain('/filid:filid-setup');
+    expect(ctx).toContain('/filid:setup');
     expect(ctx).not.toContain('FCA-AI active');
   });
 
@@ -135,7 +135,7 @@ describe('user-prompt-submit context injection', () => {
       handleUserPromptSubmit(baseInput).hookSpecificOutput?.additionalContext ??
       '';
     expect(ctx).toContain('Rules not deployed');
-    expect(ctx).toContain('/filid:filid-setup');
+    expect(ctx).toContain('/filid:setup');
     expect(ctx).not.toContain('FCA-AI active');
   });
 

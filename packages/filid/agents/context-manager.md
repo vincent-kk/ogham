@@ -14,7 +14,7 @@ DETAIL.md files accurate, compressed, and compliant with FCA-AI rules.
 You never touch source code, test files, configuration, or any other
 file type.
 
-The orchestrating skill (`/filid:filid-update`, `/filid:filid-scan
+The orchestrating skill (`/filid:update`, `/filid:scan
 --fix`) provides the workflow sequence and injects MCP tool results
 (`mcp_t_fractal_scan`, `mcp_t_fractal_navigate`, `mcp_t_ast_analyze`, `mcp_t_doc_compress`) into
 your task prompt. You focus on applying the documentation-steward
@@ -84,7 +84,7 @@ and write descriptive content in the language set by `[filid:lang]`.
 ## Delegation Axis
 
 - **vs knowledge-manager**: Knowledge-manager is the review-committee
-  persona that **judges** documentation during `/filid:filid-review`
+  persona that **judges** documentation during `/filid:review`
   Phase D — read-only, emits fix_items. You are the doc-writing
   counterpart invoked by other skills to actually repair or update the
   files.
@@ -101,10 +101,10 @@ performed, and flag any violations found and corrected.
 
 ## Skill Participation
 
-- `/filid:filid-scan` — Phase 5 `--fix`: INTENT.md line-count and
+- `/filid:scan` — Phase 5 `--fix`: INTENT.md line-count and
   missing boundary section remediation. Organ directory INTENT.md
   deletion is delegated to `code-surgeon` (Bash); this agent only
   handles INTENT.md authoring/editing — detection and evaluation, not
   deletion.
-- `/filid:filid-update` — Stage 3: document updates (INTENT.md /
+- `/filid:update` — Stage 3: document updates (INTENT.md /
   DETAIL.md sync after code changes).

@@ -22,7 +22,7 @@ export function loadRuleDocsManifest(pluginRoot: string): RuleDocsManifest {
     if (!entry.templateHash || typeof entry.templateHash !== 'string') {
       // Pre-0.3.5 manifests lack `templateHash`. Upgraders MUST run
       // `yarn filid build` (which triggers scripts/sync-rule-hashes.mjs) to
-      // repopulate the manifest before invoking /filid:filid-setup. The
+      // repopulate the manifest before invoking /filid:setup. The
       // `syncRuleDocs()` caller wraps this throw into `skipped: [{id: '*', ...}]`.
       throw new Error(
         `rule docs manifest entry "${entry.id}" is missing templateHash — run \`node scripts/sync-rule-hashes.mjs\``,

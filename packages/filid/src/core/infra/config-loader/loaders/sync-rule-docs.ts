@@ -27,7 +27,7 @@ const log = createLogger('config-loader');
  * - not selected + file present → removed
  * - not selected + file absent → unchanged
  *
- * This function MUST be invoked exclusively from the filid-setup skill. It is
+ * This function MUST be invoked exclusively from the setup skill. It is
  * safe to call repeatedly (idempotent relative to the selection + resync inputs).
  *
  * @param projectRoot - Target project (git root resolved internally)

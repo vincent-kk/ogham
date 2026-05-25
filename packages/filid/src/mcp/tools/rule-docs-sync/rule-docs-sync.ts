@@ -1,7 +1,7 @@
 /**
  * @file rule-docs-sync.ts
  * @description MCP tool handler for rule doc deployment driven by the
- * filid-setup skill. Three actions wrap the core functions in
+ * setup skill. Three actions wrap the core functions in
  * `config-loader.ts`:
  *
  *   - `status` — inspect current filesystem state, returned as a

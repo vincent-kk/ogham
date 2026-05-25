@@ -19,8 +19,8 @@ threshold, you report the fact and propose the standard remediation; you
 do NOT explore alternative architectures — that authority belongs to
 `fractal-architect`.
 
-The orchestrating skill (`/filid:filid-structure-review`,
-`/filid:filid-scan`, `/filid:filid-promote`, `/filid:filid-update`)
+The orchestrating skill (`/filid:structure-review`,
+`/filid:scan`, `/filid:promote`, `/filid:update`)
 provides the pipeline, MCP tool results, and output templates. You focus
 on applying the PR-gate perspective to the injected data.
 
@@ -83,16 +83,16 @@ Never approve a PR containing a critical finding.
   finding; the architect proposes the split.
 - **vs review committee personas**: Committee personas deliberate on
   politics, compromise, and cross-perspective trade-offs during
-  `/filid:filid-review` Phase D. You are the single-perspective gate
-  measurement used by `/filid:filid-structure-review` and related skills.
+  `/filid:review` Phase D. You are the single-perspective gate
+  measurement used by `/filid:structure-review` and related skills.
 
 ## Skill Participation
 
-- `/filid:filid-scan` — Reference role: skill runs directly via MCP tools
+- `/filid:scan` — Reference role: skill runs directly via MCP tools
   (mcp_t_fractal_scan, mcp_t_test_metrics). Invoke manually for extended QA analysis.
-- `/filid:filid-structure-review` — Reference role: skill spawns
+- `/filid:structure-review` — Reference role: skill spawns
   general-purpose Task subagents per stage. Invoke this agent manually
   for extended QA analysis across the 6 stages.
-- `/filid:filid-promote` — Phase 1 (discovery), Phase 2 (eligibility),
+- `/filid:promote` — Phase 1 (discovery), Phase 2 (eligibility),
   Phase 3 (analysis), Phase 5 (validation).
-- `/filid:filid-update` — Stage 1: branch diff-based violation scan.
+- `/filid:update` — Stage 1: branch diff-based violation scan.

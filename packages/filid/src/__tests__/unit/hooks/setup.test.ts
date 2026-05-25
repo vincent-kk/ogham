@@ -159,7 +159,7 @@ describe('processSetup', () => {
 
   // Rule doc deployment is no longer performed by setup.ts. The SessionStart
   // hook MUST NOT write to .claude/rules/ — that is the sole responsibility
-  // of the filid-setup skill via the rule_docs_sync MCP tool. See
+  // of the setup skill via the rule_docs_sync MCP tool. See
   // src/core/infra/config-loader/config-loader.ts syncRuleDocs() and its
   // tests in config-loader.test.ts.
   it('never invokes fs.copyFileSync (no rule doc deployment from hook)', async () => {

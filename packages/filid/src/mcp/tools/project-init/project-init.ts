@@ -17,7 +17,7 @@ export interface ProjectInitInput {
  * - Creates .filid/config.json with default rule configuration.
  *
  * Rule doc deployment (`.claude/rules/*.md`) is NOT performed here; the
- * filid-setup skill drives that through the rule_docs_sync tool so users
+ * setup skill drives that through the rule_docs_sync tool so users
  * always make an explicit checkbox choice about optional rule files.
  *
  * Existing config.json is never overwritten.

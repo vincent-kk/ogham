@@ -27,7 +27,7 @@ claude plugin install maencof
 
 이것으로 끝입니다. 모든 컴포넌트(Skills, MCP 도구, Agents, Hooks)가 자동으로 등록되며 별도 설정이 필요 없습니다.
 
-> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:filid-setup`을 입력하면 프로젝트에 FCA-AI를 초기화합니다. 사용 가능한 모든 플러그인은 아래 [전체 패키지 목록](#전체-패키지-목록) 표에서 확인하세요.
+> 설치 후 Claude Code에서 바로 스킬을 사용할 수 있습니다. 예를 들어 `/filid:setup`을 입력하면 프로젝트에 FCA-AI를 초기화합니다. 사용 가능한 모든 플러그인은 아래 [전체 패키지 목록](#전체-패키지-목록) 표에서 확인하세요.
 
 ---
 
@@ -43,7 +43,7 @@ claude plugin install maencof
 
 | 컴포넌트 | 수량     | 예시                                                                                      |
 | -------- | -------- | ----------------------------------------------------------------------------------------- |
-| Skills   | 18       | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan`, `/filid:filid-pipeline` |
+| Skills   | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline` |
 | MCP 도구 | 18       | 구조 분석, 드리프트 감지, AST 메트릭, 기술 부채 추적                                      |
 | Agents   | 14       | Architect, Implementer, QA Reviewer, 7인 페르소나 리뷰 위원회                             |
 | Hooks    | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd                     |
@@ -54,20 +54,20 @@ claude plugin install maencof
 - **자동 규칙 시행** — INTENT.md 50줄 제한, 3-Tier 경계 섹션 검증, organ 디렉토리 보호, 네이밍 컨벤션 검사
 - **구조적 드리프트 감지** — 코드 변경이 문서화된 구조를 벗어나면 DAG 분석으로 감지하고 자동 동기화
 - **AST 기반 분석** — `@ast-grep/napi`로 모듈 응집도(LCOM4), 순환 복잡도, 순환 의존성 검출
-- **End-to-end 파이프라인** — `filid-pipeline`이 PR 생성 → 다중 페르소나 리뷰 → 리졸브 → 재검증을 연결
+- **End-to-end 파이프라인** — `pipeline`이 PR 생성 → 다중 페르소나 리뷰 → 리졸브 → 재검증을 연결
 
 ```
 # 프로젝트에 FCA-AI 초기화
-/filid:filid-setup
+/filid:setup
 
 # 규칙 위반 스캔
-/filid:filid-scan
+/filid:scan
 
 # 현재 브랜치에 대해 다중 페르소나 코드 리뷰 실행
-/filid:filid-review
+/filid:review
 
 # 전체 PR 파이프라인 실행 (review → resolve → revalidate)
-/filid:filid-pipeline
+/filid:pipeline
 ```
 
 자세한 문서는 [filid README (영문)](./packages/filid/README.md) 또는 [filid README (한글)](./packages/filid/README-ko_kr.md)을 참조하세요.

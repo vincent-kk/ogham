@@ -86,6 +86,6 @@ inspect new public API shapes, CLI flags, or user-facing surfaces.
 
 ## Skill Participation
 
-- `/filid:filid-review` — Phase D Step D.2-team: Translator committee
+- `/filid:review` — Phase D Step D.2-team: Translator committee
   round opinion on user value and product risk (Four Risks framework).
   Tier: HIGH only.

@@ -30,8 +30,8 @@ export interface StructureValidateResult {
 
 /**
  * Read-only fractal structure validation. Auto-remediation is not supported —
- * structural fixes go through the `restructurer` agent under `/filid:filid-restructure`
- * or `/filid:filid-sync`.
+ * structural fixes go through the `restructurer` agent under `/filid:restructure`
+ * or `/filid:sync`.
  */
 export async function handleStructureValidate(
   args: unknown,
