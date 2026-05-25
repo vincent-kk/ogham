@@ -119,6 +119,17 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod
 
 ---
 
+## 보안
+
+자격증명 (`~/.claude/plugins/atlassian/credentials.json`) 과 설정 (`~/.claude/plugins/atlassian/config.json`) 은 평문 JSON 으로 저장됩니다.
+
+- **macOS / Linux**: `0o600` 모드 (소유자만 읽기/쓰기) 로 기록되며, 권한이 느슨한 기존 파일은 로드 시 자동으로 조여집니다.
+- **Windows**: NTFS 환경에서 Node 의 `chmod` 는 사실상 무시되어 `0o600` 호출이 파일 모드를 변경하지 않습니다. 파일 보호는 부모 디렉토리 `~/.claude/plugins/atlassian/` 의 NTFS ACL 상속에 의존하며, 기본값은 현재 사용자에게만 접근을 허용합니다. ACL 상속이 넓게 설정된 디렉토리 (예: `C:\ProgramData\`, `C:\Users\Public\`) 아래로 이 파일들을 이동하지 마세요.
+
+자격증명은 stdout / 로그에 절대 기록되지 않습니다.
+
+---
+
 ## 상세 문서
 
 기술적 세부사항 및 아키텍처 결정 사항은 [`.metadata/atlassian/`](../../.metadata/atlassian/) 디렉토리를 참조하세요:

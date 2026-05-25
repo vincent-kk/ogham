@@ -119,6 +119,17 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod
 
 ---
 
+## Security
+
+Credentials (`~/.claude/plugins/atlassian/credentials.json`) and config (`~/.claude/plugins/atlassian/config.json`) are stored as plain JSON.
+
+- **macOS / Linux**: files are written with mode `0o600` (owner-only read/write). Existing files with overly permissive modes are tightened on load.
+- **Windows**: Node's `chmod` is effectively a no-op on NTFS, so the `0o600` call leaves the file mode unchanged. File protection relies on the inherited NTFS ACL of the parent directory `~/.claude/plugins/atlassian/`, which by default grants access only to the current user. Do not relocate these files under a directory whose ACL inheritance permits broader access (e.g. `C:\ProgramData\` or `C:\Users\Public\`).
+
+Credentials are never written to stdout or log output.
+
+---
+
 ## Documentation
 
 For technical details and architectural decisions, see the [`.metadata/atlassian/`](../../.metadata/atlassian/) directory:

@@ -19,6 +19,7 @@ Jira/Confluence 자격증명의 JSON 파일 기반 저장·로드와 HTTP 인증
 - `buildAuthHeader`(utils)를 사용해 헤더 값을 조립하고, 완성된 헤더 문자열만 반환한다.
 - types/의 `AuthType`, `Credentials` Zod 스키마로 유효성을 검증한다.
 - index.ts 배럴을 통해서만 외부에 심볼을 노출한다.
+- Win32 에서는 `chmod 0o600` 가 no-op 이며, `~/.claude/plugins/atlassian/` 부모 디렉토리의 NTFS ACL (기본값: 현재 사용자 전용 상속) 이 파일 보호를 담당함을 호출자에게 README Security 섹션으로 안내한다.
 
 ### Ask first
 
