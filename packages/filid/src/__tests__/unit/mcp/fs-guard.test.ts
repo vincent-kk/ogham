@@ -66,6 +66,14 @@ describe('assertUnder', () => {
       expect(result).toBe('C:\\project\\.filid\\debt\\FIX-001.md');
     });
 
+    it('allows Windows child paths when only drive-letter casing differs', () => {
+      const result = assertUnder(
+        'C:\\Project\\.filid\\debt',
+        'c:\\project\\.filid\\debt\\FIX-001.md',
+      );
+      expect(result).toBe('c:\\project\\.filid\\debt\\FIX-001.md');
+    });
+
     it('error message includes the resolved parent dir', () => {
       try {
         assertUnder(parent, '/etc/passwd');

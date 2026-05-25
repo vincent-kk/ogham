@@ -1,4 +1,5 @@
 import {
+  pathForCompare,
   portableResolve,
   samePath,
 } from '../../../core/infra/path/portable-path.js';
@@ -10,8 +11,8 @@ import {
 export function assertUnder(parentDir: string, targetPath: string): string {
   const resolvedParent = portableResolve(parentDir);
   const resolvedTarget = portableResolve(targetPath);
-  const parentForCompare = resolvedParent.replace(/\\/g, '/');
-  const targetForCompare = resolvedTarget.replace(/\\/g, '/');
+  const parentForCompare = pathForCompare(resolvedParent);
+  const targetForCompare = pathForCompare(resolvedTarget);
   if (
     !samePath(resolvedTarget, resolvedParent) &&
     !targetForCompare.startsWith(parentForCompare + '/')

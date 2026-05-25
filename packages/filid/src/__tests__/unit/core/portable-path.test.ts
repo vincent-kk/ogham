@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   portableBasename,
   portableResolve,
+  samePath,
 } from '../../../core/infra/path/portable-path.js';
 
 describe('portable path helpers', () => {
@@ -27,6 +28,18 @@ describe('portable path helpers', () => {
       expect(portableResolve('C:\\repo', 'src\\file.ts')).toBe(
         'C:\\repo\\src\\file.ts',
       );
+    });
+  });
+
+  describe('samePath', () => {
+    it('compares Windows-like paths case-insensitively', () => {
+      expect(samePath('C:\\Project\\.filid', 'c:\\project\\.filid')).toBe(
+        true,
+      );
+    });
+
+    it('keeps POSIX path comparison case-sensitive', () => {
+      expect(samePath('/Project/.filid', '/project/.filid')).toBe(false);
     });
   });
 });

@@ -37,6 +37,11 @@ export function portableRelative(from: string, to: string): string {
   return apiFor(from, to).relative(from, to);
 }
 
+export function pathForCompare(p: string): string {
+  const normalized = p.replace(/\\/g, '/');
+  return isWindowsLikePath(p) ? normalized.toLowerCase() : normalized;
+}
+
 export function samePath(a: string, b: string): boolean {
-  return a.replace(/\\/g, '/') === b.replace(/\\/g, '/');
+  return pathForCompare(a) === pathForCompare(b);
 }
