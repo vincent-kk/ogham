@@ -7,8 +7,8 @@ tools:
   - Grep
   - Glob
   - Bash
-  - mcp__plugin_imbas_tools__ast_search
-  - mcp__plugin_imbas_tools__ast_analyze
+  - mcp_tools_ast_search
+  - mcp_tools_ast_analyze
 maxTurns: 80
 ---
 
