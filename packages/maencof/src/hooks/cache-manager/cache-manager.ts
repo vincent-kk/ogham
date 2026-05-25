@@ -13,8 +13,9 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
-import { homedir } from 'node:os';
 import { join } from 'node:path';
+
+import { pluginCache } from '@ogham/cross-platform/paths';
 
 import { CACHE_TTL_MS, MAX_PINNED_NODES } from '../../constants/performance.js';
 
@@ -40,8 +41,7 @@ export function sessionIdHash(sessionId: string): string {
 }
 
 export function getCacheDir(cwd: string): string {
-  const configDir = process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
-  return join(configDir, 'plugins', 'maencof', cwdHash(cwd));
+  return join(pluginCache('maencof'), cwdHash(cwd));
 }
 
 export function isFirstInSession(sessionId: string, cwd: string): boolean {

@@ -4,17 +4,18 @@
 
 ## Structure
 
-| Path             | Role                                                  |
-| ---------------- | ----------------------------------------------------- |
-| `src/`           | TypeScript 소스 (fractal 루트)                        |
-| `src/index.ts`   | barrel export                                         |
-| `src/spawn/`     | cross-spawn 래퍼 + 타임아웃 + EOL 정규화 (PR-B 도착)  |
-| `src/paths/`     | OS 별 home/tmp/config/cache 경로 추상화               |
-| `src/env/`       | 환경변수 / OS 분기 / PATH delimiter / EOL             |
-| `src/eol/`       | CRLF → LF, BOM strip                                  |
-| `src/binaries/`  | which/where 디스커버리 + 24h 캐시 + 설치 가이드        |
-| `src/hooks/`     | hook bootstrap + selfProbe + errorLog                 |
-| `src/shim/`      | Windows `.cmd` shim 자동 생성 (빌드 step)              |
+| Path            | Role                                                 |
+| --------------- | ---------------------------------------------------- |
+| `src/`          | TypeScript 소스 (fractal 루트)                       |
+| `src/index.ts`  | barrel export                                        |
+| `src/spawn/`    | cross-spawn 래퍼 + 타임아웃 + EOL 정규화 (PR-B 도착) |
+| `src/paths/`    | OS 별 home/tmp/config/cache 경로 추상화              |
+| `src/env/`      | 환경변수 / OS 분기 / PATH delimiter / EOL            |
+| `src/eol/`      | CRLF → LF, BOM strip                                 |
+| `src/binaries/` | which/where 디스커버리 + 24h 캐시 + 설치 가이드      |
+| `src/hooks/`    | hook bootstrap + selfProbe + errorLog                |
+| `src/shim/`     | Windows `.cmd` shim 자동 생성 (빌드 step)            |
+| `src/launcher/` | OS 기본 핸들러로 URL/파일 열기 (`openBrowser`)       |
 
 ## Conventions
 

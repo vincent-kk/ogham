@@ -50,6 +50,14 @@
     "./bootstrap": {
       "types": "./dist/hooks/bootstrap.d.ts",
       "import": "./dist/hooks/bootstrap.js"
+    },
+    "./launcher": {
+      "types": "./dist/launcher/index.d.ts",
+      "import": "./dist/launcher/index.js"
+    },
+    "./compat": {
+      "types": "./dist/paths/compat/index.d.ts",
+      "import": "./dist/paths/compat/index.js"
     }
   },
   "main": "dist/index.js",

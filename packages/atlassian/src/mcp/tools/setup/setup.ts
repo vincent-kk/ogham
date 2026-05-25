@@ -7,7 +7,7 @@ import {
 import type { SetupServerHandle, SetupParams, SetupResult } from "../../../types/index.js";
 import { SETUP_HTML } from "./__generated__/setup-html.js";
 import { testConnection } from "../../../core/index.js";
-import { openBrowser } from "./utils/openBrowser.js";
+import { openBrowser } from "@ogham/cross-platform/launcher";
 import { startSetupServer } from "./web-server/index.js";
 
 /** Setup tool handler — launches local web server for auth configuration */

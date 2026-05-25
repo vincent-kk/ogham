@@ -3,7 +3,7 @@ import { rm } from 'node:fs/promises';
 import { SETTINGS_SERVER_PATH } from '../../../constants/paths.js';
 
 import { SETTINGS_HTML } from './__generated__/settingsHtml.js';
-import { openBrowser } from './utils/openBrowser.js';
+import { openBrowser } from '@ogham/cross-platform/launcher';
 import { persistState } from './utils/persistState.js';
 import {
   type SettingsServerInstance,

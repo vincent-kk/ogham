@@ -1,7 +1,8 @@
-import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-export const COGAIR_HOME = join(homedir(), '.claude', 'plugins', 'cogair');
+import { pluginCache } from '@ogham/cross-platform/paths';
+
+export const COGAIR_HOME = pluginCache('cogair');
 
 export const CONFIG_PATH = join(COGAIR_HOME, 'config.json');
 export const SESSIONS_DIR = join(COGAIR_HOME, 'sessions');

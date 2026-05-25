@@ -26,15 +26,42 @@ describe("paths", () => {
   });
 
   it("pluginCache(pkg) builds ~/.claude/plugins/<pkg>", () => {
-    expect(paths.pluginCache("cogair")).toBe(
-      join(homedir(), ".claude", "plugins", "cogair"),
-    );
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    delete process.env.CLAUDE_CONFIG_DIR;
+    try {
+      expect(paths.pluginCache("cogair")).toBe(
+        join(homedir(), ".claude", "plugins", "cogair"),
+      );
+    } finally {
+      if (originalEnv !== undefined)
+        process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
   });
 
   it("pluginCache(pkg, version) appends version", () => {
-    expect(paths.pluginCache("cogair", "0.2.1")).toBe(
-      join(homedir(), ".claude", "plugins", "cogair", "0.2.1"),
-    );
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    delete process.env.CLAUDE_CONFIG_DIR;
+    try {
+      expect(paths.pluginCache("cogair", "0.2.1")).toBe(
+        join(homedir(), ".claude", "plugins", "cogair", "0.2.1"),
+      );
+    } finally {
+      if (originalEnv !== undefined)
+        process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
+  });
+
+  it("pluginCache honors CLAUDE_CONFIG_DIR when set", () => {
+    const originalEnv = process.env.CLAUDE_CONFIG_DIR;
+    process.env.CLAUDE_CONFIG_DIR = join("/custom", "claude");
+    try {
+      expect(paths.pluginCache("filid")).toBe(
+        join("/custom", "claude", "plugins", "filid"),
+      );
+    } finally {
+      if (originalEnv === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+      else process.env.CLAUDE_CONFIG_DIR = originalEnv;
+    }
   });
 
   it("normalize converts backslashes to forward slashes", () => {

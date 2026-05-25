@@ -13,7 +13,7 @@ OS 별 경로 추상화. home / tmp / config / cache / plugin cache 와 Windows/
 ## Conventions
 
 - 외부 OS 별 위치 결정은 `env-paths` 위임 — Windows AppData, macOS Library/Application Support, Linux XDG.
-- `pluginCache(pkg, version?)` 는 `~/.claude/plugins/<pkg>[/version]` 컨벤션 강제.
+- `pluginCache(pkg, version?)` 는 `${CLAUDE_CONFIG_DIR ?? ~/.claude}/plugins/<pkg>[/version]` 컨벤션 강제.
 - `normalize(p)` 는 backslash → forward 단방향.
 - `compat/` public 함수는 함수별 파일로 유지해 inline 번들 tree-shaking 을 돕는다.
 

@@ -1,7 +1,5 @@
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { pluginCache } from '@ogham/cross-platform/paths';
 
 export function getPluginRoot(): string {
-  const configDir = process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude');
-  return join(configDir, 'plugins', 'filid');
+  return pluginCache('filid');
 }
