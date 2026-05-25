@@ -1,6 +1,6 @@
-import { handleMaencofRead } from '@ogham/maencof';
+import { handleMaencofRead } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
+import { computeEffectiveLayers } from "../../filter/layer-guard/layer-guard.js";
 
 export interface LensReadInput {
   vault?: string;
@@ -20,7 +20,10 @@ export async function handleLensRead(
   // Check result node's layer from frontmatter
   const raw = result as unknown as Record<string, unknown>;
   const node = raw.node as Record<string, unknown> | undefined;
-  if (node?.layer !== undefined && !effectiveLayers.includes(node.layer as number)) {
+  if (
+    node?.layer !== undefined &&
+    !effectiveLayers.includes(node.layer as number)
+  ) {
     return { error: `Document is in a restricted layer (L${node.layer})` };
   }
 

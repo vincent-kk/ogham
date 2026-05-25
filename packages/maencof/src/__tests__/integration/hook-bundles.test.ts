@@ -128,10 +128,11 @@ describe('hook bundle smoke tests', () => {
     it.skipIf(!existsSync(bundle))(
       `${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`,
       () => {
-        const result = spawnSync('node', [bundle, ...args], {
+        const result = spawnSync(process.execPath, [bundle, ...args], {
           input: JSON.stringify(buildInput(cwd)),
           encoding: 'utf8',
           timeout: 10_000,
+          windowsHide: true,
         });
 
         expect(result.status).toBe(0);

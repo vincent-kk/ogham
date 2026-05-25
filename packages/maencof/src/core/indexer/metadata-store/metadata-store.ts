@@ -9,6 +9,12 @@
 import { access, mkdir, readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import {
+  ATOMIC_WRITE_RETRY_ATTEMPTS as STALE_RETRY_ATTEMPTS,
+  ATOMIC_WRITE_RETRY_BACKOFF_MS as STALE_RETRY_BACKOFF_MS,
+} from '../../../constants/atomic-write.js';
+// CACHE_FILES 는 단일 출처 constants/cache-files.ts. 본 모듈은 외부 호환을 위해 re-export 만 한다.
+import { CACHE_FILES } from '../../../constants/cache-files.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -19,20 +25,13 @@ import type {
   SerializedGraphMeta,
   SerializedNodes,
 } from '../../../types/graph.js';
+
 import { atomicWriteJson } from './atomic-write.js';
 import { withVaultLock } from './file-mutex.js';
-
-import {
-  ATOMIC_WRITE_RETRY_ATTEMPTS as STALE_RETRY_ATTEMPTS,
-  ATOMIC_WRITE_RETRY_BACKOFF_MS as STALE_RETRY_BACKOFF_MS,
-} from '../../../constants/atomic-write.js';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
-// CACHE_FILES 는 단일 출처 constants/cache-files.ts. 본 모듈은 외부 호환을 위해 re-export 만 한다.
-import { CACHE_FILES } from '../../../constants/cache-files.js';
 
 export { CACHE_FILES };
 

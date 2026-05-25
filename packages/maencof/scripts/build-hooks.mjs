@@ -59,6 +59,14 @@ const hookEntries = [
   { name: 'layer-guard', maxBytes: LIGHT_HOOK_BYTES },
 ];
 
+// esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
+// of X is not supported"). cross-spawn (CJS) calls require('child_process') at
+// load time, so without this banner the bundle crashes on import. createRequire
+// from node:module restores a working require for CJS deps inlined into ESM.
+const ESM_CJS_REQUIRE_BANNER =
+  "import { createRequire as __cpCreateRequire } from 'node:module';\n" +
+  'const require = __cpCreateRequire(import.meta.url);\n';
+
 await Promise.all(
   hookEntries.map(({ name }) =>
     esbuild.build({
@@ -72,6 +80,7 @@ await Promise.all(
       sourcemap: false,
       treeShaking: true,
       loader: { '.md': 'text' },
+      banner: { js: ESM_CJS_REQUIRE_BANNER },
     }),
   ),
 );

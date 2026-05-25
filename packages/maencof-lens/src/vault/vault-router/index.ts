@@ -1,1 +1,1 @@
-export { VaultRouter } from './vault-router.js';
+export { VaultRouter } from "./vault-router.js";

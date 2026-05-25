@@ -9,14 +9,13 @@
  * 관리하는 경로에 대한 write 는 dailynote 에 기록하지 않는다. 기록하면 매 dailynote
  * append 가 또 다른 dailynote 이벤트를 유발해 엔트리가 무한 복제된다.
  */
+import { DAILYNOTE_RECORDER_EXCLUSION_PREFIXES } from '../../constants/dailynote-recorder.js';
+import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
 import {
   appendDailynoteEntry,
   buildToolDescription,
   formatTime,
 } from '../../core/dailynote-writer/index.js';
-import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
-import { DAILYNOTE_RECORDER_EXCLUSION_PREFIXES } from '../../constants/dailynote-recorder.js';
-
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault } from '../shared/index.js';
 
@@ -80,7 +79,11 @@ export function runDailynoteRecorder(
       path,
     });
   } catch (e) {
-    appendErrorLogSafe(input.cwd ?? process.cwd(), { hook: 'dailynote-recorder', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(input.cwd ?? process.cwd(), {
+      hook: 'dailynote-recorder',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return { continue: true };

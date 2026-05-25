@@ -1,4 +1,7 @@
-import type { LensConfig, VaultConfig } from '../../config/config-schema/config-schema.js';
+import type {
+  LensConfig,
+  VaultConfig,
+} from "../../config/config-schema/config-schema.js";
 
 /**
  * Multi-vault name→config resolution.
@@ -19,10 +22,8 @@ export class VaultRouter {
 
     const found = this.vaults.find((v) => v.name === vaultName);
     if (!found) {
-      const available = this.vaults.map((v) => v.name).join(', ');
-      throw new Error(
-        `Unknown vault: "${vaultName}". Available: ${available}`,
-      );
+      const available = this.vaults.map((v) => v.name).join(", ");
+      throw new Error(`Unknown vault: "${vaultName}". Available: ${available}`);
     }
     return found;
   }

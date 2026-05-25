@@ -9,7 +9,9 @@ import { SYMMETRIC_RELATIONSHIPS } from '../../../types/person.js';
  * Person frontmatter가 있는 노드 쌍 간 RELATIONSHIP 엣지 생성.
  * 대칭 관계: 양방향 엣지 2개, 비대칭 관계: 단방향 엣지 1개.
  */
-export function buildRelationshipEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
+export function buildRelationshipEdges(
+  nodes: KnowledgeNode[],
+): KnowledgeEdge[] {
   const edges: KnowledgeEdge[] = [];
   type PersonExt = KnowledgeNode & {
     person?: { relationship_type?: string; intimacy_level?: number };

@@ -1,7 +1,7 @@
-import { handleKgNavigate } from '@ogham/maencof';
-import type { KnowledgeGraph } from '@ogham/maencof';
+import { handleKgNavigate } from "@ogham/maencof";
+import type { KnowledgeGraph } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
+import { computeEffectiveLayers } from "../../filter/layer-guard/layer-guard.js";
 
 export interface LensNavigateInput {
   vault?: string;
@@ -25,8 +25,10 @@ export async function handleLensNavigate(
     include_hierarchy: input.include_hierarchy,
   });
 
-  if ('error' in result) {
-    return { error: 'Vault index not available. Run kg_build in a maencof session.' };
+  if ("error" in result) {
+    return {
+      error: "Vault index not available. Run kg_build in a maencof session.",
+    };
   }
 
   // Post-filter neighbor nodes by effective layers

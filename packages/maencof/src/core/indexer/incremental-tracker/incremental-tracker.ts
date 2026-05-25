@@ -7,10 +7,9 @@
  * - PageRank 같은 전역 메트릭은 다음 전체 빌드까지 유지
  * - stale 노드 비율 10% 초과 시 전체 재빌드 권장
  */
+import { FULL_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-import { FULL_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
-
 import type { FileSnapshot, SnapshotEntry } from '../metadata-store/index.js';
 
 /** 변경 세트 */

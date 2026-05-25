@@ -5,12 +5,12 @@
 
 /** 볼트 상태값 */
 export const VAULT_STATUS = {
-  READY: 'ready',
-  STALE: 'stale',
-  PATH_NOT_FOUND: 'path not found',
-  INDEX_NOT_BUILT: 'index not built',
-  LEGACY_V1: 'legacy v1',
-  UNKNOWN: 'status unknown',
+  READY: "ready",
+  STALE: "stale",
+  PATH_NOT_FOUND: "path not found",
+  INDEX_NOT_BUILT: "index not built",
+  LEGACY_V1: "legacy v1",
+  UNKNOWN: "status unknown",
 } as const;
 
 /** 볼트 상태 타입 */

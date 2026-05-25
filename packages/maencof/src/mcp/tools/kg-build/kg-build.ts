@@ -10,9 +10,6 @@ import {
   parseDocument,
 } from '../../../core/document-parser/index.js';
 import { buildGraph } from '../../../core/graph-builder/index.js';
-import type { ScannedFile } from '../../../core/vault-scanner/index.js';
-import { scanVault } from '../../../core/vault-scanner/index.js';
-import { calculateWeights } from '../../../core/weight-calculator/index.js';
 import {
   type CurrentFileInfo,
   computeChangeSet,
@@ -20,6 +17,9 @@ import {
   createSnapshot,
 } from '../../../core/indexer/incremental-tracker/index.js';
 import { MetadataStore } from '../../../core/indexer/metadata-store/index.js';
+import type { ScannedFile } from '../../../core/vault-scanner/index.js';
+import { scanVault } from '../../../core/vault-scanner/index.js';
+import { calculateWeights } from '../../../core/weight-calculator/index.js';
 import type { NodeId } from '../../../types/common.js';
 import type {
   AdjacencyList,

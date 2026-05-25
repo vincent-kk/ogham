@@ -2,8 +2,8 @@
  * @file crossLayer.ts
  * @description L5-Boundary 노드 → connected_layers 내 태그 겹침 노드로 CROSS_LAYER 엣지 생성.
  */
-import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
 import { MAX_CROSS_LAYER_EDGES_PER_NODE } from '../../../constants/thresholds.js';
+import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
 
 /**
  * L5-Boundary 노드에서 connected_layers 내 노드로 CROSS_LAYER 엣지 생성.

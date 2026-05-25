@@ -2,11 +2,11 @@
  * @file vault-committer.test.ts
  * @description vault-committer hook unit tests — auto-commit vault changes on SessionEnd
  */
-import { execFileSync, execSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { spawnCli } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -16,15 +16,33 @@ import {
   shouldCommitOnPrompt,
 } from '../../hooks/vault-committer/vault-committer.js';
 
-// ── Mock child_process ───────────────────────────────────────────────
+// ── Mock @ogham/cross-platform/spawn ─────────────────────────────────
+//
+// PR-D moved git execSync/execFileSync to spawnCli from @ogham/cross-platform.
+// Tests mock the spawnCli sub-export directly; arguments are normalized to
+// `(bin, args, opts)` so legacy execSync command-string parsing is gone.
 
-vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
-  execFileSync: vi.fn(),
+vi.mock('@ogham/cross-platform/spawn', () => ({
+  spawnCli: vi.fn(),
 }));
 
-const mockExecSync = vi.mocked(execSync);
-const mockExecFileSync = vi.mocked(execFileSync);
+const mockSpawnCli = vi.mocked(spawnCli);
+
+const okResult = (stdout = '') => ({
+  code: 0,
+  stdout,
+  stderr: '',
+  timedOut: false,
+  spawnError: undefined,
+});
+
+const errResult = (stderr = 'fail') => ({
+  code: 1,
+  stdout: '',
+  stderr,
+  timedOut: false,
+  spawnError: undefined,
+});
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -47,8 +65,8 @@ function enableVaultCommit(cwd: string): void {
 }
 
 /**
- * Configure mockExecSync to simulate a git repo with vault changes.
- * Each command is matched by prefix and returns the appropriate result.
+ * Configure mockSpawnCli to simulate a git repo with vault changes.
+ * Matches by (bin, args) — no command-string parsing.
  */
 function setupGitMocks(
   cwd: string,
@@ -59,29 +77,28 @@ function setupGitMocks(
 ): void {
   const { hasChanges = true, commitThrows = false } = opts ?? {};
 
-  mockExecSync.mockImplementation((cmd: string) => {
-    const cmdStr = typeof cmd === 'string' ? cmd : String(cmd);
-    if (cmdStr.includes('rev-parse --is-inside-work-tree')) {
-      return Buffer.from('true\n');
-    }
-    if (cmdStr.includes('rev-parse --show-toplevel')) {
-      return Buffer.from(`${cwd}\n`);
-    }
-    if (cmdStr.includes('status --porcelain')) {
-      return Buffer.from(hasChanges ? ' M .maencof/graph.json\n' : '');
-    }
-    return Buffer.from('');
-  });
-
-  // execFileSync handles git add and git commit
-  mockExecFileSync.mockImplementation(
-    (cmd: string, args?: readonly string[]) => {
-      if (commitThrows && cmd === 'git' && args?.includes('commit')) {
-        throw new Error('commit failed');
+  mockSpawnCli.mockImplementation(
+    async (bin: string, args: readonly string[]) => {
+      if (bin !== 'git') return okResult();
+      if (args.includes('--is-inside-work-tree')) return okResult('true\n');
+      if (args.includes('--show-toplevel')) return okResult(`${cwd}\n`);
+      if (args[0] === 'status') {
+        return okResult(hasChanges ? ' M .maencof/graph.json\n' : '');
       }
-      return Buffer.from('');
+      if (args[0] === 'commit' && commitThrows)
+        return errResult('commit failed');
+      return okResult();
     },
   );
+}
+
+function findCalls(
+  predicate: (bin: string, args: readonly string[]) => boolean,
+) {
+  return mockSpawnCli.mock.calls.filter((call) => {
+    const [bin, args] = call as [string, readonly string[]];
+    return predicate(bin, args);
+  });
 }
 
 // ── Tests ────────────────────────────────────────────────────────────
@@ -200,111 +217,101 @@ describe('runVaultCommitter', () => {
 
   beforeEach(() => {
     vaultDir = createTempVault();
-    mockExecSync.mockReset();
-    mockExecFileSync.mockReset();
+    mockSpawnCli.mockReset();
   });
 
   afterEach(() => {
     rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
   });
 
-  it('returns { continue: true } when not a maencof vault', () => {
+  it('returns { continue: true } when not a maencof vault', async () => {
     const tmpDir = join(tmpdir(), `non-vault-${Date.now()}`);
     mkdirSync(tmpDir, { recursive: true });
     try {
-      const result = runVaultCommitter({ cwd: tmpDir });
+      const result = await runVaultCommitter({ cwd: tmpDir });
       expect(result).toEqual({ continue: true });
-      expect(mockExecSync).not.toHaveBeenCalled();
+      expect(mockSpawnCli).not.toHaveBeenCalled();
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it('returns { continue: true } when config file is missing', () => {
-    const result = runVaultCommitter({ cwd: vaultDir });
+  it('returns { continue: true } when config file is missing', async () => {
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockSpawnCli).not.toHaveBeenCalled();
   });
 
-  it('returns { continue: true } when config has enabled: false', () => {
+  it('returns { continue: true } when config has enabled: false', async () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'vault-commit.json'),
       JSON.stringify({ enabled: false }),
     );
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockSpawnCli).not.toHaveBeenCalled();
   });
 
-  it('returns { continue: true } when not in a git repo', () => {
+  it('returns { continue: true } when not in a git repo', async () => {
     enableVaultCommit(vaultDir);
-    mockExecSync.mockImplementation(() => {
-      throw new Error('not a git repository');
-    });
-    const result = runVaultCommitter({ cwd: vaultDir });
+    mockSpawnCli.mockResolvedValue(errResult('not a git repository'));
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
   });
 
-  it('returns { continue: true } when .git/index.lock exists', () => {
+  it('returns { continue: true } when .git/index.lock exists', async () => {
     enableVaultCommit(vaultDir);
-    // Create a fake .git directory with index.lock
     const gitDir = join(vaultDir, '.git');
     mkdirSync(gitDir, { recursive: true });
     writeFileSync(join(gitDir, 'index.lock'), '');
 
-    mockExecSync.mockImplementation((cmd: string) => {
-      const cmdStr = typeof cmd === 'string' ? cmd : String(cmd);
-      if (cmdStr.includes('rev-parse --is-inside-work-tree')) {
-        return Buffer.from('true\n');
-      }
-      if (cmdStr.includes('rev-parse --show-toplevel')) {
-        return Buffer.from(`${vaultDir}\n`);
-      }
-      return Buffer.from('');
-    });
+    mockSpawnCli.mockImplementation(
+      async (bin: string, args: readonly string[]) => {
+        if (bin !== 'git') return okResult();
+        if (args.includes('--is-inside-work-tree')) return okResult('true\n');
+        if (args.includes('--show-toplevel')) return okResult(`${vaultDir}\n`);
+        return okResult();
+      },
+    );
 
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
     // Should not have called git status (stopped at index.lock check)
-    const statusCalls = mockExecSync.mock.calls.filter(
-      (call) =>
-        typeof call[0] === 'string' && call[0].includes('status --porcelain'),
+    const statusCalls = findCalls(
+      (bin, args) => bin === 'git' && args[0] === 'status',
     );
     expect(statusCalls).toHaveLength(0);
   });
 
-  it('returns { continue: true } when no vault changes exist', () => {
+  it('returns { continue: true } when no vault changes exist', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: false });
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
-    // Should not have called execFileSync (git add or git commit)
-    expect(mockExecFileSync).not.toHaveBeenCalled();
+    // Should not have called git add or commit
+    expect(
+      findCalls((bin, args) => bin === 'git' && args[0] === 'add'),
+    ).toHaveLength(0);
+    expect(
+      findCalls((bin, args) => bin === 'git' && args[0] === 'commit'),
+    ).toHaveLength(0);
   });
 
-  it('executes git add + commit when all conditions are met', () => {
+  it('executes git add + commit when all conditions are met', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
 
-    // Verify git add was called separately for each directory
-    const addCalls = mockExecFileSync.mock.calls.filter(
-      (call) =>
-        call[0] === 'git' &&
-        Array.isArray(call[1]) &&
-        (call[1] as string[]).includes('add'),
+    const addCalls = findCalls(
+      (bin, args) => bin === 'git' && args[0] === 'add',
     );
     expect(addCalls).toHaveLength(2);
     expect(addCalls[0][1]).toEqual(['add', '.maencof/']);
     expect(addCalls[1][1]).toEqual(['add', '.maencof-meta/']);
 
-    // Verify git commit was called with --no-verify and timestamped message
-    const commitCalls = mockExecFileSync.mock.calls.filter(
-      (call) =>
-        call[0] === 'git' &&
-        Array.isArray(call[1]) &&
-        (call[1] as string[]).includes('commit'),
+    const commitCalls = findCalls(
+      (bin, args) => bin === 'git' && args[0] === 'commit',
     );
     expect(commitCalls).toHaveLength(1);
     const commitArgs = commitCalls[0][1] as string[];
@@ -316,32 +323,22 @@ describe('runVaultCommitter', () => {
     );
   });
 
-  it('returns { continue: true } when git commit fails', () => {
+  it('returns { continue: true } when git commit fails', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true, commitThrows: true });
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
   });
 
-  it('passes timeout: 1500 and stdio: pipe to all exec calls', () => {
+  it('passes timeoutMs: 1500 to all spawnCli calls', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    runVaultCommitter({ cwd: vaultDir });
+    await runVaultCommitter({ cwd: vaultDir });
 
-    // All execSync calls (read-only git operations) should have timeout: 1500
-    for (const call of mockExecSync.mock.calls) {
-      const opts = call[1] as { timeout?: number; stdio?: string } | undefined;
+    for (const call of mockSpawnCli.mock.calls) {
+      const opts = call[2] as { timeoutMs?: number } | undefined;
       expect(opts).toBeDefined();
-      expect(opts!.timeout).toBe(1500);
-      expect(opts!.stdio).toBe('pipe');
-    }
-
-    // All execFileSync calls (git add, git commit) should have timeout: 1500
-    for (const call of mockExecFileSync.mock.calls) {
-      const opts = call[2] as { timeout?: number; stdio?: string } | undefined;
-      expect(opts).toBeDefined();
-      expect(opts!.timeout).toBe(1500);
-      expect(opts!.stdio).toBe('pipe');
+      expect(opts!.timeoutMs).toBe(1500);
     }
   });
 });
@@ -385,58 +382,65 @@ describe('runVaultCommitter with UserPromptSubmit event', () => {
 
   beforeEach(() => {
     vaultDir = createTempVault();
-    mockExecSync.mockReset();
-    mockExecFileSync.mockReset();
+    mockSpawnCli.mockReset();
   });
 
   afterEach(() => {
     rmSync(vaultDir, { recursive: true, force: true, maxRetries: 3 });
   });
 
-  it('skips when UserPromptSubmit prompt is not /clear', () => {
+  it('skips when UserPromptSubmit prompt is not /clear', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter(
+    const result = await runVaultCommitter(
       { cwd: vaultDir, prompt: 'fix the bug' },
       'UserPromptSubmit',
     );
     expect(result).toEqual({ continue: true });
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockSpawnCli).not.toHaveBeenCalled();
   });
 
-  it('skips when UserPromptSubmit prompt is missing', () => {
+  it('skips when UserPromptSubmit prompt is missing', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter({ cwd: vaultDir }, 'UserPromptSubmit');
+    const result = await runVaultCommitter(
+      { cwd: vaultDir },
+      'UserPromptSubmit',
+    );
     expect(result).toEqual({ continue: true });
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockSpawnCli).not.toHaveBeenCalled();
   });
 
-  it('commits when UserPromptSubmit prompt is /clear', () => {
+  it('commits when UserPromptSubmit prompt is /clear', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter(
+    const result = await runVaultCommitter(
       { cwd: vaultDir, prompt: '/clear' },
       'UserPromptSubmit',
     );
     expect(result).toEqual({ continue: true });
-    // Should have called execFileSync for git add + commit
-    expect(mockExecFileSync).toHaveBeenCalled();
+    expect(
+      findCalls((bin, args) => bin === 'git' && args[0] === 'commit'),
+    ).toHaveLength(1);
   });
 
-  it('commits on SessionEnd without needing prompt field', () => {
+  it('commits on SessionEnd without needing prompt field', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter({ cwd: vaultDir }, 'SessionEnd');
+    const result = await runVaultCommitter({ cwd: vaultDir }, 'SessionEnd');
     expect(result).toEqual({ continue: true });
-    expect(mockExecFileSync).toHaveBeenCalled();
+    expect(
+      findCalls((bin, args) => bin === 'git' && args[0] === 'commit'),
+    ).toHaveLength(1);
   });
 
-  it('commits when event is undefined (backward compat, defaults to SessionEnd behavior)', () => {
+  it('commits when event is undefined (backward compat, defaults to SessionEnd behavior)', async () => {
     enableVaultCommit(vaultDir);
     setupGitMocks(vaultDir, { hasChanges: true });
-    const result = runVaultCommitter({ cwd: vaultDir });
+    const result = await runVaultCommitter({ cwd: vaultDir });
     expect(result).toEqual({ continue: true });
-    expect(mockExecFileSync).toHaveBeenCalled();
+    expect(
+      findCalls((bin, args) => bin === 'git' && args[0] === 'commit'),
+    ).toHaveLength(1);
   });
 });

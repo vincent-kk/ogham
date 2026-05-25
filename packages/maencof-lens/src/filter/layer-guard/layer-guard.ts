@@ -24,5 +24,7 @@ export function filterResultsByLayer<T extends { layer?: number }>(
   results: T[],
   effectiveLayers: number[],
 ): T[] {
-  return results.filter((r) => r.layer === undefined || effectiveLayers.includes(r.layer));
+  return results.filter(
+    (r) => r.layer === undefined || effectiveLayers.includes(r.layer),
+  );
 }

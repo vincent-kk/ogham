@@ -5,8 +5,8 @@
 import { rename, unlink, writeFile } from 'node:fs/promises';
 
 import {
-  ATOMIC_WRITE_RETRY_ATTEMPTS as DEFAULT_RETRIES,
   ATOMIC_WRITE_RETRY_BACKOFF_MS as DEFAULT_BACKOFF_MS,
+  ATOMIC_WRITE_RETRY_ATTEMPTS as DEFAULT_RETRIES,
 } from '../../../constants/atomic-write.js';
 
 export interface AtomicWriteOptions {

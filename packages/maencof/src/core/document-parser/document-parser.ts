@@ -10,6 +10,12 @@
 import { readFile } from 'node:fs/promises';
 
 import { SUBLAYER_DIR_PATTERNS } from '../../constants/document-parser.js';
+import {
+  ABSOLUTE_HREF_REGEX,
+  FRONTMATTER_REGEX,
+  MARKDOWN_LINK_REGEX,
+  WIKILINK_REGEX,
+} from '../../constants/regexes.js';
 import type { Layer, SubLayer } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import { validateFrontmatter } from '../../types/frontmatter.js';
@@ -18,16 +24,12 @@ import type {
   FrontmatterParseResult,
 } from '../../types/frontmatter.js';
 import type { KnowledgeNode } from '../../types/graph.js';
-
 import { parseYamlFrontmatter } from '../yaml-parser/index.js';
-import {
-  ABSOLUTE_HREF_REGEX,
-  FRONTMATTER_REGEX,
-  MARKDOWN_LINK_REGEX,
-  WIKILINK_REGEX,
-} from '../../constants/regexes.js';
 
-export { parseScalarValue, parseYamlFrontmatter } from '../yaml-parser/index.js';
+export {
+  parseScalarValue,
+  parseYamlFrontmatter,
+} from '../yaml-parser/index.js';
 
 /** 마크다운 링크 정보 */
 export interface MarkdownLink {
@@ -62,7 +64,6 @@ export interface NodeBuildResult {
   /** 오류 메시지 (실패 시) */
   error?: string;
 }
-
 
 /**
  * 마크다운 문자열에서 Frontmatter를 추출하고 Zod로 검증한다.

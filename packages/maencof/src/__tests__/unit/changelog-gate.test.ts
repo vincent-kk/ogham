@@ -2,9 +2,9 @@
  * @file changelog-gate.test.ts
  * @description runChangelogGate 유닛 테스트 — Stop hook
  */
-import { execSync } from 'node:child_process';
 import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 
+import { spawnCli } from '@ogham/cross-platform/spawn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { runChangelogGate } from '../../hooks/changelog-gate/changelog-gate.js';
@@ -18,8 +18,8 @@ vi.mock('node:fs', () => ({
   unlinkSync: vi.fn(),
 }));
 
-vi.mock('node:child_process', () => ({
-  execSync: vi.fn(),
+vi.mock('@ogham/cross-platform/spawn', () => ({
+  spawnCli: vi.fn(),
 }));
 
 vi.mock('../../hooks/shared/shared.js', () => ({
@@ -30,9 +30,17 @@ vi.mock('../../hooks/shared/shared.js', () => ({
 const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
 const mockUnlinkSync = vi.mocked(unlinkSync);
-const mockExecSync = vi.mocked(execSync);
+const mockSpawnCli = vi.mocked(spawnCli);
 const mockIsMaencofVault = vi.mocked(isMaencofVault);
 const mockMetaPath = vi.mocked(metaPath);
+
+const gitOk = (stdout = '') => ({
+  code: 0,
+  stdout,
+  stderr: '',
+  timedOut: false,
+  spawnError: undefined,
+});
 
 // ─── 테스트 ───────────────────────────────────────────────────────────────────
 
@@ -43,80 +51,17 @@ describe('runChangelogGate', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // 기본값: 마커 없음, vault, lockPath 계산
     mockExistsSync.mockReturnValue(false);
     mockIsMaencofVault.mockReturnValue(true);
     mockMetaPath.mockImplementation((_cwd, ...segments) =>
       [_cwd, '.maencof-meta', ...segments].join('/'),
     );
-    // git 변경 없음
-    mockExecSync.mockReturnValue(Buffer.from(''));
-    // unlinkSync 기본값: no-op
+    // git status 변경 없음 (default)
+    mockSpawnCli.mockResolvedValue(gitOk(''));
     mockUnlinkSync.mockImplementation(() => undefined);
   });
 
-  it('migration.lock 존재 + TTL 유효 + sessionId 일치 → { continue: true }', () => {
-    // 마커 파일 없음 → false, lockPath 존재 → true
-    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({
-        startedAt: new Date(Date.now() - 60_000).toISOString(), // 1분 전
-        ttlMinutes: 30,
-        sessionId: SESSION_ID,
-      }),
-    );
-
-    const result = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
-
-    expect(result).toEqual({ continue: true });
-  });
-
-  it('migration.lock 존재하지만 TTL 만료 → orphan cleanup 수행 후 일반 게이트 진행', () => {
-    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({
-        startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2시간 전
-        ttlMinutes: 30,
-        sessionId: SESSION_ID,
-      }),
-    );
-
-    // (a) 변경 없음 → 통과 + orphan lock 제거
-    mockExecSync.mockReturnValue(Buffer.from(''));
-    const resultNoChange = runChangelogGate({
-      cwd: CWD,
-      session_id: SESSION_ID,
-    });
-    expect(resultNoChange).toEqual({ continue: true });
-    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
-
-    // (b) 변경 있음 → 차단 + orphan lock 제거
-    mockUnlinkSync.mockClear();
-    mockExecSync.mockReturnValue(Buffer.from('M  01_Core/identity.md'));
-    const resultChange = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
-    expect(resultChange.continue).toBe(false);
-    expect(resultChange.reason).toBeDefined();
-    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
-  });
-
-  it('migration.lock sessionId 불일치 → orphan cleanup 후 일반 게이트 진행', () => {
-    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({
-        startedAt: new Date(Date.now() - 60_000).toISOString(), // 1분 전 (TTL 유효)
-        ttlMinutes: 30,
-        sessionId: 'other-session-xyz',
-      }),
-    );
-    mockExecSync.mockReturnValue(Buffer.from(''));
-
-    const result = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
-
-    expect(result).toEqual({ continue: true });
-    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
-  });
-
-  it('유효한 lock (TTL+session 일치) 은 절대 unlink 되지 않는다', () => {
+  it('migration.lock 존재 + TTL 유효 + sessionId 일치 → { continue: true }', async () => {
     mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
     mockReadFileSync.mockReturnValue(
       JSON.stringify({
@@ -126,12 +71,75 @@ describe('runChangelogGate', () => {
       }),
     );
 
-    runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+    const result = await runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+
+    expect(result).toEqual({ continue: true });
+  });
+
+  it('migration.lock 존재하지만 TTL 만료 → orphan cleanup 수행 후 일반 게이트 진행', async () => {
+    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        ttlMinutes: 30,
+        sessionId: SESSION_ID,
+      }),
+    );
+
+    // (a) 변경 없음 → 통과 + orphan lock 제거
+    mockSpawnCli.mockResolvedValue(gitOk(''));
+    const resultNoChange = await runChangelogGate({
+      cwd: CWD,
+      session_id: SESSION_ID,
+    });
+    expect(resultNoChange).toEqual({ continue: true });
+    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
+
+    // (b) 변경 있음 → 차단 + orphan lock 제거
+    mockUnlinkSync.mockClear();
+    mockSpawnCli.mockResolvedValue(gitOk('M  01_Core/identity.md'));
+    const resultChange = await runChangelogGate({
+      cwd: CWD,
+      session_id: SESSION_ID,
+    });
+    expect(resultChange.continue).toBe(false);
+    expect(resultChange.reason).toBeDefined();
+    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
+  });
+
+  it('migration.lock sessionId 불일치 → orphan cleanup 후 일반 게이트 진행', async () => {
+    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        startedAt: new Date(Date.now() - 60_000).toISOString(),
+        ttlMinutes: 30,
+        sessionId: 'other-session-xyz',
+      }),
+    );
+    mockSpawnCli.mockResolvedValue(gitOk(''));
+
+    const result = await runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+
+    expect(result).toEqual({ continue: true });
+    expect(mockUnlinkSync).toHaveBeenCalledWith(LOCK_PATH);
+  });
+
+  it('유효한 lock (TTL+session 일치) 은 절대 unlink 되지 않는다', async () => {
+    mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({
+        startedAt: new Date(Date.now() - 60_000).toISOString(),
+        ttlMinutes: 30,
+        sessionId: SESSION_ID,
+      }),
+    );
+
+    await runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
 
     expect(mockUnlinkSync).not.toHaveBeenCalled();
   });
 
-  it('orphan cleanup 의 unlink 실패는 치명적이지 않다 (graceful degradation)', () => {
+  it('orphan cleanup 의 unlink 실패는 치명적이지 않다 (graceful degradation)', async () => {
     mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
     mockReadFileSync.mockReturnValue(
       JSON.stringify({
@@ -143,30 +151,28 @@ describe('runChangelogGate', () => {
     mockUnlinkSync.mockImplementation(() => {
       throw new Error('ENOENT');
     });
-    mockExecSync.mockReturnValue(Buffer.from(''));
+    mockSpawnCli.mockResolvedValue(gitOk(''));
 
-    const result = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+    const result = await runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
 
     expect(result).toEqual({ continue: true });
   });
 
-  it('migration.lock JSON parse 실패 → { continue: true } (graceful degradation)', () => {
+  it('migration.lock JSON parse 실패 → { continue: true } (graceful degradation)', async () => {
     mockExistsSync.mockImplementation((p) => p === LOCK_PATH);
     mockReadFileSync.mockReturnValue('NOT_VALID_JSON{{{');
 
-    // git 변경 없음 → 파싱 실패 후 정상 gate 통과
-    mockExecSync.mockReturnValue(Buffer.from(''));
-    const result = runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
+    mockSpawnCli.mockResolvedValue(gitOk(''));
+    const result = await runChangelogGate({ cwd: CWD, session_id: SESSION_ID });
 
     expect(result).toEqual({ continue: true });
   });
 
-  it('migration.lock 없음 + 감시 경로 변경 없음 → { continue: true }', () => {
-    // 마커도 없고 lockPath도 없음
+  it('migration.lock 없음 + 감시 경로 변경 없음 → { continue: true }', async () => {
     mockExistsSync.mockReturnValue(false);
-    mockExecSync.mockReturnValue(Buffer.from(''));
+    mockSpawnCli.mockResolvedValue(gitOk(''));
 
-    const result = runChangelogGate({ cwd: CWD });
+    const result = await runChangelogGate({ cwd: CWD });
 
     expect(result).toEqual({ continue: true });
   });

@@ -5,8 +5,8 @@
  *
  * Pure function: no file I/O, string in → string out.
  */
-import { parseYamlFrontmatter } from '../yaml-parser/index.js';
 import { FRONTMATTER_REGEX, H1_REGEX } from '../../constants/regexes.js';
+import { parseYamlFrontmatter } from '../yaml-parser/index.js';
 
 /** Result of deduplication with optional warnings */
 export interface DeduplicateResult {

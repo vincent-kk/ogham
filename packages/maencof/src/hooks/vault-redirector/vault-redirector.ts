@@ -6,7 +6,11 @@
 import { resolve } from 'node:path';
 
 import { VAULT_REDIRECTOR_TOOL_GUIDANCE as TOOL_GUIDANCE } from '../../constants/vault-redirector.js';
-import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from '../shared/index.js';
+import {
+  MAENCOF_DIR,
+  MAENCOF_META_DIR,
+  isMaencofVault,
+} from '../shared/index.js';
 
 export interface VaultRedirectorInput {
   tool_name?: string;

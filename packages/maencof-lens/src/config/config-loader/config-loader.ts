@@ -1,12 +1,17 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   isValidLensConfig,
   normalizeLensConfig,
-} from '../config-schema/guard/config-guard.js';
-import type { LensConfig } from '../config-schema/config-schema.js';
-import { CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION, DEFAULT_LAYERS } from '../defaults/defaults.js';
+} from "../config-schema/guard/config-guard.js";
+import type { LensConfig } from "../config-schema/config-schema.js";
+import {
+  CONFIG_DIR,
+  CONFIG_FILE,
+  CONFIG_VERSION,
+  DEFAULT_LAYERS,
+} from "../defaults/defaults.js";
 
 /**
  * Load .maencof-lens/config.json from the given project root.
@@ -17,7 +22,7 @@ export function loadConfig(projectRoot: string): LensConfig | null {
   if (!existsSync(configPath)) return null;
 
   try {
-    const parsed: unknown = JSON.parse(readFileSync(configPath, 'utf8'));
+    const parsed: unknown = JSON.parse(readFileSync(configPath, "utf8"));
     if (!isValidLensConfig(parsed)) return null;
     return normalizeLensConfig(parsed);
   } catch {
@@ -33,7 +38,7 @@ export function writeConfig(projectRoot: string, config: LensConfig): void {
   const configDir = join(projectRoot, CONFIG_DIR);
   mkdirSync(configDir, { recursive: true });
   const configPath = join(configDir, CONFIG_FILE);
-  writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
+  writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
 }
 
 /**

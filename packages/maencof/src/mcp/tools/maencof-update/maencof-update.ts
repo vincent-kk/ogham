@@ -5,7 +5,10 @@
 import { appendFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { FRONTMATTER_REGEX, FRONTMATTER_STRIP_REGEX } from '../../../constants/regexes.js';
+import {
+  FRONTMATTER_REGEX,
+  FRONTMATTER_STRIP_REGEX,
+} from '../../../constants/regexes.js';
 import { deduplicateContent } from '../../../core/content-dedup/index.js';
 import {
   buildKnowledgeNode,
@@ -28,12 +31,7 @@ import type {
 } from '../../../types/mcp.js';
 
 /** unset 거부 대상 — 데이터 무결성 핵심 필드 */
-const PROTECTED_UNSET_FIELDS = new Set([
-  'created',
-  'updated',
-  'layer',
-  'tags',
-]);
+const PROTECTED_UNSET_FIELDS = new Set(['created', 'updated', 'layer', 'tags']);
 
 /**
  * Frontmatter 블록에서 특정 필드를 갱신한다.
@@ -237,9 +235,7 @@ export async function handleMaencofUpdate(
     // content-only update 라도 손상된 디스크 frontmatter 가 영속화되지 않도록
     // 동일 schema 게이트를 통과해야만 write 한다. 회복은 frontmatter.unset 으로.
     const updatedFmYamlMatch = FRONTMATTER_REGEX.exec(updatedFmBlock);
-    const updatedFmObject = parseYamlFrontmatter(
-      updatedFmYamlMatch?.[1] ?? '',
-    );
+    const updatedFmObject = parseYamlFrontmatter(updatedFmYamlMatch?.[1] ?? '');
     const validation = validateFrontmatter(updatedFmObject);
     if (!validation.ok) {
       return {

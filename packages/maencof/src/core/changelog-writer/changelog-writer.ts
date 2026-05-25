@@ -14,13 +14,15 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { ChangelogCategory, ChangelogEntry } from '../../types/changelog.js';
+import type {
+  ChangelogCategory,
+  ChangelogEntry,
+} from '../../types/changelog.js';
 import {
   CHANGELOG_CATEGORY_LABELS,
   CHANGELOG_CATEGORY_ORDER,
   CHANGELOG_DIR,
 } from '../../types/changelog.js';
-
 import { formatDate } from '../dailynote-writer/index.js';
 
 /**

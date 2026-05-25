@@ -2,7 +2,6 @@ import {
   getSessionCaptureCount,
   readInsightConfig,
 } from '../../core/insight-stats/index.js';
-
 import { isMaencofVault } from '../shared/index.js';
 
 export interface InsightInjectorInput {
@@ -25,9 +24,7 @@ export interface InsightInjectorResult {
   };
 }
 
-function buildInjectorResult(
-  additionalContext: string,
-): InsightInjectorResult {
+function buildInjectorResult(additionalContext: string): InsightInjectorResult {
   return {
     continue: true,
     hookSpecificOutput: {

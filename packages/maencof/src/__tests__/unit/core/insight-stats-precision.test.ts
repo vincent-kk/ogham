@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   autoAdjustSensitivity,
   calculatePrecision,
-  updatePromotionStats,
   readInsightStats,
+  updatePromotionStats,
 } from '../../../core/insight-stats/insight-stats.js';
 import type { InsightStats } from '../../../types/insight.js';
 
@@ -51,8 +51,12 @@ describe('insight-stats precision', () => {
   // Happy path (3)
   it('calculatePrecision returns correct ratio', () => {
     const stats: InsightStats = {
-      total_captured: 10, l2_direct: 0, l5_captured: 10,
-      l5_promoted: 7, l5_archived: 3, updatedAt: '',
+      total_captured: 10,
+      l2_direct: 0,
+      l5_captured: 10,
+      l5_promoted: 7,
+      l5_archived: 3,
+      updatedAt: '',
     };
     expect(calculatePrecision(stats)).toBe(0.7);
   });
@@ -74,24 +78,36 @@ describe('insight-stats precision', () => {
   // Edge cases
   it('calculatePrecision returns null when denominator is 0', () => {
     const stats: InsightStats = {
-      total_captured: 0, l2_direct: 0, l5_captured: 0,
-      l5_promoted: 0, l5_archived: 0, updatedAt: '',
+      total_captured: 0,
+      l2_direct: 0,
+      l5_captured: 0,
+      l5_promoted: 0,
+      l5_archived: 0,
+      updatedAt: '',
     };
     expect(calculatePrecision(stats)).toBeNull();
   });
 
   it('calculatePrecision returns 1.0 when all promoted', () => {
     const stats: InsightStats = {
-      total_captured: 5, l2_direct: 0, l5_captured: 5,
-      l5_promoted: 5, l5_archived: 0, updatedAt: '',
+      total_captured: 5,
+      l2_direct: 0,
+      l5_captured: 5,
+      l5_promoted: 5,
+      l5_archived: 0,
+      updatedAt: '',
     };
     expect(calculatePrecision(stats)).toBe(1.0);
   });
 
   it('calculatePrecision returns 0.0 when all archived', () => {
     const stats: InsightStats = {
-      total_captured: 5, l2_direct: 0, l5_captured: 5,
-      l5_promoted: 0, l5_archived: 5, updatedAt: '',
+      total_captured: 5,
+      l2_direct: 0,
+      l5_captured: 5,
+      l5_promoted: 0,
+      l5_archived: 5,
+      updatedAt: '',
     };
     expect(calculatePrecision(stats)).toBe(0.0);
   });

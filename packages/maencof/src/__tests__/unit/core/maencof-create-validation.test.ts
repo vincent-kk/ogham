@@ -36,7 +36,9 @@ describe('handleMaencofCreate — frontmatter validation gate', () => {
     });
     expect(result.success).toBe(false);
     expect(result.message).toContain('Frontmatter validation failed');
-    expect(result.message).toContain('sub_layer is only valid for Layer 3 or 5');
+    expect(result.message).toContain(
+      'sub_layer is only valid for Layer 3 or 5',
+    );
 
     // 파일이 디스크에 쓰이지 않았는지 확인 (04_Action 디렉토리 자체가 없어야 함)
     await expect(access(join(vault, '04_Action'))).rejects.toThrow();
@@ -68,6 +70,8 @@ describe('handleMaencofCreate — frontmatter validation gate', () => {
       title: 'l1-bad',
     });
     expect(result.success).toBe(false);
-    expect(result.message).toContain('sub_layer is only valid for Layer 3 or 5');
+    expect(result.message).toContain(
+      'sub_layer is only valid for Layer 3 or 5',
+    );
   });
 });

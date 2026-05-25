@@ -12,8 +12,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MetadataStore } from '../../../core/indexer/metadata-store/metadata-store.js';
 import { mergeStaleNodesIntoGraph } from '../../../mcp/server/middlewares/partial-reindex.js';
 import * as queryEngine from '../../../search/query-engine/query-engine.js';
-import type { InvertedIndex, KnowledgeGraph, KnowledgeNode } from '../../../types/graph.js';
 import type { NodeId } from '../../../types/common.js';
+import type {
+  InvertedIndex,
+  KnowledgeGraph,
+  KnowledgeNode,
+} from '../../../types/graph.js';
 
 let vaultDir: string;
 
@@ -84,7 +88,12 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
         [b.id, b],
       ]),
       edges: [
-        { from: 'a.md' as NodeId, to: 'b.md' as NodeId, type: 'LINK', weight: 0.5 },
+        {
+          from: 'a.md' as NodeId,
+          to: 'b.md' as NodeId,
+          type: 'LINK',
+          weight: 0.5,
+        },
       ],
       builtAt: '2026-01-01',
       nodeCount: 2,
@@ -112,7 +121,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
       builtAt: '2026-01-01',
       nodeCount: 1,
       edgeCount: 0,
-      edgeWeightMap: new Map([['a.md' as NodeId, new Map([['x' as NodeId, 0.7]])]]),
+      edgeWeightMap: new Map([
+        ['a.md' as NodeId, new Map([['x' as NodeId, 0.7]])],
+      ]),
       adjacencyList: new Map([['a.md' as NodeId, ['x' as NodeId]]]),
     };
 
@@ -124,7 +135,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
 
     await mergeStaleNodesIntoGraph(vaultDir, graph);
-    expect(graph.edgeWeightMap?.get('a.md' as NodeId)?.get('x' as NodeId)).toBe(0.7);
+    expect(graph.edgeWeightMap?.get('a.md' as NodeId)?.get('x' as NodeId)).toBe(
+      0.7,
+    );
     expect(graph.adjacencyList?.get('a.md' as NodeId)).toEqual(['x']);
   });
 
@@ -141,8 +154,18 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
         [b.id, b],
       ]),
       edges: [
-        { from: 'a.md' as NodeId, to: 'b.md' as NodeId, type: 'LINK', weight: 1 },
-        { from: 'b.md' as NodeId, to: 'a.md' as NodeId, type: 'LINK', weight: 1 },
+        {
+          from: 'a.md' as NodeId,
+          to: 'b.md' as NodeId,
+          type: 'LINK',
+          weight: 1,
+        },
+        {
+          from: 'b.md' as NodeId,
+          to: 'a.md' as NodeId,
+          type: 'LINK',
+          weight: 1,
+        },
       ],
       builtAt: '2026-01-01',
       nodeCount: 2,
@@ -155,7 +178,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     ]);
 
     expect(graph.nodes.has('a.md' as NodeId)).toBe(false);
-    expect(graph.edges.find((e) => e.from === 'a.md' || e.to === 'a.md')).toBeUndefined();
+    expect(
+      graph.edges.find((e) => e.from === 'a.md' || e.to === 'a.md'),
+    ).toBeUndefined();
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
     expect(graph.invertedIndex?.get('t')?.has('a.md' as NodeId)).toBe(false);
     expect(graph.invertedIndex?.get('t')?.has('b.md' as NodeId)).toBe(true);
@@ -189,7 +214,9 @@ describe('mergeStaleNodesIntoGraph (Hybrid)', () => {
     expect(graph.invertedIndex?.get('alpha')).toBeUndefined();
     // 옛 tag 't' 는 사라지고 새 tag 'renamed' 가 등장
     expect(graph.invertedIndex?.get('t')).toBeUndefined();
-    expect(graph.invertedIndex?.get('renamed')?.has('a.md' as NodeId)).toBe(true);
+    expect(graph.invertedIndex?.get('renamed')?.has('a.md' as NodeId)).toBe(
+      true,
+    );
     // 새 title term 'beta' 가 등장
     expect(graph.invertedIndex?.get('beta')?.has('a.md' as NodeId)).toBe(true);
   });
@@ -294,9 +321,7 @@ describe('mergeStaleNodesIntoGraph queryCache invalidation', () => {
       builtAt: '2026-01-01',
       nodeCount: 1,
       edgeCount: 0,
-      invertedIndex: new Map([
-        ['alpha', new Set<NodeId>(['a.md' as NodeId])],
-      ]),
+      invertedIndex: new Map([['alpha', new Set<NodeId>(['a.md' as NodeId])]]),
     };
 
     // 사전 query 1회 → cache 저장

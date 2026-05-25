@@ -2,10 +2,10 @@
  * @file dag-converter.ts
  * @description 순환 탐지 (DFS) + DAG 변환 — 순환 엣지 가중치를 0.1로 약화, 레이어 기반 방향성 보정
  */
+import { CYCLE_WEIGHT } from '../../constants/weights.js';
 import { Layer } from '../../types/common.js';
 import type { NodeId } from '../../types/common.js';
 import type { KnowledgeEdge, KnowledgeGraph } from '../../types/graph.js';
-import { CYCLE_WEIGHT } from '../../constants/weights.js';
 
 /** DAG 변환 결과 */
 export interface DAGConvertResult {

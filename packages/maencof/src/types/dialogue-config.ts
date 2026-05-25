@@ -18,4 +18,3 @@ export const DialogueConfigSchema = z.object({
 });
 
 export type DialogueConfig = z.infer<typeof DialogueConfigSchema>;
-

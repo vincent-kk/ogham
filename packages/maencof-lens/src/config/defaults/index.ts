@@ -1,1 +1,6 @@
-export { DEFAULT_LAYERS, CONFIG_DIR, CONFIG_FILE, CONFIG_VERSION } from './defaults.js';
+export {
+  DEFAULT_LAYERS,
+  CONFIG_DIR,
+  CONFIG_FILE,
+  CONFIG_VERSION,
+} from "./defaults.js";

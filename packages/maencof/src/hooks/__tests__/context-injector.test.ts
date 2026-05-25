@@ -38,7 +38,12 @@ function writeIndex(nodes: Array<{ layer?: number; domain?: string }>): void {
   );
   writeFileSync(
     join(vaultDir, '.maencof', 'graph-meta.json'),
-    JSON.stringify({ schemaVersion: 2, builtAt: 'x', nodeCount: nodes.length, edgeCount: 0 }),
+    JSON.stringify({
+      schemaVersion: 2,
+      builtAt: 'x',
+      nodeCount: nodes.length,
+      edgeCount: 0,
+    }),
     'utf-8',
   );
 }

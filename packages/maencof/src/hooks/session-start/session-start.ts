@@ -6,7 +6,12 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { EXPECTED_ARCHITECTURE_VERSION } from '../../constants/architecture.js';
 import { buildDefaultDirective } from '../../constants/directive-template.js';
+import {
+  META_SKILL_MAX_CHARS,
+  META_SKILL_TAG,
+} from '../../constants/session-start.js';
 import {
   mergeMaencofSection,
   readMaencofSection,
@@ -24,7 +29,6 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../../core/insight-stats/index.js';
-import { EXPECTED_ARCHITECTURE_VERSION } from '../../constants/architecture.js';
 import type { CompanionIdentityMinimal } from '../../types/companion-guard.js';
 import { isValidCompanionIdentity } from '../../types/companion-guard.js';
 import type { VaultVersionInfo } from '../../types/setup.js';
@@ -33,11 +37,6 @@ import { provisionMissingConfigs } from '../config-provisioner/index.js';
 import { claudeMdPath, isMaencofVault, metaPath } from '../shared/index.js';
 
 import META_SKILL_BODY from './meta-skill-body.md';
-
-import {
-  META_SKILL_MAX_CHARS,
-  META_SKILL_TAG,
-} from '../../constants/session-start.js';
 
 export interface SessionStartInput {
   session_id?: string;

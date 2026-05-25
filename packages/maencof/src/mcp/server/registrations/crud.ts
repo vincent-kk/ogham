@@ -15,11 +15,7 @@ import { handleMaencofDelete } from '../../tools/maencof-delete/index.js';
 import { handleMaencofMove } from '../../tools/maencof-move/index.js';
 import { handleMaencofRead } from '../../tools/maencof-read/index.js';
 import { handleMaencofUpdate } from '../../tools/maencof-update/index.js';
-
-import {
-  registerMutateTool,
-  registerReadTool,
-} from '../middlewares/index.js';
+import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerCrudTools(server: McpServer): void {
   // ─── create (mutate) ───────────────────────────────────────
@@ -30,30 +26,45 @@ export function registerCrudTools(server: McpServer): void {
       description:
         'Creates a new memory document in the knowledge tree. Frontmatter and H1 title are auto-generated — do NOT include them in the content field.',
       inputSchema: z.object({
-        layer: z.number().int().min(1).max(5).describe(
-          'Document Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
-        ),
+        layer: z
+          .number()
+          .int()
+          .min(1)
+          .max(5)
+          .describe(
+            'Document Layer (1=Core, 2=Derived, 3=External, 4=Action, 5=Context)',
+          ),
         tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
-        content: z.string().describe(
-          'Document body (markdown). Do NOT include frontmatter (---) or H1 heading — they are auto-generated.',
-        ),
+        content: z
+          .string()
+          .describe(
+            'Document body (markdown). Do NOT include frontmatter (---) or H1 heading — they are auto-generated.',
+          ),
         title: z.string().optional().describe('Document title (optional)'),
-        filename: z.string().optional().describe(
-          'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234"',
-        ),
+        filename: z
+          .string()
+          .optional()
+          .describe(
+            'Filename hint (optional, auto-generated if omitted). Supports subdirectory paths like "cve/CVE-2025-1234"',
+          ),
         source: z.string().optional().describe('External source (for Layer 3)'),
-        expires: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe(
-          'Expiry date YYYY-MM-DD (for Layer 4)',
-        ),
+        expires: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional()
+          .describe('Expiry date YYYY-MM-DD (for Layer 4)'),
         sub_layer: z
           .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
           .optional()
           .describe(
             'Sub-layer (L3: relational/structural/topical, L5: buffer/boundary)',
           ),
-        mentioned_persons: z.array(z.string()).optional().describe(
-          'People mentioned in this document (e.g., ["홍길동", "Alice"])',
-        ),
+        mentioned_persons: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'People mentioned in this document (e.g., ["홍길동", "Alice"])',
+          ),
       }),
     },
     async (vaultPath, args) =>
@@ -86,12 +97,17 @@ export function registerCrudTools(server: McpServer): void {
         'Reads a document and returns Frontmatter + body. When include_related=true, also includes SA-based related documents.',
       inputSchema: z.object({
         path: z.string().describe('Document path (relative to vault)'),
-        depth: z.number().int().min(1).max(10).optional().describe(
-          'SA hop count (default 2)',
-        ),
-        include_related: z.boolean().optional().describe(
-          'Include related documents (default true)',
-        ),
+        depth: z
+          .number()
+          .int()
+          .min(1)
+          .max(10)
+          .optional()
+          .describe('SA hop count (default 2)'),
+        include_related: z
+          .boolean()
+          .optional()
+          .describe('Include related documents (default true)'),
       }),
     },
     async (vaultPath, args) => handleMaencofRead(vaultPath, args),
@@ -107,16 +123,23 @@ export function registerCrudTools(server: McpServer): void {
         'Updates an existing document. The updated field in Frontmatter is automatically refreshed.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
-        content: z.string().optional().describe(
-          'New content (markdown, preserves existing if omitted)',
-        ),
+        content: z
+          .string()
+          .optional()
+          .describe('New content (markdown, preserves existing if omitted)'),
         frontmatter: z
           .object({
             tags: z.array(z.string()).optional(),
             title: z.string().optional(),
-            layer: z.number().int().min(1).max(5).optional().describe(
-              'Layer change (1-5, use when correcting Layer violations)',
-            ),
+            layer: z
+              .number()
+              .int()
+              .min(1)
+              .max(5)
+              .optional()
+              .describe(
+                'Layer change (1-5, use when correcting Layer violations)',
+              ),
             confidence: z.number().min(0).max(1).optional(),
             schedule: z.string().optional(),
             sub_layer: z
@@ -146,12 +169,19 @@ export function registerCrudTools(server: McpServer): void {
           .describe(
             'Required for L1. Category: identity_evolution | error_correction | info_update | consolidation | reinterpretation',
           ),
-        justification: z.string().min(20).optional().describe(
-          'Required for L1. Why this Core Identity change is needed (min 20 chars)',
-        ),
-        confirm_l1: z.boolean().optional().describe(
-          'Required for L1. Set true to confirm intentional modification',
-        ),
+        justification: z
+          .string()
+          .min(20)
+          .optional()
+          .describe(
+            'Required for L1. Why this Core Identity change is needed (min 20 chars)',
+          ),
+        confirm_l1: z
+          .boolean()
+          .optional()
+          .describe(
+            'Required for L1. Set true to confirm intentional modification',
+          ),
       }),
     },
     async (vaultPath, args) => handleMaencofUpdate(vaultPath, args),
@@ -167,9 +197,10 @@ export function registerCrudTools(server: McpServer): void {
         'Deletes a document. Layer 1 documents cannot be deleted. Requires force=true if backlinks exist.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
-        force: z.boolean().optional().describe(
-          'Ignore backlink warnings (default false)',
-        ),
+        force: z
+          .boolean()
+          .optional()
+          .describe('Ignore backlink warnings (default false)'),
       }),
     },
     async (vaultPath, args) => handleMaencofDelete(vaultPath, args),
@@ -185,13 +216,19 @@ export function registerCrudTools(server: McpServer): void {
         'Moves a document to a different Layer (transition). Layer 1 documents cannot be moved.',
       inputSchema: z.object({
         path: z.string().describe('Document path'),
-        target_layer: z.number().int().min(1).max(5).describe(
-          'Target Layer (1-5)',
-        ),
+        target_layer: z
+          .number()
+          .int()
+          .min(1)
+          .max(5)
+          .describe('Target Layer (1-5)'),
         reason: z.string().optional().describe('Reason for transition'),
-        confidence: z.number().min(0).max(1).optional().describe(
-          'Confidence score (for Layer 3→2 transition)',
-        ),
+        confidence: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe('Confidence score (for Layer 3→2 transition)'),
         target_sub_layer: z
           .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
           .optional()

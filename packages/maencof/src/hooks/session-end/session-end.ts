@@ -13,14 +13,19 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { appendDailynoteEntry, formatTime } from '../../core/dailynote-writer/index.js';
+import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
+import {
+  appendDailynoteEntry,
+  formatTime,
+} from '../../core/dailynote-writer/index.js';
 import { isSessionRecapDisabled } from '../../core/dialogue-config/index.js';
 import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { readPendingNotification } from '../../core/insight-stats/index.js';
-
-import { removeSessionFiles, removeTurnContext } from '../cache-manager/index.js';
+import {
+  removeSessionFiles,
+  removeTurnContext,
+} from '../cache-manager/index.js';
 import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
-import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
 
 export interface SessionEndInput {
   session_id?: string;
@@ -64,7 +69,11 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     try {
       writeFileSync(filePath, summary, 'utf-8');
     } catch (e) {
-      appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
+      appendErrorLogSafe(cwd, {
+        hook: 'session-end',
+        error: String(e),
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 
@@ -77,7 +86,11 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     // turn-context는 session-scope이므로 sessionId와 무관하게 종료 시 폐기
     removeTurnContext(cwd);
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-end',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // Clean up old session files
@@ -98,7 +111,11 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
       description: `Session ended${detail}`,
     });
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-end',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // Build session recap (off-switch honored)
@@ -109,7 +126,11 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
       if (recap !== null) result.message = recap;
     }
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'session-end', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'session-end',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return result;
@@ -124,10 +145,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
  *
  * Returns null when there is no meaningful content to report (avoids noise).
  */
-function buildSessionRecap(
-  input: SessionEndInput,
-  cwd: string,
-): string | null {
+function buildSessionRecap(input: SessionEndInput, cwd: string): string | null {
   const files = input.files_modified ?? [];
   const pending = readPendingNotification(cwd);
   const captures = pending?.captures ?? [];

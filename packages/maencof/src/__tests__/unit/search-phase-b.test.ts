@@ -8,7 +8,10 @@ import { buildAdjacencyList } from '../../core/graph-builder/graph-builder.js';
 import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
 import { handleKgContext } from '../../mcp/tools/kg-context/kg-context.js';
 import { extractBestSnippet } from '../../search/context-assembler/context-assembler.js';
-import { query, resolveSeedNodes } from '../../search/query-engine/query-engine.js';
+import {
+  query,
+  resolveSeedNodes,
+} from '../../search/query-engine/query-engine.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,

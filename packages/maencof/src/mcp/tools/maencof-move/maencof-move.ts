@@ -6,6 +6,11 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
+import {
+  L3_SUBDIR,
+  L5_SUBDIR,
+  LAYER_DIR,
+} from '../../../constants/architecture.js';
 import { FRONTMATTER_REGEX } from '../../../constants/regexes.js';
 import {
   buildKnowledgeNode,
@@ -14,13 +19,11 @@ import {
 import { parseYamlFrontmatter } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer } from '../../../types/common.js';
 import { Layer } from '../../../types/common.js';
-import {
-  L3_SUBDIR,
-  L5_SUBDIR,
-  LAYER_DIR,
-} from '../../../constants/architecture.js';
 import { validateFrontmatter } from '../../../types/frontmatter.js';
-import type { MaencofCrudResult, MaencofMoveInput } from '../../../types/mcp.js';
+import type {
+  MaencofCrudResult,
+  MaencofMoveInput,
+} from '../../../types/mcp.js';
 
 /**
  * Frontmatter의 layer 필드를 갱신한다.

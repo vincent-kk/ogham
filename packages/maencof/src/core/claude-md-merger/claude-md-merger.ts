@@ -13,8 +13,15 @@
  */
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 
-export { MAENCOF_START_MARKER, MAENCOF_END_MARKER } from '../../constants/markers.js';
-import { MAENCOF_START_MARKER, MAENCOF_END_MARKER } from '../../constants/markers.js';
+import {
+  MAENCOF_END_MARKER,
+  MAENCOF_START_MARKER,
+} from '../../constants/markers.js';
+
+export {
+  MAENCOF_START_MARKER,
+  MAENCOF_END_MARKER,
+} from '../../constants/markers.js';
 
 /** 머지 결과 */
 export interface MergeResult {

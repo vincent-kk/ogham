@@ -9,7 +9,9 @@ import type { KnowledgeEdge, KnowledgeNode } from '../../../types/graph.js';
  * 노드 경로를 디렉토리별로 그룹화한다.
  * key: 디렉토리 경로, value: 해당 디렉토리 노드 ID 목록
  */
-export function buildDirectoryMap(nodes: KnowledgeNode[]): Map<string, NodeId[]> {
+export function buildDirectoryMap(
+  nodes: KnowledgeNode[],
+): Map<string, NodeId[]> {
   const dirMap = new Map<string, NodeId[]>();
   for (const node of nodes) {
     const dir = getDirectory(node.path);
@@ -65,7 +67,9 @@ export function buildHierarchyEdges(
 /**
  * SIBLING 엣지 생성: 동일 디렉토리 내 노드 쌍 (양방향)
  */
-export function buildSiblingEdges(dirMap: Map<string, NodeId[]>): KnowledgeEdge[] {
+export function buildSiblingEdges(
+  dirMap: Map<string, NodeId[]>,
+): KnowledgeEdge[] {
   const edges: KnowledgeEdge[] = [];
   for (const [, siblings] of dirMap) {
     if (siblings.length < 2) continue;

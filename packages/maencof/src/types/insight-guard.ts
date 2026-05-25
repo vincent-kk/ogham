@@ -6,8 +6,8 @@
  * Zod를 import하지 않아 hook 번들 크기를 보전한다.
  * 타입 정의는 insight.ts의 Zod 스키마와 동기화 유지할 것.
  */
-
 import { DEFAULT_INSIGHT_CONFIG } from '../constants/insight.js';
+
 import type { InsightConfig } from './insight.js';
 
 /** Insight Config 최소 인터페이스 (hook용). zod 객체 형태와 등가. */
@@ -49,11 +49,10 @@ function normalizeMaxCaptures(v: unknown): number {
     : DEFAULT_INSIGHT_CONFIG.max_captures_per_session;
 }
 
-function normalizeCategoryFilter(
-  v: unknown,
-): InsightConfig['category_filter'] {
+function normalizeCategoryFilter(v: unknown): InsightConfig['category_filter'] {
   const def = DEFAULT_INSIGHT_CONFIG.category_filter;
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) return { ...def };
+  if (v === null || typeof v !== 'object' || Array.isArray(v))
+    return { ...def };
   const obj = v as Record<string, unknown>;
   return {
     principle: normalizeBoolean(obj.principle, def.principle),
@@ -75,7 +74,9 @@ export function normalizeInsightConfig(raw: unknown): InsightConfig {
   return {
     enabled: normalizeBoolean(obj.enabled, DEFAULT_INSIGHT_CONFIG.enabled),
     sensitivity: normalizeSensitivity(obj.sensitivity),
-    max_captures_per_session: normalizeMaxCaptures(obj.max_captures_per_session),
+    max_captures_per_session: normalizeMaxCaptures(
+      obj.max_captures_per_session,
+    ),
     notify: normalizeBoolean(obj.notify, DEFAULT_INSIGHT_CONFIG.notify),
     category_filter: normalizeCategoryFilter(obj.category_filter),
   };

@@ -10,7 +10,6 @@ import { resolve } from 'node:path';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../../search/query-engine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-
 import { ensureFreshGraphNonBlocking } from '../middlewares/freshness-guard.js';
 
 /** Blocked prefixes for global config path access */

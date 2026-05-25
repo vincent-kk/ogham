@@ -9,7 +9,6 @@ import {
   contextCacheManageInputSchema,
   handleContextCacheManage,
 } from '../../tools/context-cache-manage/index.js';
-
 import { registerReadTool } from '../middlewares/index.js';
 
 export function registerCacheTools(server: McpServer): void {

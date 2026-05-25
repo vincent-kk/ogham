@@ -5,8 +5,10 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-export { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
 import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
+
+export { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
+
 export { LAYER1_PREFIX } from '../../constants/directories.js';
 export { isLayer1Path } from '../../types/layer.js';
 

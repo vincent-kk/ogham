@@ -2,12 +2,7 @@
  * @file read-remove-section.test.ts
  * @description readMaencofSection, removeMaencofSection, ClaudeMdMerger 클래스 단위 테스트
  */
-import {
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 

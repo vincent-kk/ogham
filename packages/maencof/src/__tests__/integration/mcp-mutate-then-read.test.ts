@@ -8,18 +8,14 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleMaencofCreate } from '../../mcp/tools/maencof-create/index.js';
-import { handleMaencofDelete } from '../../mcp/tools/maencof-delete/index.js';
-import { handleKgSearch } from '../../mcp/tools/kg-search/index.js';
-import { handleKgBuild } from '../../mcp/tools/kg-build/index.js';
-import {
-  invalidateCache,
-} from '../../mcp/server/graph-cache/index.js';
-import {
-  _peekRebuildInProgress,
-} from '../../mcp/server/middlewares/background-rebuild.js';
+import { invalidateCache } from '../../mcp/server/graph-cache/index.js';
+import { _peekRebuildInProgress } from '../../mcp/server/middlewares/background-rebuild.js';
 import { ensureFreshGraphNonBlocking } from '../../mcp/server/middlewares/freshness-guard.js';
 import { runMutateSideEffects } from '../../mcp/server/middlewares/mutate-side-effects.js';
+import { handleKgBuild } from '../../mcp/tools/kg-build/index.js';
+import { handleKgSearch } from '../../mcp/tools/kg-search/index.js';
+import { handleMaencofCreate } from '../../mcp/tools/maencof-create/index.js';
+import { handleMaencofDelete } from '../../mcp/tools/maencof-delete/index.js';
 import type { NodeId } from '../../types/common.js';
 
 let vaultDir: string;
@@ -135,9 +131,8 @@ describe('mutate → immediate read pipeline', () => {
   });
 
   it('background rebuild 가 트리거되어도 read 응답을 await 하지 않는다', async () => {
-    const { MetadataStore } = await import(
-      '../../core/indexer/metadata-store/metadata-store.js'
-    );
+    const { MetadataStore } =
+      await import('../../core/indexer/metadata-store/metadata-store.js');
     const store = new MetadataStore(vaultDir);
     await store.appendStaleEntries(
       Array.from({ length: 14 }, (_, i) => ({

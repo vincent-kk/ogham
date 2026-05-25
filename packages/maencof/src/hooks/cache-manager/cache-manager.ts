@@ -16,7 +16,7 @@ import {
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { MAX_PINNED_NODES, CACHE_TTL_MS } from '../../constants/performance.js';
+import { CACHE_TTL_MS, MAX_PINNED_NODES } from '../../constants/performance.js';
 
 // Cache directory layout:
 //   {cwdHash}/session-context-{hash}   — session inject marker (24h TTL)

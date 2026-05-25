@@ -77,9 +77,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
-    expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'read',
-    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain('read');
     expect(result.hookSpecificOutput?.additionalContext).toContain('[maencof]');
   });
 
@@ -168,9 +166,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
-    expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'read',
-    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain('read');
   });
 
   it('비마크다운 파일은 hookSpecificOutput이 없다', () => {

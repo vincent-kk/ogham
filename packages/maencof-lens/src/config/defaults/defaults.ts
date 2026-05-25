@@ -3,4 +3,4 @@ export {
   CONFIG_DIR,
   CONFIG_FILE,
   CONFIG_VERSION,
-} from '../../constants/config.js';
+} from "../../constants/config.js";

@@ -6,8 +6,8 @@
  * Zod를 import하지 않아 hook 번들 크기를 보전한다.
  * 타입 정의는 dialogue-config.ts의 Zod 스키마와 동기화 유지할 것.
  */
-
 import { DEFAULT_DIALOGUE_CONFIG } from '../constants/dialogue.js';
+
 import type { DialogueConfig } from './dialogue-config.js';
 
 /** Dialogue Config 최소 인터페이스 (hook용). zod 객체 형태와 등가. */
@@ -38,7 +38,8 @@ function normalizePositiveInt(v: unknown, fallback: number): number {
 
 function normalizeInjection(v: unknown): DialogueConfig['injection'] {
   const def = DEFAULT_DIALOGUE_CONFIG.injection;
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) return { ...def };
+  if (v === null || typeof v !== 'object' || Array.isArray(v))
+    return { ...def };
   const obj = v as Record<string, unknown>;
   return {
     enabled: normalizeBoolean(obj.enabled, def.enabled),
@@ -48,7 +49,8 @@ function normalizeInjection(v: unknown): DialogueConfig['injection'] {
 
 function normalizeSessionRecap(v: unknown): DialogueConfig['session_recap'] {
   const def = DEFAULT_DIALOGUE_CONFIG.session_recap;
-  if (v === null || typeof v !== 'object' || Array.isArray(v)) return { ...def };
+  if (v === null || typeof v !== 'object' || Array.isArray(v))
+    return { ...def };
   const obj = v as Record<string, unknown>;
   return {
     enabled: normalizeBoolean(obj.enabled, def.enabled),
@@ -60,11 +62,12 @@ function normalizeSessionRecap(v: unknown): DialogueConfig['session_recap'] {
  * Zod 스키마의 .default(...) 흐름을 수동으로 재현한다.
  */
 export function normalizeDialogueConfig(raw: unknown): DialogueConfig {
-  if (!isValidDialogueConfig(raw)) return {
-    ...DEFAULT_DIALOGUE_CONFIG,
-    injection: { ...DEFAULT_DIALOGUE_CONFIG.injection },
-    session_recap: { ...DEFAULT_DIALOGUE_CONFIG.session_recap },
-  };
+  if (!isValidDialogueConfig(raw))
+    return {
+      ...DEFAULT_DIALOGUE_CONFIG,
+      injection: { ...DEFAULT_DIALOGUE_CONFIG.injection },
+      session_recap: { ...DEFAULT_DIALOGUE_CONFIG.session_recap },
+    };
   const obj = raw as Record<string, unknown>;
   return {
     schema_version: normalizePositiveInt(
