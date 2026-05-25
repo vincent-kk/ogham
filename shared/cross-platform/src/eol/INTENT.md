@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File                  | Role                              |
-| --------------------- | --------------------------------- |
-| `index.ts`            | barrel                            |
-| `normalize-eol.ts`    | `normalizeEol(s)` 단일 함수       |
+| File               | Role                        |
+| ------------------ | --------------------------- |
+| `index.ts`         | barrel                      |
+| `normalize-eol.ts` | `normalizeEol(s)` 단일 함수 |
 
 ## Conventions
 

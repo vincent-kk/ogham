@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File                      | Role                                            |
-| ------------------------- | ----------------------------------------------- |
-| `index.ts`                | barrel                                          |
-| `generate-windows-cmd.ts` | `generateWindowsCmd(opts)` — .cmd 텍스트 emit   |
+| File                      | Role                                          |
+| ------------------------- | --------------------------------------------- |
+| `index.ts`                | barrel                                        |
+| `generate-windows-cmd.ts` | `generateWindowsCmd(opts)` — .cmd 텍스트 emit |
 
 ## Conventions
 

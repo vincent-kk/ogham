@@ -10,7 +10,8 @@ describe("env", () => {
     Object.defineProperty(process, "platform", { value: originalPlatform });
     if (originalHome !== undefined) process.env.HOME = originalHome;
     else delete process.env.HOME;
-    if (originalUserProfile !== undefined) process.env.USERPROFILE = originalUserProfile;
+    if (originalUserProfile !== undefined)
+      process.env.USERPROFILE = originalUserProfile;
     else delete process.env.USERPROFILE;
     vi.restoreAllMocks();
   });

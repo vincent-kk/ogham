@@ -4,13 +4,13 @@
 
 ## Structure
 
-| File             | Role                                              |
-| ---------------- | ------------------------------------------------- |
-| `index.ts`       | barrel                                            |
-| `types.ts`       | SpawnOptions / SpawnResult                        |
-| `spawn-cli.ts`   | 메인 Promise-based spawn 래퍼                     |
-| `exec-cli.ts`    | `spawnCli` thin alias (이름 호환성)                |
-| `os-timeout.ts`  | win32 ×3, floor 5000ms                            |
+| File            | Role                                |
+| --------------- | ----------------------------------- |
+| `index.ts`      | barrel                              |
+| `types.ts`      | SpawnOptions / SpawnResult          |
+| `spawn-cli.ts`  | 메인 Promise-based spawn 래퍼       |
+| `exec-cli.ts`   | `spawnCli` thin alias (이름 호환성) |
+| `os-timeout.ts` | win32 ×3, floor 5000ms              |
 
 ## Conventions
 

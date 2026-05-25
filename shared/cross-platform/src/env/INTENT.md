@@ -4,10 +4,10 @@ OS 분기 및 환경변수 추상화. `process.platform` / `process.env.HOME|USE
 
 ## Structure
 
-| File           | Role                                               |
-| -------------- | -------------------------------------------------- |
-| `index.ts`     | barrel — `env` 단일 export                          |
-| `env.ts`       | `home()`, `isWindows`, `isMacOS`, `isLinux`, `pathDelimiter`, `eol` |
+| File       | Role                                                                |
+| ---------- | ------------------------------------------------------------------- |
+| `index.ts` | barrel — `env` 단일 export                                          |
+| `env.ts`   | `home()`, `isWindows`, `isMacOS`, `isLinux`, `pathDelimiter`, `eol` |
 
 ## Conventions
 

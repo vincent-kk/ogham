@@ -444,14 +444,14 @@ function osTimeout(ms: number): number {
 
 **PR-A (1d) — 워크스페이스 + 빌드 파이프라인 골격**
 
-| 변경 파일                                         | 변경 내용                                                                                                                                                                                                       |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 변경 파일                                       | 변경 내용                                                                                                                                                                                                       |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `shared/cross-platform/package.json`            | `private: true`, `name: "@ogham/cross-platform"`, `type: "module"`, `main: "./dist/index.js"`, `types: "./dist/index.d.ts"`, `devDependencies` 에 `cross-spawn ^7`, `which ^4`, `env-paths ^3` (또는 자체 구현) |
 | `shared/cross-platform/tsconfig.build.json`     | ESM declaration true, outDir `./dist`                                                                                                                                                                           |
 | `shared/cross-platform/INTENT.md` + `DETAIL.md` | FCA-AI 규약대로 — 50 line 이내, 3-tier 경계                                                                                                                                                                     |
 | `shared/cross-platform/src/index.ts`            | barrel only (서브 모듈 도착 시점에 채워짐)                                                                                                                                                                      |
-| `vitest.config.ts`                                | 워크스페이스 추가                                                                                                                                                                                               |
-| `.github/workflows/ci.yml`                        | 매트릭스 확장: `os: [ubuntu-latest, macos-latest, windows-latest]` × `node: [20, 22]`                                                                                                                           |
+| `vitest.config.ts`                              | 워크스페이스 추가                                                                                                                                                                                               |
+| `.github/workflows/ci.yml`                      | 매트릭스 확장: `os: [ubuntu-latest, macos-latest, windows-latest]` × `node: [20, 22]`                                                                                                                           |
 
 **완료 기준 (PR-A)**: 빈 워크스페이스가 빌드되고 매트릭스 CI 가 green.
 

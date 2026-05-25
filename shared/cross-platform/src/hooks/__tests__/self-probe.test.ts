@@ -27,7 +27,9 @@ describe("selfProbe", () => {
     delete process.env.CLAUDE_PLUGIN_ROOT;
     const result = await selfProbe();
     expect(result.pluginRootResolved).toBe(false);
-    expect(result.errors.some((e) => e.includes("CLAUDE_PLUGIN_ROOT"))).toBe(true);
+    expect(result.errors.some((e) => e.includes("CLAUDE_PLUGIN_ROOT"))).toBe(
+      true,
+    );
   });
 
   it("flags PATH empty when PATH is cleared", async () => {

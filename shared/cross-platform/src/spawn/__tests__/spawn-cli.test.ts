@@ -3,7 +3,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { spawnCli } from "../spawn-cli.js";
 
-const fixturesDir = resolve(fileURLToPath(new URL("./fixtures/", import.meta.url)));
+const fixturesDir = resolve(
+  fileURLToPath(new URL("./fixtures/", import.meta.url)),
+);
 const node = process.execPath;
 
 function fixture(name: string): string {
@@ -62,7 +64,8 @@ describe("spawnCli", () => {
   it("returns spawnError or non-zero code for an unknown binary", async () => {
     const result = await spawnCli("non-existent-binary-xyz", []);
     const failed =
-      result.spawnError !== undefined || (result.code !== 0 && result.code !== null);
+      result.spawnError !== undefined ||
+      (result.code !== 0 && result.code !== null);
     expect(failed).toBe(true);
   });
 });

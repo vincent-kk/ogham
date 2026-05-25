@@ -4,13 +4,13 @@ Claude Code hook 진입점 단일화. (1) `runHookEntry` 가 `process.execPath` 
 
 ## Structure
 
-| File              | Role                                                 |
-| ----------------- | ---------------------------------------------------- |
-| `index.ts`        | barrel                                               |
-| `types.ts`        | ProbeResult                                          |
-| `bootstrap.ts`    | runHookEntry — spawnSync(process.execPath, [target]) |
-| `self-probe.ts`   | selfProbe — node/git/PATH/pluginRoot 진단            |
-| `error-log.ts`    | logHookFailure — JSON append, 256 KB cap rotation    |
+| File            | Role                                                 |
+| --------------- | ---------------------------------------------------- |
+| `index.ts`      | barrel                                               |
+| `types.ts`      | ProbeResult                                          |
+| `bootstrap.ts`  | runHookEntry — spawnSync(process.execPath, [target]) |
+| `self-probe.ts` | selfProbe — node/git/PATH/pluginRoot 진단            |
+| `error-log.ts`  | logHookFailure — JSON append, 256 KB cap rotation    |
 
 ## Conventions
 

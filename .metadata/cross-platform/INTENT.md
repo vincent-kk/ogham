@@ -4,12 +4,12 @@
 
 ## Structure
 
-| File                                  | Role                                                                |
-| ------------------------------------- | ------------------------------------------------------------------- |
-| `PLAN.md`                             | 인벤토리 → 카테고리 → 시스템 설계 → PR 분할 → 합격 기준              |
-| `bug-windows-cogair-checkexec.md`     | cogair `checkExecutable` 1차 진단 (재현 절차 포함)                  |
-| `bug-windows-cogair-comprehensive.md` | cogair Windows 종합 (provider 감지 / 디스패치 / 타임아웃 3 증상)    |
-| `bug-windows-maencof-hook.md`         | maencof SessionStart 페르소나 미주입 (hook silent failure)          |
+| File                                  | Role                                                             |
+| ------------------------------------- | ---------------------------------------------------------------- |
+| `PLAN.md`                             | 인벤토리 → 카테고리 → 시스템 설계 → PR 분할 → 합격 기준          |
+| `bug-windows-cogair-checkexec.md`     | cogair `checkExecutable` 1차 진단 (재현 절차 포함)               |
+| `bug-windows-cogair-comprehensive.md` | cogair Windows 종합 (provider 감지 / 디스패치 / 타임아웃 3 증상) |
+| `bug-windows-maencof-hook.md`         | maencof SessionStart 페르소나 미주입 (hook silent failure)       |
 
 ## Conventions
 

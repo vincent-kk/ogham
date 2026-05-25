@@ -4,10 +4,10 @@ OS 별 경로 추상화. home / tmp / config / cache / plugin cache 단일 진�
 
 ## Structure
 
-| File         | Role                                                     |
-| ------------ | -------------------------------------------------------- |
-| `index.ts`   | barrel                                                   |
-| `paths.ts`   | `paths.home/tmp/configDir/cacheDir/pluginCache/normalize` |
+| File       | Role                                                      |
+| ---------- | --------------------------------------------------------- |
+| `index.ts` | barrel                                                    |
+| `paths.ts` | `paths.home/tmp/configDir/cacheDir/pluginCache/normalize` |
 
 ## Conventions
 

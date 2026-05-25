@@ -3,7 +3,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { runHookEntry } from "../bootstrap.js";
 
-const fixturesDir = resolve(fileURLToPath(new URL("./fixtures/", import.meta.url)));
+const fixturesDir = resolve(
+  fileURLToPath(new URL("./fixtures/", import.meta.url)),
+);
 function fixture(name: string): string {
   return resolve(fixturesDir, name);
 }
@@ -22,6 +24,8 @@ describe("runHookEntry", () => {
   });
 
   it("forwards argv to the child", async () => {
-    expect(await runHookEntry(fixture("hook-argv.mjs"), ["arg1", "arg2"])).toBe(0);
+    expect(await runHookEntry(fixture("hook-argv.mjs"), ["arg1", "arg2"])).toBe(
+      0,
+    );
   });
 });

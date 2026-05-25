@@ -4,12 +4,12 @@
 
 ## Structure
 
-| File                | Role                                                     |
-| ------------------- | -------------------------------------------------------- |
-| `index.ts`          | barrel                                                   |
-| `types.ts`          | BinaryStatus                                             |
-| `discover.ts`       | `discover(bin, opts)` + `binaries.ensureNode/Git/ensure` |
-| `install-hints.ts`  | OS × bin 매트릭스 — 명령 + 링크 병기                     |
+| File               | Role                                                     |
+| ------------------ | -------------------------------------------------------- |
+| `index.ts`         | barrel                                                   |
+| `types.ts`         | BinaryStatus                                             |
+| `discover.ts`      | `discover(bin, opts)` + `binaries.ensureNode/Git/ensure` |
+| `install-hints.ts` | OS × bin 매트릭스 — 명령 + 링크 병기                     |
 
 ## Conventions
 
