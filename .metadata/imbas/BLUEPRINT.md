@@ -32,7 +32,7 @@ ogham (사전 가이드 시스템)
        │    ├── Core:  validate, split, devplan
        │    ├── Infra: setup, status
        │    ├── Exec:  manifest, digest
-       │    └── Internal: `imbas:imbas-read-issue`, cache
+       │    └── Internal: `imbas:read-issue`, cache
        │
        ├── Agents (3개)
        │    ├── imbas-analyst   — 문서 정합성 검증
@@ -162,20 +162,20 @@ ogham (사전 가이드 시스템)
 
 | # | Skill | Type | Slash Command | Agent | 입력 | 출력 |
 |---|-------|------|--------------|-------|------|------|
-| 1 | setup | Infra | `/imbas:imbas-setup` | — | 사용자 입력 | config.json, cache/ |
-| 2 | validate | Core | `/imbas:imbas-validate` | imbas-analyst | 기획 문서 | validation-report.md |
-| 3 | split | Core | `/imbas:imbas-split` | imbas-planner, imbas-analyst | 검증 통과 문서 | stories-manifest.json |
-| 4 | devplan | Core | `/imbas:imbas-devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
-| 5 | manifest | Exec | `/imbas:imbas-manifest` | — | *-manifest.json | Jira 이슈 |
-| 6 | status | Infra | `/imbas:imbas-status` | — | — | 상태 표시 |
+| 1 | setup | Infra | `/imbas:setup` | — | 사용자 입력 | config.json, cache/ |
+| 2 | validate | Core | `/imbas:validate` | imbas-analyst | 기획 문서 | validation-report.md |
+| 3 | split | Core | `/imbas:split` | imbas-planner, imbas-analyst | 검증 통과 문서 | stories-manifest.json |
+| 4 | devplan | Core | `/imbas:devplan` | imbas-engineer | 승인된 Story + 코드 | devplan-manifest.json |
+| 5 | manifest | Exec | `/imbas:manifest` | — | *-manifest.json | Jira 이슈 |
+| 6 | status | Infra | `/imbas:status` | — | — | 상태 표시 |
 | ~~7~~ | ~~`imbas:fetch-media`~~ | — | `/atlassian:atlassian-media-analysis` | — | — | *migrated to `@ogham/atlassian`* |
-| 7 | digest | Exec | `/imbas:imbas-digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
+| 7 | digest | Exec | `/imbas:digest` | — | Jira 이슈 키 | Jira 코멘트 (압축 요약) |
 
 ### Internal (내부 전용, 2개)
 
 | # | Skill | 호출자 | 역할 | 출력 |
 |---|-------|--------|------|------|
-| 9 | `imbas:imbas-read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
+| 9 | `imbas:read-issue` | validate, split, devplan, digest, agents | 이슈 본문+코멘트 대화 맥락 구조화 | 구조화된 JSON |
 | 10 | cache | setup, core skills | Jira 메타데이터 캐시 자동 갱신 | cache/*.json |
 
 → 상세: [SPEC-skills.md](./specs/SPEC-skills.md)

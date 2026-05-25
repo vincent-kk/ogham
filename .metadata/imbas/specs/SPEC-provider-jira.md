@@ -44,7 +44,7 @@ Jira provider implementation for imbas. Uses Atlassian MCP server tools for all 
 |--------------------|---------------|---------|
 | `[OP: create_issue]` | `POST /rest/api/3/issue` | manifest |
 | `[OP: create_link]` | `POST /rest/api/3/issueLink` | manifest |
-| `[OP: get_issue]` | `GET /rest/api/3/issue/{key}` | split, devplan, `imbas:imbas-read-issue` |
+| `[OP: get_issue]` | `GET /rest/api/3/issue/{key}` | split, devplan, `imbas:read-issue` |
 | `[OP: edit_issue]` | `PUT /rest/api/3/issue/{key}` | manifest (horizontal split) |
 | `[OP: search_jql]` | `POST /rest/api/3/search/jql` | split, devplan, cache |
 | `[OP: add_comment]` | `POST /rest/api/3/issue/{key}/comment` | manifest (feedback), digest |
@@ -137,8 +137,8 @@ Note: Jira workflow may restrict transitions. If target transition unavailable �
 | split | `get_issue`, `search_jql` | (none — manifest only) |
 | devplan | `get_issue`, `search_jql` | (none — manifest only) |
 | manifest | `get_issue`, `get_transitions` | `create_issue`, `create_link`, `edit_issue`, `transition_issue`, `add_comment` |
-| digest | (via `imbas:imbas-read-issue`) | `add_comment` |
-| `imbas:imbas-read-issue` | `get_issue` | (none) |
+| digest | (via `imbas:read-issue`) | `add_comment` |
+| `imbas:read-issue` | `get_issue` | (none) |
 
 ### 5.2 By Agent
 

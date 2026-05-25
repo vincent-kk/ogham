@@ -1,0 +1,55 @@
+---
+name: read-issue
+user_invocable: false
+description: "[imbas:read-issue] Internal skill. Reads an issue with its full comment thread (Jira), digest entries (local), or GitHub issue thread, reconstructs the conversation context, and returns a structured JSON summary."
+argument-hint: "<issue-ref> [--depth shallow|full]"
+version: "1.0.0"
+complexity: moderate
+plugin: imbas
+---
+
+# read-issue — Issue Context Reconstruction (Internal)
+
+Internal skill that reads an issue with its full context (Jira comment thread,
+GitHub issue thread, or local digest entries), reconstructs the conversation
+context (who said what, decisions made, latest state), and returns a structured
+JSON summary. Called by validate, split, devplan, digest skills and by
+`analyst`, `planner`, `engineer` agents.
+
+## Arguments
+
+```
+imbas:read-issue <issue-ref> [--depth shallow|full]
+
+<issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
+--depth      : shallow = metadata + description only, full = include comments (default: full)
+```
+
+## References
+
+- [Workflow](./references/workflow.md) — Provider-agnostic skeleton (Step 0 routing, Step 5 structured output)
+- [Output Schema](./references/output-schema.md) — JSON example and field reference table
+- [Caching & Usage](./references/caching-and-usage.md) — Caching policy and agent usage patterns
+- [Tools](./references/tools.md) — Shared tools (mcp_tools_config_get) and provider delegation
+- [Error Handling](./references/errors.md) — Provider-agnostic error conditions
+
+<!-- imbas:constraints-v1 -->
+## Workflow (Provider-agnostic skeleton)
+
+1. Load inputs (target issue ID) via imbas_tools.
+2. Read `config.provider` via `mcp_tools_config_get`.
+3. Load ONLY the provider-specific workflow file matching `config.provider`:
+
+   | provider | workflow file |
+   |---|---|
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
+
+4. Execute those steps exactly.
+5. Return the shared structured output (per `output-schema.md`).
+
+## Constraints
+
+- When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
+- Provider-specific operations (`[OP:]` notation for jira, `gh issue view` via Bash for github, Read/Glob for local) MUST only be invoked from within the matching `references/<provider>/` workflow.

@@ -1,4 +1,4 @@
-# imbas-manifest-save
+# manifest-save
 
 ## Purpose
 매니페스트 저장 도구 핸들러.

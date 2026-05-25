@@ -1,4 +1,4 @@
-# imbas-manifest-implement-plan
+# manifest-implement-plan
 
 ## Purpose
 Stories + devplan 매니페스트를 로드해 DAG 기반 구현 일정(implement-plan)을 생성, 저장, 리포트 렌더링까지 수행하는 도구 핸들러.

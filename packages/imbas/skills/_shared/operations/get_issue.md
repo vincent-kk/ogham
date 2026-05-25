@@ -32,9 +32,9 @@ GET /rest/api/3/issue/{issueIdOrKey}
 
 ## Used By
 
-- `imbas-read-issue` — Primary: load issue + comment thread
-- `imbas-scaffold-pr` — Fetch issue details including subtasks
-- `imbas-manifest` — Drift check to verify remote state
-- `imbas-split` — Verify Epic existence when `--epic` provided
-- `imbas-devplan` — Optional enrichment during code exploration
-- `imbas-digest` — Transitively via `imbas:imbas-read-issue`
+- `read-issue` — Primary: load issue + comment thread
+- `scaffold-pr` — Fetch issue details including subtasks
+- `manifest` — Drift check to verify remote state
+- `split` — Verify Epic existence when `--epic` provided
+- `devplan` — Optional enrichment during code exploration
+- `digest` — Transitively via `imbas:read-issue`

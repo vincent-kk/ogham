@@ -18,5 +18,5 @@ GET /rest/api/3/issueLinkType
 
 ## Used By
 
-- `imbas-setup` — Fetch available link types
-- `imbas-cache` — Cache link type metadata
+- `setup` — Fetch available link types
+- `cache` — Cache link type metadata

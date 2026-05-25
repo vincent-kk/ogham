@@ -42,7 +42,7 @@ The file path is always derived from the ID prefix at read time.
 
 ## 4. Execution Model
 
-During `imbas:imbas-manifest` execution in local mode:
+During `imbas:manifest` execution in local mode:
 
 1. Determine the target directory from the item type.
 2. `Glob` existing files in that directory.

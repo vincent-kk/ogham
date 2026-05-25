@@ -146,7 +146,7 @@ Step N — [Operation Name]
 | **devplan** | Story lookup, duplicate search | Step 1 (manifest check), Step 2 (search) |
 | **manifest** | Issue creation, linking, transitions | Step 4 (entire batch execution) |
 | **digest** | Comment posting | Step 6 (publish) |
-| **`imbas:imbas-read-issue`** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
+| **`imbas:read-issue`** | Issue + comment fetch | Steps 1-2 (fetch + parse) |
 | **cache** | Metadata refresh | Entire workflow |
 
 ### 4.3 Which Skills Don't Branch

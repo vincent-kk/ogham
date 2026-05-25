@@ -32,7 +32,7 @@ Phase 3.5 → manifest-devplan   (batch Task / Subtask create)
 
 imbas 파이프라인은 다단계 + Task subagent spawn + Jira `[OP:]` 루프로 turn 끊김에 취약하다. Tier 분류와 3-layer 방어는 filid 와 동일 패턴:
 
-- **Tier-1** (파이프라인): `imbas-pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts (Phase 2.5 → Phase 3 경계 + workflow.md 의 CRITICAL 참조)
+- **Tier-1** (파이프라인): `pipeline` — 상단 EXECUTION MODEL preamble + phase-transition inline directives + DO NOT STOP callouts (Phase 2.5 → Phase 3 경계 + workflow.md 의 CRITICAL 참조)
 - **Tier-2a** (다단계 비상호작용): 3-layer 동일 적용
 - **Tier-2b** (단일 MCP 호출 기반): 간소화된 preamble
 - **Tier-3** (단일 phase): preamble 추가 금지

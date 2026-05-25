@@ -171,7 +171,7 @@ Issue #15 [type:task, status:todo, imbas]
 
 ### 3.3 Label Auto-Creation
 
-`imbas:imbas-setup init` (GitHub provider) creates all labels if missing:
+`imbas:setup init` (GitHub provider) creates all labels if missing:
 
 ```bash
 gh label create "type:epic" --color "0E8A16" --description "imbas Epic" --force
@@ -372,7 +372,7 @@ gh issue comment 42 --repo "owner/repo" --body "$(cat <<'COMMENT'
 <!-- imbas:digest v1 | generated: 2026-04-04T11:00:00+09:00 | comments_covered: 1-7 -->
 ## imbas Digest
 ...
-<!-- /imbas:imbas-digest -->
+<!-- /imbas:digest -->
 COMMENT
 )"
 ```
@@ -411,7 +411,7 @@ gh label list --repo "owner/repo" --json name -q '.[].name' | grep -q "type:stor
 
 ## 6. Setup Workflow (GitHub)
 
-`imbas:imbas-setup init` for GitHub provider:
+`imbas:setup init` for GitHub provider:
 
 ```
 Step 1 — Verify gh CLI
@@ -447,7 +447,7 @@ Step 7 — Result display
 
 ---
 
-## 7. Execution Patterns (imbas:imbas-manifest)
+## 7. Execution Patterns (imbas:manifest)
 
 ### 7.1 stories-manifest Execution (GitHub)
 
@@ -511,7 +511,7 @@ Same as Jira: fully qualified `issue_ref` already set → skip. Resume-safe.
 
 ---
 
-## 8. `imbas:imbas-read-issue` (GitHub)
+## 8. `imbas:read-issue` (GitHub)
 
 ```bash
 # Full issue with comments

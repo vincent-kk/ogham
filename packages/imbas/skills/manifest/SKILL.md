@@ -1,0 +1,74 @@
+---
+name: manifest
+user_invocable: true
+description: "[imbas:manifest] Execute a stories-manifest or devplan-manifest to batch-create issues (Jira, GitHub, or local). Supports dry-run, resume from failure, and selective execution. Trigger: \"execute manifest\", \"매니페스트 실행\", \"jira 생성\", \"issue 생성\""
+argument-hint: "<stories|devplan> [--run RUN_ID] [--dry-run]"
+version: "1.0.0"
+complexity: moderate
+plugin: imbas
+---
+
+> **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION.
+> After each step completes, IMMEDIATELY proceed to the next in the SAME TURN.
+> NEVER yield after MCP tool calls, subagent returns, or [OP:] provider operations.
+>
+> **Valid reasons to yield**:
+> 1. User decision genuinely required (ambiguity only the user can resolve)
+> 2. Terminal stage marker emitted: `Manifest execution complete` or `Manifest partial failure`
+>
+> **HIGH-RISK YIELD POINTS**:
+> - Provider [OP:] loops — after EACH item creation, save manifest via `mcp_tools_manifest_save` and chain the next item in the same turn (do NOT pause to report partial progress)
+> - Dry-run preview display — do NOT pause after rendering the plan; continue to the final report
+> - Per-item failure — log on the item and chain to the next; never stop mid-batch
+
+# manifest — Manifest Execution (Batch Issue Creation)
+
+Executes a stories-manifest or devplan-manifest to batch-create issues,
+links, and comments across providers (Jira, GitHub, or local). Supports dry-run
+preview, crash recovery via per-item save, and idempotent re-execution.
+
+## When to Use This Skill
+
+- After Phase 2 (split) to create Stories in Jira
+- After Phase 3 (devplan) to create Tasks, Subtasks, links, and feedback comments
+- To resume a partially failed batch execution
+- To preview what will be created (dry-run)
+
+## Arguments
+
+```
+/imbas:manifest <type> [--run <run-id>] [--dry-run]
+
+<type>    : "stories" | "devplan"
+--run     : Run ID (if omitted, uses most recent eligible run)
+--dry-run : Preview execution plan without creating any issues
+```
+
+## References
+
+- [Workflow](./references/workflow.md) — Steps 1–5: load, dry-run, confirm, batch execution, result report
+- [Label Transitions](./references/label-transitions.md) — Lifecycle label apply/remove at phase boundaries (Step 6)
+- [Tools](./references/tools.md) — imbas MCP tools, output, agent spawn
+- [Error Handling](./references/errors.md) — Error conditions and recovery actions
+- [State Transitions](./references/state-transitions.md) — Preconditions and manifest item status spec
+
+<!-- imbas:constraints-v1 -->
+## Workflow (Provider-agnostic skeleton)
+
+1. Load inputs (manifest, run state) via imbas_tools.
+2. Read `config.provider` via `mcp_tools_config_get`.
+3. Load ONLY the provider-specific workflow file matching `config.provider`:
+
+   | provider | workflow file |
+   |---|---|
+   | `jira`   | `references/jira/workflow.md` |
+   | `github` | `references/github/workflow.md` |
+   | `local`  | `references/local/workflow.md` |
+
+4. Execute those steps exactly.
+5. Persist outputs via imbas_tools (`mcp_tools_manifest_save`, `mcp_tools_run_transition`, etc.).
+
+## Constraints
+
+- When running as provider X, MUST NOT read any file under `references/Y/**` for any other Y.
+- Provider-specific operations (`[OP:]` notation for jira, `gh issue *` / `gh label *` / `gh api` via Bash for github, Read/Write/Edit for local) MUST only be invoked from within the matching `references/<provider>/` workflow.

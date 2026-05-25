@@ -8,18 +8,18 @@
 
 | 경로 | 역할 |
 |------|------|
-| `imbas-pipeline/` | 전체 파이프라인 오케스트레이션 (Phase 0~3.5) |
-| `imbas-validate/` | Phase 1 문서 검증 |
-| `imbas-split/` | Phase 2 Story 분할 |
-| `imbas-devplan/` | Phase 3 개발 계획 (EARS Subtask 생성) |
-| `imbas-manifest/` | Phase 2.5/3.5 매니페스트 배치 실행 |
-| `imbas-implement-plan/` | Phase 3.5 이후 DAG 기반 병렬 구현 일정 생성 |
-| `imbas-digest/` | 이슈 컨텍스트 압축 |
-| `imbas-read-issue/` | 이슈 + 댓글 스레드 복원 (internal) |
-| `imbas-scaffold-pr/` | 이슈 기반 Draft PR 생성 |
-| `imbas-setup/` | `.imbas/` 초기화 |
-| `imbas-status/` | 런 상태 조회 |
-| `imbas-cache/` | Jira 메타데이터 캐시 (internal) |
+| `pipeline/` | 전체 파이프라인 오케스트레이션 (Phase 0~3.5) |
+| `validate/` | Phase 1 문서 검증 |
+| `split/` | Phase 2 Story 분할 |
+| `devplan/` | Phase 3 개발 계획 (EARS Subtask 생성) |
+| `manifest/` | Phase 2.5/3.5 매니페스트 배치 실행 |
+| `implement-plan/` | Phase 3.5 이후 DAG 기반 병렬 구현 일정 생성 |
+| `digest/` | 이슈 컨텍스트 압축 |
+| `read-issue/` | 이슈 + 댓글 스레드 복원 (internal) |
+| `scaffold-pr/` | 이슈 기반 Draft PR 생성 |
+| `setup/` | `.imbas/` 초기화 |
+| `status/` | 런 상태 조회 |
+| `cache/` | Jira 메타데이터 캐시 (internal) |
 
 ## Conventions
 

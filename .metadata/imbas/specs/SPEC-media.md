@@ -236,7 +236,7 @@ analysis.json의 각 프레임에 `path` 필드를 포함하는 이유:
 ### 5.3 정리
 
 - `.temp/` 디렉토리는 `.gitignore`에 포함
-- 수동 정리: `imbas:imbas-setup clear-temp` (추가 subcommand)
+- 수동 정리: `imbas:setup clear-temp` (추가 subcommand)
 - 자동 정리 없음 (사용자 동의 없는 삭제 금지)
 
 ---

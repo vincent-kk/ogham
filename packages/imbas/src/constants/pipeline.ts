@@ -19,7 +19,7 @@ export const AGENT_CONSTRAINTS: Record<string, string> = {
   analyst:
     '[imbas:analyst] Read-only analysis mode. Do NOT create or modify Jira issues. Return structured validation report only.',
   planner:
-    '[imbas:planner] Plan-then-Execute mode. Generate stories-manifest.json only — do NOT create Jira issues directly. All Jira writes go through /imbas:imbas-manifest.',
+    '[imbas:planner] Plan-then-Execute mode. Generate stories-manifest.json only — do NOT create Jira issues directly. All Jira writes go through /imbas:manifest.',
   engineer:
     '[imbas:engineer] Code exploration mode. Generate devplan-manifest.json only — do NOT modify source code or create Jira issues directly.',
 };

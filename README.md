@@ -191,7 +191,7 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 
 | Component | Count | Examples                                                                                                                |
 | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
-| Skills    | 12    | `/imbas:imbas-pipeline`, `/imbas:imbas-validate`, `/imbas:imbas-split`, `/imbas:imbas-devplan`, `/imbas:imbas-manifest` |
+| Skills    | 12    | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
 | MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                                                          |
 | Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                                                       |
 | Hooks     | 3     | pre-tool-use, context-injector, session-cleanup                                                                         |
@@ -205,13 +205,13 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 
 ```
 # Initialize imbas configuration
-/imbas:imbas-setup
+/imbas:setup
 
 # Run the full pipeline on a planning doc
-/imbas:imbas-pipeline
+/imbas:pipeline
 
 # Check pipeline status
-/imbas:imbas-status
+/imbas:status
 ```
 
 For full documentation, see the [imbas README](./packages/imbas/README.md) ([Korean](./packages/imbas/README-ko_kr.md)).

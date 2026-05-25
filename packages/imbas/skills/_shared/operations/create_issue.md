@@ -33,4 +33,4 @@ POST /rest/api/3/issue
 
 ## Used By
 
-- `imbas-manifest` — Batch creation of Epics, Stories, Tasks, Sub-tasks
+- `manifest` — Batch creation of Epics, Stories, Tasks, Sub-tasks
