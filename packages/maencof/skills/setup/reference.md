@@ -43,11 +43,12 @@ Initial configuration files have been prepared:
 - **Rule:** Ask one question at a time. When the user responds, provide a brief reflection to show you understand, then naturally ask a follow-up to uncover the remaining schema fields.
 
 ### Core Identity Schema (The Target)
+
 You must uncover or infer these 5 elements through dialogue:
 
 1. **Name:** How the user wishes to be addressed.
 2. **Primary Interest:** Current focus areas and the specific frustrations they face with information management.
-3. **Core Values (3 values):** The underlying principles that guide the user's work and thoughts. -> *AI extracts 3 values from the dialogue.*
+3. **Core Values (3 values):** The underlying principles that guide the user's work and thoughts. -> _AI extracts 3 values from the dialogue._
 4. **Boundary:** A fundamental promise or line the AI must not cross. (e.g., "Never modify my original thoughts without permission.")
 5. **Communication Style:** Preferred depth and speed of interaction.
 
@@ -77,6 +78,7 @@ Holistically synthesize a companion persona that perfectly balances the user's s
 - `principles`: 3 actionable guidelines derived from the user's core values.
 - `taboos`: Explicit rules derived from the user's boundary.
 - `origin_story`: A logical proposal of why this partner fits the user (2 sentences).
+- `greeting`: One short opening line — the SessionStart hook prints `[maencof:{name}] {greeting}`.
 
 ### T3-1: Persona Proposal
 
@@ -97,6 +99,7 @@ Greeting: "{greeting}"
 
 Would you like to proceed with this partner?
 ```
+
 Options: ["Start with this partner (Use)", "Adjust the personality (Regenerate)", "Proceed without a partner (Skip)"]
 
 ## Stage 4 Templates — Scaffolding
@@ -104,66 +107,79 @@ Options: ["Start with this partner (Use)", "Adjust the personality (Regenerate)"
 ### T4-1: L1 Document Templates
 
 #### 01_Core/identity.md
+
 ```yaml
 ---
 id: identity
 layer: 1
-created: {ISO_DATE}
+created: { ISO_DATE }
 tags: [identity, core]
 title: Basic Profile
 ---
 ```
+
 ```markdown
 # Basic Profile
+
 - Name: {name}
 - Primary Interest: {interest}
 - Background: {brief_summary_of_users_knowledge_situation}
 ```
 
 #### 01_Core/values.md
+
 ```yaml
 ---
 id: values
 layer: 1
-created: {ISO_DATE}
+created: { ISO_DATE }
 tags: [values, core]
 title: Core Values
 ---
 ```
+
 ```markdown
 # Core Values
+
 {for each value}
+
 - **{value_name}**: {brief_explanation_why_this_fits_the_user}
-{end}
+  {end}
 ```
 
 #### 01_Core/boundaries.md
+
 ```yaml
 ---
 id: boundaries
 layer: 1
-created: {ISO_DATE}
+created: { ISO_DATE }
 tags: [boundaries, core]
 title: Boundaries
 ---
 ```
+
 ```markdown
 # Boundaries
+
 - **{boundary}**
 ```
 
 #### 01_Core/preferences.md
+
 ```yaml
 ---
 id: preferences
 layer: 1
-created: {ISO_DATE}
+created: { ISO_DATE }
 tags: [preferences, core]
 title: Communication Style
 ---
 ```
+
 ```markdown
 # Communication Style
+
 - Preferred style: {communication_style}
 ```
 

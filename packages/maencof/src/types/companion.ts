@@ -16,7 +16,6 @@ export const CompanionPersonalitySchema = z.object({
 
 /** AI 동반자 자아 정체성 스키마 */
 export const CompanionIdentitySchema = z.object({
-  schema_version: z.literal(1),
   name: z.string().min(1),
   role: z.string().min(1),
   personality: CompanionPersonalitySchema,

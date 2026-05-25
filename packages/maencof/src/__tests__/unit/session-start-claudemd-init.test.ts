@@ -154,7 +154,6 @@ describe('session-start CLAUDE.md 초기화', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),
       JSON.stringify({
-        schema_version: 1,
         name: 'Mochi',
         greeting: '안녕!',
       }),

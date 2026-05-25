@@ -95,7 +95,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   }
 
   // 2. Load companion identity
-  const companion = loadCompanionIdentity(cwd);
+  const companion = loadCompanionIdentity(cwd, messages);
   if (companion) {
     messages.push(`[maencof:${companion.name}] ${companion.greeting}`);
   }
@@ -307,18 +307,30 @@ function buildMetaSkillContext(cwd: string): string | null {
 /**
  * Load companion identity from .maencof-meta/companion-identity.json.
  * Uses manual type guard (no Zod) to keep hook bundle small.
+ * Surfaces a diagnostic when the file exists but fails validation so the
+ * user can repair the JSON instead of silently losing greeting/turn context.
  * Graceful degradation: returns null on any failure.
  */
 function loadCompanionIdentity(
   cwd: string,
+  messages: string[],
 ): Pick<CompanionIdentityMinimal, 'name' | 'greeting'> | null {
   const identityPath = metaPath(cwd, 'companion-identity.json');
   if (!existsSync(identityPath)) return null;
   try {
     const raw: unknown = JSON.parse(readFileSync(identityPath, 'utf-8'));
-    return isValidCompanionIdentity(raw)
-      ? { name: raw.name, greeting: raw.greeting }
-      : null;
+    if (isValidCompanionIdentity(raw))
+      return { name: raw.name, greeting: raw.greeting };
+    messages.push(
+      '[maencof] companion-identity.json present but invalid — missing `name` or `greeting`. Run `/maencof:setup --reset --companion` to repair.',
+    );
+    appendErrorLogSafe(cwd, {
+      hook: 'session-start',
+      error:
+        'companion-identity.json failed validation (missing name/greeting)',
+      timestamp: new Date().toISOString(),
+    });
+    return null;
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',

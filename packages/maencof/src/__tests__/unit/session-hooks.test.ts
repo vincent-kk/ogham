@@ -92,7 +92,6 @@ describe('runSessionStart', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),
       JSON.stringify({
-        schema_version: 1,
         name: 'Mochi',
         greeting: '오늘도 함께 정리해볼까요?',
       }),
@@ -187,20 +186,21 @@ describe('runSessionStart', () => {
     expect(ctxOf(result)).not.toContain('[maencof:');
   });
 
-  it('스키마 불일치 companion-identity.json은 무시한다', () => {
+  it('스키마 불일치 companion-identity.json은 인사말을 건너뛰고 진단을 띄운다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),
-      JSON.stringify({ schema_version: 1, name: '', greeting: 'hi' }),
+      JSON.stringify({ name: '', greeting: 'hi' }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(ctxOf(result)).not.toContain('[maencof:');
+    const ctx = ctxOf(result);
+    expect(ctx).not.toContain('[maencof:Mochi]');
+    expect(ctx).toContain('companion-identity.json present but invalid');
   });
 
-  it('schema_version 2도 name/greeting을 추출한다 (미래 호환)', () => {
+  it('알 수 없는 필드가 있어도 name/greeting을 추출한다 (미래 호환)', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'companion-identity.json'),
       JSON.stringify({
-        schema_version: 2,
         name: 'FutureMochi',
         greeting: '미래에서 왔어요!',
         new_field: true,
