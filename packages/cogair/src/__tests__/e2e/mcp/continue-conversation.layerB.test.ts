@@ -5,7 +5,6 @@ import { join } from 'node:path';
 
 import {
   afterAll,
-  afterEach,
   beforeAll,
   beforeEach,
   describe,
@@ -26,10 +25,7 @@ import {
   type FakeProvidersHandle,
   installFakeProviders,
 } from '../helpers/installFakeProviders.js';
-import {
-  type LayerBClient,
-  makeLayerBClient,
-} from '../helpers/mcpClientLayerB.js';
+import { makeLayerBClient } from '../helpers/mcpClientLayerB.js';
 
 let fake: FakeProvidersHandle;
 
@@ -86,8 +82,7 @@ describe('continue_conversation (Layer B)', () => {
   it('cross-project: same session_id from different cwd returns unknown', async () => {
     const otherDir = mkdtempSync(join(tmpdir(), 'cogair-other-cwd-'));
     const first = await makeLayerBClient({ env: geminiEnv('success') });
-    let startSessionId = '';
-    try {
+    const startSessionId = await (async () => {
       const startResult = await first.client.callTool({
         name: 'start_conversation',
         arguments: { provider: 'gemini', prompt: 'first' },
@@ -96,10 +91,8 @@ describe('continue_conversation (Layer B)', () => {
         parseToolCallText(startResult.content),
         { provider: 'gemini', turn: 1 },
       );
-      startSessionId = startEnv.session_id;
-    } finally {
-      await first.close();
-    }
+      return startEnv.session_id;
+    })().finally(() => first.close());
 
     const second = await makeLayerBClient({
       cwd: otherDir,
