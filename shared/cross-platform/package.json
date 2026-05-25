@@ -8,8 +8,8 @@
     "name": "Vincent K. Kelvin",
     "email": "lunox273@gmail.com"
   },
-  "type": "module",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -15,6 +15,7 @@
     "shared/*"
   ],
   "scripts": {
+    "atlassian": "yarn workspace @ogham/atlassian",
     "build:all": "node scripts/build-all.mjs",
     "changeset": "changeset",
     "changeset:publish": "yarn build:all && changeset publish",
@@ -22,12 +23,11 @@
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "cogair": "yarn workspace @ogham/cogair",
     "filid": "yarn workspace @ogham/filid",
+    "imbas": "yarn workspace @ogham/imbas",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "maencof": "yarn workspace @ogham/maencof",
-    "imbas": "yarn workspace @ogham/imbas",
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
-    "atlassian": "yarn workspace @ogham/atlassian",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
