@@ -87,7 +87,7 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
 
   afterEach(() => {
     rmSync(tmpRoot, { recursive: true, force: true });
-    vi.restoreAllMocks();
+    mockedSpawnCliSync.mockReset();
   });
 
   function writeScanConfig(maxDepth: number | null): void {

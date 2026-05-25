@@ -26,6 +26,7 @@ export function spawnCli(
     let timedOut = false;
     let spawnError: Error | undefined;
     let settled = false;
+    let timeoutSettleTimer: ReturnType<typeof setTimeout> | null = null;
 
     const timer = timeoutMs
       ? setTimeout(() => {
@@ -35,6 +36,7 @@ export function spawnCli(
               stdio: "ignore",
             });
           else child.kill("SIGKILL");
+          timeoutSettleTimer = setTimeout(() => settle(null), 1000);
         }, timeoutMs)
       : null;
 
@@ -42,6 +44,7 @@ export function spawnCli(
       if (settled) return;
       settled = true;
       if (timer) clearTimeout(timer);
+      if (timeoutSettleTimer) clearTimeout(timeoutSettleTimer);
       resolve({
         code,
         stdout: normalize ? normalizeEol(stdout) : stdout,

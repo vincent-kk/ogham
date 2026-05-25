@@ -41,7 +41,12 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
   const absPath = resolve(resolvedCwd, filePath);
   const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
 
-  if (relPath === '' || relPath.startsWith('../') || isAbsolute(relPath))
+  if (
+    relPath === '' ||
+    relPath === '..' ||
+    relPath.startsWith('../') ||
+    isAbsolute(relPath)
+  )
     return false;
 
   for (const dir of INTERNAL_DIRS)
@@ -62,7 +67,8 @@ export function isVaultDocDirectory(cwd: string, dirPath: string): boolean {
   const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
 
   // vault 루트이거나 하위 디렉토리여야 함
-  if (relPath.startsWith('../') || isAbsolute(relPath)) return false;
+  if (relPath === '..' || relPath.startsWith('../') || isAbsolute(relPath))
+    return false;
 
   // 내부 관리 디렉토리 제외
   if (relPath !== '')

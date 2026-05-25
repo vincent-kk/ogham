@@ -239,7 +239,7 @@ describe('runVaultRedirector', () => {
   it('Glob path가 vault 외부이면 hookSpecificOutput이 없다', () => {
     const result = runVaultRedirector({
       tool_name: 'Glob',
-      tool_input: { pattern: '**/*.md', path: '/tmp' },
+      tool_input: { pattern: '**/*.md', path: join(vaultDir, '..') },
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);
