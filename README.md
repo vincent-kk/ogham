@@ -82,7 +82,7 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 | Component | Count       | Examples                                                                                                      |
 | --------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 26          | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`, `/maencof:maencof-organize` |
+| Skills    | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize` |
 | MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture                                           |
 | Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector                               |
 | Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd                                     |
@@ -96,13 +96,13 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 ```
 # Initialize your knowledge vault
-/maencof:maencof-setup
+/maencof:setup
 
 # Remember something new
-/maencof:maencof-remember
+/maencof:remember
 
 # Search your knowledge graph
-/maencof:maencof-recall
+/maencof:recall
 ```
 
 For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
@@ -226,7 +226,7 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 
 | Component | Count | Examples                                                                                                      |
 | --------- | ----- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 3     | `/maencof-lens:maencof-lens-setup`, `/maencof-lens:maencof-lens-lookup`, `/maencof-lens:maencof-lens-context` |
+| Skills    | 3     | `/maencof-lens:setup`, `/maencof-lens:lookup`, `/maencof-lens:context` |
 | MCP Tools | 5     | `search`, `context`, `navigate`, `read`, `status`                                                             |
 | Agents    | 1     | researcher (autonomous multi-tool vault exploration)                                                          |
 | Hooks     | 1     | SessionStart (config detection + skill usage guide injection)                                                 |
@@ -235,18 +235,18 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 
 - **Read-only by design** — Reuses maencof handlers but blocks all mutation paths; layer-filter guard (L1 excluded by default) is enforced on every tool call
 - **Multi-vault routing** — Register multiple vaults in `.maencof-lens/config.json` and switch by name
-- **Token-budgeted context assembly** — `/maencof-lens:maencof-lens-context` assembles relevant vault docs within a target token budget for prompt injection
+- **Token-budgeted context assembly** — `/maencof-lens:context` assembles relevant vault docs within a target token budget for prompt injection
 - **Autonomous researcher** — The `researcher` agent performs deep multi-step vault exploration via spreading activation
 
 ```
 # Register a vault (default vault on first run)
-/maencof-lens:maencof-lens-setup
+/maencof-lens:setup
 
 # Quick lookup of a single topic
-/maencof-lens:maencof-lens-lookup
+/maencof-lens:lookup
 
 # Token-budgeted multi-doc context for the current task
-/maencof-lens:maencof-lens-context
+/maencof-lens:context
 ```
 
 For full documentation, see the [maencof-lens package](./packages/maencof-lens/).

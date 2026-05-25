@@ -24,22 +24,22 @@ yarn version:sync       # package.json → src/version.ts
 
 6 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
 
-- **Brainstorm / ideation**: `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
-- **Insight capture management**: `maencof-insight` (capture 자체는 `capture_insight` MCP 도구 + `insight-injector` bridge)
-- **Spec refinement / interview convergence**: `maencof-refine` (Phase 2.5 Socratic 포함)
-- **Plan review**: `maencof-think --mode review`
+- **Brainstorm / ideation**: `explore --for-brainstorm` → `think --mode divergent`
+- **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insight-injector` bridge)
+- **Spec refinement / interview convergence**: `refine` (Phase 2.5 Socratic 포함)
+- **Plan review**: `think --mode review`
 
 자동 호출 체인:
 
-- vague input → `maencof-refine`
-- ambiguous requirement → `maencof-think --mode default`
-- ideation signals ("아이디어" / "막막") → `maencof-explore --for-brainstorm` → `maencof-think --mode divergent`
-- plan/spec path ref + "검토" → `maencof-think --mode review`
-- skill / agent create / modify → `maencof-craft-skill` / `maencof-craft-agent`
+- vague input → `refine`
+- ambiguous requirement → `think --mode default`
+- ideation signals ("아이디어" / "막막") → `explore --for-brainstorm` → `think --mode divergent`
+- plan/spec path ref + "검토" → `think --mode review`
+- skill / agent create / modify → `craft-skill` / `craft-agent`
 
 ## Session Lifecycle
 
-- **Session recap**: SessionEnd 훅이 `[maencof] Session Recap` 을 자동 출력 (명시 호출 불필요). `maencof-reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
+- **Session recap**: SessionEnd 훅이 `[maencof] Session Recap` 을 자동 출력 (명시 호출 불필요). `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
 - **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/session-start/meta-skill-body.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
 
 ## Development Notes

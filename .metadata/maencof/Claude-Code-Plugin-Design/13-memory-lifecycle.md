@@ -51,7 +51,7 @@ layer: design-area-3
 4. 전이 후보 목록 생성
 5a. [Level 0-1] 사용자에게 제시, 승인 후 실행
 5b. [Level 2-3] L3→L2 자동, 파괴적 삭제만 확인
-6. fallback: /maencof:maencof-organize 수동 스킬 안내
+6. fallback: /maencof:organize 수동 스킬 안내
 ```
 
 Hook 타임아웃 내 불가 시: 목록 생성만 수행, 실행은 연기.
@@ -97,7 +97,7 @@ SessionEnd 훅은 세션 내 다음 4요소를 집계해 `[maencof] Session Reca
 | ephemeral_candidate | (기본 폐기) | — |
 
 `refuted_premise`와 `ephemeral_candidate`는 `InsightCategoryFilter` 기본 정책에서 거부된다.
-사용자가 `/maencof:maencof-insight --category refuted --accept`로 필터를 연 경우에만 L5-Buffer에 기록된다.
+사용자가 `/maencof:insight --category refuted --accept`로 필터를 연 경우에만 L5-Buffer에 기록된다.
 
 ### 제어 스위치
 
@@ -106,7 +106,7 @@ SessionEnd 훅은 세션 내 다음 4요소를 집계해 `[maencof] Session Reca
 
 ### 관련 구분
 
-- `maencof-reflect` 스킬은 **볼트 관점 저지먼트 리포터**이며 session recap과 **직교**.
+- `reflect` 스킬은 **볼트 관점 저지먼트 리포터**이며 session recap과 **직교**.
   reflect는 볼트 전체를 대상으로 판정 리포트를 생성하고, session recap은 현재 세션 내 pending 상태를 요약한다.
 
 관련: [16 §5 대화 규율 통합 뷰](./16-plugin-architecture.md) | [17 §3 capture_insight](./17-mcp-tools.md) | [18 §7 비호출 Meta-skill](./18-skills.md)

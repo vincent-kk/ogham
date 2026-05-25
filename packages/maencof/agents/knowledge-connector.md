@@ -101,7 +101,7 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Failure Modes
 
-- **`mcp_t_kg_suggest_links` returns empty array**: No system-suggested links available. Inform the user that the vault may need more tag enrichment or manual connections. Suggest running `/maencof:maencof-suggest` for tag-based discovery.
+- **`mcp_t_kg_suggest_links` returns empty array**: No system-suggested links available. Inform the user that the vault may need more tag enrichment or manual connections. Suggest running `/maencof:suggest` for tag-based discovery.
 - **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `mcp_t_update`. Report the failure to the user with both document paths.
 - **Target document deleted or moved**: If a link candidate references a document that no longer exists at the expected path, skip the proposal silently and proceed to the next candidate. Log the stale reference for the user's final report.
 - **Session link limit reached**: When 10 link operations are completed in the current session, stop proposing new links and present the session summary. Guide the user to start a new session for additional connections.
@@ -110,4 +110,4 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Skill Participation
 
-- `/maencof:maencof-suggest` — full workflow entry point
+- `/maencof:suggest` — full workflow entry point

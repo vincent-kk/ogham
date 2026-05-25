@@ -113,7 +113,7 @@ Hook, MCP, Skill이 동일 인덱스·설정에 접근하므로 상태 공유 �
 | Meta-skill injection | SessionStart Hook → `meta-skill-body.md` 본문 주입 | [18 §7](./18-skills.md) |
 | Session recap | SessionEnd Hook → recap 메시지 빌드 (4요소) | [13 §5](./13-memory-lifecycle.md) |
 | InsightCategoryFilter | `capture_insight` MCP 도구 + `insight-injector` 훅 | [17 §3, §6](./17-mcp-tools.md) |
-| Socratic Elenchus | `maencof-refine` Phase 2.5 | [18 §3](./18-skills.md) |
+| Socratic Elenchus | `refine` Phase 2.5 | [18 §3](./18-skills.md) |
 
 ### Off-switch (독립 3축)
 

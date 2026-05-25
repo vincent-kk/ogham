@@ -1,4 +1,4 @@
-# maencof-changelog-writer
+# changelog-writer
 
 ## Purpose
 

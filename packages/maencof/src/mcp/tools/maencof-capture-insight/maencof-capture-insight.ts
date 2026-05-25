@@ -55,7 +55,7 @@ export async function handleCaptureInsight(
       return {
         success: false,
         path: '',
-        message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:maencof-insight --max N to increase.`,
+        message: `Session capture limit (${config.max_captures_per_session}) reached. Use /maencof:insight --max N to increase.`,
       };
     }
   }
@@ -66,7 +66,7 @@ export async function handleCaptureInsight(
     return {
       success: false,
       path: '',
-      message: `Category "${category}" is rejected by config.category_filter. Use /maencof:maencof-insight --category ${categoryFlag(category)} --accept to allow.`,
+      message: `Category "${category}" is rejected by config.category_filter. Use /maencof:insight --category ${categoryFlag(category)} --accept to allow.`,
     };
   }
 
@@ -104,7 +104,7 @@ export async function handleCaptureInsight(
 
 /**
  * Map an internal category key to the user-facing `--category` flag value
- * used by `/maencof:maencof-insight`.
+ * used by `/maencof:insight`.
  */
 function categoryFlag(category: keyof InsightCategoryFilter): string {
   switch (category) {

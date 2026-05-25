@@ -40,7 +40,7 @@ export function buildDefaultDirective(
 ## Memory Routing (CRITICAL)
 
 - NEVER use Claude's built-in auto-memory (<remember> tags or MEMORY.md) for knowledge the user asks to remember.
-- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:maencof-remember\` skill or \`create\` tool.
+- When the user says "기억해줘", "기억해", "remember this", "save this", "기록해", "메모해" or similar memory requests, ALWAYS route to \`/maencof:remember\` skill or \`create\` tool.
 - Claude's auto-memory is ONLY for Claude's own operational notes (tool preferences, workflow settings). All user knowledge MUST go to the maencof vault.
 
 ## Tool Mapping
@@ -62,18 +62,18 @@ export function buildDefaultDirective(
 
 | Skill | Purpose |
 |---|---|
-| /maencof:maencof-remember | Record new knowledge |
-| /maencof:maencof-recall | Search past knowledge |
-| /maencof:maencof-explore | Explore knowledge graph |
-| /maencof:maencof-organize | Organize/review knowledge |
-| /maencof:maencof-reflect | Reflect on knowledge |
-| /maencof:maencof-insight | Manage auto-insight capture |
+| /maencof:remember | Record new knowledge |
+| /maencof:recall | Search past knowledge |
+| /maencof:explore | Explore knowledge graph |
+| /maencof:organize | Organize/review knowledge |
+| /maencof:reflect | Reflect on knowledge |
+| /maencof:insight | Manage auto-insight capture |
 
 ## Auto-Insight Capture
 
 When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
 When you detect a meaningful insight during conversation, call \`capture_insight\` to record it.
-Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:maencof-insight --recent\`.
+Do NOT ask for confirmation — capture proactively. The user can review later via \`/maencof:insight --recent\`.
 After capture, display: 💡 Insight recorded to L{layer}: "{title}"
 Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
@@ -91,7 +91,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - After creating a document via \`create\`, check whether concept documents exist for each tag used.
 - A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
 - If a tag has been used 3+ times across documents but has no concept document, suggest creating one:
-  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:maencof-remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
+  "Tag '{tag}' is used in {N} documents but has no concept document. Create one with \`/maencof:remember --layer 3 --sub-layer topical --title "{tag}" --tags {tag},concept\`?"
 - Use \`kg_search\` with the tag as seed to check for existing concept documents before suggesting.
 - Do NOT auto-create concept documents — always suggest and wait for user confirmation.
 

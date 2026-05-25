@@ -12,18 +12,18 @@ Observe every session. CLAUDE.md / AGENTS.md user instructions override this met
 
 | Role | Skill |
 |---|---|
-| Brainstorming / ideation | `maencof-explore --for-brainstorm` → `maencof-think --mode divergent` |
-| Insight capture management | `maencof-insight` + `capture_insight` MCP tool |
-| Spec refinement | `maencof-refine` (Phase 2.5 Socratic included) |
-| Interview convergence | `maencof-refine` Phase 2.5 |
-| Plan review | `maencof-think --mode review` |
+| Brainstorming / ideation | `explore --for-brainstorm` → `think --mode divergent` |
+| Insight capture management | `insight` + `capture_insight` MCP tool |
+| Spec refinement | `refine` (Phase 2.5 Socratic included) |
+| Interview convergence | `refine` Phase 2.5 |
+| Plan review | `think --mode review` |
 | Session retrospective | SessionEnd hook automatic recap (no explicit invocation) |
 
 ## 3. Flow & Priority
 
-1. Vague / ambiguous input → `maencof-refine` first. If alternatives still remain, then `maencof-think --mode default`.
-2. Ideation signals ("idea", "stuck", "brainstorm") → `maencof-explore --for-brainstorm` (seed first) → `maencof-think --mode divergent`. Never invoke `think` without a sufficient seed — run `explore` beforehand.
-3. Plan / spec path ref + "review" / "check" → `maencof-think --mode review`.
+1. Vague / ambiguous input → `refine` first. If alternatives still remain, then `think --mode default`.
+2. Ideation signals ("idea", "stuck", "brainstorm") → `explore --for-brainstorm` (seed first) → `think --mode divergent`. Never invoke `think` without a sufficient seed — run `explore` beforehand.
+3. Plan / spec path ref + "review" / "check" → `think --mode review`.
 4. Session termination → SessionEnd recap surfaces automatically. Persist only when the user explicitly requests it. `reflect` is reserved for the vault judge, not session recap.
 5. Auto-insight capture runs via `capture_insight` MCP + `insight-injector` hook; direct invocation not required.
 

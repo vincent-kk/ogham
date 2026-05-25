@@ -360,7 +360,7 @@ inputSchema:
 - [ ] `search` passes effective layers to handler
 - [ ] `context` post-filters assembled items (token budget limitation documented)
 - [ ] `status` includes stale warning when applicable
-- [ ] Error messages do not reference maencof-specific commands (/maencof:maencof-build)
+- [ ] Error messages do not reference maencof-specific commands (/maencof:build)
 - [ ] Each tool accepts `vault` parameter and routes to the correct vault
 - [ ] Omitting `vault` parameter uses the default vault
 
