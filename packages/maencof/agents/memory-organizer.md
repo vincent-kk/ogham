@@ -137,5 +137,5 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Skill Participation
 
-- `/maencof:maencof-organize` — full workflow entry point
-- `/maencof:maencof-reflect` — judge module result report only (execute not run)
+- `/maencof:organize` — full workflow entry point
+- `/maencof:reflect` — judge module result report only (execute not run)

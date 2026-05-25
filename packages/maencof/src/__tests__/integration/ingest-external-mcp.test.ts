@@ -23,7 +23,7 @@ import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-crea
 import { handleMaencofRead } from '../../mcp/tools/maencof-read/maencof-read.js';
 
 async function makeTempVault(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'maencof-ingest-'));
+  return mkdtemp(join(tmpdir(), 'ingest-'));
 }
 
 /** 외부 MCP 도구 응답 시뮬레이터 */

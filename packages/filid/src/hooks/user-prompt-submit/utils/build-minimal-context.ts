@@ -9,7 +9,7 @@ export function buildMinimalContext(cwd: string): string {
 
   if (!config)
     lines.push(
-      '[filid] ⚠ Not initialized. Run /filid:filid-setup to create .filid/config.json.',
+      '[filid] ⚠ Not initialized. Run /filid:setup to create .filid/config.json.',
     );
   else if (existsSync(join(cwd, '.claude', 'rules', 'filid_fca-policy.md')))
     lines.push(
@@ -19,7 +19,7 @@ export function buildMinimalContext(cwd: string): string {
     lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
   else
     lines.push(
-      '[filid] ⚠ Rules not deployed. Run /filid:filid-setup to deploy .claude/rules/filid_fca-policy.md.',
+      '[filid] ⚠ Rules not deployed. Run /filid:setup to deploy .claude/rules/filid_fca-policy.md.',
     );
 
   lines.push(`[filid:lang] ${config?.language ?? 'en'}`);

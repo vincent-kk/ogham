@@ -422,7 +422,7 @@ mode: default  # Plan-then-Execute: 에이전트는 매니페스트만 생성, p
 
 > **Migrated** — 이 에이전트는 `@ogham/atlassian` 패키지로 이전되었습니다.
 > 새 위치: `packages/atlassian/agents/media.md`
-> 호출 스킬: `/atlassian:atlassian-media-analysis`
+> 호출 스킬: `/atlassian:media-analysis`
 > 커밋: 9c2c45c
 
 ### Workflow
@@ -520,7 +520,7 @@ mode: default  # 격리된 서브에이전트이지만, bypassPermissions는 권
     └── spawns imbas-engineer
          └── returns: devplan-manifest.json
 
-[atlassian:atlassian-media-analysis skill] (migrated to @ogham/atlassian)
+[atlassian:media-analysis skill] (migrated to @ogham/atlassian)
     ├── (skill 자체에서) scene-sieve 실행
     └── spawns atlassian media agent (키프레임 분석)
          └── returns: analysis.json

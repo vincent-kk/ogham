@@ -30,7 +30,7 @@ This pattern ensures SKILL.md stays lightweight (~token-efficient) while `tools/
 
 ---
 
-## 2. atlassian-setup
+## 2. setup
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 2
 
@@ -41,7 +41,7 @@ Authentication and connection configuration. Prerequisite for all other Skills.
 ### SKILL.md Content Outline
 
 ```
-- Skill name: atlassian-setup
+- Skill name: setup
 - Domain: common
 - MCP tools used: setup (local web server)
 - Description: Atlassian authentication and connection management
@@ -94,7 +94,7 @@ options:
 ### references/ Structure
 
 ```
-skills/atlassian-setup/
+skills/setup/
   SKILL.md
   references/
     auth-types.md        # Detailed auth type comparison
@@ -104,7 +104,7 @@ skills/atlassian-setup/
 
 ---
 
-## 3. atlassian-download
+## 3. download
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 5
 
@@ -115,9 +115,9 @@ Unified attachment download for both Jira and Confluence.
 ### SKILL.md Content Outline
 
 ```
-- Skill name: atlassian-download
+- Skill name: download
 - Domain: common
-- MCP tools used: get
+- MCP tools used: fetch (with method: "GET" and accept_format: "raw")
 - Description: Download attachments and images from Jira issues and Confluence pages
 ```
 
@@ -125,8 +125,8 @@ Unified attachment download for both Jira and Confluence.
 
 | Operation | MCP Tool | Description |
 |---|---|---|
-| `download_attachment` | `get` | Download attachment by URL or issue_key/page_id + filename |
-| `get_images` | `get` | Retrieve image attachment metadata |
+| `download_attachment` | `fetch` (`method: "GET"`, `accept_format: "raw"`) | Download attachment by URL or issue_key/page_id + filename |
+| `get_images` | `fetch` (`method: "GET"`) | Retrieve image attachment metadata |
 
 ### Download Flow
 
@@ -152,7 +152,7 @@ constraints:
 ### references/ Structure
 
 ```
-skills/atlassian-download/
+skills/download/
   SKILL.md
   references/
     download-flow.md     # Download and upload shared specs
@@ -161,7 +161,7 @@ skills/atlassian-download/
 
 ---
 
-## 4. atlassian-jira
+## 4. jira
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 3, `agents.md` Section 2
 
@@ -201,7 +201,7 @@ The SKILL.md must include:
 
 | HTTP Status | Cause | Recovery Strategy |
 |---|---|---|
-| **401** | Auth expired or invalid credentials | Trigger reauth via atlassian-setup -> retry once |
+| **401** | Auth expired or invalid credentials | Trigger reauth via setup -> retry once |
 | **403** | Insufficient permissions | Report required permissions to user. No retry. |
 | **404** | Issue/project not found | Verify identifier (typo check) -> report to user |
 | **409** | Concurrent modification | Re-fetch latest data -> inform user of conflict |
@@ -230,7 +230,7 @@ The SKILL.md must include:
 ### tools/ Subdirectory Structure
 
 ```
-skills/atlassian-jira/
+skills/jira/
   SKILL.md
   tools/
     issue/
@@ -315,13 +315,13 @@ Each `schema.md` follows a consistent structure:
 
 ---
 
-## 5. atlassian-confluence
+## 5. confluence
 
 > **Spec Reference**: `/Users/Vincent/Workspace/mcp-atlassian/.docs/.spec/skills.md` Section 4, `agents.md` Section 3
 
 ### Purpose
 
-Confluence API domain router. Same lazy-loading pattern as atlassian-jira.
+Confluence API domain router. Same lazy-loading pattern as jira.
 
 ### SKILL.md Content Outline
 
@@ -374,7 +374,7 @@ Confluence API domain router. Same lazy-loading pattern as atlassian-jira.
 ### tools/ Subdirectory Structure
 
 ```
-skills/atlassian-confluence/
+skills/confluence/
   SKILL.md
   tools/
     page/
@@ -433,7 +433,111 @@ Confluence page updates require `version.number` as a **mandatory parameter**:
 
 ---
 
-## 6. Skill Interface Contract
+## 6. media-analysis
+
+> **Spec Reference**: `packages/atlassian/skills/media-analysis/SKILL.md` and `packages/atlassian/skills/media-analysis/references/`
+
+### Purpose
+
+Download images, videos, and GIFs from Atlassian sources or local paths, optionally extract visually meaningful keyframes via scene-sieve, and produce a structured `analysis.json` by delegating semantic frame interpretation to the `media` sub-agent. Keeps multimodal frame data isolated in the sub-agent so the caller's context stays clean.
+
+### SKILL.md Content Outline
+
+```
+- Skill name: media-analysis
+- Domain: common
+- User-invocable: true (slash command: /atlassian:media-analysis)
+- MCP tools used: fetch (via download), none direct
+- Sub-agent spawned: media (atlassian:media)
+- Description: Atlassian attachment download + multimodal keyframe analysis
+```
+
+### Arguments
+
+```
+/atlassian:media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
+
+<url-or-path>  Confluence attachment URL, Jira attachment URL, or local file path
+--analyze      For video/GIF, run scene-sieve extraction + `media` analysis
+--preset       scene-sieve preset override (default: auto-detect from extension/duration)
+--force        Force re-analysis even if cached analysis.json exists
+```
+
+### Workflow
+
+```
+1. Input resolution
+   - Detect Atlassian URL (Jira / Confluence attachment) or local path
+   - URL path → reuse `download` skill to fetch + cache under .temp/<namespace>/
+2. Probe
+   - Run scripts/probe.mjs (cross-platform ffprobe wrapper) to get duration, fps, resolution
+3. Image path
+   - For image attachments, stop after download; no keyframe extraction
+4. Video / GIF path (requires --analyze)
+   - Auto-select preset (short-clip / medium-video / long-video / very-long / gif)
+   - Extract keyframes via scene-sieve into .temp/<namespace>/<filename>/frames/
+   - Write .metadata.json (duration, fps, per-frame timestamp)
+5. Sub-agent spawn
+   - Spawn `media` agent (atlassian:media) with the .temp directory as scope
+   - Sub-agent reads frames sequentially → writes analysis.json
+   - Caller reads analysis.json only; raw frames are not loaded into caller context
+```
+
+### Caching
+
+```
+.temp/<namespace>/<filename>/
+  <original-file>           # Downloaded artifact
+  frames/                   # Extracted keyframes (video/GIF only)
+  .metadata.json            # Probe results + per-frame timestamps
+  analysis.json             # Sub-agent output (final consumable)
+```
+
+`--force` re-runs the pipeline even when `analysis.json` exists. Otherwise the cached result is returned immediately.
+
+### Sub-agent Contract
+
+| Direction | Payload |
+|---|---|
+| Caller → `media` | `.temp/<namespace>/<filename>/` path containing frames + `.metadata.json` |
+| `media` → caller | `analysis.json` written in place; caller reads it |
+
+The `media` agent has only `Read`/`Write`/`Grep`/`Glob` tools — no Atlassian MCP tools, no network access. Frame images are loaded as multimodal input inside the sub-agent and released on termination.
+
+### references/ Structure
+
+```
+skills/media-analysis/
+  SKILL.md
+  scripts/
+    probe.mjs                # ffprobe wrapper + preset auto-selection
+  presets/
+    index.md
+    short-clip.md            # <= 30s clips
+    medium-video.md          # 30s–5min videos
+    long-video.md            # 5–30min videos
+    very-long.md             # > 30min videos
+    gif.md                   # GIF animations
+    quick-glance.md          # Fast summary
+    detailed.md              # Thorough analysis
+    hq-capture.md            # High-quality screenshots
+    inspection.md            # Visual bug detection
+    screen-recording.md      # UI walkthroughs
+  references/
+    workflow.md              # Steps 1–5 full protocol
+    preset-selection.md      # Priority rules and intent overrides
+    tools.md                 # MCP tools used + `media` sub-agent spawn + cache
+    reference.md             # Complete flag reference, JSON schemas, error codes
+```
+
+### Cross-Skill / Cross-Package Touch Points
+
+- Reuses [`download`](#3-download) skill for the Atlassian attachment fetch step (no direct `fetch` call).
+- Consumed by `imbas:imbas-digest` and `imbas:imbas-pipeline` skills when a Jira issue references attached images / videos / GIFs.
+
+---
+
+## 7. Skill Interface Contract
 
 ### Input (Agent -> Skill)
 

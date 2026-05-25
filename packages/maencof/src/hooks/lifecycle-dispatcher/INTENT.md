@@ -1,4 +1,4 @@
-# maencof-lifecycle-dispatcher
+# lifecycle-dispatcher
 
 ## Purpose
 

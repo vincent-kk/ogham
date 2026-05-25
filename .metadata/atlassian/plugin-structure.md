@@ -14,20 +14,21 @@ packages/atlassian/
 ├── .mcp.json                    # MCP server configuration
 ├── agents/
 │   ├── jira.md                  # Jira domain expert agent
-│   └── confluence.md            # Confluence domain expert agent
+│   ├── confluence.md            # Confluence domain expert agent
+│   └── media.md                 # Multimodal keyframe analyst (spawned by media-analysis skill)
 ├── skills/
-│   ├── atlassian-setup/
+│   ├── setup/
 │   │   ├── SKILL.md             # Auth/connection setup skill
 │   │   └── references/
 │   │       ├── auth-types.md
 │   │       ├── setup-flow.md
 │   │       └── errors.md
-│   ├── atlassian-download/
+│   ├── download/
 │   │   ├── SKILL.md             # Attachment download skill
 │   │   └── references/
 │   │       ├── download-flow.md
 │   │       └── errors.md
-│   ├── atlassian-jira/
+│   ├── jira/
 │   │   ├── SKILL.md             # Jira API domain router
 │   │   └── tools/
 │   │       ├── issue/
@@ -67,28 +68,49 @@ packages/atlassian/
 │   │       │   └── schema.md
 │   │       └── metrics/
 │   │           └── schema.md
-│   └── atlassian-confluence/
-│       ├── SKILL.md             # Confluence API domain router
-│       └── tools/
-│           ├── page/
-│           │   ├── schema.md
-│           │   ├── hierarchy.md
-│           │   └── version.md
-│           ├── search/
-│           │   ├── schema.md
-│           │   └── cql-guide.md
-│           ├── space/
-│           │   └── schema.md
-│           ├── comment/
-│           │   └── schema.md
-│           ├── attachment/
-│           │   └── schema.md
-│           ├── label/
-│           │   └── schema.md
-│           ├── analytics/
-│           │   └── schema.md
-│           └── user/
-│               └── schema.md
+│   ├── confluence/
+│   │   ├── SKILL.md             # Confluence API domain router
+│   │   └── tools/
+│   │       ├── page/
+│   │       │   ├── schema.md
+│   │       │   ├── hierarchy.md
+│   │       │   └── version.md
+│   │       ├── search/
+│   │       │   ├── schema.md
+│   │       │   └── cql-guide.md
+│   │       ├── space/
+│   │       │   └── schema.md
+│   │       ├── comment/
+│   │       │   └── schema.md
+│   │       ├── attachment/
+│   │       │   └── schema.md
+│   │       ├── label/
+│   │       │   └── schema.md
+│   │       ├── analytics/
+│   │       │   └── schema.md
+│   │       └── user/
+│   │           └── schema.md
+│   └── media-analysis/
+│       ├── SKILL.md             # Media download + multimodal analysis skill
+│       ├── scripts/
+│       │   └── probe.mjs        # ffprobe wrapper + preset auto-selection
+│       ├── presets/             # scene-sieve preset definitions
+│       │   ├── index.md
+│       │   ├── short-clip.md
+│       │   ├── medium-video.md
+│       │   ├── long-video.md
+│       │   ├── very-long.md
+│       │   ├── gif.md
+│       │   ├── quick-glance.md
+│       │   ├── detailed.md
+│       │   ├── hq-capture.md
+│       │   ├── inspection.md
+│       │   └── screen-recording.md
+│       └── references/
+│           ├── workflow.md
+│           ├── preset-selection.md
+│           ├── tools.md
+│           └── reference.md
 ├── hooks/
 │   └── hooks.json               # Hook configuration
 ├── bridge/
@@ -97,60 +119,46 @@ packages/atlassian/
 ├── src/
 │   ├── index.ts                 # Package entry
 │   ├── version.ts               # Auto-injected version
-│   ├── types/
-│   │   ├── index.ts
-│   │   ├── config.ts            # Connection/auth config types
-│   │   ├── mcp.ts               # McpResponse, tool param types
-│   │   └── convert.ts           # Format conversion types
+│   ├── types/                   # Zod schemas and type definitions
+│   ├── constants/               # Paths, defaults, config constants
 │   ├── mcp/
-│   │   ├── index.ts
 │   │   ├── server/
-│   │   │   ├── index.ts
 │   │   │   └── server.ts        # MCP server setup + tool registration
-│   │   ├── server-entry/
-│   │   │   ├── index.ts
-│   │   │   └── server-entry.ts  # CJS entry point
+│   │   ├── server-entry/        # CJS entry point bundled into bridge/mcp-server.cjs
+│   │   ├── shared/              # build-fetch-context, tool-response envelope helpers
+│   │   ├── pages/
+│   │   │   └── setup/           # HTML setup wizard pages served by the setup tool
 │   │   └── tools/
-│   │       ├── index.ts
-│   │       ├── fetch/
-│   │       │   ├── index.ts
-│   │       │   └── fetch.ts     # HTTP GET/POST/PUT/PATCH/DELETE tool
-│   │       ├── convert/
-│   │       │   ├── index.ts
-│   │       │   └── convert.ts   # Format conversion tool
-│   │       └── setup/
-│   │           ├── index.ts
-│   │           └── setup.ts     # Auth setup tool (local web server)
+│   │       ├── fetch/           # HTTP GET/POST/PUT/PATCH/DELETE tool
+│   │       ├── convert/         # ADF / Storage Format / Wiki ↔ Markdown
+│   │       ├── auth-check/      # Stored-credential probe + optional live connectivity test
+│   │       └── setup/           # Auth setup tool (local web server)
 │   ├── core/
-│   │   ├── index.ts
-│   │   ├── auth-manager/
-│   │   │   ├── index.ts
-│   │   │   └── auth-manager.ts  # Token storage, injection, refresh
-│   │   ├── config-manager/
-│   │   │   ├── index.ts
-│   │   │   └── config-manager.ts # config.json / credentials.enc management
-│   │   ├── environment-resolver/
-│   │   │   ├── index.ts
-│   │   │   └── environment-resolver.ts  # is_cloud detection, URL normalization
-│   │   └── http-client/
-│   │       ├── index.ts
-│   │       └── http-client.ts   # Fetch wrapper with retry, rate limit
+│   │   ├── auth-manager/        # Token storage and injection
+│   │   ├── config-manager/      # config.json + credentials.json (plain JSON) management
+│   │   ├── connection-tester/   # Live connectivity probe used by auth-check + setup
+│   │   ├── environment-resolver/ # is_cloud detection, URL normalization
+│   │   └── http-client/         # Fetch wrapper + ssrf-guard, retry, rate limit
 │   ├── converter/
-│   │   ├── index.ts
-│   │   ├── adf-to-markdown.ts   # ADF -> Markdown
-│   │   ├── markdown-to-adf.ts   # Markdown -> ADF
-│   │   ├── storage-to-markdown.ts # Storage Format -> Markdown
-│   │   ├── markdown-to-storage.ts # Markdown -> Storage Format
-│   │   └── wiki-markup.ts       # Wiki Markup <-> Markdown
-│   ├── setup-ui/
-│   │   ├── index.ts
-│   │   ├── web-server.ts        # Local HTTP server for setup form
-│   │   └── templates/
-│   │       └── setup.html       # Auth setup HTML form
+│   │   ├── adf-to-markdown/
+│   │   ├── markdown-to-adf/
+│   │   ├── markdown-to-storage/
+│   │   ├── markdown-to-wiki/
+│   │   ├── markdown-parsing/    # Shared Markdown AST utilities
+│   │   ├── storage-to-markdown/
+│   │   └── types/
+│   ├── lib/
+│   │   ├── file-io.ts           # Local file read/write helpers
+│   │   └── logger.ts            # Structured logger
 │   └── utils/
-│       ├── index.ts
-│       ├── url-validator.ts     # SSRF prevention, path traversal check
-│       └── retry.ts             # Exponential backoff retry logic
+│       ├── attach-prefix.ts
+│       ├── auth.ts              # Auth header injection helpers (no token storage)
+│       ├── ip.ts                # IP / hostname classification (SSRF supporting helper)
+│       ├── jira-url.ts          # Jira issue URL parsing
+│       ├── path.ts              # Endpoint path normalization
+│       ├── site-resolver.ts     # Multi-site selection (Cloud vs Server/DC)
+│       ├── transform-request.ts # Request body / header transformation
+│       └── url.ts               # Generic URL helpers
 ├── CLAUDE.md
 ├── package.json
 ├── tsconfig.json
@@ -205,7 +213,7 @@ packages/atlassian/
 ```
 
 **Notes**:
-- Single MCP server named `"tools"` — all 3 tools (fetch, convert, setup) are registered under this server
+- Single MCP server named `"tools"` — all 4 tools (fetch, convert, auth-check, setup) are registered under this server
 - Uses CJS bundle via bridge for Node.js compatibility
 - `${CLAUDE_PLUGIN_ROOT}` is resolved by Claude Code at runtime
 

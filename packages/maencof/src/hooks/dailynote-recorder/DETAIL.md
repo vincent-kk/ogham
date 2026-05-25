@@ -48,7 +48,7 @@ Recorder 는 path 가 다음 prefix 중 하나로 시작하면 skip 한다:
 
 - **`kg_build`** (Y4): 내부 유지보수 연산. 사용자가 직접 호출할 일이 드물고,
   실행될 때마다 dailynote 에 한 줄씩 추가되면 실제 지식 이벤트 신호 대비 노이즈가
-  커지므로 의도적으로 matcher 에서 제외한다. `maencof-changelog` 는 별도로 rebuild
+  커지므로 의도적으로 matcher 에서 제외한다. `changelog` 는 별도로 rebuild
   추적을 담당한다.
 - **`context_cache_manage`** (Y5): pin/unpin/refresh 는 휘발성 캐시 작업으로,
   벌트 상태 변화가 아니다. 기록해도 "해당 턴에 무슨 지식 작업이 있었는가" 라는

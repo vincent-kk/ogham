@@ -85,7 +85,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   // 1. Check maencof vault
   if (!isMaencofVault(cwd)) {
     const notice =
-      '[maencof] Vault is not initialized. Run `/maencof:maencof-setup` to get started.';
+      '[maencof] Vault is not initialized. Run `/maencof:setup` to get started.';
     return {
       continue: true,
       hookSpecificOutput: {
@@ -135,7 +135,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   const walPath = metaPath(cwd, 'wal.json');
   if (existsSync(walPath)) {
     messages.push(
-      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:maencof-checkup` to diagnose.',
+      '[maencof] Incomplete transaction (WAL) detected from a previous session. Run `/maencof:checkup` to diagnose.',
     );
   }
 
@@ -148,7 +148,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       };
       if (log.pending && log.pending.length > 0) {
         messages.push(
-          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:maencof-organize\` to process.`,
+          `[maencof] ${log.pending.length} pending task(s) found. Run \`/maencof:organize\` to process.`,
         );
       }
     } catch (e) {
@@ -176,7 +176,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     const dataSources = JSON.parse(dataSourcesRaw) as { sources?: unknown[] };
     if (!dataSources.sources || dataSources.sources.length === 0) {
       messages.push(
-        '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
+        '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
       );
     }
   } catch (e) {
@@ -186,7 +186,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
       timestamp: new Date().toISOString(),
     });
     messages.push(
-      '[maencof] No external data sources connected. Run `/maencof:maencof-connect` to set up.',
+      '[maencof] No external data sources connected. Run `/maencof:connect` to set up.',
     );
   }
 
@@ -221,7 +221,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
         .join('\n');
 
       messages.push(
-        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:maencof-insight --recent 로 확인하세요.`,
+        `💡 지난 세션에서 ${pending.captures.length}개 인사이트를 자동 캡처했습니다 (L2: ${l2Count}, L5: ${l5Count}):\n${titles}\n/maencof:insight --recent 로 확인하세요.`,
       );
 
       deletePendingNotification(cwd);
@@ -463,7 +463,7 @@ function checkArchitectureMismatch(cwd: string, messages: string[]): void {
       messages.push(
         `[maencof] Architecture update available (${archVersion} → ${EXPECTED_ARCHITECTURE_VERSION}).` +
           '\nL3 sub-layers (relational/structural/topical) and L5 sub-layers (buffer/boundary) are now supported.' +
-          '\nRun `/maencof:maencof-migrate` to upgrade your vault structure.',
+          '\nRun `/maencof:migrate` to upgrade your vault structure.',
       );
     }
   } catch (e) {
@@ -485,7 +485,7 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
     if (vaultVersion !== null && vaultVersion !== VERSION) {
       messages.push(
         `[maencof] Plugin updated (${vaultVersion} → ${VERSION}).` +
-          '\nRun `/maencof:maencof-setup` to complete the migration.',
+          '\nRun `/maencof:setup` to complete the migration.',
       );
     }
   } catch (e) {

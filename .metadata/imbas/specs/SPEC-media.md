@@ -12,7 +12,7 @@
 ### 핵심 설계 원칙
 
 1. **컨텍스트 격리** — 동영상 분석은 서브에이전트(atlassian media agent)에서 수행. 메인 에이전트 컨텍스트 미오염.
-2. **온디맨드 실행** — 자동 실행 아님. 사용자가 `/atlassian:atlassian-media-analysis --analyze` 또는 Phase 1/2에서 미디어 발견 시 안내.
+2. **온디맨드 실행** — 자동 실행 아님. 사용자가 `/atlassian:media-analysis --analyze` 또는 Phase 1/2에서 미디어 발견 시 안내.
 
 > **Note**: 이 스킬은 `@ogham/atlassian` 패키지로 이전되었습니다 (커밋 9c2c45c).
 3. **결과 재사용** — `.imbas/.temp/<filename>/analysis.json`에 저장. 동일 파일 재분석 불필요.
@@ -146,7 +146,7 @@
 ### 4.2 호출 프로토콜
 
 ```
-[atlassian:atlassian-media-analysis skill] (migrated to @ogham/atlassian)
+[atlassian:media-analysis skill] (migrated to @ogham/atlassian)
   │
   ├── (1) scene-sieve 실행 (Bash — 스킬 자체에서)
   │    └── 결과: frames/ 디렉토리 + .metadata.json
@@ -271,5 +271,5 @@ analysis.json의 각 프레임에 `path` 필드를 포함하는 이유:
 ## Related
 
 - [SPEC-agents.md](./SPEC-agents.md) — 에이전트 정의 (imbas-media → atlassian media로 이전)
-- [SPEC-skills.md](./SPEC-skills.md) — 스킬 정의 (`~~imbas:fetch-media~~` → `/atlassian:atlassian-media-analysis`로 이전)
+- [SPEC-skills.md](./SPEC-skills.md) — 스킬 정의 (`~~imbas:fetch-media~~` → `/atlassian:media-analysis`로 이전)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처

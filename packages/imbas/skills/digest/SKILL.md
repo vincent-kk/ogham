@@ -20,7 +20,7 @@ plugin: imbas
 >
 > **HIGH-RISK YIELD POINTS**:
 >
-> - After `atlassian-media-analysis` delegation returns — immediately continue to QA-Prompting compression
+> - After `media-analysis` delegation returns — immediately continue to QA-Prompting compression
 > - State Tracking intermediate results — do NOT pause between tracker rounds
 > - Provider publish operation (Jira/GitHub/local) — chain the final confirmation in the same turn
 
@@ -47,7 +47,7 @@ Uses a State Tracking + QA-Prompting hybrid approach.
 
 <issue-ref>  : Issue reference — Jira key (e.g., PROJ-123), GitHub issue (e.g., owner/repo#42), or local ID (e.g., S-1)
 --preview    : Show digest without posting (dry run)
---no-media   : Skip automatic media fetching for Jira attachments (suppresses atlassian-media-analysis invocation)
+--no-media   : Skip automatic media fetching for Jira attachments (suppresses media-analysis invocation)
 ```
 
 ## References

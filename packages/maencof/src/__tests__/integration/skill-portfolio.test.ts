@@ -1,13 +1,13 @@
 /**
  * @file skill-portfolio.test.ts
  * @description Regression guard for the maencof skill portfolio. Asserts:
- *   1. The `skills/` directory contains exactly EXPECTED_COUNT `maencof-*` directories.
+ *   1. The `skills/` directory contains exactly EXPECTED_COUNT skill directories.
  *   2. No skill or agent markdown file references a slash invocation of a REMOVED_SKILLS entry.
  *
  * Update EXPECTED_COUNT and REMOVED_SKILLS as skills are merged or removed.
  * Source of truth: .omc/plans/maencof-skill-portfolio-refactor.md.
  */
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,17 +19,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_ROOT = join(__dirname, '..', '..', '..');
 const SKILLS_DIR = join(PACKAGE_ROOT, 'skills');
 
-const REMOVED_SKILLS = [
-  'maencof-rebuild',
-  'maencof-diagnose',
-  'maencof-dailynote',
-];
+const REMOVED_SKILLS = ['rebuild', 'diagnose', 'dailynote'];
 const EXPECTED_COUNT = 26;
 
 describe('maencof skill portfolio invariants', () => {
-  it(`skills/ contains exactly ${EXPECTED_COUNT} maencof-* directories`, () => {
+  it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {
     const dirs = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter(
-      (entry) => entry.isDirectory() && entry.name.startsWith('maencof-'),
+      (entry) => entry.isDirectory(),
     );
     expect(dirs.length).toBe(EXPECTED_COUNT);
   });

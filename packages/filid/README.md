@@ -48,8 +48,8 @@ filid skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 ### Initialize a Project
 
 ```
-/filid:filid-setup
-/filid:filid-setup ./packages/my-app
+/filid:setup
+/filid:setup ./packages/my-app
 ```
 
 Scans directories and generates `INTENT.md` boundary documents for each module. Utility directories like `components/`, `utils/` (organs) are automatically skipped.
@@ -57,9 +57,9 @@ Scans directories and generates `INTENT.md` boundary documents for each module. 
 ### Find and Fix Violations
 
 ```
-/filid:filid-scan
-/filid:filid-scan src/core 쪽만 봐줘
-/filid:filid-scan 고칠 수 있는 건 고쳐줘
+/filid:scan
+/filid:scan src/core 쪽만 봐줘
+/filid:scan 고칠 수 있는 건 고쳐줘
 ```
 
 Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in organ directories, etc.
@@ -67,9 +67,9 @@ Detects INTENT.md exceeding 50 lines, missing boundary sections, INTENT.md in or
 ### Sync Documentation After Code Changes
 
 ```
-/filid:filid-sync
-/filid:filid-sync 바뀌는 것만 미리 보여줘
-/filid:filid-sync critical 이상만 처리해줘
+/filid:sync
+/filid:sync 바뀌는 것만 미리 보여줘
+/filid:sync critical 이상만 처리해줘
 ```
 
 Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Uses `drift-detect` MCP tool internally.
@@ -77,13 +77,13 @@ Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Use
 ### Full Project Structure Check
 
 ```
-/filid:filid-structure-review
-/filid:filid-structure-review 3단계만 실행해줘
+/filid:structure-review
+/filid:structure-review 3단계만 실행해줘
 ```
 
 Scans the **entire project** across 6 stages: boundary check → document validation → dependency analysis → test metrics → complexity assessment → final verdict.
 
-> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:filid-review` instead.
+> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:review` instead.
 
 ### AI Code Review (per PR)
 
@@ -91,47 +91,47 @@ The most powerful feature. A multi-persona consensus committee reviews only the 
 
 ```
 # Review current branch
-/filid:filid-review
+/filid:review
 
 # Review a specific PR
-/filid:filid-review https://github.com/owner/repo/pull/123
+/filid:review https://github.com/owner/repo/pull/123
 
 # Force restart (discard previous review)
-/filid:filid-review 처음부터 다시 해줘
+/filid:review 처음부터 다시 해줘
 
 # After review — handle fix requests
-/filid:filid-resolve
+/filid:resolve
 
 # After fixes — final verdict
-/filid:filid-revalidate
+/filid:revalidate
 ```
 
 **Flow:**
 
-1. **`/filid:filid-review`** — Structure check (diff) → committee election → technical verification → consensus → review report
-2. **`/filid:filid-resolve`** — Accept or reject each fix request (with justification for rejections)
-3. **`/filid:filid-revalidate`** — Final PASS/FAIL verdict after fixes
+1. **`/filid:review`** — Structure check (diff) → committee election → technical verification → consensus → review report
+2. **`/filid:resolve`** — Accept or reject each fix request (with justification for rejections)
+3. **`/filid:revalidate`** — Final PASS/FAIL verdict after fixes
 
 Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 
-> **`filid:filid-structure-review` vs `filid:filid-review` at a glance:**
+> **`filid:structure-review` vs `filid:review` at a glance:**
 >
-> - `filid:filid-structure-review` — full project scan (periodic health check)
-> - `filid:filid-review` — changed files only + multi-persona review (use on every PR)
+> - `filid:structure-review` — full project scan (periodic health check)
+> - `filid:review` — changed files only + multi-persona review (use on every PR)
 
 ### Learn About FCA-AI
 
 ```
-/filid:filid-guide
-/filid:filid-guide fractal 구조에 대해 알려줘
-/filid:filid-context-query organ 디렉토리에서 뭘 할 수 있어?
+/filid:guide
+/filid:guide fractal 구조에 대해 알려줘
+/filid:context-query organ 디렉토리에서 뭘 할 수 있어?
 ```
 
 ### Improve Module Structure
 
 ```
-/filid:filid-restructure ./src/core
-/filid:filid-promote
+/filid:restructure ./src/core
+/filid:promote
 ```
 
 ---
@@ -155,17 +155,17 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 | Skill                         | Scope             | What it does                                               |
 | ----------------------------- | ----------------- | ---------------------------------------------------------- |
-| `/filid:filid-setup`             | —                 | Initialize FCA-AI in a project                             |
-| `/filid:filid-scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
-| `/filid:filid-sync`             | Full project      | Sync documentation with code changes                       |
-| `/filid:filid-structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
-| `/filid:filid-promote`          | —                 | Promote stable tests to spec                               |
-| `/filid:filid-context-query`    | —                 | Q&A about project structure                                |
-| `/filid:filid-guide`            | —                 | FCA-AI guidance on any topic                               |
-| `/filid:filid-restructure`      | —                 | Module refactoring guide with migration steps              |
-| `/filid:filid-review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
-| `/filid:filid-resolve`          | —                 | Resolve fix requests from a review                         |
-| `/filid:filid-revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
+| `/filid:setup`             | —                 | Initialize FCA-AI in a project                             |
+| `/filid:scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
+| `/filid:sync`             | Full project      | Sync documentation with code changes                       |
+| `/filid:structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
+| `/filid:promote`          | —                 | Promote stable tests to spec                               |
+| `/filid:context-query`    | —                 | Q&A about project structure                                |
+| `/filid:guide`            | —                 | FCA-AI guidance on any topic                               |
+| `/filid:restructure`      | —                 | Module refactoring guide with migration steps              |
+| `/filid:review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
+| `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
+| `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
 
 ---
 

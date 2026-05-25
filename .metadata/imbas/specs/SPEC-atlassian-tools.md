@@ -66,7 +66,7 @@ search-company-knowledge에서:
 |------|-----------------|------|
 | `getConfluencePage` | Phase 1 | Confluence 기획 문서 읽기 |
 | `searchConfluenceUsingCql` | Phase 1 | 관련 스펙 문서 탐색 |
-| `fetchAtlassian` | `/atlassian:atlassian-media-analysis` (migrated) | 첨부 파일/이미지 다운로드 |
+| `fetchAtlassian` | `/atlassian:media-analysis` (migrated) | 첨부 파일/이미지 다운로드 |
 
 ### 불필요
 

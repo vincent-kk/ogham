@@ -22,7 +22,7 @@ const MARKER = 'MAENCOF_V030_TEST_MARKER_42';
 function createVaultWithEchoAction(event: LifecycleEvent): string {
   const dir = join(
     tmpdir(),
-    `maencof-lifecycle-${event}-${Date.now()}-${Math.random()
+    `lifecycle-${event}-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 6)}`,
   );

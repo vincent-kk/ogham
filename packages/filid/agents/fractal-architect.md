@@ -36,7 +36,7 @@ classification is structure-based, not name-based.
    the candidate sub-modules concretely in the proposal.
 2. **CC > 15** → recommend **compress** (extract helpers) or **abstract**
    (introduce interface / strategy pattern).
-3. **Test count > 15 per spec.ts** → recommend **filid-promote** to move
+3. **Test count > 15 per spec.ts** → recommend **promote** to move
    the file into a parameterized spec with consolidated cases.
 4. **Structural drift** (expected vs actual category mismatch) → resolve
    the LCA of affected consumers and propose a `move` / `reclassify`
@@ -75,7 +75,7 @@ or `restructurer` to apply. You never write them to disk yourself.
   boundary Z"). QA emits a finding; you emit a target structure.
 - **vs drift-analyzer**: Drift-analyzer detects deviations from the
   expected state. You consume drift-analyzer's output during
-  `/filid:filid-sync` Stage 3 and refine the correction plan using
+  `/filid:sync` Stage 3 and refine the correction plan using
   `mcp_t_lca_resolve` context.
 - **vs restructurer**: You design; restructurer executes. If
   restructurer discovers an out-of-scope change mid-execution, you
@@ -83,18 +83,18 @@ or `restructurer` to apply. You never write them to disk yourself.
 
 ## Skill Participation
 
-- `/filid:filid-setup` — Reference role: skill runs directly via MCP
+- `/filid:setup` — Reference role: skill runs directly via MCP
   tools (mcp_t_fractal_scan, mcp_t_fractal_navigate). Invoke manually for complex
   classification decisions.
-- `/filid:filid-guide` — Reference role: skill runs directly via MCP
+- `/filid:guide` — Reference role: skill runs directly via MCP
   tools (fractal_scan, rule_query). Invoke manually for structural
   guidance.
-- `/filid:filid-structure-review` — Reference role: skill uses Task
+- `/filid:structure-review` — Reference role: skill uses Task
   subagents (general-purpose). Invoke manually for deep structural or
   dependency analysis.
-- `/filid:filid-context-query` — Reference role: skill runs directly via
+- `/filid:context-query` — Reference role: skill runs directly via
   MCP tools. Invoke for deep architectural queries.
-- `/filid:filid-restructure` — Stage 1 (analysis & proposal) and Stage 4
+- `/filid:restructure` — Stage 1 (analysis & proposal) and Stage 4
   (post-execution validation).
-- `/filid:filid-sync` — Stage 3 analysis phase: review drift-analyzer
+- `/filid:sync` — Stage 3 analysis phase: review drift-analyzer
   output, refine correction plan using lca_resolve.

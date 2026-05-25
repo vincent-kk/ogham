@@ -153,7 +153,7 @@ function buildSessionRecap(
     `- Tentative principles:${tentativePrinciples.length > 0 ? '\n' + tentativePrinciples.join('\n') : ' (none)'}`,
   );
   lines.push('- Unresolved tensions: (none)');
-  lines.push('To save this recap, run /maencof:maencof-remember.');
+  lines.push('To save this recap, run /maencof:remember.');
   return lines.join('\n');
 }
 

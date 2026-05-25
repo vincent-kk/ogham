@@ -15,4 +15,4 @@ file read; this skill only edits the `## Digest` section at publish time.
 
 Media attachments are not supported for local issues in v1 (local files are
 plain markdown; embedded image references can be manual, but
-`/atlassian:atlassian-media-analysis` auto-invocation is Jira-only).
+`/atlassian:media-analysis` auto-invocation is Jira-only).

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-세션 시작 시 3단계 초기화를 수행한다: (1) 캐시 디렉토리 생성 + 로거 경로 설정, (2) INTENT.md 자동 탐지로 `.filid/` 마커 생성, (3) 만료 세션·stale 캐시 정리. `.claude/rules/`는 절대 건드리지 않음 — 규칙 배포는 `/filid:filid-setup` 스킬 전담.
+세션 시작 시 3단계 초기화를 수행한다: (1) 캐시 디렉토리 생성 + 로거 경로 설정, (2) INTENT.md 자동 탐지로 `.filid/` 마커 생성, (3) 만료 세션·stale 캐시 정리. `.claude/rules/`는 절대 건드리지 않음 — 규칙 배포는 `/filid:setup` 스킬 전담.
 
 ## Structure
 

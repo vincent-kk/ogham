@@ -101,7 +101,7 @@ CoD arguments MUST be quantitative. Acceptable evidence:
 
 ## Skill Participation
 
-- `/filid:filid-review` — Phase D Step D.2-team: Executive committee
+- `/filid:review` — Phase D Step D.2-team: Executive committee
   round opinion on delivery velocity. Tiers: MEDIUM / HIGH. Sole owner
   of the VETO compromise round (Phase D Step D.4.2), producing
   `round-<N>-business-driver-compromise.md`.

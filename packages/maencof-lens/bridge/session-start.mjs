@@ -5,8 +5,8 @@ import{existsSync as N}from"node:fs";import{join as V}from"node:path";import{exi
 </vaults>
 
 <capabilities>
-- /maencof-lens:maencof-lens-lookup <keyword> \u2014 single-doc retrieval + summary
-- /maencof-lens:maencof-lens-context <query> \u2014 token-budgeted multi-doc assembly
+- /maencof-lens:lookup <keyword> \u2014 single-doc retrieval + summary
+- /maencof-lens:context <query> \u2014 token-budgeted multi-doc assembly
 - "vault research" or "vault explore" \u2014 autonomous researcher agent
 </capabilities>
 

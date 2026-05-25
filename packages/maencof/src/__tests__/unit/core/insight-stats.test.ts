@@ -24,7 +24,7 @@ import { DEFAULT_INSIGHT_CONFIG } from '../../../types/insight.js';
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 
 function createTempDir(): string {
-  return mkdtempSync(join(tmpdir(), 'maencof-insight-test-'));
+  return mkdtempSync(join(tmpdir(), 'insight-test-'));
 }
 
 function removeDir(dir: string): void {

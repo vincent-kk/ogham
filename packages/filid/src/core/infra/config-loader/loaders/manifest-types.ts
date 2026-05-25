@@ -38,7 +38,7 @@ export interface RuleDocSyncResult {
   skipped: Array<{ id: string; reason: string }>;
 }
 
-/** Per-rule status snapshot used by the filid-setup checkbox UI. */
+/** Per-rule status snapshot used by the setup checkbox UI. */
 export interface RuleDocStatusEntry {
   id: string;
   filename: string;
@@ -66,7 +66,7 @@ export interface RuleDocStatusEntry {
 export interface RuleDocsStatus {
   /**
    * Optional rule entries — the ONLY list rendered as checkboxes in the
-   * filid-setup UI. Required entries are filtered out because they are
+   * setup UI. Required entries are filtered out because they are
    * auto-synced regardless of user input.
    */
   entries: RuleDocStatusEntry[];

@@ -15,7 +15,7 @@ recommended change, and report what changed. You do not design
 architecture, do not run full test suites unless explicitly asked, and
 do not stray beyond the fix item you were assigned.
 
-The orchestrating skill (`/filid:filid-resolve`, `/filid:filid-scan
+The orchestrating skill (`/filid:resolve`, `/filid:scan
 --fix`) injects the single fix item into your task prompt. Any
 pre-computed MCP context (LCOM4 measurements, test counts) is included
 in that prompt. You operate using built-in tools only.
@@ -100,8 +100,8 @@ was not needed.
 
 ## Skill Participation
 
-- `/filid:filid-scan` — Phase 5 `--fix`: 3+12 rule violation remediation
+- `/filid:scan` — Phase 5 `--fix`: 3+12 rule violation remediation
   (it.each parameterization); also handles `ORGAN_INTENT_MD_PRESENT`
   violations by deleting INTENT.md from organ directories.
-- `/filid:filid-resolve` — Step 4: parallel fix application for
+- `/filid:resolve` — Step 4: parallel fix application for
   accepted fix items.

@@ -124,7 +124,7 @@ Step 1.2 — Document Source Resolution
     - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.
     - If page contains embedded media (images, videos):
-      → Display: "Media attachments detected. Run /atlassian:atlassian-media-analysis to include visual context."
+      → Display: "Media attachments detected. Run /atlassian:media-analysis to include visual context."
       → Do NOT auto-invoke media-analysis.
   - If source contains references to other Confluence pages:
     - [OP: search_confluence] to resolve references.

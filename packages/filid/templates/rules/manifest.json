@@ -1,5 +1,5 @@
 {
-  "_comment": "Injectable rule docs manifest. Used by syncRuleDocs() to drive optional rule file deployment from the filid-setup skill. Never read by SessionStart hooks.",
+  "_comment": "Injectable rule docs manifest. Used by syncRuleDocs() to drive optional rule file deployment from the setup skill. Never read by SessionStart hooks.",
   "version": "1.0",
   "rules": [
     {
@@ -9,7 +9,7 @@
       "required": true,
       "title": "FCA-AI Architecture Rules",
       "description": "Fractal Context Architecture rules: node types, structural rules, documentation constraints, and quality thresholds. Mandatory for every FCA-AI project.",
-      "templateHash": "90a53389ce68eece96399ad92f181bf604db2d0dc4599e7f76ebde4def5b9509"
+      "templateHash": "1e904e839f0f56a1c4d0dad351f4665c386a3f42345f99f0f8c042c16eda058a"
     },
     {
       "id": "filid_reuse-first",

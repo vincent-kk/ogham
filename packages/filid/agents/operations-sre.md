@@ -94,7 +94,7 @@ operations).
 
 ## Skill Participation
 
-- `/filid:filid-review` — Phase D Step D.2-team: Judicial committee
+- `/filid:review` — Phase D Step D.2-team: Judicial committee
   round opinion on production stability. Tiers: LOW / MEDIUM / HIGH.
   Natural ally of engineering-architect and knowledge-manager.
 

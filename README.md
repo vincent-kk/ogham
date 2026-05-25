@@ -27,7 +27,7 @@ claude plugin install maencof
 
 That's it. All components (Skills, MCP tools, Agents, Hooks) register automatically — no manual configuration needed.
 
-> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:filid-setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
+> After installation, you can start using plugin skills directly in Claude Code. For example, type `/filid:setup` to initialize FCA-AI in your project. See the [All Packages](#all-packages) table below for every available plugin.
 
 ---
 
@@ -43,7 +43,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 | Component | Count    | Examples                                                                                  |
 | --------- | -------- | ----------------------------------------------------------------------------------------- |
-| Skills    | 18       | `/filid:filid-setup`, `/filid:filid-review`, `/filid:filid-scan`, `/filid:filid-pipeline` |
+| Skills    | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline` |
 | MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking                           |
 | Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee                           |
 | Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd                     |
@@ -54,20 +54,20 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 - **Automated rule enforcement** — INTENT.md 50-line limit, 3-tier boundary section validation, organ directory protection, naming conventions
 - **Structural drift detection** — Detects when code changes break documented structure and syncs automatically via DAG analysis
 - **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular-dependency detection via `@ast-grep/napi`
-- **End-to-end pipeline** — `filid-pipeline` chains PR creation → multi-persona review → resolve → revalidate
+- **End-to-end pipeline** — `pipeline` chains PR creation → multi-persona review → resolve → revalidate
 
 ```
 # Initialize FCA-AI in your project
-/filid:filid-setup
+/filid:setup
 
 # Scan for rule violations
-/filid:filid-scan
+/filid:scan
 
 # Run multi-persona code review on current branch
-/filid:filid-review
+/filid:review
 
 # Run the full PR pipeline (review → resolve → revalidate)
-/filid:filid-pipeline
+/filid:pipeline
 ```
 
 For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
@@ -82,7 +82,7 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 | Component | Count       | Examples                                                                                                      |
 | --------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 26          | `/maencof:maencof-setup`, `/maencof:maencof-remember`, `/maencof:maencof-recall`, `/maencof:maencof-organize` |
+| Skills    | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize` |
 | MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture                                           |
 | Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector                               |
 | Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd                                     |
@@ -96,13 +96,13 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 ```
 # Initialize your knowledge vault
-/maencof:maencof-setup
+/maencof:setup
 
 # Remember something new
-/maencof:maencof-remember
+/maencof:remember
 
 # Search your knowledge graph
-/maencof:maencof-recall
+/maencof:recall
 ```
 
 For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
@@ -117,7 +117,7 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 | Component | Count | Examples                                                                                                                                                             |
 | --------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Skills    | 5     | `/atlassian:atlassian-setup`, `/atlassian:atlassian-jira`, `/atlassian:atlassian-confluence`, `/atlassian:atlassian-download`, `/atlassian:atlassian-media-analysis` |
+| Skills    | 5     | `/atlassian:setup`, `/atlassian:jira`, `/atlassian:confluence`, `/atlassian:download`, `/atlassian:media-analysis` |
 | MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                                                                            |
 | Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                                                                               |
 | Hooks     | 0     | —                                                                                                                                                                    |
@@ -132,13 +132,13 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 ```
 # Configure Jira / Confluence credentials
-/atlassian:atlassian-setup
+/atlassian:setup
 
 # Operate on Jira issues
-/atlassian:atlassian-jira
+/atlassian:jira
 
 # Operate on Confluence pages
-/atlassian:atlassian-confluence
+/atlassian:confluence
 ```
 
 For full documentation, see the [atlassian README](./packages/atlassian/README.md) ([Korean](./packages/atlassian/README-ko_kr.md)).
@@ -226,7 +226,7 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 
 | Component | Count | Examples                                                                                                      |
 | --------- | ----- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 3     | `/maencof-lens:maencof-lens-setup`, `/maencof-lens:maencof-lens-lookup`, `/maencof-lens:maencof-lens-context` |
+| Skills    | 3     | `/maencof-lens:setup`, `/maencof-lens:lookup`, `/maencof-lens:context` |
 | MCP Tools | 5     | `search`, `context`, `navigate`, `read`, `status`                                                             |
 | Agents    | 1     | researcher (autonomous multi-tool vault exploration)                                                          |
 | Hooks     | 1     | SessionStart (config detection + skill usage guide injection)                                                 |
@@ -235,18 +235,18 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 
 - **Read-only by design** — Reuses maencof handlers but blocks all mutation paths; layer-filter guard (L1 excluded by default) is enforced on every tool call
 - **Multi-vault routing** — Register multiple vaults in `.maencof-lens/config.json` and switch by name
-- **Token-budgeted context assembly** — `/maencof-lens:maencof-lens-context` assembles relevant vault docs within a target token budget for prompt injection
+- **Token-budgeted context assembly** — `/maencof-lens:context` assembles relevant vault docs within a target token budget for prompt injection
 - **Autonomous researcher** — The `researcher` agent performs deep multi-step vault exploration via spreading activation
 
 ```
 # Register a vault (default vault on first run)
-/maencof-lens:maencof-lens-setup
+/maencof-lens:setup
 
 # Quick lookup of a single topic
-/maencof-lens:maencof-lens-lookup
+/maencof-lens:lookup
 
 # Token-budgeted multi-doc context for the current task
-/maencof-lens:maencof-lens-context
+/maencof-lens:context
 ```
 
 For full documentation, see the [maencof-lens package](./packages/maencof-lens/).

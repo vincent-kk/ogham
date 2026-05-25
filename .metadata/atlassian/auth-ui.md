@@ -97,9 +97,9 @@ After form submission, the setup tool validates the connection:
     | 3. Detect is_cloud from URL pattern
     | 4. Connection test (Jira + Confluence)
     |
-    +-- Success --> Save to secure storage --> Return result to LLM
-    |               config.json (non-secret)
-    |               credentials.enc (secrets)
+    +-- Success --> Save to local storage --> Return result to LLM
+    |               config.json (non-secret connection settings)
+    |               credentials.json (plain JSON, user-editable)
     |
     +-- Failure --> Return error with details --> Form shows error message
 ```

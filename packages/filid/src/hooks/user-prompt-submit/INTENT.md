@@ -29,7 +29,7 @@
 
 - 규칙 본문을 복제하지 않고 경로만 포인터로 제공
 - fmap reset은 FCA 프로젝트에서만 수행
-- `.claude/rules/`에는 절대 write 금지 (`filid-setup` 스킬 전담)
+- `.claude/rules/`에는 절대 write 금지 (`setup` 스킬 전담)
 
 ### Ask first
 

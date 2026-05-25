@@ -19,7 +19,7 @@ let cacheDir: string;
 beforeEach(() => {
   vaultDir = join(
     tmpdir(),
-    `maencof-migrate-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    `migrate-${Date.now()}-${Math.random().toString(36).slice(2)}`,
   );
   cacheDir = join(vaultDir, '.maencof');
   mkdirSync(cacheDir, { recursive: true });

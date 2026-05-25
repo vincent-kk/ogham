@@ -36,7 +36,7 @@ for items that can be repaired automatically.
 ```
 Detection: nodes with both inbound and outbound link counts of 0 via mcp_t_kg_status
 Severity: warning
-Auto-fix: suggest calling /maencof:maencof-suggest skill (discover related documents and recommend new connections)
+Auto-fix: suggest calling /maencof:suggest skill (discover related documents and recommend new connections)
 ```
 
 ### D2. Stale Index (stale-index)
@@ -44,7 +44,7 @@ Auto-fix: suggest calling /maencof:maencof-suggest skill (discover related docum
 Detection: .maencof/stale-nodes.json is non-empty
            OR .maencof/index.json builtAt is older than 24 hours
 Severity: warning
-Auto-fixable: call /maencof:maencof-build --force --reset-cache
+Auto-fixable: call /maencof:build --force --reset-cache
 ```
 
 ### D3. Broken Link (broken-link)
@@ -70,7 +70,7 @@ Auto-fixable: update Frontmatter layer field to match path (`mcp_t_update`)
 ```
 Detection: document pairs sharing 3 or more identical tags with high title similarity
 Severity: warning
-Auto-fix: not possible — reports duplicate pairs and suggests /maencof:maencof-organize
+Auto-fix: not possible — reports duplicate pairs and suggests /maencof:organize
 ```
 
 ### D6. Frontmatter Validation (invalid-frontmatter)
@@ -152,11 +152,11 @@ Minimum required AutonomyLevel: **0** (diagnosis always allowed; auto-fix requir
 - **Bulk modification forbidden** — auto-fixes are applied file by file
 - **D3 (broken link) auto-fix forbidden** — requires manual review
 - **D5 (duplicate) auto-merge forbidden** — decision belongs to the user
-- **Layer 1 (01_Core/) auto-fix via `mcp_t_update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:maencof-setup --step 4` or edit manually
+- **Layer 1 (01_Core/) auto-fix via `mcp_t_update` is forbidden** — D4/D6 fixes for L1 files require explicit user confirmation and must not be applied automatically; report the issue and guide the user to run `/maencof:setup --step 4` or edit manually
 
 ---
 
 ## Skill Participation
 
-- `/maencof:maencof-checkup` — full workflow entry point
-- `/maencof:maencof-checkup --quick` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)
+- `/maencof:checkup` — full workflow entry point
+- `/maencof:checkup --quick` — fast check via kg_status only (surfaces D1 orphan count and D2 stale ratio; no file-level scan)

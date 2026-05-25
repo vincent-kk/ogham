@@ -8,10 +8,10 @@
 
 | 그룹 | 스킬 |
 |------|------|
-| 파이프라인/리뷰 | `filid-pipeline`, `filid-review`, `filid-resolve`, `filid-revalidate`, `filid-structure-review` |
-| 문서/동기화 | `filid-update`, `filid-enrich-docs`, `filid-pull-request`, `filid-sync`, `filid-restructure`, `filid-migrate` |
-| 스캔/설정 | `filid-setup`, `filid-scan`, `filid-guide`, `filid-context-query`, `filid-config` |
-| 테스트/폴백 | `filid-promote`, `filid-ast-fallback` |
+| 파이프라인/리뷰 | `pipeline`, `review`, `resolve`, `revalidate`, `structure-review` |
+| 문서/동기화 | `update`, `enrich-docs`, `pull-request`, `sync`, `restructure`, `migrate` |
+| 스캔/설정 | `setup`, `scan`, `guide`, `context-query`, `config` |
+| 테스트/폴백 | `promote`, `ast-fallback` |
 
 ## Conventions
 
