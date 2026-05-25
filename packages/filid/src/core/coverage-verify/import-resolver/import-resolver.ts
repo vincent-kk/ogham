@@ -18,7 +18,7 @@ import {
   portableDirname,
   portableJoin,
   portableResolve,
-} from '../../infra/path/portable-path.js';
+} from '@ogham/cross-platform/paths';
 
 /**
  * Resolve a raw import source string to an absolute file path.

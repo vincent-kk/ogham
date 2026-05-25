@@ -2,7 +2,7 @@ import {
   pathForCompare,
   portableResolve,
   samePath,
-} from '../../../core/infra/path/portable-path.js';
+} from '@ogham/cross-platform/paths';
 
 /**
  * Assert `targetPath` resolves under `parentDir`; return the resolved target

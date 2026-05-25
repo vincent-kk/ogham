@@ -4,7 +4,7 @@
  */
 import { readdirSync } from 'node:fs';
 
-import { portableJoin } from '../../../infra/path/portable-path.js';
+import { portableJoin } from '@ogham/cross-platform/paths';
 import { moduleName } from './module-name.js';
 import { tryTestFile } from './try-test-file.js';
 

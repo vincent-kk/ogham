@@ -2,7 +2,7 @@ import {
   portableBasename,
   portableDirname,
   portableResolve,
-} from '../../infra/path/portable-path.js';
+} from '@ogham/cross-platform/paths';
 import type { ModuleInfo } from '../../../types/fractal.js';
 
 import { findEntryPoint } from './find-entry-point.js';

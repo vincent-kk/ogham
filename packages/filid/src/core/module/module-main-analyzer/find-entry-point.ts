@@ -1,7 +1,8 @@
 import { access, readdir } from 'node:fs/promises';
 
+import { portableJoin } from '@ogham/cross-platform/paths';
+
 import { ENTRY_CANDIDATES } from '../../../constants/entry-candidates.js';
-import { portableJoin } from '../../infra/path/portable-path.js';
 
 async function fileExists(filePath: string): Promise<boolean> {
   try {

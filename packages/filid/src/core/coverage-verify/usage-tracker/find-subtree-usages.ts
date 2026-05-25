@@ -1,10 +1,11 @@
 import { readFileSync } from 'node:fs';
 
+import { portableJoin, samePath } from '@ogham/cross-platform/paths';
+
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 import { SKIP_PATTERNS } from '../../../constants/scan-defaults.js';
 import type { UsageSite } from '../../../types/coverage.js';
 import type { FractalTree } from '../../../types/fractal.js';
-import { portableJoin, samePath } from '../../infra/path/portable-path.js';
 import { scanProject } from '../../tree/fractal-tree/fractal-tree.js';
 import {
   getDescendants,

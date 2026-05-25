@@ -12,7 +12,7 @@ import {
 import {
   isPosixLikePath,
   portableResolve,
-} from '../../../core/infra/path/portable-path.js';
+} from '@ogham/cross-platform/paths';
 import { findSubtreeUsages } from '../../../core/coverage-verify/usage-tracker/usage-tracker.js';
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CoverageVerifyResult } from '../../../types/coverage.js';

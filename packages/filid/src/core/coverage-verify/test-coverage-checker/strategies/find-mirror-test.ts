@@ -5,7 +5,7 @@
 import {
   portableJoin,
   portableRelative,
-} from '../../../infra/path/portable-path.js';
+} from '@ogham/cross-platform/paths';
 import { tryTestFile } from './try-test-file.js';
 
 /**
