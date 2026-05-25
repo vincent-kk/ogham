@@ -323,7 +323,7 @@ Step 6 — .gitignore 가드 (setup-lens 패턴)
 Step 7 — 결과 표시
 ```
 
-**참고:** setup-lens 패턴 (`/Users/Vincent/Workspace/ogham/packages/maencof-lens/skills/setup-lens/SKILL.md`) 구조를 따름.
+**참고:** maencof-lens setup 패턴 (`packages/maencof-lens/skills/setup/SKILL.md`) 구조를 따름.
 
 ---
 

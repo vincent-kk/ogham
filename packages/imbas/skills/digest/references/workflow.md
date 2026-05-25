@@ -3,9 +3,9 @@
 This file owns Steps 1–5. Step 6 (preview / publish) is delegated to the
 provider-specific workflow file selected by `config.provider`:
 
-- `jira`   → `jira/workflow.md` Step 6
+- `jira` → `jira/workflow.md` Step 6
 - `github` → `github/workflow.md` Step 6
-- `local`  → `local/workflow.md` Step 6
+- `local` → `local/workflow.md` Step 6
 
 ## Step 0 — Provider routing
 
@@ -25,7 +25,9 @@ Step 6, but do not read it yet.
    - Existing decisions and open questions
 3. Detect attached media (images, videos, GIFs) in description or comments.
    - If media found AND `--no-media` flag NOT set AND provider is `jira` →
-     call `/atlassian:media-analysis` for each attachment.
+     call `/atlassian:media-analysis <attachment-url> --analyze` for each attachment.
+     Full signature: `<url-or-path> [--analyze] [--preset NAME] [--force]`.
+   - Skip with a one-line warning if the `@ogham/atlassian` plugin is not installed (the skill is unresolved at runtime).
    - Include visual analysis in digest context.
    - Local provider skips media auto-invocation in v1.
 
