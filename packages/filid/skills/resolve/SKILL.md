@@ -1,9 +1,9 @@
 ---
 name: resolve
 user_invocable: true
-description: "[filid:resolve] Resolve review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing."
-argument-hint: "[--auto]"
-version: "2.0.0"
+description: '[filid:resolve] Resolve review fix requests by accepting or rejecting each item, applying accepted fixes via parallel code-surgeon subagents, recording ADR justifications for rejections, then auto-committing and pushing.'
+argument-hint: '[--auto]'
+version: '2.0.0'
 complexity: medium
 plugin: filid
 ---
@@ -18,11 +18,13 @@ plugin: filid
 > step without exception.
 >
 > **Valid reasons to yield**:
+>
 > 1. Interactive mode active AND current step is `[INTERACTIVE]`
 > 2. User decision genuinely required (outside `--auto`)
 > 3. Terminal stage marker emitted: `Resolve complete — N accepted` or `Resolve aborted`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After `filid:code-surgeon` parallel subagent returns — chain typecheck and commit in the same turn
 > - After git commit+push (in `--auto` mode) — immediately chain `Skill("filid:revalidate")` in the same turn (primary stall point). In interactive mode, Step 9 `[INTERACTIVE]` gates this with `AskUserQuestion` — yield is permitted there.
 > - Interactive step completion (user responded) — chain next non-interactive step without delay
@@ -76,6 +78,7 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - **Type** (one of `code-fix`, `promote`, `restructure`; defaults to `code-fix` if absent)
 
 Classify each item by type:
+
 - `code-fix` — standard code patch (applied by `filid:code-surgeon`)
 - `promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
@@ -96,6 +99,7 @@ Classify each item by type:
 > Proceed directly to Step 4.**
 
 <!-- [INTERACTIVE] AskUserQuestion: per-fix accept/reject decision -->
+
 Use `AskUserQuestion` to present each fix item for decision:
 
 ```
@@ -129,6 +133,7 @@ results together before the next response, which naturally "awaits all"
 before Phase 4b begins. No explicit wait primitive is needed.
 
 For each accepted code-fix, include one Task in the parallel block with:
+
 - The target file path
 - The recommended action and code patch from `fix-requests.md`
 - Instruction to apply the fix directly to the file
@@ -141,11 +146,13 @@ response.
 After all code fixes are applied, process structural fix items **sequentially**:
 
 For each accepted `promote` item:
+
 - Invoke `Skill("filid:promote", "<target_path>")`.
 - If the skill reports no eligible files, log as "SKIP — no stable test.ts found"
   and continue. This is non-blocking.
 
 For each accepted `restructure` item:
+
 - Invoke `Skill("filid:restructure", "<target_path> --auto-approve")`.
 - If the skill fails or reports no actionable changes, log as
   "SKIP — restructure not applicable" and continue. This is non-blocking.
@@ -164,6 +171,7 @@ For each accepted `restructure` item:
 For each rejected fix:
 
 <!-- [INTERACTIVE] AskUserQuestion: rejection justification collection -->
+
 1. **Collect justification**: Use `AskUserQuestion` with free text input
    to collect the developer's reason for rejection.
 
@@ -239,9 +247,11 @@ If there were accepted fixes (files modified by code-surgeon):
      local-only and excluded by `.gitignore`.
 
 3. **Construct commit message** from accepted fix IDs:
+
    ```
    fix(filid): resolve FIX-001, FIX-003 from review
    ```
+
    Format: `fix(filid): resolve <comma-separated accepted FIX-IDs> from review`
 
 4. **Execute**: `git commit -m "<message>"` (Bash)
@@ -312,10 +322,10 @@ If there were NO accepted fixes (all rejected):
 
 ## Available MCP Tools
 
-| Tool             | Action             | Purpose                                                  |
-| ---------------- | ------------------ | -------------------------------------------------------- |
-| `mcp_t_review_manage`  | `normalize-branch` | Normalize branch name for review directory path          |
-| `mcp_t_debt_manage`    | `create`           | Create a technical debt record for each rejected fix     |
+| Tool                  | Action             | Purpose                                              |
+| --------------------- | ------------------ | ---------------------------------------------------- |
+| `mcp_t_review_manage` | `normalize-branch` | Normalize branch name for review directory path      |
+| `mcp_t_debt_manage`   | `create`           | Create a technical debt record for each rejected fix |
 
 ## Options
 
@@ -325,9 +335,9 @@ If there were NO accepted fixes (all rejected):
 /filid:resolve [--auto]
 ```
 
-| Option   | Type | Default | Description                                                          |
-| -------- | ---- | ------- | -------------------------------------------------------------------- |
-| `--auto` | flag | off     | Accept all fixes, skip user prompts, auto-commit/push/revalidate     |
+| Option   | Type | Default | Description                                                      |
+| -------- | ---- | ------- | ---------------------------------------------------------------- |
+| `--auto` | flag | off     | Accept all fixes, skip user prompts, auto-commit/push/revalidate |
 
 Current branch auto-detected. No other parameters required.
 
