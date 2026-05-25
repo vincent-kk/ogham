@@ -60,7 +60,13 @@ async function clearTscCache(pkgDir) {
 
 function run(cmd, args, label) {
   return new Promise((res, rej) => {
-    const child = spawn(cmd, args, { stdio: "inherit", cwd: root });
+    // shell:true so Windows resolves yarn.cmd via PATHEXT. The cmd+args
+    // here are constants in this repo, so no injection surface.
+    const child = spawn(cmd, args, {
+      stdio: "inherit",
+      cwd: root,
+      shell: true,
+    });
     child.on("exit", (code) => {
       if (code === 0) res();
       else rej(new Error(`${label} → exit ${code}`));
