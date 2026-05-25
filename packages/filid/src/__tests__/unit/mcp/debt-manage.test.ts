@@ -55,7 +55,7 @@ describe('handleDebtManage', () => {
       expect(typeof id).toBe('string');
       expect(id.length).toBeGreaterThan(0);
       expect(filePath).toContain(id);
-      expect(filePath).toContain('.filid/debt');
+      expect(filePath.replace(/\\/g, '/')).toContain('.filid/debt');
     });
 
     it('생성된 파일에 YAML 프론트매터가 포함된다', async () => {

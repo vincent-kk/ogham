@@ -13,7 +13,12 @@
  * - node_modules package resolution
  */
 import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+
+import {
+  portableDirname,
+  portableJoin,
+  portableResolve,
+} from '../../infra/path/portable-path.js';
 
 /**
  * Resolve a raw import source string to an absolute file path.
@@ -32,8 +37,8 @@ export function resolveImportPath(
     return null;
   }
 
-  const baseDir = dirname(currentFilePath);
-  const resolved = resolve(baseDir, importSource);
+  const baseDir = portableDirname(currentFilePath);
+  const resolved = portableResolve(baseDir, importSource);
 
   // Strategy 1: ESM .js -> .ts substitution
   if (resolved.endsWith('.js')) {
@@ -52,13 +57,14 @@ export function resolveImportPath(
   // Strategy 3: No extension — try adding common extensions
   if (!/\.\w+$/.test(resolved)) {
     const extensions = ['.ts', '.tsx', '.js', '.mjs'];
-    for (const ext of extensions) {
+    for (const ext of extensions)
       if (existsSync(resolved + ext)) return resolved + ext;
-    }
+
     // Index resolution: './dir' -> './dir/index.ts'
-    const indexExtensions = ['/index.ts', '/index.tsx', '/index.js'];
+    const indexExtensions = ['index.ts', 'index.tsx', 'index.js'];
     for (const idx of indexExtensions) {
-      if (existsSync(resolved + idx)) return resolved + idx;
+      const indexPath = portableJoin(resolved, idx);
+      if (existsSync(indexPath)) return indexPath;
     }
   }
 

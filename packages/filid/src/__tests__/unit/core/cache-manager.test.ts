@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+function toPosixPath(p: string): string {
+  return p.replace(/\\/g, '/');
+}
+
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
   return {
@@ -66,7 +70,7 @@ describe('cache-manager', () => {
       await import('../../../core/infra/cache-manager/cache-manager.js');
     const dir = getCacheDir('/my/project');
     const hash = cwdHash('/my/project');
-    expect(dir).toContain('plugins/filid');
+    expect(toPosixPath(dir)).toContain('plugins/filid');
     expect(dir).toContain(hash);
   });
 
@@ -94,7 +98,7 @@ describe('cache-manager', () => {
     const { getCacheDir } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
     const dir = getCacheDir('/proj');
-    expect(dir).toContain('/custom/config');
+    expect(toPosixPath(dir)).toContain('/custom/config');
     delete process.env.CLAUDE_CONFIG_DIR;
   });
 

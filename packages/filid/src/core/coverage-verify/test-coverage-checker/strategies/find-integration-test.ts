@@ -3,8 +3,8 @@
  * @description Strategy 3: `src/__tests__/integration/` 아래의 이름 규칙 매칭 테스트 탐색.
  */
 import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
 
+import { portableJoin } from '../../../infra/path/portable-path.js';
 import { moduleName } from './module-name.js';
 import { tryTestFile } from './try-test-file.js';
 
@@ -19,7 +19,12 @@ export function findIntegrationTest(
   projectRoot: string,
 ): { testFilePath: string; testCount: number } | null {
   const name = moduleName(sourceFilePath);
-  const integrationDir = join(projectRoot, 'src', '__tests__', 'integration');
+  const integrationDir = portableJoin(
+    projectRoot,
+    'src',
+    '__tests__',
+    'integration',
+  );
 
   let entries: string[];
   try {
@@ -35,7 +40,7 @@ export function findIntegrationTest(
     const entryName = entry.replace(/\.(test|spec)\.ts$/, '');
     // Match: entry name equals, or starts with `<name>-`
     if (entryName === name || entryName.startsWith(`${name}-`)) {
-      const candidatePath = join(integrationDir, entry);
+      const candidatePath = portableJoin(integrationDir, entry);
       const found = tryTestFile(candidatePath);
       if (found) return found;
     }

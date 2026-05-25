@@ -1,4 +1,5 @@
 import spawn from "cross-spawn";
+import { spawn as nodeSpawn } from "node:child_process";
 import { normalizeEol } from "../eol/index.js";
 import { osTimeout } from "./os-timeout.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";
@@ -29,7 +30,11 @@ export function spawnCli(
     const timer = timeoutMs
       ? setTimeout(() => {
           timedOut = true;
-          child.kill("SIGKILL");
+          if (process.platform === "win32" && child.pid !== undefined)
+            nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+              stdio: "ignore",
+            });
+          else child.kill("SIGKILL");
         }, timeoutMs)
       : null;
 
@@ -61,9 +66,7 @@ export function spawnCli(
     if (options.input !== undefined && child.stdin) {
       child.stdin.write(options.input);
       child.stdin.end();
-    } else if (child.stdin) {
-      child.stdin.end();
-    }
+    } else if (child.stdin) child.stdin.end();
 
     child.on("close", (code) => settle(code));
   });

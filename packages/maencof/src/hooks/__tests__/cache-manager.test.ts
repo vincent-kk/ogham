@@ -22,6 +22,10 @@ import type { PinnedNode } from '../cache-manager/cache-manager.js';
 
 let testDir: string;
 
+function toPosixPath(p: string): string {
+  return p.replace(/\\/g, '/');
+}
+
 beforeEach(() => {
   testDir = join(
     tmpdir(),
@@ -48,14 +52,14 @@ describe('getCacheDir', () => {
   it('uses CLAUDE_CONFIG_DIR env when set', () => {
     const dir = getCacheDir('/my/vault');
     expect(dir).toContain(testDir);
-    expect(dir).toContain('plugins/maencof/');
+    expect(toPosixPath(dir)).toContain('plugins/maencof/');
   });
 
   it('falls back to ~/.claude when env not set', () => {
     vi.stubEnv('CLAUDE_CONFIG_DIR', '');
     delete process.env.CLAUDE_CONFIG_DIR;
     const dir = getCacheDir('/my/vault');
-    expect(dir).toContain('plugins/maencof/');
+    expect(toPosixPath(dir)).toContain('plugins/maencof/');
   });
 });
 

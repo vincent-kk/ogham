@@ -1,17 +1,16 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
+import { SKIP_PATTERNS } from '../../../constants/scan-defaults.js';
 import type { UsageSite } from '../../../types/coverage.js';
 import type { FractalTree } from '../../../types/fractal.js';
+import { portableJoin, samePath } from '../../infra/path/portable-path.js';
 import { scanProject } from '../../tree/fractal-tree/fractal-tree.js';
 import {
   getDescendants,
   getFractalsUnderOrgans,
 } from '../../tree/fractal-tree/fractal-tree.js';
-
 import { resolveImportPath } from '../import-resolver/import-resolver.js';
-import { SKIP_PATTERNS } from '../../../constants/scan-defaults.js';
 
 function shouldSkipFile(fileName: string): boolean {
   return SKIP_PATTERNS.some((pattern) => pattern.test(fileName));
@@ -64,10 +63,10 @@ export async function findSubtreeUsages(
       // Only analyze TypeScript/JavaScript files
       if (!/\.[mc]?[jt]sx?$/.test(fileName)) continue;
 
-      const filePath = join(nodePath, fileName);
+      const filePath = portableJoin(nodePath, fileName);
 
       // Skip if this is the target file itself
-      if (filePath === targetPath) continue;
+      if (samePath(filePath, targetPath)) continue;
 
       let content: string;
       try {
@@ -90,7 +89,7 @@ export async function findSubtreeUsages(
         if (imp.isTypeOnly) continue;
 
         const resolved = resolveImportPath(imp.source, filePath);
-        if (resolved === targetPath) {
+        if (resolved && samePath(resolved, targetPath)) {
           usages.push({
             filePath,
             fractalPath: nodePath,

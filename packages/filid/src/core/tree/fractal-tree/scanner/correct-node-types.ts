@@ -15,7 +15,7 @@ export function correctNodeTypes(
 
   // 깊이 역순 정렬 (deepest first = bottom-up)
   const sortedByDepth = [...nodeEntries].sort(
-    (a, b) => b.path.split('/').length - a.path.split('/').length,
+    (a, b) => b.path.split(/[\\/]/).length - a.path.split(/[\\/]/).length,
   );
 
   for (const entry of sortedByDepth) {

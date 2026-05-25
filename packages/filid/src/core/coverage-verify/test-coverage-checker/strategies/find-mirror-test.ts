@@ -2,8 +2,10 @@
  * @file find-mirror-test.ts
  * @description Strategy 2: `src/<layer>/<name>.ts` → `src/__tests__/unit/<layer>/<name>.test.ts` 미러 구조 탐색.
  */
-import { join, relative } from 'node:path';
-
+import {
+  portableJoin,
+  portableRelative,
+} from '../../../infra/path/portable-path.js';
 import { tryTestFile } from './try-test-file.js';
 
 /**
@@ -19,7 +21,7 @@ export function findMirrorTest(
   sourceFilePath: string,
   projectRoot: string,
 ): { testFilePath: string; testCount: number } | null {
-  const rel = relative(projectRoot, sourceFilePath);
+  const rel = portableRelative(projectRoot, sourceFilePath);
 
   // Must be under src/
   if (!rel.startsWith('src/')) return null;
@@ -30,9 +32,21 @@ export function findMirrorTest(
   const nameWithoutExt = withoutSrc.replace(/\.[^.]+$/, '');
 
   const candidates = [
-    join(projectRoot, 'src', '__tests__', 'unit', `${nameWithoutExt}.test.ts`),
-    join(projectRoot, 'src', '__tests__', 'unit', `${nameWithoutExt}.spec.ts`),
-    join(
+    portableJoin(
+      projectRoot,
+      'src',
+      '__tests__',
+      'unit',
+      `${nameWithoutExt}.test.ts`,
+    ),
+    portableJoin(
+      projectRoot,
+      'src',
+      '__tests__',
+      'unit',
+      `${nameWithoutExt}.spec.ts`,
+    ),
+    portableJoin(
       projectRoot,
       'src',
       '__tests__',

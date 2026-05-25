@@ -14,23 +14,31 @@ import type { UserPromptSubmitInput } from '../../../types/hooks.js';
 // throws (unexpected reads are test errors).
 const MOCK_CONFIG_JSON = JSON.stringify({ version: '1.0', rules: {} });
 
+function toPosixPath(p: string): string {
+  return p.replace(/\\/g, '/');
+}
+
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
   return {
     ...actual,
     existsSync: vi.fn((p: unknown) => {
       if (typeof p !== 'string') return false;
-      if (p.endsWith('.filid')) return true;
-      if (p.endsWith('.filid/config.json')) return true;
-      if (p.endsWith('.claude/rules/filid_fca-policy.md')) return true;
-      if (p.includes('/prompt-context-')) return false;
+      const normalized = toPosixPath(p);
+      if (normalized.endsWith('.filid')) return true;
+      if (normalized.endsWith('.filid/config.json')) return true;
+      if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
+      if (normalized.includes('/prompt-context-')) return false;
       return false;
     }),
     statSync: vi.fn(() => {
       throw new Error('no cache');
     }),
     readFileSync: vi.fn((p: unknown) => {
-      if (typeof p === 'string' && p.endsWith('.filid/config.json')) {
+      if (
+        typeof p === 'string' &&
+        toPosixPath(p).endsWith('.filid/config.json')
+      ) {
         return MOCK_CONFIG_JSON;
       }
       throw new Error(`unexpected readFileSync: ${String(p)}`);
@@ -60,10 +68,11 @@ describe('user-prompt-submit context injection', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
-        if (p.endsWith('.filid')) return true;
-        if (p.endsWith('.filid/config.json')) return true;
-        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return true;
-        if (p.includes('/prompt-context-')) return false;
+        const normalized = toPosixPath(p);
+        if (normalized.endsWith('.filid')) return true;
+        if (normalized.endsWith('.filid/config.json')) return true;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
+        if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
     );
@@ -103,10 +112,11 @@ describe('user-prompt-submit context injection', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
-        if (p.endsWith('.filid')) return true;
-        if (p.endsWith('.filid/config.json')) return false;
-        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return false;
-        if (p.includes('/prompt-context-')) return false;
+        const normalized = toPosixPath(p);
+        if (normalized.endsWith('.filid')) return true;
+        if (normalized.endsWith('.filid/config.json')) return false;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return false;
+        if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
     );
@@ -123,10 +133,11 @@ describe('user-prompt-submit context injection', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
         if (typeof p !== 'string') return false;
-        if (p.endsWith('.filid')) return true;
-        if (p.endsWith('.filid/config.json')) return true;
-        if (p.endsWith('.claude/rules/filid_fca-policy.md')) return false;
-        if (p.includes('/prompt-context-')) return false;
+        const normalized = toPosixPath(p);
+        if (normalized.endsWith('.filid')) return true;
+        if (normalized.endsWith('.filid/config.json')) return true;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return false;
+        if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
     );
@@ -142,10 +153,12 @@ describe('user-prompt-submit context injection', () => {
   it('does not inject when prompt-context exists', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('.filid')) return true;
-        if (typeof p === 'string' && p.includes('/session-context-'))
+        if (typeof p !== 'string') return false;
+        const normalized = toPosixPath(p);
+        if (normalized.endsWith('.filid')) return true;
+        if (normalized.includes('/session-context-'))
           return true;
-        if (typeof p === 'string' && p.includes('/prompt-context-'))
+        if (normalized.includes('/prompt-context-'))
           return true;
         return false;
       },
@@ -171,8 +184,10 @@ describe('user-prompt-submit context injection', () => {
   it('safely injects when prompt-context I/O fails', () => {
     (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
       (p: unknown) => {
-        if (typeof p === 'string' && p.endsWith('.filid')) return true;
-        if (typeof p === 'string' && p.includes('/prompt-context-'))
+        if (typeof p !== 'string') return false;
+        const normalized = toPosixPath(p);
+        if (normalized.endsWith('.filid')) return true;
+        if (normalized.includes('/prompt-context-'))
           throw new Error('fs error');
         return false;
       },

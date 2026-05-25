@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { SessionStartInput } from '../../../types/hooks.js';
@@ -32,8 +34,10 @@ const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =
 const { getCacheDir, pruneOldSessions } =
   await import('../../../core/infra/cache-manager/cache-manager.js');
 
+const testWorkspace = resolve('/tmp/test-workspace');
+
 const baseInput: SessionStartInput = {
-  cwd: '/tmp/test-workspace',
+  cwd: testWorkspace,
   session_id: 'test-session-123',
   hook_event_name: 'SessionStart',
 };
@@ -62,7 +66,7 @@ describe('processSetup', () => {
 
     processSetup(baseInput);
 
-    expect(getCacheDir).toHaveBeenCalledWith('/tmp/test-workspace');
+    expect(getCacheDir).toHaveBeenCalledWith(testWorkspace);
   });
 
   it('creates cache directory when missing', () => {
@@ -91,7 +95,7 @@ describe('processSetup', () => {
 
     processSetup(baseInput);
 
-    expect(pruneOldSessions).toHaveBeenCalledWith('/tmp/test-workspace');
+    expect(pruneOldSessions).toHaveBeenCalledWith(testWorkspace);
   });
 
   it('returns additionalContext for FCA projects', () => {
