@@ -1,9 +1,9 @@
 ---
 name: implement-plan
 user_invocable: true
-description: "[imbas:implement-plan] Build a DAG-based implementation schedule from Stories and cross-story Tasks. Groups tickets into parallel batches with execution order like [1,2,5] -> [3] -> [4,6,7]. Runs after devplan (Phase 3) or manifest-devplan (Phase 3.5). Trigger: \"implement plan\", \"배치 계획\", \"implementation schedule\", \"병렬 스토리 그룹화\"."
-argument-hint: "[--run RUN_ID] [--source stories|devplan] [--max-parallel N]"
-version: "1.0.0"
+description: '[imbas:implement-plan] Build a DAG-based implementation schedule from Stories and cross-story Tasks. Groups tickets into parallel batches with execution order like [1,2,5] -> [3] -> [4,6,7]. Runs after devplan (Phase 3) or manifest-devplan (Phase 3.5). Trigger: "implement plan", "배치 계획", "implementation schedule", "병렬 스토리 그룹화".'
+argument-hint: '[--run RUN_ID] [--source stories|devplan] [--max-parallel N]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -13,6 +13,7 @@ plugin: imbas
 > NEVER yield after MCP tool calls or manifest save.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required (e.g., unresolved cycle needs manual input)
 > 2. Terminal stage marker emitted: `Implement plan generated` or `Implement plan BLOCKED`
 
@@ -52,10 +53,10 @@ Produces `implement-plan.json` and a human-readable `implement-plan-report.md`.
 
 1. Resolve `run_id` via `mcp_tools_run_get` (omit for latest).
 2. Call `mcp_tools_manifest_implement_plan` with `{project_ref, run_id, source, max_parallel}`.
-2a. If the call fails on a precondition (`E-IP-3` missing/wrong source manifest,
-   `E-IP-4` schema validation, `E-IP-5` invalid `--max-parallel`), emit terminal
-   marker `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md)
-   and end. Do NOT continue.
+   - **On precondition failure** (`E-IP-3` missing/wrong source manifest,
+     `E-IP-4` schema validation, `E-IP-5` invalid `--max-parallel`): emit terminal
+     marker `Implement plan BLOCKED: <error_code> — <reason>` (see references/errors.md)
+     and end. Do NOT continue to step 3.
 3. On success, read the summary (`total_groups`, `total_items`, `max_level`, `cycles_broken`).
 4. If `cycles_broken.length > 0` or `unresolved.length > 0`, surface them in the
    completion message; do NOT pause — the plan is still saved.

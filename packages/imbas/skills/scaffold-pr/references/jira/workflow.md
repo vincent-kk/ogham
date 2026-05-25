@@ -1,9 +1,9 @@
 # scaffold-pr Workflow — Jira Provider
 
-Loaded when `config.provider === 'jira'`. Handles Step 1 (sub-task fetching)
+Loaded when `config.provider === 'jira'`. Handles Step 3 (sub-task fetching)
 from the shared skeleton (`../workflow.md`).
 
-## Step 1 — Fetch sub-tasks
+## Step 3 — Fetch sub-tasks
 
 1. Read `config.jira.base_url` via `mcp_tools_config_get` to build issue URLs.
 
@@ -17,6 +17,7 @@ from the shared skeleton (`../workflow.md`).
    - `status`: current workflow status
 
 4. Build the sub-task list with URLs:
+
    ```json
    [
      {
@@ -35,4 +36,4 @@ from the shared skeleton (`../workflow.md`).
 - Pattern: `{config.jira.base_url}/browse/{issue-key}`
 - Example: `https://jira.example.com/browse/PROJ-123`
 
-Return the sub-task list and issue URL to the shared workflow for Steps 2–4.
+Return the sub-task list and issue URL to the shared workflow for Step 4.

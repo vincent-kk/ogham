@@ -1,9 +1,9 @@
 ---
 name: pipeline
 user_invocable: true
-description: "[imbas:pipeline] End-to-end pipeline orchestration. Accepts a document/URL (full pipeline: validate → split → manifest-stories → devplan → manifest-devplan) or Jira Story keys (devplan-only: devplan → manifest-devplan), with auto-approval at quality gates. Stops with structured blocker report on any gate failure. Trigger: \"pipeline\", \"full pipeline\", \"전체 파이프라인\", \"자동 실행\", \"한번에 실행\""
-argument-hint: "<source-or-stories> [--project KEY] [--codebase PATH] [--supplements PATHS] [--parent KEY|new|none] [--stop-at PHASE] [--dry-run] [--strict-drift]"
-version: "1.0.0"
+description: '[imbas:pipeline] End-to-end pipeline orchestration. Accepts a document/URL (full pipeline: validate → split → manifest-stories → devplan → manifest-devplan) or Jira Story keys (devplan-only: devplan → manifest-devplan), with auto-approval at quality gates. Stops with structured blocker report on any gate failure. Trigger: "pipeline", "full pipeline", "전체 파이프라인", "자동 실행", "한번에 실행"'
+argument-hint: '<source-or-stories> [--project KEY] [--codebase PATH] [--supplements PATHS] [--parent KEY|new|none] [--stop-at PHASE] [--dry-run] [--strict-drift]'
+version: '1.0.0'
 complexity: complex
 plugin: imbas
 ---
@@ -14,18 +14,21 @@ plugin: imbas
 > agent subagent return, MCP tool result, or [OP:] Jira operation.
 >
 > **Existing CRITICAL directives are authoritative** (do not duplicate):
-> - `references/workflow.md:296` — After EACH item creation, save manifest via `mcp_tools_manifest_save` (Phase 2.5)
-> - `references/workflow.md:459` — After EACH item creation, save manifest via `mcp_tools_manifest_save` (Phase 3.5)
+>
+> - `references/workflow.md` → `Step 2.5.2 — Batch Execution` — After EACH item creation, save manifest via `mcp_tools_manifest_save` (Phase 2.5)
+> - `references/workflow.md` → `Step 3.5.2 — Batch Execution` — After EACH item creation, save manifest via `mcp_tools_manifest_save` (Phase 3.5)
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required (ambiguity only the user can resolve)
 > 2. Terminal stage marker emitted: `# imbas Pipeline — (COMPLETE|STOPPED|DRY RUN COMPLETE|PLANNING COMPLETE|STOPPED AT)`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - Phase 0 confirmation banner — do NOT pause after displaying; immediately invoke the first tool (`mcp_tools_run_create` / `get_issue`)
 > - GATE 1–4 decision points — after judging PASS, immediately chain the next phase's tool call
 > - Phase 2.5 → Phase 3 boundary — manifest-stories success is NOT pipeline completion; immediately spawn `engineer` if `--codebase` present
-> - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md:296,459` CRITICAL; do not add duplicate directives
+> - Phase 3.5 [OP:] Jira batch — honor existing `workflow.md` `Step 2.5.2` / `Step 3.5.2` CRITICAL; do not add duplicate directives
 >
 > **⚠️ DO NOT STOP HERE**: Phase 2.5 → Phase 3 boundary is the highest-stall
 > risk point. When manifest-stories completes successfully and `--codebase`
@@ -118,6 +121,7 @@ Story keys → devplan → manifest-devplan
 ```
 
 Mode is auto-detected from the first argument — no flag needed:
+
 - Looks like a file path or URL → Document Pipeline (full or planning-only based on `--codebase`)
 - Looks like Jira key(s) (PROJ-NNN pattern) → Devplan Pipeline (`--codebase` required)
 
@@ -160,13 +164,13 @@ imbas pipeline — configuration
 
 Resolution order for each option:
 
-| Option | Document Mode | Devplan Mode |
-|--------|--------------|--------------|
-| `--project` | argument → config default → STOP | extracted from Story keys → argument → config |
-| `--codebase` | argument → config default → null (planning-only) | argument → config default → STOP |
-| `--parent` | argument → "new" | N/A (Stories already exist) |
-| `--stop-at` | argument → none (full) | argument → none (full) |
-| `--dry-run` | argument → false | argument → false |
+| Option       | Document Mode                                    | Devplan Mode                                  |
+| ------------ | ------------------------------------------------ | --------------------------------------------- |
+| `--project`  | argument → config default → STOP                 | extracted from Story keys → argument → config |
+| `--codebase` | argument → config default → null (planning-only) | argument → config default → STOP              |
+| `--parent`   | argument → "new"                                 | N/A (Stories already exist)                   |
+| `--stop-at`  | argument → none (full)                           | argument → none (full)                        |
+| `--dry-run`  | argument → false                                 | argument → false                              |
 
 ## Pipeline Flow
 

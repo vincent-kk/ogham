@@ -15,11 +15,11 @@
      max_parallel: <number | undefined>
    }
    ```
-2a. **If the call returns a precondition error** (`E-IP-3` missing/wrong source
-   manifest, `E-IP-4` schema validation failure, `E-IP-5` invalid `--max-parallel`):
-   - Emit terminal marker `Implement plan BLOCKED: <error_code> — <reason>`
-     (see `errors.md` for the full table).
-   - End execution. Do NOT continue to Step 3.
+
+   - **On precondition failure** (`E-IP-3` missing/wrong source manifest,
+     `E-IP-4` schema validation failure, `E-IP-5` invalid `--max-parallel`):
+     emit terminal marker `Implement plan BLOCKED: <error_code> — <reason>`
+     (see `errors.md` for the full table) and end execution. Do NOT continue to Step 3.
 3. **Inspect result** (only when the call succeeded):
    - `summary.total_groups`, `summary.total_items`, `summary.max_level`
    - `summary.cycles_broken` (> 0 means the DAG had cycles, resolved deterministically)
@@ -37,10 +37,10 @@
 
 ## Tool matrix
 
-| Purpose | MCP tool |
-|---|---|
-| Find recent run | `mcp_tools_run_list` |
-| Read run state | `mcp_tools_run_get` |
-| Build + persist plan | `mcp_tools_manifest_implement_plan` |
-| Validate plan | `mcp_tools_manifest_validate` |
-| Read plan | `mcp_tools_manifest_get` with `type: "implement-plan"` |
+| Purpose              | MCP tool                                               |
+| -------------------- | ------------------------------------------------------ |
+| Find recent run      | `mcp_tools_run_list`                                   |
+| Read run state       | `mcp_tools_run_get`                                    |
+| Build + persist plan | `mcp_tools_manifest_implement_plan`                    |
+| Validate plan        | `mcp_tools_manifest_validate`                          |
+| Read plan            | `mcp_tools_manifest_get` with `type: "implement-plan"` |

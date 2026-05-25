@@ -10,11 +10,11 @@
  *   - plugin equals "imbas"
  *   - Trigger line inside description matches canonical regex /^\s*Trigger:\s+"[^"]+"(,\s+"[^"]+")*$/
  */
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(__dirname, '..', '..');
@@ -33,7 +33,10 @@ interface Frontmatter {
   plugin?: string;
 }
 
-function parseFrontmatter(raw: string): { fm: Frontmatter; descriptionLines: string[] } {
+function parseFrontmatter(raw: string): {
+  fm: Frontmatter;
+  descriptionLines: string[];
+} {
   const lines = raw.split('\n');
   if (lines[0] !== '---') return { fm: {}, descriptionLines: [] };
   let end = 1;
@@ -53,10 +56,12 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; descriptionLines: str
         continue;
       }
     }
-    const m = line.match(/^(name|description|version|user_invocable|complexity|plugin):\s*(.*)$/);
+    const m = line.match(
+      /^(name|description|version|user_invocable|complexity|plugin):\s*(.*)$/,
+    );
     if (!m) continue;
     const [, key, rawVal] = m;
-    const val = rawVal.trim().replace(/^"(.*)"$/, '$1');
+    const val = rawVal.trim().replace(/^(['"])(.*)\1$/, '$2');
     if (key === 'description' && val === '>') {
       inDescription = true;
       continue;
@@ -69,7 +74,10 @@ function parseFrontmatter(raw: string): { fm: Frontmatter; descriptionLines: str
   }
   // If folded description was used, populate fm.description from the folded lines.
   if (fm.description === undefined && descriptionLines.length > 0) {
-    fm.description = descriptionLines.map((l) => l.trim()).filter(Boolean).join(' ');
+    fm.description = descriptionLines
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .join(' ');
   }
   return { fm, descriptionLines };
 }
@@ -86,12 +94,17 @@ describe('G3 skill-frontmatter — canonical SKILL.md frontmatter', () => {
       const path = join(SKILLS_DIR, skill, 'SKILL.md');
       if (!statSync(path, { throwIfNoEntry: false })) continue;
       const { fm } = parseFrontmatter(readFileSync(path, 'utf8'));
-      if (fm.name !== skill) drift.push(`${path}: name="${fm.name}" does not match dir="${skill}"`);
-      if (!fm.version || !SEMVER.test(fm.version)) drift.push(`${path}: version="${fm.version}" is not semver`);
+      if (fm.name !== skill)
+        drift.push(`${path}: name="${fm.name}" does not match dir="${skill}"`);
+      if (!fm.version || !SEMVER.test(fm.version))
+        drift.push(`${path}: version="${fm.version}" is not semver`);
       if (!fm.description) drift.push(`${path}: description missing`);
-      if (fm.plugin !== 'imbas') drift.push(`${path}: plugin="${fm.plugin}" must be "imbas"`);
+      if (fm.plugin !== 'imbas')
+        drift.push(`${path}: plugin="${fm.plugin}" must be "imbas"`);
       if (fm.complexity && !COMPLEXITY.has(fm.complexity)) {
-        drift.push(`${path}: complexity="${fm.complexity}" not in ${Array.from(COMPLEXITY).join('|')}`);
+        drift.push(
+          `${path}: complexity="${fm.complexity}" not in ${Array.from(COMPLEXITY).join('|')}`,
+        );
       }
     }
     expect(drift, drift.join('\n')).toEqual([]);
@@ -106,7 +119,9 @@ describe('G3 skill-frontmatter — canonical SKILL.md frontmatter', () => {
       const triggerLine = descriptionLines.find((l) => /\bTrigger:/.test(l));
       if (!triggerLine) continue; // Optional — not every skill declares a Trigger line
       if (!TRIGGER_RE.test(triggerLine)) {
-        drift.push(`${path}: Trigger line does not match canonical regex: ${JSON.stringify(triggerLine)}`);
+        drift.push(
+          `${path}: Trigger line does not match canonical regex: ${JSON.stringify(triggerLine)}`,
+        );
       }
     }
     expect(drift, drift.join('\n')).toEqual([]);

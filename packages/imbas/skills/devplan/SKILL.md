@@ -1,9 +1,9 @@
 ---
 name: devplan
 user_invocable: true
-description: "[imbas:devplan] Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts cross-Story Tasks by exploring the local codebase. Operates on approved Stories or E2-3 escaped splits (single-Story documents that bypass decomposition). Trigger: \"create devplan\", \"dev plan\", \"Phase 3\", \"subtask creation\"."
-argument-hint: "[--run RUN_ID] [--stories S1,S2,...] [--codebase PATH]"
-version: "1.0.0"
+description: '[imbas:devplan] Phase 3 of the imbas pipeline. Generates EARS-format Subtasks and extracts cross-Story Tasks by exploring the local codebase. Operates on approved Stories or E2-3 escaped splits (single-Story documents that bypass decomposition). Trigger: "create devplan", "dev plan", "Phase 3", "subtask creation".'
+argument-hint: '[--run RUN_ID] [--stories S1,S2,...] [--codebase PATH]'
+version: '1.0.0'
 complexity: complex
 plugin: imbas
 ---
@@ -13,10 +13,12 @@ plugin: imbas
 > NEVER yield after MCP tool calls, subagent returns, or manifest validation.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Devplan manifest generated` or `Devplan BLOCKED`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After `engineer` subagent returns `devplan-manifest.json` — chain `mcp_tools_manifest_save` and `mcp_tools_manifest_validate` in the same turn
 > - B→A feedback collection — do NOT pause to report feedback; continue to gate evaluation
 > - AST fallback mode detection — log once and continue; do not pause
@@ -35,7 +37,7 @@ batch Jira issue creation.
 ## When to Use This Skill
 
 - After Phase 2 (split) is completed and reviewed
-- After stories-manifest has been executed (Stories exist in Jira)
+- After a stories-manifest is available — either materialized by `manifest` from a split or synthesized by `pipeline` Mode B (Step 3.0) from supplied Jira Story keys before devplan runs
 - To regenerate devplan for specific Stories after changes
 
 ## Arguments
@@ -60,19 +62,20 @@ batch Jira issue creation.
 - [state-transitions.md](./references/state-transitions.md) — output location and state transition diagram
 
 <!-- imbas:constraints-v1 -->
+
 ## Workflow (Provider-agnostic skeleton)
 
 1. Load stories-manifest and run state via imbas_tools.
 2. Read `config.provider` via `mcp_tools_config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider` for Step 3 (feedback target_ref semantics) and Step 4 final message:
 
-   | provider | workflow file |
-   |---|---|
-   | `jira`   | `references/jira/workflow.md` |
+   | provider | workflow file                   |
+   | -------- | ------------------------------- |
+   | `jira`   | `references/jira/workflow.md`   |
    | `github` | `references/github/workflow.md` |
-   | `local`  | `references/local/workflow.md` |
+   | `local`  | `references/local/workflow.md`  |
 
-4. Execute Steps 1, 2 (`engineer` agent spawn), and 4 from the shared skeleton; use the provider file for Step 3 target_ref semantics and the Step 4 completion message.
+4. Execute Steps 1 and 2 (`engineer` agent spawn) from the shared skeleton. Steps 3 (feedback target_ref semantics) and 4 (completion message) come from the provider file.
 5. Persist devplan-manifest.json via mcp_tools_manifest_save.
 
 ## Constraints

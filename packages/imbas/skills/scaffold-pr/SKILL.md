@@ -1,9 +1,9 @@
 ---
 name: scaffold-pr
 user_invocable: true
-description: "[imbas:scaffold-pr] Create a Draft PR from an issue (Story/Task/Bug) with sub-task checklist in the PR body. Scaffolds branch, empty commit, and PR without code changes. Trigger: \"scaffold pr\", \"PR 생성\", \"draft pr\", \"이슈 PR\""
-argument-hint: "<issue> [--base BRANCH] [--draft true|false]"
-version: "1.0.0"
+description: '[imbas:scaffold-pr] Create a Draft PR from an issue (Story/Task/Bug) with sub-task checklist in the PR body. Scaffolds branch, empty commit, and PR without code changes. Trigger: "scaffold pr", "PR 생성", "draft pr", "이슈 PR"'
+argument-hint: '<issue> [--base BRANCH] [--draft true|false]'
+version: '1.0.0'
 complexity: moderate
 plugin: imbas
 ---
@@ -36,19 +36,20 @@ in the PR body. No code changes — empty commit only.
 - [Error Handling](./references/errors.md) — Error conditions and recovery
 
 <!-- imbas:constraints-v1 -->
+
 ## Workflow (Provider-agnostic skeleton)
 
+0. Read `config.provider` via `mcp_tools_config_get`. If provider is `local`, emit terminal marker `scaffold-pr BLOCKED: local provider not supported — PR creation requires a remote git host.` and end. Do NOT continue.
 1. Read issue via `/imbas:read-issue <issue> --depth shallow`.
-2. Read `config.provider` via `mcp_tools_config_get`.
-3. Load ONLY the provider-specific workflow file matching `config.provider`:
+2. Load ONLY the provider-specific workflow file matching `config.provider`:
 
-   | provider | workflow file |
-   |---|---|
-   | `jira`   | `references/jira/workflow.md` |
+   | provider | workflow file                   |
+   | -------- | ------------------------------- |
+   | `jira`   | `references/jira/workflow.md`   |
    | `github` | `references/github/workflow.md` |
 
-4. Execute provider-specific steps to fetch sub-tasks.
-5. Execute shared steps (branch creation, empty commit, PR creation) per `references/workflow.md`.
+3. Execute provider-specific steps to fetch sub-tasks.
+4. Execute shared steps (branch creation, empty commit, PR creation) per `references/workflow.md`.
 
 ## Constraints
 
