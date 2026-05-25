@@ -20,4 +20,4 @@ The `id` must come from `[OP: get_transitions]`. Do not hardcode transition IDs.
 
 ## Used By
 
-- `imbas-manifest` — Mark split-source Story as Done after horizontal split
+- `manifest` — Mark split-source Story as Done after horizontal split

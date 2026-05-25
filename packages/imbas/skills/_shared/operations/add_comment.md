@@ -21,5 +21,5 @@ POST /rest/api/3/issue/{issueIdOrKey}/comment
 
 ## Used By
 
-- `imbas-manifest` — Post B→A feedback comments to Story issues
-- `imbas-digest` — Post formatted digest comment
+- `manifest` — Post B→A feedback comments to Story issues
+- `digest` — Post formatted digest comment

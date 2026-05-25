@@ -27,5 +27,5 @@ GET  /rest/api/2/search?jql=...      # Server/DC
 
 ## Used By
 
-- `imbas-split` — Search for existing related Stories/Epics
-- `imbas-devplan` — Optional search for related existing issues
+- `split` — Search for existing related Stories/Epics
+- `devplan` — Optional search for related existing issues

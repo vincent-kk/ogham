@@ -25,4 +25,4 @@ GET /wiki/rest/api/content/search?cql=...
 
 ## Used By
 
-- `imbas-validate` — Resolve references to other Confluence pages
+- `validate` — Resolve references to other Confluence pages

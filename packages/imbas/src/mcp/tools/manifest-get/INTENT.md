@@ -1,4 +1,4 @@
-# imbas-manifest-get
+# manifest-get
 
 ## Purpose
 매니페스트 조회 도구 핸들러.

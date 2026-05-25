@@ -25,4 +25,4 @@ POST /rest/api/3/issueLink
 
 ## Used By
 
-- `imbas-manifest` — Create relationships between issues after batch creation
+- `manifest` — Create relationships between issues after batch creation

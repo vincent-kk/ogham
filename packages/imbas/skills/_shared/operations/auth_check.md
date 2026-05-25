@@ -21,4 +21,4 @@ If the call succeeds, the Atlassian integration is properly configured.
 
 ## Used By
 
-- `imbas-setup` — Health check (Step 0) to verify Atlassian connectivity
+- `setup` — Health check (Step 0) to verify Atlassian connectivity

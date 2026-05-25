@@ -17,5 +17,5 @@ GET /rest/api/3/project
 
 ## Used By
 
-- `imbas-setup` — List available projects for selection
-- `imbas-cache` — Fetch project metadata for cache
+- `setup` — List available projects for selection
+- `cache` — Fetch project metadata for cache

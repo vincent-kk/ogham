@@ -17,5 +17,5 @@ GET /rest/api/3/issue/createmeta/{projectKey}/issuetypes/{issueTypeId}
 
 ## Used By
 
-- `imbas-setup` — Fetch required fields per issue type
-- `imbas-cache` — Cache field metadata
+- `setup` — Fetch required fields per issue type
+- `cache` — Cache field metadata

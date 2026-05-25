@@ -23,4 +23,4 @@ Only include fields that need to change. Unmentioned fields are preserved.
 
 ## Used By
 
-- `imbas-manifest` — Update issue fields after creation (e.g., horizontal split)
+- `manifest` — Update issue fields after creation (e.g., horizontal split)

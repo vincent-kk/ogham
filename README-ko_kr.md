@@ -191,7 +191,7 @@ MCP 도구, 스킬, 라이프사이클 훅을 통해 Claude가 **OpenAI Codex CL
 
 | 컴포넌트 | 수량 | 예시                                                                                                                    |
 | -------- | ---- | ----------------------------------------------------------------------------------------------------------------------- |
-| Skills   | 12   | `/imbas:imbas-pipeline`, `/imbas:imbas-validate`, `/imbas:imbas-split`, `/imbas:imbas-devplan`, `/imbas:imbas-manifest` |
+| Skills   | 12   | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
 | MCP 도구 | 16   | `run_create`, `manifest_save`, `manifest_implement_plan` 등                                                             |
 | Agents   | 3    | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                                                       |
 | Hooks    | 3    | pre-tool-use, context-injector, session-cleanup                                                                         |
@@ -205,13 +205,13 @@ MCP 도구, 스킬, 라이프사이클 훅을 통해 Claude가 **OpenAI Codex CL
 
 ```
 # imbas 설정 초기화
-/imbas:imbas-setup
+/imbas:setup
 
 # 기획 문서에 대해 전체 파이프라인 실행
-/imbas:imbas-pipeline
+/imbas:pipeline
 
 # 파이프라인 상태 확인
-/imbas:imbas-status
+/imbas:status
 ```
 
 자세한 문서는 [imbas README (영문)](./packages/imbas/README.md) 또는 [imbas README (한글)](./packages/imbas/README-ko_kr.md)을 참조하세요.

@@ -1,9 +1,17 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { IMBAS_ROOT_DIRNAME, CONFIG_FILENAME, RUNS_DIRNAME, STATE_FILENAME } from '../../constants/index.js';
+
+import {
+  CONFIG_FILENAME,
+  IMBAS_ROOT_DIRNAME,
+  RUNS_DIRNAME,
+  STATE_FILENAME,
+} from '../../constants/index.js';
 import type { HookOutput, UserPromptSubmitInput } from '../../types/hooks.js';
 
-export function processContextInjector(input: UserPromptSubmitInput): HookOutput {
+export function processContextInjector(
+  input: UserPromptSubmitInput,
+): HookOutput {
   // Inject active run context into user prompts
   const { cwd } = input;
   const imbasRoot = join(cwd, IMBAS_ROOT_DIRNAME);
@@ -24,6 +32,8 @@ export function processContextInjector(input: UserPromptSubmitInput): HookOutput
     const runsDir = join(imbasRoot, projectKey, RUNS_DIRNAME);
     if (!existsSync(runsDir)) return { continue: true };
 
+    // Run IDs follow YYYYMMDD-NNN format (see core/run-id-generator), so
+    // lexicographic order is chronological. Descending sort puts the newest first.
     const runs = readdirSync(runsDir).sort().reverse();
     if (runs.length === 0) return { continue: true };
 
@@ -39,7 +49,7 @@ export function processContextInjector(input: UserPromptSubmitInput): HookOutput
       continue: true,
       hookSpecificOutput: {
         hookEventName: 'UserPromptSubmit',
-        additionalContext: `[imbas] Active run: ${latestRun} (project: ${projectKey}, phase: ${phase}, status: ${phaseStatus}). Use /imbas:imbas-status for details.`,
+        additionalContext: `[imbas] Active run: ${latestRun} (project: ${projectKey}, phase: ${phase}, status: ${phaseStatus}). Use /imbas:status for details.`,
       },
     };
   } catch {

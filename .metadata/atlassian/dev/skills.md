@@ -9,6 +9,7 @@
 ## 1. Skill Layer Overview
 
 Skills are **API spec capsules** that bridge Agents and MCP tools. Each Skill:
+
 - Embeds endpoint URLs, header specs, body schemas for a specific Atlassian API domain
 - Transforms Agent intent into MCP tool calls with correct parameters
 - Is stateless — a pure function that returns `(method, endpoint, params, body)` tuples
@@ -49,27 +50,27 @@ Authentication and connection configuration. Prerequisite for all other Skills.
 
 ### Auth Types
 
-| Auth Method | Cloud | Server/DC | Config Value |
-|---|---|---|---|
-| Basic Auth | email + API token | username + password | `auth_type: "basic"` |
-| PAT | — | token | `auth_type: "pat"` |
-| OAuth 2.0 (3LO) | cloud_id + tokens | base_url + tokens | `auth_type: "oauth"` |
+| Auth Method     | Cloud             | Server/DC           | Config Value         |
+| --------------- | ----------------- | ------------------- | -------------------- |
+| Basic Auth      | email + API token | username + password | `auth_type: "basic"` |
+| PAT             | —                 | token               | `auth_type: "pat"`   |
+| OAuth 2.0 (3LO) | cloud_id + tokens | base_url + tokens   | `auth_type: "oauth"` |
 
 ### Config Schema
 
 ```yaml
 connection:
-  url: "https://mysite.atlassian.net"   # Required
-  auth_type: "basic"                     # Required: basic | pat | oauth
-  username: "user@example.com"           # Required for basic
+  url: "https://mysite.atlassian.net" # Required
+  auth_type: "basic" # Required: basic | pat | oauth
+  username: "user@example.com" # Required for basic
 
 options:
-  ssl_verify: true          # Default: true
-  timeout: 75               # Default: 75s
+  ssl_verify: true # Default: true
+  timeout: 75 # Default: 75s
   spaces_filter: "DEV,TEAM" # Optional: Confluence space filter
-  http_proxy: null           # Optional
-  https_proxy: null          # Optional
-  custom_headers: {}         # Optional
+  http_proxy: null # Optional
+  https_proxy: null # Optional
+  custom_headers: {} # Optional
 ```
 
 ### Setup Flow
@@ -123,10 +124,10 @@ Unified attachment download for both Jira and Confluence.
 
 ### Operations
 
-| Operation | MCP Tool | Description |
-|---|---|---|
+| Operation             | MCP Tool                                          | Description                                                |
+| --------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
 | `download_attachment` | `fetch` (`method: "GET"`, `accept_format: "raw"`) | Download attachment by URL or issue_key/page_id + filename |
-| `get_images` | `fetch` (`method: "GET"`) | Retrieve image attachment metadata |
+| `get_images`          | `fetch` (`method: "GET"`)                         | Retrieve image attachment metadata                         |
 
 ### Download Flow
 
@@ -142,8 +143,8 @@ Unified attachment download for both Jira and Confluence.
 
 ```yaml
 headers:
-  X-Atlassian-Token: "nocheck"           # CSRF bypass (required)
-  Content-Type: "multipart/form-data"    # Boundary auto-set
+  X-Atlassian-Token: "nocheck" # CSRF bypass (required)
+  Content-Type: "multipart/form-data" # Boundary auto-set
 constraints:
   max_file_size: "50MB"
   mime_detection: "automatic"
@@ -179,50 +180,53 @@ The SKILL.md must include:
 
 #### Tool Catalog (15 domains)
 
-| Domain | One-line Description | MCP Tools |
-|---|---|---|
-| **issue** | Issue CRUD, bulk create, changelog | get, post, put, delete |
-| **search** | JQL-based issue search (Cloud POST / Server GET) | get, post |
-| **transition** | Issue workflow state transitions | get, post |
-| **comment** | Issue comment CRUD + JSM comments | get, post |
-| **agile** | Board, Sprint, Epic management | get, post, put |
-| **project** | Project metadata, components, versions | get, post |
-| **field** | Field metadata, custom field options | get |
-| **link** | Issue links (internal + remote/external) | get, post, delete |
-| **worklog** | Work time logging | get, post |
-| **attachment** | Issue attachment upload/metadata | get, post |
-| **user** | User search and profile lookup | get |
-| **watcher** | Issue watcher management | get, post, delete |
-| **jsm** | JSM SLA, queues, ProForma forms | get, put |
-| **development-info** | Dev info (branch, commit, PR, build) | get |
-| **metrics** | Issue time metrics (cycle time, status duration) | get |
+| Domain               | One-line Description                             | MCP Tools              |
+| -------------------- | ------------------------------------------------ | ---------------------- |
+| **issue**            | Issue CRUD, bulk create, changelog               | get, post, put, delete |
+| **search**           | JQL-based issue search (Cloud POST / Server GET) | get, post              |
+| **transition**       | Issue workflow state transitions                 | get, post              |
+| **comment**          | Issue comment CRUD + JSM comments                | get, post              |
+| **agile**            | Board, Sprint, Epic management                   | get, post, put         |
+| **project**          | Project metadata, components, versions           | get, post              |
+| **field**            | Field metadata, custom field options             | get                    |
+| **link**             | Issue links (internal + remote/external)         | get, post, delete      |
+| **worklog**          | Work time logging                                | get, post              |
+| **attachment**       | Issue attachment upload/metadata                 | get, post              |
+| **user**             | User search and profile lookup                   | get                    |
+| **watcher**          | Issue watcher management                         | get, post, delete      |
+| **jsm**              | JSM SLA, queues, ProForma forms                  | get, put               |
+| **development-info** | Dev info (branch, commit, PR, build)             | get                    |
+| **metrics**          | Issue time metrics (cycle time, status duration) | get                    |
 
 #### Error Handling (SKILL.md section)
 
-| HTTP Status | Cause | Recovery Strategy |
-|---|---|---|
-| **401** | Auth expired or invalid credentials | Trigger reauth via setup -> retry once |
-| **403** | Insufficient permissions | Report required permissions to user. No retry. |
-| **404** | Issue/project not found | Verify identifier (typo check) -> report to user |
-| **409** | Concurrent modification | Re-fetch latest data -> inform user of conflict |
-| **429** | Rate limit exceeded | Exponential backoff (1s, 2s, 4s) max 3 retries |
-| **400** | Field validation error | Parse error -> re-fetch field metadata -> retry with correct format or ask user |
-| **500+** | Server-side failure | Retry once -> report to user on failure |
+| HTTP Status | Cause                               | Recovery Strategy                                                               |
+| ----------- | ----------------------------------- | ------------------------------------------------------------------------------- |
+| **401**     | Auth expired or invalid credentials | Trigger reauth via setup -> retry once                                          |
+| **403**     | Insufficient permissions            | Report required permissions to user. No retry.                                  |
+| **404**     | Issue/project not found             | Verify identifier (typo check) -> report to user                                |
+| **409**     | Concurrent modification             | Re-fetch latest data -> inform user of conflict                                 |
+| **429**     | Rate limit exceeded                 | Exponential backoff (1s, 2s, 4s) max 3 retries                                  |
+| **400**     | Field validation error              | Parse error -> re-fetch field metadata -> retry with correct format or ask user |
+| **500+**    | Server-side failure                 | Retry once -> report to user on failure                                         |
 
 #### Permission Boundaries
 
 **Allowed** (Agent can perform autonomously):
+
 - Issue CRUD, comments, worklogs, state transitions
 - Sprint management, issue link creation/deletion
 - JQL search, field metadata queries, attachment download
 
 **Denied** (Agent must refuse):
+
 - Workflow scheme changes, project create/delete
 - User permission changes, global settings
 - Bulk delete (>10 items), issue type scheme changes
 - Attachment upload (Jira — current MCP tool limitation)
 
 **Confirm first** (User approval required):
+
 - Single issue delete
 - Bulk create (>5 items — show list for confirmation)
 - Sprint start/complete, version release
@@ -280,12 +284,12 @@ Each `schema.md` follows a consistent structure:
 ## Endpoints
 
 | Operation | HTTP | Cloud Endpoint | Server Endpoint |
-|---|---|---|---|
+| --------- | ---- | -------------- | --------------- |
 
 ## Parameters
 
 | Parameter | Type | Required | Description |
-|---|---|---|---|
+| --------- | ---- | -------- | ----------- |
 
 ## Cloud vs Server Branching
 
@@ -294,7 +298,7 @@ Each `schema.md` follows a consistent structure:
 ## MCP Tool Mapping
 
 | Operation | MCP Tool | Notes |
-|---|---|---|
+| --------- | -------- | ----- |
 
 ## Response Fields
 
@@ -303,15 +307,15 @@ Each `schema.md` follows a consistent structure:
 
 ### Cloud vs Server Branching Summary
 
-| Aspect | Cloud (v3) | Server/DC (v2) |
-|---|---|---|
-| API path | `/rest/api/3/issue` | `/rest/api/2/issue` |
-| Description format | ADF (JSON) | Wiki markup (text) |
-| Comment body | ADF | Plain text / wiki markup |
-| User identifier | `accountId` | `name` or `key` |
-| Search method | POST `/rest/api/3/search/jql` | GET `/rest/api/2/search` |
-| Custom field options | Field Options API available | Not available |
-| JSM comments | Standard comment API | Dedicated Service Desk API |
+| Aspect               | Cloud (v3)                    | Server/DC (v2)             |
+| -------------------- | ----------------------------- | -------------------------- |
+| API path             | `/rest/api/3/issue`           | `/rest/api/2/issue`        |
+| Description format   | ADF (JSON)                    | Wiki markup (text)         |
+| Comment body         | ADF                           | Plain text / wiki markup   |
+| User identifier      | `accountId`                   | `name` or `key`            |
+| Search method        | POST `/rest/api/3/search/jql` | GET `/rest/api/2/search`   |
+| Custom field options | Field Options API available   | Not available              |
+| JSM comments         | Standard comment API          | Dedicated Service Desk API |
 
 ---
 
@@ -331,41 +335,44 @@ Confluence API domain router. Same lazy-loading pattern as jira.
 
 #### Tool Catalog (8 domains)
 
-| Domain | One-line Description | MCP Tools |
-|---|---|---|
-| **page** | Page CRUD, hierarchy (ancestors/descendants), tree, move, version history, diff | get, post, put, delete |
-| **search** | CQL-based content and user search | get |
-| **space** | Space listing and filtering | get |
-| **comment** | Footer comments, inline comments (Cloud), threaded replies | get, post |
-| **attachment** | Upload (single/multi), download, delete, image retrieval, V1/V2 | get, post, delete |
-| **label** | Page label query and addition | get, post |
-| **analytics** | Page view statistics (Cloud only) | get |
-| **user** | Current user, user search | get |
+| Domain         | One-line Description                                                            | MCP Tools              |
+| -------------- | ------------------------------------------------------------------------------- | ---------------------- |
+| **page**       | Page CRUD, hierarchy (ancestors/descendants), tree, move, version history, diff | get, post, put, delete |
+| **search**     | CQL-based content and user search                                               | get                    |
+| **space**      | Space listing and filtering                                                     | get                    |
+| **comment**    | Footer comments, inline comments (Cloud), threaded replies                      | get, post              |
+| **attachment** | Upload (single/multi), download, delete, image retrieval, V1/V2                 | get, post, delete      |
+| **label**      | Page label query and addition                                                   | get, post              |
+| **analytics**  | Page view statistics (Cloud only)                                               | get                    |
+| **user**       | Current user, user search                                                       | get                    |
 
 #### Error Handling (SKILL.md section)
 
-| HTTP Status | Confluence-specific Cause | Recovery Strategy |
-|---|---|---|
-| **409** | Version conflict (concurrent edit) | Re-fetch latest version number -> update and retry (max 3) |
-| **400** | Storage Format error (invalid XHTML) | Validate content -> fix broken tags -> retry or report to user |
-| **404** | Page/space not found | CQL search for similar pages as suggestion |
-| **413** | Attachment size exceeded | Report server limit, suggest file splitting |
-| **401/403/429/500+** | Same as Jira (shared error patterns) | Same recovery strategies |
+| HTTP Status          | Confluence-specific Cause            | Recovery Strategy                                              |
+| -------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| **409**              | Version conflict (concurrent edit)   | Re-fetch latest version number -> update and retry (max 3)     |
+| **400**              | Storage Format error (invalid XHTML) | Validate content -> fix broken tags -> retry or report to user |
+| **404**              | Page/space not found                 | CQL search for similar pages as suggestion                     |
+| **413**              | Attachment size exceeded             | Report server limit, suggest file splitting                    |
+| **401/403/429/500+** | Same as Jira (shared error patterns) | Same recovery strategies                                       |
 
 #### Permission Boundaries
 
 **Allowed**:
+
 - Page CRUD, comments (footer/inline/reply), labels
 - CQL search, attachment upload/download/delete
 - Page move (within same space), page tree/hierarchy queries
 - Version history and diff
 
 **Denied**:
+
 - Space create/delete, space permission changes
 - Global template management, user management
 - App/plugin configuration
 
 **Confirm first**:
+
 - Page delete (especially when child pages exist)
 - Cross-space page move
 - Bulk attachment upload (>5 files)
@@ -400,14 +407,14 @@ skills/confluence/
 
 ### V1 vs V2 API Branching
 
-| Feature | V1 API | V2 API | Notes |
-|---|---|---|---|
-| Page CRUD | `/rest/api/content/{id}` | `/api/v2/pages/{id}` | V2 preferred on Cloud |
-| Inline comments | Not supported | `/api/v2/inline-comments` | Cloud only |
-| Attachments | `/rest/api/content/{id}/child/attachment` | `/api/v2/pages/{id}/attachments` | V2 has improved metadata |
-| Page properties | `/rest/api/content/{id}/property` | `/api/v2/pages/{id}/properties` | |
-| Analytics | `/wiki/rest/api/analytics/content/{id}/views` | — | Cloud only (V1 path) |
-| Page move | `/rest/api/content/{id}/move/{position}` | Same (V1 only) | V2 exception |
+| Feature         | V1 API                                        | V2 API                           | Notes                    |
+| --------------- | --------------------------------------------- | -------------------------------- | ------------------------ |
+| Page CRUD       | `/rest/api/content/{id}`                      | `/api/v2/pages/{id}`             | V2 preferred on Cloud    |
+| Inline comments | Not supported                                 | `/api/v2/inline-comments`        | Cloud only               |
+| Attachments     | `/rest/api/content/{id}/child/attachment`     | `/api/v2/pages/{id}/attachments` | V2 has improved metadata |
+| Page properties | `/rest/api/content/{id}/property`             | `/api/v2/pages/{id}/properties`  |                          |
+| Analytics       | `/wiki/rest/api/analytics/content/{id}/views` | —                                | Cloud only (V1 path)     |
+| Page move       | `/rest/api/content/{id}/move/{position}`      | Same (V1 only)                   | V2 exception             |
 
 **Selection rule**: Skill auto-selects V2 when available on Cloud, falls back to V1 on Server/DC or when V2 endpoint doesn't exist.
 
@@ -423,13 +430,13 @@ Confluence page updates require `version.number` as a **mandatory parameter**:
 
 ### Cloud vs Server Branching Summary
 
-| Aspect | Cloud | Server/DC |
-|---|---|---|
-| Inline comments | Supported | Not supported |
-| Analytics (views) | Supported | Not supported |
-| V2 API | Available | Not available |
-| Attachment API | V1 + V2 | V1 only |
-| User identifier | `accountId` | `userKey` / `username` |
+| Aspect            | Cloud       | Server/DC              |
+| ----------------- | ----------- | ---------------------- |
+| Inline comments   | Supported   | Not supported          |
+| Analytics (views) | Supported   | Not supported          |
+| V2 API            | Available   | Not available          |
+| Attachment API    | V1 + V2     | V1 only                |
+| User identifier   | `accountId` | `userKey` / `username` |
 
 ---
 
@@ -497,10 +504,10 @@ Download images, videos, and GIFs from Atlassian sources or local paths, optiona
 
 ### Sub-agent Contract
 
-| Direction | Payload |
-|---|---|
+| Direction        | Payload                                                                   |
+| ---------------- | ------------------------------------------------------------------------- |
 | Caller → `media` | `.temp/<namespace>/<filename>/` path containing frames + `.metadata.json` |
-| `media` → caller | `analysis.json` written in place; caller reads it |
+| `media` → caller | `analysis.json` written in place; caller reads it                         |
 
 The `media` agent has only `Read`/`Write`/`Grep`/`Glob` tools — no Atlassian MCP tools, no network access. Frame images are loaded as multimodal input inside the sub-agent and released on termination.
 
@@ -533,7 +540,7 @@ skills/media-analysis/
 ### Cross-Skill / Cross-Package Touch Points
 
 - Reuses [`download`](#3-download) skill for the Atlassian attachment fetch step (no direct `fetch` call).
-- Consumed by `imbas:imbas-digest` and `imbas:imbas-pipeline` skills when a Jira issue references attached images / videos / GIFs.
+- Consumed by `imbas:digest` and `imbas:pipeline` skills when a Jira issue references attached images / videos / GIFs.
 
 ---
 
@@ -543,9 +550,9 @@ skills/media-analysis/
 
 ```typescript
 interface SkillRequest {
-  skill: string;                       // e.g., "jira-issue"
+  skill: string; // e.g., "jira-issue"
   operation: "GET" | "POST" | "PUT" | "DELETE";
-  params: Record<string, any>;         // Skill-specific parameters
+  params: Record<string, any>; // Skill-specific parameters
   context?: {
     is_cloud: boolean;
     base_url: string;
@@ -573,11 +580,11 @@ interface McpToolCall {
 
 Branching occurs in Skill and MCP layers only. Agent and Dispatcher are environment-agnostic.
 
-| Branching Item | Layer |
-|---|---|
-| API path (`/rest/api/3/` vs `/rest/api/2/`) | Skill |
-| Confluence V1 vs V2 | Skill |
-| User identifier (`accountId` vs `name`) | Skill |
-| ADF vs Wiki vs Storage format | MCP (converter) |
-| Auth method (Basic/PAT/OAuth) | MCP (auth manager) |
-| `is_cloud` auto-detection | MCP (environment resolver) |
+| Branching Item                              | Layer                      |
+| ------------------------------------------- | -------------------------- |
+| API path (`/rest/api/3/` vs `/rest/api/2/`) | Skill                      |
+| Confluence V1 vs V2                         | Skill                      |
+| User identifier (`accountId` vs `name`)     | Skill                      |
+| ADF vs Wiki vs Storage format               | MCP (converter)            |
+| Auth method (Basic/PAT/OAuth)               | MCP (auth manager)         |
+| `is_cloud` auto-detection                   | MCP (environment resolver) |

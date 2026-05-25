@@ -81,11 +81,11 @@ Each phase writes its output to a manifest file. Manifests are then executed aga
 
 Every run is tracked by a state machine (`state.json`) with strict transition rules:
 
-- `imbas:imbas-validate` → always starts
-- `imbas:imbas-split` → only after validate passes (PASS or PASS_WITH_WARNINGS)
-- `imbas:imbas-devplan` → only after split completes and Stories are reviewed
+- `imbas:validate` → always starts
+- `imbas:split` → only after validate passes (PASS or PASS_WITH_WARNINGS)
+- `imbas:devplan` → only after split completes and Stories are reviewed
 
-Phases can be escaped (abnormal termination with a reason code) or skipped. The pipeline is resume-friendly — if interrupted, `imbas:imbas-status resume` picks up where it left off.
+Phases can be escaped (abnormal termination with a reason code) or skipped. The pipeline is resume-friendly — if interrupted, `imbas:status resume` picks up where it left off.
 
 ### Working Directory
 
@@ -120,8 +120,8 @@ imbas skills are **LLM prompts**, not CLI commands. You invoke them in Claude Co
 ### Initial Setup
 
 ```
-/imbas:imbas-setup
-/imbas:imbas-setup --project PROJ
+/imbas:setup
+/imbas:setup --project PROJ
 ```
 
 Creates `.imbas/`, sets up `config.json`, and caches your Jira project metadata (issue types, link types, workflows).
@@ -129,8 +129,8 @@ Creates `.imbas/`, sets up `config.json`, and caches your Jira project metadata 
 ### Run the Full Pipeline
 
 ```
-/imbas:imbas-pipeline ./spec.md
-/imbas:imbas-pipeline ./spec.md --project PROJ
+/imbas:pipeline ./spec.md
+/imbas:pipeline ./spec.md --project PROJ
 ```
 
 Runs validate → split → manifest-stories → devplan → manifest-devplan end-to-end with auto-approval at quality gates. This is the primary entry point for most users.
@@ -141,13 +141,13 @@ For more control, run each phase separately:
 
 ```
 # Phase 1: Validate the document
-/imbas:imbas-validate
+/imbas:validate
 
 # Phase 2: Split into Stories
-/imbas:imbas-split
+/imbas:split
 
 # Phase 3: Generate dev plan
-/imbas:imbas-devplan
+/imbas:devplan
 ```
 
 Each phase reads from the previous phase's output and writes its own manifest.
@@ -155,9 +155,9 @@ Each phase reads from the previous phase's output and writes its own manifest.
 ### Execute Manifests to Jira
 
 ```
-/imbas:imbas-manifest stories     # Create Story issues
-/imbas:imbas-manifest devplan     # Create Tasks, Subtasks, and links
-/imbas:imbas-manifest stories --dry-run   # Preview without creating
+/imbas:manifest stories     # Create Story issues
+/imbas:manifest devplan     # Create Tasks, Subtasks, and links
+/imbas:manifest stories --dry-run   # Preview without creating
 ```
 
 Manifest execution is idempotent — re-running skips already-created issues (tracked by `issue_ref` in the manifest).
@@ -165,19 +165,19 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 ### Check Pipeline Status
 
 ```
-/imbas:imbas-status              # Current run status
-/imbas:imbas-status list         # All runs for a project
-/imbas:imbas-status resume       # Resume an interrupted run
+/imbas:status              # Current run status
+/imbas:status list         # All runs for a project
+/imbas:status resume       # Resume an interrupted run
 ```
 
 ### Additional Tools
 
 ```bash
 # Compress a Jira issue into a structured summary comment
-/imbas:imbas-digest PROJ-123
+/imbas:digest PROJ-123
 
 # Scaffold a Draft PR from a Jira Story with sub-task checklist
-/imbas:imbas-scaffold-pr PROJ-123
+/imbas:scaffold-pr PROJ-123
 
 # Analyze media attachments (images, videos, GIFs) — requires @ogham/atlassian
 /atlassian:media-analysis <url-or-path>
@@ -217,19 +217,19 @@ With the plugin active, these hooks fire **without user intervention**:
 
 | Skill | User-invocable | What it does |
 |-------|---------------|--------------|
-| `/imbas:imbas-setup` | Yes | Initialize `.imbas/`, configure project and Jira settings |
-| `/imbas:imbas-pipeline` | Yes | End-to-end pipeline execution with auto-approval gates |
-| `/imbas:imbas-validate` | Yes | Phase 1: Validate document for contradictions and gaps |
-| `/imbas:imbas-split` | Yes | Phase 2: Decompose document into INVEST Stories |
-| `/imbas:imbas-devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
-| `/imbas:imbas-implement-plan` | Yes | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
-| `/imbas:imbas-manifest` | Yes | Execute manifests to batch-create Jira issues |
-| `/imbas:imbas-status` | Yes | View run status, list runs, resume interrupted runs |
-| `/imbas:imbas-digest` | Yes | Compress a Jira issue into a structured summary |
-| `/imbas:imbas-scaffold-pr` | Yes | Create a Draft PR from a Jira Story with sub-tasks |
+| `/imbas:setup` | Yes | Initialize `.imbas/`, configure project and Jira settings |
+| `/imbas:pipeline` | Yes | End-to-end pipeline execution with auto-approval gates |
+| `/imbas:validate` | Yes | Phase 1: Validate document for contradictions and gaps |
+| `/imbas:split` | Yes | Phase 2: Decompose document into INVEST Stories |
+| `/imbas:devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
+| `/imbas:implement-plan` | Yes | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
+| `/imbas:manifest` | Yes | Execute manifests to batch-create Jira issues |
+| `/imbas:status` | Yes | View run status, list runs, resume interrupted runs |
+| `/imbas:digest` | Yes | Compress a Jira issue into a structured summary |
+| `/imbas:scaffold-pr` | Yes | Create a Draft PR from a Jira Story with sub-tasks |
 
-| `/imbas:imbas-cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
-| `/imbas:imbas-read-issue` | No | Internal: Read and structure Jira issue context |
+| `/imbas:cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
+| `/imbas:read-issue` | No | Internal: Read and structure Jira issue context |
 
 ---
 
@@ -299,8 +299,8 @@ During devplan:
 Modify via:
 
 ```
-/imbas:imbas-setup set-language documents=en
-/imbas:imbas-setup set-project NEWPROJ
+/imbas:setup set-language documents=en
+/imbas:setup set-project NEWPROJ
 ```
 
 ---

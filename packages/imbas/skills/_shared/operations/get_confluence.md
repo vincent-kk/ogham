@@ -24,4 +24,4 @@ GET /wiki/api/v2/pages/{pageId}?body-format=storage
 
 ## Used By
 
-- `imbas-validate` — Fetch Confluence page content when source is a URL
+- `validate` — Fetch Confluence page content when source is a URL

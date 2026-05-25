@@ -149,7 +149,7 @@ Break down a Story that is too broad into smaller, peer-level Stories.
 
 1. **Rule**: Every resulting Story must remain independently testable at the E2E level. If splitting breaks testability, stop splitting and keep it as a single Story (even if it has many Subtasks).
 2. **Create new Stories**: each with own User Story/AC/Context, must independently pass INVEST + size check.
-3. **Link**: original → status `imbas-split`; new Stories → `split_from` original ID; original → `split_into` new IDs.
+3. **Link**: original → status `split`; new Stories → `split_from` original ID; original → `split_into` new IDs.
 4. **Re-validate**: all new Stories through INVEST + size check; split again recursively if needed.
 
 When splitting creates many related Stories, group under an **Epic** (umbrella pattern).
@@ -253,7 +253,7 @@ Split Stories use `split_from`/`split_into` (`split_into` defaults to `[]`). Sta
 
 ## Read-Only Reference Context
 
-When spawned by the `imbas:imbas-split` skill, you receive `source.md` (the original planning document copy)
+When spawned by the `imbas:split` skill, you receive `source.md` (the original planning document copy)
 as read-only reference alongside the validation report.
 
 - **Primary anchor**: `validation-report.md` — your main input for decomposition decisions

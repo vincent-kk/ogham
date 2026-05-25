@@ -17,5 +17,5 @@ GET /rest/api/3/issuetype/project?projectId={projectId}
 
 ## Used By
 
-- `imbas-setup` — Fetch issue types for selected project
-- `imbas-cache` — Cache issue type metadata
+- `setup` — Fetch issue types for selected project
+- `cache` — Cache issue type metadata

@@ -11,25 +11,25 @@
 
 사용자에게 slash command로 노출되는 스킬. 플러그인 설치 시 아래 8개가 사용자에게 보임.
 
-| Skill | Slash Command | 역할 | Agent |
-|-------|-------------|------|-------|
-| **setup** | `/imbas:imbas-setup` | 초기화, config, 프로젝트 캐시 | — |
-| **validate** | `/imbas:imbas-validate` | Phase 1 — 정합성 검증 | imbas-analyst |
-| **split** | `/imbas:imbas-split` | Phase 2 — Story 분할 | imbas-planner + imbas-analyst |
-| **devplan** | `/imbas:imbas-devplan` | Phase 3 — Subtask/Task 생성 | imbas-engineer |
-| **manifest** | `/imbas:imbas-manifest` | 매니페스트 → provider별 이슈 배치 생성 | — |
-| **status** | `/imbas:imbas-status` | 런 상태 조회, 이력 | — |
-| ~~**`imbas:fetch-media`**~~ | `/atlassian:media-analysis` | *migrated to `@ogham/atlassian`* | — |
-| **digest** | `/imbas:imbas-digest` | 이슈 컨텍스트 압축 → provider별 코멘트/다이제스트 기록 | — |
+| Skill                       | Slash Command               | 역할                                                   | Agent                         |
+| --------------------------- | --------------------------- | ------------------------------------------------------ | ----------------------------- |
+| **setup**                   | `/imbas:setup`              | 초기화, config, 프로젝트 캐시                          | —                             |
+| **validate**                | `/imbas:validate`           | Phase 1 — 정합성 검증                                  | imbas-analyst                 |
+| **split**                   | `/imbas:split`              | Phase 2 — Story 분할                                   | imbas-planner + imbas-analyst |
+| **devplan**                 | `/imbas:devplan`            | Phase 3 — Subtask/Task 생성                            | imbas-engineer                |
+| **manifest**                | `/imbas:manifest`           | 매니페스트 → provider별 이슈 배치 생성                 | —                             |
+| **status**                  | `/imbas:status`             | 런 상태 조회, 이력                                     | —                             |
+| ~~**`imbas:fetch-media`**~~ | `/atlassian:media-analysis` | _migrated to `@ogham/atlassian`_                       | —                             |
+| **digest**                  | `/imbas:digest`             | 이슈 컨텍스트 압축 → provider별 코멘트/다이제스트 기록 | —                             |
 
 ### 1.2 Internal Skills (내부 전용, 2개)
 
 `user_invocable: false`. 사용자에게 노출되지 않음. 다른 스킬이나 에이전트가 내부적으로 호출.
 
-| Skill | 호출자 | 역할 | Agent |
-|-------|--------|------|-------|
-| **`imbas:imbas-read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화 | — |
-| **cache** | setup, validate, split, devplan | provider 메타데이터 캐시 자동 갱신/조회 | — |
+| Skill                  | 호출자                                   | 역할                                    | Agent |
+| ---------------------- | ---------------------------------------- | --------------------------------------- | ----- |
+| **`imbas:read-issue`** | validate, split, devplan, engineer agent | 이슈 본문 + 코멘트 대화 맥락 구조화     | —     |
+| **cache**              | setup, validate, split, devplan          | provider 메타데이터 캐시 자동 갱신/조회 | —     |
 
 **총 10개 스킬** (user-invocable 8 + internal 2).
 
@@ -37,7 +37,7 @@
 
 ## 2. Core Workflow Skills
 
-### 2.1 imbas:imbas-validate — Phase 1 정합성 검증
+### 2.1 imbas:validate — Phase 1 정합성 검증
 
 ```yaml
 name: validate
@@ -51,8 +51,9 @@ plugin: imbas
 ```
 
 **Arguments:**
+
 ```
-/imbas:imbas-validate <source>  [--project <KEY>] [--supplements <path,...>]
+/imbas:validate <source>  [--project <KEY>] [--supplements <path,...>]
 
 <source>       : 기획 문서 경로 (로컬 md/txt) 또는 Confluence URL
 --project      : 프로젝트 참조 (config.defaults.project_ref 대체)
@@ -98,7 +99,7 @@ Step 5 — 상태 갱신
 
 ---
 
-### 2.2 imbas:imbas-split — Phase 2 Story 분할
+### 2.2 imbas:split — Phase 2 Story 분할
 
 ```yaml
 name: split
@@ -112,8 +113,9 @@ plugin: imbas
 ```
 
 **Arguments:**
+
 ```
-/imbas:imbas-split [--run <run-id>] [--epic <EPIC-KEY>]
+/imbas:split [--run <run-id>] [--epic <EPIC-KEY>]
 
 --run    : 기존 런 ID (없으면 가장 최근 PASS된 런 사용)
 --epic   : 상위 Epic/parent 참조 (없으면 생성 또는 기존 참조 여부 확인)
@@ -201,7 +203,7 @@ Step 7 — 사용자 리뷰
 
 ---
 
-### 2.3 imbas:imbas-devplan — Phase 3 Subtask/Task 생성
+### 2.3 imbas:devplan — Phase 3 Subtask/Task 생성
 
 ```yaml
 name: devplan
@@ -215,8 +217,9 @@ plugin: imbas
 ```
 
 **Arguments:**
+
 ```
-/imbas:imbas-devplan [--run <run-id>] [--stories <S1,S2,...>]
+/imbas:devplan [--run <run-id>] [--stories <S1,S2,...>]
 
 --run      : 런 ID
 --stories  : 대상 Story ID (콤마 구분, 없으면 전체)
@@ -232,7 +235,7 @@ Step 1 — 런 로드 & 매니페스트 확인
   2. split 완료 + 리뷰 승인 확인
   3. stories-manifest.json의 Story 항목 상태 확인:
      - 모든 Story가 `created` (issue_ref 존재) → 정상 진행
-     - `pending` 항목 존재 → "imbas:imbas-manifest stories 먼저 실행 필요" 안내 + 블로킹
+     - `pending` 항목 존재 → "imbas:manifest stories 먼저 실행 필요" 안내 + 블로킹
   4. state.json: current_phase = "devplan", devplan.status = "in_progress"
 
 Step 2 — imbas-engineer 호출
@@ -274,7 +277,7 @@ Step 4 — 사용자 리뷰
 
 ## 3. Infrastructure Skills
 
-### 3.1 imbas:imbas-setup — 초기화 & 설정
+### 3.1 imbas:setup — 초기화 & 설정
 
 ```yaml
 name: setup
@@ -290,15 +293,15 @@ plugin: imbas
 
 **Subcommands:**
 
-| Command | 동작 |
-|---------|------|
-| `init` (default) | 대화형 초기화 — provider, 프로젝트 참조, 언어 설정 → config.json 생성 + 캐시 |
-| `show` | config.json + 캐시 상태 표시 |
-| `set-project <KEY>` | 기본 프로젝트 변경 + 캐시 갱신 |
-| `set-provider <PROVIDER>` | provider 변경 + health check 재실행 |
-| `set-language <field> <lang>` | 언어 설정 변경 |
-| `refresh-cache [KEY]` | provider별 캐시 강제 갱신 |
-| `clear-temp` | `.imbas/.temp/` 디렉토리 삭제 (미디어 임시 파일 정리) |
+| Command                       | 동작                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------- |
+| `init` (default)              | 대화형 초기화 — provider, 프로젝트 참조, 언어 설정 → config.json 생성 + 캐시 |
+| `show`                        | config.json + 캐시 상태 표시                                                 |
+| `set-project <KEY>`           | 기본 프로젝트 변경 + 캐시 갱신                                               |
+| `set-provider <PROVIDER>`     | provider 변경 + health check 재실행                                          |
+| `set-language <field> <lang>` | 언어 설정 변경                                                               |
+| `refresh-cache [KEY]`         | provider별 캐시 강제 갱신                                                    |
+| `clear-temp`                  | `.imbas/.temp/` 디렉토리 삭제 (미디어 임시 파일 정리)                        |
 
 **Init Workflow:**
 
@@ -320,11 +323,11 @@ Step 6 — .gitignore 가드 (setup-lens 패턴)
 Step 7 — 결과 표시
 ```
 
-**참고:** setup-lens 패턴 (`/Users/Vincent/Workspace/ogham/packages/maencof-lens/skills/setup-lens/SKILL.md`) 구조를 따름.
+**참고:** maencof-lens setup 패턴 (`packages/maencof-lens/skills/setup/SKILL.md`) 구조를 따름.
 
 ---
 
-### 3.2 imbas:imbas-status — 런 상태 조회
+### 3.2 imbas:status — 런 상태 조회
 
 ```yaml
 name: status
@@ -339,18 +342,18 @@ plugin: imbas
 
 **Subcommands:**
 
-| Command | 동작 |
-|---------|------|
-| (default) | 가장 최근 런의 상태 표시 |
-| `list` | 모든 런 ID + 상태 요약 |
-| `<run-id>` | 특정 런 상세 표시 |
+| Command           | 동작                             |
+| ----------------- | -------------------------------- |
+| (default)         | 가장 최근 런의 상태 표시         |
+| `list`            | 모든 런 ID + 상태 요약           |
+| `<run-id>`        | 특정 런 상세 표시                |
 | `resume <run-id>` | 중단된 런 재개 (다음 Phase 안내) |
 
 ---
 
 ## 4. Execution Skill
 
-### 4.1 imbas:imbas-manifest — 매니페스트 실행
+### 4.1 imbas:manifest — 매니페스트 실행
 
 ```yaml
 name: manifest
@@ -364,8 +367,9 @@ plugin: imbas
 ```
 
 **Arguments:**
+
 ```
-/imbas:imbas-manifest <type> [--run <run-id>] [--dry-run]
+/imbas:manifest <type> [--run <run-id>] [--dry-run]
 
 <type>    : "stories" | "devplan"
 --run     : 런 ID (없으면 최근)
@@ -374,7 +378,7 @@ plugin: imbas
 
 **Workflow:**
 
-```
+````
 Step 1 — 매니페스트 로드
   - type에 따라 stories-manifest.json 또는 devplan-manifest.json
   - pending 항목 수 확인
@@ -410,7 +414,7 @@ Step 4 — 배치 실행
 Step 5 — 결과 리포트
   - 생성된 이슈 수, 실패 수
   - 실패 항목 목록 + 재시도 안내
-```
+````
 
 **멱등성:** issue_ref가 이미 있는 항목은 스킵. 중단 후 재실행 안전.
 
@@ -430,7 +434,7 @@ Step 5 — 결과 리포트
 
 ## 6. Internal Skills
 
-### 6.1 imbas:imbas-read-issue — 이슈 컨텍스트 구조화 (내부 전용)
+### 6.1 imbas:read-issue — 이슈 컨텍스트 구조화 (내부 전용)
 
 ```yaml
 name: read-issue
@@ -445,8 +449,9 @@ plugin: imbas
 ```
 
 **호출 인터페이스:**
+
 ```
-imbas:imbas-read-issue <issue-ref> [--depth shallow|full]
+imbas:read-issue <issue-ref> [--depth shallow|full]
 
 <issue-ref>  : 이슈 참조 (Jira: PROJ-123, GitHub: owner/repo#42, local: S-1)
 --depth      : shallow = 본문+메타만, full = 코멘트 포함 (default: full)
@@ -545,18 +550,20 @@ Step 5 — 구조화 & 반환
 ```
 
 **캐싱 정책:**
+
 - 이슈 내용은 **캐싱하지 않음** — 코멘트/다이제스트가 수시로 변경되므로 매 호출마다 최신 상태를 재조회
 - digest 코멘트가 존재하면 Fast Path로 처리 비용 절감 (전체 파싱 불필요)
 - 프로젝트 메타데이터(이슈 타입, 링크 타입 등)만 cache 스킬을 통해 캐싱 (거의 변경되지 않는 정보)
 
 **에이전트에서의 사용 패턴:**
+
 - imbas-analyst: Phase 1에서 기존 관련 이슈 참조 시
 - imbas-planner: Phase 2에서 Epic이나 기존 Story 맥락 파악 시
 - imbas-engineer: Phase 3에서 Story의 최신 논의(코멘트/다이제스트) 확인 시
 
 ---
 
-### 6.2 imbas:imbas-cache — Jira 캐시 관리 (내부 전용)
+### 6.2 imbas:cache — Jira 캐시 관리 (내부 전용)
 
 ```yaml
 name: cache
@@ -569,24 +576,25 @@ plugin: imbas
 ```
 
 **호출 인터페이스:**
+
 ```
-imbas:imbas-cache <action> [--project <KEY>]
+imbas:cache <action> [--project <KEY>]
 
 <action>  : "ensure" | "refresh" | "clear"
 --project : 프로젝트 참조 (없으면 config.defaults.project_ref)
 ```
 
-| Action | 동작 |
-|--------|------|
-| `ensure` | TTL 내면 스킵, 만료면 자동 갱신 |
-| `refresh` | 강제 갱신 |
-| `clear` | 캐시 삭제 |
+| Action    | 동작                            |
+| --------- | ------------------------------- |
+| `ensure`  | TTL 내면 스킵, 만료면 자동 갱신 |
+| `refresh` | 강제 갱신                       |
+| `clear`   | 캐시 삭제                       |
 
-**사용자 접근 경로:** `/imbas:imbas-setup show` (캐시 상태 확인) / `/imbas:imbas-setup refresh-cache` (provider별 갱신)
+**사용자 접근 경로:** `/imbas:setup show` (캐시 상태 확인) / `/imbas:setup refresh-cache` (provider별 갱신)
 
 ---
 
-### 6.3 imbas:imbas-digest — 이슈 컨텍스트 압축 (사용자 호출)
+### 6.3 imbas:digest — 이슈 컨텍스트 압축 (사용자 호출)
 
 ```yaml
 name: digest
@@ -602,8 +610,9 @@ plugin: imbas
 ```
 
 **Arguments:**
+
 ```
-/imbas:imbas-digest <issue-ref> [--preview] [--no-media]
+/imbas:digest <issue-ref> [--preview] [--no-media]
 
 <issue-ref>  : 이슈 참조 (Jira: PROJ-123, GitHub: owner/repo#42, local: S-1)
 --preview    : provider에 게시하지 않고 미리보기만
@@ -614,7 +623,7 @@ plugin: imbas
 
 ```
 Step 1 — 이슈 읽기
-  - `imbas:imbas-read-issue`(issue-ref, depth: full) 호출
+  - `imbas:read-issue`(issue-ref, depth: full) 호출
   - 첨부 미디어 감지 → provider가 `jira`이고 `--no-media`가 아니면 `/atlassian:media-analysis` 호출하여 시각 정보 포함
 
 Step 2 — State Tracking (상태 추적)
@@ -660,7 +669,7 @@ Step 5 — 코멘트 포맷팅
 
   ### Participants
   - {name} ({role_hint}): {contribution summary}
-  <!-- /imbas:imbas-digest -->
+  <!-- /imbas:digest -->
 
 Step 6 — 게시
   - --preview → 사용자에게 미리보기 표시, 종료
@@ -669,22 +678,26 @@ Step 6 — 게시
 ```
 
 **digest 마커 규격:**
+
 ```
 <!-- imbas:digest v{version} | generated: {ISO8601} | comments_covered: {start}-{end} -->
 ...
-<!-- /imbas:imbas-digest -->
+<!-- /imbas:digest -->
 ```
+
 - `comments_covered`: digest가 분석한 코멘트 인덱스 범위
-- `imbas:imbas-read-issue`가 이 마커를 감지하면 Fast Path 활성화
+- `imbas:read-issue`가 이 마커를 감지하면 Fast Path 활성화
 - 동일 이슈에 digest를 재실행하면 기존 digest 이후 코멘트만 추가 분석 → 신규 digest 코멘트 게시 (기존 것은 남겨둠)
 
 **제안 트리거:**
+
 - manifest가 [OP: transition_issue]로 Done 전환 시
 - 해당 이슈의 코멘트 >= 3개 AND 작성자 >= 2명
-- 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:imbas-digest {key}` 로 정리할까요?"
+- 조건 충족 시: "이 티켓에 논의가 있었습니다. `/imbas:digest {key}` 로 정리할까요?"
 - 자동 실행 아님 — 제안만
 
 **교차 이슈 합성:**
+
 - 현재 스코프 밖. digest는 단일 이슈 전용.
 - 필요 시 별도 스킬로 추가 예정.
 
@@ -695,37 +708,37 @@ Step 6 — 게시
 ```
 사용자 (user_invocable: true — 8개)
   │
-  ├── /imbas:imbas-setup ─────────── config.json + 캐시 초기화
+  ├── /imbas:setup ─────────── config.json + 캐시 초기화
   │         └── (내부) cache ensure
   │
-  ├── /imbas:imbas-status ────────── 런 상태 조회
+  ├── /imbas:status ────────── 런 상태 조회
   │
-  ├── /imbas:imbas-validate ─────── state.json 생성 → validation-report.md
+  ├── /imbas:validate ─────── state.json 생성 → validation-report.md
   │         ├── (내부) cache ensure
-  │         └── (내부) `imbas:imbas-read-issue` (관련 기존 이슈 참조 시)
+  │         └── (내부) `imbas:read-issue` (관련 기존 이슈 참조 시)
   │
-  ├── /imbas:imbas-split ────────── state.json 갱신 → stories-manifest.json
+  ├── /imbas:split ────────── state.json 갱신 → stories-manifest.json
   │         ├── (내부) cache ensure
-  │         └── (내부) `imbas:imbas-read-issue` (Epic/기존 Story 맥락 파악 시)
+  │         └── (내부) `imbas:read-issue` (Epic/기존 Story 맥락 파악 시)
   │
-  ├── /imbas:imbas-manifest stories ── stories-manifest → provider별 Story 생성
+  ├── /imbas:manifest stories ── stories-manifest → provider별 Story 생성
   │
-  ├── /imbas:imbas-devplan ──────── state.json 갱신 → devplan-manifest.json
+  ├── /imbas:devplan ──────── state.json 갱신 → devplan-manifest.json
   │         ├── (내부) cache ensure
-  │         └── (내부) `imbas:imbas-read-issue` (Story 코멘트 추가 논의 확인)
+  │         └── (내부) `imbas:read-issue` (Story 코멘트 추가 논의 확인)
   │
-  ├── /imbas:imbas-manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
+  ├── /imbas:manifest devplan ── devplan-manifest → provider별 Task/Subtask 생성
   │         └── (제안) digest (Done 전환 시, 코멘트>=3 AND 작성자>=2)
   │
   ├── /atlassian:media-analysis ── 미디어 다운로드 + 분석 (migrated to @ogham/atlassian)
   │
-  └── /imbas:imbas-digest ────────── 이슈 컨텍스트 압축 → provider별 게시
-            ├── (내부) `imbas:imbas-read-issue` → 코멘트 대화 맥락
+  └── /imbas:digest ────────── 이슈 컨텍스트 압축 → provider별 게시
+            ├── (내부) `imbas:read-issue` → 코멘트 대화 맥락
             └── (외부) `/atlassian:media-analysis` → 첨부 미디어 분석 (있을 경우)
 
 내부 전용 (user_invocable: false — 2개)
   ├── cache ─── setup, validate, split, devplan에서 자동 호출
-  └── `imbas:imbas-read-issue` ─── validate, split, devplan, digest + 에이전트에서 호출
+  └── `imbas:read-issue` ─── validate, split, devplan, digest + 에이전트에서 호출
                       └── digest 코멘트 감지 시 Fast Path (커버된 범위 스킵)
 ```
 
@@ -736,24 +749,26 @@ Step 6 — 게시
 ### 8.1 컨텍스트 절약
 
 모든 스킬은 **slash command 직접 호출** 또는 **스킬/에이전트 내부 호출**로만 실행.
+
 - 자동 트리거 없음 (불필요한 컨텍스트 점유 방지)
 - 에이전트는 필요 시점에만 spawn → 결과 반환 → 즉시 종료
 
 ### 8.2 Plan-then-Execute
 
 Phase 1-3은 **매니페스트만 생성** (읽기 전용).
-실제 provider 쓰기(Jira/GitHub/local issue write)는 `imbas:imbas-manifest`에서만 수행.
+실제 provider 쓰기(Jira/GitHub/local issue write)는 `imbas:manifest`에서만 수행.
 → 사용자가 항상 실행 전 검토 가능.
 
 ### 8.3 실패 복구
 
 - 매니페스트의 status + issue_ref로 재실행 시 자동 스킵
 - `skip_phases` action으로 특정 phase를 건너뛸 수 있음 (코드: `state.ts:112`, `state-manager.ts:106`)
-- state.json으로 중단된 Phase 감지 → `imbas:imbas-status resume` 안내
+- state.json으로 중단된 Phase 감지 → `imbas:status resume` 안내
 
 ### 8.4 단일 턴 실행
 
 각 스킬은 `> EXECUTION MODEL: Single continuous operation` 원칙.
+
 - 읽기 → 처리 → 에이전트 호출 → 결과 평가 → 상태 저장 → 사용자 리포트
 - 사용자 결정이 필요한 시점에서만 턴 양보
 
@@ -765,4 +780,3 @@ Phase 1-3은 **매니페스트만 생성** (읽기 전용).
 - [SPEC-media.md](./SPEC-media.md) — 미디어 분석 상세 (`/atlassian:media-analysis`로 이전)
 - [SPEC-atlassian-tools.md](./SPEC-atlassian-tools.md) — Jira 도구 매핑 (deprecated)
 - [BLUEPRINT.md](../BLUEPRINT.md) — 전체 아키텍처
-� 아키텍처

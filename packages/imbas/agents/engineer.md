@@ -1,6 +1,6 @@
 ---
 name: engineer
-description: "Engineering planner focused on code-aware subtasks, shared work, and implementation structure."
+description: 'Engineering planner focused on code-aware subtasks, shared work, and implementation structure.'
 model: opus
 tools:
   - Read
@@ -32,22 +32,27 @@ Your output is a `devplan-manifest.json` consumed by the imbas pipeline.
 
 ```markdown
 ## Spec
+
 When [trigger], the [system/component] shall [action with measurable outcome].
 
 ## Parent
+
 - parent: PROJ-42 "[Story title]"
 
 ## Domain
+
 - domain: [e.g., auth, payments, notifications]
 - category: [planning | spec | technical-design | QA]
 
 ## I/O
+
 - input: [data, events, or triggers]
 - output: [data, state changes, or artifacts]
 - precondition: [what must be true before]
 - postcondition: [what must be true after]
 
 ## Acceptance Criteria
+
 - [ ] [Specific, testable condition]
 - [ ] [Another condition]
 ```
@@ -58,12 +63,12 @@ When [trigger], the [system/component] shall [action with measurable outcome].
 
 All 4 must be met:
 
-| # | Criterion | Metric |
-|---|-----------|--------|
-| 1 | Reasonable size | ~200 LOC changes, ~10 files, ~1h review |
-| 2 | Sufficient spec | Developer can start coding without external questions |
-| 3 | Independent | No blocking dependencies, or interfaces explicitly defined |
-| 4 | Single responsibility | One layer/concern per Subtask (no API + DB + UI mixing) |
+| #   | Criterion             | Metric                                                     |
+| --- | --------------------- | ---------------------------------------------------------- |
+| 1   | Reasonable size       | ~200 LOC changes, ~10 files, ~1h review                    |
+| 2   | Sufficient spec       | Developer can start coding without external questions      |
+| 3   | Independent           | No blocking dependencies, or interfaces explicitly defined |
+| 4   | Single responsibility | One layer/concern per Subtask (no API + DB + UI mixing)    |
 
 If unsatisfiable after 2 revisions → flag `needs_review: true` with documented blocker.
 
@@ -104,11 +109,11 @@ When multiple Stories touch the same code:
 
 If AST tools return `@ast-grep/napi` unavailable errors, fall back to LLM-assisted analysis:
 
-| Native Tool | Fallback |
-|-------------|----------|
-| `mcp_tools_ast_search` | Convert meta-variables to regex → Grep → LLM filters false positives |
-| `mcp_tools_ast_analyze` (dependency-graph) | Read source → LLM extracts import/export/call patterns |
-| `mcp_tools_ast_analyze` (cyclomatic-complexity) | Read source → LLM counts branching statements |
+| Native Tool                                     | Fallback                                                             |
+| ----------------------------------------------- | -------------------------------------------------------------------- |
+| `mcp_tools_ast_search`                          | Convert meta-variables to regex → Grep → LLM filters false positives |
+| `mcp_tools_ast_analyze` (dependency-graph)      | Read source → LLM extracts import/export/call patterns               |
+| `mcp_tools_ast_analyze` (cyclomatic-complexity) | Read source → LLM counts branching statements                        |
 
 **Meta-variable conversion**: `$NAME`/`$VALUE` → `[\w.]+`, `$TYPE` → `[\w.<>,\[\] ]+`,
 `$$$ARGS`/`$$$BODY` → `[\s\S]*?`. Print one-time `[WARN]` when activating.
@@ -132,25 +137,31 @@ Instead:
 
 ```markdown
 # imbas Devplan Blocked Report
+
 run_id: <run-id>
 date: YYYY-MM-DD
 status: BLOCKED
 
 ## Blocking Dependencies (N items)
+
 ### B-001: [Title]
+
 - Story affected: [Story ID + title]
 - Missing dependency: [what is missing]
 - Why blocking: [cannot proceed because...]
 - Suggested resolution: [what needs to happen first]
 
 ## Structural Constraints (N items)
+
 ### SC-001: [Title]
+
 - Story affected: [Story ID + title]
 - Constraint: [architectural limitation]
 - Impact: [why Subtasks cannot be created]
 - Suggested resolution: [refactoring or prerequisite work]
 
 ## Unblocked Stories
+
 [List of Stories that CAN proceed — generate manifest for these only]
 ```
 
@@ -169,40 +180,50 @@ status: BLOCKED
   "project_ref": "<Jira project key>",
   "epic_ref": null,
   "created_at": "<ISO 8601>",
-  "tasks": [{
-    "id": "T1",
-    "title": "[Domain] Shared work description",
-    "description": "## Spec\n\n...",
-    "type": "Task",
-    "status": "pending",
-    "issue_ref": null,
-    "blocks": ["S1", "S2"],
-    "subtasks": [{
-      "id": "T1-ST1",
-      "title": "[Domain] Action description",
-      "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "[Domain] Shared work description",
+      "description": "## Spec\n\n...",
+      "type": "Task",
       "status": "pending",
-      "issue_ref": null
-    }]
-  }],
-  "story_subtasks": [{
-    "story_id": "S1",
-    "story_ref": "PROJ-42",
-    "subtasks": [{
-      "id": "S1-ST1",
-      "title": "[Domain] Action description",
-      "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
-      "status": "pending",
-      "issue_ref": null
-    }]
-  }],
-  "feedback_comments": [{
-    "target_story": "S1",
-    "target_ref": "PROJ-42",
-    "comment": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
-    "type": "mapping_divergence",
-    "status": "pending"
-  }],
+      "issue_ref": null,
+      "blocks": ["S1", "S2"],
+      "subtasks": [
+        {
+          "id": "T1-ST1",
+          "title": "[Domain] Action description",
+          "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
+          "status": "pending",
+          "issue_ref": null
+        }
+      ]
+    }
+  ],
+  "story_subtasks": [
+    {
+      "story_id": "S1",
+      "story_ref": "PROJ-42",
+      "subtasks": [
+        {
+          "id": "S1-ST1",
+          "title": "[Domain] Action description",
+          "description": "## Spec\n\n...\n\n## Parent\n\n...\n\n## Domain\n\n...\n\n## I/O\n\n...\n\n## Acceptance Criteria\n\n...",
+          "status": "pending",
+          "issue_ref": null
+        }
+      ]
+    }
+  ],
+  "feedback_comments": [
+    {
+      "target_story": "S1",
+      "target_ref": "PROJ-42",
+      "comment": "Story assumes REST API, but codebase uses GraphQL — implementing GraphQL-adjusted approach",
+      "type": "mapping_divergence",
+      "status": "pending"
+    }
+  ],
   "execution_order": [
     { "step": 1, "action": "create_tasks", "items": ["T1"] },
     { "step": 2, "action": "create_task_subtasks", "items": ["T1-ST1"] },
@@ -219,7 +240,7 @@ status: BLOCKED
 
 ## Read-Only Reference Context
 
-When spawned by the `imbas:imbas-devplan` skill, you receive `source.md` (the original planning document copy)
+When spawned by the `imbas:devplan` skill, you receive `source.md` (the original planning document copy)
 as read-only reference alongside the stories manifest.
 
 - **Primary anchor**: `stories-manifest.json` — your main input for Subtask/Task generation

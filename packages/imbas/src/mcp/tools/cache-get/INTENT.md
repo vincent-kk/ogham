@@ -1,4 +1,4 @@
-# imbas-cache-get
+# cache-get
 
 ## Purpose
 캐시 데이터 조회 도구 핸들러.

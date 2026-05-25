@@ -30,10 +30,10 @@ const SKILLS_DIR = join(PKG_ROOT, 'skills');
  * .metadata/imbas/specs/SPEC-skills.md.
  */
 const PARTITIONED_SKILLS = [
-  'imbas-manifest',
-  'imbas-read-issue',
-  'imbas-digest',
-  'imbas-devplan',
+  'manifest',
+  'read-issue',
+  'digest',
+  'devplan',
 ] as const;
 
 const ANCHOR_LITERAL = '<!-- imbas:constraints-v1 -->';

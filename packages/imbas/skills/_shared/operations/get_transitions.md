@@ -23,5 +23,5 @@ operation before calling `[OP: transition_issue]`.
 
 ## Used By
 
-- `imbas-manifest` — Check available transitions before status change
-- `imbas-cache` — Cache workflow transitions
+- `manifest` — Check available transitions before status change
+- `cache` — Cache workflow transitions
