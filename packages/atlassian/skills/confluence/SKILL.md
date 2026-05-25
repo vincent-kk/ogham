@@ -61,7 +61,6 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 2. Read `tools/<domain>/schema.md` ONLY when needed — do not preload all schemas
 3. Compose the V2-style logical endpoint (MCP dispatches to Cloud V2 / V1 / Server/DC automatically)
 4. Call the appropriate MCP tool with resolved parameters
-5. On HTTP 401: invoke `setup` skill, then retry once
 
 ## Permission Boundaries
 

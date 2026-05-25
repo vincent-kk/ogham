@@ -8,12 +8,13 @@
 
 ## 1. Overview
 
-The MCP layer exposes 3 tools under a single server named `"tools"`:
+The MCP layer exposes 4 tools under a single server named `"tools"`:
 
 | Tool | Type | Description |
 |---|---|---|
 | `fetch` | HTTP | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
 | `convert` | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion |
+| `auth-check` | Local | Authentication status check with optional live connectivity test |
 | `setup` | Local | Local web server for auth/connection setup |
 
 **Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests.
@@ -105,9 +106,56 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 
 **Known information loss**: complex table colspan/rowspan, media node metadata, panel/status colors, textColor marks, layout sections, macro parameters
 
+**Annotations**: `readOnlyHint: true, destructiveHint: false, idempotentHint: true` (pure function — same input always yields same output).
+
 ---
 
-### 3.3 `setup` — Auth/Connection Setup
+### 3.3 `auth-check` — Authentication Status Check
+
+**Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/auth-check.ts`.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `connection_test` | `boolean` | N | When `true`, issues a live request to the Atlassian instance (Jira: `/rest/api/*/myself`, Confluence: `/rest/api/user/current`) to validate the credentials end-to-end. Default: `false`. |
+
+**Returns** (Zod-validated):
+
+```typescript
+interface AuthCheckResult {
+  authenticated: boolean;          // True when at least one configured service has valid credentials
+  services: {
+    jira?: AuthCheckServiceEntry[];        // Array — supports multi-site
+    confluence?: AuthCheckServiceEntry[];  // Array — supports multi-site
+  };
+}
+
+interface AuthCheckServiceEntry {
+  configured: boolean;
+  base_url?: string;
+  connection?: {                   // Populated only when connection_test=true
+    success: boolean;
+    message: string;
+    latency_ms?: number;
+  };
+  user?: {                         // Populated when connection succeeds against Jira /myself
+    displayName?: string;
+    emailAddress?: string;
+  } | null;
+}
+```
+
+**Connection failure reporting**: there is no top-level `error` field. When `connection_test: true` and a probe fails for a service, that service entry's `connection.success` is `false` and `connection.message` carries the reason — scoped per service, not at the result root.
+
+**Usage pattern**:
+
+- `setup` skill: calls with `connection_test: true` to validate end-to-end before persisting the saved configuration.
+- General skills (`jira`, `confluence`, `download`): do NOT call `auth-check` proactively. They use optimistic execution and only invoke `setup` when `fetch` returns HTTP 401 with `reauth_required: true`.
+
+**Annotations**: `readOnlyHint: true, destructiveHint: false, idempotentHint: true`.
+
+---
+
+### 3.4 `setup` — Auth/Connection Setup
 
 **Not an HTTP tool.** Launches a local web server for auth configuration.
 
@@ -119,6 +167,8 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 **Behavior**: Starts a local HTTP server on `127.0.0.1` (dynamic port), opens the auth setup form in the user's browser. See [auth-ui.md](auth-ui.md) for form design.
 
 **Returns**: Connection test results and saved config status.
+
+**Annotations**: `readOnlyHint: false, destructiveHint: false, idempotentHint: false` (writes credentials to local storage; the action is observable side-effect).
 
 ---
 

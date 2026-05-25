@@ -74,7 +74,6 @@ Step 5 — Video/GIF handling
      - Pass to agent:
        - frames directory absolute path
        - .metadata.json absolute path
-       - analysis purpose/context from caller
        - analysis.json save path: .temp/<namespace>/<filename>/analysis.json
      - Agent performs:
        1. Read .metadata.json -> frame list + timestamps

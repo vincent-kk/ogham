@@ -44,8 +44,8 @@ Handle authentication errors only when they occur (HTTP 401 with `reauth_require
 {
   "authenticated": true,
   "services": {
-    "jira": { "configured": true, "base_url": "https://xxx.atlassian.net", "auth_type": "basic" },
-    "confluence": { "configured": true, "base_url": "https://xxx.atlassian.net/wiki", "auth_type": "basic" }
+    "jira": [{ "configured": true, "base_url": "https://xxx.atlassian.net" }],
+    "confluence": [{ "configured": true, "base_url": "https://xxx.atlassian.net/wiki" }]
   }
 }
 ```
@@ -56,20 +56,18 @@ Handle authentication errors only when they occur (HTTP 401 with `reauth_require
 {
   "authenticated": true,
   "services": {
-    "jira": {
+    "jira": [{
       "configured": true,
       "base_url": "https://xxx.atlassian.net",
-      "auth_type": "basic",
       "connection": { "success": true, "message": "Connected to jira (Cloud)", "latency_ms": 230 },
       "user": { "displayName": "홍길동", "emailAddress": "hong@example.com" }
-    },
-    "confluence": {
+    }],
+    "confluence": [{
       "configured": true,
       "base_url": "https://xxx.atlassian.net/wiki",
-      "auth_type": "basic",
       "connection": { "success": true, "message": "Connected to confluence (Cloud)", "latency_ms": 180 },
       "user": null
-    }
+    }]
   }
 }
 ```

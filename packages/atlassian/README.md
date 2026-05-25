@@ -45,7 +45,7 @@ Unlike standard MCP servers that dump tools into the LLM context, this plugin us
 ### Initial Setup
 
 ```
-/setup
+/atlassian:setup
 ```
 
 Configures authentication (Basic, PAT, OAuth 2.0) and connection details for your Jira/Confluence Cloud or Server/DC instances. Uses a local web server for a seamless setup experience.
@@ -85,9 +85,9 @@ Read the details of Jira issue PROJ-456 and draft a release note on Confluence.
 The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 1. **Dispatcher**: Claude Code's built-in agent routing.
-2. **Agent Layer**: Domain experts (`jira`, `confluence`) with embedded knowledge (formatting, workflow rules, error recovery strategies). They orchestrate multi-step tasks.
-3. **Skill Layer**: API spec capsules (`jira`, `confluence`) that use **Lazy Reference Loading** to keep the context window small. Tool schemas are only loaded when needed.
-4. **MCP Layer**: Zero-domain-knowledge utility layer providing generic HTTP execution (`fetch`), bidirectional format conversion (`convert`), and auth setup (`setup`).
+2. **Agent Layer**: Domain experts (`jira`, `confluence`, `media`) with embedded knowledge (formatting, workflow rules, error recovery strategies, multimodal scene analysis). They orchestrate multi-step tasks.
+3. **Skill Layer**: API spec capsules (`setup`, `download`, `jira`, `confluence`, `media-analysis`) that use **Lazy Reference Loading** to keep the context window small. Tool schemas and reference docs are only loaded when needed.
+4. **MCP Layer**: Zero-domain-knowledge utility layer providing generic HTTP execution (`fetch`), bidirectional format conversion (`convert`), authentication status (`auth-check`), and auth setup (`setup`).
 
 ---
 
@@ -95,10 +95,11 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 | Skill | Scope | What it does |
 | --- | --- | --- |
-| `/setup` | Common | Auth and connection management (Basic, PAT, OAuth 2.0) |
-| `/download` | Common | Unified attachment download for both platforms |
-| `/jira` | Jira | Jira API domain router (15 domains including issue, search, agile, etc.) |
-| `/confluence` | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
+| `/atlassian:setup` | Common | Auth and connection management (Basic, PAT, OAuth 2.0) |
+| `/atlassian:download` | Common | Unified attachment download for both platforms |
+| `/atlassian:media-analysis` | Common | Download + multimodal analysis of attached images/videos/GIFs |
+| `/atlassian:jira` | Jira | Jira API domain router (15 domains including issue, search, agile, etc.) |
+| `/atlassian:confluence` | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
 
 ---
 
@@ -127,8 +128,8 @@ For technical details and architectural decisions, see the [`.metadata/atlassian
 | [INDEX](../../.metadata/atlassian/INDEX.md) | Architecture overview and layer responsibilities |
 | [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration |
 | [auth-ui](../../.metadata/atlassian/auth-ui.md) | Setup web server and HTML form design |
-| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md) | 3 Core MCP tools (`fetch`, `convert`, `setup`) |
-| [dev/skills](../../.metadata/atlassian/dev/skills.md) | 4 Skills and lazy reference loading mapping |
+| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md) | 4 Core MCP tools (`fetch`, `convert`, `auth-check`, `setup`) |
+| [dev/skills](../../.metadata/atlassian/dev/skills.md) | 5 Skills and lazy reference loading mapping |
 | [dev/agents](../../.metadata/atlassian/dev/agents.md) | Jira and Confluence agent domain logic |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.

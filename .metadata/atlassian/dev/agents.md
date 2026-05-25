@@ -75,6 +75,7 @@ Based on 22 original Python mixins, covering these domains:
 | `jira` | Jira API domain router (15 tool domains) |
 | `setup` | Auth/connection management |
 | `download` | Attachment download |
+| `media-analysis` | Multimodal analysis of attached images/videos/GIFs |
 
 #### Domain Knowledge
 
@@ -169,6 +170,7 @@ Based on 8 original Python mixins:
 | `confluence` | Confluence API domain router (8 tool domains) |
 | `setup` | Auth/connection management |
 | `download` | Attachment download |
+| `media-analysis` | Multimodal analysis of attached images/videos/GIFs |
 
 #### Domain Knowledge
 
@@ -236,7 +238,83 @@ Base patterns same as Jira Agent, plus Confluence-specific errors:
 
 ---
 
-## 4. Agent Common Conventions
+## 4. Media Agent
+
+### Agent Definition File: `agents/media.md`
+
+#### Domain Scope
+
+A multimodal sub-agent that interprets extracted video / GIF keyframes into structured scene descriptions. Spawned only by the `media-analysis` skill — never invoked directly by the Dispatcher or by other agents.
+
+| Category | Capabilities |
+|---|---|
+| **Frame interpretation** | Per-frame visual description (UI elements, text, state, interactive controls) |
+| **Change detection** | Frame-to-frame diff: screen transitions, state changes, animation progress |
+| **Scene classification** | Group frames by screen / interaction continuity, assign interaction type |
+| **Narrative summary** | One-line video summary + key observations (timing issues, UX concerns) |
+
+#### Available Tools
+
+| Tool | Purpose |
+|---|---|
+| `Read` | Load `.metadata.json` and frame images (multimodal input) |
+| `Write` | Persist `analysis.json` in the caller's `.temp/` directory |
+| `Grep`, `Glob` | Locate frame files when manifest layout varies |
+
+**No Atlassian MCP tools, no network access.** Frame data stays inside this sub-agent and the only deliverable to the caller is the `analysis.json` file path.
+
+#### Domain Knowledge
+
+**Frame ordering**: always process frames in chronological order by `timestampMs` from `.metadata.json`. Scene-sieve prunes visually similar frames, so frame indices have gaps — never compute timing from frame number arithmetic.
+
+**Description discipline**: 1–3 sentences per frame. Describe visible content only; do not speculate about backend behavior. Always reference the previous frame when describing change ("Compared to previous frame (600ms earlier), the modal is dismissed and the underlying list reappears").
+
+**Scene grouping rules**:
+- Same screen / view across consecutive frames → single scene
+- Continuous interaction (form fill, drag) → single scene
+- Timestamp clustering with no semantic change → merge
+
+Each scene carries `scene_id`, `start_ms` / `end_ms`, `description`, `frames[]`, `ui_elements[]`, and an `interaction_type` drawn from a closed set: `form_input` | `navigation` | `modal_dialog` | `data_display` | `loading_state` | `error_state` | `animation`.
+
+#### Output Contract
+
+```typescript
+interface MediaAnalysis {
+  source: string;
+  analyzed_at: string;           // ISO 8601
+  total_frames: number;
+  duration_ms: number;
+  resolution: string;
+  scenes: Scene[];
+  summary: string;               // One-line narrative
+  key_observations: string[];
+}
+
+interface Scene {
+  scene_id: number;
+  start_ms: number;
+  end_ms: number;
+  description: string;
+  frames: { path: string; timestamp_ms: number; description: string }[];
+  ui_elements: string[];
+  interaction_type:
+    | "form_input" | "navigation" | "modal_dialog"
+    | "data_display" | "loading_state" | "error_state" | "animation";
+}
+```
+
+Every frame from the input `.metadata.json` must appear in the output — complete coverage is mandatory.
+
+#### Constraints
+
+- **Write only to `.temp/`** for `analysis.json`; all other paths are read-only
+- **No external network access** — work only with files passed by the caller
+- **No prose creativity** — structured extraction, not narrative writing
+- **Metadata timestamps only** — never estimate timing from visual content
+
+---
+
+## 5. Agent Common Conventions
 
 ### Input/Output Interface
 
