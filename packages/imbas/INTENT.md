@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/imbas` 패키지 루트. planning 문서를 Jira / GitHub / local 이슈로 변환하는 4-Phase 파이프라인 Claude Code 플러그인.
+`@ogham/imbas` 패키지 루트. planning 문서를 Jira / GitHub / local 이슈로 변환하는 4-Phase 파이프라인 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 

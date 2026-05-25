@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/filid` 패키지 루트. FCA-AI 프랙탈 컨텍스트 아키텍처 규칙 시행 Claude Code 플러그인. 자체 dogfooding — 스스로를 fractal 노드로 관리.
+`@ogham/filid` 패키지 루트. FCA-AI 프랙탈 컨텍스트 아키텍처 규칙 시행 Claude Code 플러그인. 자체 dogfooding — 스스로를 fractal 노드로 관리. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 
@@ -46,5 +46,4 @@
 ## Dependencies
 
 - **런타임**: `@ast-grep/napi ^0.42`, `@modelcontextprotocol/sdk ~1.22`, `fast-glob ^3`, `zod ^3.23`
-- **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest 3.2`
-- **환경**: Node.js ≥ 20, Yarn 4.12 workspaces
+- **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest 3.2` — Node.js ≥ 20, Yarn 4.12 workspaces
