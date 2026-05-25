@@ -5,8 +5,8 @@
  * Same provider/consumer staging as scripts/typecheck-all.mjs:
  * providers emit dist first so consumer `tsc -p tsconfig.build.json`
  * can resolve their .d.ts files. Consumers run sequentially via
- * `yarn workspaces foreach` (parallel-safe, no shared write contention)
- * but the providers are pinned ahead so the dep graph is satisfied.
+ * `yarn workspaces foreach --topological-dev` so package dependencies
+ * such as @ogham/maencof -> @ogham/maencof-lens keep their build order.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -52,11 +52,19 @@ for (const { name, dir } of PROVIDERS) {
   await run("yarn", ["workspace", name, "build"], `${name} build`);
 }
 
-// 2. Build the rest via foreach (yarn handles its own ordering for the consumers).
+// 2. Build the rest via foreach with dependency ordering among consumers.
 console.log(`\n→ Building remaining workspaces`);
 await run(
   "yarn",
-  ["workspaces", "foreach", "-A", ...EXCLUDES, "run", "build"],
+  [
+    "workspaces",
+    "foreach",
+    "-A",
+    "--topological-dev",
+    ...EXCLUDES,
+    "run",
+    "build",
+  ],
   "consumers build",
 );
 
