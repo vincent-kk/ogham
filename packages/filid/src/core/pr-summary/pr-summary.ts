@@ -8,13 +8,14 @@
  * 주의: TypeScript의 `export *`는 type-only 심볼을 forwarding 하지 않는다.
  * 반드시 별도의 `export type *` 또는 명시적 `export type { X }`를 추가해야 한다.
  */
-import type {
-  HumanSummary,
-  SummaryItem,
-} from '../../types/summary.js';
-import { RULE_ERROR_PROBABILITY, MAX_REVIEW_ITEMS } from '../../constants/review-probabilities.js';
-import { collectStructureItems } from './aggregators/collect-structure-items.js';
+import {
+  MAX_REVIEW_ITEMS,
+  RULE_ERROR_PROBABILITY,
+} from '../../constants/review-probabilities.js';
+import type { HumanSummary, SummaryItem } from '../../types/summary.js';
+
 import { collectFixRequestItems } from './aggregators/collect-fix-requests.js';
+import { collectStructureItems } from './aggregators/collect-structure-items.js';
 import { resolveVerdict } from './aggregators/resolve-verdict.js';
 import { renderMarkdown } from './renderers/render-markdown.js';
 

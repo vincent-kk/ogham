@@ -1,11 +1,12 @@
-import { describe, expect, it, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { validateManifest } from '../core/manifest-validator/manifest-validator.js';
-import type { StoriesManifest, DevplanManifest } from '../types/manifest.js';
+import type { DevplanManifest, StoriesManifest } from '../types/manifest.js';
 
 const dirs: string[] = [];
 
@@ -52,7 +53,11 @@ const baseStoriesManifest: StoriesManifest = {
       type: 'Story',
       status: 'pending',
       issue_ref: null,
-      verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
+      verification: {
+        anchor_link: true,
+        coherence: 'PASS',
+        reverse_inference: 'PASS',
+      },
       size_check: 'PASS',
       split_from: null,
       split_into: [],
@@ -64,7 +69,11 @@ const baseStoriesManifest: StoriesManifest = {
       type: 'Story',
       status: 'pending',
       issue_ref: null,
-      verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
+      verification: {
+        anchor_link: true,
+        coherence: 'PASS',
+        reverse_inference: 'PASS',
+      },
       size_check: 'PASS',
       split_from: null,
       split_into: [],
@@ -88,7 +97,15 @@ const baseDevplanManifest: DevplanManifest = {
       status: 'pending',
       issue_ref: null,
       blocks: [],
-      subtasks: [{ id: 'ST-001', title: 'Sub 1', description: 'Sub desc', status: 'pending', issue_ref: null }],
+      subtasks: [
+        {
+          id: 'ST-001',
+          title: 'Sub 1',
+          description: 'Sub desc',
+          status: 'pending',
+          issue_ref: null,
+        },
+      ],
     },
   ],
   story_subtasks: [],
@@ -148,33 +165,43 @@ describe('stories manifest validation errors', () => {
 
     const result = await validateManifest(runDir, 'stories');
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('Duplicate story ID'))).toBe(true);
+    expect(result.errors.some((e) => e.includes('Duplicate story ID'))).toBe(
+      true,
+    );
   });
 
   it('detects broken link from reference', async () => {
     const runDir = makeTempDir();
     const manifest: StoriesManifest = {
       ...baseStoriesManifest,
-      links: [{ type: 'blocks', from: 'S-999', to: ['S-001'], status: 'pending' }],
+      links: [
+        { type: 'blocks', from: 'S-999', to: ['S-001'], status: 'pending' },
+      ],
     };
     writeStoriesManifest(runDir, manifest);
 
     const result = await validateManifest(runDir, 'stories');
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('unknown source ID: "S-999"'))).toBe(true);
+    expect(
+      result.errors.some((e) => e.includes('unknown source ID: "S-999"')),
+    ).toBe(true);
   });
 
   it('detects broken link to reference', async () => {
     const runDir = makeTempDir();
     const manifest: StoriesManifest = {
       ...baseStoriesManifest,
-      links: [{ type: 'blocks', from: 'S-001', to: ['S-999'], status: 'pending' }],
+      links: [
+        { type: 'blocks', from: 'S-001', to: ['S-999'], status: 'pending' },
+      ],
     };
     writeStoriesManifest(runDir, manifest);
 
     const result = await validateManifest(runDir, 'stories');
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('unknown target ID: "S-999"'))).toBe(true);
+    expect(
+      result.errors.some((e) => e.includes('unknown target ID: "S-999"')),
+    ).toBe(true);
   });
 
   it('produces warning for broken split_into reference', async () => {
@@ -196,7 +223,9 @@ describe('stories manifest validation errors', () => {
     const runDir = makeTempDir();
     const manifest: StoriesManifest = {
       ...baseStoriesManifest,
-      links: [{ type: 'blocks', from: 'S-001', to: ['S-002'], status: 'pending' }],
+      links: [
+        { type: 'blocks', from: 'S-001', to: ['S-002'], status: 'pending' },
+      ],
     };
     writeStoriesManifest(runDir, manifest);
 
@@ -235,16 +264,16 @@ describe('devplan manifest validation errors', () => {
 
     const result = await validateManifest(runDir, 'devplan');
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes('Duplicate task ID'))).toBe(true);
+    expect(result.errors.some((e) => e.includes('Duplicate task ID'))).toBe(
+      true,
+    );
   });
 
   it('produces warning for task.blocks referencing unknown task ID', async () => {
     const runDir = makeTempDir();
     const manifest: DevplanManifest = {
       ...baseDevplanManifest,
-      tasks: [
-        { ...baseDevplanManifest.tasks[0]!, blocks: ['T-UNKNOWN'] },
-      ],
+      tasks: [{ ...baseDevplanManifest.tasks[0]!, blocks: ['T-UNKNOWN'] }],
       execution_order: [{ step: 1, action: 'create_tasks', items: ['T-001'] }],
     };
     writeDevplanManifest(runDir, manifest);

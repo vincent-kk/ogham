@@ -32,7 +32,9 @@ export function validateSavePath(saveTo: string): string {
   const result = resolve(tmpBase, relative);
 
   if (!result.startsWith(tmpBase)) {
-    throw new Error(`Invalid save path: must resolve under ${TEMP_DIR_NAME} directory`);
+    throw new Error(
+      `Invalid save path: must resolve under ${TEMP_DIR_NAME} directory`,
+    );
   }
 
   return result;

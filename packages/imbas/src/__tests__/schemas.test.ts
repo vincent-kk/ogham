@@ -1,14 +1,25 @@
 import { describe, expect, it } from 'vitest';
 
+import { CachedAtSchema } from '../types/cache.js';
 import {
-  RunStateSchema,
-  RunTransitionSchema,
+  ImbasConfigSchema,
+  LabelsConfigSchema,
+  ProviderSchema,
+} from '../types/config.js';
+import {
+  DevplanManifestSchema,
+  StoriesManifestSchema,
+  StoryItemSchema,
+  SubtaskItemSchema,
+  TaskItemSchema,
+  TransitionItemSchema,
+} from '../types/manifest.js';
+import {
   EscapeCodeSchema,
   PhaseStatusSchema,
+  RunStateSchema,
+  RunTransitionSchema,
 } from '../types/state.js';
-import { ImbasConfigSchema, ProviderSchema, LabelsConfigSchema } from '../types/config.js';
-import { StoriesManifestSchema, DevplanManifestSchema, StoryItemSchema, TaskItemSchema, SubtaskItemSchema, TransitionItemSchema } from '../types/manifest.js';
-import { CachedAtSchema } from '../types/cache.js';
 
 // --- RunStateSchema ---
 
@@ -105,7 +116,12 @@ describe('RunStateSchema', () => {
   });
 
   it('accepts all valid PhaseStatus values', () => {
-    for (const status of ['pending', 'in_progress', 'completed', 'escaped'] as const) {
+    for (const status of [
+      'pending',
+      'in_progress',
+      'completed',
+      'escaped',
+    ] as const) {
       const result = PhaseStatusSchema.safeParse(status);
       expect(result.success).toBe(true);
     }
@@ -128,8 +144,17 @@ describe('ImbasConfigSchema', () => {
   it('preserves custom values', () => {
     const input = {
       version: '2.0',
-      language: { documents: 'en', skills: 'ko', issue_content: 'en', reports: 'en' },
-      defaults: { project_ref: 'MYPROJ', llm_model: { validate: 'haiku', split: 'haiku', devplan: 'sonnet' }, subtask_limits: { max_lines: 100, max_files: 5, review_hours: 2 } },
+      language: {
+        documents: 'en',
+        skills: 'ko',
+        issue_content: 'en',
+        reports: 'en',
+      },
+      defaults: {
+        project_ref: 'MYPROJ',
+        llm_model: { validate: 'haiku', split: 'haiku', devplan: 'sonnet' },
+        subtask_limits: { max_lines: 100, max_files: 5, review_hours: 2 },
+      },
     };
     const result = ImbasConfigSchema.safeParse(input);
     expect(result.success).toBe(true);
@@ -202,7 +227,9 @@ describe('ImbasConfigSchema labels integration', () => {
     const result = ImbasConfigSchema.safeParse({});
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.data.jira.phase_to_workflow.pipeline_exit).toBe('ready_for_dev');
+    expect(result.data.jira.phase_to_workflow.pipeline_exit).toBe(
+      'ready_for_dev',
+    );
   });
 
   it('allows custom phase_to_workflow.pipeline_exit', () => {
@@ -219,8 +246,15 @@ describe('ImbasConfigSchema labels integration', () => {
 
 describe('Manifest schemas labels field', () => {
   const storyBase = {
-    id: 'S-001', title: 'T', description: 'D', type: 'Story',
-    verification: { anchor_link: true, coherence: 'PASS' as const, reverse_inference: 'PASS' as const },
+    id: 'S-001',
+    title: 'T',
+    description: 'D',
+    type: 'Story',
+    verification: {
+      anchor_link: true,
+      coherence: 'PASS' as const,
+      reverse_inference: 'PASS' as const,
+    },
     size_check: 'PASS' as const,
   };
 
@@ -232,14 +266,21 @@ describe('Manifest schemas labels field', () => {
   });
 
   it('StoryItemSchema preserves provided labels', () => {
-    const result = StoryItemSchema.safeParse({ ...storyBase, labels: ['imbas-managed'] });
+    const result = StoryItemSchema.safeParse({
+      ...storyBase,
+      labels: ['imbas-managed'],
+    });
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.labels).toEqual(['imbas-managed']);
   });
 
   it('SubtaskItemSchema defaults labels to empty array', () => {
-    const result = SubtaskItemSchema.safeParse({ id: 'ST-1', title: 'T', description: 'D' });
+    const result = SubtaskItemSchema.safeParse({
+      id: 'ST-1',
+      title: 'T',
+      description: 'D',
+    });
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.labels).toEqual([]);
@@ -247,7 +288,11 @@ describe('Manifest schemas labels field', () => {
 
   it('TaskItemSchema defaults labels to empty array', () => {
     const result = TaskItemSchema.safeParse({
-      id: 'T-1', title: 'T', description: 'D', type: 'Task', blocks: [],
+      id: 'T-1',
+      title: 'T',
+      description: 'D',
+      type: 'Task',
+      blocks: [],
     });
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -285,7 +330,11 @@ describe('StoriesManifestSchema', () => {
         title: 'Story 1',
         description: 'Description',
         type: 'Story',
-        verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
+        verification: {
+          anchor_link: true,
+          coherence: 'PASS',
+          reverse_inference: 'PASS',
+        },
         size_check: 'PASS',
       },
     ],
@@ -319,7 +368,11 @@ describe('StoriesManifestSchema', () => {
     const withTransitions = {
       ...validManifest,
       transitions: [
-        { issue_ref: 'S-001', target_status: 'Done', reason: 'horizontal_split' },
+        {
+          issue_ref: 'S-001',
+          target_status: 'Done',
+          reason: 'horizontal_split',
+        },
       ],
     };
     const result = StoriesManifestSchema.safeParse(withTransitions);
@@ -406,9 +459,7 @@ describe('DevplanManifestSchema', () => {
         ],
       },
     ],
-    execution_order: [
-      { step: 1, action: 'create_tasks', items: ['T-001'] },
-    ],
+    execution_order: [{ step: 1, action: 'create_tasks', items: ['T-001'] }],
   };
 
   it('parses valid devplan manifest with execution_order', () => {
@@ -422,7 +473,9 @@ describe('DevplanManifestSchema', () => {
   it('rejects invalid execution step action', () => {
     const bad = {
       ...validDevplan,
-      execution_order: [{ step: 1, action: 'invalid_action', items: ['T-001'] }],
+      execution_order: [
+        { step: 1, action: 'invalid_action', items: ['T-001'] },
+      ],
     };
     const result = DevplanManifestSchema.safeParse(bad);
     expect(result.success).toBe(false);

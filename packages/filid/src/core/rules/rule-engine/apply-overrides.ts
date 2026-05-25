@@ -1,4 +1,5 @@
 import type { Rule, RuleOverride } from '../../../types/rules.js';
+
 import { remapSeverity } from './utils/remap-severity.js';
 import { wrapExempt } from './utils/wrap-exempt.js';
 
@@ -29,7 +30,8 @@ export function applyOverrides(
       return rule;
     }
     let check = rule.check;
-    if (newSeverity !== rule.severity) check = remapSeverity(check, newSeverity);
+    if (newSeverity !== rule.severity)
+      check = remapSeverity(check, newSeverity);
     if (hasExempt) check = wrapExempt(check, override.exempt!);
     return { ...rule, enabled: newEnabled, severity: newSeverity, check };
   });

@@ -1,8 +1,15 @@
-import { describe, expect, it, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
 import { readJson, writeJson } from '../lib/file-io.js';
@@ -64,7 +71,9 @@ describe('readJson', () => {
     writeFileSync(file, JSON.stringify({ name: 123 }), 'utf-8');
 
     const schema = z.object({ name: z.string() });
-    await expect(readJson(file, schema)).rejects.toThrow('Schema validation failed');
+    await expect(readJson(file, schema)).rejects.toThrow(
+      'Schema validation failed',
+    );
   });
 
   it('reads nested object without schema', async () => {

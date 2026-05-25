@@ -4,7 +4,7 @@ export {
   CREDENTIALS_PATH,
   STATE_PATH,
   TEMP_DIR_NAME,
-} from './paths.js';
+} from "./paths.js";
 
 export {
   DEFAULT_TIMEOUT,
@@ -18,4 +18,4 @@ export {
   SERVER_ERROR_CODE,
   CLOUD_HOSTNAME_PATTERN,
   CONNECTION_TEST_TIMEOUT,
-} from './defaults.js';
+} from "./defaults.js";

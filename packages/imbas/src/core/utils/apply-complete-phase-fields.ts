@@ -1,4 +1,4 @@
-import type { RunState, RunTransition, PhaseName } from '../../types/state.js';
+import type { PhaseName, RunState, RunTransition } from '../../types/state.js';
 
 export function applyCompletePhaseFields(
   updated: RunState,

@@ -67,17 +67,38 @@ describe('planExecution', () => {
     const manifest = makeManifest({
       tasks: [
         {
-          id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'pending', issue_ref: null, blocks: [],
+          id: 'T-001',
+          title: 'T1',
+          description: 'D',
+          type: 'Task',
+          status: 'pending',
+          issue_ref: null,
+          blocks: [],
           subtasks: [
-            { id: 'ST-001', title: 'S1', description: 'D', status: 'pending', issue_ref: null },
-            { id: 'ST-002', title: 'S2', description: 'D', status: 'created', issue_ref: null },
+            {
+              id: 'ST-001',
+              title: 'S1',
+              description: 'D',
+              status: 'pending',
+              issue_ref: null,
+            },
+            {
+              id: 'ST-002',
+              title: 'S2',
+              description: 'D',
+              status: 'created',
+              issue_ref: null,
+            },
           ],
         },
       ],
       execution_order: [
         { step: 1, action: 'create_tasks', items: ['T-001'] },
-        { step: 2, action: 'create_task_subtasks', items: ['ST-001', 'ST-002'] },
+        {
+          step: 2,
+          action: 'create_task_subtasks',
+          items: ['ST-001', 'ST-002'],
+        },
       ],
     });
 
@@ -93,13 +114,17 @@ describe('planExecution filtering', () => {
     const manifest = makeManifest({
       tasks: [
         {
-          id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'created', issue_ref: null, blocks: [], subtasks: [],
+          id: 'T-001',
+          title: 'T1',
+          description: 'D',
+          type: 'Task',
+          status: 'created',
+          issue_ref: null,
+          blocks: [],
+          subtasks: [],
         },
       ],
-      execution_order: [
-        { step: 1, action: 'create_tasks', items: ['T-001'] },
-      ],
+      execution_order: [{ step: 1, action: 'create_tasks', items: ['T-001'] }],
     });
 
     const plan = planExecution(manifest);
@@ -111,13 +136,17 @@ describe('planExecution filtering', () => {
     const manifest = makeManifest({
       tasks: [
         {
-          id: 'T-001', title: 'T', description: 'D', type: 'Task',
-          status: 'pending', issue_ref: null, blocks: [], subtasks: [],
+          id: 'T-001',
+          title: 'T',
+          description: 'D',
+          type: 'Task',
+          status: 'pending',
+          issue_ref: null,
+          blocks: [],
+          subtasks: [],
         },
       ],
-      execution_order: [
-        { step: 3, action: 'create_tasks', items: ['T-001'] },
-      ],
+      execution_order: [{ step: 3, action: 'create_tasks', items: ['T-001'] }],
     });
 
     const plan = planExecution(manifest);
@@ -132,13 +161,29 @@ describe('planExecution filtering', () => {
           story_id: 'S-001',
           story_ref: null,
           subtasks: [
-            { id: 'SS-001', title: 'SS1', description: 'D', status: 'pending', issue_ref: null },
-            { id: 'SS-002', title: 'SS2', description: 'D', status: 'failed', issue_ref: null },
+            {
+              id: 'SS-001',
+              title: 'SS1',
+              description: 'D',
+              status: 'pending',
+              issue_ref: null,
+            },
+            {
+              id: 'SS-002',
+              title: 'SS2',
+              description: 'D',
+              status: 'failed',
+              issue_ref: null,
+            },
           ],
         },
       ],
       execution_order: [
-        { step: 1, action: 'create_story_subtasks', items: ['SS-001', 'SS-002'] },
+        {
+          step: 1,
+          action: 'create_story_subtasks',
+          items: ['SS-001', 'SS-002'],
+        },
       ],
     });
 
@@ -192,17 +237,38 @@ describe('planExecution filtering', () => {
     const manifest = makeManifest({
       tasks: [
         {
-          id: 'T-001', title: 'T1', description: 'D', type: 'Task',
-          status: 'pending', issue_ref: null, blocks: [],
+          id: 'T-001',
+          title: 'T1',
+          description: 'D',
+          type: 'Task',
+          status: 'pending',
+          issue_ref: null,
+          blocks: [],
           subtasks: [
-            { id: 'ST-001', title: 'S1', description: 'D', status: 'created', issue_ref: null },
-            { id: 'ST-002', title: 'S2', description: 'D', status: 'pending', issue_ref: null },
+            {
+              id: 'ST-001',
+              title: 'S1',
+              description: 'D',
+              status: 'created',
+              issue_ref: null,
+            },
+            {
+              id: 'ST-002',
+              title: 'S2',
+              description: 'D',
+              status: 'pending',
+              issue_ref: null,
+            },
           ],
         },
       ],
       execution_order: [
         { step: 1, action: 'create_tasks', items: ['T-001'] },
-        { step: 2, action: 'create_task_subtasks', items: ['ST-001', 'ST-002'] },
+        {
+          step: 2,
+          action: 'create_task_subtasks',
+          items: ['ST-001', 'ST-002'],
+        },
       ],
     });
 

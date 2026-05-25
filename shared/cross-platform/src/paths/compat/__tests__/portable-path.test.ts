@@ -29,9 +29,7 @@ describe("portable path helpers", () => {
 
   describe("samePath", () => {
     it("compares Windows-like paths case-insensitively", () => {
-      expect(samePath("C:\\Project\\.filid", "c:\\project\\.filid")).toBe(
-        true,
-      );
+      expect(samePath("C:\\Project\\.filid", "c:\\project\\.filid")).toBe(true);
     });
 
     it("keeps POSIX path comparison case-sensitive", () => {

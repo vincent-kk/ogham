@@ -249,7 +249,11 @@ describe('handleReviewManage – checkpoint', () => {
       action: 'checkpoint',
       projectRoot: tmpDir,
       branchName: branch,
-    })) as { phase: string; resumeAttempts?: number; resumeExhausted?: boolean };
+    })) as {
+      phase: string;
+      resumeAttempts?: number;
+      resumeExhausted?: boolean;
+    };
     expect(result.resumeAttempts).toBe(3);
     expect(result.resumeExhausted).toBe(true);
   });

@@ -1,25 +1,28 @@
-import { tokenizeInlineMarkdown, type InlineToken } from '../markdown-parsing/tokenize-inline.js';
+import {
+  tokenizeInlineMarkdown,
+  type InlineToken,
+} from "../markdown-parsing/tokenize-inline.js";
 
 function renderToken(token: InlineToken): string {
   switch (token.type) {
-    case 'text':
+    case "text":
       return token.text;
-    case 'code':
+    case "code":
       return `{{${token.text}}}`;
-    case 'strong':
+    case "strong":
       return `*${token.text}*`;
-    case 'em':
+    case "em":
       return `_${token.text}_`;
-    case 'strike':
+    case "strike":
       return `-${token.text}-`;
-    case 'link':
+    case "link":
       return `[${token.text}|${token.href}]`;
-    case 'image':
+    case "image":
       return `!${token.url}|alt=${token.alt}!`;
   }
 }
 
 export function renderInlineToWiki(text: string): string {
-  if (!text) return '';
-  return tokenizeInlineMarkdown(text).map(renderToken).join('');
+  if (!text) return "";
+  return tokenizeInlineMarkdown(text).map(renderToken).join("");
 }

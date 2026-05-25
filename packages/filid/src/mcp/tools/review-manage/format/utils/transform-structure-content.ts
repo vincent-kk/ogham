@@ -1,4 +1,5 @@
 import { parseStructureCheckFrontmatter } from '../../../../../core/pr-summary/index.js';
+
 import { resultEmoji } from './result-emoji.js';
 
 const STAGE_DISPLAY_NAMES: Record<string, string> = {

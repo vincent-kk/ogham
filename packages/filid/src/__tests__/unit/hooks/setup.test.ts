@@ -15,18 +15,21 @@ vi.mock('node:fs', async (importOriginal) => {
 });
 
 // Mock cache-manager to control getCacheDir and pruneOldSessions
-vi.mock('../../../core/infra/cache-manager/cache-manager.js', async (importOriginal) => {
-  const actual =
-    await importOriginal<
-      typeof import('../../../core/infra/cache-manager/cache-manager.js')
-    >();
-  return {
-    ...actual,
-    getCacheDir: vi.fn(actual.getCacheDir),
-    pruneOldSessions: vi.fn(),
-    pruneStaleCacheDirs: vi.fn(),
-  };
-});
+vi.mock(
+  '../../../core/infra/cache-manager/cache-manager.js',
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import('../../../core/infra/cache-manager/cache-manager.js')
+      >();
+    return {
+      ...actual,
+      getCacheDir: vi.fn(actual.getCacheDir),
+      pruneOldSessions: vi.fn(),
+      pruneStaleCacheDirs: vi.fn(),
+    };
+  },
+);
 
 const { processSetup } = await import('../../../hooks/setup/setup.js');
 const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =

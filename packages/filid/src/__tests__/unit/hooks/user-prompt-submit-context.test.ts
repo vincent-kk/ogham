@@ -50,9 +50,8 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { handleUserPromptSubmit } = await import(
-  '../../../hooks/user-prompt-submit/user-prompt-submit.js'
-);
+const { handleUserPromptSubmit } =
+  await import('../../../hooks/user-prompt-submit/user-prompt-submit.js');
 const { existsSync, readdirSync } = await import('node:fs');
 
 const baseInput: UserPromptSubmitInput = {
@@ -71,7 +70,8 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return true;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return true;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+          return true;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
@@ -115,7 +115,8 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return false;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return false;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+          return false;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
@@ -136,7 +137,8 @@ describe('user-prompt-submit context injection', () => {
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
         if (normalized.endsWith('.filid/config.json')) return true;
-        if (normalized.endsWith('.claude/rules/filid_fca-policy.md')) return false;
+        if (normalized.endsWith('.claude/rules/filid_fca-policy.md'))
+          return false;
         if (normalized.includes('/prompt-context-')) return false;
         return false;
       },
@@ -156,10 +158,8 @@ describe('user-prompt-submit context injection', () => {
         if (typeof p !== 'string') return false;
         const normalized = toPosixPath(p);
         if (normalized.endsWith('.filid')) return true;
-        if (normalized.includes('/session-context-'))
-          return true;
-        if (normalized.includes('/prompt-context-'))
-          return true;
+        if (normalized.includes('/session-context-')) return true;
+        if (normalized.includes('/prompt-context-')) return true;
         return false;
       },
     );

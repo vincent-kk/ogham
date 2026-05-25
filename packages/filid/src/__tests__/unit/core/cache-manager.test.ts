@@ -57,7 +57,8 @@ describe('cache-manager', () => {
 
   // Test 1: cwdHash — same input returns same 16-char hash
   it('cwdHash: returns consistent 16-char hash for same input', async () => {
-    const { cwdHash } = await import('../../../core/infra/cache-manager/cache-manager.js');
+    const { cwdHash } =
+      await import('../../../core/infra/cache-manager/cache-manager.js');
     const h1 = cwdHash('/some/path');
     const h2 = cwdHash('/some/path');
     expect(h1).toBe(h2);

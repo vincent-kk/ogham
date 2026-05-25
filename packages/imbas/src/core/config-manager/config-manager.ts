@@ -3,13 +3,13 @@
  * @description Config.json CRUD with dot-path access
  * @see skills/setup/references/init-workflow.md
  */
-
 import { join } from 'node:path';
-import { readJson, writeJson } from '../../lib/file-io.js';
+
 import { CONFIG_FILENAME, IMBAS_ROOT_DIRNAME } from '../../constants/index.js';
-import { setNested } from '../../utils/index.js';
+import { readJson, writeJson } from '../../lib/file-io.js';
 import { ImbasConfigSchema } from '../../types/config.js';
 import type { ImbasConfig } from '../../types/config.js';
+import { setNested } from '../../utils/index.js';
 
 /**
  * Load config.json from cwd/.imbas/config.json.
@@ -30,7 +30,10 @@ export async function loadConfig(cwd: string): Promise<ImbasConfig> {
 }
 
 /** Atomically write config.json */
-export async function saveConfig(cwd: string, config: ImbasConfig): Promise<void> {
+export async function saveConfig(
+  cwd: string,
+  config: ImbasConfig,
+): Promise<void> {
   await writeJson(join(cwd, IMBAS_ROOT_DIRNAME, CONFIG_FILENAME), config);
 }
 
@@ -74,4 +77,3 @@ export function applyConfigUpdates(
   }
   return result;
 }
-

@@ -1,60 +1,60 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-import { convert } from '../index.js';
+import { convert } from "../index.js";
 
-describe('convert', () => {
-  it('returns the input unchanged when formats match', () => {
-    expect(convert('markdown', 'markdown', '# Hello')).toBe('# Hello');
+describe("convert", () => {
+  it("returns the input unchanged when formats match", () => {
+    expect(convert("markdown", "markdown", "# Hello")).toBe("# Hello");
   });
 
-  it('converts markdown into an ADF JSON string', () => {
-    const result = JSON.parse(convert('markdown', 'adf', '# Hello'));
+  it("converts markdown into an ADF JSON string", () => {
+    const result = JSON.parse(convert("markdown", "adf", "# Hello"));
 
     expect(result).toEqual({
-      type: 'doc',
+      type: "doc",
       attrs: { version: 1 },
       content: [
         {
-          type: 'heading',
+          type: "heading",
           attrs: { level: 1 },
-          content: [{ type: 'text', text: 'Hello' }],
+          content: [{ type: "text", text: "Hello" }],
         },
       ],
     });
   });
 
-  it('converts ADF JSON into storage through markdown composition', () => {
+  it("converts ADF JSON into storage through markdown composition", () => {
     const adf = JSON.stringify({
-      type: 'doc',
+      type: "doc",
       content: [
         {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Hello' }],
+          type: "paragraph",
+          content: [{ type: "text", text: "Hello" }],
         },
       ],
     });
 
-    expect(convert('adf', 'storage', adf)).toBe('<p>Hello</p>');
+    expect(convert("adf", "storage", adf)).toBe("<p>Hello</p>");
   });
 
-  it('converts storage into ADF JSON through markdown composition', () => {
-    const result = JSON.parse(convert('storage', 'adf', '<p>Hello</p>'));
+  it("converts storage into ADF JSON through markdown composition", () => {
+    const result = JSON.parse(convert("storage", "adf", "<p>Hello</p>"));
 
     expect(result).toEqual({
-      type: 'doc',
+      type: "doc",
       attrs: { version: 1 },
       content: [
         {
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Hello' }],
+          type: "paragraph",
+          content: [{ type: "text", text: "Hello" }],
         },
       ],
     });
   });
 
-  it('throws for unsupported conversions', () => {
-    expect(() => convert('wiki', 'markdown', 'h1. Title')).toThrow(
-      'Unsupported conversion: wiki > markdown',
+  it("throws for unsupported conversions", () => {
+    expect(() => convert("wiki", "markdown", "h1. Title")).toThrow(
+      "Unsupported conversion: wiki > markdown",
     );
   });
 });

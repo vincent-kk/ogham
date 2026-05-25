@@ -2,16 +2,16 @@
  * @file implement-planner.ts
  * @description Build ImplementPlanManifest from stories/devplan manifests via DAG topo-sort
  */
-
 import type {
-  StoriesManifest,
   DevplanManifest,
   ImplementPlanManifest,
   ImplementPlanSource,
+  StoriesManifest,
 } from '../../types/manifest.js';
+
 import { collectGraph } from './dependency-collector.js';
-import { assignLevels } from './topo-leveler.js';
 import type { CollectedNode } from './dependency-collector.js';
+import { assignLevels } from './topo-leveler.js';
 
 export interface ImplementPlanInput {
   run_id: string;

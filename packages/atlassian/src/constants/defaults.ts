@@ -15,16 +15,16 @@ export const RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504] as const;
 
 /** Error code mapping from HTTP status */
 export const ERROR_CODE_MAP: Record<number, string> = {
-  400: 'BAD_REQUEST',
-  401: 'UNAUTHORIZED',
-  403: 'FORBIDDEN',
-  404: 'NOT_FOUND',
-  409: 'CONFLICT',
-  429: 'RATE_LIMITED',
+  400: "BAD_REQUEST",
+  401: "UNAUTHORIZED",
+  403: "FORBIDDEN",
+  404: "NOT_FOUND",
+  409: "CONFLICT",
+  429: "RATE_LIMITED",
 } as const;
 
 /** Default error code for 5xx responses */
-export const SERVER_ERROR_CODE = 'SERVER_ERROR';
+export const SERVER_ERROR_CODE = "SERVER_ERROR";
 
 /** Connection test timeout in milliseconds */
 export const CONNECTION_TEST_TIMEOUT = 10_000;

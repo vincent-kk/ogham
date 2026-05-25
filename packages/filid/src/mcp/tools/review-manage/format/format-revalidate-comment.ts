@@ -6,6 +6,7 @@ import {
   normalizeBranch,
   tryReadFile,
 } from '../utils/review-utils.js';
+
 import { collapsible } from './collapsible.js';
 
 const MAX_COMMENT_SIZE = 50_000;

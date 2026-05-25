@@ -2,13 +2,12 @@
  * @file ast-search.ts
  * @description AST pattern search via @ast-grep/napi
  */
-
 import { readFileSync } from 'node:fs';
 
 import {
-  getSgModule,
-  getSgLoadError,
   collectFiles,
+  getSgLoadError,
+  getSgModule,
   toLangEnum,
 } from '../../../ast/index.js';
 import { AST_SEARCH_MAX_RESULTS } from '../../../constants/defaults.js';
@@ -25,7 +24,8 @@ export async function handleAstSearch(input: AstSearchInput) {
   const sg = await getSgModule();
   if (!sg) {
     return {
-      error: '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
+      error:
+        '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
   }

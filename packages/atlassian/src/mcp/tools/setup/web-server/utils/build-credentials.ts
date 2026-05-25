@@ -1,7 +1,10 @@
-import type { SetupFormData, ServiceCredentials } from '../../../../../types/index.js';
+import type {
+  SetupFormData,
+  ServiceCredentials,
+} from "../../../../../types/index.js";
 
 export function buildCredentials(
-  svc: SetupFormData['jira'],
+  svc: SetupFormData["jira"],
   username?: string,
 ): ServiceCredentials {
   if (!svc) return {};

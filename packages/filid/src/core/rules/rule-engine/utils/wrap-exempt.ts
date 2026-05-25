@@ -1,4 +1,9 @@
-import type { Rule, RuleContext, RuleViolation } from '../../../../types/rules.js';
+import type {
+  Rule,
+  RuleContext,
+  RuleViolation,
+} from '../../../../types/rules.js';
+
 import { isExempt } from './is-exempt.js';
 
 /**

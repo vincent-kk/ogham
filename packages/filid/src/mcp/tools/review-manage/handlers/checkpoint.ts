@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import type { CheckpointStatus } from '../../../../types/review.js';
 import { MAX_RESUME_RETRIES } from '../../../../constants/review-defaults.js';
+import type { CheckpointStatus } from '../../../../types/review.js';
 import type { ReviewManageInput } from '../review-manage.js';
 import { normalizeBranch } from '../utils/review-utils.js';
 

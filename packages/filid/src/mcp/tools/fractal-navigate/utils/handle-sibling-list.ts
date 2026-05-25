@@ -2,9 +2,14 @@ import {
   buildFractalTree,
   findNode,
 } from '../../../../core/tree/fractal-tree/fractal-tree.js';
-import type { FractalNavigateInput, FractalNavigateOutput } from '../fractal-navigate.js';
+import type {
+  FractalNavigateInput,
+  FractalNavigateOutput,
+} from '../fractal-navigate.js';
 
-export function handleSiblingList(input: FractalNavigateInput): FractalNavigateOutput {
+export function handleSiblingList(
+  input: FractalNavigateInput,
+): FractalNavigateOutput {
   const tree = buildFractalTree(input.entries);
 
   // Find parent path

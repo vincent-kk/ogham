@@ -1,8 +1,8 @@
-import type { BiasResult, DebtItem } from '../../../../types/debt.js';
 import {
   DEBT_BASE_WEIGHT,
   DEBT_WEIGHT_CAP,
 } from '../../../../constants/debt-defaults.js';
+import type { BiasResult, DebtItem } from '../../../../types/debt.js';
 import { determineBiasLevel } from '../utils/determine-bias-level.js';
 
 export function handleCalculateBias(

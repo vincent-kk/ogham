@@ -4,7 +4,11 @@ import {
   saveConfig,
   saveCredentials,
 } from "../../../core/index.js";
-import type { SetupServerHandle, SetupParams, SetupResult } from "../../../types/index.js";
+import type {
+  SetupServerHandle,
+  SetupParams,
+  SetupResult,
+} from "../../../types/index.js";
 import { SETUP_HTML } from "./__generated__/setup-html.js";
 import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "@ogham/cross-platform/launcher";

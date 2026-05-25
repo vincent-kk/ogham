@@ -1,4 +1,7 @@
-import type { AnalysisReport, RenderedReport } from '../../../../types/report.js';
+import type {
+  AnalysisReport,
+  RenderedReport,
+} from '../../../../types/report.js';
 
 import { renderMarkdownReport } from './render-markdown-report.js';
 import { renderTextReport } from './render-text-report.js';

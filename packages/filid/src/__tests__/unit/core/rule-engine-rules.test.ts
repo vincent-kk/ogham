@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import { loadBuiltinRules } from '../../../core/rules/rule-engine/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
-import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { RuleContext } from '../../../types/rules.js';
 
 // 테스트용 헬퍼 - FractalNode 생성

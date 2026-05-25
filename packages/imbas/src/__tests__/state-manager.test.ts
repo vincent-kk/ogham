@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { createRunState, applyTransition } from '../core/state-manager/state-manager.js';
+import {
+  applyTransition,
+  createRunState,
+} from '../core/state-manager/state-manager.js';
 import type { RunState } from '../types/state.js';
 
 // --- Helpers ---
@@ -14,7 +17,10 @@ function makeState(overrides?: Partial<RunState>): RunState {
   return { ...base, ...overrides };
 }
 
-function withValidateCompleted(state: RunState, result: 'PASS' | 'PASS_WITH_WARNINGS' | 'BLOCKED' = 'PASS'): RunState {
+function withValidateCompleted(
+  state: RunState,
+  result: 'PASS' | 'PASS_WITH_WARNINGS' | 'BLOCKED' = 'PASS',
+): RunState {
   return {
     ...state,
     phases: {
@@ -58,7 +64,10 @@ function withSplitCompleted(state: RunState, pendingReview = false): RunState {
   };
 }
 
-function withSplitEscaped(state: RunState, escape_code: 'E2-1' | 'E2-2' | 'E2-3' | 'EC-1' | 'EC-2'): RunState {
+function withSplitEscaped(
+  state: RunState,
+  escape_code: 'E2-1' | 'E2-2' | 'E2-3' | 'EC-1' | 'EC-2',
+): RunState {
   return {
     ...state,
     phases: {
@@ -107,7 +116,10 @@ describe('applyTransition complete_phase validate', () => {
       ...makeState(),
       phases: {
         ...makeState().phases,
-        validate: { ...makeState().phases.validate, status: 'in_progress' as const },
+        validate: {
+          ...makeState().phases.validate,
+          status: 'in_progress' as const,
+        },
       },
     };
     const next = applyTransition(state, {
@@ -256,7 +268,10 @@ describe('complete_phase', () => {
       ...makeState(),
       phases: {
         ...makeState().phases,
-        validate: { ...makeState().phases.validate, status: 'in_progress' as const },
+        validate: {
+          ...makeState().phases.validate,
+          status: 'in_progress' as const,
+        },
       },
     };
     const next = applyTransition(state, {

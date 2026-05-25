@@ -2,10 +2,10 @@
  * @file lib/file-io.ts
  * @description Atomic JSON file I/O with write-to-temp-then-rename pattern
  */
-
-import { readFileSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+
 import type { z } from 'zod';
 
 /**
@@ -21,18 +21,24 @@ export async function readJson<T>(
   try {
     raw = readFileSync(filePath, 'utf-8');
   } catch (err) {
-    throw new Error(`Failed to read file: ${filePath}: ${(err as Error).message}`, {
-      cause: err,
-    });
+    throw new Error(
+      `Failed to read file: ${filePath}: ${(err as Error).message}`,
+      {
+        cause: err,
+      },
+    );
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(`Invalid JSON in file: ${filePath}: ${(err as Error).message}`, {
-      cause: err,
-    });
+    throw new Error(
+      `Invalid JSON in file: ${filePath}: ${(err as Error).message}`,
+      {
+        cause: err,
+      },
+    );
   }
 
   if (schema) {
@@ -53,7 +59,10 @@ export async function readJson<T>(
  * Writes to a temp file first, then renames to the target path (crash-safe).
  * Sync internals intentional — atomic rename requires no await gap.
  */
-export async function writeJson(filePath: string, data: unknown): Promise<void> {
+export async function writeJson(
+  filePath: string,
+  data: unknown,
+): Promise<void> {
   const dir = dirname(filePath);
   mkdirSync(dir, { recursive: true });
 
@@ -64,8 +73,11 @@ export async function writeJson(filePath: string, data: unknown): Promise<void> 
     writeFileSync(tempPath, json, 'utf-8');
     renameSync(tempPath, filePath);
   } catch (err) {
-    throw new Error(`Failed to write file: ${filePath}: ${(err as Error).message}`, {
-      cause: err,
-    });
+    throw new Error(
+      `Failed to write file: ${filePath}: ${(err as Error).message}`,
+      {
+        cause: err,
+      },
+    );
   }
 }

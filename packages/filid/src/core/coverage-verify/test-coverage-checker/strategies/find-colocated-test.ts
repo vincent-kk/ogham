@@ -2,10 +2,8 @@
  * @file find-colocated-test.ts
  * @description Strategy 1: 소스 파일과 같은 디렉터리의 `<name>.{test,spec}.{ts,tsx}` 탐색.
  */
-import {
-  portableDirname,
-  portableJoin,
-} from '@ogham/cross-platform/paths';
+import { portableDirname, portableJoin } from '@ogham/cross-platform/paths';
+
 import { moduleName } from './module-name.js';
 import { tryTestFile } from './try-test-file.js';
 

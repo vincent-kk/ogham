@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Track registerTool and tool calls across the mock instance
 const registeredTools: string[] = [];
@@ -13,7 +13,9 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
         }),
         tool: vi.fn(function () {
           toolCallCount++;
-          throw new Error('server.tool() should not be called — use registerTool()');
+          throw new Error(
+            'server.tool() should not be called — use registerTool()',
+          );
         }),
         connect: vi.fn(),
       };

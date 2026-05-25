@@ -9,8 +9,8 @@
  * schema lives exactly once in the config-loader module and is re-exported.
  */
 import {
-  validateConfigPatch,
   type ConfigPatchValidation,
+  validateConfigPatch,
 } from '../../../core/infra/config-loader/config-loader.js';
 
 export interface ConfigPatchValidateInput {

@@ -1,7 +1,16 @@
-import type { DetectDriftOptions, DriftItem, DriftResult, DriftSeverity } from '../../../types/drift.js';
+import {
+  RULE_TO_ACTION,
+  SEVERITY_ORDER,
+} from '../../../constants/drift-mappings.js';
+import type {
+  DetectDriftOptions,
+  DriftItem,
+  DriftResult,
+  DriftSeverity,
+} from '../../../types/drift.js';
 import type { FractalTree } from '../../../types/fractal.js';
 import type { RuleViolation } from '../../../types/rules.js';
-import { RULE_TO_ACTION, SEVERITY_ORDER } from '../../../constants/drift-mappings.js';
+
 import { calculateSeverity } from './calculate-severity.js';
 
 /**

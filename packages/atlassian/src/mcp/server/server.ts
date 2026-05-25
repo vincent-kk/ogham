@@ -69,7 +69,11 @@ export function createServer(): McpServer {
         force?: boolean;
       }) => {
         const service = args.service ?? detectService(args.endpoint);
-        const ctx = await buildFetchContext(service, args.base_url, args.endpoint);
+        const ctx = await buildFetchContext(
+          service,
+          args.base_url,
+          args.endpoint,
+        );
         if (!ctx)
           throw new Error(
             `No ${service} configuration found. Run setup first.`,
@@ -83,7 +87,8 @@ export function createServer(): McpServer {
   server.registerTool(
     "convert",
     {
-      description: "[Internal] Do not call directly. Used by atlassian skills only. Format conversion: ADF/Storage/Wiki ↔ Markdown.",
+      description:
+        "[Internal] Do not call directly. Used by atlassian skills only. Format conversion: ADF/Storage/Wiki ↔ Markdown.",
       inputSchema: z.object({
         from: ConvertFormatSchema,
         to: ConvertFormatSchema,
@@ -120,7 +125,8 @@ export function createServer(): McpServer {
   server.registerTool(
     "setup",
     {
-      description: "[Internal] Do not call directly. Used by atlassian skills only. Auth/connection setup wizard.",
+      description:
+        "[Internal] Do not call directly. Used by atlassian skills only. Auth/connection setup wizard.",
       inputSchema: z.object({
         mode: z.enum(["new", "edit"]).optional(),
         prefill: z.record(z.unknown()).optional(),

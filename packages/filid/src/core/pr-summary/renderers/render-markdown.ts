@@ -1,4 +1,5 @@
 import type { SummaryItem } from '../../../types/summary.js';
+
 import { severityEmoji } from './severity-emoji.js';
 
 /** HumanSummary를 마크다운으로 렌더링한다. */

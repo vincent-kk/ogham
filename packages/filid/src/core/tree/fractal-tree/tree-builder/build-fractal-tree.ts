@@ -1,4 +1,8 @@
-import type { CategoryType, FractalNode, FractalTree } from '../../../../types/fractal.js';
+import type {
+  CategoryType,
+  FractalNode,
+  FractalTree,
+} from '../../../../types/fractal.js';
 
 /** Input entry for buildFractalTree */
 export interface NodeEntry {

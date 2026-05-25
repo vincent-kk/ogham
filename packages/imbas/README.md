@@ -64,12 +64,14 @@ Document → [Validate] → [Split] → [Devplan] → Jira Issues
 **Phase 1 — Validate:** The `analyst` agent reads your spec and checks for contradictions, divergences between sections, missing requirements, and logical infeasibilities. It produces a validation report. If blocking issues are found, the pipeline stops here — fix the spec first.
 
 **Phase 2 — Split:** The `planner` agent decomposes the validated document into INVEST-compliant Jira Stories. Each Story gets:
+
 - User Story syntax ("As a... I want... So that...")
 - Given/When/Then acceptance criteria
 - A 3-step verification: anchor link back to source → coherence check → reverse inference (can you reconstruct the original requirement from the Stories alone?)
 - Size check — Stories too large get split horizontally
 
 **Phase 3 — Devplan:** The `engineer` agent takes the Stories and explores your local codebase (via AST analysis) to produce:
+
 - EARS-format Subtasks per Story (scoped to max 200 lines / 10 files / 1 hour review)
 - Cross-Story shared Tasks (extracted via N:M merge-point detection)
 - Dependency links and execution order
@@ -189,11 +191,11 @@ Manifest execution is idempotent — re-running skips already-created issues (tr
 
 imbas uses 3 specialized subagents, each with constrained roles:
 
-| Agent | Model | Role | Phase |
-|-------|-------|------|-------|
-| `analyst` | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
-| `planner` | Sonnet | Story decomposition (INVEST criteria, acceptance criteria) | Split |
-| `engineer` | Opus | Task planning (codebase exploration, subtask generation) | Devplan |
+| Agent      | Model  | Role                                                        | Phase                               |
+| ---------- | ------ | ----------------------------------------------------------- | ----------------------------------- |
+| `analyst`  | Sonnet | Document validation (contradictions, gaps, infeasibilities) | Validate, Split (reverse inference) |
+| `planner`  | Sonnet | Story decomposition (INVEST criteria, acceptance criteria)  | Split                               |
+| `engineer` | Opus   | Task planning (codebase exploration, subtask generation)    | Devplan                             |
 
 Agent roles are enforced at runtime via the `SubagentStart` hook — agents cannot overstep their assigned responsibilities.
 
@@ -203,30 +205,30 @@ Agent roles are enforced at runtime via the `SubagentStart` hook — agents cann
 
 With the plugin active, these hooks fire **without user intervention**:
 
-| When | What | Why |
-|------|------|-----|
-| Session starts | Initializes cache directory + logging | Ensures `.imbas/` structure exists |
-| Read/Write/Edit a file | Validates tool inputs | Prevents invalid operations on `.imbas/` state files |
-| Sub-agent starting | Injects role restrictions | Prevents agents from overstepping assigned phase |
-| User submits a prompt | Injects run/manifest context | Agents are aware of current pipeline state |
-| Session ends | Placeholder (no auto-cleanup) | `.imbas/.temp/` persists; clean manually if needed |
+| When                   | What                                  | Why                                                  |
+| ---------------------- | ------------------------------------- | ---------------------------------------------------- |
+| Session starts         | Initializes cache directory + logging | Ensures `.imbas/` structure exists                   |
+| Read/Write/Edit a file | Validates tool inputs                 | Prevents invalid operations on `.imbas/` state files |
+| Sub-agent starting     | Injects role restrictions             | Prevents agents from overstepping assigned phase     |
+| User submits a prompt  | Injects run/manifest context          | Agents are aware of current pipeline state           |
+| Session ends           | Placeholder (no auto-cleanup)         | `.imbas/.temp/` persists; clean manually if needed   |
 
 ---
 
 ## Skills Reference
 
-| Skill | User-invocable | What it does |
-|-------|---------------|--------------|
-| `/imbas:setup` | Yes | Initialize `.imbas/`, configure project and Jira settings |
-| `/imbas:pipeline` | Yes | End-to-end pipeline execution with auto-approval gates |
-| `/imbas:validate` | Yes | Phase 1: Validate document for contradictions and gaps |
-| `/imbas:split` | Yes | Phase 2: Decompose document into INVEST Stories |
-| `/imbas:devplan` | Yes | Phase 3: Generate Tasks/Subtasks grounded in codebase |
-| `/imbas:implement-plan` | Yes | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
-| `/imbas:manifest` | Yes | Execute manifests to batch-create Jira issues |
-| `/imbas:status` | Yes | View run status, list runs, resume interrupted runs |
-| `/imbas:digest` | Yes | Compress a Jira issue into a structured summary |
-| `/imbas:scaffold-pr` | Yes | Create a Draft PR from a Jira Story with sub-tasks |
+| Skill                   | User-invocable | What it does                                                                           |
+| ----------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| `/imbas:setup`          | Yes            | Initialize `.imbas/`, configure project and Jira settings                              |
+| `/imbas:pipeline`       | Yes            | End-to-end pipeline execution with auto-approval gates                                 |
+| `/imbas:validate`       | Yes            | Phase 1: Validate document for contradictions and gaps                                 |
+| `/imbas:split`          | Yes            | Phase 2: Decompose document into INVEST Stories                                        |
+| `/imbas:devplan`        | Yes            | Phase 3: Generate Tasks/Subtasks grounded in codebase                                  |
+| `/imbas:implement-plan` | Yes            | Build a DAG-based implementation schedule grouping Stories/Tasks into parallel batches |
+| `/imbas:manifest`       | Yes            | Execute manifests to batch-create Jira issues                                          |
+| `/imbas:status`         | Yes            | View run status, list runs, resume interrupted runs                                    |
+| `/imbas:digest`         | Yes            | Compress a Jira issue into a structured summary                                        |
+| `/imbas:scaffold-pr`    | Yes            | Create a Draft PR from a Jira Story with sub-tasks                                     |
 
 | `/imbas:cache` | No | Internal: Manage Jira metadata cache (24h TTL) |
 | `/imbas:read-issue` | No | Internal: Read and structure Jira issue context |
@@ -253,16 +255,19 @@ A fully structured Jira backlog:
 ### What It Catches
 
 During validation:
+
 - **Contradictions** — section A says X, section B says not-X
 - **Divergences** — terminology or scope drifts between sections
 - **Omissions** — referenced features/flows with no specification
 - **Infeasibilities** — requirements that conflict with technical constraints
 
 During split:
+
 - **Functional violations** — Stories that are not independently testable at the E2E level, or missing testability
 - **Semantic loss** — reverse inference verifies no requirements were dropped during decomposition
 
 During devplan:
+
 - **Missing implementation paths** — Stories that can't be mapped to existing code patterns
 - **Cross-Story overlaps** — shared logic that should be a single Task, not duplicated across Subtasks
 
@@ -275,24 +280,24 @@ During devplan:
 ```jsonc
 {
   "language": {
-    "documents": "ko",           // Source document language
-    "skills": "en",              // Agent prompt language
-    "issue_content": "ko",       // Jira issue content language
-    "reports": "ko"              // Report output language
+    "documents": "ko", // Source document language
+    "skills": "en", // Agent prompt language
+    "issue_content": "ko", // Jira issue content language
+    "reports": "ko", // Report output language
   },
   "defaults": {
-    "project_ref": "PROJ",       // Default Jira project
+    "project_ref": "PROJ", // Default Jira project
     "llm_model": {
-      "validate": "sonnet",      // Model per phase
+      "validate": "sonnet", // Model per phase
       "split": "sonnet",
-      "devplan": "opus"
+      "devplan": "opus",
     },
     "subtask_limits": {
-      "max_lines": 200,          // Max lines per subtask
-      "max_files": 10,           // Max files per subtask
-      "review_hours": 1          // Max review time per subtask
-    }
-  }
+      "max_lines": 200, // Max lines per subtask
+      "max_files": 10, // Max files per subtask
+      "review_hours": 1, // Max review time per subtask
+    },
+  },
 }
 ```
 

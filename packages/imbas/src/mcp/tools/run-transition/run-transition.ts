@@ -2,10 +2,16 @@
  * @file run-transition.ts
  * @description Typed phase transition (start/complete/escape)
  */
-
 import { getRunDir } from '../../../core/paths/paths.js';
-import { loadRunState, saveRunState, applyTransition } from '../../../core/state-manager/state-manager.js';
-import { RunTransitionSchema, type RunTransition } from '../../../types/state.js';
+import {
+  applyTransition,
+  loadRunState,
+  saveRunState,
+} from '../../../core/state-manager/state-manager.js';
+import {
+  type RunTransition,
+  RunTransitionSchema,
+} from '../../../types/state.js';
 
 export async function handleRunTransition(input: unknown) {
   // Per-action validation lives here, not at the MCP boundary. The MCP

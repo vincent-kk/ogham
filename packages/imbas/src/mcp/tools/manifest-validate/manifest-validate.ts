@@ -2,9 +2,8 @@
  * @file manifest-validate.ts
  * @description Validate manifest structure
  */
-
-import { getRunDir } from '../../../core/paths/paths.js';
 import { validateManifest } from '../../../core/manifest-validator/manifest-validator.js';
+import { getRunDir } from '../../../core/paths/paths.js';
 
 export interface ManifestValidateInput {
   project_ref: string;

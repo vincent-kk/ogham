@@ -2,10 +2,8 @@
  * @file find-mirror-test.ts
  * @description Strategy 2: `src/<layer>/<name>.ts` → `src/__tests__/unit/<layer>/<name>.test.ts` 미러 구조 탐색.
  */
-import {
-  portableJoin,
-  portableRelative,
-} from '@ogham/cross-platform/paths';
+import { portableJoin, portableRelative } from '@ogham/cross-platform/paths';
+
 import { tryTestFile } from './try-test-file.js';
 
 /**

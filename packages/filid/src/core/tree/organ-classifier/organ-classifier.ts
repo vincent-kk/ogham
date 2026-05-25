@@ -1,5 +1,5 @@
-import type { CategoryType } from '../../../types/fractal.js';
 import { KNOWN_ORGAN_DIR_NAMES } from '../../../constants/organ-names.js';
+import type { CategoryType } from '../../../types/fractal.js';
 
 export { KNOWN_ORGAN_DIR_NAMES };
 

@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 
 import {
-  RE_IMPORT,
   RE_DYNAMIC_IMPORT,
+  RE_IMPORT,
   RE_REQUIRE,
 } from '../../../constants/entry-candidates.js';
 

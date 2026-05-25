@@ -15,39 +15,42 @@ interface LogicalRoute {
   /** V1 physical path pattern, e.g., `/content/{id}/child/page`. */
   v1: string;
   /** Content type injected into body when posting to collection endpoints. */
-  contentType?: 'page' | 'comment' | 'attachment';
+  contentType?: "page" | "comment" | "attachment";
 }
 
 /** Order matters: more specific routes must come before generic ones. */
 const ROUTES: LogicalRoute[] = [
-  { v2: '/pages/{id}/move/{position}/{targetId}', v1: '/content/{id}/move/{position}/{targetId}' },
-  { v2: '/pages/{id}/children', v1: '/content/{id}/child/page' },
-  { v2: '/pages/{id}/descendants', v1: '/content/{id}/descendant/page' },
-  { v2: '/pages/{id}/footer-comments', v1: '/content/{id}/child/comment' },
-  { v2: '/pages/{id}/attachments', v1: '/content/{id}/child/attachment' },
-  { v2: '/pages/{id}/properties', v1: '/content/{id}/property' },
-  { v2: '/pages/{id}/versions', v1: '/content/{id}/version' },
-  { v2: '/pages/{id}/labels', v1: '/content/{id}/label' },
-  { v2: '/pages/{id}', v1: '/content/{id}' },
-  { v2: '/pages', v1: '/content', contentType: 'page' },
-  { v2: '/footer-comments', v1: '/content', contentType: 'comment' },
-  { v2: '/attachments/{id}', v1: '/content/{id}' },
-  { v2: '/spaces/{id}', v1: '/space/{id}' },
-  { v2: '/spaces', v1: '/space' },
-  { v2: '/users/current', v1: '/user/current' },
+  {
+    v2: "/pages/{id}/move/{position}/{targetId}",
+    v1: "/content/{id}/move/{position}/{targetId}",
+  },
+  { v2: "/pages/{id}/children", v1: "/content/{id}/child/page" },
+  { v2: "/pages/{id}/descendants", v1: "/content/{id}/descendant/page" },
+  { v2: "/pages/{id}/footer-comments", v1: "/content/{id}/child/comment" },
+  { v2: "/pages/{id}/attachments", v1: "/content/{id}/child/attachment" },
+  { v2: "/pages/{id}/properties", v1: "/content/{id}/property" },
+  { v2: "/pages/{id}/versions", v1: "/content/{id}/version" },
+  { v2: "/pages/{id}/labels", v1: "/content/{id}/label" },
+  { v2: "/pages/{id}", v1: "/content/{id}" },
+  { v2: "/pages", v1: "/content", contentType: "page" },
+  { v2: "/footer-comments", v1: "/content", contentType: "comment" },
+  { v2: "/attachments/{id}", v1: "/content/{id}" },
+  { v2: "/spaces/{id}", v1: "/space/{id}" },
+  { v2: "/spaces", v1: "/space" },
+  { v2: "/users/current", v1: "/user/current" },
 ];
 
 const V2_ONLY_PREFIXES = [
-  '/inline-comments',
-  '/whiteboards',
-  '/databases',
-  '/embeds',
-  '/analytics',
+  "/inline-comments",
+  "/whiteboards",
+  "/databases",
+  "/embeds",
+  "/analytics",
 ];
 
 function splitEndpoint(endpoint: string): { path: string; query: string } {
-  const idx = endpoint.indexOf('?');
-  if (idx < 0) return { path: endpoint, query: '' };
+  const idx = endpoint.indexOf("?");
+  if (idx < 0) return { path: endpoint, query: "" };
   return { path: endpoint.slice(0, idx), query: endpoint.slice(idx) };
 }
 
@@ -55,13 +58,13 @@ function matchesPattern(
   path: string,
   pattern: string,
 ): { params: Record<string, string> } | null {
-  const pSegs = path.split('/').filter(Boolean);
-  const ptSegs = pattern.split('/').filter(Boolean);
+  const pSegs = path.split("/").filter(Boolean);
+  const ptSegs = pattern.split("/").filter(Boolean);
   if (pSegs.length !== ptSegs.length) return null;
   const params: Record<string, string> = {};
   for (let i = 0; i < ptSegs.length; i++) {
     const ps = ptSegs[i];
-    if (ps.startsWith('{') && ps.endsWith('}')) {
+    if (ps.startsWith("{") && ps.endsWith("}")) {
       params[ps.slice(1, -1)] = pSegs[i];
     } else if (ps !== pSegs[i]) {
       return null;
@@ -70,25 +73,30 @@ function matchesPattern(
   return { params };
 }
 
-function applyTemplate(template: string, params: Record<string, string>): string {
+function applyTemplate(
+  template: string,
+  params: Record<string, string>,
+): string {
   return (
-    '/' +
+    "/" +
     template
-      .split('/')
+      .split("/")
       .filter(Boolean)
       .map((s) =>
-        s.startsWith('{') && s.endsWith('}') ? (params[s.slice(1, -1)] ?? s) : s,
+        s.startsWith("{") && s.endsWith("}")
+          ? (params[s.slice(1, -1)] ?? s)
+          : s,
       )
-      .join('/')
+      .join("/")
   );
 }
 
 function isV2OnlyPath(path: string): boolean {
-  return V2_ONLY_PREFIXES.some((p) => path === p || path.startsWith(p + '/'));
+  return V2_ONLY_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
 }
 
 function mapBodyV2ToV1(body: unknown, route: LogicalRoute): unknown {
-  if (!body || typeof body !== 'object') return body;
+  if (!body || typeof body !== "object") return body;
   const obj = { ...(body as Record<string, unknown>) };
 
   // V2 `spaceId` (flat) → V1 `space: { key }` (nested object).
@@ -105,8 +113,8 @@ function mapBodyV2ToV1(body: unknown, route: LogicalRoute): unknown {
   }
 
   // V2 comment `pageId` (flat) → V1 `container: { id, type: 'page' }`.
-  if (route.contentType === 'comment' && obj.pageId !== undefined) {
-    obj.container = { id: String(obj.pageId), type: 'page' };
+  if (route.contentType === "comment" && obj.pageId !== undefined) {
+    obj.container = { id: String(obj.pageId), type: "page" };
     delete obj.pageId;
   }
 
@@ -130,11 +138,11 @@ function mapBodyV2ToV1(body: unknown, route: LogicalRoute): unknown {
 export function transformRequest(
   endpoint: string,
   body: unknown,
-  service: 'jira' | 'confluence',
-  apiVersion: '2' | '3' | 'v1' | 'v2',
+  service: "jira" | "confluence",
+  apiVersion: "2" | "3" | "v1" | "v2",
 ): { endpoint: string; body: unknown } {
-  if (service !== 'confluence') return { endpoint, body };
-  if (apiVersion === 'v2') return { endpoint, body };
+  if (service !== "confluence") return { endpoint, body };
+  if (apiVersion === "v2") return { endpoint, body };
 
   // Confluence DC (apiVersion === 'v1')
   const { path, query } = splitEndpoint(endpoint);

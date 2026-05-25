@@ -1,4 +1,5 @@
 import { parseSource } from '../../parser/parser.js';
+
 import { getNameFromNode } from './get-name-from-node.js';
 
 export interface DeclSignature {
@@ -8,7 +9,9 @@ export interface DeclSignature {
   line: number;
 }
 
-export async function extractDeclarations(source: string): Promise<DeclSignature[]> {
+export async function extractDeclarations(
+  source: string,
+): Promise<DeclSignature[]> {
   const root = await parseSource(source);
   const decls: DeclSignature[] = [];
   const rootChildren = root.children();

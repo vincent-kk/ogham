@@ -1,5 +1,5 @@
-import type { PromotionCandidate } from '../../types/metrics.js';
 import { DEFAULT_STABILITY_DAYS } from '../../constants/quality-thresholds.js';
+import type { PromotionCandidate } from '../../types/metrics.js';
 
 /** Input for promotion eligibility check */
 export interface PromotionInput {

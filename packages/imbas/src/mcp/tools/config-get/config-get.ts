@@ -2,8 +2,10 @@
  * @file config-get.ts
  * @description Read config.json
  */
-
-import { loadConfig, getConfigValue } from '../../../core/config-manager/config-manager.js';
+import {
+  getConfigValue,
+  loadConfig,
+} from '../../../core/config-manager/config-manager.js';
 
 export interface ConfigGetInput {
   field?: string;

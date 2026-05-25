@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 
 import type { ScanOptions } from '../../../../types/scan.js';
+
 import { shouldExclude } from './should-exclude.js';
 
 /**

@@ -39,8 +39,20 @@ export function wrapHandler<T>(
   return async (args: T) => {
     try {
       const result = await fn(args);
-      if (options?.checkErrorField && result && typeof result === 'object' && 'error' in result) {
-        return { content: [{ type: 'text' as const, text: String((result as { error: unknown }).error) }] };
+      if (
+        options?.checkErrorField &&
+        result &&
+        typeof result === 'object' &&
+        'error' in result
+      ) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: String((result as { error: unknown }).error),
+            },
+          ],
+        };
       }
       return toolResult(result);
     } catch (error) {

@@ -122,8 +122,4 @@ export type {
   HumanSummary,
 } from './summary.js';
 
-export type {
-  FixRequestType,
-  DebtAction,
-  PipelineStage,
-} from './handoff.js';
+export type { FixRequestType, DebtAction, PipelineStage } from './handoff.js';

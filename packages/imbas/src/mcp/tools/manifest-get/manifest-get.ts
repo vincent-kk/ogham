@@ -2,13 +2,12 @@
  * @file manifest-get.ts
  * @description Load manifest with summary
  */
-
-import { getRunDir } from '../../../core/paths/paths.js';
 import {
-  loadManifest,
-  getManifestSummary,
   getImplementPlanSummary,
+  getManifestSummary,
+  loadManifest,
 } from '../../../core/manifest-parser/manifest-parser.js';
+import { getRunDir } from '../../../core/paths/paths.js';
 
 export interface ManifestGetInput {
   project_ref: string;

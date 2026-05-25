@@ -1,6 +1,7 @@
 import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { Rule, RuleOverride } from '../../../types/rules.js';
 import type { AllowedEntry } from '../../infra/config-loader/loaders/config-schemas.js';
+
 import { applyOverrides } from './apply-overrides.js';
 import { checkCircularDependency } from './utils/check-circular-dependency.js';
 import { checkIndexBarrelPattern } from './utils/check-index-barrel-pattern.js';

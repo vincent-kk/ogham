@@ -19,7 +19,9 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassified from organ to fractal');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'reclassified from organ to fractal',
+    );
   });
 
   it('should allow INTENT.md in nested organ directories with info', () => {
@@ -32,7 +34,9 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('reclassified from organ to fractal');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'reclassified from organ to fractal',
+    );
   });
 
   it('should allow INTENT.md in fractal directories', () => {
@@ -87,9 +91,10 @@ describe('structure-guard', () => {
         tool_input: { file_path: `/app/src/${dir}/INTENT.md`, content: '# X' },
       };
       const result = guardStructure(input);
-      expect(result.continue, `Expected allow for target organ dir: ${dir}`).toBe(
-        true,
-      );
+      expect(
+        result.continue,
+        `Expected allow for target organ dir: ${dir}`,
+      ).toBe(true);
     }
   });
 
@@ -124,7 +129,9 @@ describe('structure-guard', () => {
     };
     const result = guardStructure(input);
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.additionalContext).toContain('organ directory');
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'organ directory',
+    );
   });
 
   it('should pass through non-Write/Edit tool calls', () => {

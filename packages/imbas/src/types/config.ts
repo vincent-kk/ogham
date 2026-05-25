@@ -3,7 +3,6 @@
  * @description Zod schemas for imbas config.json
  * @see skills/setup/references/init-workflow.md
  */
-
 import { z } from 'zod';
 
 /**
@@ -105,13 +104,9 @@ export type GithubLinkType = z.infer<typeof GithubLinkTypeSchema>;
 export const GithubConfigSchema = z.object({
   repo: z.string(),
   defaultLabels: z.array(z.string()).default([]),
-  linkTypes: z.array(GithubLinkTypeSchema).default([
-    'blocks',
-    'blocked-by',
-    'split-from',
-    'split-into',
-    'relates',
-  ]),
+  linkTypes: z
+    .array(GithubLinkTypeSchema)
+    .default(['blocks', 'blocked-by', 'split-from', 'split-into', 'relates']),
 });
 export type GithubConfig = z.infer<typeof GithubConfigSchema>;
 

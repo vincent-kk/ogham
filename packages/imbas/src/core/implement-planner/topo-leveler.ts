@@ -2,13 +2,13 @@
  * @file topo-leveler.ts
  * @description Kahn topological level assignment + cycle breaking + group chunking
  */
-
 import type {
+  BatchCycleBroken,
   BatchEdge,
   BatchGroup,
-  BatchCycleBroken,
   BatchItemRef,
 } from '../../types/manifest.js';
+
 import type { CollectedNode } from './dependency-collector.js';
 
 export interface LevelingResult {
@@ -101,7 +101,9 @@ function findCycle(
   edges: BatchEdge[],
   levelByNode: Map<string, number>,
 ): string[] {
-  const candidates = nodes.filter((n) => !levelByNode.has(n.id)).map((n) => n.id);
+  const candidates = nodes
+    .filter((n) => !levelByNode.has(n.id))
+    .map((n) => n.id);
   const candSet = new Set(candidates);
   const outEdges = new Map<string, string[]>();
   for (const id of candidates) outEdges.set(id, []);
@@ -170,7 +172,10 @@ function removeWeakestEdge(
   });
   const weakest = cycleEdges[0]!;
   const idx = edges.findIndex(
-    (e) => e.from === weakest.from && e.to === weakest.to && e.source === weakest.source,
+    (e) =>
+      e.from === weakest.from &&
+      e.to === weakest.to &&
+      e.source === weakest.source,
   );
   if (idx >= 0) edges.splice(idx, 1);
   return weakest;
@@ -211,7 +216,8 @@ function buildGroups(
         issue_ref: n.issue_ref,
         rationale: rationaleFor(n),
       }));
-      const depends_on_groups = level === 0 ? [] : (lastGroupIdAtLevel.get(level - 1) ?? []);
+      const depends_on_groups =
+        level === 0 ? [] : (lastGroupIdAtLevel.get(level - 1) ?? []);
       groups.push({
         group_id,
         level,

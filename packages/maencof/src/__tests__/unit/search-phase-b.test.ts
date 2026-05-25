@@ -384,10 +384,12 @@ describe('B6: Turn Context Directive', () => {
     const fs = await import('node:fs');
     const { fileURLToPath } = await import('node:url');
     const source = fs.readFileSync(
-      fileURLToPath(new URL(
-        '../../hooks/context-injector/turn-context/build.ts',
-        import.meta.url,
-      )),
+      fileURLToPath(
+        new URL(
+          '../../hooks/context-injector/turn-context/build.ts',
+          import.meta.url,
+        ),
+      ),
       'utf-8',
     );
     expect(source).toContain('content snippets from top documents');
@@ -398,10 +400,12 @@ describe('B6: Turn Context Directive', () => {
     const fs = await import('node:fs');
     const { fileURLToPath } = await import('node:url');
     const source = fs.readFileSync(
-      fileURLToPath(new URL(
-        '../../hooks/context-injector/context-injector.ts',
-        import.meta.url,
-      )),
+      fileURLToPath(
+        new URL(
+          '../../hooks/context-injector/context-injector.ts',
+          import.meta.url,
+        ),
+      ),
       'utf-8',
     );
     expect(source).toContain(

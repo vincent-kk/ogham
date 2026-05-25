@@ -48,8 +48,12 @@ describe('handleRuleDocsSync', () => {
       throw new Error('expected sync output');
     }
     expect(output.selections).toEqual({ 'filid_reuse-first': true });
-    expect(existsSync(join(repoRoot, '.claude', 'rules', 'filid_fca-policy.md'))).toBe(true);
-    expect(existsSync(join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md'))).toBe(true);
+    expect(
+      existsSync(join(repoRoot, '.claude', 'rules', 'filid_fca-policy.md')),
+    ).toBe(true);
+    expect(
+      existsSync(join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md')),
+    ).toBe(true);
   });
 
   it('recovers selections passed as a JSON string', () => {
@@ -65,7 +69,10 @@ describe('handleRuleDocsSync', () => {
     if (output.action !== 'sync') {
       throw new Error('expected sync output');
     }
-    expect(output.selections).toEqual({ 'filid_fca-policy': true, 'filid_reuse-first': true });
+    expect(output.selections).toEqual({
+      'filid_fca-policy': true,
+      'filid_reuse-first': true,
+    });
 
     const rfxPath = join(repoRoot, '.claude', 'rules', 'filid_reuse-first.md');
     expect(existsSync(rfxPath)).toBe(true);
@@ -150,7 +157,10 @@ describe('handleRuleDocsSync', () => {
     if (output.action !== 'sync') throw new Error('expected sync output');
     expect(output.result.skipped).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: 'does-not-exist', reason: 'unknown rule id' }),
+        expect.objectContaining({
+          id: 'does-not-exist',
+          reason: 'unknown rule id',
+        }),
       ]),
     );
     expect(output.resync).toEqual([]);

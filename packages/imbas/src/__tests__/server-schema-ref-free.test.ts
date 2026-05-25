@@ -4,10 +4,9 @@
  *              be structurally ref-free (Claude Code rejects schemas with
  *              internal $ref). See plan: imbas-mcp-schema-ref-fix.md
  */
-
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodTypeAny } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 type Captured = { name: string; inputSchema: ZodTypeAny; description?: string };
 const captured: Captured[] = [];
@@ -19,7 +18,11 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
         name: string,
         opts: { description?: string; inputSchema: ZodTypeAny },
       ) {
-        captured.push({ name, inputSchema: opts.inputSchema, description: opts.description });
+        captured.push({
+          name,
+          inputSchema: opts.inputSchema,
+          description: opts.description,
+        });
       }),
       tool: vi.fn(),
       connect: vi.fn(),
@@ -88,11 +91,17 @@ describe('MCP inputSchema is structurally ref-free', () => {
       phase: 'validate',
     };
     const mcpResult = entry!.inputSchema.safeParse(payload);
-    expect(mcpResult.success, `flat MCP parse failed: ${JSON.stringify(mcpResult)}`).toBe(true);
+    expect(
+      mcpResult.success,
+      `flat MCP parse failed: ${JSON.stringify(mcpResult)}`,
+    ).toBe(true);
 
     const { RunTransitionSchema } = await import('../types/state.js');
     const coreResult = RunTransitionSchema.safeParse(payload);
-    expect(coreResult.success, `RunTransitionSchema parse failed: ${JSON.stringify(coreResult)}`).toBe(true);
+    expect(
+      coreResult.success,
+      `RunTransitionSchema parse failed: ${JSON.stringify(coreResult)}`,
+    ).toBe(true);
   });
 
   it('invalid escape_phase (missing escape_code) passes flat schema but fails RunTransitionSchema', async () => {

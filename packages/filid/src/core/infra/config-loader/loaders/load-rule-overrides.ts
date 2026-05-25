@@ -1,4 +1,5 @@
 import type { RuleOverride } from '../../../../types/rules.js';
+
 import { loadConfig } from './load-config.js';
 
 /** Read rule overrides from .filid/config.json. Returns empty object if no config. */

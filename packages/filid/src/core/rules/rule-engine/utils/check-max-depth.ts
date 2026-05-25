@@ -12,8 +12,7 @@ export function checkMaxDepth(context: RuleContext): RuleViolation[] {
         severity: 'error',
         message: `The depth of "${node.name}" (${node.depth}) exceeds the maximum allowed depth (${maxDepth}).`,
         path: node.path,
-        suggestion:
-          'Flatten the directory structure or merge related modules.',
+        suggestion: 'Flatten the directory structure or merge related modules.',
       },
     ];
   }

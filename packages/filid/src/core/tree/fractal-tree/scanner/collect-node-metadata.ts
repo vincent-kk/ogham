@@ -36,10 +36,7 @@ export function collectNodeMetadata(
     const depth = rel === '' ? 0 : rel.split(/[\\/]/).length;
     if (depth > maxDepth) continue;
 
-    const name =
-      absPath === rootPath
-        ? basename(rootPath)
-        : basename(absPath);
+    const name = absPath === rootPath ? basename(rootPath) : basename(absPath);
     const hasIntentMd = existsSync(join(absPath, 'INTENT.md'));
     const hasDetailMd = existsSync(join(absPath, 'DETAIL.md'));
     const hasIndex =

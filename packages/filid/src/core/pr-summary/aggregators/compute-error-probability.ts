@@ -1,11 +1,14 @@
 import {
+  DEFAULT_ERROR_PROBABILITY,
   RULE_ERROR_PROBABILITY,
   SEVERITY_FALLBACK,
-  DEFAULT_ERROR_PROBABILITY,
 } from '../../../constants/review-probabilities.js';
 
 /** 에러 확률을 계산한다. ruleId → RULE_ERROR_PROBABILITY → severity fallback → DEFAULT. */
-export function computeErrorProbability(ruleId: string, severity: string): number {
+export function computeErrorProbability(
+  ruleId: string,
+  severity: string,
+): number {
   if (ruleId && RULE_ERROR_PROBABILITY[ruleId] !== undefined) {
     return RULE_ERROR_PROBABILITY[ruleId];
   }

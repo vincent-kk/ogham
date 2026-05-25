@@ -3,7 +3,6 @@
  * @description Zod schemas for Jira metadata cache
  * @see skills/cache/references/cache-structure.md
  */
-
 import { z } from 'zod';
 
 // --- project-meta.json ---
@@ -55,11 +54,15 @@ export type LinkTypeCache = z.infer<typeof LinkTypeCacheSchema>;
 // not available in current MCP surface. Schema stub for future use.
 
 export const WorkflowCacheSchema = z.object({
-  states: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    category: z.string().optional(),
-  })).default([]),
+  states: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        category: z.string().optional(),
+      }),
+    )
+    .default([]),
 });
 export type WorkflowCache = z.infer<typeof WorkflowCacheSchema>;
 

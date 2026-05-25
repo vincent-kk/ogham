@@ -2,10 +2,10 @@
  * @file cache-set.ts
  * @description Write Jira metadata cache
  */
-
-import { getCacheDir } from '../../../core/paths/paths.js';
-import { saveCache } from '../../../core/cache-manager/cache-manager.js';
 import { join } from 'node:path';
+
+import { saveCache } from '../../../core/cache-manager/cache-manager.js';
+import { getCacheDir } from '../../../core/paths/paths.js';
 import type { CacheType } from '../../../types/cache.js';
 
 export interface CacheSetInput {

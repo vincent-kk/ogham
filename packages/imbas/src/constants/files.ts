@@ -47,5 +47,5 @@ export const CACHE_FILE_MAP: Record<string, string> = {
   'project-meta': 'project-meta.json',
   'issue-types': 'issue-types.json',
   'link-types': 'link-types.json',
-  'workflows': 'workflows.json',
+  workflows: 'workflows.json',
 };

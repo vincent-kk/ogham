@@ -3,9 +3,14 @@ import {
   countTestCases,
 } from '../../../../metrics/test-counter/test-counter.js';
 import { check312Rule } from '../../../../metrics/three-plus-twelve/three-plus-twelve.js';
-import type { TestFileInput, ThreePlusTwelveViolation } from '../test-metrics.js';
+import type {
+  TestFileInput,
+  ThreePlusTwelveViolation,
+} from '../test-metrics.js';
 
-export function handleCheck312(files: TestFileInput[]): { violations: ThreePlusTwelveViolation[] } {
+export function handleCheck312(files: TestFileInput[]): {
+  violations: ThreePlusTwelveViolation[];
+} {
   const testCaseCounts = files.map((f) => {
     const raw: RawTestFile = { filePath: f.filePath, content: f.content };
     const count = countTestCases(raw);

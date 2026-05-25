@@ -2,14 +2,13 @@
  * @file run-get.ts
  * @description Read state.json for a run
  */
-
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import { loadConfig } from '../../../core/config-manager/config-manager.js';
 import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
 import { loadRunState } from '../../../core/state-manager/state-manager.js';
-import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 
 export interface RunGetInput {
   project_ref?: string;
@@ -24,7 +23,9 @@ export async function handleRunGet(input: RunGetInput) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
     if (!project_ref) {
-      throw new Error('project_ref is required (or set defaults.project_ref in config)');
+      throw new Error(
+        'project_ref is required (or set defaults.project_ref in config)',
+      );
     }
   }
 

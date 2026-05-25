@@ -4,15 +4,13 @@
  */
 import { readFileSync } from 'node:fs';
 
+import { isPosixLikePath, portableResolve } from '@ogham/cross-platform/paths';
+
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 import {
   checkTestCoverage,
   generateCoverageWarnings,
 } from '../../../core/coverage-verify/test-coverage-checker/test-coverage-checker.js';
-import {
-  isPosixLikePath,
-  portableResolve,
-} from '@ogham/cross-platform/paths';
 import { findSubtreeUsages } from '../../../core/coverage-verify/usage-tracker/usage-tracker.js';
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
 import type { CoverageVerifyResult } from '../../../types/coverage.js';

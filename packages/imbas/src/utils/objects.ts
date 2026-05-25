@@ -12,9 +12,10 @@ export function setNested(
   if (parts.length === 0) return value;
 
   const [head, ...rest] = parts as [string, ...string[]];
-  const current = (obj !== null && typeof obj === 'object')
-    ? (obj as Record<string, unknown>)
-    : {};
+  const current =
+    obj !== null && typeof obj === 'object'
+      ? (obj as Record<string, unknown>)
+      : {};
 
   return {
     ...current,

@@ -1,38 +1,45 @@
-import type { MarkdownBlock } from '../markdown-parsing/parse-blocks.js';
-import type { AdfNode } from '../types/adf-node.js';
-import { renderInlineToAdf } from './render-inline.js';
+import type { MarkdownBlock } from "../markdown-parsing/parse-blocks.js";
+import type { AdfNode } from "../types/adf-node.js";
+import { renderInlineToAdf } from "./render-inline.js";
 
 function makeParagraph(text: string): AdfNode {
   const content = renderInlineToAdf(text);
   return {
-    type: 'paragraph',
-    content: content.length > 0 ? content : [{ type: 'text', text: '' }],
+    type: "paragraph",
+    content: content.length > 0 ? content : [{ type: "text", text: "" }],
   };
 }
 
 function makeListItem(text: string): AdfNode {
   return {
-    type: 'listItem',
+    type: "listItem",
     content: [makeParagraph(text)],
   };
 }
 
-function renderTable(block: Extract<MarkdownBlock, { type: 'table' }>): AdfNode {
+function renderTable(
+  block: Extract<MarkdownBlock, { type: "table" }>,
+): AdfNode {
   return {
-    type: 'table',
-    attrs: { isNumberColumnEnabled: false, layout: 'default' },
+    type: "table",
+    attrs: { isNumberColumnEnabled: false, layout: "default" },
     content: block.rows.map((cells, index) => {
-      const cellType = index === 0 ? 'tableHeader' : 'tableCell';
+      const cellType = index === 0 ? "tableHeader" : "tableCell";
       return {
-        type: 'tableRow',
+        type: "tableRow",
         content: cells.map((cell) => {
           const inlineContent = renderInlineToAdf(cell);
           return {
             type: cellType,
-            content: [{
-              type: 'paragraph',
-              content: inlineContent.length > 0 ? inlineContent : [{ type: 'text', text: '' }],
-            }],
+            content: [
+              {
+                type: "paragraph",
+                content:
+                  inlineContent.length > 0
+                    ? inlineContent
+                    : [{ type: "text", text: "" }],
+              },
+            ],
           };
         }),
       };
@@ -43,38 +50,38 @@ function renderTable(block: Extract<MarkdownBlock, { type: 'table' }>): AdfNode 
 export function renderBlocksToAdf(blocks: MarkdownBlock[]): AdfNode[] {
   return blocks.map((block): AdfNode => {
     switch (block.type) {
-      case 'codeBlock':
+      case "codeBlock":
         return {
-          type: 'codeBlock',
+          type: "codeBlock",
           attrs: block.language ? { language: block.language } : {},
-          content: [{ type: 'text', text: block.code }],
+          content: [{ type: "text", text: block.code }],
         };
-      case 'rule':
-        return { type: 'rule' };
-      case 'heading':
+      case "rule":
+        return { type: "rule" };
+      case "heading":
         return {
-          type: 'heading',
+          type: "heading",
           attrs: { level: block.level },
           content: renderInlineToAdf(block.text),
         };
-      case 'blockquote':
+      case "blockquote":
         return {
-          type: 'blockquote',
+          type: "blockquote",
           content: block.lines.map((line) => makeParagraph(line)),
         };
-      case 'bulletList':
+      case "bulletList":
         return {
-          type: 'bulletList',
+          type: "bulletList",
           content: block.items.map((item) => makeListItem(item)),
         };
-      case 'orderedList':
+      case "orderedList":
         return {
-          type: 'orderedList',
+          type: "orderedList",
           content: block.items.map((item) => makeListItem(item)),
         };
-      case 'table':
+      case "table":
         return renderTable(block);
-      case 'paragraph':
+      case "paragraph":
         return makeParagraph(block.text);
     }
   });

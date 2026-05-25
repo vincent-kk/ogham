@@ -16,10 +16,7 @@ export function checkPureFunctionIsolation(
   for (const dep of deps) {
     // 의존 대상이 트리에 있고 fractal 타입이면 위반
     const depNode = tree.nodes.get(dep);
-    if (
-      depNode &&
-      (depNode.type === 'fractal' || depNode.type === 'hybrid')
-    ) {
+    if (depNode && (depNode.type === 'fractal' || depNode.type === 'hybrid')) {
       violations.push({
         ruleId: BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION,
         severity: 'error',

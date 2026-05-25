@@ -1,10 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-import type {
-  ModuleExportInfo,
-  PublicApi,
-} from '../../../types/fractal.js';
-
+import type { ModuleExportInfo, PublicApi } from '../../../types/fractal.js';
 import { extractModuleExports } from '../index-analyzer/index-analyzer.js';
 
 /**

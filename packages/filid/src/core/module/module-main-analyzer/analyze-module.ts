@@ -3,11 +3,12 @@ import {
   portableDirname,
   portableResolve,
 } from '@ogham/cross-platform/paths';
+
 import type { ModuleInfo } from '../../../types/fractal.js';
 
-import { findEntryPoint } from './find-entry-point.js';
 import { extractImports } from './extract-imports.js';
 import { extractPublicApi } from './extract-public-api.js';
+import { findEntryPoint } from './find-entry-point.js';
 
 /**
  * 모듈 디렉토리를 분석하여 ModuleInfo를 반환한다.

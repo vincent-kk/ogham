@@ -1,8 +1,9 @@
-import type { SummaryItem } from '../../../types/summary.js';
 import { AUTO_FIXABLE_RULES } from '../../../constants/review-probabilities.js';
+import type { SummaryItem } from '../../../types/summary.js';
 import { parseFixRequests } from '../parsers/parse-fix-requests.js';
-import { mapSeverity } from './map-severity.js';
+
 import { computeErrorProbability } from './compute-error-probability.js';
+import { mapSeverity } from './map-severity.js';
 
 /** fix-requests.md에서 항목들을 SummaryItem으로 변환한다. */
 export function collectFixRequestItems(content: string): SummaryItem[] {

@@ -1,7 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import os from 'node:os';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleRunCreate } from '../../mcp/tools/run-create/run-create.js';
 import { handleRunGet } from '../../mcp/tools/run-get/run-get.js';
@@ -11,7 +12,10 @@ import { handleRunTransition } from '../../mcp/tools/run-transition/run-transiti
 // --- helpers ---
 
 function makeTmpDir(): string {
-  const dir = join(os.tmpdir(), `imbas-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(
+    os.tmpdir(),
+    `imbas-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -27,7 +31,11 @@ function writeStateJson(runDir: string, state: object): void {
   writeFileSync(join(runDir, 'state.json'), JSON.stringify(state, null, 2));
 }
 
-function makeInitialState(run_id: string, project_ref: string, source_file: string) {
+function makeInitialState(
+  run_id: string,
+  project_ref: string,
+  source_file: string,
+) {
   const now = new Date().toISOString();
   return {
     run_id,
@@ -112,7 +120,9 @@ describe('handleRunCreate', () => {
       supplements: [suppFile],
     });
     const { existsSync } = await import('node:fs');
-    expect(existsSync(join(result.run_dir, 'supplements', 'extra.md'))).toBe(true);
+    expect(existsSync(join(result.run_dir, 'supplements', 'extra.md'))).toBe(
+      true,
+    );
   });
 });
 
@@ -134,7 +144,10 @@ describe('handleRunGet', () => {
     const state = makeInitialState('20260101-001', 'MYPROJ', '/source.md');
     writeStateJson(runDir, state);
 
-    const result = await handleRunGet({ project_ref: 'MYPROJ', run_id: '20260101-001' });
+    const result = await handleRunGet({
+      project_ref: 'MYPROJ',
+      run_id: '20260101-001',
+    });
     expect(result.state.run_id).toBe('20260101-001');
     expect(result.state.project_ref).toBe('MYPROJ');
   });
@@ -144,7 +157,10 @@ describe('handleRunGet', () => {
     const state = makeInitialState('20260101-001', 'MYPROJ', '/source.md');
     writeStateJson(runDir, state);
 
-    const result = await handleRunGet({ project_ref: 'MYPROJ', run_id: '20260101-001' });
+    const result = await handleRunGet({
+      project_ref: 'MYPROJ',
+      run_id: '20260101-001',
+    });
     expect(result.manifests_available).toEqual([]);
   });
 

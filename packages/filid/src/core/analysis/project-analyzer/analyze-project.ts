@@ -8,7 +8,10 @@ import type {
   ValidationReport,
 } from '../../../types/report.js';
 import { analyzeModule } from '../../module/module-main-analyzer/module-main-analyzer.js';
-import { detectDrift, generateSyncPlan } from '../../rules/drift-detector/drift-detector.js';
+import {
+  detectDrift,
+  generateSyncPlan,
+} from '../../rules/drift-detector/drift-detector.js';
 import { validateStructure } from '../../rules/fractal-validator/fractal-validator.js';
 import { scanProject } from '../../tree/fractal-tree/fractal-tree.js';
 

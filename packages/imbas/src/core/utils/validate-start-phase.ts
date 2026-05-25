@@ -1,4 +1,4 @@
-import type { RunState, PhaseName } from '../../types/state.js';
+import type { PhaseName, RunState } from '../../types/state.js';
 
 export function validateStartPhase(state: RunState, phase: PhaseName): void {
   if (phase === 'validate') {
@@ -26,8 +26,7 @@ export function validateStartPhase(state: RunState, phase: PhaseName): void {
 
   if (phase === 'devplan') {
     const split = state.phases.split;
-    const normalPath =
-      split.status === 'completed' && !split.pending_review;
+    const normalPath = split.status === 'completed' && !split.pending_review;
     const escapePath =
       split.status === 'escaped' && split.escape_code === 'E2-3';
 

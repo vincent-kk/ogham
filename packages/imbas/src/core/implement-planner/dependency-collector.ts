@@ -2,12 +2,11 @@
  * @file dependency-collector.ts
  * @description Collect DAG nodes (Story/Task) and edges from stories/devplan manifests
  */
-
 import type {
-  StoriesManifest,
-  DevplanManifest,
   BatchEdge,
   BatchItemKind,
+  DevplanManifest,
+  StoriesManifest,
 } from '../../types/manifest.js';
 
 export interface CollectedNode {

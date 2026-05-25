@@ -2,21 +2,20 @@
  * @file manifest-implement-plan.ts
  * @description Build ImplementPlanManifest from stories/devplan and persist
  */
-
-import { join } from 'node:path';
 import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { getRunDir } from '../../../core/paths/paths.js';
-import { loadManifest } from '../../../core/manifest-parser/manifest-parser.js';
-import {
-  buildImplementPlan,
-  renderImplementPlanReport,
-} from '../../../core/implement-planner/index.js';
-import { writeJson } from '../../../lib/file-io.js';
 import {
   MANIFEST_FILE_MAP,
   REPORT_FILE_MAP,
 } from '../../../constants/index.js';
+import {
+  buildImplementPlan,
+  renderImplementPlanReport,
+} from '../../../core/implement-planner/index.js';
+import { loadManifest } from '../../../core/manifest-parser/manifest-parser.js';
+import { getRunDir } from '../../../core/paths/paths.js';
+import { writeJson } from '../../../lib/file-io.js';
 
 export interface ManifestImplementPlanInput {
   project_ref: string;
@@ -51,7 +50,11 @@ export async function handleManifestImplementPlan(
   await writeJson(manifestPath, result.manifest);
 
   const reportPath = join(run_dir, REPORT_FILE_MAP['implement-plan']);
-  writeFileSync(reportPath, renderImplementPlanReport(result.manifest), 'utf-8');
+  writeFileSync(
+    reportPath,
+    renderImplementPlanReport(result.manifest),
+    'utf-8',
+  );
 
   return {
     manifest_path: manifestPath,

@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { DebtItem, DebtItemCreate } from '../../../../types/debt.js';
 import { DEBT_BASE_WEIGHT } from '../../../../constants/debt-defaults.js';
+import type { DebtItem, DebtItemCreate } from '../../../../types/debt.js';
 import { buildMarkdownBody } from '../utils/build-markdown-body.js';
 import { getDebtDir } from '../utils/get-debt-dir.js';
 import { normalizeId } from '../utils/normalize-id.js';

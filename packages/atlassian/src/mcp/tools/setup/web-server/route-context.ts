@@ -3,7 +3,7 @@ import type {
   Credentials,
   ServiceCredentials,
   ConnectionTestResult,
-} from '../../../../types/index.js';
+} from "../../../../types/index.js";
 
 /** Shared context handed to every route handler. Defined in its own file so
  *  routes.ts and handlers/* can both depend on the type without creating a
@@ -18,8 +18,8 @@ export interface RouteContext {
     base_url: string;
     credentials: ServiceCredentials;
     username?: string;
-    service: 'jira' | 'confluence';
-    api_version_override?: '2' | '3';
+    service: "jira" | "confluence";
+    api_version_override?: "2" | "3";
   }) => Promise<ConnectionTestResult>;
   resetTimer: () => void;
   closeServer: () => Promise<void>;

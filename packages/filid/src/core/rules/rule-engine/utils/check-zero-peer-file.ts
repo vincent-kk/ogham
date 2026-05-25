@@ -1,7 +1,8 @@
 import { ALLOWED_FRACTAL_ROOT_FILES } from '../../../../constants/allowed-peer-files.js';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtin-rule-ids.js';
-import type { AllowedEntry } from '../../../infra/config-loader/loaders/config-schemas.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
+import type { AllowedEntry } from '../../../infra/config-loader/loaders/config-schemas.js';
+
 import { isExempt } from './is-exempt.js';
 
 /**

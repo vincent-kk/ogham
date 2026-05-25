@@ -6,6 +6,7 @@ import {
   normalizeBranch,
   tryReadFile,
 } from '../utils/review-utils.js';
+
 import { collapsible } from './collapsible.js';
 import { transformStructureContent } from './utils/transform-structure-content.js';
 

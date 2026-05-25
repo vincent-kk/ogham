@@ -1,4 +1,5 @@
 import path from 'node:path';
+
 import { normalizeBranch } from './normalize-branch.js';
 
 export function resolveReviewDir(

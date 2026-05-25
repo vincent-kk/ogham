@@ -2,8 +2,11 @@
  * @file config-set.ts
  * @description Update config.json fields
  */
-
-import { loadConfig, saveConfig, applyConfigUpdates } from '../../../core/config-manager/config-manager.js';
+import {
+  applyConfigUpdates,
+  loadConfig,
+  saveConfig,
+} from '../../../core/config-manager/config-manager.js';
 
 export interface ConfigSetInput {
   updates: Record<string, unknown>;

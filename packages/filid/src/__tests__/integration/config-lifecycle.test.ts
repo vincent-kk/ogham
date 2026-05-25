@@ -25,10 +25,7 @@ interface ZpfScenarioFiles {
   config: Record<string, unknown>;
 }
 
-function setupFractalRepo(
-  repoDir: string,
-  files: ZpfScenarioFiles,
-): string {
+function setupFractalRepo(repoDir: string, files: ZpfScenarioFiles): string {
   mkdirSync(join(repoDir, '.filid'), { recursive: true });
   writeFileSync(
     join(repoDir, '.filid', 'config.json'),
@@ -43,11 +40,7 @@ function setupFractalRepo(
     '## Purpose\n\ntest fixture for AC-E2E.\n',
     'utf8',
   );
-  writeFileSync(
-    join(moduleDir, 'index.ts'),
-    'export const x = 1;\n',
-    'utf8',
-  );
+  writeFileSync(join(moduleDir, 'index.ts'), 'export const x = 1;\n', 'utf8');
   writeFileSync(join(moduleDir, 'CLAUDE.md'), '# CLAUDE.md peer\n', 'utf8');
   return moduleDir;
 }
@@ -97,8 +90,7 @@ describe('config lifecycle (incident §9 AC-E2E)', () => {
     //     The config did NOT suppress the warning; this is the structural
     //     guarantee that the no-op-config class of failures cannot recur.
     const zpfViolations = result.report.result.violations.filter(
-      (v) =>
-        v.ruleId === 'zero-peer-file' && v.message.includes('CLAUDE.md'),
+      (v) => v.ruleId === 'zero-peer-file' && v.message.includes('CLAUDE.md'),
     );
     expect(zpfViolations.length).toBeGreaterThan(0);
   });

@@ -1,4 +1,7 @@
-import { getLastRunHash, saveRunHash } from '../../../core/infra/cache-manager/cache-manager.js';
+import {
+  getLastRunHash,
+  saveRunHash,
+} from '../../../core/infra/cache-manager/cache-manager.js';
 import { computeProjectHash } from '../../../core/infra/project-hash/project-hash.js';
 
 export type CacheManageAction = 'compute-hash' | 'save-hash' | 'get-hash';

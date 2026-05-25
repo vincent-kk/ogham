@@ -6,12 +6,12 @@
  */
 import { describe, expect, it } from 'vitest';
 
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import {
   applyOverrides,
   evaluateRules,
   loadBuiltinRules,
 } from '../../../core/rules/rule-engine/rule-engine.js';
-import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
 
 function makeNode(overrides: Partial<FractalNode>): FractalNode {

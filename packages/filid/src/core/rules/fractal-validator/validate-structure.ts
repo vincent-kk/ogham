@@ -1,13 +1,9 @@
 import type { FractalTree } from '../../../types/fractal.js';
 import type { ValidationReport } from '../../../types/report.js';
-import type {
-  Rule,
-  RuleContext,
-  RuleViolation,
-} from '../../../types/rules.js';
+import type { Rule, RuleContext, RuleViolation } from '../../../types/rules.js';
 import type { ScanOptions } from '../../../types/scan.js';
-
 import { loadBuiltinRules } from '../rule-engine/rule-engine.js';
+
 import { validateNode } from './validate-node.js';
 
 /**

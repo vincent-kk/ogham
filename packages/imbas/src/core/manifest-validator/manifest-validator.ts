@@ -2,15 +2,14 @@
  * @file core/manifest-validator.ts
  * @description Schema + reference integrity validation for manifests
  */
-
-import { loadManifest } from '../manifest-parser/manifest-parser.js';
-import type { ManifestType } from '../manifest-parser/manifest-parser.js';
-import { findDuplicates } from '../../utils/index.js';
 import type {
-  StoriesManifest,
   DevplanManifest,
   ImplementPlanManifest,
+  StoriesManifest,
 } from '../../types/manifest.js';
+import { findDuplicates } from '../../utils/index.js';
+import { loadManifest } from '../manifest-parser/manifest-parser.js';
+import type { ManifestType } from '../manifest-parser/manifest-parser.js';
 
 export interface ValidationResult {
   valid: boolean;
@@ -206,7 +205,9 @@ function validateImplementPlanManifest(
   }
 
   // level monotonicity: a group's level must be > max level of its dependencies
-  const levelByGroup = new Map(manifest.groups.map((g) => [g.group_id, g.level]));
+  const levelByGroup = new Map(
+    manifest.groups.map((g) => [g.group_id, g.level]),
+  );
   for (const group of manifest.groups) {
     for (const depGroupId of group.depends_on_groups) {
       const depLevel = levelByGroup.get(depGroupId);
@@ -218,4 +219,3 @@ function validateImplementPlanManifest(
     }
   }
 }
-

@@ -10,10 +10,10 @@
  * preserved verbatim via the backward-compat check below.
  */
 const PREFIX_MAP: Record<string, string> = {
-  'jira:2': '/rest/api/2',
-  'jira:3': '/rest/api/3',
-  'confluence:v1': '/rest/api',
-  'confluence:v2': '/wiki/api/v2',
+  "jira:2": "/rest/api/2",
+  "jira:3": "/rest/api/3",
+  "confluence:v1": "/rest/api",
+  "confluence:v2": "/wiki/api/v2",
 };
 
 /**
@@ -23,14 +23,14 @@ const PREFIX_MAP: Record<string, string> = {
  */
 export function attachPrefix(
   endpoint: string,
-  service: 'jira' | 'confluence',
-  apiVersion: '2' | '3' | 'v1' | 'v2',
+  service: "jira" | "confluence",
+  apiVersion: "2" | "3" | "v1" | "v2",
 ): string {
-  if (endpoint.startsWith('/wiki/') || endpoint.startsWith('/rest/api/')) {
+  if (endpoint.startsWith("/wiki/") || endpoint.startsWith("/rest/api/")) {
     return endpoint;
   }
   const prefix = PREFIX_MAP[`${service}:${apiVersion}`];
   if (!prefix) return endpoint;
-  const normalized = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const normalized = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   return `${prefix}${normalized}`;
 }

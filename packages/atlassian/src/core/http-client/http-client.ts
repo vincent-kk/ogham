@@ -1,4 +1,8 @@
-import type { McpResponse, HttpClientConfig, RequestOptions } from '../../types/index.js';
+import type {
+  McpResponse,
+  HttpClientConfig,
+  RequestOptions,
+} from "../../types/index.js";
 import {
   RETRY_MAX_RETRIES,
   RETRY_BASE_DELAY_MS,
@@ -8,12 +12,15 @@ import {
   ERROR_CODE_MAP,
   SERVER_ERROR_CODE,
   DEFAULT_TIMEOUT,
-} from '../../constants/index.js';
-import { buildUrl, extractHostname } from '../../utils/index.js';
-import { validateUrl } from './ssrf-guard.js';
+} from "../../constants/index.js";
+import { buildUrl, extractHostname } from "../../utils/index.js";
+import { validateUrl } from "./ssrf-guard.js";
 
 function getErrorCode(status: number): string {
-  return ERROR_CODE_MAP[status] ?? (status >= 500 ? SERVER_ERROR_CODE : 'UNKNOWN_ERROR');
+  return (
+    ERROR_CODE_MAP[status] ??
+    (status >= 500 ? SERVER_ERROR_CODE : "UNKNOWN_ERROR")
+  );
 }
 
 function isRetryable(status: number): boolean {
@@ -38,14 +45,14 @@ export async function executeRequest(
   const timeout = options.timeout ?? config.timeout ?? DEFAULT_TIMEOUT;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept': options.acceptBinary ? '*/*' : 'application/json',
+    "Content-Type": "application/json",
+    Accept: options.acceptBinary ? "*/*" : "application/json",
     ...options.headers,
   };
 
   // Auth injection — tokens never exposed to caller
   if (config.auth_header) {
-    headers['Authorization'] = config.auth_header;
+    headers["Authorization"] = config.auth_header;
   }
 
   const fetchOptions: RequestInit = {
@@ -54,7 +61,7 @@ export async function executeRequest(
     signal: AbortSignal.timeout(timeout),
   };
 
-  if (options.body && options.method !== 'GET' && options.method !== 'DELETE') {
+  if (options.body && options.method !== "GET" && options.method !== "DELETE") {
     fetchOptions.body = JSON.stringify(options.body);
   }
 
@@ -75,11 +82,11 @@ export async function executeRequest(
 
       if (status >= 200 && status < 300) {
         let data: unknown = null;
-        const contentType = response.headers.get('content-type') ?? '';
-        if (options.acceptBinary && !contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type") ?? "";
+        if (options.acceptBinary && !contentType.includes("application/json")) {
           const buffer = await response.arrayBuffer();
           data = { _binary: true, buffer, contentType };
-        } else if (contentType.includes('application/json')) {
+        } else if (contentType.includes("application/json")) {
           data = await response.json();
         } else if (status !== 204) {
           data = await response.text();
@@ -119,7 +126,7 @@ export async function executeRequest(
 
       // Check Retry-After header for 429
       if (status === 429) {
-        const retryAfter = response.headers.get('retry-after');
+        const retryAfter = response.headers.get("retry-after");
         if (retryAfter) {
           const retryMs = parseInt(retryAfter, 10) * 1000;
           if (!isNaN(retryMs) && retryMs > 0) {
@@ -137,7 +144,7 @@ export async function executeRequest(
         status: 0,
         data: null,
         error: {
-          code: 'NETWORK_ERROR',
+          code: "NETWORK_ERROR",
           message,
           retryable: attempt < RETRY_MAX_RETRIES,
         },

@@ -9,7 +9,12 @@
  */
 import type { SgNode } from '@ast-grep/napi';
 
-import { EXT_TO_LANG, getSgLoadError, getSgModule, toLangEnum } from '../ast-grep-shared/index.js';
+import {
+  EXT_TO_LANG,
+  getSgLoadError,
+  getSgModule,
+  toLangEnum,
+} from '../ast-grep-shared/index.js';
 
 export interface CyclomaticResult {
   /** Max CC across all functions in the file */
@@ -81,7 +86,8 @@ function computeCC(bodyNode: SgNode): number {
 function getFunctionName(node: SgNode): string | null {
   const children = node.children();
   const nameNode = children.find(
-    (c: SgNode) => c.kind() === 'identifier' || c.kind() === 'property_identifier',
+    (c: SgNode) =>
+      c.kind() === 'identifier' || c.kind() === 'property_identifier',
   );
   return nameNode ? nameNode.text() : null;
 }
@@ -91,21 +97,30 @@ function processFunction(
   name: string,
   perFunction: Map<string, number>,
 ): void {
-  const body = node.children().find((c: SgNode) => c.kind() === 'statement_block');
+  const body = node
+    .children()
+    .find((c: SgNode) => c.kind() === 'statement_block');
   if (body) {
     perFunction.set(name, computeCC(body));
   }
 }
 
-function processClassMethods(classNode: SgNode, perFunction: Map<string, number>): void {
-  const classBody = classNode.children().find((c: SgNode) => c.kind() === 'class_body');
+function processClassMethods(
+  classNode: SgNode,
+  perFunction: Map<string, number>,
+): void {
+  const classBody = classNode
+    .children()
+    .find((c: SgNode) => c.kind() === 'class_body');
   if (!classBody) return;
   for (const member of classBody.children()) {
     if (member.kind() === 'method_definition') {
       const nameNode = member
         .children()
         .find((c: SgNode) => c.kind() === 'property_identifier');
-      const body = member.children().find((c: SgNode) => c.kind() === 'statement_block');
+      const body = member
+        .children()
+        .find((c: SgNode) => c.kind() === 'statement_block');
       if (nameNode && body) {
         perFunction.set(nameNode.text(), computeCC(body));
       }
@@ -119,7 +134,9 @@ function processLexicalDecl(
 ): void {
   for (const decl of lexDecl.children()) {
     if (decl.kind() === 'variable_declarator') {
-      const nameNode = decl.children().find((c: SgNode) => c.kind() === 'identifier');
+      const nameNode = decl
+        .children()
+        .find((c: SgNode) => c.kind() === 'identifier');
       const init = decl
         .children()
         .find(
@@ -149,13 +166,16 @@ export async function calculateComplexity(
   const sg = await getSgModule();
   if (!sg) {
     return {
-      error: '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
+      error:
+        '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
   }
 
   try {
-    const ext = filePath.includes('.') ? '.' + filePath.split('.').pop() : '.ts';
+    const ext = filePath.includes('.')
+      ? '.' + filePath.split('.').pop()
+      : '.ts';
     const langStr = EXT_TO_LANG[ext] ?? 'typescript';
     const lang = toLangEnum(sg, langStr);
     const root = sg.parse(lang, source).root();
@@ -180,18 +200,23 @@ export async function calculateComplexity(
       if (kind === 'export_statement') {
         const children = stmt.children();
 
-        const funcDecl = children.find((c: SgNode) => c.kind() === 'function_declaration');
+        const funcDecl = children.find(
+          (c: SgNode) => c.kind() === 'function_declaration',
+        );
         if (funcDecl) {
           const name = getFunctionName(funcDecl);
           if (name) processFunction(funcDecl, name, perFunction);
         }
 
-        const classDecl = children.find((c: SgNode) => c.kind() === 'class_declaration');
+        const classDecl = children.find(
+          (c: SgNode) => c.kind() === 'class_declaration',
+        );
         if (classDecl) processClassMethods(classDecl, perFunction);
 
         const lexDecl = children.find(
           (c: SgNode) =>
-            c.kind() === 'lexical_declaration' || c.kind() === 'variable_declaration',
+            c.kind() === 'lexical_declaration' ||
+            c.kind() === 'variable_declaration',
         );
         if (lexDecl) processLexicalDecl(lexDecl, perFunction);
       }

@@ -3,21 +3,35 @@
  * @description Zod schemas for imbas pipeline state (state.json)
  * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
  */
-
 import { z } from 'zod';
 
 // --- Enums ---
 
-export const PhaseStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'escaped']);
+export const PhaseStatusSchema = z.enum([
+  'pending',
+  'in_progress',
+  'completed',
+  'escaped',
+]);
 export type PhaseStatus = z.infer<typeof PhaseStatusSchema>;
 
 export const PhaseNameSchema = z.enum(['validate', 'split', 'devplan']);
 export type PhaseName = z.infer<typeof PhaseNameSchema>;
 
-export const ValidateResultSchema = z.enum(['PASS', 'PASS_WITH_WARNINGS', 'BLOCKED']);
+export const ValidateResultSchema = z.enum([
+  'PASS',
+  'PASS_WITH_WARNINGS',
+  'BLOCKED',
+]);
 export type ValidateResult = z.infer<typeof ValidateResultSchema>;
 
-export const EscapeCodeSchema = z.enum(['E2-1', 'E2-2', 'E2-3', 'EC-1', 'EC-2']);
+export const EscapeCodeSchema = z.enum([
+  'E2-1',
+  'E2-2',
+  'E2-3',
+  'EC-1',
+  'EC-2',
+]);
 export type EscapeCode = z.infer<typeof EscapeCodeSchema>;
 
 // --- Phase Data ---
@@ -73,9 +87,11 @@ export const RunStateSchema = z.object({
   updated_at: z.string(),
   current_phase: PhaseNameSchema,
   phases: PhasesSchema,
-  metadata: z.object({
-    skipped_phases: z.array(PhaseNameSchema).optional(),
-  }).optional(),
+  metadata: z
+    .object({
+      skipped_phases: z.array(PhaseNameSchema).optional(),
+    })
+    .optional(),
 });
 export type RunState = z.infer<typeof RunStateSchema>;
 
@@ -122,4 +138,3 @@ export const RunTransitionSchema = z.discriminatedUnion('action', [
   SkipPhasesActionSchema,
 ]);
 export type RunTransition = z.infer<typeof RunTransitionSchema>;
-

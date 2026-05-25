@@ -5,7 +5,7 @@
  * This file is bundled into bridge/mcp-server.cjs.
  * Invoked by Claude Code via `node bridge/mcp-server.cjs`.
  */
-import { startServer } from '../server/server.js';
+import { startServer } from "../server/server.js";
 
 startServer().catch((err: unknown) => {
   process.stderr.write(`atlassian MCP server error: ${String(err)}\n`);

@@ -8,8 +8,8 @@
 import type { SgNode } from '@ast-grep/napi';
 
 import type { CyclomaticComplexityResult } from '../../types/metrics.js';
-
 import { parseSource } from '../parser/parser.js';
+
 import { computeCC } from './utils/compute-cc.js';
 import { getNodeName } from './utils/get-node-name.js';
 import { processClassMethods } from './utils/process-class-methods.js';
