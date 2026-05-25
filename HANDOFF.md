@@ -38,16 +38,16 @@ PR-C 부터 시작. 각 패키지 적용 일관 절차 (HANDOFF "🔁 적용 절
 
 ## 🔒 이미 확정된 결정 (재논의 금지)
 
-| #   | 항목                      | 결정                                                |
-| --- | ------------------------- | --------------------------------------------------- |
-| 1   | 공유 모듈 위치            | **`shared/cross-platform` 신규 워크스페이스**       |
-| 2   | `cross-spawn` 채택        | **채택** (cross-platform 내부에서만)                |
-| 3   | Windows hook bootstrap    | **A + E 병용** (`.cmd` shim + self-probe)           |
-| 4   | CI Windows runner         | **매 PR full matrix** (3 OS × Node 20+22)           |
-| 5   | 외부 바이너리 설치 가이드 | **명령 + 링크 병기** (winget/brew + 공식 링크)      |
-| 6   | lint 가드 강도            | **금지=error / 경고=warning** (PR-I 에서 적용)      |
-| —   | 번들 정책                 | **모노레포 내부 전용 + esbuild inline**             |
-| —   | maencof 페르소나 fallback | **미도입** (hook 무결화로 수렴)                     |
+| #   | 항목                      | 결정                                           |
+| --- | ------------------------- | ---------------------------------------------- |
+| 1   | 공유 모듈 위치            | **`shared/cross-platform` 신규 워크스페이스**  |
+| 2   | `cross-spawn` 채택        | **채택** (cross-platform 내부에서만)           |
+| 3   | Windows hook bootstrap    | **A + E 병용** (`.cmd` shim + self-probe)      |
+| 4   | CI Windows runner         | **매 PR full matrix** (3 OS × Node 20+22)      |
+| 5   | 외부 바이너리 설치 가이드 | **명령 + 링크 병기** (winget/brew + 공식 링크) |
+| 6   | lint 가드 강도            | **금지=error / 경고=warning** (PR-I 에서 적용) |
+| —   | 번들 정책                 | **모노레포 내부 전용 + esbuild inline**        |
+| —   | maencof 페르소나 fallback | **미도입** (hook 무결화로 수렴)                |
 
 근거 / 세부 디테일은 `PLAN.md` Part 8 + 4.2.0 + 4.8.
 
@@ -55,18 +55,18 @@ PR-C 부터 시작. 각 패키지 적용 일관 절차 (HANDOFF "🔁 적용 절
 
 ## 🛠️ PR 분할 및 진행 상태
 
-| 순서 | PR       | 패키지                                                                | 분량 | 의존   | 상태       |
-| ---- | -------- | --------------------------------------------------------------------- | ---- | ------ | ---------- |
-| 1    | **PR-Z** | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전               | 0.5d | none   | ✅ 완료    |
-| 2    | **PR-A** | `shared/cross-platform` 워크스페이스 + 빌드 + CI 매트릭스             | 1d   | PR-Z   | ✅ 완료    |
-| 3    | **PR-B** | 7 helper 구현 + 단위 테스트 (57 tests passing)                        | 2d   | PR-A   | ✅ 완료    |
-| 4    | **PR-C** | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃 + light hook 가드)       | 2d   | PR-B   | ⏳ 다음    |
-| 5    | **PR-D** | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)         | 2d   | PR-B   | ⏳ 대기    |
-| 6    | **PR-E** | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리       | 1d   | PR-B   | ⏳ 대기    |
-| 7    | **PR-F** | filid (ast-grep 화이트리스트 OS-aware + git spawnCli + run.cjs)       | 1d   | PR-B   | ⏳ 대기    |
-| 8    | **PR-G** | imbas (`setup.ts` HOME/basename + npm fallback)                       | 0.5d | PR-B   | ⏳ 대기    |
-| 9    | **PR-H** | atlassian — docs only (chmod Windows 무시 명기)                       | 0.5d | none   | ⏳ 대기    |
-| 10   | **PR-I** | repo-wide lint 가드 (eslint custom rules)                             | 1d   | PR-C~G | ⏳ 마지막  |
+| 순서 | PR       | 패키지                                                          | 분량 | 의존   | 상태      |
+| ---- | -------- | --------------------------------------------------------------- | ---- | ------ | --------- |
+| 1    | **PR-Z** | meta — `.metadata/cross-platform/` 신설 + 4개 문서 이전         | 0.5d | none   | ✅ 완료   |
+| 2    | **PR-A** | `shared/cross-platform` 워크스페이스 + 빌드 + CI 매트릭스       | 1d   | PR-Z   | ✅ 완료   |
+| 3    | **PR-B** | 7 helper 구현 + 단위 테스트 (57 tests passing)                  | 2d   | PR-A   | ✅ 완료   |
+| 4    | **PR-C** | cogair 전환 (3 spawn + EOL 정규화 + 타임아웃 + light hook 가드) | 2d   | PR-B   | ⏳ 다음   |
+| 5    | **PR-D** | maencof hook bootstrap (.cmd shim + selfProbe + git spawnCli)   | 2d   | PR-B   | ⏳ 대기   |
+| 6    | **PR-E** | maencof-lens hook bootstrap + run.cjs 안전화 + 테스트 경로 정리 | 1d   | PR-B   | ⏳ 대기   |
+| 7    | **PR-F** | filid (ast-grep 화이트리스트 OS-aware + git spawnCli + run.cjs) | 1d   | PR-B   | ⏳ 대기   |
+| 8    | **PR-G** | imbas (`setup.ts` HOME/basename + npm fallback)                 | 0.5d | PR-B   | ⏳ 대기   |
+| 9    | **PR-H** | atlassian — docs only (chmod Windows 무시 명기)                 | 0.5d | none   | ⏳ 대기   |
+| 10   | **PR-I** | repo-wide lint 가드 (eslint custom rules)                       | 1d   | PR-C~G | ⏳ 마지막 |
 
 - 남은 분량 직렬: **8 영업일**
 - PR-C/D/E/F/G 병렬: **약 4 영업일**
@@ -83,8 +83,8 @@ cogair / maencof / maencof-lens / filid / imbas 모두 동일 6단계. PR-H (atl
 ```jsonc
 {
   "devDependencies": {
-    "@ogham/cross-platform": "workspace:^"
-  }
+    "@ogham/cross-platform": "workspace:^",
+  },
 }
 ```
 
@@ -101,17 +101,17 @@ cogair / maencof / maencof-lens / filid / imbas 모두 동일 6단계. PR-H (atl
 
 ### Step 3 — src 코드 마이그레이션
 
-| Before (직접 사용)                                                  | After (`@ogham/cross-platform`)                          |
-| ------------------------------------------------------------------- | -------------------------------------------------------- |
-| `import { spawn|exec|execSync|execFile } from "node:child_process"` | `import { spawnCli } from "@ogham/cross-platform"`       |
-| `process.env.HOME ?? process.env.USERPROFILE`                       | `env.home()`                                             |
-| `process.env.TMPDIR ?? process.env.TEMP`                            | `paths.tmp()`                                            |
-| `os.homedir()` / `os.tmpdir()` 직접 호출                            | `paths.home()` / `paths.tmp()`                           |
-| 외부 CLI stdout 의 `.split('\n')` / `.replace(/\n+$/, '')`          | 진입점에서 `normalizeEol(stdout)` 먼저                   |
-| `'/usr'`, `'/bin'` 절대경로 화이트리스트                            | `env.isWindows` 분기 OS-aware 화이트리스트               |
-| 하드코딩 타임아웃 (`1500ms`)                                        | `spawnCli({ timeoutMs: 1500 })` (내부 `osTimeout` 적용)  |
-| `which(bin)` / `where bin` 직접 호출                                | `binaries.discover(bin, { pkg })` / `binaries.ensureXxx` |
-| `cwd.split('/').pop()`                                              | `path.basename(cwd)`                                     |
+| Before (직접 사용)                                         | After (`@ogham/cross-platform`)                          |
+| ---------------------------------------------------------- | -------------------------------------------------------- | -------- | ------------------------------------- | -------------------------------------------------- |
+| `import { spawn                                            | exec                                                     | execSync | execFile } from "node:child_process"` | `import { spawnCli } from "@ogham/cross-platform"` |
+| `process.env.HOME ?? process.env.USERPROFILE`              | `env.home()`                                             |
+| `process.env.TMPDIR ?? process.env.TEMP`                   | `paths.tmp()`                                            |
+| `os.homedir()` / `os.tmpdir()` 직접 호출                   | `paths.home()` / `paths.tmp()`                           |
+| 외부 CLI stdout 의 `.split('\n')` / `.replace(/\n+$/, '')` | 진입점에서 `normalizeEol(stdout)` 먼저                   |
+| `'/usr'`, `'/bin'` 절대경로 화이트리스트                   | `env.isWindows` 분기 OS-aware 화이트리스트               |
+| 하드코딩 타임아웃 (`1500ms`)                               | `spawnCli({ timeoutMs: 1500 })` (내부 `osTimeout` 적용)  |
+| `which(bin)` / `where bin` 직접 호출                       | `binaries.discover(bin, { pkg })` / `binaries.ensureXxx` |
+| `cwd.split('/').pop()`                                     | `path.basename(cwd)`                                     |
 
 ### Step 4 — hooks.json + Windows shim (hook 보유 패키지만)
 
@@ -128,13 +128,13 @@ cogair / maencof / maencof-lens / filid / imbas 모두 동일 6단계. PR-H (atl
 
 ### Step 6 — 빌드 검증 + 커밋
 
-| 검증                                                    | 통과 기준         |
-| ------------------------------------------------------- | ----------------- |
-| `yarn workspace @ogham/<pkg> build`                     | exit 0            |
-| `yarn workspace @ogham/<pkg> typecheck`                 | no errors         |
-| `yarn workspace @ogham/<pkg> test:run`                  | all green         |
-| Hook bundle size cap (`FORBIDDEN_PATTERNS` + byte cap)  | 통과              |
-| macOS/Linux 회귀                                        | 0 건              |
+| 검증                                                   | 통과 기준 |
+| ------------------------------------------------------ | --------- |
+| `yarn workspace @ogham/<pkg> build`                    | exit 0    |
+| `yarn workspace @ogham/<pkg> typecheck`                | no errors |
+| `yarn workspace @ogham/<pkg> test:run`                 | all green |
+| Hook bundle size cap (`FORBIDDEN_PATTERNS` + byte cap) | 통과      |
+| macOS/Linux 회귀                                       | 0 건      |
 
 커밋 메시지 패턴:
 
@@ -148,14 +148,14 @@ feat(<pkg>): migrate to @ogham/cross-platform for windows compatibility
 
 ### 패키지별 특수사항
 
-| PR   | 패키지       | 특수사항                                                                                                                                                                                                                                            |
-| ---- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PR-C | cogair       | **LIGHT cap 10240 bytes**. 3 spawn site (`checkExecutable` + `dispatcher/codex/operations/spawn` + `dispatcher/gemini/operations/spawn`), EOL 정규화 3 곳, gemini 콜드스타트 타임아웃 ×3 (`spawnCli` 내부 osTimeout 가 자동 처리).                  |
-| PR-D | maencof      | hook silent failure 해결의 본진 — `.cmd` shim + selfProbe + `vault-committer` / `changelog-gate` 의 git execSync → spawnCli. 페르소나 fallback 채널은 결정대로 도입 안 함.                                                                          |
-| PR-E | maencof-lens | hook bootstrap + `libs/run.cjs` path slice 안전화 + `__tests__` 의 `/tmp` 하드코딩을 `paths.tmp()` 로 교체.                                                                                                                                          |
+| PR   | 패키지       | 특수사항                                                                                                                                                                                                                                                                        |
+| ---- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PR-C | cogair       | **LIGHT cap 10240 bytes**. 3 spawn site (`checkExecutable` + `dispatcher/codex/operations/spawn` + `dispatcher/gemini/operations/spawn`), EOL 정규화 3 곳, gemini 콜드스타트 타임아웃 ×3 (`spawnCli` 내부 osTimeout 가 자동 처리).                                              |
+| PR-D | maencof      | hook silent failure 해결의 본진 — `.cmd` shim + selfProbe + `vault-committer` / `changelog-gate` 의 git execSync → spawnCli. 페르소나 fallback 채널은 결정대로 도입 안 함.                                                                                                      |
+| PR-E | maencof-lens | hook bootstrap + `libs/run.cjs` path slice 안전화 + `__tests__` 의 `/tmp` 하드코딩을 `paths.tmp()` 로 교체.                                                                                                                                                                     |
 | PR-F | filid        | `src/mcp/tools/ast-grep-replace/ast-grep-replace.ts:73` 시스템 경로 화이트리스트 OS-aware (Unix `/usr,/bin,/sbin,/etc,/var/lib` + Windows `C:\Windows\System32`, `C:\Program Files`, `C:\Program Files (x86)`). `resolve-git-root` + `content-hash` 의 git execSync → spawnCli. |
-| PR-G | imbas        | `setup.ts:21` `process.env.HOME` → `env.home()`. `setup.ts:23` `cwd.split('/').pop()` → `path.basename(cwd)`. `build-mcp-server.mjs:44` `execSync('npm root -g')` fallback → `binaries.ensure('npm')`.                                              |
-| PR-H | atlassian    | docs only — chmod 0o600 가 Windows 에서 무시되어 ACL 기본값으로 보호됨을 `auth-manager` / `config-manager` INTENT.md + README Security 섹션에 명기.                                                                                                  |
+| PR-G | imbas        | `setup.ts:21` `process.env.HOME` → `env.home()`. `setup.ts:23` `cwd.split('/').pop()` → `path.basename(cwd)`. `build-mcp-server.mjs:44` `execSync('npm root -g')` fallback → `binaries.ensure('npm')`.                                                                          |
+| PR-H | atlassian    | docs only — chmod 0o600 가 Windows 에서 무시되어 ACL 기본값으로 보호됨을 `auth-manager` / `config-manager` INTENT.md + README Security 섹션에 명기.                                                                                                                             |
 
 ---
 
@@ -189,22 +189,22 @@ feat(<pkg>): migrate to @ogham/cross-platform for windows compatibility
 
 ## 📊 작업 상태 스냅샷
 
-| 단계                                                 | 상태       |
-| ---------------------------------------------------- | ---------- |
-| 6개 패키지 인벤토리 분석                             | ✅ 완료    |
-| 카테고리 통합 (C1–C8)                                | ✅ 완료    |
-| `shared/cross-platform` 모듈 설계 (PLAN Part 4.2)    | ✅ 완료    |
-| 번들 정책 (PLAN Part 4.2.0)                          | ✅ 완료    |
-| Hook bootstrap 옵션 비교 (PLAN Part 4.3)             | ✅ 완료    |
-| Phase 0–6 PR 분할 (PLAN Part 5)                      | ✅ 완료    |
-| 합격 기준 (PLAN Part 7)                              | ✅ 완료    |
-| 결정 #1 ~ #6 + 번들 / fallback                       | ✅ 완료    |
-| PR-Z 메타데이터 이전                                 | ✅ 완료    |
-| PR-A 워크스페이스 + CI 매트릭스                      | ✅ 완료    |
-| PR-B 7 helper + 57 단위 테스트                       | ✅ 완료    |
-| PR-C cogair 전환                                     | ⏳ 다음    |
-| PR-D / E / F / G / H                                 | ⏳ 대기    |
-| PR-I lint 가드                                       | ⏳ 마지막  |
+| 단계                                              | 상태      |
+| ------------------------------------------------- | --------- |
+| 6개 패키지 인벤토리 분석                          | ✅ 완료   |
+| 카테고리 통합 (C1–C8)                             | ✅ 완료   |
+| `shared/cross-platform` 모듈 설계 (PLAN Part 4.2) | ✅ 완료   |
+| 번들 정책 (PLAN Part 4.2.0)                       | ✅ 완료   |
+| Hook bootstrap 옵션 비교 (PLAN Part 4.3)          | ✅ 완료   |
+| Phase 0–6 PR 분할 (PLAN Part 5)                   | ✅ 완료   |
+| 합격 기준 (PLAN Part 7)                           | ✅ 완료   |
+| 결정 #1 ~ #6 + 번들 / fallback                    | ✅ 완료   |
+| PR-Z 메타데이터 이전                              | ✅ 완료   |
+| PR-A 워크스페이스 + CI 매트릭스                   | ✅ 완료   |
+| PR-B 7 helper + 57 단위 테스트                    | ✅ 완료   |
+| PR-C cogair 전환                                  | ⏳ 다음   |
+| PR-D / E / F / G / H                              | ⏳ 대기   |
+| PR-I lint 가드                                    | ⏳ 마지막 |
 
 ---
 
