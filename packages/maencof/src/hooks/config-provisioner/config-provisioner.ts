@@ -61,7 +61,11 @@ export function provisionMissingConfigs(cwd: string): ProvisionResult {
           result.skipped.push(entry.filename);
         }
       } catch (e) {
-        appendErrorLogSafe(cwd, { hook: 'config-provisioner', error: String(e), timestamp: new Date().toISOString() });
+        appendErrorLogSafe(cwd, {
+          hook: 'config-provisioner',
+          error: String(e),
+          timestamp: new Date().toISOString(),
+        });
         result.skipped.push(entry.filename); // corrupted -> skip
       }
     } else {

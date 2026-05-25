@@ -10,7 +10,6 @@ import type { SpreadingActivationParams } from '../../core/spreading-activation/
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
 import type { ActivationResult, KnowledgeGraph } from '../../types/graph.js';
-
 import { QueryCache } from '../query-cache/index.js';
 
 /** 시드 매칭 유형 */

@@ -5,11 +5,11 @@
  *   invoked in workflow.md must appear in tools.md. Every tool name listed in tools.md that is NOT
  *   in workflow.md must carry an explicit `(declared-only)` or `(fallback)` marker.
  */
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(__dirname, '..', '..');
@@ -27,12 +27,21 @@ function skillNames(): string[] {
 // `mcp__plugin_imbas_tools__<name>` is also matched for agent tool lists.
 const BARE_TOOL_NAMES = [
   'ping',
-  'run_create', 'run_get', 'run_transition', 'run_list',
-  'manifest_get', 'manifest_save', 'manifest_validate', 'manifest_plan',
+  'run_create',
+  'run_get',
+  'run_transition',
+  'run_list',
+  'manifest_get',
+  'manifest_save',
+  'manifest_validate',
+  'manifest_plan',
   'manifest_implement_plan',
-  'config_get', 'config_set',
-  'cache_get', 'cache_set',
-  'ast_search', 'ast_analyze',
+  'config_get',
+  'config_set',
+  'cache_get',
+  'cache_set',
+  'ast_search',
+  'ast_analyze',
 ] as const;
 
 const TOOL_REGEX = new RegExp(
@@ -75,7 +84,9 @@ describe('G2 skill-tools-coverage — workflow ↔ tools.md symmetric difference
       const declared = extractToolsWithMarkers(readFileSync(tools, 'utf8'));
       for (const tool of used) {
         if (!declared.has(tool)) {
-          drift.push(`skills/${skill}: workflow.md invokes ${tool} but tools.md does not list it`);
+          drift.push(
+            `skills/${skill}: workflow.md invokes ${tool} but tools.md does not list it`,
+          );
         }
       }
     }
@@ -93,7 +104,9 @@ describe('G2 skill-tools-coverage — workflow ↔ tools.md symmetric difference
       const declared = extractToolsWithMarkers(readFileSync(tools, 'utf8'));
       for (const [tool, hasMarker] of declared) {
         if (!used.has(tool) && !hasMarker) {
-          drift.push(`skills/${skill}: tools.md lists ${tool} but it is not invoked in workflow.md and lacks (declared-only)/(fallback) marker`);
+          drift.push(
+            `skills/${skill}: tools.md lists ${tool} but it is not invoked in workflow.md and lacks (declared-only)/(fallback) marker`,
+          );
         }
       }
     }

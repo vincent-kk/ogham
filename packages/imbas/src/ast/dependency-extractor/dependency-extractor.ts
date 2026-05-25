@@ -7,7 +7,12 @@
  */
 import type { SgNode } from '@ast-grep/napi';
 
-import { EXT_TO_LANG, getSgLoadError, getSgModule, toLangEnum } from '../ast-grep-shared/index.js';
+import {
+  EXT_TO_LANG,
+  getSgLoadError,
+  getSgModule,
+  toLangEnum,
+} from '../ast-grep-shared/index.js';
 
 export interface ImportInfo {
   source: string;
@@ -56,7 +61,9 @@ function getCallee(node: SgNode): string | null {
   if (kind === 'identifier') return node.text();
   if (kind === 'member_expression') {
     const children = node.children();
-    const prop = children.find((c: SgNode) => c.kind() === 'property_identifier');
+    const prop = children.find(
+      (c: SgNode) => c.kind() === 'property_identifier',
+    );
     if (children[0] && prop) {
       const objName = getCallee(children[0]);
       return objName ? `${objName}.${prop.text()}` : null;
@@ -72,14 +79,18 @@ function extractImports(stmt: SgNode): ImportInfo | null {
     const k = node.kind();
     // named imports: { foo, bar }
     if (k === 'import_specifier') {
-      const nameNode = node.children().find((c: SgNode) => c.kind() === 'identifier');
+      const nameNode = node
+        .children()
+        .find((c: SgNode) => c.kind() === 'identifier');
       if (nameNode && !specifiers.includes(nameNode.text())) {
         specifiers.push(nameNode.text());
       }
     }
     // namespace import: * as foo
     if (k === 'namespace_import') {
-      const nameNode = node.children().find((c: SgNode) => c.kind() === 'identifier');
+      const nameNode = node
+        .children()
+        .find((c: SgNode) => c.kind() === 'identifier');
       if (nameNode && !specifiers.includes(nameNode.text())) {
         specifiers.push(nameNode.text());
       }
@@ -87,9 +98,13 @@ function extractImports(stmt: SgNode): ImportInfo | null {
   });
 
   // default import via import_clause
-  const importClause = stmt.children().find((c: SgNode) => c.kind() === 'import_clause');
+  const importClause = stmt
+    .children()
+    .find((c: SgNode) => c.kind() === 'import_clause');
   if (importClause) {
-    const defaultId = importClause.children().find((c: SgNode) => c.kind() === 'identifier');
+    const defaultId = importClause
+      .children()
+      .find((c: SgNode) => c.kind() === 'identifier');
     if (defaultId && !specifiers.includes(defaultId.text())) {
       specifiers.push(defaultId.text());
     }
@@ -106,54 +121,78 @@ function extractExports(stmt: SgNode): ExportInfo[] {
   const children = stmt.children();
 
   // export { foo, bar }
-  const exportClause = children.find((c: SgNode) => c.kind() === 'export_clause');
+  const exportClause = children.find(
+    (c: SgNode) => c.kind() === 'export_clause',
+  );
   if (exportClause) {
     for (const spec of exportClause.children()) {
       if (spec.kind() === 'export_specifier') {
-        const nameNode = spec.children().find((c: SgNode) => c.kind() === 'identifier');
-        if (nameNode) results.push({ name: nameNode.text(), type: 'specifier' });
+        const nameNode = spec
+          .children()
+          .find((c: SgNode) => c.kind() === 'identifier');
+        if (nameNode)
+          results.push({ name: nameNode.text(), type: 'specifier' });
       }
     }
   }
 
   // export function foo() {}
-  const funcDecl = children.find((c: SgNode) => c.kind() === 'function_declaration');
+  const funcDecl = children.find(
+    (c: SgNode) => c.kind() === 'function_declaration',
+  );
   if (funcDecl) {
-    const nameNode = funcDecl.children().find((c: SgNode) => c.kind() === 'identifier');
+    const nameNode = funcDecl
+      .children()
+      .find((c: SgNode) => c.kind() === 'identifier');
     if (nameNode) results.push({ name: nameNode.text(), type: 'function' });
   }
 
   // export class Foo {}
-  const classDecl = children.find((c: SgNode) => c.kind() === 'class_declaration');
+  const classDecl = children.find(
+    (c: SgNode) => c.kind() === 'class_declaration',
+  );
   if (classDecl) {
-    const nameNode = classDecl.children().find((c: SgNode) => c.kind() === 'type_identifier');
+    const nameNode = classDecl
+      .children()
+      .find((c: SgNode) => c.kind() === 'type_identifier');
     if (nameNode) results.push({ name: nameNode.text(), type: 'class' });
   }
 
   // export const/let/var foo = ...
   const lexDecl = children.find(
-    (c: SgNode) => c.kind() === 'lexical_declaration' || c.kind() === 'variable_declaration',
+    (c: SgNode) =>
+      c.kind() === 'lexical_declaration' || c.kind() === 'variable_declaration',
   );
   if (lexDecl) {
     for (const d of lexDecl.children()) {
       if (d.kind() === 'variable_declarator') {
-        const nameNode = d.children().find((c: SgNode) => c.kind() === 'identifier');
+        const nameNode = d
+          .children()
+          .find((c: SgNode) => c.kind() === 'identifier');
         if (nameNode) results.push({ name: nameNode.text(), type: 'const' });
       }
     }
   }
 
   // export type Foo = ...
-  const typeAlias = children.find((c: SgNode) => c.kind() === 'type_alias_declaration');
+  const typeAlias = children.find(
+    (c: SgNode) => c.kind() === 'type_alias_declaration',
+  );
   if (typeAlias) {
-    const nameNode = typeAlias.children().find((c: SgNode) => c.kind() === 'type_identifier');
+    const nameNode = typeAlias
+      .children()
+      .find((c: SgNode) => c.kind() === 'type_identifier');
     if (nameNode) results.push({ name: nameNode.text(), type: 'type' });
   }
 
   // export interface Foo {}
-  const interfaceDecl = children.find((c: SgNode) => c.kind() === 'interface_declaration');
+  const interfaceDecl = children.find(
+    (c: SgNode) => c.kind() === 'interface_declaration',
+  );
   if (interfaceDecl) {
-    const nameNode = interfaceDecl.children().find((c: SgNode) => c.kind() === 'type_identifier');
+    const nameNode = interfaceDecl
+      .children()
+      .find((c: SgNode) => c.kind() === 'type_identifier');
     if (nameNode) results.push({ name: nameNode.text(), type: 'interface' });
   }
 
@@ -182,13 +221,16 @@ export async function extractDependencies(
   const sg = await getSgModule();
   if (!sg) {
     return {
-      error: '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
+      error:
+        '@ast-grep/napi is not available. Install it with: npm install -g @ast-grep/napi',
       sgLoadError: getSgLoadError(),
     };
   }
 
   try {
-    const ext = filePath.includes('.') ? '.' + filePath.split('.').pop() : '.ts';
+    const ext = filePath.includes('.')
+      ? '.' + filePath.split('.').pop()
+      : '.ts';
     const langStr = EXT_TO_LANG[ext] ?? 'typescript';
     const lang = toLangEnum(sg, langStr);
     const root = sg.parse(lang, source).root();
@@ -223,10 +265,12 @@ export async function extractDependencies(
       }
     });
 
-    const calls: CallInfo[] = Array.from(callCounts.entries()).map(([name, count]) => ({
-      name,
-      count,
-    }));
+    const calls: CallInfo[] = Array.from(callCounts.entries()).map(
+      ([name, count]) => ({
+        name,
+        count,
+      }),
+    );
 
     return { imports, exports, calls };
   } catch (error) {

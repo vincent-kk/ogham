@@ -1,4 +1,8 @@
-import type { CategoryType, FractalNode, FractalTree } from '../../../../types/fractal.js';
+import type {
+  CategoryType,
+  FractalNode,
+  FractalTree,
+} from '../../../../types/fractal.js';
 
 /** Input entry for buildFractalTree */
 export interface NodeEntry {
@@ -18,15 +22,24 @@ export interface NodeEntry {
  * Find the closest parent path.
  * Returns the deepest ancestor path among entries.
  */
+function toComparePath(path: string): string {
+  return path.replace(/\\/g, '/');
+}
+
 function findParentPath(path: string, allPaths: string[]): string | null {
   let bestParent: string | null = null;
   let bestLen = 0;
+  const comparePath = toComparePath(path);
 
   for (const candidate of allPaths) {
     if (candidate === path) continue;
-    if (path.startsWith(candidate + '/') && candidate.length > bestLen) {
+    const compareCandidate = toComparePath(candidate);
+    if (
+      comparePath.startsWith(compareCandidate + '/') &&
+      compareCandidate.length > bestLen
+    ) {
       bestParent = candidate;
-      bestLen = candidate.length;
+      bestLen = compareCandidate.length;
     }
   }
 

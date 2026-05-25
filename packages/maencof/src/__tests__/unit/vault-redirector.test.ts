@@ -77,9 +77,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
-    expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'read',
-    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain('read');
     expect(result.hookSpecificOutput?.additionalContext).toContain('[maencof]');
   });
 
@@ -168,9 +166,7 @@ describe('runVaultRedirector', () => {
     });
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.hookEventName).toBe('PreToolUse');
-    expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'read',
-    );
+    expect(result.hookSpecificOutput?.additionalContext).toContain('read');
   });
 
   it('비마크다운 파일은 hookSpecificOutput이 없다', () => {
@@ -243,7 +239,7 @@ describe('runVaultRedirector', () => {
   it('Glob path가 vault 외부이면 hookSpecificOutput이 없다', () => {
     const result = runVaultRedirector({
       tool_name: 'Glob',
-      tool_input: { pattern: '**/*.md', path: '/tmp' },
+      tool_input: { pattern: '**/*.md', path: join(vaultDir, '..') },
       cwd: vaultDir,
     });
     expect(result.continue).toBe(true);

@@ -1,4 +1,7 @@
-import { FIX_REQUEST_TYPES, type FixRequestType } from '../constants/handoff-tokens.js';
+import {
+  FIX_REQUEST_TYPES,
+  type FixRequestType,
+} from '../constants/handoff-tokens.js';
 
 /**
  * Normalize a fix-request type token from user-authored markdown.

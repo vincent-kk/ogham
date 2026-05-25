@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const VaultConfigSchema = z.object({
   name: z.string().min(1),
@@ -8,7 +8,7 @@ export const VaultConfigSchema = z.object({
 });
 
 export const LensConfigSchema = z.object({
-  version: z.string().default('1.0'),
+  version: z.string().default("1.0"),
   vaults: z.array(VaultConfigSchema).min(1),
 });
 

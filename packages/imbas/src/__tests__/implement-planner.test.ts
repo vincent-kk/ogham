@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { buildImplementPlan } from '../core/implement-planner/implement-planner.js';
 import { renderImplementPlanReport } from '../core/implement-planner/report-renderer.js';
 import type {
-  StoriesManifest,
   DevplanManifest,
+  StoriesManifest,
   StoryItem,
   StoryLink,
   TaskItem,
@@ -18,7 +18,11 @@ function story(id: string, extra: Partial<StoryItem> = {}): StoryItem {
     type: 'Story',
     status: 'pending',
     issue_ref: null,
-    verification: { anchor_link: true, coherence: 'PASS', reverse_inference: 'PASS' },
+    verification: {
+      anchor_link: true,
+      coherence: 'PASS',
+      reverse_inference: 'PASS',
+    },
     size_check: 'PASS',
     split_from: null,
     split_into: [],
@@ -27,7 +31,11 @@ function story(id: string, extra: Partial<StoryItem> = {}): StoryItem {
   };
 }
 
-function task(id: string, blocks: string[] = [], extra: Partial<TaskItem> = {}): TaskItem {
+function task(
+  id: string,
+  blocks: string[] = [],
+  extra: Partial<TaskItem> = {},
+): TaskItem {
   return {
     id,
     title: `Task ${id}`,
@@ -100,7 +108,11 @@ describe('buildImplementPlan basics', () => {
     expect(plan.groups).toHaveLength(1);
     expect(plan.groups[0]!.level).toBe(0);
     expect(plan.groups[0]!.can_parallel).toBe(true);
-    expect(plan.groups[0]!.items.map((i) => i.id).sort()).toEqual(['S1', 'S2', 'S3']);
+    expect(plan.groups[0]!.items.map((i) => i.id).sort()).toEqual([
+      'S1',
+      'S2',
+      'S3',
+    ]);
     expect(plan.cycles_broken).toEqual([]);
     expect(plan.unresolved).toEqual([]);
   });
@@ -124,8 +136,12 @@ describe('buildImplementPlan basics', () => {
       makeStories([story('S1'), story('S2'), story('S3')]),
       makeDevplan([task('T1', ['S1', 'S2']), task('T2', ['S3'])]),
     );
-    const level0 = plan.groups.filter((g) => g.level === 0).flatMap((g) => g.items.map((i) => i.id));
-    const level1 = plan.groups.filter((g) => g.level === 1).flatMap((g) => g.items.map((i) => i.id));
+    const level0 = plan.groups
+      .filter((g) => g.level === 0)
+      .flatMap((g) => g.items.map((i) => i.id));
+    const level1 = plan.groups
+      .filter((g) => g.level === 1)
+      .flatMap((g) => g.items.map((i) => i.id));
     expect(level0.sort()).toEqual(['T1', 'T2']);
     expect(level1.sort()).toEqual(['S1', 'S2', 'S3']);
   });
@@ -135,7 +151,9 @@ describe('buildImplementPlan basics', () => {
 
 describe('buildImplementPlan edge cases', () => {
   it('marks degraded when source is stories-only', () => {
-    const plan = planFor(makeStories([story('S1'), story('S2')]), null, { source: 'stories' });
+    const plan = planFor(makeStories([story('S1'), story('S2')]), null, {
+      source: 'stories',
+    });
     expect(plan.degraded).toBe(true);
     expect(plan.source_manifest).toBe('stories');
   });
@@ -148,14 +166,24 @@ describe('buildImplementPlan edge cases', () => {
       ),
     );
     // S1 is-blocked-by S2 -> S2 must precede S1
-    const levelOfS1 = plan.groups.find((g) => g.items.some((i) => i.id === 'S1'))!.level;
-    const levelOfS2 = plan.groups.find((g) => g.items.some((i) => i.id === 'S2'))!.level;
+    const levelOfS1 = plan.groups.find((g) =>
+      g.items.some((i) => i.id === 'S1'),
+    )!.level;
+    const levelOfS2 = plan.groups.find((g) =>
+      g.items.some((i) => i.id === 'S2'),
+    )!.level;
     expect(levelOfS2).toBeLessThan(levelOfS1);
   });
 
   it('chunks a crowded level into multiple groups when max_parallel is set', () => {
     const plan = planFor(
-      makeStories([story('S1'), story('S2'), story('S3'), story('S4'), story('S5')]),
+      makeStories([
+        story('S1'),
+        story('S2'),
+        story('S3'),
+        story('S4'),
+        story('S5'),
+      ]),
       null,
       { max_parallel: 2 },
     );
@@ -184,10 +212,7 @@ describe('buildImplementPlan edge cases', () => {
 
   it('prefers removing story_link edges over task_blocks edges when breaking cycles', () => {
     const plan = planFor(
-      makeStories(
-        [story('S1'), story('S2')],
-        [link('blocks', 'S2', ['S1'])],
-      ),
+      makeStories([story('S1'), story('S2')], [link('blocks', 'S2', ['S1'])]),
       makeDevplan([task('T1', ['S2'], {}), task('T2', [], {})]),
     );
     // Add an artificial cycle via task blocks -> story link
@@ -215,12 +240,11 @@ describe('buildImplementPlan edge cases', () => {
 
   it('fills depends_on_groups with immediate previous level group ids', () => {
     const plan = planFor(
-      makeStories(
-        [story('S1'), story('S2')],
-        [link('blocks', 'S1', ['S2'])],
-      ),
+      makeStories([story('S1'), story('S2')], [link('blocks', 'S1', ['S2'])]),
     );
-    const level0Ids = plan.groups.filter((g) => g.level === 0).map((g) => g.group_id);
+    const level0Ids = plan.groups
+      .filter((g) => g.level === 0)
+      .map((g) => g.group_id);
     const level1 = plan.groups.find((g) => g.level === 1)!;
     expect(level1.depends_on_groups).toEqual(level0Ids);
   });
@@ -254,10 +278,7 @@ describe('buildImplementPlan edge cases', () => {
 
   it('renders a non-empty markdown report including level headings and group ids', () => {
     const plan = planFor(
-      makeStories(
-        [story('S1'), story('S2')],
-        [link('blocks', 'S1', ['S2'])],
-      ),
+      makeStories([story('S1'), story('S2')], [link('blocks', 'S1', ['S2'])]),
     );
     const report = renderImplementPlanReport(plan);
     expect(report).toContain('Implement Plan');

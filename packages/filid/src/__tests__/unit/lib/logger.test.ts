@@ -85,10 +85,11 @@ describe('createLogger', () => {
     setLogDir('/tmp/test-cache');
     const log = createLogger('cache');
     log.debug('file test');
-    expect(appendFileSync).toHaveBeenCalledWith(
+    const [filePath, content] = vi.mocked(appendFileSync).mock.calls[0];
+    expect(filePath.toString().replace(/\\/g, '/')).toContain(
       '/tmp/test-cache/debug.log',
-      expect.stringContaining('[filid:cache] file test'),
     );
+    expect(content).toEqual(expect.stringContaining('[filid:cache] file test'));
   });
 
   it('does not write to file when logDir is not set', () => {

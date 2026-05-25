@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/maencof` 패키지 루트. 마크다운 기반 Knowledge Graph + Spreading Activation 검색을 제공하는 개인 지식 공간 관리 Claude Code 플러그인.
+`@ogham/maencof` 패키지 루트. 마크다운 기반 Knowledge Graph + Spreading Activation 검색을 제공하는 개인 지식 공간 관리 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 

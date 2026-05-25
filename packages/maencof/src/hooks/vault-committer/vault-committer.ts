@@ -8,6 +8,13 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 
+// ── Constants ────────────────────────────────────────────────────────
+
+import {
+  DEFAULT_SKIP_PATTERN_SOURCE,
+  VAULT_COMMIT_CONFIG_FILE,
+} from '../../constants/vault-committer.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import {
   commitVaultChanges,
   generateCommitMessage,
@@ -16,7 +23,6 @@ import {
   isGitRepo,
   isIndexLocked,
 } from '../git-utils/index.js';
-import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault, metaPath } from '../shared/index.js';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -46,13 +52,6 @@ export type VaultCommitterEvent = 'SessionEnd' | 'UserPromptSubmit';
 export interface VaultCommitterResult {
   continue: boolean;
 }
-
-// ── Constants ────────────────────────────────────────────────────────
-
-import {
-  DEFAULT_SKIP_PATTERN_SOURCE,
-  VAULT_COMMIT_CONFIG_FILE,
-} from '../../constants/vault-committer.js';
 
 export { DEFAULT_SKIP_PATTERN_SOURCE };
 
@@ -92,7 +91,11 @@ export function readVaultCommitConfig(cwd: string): VaultCommitConfig | null {
     }
     return null;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'vault-committer',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return null;
   }
 }
@@ -154,10 +157,10 @@ export function isClearCommand(prompt: string): boolean {
  * For UserPromptSubmit: only proceeds when prompt matches /clear.
  * Every step that fails silently returns { continue: true }.
  */
-export function runVaultCommitter(
+export async function runVaultCommitter(
   input: VaultCommitterInput,
   event?: VaultCommitterEvent,
-): VaultCommitterResult {
+): Promise<VaultCommitterResult> {
   try {
     const cwd = input.cwd ?? process.cwd();
 
@@ -177,20 +180,24 @@ export function runVaultCommitter(
     }
 
     // 3. Git repo check
-    if (!isGitRepo(cwd)) return { continue: true };
+    if (!(await isGitRepo(cwd))) return { continue: true };
 
     // 4. Index lock check
-    const gitRoot = getGitRoot(cwd);
+    const gitRoot = await getGitRoot(cwd);
     if (!gitRoot || isIndexLocked(gitRoot)) return { continue: true };
 
     // 5. Vault changes check
-    if (!hasVaultChanges(cwd)) return { continue: true };
+    if (!(await hasVaultChanges(cwd))) return { continue: true };
 
     // 6. Stage and commit
-    commitVaultChanges(cwd, generateCommitMessage());
+    await commitVaultChanges(cwd, generateCommitMessage());
   } catch (e) {
     const cwd = input.cwd ?? process.cwd();
-    appendErrorLogSafe(cwd, { hook: 'vault-committer', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'vault-committer',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   return { continue: true };

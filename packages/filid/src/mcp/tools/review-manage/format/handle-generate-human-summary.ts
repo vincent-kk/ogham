@@ -1,10 +1,7 @@
 import path from 'node:path';
 
 import type { ReviewManageInput } from '../review-manage.js';
-import {
-  normalizeBranch,
-  tryReadFile,
-} from '../utils/review-utils.js';
+import { normalizeBranch, tryReadFile } from '../utils/review-utils.js';
 
 export async function handleGenerateHumanSummary(
   args: unknown,

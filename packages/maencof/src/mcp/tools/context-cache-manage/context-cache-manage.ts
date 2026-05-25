@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 
 import { z } from 'zod';
 
+import { MAX_PINNED_NODES } from '../../../constants/performance.js';
 import type { PinnedNode } from '../../../hooks/cache-manager/index.js';
 import {
   readPinnedNodes,
@@ -15,7 +16,6 @@ import {
   writeTurnContext,
 } from '../../../hooks/cache-manager/index.js';
 import { buildTurnContext } from '../../../hooks/context-injector/index.js';
-import { MAX_PINNED_NODES } from '../../../constants/performance.js';
 
 export const contextCacheManageInputSchema = {
   action: z

@@ -8,6 +8,7 @@ export default defineConfig({
       "./packages/imbas",
       "./packages/maencof",
       "./packages/maencof-lens",
+      "./shared/cross-platform",
     ],
   },
 });

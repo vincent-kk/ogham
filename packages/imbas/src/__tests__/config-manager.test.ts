@@ -1,14 +1,15 @@
-import { describe, expect, it, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  getConfigValue,
-  setConfigValue,
   applyConfigUpdates,
+  getConfigValue,
   loadConfig,
+  setConfigValue,
 } from '../core/config-manager/config-manager.js';
 import { ImbasConfigSchema } from '../types/config.js';
 import type { ImbasConfig } from '../types/config.js';
@@ -42,7 +43,9 @@ describe('getConfigValue', () => {
 
   it('returns nested value at dot-path', () => {
     const config = defaultConfig();
-    expect(getConfigValue(config, 'defaults.llm_model.validate')).toBe('sonnet');
+    expect(getConfigValue(config, 'defaults.llm_model.validate')).toBe(
+      'sonnet',
+    );
   });
 
   it('returns undefined for missing path', () => {
@@ -63,7 +66,11 @@ describe('setConfigValue', () => {
 
   it('updates nested dot-path value', () => {
     const config = defaultConfig();
-    const updated = setConfigValue(config, 'defaults.llm_model.devplan', 'haiku');
+    const updated = setConfigValue(
+      config,
+      'defaults.llm_model.devplan',
+      'haiku',
+    );
     expect(getConfigValue(updated, 'defaults.llm_model.devplan')).toBe('haiku');
     expect(getConfigValue(config, 'defaults.llm_model.devplan')).toBe('opus');
   });
@@ -76,7 +83,11 @@ describe('setConfigValue', () => {
 
   it('preserves other keys when updating one path', () => {
     const config = defaultConfig();
-    const updated = setConfigValue(config, 'defaults.llm_model.validate', 'haiku');
+    const updated = setConfigValue(
+      config,
+      'defaults.llm_model.validate',
+      'haiku',
+    );
     expect(getConfigValue(updated, 'defaults.llm_model.split')).toBe('sonnet');
     expect(getConfigValue(updated, 'defaults.llm_model.devplan')).toBe('opus');
   });
@@ -86,18 +97,20 @@ describe('applyConfigUpdates', () => {
   it('applies multiple dot-path updates at once', () => {
     const config = defaultConfig();
     const updated = applyConfigUpdates(config, {
-      'version': '3.0',
+      version: '3.0',
       'defaults.llm_model.validate': 'haiku',
       'language.documents': 'en',
     });
     expect(updated.version).toBe('3.0');
-    expect(getConfigValue(updated, 'defaults.llm_model.validate')).toBe('haiku');
+    expect(getConfigValue(updated, 'defaults.llm_model.validate')).toBe(
+      'haiku',
+    );
     expect(getConfigValue(updated, 'language.documents')).toBe('en');
   });
 
   it('is immutable — original unchanged after batch update', () => {
     const config = defaultConfig();
-    applyConfigUpdates(config, { 'version': '9.9' });
+    applyConfigUpdates(config, { version: '9.9' });
     expect(config.version).toBe('1.0');
   });
 
@@ -109,7 +122,9 @@ describe('applyConfigUpdates', () => {
     const updated2 = applyConfigUpdates(updated, {
       'defaults.llm_model.validate': 'opus',
     });
-    expect(getConfigValue(updated2, 'defaults.llm_model.validate')).toBe('opus');
+    expect(getConfigValue(updated2, 'defaults.llm_model.validate')).toBe(
+      'opus',
+    );
   });
 });
 
@@ -127,7 +142,12 @@ describe('loadConfig', () => {
     mkdirSync(join(cwd, '.imbas'), { recursive: true });
     const customConfig = {
       version: '2.0',
-      language: { documents: 'en', skills: 'en', issue_content: 'en', reports: 'en' },
+      language: {
+        documents: 'en',
+        skills: 'en',
+        issue_content: 'en',
+        reports: 'en',
+      },
     };
     writeFileSync(
       join(cwd, '.imbas', 'config.json'),

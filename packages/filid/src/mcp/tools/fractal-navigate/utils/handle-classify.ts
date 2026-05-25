@@ -2,9 +2,14 @@ import {
   type ClassifyInput,
   classifyNode,
 } from '../../../../core/tree/organ-classifier/organ-classifier.js';
-import type { FractalNavigateInput, FractalNavigateOutput } from '../fractal-navigate.js';
+import type {
+  FractalNavigateInput,
+  FractalNavigateOutput,
+} from '../fractal-navigate.js';
 
-export function handleClassify(input: FractalNavigateInput): FractalNavigateOutput {
+export function handleClassify(
+  input: FractalNavigateInput,
+): FractalNavigateOutput {
   // First check if the entry already has a known type in the provided entries
   const entry = input.entries.find((e) => e.path === input.path);
   if (entry && entry.type !== ('directory' as string)) {

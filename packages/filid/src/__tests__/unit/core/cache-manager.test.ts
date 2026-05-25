@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+function toPosixPath(p: string): string {
+  return p.replace(/\\/g, '/');
+}
+
 vi.mock('node:fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:fs')>();
   return {
@@ -53,7 +57,8 @@ describe('cache-manager', () => {
 
   // Test 1: cwdHash — same input returns same 16-char hash
   it('cwdHash: returns consistent 16-char hash for same input', async () => {
-    const { cwdHash } = await import('../../../core/infra/cache-manager/cache-manager.js');
+    const { cwdHash } =
+      await import('../../../core/infra/cache-manager/cache-manager.js');
     const h1 = cwdHash('/some/path');
     const h2 = cwdHash('/some/path');
     expect(h1).toBe(h2);
@@ -66,7 +71,7 @@ describe('cache-manager', () => {
       await import('../../../core/infra/cache-manager/cache-manager.js');
     const dir = getCacheDir('/my/project');
     const hash = cwdHash('/my/project');
-    expect(dir).toContain('plugins/filid');
+    expect(toPosixPath(dir)).toContain('plugins/filid');
     expect(dir).toContain(hash);
   });
 
@@ -94,7 +99,7 @@ describe('cache-manager', () => {
     const { getCacheDir } =
       await import('../../../core/infra/cache-manager/cache-manager.js');
     const dir = getCacheDir('/proj');
-    expect(dir).toContain('/custom/config');
+    expect(toPosixPath(dir)).toContain('/custom/config');
     delete process.env.CLAUDE_CONFIG_DIR;
   });
 

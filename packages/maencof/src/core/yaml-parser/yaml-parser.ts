@@ -1,3 +1,8 @@
+import {
+  YAML_BOOLEAN_NULL,
+  YAML_UNSAFE_START,
+} from '../../constants/regexes.js';
+
 /**
  * @file yaml-parser.ts
  * @description 경량 YAML frontmatter 파서 (regex 기반, gray-matter 의존 없음)
@@ -33,8 +38,6 @@ export function parseScalarValue(raw: string): unknown {
 
   return raw;
 }
-
-import { YAML_BOOLEAN_NULL, YAML_UNSAFE_START } from '../../constants/regexes.js';
 
 /**
  * YAML 직렬화 시 특수문자를 포함하는 문자열을 안전하게 double-quote로 감싼다.

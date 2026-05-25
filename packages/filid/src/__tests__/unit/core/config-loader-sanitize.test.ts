@@ -4,12 +4,7 @@
  * fallback. Covers AC1 (nested unknown key), AC10b (invalid exempt glob),
  * and the pre-mortem-2 bare `**` exempt drop.
  */
-import {
-  existsSync,
-  mkdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -53,9 +48,7 @@ describe('config-loader sanitize (Commit C)', () => {
       });
       const { config, warnings } = loadConfig(tmpDir);
       expect(config).not.toBeNull();
-      expect(
-        warnings.some((w) => w.includes('additional-allowed')),
-      ).toBe(true);
+      expect(warnings.some((w) => w.includes('additional-allowed'))).toBe(true);
       expect(
         'additional-allowed' in (config?.rules['zero-peer-file'] ?? {}),
       ).toBe(false);
@@ -155,8 +148,15 @@ describe('config-loader sanitize (Commit C)', () => {
         .mockImplementation(() => undefined);
       const { warnings } = loadConfig(tmpDir);
       const configWarnLines = consoleErrorSpy.mock.calls
-        .filter((call) => call.some((arg) => String(arg).includes('[filid:config-loader]')))
-        .map((call) => call.slice(1).map((a) => String(a)).join(' '));
+        .filter((call) =>
+          call.some((arg) => String(arg).includes('[filid:config-loader]')),
+        )
+        .map((call) =>
+          call
+            .slice(1)
+            .map((a) => String(a))
+            .join(' '),
+        );
       // Every warning message must appear in console.error output with the
       // config-loader tag, preserving order.
       expect(warnings.length).toBeGreaterThan(0);
@@ -184,11 +184,7 @@ describe('config-loader sanitize (Commit C)', () => {
 
     it('invalid JSON returns null config with a warning', () => {
       mkdirSync(join(tmpDir, '.filid'), { recursive: true });
-      writeFileSync(
-        join(tmpDir, '.filid', 'config.json'),
-        'not-json',
-        'utf8',
-      );
+      writeFileSync(join(tmpDir, '.filid', 'config.json'), 'not-json', 'utf8');
       const { config, warnings } = loadConfig(tmpDir);
       expect(config).toBeNull();
       expect(warnings.length).toBeGreaterThan(0);
@@ -230,7 +226,8 @@ describe('config-loader sanitize (Commit C)', () => {
       expect(config?.['additional-route-patterns']).toEqual(['^@@']);
       expect(
         warnings.some(
-          (w) => w.includes('additional-route-patterns') && w.includes('[invalid'),
+          (w) =>
+            w.includes('additional-route-patterns') && w.includes('[invalid'),
         ),
       ).toBe(true);
     });
@@ -242,8 +239,13 @@ describe('config-loader sanitize (Commit C)', () => {
         'additional-route-patterns': ['^@@', '^~[a-z]+'],
       });
       const { config, warnings } = loadConfig(tmpDir);
-      expect(config?.['additional-route-patterns']).toEqual(['^@@', '^~[a-z]+']);
-      expect(warnings.some((w) => w.includes('additional-route-patterns'))).toBe(false);
+      expect(config?.['additional-route-patterns']).toEqual([
+        '^@@',
+        '^~[a-z]+',
+      ]);
+      expect(
+        warnings.some((w) => w.includes('additional-route-patterns')),
+      ).toBe(false);
     });
   });
 });

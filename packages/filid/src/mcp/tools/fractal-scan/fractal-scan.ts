@@ -24,9 +24,7 @@ export interface FractalScanInput {
  * `nodes` is a `Map`) is converted to a flat `nodes: FractalNode[]` array
  * to avoid Map+Array double serialization in the MCP transport.
  */
-export async function handleFractalScan(
-  args: unknown,
-): Promise<ScanReportDto> {
+export async function handleFractalScan(args: unknown): Promise<ScanReportDto> {
   const input = args as FractalScanInput;
 
   if (!input.path) {

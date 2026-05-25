@@ -14,12 +14,8 @@ import { handleKgNavigate } from '../../tools/kg-navigate/index.js';
 import { handleKgSearch } from '../../tools/kg-search/index.js';
 import { handleKgStatus } from '../../tools/kg-status/index.js';
 import { handleKgSuggestLinks } from '../../tools/kg-suggest-links/index.js';
-
 import { loadGraphIfNeeded } from '../graph-cache/index.js';
-import {
-  registerMutateTool,
-  registerReadTool,
-} from '../middlewares/index.js';
+import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerKgTools(server: McpServer): void {
   // ─── kg_search (fresh read) ──────────────────────────────────────
@@ -30,20 +26,40 @@ export function registerKgTools(server: McpServer): void {
       description:
         'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords).',
       inputSchema: z.object({
-        seed: z.array(z.string()).min(1).describe('Seed nodes (paths or keywords)'),
-        max_results: z.number().int().min(1).max(100).optional().describe(
-          'Maximum results to return (default 10)',
-        ),
-        decay: z.number().min(0).max(1).optional().describe('Decay factor (default 0.7)'),
-        threshold: z.number().min(0).max(1).optional().describe(
-          'Activation threshold (default 0.1)',
-        ),
-        max_hops: z.number().int().min(1).max(20).optional().describe(
-          'Maximum hop count (default 5)',
-        ),
-        layer_filter: z.array(z.number().int().min(1).max(5)).optional().describe(
-          'Layer filter (1-5)',
-        ),
+        seed: z
+          .array(z.string())
+          .min(1)
+          .describe('Seed nodes (paths or keywords)'),
+        max_results: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe('Maximum results to return (default 10)'),
+        decay: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe('Decay factor (default 0.7)'),
+        threshold: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe('Activation threshold (default 0.1)'),
+        max_hops: z
+          .number()
+          .int()
+          .min(1)
+          .max(20)
+          .optional()
+          .describe('Maximum hop count (default 5)'),
+        layer_filter: z
+          .array(z.number().int().min(1).max(5))
+          .optional()
+          .describe('Layer filter (1-5)'),
         sub_layer: z
           .enum(['relational', 'structural', 'topical', 'buffer', 'boundary'])
           .optional()
@@ -69,15 +85,18 @@ export function registerKgTools(server: McpServer): void {
         'Retrieves neighbors (inbound/outbound links, parent/child, siblings) of a specific node.',
       inputSchema: z.object({
         path: z.string().describe('Target node path'),
-        include_inbound: z.boolean().optional().describe(
-          'Include inbound links (default true)',
-        ),
-        include_outbound: z.boolean().optional().describe(
-          'Include outbound links (default true)',
-        ),
-        include_hierarchy: z.boolean().optional().describe(
-          'Include parent/child/siblings (default true)',
-        ),
+        include_inbound: z
+          .boolean()
+          .optional()
+          .describe('Include inbound links (default true)'),
+        include_outbound: z
+          .boolean()
+          .optional()
+          .describe('Include outbound links (default true)'),
+        include_hierarchy: z
+          .boolean()
+          .optional()
+          .describe('Include parent/child/siblings (default true)'),
       }),
     },
     async (_vaultPath, args, graph) => handleKgNavigate(graph, args),
@@ -93,12 +112,17 @@ export function registerKgTools(server: McpServer): void {
         'Returns a context block assembled from documents relevant to the query within a token budget.',
       inputSchema: z.object({
         query: z.string().describe('Search query'),
-        token_budget: z.number().int().min(100).max(10000).optional().describe(
-          'Token budget (default 2000)',
-        ),
-        include_full: z.boolean().optional().describe(
-          'Include full text of top N results (default false)',
-        ),
+        token_budget: z
+          .number()
+          .int()
+          .min(100)
+          .max(10000)
+          .optional()
+          .describe('Token budget (default 2000)'),
+        include_full: z
+          .boolean()
+          .optional()
+          .describe('Include full text of top N results (default false)'),
       }),
     },
     async (vaultPath, args, graph) => handleKgContext(graph, args, vaultPath),
@@ -148,9 +172,10 @@ export function registerKgTools(server: McpServer): void {
         boundary_type: z
           .enum(['project_moc', 'cross_domain', 'synthesis'])
           .describe('Boundary object type'),
-        connected_layers: z.array(z.number().int().min(1).max(5)).min(1).describe(
-          'Connected layer numbers',
-        ),
+        connected_layers: z
+          .array(z.number().int().min(1).max(5))
+          .min(1)
+          .describe('Connected layer numbers'),
         tags: z.array(z.string()).min(1).describe('Tag list (at least 1)'),
       }),
     },
@@ -166,17 +191,33 @@ export function registerKgTools(server: McpServer): void {
       description:
         'Suggests link candidates from the existing knowledge base for a target document. Two-stage algorithm: tag Jaccard similarity + SA reinforcement.',
       inputSchema: z.object({
-        path: z.string().optional().describe('Target document path (existing document)'),
-        tags: z.array(z.string()).optional().describe('Tag list for a new document'),
-        content_hint: z.string().optional().describe(
-          'Partial content of a new document (for keyword extraction)',
-        ),
-        max_suggestions: z.number().int().min(1).max(20).optional().describe(
-          'Maximum suggestions (default 5)',
-        ),
-        min_score: z.number().min(0).max(1).optional().describe(
-          'Minimum similarity threshold (default 0.2)',
-        ),
+        path: z
+          .string()
+          .optional()
+          .describe('Target document path (existing document)'),
+        tags: z
+          .array(z.string())
+          .optional()
+          .describe('Tag list for a new document'),
+        content_hint: z
+          .string()
+          .optional()
+          .describe(
+            'Partial content of a new document (for keyword extraction)',
+          ),
+        max_suggestions: z
+          .number()
+          .int()
+          .min(1)
+          .max(20)
+          .optional()
+          .describe('Maximum suggestions (default 5)'),
+        min_score: z
+          .number()
+          .min(0)
+          .max(1)
+          .optional()
+          .describe('Minimum similarity threshold (default 0.2)'),
       }),
     },
     async (_vaultPath, args, graph) =>

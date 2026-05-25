@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/cogair` 패키지 루트. Gemini CLI / Codex CLI 위임용 Claude Code 플러그인.
+`@ogham/cogair` 패키지 루트. Gemini CLI / Codex CLI 위임용 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 

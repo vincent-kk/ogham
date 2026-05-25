@@ -1,10 +1,5 @@
 import type { FractalNode } from '../../../types/fractal.js';
-import type {
-  Rule,
-  RuleContext,
-  RuleViolation,
-} from '../../../types/rules.js';
-
+import type { Rule, RuleContext, RuleViolation } from '../../../types/rules.js';
 import { loadBuiltinRules } from '../rule-engine/rule-engine.js';
 
 /**

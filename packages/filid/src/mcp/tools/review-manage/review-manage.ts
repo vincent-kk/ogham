@@ -1,3 +1,10 @@
+import { resolveGitRoot } from '../../../core/infra/config-loader/utils/resolve-git-root.js';
+
+import {
+  formatPrComment,
+  formatRevalidateComment,
+  handleGenerateHumanSummary,
+} from './format/review-format.js';
 import { handleCheckCache } from './handlers/check-cache.js';
 import { handleCheckpoint } from './handlers/checkpoint.js';
 import { handleCleanup } from './handlers/cleanup.js';
@@ -5,12 +12,6 @@ import { handleContentHash } from './handlers/content-hash.js';
 import { handleElectCommittee } from './handlers/elect-committee.js';
 import { handleEnsureDir } from './handlers/ensure-dir.js';
 import { handleNormalizeBranch } from './handlers/normalize-branch.js';
-import {
-  formatPrComment,
-  formatRevalidateComment,
-  handleGenerateHumanSummary,
-} from './format/review-format.js';
-import { resolveGitRoot } from '../../../core/infra/config-loader/utils/resolve-git-root.js';
 
 export interface ReviewManageInput {
   action:

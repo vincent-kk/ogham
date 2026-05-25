@@ -3,15 +3,15 @@
  * @description State.json CRUD + transition validation
  * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
  */
-
 import { join } from 'node:path';
-import { readJson, writeJson } from '../../lib/file-io.js';
+
 import { STATE_FILENAME } from '../../constants/index.js';
+import { readJson, writeJson } from '../../lib/file-io.js';
 import { RunStateSchema } from '../../types/state.js';
 import type { RunState, RunTransition } from '../../types/state.js';
-import { validateStartPhase } from '../utils/validate-start-phase.js';
-import { handleCompletePhase } from '../utils/handle-complete-phase.js';
 import { advancePhase } from '../utils/advance-phase.js';
+import { handleCompletePhase } from '../utils/handle-complete-phase.js';
+import { validateStartPhase } from '../utils/validate-start-phase.js';
 
 /** Create a new initial RunState */
 export function createRunState(params: {
@@ -67,12 +67,18 @@ export async function loadRunState(runDir: string): Promise<RunState> {
 }
 
 /** Atomically write state.json to runDir */
-export async function saveRunState(runDir: string, state: RunState): Promise<void> {
+export async function saveRunState(
+  runDir: string,
+  state: RunState,
+): Promise<void> {
   await writeJson(join(runDir, STATE_FILENAME), state);
 }
 
 /** Apply a validated transition to the state, returning the new state */
-export function applyTransition(state: RunState, action: RunTransition): RunState {
+export function applyTransition(
+  state: RunState,
+  action: RunTransition,
+): RunState {
   const now = new Date().toISOString();
 
   switch (action.action) {

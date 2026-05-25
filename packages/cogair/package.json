@@ -46,10 +46,10 @@
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:run": "vitest run",
     "test:e2e": "vitest --config vitest.e2e.config.ts",
-    "test:e2e:run": "vitest run --config vitest.e2e.config.ts",
     "test:e2e:real": "COGAIR_E2E_REAL_CLI=1 vitest run --config vitest.e2e.config.ts",
+    "test:e2e:run": "vitest run --config vitest.e2e.config.ts",
+    "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
@@ -61,6 +61,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@ogham/cross-platform": "workspace:^",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^3.2.4",
     "esbuild": "^0.24.0",

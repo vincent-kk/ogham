@@ -1,4 +1,5 @@
 import type { FractalNode, FractalTree } from '../../../../types/fractal.js';
+
 import { getDescendants } from './get-descendants.js';
 
 /**

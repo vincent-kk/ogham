@@ -1,5 +1,7 @@
 import * as path from 'node:path';
 
+import { pathForCompare } from '@ogham/cross-platform/compat';
+
 export function isAncestorPath(
   filePath: string,
   importPath: string,
@@ -9,5 +11,7 @@ export function isAncestorPath(
   const fileDir = path.dirname(path.resolve(cwd, filePath));
   const resolvedImport = path.resolve(fileDir, importPath);
   const fileAbsolute = path.resolve(cwd, filePath);
-  return fileAbsolute.startsWith(resolvedImport + path.sep);
+  return pathForCompare(fileAbsolute).startsWith(
+    pathForCompare(resolvedImport) + '/',
+  );
 }

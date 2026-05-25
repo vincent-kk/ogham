@@ -3,7 +3,8 @@
  * Verifies test coverage for a shared module's usage sites within the fractal subtree.
  */
 import { readFileSync } from 'node:fs';
-import * as path from 'node:path';
+
+import { isPosixLikePath, portableResolve } from '@ogham/cross-platform/paths';
 
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 import {
@@ -51,9 +52,9 @@ export async function handleCoverageVerify(
   }
 
   // 1. Resolve targetPath
-  const absTarget = path.isAbsolute(input.targetPath)
-    ? input.targetPath
-    : path.join(input.projectRoot, input.targetPath);
+  const absTarget = isPosixLikePath(input.targetPath)
+    ? portableResolve(input.targetPath)
+    : portableResolve(input.projectRoot, input.targetPath);
 
   // 2. Read target module content
   let targetContent: string;
@@ -85,9 +86,9 @@ export async function handleCoverageVerify(
 
   // 5. Find subtree usages (pass pre-scanned tree)
   const subtreeRoot = input.subtreeRoot
-    ? path.isAbsolute(input.subtreeRoot)
-      ? input.subtreeRoot
-      : path.join(input.projectRoot, input.subtreeRoot)
+    ? isPosixLikePath(input.subtreeRoot)
+      ? portableResolve(input.subtreeRoot)
+      : portableResolve(input.projectRoot, input.subtreeRoot)
     : undefined;
 
   const usageSites = await findSubtreeUsages(

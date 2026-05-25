@@ -1,27 +1,40 @@
-import type { ConnectionTestResult, HttpClientConfig, TestConnectionParams } from '../../types/index.js';
-import { CONNECTION_TEST_TIMEOUT } from '../../constants/index.js';
-import { resolveEnvironment, getApiVersion, executeRequest } from '../index.js';
-import { buildAuthHeader } from '../../utils/index.js';
+import type {
+  ConnectionTestResult,
+  HttpClientConfig,
+  TestConnectionParams,
+} from "../../types/index.js";
+import { CONNECTION_TEST_TIMEOUT } from "../../constants/index.js";
+import { resolveEnvironment, getApiVersion, executeRequest } from "../index.js";
+import { buildAuthHeader } from "../../utils/index.js";
 
 function getTestEndpoint(
-  service: 'jira' | 'confluence',
+  service: "jira" | "confluence",
   isCloud: boolean,
-  override?: '2' | '3',
+  override?: "2" | "3",
 ): string {
-  if (service === 'jira') {
-    const version = getApiVersion('jira', isCloud, override);
+  if (service === "jira") {
+    const version = getApiVersion("jira", isCloud, override);
     return `/rest/api/${version}/myself`;
   }
   // Confluence — DC v1 단일 표준이므로 override 미적용
   if (isCloud) {
-    return '/wiki/rest/api/space?limit=1';
+    return "/wiki/rest/api/space?limit=1";
   }
-  return '/rest/api/space?limit=1';
+  return "/rest/api/space?limit=1";
 }
 
 /** Test connection to a Jira or Confluence instance */
-export async function testConnection(params: TestConnectionParams): Promise<ConnectionTestResult> {
-  const { base_url, credentials, username, service, include_body = false, api_version_override } = params;
+export async function testConnection(
+  params: TestConnectionParams,
+): Promise<ConnectionTestResult> {
+  const {
+    base_url,
+    credentials,
+    username,
+    service,
+    include_body = false,
+    api_version_override,
+  } = params;
 
   const env = resolveEnvironment(base_url);
   const endpoint = getTestEndpoint(service, env.is_cloud, api_version_override);
@@ -31,7 +44,7 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
     return {
       service,
       success: false,
-      message: 'Invalid or missing credentials',
+      message: "Invalid or missing credentials",
     };
   }
 
@@ -44,7 +57,7 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
   const start = Date.now();
 
   const response = await executeRequest(clientConfig, {
-    method: 'GET',
+    method: "GET",
     endpoint,
     timeout: CONNECTION_TEST_TIMEOUT,
   });
@@ -55,7 +68,7 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
     const result: ConnectionTestResult = {
       service,
       success: true,
-      message: `Connected to ${service} (${env.is_cloud ? 'Cloud' : 'Server'})`,
+      message: `Connected to ${service} (${env.is_cloud ? "Cloud" : "Server"})`,
       latency_ms,
     };
     if (include_body) {
@@ -64,9 +77,10 @@ export async function testConnection(params: TestConnectionParams): Promise<Conn
     return result;
   }
 
-  const errorMessage = response.error?.code === 'UNAUTHORIZED'
-    ? 'Authentication failed — check your credentials'
-    : response.error?.message ?? 'Connection failed';
+  const errorMessage =
+    response.error?.code === "UNAUTHORIZED"
+      ? "Authentication failed — check your credentials"
+      : (response.error?.message ?? "Connection failed");
 
   return {
     service,

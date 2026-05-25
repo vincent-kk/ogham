@@ -8,12 +8,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { MAENCOF_META_DIR } from '../../constants/directories.js';
 import {
   DEFAULT_DIALOGUE_CONFIG,
   DIALOGUE_CONFIG_FILE,
   DIALOGUE_DISABLE_ENV,
 } from '../../constants/dialogue.js';
+import { MAENCOF_META_DIR } from '../../constants/directories.js';
 import {
   isValidDialogueConfig,
   normalizeDialogueConfig,

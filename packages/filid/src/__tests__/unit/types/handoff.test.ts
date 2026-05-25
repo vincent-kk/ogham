@@ -13,7 +13,12 @@ describe('handoff token enums', () => {
   });
 
   it('exposes the four debt actions', () => {
-    expect(DEBT_ACTIONS).toEqual(['create', 'list', 'resolve', 'calculate-bias']);
+    expect(DEBT_ACTIONS).toEqual([
+      'create',
+      'list',
+      'resolve',
+      'calculate-bias',
+    ]);
   });
 
   it('exposes the four pipeline stages', () => {

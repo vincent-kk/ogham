@@ -2,16 +2,22 @@
  * @file metadata-store-migration.test.ts
  * @description saveGraph/loadGraph 3-shard layout + legacy index.json one-shot migration 검증.
  */
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { MetadataStore } from '../../core/indexer/metadata-store/metadata-store.js';
-import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 import type { NodeId } from '../../types/common.js';
 import { toNodeId } from '../../types/common.js';
+import type { KnowledgeGraph, KnowledgeNode } from '../../types/graph.js';
 
 let vaultDir: string;
 let cacheDir: string;
@@ -68,7 +74,12 @@ describe('MetadataStore.saveGraph 샤드 layout', () => {
 
     const meta = JSON.parse(
       readFileSync(join(cacheDir, 'graph-meta.json'), 'utf-8'),
-    ) as { schemaVersion: number; builtAt: string; nodeCount: number; edgeCount: number };
+    ) as {
+      schemaVersion: number;
+      builtAt: string;
+      nodeCount: number;
+      edgeCount: number;
+    };
     expect(meta.schemaVersion).toBe(2);
     expect(meta.builtAt).toBe('2026-01-01T00:00:00Z');
     expect(meta.nodeCount).toBe(1);
@@ -78,7 +89,13 @@ describe('MetadataStore.saveGraph 샤드 layout', () => {
   it('legacy index.json 이 잔존해 있으면 saveGraph 가 정리한다', async () => {
     writeFileSync(
       join(cacheDir, 'index.json'),
-      JSON.stringify({ nodes: [], edges: [], builtAt: 'x', nodeCount: 0, edgeCount: 0 }),
+      JSON.stringify({
+        nodes: [],
+        edges: [],
+        builtAt: 'x',
+        nodeCount: 0,
+        edgeCount: 0,
+      }),
       'utf-8',
     );
     expect(existsSync(join(cacheDir, 'index.json'))).toBe(true);
@@ -185,7 +202,13 @@ describe('MetadataStore.cacheExists', () => {
   it('legacy index.json 만 있어도 true', async () => {
     writeFileSync(
       join(cacheDir, 'index.json'),
-      JSON.stringify({ nodes: [], edges: [], builtAt: '', nodeCount: 0, edgeCount: 0 }),
+      JSON.stringify({
+        nodes: [],
+        edges: [],
+        builtAt: '',
+        nodeCount: 0,
+        edgeCount: 0,
+      }),
       'utf-8',
     );
     const store = new MetadataStore(vaultDir);

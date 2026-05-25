@@ -2,7 +2,6 @@
  * @file core/execution-planner.ts
  * @description Devplan execution order filtering — pending items only
  */
-
 import type { DevplanManifest } from '../../types/manifest.js';
 
 export interface ExecutionPlan {

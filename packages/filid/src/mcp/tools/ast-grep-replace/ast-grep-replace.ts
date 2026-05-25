@@ -5,12 +5,32 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { env } from '@ogham/cross-platform/env';
+
 import {
   getFilesForLanguage,
   getSgLoadError,
   getSgModule,
   toLangEnum,
 } from '../../../ast/ast-grep-shared/ast-grep-shared.js';
+
+const UNIX_SYSTEM_PREFIXES = ['/usr', '/bin', '/sbin', '/etc', '/var/lib'];
+const WINDOWS_SYSTEM_PREFIXES = [
+  'C:\\Windows\\System32',
+  'C:\\Windows\\SysWOW64',
+  'C:\\Program Files',
+  'C:\\Program Files (x86)',
+];
+
+function isSystemPath(absolutePath: string): boolean {
+  if (env.isWindows) {
+    const normalised = absolutePath.toLowerCase();
+    return WINDOWS_SYSTEM_PREFIXES.some((p) =>
+      normalised.startsWith(p.toLowerCase()),
+    );
+  }
+  return UNIX_SYSTEM_PREFIXES.some((p) => absolutePath.startsWith(p));
+}
 
 export interface AstGrepReplaceInput {
   /** Pattern to match */
@@ -70,8 +90,7 @@ export async function handleAstGrepReplace(
     // not a system directory to prevent accidental modifications outside projects.
     if (!dry_run) {
       const resolvedSearch = resolve(searchPath);
-      const systemPrefixes = ['/usr', '/bin', '/sbin', '/etc', '/var/lib'];
-      if (systemPrefixes.some((p) => resolvedSearch.startsWith(p))) {
+      if (isSystemPath(resolvedSearch)) {
         return {
           error: `Refusing to modify files in system directory "${searchPath}". Only project directories are allowed.`,
         };

@@ -1,6 +1,6 @@
+import { RULE_TO_SEVERITY } from '../../../constants/drift-mappings.js';
 import type { DriftSeverity } from '../../../types/drift.js';
 import type { RuleViolation } from '../../../types/rules.js';
-import { RULE_TO_SEVERITY } from '../../../constants/drift-mappings.js';
 
 /**
  * RuleViolation의 심각도를 DriftSeverity로 변환한다.

@@ -8,10 +8,6 @@ import { afterEach, beforeEach } from 'vitest';
 // stays isolated across e2e specs that mutate config / counter / sessions on disk.
 process.env.HOME = mkdtempSync(join(tmpdir(), 'cogair-e2e-'));
 
-// open_settings normally launches the user's default browser. e2e iterations
-// would spam the desktop, so suppress it for the whole test run.
-process.env.COGAIR_DISABLE_BROWSER = '1';
-
 const E2E_FAKE_ENV_PREFIXES = ['COGAIR_FAKE_'] as const;
 
 function clearFakeEnv(): void {

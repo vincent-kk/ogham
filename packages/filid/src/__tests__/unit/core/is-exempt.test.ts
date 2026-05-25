@@ -52,12 +52,7 @@ describe('isExempt (edge)', () => {
   });
 
   it('ignores non-string / empty-string entries defensively', () => {
-    expect(
-      isExempt(node, [
-        '',
-        'packages/**',
-      ]),
-    ).toBe(true);
+    expect(isExempt(node, ['', 'packages/**'])).toBe(true);
   });
 
   it('accepts a FractalNode-shaped target via duck typing', () => {
@@ -89,9 +84,9 @@ describe('isExempt (edge)', () => {
   });
 
   it('matches path with literal dot in segment (regex-escape safety)', () => {
-    expect(
-      isExempt({ path: 'src/index.test.ts' }, ['src/index.test.ts']),
-    ).toBe(true);
+    expect(isExempt({ path: 'src/index.test.ts' }, ['src/index.test.ts'])).toBe(
+      true,
+    );
     expect(isExempt({ path: 'src/indexXtestXts' }, ['src/index.test.ts'])).toBe(
       false,
     );

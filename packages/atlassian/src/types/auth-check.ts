@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // --- Service status (config-only, no credentials) ---
 
@@ -6,7 +6,9 @@ export const AuthCheckServiceStatusSchema = z.object({
   configured: z.boolean(),
   base_url: z.string().optional(),
 });
-export type AuthCheckServiceStatus = z.infer<typeof AuthCheckServiceStatusSchema>;
+export type AuthCheckServiceStatus = z.infer<
+  typeof AuthCheckServiceStatusSchema
+>;
 
 // --- Connection test result (added when connection_test: true) ---
 
@@ -15,7 +17,9 @@ export const AuthCheckConnectionStatusSchema = z.object({
   message: z.string(),
   latency_ms: z.number().optional(),
 });
-export type AuthCheckConnectionStatus = z.infer<typeof AuthCheckConnectionStatusSchema>;
+export type AuthCheckConnectionStatus = z.infer<
+  typeof AuthCheckConnectionStatusSchema
+>;
 
 // --- User info (Jira /myself only) ---
 

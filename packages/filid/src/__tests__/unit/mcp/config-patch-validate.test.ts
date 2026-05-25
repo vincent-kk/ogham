@@ -33,7 +33,9 @@ describe('config-patch-validate handler', () => {
       const result = await handleConfigPatchValidate({ patch_json: patch });
       expect(result.valid).toBe(false);
       expect(
-        result.errors.some((e) => e.message.toLowerCase().includes('unrecognized')),
+        result.errors.some((e) =>
+          e.message.toLowerCase().includes('unrecognized'),
+        ),
       ).toBe(true);
       expect(result.suggestion).toBeDefined();
       expect(result.suggestion).not.toContain('allowed-no-entry');
@@ -55,9 +57,7 @@ describe('config-patch-validate handler', () => {
 
   describe('edge', () => {
     it('rejects missing patch_json', async () => {
-      await expect(handleConfigPatchValidate({})).rejects.toThrow(
-        /patch_json/,
-      );
+      await expect(handleConfigPatchValidate({})).rejects.toThrow(/patch_json/);
     });
 
     it('rejects non-string patch_json', async () => {
@@ -102,9 +102,7 @@ describe('config-patch-validate handler', () => {
       });
       const result = await handleConfigPatchValidate({ patch_json: patch });
       expect(result.valid).toBe(false);
-      expect(
-        result.errors.some((e) => e.path.includes('severity')),
-      ).toBe(true);
+      expect(result.errors.some((e) => e.path.includes('severity'))).toBe(true);
       expect(result.suggestion).toBeDefined();
       const sug = JSON.parse(result.suggestion as string) as {
         rules: { 'naming-convention': Record<string, unknown> };

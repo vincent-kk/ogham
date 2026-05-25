@@ -93,13 +93,13 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 ## Skills Reference
 
-| Skill | Scope | What it does |
-| --- | --- | --- |
-| `/atlassian:setup` | Common | Auth and connection management (Basic, PAT, OAuth 2.0) |
-| `/atlassian:download` | Common | Unified attachment download for both platforms |
-| `/atlassian:media-analysis` | Common | Download + multimodal analysis of attached images/videos/GIFs |
-| `/atlassian:jira` | Jira | Jira API domain router (15 domains including issue, search, agile, etc.) |
-| `/atlassian:confluence` | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
+| Skill                       | Scope      | What it does                                                                 |
+| --------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `/atlassian:setup`          | Common     | Auth and connection management (Basic, PAT, OAuth 2.0)                       |
+| `/atlassian:download`       | Common     | Unified attachment download for both platforms                               |
+| `/atlassian:media-analysis` | Common     | Download + multimodal analysis of attached images/videos/GIFs                |
+| `/atlassian:jira`           | Jira       | Jira API domain router (15 domains including issue, search, agile, etc.)     |
+| `/atlassian:confluence`     | Confluence | Confluence API domain router (8 domains including page, search, space, etc.) |
 
 ---
 
@@ -119,18 +119,29 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod
 
 ---
 
+## Security
+
+Credentials (`~/.claude/plugins/atlassian/credentials.json`) and config (`~/.claude/plugins/atlassian/config.json`) are stored as plain JSON.
+
+- **macOS / Linux**: files are written with mode `0o600` (owner-only read/write). Existing files with overly permissive modes are tightened on load.
+- **Windows**: Node's `chmod` is effectively a no-op on NTFS, so the `0o600` call leaves the file mode unchanged. File protection relies on the inherited NTFS ACL of the parent directory `~/.claude/plugins/atlassian/`, which by default grants access only to the current user. Do not relocate these files under a directory whose ACL inheritance permits broader access (e.g. `C:\ProgramData\` or `C:\Users\Public\`).
+
+Credentials are never written to stdout or log output.
+
+---
+
 ## Documentation
 
 For technical details and architectural decisions, see the [`.metadata/atlassian/`](../../.metadata/atlassian/) directory:
 
-| Document | Content |
-| --- | --- |
-| [INDEX](../../.metadata/atlassian/INDEX.md) | Architecture overview and layer responsibilities |
-| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration |
-| [auth-ui](../../.metadata/atlassian/auth-ui.md) | Setup web server and HTML form design |
-| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md) | 4 Core MCP tools (`fetch`, `convert`, `auth-check`, `setup`) |
-| [dev/skills](../../.metadata/atlassian/dev/skills.md) | 5 Skills and lazy reference loading mapping |
-| [dev/agents](../../.metadata/atlassian/dev/agents.md) | Jira and Confluence agent domain logic |
+| Document                                                          | Content                                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| [INDEX](../../.metadata/atlassian/INDEX.md)                       | Architecture overview and layer responsibilities             |
+| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration                    |
+| [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | Setup web server and HTML form design                        |
+| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 4 Core MCP tools (`fetch`, `convert`, `auth-check`, `setup`) |
+| [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5 Skills and lazy reference loading mapping                  |
+| [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira and Confluence agent domain logic                       |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
 

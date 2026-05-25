@@ -1,15 +1,15 @@
-import type { AnalysisReport } from '../../../types/report.js';
 import {
-  HEALTH_BASE_SCORE,
+  CRITICAL_DRIFT_CAP,
+  CRITICAL_DRIFT_PENALTY,
   ERROR_PENALTY,
   ERROR_PENALTY_CAP,
+  HEALTH_BASE_SCORE,
+  HIGH_DRIFT_CAP,
+  HIGH_DRIFT_PENALTY,
   WARNING_PENALTY,
   WARNING_PENALTY_CAP,
-  CRITICAL_DRIFT_PENALTY,
-  CRITICAL_DRIFT_CAP,
-  HIGH_DRIFT_PENALTY,
-  HIGH_DRIFT_CAP,
 } from '../../../constants/health-score.js';
+import type { AnalysisReport } from '../../../types/report.js';
 
 /**
  * AnalysisReport에서 건강도 점수(0~100)를 계산한다.
@@ -37,8 +37,14 @@ export function calculateHealthScore(report: AnalysisReport): number {
   score -= Math.min(warningCount * WARNING_PENALTY, WARNING_PENALTY_CAP);
 
   const { bySeverity } = report.drift.drift;
-  score -= Math.min((bySeverity.critical ?? 0) * CRITICAL_DRIFT_PENALTY, CRITICAL_DRIFT_CAP);
-  score -= Math.min((bySeverity.high ?? 0) * HIGH_DRIFT_PENALTY, HIGH_DRIFT_CAP);
+  score -= Math.min(
+    (bySeverity.critical ?? 0) * CRITICAL_DRIFT_PENALTY,
+    CRITICAL_DRIFT_CAP,
+  );
+  score -= Math.min(
+    (bySeverity.high ?? 0) * HIGH_DRIFT_PENALTY,
+    HIGH_DRIFT_CAP,
+  );
 
   return Math.max(0, score);
 }

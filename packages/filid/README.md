@@ -153,9 +153,9 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 ## Skills Reference
 
-| Skill                         | Scope             | What it does                                               |
-| ----------------------------- | ----------------- | ---------------------------------------------------------- |
-| `/filid:setup`             | —                 | Initialize FCA-AI in a project                             |
+| Skill                     | Scope             | What it does                                               |
+| ------------------------- | ----------------- | ---------------------------------------------------------- |
+| `/filid:setup`            | —                 | Initialize FCA-AI in a project                             |
 | `/filid:scan`             | Full project      | Detect rule violations (with optional auto-fix)            |
 | `/filid:sync`             | Full project      | Sync documentation with code changes                       |
 | `/filid:structure-review` | **Full project**  | 6-stage structural health check — periodic or pre-refactor |
@@ -204,8 +204,8 @@ TypeScript 5.7 (+ Compiler API), @modelcontextprotocol/sdk, fast-glob, esbuild, 
 
 For technical details, see the [`.metadata/`](../../.metadata/filid/) directory:
 
-| Document                                             | Content                                                        |
-| ---------------------------------------------------- | -------------------------------------------------------------- |
+| Document                                                       | Content                                                        |
+| -------------------------------------------------------------- | -------------------------------------------------------------- |
 | [ARCHITECTURE](../../.metadata/filid/01-ARCHITECTURE.md)       | Design philosophy, 4-layer architecture, ADRs                  |
 | [BLUEPRINT](../../.metadata/filid/02-BLUEPRINT.md)             | Technical blueprint for 30+ modules                            |
 | [LIFECYCLE](../../.metadata/filid/03-LIFECYCLE.md)             | Skill workflows, agent collaboration, hook timeline            |

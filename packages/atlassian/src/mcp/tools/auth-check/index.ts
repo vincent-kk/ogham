@@ -1,1 +1,1 @@
-export { handleAuthCheck } from './auth-check.js';
+export { handleAuthCheck } from "./auth-check.js";

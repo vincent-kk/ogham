@@ -2,15 +2,21 @@
  * @file weight-calculator.ts
  * @description 엣지 가중치 계산 — P0: 균일 가중치 1.0, Layer별 감쇠, 정규화
  */
+import {
+  LAYER_DECAY_FACTORS,
+  SUBLAYER_DECAY_FACTORS,
+} from '../../constants/weights.js';
 import type { Layer, NodeId, SubLayer } from '../../types/common.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
   KnowledgeNode,
 } from '../../types/graph.js';
-import { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from '../../constants/weights.js';
 
-export { LAYER_DECAY_FACTORS, SUBLAYER_DECAY_FACTORS } from '../../constants/weights.js';
+export {
+  LAYER_DECAY_FACTORS,
+  SUBLAYER_DECAY_FACTORS,
+} from '../../constants/weights.js';
 
 /** 가중치 계산 결과 */
 export interface WeightCalcResult {

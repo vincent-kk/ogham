@@ -1,12 +1,12 @@
-import { stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { stat } from "node:fs/promises";
+import { join } from "node:path";
 
 import {
   MetadataStore,
   mergeStaleNodesIntoGraph,
   READ_REINDEX_CAP,
-} from '@ogham/maencof';
-import type { KnowledgeGraph } from '@ogham/maencof';
+} from "@ogham/maencof";
+import type { KnowledgeGraph } from "@ogham/maencof";
 
 interface CacheEntry {
   graph: KnowledgeGraph;
@@ -100,7 +100,7 @@ export class GraphCache {
 
   private async readStaleMtime(vaultPath: string): Promise<number> {
     try {
-      const file = join(vaultPath, '.maencof', 'stale-nodes.json');
+      const file = join(vaultPath, ".maencof", "stale-nodes.json");
       const s = await stat(file);
       return s.mtimeMs;
     } catch {

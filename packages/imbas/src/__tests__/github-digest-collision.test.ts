@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { describe, expect, it } from 'vitest';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_PATH = join(
@@ -12,7 +13,7 @@ const FIXTURE_PATH = join(
   'test-helpers',
   'fixtures',
   'gh',
-  'digest-collision-2markers.json'
+  'digest-collision-2markers.json',
 );
 
 const DIGEST_MARKER = '<!-- imbas:digest -->';
@@ -24,15 +25,13 @@ interface DigestComment {
   author: { login: string };
 }
 
-function resolveDigest(
-  comments: DigestComment[]
-): DigestComment | undefined {
+function resolveDigest(comments: DigestComment[]): DigestComment | undefined {
   const marked = comments.filter((c) => c.body.includes(DIGEST_MARKER));
   if (marked.length === 0) return undefined;
   return marked.reduce((latest, c) =>
     new Date(c.createdAt).getTime() > new Date(latest.createdAt).getTime()
       ? c
-      : latest
+      : latest,
   );
 }
 

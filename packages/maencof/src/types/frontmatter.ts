@@ -5,6 +5,7 @@
 import { z } from 'zod';
 
 import { L3_SUB_LAYERS, L5_SUB_LAYERS } from '../constants/validation-sets.js';
+
 import { PersonSchema } from './person.js';
 
 /** 서브레이어 Zod 스키마 */

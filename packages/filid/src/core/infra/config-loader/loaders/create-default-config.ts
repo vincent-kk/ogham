@@ -1,4 +1,5 @@
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtin-rule-ids.js';
+
 import type { FilidConfig } from './config-schemas.js';
 
 /**

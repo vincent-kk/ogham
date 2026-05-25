@@ -2,33 +2,30 @@
  * @file server.ts
  * @description imbas MCP server — tool registration + routing
  */
-
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-import { VERSION } from '../../version.js';
 import { CacheTypeSchema } from '../../types/index.js';
-
+import { VERSION } from '../../version.js';
 import { wrapHandler } from '../shared/index.js';
-
 import {
-  handleImbasPing,
-  handleRunCreate,
-  handleRunGet,
-  handleRunTransition,
-  handleRunList,
-  handleManifestGet,
-  handleManifestSave,
-  handleManifestValidate,
-  handleManifestPlan,
-  handleManifestImplementPlan,
-  handleConfigGet,
-  handleConfigSet,
+  handleAstAnalyze,
+  handleAstSearch,
   handleCacheGet,
   handleCacheSet,
-  handleAstSearch,
-  handleAstAnalyze,
+  handleConfigGet,
+  handleConfigSet,
+  handleImbasPing,
+  handleManifestGet,
+  handleManifestImplementPlan,
+  handleManifestPlan,
+  handleManifestSave,
+  handleManifestValidate,
+  handleRunCreate,
+  handleRunGet,
+  handleRunList,
+  handleRunTransition,
 } from '../tools/index.js';
 
 /**
@@ -47,7 +44,11 @@ export function createServer(): McpServer {
     {
       description: 'Health check — returns server status and version',
       inputSchema: z.object({}),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleImbasPing),
   );
@@ -64,7 +65,11 @@ export function createServer(): McpServer {
         supplements: z.array(z.string()).optional(),
         source_issue_ref: z.string().optional(),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleRunCreate),
   );
@@ -77,7 +82,11 @@ export function createServer(): McpServer {
         project_ref: z.string().optional(),
         run_id: z.string().optional(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleRunGet),
   );
@@ -101,7 +110,11 @@ export function createServer(): McpServer {
         pending_review: z.boolean().optional(),
         stories_created: z.number().int().nonnegative().optional(),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleRunTransition),
   );
@@ -113,7 +126,11 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         project_ref: z.string().optional(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleRunList),
   );
@@ -129,7 +146,11 @@ export function createServer(): McpServer {
         run_id: z.string(),
         type: z.enum(['stories', 'devplan', 'implement-plan']),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleManifestGet),
   );
@@ -147,7 +168,11 @@ export function createServer(): McpServer {
         // StoriesManifestSchema.parse() / DevplanManifestSchema.parse().
         manifest: z.unknown().optional(),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleManifestSave),
   );
@@ -161,7 +186,11 @@ export function createServer(): McpServer {
         run_id: z.string(),
         type: z.enum(['stories', 'devplan', 'implement-plan']),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleManifestValidate),
   );
@@ -174,7 +203,11 @@ export function createServer(): McpServer {
         project_ref: z.string(),
         run_id: z.string(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleManifestPlan),
   );
@@ -191,7 +224,11 @@ export function createServer(): McpServer {
         source: z.enum(['stories', 'devplan']).optional(),
         max_parallel: z.number().int().positive().optional(),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleManifestImplementPlan),
   );
@@ -205,7 +242,11 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         field: z.string().optional(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleConfigGet),
   );
@@ -219,7 +260,11 @@ export function createServer(): McpServer {
         // allows any JSON value. Handler validates via dot-path resolution.
         updates: z.record(z.string(), z.unknown()),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleConfigSet),
   );
@@ -234,7 +279,11 @@ export function createServer(): McpServer {
         project_ref: z.string().optional(),
         cache_type: CacheTypeSchema.optional(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleCacheGet),
   );
@@ -250,7 +299,11 @@ export function createServer(): McpServer {
         // is intentional. Handler validates via CacheTypeSchema for the type field.
         data: z.unknown().optional(),
       }),
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleCacheSet),
   );
@@ -268,7 +321,11 @@ export function createServer(): McpServer {
         context: z.number().int().nonnegative().optional(),
         max_results: z.number().int().positive().optional(),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleAstSearch, { checkErrorField: true }),
   );
@@ -280,9 +337,17 @@ export function createServer(): McpServer {
       inputSchema: z.object({
         source: z.string(),
         file_path: z.string().optional(),
-        analysis_type: z.enum(['dependency-graph', 'cyclomatic-complexity', 'full']),
+        analysis_type: z.enum([
+          'dependency-graph',
+          'cyclomatic-complexity',
+          'full',
+        ]),
       }),
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
     },
     wrapHandler(handleAstAnalyze, { checkErrorField: true }),
   );

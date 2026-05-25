@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { TransitionHistoryEntry } from '../../types/agent.js';
 import { MAENCOF_META_DIR } from '../../constants/directories.js';
 import {
   TRANSITION_HISTORY_FILE as HISTORY_FILE,
   TRANSITION_HISTORY_MAX_ENTRIES as MAX_ENTRIES,
 } from '../../constants/transition-history.js';
+import type { TransitionHistoryEntry } from '../../types/agent.js';
 
 function historyPath(cwd: string): string {
   return join(cwd, MAENCOF_META_DIR, HISTORY_FILE);
@@ -19,9 +19,7 @@ function ensureDir(filePath: string): void {
   }
 }
 
-export function readTransitionHistory(
-  cwd: string,
-): TransitionHistoryEntry[] {
+export function readTransitionHistory(cwd: string): TransitionHistoryEntry[] {
   const fp = historyPath(cwd);
   if (!existsSync(fp)) return [];
   try {

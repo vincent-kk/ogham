@@ -1,11 +1,11 @@
-import { stat, chmod } from 'node:fs/promises';
+import { stat, chmod } from "node:fs/promises";
 
-import type { Credentials } from '../../types/index.js';
-import { CREDENTIALS_PATH } from '../../constants/index.js';
-import { readJson, writeJson } from '../../lib/file-io.js';
-import { buildAuthHeader } from '../../utils/index.js';
+import type { Credentials } from "../../types/index.js";
+import { CREDENTIALS_PATH } from "../../constants/index.js";
+import { readJson, writeJson } from "../../lib/file-io.js";
+import { buildAuthHeader } from "../../utils/index.js";
 
-type ServiceName = 'jira' | 'confluence';
+type ServiceName = "jira" | "confluence";
 
 /** Load all credentials from JSON storage. Defense-in-depth: tighten file
  *  permissions to 0o600 if a pre-existing file was created under a permissive

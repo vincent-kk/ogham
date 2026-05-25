@@ -69,6 +69,14 @@ const FORBIDDEN_PATTERNS = [
   /@modelcontextprotocol\/sdk/,
   // CJS dynamic-require shim (filid 0.4.0 module-init crash signature)
   /Dynamic require of/,
+  // cross-platform heavy helpers — MCP bundle only, never in LIGHT hook bundle
+  /\bbinaries\.discover\b/,
+  /\brunHookEntry\b/,
+  /\bselfProbe\b/,
+  /\blogHookFailure\b/,
+  /\bgenerateWindowsCmd\b/,
+  // cross-spawn is heavy; hooks must not pull a spawn wrapper into LIGHT bundle
+  /\bcross-spawn\b/,
 ];
 
 const violations = [];

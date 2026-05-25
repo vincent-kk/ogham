@@ -6,6 +6,7 @@ import type {
   RuleViolation,
 } from '../../../types/rules.js';
 import type { ScanOptions } from '../../../types/scan.js';
+
 import { evaluateRule } from './evaluate-rule.js';
 import { getActiveRules } from './get-active-rules.js';
 import { loadBuiltinRules } from './load-builtin-rules.js';

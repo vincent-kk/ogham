@@ -10,8 +10,8 @@ import type {
   ExportInfo,
   ImportInfo,
 } from '../../types/ast.js';
-
 import { parseSource, walk } from '../parser/parser.js';
+
 import { getCallee } from './utils/get-callee.js';
 import { stripQuotes } from './utils/strip-quotes.js';
 

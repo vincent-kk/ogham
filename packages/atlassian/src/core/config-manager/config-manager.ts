@@ -1,9 +1,9 @@
-import { stat, chmod } from 'node:fs/promises';
+import { stat, chmod } from "node:fs/promises";
 
-import { AtlassianConfigSchema } from '../../types/index.js';
-import type { AtlassianConfig } from '../../types/index.js';
-import { CONFIG_PATH } from '../../constants/index.js';
-import { readJson, writeJson } from '../../lib/file-io.js';
+import { AtlassianConfigSchema } from "../../types/index.js";
+import type { AtlassianConfig } from "../../types/index.js";
+import { CONFIG_PATH } from "../../constants/index.js";
+import { readJson, writeJson } from "../../lib/file-io.js";
 
 const DEFAULT_CONFIG: AtlassianConfig = {};
 
@@ -11,7 +11,9 @@ const DEFAULT_CONFIG: AtlassianConfig = {};
  *  missing. Defense-in-depth: tighten file permissions to 0o600 if a
  *  pre-existing file was created under a permissive umask before saveConfig
  *  was hardened (mirrors loadCredentials in auth-manager). */
-export async function loadConfig(path: string = CONFIG_PATH): Promise<AtlassianConfig> {
+export async function loadConfig(
+  path: string = CONFIG_PATH,
+): Promise<AtlassianConfig> {
   try {
     const s = await stat(path);
     if ((s.mode & 0o077) !== 0) await chmod(path, 0o600);
@@ -22,7 +24,7 @@ export async function loadConfig(path: string = CONFIG_PATH): Promise<AtlassianC
     const raw = await readJson<unknown>(path);
     return AtlassianConfigSchema.parse(raw);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return { ...DEFAULT_CONFIG };
     }
     throw error;

@@ -4,19 +4,19 @@
  * Read-path freshness gating is delegated to middlewares/freshness-guard;
  * background rebuild lifecycle to middlewares/background-rebuild.
  */
-import { homedir } from 'node:os';
 import { resolve } from 'node:path';
+
+import { home } from '@ogham/cross-platform/paths';
 
 import { MetadataStore } from '../../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../../search/query-engine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
-
 import { ensureFreshGraphNonBlocking } from '../middlewares/freshness-guard.js';
 
 /** Blocked prefixes for global config path access */
 const BLOCKED_PREFIXES = [
-  resolve(homedir(), '.claude'),
-  resolve(homedir(), '.config'),
+  resolve(home(), '.claude'),
+  resolve(home(), '.config'),
 ];
 
 /**

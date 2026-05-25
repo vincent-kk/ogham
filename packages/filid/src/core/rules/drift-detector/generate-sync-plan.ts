@@ -1,10 +1,11 @@
+import { SEVERITY_ORDER } from '../../../constants/drift-mappings.js';
 import type {
   DriftItem,
   SyncAction,
   SyncPlan,
   SyncPlanAction,
 } from '../../../types/drift.js';
-import { SEVERITY_ORDER } from '../../../constants/drift-mappings.js';
+
 import { computeOverallRisk } from './utils/compute-overall-risk.js';
 import { isReversible } from './utils/is-reversible.js';
 

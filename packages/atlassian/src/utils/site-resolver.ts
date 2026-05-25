@@ -1,5 +1,5 @@
-import type { ServiceConfig } from '../types/index.js';
-import { extractHostname } from './url.js';
+import type { ServiceConfig } from "../types/index.js";
+import { extractHostname } from "./url.js";
 
 /**
  * Resolve a single ServiceConfig from a multi-site array.
@@ -11,7 +11,7 @@ import { extractHostname } from './url.js';
  * 4. Multiple sites, no disambiguator → error
  */
 export function resolveSiteConfig(
-  service: 'jira' | 'confluence',
+  service: "jira" | "confluence",
   sites: ServiceConfig[],
   baseUrl?: string,
   endpoint?: string,
@@ -60,14 +60,17 @@ export function resolveSiteConfig(
 }
 
 function isAbsoluteUrl(s: string): boolean {
-  return s.startsWith('https://') || s.startsWith('http://');
+  return s.startsWith("https://") || s.startsWith("http://");
 }
 
-function findSiteByUrl(sites: ServiceConfig[], url: string): ServiceConfig | undefined {
+function findSiteByUrl(
+  sites: ServiceConfig[],
+  url: string,
+): ServiceConfig | undefined {
   const targetHostname = extractHostname(url);
   return sites.find((s) => extractHostname(s.base_url) === targetHostname);
 }
 
 function formatSiteList(sites: ServiceConfig[]): string {
-  return sites.map((s) => s.base_url).join(', ');
+  return sites.map((s) => s.base_url).join(", ");
 }

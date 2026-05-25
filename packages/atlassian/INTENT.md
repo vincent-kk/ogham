@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/atlassian` 패키지 루트. Python `mcp-atlassian` 의 네이티브 TypeScript 대체. Jira / Confluence REST API 통합 Claude Code 플러그인.
+`@ogham/atlassian` 패키지 루트. Python `mcp-atlassian` 의 네이티브 TypeScript 대체. Jira / Confluence REST API 통합 Claude Code 플러그인. Windows 호환성은 [`.metadata/cross-platform/`](../../.metadata/cross-platform/) 에서 추적.
 
 ## Structure
 

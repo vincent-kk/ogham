@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
+
 import { getCacheDir } from './get-cache-dir.js';
 import { sessionIdHash } from './session-id-hash.js';
 

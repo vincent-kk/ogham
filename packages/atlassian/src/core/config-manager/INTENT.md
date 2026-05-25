@@ -6,10 +6,10 @@ Atlassian 플러그인 설정 파일(config.json)의 로드·저장·병합을 Z
 
 ## Structure
 
-| 파일 | 역할 |
-|---|---|
+| 파일                | 역할                                           |
+| ------------------- | ---------------------------------------------- |
 | `config-manager.ts` | `loadConfig`, `saveConfig`, `mergeConfig` 구현 |
-| `index.ts` | 배럴 재내보내기 |
+| `index.ts`          | 배럴 재내보내기                                |
 
 ## Boundaries
 
@@ -19,6 +19,7 @@ Atlassian 플러그인 설정 파일(config.json)의 로드·저장·병합을 Z
 - 설정 파일 부재 시 빈 기본값을 반환하고, 그 외 오류는 상위로 전파한다.
 - `mergeConfig`는 얕은 병합 후 스키마 파싱으로 유효성을 재확인한다.
 - index.ts 배럴을 통해서만 외부에 심볼을 노출한다.
+- Win32 에서는 `chmod 0o600` 가 no-op 이며, `~/.claude/plugins/atlassian/` 부모 디렉토리의 NTFS ACL (기본값: 현재 사용자 전용 상속) 이 파일 보호를 담당함을 호출자에게 README Security 섹션으로 안내한다.
 
 ### Ask first
 
@@ -33,8 +34,8 @@ Atlassian 플러그인 설정 파일(config.json)의 로드·저장·병합을 Z
 
 ## Dependencies
 
-| 대상 | 이유 |
-|---|---|
-| `../../types/` | `AtlassianConfig`, `AtlassianConfigSchema` |
-| `../../constants/` | `CONFIG_PATH` 기본 경로 |
-| `../../lib/file-io` | `readJson`, `writeJson` |
+| 대상                | 이유                                       |
+| ------------------- | ------------------------------------------ |
+| `../../types/`      | `AtlassianConfig`, `AtlassianConfigSchema` |
+| `../../constants/`  | `CONFIG_PATH` 기본 경로                    |
+| `../../lib/file-io` | `readJson`, `writeJson`                    |

@@ -2,7 +2,6 @@
  * Shared stdin utilities for imbas hook scripts
  * Provides timeout-protected stdin reading to prevent hangs in subagent environments.
  */
-
 import { STDIN_TIMEOUT_MS } from '../constants/defaults.js';
 
 /**

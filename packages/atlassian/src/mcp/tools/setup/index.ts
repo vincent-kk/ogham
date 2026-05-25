@@ -1,1 +1,1 @@
-export { handleSetup } from './setup.js';
+export { handleSetup } from "./setup.js";

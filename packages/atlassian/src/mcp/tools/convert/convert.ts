@@ -1,5 +1,5 @@
-import { convert } from '../../../converter/index.js';
-import type { ConvertFormat } from '../../../types/index.js';
+import { convert } from "../../../converter/index.js";
+import type { ConvertFormat } from "../../../types/index.js";
 
 interface ConvertParams {
   from: ConvertFormat;
@@ -22,6 +22,12 @@ export function handleConvert(params: ConvertParams): ConvertResult {
     return { success: true, from: params.from, to: params.to, result };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { success: false, from: params.from, to: params.to, result: '', error: message };
+    return {
+      success: false,
+      from: params.from,
+      to: params.to,
+      result: "",
+      error: message,
+    };
   }
 }

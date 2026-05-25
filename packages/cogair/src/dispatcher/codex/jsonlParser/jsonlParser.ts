@@ -1,3 +1,5 @@
+import { normalizeEol } from '@ogham/cross-platform';
+
 import { findThreadId } from './utils/findThreadId.js';
 import { isObject } from './utils/isObject.js';
 import { readObject } from './utils/readObject.js';
@@ -15,7 +17,7 @@ export function parseCodexStream(stdout: string): ParsedCodexStream {
   let response: string | null = null;
   if (!stdout) return { threadId, resolvedModel, response };
 
-  for (const rawLine of stdout.split('\n')) {
+  for (const rawLine of normalizeEol(stdout).split('\n')) {
     const line = rawLine.trim();
     if (!line) continue;
     let parsed: unknown;

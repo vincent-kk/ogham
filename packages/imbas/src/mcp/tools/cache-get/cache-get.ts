@@ -2,13 +2,16 @@
  * @file cache-get.ts
  * @description Read Jira metadata cache
  */
+import { join } from 'node:path';
 
+import { CACHED_AT_FILENAME } from '../../../constants/index.js';
+import {
+  isCacheExpired,
+  loadCache,
+} from '../../../core/cache-manager/cache-manager.js';
 import { loadConfig } from '../../../core/config-manager/config-manager.js';
 import { getCacheDir } from '../../../core/paths/paths.js';
-import { loadCache, isCacheExpired } from '../../../core/cache-manager/cache-manager.js';
 import { readJson } from '../../../lib/file-io.js';
-import { join } from 'node:path';
-import { CACHED_AT_FILENAME } from '../../../constants/index.js';
 import { CachedAtSchema } from '../../../types/cache.js';
 import type { CacheType } from '../../../types/cache.js';
 
@@ -25,7 +28,9 @@ export async function handleCacheGet(input: CacheGetInput) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
     if (!project_ref) {
-      throw new Error('project_ref is required (or set defaults.project_ref in config)');
+      throw new Error(
+        'project_ref is required (or set defaults.project_ref in config)',
+      );
     }
   }
 
@@ -37,7 +42,10 @@ export async function handleCacheGet(input: CacheGetInput) {
 
   let cached_at: string | null = null;
   try {
-    const meta = await readJson(join(cacheDir, CACHED_AT_FILENAME), CachedAtSchema);
+    const meta = await readJson(
+      join(cacheDir, CACHED_AT_FILENAME),
+      CachedAtSchema,
+    );
     cached_at = meta.cached_at;
   } catch {
     // no cached_at.json yet

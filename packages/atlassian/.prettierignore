@@ -1,0 +1,5 @@
+bridge/
+scripts/
+dist/
+node_modules/
+src/**/__generated__/

@@ -10,8 +10,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleMaencofUpdate } from '../../../mcp/tools/maencof-update/maencof-update.js';
 import { handleMaencofRead } from '../../../mcp/tools/maencof-read/maencof-read.js';
+import { handleMaencofUpdate } from '../../../mcp/tools/maencof-update/maencof-update.js';
 
 async function makeTempVault(): Promise<string> {
   return mkdtemp(join(tmpdir(), 'maencof-update-unset-'));
@@ -60,7 +60,9 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
         frontmatter: { unset: [key] },
       });
       expect(result.success).toBe(false);
-      expect(result.message).toContain('Cannot unset protected frontmatter fields');
+      expect(result.message).toContain(
+        'Cannot unset protected frontmatter fields',
+      );
       expect(result.message).toContain(key);
     },
   );
@@ -83,7 +85,10 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
       path: '03_External/topical/x.md',
     });
     expect(readBack.success).toBe(true);
-    const raw = await readFile(join(vault, '03_External/topical/x.md'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '03_External/topical/x.md'),
+      'utf-8',
+    );
     expect(raw).not.toMatch(/^sub_layer:/m);
     expect(raw).toContain(`updated: ${TODAY}`);
   });
@@ -119,7 +124,10 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
       frontmatter: { unset: ['source'] },
     });
     expect(result.success).toBe(true);
-    const raw = await readFile(join(vault, '03_External/topical/z.md'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '03_External/topical/z.md'),
+      'utf-8',
+    );
     expect(raw).not.toMatch(/^source:/m);
   });
 
@@ -152,7 +160,10 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
       frontmatter: { unset: ['sub_layer', 'title'] },
     });
     expect(result.success).toBe(true);
-    const raw = await readFile(join(vault, '03_External/topical/m.md'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '03_External/topical/m.md'),
+      'utf-8',
+    );
     expect(raw).not.toMatch(/^sub_layer:/m);
     expect(raw).not.toMatch(/^title:/m);
   });
@@ -170,7 +181,10 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
       frontmatter: { unset: ['sub_layer'], title: 'New Title' },
     });
     expect(result.success).toBe(true);
-    const raw = await readFile(join(vault, '03_External/topical/c.md'), 'utf-8');
+    const raw = await readFile(
+      join(vault, '03_External/topical/c.md'),
+      'utf-8',
+    );
     expect(raw).not.toMatch(/^sub_layer:/m);
     expect(raw).toMatch(/^title: New Title$/m);
   });
@@ -251,6 +265,8 @@ describe('handleMaencofUpdate — frontmatter.unset', () => {
       frontmatter: { unset: ['title'] },
     });
     expect(result.success).toBe(false);
-    expect(result.message).toContain('Layer 1 documents do not allow frontmatter.unset');
+    expect(result.message).toContain(
+      'Layer 1 documents do not allow frontmatter.unset',
+    );
   });
 });

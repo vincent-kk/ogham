@@ -1,7 +1,7 @@
-import { handleKgContext } from '@ogham/maencof';
-import type { KnowledgeGraph } from '@ogham/maencof';
+import { handleKgContext } from "@ogham/maencof";
+import type { KnowledgeGraph } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
+import { computeEffectiveLayers } from "../../filter/layer-guard/layer-guard.js";
 
 export interface LensContextInput {
   vault?: string;
@@ -17,16 +17,25 @@ export async function handleLensContext(
   vaultPath: string,
   vaultLayers: number[],
 ): Promise<Record<string, unknown>> {
-  const effectiveLayers = computeEffectiveLayers(vaultLayers, input.layer_filter);
+  const effectiveLayers = computeEffectiveLayers(
+    vaultLayers,
+    input.layer_filter,
+  );
 
-  const result = await handleKgContext(graph, {
-    query: input.query,
-    token_budget: input.token_budget,
-    include_full: input.include_full,
-  }, vaultPath);
+  const result = await handleKgContext(
+    graph,
+    {
+      query: input.query,
+      token_budget: input.token_budget,
+      include_full: input.include_full,
+    },
+    vaultPath,
+  );
 
-  if ('error' in result) {
-    return { error: 'Vault index not available. Run kg_build in a maencof session.' };
+  if ("error" in result) {
+    return {
+      error: "Vault index not available. Run kg_build in a maencof session.",
+    };
   }
 
   // Post-filter: remove context items from excluded layers
@@ -35,7 +44,9 @@ export async function handleLensContext(
   if (Array.isArray(filtered.items)) {
     const items = filtered.items as Array<Record<string, unknown>>;
     filtered.items = items.filter(
-      (item) => item.layer === undefined || effectiveLayers.includes(item.layer as number),
+      (item) =>
+        item.layer === undefined ||
+        effectiveLayers.includes(item.layer as number),
     );
   }
 

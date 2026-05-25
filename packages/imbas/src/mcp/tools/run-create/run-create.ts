@@ -2,14 +2,20 @@
  * @file run-create.ts
  * @description Create run directory and initial state.json
  */
+import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 
-import { mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
-import { join, basename } from 'node:path';
-
+import {
+  DEVPLAN_PIPELINE_SOURCE,
+  SOURCE_FILENAME,
+  SUPPLEMENTS_DIRNAME,
+} from '../../../constants/index.js';
 import { getRunsDir } from '../../../core/paths/paths.js';
 import { generateRunId } from '../../../core/run-id-generator/run-id-generator.js';
-import { createRunState, saveRunState } from '../../../core/state-manager/state-manager.js';
-import { SOURCE_FILENAME, SUPPLEMENTS_DIRNAME, DEVPLAN_PIPELINE_SOURCE } from '../../../constants/index.js';
+import {
+  createRunState,
+  saveRunState,
+} from '../../../core/state-manager/state-manager.js';
 
 export interface RunCreateInput {
   project_ref: string;

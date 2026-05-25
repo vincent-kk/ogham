@@ -1,5 +1,6 @@
 import { access, readdir } from 'node:fs/promises';
-import { join } from 'node:path';
+
+import { portableJoin } from '@ogham/cross-platform/paths';
 
 import { ENTRY_CANDIDATES } from '../../../constants/entry-candidates.js';
 
@@ -30,7 +31,7 @@ export async function findEntryPoint(
 ): Promise<string | null> {
   // 1. 후보 파일을 순서대로 확인
   for (const candidate of ENTRY_CANDIDATES) {
-    const full = join(modulePath, candidate);
+    const full = portableJoin(modulePath, candidate);
     if (await fileExists(full)) return full;
   }
 
@@ -44,7 +45,7 @@ export async function findEntryPoint(
       )
       .map((e) => e.name);
     if (tsFiles.length === 1) {
-      return join(modulePath, tsFiles[0]);
+      return portableJoin(modulePath, tsFiles[0]);
     }
   } catch {
     // 디렉토리 읽기 실패

@@ -8,7 +8,6 @@ import {
 } from '../../../core/insight-stats/index.js';
 import type { InsightCategoryFilter } from '../../../types/insight.js';
 import type { MaencofCrudResult } from '../../../types/mcp.js';
-
 import { handleMaencofCreate } from '../maencof-create/index.js';
 
 /** Capture-insight category — maps to InsightCategoryFilter keys. */

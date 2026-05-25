@@ -16,11 +16,11 @@
 import { describe, expectTypeOf, it } from 'vitest';
 
 import {
+  type AllowedEntry,
   AllowedEntrySchema,
+  type FilidConfig,
   FilidConfigSchema,
   RuleOverrideSchema,
-  type AllowedEntry,
-  type FilidConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
 import type { RuleOverride, RuleSeverity } from '../../../types/rules.js';
 

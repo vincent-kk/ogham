@@ -6,7 +6,11 @@ import {
 import { SEVERITY_ORDER } from '../../../core/rules/drift-detector/drift-detector.js';
 import { validateStructure } from '../../../core/rules/fractal-validator/fractal-validator.js';
 import { scanProject } from '../../../core/tree/fractal-tree/fractal-tree.js';
-import type { DriftItem, DriftSeverity, SyncPlan } from '../../../types/drift.js';
+import type {
+  DriftItem,
+  DriftSeverity,
+  SyncPlan,
+} from '../../../types/drift.js';
 
 export interface DriftDetectInput {
   path: string;

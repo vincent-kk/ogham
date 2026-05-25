@@ -2,7 +2,10 @@ import * as path from 'node:path';
 
 import { isOrganByStructure } from './organ-structure-checker.js';
 
-export function checkOrganSubdirectory(segments: string[], cwd: string): string[] {
+export function checkOrganSubdirectory(
+  segments: string[],
+  cwd: string,
+): string[] {
   // 검사 2: organ 내부 하위 디렉토리 생성 (organ은 flat이어야 한다)
   let organIdx = -1;
   let organSegment = '';

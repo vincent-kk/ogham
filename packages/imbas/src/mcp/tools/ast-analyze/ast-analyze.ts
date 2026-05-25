@@ -2,8 +2,10 @@
  * @file ast-analyze.ts
  * @description Dependency graph / cyclomatic complexity analysis
  */
-
-import { extractDependencies, calculateComplexity } from '../../../ast/index.js';
+import {
+  calculateComplexity,
+  extractDependencies,
+} from '../../../ast/index.js';
 import { DEFAULT_ANONYMOUS_PATH } from '../../../constants/defaults.js';
 
 export interface AstAnalyzeInput {

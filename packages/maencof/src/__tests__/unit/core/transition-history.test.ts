@@ -19,7 +19,9 @@ function ensureMeta(cwd: string): void {
   mkdirSync(join(cwd, '.maencof-meta'), { recursive: true });
 }
 
-function makeEntry(overrides?: Partial<TransitionHistoryEntry>): TransitionHistoryEntry {
+function makeEntry(
+  overrides?: Partial<TransitionHistoryEntry>,
+): TransitionHistoryEntry {
   return {
     directive: {
       path: '/doc.md',
@@ -86,21 +88,57 @@ describe('transition-history', () => {
   });
 
   it('getRejectCount counts only matching path and direction', () => {
-    appendTransition(cwd, makeEntry({
-      directive: { path: '/a.md', fromLayer: 3, toLayer: 2, reason: 'r', requestedAt: '', requestedBy: 'system', outcome: 'rejected' },
-    }));
-    appendTransition(cwd, makeEntry({
-      directive: { path: '/a.md', fromLayer: 3, toLayer: 2, reason: 'r', requestedAt: '', requestedBy: 'system', outcome: 'executed' },
-    }));
-    appendTransition(cwd, makeEntry({
-      directive: { path: '/b.md', fromLayer: 3, toLayer: 2, reason: 'r', requestedAt: '', requestedBy: 'system', outcome: 'rejected' },
-    }));
+    appendTransition(
+      cwd,
+      makeEntry({
+        directive: {
+          path: '/a.md',
+          fromLayer: 3,
+          toLayer: 2,
+          reason: 'r',
+          requestedAt: '',
+          requestedBy: 'system',
+          outcome: 'rejected',
+        },
+      }),
+    );
+    appendTransition(
+      cwd,
+      makeEntry({
+        directive: {
+          path: '/a.md',
+          fromLayer: 3,
+          toLayer: 2,
+          reason: 'r',
+          requestedAt: '',
+          requestedBy: 'system',
+          outcome: 'executed',
+        },
+      }),
+    );
+    appendTransition(
+      cwd,
+      makeEntry({
+        directive: {
+          path: '/b.md',
+          fromLayer: 3,
+          toLayer: 2,
+          reason: 'r',
+          requestedAt: '',
+          requestedBy: 'system',
+          outcome: 'rejected',
+        },
+      }),
+    );
     expect(getRejectCount(cwd, '/a.md', '3->2')).toBe(1);
   });
 
   it('handles corrupted JSON gracefully', () => {
     const { writeFileSync } = require('node:fs');
-    writeFileSync(join(cwd, '.maencof-meta', 'transition-history.json'), 'not json');
+    writeFileSync(
+      join(cwd, '.maencof-meta', 'transition-history.json'),
+      'not json',
+    );
     expect(readTransitionHistory(cwd)).toEqual([]);
   });
 

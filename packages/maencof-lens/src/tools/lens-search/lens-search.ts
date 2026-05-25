@@ -1,7 +1,7 @@
-import { handleKgSearch } from '@ogham/maencof';
-import type { KnowledgeGraph, SubLayer } from '@ogham/maencof';
+import { handleKgSearch } from "@ogham/maencof";
+import type { KnowledgeGraph, SubLayer } from "@ogham/maencof";
 
-import { computeEffectiveLayers } from '../../filter/layer-guard/layer-guard.js';
+import { computeEffectiveLayers } from "../../filter/layer-guard/layer-guard.js";
 
 export interface LensSearchInput {
   vault?: string;
@@ -19,7 +19,10 @@ export async function handleLensSearch(
   input: LensSearchInput,
   vaultLayers: number[],
 ): Promise<Record<string, unknown>> {
-  const effectiveLayers = computeEffectiveLayers(vaultLayers, input.layer_filter);
+  const effectiveLayers = computeEffectiveLayers(
+    vaultLayers,
+    input.layer_filter,
+  );
 
   const result = await handleKgSearch(graph, {
     seed: input.seed,
@@ -31,8 +34,10 @@ export async function handleLensSearch(
     sub_layer: input.sub_layer as SubLayer | undefined,
   });
 
-  if ('error' in result) {
-    return { error: 'Vault index not available. Run kg_build in a maencof session.' };
+  if ("error" in result) {
+    return {
+      error: "Vault index not available. Run kg_build in a maencof session.",
+    };
   }
 
   return result as unknown as Record<string, unknown>;

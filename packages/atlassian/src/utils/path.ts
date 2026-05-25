@@ -1,4 +1,4 @@
-import { resolve, isAbsolute } from "node:path";
+import { relative, resolve, isAbsolute } from "node:path";
 import { TEMP_DIR_NAME } from "../constants/index.js";
 
 /** Validate a save path: reject traversal and always resolve under {cwd}/{TEMP_DIR_NAME}/ */
@@ -14,10 +14,12 @@ export function validateSavePath(saveTo: string): string {
 
   if (isAbsolute(relative)) {
     const normalized = resolve(saveTo);
-    if (normalized.startsWith(tmpBase + "/")) {
-      relative = normalized.slice(tmpBase.length + 1);
-    } else if (normalized.startsWith(cwd + "/")) {
-      relative = normalized.slice(cwd.length + 1).replace(new RegExp(`^${TEMP_DIR_NAME}[/\\\\]`), "");
+    const fromTmp = relativePath(tmpBase, normalized);
+    const fromCwd = relativePath(cwd, normalized);
+    if (isContained(fromTmp) && fromTmp !== "") {
+      relative = fromTmp;
+    } else if (isContained(fromCwd) && fromCwd !== "") {
+      relative = fromCwd.replace(new RegExp(`^${TEMP_DIR_NAME}[/\\\\]`), "");
     } else {
       throw new Error(
         'Invalid save path: absolute paths must be under working directory. Use a relative path (e.g., "KAN-27/file.png")',
@@ -30,8 +32,18 @@ export function validateSavePath(saveTo: string): string {
   const result = resolve(tmpBase, relative);
 
   if (!result.startsWith(tmpBase)) {
-    throw new Error(`Invalid save path: must resolve under ${TEMP_DIR_NAME} directory`);
+    throw new Error(
+      `Invalid save path: must resolve under ${TEMP_DIR_NAME} directory`,
+    );
   }
 
   return result;
+}
+
+function relativePath(from: string, to: string): string {
+  return relative(from, to);
+}
+
+function isContained(rel: string): boolean {
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
 }

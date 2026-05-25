@@ -14,11 +14,11 @@
  *   check because it names `[OP:]` / `gh issue *` as part of the
  *   Constraints directive.
  */
-
-import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { describe, expect, it } from 'vitest';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(__dirname, '..', '..');
@@ -86,7 +86,7 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
     (skill) => {
       const content = readSkillMd(skill);
       expect(content).toContain(ANCHOR_LITERAL);
-    }
+    },
   );
 
   it.each(PARTITIONED_SKILLS)(
@@ -101,7 +101,7 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       expect(block).toMatch(/`local`/);
       expect(block).toMatch(/references\/jira\/workflow\.md/);
       expect(block).toMatch(/references\/local\/workflow\.md/);
-    }
+    },
   );
 
   it.each(PARTITIONED_SKILLS)(
@@ -114,7 +114,7 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       // Dispatch table must mention github provider and its workflow path.
       expect(block).toMatch(/`github`/);
       expect(block).toMatch(/references\/github\/workflow\.md/);
-    }
+    },
   );
 
   it.each(PARTITIONED_SKILLS)(
@@ -124,7 +124,7 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       const block = extractConstraintsBlock(content);
       if (!block) throw new Error(`${skill}: missing anchor block`);
       expect(block).toMatch(/^## Constraints$/m);
-    }
+    },
   );
 
   it.each(PARTITIONED_SKILLS)(
@@ -136,9 +136,9 @@ describe('skill-constraints-block — provider dispatch anchor in partitioned SK
       for (const token of FORBIDDEN_BODY_TOKENS) {
         expect(
           bodyOutsideAnchor,
-          `${skill}: SKILL.md body contains forbidden tracker token "${token}" outside the anchor block; move it into references/<provider>/**`
+          `${skill}: SKILL.md body contains forbidden tracker token "${token}" outside the anchor block; move it into references/<provider>/**`,
         ).not.toContain(token);
       }
-    }
+    },
   );
 });

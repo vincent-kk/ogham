@@ -5,6 +5,7 @@ import { createLogger } from '../../../../lib/logger.js';
 import { computeFileSha256 } from '../utils/compute-file-sha256.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
 import { resolvePluginRoot } from '../utils/resolve-plugin-root.js';
+
 import { loadRuleDocsManifest } from './load-rule-docs-manifest.js';
 import type {
   RuleDocStatusEntry,

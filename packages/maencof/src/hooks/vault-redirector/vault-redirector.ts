@@ -3,10 +3,14 @@
  * @description PreToolUse Hook — vault 내 마크다운 파일에 대한 Read/Grep/Glob 사용 시 maencof 도구 안내
  * 차단하지 않고 additionalContext로 안내만 제공
  */
-import { resolve } from 'node:path';
+import { isAbsolute, relative, resolve } from 'node:path';
 
 import { VAULT_REDIRECTOR_TOOL_GUIDANCE as TOOL_GUIDANCE } from '../../constants/vault-redirector.js';
-import { MAENCOF_DIR, MAENCOF_META_DIR, isMaencofVault } from '../shared/index.js';
+import {
+  MAENCOF_DIR,
+  MAENCOF_META_DIR,
+  isMaencofVault,
+} from '../shared/index.js';
 
 export interface VaultRedirectorInput {
   tool_name?: string;
@@ -33,23 +37,22 @@ const INTERNAL_DIRS = [MAENCOF_DIR, MAENCOF_META_DIR] as const;
  * vault 내부 마크다운 파일인지 판별한다.
  */
 export function isVaultInternalPath(cwd: string, filePath: string): boolean {
-  const absPath = resolve(cwd, filePath);
-  const cwdWithSep = cwd.endsWith('/') ? cwd : cwd + '/';
+  const resolvedCwd = resolve(cwd);
+  const absPath = resolve(resolvedCwd, filePath);
+  const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
 
-  if (!absPath.startsWith(cwdWithSep) && absPath !== cwd) {
+  if (
+    relPath === '' ||
+    relPath === '..' ||
+    relPath.startsWith('../') ||
+    isAbsolute(relPath)
+  )
     return false;
-  }
 
-  const relPath = absPath.slice(cwdWithSep.length);
-  for (const dir of INTERNAL_DIRS) {
-    if (relPath.startsWith(dir + '/') || relPath === dir) {
-      return false;
-    }
-  }
+  for (const dir of INTERNAL_DIRS)
+    if (relPath.startsWith(dir + '/') || relPath === dir) return false;
 
-  if (!absPath.endsWith('.md')) {
-    return false;
-  }
+  if (!absPath.endsWith('.md')) return false;
 
   return true;
 }
@@ -59,23 +62,18 @@ export function isVaultInternalPath(cwd: string, filePath: string): boolean {
  * Glob의 path (검색 디렉토리) 검사에 사용된다.
  */
 export function isVaultDocDirectory(cwd: string, dirPath: string): boolean {
-  const absPath = resolve(cwd, dirPath);
-  const cwdWithSep = cwd.endsWith('/') ? cwd : cwd + '/';
+  const resolvedCwd = resolve(cwd);
+  const absPath = resolve(resolvedCwd, dirPath);
+  const relPath = relative(resolvedCwd, absPath).replace(/\\/g, '/');
 
   // vault 루트이거나 하위 디렉토리여야 함
-  if (absPath !== cwd && !absPath.startsWith(cwdWithSep)) {
+  if (relPath === '..' || relPath.startsWith('../') || isAbsolute(relPath))
     return false;
-  }
 
   // 내부 관리 디렉토리 제외
-  if (absPath !== cwd) {
-    const relPath = absPath.slice(cwdWithSep.length);
-    for (const dir of INTERNAL_DIRS) {
-      if (relPath.startsWith(dir + '/') || relPath === dir) {
-        return false;
-      }
-    }
-  }
+  if (relPath !== '')
+    for (const dir of INTERNAL_DIRS)
+      if (relPath.startsWith(dir + '/') || relPath === dir) return false;
 
   return true;
 }
@@ -90,30 +88,24 @@ export function runVaultRedirector(
 ): VaultRedirectorResult {
   const cwd = input.cwd ?? process.cwd();
 
-  if (!isMaencofVault(cwd)) {
-    return { continue: true };
-  }
+  if (!isMaencofVault(cwd)) return { continue: true };
 
   const toolName = input.tool_name ?? '';
 
   // Glob은 pattern + path(디렉토리)를 사용하므로 별도 처리
-  if (toolName === 'Glob') {
-    return handleGlobRedirect(cwd, input.tool_input);
-  }
+  if (toolName === 'Glob') return handleGlobRedirect(cwd, input.tool_input);
 
   const filePath = input.tool_input?.file_path ?? input.tool_input?.path ?? '';
 
-  if (!filePath) {
-    return { continue: true };
-  }
+  if (!filePath) return { continue: true };
 
-  if (!isVaultInternalPath(cwd, filePath)) {
-    return { continue: true };
-  }
+  if (!isVaultInternalPath(cwd, filePath)) return { continue: true };
 
   const suggestion = TOOL_GUIDANCE[toolName] ?? 'maencof MCP tools';
-  const cwdWithSep = cwd.endsWith('/') ? cwd : cwd + '/';
-  const relPath = resolve(cwd, filePath).slice(cwdWithSep.length);
+  const relPath = relative(resolve(cwd), resolve(cwd, filePath)).replace(
+    /\\/g,
+    '/',
+  );
 
   return {
     continue: true,
@@ -140,14 +132,10 @@ function handleGlobRedirect(
   const searchDir = (toolInput?.path as string | undefined) ?? cwd;
 
   // .md 파일을 대상으로 하지 않으면 스킵
-  if (!pattern.includes('.md')) {
-    return { continue: true };
-  }
+  if (!pattern.includes('.md')) return { continue: true };
 
   // 검색 디렉토리가 vault 내 문서 디렉토리인지 확인
-  if (!isVaultDocDirectory(cwd, searchDir)) {
-    return { continue: true };
-  }
+  if (!isVaultDocDirectory(cwd, searchDir)) return { continue: true };
 
   const suggestion = TOOL_GUIDANCE['Glob'] ?? 'maencof MCP tools';
 

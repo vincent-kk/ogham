@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { AutonomyLevel } from '../../types/common.js';
 import { AUTONOMY_CONFIG_FILE as CONFIG_FILE } from '../../constants/autonomy.js';
 import { MAENCOF_META_DIR } from '../../constants/directories.js';
+import type { AutonomyLevel } from '../../types/common.js';
 
 interface AutonomyConfig {
   level: AutonomyLevel;

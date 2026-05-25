@@ -1,4 +1,7 @@
-import type { AtlassianConfig, SetupStatus } from '../../../../../types/index.js';
+import type {
+  AtlassianConfig,
+  SetupStatus,
+} from "../../../../../types/index.js";
 
 export function buildStatus(config: AtlassianConfig): SetupStatus {
   return {

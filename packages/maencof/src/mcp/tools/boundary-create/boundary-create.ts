@@ -5,8 +5,8 @@
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import { L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
+import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import { Layer } from '../../../types/common.js';
 import { validateFrontmatter } from '../../../types/frontmatter.js';
 

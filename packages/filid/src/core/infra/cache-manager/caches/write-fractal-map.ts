@@ -1,9 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getCacheDir, sessionIdHash } from './session-cache.js';
-
 import type { FractalMap } from './read-fractal-map.js';
+import { getCacheDir, sessionIdHash } from './session-cache.js';
 
 /**
  * Write fractal map to cache.

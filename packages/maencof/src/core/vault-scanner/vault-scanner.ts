@@ -10,6 +10,8 @@
 import { readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { VAULT_SCAN_DEFAULT_EXCLUDE as DEFAULT_EXCLUDE } from '../../constants/vault-scanner.js';
+
 /** 스캔된 파일 정보 */
 export interface ScannedFile {
   /** 파일 절대 경로 */
@@ -42,8 +44,6 @@ export interface VaultScanOptions {
   /** 심볼릭 링크 추적 여부 (기본: false) */
   followSymlinks?: boolean;
 }
-
-import { VAULT_SCAN_DEFAULT_EXCLUDE as DEFAULT_EXCLUDE } from '../../constants/vault-scanner.js';
 
 /**
  * vault 디렉토리에서 모든 마크다운 파일을 스캔한다.

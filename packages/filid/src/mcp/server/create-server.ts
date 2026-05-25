@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 import { SUPPORTED_LANGUAGES } from '../../ast/ast-grep-shared/ast-grep-shared.js';
 import { VERSION } from '../../version.js';
-
 import { handleAstAnalyze } from '../tools/ast-analyze/ast-analyze.js';
 import { handleAstGrepReplace } from '../tools/ast-grep-replace/ast-grep-replace.js';
 import { handleAstGrepSearch } from '../tools/ast-grep-search/ast-grep-search.js';
@@ -194,8 +193,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'drift_detect',
     {
-      description:
-        'Detect structural drift between project and FCA-AI rules.',
+      description: 'Detect structural drift between project and FCA-AI rules.',
       inputSchema: z.object({
         path: z.string(),
         severity: z.enum(['critical', 'high', 'medium', 'low']).optional(),
@@ -222,8 +220,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'rule_query',
     {
-      description:
-        'Query or check compliance of FCA-AI structure rules.',
+      description: 'Query or check compliance of FCA-AI structure rules.',
       inputSchema: z.object({
         action: z.enum(['list', 'get', 'check']),
         path: z.string(),
@@ -404,8 +401,7 @@ export function createServer(): McpServer {
   server.registerTool(
     'coverage_verify',
     {
-      description:
-        'Verify per-consumer test coverage for a shared module.',
+      description: 'Verify per-consumer test coverage for a shared module.',
       inputSchema: z.object({
         projectRoot: z.string(),
         targetPath: z.string(),

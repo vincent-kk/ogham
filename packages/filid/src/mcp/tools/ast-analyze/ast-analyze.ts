@@ -3,7 +3,10 @@
  * Wraps AST analysis modules (dependency-extractor, lcom4, cyclomatic-complexity, tree-diff).
  * Requires @ast-grep/napi — returns helpful error if not installed.
  */
-import { getSgLoadError, getSgModule } from '../../../ast/ast-grep-shared/ast-grep-shared.js';
+import {
+  getSgLoadError,
+  getSgModule,
+} from '../../../ast/ast-grep-shared/ast-grep-shared.js';
 import { calculateCC } from '../../../ast/cyclomatic-complexity/cyclomatic-complexity.js';
 import { extractDependencies } from '../../../ast/dependency-extractor/dependency-extractor.js';
 import { calculateLCOM4 } from '../../../ast/lcom4/lcom4.js';

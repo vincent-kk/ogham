@@ -1,22 +1,29 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import os from 'node:os';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { join } from 'node:path';
 
-import { StoriesManifestSchema, DevplanManifestSchema } from '../../types/manifest.js';
-import { handleRunCreate } from '../../mcp/tools/run-create/run-create.js';
-import { handleRunTransition } from '../../mcp/tools/run-transition/run-transition.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { handleManifestGet } from '../../mcp/tools/manifest-get/manifest-get.js';
 import { handleManifestSave } from '../../mcp/tools/manifest-save/manifest-save.js';
 import { handleManifestValidate } from '../../mcp/tools/manifest-validate/manifest-validate.js';
-import { handleManifestGet } from '../../mcp/tools/manifest-get/manifest-get.js';
+import { handleRunCreate } from '../../mcp/tools/run-create/run-create.js';
+import { handleRunTransition } from '../../mcp/tools/run-transition/run-transition.js';
+import {
+  DevplanManifestSchema,
+  StoriesManifestSchema,
+} from '../../types/manifest.js';
 
 const require = createRequire(import.meta.url);
 const goldenStories = require('./fixtures/golden-stories-manifest.json');
 const goldenDevplan = require('./fixtures/golden-devplan-manifest.json');
 
 function makeTmpDir(): string {
-  const dir = join(os.tmpdir(), `imbas-e2e-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const dir = join(
+    os.tmpdir(),
+    `imbas-e2e-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
   mkdirSync(dir, { recursive: true });
   return dir;
 }
@@ -41,7 +48,11 @@ describe('Pipeline Integration', () => {
         stories: [
           {
             ...goldenStories.stories[0],
-            verification: { anchor_link: true, coherence: 'MAYBE', reverse_inference: 'PASS' },
+            verification: {
+              anchor_link: true,
+              coherence: 'MAYBE',
+              reverse_inference: 'PASS',
+            },
           },
         ],
       };
@@ -67,7 +78,9 @@ describe('Pipeline Integration', () => {
     it('rejects devplan manifest with invalid execution_order action', () => {
       const bad = {
         ...goldenDevplan,
-        execution_order: [{ step: 1, action: 'invalid_action', items: ['T-1'] }],
+        execution_order: [
+          { step: 1, action: 'invalid_action', items: ['T-1'] },
+        ],
       };
       expect(() => DevplanManifestSchema.parse(bad)).toThrow();
     });
@@ -90,9 +103,17 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({
+        project_ref: 'ALPHA',
+        source_file: src,
+      });
 
-      await handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'validate' });
+      await handleRunTransition({
+        project_ref: 'ALPHA',
+        run_id,
+        action: 'start_phase',
+        phase: 'validate',
+      });
       await handleRunTransition({
         project_ref: 'ALPHA',
         run_id,
@@ -103,10 +124,20 @@ describe('Pipeline Integration', () => {
         warning_issues: 0,
       });
 
-      await handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'split' });
+      await handleRunTransition({
+        project_ref: 'ALPHA',
+        run_id,
+        action: 'start_phase',
+        phase: 'split',
+      });
 
       const manifest = { ...goldenStories, run_id, project_ref: 'ALPHA' };
-      const saveResult = await handleManifestSave({ project_ref: 'ALPHA', run_id, type: 'stories', manifest });
+      const saveResult = await handleManifestSave({
+        project_ref: 'ALPHA',
+        run_id,
+        type: 'stories',
+        manifest,
+      });
       expect(saveResult.path).toContain('stories-manifest.json');
       expect(saveResult.summary.total).toBe(3);
 
@@ -132,10 +163,18 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({
+        project_ref: 'ALPHA',
+        source_file: src,
+      });
 
       await expect(
-        handleRunTransition({ project_ref: 'ALPHA', run_id, action: 'start_phase', phase: 'split' }),
+        handleRunTransition({
+          project_ref: 'ALPHA',
+          run_id,
+          action: 'start_phase',
+          phase: 'split',
+        }),
       ).rejects.toThrow();
     });
 
@@ -143,15 +182,31 @@ describe('Pipeline Integration', () => {
       const src = join(tmpDir, 'source.md');
       writeFileSync(src, '# Epic source\n');
 
-      const { run_id } = await handleRunCreate({ project_ref: 'ALPHA', source_file: src });
+      const { run_id } = await handleRunCreate({
+        project_ref: 'ALPHA',
+        source_file: src,
+      });
 
       const manifest = { ...goldenStories, run_id, project_ref: 'ALPHA' };
-      await handleManifestSave({ project_ref: 'ALPHA', run_id, type: 'stories', manifest });
+      await handleManifestSave({
+        project_ref: 'ALPHA',
+        run_id,
+        type: 'stories',
+        manifest,
+      });
 
-      const getResult = await handleManifestGet({ project_ref: 'ALPHA', run_id, type: 'stories' });
+      const getResult = await handleManifestGet({
+        project_ref: 'ALPHA',
+        run_id,
+        type: 'stories',
+      });
       expect(getResult.summary.total).toBe(3);
 
-      const validateResult = await handleManifestValidate({ project_ref: 'ALPHA', run_id, type: 'stories' });
+      const validateResult = await handleManifestValidate({
+        project_ref: 'ALPHA',
+        run_id,
+        type: 'stories',
+      });
       expect(validateResult.valid).toBe(true);
       expect(validateResult.errors).toHaveLength(0);
     });

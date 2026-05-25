@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { mapReplacer, toolError, toolResult, wrapHandler } from '../mcp/shared/shared.js';
+import {
+  mapReplacer,
+  toolError,
+  toolResult,
+  wrapHandler,
+} from '../mcp/shared/shared.js';
 
 describe('MCP shared utilities', () => {
   describe('toolResult', () => {
@@ -60,7 +65,10 @@ describe('MCP shared utilities', () => {
     });
 
     it('with checkErrorField: true detects error field in result', async () => {
-      const handler = async () => ({ error: 'napi unavailable', sgLoadError: '' });
+      const handler = async () => ({
+        error: 'napi unavailable',
+        sgLoadError: '',
+      });
       const wrapped = wrapHandler(handler, { checkErrorField: true });
       const res = await wrapped({});
       expect((res as { isError?: boolean }).isError).toBeUndefined();
@@ -72,7 +80,9 @@ describe('MCP shared utilities', () => {
       const wrapped = wrapHandler(handler, { checkErrorField: false });
       const res = await wrapped({});
       expect((res as { isError?: boolean }).isError).toBeUndefined();
-      expect(JSON.parse(res.content[0].text)).toEqual({ error: 'napi unavailable' });
+      expect(JSON.parse(res.content[0].text)).toEqual({
+        error: 'napi unavailable',
+      });
     });
   });
 });

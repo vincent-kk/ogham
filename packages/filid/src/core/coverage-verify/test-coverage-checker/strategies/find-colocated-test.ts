@@ -2,7 +2,7 @@
  * @file find-colocated-test.ts
  * @description Strategy 1: 소스 파일과 같은 디렉터리의 `<name>.{test,spec}.{ts,tsx}` 탐색.
  */
-import { dirname, join } from 'node:path';
+import { portableDirname, portableJoin } from '@ogham/cross-platform/paths';
 
 import { moduleName } from './module-name.js';
 import { tryTestFile } from './try-test-file.js';
@@ -15,14 +15,14 @@ import { tryTestFile } from './try-test-file.js';
 export function findColocatedTest(
   sourceFilePath: string,
 ): { testFilePath: string; testCount: number } | null {
-  const dir = dirname(sourceFilePath);
+  const dir = portableDirname(sourceFilePath);
   const name = moduleName(sourceFilePath);
 
   const candidates = [
-    join(dir, `${name}.test.ts`),
-    join(dir, `${name}.spec.ts`),
-    join(dir, `${name}.test.tsx`),
-    join(dir, `${name}.spec.tsx`),
+    portableJoin(dir, `${name}.test.ts`),
+    portableJoin(dir, `${name}.spec.ts`),
+    portableJoin(dir, `${name}.test.tsx`),
+    portableJoin(dir, `${name}.spec.tsx`),
   ];
 
   for (const candidate of candidates) {

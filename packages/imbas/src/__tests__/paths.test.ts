@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
 import { join } from 'node:path';
 
+import { describe, expect, it } from 'vitest';
+
 import {
+  getCacheDir,
   getImbasRoot,
   getProjectDir,
-  getCacheDir,
   getRunDir,
 } from '../core/paths/paths.js';
 
@@ -31,7 +32,9 @@ describe('paths', () => {
 
   it('handles different project keys', () => {
     expect(getProjectDir(cwd, 'MYTEAM')).toBe(join(cwd, '.imbas', 'MYTEAM'));
-    expect(getCacheDir(cwd, 'MYTEAM')).toBe(join(cwd, '.imbas', 'MYTEAM', 'cache'));
+    expect(getCacheDir(cwd, 'MYTEAM')).toBe(
+      join(cwd, '.imbas', 'MYTEAM', 'cache'),
+    );
   });
 
   it('handles different run IDs', () => {

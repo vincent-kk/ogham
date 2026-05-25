@@ -1,7 +1,8 @@
+import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
 import type { FractalTree } from '../../../../types/fractal.js';
 import type { ScanOptions } from '../../../../types/scan.js';
-import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
 import { buildFractalTree } from '../tree-builder/build-fractal-tree.js';
+
 import { collectNodeMetadata } from './collect-node-metadata.js';
 import { correctNodeTypes } from './correct-node-types.js';
 import { detectFrameworkReserved } from './detect-frameworks.js';

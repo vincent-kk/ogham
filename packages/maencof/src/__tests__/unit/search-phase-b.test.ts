@@ -8,7 +8,10 @@ import { buildAdjacencyList } from '../../core/graph-builder/graph-builder.js';
 import { runSpreadingActivation } from '../../core/spreading-activation/spreading-activation.js';
 import { handleKgContext } from '../../mcp/tools/kg-context/kg-context.js';
 import { extractBestSnippet } from '../../search/context-assembler/context-assembler.js';
-import { query, resolveSeedNodes } from '../../search/query-engine/query-engine.js';
+import {
+  query,
+  resolveSeedNodes,
+} from '../../search/query-engine/query-engine.js';
 import { Layer, toNodeId } from '../../types/common.js';
 import type {
   KnowledgeEdge,
@@ -379,11 +382,14 @@ describe('B6: Turn Context Directive', () => {
     // buildTurnContext needs a CWD with .maencof — mock by using a non-vault dir
     // The directive text is hardcoded so we can verify it from the source
     const fs = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
     const source = fs.readFileSync(
-      new URL(
-        '../../hooks/context-injector/turn-context/build.ts',
-        import.meta.url,
-      ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
+      fileURLToPath(
+        new URL(
+          '../../hooks/context-injector/turn-context/build.ts',
+          import.meta.url,
+        ),
+      ),
       'utf-8',
     );
     expect(source).toContain('content snippets from top documents');
@@ -392,11 +398,14 @@ describe('B6: Turn Context Directive', () => {
 
   it('context-injector에 kg_context snippet directive가 포함되어야 한다', async () => {
     const fs = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
     const source = fs.readFileSync(
-      new URL(
-        '../../hooks/context-injector/context-injector.ts',
-        import.meta.url,
-      ).pathname.replace('/src/__tests__/unit/../../', '/src/'),
+      fileURLToPath(
+        new URL(
+          '../../hooks/context-injector/context-injector.ts',
+          import.meta.url,
+        ),
+      ),
       'utf-8',
     );
     expect(source).toContain(

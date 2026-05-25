@@ -6,19 +6,17 @@
  *   exist in LanguageConfigSchema / ValidatePhaseSchema / SplitPhaseSchema /
  *   DevplanPhaseSchema. Fails CI on drift.
  */
-
-import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { describe, expect, it } from 'vitest';
+
+import { LanguageConfigSchema } from '../types/config.js';
 import {
-  LanguageConfigSchema,
-} from '../types/config.js';
-import {
-  ValidatePhaseSchema,
-  SplitPhaseSchema,
   DevplanPhaseSchema,
+  SplitPhaseSchema,
+  ValidatePhaseSchema,
 } from '../types/state.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -90,7 +88,9 @@ describe('G1 skill-doc-sync — schema field references', () => {
       for (const m of matches) {
         const key = m[1];
         if (!LANGUAGE_KEYS.includes(key)) {
-          drift.push(`${file}: config.language.${key} not in LanguageConfigSchema (known: ${LANGUAGE_KEYS.join(', ')})`);
+          drift.push(
+            `${file}: config.language.${key} not in LanguageConfigSchema (known: ${LANGUAGE_KEYS.join(', ')})`,
+          );
         }
       }
     }
@@ -101,13 +101,17 @@ describe('G1 skill-doc-sync — schema field references', () => {
     const drift: string[] = [];
     for (const file of files) {
       const structured = extractStructuredText(readFileSync(file, 'utf8'));
-      const matches = structured.matchAll(/phases\.(validate|split|devplan)\.([a-z_]+)/g);
+      const matches = structured.matchAll(
+        /phases\.(validate|split|devplan)\.([a-z_]+)/g,
+      );
       for (const m of matches) {
         const phase = m[1];
         const field = m[2];
         const known = PHASE_FIELD_MAP[phase];
         if (!known || !known.includes(field)) {
-          drift.push(`${file}: phases.${phase}.${field} not in ${phase} phase schema (known: ${known?.join(', ') ?? 'N/A'})`);
+          drift.push(
+            `${file}: phases.${phase}.${field} not in ${phase} phase schema (known: ${known?.join(', ') ?? 'N/A'})`,
+          );
         }
       }
     }

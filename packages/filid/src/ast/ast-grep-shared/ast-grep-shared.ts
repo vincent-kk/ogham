@@ -18,6 +18,12 @@ import { getSgLoadError, getSgModule } from './utils/get-sg-module.js';
 import { toLangEnum } from './utils/to-lang-enum.js';
 
 export { SUPPORTED_LANGUAGES, EXT_TO_LANG };
-export { formatMatch, getFilesForLanguage, getSgLoadError, getSgModule, toLangEnum };
+export {
+  formatMatch,
+  getFilesForLanguage,
+  getSgLoadError,
+  getSgModule,
+  toLangEnum,
+};
 export type { NapiLang, SgModule };
 export { AST_MAX_FILES, AST_SKIP_DIRS };

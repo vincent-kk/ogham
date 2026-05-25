@@ -7,30 +7,25 @@
  *   - AC-Obs: log.warn (via console.error) emits the same message set in the
  *     same order as the returned `configWarnings` array.
  */
-import { execSync } from 'node:child_process';
-import {
-  mkdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleDriftDetect } from '../../../mcp/tools/drift-detect/drift-detect.js';
 import { handleRuleQuery } from '../../../mcp/tools/rule-query/rule-query.js';
 import { handleStructureValidate } from '../../../mcp/tools/structure-validate/structure-validate.js';
 
-vi.mock('node:child_process', async () => {
-  const actual =
-    await vi.importActual<typeof import('node:child_process')>(
-      'node:child_process',
-    );
-  return { ...actual, execSync: vi.fn(actual.execSync) };
+vi.mock('@ogham/cross-platform/spawn', async () => {
+  const actual = await vi.importActual<
+    typeof import('@ogham/cross-platform/spawn')
+  >('@ogham/cross-platform/spawn');
+  return { ...actual, spawnCliSync: vi.fn(actual.spawnCliSync) };
 });
 
-const mockedExecSync = vi.mocked(execSync);
+const mockedSpawnCliSync = vi.mocked(spawnCliSync);
 
 function writeRaw(root: string, raw: unknown): void {
   const dir = join(root, '.filid');
@@ -49,11 +44,23 @@ describe('configWarnings propagation', () => {
     mkdirSync(tmpDir, { recursive: true });
     // Pretend tmpDir is its own git root so loadConfig's resolveGitRoot cache
     // hits this path instead of walking upward.
-    mockedExecSync.mockImplementation(((cmd: string) => {
-      if (typeof cmd === 'string' && cmd.includes('rev-parse'))
-        return tmpDir + '\n';
-      throw new Error('unexpected command');
-    }) as typeof execSync);
+    mockedSpawnCliSync.mockImplementation((bin, args) => {
+      if (bin === 'git' && [...args].includes('rev-parse')) {
+        return {
+          code: 0,
+          stdout: tmpDir + '\n',
+          stderr: '',
+          timedOut: false,
+        };
+      }
+      return {
+        code: 1,
+        stdout: '',
+        stderr: 'unexpected command',
+        timedOut: false,
+        spawnError: new Error('unexpected command'),
+      };
+    });
   });
 
   afterEach(() => {
@@ -138,7 +145,12 @@ describe('configWarnings propagation', () => {
         .filter((call) =>
           call.some((arg) => String(arg).includes('[filid:config-loader]')),
         )
-        .map((call) => call.slice(1).map((a) => String(a)).join(' '));
+        .map((call) =>
+          call
+            .slice(1)
+            .map((a) => String(a))
+            .join(' '),
+        );
       expect(result.configWarnings.length).toBeGreaterThan(0);
       // Each warning appears in log.warn output; order preserved.
       for (let i = 0; i < result.configWarnings.length; i++) {
@@ -176,9 +188,7 @@ describe('configWarnings propagation', () => {
       });
       const result = await handleStructureValidate({ path: tmpDir });
       expect(
-        result.configWarnings.some((w) =>
-          w.includes('invalid glob syntax'),
-        ),
+        result.configWarnings.some((w) => w.includes('invalid glob syntax')),
       ).toBe(true);
     });
   });

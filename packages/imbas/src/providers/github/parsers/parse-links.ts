@@ -22,7 +22,7 @@ const VALID_LINK_TYPES = new Set<ValidLinkType>([
 export type GithubLinks = Partial<Record<ValidLinkType, string[]>>;
 
 function parseLinkLine(
-  line: string
+  line: string,
 ): { type: ValidLinkType; refs: string[] } | null {
   if (/^#{1,2}\s/.test(line)) return null; // caller must treat as boundary
   const trimmed = line.trim();

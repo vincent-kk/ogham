@@ -11,29 +11,30 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "shared/*"
   ],
   "scripts": {
-    "build:all": "yarn workspaces foreach -A run build",
+    "atlassian": "yarn workspace @ogham/atlassian",
+    "build:all": "node scripts/build-all.mjs",
     "changeset": "changeset",
     "changeset:publish": "yarn build:all && changeset publish",
     "changeset:version": "changeset version",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "cogair": "yarn workspace @ogham/cogair",
     "filid": "yarn workspace @ogham/filid",
+    "imbas": "yarn workspace @ogham/imbas",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "maencof": "yarn workspace @ogham/maencof",
-    "imbas": "yarn workspace @ogham/imbas",
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
-    "atlassian": "yarn workspace @ogham/atlassian",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
-    "run:all": "yarn workspaces foreach -A run",
+    "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "node scripts/typecheck-all.mjs"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",

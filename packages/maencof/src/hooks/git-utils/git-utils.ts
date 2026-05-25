@@ -2,70 +2,75 @@
  * @file git-utils.ts
  * @description Git helper utilities for vault-committer hook — repo detection, status, commit
  */
-import { execFileSync, execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/index.js';
+import { spawnCli } from '@ogham/cross-platform';
+
 import { GIT_EXEC_TIMEOUT_MS } from '../../constants/performance.js';
+import { MAENCOF_DIR, MAENCOF_META_DIR } from '../shared/index.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-export const execOpts = (cwd: string) => ({
-  cwd,
-  timeout: GIT_EXEC_TIMEOUT_MS,
-  stdio: 'pipe' as const,
-});
-
-export function isGitRepo(cwd: string): boolean {
-  try {
-    execSync('git rev-parse --is-inside-work-tree', execOpts(cwd));
-    return true;
-  } catch {
-    return false;
-  }
+export async function isGitRepo(cwd: string): Promise<boolean> {
+  const result = await spawnCli('git', ['rev-parse', '--is-inside-work-tree'], {
+    cwd,
+    timeoutMs: GIT_EXEC_TIMEOUT_MS,
+  });
+  return result.code === 0 && !result.spawnError;
 }
 
-export function getGitRoot(cwd: string): string | null {
-  try {
-    return execSync('git rev-parse --show-toplevel', execOpts(cwd))
-      .toString()
-      .trim();
-  } catch {
-    return null;
-  }
+export async function getGitRoot(cwd: string): Promise<string | null> {
+  const result = await spawnCli('git', ['rev-parse', '--show-toplevel'], {
+    cwd,
+    timeoutMs: GIT_EXEC_TIMEOUT_MS,
+  });
+  if (result.code !== 0 || result.spawnError) return null;
+  return result.stdout.trim();
 }
 
 export function isIndexLocked(gitRoot: string): boolean {
   return existsSync(join(gitRoot, '.git', 'index.lock'));
 }
 
-export function hasVaultChanges(cwd: string): boolean {
-  try {
-    const output = execSync(
-      'git status --porcelain -- .maencof/ .maencof-meta/',
-      execOpts(cwd),
-    )
-      .toString()
-      .trim();
-    return output.length > 0;
-  } catch {
-    return false;
-  }
+export async function hasVaultChanges(cwd: string): Promise<boolean> {
+  const result = await spawnCli(
+    'git',
+    ['status', '--porcelain', '--', MAENCOF_DIR + '/', MAENCOF_META_DIR + '/'],
+    { cwd, timeoutMs: GIT_EXEC_TIMEOUT_MS },
+  );
+  if (result.code !== 0 || result.spawnError) return false;
+  return result.stdout.trim().length > 0;
 }
 
-export function commitVaultChanges(cwd: string, commitMessage: string): void {
+export async function commitVaultChanges(
+  cwd: string,
+  commitMessage: string,
+): Promise<void> {
   // Add each directory separately — if one doesn't exist, the other still gets staged
   for (const dir of [MAENCOF_DIR, MAENCOF_META_DIR]) {
     if (existsSync(join(cwd, dir))) {
-      execFileSync('git', ['add', `${dir}/`], execOpts(cwd));
+      const add = await spawnCli('git', ['add', `${dir}/`], {
+        cwd,
+        timeoutMs: GIT_EXEC_TIMEOUT_MS,
+      });
+      if (add.code !== 0 || add.spawnError) {
+        throw new Error(
+          `git add ${dir}/ failed: ${add.stderr.trim() || add.spawnError?.message || `exit ${add.code}`}`,
+        );
+      }
     }
   }
-  execFileSync(
+  const commit = await spawnCli(
     'git',
     ['commit', '--no-verify', '-m', commitMessage],
-    execOpts(cwd),
+    { cwd, timeoutMs: GIT_EXEC_TIMEOUT_MS },
   );
+  if (commit.code !== 0 || commit.spawnError) {
+    throw new Error(
+      `git commit failed: ${commit.stderr.trim() || commit.spawnError?.message || `exit ${commit.code}`}`,
+    );
+  }
 }
 
 /**

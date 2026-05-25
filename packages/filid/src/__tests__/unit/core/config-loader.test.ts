@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   existsSync,
@@ -10,12 +9,11 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-function sha256Hex(content: string): string {
-  return createHash('sha256').update(content).digest('hex');
-}
-
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
 import {
   createDefaultConfig,
   getRuleDocsStatus,
@@ -27,18 +25,38 @@ import {
   syncRuleDocs,
   writeConfig,
 } from '../../../core/infra/config-loader/config-loader.js';
-import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scan-defaults.js';
-import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 
-vi.mock('node:child_process', async () => {
-  const actual =
-    await vi.importActual<typeof import('node:child_process')>(
-      'node:child_process',
-    );
-  return { ...actual, execSync: vi.fn(actual.execSync) };
+function sha256Hex(content: string): string {
+  return createHash('sha256').update(content).digest('hex');
+}
+
+vi.mock('@ogham/cross-platform/spawn', async () => {
+  const actual = await vi.importActual<
+    typeof import('@ogham/cross-platform/spawn')
+  >('@ogham/cross-platform/spawn');
+  return { ...actual, spawnCliSync: vi.fn(actual.spawnCliSync) };
 });
 
-const mockedExecSync = vi.mocked(execSync);
+const mockedSpawnCliSync = vi.mocked(spawnCliSync);
+
+function gitRootResult(root: string): ReturnType<typeof spawnCliSync> {
+  return {
+    code: 0,
+    stdout: root + '\n',
+    stderr: '',
+    timedOut: false,
+  };
+}
+
+function gitRootFailure(): ReturnType<typeof spawnCliSync> {
+  return {
+    code: 128,
+    stdout: '',
+    stderr: 'not a git repository',
+    timedOut: false,
+    spawnError: new Error('not a git repository'),
+  };
+}
 
 describe('config-loader', () => {
   let tmpDir: string;
@@ -210,11 +228,7 @@ describe('config-loader', () => {
     function writeRawConfig(raw: unknown): void {
       const dir = join(tmpDir, '.filid');
       mkdirSync(dir, { recursive: true });
-      writeFileSync(
-        join(dir, 'config.json'),
-        JSON.stringify(raw),
-        'utf8',
-      );
+      writeFileSync(join(dir, 'config.json'), JSON.stringify(raw), 'utf8');
     }
 
     it('loadConfig strips negative scan.maxDepth and falls back', () => {
@@ -343,9 +357,9 @@ describe('config-loader', () => {
       const pluginRoot = setupFakePluginRoot();
       const result = syncRuleDocs(tmpDir, [], { pluginRoot });
       expect(result.copied).toContain(REQUIRED_FILE);
-      expect(
-        existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE)),
-      ).toBe(true);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE))).toBe(
+        true,
+      );
     });
 
     it('preserves existing files when content matches template', () => {
@@ -389,28 +403,28 @@ describe('config-loader', () => {
       const pluginRoot = setupFakePluginRoot(['extra']);
       const result = syncRuleDocs(tmpDir, ['extra'], { pluginRoot });
       expect(result.copied).toContain('extra.md');
-      expect(
-        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
-      ).toBe(true);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', 'extra.md'))).toBe(
+        true,
+      );
     });
 
     it('removes optional rule doc when unselected', () => {
       const pluginRoot = setupFakePluginRoot(['extra']);
       // First deploy
       syncRuleDocs(tmpDir, ['extra'], { pluginRoot });
-      expect(
-        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
-      ).toBe(true);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', 'extra.md'))).toBe(
+        true,
+      );
       // Then unselect
       const result = syncRuleDocs(tmpDir, [], { pluginRoot });
       expect(result.removed).toContain('extra.md');
-      expect(
-        existsSync(join(tmpDir, '.claude', 'rules', 'extra.md')),
-      ).toBe(false);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', 'extra.md'))).toBe(
+        false,
+      );
       // Required rule is still there
-      expect(
-        existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE)),
-      ).toBe(true);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE))).toBe(
+        true,
+      );
     });
 
     it('skips with error reason when pluginRoot cannot be resolved', () => {
@@ -438,8 +452,12 @@ describe('config-loader', () => {
       );
       const result = syncRuleDocs(tmpDir, [], { pluginRoot });
       // Legacy file should have been renamed, not overwritten
-      expect(existsSync(join(tmpDir, '.claude', 'rules', LEGACY_FILE))).toBe(false);
-      expect(existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE))).toBe(true);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', LEGACY_FILE))).toBe(
+        false,
+      );
+      expect(existsSync(join(tmpDir, '.claude', 'rules', REQUIRED_FILE))).toBe(
+        true,
+      );
       // Content preserved (rename is metadata-only; no drift)
       const content = readFileSync(
         join(tmpDir, '.claude', 'rules', REQUIRED_FILE),
@@ -460,7 +478,9 @@ describe('config-loader', () => {
       );
       const result = syncRuleDocs(tmpDir, [], { pluginRoot });
       // Legacy file renamed, then drift detected → required auto-update.
-      expect(existsSync(join(tmpDir, '.claude', 'rules', LEGACY_FILE))).toBe(false);
+      expect(existsSync(join(tmpDir, '.claude', 'rules', LEGACY_FILE))).toBe(
+        false,
+      );
       expect(result.updated).toContain(REQUIRED_FILE);
       const content = readFileSync(
         join(tmpDir, '.claude', 'rules', REQUIRED_FILE),
@@ -517,9 +537,7 @@ describe('config-loader', () => {
       );
       const result = syncRuleDocs(tmpDir, [], { pluginRoot });
       expect(result.skipped.some((s) => s.id === '*')).toBe(true);
-      expect(
-        result.skipped[0]?.reason.includes('templateHash'),
-      ).toBe(true);
+      expect(result.skipped[0]?.reason.includes('templateHash')).toBe(true);
     });
 
     describe('drift detection', () => {
@@ -660,7 +678,9 @@ describe('config-loader', () => {
       expect(fca!.selected).toBe(true); // required → always selected
 
       // Required entry must NOT leak into the checkbox-facing list.
-      expect(status.entries.find((e) => e.id === STATUS_REQUIRED_ID)).toBeUndefined();
+      expect(
+        status.entries.find((e) => e.id === STATUS_REQUIRED_ID),
+      ).toBeUndefined();
 
       const extra = status.entries.find((e) => e.id === 'extra');
       expect(extra).toBeDefined();
@@ -754,11 +774,11 @@ describe('config-loader', () => {
       const subDir = join(fakeGitRoot, 'packages', 'sub');
       mkdirSync(subDir, { recursive: true });
 
-      mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
-          return fakeGitRoot + '\n';
-        throw new Error('unexpected command');
-      }) as typeof execSync);
+      mockedSpawnCliSync.mockImplementation((bin, args) => {
+        if (bin === 'git' && [...args].includes('rev-parse'))
+          return gitRootResult(fakeGitRoot);
+        return gitRootFailure();
+      });
 
       const result = initProject(subDir);
       expect(result.configCreated).toBe(true);
@@ -773,11 +793,11 @@ describe('config-loader', () => {
       const subDir = join(fakeGitRoot, 'packages', 'sub');
       mkdirSync(subDir, { recursive: true });
 
-      mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
-          return fakeGitRoot + '\n';
-        throw new Error('unexpected command');
-      }) as typeof execSync);
+      mockedSpawnCliSync.mockImplementation((bin, args) => {
+        if (bin === 'git' && [...args].includes('rev-parse'))
+          return gitRootResult(fakeGitRoot);
+        return gitRootFailure();
+      });
 
       // Write config at repo root
       writeConfig(fakeGitRoot, createDefaultConfig());
@@ -793,11 +813,11 @@ describe('config-loader', () => {
       const subDir = join(fakeGitRoot, 'packages', 'sub');
       mkdirSync(subDir, { recursive: true });
 
-      mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
-          return fakeGitRoot + '\n';
-        throw new Error('unexpected command');
-      }) as typeof execSync);
+      mockedSpawnCliSync.mockImplementation((bin, args) => {
+        if (bin === 'git' && [...args].includes('rev-parse'))
+          return gitRootResult(fakeGitRoot);
+        return gitRootFailure();
+      });
 
       // init from subdirectory writes config at repo root
       initProject(subDir);
@@ -808,9 +828,7 @@ describe('config-loader', () => {
     });
 
     it('falls back to provided path when git root cannot be determined', () => {
-      mockedExecSync.mockImplementation((() => {
-        throw new Error('not a git repository');
-      }) as unknown as typeof execSync);
+      mockedSpawnCliSync.mockImplementation(() => gitRootFailure());
 
       const result = initProject(tmpDir);
       expect(result.configCreated).toBe(true);
@@ -820,31 +838,31 @@ describe('config-loader', () => {
       );
     });
 
-    it('caches git root resolution — execSync called once per unique path', () => {
+    it('caches git root resolution — spawnCliSync called once per unique path', () => {
       const fakeGitRoot = join(tmpDir, 'repo');
       const subDir = join(fakeGitRoot, 'packages', 'sub');
       mkdirSync(subDir, { recursive: true });
 
-      mockedExecSync.mockImplementation(((cmd: string) => {
-        if (typeof cmd === 'string' && cmd.includes('rev-parse'))
-          return fakeGitRoot + '\n';
-        throw new Error('unexpected command');
-      }) as typeof execSync);
+      mockedSpawnCliSync.mockImplementation((bin, args) => {
+        if (bin === 'git' && [...args].includes('rev-parse'))
+          return gitRootResult(fakeGitRoot);
+        return gitRootFailure();
+      });
 
       // Write config so loadConfig succeeds
       writeConfig(fakeGitRoot, createDefaultConfig());
 
       // Reset call history before measuring caching behavior
-      mockedExecSync.mockClear();
+      mockedSpawnCliSync.mockClear();
 
       // Call multiple times with same path
       loadConfig(subDir);
       loadConfig(subDir);
       loadRuleOverrides(subDir);
 
-      // execSync should be called only once for this path (cached after first call)
-      const revParseCalls = mockedExecSync.mock.calls.filter(
-        ([cmd]) => typeof cmd === 'string' && cmd.includes('rev-parse'),
+      // spawnCliSync should be called only once for this path (cached after first call)
+      const revParseCalls = mockedSpawnCliSync.mock.calls.filter(
+        ([bin, args]) => bin === 'git' && [...args].includes('rev-parse'),
       );
       expect(revParseCalls).toHaveLength(1);
     });

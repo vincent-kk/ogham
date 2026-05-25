@@ -7,6 +7,13 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { MAENCOF_META_DIR } from '../../constants/directories.js';
+import {
+  DEFAULT_INSIGHT_CONFIG,
+  DEFAULT_INSIGHT_STATS,
+  PENDING_FILE,
+  SENSITIVITY_CRITERIA,
+} from '../../constants/insight.js';
 import {
   isValidInsightConfig,
   normalizeInsightConfig,
@@ -17,13 +24,6 @@ import type {
   PendingInsightCapture,
   PendingInsightNotification,
 } from '../../types/insight.js';
-import {
-  DEFAULT_INSIGHT_CONFIG,
-  DEFAULT_INSIGHT_STATS,
-  PENDING_FILE,
-  SENSITIVITY_CRITERIA,
-} from '../../constants/insight.js';
-import { MAENCOF_META_DIR } from '../../constants/directories.js';
 
 function metaPath(cwd: string, ...segments: string[]): string {
   return join(cwd, MAENCOF_META_DIR, ...segments);
@@ -152,9 +152,7 @@ export function updatePromotionStats(
   writeFileSync(statsPath, JSON.stringify(stats), 'utf-8');
 }
 
-export function calculatePrecision(
-  stats: InsightStats,
-): number | null {
+export function calculatePrecision(stats: InsightStats): number | null {
   const denominator = stats.l5_promoted + stats.l5_archived;
   if (denominator === 0) return null;
   return stats.l5_promoted / denominator;

@@ -7,6 +7,7 @@
  *
  * All injected text MUST be in English.
  */
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import {
   isFirstInSession,
   markSessionInjected,
@@ -14,8 +15,8 @@ import {
   writePromptContext,
   writeTurnContext,
 } from '../cache-manager/index.js';
-import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault } from '../shared/index.js';
+
 import {
   buildTurnContext,
   readCachedNodesArray,
@@ -111,7 +112,11 @@ function readTopDomains(cwd: string, limit: number): DomainCount[] {
       .slice(0, limit)
       .map(([domain, count]) => ({ domain, count }));
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'context-injector', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'context-injector',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return [];
   }
 }

@@ -1,91 +1,107 @@
-import { describe, it, expect, vi } from 'vitest';
-import { isPrivateIp } from '../utils/index.js';
-import { validateUrl } from '../core/http-client/ssrf-guard.js';
+import { describe, it, expect, vi } from "vitest";
+import { isPrivateIp } from "../utils/index.js";
+import { validateUrl } from "../core/http-client/ssrf-guard.js";
 
-vi.mock('node:dns/promises', () => ({
+vi.mock("node:dns/promises", () => ({
   resolve: vi.fn(async (host: string) => {
-    if (host === 'jira.internal.corp') return ['10.0.0.42'];
-    throw new Error('not resolvable');
+    if (host === "jira.internal.corp") return ["10.0.0.42"];
+    throw new Error("not resolvable");
   }),
 }));
 
-describe('ssrf-guard', () => {
-  describe('isPrivateIp', () => {
+describe("ssrf-guard", () => {
+  describe("isPrivateIp", () => {
     it.each([
-      '127.0.0.1',
-      '127.0.0.2',
-      '10.0.0.1',
-      '10.255.255.255',
-      '172.16.0.1',
-      '172.31.255.255',
-      '192.168.0.1',
-      '192.168.255.255',
-      '169.254.1.1',
-      '0.0.0.0',
-      '::1',
-      'fc00::1',
-      'fe80::1',
-      '::ffff:127.0.0.1',
-      '::ffff:10.0.0.1',
-      '::ffff:192.168.1.1',
-      '::ffff:169.254.1.1',
-    ])('blocks private IP: %s', (ip) => {
+      "127.0.0.1",
+      "127.0.0.2",
+      "10.0.0.1",
+      "10.255.255.255",
+      "172.16.0.1",
+      "172.31.255.255",
+      "192.168.0.1",
+      "192.168.255.255",
+      "169.254.1.1",
+      "0.0.0.0",
+      "::1",
+      "fc00::1",
+      "fe80::1",
+      "::ffff:127.0.0.1",
+      "::ffff:10.0.0.1",
+      "::ffff:192.168.1.1",
+      "::ffff:169.254.1.1",
+    ])("blocks private IP: %s", (ip) => {
       expect(isPrivateIp(ip)).toBe(true);
     });
 
     it.each([
-      '8.8.8.8',
-      '1.1.1.1',
-      '203.0.113.1',
-      '172.32.0.1',
-      '172.15.255.255',
-      '11.0.0.1',
-      '192.169.0.1',
-    ])('allows public IP: %s', (ip) => {
+      "8.8.8.8",
+      "1.1.1.1",
+      "203.0.113.1",
+      "172.32.0.1",
+      "172.15.255.255",
+      "11.0.0.1",
+      "192.169.0.1",
+    ])("allows public IP: %s", (ip) => {
       expect(isPrivateIp(ip)).toBe(false);
     });
   });
 
-  describe('validateUrl', () => {
-    it('rejects path traversal', async () => {
+  describe("validateUrl", () => {
+    it("rejects path traversal", async () => {
       await expect(
-        validateUrl('https://example.atlassian.net/rest/api/../etc/passwd', 'example.atlassian.net'),
-      ).rejects.toThrow('SSRF: Path traversal');
+        validateUrl(
+          "https://example.atlassian.net/rest/api/../etc/passwd",
+          "example.atlassian.net",
+        ),
+      ).rejects.toThrow("SSRF: Path traversal");
     });
 
-    it('rejects hostname mismatch', async () => {
+    it("rejects hostname mismatch", async () => {
       await expect(
-        validateUrl('https://evil.com/rest/api/3/issue', 'example.atlassian.net'),
-      ).rejects.toThrow('SSRF: Hostname');
+        validateUrl(
+          "https://evil.com/rest/api/3/issue",
+          "example.atlassian.net",
+        ),
+      ).rejects.toThrow("SSRF: Hostname");
     });
 
-    it('rejects non-http protocols', async () => {
+    it("rejects non-http protocols", async () => {
       await expect(
-        validateUrl('ftp://example.atlassian.net/file', 'example.atlassian.net'),
-      ).rejects.toThrow('SSRF: Invalid protocol');
+        validateUrl(
+          "ftp://example.atlassian.net/file",
+          "example.atlassian.net",
+        ),
+      ).rejects.toThrow("SSRF: Invalid protocol");
     });
 
-    it('rejects direct private IP access', async () => {
+    it("rejects direct private IP access", async () => {
       await expect(
-        validateUrl('https://127.0.0.1/api', '127.0.0.1'),
-      ).rejects.toThrow('SSRF: Direct access to private IP');
+        validateUrl("https://127.0.0.1/api", "127.0.0.1"),
+      ).rejects.toThrow("SSRF: Direct access to private IP");
     });
 
-    it('allows valid public URL with matching hostname', async () => {
+    it("allows valid public URL with matching hostname", async () => {
       await expect(
-        validateUrl('https://mycompany.atlassian.net/rest/api/3/issue/TEST-1', 'mycompany.atlassian.net'),
+        validateUrl(
+          "https://mycompany.atlassian.net/rest/api/3/issue/TEST-1",
+          "mycompany.atlassian.net",
+        ),
       ).resolves.toBeUndefined();
     });
 
-    it('allows private-IP DNS resolution when allowPrivateIp is true (on-prem)', async () => {
+    it("allows private-IP DNS resolution when allowPrivateIp is true (on-prem)", async () => {
       await expect(
-        validateUrl('https://jira.internal.corp/rest/api/2/myself', 'jira.internal.corp', true),
+        validateUrl(
+          "https://jira.internal.corp/rest/api/2/myself",
+          "jira.internal.corp",
+          true,
+        ),
       ).resolves.toBeUndefined();
     });
 
-    it('allows direct private-IP hostname when allowPrivateIp is true (on-prem)', async () => {
+    it("allows direct private-IP hostname when allowPrivateIp is true (on-prem)", async () => {
       await expect(
-        validateUrl('https://10.0.0.42/rest/api/2/myself', '10.0.0.42', true),
+        validateUrl("https://10.0.0.42/rest/api/2/myself", "10.0.0.42", true),
       ).resolves.toBeUndefined();
     });
   });

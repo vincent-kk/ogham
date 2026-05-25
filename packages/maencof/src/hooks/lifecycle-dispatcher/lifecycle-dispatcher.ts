@@ -6,15 +6,14 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 
+import { VALID_LIFECYCLE_EVENTS as VALID_EVENTS } from '../../constants/lifecycle.js';
+import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import type {
   LifecycleAction,
   LifecycleConfig,
   LifecycleDispatchResult,
   LifecycleEvent,
 } from '../../types/lifecycle.js';
-
-import { VALID_LIFECYCLE_EVENTS as VALID_EVENTS } from '../../constants/lifecycle.js';
-import { appendErrorLogSafe } from '../../core/error-log/index.js';
 import { isMaencofVault, metaPath } from '../shared/index.js';
 
 /** Input received from Claude Code hook stdin */
@@ -127,7 +126,11 @@ function loadLifecycleConfig(cwd: string): LifecycleConfig | null {
 
     return parsed;
   } catch (e) {
-    appendErrorLogSafe(cwd, { hook: 'lifecycle-dispatcher', error: String(e), timestamp: new Date().toISOString() });
+    appendErrorLogSafe(cwd, {
+      hook: 'lifecycle-dispatcher',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
     return null;
   }
 }

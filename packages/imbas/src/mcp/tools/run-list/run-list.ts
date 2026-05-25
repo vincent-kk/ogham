@@ -2,11 +2,10 @@
  * @file run-list.ts
  * @description List runs for a project
  */
-
 import { existsSync, readdirSync } from 'node:fs';
 
 import { loadConfig } from '../../../core/config-manager/config-manager.js';
-import { getRunsDir, getRunDir } from '../../../core/paths/paths.js';
+import { getRunDir, getRunsDir } from '../../../core/paths/paths.js';
 import { loadRunState } from '../../../core/state-manager/state-manager.js';
 
 export interface RunListInput {
@@ -21,7 +20,9 @@ export async function handleRunList(input: RunListInput) {
     const config = await loadConfig(cwd);
     project_ref = config.defaults.project_ref ?? undefined;
     if (!project_ref) {
-      throw new Error('project_ref is required (or set defaults.project_ref in config)');
+      throw new Error(
+        'project_ref is required (or set defaults.project_ref in config)',
+      );
     }
   }
 

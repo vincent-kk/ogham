@@ -1,7 +1,4 @@
-import type {
-  ServiceCredentials,
-  TokenPayload,
-} from "../types/index.js";
+import type { ServiceCredentials, TokenPayload } from "../types/index.js";
 
 /** Build an Authorization header from service credentials.
  *

@@ -2,7 +2,6 @@
  * @file core/paths.ts
  * @description Path resolution for .imbas/ directory structure
  */
-
 import { join } from 'node:path';
 
 import { IMBAS_ROOT_DIRNAME, RUNS_DIRNAME } from '../../constants/index.js';
@@ -28,7 +27,10 @@ export function getRunsDir(cwd: string, projectKey: string): string {
 }
 
 /** Returns .imbas/<KEY>/runs/<runId>/ */
-export function getRunDir(cwd: string, projectKey: string, runId: string): string {
+export function getRunDir(
+  cwd: string,
+  projectKey: string,
+  runId: string,
+): string {
   return join(getRunsDir(cwd, projectKey), runId);
 }
-

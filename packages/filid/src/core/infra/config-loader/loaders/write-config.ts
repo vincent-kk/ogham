@@ -1,9 +1,13 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  CONFIG_DIR,
+  CONFIG_FILE,
+} from '../../../../constants/infra-defaults.js';
 import { createLogger } from '../../../../lib/logger.js';
-import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
+
 import type { FilidConfig } from './config-schemas.js';
 
 const log = createLogger('config-loader');

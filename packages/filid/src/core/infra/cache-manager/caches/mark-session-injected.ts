@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createLogger } from '../../../../lib/logger.js';
+
 import { getCacheDir } from './get-cache-dir.js';
 import { pruneOldSessions } from './prune-old-sessions.js';
 import { sessionIdHash } from './session-id-hash.js';

@@ -1,7 +1,10 @@
-import type { AtlassianConfig, ServiceCredentials } from '../../../../../types/index.js';
+import type {
+  AtlassianConfig,
+  ServiceCredentials,
+} from "../../../../../types/index.js";
 
 export function buildEditableSitesState(
-  sites: AtlassianConfig['jira'] | undefined,
+  sites: AtlassianConfig["jira"] | undefined,
   credentials: ServiceCredentials | undefined,
 ) {
   if (!sites || sites.length === 0) return undefined;

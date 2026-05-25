@@ -1,1 +1,1 @@
-export { handleFetch } from './fetch.js';
+export { handleFetch } from "./fetch.js";

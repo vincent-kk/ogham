@@ -1,4 +1,5 @@
 import { DEFAULT_SCAN_OPTIONS } from '../../../../constants/scan-defaults.js';
+
 import type { FilidConfig } from './config-schemas.js';
 
 /**

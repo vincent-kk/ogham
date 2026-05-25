@@ -11,7 +11,10 @@ import {
   parseDocument,
 } from '../../../core/document-parser/index.js';
 import { Layer } from '../../../types/common.js';
-import type { MaencofCrudResult, MaencofDeleteInput } from '../../../types/mcp.js';
+import type {
+  MaencofCrudResult,
+  MaencofDeleteInput,
+} from '../../../types/mcp.js';
 import { getBacklinks, removeBacklinks } from '../../shared/index.js';
 
 /**

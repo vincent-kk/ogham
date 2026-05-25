@@ -1,1 +1,1 @@
-export { markdownToWiki } from './markdown-to-wiki.js';
+export { markdownToWiki } from "./markdown-to-wiki.js";

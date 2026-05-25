@@ -4,7 +4,8 @@ export function processPreToolUse(input: PreToolUseInput): HookOutput {
   // Context injection for .imbas/ file operations
   // When Read/Write/Edit targets files inside .imbas/, inject context about imbas state
   const { tool_input } = input;
-  const filePath = (tool_input?.file_path as string) || (tool_input?.path as string) || '';
+  const filePath =
+    (tool_input?.file_path as string) || (tool_input?.path as string) || '';
 
   if (filePath.includes('.imbas/') || filePath.includes('.imbas\\')) {
     return {

@@ -1,11 +1,15 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  CONFIG_DIR,
+  CONFIG_FILE,
+} from '../../../../constants/infra-defaults.js';
 import { createLogger } from '../../../../lib/logger.js';
-import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { resolveGitRoot } from '../utils/resolve-git-root.js';
-import { createDefaultConfig } from './create-default-config.js';
+
 import type { InitResult } from './config-types.js';
+import { createDefaultConfig } from './create-default-config.js';
 import { writeConfig } from './write-config.js';
 
 const log = createLogger('config-loader');
@@ -22,7 +26,10 @@ const log = createLogger('config-loader');
  *   When provided, recorded in the freshly created config; ignored when the
  *   config already exists (existing config is never overwritten).
  */
-export function initProject(projectRoot: string, language?: string): InitResult {
+export function initProject(
+  projectRoot: string,
+  language?: string,
+): InitResult {
   const resolvedRoot = resolveGitRoot(projectRoot);
   const configPath = join(resolvedRoot, CONFIG_DIR, CONFIG_FILE);
 

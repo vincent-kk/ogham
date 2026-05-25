@@ -9,13 +9,13 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  _peekRebuildInProgress,
-  triggerBackgroundRebuild,
-} from '../../../mcp/server/middlewares/background-rebuild.js';
-import {
   invalidateCache,
   loadGraphIfNeeded,
 } from '../../../mcp/server/graph-cache/index.js';
+import {
+  _peekRebuildInProgress,
+  triggerBackgroundRebuild,
+} from '../../../mcp/server/middlewares/background-rebuild.js';
 
 let vaultDir: string;
 

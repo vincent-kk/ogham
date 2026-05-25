@@ -87,7 +87,9 @@ describe('getVaultPath CWD guard', () => {
     }
 
     expect(() => getVaultPath('/Users/test/project')).not.toThrow();
-    expect(getVaultPath('/Users/test/project')).toBe('/Users/test/project');
+    expect(getVaultPath('/Users/test/project')).toBe(
+      resolve('/Users/test/project'),
+    );
   });
 
   it('CWD 기반 기본값이 사용된다', () => {

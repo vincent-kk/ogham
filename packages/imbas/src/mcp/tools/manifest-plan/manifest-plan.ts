@@ -2,10 +2,9 @@
  * @file manifest-plan.ts
  * @description Execution plan from devplan manifest
  */
-
-import { getRunDir } from '../../../core/paths/paths.js';
-import { loadManifest } from '../../../core/manifest-parser/manifest-parser.js';
 import { planExecution } from '../../../core/execution-planner/execution-planner.js';
+import { loadManifest } from '../../../core/manifest-parser/manifest-parser.js';
+import { getRunDir } from '../../../core/paths/paths.js';
 
 export interface ManifestPlanInput {
   project_ref: string;

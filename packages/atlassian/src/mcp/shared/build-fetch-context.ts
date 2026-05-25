@@ -1,12 +1,12 @@
-import type { FetchContext, HttpClientConfig } from '../../types/index.js';
-import { loadConfig } from '../../core/config-manager/index.js';
-import { getAuthHeader } from '../../core/auth-manager/index.js';
-import { getApiVersion } from '../../core/index.js';
-import { resolveSiteConfig } from '../../utils/index.js';
+import type { FetchContext, HttpClientConfig } from "../../types/index.js";
+import { loadConfig } from "../../core/config-manager/index.js";
+import { getAuthHeader } from "../../core/auth-manager/index.js";
+import { getApiVersion } from "../../core/index.js";
+import { resolveSiteConfig } from "../../utils/index.js";
 
 /** Build FetchContext (HttpClientConfig + service + apiVersion) for a fetch call. */
 export async function buildFetchContext(
-  service: 'jira' | 'confluence',
+  service: "jira" | "confluence",
   baseUrl?: string,
   endpoint?: string,
 ): Promise<FetchContext | null> {
@@ -26,7 +26,11 @@ export async function buildFetchContext(
     allow_private_ip: !siteConfig.is_cloud,
   };
 
-  const apiVersion = getApiVersion(service, siteConfig.is_cloud, siteConfig.api_version_override);
+  const apiVersion = getApiVersion(
+    service,
+    siteConfig.is_cloud,
+    siteConfig.api_version_override,
+  );
 
   return {
     http,

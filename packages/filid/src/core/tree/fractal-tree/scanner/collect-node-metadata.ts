@@ -1,5 +1,5 @@
 import { existsSync, readdirSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 import type { ScanOptions } from '../../../../types/scan.js';
 import { classifyNode } from '../../organ-classifier/organ-classifier.js';
@@ -33,13 +33,10 @@ export function collectNodeMetadata(
 
   for (const absPath of allDirs) {
     const rel = relative(rootPath, absPath);
-    const depth = rel === '' ? 0 : rel.split('/').length;
+    const depth = rel === '' ? 0 : rel.split(/[\\/]/).length;
     if (depth > maxDepth) continue;
 
-    const name =
-      absPath === rootPath
-        ? (rootPath.split('/').pop() ?? '')
-        : (absPath.split('/').pop() ?? '');
+    const name = absPath === rootPath ? basename(rootPath) : basename(absPath);
     const hasIntentMd = existsSync(join(absPath, 'INTENT.md'));
     const hasDetailMd = existsSync(join(absPath, 'DETAIL.md'));
     const hasIndex =

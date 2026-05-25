@@ -13,7 +13,6 @@ import type {
   AdjacencyList,
   KnowledgeGraph,
 } from '../../types/graph.js';
-
 import { buildAdjacencyList } from '../graph-builder/index.js';
 import { getLayerDecay } from '../weight-calculator/index.js';
 

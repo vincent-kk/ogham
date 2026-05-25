@@ -5,15 +5,22 @@
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+import {
+  L3_SUBDIR,
+  L5_SUBDIR,
+  LAYER_DIR,
+} from '../../../constants/architecture.js';
 import { deduplicateContent } from '../../../core/content-dedup/index.js';
 import { quoteYamlValue } from '../../../core/yaml-parser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
-import { L3_SUBDIR, L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
 import {
   AUTO_GENERATED_FM_KEYS,
   validateFrontmatter,
 } from '../../../types/frontmatter.js';
-import type { MaencofCreateInput, MaencofCrudResult } from '../../../types/mcp.js';
+import type {
+  MaencofCreateInput,
+  MaencofCrudResult,
+} from '../../../types/mcp.js';
 
 /**
  * MaencofCreateInput을 frontmatter 객체로 변환한다.

@@ -62,11 +62,7 @@ describe('handleCacheManage', () => {
         hash: 'cafebabe',
       });
 
-      expect(saveRunHash).toHaveBeenCalledWith(
-        '/my/repo',
-        'scan',
-        'cafebabe',
-      );
+      expect(saveRunHash).toHaveBeenCalledWith('/my/repo', 'scan', 'cafebabe');
     });
 
     it('returned skillName matches the input', async () => {

@@ -7,10 +7,10 @@
 export const DEFAULT_LAYERS = [2, 3, 4, 5] as const;
 
 /** 설정 디렉터리 이름 */
-export const CONFIG_DIR = '.maencof-lens';
+export const CONFIG_DIR = ".maencof-lens";
 
 /** 설정 파일 이름 */
-export const CONFIG_FILE = 'config.json';
+export const CONFIG_FILE = "config.json";
 
 /** 설정 스키마 버전 */
-export const CONFIG_VERSION = '1.0';
+export const CONFIG_VERSION = "1.0";

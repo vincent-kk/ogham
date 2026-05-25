@@ -1,21 +1,20 @@
-import { execSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { spawnCliSync } from '@ogham/cross-platform/spawn';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handleFractalScan } from '../../../mcp/tools/fractal-scan/fractal-scan.js';
 
-vi.mock('node:child_process', async () => {
-  const actual =
-    await vi.importActual<typeof import('node:child_process')>(
-      'node:child_process',
-    );
-  return { ...actual, execSync: vi.fn(actual.execSync) };
+vi.mock('@ogham/cross-platform/spawn', async () => {
+  const actual = await vi.importActual<
+    typeof import('@ogham/cross-platform/spawn')
+  >('@ogham/cross-platform/spawn');
+  return { ...actual, spawnCliSync: vi.fn(actual.spawnCliSync) };
 });
 
-const mockedExecSync = vi.mocked(execSync);
+const mockedSpawnCliSync = vi.mocked(spawnCliSync);
 
 describe('fractal-scan tool — DTO shape', () => {
   it('should expose tree.nodes as a flat array', async () => {
@@ -57,22 +56,38 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
     //         a/b/c/INTENT.md + a/b/c/index.ts (depth 3)
     const nested = join(tmpRoot, 'a', 'b', 'c');
     mkdirSync(nested, { recursive: true });
-    for (const dir of [tmpRoot, join(tmpRoot, 'a'), join(tmpRoot, 'a', 'b'), nested]) {
+    for (const dir of [
+      tmpRoot,
+      join(tmpRoot, 'a'),
+      join(tmpRoot, 'a', 'b'),
+      nested,
+    ]) {
       writeFileSync(join(dir, 'INTENT.md'), '# x', 'utf8');
       writeFileSync(join(dir, 'index.ts'), 'export {};\n', 'utf8');
     }
     // Pretend tmpRoot is its own git repo root for loadConfig's resolveGitRoot.
-    mockedExecSync.mockImplementation(((cmd: string) => {
-      if (typeof cmd === 'string' && cmd.includes('rev-parse')) {
-        return tmpRoot + '\n';
+    mockedSpawnCliSync.mockImplementation((bin, args) => {
+      if (bin === 'git' && [...args].includes('rev-parse')) {
+        return {
+          code: 0,
+          stdout: tmpRoot + '\n',
+          stderr: '',
+          timedOut: false,
+        };
       }
-      throw new Error('unexpected command');
-    }) as typeof execSync);
+      return {
+        code: 1,
+        stdout: '',
+        stderr: 'unexpected command',
+        timedOut: false,
+        spawnError: new Error('unexpected command'),
+      };
+    });
   });
 
   afterEach(() => {
     rmSync(tmpRoot, { recursive: true, force: true });
-    vi.restoreAllMocks();
+    mockedSpawnCliSync.mockReset();
   });
 
   function writeScanConfig(maxDepth: number | null): void {

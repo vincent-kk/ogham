@@ -1,7 +1,11 @@
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
 
-import { AST_MAX_FILES, AST_SKIP_DIRS, EXT_TO_LANG } from '../../../constants/ast-languages.js';
+import {
+  AST_MAX_FILES,
+  AST_SKIP_DIRS,
+  EXT_TO_LANG,
+} from '../../../constants/ast-languages.js';
 
 export function getFilesForLanguage(
   dirPath: string,

@@ -18,7 +18,7 @@ export function buildCtxBlock(
   // Intent line — point to owning fractal's INTENT.md, not organ's
   const ownerRelDir =
     path.relative(boundary, ownerDir).replace(/\\/g, '/') || '.';
-  const intentPath = path.join(ownerRelDir, 'INTENT.md');
+  const intentPath = path.join(ownerRelDir, 'INTENT.md').replace(/\\/g, '/');
   lines.push(`intent: ${intentPath}`);
 
   if (intentContent !== undefined) {
@@ -40,7 +40,7 @@ export function buildCtxBlock(
 
   // Detail hint (check owning fractal for DETAIL.md too)
   if (details.get(ownerDir)) {
-    const detailPath = path.join(ownerRelDir, 'DETAIL.md');
+    const detailPath = path.join(ownerRelDir, 'DETAIL.md').replace(/\\/g, '/');
     lines.push(`detail: ${detailPath}`);
   }
 

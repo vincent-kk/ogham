@@ -2,11 +2,13 @@
  * @file devplan-result.test.ts
  * @description DevplanPhase.result field — complete_phase assignment + backward compat
  */
-
 import { describe, expect, it } from 'vitest';
 
-import { createRunState, applyTransition } from '../core/state-manager/state-manager.js';
-import { RunStateSchema, type RunState } from '../types/state.js';
+import {
+  applyTransition,
+  createRunState,
+} from '../core/state-manager/state-manager.js';
+import { type RunState, RunStateSchema } from '../types/state.js';
 
 function freshState(): RunState {
   return createRunState({
@@ -22,9 +24,23 @@ function devplanInProgress(state: RunState): RunState {
     current_phase: 'devplan',
     phases: {
       ...state.phases,
-      validate: { ...state.phases.validate, status: 'completed', result: 'PASS', completed_at: new Date().toISOString() },
-      split: { ...state.phases.split, status: 'completed', pending_review: false, completed_at: new Date().toISOString() },
-      devplan: { ...state.phases.devplan, status: 'in_progress', started_at: new Date().toISOString() },
+      validate: {
+        ...state.phases.validate,
+        status: 'completed',
+        result: 'PASS',
+        completed_at: new Date().toISOString(),
+      },
+      split: {
+        ...state.phases.split,
+        status: 'completed',
+        pending_review: false,
+        completed_at: new Date().toISOString(),
+      },
+      devplan: {
+        ...state.phases.devplan,
+        status: 'in_progress',
+        started_at: new Date().toISOString(),
+      },
     },
   };
 }

@@ -3,12 +3,16 @@
  * @description Zod schemas for imbas manifests (stories + devplan)
  * @see `agents/planner.md` (stories-manifest), `agents/engineer.md` (devplan-manifest)
  */
-
 import { z } from 'zod';
 
 // --- Common ---
 
-export const ManifestItemStatusSchema = z.enum(['pending', 'created', 'failed', 'skipped']);
+export const ManifestItemStatusSchema = z.enum([
+  'pending',
+  'created',
+  'failed',
+  'skipped',
+]);
 export type ManifestItemStatus = z.infer<typeof ManifestItemStatusSchema>;
 
 export const LinkStatusSchema = z.enum(['pending', 'created', 'failed']);

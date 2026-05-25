@@ -1,13 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  CONFIG_DIR,
+  CONFIG_FILE,
+} from '../../../../constants/infra-defaults.js';
 import { createLogger } from '../../../../lib/logger.js';
-import { CONFIG_DIR, CONFIG_FILE } from '../../../../constants/infra-defaults.js';
 import { sanitizeExemptPatterns } from '../utils/exempt-sanitize.js';
-import { sanitizeRoutePatterns } from '../utils/route-pattern-sanitize.js';
-import { resolveGitRoot } from '../utils/resolve-git-root.js';
 import { formatIssuePath } from '../utils/format-issue-path.js';
 import { parseWithAllowlistWarn } from '../utils/parse-with-allowlist-warn.js';
+import { resolveGitRoot } from '../utils/resolve-git-root.js';
+import { sanitizeRoutePatterns } from '../utils/route-pattern-sanitize.js';
+
 import { FilidConfigSchema } from './config-schemas.js';
 import type { LoadConfigResult } from './config-types.js';
 

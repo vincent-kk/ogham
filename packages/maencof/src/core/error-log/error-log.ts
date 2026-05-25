@@ -34,10 +34,7 @@ export function readErrorLog(cwd: string): ErrorLogEntry[] {
   }
 }
 
-export function appendErrorLog(
-  cwd: string,
-  entry: ErrorLogEntry,
-): void {
+export function appendErrorLog(cwd: string, entry: ErrorLogEntry): void {
   const entries = readErrorLog(cwd);
   entries.push(entry);
 
@@ -54,10 +51,7 @@ export function appendErrorLog(
  * Fire-and-forget error log wrapper.
  * Never throws — safe to call in catch blocks without breaking the caller.
  */
-export function appendErrorLogSafe(
-  cwd: string,
-  entry: ErrorLogEntry,
-): void {
+export function appendErrorLogSafe(cwd: string, entry: ErrorLogEntry): void {
   try {
     appendErrorLog(cwd, entry);
   } catch {

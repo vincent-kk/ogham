@@ -3,9 +3,9 @@
  * @description esbuild entry point — starts MCP server on stdio.
  * Bundled to bridge/mcp-server.cjs.
  */
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import { createLensServer } from '../server/server.js';
+import { createLensServer } from "../server/server.js";
 
 async function main() {
   const configRoot = process.cwd();

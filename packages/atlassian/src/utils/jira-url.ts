@@ -19,11 +19,11 @@ export function parseJiraUrl(url: string): JiraUrlParts | null {
   if (!match) return null;
 
   const issueKey = match[1];
-  const projectKey = issueKey.split('-')[0];
+  const projectKey = issueKey.split("-")[0];
 
   const focusedCommentId =
-    parsed.searchParams.get('focusedCommentId') ??
-    parsed.searchParams.get('focusedId') ??
+    parsed.searchParams.get("focusedCommentId") ??
+    parsed.searchParams.get("focusedId") ??
     undefined;
 
   return { issueKey, projectKey, focusedCommentId };

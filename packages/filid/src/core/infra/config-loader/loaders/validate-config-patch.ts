@@ -1,8 +1,12 @@
 import { sanitizeExemptPatterns } from '../utils/exempt-sanitize.js';
 import { formatIssuePath } from '../utils/format-issue-path.js';
 import { parseWithAllowlistWarn } from '../utils/parse-with-allowlist-warn.js';
+
 import { FilidConfigSchema } from './config-schemas.js';
-import type { ConfigPatchIssue, ConfigPatchValidation } from './config-types.js';
+import type {
+  ConfigPatchIssue,
+  ConfigPatchValidation,
+} from './config-types.js';
 
 /**
  * Validate a prospective `.filid/config.json` patch JSON string against the

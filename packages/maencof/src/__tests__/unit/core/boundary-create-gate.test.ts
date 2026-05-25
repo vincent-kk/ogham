@@ -5,7 +5,7 @@
  * boundary_create는 입력이 정적으로 안전(layer:5 + sub_layer:'boundary' 하드코딩).
  * write-path 일관성을 위해 게이트를 통과시키며, 정적 안전 입력이 회귀로 거부되지 않음을 보증한다.
  */
-import { access, mkdtemp, rm, readFile } from 'node:fs/promises';
+import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 

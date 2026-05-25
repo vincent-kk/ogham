@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { parseLinks } from '../providers/github/index.js';
 
 describe('parseLinks — basic', () => {
@@ -71,7 +72,9 @@ describe('parseLinks — complex', () => {
     },
     {
       name: 'stops at next h2 boundary',
-      body: ['## Links', '- blocks: #10', '', '## Meta', '- relates: #99'].join('\n'),
+      body: ['## Links', '- blocks: #10', '', '## Meta', '- relates: #99'].join(
+        '\n',
+      ),
       expected: { blocks: ['#10'] },
     },
     { name: 'empty string input', body: '', expected: {} },
@@ -89,7 +92,7 @@ describe('parseLinks — complex', () => {
     const result = parseLinks('## Links\n\n- references: #5\n- blocks: #10\n');
     expect(result).toEqual({ blocks: ['#10'] });
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('unknown linkType "references"')
+      expect.stringContaining('unknown linkType "references"'),
     );
     warnSpy.mockRestore();
   });
@@ -100,9 +103,18 @@ describe('parseLinks — complex', () => {
     const { fileURLToPath } = await import('node:url');
     const __dirname = dirname(fileURLToPath(import.meta.url));
     const fixturePath = join(
-      __dirname, '..', '..', 'scripts', 'test-helpers', 'fixtures', 'gh', 'links-4types.json'
+      __dirname,
+      '..',
+      '..',
+      'scripts',
+      'test-helpers',
+      'fixtures',
+      'gh',
+      'links-4types.json',
     );
-    const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as { body: string };
+    const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as {
+      body: string;
+    };
     const result = parseLinks(fixture.body);
     expect(result.blocks).toEqual(['#10', '#11']);
     expect(result['blocked-by']).toEqual(['#5']);

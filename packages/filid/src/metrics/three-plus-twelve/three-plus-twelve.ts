@@ -1,5 +1,8 @@
-import type { TestCaseCount, ThreePlusTwelveResult } from '../../types/metrics.js';
 import { THREE_PLUS_TWELVE_THRESHOLD } from '../../constants/quality-thresholds.js';
+import type {
+  TestCaseCount,
+  ThreePlusTwelveResult,
+} from '../../types/metrics.js';
 
 /**
  * Check the 3+12 rule across spec.ts files.

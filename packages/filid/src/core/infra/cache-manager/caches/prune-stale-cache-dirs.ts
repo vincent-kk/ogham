@@ -1,11 +1,12 @@
 import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { createLogger } from '../../../../lib/logger.js';
 import {
   MAX_CACHE_DIRS_BEFORE_PRUNE,
   STALE_CACHE_TTL_MS,
 } from '../../../../constants/infra-defaults.js';
+import { createLogger } from '../../../../lib/logger.js';
+
 import { getPluginRoot } from './get-plugin-root.js';
 
 const log = createLogger('cache');
@@ -41,7 +42,9 @@ export function pruneStaleCacheDirs(): void {
         }
         const allStale = files.every((f) => {
           try {
-            return now - statSync(join(dirPath, f)).mtimeMs > STALE_CACHE_TTL_MS;
+            return (
+              now - statSync(join(dirPath, f)).mtimeMs > STALE_CACHE_TTL_MS
+            );
           } catch (e) {
             log.debug(`pruneStaleCacheDirs: statSync failed for ${f}:`, e);
             return true;

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import { loadBuiltinRules } from '../../../core/rules/rule-engine/rule-engine.js';
 import type { FractalNode, FractalTree } from '../../../types/fractal.js';
-import { BUILTIN_RULE_IDS } from '../../../constants/builtin-rule-ids.js';
 import type { RuleContext } from '../../../types/rules.js';
 
 // 테스트용 헬퍼 - FractalNode 생성 (진입점 없는 fractal이 기본)
@@ -93,7 +93,10 @@ describe('module-entry-point — framework awareness', () => {
   it('passes a route segment with route.ts', () => {
     const rule = entryRule();
     const node = makeNode({
-      metadata: { peerFiles: ['route.ts'], frameworkReservedFiles: ['route.ts'] },
+      metadata: {
+        peerFiles: ['route.ts'],
+        frameworkReservedFiles: ['route.ts'],
+      },
     });
     const tree = makeTree([node]);
     const ctx: RuleContext = { node, tree };

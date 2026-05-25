@@ -4,3 +4,7 @@
 
 # Rule doc templates must stay LF so sync-rule-hashes.mjs produces deterministic hashes across OS
 packages/filid/templates/rules/*.md text eol=lf
+
+# Windows .cmd / .bat shims MUST be CRLF — cmd.exe rejects LF-only batch files
+*.cmd text eol=crlf
+*.bat text eol=crlf

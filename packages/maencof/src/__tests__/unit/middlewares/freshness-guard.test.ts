@@ -12,7 +12,10 @@ import { READ_REINDEX_CAP } from '../../../constants/thresholds.js';
 import { invalidateCache } from '../../../mcp/server/graph-cache/index.js';
 import { _peekRebuildInProgress } from '../../../mcp/server/middlewares/background-rebuild.js';
 import { ensureFreshGraphNonBlocking } from '../../../mcp/server/middlewares/freshness-guard.js';
-import { invalidateQueryCache, query } from '../../../search/query-engine/query-engine.js';
+import {
+  invalidateQueryCache,
+  query,
+} from '../../../search/query-engine/query-engine.js';
 import type { NodeId } from '../../../types/common.js';
 
 let vaultDir: string;

@@ -3,21 +3,21 @@
  * @description Manifest loading + summary generation
  * @see `agents/planner.md` (stories-manifest), `agents/engineer.md` (devplan-manifest)
  */
-
 import { join } from 'node:path';
-import { readJson } from '../../lib/file-io.js';
+
 import { MANIFEST_FILE_MAP } from '../../constants/index.js';
+import { readJson } from '../../lib/file-io.js';
 import {
-  StoriesManifestSchema,
   DevplanManifestSchema,
   ImplementPlanManifestSchema,
+  StoriesManifestSchema,
 } from '../../types/manifest.js';
 import type {
-  StoriesManifest,
   DevplanManifest,
   ImplementPlanManifest,
-  ManifestSummary,
   ImplementPlanSummary,
+  ManifestSummary,
+  StoriesManifest,
 } from '../../types/manifest.js';
 
 export type ManifestType = 'stories' | 'devplan' | 'implement-plan';

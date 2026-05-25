@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawnCli } from '@ogham/cross-platform';
 
 export interface ExecutableStatus {
   available: boolean;
@@ -7,42 +7,14 @@ export interface ExecutableStatus {
 
 const DEFAULT_TIMEOUT_MS = 1500;
 
-export function checkExecutable(
+export async function checkExecutable(
   bin: string,
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<ExecutableStatus> {
-  return new Promise((resolve) => {
-    let stdout = '';
-    let settled = false;
-    const settle = (status: ExecutableStatus): void => {
-      if (settled) return;
-      settled = true;
-      resolve(status);
-    };
-
-    const child = spawn(bin, ['--version'], {
-      stdio: ['ignore', 'pipe', 'ignore'],
-    });
-
-    const timer = setTimeout(() => {
-      child.kill();
-      settle({ available: false });
-    }, timeoutMs);
-
-    child.stdout?.on('data', (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    child.on('error', () => {
-      clearTimeout(timer);
-      settle({ available: false });
-    });
-    child.on('exit', (code) => {
-      clearTimeout(timer);
-      if (code === 0) {
-        settle({ available: true, version: stdout.trim() || undefined });
-      } else {
-        settle({ available: false });
-      }
-    });
-  });
+  const result = await spawnCli(bin, ['--version'], { timeoutMs });
+  if (result.spawnError || result.timedOut || result.code !== 0) {
+    return { available: false };
+  }
+  const version = result.stdout.trim();
+  return { available: true, version: version || undefined };
 }

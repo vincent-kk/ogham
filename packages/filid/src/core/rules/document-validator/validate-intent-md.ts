@@ -1,8 +1,12 @@
+import {
+  BOUNDARY_KEYWORDS,
+  INTENT_MD_LINE_LIMIT,
+} from '../../../constants/document-validation.js';
 import type {
   DocumentViolation,
   IntentMdValidation,
 } from '../../../types/documents.js';
-import { INTENT_MD_LINE_LIMIT, BOUNDARY_KEYWORDS } from '../../../constants/document-validation.js';
+
 import { countLines } from './count-lines.js';
 
 /**

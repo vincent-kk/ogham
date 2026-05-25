@@ -1,8 +1,9 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { createLogger } from '../../../../lib/logger.js';
 import { PRUNE_MARKER_FILENAME } from '../../../../constants/infra-defaults.js';
+import { createLogger } from '../../../../lib/logger.js';
+
 import { getCacheDir } from './get-cache-dir.js';
 
 const log = createLogger('cache');

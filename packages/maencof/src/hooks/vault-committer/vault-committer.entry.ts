@@ -1,5 +1,8 @@
 #!/usr/bin/env node
+import { logHookFailure } from '@ogham/cross-platform/error-log';
+
 import { readStdin, writeResult } from '../shared/index.js';
+
 import type {
   VaultCommitterEvent,
   VaultCommitterInput,
@@ -13,8 +16,9 @@ const raw = await readStdin();
 let result;
 try {
   const input = JSON.parse(raw) as VaultCommitterInput;
-  result = runVaultCommitter(input, event);
-} catch {
+  result = await runVaultCommitter(input, event);
+} catch (e) {
+  logHookFailure('maencof', 'vault-committer', e);
   result = { continue: true };
 }
 

@@ -1,21 +1,26 @@
-import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { promisify } from 'node:util';
 
-const execFileAsync = promisify(execFile);
+import { spawnCli } from '@ogham/cross-platform/spawn';
 
 export async function gitExec(cwd: string, args: string[]): Promise<string> {
-  try {
-    const { stdout } = await execFileAsync('git', args, {
-      cwd,
-      timeout: 30_000,
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    return stdout.trimEnd();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    throw new Error(`git ${args[0]} failed in ${cwd}: ${msg}`, { cause: error });
+  const result = await spawnCli('git', args, {
+    cwd,
+    timeoutMs: 30_000,
+  });
+  if (result.spawnError) {
+    throw new Error(
+      `git ${args[0]} failed in ${cwd}: ${result.spawnError.message}`,
+      {
+        cause: result.spawnError,
+      },
+    );
   }
+  if (result.code !== 0) {
+    throw new Error(
+      `git ${args[0]} failed in ${cwd} (exit ${result.code}): ${result.stderr.trim()}`,
+    );
+  }
+  return result.stdout.trimEnd();
 }
 
 /** Compute content hash from committed (HEAD) blob state, not working tree. */

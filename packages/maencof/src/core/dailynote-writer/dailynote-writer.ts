@@ -8,10 +8,12 @@
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { DailynoteCategory, DailynoteEntry } from '../../types/dailynote.js';
 import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
-
 import { DAILYNOTES_DIR } from '../../constants/directories.js';
+import type {
+  DailynoteCategory,
+  DailynoteEntry,
+} from '../../types/dailynote.js';
 
 /**
  * dailynotes 디렉토리 경로를 반환한다.

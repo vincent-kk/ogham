@@ -11,7 +11,10 @@ import {
   parseDocument,
 } from '../../../core/document-parser/index.js';
 import { isLayer1Path } from '../../../types/layer.js';
-import type { MaencofReadInput, MaencofReadResult } from '../../../types/mcp.js';
+import type {
+  MaencofReadInput,
+  MaencofReadResult,
+} from '../../../types/mcp.js';
 
 /**
  * `read` 핸들러

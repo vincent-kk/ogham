@@ -1,21 +1,21 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 
-import { loadConfig } from '../../config/config-loader/config-loader.js';
-import { handleLensContext } from '../../tools/lens-context/lens-context.js';
-import { handleLensNavigate } from '../../tools/lens-navigate/lens-navigate.js';
-import { handleLensRead } from '../../tools/lens-read/lens-read.js';
-import { handleLensSearch } from '../../tools/lens-search/lens-search.js';
-import { handleLensStatus } from '../../tools/lens-status/lens-status.js';
-import { GraphCache } from '../../vault/graph-cache/graph-cache.js';
-import { VaultRouter } from '../../vault/vault-router/vault-router.js';
-import { VERSION } from '../../version.js';
+import { loadConfig } from "../../config/config-loader/config-loader.js";
+import { handleLensContext } from "../../tools/lens-context/lens-context.js";
+import { handleLensNavigate } from "../../tools/lens-navigate/lens-navigate.js";
+import { handleLensRead } from "../../tools/lens-read/lens-read.js";
+import { handleLensSearch } from "../../tools/lens-search/lens-search.js";
+import { handleLensStatus } from "../../tools/lens-status/lens-status.js";
+import { GraphCache } from "../../vault/graph-cache/graph-cache.js";
+import { VaultRouter } from "../../vault/vault-router/vault-router.js";
+import { VERSION } from "../../version.js";
 
-import { toolError, toolResult } from '../shared/shared.js';
+import { toolError, toolResult } from "../shared/shared.js";
 
 export function createLensServer(configRoot: string) {
   const config = loadConfig(configRoot);
-  const server = new McpServer({ name: 'maencof-lens', version: VERSION });
+  const server = new McpServer({ name: "maencof-lens", version: VERSION });
 
   let router: VaultRouter | null = null;
   const graphCache = new GraphCache();
@@ -25,15 +25,19 @@ export function createLensServer(configRoot: string) {
   }
 
   const resolveVault = (vaultName?: string) => {
-    if (!router) throw new Error('No .maencof-lens/config.json found. Run /maencof-lens:setup to configure.');
+    if (!router)
+      throw new Error(
+        "No .maencof-lens/config.json found. Run /maencof-lens:setup to configure.",
+      );
     return router.resolve(vaultName);
   };
 
   // --- search ---
   server.registerTool(
-    'search',
+    "search",
     {
-      description: 'Search vault knowledge via Spreading Activation from seed keywords.',
+      description:
+        "Search vault knowledge via Spreading Activation from seed keywords.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         seed: z.array(z.string()).min(1),
@@ -59,9 +63,10 @@ export function createLensServer(configRoot: string) {
 
   // --- context ---
   server.registerTool(
-    'context',
+    "context",
     {
-      description: 'Assemble a token-budgeted context block from vault documents matching a query.',
+      description:
+        "Assemble a token-budgeted context block from vault documents matching a query.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         query: z.string(),
@@ -74,7 +79,12 @@ export function createLensServer(configRoot: string) {
       try {
         const vault = resolveVault(args.vault);
         const graph = await graphCache.getGraph(vault.path);
-        const result = await handleLensContext(graph, args, vault.path, vault.layers);
+        const result = await handleLensContext(
+          graph,
+          args,
+          vault.path,
+          vault.layers,
+        );
         return toolResult(result);
       } catch (e) {
         return toolError(String(e instanceof Error ? e.message : e));
@@ -84,9 +94,10 @@ export function createLensServer(configRoot: string) {
 
   // --- navigate ---
   server.registerTool(
-    'navigate',
+    "navigate",
     {
-      description: 'Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.',
+      description:
+        "Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         path: z.string(),
@@ -109,9 +120,9 @@ export function createLensServer(configRoot: string) {
 
   // --- read ---
   server.registerTool(
-    'read',
+    "read",
     {
-      description: 'Read a single vault document by path.',
+      description: "Read a single vault document by path.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
         path: z.string(),
@@ -121,7 +132,7 @@ export function createLensServer(configRoot: string) {
       try {
         const vault = resolveVault(args.vault);
         const result = await handleLensRead(args, vault.path, vault.layers);
-        if ('error' in result) return toolError(result.error as string);
+        if ("error" in result) return toolError(result.error as string);
         return toolResult(result);
       } catch (e) {
         return toolError(String(e instanceof Error ? e.message : e));
@@ -131,9 +142,10 @@ export function createLensServer(configRoot: string) {
 
   // --- status ---
   server.registerTool(
-    'status',
+    "status",
     {
-      description: 'Check vault index status including node count, staleness, and health.',
+      description:
+        "Check vault index status including node count, staleness, and health.",
       inputSchema: z.object({
         vault: z.optional(z.string()),
       }),

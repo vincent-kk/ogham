@@ -1,9 +1,9 @@
-import type { DecisionResult } from '../../types/metrics.js';
 import {
-  THREE_PLUS_TWELVE_THRESHOLD,
   CC_THRESHOLD,
   LCOM4_SPLIT_THRESHOLD,
+  THREE_PLUS_TWELVE_THRESHOLD,
 } from '../../constants/quality-thresholds.js';
+import type { DecisionResult } from '../../types/metrics.js';
 
 /** Input metrics for the decision tree */
 export interface DecisionInput {

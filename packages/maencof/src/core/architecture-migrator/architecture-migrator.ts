@@ -18,14 +18,14 @@ import {
 import { basename, dirname, join } from 'node:path';
 
 import {
+  ORG_TAGS,
+  PERSON_TAGS,
+} from '../../constants/architecture-migrator.js';
+import {
   EXPECTED_ARCHITECTURE_VERSION,
   L3_SUBDIR,
   L5_SUBDIR,
 } from '../../constants/architecture.js';
-import {
-  ORG_TAGS,
-  PERSON_TAGS,
-} from '../../constants/architecture-migrator.js';
 import type { L3SubLayer } from '../../types/common.js';
 import type {
   MigrationOp,

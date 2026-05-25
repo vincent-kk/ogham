@@ -2,7 +2,6 @@
  * @file report-renderer.ts
  * @description Render ImplementPlanManifest as human-readable markdown
  */
-
 import type { ImplementPlanManifest } from '../../types/manifest.js';
 
 export function renderImplementPlanReport(

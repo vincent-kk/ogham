@@ -4,8 +4,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { handleKgSuggestLinks } from '../../mcp/tools/kg-suggest-links/kg-suggest-links.js';
 import { EDGE_TYPE } from '../../constants/architecture.js';
+import { handleKgSuggestLinks } from '../../mcp/tools/kg-suggest-links/kg-suggest-links.js';
 import type {
   KnowledgeEdge,
   KnowledgeGraph,
