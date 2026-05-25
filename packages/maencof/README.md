@@ -50,8 +50,8 @@ maencof skills are **LLM prompts**, not CLI commands. You invoke them in Claude 
 ### Initial Setup
 
 ```
-/maencof:maencof-setup
-/maencof:maencof-setup --step 4
+/maencof:setup
+/maencof:setup --step 4
 ```
 
 7-step onboarding wizard: Vault path selection → Core Identity interview → AI companion generation → Layer directory creation → initial index build → rule activation → completion summary.
@@ -59,8 +59,8 @@ maencof skills are **LLM prompts**, not CLI commands. You invoke them in Claude 
 ### Record Knowledge
 
 ```
-/maencof:maencof-remember
-/maencof:maencof-remember React Server Components 핵심 개념 정리
+/maencof:remember
+/maencof:remember React Server Components 핵심 개념 정리
 ```
 
 Creates a new document with automatic layer recommendation, tag extraction, frontmatter generation, and duplicate detection.
@@ -68,60 +68,60 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 ### Search Knowledge
 
 ```
-/maencof:maencof-recall React 상태관리 관련 자료 찾아줘
-/maencof:maencof-explore
+/maencof:recall React 상태관리 관련 자료 찾아줘
+/maencof:explore
 ```
 
-- **`maencof-recall`** — Spreading Activation search across your Knowledge Graph. Activates related nodes through weighted links.
-- **`maencof-explore`** — Interactive graph traversal (up to 3 rounds). Browse connections visually.
+- **`recall`** — Spreading Activation search across your Knowledge Graph. Activates related nodes through weighted links.
+- **`explore`** — Interactive graph traversal (up to 3 rounds). Browse connections visually.
 
 ### Organize Knowledge
 
 ```
-/maencof:maencof-organize
-/maencof:maencof-organize --dry-run
-/maencof:maencof-reflect
+/maencof:organize
+/maencof:organize --dry-run
+/maencof:reflect
 ```
 
-- **`maencof-organize`** — The memory-organizer agent recommends document moves → you confirm → it executes.
-- **`maencof-reflect`** — Analysis only, no changes. Uses the judge module to assess knowledge health.
+- **`organize`** — The memory-organizer agent recommends document moves → you confirm → it executes.
+- **`reflect`** — Analysis only, no changes. Uses the judge module to assess knowledge health.
 
 ### Health Check
 
 ```
-/maencof:maencof-checkup --quick
-/maencof:maencof-checkup
-/maencof:maencof-checkup --fix
+/maencof:checkup --quick
+/maencof:checkup
+/maencof:checkup --fix
 ```
 
-- **`maencof-checkup --quick`** — Lightweight read-only status check (index freshness, stale ratio, sub-layer distribution). Absorbs the former `maencof-diagnose` skill.
-- **`maencof-checkup`** — 7 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues, auto-insight system health.
+- **`checkup --quick`** — Lightweight read-only status check (index freshness, stale ratio, sub-layer distribution). Absorbs the former `maencof-diagnose` skill.
+- **`checkup`** — 7 diagnostics + auto-fix: orphan documents, stale entries, broken links, layer violations, duplicates, frontmatter issues, auto-insight system health.
 
 ### Index Management
 
 ```
-/maencof:maencof-build
-/maencof:maencof-build --force --reset-cache
+/maencof:build
+/maencof:build --force --reset-cache
 ```
 
-- **`maencof-build`** — Auto-selects full or incremental mode based on index state. Pass `--force` for an unconditional full rebuild, or `--force --reset-cache` to discard the `.maencof/` cache entirely before rebuilding (recovery / migration mode; absorbs the former `maencof-rebuild` skill).
+- **`build`** — Auto-selects full or incremental mode based on index state. Pass `--force` for an unconditional full rebuild, or `--force --reset-cache` to discard the `.maencof/` cache entirely before rebuilding (recovery / migration mode; absorbs the former `maencof-rebuild` skill).
 
 ### External Data Ingestion
 
 ```
-/maencof:maencof-ingest https://example.com/article
-/maencof:maencof-connect github
-/maencof:maencof-mcp-setup
+/maencof:ingest https://example.com/article
+/maencof:connect github
+/maencof:mcp-setup
 ```
 
-- **`maencof-ingest`** — Converts URLs, GitHub issues, or raw text into knowledge documents.
-- **`maencof-connect`** — Registers external data sources (GitHub, Jira, Slack, Notion).
-- **`maencof-mcp-setup`** — Installs external MCP servers for expanded connectivity.
+- **`ingest`** — Converts URLs, GitHub issues, or raw text into knowledge documents.
+- **`connect`** — Registers external data sources (GitHub, Jira, Slack, Notion).
+- **`mcp-setup`** — Installs external MCP servers for expanded connectivity.
 
 ### Plugin Management
 
 ```
-/maencof:maencof-manage
+/maencof:manage
 ```
 
 View skill/agent activation status, usage reports, and toggle features on/off.
@@ -129,17 +129,17 @@ View skill/agent activation status, usage reports, and toggle features on/off.
 ### Environment Configuration
 
 ```
-/maencof:maencof-configure
-/maencof:maencof-bridge slack
-/maencof:maencof-craft-skill pr-review
+/maencof:configure
+/maencof:bridge slack
+/maencof:craft-skill pr-review
 ```
 
-- `maencof-configure` — Unified entry point for project configuration (MCP, skills, agents, rules, CLAUDE.md).
-- `maencof-bridge` — End-to-end external service integration: install MCP + register data source + generate workflow skill.
-- `maencof-craft-skill` / `maencof-craft-agent` — Generate custom skills or agents via conversation.
-- `maencof-instruct` — Safely edit CLAUDE.md with backup and @import splitting.
-- `maencof-rule` — Create, edit, or remove behavioral rules.
-- `maencof-lifecycle` — Register dynamic hook actions (echo/remind) triggered by lifecycle events.
+- `configure` — Unified entry point for project configuration (MCP, skills, agents, rules, CLAUDE.md).
+- `bridge` — End-to-end external service integration: install MCP + register data source + generate workflow skill.
+- `craft-skill` / `craft-agent` — Generate custom skills or agents via conversation.
+- `instruct` — Safely edit CLAUDE.md with backup and @import splitting.
+- `rule` — Create, edit, or remove behavioral rules.
+- `lifecycle` — Register dynamic hook actions (echo/remind) triggered by lifecycle events.
 
 ---
 
@@ -157,7 +157,7 @@ maencof organizes knowledge into five layers with distinct decay rates for Sprea
 
 **Lower decay = stronger persistence.** L1 documents activate strongly and stay relevant across searches. L4 documents fade quickly unless reinforced.
 
-**Link direction rules:** Links flow downward (L1→L2→L3→L4) by default. Upward links (e.g., L3→L1) require explicit justification and are flagged during `maencof-organize`.
+**Link direction rules:** Links flow downward (L1→L2→L3→L4) by default. Upward links (e.g., L3→L1) require explicit justification and are flagged during `organize`.
 
 ---
 
@@ -182,32 +182,32 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 | Skill                  | Category | What it does                                   |
 | ---------------------- | -------- | ---------------------------------------------- |
-| `/maencof:maencof-setup`       | Setup    | 7-step onboarding wizard                       |
-| `/maencof:maencof-remember`    | Core     | Record new knowledge (auto-layer, tags, dedup) |
-| `/maencof:maencof-recall`      | Core     | Spreading Activation search                    |
-| `/maencof:maencof-explore`     | Core     | Interactive graph traversal (up to 3 rounds)   |
-| `/maencof:maencof-organize`    | Core     | Agent-guided document reorganization           |
-| `/maencof:maencof-reflect`     | Core     | Read-only knowledge health analysis            |
-| `/maencof:maencof-suggest`     | Core     | SA + Jaccard similarity link suggestions       |
-| `/maencof:maencof-build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
-| `/maencof:maencof-checkup`     | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
-| `/maencof:maencof-cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
-| `/maencof:maencof-ingest`      | Advanced | Import from URL, GitHub, or text               |
-| `/maencof:maencof-connect`     | Advanced | Register external data sources                 |
-| `/maencof:maencof-mcp-setup`   | Advanced | Install external MCP servers                   |
-| `/maencof:maencof-manage`      | Advanced | Skill/agent activation and usage reports       |
-| `/maencof:maencof-insight`     | Advanced | Auto-insight capture management                |
-| `/maencof:maencof-changelog`   | Advanced | Self-change daily changelog recorder           |
-| `/maencof:maencof-migrate`     | Advanced | Vault architecture migration                   |
-| `/maencof:maencof-configure`   | Config   | Unified environment configuration entry point  |
-| `/maencof:maencof-bridge`      | Config   | MCP install + register + workflow skill in one |
-| `/maencof:maencof-craft-skill` | Config   | Custom skill generator                         |
-| `/maencof:maencof-craft-agent` | Config   | Custom agent generator                         |
-| `/maencof:maencof-instruct`    | Config   | CLAUDE.md management                           |
-| `/maencof:maencof-rule`        | Config   | Behavioral rule management                     |
-| `/maencof:maencof-lifecycle`   | Config   | Lifecycle action management                    |
-| `/maencof:maencof-think`       | Analysis | Tree of Thoughts requirement analysis          |
-| `/maencof:maencof-refine`      | Analysis | Ambiguous input refinement interview loop      |
+| `/maencof:setup`       | Setup    | 7-step onboarding wizard                       |
+| `/maencof:remember`    | Core     | Record new knowledge (auto-layer, tags, dedup) |
+| `/maencof:recall`      | Core     | Spreading Activation search                    |
+| `/maencof:explore`     | Core     | Interactive graph traversal (up to 3 rounds)   |
+| `/maencof:organize`    | Core     | Agent-guided document reorganization           |
+| `/maencof:reflect`     | Core     | Read-only knowledge health analysis            |
+| `/maencof:suggest`     | Core     | SA + Jaccard similarity link suggestions       |
+| `/maencof:build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
+| `/maencof:checkup`     | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
+| `/maencof:cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup  |
+| `/maencof:ingest`      | Advanced | Import from URL, GitHub, or text               |
+| `/maencof:connect`     | Advanced | Register external data sources                 |
+| `/maencof:mcp-setup`   | Advanced | Install external MCP servers                   |
+| `/maencof:manage`      | Advanced | Skill/agent activation and usage reports       |
+| `/maencof:insight`     | Advanced | Auto-insight capture management                |
+| `/maencof:changelog`   | Advanced | Self-change daily changelog recorder           |
+| `/maencof:migrate`     | Advanced | Vault architecture migration                   |
+| `/maencof:configure`   | Config   | Unified environment configuration entry point  |
+| `/maencof:bridge`      | Config   | MCP install + register + workflow skill in one |
+| `/maencof:craft-skill` | Config   | Custom skill generator                         |
+| `/maencof:craft-agent` | Config   | Custom agent generator                         |
+| `/maencof:instruct`    | Config   | CLAUDE.md management                           |
+| `/maencof:rule`        | Config   | Behavioral rule management                     |
+| `/maencof:lifecycle`   | Config   | Lifecycle action management                    |
+| `/maencof:think`       | Analysis | Tree of Thoughts requirement analysis          |
+| `/maencof:refine`      | Analysis | Ambiguous input refinement interview loop      |
 
 ---
 

@@ -29,7 +29,7 @@ import { handleMaencofCreate } from '../../mcp/tools/maencof-create/maencof-crea
 import type { SetupProgress, SetupStep } from '../../types/setup.js';
 
 async function makeTempVault(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'maencof-setup-'));
+  return mkdtemp(join(tmpdir(), 'setup-'));
 }
 
 describe('Setup Wizard 7단계 통합 테스트', () => {

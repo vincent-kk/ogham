@@ -1,4 +1,4 @@
-# maencof-changelog-gate
+# changelog-gate
 
 ## Purpose
 

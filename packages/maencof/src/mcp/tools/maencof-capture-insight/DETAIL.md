@@ -3,7 +3,7 @@
 ## Requirements
 
 - `capture_insight` MCP 도구는 auto-insight 레코드를 벌트에 영속화하기 **이전에** `config.category_filter` 를 반드시 적용한다. 금지된 카테고리에 대한 호출은 파일 쓰기 없이 즉시 거절된다.
-- 사용자는 `/maencof:maencof-insight --category <key> --accept|--reject` 를 통해 `.maencof-meta/insight-config.json::category_filter.<key>` 를 토글할 수 있다.
+- 사용자는 `/maencof:insight --category <key> --accept|--reject` 를 통해 `.maencof-meta/insight-config.json::category_filter.<key>` 를 토글할 수 있다.
 - `insight-injector` 훅은 이 필터에 대한 표면 배너를 노출할 뿐이며 실제 차단은 이 MCP 도구의 책임이다. 따라서 이 파일의 enforcement 로직이 바뀌면 `insight-injector` 의 배너 문구도 동기화해야 한다.
 
 ## API Contracts
@@ -16,7 +16,7 @@
 {
   success: false,
   path: '',
-  message: `Category "${category}" is rejected by config.category_filter. Use /maencof:maencof-insight --category ${flag} --accept to allow.`,
+  message: `Category "${category}" is rejected by config.category_filter. Use /maencof:insight --category ${flag} --accept to allow.`,
 }
 ```
 
