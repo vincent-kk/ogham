@@ -36,6 +36,7 @@ export const PLANNING_GUIDANCE = [
   '2. Plan DETAIL.md updates for requirements/API changes BEFORE code',
   '3. Plan INTENT.md updates if boundaries or conventions change',
   '4. New modules need INTENT.md (max 50 lines, 3-tier) + DETAIL.md',
+  '5. DETAIL.md has NO line cap — restructure in place on each update',
 ].join('\n');
 
 export const IMPLEMENTATION_REMINDER = [

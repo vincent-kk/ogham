@@ -312,6 +312,39 @@ describe('handleReviewManage – elect-committee', () => {
     ]);
   });
 
+  it('LOW + hasDocumentChanges:true adds knowledge-manager (3-member)', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 2,
+      changedFractalsCount: 1,
+      hasInterfaceChanges: false,
+      hasDocumentChanges: true,
+    });
+    expect(result.complexity).toBe('LOW');
+    expect(result.committee).toEqual([
+      'engineering-architect',
+      'operations-sre',
+      'knowledge-manager',
+    ]);
+  });
+
+  it('LOW + hasDocumentChanges:false keeps 2-member (backwards compat)', async () => {
+    const result = await handleReviewManage({
+      action: 'elect-committee',
+      projectRoot: '/tmp',
+      changedFilesCount: 2,
+      changedFractalsCount: 1,
+      hasInterfaceChanges: false,
+      hasDocumentChanges: false,
+    });
+    expect(result.complexity).toBe('LOW');
+    expect(result.committee).toEqual([
+      'engineering-architect',
+      'operations-sre',
+    ]);
+  });
+
   it('selects MEDIUM complexity when interface changes exist', async () => {
     const result = await handleReviewManage({
       action: 'elect-committee',

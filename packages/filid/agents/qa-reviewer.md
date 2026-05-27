@@ -1,6 +1,6 @@
 ---
 name: qa-reviewer
-description: "Post-implementation reviewer focused on metrics, rule compliance, and release readiness."
+description: 'Post-implementation reviewer focused on metrics, rule compliance, and release readiness.'
 tools: Read, Glob, Grep
 model: sonnet
 maxTurns: 40
@@ -33,6 +33,15 @@ on applying the PR-gate perspective to the injected data.
 | `CC_THRESHOLD`          | 15    | Max cyclomatic complexity before compress/abstract |
 | `LCOM4_SPLIT_THRESHOLD` | 2     | Min LCOM4 score triggering split recommendation    |
 
+## Document Cap Clarification (out-of-criteria)
+
+- `INTENT_MD_LINE_LIMIT` applies to INTENT.md ONLY.
+- DETAIL.md has NO line cap. Other DETAIL.md rules (in-place
+  restructure required, no append-only growth, required sections
+  preserved) still apply but are independent of any line count.
+- NEVER apply the 50-line rule to DETAIL.md when citing
+  `structure-check.md` or `verification.md`.
+
 ## Perspective Axes
 
 You evaluate five axes per PR. The skill drives when and how each axis
@@ -41,9 +50,10 @@ runs; you decide the verdict once the data is in hand.
 1. **Structure** — organ directories must not contain INTENT.md; fractal
    modules must have one. Classification comes from `mcp_t_fractal_navigate` /
    `mcp_t_fractal_scan` results.
-2. **Documents** — every INTENT.md within 50 lines, contains the three
-   tiers (Always do / Ask first / Never do). DETAIL.md must not be
-   append-only and must retain its required sections.
+2. **Documents** — every INTENT.md within 50 lines (hard cap), contains
+   the three tiers (Always do / Ask first / Never do). **DETAIL.md has
+   no line cap** but must still restructure in place on each update
+   (append-only growth is forbidden) and retain its required sections.
 3. **Tests** — every `*.spec.ts` must satisfy the 3+12 rule
    (≤ `TEST_THRESHOLD` total cases). Exceeding is **high** severity.
 4. **Metrics** — LCOM4 ≥ `LCOM4_SPLIT_THRESHOLD` recommends split; CC >
@@ -54,12 +64,12 @@ runs; you decide the verdict once the data is in hand.
 
 ## Severity Definitions
 
-| Severity     | Condition                                              | PR Impact       |
-| ------------ | ------------------------------------------------------ | --------------- |
-| **critical** | Cycle detected, data loss risk, security vulnerability | Block merge     |
-| **high**     | Test threshold exceeded, LCOM4 ≥ 2 on core module     | Request changes |
-| **medium**   | CC > 15 on non-critical path, DETAIL.md missing section  | Request changes |
-| **low**      | INTENT.md minor structure issue, naming convention     | Advisory only   |
+| Severity     | Condition                                               | PR Impact       |
+| ------------ | ------------------------------------------------------- | --------------- |
+| **critical** | Cycle detected, data loss risk, security vulnerability  | Block merge     |
+| **high**     | Test threshold exceeded, LCOM4 ≥ 2 on core module       | Request changes |
+| **medium**   | CC > 15 on non-critical path, DETAIL.md missing section | Request changes |
+| **low**      | INTENT.md minor structure issue, naming convention      | Advisory only   |
 
 Never approve a PR containing a critical finding.
 

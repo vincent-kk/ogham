@@ -27,14 +27,19 @@ consumes these conventions when assembling PR comments.
 
 > Omitted if `--no-structure-check` was used.
 
-| Stage | Name         | Result      | Issues |
-|-------|--------------|-------------|--------|
-| 1     | Structure    | PASS / FAIL | N      |
-| 2     | Documents    | PASS / FAIL | N      |
-| 3     | Tests        | PASS / FAIL | N      |
-| 4     | Metrics      | PASS / FAIL | N      |
-| 5     | Dependencies | PASS / FAIL | N      |
-| **Overall** |       | **PASS/FAIL** | **N total** |
+> **Cap applied** — when summarizing INTENT.md / DETAIL.md findings, label
+> cap scope: INTENT.md = 50-line hard cap; DETAIL.md = no cap (still
+> requires in-place restructure on each update). Do NOT propagate
+> "DETAIL.md exceeds N lines" framing.
+
+| Stage       | Name         | Result        | Issues      |
+| ----------- | ------------ | ------------- | ----------- |
+| 1           | Structure    | PASS / FAIL   | N           |
+| 2           | Documents    | PASS / FAIL   | N           |
+| 3           | Tests        | PASS / FAIL   | N           |
+| 4           | Metrics      | PASS / FAIL   | N           |
+| 5           | Dependencies | PASS / FAIL   | N           |
+| **Overall** |              | **PASS/FAIL** | **N total** |
 
 Structure violations elevated to committee agenda: <N critical/high items>
 
@@ -100,9 +105,9 @@ consistent verdict field. Use this minimal variant alongside
 
 ## Committee Composition
 
-| Persona    | Election Basis         | Final Position |
-| ---------- | ---------------------- | -------------- |
-| <persona>  | <from session.md>      | N/A (fail)     |
+| Persona   | Election Basis    | Final Position |
+| --------- | ----------------- | -------------- |
+| <persona> | <from session.md> | N/A (fail)     |
 
 ## Deliberation Log
 
@@ -119,6 +124,7 @@ See `rounds/failure.md` for the raw failure record.
 ```
 
 Sections omitted relative to the standard template:
+
 - `## Structure Compliance (Phase A)` — include only if `structure-check.md` exists
 - `## Technical Verification Results` — omit (no C1/C2 ingestion performed)
 - `fix-requests.md` — NOT written in the fail path; reviewers inspect
@@ -142,12 +148,12 @@ is responsible for assigning IDs sequentially across both sources.
 ## FIX-001: <title>
 
 - **Severity**: LOW | MEDIUM | HIGH | CRITICAL
-- **Source**: structure | code-quality        ← origin of the finding
+- **Source**: structure | code-quality ← origin of the finding
 - **Type**: code-fix | promote | restructure ← dispatch type (default: code-fix)
 - **Path**: `<file path>`
 - **Rule**: <violated rule>
 - **Current**: <current value>
-- **Raised by**: <persona name>              ← "Phase A" for structure items
+- **Raised by**: <persona name> ← "Phase A" for structure items
 - **Recommended Action**: <description>
 - **Code Patch**:
   ```typescript

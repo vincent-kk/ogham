@@ -30,6 +30,7 @@ the code change and elect a review committee. Write the results to `session.md`.
 Read `<REVIEW_DIR>/structure-check.md` if it exists.
 
 Extract from its frontmatter:
+
 - `critical_count`: total CRITICAL + HIGH structure findings
 - `stage_results`: per-stage PASS/FAIL map
 - `overall`: overall PASS/FAIL
@@ -81,9 +82,24 @@ mcp_t_review_manage(
   changedFilesCount: <count>,
   changedFractalsCount: <count>,
   hasInterfaceChanges: <boolean>,
+  hasDocumentChanges: <boolean>,
   adjudicatorMode: <ADJUDICATOR_MODE from context, true or false>
 )
 ```
+
+Compute `hasDocumentChanges` per the SSoT in
+`skills/review/contracts.md` → `## Document Change Signal`:
+
+```bash
+git diff --name-only <BASE_REF>..HEAD | grep -E '(/|^)(INTENT|DETAIL)\.md$' >/dev/null
+# exit 0 → hasDocumentChanges: true
+# exit 1 → hasDocumentChanges: false
+# uninspectable diff → hasDocumentChanges: true (fail-safe)
+```
+
+This signal lets `elect-committee` add `knowledge-manager` to LOW-tier
+committees that touch documentation, preventing cap-rule cascades from
+passing Phase D unchallenged.
 
 Result contains: `complexity`, `committee`, `adversarialPairs`.
 
@@ -92,6 +108,7 @@ handler short-circuits complexity calculation and returns:
 `{ complexity: 'TRIVIAL', committee: ['adjudicator'], adversarialPairs: [] }`.
 
 **Complexity tiers** (without solo mode):
+
 - `TRIVIAL` — 1 member (`adjudicator`) when
   `changedFilesCount <= 1 && changedFractalsCount <= 1 && !hasInterfaceChanges`.
   The auto-selected TRIVIAL tier uses the same integrated fast-path agent
@@ -148,15 +165,15 @@ complexity: <complexity from B.3; chairperson may overwrite after structure-bias
 committee:
   - <persona-id>
   - ...
-deliberation_mode: <solo-adjudicator|team>   # from B.3.5; consumed by verdict_gate in pipeline
-failure_reason: none                          # A/B/C boundary is always "none"; Phase D may surface other values
+deliberation_mode: <solo-adjudicator|team> # from B.3.5; consumed by verdict_gate in pipeline
+failure_reason: none # A/B/C boundary is always "none"; Phase D may surface other values
 changed_files_count: <count>
 changed_fractals:
   - <fractal path>
   - ...
 interface_changes: <true|false>
 no_structure_check: <true if --no-structure-check was set, false otherwise>
-adjudicator_mode: <true|false>   # true if --solo flag was set
+adjudicator_mode: <true|false> # true if --solo flag was set
 structure_critical_count: <STRUCTURE_CRITICAL_COUNT>
 structure_overall: <PASS|FAIL|N/A>
 created_at: <ISO 8601>

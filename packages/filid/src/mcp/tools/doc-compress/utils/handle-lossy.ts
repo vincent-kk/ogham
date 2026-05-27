@@ -8,5 +8,6 @@ export function handleLossy(input: DocCompressInput): DocCompressOutput {
   return {
     summary: result.summary,
     meta: result.meta,
+    cap_applies: { intent: true, detail: false },
   };
 }

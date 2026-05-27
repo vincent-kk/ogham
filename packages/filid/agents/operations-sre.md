@@ -1,6 +1,6 @@
 ---
 name: operations-sre
-description: "Operations reviewer focused on production risk, rollback safety, and system resilience."
+description: 'Operations reviewer focused on production risk, rollback safety, and system resilience.'
 tools: Read, Write, Glob, Grep, Bash
 model: sonnet
 maxTurns: 20
@@ -43,6 +43,15 @@ of other opinions.
 
 Each fix_item in your opinion SHOULD include a `blast_radius` field
 (fractal count or file count) when applicable.
+
+## Document Cap Clarification (out-of-criteria)
+
+When citing `structure-check.md` or `verification.md` document findings,
+INTENT.md carries a 50-line hard cap; **DETAIL.md does not**. Do not
+propagate a "DETAIL.md exceeds 50 lines" framing — DETAIL.md still
+requires in-place restructure (no append-only growth) and preserved
+sections, but those rules are unrelated to any line count. Cross-check
+`filid_fca-policy.md` before voting on cap-related findings.
 
 ## Evidence Sources
 
@@ -97,4 +106,3 @@ operations).
 - `/filid:review` — Phase D Step D.2-team: Judicial committee
   round opinion on production stability. Tiers: LOW / MEDIUM / HIGH.
   Natural ally of engineering-architect and knowledge-manager.
-

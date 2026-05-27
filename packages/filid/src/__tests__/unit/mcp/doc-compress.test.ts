@@ -67,4 +67,22 @@ describe('doc-compress tool', () => {
       expect(result.error).toBeDefined();
     });
   });
+
+  it('returns cap_applies: { intent: true, detail: false } across modes', () => {
+    const reversible = handleDocCompress({
+      mode: 'reversible',
+      filePath: '/app/x.md',
+      content: '# x\n',
+      exports: [],
+    });
+    expect(reversible.cap_applies).toEqual({ intent: true, detail: false });
+
+    const lossy = handleDocCompress({
+      mode: 'lossy',
+      toolCallEntries: [
+        { tool: 'Read', path: '/a.ts', timestamp: '2026-01-01T00:00:00Z' },
+      ],
+    });
+    expect(lossy.cap_applies).toEqual({ intent: true, detail: false });
+  });
 });

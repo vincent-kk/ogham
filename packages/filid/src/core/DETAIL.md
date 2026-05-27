@@ -6,7 +6,7 @@
 - 노드를 fractal/organ/pure-function으로 구조 기반 분류해야 한다
 - 8개 내장 규칙(naming, structure, dependency, documentation, index, module)을 평가할 수 있어야 한다
 - 현재 구조와 기대 구조 사이의 드리프트를 감지하고 SyncPlan을 생성해야 한다
-- INTENT.md/DETAIL.md의 50줄 제한과 3-tier 경계 섹션을 검증해야 한다
+- INTENT.md의 50줄 제한 및 3-tier 섹션과 DETAIL.md의 append-only 금지를 검증해야 한다
 - 두 모듈의 Lowest Common Ancestor(LCA)를 계산해야 한다
 - 프로젝트 건강도 점수와 리포트를 생성해야 한다
 - 스킬 실행 해시를 캐시 디렉토리에 저장·조회하고 프로젝트 변경 해시를 계산해야 한다

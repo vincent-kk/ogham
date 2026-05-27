@@ -19,6 +19,7 @@
 - 변경 후 관련 테스트 업데이트
 - `format/` · `utils/` · `handlers/` 수정은 review-manage 계약과 동기화
 - `computeContentHash` · `gitExec`는 반드시 `utils/content-hash.ts`에 위치
+- `hasDocumentChanges` 시그널 산정 규칙은 `skills/review/contracts.md` SSoT
 
 ### Ask first
 

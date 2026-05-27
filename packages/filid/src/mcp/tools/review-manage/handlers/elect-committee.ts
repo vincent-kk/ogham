@@ -67,6 +67,9 @@ export async function handleElectCommittee(
     committee = ['adjudicator'];
   } else if (complexity === 'LOW') {
     committee = ['engineering-architect', 'operations-sre'];
+    if (input.hasDocumentChanges === true) {
+      committee.push('knowledge-manager');
+    }
   } else if (complexity === 'MEDIUM') {
     committee = [
       'engineering-architect',

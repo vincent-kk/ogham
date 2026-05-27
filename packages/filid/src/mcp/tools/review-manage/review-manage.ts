@@ -32,6 +32,18 @@ export interface ReviewManageInput {
   changedFractalsCount?: number;
   hasInterfaceChanges?: boolean;
   /**
+   * True when the diff includes INTENT.md or DETAIL.md additions or
+   * modifications. Used by `elect-committee` so `knowledge-manager` joins
+   * LOW-complexity committees that touch documentation, preventing
+   * cap-rule misapplications from passing unchallenged.
+   *
+   * Computation rule (caller-side; defined in
+   * `skills/review/contracts.md`):
+   *   git diff --name-only <base>...HEAD | grep -E '(/|^)(INTENT|DETAIL)\.md$'
+   *   exit 0 → true · exit 1 → false · uninspectable → true (fail-safe)
+   */
+  hasDocumentChanges?: boolean;
+  /**
    * When true, bypass adversarial committee election and return the
    * integrated `adjudicator` fast-path agent as the sole committee
    * member. Triggered by the `--solo` review flag. The adjudicator

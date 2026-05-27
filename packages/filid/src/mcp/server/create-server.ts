@@ -277,6 +277,7 @@ export function createServer(): McpServer {
         changedFilesCount: z.number().optional(),
         changedFractalsCount: z.number().optional(),
         hasInterfaceChanges: z.boolean().optional(),
+        hasDocumentChanges: z.boolean().optional(),
       }),
     },
     wrapHandler(handleReviewManage),

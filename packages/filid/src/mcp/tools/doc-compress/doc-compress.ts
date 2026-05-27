@@ -30,6 +30,14 @@ export interface DocCompressOutput {
   summary?: ToolCallSummary;
   /** Compression metadata */
   meta?: CompressionMeta;
+  /**
+   * Cap-rule applicability label. Surfaces the asymmetry to downstream
+   * consumers (review personas, structure-check.md) so the INTENT.md
+   * 50-line hard cap is never extended to DETAIL.md, which has no line
+   * cap. DETAIL.md still requires in-place restructure — that rule is
+   * tracked separately and is independent of any line count.
+   */
+  cap_applies?: { intent: boolean; detail: boolean };
   /** Error message */
   error?: string;
 }

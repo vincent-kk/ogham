@@ -35,7 +35,7 @@
 
 - 새 built-in rule 추가 또는 기존 rule severity 변경 (사용자 프로젝트 영향)
 - `templates/` 변경 (신규 모듈 생성에 광범위 영향)
-- INTENT.md / DETAIL.md 50줄 cap 자체의 수정 (cap 위반은 모듈 분리 신호)
+- INTENT.md 50줄 cap 자체의 수정 (cap 위반은 모듈 분리 신호)
 
 ### Never do
 

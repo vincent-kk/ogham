@@ -5,13 +5,13 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 
 ## Hook Overview
 
-| Hook Event | Entry File | Purpose |
-|---|---|---|
-| `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts` | Unified hook: intent injection + INTENT.md/DETAIL.md validation + organ structure protection |
-| `PreToolUse` (EnterPlanMode) | `plan-gate.entry.ts` | FCA-AI compliance checklist when entering plan mode |
-| `SubagentStart` | `agent-enforcer.entry.ts` | FCA-AI agent role restriction injection |
-| `UserPromptSubmit` | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start |
-| `SessionEnd` | `session-cleanup.entry.ts` | Session cache and marker file cleanup |
+| Hook Event                     | Entry File                    | Purpose                                                                                                                  |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts`       | Unified hook: intent injection + INTENT.md(50-line cap) / DETAIL.md(append-only) validation + organ structure protection |
+| `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode                                                                      |
+| `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                  |
+| `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                  |
+| `SessionEnd`                   | `session-cleanup.entry.ts`    | Session cache and marker file cleanup                                                                                    |
 
 Built entry files live in `bridge/` after `yarn build:plugin`.
 
@@ -53,15 +53,15 @@ Does not block agent startup; restrictions are communicated as instructions.
 
 **Supported FCA-AI agent roles and their restrictions**:
 
-| Agent Type | Restriction |
-|---|---|
-| `fractal-architect` | Read-only. Cannot use Write or Edit tools. Analysis and planning only. |
-| `qa-reviewer` | Read-only. Cannot use Write or Edit tools. Review and report only. |
-| `implementer` | Must implement within the scope defined by DETAIL.md only. No architectural changes. |
-| `context-manager` | Can only edit INTENT.md and DETAIL.md. Cannot modify business logic or source code. |
-| `drift-analyzer` | Read-only. Cannot use Write or Edit tools. Detects drift and produces correction plans only. |
-| `restructurer` | Can only execute actions from an approved restructuring plan. No structural decisions. |
-| `code-surgeon` | Can only apply approved fix items from fix-requests.md. No architectural changes. |
+| Agent Type          | Restriction                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `fractal-architect` | Read-only. Cannot use Write or Edit tools. Analysis and planning only.                       |
+| `qa-reviewer`       | Read-only. Cannot use Write or Edit tools. Review and report only.                           |
+| `implementer`       | Must implement within the scope defined by DETAIL.md only. No architectural changes.         |
+| `context-manager`   | Can only edit INTENT.md and DETAIL.md. Cannot modify business logic or source code.          |
+| `drift-analyzer`    | Read-only. Cannot use Write or Edit tools. Detects drift and produces correction plans only. |
+| `restructurer`      | Can only execute actions from an approved restructuring plan. No structural decisions.       |
+| `code-surgeon`      | Can only apply approved fix items from fix-requests.md. No architectural changes.            |
 
 Unrecognized agent types pass through with no restriction.
 
@@ -75,6 +75,7 @@ Unrecognized agent types pass through with no restriction.
 Fires when `EnterPlanMode` tool is called. Injects an FCA-AI compliance checklist reminder into the agent's context when entering plan mode.
 
 **Behavior**:
+
 - Passes with `additionalContext` containing FCA-AI plan compliance reminders (INTENT.md limits, organ boundaries, 3+12 test rule)
 - Never blocks plan mode exit (always `continue: true`)
 
@@ -94,10 +95,12 @@ Fires on each user prompt submission. Injects FCA-AI rules into Claude's context
 **Cache**: Content hash-based invalidation. If the generated context matches the cached version, the cached copy is returned immediately (no regeneration cost).
 
 **Injected content**:
+
 1. Active FCA-AI project path
 2. Core FCA-AI rules summary:
-   - INTENT.md max 50 lines with 3-tier boundary sections
-   - DETAIL.md no append-only growth
+   - INTENT.md max 50 lines (hard cap) with 3-tier boundary sections
+   - DETAIL.md has no line cap; updates must restructure in place
+     (append-only growth forbidden, required sections preserved)
    - Organ directories must not have INTENT.md
    - Test files max 15 cases per spec (3 basic + 12 complex)
    - LCOM4 >= 2 triggers module split; CC > 15 triggers compress/abstract
@@ -116,6 +119,7 @@ Never blocks user prompts (always `continue: true`).
 Fires when a Claude Code session ends. Cleans up session-specific cache and marker files.
 
 **Behavior**:
+
 - Deletes the session context marker file (`session-context-<hash>`) from the plugin cache directory
 - Deletes the cached context file (`cached-context-<hash>`) if present
 - Always returns `continue: true` (SessionEnd hooks cannot block session termination)
@@ -136,7 +140,11 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "Read|Write|Edit",
         "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"", "timeout": 3 }
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "timeout": 3
+          }
         ]
       }
     ],
@@ -144,7 +152,11 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"", "timeout": 3 }
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
+            "timeout": 3
+          }
         ]
       }
     ],
@@ -152,7 +164,11 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"", "timeout": 5 }
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
+            "timeout": 5
+          }
         ]
       }
     ],
@@ -160,7 +176,11 @@ then executes the built `.mjs` file in `bridge/`.
       {
         "matcher": "*",
         "hooks": [
-          { "type": "command", "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"", "timeout": 3 }
+          {
+            "type": "command",
+            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
+            "timeout": 3
+          }
         ]
       }
     ]

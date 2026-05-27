@@ -18,5 +18,6 @@ export function handleReversible(input: DocCompressInput): DocCompressOutput {
   return {
     compacted: result.compacted,
     meta: result.meta,
+    cap_applies: { intent: true, detail: false },
   };
 }

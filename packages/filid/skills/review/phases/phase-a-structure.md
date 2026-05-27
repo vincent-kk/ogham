@@ -106,9 +106,18 @@ Skip this stage if both lists are empty.
 
 Severity mapping:
 
-- Line count > 50 → HIGH
+- Line count > 50 → HIGH (INTENT.md only)
 - Missing tier section → MEDIUM
 - DETAIL.md append-only → MEDIUM
+
+> **Cap applied — DO NOT propagate misapplications**: INTENT.md has a
+> 50-line hard cap; **DETAIL.md has NO line cap**. NEVER record a
+> "DETAIL.md exceeds N lines" finding in `structure-check.md`. DETAIL.md
+> still requires in-place restructure on each update (no append-only
+> growth) and preserved required sections — those rules are evaluated
+> separately and are independent of any line count. This cap separation
+> MUST be preserved in the structure-check.md output so downstream
+> Phase C/D personas do not extend the line cap to DETAIL.md.
 
 ### A.3 — Stage 3: Test Compliance (3+12 Rule)
 

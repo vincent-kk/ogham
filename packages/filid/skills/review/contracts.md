@@ -11,15 +11,15 @@ Phase D spawns committee members as real Claude Code subagents. Each
 `PersonaId` from `src/types/review.ts` corresponds to exactly one agent
 file under `packages/filid/agents/`:
 
-| PersonaId (MCP + session.md) | Agent file                          | Role / Branch                       | Election tier     |
-| ---------------------------- | ----------------------------------- | ----------------------------------- | ----------------- |
-| `adjudicator`                | `agents/adjudicator.md`             | Integrated fast-path (6 lenses)     | `TRIVIAL` / `--solo` only |
-| `engineering-architect`      | `agents/engineering-architect.md`   | Legislative — Structure             | LOW / MEDIUM / HIGH |
-| `knowledge-manager`          | `agents/knowledge-manager.md`       | Judicial — Documentation            | MEDIUM / HIGH     |
-| `operations-sre`             | `agents/operations-sre.md`          | Judicial — Stability                | LOW / MEDIUM / HIGH |
-| `business-driver`            | `agents/business-driver.md`         | Executive — Velocity                | MEDIUM / HIGH     |
-| `product-manager`            | `agents/product-manager.md`         | Translator — User value             | HIGH              |
-| `design-hci`                 | `agents/design-hci.md`              | Humanist — Cognitive load           | HIGH              |
+| PersonaId (MCP + session.md) | Agent file                        | Role / Branch                   | Election tier             |
+| ---------------------------- | --------------------------------- | ------------------------------- | ------------------------- |
+| `adjudicator`                | `agents/adjudicator.md`           | Integrated fast-path (6 lenses) | `TRIVIAL` / `--solo` only |
+| `engineering-architect`      | `agents/engineering-architect.md` | Legislative — Structure         | LOW / MEDIUM / HIGH       |
+| `knowledge-manager`          | `agents/knowledge-manager.md`     | Judicial — Documentation        | MEDIUM / HIGH             |
+| `operations-sre`             | `agents/operations-sre.md`        | Judicial — Stability            | LOW / MEDIUM / HIGH       |
+| `business-driver`            | `agents/business-driver.md`       | Executive — Velocity            | MEDIUM / HIGH             |
+| `product-manager`            | `agents/product-manager.md`       | Translator — User value         | HIGH                      |
+| `design-hci`                 | `agents/design-hci.md`            | Humanist — Cognitive load       | HIGH                      |
 
 All seven agents have scoped tool access (`Read, Write, Glob, Grep, Bash`).
 `Write` is used **exclusively** to author their
@@ -65,6 +65,30 @@ the sole reference for chairperson-side committee rewrites (e.g.,
 structure-bias escalation). Keep in sync with
 `src/mcp/tools/review-manage/handlers/elect-committee.ts`.
 
+## Document Change Signal
+
+`hasDocumentChanges` (input to `mcp_t_review_manage(elect-committee)`) is
+computed by Phase B as:
+
+```bash
+git diff --name-only <BASE_REF>..HEAD | grep -E '(/|^)(INTENT|DETAIL)\.md$' >/dev/null
+# exit 0 → hasDocumentChanges: true
+# exit 1 → hasDocumentChanges: false
+```
+
+When `hasDocumentChanges: true` AND complexity is `LOW`, the committee
+includes `knowledge-manager` (3-member LOW). MEDIUM/HIGH committees
+already include `knowledge-manager`; the signal has no effect there.
+
+Phase B (haiku model) MUST compute this signal explicitly. Falling back
+to `false` on uncertainty is forbidden — if the diff cannot be inspected,
+treat as `true` (fail-safe toward `knowledge-manager` inclusion).
+
+This signal is the LOW-tier counterpart to BUG_REPORT
+`detail-md-50-line-cascade` mitigation: it ensures DETAIL.md / INTENT.md
+cap-rule cascades from `qa-reviewer` Phase A output cannot pass Phase D
+without documentation-expert verification.
+
 ## Opinion Frontmatter Contract
 
 Every `<REVIEW_DIR>/rounds/round-<N>-<persona-id>.md` file MUST begin
@@ -77,7 +101,7 @@ round: <integer, 1..5>
 persona: <PersonaId>
 state: SYNTHESIS | VETO | ABSTAIN
 confidence: <0.0-1.0>
-rebuttal_targets: [<PersonaId>, ...]   # Round >= 2 only
+rebuttal_targets: [<PersonaId>, ...] # Round >= 2 only
 fix_items:
   - id: <FIX-candidate-id or null>
     severity: CRITICAL | HIGH | MEDIUM | LOW
@@ -88,8 +112,8 @@ fix_items:
     current: <measured value>
     recommended_action: <short imperative>
     evidence: <verification line reference or stage reference>
-compromise_accepted: <true|false>   # Optional — set when re-evaluating a VETO compromise
-reasoning_gaps: [<free-form strings>]   # Metrics the persona needed but could not find
+compromise_accepted: <true|false> # Optional — set when re-evaluating a VETO compromise
+reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not find
 ---
 ```
 
@@ -186,12 +210,12 @@ proceeding:
 
 Apply this verification to every delegated A/B/C phase (and no further):
 
-| Phase | Expected output                  |
-| ----- | -------------------------------- |
-| A     | `structure-check.md`             |
-| B     | `session.md`                     |
-| C1    | `verification-metrics.md`        |
-| C2    | `verification-structure.md`      |
+| Phase | Expected output             |
+| ----- | --------------------------- |
+| A     | `structure-check.md`        |
+| B     | `session.md`                |
+| C1    | `verification-metrics.md`   |
+| C2    | `verification-structure.md` |
 
 For batched A/B/C phases (`changedFilesCount > 15`), verify every
 `<base>.partial-<batchId>.md` file exists before merging. Missing partials
@@ -205,13 +229,13 @@ Every Phase D fix whose Code Patch modifies `.filid/config.json` MUST
 pass through `mcp_t_config_patch_validate` before being written to
 `fix-requests.md`. The contract is:
 
-| Field        | Direction            | Shape                                                     | Required |
-| ------------ | -------------------- | --------------------------------------------------------- | -------- |
-| `patch_json` | main → tool (input)  | stringified JSON of the proposed `.filid/config.json`     | yes      |
-| `source_context` | main → tool (input) | free-form trace tag (persona id or FIX-id)               | no       |
-| `valid`      | tool → main (output) | `true` iff the patch passes `FilidConfigSchema` strictly  | yes      |
-| `errors`     | tool → main (output) | `{ path: string; message: string }[]` zod issues          | yes (may be empty) |
-| `suggestion` | tool → main (output) | JSON string of the sanitised patch that would pass        | iff recoverable |
+| Field            | Direction            | Shape                                                    | Required           |
+| ---------------- | -------------------- | -------------------------------------------------------- | ------------------ |
+| `patch_json`     | main → tool (input)  | stringified JSON of the proposed `.filid/config.json`    | yes                |
+| `source_context` | main → tool (input)  | free-form trace tag (persona id or FIX-id)               | no                 |
+| `valid`          | tool → main (output) | `true` iff the patch passes `FilidConfigSchema` strictly | yes                |
+| `errors`         | tool → main (output) | `{ path: string; message: string }[]` zod issues         | yes (may be empty) |
+| `suggestion`     | tool → main (output) | JSON string of the sanitised patch that would pass       | iff recoverable    |
 
 Dispatch rules are encoded in `phase-d-deliberation.md` Step D.6.4:
 

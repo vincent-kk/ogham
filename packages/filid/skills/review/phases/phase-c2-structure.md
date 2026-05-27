@@ -134,7 +134,7 @@ Write to `<REVIEW_DIR>/verification-structure.md`:
 ---
 session_ref: session.md
 scope: structure-half
-structure_check_ref: structure-check.md   # present if Phase A ran
+structure_check_ref: structure-check.md # present if Phase A ran
 tools_executed:
   - mcp_t_structure_validate
   - mcp_t_ast_analyze(dependency-graph)
@@ -153,13 +153,19 @@ created_at: <ISO 8601>
 
 ## Structure & Dependency Verification
 
-| Check                 | Result         | Detail                            |
-| --------------------- | -------------- | --------------------------------- |
-| Fractal boundary      | PASS/WARN/FAIL | <violating paths>                 |
-| INTENT.md compliance  | PASS/WARN/FAIL | <files over 50 lines, missing tiers> |
-| Circular dependencies | PASS/WARN/FAIL | <cycle chains>                    |
-| Semantic diff         | INFO           | <interface additions/removals>    |
-| Structure drift       | PASS/WARN/FAIL | <drift findings>                  |
+> Note: The `Cap applied` column makes the rule scope explicit so downstream
+> personas in Phase D do not extend INTENT.md's 50-line cap to DETAIL.md.
+> INTENT.md = 50-line hard cap. DETAIL.md = no line cap (in-place
+> restructure required on each update; append-only growth forbidden).
+
+| Check                 | Cap applied                          | Result         | Detail                                 |
+| --------------------- | ------------------------------------ | -------------- | -------------------------------------- |
+| Fractal boundary      | n/a                                  | PASS/WARN/FAIL | <violating paths>                      |
+| INTENT.md compliance  | 50 lines hard cap                    | PASS/WARN/FAIL | <files over 50 lines, missing tiers>   |
+| DETAIL.md compliance  | none (in-place restructure required) | PASS/WARN/FAIL | <append-only growth, missing sections> |
+| Circular dependencies | n/a                                  | PASS/WARN/FAIL | <cycle chains>                         |
+| Semantic diff         | n/a                                  | INFO           | <interface additions/removals>         |
+| Structure drift       | n/a                                  | PASS/WARN/FAIL | <drift findings>                       |
 
 ## Debt Status
 
@@ -221,6 +227,7 @@ block. Behavior depends on `SCOPE_OVERRIDE`:
 ### Merge protocol (executed by chairperson)
 
 After all partials arrive, the chairperson merges:
+
 1. Combine per-file partials into one set of per-file rows
 2. Append the project-wide rows from `verification-structure.global.md`
 3. Write the unified `verification-structure.md` with
