@@ -1,0 +1,19 @@
+/* tokens.css — design token slot
+ *
+ * craft-dashboard does NOT define design tokens.
+ * Bring your own from a UI/design skill or hand-edit this file.
+ *
+ * Variables consumed by generated panels:
+ *   --bg, --fg, --muted, --accent
+ *   --accent-up, --accent-down
+ *   --layer-1, --layer-2, --layer-3, --layer-4, --layer-5
+ *   --space-1 … --space-6
+ *   --radius, --font-ui, --font-mono
+ *
+ * Leave this file empty to let Recharts and globals.css apply defaults.
+ */
+
+:root {
+  /* USER-EDIT-START: tokens */
+  /* USER-EDIT-END */
+}
