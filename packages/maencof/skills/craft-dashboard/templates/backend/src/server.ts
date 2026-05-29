@@ -122,6 +122,15 @@ async function main() {
     });
   }
 
+  // Runtime file path + its cleanup hook must be registered BEFORE listen():
+  // Fastify throws FST_ERR_INSTANCE_ALREADY_LISTENING if addHook runs after the
+  // server starts listening (the file itself is written post-listen, once the
+  // bound port is known).
+  const runtimeFile = resolve(modDir, '../..', '.dashboard-runtime.json');
+  app.addHook('onClose', async () => {
+    await unlink(runtimeFile).catch(() => {});
+  });
+
   // spec.port is the PREFERRED port (env PORT > 5174). Bind the first free port
   // at or after it so a busy 5174 steps to 5175, … instead of crashing.
   const port = await findFreePort(spec.port);
@@ -130,14 +139,10 @@ async function main() {
 
   // Record the actual port next to dashboard-spec.json so tooling (Makefile
   // dev-frontend proxy alignment, the vault run-skill) can discover it.
-  const runtimeFile = resolve(modDir, '../..', '.dashboard-runtime.json');
   await writeFile(
     runtimeFile,
     JSON.stringify({ port, url, pid: process.pid }, null, 2),
   );
-  app.addHook('onClose', async () => {
-    await unlink(runtimeFile).catch(() => {});
-  });
 
   app.log.info(`dashboard ready at ${url}`);
   if (process.env.DASHBOARD_OPEN === '1') openBrowser(url);
