@@ -8,4 +8,5 @@ backend/app/static/*
 .run/
 .dashboard-priming.md
 .dashboard-spec.draft.md
+.dashboard-runtime.json
 dashboard-spec.json.bak

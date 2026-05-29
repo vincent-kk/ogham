@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "vite": "^6",
-    "@vitejs/plugin-react": "latest",
+    "@vitejs/plugin-react": "^5",
     "typescript": "^5",
     "@types/react": "^19",
     "@types/react-dom": "^19"

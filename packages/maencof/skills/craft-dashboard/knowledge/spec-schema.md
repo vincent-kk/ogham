@@ -42,7 +42,7 @@ interface DashboardSpec {
 ```typescript
 interface RuntimeSpec extends Omit<DashboardSpec, 'vaultPath'> {
   vaultPath: string; // resolved absolute path, non-optional
-  port: number; // backend listen port; default 5174 from env PORT
+  port: number; // preferred backend port (default 5174 from env PORT); server.ts binds the first free port at/after it
 }
 ```
 

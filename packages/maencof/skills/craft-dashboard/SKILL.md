@@ -2,7 +2,7 @@
 name: craft-dashboard
 user_invocable: true
 description: '[maencof:craft-dashboard] Generates or updates a personal vault dashboard from an interactive interview. Defaults to reading .maencof/ graph indexes; falls back to a vault file walk with --vault-index independent.'
-argument-hint: '[create|mutate] [target-dir] [--chart recharts|plotly] [--search fuse|kg|both|off] [--vault-index maencof|independent] [--pin <version>] [--yes]'
+argument-hint: '[create|mutate] [target-dir] [--chart recharts|plotly] [--search fuse|kg|both|off] [--vault-index maencof|independent] [--pin <version>] [--no-run-skill] [--yes]'
 version: '0.1.0'
 complexity: complex
 context_layers: [2, 3, 4, 5]
@@ -117,7 +117,7 @@ Do not preload both. Do not re-implement phases from the wrong workflow.
 
 - Run the interview loop inline by adopting `/maencof:refine`'s 5-phase protocol (Read its `SKILL.md`, execute Phases 1-4 in-session) — never invoke `/maencof:refine` as a sub-skill
 - Treat the vault and `.maencof/` as read-only from the generated dashboard
-- Write only inside `<target>/` (the dashboard output directory)
+- Write only inside `<target>/` (the dashboard output directory) — the sole exception is the one generated run-skill, written to `<vault>/.claude/skills/` after confirmation (see "Ask first")
 - Honor the user's chart/search/vault-index CLI flags over defaults
 - Preserve `// USER-EDIT-START` / `END` regions during MUTATE patches
 
@@ -126,18 +126,21 @@ Do not preload both. Do not re-implement phases from the wrong workflow.
 - Overwriting an existing `dashboard-spec.json` without backup
 - Changing the target directory after Phase 0 confirmation
 - Running `npm install` (network call) — confirm if the user has constraints
+- Writing the generated run-skill to `<vault>/.claude/skills/run-<name>/` (outside `<target>`) — confirm before writing; `--no-run-skill` skips it, and an existing same-named skill is overwritten only on explicit `[y/N]`
 
 ### Never do
 
 - Modify `.maencof/` or vault markdown from inside the generated dashboard
-- Run a long-lived dev server inside the Claude Code session
+- Run a long-lived dev server inside the Claude Code session during scaffold (the generated run-skill launches it later as a background job — that is the run-skill's job, not craft-dashboard's)
 - Bundle UI design tokens or color palettes — those are user-chosen
 - Replace the caret-pinned majors in `templates/{backend,frontend}/package.json` with floating `"latest"` unless `--pin <version>` requests a deliberate snapshot
 
 ### Dependency version policy
 
 - Major versions of stack-defining libraries (Fastify 4, React 19, Vite 6, TypeScript 5, Zod 3, TanStack Query 5) are caret-pinned (`^N`) in the templates to preserve API compatibility.
-- Fastify plugins (`@fastify/static ^7`, `@fastify/cors ^8`, `fastify-sse-v2 ^4`) are co-pinned to the Fastify-4-compatible majors, NOT `"latest"`: each plugin enforces its accepted Fastify range at `app.register()` time, so a `"latest"` (Fastify-5-only) plugin crashes the backend at boot with `FST_ERR_PLUGIN_VERSION_MISMATCH`. Co-bump them only when bumping Fastify itself.
+- **Framework-coupled plugins** are co-pinned to the highest plugin major that still supports the framework's pinned major, NOT `"latest"` — a plugin's newest major routinely drops the older framework, and `--force`/`--legacy-peer-deps` only mask the break. Fix the pin instead. Co-bump a plugin only when bumping its framework.
+  - Fastify plugins (`@fastify/static ^7`, `@fastify/cors ^8`, `fastify-sse-v2 ^4`) target the Fastify-4-compatible majors. Each enforces its Fastify range at `app.register()` time, so a `"latest"` (Fastify-5-only) plugin crashes the backend at boot with `FST_ERR_PLUGIN_VERSION_MISMATCH` (install + `tsc` still pass — it only fails when the server runs).
+  - The Vite plugin (`@vitejs/plugin-react ^5`) targets the Vite-6-compatible majors. `@vitejs/plugin-react@latest` (6.x) declares `vite ^8` as its peer, so against the pinned `vite ^6` it fails `npm install` with an `ERESOLVE` peer conflict. v5 is the highest major whose peer range still includes `vite ^6`.
 - Minor/patch versions of leaf libraries (chokidar, gray-matter, markdown-it, recharts, zustand, dayjs, etc.) ship as `"latest"` so the user's first `npm install` writes a fresh lockfile.
 - `--pin <version>` is an optional override that rewrites every `"latest"` to the given concrete version (and is allowed to override caret-pinned majors when the user explicitly opts in).
 
@@ -193,8 +196,10 @@ Domain knowledge shared by both modes. Load specific files on demand; do not pre
 
 **Boilerplate + entry shells only.** No file-level `.tmpl` templates. Infrastructure and spec-driven files are authored by the LLM at scaffold time, against contracts encoded in the entry shells.
 
-- `backend/` — Fastify entry shell (`server.ts`, `fastify-decorators.d.ts`, `markdown-it-task-lists.d.ts` ambient shim) + package/tsconfig + `.npmrc`
-- `frontend/` — Vite + React 19 entry shell (`main.tsx`, `App.tsx`, `pages/Dashboard.tsx` placeholder) + styles, package/tsconfig + `.npmrc`
+- `backend/` — Fastify entry shell (`server.ts` — owns CORS, free-port fallback, `.dashboard-runtime.json`, and `DASHBOARD_OPEN` browser launch; `fastify-decorators.d.ts`, `markdown-it-task-lists.d.ts` ambient shim) + package/tsconfig + `.npmrc`
+- `frontend/` — Vite + React 19 entry shell (`main.tsx`, `App.tsx`, `pages/Dashboard.tsx` placeholder, `vite.config.ts` — proxy follows `DASHBOARD_API_PORT`, auto-opens browser) + styles, package/tsconfig + `.npmrc`
+- `scripts/read-api-port.mjs` — reads `.dashboard-runtime.json` so `make dev-frontend` aligns the Vite proxy with the backend's actual port (copied to `<target>` in CREATE Phase 4 step 0)
+- The vault run-skill is **not** a template file: CREATE Phase 5 authors it into `<vault>/.claude/skills/run-<name>/SKILL.md` from the pattern in `methods/create/workflow.md` "Run-skill generation" (skip with `--no-run-skill`)
 - `Makefile`, `package.json` (workspaces), `README.md`, `.gitignore`, `.npmrc` (all copied to `<target>` in CREATE Phase 4 step 0)
 
 The entry shells import infrastructure modules (`./graph-store.js`, `./api/client`, `./components/SearchBar`, etc.) that do **not** yet exist in templates. CREATE Phase 4 step 2-3 authors them; MUTATE reuses what CREATE left in `<target>/`.

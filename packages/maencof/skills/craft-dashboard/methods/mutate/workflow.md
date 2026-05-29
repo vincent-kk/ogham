@@ -295,12 +295,12 @@ Changes applied:
   - 1 panel removed (LegacyHeatmap)
   ~ 1 panel modified (ActivityByLayer — layout col-12 → col-6)
 
-Dev mode:   cd <target> && make dev-backend  (terminal 1, Fastify on 5174)
-            cd <target> && make dev-frontend (terminal 2, Vite on 5173)
-            Open: http://127.0.0.1:5173  (Vite proxies /api to 5174)
+Run it:     cd <target> && make serve   (or the /run-<name> skill from create)
+            — binds a free port and opens the browser; the bound URL is in
+            <target>/.dashboard-runtime.json
 
-Prod mode:  cd <target> && make serve
-            Open: http://127.0.0.1:5174
+Dev mode:   cd <target> && make dev-backend  (terminal 1 — Fastify, free port from 5174)
+            cd <target> && make dev-frontend (terminal 2 — Vite opens the browser)
 
 Spec reload:  /api/spec uses mtime cache — search.modes/fields/fuzzy
               changes apply on the next request without restart.

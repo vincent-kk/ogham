@@ -91,12 +91,11 @@ Changes applied:
   ~ 1 panel modified (ActivityHeatmap — layout col-12 → col-6)
   + 1 dataDomain added (tag-stats)
 
-Dev mode:   cd <target> && make dev-backend  (terminal 1, Fastify on 5174)
-            cd <target> && make dev-frontend (terminal 2, Vite on 5173)
-            Open: http://127.0.0.1:5173
+Dev mode:   cd <target> && make dev-backend  (terminal 1 — Fastify, free port from 5174)
+            cd <target> && make dev-frontend (terminal 2 — Vite opens the browser)
 
-Prod mode:  cd <target> && make serve
-            Open: http://127.0.0.1:5174
+Prod mode:  cd <target> && make serve   (binds a free port + opens the browser;
+            URL in <target>/.dashboard-runtime.json)
 
 Backup of previous spec: <target>/dashboard-spec.json.bak
 ```

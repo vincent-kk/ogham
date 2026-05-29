@@ -250,7 +250,7 @@ export type { RuntimeSpec };
 
 export const CONFIG: {
   VAULT_ROOT: string; // default only — see priority below
-  PORT: number; // default 5174
+  PORT: number; // preferred port (default 5174); server.ts binds the first free port at/after it
   SPEC_PATH: string; // <target>/dashboard-spec.json
 };
 
