@@ -35,8 +35,8 @@ export async function handleGetRoot(
     deployment_type: hasOnPremSite ? "onprem" : "cloud",
   };
 
-  const html = ctx.setupHtml.replace(
-    /["']__SETUP_STATE__["']/,
+  const html = ctx.settingsHtml.replace(
+    /["']__SETTINGS_STATE__["']/,
     escapeJsonForHtml(stateData),
   );
   res.writeHead(200, {

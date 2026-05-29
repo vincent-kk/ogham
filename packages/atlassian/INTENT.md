@@ -9,14 +9,14 @@
 | `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md)     |
 | `agents/`                    | 도메인 전문가 에이전트 (jira, confluence, media)   |
 | `skills/`                    | 사용자 스킬 디렉토리 (lazy reference loading 패턴) |
-| `scripts/`                   | esbuild 빌드 + setup HTML 번들링                   |
-| `bridge/`                    | esbuild 산출물 (커밋)                              |
+| `scripts/`                   | esbuild 빌드 + settings HTML 번들링                |
+| `bridge/` · `public/`        | esbuild 번들 + 빌드된 settings UI (둘 다 커밋)     |
 | `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                    |
 | `.mcp.json`                  | MCP 서버 등록                                      |
 
 ## Conventions
 
-- 빌드 파이프라인: `clean → version:sync → setup-html → tsc → mcp-server`
+- 빌드 파이프라인: `clean → version:sync → settings-html → tsc → mcp-server`
 - 의존성 방향 단방향: dispatcher → agent → skill → MCP → REST API
 - skill 은 lazy reference loading — capsule 만 컨텍스트에 적재, 도메인 상세는 필요 시점에 로드
 - credentials 는 `~/.claude/plugins/atlassian/credentials.json` 평문 JSON
@@ -25,7 +25,7 @@
 
 ### Always do
 
-- 빌드 후 `bridge/` 커밋
+- 빌드 후 `bridge/` · `public/` 커밋
 - SSRF guard (`src/core/http-client/ssrf-guard.ts`) 모든 outbound 요청에 적용
 - ADF / Storage ↔ Markdown 변환은 `src/converter/` 의 포팅된 로직 재사용
 

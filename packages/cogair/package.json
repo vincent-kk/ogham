@@ -31,6 +31,7 @@
   "files": [
     "dist",
     "bridge",
+    "public",
     "hooks",
     "libs",
     "skills",
@@ -41,7 +42,7 @@
   "scripts": {
     "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
     "build:plugin": "node scripts/buildSettingsHtml.mjs && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
-    "clean": "rm -rf bridge dist",
+    "clean": "rm -rf bridge dist public",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",

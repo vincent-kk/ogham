@@ -3,7 +3,7 @@ import type { SetupServerHandle } from "../../../../types/index.js";
 import { startSetupServer } from "../web-server/web-server.js";
 
 const mockContext = {
-  setupHtml: "<html>__SETUP_STATE__</html>",
+  settingsHtml: "<html>__SETTINGS_STATE__</html>",
   loadConfig: vi.fn().mockResolvedValue({}),
   saveConfig: vi.fn().mockResolvedValue(undefined),
   loadCredentials: vi.fn().mockResolvedValue({}),

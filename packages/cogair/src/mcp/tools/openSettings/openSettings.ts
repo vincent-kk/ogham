@@ -4,7 +4,7 @@ import { openBrowser } from '@ogham/cross-platform/launcher';
 
 import { SETTINGS_SERVER_PATH } from '../../../constants/paths.js';
 
-import { SETTINGS_HTML } from './__generated__/settingsHtml.js';
+import { loadSettingsHtml } from './utils/loadSettingsHtml.js';
 import { persistState } from './utils/persistState.js';
 import {
   type SettingsServerInstance,
@@ -33,7 +33,7 @@ export async function handleOpenSettings(
   }
 
   const handle = await startSettingsServer({
-    settingsHtml: SETTINGS_HTML,
+    settingsHtml: loadSettingsHtml(),
     onClose: async () => {
       currentServer = null;
       await rm(SETTINGS_SERVER_PATH, { force: true });

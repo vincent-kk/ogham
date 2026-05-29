@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
  * Inline src/mcp/pages/settings/{index.html, styles/styles.css, scripts/app.js}
- * into a single minified HTML string and emit
- * src/mcp/tools/openSettings/__generated__/settingsHtml.ts.
+ * into a single minified HTML file and emit public/settings.html.
  *
- * Adapted from atlassian's build-setup-html.mjs.
+ * The page is served at runtime by mcp/tools/openSettings by reading this file
+ * from disk (shipped via package.json:files) — it is NOT inlined into the MCP
+ * bundle, keeping bridge/mcp-server.cjs small and avoiding a duplicated copy of
+ * the markup inside the TypeScript sources.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -15,15 +17,8 @@ import { transform } from 'esbuild';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const pagesDir = join(root, 'src', 'mcp', 'pages', 'settings');
-const outputDir = join(
-  root,
-  'src',
-  'mcp',
-  'tools',
-  'openSettings',
-  '__generated__',
-);
-const outputPath = join(outputDir, 'settingsHtml.ts');
+const outputDir = join(root, 'public');
+const outputPath = join(outputDir, 'settings.html');
 
 async function readPage(...segments) {
   return readFile(join(pagesDir, ...segments), 'utf-8');
@@ -48,17 +43,6 @@ html = html.replace(
   `<script>${appJs}</script>`,
 );
 
-const serialized = JSON.stringify(html);
-
-const moduleSource = `// GENERATED FILE — do not edit manually.
-// Source: src/mcp/pages/settings/
-// Regenerate: node scripts/buildSettingsHtml.mjs
-
-export const SETTINGS_HTML = ${serialized};
-`;
-
 await mkdir(outputDir, { recursive: true });
-await writeFile(outputPath, moduleSource, 'utf-8');
-console.log(
-  '  settings UI -> src/mcp/tools/openSettings/__generated__/settingsHtml.ts',
-);
+await writeFile(outputPath, html, 'utf-8');
+console.log('  settings UI -> public/settings.html');

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atlassian Configuration</title>
+    <style>
+:root{--primary: #0052cc;--primary-hover: #0747a6;--danger: #de350b;--warning-bg: #fffae6;--warning-border: #ff8b00;--success: #00875a;--success-bg: #e3fcef;--gray-50: #f4f5f7;--gray-100: #ebecf0;--gray-200: #dfe1e6;--gray-400: #97a0af;--gray-600: #6b778c;--gray-800: #172b4d;--white: #ffffff;--radius: 4px;--shadow: 0 1px 3px rgba(9, 30, 66, .13), 0 0 0 1px rgba(9, 30, 66, .08);--t: .15s ease;--t-enter: .2s ease-out;--t-exit: .14s ease-in;--t-page: .35s ease-out}*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:14px;color:var(--gray-800);background:var(--gray-50);min-height:100vh;padding:24px 16px}.container{max-width:640px;margin:0 auto}.is-hidden{display:none}@keyframes card-enter{0%{opacity:0;transform:translateY(12px)}}.card{background:var(--white);border-radius:8px;box-shadow:var(--shadow);padding:28px;animation:card-enter var(--t-page) both}.page-title{font-size:20px;font-weight:600;margin-bottom:20px}.warning-banner{display:flex;align-items:center;gap:8px;background:var(--warning-bg);border-left:4px solid var(--warning-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:20px;font-size:13px;color:#6b4c00;transition:opacity var(--t-enter),transform var(--t-enter)}.warning-banner.is-hidden{display:none}.warning-banner.is-entering{opacity:0;transform:translateY(-8px)}.tab-bar{display:flex;border-bottom:2px solid var(--gray-200);margin-bottom:24px}.tab-btn{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:10px 16px;font-size:14px;font-weight:500;color:var(--gray-600);cursor:pointer;white-space:nowrap;transition:color var(--t),border-color var(--t)}.tab-btn:hover{color:var(--primary)}.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}.form-section{display:flex;flex-direction:column;gap:16px}.form-group{display:flex;flex-direction:column;gap:6px}.form-group label{font-weight:500;font-size:13px}.form-group input[type=text],.form-group input[type=url],.form-group input[type=password],.form-group input[type=number]{width:100%;padding:8px 10px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;color:var(--gray-800);background:var(--white);outline:none;transition:border-color var(--t),box-shadow var(--t)}@keyframes focus-glow{0%{box-shadow:0 0 #0052cc4d}to{box-shadow:0 0 0 2px #0052cc33}}.form-group input:focus{border-color:var(--primary);animation:focus-glow var(--t) ease-out forwards}.form-group input:not(:focus){box-shadow:none;transition:box-shadow var(--t-exit),border-color var(--t-exit)}.form-group input.error{border-color:var(--danger)}.field-error{font-size:12px;color:var(--danger);transition:opacity var(--t-enter),transform var(--t-enter)}.field-error.is-entering{opacity:0;transform:translateY(-4px)}.required{color:var(--danger)}.optional{color:var(--gray-400);font-weight:400;font-size:12px}.auth-type-group{display:flex;gap:8px;flex-wrap:wrap}.radio-pill{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--gray-200);border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-600);transition:all var(--t);user-select:none}.radio-pill:hover{border-color:var(--primary);color:var(--primary)}.radio-pill input[type=radio]{display:none}.radio-pill:has(input:checked){background:var(--primary);border-color:var(--primary);color:var(--white)}.auth-fields{display:flex;flex-direction:column;gap:14px;transition:opacity var(--t-enter)}.auth-fields.is-hidden{display:none}.auth-fields.is-entering{opacity:0}.tab-panel{transition:opacity var(--t-enter)}.tab-panel.is-hidden{display:none}.tab-panel.is-entering{opacity:0}.advanced-accordion{border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden}.advanced-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;font-size:13px;font-weight:500;color:var(--gray-600);cursor:pointer;list-style:none;background:var(--gray-50);transition:background var(--t)}.advanced-toggle::-webkit-details-marker{display:none}.advanced-toggle:after{content:"\25b8";font-size:11px;transition:transform var(--t)}details[open] .advanced-toggle:after{transform:rotate(90deg)}.advanced-toggle:hover{background:var(--gray-100)}@keyframes accordion-open{0%{opacity:0;transform:translateY(-6px)}}.advanced-body{padding:14px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--gray-200);animation:accordion-open var(--t-enter) both}.checkbox-group label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400}.checkbox-group input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}#cloud-sites-container{display:flex;flex-direction:column;gap:12px}.input-with-action{display:flex;align-items:center;gap:8px}.input-with-action input{flex:1}.btn-remove-site{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--gray-200);border-radius:var(--radius);background:var(--white);color:var(--gray-400);cursor:pointer;flex-shrink:0;transition:all var(--t)}.btn-remove-site:hover{border-color:var(--danger);background:#ffebe6;color:var(--danger)}.btn-remove-site:active{transform:scale(.95);transition-duration:.08s}.endpoint-section{border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-bottom:20px}.endpoint-section legend{font-weight:600;font-size:13px;color:var(--gray-600);padding:0 8px;text-transform:uppercase;letter-spacing:.05em}.endpoint-section>*+*{margin-top:14px}.action-row{display:flex;align-items:center;justify-content:space-between;margin-top:24px;gap:12px;flex-wrap:wrap}.action-right{display:flex;align-items:center;gap:10px}.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all var(--t);white-space:nowrap;transform:translateZ(0)}.btn:disabled{opacity:.6;cursor:not-allowed}.btn:hover:not(:disabled){transform:translateY(-1px)}.btn:active:not(:disabled){transform:translateY(0) scale(.97);transition-duration:.08s}.btn-primary{background:var(--primary);color:var(--white)}.btn-primary:hover:not(:disabled){background:var(--primary-hover)}.btn-secondary{background:var(--white);color:var(--gray-800);border:1px solid var(--gray-200)}.btn-secondary:hover:not(:disabled){background:var(--gray-50);border-color:var(--gray-400)}.btn-link{width:100%;justify-content:flex-start;padding:10px 14px;background:var(--gray-50);border:1px solid var(--gray-200);color:var(--gray-600);font-size:13px}.btn-link:hover:not(:disabled){background:var(--gray-100);transform:none}.btn-spinner:after{content:"";display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.test-result{font-size:13px;padding:4px 10px;border-radius:var(--radius)}.test-result.success{color:var(--success);background:var(--success-bg)}.test-result.error{color:var(--danger);background:#ffebe6}@keyframes success-icon-enter{0%{opacity:0;transform:scale(.5)}}@keyframes success-text-enter{0%{opacity:0;transform:translateY(6px)}}.success-screen{text-align:center;padding:48px 24px}.success-screen.is-hidden{display:none}.success-icon{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--success-bg);color:var(--success);border-radius:50%;font-size:28px;font-weight:700;margin-bottom:16px;animation:success-icon-enter .3s ease-out both}.success-screen p{font-size:15px;color:var(--gray-600);animation:success-text-enter .25s ease-out .1s both}@keyframes modal-backdrop-enter{0%{opacity:0}}@keyframes modal-card-enter{0%{opacity:0;transform:scale(.95) translateY(8px)}}@keyframes modal-backdrop-exit{to{opacity:0}}@keyframes modal-card-exit{to{opacity:0;transform:scale(.97) translateY(4px)}}.modal-overlay{position:fixed;inset:0;background:#091e4280;display:flex;align-items:center;justify-content:center;z-index:1000;animation:modal-backdrop-enter var(--t-enter) both}.modal-overlay .modal-card{animation:modal-card-enter var(--t-enter) both}.modal-overlay.is-closing{animation:modal-backdrop-exit var(--t-exit) both}.modal-overlay.is-closing .modal-card{animation:modal-card-exit var(--t-exit) both}.modal-card{background:var(--white);border-radius:8px;box-shadow:0 8px 32px #091e4240;padding:24px;width:480px;max-width:calc(100vw - 32px)}.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.modal-title{font-size:16px;font-weight:600}.modal-close{background:none;border:none;font-size:20px;color:var(--gray-400);cursor:pointer;line-height:1;padding:4px;transition:color var(--t)}.modal-close:hover{color:var(--gray-800)}.modal-textarea{width:100%;height:180px;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius);font-family:Menlo,Consolas,monospace;font-size:12px;resize:vertical;outline:none;transition:border-color var(--t)}.modal-textarea:focus{border-color:var(--primary)}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}@keyframes toast-in{0%{opacity:0;transform:translate(-50%) translateY(8px)}to{opacity:1;transform:translate(-50%) translateY(0)}}@keyframes toast-out{0%{opacity:1;transform:translate(-50%) translateY(0)}to{opacity:0;transform:translate(-50%) translateY(8px)}}.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%);background:var(--gray-800);color:var(--white);padding:10px 20px;border-radius:20px;font-size:13px;z-index:2000;white-space:nowrap;animation:toast-in .2s ease-out both}.toast.is-hidden{display:none}.toast.is-exiting{animation:toast-out var(--t-exit) both}.tab-panel[hidden],.auth-fields[hidden]{display:none}@media (max-width: 500px){.card{padding:20px 16px}.action-row{flex-direction:column;align-items:stretch}.action-right{justify-content:flex-end}.tab-btn{font-size:12px;padding:8px 10px}}@media (prefers-reduced-motion: reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1 class="page-title">Atlassian Configuration</h1>
+
+        <div class="warning-banner is-hidden" id="warning-banner">
+          <span class="warning-icon">&#9888;</span>
+          Existing configuration found. Changes will overwrite current settings.
+        </div>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="cloud">Cloud</button>
+          <button class="tab-btn" data-tab="on-premise">
+            On-premise (Separate Endpoints)
+          </button>
+        </div>
+
+        <form id="settings-form" novalidate>
+          <!-- Cloud Tab -->
+          <div class="tab-panel" data-panel="cloud">
+            <div class="form-section">
+              <div id="cloud-sites-container">
+                <div class="site-entry" data-site-index="0">
+                  <div class="form-group">
+                    <label>Site Name <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      data-field="cloud.sites.0.base_url"
+                      placeholder="your-site-name or https://your-site-name.atlassian.net"
+                      autocomplete="off"
+                    />
+                    <span class="field-error" hidden></span>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-link" id="btn-add-site">
+                + Add another site
+              </button>
+
+              <div class="form-group">
+                <label>Username (Email) <span class="required">*</span></label>
+                <input
+                  type="text"
+                  data-field="cloud.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="cloud.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion">
+                <summary class="advanced-toggle">Advanced</summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="cloud.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="cloud.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <!-- On-premise Tab -->
+          <div class="tab-panel is-hidden" data-panel="on-premise">
+            <fieldset class="endpoint-section">
+              <legend>Jira</legend>
+
+              <div class="form-group">
+                <label>Base URL <span class="required">*</span></label>
+                <input
+                  type="url"
+                  data-field="onprem.jira.base_url"
+                  placeholder="https://jira.your-company.com"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <div class="form-group">
+                <label>Username</label>
+                <input
+                  type="text"
+                  data-field="onprem.jira.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="onprem.jira.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion" open>
+                <summary class="advanced-toggle">
+                  Advanced · API Version
+                </summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="onprem.jira.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="onprem.jira.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Jira API Version</label>
+                    <div class="auth-type-group">
+                      <label class="radio-pill">
+                        <input
+                          type="radio"
+                          name="onprem-jira-api-ver"
+                          data-field="onprem.jira.api_version_override"
+                          value=""
+                          checked
+                        />
+                        Auto(v2)
+                      </label>
+                      <label class="radio-pill">
+                        <input
+                          type="radio"
+                          name="onprem-jira-api-ver"
+                          data-field="onprem.jira.api_version_override"
+                          value="3"
+                        />
+                        v3
+                      </label>
+                    </div>
+                    <p class="form-help">
+                      기본값(Auto / v2)은 대부분의 Jira Server·Data Center에서
+                      작동합니다. <br />
+                      v3는 Jira Data Center 8.4 이상에서 ADF(리치 텍스트) 형식이
+                      필요한 경우에만 선택하세요.
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </fieldset>
+
+            <fieldset class="endpoint-section">
+              <legend>Confluence</legend>
+
+              <div class="form-group">
+                <label>Base URL <span class="required">*</span></label>
+                <input
+                  type="url"
+                  data-field="onprem.confluence.base_url"
+                  placeholder="https://confluence.your-company.com"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <div class="form-group">
+                <label>Username</label>
+                <input
+                  type="text"
+                  data-field="onprem.confluence.username"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+              <div class="form-group">
+                <label>API Token <span class="required">*</span></label>
+                <input
+                  type="password"
+                  data-field="onprem.confluence.api_token"
+                  autocomplete="off"
+                />
+                <span class="field-error" hidden></span>
+              </div>
+
+              <details class="advanced-accordion">
+                <summary class="advanced-toggle">Advanced</summary>
+                <div class="advanced-body">
+                  <div class="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-field="onprem.confluence.ssl_verify"
+                        checked
+                      />
+                      SSL Verify
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label>Timeout (ms)</label>
+                    <input
+                      type="number"
+                      data-field="onprem.confluence.timeout"
+                      placeholder="30000"
+                    />
+                  </div>
+                </div>
+              </details>
+            </fieldset>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-row">
+            <button type="button" class="btn btn-secondary" id="btn-import">
+              Import from JSON
+            </button>
+            <div class="action-right">
+              <span class="test-result" id="test-result" hidden></span>
+              <button type="submit" class="btn btn-primary" id="btn-save">
+                Save
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Success Screen -->
+        <div class="success-screen is-hidden" id="success-screen">
+          <div class="success-icon">&#10003;</div>
+          <p>Configuration saved successfully. You may close this window.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script>
+      window.__SETTINGS_STATE__ = "__SETTINGS_STATE__";
+    </script>
+    <script>
+"use strict";(function(){var p={CLOUD:"cloud",ON_PREMISE:"on-premise"},v={tab:p.CLOUD,editMode:!1,loading:!1,cloudSiteCount:1};function A(e){e.classList.remove("is-hidden"),e.classList.add("is-entering"),e.offsetHeight,e.classList.remove("is-entering")}document.addEventListener("DOMContentLoaded",function(){B(),F(),U(),D()});function B(){var e=window.__SETTINGS_STATE__;if(!(!e||e==="__SETTINGS_STATE__")){var t;try{t=typeof e=="string"?JSON.parse(e):e}catch{return}!t||!t.configured||(v.editMode=!0,N(),O(t))}}function N(){var e=document.getElementById("warning-banner");e&&A(e)}function O(e){var t=e.deployment_type||"cloud";if(y(t==="onprem"?p.ON_PREMISE:p.CLOUD),t==="cloud"&&e.jira){for(var n=Array.isArray(e.jira)?e.jira:[e.jira],r=0;r<n.length;r++)r>0&&g(),l("cloud.sites."+r+".base_url",n[r].base_url||"");var i=n[0]||{};l("cloud.username",i.username||""),l("cloud.api_token",i.api_token?C:""),i.ssl_verify!==void 0&&E("cloud.ssl_verify",i.ssl_verify),i.timeout&&l("cloud.timeout",String(i.timeout))}else if(t==="onprem"){if(e.jira){var f=Array.isArray(e.jira)?e.jira[0]:e.jira;f&&(L("onprem.jira",f),H("onprem.jira.api_version_override",f.api_version_override||""))}if(e.confluence){var o=Array.isArray(e.confluence)?e.confluence[0]:e.confluence;o&&L("onprem.confluence",o)}}}function L(e,t){l(e+".base_url",t.base_url||""),l(e+".username",t.username||""),l(e+".api_token",t.api_token?C:""),t.ssl_verify!==void 0&&E(e+".ssl_verify",t.ssl_verify),t.timeout&&l(e+".timeout",String(t.timeout))}var C="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";function F(){document.querySelectorAll(".tab-btn").forEach(function(e){e.addEventListener("click",function(){w(),q(),y(e.dataset.tab)})})}function y(e){v.tab=e,document.querySelectorAll(".tab-btn").forEach(function(t){t.classList.toggle("active",t.dataset.tab===e)}),document.querySelectorAll(".tab-panel").forEach(function(t){t.dataset.panel===e?A(t):t.classList.add("is-hidden")})}function d(e,t,n){var r=document.createElement(e);return t&&Object.keys(t).forEach(function(i){i==="className"?r.className=t[i]:i==="textContent"?r.textContent=t[i]:i==="hidden"?r.hidden=t[i]:(i.indexOf("data-"),r.setAttribute(i,t[i]))}),n&&n.forEach(function(i){r.appendChild(i)}),r}function h(e,t){var n=document.createElementNS("http://www.w3.org/2000/svg",e);return t&&Object.keys(t).forEach(function(r){n.setAttribute(r,t[r])}),n}function M(){var e=h("svg",{width:"12",height:"12",viewBox:"0 0 12 12",fill:"none",stroke:"currentColor","stroke-width":"1.5","stroke-linecap":"round"});return e.appendChild(h("line",{x1:"2",y1:"2",x2:"10",y2:"10"})),e.appendChild(h("line",{x1:"10",y1:"2",x2:"2",y2:"10"})),e}function R(e){var t=d("input",{type:"text","data-field":"cloud.sites."+e+".base_url",placeholder:"your-site-name or https://your-site-name.atlassian.net",autocomplete:"off"}),n=d("button",{type:"button",className:"btn-remove-site","aria-label":"Remove site","data-remove-index":String(e)},[M()]),r=d("div",{className:"site-entry","data-site-index":String(e)},[d("div",{className:"form-group"},[d("label",{},[document.createTextNode("Site Name "),d("span",{className:"optional",textContent:"(optional)"})]),d("div",{className:"input-with-action"},[t,n]),d("span",{className:"field-error",hidden:!0})])]);return n.addEventListener("click",function(){r.remove()}),r}function D(){var e=document.getElementById("btn-add-site");e&&e.addEventListener("click",g)}function g(){var e=document.getElementById("cloud-sites-container");if(e){var t=v.cloudSiteCount++;e.appendChild(R(t))}}function U(){document.getElementById("btn-save").addEventListener("click",I),document.getElementById("settings-form").addEventListener("submit",function(e){e.preventDefault(),I()})}function z(){w();var e=k(),t=!0;function n(o,a){(!a||!a.trim())&&(_(o,"This field is required."),t=!1)}function r(o,a){!a||!a.trim()?(_(o,"This field is required."),t=!1):/^https?:\/\//i.test(a.trim())||(_(o,"Must start with http:// or https://"),t=!1)}function i(o,a){if(!a||!a.trim())_(o,"This field is required."),t=!1;else{var m=a.trim(),c=/^https?:\/\//i.test(m),s=/^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(m);!c&&!s&&(_(o,"Enter a site name (e.g. my-company) or full URL (https://my-company.atlassian.net)"),t=!1)}}if(e.deployment_type==="cloud"){var f=document.querySelectorAll("#cloud-sites-container .site-entry");f.forEach(function(o,a){var m=o.dataset.siteIndex,c="cloud.sites."+m+".base_url",s=u(c);(a===0||s&&s.trim())&&i(c,s)}),n("cloud.username",e.jira?e.jira.username:""),n("cloud.api_token",e.jira?e.jira.api_token:"")}else r("onprem.jira.base_url",e.jira?e.jira.base_url:""),n("onprem.jira.api_token",e.jira?e.jira.api_token:""),r("onprem.confluence.base_url",e.confluence?e.confluence.base_url:""),n("onprem.confluence.api_token",e.confluence?e.confluence.api_token:"");return t}function _(e,t){var n=document.querySelector('[data-field="'+e+'"]');if(n){n.classList.add("error");var r=n.closest(".form-group"),i=r?r.querySelector(".field-error"):null;i&&(i.textContent=t,i.hidden=!1,i.classList.add("is-entering"),i.offsetHeight,i.classList.remove("is-entering"))}}function w(){document.querySelectorAll(".field-error").forEach(function(e){e.hidden=!0,e.textContent=""}),document.querySelectorAll("input.error").forEach(function(e){e.classList.remove("error")})}function k(){var e=v.tab===p.CLOUD,t=e?"cloud":"onprem";function n(c){if(!c)return c;var s=c.trim();return/^https?:\/\//i.test(s)?s.replace(/\/+$/,""):"https://"+s+".atlassian.net"}if(e){var r=[],i=document.querySelectorAll("#cloud-sites-container .site-entry");i.forEach(function(c){var s=c.dataset.siteIndex,x=u("cloud.sites."+s+".base_url");x&&r.push(n(x))});var f=u("cloud.username"),o=u("cloud.api_token"),a=S("cloud.ssl_verify"),m=j("cloud.timeout");return{deployment_type:t,cloud_sites:r,jira:{base_url:r[0]||"",username:f,api_token:o,ssl_verify:a,timeout:m},confluence:{base_url:r[0]||"",username:f,api_token:o,ssl_verify:a,timeout:m}}}else return{deployment_type:t,jira:{base_url:u("onprem.jira.base_url"),username:u("onprem.jira.username"),api_token:u("onprem.jira.api_token"),ssl_verify:S("onprem.jira.ssl_verify"),timeout:j("onprem.jira.timeout"),api_version_override:G("onprem.jira.api_version_override")||void 0},confluence:{base_url:u("onprem.confluence.base_url"),username:u("onprem.confluence.username"),api_token:u("onprem.confluence.api_token"),ssl_verify:S("onprem.confluence.ssl_verify"),timeout:j("onprem.confluence.timeout")}}}function b(e,t){var n=document.getElementById("test-result");n.textContent=t,n.className="test-result "+(e?"success":"error"),n.hidden=!1}function q(){var e=document.getElementById("test-result");e.hidden=!0}function I(){if(z()){if(v.editMode){var e=window.confirm("This will overwrite existing settings. Continue?");if(!e)return}var t=k();T(!0),q(),b(!0,"Testing connection..."),fetch("/submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)}).then(function(n){return n.json()}).then(function(n){n.success?P():b(!1,n.message||"Save failed")}).catch(function(n){b(!1,"Request failed: "+n.message)}).finally(function(){T(!1)})}}function P(){document.getElementById("settings-form").classList.add("is-hidden");var e=document.getElementById("success-screen");e.classList.remove("is-hidden");var t=document.getElementById("warning-banner");t&&t.classList.add("is-hidden")}function T(e){v.loading=e;var t=[document.getElementById("btn-save"),document.getElementById("btn-import")];t.forEach(function(n){n&&(n.disabled=e,e?n.classList.add("btn-spinner"):n.classList.remove("btn-spinner"))})}function u(e){var t=document.querySelector('[data-field="'+e+'"]');return t?t.value.trim():""}function l(e,t){var n=document.querySelector('[data-field="'+e+'"]');n&&(n.value=t)}function S(e){var t=document.querySelector('[data-field="'+e+'"]');return t?t.checked:!0}function E(e,t){var n=document.querySelector('[data-field="'+e+'"]');n&&(n.checked=!!t)}function j(e){var t=u(e),n=parseInt(t,10);return isNaN(n)?null:n}function G(e){var t=document.querySelector('input[type="radio"][data-field="'+e+'"]:checked');return t?t.value:""}function H(e,t){var n=document.querySelectorAll('input[type="radio"][data-field="'+e+'"]');n.forEach(function(r){r.checked=r.value===t})}window.__settingsApp={setField:l,setCheckbox:E,activateTab:y,addSiteEntry:g,TABS:p}})();
+</script>
+    <script>
+"use strict";(function(){var u=["JIRA_URL","CONFLUENCE_URL","JIRA_USERNAME","CONFLUENCE_USERNAME","JIRA_API_TOKEN","CONFLUENCE_API_TOKEN","JIRA_SSL_VERIFY","CONFLUENCE_SSL_VERIFY","JIRA_TIMEOUT","CONFLUENCE_TIMEOUT"];document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("btn-import");e&&e.addEventListener("click",N)});function N(){var e=document.createElement("div");e.className="modal-overlay",e.innerHTML=['<div class="modal-card">','  <div class="modal-header">','    <span class="modal-title">Import Configuration</span>','    <button class="modal-close" aria-label="Close">&times;</button>',"  </div>",'  <textarea class="modal-textarea"',`    placeholder="Paste JSON or .env content here...
+
+Supported formats:
+\u2022 MCP config JSON (mcpServers.mcp-atlassian.env)
+\u2022 env object JSON ({ JIRA_URL: ... })
+\u2022 .env KEY=VALUE lines"></textarea>`,'  <div class="modal-actions">','    <button class="btn btn-secondary" data-action="cancel">Cancel</button>','    <button class="btn btn-primary" data-action="import">Import</button>',"  </div>","</div>"].join(`
+`),document.body.appendChild(e),e.querySelector(".modal-close").addEventListener("click",function(){c(e)}),e.querySelector('[data-action="cancel"]').addEventListener("click",function(){c(e)}),e.querySelector('[data-action="import"]').addEventListener("click",function(){var t=e.querySelector(".modal-textarea").value;v(t),c(e)}),e.addEventListener("click",function(t){t.target===e&&c(e)})}function c(e){!e||!e.parentNode||(e.classList.add("is-closing"),e.addEventListener("animationend",function(){e.parentNode&&e.parentNode.removeChild(e)},{once:!0}))}function _(e){var t=e.trim();if(t.startsWith("{"))try{var i=JSON.parse(t);return f(i)}catch{}var a=t.indexOf("{");if(a>0){for(var r=t.slice(a),o=0,s=-1,n=0;n<r.length;n++)if(r[n]==="{")o++;else if(r[n]==="}"&&(o--,o===0)){s=n+1;break}if(s>0)try{var I=JSON.parse(r.slice(0,s)),m=f(I);if(Object.keys(m).length>0)return m}catch{}}return L(t)}function f(e){var t={};function i(a){if(!(!a||typeof a!="object")){if(Array.isArray(a)){a.forEach(i);return}for(var r=Object.keys(a),o=0;o<r.length;o++){var s=r[o],n=a[s];u.indexOf(s)>=0&&typeof n=="string"?t[s]=n:n&&typeof n=="object"&&i(n)}}}return i(e),t}function L(e){var t={},i=e.split(/\r?\n/);return i.forEach(function(a){var r=a.trim();if(!(!r||r.startsWith("#"))){var o=r.indexOf("=");if(!(o<0)){var s=r.slice(0,o).trim(),n=r.slice(o+1).trim();(n.startsWith('"')&&n.endsWith('"')||n.startsWith("'")&&n.endsWith("'"))&&(n=n.slice(1,-1)),u.indexOf(s)>=0&&(t[s]=n)}}}),t}function E(e){try{return new URL(e).origin}catch{return e}}function v(e){var t=_(e);if(Object.keys(t).length===0){d("No recognized configuration keys found.");return}var i=window.__settingsApp;if(!i){d("App not ready. Please try again.");return}var a=t.JIRA_URL||"",r=t.CONFLUENCE_URL||"",o=a&&r,s=o&&E(a)===E(r),n=o&&!s;n?(i.activateTab(i.TABS.ON_PREMISE),C(t,i)):(i.activateTab(i.TABS.CLOUD),O(t,i)),d("Import complete")}function O(e,t){var i=e.JIRA_URL||e.CONFLUENCE_URL||"";t.setField("cloud.sites.0.base_url",i),t.setField("cloud.username",e.JIRA_USERNAME||e.CONFLUENCE_USERNAME||""),t.setField("cloud.api_token",e.JIRA_API_TOKEN||e.CONFLUENCE_API_TOKEN||""),l(e,"cloud","JIRA",t)}function C(e,t){t.setField("onprem.jira.base_url",e.JIRA_URL||""),t.setField("onprem.jira.username",e.JIRA_USERNAME||""),t.setField("onprem.jira.api_token",e.JIRA_API_TOKEN||""),l(e,"onprem.jira","JIRA",t),t.setField("onprem.confluence.base_url",e.CONFLUENCE_URL||""),t.setField("onprem.confluence.username",e.CONFLUENCE_USERNAME||""),t.setField("onprem.confluence.api_token",e.CONFLUENCE_API_TOKEN||""),l(e,"onprem.confluence","CONFLUENCE",t)}function l(e,t,i,a){var r=i+"_SSL_VERIFY";e[r]!==void 0&&a.setCheckbox(t+".ssl_verify",e[r]!=="false");var o=i+"_TIMEOUT";if(e[o]){var s=parseInt(e[o],10);isNaN(s)||a.setField(t+".timeout",String(s*1e3))}}function d(e){var t=document.getElementById("toast");t&&(t.textContent=e,t.classList.remove("is-hidden","is-exiting"),t.hidden=!1,t.style.animation="none",t.offsetHeight,t.style.animation="",setTimeout(function(){t.classList.add("is-exiting"),t.addEventListener("animationend",function(){t.classList.add("is-hidden"),t.classList.remove("is-exiting")},{once:!0})},2500))}})();
+</script>
+  </body>
+</html>

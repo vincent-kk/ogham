@@ -19,8 +19,8 @@ vi.mock("../../../../core/index.js", () => ({
 
 function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
   return {
-    setupHtml:
-      "<html><script>window.__SETUP_STATE__ = '__SETUP_STATE__';</script></html>",
+    settingsHtml:
+      "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
     saveConfig: vi.fn().mockResolvedValue(undefined),
     loadCredentials: vi.fn().mockResolvedValue({}),

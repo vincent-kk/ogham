@@ -4,18 +4,19 @@ MCP setup tool with local HTTP server for Atlassian auth configuration UI.
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `web-server/` | node:http server, closure pattern, 5min auto-shutdown |
-| `connection-tester/` | Jira/Confluence connection test via core modules |
-| `__generated__/` | Build-time generated files (setup-html.ts) |
-| `__tests__/` | Unit tests for all sub-organs |
+| Directory            | Role                                                                   |
+| -------------------- | ---------------------------------------------------------------------- |
+| `web-server/`        | node:http server, closure pattern, 5min auto-shutdown                  |
+| `connection-tester/` | Jira/Confluence connection test via core modules                       |
+| `utils/`             | `loadSettingsHtml` — reads `public/settings.html` from disk at runtime |
+| `__tests__/`         | Unit tests for all sub-organs                                          |
 
 ## Conventions
 
 - Server instance via closure/return value `{ url, close }` only
 - Reuse core modules: config-manager, auth-manager, http-client, environment-resolver
-- FE code lives in `src/mcp/pages/setup/` — HTTP API interface only
+- FE code lives in `src/mcp/pages/settings/` — HTTP API interface only
+- Tool name stays `setup` (public MCP interface); only the page/asset layer is named `settings`. Renaming the tool is an interface change — handle separately.
 
 ## Boundaries
 

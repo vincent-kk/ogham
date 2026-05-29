@@ -9,7 +9,7 @@ import type {
   SetupParams,
   SetupResult,
 } from "../../../types/index.js";
-import { SETUP_HTML } from "./__generated__/setup-html.js";
+import { loadSettingsHtml } from "./utils/load-settings-html.js";
 import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "@ogham/cross-platform/launcher";
 import { startSetupServer } from "./web-server/index.js";
@@ -22,7 +22,7 @@ export async function handleSetup(params: SetupParams): Promise<SetupResult> {
   try {
     handle = await startSetupServer({
       context: {
-        setupHtml: SETUP_HTML,
+        settingsHtml: loadSettingsHtml(),
         loadConfig,
         saveConfig,
         loadCredentials,

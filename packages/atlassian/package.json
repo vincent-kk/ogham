@@ -21,15 +21,16 @@
     "dist",
     "agents",
     "bridge",
+    "public",
     "skills",
     ".claude-plugin",
     ".mcp.json",
     "README.md"
   ],
   "scripts": {
-    "build": "yarn clean && yarn version:sync && node scripts/build-setup-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs",
+    "build": "yarn clean && yarn version:sync && node scripts/build-settings-html.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs",
     "build:plugin": "node scripts/build-mcp-server.mjs",
-    "clean": "rm -rf bridge",
+    "clean": "rm -rf bridge public",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
     "test": "vitest",

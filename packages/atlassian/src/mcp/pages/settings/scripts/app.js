@@ -1,10 +1,13 @@
-// Atlassian Setup UI - App
+// Atlassian Settings UI - App
 "use strict";
 
 (function () {
+  // Tab identifiers — shared with json-import.js via window.__settingsApp.TABS
+  var TABS = { CLOUD: "cloud", ON_PREMISE: "on-premise" };
+
   // State
   var state = {
-    tab: "cloud",
+    tab: TABS.CLOUD,
     editMode: false,
     loading: false,
     cloudSiteCount: 1,
@@ -24,12 +27,11 @@
     bindTabs();
     bindButtons();
     bindAddSite();
-    loadStatus();
   });
 
   function initApp() {
-    var raw = window.__SETUP_STATE__;
-    if (!raw || raw === "__SETUP_STATE__") return;
+    var raw = window.__SETTINGS_STATE__;
+    if (!raw || raw === "__SETTINGS_STATE__") return;
 
     var parsed;
     try {
@@ -52,7 +54,7 @@
 
   function prefillForm(data) {
     var dt = data.deployment_type || "cloud";
-    activateTab(dt === "onprem" ? "on-premise" : "cloud");
+    activateTab(dt === "onprem" ? TABS.ON_PREMISE : TABS.CLOUD);
 
     if (dt === "cloud" && data.jira) {
       // Multi-site: jira is an array of { base_url, is_cloud }
@@ -239,7 +241,7 @@
   function bindButtons() {
     document.getElementById("btn-save").addEventListener("click", onSave);
     document
-      .getElementById("setup-form")
+      .getElementById("settings-form")
       .addEventListener("submit", function (e) {
         e.preventDefault();
         onSave();
@@ -352,7 +354,7 @@
 
   // --- Collect Form Data ---
   function collectFormData() {
-    var isCloud = state.tab === "cloud";
+    var isCloud = state.tab === TABS.CLOUD;
     var deployType = isCloud ? "cloud" : "onprem";
 
     function normalizeCloudUrl(value) {
@@ -473,22 +475,11 @@
   }
 
   function showSuccessScreen() {
-    document.getElementById("setup-form").classList.add("is-hidden");
+    document.getElementById("settings-form").classList.add("is-hidden");
     var screen = document.getElementById("success-screen");
     screen.classList.remove("is-hidden");
     var banner = document.getElementById("warning-banner");
     if (banner) banner.classList.add("is-hidden");
-  }
-
-  // --- Status Check ---
-  function loadStatus() {
-    fetch("/status")
-      .then(function (res) {
-        return res.json();
-      })
-      .catch(function () {
-        return { configured: false };
-      });
   }
 
   // --- Loading State ---
@@ -550,10 +541,11 @@
   }
 
   // Expose fill helpers for json-import.js
-  window.__setupApp = {
+  window.__settingsApp = {
     setField: setField,
     setCheckbox: setCheckbox,
     activateTab: activateTab,
     addSiteEntry: addSiteEntry,
+    TABS: TABS,
   };
 })();

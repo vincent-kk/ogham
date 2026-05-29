@@ -41,6 +41,14 @@ await esbuild.build({
   alias: {
     zod: zodPath,
   },
+  // esbuild empties bare `import.meta` in CJS output; shim `import.meta.url` to
+  // the bundle file path so runtime asset resolution (public/settings.html) works.
+  banner: {
+    js: "const __import_meta_url = require('url').pathToFileURL(__filename).href;",
+  },
+  define: {
+    'import.meta.url': '__import_meta_url',
+  },
 });
 
 console.log('  MCP server  -> bridge/mcp-server.cjs');

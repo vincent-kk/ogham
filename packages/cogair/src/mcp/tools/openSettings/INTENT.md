@@ -4,12 +4,12 @@
 
 ## Structure
 
-| Path                            | Role                                                                                   |
-| ------------------------------- | -------------------------------------------------------------------------------------- |
-| `openSettings.ts`               | `handleOpenSettings` — 활성 서버 재사용 또는 신규 기동 + `settings_server.json` 영속화 |
-| `__generated__/settingsHtml.ts` | `scripts/buildSettingsHtml.mjs` 가 inline 한 단일 HTML 문자열                          |
-| `webServer/`                    | HTTP 서버, 라우트, 핸들러, token / CSRF 가드                                           |
-| `index.ts`                      | barrel                                                                                 |
+| Path              | Role                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `openSettings.ts` | `handleOpenSettings` — 활성 서버 재사용 또는 신규 기동 + `settings_server.json` 영속화 |
+| `utils/`          | `loadSettingsHtml` (`public/settings.html` 런타임 로드), `persistState` (state 기록)   |
+| `webServer/`      | HTTP 서버, 라우트, 핸들러, token / CSRF 가드                                           |
+| `index.ts`        | barrel                                                                                 |
 
 ## Conventions
 
@@ -41,7 +41,7 @@
 
 - `node:fs/promises` — `rm` (state 파일 삭제)
 - `../../../constants/paths` — `SETTINGS_SERVER_PATH`
-- `./__generated__/settingsHtml` — `SETTINGS_HTML` (빌드 시 인라인된 HTML 문자열)
+- `./utils/loadSettingsHtml` — `loadSettingsHtml` (`public/settings.html` 런타임 로드)
 - `@ogham/cross-platform/launcher` — `openBrowser` (OS별 브라우저 기동)
 - `./utils/persistState` — `persistState` (state 파일 원자적 기록)
 - `./webServer` — `startSettingsServer`, `SettingsServerInstance`

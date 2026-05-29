@@ -4,16 +4,17 @@
 
 ## Structure
 
-| Path                         | Role                                          |
-| ---------------------------- | --------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트)                |
-| `scripts/`                   | esbuild 빌드 스크립트                         |
-| `hooks/`                     | Claude Code 훅 매핑                           |
-| `skills/`                    | `setup`, `codex`, `gemini`, `crosscheck` 스킬 |
-| `libs/run.cjs`               | cross-platform Node 러너 (filid 동일)         |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)  |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트               |
-| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                 |
+| Path                         | Role                                           |
+| ---------------------------- | ---------------------------------------------- |
+| `src/`                       | TypeScript 소스 (fractal 루트)                 |
+| `scripts/`                   | esbuild 빌드 스크립트                          |
+| `hooks/`                     | Claude Code 훅 매핑                            |
+| `skills/`                    | `setup`, `codex`, `gemini`, `crosscheck` 스킬  |
+| `libs/run.cjs`               | cross-platform Node 러너 (filid 동일)          |
+| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)   |
+| `public/settings.html`       | 빌드된 settings UI — 런타임 디스크 서빙 (커밋) |
+| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                |
+| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                  |
 
 ## Conventions
 
@@ -35,7 +36,7 @@
 
 ### Never do
 
-- `dist/` 를 커밋 (`bridge/` 는 의도적 커밋 — `package.json:files` 포함)
+- `dist/` 를 커밋 (`bridge/` · `public/` 는 의도적 커밋 — `package.json:files` 포함)
 - `version.ts` 또는 `.claude-plugin/plugin.json` 의 version 을 손으로 수정 (inject-version.mjs 만)
 
 ## Dependencies

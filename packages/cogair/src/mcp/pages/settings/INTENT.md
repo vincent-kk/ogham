@@ -1,6 +1,6 @@
 ## Purpose
 
-`open_settings` 도구가 기동하는 로컬 웹 UI 의 프런트엔드 소스. 빌드 시 `scripts/buildSettingsHtml.mjs` 가 CSS·JS 를 inline + minify 해 `tools/openSettings/__generated__/settingsHtml.ts` 로 직렬화한다.
+`open_settings` 도구가 기동하는 로컬 웹 UI 의 프런트엔드 소스. 빌드 시 `scripts/buildSettingsHtml.mjs` 가 CSS·JS 를 inline + minify 해 `public/settings.html` 로 빌드한다 (런타임에 디스크에서 읽어 서빙).
 
 ## Structure
 
@@ -12,7 +12,7 @@
 
 ## Conventions
 
-- 외부 CDN·이미지 의존 금지 — 빌드 시 단일 HTML 문자열로 묶여 배포
+- 외부 CDN·이미지 의존 금지 — 빌드 시 단일 HTML 파일로 묶여 디스크에서 서빙
 - token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달
 - POST body 는 항상 `Content-Type: application/json`
 - CSS 변수로 다크 모드 토큰화
@@ -34,7 +34,7 @@
 
 - `eval`, `Function('...')`, inline event handler 사용
 - 외부 origin 으로 fetch
-- `__generated__/` 직접 수정
+- `public/settings.html` (빌드 산출물) 직접 수정
 
 ## Dependencies
 
