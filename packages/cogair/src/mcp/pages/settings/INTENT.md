@@ -21,6 +21,7 @@
 
 ### Always do
 
+- 모든 사용자 노출 텍스트(`index.html`·`app.js` 의 라벨·힌트·placeholder·메시지)는 영문만 사용 — `[filid:lang]` 무관
 - 모든 fetch 호출에 `?token=` 부착
 - `prefers-reduced-motion` 존중
 - 사용자 입력은 inlined `__COGAIR_STATE__` 만 신뢰

@@ -24,6 +24,7 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음.
 
 ### Always do
 
+- 모든 사용자 노출 텍스트(`index.html`·`scripts/*.js` 의 라벨·힌트·placeholder·메시지)는 영문만 사용 — `[filid:lang]` 무관
 - 각 파일을 독립적으로 유지 (파일 간 전역 함수 최소화)
 - data-field 속성으로 폼 필드 접근
 - mock-api.js는 file:// 프로토콜에서만 활성화
