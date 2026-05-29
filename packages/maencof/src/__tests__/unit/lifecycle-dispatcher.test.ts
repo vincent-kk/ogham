@@ -8,7 +8,7 @@
  *   - Stop / SessionEnd → `systemMessage` 로 payload 전달 (사용자 가시).
  *   - 어떤 이벤트도 top-level `message` / `hookMessage` 방출 금지.
  */
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -115,8 +115,7 @@ describe('runLifecycleDispatcher — hook output envelope', () => {
   );
 
   it('vault 가 아니면 { continue: true } 만 반환한다', () => {
-    const nonVault = join(tmpdir(), `non-vault-${Date.now()}`);
-    mkdirSync(nonVault, { recursive: true });
+    const nonVault = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
       const result = runLifecycleDispatcher('SessionStart', { cwd: nonVault });
       expect(result).toEqual({ continue: true });

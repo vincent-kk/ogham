@@ -2,7 +2,7 @@
  * @file dailynote-read.test.ts
  * @description dailynote_read MCP 도구 핸들러 테스트
  */
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -15,8 +15,7 @@ import {
 import { handleDailynoteRead } from '../../mcp/tools/dailynote-read/dailynote-read.js';
 
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-dnread-test-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-dnread-test-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta', 'dailynotes'), { recursive: true });
   return dir;

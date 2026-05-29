@@ -2,7 +2,13 @@
  * @file session-hooks.test.ts
  * @description maencof 세션 훅 유닛 테스트 (runSessionStart, runSessionEnd)
  */
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -13,8 +19,7 @@ import { runSessionStart } from '../../hooks/session-start/session-start.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-test-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-test-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;
@@ -46,8 +51,7 @@ describe('runSessionStart', () => {
   }
 
   it('maencof vault가 아닌 경우 setup 안내를 additionalContext에 반환한다', () => {
-    const tmpDir = join(tmpdir(), `non-vault-${Date.now()}`);
-    mkdirSync(tmpDir, { recursive: true });
+    const tmpDir = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
       const result = runSessionStart({ cwd: tmpDir });
       expect(result.continue).toBe(true);
@@ -281,8 +285,7 @@ describe('runSessionEnd', () => {
   });
 
   it('maencof vault가 아닌 경우 아무 작업도 하지 않는다', () => {
-    const tmpDir = join(tmpdir(), `non-vault-${Date.now()}`);
-    mkdirSync(tmpDir, { recursive: true });
+    const tmpDir = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
       const result = runSessionEnd({ cwd: tmpDir });
       expect(result.continue).toBe(true);

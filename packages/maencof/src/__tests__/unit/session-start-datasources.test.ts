@@ -2,7 +2,7 @@
  * @file session-start-datasources.test.ts
  * @description session-start hook의 data-sources.json 체크 테스트
  */
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -14,8 +14,7 @@ const CONNECT_MSG =
   '[maencof] No external data sources connected. Run `/maencof:connect` to set up.';
 
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-ds-test-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-ds-test-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;

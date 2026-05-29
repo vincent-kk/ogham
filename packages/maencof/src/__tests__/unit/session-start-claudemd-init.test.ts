@@ -5,6 +5,7 @@
 import {
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -23,8 +24,7 @@ import { VERSION } from '../../version.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-claudemd-init-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-claudemd-init-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;
@@ -140,8 +140,7 @@ describe('session-start CLAUDE.md 초기화', () => {
   });
 
   it('vault가 아닌 경우 CLAUDE.md를 건드리지 않는다', () => {
-    const nonVaultDir = join(tmpdir(), `non-vault-claudemd-${Date.now()}`);
-    mkdirSync(nonVaultDir, { recursive: true });
+    const nonVaultDir = mkdtempSync(join(tmpdir(), 'non-vault-claudemd-'));
     try {
       runSessionStart({ cwd: nonVaultDir });
       expect(existsSync(join(nonVaultDir, 'CLAUDE.md'))).toBe(false);

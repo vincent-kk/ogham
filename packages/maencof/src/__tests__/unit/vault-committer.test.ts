@@ -2,7 +2,7 @@
  * @file vault-committer.test.ts
  * @description vault-committer hook unit tests — auto-commit vault changes on SessionEnd
  */
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -225,8 +225,7 @@ describe('runVaultCommitter', () => {
   });
 
   it('returns { continue: true } when not a maencof vault', async () => {
-    const tmpDir = join(tmpdir(), `non-vault-${Date.now()}`);
-    mkdirSync(tmpDir, { recursive: true });
+    const tmpDir = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
       const result = await runVaultCommitter({ cwd: tmpDir });
       expect(result).toEqual({ continue: true });

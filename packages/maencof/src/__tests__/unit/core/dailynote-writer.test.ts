@@ -2,7 +2,13 @@
  * @file dailynote-writer.test.ts
  * @description dailynote-writer 순수 함수 단위 테스트
  */
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -21,8 +27,7 @@ import {
 import type { DailynoteEntry } from '../../../types/dailynote.js';
 
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-dn-test-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-dn-test-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;

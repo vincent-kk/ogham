@@ -2,7 +2,7 @@
  * @file mcp-claudemd-read-remove.test.ts
  * @description claudemd_read, claudemd_remove MCP 도구 핸들러 단위 테스트
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -18,8 +18,7 @@ import { handleClaudeMdRemove } from '../../mcp/tools/claudemd-remove/claudemd-r
 let testDir: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-claudemd-rr-${Date.now()}`);
-  mkdirSync(testDir, { recursive: true });
+  testDir = mkdtempSync(join(tmpdir(), 'maencof-claudemd-rr-'));
 });
 
 afterEach(() => {

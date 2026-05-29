@@ -2,7 +2,7 @@
  * @file vault-redirector.test.ts
  * @description vault-redirector PreToolUse 훅 유닛 테스트
  */
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -16,8 +16,7 @@ import {
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
-  const dir = join(tmpdir(), `maencof-test-${Date.now()}`);
-  mkdirSync(dir, { recursive: true });
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-test-'));
   mkdirSync(join(dir, '.maencof'), { recursive: true });
   return dir;
 }
@@ -116,8 +115,7 @@ describe('runVaultRedirector', () => {
   });
 
   it('vault 미초기화 디렉토리에서는 즉시 continue: true를 반환한다', () => {
-    const nonVaultDir = join(tmpdir(), `non-vault-${Date.now()}`);
-    mkdirSync(nonVaultDir, { recursive: true });
+    const nonVaultDir = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
       const result = runVaultRedirector({
         tool_name: 'Read',

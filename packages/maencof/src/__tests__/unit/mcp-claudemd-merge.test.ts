@@ -4,7 +4,7 @@
  */
 import {
   existsSync,
-  mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -23,8 +23,7 @@ import { handleClaudeMdMerge } from '../../mcp/tools/claudemd-merge/claudemd-mer
 let testDir: string;
 
 beforeEach(() => {
-  testDir = join(tmpdir(), `maencof-claudemd-test-${Date.now()}`);
-  mkdirSync(testDir, { recursive: true });
+  testDir = mkdtempSync(join(tmpdir(), 'maencof-claudemd-test-'));
 });
 
 afterEach(() => {
