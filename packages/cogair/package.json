@@ -1,6 +1,6 @@
 {
   "name": "@ogham/cogair",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Cogair — delegate to Gemini CLI / Codex CLI from Claude Code via MCP, skills, and hooks",
   "keywords": [
     "claude-code",
