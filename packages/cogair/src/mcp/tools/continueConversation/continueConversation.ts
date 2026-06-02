@@ -49,9 +49,28 @@ export async function handleContinueConversation(
     };
   }
 
+  const config = await loadConfig();
+  if (!config.ratio[session.provider].enabled) {
+    return {
+      status: 'failure',
+      session_id: session.session_id,
+      provider: session.provider,
+      response: null,
+      error: {
+        code: 'disabled',
+        message: `Provider '${session.provider}' is disabled in cogair config. Re-enable it via /cogair:setup to resume this session.`,
+      },
+      meta: {
+        turn: session.turn_count,
+        created_at: isoNow(),
+        elapsed_ms: Math.round(performance.now() - startedAt),
+        ignored_options: [],
+      },
+    };
+  }
+
   await incrementCounter(session.provider);
 
-  const config = await loadConfig();
   const composedPrompt = composePrompt({
     prompt: input.prompt,
     preamble: config.preamble[session.provider],

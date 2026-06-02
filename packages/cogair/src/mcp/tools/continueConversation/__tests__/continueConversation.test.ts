@@ -2,7 +2,9 @@ import { rm } from 'node:fs/promises';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { DEFAULT_CONFIG } from '../../../../constants/defaults.js';
 import { COGAIR_HOME } from '../../../../constants/paths.js';
+import { saveConfig } from '../../../../core/configManager/index.js';
 import { getProjectHash } from '../../../../core/projectHash/index.js';
 import {
   createSession,
@@ -119,5 +121,34 @@ describe('handleContinueConversation', () => {
     const hash = getProjectHash(process.cwd());
     const updated = await getSession(hash, session.session_id);
     expect(updated?.turn_count).toBe(2);
+  });
+
+  it('rejects resume when the session provider is disabled', async () => {
+    await saveConfig({
+      ...DEFAULT_CONFIG,
+      ratio: {
+        ...DEFAULT_CONFIG.ratio,
+        codex: { value: 0, enabled: false },
+      },
+    });
+    const session = await createSession({
+      provider: 'codex',
+      cwd: process.cwd(),
+      externalSessionRef: 'tid-disabled',
+      model: 'gpt-5-codex',
+    });
+
+    const result = await handleContinueConversation({
+      session_id: session.session_id,
+      prompt: 'hi',
+    });
+
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('disabled');
+    expect(result.provider).toBe('codex');
+
+    const hash = getProjectHash(process.cwd());
+    const updated = await getSession(hash, session.session_id);
+    expect(updated?.turn_count).toBe(1);
   });
 });

@@ -42,6 +42,7 @@ Always surface the response's `session_id` to the user — the user needs it to 
 On `status: 'failure'`, dispatch by `error.code`:
 
 - `auth` → tell the user to run `codex login` and retry.
+- `disabled` → codex is disabled in cogair config. Tell the user to enable it via `/cogair:setup`. Do not retry.
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `gemini` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 

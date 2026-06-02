@@ -2,7 +2,9 @@ import { readFile, rm } from 'node:fs/promises';
 
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
+import { DEFAULT_CONFIG } from '../../../../constants/defaults.js';
 import { COGAIR_HOME, sessionPath } from '../../../../constants/paths.js';
+import { saveConfig } from '../../../../core/configManager/index.js';
 import { getProjectHash } from '../../../../core/projectHash/index.js';
 import {
   installFakeBinary,
@@ -102,5 +104,31 @@ describe('handleStartConversation', () => {
       prompt: 'hi',
     });
     expect(result.meta.ignored_options).toEqual([]);
+  });
+
+  it('rejects a disabled provider without dispatching or persisting a session', async () => {
+    await saveConfig({
+      ...DEFAULT_CONFIG,
+      ratio: {
+        ...DEFAULT_CONFIG.ratio,
+        codex: { value: 0, enabled: false },
+      },
+    });
+
+    const result = await handleStartConversation({
+      provider: 'codex',
+      prompt: 'hi',
+    });
+
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('disabled');
+    expect(result.provider).toBe('codex');
+    expect(result.response).toBeNull();
+    expect(result.meta.turn).toBe(0);
+
+    const hash = getProjectHash(process.cwd());
+    await expect(
+      readFile(sessionPath(hash, result.session_id), 'utf8'),
+    ).rejects.toThrow();
   });
 });

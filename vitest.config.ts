@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     projects: [
       "./packages/atlassian",
+      "./packages/cogair",
       "./packages/filid",
       "./packages/imbas",
       "./packages/maencof",

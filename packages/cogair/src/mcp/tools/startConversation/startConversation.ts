@@ -31,6 +31,26 @@ export async function handleStartConversation(
   const startedAt = performance.now();
   const config = await loadConfig();
   const sessionId = randomUUID();
+
+  if (!config.ratio[input.provider].enabled) {
+    return {
+      status: 'failure',
+      session_id: sessionId,
+      provider: input.provider,
+      response: null,
+      error: {
+        code: 'disabled',
+        message: `Provider '${input.provider}' is disabled in cogair config. Enable it via /cogair:setup before dispatching, or route to the other provider.`,
+      },
+      meta: {
+        turn: 0,
+        created_at: isoNow(),
+        elapsed_ms: Math.round(performance.now() - startedAt),
+        ignored_options: [],
+      },
+    };
+  }
+
   const cwd = process.cwd();
   const model: ModelAlias = input.model ?? config.default_model;
   const options = {};

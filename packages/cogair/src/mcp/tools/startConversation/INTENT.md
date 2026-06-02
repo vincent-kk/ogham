@@ -13,7 +13,7 @@
 
 - 입력 키는 `snake_case` 그대로 (외부 LLM 인터페이스)
 - 외부 CLI 실패 시에도 `session_id` 디스크 기록 유지 (스펙)
-- `provider` 카운터는 시도 기준으로 +1 (성공/실패 무관)
+- `provider` 카운터는 시도 기준 +1 (성공/실패 무관); 비활성 provider(`ratio[provider].enabled=false`)는 dispatch·기록·카운터 없이 `error.code='disabled'` 거부
 - model 미지정 → `config.default_model` 적용 (기본 `auto`)
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 MCP input 미노출 — `config.option_flags[provider]` 에서만 결정
 - dispatcher 에 `options` 는 항상 `{}` 로 전달 (MCP-facing layer 분리)

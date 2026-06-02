@@ -23,6 +23,7 @@
 ### Always do
 
 - `getSession(projectHash, session_id)` 가 `null` → `error.code='unknown'` 즉시 반환
+- 세션 provider 가 비활성(`ratio[provider].enabled=false`) → `error.code='disabled'` 즉시 반환 (resume·카운터 없음)
 - resume 후 성공/실패 무관 `last_used_at`, `turn_count` 갱신 (호출 카운트 반영)
 - dispatcher 가 반환한 `external_session_ref` 는 변경 없이 보존
 

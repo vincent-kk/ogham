@@ -6,5 +6,10 @@ export default defineConfig({
     exclude: ['**/fixtures/**', 'src/__tests__/e2e/**'],
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    server: {
+      deps: {
+        inline: [/@ogham\/cross-platform/, 'cross-spawn'],
+      },
+    },
   },
 });

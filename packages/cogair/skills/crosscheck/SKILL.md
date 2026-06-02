@@ -48,7 +48,26 @@ immediately — do not issue any MCP calls**, and tell the user to resume
 via `/cogair:codex --continue <id>` or `/cogair:gemini --continue <id>`
 (echo back the id they provided) for the desired side.
 
-## Call mapping
+## Provider activation gate
+
+cogair dispatches only to **enabled** providers. Read the active set from
+the SessionStart `[cogair] Static policy` block (the `Active providers:`
+line). Branch on it BEFORE issuing any MCP call:
+
+- **Both enabled** → standard two-provider crosscheck (Call mapping below).
+- **Exactly one enabled** → dispatch the enabled provider via MCP, and fill
+  the disabled provider's slot with an independent Claude stand-in: spawn a
+  single subagent (Task tool, `general-purpose`) on the SAME prompt to
+  produce a second, independent opinion. Synthesize the live provider's
+  answer against the stand-in so the cross-check still has two viewpoints.
+- **Neither enabled** → issue NO MCP call. Tell the user both providers are
+  disabled and to enable at least one via `/cogair:setup`.
+
+If a `start_conversation` call returns `error.code: 'disabled'` (the static
+policy was stale — config changed mid-session), treat that provider as
+disabled and fall back to the one-enabled flow above.
+
+## Call mapping (both enabled)
 
 Issue the two calls **in parallel** (single message, two tool uses):
 
@@ -72,6 +91,9 @@ For each provider independently:
   for each failing provider.
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause or
   invoking only the surviving provider via `/cogair:<provider>`.
+- `disabled` → the provider was switched off in config. Fall back to the
+  one-enabled flow (a Claude stand-in fills the slot), or tell the user to
+  re-enable it via `/cogair:setup`.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
 
 ### Partial-failure synthesis
@@ -117,6 +139,11 @@ When both responses succeed, render exactly four sections:
 - [ ] <concrete next step>
 - [ ] ...
 ```
+
+In the one-enabled flow, the Claude stand-in counts as one of the two
+responses. Label it explicitly in every section (e.g.
+`Gemini (disabled → Claude stand-in)`) so the user can tell which viewpoint
+came from a real provider and which from the stand-in.
 
 When `artifact_path` is present on either envelope (config opt-in),
 include a `## Artifacts` section linking to each available

@@ -6,6 +6,7 @@ export const ERROR_CODES = [
   'budget_exhausted',
   'rate_limit',
   'auth',
+  'disabled',
   'network',
   'cli_error',
   'unknown',
