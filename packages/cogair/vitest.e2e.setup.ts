@@ -6,7 +6,10 @@ import { afterEach, beforeEach } from 'vitest';
 
 // Per-test-file HOME tmpdir so cogair's COGAIR_HOME (= `<home>/.claude/plugins/cogair`)
 // stays isolated across e2e specs that mutate config / counter / sessions on disk.
-process.env.HOME = mkdtempSync(join(tmpdir(), 'cogair-e2e-'));
+// `os.homedir()` reads HOME on POSIX but USERPROFILE on Windows, so set both.
+const e2eHome = mkdtempSync(join(tmpdir(), 'cogair-e2e-'));
+process.env.HOME = e2eHome;
+process.env.USERPROFILE = e2eHome;
 
 const E2E_FAKE_ENV_PREFIXES = ['COGAIR_FAKE_'] as const;
 

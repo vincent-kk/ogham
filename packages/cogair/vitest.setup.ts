@@ -4,6 +4,11 @@ import { join } from 'node:path';
 
 // Redirect `homedir()` to a per-test-file tmp dir so cogair's COGAIR_HOME
 // (= `<home>/.claude/plugins/cogair`) operates inside an isolated sandbox.
+// `os.homedir()` reads HOME on POSIX but USERPROFILE on Windows, so BOTH must
+// be set — otherwise Windows runs fall back to the real global dir, where
+// parallel workers race on `atomicWrite`'s rename and surface as flaky EPERM.
 // Phase 1's `paths.test.ts` keeps passing because both sides of its
 // assertion read `homedir()` after this override.
-process.env.HOME = mkdtempSync(join(tmpdir(), 'cogair-test-'));
+const testHome = mkdtempSync(join(tmpdir(), 'cogair-test-'));
+process.env.HOME = testHome;
+process.env.USERPROFILE = testHome;

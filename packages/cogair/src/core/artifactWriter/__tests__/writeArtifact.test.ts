@@ -38,21 +38,27 @@ describe('writeArtifact', () => {
     expect(body).toContain('## Response\n\nhello');
   });
 
-  it('returns undefined and does not throw when the target dir is not writable', async () => {
-    await chmod(dir, 0o500);
-    const path = await writeArtifact({
-      artifacts: { enabled: true, location: 'project' },
-      cwd: dir,
-      projectHash: 'deadbeefcafe',
-      sessionId: 'sid-2',
-      turn: 1,
-      provider: 'gemini',
-      model: 'm',
-      createdAt: '2026-05-22T10:00:00.000Z',
-      elapsedMs: 0,
-      prompt: 'p',
-      response: 'r',
-    });
-    expect(path).toBeUndefined();
-  });
+  // POSIX permission bits don't restrict directory creation on Windows, so this
+  // not-writable scenario can't be reproduced there. The catch path itself is
+  // platform-independent and stays covered on POSIX runners.
+  it.skipIf(process.platform === 'win32')(
+    'returns undefined and does not throw when the target dir is not writable',
+    async () => {
+      await chmod(dir, 0o500);
+      const path = await writeArtifact({
+        artifacts: { enabled: true, location: 'project' },
+        cwd: dir,
+        projectHash: 'deadbeefcafe',
+        sessionId: 'sid-2',
+        turn: 1,
+        provider: 'gemini',
+        model: 'm',
+        createdAt: '2026-05-22T10:00:00.000Z',
+        elapsedMs: 0,
+        prompt: 'p',
+        response: 'r',
+      });
+      expect(path).toBeUndefined();
+    },
+  );
 });
