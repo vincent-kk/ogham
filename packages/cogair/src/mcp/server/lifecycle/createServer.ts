@@ -17,11 +17,23 @@ export function createServer(): McpServer {
   server.registerTool(
     'start_conversation',
     {
-      description: 'Start a new external LLM session via gemini or codex CLI.',
+      description:
+        'Delegate a prompt to an external LLM CLI (codex = code/shell, gemini = web research & large context) ' +
+        'and return its answer plus a session_id for follow-ups. ' +
+        'The CLI cannot see this Claude conversation — make the prompt self-contained.',
       inputSchema: {
-        provider: ProviderSchema,
-        prompt: z.string().min(1),
-        model: ModelAliasSchema.optional(),
+        provider: ProviderSchema.describe(
+          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'gemini' (Google): live web research, large-context synthesis.",
+        ),
+        prompt: z
+          .string()
+          .min(1)
+          .describe(
+            'Self-contained prompt; the CLI has no access to this conversation, the repo, or prior turns.',
+          ),
+        model: ModelAliasSchema.describe(
+          'Capability tier (high/mid/low, or auto = CLI default). Omit to use the configured default.',
+        ).optional(),
       },
       annotations: {
         readOnlyHint: false,
@@ -35,10 +47,23 @@ export function createServer(): McpServer {
   server.registerTool(
     'continue_conversation',
     {
-      description: 'Continue an existing external LLM session by session_id.',
+      description:
+        'Continue an external LLM session by session_id, keeping its original provider and model. ' +
+        'The session_id must come from a start_conversation in the SAME working directory — sessions are ' +
+        'project-scoped, so one from elsewhere returns error.code "unknown".',
       inputSchema: {
-        session_id: z.string().uuid(),
-        prompt: z.string().min(1),
+        session_id: z
+          .string()
+          .uuid()
+          .describe(
+            'UUID returned by a prior start_conversation in this same working directory.',
+          ),
+        prompt: z
+          .string()
+          .min(1)
+          .describe(
+            'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
+          ),
       },
       annotations: {
         readOnlyHint: false,
@@ -52,7 +77,9 @@ export function createServer(): McpServer {
   server.registerTool(
     'open_settings',
     {
-      description: 'Open the cogair settings UI in a local browser.',
+      description:
+        'Open the cogair settings UI in a local browser to configure provider ratio, intervention strength, ' +
+        'routing keywords, defaults, and permission flags. No arguments; returns a localhost URL.',
       inputSchema: {},
       annotations: {
         readOnlyHint: false,
