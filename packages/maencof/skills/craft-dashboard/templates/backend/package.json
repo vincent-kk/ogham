@@ -3,30 +3,30 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@fastify/cors": "^8",
+    "@fastify/static": "^7",
+    "chokidar": "latest",
+    "fast-glob": "latest",
     "fastify": "^4",
     "fastify-sse-v2": "^4",
-    "@fastify/static": "^7",
-    "@fastify/cors": "^8",
-    "chokidar": "latest",
+    "fuse.js": "latest",
     "gray-matter": "latest",
     "markdown-it": "latest",
     "markdown-it-task-lists": "latest",
-    "fuse.js": "latest",
-    "fast-glob": "latest",
     "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "latest",
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
   },
   "optionalDependencies": {
     "@ogham/maencof": "latest"
-  },
-  "devDependencies": {
-    "typescript": "latest",
-    "tsx": "latest",
-    "@types/node": "latest",
-    "@types/markdown-it": "latest"
   }
 }
