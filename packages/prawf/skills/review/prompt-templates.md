@@ -69,7 +69,7 @@ REMINDER: Write `<REVIEW_DIR>/findings/round-1-<AXIS>.md`. Always to a file, eve
 ```
 
 > **Absorption injection (P0→R1)**: For axes in the profile's `disabled_axes`, inject that axis's
-> *invariant questions* explicitly into the `ABSORBED_AXES` slot of the absorbing persona named in
+> _invariant questions_ explicitly into the `ABSORBED_AXES` slot of the absorbing persona named in
 > `absorb_map`. Example: in `math-theory`, the `argument-analyst` prompt gets
 > `ABSORBED_AXES: "causality → inference-leap-check (check leaps from observation to mechanism)"`.
 

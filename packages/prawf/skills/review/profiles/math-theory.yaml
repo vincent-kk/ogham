@@ -2,8 +2,7 @@
 # is disabled and absorbed into methodology. Axis/framework ids stay verbatim.
 profile: math-theory
 axis_frameworks:
-  argument:
-    [
+  argument: [
       proof-line-by-line,
       assumption-strength,
       formalizability,

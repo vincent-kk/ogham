@@ -1,7 +1,7 @@
 # prawf Deliverable Templates
 
 > The **literal output formats** for the deliverables written by the chair and the strategist. This file defines the
-> *body structure* that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
+> _body structure_ that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
 > Ported from the Korean SSoT in `.metadata/prawf/`.
 >
 > **Output language**: deliverables follow the `[filid:lang]` setting (or the system language, default English) — the
@@ -35,24 +35,24 @@ profile: natural-science
 
 ## Panel & Profile
 
-| Item             | Value                                                                  |
-| ---------------- | --------------------------------------------------------------------- |
-| Field profile    | <profile> (<injection path: --profile/auto/fallback/custom>)          |
-| Paper type       | <type> → applied guideline <guideline>                                |
-| Convened axes    | <argument, statistics, causality, bias, integrity (+impact advisory)> |
-| Inactive/absorbed| <causality→argument (math profile)> / none                            |
+| Item              | Value                                                                 |
+| ----------------- | --------------------------------------------------------------------- |
+| Field profile     | <profile> (<injection path: --profile/auto/fallback/custom>)          |
+| Paper type        | <type> → applied guideline <guideline>                                |
+| Convened axes     | <argument, statistics, causality, bias, integrity (+impact advisory)> |
+| Inactive/absorbed | <causality→argument (math profile)> / none                            |
 
 ## Findings by Axis
 
 > All locations use `paper-normalized.md` coordinates (`§<section>¶<paragraph> + line`). Duplicates are listed once on
 > the owning axis after dedup.
 
-| finding-id | axis        | severity | location  | final status | one-line summary                              |
-| ---------- | ----------- | -------- | --------- | ------------ | --------------------------------------------- |
-| CAUS-2     | causality   | critical | §4¶1 L88  | UNRESOLVED   | Cross-sectional design cannot rule out reverse causality |
+| finding-id | axis        | severity | location  | final status | one-line summary                                          |
+| ---------- | ----------- | -------- | --------- | ------------ | --------------------------------------------------------- |
+| CAUS-2     | causality   | critical | §4¶1 L88  | UNRESOLVED   | Cross-sectional design cannot rule out reverse causality  |
 | STAT-1     | statistics  | major    | §3¶2 L45  | MITIGATED    | Unadjusted multiple comparisons → mitigated by reanalysis |
-| METH-3     | methodology | minor    | §2¶4 L31  | DEFENDED     | Missing-data handling — confirmed described in text |
-| INTEG-1    | integrity   | minor    | §6¶1 L120 | DEFENDED     | Data availability — supplemented with OSF link |
+| METH-3     | methodology | minor    | §2¶4 L31  | DEFENDED     | Missing-data handling — confirmed described in text       |
+| INTEG-1    | integrity   | minor    | §6¶1 L120 | DEFENDED     | Data availability — supplemented with OSF link            |
 
 ## Deliberation Log
 
@@ -123,12 +123,12 @@ claim, so a verdict cannot be rendered (see `reasoning_gaps`). This condition di
 
 ## Q&A by Finding
 
-| finding-id  | axis        | anticipated question                                  | type | defense tactic | solution                          | status     |
-| ----------- | ----------- | ----------------------------------------------------- | ---- | -------------- | --------------------------------- | ---------- |
-| STAT-1      | statistics  | "Did you adjust for multiple comparisons?"            | good | justification  | Bonferroni reanalysis attached    | mitigated  |
+| finding-id  | axis        | anticipated question                                             | type | defense tactic | solution                                  | status     |
+| ----------- | ----------- | ---------------------------------------------------------------- | ---- | -------------- | ----------------------------------------- | ---------- |
+| STAT-1      | statistics  | "Did you adjust for multiple comparisons?"                       | good | justification  | Bonferroni reanalysis attached            | mitigated  |
 | CAUS-2      | causality   | "It's cross-sectional — how did you rule out reverse causality?" | good | deferral       | _(unresolved — longitudinal data needed)_ | unresolved |
-| METH-3      | methodology | "How was missing data handled?"                       | good | clarification  | Multiple imputation stated in §2  | defended   |
-| —(advisory) | —           | "Does this result apply beyond its field?"            | bad  | —              | sidestep (not verification) — qa only | —      |
+| METH-3      | methodology | "How was missing data handled?"                                  | good | clarification  | Multiple imputation stated in §2          | defended   |
+| —(advisory) | —           | "Does this result apply beyond its field?"                       | bad  | —              | sidestep (not verification) — qa only     | —          |
 
 > `bad`/`cringy` type and `sidestep` tactic items are **not grounds for verdict downgrade** — they are for oral-defense
 > reference only.
@@ -194,9 +194,9 @@ external_refs: ["Bonferroni 1936", "OSF/abc123"]
 
 ## 4. Intermediate deliverables (summary format)
 
-| File                         | Key body                                                                            |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `paper-profile.md`           | type · profile · convened panel · injection path + applied `absorb_map` details     |
+| File                         | Key body                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `paper-profile.md`           | type · profile · convened panel · injection path + applied `absorb_map` details                            |
 | `paper-normalized.md`        | `§<section>¶<paragraph>` headers + chair-assigned line numbers. Shared coordinate system for all citations |
-| `findings/round-1-<axis>.md` | frontmatter (§5.1) + per-axis finding narrative (claim · evidence · anticipated_question) |
-| `findings/round-3-<axis>.md` | frontmatter (§5.4) + defense accept/reject rationale                                 |
+| `findings/round-1-<axis>.md` | frontmatter (§5.1) + per-axis finding narrative (claim · evidence · anticipated_question)                  |
+| `findings/round-3-<axis>.md` | frontmatter (§5.4) + defense accept/reject rationale                                                       |

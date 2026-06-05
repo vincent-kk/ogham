@@ -56,7 +56,13 @@
       "name": "prawf",
       "source": "./packages/prawf",
       "category": "productivity",
-      "tags": ["peer-review", "academic", "multi-agent", "research", "paper-review"]
+      "tags": [
+        "peer-review",
+        "academic",
+        "multi-agent",
+        "research",
+        "paper-review"
+      ]
     }
   ]
 }

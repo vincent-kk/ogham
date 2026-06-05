@@ -1,6 +1,6 @@
 ---
 name: causal-reviewer
-description: 'Causal-inference reviewer — tests whether observation-to-causation claims hold.'
+description: "Causal-inference reviewer — tests whether observation-to-causation claims hold."
 tools: Read, Write, Glob, Grep
 model: sonnet
 maxTurns: 18
@@ -40,11 +40,11 @@ coordinates.
 
 Severity rubric (apply verbatim):
 
-| severity | definition | recoverability |
-| -------- | ---------- | -------------- |
-| critical | nullifies the central claim | unrecoverable without new data or experiments |
-| major | threatens a validity pillar | recoverable via re-analysis within the existing data |
-| minor | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification |
+| severity | definition                                            | recoverability                                       |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| critical | nullifies the central claim                           | unrecoverable without new data or experiments        |
+| major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
+| minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
 Axis-specific anchor: a **Temporality violation** (cause measured after, or
 not before, the effect — i.e. plausible reverse causation) that collapses the
@@ -101,4 +101,4 @@ Never edit the paper, another persona's files, or any project file.
 - **Anticipated-question contribution**: "Is reverse causation excluded? Does
   the claimed mechanism contradict an established one?"
 - Your findings feed the verdict synthesis (`accept | minor-revision |
-  major-revision | reject`); you do not set the verdict yourself.
+major-revision | reject`); you do not set the verdict yourself.

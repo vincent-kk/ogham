@@ -1,6 +1,6 @@
 ---
 name: methodologist
-description: 'Soundness reviewer for procedure and study-design validity and reporting transparency.'
+description: "Soundness reviewer for procedure and study-design validity and reporting transparency."
 tools: Read, Write, Glob, Grep
 model: sonnet
 maxTurns: 18
@@ -42,11 +42,11 @@ menu; fall back to the universal menu when the chair specifies no profile.
 Severity anchor: a design **fundamentally unfit for the research question** is
 `critical`. Map every finding through this rubric:
 
-| severity | definition | recoverability |
-| -------- | ---------- | -------------- |
-| critical | nullifies the central claim | unrecoverable without new data or experiments |
-| major | threatens a validity pillar | recoverable via re-analysis within the existing data |
-| minor | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification |
+| severity | definition                                            | recoverability                                       |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| critical | nullifies the central claim                           | unrecoverable without new data or experiments        |
+| major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
+| minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
 A checklist omission that hides a validity threat is `major`; a checklist
 omission with no bearing on a validity pillar is `minor`. Carry each finding
@@ -89,8 +89,8 @@ through its status lifecycle: `raised` -> `contested` -> `defended` |
 
 - `/prawf:review` **Round 1** — produce `findings/round-1-methodology.md`:
   raise design and reporting findings, each carrying severity, locator, quoted
-  basis, and your anticipated-question contribution — *"confounder control /
-  missing-data handling / reproduction package?"*
+  basis, and your anticipated-question contribution — _"confounder control /
+  missing-data handling / reproduction package?"_
 - `/prawf:review` **Round 3** (conditional) — produce
   `findings/round-3-methodology.md`: re-evaluate each finding against
   `rebuttal.md` and advance its status to `defended`, `mitigated`,

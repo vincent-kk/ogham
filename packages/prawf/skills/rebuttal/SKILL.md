@@ -15,6 +15,7 @@ plugin: prawf
 > internal working data — do NOT summarize them mid-pipeline.
 >
 > **Valid reasons to yield**:
+>
 > 1. A user decision is genuinely required (no paper or no review comments provided).
 > 2. Terminal marker emitted: `prawf rebuttal: complete` — only after
 >    `rebuttal-letter.md` + `revision-checklist.md` are written.
@@ -29,6 +30,7 @@ actionable revision checklist. The chair (`../../agents/chair.md`) assembles; th
 rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
 
 > **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+>
 > - `../review/orchestration.md` §4.3 — downgrade burden, fatal-flaw discipline
 > - `../review/prompt-templates.md` §3 — R2 defense prompt
 > - `../review/templates.md` — rebuttal letter format (Revision / Justification / Clarification tagging)
@@ -82,9 +84,9 @@ Emit the terminal marker `prawf rebuttal: complete`.
 
 ## Options
 
-| Option              | Default | Description                                           |
-| ------------------- | ------- | ----------------------------------------------------- |
-| `--profile <name>`  | auto    | Field profile for framework-aware defense framing     |
+| Option             | Default | Description                                       |
+| ------------------ | ------- | ------------------------------------------------- |
+| `--profile <name>` | auto    | Field profile for framework-aware defense framing |
 
 ## Quick Reference
 

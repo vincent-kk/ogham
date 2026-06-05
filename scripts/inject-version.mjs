@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const ROOT = process.cwd();
 
@@ -8,14 +8,14 @@ const SEMVER_REGEX =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 function readPackageVersion() {
-  const packageJsonPath = join(ROOT, 'package.json');
+  const packageJsonPath = join(ROOT, "package.json");
 
   try {
-    const content = readFileSync(packageJsonPath, 'utf-8');
+    const content = readFileSync(packageJsonPath, "utf-8");
     const pkg = JSON.parse(content);
 
     if (!pkg.version) {
-      console.error('❌ Error: No version field found in package.json');
+      console.error("❌ Error: No version field found in package.json");
       process.exit(1);
     }
 
@@ -28,12 +28,12 @@ function readPackageVersion() {
 
     return pkg.version;
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      console.error('❌ Error: package.json not found at', packageJsonPath);
+    if (error.code === "ENOENT") {
+      console.error("❌ Error: package.json not found at", packageJsonPath);
     } else if (error instanceof SyntaxError) {
-      console.error('❌ Error: Invalid JSON in package.json');
+      console.error("❌ Error: Invalid JSON in package.json");
     } else {
-      console.error('❌ Error reading package.json:', error.message);
+      console.error("❌ Error reading package.json:", error.message);
     }
     process.exit(1);
   }
@@ -42,17 +42,19 @@ function readPackageVersion() {
 function generateVersionFile(version) {
   // Pure-markdown plugins (e.g. @ogham/prawf) have no `src/`. Skip
   // version.ts generation entirely and sync plugin.json only.
-  if (!existsSync(join(ROOT, 'src'))) {
-    console.log('  ✓ src/ absent — skipping version.ts (markdown-only package)');
+  if (!existsSync(join(ROOT, "src"))) {
+    console.log(
+      "  ✓ src/ absent — skipping version.ts (markdown-only package)",
+    );
     return false;
   }
 
-  const versionFilePath = join(ROOT, 'src', 'version.ts');
+  const versionFilePath = join(ROOT, "src", "version.ts");
 
   try {
     let currentVersion = null;
     try {
-      const existingContent = readFileSync(versionFilePath, 'utf-8');
+      const existingContent = readFileSync(versionFilePath, "utf-8");
       const match = existingContent.match(/VERSION = ['"]([^'"]+)['"]/);
       if (match) {
         currentVersion = match[1];
@@ -76,7 +78,7 @@ function generateVersionFile(version) {
 export const VERSION = '${version}';
 `;
 
-    writeFileSync(versionFilePath, content, 'utf-8');
+    writeFileSync(versionFilePath, content, "utf-8");
 
     if (currentVersion) {
       console.log(`  ✓ src/version.ts updated: ${currentVersion} → ${version}`);
@@ -85,36 +87,47 @@ export const VERSION = '${version}';
     }
     return true;
   } catch (error) {
-    console.error('❌ Error generating version file:', error.message);
+    console.error("❌ Error generating version file:", error.message);
     process.exit(1);
   }
 }
 
 function syncPluginJson(version) {
-  const pluginJsonPath = join(ROOT, '.claude-plugin', 'plugin.json');
+  const pluginJsonPath = join(ROOT, ".claude-plugin", "plugin.json");
 
   try {
-    const content = readFileSync(pluginJsonPath, 'utf-8');
+    const content = readFileSync(pluginJsonPath, "utf-8");
     const plugin = JSON.parse(content);
 
     if (plugin.version === version) {
-      console.log(`  ✓ .claude-plugin/plugin.json already up to date: ${version}`);
+      console.log(
+        `  ✓ .claude-plugin/plugin.json already up to date: ${version}`,
+      );
       return false;
     }
 
     const prevVersion = plugin.version;
     plugin.version = version;
 
-    writeFileSync(pluginJsonPath, JSON.stringify(plugin, null, 2) + '\n', 'utf-8');
-    console.log(`  ✓ .claude-plugin/plugin.json updated: ${prevVersion} → ${version}`);
+    writeFileSync(
+      pluginJsonPath,
+      JSON.stringify(plugin, null, 2) + "\n",
+      "utf-8",
+    );
+    console.log(
+      `  ✓ .claude-plugin/plugin.json updated: ${prevVersion} → ${version}`,
+    );
     return true;
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      console.error('❌ Error: .claude-plugin/plugin.json not found at', pluginJsonPath);
+    if (error.code === "ENOENT") {
+      console.error(
+        "❌ Error: .claude-plugin/plugin.json not found at",
+        pluginJsonPath,
+      );
     } else if (error instanceof SyntaxError) {
-      console.error('❌ Error: Invalid JSON in plugin.json');
+      console.error("❌ Error: Invalid JSON in plugin.json");
     } else {
-      console.error('❌ Error syncing plugin.json:', error.message);
+      console.error("❌ Error syncing plugin.json:", error.message);
     }
     process.exit(1);
   }
@@ -133,6 +146,6 @@ try {
     console.log(`\n✅ Version synchronization complete: ${version}`);
   }
 } catch (error) {
-  console.error('❌ Unexpected error:', error.message);
+  console.error("❌ Unexpected error:", error.message);
   process.exit(1);
 }

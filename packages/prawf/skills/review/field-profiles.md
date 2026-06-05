@@ -2,9 +2,9 @@
 
 > The **data layer that injects field expertise** into the universal core personas.
 > A persona's identity (defined in `../../agents/<id>.md`) is a field-agnostic
-> *invariant question*; the field-specific frameworks are injected as a *menu* by the
+> _invariant question_; the field-specific frameworks are injected as a _menu_ by the
 > profiles in this document. This data is the **field data that review P0 uses when it
-> auto-detects the field from the paper content** — it is *reference data*, not an
+> auto-detects the field from the paper content** — it is _reference data_, not an
 > evaluation behavior, and it feeds P0 auto-detection directly without any separate
 > injection channel.
 >
@@ -12,10 +12,10 @@
 
 ## 1. Concept — Axes Are Core, Frameworks Are Data
 
-| Component                                            | Location                  | Field-dependent |
-| --------------------------------------------------- | ------------------------- | --------------- |
-| Persona identity (invariant question)               | `agents/<id>.md` (core)   | **no**          |
-| Framework menu · type taxonomy · severity examples  | field profile (config)    | **yes**         |
+| Component                                          | Location                | Field-dependent |
+| -------------------------------------------------- | ----------------------- | --------------- |
+| Persona identity (invariant question)              | `agents/<id>.md` (core) | **no**          |
+| Framework menu · type taxonomy · severity examples | field profile (config)  | **yes**         |
 
 This lets the same nine reviewers operate on a medical paper or an ML paper alike —
 only the injected profile changes. It is the concrete realization of the principle
@@ -102,17 +102,17 @@ rejects the profile and falls back to the universal menu.
 
 ## 6. Fallback — Universal Menu (No Profile Specified · Unknown Field)
 
-When a profile cannot be determined, each axis falls back to its *field-agnostic core*:
+When a profile cannot be determined, each axis falls back to its _field-agnostic core_:
 
-| Axis        | Universal fallback question                                              |
-| ----------- | ----------------------------------------------------------------------- |
-| argument    | Are there any formal errors or leaps in the reasoning?                  |
-| methodology | Are the methods and procedures reported transparently and reproducibly? |
-| statistics  | Are arbitrary choices in the data or analysis left concealed?           |
+| Axis        | Universal fallback question                                                 |
+| ----------- | --------------------------------------------------------------------------- |
+| argument    | Are there any formal errors or leaps in the reasoning?                      |
+| methodology | Are the methods and procedures reported transparently and reproducibly?     |
+| statistics  | Are arbitrary choices in the data or analysis left concealed?               |
 | causality   | Are causal/mechanism claims proportional to the evidence? (disabled if N/A) |
-| bias        | Are inherent biases controlled and the results reproducible?            |
-| integrity   | Is there any plagiarism, fabrication, or conflict of interest?          |
-| impact      | Is the contribution clear and situated within its context? (advisory)   |
+| bias        | Are inherent biases controlled and the results reproducible?                |
+| integrity   | Is there any plagiarism, fabrication, or conflict of interest?              |
+| impact      | Is the contribution clear and situated within its context? (advisory)       |
 
 When the fallback is used, the chair notes _"generic profile — no field-specific
 checks applied"_ in `review-report.md`.

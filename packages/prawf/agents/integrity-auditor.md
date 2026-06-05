@@ -1,6 +1,6 @@
 ---
 name: integrity-auditor
-description: 'Research-integrity auditor — plagiarism, data/image manipulation, COI, outcome-switching.'
+description: "Research-integrity auditor — plagiarism, data/image manipulation, COI, outcome-switching."
 tools: Read, Write, Glob, Grep
 model: sonnet
 maxTurns: 18
@@ -36,11 +36,11 @@ inside REVIEW_DIR (`.prawf/review/<paper-slug>/`) and the shared
 Anchor severity to the rubric below. Evidence of data/image manipulation or
 plagiarism is **critical**; undisclosed COI or outcome-switching is **major**.
 
-| severity | definition | recoverability |
-| -------- | ---------- | -------------- |
-| critical | nullifies the central claim | unrecoverable without new data or experiments |
-| major | threatens a validity pillar | recoverable via re-analysis within the existing data |
-| minor | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification |
+| severity | definition                                            | recoverability                                       |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| critical | nullifies the central claim                           | unrecoverable without new data or experiments        |
+| major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
+| minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
 Map each finding to a verdict contribution: a defended critical drives
 **reject**; an unmitigated major drives **major-revision**; isolated minors

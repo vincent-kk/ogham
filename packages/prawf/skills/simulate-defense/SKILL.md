@@ -29,6 +29,7 @@ coaches each answer — what is strong, what is missing, which tactic
 is preparation, NOT a verdict — it never issues Accept/Reject.
 
 > **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+>
 > - `../review/prompt-templates.md` — R1 anticipated-question and R2 defense prompts
 > - `../review/orchestration.md` — question types (good/bad/cringy), defense tactics
 > - `../../agents/<persona-id>.md` — the reviewer personas and the strategist
@@ -94,10 +95,10 @@ This is advisory rehearsal output — it carries no verdict.
 
 ## Options
 
-| Option              | Default | Description                                                |
-| ------------------- | ------- | ---------------------------------------------------------- |
-| `--batch`           | off     | Non-interactive: generate model answers, run Tier-2a       |
-| `--profile <name>`  | auto    | Field profile for question generation (when starting from a paper) |
+| Option             | Default | Description                                                        |
+| ------------------ | ------- | ------------------------------------------------------------------ |
+| `--batch`          | off     | Non-interactive: generate model answers, run Tier-2a               |
+| `--profile <name>` | auto    | Field profile for question generation (when starting from a paper) |
 
 ## Quick Reference
 

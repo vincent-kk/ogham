@@ -1,6 +1,6 @@
 ---
 name: adjudicator
-description: 'Solo fast-path reviewer — sweeps all six soundness axes in one pass for --solo / TRIVIAL scope.'
+description: "Solo fast-path reviewer — sweeps all six soundness axes in one pass for --solo / TRIVIAL scope."
 tools: Read, Write, Glob, Grep
 model: opus
 maxTurns: 26
@@ -34,11 +34,11 @@ deliverable: `review-report.md`, in the `templates.md §1` format.
 
 Assign each finding a severity using this rubric verbatim:
 
-| severity | definition | recoverability |
-| -------- | ---------- | -------------- |
-| critical | nullifies the central claim | unrecoverable without new data or experiments |
-| major | threatens a validity pillar | recoverable via re-analysis within the existing data |
-| minor | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification |
+| severity | definition                                            | recoverability                                       |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| critical | nullifies the central claim                           | unrecoverable without new data or experiments        |
+| major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
+| minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
 Derive the verdict from UNRESOLVED soundness findings ONLY (impact is excluded):
 

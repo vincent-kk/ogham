@@ -1,6 +1,6 @@
 ---
 name: argument-analyst
-description: 'Soundness reviewer for argument and deductive integrity — checks logical leaps and hidden premises.'
+description: "Soundness reviewer for argument and deductive integrity — checks logical leaps and hidden premises."
 tools: Read, Write, Glob, Grep
 model: sonnet
 maxTurns: 18
@@ -39,11 +39,11 @@ Fall back to the universal menu when no profile is specified.
 
 Map each finding to a severity using this rubric:
 
-| severity | definition | recoverability |
-| -------- | ---------- | -------------- |
-| critical | nullifies the central claim | unrecoverable without new data or experiments |
-| major | threatens a validity pillar | recoverable via re-analysis within the existing data |
-| minor | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification |
+| severity | definition                                            | recoverability                                       |
+| -------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| critical | nullifies the central claim                           | unrecoverable without new data or experiments        |
+| major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
+| minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
 Axis severity anchor: a **core inference that is formally invalid** — a circular
 argument, an affirmed consequent, or a proof-step error in the load-bearing

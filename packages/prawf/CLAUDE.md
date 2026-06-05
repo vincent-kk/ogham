@@ -25,7 +25,7 @@ markdown only. `build:all` skips this package (it defines no `build` script).
 agents/<persona>.md      → 10 reviewer personas spawned via Task/TeamCreate
 ```
 
-Evaluation is persona *reasoning*, not deterministic measurement — that is why the
+Evaluation is persona _reasoning_, not deterministic measurement — that is why the
 package carries no analysis tooling. External lookups (prior work, preregistration,
 plagiarism) are delegated as a capability; never hardcode a specific tool name.
 
@@ -52,7 +52,9 @@ The Korean design specification is the source of truth at `../../.metadata/prawf
 
 - **Version**: use `yarn prawf version:sync` only; `plugin.json` version is
   generated, never hand-edited.
-- **FCA**: `INTENT.md` ≤ 50 lines with 3-tier boundaries; `DETAIL.md` accompanies
-  each fractal module. Run `/filid:scan` to check structural compliance.
+- **FCA**: root `INTENT.md` (≤ 50 lines, 3-tier boundaries) and `DETAIL.md` are
+  written in Korean (section headings stay English as machine-readable anchors).
+  A skill is self-describing: a skill directory carries `SKILL.md` only — no
+  per-skill `INTENT.md`/`DETAIL.md`. Run `/filid:scan` to check structure.
 - **Registration**: listed in root `.claude-plugin/marketplace.json`. Not in
   `scripts/typecheck-all.mjs` (no TypeScript to typecheck).

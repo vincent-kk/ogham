@@ -10,7 +10,7 @@ verdict plus the questions you should expect at your defense. When the paper
 holds up, it says so: **PASS (Accept)** is a real outcome, justified on evidence.
 
 prawf is **pure markdown** — no MCP server, no hooks, no build step, zero runtime
-dependencies. The evaluation is persona *reasoning* run on Claude Code's native
+dependencies. The evaluation is persona _reasoning_ run on Claude Code's native
 team tools; external lookups (prior work, preregistration, plagiarism) are
 delegated as a capability, never bound to a specific tool.
 
@@ -23,11 +23,11 @@ delegated as a capability, never bound to a specific tool.
 
 ## Skills
 
-| Command                    | What it does                                                        |
-| -------------------------- | ------------------------------------------------------------------ |
-| `/prawf:review`            | Full committee review of a paper → verdict + anticipated questions  |
-| `/prawf:simulate-defense`  | Rehearse your defense: the committee asks, you answer, you get coached |
-| `/prawf:rebuttal`          | Turn real reviewer comments into a rebuttal letter + revision checklist |
+| Command                   | What it does                                                            |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `/prawf:review`           | Full committee review of a paper → verdict + anticipated questions      |
+| `/prawf:simulate-defense` | Rehearse your defense: the committee asks, you answer, you get coached  |
+| `/prawf:rebuttal`         | Turn real reviewer comments into a rebuttal letter + revision checklist |
 
 ```bash
 /prawf:review                      # auto-detect the field, run the full panel
@@ -50,8 +50,8 @@ R3  Re-review (if needed)  the original reviewer accepts or rejects each defense
 ADJ Adjudicate            dedup → verdict (Accept / Minor / Major / Reject)
 ```
 
-**Soundness-only verdict.** The verdict is a pure function of *unresolved
-soundness* findings. Significance (novelty, impact) is scored separately and is
+**Soundness-only verdict.** The verdict is a pure function of _unresolved
+soundness_ findings. Significance (novelty, impact) is scored separately and is
 **advisory** — a low-impact paper is never rejected for being unexciting. A
 defense only downgrades a finding when it is backed by a verifiable artifact
 (an actual re-analysis, an external citation, or direct text), so the committee
@@ -59,16 +59,16 @@ cannot be talked out of a real flaw.
 
 ### The panel
 
-| Line          | Personas                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------ |
+| Line          | Personas                                                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
 | Soundness (6) | argument-analyst, methodologist, statistical-auditor, causal-reviewer, bias-grader, integrity-auditor |
-| Significance  | impact-assessor (advisory)                                                                  |
-| Defense       | rebuttal-strategist                                                                         |
-| Mediation     | chair (and `adjudicator` for the `--solo` fast path)                                        |
+| Significance  | impact-assessor (advisory)                                                                            |
+| Defense       | rebuttal-strategist                                                                                   |
+| Mediation     | chair (and `adjudicator` for the `--solo` fast path)                                                  |
 
 ### Field profiles
 
-A persona's identity is a field-agnostic *invariant question*; the field-specific
+A persona's identity is a field-agnostic _invariant question_; the field-specific
 frameworks (EQUATOR, Bradford Hill, data-leakage checks, proof rigor, …) are
 injected by a **field profile**. Four are built in — `natural-science`, `cs-ml`,
 `math-theory`, `humanities-qualitative` — and the chair auto-detects which to use

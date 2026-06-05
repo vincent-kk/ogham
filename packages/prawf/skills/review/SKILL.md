@@ -16,6 +16,7 @@ plugin: prawf
 > data — do NOT summarize them to the user mid-pipeline.
 >
 > **Valid reasons to yield**:
+>
 > 1. A user decision is genuinely required (unrecoverable input error only —
 >    e.g. no paper was provided).
 > 2. Terminal marker emitted: `prawf verdict: <accept|minor-revision|major-revision|reject>`
@@ -24,6 +25,7 @@ plugin: prawf
 >    only `review-report.md` and creates no team.
 >
 > **HIGH-RISK YIELD POINTS** (strengthen vigilance here):
+>
 > 1. After `TeamCreate` + R1 worker spawns return → chain R1 monitoring and
 >    then R2 immediately; do not pause between spawn and await.
 > 2. After R1 `await all` → chain R2 (`rebuttal-strategist`) without yielding.
@@ -41,6 +43,7 @@ yourself. You NEVER call external-search or measurement tools directly — you
 synthesize the attack and defense deliverables only.
 
 > **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+>
 > - `orchestration.md` — pipeline, finding state machine, dedup + verdict rules, deliverable contracts
 > - `field-profiles.md` — profile schema, injection priority, universal fallback
 > - `profiles/<name>.yaml` — built-in field-profile data (natural-science, cs-ml, math-theory, humanities-qualitative)
@@ -78,9 +81,9 @@ synthesize the attack and defense deliverables only.
    - `STANDARD` (typical paper) → 3-4 axes + impact.
    - `FULL` (rigorous, all nine) → all six soundness axes + impact.
    - `--solo` → skip the team; go to the Solo branch in Step 2.
-   `argument-analyst`, `chair`, `rebuttal-strategist` are always convened. For any
-   disabled axis, inject its invariant question into the absorbing persona's R1
-   prompt (`ABSORBED_AXES`).
+     `argument-analyst`, `chair`, `rebuttal-strategist` are always convened. For any
+     disabled axis, inject its invariant question into the absorbing persona's R1
+     prompt (`ABSORBED_AXES`).
 
 **→ Immediately proceed to Step 2.**
 
@@ -151,11 +154,11 @@ execution is COMPLETE.**
 > Options are LLM-interpreted hints, not strict flags. Natural language works too
 > ("review just the abstract", "treat this as a CS/ML paper").
 
-| Option              | Default | Description                                                        |
-| ------------------- | ------- | ------------------------------------------------------------------ |
-| `--solo`            | off     | Single-pass `adjudicator` (6 soundness axes, one Task, no team)    |
-| `--profile <name>`  | auto    | Override field profile (`natural-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
-| `--scope`           | `full`  | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile       |
+| Option             | Default | Description                                                                                      |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------ |
+| `--solo`           | off     | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                  |
+| `--profile <name>` | auto    | Override field profile (`natural-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
+| `--scope`          | `full`  | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                     |
 
 ## Quick Reference
 

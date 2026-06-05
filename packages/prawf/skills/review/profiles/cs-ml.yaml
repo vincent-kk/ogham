@@ -26,4 +26,5 @@ severity_examples:
       major: "unreported seed variance / unfair baseline",
       minor: "undisclosed hyperparameters",
     }
-external_checks: [benchmark-leakage, sota-comparison-fairness, code-reproduction]
+external_checks:
+  [benchmark-leakage, sota-comparison-fairness, code-reproduction]

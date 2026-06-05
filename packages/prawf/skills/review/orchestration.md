@@ -13,13 +13,13 @@
 
 ## 1. Structural Differences from filid
 
-| Aspect              | filid review                              | prawf                                                                         |
-| ------------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| Aspect               | filid review                                        | prawf                                                                                                 |
+| -------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Persona relationship | Equal committee members in **horizontal consensus** | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1) |
-| Unit of consensus   | A vote per proposition                    | **Survival of each individual finding**                                       |
-| Core mechanism      | 2/3 quorum, VETO/SYNTHESIS/ABSTAIN        | finding state transitions + chair synthesis                                   |
-| Verdict input       | All committee members equal               | **Only the 6 soundness axes drive the verdict; significance is advisory**     |
-| Final verdict       | APPROVED / REQUEST_CHANGES / INCONCLUSIVE | Accept / Minor / Major / Reject                                               |
+| Unit of consensus    | A vote per proposition                              | **Survival of each individual finding**                                                               |
+| Core mechanism       | 2/3 quorum, VETO/SYNTHESIS/ABSTAIN                  | finding state transitions + chair synthesis                                                           |
+| Verdict input        | All committee members equal                         | **Only the 6 soundness axes drive the verdict; significance is advisory**                             |
+| Final verdict        | APPROVED / REQUEST_CHANGES / INCONCLUSIVE           | Accept / Minor / Major / Reject                                                                       |
 
 prawf rounds simulate a journal's **review → rebuttal → re-review cycle**, not a vote.
 
@@ -49,12 +49,12 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
 
 ### Panel Convocation (elected from the nine)
 
-| Scale      | soundness attack axes              | significance     | Notes                  |
-| ---------- | ---------------------------------- | ---------------- | ---------------------- |
-| `LIGHT`    | argument + 1 core axis             | impact(advisory) | abstract / single issue |
-| `STANDARD` | 3~4 axes                           | impact           | general paper          |
-| `FULL`     | all 6 axes                         | impact           | rigorous review (all 9) |
-| `--solo`   | `adjudicator` consolidates 1~6 axes in one pass | —                | fast pre-screen        |
+| Scale      | soundness attack axes                           | significance     | Notes                   |
+| ---------- | ----------------------------------------------- | ---------------- | ----------------------- |
+| `LIGHT`    | argument + 1 core axis                          | impact(advisory) | abstract / single issue |
+| `STANDARD` | 3~4 axes                                        | impact           | general paper           |
+| `FULL`     | all 6 axes                                      | impact           | rigorous review (all 9) |
+| `--solo`   | `adjudicator` consolidates 1~6 axes in one pass | —                | fast pre-screen         |
 
 - `argument-analyst`, `chair`, and `rebuttal-strategist` are **always convened**, regardless of field.
 - **Convened axes = the profile's `paper_types[type].axes`**. If the profile specifies `disabled_axes` (e.g. causality for mathematics), that axis is _not deleted_ but transferred to the absorber that the profile's `absorb_map` (e.g. `{ causality: argument }`) designates.
@@ -86,27 +86,27 @@ Each finding holds a single status, and the chair decides transitions by grep-pa
 
 When convened axes overlap and report the same defect twice, the verdict tally is inflated. The chair merges them:
 
-- **Merge key**: `canonical-location + defect-class`. On collision, **merge into one, keep the highest severity, and record all contributing axes** (multi-axis agreement is a *signal*, not a weight).
+- **Merge key**: `canonical-location + defect-class`. On collision, **merge into one, keep the highest severity, and record all contributing axes** (multi-axis agreement is a _signal_, not a weight).
 - **Ownership table** (the primary owner holds it; the rest yield):
 
-  | Defect class                          | Owning axis                                   |
-  | ------------------------------------- | --------------------------------------------- |
-  | correlation ↔ causation confusion     | `causal-reviewer` (argument yields)           |
-  | sample size, power, multiple comparisons | `statistical-auditor` (methodology, bias yield) |
-  | publication bias, external validity, reproducibility | `bias-grader` (statistical, methodology yield) |
-  | plagiarism, data fabrication, conflict of interest | `integrity-auditor`                           |
+  | Defect class                                         | Owning axis                                     |
+  | ---------------------------------------------------- | ----------------------------------------------- |
+  | correlation ↔ causation confusion                    | `causal-reviewer` (argument yields)             |
+  | sample size, power, multiple comparisons             | `statistical-auditor` (methodology, bias yield) |
+  | publication bias, external validity, reproducibility | `bias-grader` (statistical, methodology yield)  |
+  | plagiarism, data fabrication, conflict of interest   | `integrity-auditor`                             |
 
 ### 4.2 Verdict Derivation
 
 Tally **only the UNRESOLVED findings on the 6 soundness axes** (`impact-assessor` is excluded — see §4.4).
 
-| Condition (UNRESOLVED, soundness axes)                          | Verdict            |
-| --------------------------------------------------------------- | ------------------ |
-| `critical` ≥ 1                                                  | **Reject**         |
-| `major` ≥ 1                                                     | **Major Revision** |
-| all `major` are MITIGATED, no critical/major UNRESOLVED         | **Minor Revision** |
-| only `minor` UNRESOLVED exist                                   | **Minor Revision** |
-| no UNRESOLVED (all DEFENDED/WITHDRAWN, or 0 findings)           | **Accept (PASS)**  |
+| Condition (UNRESOLVED, soundness axes)                  | Verdict            |
+| ------------------------------------------------------- | ------------------ |
+| `critical` ≥ 1                                          | **Reject**         |
+| `major` ≥ 1                                             | **Major Revision** |
+| all `major` are MITIGATED, no critical/major UNRESOLVED | **Minor Revision** |
+| only `minor` UNRESOLVED exist                           | **Minor Revision** |
+| no UNRESOLVED (all DEFENDED/WITHDRAWN, or 0 findings)   | **Accept (PASS)**  |
 
 - **PASS justification**: even an Accept must state, on an evidence basis, that "the 6 soundness axes have 0 critical/major and the residual minor findings do not change the conclusion."
 
@@ -245,12 +245,12 @@ chair = **main session = team lead** (the filid Phase D chair pattern).
 
 When search/investigation capability is **entirely absent**, the dependent axes are starved:
 
-| Axis                  | Impact when absent                              |
-| --------------------- | ----------------------------------------------- |
-| `causal-reviewer`     | prior work & reproduction consistency unverified |
-| `statistical-auditor` | pre-registration comparison impossible          |
+| Axis                  | Impact when absent                                          |
+| --------------------- | ----------------------------------------------------------- |
+| `causal-reviewer`     | prior work & reproduction consistency unverified            |
+| `statistical-auditor` | pre-registration comparison impossible                      |
 | `integrity-auditor`   | plagiarism / fabrication / COI comparison mostly impossible |
-| `impact-assessor`     | trend & influence estimation weakened           |
+| `impact-assessor`     | trend & influence estimation weakened                       |
 
 - The affected finding/item is marked as a `reasoning_gap` (not an abandonment of the whole opinion).
 - The chair records `external_verification: unavailable` in the frontmatter, and if it issues an Accept, marks it as **`provisional-accept` (provisional pass — external verification not performed)**. It still operates without tools but honestly surfaces the reduced confidence.
@@ -259,11 +259,11 @@ When search/investigation capability is **entirely absent**, the dependent axes 
 
 Separately from the review report, output an independent sheet of **the anticipated questions the author will receive and (where possible) their solutions**.
 
-| finding-id | Axis         | Anticipated question     | Type | Defense/tactic | Solution                              | Final status |
-| ---------- | ------------ | ------------------------ | ---- | -------------- | ------------------------------------- | ------------ |
-| STAT-1     | statistics   | "What about multiple-comparison correction?" | good | justification  | Bonferroni re-analysis                | mitigated    |
-| CAUS-2     | causality    | "Is reverse causation ruled out?" | good | deferral       | _(unresolved — longitudinal data needed)_ | unresolved   |
-| INTEG-1    | integrity    | "What about data availability?" | good | clarification  | Add OSF link                          | defended     |
+| finding-id | Axis       | Anticipated question                         | Type | Defense/tactic | Solution                                  | Final status |
+| ---------- | ---------- | -------------------------------------------- | ---- | -------------- | ----------------------------------------- | ------------ |
+| STAT-1     | statistics | "What about multiple-comparison correction?" | good | justification  | Bonferroni re-analysis                    | mitigated    |
+| CAUS-2     | causality  | "Is reverse causation ruled out?"            | good | deferral       | _(unresolved — longitudinal data needed)_ | unresolved   |
+| INTEG-1    | integrity  | "What about data availability?"              | good | clarification  | Add OSF link                              | defended     |
 
 Fill the Solution column **only when clear**; when unclear, leave it honestly empty as _unresolved / elevated to a Limitation_.
 Separately, append a _Significance & Scope_ note (impact rating + applicability range) at the end.
