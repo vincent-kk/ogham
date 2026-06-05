@@ -1,44 +1,50 @@
 ## Purpose
 
-`@ogham/prawf` 패키지 루트. Claude Code 플러그인 — esbuild 산출물(`bridge/`)을 커밋해 배포하는 cogair 동형 구조. MCP 서버는 현재 도구 0개 stub, skills/agents 는 빈 디렉토리 골격.
+`@ogham/prawf` — a Claude Code plugin for **multi-agent academic peer review**
+(_prawf_ is Welsh for "test/proof"). Six soundness reviewers attack a paper, an
+author's advocate defends, and a handling editor adjudicates a verdict
+(Accept / Minor / Major / Reject) plus an anticipated-question sheet. Pure
+markdown — no MCP server, no hooks, no build, zero runtime dependencies.
 
 ## Structure
 
-| Path                         | Role                                         |
-| ---------------------------- | -------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트)               |
-| `scripts/`                   | esbuild 빌드 스크립트                        |
-| `hooks/`                     | Claude Code 훅 매핑 (`hooks.json`)           |
-| `skills/`                    | 스킬 디렉토리 (`.gitkeep` — 비어 있음)       |
-| `agents/`                    | 에이전트 디렉토리 (`.gitkeep` — 비어 있음)   |
-| `libs/run.cjs`               | cross-platform Node 러너                     |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`) |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트              |
-| `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                |
+| Path                         | Role                                                       |
+| ---------------------------- | ---------------------------------------------------------- |
+| `agents/`                    | 10 persona definitions (6 soundness + impact + rebuttal + chair + adjudicator) |
+| `skills/review/`             | main 9-persona team evaluation + ported specs + profiles   |
+| `skills/simulate-defense/`   | defense Q&A simulation skill                                |
+| `skills/rebuttal/`           | external-review rebuttal-letter skill                      |
+| `.claude-plugin/plugin.json` | plugin manifest (skills only; no `mcpServers`)             |
+| `package.json`               | metadata + `version:sync` (no build)                       |
 
 ## Conventions
 
-- 빌드 파이프라인: `version:sync → tsc → mcpServer → hooks`
-- 스킬/에이전트는 마크다운 (빌드 불필요), MCP·훅은 esbuild → `bridge/`
+- Pure-markdown plugin — capabilities ship as `skills/` + `agents/`, never `bridge/`.
+- Personas run as native Claude Code teams (`TeamCreate`/`Task`); external search
+  is delegated as a capability, never bound to a named tool.
+- English implementation; the Korean design SSoT lives in `.metadata/prawf/`.
+- `version:sync` mirrors `package.json` version into `plugin.json` only.
 
 ## Boundaries
 
 ### Always do
 
-- 디스크 산출물은 `bridge/` 로, `package.json:files` 에 포함해 커밋
+- Keep `agents/*.md` and `skills/**/SKILL.md` in English.
+- Keep persona ids and deliverable filenames consistent across every spec.
 
 ### Ask first
 
-- 새 빌드 스크립트 추가 (파이프라인 영향)
-- `package.json` 의 `files` 배열 변경
+- Adding any MCP server, hook, or build step (breaks the pure-markdown contract).
+- Adding or removing a persona (touches agents + orchestration + prompt-templates).
 
 ### Never do
 
-- `dist/` 를 커밋 (`bridge/` 는 의도적 커밋)
-- `version.ts` / `plugin.json` 의 version 손으로 수정 (inject-version.mjs 만)
+- Add an `agents` field to `plugin.json` (agents are auto-discovered).
+- Hardcode a specific external search tool into a persona.
+- Let `impact-assessor` (significance) raise a verdict above Minor Revision.
 
 ## Dependencies
 
-- **런타임**: `@modelcontextprotocol/sdk ~1.22.0`, `zod ^3.23.8`
-- **개발**: `esbuild ^0.24.0`, `typescript ^5.7.2`, `vitest ^4.1.2`
-- **빌드 스크립트**: `scripts/buildMcpServer.mjs`, `scripts/buildHooks.mjs`, `../../scripts/inject-version.mjs`
+- **Runtime**: none (pure markdown).
+- **Tooling**: root `scripts/inject-version.mjs` for `version:sync`.
+- **Design SSoT**: `.metadata/prawf/` (Korean, read-only reference).

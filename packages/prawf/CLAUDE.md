@@ -1,39 +1,58 @@
 # CLAUDE.md — @ogham/prawf
 
-Working guide for the `@ogham/prawf` package. See [INTENT.md](./INTENT.md) for the package contract and [src/INTENT.md](./src/INTENT.md) for the source layout.
+Working guide for the `@ogham/prawf` package. See [INTENT.md](./INTENT.md) for the
+package contract and [DETAIL.md](./DETAIL.md) for the skill/persona API surface.
 
-> **Status: skeleton.** The plugin ships the full cogair-style runtime structure (esbuild → committed `bridge/`), but the MCP server is a 0-tool stub and `skills/` / `agents/` are empty (`.gitkeep`). Fill them by mirroring the cogair / imbas packages.
+> **What this is.** A pure-markdown Claude Code plugin for multi-agent academic
+> peer review. Capabilities ship entirely as `skills/` + `agents/` — there is no
+> MCP server, no hooks, no esbuild `bridge/`, and no runtime dependency.
 
 ## Commands
 
 ```bash
-yarn build              # clean → version:sync → tsc → mcpServer → hooks
-yarn build:plugin       # MCP + hook bundles only (skip tsc / version:sync)
-yarn typecheck          # type check (no emit)
-yarn test:run           # single test run (CI)
-yarn format             # prettier
-yarn version:sync       # package.json → src/version.ts + plugin.json
+yarn prawf version:sync   # mirror package.json version → .claude-plugin/plugin.json
 ```
+
+There is intentionally no `build`, `typecheck`, or `test` script — the plugin is
+markdown only. `build:all` skips this package (it defines no `build` script).
 
 ## Architecture
 
 ```
-MCP "tools" server (stdio)   → bridge/mcp-server.cjs    — src/mcp/, 0-tool stub
-Hook (SessionStart)          → bridge/injectStatic.mjs  — src/hooks/, static banner
+/prawf:review            → skills/review/        — 9-persona native team (P0→R1→R2→R3→ADJ)
+/prawf:simulate-defense  → skills/simulate-defense/ — committee Q&A → author answers → coaching
+/prawf:rebuttal          → skills/rebuttal/      — external review comments → rebuttal letter
+agents/<persona>.md      → 10 reviewer personas spawned via Task/TeamCreate
 ```
 
-Build artifacts land in `bridge/` and are committed (`package.json:files`). `dist/` is library-export only and is not emitted (base tsconfig `noEmit`); plugins ship via `bridge/`.
+Evaluation is persona *reasoning*, not deterministic measurement — that is why the
+package carries no analysis tooling. External lookups (prior work, preregistration,
+plagiarism) are delegated as a capability; never hardcode a specific tool name.
 
-## Plugin Runtime
+## Authoring Notes
 
-- **MCP server** name is `tools` (`.mcp.json`). Register tools in `src/mcp/server/lifecycle/createServer.ts`; tool schemas use `zod`. esbuild entry is `src/mcp/serverEntry/serverEntry.ts`.
-- **Hooks** stay thin (`node:*` builtins only). A 10 KB LIGHT cap + `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` block `zod` / MCP SDK / glob / lodash from hook bundles. Each hook command runs through `libs/run.cjs` (cross-platform Node runner).
-- **Skills** — drop `skills/<name>/SKILL.md` (English). The `"skills": "./skills/"` field is already wired in `plugin.json`.
-- **Agents** — drop `agents/<name>.md` (English). Auto-discovered; do NOT add an `agents` field to `plugin.json`.
+- **Skills** — drop `skills/<name>/SKILL.md` (English) with `name`,
+  `user_invocable`, `description` frontmatter. The `"skills": "./skills/"` field is
+  already wired in `plugin.json`.
+- **Agents** — drop `agents/<name>.md` (English). Auto-discovered; do NOT add an
+  `agents` field to `plugin.json`.
+- **Anti-yield** — `skills/review/SKILL.md` follows filid's Tier-2a 3-layer
+  pattern (round-to-round chaining, never yield mid-pipeline). An interactive
+  `simulate-defense` uses the Tier-2b `<!-- [INTERACTIVE] -->` escape hatch.
+- **Cross-references** — persona ids and deliverable filenames must stay identical
+  across agents, orchestration, prompt-templates, templates, and every SKILL.md.
+
+## Design SSoT
+
+The Korean design specification is the source of truth at `../../.metadata/prawf/`
+(read-only): `personas.md`, `orchestration.md`, `field-profiles.md`, `templates.md`,
+`prompt-templates.md`, `scaffold.md`. This package is the English implementation.
 
 ## Development Notes
 
-- **Version**: use `yarn version:sync` only. `src/version.ts` and `.claude-plugin/plugin.json` mirror `package.json`.
-- **Hook sync**: editing `hooks/hooks.json` requires updating `hookEntries` in `scripts/buildHooks.mjs` and adding `src/hooks/<name>/build/<name>.entry.ts`.
-- **Tests**: `src/**/__tests__/**/*.test.ts`. FCA 3+12 rule — max 15 cases per spec file.
-- **Registration**: listed in root `.claude-plugin/marketplace.json` and `scripts/typecheck-all.mjs` (CONSUMERS).
+- **Version**: use `yarn prawf version:sync` only; `plugin.json` version is
+  generated, never hand-edited.
+- **FCA**: `INTENT.md` ≤ 50 lines with 3-tier boundaries; `DETAIL.md` accompanies
+  each fractal module. Run `/filid:scan` to check structural compliance.
+- **Registration**: listed in root `.claude-plugin/marketplace.json`. Not in
+  `scripts/typecheck-all.mjs` (no TypeScript to typecheck).

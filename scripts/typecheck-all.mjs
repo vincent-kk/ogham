@@ -38,6 +38,8 @@ const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },
 ];
 
+// @ogham/prawf is a pure-markdown plugin (no TypeScript) and is
+// intentionally absent — it has no `typecheck` script to run.
 const CONSUMERS = [
   "@ogham/cogair",
   "@ogham/maencof",
@@ -45,7 +47,6 @@ const CONSUMERS = [
   "@ogham/filid",
   "@ogham/imbas",
   "@ogham/atlassian",
-  "@ogham/prawf",
 ];
 
 async function clearTscCache(pkgDir) {

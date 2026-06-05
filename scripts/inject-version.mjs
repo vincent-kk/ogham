@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOT = process.cwd();
@@ -40,6 +40,13 @@ function readPackageVersion() {
 }
 
 function generateVersionFile(version) {
+  // Pure-markdown plugins (e.g. @ogham/prawf) have no `src/`. Skip
+  // version.ts generation entirely and sync plugin.json only.
+  if (!existsSync(join(ROOT, 'src'))) {
+    console.log('  ✓ src/ absent — skipping version.ts (markdown-only package)');
+    return false;
+  }
+
   const versionFilePath = join(ROOT, 'src', 'version.ts');
 
   try {
