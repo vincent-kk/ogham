@@ -1,9 +1,9 @@
-# prawf 분야 프로파일 (config 주입)
+# prawf 분야 프로파일 (분야 프로파일 데이터)
 
 > 보편 코어 페르소나에 **분야 전문성을 주입하는 데이터 레이어**. 페르소나([personas.md](./personas.md))의
 > 정체성은 분야 무관 *불변 질문*이고, 분야별 프레임워크는 본 문서의 프로파일이 *메뉴*로 주입한다.
-> 이 주입은 **MCP setup(또는 CLAUDE.md / `.prawf/config.json`)으로 config 형태로 공급**된다 —
-> 평가 동작이 아니라 *설정값*이므로 사용자가 앞서 정의한 "MCP는 config 주입용" 범주에 정확히 속한다.
+> 이 데이터는 **review P0가 논문 내용으로 분야를 자동 판정할 때 사용하는 분야 데이터**다 —
+> 평가 동작이 아니라 *참조 데이터*이며, 별도 주입 통로 없이 P0 자동 판정에 직접 쓰인다.
 
 ## 1. 개념 — 축은 코어, 프레임워크는 데이터
 
@@ -18,7 +18,7 @@ critic 권고("axis = invariant question, framework = variable menu")와 gemini 
 ## 2. 프로파일 스키마
 
 ```yaml
-# .prawf/profiles/<name>.yaml  (또는 MCP setup이 주입하는 JSON)
+# .prawf/profiles/<name>.yaml
 profile: <name>
 axis_frameworks: # 축 id → 활성 프레임워크 메뉴
   argument: [<framework>, ...]
@@ -187,18 +187,17 @@ external_checks: [1차 사료 귀속, 표절, 담론 위치]
 
 우선순위 (높은 쪽이 우선):
 
-1. **명시 지정** — `/prawf:review --profile=cs-ml` (CLI 인자)
-2. **프로젝트 config** — `.prawf/config.json` 의 `default_profile`
-3. **CLAUDE.md 힌트** — 리포지토리/사용자 지침의 분야 선언
-4. **P0 자동 판별** — chair가 논문을 읽고 유형·분야 추론 → 프로파일 선택 (사용자 override 가능)
-5. **보편 폴백** — §6
+1. **`--profile <name>` override** — `/prawf:review --profile=cs-ml` (명시 지정, 선택)
+2. **P0 자동 판정 (기본)** — chair가 논문 내용으로 유형·분야를 추론해 내장 프로파일 선택
+3. **보편 폴백** — §6 (내장에 없는 미지의 분야)
+4. **(선택) 커스텀 yaml** — 사용자가 작성한 `.prawf/profiles/<name>.yaml` 이 있을 때만 후보에 추가
 
 **무결성 제약 (P0 검증)**: 주입 프로파일은 (1) 필수 키·축 참조 정합성, (2) `severity_examples` 존재를 만족해야 하며,
 **필수 soundness 축 `argument·methodology·integrity` 는 `disabled_axes` 로 끌 수 없다**(statistics·causality·bias만
 `absorb_map` 동반 시 조건부 비활성). 위반 시 chair는 프로파일을 거부하고 보편 폴백한다.
 
-> MCP setup(채택 시)은 위 2의 `.prawf/config.json` 을 웹 UI로 주입·편집하는 통로다(atlassian setup 대응).
-> 평가 동작은 전부 claude-code 세션 내부에서 일어나며, MCP는 이 설정값 공급에만 관여한다.
+> 별도 설정 파일 없이 동작한다 — 분야 데이터는 본 문서의 내장 프로파일로 충분하다.
+> 설정 파일(`.prawf/profiles/<name>.yaml`)은 사용자가 커스텀 분야를 둘 때만 생긴다.
 
 ## 6. 폴백 — 보편 메뉴 (프로파일 미지정·미지 분야)
 
