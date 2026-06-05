@@ -1,5 +1,5 @@
 /**
- * @file types/state.ts
+ * @file state.ts
  * @description Zod schemas for imbas pipeline state (state.json)
  * @see skills/validate/references/state-transitions.md, skills/split/references/state-transitions.md
  */

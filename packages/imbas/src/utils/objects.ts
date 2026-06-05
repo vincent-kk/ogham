@@ -1,5 +1,5 @@
 /**
- * @file utils/objects.ts
+ * @file objects.ts
  * @description Object utility functions
  */
 

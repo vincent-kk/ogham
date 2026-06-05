@@ -1,5 +1,5 @@
 /**
- * @file types/index.ts
+ * @file index.ts
  * @description Central type exports for @ogham/imbas
  */
 

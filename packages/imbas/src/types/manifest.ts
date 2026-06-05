@@ -1,5 +1,5 @@
 /**
- * @file types/manifest.ts
+ * @file manifest.ts
  * @description Zod schemas for imbas manifests (stories + devplan)
  * @see `agents/planner.md` (stories-manifest), `agents/engineer.md` (devplan-manifest)
  */

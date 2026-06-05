@@ -1,5 +1,5 @@
 /**
- * @file constants/files.ts
+ * @file files.ts
  * @description Filename and path constants for .imbas/ directory structure
  */
 

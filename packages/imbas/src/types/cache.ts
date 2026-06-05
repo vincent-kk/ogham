@@ -1,5 +1,5 @@
 /**
- * @file types/cache.ts
+ * @file cache.ts
  * @description Zod schemas for Jira metadata cache
  * @see skills/cache/references/cache-structure.md
  */

@@ -6,12 +6,12 @@ MCP 도구 핸들러 모음. 각 핸들러는 core/ast 모듈에 위임하는 th
 
 ## Structure
 
-16개 도구 핸들러 (imbas-ping 포함):
-- Pipeline: run-create, run-get, run-transition, run-list
-- Manifest: manifest-get, manifest-save, manifest-validate, manifest-plan, manifest-implement-plan
-- Config/Cache: config-get, config-set, cache-get, cache-set
-- AST: ast-search, ast-analyze
-- Utility: imbas-ping
+16개 도구 핸들러 (imbasPing 포함):
+- Pipeline: runCreate, runGet, runTransition, runList
+- Manifest: manifestGet, manifestSave, manifestValidate, manifestPlan, manifestImplementPlan
+- Config/Cache: configGet, configSet, cacheGet, cacheSet
+- AST: astSearch, astAnalyze
+- Utility: imbasPing
 
 ## Boundaries
 

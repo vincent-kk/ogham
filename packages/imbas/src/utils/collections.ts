@@ -1,5 +1,5 @@
 /**
- * @file utils/collections.ts
+ * @file collections.ts
  * @description Collection utility functions
  */
 

@@ -1,5 +1,5 @@
 /**
- * @file constants/ast.ts
+ * @file ast.ts
  * @description AST 파일 탐색 및 언어 지원 관련 상수
  */
 import type { NapiLang } from '../types/index.js';

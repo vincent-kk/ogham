@@ -1,5 +1,5 @@
 /**
- * @file constants/defaults.ts
+ * @file defaults.ts
  * @description 타임아웃, 결과 수, 기본값 등 런타임 기본 상수
  */
 

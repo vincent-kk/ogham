@@ -1,5 +1,5 @@
-export { processAgentEnforcer } from './agent-enforcer/index.js';
-export { processContextInjector } from './context-injector/index.js';
-export { processPreToolUse } from './pre-tool-use/index.js';
-export { processSessionCleanup } from './session-cleanup/index.js';
+export { processAgentEnforcer } from './agentEnforcer/index.js';
+export { processContextInjector } from './contextInjector/index.js';
+export { processPreToolUse } from './preToolUse/index.js';
+export { processSessionCleanup } from './sessionCleanup/index.js';
 export { processSetup } from './setup/index.js';

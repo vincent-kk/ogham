@@ -1,1 +1,1 @@
-export { parseLinks, type GithubLinks } from './parsers/parse-links.js';
+export { parseLinks, type GithubLinks } from './parsers/parseLinks.js';

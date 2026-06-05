@@ -1,5 +1,5 @@
 /**
- * @file constants/pipeline.ts
+ * @file pipeline.ts
  * @description Pipeline phase, agent, and lifecycle constants
  */
 import type { PhaseName } from '../types/state.js';

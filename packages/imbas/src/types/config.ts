@@ -1,5 +1,5 @@
 /**
- * @file types/config.ts
+ * @file config.ts
  * @description Zod schemas for imbas config.json
  * @see skills/setup/references/init-workflow.md
  */

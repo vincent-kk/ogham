@@ -1,5 +1,5 @@
 /**
- * @file core/paths.ts
+ * @file paths.ts
  * @description Path resolution for .imbas/ directory structure
  */
 import { join } from 'node:path';

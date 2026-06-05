@@ -1,5 +1,5 @@
 /**
- * @file types/mcp.ts
+ * @file mcp.ts
  * @description MCP tool input/output type definitions
  */
 
