@@ -1,13 +1,13 @@
-import { executeRequest } from "../../../core/http-client/index.js";
+import { executeRequest } from "../../../core/httpClient/index.js";
 import type {
   FetchContext,
   McpResponse,
   FetchParams,
 } from "../../../types/index.js";
 import { attachPrefix, transformRequest } from "../../../utils/index.js";
-import { autoConvertAdf } from "./utils/auto-convert-adf.js";
-import { convertBody } from "./utils/convert-body.js";
-import { handleAssetFetch } from "./utils/asset-fetch.js";
+import { autoConvertAdf } from "./utils/autoConvertAdf.js";
+import { convertBody } from "./utils/convertBody.js";
+import { handleAssetFetch } from "./utils/assetFetch.js";
 
 /** Unified HTTP tool handler */
 export async function handleFetch(

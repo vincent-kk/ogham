@@ -66,11 +66,11 @@ export {
   AuthCheckUserInfoSchema,
   AuthCheckServiceEntrySchema,
   AuthCheckResultSchema,
-} from "./auth-check.js";
+} from "./authCheck.js";
 export type {
   AuthCheckServiceStatus,
   AuthCheckConnectionStatus,
   AuthCheckUserInfo,
   AuthCheckServiceEntry,
   AuthCheckResult,
-} from "./auth-check.js";
+} from "./authCheck.js";

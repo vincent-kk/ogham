@@ -14,7 +14,7 @@ import { wrapHandler, buildFetchContext } from "../shared/index.js";
 import { handleFetch } from "../tools/fetch/index.js";
 import { handleConvert } from "../tools/convert/index.js";
 import { handleSetup } from "../tools/setup/index.js";
-import { handleAuthCheck } from "../tools/auth-check/index.js";
+import { handleAuthCheck } from "../tools/authCheck/index.js";
 
 /**
  * Create and configure the MCP server with all tool registrations.

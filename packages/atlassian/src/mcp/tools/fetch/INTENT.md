@@ -9,18 +9,18 @@ ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki
 |------|------|
 | `fetch.ts` | `handleFetch` — 메서드별 분기, 유틸 조율 |
 | `index.ts` | 배럴 — `handleFetch` 재내보내기 |
-| `utils/asset-fetch.ts` | 바이너리 파일 다운로드 및 파일시스템 캐싱 |
-| `utils/auto-convert-adf.ts` | GET 응답에서 ADF 필드를 Markdown으로 자동 변환 |
-| `utils/pick-body-format.ts` | service+apiVersion → ADF/Storage/Wiki 결정 |
-| `utils/render-by-format.ts` | 선택된 포맷으로 markdown 렌더 |
-| `utils/convert-body.ts` | POST/PUT/PATCH body의 Markdown → wire 포맷 변환 |
+| `utils/assetFetch.ts` | 바이너리 파일 다운로드 및 파일시스템 캐싱 |
+| `utils/autoConvertAdf.ts` | GET 응답에서 ADF 필드를 Markdown으로 자동 변환 |
+| `utils/pickBodyFormat.ts` | service+apiVersion → ADF/Storage/Wiki 결정 |
+| `utils/renderByFormat.ts` | 선택된 포맷으로 markdown 렌더 |
+| `utils/convertBody.ts` | POST/PUT/PATCH body의 Markdown → wire 포맷 변환 |
 
 ## Boundaries
 
 ### Always do
 
-- HTTP 전송은 `core/http-client`의 `executeRequest`에 위임한다
-- GET + `save_to_path` 조합은 `asset-fetch` 유틸로 라우팅한다
+- HTTP 전송은 `core/httpClient`의 `executeRequest`에 위임한다
+- GET + `save_to_path` 조합은 `assetFetch` 유틸로 라우팅한다
 - GET 응답의 ADF 필드는 `autoConvertAdf`로 자동 Markdown 변환한다
 - `transformRequest`로 V2 logical path를 V1/DC physical로 매핑하고, `attachPrefix`로 service+버전 prefix를 부착한다
 - DC(`ctx.requires_xsrf_bypass`) non-GET 요청에는 `X-Atlassian-Token: no-check` 헤더를 주입한다
@@ -39,8 +39,8 @@ ADF 자동 변환, 바이너리 에셋 다운로드, Markdown→ADF/Storage/Wiki
 
 ## Dependencies
 
-- `core/http-client` — `executeRequest`
+- `core/httpClient` — `executeRequest`
 - `types/index` — `FetchContext`, `McpResponse`, `FetchParams`, `AssetFetchParams`
 - `converter/index` — ADF/Storage/Wiki ↔ Markdown 변환 (utils 경유)
 - `utils/index` — `validateSavePath`, `attachPrefix`, `transformRequest`, `detectService` (폴백)
-- `lib/file-io` — `writeBinary`
+- `lib/fileIo` — `writeBinary`

@@ -4,21 +4,21 @@ Atlassian plugin source root. 4 MCP tools (fetch + convert + auth-check + setup)
 
 ## Structure
 
-| Directory | Role |
-|---|---|
-| `types/` | Zod schemas and type definitions |
-| `constants/` | Paths, defaults, config constants |
-| `core/` | Config, auth, environment, HTTP client |
-| `converter/` | ADF/Storage Format ↔ Markdown |
-| `mcp/` | MCP server and 4 tool handlers |
-| `lib/` | Logger, file I/O |
-| `utils/` | URL helpers |
+| Directory    | Role                                   |
+| ------------ | -------------------------------------- |
+| `types/`     | Zod schemas and type definitions       |
+| `constants/` | Paths, defaults, config constants      |
+| `core/`      | Config, auth, environment, HTTP client |
+| `converter/` | ADF/Storage Format ↔ Markdown          |
+| `mcp/`       | MCP server and 4 tool handlers         |
+| `lib/`       | Logger, file I/O                       |
+| `utils/`     | URL helpers                            |
 
 ## Conventions
 
 - 모든 exports는 barrel `index.ts`를 통해 노출
 - Zod 스키마는 `types/` organ에만 정의
-- kebab-case 파일명, ESM `.js` 확장자 import
+- camelCase 파일명, ESM `.js` 확장자 import
 
 ## Dependencies
 

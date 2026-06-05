@@ -1,13 +1,13 @@
-export { loadConfig, saveConfig, mergeConfig } from "./config-manager/index.js";
+export { loadConfig, saveConfig, mergeConfig } from "./configManager/index.js";
 export {
   loadCredentials,
   saveCredentials,
   getAuthHeader,
-} from "./auth-manager/index.js";
+} from "./authManager/index.js";
 export {
   resolveEnvironment,
   getApiVersion,
-} from "./environment-resolver/index.js";
-export type { EnvironmentInfo } from "./environment-resolver/index.js";
-export { executeRequest, validateUrl } from "./http-client/index.js";
-export { testConnection } from "./connection-tester/index.js";
+} from "./environmentResolver/index.js";
+export type { EnvironmentInfo } from "./environmentResolver/index.js";
+export { executeRequest, validateUrl } from "./httpClient/index.js";
+export { testConnection } from "./connectionTester/index.js";

@@ -9,10 +9,10 @@ import type {
   SetupParams,
   SetupResult,
 } from "../../../types/index.js";
-import { loadSettingsHtml } from "./utils/load-settings-html.js";
+import { loadSettingsHtml } from "./utils/loadSettingsHtml.js";
 import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "@ogham/cross-platform/launcher";
-import { startSetupServer } from "./web-server/index.js";
+import { startSetupServer } from "./webServer/index.js";
 
 /** Setup tool handler — launches local web server for auth configuration */
 export async function handleSetup(params: SetupParams): Promise<SetupResult> {

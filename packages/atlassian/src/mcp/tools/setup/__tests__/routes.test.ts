@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { createServer } from "node:http";
 import type { Server } from "node:http";
-import { createRouteHandler } from "../web-server/routes.js";
-import type { RouteContext } from "../web-server/routes.js";
+import { createRouteHandler } from "../webServer/routes.js";
+import type { RouteContext } from "../webServer/routes.js";
 
 // core/index.js의 resolveEnvironment는 handleSubmit 내부에서 동적으로 import됨
 vi.mock("../../../../core/index.js", () => ({

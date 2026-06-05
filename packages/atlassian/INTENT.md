@@ -26,7 +26,7 @@
 ### Always do
 
 - 빌드 후 `bridge/` · `public/` 커밋
-- SSRF guard (`src/core/http-client/ssrf-guard.ts`) 모든 outbound 요청에 적용
+- SSRF guard (`src/core/httpClient/ssrfGuard.ts`) 모든 outbound 요청에 적용
 - ADF / Storage ↔ Markdown 변환은 `src/converter/` 의 포팅된 로직 재사용
 
 ### Ask first

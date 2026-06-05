@@ -34,4 +34,4 @@ stdio 트랜스포트로 Claude Code와 통신한다.
 - `@modelcontextprotocol/sdk` — `McpServer`, `StdioServerTransport`
 - `../../utils` — `detectService`
 - `../shared` — `wrapHandler`, `buildFetchContext`
-- `../tools/{fetch,convert,setup,auth-check}` — 도구 핸들러
+- `../tools/{fetch,convert,setup,authCheck}` — 도구 핸들러

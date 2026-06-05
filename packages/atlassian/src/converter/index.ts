@@ -1,6 +1,6 @@
 export { convert } from "./convert.js";
-export { adfToMarkdown } from "./adf-to-markdown/index.js";
-export { markdownToAdf } from "./markdown-to-adf/index.js";
-export { storageToMarkdown } from "./storage-to-markdown/index.js";
-export { markdownToStorage } from "./markdown-to-storage/index.js";
-export { markdownToWiki } from "./markdown-to-wiki/index.js";
+export { adfToMarkdown } from "./adfToMarkdown/index.js";
+export { markdownToAdf } from "./markdownToAdf/index.js";
+export { storageToMarkdown } from "./storageToMarkdown/index.js";
+export { markdownToStorage } from "./markdownToStorage/index.js";
+export { markdownToWiki } from "./markdownToWiki/index.js";

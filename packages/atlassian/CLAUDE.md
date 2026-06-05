@@ -34,7 +34,7 @@ Dispatcher (Claude Code main agent)
 ## Development Notes
 
 - **테스트**: `src/**/__tests__/**/*.test.ts`
-- **SSRF guard**: `src/core/http-client/ssrf-guard.ts` — 모든 outbound 요청 통과 필수
+- **SSRF guard**: `src/core/httpClient/ssrfGuard.ts` — 모든 outbound 요청 통과 필수
 - **Credentials**: `~/.claude/plugins/atlassian/credentials.json` 평문 JSON; stdout / log 출력 금지
 - **Converter**: `src/converter/` — Python `mcp-atlassian` 에서 포팅. ADF ↔ Markdown / Storage ↔ Markdown
 - **버전**: `src/version.ts` 직접 수정 금지 — `yarn version:sync` 사용

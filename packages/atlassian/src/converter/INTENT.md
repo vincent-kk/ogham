@@ -6,15 +6,15 @@ Pure local format conversion: ADF/Storage Format <-> Markdown. Zero dependency o
 
 | File | Role |
 |---|---|
-| `adf-to-markdown/` | ADF JSON → Markdown (port from Python adf.py) |
-| `markdown-to-adf/` | Markdown → ADF JSON (port from Python adf.py) |
-| `storage-to-markdown/` | Confluence Storage XHTML → Markdown |
-| `markdown-to-storage/` | Markdown → Confluence Storage XHTML |
-| `markdown-to-wiki/` | Markdown → Jira Wiki Markup (Server/DC v2) |
+| `adfToMarkdown/` | ADF JSON → Markdown (port from Python adf.py) |
+| `markdownToAdf/` | Markdown → ADF JSON (port from Python adf.py) |
+| `storageToMarkdown/` | Confluence Storage XHTML → Markdown |
+| `markdownToStorage/` | Markdown → Confluence Storage XHTML |
+| `markdownToWiki/` | Markdown → Jira Wiki Markup (Server/DC v2) |
 
 ## Conventions
 
-- 각 변환 방향은 독립 파일로 분리 (`adf-to-markdown.ts` 등)
+- 각 변환 방향은 독립 파일로 분리 (`adfToMarkdown.ts` 등)
 - 순수 함수만 허용 — 부수 효과 없음
 - Python `adf.py` 레퍼런스 구현을 기준으로 포팅
 

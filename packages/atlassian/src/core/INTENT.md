@@ -6,17 +6,17 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 
 | Directory | Role |
 |---|---|
-| `config-manager/` | Load/save config.json with Zod validation |
-| `auth-manager/` | Credential storage (plain JSON), header injection |
-| `environment-resolver/` | Cloud/Server detection, URL normalization |
-| `http-client/` | Fetch wrapper with retry, SSRF guard, auth injection |
-| `connection-tester/` | Jira/Confluence connectivity test via core modules |
+| `configManager/` | Load/save config.json with Zod validation |
+| `authManager/` | Credential storage (plain JSON), header injection |
+| `environmentResolver/` | Cloud/Server detection, URL normalization |
+| `httpClient/` | Fetch wrapper with retry, SSRF guard, auth injection |
+| `connectionTester/` | Jira/Confluence connectivity test via core modules |
 
 ## Conventions
 
 - 각 인프라 관심사는 독립 sub-fractal로 분리
-- 인증 헤더는 `auth-manager`만 생성, 직접 조합 금지
-- HTTP 요청은 반드시 `http-client`를 통해 실행
+- 인증 헤더는 `authManager`만 생성, 직접 조합 금지
+- HTTP 요청은 반드시 `httpClient`를 통해 실행
 
 ## Dependencies
 
@@ -38,4 +38,4 @@ Shared infrastructure modules for MCP tools: config, auth, environment detection
 ### Never do
 
 - Import from mcp/ layer (unidirectional: mcp → core)
-- Expose raw credentials outside auth-manager
+- Expose raw credentials outside authManager
