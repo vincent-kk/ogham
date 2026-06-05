@@ -68,7 +68,7 @@ Language: <see Common above>
 REMINDER: Write `<REVIEW_DIR>/findings/round-1-<AXIS>.md`. Always to a file, even partial results.
 ```
 
-> **Absorption injection (P1-R2)**: For axes in the profile's `disabled_axes`, inject that axis's
+> **Absorption injection (P0→R1)**: For axes in the profile's `disabled_axes`, inject that axis's
 > *invariant questions* explicitly into the `ABSORBED_AXES` slot of the absorbing persona named in
 > `absorb_map`. Example: in `math-theory`, the `argument-analyst` prompt gets
 > `ABSORBED_AXES: "causality → inference-leap-check (check leaps from observation to mechanism)"`.
@@ -194,5 +194,5 @@ When the chair fills in the templates above:
 3. **Give the persona .md path** (`../../agents/<id>.md`) and have the persona read it.
 4. **Enforce the `paper-normalized.md` coordinate system** (no citing the original PDF — keep the shared coordinates).
 5. **Pass the language setting** (`[filid:lang]`).
-6. **Inject the absorption mission** (`ABSORBED_AXES`) into the relevant absorbing persona (P1-R2).
+6. **Inject the absorption mission** (`ABSORBED_AXES`) into the relevant absorbing persona (P0→R1).
 7. **Re-emphasize the output file at the end** and append the budget-fallback (write the file even with partial results).

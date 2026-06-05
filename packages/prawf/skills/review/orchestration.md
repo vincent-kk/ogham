@@ -238,7 +238,7 @@ chair = **main session = team lead** (the filid Phase D chair pattern).
 ## 7. Convergence & Termination Rules
 
 - Standard flow: R1 → R2 → (R3) → consensus. **A single R3 pass is the default.**
-- **The sole condition for entering an extra cycle**: only when, in R3, the strategist presents a _new_ MITIGATED residual risk and the original Reviewer re-rebuts it is **one extra defense + re-review** allowed (R3 at most twice total). No other repetition — to prevent endless debate.
+- **The sole condition for entering an extra cycle**: only when, in R3, an original Reviewer surfaces a _new_ MITIGATED residual risk (absent from R1) in `findings/round-3-<axis>.md` is **one extra defense (R2) + re-review (R3)** allowed (R3 at most twice total). No other repetition — to prevent endless debate.
 - **Inconclusive**: only when a soundness axis that is load-bearing for the verdict **abstains entirely** (it ultimately fails to obtain grounding to verify the core claim). This differs in _condition_ from filid's quorum-failure INCONCLUSIVE — do not confuse them.
 
 ## 8. Degradation — Absence of External Capability

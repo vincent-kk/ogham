@@ -18,9 +18,10 @@ plugin: prawf
 > **Valid reasons to yield**:
 > 1. A user decision is genuinely required (unrecoverable input error only —
 >    e.g. no paper was provided).
-> 2. Terminal marker emitted: `prawf verdict: (ACCEPT|MINOR-REVISION|MAJOR-REVISION|REJECT)`
->    — emitted only after `review-report.md` + `qa-sheet.md` are written and
->    any review team has been deleted.
+> 2. Terminal marker emitted: `prawf verdict: <accept|minor-revision|major-revision|reject>`
+>    — emitted only after `review-report.md` is written (plus `qa-sheet.md` in
+>    team mode) and any review team has been deleted. The `--solo` path produces
+>    only `review-report.md` and creates no team.
 >
 > **HIGH-RISK YIELD POINTS** (strengthen vigilance here):
 > 1. After `TeamCreate` + R1 worker spawns return → chain R1 monitoring and
@@ -85,9 +86,11 @@ synthesize the attack and defense deliverables only.
 
 ### Step 2 — R1: Attack (team, parallel)
 
-**Solo branch (`--solo` or auto-TRIVIAL/abstract)**: spawn `adjudicator` as a
-standalone `Task` (NO team) with the prompt from `prompt-templates.md` §5. It writes
-`review-report.md` directly. Then skip to Step 5's terminal marker.
+**Solo branch (`--solo`, or an auto-detected TRIVIAL paper)**: spawn `adjudicator`
+as a standalone `Task` (NO team) with the prompt from `prompt-templates.md` §5. It
+writes `review-report.md` directly — the chair's ADJ block (dedup, `qa-sheet.md`,
+`TeamDelete`) is skipped, and `--solo` produces no `qa-sheet.md`. Emit the terminal
+marker `prawf verdict: <verdict>` once `review-report.md` exists, then stop.
 
 **Team branch**: `TeamCreate prawf-<paper-slug>`. Spawn every convened soundness
 reviewer plus `impact-assessor` as **parallel** team workers
@@ -132,13 +135,13 @@ MITIGATED residual risk (see `orchestration.md` §7).
    MITIGATED and no critical/major UNRESOLVED → minor-revision; only minor
    UNRESOLVED → minor-revision; none UNRESOLVED → accept (PASS). Apply the
    fatal-flaw override (Temporality, p-hacking + preregistration mismatch, data
-   leakage, data manipulation stay critical unless verifiably defended).
+   leakage, data fabrication stay critical unless verifiably defended).
 3. Record `external_verification`; when `unavailable`, label an Accept a
    **provisional-accept**.
 4. Read `templates.md`, then write `review-report.md` (verdict + Significance &
    Scope) and `qa-sheet.md` (anticipated questions + solutions). `TeamDelete` the
    review team.
-5. Emit the terminal marker `prawf verdict: <VERDICT>`.
+5. Emit the terminal marker `prawf verdict: <verdict>`.
 
 **After `review-report.md` + `qa-sheet.md` exist and the team is deleted,
 execution is COMPLETE.**

@@ -93,7 +93,7 @@ If the evidence needed to defend an item is absent, mark only that item a
 7. **Downgrade requires an artifact.** A sidestep or unbacked justification never
    proposes `mitigated`/`defended`; the chair keeps it CONTESTED.
 8. **Fatal-flaw axes get no forced defense.** Temporality, p-hacking +
-   preregistration mismatch, data leakage, and data manipulation are marked
+   preregistration mismatch, data leakage, and data fabrication are marked
    honestly `unresolved`; do not manufacture a defense for them.
 9. **Withdrawal needs R3 confirmation.** You may only propose `withdrawn-proposed`;
    finalization belongs to the original attacker in R3.

@@ -45,7 +45,7 @@ for the full state machine and frontmatter contracts; this file is the summary.
 `critical ≥ 1` → `reject`; `major ≥ 1` → `major-revision`; all majors MITIGATED and
 none critical/major UNRESOLVED → `minor-revision`; only minor UNRESOLVED →
 `minor-revision`; none UNRESOLVED → `accept`. Fatal-flaw override keeps Temporality,
-p-hacking + preregistration mismatch, data leakage, and data manipulation `critical`
+p-hacking + preregistration mismatch, data leakage, and data fabrication `critical`
 unless verifiably defended. When `external_verification: unavailable`, an Accept is
 labelled `provisional-accept`.
 

@@ -46,8 +46,9 @@ is preparation, NOT a verdict — it never issues Accept/Reject.
 1. If a `qa-sheet.md` from a prior `/prawf:review` is supplied or found, load its
    anticipated questions directly — no spawning needed.
 2. Otherwise, take the paper, run P0-lite (detect profile, normalize to
-   `paper-normalized.md`), and spawn a LIGHT panel of soundness reviewers in
-   question-only mode (each emits its `anticipated_question` set per
+   `paper-normalized.md`), and spawn a LIGHT panel of soundness reviewers as
+   standalone `Task`s (no team is needed for question generation) in question-only
+   mode (each emits its `anticipated_question` set per
    `../review/prompt-templates.md` §1, without full findings). Then spawn
    `rebuttal-strategist` to refine and classify each question as
    `good | bad | cringy`.

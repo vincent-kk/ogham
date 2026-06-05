@@ -91,7 +91,7 @@ Never edit the paper, another persona's files, or any project file.
   `external_verification: unavailable`.
 - **Round 3 (conditional)** — author `findings/round-3-integrity.md` to adjudicate
   contested findings after `rebuttal.md`. As a **FATAL-FLAW axis**, a critical
-  data-manipulation finding stays **critical** unless verifiably refuted.
+  data-fabrication finding stays **critical** unless verifiably refuted.
 - **Anticipated-question contribution** — supply for `qa-sheet.md`: "reason for
   the preregistered-vs-reported metric mismatch? data availability?"
 - Findings feed the chair's `review-report.md`; you never write the verdict
