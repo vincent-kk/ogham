@@ -9,9 +9,11 @@ persona agents at `../agents/`. The plugin manifest wires this directory via
 
 ## Structure
 
-| Path        | Role                                                              |
-| ----------- | ---------------------------------------------------------------- |
-| `review/`   | main skill — 9-persona team evaluation (P0→R1→R2→R3→ADJ)          |
+| Path                | Role                                                     |
+| ------------------- | ------------------------------------------------------- |
+| `review/`           | main skill — 9-persona team evaluation (P0→R1→R2→R3→ADJ) |
+| `simulate-defense/` | interactive defense Q&A rehearsal + coaching            |
+| `rebuttal/`         | external review comments → rebuttal letter + checklist  |
 
 ## Conventions
 
