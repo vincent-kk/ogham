@@ -13,21 +13,13 @@
       "name": "atlassian",
       "source": "./packages/atlassian",
       "category": "productivity",
-      "tags": [
-        "jira",
-        "confluence",
-        "integration"
-      ]
+      "tags": ["jira", "confluence", "integration"]
     },
     {
       "name": "cogair",
       "source": "./packages/cogair",
       "category": "productivity",
-      "tags": [
-        "codex",
-        "gemini",
-        "multi-model"
-      ]
+      "tags": ["codex", "gemini", "multi-model"]
     },
     {
       "name": "filid",
@@ -46,32 +38,25 @@
       "name": "imbas",
       "source": "./packages/imbas",
       "category": "productivity",
-      "tags": [
-        "claude-code",
-        "plugin"
-      ]
+      "tags": ["claude-code", "plugin"]
     },
     {
       "name": "maencof",
       "source": "./packages/maencof",
       "category": "productivity",
-      "tags": [
-        "knowledge-graph",
-        "memory",
-        "spreading-activation",
-        "markdown"
-      ]
+      "tags": ["knowledge-graph", "memory", "spreading-activation", "markdown"]
     },
     {
       "name": "maencof-lens",
       "source": "./packages/maencof-lens",
       "category": "productivity",
-      "tags": [
-        "knowledge-graph",
-        "read-only",
-        "lens",
-        "vault"
-      ]
+      "tags": ["knowledge-graph", "read-only", "lens", "vault"]
+    },
+    {
+      "name": "prawf",
+      "source": "./packages/prawf",
+      "category": "productivity",
+      "tags": ["claude-code", "plugin"]
     }
   ]
 }
