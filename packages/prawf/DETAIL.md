@@ -17,11 +17,11 @@
 
 ### Skills
 
-| Command                   | Purpose                                             | Primary output                                 |
-| ------------------------- | --------------------------------------------------- | ---------------------------------------------- |
-| `/prawf:review`           | 9인 team 평가 (P0 → R1 → R2 → R3 → ADJ)             | `review-report.md` + `qa-sheet.md`             |
-| `/prawf:simulate-defense` | 심사위원 질문 → 저자 답변 → 코칭                    | 모의 Q&A 세션 + 코칭 노트                      |
-| `/prawf:rebuttal`         | 외부 리뷰 코멘트 → 점대점 응답                      | `rebuttal-letter.md` + `revision-checklist.md` |
+| Command                   | Purpose                                 | Primary output                                 |
+| ------------------------- | --------------------------------------- | ---------------------------------------------- |
+| `/prawf:review`           | 9인 team 평가 (P0 → R1 → R2 → R3 → ADJ) | `review-report.md` + `qa-sheet.md`             |
+| `/prawf:simulate-defense` | 심사위원 질문 → 저자 답변 → 코칭        | 모의 Q&A 세션 + 코칭 노트                      |
+| `/prawf:rebuttal`         | 외부 리뷰 코멘트 → 점대점 응답          | `rebuttal-letter.md` + `revision-checklist.md` |
 
 `/prawf:review` 옵션: `--solo`(단일 패스 `adjudicator`), `--profile <name>`(분야
 프로파일 override), `--scope <abstract|full>`.
