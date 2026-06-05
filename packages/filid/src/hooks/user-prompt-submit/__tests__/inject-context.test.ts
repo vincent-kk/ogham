@@ -118,11 +118,28 @@ describe('buildMinimalContext', () => {
   it('falls back to en and emits Not initialized when config is missing', () => {
     const projectRoot = mkdtempSync(join(tmpdir(), 'filid-inject-context-'));
     tempDirs.push(projectRoot);
+    // Bound the walk-up at projectRoot (a git root with no config) so it does
+    // not escape into an unrelated ancestor config.
+    mkdirSync(join(projectRoot, '.git'), { recursive: true });
 
     const context = buildMinimalContext(projectRoot);
 
     expect(context).toContain('[filid] ⚠ Not initialized');
     expect(context).toContain('[filid:lang] en');
     expect(context).not.toContain('Disabled rules');
+  });
+
+  it('resolves the project root from a subdirectory (walk-up)', () => {
+    const projectRoot = makeProject({ deployFca: true });
+    const sub = join(projectRoot, 'packages', 'pkg');
+    mkdirSync(sub, { recursive: true });
+
+    const context = buildMinimalContext(sub);
+
+    expect(context).toContain(
+      `[filid] FCA-AI active. Rules: .claude/rules/${RULE_FILE}`,
+    );
+    expect(context).toContain('[filid:lang]');
+    expect(context).not.toContain('Not initialized');
   });
 });

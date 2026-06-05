@@ -1,21 +1,26 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { findConfigRoot } from '../../utils/find-config-root.js';
 import { readHookConfig } from '../../utils/read-hook-config.js';
 
 export function buildMinimalContext(cwd: string): string {
   const lines: string[] = [];
-  const config = readHookConfig(cwd);
+  // Resolve the project root once (walking up from a subdirectory if needed),
+  // then read both the config and the rule-doc pointer from that same root so
+  // the pointer and the language tag stay consistent regardless of cwd depth.
+  const root = findConfigRoot(cwd) ?? cwd;
+  const config = readHookConfig(root);
 
   if (!config)
     lines.push(
       '[filid] ⚠ Not initialized. Run /filid:setup to create .filid/config.json.',
     );
-  else if (existsSync(join(cwd, '.claude', 'rules', 'filid_fca-policy.md')))
+  else if (existsSync(join(root, '.claude', 'rules', 'filid_fca-policy.md')))
     lines.push(
       '[filid] FCA-AI active. Rules: .claude/rules/filid_fca-policy.md',
     );
-  else if (existsSync(join(cwd, '.claude', 'rules', 'fca.md')))
+  else if (existsSync(join(root, '.claude', 'rules', 'fca.md')))
     lines.push('[filid] FCA-AI active. Rules: .claude/rules/fca.md');
   else
     lines.push(

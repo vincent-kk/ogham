@@ -10,10 +10,10 @@
 
 ## Conventions
 
-- `isFcaProject(cwd)`: `.filid/` 디렉토리 또는 루트 `INTENT.md` 존재 시 true
+- `isFcaProject(cwd)`: `.filid/` 또는 `INTENT.md` 를 git 루트(`.git`)까지 walk-up 검색 — 하위 디렉토리 cwd에서도 프로젝트 감지, 첫 마커에서 반환
 - `fileBasename(path)`: POSIX `/`와 Windows `\` 양쪽 separator 지원 — `lastIndexOf`의 최댓값 사용
 - 파일 판정은 `fileBasename(path) === 'INTENT.md'` / `'DETAIL.md'` 정확 일치 (대소문자 구분)
-- 모든 함수는 `existsSync` 한 번 호출 또는 순수 문자열 연산 — 서브 I/O 금지
+- `isFcaProject` 는 git 루트까지 bounded walk-up(level당 `existsSync`); 그 외 함수는 `existsSync` 한 번 또는 순수 문자열 연산
 - 함수 네이밍: `is*` 접두사로 boolean predicate 명시
 
 ## Boundaries
@@ -25,7 +25,7 @@
 
 ### Ask first
 
-- FCA 프로젝트 감지에 `.git`, `package.json` 등 다른 마커 추가
+- FCA 감지 마커 추가/변경 (`.git` 는 walk-up 경계로만 사용; `package.json` 등 신규 마커는 협의)
 - 대소문자 비교를 `.toLowerCase()` 기반으로 완화
 
 ### Never do
@@ -36,4 +36,4 @@
 ## Dependencies
 
 - `node:fs` (`existsSync`)
-- `node:path` (`join`)
+- `node:path` (`join`, `dirname`)

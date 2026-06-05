@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('node:fs', async (importOriginal) => {
@@ -37,6 +39,23 @@ describe('shared hooks utilities', () => {
     it('should return false when no FCA indicators exist', () => {
       (existsSync as ReturnType<typeof vi.fn>).mockReturnValue(false);
       expect(isFcaProject('/workspace/project')).toBe(false);
+    });
+
+    it('should walk up to an ancestor marker from a subdirectory', () => {
+      const marker = join('/workspace/project', '.filid');
+      (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
+        (p: unknown) => p === marker,
+      );
+      expect(isFcaProject('/workspace/project/packages/pkg')).toBe(true);
+    });
+
+    it('should stop at the git root and ignore a marker above it', () => {
+      const outerMarker = join('/outer', '.filid');
+      const gitRoot = join('/outer/repo', '.git');
+      (existsSync as ReturnType<typeof vi.fn>).mockImplementation(
+        (p: unknown) => p === outerMarker || p === gitRoot,
+      );
+      expect(isFcaProject('/outer/repo/sub')).toBe(false);
     });
   });
 
