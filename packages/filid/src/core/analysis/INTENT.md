@@ -8,15 +8,15 @@
 
 | 모듈 | 역할 |
 |------|------|
-| `project-analyzer` | `scan → validate → drift → healthScore → render` 파이프라인. text/json/markdown 리포트 생성 |
-| `dependency-graph` | `DependencyEdge[]`에서 DAG 구축, Kahn 위상 정렬, DFS 사이클 감지, 직접 의존 조회 |
-| `lca-calculator` | 두 노드의 Lowest Common Ancestor 계산. 공유 모듈 배치 위치 제안 (`getModulePlacement`) |
+| `projectAnalyzer` | `scan → validate → drift → healthScore → render` 파이프라인. text/json/markdown 리포트 생성 |
+| `dependencyGraph` | `DependencyEdge[]`에서 DAG 구축, Kahn 위상 정렬, DFS 사이클 감지, 직접 의존 조회 |
+| `lcaCalculator` | 두 노드의 Lowest Common Ancestor 계산. 공유 모듈 배치 위치 제안 (`getModulePlacement`) |
 
 ## Conventions
 
 - 분석 결과는 `types/report.ts`의 타입 객체로만 반환 (string 직접 조립 금지)
-- 건강도 상수는 `constants/health-score.ts`에서만 import
-- `project-analyzer`는 순수 오케스트레이터 — 알고리즘 구현은 하위 모듈에 위임
+- 건강도 상수는 `constants/healthScore.ts`에서만 import
+- `projectAnalyzer`는 순수 오케스트레이터 — 알고리즘 구현은 하위 모듈에 위임
 - 사이클 감지 실패 시 null/빈 배열 반환, 예외로 던지지 않음
 
 ## Boundaries
@@ -38,4 +38,4 @@
 
 ## Dependencies
 
-- `../tree/` (스캔), `../rules/` (검증·드리프트), `../module/` (모듈 분석), `../../types/`, `../../constants/health-score.js`
+- `../tree/` (스캔), `../rules/` (검증·드리프트), `../module/` (모듈 분석), `../../types/`, `../../constants/healthScore.js`

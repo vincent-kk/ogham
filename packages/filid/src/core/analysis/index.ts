@@ -1,5 +1,5 @@
 // barrel -- re-exports all public APIs
 
-export * from './dependency-graph/dependency-graph.js';
-export * from './lca-calculator/lca-calculator.js';
-export * from './project-analyzer/project-analyzer.js';
+export * from './dependencyGraph/dependencyGraph.js';
+export * from './lcaCalculator/lcaCalculator.js';
+export * from './projectAnalyzer/projectAnalyzer.js';

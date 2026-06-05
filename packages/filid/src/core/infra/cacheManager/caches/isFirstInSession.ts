@@ -1,0 +1,22 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { createLogger } from '../../../../lib/logger.js';
+
+import { getCacheDir } from './getCacheDir.js';
+import { sessionIdHash } from './sessionIdHash.js';
+
+const log = createLogger('cache');
+
+export function isFirstInSession(sessionId: string, cwd: string): boolean {
+  const marker = join(
+    getCacheDir(cwd),
+    `session-context-${sessionIdHash(sessionId)}`,
+  );
+  try {
+    return !existsSync(marker);
+  } catch (e) {
+    log.debug('isFirstInSession failed:', e);
+    return true;
+  }
+}

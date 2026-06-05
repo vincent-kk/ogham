@@ -1,6 +1,6 @@
 // barrel -- re-exports all public APIs
 
-export * from './cache-manager/cache-manager.js';
-export * from './change-queue/change-queue.js';
-export * from './config-loader/config-loader.js';
-export * from './project-hash/project-hash.js';
+export * from './cacheManager/cacheManager.js';
+export * from './changeQueue/changeQueue.js';
+export * from './configLoader/configLoader.js';
+export * from './projectHash/projectHash.js';

@@ -9,19 +9,19 @@ export {
   getFractalsUnderOrgans,
   scanProject,
   shouldExclude,
-} from './tree/fractal-tree/fractal-tree.js';
-export type { NodeEntry } from './tree/fractal-tree/fractal-tree.js';
+} from './tree/fractalTree/fractalTree.js';
+export type { NodeEntry } from './tree/fractalTree/fractalTree.js';
 export {
   classifyNode,
   isInfraOrgDirectoryByPattern,
   KNOWN_ORGAN_DIR_NAMES,
-} from './tree/organ-classifier/organ-classifier.js';
-export type { ClassifyInput } from './tree/organ-classifier/organ-classifier.js';
+} from './tree/organClassifier/organClassifier.js';
+export type { ClassifyInput } from './tree/organClassifier/organClassifier.js';
 export {
   buildChain,
   findBoundary,
-} from './tree/boundary-detector/boundary-detector.js';
-export type { ChainResult } from './tree/boundary-detector/boundary-detector.js';
+} from './tree/boundaryDetector/boundaryDetector.js';
+export type { ChainResult } from './tree/boundaryDetector/boundaryDetector.js';
 
 // rules
 export {
@@ -30,55 +30,55 @@ export {
   evaluateRules,
   getActiveRules,
   loadBuiltinRules,
-} from './rules/rule-engine/rule-engine.js';
+} from './rules/ruleEngine/ruleEngine.js';
 export {
   validateDependencies,
   validateNode,
   validateStructure,
-} from './rules/fractal-validator/fractal-validator.js';
+} from './rules/fractalValidator/fractalValidator.js';
 export {
   countLines,
   detectAppendOnly,
   validateDetailMd,
   validateIntentMd,
-} from './rules/document-validator/document-validator.js';
+} from './rules/documentValidator/documentValidator.js';
 export {
   SEVERITY_ORDER,
   calculateSeverity,
   compareCurrent,
   detectDrift,
   generateSyncPlan,
-} from './rules/drift-detector/drift-detector.js';
+} from './rules/driftDetector/driftDetector.js';
 
 // analysis
 export {
   analyzeProject,
   calculateHealthScore,
-} from './analysis/project-analyzer/project-analyzer.js';
-export { generateReport } from './analysis/project-analyzer/renderers/index.js';
+} from './analysis/projectAnalyzer/projectAnalyzer.js';
+export { generateReport } from './analysis/projectAnalyzer/renderers/index.js';
 export {
   buildDAG,
   detectCycles,
   getDirectDependencies,
   topologicalSort,
-} from './analysis/dependency-graph/dependency-graph.js';
+} from './analysis/dependencyGraph/dependencyGraph.js';
 export {
   findLCA,
   getAncestorPaths,
   getModulePlacement,
-} from './analysis/lca-calculator/lca-calculator.js';
+} from './analysis/lcaCalculator/lcaCalculator.js';
 
 // module
 export {
   analyzeIndex,
   extractModuleExports,
-} from './module/index-analyzer/index-analyzer.js';
+} from './module/indexAnalyzer/indexAnalyzer.js';
 export {
   analyzeModule,
   extractImports,
   extractPublicApi,
   findEntryPoint,
-} from './module/module-main-analyzer/module-main-analyzer.js';
+} from './module/moduleMainAnalyzer/moduleMainAnalyzer.js';
 
 // infra
 export {
@@ -100,11 +100,11 @@ export {
   writeBoundary,
   writeFractalMap,
   writePromptContext,
-} from './infra/cache-manager/cache-manager.js';
-export type { FractalMap } from './infra/cache-manager/cache-manager.js';
-export { computeProjectHash } from './infra/project-hash/project-hash.js';
-export { ChangeQueue } from './infra/change-queue/change-queue.js';
-export type { ChangeRecord } from './infra/change-queue/change-queue.js';
+} from './infra/cacheManager/cacheManager.js';
+export type { FractalMap } from './infra/cacheManager/cacheManager.js';
+export { computeProjectHash } from './infra/projectHash/projectHash.js';
+export { ChangeQueue } from './infra/changeQueue/changeQueue.js';
+export type { ChangeRecord } from './infra/changeQueue/changeQueue.js';
 export {
   createDefaultConfig,
   getRuleDocsStatus,
@@ -115,7 +115,7 @@ export {
   resolveLanguage,
   syncRuleDocs,
   writeConfig,
-} from './infra/config-loader/config-loader.js';
+} from './infra/configLoader/configLoader.js';
 export type {
   FilidConfig,
   InitResult,
@@ -125,29 +125,29 @@ export type {
   RuleDocsManifest,
   RuleDocsStatus,
   SyncRuleDocsOptions,
-} from './infra/config-loader/config-loader.js';
+} from './infra/configLoader/configLoader.js';
 
 // coverage
 export {
   findSubtreeUsages,
   getModuleName,
-} from './coverage-verify/usage-tracker/usage-tracker.js';
+} from './coverageVerify/usageTracker/usageTracker.js';
 export {
   checkTestCoverage,
   generateCoverageWarnings,
-} from './coverage-verify/test-coverage-checker/test-coverage-checker.js';
-export { resolveImportPath } from './coverage-verify/import-resolver/import-resolver.js';
+} from './coverageVerify/testCoverageChecker/testCoverageChecker.js';
+export { resolveImportPath } from './coverageVerify/importResolver/importResolver.js';
 
 // utils
 export {
   ALLOWED_FRACTAL_ROOT_FILES,
   FRAMEWORK_PACKAGES,
   FRAMEWORK_RESERVED_FILES,
-} from '../constants/allowed-peer-files.js';
+} from '../constants/allowedPeerFiles.js';
 export {
   RULE_ERROR_PROBABILITY,
   generateHumanSummary,
   parseFixRequests,
   parseStructureCheckFrontmatter,
-} from './pr-summary/index.js';
-export type { GenerateSummaryInput } from './pr-summary/index.js';
+} from './prSummary/index.js';
+export type { GenerateSummaryInput } from './prSummary/index.js';

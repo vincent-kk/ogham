@@ -1,0 +1,197 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  calculateSeverity,
+  compareCurrent,
+  detectDrift,
+} from '../../../core/rules/driftDetector/driftDetector.js';
+import { buildFractalTree } from '../../../core/tree/fractalTree/fractalTree.js';
+import type { NodeEntry } from '../../../core/tree/fractalTree/fractalTree.js';
+import type { CategoryType } from '../../../types/fractal.js';
+import type {
+  RuleEvaluationResult,
+  RuleViolation,
+} from '../../../types/rules.js';
+
+const entry = (
+  path: string,
+  type: CategoryType,
+  hasIntentMd = false,
+  hasDetailMd = false,
+): NodeEntry => ({
+  path,
+  name: path.split('/').pop()!,
+  type,
+  hasIntentMd,
+  hasDetailMd,
+});
+
+const makeViolation = (
+  ruleId: string,
+  severity: 'error' | 'warning' | 'info',
+  path = '/app',
+): RuleViolation => ({
+  ruleId,
+  severity,
+  message: `Violation of ${ruleId}`,
+  path,
+  suggestion: `Fix ${ruleId}`,
+});
+
+describe('drift-detector', () => {
+  describe('calculateSeverity', () => {
+    it('should map circular-dependency to critical', () => {
+      expect(
+        calculateSeverity(makeViolation('circular-dependency', 'error')),
+      ).toBe('critical');
+    });
+
+    it('should map pure-function-isolation to critical', () => {
+      expect(
+        calculateSeverity(makeViolation('pure-function-isolation', 'error')),
+      ).toBe('critical');
+    });
+
+    it('should map max-depth to high', () => {
+      expect(calculateSeverity(makeViolation('max-depth', 'error'))).toBe(
+        'high',
+      );
+    });
+
+    it('should map organ-no-intentmd to high', () => {
+      expect(
+        calculateSeverity(makeViolation('organ-no-intentmd', 'error')),
+      ).toBe('high');
+    });
+
+    it('should map index-barrel-pattern to medium', () => {
+      expect(
+        calculateSeverity(makeViolation('index-barrel-pattern', 'warning')),
+      ).toBe('medium');
+    });
+
+    it('should map module-entry-point to medium', () => {
+      expect(
+        calculateSeverity(makeViolation('module-entry-point', 'warning')),
+      ).toBe('medium');
+    });
+
+    it('should map naming-convention to low', () => {
+      expect(
+        calculateSeverity(makeViolation('naming-convention', 'warning')),
+      ).toBe('low');
+    });
+
+    it('should fallback on severity for unknown ruleId', () => {
+      expect(calculateSeverity(makeViolation('unknown-rule', 'error'))).toBe(
+        'high',
+      );
+      expect(calculateSeverity(makeViolation('unknown-rule', 'warning'))).toBe(
+        'medium',
+      );
+      expect(calculateSeverity(makeViolation('unknown-rule', 'info'))).toBe(
+        'low',
+      );
+    });
+  });
+
+  describe('detectDrift', () => {
+    it('should return empty DriftResult for no violations', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const result = detectDrift(tree, []);
+
+      expect(result.items).toHaveLength(0);
+      expect(result.totalDrifts).toBe(0);
+      expect(result.bySeverity.critical).toBe(0);
+      expect(result.bySeverity.high).toBe(0);
+      expect(result.bySeverity.medium).toBe(0);
+      expect(result.bySeverity.low).toBe(0);
+    });
+
+    it('should convert violations to DriftItems', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const violations: RuleViolation[] = [
+        makeViolation('organ-no-intentmd', 'error', '/app/utils'),
+        makeViolation('naming-convention', 'warning', '/app/MyComponent'),
+      ];
+
+      const result = detectDrift(tree, violations);
+
+      expect(result.items).toHaveLength(2);
+      expect(result.totalDrifts).toBe(2);
+    });
+
+    it('should sort items by severity (critical first)', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const violations: RuleViolation[] = [
+        makeViolation('naming-convention', 'warning', '/app/A'),
+        makeViolation('circular-dependency', 'error', '/app/B'),
+        makeViolation('organ-no-intentmd', 'error', '/app/C'),
+      ];
+
+      const result = detectDrift(tree, violations);
+
+      expect(result.items[0].severity).toBe('critical');
+      expect(result.items[1].severity).toBe('high');
+      expect(result.items[2].severity).toBe('low');
+    });
+
+    it('should count bySeverity correctly', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const violations: RuleViolation[] = [
+        makeViolation('circular-dependency', 'error', '/app/A'),
+        makeViolation('pure-function-isolation', 'error', '/app/B'),
+        makeViolation('organ-no-intentmd', 'error', '/app/C'),
+        makeViolation('module-entry-point', 'warning', '/app/D'),
+      ];
+
+      const result = detectDrift(tree, violations);
+
+      expect(result.bySeverity.critical).toBe(2);
+      expect(result.bySeverity.high).toBe(1);
+      expect(result.bySeverity.medium).toBe(1);
+      expect(result.bySeverity.low).toBe(0);
+    });
+
+    it('should filter to criticalOnly when option is set', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const violations: RuleViolation[] = [
+        makeViolation('circular-dependency', 'error', '/app/A'),
+        makeViolation('naming-convention', 'warning', '/app/B'),
+      ];
+
+      const result = detectDrift(tree, violations, { criticalOnly: true });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].severity).toBe('critical');
+    });
+
+    it('should include a scanTimestamp', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const result = detectDrift(tree, []);
+
+      expect(result.scanTimestamp).toBeTruthy();
+      expect(typeof result.scanTimestamp).toBe('string');
+    });
+  });
+
+  describe('compareCurrent', () => {
+    it('should convert RuleEvaluationResult to DriftItems', () => {
+      const tree = buildFractalTree([entry('/app', 'fractal', true)]);
+      const evalResult: RuleEvaluationResult = {
+        violations: [makeViolation('organ-no-intentmd', 'error', '/app/utils')],
+        passed: 5,
+        failed: 1,
+        skipped: 0,
+        duration: 10,
+      };
+
+      const items = compareCurrent(tree, evalResult);
+
+      expect(items).toHaveLength(1);
+      expect(items[0].rule).toBe('organ-no-intentmd');
+      expect(items[0].severity).toBe('high');
+      expect(items[0].suggestedAction).toBe('move');
+    });
+  });
+});

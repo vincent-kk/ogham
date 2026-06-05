@@ -8,10 +8,10 @@
 
 | 모듈 | 역할 |
 |------|------|
-| `cache-manager` | 세션/프롬프트 캐시, 프랙탈 맵 관리 |
-| `project-hash` | 프로젝트 구조 해시 계산 |
-| `change-queue` | 변경 기록 큐 |
-| `config-loader` | `.filid/config.json` 로딩 및 프로젝트 초기화 |
+| `cacheManager` | 세션/프롬프트 캐시, 프랙탈 맵 관리 |
+| `projectHash` | 프로젝트 구조 해시 계산 |
+| `changeQueue` | 변경 기록 큐 |
+| `configLoader` | `.filid/config.json` 로딩 및 프로젝트 초기화 |
 
 ## Boundaries
 

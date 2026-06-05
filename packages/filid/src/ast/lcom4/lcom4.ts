@@ -15,7 +15,7 @@ import type { ClassInfo, MethodInfo } from '../../types/ast.js';
 import type { LCOM4Result } from '../../types/metrics.js';
 import { parseSource, walk } from '../parser/parser.js';
 
-import { findThisAccesses } from './utils/find-this-accesses.js';
+import { findThisAccesses } from './utils/findThisAccesses.js';
 
 export async function extractClassInfo(
   source: string,

@@ -26,11 +26,11 @@ import {
   markSessionPruneRun,
   pruneOldSessions,
   pruneStaleCacheDirs,
-} from '../../core/infra/cache-manager/cache-manager.js';
+} from '../../core/infra/cacheManager/cacheManager.js';
 import { createLogger, setLogDir } from '../../lib/logger.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import { isFcaProject } from '../shared/shared.js';
-import { validateCwd } from '../utils/validate-cwd.js';
+import { validateCwd } from '../utils/validateCwd.js';
 
 import { hasIntentMdInTree } from './utils/hasIntentMdInTree.js';
 

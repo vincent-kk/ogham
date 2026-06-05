@@ -62,7 +62,7 @@ export interface RuleEvaluationResult {
   duration: number;
 }
 
-export type { BuiltinRuleId } from '../constants/builtin-rule-ids.js';
+export type { BuiltinRuleId } from '../constants/builtinRuleIds.js';
 
 /** 프로젝트별 규칙 오버라이드. `.filid/config.json`의 rules 섹션에서 사용. */
 export interface RuleOverride {

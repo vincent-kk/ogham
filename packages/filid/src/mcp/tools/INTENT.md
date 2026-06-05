@@ -6,15 +6,15 @@
 
 ## Structure
 
-- 18개 sub-fractal: `ast-analyze`, `ast-grep-search`, `ast-grep-replace`, `cache-manage`, `config-patch-validate`, `coverage-verify`, `debt-manage`, `doc-compress`, `drift-detect`, `fractal-navigate`, `fractal-scan`, `lca-resolve`, `project-init`, `review-manage`, `rule-docs-sync`, `rule-query`, `structure-validate`, `test-metrics`
-- `utils/` organ: 도구 간 공유되는 파일 시스템 가드(`fs-guard`) 등
+- 18개 sub-fractal: `astAnalyze`, `astGrepSearch`, `astGrepReplace`, `cacheManage`, `configPatchValidate`, `coverageVerify`, `debtManage`, `docCompress`, `driftDetect`, `fractalNavigate`, `fractalScan`, `lcaResolve`, `projectInit`, `reviewManage`, `ruleDocsSync`, `ruleQuery`, `structureValidate`, `testMetrics`
+- `utils/` organ: 도구 간 공유되는 파일 시스템 가드(`fsGuard`) 등
 - 각 sub-fractal은 `handle*` 함수 하나를 주요 runtime export로 둔다
 
 ## Conventions
 
 - 도구 응답: `toolResult()` / `toolError()` 래퍼 사용
 - Zod 스키마로 모든 입력 검증
-- I/O 경계는 `utils/fs-guard.ts`에서 공통화
+- I/O 경계는 `utils/fsGuard.ts`에서 공통화
 
 ## Boundaries
 

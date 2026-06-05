@@ -115,35 +115,35 @@ export type {
 } from './core/index.js';
 
 // Metrics
-export { countTestCases } from './metrics/test-counter/test-counter.js';
-export { check312Rule } from './metrics/three-plus-twelve/three-plus-twelve.js';
-export { decide } from './metrics/decision-tree/decision-tree.js';
-export { checkPromotionEligibility } from './metrics/promotion-tracker/promotion-tracker.js';
+export { countTestCases } from './metrics/testCounter/testCounter.js';
+export { check312Rule } from './metrics/threePlusTwelve/threePlusTwelve.js';
+export { decide } from './metrics/decisionTree/decisionTree.js';
+export { checkPromotionEligibility } from './metrics/promotionTracker/promotionTracker.js';
 
 // Compression
 export {
   compactReversible,
   restoreFromCompacted,
-} from './compress/reversible-compactor/reversible-compactor.js';
-export { summarizeLossy } from './compress/lossy-summarizer/lossy-summarizer.js';
+} from './compress/reversibleCompactor/reversibleCompactor.js';
+export { summarizeLossy } from './compress/lossySummarizer/lossySummarizer.js';
 
 // AST analysis
 export { parseSource, parseFile } from './ast/parser/parser.js';
-export { extractDependencies } from './ast/dependency-extractor/dependency-extractor.js';
+export { extractDependencies } from './ast/dependencyExtractor/dependencyExtractor.js';
 export { calculateLCOM4, extractClassInfo } from './ast/lcom4/lcom4.js';
-export { calculateCC } from './ast/cyclomatic-complexity/cyclomatic-complexity.js';
-export { computeTreeDiff } from './ast/tree-diff/tree-diff.js';
+export { calculateCC } from './ast/cyclomaticComplexity/cyclomaticComplexity.js';
+export { computeTreeDiff } from './ast/treeDiff/treeDiff.js';
 
 // Hooks
-export { handlePreToolUse } from './hooks/pre-tool-use/pre-tool-use.js';
+export { handlePreToolUse } from './hooks/preToolUse/preToolUse.js';
 
-export { enforceAgentRole } from './hooks/agent-enforcer/agent-enforcer.js';
-export { handleUserPromptSubmit } from './hooks/user-prompt-submit/user-prompt-submit.js';
+export { enforceAgentRole } from './hooks/agentEnforcer/agentEnforcer.js';
+export { handleUserPromptSubmit } from './hooks/userPromptSubmit/userPromptSubmit.js';
 export { processSetup } from './hooks/setup/setup.js';
 
 // AST Grep tools (pattern matching via @ast-grep/napi)
-export { handleAstGrepSearch } from './mcp/tools/ast-grep-search/ast-grep-search.js';
-export { handleAstGrepReplace } from './mcp/tools/ast-grep-replace/ast-grep-replace.js';
+export { handleAstGrepSearch } from './mcp/tools/astGrepSearch/astGrepSearch.js';
+export { handleAstGrepReplace } from './mcp/tools/astGrepReplace/astGrepReplace.js';
 export {
   getSgModule,
   getSgLoadError,
@@ -152,23 +152,23 @@ export {
   getFilesForLanguage,
   formatMatch,
   toLangEnum,
-} from './ast/ast-grep-shared/ast-grep-shared.js';
+} from './ast/astGrepShared/astGrepShared.js';
 
 // MCP tool handlers
-export { handleAstAnalyze } from './mcp/tools/ast-analyze/ast-analyze.js';
-export { handleConfigPatchValidate } from './mcp/tools/config-patch-validate/config-patch-validate.js';
-export { handleFractalNavigate } from './mcp/tools/fractal-navigate/fractal-navigate.js';
-export { handleDocCompress } from './mcp/tools/doc-compress/doc-compress.js';
-export { handleTestMetrics } from './mcp/tools/test-metrics/test-metrics.js';
-export { handleFractalScan } from './mcp/tools/fractal-scan/fractal-scan.js';
-export { handleDriftDetect } from './mcp/tools/drift-detect/drift-detect.js';
-export { handleLcaResolve } from './mcp/tools/lca-resolve/lca-resolve.js';
-export { handleRuleQuery } from './mcp/tools/rule-query/rule-query.js';
-export { handleStructureValidate } from './mcp/tools/structure-validate/structure-validate.js';
-export { handleReviewManage } from './mcp/tools/review-manage/review-manage.js';
-export { handleDebtManage } from './mcp/tools/debt-manage/debt-manage.js';
-export { handleCacheManage } from './mcp/tools/cache-manage/cache-manage.js';
-export { handleCoverageVerify } from './mcp/tools/coverage-verify/coverage-verify.js';
+export { handleAstAnalyze } from './mcp/tools/astAnalyze/astAnalyze.js';
+export { handleConfigPatchValidate } from './mcp/tools/configPatchValidate/configPatchValidate.js';
+export { handleFractalNavigate } from './mcp/tools/fractalNavigate/fractalNavigate.js';
+export { handleDocCompress } from './mcp/tools/docCompress/docCompress.js';
+export { handleTestMetrics } from './mcp/tools/testMetrics/testMetrics.js';
+export { handleFractalScan } from './mcp/tools/fractalScan/fractalScan.js';
+export { handleDriftDetect } from './mcp/tools/driftDetect/driftDetect.js';
+export { handleLcaResolve } from './mcp/tools/lcaResolve/lcaResolve.js';
+export { handleRuleQuery } from './mcp/tools/ruleQuery/ruleQuery.js';
+export { handleStructureValidate } from './mcp/tools/structureValidate/structureValidate.js';
+export { handleReviewManage } from './mcp/tools/reviewManage/reviewManage.js';
+export { handleDebtManage } from './mcp/tools/debtManage/debtManage.js';
+export { handleCacheManage } from './mcp/tools/cacheManage/cacheManage.js';
+export { handleCoverageVerify } from './mcp/tools/coverageVerify/coverageVerify.js';
 
 // Note: format/* and utils/* helpers under review-manage are internal organs
 // (Stage 3 / v0.2.0 — see .omc/plans/filid-structural-fix-round1.md T7). They
@@ -178,17 +178,14 @@ export { handleCoverageVerify } from './mcp/tools/coverage-verify/coverage-verif
 export { createServer, startServer } from './mcp/index.js';
 
 // Constants (runtime values moved from types/ organ)
-export { BUILTIN_RULE_IDS } from './constants/builtin-rule-ids.js';
-export { DEFAULT_SCAN_OPTIONS } from './constants/scan-defaults.js';
-export {
-  DEBT_WEIGHT_CAP,
-  DEBT_BASE_WEIGHT,
-} from './constants/debt-defaults.js';
+export { BUILTIN_RULE_IDS } from './constants/builtinRuleIds.js';
+export { DEFAULT_SCAN_OPTIONS } from './constants/scanDefaults.js';
+export { DEBT_WEIGHT_CAP, DEBT_BASE_WEIGHT } from './constants/debtDefaults.js';
 export {
   FIX_REQUEST_TYPES,
   DEBT_ACTIONS,
   PIPELINE_STAGES,
-} from './constants/handoff-tokens.js';
+} from './constants/handoffTokens.js';
 
 // Lib utilities
-export { normalizeFixRequestType } from './lib/normalize-fix-request.js';
+export { normalizeFixRequestType } from './lib/normalizeFixRequest.js';

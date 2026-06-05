@@ -20,8 +20,8 @@
 
 ### Always do
 
-- 파싱/walking 외 분석 로직은 하위 모듈(`lcom4`, `cyclomatic-complexity` 등)로 위임
-- 언어 매핑 변경 시 `constants/ast-languages.ts`와 동기화
+- 파싱/walking 외 분석 로직은 하위 모듈(`lcom4`, `cyclomaticComplexity` 등)로 위임
+- 언어 매핑 변경 시 `constants/astLanguages.ts`와 동기화
 
 ### Ask first
 
@@ -30,12 +30,12 @@
 
 ### Never do
 
-- 파서 인스턴스 전역 캐싱 (lazy loader는 `ast-grep-shared`에만 존재)
+- 파서 인스턴스 전역 캐싱 (lazy loader는 `astGrepShared`에만 존재)
 - 분석 로직을 `parser.ts` 내부에 인라인
 - `core/`, `mcp/`, `hooks/` 역방향 import
 
 ## Dependencies
 
 - `@ast-grep/napi` (외부 peer)
-- `../ast-grep-shared/` (`getSgModule`, `getSgLoadError`, `EXT_TO_LANG`, `toLangEnum`)
+- `../astGrepShared/` (`getSgModule`, `getSgLoadError`, `EXT_TO_LANG`, `toLangEnum`)
 - `node:fs` (`readFileSync`)

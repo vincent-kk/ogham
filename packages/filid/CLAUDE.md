@@ -17,7 +17,7 @@ yarn version:sync       # package.json → src/version.ts
 
 ## Build System
 
-- `scripts/build-mcp-server.mjs`: `src/mcp/server-entry/server-entry.ts` → `bridge/mcp-server.cjs` (CJS)
+- `scripts/build-mcp-server.mjs`: `src/mcp/serverEntry/serverEntry.ts` → `bridge/mcp-server.cjs` (CJS)
 - `scripts/build-hooks.mjs`: `src/hooks/<name>/<name>.entry.ts` → `bridge/<name>.mjs` (ESM, 각 훅 개별 번들)
 - `scripts/sync-rule-hashes.mjs`: built-in rule 의 hash 를 rule registry 와 동기화
 - `dist/` 는 라이브러리 export 용, `bridge/` 는 플러그인 런타임용, `libs/` 는 cross-platform Node 러너 (`find-node.sh`)

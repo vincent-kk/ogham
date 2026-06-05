@@ -1,4 +1,4 @@
 // barrel -- re-exports all public APIs
 
-export * from './index-analyzer/index-analyzer.js';
-export * from './module-main-analyzer/module-main-analyzer.js';
+export * from './indexAnalyzer/indexAnalyzer.js';
+export * from './moduleMainAnalyzer/moduleMainAnalyzer.js';

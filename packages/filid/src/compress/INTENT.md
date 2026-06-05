@@ -8,8 +8,8 @@ AI 에이전트 컨텍스트 윈도우를 절약하기 위한 두 가지 상호 
 
 | 모듈 | 전략 | 복원 |
 |------|------|------|
-| `reversible-compactor` | `[REF]`/`[EXPORTS]`/`[LINES]` 3줄 참조. 원본 파일은 디스크에 보존 | 가능 (경로 재읽기) |
-| `lossy-summarizer` | 도구 호출 이벤트 배열 → 집계 요약 1건 | 불가 |
+| `reversibleCompactor` | `[REF]`/`[EXPORTS]`/`[LINES]` 3줄 참조. 원본 파일은 디스크에 보존 | 가능 (경로 재읽기) |
+| `lossySummarizer` | 도구 호출 이벤트 배열 → 집계 요약 1건 | 불가 |
 
 ## Conventions
 

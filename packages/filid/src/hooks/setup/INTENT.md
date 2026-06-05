@@ -39,7 +39,7 @@
 
 ## Dependencies
 
-- `../../core/infra/cache-manager/` (`getCacheDir`, `isPruneDue`, `isSessionPruneDue`, `markPruneRun`, `markSessionPruneRun`, `pruneOldSessions`, `pruneStaleCacheDirs`)
+- `../../core/infra/cacheManager/` (`getCacheDir`, `isPruneDue`, `isSessionPruneDue`, `markPruneRun`, `markSessionPruneRun`, `pruneOldSessions`, `pruneStaleCacheDirs`)
 - `../../lib/logger.js` (`createLogger`, `setLogDir`)
-- `../../constants/scan-defaults.js` (`SCAN_SKIP_DIRS`)
+- `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`)
 - `../shared/`, `../../types/hooks.js`

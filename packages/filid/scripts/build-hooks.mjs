@@ -40,12 +40,14 @@ const SESSION_START_HOOK_BYTES = 40 * 1024;
 const HEAVY_HOOK_BYTES = 17 * 1024;
 const LIGHT_HOOK_BYTES = 10 * 1024;
 
+// `name` is the bridge output basename (kebab — referenced by hooks.json and
+// kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
-  { name: 'pre-tool-use', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'agent-enforcer', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'user-prompt-submit', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'session-cleanup', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
+  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'agent-enforcer', entry: 'agentEnforcer', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'user-prompt-submit', entry: 'userPromptSubmit', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'session-cleanup', entry: 'sessionCleanup', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
@@ -58,9 +60,9 @@ const ESM_CJS_REQUIRE_BANNER =
   'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
-  hookEntries.map(({ name }) =>
+  hookEntries.map(({ name, entry }) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
+      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: 'node',
       target: 'node20',

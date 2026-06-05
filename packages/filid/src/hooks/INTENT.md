@@ -9,21 +9,21 @@ Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초
 | 모듈 | 이벤트 | 역할 |
 |------|--------|------|
 | `setup` | SessionStart | 캐시 초기화 + INTENT.md 자동 감지 + pruning |
-| `user-prompt-submit` | UserPromptSubmit | 턴당 fmap reset + 세션 첫 프롬프트 FCA 포인터 주입 |
-| `intent-injector` | PreToolUse (내부) | INTENT.md 체인·map 주입 |
-| `pre-tool-validator` | PreToolUse (내부) | INTENT.md 50줄·DETAIL.md append-only 블록 |
-| `structure-guard` | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고 |
-| `pre-tool-use` | PreToolUse | 위 3개 서브모듈 오케스트레이션 |
-| `agent-enforcer` | SubagentStart | 에이전트 역할·언어 태그 주입 |
-| `change-tracker` | PostToolUse | 변경 추적 (현재 비활성) |
-| `session-cleanup` | SessionEnd | 세션 캐시 파일 정리 |
+| `userPromptSubmit` | UserPromptSubmit | 턴당 fmap reset + 세션 첫 프롬프트 FCA 포인터 주입 |
+| `intentInjector` | PreToolUse (내부) | INTENT.md 체인·map 주입 |
+| `preToolValidator` | PreToolUse (내부) | INTENT.md 50줄·DETAIL.md append-only 블록 |
+| `structureGuard` | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고 |
+| `preToolUse` | PreToolUse | 위 3개 서브모듈 오케스트레이션 |
+| `agentEnforcer` | SubagentStart | 에이전트 역할·언어 태그 주입 |
+| `changeTracker` | PostToolUse | 변경 추적 (현재 비활성) |
+| `sessionCleanup` | SessionEnd | 세션 캐시 파일 정리 |
 | `shared` organ | - | `isFcaProject`/`isIntentMd`/`isDetailMd` |
 | `utils` organ | - | `validateCwd`, organ 구조 검사, 순환 감지 등 |
 
 ## Conventions
 
 - 모든 훅은 `validateCwd`를 최우선 호출 (payload cwd 보안 가드)
-- `pre-tool-validator`는 위반 시 `permissionDecision: 'deny'`로 해당 도구 호출만 차단 (턴 비중단)
+- `preToolValidator`는 위반 시 `permissionDecision: 'deny'`로 해당 도구 호출만 차단 (턴 비중단)
 - 엔트리 파일(`*.entry.ts`)은 stdin→핸들러→stdout 파이프만 — 로직 금지
 - 수정 후 `yarn build:plugin`으로 `bridge/*.mjs` 재생성 필수
 

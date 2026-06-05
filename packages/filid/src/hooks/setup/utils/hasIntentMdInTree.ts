@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { SCAN_SKIP_DIRS } from '../../../constants/scan-defaults.js';
+import { SCAN_SKIP_DIRS } from '../../../constants/scanDefaults.js';
 
 /**
  * Shallow BFS scan for INTENT.md in the project tree.

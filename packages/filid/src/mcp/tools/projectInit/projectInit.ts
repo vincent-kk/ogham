@@ -1,0 +1,33 @@
+import { initProject } from '../../../core/infra/configLoader/configLoader.js';
+import type { InitResult } from '../../../core/infra/configLoader/configLoader.js';
+
+export interface ProjectInitInput {
+  path: string;
+  /**
+   * Output language name (English name, e.g. `'Korean'`). Threaded into the
+   * freshly created `.filid/config.json`; omit for English.
+   */
+  language?: string;
+}
+
+/**
+ * Handle project_init MCP tool calls.
+ *
+ * Initializes FCA-AI project infrastructure — config only:
+ * - Creates .filid/config.json with default rule configuration.
+ *
+ * Rule doc deployment (`.claude/rules/*.md`) is NOT performed here; the
+ * setup skill drives that through the rule_docs_sync tool so users
+ * always make an explicit checkbox choice about optional rule files.
+ *
+ * Existing config.json is never overwritten.
+ */
+export function handleProjectInit(args: unknown): InitResult {
+  const input = args as ProjectInitInput;
+
+  if (!input.path) {
+    throw new Error('path is required');
+  }
+
+  return initProject(input.path, input.language);
+}

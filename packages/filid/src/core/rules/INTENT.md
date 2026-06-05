@@ -8,15 +8,15 @@
 
 | 모듈 | 역할 |
 |------|------|
-| `rule-engine` | 내장 규칙 로딩, 평가, 오버라이드 적용 |
-| `fractal-validator` | 구조 유효성 검증, 의존성 검증 |
-| `document-validator` | INTENT.md/DETAIL.md 유효성 검증 |
-| `drift-detector` | 규칙 위반 기반 드리프트 감지 및 동기화 계획 생성 |
+| `ruleEngine` | 내장 규칙 로딩, 평가, 오버라이드 적용 |
+| `fractalValidator` | 구조 유효성 검증, 의존성 검증 |
+| `documentValidator` | INTENT.md/DETAIL.md 유효성 검증 |
+| `driftDetector` | 규칙 위반 기반 드리프트 감지 및 동기화 계획 생성 |
 
 ## Boundaries
 
 ### Always do
-- 새 규칙은 `rule-engine.ts`의 `loadBuiltinRules`에 등록
+- 새 규칙은 `ruleEngine.ts`의 `loadBuiltinRules`에 등록
 
 ### Ask first
 - 내장 규칙 임계값 변경

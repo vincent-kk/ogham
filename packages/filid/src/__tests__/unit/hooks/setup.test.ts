@@ -16,11 +16,11 @@ vi.mock('node:fs', async (importOriginal) => {
 
 // Mock cache-manager to control getCacheDir and pruneOldSessions
 vi.mock(
-  '../../../core/infra/cache-manager/cache-manager.js',
+  '../../../core/infra/cacheManager/cacheManager.js',
   async (importOriginal) => {
     const actual =
       await importOriginal<
-        typeof import('../../../core/infra/cache-manager/cache-manager.js')
+        typeof import('../../../core/infra/cacheManager/cacheManager.js')
       >();
     return {
       ...actual,
@@ -35,7 +35,7 @@ const { processSetup } = await import('../../../hooks/setup/setup.js');
 const { existsSync: mockExistsSync, mkdirSync: mockMkdirSync } =
   await import('node:fs');
 const { getCacheDir, pruneOldSessions } =
-  await import('../../../core/infra/cache-manager/cache-manager.js');
+  await import('../../../core/infra/cacheManager/cacheManager.js');
 
 const testWorkspace = resolve('/tmp/test-workspace');
 
@@ -167,8 +167,8 @@ describe('processSetup', () => {
   // Rule doc deployment is no longer performed by setup.ts. The SessionStart
   // hook MUST NOT write to .claude/rules/ — that is the sole responsibility
   // of the setup skill via the rule_docs_sync MCP tool. See
-  // src/core/infra/config-loader/config-loader.ts syncRuleDocs() and its
-  // tests in config-loader.test.ts.
+  // src/core/infra/configLoader/configLoader.ts syncRuleDocs() and its
+  // tests in configLoader.test.ts.
   it('never invokes fs.copyFileSync (no rule doc deployment from hook)', async () => {
     const { copyFileSync } = await import('node:fs');
     (getCacheDir as ReturnType<typeof vi.fn>).mockReturnValue(
