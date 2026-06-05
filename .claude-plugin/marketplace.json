@@ -56,7 +56,7 @@
       "name": "prawf",
       "source": "./packages/prawf",
       "category": "productivity",
-      "tags": ["claude-code", "plugin"]
+      "tags": ["peer-review", "academic", "multi-agent", "research", "paper-review"]
     }
   ]
 }
