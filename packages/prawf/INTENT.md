@@ -10,9 +10,7 @@
 | Path                         | Role                                                                  |
 | ---------------------------- | --------------------------------------------------------------------- |
 | `agents/`                    | 페르소나 10인 (soundness 6 + impact + rebuttal + chair + adjudicator) |
-| `skills/review/`             | 메인 9인 team 평가 + 이식 명세 + 프로파일                             |
-| `skills/simulate-defense/`   | 답변 시뮬레이션 스킬                                                  |
-| `skills/rebuttal/`           | 외부 리뷰 코멘트 → 반박문 스킬                                        |
+| `skills/`                    | 4개 스킬 — review(메인 평가) · simulate-defense · rebuttal · auto-fix |
 | `.claude-plugin/plugin.json` | 플러그인 매니페스트 (skills 전용; `mcpServers` 없음)                  |
 | `package.json`               | 메타 + `version:sync` (빌드 없음)                                     |
 

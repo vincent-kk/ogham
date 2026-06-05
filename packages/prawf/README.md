@@ -23,11 +23,12 @@ delegated as a capability, never bound to a specific tool.
 
 ## Skills
 
-| Command                   | What it does                                                            |
-| ------------------------- | ----------------------------------------------------------------------- |
-| `/prawf:review`           | Full committee review of a paper → verdict + anticipated questions      |
-| `/prawf:simulate-defense` | Rehearse your defense: the committee asks, you answer, you get coached  |
-| `/prawf:rebuttal`         | Turn real reviewer comments into a rebuttal letter + revision checklist |
+| Command                   | What it does                                                              |
+| ------------------------- | ------------------------------------------------------------------------- |
+| `/prawf:review`           | Full committee review of a paper → verdict + anticipated questions        |
+| `/prawf:simulate-defense` | Rehearse your defense: the committee asks, you answer, you get coached    |
+| `/prawf:rebuttal`         | Turn real reviewer comments into a rebuttal letter + revision checklist   |
+| `/prawf:auto-fix`         | Apply the auto-fixable revisions from a review straight to the manuscript |
 
 ```bash
 /prawf:review                      # auto-detect the field, run the full panel
@@ -35,6 +36,7 @@ delegated as a capability, never bound to a specific tool.
 /prawf:review --profile cs-ml      # force a field profile
 /prawf:simulate-defense paper.pdf  # generate questions, then rehearse
 /prawf:rebuttal paper.pdf reviews.txt
+/prawf:auto-fix --dry-run          # preview the auto-fixable revisions, change nothing
 ```
 
 ## How it works

@@ -22,6 +22,7 @@ markdown only. `build:all` skips this package (it defines no `build` script).
 /prawf:review            → skills/review/        — 9-persona native team (P0→R1→R2→R3→ADJ)
 /prawf:simulate-defense  → skills/simulate-defense/ — committee Q&A → author answers → coaching
 /prawf:rebuttal          → skills/rebuttal/      — external review comments → rebuttal letter
+/prawf:auto-fix          → skills/auto-fix/      — apply auto-fixable review revisions to the manuscript
 agents/<persona>.md      → 10 reviewer personas spawned via Task/TeamCreate
 ```
 
