@@ -7,14 +7,14 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { handleBoundaryCreate } from '../../tools/boundary-create/index.js';
-import { handleKgBuild } from '../../tools/kg-build/index.js';
-import { handleKgContext } from '../../tools/kg-context/index.js';
-import { handleKgNavigate } from '../../tools/kg-navigate/index.js';
-import { handleKgSearch } from '../../tools/kg-search/index.js';
-import { handleKgStatus } from '../../tools/kg-status/index.js';
-import { handleKgSuggestLinks } from '../../tools/kg-suggest-links/index.js';
-import { loadGraphIfNeeded } from '../graph-cache/index.js';
+import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
+import { handleKgBuild } from '../../tools/kgBuild/index.js';
+import { handleKgContext } from '../../tools/kgContext/index.js';
+import { handleKgNavigate } from '../../tools/kgNavigate/index.js';
+import { handleKgSearch } from '../../tools/kgSearch/index.js';
+import { handleKgStatus } from '../../tools/kgStatus/index.js';
+import { handleKgSuggestLinks } from '../../tools/kgSuggestLinks/index.js';
+import { loadGraphIfNeeded } from '../graphCache/index.js';
 import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerKgTools(server: McpServer): void {

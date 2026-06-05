@@ -9,12 +9,12 @@ import { z } from 'zod';
 import {
   captureInsightInputSchema,
   handleCaptureInsight,
-} from '../../tools/maencof-capture-insight/index.js';
-import { handleMaencofCreate } from '../../tools/maencof-create/index.js';
-import { handleMaencofDelete } from '../../tools/maencof-delete/index.js';
-import { handleMaencofMove } from '../../tools/maencof-move/index.js';
-import { handleMaencofRead } from '../../tools/maencof-read/index.js';
-import { handleMaencofUpdate } from '../../tools/maencof-update/index.js';
+} from '../../tools/maencofCaptureInsight/index.js';
+import { handleMaencofCreate } from '../../tools/maencofCreate/index.js';
+import { handleMaencofDelete } from '../../tools/maencofDelete/index.js';
+import { handleMaencofMove } from '../../tools/maencofMove/index.js';
+import { handleMaencofRead } from '../../tools/maencofRead/index.js';
+import { handleMaencofUpdate } from '../../tools/maencofUpdate/index.js';
 import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerCrudTools(server: McpServer): void {

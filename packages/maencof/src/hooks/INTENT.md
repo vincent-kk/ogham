@@ -10,7 +10,7 @@ Claude Code 훅 이벤트 핸들러. 세션 시작/종료, 도구 사용 전후 
 
 - shared.ts 유틸리티 함수 사용
 - 각 훅은 독립 entry 파일 보유
-- config-registry에 설정 등록
+- configRegistry에 설정 등록
 
 ### Ask first
 

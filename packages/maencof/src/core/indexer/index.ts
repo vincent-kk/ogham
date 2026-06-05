@@ -1,2 +1,2 @@
-export * from './incremental-tracker/index.js';
-export * from './metadata-store/index.js';
+export * from './incrementalTracker/index.js';
+export * from './metadataStore/index.js';

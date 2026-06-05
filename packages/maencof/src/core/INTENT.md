@@ -15,7 +15,7 @@
 ### Ask first
 
 - 새 모듈 추가 시 index.ts barrel export 갱신 필요 여부
-- vault-scanner I/O 패턴 변경
+- vaultScanner I/O 패턴 변경
 
 ### Never do
 

@@ -2,8 +2,8 @@
  * @file companion.ts
  * @description AI Companion Identity Zod 스키마 (MCP 서버 tools용)
  *
- * 수동 타입 가드는 companion-guard.ts에 분리되어 있다.
- * session-start hook은 반드시 companion-guard.ts에서 import할 것.
+ * 수동 타입 가드는 companionGuard.ts에 분리되어 있다.
+ * session-start hook은 반드시 companionGuard.ts에서 import할 것.
  */
 import { z } from 'zod';
 

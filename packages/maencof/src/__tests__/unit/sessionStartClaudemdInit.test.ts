@@ -1,0 +1,173 @@
+/**
+ * @file sessionStartClaudemdInit.test.ts
+ * @description session-start hook의 CLAUDE.md 초기화 테스트
+ */
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import {
+  MAENCOF_END_MARKER,
+  MAENCOF_START_MARKER,
+} from '../../core/claudeMdMerger/claudeMdMerger.js';
+import { runSessionStart } from '../../hooks/sessionStart/sessionStart.js';
+import { VERSION } from '../../version.js';
+
+/** 테스트용 임시 vault 디렉토리 생성 */
+function createTempVault(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'maencof-claudemd-init-'));
+  mkdirSync(join(dir, '.maencof'), { recursive: true });
+  mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
+  return dir;
+}
+
+describe('session-start CLAUDE.md 초기화', () => {
+  let vaultDir: string;
+
+  beforeEach(() => {
+    vaultDir = createTempVault();
+  });
+
+  afterEach(() => {
+    rmSync(vaultDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
+  });
+
+  it('vault에 CLAUDE.md가 없으면 maencof 섹션을 포함한 CLAUDE.md를 생성한다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const claudeMd = join(vaultDir, 'CLAUDE.md');
+    expect(existsSync(claudeMd)).toBe(true);
+
+    const content = readFileSync(claudeMd, 'utf-8');
+    expect(content).toContain(MAENCOF_START_MARKER);
+    expect(content).toContain(MAENCOF_END_MARKER);
+    expect(content).toContain('maencof Knowledge Space');
+    expect(content).toContain('kg_suggest_links');
+    expect(content).toContain('claudemd_merge');
+  });
+
+  it('MUST/FORBIDDEN 명령형 지시문이 포함된다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('## Required Rules (MUST)');
+    expect(content).toContain('## Forbidden Rules (FORBIDDEN)');
+    expect(content).toContain('MUST use `kg_search`');
+    expect(content).toContain('MUST use `read`');
+    expect(content).toContain('MUST use `create`');
+    expect(content).toContain('FORBIDDEN:');
+  });
+
+  it('도구 매핑 테이블이 포함된다', () => {
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('## Tool Mapping');
+    expect(content).toContain('| Search vault documents |');
+    expect(content).toContain('| Read vault documents |');
+    expect(content).toContain('kg_search');
+    expect(content).toContain('read');
+  });
+
+  it('기존 CLAUDE.md에 maencof 섹션이 없으면 추가한다', () => {
+    writeFileSync(
+      join(vaultDir, 'CLAUDE.md'),
+      '# My Project\n\nExisting content.\n',
+      'utf-8',
+    );
+
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('# My Project');
+    expect(content).toContain('Existing content.');
+    expect(content).toContain(MAENCOF_START_MARKER);
+    expect(content).toContain('maencof Knowledge Space');
+  });
+
+  it('이미 maencof 섹션이 있고 버전이 같으면 변경하지 않는다', () => {
+    // version.json을 현재 버전으로 설정
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'version.json'),
+      JSON.stringify({
+        version: VERSION,
+        installedAt: new Date().toISOString(),
+        migrationHistory: [],
+      }),
+      'utf-8',
+    );
+    const existing = `# Project\n\n${MAENCOF_START_MARKER}\ncustom directive\n${MAENCOF_END_MARKER}\n`;
+    writeFileSync(join(vaultDir, 'CLAUDE.md'), existing, 'utf-8');
+
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('custom directive');
+    // 기본 지시문이 삽입되지 않아야 함
+    expect(content).not.toContain('maencof Knowledge Space');
+  });
+
+  it('이미 maencof 섹션이 있지만 version.json이 없으면 version.json만 생성한다', () => {
+    const existing = `# Project\n\n${MAENCOF_START_MARKER}\ncustom directive\n${MAENCOF_END_MARKER}\n`;
+    writeFileSync(join(vaultDir, 'CLAUDE.md'), existing, 'utf-8');
+
+    runSessionStart({ cwd: vaultDir });
+
+    // CLAUDE.md는 변경되지 않음
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('custom directive');
+    expect(content).not.toContain('maencof Knowledge Space');
+
+    // version.json이 생성됨
+    const versionPath = join(vaultDir, '.maencof-meta', 'version.json');
+    expect(existsSync(versionPath)).toBe(true);
+    const versionData = JSON.parse(readFileSync(versionPath, 'utf-8'));
+    expect(versionData.version).toBe(VERSION);
+  });
+
+  it('vault가 아닌 경우 CLAUDE.md를 건드리지 않는다', () => {
+    const nonVaultDir = mkdtempSync(join(tmpdir(), 'non-vault-claudemd-'));
+    try {
+      runSessionStart({ cwd: nonVaultDir });
+      expect(existsSync(join(nonVaultDir, 'CLAUDE.md'))).toBe(false);
+    } finally {
+      rmSync(nonVaultDir, { recursive: true, force: true });
+    }
+  });
+
+  it('companion identity가 있으면 지시문에 이름이 포함된다', () => {
+    writeFileSync(
+      join(vaultDir, '.maencof-meta', 'companion-identity.json'),
+      JSON.stringify({
+        name: 'Mochi',
+        greeting: '안녕!',
+      }),
+    );
+
+    runSessionStart({ cwd: vaultDir });
+
+    const content = readFileSync(join(vaultDir, 'CLAUDE.md'), 'utf-8');
+    expect(content).toContain('maencof Knowledge Space (Mochi)');
+  });
+
+  it('초기화 메시지가 반환된다 (additionalContext로 라우팅됨)', () => {
+    const result = runSessionStart({ cwd: vaultDir });
+    const ctx = result.hookSpecificOutput?.additionalContext ?? '';
+    expect(ctx).toContain('CLAUDE.md');
+    expect(ctx).toContain('initialized');
+  });
+});

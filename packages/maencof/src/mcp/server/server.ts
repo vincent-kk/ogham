@@ -17,7 +17,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { VERSION } from '../../version.js';
 
-import { getVaultPath } from './graph-cache/index.js';
+import { getVaultPath } from './graphCache/index.js';
 import { walkVaultForExternalChanges } from './middlewares/index.js';
 import {
   registerCacheTools,

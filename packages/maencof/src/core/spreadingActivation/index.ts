@@ -1,0 +1,1 @@
+export * from './spreadingActivation.js';

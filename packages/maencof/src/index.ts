@@ -13,13 +13,13 @@ export {
   computeChangeSet,
   scanIncrementalChanges,
   readVaultFile,
-} from './core/vault-scanner/vault-scanner.js';
+} from './core/vaultScanner/vaultScanner.js';
 export type {
   ScannedFile,
   FileSnapshot,
   ChangeSet,
   VaultScanOptions,
-} from './core/vault-scanner/vault-scanner.js';
+} from './core/vaultScanner/vaultScanner.js';
 
 export {
   parseYamlFrontmatter,
@@ -28,28 +28,28 @@ export {
   parseDocument,
   buildKnowledgeNode,
   parseDocumentFromFile,
-} from './core/document-parser/document-parser.js';
+} from './core/documentParser/documentParser.js';
 export type {
   MarkdownLink,
   ParsedDocument,
   NodeBuildResult,
-} from './core/document-parser/document-parser.js';
+} from './core/documentParser/documentParser.js';
 
 export {
   buildGraph,
   buildAdjacencyList,
   detectOrphans,
-} from './core/graph-builder/graph-builder.js';
+} from './core/graphBuilder/graphBuilder.js';
 export type {
   GraphBuilderOptions,
   GraphBuildResult,
-} from './core/graph-builder/graph-builder.js';
+} from './core/graphBuilder/graphBuilder.js';
 
 export {
   convertToDAG,
   applyLayerDirectionality,
-} from './core/dag-converter/dag-converter.js';
-export type { DAGConvertResult } from './core/dag-converter/dag-converter.js';
+} from './core/dagConverter/dagConverter.js';
+export type { DAGConvertResult } from './core/dagConverter/dagConverter.js';
 
 export {
   calculateWeights,
@@ -57,24 +57,24 @@ export {
   normalizeWeights,
   getLayerDecay,
   LAYER_DECAY_FACTORS,
-} from './core/weight-calculator/weight-calculator.js';
-export type { WeightCalcResult } from './core/weight-calculator/weight-calculator.js';
+} from './core/weightCalculator/weightCalculator.js';
+export type { WeightCalcResult } from './core/weightCalculator/weightCalculator.js';
 
 export {
   runSpreadingActivation,
   SpreadingActivationEngine,
-} from './core/spreading-activation/spreading-activation.js';
-export type { SpreadingActivationParams } from './core/spreading-activation/spreading-activation.js';
+} from './core/spreadingActivation/spreadingActivation.js';
+export type { SpreadingActivationParams } from './core/spreadingActivation/spreadingActivation.js';
 
 export {
   CommunityDetector,
   detectCommunities,
-} from './core/community-detector/community-detector.js';
+} from './core/communityDetector/communityDetector.js';
 export type {
   Community,
   CommunityDetectionResult,
   CommunityDetectorParams,
-} from './core/community-detector/community-detector.js';
+} from './core/communityDetector/communityDetector.js';
 
 export {
   mergeMaencofSection,
@@ -83,11 +83,11 @@ export {
   ClaudeMdMerger,
   MAENCOF_START_MARKER,
   MAENCOF_END_MARKER,
-} from './core/claude-md-merger/claude-md-merger.js';
-export type { MergeResult } from './core/claude-md-merger/claude-md-merger.js';
+} from './core/claudeMdMerger/claudeMdMerger.js';
+export type { MergeResult } from './core/claudeMdMerger/claudeMdMerger.js';
 
-export { deduplicateContent } from './core/content-dedup/content-dedup.js';
-export type { DeduplicateResult } from './core/content-dedup/content-dedup.js';
+export { deduplicateContent } from './core/contentDedup/contentDedup.js';
+export type { DeduplicateResult } from './core/contentDedup/contentDedup.js';
 
 // Search modules
 export {
@@ -95,24 +95,24 @@ export {
   resolveSeedNodes,
   QueryEngine,
   invalidateQueryCache,
-} from './search/query-engine/query-engine.js';
+} from './search/queryEngine/queryEngine.js';
 export type {
   QueryOptions,
   QueryResult,
   ScoredSeed,
   MatchType,
-} from './search/query-engine/query-engine.js';
+} from './search/queryEngine/queryEngine.js';
 
 export {
   assembleContext,
   extractBestSnippet,
   ContextAssembler,
-} from './search/context-assembler/context-assembler.js';
+} from './search/contextAssembler/contextAssembler.js';
 export type {
   ContextItem,
   AssembleOptions,
   AssembledContext,
-} from './search/context-assembler/context-assembler.js';
+} from './search/contextAssembler/contextAssembler.js';
 
 // Index modules
 export {
@@ -120,14 +120,14 @@ export {
   deserializeGraph,
   MetadataStore,
   CACHE_FILES,
-} from './core/indexer/metadata-store/metadata-store.js';
+} from './core/indexer/metadataStore/metadataStore.js';
 export type {
   SnapshotEntry,
   FileSnapshot as CacheSnapshot,
   WeightsData,
   StaleEntry,
   StaleEntries,
-} from './core/indexer/metadata-store/metadata-store.js';
+} from './core/indexer/metadataStore/metadataStore.js';
 
 export {
   computeChangeSet as computeIncrementalChangeSet,
@@ -135,12 +135,12 @@ export {
   computeIncrementalScope,
   createSnapshot as createIncrementalSnapshot,
   IncrementalTracker,
-} from './core/indexer/incremental-tracker/incremental-tracker.js';
+} from './core/indexer/incrementalTracker/incrementalTracker.js';
 export type {
   ChangeSet as IncrementalChangeSet,
   IncrementalScope,
   CurrentFileInfo,
-} from './core/indexer/incremental-tracker/incremental-tracker.js';
+} from './core/indexer/incrementalTracker/incrementalTracker.js';
 
 // MCP modules
 export {

@@ -1,4 +1,4 @@
-import type { DialogueConfig } from '../types/dialogue-config.js';
+import type { DialogueConfig } from '../types/dialogueConfig.js';
 
 export const DEFAULT_DIALOGUE_CONFIG: DialogueConfig = {
   schema_version: 1,

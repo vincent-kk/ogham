@@ -49,8 +49,8 @@ export {
 } from './companion.js';
 export type { CompanionIdentity, CompanionPersonality } from './companion.js';
 
-export { isValidCompanionIdentity } from './companion-guard.js';
-export type { CompanionIdentityMinimal } from './companion-guard.js';
+export { isValidCompanionIdentity } from './companionGuard.js';
+export type { CompanionIdentityMinimal } from './companionGuard.js';
 
 export { DomainSchema, LifeDomainEnum } from './domain.js';
 export type { Domain, LifeDomain } from './domain.js';
@@ -103,9 +103,9 @@ export type {
 export { LAYER1_PREFIX } from '../constants/directories.js';
 export { isLayer1Path } from './layer.js';
 
-export { L1ChangeReasonSchema } from './l1-amendment.js';
-export { L1_VERIFICATION_INTENSITY } from '../constants/l1-amendment.js';
-export type { L1ChangeReason, L1AmendmentRecord } from './l1-amendment.js';
+export { L1ChangeReasonSchema } from './l1Amendment.js';
+export { L1_VERIFICATION_INTENSITY } from '../constants/l1Amendment.js';
+export type { L1ChangeReason, L1AmendmentRecord } from './l1Amendment.js';
 
 export type {
   LifecycleEvent,
@@ -179,9 +179,9 @@ export type {
   PendingInsightNotification,
 } from './insight.js';
 
-export { DialogueConfigSchema } from './dialogue-config.js';
+export { DialogueConfigSchema } from './dialogueConfig.js';
 export {
   DEFAULT_DIALOGUE_CONFIG,
   DIALOGUE_DISABLE_ENV,
 } from '../constants/dialogue.js';
-export type { DialogueConfig } from './dialogue-config.js';
+export type { DialogueConfig } from './dialogueConfig.js';

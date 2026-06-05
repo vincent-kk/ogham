@@ -5,7 +5,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { handleDailynoteRead } from '../../tools/dailynote-read/index.js';
+import { handleDailynoteRead } from '../../tools/dailynoteRead/index.js';
 import { registerReadTool } from '../middlewares/index.js';
 
 export function registerDailynoteTools(server: McpServer): void {

@@ -5,10 +5,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { CLAUDE_MD_RELATIVE_PATH } from '../../../constants/claude-md.js';
-import { handleClaudeMdMerge } from '../../tools/claudemd-merge/index.js';
-import { handleClaudeMdRead } from '../../tools/claudemd-read/index.js';
-import { handleClaudeMdRemove } from '../../tools/claudemd-remove/index.js';
+import { CLAUDE_MD_RELATIVE_PATH } from '../../../constants/claudeMd.js';
+import { handleClaudeMdMerge } from '../../tools/claudemdMerge/index.js';
+import { handleClaudeMdRead } from '../../tools/claudemdRead/index.js';
+import { handleClaudeMdRemove } from '../../tools/claudemdRemove/index.js';
 import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
 
 export function registerClaudeMdTools(server: McpServer): void {

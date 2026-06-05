@@ -18,14 +18,14 @@ yarn version:sync       # package.json → src/version.ts
 
 - `scripts/build-mcp-server.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
 - `scripts/build-hooks.mjs`: 각 훅 entry → `bridge/<name>.mjs`
-- SessionStart 훅은 esbuild `.md → text` loader 로 `src/hooks/session-start/meta-skill-body.md` 를 인라인 (dialogue discipline meta-prompt)
+- SessionStart 훅은 esbuild `.md → text` loader 로 `src/hooks/sessionStart/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt)
 
 ## Auto-invocation Mapping
 
 6 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
 
 - **Brainstorm / ideation**: `explore --for-brainstorm` → `think --mode divergent`
-- **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insight-injector` bridge)
+- **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insightInjector` bridge)
 - **Spec refinement / interview convergence**: `refine` (Phase 2.5 Socratic 포함)
 - **Plan review**: `think --mode review`
 
@@ -40,7 +40,7 @@ yarn version:sync       # package.json → src/version.ts
 ## Session Lifecycle
 
 - **Session recap**: SessionEnd 훅이 `[maencof] Session Recap` 을 자동 출력 (명시 호출 불필요). `reflect` 는 별도 vault judge 리포터이며 session-wide recap 에 매핑되지 않음.
-- **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/session-start/meta-skill-body.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
+- **Dialogue meta-prompt injection**: SessionStart 훅이 `src/hooks/sessionStart/metaSkillBody.md` 를 `<maencof-meta-skill>` 로 감싸 `hookSpecificOutput.additionalContext` 로 주입. **OFF-switch**: `MAENCOF_DISABLE_DIALOGUE=1` env 또는 `.maencof-meta/dialogue-config.json::injection.enabled=false`.
 
 ## Development Notes
 

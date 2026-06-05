@@ -8,7 +8,7 @@ import { z } from 'zod';
 import {
   contextCacheManageInputSchema,
   handleContextCacheManage,
-} from '../../tools/context-cache-manage/index.js';
+} from '../../tools/contextCacheManage/index.js';
 import { registerReadTool } from '../middlewares/index.js';
 
 export function registerCacheTools(server: McpServer): void {

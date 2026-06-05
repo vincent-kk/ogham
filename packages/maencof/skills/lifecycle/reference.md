@@ -10,26 +10,26 @@ hooks.json (static, Plugin Area — never modified)
     → lifecycle.json (dynamic, Execution Area — managed by this skill)
 ```
 
-The dispatcher runtime (`src/hooks/lifecycle-dispatcher.ts`) reads `lifecycle.json` at hook invocation time — no restart required for changes to take effect.
+The dispatcher runtime (`src/hooks/lifecycleDispatcher/lifecycleDispatcher.ts`) reads `lifecycle.json` at hook invocation time — no restart required for changes to take effect.
 
 ## Supported Events
 
-| Event | Fires When | Typical Use |
-|-------|-----------|-------------|
-| `SessionStart` | Session begins | Greeting, context loading |
-| `UserPromptSubmit` | Before prompt processing | Reminders, validation |
-| `PreToolUse` | Before tool execution | Warnings, confirmation |
-| `PostToolUse` | After tool execution | Logging, post-processing |
-| `Stop` | Claude response complete | Checklists, notifications |
-| `SessionEnd` | Session closing | Cleanup, summaries |
+| Event              | Fires When               | Typical Use               |
+| ------------------ | ------------------------ | ------------------------- |
+| `SessionStart`     | Session begins           | Greeting, context loading |
+| `UserPromptSubmit` | Before prompt processing | Reminders, validation     |
+| `PreToolUse`       | Before tool execution    | Warnings, confirmation    |
+| `PostToolUse`      | After tool execution     | Logging, post-processing  |
+| `Stop`             | Claude response complete | Checklists, notifications |
+| `SessionEnd`       | Session closing          | Cleanup, summaries        |
 
 ## Action Types
 
-| Type | Description | Config Fields |
-|------|-------------|---------------|
-| `echo` | Output a message | `message: string` |
-| `remind` | Conditional reminder | `message: string`, `condition?: string` |
-| `command` | Shell command (v2 reserved) | Pending security review |
+| Type      | Description                 | Config Fields                           |
+| --------- | --------------------------- | --------------------------------------- |
+| `echo`    | Output a message            | `message: string`                       |
+| `remind`  | Conditional reminder        | `message: string`, `condition?: string` |
+| `command` | Shell command (v2 reserved) | Pending security review                 |
 
 ## Matcher Field (PreToolUse / PostToolUse only)
 
@@ -62,13 +62,13 @@ Total: 3 actions (2 active, 1 inactive)
 
 ### Step 2 — Identify Intent and Map to Event
 
-| User Expression | Mapped Event |
-|----------------|-------------|
-| "When session starts", "on startup" | `SessionStart` |
-| "Every time I ask", "on prompt" | `UserPromptSubmit` |
-| "Before editing files", "before tool" | `PreToolUse` |
-| "After each response", "when done" | `Stop` |
-| "When session ends", "on close" | `SessionEnd` |
+| User Expression                       | Mapped Event       |
+| ------------------------------------- | ------------------ |
+| "When session starts", "on startup"   | `SessionStart`     |
+| "Every time I ask", "on prompt"       | `UserPromptSubmit` |
+| "Before editing files", "before tool" | `PreToolUse`       |
+| "After each response", "when done"    | `Stop`             |
+| "When session ends", "on close"       | `SessionEnd`       |
 
 ### Step 3 — Define Action
 
@@ -86,6 +86,7 @@ Register this action? [Yes / Edit]
 ```
 
 For PreToolUse/PostToolUse, also collect the matcher:
+
 ```
   Matcher (optional): Which tools should trigger this?
     Example: Write|Edit  (fires only for Write or Edit tools)
@@ -143,6 +144,7 @@ Executed by the **configurator** agent. The configurator validates action schema
 ```
 
 Natural language:
+
 ```
 "Greet me when the session starts"
 "Remind me to write tests after every response"
@@ -151,14 +153,14 @@ Natural language:
 
 ## Error Handling
 
-| Condition | Resolution |
-|-----------|------------|
-| `lifecycle.json` missing | Check `.maencof-meta/`; auto-create if vault initialized; suggest `/maencof:setup` otherwise |
-| JSON parse error | Create backup, offer regeneration, attempt action recovery |
-| Duplicate ID | Show existing action, offer overwrite or new ID |
-| `command` type requested | Inform v2 reservation, suggest echo/remind alternatives |
-| Invalid event name | Display supported events table |
-| Unclear condition expression | Request specific condition (tool name, keyword) |
+| Condition                    | Resolution                                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `lifecycle.json` missing     | Check `.maencof-meta/`; auto-create if vault initialized; suggest `/maencof:setup` otherwise |
+| JSON parse error             | Create backup, offer regeneration, attempt action recovery                                   |
+| Duplicate ID                 | Show existing action, offer overwrite or new ID                                              |
+| `command` type requested     | Inform v2 reservation, suggest echo/remind alternatives                                      |
+| Invalid event name           | Display supported events table                                                               |
+| Unclear condition expression | Request specific condition (tool name, keyword)                                              |
 
 ## Acceptance Criteria
 

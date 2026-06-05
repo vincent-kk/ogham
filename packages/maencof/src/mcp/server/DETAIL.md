@@ -10,7 +10,7 @@
 
 ## API Contracts
 
-- `ensureFreshGraph(vaultPath): Promise<KnowledgeGraph | null>` — `freshness-guard.ts::ensureFreshGraphNonBlocking` 의 thin wrapper. graph 부재 시 null.
+- `ensureFreshGraph(vaultPath): Promise<KnowledgeGraph | null>` — `freshnessGuard.ts::ensureFreshGraphNonBlocking` 의 thin wrapper. graph 부재 시 null.
 - `registerMutateTool(server, name, schema, coreHandler, getAffectedPath)` — mutate tool 등록.
 - `registerReadTool(server, name, schema, coreHandler, { needsFreshness })` — freshness-read 와 plain-read 등록.
 - `triggerBackgroundRebuild(vaultPath): void` — 모듈 레벨 mutex 로 중복 트리거 차단, 절대 await 노출 금지.

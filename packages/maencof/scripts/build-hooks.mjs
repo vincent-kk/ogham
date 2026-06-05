@@ -44,19 +44,21 @@ const HEAVY_HOOK_BYTES = 12 * 1024;
 const MEDIUM_HOOK_BYTES = 15 * 1024;
 const LIGHT_HOOK_BYTES = 10 * 1024;
 
+// `name` is the bridge output basename (kebab — referenced by hooks.json and
+// kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
-  { name: 'session-start', maxBytes: SESSION_START_HOOK_BYTES },
-  { name: 'session-end', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'insight-injector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'context-injector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'dailynote-recorder', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'session-start', entry: 'sessionStart', maxBytes: SESSION_START_HOOK_BYTES },
+  { name: 'session-end', entry: 'sessionEnd', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'insight-injector', entry: 'insightInjector', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'context-injector', entry: 'contextInjector', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'dailynote-recorder', entry: 'dailynoteRecorder', maxBytes: LIGHT_HOOK_BYTES },
   // spawnCli (git) callers — cross-spawn inlined
-  { name: 'vault-committer', maxBytes: MEDIUM_HOOK_BYTES },
-  { name: 'changelog-gate', maxBytes: MEDIUM_HOOK_BYTES },
+  { name: 'vault-committer', entry: 'vaultCommitter', maxBytes: MEDIUM_HOOK_BYTES },
+  { name: 'changelog-gate', entry: 'changelogGate', maxBytes: MEDIUM_HOOK_BYTES },
   // logHookFailure only
-  { name: 'lifecycle-dispatcher', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'vault-redirector', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'layer-guard', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'lifecycle-dispatcher', entry: 'lifecycleDispatcher', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'vault-redirector', entry: 'vaultRedirector', maxBytes: LIGHT_HOOK_BYTES },
+  { name: 'layer-guard', entry: 'layerGuard', maxBytes: LIGHT_HOOK_BYTES },
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
@@ -68,9 +70,9 @@ const ESM_CJS_REQUIRE_BANNER =
   'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
-  hookEntries.map(({ name }) =>
+  hookEntries.map(({ name, entry }) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
+      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: 'node',
       target: 'node20',
@@ -147,8 +149,8 @@ if (violations.length > 0) {
   console.error(
     '\nHooks must stay thin (Node builtins only). External runtimes (zod,\n' +
       'fast-glob, MCP SDK, AST tooling) belong in mcp-server.cjs / skill paths,\n' +
-      'not in hook bundles. See packages/maencof/src/types/dialogue-config-guard.ts\n' +
-      'and insight-guard.ts for the zod-free guard pattern.',
+      'not in hook bundles. See packages/maencof/src/types/dialogueConfigGuard.ts\n' +
+      'and insightGuard.ts for the zod-free guard pattern.',
   );
   process.exit(1);
 }

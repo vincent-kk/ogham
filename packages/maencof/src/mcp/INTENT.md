@@ -20,5 +20,5 @@ MCP 서버 + 18개 도구 핸들러. stdio 전송으로 Claude Code와 통신.
 ### Never do
 
 - 도구 핸들러에서 파일 I/O 직접 수행 (core/ 모듈 위임)
-- server-entry.ts 수정 (esbuild 번들 진입점)
+- serverEntry.ts 수정 (esbuild 번들 진입점)
 - getVaultPath() 우회 또는 vault 경로 하드코딩
