@@ -28,7 +28,7 @@ Input:
 - Framework menu (profile <PROFILE>): <the menu for this axis>
 - Severity anchors: <the severity_examples for this axis>
 
-Language: Write the deliverable in `[filid:lang]` (if absent, the system language; English by default). Keep axis ids, framework names, and finding-ids in their original form.
+Language: Write the deliverable in the user's language — match the request or the paper; English by default. Keep axis ids, framework names, and finding-ids in their original form.
 
 REMINDER: Write `<REVIEW_DIR>/<OUTPUT_FILE>` before finishing. If you run low on budget, skip the remaining analysis and write the file with partial results.
 ```
@@ -184,7 +184,7 @@ REMINDER: Write `review-report.md`.
 P0 (profile · normalize) and ADJ (dedup · verdict · report) are performed **directly** by the chair (team lead) — not spawned.
 For the chair invariants (no direct external-tool calls, cite deliverables only), see orchestration §6.
 
-## 7. Prompt Composition Rules (corresponds to filid Subagent Prompt Rules)
+## 7. Prompt Composition Rules
 
 When the chair fills in the templates above:
 
@@ -193,6 +193,6 @@ When the chair fills in the templates above:
    extract the axis's framework menu and severity anchors from [`field-profiles.md`](./field-profiles.md) and put them in **as values**.
 3. **Give the persona .md path** (`../../agents/<id>.md`) and have the persona read it.
 4. **Enforce the `paper-normalized.md` coordinate system** (no citing the original PDF — keep the shared coordinates).
-5. **Pass the language setting** (`[filid:lang]`).
+5. **Pass the language setting** (the user's language; English by default).
 6. **Inject the absorption mission** (`ABSORBED_AXES`) into the relevant absorbing persona (P0→R1).
 7. **Re-emphasize the output file at the end** and append the budget-fallback (write the file even with partial results).

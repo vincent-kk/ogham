@@ -4,9 +4,9 @@
 > _body structure_ that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
 > Ported from the Korean SSoT in `.metadata/prawf/`.
 >
-> **Output language**: deliverables follow the `[filid:lang]` setting (or the system language, default English) — the
-> examples below are in English. Axis ids, framework names, finding-ids, and verdict enums are kept verbatim. The chair
-> reads this file before writing any deliverable.
+> **Output language**: write deliverables in the user's language — match the language of the request (or the paper);
+> default to English when unspecified. The examples below are in English. Axis ids, framework names, finding-ids, and
+> verdict enums are kept verbatim. The chair reads this file before writing any deliverable.
 
 ## 1. `review-report.md` (chair) — main deliverable
 

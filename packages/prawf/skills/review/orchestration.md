@@ -11,15 +11,15 @@
 > plugin with no dependence on external servers or hooks — all review behavior
 > happens inside the session.
 
-## 1. Structural Differences from filid
+## 1. The prawf Review Model
 
-| Aspect               | filid review                                        | prawf                                                                                                 |
-| -------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Persona relationship | Equal committee members in **horizontal consensus** | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1) |
-| Unit of consensus    | A vote per proposition                              | **Survival of each individual finding**                                                               |
-| Core mechanism       | 2/3 quorum, VETO/SYNTHESIS/ABSTAIN                  | finding state transitions + chair synthesis                                                           |
-| Verdict input        | All committee members equal                         | **Only the 6 soundness axes drive the verdict; significance is advisory**                             |
-| Final verdict        | APPROVED / REQUEST_CHANGES / INCONCLUSIVE           | Accept / Minor / Major / Reject                                                                       |
+| Aspect               | prawf                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| Persona relationship | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1) |
+| Unit of consensus    | **Survival of each individual finding**                                                               |
+| Core mechanism       | finding state transitions + chair synthesis                                                           |
+| Verdict input        | **Only the 6 soundness axes drive the verdict; significance is advisory**                             |
+| Final verdict        | Accept / Minor / Major / Reject                                                                       |
 
 prawf rounds simulate a journal's **review → rebuttal → re-review cycle**, not a vote.
 
@@ -219,7 +219,7 @@ profile: <field profile>
 
 ## 6. Team Operation (claude-code native)
 
-chair = **main session = team lead** (the filid Phase D chair pattern).
+chair = **main session = team lead** (the chair orchestrates the rounds; it is never spawned as a worker).
 
 1. After P0, `TeamCreate prawf-<paper-slug>`.
 2. **R1**: spawn the convened soundness Reviewers + impact-assessor as `Task(team worker)` **in parallel** → each produces its deliverable. `await all`.
@@ -239,7 +239,7 @@ chair = **main session = team lead** (the filid Phase D chair pattern).
 
 - Standard flow: R1 → R2 → (R3) → consensus. **A single R3 pass is the default.**
 - **The sole condition for entering an extra cycle**: only when, in R3, an original Reviewer surfaces a _new_ MITIGATED residual risk (absent from R1) in `findings/round-3-<axis>.md` is **one extra defense (R2) + re-review (R3)** allowed (R3 at most twice total). No other repetition — to prevent endless debate.
-- **Inconclusive**: only when a soundness axis that is load-bearing for the verdict **abstains entirely** (it ultimately fails to obtain grounding to verify the core claim). This differs in _condition_ from filid's quorum-failure INCONCLUSIVE — do not confuse them.
+- **Inconclusive**: only when a soundness axis that is load-bearing for the verdict **abstains entirely** (it ultimately fails to obtain grounding to verify the core claim). This is distinct from a no-finding Accept: Inconclusive means the verdict could not be established at all, not that the paper passed.
 
 ## 8. Degradation — Absence of External Capability
 

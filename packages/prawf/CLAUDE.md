@@ -37,8 +37,8 @@ plagiarism) are delegated as a capability; never hardcode a specific tool name.
   already wired in `plugin.json`.
 - **Agents** — drop `agents/<name>.md` (English). Auto-discovered; do NOT add an
   `agents` field to `plugin.json`.
-- **Anti-yield** — `skills/review/SKILL.md` follows filid's Tier-2a 3-layer
-  pattern (round-to-round chaining, never yield mid-pipeline). An interactive
+- **Anti-yield** — `skills/review/SKILL.md` uses the Tier-2a anti-yield
+  discipline (round-to-round chaining, never yield mid-pipeline). An interactive
   `simulate-defense` uses the Tier-2b `<!-- [INTERACTIVE] -->` escape hatch.
 - **Cross-references** — persona ids and deliverable filenames must stay identical
   across agents, orchestration, prompt-templates, templates, and every SKILL.md.
@@ -56,6 +56,7 @@ The Korean design specification is the source of truth at `../../.metadata/prawf
 - **FCA**: root `INTENT.md` (≤ 50 lines, 3-tier boundaries) and `DETAIL.md` are
   written in Korean (section headings stay English as machine-readable anchors).
   A skill is self-describing: a skill directory carries `SKILL.md` only — no
-  per-skill `INTENT.md`/`DETAIL.md`. Run `/filid:scan` to check structure.
+  per-skill `INTENT.md`/`DETAIL.md`. Optionally run `/filid:scan` (this monorepo's
+  FCA dev tool — not a prawf runtime dependency) to check structure.
 - **Registration**: listed in root `.claude-plugin/marketplace.json`. Not in
   `scripts/typecheck-all.mjs` (no TypeScript to typecheck).
