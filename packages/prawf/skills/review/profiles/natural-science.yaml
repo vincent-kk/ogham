@@ -1,0 +1,36 @@
+# Default profile (applied when P0 cannot specify a field). Native domain of
+# the source report: natural science and medicine. Axis ids, framework ids, and
+# guideline names are canonical identifiers and stay verbatim.
+profile: natural-science
+axis_frameworks:
+  argument: [toulmin, logical-fallacies]
+  methodology:
+    [cook-campbell-validity, equator-consort, equator-strobe, equator-prisma]
+  statistics: [p-curve, multiple-comparison, preregistration-match]
+  causality: [bradford-hill]
+  bias: [rob2, robins-i, grade, newcastle-ottawa]
+  integrity: [data-fabrication, image-forensics, coi, outcome-switching]
+  impact: [nature-broad-consequence, lancet-mcid, health-equity]
+disabled_axes: []
+paper_types:
+  - { type: rct, axes: [all], guideline: consort }
+  - { type: observational, axes: [all], guideline: strobe }
+  - {
+      type: meta-analysis,
+      axes: [argument, methodology, statistics, bias, impact],
+      guideline: prisma,
+    }
+  - {
+      type: qualitative,
+      axes: [argument, methodology, integrity, impact],
+      guideline: srqr,
+    }
+severity_examples:
+  causality:
+    {
+      critical: "Temporality violation (reverse causation)",
+      major: "causal claim with uncontrolled confounding",
+      minor: "insufficient mechanism explanation",
+    }
+external_checks:
+  [prior-work-coherence, preregistration-match, publication-bias, plagiarism]

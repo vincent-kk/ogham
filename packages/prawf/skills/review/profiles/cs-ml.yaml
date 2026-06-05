@@ -1,0 +1,29 @@
+# Computer science and machine learning. Causality is weakened (only for papers
+# that make causal claims). Axis/framework/guideline ids stay verbatim.
+profile: cs-ml
+axis_frameworks:
+  argument: [contribution-clarity, logical-fallacies]
+  methodology: [ablation-study, reproducibility-badge, experimental-protocol]
+  statistics:
+    [data-leakage, seed-variance, benchmark-fairness, baseline-fairness]
+  causality: [ablation-causal, confound-control] # weakened — causal-claim papers only
+  bias: [dataset-bias, artifact-availability]
+  integrity: [code-data-availability, benchmark-cherry-picking, plagiarism]
+  impact: [acl-excitement, sota-contribution]
+disabled_axes: []
+paper_types:
+  - { type: empirical-ml, axes: [all], guideline: neurips-checklist }
+  - {
+      type: systems-benchmark,
+      axes: [methodology, statistics, bias, integrity],
+      guideline: acm-artifact,
+    }
+  - { type: theory-ml, axes: [argument, statistics], guideline: null }
+severity_examples:
+  statistics:
+    {
+      critical: "test-set contamination (data leakage)",
+      major: "unreported seed variance / unfair baseline",
+      minor: "undisclosed hyperparameters",
+    }
+external_checks: [benchmark-leakage, sota-comparison-fairness, code-reproduction]
