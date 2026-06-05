@@ -20,10 +20,10 @@ mcp_t_rule_query({ action: "list", path: "<target-path>" })
 ```
 
 After `mcp_t_drift_detect` completes, call `mcp_t_lca_resolve` for each move candidate
-(requires drift_detect output to identify reclassification targets):
+(requires mcp_t_drift_detect output to identify reclassification targets):
 
 ```
-// Sequential — after drift_detect:
+// Sequential — after mcp_t_drift_detect:
 mcp_t_lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
 // Returns: { lcaPath: string, recommendedParent: string, confidence: number }
 ```
@@ -67,6 +67,7 @@ No changes applied. Remove --dry-run to execute.
 ```
 
 <!-- [INTERACTIVE] AskUserQuestion: Stage 2 restructure plan approval -->
+
 Without `--auto-approve`, request explicit user confirmation:
 
 ```

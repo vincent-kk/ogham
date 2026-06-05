@@ -1,9 +1,9 @@
 ---
 name: setup
 user_invocable: true
-description: "[filid:setup] Initialize FCA-AI fractal architecture: create config, apply selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only."
-argument-hint: "[path] [--rules]"
-version: "1.4.0"
+description: '[filid:setup] Initialize FCA-AI fractal architecture: create config, apply selected rule docs via a count-aware prompt (0/1/N optional rules), scan the directory tree, and generate missing INTENT.md and DETAIL.md files. Pass `--rules` to update rule docs only.'
+argument-hint: '[path] [--rules]'
+version: '1.4.0'
 complexity: medium
 plugin: filid
 ---
@@ -13,7 +13,7 @@ plugin: filid
 > marked `<!-- [INTERACTIVE] -->` points where a user decision is required.
 > After each phase completes, IMMEDIATELY proceed to the next.
 > NEVER yield the turn after an MCP tool call returns or between non-interactive phases.
-> Large tool responses (e.g., fractal_scan) are internal working data —
+> Large tool responses (e.g., mcp_t_fractal_scan) are internal working data —
 > do NOT summarize them to the user. Skip phases with no work silently.
 > At `<!-- [INTERACTIVE] -->` markers, present the appropriate prompt
 > shape for `status.entries.length` (see Phase 0c), wait for the user's
@@ -96,10 +96,11 @@ rule docs and template drift. The response partitions rules into
 `status.entries[]` (optional — feeds Phase 0c UI) and `status.autoDeployed[]`
 (required — auto-synced silently). Each optional entry carries
 `templateHash` / `deployedHash` / `inSync` so drift can be surfaced in the UI.
-If `status.pluginRootResolved === false`, fail fast and skip Phase 0c/0d.
+If `status.pluginRootResolved === false`, fail fast and skip Phase 0c/0d
+(do not run the rule-docs prompt or deployment).
 See [sections/section-0-rule-docs.md — Phase 0b](./sections/section-0-rule-docs.md#phase-0b--rule-docs-status).
 
-**→ Immediately proceed to Phase 0c.**
+**→ Otherwise, immediately proceed to Phase 0c.**
 
 ### Phase 0c — Rule Docs Prompt <!-- [INTERACTIVE] -->
 
@@ -182,15 +183,15 @@ See [sections/section-5-validation-report.md](./sections/section-5-validation-re
 
 ## Available MCP Tools
 
-| Tool                     | Action     | Purpose                                                            |
-| ------------------------ | ---------- | ------------------------------------------------------------------ |
-| `mcp_t_project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)               |
-| `mcp_t_rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                          |
-| `mcp_t_rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)    |
-| `mcp_t_rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering              |
-| `mcp_t_fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy  |
-| `mcp_t_fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function     |
-| `mcp_t_ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)          |
+| Tool                     | Action     | Purpose                                                           |
+| ------------------------ | ---------- | ----------------------------------------------------------------- |
+| `mcp_t_project_init`     | —          | Create `.filid/config.json` with defaults (Phase 0a)              |
+| `mcp_t_rule_docs_sync`   | `status`   | Inspect current rule doc state (Phase 0b)                         |
+| `mcp_t_rule_docs_sync`   | `sync`     | Persist selection + copy/remove `.claude/rules/*.md` (Phase 0d)   |
+| `mcp_t_rule_docs_sync`   | `manifest` | (Optional) Fetch raw manifest for custom UI rendering             |
+| `mcp_t_fractal_scan`     | —          | Scan filesystem and retrieve complete project directory hierarchy |
+| `mcp_t_fractal_navigate` | `classify` | Classify a single directory as fractal / organ / pure-function    |
+| `mcp_t_ast_grep_search`  | —          | AST pattern matching (optional — requires @ast-grep/napi)         |
 
 ## Options
 

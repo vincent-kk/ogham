@@ -16,14 +16,14 @@ The A/B/C subagent returns this handoff payload to its caller (the pipeline main
 
 ```yaml
 SubagentReturn:
-  committee: list<PersonaId>              # elected by mcp_t_review_manage(elect-committee)
-  deliberation_mode: DeliberationMode     # see enum below
-  failure_reason: FailureReason           # see enum below; "none" when healthy
+  committee: list<PersonaId> # elected by mcp_t_review_manage(elect-committee)
+  deliberation_mode: DeliberationMode # see enum below
+  failure_reason: FailureReason # see enum below; "none" when healthy
   paths_to_artifacts:
-    structure_check: string | null        # .filid/review/<branch>/structure-check.md
-    session: string                       # .filid/review/<branch>/session.md
-    verification_metrics: string          # .filid/review/<branch>/verification-metrics.md
-    verification_structure: string        # .filid/review/<branch>/verification-structure.md
+    structure_check: string | null # .filid/review/<branch>/structure-check.md
+    session: string # .filid/review/<branch>/session.md
+    verification_metrics: string # .filid/review/<branch>/verification-metrics.md
+    verification_structure: string # .filid/review/<branch>/verification-structure.md
 ```
 
 Every field is mandatory. The main orchestrator cross-checks `committee` against `session.md`, then branches on the pair `(deliberation_mode, failure_reason)` via the gate below.
@@ -33,7 +33,7 @@ Every field is mandatory. The main orchestrator cross-checks `committee` against
 ```yaml
 deliberation_mode:
   type: enum
-  values: ["team", "solo-adjudicator", "chairperson-forbidden"]
+  values: ['team', 'solo-adjudicator', 'chairperson-forbidden']
   semantics:
     team: committee.length >= 2; main MUST perform TeamCreate(review-<branch>) and spawn one Task per persona.
     solo-adjudicator: committee == ["adjudicator"]; main MUST dispatch a single standalone Task (no TeamCreate).
@@ -45,7 +45,13 @@ deliberation_mode:
 ```yaml
 failure_reason:
   type: enum
-  values: ["none", "phase-d-team-spawn-unavailable", "team-incomplete", "round5-exhaust"]
+  values:
+    [
+      'none',
+      'phase-d-team-spawn-unavailable',
+      'team-incomplete',
+      'round5-exhaust',
+    ]
   semantics:
     none: healthy handoff; verdict derived from Phase D quorum result.
     phase-d-team-spawn-unavailable: TeamCreate errored or the runtime refused the spawn call.
@@ -61,10 +67,13 @@ The main orchestrator MUST evaluate the gate in order — first match wins:
 verdict_gate:
   if deliberation_mode in {"chairperson-forbidden", null}:
     verdict: INCONCLUSIVE
-    rationale: "Phase D deliberation integrity not established; block merge."
+    rationale: 'Phase D deliberation integrity not established; block merge.'
   elif failure_reason != "none":
     verdict: INCONCLUSIVE
     rationale: ${failure_reason}
+  elif deliberation_mode == "team" and committee.length < 2:
+    verdict: INCONCLUSIVE
+    rationale: 'team mode elected but committee too small to form a quorum; block merge.'
   else:
     verdict: derived from Phase D quorum result (APPROVED | REQUEST_CHANGES | INCONCLUSIVE)
 ```
@@ -73,15 +82,15 @@ A missing or `null` `deliberation_mode` is handled identically to `chairperson-f
 
 ### review-report.md frontmatter (mandatory)
 
-| Field | Type | Required | Consumer |
-|---|---|---|---|
-| `verdict` | `APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE` | yes | pipeline cached-verdict short-circuit |
-| `branch` | string | yes | revalidate |
-| `base_ref` | string | yes | revalidate |
-| `content_hash` | string | conditional | cache lookup on next review |
-| `committee` | `PersonaId[]` | yes | audit trail |
-| `deliberation_mode` | `team \| solo-adjudicator \| chairperson-forbidden` | yes | replayability |
-| `generated_at` | ISO-8601 string | yes | freshness check |
+| Field               | Type                                                | Required    | Consumer                              |
+| ------------------- | --------------------------------------------------- | ----------- | ------------------------------------- |
+| `verdict`           | `APPROVED \| REQUEST_CHANGES \| INCONCLUSIVE`       | yes         | pipeline cached-verdict short-circuit |
+| `branch`            | string                                              | yes         | revalidate                            |
+| `base_ref`          | string                                              | yes         | revalidate                            |
+| `content_hash`      | string                                              | conditional | cache lookup on next review           |
+| `committee`         | `PersonaId[]`                                       | yes         | audit trail                           |
+| `deliberation_mode` | `team \| solo-adjudicator \| chairperson-forbidden` | yes         | replayability                         |
+| `generated_at`      | ISO-8601 string                                     | yes         | freshness check                       |
 
 Writers MUST emit all required fields. Readers (pipeline main, revalidate) grep-parse these fields; missing required fields trigger an `INCONCLUSIVE` fallback.
 

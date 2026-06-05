@@ -1,9 +1,9 @@
 ---
 name: review
 user_invocable: true
-description: "[filid:review] Run multi-persona consensus code review governance: structure check (Phase A), analysis & committee election (Phase B), parallel technical verification (Phase C1 metrics + C2 structure), then Phase D political consensus executed as a real Claude Code team (committee.length >= 2) or a single Task (committee.length == 1)."
-argument-hint: "[--scope branch|pr|commit] [--base REF] [--force] [--verbose] [--no-structure-check] [--solo]"
-version: "2.1.0"
+description: '[filid:review] Run multi-persona consensus code review governance: structure check (Phase A), analysis & committee election (Phase B), parallel technical verification (Phase C1 metrics + C2 structure), then Phase D political consensus executed as a real Claude Code team (committee.length >= 2) or a single Task (committee.length == 1).'
+argument-hint: '[--scope branch|pr|commit] [--base REF] [--force] [--verbose] [--no-structure-check] [--solo]'
+version: '2.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -17,12 +17,14 @@ plugin: filid
 > internal working data — do NOT summarize them to the user mid-execution.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required (unrecoverable error only)
 > 2. Terminal stage marker emitted: `Review verdict: (APPROVED|REQUEST_CHANGES|INCONCLUSIVE)`
 >    — after `review-report.md` + `fix-requests.md` are written, Step 4.5
 >    content-hash is persisted, and any Phase D team has been deleted.
 >
 > **HIGH-RISK YIELD POINTS** (strengthen vigilance here):
+>
 > 1. After Phase A/B background tasks complete → chain Step 3 immediately.
 > 2. After Phase C1/C2 background tasks complete → chain verification.md
 >    merge + Phase D immediately.
@@ -54,6 +56,7 @@ to subagents, then directly conducts Phase D (political consensus)
 using elected committee personas and a state machine.
 
 > **References**:
+>
 > - `state-machine.md` — round judgment rules (quorum, VETO branch, 5-round limit)
 > - `templates.md` — `review-report.md` / `fix-requests.md` / PR comment formats
 > - `contracts.md` — opinion frontmatter schema, committee → agent mapping, subagent prompt rules, post-completion verification fallback
@@ -117,10 +120,10 @@ runs.
 > `general-purpose` is chosen (not filid agents) because these phases
 > perform broad analysis that benefits from unrestricted tool access.
 
-| Phase | Model  | Phase file                        | Output file             |
-| ----- | ------ | --------------------------------- | ----------------------- |
-| A     | sonnet | `phases/phase-a-structure.md`     | `structure-check.md`    |
-| B     | haiku  | `phases/phase-b-analysis.md`      | `session.md`            |
+| Phase | Model  | Phase file                    | Output file          |
+| ----- | ------ | ----------------------------- | -------------------- |
+| A     | sonnet | `phases/phase-a-structure.md` | `structure-check.md` |
+| B     | haiku  | `phases/phase-b-analysis.md`  | `session.md`         |
 
 Resolve each phase file path via
 `${CLAUDE_PLUGIN_ROOT}/skills/review/phases/<phase>.md` (fallback:
@@ -173,10 +176,10 @@ immediately proceed to Step 3.**
 Phase C is split into two parallel halves to reduce per-subagent context
 load. Both run as `general-purpose` subagents in parallel.
 
-| Phase | Model  | Phase file                        | Output file                   | Scope                                                        |
-| ----- | ------ | --------------------------------- | ----------------------------- | ------------------------------------------------------------ |
-| C1    | sonnet | `phases/phase-c1-metrics.md`      | `verification-metrics.md`     | file-level metrics (LCOM4, CC, 3+12, coverage)               |
-| C2    | sonnet | `phases/phase-c2-structure.md`    | `verification-structure.md`   | structure, dependency acyclicity, drift, documentation, debt |
+| Phase | Model  | Phase file                     | Output file                 | Scope                                                        |
+| ----- | ------ | ------------------------------ | --------------------------- | ------------------------------------------------------------ |
+| C1    | sonnet | `phases/phase-c1-metrics.md`   | `verification-metrics.md`   | file-level metrics (LCOM4, CC, 3+12, coverage)               |
+| C2    | sonnet | `phases/phase-c2-structure.md` | `verification-structure.md` | structure, dependency acyclicity, drift, documentation, debt |
 
 **Prompt construction**: Use the literal templates in
 `prompt-templates.md` → Phase C1 / Phase C2. Each subagent reads
@@ -216,13 +219,12 @@ message and terminate.
    missing (legacy session.md without the field), derive it locally:
    - `committee == ['adjudicator']` → `solo-adjudicator`
    - `committee.length >= 2` → `team`
-   If `failure_reason` is missing, default to `none`.
+   - otherwise (empty or unrecognized committee) → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline `verdict_gate` blocks the merge as INCONCLUSIVE
+     If `failure_reason` is missing, default to `none`.
 2. Verify required artifacts exist. Always required: `session.md`,
    `verification-metrics.md`, `verification-structure.md`. Required only
    when Phase A ran (`NO_STRUCTURE_CHECK=false`): `structure-check.md`.
-   Any missing required artifact → set `deliberation_mode:
-   chairperson-forbidden`, `failure_reason: team-incomplete` so the
-   pipeline main blocks the merge via `verdict_gate`.
+   Any missing required artifact → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline main blocks the merge via `verdict_gate`.
 3. Emit the following fenced block verbatim as the terminal assistant
    message, substituting real values for every placeholder:
 
@@ -237,6 +239,7 @@ message and terminate.
        verification_metrics: <REVIEW_DIR>/verification-metrics.md
        verification_structure: <REVIEW_DIR>/verification-structure.md
    ```
+
 4. Terminate. Do NOT read Phase D's phase file, do NOT call `TeamCreate`,
    do NOT write `review-report.md` or `fix-requests.md`. The pipeline
    main will dispatch Phase D via the `verdict_gate` rule and write
@@ -363,14 +366,14 @@ COMPLETE.**
 /filid:review [--scope=branch|pr|commit] [--base=<ref>] [--force] [--verbose] [--no-structure-check] [--solo]
 ```
 
-| Option                  | Default  | Description                                        |
-| ----------------------- | -------- | -------------------------------------------------- |
-| `--scope`               | `branch` | Review scope (branch, pr, commit)                  |
-| `--base`                | auto     | Comparison base ref                                |
-| `--force`               | off      | Delete existing review, restart from Phase A       |
-| `--verbose`             | off      | Show detailed deliberation process                 |
-| `--no-structure-check`  | off      | Skip Phase A (faster; omits structure compliance)  |
-| `--solo`                | off      | Force `adjudicator` fast-path agent (integrated 6-perspective review, skips committee election and state machine) |
+| Option                 | Default  | Description                                                                                                       |
+| ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `--scope`              | `branch` | Review scope (branch, pr, commit)                                                                                 |
+| `--base`               | auto     | Comparison base ref                                                                                               |
+| `--force`              | off      | Delete existing review, restart from Phase A                                                                      |
+| `--verbose`            | off      | Show detailed deliberation process                                                                                |
+| `--no-structure-check` | off      | Skip Phase A (faster; omits structure compliance)                                                                 |
+| `--solo`               | off      | Force `adjudicator` fast-path agent (integrated 6-perspective review, skips committee election and state machine) |
 
 `--solo` does NOT take an argument. It always selects the `adjudicator`
 agent (`packages/filid/agents/adjudicator.md`), which covers all six

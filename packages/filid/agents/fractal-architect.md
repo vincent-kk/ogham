@@ -1,6 +1,6 @@
 ---
 name: fractal-architect
-description: "Pre-implementation architect focused on how modules should split, merge, and evolve."
+description: 'Pre-implementation architect focused on how modules should split, merge, and evolve.'
 tools: Read, Glob, Grep
 model: opus
 maxTurns: 40
@@ -87,7 +87,7 @@ or `restructurer` to apply. You never write them to disk yourself.
   tools (mcp_t_fractal_scan, mcp_t_fractal_navigate). Invoke manually for complex
   classification decisions.
 - `/filid:guide` — Reference role: skill runs directly via MCP
-  tools (fractal_scan, rule_query). Invoke manually for structural
+  tools (mcp_t_fractal_scan, mcp_t_rule_query). Invoke manually for structural
   guidance.
 - `/filid:structure-review` — Reference role: skill uses Task
   subagents (general-purpose). Invoke manually for deep structural or
@@ -97,4 +97,4 @@ or `restructurer` to apply. You never write them to disk yourself.
 - `/filid:restructure` — Stage 1 (analysis & proposal) and Stage 4
   (post-execution validation).
 - `/filid:sync` — Stage 3 analysis phase: review drift-analyzer
-  output, refine correction plan using lca_resolve.
+  output, refine correction plan using mcp_t_lca_resolve.

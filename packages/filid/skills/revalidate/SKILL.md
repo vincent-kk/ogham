@@ -1,9 +1,9 @@
 ---
 name: revalidate
 user_invocable: true
-description: "[filid:revalidate] Extract delta since resolve_commit_sha, verify accepted fixes resolved their issues, check rejected justifications for constitutional compliance, then render a final PASS or FAIL verdict with optional PR comment."
-argument-hint: ""
-version: "1.0.0"
+description: '[filid:revalidate] Extract delta since resolve_commit_sha, verify accepted fixes resolved their issues, check rejected justifications for constitutional compliance, then render a final PASS or FAIL verdict with optional PR comment.'
+argument-hint: ''
+version: '1.0.0'
 complexity: complex
 plugin: filid
 ---
@@ -14,10 +14,12 @@ plugin: filid
 > Large diff outputs are internal working data — do NOT summarize to the user.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required
 > 2. Terminal stage marker emitted: `Revalidate verdict: (PASS|FAIL)`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After parallel verification subagents return — chain verdict aggregation and `re-validate.md` write in the same turn
 > - After PR comment post — emit final verdict in the same turn
 
@@ -88,9 +90,9 @@ For each accepted fix item from `justifications.md`, append one row to
 `<REVIEW_DIR>/verification-ledger.md` using **exactly** this template:
 
 ```markdown
-| fix_id | target_path | rule_id | pre_count | post_count | file_was_modified | status |
-| ------ | ----------- | ------- | --------- | ---------- | ----------------- | ------ |
-| FIX-001 | <target_path> | <rule_id> | <integer from review-report> | TBD | <true|false> | TBD |
+| fix_id  | target_path   | rule_id   | pre_count                    | post_count | file_was_modified | status |
+| ------- | ------------- | --------- | ---------------------------- | ---------- | ----------------- | ------ | --- |
+| FIX-001 | <target_path> | <rule_id> | <integer from review-report> | TBD        | <true             | false> | TBD |
 ```
 
 Fill `pre_count` from `review-report.md` / `fix-requests.md`. Fill
@@ -147,7 +149,7 @@ For each debt item whose `file_path` is in the Delta:
 - If the file is **present** but any row is malformed (column count
   != 7, missing `fix_id`, or `pre_count` not a non-negative integer),
   pin verdict to `FAIL` with reason `verification-ledger.md parse
-  failed` and jump to the verdict write step.
+failed` and jump to the verdict write step.
 
 **Step 6.2 — Detect tampering.** For each row:
 
@@ -167,12 +169,12 @@ MCP tool for LCOM4/CC/3+12 — see table below). Filter violations by
 `ruleId == <rule_id>` and `path starts with <target_path>`. Write the
 integer count into `post_count`.
 
-| rule_id kind             | MCP tool                              | success = |
-| ------------------------ | ------------------------------------- | --------- |
-| structure violation      | `mcp_t_structure_validate`            | 0 matching violations |
-| LCOM4 violation          | `mcp_t_ast_analyze(analysisType: "lcom4", className)` | LCOM4 < 2 |
-| CC violation             | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15 |
-| 3+12 violation           | `mcp_t_test_metrics(action: "check-312")` | PASS |
+| rule_id kind        | MCP tool                                                   | success =             |
+| ------------------- | ---------------------------------------------------------- | --------------------- |
+| structure violation | `mcp_t_structure_validate`                                 | 0 matching violations |
+| LCOM4 violation     | `mcp_t_ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
+| CC violation        | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
+| 3+12 violation      | `mcp_t_test_metrics(action: "check-312")`                  | PASS                  |
 
 **Step 6.5 — Derive status.** Apply the DETAIL.md matrix
 `(pre_count, post_count, file_was_modified) → status`. The only path to
@@ -243,18 +245,18 @@ remaining unresolved items.
 
 ## Available MCP Tools
 
-| Tool                 | Action             | Purpose                                                         |
-| -------------------- | ------------------ | --------------------------------------------------------------- |
-| `mcp_t_review_manage`      | `normalize-branch` | Normalize branch name for review directory path                 |
-| `mcp_t_review_manage`      | `cleanup`          | Delete review session directory on PASS                         |
-| `mcp_t_ast_analyze`        | `tree-diff`        | Semantic diff of changed files since resolve_commit_sha         |
-| `mcp_t_ast_analyze`        | `lcom4`            | Verify LCOM4 < 2 after accepted fix                             |
-| `mcp_t_ast_analyze`        | `cyclomatic-complexity` | Verify CC <= 15 after accepted fix                         |
-| `mcp_t_test_metrics`       | `check-312`        | Verify 3+12 rule PASS after accepted fix                        |
-| `mcp_t_structure_validate` | —                  | Verify structure violation resolved after accepted fix          |
-| `mcp_t_debt_manage`        | `list`             | Retrieve existing debt items to check for resolution            |
-| `mcp_t_debt_manage`        | `resolve`          | Mark a debt item as resolved when its rule is now satisfied     |
-| `mcp_t_review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment |
+| Tool                       | Action                      | Purpose                                                     |
+| -------------------------- | --------------------------- | ----------------------------------------------------------- |
+| `mcp_t_review_manage`      | `normalize-branch`          | Normalize branch name for review directory path             |
+| `mcp_t_review_manage`      | `cleanup`                   | Delete review session directory on PASS                     |
+| `mcp_t_ast_analyze`        | `tree-diff`                 | Semantic diff of changed files since resolve_commit_sha     |
+| `mcp_t_ast_analyze`        | `lcom4`                     | Verify LCOM4 < 2 after accepted fix                         |
+| `mcp_t_ast_analyze`        | `cyclomatic-complexity`     | Verify CC <= 15 after accepted fix                          |
+| `mcp_t_test_metrics`       | `check-312`                 | Verify 3+12 rule PASS after accepted fix                    |
+| `mcp_t_structure_validate` | —                           | Verify structure violation resolved after accepted fix      |
+| `mcp_t_debt_manage`        | `list`                      | Retrieve existing debt items to check for resolution        |
+| `mcp_t_debt_manage`        | `resolve`                   | Mark a debt item as resolved when its rule is now satisfied |
+| `mcp_t_review_manage`      | `format-revalidate-comment` | Format re-validation results into collapsible PR comment    |
 
 ## Options
 
@@ -278,6 +280,6 @@ Verdict:  PASS | FAIL
 
 Steps:    1 (Load) → 2 (Delta) → [3 + 4 + 5 in parallel] → 6 (Verdict) → 7 (PR) → 8 (Cleanup on PASS)
 MCP tools: mcp_t_review_manage(normalize-branch, cleanup), mcp_t_ast_analyze(tree-diff, lcom4, cyclomatic-complexity),
-           test_metrics(check-312), structure_validate, mcp_t_debt_manage(list, resolve)
+           mcp_t_test_metrics(check-312), mcp_t_structure_validate, mcp_t_debt_manage(list, resolve)
 Cleanup:  PASS → .filid/review/<branch>/ deleted | FAIL → kept for inspection
 ```

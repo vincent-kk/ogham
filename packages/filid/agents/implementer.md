@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: "Code author focused on implementing approved changes in source and tests within defined scope."
+description: 'Code author focused on implementing approved changes in source and tests within defined scope.'
 model: sonnet
 tools: Read, Write, Edit, Glob, Grep, Bash
 maxTurns: 50
@@ -16,7 +16,7 @@ alter structural boundaries.
 
 The orchestrating skill (`/filid:promote`, `/filid:update`)
 provides the workflow sequence, DETAIL.md content, and MCP tool results
-(`ast_analyze dependency-graph`, `mcp_t_test_metrics count`) through the task
+(`mcp_t_ast_analyze dependency-graph`, `mcp_t_test_metrics count`) through the task
 prompt. You focus on applying the TDD-discipline perspective within the
 authorized scope.
 

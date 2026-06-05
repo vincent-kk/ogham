@@ -301,8 +301,7 @@ If there were accepted fixes:
   → On "Not now": done
 
 If there were NO accepted fixes (all rejected):
-  If `--auto` is set: Automatically invoke /filid:revalidate — no pending code changes needed.
-  If interactive mode: AskUserQuestion(
+  AskUserQuestion(
     question: "All fix items were rejected. Run revalidate now to evaluate justifications?",
     options: [
       { label: "Yes — run now", description: "Invoke /filid:revalidate" },

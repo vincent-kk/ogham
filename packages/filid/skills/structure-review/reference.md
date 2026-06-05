@@ -123,14 +123,14 @@ Recommendations:
 **mcp_t_fractal_navigate classify:**
 
 ```
-mcp_t_fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from fractal_scan */])
+mcp_t_fractal_navigate(action: "classify", path: "packages/filid/src/parser", entries: [/* nodes from mcp_t_fractal_scan */])
 // Returns: { type: "fractal" | "organ", hasIntentMd: boolean }
 ```
 
-**ast_analyze lcom4:**
+**mcp_t_ast_analyze lcom4:**
 
 ```
-// Read file first, then call ast_analyze with source content
+// Read file first, then call mcp_t_ast_analyze with source content
 const source = readFile("src/core/index.ts")
 mcp_t_ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 // Returns: { lcom4: 1 }
@@ -139,8 +139,8 @@ mcp_t_ast_analyze(source: source, analysisType: "lcom4", className: "MyClass")
 
 ## MCP Tool Reference
 
-| Tool               | Action / Parameters                             | Stage | Purpose                                      |
-| ------------------ | ----------------------------------------------- | ----- | -------------------------------------------- |
+| Tool                     | Action / Parameters                             | Stage | Purpose                                      |
+| ------------------------ | ----------------------------------------------- | ----- | -------------------------------------------- |
 | `mcp_t_fractal_scan`     | `path: cwd`                                     | 1, 5  | Retrieve module tree; verify classifications |
 | `mcp_t_fractal_navigate` | `action: "classify", path, entries`             | 1     | Classify a specific directory                |
 | `mcp_t_doc_compress`     | `mode: "auto"`                                  | 2     | Check document size                          |

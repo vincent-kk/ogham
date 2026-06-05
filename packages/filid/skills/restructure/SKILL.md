@@ -1,9 +1,9 @@
 ---
 name: restructure
 user_invocable: false
-description: "[filid:restructure] Analyze project directory structure and apply fractal principle restructuring through a proposal, user approval, execution, and validation workflow with optional dry-run and auto-approve modes."
-argument-hint: "[path] [--dry-run] [--auto-approve]"
-version: "1.0.0"
+description: '[filid:restructure] Analyze project directory structure and apply fractal principle restructuring through a proposal, user approval, execution, and validation workflow with optional dry-run and auto-approve modes.'
+argument-hint: '[path] [--dry-run] [--auto-approve]'
+version: '1.0.0'
 complexity: complex
 plugin: filid
 ---
@@ -17,10 +17,12 @@ plugin: filid
 > MODEL applies to every stage without exception.
 >
 > **Valid reasons to yield**:
+>
 > 1. Stage 2 interactive approval active (no `--auto-approve`)
 > 2. Terminal stage marker emitted: `Restructure complete: N moves applied` or `Restructure dry-run complete`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After parallel MCP calls (`mcp_t_fractal_scan`, `mcp_t_drift_detect`, `mcp_t_rule_query`) — chain `mcp_t_lca_resolve` and `fractal-architect` delegation without pause
 > - After `fractal-architect` returns proposal — chain Stage 2 approval or `--auto-approve` execution in the same turn
 > - Stage 3 `restructurer` execution — do NOT pause between file moves, renames, or index.ts creations
@@ -65,6 +67,7 @@ See [reference.md Section 1](./reference.md#section-1--analysis--proposal).
 The restructuring plan is presented to the user with a summary of affected files.
 Explicit approval is required before any changes are made.
 `--auto-approve` skips this stage.
+`--dry-run` presents the plan, emits the terminal marker `Restructure dry-run complete`, and ENDS execution (Stages 3-4 are skipped).
 See [reference.md Section 2](./reference.md#section-2--plan-review--approval).
 
 ### Stage 3 — Execution
@@ -91,8 +94,8 @@ See [reference.md Section 4](./reference.md#section-4--validation).
 
 ## Available MCP Tools
 
-| Tool                 | Stage | Purpose                             |
-| -------------------- | ----- | ----------------------------------- |
+| Tool                       | Stage | Purpose                             |
+| -------------------------- | ----- | ----------------------------------- |
 | `mcp_t_fractal_scan`       | 1     | Full structure scan                 |
 | `mcp_t_drift_detect`       | 1     | Detect fractal principle deviations |
 | `mcp_t_lca_resolve`        | 1     | Resolve move targets via LCA        |
@@ -119,8 +122,8 @@ See [reference.md Section 4](./reference.md#section-4--validation).
 
 ```
 Stages:  Analysis → Plan → Execute → Validate
-         Stage 1: fractal_scan + drift_detect + rule_query run in parallel;
-                  lca_resolve runs after drift_detect
+         Stage 1: mcp_t_fractal_scan + mcp_t_drift_detect + mcp_t_rule_query run in parallel;
+                  mcp_t_lca_resolve runs after mcp_t_drift_detect
 Agents:  fractal-architect (Stage 1, 4), restructurer (Stage 3)
 Dry-run: Prints plan then exits — no file changes
 ```

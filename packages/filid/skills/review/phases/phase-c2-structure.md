@@ -139,7 +139,7 @@ tools_executed:
   - mcp_t_structure_validate
   - mcp_t_ast_analyze(dependency-graph)
   - mcp_t_ast_analyze(tree-diff)
-  - drift_detect
+  - mcp_t_drift_detect
   - mcp_t_doc_compress
   - mcp_t_debt_manage(list)
   - mcp_t_debt_manage(calculate-bias)

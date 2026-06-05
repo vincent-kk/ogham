@@ -23,7 +23,7 @@ when the native tool is genuinely unavailable.
 ### Search Request
 
 ```
-Tool: ast_grep_search
+Tool: mcp_t_ast_grep_search
 Input:
   pattern: <user pattern>
   language: <language>
@@ -35,7 +35,7 @@ Input:
 ### Replace Request
 
 ```
-Tool: ast_grep_replace
+Tool: mcp_t_ast_grep_replace
 Input:
   pattern: <user pattern>
   replacement: <user replacement>
@@ -93,29 +93,30 @@ Use `Glob` tool to find files matching the target language extensions.
 
 Sourced from `src/mcp/tools/ast-grep-shared.ts` (`EXT_TO_LANG`):
 
-| Language     | Extensions                              |
-| ------------ | --------------------------------------- |
-| javascript   | `.js`, `.mjs`, `.cjs`, `.jsx`           |
-| typescript   | `.ts`, `.mts`, `.cts`                   |
-| tsx          | `.tsx`                                  |
-| python       | `.py`                                   |
-| ruby         | `.rb`                                   |
-| go           | `.go`                                   |
-| rust         | `.rs`                                   |
-| java         | `.java`                                 |
-| kotlin       | `.kt`, `.kts`                           |
-| swift        | `.swift`                                |
-| c            | `.c`, `.h`                              |
-| cpp          | `.cpp`, `.cc`, `.cxx`, `.hpp`           |
-| csharp       | `.cs`                                   |
-| html         | `.html`, `.htm`                         |
-| css          | `.css`                                  |
-| json         | `.json`                                 |
-| yaml         | `.yaml`, `.yml`                         |
+| Language   | Extensions                    |
+| ---------- | ----------------------------- |
+| javascript | `.js`, `.mjs`, `.cjs`, `.jsx` |
+| typescript | `.ts`, `.mts`, `.cts`         |
+| tsx        | `.tsx`                        |
+| python     | `.py`                         |
+| ruby       | `.rb`                         |
+| go         | `.go`                         |
+| rust       | `.rs`                         |
+| java       | `.java`                       |
+| kotlin     | `.kt`, `.kts`                 |
+| swift      | `.swift`                      |
+| c          | `.c`, `.h`                    |
+| cpp        | `.cpp`, `.cc`, `.cxx`, `.hpp` |
+| csharp     | `.cs`                         |
+| html       | `.html`, `.htm`               |
+| css        | `.css`                        |
+| json       | `.json`                       |
+| yaml       | `.yaml`, `.yml`               |
 
 #### Glob Patterns
 
 For language `typescript`:
+
 ```
 **/*.ts
 **/*.mts
@@ -125,6 +126,7 @@ For language `typescript`:
 #### Exclusions
 
 Always exclude these directories:
+
 - `node_modules/`
 - `.git/`
 - `dist/`
@@ -136,13 +138,13 @@ Always exclude these directories:
 
 AST meta-variables are converted to regex patterns for Grep:
 
-| Meta-Variable Pattern | Regex Approximation | Matches                           |
-| --------------------- | ------------------- | --------------------------------- |
-| `$NAME`               | `[\w.]+`            | Single identifier or dotted path  |
-| `$VALUE`              | `[\w.]+`            | Single value expression           |
-| `$TYPE`               | `[\w.<>,\[\] ]+`    | Type annotation                   |
-| `$$$ARGS`             | `[\s\S]*?`          | Multiple items (non-greedy)       |
-| `$$$BODY`             | `[\s\S]*?`          | Block body (non-greedy)           |
+| Meta-Variable Pattern | Regex Approximation | Matches                          |
+| --------------------- | ------------------- | -------------------------------- |
+| `$NAME`               | `[\w.]+`            | Single identifier or dotted path |
+| `$VALUE`              | `[\w.]+`            | Single value expression          |
+| `$TYPE`               | `[\w.<>,\[\] ]+`    | Type annotation                  |
+| `$$$ARGS`             | `[\s\S]*?`          | Multiple items (non-greedy)      |
+| `$$$BODY`             | `[\s\S]*?`          | Block body (non-greedy)          |
 
 **Conversion algorithm**:
 

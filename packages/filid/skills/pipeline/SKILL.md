@@ -18,7 +18,7 @@ plugin: filid
 > stage runs in a subagent (context isolation for its ~100k token consumption).
 > Phase D of `filid:review` runs **in the main orchestrator** — the A/B/C
 > subagent returns `{ committee, deliberation_mode, failure_reason,
-> paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
+paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
 > fail via the `verdict_gate` rule. All other stages (`pr-create`,
 > `filid:resolve`, `filid:revalidate`) also execute directly in the main
 > context via `Skill()`.
@@ -215,13 +215,14 @@ Apply the `verdict_gate` rule (spec:
 `packages/filid/skills/review/DETAIL.md` → `## API Contracts`) in
 priority order — first match wins:
 
-| Condition                                                 | Dispatch | Verdict                                     |
-| --------------------------------------------------------- | -------- | ------------------------------------------- |
-| existing `review-report.md` contains a `verdict:` field   | skip     | cached verdict (no Phase D dispatch)        |
-| `deliberation_mode` is `chairperson-forbidden` or `null`  | fail     | `INCONCLUSIVE`                              |
-| `failure_reason != "none"`                                | fail     | `INCONCLUSIVE` (rationale = failure_reason) |
-| `deliberation_mode == "solo-adjudicator"`                 | solo     | from the single adjudicator Task            |
-| `deliberation_mode == "team"` AND `committee.length >= 2` | team     | from Phase D quorum result                  |
+| Condition                                                   | Dispatch | Verdict                                                   |
+| ----------------------------------------------------------- | -------- | --------------------------------------------------------- |
+| existing `review-report.md` contains a `verdict:` field     | skip     | cached verdict (no Phase D dispatch)                      |
+| `deliberation_mode` is `chairperson-forbidden` or `null`    | fail     | `INCONCLUSIVE`                                            |
+| `failure_reason != "none"`                                  | fail     | `INCONCLUSIVE` (rationale = failure_reason)               |
+| `deliberation_mode == "solo-adjudicator"`                   | solo     | from the single adjudicator Task                          |
+| `deliberation_mode == "team"` AND `committee.length >= 2`   | team     | from Phase D quorum result                                |
+| _any other state (e.g. `team` with `committee.length < 2`)_ | fail     | `INCONCLUSIVE` (rationale: incomplete deliberation state) |
 
 Dispatch actions (see `review/phases/phase-d-deliberation.md` Step D.1):
 
@@ -257,10 +258,7 @@ subagent exits before Phase D.
    3. Query existing comments via `gh pr view --json comments --jq '.comments[].body'` (Bash).
       If a `Code Review Governance` comment already exists, check that
       its body contains ALL three structural markers emitted only by
-      `review_manage format-pr-comment`:
-      1. `<details><summary>Phase A — Structure Compliance</summary>`
-      2. `<details><summary>Review Report (Phase B~D)</summary>`
-      3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``If any marker is missing OR the comment was hand-rolled, **edit it
+      `mcp_t_review_manage format-pr-comment`: 1. `<details><summary>Phase A — Structure Compliance</summary>` 2. `<details><summary>Review Report (Phase B~D)</summary>` 3. Footer line `> Full report: \`.filid/review/<normalized-branch>/review-report.md\``If any marker is missing OR the comment was hand-rolled, **edit it
 in place** via`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body=@<file>`(obtain numeric`id`via`gh api repos/<owner>/<repo>/issues/<pr>/comments`).
    4. Otherwise post fresh via `gh pr comment --body-file <file>`.
 3. **Verdict decision** (read `verdict` from `review-report.md`
