@@ -1,14 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { loadConfig } from "../../config/config-loader/config-loader.js";
-import { handleLensContext } from "../../tools/lens-context/lens-context.js";
-import { handleLensNavigate } from "../../tools/lens-navigate/lens-navigate.js";
-import { handleLensRead } from "../../tools/lens-read/lens-read.js";
-import { handleLensSearch } from "../../tools/lens-search/lens-search.js";
-import { handleLensStatus } from "../../tools/lens-status/lens-status.js";
-import { GraphCache } from "../../vault/graph-cache/graph-cache.js";
-import { VaultRouter } from "../../vault/vault-router/vault-router.js";
+import { loadConfig } from "../../config/configLoader/configLoader.js";
+import { handleLensContext } from "../../tools/lensContext/lensContext.js";
+import { handleLensNavigate } from "../../tools/lensNavigate/lensNavigate.js";
+import { handleLensRead } from "../../tools/lensRead/lensRead.js";
+import { handleLensSearch } from "../../tools/lensSearch/lensSearch.js";
+import { handleLensStatus } from "../../tools/lensStatus/lensStatus.js";
+import { GraphCache } from "../../vault/graphCache/graphCache.js";
+import { VaultRouter } from "../../vault/vaultRouter/vaultRouter.js";
 import { VERSION } from "../../version.js";
 
 import { toolError, toolResult } from "../shared/shared.js";

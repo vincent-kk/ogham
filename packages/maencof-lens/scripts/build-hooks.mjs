@@ -34,7 +34,9 @@ console.log("  Windows hook shim -> bridge/run-hook.cmd");
 // would land under the LIGHT 10 KB tier — pattern matches maencof's caps.
 const MAX_HOOK_BYTES = 40 * 1024;
 
-const hookEntries = ["session-start"];
+// `name` is the bridge output basename (kebab — referenced by hooks.json and
+// kept stable). `entry` is the camelCase src module/dir basename.
+const hookEntries = [{ name: "session-start", entry: "sessionStart" }];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
 // of X is not supported"). cross-spawn (CJS, pulled via @ogham/cross-platform/
@@ -46,9 +48,9 @@ const ESM_CJS_REQUIRE_BANNER =
   "const require = __cpCreateRequire(import.meta.url);\n";
 
 await Promise.all(
-  hookEntries.map((name) =>
+  hookEntries.map(({ name, entry }) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${name}/${name}.entry.ts`)],
+      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
       bundle: true,
       platform: "node",
       target: "node20",
@@ -110,7 +112,7 @@ const FORBIDDEN_ALIAS_PATTERNS = [/@ogham\/maencof\b/, /\bscanVault\b/];
 
 const violations = [];
 
-for (const name of hookEntries) {
+for (const { name } of hookEntries) {
   const file = resolve(root, `bridge/${name}.mjs`);
   const { size } = await stat(file);
   if (size > MAX_HOOK_BYTES) {
@@ -139,8 +141,8 @@ if (violations.length > 0) {
   console.error(
     "\nHooks must stay thin (Node builtins only). External runtimes and\n" +
       "maencof modules belong in mcp-server.cjs / skill paths, not in hook\n" +
-      "bundles. See packages/maencof/src/types/dialogue-config-guard.ts and\n" +
-      "maencof-lens/src/config/config-schema/guard/config-guard.ts for the\n" +
+      "bundles. See packages/maencof/src/types/dialogueConfigGuard.ts and\n" +
+      "maencof-lens/src/config/configSchema/guard/configGuard.ts for the\n" +
       "zod-free guard pattern.",
   );
   process.exit(1);

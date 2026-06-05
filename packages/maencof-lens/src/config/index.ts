@@ -2,9 +2,9 @@ export {
   loadConfig,
   writeConfig,
   createDefaultConfig,
-} from "./config-loader/index.js";
-export { VaultConfigSchema, LensConfigSchema } from "./config-schema/index.js";
-export type { VaultConfig, LensConfig } from "./config-schema/index.js";
+} from "./configLoader/index.js";
+export { VaultConfigSchema, LensConfigSchema } from "./configSchema/index.js";
+export type { VaultConfig, LensConfig } from "./configSchema/index.js";
 export {
   DEFAULT_LAYERS,
   CONFIG_DIR,

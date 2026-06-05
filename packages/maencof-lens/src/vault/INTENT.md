@@ -4,9 +4,9 @@
 
 ## Structure
 
-- `graph-cache/` — 볼트별 KnowledgeGraph 메모리 캐시
-- `stale-detector/` — 인덱스 만료 감지
-- `vault-router/` — 다중 볼트 이름→설정 해석
+- `graphCache/` — 볼트별 KnowledgeGraph 메모리 캐시
+- `staleDetector/` — 인덱스 만료 감지
+- `vaultRouter/` — 다중 볼트 이름→설정 해석
 
 ## Boundaries
 

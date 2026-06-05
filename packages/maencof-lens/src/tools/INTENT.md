@@ -4,11 +4,11 @@
 
 ## Structure
 
-- `lens-context/` — 토큰 예산 기반 컨텍스트 조합
-- `lens-navigate/` — 그래프 이웃 탐색
-- `lens-read/` — 단일 문서 읽기
-- `lens-search/` — Spreading Activation 검색
-- `lens-status/` — 인덱스 상태 확인
+- `lensContext/` — 토큰 예산 기반 컨텍스트 조합
+- `lensNavigate/` — 그래프 이웃 탐색
+- `lensRead/` — 단일 문서 읽기
+- `lensSearch/` — Spreading Activation 검색
+- `lensStatus/` — 인덱스 상태 확인
 
 ## Boundaries
 

@@ -1,5 +1,5 @@
 /**
- * @file constants/config.ts
+ * @file config.ts
  * @description 렌즈 설정 파일 관련 상수
  */
 

@@ -10,15 +10,15 @@ export {
   loadConfig,
   writeConfig,
   createDefaultConfig,
-} from "./config/config-loader/config-loader.js";
+} from "./config/configLoader/configLoader.js";
 export {
   LensConfigSchema,
   VaultConfigSchema,
-} from "./config/config-schema/config-schema.js";
+} from "./config/configSchema/configSchema.js";
 export type {
   LensConfig,
   VaultConfig,
-} from "./config/config-schema/config-schema.js";
+} from "./config/configSchema/configSchema.js";
 export {
   DEFAULT_LAYERS,
   CONFIG_DIR,
@@ -26,16 +26,16 @@ export {
 } from "./config/defaults/defaults.js";
 
 // Vault
-export { VaultRouter } from "./vault/vault-router/vault-router.js";
-export { GraphCache } from "./vault/graph-cache/graph-cache.js";
-export { detectStale } from "./vault/stale-detector/stale-detector.js";
-export type { StaleInfo } from "./vault/stale-detector/stale-detector.js";
+export { VaultRouter } from "./vault/vaultRouter/vaultRouter.js";
+export { GraphCache } from "./vault/graphCache/graphCache.js";
+export { detectStale } from "./vault/staleDetector/staleDetector.js";
+export type { StaleInfo } from "./vault/staleDetector/staleDetector.js";
 
 // Filter
 export {
   computeEffectiveLayers,
   filterResultsByLayer,
-} from "./filter/layer-guard/layer-guard.js";
+} from "./filter/layerGuard/layerGuard.js";
 
 // MCP
 export { createLensServer } from "./mcp/server/server.js";

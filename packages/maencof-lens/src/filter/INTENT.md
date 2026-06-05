@@ -4,7 +4,7 @@
 
 ## Structure
 
-- `layer-guard/` — 2단계 레이어 필터링 로직
+- `layerGuard/` — 2단계 레이어 필터링 로직
 
 ## Boundaries
 

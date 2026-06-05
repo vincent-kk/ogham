@@ -4,8 +4,8 @@
 
 ## Structure
 
-- `config-loader/` — 설정 파일 읽기/쓰기/기본값 생성
-- `config-schema/` — Zod 기반 스키마 및 타입 정의
+- `configLoader/` — 설정 파일 읽기/쓰기/기본값 생성
+- `configSchema/` — Zod 기반 스키마 및 타입 정의
 - `defaults/` — 기본값 상수 (레이어, 디렉토리명, 파일명, 버전)
 
 ## Boundaries
@@ -23,4 +23,4 @@
 ### Never do
 
 - 순환 의존성 도입
-- 설정 파일에 직접 접근하지 않고 config-loader를 우회
+- 설정 파일에 직접 접근하지 않고 configLoader를 우회
