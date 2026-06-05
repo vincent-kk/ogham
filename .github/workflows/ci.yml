@@ -1,10 +1,27 @@
 name: CI
 
 on:
+  # Run CI only when real source/test code changes.
+  # Docs-only (**.md) or config/manifest-only (**.json) changes skip the matrix.
+  # A PR mixing code with docs/config still runs (any matched path triggers).
   push:
     branches: [main]
+    paths:
+      - "**.ts"
+      - "**.tsx"
+      - "**.js"
+      - "**.jsx"
+      - "**.mjs"
+      - "**.cjs"
   pull_request:
     branches: [main]
+    paths:
+      - "**.ts"
+      - "**.tsx"
+      - "**.js"
+      - "**.jsx"
+      - "**.mjs"
+      - "**.cjs"
 
 jobs:
   test:
