@@ -169,7 +169,7 @@ execution is COMPLETE.**
 | ------------------ | ---------- | -------------------------------------------------------------------------------------------------- |
 | `--solo`           | off        | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                    |
 | `--profile <name>` | auto       | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
-| `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                       |
+| `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD or FULL (profile-determined)                           |
 | `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env); `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`                |
 
 ## Quick Reference

@@ -95,6 +95,9 @@ Emit the terminal marker `prawf rebuttal: complete`.
 
 ## Quick Reference
 
+> **Note**: If `/prawf:review` already ran on the same paper in the same
+> `REVIEW_DIR`, pass a separate `--workdir` to avoid overwriting `rebuttal.md`.
+
 ```
 /prawf:rebuttal paper.pdf reviews.txt      # rebuttal letter + revision checklist
 /prawf:rebuttal --profile cs-ml            # CS/ML framing for the defense
