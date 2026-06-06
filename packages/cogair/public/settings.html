@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>cogair · settings</title>
-    <style>:root{--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent: #f5f5f7;--accent-soft: rgba(245, 245, 247, .08);--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field input,.field textarea{font:inherit;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.field input:focus,.field textarea:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.ratio-panel{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.ratio-row{display:flex;gap:8px;align-items:stretch}.provider-toggle{appearance:none;font:inherit;display:flex;align-items:center;gap:14px;flex:1;min-width:0;min-height:56px;padding:12px 16px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:background var(--transition),border-color var(--transition),opacity var(--transition)}.provider-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi)}.provider-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.provider-toggle[aria-checked=false]{opacity:.4;background:var(--bg)}.provider-toggle[aria-checked=false]:hover{opacity:.6}.provider-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;color:var(--fg)}.provider-icon svg{width:22px;height:22px;display:block}.provider-meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex-shrink:0}.provider-summary{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0;margin:0 4px 0 12px}.provider-summary:empty{display:none}.summary-chip{display:inline-flex;align-items:center;padding:2px 6px;font-size:9px;font-weight:500;letter-spacing:0;color:var(--fg-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;white-space:nowrap;text-transform:lowercase;font-variant-numeric:tabular-nums}.summary-chip[data-tone=warn]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 8%,transparent)}.summary-chip[data-tooltip]{position:relative;cursor:pointer}.summary-chip[data-tooltip]:after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translate(-50%);padding:6px 10px;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--fg);background:var(--muted-hi);border:1px solid var(--border-hi);border-radius:4px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px #0006;z-index:100;opacity:0;pointer-events:none;transition:opacity .12s ease}.summary-chip[data-tooltip]:hover:after{opacity:1}.provider-toggle[aria-checked=false] .provider-summary,.provider-toggle[data-unavailable=true] .provider-summary{opacity:.5}.provider-name{font-size:14px;font-weight:500;color:var(--fg);letter-spacing:-.01em}.provider-hint{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint)}.provider-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);min-width:48px;text-align:right}.provider-toggle[aria-checked=false] .provider-pct{color:var(--fg-faint)}.ratio-slider-wrap{padding:4px 16px}.ratio-slider-wrap input[type=range]{margin:0}.ratio-warn{margin:0;font-size:12px;color:var(--danger);padding:0 4px}.install-hint{margin:4px 0 0;padding:0 16px;font-size:11px;color:var(--fg-faint);line-height:1.6}.provider-toggle[data-unavailable=true]{cursor:not-allowed}.provider-toggle[data-unavailable=true]:hover{border-color:var(--border);background:var(--muted)}.provider-toggle[data-unavailable=true] .provider-hint{color:var(--danger)}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--muted);border-radius:999px;outline:none;cursor:pointer}input[type=range]:disabled{cursor:not-allowed;opacity:.5}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg);transition:transform var(--transition)}input[type=range]:disabled::-webkit-slider-thumb{background:var(--fg-faint)}input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.1)}input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg)}input[type=range]:disabled::-moz-range-thumb{background:var(--fg-faint)}input[type=range]:focus-visible{box-shadow:0 0 0 3px var(--accent-ring)}.ticks{position:relative;height:14px;margin:12px 9px 0;font-size:11px;color:var(--fg-muted)}.ticks span{position:absolute;top:0;transform:translate(-50%);white-space:nowrap}.ticks span[data-value="-2"]{left:0%}.ticks span[data-value="-1"]{left:25%}.ticks span[data-value="0"]{left:50%}.ticks span[data-value="1"]{left:75%}.ticks span[data-value="2"]{left:100%}.strength-current{display:inline-block;margin-top:12px;font-size:13px;color:var(--fg);padding:2px 10px;background:var(--muted);border-radius:4px;border:1px solid var(--border)}.radio-row{display:flex;gap:8px;flex-wrap:wrap}.radio{position:relative;cursor:pointer}.radio input{position:absolute;opacity:0;inset:0;cursor:pointer}.radio span{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg-muted);transition:border-color var(--transition),background var(--transition),color var(--transition)}.radio:hover span{border-color:var(--border-hi);color:var(--fg)}.radio input:checked+span{border-color:var(--fg);background:var(--muted-hi);color:var(--fg)}.radio input:focus-visible+span{box-shadow:0 0 0 3px var(--accent-ring)}.toggle{display:inline-flex;align-items:center;gap:12px;cursor:pointer;user-select:none;position:relative}.toggle.is-disabled{cursor:not-allowed;opacity:.5}.toggle input{position:absolute;opacity:0;inset:0;pointer-events:none}.toggle-track{width:36px;height:20px;background:var(--muted);border:1px solid var(--border);border-radius:999px;position:relative;transition:background var(--transition),border-color var(--transition);flex-shrink:0}.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--fg-muted);transition:transform var(--transition),background var(--transition)}.toggle input:checked~.toggle-track{background:var(--fg);border-color:var(--fg)}.toggle input:checked~.toggle-track .toggle-thumb{transform:translate(16px);background:var(--bg)}.toggle input:focus-visible~.toggle-track{box-shadow:0 0 0 3px var(--accent-ring)}.toggle-label{font-size:14px;color:var(--fg)}.advanced-toggle{appearance:none;font:inherit;display:inline-flex;align-items:center;justify-content:center;width:44px;min-height:56px;padding:0;background:var(--muted);color:var(--fg-muted);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;flex-shrink:0;transition:background var(--transition),border-color var(--transition),color var(--transition)}.advanced-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi);color:var(--fg)}.advanced-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.advanced-toggle[aria-expanded=true]{background:var(--muted-hi);border-color:var(--border-hi);color:var(--fg)}.advanced-toggle[disabled]{opacity:.4;cursor:not-allowed}.advanced-toggle-icon{display:inline-flex;width:20px;height:20px}.advanced-toggle-icon svg{width:100%;height:100%;transition:transform var(--transition)}.advanced-toggle[aria-expanded=true] .advanced-toggle-icon svg{transform:rotate(30deg)}.advanced-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.advanced-panel[hidden]{display:none}.advanced-panel.is-open{grid-template-rows:1fr}.advanced-panel-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px 16px;margin-top:4px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}.advanced-divider{margin:4px 0;border:0;border-top:1px solid var(--border)}.flag-row{width:100%;min-height:32px}.flag-desc{margin-left:auto;font-size:11px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;text-align:right}.flag-field{display:flex;flex-direction:column;gap:8px}.flag-field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.flag-hint{margin:0;font-size:11px;color:var(--fg-faint);line-height:1.6}.is-inert{opacity:.4;pointer-events:none}.warning-inline{font-size:11px;color:var(--danger);font-weight:600;line-height:1.5}.actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted)}.status.success{color:var(--fg)}.status.error{color:var(--danger)}.status ul{margin:4px 0 0 16px;padding:0;font-weight:400}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 480px){body{padding:24px 16px 64px}.ratio-slider-wrap{padding:4px 8px}.provider-toggle{padding:12px;gap:10px}.advanced-toggle{width:40px;min-height:52px}.advanced-panel-inner{padding:12px}}</style>
+    <style>:root{--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent: #f5f5f7;--accent-soft: rgba(245, 245, 247, .08);--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field input,.field textarea{font:inherit;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.field input:focus,.field textarea:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.ratio-panel{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.ratio-row{display:flex;gap:8px;align-items:stretch}.provider-toggle{appearance:none;font:inherit;display:flex;align-items:center;gap:14px;flex:1;min-width:0;min-height:56px;padding:12px 16px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:background var(--transition),border-color var(--transition),opacity var(--transition)}.provider-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi)}.provider-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.provider-toggle[aria-checked=false]{opacity:.4;background:var(--bg)}.provider-toggle[aria-checked=false]:hover{opacity:.6}.provider-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;color:var(--fg)}.provider-icon svg{width:22px;height:22px;display:block}.provider-meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex-shrink:0}.provider-summary{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0;margin:0 4px 0 12px}.provider-summary:empty{display:none}.summary-chip{display:inline-flex;align-items:center;padding:2px 6px;font-size:9px;font-weight:500;letter-spacing:0;color:var(--fg-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;white-space:nowrap;text-transform:lowercase;font-variant-numeric:tabular-nums}.summary-chip[data-tone=warn]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 8%,transparent)}.summary-chip[data-tooltip]{position:relative;cursor:pointer}.summary-chip[data-tooltip]:after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translate(-50%);padding:6px 10px;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--fg);background:var(--muted-hi);border:1px solid var(--border-hi);border-radius:4px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px #0006;z-index:100;opacity:0;pointer-events:none;transition:opacity .12s ease}.summary-chip[data-tooltip]:hover:after{opacity:1}.provider-toggle[aria-checked=false] .provider-summary,.provider-toggle[data-unavailable=true] .provider-summary{opacity:.5}.provider-name{font-size:14px;font-weight:500;color:var(--fg);letter-spacing:-.01em}.provider-hint{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint)}.provider-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);min-width:48px;text-align:right}.provider-toggle[aria-checked=false] .provider-pct{color:var(--fg-faint)}.ratio-slider-wrap{padding:4px 16px}.ratio-slider-wrap input[type=range]{margin:0}.ratio-warn{margin:0;font-size:12px;color:var(--danger);padding:0 4px}.install-hint{margin:4px 0 0;padding:0 16px;font-size:11px;color:var(--fg-faint);line-height:1.6}.provider-toggle[data-unavailable=true]{cursor:not-allowed}.provider-toggle[data-unavailable=true]:hover{border-color:var(--border);background:var(--muted)}.provider-toggle[data-unavailable=true] .provider-hint{color:var(--danger)}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--muted);border-radius:999px;outline:none;cursor:pointer}input[type=range]:disabled{cursor:not-allowed;opacity:.5}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg);transition:transform var(--transition)}input[type=range]:disabled::-webkit-slider-thumb{background:var(--fg-faint)}input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.1)}input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg)}input[type=range]:disabled::-moz-range-thumb{background:var(--fg-faint)}input[type=range]:focus-visible{box-shadow:0 0 0 3px var(--accent-ring)}.ticks{position:relative;height:14px;margin:12px 9px 0;font-size:11px;color:var(--fg-muted)}.ticks span{position:absolute;top:0;transform:translate(-50%);white-space:nowrap}.ticks span[data-value="-2"]{left:0%}.ticks span[data-value="-1"]{left:25%}.ticks span[data-value="0"]{left:50%}.ticks span[data-value="1"]{left:75%}.ticks span[data-value="2"]{left:100%}.strength-current{display:inline-block;margin-top:12px;font-size:13px;color:var(--fg);padding:2px 10px;background:var(--muted);border-radius:4px;border:1px solid var(--border)}.radio-row{display:flex;gap:8px;flex-wrap:wrap}.radio{position:relative;cursor:pointer}.radio input{position:absolute;opacity:0;inset:0;cursor:pointer}.radio span{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg-muted);transition:border-color var(--transition),background var(--transition),color var(--transition)}.radio:hover span{border-color:var(--border-hi);color:var(--fg)}.radio input:checked+span{border-color:var(--fg);background:var(--muted-hi);color:var(--fg)}.radio input:focus-visible+span{box-shadow:0 0 0 3px var(--accent-ring)}.toggle{display:inline-flex;align-items:center;gap:12px;cursor:pointer;user-select:none;position:relative}.toggle.is-disabled{cursor:not-allowed;opacity:.5}.toggle input{position:absolute;opacity:0;inset:0;pointer-events:none}.toggle-track{width:36px;height:20px;background:var(--muted);border:1px solid var(--border);border-radius:999px;position:relative;transition:background var(--transition),border-color var(--transition);flex-shrink:0}.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--fg-muted);transition:transform var(--transition),background var(--transition)}.toggle input:checked~.toggle-track{background:var(--fg);border-color:var(--fg)}.toggle input:checked~.toggle-track .toggle-thumb{transform:translate(16px);background:var(--bg)}.toggle input:focus-visible~.toggle-track{box-shadow:0 0 0 3px var(--accent-ring)}.toggle-label{font-size:14px;color:var(--fg)}.advanced-toggle{appearance:none;font:inherit;display:inline-flex;align-items:center;justify-content:center;width:44px;min-height:56px;padding:0;background:var(--muted);color:var(--fg-muted);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;flex-shrink:0;transition:background var(--transition),border-color var(--transition),color var(--transition)}.advanced-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi);color:var(--fg)}.advanced-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.advanced-toggle[aria-expanded=true]{background:var(--muted-hi);border-color:var(--border-hi);color:var(--fg)}.advanced-toggle[disabled]{opacity:.4;cursor:not-allowed}.advanced-toggle-icon{display:inline-flex;width:20px;height:20px}.advanced-toggle-icon svg{width:100%;height:100%;transition:transform var(--transition)}.advanced-toggle[aria-expanded=true] .advanced-toggle-icon svg{transform:rotate(30deg)}.advanced-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.advanced-panel[hidden]{display:none}.advanced-panel.is-open{grid-template-rows:1fr}.advanced-panel-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px 16px;margin-top:4px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}.advanced-divider{margin:4px 0;border:0;border-top:1px solid var(--border)}.flag-row{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:3px;align-items:center;width:100%}.flag-row .toggle-track{grid-column:1;grid-row:1 / span 2;align-self:center}.flag-row .toggle-label{grid-column:2;grid-row:1}.flag-desc{grid-column:2;grid-row:2;font-size:11px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;text-align:left;line-height:1.5}.flag-field{display:flex;flex-direction:column;gap:8px}.flag-field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.flag-hint{margin:0;font-size:11px;color:var(--fg-faint);line-height:1.6}.is-inert{opacity:.4;pointer-events:none}.warning-inline{font-size:11px;color:var(--danger);font-weight:600;line-height:1.5}.actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted)}.status.success{color:var(--fg)}.status.error{color:var(--danger)}.status ul{margin:4px 0 0 16px;padding:0;font-weight:400}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 480px){body{padding:24px 16px 64px}.ratio-slider-wrap{padding:4px 8px}.provider-toggle{padding:12px;gap:10px}.advanced-toggle{width:40px;min-height:52px}.advanced-panel-inner{padding:12px}}.engine-segment-row{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:0 2px}.engine-segment-label{font-size:12px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em}.engine-segment{display:inline-flex;gap:6px}.engine-segment .radio span{display:inline-flex;align-items:center;gap:6px}.engine-mark{width:14px;height:14px;flex-shrink:0}.engine-flags{display:flex;flex-direction:column;gap:16px}.engine-flags[hidden]{display:none}.engine-flags>.flag-hint,.engine-flags>.tier-model-map{padding-top:16px;border-top:1px solid var(--border)}.tier-model-map{display:grid;gap:12px}.tier-field{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:12px}.tier-field label{font-size:13px;color:var(--fg-muted)}.tier-select{width:100%;font-family:var(--mono);font-size:13px;color:var(--fg);background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;transition:border-color var(--transition)}.tier-select:focus{outline:none;border-color:var(--border-hi)}</style>
   </head>
   <body>
     <main class="shell">
@@ -14,8 +14,8 @@
           <span class="brand-tag">/ settings</span>
         </div>
         <p class="lede">
-          Routing, intervention, and provider defaults for codex / gemini
-          dispatch.
+          Routing, intervention, and provider defaults for codex / Google
+          engine (gemini or antigravity) dispatch.
         </p>
       </header>
 
@@ -219,28 +219,28 @@
                 max="100"
                 step="1"
                 value="50"
-                aria-label="codex / gemini ratio (0% = all codex, 100% = all gemini)"
+                aria-label="codex / Google ratio (0% = all codex, 100% = all Google)"
               />
             </div>
 
-            <div class="ratio-row" data-provider="gemini">
+            <div class="ratio-row" data-provider="google">
               <button
                 type="button"
                 id="toggle-gemini"
                 class="provider-toggle"
                 role="switch"
                 aria-checked="true"
-                aria-label="gemini provider"
+                aria-label="Google provider"
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path
-                      d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
+                      d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-0.013z"
                     />
                   </svg>
                 </span>
                 <span class="provider-meta">
-                  <span class="provider-name">gemini</span>
+                  <span class="provider-name">Google</span>
                   <span class="provider-hint" id="gemini-hint"
                     >click to toggle</span
                   >
@@ -258,7 +258,7 @@
                 class="advanced-toggle"
                 aria-expanded="false"
                 aria-controls="advanced-panel-gemini"
-                aria-label="gemini advanced settings"
+                aria-label="Google advanced settings"
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
@@ -278,9 +278,72 @@
                 </span>
               </button>
             </div>
-            <p class="install-hint" id="gemini-install-hint" hidden>
+            <div class="engine-segment-row">
+              <span class="engine-segment-label">engine</span>
+              <div
+                class="engine-segment"
+                role="radiogroup"
+                aria-label="Google engine — gemini or antigravity (mutually exclusive)"
+              >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="google-engine"
+                    value="gemini"
+                  /><span
+                    ><svg
+                      class="engine-mark"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
+                      /></svg
+                    >gemini</span
+                  ></label
+                >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="google-engine"
+                    value="antigravity"
+                  /><span
+                    ><svg
+                      class="engine-mark"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 2 2 22h20L12 2zm0 5L17.5 19h-11L12 7z"
+                      /></svg
+                    >antigravity</span
+                  ></label
+                >
+              </div>
+            </div>
+            <p
+              class="install-hint"
+              id="gemini-install-hint"
+              data-engine="gemini"
+              hidden
+            >
               Install: <code>npm install -g @google/gemini-cli</code> — reload
               after installing.
+            </p>
+            <p
+              class="install-hint"
+              id="antigravity-install-hint"
+              data-engine="antigravity"
+              hidden
+            >
+              Install:
+              <code
+                >curl -fsSL https://antigravity.google/cli/install.sh |
+                bash</code
+              >
+              — reload after installing, then sign in with <code>agy</code>.
             </p>
             <div
               class="advanced-panel"
@@ -298,7 +361,8 @@
                     placeholder="comma-separated, e.g. research, search, large-context"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest gemini when these appear in the prompt.</span
+                    >Hooks suggest the active Google engine when these appear in
+                    the prompt.</span
                   >
                 </label>
 
@@ -334,8 +398,8 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback. gemini has web-tool access by default, so auto is
-                    recommended for recency.
+                    fallback. Google engines have web-tool access by default, so
+                    auto is recommended for recency.
                   </p>
                 </div>
 
@@ -350,66 +414,159 @@
 
                 <hr class="advanced-divider" />
 
-                <label class="toggle flag-row">
-                  <input id="gemini-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc">skip approval prompts</span>
-                </label>
+                <div class="engine-flags" data-engine="gemini">
+                  <label class="toggle flag-row">
+                    <input id="gemini-yolo" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label">Skip approvals (--yolo)</span>
+                    <span class="flag-desc">skip approval prompts</span>
+                  </label>
 
-                <label class="toggle flag-row">
-                  <input id="gemini-sandbox" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label"
-                    >Isolated execution (--sandbox)</span
-                  >
-                  <span class="flag-desc">isolated execution environment</span>
-                </label>
+                  <label class="toggle flag-row">
+                    <input id="gemini-sandbox" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Isolated execution (--sandbox)</span
+                    >
+                    <span class="flag-desc"
+                      >isolated execution environment</span
+                    >
+                  </label>
 
-                <div class="flag-field" id="gemini-backend-wrap">
-                  <span class="flag-field-label">sandbox backend</span>
-                  <p class="flag-hint">
-                    Sandbox backend is only configurable when Sandbox is
-                    enabled.
-                  </p>
-                  <div class="radio-row" id="gemini-backend-radio">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="docker"
-                      /><span>docker</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="podman"
-                      /><span>podman</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="sandbox-exec"
-                      /><span>sandbox-exec</span></label
-                    >
+                  <div class="flag-field" id="gemini-backend-wrap">
+                    <span class="flag-field-label">sandbox backend</span>
+                    <p class="flag-hint">
+                      Sandbox backend is only configurable when Sandbox is
+                      enabled.
+                    </p>
+                    <div class="radio-row" id="gemini-backend-radio">
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="auto"
+                        /><span>auto</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="docker"
+                        /><span>docker</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="podman"
+                        /><span>podman</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="sandbox-exec"
+                        /><span>sandbox-exec</span></label
+                      >
+                    </div>
+                    <p class="flag-hint">
+                      Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
+                      gemini-cli pick; <code>sandbox-exec</code> is macOS only.
+                    </p>
                   </div>
-                  <p class="flag-hint">
-                    Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
-                    gemini-cli pick; <code>sandbox-exec</code> is macOS only.
+
+                  <p class="warning-inline" data-engine="gemini">
+                    &#9888; Gemini CLI service ends 2026-06-18 — switch the
+                    engine to antigravity.
                   </p>
+                </div>
+
+                <div class="engine-flags" data-engine="antigravity" hidden>
+                  <label class="toggle flag-row">
+                    <input id="antigravity-sandbox" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Isolated execution (--sandbox)</span
+                    >
+                    <span class="flag-desc"
+                      >terminal-only sandbox (macOS); no filesystem/container
+                      isolation</span
+                    >
+                  </label>
+
+                  <label class="toggle flag-row">
+                    <input id="antigravity-skip-perms" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Skip permissions (--dangerously-skip-permissions)</span
+                    >
+                    <span class="flag-desc"
+                      >bypass all approvals incl. your Deny list (danger)</span
+                    >
+                  </label>
+
+                  <p class="flag-hint">
+                    Antigravity has no container sandbox. Permission
+                    Allow/Deny/Ask lists are managed inside agy via
+                    <code>/permissions</code>; cogair follows your agy
+                    <code>settings.json</code>. Leaving "skip permissions" off
+                    keeps your Deny list as the safety net.
+                  </p>
+
+                  <label class="toggle flag-row">
+                    <input id="antigravity-youtube" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label">YouTube summarization</span>
+                    <span class="flag-desc"
+                      >registers a youtube-transcript MCP server in agy's global
+                      config so agy can fetch and summarize YouTube links
+                    </span>
+                  </label>
+
+                  <div class="tier-model-map">
+                    <p class="flag-field-label">per-tier model mapping</p>
+                    <p class="flag-hint">
+                      Antigravity serves multiple model families. Map each tier
+                      to a model — <code>auto</code> lets Claude pick per
+                      request. Options come from <code>agy models</code> (run
+                      agy and sign in to populate them).
+                    </p>
+                    <div class="tier-field">
+                      <label for="model-antigravity-high">high</label>
+                      <select
+                        id="model-antigravity-high"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <div class="tier-field">
+                      <label for="model-antigravity-mid">mid</label>
+                      <select
+                        id="model-antigravity-mid"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <div class="tier-field">
+                      <label for="model-antigravity-low">low</label>
+                      <select
+                        id="model-antigravity-low"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <p class="flag-hint">
+                      <code>auto</code> → Claude picks via
+                      <code>list_antigravity_models</code> (no mapping needed).
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -481,7 +638,7 @@
         <section class="section">
           <h2 class="section-title">CLI spawn timeout</h2>
           <p class="section-help">
-            Hard timeout (ms) for each codex / gemini CLI invocation. Hung
+            Hard timeout (ms) for each codex / Google CLI invocation. Hung
             processes are killed and surface as
             <code>error.code: network</code>.
           </p>
@@ -551,6 +708,6 @@
     <script>
       window.__COGAIR_STATE__ = '__COGAIR_STATE__';
     </script>
-    <script>(function(){"use strict";var M=50,ge="auto",be=72,xe=10*60*1e3,u={gemini:{yolo:!0,sandbox:!0,sandbox_backend:"auto"},codex:{yolo:!1,sandbox:"workspace-write"}},N={enabled:!1,location:"project"},w={gemini:"",codex:""},v={gemini:"auto",codex:"off"},S=0,m=100,pe=1,he=720,ye=1e3,Se=18e5,I=["auto","docker","podman","sandbox-exec"],F=["read-only","workspace-write","danger-full-access","off"],V=["project","user"],f=["off","auto","strict"],_e={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},ke=new URLSearchParams(location.search),Ae=ke.get("token")||"";function i(e){return document.querySelector(e)}var P=i("#form"),g=i("#ratio-slider"),R=i("#toggle-codex"),B=i("#toggle-gemini"),Le=i("#gemini-pct"),Ee=i("#codex-pct"),Te=i("#codex-hint"),Ce=i("#gemini-hint"),Oe=i("#codex-install-hint"),Me=i("#gemini-install-hint"),Ne=i("#ratio-warn"),_=i("#strength"),we=i("#strength-label"),U=i("#kw-gemini"),j=i("#kw-codex"),J=i("#ttl"),K=i("#spawn-timeout-ms"),D=i("#gemini-yolo"),b=i("#gemini-sandbox"),$=i("#gemini-backend-wrap"),x=i("#codex-yolo"),z=i("#codex-sandbox-wrap"),Q=i("#codex-sandbox-hint"),Ie=i("#codex-full-access-warning"),k=i("#artifacts-enabled"),Z=i("#artifacts-location-wrap"),H=i("#preamble-gemini"),G=i("#preamble-codex"),p=i("#advanced-toggle-codex"),h=i("#advanced-toggle-gemini"),W=i("#advanced-panel-codex"),q=i("#advanced-panel-gemini"),Fe=i("#summary-codex"),Pe=i("#summary-gemini"),A=i("#status"),ee=i("#save"),X=i("#save-close"),o={gemini:{value:M,enabled:!0},codex:{value:M,enabled:!0}},d={codex:!0,gemini:!0};function L(e,a,n){return Math.max(a,Math.min(n,e))}function l(e,a,n){if(A.className="status"+(e?" "+e:""),A.innerHTML="",!(!a&&(!n||!n.length))){var t=document.createElement("div");if(t.textContent=a||"",A.appendChild(t),n&&n.length){for(var r=document.createElement("ul"),c=0;c<n.length;c+=1){var O=document.createElement("li");O.textContent=String(n[c]),r.appendChild(O)}A.appendChild(r)}}}function E(){var e=o.gemini.enabled,a=o.codex.enabled,n,t;e&&a?(n=o.gemini.value,t=o.codex.value):e?(n=100,t=o.codex.value):a?(n=o.gemini.value,t=100):(n=0,t=0),g.disabled=!(e&&a),e&&a&&(g.value=String(o.gemini.value)),Le.textContent=e?n+"%":"OFF",Ee.textContent=a?t+"%":"OFF",B.setAttribute("aria-checked",String(e)),R.setAttribute("aria-checked",String(a)),R.setAttribute("data-unavailable",String(!d.codex)),B.setAttribute("data-unavailable",String(!d.gemini)),Te.textContent=d.codex?"click to toggle":"not installed",Ce.textContent=d.gemini?"click to toggle":"not installed",Ne.hidden=e||a}function Re(){if(!g.disabled){var e=L(Math.floor(Number(g.value)||0),S,m);o.gemini.value=e,o.codex.value=m-e,E()}}function ae(e){if(d[e]){var a=o[e],n=e==="gemini"?o.codex:o.gemini;a.enabled?a.enabled=!1:(a.enabled=!0,a.value<=0&&(a.value=M),n.enabled&&(n.value=L(m-a.value,S,m))),E()}}function ne(){we.textContent=_e[_.value]||"Neutral"}function te(e,a){if(e&&typeof e=="object"&&"value"in e)return{value:L(Math.floor(Number(e.value)||0),S,m),enabled:!!e.enabled};if(typeof e=="number"){var n=L(Math.floor(e),S,m);return{value:n,enabled:n>0}}return{value:a.value,enabled:a.enabled}}function y(e,a,n){for(var t=document.querySelectorAll('input[name="'+e+'"]'),r=n.indexOf(a)>=0?a:n[0],c=0;c<t.length;c+=1)t[c].checked=t[c].value===r}function s(e,a,n){var t=document.querySelector('input[name="'+e+'"]:checked');return t&&a.indexOf(t.value)>=0?t.value:n}function ie(){b.checked?$.classList.remove("is-inert"):$.classList.add("is-inert")}function Y(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');Ie.hidden=!(e&&e.value==="danger-full-access")}function oe(){for(var e=x.checked,a=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),n=0;n<a.length;n+=1)a[n].disabled=e;e?(z.classList.add("is-inert"),Q.hidden=!1):(z.classList.remove("is-inert"),Q.hidden=!0),Y()}function re(){k.checked?Z.classList.remove("is-inert"):Z.classList.add("is-inert")}function de(e,a){if(!e.disabled){var n=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",n?"true":"false"),n){a.hidden=!1,a.offsetHeight,a.classList.add("is-open");return}a.classList.remove("is-open");var t=!1,r=function(c){t||c&&c.propertyName&&c.propertyName!=="grid-template-rows"||(t=!0,a.hidden=!0,a.removeEventListener("transitionend",r))};a.addEventListener("transitionend",r),setTimeout(r,260)}}function Be(e){var a=[];if(e==="codex"){x.checked&&a.push({label:"yolo: on",tone:"warn"});var n=s("codex-sandbox",F,u.codex.sandbox);n==="danger-full-access"?a.push({label:"sandbox: full-access",tone:"warn"}):n!=="off"&&a.push({label:"sandbox: "+n});var t=s("recency-codex",f,v.codex);t!=="off"&&a.push({label:"rec: "+t});var r=(j.value||"").trim();r&&a.push({label:"keyword: on",title:r});var c=(G.value||"").trim();c&&a.push({label:"preamble: on",title:c.slice(0,80)})}else{if(D.checked&&a.push({label:"yolo: on",tone:"warn"}),b.checked){var O=s("gemini-backend",I,u.gemini.sandbox_backend);a.push({label:"sandbox: "+O})}var ve=s("recency-gemini",f,v.gemini);ve!=="off"&&a.push({label:"rec: "+ve});var me=(U.value||"").trim();me&&a.push({label:"keyword: on",title:me});var fe=(H.value||"").trim();fe&&a.push({label:"preamble: on",title:fe.slice(0,80)})}return a}function ce(e){var a=e==="codex"?Fe:Pe;if(a){for(var n=Be(e);a.firstChild;)a.removeChild(a.firstChild);for(var t=0;t<n.length;t+=1){var r=document.createElement("span");r.className="summary-chip",n[t].tone&&r.setAttribute("data-tone",n[t].tone),n[t].title&&r.setAttribute("data-tooltip",n[t].title),r.textContent=n[t].label,a.appendChild(r)}}}function T(){ce("codex"),ce("gemini")}function Ue(){p.disabled=!d.codex,h.disabled=!d.gemini,!d.codex&&p.getAttribute("aria-expanded")==="true"&&(p.setAttribute("aria-expanded","false"),W.classList.remove("is-open"),W.hidden=!0),!d.gemini&&h.getAttribute("aria-expanded")==="true"&&(h.setAttribute("aria-expanded","false"),q.classList.remove("is-open"),q.hidden=!0)}function je(e){var a=e&&typeof e=="object"?e:u,n=a.gemini&&typeof a.gemini=="object"?a.gemini:{},t=a.codex&&typeof a.codex=="object"?a.codex:{};D.checked=!!n.yolo,b.checked=typeof n.sandbox=="boolean"?n.sandbox:u.gemini.sandbox,y("gemini-backend",typeof n.sandbox_backend=="string"?n.sandbox_backend:u.gemini.sandbox_backend,I),x.checked=!!t.yolo,y("codex-sandbox",typeof t.sandbox=="string"?t.sandbox:u.codex.sandbox,F),ie(),oe(),Y()}function De(e){var a=e&&typeof e=="object"?e:N;k.checked=!!a.enabled,y("artifacts-location",typeof a.location=="string"?a.location:N.location,V),re()}function He(e){var a=e&&typeof e=="object"?e:w;H.value=typeof a.gemini=="string"?a.gemini:w.gemini,G.value=typeof a.codex=="string"?a.codex:w.codex}function Ge(e){var a=e&&typeof e=="object"?e:v;y("recency-gemini",typeof a.gemini=="string"?a.gemini:v.gemini,f),y("recency-codex",typeof a.codex=="string"?a.codex:v.codex,f)}function le(e){var a=e.ratio||{};o.gemini=te(a.gemini,o.gemini),o.codex=te(a.codex,o.codex),_.value=String(e.intervention_strength),U.value=e.keywords.gemini,j.value=e.keywords.codex,J.value=e.session_ttl_hours,K.value=e.spawn_timeout_ms,je(e.option_flags),De(e.artifacts),He(e.preamble),Ge(e.recency_factor);var n=document.querySelector('input[name="model"][value="'+e.default_model+'"]');n&&(n.checked=!0),E(),ne(),T()}function We(){return{gemini:{yolo:!!D.checked,sandbox:!!b.checked,sandbox_backend:s("gemini-backend",I,u.gemini.sandbox_backend)},codex:{yolo:!!x.checked,sandbox:s("codex-sandbox",F,u.codex.sandbox)}}}function qe(){return{enabled:!!k.checked,location:s("artifacts-location",V,N.location)}}function Xe(){return{gemini:String(H.value||""),codex:String(G.value||"")}}function Ye(){return{gemini:s("recency-gemini",f,v.gemini),codex:s("recency-codex",f,v.codex)}}function Ve(){var e=document.querySelector('input[name="model"]:checked');return{ratio:{gemini:{value:o.gemini.value,enabled:o.gemini.enabled},codex:{value:o.codex.value,enabled:o.codex.enabled}},intervention_strength:Number(_.value),keywords:{gemini:U.value.trim(),codex:j.value.trim()},default_model:e?e.value:ge,option_flags:We(),session_ttl_hours:Math.max(pe,Math.min(he,Math.floor(Number(J.value)||be))),spawn_timeout_ms:Math.max(ye,Math.min(Se,Math.floor(Number(K.value)||xe))),artifacts:qe(),preamble:Xe(),recency_factor:Ye()}}function C(e){return e+"?token="+encodeURIComponent(Ae)}function Je(){var e=window.__COGAIR_STATE__;return e&&typeof e=="object"&&e.ratio?(le(e),!0):!1}async function se(){try{var e=await fetch(C("/provider-status"));if(!e.ok)return;var a=await e.json();d.codex=!!(a.codex&&a.codex.available),d.gemini=!!(a.gemini&&a.gemini.available)}catch{return}d.codex||(o.codex.enabled=!1),d.gemini||(o.gemini.enabled=!1),Oe.hidden=d.codex,Me.hidden=d.gemini,E(),Ue()}async function Ke(){if(Je()){l("",""),await se();return}l("","Loading\u2026");try{var e=await fetch(C("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var a=await e.json();le(a),l("","")}catch(n){l("error","Failed to load config: "+n.message)}await se()}async function ue(e){if(!o.gemini.enabled&&!o.codex.enabled){l("error","At least one provider must be enabled.");return}var a=Ve();l("","Saving\u2026"),ee.disabled=X.disabled=!0;try{var n=await fetch(C("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}),t=await n.json();if(!n.ok||t.success===!1){l("error",t.message||"Save failed",t.errors);return}if(l("success","Saved."),e){try{await fetch(C("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}l("success","Saved. Server closed.");return}}catch(r){l("error","Save failed: "+r.message)}finally{e||(ee.disabled=X.disabled=!1)}}g.addEventListener("input",Re),B.addEventListener("click",function(){ae("gemini")}),R.addEventListener("click",function(){ae("codex")}),p.addEventListener("click",function(){de(p,W)}),h.addEventListener("click",function(){de(h,q)}),_.addEventListener("input",ne),b.addEventListener("change",ie),x.addEventListener("change",oe),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",Y)}),k.addEventListener("change",re),P.addEventListener("change",T),P.addEventListener("input",T),P.addEventListener("submit",function(e){e.preventDefault(),ue(!1)}),X.addEventListener("click",function(){ue(!0)}),T(),Ke()})();</script>
+    <script>(function(){"use strict";var G=50,we="auto",Ne=72,Ie=10*60*1e3,u={gemini:{yolo:!0,sandbox:!0,sandbox_backend:"auto"},codex:{yolo:!1,sandbox:"workspace-write"},antigravity:{sandbox:!0,skip_permissions:!1}},F={enabled:!1,location:"project"},ie={gemini:"",codex:"",antigravity:""},m={gemini:"auto",codex:"off",antigravity:"auto"},Be={enabled:!1},oe="gemini",C=0,y=100,Ge=1,Fe=720,Pe=1e3,Re=18e5,P=["auto","docker","podman","sandbox-exec"],R=["read-only","workspace-write","danger-full-access","off"],Ue=["gemini","antigravity"],re=["project","user"],p=["off","auto","strict"],De={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},je=new URLSearchParams(location.search),He=je.get("token")||"";function i(e){return document.querySelector(e)}var U=i("#form"),S=i("#ratio-slider"),D=i("#toggle-codex"),j=i("#toggle-gemini"),qe=i("#gemini-pct"),We=i("#codex-pct"),Ye=i("#codex-hint"),Ve=i("#gemini-hint"),Xe=i("#codex-install-hint"),Ke=i("#gemini-install-hint"),Je=i("#antigravity-install-hint"),$e=i("#ratio-warn"),O=i("#strength"),ze=i("#strength-label"),H=i("#kw-gemini"),q=i("#kw-codex"),de=i("#ttl"),le=i("#spawn-timeout-ms"),W=i("#gemini-yolo"),k=i("#gemini-sandbox"),ce=i("#gemini-backend-wrap"),Y=i("#antigravity-sandbox"),V=i("#antigravity-skip-perms"),X=i("#antigravity-youtube"),K=i("#model-antigravity-high"),J=i("#model-antigravity-mid"),$=i("#model-antigravity-low"),_=i("#codex-yolo"),se=i("#codex-sandbox-wrap"),ve=i("#codex-sandbox-hint"),Qe=i("#codex-full-access-warning"),M=i("#artifacts-enabled"),ue=i("#artifacts-location-wrap"),z=i("#preamble-gemini"),Q=i("#preamble-codex"),A=i("#advanced-toggle-codex"),E=i("#advanced-toggle-gemini"),Z=i("#advanced-panel-codex"),ee=i("#advanced-panel-gemini"),Ze=i("#summary-codex"),ea=i("#summary-gemini"),w=i("#status"),ge=i("#save"),ae=i("#save-close"),d={gemini:{value:G,enabled:!0},codex:{value:G,enabled:!0}},l=oe,te=[],N={high:"",mid:"",low:""},c={codex:!0,gemini:!0,antigravity:!0};function I(e,a,t){return Math.max(a,Math.min(t,e))}function h(){return l==="antigravity"?c.antigravity:c.gemini}function v(e,a,t){if(w.className="status"+(e?" "+e:""),w.innerHTML="",!(!a&&(!t||!t.length))){var n=document.createElement("div");if(n.textContent=a||"",w.appendChild(n),t&&t.length){for(var o=document.createElement("ul"),r=0;r<t.length;r+=1){var s=document.createElement("li");s.textContent=String(t[r]),o.appendChild(s)}w.appendChild(o)}}}function L(){var e=d.gemini.enabled,a=d.codex.enabled,t,n;e&&a?(t=d.gemini.value,n=d.codex.value):e?(t=100,n=d.codex.value):a?(t=d.gemini.value,n=100):(t=0,n=0),S.disabled=!(e&&a),e&&a&&(S.value=String(d.gemini.value)),qe.textContent=e?t+"%":"OFF",We.textContent=a?n+"%":"OFF",j.setAttribute("aria-checked",String(e)),D.setAttribute("aria-checked",String(a)),D.setAttribute("data-unavailable",String(!c.codex)),j.setAttribute("data-unavailable",String(!h())),Ye.textContent=c.codex?"click to toggle":"not installed",Ve.textContent=h()?"click to toggle":"not installed",$e.hidden=e||a}function aa(){if(!S.disabled){var e=I(Math.floor(Number(S.value)||0),C,y);d.gemini.value=e,d.codex.value=y-e,L()}}function fe(e){var a=e==="gemini"?h():c[e];if(a){var t=d[e],n=e==="gemini"?d.codex:d.gemini;t.enabled?t.enabled=!1:(t.enabled=!0,t.value<=0&&(t.value=G),n.enabled&&(n.value=I(y-t.value,C,y))),L()}}function me(){ze.textContent=De[O.value]||"Neutral"}function be(e,a){if(e&&typeof e=="object"&&"value"in e)return{value:I(Math.floor(Number(e.value)||0),C,y),enabled:!!e.enabled};if(typeof e=="number"){var t=I(Math.floor(e),C,y);return{value:t,enabled:t>0}}return{value:a.value,enabled:a.enabled}}function x(e,a,t){for(var n=document.querySelectorAll('input[name="'+e+'"]'),o=t.indexOf(a)>=0?a:t[0],r=0;r<n.length;r+=1)n[r].checked=n[r].value===o}function g(e,a,t){var n=document.querySelector('input[name="'+e+'"]:checked');return n&&a.indexOf(n.value)>=0?n.value:t}function ye(e,a){for(var t=0;t<e.length;t+=1)e[t].hidden=e[t].getAttribute("data-engine")!==a}function pe(){Xe.hidden=c.codex;var e=l==="gemini";Ke.hidden=!e||c.gemini,Je.hidden=e||c.antigravity}function he(e){l=e==="antigravity"?"antigravity":"gemini",x("google-engine",l,Ue),ye(document.querySelectorAll(".engine-flags"),l),ye(document.querySelectorAll(".warning-inline[data-engine]"),l),pe()}function ta(){var e=document.querySelector('input[name="google-engine"]:checked');he(e?e.value:"gemini"),L(),Ee(),T()}function xe(){k.checked?ce.classList.remove("is-inert"):ce.classList.add("is-inert")}function ne(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');Qe.hidden=!(e&&e.value==="danger-full-access")}function Se(){for(var e=_.checked,a=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),t=0;t<a.length;t+=1)a[t].disabled=e;e?(se.classList.add("is-inert"),ve.hidden=!1):(se.classList.remove("is-inert"),ve.hidden=!0),ne()}function ke(){M.checked?ue.classList.remove("is-inert"):ue.classList.add("is-inert")}function _e(e,a){if(!e.disabled){var t=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",t?"true":"false"),t){a.hidden=!1,a.offsetHeight,a.classList.add("is-open");return}a.classList.remove("is-open");var n=!1,o=function(r){n||r&&r.propertyName&&r.propertyName!=="grid-template-rows"||(n=!0,a.hidden=!0,a.removeEventListener("transitionend",o))};a.addEventListener("transitionend",o),setTimeout(o,260)}}function na(e){var a=[];if(e==="codex"){_.checked&&a.push({label:"yolo: on",tone:"warn"});var t=g("codex-sandbox",R,u.codex.sandbox);t==="danger-full-access"?a.push({label:"sandbox: full-access",tone:"warn"}):t!=="off"&&a.push({label:"sandbox: "+t});var n=g("recency-codex",p,m.codex);n!=="off"&&a.push({label:"rec: "+n});var o=(q.value||"").trim();o&&a.push({label:"keyword: on",title:o});var r=(Q.value||"").trim();r&&a.push({label:"preamble: on",title:r.slice(0,80)})}else{if(a.push({label:"engine: "+l}),l==="antigravity")V.checked&&a.push({label:"skip-perms: on",tone:"warn"}),Y.checked&&a.push({label:"sandbox: terminal"}),X.checked&&a.push({label:"youtube: on"});else if(W.checked&&a.push({label:"yolo: on",tone:"warn"}),k.checked){var s=g("gemini-backend",P,u.gemini.sandbox_backend);a.push({label:"sandbox: "+s})}var f=g("recency-gemini",p,m.gemini);f!=="off"&&a.push({label:"rec: "+f});var b=(H.value||"").trim();b&&a.push({label:"keyword: on",title:b});var Me=(z.value||"").trim();Me&&a.push({label:"preamble: on",title:Me.slice(0,80)})}return a}function Ae(e){var a=e==="codex"?Ze:ea;if(a){for(var t=na(e);a.firstChild;)a.removeChild(a.firstChild);for(var n=0;n<t.length;n+=1){var o=document.createElement("span");o.className="summary-chip",t[n].tone&&o.setAttribute("data-tone",t[n].tone),t[n].title&&o.setAttribute("data-tooltip",t[n].title),o.textContent=t[n].label,a.appendChild(o)}}}function T(){Ae("codex"),Ae("gemini")}function Ee(){A.disabled=!c.codex,E.disabled=!h(),!c.codex&&A.getAttribute("aria-expanded")==="true"&&(A.setAttribute("aria-expanded","false"),Z.classList.remove("is-open"),Z.hidden=!0),!h()&&E.getAttribute("aria-expanded")==="true"&&(E.setAttribute("aria-expanded","false"),ee.classList.remove("is-open"),ee.hidden=!0)}function ia(e){var a=e&&typeof e=="object"?e:u,t=a.gemini&&typeof a.gemini=="object"?a.gemini:{},n=a.codex&&typeof a.codex=="object"?a.codex:{},o=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{};W.checked=!!t.yolo,k.checked=typeof t.sandbox=="boolean"?t.sandbox:u.gemini.sandbox,x("gemini-backend",typeof t.sandbox_backend=="string"?t.sandbox_backend:u.gemini.sandbox_backend,P),_.checked=!!n.yolo,x("codex-sandbox",typeof n.sandbox=="string"?n.sandbox:u.codex.sandbox,R),Y.checked=typeof o.sandbox=="boolean"?o.sandbox:u.antigravity.sandbox,V.checked=!!o.skip_permissions,xe(),Se(),ne()}function oa(e){var a=e&&typeof e=="object"?e:F;M.checked=!!a.enabled,x("artifacts-location",typeof a.location=="string"?a.location:F.location,re),ke()}function ra(e){var a=e&&typeof e=="object"?e:ie,t=l==="antigravity"?a.antigravity:a.gemini;z.value=typeof t=="string"?t:"",Q.value=typeof a.codex=="string"?a.codex:ie.codex}function da(e){var a=e&&typeof e=="object"?e:m,t=l==="antigravity"?a.antigravity:a.gemini;x("recency-gemini",typeof t=="string"?t:m.gemini,p),x("recency-codex",typeof a.codex=="string"?a.codex:m.codex,p)}function Le(e){for(var a=[{el:K,val:N.high},{el:J,val:N.mid},{el:$,val:N.low}],t=0;t<a.length;t+=1){var n=a[t].el;if(n){for(var o=a[t].val;n.firstChild;)n.removeChild(n.firstChild);var r=e.slice();if(o&&r.indexOf(o)<0&&r.unshift(o),r.length===0){var s=document.createElement("option");s.value="",s.textContent="(run agy to load models)",n.appendChild(s)}else for(var f=0;f<r.length;f+=1){var b=document.createElement("option");b.value=r[f],b.textContent=r[f],r[f]===o&&(b.selected=!0),n.appendChild(b)}}}}function la(e){var a=e&&typeof e=="object"?e:{},t=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{};N={high:typeof t.high=="string"?t.high:"",mid:typeof t.mid=="string"?t.mid:"",low:typeof t.low=="string"?t.low:""},Le(te)}function ca(e){var a=e&&typeof e=="object"?e:Be;X.checked=!!a.enabled}function Te(e){var a=e.ratio||{},t=a.antigravity&&a.antigravity.enabled;l=t?"antigravity":oe;var n=l==="antigravity"?a.antigravity:a.gemini;d.gemini=be(n,d.gemini),d.codex=be(a.codex,d.codex),O.value=String(e.intervention_strength);var o=e.keywords||{},r=l==="antigravity"?o.antigravity:o.gemini;H.value=typeof r=="string"?r:"",q.value=typeof o.codex=="string"?o.codex:"",de.value=e.session_ttl_hours,le.value=e.spawn_timeout_ms,ia(e.option_flags),oa(e.artifacts),ra(e.preamble),da(e.recency_factor),la(e.model_map),ca(e.antigravity_youtube);var s=document.querySelector('input[name="model"][value="'+e.default_model+'"]');s&&(s.checked=!0),he(l),L(),me(),T()}function sa(){return{gemini:{yolo:!!W.checked,sandbox:!!k.checked,sandbox_backend:g("gemini-backend",P,u.gemini.sandbox_backend)},codex:{yolo:!!_.checked,sandbox:g("codex-sandbox",R,u.codex.sandbox)},antigravity:{sandbox:!!Y.checked,skip_permissions:!!V.checked}}}function va(){return{antigravity:{high:K?String(K.value||""):"",mid:J?String(J.value||""):"",low:$?String($.value||""):""}}}function ua(){return{enabled:!!M.checked,location:g("artifacts-location",re,F.location)}}function ga(){var e=document.querySelector('input[name="model"]:checked'),a=l==="gemini",t={value:d.gemini.value,enabled:d.gemini.enabled},n={value:d.gemini.value,enabled:!1},o=H.value.trim(),r=String(z.value||""),s=g("recency-gemini",p,m.gemini);return{ratio:{gemini:a?t:n,codex:{value:d.codex.value,enabled:d.codex.enabled},antigravity:a?n:t},intervention_strength:Number(O.value),keywords:{gemini:o,codex:q.value.trim(),antigravity:o},default_model:e?e.value:we,option_flags:sa(),model_map:va(),session_ttl_hours:Math.max(Ge,Math.min(Fe,Math.floor(Number(de.value)||Ne))),spawn_timeout_ms:Math.max(Pe,Math.min(Re,Math.floor(Number(le.value)||Ie))),artifacts:ua(),preamble:{gemini:r,codex:String(Q.value||""),antigravity:r},recency_factor:{gemini:s,codex:g("recency-codex",p,m.codex),antigravity:s},antigravity_youtube:{enabled:!!X.checked}}}function B(e){return e+"?token="+encodeURIComponent(He)}function fa(){var e=window.__COGAIR_STATE__;return e&&typeof e=="object"&&e.ratio?(Te(e),!0):!1}async function Ce(){try{var e=await fetch(B("/provider-status"));if(!e.ok)return;var a=await e.json();c.codex=!!(a.codex&&a.codex.available),c.gemini=!!(a.gemini&&a.gemini.available),c.antigravity=!!(a.antigravity&&a.antigravity.available),te=Array.isArray(a.agyModels)?a.agyModels:[],Le(te)}catch{return}c.codex||(d.codex.enabled=!1),h()||(d.gemini.enabled=!1),pe(),L(),Ee()}async function ma(){if(fa()){v("",""),await Ce();return}v("","Loading\u2026");try{var e=await fetch(B("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var a=await e.json();Te(a),v("","")}catch(t){v("error","Failed to load config: "+t.message)}await Ce()}async function Oe(e){if(!d.gemini.enabled&&!d.codex.enabled){v("error","At least one provider must be enabled.");return}var a=ga();v("","Saving\u2026"),ge.disabled=ae.disabled=!0;try{var t=await fetch(B("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}),n=await t.json();if(!t.ok||n.success===!1){v("error",n.message||"Save failed",n.errors);return}if(v("success","Saved."),e){try{await fetch(B("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}v("success","Saved. Server closed.");return}}catch(o){v("error","Save failed: "+o.message)}finally{e||(ge.disabled=ae.disabled=!1)}}S.addEventListener("input",aa),j.addEventListener("click",function(){fe("gemini")}),D.addEventListener("click",function(){fe("codex")}),A.addEventListener("click",function(){_e(A,Z)}),E.addEventListener("click",function(){_e(E,ee)}),document.querySelectorAll('input[name="google-engine"]').forEach(function(e){e.addEventListener("change",ta)}),O.addEventListener("input",me),k.addEventListener("change",xe),_.addEventListener("change",Se),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",ne)}),M.addEventListener("change",ke),U.addEventListener("change",T),U.addEventListener("input",T),U.addEventListener("submit",function(e){e.preventDefault(),Oe(!1)}),ae.addEventListener("click",function(){Oe(!0)}),T(),ma()})();</script>
   </body>
 </html>
