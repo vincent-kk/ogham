@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type {
+  AntigravityFlags,
   CodexFlags,
   CodexSandboxMode,
   GeminiFlags,
@@ -52,10 +53,23 @@ function pickCodex(raw: unknown): CodexFlags {
   };
 }
 
+function pickAntigravity(raw: unknown): AntigravityFlags {
+  const defaults = DEFAULT_CONFIG.option_flags.antigravity;
+  if (!isObj(raw)) return defaults;
+  return {
+    sandbox: typeof raw.sandbox === 'boolean' ? raw.sandbox : defaults.sandbox,
+    skip_permissions:
+      typeof raw.skip_permissions === 'boolean'
+        ? raw.skip_permissions
+        : defaults.skip_permissions,
+  };
+}
+
 export function pickOptionFlags(raw: unknown): OptionFlags {
   if (!isObj(raw)) return DEFAULT_CONFIG.option_flags;
   return {
     gemini: pickGemini(raw.gemini),
     codex: pickCodex(raw.codex),
+    antigravity: pickAntigravity(raw.antigravity),
   };
 }

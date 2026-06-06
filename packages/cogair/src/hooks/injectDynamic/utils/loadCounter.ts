@@ -7,16 +7,19 @@ import { asNonNegInt } from './asNonNegInt.js';
 
 export function loadCounter(): HookCounter {
   const raw = safeReadJson(COUNTER_PATH);
-  if (!isObj(raw)) return { gemini: 0, codex: 0, is_stale: false };
+  if (!isObj(raw)) {
+    return { gemini: 0, codex: 0, antigravity: 0, is_stale: false };
+  }
 
   const recorded = typeof raw.parent_pid === 'number' ? raw.parent_pid : null;
   if (recorded !== null && recorded !== process.ppid) {
-    return { gemini: 0, codex: 0, is_stale: true };
+    return { gemini: 0, codex: 0, antigravity: 0, is_stale: true };
   }
 
   return {
     gemini: asNonNegInt(raw.gemini),
     codex: asNonNegInt(raw.codex),
+    antigravity: asNonNegInt(raw.antigravity),
     is_stale: false,
   };
 }
