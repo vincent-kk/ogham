@@ -1,10 +1,16 @@
-// Defensive no-op. Real-CLI verification (agy 1.0.6) shows `agy -p` emits stdout
-// under cogair's non-TTY spawn (stdin closed), so the empty-stdout path is not
-// reached in practice; returning null lets callAgy surface a clear error on the
-// off chance it ever is, without reverse-engineering agy's transcript storage.
+import { readAgyTranscript } from './agyTranscriptStore.js';
+
+// Fallback for callAgy when `agy -p` returns empty stdout (Issue #76): recover
+// the answer from agy's on-disk transcript. Any failure (missing files, schema
+// drift, parse error) collapses to null so callAgy emits its existing cli_error
+// rather than a fake or corrupted success.
 export async function resolveTranscript(
-  _cwd: string,
-  _since: number,
+  cwd: string,
+  since: number,
 ): Promise<string | null> {
-  return null;
+  try {
+    return await readAgyTranscript(cwd, since);
+  } catch {
+    return null;
+  }
 }

@@ -9,7 +9,7 @@
   var DEFAULT_OPTION_FLAGS = {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
-    antigravity: { sandbox: true, skip_permissions: false },
+    antigravity: { sandbox: false, skip_permissions: false },
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
@@ -390,9 +390,8 @@
         if (antigravitySkipPerms.checked) {
           chips.push({ label: 'skip-perms: on', tone: 'warn' });
         }
-        if (antigravitySandbox.checked) {
-          chips.push({ label: 'sandbox: terminal' });
-        }
+        // Disabled while agy #76 is unfixed; restore when fixed:
+        // if (antigravitySandbox.checked) chips.push({ label: 'sandbox: terminal' });
         if (antigravityYoutube.checked) {
           chips.push({ label: 'youtube: on' });
         }
@@ -492,10 +491,10 @@
         : DEFAULT_OPTION_FLAGS.codex.sandbox,
       CODEX_SANDBOX_MODES,
     );
-    antigravitySandbox.checked =
-      typeof a.sandbox === 'boolean'
-        ? a.sandbox
-        : DEFAULT_OPTION_FLAGS.antigravity.sandbox;
+    // Disabled while agy #76 is unfixed; restore when fixed:
+    // antigravitySandbox.checked =
+    //   typeof a.sandbox === 'boolean' ? a.sandbox : DEFAULT_OPTION_FLAGS.antigravity.sandbox;
+    antigravitySandbox.checked = false;
     antigravitySkipPerms.checked = Boolean(a.skip_permissions);
     syncGeminiBackendInert();
     syncCodexSandboxInert();
@@ -642,7 +641,8 @@
         ),
       },
       antigravity: {
-        sandbox: Boolean(antigravitySandbox.checked),
+        // Disabled while agy #76 is unfixed; restore: Boolean(antigravitySandbox.checked)
+        sandbox: false,
         skip_permissions: Boolean(antigravitySkipPerms.checked),
       },
     };

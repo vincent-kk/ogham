@@ -55,8 +55,8 @@ describe('antigravity buildStartArgs', () => {
     expect(args).not.toContain('--dangerously-skip-permissions');
   });
 
-  it('emits --sandbox when flags.sandbox=true', () => {
-    expect(startArgs({ sandbox: true, skip_permissions: false })).toContain(
+  it('never emits --sandbox even when flags.sandbox=true (disabled for #76)', () => {
+    expect(startArgs({ sandbox: true, skip_permissions: false })).not.toContain(
       '--sandbox',
     );
   });
@@ -92,9 +92,9 @@ describe('antigravity buildResumeArgs', () => {
     );
   });
 
-  it('carries the same permission flags as start', () => {
+  it('carries skip-permissions but never --sandbox (disabled for #76)', () => {
     const args = resumeArgs({ sandbox: true, skip_permissions: true });
-    expect(args).toContain('--sandbox');
+    expect(args).not.toContain('--sandbox');
     expect(args).toContain('--dangerously-skip-permissions');
   });
 });

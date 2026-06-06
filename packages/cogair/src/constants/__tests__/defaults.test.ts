@@ -25,7 +25,7 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
       gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
       codex: { yolo: false, sandbox: 'workspace-write' },
-      antigravity: { sandbox: true, skip_permissions: false },
+      antigravity: { sandbox: false, skip_permissions: false },
     });
   });
 

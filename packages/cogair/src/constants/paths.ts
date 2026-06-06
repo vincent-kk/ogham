@@ -5,16 +5,32 @@ import { pluginCache } from '@ogham/cross-platform/paths';
 
 export const COGAIR_HOME = pluginCache('cogair');
 
-// agy's GLOBAL MCP server registry (outside COGAIR_HOME). agy loads MCP servers
-// from here even in headless `-p` mode, so cogair provisions a youtube-transcript
-// server into it when antigravity YouTube support is enabled via /setup. Path
-// mirrors the Antigravity CLI layout on both POSIX and Windows (homedir-based).
-export const AGY_MCP_CONFIG_PATH = join(
-  homedir(),
-  '.gemini',
-  'antigravity-cli',
-  'mcp_config.json',
+// agy's GLOBAL data root (outside COGAIR_HOME), homedir-based on both POSIX and
+// Windows — mirrors the Antigravity CLI layout.
+export const AGY_HOME = join(homedir(), '.gemini', 'antigravity-cli');
+
+// agy loads MCP servers from here even in headless `-p` mode; cogair provisions a
+// youtube-transcript server into it when antigravity YouTube support is enabled.
+export const AGY_MCP_CONFIG_PATH = join(AGY_HOME, 'mcp_config.json');
+
+// cwd → conversation-id map and per-conversation transcript. Used to recover the
+// answer from disk when `agy -p` drops stdout (Issue #76).
+export const AGY_LAST_CONVERSATIONS_PATH = join(
+  AGY_HOME,
+  'cache',
+  'last_conversations.json',
 );
+
+export function agyTranscriptPath(convId: string): string {
+  return join(
+    AGY_HOME,
+    'brain',
+    convId,
+    '.system_generated',
+    'logs',
+    'transcript.jsonl',
+  );
+}
 
 export const CONFIG_PATH = join(COGAIR_HOME, 'config.json');
 export const SESSIONS_DIR = join(COGAIR_HOME, 'sessions');

@@ -49,7 +49,7 @@ export async function callAgy(
     error: {
       code: 'cli_error',
       message:
-        'agy produced no stdout (non-TTY output drop — Antigravity CLI Issue #76) and no transcript was recoverable. Run agy in a TTY or update agy.',
+        'agy returned no output and the response could not be recovered. Try again, or update the agy CLI.',
     },
   };
 }

@@ -16,7 +16,7 @@ export const DEFAULT_CONFIG: Config = {
   option_flags: {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
-    antigravity: { sandbox: true, skip_permissions: false },
+    antigravity: { sandbox: false, skip_permissions: false },
   },
   model_map: {
     antigravity: {

@@ -1,4 +1,5 @@
-import { rm } from 'node:fs/promises';
+import { mkdir, rm, utimes, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 
 import {
   afterAll,
@@ -10,7 +11,13 @@ import {
   it,
 } from 'vitest';
 
-import { COGAIR_HOME } from '../../../constants/paths.js';
+import {
+  AGY_HOME,
+  AGY_LAST_CONVERSATIONS_PATH,
+  COGAIR_HOME,
+  agyTranscriptPath,
+  antigravityCwdPath,
+} from '../../../constants/paths.js';
 import type {
   AntigravityFlags,
   DispatchOptions,
@@ -74,6 +81,7 @@ afterAll(async () => {
 beforeEach(async () => {
   delete process.env.COGAIR_FAKE_AGY_MODE;
   await rm(COGAIR_HOME, { recursive: true, force: true });
+  await rm(AGY_HOME, { recursive: true, force: true });
 });
 
 function baseOptions(): DispatchOptions<AntigravityFlags> {
@@ -103,6 +111,34 @@ describe('antigravityDispatcher.start', () => {
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.status).toBe('failure');
     expect(result.error?.code).toBe('cli_error');
+  });
+
+  it('recovers from the agy transcript when stdout is empty (#76 fallback)', async () => {
+    process.env.COGAIR_FAKE_AGY_MODE = 'empty-stdout';
+    const cwd = antigravityCwdPath('agy-session');
+    const convId = 'recovered-conv';
+    await mkdir(dirname(AGY_LAST_CONVERSATIONS_PATH), { recursive: true });
+    await writeFile(
+      AGY_LAST_CONVERSATIONS_PATH,
+      JSON.stringify({ [cwd]: convId }),
+    );
+    const transcript = agyTranscriptPath(convId);
+    await mkdir(dirname(transcript), { recursive: true });
+    await writeFile(
+      transcript,
+      JSON.stringify({
+        source: 'MODEL',
+        type: 'PLANNER_RESPONSE',
+        status: 'DONE',
+        content: 'disk answer',
+      }),
+    );
+    const future = new Date(Date.now() + 60_000);
+    await utimes(transcript, future, future);
+
+    const result = await antigravityDispatcher.start(baseOptions());
+    expect(result.status).toBe('success');
+    expect(result.response).toBe('disk answer');
   });
 
   it('maps OAuth sign-in stderr to an auth failure', async () => {

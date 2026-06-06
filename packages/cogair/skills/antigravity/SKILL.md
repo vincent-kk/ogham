@@ -62,7 +62,7 @@ On `status: 'failure'`, dispatch by `error.code`:
 - `auth` → tell the user to sign in to Antigravity: run `agy` once interactively and complete the Google OAuth flow (agy has no API-key auth), then retry.
 - `disabled` → antigravity is not the enabled Google engine. Tell the user to switch the Google engine to antigravity and enable it via `/cogair:setup`. Do not retry.
 - `rate_limit` / `budget_exhausted` → model availability depends on the subscription tier; suggest retrying after a pause, a different tier, or switching to the `codex` skill.
-- `network` / `cli_error` / `unknown` → relay `error.message` verbatim. A `cli_error` mentioning empty stdout is Antigravity CLI Issue #76 (agy dropped its output in a non-TTY context).
+- `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
 
 ## Model alias
 
