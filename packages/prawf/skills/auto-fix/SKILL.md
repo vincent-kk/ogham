@@ -66,8 +66,12 @@ evidence, insert a correction the author already supplied in the rebuttal.
 1. Resolve `WORKDIR` per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
    (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`), then the review directory: from
    `<paper-slug | review-dir>` or the most recent `<WORKDIR>/review/<slug>/`. Read
-   `review-report.md` and `qa-sheet.md`. If neither exists, stop and tell the user to
-   run `/prawf:review` first.
+   `review-report.md` and `qa-sheet.md`. If `review-report.md` is missing, stop and tell
+   the user to run `/prawf:review` first. If `review-report.md` exists but `qa-sheet.md`
+   does not (e.g. after `/prawf:review --solo`, which writes no `qa-sheet.md`), proceed on
+   `review-report.md` alone — the `tactic`/`solution` columns are then unavailable, so any
+   finding whose AUTO classification would require a `tactic` or `solution` it cannot read
+   defaults to `MANUAL`.
 2. Resolve the **manuscript source**: prefer `<manuscript-path>`; otherwise read
    the input recorded in `paper-profile.md`. It MUST be an editable text source
    (markdown / LaTeX). If only a PDF exists, do NOT edit — skip to Step 4 and
@@ -80,9 +84,11 @@ evidence, insert a correction the author already supplied in the rebuttal.
 
 ### Step 2 — Classify (direct)
 
-Walk every finding in `review-report.md`, joined with its `qa-sheet.md` row.
-Tag each `AUTO` or `MANUAL` per the rubric above. When in doubt, choose `MANUAL`
-— a missed easy fix is far safer than a wrong edit to someone's paper.
+Walk every finding in `review-report.md`, joined with its `qa-sheet.md` row when
+`qa-sheet.md` is present (after `--solo` there is none — walk `review-report.md` alone and
+default every `tactic`/`solution`-dependent finding to `MANUAL`). Tag each `AUTO` or
+`MANUAL` per the rubric above. When in doubt, choose `MANUAL` — a missed easy fix is far
+safer than a wrong edit to someone's paper.
 
 **→ Immediately proceed to Step 3.**
 
@@ -111,8 +117,8 @@ Write to the review directory:
 1. `applied-fixes.md` — one row per applied (or, in dry-run, would-apply) edit:
    finding-id, axis, location, before → after, and the source rationale.
 2. `manual-fixes.md` — every `MANUAL` finding with its reason (unresolved /
-   needs-data / ambiguous / fatal-flaw), the `qa-sheet` question, and any drafted
-   solution, so the author can act on it.
+   needs-data / ambiguous / fatal-flaw), the `qa-sheet` question (when a `qa-sheet`
+   exists), and any drafted solution, so the author can act on it.
 
 Emit the terminal marker `prawf auto-fix: <N> applied, <M> manual`.
 
@@ -140,7 +146,7 @@ Emit the terminal marker `prawf auto-fix: <N> applied, <M> manual`.
 /prawf:auto-fix --dry-run               # preview only, change nothing
 /prawf:auto-fix my-paper paper.md       # explicit review slug + manuscript path
 
-Input:   review-report.md + qa-sheet.md (from /prawf:review) + manuscript source
+Input:   review-report.md (+ qa-sheet.md from a team review; --solo omits it) + manuscript source
 Applies: minor / mitigated / defended findings with a concrete, locatable text edit
 Skips:   unresolved · critical · fatal-flaw · needs-new-data · ambiguous → manual-fixes.md
 Output:  applied-fixes.md (changelog) + manual-fixes.md (author to-do). No verdict.

@@ -132,7 +132,7 @@ REMINDER: Write `rebuttal.md`.
 ## 4. R3 — Re-review (conditional)
 
 **Agent type**: `prawf:<axis-persona>` (the original attacker) · **Output**: `findings/round-3-<AXIS>.md`
-**Convening condition**: only when `rebuttal.md` has a `proposed_status` of `unresolved|mitigated|withdrawn-proposed` for a finding on your own axis.
+**Convening condition**: when `rebuttal.md` has a `proposed_status` of `unresolved|mitigated|withdrawn-proposed` for a finding on your own axis, OR when the chair reclassifies a `defended`/`mitigated` proposal to `contested` under §4.3 (its defense rests on a `sidestep` or an unbacked `justification`).
 
 ```
 PRIMARY DELIVERABLE: `<REVIEW_DIR>/findings/round-3-<AXIS>.md` (frontmatter: orchestration §5.4).
@@ -141,6 +141,7 @@ You are <PERSONA> (axis <AXIS>). You re-examine the strategist's defense of the 
 
 Context:
 - REVIEW_DIR / AXIS: <actual values>
+- CONTESTED_BY_CHAIR: <findings the chair reclassified from `defended`/`mitigated` to `contested` under §4.3 — the defense rested on a `sidestep` or an unbacked `justification` — so re-scrutinize them even though `rebuttal.md` still shows `proposed_status: defended`/`mitigated`> | none
 
 Input:
 - Read your `<REVIEW_DIR>/findings/round-1-<AXIS>.md` and the corresponding defenses in `<REVIEW_DIR>/rebuttal.md`.
@@ -150,6 +151,7 @@ Task: for each contested finding,
 2. withdrawn_confirmed — only when `withdrawn-proposed`, confirm the factual-error proof (true|false).
 3. final_status: defended | mitigated | unresolved | withdrawn + note(reason).
    - If the defense is only words (unverified), do not actively accept it → set `final_status: unresolved` (a contested finding whose defense is unverified is conservatively confirmed UNRESOLVED by the chair).
+4. If the strategist's defense itself surfaces a genuinely NEW residual risk absent from your round-1 findings, raise it as a new finding with `final_status: mitigated` and a note — this is the only signal that lets the chair grant at most one extra defense+re-review cycle (orchestration §7).
 
 Language: <Common>
 REMINDER: Write `findings/round-3-<AXIS>.md`.

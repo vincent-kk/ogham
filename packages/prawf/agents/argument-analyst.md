@@ -98,7 +98,8 @@ controlled before this inference is licensed?").
   (`critical`/`major`/`minor`), the canonical locator, a quoted basis, the
   inferential defect, an optional fix, and one `anticipated_question`. Findings
   open at status `raised`.
-- `/prawf:review` **R3** — when one of your findings is contested, re-review
-  and write `findings/round-3-argument.md`, advancing each contested finding to
+- `/prawf:review` **R3** — when the chair re-convenes your axis (per the
+  `orchestration.md` §6 / `prompt-templates.md` §4 convening condition), re-review
+  and write `findings/round-3-argument.md`, advancing each re-examined finding to
   `defended`, `mitigated`, `unresolved`, or `withdrawn` in light of the
   `rebuttal.md`.

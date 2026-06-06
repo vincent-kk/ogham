@@ -85,12 +85,14 @@ Never edit the paper, another persona's files, or any project file.
 
 ## Skill Participation
 
-- `/prawf:review` **Round 1** — author `findings/round-1-integrity.md`. You are
-  convened only when the external capability is **available**; on full absence
-  the axis degrades to `reasoning_gaps` and the chair records
-  `external_verification: unavailable`.
-- **Round 3 (conditional)** — author `findings/round-3-integrity.md` to adjudicate
-  contested findings after `rebuttal.md`. As a **FATAL-FLAW axis**, a critical
+- `/prawf:review` **Round 1** — author `findings/round-1-integrity.md`. When convened,
+  integrity runs **regardless of external-tool availability**: on full absence your
+  capability-dependent checks degrade to `reasoning_gaps` (you still audit what the
+  manuscript itself supports) and the chair records `external_verification: unavailable`
+  (orchestration §8) — the axis is never dropped for lack of tools.
+- **Round 3 (conditional)** — author `findings/round-3-integrity.md` to re-examine
+  your findings when the chair re-convenes your axis (per the `orchestration.md` §6 /
+  `prompt-templates.md` §4 convening condition). As a **FATAL-FLAW axis**, a critical
   data-fabrication finding stays **critical** unless verifiably refuted.
 - **Anticipated-question contribution** — supply for `qa-sheet.md`: "reason for
   the preregistered-vs-reported metric mismatch? data availability?"

@@ -20,6 +20,15 @@ plugin: prawf
 > response and run the remaining phases without further yields. With
 > `--batch`, there is NO interactive point — generate model answers and run
 > straight through (Tier-2a).
+>
+> **Valid reasons to yield**:
+>
+> 1. A user decision is genuinely required (unrecoverable input error only — neither a
+>    paper nor a `qa-sheet.md` was provided).
+> 2. An `<!-- [INTERACTIVE] -->` author-answer point (Phase 2) — interactive mode only;
+>    `--batch` has none.
+> 3. Terminal marker emitted: `prawf simulate-defense: complete` — only after
+>    `defense-session.md` is written.
 
 # simulate-defense — Defense Q&A Rehearsal
 
@@ -53,11 +62,12 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
    anticipated questions directly — no spawning needed.
 2. Otherwise, take the paper, run P0-lite (detect profile, normalize to
    `paper-normalized.md`), and spawn a LIGHT panel of soundness reviewers as
-   standalone `Task`s (no team is needed for question generation) in question-only
-   mode (each emits its `anticipated_question` set per
-   `../review/prompt-templates.md` §1, without full findings). Then spawn
-   `rebuttal-strategist` to refine and classify each question as
-   `good | bad | cringy`.
+   standalone `Task`s (no team is needed for question generation) in **question-only
+   mode**: adapt the `../review/prompt-templates.md` §1 prompt to ask each reviewer for
+   ONLY its `anticipated_question` set (one per axis concern), returned inline in the Task
+   response — in this mode they do NOT write a `findings/round-1-<axis>.md` file. Then
+   spawn `rebuttal-strategist` (passing the collected questions in its spawn prompt) to
+   refine and classify each question as `good | bad | cringy`.
 
 **→ Immediately proceed to Phase 1.**
 
@@ -82,8 +92,13 @@ next response.
 
 ### Phase 3 — Coach (strategist)
 
-Spawn `rebuttal-strategist` as the coach. For each answer it returns: a strength
-read, the gaps a real panel would exploit, the fitting tactic
+Spawn `rebuttal-strategist` as the coach. Pass each anticipated question and the author's
+answer **in the spawn prompt itself** (a `Task` cannot see this conversation), point it at
+`paper-normalized.md` for citation coordinates when one exists, and have it adapt the
+`prompt-templates.md` §3 defense discipline to coaching (no `rebuttal.md` deliverable). In
+this mode it returns its coaching **inline in the Task response — it does NOT write
+`rebuttal.md`** (you assemble `defense-session.md` in Phase 4). For each answer it returns:
+a strength read, the gaps a real panel would exploit, the fitting tactic
 (`revision | justification | clarification | sidestep | deferral`), the evidence
 to cite (`paper-normalized.md` coordinate where possible), and a tighter
 re-phrasing. Honest "unresolved — needs more data" coaching is allowed; never
@@ -97,6 +112,8 @@ Write `defense-session.md` into `REVIEW_DIR`: the mock Q&A transcript (question,
 author answer, coaching) plus a short readiness summary (which axes are solid,
 which need work).
 This is advisory rehearsal output — it carries no verdict.
+
+Emit the terminal marker `prawf simulate-defense: complete`.
 
 **After `defense-session.md` is written, execution is COMPLETE.**
 

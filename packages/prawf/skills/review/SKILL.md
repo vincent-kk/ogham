@@ -71,8 +71,9 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
 1. Read the paper (PDF / LaTeX / markdown). If no paper is provided, this is the
    one valid place to ask the user.
 2. **Detect type & field** and load the field profile. Priority:
-   `--profile` override > **P0 auto-detection (default)** > universal fallback >
-   optional `<WORKDIR>/profiles/<name>.yaml` custom. Read `field-profiles.md` for the
+   `--profile` override (a built-in or a custom `<WORKDIR>/profiles/<name>.yaml`) >
+   **P0 auto-detection of a built-in (default)** > universal fallback. A custom yaml is
+   reached only via `--profile`, never auto-detected. Read `field-profiles.md` for the
    schema and the four built-ins under `profiles/`.
 3. **Validate the profile**: required keys, axis-ref integrity, `severity_examples`
    present. `argument`, `methodology`, `integrity` can NEVER be disabled; only
@@ -124,14 +125,17 @@ proposed when backed by a verifiable artifact.
 
 ### Step 4 — R3: Re-review (conditional, parallel)
 
-Re-spawn ONLY the original reviewers whose axis has a finding with
-`proposed_status` in `{unresolved, mitigated, withdrawn-proposed}`, per
+First, apply the `orchestration.md` §4.3 downgrade check: a `defended`/`mitigated`
+proposal whose defense rests only on a `sidestep` or an unbacked `justification` is
+reclassified `contested`. Then re-spawn ONLY the original reviewers whose axis has a
+finding with status in `{unresolved, mitigated, withdrawn-proposed, contested}`, per
 `prompt-templates.md` §4. They write `findings/round-3-<axis>.md` with
-`accept_defense`, `withdrawn_confirmed`, and `final_status`. If every finding is
-`defended`, **skip R3**. A finding left `contested` and not actively accepted is
-conservatively confirmed `unresolved`. R3 is a single pass; allow at most one extra
-defense+re-review cycle only when an original reviewer surfaces a genuinely new
-MITIGATED residual risk in `findings/round-3-<axis>.md` (see `orchestration.md` §7).
+`accept_defense`, `withdrawn_confirmed`, and `final_status`. If every finding is a
+verifiably-backed `defended`, **skip R3**. A finding left `contested` and not actively
+accepted in R3 is conservatively confirmed `unresolved`. R3 is a single pass; allow at
+most one extra defense+re-review cycle only when an original reviewer surfaces a
+genuinely new MITIGATED residual risk in `findings/round-3-<axis>.md` (see
+`orchestration.md` §7).
 
 **→ After R3 (or skip), immediately proceed to Step 5.**
 
@@ -183,6 +187,7 @@ Panel:     LIGHT / STANDARD / FULL (9 personas) or --solo (adjudicator)
 Outputs:   under REVIEW_DIR = <WORKDIR>/review/<paper-slug>/ —
            paper-profile.md, paper-normalized.md, findings/round-1-<axis>.md,
            rebuttal.md, findings/round-3-<axis>.md, review-report.md, qa-sheet.md
+           (qa-sheet.md in team mode only; --solo writes review-report.md alone)
 Verdict:   accept | minor-revision | major-revision | reject (soundness-only;
            impact is advisory and never raises the verdict above minor-revision)
 ```

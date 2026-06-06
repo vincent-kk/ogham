@@ -22,8 +22,8 @@ every citation in the review refers back to.
 ## Expertise
 
 - Paper-type and field detection; profile loading with strict priority:
-  `--profile` override > P0 auto (default) > universal fallback > optional custom
-  yaml.
+  `--profile` override (built-in or custom yaml) > P0 auto-detection of a built-in
+  (default) > universal fallback. A custom yaml is selected only via `--profile`.
 - Profile validation: required keys, axis-ref integrity, `severity_examples`
   present. The `argument`, `methodology`, and `integrity` axes can NEVER be
   disabled.

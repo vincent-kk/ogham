@@ -56,8 +56,10 @@ REVIEW_DIR 을 공유한다 — 한 논문의 review·defense·rebuttal·auto-fi
 
 `paper-profile.md`, `paper-normalized.md`, `findings/round-1-<axis>.md`,
 `rebuttal.md`, `findings/round-3-<axis>.md`, `review-report.md`, `qa-sheet.md`
-(review); `defense-session.md`(simulate-defense); `rebuttal-letter.md`,
-`revision-checklist.md`(rebuttal); `applied-fixes.md`, `manual-fixes.md`(auto-fix).
+(review); `defense-session.md`(simulate-defense); `external-findings.md`(중간 산출물) +
+`rebuttal-letter.md`, `revision-checklist.md`(rebuttal); `applied-fixes.md`,
+`manual-fixes.md`(auto-fix). `rebuttal.md` 는 review·rebuttal 이 같은 REVIEW_DIR 에서
+재생성하는 스킬-런 중간 산출물이며 최종 산출물이 아니다.
 모든 location 은 `paper-normalized.md` 좌표(`§<section>¶<paragraph>` + 줄)를 인용한다.
 
 ### Versioning

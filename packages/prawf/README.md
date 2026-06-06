@@ -75,8 +75,9 @@ A persona's identity is a field-agnostic _invariant question_; the field-specifi
 frameworks (EQUATOR, Bradford Hill, data-leakage checks, proof rigor, …) are
 injected by a **field profile**. Four are built in — `empirical-science`, `cs-ml`,
 `math-theory`, `humanities-qualitative` — and the chair auto-detects which to use
-from the paper's content. Override with `--profile <name>`, or drop a custom
-profile under `<workdir>/profiles/<name>.yaml` (workdir defaults to `.prawf/`). When
+from the paper's content. Override with `--profile <name>`; the same flag also selects a
+custom profile you drop under `<workdir>/profiles/<name>.yaml` (a custom profile is used
+only when named with `--profile`, never auto-detected; workdir defaults to `.prawf/`). When
 the field is unclear, prawf falls back to a universal menu rather than guess wrong.
 
 ## Outputs

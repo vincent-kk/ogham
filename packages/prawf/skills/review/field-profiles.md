@@ -82,12 +82,18 @@ into `methodology` and `causality` into `argument` (via `absorb_map`).
 
 Priority (higher wins):
 
-1. **`--profile <name>` override** — `/prawf:review --profile=cs-ml` (explicit, optional)
+1. **`--profile <name>` override** — `/prawf:review --profile=cs-ml` (explicit, optional).
+   `<name>` may be a built-in OR a user-authored `<WORKDIR>/profiles/<name>.yaml` custom
+   profile — this is the path by which a custom profile is selected.
 2. **P0 auto-detection (default)** — the chair infers the type and field from the
    paper content and selects a built-in profile
 3. **Universal fallback** — §6 (an unknown field with no built-in)
-4. **(Optional) custom yaml** — added as a candidate only when a user-authored
-   `<WORKDIR>/profiles/<name>.yaml` exists
+
+A custom `<WORKDIR>/profiles/<name>.yaml` is reachable only by naming it with `--profile`
+(priority 1): auto-detection (priority 2) selects only built-ins, and the universal
+fallback (priority 3) catches every remaining case, so there is no separate auto-select
+step for custom yaml. (A future revision could let auto-detection consider custom yaml as
+a candidate; today it does not.)
 
 **Integrity constraint (P0 verification)**: an injected profile must satisfy (1)
 required-key and axis-reference consistency and (2) the presence of

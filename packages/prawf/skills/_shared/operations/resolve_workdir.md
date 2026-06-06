@@ -40,5 +40,12 @@ filename): lowercase, hyphen-separated, no spaces. The same slug names the revie
 
 - `review` — P0 resolves WORKDIR before normalizing; every R1–ADJ deliverable lands in REVIEW_DIR.
 - `simulate-defense` — writes `defense-session.md` into REVIEW_DIR (reuses a prior review's directory when present).
-- `rebuttal` — writes `rebuttal-letter.md` + `revision-checklist.md` into REVIEW_DIR.
+- `rebuttal` — writes `external-findings.md` + `rebuttal.md` (intermediates) and `rebuttal-letter.md` + `revision-checklist.md` (final) into REVIEW_DIR.
 - `auto-fix` — reads `review-report.md` / `qa-sheet.md` from REVIEW_DIR; writes `applied-fixes.md` + `manual-fixes.md` back there.
+
+> `rebuttal.md` is a per-run **intermediate** (the strategist's R2 defense), written by
+> both `review` and `rebuttal`. When both run on one paper they share a REVIEW_DIR and the
+> later run regenerates `rebuttal.md` — this is benign because no skill consumes another
+> skill's `rebuttal.md` after its own run; the durable outputs are
+> `review-report.md`/`qa-sheet.md` (review) and `rebuttal-letter.md`/`revision-checklist.md`
+> (rebuttal). To preserve both, pass distinct `--workdir` values.

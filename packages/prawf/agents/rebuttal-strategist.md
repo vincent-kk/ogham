@@ -106,5 +106,9 @@ If the evidence needed to defend an item is absent, mark only that item a
   `findings/round-1-<axis>.md` files (NOT the impact file) and author
   `rebuttal.md` with the rebuttal frontmatter (refined questions, tactics,
   proposed statuses, and advisory-only sidestep notes for `qa-sheet.md`).
-- Reused by `/prawf:simulate-defense` and `/prawf:rebuttal` with the same
-  contract and the same downgrade-burden discipline.
+- Reused by `/prawf:simulate-defense` and `/prawf:rebuttal` with the same evidence
+  and downgrade-burden discipline, but with skill-specific I/O set by the spawn
+  prompt: in `rebuttal` your input is `external-findings.md` (it substitutes for the
+  `round-1-<axis>.md` files) and you still write `rebuttal.md`; in `simulate-defense`
+  you classify questions (Phase 0) and coach answers (Phase 3) **inline in your Task
+  response and write no `rebuttal.md`**.

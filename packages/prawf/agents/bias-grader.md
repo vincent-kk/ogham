@@ -93,8 +93,8 @@ When evidence for a specific bias domain is absent, mark that item a
   domains and reproducibility status, each with severity, canonical locator,
   and quoted basis. Contribute anticipated questions: _"Is the reproduction
   package public?"_ and _"What is the per-domain risk of bias?"_
-- `/prawf:review` **R3** (conditional): emit `findings/round-3-bias.md` only
-  when your R1 findings were contested in `rebuttal.md`; defend, mitigate, or
-  withdraw each finding (`raised -> contested -> defended | mitigated |
-unresolved | withdrawn`) and feed the final verdict
-  (`accept | minor-revision | major-revision | reject`).
+- `/prawf:review` **R3** (conditional): emit `findings/round-3-bias.md` when the
+  chair re-convenes your axis (per the `orchestration.md` §6 / `prompt-templates.md`
+  §4 convening condition); defend, mitigate, or withdraw each finding (`raised ->
+contested -> defended | mitigated | unresolved | withdrawn`) and feed the final
+  verdict (`accept | minor-revision | major-revision | reject`).

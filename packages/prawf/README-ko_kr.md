@@ -72,8 +72,9 @@ ADJ 판정              dedup → verdict (Accept / Minor / Major / Reject)
 Hill, data-leakage 점검, 증명 엄밀성 등)는 **분야 프로파일**이 주입합니다. 내장
 프로파일 4종(`empirical-science`, `cs-ml`, `math-theory`, `humanities-qualitative`)이
 있고, 편집장이 논문 내용으로 어느 것을 쓸지 자동 판정합니다. `--profile <name>` 으로
-지정하거나, `<workdir>/profiles/<name>.yaml`(workdir 기본값 `.prawf/`)에 커스텀
-프로파일을 둘 수 있습니다. 분야가 불분명하면 잘못 특화하기보다 보편 메뉴로 폴백합니다.
+지정하며, 같은 플래그로 `<workdir>/profiles/<name>.yaml`(workdir 기본값 `.prawf/`)에 둔
+커스텀 프로파일도 선택합니다(커스텀 프로파일은 `--profile` 로 지정할 때만 쓰이며 자동
+판정되지 않습니다). 분야가 불분명하면 잘못 특화하기보다 보편 메뉴로 폴백합니다.
 
 ## 산출물
 
