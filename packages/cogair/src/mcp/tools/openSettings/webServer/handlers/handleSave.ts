@@ -43,5 +43,15 @@ export async function handleSave(
     return;
   }
 
-  sendJson(res, 200, { success: true, message: 'Saved' });
+  // Sync agy's MCP registry to the saved toggle. provisionYoutube never throws —
+  // an agy-config problem must not fail a successful config save.
+  const youtube = await ctx.provisionYoutube(
+    parsed.data.antigravity_youtube.enabled,
+  );
+
+  sendJson(res, 200, {
+    success: true,
+    message: 'Saved',
+    antigravity_youtube: { ok: youtube.ok, action: youtube.action },
+  });
 }

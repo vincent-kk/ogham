@@ -14,6 +14,7 @@
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
   var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off', antigravity: 'auto' };
+  var DEFAULT_ANTIGRAVITY_YOUTUBE = { enabled: false };
   // gemini and antigravity are mutually exclusive Google engines; default to
   // gemini until the user switches (matches DEFAULT_CONFIG: gemini enabled).
   var DEFAULT_GOOGLE_ENGINE = 'gemini';
@@ -74,6 +75,7 @@
   var geminiBackendWrap = $('#gemini-backend-wrap');
   var antigravitySandbox = $('#antigravity-sandbox');
   var antigravitySkipPerms = $('#antigravity-skip-perms');
+  var antigravityYoutube = $('#antigravity-youtube');
   var modelAntigravityHigh = $('#model-antigravity-high');
   var modelAntigravityMid = $('#model-antigravity-mid');
   var modelAntigravityLow = $('#model-antigravity-low');
@@ -391,6 +393,9 @@
         if (antigravitySandbox.checked) {
           chips.push({ label: 'sandbox: terminal' });
         }
+        if (antigravityYoutube.checked) {
+          chips.push({ label: 'youtube: on' });
+        }
       } else {
         if (geminiYolo.checked) {
           chips.push({ label: 'yolo: on', tone: 'warn' });
@@ -579,6 +584,12 @@
     bindAgyModelOptions(agyModels);
   }
 
+  function applyAntigravityYoutube(raw) {
+    var src =
+      raw && typeof raw === 'object' ? raw : DEFAULT_ANTIGRAVITY_YOUTUBE;
+    antigravityYoutube.checked = Boolean(src.enabled);
+  }
+
   function applyConfig(cfg) {
     var r = cfg.ratio || {};
     var aEnabled = r.antigravity && r.antigravity.enabled;
@@ -599,6 +610,7 @@
     applyPreamble(cfg.preamble);
     applyRecencyFactor(cfg.recency_factor);
     applyModels(cfg.model_map);
+    applyAntigravityYoutube(cfg.antigravity_youtube);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -722,6 +734,9 @@
           DEFAULT_RECENCY.codex,
         ),
         antigravity: recGoogle,
+      },
+      antigravity_youtube: {
+        enabled: Boolean(antigravityYoutube.checked),
       },
     };
   }

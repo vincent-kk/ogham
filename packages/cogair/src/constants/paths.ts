@@ -1,8 +1,20 @@
+import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import { pluginCache } from '@ogham/cross-platform/paths';
 
 export const COGAIR_HOME = pluginCache('cogair');
+
+// agy's GLOBAL MCP server registry (outside COGAIR_HOME). agy loads MCP servers
+// from here even in headless `-p` mode, so cogair provisions a youtube-transcript
+// server into it when antigravity YouTube support is enabled via /setup. Path
+// mirrors the Antigravity CLI layout on both POSIX and Windows (homedir-based).
+export const AGY_MCP_CONFIG_PATH = join(
+  homedir(),
+  '.gemini',
+  'antigravity-cli',
+  'mcp_config.json',
+);
 
 export const CONFIG_PATH = join(COGAIR_HOME, 'config.json');
 export const SESSIONS_DIR = join(COGAIR_HOME, 'sessions');

@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
+import type { ProvisionResult } from '../../../../../core/agyMcpConfig/index.js';
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
 import type { Config } from '../../../../../types/index.js';
 import { type SettingsServerInstance, startSettingsServer } from '../index.js';
 
 let handle: SettingsServerInstance | null = null;
 let savedConfig: Config | null = null;
+let provisionedWith: boolean | null = null;
 
 afterEach(async () => {
   if (handle) {
@@ -13,12 +15,14 @@ afterEach(async () => {
     handle = null;
   }
   savedConfig = null;
+  provisionedWith = null;
 });
 
 interface StartOverrides {
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
   saveConfig?: (config: Config) => Promise<void>;
+  provisionYoutube?: (enabled: boolean) => Promise<ProvisionResult>;
   settingsHtml?: string;
 }
 
@@ -35,6 +39,13 @@ async function start(
       overrides.saveConfig ??
       (async (cfg) => {
         savedConfig = cfg;
+      }),
+    // Stub provisioning so /save tests never touch agy's real global config.
+    provisionYoutube:
+      overrides.provisionYoutube ??
+      (async (enabled) => {
+        provisionedWith = enabled;
+        return { ok: true, action: 'unchanged', path: '/tmp/fake' };
       }),
   });
   return handle;
@@ -114,6 +125,26 @@ describe('settings web server', () => {
     });
     expect(res.status).toBe(200);
     expect(savedConfig).toEqual(updated);
+  });
+
+  it('POST /save provisions agy youtube MCP with the saved toggle', async () => {
+    const h = await start();
+    const updated: Config = {
+      ...DEFAULT_CONFIG,
+      antigravity_youtube: { enabled: true },
+    };
+    const res = await fetch(urlFor(h, '/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    });
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(provisionedWith).toBe(true);
+    expect(body.antigravity_youtube).toEqual({
+      ok: true,
+      action: 'unchanged',
+    });
   });
 
   it('POST /save returns 400 with errors[] on invalid Config', async () => {

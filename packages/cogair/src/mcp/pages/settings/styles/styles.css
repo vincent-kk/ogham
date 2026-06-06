@@ -881,6 +881,14 @@ input[type='range']:focus-visible {
   gap: 16px;
 }
 
+/* `display: flex` (author rule) outranks the UA `[hidden] { display: none }`,
+   so the engine toggle's `el.hidden = true` would not hide the inactive engine's
+   flags — both gemini and antigravity blocks would stay visible. Restore hiding
+   the same way `.advanced-panel[hidden]` does. */
+.engine-flags[hidden] {
+  display: none;
+}
+
 /* Divider blocks inside an engine panel (trailing hint + tier-model-map) share
    the same rhythm: gap (16px from .engine-flags) above the rule, 16px padding
    below it. No margin-top — the flex gap already provides the top space. */

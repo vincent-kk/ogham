@@ -90,6 +90,19 @@ export const RecencyFactorConfigSchema = z.object({
 
 export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 
+// Antigravity, unlike Gemini CLI, has no built-in YouTube ingestion. When
+// enabled, cogair provisions a youtube-transcript MCP server into agy's global
+// mcp_config.json so agy fetches and summarizes YouTube transcripts natively in
+// headless print mode. Opt-in (defaults disabled): toggling it writes to agy's
+// config as a side effect of /setup, outside cogair's own namespace.
+export const AntigravityYoutubeConfigSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export type AntigravityYoutubeConfig = z.infer<
+  typeof AntigravityYoutubeConfigSchema
+>;
+
 // Base object schema, exported so callers that need `.shape`/`.extend` (e.g.
 // partial merges) keep access. ConfigSchema wraps it with the mutual-exclusion
 // refinement below; `.parse`/`.safeParse` still work on the wrapped schema.
@@ -105,6 +118,7 @@ export const ConfigObjectSchema = z.object({
   artifacts: ArtifactsConfigSchema,
   preamble: PreambleConfigSchema,
   recency_factor: RecencyFactorConfigSchema,
+  antigravity_youtube: AntigravityYoutubeConfigSchema,
 });
 
 // gemini and antigravity are mutually exclusive Google engines: the Gemini CLI

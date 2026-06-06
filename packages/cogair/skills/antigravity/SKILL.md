@@ -14,6 +14,7 @@ Delegate to the Antigravity CLI (`agy`) through the cogair MCP server.
 - Research requiring live web search or grounding outside Claude's knowledge cutoff.
 - Large-context synthesis across many large documents at once.
 - Work that benefits from a specific model family (Gemini, Claude, GPT-OSS) that agy can serve.
+- Summarizing or answering questions about a YouTube video — once the YouTube toggle is on (see below), just pass the URL in the prompt.
 
 ## When NOT to use
 
@@ -36,6 +37,21 @@ Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping 
 - Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, model? })`. Omit `model` when alias is `auto` or unspecified.
 
 > antigravity and gemini are mutually exclusive Google engines in cogair config (the Gemini CLI service ends 2026-06-18). If antigravity is not the enabled engine, `start_conversation` returns `error.code: 'disabled'`.
+
+## YouTube
+
+Antigravity has no built-in YouTube ingestion (Gemini CLI does). cogair closes
+this gap by registering a `youtube-transcript` MCP server in agy's own config so
+agy fetches and summarizes transcripts natively — no special dispatch path.
+
+- This is **opt-in**: the user enables it in `/cogair:setup` ("YouTube
+  summarization" toggle). Saving settings provisions the server; turning it off
+  removes it. A user-supplied `youtube-transcript` entry is never overwritten.
+- When it's on, just include the YouTube URL in the prompt and ask for a summary
+  — agy handles the transcript fetch on its own.
+- If a YouTube prompt comes back as if the video was inaccessible, the toggle is
+  likely off: tell the user to enable YouTube in `/cogair:setup`. Do not try to
+  fetch the transcript yourself.
 
 ## Response handling
 

@@ -41,6 +41,9 @@ export const DEFAULT_CONFIG: Config = {
     codex: 'off',
     antigravity: 'auto',
   },
+  antigravity_youtube: {
+    enabled: false,
+  },
 };
 
 export const DIR_MODE = 0o700;

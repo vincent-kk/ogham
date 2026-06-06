@@ -28,5 +28,11 @@ export function mergeWithDefaults(raw: unknown): unknown {
     artifacts: mergeArtifacts(raw.artifacts),
     preamble: mergePreamble(raw.preamble),
     recency_factor: mergeRecencyFactor(raw.recency_factor),
+    antigravity_youtube: {
+      ...DEFAULT_CONFIG.antigravity_youtube,
+      ...(isPlainObject(raw.antigravity_youtube)
+        ? raw.antigravity_youtube
+        : {}),
+    },
   };
 }

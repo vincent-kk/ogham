@@ -56,6 +56,7 @@ describe('loadConfig', () => {
         codex: 'strict' as const,
         antigravity: 'auto' as const,
       },
+      antigravity_youtube: { enabled: true },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
