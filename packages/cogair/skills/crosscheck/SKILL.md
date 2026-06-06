@@ -20,15 +20,16 @@ the two `ConversationResponse` envelopes into one consolidated answer.
 
 ## When NOT to use
 
-- Trivial tasks the current Claude session can answer directly.
-- Tasks that only one provider's strength fits — use `/cogair:codex` or
-  `/cogair:gemini` directly.
-- Multi-turn conversations — crosscheck is single-shot. Use
-  `/cogair:codex --continue` or `/cogair:gemini --continue` for follow-ups
-  on either side.
 - Prompts containing secrets the user does not want shared with both
   vendors — the same prompt is forwarded to BOTH codex (OpenAI) and
   gemini (Google).
+- Trivial tasks the current Claude session can answer directly.
+- Tasks that only one provider's strength fits — use `/cogair:codex` or
+  the active Google engine skill (`/cogair:gemini` or `/cogair:antigravity`)
+  directly.
+- Multi-turn conversations — crosscheck is single-shot. Use
+  `/cogair:codex --continue` or `/cogair:gemini --continue` for follow-ups
+  on either side.
 
 ## Arguments
 

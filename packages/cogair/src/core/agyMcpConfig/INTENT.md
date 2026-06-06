@@ -26,6 +26,7 @@ agy 글로벌 `mcp_config.json`(`~/.gemini/antigravity-cli/`)에 youtube-transcr
 
 - read/write 실패를 throw 하지 않고 `{ ok: false }` + `logger.warn` 으로 degrade
 - 사용자가 손수 넣은 youtube-transcript 정의 보존 (enable 시 미덮어쓰기)
+- `readMcpConfig` 의 JSON 파싱 오류(SyntaxError)는 `provisionYoutubeMcp` 의 catch 가 흡수 — `readMcpConfig` 단독 호출 시 caller 가 직접 수신함을 전제로 한다
 
 ### Ask first
 

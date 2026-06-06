@@ -1,6 +1,6 @@
 ## Purpose
 
-**레거시 — Gemini CLI 서비스 2026-06-18 종료. 후속 구현은 `../antigravity/` 참조.**
+**레거시(deprecated) — 후속 구현은 `../antigravity/` 참조.**
 gemini-cli 어댑터. 세션마다 격리된 `gemini-cwd/<sessionId>/` 작업 디렉토리를 만들고, UUID ↔ integer index 매핑을 매번 재해결.
 
 ## Structure
