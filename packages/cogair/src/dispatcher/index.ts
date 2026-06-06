@@ -1,3 +1,4 @@
+export { antigravityDispatcher } from './antigravity/index.js';
 export { codexDispatcher } from './codex/index.js';
 export { geminiDispatcher } from './gemini/index.js';
 export { buildResponse, type BuildResponseArgs } from './entities/envelope.js';

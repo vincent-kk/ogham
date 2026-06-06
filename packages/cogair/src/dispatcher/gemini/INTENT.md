@@ -1,26 +1,25 @@
 ## Purpose
 
-gemini-cli 어댑터. 세션마다 격리된 `~/.claude/plugins/cogair/runtime/gemini-cwd/<sessionId>/` 작업 디렉토리를 만들고, UUID ↔ integer index 매핑을 매번 재해결.
+**레거시 — Gemini CLI 서비스 2026-06-18 종료. 후속 구현은 `../antigravity/` 참조.**
+gemini-cli 어댑터. 세션마다 격리된 `gemini-cwd/<sessionId>/` 작업 디렉토리를 만들고, UUID ↔ integer index 매핑을 매번 재해결.
 
 ## Structure
 
 | File / Path           | Role                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `modelAlias.ts`       | `high/mid/low/auto` → gemini-cli alias (env override)                                                         |
-| `sessionResolver/`    | `--list-sessions` 출력 파싱 + UUID → 현재 integer index 매핑 (constants organ)                                |
+| `sessionResolver/`    | `--list-sessions` 파싱 + UUID → integer index 매핑                                                            |
 | `spawn.ts`            | `node:child_process.spawn('gemini', ...)` + env 주입                                                          |
-| `geminiDispatcher.ts` | `Dispatcher<GeminiFlags>` 구현 + `supportedOptions = new Set()`                                               |
+| `geminiDispatcher.ts` | `Dispatcher<GeminiFlags>` 구현                                                                                |
 | `utils/`              | `ensureCwd`, `buildPromptArgs`, `normalizeResponse`, `callGemini`, `captureSessionUuid`, `resolveResumeIndex` |
 | `index.ts`            | `export { geminiDispatcher }` barrel                                                                          |
 
 ## Conventions
 
-- env: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제; sandbox ON+backend≠auto 시 `GEMINI_SANDBOX=<backend>`, sandbox OFF 시 `GEMINI_SANDBOX=false` (상속 env 무력화)
-- 세션마다 cwd 격리: `gemini-cwd/<sessionId>/` 생성 후 그 안에서 spawn
-- `start`: `gemini [--yolo] [--sandbox] [-m <model>] -p "<prompt>"` → 직후 `--list-sessions` 로 UUID 캡처
+- env: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제; sandbox ON+backend≠auto → `GEMINI_SANDBOX=<backend>`, OFF → `GEMINI_SANDBOX=false`
+- `start`: `gemini [--yolo] [--sandbox] [-m <model>] -p "<prompt>"` → `--list-sessions` 로 UUID 캡처
 - `resume`: UUID → integer index 해결 → `gemini --resume <index> [--yolo] [--sandbox] [-m] -p "<prompt>"`
-- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `GeminiFlags` 채널 — config 단독 결정
-- `externalSessionRef` 는 항상 UUID (integer index 는 매번 재계산)
+- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `GeminiFlags` 채널; `externalSessionRef` 는 항상 UUID
 
 ## Boundaries
 
