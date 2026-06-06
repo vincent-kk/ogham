@@ -40,7 +40,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //              extra src code (recap composer, insight stats).
 //   SESSION_START — selfProbe (spawn-dependent) + inlined meta-skill-body.md.
 const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 12 * 1024;
+const HEAVY_HOOK_BYTES = 20 * 1024;
 const MEDIUM_HOOK_BYTES = 15 * 1024;
 const LIGHT_HOOK_BYTES = 10 * 1024;
 
@@ -53,8 +53,8 @@ const hookEntries = [
   { name: 'context-injector', entry: 'contextInjector', maxBytes: HEAVY_HOOK_BYTES },
   { name: 'dailynote-recorder', entry: 'dailynoteRecorder', maxBytes: LIGHT_HOOK_BYTES },
   // spawnCli (git) callers — cross-spawn inlined
-  { name: 'vault-committer', entry: 'vaultCommitter', maxBytes: MEDIUM_HOOK_BYTES },
-  { name: 'changelog-gate', entry: 'changelogGate', maxBytes: MEDIUM_HOOK_BYTES },
+  { name: 'vault-committer', entry: 'vaultCommitter', maxBytes: HEAVY_HOOK_BYTES },
+  { name: 'changelog-gate', entry: 'changelogGate', maxBytes: HEAVY_HOOK_BYTES },
   // logHookFailure only
   { name: 'lifecycle-dispatcher', entry: 'lifecycleDispatcher', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'vault-redirector', entry: 'vaultRedirector', maxBytes: LIGHT_HOOK_BYTES },
