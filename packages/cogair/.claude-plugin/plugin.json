@@ -1,6 +1,6 @@
 {
   "name": "cogair",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Cogair — delegate to Gemini / Codex / Antigravity CLI from Claude Code via MCP, skills, and hooks",
   "author": {
     "name": "Vincent K. Kelvin"
