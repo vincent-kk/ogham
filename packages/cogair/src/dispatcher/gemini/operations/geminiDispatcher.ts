@@ -45,6 +45,7 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
       cwd,
       buildPromptArgs({ model, prompt: args.prompt, flags: args.flags }),
       {
+        sandbox: args.flags.sandbox,
         sandboxBackend: args.flags.sandbox_backend,
         timeoutMs: args.spawnTimeoutMs,
       },
@@ -120,6 +121,7 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
         resumeIndex: resolved.index,
       }),
       {
+        sandbox: args.flags.sandbox,
         sandboxBackend: args.flags.sandbox_backend,
         timeoutMs: args.spawnTimeoutMs,
       },

@@ -15,7 +15,7 @@ gemini-cli 어댑터. 세션마다 격리된 `~/.claude/plugins/cogair/runtime/g
 
 ## Conventions
 
-- env: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제, `flags.sandbox && backend!=='auto'` 시 `GEMINI_SANDBOX=<backend>` 추가
+- env: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제; sandbox ON+backend≠auto 시 `GEMINI_SANDBOX=<backend>`, sandbox OFF 시 `GEMINI_SANDBOX=false` (상속 env 무력화)
 - 세션마다 cwd 격리: `gemini-cwd/<sessionId>/` 생성 후 그 안에서 spawn
 - `start`: `gemini [--yolo] [--sandbox] [-m <model>] -p "<prompt>"` → 직후 `--list-sessions` 로 UUID 캡처
 - `resume`: UUID → integer index 해결 → `gemini --resume <index> [--yolo] [--sandbox] [-m] -p "<prompt>"`

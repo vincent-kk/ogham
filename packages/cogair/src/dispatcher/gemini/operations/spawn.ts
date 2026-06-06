@@ -1,6 +1,7 @@
 import { spawnCli } from '@ogham/cross-platform';
 
 import type { GeminiSandboxBackend } from '../../../types/index.js';
+import { resolveSandboxEnv } from '../utils/resolveSandboxEnv.js';
 
 export interface GeminiSpawnResult {
   exitCode: number;
@@ -12,6 +13,7 @@ export interface GeminiSpawnResult {
 export interface GeminiSpawnOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  sandbox?: boolean;
   sandboxBackend?: GeminiSandboxBackend;
   timeoutMs?: number;
 }
@@ -20,16 +22,16 @@ export async function spawnGemini(
   args: string[],
   options: GeminiSpawnOptions = {},
 ): Promise<GeminiSpawnResult> {
-  const backendEnv =
-    options.sandboxBackend && options.sandboxBackend !== 'auto'
-      ? { GEMINI_SANDBOX: options.sandboxBackend }
-      : {};
+  const sandboxEnv = resolveSandboxEnv({
+    sandbox: options.sandbox,
+    sandboxBackend: options.sandboxBackend,
+  });
   const result = await spawnCli('gemini', args, {
     cwd: options.cwd,
     env: {
       ...process.env,
       GEMINI_CLI_TRUST_WORKSPACE: 'true',
-      ...backendEnv,
+      ...sandboxEnv,
       ...options.env,
     },
     timeoutMs: options.timeoutMs,
