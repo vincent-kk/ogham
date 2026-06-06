@@ -1,0 +1,34 @@
+# Humanities and qualitative research. statistics and causality are disabled and
+# absorbed (statistics -> methodology, causality -> argument). social-science
+# inherits empirical-science (constructs + WEIRD-sample caveats) and is the fallback
+# when no profile is specified. Axis/framework ids stay verbatim.
+profile: humanities-qualitative
+axis_frameworks:
+  argument: [interpretive-validity, groundedness, logical-coherence]
+  methodology: [coreq, reflexivity, data-saturation]
+  statistics: [] # disabled
+  causality: [] # disabled
+  bias: [researcher-positionality, confirmation-bias]
+  integrity: [source-attribution, plagiarism]
+  impact: [discourse-contribution, situating]
+disabled_axes: [statistics, causality]
+absorb_map: { statistics: methodology, causality: argument }
+paper_types:
+  - {
+      type: interpretive,
+      axes: [argument, methodology, bias, integrity, impact],
+      guideline: srqr,
+    }
+  - {
+      type: ethnographic,
+      axes: [argument, methodology, bias, integrity],
+      guideline: coreq,
+    }
+severity_examples:
+  argument:
+    {
+      critical: "primary sources do not support the interpretation",
+      major: "alternative interpretation not considered",
+      minor: "insufficient contextualization",
+    }
+external_checks: [primary-source-attribution, plagiarism, discourse-positioning]

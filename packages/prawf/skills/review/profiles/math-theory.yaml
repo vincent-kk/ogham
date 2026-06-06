@@ -1,0 +1,37 @@
+# Mathematics and theory. causality is disabled and absorbed into argument; bias
+# is disabled and absorbed into methodology. Axis/framework ids stay verbatim.
+profile: math-theory
+axis_frameworks:
+  argument: [
+      proof-line-by-line,
+      assumption-strength,
+      formalizability,
+      inference-leap-check,
+    ] # core axis (+ absorbs causality)
+  methodology: [proof-structure]
+  statistics: [counterexample, numerical-stability]
+  causality: [] # disabled -> absorbed into argument
+  bias: [] # disabled -> absorbed into methodology
+  integrity: [plagiarism, prior-result-attribution]
+  impact: [theorem-generality, applicability]
+disabled_axes: [causality, bias]
+absorb_map: { causality: argument, bias: methodology }
+paper_types:
+  - {
+      type: pure-proof,
+      axes: [argument, methodology, integrity, impact],
+      guideline: null,
+    }
+  - {
+      type: computational,
+      axes: [argument, methodology, statistics, integrity],
+      guideline: null,
+    }
+severity_examples:
+  argument:
+    {
+      critical: "proof-step error / circular argument",
+      major: "assumption is excessively strong",
+      minor: "inconsistent notation",
+    }
+external_checks: [prior-theorem-attribution, plagiarism]

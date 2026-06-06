@@ -1289,6 +1289,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ogham/prawf@workspace:packages/prawf":
+  version: 0.0.0-use.local
+  resolution: "@ogham/prawf@workspace:packages/prawf"
+  languageName: unknown
+  linkType: soft
+
 "@oxc-project/types@npm:=0.122.0":
   version: 0.122.0
   resolution: "@oxc-project/types@npm:0.122.0"

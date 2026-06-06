@@ -55,5 +55,6 @@
     "vitest.e2e.setup.ts",
     "vitest.e2e.globalSetup.ts",
     "index.html"
-  ]
+  ],
+  "additional-route-patterns": ["^_shared$"]
 }

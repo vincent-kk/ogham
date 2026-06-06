@@ -1,0 +1,19 @@
+{
+  "name": "prawf",
+  "version": "0.0.1",
+  "description": "Prawf — multi-agent academic peer-review orchestration plugin for Claude Code",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/packages/prawf",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "peer-review",
+    "academic",
+    "multi-agent"
+  ],
+  "skills": "./skills/"
+}
