@@ -4,6 +4,8 @@
 
 디렉토리와 TypeScript 파일 이름은 **camelCase** 로 통일한다 (filid fca-policy 의 기본값). 단, organ 컨벤션(`__tests__`, `__generated__`, `.claude-plugin` 등)과 디스크 JSON 키(`session_ttl_hours`, `multi_agent` 등 외부 인터페이스)는 영향받지 않는다.
 
+cogair 는 세 provider 를 지원한다: **codex**, **gemini**, **antigravity**. gemini 와 antigravity 는 동일한 Google 슬롯을 공유하며 동시에 활성화할 수 없다 (상호 배타 규칙은 `ConfigSchema` superRefine 과 `configManager/utils/normalizeMutualExclusion.ts` 가 강제). Gemini CLI 서비스는 2026-06-18 에 종료되며, antigravity(agy CLI) 가 그 후속 Google 엔진이다.
+
 ## 패키지 루트 레이아웃
 
 ```
@@ -20,6 +22,7 @@ packages/cogair/
 │   ├── setup/SKILL.md
 │   ├── codex/SKILL.md
 │   ├── gemini/SKILL.md
+│   ├── antigravity/SKILL.md
 │   └── crosscheck/SKILL.md
 ├── scripts/
 │   ├── buildMcpServer.mjs       # esbuild → bridge/mcp-server.cjs (CJS)
@@ -68,7 +71,8 @@ src/
 │   ├── counterManager/
 │   ├── sessionStore/
 │   ├── projectHash/
-│   └── authToken/
+│   ├── authToken/
+│   └── agyModels/               # agy model cache (TTL 1 h); calls `agy models`
 ├── dispatcher/                  # fractal
 │   ├── INTENT.md
 │   ├── index.ts
@@ -84,9 +88,23 @@ src/
 │   │   ├── spawn.ts
 │   │   ├── sessionResolver.ts
 │   │   └── modelAlias.ts
+│   ├── antigravity/             # agy CLI adapter
+│   │   ├── INTENT.md
+│   │   ├── index.ts
+│   │   ├── operations/
+│   │   │   ├── antigravityDispatcher.ts
+│   │   │   ├── modelAlias.ts    # reads config model_map.antigravity
+│   │   │   └── spawn.ts
+│   │   └── utils/
+│   │       ├── buildStartArgs.ts
+│   │       ├── buildResumeArgs.ts
+│   │       ├── callAgy.ts
+│   │       ├── ensureCwd.ts
+│   │       ├── parseJsonOutput.ts
+│   │       └── resolveTranscript.ts
 │   ├── envelope.ts
 │   └── errorMap.ts
-├── mcp/                         # fractal — MCP server + 3 tools
+├── mcp/                         # fractal — MCP server + 4 tools
 │   ├── INTENT.md
 │   ├── index.ts
 │   ├── server/
@@ -109,6 +127,10 @@ src/
 │   │   │   ├── INTENT.md
 │   │   │   ├── index.ts
 │   │   │   └── handler.ts
+│   │   ├── listModels/          # list_antigravity_models — delegates to core/agyModels
+│   │   │   ├── INTENT.md
+│   │   │   ├── index.ts
+│   │   │   └── listModels.ts
 │   │   └── openSettings/
 │   │       ├── INTENT.md
 │   │       ├── index.ts
@@ -172,6 +194,7 @@ src/
 
 ```
 mcp/server  →  mcp/tools/*  →  dispatcher/*  →  core/*  →  lib, utils, constants
+mcp/tools/listModels  →  core/agyModels
 mcp/serverEntry  →  mcp/server
 hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 ```
@@ -179,6 +202,7 @@ hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 - `src/hooks/*` 는 `src/core/*` 또는 `src/types/*` 를 import 하지 않는다. 빌드 가드(`FORBIDDEN_PATTERNS`, byte cap) 위반.
 - 디스크 I/O 는 `src/hooks/shared/` 안에 `node:fs` 만 사용해 직접 구현.
 - `dispatcher/` 는 `core/sessionStore`, `core/counterManager` 를 단방향 import.
+- `dispatcher/antigravity` 는 `core/sessionStore` 를 직접 import 하지 않는다. session cwd 가 곧 세션 식별자이므로 별도 session record 조회 불필요.
 
 ## 빌드 파이프라인 (filid 동일 패턴)
 
@@ -239,6 +263,42 @@ atlassian `build-setup-html.mjs` 패턴:
 ## tsconfig
 
 filid 의 `tsconfig.json`, `tsconfig.build.json` 형태 동일. ESM `.js` 확장자 import 강제.
+
+## Antigravity 디스패처 상세
+
+cogair 가 agy CLI 를 다음과 같이 호출한다.
+
+**start**: `agy -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]`
+
+**resume**: `agy --continue -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]`
+
+agy 는 headless conversation-id 를 발급하지 않는다 (Issue #7). cogair 는 세션별로 격리된 cwd (`ANTIGRAVITY_CWD_DIR/<sessionId>`) 를 생성하고 이것을 `externalSessionRef` 로 저장한다. resume 시 동일 cwd 에서 `--continue` 를 실행하면 해당 cwd 에 기록된 최근 대화가 이어진다.
+
+**stdout 파싱 순서** (Issue #76 — non-TTY 환경에서 agy 가 stdout 을 무음으로 누락하는 버그):
+
+1. `parseJsonOutput` 이 stdout 을 파싱 — JSON 객체이면 `response`/`output`/`text`/`message`/`result` 키 순서로 탐색; plain text 이면 그대로 반환; 비어 있으면 `null`.
+2. stdout 이 `null` 이면 `resolveTranscript(cwd, since)` 로 트랜스크립트 파일 폴백 시도.
+3. 트랜스크립트도 없으면 `cli_error` 반환.
+
+start 타임아웃 시 cwd 를 삭제한다. resume 타임아웃 시에는 삭제하지 않는다 (삭제하면 이후 `--continue` 가 새 대화를 시작해 컨텍스트가 소실됨).
+
+**모델 해석**: `resolveAntigravityModel` 이 `alias` (`high`/`mid`/`low`/`auto`) 를 config `model_map.antigravity` 에서 조회한다. `auto` 또는 맵 미설정이면 `-m` 을 생략해 agy 기본 모델을 사용한다. 모델 문자열은 `src/dispatcher/antigravity/operations/modelAlias.ts` 에만 존재하며, 다른 파일은 tier 만 참조한다.
+
+**agy 모델 목록** (`core/agyModels`): `agy models` 출력을 파싱해 `ANTIGRAVITY_CWD_DIR/../agy-models.json` 에 캐시한다 (TTL 1 시간). `list_antigravity_models` MCP 도구가 이 캐시를 서빙한다. 캐시 미스·갱신 실패 시 빈 목록을 반환하며 절대 throw 하지 않는다.
+
+**설정 UI**: Google 엔진 토글(radio: `gemini` | `antigravity`) 로 두 Google provider 중 하나를 선택한다. antigravity 활성 시 per-tier model 드롭다운(`model-antigravity-high`, `model-antigravity-mid`, `model-antigravity-low`)과 option_flags(`--sandbox`, `--dangerously-skip-permissions`)가 표시된다. gemini/antigravity 중복 활성화는 `ConfigSchema` superRefine 이 저장 시 차단하고, `normalizeMutualExclusion` 이 디스크 상 레거시 파일을 자동 교정한다.
+
+## 런타임 경로
+
+| 상수                    | 경로                                                    | 용도                                  |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------- |
+| `CONFIG_PATH`           | `~/.claude/plugins/cogair/config.json`                  | 설정                                  |
+| `SESSIONS_DIR`          | `~/.claude/plugins/cogair/sessions/`                    | 세션 store                            |
+| `COUNTER_PATH`          | `~/.claude/plugins/cogair/runtime/counter.json`         | 사용량 카운터                         |
+| `SETTINGS_SERVER_PATH`  | `~/.claude/plugins/cogair/runtime/settings_server.json` | 설정 서버 PID                         |
+| `GEMINI_CWD_DIR`        | `~/.claude/plugins/cogair/runtime/gemini-cwd/`          | gemini 세션별 cwd                     |
+| `ANTIGRAVITY_CWD_DIR`   | `~/.claude/plugins/cogair/runtime/antigravity-cwd/`     | agy 세션별 cwd (= externalSessionRef) |
+| `AGY_MODELS_CACHE_PATH` | `~/.claude/plugins/cogair/runtime/agy-models.json`      | agy 모델 캐시                         |
 
 ## 외부 의존성
 

@@ -2,6 +2,8 @@
 
 filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가능 단위. 단계 종료 시 `yarn cogair build` 가 통과해야 한다.
 
+프로바이더: `codex`, `gemini`, `antigravity` (3개). `gemini` 와 `antigravity` 는 상호 배타 Google 슬롯 — Gemini CLI 서비스 종료일 2026-06-18 이후 `antigravity` 가 기본. MCP 도구는 4개(`start_conversation`, `continue_conversation`, `open_settings`, `list_antigravity_models`).
+
 ## Phase 0 — Skeleton
 
 1. `packages/cogair/` 디렉토리 생성.
@@ -31,7 +33,7 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 1. `src/core/configManager/`: `loadConfig`, `saveConfig` (atomic write + defaults 병합 + Zod 검증).
 2. `src/core/counterManager/`: `loadCounter`, `incrementCounter` (parent-pid 리셋), `getCounter`.
 3. `src/core/projectHash/`: `getProjectHash(cwd)`.
-4. `src/core/sessionStore/`: `createSession`, `getSession` (project_hash 일치 검사 포함), `updateSession`, `pruneExpired` (cogair 매핑 + gemini-cwd 만 삭제).
+4. `src/core/sessionStore/`: `createSession`, `getSession` (project_hash 일치 검사 포함), `updateSession`, `pruneExpired` (cogair 매핑 + gemini-cwd / antigravity-cwd 삭제).
 5. `src/core/authToken/`: `generateToken`, `verifyToken`.
 6. `src/core/index.ts` barrel.
 7. 단위 테스트. tmp dir 으로 디스크 격리.
@@ -41,19 +43,27 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 1. `src/dispatcher/envelope.ts`, `src/dispatcher/errorMap.ts`.
 2. `src/dispatcher/codex/`: `spawn.ts`, `jsonlParser.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`).
 3. `src/dispatcher/gemini/`: `spawn.ts`, `sessionResolver.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`).
-4. `src/dispatcher/index.ts` barrel.
-5. 통합 테스트: 가짜 PATH 의 mock CLI 스크립트로 시나리오 커버 (success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options).
+4. `src/dispatcher/antigravity/`: `spawn.ts`, `modelAlias.ts` (config `model_map.antigravity` 읽기), `antigravityDispatcher.ts`, utils(`ensureCwd`, `buildStartArgs`, `buildResumeArgs`, `callAgy`, `parseJsonOutput`, `resolveTranscript`), `index.ts`.
+   - CLI 호출 패턴: `agy -p "<prompt>" --output-format json [--sandbox] [--dangerously-skip-permissions] [-m "<model>"]`; resume 시 `--continue` 선두 추가.
+   - 세션 격리: `runtime/antigravity-cwd/<sessionId>/` (`0o700`). `externalSessionRef` = cwd 경로. agy 는 headless conversation-id 미발급(Issue #7)이라 cwd 가 세션 핸들.
+   - 응답: json stdout 1차; 빈 stdout(Issue #76) 시 `resolveTranscript` 폴백 → 실패 시 `cli_error`.
+   - resume 타임아웃 시 cwd 삭제 금지 (대화 이력 보존).
+5. `src/dispatcher/utils/computeIgnoredOptions.ts`, `src/dispatcher/utils/composePrompt.ts`.
+6. `src/dispatcher/index.ts` barrel.
+7. 통합 테스트: 가짜 PATH 의 mock CLI 스크립트로 시나리오 커버 (success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options).
 
-## Phase 4 — MCP server + 3 tools
+## Phase 4 — MCP server + 4 tools
 
 1. `src/mcp/shared/toolResponse.ts`.
 2. `src/mcp/tools/startConversation/handler.ts`.
 3. `src/mcp/tools/continueConversation/handler.ts` (project_hash 검증 → error.code='unknown').
-4. `src/mcp/server/lifecycle/createServer.ts`: 3 tool 등록.
-5. `src/mcp/serverEntry/serverEntry.ts`.
-6. `scripts/buildMcpServer.mjs` (filid 동일 패턴, native-deps 단순화).
-7. `yarn cogair build:plugin` 으로 `bridge/mcp-server.cjs` 생성 확인.
-8. Claude Code 등록 후 수동 호출 검증.
+4. `src/mcp/tools/listModels/listModels.ts`: `list_antigravity_models` — 입력 없음, `{ models: string[] }` 반환. `core/agyModels.getAvailableModels` 에 위임; agy 미설치·미인증 시 빈 배열.
+5. `src/core/agyModels/`: `getAvailableModels` (TTL 1h 캐시), `refreshModels` (`agy models` spawn → 파싱 → write), `utils/parseModels` (JSON 또는 텍스트 테이블 → `string[]`). 캐시 파일 `runtime/agy-models.json`.
+6. `src/mcp/server/lifecycle/createServer.ts`: 4 tool 등록.
+7. `src/mcp/serverEntry/serverEntry.ts`.
+8. `scripts/buildMcpServer.mjs` (filid 동일 패턴, native-deps 단순화).
+9. `yarn cogair build:plugin` 으로 `bridge/mcp-server.cjs` 생성 확인.
+10. Claude Code 등록 후 수동 호출 검증.
 
 ## Phase 5 — Settings web UI (`open_settings`)
 
@@ -64,11 +74,18 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 5. token 검증 + 5분 idle 단위 테스트.
 6. `lifecycle/createServer.ts` 의 placeholder 를 실제 handler 로 교체.
 
+UI 주요 동작:
+
+- **Google 슬롯**: `gemini` / `antigravity` 라디오 토글 — 상호 배타. 저장 시 활성 엔진 `ratio.enabled = true`, 비활성 엔진 `ratio.enabled = false`. `configManager.normalizeMutualExclusion` 이 양쪽 모두 enabled 인 레거시 파일을 antigravity 우선으로 자동 보정.
+- **antigravity 활성 시**: `/provider-status` 응답의 `agyModels` 배열로 per-tier 드롭다운 (high / mid / low) 동적 바인딩 → `config.model_map.antigravity` 저장.
+- **config 키**: `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 모두 `antigravity` 필드 포함 (3-key 구조).
+
 ## Phase 6 — Skills
 
 1. `skills/setup/SKILL.md`.
 2. `skills/codex/SKILL.md`.
 3. `skills/gemini/SKILL.md`.
+4. `skills/antigravity/SKILL.md`.
 
 ## Phase 7 — Hooks (filid 패턴)
 

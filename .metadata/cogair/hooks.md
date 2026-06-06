@@ -73,13 +73,49 @@ src/hooks/
     ├── paths.ts                     # COGAIR_HOME (= ~/.claude/plugins/cogair) 등 빌드 시 inline
     ├── safeReadJson.ts
     ├── nowIso.ts
-    ├── configTypes.ts               # HookConfig, HookCounter, Ratio, ProviderRatio, ...
-    └── loadConfig.ts                # fs read + safe JSON parse + 레거시 ratio 마이그레이션
+    ├── configTypes.ts               # HookConfig, HookCounter, Ratio, ProviderRatio, OptionFlags, ...
+    ├── loadConfig.ts                # fs read + safe JSON parse + 레거시 ratio 마이그레이션
+    ├── activeGoogleEngine.ts        # gemini/antigravity 상호배타 해소 → 활성 엔진 반환
+    ├── pickKeywords.ts
+    ├── pickModel.ts
+    ├── pickOptionFlags.ts
+    ├── pickPreamble.ts
+    ├── pickProviderRatio.ts
+    ├── pickRatio.ts
+    ├── pickRecencyFactor.ts
+    └── pickStrength.ts
 ```
 
 - `src/hooks/*` 는 **외부 npm 모듈 import 금지**. `node:fs`, `node:path`, `node:os`, `node:crypto` 만.
 - `src/core/*`, `src/types/*` import 금지 (zod 가 번들에 빨려들면 cap 위반). 필요한 타입은 `src/hooks/shared/` 에 별도 선언.
 - 각 `*.entry.ts` 는 main logic 호출 후 `process.exit(0)` 종료. 예외 발생해도 stderr 만 쓰고 `process.exit(0)`.
+
+## Provider 모델 — 3-key 구조
+
+cogair 는 **gemini**, **codex**, **antigravity** 3개 provider 를 지원한다. gemini 와 antigravity 는 상호 배타적인 Google 엔진이다 — 동시에 enabled 될 수 없다. `activeGoogleEngine(config)` 가 `ratio.antigravity.enabled` 를 먼저 검사하고, 참이면 `'antigravity'`, 거짓이면 `ratio.gemini.enabled` 를 검사한다. 둘 다 false 면 `null`.
+
+config 의 `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 는 모두 3-key 구조(`gemini`, `codex`, `antigravity`)를 갖는다. 훅은 이를 read-only 로 소비한다.
+
+```
+HookConfig {
+  ratio: { gemini, codex, antigravity }        // ProviderRatio = { value, enabled }
+  keywords: { gemini, codex, antigravity }
+  option_flags: { gemini, codex, antigravity }
+  preamble: { gemini, codex, antigravity }
+  recency_factor: { gemini, codex, antigravity }
+  intervention_strength: -2 | -1 | 0 | 1 | 2
+  default_model: 'high' | 'mid' | 'low' | 'auto'
+}
+
+HookCounter {
+  gemini: number
+  codex: number
+  antigravity: number
+  is_stale: boolean
+}
+```
+
+`AntigravityFlags` (`option_flags.antigravity`): `{ sandbox: boolean; skip_permissions: boolean }`.
 
 ## `injectStatic` 페이로드
 
@@ -87,35 +123,37 @@ src/hooks/
 
 입력: `~/.claude/plugins/cogair/config.json` (없으면 defaults).
 
-`config.ratio` 는 `{ gemini: { value, enabled }, codex: { value, enabled } }` (백분율 + 활성 플래그). 레거시 정수 비율 (`{ gemini: 5, codex: 0 }`) 은 `core/configManager` 와 동일한 식으로 백분율 + enabled 로 마이그레이션해 표시. hook 은 read-only 이므로 디스크 파일은 다음 MCP write 때 정규화된다.
+`config.ratio` 는 `{ gemini: { value, enabled }, codex: { value, enabled }, antigravity: { value, enabled } }` (백분율 + 활성 플래그). 레거시 정수 비율(`{ gemini: 5, codex: 0 }` — antigravity 이전 형식)은 `pickRatio` 에서 백분율 + enabled 로 마이그레이션해 표시. hook 은 read-only 이므로 디스크 파일은 다음 MCP write 때 정규화된다.
+
+gemini 와 antigravity 는 상호 배타적이므로 활성 Google 엔진만 표시한다. `activeGoogleEngine(config)` 가 `'antigravity'` 또는 `'gemini'` 를 반환하면 그 이름과 ratio 값을 사용. 둘 다 비활성이면 `gemini/antigravity 0%` 로 표시.
 
 출력:
 
 ```
 [cogair] Static policy
 
-Provider ratio: gemini <r_g>% · codex <r_c>%
-Active providers: <gemini, codex | gemini | codex | none — run /setup>
+Provider ratio: <google-provider> <r_google>% · codex <r_c>%
+Active providers: <antigravity | gemini | codex | antigravity, codex | gemini, codex | none — run /setup>
 Intervention strength: <-2..+2> (<tone phrase>)
 
 Keyword mapping
-- gemini → <config.keywords.gemini>
+- <google-provider> → <config.keywords[google]>
 - codex  → <config.keywords.codex>
 
 Routing guidance
 - Default model alias: <config.default_model>
-- Default options:    <config.default_options>
+- Option flags:        <JSON.stringify(config.option_flags)>
 - Delegate when (a) a keyword matches the provider's domain,
-  (b) the task suits the provider's strength (gemini: live search, large context;
+  (b) the task suits the provider's strength (gemini/antigravity: live search, large context;
   codex: heavy code, sandboxed shell), or
   (c) keeping near the configured ratio.
 - Fall back to Claude when neither provider clearly fits.
-- Use /codex and /gemini skills, never invoke CLI binaries directly.
+- Use /cogair:codex and /cogair:<google-provider> skills, never invoke CLI binaries directly.
 ```
 
-`<r_g>`, `<r_c>` 는 각각 `ratio.gemini.value`, `ratio.codex.value` (이미 0–100 정수). `Active providers` 는 `enabled === true` 인 provider 만 나열. 둘 다 false 면 `none — run /setup`.
+`Active providers` 는 `enabled === true` 인 provider 만 나열. 전부 false 면 `none — run /setup`. Google 엔진은 `activeGoogleEngine` 결과만 표시 (둘 다 false 면 생략).
 
-`default_options` 표시는 `JSON.stringify(config.default_options)` 한 줄. 비어 있으면 `{}`.
+`option_flags` 표시는 `JSON.stringify(config.option_flags)` 한 줄.
 
 Tone phrase:
 
@@ -138,11 +176,13 @@ Tone phrase:
 ```
 [cogair] Live state
 
-Calls this session: gemini <c_g> · codex <c_c> · total <total>
-Current ratio:      gemini <pct_g>% · codex <pct_c>%
-Target ratio:       gemini <pct_target_g>% · codex <pct_target_c>%
-Drift:              gemini <±n> · codex <±n>   (target − current)
+Calls this session: <google-provider> <c_google> · codex <c_c> · total <total>
+Current ratio:      <google-provider> <pct_google>% · codex <pct_c>%
+Target ratio:       <google-provider> <pct_target_google>% · codex <pct_target_c>%
+Drift:              <google-provider> <±n> · codex <±n>   (target - current)
 ```
+
+`<google-provider>` 는 `activeGoogleEngine(config)` 결과 (`'antigravity'` 또는 `'gemini'`). 둘 다 비활성이면 `gemini/antigravity` 로 표기하고 count = 0.
 
 호출 0건:
 
@@ -156,7 +196,7 @@ No calls this session yet.
 
 목표 비율(`Target ratio`)은 `ratio.<provider>.enabled === false` 인 provider 를 0% 로 표시. drift 계산도 0 기준.
 
-활성 provider 없음 (`!ratio.gemini.enabled && !ratio.codex.enabled`): 마지막 줄에 `Available providers: none — run /setup` 추가.
+활성 provider 없음 (`activeGoogleEngine` 이 null 이고 `!ratio.codex.enabled`): 마지막 줄에 `Available providers: none — run /setup` 추가.
 
 ## 빌드 가드 — `scripts/buildHooks.mjs`
 

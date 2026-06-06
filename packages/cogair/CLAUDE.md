@@ -20,13 +20,13 @@ yarn version:sync       # package.json → src/version.ts
 ## Architecture (Layered Flow)
 
 ```
-Skills (/setup, /codex, /gemini, /crosscheck)    Layer 3 (user) — thin tool-call mappers
+Skills (/setup, /codex, /gemini, /antigravity, /crosscheck)  Layer 3 (user) — thin tool-call mappers
         │
         ▼
-MCP "tools" server                                Layer 2 (logic) — 3 MCP 도구
+MCP "tools" server                                Layer 2 (logic) — 4 MCP 도구
         │
         ▼
-Dispatcher (codex / gemini)                       외부 CLI spawn, JSONL 파싱, envelope 빌드
+Dispatcher (codex / gemini / antigravity)         외부 CLI spawn, JSONL 파싱, envelope 빌드
         │
         ▼
 Core storage                                      ~/.claude/plugins/cogair/{config, counter, sessions}
@@ -39,7 +39,7 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 
 ## Plugin Runtime
 
-- 스킬 이름에 플러그인 prefix 없음 (`setup`, `codex`, `gemini`, `crosscheck`) — 디렉토리 이름 = 스킬 이름
+- 스킬 이름에 플러그인 prefix 없음 (`setup`, `codex`, `gemini`, `antigravity`, `crosscheck`) — 디렉토리 이름 = 스킬 이름
 - MCP 서버 이름은 `tools` — 스킬에서 `mcp_tools_<name>` 으로 참조
 - **훅 번들 cap**: 10 KB LIGHT (enforced by `scripts/buildHooks.mjs`). injectStatic / injectDynamic 모두 ~3.3 KB minified
 - **훅 번들 금지 import**: `zod`, `@modelcontextprotocol/sdk`, `fast-glob`, `lodash`, `moment`, `date-fns` — `FORBIDDEN_PATTERNS` in `scripts/buildHooks.mjs` 가 강제
@@ -51,7 +51,8 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 - **Mock CLI**: dispatcher 통합 테스트는 fake `PATH` 의 scripted CLI 로 success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options 커버
 - **Sessions**: project-hash 스코프 (`sha256(cwd).slice(0, 12)`). `continue_conversation` 은 다른 cwd 세션이면 `error.code: 'unknown'` 반환 (자동 cross-project fallback 없음)
 - **Gemini sandbox**: `GEMINI_CLI_TRUST_WORKSPACE=true` 가 gemini spawn 에 항상 주입됨 (non-interactive agent mode). `/setup` 으로 토글 불가
-- **Model IDs**: 하드코딩 model 문자열은 **오직** `src/dispatcher/<provider>/modelAlias.ts` 에만. 다른 파일은 tier (`high` / `mid` / `low` / `auto`) 만 사용
+- **Antigravity sandbox**: sandbox-backend 없음. `--sandbox` 는 terminal-only 모드, `--dangerously-skip-permissions` 만 지원
+- **Model IDs**: 하드코딩 model 문자열은 **오직** `src/dispatcher/<provider>/modelAlias.ts` 에만. 다른 파일은 tier (`high` / `mid` / `low` / `auto`) 만 사용. antigravity 는 `src/dispatcher/antigravity/modelAlias.ts` 가 config `model_map` 을 읽어 tier 를 해석
 
 ## References
 

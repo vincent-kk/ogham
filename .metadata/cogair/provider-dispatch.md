@@ -1,6 +1,8 @@
-# Provider Dispatch — codex-cli / gemini-cli
+# Provider Dispatch — codex-cli / gemini-cli / agy (Antigravity CLI)
 
 `dispatcher/` 모듈은 검증된 `~/.claude/skills/codex-call/scripts/codex_call.mjs` 와 `gemini_call.mjs` 의 동작·envelope·exit code 처리를 TypeScript 로 재구현한다. 코드를 그대로 복사하지 않고 인터페이스만 보존한다.
+
+gemini 와 antigravity 는 상호 배타적인 Google 엔진이다. Gemini CLI 서비스가 2026-06-18 에 종료되므로 cogair 는 Antigravity CLI(`agy`) 로 전환한다. 두 엔진이 동시에 활성화될 수 없으며 config validation 및 settings UI 가 이를 강제한다.
 
 ## 공통 dispatcher 인터페이스
 
@@ -10,44 +12,40 @@ interface ConversationOptions {
   // 향후 확장 — search, sandbox, image, input_file 등.
 }
 
-interface DispatchOptions {
+interface DispatchOptions<F> {
   prompt: string;
   model: "high" | "mid" | "low" | "auto";
   options: ConversationOptions; // 기본 {}
   sessionId: string; // cogair UUID (메타 키)
   cwd: string;
+  flags: F;
+  modelMap?: TierModelMap;
+  spawnTimeoutMs?: number;
 }
 
-interface Dispatcher {
+interface Dispatcher<F> {
   readonly supportedOptions: ReadonlySet<keyof ConversationOptions>;
-  start(args: DispatchOptions): Promise<DispatchResult>;
+  start(args: DispatchOptions<F>): Promise<DispatchResult>;
   resume(
-    args: DispatchOptions & { externalSessionRef: string },
+    args: DispatchOptions<F> & { externalSessionRef: string },
   ): Promise<DispatchResult>;
 }
 
 interface DispatchResult {
   status: "success" | "failure";
   response: string | null;
-  error: ConversationResponse["error"];
+  error: ConversationError | null;
   externalSessionRef: string; // 신규 또는 기존 — 항상 명시
   ignoredOptions: string[]; // supportedOptions 에 없던 키들
+  resolvedModel: string | null;
 }
 ```
 
-`dispatcher/index.ts` 가 `{ codex: Dispatcher, gemini: Dispatcher }` 를 export. 도구 핸들러는 `dispatchers[provider].start(...)` / `.resume(...)` 호출 후 `dispatcher/entities/envelope.ts` 의 `buildResponse` 로 `ConversationResponse` 직조.
+`dispatcher/index.ts` 가 `{ codex, gemini, antigravity }` 세 dispatcher 를 export. `dispatcher/operations/dispatchers.ts` 의 `dispatchers` 맵이 provider 키로 인덱싱. 도구 핸들러는 `dispatchers[provider].start(...)` / `.resume(...)` 호출 후 `dispatcher/entities/envelope.ts` 의 `buildResponse` 로 `ConversationResponse` 직조.
 
 ### Options 화이트리스트 (v1)
 
-```typescript
-// dispatcher/codex/index.ts
-const supportedOptions = new Set<keyof ConversationOptions>([]); // 비어 있음
-
-// dispatcher/gemini/index.ts
-const supportedOptions = new Set<keyof ConversationOptions>([]); // 비어 있음
-```
-
-v1 에서는 양쪽 모두 비어 있다. 사용자가 `multi_agent: true` 를 보내도 dispatcher 가 `ignoredOptions = ['multi_agent']` 로 보고 + 정상 처리 진행. 후속 이슈에서 각 provider 의 실제 multi-agent 기능을 조사해 화이트리스트에 추가.
+v1 에서 세 provider 모두 `supportedOptions` 가 비어 있다. 사용자가 `multi_agent: true` 를 보내도 dispatcher 가 `ignoredOptions = ['multi_agent']` 로 보고 + 정상 처리 진행. 후속 이슈에서 각 provider 의 실제 multi-agent 기능을 조사해 화이트리스트에 추가.
 
 ## Codex dispatcher
 
@@ -91,6 +89,8 @@ function resolveCodexModel(alias: ModelAlias): string | null {
 
 ## Gemini dispatcher
 
+> Gemini CLI 서비스는 2026-06-18 종료 예정. 신규 프로젝트는 Antigravity dispatcher 를 사용한다.
+
 ### Spawn
 
 - 환경 변수: `GEMINI_CLI_TRUST_WORKSPACE=true` 강제.
@@ -127,22 +127,74 @@ function resolveGeminiModel(alias: ModelAlias): string | null {
 // gemini-cli 가 인식하는 short alias (pro / flash / flash-lite) 를 그대로 전달. 'auto' → -m 생략.
 ```
 
+## Antigravity dispatcher
+
+### Spawn
+
+- 실행: `agy -p "<prompt>" --output-format json [--sandbox] [--dangerously-skip-permissions] [-m "<model>"]`.
+- cwd 는 `~/.claude/plugins/cogair/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리.
+- `--output-format json` 은 항상 전달 — agy 가 JSON 객체를 stdout 으로 출력하게 한다.
+- Sandbox: `flags.sandbox` → `--sandbox` (terminal-only 제한), `flags.skip_permissions` → `--dangerously-skip-permissions`. gemini 와 달리 sandbox-backend 가 없어 두 플래그가 독립적으로 동작.
+
+### Session 매핑
+
+agy 는 헤드리스 conversation id 를 발급하지 않는다 (Issue #7). cogair 는 세션당 격리된 cwd 를 session handle 로 사용한다.
+
+- `start` 호출: `ensureCwd(sessionId)` 로 `antigravity-cwd/<sessionId>/` 생성 후 실행. `externalSessionRef` = cwd 경로.
+- `resume` 호출: `--continue -p "<prompt>" ...` 형태로 실행. `ensureCwd(sessionId)` 가 결정론적으로 동일 경로를 반환하므로, 저장된 `externalSessionRef` 와 항상 일치.
+- start 타임아웃 시 해당 cwd 삭제 (세션 히스토리 없음). resume 타임아웃 시 cwd 보존 (히스토리 손실 방지 — `--continue` 가 빈 디렉토리에서 새 대화를 시작할 수 있기 때문).
+
+### stdout 파싱 — Issue #76 대응
+
+`agy -p --output-format json` 이 non-TTY(파이프/서브프로세스) 환경에서 stdout 을 무음으로 버리는 버그(Issue #76). 3단계 폴백:
+
+1. **JSON 파싱**: stdout 비어 있지 않으면 `response`/`output`/`text`/`message`/`result` 키를 순서대로 탐색. plain text 이면 그대로 반환.
+2. **Transcript 폴백**: `resolveTranscript(cwd, since)` 로 agy 세션 transcript 파일에서 응답 복구 (real-CLI 검증 후 경로·형식 확정 전까지는 null 반환).
+3. **cli_error**: 두 단계 모두 실패하면 Issue #76 메시지를 포함한 `cli_error` 반환.
+
+### Model alias 매핑 — `dispatcher/antigravity/operations/modelAlias.ts`
+
+codex/gemini 와 달리 환경변수 fallback 없음. 모델 전체 이름은 config `model_map.antigravity` 에서만 가져온다.
+
+```typescript
+function resolveAntigravityModel(
+  alias: ModelAlias,
+  map: TierModelMap | undefined,
+): string | null {
+  if (alias === "auto" || !map) return null;
+  const name = map[alias];
+  return name.trim().length > 0 ? name : null;
+}
+// null → -m 플래그 생략 (agy 기본값). 'auto' 또는 map 미설정 시 항상 null.
+```
+
+`config.model_map.antigravity` 는 `{ high, mid, low }` per-tier 매핑. 사용 가능한 모델 전체 이름은 `list_antigravity_models` MCP 도구 또는 settings UI 드롭다운에서 확인한다.
+
+### core/agyModels — 모델 캐시
+
+`agy models` 결과를 1시간 TTL 캐시(`~/.claude/plugins/cogair/agy-models.json`)로 관리.
+
+- `getAvailableModels()`: 캐시 유효 시 반환, 만료 시 `refreshModels()` 호출. refresh 실패 시 stale 캐시 → 빈 배열 순서로 degradation.
+- `refreshModels(now)`: `agy models` 를 15초 타임아웃으로 spawn. 성공 시 파싱 후 원자적 캐시 기록. 실패 시 빈 배열 반환 (throw 없음).
+
 ## Envelope 빌더 — `dispatcher/entities/envelope.ts`
 
 ```typescript
 function buildResponse(args: {
   sessionId: string;
-  provider: "gemini" | "codex";
+  provider: "gemini" | "codex" | "antigravity" | null;
   result: DispatchResult;
   turn: number;
   createdAt: string;
   startedAt: number; // performance.now()
+  artifactPath?: string;
 }): ConversationResponse;
 ```
 
 - `elapsed_ms` = `Math.round(performance.now() - startedAt)`.
 - `created_at` 은 ISO 8601 UTC.
 - `meta.ignored_options` 는 `result.ignoredOptions` 그대로 전달.
+- `artifact_path` 는 값이 있을 때만 포함.
 
 ## Error mapping — `dispatcher/errorMap.ts`
 
@@ -158,10 +210,30 @@ function buildResponse(args: {
 | `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network`                                                                    |
 | 그 외                                  | `unknown`                                                                    |
 
+codex / gemini / antigravity 세 provider 가 동일한 errorMap 을 공유한다.
+
+## Provider 상호 배타성 (gemini ↔ antigravity)
+
+`config.ratio.gemini.enabled` 와 `config.ratio.antigravity.enabled` 는 동시에 true 일 수 없다.
+
+- **ConfigSchema**: `superRefine` 으로 동시 활성화 시 `antigravity.enabled` 경로에 `ZodIssue` 추가.
+- **normalizeMutualExclusion** (`configManager/utils`): 파일에서 로드 시 두 플래그가 모두 true 이면 antigravity 를 우선해 gemini 를 비활성화 (마이그레이션 대상 엔진 우선).
+- **activeGoogleEngine** (`hooks/shared`): 훅이 설정을 직접 읽으므로 방어적 해결 — antigravity 가 enabled 이면 우선 반환.
+- **Settings UI**: Google Engine 토글(gemini/antigravity)이 라디오 그룹으로 표시되어 하나만 선택 가능. per-tier model 드롭다운은 선택된 Google Engine 에 따라 전환됨.
+
 ## 동시성
 
 - v1: 동일 `sessionId` 에 대한 동시 호출은 MCP 단일 프로세스라 자연스럽게 직렬화. 별도 락 없음.
 - 다중 cogair 클라이언트 시나리오는 v1 비범위.
+
+## MCP 도구 목록 (4개)
+
+| 도구                      | 역할                                                          |
+| ------------------------- | ------------------------------------------------------------- |
+| `start_conversation`      | 신규 세션 시작, provider 선택, prompt 전달                    |
+| `continue_conversation`   | 기존 세션 재개 (`externalSessionRef` 기반)                    |
+| `open_settings`           | 설정 웹 UI 오픈 (로컬 HTTP 서버)                              |
+| `list_antigravity_models` | `agy models` 캐시를 읽어 사용 가능한 모델 전체 이름 목록 반환 |
 
 ## 미채택 기능 (codex-call/gemini-call 대비)
 
