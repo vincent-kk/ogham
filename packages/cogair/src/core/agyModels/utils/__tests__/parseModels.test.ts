@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { parseModels } from '../parseModels.js';
 
 describe('parseModels', () => {
-  // Basic (happy-path)
-
   it('parses a JSON array of strings', () => {
     const stdout = JSON.stringify(['gemini-2.0-flash', 'gemini-1.5-pro']);
     expect(parseModels(stdout)).toEqual(['gemini-2.0-flash', 'gemini-1.5-pro']);
@@ -22,8 +20,6 @@ describe('parseModels', () => {
     });
     expect(parseModels(stdout)).toEqual(['gemini-pro', 'gemini-flash']);
   });
-
-  // Complex (edge cases)
 
   it('returns [] for empty string', () => {
     expect(parseModels('')).toEqual([]);
@@ -85,9 +81,8 @@ describe('parseModels', () => {
     expect(parseModels(stdout)).toEqual(['Gemini 2.0 Flash Experimental']);
   });
 
-  it('falls back to line parsing when JSON object has no models array', () => {
-    // arr is null → names stays [] → line fallback runs on the raw JSON string.
+  it('returns [] for a valid JSON object with no models array', () => {
     const raw = JSON.stringify({ other: 'field', count: 5 });
-    expect(parseModels(raw)).toEqual([raw]);
+    expect(parseModels(raw)).toEqual([]);
   });
 });
