@@ -56,7 +56,7 @@ packages/prawf/
 │   │   ├── templates.md             # 산출물 포맷
 │   │   ├── prompt-templates.md      # spawn 프롬프트
 │   │   └── profiles/                # 내장 분야 프로파일 데이터 (배포·읽기전용)
-│   │       ├── natural-science.yaml
+│   │       ├── empirical-science.yaml
 │   │       ├── cs-ml.yaml
 │   │       ├── math-theory.yaml
 │   │       └── humanities-qualitative.yaml

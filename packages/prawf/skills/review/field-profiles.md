@@ -44,9 +44,9 @@ severity_examples: # per-axis critical/major/minor anchor examples
 external_checks: [<item>, ...] # handled as reasoning_gap when the capability is absent
 ```
 
-## 3. Default Profile: `natural-science` (Natural Science · Medicine Focus)
+## 3. Default Profile: `empirical-science` (Empirical Science · Medicine Focus)
 
-See [`./profiles/natural-science.yaml`](./profiles/natural-science.yaml). The native
+See [`./profiles/empirical-science.yaml`](./profiles/empirical-science.yaml). The native
 domain of the source report; applied by default when no field is specified. Focuses
 on EQUATOR reporting guidelines (CONSORT/STROBE/PRISMA), risk-of-bias frameworks
 (rob2, robins-i, grade), and Bradford-Hill causal inference. No axes are disabled —
@@ -75,7 +75,7 @@ Focuses on interpretive validity, groundedness, researcher positionality, and so
 attribution. `statistics` and `causality` are disabled and absorbed — `statistics`
 into `methodology` and `causality` into `argument` (via `absorb_map`).
 
-> `social-science` inherits `natural-science` but emphasizes construct validity and
+> `social-science` inherits `empirical-science` but emphasizes construct validity and
 > WEIRD-sample caveats; it is the default fallback when its profile is omitted.
 
 ## 5. Injection Mechanism

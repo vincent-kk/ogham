@@ -48,7 +48,7 @@ synthesize the attack and defense deliverables only.
 >
 > - `orchestration.md` — pipeline, finding state machine, dedup + verdict rules, deliverable contracts
 > - `field-profiles.md` — profile schema, injection priority, universal fallback
-> - `profiles/<name>.yaml` — built-in field-profile data (natural-science, cs-ml, math-theory, humanities-qualitative)
+> - `profiles/<name>.yaml` — built-in field-profile data (empirical-science, cs-ml, math-theory, humanities-qualitative)
 > - `templates.md` — `review-report.md` / `qa-sheet.md` / `rebuttal.md` output formats
 > - `prompt-templates.md` — literal spawn-prompt templates per persona
 > - `../../agents/<persona-id>.md` — the 10 persona agents
@@ -156,11 +156,11 @@ execution is COMPLETE.**
 > Options are LLM-interpreted hints, not strict flags. Natural language works too
 > ("review just the abstract", "treat this as a CS/ML paper").
 
-| Option             | Default | Description                                                                                      |
-| ------------------ | ------- | ------------------------------------------------------------------------------------------------ |
-| `--solo`           | off     | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                  |
-| `--profile <name>` | auto    | Override field profile (`natural-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
-| `--scope`          | `full`  | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                     |
+| Option             | Default | Description                                                                                        |
+| ------------------ | ------- | -------------------------------------------------------------------------------------------------- |
+| `--solo`           | off     | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                    |
+| `--profile <name>` | auto    | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
+| `--scope`          | `full`  | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                       |
 
 ## Quick Reference
 

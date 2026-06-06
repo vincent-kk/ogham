@@ -1,7 +1,7 @@
-# Default profile (applied when P0 cannot specify a field). Native domain of
-# the source report: natural science and medicine. Axis ids, framework ids, and
-# guideline names are canonical identifiers and stay verbatim.
-profile: natural-science
+# Default profile (applied when P0 cannot specify a field). Empirical/quantitative
+# science — medicine is the native domain (richest framework set); natural and
+# social science share the same full axis set. Axis/framework/guideline ids stay verbatim.
+profile: empirical-science
 axis_frameworks:
   argument: [toulmin, logical-fallacies]
   methodology:

@@ -87,7 +87,7 @@
 
 - `SKILL.md`: P0~ADJ 워크플로우 엔트리. filid `review/SKILL.md` 의 **anti-yield 3-layer 패턴**(Tier-2a) 복제 — 라운드 사이 yield 금지. `--solo`/`--profile`/`--scope` 옵션.
 - `orchestration.md`·`field-profiles.md`·`templates.md`·`prompt-templates.md` 영문 이식(Phase 0 정리 반영).
-- `profiles/*.yaml` ×4: `natural-science`·`cs-ml`·`math-theory`·`humanities-qualitative` (`field-profiles.md` 데이터 그대로).
+- `profiles/*.yaml` ×4: `empirical-science`·`cs-ml`·`math-theory`·`humanities-qualitative` (`field-profiles.md` 데이터 그대로).
 - `INTENT.md`·`DETAIL.md`.
 - **완료**: SKILL.md frontmatter valid, 명세 cross-ref 일관(persona id·산출물 파일명), `validate-plugin` 통과.
 

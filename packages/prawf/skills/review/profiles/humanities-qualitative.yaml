@@ -1,6 +1,6 @@
 # Humanities and qualitative research. statistics and causality are disabled and
 # absorbed (statistics -> methodology, causality -> argument). social-science
-# inherits natural-science (constructs + WEIRD-sample caveats) and is the fallback
+# inherits empirical-science (constructs + WEIRD-sample caveats) and is the fallback
 # when no profile is specified. Axis/framework ids stay verbatim.
 profile: humanities-qualitative
 axis_frameworks:

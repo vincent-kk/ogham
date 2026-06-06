@@ -19,7 +19,7 @@ impact: moderate
 override: fatal-flaw # none | fatal-flaw
 external_verification: complete # complete | unavailable | partial
 panel: [argument, methodology, statistics, causality, bias, integrity, impact]
-profile: natural-science
+profile: empirical-science
 ---
 
 # prawf Review Report — <paper title>

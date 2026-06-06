@@ -69,7 +69,7 @@ ADJ 판정              dedup → verdict (Accept / Minor / Major / Reject)
 
 페르소나의 정체성은 분야 무관 *불변 질문*이고, 분야별 프레임워크(EQUATOR, Bradford
 Hill, data-leakage 점검, 증명 엄밀성 등)는 **분야 프로파일**이 주입합니다. 내장
-프로파일 4종(`natural-science`, `cs-ml`, `math-theory`, `humanities-qualitative`)이
+프로파일 4종(`empirical-science`, `cs-ml`, `math-theory`, `humanities-qualitative`)이
 있고, 편집장이 논문 내용으로 어느 것을 쓸지 자동 판정합니다. `--profile <name>` 으로
 지정하거나, 프로젝트에 커스텀 `.prawf/profiles/<name>.yaml` 을 둘 수 있습니다. 분야가
 불분명하면 잘못 특화하기보다 보편 메뉴로 폴백합니다.

@@ -37,12 +37,12 @@ severity_examples: # 축별 critical/major/minor 앵커 예시
 external_checks: [<항목>, ...] # capability 부재 시 reasoning_gap 처리 대상
 ```
 
-## 3. 기본 프로파일: `natural-science` (자연과학·의학 역점)
+## 3. 기본 프로파일: `empirical-science` (실증과학·의학 역점)
 
 보고서 native 도메인. 미지정 시 이 프로파일을 기본 적용한다.
 
 ```yaml
-profile: natural-science
+profile: empirical-science
 axis_frameworks:
   argument: [toulmin, logical-fallacies]
   methodology:
@@ -181,7 +181,7 @@ severity_examples:
 external_checks: [1차 사료 귀속, 표절, 담론 위치]
 ```
 
-> `social-science` 는 `natural-science` 를 상속하되 구성개념 타당도·WEIRD 표본 경고를 강조한다(프로파일 생략 시 기본 폴백).
+> `social-science` 는 `empirical-science` 를 상속하되 구성개념 타당도·WEIRD 표본 경고를 강조한다(프로파일 생략 시 기본 폴백).
 
 ## 5. 주입 메커니즘
 
