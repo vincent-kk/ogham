@@ -16,6 +16,8 @@
 - token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달
 - POST body 는 항상 `Content-Type: application/json`
 - CSS 변수로 다크 모드 토큰화
+- Google 슬롯은 gemini·antigravity 중 하나만 활성 (상호 배타). `google_engine` 은 `ratio.antigravity.enabled` 플래그에서 파생되며, 비활성 엔진의 ratio 는 항상 `enabled: false` 로 저장
+- antigravity 활성 시 per-tier 모델 드롭다운(high / mid / low) 표시 — 선택 항목은 `/provider-status` 의 `agyModels` 배열로 동적 바인딩
 
 ## Boundaries
 

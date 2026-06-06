@@ -14,8 +14,8 @@
           <span class="brand-tag">/ settings</span>
         </div>
         <p class="lede">
-          Routing, intervention, and provider defaults for codex / gemini
-          dispatch.
+          Routing, intervention, and provider defaults for codex / Google
+          (gemini · antigravity) dispatch.
         </p>
       </header>
 
@@ -219,28 +219,28 @@
                 max="100"
                 step="1"
                 value="50"
-                aria-label="codex / gemini ratio (0% = all codex, 100% = all gemini)"
+                aria-label="codex / Google ratio (0% = all codex, 100% = all Google)"
               />
             </div>
 
-            <div class="ratio-row" data-provider="gemini">
+            <div class="ratio-row" data-provider="google">
               <button
                 type="button"
                 id="toggle-gemini"
                 class="provider-toggle"
                 role="switch"
                 aria-checked="true"
-                aria-label="gemini provider"
+                aria-label="Google provider"
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path
-                      d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
+                      d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-0.013z"
                     />
                   </svg>
                 </span>
                 <span class="provider-meta">
-                  <span class="provider-name">gemini</span>
+                  <span class="provider-name">Google</span>
                   <span class="provider-hint" id="gemini-hint"
                     >click to toggle</span
                   >
@@ -258,7 +258,7 @@
                 class="advanced-toggle"
                 aria-expanded="false"
                 aria-controls="advanced-panel-gemini"
-                aria-label="gemini advanced settings"
+                aria-label="Google advanced settings"
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
@@ -278,9 +278,72 @@
                 </span>
               </button>
             </div>
-            <p class="install-hint" id="gemini-install-hint" hidden>
+            <div class="engine-segment-row">
+              <span class="engine-segment-label">engine</span>
+              <div
+                class="engine-segment"
+                role="radiogroup"
+                aria-label="Google engine — gemini or antigravity (mutually exclusive)"
+              >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="google-engine"
+                    value="gemini"
+                  /><span
+                    ><svg
+                      class="engine-mark"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
+                      /></svg
+                    >gemini</span
+                  ></label
+                >
+                <label class="radio"
+                  ><input
+                    type="radio"
+                    name="google-engine"
+                    value="antigravity"
+                  /><span
+                    ><svg
+                      class="engine-mark"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 2 2 22h20L12 2zm0 5L17.5 19h-11L12 7z"
+                      /></svg
+                    >antigravity</span
+                  ></label
+                >
+              </div>
+            </div>
+            <p
+              class="install-hint"
+              id="gemini-install-hint"
+              data-engine="gemini"
+              hidden
+            >
               Install: <code>npm install -g @google/gemini-cli</code> — reload
               after installing.
+            </p>
+            <p
+              class="install-hint"
+              id="antigravity-install-hint"
+              data-engine="antigravity"
+              hidden
+            >
+              Install:
+              <code
+                >curl -fsSL https://antigravity.google/cli/install.sh |
+                bash</code
+              >
+              — reload after installing, then sign in with <code>agy</code>.
             </p>
             <div
               class="advanced-panel"
@@ -298,7 +361,8 @@
                     placeholder="comma-separated, e.g. research, search, large-context"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest gemini when these appear in the prompt.</span
+                    >Hooks suggest the active Google engine when these appear in
+                    the prompt.</span
                   >
                 </label>
 
@@ -334,8 +398,8 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback. gemini has web-tool access by default, so auto is
-                    recommended for recency.
+                    fallback. Google engines have web-tool access by default, so
+                    auto is recommended for recency.
                   </p>
                 </div>
 
@@ -350,66 +414,147 @@
 
                 <hr class="advanced-divider" />
 
-                <label class="toggle flag-row">
-                  <input id="gemini-yolo" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc">skip approval prompts</span>
-                </label>
+                <div class="engine-flags" data-engine="gemini">
+                  <label class="toggle flag-row">
+                    <input id="gemini-yolo" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label">Skip approvals (--yolo)</span>
+                    <span class="flag-desc">skip approval prompts</span>
+                  </label>
 
-                <label class="toggle flag-row">
-                  <input id="gemini-sandbox" type="checkbox" />
-                  <span class="toggle-track"
-                    ><span class="toggle-thumb"></span
-                  ></span>
-                  <span class="toggle-label"
-                    >Isolated execution (--sandbox)</span
-                  >
-                  <span class="flag-desc">isolated execution environment</span>
-                </label>
+                  <label class="toggle flag-row">
+                    <input id="gemini-sandbox" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Isolated execution (--sandbox)</span
+                    >
+                    <span class="flag-desc"
+                      >isolated execution environment</span
+                    >
+                  </label>
 
-                <div class="flag-field" id="gemini-backend-wrap">
-                  <span class="flag-field-label">sandbox backend</span>
-                  <p class="flag-hint">
-                    Sandbox backend is only configurable when Sandbox is
-                    enabled.
-                  </p>
-                  <div class="radio-row" id="gemini-backend-radio">
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="auto"
-                      /><span>auto</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="docker"
-                      /><span>docker</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="podman"
-                      /><span>podman</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="gemini-backend"
-                        value="sandbox-exec"
-                      /><span>sandbox-exec</span></label
-                    >
+                  <div class="flag-field" id="gemini-backend-wrap">
+                    <span class="flag-field-label">sandbox backend</span>
+                    <p class="flag-hint">
+                      Sandbox backend is only configurable when Sandbox is
+                      enabled.
+                    </p>
+                    <div class="radio-row" id="gemini-backend-radio">
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="auto"
+                        /><span>auto</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="docker"
+                        /><span>docker</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="podman"
+                        /><span>podman</span></label
+                      >
+                      <label class="radio"
+                        ><input
+                          type="radio"
+                          name="gemini-backend"
+                          value="sandbox-exec"
+                        /><span>sandbox-exec</span></label
+                      >
+                    </div>
+                    <p class="flag-hint">
+                      Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
+                      gemini-cli pick; <code>sandbox-exec</code> is macOS only.
+                    </p>
                   </div>
-                  <p class="flag-hint">
-                    Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
-                    gemini-cli pick; <code>sandbox-exec</code> is macOS only.
+
+                  <p class="warning-inline" data-engine="gemini">
+                    &#9888; Gemini CLI service ends 2026-06-18 — switch the
+                    engine to antigravity.
                   </p>
+                </div>
+
+                <div class="engine-flags" data-engine="antigravity" hidden>
+                  <label class="toggle flag-row">
+                    <input id="antigravity-sandbox" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Isolated execution (--sandbox)</span
+                    >
+                    <span class="flag-desc"
+                      >terminal-only sandbox (macOS); no filesystem/container
+                      isolation</span
+                    >
+                  </label>
+
+                  <label class="toggle flag-row">
+                    <input id="antigravity-skip-perms" type="checkbox" />
+                    <span class="toggle-track"
+                      ><span class="toggle-thumb"></span
+                    ></span>
+                    <span class="toggle-label"
+                      >Skip permissions (--dangerously-skip-permissions)</span
+                    >
+                    <span class="flag-desc"
+                      >bypass all approvals incl. your Deny list (danger)</span
+                    >
+                  </label>
+
+                  <p class="flag-hint">
+                    Antigravity has no container sandbox. Permission
+                    Allow/Deny/Ask lists are managed inside agy via
+                    <code>/permissions</code>; cogair follows your agy
+                    <code>settings.json</code>. Leaving "skip permissions" off
+                    keeps your Deny list as the safety net.
+                  </p>
+
+                  <div class="tier-model-map">
+                    <p class="flag-field-label">per-tier model mapping</p>
+                    <p class="flag-hint">
+                      Antigravity serves multiple model families. Map each tier
+                      to a model — <code>auto</code> lets Claude pick per
+                      request. Options come from <code>agy models</code> (run
+                      agy and sign in to populate them).
+                    </p>
+                    <div class="tier-field">
+                      <label for="model-antigravity-high">high</label>
+                      <select
+                        id="model-antigravity-high"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <div class="tier-field">
+                      <label for="model-antigravity-mid">mid</label>
+                      <select
+                        id="model-antigravity-mid"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <div class="tier-field">
+                      <label for="model-antigravity-low">low</label>
+                      <select
+                        id="model-antigravity-low"
+                        class="tier-select"
+                      ></select>
+                    </div>
+                    <p class="flag-hint">
+                      <code>auto</code> → Claude picks via
+                      <code>list_antigravity_models</code> (no mapping needed).
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -481,7 +626,7 @@
         <section class="section">
           <h2 class="section-title">CLI spawn timeout</h2>
           <p class="section-help">
-            Hard timeout (ms) for each codex / gemini CLI invocation. Hung
+            Hard timeout (ms) for each codex / Google CLI invocation. Hung
             processes are killed and surface as
             <code>error.code: network</code>.
           </p>
