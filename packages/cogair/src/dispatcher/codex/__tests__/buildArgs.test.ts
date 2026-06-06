@@ -18,6 +18,7 @@ function startArgs(flags: CodexFlags): string[] {
     sessionId: 's',
     cwd: '/tmp',
     flags,
+    spawnTimeoutMs: 10000,
   };
   return buildStartArgs(opts);
 }
@@ -31,6 +32,7 @@ function resumeArgs(flags: CodexFlags): string[] {
     cwd: '/tmp',
     flags,
     externalSessionRef: 'thread-id',
+    spawnTimeoutMs: 10000,
   };
   return buildResumeArgs(opts);
 }

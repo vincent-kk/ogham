@@ -95,6 +95,7 @@ function baseOptions(): DispatchOptions<GeminiFlags> {
     sessionId: 'cogair-session',
     cwd: process.cwd(),
     flags: FLAGS_SANDBOX_AUTO,
+    spawnTimeoutMs: 10000,
   };
 }
 

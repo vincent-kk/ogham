@@ -21,7 +21,7 @@ export const DEFAULT_CONFIG: Config = {
   model_map: {
     antigravity: {
       high: 'Gemini 3.1 Pro',
-      mid: 'Claude Sonnet 4.5',
+      mid: 'Gemini 3.5 Flash',
       low: 'Gemini 3.5 Flash',
     },
   },

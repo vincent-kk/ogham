@@ -65,7 +65,7 @@ describe('settings web server', () => {
     const h = await start();
     const res = await fetch(urlFor(h, '/config', 'bad-token'));
     expect(res.status).toBe(401);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean };
     expect(body.success).toBe(false);
   });
 
@@ -97,6 +97,7 @@ describe('settings web server', () => {
       keywords: {
         gemini: '</script><script>alert(1)</script>',
         codex: 'safe',
+        antigravity: 'safe',
       },
     };
     const h = await start({ loadConfig: async () => malicious });
@@ -138,7 +139,9 @@ describe('settings web server', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
     });
-    const body = await res.json();
+    const body = (await res.json()) as {
+      antigravity_youtube: { ok: boolean; action: string };
+    };
     expect(res.status).toBe(200);
     expect(provisionedWith).toBe(true);
     expect(body.antigravity_youtube).toEqual({
@@ -155,7 +158,7 @@ describe('settings web server', () => {
       body: JSON.stringify({ ratio: { gemini: 'oops', codex: 1 } }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json();
+    const body = (await res.json()) as { success: boolean; errors: unknown };
     expect(body.success).toBe(false);
     expect(Array.isArray(body.errors)).toBe(true);
   });
