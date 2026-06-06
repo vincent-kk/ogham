@@ -131,14 +131,14 @@ function resolveGeminiModel(alias: ModelAlias): string | null {
 
 ### Spawn
 
-- 실행: `agy -p "<prompt>" --output-format json [--sandbox] [--dangerously-skip-permissions] [-m "<model>"]`.
+- 실행: `agy -p "<prompt>" [--sandbox] [--dangerously-skip-permissions] [--model=<model>]`.
 - cwd 는 `~/.claude/plugins/cogair/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리.
-- `--output-format json` 은 항상 전달 — agy 가 JSON 객체를 stdout 으로 출력하게 한다.
+- agy 는 `--output-format` 플래그가 없어(1.x 가 미정의 플래그로 거부) plain text 를 출력 — `parseJsonOutput` 가 text/json 모두 파싱. 모델은 `--model=<name>` (등호; `-m` 별칭 없음).
 - Sandbox: `flags.sandbox` → `--sandbox` (terminal-only 제한), `flags.skip_permissions` → `--dangerously-skip-permissions`. gemini 와 달리 sandbox-backend 가 없어 두 플래그가 독립적으로 동작.
 
 ### Session 매핑
 
-agy 는 헤드리스 conversation id 를 발급하지 않는다 (Issue #7). cogair 는 세션당 격리된 cwd 를 session handle 로 사용한다.
+agy 는 `--print` 모드에서 conversation id 를 노출하지 않는다 (Issue #7, open). cogair 는 세션당 격리된 cwd 를 session handle 로 사용한다 — `--continue` 가 cwd-scoped 로 동작함(교차 세션 누출 없음)을 실측 확인.
 
 - `start` 호출: `ensureCwd(sessionId)` 로 `antigravity-cwd/<sessionId>/` 생성 후 실행. `externalSessionRef` = cwd 경로.
 - `resume` 호출: `--continue -p "<prompt>" ...` 형태로 실행. `ensureCwd(sessionId)` 가 결정론적으로 동일 경로를 반환하므로, 저장된 `externalSessionRef` 와 항상 일치.
@@ -146,7 +146,7 @@ agy 는 헤드리스 conversation id 를 발급하지 않는다 (Issue #7). coga
 
 ### stdout 파싱 — Issue #76 대응
 
-`agy -p --output-format json` 이 non-TTY(파이프/서브프로세스) 환경에서 stdout 을 무음으로 버리는 버그(Issue #76). 3단계 폴백:
+`agy -p` 가 non-TTY(파이프/서브프로세스) 환경에서 stdout 을 무음으로 버릴 수 있는 버그(Issue #76; 현재 버전에서는 파이프 환경에서도 정상 출력으로 미재현). 3단계 폴백:
 
 1. **JSON 파싱**: stdout 비어 있지 않으면 `response`/`output`/`text`/`message`/`result` 키를 순서대로 탐색. plain text 이면 그대로 반환.
 2. **Transcript 폴백**: `resolveTranscript(cwd, since)` 로 agy 세션 transcript 파일에서 응답 복구 (real-CLI 검증 후 경로·형식 확정 전까지는 null 반환).
@@ -163,9 +163,9 @@ function resolveAntigravityModel(
 ): string | null {
   if (alias === "auto" || !map) return null;
   const name = map[alias];
-  return name.trim().length > 0 ? name : null;
+  return name && name.trim().length > 0 ? name : null;
 }
-// null → -m 플래그 생략 (agy 기본값). 'auto' 또는 map 미설정 시 항상 null.
+// null → --model 플래그 생략 (agy 기본값). 'auto' 또는 map 미설정 시 항상 null.
 ```
 
 `config.model_map.antigravity` 는 `{ high, mid, low }` per-tier 매핑. 사용 가능한 모델 전체 이름은 `list_antigravity_models` MCP 도구 또는 settings UI 드롭다운에서 확인한다.

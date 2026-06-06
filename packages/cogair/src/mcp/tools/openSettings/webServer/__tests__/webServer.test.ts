@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import type { ProvisionResult } from '../../../../../core/agyMcpConfig/index.js';
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
+import type { ProvisionResult } from '../../../../../core/agyMcpConfig/index.js';
 import type { Config } from '../../../../../types/index.js';
 import { type SettingsServerInstance, startSettingsServer } from '../index.js';
 

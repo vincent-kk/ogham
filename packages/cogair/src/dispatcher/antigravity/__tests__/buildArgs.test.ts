@@ -21,6 +21,7 @@ function startArgs(
     sessionId: 's',
     cwd: '/tmp',
     flags,
+    spawnTimeoutMs: 10000,
   };
   return buildStartArgs(opts, model);
 }
@@ -37,18 +38,15 @@ function resumeArgs(
     cwd: '/tmp',
     flags,
     externalSessionRef: '/tmp/cwd',
+    spawnTimeoutMs: 10000,
   };
   return buildResumeArgs(opts, model);
 }
 
 describe('antigravity buildStartArgs', () => {
-  it('starts with -p <prompt> --output-format json', () => {
-    expect(startArgs(OFF).slice(0, 4)).toEqual([
-      '-p',
-      'hi',
-      '--output-format',
-      'json',
-    ]);
+  it('starts with -p <prompt> and no --output-format', () => {
+    expect(startArgs(OFF).slice(0, 2)).toEqual(['-p', 'hi']);
+    expect(startArgs(OFF)).not.toContain('--output-format');
   });
 
   it('omits permission flags when both are off', () => {
@@ -69,27 +67,29 @@ describe('antigravity buildStartArgs', () => {
     );
   });
 
-  it('appends -m <model> when a model name is given', () => {
+  it('appends --model=<name> when a model name is given', () => {
     const args = startArgs(OFF, 'Gemini 3.1 Pro');
-    const i = args.indexOf('-m');
-    expect(i).toBeGreaterThanOrEqual(0);
-    expect(args[i + 1]).toBe('Gemini 3.1 Pro');
+    expect(args).toContain('--model=Gemini 3.1 Pro');
+    expect(args).not.toContain('-m');
   });
 
-  it('omits -m when model is null (auto)', () => {
-    expect(startArgs(OFF, null)).not.toContain('-m');
+  it('omits the model flag when model is null (auto)', () => {
+    const args = startArgs(OFF, null);
+    expect(args.some((a) => a.startsWith('--model'))).toBe(false);
+    expect(args).not.toContain('-m');
   });
 });
 
 describe('antigravity buildResumeArgs', () => {
-  it('starts with --continue -p <prompt> --output-format json', () => {
-    expect(resumeArgs(OFF).slice(0, 5)).toEqual([
-      '--continue',
-      '-p',
-      'hi',
-      '--output-format',
-      'json',
-    ]);
+  it('starts with --continue -p <prompt> and no --output-format', () => {
+    expect(resumeArgs(OFF).slice(0, 3)).toEqual(['--continue', '-p', 'hi']);
+    expect(resumeArgs(OFF)).not.toContain('--output-format');
+  });
+
+  it('appends --model=<name> when a model name is given', () => {
+    expect(resumeArgs(OFF, 'Gemini 3.1 Pro')).toContain(
+      '--model=Gemini 3.1 Pro',
+    );
   });
 
   it('carries the same permission flags as start', () => {

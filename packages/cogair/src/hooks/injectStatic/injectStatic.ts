@@ -42,6 +42,6 @@ export function buildStaticPayload(config: HookConfig): string {
     '  codex: heavy code, sandboxed shell), or',
     '  (c) keeping near the configured ratio.',
     '- Fall back to Claude when neither provider clearly fits.',
-    `- Use /cogair:codex and /cogair:${google ?? 'gemini'} skills, never invoke CLI binaries directly.`,
+    `- Use /cogair:codex${google ? ` and /cogair:${google}` : ''} skills, never invoke CLI binaries directly.`,
   ].join('\n');
 }

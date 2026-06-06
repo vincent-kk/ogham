@@ -10,5 +10,5 @@ export function resolveAntigravityModel(
 ): string | null {
   if (alias === 'auto' || !map) return null;
   const name = map[alias];
-  return name.trim().length > 0 ? name : null;
+  return name && name.trim().length > 0 ? name : null;
 }

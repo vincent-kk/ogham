@@ -208,10 +208,10 @@ For technical details and design rationale, see [`.metadata/cogair/`](../../.met
 | [README](../../.metadata/cogair/README.md)                       | Spec index + core decisions                     |
 | [spec](../../.metadata/cogair/spec.md)                           | Responsibilities, data flow, non-goals          |
 | [architecture](../../.metadata/cogair/architecture.md)           | Module tree + dependency direction + build flow |
-| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
+| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 4 MCP tools (input schema, behavior, envelope)  |
 | [skills](../../.metadata/cogair/skills.md)                       | Skill body + tool-call mapping                  |
 | [hooks](../../.metadata/cogair/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
-| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli invocation matrix        |
+| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli / agy invocation matrix  |
 | [storage](../../.metadata/cogair/storage.md)                     | Disk layout under `~/.claude/plugins/cogair/`   |
 | [web-ui](../../.metadata/cogair/web-ui.md)                       | Local settings UI design                        |
 | [roadmap](../../.metadata/cogair/roadmap.md)                     | Phase-by-phase implementation plan              |

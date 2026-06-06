@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/cogair` 소스 루트. Claude 가 Gemini CLI / Codex CLI 에 자율 위임하도록 하는 MCP 서버, dispatcher, hooks, core 저장소를 모은 패키지 진입 모듈.
+`@ogham/cogair` 소스 루트. Claude 가 Gemini / Codex / Antigravity CLI 에 자율 위임하도록 하는 MCP 서버, dispatcher, hooks, core 저장소를 모은 패키지 진입 모듈.
 
 ## Structure
 

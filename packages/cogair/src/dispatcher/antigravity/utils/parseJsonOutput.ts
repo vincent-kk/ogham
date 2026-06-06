@@ -4,10 +4,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-// agy -p --output-format json emits a single JSON object with the answer plus
-// usage stats. The exact answer key is version-dependent, so probe common
-// candidates. Returns null for empty stdout (Issue #76) so callAgy can fall
-// back; returns trimmed text verbatim if stdout was plain (non-JSON) text.
+// agy -p emits plain text. If it parses as a JSON object, probe common answer
+// keys; otherwise return the trimmed text. Empty stdout → null (Issue #76).
 export function parseJsonOutput(stdout: string): string | null {
   const text = normalizeEol(stdout).trim();
   if (text.length === 0) return null;

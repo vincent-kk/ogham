@@ -53,8 +53,6 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       status: callResult.status,
       response: callResult.response,
       error: callResult.error,
-      // agy issues no headless conversation id (Issue #7); the isolated cwd is
-      // the durable session handle used by resume.
       externalSessionRef: cwd,
       ignoredOptions,
       resolvedModel: model,

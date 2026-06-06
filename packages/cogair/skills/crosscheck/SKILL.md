@@ -112,7 +112,7 @@ For each provider independently:
 
 ### Partial-failure template
 
-Substitute the actual provider name (`Codex` or `Gemini`) for each
+Substitute the actual provider name (`Codex`, `Gemini`, or `Antigravity`) for each
 `<SurvivingProvider>` / `<FailedProvider>` placeholder.
 
 ```

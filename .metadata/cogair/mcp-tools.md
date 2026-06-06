@@ -190,11 +190,11 @@ interface ConversationResponse {
 
 `agy` CLI 어댑터(`src/dispatcher/antigravity`)의 핵심 동작:
 
-**호출 형태**: `agy -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]`
+**호출 형태**: `agy -p <prompt> [--sandbox] [--dangerously-skip-permissions] [--model=<model>]`
 
-**재개**: `agy --continue -p <prompt> --output-format json ...` — headless conversation-id 가 없으므로(Issue #7) per-session cwd 격리로 세션 동일성을 보장한다. `externalSessionRef = cwd`.
+**재개**: `agy --continue -p <prompt> ...` — `--print` 모드가 conversation id 를 노출하지 않으므로(Issue #7, open) per-session cwd 격리로 세션 동일성을 보장한다. `externalSessionRef = cwd`.
 
-**출력 파싱**: `--output-format json` 이 단일 JSON 오브젝트를 방출한다. `response`, `output`, `text`, `message`, `result` 키를 순서대로 탐색한다. stdout 이 비어 있으면(Issue #76 — non-TTY subprocess 에서 출력 누락) transcript 폴백을 시도한다. transcript 도 복구 불가면 `cli_error` 반환.
+**출력 파싱**: agy 는 plain text 를 방출한다(`--output-format` 플래그 없음). `parseJsonOutput` 가 JSON 이면 `response`/`output`/`text`/`message`/`result` 키를 순서대로 탐색하고, plain text 면 그대로 반환한다. stdout 이 비어 있으면(Issue #76 — non-TTY subprocess 출력 누락 가능) transcript 폴백을 시도하고, 복구 불가면 `cli_error` 반환.
 
 **cwd 생명주기**: start 성공 → cwd 유지. start timeout → cwd 삭제. resume timeout → cwd 유지(대화 히스토리 보호).
 

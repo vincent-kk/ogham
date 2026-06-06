@@ -28,15 +28,22 @@ const args = process.argv.slice(2);
 const mode = process.env.COGAIR_FAKE_AGY_MODE || 'success';
 
 if (args[0] === 'models') {
-  process.stdout.write(JSON.stringify(['Gemini 3.1 Pro', 'Claude Sonnet 4.5']) + '\\n');
+  process.stdout.write('Gemini 3.1 Pro\\nClaude Sonnet 4.5\\n');
   process.exit(0);
 }
 
+const allowed = new Set(['-p', '--print', '--continue', '-c', '--sandbox', '--dangerously-skip-permissions']);
+for (const a of args) {
+  if (a.startsWith('-') && !a.startsWith('--model=') && !allowed.has(a)) {
+    process.stderr.write('flags provided but not defined: ' + a + '\\n');
+    process.exit(2);
+  }
+}
+
 if (mode === 'success') {
-  process.stdout.write(JSON.stringify({ response: 'fake antigravity response' }) + '\\n');
+  process.stdout.write('fake antigravity response\\n');
   process.exit(0);
 } else if (mode === 'empty-stdout') {
-  // Simulate Antigravity CLI Issue #76: success exit but no stdout in non-TTY.
   process.exit(0);
 } else if (mode === 'auth-stderr') {
   process.stderr.write('Please sign in to continue\\n');
@@ -77,6 +84,7 @@ function baseOptions(): DispatchOptions<AntigravityFlags> {
     sessionId: 'agy-session',
     cwd: process.cwd(),
     flags: FLAGS,
+    spawnTimeoutMs: 10000,
   };
 }
 
@@ -107,6 +115,17 @@ describe('antigravityDispatcher.start', () => {
     process.env.COGAIR_FAKE_AGY_MODE = 'rate-limit-stderr';
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.error?.code).toBe('rate_limit');
+  });
+
+  it('passes --model=<name> for a concrete tier without it being rejected', async () => {
+    process.env.COGAIR_FAKE_AGY_MODE = 'success';
+    const result = await antigravityDispatcher.start({
+      ...baseOptions(),
+      model: 'high',
+      modelMap: { high: 'Gemini 3.1 Pro', mid: 'x', low: 'y' },
+    });
+    expect(result.status).toBe('success');
+    expect(result.resolvedModel).toBe('Gemini 3.1 Pro');
   });
 });
 

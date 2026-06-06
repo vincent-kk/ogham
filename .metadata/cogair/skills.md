@@ -135,7 +135,7 @@ argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt
 - 그 외 → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, model? })`.
 - 권한 플래그(`sandbox` / `skip_permissions`)는 `/setup` 설정 UI 로만 관리 (MCP input 미노출). sandbox-backend 없음.
 - 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
-- `--continue` 재개 시 `externalSessionRef` 는 격리된 cwd 경로. agy 는 헤드리스 conversation id 를 발급하지 않아(Issue #7) cwd 격리로 세션을 식별.
+- `--continue` 재개 시 `externalSessionRef` 는 격리된 cwd 경로. agy 는 `--print` 모드에서 conversation id 를 노출하지 않아(Issue #7) cwd 격리로 세션을 식별.
 - 실패 응답 (`status: 'failure'`):
   - `auth` → 사용자에게 `agy` 인증 확인 요청.
   - `cli_error` (Issue #76 empty-stdout) → transcript 폴백 실패 시 발생. agy 업데이트 또는 TTY 환경 권장 안내.

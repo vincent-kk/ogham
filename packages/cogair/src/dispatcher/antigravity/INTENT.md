@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cwd/<sessionId>/` 에서 `agy -p --output-format json` 실행, 응답·에러를 `DispatchResult` 로 정규화. agy 는 헤드리스 conversation id 미발급(Issue #7)이라 cwd 격리로 "최근 대화 = 이 세션" 보장.
+Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cwd/<sessionId>/` 에서 `agy -p` 실행, 응답·에러를 `DispatchResult` 로 정규화. agy 는 `--print` 모드에서 conversation id 미노출(Issue #7)이라 cwd 격리로 "최근 대화 = 이 세션" 보장.
 
 ## Structure
 
@@ -14,10 +14,10 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 
 ## Conventions
 
-- `start`: `agy -p "<prompt>" --output-format json [--sandbox] [--dangerously-skip-permissions] [-m "<name>"]`
+- `start`: `agy -p "<prompt>" [--sandbox] [--dangerously-skip-permissions] [--model=<name>]`
 - `resume`: `agy --continue -p "<prompt>" ...` (cwd 격리 = 세션)
 - 권한: `flags.sandbox`→`--sandbox`, `flags.skip_permissions`→`--dangerously-skip-permissions`
-- 응답: json stdout 1차; 빈 stdout(Issue #76) 시 `resolveTranscript` 폴백
+- 응답: `parseJsonOutput` 가 plain text/json 모두 파싱; 빈 stdout(Issue #76) 시 `resolveTranscript` 폴백
 - 모델 풀네임은 config `model_map.antigravity` 단독; `externalSessionRef`=cwd
 
 ## Boundaries
@@ -29,7 +29,7 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 
 ### Ask first
 
-- `--output-format`·플래그 조합, `AntigravityFlags` 스키마 변경
+- 플래그 조합, `AntigravityFlags` 스키마 변경
 - transcript 폴백 경로/형식 확정 (real-CLI 검증)
 
 ### Never do

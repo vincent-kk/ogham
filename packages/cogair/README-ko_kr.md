@@ -208,10 +208,10 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 | [README](../../.metadata/cogair/README.md)                       | 스펙 인덱스 + 핵심 결정                     |
 | [spec](../../.metadata/cogair/spec.md)                           | 책임 분리·데이터 흐름·비채택 사항           |
 | [architecture](../../.metadata/cogair/architecture.md)           | 모듈 트리·의존 방향·빌드 파이프라인         |
-| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 3 MCP 도구 (입력 스키마·동작·envelope)      |
+| [mcp-tools](../../.metadata/cogair/mcp-tools.md)                 | 4 MCP 도구 (입력 스키마·동작·envelope)      |
 | [skills](../../.metadata/cogair/skills.md)                       | 스킬 본문 + 도구 호출 매핑                  |
 | [hooks](../../.metadata/cogair/hooks.md)                         | SessionStart / UserPromptSubmit 주입        |
-| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli 호출 매트릭스        |
+| [provider-dispatch](../../.metadata/cogair/provider-dispatch.md) | codex-cli / gemini-cli / agy 호출 매트릭스  |
 | [storage](../../.metadata/cogair/storage.md)                     | `~/.claude/plugins/cogair/` 디스크 레이아웃 |
 | [web-ui](../../.metadata/cogair/web-ui.md)                       | 로컬 설정 UI 설계                           |
 | [roadmap](../../.metadata/cogair/roadmap.md)                     | 단계별 구현 계획                            |

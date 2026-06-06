@@ -16,7 +16,7 @@ describe('resolveAntigravityModel', () => {
     expect(resolveAntigravityModel('low', MAP)).toBe('Gemini 3.5 Flash');
   });
 
-  it('returns null for auto so the dispatcher omits -m', () => {
+  it('returns null for auto so the dispatcher omits the model flag', () => {
     expect(resolveAntigravityModel('auto', MAP)).toBeNull();
   });
 
