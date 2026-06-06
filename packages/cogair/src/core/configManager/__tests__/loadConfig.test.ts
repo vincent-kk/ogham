@@ -30,19 +30,32 @@ describe('loadConfig', () => {
       ratio: {
         gemini: { value: 40, enabled: true },
         codex: { value: 60, enabled: true },
+        antigravity: { value: 50, enabled: false },
       },
       intervention_strength: 1,
-      keywords: { gemini: 'g', codex: 'c' },
+      keywords: { gemini: 'g', codex: 'c', antigravity: 'a' },
       default_model: 'high',
       option_flags: {
         gemini: { yolo: true, sandbox: true, sandbox_backend: 'docker' },
         codex: { yolo: false, sandbox: 'workspace-write' },
+        antigravity: { sandbox: true, skip_permissions: false },
+      },
+      model_map: {
+        antigravity: {
+          high: 'Gemini 3.1 Pro',
+          mid: 'Claude Sonnet 4.5',
+          low: 'Gemini 3.5 Flash',
+        },
       },
       session_ttl_hours: 24,
       spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },
-      preamble: { gemini: 'be terse', codex: 'prefer ts' },
-      recency_factor: { gemini: 'auto' as const, codex: 'strict' as const },
+      preamble: { gemini: 'be terse', codex: 'prefer ts', antigravity: 'agy' },
+      recency_factor: {
+        gemini: 'auto' as const,
+        codex: 'strict' as const,
+        antigravity: 'auto' as const,
+      },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
@@ -154,6 +167,7 @@ describe('loadConfig', () => {
     expect(result.ratio).toEqual({
       gemini: { value: 100, enabled: true },
       codex: { value: 0, enabled: false },
+      antigravity: { value: 50, enabled: false },
     });
     expect(result.keywords).toEqual(DEFAULT_CONFIG.keywords);
     expect(result.session_ttl_hours).toBe(DEFAULT_CONFIG.session_ttl_hours);
@@ -165,6 +179,7 @@ describe('loadConfig', () => {
     expect(result.ratio).toEqual({
       gemini: { value: 60, enabled: true },
       codex: { value: 40, enabled: true },
+      antigravity: { value: 50, enabled: false },
     });
   });
 

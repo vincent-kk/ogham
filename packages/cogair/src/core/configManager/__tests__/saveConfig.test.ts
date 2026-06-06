@@ -23,6 +23,7 @@ describe('saveConfig', () => {
       ratio: {
         gemini: { value: 75, enabled: true },
         codex: { value: 25, enabled: true },
+        antigravity: { value: 50, enabled: false },
       },
     };
     await saveConfig(config);

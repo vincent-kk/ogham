@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   COGAIR_HOME,
+  antigravityCwdPath,
   geminiCwdPath,
   projectMetaPath,
   sessionDir,
@@ -77,6 +78,21 @@ describe('pruneExpired', () => {
       model: 'gemini-2.5-pro',
     });
     const cwdDir = geminiCwdPath(session.session_id);
+    await mkdir(cwdDir, { recursive: true });
+    await updateSession({ ...session, last_used_at: hoursAgo(100) });
+
+    await pruneExpired(72);
+    expect(await pathExists(cwdDir)).toBe(false);
+  });
+
+  it('removes the antigravity-cwd directory for expired antigravity sessions', async () => {
+    const session = await createSession({
+      provider: 'antigravity',
+      cwd: '/proj/oldagy',
+      externalSessionRef: antigravityCwdPath('seed'),
+      model: 'Gemini 3.1 Pro',
+    });
+    const cwdDir = antigravityCwdPath(session.session_id);
     await mkdir(cwdDir, { recursive: true });
     await updateSession({ ...session, last_used_at: hoursAgo(100) });
 

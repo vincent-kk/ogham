@@ -25,7 +25,7 @@ describe('loadCounter', () => {
   });
 
   it('returns the parsed counter when valid', async () => {
-    const counter = { parent_pid: 100, gemini: 3, codex: 1 };
+    const counter = { parent_pid: 100, gemini: 3, codex: 1, antigravity: 2 };
     await writeCounterFile(JSON.stringify(counter));
     expect(await loadCounter()).toEqual(counter);
   });

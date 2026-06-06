@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import {
   SESSIONS_DIR,
+  antigravityCwdPath,
   geminiCwdPath,
   sessionDir,
 } from '../../../constants/paths.js';
@@ -48,6 +49,11 @@ export async function pruneExpired(ttlHours: number): Promise<number> {
       await rm(file, { force: true });
       if (parsed.data.provider === 'gemini') {
         await rm(geminiCwdPath(parsed.data.session_id), {
+          recursive: true,
+          force: true,
+        });
+      } else if (parsed.data.provider === 'antigravity') {
+        await rm(antigravityCwdPath(parsed.data.session_id), {
           recursive: true,
           force: true,
         });

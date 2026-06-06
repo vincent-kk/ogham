@@ -2,15 +2,17 @@ import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 
 import { isPlainObject } from './isPlainObject.js';
 import { mergeArtifacts } from './mergeArtifacts.js';
+import { mergeModelMap } from './mergeModelMap.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { mergePreamble } from './mergePreamble.js';
 import { mergeRecencyFactor } from './mergeRecencyFactor.js';
+import { normalizeMutualExclusion } from './normalizeMutualExclusion.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
 export function mergeWithDefaults(raw: unknown): unknown {
   if (!isPlainObject(raw)) return DEFAULT_CONFIG;
   return {
-    ratio: normalizeRatio(raw.ratio),
+    ratio: normalizeMutualExclusion(normalizeRatio(raw.ratio)),
     intervention_strength:
       raw.intervention_strength ?? DEFAULT_CONFIG.intervention_strength,
     keywords: {
@@ -19,6 +21,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
     },
     default_model: raw.default_model ?? DEFAULT_CONFIG.default_model,
     option_flags: mergeOptionFlags(raw.option_flags),
+    model_map: mergeModelMap(raw.model_map),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
     spawn_timeout_ms: raw.spawn_timeout_ms ?? DEFAULT_CONFIG.spawn_timeout_ms,

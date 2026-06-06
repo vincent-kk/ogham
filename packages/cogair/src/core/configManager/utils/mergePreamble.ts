@@ -9,5 +9,9 @@ export function mergePreamble(raw: unknown): PreambleConfig {
   return {
     gemini: typeof raw.gemini === 'string' ? raw.gemini : defaults.gemini,
     codex: typeof raw.codex === 'string' ? raw.codex : defaults.codex,
+    antigravity:
+      typeof raw.antigravity === 'string'
+        ? raw.antigravity
+        : defaults.antigravity,
   };
 }
