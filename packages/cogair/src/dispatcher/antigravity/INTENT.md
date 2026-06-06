@@ -17,7 +17,7 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 - `start`: `agy -p "<prompt>" [--sandbox] [--dangerously-skip-permissions] [--model=<name>]`
 - `resume`: `agy --continue -p "<prompt>" ...` (cwd 격리 = 세션)
 - 권한: `flags.sandbox`→`--sandbox`, `flags.skip_permissions`→`--dangerously-skip-permissions`
-- 응답: `parseJsonOutput` 가 plain text/json 모두 파싱; 빈 stdout(Issue #76) 시 `resolveTranscript` 폴백
+- 응답: `parseJsonOutput` 가 plain text/json 파싱; agy 1.0.6 실측상 non-TTY(stdin closed)에서 stdout 정상 → `resolveTranscript` 는 방어용 no-op
 - 모델 풀네임은 config `model_map.antigravity` 단독; `externalSessionRef`=cwd
 
 ## Boundaries
@@ -25,12 +25,11 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 ### Always do
 
 - antigravity-cwd 부재 시 `0o700` 생성; 모든 에러 `errorMap` 정규화
-- 빈 stdout 시 transcript 폴백 후 실패면 Issue #76 cli_error
+- 빈 stdout(실측 미발생)은 방어적으로 cli_error 로 정규화
 
 ### Ask first
 
 - 플래그 조합, `AntigravityFlags` 스키마 변경
-- transcript 폴백 경로/형식 확정 (real-CLI 검증)
 
 ### Never do
 
