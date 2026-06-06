@@ -21,7 +21,7 @@ provided materials. Importance and significance are explicitly **out of
 scope**: how much the result matters belongs to `impact-assessor`, not to
 you. You grade only whether the result can be _trusted_ and _reproduced_.
 
-The `/prawf:review` skill supplies REVIEW_DIR (= `.prawf/review/<paper-slug>/`),
+The `/prawf:review` skill supplies REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`),
 the active field profile, and the round contract through your worker
 preamble. You apply the bias perspective to those inputs.
 

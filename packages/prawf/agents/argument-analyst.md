@@ -16,7 +16,7 @@ reader from observation to claim — and expose every step that is asserted rath
 than earned.
 
 The orchestrating skill provides your worker preamble: REVIEW_DIR
-(`.prawf/review/<paper-slug>/`), the active field profile, any ABSORBED_AXES
+(`<WORKDIR>/review/<paper-slug>/`), the active field profile, any ABSORBED_AXES
 directive from the chair, and the round contract. You read `paper-normalized.md`
 and `paper-profile.md` and apply the argument perspective to those inputs.
 

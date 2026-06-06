@@ -2,7 +2,7 @@
 name: auto-fix
 user_invocable: true
 description: "[prawf:auto-fix] After a /prawf:review, apply the auto-fixable revisions directly to the manuscript source. Only mechanical, artifact-backed text edits (clarifications, added statements, notation/citation fixes) are applied; anything needing new data, analysis, or author judgment is listed as manual. Triggers: 자동 수정, 자동수정, auto-fix, 리뷰 수정 적용, apply review fixes, apply fixes."
-argument-hint: "[--dry-run] [<paper-slug | review-dir>] [<manuscript-path>]"
+argument-hint: "[--dry-run] [--workdir <dir>] [<paper-slug | review-dir>] [<manuscript-path>]"
 version: "1.0.0"
 complexity: medium
 plugin: prawf
@@ -63,9 +63,11 @@ evidence, insert a correction the author already supplied in the rebuttal.
 
 ### Step 1 — Locate inputs (direct)
 
-1. Resolve the review directory: from `<paper-slug | review-dir>` or the most
-   recent `.prawf/review/<slug>/`. Read `review-report.md` and `qa-sheet.md`.
-   If neither exists, stop and tell the user to run `/prawf:review` first.
+1. Resolve `WORKDIR` per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
+   (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`), then the review directory: from
+   `<paper-slug | review-dir>` or the most recent `<WORKDIR>/review/<slug>/`. Read
+   `review-report.md` and `qa-sheet.md`. If neither exists, stop and tell the user to
+   run `/prawf:review` first.
 2. Resolve the **manuscript source**: prefer `<manuscript-path>`; otherwise read
    the input recorded in `paper-profile.md`. It MUST be an editable text source
    (markdown / LaTeX). If only a PDF exists, do NOT edit — skip to Step 4 and
@@ -126,9 +128,10 @@ Emit the terminal marker `prawf auto-fix: <N> applied, <M> manual`.
 
 ## Options
 
-| Option      | Default | Description                                           |
-| ----------- | ------- | ----------------------------------------------------- |
-| `--dry-run` | off     | Preview the would-apply edits; change nothing on disk |
+| Option            | Default    | Description                                              |
+| ----------------- | ---------- | -------------------------------------------------------- |
+| `--dry-run`       | off        | Preview the would-apply edits; change nothing on disk    |
+| `--workdir <dir>` | `./.prawf` | Output root to read/write under (or `PRAWF_WORKDIR` env) |
 
 ## Quick Reference
 

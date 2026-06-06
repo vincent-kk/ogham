@@ -25,7 +25,7 @@ concerns (transparency, soundness, reproducibility, contextualization).
 ## 2. Profile Schema
 
 ```yaml
-# .prawf/profiles/<name>.yaml
+# <WORKDIR>/profiles/<name>.yaml
 profile: <name>
 axis_frameworks: # axis id → active framework menu
   argument: [<framework>, ...]
@@ -87,7 +87,7 @@ Priority (higher wins):
    paper content and selects a built-in profile
 3. **Universal fallback** — §6 (an unknown field with no built-in)
 4. **(Optional) custom yaml** — added as a candidate only when a user-authored
-   `.prawf/profiles/<name>.yaml` exists
+   `<WORKDIR>/profiles/<name>.yaml` exists
 
 **Integrity constraint (P0 verification)**: an injected profile must satisfy (1)
 required-key and axis-reference consistency and (2) the presence of
@@ -97,7 +97,7 @@ conditionally disabled when accompanied by an `absorb_map`). On violation the ch
 rejects the profile and falls back to the universal menu.
 
 > It works without any separate config file — the built-in profiles in this document
-> are sufficient as field data. A config file (`.prawf/profiles/<name>.yaml`) appears
+> are sufficient as field data. A config file (`<WORKDIR>/profiles/<name>.yaml`) appears
 > only when a user adds a custom field.
 
 ## 6. Fallback — Universal Menu (No Profile Specified · Unknown Field)

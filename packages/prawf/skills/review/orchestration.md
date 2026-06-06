@@ -40,7 +40,8 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
 
 ### P0 — Profile & Normalize (chair)
 
-1. **Detect type & field** → load a [field profile](./field-profiles.md). Priority: `--profile` override > P0 auto-detection (default) > universal fallback > optional `.prawf/profiles/<name>.yaml` custom.
+0. **Resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md): `--workdir` > `PRAWF_WORKDIR` > `./.prawf`. All deliverables go under `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+1. **Detect type & field** → load a [field profile](./field-profiles.md). Priority: `--profile` override > P0 auto-detection (default) > universal fallback > optional `<WORKDIR>/profiles/<name>.yaml` custom.
 2. **Validate the profile**: confirm the loaded profile's minimum schema (required keys, axis-reference consistency, presence of `severity_examples`).
    **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
 3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers).
@@ -128,6 +129,8 @@ This reflects the skeptic note (the structural Accept-opposing gravity of 6 atta
 - The result is reflected only in the _Significance & Scope_ section of `review-report.md` and in `qa-sheet.md`.
 
 ## 5. Deliverable Contracts
+
+All paths are relative to `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` (resolved in P0 via [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)).
 
 | File                         | Author                                   |
 | ---------------------------- | ---------------------------------------- |

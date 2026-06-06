@@ -33,7 +33,9 @@ Language: Write the deliverable in the user's language — match the request or 
 REMINDER: Write `<REVIEW_DIR>/<OUTPUT_FILE>` before finishing. If you run low on budget, skip the remaining analysis and write the file with partial results.
 ```
 
-`REVIEW_DIR` = `.prawf/review/<paper-slug>/`, `PAPER_NORMALIZED` = `<REVIEW_DIR>/paper-normalized.md`.
+`WORKDIR` is resolved by [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
+(`--workdir` > `PRAWF_WORKDIR` > default `./.prawf`). `REVIEW_DIR` =
+`<WORKDIR>/review/<paper-slug>/`, `PAPER_NORMALIZED` = `<REVIEW_DIR>/paper-normalized.md`.
 
 ## 1. R1 — Soundness Reviewer (shared, axis-parameterized)
 

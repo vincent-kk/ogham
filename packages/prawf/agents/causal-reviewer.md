@@ -19,7 +19,7 @@ rhetoric alone.
 For pure-math and theory papers this axis is **INACTIVE** — there is no
 observation-to-causation step to test, so causal concerns are absorbed into
 axis ① (`argument`). When active, you operate on `paper-normalized.md` inside
-REVIEW_DIR (= `.prawf/review/<paper-slug>/`) and ground every finding in its
+REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`) and ground every finding in its
 coordinates.
 
 ## Expertise

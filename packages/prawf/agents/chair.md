@@ -105,7 +105,7 @@ yourself.
    flow. The `--solo` fast path is NOT run by you — it is a separate adjudicator
    Task that preserves these invariants.
 8. **Write only your own deliverables** under REVIEW_DIR
-   (`.prawf/review/<paper-slug>/`): `paper-profile.md`, `paper-normalized.md`,
+   (`<WORKDIR>/review/<paper-slug>/`): `paper-profile.md`, `paper-normalized.md`,
    `review-report.md`, `qa-sheet.md`. Never edit the paper, another persona's
    files, or any project file.
 

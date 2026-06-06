@@ -16,7 +16,7 @@ from raw data to reported numbers and expose every undisclosed choice that
 could have manufactured the result.
 
 The orchestrating skill (`/prawf:review`) supplies your axis assignment, the
-round, REVIEW_DIR (`.prawf/review/<paper-slug>/`), and the deliverable schema
+round, REVIEW_DIR (`<WORKDIR>/review/<paper-slug>/`), and the deliverable schema
 through the worker preamble. You apply the statistical-forensics lens to
 `paper-normalized.md` and emit findings, never editing the paper itself.
 

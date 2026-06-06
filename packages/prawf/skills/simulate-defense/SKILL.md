@@ -2,7 +2,7 @@
 name: simulate-defense
 user_invocable: true
 description: "[prawf:simulate-defense] Rehearse a thesis/paper defense. The committee personas pose anticipated questions, the author (you) answers, and the rebuttal-strategist coaches each answer with tactics and evidence to cite. Reuses the prawf review personas. Triggers: 답변 시뮬레이션, 모의 심사, defense simulation, mock defense, Q&A 연습, 예상 질문 연습."
-argument-hint: "[--batch] [--profile <name>] [<qa-sheet-or-paper-path>]"
+argument-hint: "[--batch] [--profile <name>] [--workdir <dir>] [<qa-sheet-or-paper-path>]"
 version: "1.0.0"
 complexity: medium
 plugin: prawf
@@ -44,6 +44,10 @@ is preparation, NOT a verdict — it never issues Accept/Reject.
 ## Core Workflow
 
 ### Phase 0 — Resolve questions (direct + optional spawn)
+
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
+(`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); session outputs go under
+`REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`, reusing a prior review's directory when present.
 
 1. If a `qa-sheet.md` from a prior `/prawf:review` is supplied or found, load its
    anticipated questions directly — no spawning needed.
@@ -89,18 +93,20 @@ manufacture a defense for a fatal flaw.
 
 ### Phase 4 — Output (direct)
 
-Write `defense-session.md`: the mock Q&A transcript (question, author answer,
-coaching) plus a short readiness summary (which axes are solid, which need work).
+Write `defense-session.md` into `REVIEW_DIR`: the mock Q&A transcript (question,
+author answer, coaching) plus a short readiness summary (which axes are solid,
+which need work).
 This is advisory rehearsal output — it carries no verdict.
 
 **After `defense-session.md` is written, execution is COMPLETE.**
 
 ## Options
 
-| Option             | Default | Description                                                        |
-| ------------------ | ------- | ------------------------------------------------------------------ |
-| `--batch`          | off     | Non-interactive: generate model answers, run Tier-2a               |
-| `--profile <name>` | auto    | Field profile for question generation (when starting from a paper) |
+| Option             | Default    | Description                                                        |
+| ------------------ | ---------- | ------------------------------------------------------------------ |
+| `--batch`          | off        | Non-interactive: generate model answers, run Tier-2a               |
+| `--profile <name>` | auto       | Field profile for question generation (when starting from a paper) |
+| `--workdir <dir>`  | `./.prawf` | Output root for `defense-session.md` (or `PRAWF_WORKDIR` env)      |
 
 ## Quick Reference
 

@@ -2,7 +2,7 @@
 name: rebuttal
 user_invocable: true
 description: "[prawf:rebuttal] Turn real external reviewer comments into a point-by-point rebuttal letter and a revision checklist. Skips the attack round (the external reviewers already attacked) and runs the prawf defense round directly. Reuses the chair and rebuttal-strategist personas. Triggers: 반박문, 리뷰 응답, rebuttal letter, response to reviewers, point-by-point response, 심사평 대응."
-argument-hint: "[--profile <name>] [<paper-path>] [<review-comments-path>]"
+argument-hint: "[--profile <name>] [--workdir <dir>] [<paper-path>] [<review-comments-path>]"
 version: "1.0.0"
 complexity: medium
 plugin: prawf
@@ -45,6 +45,10 @@ rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
 
 ### Step 1 — Inputs & comment normalization (chair, direct)
 
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
+(`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); all outputs go under
+`REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+
 1. Take the paper and the external review comments (a file or pasted text). If
    either is missing, ask the user — this is the one valid yield point.
 2. Normalize the paper into `paper-normalized.md` (reuse if it already exists).
@@ -68,7 +72,7 @@ honestly, not waved away.
 
 ### Step 3 — Assemble letter + checklist (chair, direct)
 
-Read `../review/templates.md`, then write:
+Read `../review/templates.md`, then write into `REVIEW_DIR`:
 
 1. `rebuttal-letter.md` — a courteous point-by-point response. Each item is tagged
    **Revision** (a change made), **Justification** (defended with evidence), or
@@ -84,9 +88,10 @@ Emit the terminal marker `prawf rebuttal: complete`.
 
 ## Options
 
-| Option             | Default | Description                                       |
-| ------------------ | ------- | ------------------------------------------------- |
-| `--profile <name>` | auto    | Field profile for framework-aware defense framing |
+| Option             | Default    | Description                                       |
+| ------------------ | ---------- | ------------------------------------------------- |
+| `--profile <name>` | auto       | Field profile for framework-aware defense framing |
+| `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env)              |
 
 ## Quick Reference
 

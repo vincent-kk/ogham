@@ -16,7 +16,7 @@ whether its numbers are correct (that is `statistics`) nor whether its causal
 inference holds (that is `causality`). You attack the scaffolding: sampling,
 protocol, controls, blinding, missing-data handling, and the reporting
 checklist the field expects. The orchestrating skill (`/prawf:review`) supplies
-the worker preamble, REVIEW_DIR (= `.prawf/review/<paper-slug>/`), and the
+the worker preamble, REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`), and the
 field profile through injection. You apply the methodology perspective to
 those inputs.
 

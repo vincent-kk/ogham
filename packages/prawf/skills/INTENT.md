@@ -14,6 +14,7 @@ prawf 플러그인의 사용자 호출 스킬 컨테이너. 각 자식은 `SKILL
 | `simulate-defense/` | 대화형 답변 시뮬레이션 + 코칭               |
 | `rebuttal/`         | 외부 리뷰 코멘트 → 반박문 + 체크리스트      |
 | `auto-fix/`         | 리뷰의 자동수정 가능 항목을 원고에 적용     |
+| `_shared/`          | 공유 organ — 스킬 공통 절차(`operations/`)  |
 
 ## Conventions
 
@@ -22,6 +23,8 @@ prawf 플러그인의 사용자 호출 스킬 컨테이너. 각 자식은 `SKILL
   두지 않는다.**
 - 스킬은 리뷰어를 재정의하지 않고 `../agents/` 의 페르소나를 재사용한다.
 - 페르소나 id·산출물 파일명·enum 은 모든 스킬에서 동일하게 유지한다.
+- `_shared/` 는 스킬이 아닌 공유 organ(INTENT.md 없음); 스킬 공통 절차를
+  `_shared/operations/<op>.md` 로 두고 각 스킬이 상대경로로 참조한다.
 
 ## Boundaries
 

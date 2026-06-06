@@ -34,6 +34,7 @@ delegated as a capability, never bound to a specific tool.
 /prawf:review                      # auto-detect the field, run the full panel
 /prawf:review --solo               # fast single-pass pre-check
 /prawf:review --profile cs-ml      # force a field profile
+/prawf:review --workdir ~/reviews  # pin the output root (or set PRAWF_WORKDIR)
 /prawf:simulate-defense paper.pdf  # generate questions, then rehearse
 /prawf:rebuttal paper.pdf reviews.txt
 /prawf:auto-fix --dry-run          # preview the auto-fixable revisions, change nothing
@@ -75,13 +76,15 @@ frameworks (EQUATOR, Bradford Hill, data-leakage checks, proof rigor, …) are
 injected by a **field profile**. Four are built in — `empirical-science`, `cs-ml`,
 `math-theory`, `humanities-qualitative` — and the chair auto-detects which to use
 from the paper's content. Override with `--profile <name>`, or drop a custom
-`.prawf/profiles/<name>.yaml` in your project. When the field is unclear, prawf
-falls back to a universal menu rather than guess wrong.
+profile under `<workdir>/profiles/<name>.yaml` (workdir defaults to `.prawf/`). When
+the field is unclear, prawf falls back to a universal menu rather than guess wrong.
 
 ## Outputs
 
 `/prawf:review` writes `review-report.md` (the verdict, traceable to each finding)
-and `qa-sheet.md` (the anticipated questions and, where one is clear, a solution).
+and `qa-sheet.md` (the anticipated questions and, where one is clear, a solution)
+under `<workdir>/review/<paper-slug>/`. The workdir defaults to `.prawf/`; pin it with
+`--workdir <dir>` or `PRAWF_WORKDIR` to keep outputs in one place as your `pwd` changes.
 All findings cite a coordinate in the chair's normalized snapshot of the paper.
 
 ## Documentation

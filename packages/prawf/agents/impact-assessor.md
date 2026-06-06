@@ -17,7 +17,7 @@ significant-but-flawed paper are different judgments on different axes; you
 speak only to significance.
 
 The orchestrating skill (`/prawf:review`) provides the review directory
-(REVIEW_DIR = `.prawf/review/<paper-slug>/`), the normalized paper, and the
+(REVIEW_DIR = `<WORKDIR>/review/<paper-slug>/`), the normalized paper, and the
 round contract. You apply the impact-assessor lens to those inputs and emit a
 rating, not a severity and not findings.
 

@@ -12,6 +12,9 @@
   `skills/review/templates.md`, 그리고 각 `SKILL.md` 에서 동일해야 한다.
 - verdict 는 미해결 **soundness** finding 만의 순수 함수여야 한다. 중요성
   (`impact-assessor`)은 advisory 이며 verdict 를 Minor Revision 이상으로 올리지 못한다.
+- 모든 스킬의 산출물 베이스 경로는 단일 WORKDIR 규약을 따른다: 우선순위
+  `--workdir <dir>` > 환경변수 `PRAWF_WORKDIR` > 기본값 `./.prawf`. 해석 규칙의 단일
+  출처는 `skills/_shared/operations/resolve_workdir.md` 이며 4개 스킬이 공유한다.
 
 ## API Contracts
 
@@ -25,7 +28,7 @@
 | `/prawf:auto-fix`         | 리뷰의 자동수정 가능 항목을 원고에 적용 | `applied-fixes.md` + `manual-fixes.md`         |
 
 `/prawf:review` 옵션: `--solo`(단일 패스 `adjudicator`), `--profile <name>`(분야
-프로파일 override), `--scope <abstract|full>`.
+프로파일 override), `--scope <abstract|full>`, `--workdir <dir>`(산출물 루트 지정).
 
 ### Persona roster (10)
 
@@ -43,10 +46,18 @@
 - `impact`: `high | moderate | low | niche` (advisory).
 - `external_verification`: `complete | partial | unavailable`.
 
+### Output location
+
+산출물은 per-paper 디렉토리 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` 에 쌓이며,
+커스텀 프로파일은 `<WORKDIR>/profiles/<name>.yaml` 에서 읽는다. 4개 스킬이 같은
+REVIEW_DIR 을 공유한다 — 한 논문의 review·defense·rebuttal·auto-fix 산출물이 한곳에 모인다.
+
 ### Deliverable filenames
 
 `paper-profile.md`, `paper-normalized.md`, `findings/round-1-<axis>.md`,
-`rebuttal.md`, `findings/round-3-<axis>.md`, `review-report.md`, `qa-sheet.md`.
+`rebuttal.md`, `findings/round-3-<axis>.md`, `review-report.md`, `qa-sheet.md`
+(review); `defense-session.md`(simulate-defense); `rebuttal-letter.md`,
+`revision-checklist.md`(rebuttal); `applied-fixes.md`, `manual-fixes.md`(auto-fix).
 모든 location 은 `paper-normalized.md` 좌표(`§<section>¶<paragraph>` + 줄)를 인용한다.
 
 ### Versioning

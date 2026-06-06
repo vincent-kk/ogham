@@ -2,7 +2,7 @@
 name: review
 user_invocable: true
 description: "[prawf:review] Run multi-agent academic peer review. The chair profiles and normalizes the paper, then convenes a native Claude Code team: six soundness reviewers attack across axes, the rebuttal-strategist defends, original reviewers re-review, and the chair adjudicates a verdict (Accept / Minor / Major / Reject) plus an anticipated-question sheet. Triggers: 동료평가, peer review, 논문 평가, paper review, soundness review."
-argument-hint: "[--solo] [--profile <name>] [--scope abstract|full]"
+argument-hint: "[--solo] [--profile <name>] [--scope abstract|full] [--workdir <dir>]"
 version: "1.0.0"
 complexity: complex
 plugin: prawf
@@ -51,6 +51,7 @@ synthesize the attack and defense deliverables only.
 > - `profiles/<name>.yaml` — built-in field-profile data (empirical-science, cs-ml, math-theory, humanities-qualitative)
 > - `templates.md` — `review-report.md` / `qa-sheet.md` / `rebuttal.md` output formats
 > - `prompt-templates.md` — literal spawn-prompt templates per persona
+> - `../_shared/operations/resolve_workdir.md` — WORKDIR / REVIEW_DIR resolution (shared by all skills)
 > - `../../agents/<persona-id>.md` — the 10 persona agents
 
 ## When to Use
@@ -63,11 +64,15 @@ synthesize the attack and defense deliverables only.
 
 ### Step 1 — P0: Profile & Normalize (chair, direct)
 
+First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations/resolve_workdir.md)
+(`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); every deliverable below lands under
+`REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`.
+
 1. Read the paper (PDF / LaTeX / markdown). If no paper is provided, this is the
    one valid place to ask the user.
 2. **Detect type & field** and load the field profile. Priority:
    `--profile` override > **P0 auto-detection (default)** > universal fallback >
-   optional `.prawf/profiles/<name>.yaml` custom. Read `field-profiles.md` for the
+   optional `<WORKDIR>/profiles/<name>.yaml` custom. Read `field-profiles.md` for the
    schema and the four built-ins under `profiles/`.
 3. **Validate the profile**: required keys, axis-ref integrity, `severity_examples`
    present. `argument`, `methodology`, `integrity` can NEVER be disabled; only
@@ -156,11 +161,12 @@ execution is COMPLETE.**
 > Options are LLM-interpreted hints, not strict flags. Natural language works too
 > ("review just the abstract", "treat this as a CS/ML paper").
 
-| Option             | Default | Description                                                                                        |
-| ------------------ | ------- | -------------------------------------------------------------------------------------------------- |
-| `--solo`           | off     | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                    |
-| `--profile <name>` | auto    | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
-| `--scope`          | `full`  | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                       |
+| Option             | Default    | Description                                                                                        |
+| ------------------ | ---------- | -------------------------------------------------------------------------------------------------- |
+| `--solo`           | off        | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                    |
+| `--profile <name>` | auto       | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
+| `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD/FULL per profile                                       |
+| `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env); `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`                |
 
 ## Quick Reference
 
@@ -169,11 +175,13 @@ execution is COMPLETE.**
 /prawf:review --solo                       # fast single-pass adjudicator
 /prawf:review --profile cs-ml              # force the CS/ML profile
 /prawf:review --scope abstract             # LIGHT panel (abstract / single issue)
+/prawf:review --workdir ~/reviews/.prawf   # fix the output root (or set PRAWF_WORKDIR)
 
 Pipeline:  P0 (profile+normalize) → R1 (attack, parallel) → R2 (defense)
            → R3 (re-review, conditional) → ADJ (dedup+verdict)
 Panel:     LIGHT / STANDARD / FULL (9 personas) or --solo (adjudicator)
-Outputs:   paper-profile.md, paper-normalized.md, findings/round-1-<axis>.md,
+Outputs:   under REVIEW_DIR = <WORKDIR>/review/<paper-slug>/ —
+           paper-profile.md, paper-normalized.md, findings/round-1-<axis>.md,
            rebuttal.md, findings/round-3-<axis>.md, review-report.md, qa-sheet.md
 Verdict:   accept | minor-revision | major-revision | reject (soundness-only;
            impact is advisory and never raises the verdict above minor-revision)
