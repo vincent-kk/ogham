@@ -8,6 +8,7 @@ import {
 import { VERSION } from '../../../version.js';
 import { wrapHandler } from '../../shared/index.js';
 import { handleContinueConversation } from '../../tools/continueConversation/index.js';
+import { handleListAntigravityModels } from '../../tools/listModels/index.js';
 import { handleOpenSettings } from '../../tools/openSettings/index.js';
 import { handleStartConversation } from '../../tools/startConversation/index.js';
 
@@ -18,12 +19,13 @@ export function createServer(): McpServer {
     'start_conversation',
     {
       description:
-        'Delegate a prompt to an external LLM CLI (codex = code/shell, gemini = web research & large context) ' +
-        'and return its answer plus a session_id for follow-ups. ' +
+        'Delegate a prompt to an external LLM CLI (codex = code/shell; gemini or antigravity = web research & ' +
+        'large context) and return its answer plus a session_id for follow-ups. ' +
         'The CLI cannot see this Claude conversation — make the prompt self-contained.',
       inputSchema: {
         provider: ProviderSchema.describe(
-          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'gemini' (Google): live web research, large-context synthesis.",
+          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'gemini'/'antigravity' (Google): live web " +
+            'research, large-context synthesis. gemini and antigravity are mutually exclusive — dispatch to whichever is enabled.',
         ),
         prompt: z
           .string()
@@ -88,6 +90,23 @@ export function createServer(): McpServer {
       },
     },
     wrapHandler(handleOpenSettings),
+  );
+
+  server.registerTool(
+    'list_antigravity_models',
+    {
+      description:
+        'List the Antigravity (agy) model full-names currently available to your account — use this before an ' +
+        'auto-tier antigravity dispatch to pick a model, or to see which models the tier mapping can target. ' +
+        'Returns { models: string[] } (empty if agy is not installed or not authenticated).',
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      },
+    },
+    wrapHandler(handleListAntigravityModels),
   );
 
   return server;

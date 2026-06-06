@@ -38,7 +38,7 @@ export async function handleContinueConversation(
       error: {
         code: 'unknown',
         message:
-          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember whether it was a codex or gemini session, retry with /cogair:codex --continue <id> or /cogair:gemini --continue <id>; otherwise start a fresh session.',
+          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember which provider it used, retry with /cogair:codex --continue <id>, /cogair:gemini --continue <id>, or /cogair:antigravity --continue <id>; otherwise start a fresh session.',
       },
       meta: {
         turn: 0,
@@ -76,28 +76,49 @@ export async function handleContinueConversation(
     preamble: config.preamble[session.provider],
     recencyLevel: config.recency_factor[session.provider],
   });
-  const result: DispatchResult =
-    session.provider === 'codex'
-      ? await dispatchers.codex.resume({
-          prompt: composedPrompt,
-          model: 'auto',
-          options: {},
-          sessionId: session.session_id,
-          cwd: session.cwd,
-          externalSessionRef: session.external_session_ref,
-          flags: config.option_flags.codex,
-          spawnTimeoutMs: config.spawn_timeout_ms,
-        })
-      : await dispatchers.gemini.resume({
-          prompt: composedPrompt,
-          model: 'auto',
-          options: {},
-          sessionId: session.session_id,
-          cwd: session.cwd,
-          externalSessionRef: session.external_session_ref,
-          flags: config.option_flags.gemini,
-          spawnTimeoutMs: config.spawn_timeout_ms,
-        });
+  const base = {
+    prompt: composedPrompt,
+    model: 'auto' as const,
+    options: {},
+    sessionId: session.session_id,
+    cwd: session.cwd,
+    externalSessionRef: session.external_session_ref,
+    spawnTimeoutMs: config.spawn_timeout_ms,
+  };
+  let result: DispatchResult;
+  if (session.provider === 'antigravity')
+    result = await dispatchers.antigravity.resume({
+      ...base,
+      flags: config.option_flags.antigravity,
+      modelMap: config.model_map.antigravity,
+    });
+  else if (session.provider === 'gemini')
+    result = await dispatchers.gemini.resume({
+      ...base,
+      flags: config.option_flags.gemini,
+    });
+  else if (session.provider === 'codex')
+    result = await dispatchers.codex.resume({
+      ...base,
+      flags: config.option_flags.codex,
+    });
+  else
+    return {
+      status: 'failure',
+      session_id: session.session_id,
+      provider: null,
+      response: null,
+      error: {
+        code: 'unknown',
+        message: `Session references an unsupported provider '${session.provider}'. cogair can only resume 'antigravity', 'gemini', or 'codex' sessions; this stored session is likely from an incompatible cogair version. Start a fresh session with /cogair:codex, /cogair:gemini, or /cogair:antigravity.`,
+      },
+      meta: {
+        turn: session.turn_count,
+        created_at: isoNow(),
+        elapsed_ms: Math.round(performance.now() - startedAt),
+        ignored_options: [],
+      },
+    };
 
   const nextTurn = session.turn_count + 1;
   await updateSession({
