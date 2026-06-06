@@ -7,6 +7,11 @@ argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt
 
 # gemini
 
+> ⚠ **Deprecation:** The Gemini CLI service ends **2026-06-18**. cogair is
+> migrating to the Antigravity CLI (`agy`) — prefer `/cogair:antigravity` for
+> new work. gemini and antigravity are mutually exclusive Google engines in
+> cogair config; switch engines via `/cogair:setup`.
+
 Delegate to Gemini CLI through the cogair MCP server.
 
 ## When to use
