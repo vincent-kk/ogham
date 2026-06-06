@@ -1,7 +1,7 @@
 import path from "node:path";
 
-import { isPosixLikePath } from "./is-posix-like-path.js";
-import { isWindowsLikePath } from "./is-windows-like-path.js";
+import { isPosixLikePath } from "./isPosixLikePath.js";
+import { isWindowsLikePath } from "./isWindowsLikePath.js";
 
 type PathApi = typeof path.win32 | typeof path.posix | typeof path;
 

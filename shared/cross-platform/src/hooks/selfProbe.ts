@@ -1,5 +1,5 @@
 import { spawnCli } from "../spawn/index.js";
-import { logHookFailure } from "./error-log.js";
+import { logHookFailure } from "./errorLog.js";
 import type { ProbeResult } from "./types.js";
 
 export interface SelfProbeOptions {

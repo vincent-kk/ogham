@@ -40,12 +40,12 @@
       "import": "./dist/shim/index.js"
     },
     "./error-log": {
-      "types": "./dist/hooks/error-log.d.ts",
-      "import": "./dist/hooks/error-log.js"
+      "types": "./dist/hooks/errorLog.d.ts",
+      "import": "./dist/hooks/errorLog.js"
     },
     "./self-probe": {
-      "types": "./dist/hooks/self-probe.d.ts",
-      "import": "./dist/hooks/self-probe.js"
+      "types": "./dist/hooks/selfProbe.d.ts",
+      "import": "./dist/hooks/selfProbe.js"
     },
     "./bootstrap": {
       "types": "./dist/hooks/bootstrap.d.ts",

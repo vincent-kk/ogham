@@ -6,7 +6,7 @@ vi.mock("cross-spawn", () => ({
   default: spawnMock,
 }));
 
-import { openBrowser } from "../open-browser.js";
+import { openBrowser } from "../openBrowser.js";
 
 describe("openBrowser", () => {
   const originalPlatform = process.platform;

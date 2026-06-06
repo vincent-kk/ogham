@@ -1,1 +1,1 @@
-export { normalizeEol } from "./normalize-eol.js";
+export { normalizeEol } from "./normalizeEol.js";

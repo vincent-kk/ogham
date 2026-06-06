@@ -1,4 +1,4 @@
-import { isWindowsLikePath } from "./is-windows-like-path.js";
+import { isWindowsLikePath } from "./isWindowsLikePath.js";
 
 export function pathForCompare(p: string): string {
   const normalized = p.replace(/\\/g, "/");

@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { spawnCliSync } from "../spawn-cli-sync.js";
+import { spawnCliSync } from "../spawnCliSync.js";
 
 const fixturesDir = resolve(
   fileURLToPath(new URL("./fixtures/", import.meta.url)),

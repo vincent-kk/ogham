@@ -1,4 +1,4 @@
-import { pathForCompare } from "./path-for-compare.js";
+import { pathForCompare } from "./pathForCompare.js";
 
 export function samePath(a: string, b: string): boolean {
   return pathForCompare(a) === pathForCompare(b);

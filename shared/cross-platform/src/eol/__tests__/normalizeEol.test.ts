@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeEol } from "../normalize-eol.js";
+import { normalizeEol } from "../normalizeEol.js";
 
 describe("normalizeEol", () => {
   it("converts CRLF to LF", () => {

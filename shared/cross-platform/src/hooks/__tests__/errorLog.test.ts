@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { logHookFailure } from "../error-log.js";
+import { logHookFailure } from "../errorLog.js";
 
 describe("logHookFailure", () => {
   let tmp: string;

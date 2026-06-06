@@ -1,1 +1,1 @@
-export { openBrowser } from "./open-browser.js";
+export { openBrowser } from "./openBrowser.js";

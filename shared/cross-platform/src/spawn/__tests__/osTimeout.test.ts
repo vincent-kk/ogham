@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { osTimeout } from "../os-timeout.js";
+import { osTimeout } from "../osTimeout.js";
 
 describe("osTimeout", () => {
   const originalPlatform = process.platform;

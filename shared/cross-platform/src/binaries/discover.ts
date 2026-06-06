@@ -9,7 +9,7 @@ import { dirname, join } from "node:path";
 import which from "which";
 import { paths } from "../paths/index.js";
 import { spawnCli } from "../spawn/index.js";
-import { installHints } from "./install-hints.js";
+import { installHints } from "./installHints.js";
 import type { BinaryStatus } from "./types.js";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;

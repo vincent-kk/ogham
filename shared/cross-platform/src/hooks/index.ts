@@ -1,6 +1,6 @@
 export { runHookEntry } from "./bootstrap.js";
-export { selfProbe } from "./self-probe.js";
-export type { SelfProbeOptions } from "./self-probe.js";
-export { logHookFailure } from "./error-log.js";
-export type { LogHookFailureOptions } from "./error-log.js";
+export { selfProbe } from "./selfProbe.js";
+export type { SelfProbeOptions } from "./selfProbe.js";
+export { logHookFailure } from "./errorLog.js";
+export type { LogHookFailureOptions } from "./errorLog.js";
 export type { ProbeResult } from "./types.js";

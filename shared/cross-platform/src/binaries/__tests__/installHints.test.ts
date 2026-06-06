@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { installHints } from "../install-hints.js";
+import { installHints } from "../installHints.js";
 
 describe("installHints", () => {
   const originalPlatform = process.platform;

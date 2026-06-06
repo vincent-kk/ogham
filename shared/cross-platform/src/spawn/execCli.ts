@@ -1,4 +1,4 @@
-import { spawnCli } from "./spawn-cli.js";
+import { spawnCli } from "./spawnCli.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";
 
 export function execCli(

@@ -1,6 +1,6 @@
 import spawn from "cross-spawn";
 import { normalizeEol } from "../eol/index.js";
-import { osTimeout } from "./os-timeout.js";
+import { osTimeout } from "./osTimeout.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";
 
 export function spawnCliSync(

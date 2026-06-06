@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { selfProbe } from "../self-probe.js";
+import { selfProbe } from "../selfProbe.js";
 
 describe("selfProbe", () => {
   let originalPluginRoot: string | undefined;
