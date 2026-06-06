@@ -1,6 +1,8 @@
 import spawn from "cross-spawn";
-import { normalizeEol } from "../eol/index.js";
+import { spawnSync as nodeSpawnSync } from "node:child_process";
+import { normalizeEol } from "../eol/normalizeEol.js";
 import { osTimeout } from "./osTimeout.js";
+import { resolveLauncher } from "./resolveLauncher.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";
 
 export function spawnCliSync(
@@ -13,13 +15,24 @@ export function spawnCliSync(
   const timeoutMs =
     options.timeoutMs !== undefined ? osTimeout(options.timeoutMs) : undefined;
 
-  const result = spawn.sync(bin, [...args], {
-    cwd: options.cwd,
-    env: options.env,
-    input: options.input,
-    timeout: timeoutMs,
-    encoding,
-  });
+  const launcher = resolveLauncher(bin, { env: options.env });
+  const result = launcher
+    ? nodeSpawnSync(launcher.command, [...launcher.prependArgs, ...args], {
+        cwd: options.cwd,
+        env: options.env,
+        input: options.input,
+        timeout: timeoutMs,
+        encoding,
+        windowsVerbatimArguments: false,
+        windowsHide: true,
+      })
+    : spawn.sync(bin, [...args], {
+        cwd: options.cwd,
+        env: options.env,
+        input: options.input,
+        timeout: timeoutMs,
+        encoding,
+      });
 
   const rawStdout = result.stdout ?? "";
   const rawStderr = result.stderr ?? "";

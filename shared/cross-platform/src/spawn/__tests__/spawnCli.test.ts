@@ -1,16 +1,24 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resolveLauncher } from "../resolveLauncher.js";
 import { spawnCli } from "../spawnCli.js";
+
+vi.mock("../resolveLauncher.js", () => ({ resolveLauncher: vi.fn() }));
 
 const fixturesDir = resolve(
   fileURLToPath(new URL("./fixtures/", import.meta.url)),
 );
 const node = process.execPath;
+const mockLauncher = vi.mocked(resolveLauncher);
 
 function fixture(name: string): string {
   return resolve(fixturesDir, name);
 }
+
+beforeEach(() => {
+  mockLauncher.mockReturnValue(null);
+});
 
 describe("spawnCli", () => {
   it("captures stdout from a fixture script", async () => {
@@ -67,5 +75,26 @@ describe("spawnCli", () => {
       result.spawnError !== undefined ||
       (result.code !== 0 && result.code !== null);
     expect(failed).toBe(true);
+  });
+
+  it("routes through a launcher and preserves multi-line arguments", async () => {
+    mockLauncher.mockReturnValue({
+      command: node,
+      prependArgs: [fixture("echo-argv.mjs")],
+    });
+    const multiline =
+      "<recency_policy>\nToday: 2026-06-07.\n</recency_policy>\n\nsummarise https://x?v=1";
+    const result = await spawnCli("gemini", [multiline]);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toBe(multiline);
+  });
+
+  it("prepends launcher args before the caller args", async () => {
+    mockLauncher.mockReturnValue({
+      command: node,
+      prependArgs: [fixture("echo-argv.mjs")],
+    });
+    const result = await spawnCli("gemini", ["just-one-line"]);
+    expect(result.stdout).toBe("just-one-line");
   });
 });

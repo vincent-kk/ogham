@@ -1,7 +1,8 @@
 import spawn from "cross-spawn";
 import { spawn as nodeSpawn } from "node:child_process";
-import { normalizeEol } from "../eol/index.js";
+import { normalizeEol } from "../eol/normalizeEol.js";
 import { osTimeout } from "./osTimeout.js";
+import { resolveLauncher } from "./resolveLauncher.js";
 import type { SpawnOptions, SpawnResult } from "./types.js";
 
 export function spawnCli(
@@ -15,11 +16,20 @@ export function spawnCli(
     options.timeoutMs !== undefined ? osTimeout(options.timeoutMs) : undefined;
 
   return new Promise((resolve) => {
-    const child = spawn(bin, [...args], {
-      cwd: options.cwd,
-      env: options.env,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    const launcher = resolveLauncher(bin, { env: options.env });
+    const child = launcher
+      ? nodeSpawn(launcher.command, [...launcher.prependArgs, ...args], {
+          cwd: options.cwd,
+          env: options.env,
+          stdio: ["pipe", "pipe", "pipe"],
+          windowsVerbatimArguments: false,
+          windowsHide: true,
+        })
+      : spawn(bin, [...args], {
+          cwd: options.cwd,
+          env: options.env,
+          stdio: ["pipe", "pipe", "pipe"],
+        });
 
     let stdout = "";
     let stderr = "";

@@ -7,8 +7,8 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import which from "which";
-import { paths } from "../paths/index.js";
-import { spawnCli } from "../spawn/index.js";
+import { paths } from "../paths/paths.js";
+import { spawnCli } from "../spawn/spawnCli.js";
 import { installHints } from "./installHints.js";
 import type { BinaryStatus } from "./types.js";
 
