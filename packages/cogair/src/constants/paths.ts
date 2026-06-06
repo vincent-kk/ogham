@@ -10,6 +10,8 @@ export const RUNTIME_DIR = join(COGAIR_HOME, 'runtime');
 export const COUNTER_PATH = join(RUNTIME_DIR, 'counter.json');
 export const SETTINGS_SERVER_PATH = join(RUNTIME_DIR, 'settings_server.json');
 export const GEMINI_CWD_DIR = join(RUNTIME_DIR, 'gemini-cwd');
+export const ANTIGRAVITY_CWD_DIR = join(RUNTIME_DIR, 'antigravity-cwd');
+export const AGY_MODELS_CACHE_PATH = join(RUNTIME_DIR, 'agy-models.json');
 export const ARTIFACTS_DIR_USER = join(COGAIR_HOME, 'artifacts');
 
 export function sessionDir(projectHash: string): string {
@@ -26,6 +28,10 @@ export function sessionPath(projectHash: string, sessionId: string): string {
 
 export function geminiCwdPath(sessionId: string): string {
   return join(GEMINI_CWD_DIR, sessionId);
+}
+
+export function antigravityCwdPath(sessionId: string): string {
+  return join(ANTIGRAVITY_CWD_DIR, sessionId);
 }
 
 export function artifactDir(
