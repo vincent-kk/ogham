@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { normalizeMutualExclusion } from '../normalizeMutualExclusion.js';
 
 describe('normalizeMutualExclusion', () => {
-  // basic: happy-path scenarios
   it('disables gemini when both gemini and antigravity are enabled', () => {
     const input = {
       gemini: { value: 50, enabled: true },
@@ -32,7 +31,6 @@ describe('normalizeMutualExclusion', () => {
     expect(result).toBe(input);
   });
 
-  // complex: edge cases
   it('returns unchanged object when only antigravity is enabled', () => {
     const input = {
       gemini: { value: 50, enabled: false },

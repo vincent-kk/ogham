@@ -6,8 +6,6 @@ import { asNonNegInt } from '../utils/asNonNegInt.js';
 import { formatRatio } from '../utils/formatRatio.js';
 import { signed } from '../utils/signed.js';
 
-// --- asNonNegInt ---
-
 describe('asNonNegInt', () => {
   it('returns the integer as-is for a valid non-negative integer', () => {
     expect(asNonNegInt(5)).toBe(5);
@@ -30,8 +28,6 @@ describe('asNonNegInt', () => {
   });
 });
 
-// --- signed ---
-
 describe('signed', () => {
   it('prefixes positive numbers with +', () => {
     expect(signed(5)).toBe('+5');
@@ -45,8 +41,6 @@ describe('signed', () => {
     expect(signed(0)).toBe('0');
   });
 });
-
-// --- formatRatio ---
 
 describe('formatRatio', () => {
   it('returns 0% for both providers when total is zero', () => {
@@ -87,8 +81,6 @@ describe('formatRatio', () => {
     expect(r.drift).toBe('gemini -15 · codex +15');
   });
 });
-
-// --- buildDynamicPayload ---
 
 const BASE_CONFIG: HookConfig = {
   ratio: {

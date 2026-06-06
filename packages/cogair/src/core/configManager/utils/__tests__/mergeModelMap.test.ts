@@ -6,7 +6,6 @@ import { mergeModelMap } from '../mergeModelMap.js';
 const defaults = DEFAULT_CONFIG.model_map;
 
 describe('mergeModelMap', () => {
-  // basic: happy-path scenarios
   it('returns defaults when raw is undefined', () => {
     expect(mergeModelMap(undefined)).toEqual(defaults);
   });
@@ -22,7 +21,6 @@ describe('mergeModelMap', () => {
     expect(mergeModelMap(raw)).toEqual(raw);
   });
 
-  // complex: edge cases
   it('fills missing mid and low from defaults when only high is provided', () => {
     const raw = { antigravity: { high: 'CustomHigh' } };
     const result = mergeModelMap(raw) as typeof defaults;
