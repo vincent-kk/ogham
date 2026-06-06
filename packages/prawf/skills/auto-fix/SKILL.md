@@ -51,6 +51,9 @@ A finding is **AUTO** (apply) only when ALL hold; otherwise it is **MANUAL** (li
 | `tactic` ∈ {`revision`, `clarification`, `justification`(+text)}    | `tactic` = `sidestep`, or the defense is advisory-only         |
 | the target text is unambiguously locatable in the manuscript source | a fatal-flaw axis finding, or the edit needs new analysis/data |
 
+Any **Never apply when** condition overrides a matching **Apply when** condition —
+e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO.
+
 Auto-fixable examples: add a data-availability / COI statement, add a Limitation
 paragraph the strategist already drafted, fix notation/terminology consistency,
 add a citation the review identified by name, soften an overclaim to match the

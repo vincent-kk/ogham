@@ -15,8 +15,9 @@ plugin: prawf
 > to the next. NEVER yield the turn after a `Task` subagent returns or
 > between non-interactive phases. Subagent question/coaching files are
 > internal working data — do NOT dump them; present only the rehearsal.
-> At `<!-- [INTERACTIVE] -->` markers, present the questions, wait for the
-> author's answers, then resume the chain in the same response. With
+> At `<!-- [INTERACTIVE] -->` markers, present the questions and yield the turn
+> for the author's answers; once they arrive, resume the chain in your next
+> response and run the remaining phases without further yields. With
 > `--batch`, there is NO interactive point — generate model answers and run
 > straight through (Tier-2a).
 
@@ -66,7 +67,8 @@ Group the questions by axis and order them hardest-first. Show each with its
 ### Phase 2 — Author answers <!-- [INTERACTIVE] -->
 
 Present the questions and ask the author to answer them (one axis at a time is
-fine). **Wait for the author's answers**, then resume in the same response.
+fine). **Wait for the author's answers** (yield the turn), then resume in your
+next response.
 
 > With `--batch`: skip the wait. Generate plausible model answers (clearly
 > labelled as simulated) and proceed — the whole skill then runs Tier-2a with no

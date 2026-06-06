@@ -147,7 +147,7 @@ Task: for each contested finding,
 1. accept_defense(true|false) — did the defense resolve/mitigate the defect with a verifiable deliverable.
 2. withdrawn_confirmed — only when `withdrawn-proposed`, confirm the factual-error proof (true|false).
 3. final_status: defended | mitigated | unresolved | withdrawn + note(reason).
-   - If the defense is only words (unverified), do not actively accept it → keep CONTESTED (the chair conservatively settles it as UNRESOLVED).
+   - If the defense is only words (unverified), do not actively accept it → set `final_status: unresolved` (a contested finding whose defense is unverified is conservatively confirmed UNRESOLVED by the chair).
 
 Language: <Common>
 REMINDER: Write `findings/round-3-<AXIS>.md`.

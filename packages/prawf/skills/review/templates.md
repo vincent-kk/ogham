@@ -196,7 +196,7 @@ external_refs: ["Bonferroni 1936", "OSF/abc123"]
 
 | File                         | Key body                                                                                                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `paper-profile.md`           | type · profile · convened panel · injection path + applied `absorb_map` details                            |
+| `paper-profile.md`           | input source path · type · profile · convened panel · injection path + applied `absorb_map` details        |
 | `paper-normalized.md`        | `§<section>¶<paragraph>` headers + chair-assigned line numbers. Shared coordinate system for all citations |
 | `findings/round-1-<axis>.md` | frontmatter (§5.1) + per-axis finding narrative (claim · evidence · anticipated_question)                  |
 | `findings/round-3-<axis>.md` | frontmatter (§5.4) + defense accept/reject rationale                                                       |

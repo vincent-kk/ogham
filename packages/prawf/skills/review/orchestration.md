@@ -45,7 +45,7 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
    **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
 3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers).
    Every Reviewer cites the **`§<section>¶<paragraph>` and line numbers of this snapshot**, not the original — this establishes a shared coordinate system.
-4. Output: `paper-profile.md` (type, profile, convened panel) + `paper-normalized.md`.
+4. Output: `paper-profile.md` (input source path, type, profile, convened panel) + `paper-normalized.md`.
 
 ### Panel Convocation (elected from the nine)
 
@@ -95,6 +95,8 @@ When convened axes overlap and report the same defect twice, the verdict tally i
   | sample size, power, multiple comparisons             | `statistical-auditor` (methodology, bias yield) |
   | publication bias, external validity, reproducibility | `bias-grader` (statistical, methodology yield)  |
   | plagiarism, data fabrication, conflict of interest   | `integrity-auditor`                             |
+
+- **Absorbed owner**: when an owning axis is disabled and absorbed under the active profile (e.g. `causal-reviewer` or `bias-grader` under `math-theory`), its ownership passes to the absorbing axis named in the profile's `absorb_map` (causality→`argument-analyst`, bias→`methodologist`). If no absorber is convened, the highest-severity contributing axis present holds the merged finding.
 
 ### 4.2 Verdict Derivation
 

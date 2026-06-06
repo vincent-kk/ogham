@@ -17,10 +17,14 @@ axis_frameworks:
 disabled_axes: [causality, bias]
 absorb_map: { causality: argument, bias: methodology }
 paper_types:
-  - { type: pure-proof, axes: [argument, integrity, impact], guideline: null }
+  - {
+      type: pure-proof,
+      axes: [argument, methodology, integrity, impact],
+      guideline: null,
+    }
   - {
       type: computational,
-      axes: [argument, statistics, integrity],
+      axes: [argument, methodology, statistics, integrity],
       guideline: null,
     }
 severity_examples:

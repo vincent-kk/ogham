@@ -1,6 +1,6 @@
 # prawf — Public Contract Specification
 
-패키지 표면은 10인의 페르소나 agent 가 뒷받침하는 3개의 skill 이다. 코드 API 는 없으며,
+패키지 표면은 10인의 페르소나 agent 가 뒷받침하는 4개의 skill 이다. 코드 API 는 없으며,
 아래 계약은 모두 Claude Code 가 런타임에 소비하는 마크다운/오케스트레이션 약속이다.
 
 ## Requirements

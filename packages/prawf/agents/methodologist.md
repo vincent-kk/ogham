@@ -95,6 +95,7 @@ through its status lifecycle: `raised` -> `contested` -> `defended` |
   `findings/round-3-methodology.md`: re-evaluate each finding against
   `rebuttal.md` and advance its status to `defended`, `mitigated`,
   `unresolved`, or `withdrawn`.
-- Under the **humanities-qualitative** profile, methodology also absorbs the
-  disabled `statistics` axis when the chair injects ABSORBED_AXES; cover those
-  items within your methodology deliverables.
+- Under the **humanities-qualitative** profile methodology absorbs the disabled
+  `statistics` axis, and under the **math-theory** profile it absorbs the disabled
+  `bias` axis, when the chair injects ABSORBED_AXES; cover those items within your
+  methodology deliverables.

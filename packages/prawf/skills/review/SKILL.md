@@ -32,7 +32,9 @@ plugin: prawf
 > 3. After R2 returns → parse `rebuttal.md` `proposed_status` and decide R3 in
 >    the same response.
 > 4. Between rounds → never narrate progress and stop; spawn the next round.
-> 5. After `TeamDelete` → chain ADJ (dedup → verdict → report) immediately.
+> 5. After R3 `await all` (or the R3 skip when every finding is `defended`) →
+>    chain ADJ as a direct chair operation: dedup → verdict → write reports →
+>    `TeamDelete` → terminal marker, all in the same response.
 
 # review — Multi-Agent Academic Peer Review
 
@@ -74,8 +76,8 @@ synthesize the attack and defense deliverables only.
    of the field, prefer the universal fallback over a wrong specialization.
 4. **Normalize** the input into `paper-normalized.md` — a chair-numbered snapshot
    with `§<section>¶<paragraph>` + line coordinates. Every persona cites THIS file,
-   never the original PDF. Write `paper-profile.md` (type, profile, convened panel,
-   `absorb_map` applied).
+   never the original PDF. Write `paper-profile.md` (input source path, type,
+   profile, convened panel, `absorb_map` applied).
 5. **Convene the panel** from the profile's `paper_types` axes:
    - `LIGHT` (abstract / single issue) → `argument` + one core axis + impact.
    - `STANDARD` (typical paper) → 3-4 axes + impact.
@@ -123,8 +125,8 @@ Re-spawn ONLY the original reviewers whose axis has a finding with
 `accept_defense`, `withdrawn_confirmed`, and `final_status`. If every finding is
 `defended`, **skip R3**. A finding left `contested` and not actively accepted is
 conservatively confirmed `unresolved`. R3 is a single pass; allow at most one extra
-defense+re-review cycle only when the strategist raises a genuinely new
-MITIGATED residual risk (see `orchestration.md` §7).
+defense+re-review cycle only when an original reviewer surfaces a genuinely new
+MITIGATED residual risk in `findings/round-3-<axis>.md` (see `orchestration.md` §7).
 
 **→ After R3 (or skip), immediately proceed to Step 5.**
 
