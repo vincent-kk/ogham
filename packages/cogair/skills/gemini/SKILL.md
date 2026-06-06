@@ -7,6 +7,11 @@ argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt
 
 # gemini
 
+> ⚠ **Deprecation:** The Gemini CLI service ends **2026-06-18**. cogair is
+> migrating to the Antigravity CLI (`agy`) — prefer `/cogair:antigravity` for
+> new work. gemini and antigravity are mutually exclusive Google engines in
+> cogair config; switch engines via `/cogair:setup`.
+
 Delegate to Gemini CLI through the cogair MCP server.
 
 ## When to use
@@ -43,7 +48,7 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 - `auth` → tell the user to run `gemini auth login` and retry.
 - `disabled` → gemini is disabled in cogair config. Tell the user to enable it via `/cogair:setup`. Do not retry.
-- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `codex` skill.
+- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `codex` skill (switching to `antigravity` first requires enabling it as the Google engine via `/cogair:setup`).
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 
 ## Model alias

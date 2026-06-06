@@ -1,5 +1,3 @@
-import type { Ratio } from '../../shared/configTypes.js';
-
 import { signed } from './signed.js';
 
 export interface RatioLines {
@@ -8,20 +6,21 @@ export interface RatioLines {
   drift: string;
 }
 
+// Renders current/target/drift for the codex vs active-Google-engine pair.
+// gemini and antigravity are mutually exclusive, so only one Google engine is
+// ever shown (labelled by `googleName`).
 export function formatRatio(
-  counter: { gemini: number; codex: number },
-  ratio: Ratio,
+  current: { google: number; codex: number },
+  target: { google: number; codex: number },
+  googleName: string,
 ): RatioLines {
-  const total = counter.gemini + counter.codex;
-  const currG = total === 0 ? 0 : Math.round((counter.gemini / total) * 100);
+  const total = current.google + current.codex;
+  const currG = total === 0 ? 0 : Math.round((current.google / total) * 100);
   const currC = total === 0 ? 0 : 100 - currG;
 
-  const tgtG = ratio.gemini.enabled ? ratio.gemini.value : 0;
-  const tgtC = ratio.codex.enabled ? ratio.codex.value : 0;
-
   return {
-    current: `gemini ${currG}% · codex ${currC}%`,
-    target: `gemini ${tgtG}% · codex ${tgtC}%`,
-    drift: `gemini ${signed(tgtG - currG)} · codex ${signed(tgtC - currC)}`,
+    current: `${googleName} ${currG}% · codex ${currC}%`,
+    target: `${googleName} ${target.google}% · codex ${target.codex}%`,
+    drift: `${googleName} ${signed(target.google - currG)} · codex ${signed(target.codex - currC)}`,
   };
 }

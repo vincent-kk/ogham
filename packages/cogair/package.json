@@ -52,6 +52,7 @@
     "test:e2e:run": "vitest run --config vitest.e2e.config.ts",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
     "version:major": "yarn version major",
     "version:minor": "yarn version minor",
     "version:patch": "yarn version patch",

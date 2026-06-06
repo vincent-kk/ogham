@@ -31,6 +31,21 @@ export const CodexFlagsSchema = z.object({
 });
 export type CodexFlags = z.infer<typeof CodexFlagsSchema>;
 
+export const AntigravityFlagsSchema = z.object({
+  sandbox: z.boolean(),
+  skip_permissions: z.boolean(),
+});
+export type AntigravityFlags = z.infer<typeof AntigravityFlagsSchema>;
+
+// Per-tier model-name map. Lives here (not config.ts) so DispatchOptions can
+// carry it without a config→dispatch→config import cycle.
+export const TierModelMapSchema = z.object({
+  high: z.string(),
+  mid: z.string(),
+  low: z.string(),
+});
+export type TierModelMap = z.infer<typeof TierModelMapSchema>;
+
 export interface DispatchOptions<F = unknown> {
   prompt: string;
   model: 'high' | 'mid' | 'low' | 'auto';
@@ -39,6 +54,9 @@ export interface DispatchOptions<F = unknown> {
   cwd: string;
   flags: F;
   spawnTimeoutMs: number;
+  // Tier→model-name map, injected by the MCP tool for providers that resolve
+  // concrete model names from config (antigravity). codex/gemini ignore it.
+  modelMap?: TierModelMap;
 }
 
 export interface DispatchResumeOptions<F = unknown> extends DispatchOptions<F> {

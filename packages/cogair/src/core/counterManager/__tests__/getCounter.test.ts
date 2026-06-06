@@ -34,28 +34,41 @@ describe('getCounter', () => {
       parent_pid: 12345,
       gemini: 0,
       codex: 0,
+      antigravity: 0,
     });
   });
 
   it('returns the persisted counter when parent_pid matches', async () => {
     await writeCounterFile(
-      JSON.stringify({ parent_pid: 12345, gemini: 4, codex: 2 }),
+      JSON.stringify({
+        parent_pid: 12345,
+        gemini: 4,
+        codex: 2,
+        antigravity: 1,
+      }),
     );
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
       gemini: 4,
       codex: 2,
+      antigravity: 1,
     });
   });
 
   it('resets to zeros when parent_pid no longer matches', async () => {
     await writeCounterFile(
-      JSON.stringify({ parent_pid: 99999, gemini: 7, codex: 3 }),
+      JSON.stringify({
+        parent_pid: 99999,
+        gemini: 7,
+        codex: 3,
+        antigravity: 2,
+      }),
     );
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
       gemini: 0,
       codex: 0,
+      antigravity: 0,
     });
   });
 
@@ -65,6 +78,7 @@ describe('getCounter', () => {
       parent_pid: 12345,
       gemini: 0,
       codex: 0,
+      antigravity: 0,
     });
   });
 });

@@ -12,6 +12,7 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.ratio).toEqual({
       gemini: { value: 50, enabled: true },
       codex: { value: 50, enabled: true },
+      antigravity: { value: 50, enabled: false },
     });
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
@@ -24,6 +25,7 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
       gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
       codex: { yolo: false, sandbox: 'workspace-write' },
+      antigravity: { sandbox: true, skip_permissions: false },
     });
   });
 

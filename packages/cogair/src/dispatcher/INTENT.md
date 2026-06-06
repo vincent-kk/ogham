@@ -1,6 +1,6 @@
 ## Purpose
 
-codex-cli / gemini-cli 호출 본체. MCP 도구 핸들러에서 받은 `DispatchOptions` 를 외부 CLI 실행으로 변환하고, 결과·에러를 `ConversationResponse` envelope 로 정규화.
+codex-cli / gemini-cli / agy 호출 본체. MCP 도구 핸들러에서 받은 `DispatchOptions` 를 외부 CLI 실행으로 변환하고, 결과·에러를 `ConversationResponse` envelope 로 정규화.
 
 ## Structure
 
@@ -11,11 +11,11 @@ codex-cli / gemini-cli 호출 본체. MCP 도구 핸들러에서 받은 `Dispatc
 | `utils/`               | `computeIgnoredOptions` + `composePrompt` (recency_policy + preamble) 공유 |
 | `codex/`               | codex-cli 어댑터 (`spawn`, `jsonlParser`, `modelAlias`, dispatcher)        |
 | `gemini/`              | gemini-cli 어댑터 (`spawn`, `sessionResolver`, `modelAlias`, dispatcher)   |
-| `index.ts`             | `{ codex: Dispatcher, gemini: Dispatcher }` barrel                         |
+| `antigravity/`         | agy 어댑터; resume 은 `--continue` + cwd 격리 (`runtime/antigravity-cwd/`) |
 
 ## Conventions
 
-- v1 `supportedOptions` 는 양쪽 dispatcher 모두 비어 있음. 모든 키는 `ignoredOptions` 로 보고
+- `supportedOptions` 는 모든 dispatcher 비어 있음 — 모든 키는 `ignoredOptions` 로 보고
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `DispatchOptions.flags` 채널 — config 단독, MCP input 노출 금지
 - 외부 CLI 호출은 `node:child_process.spawn` 직접 사용 (의존성 추가 없음)
 - 환경 변수: codex 상속만, gemini `GEMINI_CLI_TRUST_WORKSPACE=true` + `flags.sandbox && backend!=='auto'` 시 `GEMINI_SANDBOX=<backend>`

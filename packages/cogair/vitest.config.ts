@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['src/**/__tests__/**/*.test.ts'],
     exclude: ['**/fixtures/**', 'src/__tests__/e2e/**'],
     globals: true,
+    testTimeout: 15_000,
     setupFiles: ['./vitest.setup.ts'],
     server: {
       deps: {

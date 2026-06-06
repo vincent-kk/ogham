@@ -72,7 +72,11 @@ describe('ConfigSchema', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
-        recency_factor: { gemini: 'aggressive', codex: 'off' },
+        recency_factor: {
+          gemini: 'aggressive',
+          codex: 'off',
+          antigravity: 'auto',
+        },
       }),
     ).toThrow();
   });
@@ -81,7 +85,7 @@ describe('ConfigSchema', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
-        preamble: { gemini: 123, codex: '' },
+        preamble: { gemini: 123, codex: '', antigravity: '' },
       }),
     ).toThrow();
   });
@@ -91,7 +95,7 @@ describe('ConfigSchema', () => {
       expect(() =>
         ConfigSchema.parse({
           ...DEFAULT_CONFIG,
-          recency_factor: { gemini: level, codex: level },
+          recency_factor: { gemini: level, codex: level, antigravity: level },
         }),
       ).not.toThrow();
     }

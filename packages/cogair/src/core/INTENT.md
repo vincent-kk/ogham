@@ -12,6 +12,8 @@
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                            |
 | `authToken/`      | settings web UI 일회용 토큰 발급·검증                                   |
 | `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                       |
+| `agyModels/`      | `agy models` CLI 출력 캐싱 → 사용 가능한 Antigravity 모델 목록 제공     |
+| `agyMcpConfig/`   | agy 글로벌 `mcp_config.json` 에 youtube-transcript MCP 멱등 등록·해제   |
 
 ## Conventions
 

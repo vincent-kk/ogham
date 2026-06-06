@@ -1,6 +1,10 @@
 export type ProviderRatio = { value: number; enabled: boolean };
 
-export type Ratio = { gemini: ProviderRatio; codex: ProviderRatio };
+export type Ratio = {
+  gemini: ProviderRatio;
+  codex: ProviderRatio;
+  antigravity: ProviderRatio;
+};
 
 export type ModelAlias = 'high' | 'mid' | 'low' | 'auto';
 
@@ -29,9 +33,15 @@ export interface CodexFlags {
   sandbox: CodexSandboxMode;
 }
 
+export interface AntigravityFlags {
+  sandbox: boolean;
+  skip_permissions: boolean;
+}
+
 export interface OptionFlags {
   gemini: GeminiFlags;
   codex: CodexFlags;
+  antigravity: AntigravityFlags;
 }
 
 export type RecencyLevel = 'off' | 'auto' | 'strict';
@@ -39,17 +49,19 @@ export type RecencyLevel = 'off' | 'auto' | 'strict';
 export interface PreambleConfig {
   gemini: string;
   codex: string;
+  antigravity: string;
 }
 
 export interface RecencyFactorConfig {
   gemini: RecencyLevel;
   codex: RecencyLevel;
+  antigravity: RecencyLevel;
 }
 
 export interface HookConfig {
   ratio: Ratio;
   intervention_strength: InterventionStrength;
-  keywords: { gemini: string; codex: string };
+  keywords: { gemini: string; codex: string; antigravity: string };
   default_model: ModelAlias;
   option_flags: OptionFlags;
   preamble: PreambleConfig;
@@ -59,5 +71,6 @@ export interface HookConfig {
 export interface HookCounter {
   gemini: number;
   codex: number;
+  antigravity: number;
   is_stale: boolean;
 }

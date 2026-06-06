@@ -6,7 +6,10 @@ export function normalizeRatio(raw: unknown): unknown {
   if (!isPlainObject(raw)) return DEFAULT_CONFIG.ratio;
   const g = raw.gemini;
   const c = raw.codex;
+  const a = raw.antigravity;
   if (typeof g === 'number' && typeof c === 'number') {
+    // Legacy pre-antigravity integer ratio. Migrate gemini/codex to enabled
+    // flags; antigravity keeps its default (disabled).
     const gw = Math.max(0, Math.floor(g));
     const cw = Math.max(0, Math.floor(c));
     const total = gw + cw;
@@ -16,6 +19,7 @@ export function normalizeRatio(raw: unknown): unknown {
     return {
       gemini: { value: gPct, enabled: gw > 0 },
       codex: { value: cPct, enabled: cw > 0 },
+      antigravity: { ...DEFAULT_CONFIG.ratio.antigravity },
     };
   }
   return {
@@ -25,5 +29,8 @@ export function normalizeRatio(raw: unknown): unknown {
     codex: isPlainObject(c)
       ? { ...DEFAULT_CONFIG.ratio.codex, ...c }
       : DEFAULT_CONFIG.ratio.codex,
+    antigravity: isPlainObject(a)
+      ? { ...DEFAULT_CONFIG.ratio.antigravity, ...a }
+      : DEFAULT_CONFIG.ratio.antigravity,
   };
 }

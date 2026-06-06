@@ -9,10 +9,15 @@
   var DEFAULT_OPTION_FLAGS = {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
+    antigravity: { sandbox: true, skip_permissions: false },
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
-  var DEFAULT_PREAMBLE = { gemini: '', codex: '' };
-  var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off' };
+  var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
+  var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off', antigravity: 'auto' };
+  var DEFAULT_ANTIGRAVITY_YOUTUBE = { enabled: false };
+  // gemini and antigravity are mutually exclusive Google engines; default to
+  // gemini until the user switches (matches DEFAULT_CONFIG: gemini enabled).
+  var DEFAULT_GOOGLE_ENGINE = 'gemini';
 
   var RATIO_MIN = 0;
   var RATIO_MAX = 100;
@@ -28,6 +33,7 @@
     'danger-full-access',
     'off',
   ];
+  var GOOGLE_ENGINES = ['gemini', 'antigravity'];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
   var RECENCY_LEVELS = ['off', 'auto', 'strict'];
 
@@ -56,6 +62,7 @@
   var geminiHint = $('#gemini-hint');
   var codexInstallHint = $('#codex-install-hint');
   var geminiInstallHint = $('#gemini-install-hint');
+  var antigravityInstallHint = $('#antigravity-install-hint');
   var ratioWarn = $('#ratio-warn');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
@@ -66,6 +73,12 @@
   var geminiYolo = $('#gemini-yolo');
   var geminiSandbox = $('#gemini-sandbox');
   var geminiBackendWrap = $('#gemini-backend-wrap');
+  var antigravitySandbox = $('#antigravity-sandbox');
+  var antigravitySkipPerms = $('#antigravity-skip-perms');
+  var antigravityYoutube = $('#antigravity-youtube');
+  var modelAntigravityHigh = $('#model-antigravity-high');
+  var modelAntigravityMid = $('#model-antigravity-mid');
+  var modelAntigravityLow = $('#model-antigravity-low');
   var codexYolo = $('#codex-yolo');
   var codexSandboxWrap = $('#codex-sandbox-wrap');
   var codexSandboxHint = $('#codex-sandbox-hint');
@@ -84,15 +97,26 @@
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
 
+  // ratioState.gemini is the "Google slot" ratio; googleEngine decides which
+  // concrete provider (gemini|antigravity) that slot maps to on save.
   var ratioState = {
     gemini: { value: DEFAULT_RATIO_VALUE, enabled: true },
     codex: { value: DEFAULT_RATIO_VALUE, enabled: true },
   };
+  var googleEngine = DEFAULT_GOOGLE_ENGINE;
+  var agyModels = [];
+  var modelMapState = { high: '', mid: '', low: '' };
 
-  var providerAvailable = { codex: true, gemini: true };
+  var providerAvailable = { codex: true, gemini: true, antigravity: true };
 
   function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
+  }
+
+  function googleSlotAvailable() {
+    return googleEngine === 'antigravity'
+      ? providerAvailable.antigravity
+      : providerAvailable.gemini;
   }
 
   function setStatus(kind, text, details) {
@@ -150,13 +174,13 @@
     );
     toggleGemini.setAttribute(
       'data-unavailable',
-      String(!providerAvailable.gemini),
+      String(!googleSlotAvailable()),
     );
 
     codexHint.textContent = providerAvailable.codex
       ? 'click to toggle'
       : 'not installed';
-    geminiHint.textContent = providerAvailable.gemini
+    geminiHint.textContent = googleSlotAvailable()
       ? 'click to toggle'
       : 'not installed';
 
@@ -176,7 +200,9 @@
   }
 
   function toggleProvider(name) {
-    if (!providerAvailable[name]) return;
+    var avail =
+      name === 'gemini' ? googleSlotAvailable() : providerAvailable[name];
+    if (!avail) return;
     var entry = ratioState[name];
     var other = name === 'gemini' ? ratioState.codex : ratioState.gemini;
     if (entry.enabled) {
@@ -221,6 +247,43 @@
     var sel = document.querySelector('input[name="' + name + '"]:checked');
     if (sel && allowed.indexOf(sel.value) >= 0) return sel.value;
     return fallback;
+  }
+
+  function toggleByEngine(els, engine) {
+    for (var i = 0; i < els.length; i += 1) {
+      els[i].hidden = els[i].getAttribute('data-engine') !== engine;
+    }
+  }
+
+  function updateInstallHints() {
+    codexInstallHint.hidden = providerAvailable.codex;
+    var geminiActive = googleEngine === 'gemini';
+    geminiInstallHint.hidden = !geminiActive || providerAvailable.gemini;
+    antigravityInstallHint.hidden =
+      geminiActive || providerAvailable.antigravity;
+  }
+
+  function applyGoogleEngine(engine) {
+    googleEngine = engine === 'antigravity' ? 'antigravity' : 'gemini';
+    setRadio('google-engine', googleEngine, GOOGLE_ENGINES);
+    // provider-icon stays the fixed Google "G" mark; the gemini/antigravity
+    // marks live on the engine segment options, so no icon swap here.
+    // .engine-flags carries the antigravity tier-model-map, so toggling it also
+    // shows/hides the dropdowns — no separate .tier-model-map toggle needed.
+    toggleByEngine(document.querySelectorAll('.engine-flags'), googleEngine);
+    toggleByEngine(
+      document.querySelectorAll('.warning-inline[data-engine]'),
+      googleEngine,
+    );
+    updateInstallHints();
+  }
+
+  function onGoogleEngineChange() {
+    var sel = document.querySelector('input[name="google-engine"]:checked');
+    applyGoogleEngine(sel ? sel.value : 'gemini');
+    renderRatio();
+    syncAdvancedToggleAvailability();
+    renderAllSummaries();
   }
 
   function syncGeminiBackendInert() {
@@ -322,16 +385,29 @@
       var prc = (preambleCodex.value || '').trim();
       if (prc) chips.push({ label: 'preamble: on', title: prc.slice(0, 80) });
     } else {
-      if (geminiYolo.checked) {
-        chips.push({ label: 'yolo: on', tone: 'warn' });
-      }
-      if (geminiSandbox.checked) {
-        var be = readRadio(
-          'gemini-backend',
-          GEMINI_BACKENDS,
-          DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
-        );
-        chips.push({ label: 'sandbox: ' + be });
+      chips.push({ label: 'engine: ' + googleEngine });
+      if (googleEngine === 'antigravity') {
+        if (antigravitySkipPerms.checked) {
+          chips.push({ label: 'skip-perms: on', tone: 'warn' });
+        }
+        if (antigravitySandbox.checked) {
+          chips.push({ label: 'sandbox: terminal' });
+        }
+        if (antigravityYoutube.checked) {
+          chips.push({ label: 'youtube: on' });
+        }
+      } else {
+        if (geminiYolo.checked) {
+          chips.push({ label: 'yolo: on', tone: 'warn' });
+        }
+        if (geminiSandbox.checked) {
+          var be = readRadio(
+            'gemini-backend',
+            GEMINI_BACKENDS,
+            DEFAULT_OPTION_FLAGS.gemini.sandbox_backend,
+          );
+          chips.push({ label: 'sandbox: ' + be });
+        }
       }
       var rg = readRadio(
         'recency-gemini',
@@ -369,7 +445,7 @@
 
   function syncAdvancedToggleAvailability() {
     advancedToggleCodex.disabled = !providerAvailable.codex;
-    advancedToggleGemini.disabled = !providerAvailable.gemini;
+    advancedToggleGemini.disabled = !googleSlotAvailable();
     if (
       !providerAvailable.codex &&
       advancedToggleCodex.getAttribute('aria-expanded') === 'true'
@@ -379,7 +455,7 @@
       advancedPanelCodex.hidden = true;
     }
     if (
-      !providerAvailable.gemini &&
+      !googleSlotAvailable() &&
       advancedToggleGemini.getAttribute('aria-expanded') === 'true'
     ) {
       advancedToggleGemini.setAttribute('aria-expanded', 'false');
@@ -392,6 +468,10 @@
     var src = raw && typeof raw === 'object' ? raw : DEFAULT_OPTION_FLAGS;
     var g = src.gemini && typeof src.gemini === 'object' ? src.gemini : {};
     var c = src.codex && typeof src.codex === 'object' ? src.codex : {};
+    var a =
+      src.antigravity && typeof src.antigravity === 'object'
+        ? src.antigravity
+        : {};
     geminiYolo.checked = Boolean(g.yolo);
     geminiSandbox.checked =
       typeof g.sandbox === 'boolean'
@@ -412,6 +492,11 @@
         : DEFAULT_OPTION_FLAGS.codex.sandbox,
       CODEX_SANDBOX_MODES,
     );
+    antigravitySandbox.checked =
+      typeof a.sandbox === 'boolean'
+        ? a.sandbox
+        : DEFAULT_OPTION_FLAGS.antigravity.sandbox;
+    antigravitySkipPerms.checked = Boolean(a.skip_permissions);
     syncGeminiBackendInert();
     syncCodexSandboxInert();
     syncCodexFullAccessWarning();
@@ -432,17 +517,20 @@
 
   function applyPreamble(raw) {
     var src = raw && typeof raw === 'object' ? raw : DEFAULT_PREAMBLE;
-    preambleGemini.value =
-      typeof src.gemini === 'string' ? src.gemini : DEFAULT_PREAMBLE.gemini;
+    var googleVal =
+      googleEngine === 'antigravity' ? src.antigravity : src.gemini;
+    preambleGemini.value = typeof googleVal === 'string' ? googleVal : '';
     preambleCodex.value =
       typeof src.codex === 'string' ? src.codex : DEFAULT_PREAMBLE.codex;
   }
 
   function applyRecencyFactor(raw) {
     var src = raw && typeof raw === 'object' ? raw : DEFAULT_RECENCY;
+    var googleVal =
+      googleEngine === 'antigravity' ? src.antigravity : src.gemini;
     setRadio(
       'recency-gemini',
-      typeof src.gemini === 'string' ? src.gemini : DEFAULT_RECENCY.gemini,
+      typeof googleVal === 'string' ? googleVal : DEFAULT_RECENCY.gemini,
       RECENCY_LEVELS,
     );
     setRadio(
@@ -452,25 +540,83 @@
     );
   }
 
+  function bindAgyModelOptions(list) {
+    var selects = [
+      { el: modelAntigravityHigh, val: modelMapState.high },
+      { el: modelAntigravityMid, val: modelMapState.mid },
+      { el: modelAntigravityLow, val: modelMapState.low },
+    ];
+    for (var i = 0; i < selects.length; i += 1) {
+      var sel = selects[i].el;
+      if (!sel) continue;
+      var current = selects[i].val;
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      var values = list.slice();
+      if (current && values.indexOf(current) < 0) values.unshift(current);
+      if (values.length === 0) {
+        var empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = '(run agy to load models)';
+        sel.appendChild(empty);
+      } else {
+        for (var j = 0; j < values.length; j += 1) {
+          var opt = document.createElement('option');
+          opt.value = values[j];
+          opt.textContent = values[j];
+          if (values[j] === current) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      }
+    }
+  }
+
+  function applyModels(raw) {
+    var src = raw && typeof raw === 'object' ? raw : {};
+    var ag =
+      src.antigravity && typeof src.antigravity === 'object'
+        ? src.antigravity
+        : {};
+    modelMapState = {
+      high: typeof ag.high === 'string' ? ag.high : '',
+      mid: typeof ag.mid === 'string' ? ag.mid : '',
+      low: typeof ag.low === 'string' ? ag.low : '',
+    };
+    bindAgyModelOptions(agyModels);
+  }
+
+  function applyAntigravityYoutube(raw) {
+    var src =
+      raw && typeof raw === 'object' ? raw : DEFAULT_ANTIGRAVITY_YOUTUBE;
+    antigravityYoutube.checked = Boolean(src.enabled);
+  }
+
   function applyConfig(cfg) {
     var r = cfg.ratio || {};
-    ratioState.gemini = readProviderRatio(r.gemini, ratioState.gemini);
+    var aEnabled = r.antigravity && r.antigravity.enabled;
+    googleEngine = aEnabled ? 'antigravity' : DEFAULT_GOOGLE_ENGINE;
+    var googleRatio = googleEngine === 'antigravity' ? r.antigravity : r.gemini;
+    ratioState.gemini = readProviderRatio(googleRatio, ratioState.gemini);
     ratioState.codex = readProviderRatio(r.codex, ratioState.codex);
 
     strength.value = String(cfg.intervention_strength);
-    kwGemini.value = cfg.keywords.gemini;
-    kwCodex.value = cfg.keywords.codex;
+    var kw = cfg.keywords || {};
+    var googleKw = googleEngine === 'antigravity' ? kw.antigravity : kw.gemini;
+    kwGemini.value = typeof googleKw === 'string' ? googleKw : '';
+    kwCodex.value = typeof kw.codex === 'string' ? kw.codex : '';
     ttl.value = cfg.session_ttl_hours;
     spawnTimeoutMs.value = cfg.spawn_timeout_ms;
     applyOptionFlags(cfg.option_flags);
     applyArtifacts(cfg.artifacts);
     applyPreamble(cfg.preamble);
     applyRecencyFactor(cfg.recency_factor);
+    applyModels(cfg.model_map);
+    applyAntigravityYoutube(cfg.antigravity_youtube);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
     if (radio) radio.checked = true;
 
+    applyGoogleEngine(googleEngine);
     renderRatio();
     updateStrengthLabel();
     renderAllSummaries();
@@ -495,6 +641,22 @@
           DEFAULT_OPTION_FLAGS.codex.sandbox,
         ),
       },
+      antigravity: {
+        sandbox: Boolean(antigravitySandbox.checked),
+        skip_permissions: Boolean(antigravitySkipPerms.checked),
+      },
+    };
+  }
+
+  function buildModelMap() {
+    return {
+      antigravity: {
+        high: modelAntigravityHigh
+          ? String(modelAntigravityHigh.value || '')
+          : '',
+        mid: modelAntigravityMid ? String(modelAntigravityMid.value || '') : '',
+        low: modelAntigravityLow ? String(modelAntigravityLow.value || '') : '',
+      },
     };
   }
 
@@ -509,44 +671,41 @@
     };
   }
 
-  function buildPreamble() {
-    return {
-      gemini: String(preambleGemini.value || ''),
-      codex: String(preambleCodex.value || ''),
-    };
-  }
-
-  function buildRecencyFactor() {
-    return {
-      gemini: readRadio(
-        'recency-gemini',
-        RECENCY_LEVELS,
-        DEFAULT_RECENCY.gemini,
-      ),
-      codex: readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex),
-    };
-  }
-
   function buildConfig() {
     var modelEl = document.querySelector('input[name="model"]:checked');
+    var isGemini = googleEngine === 'gemini';
+    var googleSlot = {
+      value: ratioState.gemini.value,
+      enabled: ratioState.gemini.enabled,
+    };
+    // The inactive Google engine is always disabled — this guarantees the
+    // mutual-exclusion invariant ConfigSchema.superRefine enforces on save.
+    var googleOff = { value: ratioState.gemini.value, enabled: false };
+    var kwGoogle = kwGemini.value.trim();
+    var preGoogle = String(preambleGemini.value || '');
+    var recGoogle = readRadio(
+      'recency-gemini',
+      RECENCY_LEVELS,
+      DEFAULT_RECENCY.gemini,
+    );
     return {
       ratio: {
-        gemini: {
-          value: ratioState.gemini.value,
-          enabled: ratioState.gemini.enabled,
-        },
+        gemini: isGemini ? googleSlot : googleOff,
         codex: {
           value: ratioState.codex.value,
           enabled: ratioState.codex.enabled,
         },
+        antigravity: isGemini ? googleOff : googleSlot,
       },
       intervention_strength: Number(strength.value),
       keywords: {
-        gemini: kwGemini.value.trim(),
+        gemini: kwGoogle,
         codex: kwCodex.value.trim(),
+        antigravity: kwGoogle,
       },
       default_model: modelEl ? modelEl.value : DEFAULT_MODEL,
       option_flags: buildOptionFlags(),
+      model_map: buildModelMap(),
       session_ttl_hours: Math.max(
         SESSION_TTL_HOURS_MIN,
         Math.min(
@@ -562,8 +721,23 @@
         ),
       ),
       artifacts: buildArtifacts(),
-      preamble: buildPreamble(),
-      recency_factor: buildRecencyFactor(),
+      preamble: {
+        gemini: preGoogle,
+        codex: String(preambleCodex.value || ''),
+        antigravity: preGoogle,
+      },
+      recency_factor: {
+        gemini: recGoogle,
+        codex: readRadio(
+          'recency-codex',
+          RECENCY_LEVELS,
+          DEFAULT_RECENCY.codex,
+        ),
+        antigravity: recGoogle,
+      },
+      antigravity_youtube: {
+        enabled: Boolean(antigravityYoutube.checked),
+      },
     };
   }
 
@@ -587,14 +761,18 @@
       var body = await res.json();
       providerAvailable.codex = Boolean(body.codex && body.codex.available);
       providerAvailable.gemini = Boolean(body.gemini && body.gemini.available);
+      providerAvailable.antigravity = Boolean(
+        body.antigravity && body.antigravity.available,
+      );
+      agyModels = Array.isArray(body.agyModels) ? body.agyModels : [];
+      bindAgyModelOptions(agyModels);
     } catch (e) {
-      // network/transient — leave defaults (both true) so the user is not locked out
+      // network/transient — leave defaults (all true) so the user is not locked out
       return;
     }
     if (!providerAvailable.codex) ratioState.codex.enabled = false;
-    if (!providerAvailable.gemini) ratioState.gemini.enabled = false;
-    codexInstallHint.hidden = providerAvailable.codex;
-    geminiInstallHint.hidden = providerAvailable.gemini;
+    if (!googleSlotAvailable()) ratioState.gemini.enabled = false;
+    updateInstallHints();
     renderRatio();
     syncAdvancedToggleAvailability();
   }
@@ -673,6 +851,11 @@
   advancedToggleGemini.addEventListener('click', function () {
     toggleAdvancedPanel(advancedToggleGemini, advancedPanelGemini);
   });
+  document
+    .querySelectorAll('input[name="google-engine"]')
+    .forEach(function (r) {
+      r.addEventListener('change', onGoogleEngineChange);
+    });
   strength.addEventListener('input', updateStrengthLabel);
   geminiSandbox.addEventListener('change', syncGeminiBackendInert);
   codexYolo.addEventListener('change', syncCodexSandboxInert);

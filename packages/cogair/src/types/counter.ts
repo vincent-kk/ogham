@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const CounterSchema = z.object({
   parent_pid: z.number().int(),
+  antigravity: z.number().int().nonnegative(),
   gemini: z.number().int().nonnegative(),
   codex: z.number().int().nonnegative(),
 });

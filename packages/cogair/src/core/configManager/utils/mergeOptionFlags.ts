@@ -14,5 +14,9 @@ export function mergeOptionFlags(raw: unknown): unknown {
       ...defaults.codex,
       ...(isPlainObject(raw.codex) ? raw.codex : {}),
     },
+    antigravity: {
+      ...defaults.antigravity,
+      ...(isPlainObject(raw.antigravity) ? raw.antigravity : {}),
+    },
   };
 }

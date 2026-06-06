@@ -1,20 +1,20 @@
 ## Purpose
 
-`@ogham/cogair` 소스 루트. Claude 가 Gemini CLI / Codex CLI 에 자율 위임하도록 하는 MCP 서버, dispatcher, hooks, core 저장소를 모은 패키지 진입 모듈.
+`@ogham/cogair` 소스 루트. Claude 가 Gemini / Codex / Antigravity CLI 에 자율 위임하도록 하는 MCP 서버, dispatcher, hooks, core 저장소를 모은 패키지 진입 모듈.
 
 ## Structure
 
-| Directory        | Role                                                      |
-| ---------------- | --------------------------------------------------------- |
-| `types/`         | Zod 스키마 + TypeScript 타입                              |
-| `constants/`     | 경로·기본값·에러 코드 organ                               |
-| `core/`          | config / counter / session / project hash / auth token    |
-| `dispatcher/`    | codex-cli / gemini-cli 호출 본체                          |
-| `mcp/`           | MCP 서버 + 3 도구 핸들러 + settings web UI                |
-| `hooks/`         | SessionStart / UserPromptSubmit 훅 구현체 (esbuild 입력)  |
-| `lib/`           | atomic write, logger organ                                |
-| `utils/`         | parent-pid, iso-now organ                                 |
-| `__tests__/e2e/` | E2E 회귀 스위트 (Layer A in-process + Layer B 번들 stdio) |
+| Directory        | Role                                                               |
+| ---------------- | ------------------------------------------------------------------ |
+| `types/`         | Zod 스키마 + TypeScript 타입                                       |
+| `constants/`     | 경로·기본값·에러 코드 organ                                        |
+| `core/`          | config / counter / session / project hash / auth token / agyModels |
+| `dispatcher/`    | codex / gemini / antigravity CLI 호출 본체                         |
+| `mcp/`           | MCP 서버 + 4 도구 핸들러 + settings web UI                         |
+| `hooks/`         | SessionStart / UserPromptSubmit 훅 구현체 (esbuild 입력)           |
+| `lib/`           | atomic write, logger organ                                         |
+| `utils/`         | parent-pid, iso-now organ                                          |
+| `__tests__/e2e/` | E2E 회귀 스위트 (Layer A in-process + Layer B 번들 stdio)          |
 
 ## Conventions
 

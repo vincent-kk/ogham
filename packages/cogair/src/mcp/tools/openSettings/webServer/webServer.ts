@@ -1,6 +1,10 @@
 import { type Server, createServer } from 'node:http';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
+import {
+  type ProvisionResult,
+  provisionYoutubeMcp,
+} from '../../../../core/agyMcpConfig/index.js';
 import { generateToken } from '../../../../core/authToken/index.js';
 import {
   loadConfig as loadConfigDefault,
@@ -15,6 +19,7 @@ export interface StartSettingsServerOptions {
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
   saveConfig?: (config: Config) => Promise<void>;
+  provisionYoutube?: (enabled: boolean) => Promise<ProvisionResult>;
   onClose?: () => void | Promise<void>;
 }
 
@@ -70,6 +75,8 @@ export async function startSettingsServer(
     settingsHtml: options.settingsHtml,
     loadConfig: options.loadConfig ?? loadConfigDefault,
     saveConfig: options.saveConfig ?? saveConfigDefault,
+    provisionYoutube:
+      options.provisionYoutube ?? ((enabled) => provisionYoutubeMcp(enabled)),
     closeServer,
     resetTimer,
   });

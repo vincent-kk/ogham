@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PROVIDERS = ['gemini', 'codex'] as const;
+export const PROVIDERS = ['antigravity', 'gemini', 'codex'] as const;
 export const MODEL_ALIASES = ['high', 'mid', 'low', 'auto'] as const;
 export const ERROR_CODES = [
   'budget_exhausted',

@@ -1,7 +1,12 @@
 import { z } from 'zod';
 
 import { ModelAliasSchema } from './conversation.js';
-import { CodexFlagsSchema, GeminiFlagsSchema } from './dispatch.js';
+import {
+  AntigravityFlagsSchema,
+  CodexFlagsSchema,
+  GeminiFlagsSchema,
+  TierModelMapSchema,
+} from './dispatch.js';
 
 export const InterventionStrengthSchema = z.union([
   z.literal(-2),
@@ -23,6 +28,7 @@ export type ProviderRatio = z.infer<typeof ProviderRatioSchema>;
 export const RatioSchema = z.object({
   gemini: ProviderRatioSchema,
   codex: ProviderRatioSchema,
+  antigravity: ProviderRatioSchema,
 });
 
 export type Ratio = z.infer<typeof RatioSchema>;
@@ -30,6 +36,7 @@ export type Ratio = z.infer<typeof RatioSchema>;
 export const KeywordsSchema = z.object({
   gemini: z.string(),
   codex: z.string(),
+  antigravity: z.string(),
 });
 
 export type Keywords = z.infer<typeof KeywordsSchema>;
@@ -37,9 +44,20 @@ export type Keywords = z.infer<typeof KeywordsSchema>;
 export const OptionFlagsSchema = z.object({
   gemini: GeminiFlagsSchema,
   codex: CodexFlagsSchema,
+  antigravity: AntigravityFlagsSchema,
 });
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
+
+// Per-tier model-name mapping. Only antigravity serves multiple model families,
+// so it is the only provider that needs an explicit map; gemini/codex keep their
+// env-based modelAlias resolution. TierModelMapSchema lives in dispatch.ts to
+// avoid an import cycle.
+export const ModelMapSchema = z.object({
+  antigravity: TierModelMapSchema,
+});
+
+export type ModelMap = z.infer<typeof ModelMapSchema>;
 
 export const ArtifactLocationSchema = z.enum(['project', 'user']);
 
@@ -55,6 +73,7 @@ export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
 export const PreambleConfigSchema = z.object({
   gemini: z.string(),
   codex: z.string(),
+  antigravity: z.string(),
 });
 
 export type PreambleConfig = z.infer<typeof PreambleConfigSchema>;
@@ -64,23 +83,57 @@ export const RecencyLevelSchema = z.enum(['off', 'auto', 'strict']);
 export type RecencyLevel = z.infer<typeof RecencyLevelSchema>;
 
 export const RecencyFactorConfigSchema = z.object({
+  antigravity: RecencyLevelSchema,
   gemini: RecencyLevelSchema,
   codex: RecencyLevelSchema,
 });
 
 export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 
-export const ConfigSchema = z.object({
+// Antigravity, unlike Gemini CLI, has no built-in YouTube ingestion. When
+// enabled, cogair provisions a youtube-transcript MCP server into agy's global
+// mcp_config.json so agy fetches and summarizes YouTube transcripts natively in
+// headless print mode. Opt-in (defaults disabled): toggling it writes to agy's
+// config as a side effect of /setup, outside cogair's own namespace.
+export const AntigravityYoutubeConfigSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export type AntigravityYoutubeConfig = z.infer<
+  typeof AntigravityYoutubeConfigSchema
+>;
+
+// Base object schema, exported so callers that need `.shape`/`.extend` (e.g.
+// partial merges) keep access. ConfigSchema wraps it with the mutual-exclusion
+// refinement below; `.parse`/`.safeParse` still work on the wrapped schema.
+export const ConfigObjectSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
   keywords: KeywordsSchema,
   default_model: ModelAliasSchema,
   option_flags: OptionFlagsSchema,
+  model_map: ModelMapSchema,
   session_ttl_hours: z.number().int().positive(),
   spawn_timeout_ms: z.number().int().positive(),
   artifacts: ArtifactsConfigSchema,
   preamble: PreambleConfigSchema,
   recency_factor: RecencyFactorConfigSchema,
+  antigravity_youtube: AntigravityYoutubeConfigSchema,
+});
+
+// gemini and antigravity are mutually exclusive Google engines: the Gemini CLI
+// service ends 2026-06-18 and cogair transitions to the Antigravity CLI. Only
+// one may be enabled at a time. configManager.normalizeMutualExclusion auto-
+// corrects legacy files; this refine guards saves coming from the settings UI.
+export const ConfigSchema = ConfigObjectSchema.superRefine((cfg, ctx) => {
+  if (cfg.ratio.gemini.enabled && cfg.ratio.antigravity.enabled) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['ratio', 'antigravity', 'enabled'],
+      message:
+        'gemini and antigravity are mutually exclusive (Gemini CLI service ends 2026-06-18). Enable only one Google engine.',
+    });
+  }
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

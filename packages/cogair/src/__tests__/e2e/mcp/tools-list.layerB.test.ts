@@ -20,11 +20,12 @@ describe('MCP tools/list (Layer B)', () => {
     await handle.close();
   });
 
-  it('exposes start_conversation, continue_conversation, open_settings via spawned bundle', async () => {
+  it('exposes all four tools via spawned bundle', async () => {
     const { tools } = await handle.client.listTools();
     const names = tools.map((t) => t.name).sort();
     expect(names).toEqual([
       'continue_conversation',
+      'list_antigravity_models',
       'open_settings',
       'start_conversation',
     ]);

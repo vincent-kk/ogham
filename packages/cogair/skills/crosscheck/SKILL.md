@@ -1,15 +1,15 @@
 ---
 name: crosscheck
-description: '[cogair] Cross-validate a prompt by dispatching to codex AND gemini in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
+description: '[cogair] Cross-validate a prompt by dispatching to codex AND the active Google engine (gemini or antigravity) in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
 argument-hint: '[--model high|mid|low|auto] -- "prompt"'
 ---
 
 # crosscheck
 
-Cross-validate a prompt through both Codex and Gemini in parallel via the
-cogair MCP server, then synthesize the two `ConversationResponse` envelopes
-into one consolidated answer.
+Cross-validate a prompt through both Codex and the active Google engine
+(gemini or antigravity) in parallel via the cogair MCP server, then synthesize
+the two `ConversationResponse` envelopes into one consolidated answer.
 
 ## When to use
 
@@ -20,15 +20,16 @@ into one consolidated answer.
 
 ## When NOT to use
 
-- Trivial tasks the current Claude session can answer directly.
-- Tasks that only one provider's strength fits — use `/cogair:codex` or
-  `/cogair:gemini` directly.
-- Multi-turn conversations — crosscheck is single-shot. Use
-  `/cogair:codex --continue` or `/cogair:gemini --continue` for follow-ups
-  on either side.
 - Prompts containing secrets the user does not want shared with both
   vendors — the same prompt is forwarded to BOTH codex (OpenAI) and
   gemini (Google).
+- Trivial tasks the current Claude session can answer directly.
+- Tasks that only one provider's strength fits — use `/cogair:codex` or
+  the active Google engine skill (`/cogair:gemini` or `/cogair:antigravity`)
+  directly.
+- Multi-turn conversations — crosscheck is single-shot. Use
+  `/cogair:codex --continue` or `/cogair:gemini --continue` for follow-ups
+  on either side.
 
 ## Arguments
 
@@ -52,7 +53,9 @@ via `/cogair:codex --continue <id>` or `/cogair:gemini --continue <id>`
 
 cogair dispatches only to **enabled** providers. Read the active set from
 the SessionStart `[cogair] Static policy` block (the `Active providers:`
-line). Branch on it BEFORE issuing any MCP call:
+line). The Google engine is whichever of `gemini` / `antigravity` appears
+there (they are mutually exclusive) — use that name as `<google>` below.
+Branch on the active set BEFORE issuing any MCP call:
 
 - **Both enabled** → standard two-provider crosscheck (Call mapping below).
 - **Exactly one enabled** → dispatch the enabled provider via MCP, and fill
@@ -72,7 +75,8 @@ disabled and fall back to the one-enabled flow above.
 Issue the two calls **in parallel** (single message, two tool uses):
 
 - `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`
-- `mcp_tools_start_conversation({ provider: 'gemini', prompt, model? })`
+- `mcp_tools_start_conversation({ provider: <google>, prompt, model? })` —
+  `<google>` is the active Google engine (`gemini` or `antigravity`).
 
 Omit `model` when alias is `auto` or unspecified.
 
@@ -87,8 +91,9 @@ never produced a session, surface only the surviving provider's
 
 For each provider independently:
 
-- `auth` → tell the user to run `codex login` / `gemini auth login`
-  for each failing provider.
+- `auth` → tell the user to authenticate each failing provider: `codex login`
+  for codex, `gemini auth login` for gemini, or sign in to `agy` (Google OAuth)
+  for antigravity.
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause or
   invoking only the surviving provider via `/cogair:<provider>`.
 - `disabled` → the provider was switched off in config. Fall back to the
@@ -108,7 +113,7 @@ For each provider independently:
 
 ### Partial-failure template
 
-Substitute the actual provider name (`Codex` or `Gemini`) for each
+Substitute the actual provider name (`Codex`, `Gemini`, or `Antigravity`) for each
 `<SurvivingProvider>` / `<FailedProvider>` placeholder.
 
 ```

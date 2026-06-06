@@ -63,26 +63,32 @@ export async function handleStartConversation(
     recencyLevel: config.recency_factor[input.provider],
   });
 
-  const result: DispatchResult =
-    input.provider === 'codex'
-      ? await dispatchers.codex.start({
-          prompt: composedPrompt,
-          model,
-          options,
-          sessionId,
-          cwd,
-          flags: config.option_flags.codex,
-          spawnTimeoutMs: config.spawn_timeout_ms,
-        })
-      : await dispatchers.gemini.start({
-          prompt: composedPrompt,
-          model,
-          options,
-          sessionId,
-          cwd,
-          flags: config.option_flags.gemini,
-          spawnTimeoutMs: config.spawn_timeout_ms,
-        });
+  const base = {
+    prompt: composedPrompt,
+    model,
+    options,
+    sessionId,
+    cwd,
+    spawnTimeoutMs: config.spawn_timeout_ms,
+  };
+  let result: DispatchResult;
+  if (input.provider === 'codex') {
+    result = await dispatchers.codex.start({
+      ...base,
+      flags: config.option_flags.codex,
+    });
+  } else if (input.provider === 'antigravity') {
+    result = await dispatchers.antigravity.start({
+      ...base,
+      flags: config.option_flags.antigravity,
+      modelMap: config.model_map.antigravity,
+    });
+  } else {
+    result = await dispatchers.gemini.start({
+      ...base,
+      flags: config.option_flags.gemini,
+    });
+  }
 
   await createSession({
     sessionId,

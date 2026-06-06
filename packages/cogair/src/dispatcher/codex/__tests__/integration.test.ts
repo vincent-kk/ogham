@@ -76,6 +76,7 @@ function baseOptions(): DispatchOptions<CodexFlags> {
     sessionId: 'cogair-session',
     cwd: process.cwd(),
     flags: FLAGS_READ_ONLY,
+    spawnTimeoutMs: 10000,
   };
 }
 

@@ -12,5 +12,9 @@ export function pickKeywords(raw: unknown): HookConfig['keywords'] {
         : DEFAULT_CONFIG.keywords.gemini,
     codex:
       typeof raw.codex === 'string' ? raw.codex : DEFAULT_CONFIG.keywords.codex,
+    antigravity:
+      typeof raw.antigravity === 'string'
+        ? raw.antigravity
+        : DEFAULT_CONFIG.keywords.antigravity,
   };
 }

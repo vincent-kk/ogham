@@ -24,5 +24,6 @@ export function mergeRecencyFactor(raw: unknown): RecencyFactorConfig {
   return {
     gemini: pickLevel(raw.gemini, defaults.gemini),
     codex: pickLevel(raw.codex, defaults.codex),
+    antigravity: pickLevel(raw.antigravity, defaults.antigravity),
   };
 }
