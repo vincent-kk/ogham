@@ -16,14 +16,15 @@ export function buildStaticPayload(config: HookConfig): string {
   if (r.codex.enabled) active.push('codex');
   const activeLine =
     active.length === 0 ? 'none — run /setup' : active.join(', ');
+  const skillList = active.map((p) => `/cogair:${p}`).join(' and ');
 
   const flags = JSON.stringify(config.option_flags);
 
   const keywordLines = ['Keyword mapping'];
-  if (google) {
+  if (google)
     keywordLines.push(`- ${google} → ${joinKeywords(config.keywords[google])}`);
-  }
-  keywordLines.push(`- codex  → ${joinKeywords(config.keywords.codex)}`);
+  if (r.codex.enabled)
+    keywordLines.push(`- codex  → ${joinKeywords(config.keywords.codex)}`);
 
   return [
     '[cogair] Static policy',
@@ -42,6 +43,8 @@ export function buildStaticPayload(config: HookConfig): string {
     '  codex: heavy code, sandboxed shell), or',
     '  (c) keeping near the configured ratio.',
     '- Fall back to Claude when neither provider clearly fits.',
-    `- Use /cogair:codex${google ? ` and /cogair:${google}` : ''} skills, never invoke CLI binaries directly.`,
+    active.length === 0
+      ? '- Run /cogair:setup to enable a provider before delegating.'
+      : `- Use ${skillList} skill${active.length > 1 ? 's' : ''}, never invoke CLI binaries directly.`,
   ].join('\n');
 }
