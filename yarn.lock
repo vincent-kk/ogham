@@ -1292,14 +1292,6 @@ __metadata:
 "@ogham/prawf@workspace:packages/prawf":
   version: 0.0.0-use.local
   resolution: "@ogham/prawf@workspace:packages/prawf"
-  dependencies:
-    "@modelcontextprotocol/sdk": "npm:~1.22.0"
-    "@types/node": "npm:^20.11.0"
-    "@vitest/coverage-v8": "npm:^3.2.4"
-    esbuild: "npm:^0.24.0"
-    typescript: "npm:^5.7.2"
-    vitest: "npm:^4.1.2"
-    zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
 
