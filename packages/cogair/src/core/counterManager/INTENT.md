@@ -4,12 +4,12 @@
 
 ## Structure
 
-| 파일                  | 역할                                                      |
-| --------------------- | --------------------------------------------------------- |
-| `loadCounter.ts`      | 파일 read + `parent_pid` 비교 + 불일치·누락 시 0 fallback |
-| `getCounter.ts`       | `loadCounter` 호출 후 현재 카운트 반환                    |
-| `incrementCounter.ts` | 지정 provider +1 증가 후 `atomicWrite` 저장               |
-| `index.ts`            | barrel: `getCounter`, `incrementCounter`                  |
+| 파일                              | 역할                                                      |
+| --------------------------------- | --------------------------------------------------------- |
+| `operations/loadCounter.ts`       | 파일 read + `parent_pid` 비교 + 불일치·누락 시 0 fallback |
+| `operations/getCounter.ts`        | `loadCounter` 호출 후 현재 카운트 반환                    |
+| `operations/incrementCounter.ts`  | 지정 provider +1 증가 후 `atomicWrite` 저장               |
+| `index.ts`                        | barrel: `getCounter`, `incrementCounter`                  |
 
 ## Conventions
 
