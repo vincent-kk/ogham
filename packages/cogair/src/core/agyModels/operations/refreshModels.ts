@@ -7,35 +7,54 @@ import type { AgyModelsCache } from '../../../types/index.js';
 import { parseModels } from '../utils/parseModels.js';
 
 const REFRESH_TIMEOUT_MS = 15_000;
+const MAX_ATTEMPTS = 3;
 
-// Runs `agy models`, parses the model list, and writes the cache. Never throws:
-// any spawn/parse/write failure resolves to an empty list so callers (settings
-// UI, auto-tier selection) degrade gracefully when agy is missing or unauthed.
 export async function refreshModels(now: number): Promise<string[]> {
   try {
-    const result = await spawnCli('agy', ['models'], {
-      timeoutMs: REFRESH_TIMEOUT_MS,
-    });
-    if (result.timedOut || result.spawnError || (result.code ?? 0) !== 0) {
-      return [];
-    }
-    const models = parseModels(result.stdout);
-    const cache: AgyModelsCache = { models, fetched_at: now };
-    try {
-      await atomicWrite(
-        AGY_MODELS_CACHE_PATH,
-        `${JSON.stringify(cache, null, 2)}\n`,
-      );
-    } catch (err) {
-      logger.warn('agy models cache write failed', {
-        error: err instanceof Error ? err.message : String(err),
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const result = await spawnCli('agy', ['models'], {
+        timeoutMs: REFRESH_TIMEOUT_MS,
+      });
+      if (result.timedOut || result.spawnError || (result.code ?? 0) !== 0) {
+        logger.warn('agy models refresh failed', {
+          attempt,
+          code: result.code,
+          timedOut: result.timedOut,
+          spawnError: result.spawnError?.message,
+          stderr: result.stderr.slice(0, 200),
+        });
+        return [];
+      }
+      const models = parseModels(result.stdout);
+      if (models.length > 0) return writeCache(models, now);
+      const fromStderr = parseModels(result.stderr);
+      if (fromStderr.length > 0) return writeCache(fromStderr, now);
+      logger.warn('agy models returned no parseable models', {
+        attempt,
+        stdoutLength: result.stdout.length,
+        stderrLength: result.stderr.length,
       });
     }
-    return models;
+    return [];
   } catch (err) {
-    logger.warn('agy models refresh failed', {
+    logger.warn('agy models refresh threw', {
       error: err instanceof Error ? err.message : String(err),
     });
     return [];
   }
+}
+
+async function writeCache(models: string[], now: number): Promise<string[]> {
+  const cache: AgyModelsCache = { models, fetched_at: now };
+  try {
+    await atomicWrite(
+      AGY_MODELS_CACHE_PATH,
+      `${JSON.stringify(cache, null, 2)}\n`,
+    );
+  } catch (err) {
+    logger.warn('agy models cache write failed', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+  return models;
 }

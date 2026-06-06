@@ -6,17 +6,18 @@
 
 ## Structure
 
-| 파일                               | 역할                                                     |
-| ---------------------------------- | -------------------------------------------------------- |
-| `operations/getAvailableModels.ts` | 캐시 조회(TTL 1h) → miss/만료 시 refresh, stale fallback |
-| `operations/refreshModels.ts`      | `spawnCli('agy', ['models'])` → 파싱 → 캐시 write        |
-| `utils/parseModels.ts`             | stdout(JSON 또는 텍스트 테이블) → 모델명 `string[]`      |
-| `index.ts`                         | barrel: `getAvailableModels`                             |
+| 파일                               | 역할                                                                |
+| ---------------------------------- | ------------------------------------------------------------------- |
+| `operations/getAvailableModels.ts` | 캐시 조회(TTL 1h) → miss/만료 시 refresh, stale fallback            |
+| `operations/refreshModels.ts`      | `agy models` → stdout/stderr 파싱 → 비빈 결과만 캐시·빈 결과 재시도 |
+| `utils/parseModels.ts`             | stdout(JSON/텍스트/테이블, ANSI strip) → 모델명 `string[]`          |
+| `index.ts`                         | barrel: `getAvailableModels`                                        |
 
 ## Conventions
 
 - 캐시 파일 `runtime/agy-models.json` (`{ models, fetched_at }`), TTL 1시간
 - spawn/파싱/write 어떤 실패도 throw 금지 — 항상 `string[]` 반환
+- 빈 결과(0개)는 캐시 금지 — stdout 비면 stderr 파싱, 그래도 비면 재시도(non-TTY stdout 드롭 대비)
 - 모델명 문자열은 가공 없이 보존 (`--model` 인자로 직결)
 - 모든 write 는 `atomicWrite` 경유
 
@@ -25,6 +26,7 @@
 ### Always do
 
 - spawn 실패·타임아웃·비정상 종료 시 stale 캐시 또는 빈 배열 반환
+- 빈 모델 결과는 캐시 미기록 — stale 캐시 또는 다음 호출 재시도로 복구
 - 캐시 write 실패를 무시하고 모델 목록은 정상 반환
 
 ### Ask first

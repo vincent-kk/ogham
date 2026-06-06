@@ -40,6 +40,37 @@ if (args[0] === 'models') {
 process.exit(1);
 `;
 
+const FAKE_AGY_EMPTY = `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === 'models') { process.exit(0); }
+process.exit(1);
+`;
+
+const FAKE_AGY_STDERR = `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === 'models') {
+  process.stderr.write('gemini-pro\\ngemini-flash\\n');
+  process.exit(0);
+}
+process.exit(1);
+`;
+
+const FAKE_AGY_FLAKY = `#!/usr/bin/env node
+const fs = require('node:fs');
+const path = require('node:path');
+const args = process.argv.slice(2);
+if (args[0] === 'models') {
+  const counter = path.join(__dirname, 'n.txt');
+  let n = 0;
+  try { n = parseInt(fs.readFileSync(counter, 'utf8'), 10) || 0; } catch {}
+  fs.writeFileSync(counter, String(n + 1));
+  if (n === 0) { process.exit(0); }
+  process.stdout.write('gemini-pro\\ngemini-flash\\n');
+  process.exit(0);
+}
+process.exit(1);
+`;
+
 let handle: ReturnType<typeof installFakeBinary>;
 let restorePath: () => void;
 
@@ -108,6 +139,77 @@ describe('refreshModels — nonzero exit', () => {
   it('does not write a cache file when agy models fails', async () => {
     await refreshModels(FIXED_NOW);
     await expect(readFile(AGY_MODELS_CACHE_PATH, 'utf8')).rejects.toThrow();
+  });
+});
+
+describe('refreshModels — empty output', () => {
+  let handleEmpty: ReturnType<typeof installFakeBinary>;
+  let restorePathEmpty: () => void;
+
+  beforeAll(() => {
+    restorePath();
+    handleEmpty = installFakeBinary('agy', FAKE_AGY_EMPTY);
+    restorePathEmpty = prependToPath(handleEmpty.dir);
+  });
+
+  afterAll(() => {
+    restorePathEmpty();
+    handleEmpty.cleanup();
+    restorePath = prependToPath(handle.dir);
+  });
+
+  it('returns empty array when stdout and stderr are both empty', async () => {
+    const models = await refreshModels(FIXED_NOW);
+    expect(models).toEqual([]);
+  });
+
+  it('does not cache an empty result', async () => {
+    await refreshModels(FIXED_NOW);
+    await expect(readFile(AGY_MODELS_CACHE_PATH, 'utf8')).rejects.toThrow();
+  });
+});
+
+describe('refreshModels — stderr fallback', () => {
+  let handleStderr: ReturnType<typeof installFakeBinary>;
+  let restorePathStderr: () => void;
+
+  beforeAll(() => {
+    restorePath();
+    handleStderr = installFakeBinary('agy', FAKE_AGY_STDERR);
+    restorePathStderr = prependToPath(handleStderr.dir);
+  });
+
+  afterAll(() => {
+    restorePathStderr();
+    handleStderr.cleanup();
+    restorePath = prependToPath(handle.dir);
+  });
+
+  it('parses models from stderr when stdout is empty', async () => {
+    const models = await refreshModels(FIXED_NOW);
+    expect(models).toEqual(['gemini-pro', 'gemini-flash']);
+  });
+});
+
+describe('refreshModels — retry on empty stdout', () => {
+  let handleFlaky: ReturnType<typeof installFakeBinary>;
+  let restorePathFlaky: () => void;
+
+  beforeAll(() => {
+    restorePath();
+    handleFlaky = installFakeBinary('agy', FAKE_AGY_FLAKY);
+    restorePathFlaky = prependToPath(handleFlaky.dir);
+  });
+
+  afterAll(() => {
+    restorePathFlaky();
+    handleFlaky.cleanup();
+    restorePath = prependToPath(handle.dir);
+  });
+
+  it('retries when the first attempt is empty and succeeds on retry', async () => {
+    const models = await refreshModels(FIXED_NOW);
+    expect(models).toEqual(['gemini-pro', 'gemini-flash']);
   });
 });
 

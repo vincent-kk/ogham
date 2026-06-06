@@ -34,7 +34,7 @@ describe('parseModels', () => {
     expect(parseModels(stdout)).toEqual(['model-x', 'model-y', 'model-z']);
   });
 
-  it('drops decorative lines (starting with - = * # | +) in plain text', () => {
+  it('extracts table-row cells and drops separator/decorative lines', () => {
     const stdout = [
       '+------------------+',
       '| model-one        |',
@@ -44,8 +44,17 @@ describe('parseModels', () => {
       '# header',
       'model-three',
     ].join('\n');
-    // Lines starting with |, +, =, *, # are all dropped by the decorative filter.
-    expect(parseModels(stdout)).toEqual(['model-two', 'model-three']);
+    expect(parseModels(stdout)).toEqual([
+      'model-one',
+      'model-two',
+      'model-three',
+    ]);
+  });
+
+  it('strips ANSI color codes before parsing', () => {
+    const esc = String.fromCharCode(27);
+    const stdout = `${esc}[32mmodel-green${esc}[0m\nmodel-plain`;
+    expect(parseModels(stdout)).toEqual(['model-green', 'model-plain']);
   });
 
   it('handles CRLF line endings in plain text', () => {

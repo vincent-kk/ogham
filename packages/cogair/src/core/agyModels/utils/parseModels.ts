@@ -2,22 +2,20 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-// `agy models` output format is version-dependent (a JSON array, a JSON object
-// with a `models` field, or a plain text table). Try JSON first, fall back to
-// non-decorative lines. Returns the model full-names verbatim (deduped).
+const ANSI_PATTERN = new RegExp(
+  `${String.fromCharCode(27)}\\[[0-9;]*[A-Za-z]`,
+  'g',
+);
+
 export function parseModels(stdout: string): string[] {
-  const text = stdout.trim();
+  const text = stdout.replace(ANSI_PATTERN, '').trim();
   if (text.length === 0) return [];
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0 && !/^[-=*#|+]/.test(line));
-    return Array.from(new Set(lines));
+    return parsePlainText(text);
   }
 
   const arr: unknown[] | null = Array.isArray(parsed)
@@ -35,5 +33,23 @@ export function parseModels(stdout: string): string[] {
     })
     .filter((name) => name.trim().length > 0);
 
+  return Array.from(new Set(names));
+}
+
+function parsePlainText(text: string): string[] {
+  const names: string[] = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line.length === 0) continue;
+    if (line.includes('|')) {
+      for (const cell of line.split('|')) {
+        const value = cell.trim();
+        if (value.length > 0 && !/^[-=+]+$/.test(value)) names.push(value);
+      }
+      continue;
+    }
+    if (/^[-=*#+]/.test(line)) continue;
+    names.push(line);
+  }
   return Array.from(new Set(names));
 }

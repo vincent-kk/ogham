@@ -1,5 +1,6 @@
 import spawn from "cross-spawn";
 import { spawn as nodeSpawn } from "node:child_process";
+import { StringDecoder } from "node:string_decoder";
 import { normalizeEol } from "../eol/normalizeEol.js";
 import { osTimeout } from "./osTimeout.js";
 import { resolveLauncher } from "./resolveLauncher.js";
@@ -17,6 +18,8 @@ export function spawnCli(
 
   return new Promise((resolve) => {
     const launcher = resolveLauncher(bin, { env: options.env });
+    const stdoutDecoder = new StringDecoder(encoding);
+    const stderrDecoder = new StringDecoder(encoding);
     const child = launcher
       ? nodeSpawn(launcher.command, [...launcher.prependArgs, ...args], {
           cwd: options.cwd,
@@ -55,6 +58,8 @@ export function spawnCli(
       settled = true;
       if (timer) clearTimeout(timer);
       if (timeoutSettleTimer) clearTimeout(timeoutSettleTimer);
+      stdout += stdoutDecoder.end();
+      stderr += stderrDecoder.end();
       resolve({
         code,
         stdout: normalize ? normalizeEol(stdout) : stdout,
@@ -70,10 +75,10 @@ export function spawnCli(
     });
 
     child.stdout?.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString(encoding);
+      stdout += stdoutDecoder.write(chunk);
     });
     child.stderr?.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString(encoding);
+      stderr += stderrDecoder.write(chunk);
     });
 
     if (options.input !== undefined && child.stdin) {
