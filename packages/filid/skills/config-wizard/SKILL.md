@@ -1,14 +1,14 @@
 ---
-name: config
+name: config-wizard
 user_invocable: true
-description: "[filid:config] View and modify .filid/config.json interactively using show, set, and reset subcommands with dot-notation paths for language, rule enablement, and severity settings."
-argument-hint: "[show | set KEY VALUE | reset [--full]]"
-version: "1.0.0"
+description: '[filid:config-wizard] View and modify .filid/config.json interactively using show, set, and reset subcommands with dot-notation paths for language, rule enablement, and severity settings.'
+argument-hint: '[show | set KEY VALUE | reset [--full]]'
+version: '1.0.0'
 complexity: simple
 plugin: filid
 ---
 
-# config — Project Configuration Manager
+# config-wizard — Project Configuration Manager
 
 View and modify `.filid/config.json` settings interactively. Manages language
 preferences, rule overrides, and project-level FCA-AI configuration.
@@ -27,11 +27,11 @@ preferences, rule overrides, and project-level FCA-AI configuration.
 
 ## When to Use This Skill
 
-- Setting the output language for documents: `/filid:config set language ko`
-- Checking current configuration: `/filid:config` or `/filid:config show`
-- Disabling a rule: `/filid:config set rules.naming-convention.enabled false`
-- Changing rule severity: `/filid:config set rules.max-depth.severity warning`
-- Resetting to defaults: `/filid:config reset`
+- Setting the output language for documents: `/filid:config-wizard set language ko`
+- Checking current configuration: `/filid:config-wizard` or `/filid:config-wizard show`
+- Disabling a rule: `/filid:config-wizard set rules.naming-convention.enabled false`
+- Changing rule severity: `/filid:config-wizard set rules.max-depth.severity warning`
+- Resetting to defaults: `/filid:config-wizard reset`
 
 ## Subcommands
 
@@ -45,12 +45,13 @@ If no config file exists, report that and suggest running `/filid:setup`.
 Set a config value using dot-notation for nested paths.
 
 ```
-/filid:config set language ko
-/filid:config set rules.naming-convention.enabled false
-/filid:config set rules.max-depth.severity warning
+/filid:config-wizard set language ko
+/filid:config-wizard set rules.naming-convention.enabled false
+/filid:config-wizard set rules.max-depth.severity warning
 ```
 
 Value type coercion:
+
 - `true` / `false` → boolean
 - Numeric strings → number
 - Everything else → string
@@ -61,8 +62,8 @@ Reset the config to defaults. Preserves the `language` field if currently set
 (unless `--full` is specified).
 
 ```
-/filid:config reset          # reset rules, keep language
-/filid:config reset --full   # reset everything
+/filid:config-wizard reset          # reset rules, keep language
+/filid:config-wizard reset --full   # reset everything
 ```
 
 ## Core Workflow
@@ -87,12 +88,14 @@ Parse the user's input to determine the subcommand and arguments.
 ### Step 3 — Execute Subcommand
 
 **For `show`**:
+
 1. Read `.filid/config.json` with the Read tool.
 2. Format and display as a structured table (see reference.md for format).
 3. Highlight the `language` field with its resolved value
    (config value or "en" default).
 
 **For `set`**:
+
 1. Read `.filid/config.json` with the Read tool.
 2. Resolve the dot-notation path to locate the target field.
    See reference.md for the path resolution algorithm.
@@ -102,6 +105,7 @@ Parse the user's input to determine the subcommand and arguments.
 6. Report the change: `Set <key> = <value>`.
 
 **For `reset`**:
+
 1. Read the current `.filid/config.json`. If `--full` is absent, capture the
    existing `language` field (may be undefined).
 2. Delete the current config via Bash: `rm <git_root>/.filid/config.json`.
@@ -119,6 +123,7 @@ Parse the user's input to determine the subcommand and arguments.
 ### Step 4 — Validation
 
 After any mutation (`set` or `reset`):
+
 1. Read the written file back.
 2. Verify it is valid JSON.
 3. Verify the `version` field exists.
@@ -128,26 +133,26 @@ After any mutation (`set` or `reset`):
 ## Usage
 
 ```
-/filid:config [show]
-/filid:config set <key> <value>
-/filid:config reset [--full]
+/filid:config-wizard [show]
+/filid:config-wizard set <key> <value>
+/filid:config-wizard reset [--full]
 ```
 
 ## Examples
 
 ```
 # Check current settings
-/filid:config
+/filid:config-wizard
 
 # Set output language to Korean
-/filid:config set language ko
+/filid:config-wizard set language ko
 
 # Disable naming convention rule
-/filid:config set rules.naming-convention.enabled false
+/filid:config-wizard set rules.naming-convention.enabled false
 
 # Reset rules but keep language
-/filid:config reset
+/filid:config-wizard reset
 
 # Full reset including language
-/filid:config reset --full
+/filid:config-wizard reset --full
 ```

@@ -6,12 +6,12 @@
 
 ## Structure (grouped by role)
 
-| 그룹 | 스킬 |
-|------|------|
-| 파이프라인/리뷰 | `pipeline`, `review`, `resolve`, `revalidate`, `structure-review` |
-| 문서/동기화 | `update`, `enrich-docs`, `pull-request`, `sync`, `restructure`, `migrate` |
-| 스캔/설정 | `setup`, `scan`, `guide`, `context-query`, `config` |
-| 테스트/폴백 | `promote`, `ast-fallback` |
+| 그룹            | 스킬                                                                      |
+| --------------- | ------------------------------------------------------------------------- |
+| 파이프라인/리뷰 | `pipeline`, `review`, `resolve`, `revalidate`, `structure-review`         |
+| 문서/동기화     | `update`, `enrich-docs`, `pull-request`, `sync`, `restructure`, `migrate` |
+| 스캔/설정       | `setup`, `scan`, `guide`, `context-query`, `config-wizard`                |
+| 테스트/폴백     | `promote`, `ast-fallback`                                                 |
 
 ## Conventions
 

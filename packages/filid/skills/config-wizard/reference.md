@@ -1,4 +1,4 @@
-# config — Reference
+# config-wizard — Reference
 
 Detailed specifications for config path resolution, output formatting,
 and validation logic.
@@ -12,6 +12,7 @@ bundled `bridge/mcp-server.cjs`), so this skill MUST NOT attempt to Read
 it at runtime — any such Read resolves against CWD and fails.
 
 Discover field names the safe way:
+
 1. `Read .filid/config.json` to see what the current project already stores.
 2. If you need the default shape (e.g., for `reset`), rely on
    `mcp_t_project_init` — the handler writes `createDefaultConfig()` output
@@ -42,21 +43,21 @@ Input: path = "rules.naming-convention.enabled", value = "false"
 
 ### Type Coercion Rules
 
-| Input string | Coerced type | Coerced value |
-|---|---|---|
-| `"true"` | boolean | `true` |
-| `"false"` | boolean | `false` |
-| `"123"` or `"3.14"` | number | `123` or `3.14` |
-| `"null"` | null | `null` (removes the key) |
-| anything else | string | as-is |
+| Input string        | Coerced type | Coerced value            |
+| ------------------- | ------------ | ------------------------ |
+| `"true"`            | boolean      | `true`                   |
+| `"false"`           | boolean      | `false`                  |
+| `"123"` or `"3.14"` | number       | `123` or `3.14`          |
+| `"null"`            | null         | `null` (removes the key) |
+| anything else       | string       | as-is                    |
 
 ### Examples
 
-| Command | Path segments | Target | Result |
-|---|---|---|---|
-| `set language ko` | `["language"]` | root.language | `"ko"` |
-| `set rules.naming-convention.enabled false` | `["rules","naming-convention","enabled"]` | root.rules["naming-convention"].enabled | `false` |
-| `set rules.max-depth.severity warning` | `["rules","max-depth","severity"]` | root.rules["max-depth"].severity | `"warning"` |
+| Command                                     | Path segments                             | Target                                  | Result      |
+| ------------------------------------------- | ----------------------------------------- | --------------------------------------- | ----------- |
+| `set language ko`                           | `["language"]`                            | root.language                           | `"ko"`      |
+| `set rules.naming-convention.enabled false` | `["rules","naming-convention","enabled"]` | root.rules["naming-convention"].enabled | `false`     |
+| `set rules.max-depth.severity warning`      | `["rules","max-depth","severity"]`        | root.rules["max-depth"].severity        | `"warning"` |
 
 ## Output Format — `show` Subcommand
 
@@ -65,26 +66,27 @@ Display config as a structured markdown table:
 ```markdown
 ## .filid/config.json
 
-| Key | Value |
-|-----|-------|
-| version | 1.0 |
-| language | ko |
+| Key      | Value |
+| -------- | ----- |
+| version  | 1.0   |
+| language | ko    |
 
 ### Rules
 
-| Rule | Enabled | Severity |
-|------|---------|----------|
-| naming-convention | ✓ | warning |
-| organ-no-intentmd | ✓ | error |
-| index-barrel-pattern | ✓ | warning |
-| module-entry-point | ✓ | warning |
-| max-depth | ✓ | error |
-| circular-dependency | ✓ | error |
-| pure-function-isolation | ✓ | error |
-| zero-peer-file | ✓ | warning |
+| Rule                    | Enabled | Severity |
+| ----------------------- | ------- | -------- |
+| naming-convention       | ✓       | warning  |
+| organ-no-intentmd       | ✓       | error    |
+| index-barrel-pattern    | ✓       | warning  |
+| module-entry-point      | ✓       | warning  |
+| max-depth               | ✓       | error    |
+| circular-dependency     | ✓       | error    |
+| pure-function-isolation | ✓       | error    |
+| zero-peer-file          | ✓       | warning  |
 ```
 
 Notes:
+
 - `✓` for enabled, `✗` for disabled
 - If `language` is not set, show `(default: en)` as the value
 - Any additional top-level fields should be shown in the first table
@@ -92,12 +94,12 @@ Notes:
   first table only when set in `.filid/config.json`. Example:
 
 ```markdown
-| Key | Value |
-|-----|-------|
-| version | 1.0 |
-| language | ko |
-| additional-entry-points | ["server.ts", "worker.ts"] |
-| additional-route-patterns | ["[locale]", "@sidebar"] |
+| Key                       | Value                      |
+| ------------------------- | -------------------------- |
+| version                   | 1.0                        |
+| language                  | ko                         |
+| additional-entry-points   | ["server.ts", "worker.ts"] |
+| additional-route-patterns | ["[locale]", "@sidebar"]   |
 ```
 
 ## Output Format — `set` Subcommand
@@ -151,10 +153,10 @@ Report validation failures inline after the operation output.
 
 ## Error Handling
 
-| Scenario | Response |
-|---|---|
-| No `.filid/config.json` + `show` | "No config found. Run `/filid:setup` to initialize." |
-| No `.filid/config.json` + `set` | Create default config, then apply the set operation |
-| Invalid JSON in existing config | "Config file contains invalid JSON. Run `/filid:config reset` to fix." |
-| Invalid dot-path | "Invalid path: cannot traverse into non-object at `<segment>`" |
-| Unknown top-level key | Warn but allow: "Note: `<key>` is not a known FilidConfig field. Set anyway." |
+| Scenario                         | Response                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| No `.filid/config.json` + `show` | "No config found. Run `/filid:setup` to initialize."                          |
+| No `.filid/config.json` + `set`  | Create default config, then apply the set operation                           |
+| Invalid JSON in existing config  | "Config file contains invalid JSON. Run `/filid:config-wizard reset` to fix." |
+| Invalid dot-path                 | "Invalid path: cannot traverse into non-object at `<segment>`"                |
+| Unknown top-level key            | Warn but allow: "Note: `<key>` is not a known FilidConfig field. Set anyway." |
