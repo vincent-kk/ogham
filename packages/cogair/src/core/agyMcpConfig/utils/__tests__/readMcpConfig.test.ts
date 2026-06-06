@@ -92,10 +92,10 @@ describe('readMcpConfig', () => {
     await expect(readMcpConfig(configPath)).rejects.toThrow();
   });
 
-  it('rethrows non-ENOENT read errors (e.g. EACCES on unreadable file)', async () => {
-    // A path nested inside a regular file forces ENOTDIR, not ENOENT.
-    await writeFile(configPath, '{}');
-    const invalidPath = join(configPath, 'child.json');
-    await expect(readMcpConfig(invalidPath)).rejects.toThrow();
+  it('rethrows non-ENOENT read errors (e.g. EISDIR on a directory path)', async () => {
+    // Reading a directory yields EISDIR on Linux, macOS, and Windows (Node 20/22),
+    // a deterministic non-ENOENT error. Nesting under a regular file is ENOTDIR on
+    // POSIX but ENOENT on Windows, so it would be swallowed by isFileNotFound there.
+    await expect(readMcpConfig(dir)).rejects.toThrow();
   });
 });

@@ -19,7 +19,12 @@ import { resolveAntigravityModel } from './modelAlias.js';
 
 async function cleanupCwdOnTimeout(cwd: string): Promise<void> {
   try {
-    await rm(cwd, { recursive: true, force: true });
+    await rm(cwd, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+      retryDelay: 100,
+    });
   } catch (err) {
     logger.warn('antigravity cwd cleanup failed after timeout', {
       cwd,
@@ -46,9 +51,8 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       timeoutMs: args.spawnTimeoutMs,
       since,
     });
-    if (callResult.status === 'failure' && callResult.timedOut) {
+    if (callResult.status === 'failure' && callResult.timedOut)
       void cleanupCwdOnTimeout(cwd);
-    }
     return {
       status: callResult.status,
       response: callResult.response,

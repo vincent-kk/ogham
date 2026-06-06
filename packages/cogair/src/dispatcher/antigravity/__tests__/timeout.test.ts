@@ -32,8 +32,11 @@ if (args[0] === 'models') {
   process.stdout.write('Gemini 3.1 Pro\\n');
   process.exit(0);
 }
-// Never writes stdout; sleeps 2 s so spawnTimeoutMs (250 ms) triggers first.
-setTimeout(() => { process.exit(0); }, 2000);
+// Never writes stdout. Default 2 s lets spawnTimeoutMs (250 ms) fire first on
+// POSIX. On Windows osTimeout floors the timeout to 5 s, so a 2 s exit would beat
+// it; the cleanup test overrides FAKE_AGY_SLEEP_MS to outlive any platform timeout.
+const sleepMs = Number(process.env.FAKE_AGY_SLEEP_MS) || 2000;
+setTimeout(() => { process.exit(0); }, sleepMs);
 `;
 
 const SPAWN_TIMEOUT_MS = 250;
@@ -94,6 +97,14 @@ async function pathExists(p: string): Promise<boolean> {
   }
 }
 
+async function waitUntilGone(p: string, timeoutMs: number): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!(await pathExists(p))) return;
+    await sleep(100);
+  }
+}
+
 describe('antigravityDispatcher timeout — start()', () => {
   it('returns failure status when agy exceeds spawnTimeoutMs', async () => {
     const result = await antigravityDispatcher.start(baseOptions());
@@ -106,13 +117,21 @@ describe('antigravityDispatcher timeout — start()', () => {
   });
 
   it('removes the antigravity-cwd dir after timeout (cleanupCwdOnTimeout fire-and-forget)', async () => {
-    const result = await antigravityDispatcher.start(baseOptions());
-    expect(result.status).toBe('failure');
-    // cleanupCwdOnTimeout is void (fire-and-forget); wait for the rm to settle.
-    await sleep(300);
-    const exists = await pathExists(result.externalSessionRef);
-    expect(exists).toBe(false);
-  });
+    // Windows osTimeout floors spawnTimeoutMs (250 ms) to 5 s, so a 2 s self-exit
+    // would beat the timeout and skip cleanup. 60 s guarantees the process is
+    // always killed by the timeout on every platform, so timedOut === true.
+    process.env.FAKE_AGY_SLEEP_MS = '60000';
+    try {
+      const result = await antigravityDispatcher.start(baseOptions());
+      expect(result.status).toBe('failure');
+      // cleanupCwdOnTimeout is void (fire-and-forget); poll until the rm settles.
+      await waitUntilGone(result.externalSessionRef, 3000);
+      const exists = await pathExists(result.externalSessionRef);
+      expect(exists).toBe(false);
+    } finally {
+      delete process.env.FAKE_AGY_SLEEP_MS;
+    }
+  }, 20_000);
 
   it('propagates ignoredOptions (empty for antigravity supportedOptions = {})', async () => {
     const result = await antigravityDispatcher.start(baseOptions());
