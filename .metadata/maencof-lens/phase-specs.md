@@ -7,6 +7,7 @@ Each phase is detailed enough for a developer to implement without ambiguity.
 ## Phase 1: Package Scaffolding + Config System
 
 ### Objective
+
 Create the `packages/maencof-lens` package structure and the config loader that reads `.maencof-lens/config.json` from the development context.
 
 ### Deliverables
@@ -14,6 +15,7 @@ Create the `packages/maencof-lens` package structure and the config loader that 
 #### 1.1 Package Infrastructure
 
 **`package.json`**:
+
 ```jsonc
 {
   "name": "@ogham/maencof-lens",
@@ -21,21 +23,29 @@ Create the `packages/maencof-lens` package structure and the config loader that 
   "description": "Read-only vault knowledge access plugin for Claude Code",
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "bridge", "libs", "hooks", "skills", ".claude-plugin", ".mcp.json"],
+  "files": [
+    "dist",
+    "bridge",
+    "libs",
+    "hooks",
+    "skills",
+    ".claude-plugin",
+    ".mcp.json",
+  ],
   "dependencies": {
     "@ogham/maencof": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.26.0",
-    "zod": "^4.0.0"
+    "zod": "^4.0.0",
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "esbuild": "^0.24.0",
     "typescript": "^5.7.2",
-    "@vitest/coverage-v8": "^3.2.4"
+    "@vitest/coverage-v8": "^3.2.4",
   },
   "scripts": {
     "clean": "rm -rf bridge",
@@ -44,9 +54,9 @@ Create the `packages/maencof-lens` package structure and the config loader that 
     "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
   },
-  "engines": { "node": ">=20.0.0" }
+  "engines": { "node": ">=20.0.0" },
 }
 ```
 
@@ -57,7 +67,7 @@ Create the `packages/maencof-lens` package structure and the config loader that 
 #### 1.2 Config Schema (`src/config/config-schema.ts`)
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const VaultConfigSchema = z.object({
   name: z.string().min(1),
@@ -67,7 +77,7 @@ export const VaultConfigSchema = z.object({
 });
 
 export const LensConfigSchema = z.object({
-  version: z.string().default('1.0'),
+  version: z.string().default("1.0"),
   vaults: z.array(VaultConfigSchema).min(1),
 });
 
@@ -81,10 +91,14 @@ export type LensConfig = z.infer<typeof LensConfigSchema>;
 ```typescript
 export function loadConfig(projectRoot: string): LensConfig | null;
 export function writeConfig(projectRoot: string, config: LensConfig): void;
-export function createDefaultConfig(vaultPath: string, vaultName: string): LensConfig;
+export function createDefaultConfig(
+  vaultPath: string,
+  vaultName: string,
+): LensConfig;
 ```
 
 **Behavior**:
+
 - Config path: `<projectRoot>/.maencof-lens/config.json`
 - Returns `null` if file not found or invalid JSON
 - Validates with `LensConfigSchema.safeParse()` — returns `null` on validation failure
@@ -95,11 +109,12 @@ export function createDefaultConfig(vaultPath: string, vaultName: string): LensC
 
 ```typescript
 export const DEFAULT_LAYERS = [2, 3, 4, 5] as const;
-export const CONFIG_DIR = '.maencof-lens';
-export const CONFIG_FILE = 'config.json';
+export const CONFIG_DIR = ".maencof-lens";
+export const CONFIG_FILE = "config.json";
 ```
 
 ### Acceptance Criteria
+
 - [ ] `yarn typecheck` passes
 - [ ] `loadConfig` returns valid `LensConfig` from a well-formed JSON file
 - [ ] `loadConfig` returns `null` for missing/invalid config
@@ -112,6 +127,7 @@ export const CONFIG_FILE = 'config.json';
 ## Phase 2: MCP Server + Vault Router + Graph Cache
 
 ### Objective
+
 Build the MCP server skeleton, multi-vault routing logic, and per-vault graph cache manager.
 
 ### Deliverables
@@ -128,6 +144,7 @@ export class VaultRouter {
 ```
 
 **Behavior**:
+
 - `resolve(name)` — finds vault by name; throws descriptive error if not found
 - `resolve(undefined)` — returns default vault
 - Default vault: first vault with `default: true`, or first in array if none marked
@@ -145,6 +162,7 @@ export class GraphCache {
 ```
 
 **Behavior**:
+
 - Stores `Map<string, KnowledgeGraph>` in memory
 - `getGraph`: cache miss → `new MetadataStore(vaultPath).loadGraph()` → cache + return
 - No TTL; cache lives for server process lifetime (= Claude Code session)
@@ -155,15 +173,16 @@ export class GraphCache {
 ```typescript
 export interface StaleInfo {
   isStale: boolean;
-  indexMtime: number | null;   // null if index doesn't exist
+  indexMtime: number | null; // null if index doesn't exist
   newestFileMtime: number;
-  staleSince?: string;         // human-readable duration
+  staleSince?: string; // human-readable duration
 }
 
 export function detectStale(vaultPath: string): Promise<StaleInfo>;
 ```
 
 **Behavior**:
+
 - Compare `.maencof/index.json` mtime against vault markdown files' max mtime
 - Uses `MetadataStore.loadStaleNodes()` directly (method exists on MetadataStore)
 - Returns structured info; caller decides how to present warnings
@@ -175,6 +194,7 @@ export function createServer(config: LensConfig): McpServer;
 ```
 
 **Behavior**:
+
 - Creates `McpServer({ name: 'maencof-lens', version: VERSION })`
 - Instantiates `VaultRouter` and `GraphCache` from config
 - Registers 5 read-only tools (Phase 3 implementations)
@@ -194,6 +214,7 @@ export function createServer(config: LensConfig): McpServer;
 ```
 
 **Behavior**:
+
 - Reads config from `process.cwd()` (or env override)
 - If no config found, server starts but all tools return helpful error messages
 - Connects to `StdioServerTransport`
@@ -204,6 +225,7 @@ export function createServer(config: LensConfig): McpServer;
 - Add `lensError(message)` helper for lens-specific errors
 
 ### Acceptance Criteria
+
 - [ ] `VaultRouter` resolves by name and returns default when name omitted
 - [ ] `VaultRouter` throws descriptive error for unknown vault name
 - [ ] `GraphCache` lazy-loads graph on first access per vault
@@ -218,6 +240,7 @@ export function createServer(config: LensConfig): McpServer;
 ## Phase 3: Tool Wrappers with Layer Filtering
 
 ### Objective
+
 Implement 5 read-only tool wrappers that delegate to maencof handlers with layer filtering applied.
 
 ### Deliverables
@@ -237,6 +260,7 @@ export function filterResultsByLayer<T extends { layer?: number }>(
 ```
 
 **Behavior**:
+
 - `computeEffectiveLayers`: intersection of vault config layers and tool param
 - If intersection is empty, fall back to vault layers (ignore invalid tool filter)
 - `filterResultsByLayer`: generic post-filter for result arrays
@@ -244,6 +268,7 @@ export function filterResultsByLayer<T extends { layer?: number }>(
 #### 3.2 `search` (`src/tools/lens-search.ts`)
 
 **MCP Tool Definition**:
+
 ```
 name: search
 description: Search vault knowledge via Spreading Activation from seed keywords.
@@ -259,6 +284,7 @@ inputSchema:
 ```
 
 **Implementation**:
+
 1. Resolve vault → get graph
 2. `effectiveLayers = computeEffectiveLayers(vault.layers, args.layer_filter)`
 3. Call `handleKgSearch(graph, { ...args, layer_filter: effectiveLayers })`
@@ -268,6 +294,7 @@ inputSchema:
 #### 3.3 `context` (`src/tools/lens-context.ts`)
 
 **MCP Tool Definition**:
+
 ```
 name: context
 description: Assemble a token-budgeted context block from vault documents matching a query.
@@ -280,6 +307,7 @@ inputSchema:
 ```
 
 **Implementation**:
+
 1. Resolve vault → get graph
 2. Compute effective layers
 3. Call `handleKgContext(graph, { ...args }, vaultPath)`
@@ -294,6 +322,7 @@ drops proportionally to excluded-layer content ratio.
 #### 3.4 `navigate` (`src/tools/lens-navigate.ts`)
 
 **MCP Tool Definition**:
+
 ```
 name: navigate
 description: Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.
@@ -306,6 +335,7 @@ inputSchema:
 ```
 
 **Implementation**:
+
 1. Resolve vault → get graph
 2. Compute effective layers
 3. Check target node's layer against effective layers (if excluded → error)
@@ -316,6 +346,7 @@ inputSchema:
 #### 3.5 `read` (`src/tools/lens-read.ts`)
 
 **MCP Tool Definition**:
+
 ```
 name: read
 description: Read a single vault document with optional related context.
@@ -327,6 +358,7 @@ inputSchema:
 ```
 
 **Implementation**:
+
 1. Resolve vault → vaultPath
 2. Compute effective layers
 3. Call `handleMaencofRead(vaultPath, args)` — note: handler takes `(vaultPath, input)`, NOT graph
@@ -337,6 +369,7 @@ inputSchema:
 #### 3.6 `status` (`src/tools/lens-status.ts`)
 
 **MCP Tool Definition**:
+
 ```
 name: status
 description: Check vault index status including node count, staleness, and health.
@@ -345,6 +378,7 @@ inputSchema:
 ```
 
 **Implementation**:
+
 1. Resolve vault → get graph
 2. Call `handleKgStatus(vaultPath, graph, {})`
 3. Add stale warning from `detectStale(vaultPath)` if applicable
@@ -352,6 +386,7 @@ inputSchema:
 5. Return enriched result
 
 ### Acceptance Criteria
+
 - [ ] All 5 tools return valid MCP responses
 - [ ] Layer filtering correctly intersects vault config and tool parameter
 - [ ] L1 documents are hidden by default (default layers = [2,3,4,5])
@@ -369,6 +404,7 @@ inputSchema:
 ## Phase 4: Hooks (SessionStart + Prompt Injection)
 
 ### Objective
+
 Implement the SessionStart hook that detects lens config and injects a system prompt.
 
 ### Deliverables
@@ -381,10 +417,13 @@ export interface LensSessionStartResult {
   message?: string;
 }
 
-export function runSessionStart(input: { cwd?: string }): LensSessionStartResult;
+export function runSessionStart(input: {
+  cwd?: string;
+}): LensSessionStartResult;
 ```
 
 **Behavior**:
+
 1. `cwd = input.cwd ?? process.cwd()`
 2. Check `.maencof-lens/config.json` exists in cwd
    - Not found → `{ continue: true }` (silent exit, not a lens project)
@@ -399,6 +438,7 @@ export function runSessionStart(input: { cwd?: string }): LensSessionStartResult
 Vault knowledge is available for reference during development.
 
 ## Available Tools
+
 - search: Keyword-based knowledge search (Spreading Activation)
 - context: Token-budgeted context assembly
 - navigate: Graph neighbor exploration
@@ -406,10 +446,12 @@ Vault knowledge is available for reference during development.
 - status: Vault health check
 
 ## Registered Vaults
+
 - {name} ({path}) [default] — {status}
 - {name} ({path}) — {status}
 
 ## Usage Guidelines
+
 - Use when you need design references, architecture docs, or technical knowledge
 - Vault data is read-only — modifications require a maencof session
 - Default layer filter: L2-L5 (L1 Core Identity is private)
@@ -421,13 +463,15 @@ Vault knowledge is available for reference during development.
 
 ```typescript
 // Thin entry for esbuild bundling
-import { runSessionStart } from '../session-start.js';
+import { runSessionStart } from "../session-start.js";
 const result = runSessionStart({ cwd: process.cwd() });
 if (result.message) {
-  process.stdout.write(JSON.stringify({
-    type: 'system-prompt-injection',
-    content: result.message,
-  }));
+  process.stdout.write(
+    JSON.stringify({
+      type: "system-prompt-injection",
+      content: result.message,
+    }),
+  );
 }
 ```
 
@@ -455,6 +499,7 @@ Pattern follows maencof's hook entries: minimal wrapper that calls the implement
 ```
 
 ### Acceptance Criteria
+
 - [ ] Hook runs silently when no `.maencof-lens/config.json` exists
 - [ ] Hook injects prompt with vault list when config is valid
 - [ ] Stale vaults show warning in the injected prompt
@@ -467,6 +512,7 @@ Pattern follows maencof's hook entries: minimal wrapper that calls the implement
 ## Phase 5: Skills
 
 ### Objective
+
 Create the `setup-lens` skill for managing `.maencof-lens/config.json` interactively.
 
 ### Deliverables
@@ -478,6 +524,7 @@ Create the `setup-lens` skill for managing `.maencof-lens/config.json` interacti
 **User-invocable**: true
 
 **Subcommands**:
+
 - `init` — Interactive setup: ask for vault path + name, create config
 - `add <name> <path>` — Add a vault to existing config
 - `remove <name>` — Remove a vault from config
@@ -486,12 +533,14 @@ Create the `setup-lens` skill for managing `.maencof-lens/config.json` interacti
 - `set-layers <name> <layers>` — Update layer filter for a vault
 
 **Workflow** (follows config pattern):
+
 1. Resolve config path: `<cwd>/.maencof-lens/config.json`
 2. For `init`: check if config exists → if yes, show current + ask to overwrite
 3. For mutations: load → validate → mutate → write → read-back verify
 4. Display result table with vault names, paths, layers, default status
 
 ### Acceptance Criteria
+
 - [ ] `init` creates `.maencof-lens/config.json` with at least one vault
 - [ ] `add` appends vault to existing config
 - [ ] `remove` removes vault and adjusts default if needed
@@ -504,6 +553,7 @@ Create the `setup-lens` skill for managing `.maencof-lens/config.json` interacti
 ## Phase 6: Build System + Plugin Manifest
 
 ### Objective
+
 Set up the build pipeline and plugin manifest files for Claude Code plugin distribution.
 
 ### Deliverables
@@ -511,6 +561,7 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 #### 6.1 Build Scripts
 
 **`scripts/build-mcp-server.mjs`**:
+
 - Entry: `src/mcp/server-entry.ts`
 - Output: `bridge/mcp-server.cjs`
 - Format: CJS, bundled, minified, node20 target
@@ -518,12 +569,14 @@ Set up the build pipeline and plugin manifest files for Claude Code plugin distr
 - Pattern: copy from maencof's build script
 
 **`scripts/build-hooks.mjs`**:
+
 - Entry: `src/hooks/entries/session-start.entry.ts`
 - Output: `bridge/session-start.mjs`
 - Format: ESM, bundled, node20 target
 - Pattern: copy from maencof's build script
 
 **`scripts/inject-version.mjs`**:
+
 - Reads version from `package.json`
 - Writes to `src/version.ts`: `export const VERSION = '0.0.1';`
 - Also updates `.claude-plugin/plugin.json` version field
@@ -568,11 +621,14 @@ Copy from `packages/maencof/libs/find-node.sh`. This is a shared utility that fi
 #### 6.5 FCA Documentation
 
 **`INTENT.md`** (max 50 lines):
+
 ```markdown
 ## Purpose
+
 Read-only Claude Code plugin providing access to maencof vault knowledge from development contexts.
 
 ## Structure
+
 - `src/config/` — Config loader for .maencof-lens/config.json
 - `src/vault/` — Multi-vault routing and graph caching
 - `src/filter/` — Layer filtering logic
@@ -581,6 +637,7 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 - `src/hooks/` — SessionStart prompt injection
 
 ## Conventions
+
 - All vault access is read-only; never write to vault filesystem
 - Import handlers from @ogham/maencof; never duplicate logic
 - Layer filtering: vault config ceiling intersected with per-call filter
@@ -588,15 +645,18 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 ## Boundaries
 
 ### Always do
+
 - Validate vault path existence before graph loading
 - Apply layer guard on every tool call
 - Include stale index warnings in status responses
 
 ### Ask first
+
 - Adding new MCP tools beyond the 5 read-only set
 - Changing the layer filtering intersection logic
 
 ### Never do
+
 - Write to vault filesystem (documents, index, metadata)
 - Call kg_build or any mutation handler from maencof
 - Bypass layer filtering for any tool
@@ -613,6 +673,7 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 - Verify `yarn test:run` includes the new package
 
 ### Acceptance Criteria
+
 - [ ] `yarn build` produces `bridge/mcp-server.cjs` and `bridge/session-start.mjs`
 - [ ] `yarn typecheck` passes
 - [ ] Plugin is loadable by Claude Code (plugin.json valid, .mcp.json valid, hooks.json valid)
@@ -625,7 +686,8 @@ Read-only Claude Code plugin providing access to maencof vault knowledge from de
 ## Phase 7: Skills + Agent + Prompt Injection 변경
 
 ### Objective
-2개 신규 스킬(`lookup`, `context`), 1개 에이전트(`researcher`)를 추가하고,
+
+2개 신규 스킬(`lookup`, `brief`), 1개 에이전트(`researcher`)를 추가하고,
 SessionStart 프롬프트 주입을 도구 목록에서 스킬 사용법 안내로 변경한다.
 
 ### Deliverables
@@ -640,6 +702,7 @@ SessionStart 프롬프트 주입을 도구 목록에서 스킬 사용법 안내�
 **역할**: 키워드 검색 → 문서 읽기 → 요약. 가장 간단한 vault 지식 조회 진입점.
 
 **Workflow**:
+
 1. 사용자 입력에서 키워드 추출
 2. `search(seed: [keywords], max_results: 5)` 호출
 3. 검색 결과가 없으면 → "관련 문서를 찾지 못했습니다. 다른 키워드를 시도하세요."
@@ -648,16 +711,17 @@ SessionStart 프롬프트 주입을 도구 목록에서 스킬 사용법 안내�
 6. 추가 결과 목록을 함께 표시 (선택적 깊은 조회 안내)
 
 **Options**:
+
 ```
 /maencof-lens:lookup <keyword> [--vault <name>] [--layer <N>] [--detail]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `keyword` | required | 검색 키워드 (자연어 가능) |
-| `--vault` | default vault | 대상 vault 지정 |
-| `--layer` | vault config | Layer 필터 (vault 상한 내) |
-| `--detail` | false | 상위 3개 문서까지 전문 읽기 |
+| Option     | Default       | Description                 |
+| ---------- | ------------- | --------------------------- |
+| `keyword`  | required      | 검색 키워드 (자연어 가능)   |
+| `--vault`  | default vault | 대상 vault 지정             |
+| `--layer`  | vault config  | Layer 필터 (vault 상한 내)  |
+| `--detail` | false         | 상위 3개 문서까지 전문 읽기 |
 
 **MCP Tools Used**:
 | Tool | Purpose |
@@ -666,32 +730,37 @@ SessionStart 프롬프트 주입을 도구 목록에서 스킬 사용법 안내�
 | `read` | 문서 내용 읽기 |
 
 **Output Format**:
+
 ```markdown
 ## Lookup: "{keyword}"
 
 ### {title} (L{layer}, relevance {score}%)
+
 {1-3 paragraph summary}
 
 Path: {path}
 
 ---
+
 ### Other Results
+
 1. **{title}** — {one-line summary} (L{layer}, {score}%)
 2. ...
 
 For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 ```
 
-#### 7.2 context Skill (`skills/context/SKILL.md`)
+#### 7.2 brief Skill (`skills/brief/SKILL.md`)
 
-**Name**: `context`
-**Plugin prefix**: `/maencof-lens:context`
+**Name**: `brief`
+**Plugin prefix**: `/maencof-lens:brief`
 **User-invocable**: true
 **Complexity**: simple
 
 **역할**: 토큰 예산 기반 컨텍스트 조립. 현재 작업에 필요한 vault 지식을 한 블록으로 조립.
 
 **Workflow**:
+
 1. 사용자 입력에서 쿼리와 예산 추출
 2. `context(query, token_budget)` 호출 — 내부적으로 SA 검색 + 컨텍스트 조립 수행
 3. 조립된 컨텍스트를 구조화하여 제시
@@ -699,16 +768,17 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 > Note: `context`는 `handleKgContext`를 통해 내부적으로 SA 쿼리를 실행하므로 별도 `search` 호출 불필요.
 
 **Options**:
+
 ```
-/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N>]
+/maencof-lens:brief <query> [--budget <N>] [--vault <name>] [--layer <N>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `query` | required | 컨텍스트 조립 쿼리 |
-| `--budget` | 2000 | 토큰 예산 |
-| `--vault` | default vault | 대상 vault |
-| `--layer` | vault config | Layer 필터 |
+| Option     | Default       | Description        |
+| ---------- | ------------- | ------------------ |
+| `query`    | required      | 컨텍스트 조립 쿼리 |
+| `--budget` | 2000          | 토큰 예산          |
+| `--vault`  | default vault | 대상 vault         |
+| `--layer`  | vault config  | Layer 필터         |
 
 **MCP Tools Used**:
 | Tool | Purpose |
@@ -716,12 +786,14 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 | `context` | SA 검색 + 토큰 예산 기반 컨텍스트 조립 (내부적으로 검색 수행) |
 
 **Output Format**:
+
 ```markdown
 ## Context: "{query}" (budget: {N} tokens)
 
 {assembled context block}
 
 ---
+
 Sources: {N} documents from vault "{vault_name}"
 Token usage: ~{used}/{budget}
 ```
@@ -737,6 +809,7 @@ Token usage: ~{used}/{budget}
 스킬이 제공하는 단순 파이프라인으로는 부족한 깊은 탐색이 필요할 때 사용.
 
 **Available Tools**:
+
 - `Read`, `Glob`, `Grep` (파일시스템 접근)
 - `mcp__plugin_maencof-lens_t__search`
 - `mcp__plugin_maencof-lens_t__context`
@@ -745,6 +818,7 @@ Token usage: ~{used}/{budget}
 - `mcp__plugin_maencof-lens_t__status`
 
 **Exploration Strategy**:
+
 1. `status` — vault 상태 확인 (stale 여부)
 2. `search` — 시드 키워드로 초기 탐색
 3. `read` — 상위 결과 문서 읽기
@@ -753,21 +827,24 @@ Token usage: ~{used}/{budget}
 6. `context` — 최종 컨텍스트 조립
 
 **Trigger Phrases**:
+
 - "vault에서 조사해줘", "vault 탐색", "vault research"
 - "vault 지식 찾아줘", "관련 자료 찾아줘"
 
 #### 7.4 프롬프트 주입 변경 (`src/hooks/session-start.ts`)
 
 **변경 전** (도구 목록):
+
 ```
 Available tools: search, context, navigate, read, status
 ```
 
 **변경 후** (스킬 사용법):
+
 ```
 사용 방법:
 - /maencof-lens:lookup <키워드>: vault 지식 검색 및 조회
-- /maencof-lens:context <쿼리>: 컨텍스트 조립
+- /maencof-lens:brief <쿼리>: 컨텍스트 조립
 ```
 
 **구현**: `session-start.ts`의 prompt 생성 부분에서 도구 나열을 스킬 안내로 교체.
@@ -775,6 +852,7 @@ Available tools: search, context, navigate, read, status
 #### 7.5 plugin.json 업데이트
 
 `agents` 필드 추가:
+
 ```json
 {
   "skills": "./skills/",
@@ -786,14 +864,16 @@ Available tools: search, context, navigate, read, status
 #### 7.6 CLAUDE.md / INTENT.md 업데이트
 
 CLAUDE.md에 스킬/에이전트 목록 반영:
-- **Skills (3)**: `setup-lens`, `lookup`, `context`
+
+- **Skills (3)**: `setup-lens`, `lookup`, `brief`
 - **Agents (1)**: `researcher`
 
 INTENT.md Structure 섹션에 `skills/`, `agents/` 추가.
 
 ### Acceptance Criteria
+
 - [ ] `skills/lookup/SKILL.md` — 완전한 스킬 정의, user_invocable: true
-- [ ] `skills/context/SKILL.md` — 완전한 스킬 정의, user_invocable: true
+- [ ] `skills/brief/SKILL.md` — 완전한 스킬 정의, user_invocable: true
 - [ ] `agents/researcher.md` — 5개 MCP 도구 참조, trigger phrases 포함
 - [ ] `session-start.ts` — 프롬프트에 스킬 사용법 표시, 도구 목록 제거
 - [ ] `plugin.json` — agents 필드 추가

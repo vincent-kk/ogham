@@ -22,7 +22,7 @@ const SESSION_TEMPLATE = `[maencof-lens] Read-only vault access enabled.
 
 <capabilities>
 - /maencof-lens:lookup <keyword> — single-doc retrieval + summary
-- /maencof-lens:context <query> — token-budgeted multi-doc assembly
+- /maencof-lens:brief <query> — token-budgeted multi-doc assembly
 - "vault research" or "vault explore" — autonomous researcher agent
 </capabilities>
 

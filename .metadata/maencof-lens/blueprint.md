@@ -22,8 +22,8 @@ packages/maencof-lens/
 │   │   └── SKILL.md             # /maencof-lens:setup-lens skill
 │   ├── lookup/
 │   │   └── SKILL.md             # /maencof-lens:lookup skill
-│   └── context/
-│       └── SKILL.md             # /maencof-lens:context skill
+│   └── brief/
+│       └── SKILL.md             # /maencof-lens:brief skill
 ├── agents/
 │   └── researcher.md            # maencof-lens:researcher agent
 ├── bridge/                      # esbuild output (generated)
@@ -186,7 +186,7 @@ SessionStart hook → session-start.mjs
     └─ 4. Inject prompt
           Output system-reminder with:
             - [maencof:lens] header
-            - Available skills list (lookup, context) — NOT raw tool names
+            - Available skills list (lookup, brief) — NOT raw tool names
             - Registered vault names + status
             - Stale warnings (if any)
 ```
@@ -202,17 +202,17 @@ SessionStart hook → session-start.mjs
 {
   "vaults": [
     {
-      "name": "fionn",                          // Vault alias (identifier)
-      "path": "/Users/Vincent/Soulstream/tirnanog",  // Absolute path
-      "layers": [2, 3, 4, 5],                   // Layer ceiling (default: [2,3,4,5])
-      "default": true                            // Default vault flag
+      "name": "fionn", // Vault alias (identifier)
+      "path": "/Users/Vincent/Soulstream/tirnanog", // Absolute path
+      "layers": [2, 3, 4, 5], // Layer ceiling (default: [2,3,4,5])
+      "default": true, // Default vault flag
     },
     {
       "name": "work",
       "path": "/Users/Vincent/Soulstream/work-vault",
-      "layers": [3, 4]
-    }
-  ]
+      "layers": [3, 4],
+    },
+  ],
 }
 ```
 
@@ -267,17 +267,18 @@ Result: intersection             effective: [3]
 
 ### 6.2 Application points
 
-| Tool | Pre-filter (input mutation) | Post-filter (result filter) |
-|------|---------------------------|----------------------------|
-| `search` | Set `input.layer_filter = effectiveLayers` | None (handler respects layerFilter) |
-| `context` | None (handler lacks layerFilter param) | Filter assembled items by layer ⚠️ |
-| `navigate` | None | Filter inbound/outbound/children by layer |
-| `read` | None (handler takes vaultPath, not graph) | Check result node.layer ∈ effectiveLayers |
-| `status` | None | None (status is metadata, not content) |
+| Tool       | Pre-filter (input mutation)                | Post-filter (result filter)               |
+| ---------- | ------------------------------------------ | ----------------------------------------- |
+| `search`   | Set `input.layer_filter = effectiveLayers` | None (handler respects layerFilter)       |
+| `context`  | None (handler lacks layerFilter param)     | Filter assembled items by layer ⚠️        |
+| `navigate` | None                                       | Filter inbound/outbound/children by layer |
+| `read`     | None (handler takes vaultPath, not graph)  | Check result node.layer ∈ effectiveLayers |
+| `status`   | None                                       | None (status is metadata, not content)    |
 
 ### 6.3 Edge case: Empty intersection
 
 When `intersection(vault.layers, tool.layer_filter) = []`:
+
 - Behavior: Fall back to vault.layers (ignore invalid tool parameter)
 - Rationale: Better to return vault-allowed results than nothing
 - Log warning so users notice their filter was ignored
@@ -301,15 +302,16 @@ modification needed and is tracked as a prerequisite enhancement.
 
 MCP 도구는 직접 사용자 호출 대신 **스킬/에이전트를 경유**하여 사용된다.
 
-| Tool | Access Level | Consumers |
-|------|-------------|-----------|
-| `search` | Skill/Agent mediated | `lookup` skill, `context` skill, `researcher` agent |
-| `context` | Skill/Agent mediated | `context` skill, `researcher` agent |
-| `navigate` | Agent only | `researcher` agent |
-| `read` | Skill/Agent mediated | `lookup` skill, `researcher` agent |
-| `status` | Agent/Hook only | `researcher` agent, SessionStart hook |
+| Tool       | Access Level         | Consumers                                         |
+| ---------- | -------------------- | ------------------------------------------------- |
+| `search`   | Skill/Agent mediated | `lookup` skill, `brief` skill, `researcher` agent |
+| `context`  | Skill/Agent mediated | `brief` skill, `researcher` agent                 |
+| `navigate` | Agent only           | `researcher` agent                                |
+| `read`     | Skill/Agent mediated | `lookup` skill, `researcher` agent                |
+| `status`   | Agent/Hook only      | `researcher` agent, SessionStart hook             |
 
 **Rationale**: 사용자가 MCP 도구를 직접 호출하는 대신 스킬을 통해 접근하면:
+
 1. 더 자연스러운 인터페이스 (키워드 → 자동 검색 → 요약)
 2. 도구 조합 로직을 스킬이 캡슐화 (search → read → summarize)
 3. researcher 에이전트가 자율적으로 5개 도구를 조합하여 깊은 탐색 수행
@@ -335,12 +337,12 @@ User: /maencof-lens:lookup <keyword>
         LLM summarizes content in context of the query
 ```
 
-### 8.2 context Skill (`/maencof-lens:context`)
+### 8.2 brief Skill (`/maencof-lens:brief`)
 
 토큰 예산 기반 컨텍스트 조립. 현재 작업에 필요한 vault 지식을 한 번에 조립.
 
 ```
-User: /maencof-lens:context <query> [--budget N]
+User: /maencof-lens:brief <query> [--budget N]
   │
   ├─ 1. search(seed: [query keywords])
   │     Identify relevant documents
@@ -372,32 +374,34 @@ Multi-round exploration: search → read → navigate neighbors → read more �
 
 ## 9. Key Design Decisions
 
-| # | Decision | Rationale |
-|---|----------|-----------|
-| D1 | Workspace dependency on `@ogham/maencof` | Monorepo sibling; zero code duplication |
-| D2 | Import handlers directly (no adapter layer) | Handlers are pure functions; adapter adds unnecessary indirection |
-| D3 | Per-vault graph cache in server memory | Each vault is independent; session-scoped lifetime |
-| D4 | No auto-rebuild on stale index | Read-only principle; rebuild is maencof's responsibility |
-| D5 | Layer filtering as intersection | Vault config is security ceiling; tool param is convenience filter |
-| D6 | SessionStart hook for prompt injection | Matches maencof's pattern; lightweight detection |
-| D7 | Skills as primary user interface | Tools are internal; skills provide natural-language entry points |
-| D8 | `.maencof-lens/` config dir in dev context | Separate from vault; project-specific lens settings |
-| D9 | `context` post-filter only (v1) | handleKgContext lacks layerFilter; accept token waste; fix in v1.1 |
-| D10 | Graph cache stale-on-hit check | Compare index.json mtime vs loadedAt; reload (not rebuild) if stale |
-| D11 | researcher agent for deep exploration | Autonomous multi-tool orchestration beyond what single skills provide |
-| D12 | `navigate` agent-only access | Navigation requires graph traversal judgment; not suitable for simple skill pipeline |
+| #   | Decision                                    | Rationale                                                                            |
+| --- | ------------------------------------------- | ------------------------------------------------------------------------------------ |
+| D1  | Workspace dependency on `@ogham/maencof`    | Monorepo sibling; zero code duplication                                              |
+| D2  | Import handlers directly (no adapter layer) | Handlers are pure functions; adapter adds unnecessary indirection                    |
+| D3  | Per-vault graph cache in server memory      | Each vault is independent; session-scoped lifetime                                   |
+| D4  | No auto-rebuild on stale index              | Read-only principle; rebuild is maencof's responsibility                             |
+| D5  | Layer filtering as intersection             | Vault config is security ceiling; tool param is convenience filter                   |
+| D6  | SessionStart hook for prompt injection      | Matches maencof's pattern; lightweight detection                                     |
+| D7  | Skills as primary user interface            | Tools are internal; skills provide natural-language entry points                     |
+| D8  | `.maencof-lens/` config dir in dev context  | Separate from vault; project-specific lens settings                                  |
+| D9  | `context` post-filter only (v1)             | handleKgContext lacks layerFilter; accept token waste; fix in v1.1                   |
+| D10 | Graph cache stale-on-hit check              | Compare index.json mtime vs loadedAt; reload (not rebuild) if stale                  |
+| D11 | researcher agent for deep exploration       | Autonomous multi-tool orchestration beyond what single skills provide                |
+| D12 | `navigate` agent-only access                | Navigation requires graph traversal judgment; not suitable for simple skill pipeline |
 
 ---
 
 ## 10. RALPLAN-DR Summary
 
 ### Principles
+
 1. **Read-Only Safety** — lens never writes to vault filesystem
 2. **Zero Code Duplication** — import from @ogham/maencof, never copy
 3. **Minimal Footprint** — only lens-specific code (config, routing, layer guard, server)
 4. **Convention Following** — follow filid/maencof plugin patterns for config, hooks, skills, build
 
 ### Decision Drivers
+
 1. maencof handlers are pure functions → direct import possible
 2. Multi-vault requires its own graph cache management
 3. Layer filtering is a lens-specific concern (vault config x tool param intersection)
@@ -405,6 +409,7 @@ Multi-round exploration: search → read → navigate neighbors → read more �
 ### Viable Options
 
 **Option A: Thin wrapper approach** (CHOSEN)
+
 - Import maencof handlers directly
 - Own server.ts with multi-vault graph cache
 - Own config-loader, vault-router, layer-guard
@@ -412,12 +417,14 @@ Multi-round exploration: search → read → navigate neighbors → read more �
 - Cons: Coupled to maencof's handler signatures (acceptable in monorepo)
 
 **Option B: Adapter layer approach**
+
 - Create an adapter that abstracts maencof internals
 - Pros: Loose coupling, version-resilient
 - Cons: More code, unnecessary complexity for monorepo siblings
 - **Not chosen**: The coupling risk is minimal since both packages are in the same repo and versioned together
 
 **Option C: Fork/copy approach** — INVALIDATED
+
 - Copy maencof search/core code into lens
 - Violates the "Zero Code Duplication" principle
 - No valid reason in a monorepo with workspace dependencies

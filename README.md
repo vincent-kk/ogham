@@ -41,12 +41,12 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 **What it provides:**
 
-| Component | Count    | Examples                                                                                  |
-| --------- | -------- | ----------------------------------------------------------------------------------------- |
-| Skills    | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline` |
-| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking                           |
-| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee                           |
-| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd                     |
+| Component | Count    | Examples                                                              |
+| --------- | -------- | --------------------------------------------------------------------- |
+| Skills    | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline`     |
+| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking       |
+| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee       |
+| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd |
 
 **Key features:**
 
@@ -80,12 +80,12 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 
 **What it provides:**
 
-| Component | Count       | Examples                                                                                                      |
-| --------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize` |
-| MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture                                           |
-| Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector                               |
-| Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd                                     |
+| Component | Count       | Examples                                                                        |
+| --------- | ----------- | ------------------------------------------------------------------------------- |
+| Skills    | 26          | `/maencof:setup`, `/maencof:remember`, `/maencof:recall`, `/maencof:organize`   |
+| MCP Tools | 18          | Knowledge CRUD, graph search, spreading activation, insight capture             |
+| Agents    | 5           | Memory Organizer, Identity Guardian, Checkup, Configurator, Knowledge Connector |
+| Hooks     | multi-event | SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, Stop, SessionEnd       |
 
 **Key features:**
 
@@ -115,12 +115,12 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 **What it provides:**
 
-| Component | Count | Examples                                                                                                                                                             |
-| --------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Component | Count | Examples                                                                                                           |
+| --------- | ----- | ------------------------------------------------------------------------------------------------------------------ |
 | Skills    | 5     | `/atlassian:setup`, `/atlassian:jira`, `/atlassian:confluence`, `/atlassian:download`, `/atlassian:media-analysis` |
-| MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                                                                            |
-| Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                                                                               |
-| Hooks     | 0     | —                                                                                                                                                                    |
+| MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                          |
+| Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                             |
+| Hooks     | 0     | —                                                                                                                  |
 
 **Key features:**
 
@@ -189,12 +189,12 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 
 **What it provides:**
 
-| Component | Count | Examples                                                                                                                |
-| --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
+| Component | Count | Examples                                                                                  |
+| --------- | ----- | ----------------------------------------------------------------------------------------- |
 | Skills    | 12    | `/imbas:pipeline`, `/imbas:validate`, `/imbas:split`, `/imbas:devplan`, `/imbas:manifest` |
-| MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                                                          |
-| Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                                                       |
-| Hooks     | 3     | pre-tool-use, context-injector, session-cleanup                                                                         |
+| MCP Tools | 16    | `run_create`, `manifest_save`, `manifest_implement_plan`, etc.                            |
+| Agents    | 3     | analyst (sonnet), planner (sonnet), engineer (opus, maxTurns: 80)                         |
+| Hooks     | 3     | pre-tool-use, context-injector, session-cleanup                                           |
 
 **Key features:**
 
@@ -224,18 +224,18 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 
 **What it provides:**
 
-| Component | Count | Examples                                                                                                      |
-| --------- | ----- | ------------------------------------------------------------------------------------------------------------- |
-| Skills    | 3     | `/maencof-lens:setup`, `/maencof-lens:lookup`, `/maencof-lens:context` |
-| MCP Tools | 5     | `search`, `context`, `navigate`, `read`, `status`                                                             |
-| Agents    | 1     | researcher (autonomous multi-tool vault exploration)                                                          |
-| Hooks     | 1     | SessionStart (config detection + skill usage guide injection)                                                 |
+| Component | Count | Examples                                                             |
+| --------- | ----- | -------------------------------------------------------------------- |
+| Skills    | 3     | `/maencof-lens:setup`, `/maencof-lens:lookup`, `/maencof-lens:brief` |
+| MCP Tools | 5     | `search`, `context`, `navigate`, `read`, `status`                    |
+| Agents    | 1     | researcher (autonomous multi-tool vault exploration)                 |
+| Hooks     | 1     | SessionStart (config detection + skill usage guide injection)        |
 
 **Key features:**
 
 - **Read-only by design** — Reuses maencof handlers but blocks all mutation paths; layer-filter guard (L1 excluded by default) is enforced on every tool call
 - **Multi-vault routing** — Register multiple vaults in `.maencof-lens/config.json` and switch by name
-- **Token-budgeted context assembly** — `/maencof-lens:context` assembles relevant vault docs within a target token budget for prompt injection
+- **Token-budgeted context assembly** — `/maencof-lens:brief` assembles relevant vault docs within a target token budget for prompt injection
 - **Autonomous researcher** — The `researcher` agent performs deep multi-step vault exploration via spreading activation
 
 ```
@@ -246,7 +246,7 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 /maencof-lens:lookup
 
 # Token-budgeted multi-doc context for the current task
-/maencof-lens:context
+/maencof-lens:brief
 ```
 
 For full documentation, see the [maencof-lens package](./plugins/maencof-lens/).
@@ -255,8 +255,8 @@ For full documentation, see the [maencof-lens package](./plugins/maencof-lens/).
 
 ## All Packages
 
-| Package                                        | Type          | Description                                                       |
-| ---------------------------------------------- | ------------- | ----------------------------------------------------------------- |
+| Package                                       | Type          | Description                                                       |
+| --------------------------------------------- | ------------- | ----------------------------------------------------------------- |
 | **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management            |
 | **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph             |
 | **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents           |

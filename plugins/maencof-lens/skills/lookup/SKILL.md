@@ -11,13 +11,13 @@ plugin: maencof-lens
 # lookup — Vault Knowledge Lookup
 
 Search → Read → Summarize pipeline for single-document quick reference.
-For multi-doc context assembly, use `/maencof-lens:context` instead.
+For multi-doc context assembly, use `/maencof-lens:brief` instead.
 
 ## When to Use
 
 - Quick reference lookup for a specific topic (design docs, architecture refs, technical knowledge)
 - Single-document summary is sufficient
-- **Not** for multi-document context loading — use `/maencof-lens:context`
+- **Not** for multi-document context loading — use `/maencof-lens:brief`
 
 ## Prerequisites
 
@@ -58,12 +58,15 @@ Show remaining results as a numbered list for optional deeper exploration.
 ## Lookup: "{keyword}"
 
 ### {title} (L{layer}, relevance {score}%)
+
 {1-3 paragraph summary in context of the query}
 
 Path: {path}
 
 ---
+
 ### Other Results
+
 1. **{title}** — {one-line summary} (L{layer}, {score}%)
 2. ...
 
@@ -72,10 +75,10 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 
 ## MCP Tools
 
-| Tool | Purpose |
-|------|---------|
+| Tool           | Purpose                                    |
+| -------------- | ------------------------------------------ |
 | `mcp_t_search` | SA-based keyword search across vault graph |
-| `mcp_t_read` | Read document content by path |
+| `mcp_t_read`   | Read document content by path              |
 
 ## Options
 
@@ -83,12 +86,12 @@ For deeper exploration: `/maencof-lens:lookup {keyword} --detail`
 /maencof-lens:lookup <query> [--vault <name>] [--layer <N,N,...>] [--detail]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `query` | required | Search query (natural language) |
-| `--vault` | default vault | Target vault name |
-| `--layer` | vault config | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
-| `--detail` | false | Read top 3 results instead of 1 |
+| Option     | Default       | Description                                                                                                                         |
+| ---------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `query`    | required      | Search query (natural language)                                                                                                     |
+| `--vault`  | default vault | Target vault name                                                                                                                   |
+| `--layer`  | vault config  | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
+| `--detail` | false         | Read top 3 results instead of 1                                                                                                     |
 
 ## Usage Examples
 

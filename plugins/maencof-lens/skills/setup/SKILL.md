@@ -1,7 +1,7 @@
 ---
 name: setup
 user_invocable: true
-description: "[maencof-lens:setup] Initialize and manage .maencof-lens/config.json for read-only vault access configuration. Supports vault registration, removal, default vault switching, and layer filter management through interactive setup or direct subcommands. Run this first before using lookup or context skills."
+description: "[maencof-lens:setup] Initialize and manage .maencof-lens/config.json for read-only vault access configuration. Supports vault registration, removal, default vault switching, and layer filter management through interactive setup or direct subcommands. Run this first before using lookup or brief skills."
 argument-hint: "[init | show | add NAME PATH | set-default NAME | set-layers NAME LAYERS | remove NAME]"
 version: 1.1.0
 complexity: simple
@@ -53,6 +53,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 ### Step 2 — Execute Subcommand
 
 **`init`**:
+
 1. Ask user for vault name and absolute path
 2. Validate vault path exists and contains `.maencof/index.json`
 3. Create config with default layers `[2, 3, 4, 5]`
@@ -60,6 +61,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 5. Run `.gitignore` guard (see Step 3)
 
 **`add`**:
+
 1. Load existing config (error if missing — run `init` first)
 2. Validate vault name is unique and path exists with `.maencof/index.json`
 3. Append vault entry with default layers `[2, 3, 4, 5]`
@@ -67,12 +69,14 @@ Config location: `<cwd>/.maencof-lens/config.json`
 5. Run `.gitignore` guard (see Step 3)
 
 **`remove`**:
+
 1. Load config, find vault by name (error if not found)
 2. Remove vault entry
 3. If removed vault was default → mark first remaining as default
 4. Write back
 
 **`show`**:
+
 1. Read `.maencof-lens/config.json` (error if missing)
 2. Display formatted table: name, path, layers, default status
 
@@ -100,12 +104,14 @@ After any mutation, read the file back and verify valid JSON structure.
 ```json
 {
   "version": "1.0",
-  "vaults": [{
-    "name": "personal",
-    "path": "/abs/path/to/vault",
-    "layers": [2, 3, 4, 5],
-    "default": true
-  }]
+  "vaults": [
+    {
+      "name": "personal",
+      "path": "/abs/path/to/vault",
+      "layers": [2, 3, 4, 5],
+      "default": true
+    }
+  ]
 }
 ```
 

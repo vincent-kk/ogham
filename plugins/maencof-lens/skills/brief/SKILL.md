@@ -1,14 +1,14 @@
 ---
-name: context
+name: brief
 user_invocable: true
-description: "[maencof-lens:context] Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering."
+description: "[maencof-lens:brief] Token-budgeted multi-document context assembly from vault via Spreading Activation. Assembles relevant vault documents within a specified token budget for development context injection. Use for broad knowledge loading across multiple documents when working on tasks that require vault reference material — architecture decisions, topic research, or background context gathering."
 argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full]"
 version: 1.1.0
 complexity: simple
 plugin: maencof-lens
 ---
 
-# context — Vault Context Assembly
+# brief — Vault Context Assembly
 
 Assemble a token-budgeted context block from vault documents matching a query.
 For single-doc quick reference, use `/maencof-lens:lookup` instead.
@@ -56,6 +56,7 @@ No results → suggest different query or broader keywords.
 {assembled context block}
 
 ---
+
 Sources: {N} documents from vault "{vault_name}"
 Token usage: ~{used}/{budget}
 ```
@@ -64,32 +65,32 @@ If token budget exceeded, show truncation notice with actual vs. budget count.
 
 ## MCP Tools
 
-| Tool | Purpose |
-|------|---------|
+| Tool            | Purpose                                                                  |
+| --------------- | ------------------------------------------------------------------------ |
 | `mcp_t_context` | SA search + token-budgeted context assembly (internally performs search) |
 
 ## Options
 
 ```
-/maencof-lens:context <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full]
+/maencof-lens:brief <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `query` | required | Context assembly query (natural language) |
-| `--budget` | 2000 | Token budget for assembled output |
-| `--vault` | default vault | Target vault name |
-| `--layer` | vault config | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
-| `--full` | false | Include full document text instead of snippets |
+| Option     | Default       | Description                                                                                                                         |
+| ---------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `query`    | required      | Context assembly query (natural language)                                                                                           |
+| `--budget` | 2000          | Token budget for assembled output                                                                                                   |
+| `--vault`  | default vault | Target vault name                                                                                                                   |
+| `--layer`  | vault config  | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
+| `--full`   | false         | Include full document text instead of snippets                                                                                      |
 
 ## Usage Examples
 
 ```
-/maencof-lens:context FCA architecture patterns
-/maencof-lens:context NER model optimization --budget 4000
-/maencof-lens:context project goals --vault work
-/maencof-lens:context design decisions --layer 2 --budget 3000
-/maencof-lens:context deployment strategy --full
+/maencof-lens:brief FCA architecture patterns
+/maencof-lens:brief NER model optimization --budget 4000
+/maencof-lens:brief project goals --vault work
+/maencof-lens:brief design decisions --layer 2 --budget 3000
+/maencof-lens:brief deployment strategy --full
 ```
 
 ## Error Handling
