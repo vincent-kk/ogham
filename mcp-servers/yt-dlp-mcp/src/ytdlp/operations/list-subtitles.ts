@@ -11,9 +11,7 @@ export interface ListSubtitlesParams {
 }
 
 function toTracks(group: Record<string, unknown> | undefined, isAutomatic: boolean): SubtitleTrack[] {
-  if (!group) {
-    return [];
-  }
+  if (!group) return [];
   const tracks: SubtitleTrack[] = [];
   for (const [language, value] of Object.entries(group)) {
     const variants = asRecordArray(value);
@@ -28,9 +26,7 @@ export async function listSubtitlesOperation(
   ctx: OpContext,
   params: ListSubtitlesParams,
 ): Promise<SubtitleLanguageList> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const info = await fetchInfoJson(ctx, params.url);
   return {
     videoId: asString(info.id) ?? parseVideoId(params.url) ?? 'unknown',

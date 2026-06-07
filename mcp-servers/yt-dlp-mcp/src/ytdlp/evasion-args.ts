@@ -6,13 +6,10 @@ import type { Config } from '../config.js';
  */
 export function evasionArgs(config: Config): string[] {
   const args: string[] = [];
-  if (config.evasion.cookiesFile) {
-    args.push('--cookies', config.evasion.cookiesFile);
-  } else if (config.evasion.cookiesFromBrowser) {
+  if (config.evasion.cookiesFile) args.push('--cookies', config.evasion.cookiesFile);
+  else if (config.evasion.cookiesFromBrowser) {
     args.push('--cookies-from-browser', config.evasion.cookiesFromBrowser);
   }
-  if (config.evasion.proxy) {
-    args.push('--proxy', config.evasion.proxy);
-  }
+  if (config.evasion.proxy) args.push('--proxy', config.evasion.proxy);
   return args;
 }

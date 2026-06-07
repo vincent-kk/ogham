@@ -56,9 +56,7 @@ export function createService(deps: ServiceDeps): Service {
         signal,
       };
       const result = await limit(() => fn(ctx));
-      if (cacheable && cacheKey) {
-        cache.set(cacheKey, result);
-      }
+      if (cacheable && cacheKey) cache.set(cacheKey, result);
       return result;
     },
   };

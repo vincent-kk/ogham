@@ -67,15 +67,9 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
   }
 
   async function isFresh(meta: BinaryMeta | null): Promise<boolean> {
-    if (!(await fileExists(paths.binaryPath))) {
-      return false;
-    }
-    if (config.binary.pinnedVersion) {
-      return meta?.tag === config.binary.pinnedVersion;
-    }
-    if (!meta) {
-      return false;
-    }
+    if (!(await fileExists(paths.binaryPath))) return false;
+    if (config.binary.pinnedVersion) return meta?.tag === config.binary.pinnedVersion;
+    if (!meta) return false;
     return now() - meta.downloadedAt < config.binary.refreshDays * DAY_MS;
   }
 
@@ -86,9 +80,7 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
         await mkdir(paths.lockPath);
         return;
       } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
-          throw error;
-        }
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
       }
       try {
         const info = await stat(paths.lockPath);
@@ -113,9 +105,7 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
 
   async function verifyChecksum(filePath: string, sumsText: string): Promise<void> {
     const expected = parseSums(sumsText, assetName);
-    if (!expected) {
-      throw new YtDlpMcpError(ErrorCode.CHECKSUM_MISMATCH, `No checksum entry for ${assetName}`);
-    }
+    if (!expected) throw new YtDlpMcpError(ErrorCode.CHECKSUM_MISMATCH, `No checksum entry for ${assetName}`);
     const actual = await sha256File(filePath);
     if (actual.toLowerCase() !== expected.toLowerCase()) {
       throw new YtDlpMcpError(
@@ -133,18 +123,14 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
     // .part, so verified bytes can't be overwritten before the atomic rename.
     const partPath = `${paths.binaryPath}.${randomUUID()}.part`;
     try {
-      if (await isFresh(await readMeta())) {
-        return paths.binaryPath;
-      }
+      if (await isFresh(await readMeta())) return paths.binaryPath;
       const resolved = await versionResolver.resolveSafeVersion(signal);
       await rm(partPath, { force: true });
       logger.info({ tag: resolved.tag, asset: assetName }, 'downloading yt-dlp');
       await download(resolved.assetUrl, partPath, signal);
       const sumsText = await getText(resolved.sumsUrl, signal);
       await verifyChecksum(partPath, sumsText);
-      if (process.platform !== 'win32') {
-        await chmod(partPath, 0o755);
-      }
+      if (process.platform !== 'win32') await chmod(partPath, 0o755);
       await rename(partPath, paths.binaryPath);
       const meta: BinaryMeta = { tag: resolved.tag, downloadedAt: now() };
       await writeFile(paths.metaPath, JSON.stringify(meta), 'utf8');
@@ -160,12 +146,8 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
 
   return {
     async ensureBinary(signal): Promise<string> {
-      if (await isFresh(await readMeta())) {
-        return paths.binaryPath;
-      }
-      if (inflight) {
-        return inflight;
-      }
+      if (await isFresh(await readMeta())) return paths.binaryPath;
+      if (inflight) return inflight;
       inflight = acquireAndInstall(signal).finally(() => {
         inflight = null;
       });

@@ -24,17 +24,13 @@ const DOWNLOAD_TIMEOUT_FACTOR = 10;
 const OUTPUT_TEMPLATE = '%(title).80B [%(id)s].%(ext)s';
 
 function videoFormat(resolution: Resolution = '720p'): string {
-  if (resolution === 'best') {
-    return 'bv*+ba/b';
-  }
+  if (resolution === 'best') return 'bv*+ba/b';
   const height = resolution.replace('p', '');
   return `bv*[height<=${height}]+ba/b[height<=${height}]/b`;
 }
 
 export async function downloadOperation(ctx: OpContext, params: DownloadParams): Promise<DownloadResult> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   await mkdir(ctx.paths.downloadsDir, { recursive: true });
 
   const args = [
@@ -68,9 +64,7 @@ export async function downloadOperation(ctx: OpContext, params: DownloadParams):
   });
 
   const filepath = lastNonEmptyLine(stdout);
-  if (!filepath) {
-    throw new YtDlpMcpError(ErrorCode.DOWNLOAD_FAILED, 'yt-dlp did not report an output file');
-  }
+  if (!filepath) throw new YtDlpMcpError(ErrorCode.DOWNLOAD_FAILED, 'yt-dlp did not report an output file');
   const { size } = await stat(filepath);
   return {
     path: filepath,

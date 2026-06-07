@@ -14,9 +14,7 @@ const secToMs = (sec: number | undefined): number | undefined =>
   sec === undefined ? undefined : Math.max(0, Math.round(sec * 1000));
 
 export async function chaptersOperation(ctx: OpContext, params: ChaptersParams): Promise<ChapterList> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const info = await fetchInfoJson(ctx, params.url);
   const chapters: Chapter[] = asRecordArray(info.chapters).map((c) => ({
     title: asString(c.title) ?? 'Chapter',

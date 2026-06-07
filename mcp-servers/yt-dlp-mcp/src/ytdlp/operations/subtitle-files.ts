@@ -11,9 +11,7 @@ export function pickSubtitleFile(files: string[], lang: string): { file: string;
   const byLang = new Map(files.map((f) => [fileLang(f), f]));
   for (const candidate of [lang, `${lang}-orig`, 'en']) {
     const file = byLang.get(candidate);
-    if (file) {
-      return { file, language: candidate };
-    }
+    if (file) return { file, language: candidate };
   }
   const first = files[0];
   return { file: first, language: fileLang(first) };

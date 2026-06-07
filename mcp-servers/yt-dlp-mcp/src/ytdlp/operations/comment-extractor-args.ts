@@ -15,11 +15,7 @@ export function buildCommentExtractorArgs(options: CommentExtractorOptions): str
     options.maxReplies,
     options.maxRepliesPerThread,
   ];
-  while (counts.length > 0 && counts[counts.length - 1] === undefined) {
-    counts.pop();
-  }
-  if (counts.length > 0) {
-    parts.push(`max_comments=${counts.map((c) => c ?? 'all').join(',')}`);
-  }
+  while (counts.length > 0 && counts[counts.length - 1] === undefined) counts.pop();
+  if (counts.length > 0) parts.push(`max_comments=${counts.map((c) => c ?? 'all').join(',')}`);
   return ['--extractor-args', `youtube:${parts.join(';')}`];
 }

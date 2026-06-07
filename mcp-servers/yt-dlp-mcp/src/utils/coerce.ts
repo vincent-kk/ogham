@@ -18,9 +18,7 @@ export function asArray(value: unknown): unknown[] {
 }
 
 export function asStringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) {
-    return undefined;
-  }
+  if (!Array.isArray(value)) return undefined;
   return value.filter((x): x is string => typeof x === 'string');
 }
 

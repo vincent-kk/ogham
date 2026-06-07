@@ -11,9 +11,7 @@ export interface HeatmapParams {
 }
 
 export async function heatmapOperation(ctx: OpContext, params: HeatmapParams): Promise<Heatmap> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const info = await fetchInfoJson(ctx, params.url);
   const spans: HeatmapSpan[] = asRecordArray(info.heatmap).map((h) => ({
     startMs: Math.max(0, Math.round((asNumber(h.start_time) ?? 0) * 1000)),

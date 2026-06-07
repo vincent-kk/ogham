@@ -23,9 +23,7 @@ Use when: you need structured data. Don't use when: you want a readable summary 
 
 function selectFields(meta: VideoMetadata, fields: string[] | undefined): Record<string, unknown> {
   const full: Record<string, unknown> = { ...meta };
-  if (!fields || fields.length === 0) {
-    return full;
-  }
+  if (!fields || fields.length === 0) return full;
   return Object.fromEntries(Object.entries(full).filter(([key]) => fields.includes(key)));
 }
 

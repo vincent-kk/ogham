@@ -18,9 +18,7 @@ export class TtlLruCache<V> {
 
   get(key: string): V | undefined {
     const entry = this.store.get(key);
-    if (!entry) {
-      return undefined;
-    }
+    if (!entry) return undefined;
     if (entry.expiresAt <= this.now()) {
       this.store.delete(key);
       return undefined;
@@ -36,9 +34,7 @@ export class TtlLruCache<V> {
     this.store.set(key, { value, expiresAt: this.now() + this.ttlMs });
     while (this.store.size > this.maxSize) {
       const oldest = this.store.keys().next().value;
-      if (oldest === undefined) {
-        break;
-      }
+      if (oldest === undefined) break;
       this.store.delete(oldest);
     }
   }

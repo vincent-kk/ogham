@@ -7,9 +7,7 @@ export function formatTimestamp(ms: number): string {
   const m = Math.floor((totalSec % 3600) / 60);
   const s = totalSec % 60;
   const ss = String(s).padStart(2, '0');
-  if (h > 0) {
-    return `${h}:${String(m).padStart(2, '0')}:${ss}`;
-  }
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`;
   return `${m}:${ss}`;
 }
 
@@ -23,9 +21,7 @@ export function segmentsToText(
   segments: TranscriptSegment[],
   options?: { timestamps?: boolean },
 ): string {
-  if (options?.timestamps) {
-    return segments.map((s) => `[${formatTimestamp(s.startMs)}] ${s.text}`).join('\n');
-  }
+  if (options?.timestamps) return segments.map((s) => `[${formatTimestamp(s.startMs)}] ${s.text}`).join('\n');
   return segments
     .map((s) => s.text)
     .join(' ')
@@ -35,9 +31,7 @@ export function segmentsToText(
 
 /** Truncates to `limit` chars, appending a notice when content was cut. */
 export function truncate(text: string, limit: number, notice = '\n\n… [truncated]'): string {
-  if (text.length <= limit) {
-    return text;
-  }
+  if (text.length <= limit) return text;
   const keep = Math.max(0, limit - notice.length);
   return text.slice(0, keep) + notice;
 }

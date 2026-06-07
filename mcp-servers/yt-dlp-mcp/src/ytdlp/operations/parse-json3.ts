@@ -27,17 +27,13 @@ export function parseJson3(content: string): TranscriptSegment[] {
 
   const out: TranscriptSegment[] = [];
   for (const event of doc.events ?? []) {
-    if (!event.segs) {
-      continue;
-    }
+    if (!event.segs) continue;
     const text = event.segs
       .map((s) => s.utf8 ?? '')
       .join('')
       .replace(/\s+/g, ' ')
       .trim();
-    if (!text) {
-      continue;
-    }
+    if (!text) continue;
     out.push({
       text,
       startMs: Math.max(0, Math.round(event.tStartMs ?? 0)),

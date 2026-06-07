@@ -18,9 +18,7 @@ Args: url. Returns: spans with scores plus structuredContent { videoId, spans }.
 Use when: finding popular moments. Returns an empty list when no heatmap is available.`;
 
 function render(result: Heatmap): string {
-  if (result.spans.length === 0) {
-    return `No heatmap for ${result.videoId}.`;
-  }
+  if (result.spans.length === 0) return `No heatmap for ${result.videoId}.`;
   const top = [...result.spans].sort((a, b) => b.score - a.score).slice(0, 10);
   const lines = top.map(
     (s) => `${formatTimestamp(s.startMs)}–${formatTimestamp(s.endMs)}  score ${s.score.toFixed(3)}`,

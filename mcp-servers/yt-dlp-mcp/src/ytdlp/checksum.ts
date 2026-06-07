@@ -11,13 +11,9 @@ export async function sha256File(filePath: string): Promise<string> {
 export function parseSums(text: string, assetName: string): string | null {
   for (const line of text.split('\n')) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue;
-    }
+    if (!trimmed || trimmed.startsWith('#')) continue;
     const match = trimmed.match(/^([0-9a-fA-F]{64})\s+\*?(.+)$/);
-    if (match && match[2].trim() === assetName) {
-      return match[1];
-    }
+    if (match && match[2].trim() === assetName) return match[1];
   }
   return null;
 }

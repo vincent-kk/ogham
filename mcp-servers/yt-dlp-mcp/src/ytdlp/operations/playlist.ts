@@ -24,13 +24,9 @@ function mapEntry(entry: Record<string, unknown>): PlaylistEntry {
 }
 
 export async function playlistOperation(ctx: OpContext, params: PlaylistParams): Promise<PlaylistResult> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const extraArgs = ['--flat-playlist'];
-  if (params.limit && params.limit > 0) {
-    extraArgs.push('--playlist-end', String(params.limit));
-  }
+  if (params.limit && params.limit > 0) extraArgs.push('--playlist-end', String(params.limit));
   const info = await fetchInfoJson(ctx, params.url, extraArgs);
   const entries = asRecordArray(info.entries).map(mapEntry);
   return {

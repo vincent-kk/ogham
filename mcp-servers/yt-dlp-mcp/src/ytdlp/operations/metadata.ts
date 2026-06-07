@@ -10,9 +10,7 @@ export interface MetadataParams {
 }
 
 export async function metadataOperation(ctx: OpContext, params: MetadataParams): Promise<VideoMetadata> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const info = await fetchInfoJson(ctx, params.url);
   return mapVideoMetadata(info);
 }

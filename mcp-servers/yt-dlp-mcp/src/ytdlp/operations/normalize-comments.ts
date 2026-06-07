@@ -6,9 +6,7 @@ export function normalizeComments(raw: Record<string, unknown>[]): CommentNode[]
   const byId = new Map<string, CommentNode>();
   for (const c of raw) {
     const id = asString(c.id);
-    if (!id) {
-      continue;
-    }
+    if (!id) continue;
     const parentRaw = asString(c.parent);
     byId.set(id, {
       id,
@@ -32,9 +30,7 @@ export function normalizeComments(raw: Record<string, unknown>[]): CommentNode[]
     let guard = 0;
     while (parent !== undefined && guard < 20) {
       const parentNode = byId.get(parent);
-      if (!parentNode) {
-        break;
-      }
+      if (!parentNode) break;
       depth += 1;
       parent = parentNode.parent;
       guard += 1;

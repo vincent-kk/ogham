@@ -18,9 +18,7 @@ Args: url. Returns: a timestamped chapter list plus structuredContent { videoId,
 Use when: navigating long videos. Returns an empty list when the video has no chapters.`;
 
 function render(result: ChapterList): string {
-  if (result.chapters.length === 0) {
-    return `No chapters for ${result.videoId}.`;
-  }
+  if (result.chapters.length === 0) return `No chapters for ${result.videoId}.`;
   const lines = result.chapters.map((c) => `${formatTimestamp(c.startMs)}  ${c.title}`);
   return `# Chapters (${result.chapters.length})\n\n${lines.join('\n')}`;
 }

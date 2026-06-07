@@ -51,9 +51,7 @@ const STDERR_PATTERNS: StderrPattern[] = [
 /** Maps a raw yt-dlp stderr/error string to a typed error code. */
 export function classifyYtDlpError(message: string): ErrorCode {
   for (const { code, patterns } of STDERR_PATTERNS) {
-    if (patterns.some((re) => re.test(message))) {
-      return code;
-    }
+    if (patterns.some((re) => re.test(message))) return code;
   }
   return ErrorCode.UNKNOWN;
 }

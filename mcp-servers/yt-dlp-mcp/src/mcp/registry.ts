@@ -41,9 +41,7 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
 
 /** Pure gate check (ADR-8): default tools are always on; others follow their flag. */
 export function isToolEnabled(tool: ToolDefinition, enable: EnableFlags): boolean {
-  if (tool.enabledBy === 'default') {
-    return true;
-  }
+  if (tool.enabledBy === 'default') return true;
   return enable[tool.enabledBy];
 }
 

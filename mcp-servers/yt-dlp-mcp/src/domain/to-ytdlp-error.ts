@@ -12,9 +12,7 @@ function firstLine(text: string): string {
  * shapes ({ timedOut, stderr, shortMessage, code }) without importing execa.
  */
 export function toYtDlpError(value: unknown): YtDlpMcpError {
-  if (isYtDlpMcpError(value)) {
-    return value;
-  }
+  if (isYtDlpMcpError(value)) return value;
 
   if (value && typeof value === 'object') {
     const err = value as {
@@ -26,9 +24,7 @@ export function toYtDlpError(value: unknown): YtDlpMcpError {
       message?: string;
     };
 
-    if (err.timedOut) {
-      return new YtDlpMcpError(ErrorCode.TIMEOUT, 'yt-dlp timed out', { cause: value });
-    }
+    if (err.timedOut) return new YtDlpMcpError(ErrorCode.TIMEOUT, 'yt-dlp timed out', { cause: value });
     if (err.code === 'ENOENT') {
       return new YtDlpMcpError(ErrorCode.BINARY_UNAVAILABLE, 'yt-dlp binary not found', { cause: value });
     }
@@ -39,8 +35,6 @@ export function toYtDlpError(value: unknown): YtDlpMcpError {
     }
   }
 
-  if (value instanceof Error) {
-    return new YtDlpMcpError(ErrorCode.UNKNOWN, value.message, { cause: value });
-  }
+  if (value instanceof Error) return new YtDlpMcpError(ErrorCode.UNKNOWN, value.message, { cause: value });
   return new YtDlpMcpError(ErrorCode.UNKNOWN, String(value), { cause: value });
 }

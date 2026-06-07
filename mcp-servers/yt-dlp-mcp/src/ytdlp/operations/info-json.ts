@@ -4,9 +4,7 @@ import type { OpContext } from './context.js';
 /** Parses a single yt-dlp `--dump-single-json` object from stdout. Pure. */
 export function parseInfoJson(stdout: string): Record<string, unknown> {
   const start = stdout.indexOf('{');
-  if (start === -1) {
-    throw new YtDlpMcpError(ErrorCode.UNKNOWN, 'yt-dlp produced no JSON output');
-  }
+  if (start === -1) throw new YtDlpMcpError(ErrorCode.UNKNOWN, 'yt-dlp produced no JSON output');
   try {
     return JSON.parse(stdout.slice(start)) as Record<string, unknown>;
   } catch (error) {

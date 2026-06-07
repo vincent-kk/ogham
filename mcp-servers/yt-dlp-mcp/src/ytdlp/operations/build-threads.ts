@@ -6,15 +6,11 @@ import type { CommentNode } from '../../domain/types.js';
  */
 export function buildThreads(comments: CommentNode[], maxDepth?: number): CommentNode[] {
   const byId = new Map<string, CommentNode>();
-  for (const c of comments) {
-    byId.set(c.id, { ...c, replies: [] });
-  }
+  for (const c of comments) byId.set(c.id, { ...c, replies: [] });
 
   const roots: CommentNode[] = [];
   for (const node of byId.values()) {
-    if (maxDepth !== undefined && node.depth > maxDepth) {
-      continue;
-    }
+    if (maxDepth !== undefined && node.depth > maxDepth) continue;
     const parent = node.parent ? byId.get(node.parent) : undefined;
     if (parent) {
       parent.replies = parent.replies ?? [];

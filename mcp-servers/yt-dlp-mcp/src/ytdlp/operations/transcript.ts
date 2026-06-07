@@ -20,9 +20,7 @@ export async function transcriptOperation(
   ctx: OpContext,
   params: TranscriptParams,
 ): Promise<TranscriptResult> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const lang = params.language;
   const tmpDir = await ctx.paths.makeTempDir('transcript-');
   try {

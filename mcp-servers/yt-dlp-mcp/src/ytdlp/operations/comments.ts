@@ -18,9 +18,7 @@ export interface CommentsParams {
 }
 
 export async function commentsOperation(ctx: OpContext, params: CommentsParams): Promise<CommentResult> {
-  if (!isValidUrl(params.url)) {
-    throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
-  }
+  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
   const info = await fetchInfoJson(ctx, params.url, ['--write-comments', ...buildCommentExtractorArgs(params)]);
   const comments = normalizeComments(asRecordArray(info.comments));
   return {
