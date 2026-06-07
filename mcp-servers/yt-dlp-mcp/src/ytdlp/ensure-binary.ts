@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 
 import type { Config } from '../config.js';
@@ -145,7 +145,10 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
   async function acquireAndInstall(signal?: AbortSignal): Promise<string> {
     await mkdir(paths.binDir, { recursive: true });
     await acquireLock(signal);
-    const partPath = `${paths.binaryPath}.part`;
+    // Per-attempt unique staging file: even if the cross-process lock is wrongly
+    // reclaimed (stale-mtime TOCTOU), two installers never share/clobber one
+    // .part, so verified bytes can't be overwritten before the atomic rename.
+    const partPath = `${paths.binaryPath}.${randomUUID()}.part`;
     try {
       if (await isFresh(await readMeta())) {
         return paths.binaryPath;

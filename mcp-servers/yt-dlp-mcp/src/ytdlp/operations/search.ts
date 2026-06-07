@@ -38,10 +38,13 @@ function mapItem(entry: Record<string, unknown>): SearchResultItem {
 export async function searchOperation(ctx: OpContext, params: SearchParams): Promise<SearchResult> {
   const fetchCount = params.offset + params.maxResults;
   const target = `ytsearch${fetchCount}:${params.query}`;
-  const extraArgs = ['--flat-playlist'];
-  if (params.uploadDateFilter) {
-    extraArgs.push('--dateafter', DATE_AFTER[params.uploadDateFilter]);
-  }
+  // --dateafter only filters entries that carry upload_date, which --flat-playlist
+  // omits for YouTube search entries. So when a date filter is requested we drop
+  // --flat-playlist and do full extraction (slower) so the filter actually applies
+  // and items carry uploadDate; otherwise stay flat (fast).
+  const extraArgs = params.uploadDateFilter
+    ? ['--dateafter', DATE_AFTER[params.uploadDateFilter]]
+    : ['--flat-playlist'];
   const info = await fetchInfoJson(ctx, target, extraArgs);
   const all = asRecordArray(info.entries).map(mapItem);
   const items = all.slice(params.offset, params.offset + params.maxResults);
