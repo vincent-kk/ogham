@@ -33,7 +33,7 @@ That's it. All components (Skills, MCP tools, Agents, Hooks) register automatica
 
 ## Plugins
 
-### [`@ogham/filid`](./packages/filid/) — FCA-AI Rule Enforcement
+### [`@ogham/filid`](./plugins/filid/) — FCA-AI Rule Enforcement
 
 A Claude Code plugin that automatically manages project structure and documentation through **Fractal Context Architecture (FCA-AI)**.
 
@@ -70,9 +70,9 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 /filid:pipeline
 ```
 
-For full documentation, see the [filid README](./packages/filid/README.md) ([Korean](./packages/filid/README-ko_kr.md)).
+For full documentation, see the [filid README](./plugins/filid/README.md) ([Korean](./plugins/filid/README-ko_kr.md)).
 
-### [`@ogham/maencof`](./packages/maencof/) — Personal Knowledge Space Manager
+### [`@ogham/maencof`](./plugins/maencof/) — Personal Knowledge Space Manager
 
 A Claude Code plugin that manages your personal knowledge as a **markdown-based Knowledge Graph** with **Spreading Activation** search.
 
@@ -105,9 +105,9 @@ AI agents forget you between sessions. Notes scatter across tools, insights vani
 /maencof:recall
 ```
 
-For full documentation, see the [maencof README](./packages/maencof/README.md) ([Korean](./packages/maencof/README-ko_kr.md)).
+For full documentation, see the [maencof README](./plugins/maencof/README.md) ([Korean](./plugins/maencof/README-ko_kr.md)).
 
-### [`@ogham/atlassian`](./packages/atlassian/) — Jira & Confluence Integration
+### [`@ogham/atlassian`](./plugins/atlassian/) — Jira & Confluence Integration
 
 A native TypeScript replacement for the Python `mcp-atlassian` MCP server, providing first-class Jira and Confluence access from Claude Code.
 
@@ -141,9 +141,9 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 /atlassian:confluence
 ```
 
-For full documentation, see the [atlassian README](./packages/atlassian/README.md) ([Korean](./packages/atlassian/README-ko_kr.md)).
+For full documentation, see the [atlassian README](./plugins/atlassian/README.md) ([Korean](./plugins/atlassian/README-ko_kr.md)).
 
-### [`@ogham/cogair`](./packages/cogair/) — Codex / Gemini CLI Delegation
+### [`@ogham/cogair`](./plugins/cogair/) — Codex / Gemini CLI Delegation
 
 A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI** through MCP tools, skills, and lifecycle hooks.
 
@@ -179,9 +179,9 @@ Different models have different strengths: Codex excels at heavy code generation
 /cogair:crosscheck
 ```
 
-For full documentation, see the [cogair README](./packages/cogair/README.md) ([Korean](./packages/cogair/README-ko_kr.md)).
+For full documentation, see the [cogair README](./plugins/cogair/README.md) ([Korean](./plugins/cogair/README-ko_kr.md)).
 
-### [`@ogham/imbas`](./packages/imbas/) — Planning → Issue Pipeline
+### [`@ogham/imbas`](./plugins/imbas/) — Planning → Issue Pipeline
 
 A Claude Code plugin that converts planning documents into Jira or GitHub issues through a 4-phase orchestration pipeline.
 
@@ -214,9 +214,9 @@ Translating a strategy doc into well-formed, EARS-style developer tickets is rep
 /imbas:status
 ```
 
-For full documentation, see the [imbas README](./packages/imbas/README.md) ([Korean](./packages/imbas/README-ko_kr.md)).
+For full documentation, see the [imbas README](./plugins/imbas/README.md) ([Korean](./plugins/imbas/README-ko_kr.md)).
 
-### [`@ogham/maencof-lens`](./packages/maencof-lens/) — Read-Only Vault Access
+### [`@ogham/maencof-lens`](./plugins/maencof-lens/) — Read-Only Vault Access
 
 A read-only wrapper around maencof's knowledge graph for cross-project vault access. Lets development sessions consult your personal vault without risking writes.
 
@@ -249,7 +249,7 @@ If you use maencof to keep design notes, architecture decisions, and personal re
 /maencof-lens:context
 ```
 
-For full documentation, see the [maencof-lens package](./packages/maencof-lens/).
+For full documentation, see the [maencof-lens package](./plugins/maencof-lens/).
 
 ---
 
@@ -257,12 +257,12 @@ For full documentation, see the [maencof-lens package](./packages/maencof-lens/)
 
 | Package                                        | Type          | Description                                                       |
 | ---------------------------------------------- | ------------- | ----------------------------------------------------------------- |
-| **[`filid`](./packages/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management            |
-| **[`maencof`](./packages/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph             |
-| **[`atlassian`](./packages/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents           |
-| **[`cogair`](./packages/cogair/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini CLI from Claude Code |
-| **[`imbas`](./packages/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                       |
-| **[`maencof-lens`](./packages/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts   |
+| **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management            |
+| **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph             |
+| **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents           |
+| **[`cogair`](./plugins/cogair/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini CLI from Claude Code |
+| **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                       |
+| **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts   |
 
 ---
 

@@ -32,7 +32,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // (cogair, maencof, etc.) intentionally skip dist emission because
 // they ship via bridge/ (esbuild runtime), not npm. Inter-workspace
 // type usage is wired through tsconfig paths instead of dist (see
-// packages/maencof-lens/tsconfig.json mapping @ogham/maencof to
+// plugins/maencof-lens/tsconfig.json mapping @ogham/maencof to
 // ../maencof/src/index.ts).
 const PROVIDERS = [
   { name: "@ogham/cross-platform", dir: "shared/cross-platform" },

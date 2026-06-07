@@ -37,8 +37,8 @@ export function createESLintConfig(
             alwaysTryTypes: true,
             project: [
               tsconfigPath,
-              "./packages/*/tsconfig.json",
-              "./packages/*/tsconfig.eslint.json",
+              "./plugins/*/tsconfig.json",
+              "./plugins/*/tsconfig.eslint.json",
             ],
             noWarnOnMultipleProjects: true,
           },

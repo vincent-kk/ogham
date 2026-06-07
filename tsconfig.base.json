@@ -34,5 +34,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "packages/**/node_modules", "packages/**/dist"]
+  "exclude": ["node_modules", "plugins/**/node_modules", "plugins/**/dist"]
 }

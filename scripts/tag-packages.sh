@@ -125,8 +125,8 @@ main() {
 
     # Find all package.json files in the commit (excluding node_modules)
     local package_files
-    if ! package_files=$(git ls-tree -r --name-only "$commit_hash" | grep -E '^packages/.*package\.json$' | grep -v node_modules); then
-        print_warning "No package.json files found in packages/ directory for commit $commit_hash"
+    if ! package_files=$(git ls-tree -r --name-only "$commit_hash" | grep -E '^plugins/.*package\.json$' | grep -v node_modules); then
+        print_warning "No package.json files found in plugins/ directory for commit $commit_hash"
         exit 0
     fi
 

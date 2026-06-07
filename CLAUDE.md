@@ -1,11 +1,11 @@
 # ogham
 
-Claude Code 플러그인 모노레포. 패키지별 작업 가이드는 각 `packages/<pkg>/CLAUDE.md` 와 `packages/<pkg>/INTENT.md` 를 참조하고, 사용자를 위한 패키지 목록과 소개는 [README](./README.md) 참조.
+Claude Code 플러그인 모노레포. 패키지별 작업 가이드는 각 `plugins/<pkg>/CLAUDE.md` 와 `plugins/<pkg>/INTENT.md` 를 참조하고, 사용자를 위한 패키지 목록과 소개는 [README](./README.md) 참조.
 
 ## Workspaces
 
-- **Monorepo**: Yarn 4.12 workspaces (`packages/*`)
-- 6 plugins under `packages/*` — 자세한 카탈로그는 [README.md](./README.md) 또는 [.claude-plugin/marketplace.json](./.claude-plugin/marketplace.json)
+- **Monorepo**: Yarn 4.12 workspaces (`plugins/*`)
+- 6 plugins under `plugins/*` — 자세한 카탈로그는 [README.md](./README.md) 또는 [.claude-plugin/marketplace.json](./.claude-plugin/marketplace.json)
 - 패키지별 작업: `yarn <pkg> <command>` (예: `yarn filid test:run`)
 
 ## Tech Stack
