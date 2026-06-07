@@ -11,6 +11,7 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
+    "mcp-servers/*",
     "plugins/*",
     "shared/*"
   ],
@@ -31,6 +32,7 @@
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
     "prawf": "yarn workspace @ogham/prawf",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
+    "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tag-packages.sh",
