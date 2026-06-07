@@ -14,7 +14,8 @@ function toInt(value: string | undefined): number | undefined {
 
 /** Parses the FIELD_SEP-delimited `--print META_PRINT_FMT` line into VideoMetadata. */
 export function parseMetaPrint(stdout: string, url: string): VideoMetadata {
-  const [id, title, channel, viewCount, duration, uploadDate] = lastNonEmptyLine(stdout).split(FIELD_SEP);
+  const [id, title, channel, viewCount, duration, uploadDate] =
+    lastNonEmptyLine(stdout).split(FIELD_SEP);
   return {
     videoId: (id ?? '').trim() || parseVideoId(url) || 'unknown',
     title: (title ?? '').trim() || 'unknown',

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDuration, formatTimestamp, segmentsToText, truncate } from '../postprocess/formatter.js';
+import {
+  formatDuration,
+  formatTimestamp,
+  segmentsToText,
+  truncate,
+} from '../postprocess/formatter.js';
 
 describe('formatTimestamp', () => {
   it('formats sub-hour as M:SS', () => {
@@ -30,7 +35,9 @@ describe('segmentsToText', () => {
   });
 
   it('emits one timestamped line each when requested', () => {
-    expect(segmentsToText(segs, { timestamps: true })).toBe('[0:00] Hello world\n[1:05] second line');
+    expect(segmentsToText(segs, { timestamps: true })).toBe(
+      '[0:00] Hello world\n[1:05] second line',
+    );
   });
 });
 

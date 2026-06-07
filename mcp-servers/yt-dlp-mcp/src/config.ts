@@ -3,7 +3,15 @@ import path from 'node:path';
 
 import { z } from 'zod';
 
-const LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent'] as const;
+const LOG_LEVELS = [
+  'trace',
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'fatal',
+  'silent',
+] as const;
 
 const ConfigSchema = z.object({
   paths: z.object({
@@ -46,7 +54,8 @@ type Env = Record<string, string | undefined>;
 
 function expandHome(p: string): string {
   if (p === '~') return os.homedir();
-  if (p.startsWith('~/') || p.startsWith('~\\')) return path.join(os.homedir(), p.slice(2));
+  if (p.startsWith('~/') || p.startsWith('~\\'))
+    return path.join(os.homedir(), p.slice(2));
   return p;
 }
 
@@ -67,8 +76,12 @@ function intEnv(value: string | undefined, fallback: number): number {
  * Throws on invalid values rather than silently falling back.
  */
 export function loadConfig(env: Env = process.env): Config {
-  const home = expandHome(env.YTDLP_HOME?.trim() || path.join(os.homedir(), '.yt-dlp'));
-  const downloadsDir = expandHome(env.YTDLP_DOWNLOADS_DIR?.trim() || path.join(home, 'downloads'));
+  const home = expandHome(
+    env.YTDLP_HOME?.trim() || path.join(os.homedir(), '.yt-dlp'),
+  );
+  const downloadsDir = expandHome(
+    env.YTDLP_DOWNLOADS_DIR?.trim() || path.join(home, 'downloads'),
+  );
   const enableAll = boolEnv(env.YTDLP_ENABLE_ALL);
   const flag = (key: string): boolean => enableAll || boolEnv(env[key]);
 
@@ -105,7 +118,9 @@ export function loadConfig(env: Env = process.env): Config {
 
   const parsed = ConfigSchema.safeParse(raw);
   if (!parsed.success) {
-    const issues = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
+    const issues = parsed.error.issues
+      .map((i) => `${i.path.join('.')}: ${i.message}`)
+      .join('; ');
     throw new Error(`Invalid yt-dlp-mcp configuration: ${issues}`);
   }
   return parsed.data;

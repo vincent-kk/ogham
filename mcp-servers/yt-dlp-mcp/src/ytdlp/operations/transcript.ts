@@ -6,6 +6,7 @@ import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { TranscriptResult } from '../../domain/types.js';
 import { removeDir } from '../../paths.js';
 import { isValidUrl } from '../../utils/validate-url.js';
+
 import type { OpContext } from './context.js';
 import { parseJson3 } from './parse-json3.js';
 import { parseMetaPrint } from './parse-meta-print.js';
@@ -20,7 +21,11 @@ export async function transcriptOperation(
   ctx: OpContext,
   params: TranscriptParams,
 ): Promise<TranscriptResult> {
-  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
+  if (!isValidUrl(params.url))
+    throw new YtDlpMcpError(
+      ErrorCode.INVALID_INPUT,
+      'Invalid or unsupported URL',
+    );
   const lang = params.language;
   const tmpDir = await ctx.paths.makeTempDir('transcript-');
   try {
@@ -46,14 +51,20 @@ export async function transcriptOperation(
     const metadata = parseMetaPrint(stdout, params.url);
     const files = (await readdir(tmpDir)).filter((f) => f.endsWith('.json3'));
     if (files.length === 0) {
-      throw new YtDlpMcpError(ErrorCode.NO_CAPTIONS, `No subtitles available for language '${lang}'`);
+      throw new YtDlpMcpError(
+        ErrorCode.NO_CAPTIONS,
+        `No subtitles available for language '${lang}'`,
+      );
     }
 
     const picked = pickSubtitleFile(files, lang);
     const content = await readFile(path.join(tmpDir, picked.file), 'utf8');
     const segments = parseJson3(content);
     if (segments.length === 0) {
-      throw new YtDlpMcpError(ErrorCode.NO_CAPTIONS, 'Subtitle file contained no readable text');
+      throw new YtDlpMcpError(
+        ErrorCode.NO_CAPTIONS,
+        'Subtitle file contained no readable text',
+      );
     }
 
     return {
@@ -69,4 +80,3 @@ export async function transcriptOperation(
     await removeDir(tmpDir);
   }
 }
-

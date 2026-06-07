@@ -9,11 +9,20 @@ interface StderrPattern {
 const STDERR_PATTERNS: StderrPattern[] = [
   {
     code: ErrorCode.AGE_RESTRICTED,
-    patterns: [/age[- ]restricted/i, /confirm your age/i, /inappropriate for some users/i],
+    patterns: [
+      /age[- ]restricted/i,
+      /confirm your age/i,
+      /inappropriate for some users/i,
+    ],
   },
   {
     code: ErrorCode.BLOCKED,
-    patterns: [/sign in to confirm/i, /not a bot/i, /captcha/i, /blocked it in your country/i],
+    patterns: [
+      /sign in to confirm/i,
+      /not a bot/i,
+      /captcha/i,
+      /blocked it in your country/i,
+    ],
   },
   {
     code: ErrorCode.RATE_LIMITED,
@@ -21,7 +30,12 @@ const STDERR_PATTERNS: StderrPattern[] = [
   },
   {
     code: ErrorCode.NO_CAPTIONS,
-    patterns: [/no subtitles/i, /no closed captions/i, /there are no subtitles/i, /requested format is not available.*subtitle/i],
+    patterns: [
+      /no subtitles/i,
+      /no closed captions/i,
+      /there are no subtitles/i,
+      /requested format is not available.*subtitle/i,
+    ],
   },
   {
     code: ErrorCode.VIDEO_UNAVAILABLE,
@@ -36,11 +50,24 @@ const STDERR_PATTERNS: StderrPattern[] = [
   },
   {
     code: ErrorCode.INVALID_INPUT,
-    patterns: [/unsupported url/i, /is not a valid url/i, /unable to extract/i, /no video formats found/i],
+    patterns: [
+      /unsupported url/i,
+      /is not a valid url/i,
+      /unable to extract/i,
+      /no video formats found/i,
+    ],
   },
   {
     code: ErrorCode.NETWORK,
-    patterns: [/getaddrinfo/i, /econnrefused/i, /econnreset/i, /network is unreachable/i, /temporary failure in name resolution/i, /ssl/i, /unable to download webpage/i],
+    patterns: [
+      /getaddrinfo/i,
+      /econnrefused/i,
+      /econnreset/i,
+      /network is unreachable/i,
+      /temporary failure in name resolution/i,
+      /ssl/i,
+      /unable to download webpage/i,
+    ],
   },
   {
     code: ErrorCode.TIMEOUT,

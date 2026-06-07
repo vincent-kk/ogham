@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import { dedupeAdjacent, stripCaptionArtifacts } from '../../postprocess/ad-stripper.js';
+import {
+  dedupeAdjacent,
+  stripCaptionArtifacts,
+} from '../../postprocess/ad-stripper.js';
 import { segmentsToText } from '../../postprocess/formatter.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { transcriptOperation } from '../../ytdlp/operations/transcript.js';
@@ -8,12 +11,19 @@ import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
 
 const inputSchema = {
-  url: z.string().describe('Full video URL (YouTube or any yt-dlp-supported site).'),
+  url: z
+    .string()
+    .describe('Full video URL (YouTube or any yt-dlp-supported site).'),
   language: z
     .string()
-    .regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/, 'Use a language code like "en", "ko", or "pt-BR".')
+    .regex(
+      /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/,
+      'Use a language code like "en", "ko", or "pt-BR".',
+    )
     .optional()
-    .describe("BCP-47-ish language code, e.g. 'en', 'ko', 'ja'. Falls back to 'en'."),
+    .describe(
+      "BCP-47-ish language code, e.g. 'en', 'ko', 'ja'. Falls back to 'en'.",
+    ),
   timestamps: z
     .boolean()
     .optional()
@@ -21,7 +31,9 @@ const inputSchema = {
   stripArtifacts: z
     .boolean()
     .optional()
-    .describe('Drop [Music]/[Applause] cues and rolling-caption duplicates. Default false.'),
+    .describe(
+      'Drop [Music]/[Applause] cues and rolling-caption duplicates. Default false.',
+    ),
 };
 
 const description = `Download a clean plain-text transcript from a video's captions.
@@ -76,7 +88,9 @@ export const transcriptTool: ToolDefinition = {
                 .filter((s) => s.text.length > 0);
             }
 
-            const body = segmentsToText(segments, { timestamps: args.timestamps ?? false });
+            const body = segmentsToText(segments, {
+              timestamps: args.timestamps ?? false,
+            });
             const header = `# ${result.metadata.title}\n${result.metadata.channel} · ${result.language}`;
             return {
               text: `${header}\n\n${body}`,

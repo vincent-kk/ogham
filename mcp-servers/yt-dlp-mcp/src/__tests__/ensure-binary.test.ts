@@ -6,7 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetNameForPlatform } from '../ytdlp/asset-name.js';
 import { createBinaryManager } from '../ytdlp/ensure-binary.js';
 import type { VersionResolver } from '../ytdlp/version.js';
-import { makeTestEnv, silentLogger, type TestEnv } from './helpers/test-context.js';
+
+import {
+  type TestEnv,
+  makeTestEnv,
+  silentLogger,
+} from './helpers/test-context.js';
 
 const ASSET = assetNameForPlatform();
 const BYTES = Buffer.from('fake-yt-dlp-binary');
@@ -48,7 +53,9 @@ describe('createBinaryManager', () => {
     expect(a).toBe(env.paths.binaryPath);
     expect(b).toBe(env.paths.binaryPath);
     expect(download).toHaveBeenCalledTimes(1);
-    const meta = JSON.parse(await readFile(env.paths.metaPath, 'utf8')) as { tag: string };
+    const meta = JSON.parse(await readFile(env.paths.metaPath, 'utf8')) as {
+      tag: string;
+    };
     expect(meta.tag).toBe('2025.01.01');
   });
 
@@ -66,13 +73,18 @@ describe('createBinaryManager', () => {
       fetchText,
       now: () => 1000,
     });
-    await expect(bm.ensureBinary()).rejects.toMatchObject({ code: 'CHECKSUM_MISMATCH' });
+    await expect(bm.ensureBinary()).rejects.toMatchObject({
+      code: 'CHECKSUM_MISMATCH',
+    });
     await expect(stat(env.paths.binaryPath)).rejects.toThrow();
   });
 
   it('skips download when a fresh binary is cached', async () => {
     await writeFile(env.paths.binaryPath, BYTES);
-    await writeFile(env.paths.metaPath, JSON.stringify({ tag: '2025.01.01', downloadedAt: 1000 }));
+    await writeFile(
+      env.paths.metaPath,
+      JSON.stringify({ tag: '2025.01.01', downloadedAt: 1000 }),
+    );
     const download = vi.fn();
     const bm = createBinaryManager({
       paths: env.paths,
@@ -89,7 +101,10 @@ describe('createBinaryManager', () => {
 
   it('re-downloads when the cache is older than the refresh window', async () => {
     await writeFile(env.paths.binaryPath, BYTES);
-    await writeFile(env.paths.metaPath, JSON.stringify({ tag: 'old', downloadedAt: 0 }));
+    await writeFile(
+      env.paths.metaPath,
+      JSON.stringify({ tag: 'old', downloadedAt: 0 }),
+    );
     const download = vi.fn(async (_url: string, dest: string) => {
       await writeFile(dest, BYTES);
     });

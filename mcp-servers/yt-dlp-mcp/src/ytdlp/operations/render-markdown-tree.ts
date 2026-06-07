@@ -9,8 +9,11 @@ function badges(node: CommentNode): string {
 
 function renderNode(node: CommentNode, lines: string[]): void {
   const indent = '  '.repeat(node.depth);
-  lines.push(`${indent}- **${node.author}**${badges(node)} · ${node.likeCount ?? 0} likes · ${node.timeText ?? ''}`.trimEnd());
-  for (const textLine of node.text.split('\n')) lines.push(`${indent}  | ${textLine}`);
+  lines.push(
+    `${indent}- **${node.author}**${badges(node)} · ${node.likeCount ?? 0} likes · ${node.timeText ?? ''}`.trimEnd(),
+  );
+  for (const textLine of node.text.split('\n'))
+    lines.push(`${indent}  | ${textLine}`);
   for (const reply of node.replies ?? []) renderNode(reply, lines);
 }
 

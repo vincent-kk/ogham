@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { SUMS_ASSET } from '../constants/github.js';
 import { assetNameForPlatform } from '../ytdlp/asset-name.js';
 import { selectSafeRelease } from '../ytdlp/select-safe-release.js';
-import { createVersionResolver, type GithubRelease } from '../ytdlp/version.js';
+import { type GithubRelease, createVersionResolver } from '../ytdlp/version.js';
 
 const NOW = Date.UTC(2025, 0, 31);
 const DAY = 86_400_000;
@@ -22,7 +22,10 @@ function rel(
     assets: opts.withAssets
       ? [
           { name: asset, browser_download_url: `https://dl/${tag}/${asset}` },
-          { name: SUMS_ASSET, browser_download_url: `https://dl/${tag}/${SUMS_ASSET}` },
+          {
+            name: SUMS_ASSET,
+            browser_download_url: `https://dl/${tag}/${SUMS_ASSET}`,
+          },
         ]
       : [],
   };
@@ -39,15 +42,24 @@ describe('selectSafeRelease', () => {
   });
 
   it('excludes drafts and prereleases', () => {
-    const releases = [rel('draft', 30, { draft: true }), rel('pre', 30, { prerelease: true })];
+    const releases = [
+      rel('draft', 30, { draft: true }),
+      rel('pre', 30, { prerelease: true }),
+    ];
     expect(selectSafeRelease(releases, 7, NOW)).toBeNull();
   });
 });
 
 describe('createVersionResolver', () => {
   it('resolves asset + checksum URLs for a safe release', async () => {
-    const fetchJson = vi.fn(async () => [rel('2025.01.01', 30, { withAssets: true })]);
-    const resolver = createVersionResolver({ config: { cooldownDays: 7 }, fetchJson, now: () => NOW });
+    const fetchJson = vi.fn(async () => [
+      rel('2025.01.01', 30, { withAssets: true }),
+    ]);
+    const resolver = createVersionResolver({
+      config: { cooldownDays: 7 },
+      fetchJson,
+      now: () => NOW,
+    });
     const resolved = await resolver.resolveSafeVersion();
     expect(resolved.tag).toBe('2025.01.01');
     expect(resolved.assetUrl).toContain(assetNameForPlatform());
@@ -67,8 +79,16 @@ describe('createVersionResolver', () => {
   });
 
   it('throws when the platform asset is missing', async () => {
-    const fetchJson = vi.fn(async () => [rel('2025.01.01', 30, { withAssets: false })]);
-    const resolver = createVersionResolver({ config: { cooldownDays: 7 }, fetchJson, now: () => NOW });
-    await expect(resolver.resolveSafeVersion()).rejects.toMatchObject({ code: 'BINARY_UNAVAILABLE' });
+    const fetchJson = vi.fn(async () => [
+      rel('2025.01.01', 30, { withAssets: false }),
+    ]);
+    const resolver = createVersionResolver({
+      config: { cooldownDays: 7 },
+      fetchJson,
+      now: () => NOW,
+    });
+    await expect(resolver.resolveSafeVersion()).rejects.toMatchObject({
+      code: 'BINARY_UNAVAILABLE',
+    });
   });
 });

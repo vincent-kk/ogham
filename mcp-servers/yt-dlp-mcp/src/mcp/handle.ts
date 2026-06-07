@@ -31,7 +31,12 @@ export async function handleToolExecution(
   } catch (error) {
     const e = toYtDlpError(error);
     return {
-      content: [{ type: 'text', text: `${options.errorPrefix} [${e.code}]: ${e.message}` }],
+      content: [
+        {
+          type: 'text',
+          text: `${options.errorPrefix} [${e.code}]: ${e.message}`,
+        },
+      ],
       isError: true,
     };
   }

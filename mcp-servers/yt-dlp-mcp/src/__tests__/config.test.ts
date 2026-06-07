@@ -20,7 +20,10 @@ describe('loadConfig', () => {
   });
 
   it('honors individual enable flags', () => {
-    const c = loadConfig({ YTDLP_ENABLE_COMMENTS: '1', YTDLP_ENABLE_DOWNLOAD: 'true' });
+    const c = loadConfig({
+      YTDLP_ENABLE_COMMENTS: '1',
+      YTDLP_ENABLE_DOWNLOAD: 'true',
+    });
     expect(c.enable.comments).toBe(true);
     expect(c.enable.download).toBe(true);
     expect(c.enable.heatmap).toBe(false);
@@ -32,8 +35,12 @@ describe('loadConfig', () => {
   });
 
   it('throws on out-of-range numeric config', () => {
-    expect(() => loadConfig({ YTDLP_MAX_CONCURRENCY: '99' })).toThrow(/configuration/i);
-    expect(() => loadConfig({ YTDLP_COOLDOWN_DAYS: '-1' })).toThrow(/configuration/i);
+    expect(() => loadConfig({ YTDLP_MAX_CONCURRENCY: '99' })).toThrow(
+      /configuration/i,
+    );
+    expect(() => loadConfig({ YTDLP_COOLDOWN_DAYS: '-1' })).toThrow(
+      /configuration/i,
+    );
   });
 });
 
@@ -48,7 +55,12 @@ describe('evasionArgs', () => {
       YTDLP_COOKIES_FROM_BROWSER: 'chrome',
       YTDLP_PROXY: 'socks5://127.0.0.1:1080',
     });
-    expect(evasionArgs(c)).toEqual(['--cookies', '/tmp/c.txt', '--proxy', 'socks5://127.0.0.1:1080']);
+    expect(evasionArgs(c)).toEqual([
+      '--cookies',
+      '/tmp/c.txt',
+      '--proxy',
+      'socks5://127.0.0.1:1080',
+    ]);
   });
 
   it('uses browser extraction when no file is set', () => {

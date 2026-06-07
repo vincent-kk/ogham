@@ -1,10 +1,19 @@
 import { randomUUID } from 'node:crypto';
-import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import {
+  chmod,
+  mkdir,
+  readFile,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises';
 
 import type { Config } from '../config.js';
 import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
 import type { Logger } from '../obs/logger.js';
 import type { Paths } from '../paths.js';
+
 import { assetNameForPlatform } from './asset-name.js';
 import { parseSums, sha256File } from './checksum.js';
 import { downloadToFile, fetchText } from './http.js';
@@ -24,7 +33,11 @@ export interface BinaryManagerDeps {
   config: Config;
   versionResolver: VersionResolver;
   logger: Logger;
-  download?: (url: string, destPath: string, signal?: AbortSignal) => Promise<void>;
+  download?: (
+    url: string,
+    destPath: string,
+    signal?: AbortSignal,
+  ) => Promise<void>;
   fetchText?: (url: string, signal?: AbortSignal) => Promise<string>;
   now?: () => number;
 }
@@ -33,7 +46,8 @@ const DAY_MS = 86_400_000;
 const LOCK_STALE_MS = 5 * 60_000;
 const LOCK_POLL_MS = 250;
 
-const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Acquires and caches the yt-dlp binary (ADR-2/4): cooldown version selection,
@@ -59,8 +73,13 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
 
   async function readMeta(): Promise<BinaryMeta | null> {
     try {
-      const meta = JSON.parse(await readFile(paths.metaPath, 'utf8')) as BinaryMeta;
-      return typeof meta.tag === 'string' && typeof meta.downloadedAt === 'number' ? meta : null;
+      const meta = JSON.parse(
+        await readFile(paths.metaPath, 'utf8'),
+      ) as BinaryMeta;
+      return typeof meta.tag === 'string' &&
+        typeof meta.downloadedAt === 'number'
+        ? meta
+        : null;
     } catch {
       return null;
     }
@@ -68,7 +87,8 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
 
   async function isFresh(meta: BinaryMeta | null): Promise<boolean> {
     if (!(await fileExists(paths.binaryPath))) return false;
-    if (config.binary.pinnedVersion) return meta?.tag === config.binary.pinnedVersion;
+    if (config.binary.pinnedVersion)
+      return meta?.tag === config.binary.pinnedVersion;
     if (!meta) return false;
     return now() - meta.downloadedAt < config.binary.refreshDays * DAY_MS;
   }
@@ -92,7 +112,10 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
         continue;
       }
       if (now() > deadline) {
-        throw new YtDlpMcpError(ErrorCode.DOWNLOAD_FAILED, 'Timed out waiting for binary download lock');
+        throw new YtDlpMcpError(
+          ErrorCode.DOWNLOAD_FAILED,
+          'Timed out waiting for binary download lock',
+        );
       }
       signal?.throwIfAborted?.();
       await delay(LOCK_POLL_MS);
@@ -100,12 +123,21 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
   }
 
   async function releaseLock(): Promise<void> {
-    await rm(paths.lockPath, { recursive: true, force: true }).catch(() => undefined);
+    await rm(paths.lockPath, { recursive: true, force: true }).catch(
+      () => undefined,
+    );
   }
 
-  async function verifyChecksum(filePath: string, sumsText: string): Promise<void> {
+  async function verifyChecksum(
+    filePath: string,
+    sumsText: string,
+  ): Promise<void> {
     const expected = parseSums(sumsText, assetName);
-    if (!expected) throw new YtDlpMcpError(ErrorCode.CHECKSUM_MISMATCH, `No checksum entry for ${assetName}`);
+    if (!expected)
+      throw new YtDlpMcpError(
+        ErrorCode.CHECKSUM_MISMATCH,
+        `No checksum entry for ${assetName}`,
+      );
     const actual = await sha256File(filePath);
     if (actual.toLowerCase() !== expected.toLowerCase()) {
       throw new YtDlpMcpError(
@@ -126,7 +158,10 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
       if (await isFresh(await readMeta())) return paths.binaryPath;
       const resolved = await versionResolver.resolveSafeVersion(signal);
       await rm(partPath, { force: true });
-      logger.info({ tag: resolved.tag, asset: assetName }, 'downloading yt-dlp');
+      logger.info(
+        { tag: resolved.tag, asset: assetName },
+        'downloading yt-dlp',
+      );
       await download(resolved.assetUrl, partPath, signal);
       const sumsText = await getText(resolved.sumsUrl, signal);
       await verifyChecksum(partPath, sumsText);

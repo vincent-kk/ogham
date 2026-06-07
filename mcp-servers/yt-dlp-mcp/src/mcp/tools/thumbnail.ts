@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { thumbnailOperation } from '../../ytdlp/operations/thumbnail.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { WRITES_FILE } from './annotations.js';
 
 const inputSchema = {
@@ -20,19 +21,28 @@ export const thumbnailTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_thumbnail',
-      { title: 'Download thumbnail', description, inputSchema, annotations: WRITES_FILE },
+      {
+        title: 'Download thumbnail',
+        description,
+        inputSchema,
+        annotations: WRITES_FILE,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
-            const result = await service.execute({ cacheable: false, signal: extra.signal }, (ctx) =>
-              thumbnailOperation(ctx, { url: args.url }),
+            const result = await service.execute(
+              { cacheable: false, signal: extra.signal },
+              (ctx) => thumbnailOperation(ctx, { url: args.url }),
             );
             return {
               text: `Thumbnail saved: ${result.path} (${result.bytes} bytes)`,
               structuredContent: { ...result },
             };
           },
-          { errorPrefix: 'Error downloading thumbnail', characterLimit: config.extraction.characterLimit },
+          {
+            errorPrefix: 'Error downloading thumbnail',
+            characterLimit: config.extraction.characterLimit,
+          },
         ),
     );
   },

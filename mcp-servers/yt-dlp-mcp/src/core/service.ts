@@ -29,17 +29,26 @@ export interface ExecuteOptions {
  */
 export interface Service {
   readonly config: Config;
-  execute<T>(options: ExecuteOptions, fn: (ctx: OpContext) => Promise<T>): Promise<T>;
+  execute<T>(
+    options: ExecuteOptions,
+    fn: (ctx: OpContext) => Promise<T>,
+  ): Promise<T>;
 }
 
 export function createService(deps: ServiceDeps): Service {
   const limit = pLimit(deps.config.extraction.maxConcurrency);
-  const cache = new TtlLruCache<unknown>(deps.cacheMaxSize ?? 200, deps.cacheTtlMs ?? 15 * 60_000);
+  const cache = new TtlLruCache<unknown>(
+    deps.cacheMaxSize ?? 200,
+    deps.cacheTtlMs ?? 15 * 60_000,
+  );
 
   return {
     config: deps.config,
 
-    async execute<T>(options: ExecuteOptions, fn: (ctx: OpContext) => Promise<T>): Promise<T> {
+    async execute<T>(
+      options: ExecuteOptions,
+      fn: (ctx: OpContext) => Promise<T>,
+    ): Promise<T> {
       const { cacheKey, cacheable = false, signal } = options;
       if (cacheable && cacheKey) {
         const hit = cache.get(cacheKey);

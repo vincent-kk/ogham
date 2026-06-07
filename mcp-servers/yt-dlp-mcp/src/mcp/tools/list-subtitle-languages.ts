@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
-import type { SubtitleLanguageList, SubtitleTrack } from '../../domain/types.js';
+import type {
+  SubtitleLanguageList,
+  SubtitleTrack,
+} from '../../domain/types.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { listSubtitlesOperation } from '../../ytdlp/operations/list-subtitles.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { READ_ONLY } from './annotations.js';
 
 const inputSchema = {
@@ -33,17 +37,29 @@ export const listSubtitleLanguagesTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_list_subtitle_languages',
-      { title: 'List subtitle languages', description, inputSchema, annotations: READ_ONLY },
+      {
+        title: 'List subtitle languages',
+        description,
+        inputSchema,
+        annotations: READ_ONLY,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
             const result = await service.execute(
-              { cacheKey: cacheKey('list-subs', args.url), cacheable: true, signal: extra.signal },
+              {
+                cacheKey: cacheKey('list-subs', args.url),
+                cacheable: true,
+                signal: extra.signal,
+              },
               (ctx) => listSubtitlesOperation(ctx, { url: args.url }),
             );
             return { text: render(result), structuredContent: { ...result } };
           },
-          { errorPrefix: 'Error listing subtitle languages', characterLimit: config.extraction.characterLimit },
+          {
+            errorPrefix: 'Error listing subtitle languages',
+            characterLimit: config.extraction.characterLimit,
+          },
         ),
     );
   },

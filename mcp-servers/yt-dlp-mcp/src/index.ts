@@ -20,10 +20,18 @@ async function main(): Promise<void> {
   await paths.ensureBaseDirs();
 
   const versionResolver = createVersionResolver({
-    config: { cooldownDays: config.binary.cooldownDays, pinnedVersion: config.binary.pinnedVersion },
+    config: {
+      cooldownDays: config.binary.cooldownDays,
+      pinnedVersion: config.binary.pinnedVersion,
+    },
     fetchJson,
   });
-  const binaryManager = createBinaryManager({ paths, config, versionResolver, logger });
+  const binaryManager = createBinaryManager({
+    paths,
+    config,
+    versionResolver,
+    logger,
+  });
   const runner = createRunner({ binaryManager, config, logger });
   const service = createService({ runner, config, paths, logger });
 
@@ -43,7 +51,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+  const message =
+    error instanceof Error ? (error.stack ?? error.message) : String(error);
   process.stderr.write(`fatal: ${message}\n`);
   process.exit(1);
 });

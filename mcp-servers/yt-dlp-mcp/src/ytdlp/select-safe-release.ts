@@ -13,7 +13,13 @@ export function selectSafeRelease(
 ): GithubRelease | null {
   const cutoff = now - cooldownDays * DAY_MS;
   const eligible = releases
-    .filter((r) => !r.draft && !r.prerelease && typeof r.tag_name === 'string' && r.tag_name.length > 0)
+    .filter(
+      (r) =>
+        !r.draft &&
+        !r.prerelease &&
+        typeof r.tag_name === 'string' &&
+        r.tag_name.length > 0,
+    )
     .map((r) => ({ release: r, ts: Date.parse(r.published_at) }))
     .filter((x) => Number.isFinite(x.ts) && x.ts <= cutoff)
     .sort((a, b) => b.ts - a.ts);

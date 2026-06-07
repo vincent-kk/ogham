@@ -1,6 +1,7 @@
 import type { SearchResult, SearchResultItem } from '../../domain/types.js';
 import { asNumber, asRecordArray, asString } from '../../utils/coerce.js';
 import { normalizeUploadDate } from '../../utils/normalize-date.js';
+
 import type { OpContext } from './context.js';
 import { fetchInfoJson } from './info-json.js';
 
@@ -27,7 +28,10 @@ function mapItem(entry: Record<string, unknown>): SearchResultItem {
   return {
     id,
     title: asString(entry.title) ?? 'unknown',
-    url: asString(entry.url) ?? asString(entry.webpage_url) ?? (id ? `https://www.youtube.com/watch?v=${id}` : ''),
+    url:
+      asString(entry.url) ??
+      asString(entry.webpage_url) ??
+      (id ? `https://www.youtube.com/watch?v=${id}` : ''),
     uploader: asString(entry.uploader) ?? asString(entry.channel),
     durationSec: asNumber(entry.duration),
     uploadDate: normalizeUploadDate(asString(entry.upload_date)),
@@ -35,7 +39,10 @@ function mapItem(entry: Record<string, unknown>): SearchResultItem {
   };
 }
 
-export async function searchOperation(ctx: OpContext, params: SearchParams): Promise<SearchResult> {
+export async function searchOperation(
+  ctx: OpContext,
+  params: SearchParams,
+): Promise<SearchResult> {
   const fetchCount = params.offset + params.maxResults;
   const target = `ytsearch${fetchCount}:${params.query}`;
   // --dateafter only filters entries that carry upload_date, which --flat-playlist
@@ -48,7 +55,8 @@ export async function searchOperation(ctx: OpContext, params: SearchParams): Pro
   const info = await fetchInfoJson(ctx, target, extraArgs);
   const all = asRecordArray(info.entries).map(mapItem);
   const items = all.slice(params.offset, params.offset + params.maxResults);
-  const hasMore = all.length >= fetchCount && items.length === params.maxResults;
+  const hasMore =
+    all.length >= fetchCount && items.length === params.maxResults;
   return {
     query: params.query,
     count: items.length,

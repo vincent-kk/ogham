@@ -5,6 +5,7 @@ import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { DownloadResult } from '../../domain/types.js';
 import { lastNonEmptyLine } from '../../utils/last-line.js';
 import { isValidUrl } from '../../utils/validate-url.js';
+
 import type { OpContext } from './context.js';
 
 export type Resolution = '480p' | '720p' | '1080p' | 'best';
@@ -29,8 +30,15 @@ function videoFormat(resolution: Resolution = '720p'): string {
   return `bv*[height<=${height}]+ba/b[height<=${height}]/b`;
 }
 
-export async function downloadOperation(ctx: OpContext, params: DownloadParams): Promise<DownloadResult> {
-  if (!isValidUrl(params.url)) throw new YtDlpMcpError(ErrorCode.INVALID_INPUT, 'Invalid or unsupported URL');
+export async function downloadOperation(
+  ctx: OpContext,
+  params: DownloadParams,
+): Promise<DownloadResult> {
+  if (!isValidUrl(params.url))
+    throw new YtDlpMcpError(
+      ErrorCode.INVALID_INPUT,
+      'Invalid or unsupported URL',
+    );
   await mkdir(ctx.paths.downloadsDir, { recursive: true });
 
   const args = [
@@ -64,7 +72,11 @@ export async function downloadOperation(ctx: OpContext, params: DownloadParams):
   });
 
   const filepath = lastNonEmptyLine(stdout);
-  if (!filepath) throw new YtDlpMcpError(ErrorCode.DOWNLOAD_FAILED, 'yt-dlp did not report an output file');
+  if (!filepath)
+    throw new YtDlpMcpError(
+      ErrorCode.DOWNLOAD_FAILED,
+      'yt-dlp did not report an output file',
+    );
   const { size } = await stat(filepath);
   return {
     path: filepath,

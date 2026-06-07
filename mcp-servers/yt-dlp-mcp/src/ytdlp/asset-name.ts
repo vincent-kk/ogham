@@ -5,5 +5,9 @@ export function assetNameForPlatform(
   platform: NodeJS.Platform = process.platform,
   arch: string = process.arch,
 ): string {
-  return ASSET_BY_PLATFORM[`${platform}:${arch}`] ?? ASSET_BY_PLATFORM[platform] ?? 'yt-dlp';
+  return (
+    ASSET_BY_PLATFORM[`${platform}:${arch}`] ??
+    ASSET_BY_PLATFORM[platform] ??
+    'yt-dlp'
+  );
 }

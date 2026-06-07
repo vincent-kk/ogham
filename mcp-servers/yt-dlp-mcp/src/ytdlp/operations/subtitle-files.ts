@@ -7,7 +7,10 @@ export function fileLang(file: string): string {
 }
 
 /** Picks the best json3 file: exact lang, then `<lang>-orig`, then `en`, then first. */
-export function pickSubtitleFile(files: string[], lang: string): { file: string; language: string } {
+export function pickSubtitleFile(
+  files: string[],
+  lang: string,
+): { file: string; language: string } {
   const byLang = new Map(files.map((f) => [fileLang(f), f]));
   for (const candidate of [lang, `${lang}-orig`, 'en']) {
     const file = byLang.get(candidate);

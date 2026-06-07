@@ -10,5 +10,7 @@ const binPath = join(here, '..', 'dist', 'index.js');
 try {
   chmodSync(binPath, 0o755);
 } catch (error) {
-  process.stderr.write(`finalize-bin: could not chmod ${binPath}: ${String(error)}\n`);
+  process.stderr.write(
+    `finalize-bin: could not chmod ${binPath}: ${String(error)}\n`,
+  );
 }

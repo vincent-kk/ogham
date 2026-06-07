@@ -14,7 +14,9 @@ export const META_PRINT_FIELDS = [
   'upload_date',
 ] as const;
 
-export const META_PRINT_FMT = META_PRINT_FIELDS.map((f) => `%(${f})s`).join(FIELD_SEP);
+export const META_PRINT_FMT = META_PRINT_FIELDS.map((f) => `%(${f})s`).join(
+  FIELD_SEP,
+);
 
 // JS challenge runtime: reuse the MCP server's own Node (ADR-3, no extra install).
 export function jsRuntimeArg(nodePath: string): string[] {

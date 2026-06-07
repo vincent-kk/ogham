@@ -6,6 +6,7 @@ import { cacheKey } from '../../utils/cache-key.js';
 import { chaptersOperation } from '../../ytdlp/operations/chapters.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { READ_ONLY } from './annotations.js';
 
 const inputSchema = {
@@ -19,7 +20,9 @@ Use when: navigating long videos. Returns an empty list when the video has no ch
 
 function render(result: ChapterList): string {
   if (result.chapters.length === 0) return `No chapters for ${result.videoId}.`;
-  const lines = result.chapters.map((c) => `${formatTimestamp(c.startMs)}  ${c.title}`);
+  const lines = result.chapters.map(
+    (c) => `${formatTimestamp(c.startMs)}  ${c.title}`,
+  );
   return `# Chapters (${result.chapters.length})\n\n${lines.join('\n')}`;
 }
 
@@ -29,17 +32,29 @@ export const chaptersTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_chapters',
-      { title: 'Get chapters', description, inputSchema, annotations: READ_ONLY },
+      {
+        title: 'Get chapters',
+        description,
+        inputSchema,
+        annotations: READ_ONLY,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
             const result = await service.execute(
-              { cacheKey: cacheKey('chapters', args.url), cacheable: true, signal: extra.signal },
+              {
+                cacheKey: cacheKey('chapters', args.url),
+                cacheable: true,
+                signal: extra.signal,
+              },
               (ctx) => chaptersOperation(ctx, { url: args.url }),
             );
             return { text: render(result), structuredContent: { ...result } };
           },
-          { errorPrefix: 'Error fetching chapters', characterLimit: config.extraction.characterLimit },
+          {
+            errorPrefix: 'Error fetching chapters',
+            characterLimit: config.extraction.characterLimit,
+          },
         ),
     );
   },

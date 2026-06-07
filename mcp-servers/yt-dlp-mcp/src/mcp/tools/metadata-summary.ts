@@ -5,6 +5,7 @@ import { cacheKey } from '../../utils/cache-key.js';
 import { metadataOperation } from '../../ytdlp/operations/metadata.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { READ_ONLY } from './annotations.js';
 
 const inputSchema = {
@@ -23,17 +24,32 @@ export const metadataSummaryTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_video_metadata_summary',
-      { title: 'Video metadata summary', description, inputSchema, annotations: READ_ONLY },
+      {
+        title: 'Video metadata summary',
+        description,
+        inputSchema,
+        annotations: READ_ONLY,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
             const meta = await service.execute(
-              { cacheKey: cacheKey('metadata', args.url), cacheable: true, signal: extra.signal },
+              {
+                cacheKey: cacheKey('metadata', args.url),
+                cacheable: true,
+                signal: extra.signal,
+              },
               (ctx) => metadataOperation(ctx, { url: args.url }),
             );
-            return { text: formatMetadataSummary(meta), structuredContent: { ...meta } };
+            return {
+              text: formatMetadataSummary(meta),
+              structuredContent: { ...meta },
+            };
           },
-          { errorPrefix: 'Error generating metadata summary', characterLimit: config.extraction.characterLimit },
+          {
+            errorPrefix: 'Error generating metadata summary',
+            characterLimit: config.extraction.characterLimit,
+          },
         ),
     );
   },

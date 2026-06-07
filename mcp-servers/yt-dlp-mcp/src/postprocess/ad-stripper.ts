@@ -1,7 +1,8 @@
 import type { TranscriptSegment } from '../domain/types.js';
 
 // Non-speech caption cues like [Music], [Applause]. Conservative on purpose.
-const BRACKET_CUE = /\[(?:music|applause|laughter|cheering|sighs?|gasps?|silence|inaudible)\]/gi;
+const BRACKET_CUE =
+  /\[(?:music|applause|laughter|cheering|sighs?|gasps?|silence|inaudible)\]/gi;
 
 /** Removes bracketed non-speech cues and normalizes whitespace. */
 export function stripCaptionArtifacts(text: string): string {
@@ -12,7 +13,9 @@ export function stripCaptionArtifacts(text: string): string {
  * Drops consecutive segments with identical text — a common rolling-caption
  * artifact in auto-generated subtitles.
  */
-export function dedupeAdjacent(segments: TranscriptSegment[]): TranscriptSegment[] {
+export function dedupeAdjacent(
+  segments: TranscriptSegment[],
+): TranscriptSegment[] {
   const out: TranscriptSegment[] = [];
   let prev = '';
   for (const seg of segments) {

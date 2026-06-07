@@ -4,7 +4,10 @@ import type { CommentNode } from '../../domain/types.js';
  * Reconstructs nested reply threads from a flat comment list. Replies whose
  * parent is missing are lifted to root. `maxDepth` prunes deeper replies.
  */
-export function buildThreads(comments: CommentNode[], maxDepth?: number): CommentNode[] {
+export function buildThreads(
+  comments: CommentNode[],
+  maxDepth?: number,
+): CommentNode[] {
   const byId = new Map<string, CommentNode>();
   for (const c of comments) byId.set(c.id, { ...c, replies: [] });
 

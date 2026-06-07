@@ -1,14 +1,24 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { describe, expect, it } from 'vitest';
 
 import { createService } from '../core/service.js';
 import { registerEnabledTools } from '../mcp/registry.js';
 import { createServer } from '../mcp/server.js';
+
 import { makeFakeRunner } from './helpers/fake-runner.js';
-import { SAMPLE_JSON3, SAMPLE_META, SAMPLE_URL, SAMPLE_VIDEO_ID } from './helpers/fixtures.js';
-import { makeTestEnv, silentLogger, type TestEnv } from './helpers/test-context.js';
+import {
+  SAMPLE_JSON3,
+  SAMPLE_META,
+  SAMPLE_URL,
+  SAMPLE_VIDEO_ID,
+} from './helpers/fixtures.js';
+import {
+  type TestEnv,
+  makeTestEnv,
+  silentLogger,
+} from './helpers/test-context.js';
 
 function firstText(result: CallToolResult): string {
   const item = result.content[0];
@@ -27,11 +37,19 @@ async function connectClient(env: TestEnv): Promise<Client> {
     logger: silentLogger,
   });
   const server = createServer();
-  registerEnabledTools(server, { service, config: env.config, logger: silentLogger });
+  registerEnabledTools(server, {
+    service,
+    config: env.config,
+    logger: silentLogger,
+  });
 
-  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const [clientTransport, serverTransport] =
+    InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'test-client', version: '0.0.0' });
-  await Promise.all([client.connect(clientTransport), server.connect(serverTransport)]);
+  await Promise.all([
+    client.connect(clientTransport),
+    server.connect(serverTransport),
+  ]);
   return client;
 }
 

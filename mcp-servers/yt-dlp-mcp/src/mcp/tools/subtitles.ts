@@ -5,6 +5,7 @@ import { cacheKey } from '../../utils/cache-key.js';
 import { subtitlesOperation } from '../../ytdlp/operations/subtitles.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { READ_ONLY } from './annotations.js';
 
 const inputSchema = {
@@ -28,13 +29,22 @@ export const subtitlesTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_video_subtitles',
-      { title: 'Get raw subtitles', description, inputSchema, annotations: READ_ONLY },
+      {
+        title: 'Get raw subtitles',
+        description,
+        inputSchema,
+        annotations: READ_ONLY,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
             const language = args.language ?? 'en';
             const result = await service.execute(
-              { cacheKey: cacheKey('subtitles', args.url, { language }), cacheable: true, signal: extra.signal },
+              {
+                cacheKey: cacheKey('subtitles', args.url, { language }),
+                cacheable: true,
+                signal: extra.signal,
+              },
               (ctx) => subtitlesOperation(ctx, { url: args.url, language }),
             );
             const segments = result.segments ?? [];
@@ -48,7 +58,10 @@ export const subtitlesTool: ToolDefinition = {
               },
             };
           },
-          { errorPrefix: 'Error fetching subtitles', characterLimit: config.extraction.maxTranscriptLength },
+          {
+            errorPrefix: 'Error fetching subtitles',
+            characterLimit: config.extraction.maxTranscriptLength,
+          },
         ),
     );
   },

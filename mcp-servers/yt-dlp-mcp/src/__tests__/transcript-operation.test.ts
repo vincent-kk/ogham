@@ -3,8 +3,14 @@ import { readdir } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 import { transcriptOperation } from '../ytdlp/operations/transcript.js';
+
 import { makeFakeRunner } from './helpers/fake-runner.js';
-import { SAMPLE_JSON3, SAMPLE_META, SAMPLE_URL, SAMPLE_VIDEO_ID } from './helpers/fixtures.js';
+import {
+  SAMPLE_JSON3,
+  SAMPLE_META,
+  SAMPLE_URL,
+  SAMPLE_VIDEO_ID,
+} from './helpers/fixtures.js';
 import { makeOpContext } from './helpers/test-context.js';
 
 describe('transcriptOperation', () => {
@@ -14,7 +20,10 @@ describe('transcriptOperation', () => {
       files: { [`${SAMPLE_VIDEO_ID}.en.json3`]: SAMPLE_JSON3 },
     });
     const { ctx, env } = await makeOpContext(runner);
-    const result = await transcriptOperation(ctx, { url: SAMPLE_URL, language: 'en' });
+    const result = await transcriptOperation(ctx, {
+      url: SAMPLE_URL,
+      language: 'en',
+    });
     expect(result.videoId).toBe(SAMPLE_VIDEO_ID);
     expect(result.metadata.title).toBe('Test Title');
     expect(result.metadata.durationSec).toBe(212);
@@ -26,8 +35,12 @@ describe('transcriptOperation', () => {
   });
 
   it('throws NO_CAPTIONS when no subtitle files are produced', async () => {
-    const { ctx, env } = await makeOpContext(makeFakeRunner({ stdout: SAMPLE_META }));
-    await expect(transcriptOperation(ctx, { url: SAMPLE_URL, language: 'en' })).rejects.toMatchObject({
+    const { ctx, env } = await makeOpContext(
+      makeFakeRunner({ stdout: SAMPLE_META }),
+    );
+    await expect(
+      transcriptOperation(ctx, { url: SAMPLE_URL, language: 'en' }),
+    ).rejects.toMatchObject({
       code: 'NO_CAPTIONS',
     });
     await env.cleanup();
@@ -36,7 +49,9 @@ describe('transcriptOperation', () => {
   it('rejects invalid URLs before running yt-dlp', async () => {
     const runner = makeFakeRunner();
     const { ctx, env } = await makeOpContext(runner);
-    await expect(transcriptOperation(ctx, { url: 'not a url', language: 'en' })).rejects.toMatchObject({
+    await expect(
+      transcriptOperation(ctx, { url: 'not a url', language: 'en' }),
+    ).rejects.toMatchObject({
       code: 'INVALID_INPUT',
     });
     expect(runner.calls).toHaveLength(0);

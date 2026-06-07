@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { type Config, loadConfig } from '../../config.js';
-import { createLogger, type Logger } from '../../obs/logger.js';
-import { createPaths, type Paths } from '../../paths.js';
+import { type Logger, createLogger } from '../../obs/logger.js';
+import { type Paths, createPaths } from '../../paths.js';
 import type { OpContext } from '../../ytdlp/operations/context.js';
 import type { Runner } from '../../ytdlp/runner.js';
 
@@ -18,7 +18,9 @@ export interface TestEnv {
 }
 
 /** Creates a real Config + Paths rooted in a throwaway temp YTDLP_HOME. */
-export async function makeTestEnv(env: Record<string, string | undefined> = {}): Promise<TestEnv> {
+export async function makeTestEnv(
+  env: Record<string, string | undefined> = {},
+): Promise<TestEnv> {
   const home = await mkdtemp(path.join(tmpdir(), 'ytmcp-'));
   const config = loadConfig({ ...env, YTDLP_HOME: home });
   const paths = createPaths(config);

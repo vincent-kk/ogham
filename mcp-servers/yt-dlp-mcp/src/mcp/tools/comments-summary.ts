@@ -8,12 +8,22 @@ import { commentsOperation } from '../../ytdlp/operations/comments.js';
 import { renderMarkdownTree } from '../../ytdlp/operations/render-markdown-tree.js';
 import { handleToolExecution } from '../handle.js';
 import type { ToolDefinition } from '../tool-definition.js';
+
 import { READ_ONLY } from './annotations.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),
-  maxComments: z.number().int().min(1).max(50).optional().describe('Max comments to include (1-50, default 10).'),
-  view: z.enum(['flat', 'threaded']).optional().describe("'flat' (default) or 'threaded'."),
+  maxComments: z
+    .number()
+    .int()
+    .min(1)
+    .max(50)
+    .optional()
+    .describe('Max comments to include (1-50, default 10).'),
+  view: z
+    .enum(['flat', 'threaded'])
+    .optional()
+    .describe("'flat' (default) or 'threaded'."),
 };
 
 const description = `Human-readable summary of a video's top comments.
@@ -35,23 +45,47 @@ export const commentsSummaryTool: ToolDefinition = {
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_comments_summary',
-      { title: 'Comments summary', description, inputSchema, annotations: READ_ONLY },
+      {
+        title: 'Comments summary',
+        description,
+        inputSchema,
+        annotations: READ_ONLY,
+      },
       async (args, extra) =>
         handleToolExecution(
           async () => {
             const limit = args.maxComments ?? 10;
-            const params = { url: args.url, maxComments: limit, sortOrder: 'top' as const };
+            const params = {
+              url: args.url,
+              maxComments: limit,
+              sortOrder: 'top' as const,
+            };
             const result = await service.execute(
-              { cacheKey: cacheKey('comments-summary', args.url, { limit }), cacheable: true, signal: extra.signal },
+              {
+                cacheKey: cacheKey('comments-summary', args.url, { limit }),
+                cacheable: true,
+                signal: extra.signal,
+              },
               (ctx) => commentsOperation(ctx, params),
             );
             const text =
               (args.view ?? 'flat') === 'threaded'
-                ? renderMarkdownTree(buildThreads(result.comments).slice(0, limit))
+                ? renderMarkdownTree(
+                    buildThreads(result.comments).slice(0, limit),
+                  )
                 : renderFlat(result, limit);
-            return { text, structuredContent: { videoId: result.videoId, count: result.count } };
+            return {
+              text,
+              structuredContent: {
+                videoId: result.videoId,
+                count: result.count,
+              },
+            };
           },
-          { errorPrefix: 'Error summarizing comments', characterLimit: config.extraction.characterLimit },
+          {
+            errorPrefix: 'Error summarizing comments',
+            characterLimit: config.extraction.characterLimit,
+          },
         ),
     );
   },

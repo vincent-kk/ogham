@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { buildThreads } from '../ytdlp/operations/build-threads.js';
 import { commentsOperation } from '../ytdlp/operations/comments.js';
 import { renderMarkdownTree } from '../ytdlp/operations/render-markdown-tree.js';
+
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { SAMPLE_URL } from './helpers/fixtures.js';
 import { makeOpContext } from './helpers/test-context.js';
@@ -10,7 +11,14 @@ import { makeOpContext } from './helpers/test-context.js';
 const INFO = {
   id: 'abc',
   comments: [
-    { id: 'a', text: 'root one', author: 'Alice', parent: 'root', like_count: 5, author_is_uploader: true },
+    {
+      id: 'a',
+      text: 'root one',
+      author: 'Alice',
+      parent: 'root',
+      like_count: 5,
+      author_is_uploader: true,
+    },
     { id: 'b', text: 'a reply', author: 'Bob', parent: 'a', like_count: 1 },
     { id: 'c', text: 'root two', author: 'Carol', parent: 'root' },
     { id: 'd', text: 'orphan', author: 'Dan', parent: 'missing-parent' },
@@ -18,8 +26,14 @@ const INFO = {
 };
 
 async function load() {
-  const { ctx, env } = await makeOpContext(makeFakeRunner({ stdout: JSON.stringify(INFO) }));
-  const result = await commentsOperation(ctx, { url: SAMPLE_URL, maxComments: 20, sortOrder: 'top' });
+  const { ctx, env } = await makeOpContext(
+    makeFakeRunner({ stdout: JSON.stringify(INFO) }),
+  );
+  const result = await commentsOperation(ctx, {
+    url: SAMPLE_URL,
+    maxComments: 20,
+    sortOrder: 'top',
+  });
   await env.cleanup();
   return result;
 }

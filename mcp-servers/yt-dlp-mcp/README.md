@@ -16,9 +16,9 @@ Pure-HTTP transcript extraction is no longer reliable (poToken / BotGuard). yt-d
   "mcpServers": {
     "yt-dlp": {
       "command": "npx",
-      "args": ["-y", "@ogham/yt-dlp-mcp"]
-    }
-  }
+      "args": ["-y", "@ogham/yt-dlp-mcp"],
+    },
+  },
 }
 ```
 
@@ -30,20 +30,20 @@ The first tool call downloads a checksum-verified yt-dlp binary into `~/.yt-dlp/
 
 Four tools are always on. The rest register only when their `YTDLP_ENABLE_*` flag is set, so the host's tool list stays lean.
 
-| Tool | Gate |
-|------|------|
-| `ytdlp_search_videos` | default |
-| `ytdlp_list_subtitle_languages` | default |
-| `ytdlp_download_transcript` | default |
-| `ytdlp_get_video_metadata` | default |
-| `ytdlp_get_video_subtitles` | `YTDLP_ENABLE_SUBTITLES` |
-| `ytdlp_get_video_metadata_summary` | `YTDLP_ENABLE_METADATA_SUMMARY` |
-| `ytdlp_get_comments` / `ytdlp_get_comments_summary` | `YTDLP_ENABLE_COMMENTS` |
-| `ytdlp_get_chapters` | `YTDLP_ENABLE_CHAPTERS` |
-| `ytdlp_get_heatmap` | `YTDLP_ENABLE_HEATMAP` |
-| `ytdlp_get_thumbnail` | `YTDLP_ENABLE_THUMBNAIL` (writes a file) |
-| `ytdlp_download_video` / `ytdlp_download_audio` | `YTDLP_ENABLE_DOWNLOAD` (writes a file) |
-| `ytdlp_get_playlist` | `YTDLP_ENABLE_PLAYLIST` |
+| Tool                                                | Gate                                     |
+| --------------------------------------------------- | ---------------------------------------- |
+| `ytdlp_search_videos`                               | default                                  |
+| `ytdlp_list_subtitle_languages`                     | default                                  |
+| `ytdlp_download_transcript`                         | default                                  |
+| `ytdlp_get_video_metadata`                          | default                                  |
+| `ytdlp_get_video_subtitles`                         | `YTDLP_ENABLE_SUBTITLES`                 |
+| `ytdlp_get_video_metadata_summary`                  | `YTDLP_ENABLE_METADATA_SUMMARY`          |
+| `ytdlp_get_comments` / `ytdlp_get_comments_summary` | `YTDLP_ENABLE_COMMENTS`                  |
+| `ytdlp_get_chapters`                                | `YTDLP_ENABLE_CHAPTERS`                  |
+| `ytdlp_get_heatmap`                                 | `YTDLP_ENABLE_HEATMAP`                   |
+| `ytdlp_get_thumbnail`                               | `YTDLP_ENABLE_THUMBNAIL` (writes a file) |
+| `ytdlp_download_video` / `ytdlp_download_audio`     | `YTDLP_ENABLE_DOWNLOAD` (writes a file)  |
+| `ytdlp_get_playlist`                                | `YTDLP_ENABLE_PLAYLIST`                  |
 
 Set `YTDLP_ENABLE_ALL=1` to register everything at once.
 
@@ -51,19 +51,19 @@ Set `YTDLP_ENABLE_ALL=1` to register everything at once.
 
 All settings are environment variables (see [.env.example](./.env.example)); pass them via the host's `env` block.
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `YTDLP_HOME` | `~/.yt-dlp` | Root for `bin/`, `temp/`, `downloads/` |
-| `YTDLP_DOWNLOADS_DIR` | `$YTDLP_HOME/downloads` | Override download output dir |
-| `YTDLP_COOLDOWN_DAYS` | `7` | Only adopt releases older than this (supply-chain) |
-| `YTDLP_REFRESH_DAYS` | `14` | Refresh the cached binary after this many days |
-| `YTDLP_PINNED_VERSION` | — | Pin to an exact yt-dlp tag |
-| `YTDLP_MAX_CONCURRENCY` | `2` | Concurrent yt-dlp child processes |
-| `YTDLP_TIMEOUT_MS` | `90000` | Per-extraction timeout |
-| `YTDLP_CHARACTER_LIMIT` | `25000` | Response truncation limit |
-| `YTDLP_MAX_TRANSCRIPT_LENGTH` | `50000` | Transcript/subtitle truncation limit |
-| `YTDLP_LOG_LEVEL` | `info` | `trace`…`fatal`/`silent` (stderr only) |
-| `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` / `YTDLP_PROXY` | — | Evasion (opt-in; see Legal) |
+| Variable                                                            | Default                 | Purpose                                            |
+| ------------------------------------------------------------------- | ----------------------- | -------------------------------------------------- |
+| `YTDLP_HOME`                                                        | `~/.yt-dlp`             | Root for `bin/`, `temp/`, `downloads/`             |
+| `YTDLP_DOWNLOADS_DIR`                                               | `$YTDLP_HOME/downloads` | Override download output dir                       |
+| `YTDLP_COOLDOWN_DAYS`                                               | `7`                     | Only adopt releases older than this (supply-chain) |
+| `YTDLP_REFRESH_DAYS`                                                | `14`                    | Refresh the cached binary after this many days     |
+| `YTDLP_PINNED_VERSION`                                              | —                       | Pin to an exact yt-dlp tag                         |
+| `YTDLP_MAX_CONCURRENCY`                                             | `2`                     | Concurrent yt-dlp child processes                  |
+| `YTDLP_TIMEOUT_MS`                                                  | `90000`                 | Per-extraction timeout                             |
+| `YTDLP_CHARACTER_LIMIT`                                             | `25000`                 | Response truncation limit                          |
+| `YTDLP_MAX_TRANSCRIPT_LENGTH`                                       | `50000`                 | Transcript/subtitle truncation limit               |
+| `YTDLP_LOG_LEVEL`                                                   | `info`                  | `trace`…`fatal`/`silent` (stderr only)             |
+| `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` / `YTDLP_PROXY` | —                       | Evasion (opt-in; see Legal)                        |
 
 ## Security & supply chain
 

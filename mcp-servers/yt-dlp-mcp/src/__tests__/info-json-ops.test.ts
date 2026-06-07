@@ -6,12 +6,18 @@ import { listSubtitlesOperation } from '../ytdlp/operations/list-subtitles.js';
 import { metadataOperation } from '../ytdlp/operations/metadata.js';
 import { playlistOperation } from '../ytdlp/operations/playlist.js';
 import { searchOperation } from '../ytdlp/operations/search.js';
+
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { SAMPLE_URL } from './helpers/fixtures.js';
 import { makeOpContext } from './helpers/test-context.js';
 
-async function runWith<T>(info: unknown, fn: (ctx: Parameters<typeof metadataOperation>[0]) => Promise<T>): Promise<T> {
-  const { ctx, env } = await makeOpContext(makeFakeRunner({ stdout: JSON.stringify(info) }));
+async function runWith<T>(
+  info: unknown,
+  fn: (ctx: Parameters<typeof metadataOperation>[0]) => Promise<T>,
+): Promise<T> {
+  const { ctx, env } = await makeOpContext(
+    makeFakeRunner({ stdout: JSON.stringify(info) }),
+  );
   try {
     return await fn(ctx);
   } finally {
@@ -22,7 +28,15 @@ async function runWith<T>(info: unknown, fn: (ctx: Parameters<typeof metadataOpe
 describe('info-json operations', () => {
   it('maps metadata fields', async () => {
     const meta = await runWith(
-      { id: 'abc', title: 'T', channel: 'C', view_count: 100, duration: 212, upload_date: '20240115', tags: ['a'] },
+      {
+        id: 'abc',
+        title: 'T',
+        channel: 'C',
+        view_count: 100,
+        duration: 212,
+        upload_date: '20240115',
+        tags: ['a'],
+      },
       (ctx) => metadataOperation(ctx, { url: SAMPLE_URL }),
     );
     expect(meta).toMatchObject({
@@ -38,10 +52,15 @@ describe('info-json operations', () => {
 
   it('maps chapters with ms timing', async () => {
     const result = await runWith(
-      { id: 'abc', chapters: [{ start_time: 0, end_time: 10, title: 'Intro' }] },
+      {
+        id: 'abc',
+        chapters: [{ start_time: 0, end_time: 10, title: 'Intro' }],
+      },
       (ctx) => chaptersOperation(ctx, { url: SAMPLE_URL }),
     );
-    expect(result.chapters).toEqual([{ title: 'Intro', startMs: 0, endMs: 10_000 }]);
+    expect(result.chapters).toEqual([
+      { title: 'Intro', startMs: 0, endMs: 10_000 },
+    ]);
   });
 
   it('maps heatmap spans', async () => {
@@ -54,7 +73,14 @@ describe('info-json operations', () => {
 
   it('maps playlist entries and builds missing URLs', async () => {
     const result = await runWith(
-      { id: 'pl', title: 'My List', entries: [{ id: 'v1', title: 'A', url: 'https://youtu.be/v1' }, { id: 'v2', title: 'B' }] },
+      {
+        id: 'pl',
+        title: 'My List',
+        entries: [
+          { id: 'v1', title: 'A', url: 'https://youtu.be/v1' },
+          { id: 'v2', title: 'B' },
+        ],
+      },
       (ctx) => playlistOperation(ctx, { url: SAMPLE_URL }),
     );
     expect(result.count).toBe(2);
@@ -62,7 +88,10 @@ describe('info-json operations', () => {
   });
 
   it('paginates search results and reports hasMore', async () => {
-    const entries = Array.from({ length: 5 }, (_, i) => ({ id: `v${i}`, title: `T${i}` }));
+    const entries = Array.from({ length: 5 }, (_, i) => ({
+      id: `v${i}`,
+      title: `T${i}`,
+    }));
     const result = await runWith({ entries }, (ctx) =>
       searchOperation(ctx, { query: 'q', maxResults: 2, offset: 2 }),
     );
@@ -75,13 +104,18 @@ describe('info-json operations', () => {
     const result = await runWith(
       {
         id: 'abc',
-        subtitles: { en: [{ ext: 'vtt', name: 'English' }], ko: [{ ext: 'srv3' }] },
+        subtitles: {
+          en: [{ ext: 'vtt', name: 'English' }],
+          ko: [{ ext: 'srv3' }],
+        },
         automatic_captions: { en: [{ ext: 'vtt' }] },
       },
       (ctx) => listSubtitlesOperation(ctx, { url: SAMPLE_URL }),
     );
     expect(result.manual).toHaveLength(2);
     expect(result.automatic).toHaveLength(1);
-    expect(result.manual.find((t) => t.language === 'en')?.name).toBe('English');
+    expect(result.manual.find((t) => t.language === 'en')?.name).toBe(
+      'English',
+    );
   });
 });

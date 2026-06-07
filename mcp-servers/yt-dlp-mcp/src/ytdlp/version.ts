@@ -1,5 +1,10 @@
-import { RELEASE_BY_TAG_API, RELEASES_API, SUMS_ASSET } from '../constants/github.js';
+import {
+  RELEASES_API,
+  RELEASE_BY_TAG_API,
+  SUMS_ASSET,
+} from '../constants/github.js';
 import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
+
 import { assetNameForPlatform } from './asset-name.js';
 import { selectSafeRelease } from './select-safe-release.js';
 
@@ -33,9 +38,14 @@ export interface VersionResolverDeps {
   platform?: { platform: NodeJS.Platform; arch: string };
 }
 
-export function createVersionResolver(deps: VersionResolverDeps): VersionResolver {
+export function createVersionResolver(
+  deps: VersionResolverDeps,
+): VersionResolver {
   const now = deps.now ?? Date.now;
-  const assetName = assetNameForPlatform(deps.platform?.platform, deps.platform?.arch);
+  const assetName = assetNameForPlatform(
+    deps.platform?.platform,
+    deps.platform?.arch,
+  );
 
   function pickAsset(release: GithubRelease): ResolvedVersion {
     const asset = release.assets?.find((a) => a.name === assetName);
@@ -75,11 +85,21 @@ export function createVersionResolver(deps: VersionResolverDeps): VersionResolve
         return pickAsset(release);
       }
 
-      const releases = (await deps.fetchJson(`${RELEASES_API}?per_page=30`, signal)) as GithubRelease[];
+      const releases = (await deps.fetchJson(
+        `${RELEASES_API}?per_page=30`,
+        signal,
+      )) as GithubRelease[];
       if (!Array.isArray(releases)) {
-        throw new YtDlpMcpError(ErrorCode.NETWORK, 'Unexpected releases response from GitHub');
+        throw new YtDlpMcpError(
+          ErrorCode.NETWORK,
+          'Unexpected releases response from GitHub',
+        );
       }
-      const release = selectSafeRelease(releases, deps.config.cooldownDays, now());
+      const release = selectSafeRelease(
+        releases,
+        deps.config.cooldownDays,
+        now(),
+      );
       if (!release) {
         throw new YtDlpMcpError(
           ErrorCode.BINARY_UNAVAILABLE,

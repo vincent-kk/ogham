@@ -1,16 +1,17 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { EnableFlags } from '../config.js';
+
 import type { ToolDefinition, ToolDeps } from './tool-definition.js';
 import { chaptersTool } from './tools/chapters.js';
-import { commentsTool } from './tools/comments.js';
 import { commentsSummaryTool } from './tools/comments-summary.js';
+import { commentsTool } from './tools/comments.js';
 import { downloadAudioTool } from './tools/download-audio.js';
 import { downloadVideoTool } from './tools/download-video.js';
 import { heatmapTool } from './tools/heatmap.js';
 import { listSubtitleLanguagesTool } from './tools/list-subtitle-languages.js';
-import { metadataTool } from './tools/metadata.js';
 import { metadataSummaryTool } from './tools/metadata-summary.js';
+import { metadataTool } from './tools/metadata.js';
 import { playlistTool } from './tools/playlist.js';
 import { searchVideosTool } from './tools/search.js';
 import { subtitlesTool } from './tools/subtitles.js';
@@ -40,12 +41,18 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
 ];
 
 /** Pure gate check (ADR-8): default tools are always on; others follow their flag. */
-export function isToolEnabled(tool: ToolDefinition, enable: EnableFlags): boolean {
+export function isToolEnabled(
+  tool: ToolDefinition,
+  enable: EnableFlags,
+): boolean {
   if (tool.enabledBy === 'default') return true;
   return enable[tool.enabledBy];
 }
 
-export function registerEnabledTools(server: McpServer, deps: ToolDeps): string[] {
+export function registerEnabledTools(
+  server: McpServer,
+  deps: ToolDeps,
+): string[] {
   const registered: string[] = [];
   for (const tool of TOOL_REGISTRY) {
     if (isToolEnabled(tool, deps.config.enable)) {

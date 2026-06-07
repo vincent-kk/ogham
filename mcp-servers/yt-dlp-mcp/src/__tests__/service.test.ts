@@ -1,10 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createService } from '../core/service.js';
-import { makeFakeRunner } from './helpers/fake-runner.js';
-import { makeTestEnv, silentLogger, type TestEnv } from './helpers/test-context.js';
 
-const delay = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+import { makeFakeRunner } from './helpers/fake-runner.js';
+import {
+  type TestEnv,
+  makeTestEnv,
+  silentLogger,
+} from './helpers/test-context.js';
+
+const delay = (ms: number): Promise<void> =>
+  new Promise((r) => setTimeout(r, ms));
 
 let env: TestEnv;
 beforeEach(async () => {

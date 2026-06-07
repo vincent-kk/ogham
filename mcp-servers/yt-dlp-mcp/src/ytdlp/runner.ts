@@ -4,8 +4,9 @@ import type { Config } from '../config.js';
 import { BASE_ARGS, jsRuntimeArg } from '../constants/ytdlp.js';
 import { toYtDlpError } from '../domain/to-ytdlp-error.js';
 import type { Logger } from '../obs/logger.js';
-import { evasionArgs } from './evasion-args.js';
+
 import type { BinaryManager } from './ensure-binary.js';
+import { evasionArgs } from './evasion-args.js';
 
 export interface RunResult {
   stdout: string;
@@ -38,7 +39,11 @@ export interface RunnerDeps {
 export function createRunner(deps: RunnerDeps): Runner {
   const { binaryManager, config, logger } = deps;
   const nodePath = deps.nodePath ?? process.execPath;
-  const commonArgs = [...BASE_ARGS, ...jsRuntimeArg(nodePath), ...evasionArgs(config)];
+  const commonArgs = [
+    ...BASE_ARGS,
+    ...jsRuntimeArg(nodePath),
+    ...evasionArgs(config),
+  ];
 
   return {
     async run(args, opts): Promise<RunResult> {

@@ -2,7 +2,9 @@ import type { CommentNode } from '../../domain/types.js';
 import { asBoolean, asNumber, asString } from '../../utils/coerce.js';
 
 /** Normalizes raw yt-dlp comments into a flat list with computed reply depth. */
-export function normalizeComments(raw: Record<string, unknown>[]): CommentNode[] {
+export function normalizeComments(
+  raw: Record<string, unknown>[],
+): CommentNode[] {
   const byId = new Map<string, CommentNode>();
   for (const c of raw) {
     const id = asString(c.id);
