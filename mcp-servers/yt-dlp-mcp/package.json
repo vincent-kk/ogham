@@ -1,8 +1,17 @@
 {
   "name": "@ogham/yt-dlp-mcp",
   "version": "0.0.0",
-  "description": "yt-dlp MCP Server",
-  "keywords": [],
+  "description": "MCP server that extracts YouTube (and yt-dlp-supported) transcripts, metadata, comments, chapters, and media — auto-acquires a cooldown-pinned, checksum-verified yt-dlp binary for zero system install.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "yt-dlp",
+    "youtube",
+    "transcript",
+    "subtitles",
+    "metadata",
+    "llm"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/vincent-kk/ogham.git",
@@ -14,6 +23,7 @@
     "email": "lunox273@gmail.com"
   },
   "type": "module",
+  "bin": "dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,34 +34,31 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    ".env.example"
   ],
   "scripts": {
-    "bench": "vitest bench",
-    "bench:run": "vitest bench --run",
-    "build": "yarn clean && yarn version:sync && node scripts/sync-rule-hashes.mjs && tsc -p tsconfig.build.json && node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "build:plugin": "node scripts/build-mcp-server.mjs && node scripts/build-hooks.mjs",
-    "clean": "rm -rf bridge",
-    "dev": "tsc --watch",
-    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "build": "yarn clean && tsc -p tsconfig.build.json && node scripts/finalize-bin.mjs",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "start": "node dist/index.js",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "RUN_NETWORK_TESTS=1 RUN_BINARY_TESTS=1 vitest run",
     "test:run": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "version:major": "yarn version major",
-    "version:minor": "yarn version minor",
-    "version:patch": "yarn version patch",
-    "version:sync": "node ../../scripts/inject-version.mjs"
+    "typecheck": "tsc -p tsconfig.build.json --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",
+    "execa": "^9.5.0",
+    "p-limit": "^6.2.0",
+    "pino": "^9.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@ogham/cross-platform": "workspace:^",
     "@types/node": "^20.11.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "esbuild": "^0.24.0",
+    "@vitest/coverage-v8": "^4.1.2",
     "typescript": "^5.7.2",
     "vitest": "^4.1.2"
   },
