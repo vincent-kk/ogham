@@ -3,9 +3,9 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { assetNameForPlatform } from '../ytdlp/asset-name.js';
 import { createBinaryManager } from '../ytdlp/ensure-binary.js';
 import type { VersionResolver } from '../ytdlp/version.js';
-import { assetNameForPlatform } from '../ytdlp/version.js';
 import { makeTestEnv, silentLogger, type TestEnv } from './helpers/test-context.js';
 
 const ASSET = assetNameForPlatform();

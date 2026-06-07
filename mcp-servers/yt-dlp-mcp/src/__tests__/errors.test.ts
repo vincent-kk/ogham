@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { classifyYtDlpError, ErrorCode, toYtDlpError, YtDlpMcpError } from '../domain/errors.js';
+import { classifyYtDlpError } from '../domain/classify-ytdlp-error.js';
+import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
+import { toYtDlpError } from '../domain/to-ytdlp-error.js';
 
 describe('classifyYtDlpError', () => {
   it('maps known stderr signatures', () => {

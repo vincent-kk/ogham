@@ -1,6 +1,6 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-import { toYtDlpError } from '../domain/errors.js';
+import { toYtDlpError } from '../domain/to-ytdlp-error.js';
 import { truncate } from '../postprocess/formatter.js';
 
 export interface ToolSuccess {

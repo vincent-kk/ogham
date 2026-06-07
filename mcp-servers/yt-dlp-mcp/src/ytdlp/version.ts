@@ -1,5 +1,7 @@
-import { ASSET_BY_PLATFORM, RELEASE_BY_TAG_API, RELEASES_API, SUMS_ASSET } from '../constants/github.js';
+import { RELEASE_BY_TAG_API, RELEASES_API, SUMS_ASSET } from '../constants/github.js';
 import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
+import { assetNameForPlatform } from './asset-name.js';
+import { selectSafeRelease } from './select-safe-release.js';
 
 export interface GithubAsset {
   name: string;
@@ -22,33 +24,6 @@ export interface ResolvedVersion {
 
 export interface VersionResolver {
   resolveSafeVersion(signal?: AbortSignal): Promise<ResolvedVersion>;
-}
-
-const DAY_MS = 86_400_000;
-
-export function assetNameForPlatform(
-  platform: NodeJS.Platform = process.platform,
-  arch: string = process.arch,
-): string {
-  return ASSET_BY_PLATFORM[`${platform}:${arch}`] ?? ASSET_BY_PLATFORM[platform] ?? 'yt-dlp';
-}
-
-/**
- * Pure cooldown selection (ADR-4): newest non-draft/prerelease release published
- * at least `cooldownDays` ago. Returns null when none qualify.
- */
-export function selectSafeRelease(
-  releases: GithubRelease[],
-  cooldownDays: number,
-  now: number,
-): GithubRelease | null {
-  const cutoff = now - cooldownDays * DAY_MS;
-  const eligible = releases
-    .filter((r) => !r.draft && !r.prerelease && typeof r.tag_name === 'string' && r.tag_name.length > 0)
-    .map((r) => ({ release: r, ts: Date.parse(r.published_at) }))
-    .filter((x) => Number.isFinite(x.ts) && x.ts <= cutoff)
-    .sort((a, b) => b.ts - a.ts);
-  return eligible[0]?.release ?? null;
 }
 
 export interface VersionResolverDeps {

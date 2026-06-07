@@ -1,12 +1,14 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 
 import type { Config } from '../config.js';
 import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
 import type { Logger } from '../obs/logger.js';
 import type { Paths } from '../paths.js';
+import { assetNameForPlatform } from './asset-name.js';
+import { parseSums, sha256File } from './checksum.js';
 import { downloadToFile, fetchText } from './http.js';
-import { assetNameForPlatform, type VersionResolver } from './version.js';
+import type { VersionResolver } from './version.js';
 
 export interface BinaryManager {
   ensureBinary(signal?: AbortSignal): Promise<string>;
@@ -32,25 +34,6 @@ const LOCK_STALE_MS = 5 * 60_000;
 const LOCK_POLL_MS = 250;
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function sha256File(filePath: string): Promise<string> {
-  const buffer = await readFile(filePath);
-  return createHash('sha256').update(buffer).digest('hex');
-}
-
-function parseSums(text: string, assetName: string): string | null {
-  for (const line of text.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
-      continue;
-    }
-    const match = trimmed.match(/^([0-9a-fA-F]{64})\s+\*?(.+)$/);
-    if (match && match[2].trim() === assetName) {
-      return match[1];
-    }
-  }
-  return null;
-}
 
 /**
  * Acquires and caches the yt-dlp binary (ADR-2/4): cooldown version selection,

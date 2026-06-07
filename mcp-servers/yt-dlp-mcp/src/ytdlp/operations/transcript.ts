@@ -1,16 +1,14 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import { FIELD_SEP, META_PRINT_FMT, SUB_FORMAT } from '../../constants/ytdlp.js';
+import { META_PRINT_FMT, SUB_FORMAT } from '../../constants/ytdlp.js';
 import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { TranscriptResult, VideoMetadata } from '../../domain/types.js';
+import type { TranscriptResult } from '../../domain/types.js';
 import { removeDir } from '../../paths.js';
-import { lastNonEmptyLine } from '../../utils/last-line.js';
-import { normalizeUploadDate } from '../../utils/normalize-date.js';
-import { parseVideoId } from '../../utils/parse-video-id.js';
 import { isValidUrl } from '../../utils/validate-url.js';
 import type { OpContext } from './context.js';
 import { parseJson3 } from './parse-json3.js';
+import { parseMetaPrint } from './parse-meta-print.js';
 import { pickSubtitleFile, uniqueLangs } from './subtitle-files.js';
 
 export interface TranscriptParams {
@@ -74,22 +72,3 @@ export async function transcriptOperation(
   }
 }
 
-function toInt(value: string | undefined): number | undefined {
-  if (!value || value === 'NA') {
-    return undefined;
-  }
-  const n = Number.parseInt(value, 10);
-  return Number.isFinite(n) ? n : undefined;
-}
-
-function parseMetaPrint(stdout: string, url: string): VideoMetadata {
-  const [id, title, channel, viewCount, duration, uploadDate] = lastNonEmptyLine(stdout).split(FIELD_SEP);
-  return {
-    videoId: (id ?? '').trim() || parseVideoId(url) || 'unknown',
-    title: (title ?? '').trim() || 'unknown',
-    channel: (channel ?? '').trim() || 'unknown',
-    viewCount: toInt(viewCount),
-    durationSec: toInt(duration),
-    uploadDate: normalizeUploadDate(uploadDate),
-  };
-}
