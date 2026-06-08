@@ -23,7 +23,7 @@ const inputSchema = {
     )
     .optional()
     .describe(
-      "BCP-47-ish language code, e.g. 'en', 'ko', 'ja'. Falls back to 'en'.",
+      "BCP-47-ish language code, e.g. 'en', 'ko', 'ja'. Defaults to the server's configured language (YTDLP_DEFAULT_SUB_LANG, 'en' if unset); also tries <lang>-orig.",
     ),
   timestamps: z
     .boolean()
@@ -41,7 +41,7 @@ const description = `Download a clean plain-text transcript from a video's capti
 
 Args:
   - url (string): full video URL.
-  - language (string, optional): caption language code (default 'en'); falls back to <lang>-orig.
+  - language (string, optional): caption language code; defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset); also tries <lang>-orig.
   - timestamps (boolean, optional): prefix each line with [H:MM:SS] (default false).
   - stripArtifacts (boolean, optional): remove non-speech cues and duplicate caption lines (default false).
 
@@ -72,7 +72,7 @@ export const transcriptTool: ToolDefinition = {
       async (args, extra) =>
         handleToolExecution(
           async () => {
-            const language = args.language ?? 'en';
+            const language = args.language ?? config.extraction.defaultSubLang;
             const result = await service.execute(
               {
                 cacheKey: cacheKey('transcript', args.url, { language }),

@@ -100,6 +100,35 @@ describe('info-json operations', () => {
     expect(result.nextOffset).toBe(4);
   });
 
+  it('injects youtube:lang extractor-args when YTDLP_LANG is set', async () => {
+    const runner = makeFakeRunner({
+      stdout: JSON.stringify({ id: 'abc', title: 'T' }),
+    });
+    const { ctx, env } = await makeOpContext(runner, { YTDLP_LANG: 'ko' });
+    try {
+      await metadataOperation(ctx, { url: SAMPLE_URL });
+    } finally {
+      await env.cleanup();
+    }
+    expect(runner.calls[0]).toContain('--extractor-args');
+    expect(runner.calls[0]).toContain('youtube:lang=ko');
+  });
+
+  it('omits lang extractor-args by default', async () => {
+    const runner = makeFakeRunner({
+      stdout: JSON.stringify({ id: 'abc', title: 'T' }),
+    });
+    const { ctx, env } = await makeOpContext(runner);
+    try {
+      await metadataOperation(ctx, { url: SAMPLE_URL });
+    } finally {
+      await env.cleanup();
+    }
+    expect(runner.calls[0].some((a) => a.startsWith('youtube:lang='))).toBe(
+      false,
+    );
+  });
+
   it('separates manual and automatic subtitle tracks', async () => {
     const result = await runWith(
       {

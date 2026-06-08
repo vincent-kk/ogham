@@ -31,8 +31,18 @@ export async function fetchInfoJson(
   target: string,
   extraArgs: string[] = [],
 ): Promise<Record<string, unknown>> {
+  // Placed before extraArgs so an extractor's own youtube args (e.g. comments) win.
+  const langArgs = ctx.config.lang
+    ? ['--extractor-args', `youtube:lang=${ctx.config.lang}`]
+    : [];
   const { stdout } = await ctx.runner.run(
-    ['--dump-single-json', '--skip-download', ...extraArgs, target],
+    [
+      '--dump-single-json',
+      '--skip-download',
+      ...langArgs,
+      ...extraArgs,
+      target,
+    ],
     { timeoutMs: ctx.config.extraction.timeoutMs, signal: ctx.signal },
   );
   return parseInfoJson(stdout);

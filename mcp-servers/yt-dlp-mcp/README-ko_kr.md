@@ -85,7 +85,7 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 | ------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `ytdlp_search_videos`           | 키워드로 YouTube 검색(페이지네이션·업로드 날짜 필터 지원).            | `query`, `maxResults`(1–50, 기본 10), `offset`, `uploadDateFilter`(`hour`/`today`/`week`/`month`/`year`) |
 | `ytdlp_list_subtitle_languages` | 영상에 있는 자막 언어 목록(수동 + 자동 생성).                         | `url`                                                                                                    |
-| `ytdlp_download_transcript`     | 영상 자막에서 깔끔하게 읽히는 플레인 텍스트 스크립트를 가져옵니다.    | `url`, `language`(기본 `en`), `timestamps`, `stripArtifacts`                                             |
+| `ytdlp_download_transcript`     | 영상 자막에서 깔끔하게 읽히는 플레인 텍스트 스크립트를 가져옵니다.    | `url`, `language`(기본 `YTDLP_DEFAULT_SUB_LANG`, 미설정 시 `en`), `timestamps`, `stripArtifacts`         |
 | `ytdlp_get_video_metadata`      | 정제된 영상 메타데이터를 JSON으로 반환(제목·조회수·길이·업로드일 등). | `url`, `fields`(원하는 키만 선택)                                                                        |
 
 ### 선택 활성화(환경변수로 켜기)
@@ -157,6 +157,13 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 | `YTDLP_TIMEOUT_MS`            | `90000` | 단일 추출 작업의 시간 예산(밀리초).            |
 | `YTDLP_CHARACTER_LIMIT`       | `25000` | 일반 도구 응답이 잘리기 전까지의 최대 글자 수. |
 | `YTDLP_MAX_TRANSCRIPT_LENGTH` | `50000` | 자막/스크립트 응답의 최대 글자 수.             |
+
+### 언어
+
+| 변수                     | 기본값 | 용도                                                                                                                                                                                                                          |
+| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `YTDLP_DEFAULT_SUB_LANG` | `en`   | `language`를 생략했을 때 `ytdlp_download_transcript` / `ytdlp_get_video_subtitles`가 사용할 자막 언어. 호출당 한 언어만 받으므로(timedtext 레이트 리밋), 주력 콘텐츠 언어(예: `ko`)로 두면 빈 결과를 피할 수 있습니다.        |
+| `YTDLP_LANG`             | —      | 제목/메타데이터 언어. YouTube는 인터페이스 언어에 따라 번역된 제목을 내려주므로, 이 값을 설정(예: `ko`)하면 search / playlist / metadata에서 원제목을 받습니다. 자막 요청에는 영향이 없어 레이트 리밋 부담을 늘리지 않습니다. |
 
 ### 로깅
 

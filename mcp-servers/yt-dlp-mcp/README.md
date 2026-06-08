@@ -85,7 +85,7 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 | ------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | `ytdlp_search_videos`           | Search YouTube by keyword, with pagination and an optional upload-date filter. | `query`, `maxResults` (1–50, default 10), `offset`, `uploadDateFilter` (`hour`/`today`/`week`/`month`/`year`) |
 | `ytdlp_list_subtitle_languages` | List which subtitle/caption languages a video has (manual + auto-generated).   | `url`                                                                                                         |
-| `ytdlp_download_transcript`     | Get a clean, readable plain-text transcript from a video's captions.           | `url`, `language` (default `en`), `timestamps`, `stripArtifacts`                                              |
+| `ytdlp_download_transcript`     | Get a clean, readable plain-text transcript from a video's captions.           | `url`, `language` (default `YTDLP_DEFAULT_SUB_LANG`, else `en`), `timestamps`, `stripArtifacts`               |
 | `ytdlp_get_video_metadata`      | Get curated video metadata as JSON (title, views, duration, upload date, …).   | `url`, `fields` (keep only the keys you ask for)                                                              |
 
 ### Opt-in (switch on with an environment variable)
@@ -157,6 +157,13 @@ The server manages its own yt-dlp binary; these control how it picks and refresh
 | `YTDLP_TIMEOUT_MS`            | `90000` | Time budget for a single extraction (milliseconds).         |
 | `YTDLP_CHARACTER_LIMIT`       | `25000` | Max characters in a normal tool response before truncation. |
 | `YTDLP_MAX_TRANSCRIPT_LENGTH` | `50000` | Max characters for transcript / subtitle responses.         |
+
+### Language
+
+| Variable                 | Default | Purpose                                                                                                                                                                                                                                                                           |
+| ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `YTDLP_DEFAULT_SUB_LANG` | `en`    | Caption language for `ytdlp_download_transcript` / `ytdlp_get_video_subtitles` when the call omits `language`. Set it to your main content language (e.g. `ko`) so transcripts don't return empty — only one language is fetched per call, by design (timedtext is rate-limited). |
+| `YTDLP_LANG`             | —       | Preferred language for titles / metadata. YouTube serves translated titles by interface language; set this (e.g. `ko`) to get originals from search / playlist / metadata. Never touches subtitle fetches, so it adds no rate-limit cost.                                         |
 
 ### Logging
 

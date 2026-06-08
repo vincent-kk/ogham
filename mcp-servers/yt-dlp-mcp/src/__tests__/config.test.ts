@@ -42,6 +42,18 @@ describe('loadConfig', () => {
       /configuration/i,
     );
   });
+
+  it('defaults sub language to en and leaves lang unset', () => {
+    const c = loadConfig({});
+    expect(c.extraction.defaultSubLang).toBe('en');
+    expect(c.lang).toBeUndefined();
+  });
+
+  it('reads YTDLP_DEFAULT_SUB_LANG and YTDLP_LANG', () => {
+    const c = loadConfig({ YTDLP_DEFAULT_SUB_LANG: 'ko', YTDLP_LANG: 'ko' });
+    expect(c.extraction.defaultSubLang).toBe('ko');
+    expect(c.lang).toBe('ko');
+  });
 });
 
 describe('evasionArgs', () => {

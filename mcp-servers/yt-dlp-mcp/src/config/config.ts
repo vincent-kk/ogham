@@ -30,6 +30,7 @@ const ConfigSchema = z.object({
     maxTranscriptLength: z.number().int().min(100),
     requestIntervalMs: z.number().int().min(0),
     subtitleIntervalMs: z.number().int().min(0),
+    defaultSubLang: z.string().min(1),
   }),
   enable: z.object({
     subtitles: z.boolean(),
@@ -48,6 +49,7 @@ const ConfigSchema = z.object({
     proxyPool: z.array(z.string().min(1)),
   }),
   logLevel: z.enum(LOG_LEVELS),
+  lang: z.string().min(1).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -157,6 +159,7 @@ export function loadConfig(env: Env = process.env): Config {
         env.YTDLP_SUBTITLE_INTERVAL_MS,
         adaptive.subtitleIntervalMs,
       ),
+      defaultSubLang: env.YTDLP_DEFAULT_SUB_LANG?.trim() || 'en',
     },
     enable: {
       subtitles: flag('YTDLP_ENABLE_SUBTITLES'),
@@ -175,6 +178,7 @@ export function loadConfig(env: Env = process.env): Config {
       proxyPool,
     },
     logLevel: env.YTDLP_LOG_LEVEL?.trim() || 'info',
+    lang: env.YTDLP_LANG?.trim() || undefined,
   };
 
   const parsed = ConfigSchema.safeParse(raw);
