@@ -39,6 +39,7 @@ export function createESLintConfig(
               tsconfigPath,
               "./plugins/*/tsconfig.json",
               "./plugins/*/tsconfig.eslint.json",
+              "./mcp-servers/*/tsconfig.json",
             ],
             noWarnOnMultipleProjects: true,
           },

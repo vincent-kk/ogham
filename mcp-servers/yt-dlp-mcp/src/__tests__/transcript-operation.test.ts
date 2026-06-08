@@ -2,7 +2,7 @@ import { readdir } from 'node:fs/promises';
 
 import { describe, expect, it } from 'vitest';
 
-import { transcriptOperation } from '../features/subtitle/operations/transcript.js';
+import { transcriptOperation } from '@/features/subtitle/operations/transcript.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import {

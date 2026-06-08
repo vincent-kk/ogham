@@ -2,10 +2,10 @@ import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { subtitlesOperation } from '../features/subtitle/operations/subtitles.js';
-import type { OpContext } from '../ytdlp/operations/context.js';
-import { downloadOperation } from '../ytdlp/operations/download.js';
-import { thumbnailOperation } from '../ytdlp/operations/thumbnail.js';
+import { subtitlesOperation } from '@/features/subtitle/operations/subtitles.js';
+import type { OpContext } from '@/ytdlp/operations/context.js';
+import { downloadOperation } from '@/ytdlp/operations/download.js';
+import { thumbnailOperation } from '@/ytdlp/operations/thumbnail.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { SAMPLE_JSON3, SAMPLE_URL } from './helpers/fixtures.js';

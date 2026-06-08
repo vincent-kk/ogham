@@ -1,12 +1,12 @@
 import pLimit from 'p-limit';
 
-import { TtlLruCache } from '../cache/cache.js';
-import type { Config } from '../config/index.js';
-import type { Logger } from '../obs/logger.js';
-import type { Paths } from '../paths/index.js';
-import { createThrottle } from '../utils/throttle.js';
-import type { OpContext } from '../ytdlp/operations/context.js';
-import type { Runner } from '../ytdlp/runner/runner.js';
+import { TtlLruCache } from '@/cache/cache.js';
+import type { Config } from '@/config/index.js';
+import type { Logger } from '@/obs/logger.js';
+import type { Paths } from '@/paths/index.js';
+import { createThrottle } from '@/utils/throttle.js';
+import type { OpContext } from '@/ytdlp/operations/context.js';
+import type { Runner } from '@/ytdlp/runner/runner.js';
 
 export interface ServiceDeps {
   runner: Runner;

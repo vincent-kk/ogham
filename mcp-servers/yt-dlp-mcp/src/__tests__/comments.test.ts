@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildThreads } from '../ytdlp/operations/build-threads.js';
-import { commentsOperation } from '../ytdlp/operations/comments.js';
-import { renderMarkdownTree } from '../ytdlp/operations/render-markdown-tree.js';
+import { buildThreads } from '@/ytdlp/operations/build-threads.js';
+import { commentsOperation } from '@/ytdlp/operations/comments.js';
+import { renderMarkdownTree } from '@/ytdlp/operations/render-markdown-tree.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { SAMPLE_URL } from './helpers/fixtures.js';

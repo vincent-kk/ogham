@@ -1,9 +1,9 @@
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { PlaylistEntry, PlaylistResult } from '../../domain/types.js';
-import { asNumber } from '../../utils/as-number.js';
-import { asRecordArray } from '../../utils/as-record-array.js';
-import { asString } from '../../utils/as-string.js';
-import { isValidUrl } from '../../utils/validate-url.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
+import type { PlaylistEntry, PlaylistResult } from '@/domain/types.js';
+import { asNumber } from '@/utils/as-number.js';
+import { asRecordArray } from '@/utils/as-record-array.js';
+import { asString } from '@/utils/as-string.js';
+import { isValidUrl } from '@/utils/validate-url.js';
 
 import type { OpContext } from './context.js';
 import { fetchInfoJson } from './info-json.js';

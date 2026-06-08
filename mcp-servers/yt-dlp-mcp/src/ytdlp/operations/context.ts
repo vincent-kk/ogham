@@ -1,6 +1,7 @@
-import type { Config } from '../../config/index.js';
-import type { Logger } from '../../obs/logger.js';
-import type { Paths } from '../../paths/index.js';
+import type { Config } from '@/config/index.js';
+import type { Logger } from '@/obs/logger.js';
+import type { Paths } from '@/paths/index.js';
+
 import type { Runner } from '../runner/runner.js';
 
 /**

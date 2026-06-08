@@ -2,8 +2,8 @@ import {
   RELEASES_API,
   RELEASE_BY_TAG_API,
   SUMS_ASSET,
-} from '../../constants/github.js';
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
+} from '@/constants/github.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
 
 import { assetNameForPlatform } from './asset-name.js';
 import { selectSafeRelease } from './select-safe-release.js';

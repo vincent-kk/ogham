@@ -1,4 +1,4 @@
-import type { VideoMetadata } from '../domain/types.js';
+import type { VideoMetadata } from '@/domain/types.js';
 
 import { formatDuration } from './format-timestamp.js';
 

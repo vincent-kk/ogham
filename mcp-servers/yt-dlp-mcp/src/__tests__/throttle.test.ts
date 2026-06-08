@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createThrottle } from '../utils/throttle.js';
+import { createThrottle } from '@/utils/throttle.js';
 
 describe('createThrottle', () => {
   it('minIntervalMs <= 0 is instant (sleep never called)', async () => {

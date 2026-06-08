@@ -1,8 +1,8 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-import { ErrorCode } from '../../domain/errors.js';
-import { toYtDlpError } from '../../domain/to-ytdlp-error.js';
-import { truncate } from '../../postprocess/truncate.js';
+import { ErrorCode } from '@/domain/errors.js';
+import { toYtDlpError } from '@/domain/to-ytdlp-error.js';
+import { truncate } from '@/postprocess/truncate.js';
 
 // Actionable next-step appended to errors a proxy/cookie can resolve. Order
 // reflects mitigation effectiveness: rotating proxy > request pacing > cookies.

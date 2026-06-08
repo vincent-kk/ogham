@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadConfig } from '../config/index.js';
+import { loadConfig } from '@/config/index.js';
 
 describe('loadConfig adaptive proxy rate-limit defaults', () => {
   it('parses a pool, sizing concurrency to its length and relaxing intervals', () => {

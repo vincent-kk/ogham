@@ -4,7 +4,7 @@ import {
   fileLang,
   pickSubtitleFile,
   uniqueLangs,
-} from '../features/subtitle/operations/subtitle-files.js';
+} from '@/features/subtitle/operations/subtitle-files.js';
 
 describe('pickSubtitleFile', () => {
   it('prefers the exact requested language', () => {

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { loadConfig } from '../config/index.js';
-import type { BinaryManager } from '../ytdlp/binary/ensure-binary.js';
-import { cookieArgs, proxyArg } from '../ytdlp/runner/evasion-args.js';
-import { createRunner } from '../ytdlp/runner/runner.js';
+import { loadConfig } from '@/config/index.js';
+import type { BinaryManager } from '@/ytdlp/binary/ensure-binary.js';
+import { cookieArgs, proxyArg } from '@/ytdlp/runner/evasion-args.js';
+import { createRunner } from '@/ytdlp/runner/runner.js';
 
 import { silentLogger } from './helpers/test-context.js';
 

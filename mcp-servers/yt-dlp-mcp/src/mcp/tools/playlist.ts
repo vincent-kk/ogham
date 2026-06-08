@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import type { PlaylistResult } from '../../domain/types.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { playlistOperation } from '../../ytdlp/operations/playlist.js';
+import type { PlaylistResult } from '@/domain/types.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { playlistOperation } from '@/ytdlp/operations/playlist.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

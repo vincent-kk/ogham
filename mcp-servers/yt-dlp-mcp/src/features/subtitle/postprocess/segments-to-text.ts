@@ -1,5 +1,5 @@
-import type { TranscriptSegment } from '../../../domain/types.js';
-import { formatTimestamp } from '../../../postprocess/format-timestamp.js';
+import type { TranscriptSegment } from '@/domain/types.js';
+import { formatTimestamp } from '@/postprocess/format-timestamp.js';
 
 /** Joins transcript segments into plain text, or one timestamped line each. */
 export function segmentsToText(

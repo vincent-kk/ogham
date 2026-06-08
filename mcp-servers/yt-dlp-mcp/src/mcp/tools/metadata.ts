@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import type { VideoMetadata } from '../../domain/types.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { metadataOperation } from '../../ytdlp/operations/metadata.js';
+import type { VideoMetadata } from '@/domain/types.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { metadataOperation } from '@/ytdlp/operations/metadata.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

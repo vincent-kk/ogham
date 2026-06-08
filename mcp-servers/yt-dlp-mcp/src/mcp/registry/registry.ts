@@ -1,11 +1,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import type { EnableFlags } from '../../config/index.js';
+import type { EnableFlags } from '@/config/index.js';
 import {
   listSubtitleLanguagesTool,
   subtitlesTool,
   transcriptTool,
-} from '../../features/index.js';
+} from '@/features/index.js';
+
 import { chaptersTool } from '../tools/chapters.js';
 import { commentsSummaryTool } from '../tools/comments-summary.js';
 import { commentsTool } from '../tools/comments.js';

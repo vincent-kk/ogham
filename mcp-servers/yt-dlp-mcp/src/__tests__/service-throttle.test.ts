@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createService } from '../core/service.js';
+import { createService } from '@/core/service.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import {

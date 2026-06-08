@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { searchOperation } from '../ytdlp/operations/search.js';
+import { searchOperation } from '@/ytdlp/operations/search.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { makeOpContext } from './helpers/test-context.js';

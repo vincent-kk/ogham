@@ -1,4 +1,4 @@
-import { FIELD_SEP } from '../../constants/ytdlp.js';
+import { FIELD_SEP } from '@/constants/ytdlp.js';
 
 /** Realistic json3 caption document covering joins, whitespace, and cues. */
 export const SAMPLE_JSON3 = JSON.stringify({

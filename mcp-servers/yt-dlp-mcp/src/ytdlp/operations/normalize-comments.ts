@@ -1,7 +1,7 @@
-import type { CommentNode } from '../../domain/types.js';
-import { asBoolean } from '../../utils/as-boolean.js';
-import { asNumber } from '../../utils/as-number.js';
-import { asString } from '../../utils/as-string.js';
+import type { CommentNode } from '@/domain/types.js';
+import { asBoolean } from '@/utils/as-boolean.js';
+import { asNumber } from '@/utils/as-number.js';
+import { asString } from '@/utils/as-string.js';
 
 /** Normalizes raw yt-dlp comments into a flat list with computed reply depth. */
 export function normalizeComments(

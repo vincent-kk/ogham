@@ -1,6 +1,6 @@
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { VideoMetadata } from '../../domain/types.js';
-import { isValidUrl } from '../../utils/validate-url.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
+import type { VideoMetadata } from '@/domain/types.js';
+import { isValidUrl } from '@/utils/validate-url.js';
 
 import type { OpContext } from './context.js';
 import { fetchInfoJson } from './info-json.js';

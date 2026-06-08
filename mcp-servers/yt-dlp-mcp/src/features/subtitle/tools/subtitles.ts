@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-import { READ_ONLY } from '../../../mcp/tools/annotations.js';
-import { handleToolExecution } from '../../../mcp/tools/handle.js';
-import type { ToolDefinition } from '../../../mcp/tools/tool-definition.js';
-import { cacheKey } from '../../../utils/cache-key.js';
+import { READ_ONLY } from '@/mcp/tools/annotations.js';
+import { handleToolExecution } from '@/mcp/tools/handle.js';
+import type { ToolDefinition } from '@/mcp/tools/tool-definition.js';
+import { cacheKey } from '@/utils/cache-key.js';
+
 import { subtitlesOperation } from '../operations/subtitles.js';
 import { segmentsToText } from '../postprocess/segments-to-text.js';
 

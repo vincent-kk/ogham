@@ -1,9 +1,10 @@
 import { execa } from 'execa';
 
-import type { Config } from '../../config/index.js';
-import { BASE_ARGS } from '../../constants/ytdlp.js';
-import { toYtDlpError } from '../../domain/to-ytdlp-error.js';
-import type { Logger } from '../../obs/logger.js';
+import type { Config } from '@/config/index.js';
+import { BASE_ARGS } from '@/constants/ytdlp.js';
+import { toYtDlpError } from '@/domain/to-ytdlp-error.js';
+import type { Logger } from '@/obs/logger.js';
+
 import type { BinaryManager } from '../binary/ensure-binary.js';
 
 import { cookieArgs, proxyArg } from './evasion-args.js';

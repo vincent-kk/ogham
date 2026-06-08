@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { thumbnailOperation } from '../../ytdlp/operations/thumbnail.js';
+import { thumbnailOperation } from '@/ytdlp/operations/thumbnail.js';
 
 import { WRITES_FILE } from './annotations.js';
 import { handleToolExecution } from './handle.js';

@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
 
 const USER_AGENT = 'ogham-yt-dlp-mcp';
 

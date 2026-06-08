@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
-import type { Heatmap } from '../../domain/types.js';
-import { formatTimestamp } from '../../postprocess/format-timestamp.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { heatmapOperation } from '../../ytdlp/operations/heatmap.js';
+import type { Heatmap } from '@/domain/types.js';
+import { formatTimestamp } from '@/postprocess/format-timestamp.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { heatmapOperation } from '@/ytdlp/operations/heatmap.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

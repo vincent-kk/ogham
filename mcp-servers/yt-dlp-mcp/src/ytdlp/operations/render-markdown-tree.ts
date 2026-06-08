@@ -1,4 +1,4 @@
-import type { CommentNode } from '../../domain/types.js';
+import type { CommentNode } from '@/domain/types.js';
 
 function badges(node: CommentNode): string {
   const marks: string[] = [];

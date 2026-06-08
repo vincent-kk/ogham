@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseVideoId } from '../utils/parse-video-id.js';
+import { parseVideoId } from '@/utils/parse-video-id.js';
 
 describe('parseVideoId', () => {
   it('extracts from watch URLs', () => {

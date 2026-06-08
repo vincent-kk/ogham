@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { downloadOperation } from '../../ytdlp/operations/download.js';
+import { downloadOperation } from '@/ytdlp/operations/download.js';
 
 import { WRITES_FILE } from './annotations.js';
 import { handleToolExecution } from './handle.js';

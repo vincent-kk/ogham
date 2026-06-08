@@ -1,4 +1,4 @@
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
 
 import type { OpContext } from './context.js';
 

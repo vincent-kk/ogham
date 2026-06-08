@@ -19,5 +19,11 @@ await esbuild.build({
   // stays external and is resolved at runtime from the installed dependency tree
   // (standard npm layout — deps install alongside the package via npx).
   packages: 'external',
+  // Mirror the tsconfig `@/*` -> `src/*` path mapping so bundled imports resolve.
+  // esbuild matches `@` and its subpaths (`@/foo`) without colliding with scoped
+  // packages like `@modelcontextprotocol/sdk`, which keep their own package name.
+  alias: {
+    '@': resolve(root, 'src'),
+  },
   logLevel: 'info',
 });

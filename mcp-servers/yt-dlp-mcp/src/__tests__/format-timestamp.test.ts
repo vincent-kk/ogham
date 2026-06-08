@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDuration,
   formatTimestamp,
-} from '../postprocess/format-timestamp.js';
+} from '@/postprocess/format-timestamp.js';
 
 describe('formatTimestamp', () => {
   it('formats sub-hour as M:SS', () => {

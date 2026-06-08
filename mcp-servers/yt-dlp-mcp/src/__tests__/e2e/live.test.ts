@@ -4,26 +4,26 @@ import path from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { loadConfig } from '../../config/index.js';
-import { type Service, createService } from '../../core/service.js';
-import { listSubtitlesOperation } from '../../features/subtitle/operations/list-subtitles.js';
-import { subtitlesOperation } from '../../features/subtitle/operations/subtitles.js';
-import { transcriptOperation } from '../../features/subtitle/operations/transcript.js';
-import { createLogger } from '../../obs/logger.js';
-import { createPaths } from '../../paths/index.js';
-import type { BinaryManager } from '../../ytdlp/binary/ensure-binary.js';
-import { createBinaryManager } from '../../ytdlp/binary/ensure-binary.js';
-import { fetchJson } from '../../ytdlp/binary/http.js';
-import { createVersionResolver } from '../../ytdlp/binary/version.js';
-import { chaptersOperation } from '../../ytdlp/operations/chapters.js';
-import { commentsOperation } from '../../ytdlp/operations/comments.js';
-import { downloadOperation } from '../../ytdlp/operations/download.js';
-import { heatmapOperation } from '../../ytdlp/operations/heatmap.js';
-import { metadataOperation } from '../../ytdlp/operations/metadata.js';
-import { playlistOperation } from '../../ytdlp/operations/playlist.js';
-import { searchOperation } from '../../ytdlp/operations/search.js';
-import { thumbnailOperation } from '../../ytdlp/operations/thumbnail.js';
-import { type Runner, createRunner } from '../../ytdlp/runner/runner.js';
+import { loadConfig } from '@/config/index.js';
+import { type Service, createService } from '@/core/service.js';
+import { listSubtitlesOperation } from '@/features/subtitle/operations/list-subtitles.js';
+import { subtitlesOperation } from '@/features/subtitle/operations/subtitles.js';
+import { transcriptOperation } from '@/features/subtitle/operations/transcript.js';
+import { createLogger } from '@/obs/logger.js';
+import { createPaths } from '@/paths/index.js';
+import type { BinaryManager } from '@/ytdlp/binary/ensure-binary.js';
+import { createBinaryManager } from '@/ytdlp/binary/ensure-binary.js';
+import { fetchJson } from '@/ytdlp/binary/http.js';
+import { createVersionResolver } from '@/ytdlp/binary/version.js';
+import { chaptersOperation } from '@/ytdlp/operations/chapters.js';
+import { commentsOperation } from '@/ytdlp/operations/comments.js';
+import { downloadOperation } from '@/ytdlp/operations/download.js';
+import { heatmapOperation } from '@/ytdlp/operations/heatmap.js';
+import { metadataOperation } from '@/ytdlp/operations/metadata.js';
+import { playlistOperation } from '@/ytdlp/operations/playlist.js';
+import { searchOperation } from '@/ytdlp/operations/search.js';
+import { thumbnailOperation } from '@/ytdlp/operations/thumbnail.js';
+import { type Runner, createRunner } from '@/ytdlp/runner/runner.js';
 
 // Gated end-to-end harness. These actually download the yt-dlp binary and hit
 // YouTube, so they are skipped unless explicitly enabled:

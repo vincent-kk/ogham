@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { formatMetadataSummary } from '../../postprocess/metadata-summary.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { metadataOperation } from '../../ytdlp/operations/metadata.js';
+import { formatMetadataSummary } from '@/postprocess/metadata-summary.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { metadataOperation } from '@/ytdlp/operations/metadata.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { listSubtitlesOperation } from '../features/subtitle/operations/list-subtitles.js';
-import { chaptersOperation } from '../ytdlp/operations/chapters.js';
-import { heatmapOperation } from '../ytdlp/operations/heatmap.js';
-import { metadataOperation } from '../ytdlp/operations/metadata.js';
-import { playlistOperation } from '../ytdlp/operations/playlist.js';
-import { searchOperation } from '../ytdlp/operations/search.js';
+import { listSubtitlesOperation } from '@/features/subtitle/operations/list-subtitles.js';
+import { chaptersOperation } from '@/ytdlp/operations/chapters.js';
+import { heatmapOperation } from '@/ytdlp/operations/heatmap.js';
+import { metadataOperation } from '@/ytdlp/operations/metadata.js';
+import { playlistOperation } from '@/ytdlp/operations/playlist.js';
+import { searchOperation } from '@/ytdlp/operations/search.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import { SAMPLE_URL } from './helpers/fixtures.js';

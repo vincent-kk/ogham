@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { truncate } from '../postprocess/truncate.js';
+import { truncate } from '@/postprocess/truncate.js';
 
 describe('truncate', () => {
   it('leaves short text untouched', () => {

@@ -1,10 +1,10 @@
 import { copyFile, mkdir, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { ThumbnailResult } from '../../domain/types.js';
-import { removeDir } from '../../paths/index.js';
-import { isValidUrl } from '../../utils/validate-url.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
+import type { ThumbnailResult } from '@/domain/types.js';
+import { removeDir } from '@/paths/index.js';
+import { isValidUrl } from '@/utils/validate-url.js';
 
 import type { OpContext } from './context.js';
 

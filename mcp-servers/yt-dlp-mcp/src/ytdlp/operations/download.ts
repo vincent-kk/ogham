@@ -1,10 +1,10 @@
 import { mkdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { DownloadResult } from '../../domain/types.js';
-import { lastNonEmptyLine } from '../../utils/last-line.js';
-import { isValidUrl } from '../../utils/validate-url.js';
+import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
+import type { DownloadResult } from '@/domain/types.js';
+import { lastNonEmptyLine } from '@/utils/last-line.js';
+import { isValidUrl } from '@/utils/validate-url.js';
 
 import type { OpContext } from './context.js';
 

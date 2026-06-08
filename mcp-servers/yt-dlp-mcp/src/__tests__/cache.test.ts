@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TtlLruCache } from '../cache/cache.js';
+import { TtlLruCache } from '@/cache/cache.js';
 
 describe('TtlLruCache', () => {
   it('stores and retrieves within TTL', () => {

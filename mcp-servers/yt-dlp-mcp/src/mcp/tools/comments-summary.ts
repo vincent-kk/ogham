@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-import type { CommentResult } from '../../domain/types.js';
-import { truncate } from '../../postprocess/truncate.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { buildThreads } from '../../ytdlp/operations/build-threads.js';
-import { commentsOperation } from '../../ytdlp/operations/comments.js';
-import { renderMarkdownTree } from '../../ytdlp/operations/render-markdown-tree.js';
+import type { CommentResult } from '@/domain/types.js';
+import { truncate } from '@/postprocess/truncate.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { buildThreads } from '@/ytdlp/operations/build-threads.js';
+import { commentsOperation } from '@/ytdlp/operations/comments.js';
+import { renderMarkdownTree } from '@/ytdlp/operations/render-markdown-tree.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

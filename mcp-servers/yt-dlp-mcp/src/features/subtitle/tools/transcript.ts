@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
-import { handleToolExecution } from '../../../mcp/tools/handle.js';
-import type { ToolDefinition } from '../../../mcp/tools/tool-definition.js';
-import { cacheKey } from '../../../utils/cache-key.js';
+import { handleToolExecution } from '@/mcp/tools/handle.js';
+import type { ToolDefinition } from '@/mcp/tools/tool-definition.js';
+import { cacheKey } from '@/utils/cache-key.js';
+
 import { transcriptOperation } from '../operations/transcript.js';
 import {
   dedupeAdjacent,

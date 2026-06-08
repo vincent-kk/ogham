@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import type { SearchResult } from '../../domain/types.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { searchOperation } from '../../ytdlp/operations/search.js';
+import type { SearchResult } from '@/domain/types.js';
+import { cacheKey } from '@/utils/cache-key.js';
+import { searchOperation } from '@/ytdlp/operations/search.js';
 
 import { READ_ONLY } from './annotations.js';
 import { handleToolExecution } from './handle.js';

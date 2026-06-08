@@ -1,8 +1,8 @@
-import { FIELD_SEP } from '../../../constants/ytdlp.js';
-import type { VideoMetadata } from '../../../domain/types.js';
-import { lastNonEmptyLine } from '../../../utils/last-line.js';
-import { normalizeUploadDate } from '../../../utils/normalize-date.js';
-import { parseVideoId } from '../../../utils/parse-video-id.js';
+import { FIELD_SEP } from '@/constants/ytdlp.js';
+import type { VideoMetadata } from '@/domain/types.js';
+import { lastNonEmptyLine } from '@/utils/last-line.js';
+import { normalizeUploadDate } from '@/utils/normalize-date.js';
+import { parseVideoId } from '@/utils/parse-video-id.js';
 
 function toInt(value: string | undefined): number | undefined {
   if (!value || value === 'NA') {

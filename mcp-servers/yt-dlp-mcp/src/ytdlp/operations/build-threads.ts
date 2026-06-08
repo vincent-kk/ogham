@@ -1,4 +1,4 @@
-import type { CommentNode } from '../../domain/types.js';
+import type { CommentNode } from '@/domain/types.js';
 
 /**
  * Reconstructs nested reply threads from a flat comment list. Replies whose

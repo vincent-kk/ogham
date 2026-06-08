@@ -1,4 +1,4 @@
-import { ASSET_BY_PLATFORM } from '../../constants/github.js';
+import { ASSET_BY_PLATFORM } from '@/constants/github.js';
 
 /** Resolves the yt-dlp standalone asset filename for an OS/arch pair. */
 export function assetNameForPlatform(

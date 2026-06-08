@@ -1,4 +1,4 @@
-import type { Config } from '../../config/index.js';
+import type { Config } from '@/config/index.js';
 
 /**
  * Builds the rotation-invariant cookie yt-dlp arguments. Cookie file takes
