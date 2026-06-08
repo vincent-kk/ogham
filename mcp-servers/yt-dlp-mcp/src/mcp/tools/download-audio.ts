@@ -14,6 +14,12 @@ const inputSchema = {
     .describe("Audio container (default 'm4a')."),
 };
 
+const outputSchema = {
+  path: z.string(),
+  bytes: z.number(),
+  format: z.string(),
+};
+
 const description = `Extract and download a video's audio track into the downloads directory.
 Returns: the saved file path + structuredContent { path, bytes, format }.
 Writes a file (not idempotent); audio extraction requires ffmpeg on PATH.`;
@@ -28,6 +34,7 @@ export const downloadAudioTool: ToolDefinition = {
         title: 'Download audio',
         description,
         inputSchema,
+        outputSchema,
         annotations: WRITES_FILE,
       },
       async (args, extra) =>

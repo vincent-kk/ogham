@@ -12,6 +12,19 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
+const trackSchema = z.object({
+  language: z.string(),
+  ext: z.string(),
+  isAutomatic: z.boolean(),
+  name: z.string().optional(),
+});
+
+const outputSchema = {
+  videoId: z.string(),
+  manual: z.array(trackSchema),
+  automatic: z.array(trackSchema),
+};
+
 const description = `List a video's available subtitle languages (manual and auto-generated).
 Returns: manual + automatic language lists + structuredContent { videoId, manual[], automatic[] }.
 Use when checking which languages exist before fetching a transcript; not for the text itself (use ytdlp_download_transcript).`;
@@ -36,6 +49,7 @@ export const listSubtitleLanguagesTool: ToolDefinition = {
         title: 'List subtitle languages',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

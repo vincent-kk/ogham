@@ -57,8 +57,14 @@ describe('loadConfig', () => {
     expect(c.lang).toBeUndefined();
   });
 
-  it('reads YTDLP_DEFAULT_SUB_LANG and YTDLP_LANG', () => {
-    const c = loadConfig({ YTDLP_DEFAULT_SUB_LANG: 'ko', YTDLP_LANG: 'ko' });
+  it('reads YTDLP_DEFAULT_SUB_LANG and YTDLP_LANG independently', () => {
+    const c = loadConfig({ YTDLP_DEFAULT_SUB_LANG: 'ko', YTDLP_LANG: 'ja' });
+    expect(c.extraction.defaultSubLang).toBe('ko');
+    expect(c.lang).toBe('ja');
+  });
+
+  it('falls back to YTDLP_LANG for the default sub language when YTDLP_DEFAULT_SUB_LANG is unset', () => {
+    const c = loadConfig({ YTDLP_LANG: 'ko' });
     expect(c.extraction.defaultSubLang).toBe('ko');
     expect(c.lang).toBe('ko');
   });

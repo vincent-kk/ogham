@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { videoMetadataSchema } from '@/domain/video-metadata-schema.js';
 import { handleToolExecution } from '@/mcp/tools/utils/handle.js';
 import type { ToolDefinition } from '@/mcp/tools/utils/tool-definition.js';
 import { cacheKey } from '@/utils/cache-key.js';
@@ -21,7 +22,7 @@ const inputSchema = {
     )
     .optional()
     .describe(
-      "Caption language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset); also tries <lang>-orig.",
+      "Caption language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG, then YTDLP_LANG, else 'en'; also tries <lang>-orig.",
     ),
   timestamps: z
     .boolean()
@@ -35,8 +36,20 @@ const inputSchema = {
     ),
 };
 
+const outputSchema = {
+  videoId: z.string(),
+  language: z.string(),
+  transcript: z.string(),
+  availableSubs: z.array(z.string()),
+  segmentCount: z.number(),
+  charCount: z.number(),
+  truncated: z.boolean(),
+  warnings: z.array(z.string()),
+  metadata: videoMetadataSchema,
+};
+
 const description = `Download a clean plain-text transcript from a video's captions.
-Returns: transcript text + structuredContent { videoId, language, availableSubs, segmentCount, charCount, truncated, warnings, metadata }.
+Returns: transcript text + structuredContent { videoId, language, transcript, availableSubs, segmentCount, charCount, truncated, warnings, metadata }.
 Use when you need readable text to analyze, summarize, or quote; not for timestamped raw cues (enable ytdlp_get_video_subtitles) or a media file.`;
 
 export const transcriptTool: ToolDefinition = {
@@ -49,6 +62,7 @@ export const transcriptTool: ToolDefinition = {
         title: 'Download transcript',
         description,
         inputSchema,
+        outputSchema,
         annotations: {
           readOnlyHint: true,
           destructiveHint: false,
@@ -88,6 +102,7 @@ export const transcriptTool: ToolDefinition = {
               structuredContent: {
                 videoId: result.videoId,
                 language: result.language,
+                transcript: body,
                 availableSubs: result.availableSubs,
                 segmentCount: segments.length,
                 charCount: text.length,

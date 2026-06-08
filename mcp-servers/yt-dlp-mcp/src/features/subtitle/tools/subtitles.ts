@@ -18,8 +18,21 @@ const inputSchema = {
     )
     .optional()
     .describe(
-      "Subtitle language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset).",
+      "Subtitle language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG, then YTDLP_LANG, else 'en'.",
     ),
+};
+
+const outputSchema = {
+  videoId: z.string(),
+  language: z.string(),
+  format: z.string(),
+  segments: z.array(
+    z.object({
+      text: z.string(),
+      startMs: z.number(),
+      durationMs: z.number(),
+    }),
+  ),
 };
 
 const description = `Get raw subtitles with timestamps preserved (one line per cue).
@@ -36,6 +49,7 @@ export const subtitlesTool: ToolDefinition = {
         title: 'Get raw subtitles',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

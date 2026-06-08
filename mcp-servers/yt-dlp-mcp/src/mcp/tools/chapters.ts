@@ -13,6 +13,17 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
+const outputSchema = {
+  videoId: z.string(),
+  chapters: z.array(
+    z.object({
+      title: z.string(),
+      startMs: z.number(),
+      endMs: z.number().optional(),
+    }),
+  ),
+};
+
 const description = `List a video's chapters (section markers with start times).
 Returns: a timestamped chapter list + structuredContent { videoId, chapters }.
 Use when navigating long videos. Empty list when the video has no chapters.`;
@@ -35,6 +46,7 @@ export const chaptersTool: ToolDefinition = {
         title: 'Get chapters',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

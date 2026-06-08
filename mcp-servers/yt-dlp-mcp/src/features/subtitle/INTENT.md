@@ -15,6 +15,7 @@
 
 - 도구는 공용 `handleToolExecution`(`mcp/tools`)으로 감싸고, `service.execute`에 `throttle: 'subtitle'`로 자막 페이싱을 선언한다.
 - 추출 결과는 `domain/types`의 공유 타입으로 반환한다(슬라이스 내부에 복제하지 않는다).
+- `transcript` 도구는 본문 텍스트를 `structuredContent.transcript`로도 노출한다.
 - `list-subtitles`만 공용 `info-json`을 쓰고, transcript/subtitles는 json3+파일 추출로 자기완결한다.
 
 ## Boundaries

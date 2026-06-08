@@ -178,7 +178,8 @@ export function loadConfig(env: Env = process.env): Config {
         env.YTDLP_SUBTITLE_INTERVAL_MS,
         adaptive.subtitleIntervalMs,
       ),
-      defaultSubLang: env.YTDLP_DEFAULT_SUB_LANG?.trim() || 'en',
+      defaultSubLang:
+        env.YTDLP_DEFAULT_SUB_LANG?.trim() || env.YTDLP_LANG?.trim() || 'en',
     },
     enable,
     evasion: {

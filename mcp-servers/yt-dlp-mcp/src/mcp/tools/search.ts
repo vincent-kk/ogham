@@ -29,6 +29,25 @@ const inputSchema = {
     .describe('Restrict to videos uploaded within this window.'),
 };
 
+const outputSchema = {
+  query: z.string(),
+  count: z.number(),
+  offset: z.number(),
+  hasMore: z.boolean(),
+  nextOffset: z.number(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      uploader: z.string().optional(),
+      durationSec: z.number().optional(),
+      uploadDate: z.string().optional(),
+      viewCount: z.number().optional(),
+    }),
+  ),
+};
+
 const description = `Search YouTube by keyword, with pagination and an optional upload-date filter.
 Returns: a ranked list (title, uploader, URL) + structuredContent { query, count, offset, hasMore, nextOffset, items }.
 Use when discovering videos by topic or creator; not when you already have a URL (use ytdlp_get_video_metadata).`;
@@ -57,6 +76,7 @@ export const searchVideosTool: ToolDefinition = {
         title: 'Search videos',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { VideoMetadata } from '@/domain/types.js';
+import { videoMetadataSchema } from '@/domain/video-metadata-schema.js';
 import { cacheKey } from '@/utils/cache-key.js';
 import { metadataOperation } from '@/ytdlp/operations/metadata.js';
 
@@ -17,6 +18,9 @@ const inputSchema = {
       "Subset of metadata keys to return, e.g. ['title','viewCount','uploadDate']. Omit for all. Unknown keys are silently excluded from the result.",
     ),
 };
+
+// `fields` may return any subset, so every key is optional in the contract.
+const outputSchema = videoMetadataSchema.partial();
 
 const description = `Extract curated video metadata as JSON (no download).
 Returns: JSON metadata + structuredContent { videoId, title, channel, viewCount, likeCount, durationSec, uploadDate, tags, … }.
@@ -43,6 +47,7 @@ export const metadataTool: ToolDefinition = {
         title: 'Get video metadata',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import type { CommentNode } from '@/domain/types.js';
 import { cacheKey } from '@/utils/cache-key.js';
 import { buildThreads } from '@/ytdlp/operations/build-threads.js';
 import { commentsOperation } from '@/ytdlp/operations/comments.js';
@@ -66,6 +67,32 @@ const inputSchema = {
     .describe('Max reply nesting depth kept in threaded views.'),
 };
 
+const commentNodeSchema: z.ZodType<CommentNode> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    text: z.string(),
+    author: z.string(),
+    authorId: z.string().optional(),
+    likeCount: z.number().optional(),
+    isPinned: z.boolean().optional(),
+    isUploader: z.boolean().optional(),
+    isFavorited: z.boolean().optional(),
+    timestamp: z.number().optional(),
+    timeText: z.string().optional(),
+    parent: z.string().optional(),
+    depth: z.number(),
+    replies: z.array(commentNodeSchema).optional(),
+  }),
+);
+
+const outputSchema = {
+  videoId: z.string(),
+  count: z.number(),
+  rootCount: z.number(),
+  replyCount: z.number(),
+  comments: z.array(commentNodeSchema),
+};
+
 const description = `Extract video comments as JSON or threaded Markdown.
 Returns: comments + structuredContent { videoId, count, rootCount, replyCount, comments }.
 Use when analyzing discussion in depth; for a quick read use ytdlp_get_comments_summary. Mainly YouTube; degrades to root-only elsewhere.`;
@@ -80,6 +107,7 @@ export const commentsTool: ToolDefinition = {
         title: 'Get comments',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

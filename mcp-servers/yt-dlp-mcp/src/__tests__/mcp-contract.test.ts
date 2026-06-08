@@ -30,8 +30,9 @@ async function connectClient(
   files: Record<string, string> = {
     [`${SAMPLE_VIDEO_ID}.en.json3`]: SAMPLE_JSON3,
   },
+  stdout: string = SAMPLE_META,
 ): Promise<Client> {
-  const runner = makeFakeRunner({ stdout: SAMPLE_META, files });
+  const runner = makeFakeRunner({ stdout, files });
   const service = createService({
     runner,
     config: env.config,
@@ -74,6 +75,7 @@ describe('MCP contract', () => {
     })) as CallToolResult;
     expect(result.isError).toBeFalsy();
     expect(firstText(result)).toContain('Hello world');
+    expect(result.structuredContent?.transcript).toContain('Hello world');
     await client.close();
     await env.cleanup();
   });
@@ -123,6 +125,27 @@ describe('MCP contract', () => {
     })) as CallToolResult;
     expect(result.structuredContent?.truncated).toBe(true);
     expect(result.structuredContent?.charCount).toBeGreaterThan(100);
+    await client.close();
+    await env.cleanup();
+  });
+
+  it('exposes the digest in structuredContent.summary for the comments summary', async () => {
+    const env = await makeTestEnv({ YTDLP_ENABLE_COMMENTS_SUMMARY: '1' });
+    const infoJson = JSON.stringify({
+      id: SAMPLE_VIDEO_ID,
+      comments: [
+        { id: 'c1', text: 'Loved this', author: 'Alice', like_count: 9 },
+        { id: 'c2', text: 'So helpful', author: 'Bob', like_count: 3 },
+      ],
+    });
+    const client = await connectClient(env, {}, infoJson);
+    const result = (await client.callTool({
+      name: 'ytdlp_get_comments_summary',
+      arguments: { url: SAMPLE_URL },
+    })) as CallToolResult;
+    expect(result.isError).toBeFalsy();
+    expect(result.structuredContent?.summary).toContain('Alice');
+    expect(result.structuredContent?.count).toBe(2);
     await client.close();
     await env.cleanup();
   });

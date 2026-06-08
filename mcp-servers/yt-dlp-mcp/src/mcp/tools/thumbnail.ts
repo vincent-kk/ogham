@@ -10,6 +10,12 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
+const outputSchema = {
+  path: z.string(),
+  bytes: z.number(),
+  url: z.string().optional(),
+};
+
 const description = `Download a video's thumbnail (converted to JPG) into the downloads directory.
 Returns: the saved file path + structuredContent { path, bytes }.
 Writes a file. Use when you need the cover image.`;
@@ -24,6 +30,7 @@ export const thumbnailTool: ToolDefinition = {
         title: 'Download thumbnail',
         description,
         inputSchema,
+        outputSchema,
         annotations: WRITES_FILE,
       },
       async (args, extra) =>

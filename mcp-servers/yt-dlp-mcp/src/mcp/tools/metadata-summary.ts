@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { videoMetadataSchema } from '@/domain/video-metadata-schema.js';
 import { formatMetadataSummary } from '@/postprocess/metadata-summary.js';
 import { cacheKey } from '@/utils/cache-key.js';
 import { metadataOperation } from '@/ytdlp/operations/metadata.js';
@@ -11,6 +12,8 @@ import type { ToolDefinition } from './utils/tool-definition.js';
 const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
+
+const outputSchema = videoMetadataSchema;
 
 const description = `Summarize a video's key metadata in human-readable form.
 Returns: a formatted summary (title, channel, duration, views, likes, upload date, tags, description preview).
@@ -26,6 +29,7 @@ export const metadataSummaryTool: ToolDefinition = {
         title: 'Video metadata summary',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

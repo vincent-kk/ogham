@@ -13,6 +13,17 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
+const outputSchema = {
+  videoId: z.string(),
+  spans: z.array(
+    z.object({
+      startMs: z.number(),
+      endMs: z.number(),
+      score: z.number(),
+    }),
+  ),
+};
+
 const description = `Get the most-replayed heatmap (engagement score per time span).
 Returns: scored spans + structuredContent { videoId, spans }.
 Use when finding a video's popular moments. Empty list when no heatmap is available.`;
@@ -37,6 +48,7 @@ export const heatmapTool: ToolDefinition = {
         title: 'Get heatmap',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>

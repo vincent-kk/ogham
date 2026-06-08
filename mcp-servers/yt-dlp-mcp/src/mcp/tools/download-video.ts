@@ -26,6 +26,12 @@ const inputSchema = {
     .describe('Trim end HH:MM:SS[.ms] (requires ffmpeg).'),
 };
 
+const outputSchema = {
+  path: z.string(),
+  bytes: z.number(),
+  format: z.string(),
+};
+
 const description = `Download a video file into the downloads directory.
 Returns: the saved file path + structuredContent { path, bytes, format }.
 Writes a file (not idempotent); trimming and some format merges require ffmpeg on PATH.`;
@@ -40,6 +46,7 @@ export const downloadVideoTool: ToolDefinition = {
         title: 'Download video',
         description,
         inputSchema,
+        outputSchema,
         annotations: WRITES_FILE,
       },
       async (args, extra) =>

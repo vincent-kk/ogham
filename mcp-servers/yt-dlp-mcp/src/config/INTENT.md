@@ -20,6 +20,7 @@
   - none → conc 1 / req 1500 / sub 4000
   - single → conc 2 / req 750 / sub 2000
   - pool(N) → conc `min(N, 8)` / req 0 / sub 250
+- `extraction.defaultSubLang`은 `YTDLP_DEFAULT_SUB_LANG` > `YTDLP_LANG` > `en` 순으로 해석한다.
 
 ## Boundaries
 

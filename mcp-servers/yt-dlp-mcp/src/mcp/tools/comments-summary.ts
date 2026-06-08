@@ -26,8 +26,14 @@ const inputSchema = {
     .describe("'flat' (default) or 'threaded'."),
 };
 
+const outputSchema = {
+  videoId: z.string(),
+  count: z.number(),
+  summary: z.string(),
+};
+
 const description = `Summarize a video's top comments in human-readable form.
-Returns: a formatted digest + structuredContent { videoId, count }.
+Returns: a formatted digest + structuredContent { videoId, count, summary }.
 Use when you want a quick read; not for structured data (use ytdlp_get_comments).`;
 
 function renderFlat(result: CommentResult, limit: number): string {
@@ -48,6 +54,7 @@ export const commentsSummaryTool: ToolDefinition = {
         title: 'Comments summary',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>
@@ -78,6 +85,7 @@ export const commentsSummaryTool: ToolDefinition = {
               structuredContent: {
                 videoId: result.videoId,
                 count: result.count,
+                summary: text,
               },
             };
           },

@@ -14,6 +14,7 @@ MCP 서버 결선 계층. 도구 정의를 모아 enable 게이트에 따라 등
 ## Conventions
 
 - 각 도구는 `tools/`에서 `ToolDefinition`(`name`·`enabledBy`·`register`) 형태로 정의한다
+- 각 도구는 `outputSchema`로 `structuredContent`의 출력 계약을 선언하고 SDK가 이를 검증한다
 - 도구 핸들러는 공용 `handleToolExecution` 래퍼로 감싸 에러를 `[CODE]` 접두로 표면화한다
 - `annotations`의 `READ_ONLY`/`WRITES_FILE`로 read-only·idempotent 힌트를 표기한다
 - 도구 등록은 항상 `registry`의 게이트(`registerEnabledTools`)를 경유한다
@@ -37,5 +38,5 @@ MCP 서버 결선 계층. 도구 정의를 모아 enable 게이트에 따라 등
 ## Dependencies
 
 - 내부: `registry/index`, `server/index`, `tools/tool-definition`; `registry`는 `features` 슬라이스 도구도 등록; 도구는 `core`(`Service` via `ToolDeps`)·`postprocess`·`domain` 사용
-- 외부: `@modelcontextprotocol/sdk`(server 경유), `zod`(입력 스키마)
+- 외부: `@modelcontextprotocol/sdk`(server 경유), `zod`(입·출력 스키마)
 - 소비처: root

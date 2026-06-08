@@ -19,6 +19,22 @@ const inputSchema = {
     .describe('Max entries to list (default: all).'),
 };
 
+const outputSchema = {
+  id: z.string().optional(),
+  title: z.string().optional(),
+  uploader: z.string().optional(),
+  count: z.number(),
+  entries: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      uploader: z.string().optional(),
+      durationSec: z.number().optional(),
+    }),
+  ),
+};
+
 const description = `List entries of a playlist or channel (flat, no per-video download).
 Returns: entry list + structuredContent { id, title, uploader, count, entries }.
 Use when enumerating a playlist or channel; not for one video's details (use ytdlp_get_video_metadata).`;
@@ -41,6 +57,7 @@ export const playlistTool: ToolDefinition = {
         title: 'Get playlist',
         description,
         inputSchema,
+        outputSchema,
         annotations: READ_ONLY,
       },
       async (args, extra) =>
