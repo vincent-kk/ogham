@@ -4,10 +4,10 @@ import type { ChapterList } from '../../domain/types.js';
 import { formatTimestamp } from '../../postprocess/format-timestamp.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { chaptersOperation } from '../../ytdlp/operations/chapters.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
 
 import { READ_ONLY } from './annotations.js';
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

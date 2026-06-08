@@ -1,7 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { RunOptions, RunResult, Runner } from '../../ytdlp/runner.js';
+import type {
+  RunOptions,
+  RunResult,
+  Runner,
+} from '../../ytdlp/runner/runner.js';
 
 export interface FakeRunnerSpec {
   stdout?: string;

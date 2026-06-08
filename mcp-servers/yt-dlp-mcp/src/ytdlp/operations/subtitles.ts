@@ -4,7 +4,7 @@ import path from 'node:path';
 import { SUB_FORMAT } from '../../constants/ytdlp.js';
 import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { RawSubtitleResult } from '../../domain/types.js';
-import { removeDir } from '../../paths.js';
+import { removeDir } from '../../paths/index.js';
 import { lastNonEmptyLine } from '../../utils/last-line.js';
 import { parseVideoId } from '../../utils/parse-video-id.js';
 import { isValidUrl } from '../../utils/validate-url.js';

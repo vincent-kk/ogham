@@ -4,13 +4,14 @@ import path from 'node:path';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { loadConfig } from '../../config.js';
+import { loadConfig } from '../../config/index.js';
 import { type Service, createService } from '../../core/service.js';
 import { createLogger } from '../../obs/logger.js';
-import { createPaths } from '../../paths.js';
-import type { BinaryManager } from '../../ytdlp/ensure-binary.js';
-import { createBinaryManager } from '../../ytdlp/ensure-binary.js';
-import { fetchJson } from '../../ytdlp/http.js';
+import { createPaths } from '../../paths/index.js';
+import type { BinaryManager } from '../../ytdlp/binary/ensure-binary.js';
+import { createBinaryManager } from '../../ytdlp/binary/ensure-binary.js';
+import { fetchJson } from '../../ytdlp/binary/http.js';
+import { createVersionResolver } from '../../ytdlp/binary/version.js';
 import { chaptersOperation } from '../../ytdlp/operations/chapters.js';
 import { commentsOperation } from '../../ytdlp/operations/comments.js';
 import { downloadOperation } from '../../ytdlp/operations/download.js';
@@ -22,8 +23,7 @@ import { searchOperation } from '../../ytdlp/operations/search.js';
 import { subtitlesOperation } from '../../ytdlp/operations/subtitles.js';
 import { thumbnailOperation } from '../../ytdlp/operations/thumbnail.js';
 import { transcriptOperation } from '../../ytdlp/operations/transcript.js';
-import { type Runner, createRunner } from '../../ytdlp/runner.js';
-import { createVersionResolver } from '../../ytdlp/version.js';
+import { type Runner, createRunner } from '../../ytdlp/runner/runner.js';
 
 // Gated end-to-end harness. These actually download the yt-dlp binary and hit
 // YouTube, so they are skipped unless explicitly enabled:

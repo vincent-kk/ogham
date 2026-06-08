@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { SUMS_ASSET } from '../constants/github.js';
-import { assetNameForPlatform } from '../ytdlp/asset-name.js';
-import { selectSafeRelease } from '../ytdlp/select-safe-release.js';
-import { type GithubRelease, createVersionResolver } from '../ytdlp/version.js';
+import { assetNameForPlatform } from '../ytdlp/binary/asset-name.js';
+import { selectSafeRelease } from '../ytdlp/binary/select-safe-release.js';
+import {
+  type GithubRelease,
+  createVersionResolver,
+} from '../ytdlp/binary/version.js';
 
 const NOW = Date.UTC(2025, 0, 31);
 const DAY = 86_400_000;

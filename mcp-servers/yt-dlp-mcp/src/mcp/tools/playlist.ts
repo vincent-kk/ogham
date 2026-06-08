@@ -3,10 +3,10 @@ import { z } from 'zod';
 import type { PlaylistResult } from '../../domain/types.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { playlistOperation } from '../../ytdlp/operations/playlist.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
 
 import { READ_ONLY } from './annotations.js';
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Playlist or channel URL.'),

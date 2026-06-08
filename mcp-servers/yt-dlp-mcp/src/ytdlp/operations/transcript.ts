@@ -4,7 +4,7 @@ import path from 'node:path';
 import { META_PRINT_FMT, SUB_FORMAT } from '../../constants/ytdlp.js';
 import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { TranscriptResult } from '../../domain/types.js';
-import { removeDir } from '../../paths.js';
+import { removeDir } from '../../paths/index.js';
 import { isValidUrl } from '../../utils/validate-url.js';
 
 import type { OpContext } from './context.js';

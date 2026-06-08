@@ -7,8 +7,9 @@ import {
 import { segmentsToText } from '../../postprocess/segments-to-text.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { transcriptOperation } from '../../ytdlp/operations/transcript.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
+
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z

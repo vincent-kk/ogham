@@ -3,9 +3,9 @@ import { readFile, stat, writeFile } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { assetNameForPlatform } from '../ytdlp/asset-name.js';
-import { createBinaryManager } from '../ytdlp/ensure-binary.js';
-import type { VersionResolver } from '../ytdlp/version.js';
+import { assetNameForPlatform } from '../ytdlp/binary/asset-name.js';
+import { createBinaryManager } from '../ytdlp/binary/ensure-binary.js';
+import type { VersionResolver } from '../ytdlp/binary/version.js';
 
 import {
   type TestEnv,

@@ -2,11 +2,11 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { type Config, loadConfig } from '../../config.js';
+import { type Config, loadConfig } from '../../config/index.js';
 import { type Logger, createLogger } from '../../obs/logger.js';
-import { type Paths, createPaths } from '../../paths.js';
+import { type Paths, createPaths } from '../../paths/index.js';
 import type { OpContext } from '../../ytdlp/operations/context.js';
-import type { Runner } from '../../ytdlp/runner.js';
+import type { Runner } from '../../ytdlp/runner/runner.js';
 
 export const silentLogger: Logger = createLogger('silent');
 

@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { segmentsToText } from '../../postprocess/segments-to-text.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { subtitlesOperation } from '../../ytdlp/operations/subtitles.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
 
 import { READ_ONLY } from './annotations.js';
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

@@ -6,10 +6,10 @@ import type {
 } from '../../domain/types.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { listSubtitlesOperation } from '../../ytdlp/operations/list-subtitles.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
 
 import { READ_ONLY } from './annotations.js';
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

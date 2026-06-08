@@ -9,10 +9,10 @@ import {
   writeFile,
 } from 'node:fs/promises';
 
-import type { Config } from '../config.js';
-import { ErrorCode, YtDlpMcpError } from '../domain/errors.js';
-import type { Logger } from '../obs/logger.js';
-import type { Paths } from '../paths.js';
+import type { Config } from '../../config/index.js';
+import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
+import type { Logger } from '../../obs/logger.js';
+import type { Paths } from '../../paths/index.js';
 
 import { assetNameForPlatform } from './asset-name.js';
 import { parseSums, sha256File } from './checksum.js';

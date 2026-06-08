@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 import { downloadOperation } from '../../ytdlp/operations/download.js';
-import { handleToolExecution } from '../handle.js';
-import type { ToolDefinition } from '../tool-definition.js';
 
 import { WRITES_FILE } from './annotations.js';
+import { handleToolExecution } from './handle.js';
+import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

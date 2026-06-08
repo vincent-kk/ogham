@@ -1,4 +1,4 @@
-import type { Config } from '../config.js';
+import type { Config } from '../../config/index.js';
 
 /**
  * Builds the cookie/proxy yt-dlp arguments from config. Cookie file takes

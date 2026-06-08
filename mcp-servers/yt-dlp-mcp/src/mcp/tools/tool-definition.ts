@@ -1,8 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import type { Config } from '../config.js';
-import type { Service } from '../core/service.js';
-import type { Logger } from '../obs/logger.js';
+import type { Config } from '../../config/index.js';
+import type { Service } from '../../core/service.js';
+import type { Logger } from '../../obs/logger.js';
 
 /** Registration gate. 'default' tools are always on; the rest require their flag. */
 export type EnableKey =

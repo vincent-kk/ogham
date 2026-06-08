@@ -1,22 +1,21 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import type { EnableFlags } from '../config.js';
-
-import type { ToolDefinition, ToolDeps } from './tool-definition.js';
-import { chaptersTool } from './tools/chapters.js';
-import { commentsSummaryTool } from './tools/comments-summary.js';
-import { commentsTool } from './tools/comments.js';
-import { downloadAudioTool } from './tools/download-audio.js';
-import { downloadVideoTool } from './tools/download-video.js';
-import { heatmapTool } from './tools/heatmap.js';
-import { listSubtitleLanguagesTool } from './tools/list-subtitle-languages.js';
-import { metadataSummaryTool } from './tools/metadata-summary.js';
-import { metadataTool } from './tools/metadata.js';
-import { playlistTool } from './tools/playlist.js';
-import { searchVideosTool } from './tools/search.js';
-import { subtitlesTool } from './tools/subtitles.js';
-import { thumbnailTool } from './tools/thumbnail.js';
-import { transcriptTool } from './tools/transcript.js';
+import type { EnableFlags } from '../../config/index.js';
+import { chaptersTool } from '../tools/chapters.js';
+import { commentsSummaryTool } from '../tools/comments-summary.js';
+import { commentsTool } from '../tools/comments.js';
+import { downloadAudioTool } from '../tools/download-audio.js';
+import { downloadVideoTool } from '../tools/download-video.js';
+import { heatmapTool } from '../tools/heatmap.js';
+import { listSubtitleLanguagesTool } from '../tools/list-subtitle-languages.js';
+import { metadataSummaryTool } from '../tools/metadata-summary.js';
+import { metadataTool } from '../tools/metadata.js';
+import { playlistTool } from '../tools/playlist.js';
+import { searchVideosTool } from '../tools/search.js';
+import { subtitlesTool } from '../tools/subtitles.js';
+import { thumbnailTool } from '../tools/thumbnail.js';
+import type { ToolDefinition, ToolDeps } from '../tools/tool-definition.js';
+import { transcriptTool } from '../tools/transcript.js';
 
 /**
  * Every tool the server knows about (ARCHITECTURE §7 order). Boot registers each

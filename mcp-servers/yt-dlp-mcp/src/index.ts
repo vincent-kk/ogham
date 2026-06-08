@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { loadConfig } from './config.js';
+import { loadConfig } from './config/index.js';
 import { createService } from './core/service.js';
-import { registerEnabledTools } from './mcp/registry.js';
-import { createServer } from './mcp/server.js';
+import { registerEnabledTools } from './mcp/registry/index.js';
+import { createServer } from './mcp/server/index.js';
 import { createLogger } from './obs/logger.js';
-import { createPaths } from './paths.js';
+import { createPaths } from './paths/index.js';
 import { SERVER_NAME, VERSION } from './version.js';
-import { createBinaryManager } from './ytdlp/ensure-binary.js';
-import { fetchJson } from './ytdlp/http.js';
-import { createRunner } from './ytdlp/runner.js';
-import { createVersionResolver } from './ytdlp/version.js';
+import { createBinaryManager } from './ytdlp/binary/ensure-binary.js';
+import { fetchJson } from './ytdlp/binary/http.js';
+import { createVersionResolver } from './ytdlp/binary/version.js';
+import { createRunner } from './ytdlp/runner/runner.js';
 
 async function main(): Promise<void> {
   const config = loadConfig();

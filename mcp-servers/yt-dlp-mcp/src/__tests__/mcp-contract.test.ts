@@ -4,8 +4,8 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { describe, expect, it } from 'vitest';
 
 import { createService } from '../core/service.js';
-import { registerEnabledTools } from '../mcp/registry.js';
-import { createServer } from '../mcp/server.js';
+import { registerEnabledTools } from '../mcp/registry/index.js';
+import { createServer } from '../mcp/server/index.js';
 
 import { makeFakeRunner } from './helpers/fake-runner.js';
 import {

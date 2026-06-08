@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { loadConfig } from '../config.js';
-import { evasionArgs } from '../ytdlp/evasion-args.js';
+import { loadConfig } from '../config/index.js';
+import { evasionArgs } from '../ytdlp/runner/evasion-args.js';
 
 describe('loadConfig', () => {
   it('applies documented defaults', () => {

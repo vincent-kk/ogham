@@ -1,8 +1,8 @@
 import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Config } from './config.js';
-import { LOCAL_BINARY_NAME } from './constants/github.js';
+import type { Config } from '../config/index.js';
+import { LOCAL_BINARY_NAME } from '../constants/github.js';
 
 export interface Paths {
   home: string;
