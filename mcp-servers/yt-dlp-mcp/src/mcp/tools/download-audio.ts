@@ -14,11 +14,9 @@ const inputSchema = {
     .describe("Audio container (default 'm4a')."),
 };
 
-const description = `Extract and download the audio track into the downloads directory.
-
-Args: url; audioFormat ('m4a'|'mp3', default 'm4a').
-Returns: the saved file path plus structuredContent { path, bytes, format }.
-Note: writes a file; not idempotent. Audio extraction requires ffmpeg on PATH.`;
+const description = `Extract and download a video's audio track into the downloads directory.
+Returns: the saved file path + structuredContent { path, bytes, format }.
+Writes a file (not idempotent); audio extraction requires ffmpeg on PATH.`;
 
 export const downloadAudioTool: ToolDefinition = {
   name: 'ytdlp_download_audio',

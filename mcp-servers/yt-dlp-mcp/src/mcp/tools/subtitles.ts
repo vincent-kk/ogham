@@ -15,15 +15,13 @@ const inputSchema = {
     .regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/)
     .optional()
     .describe(
-      "Language code; defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset).",
+      "Subtitle language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset).",
     ),
 };
 
-const description = `Get raw subtitles with timestamps preserved (json3-derived, one line per cue).
-
-Args: url (string); language (optional; defaults to YTDLP_DEFAULT_SUB_LANG, 'en' if unset).
-Returns: timestamped lines plus structuredContent { videoId, language, format, segments }.
-Use when: you need timing data. Don't use when: you want clean prose (use ytdlp_download_transcript).`;
+const description = `Get raw subtitles with timestamps preserved (one line per cue).
+Returns: timestamped lines + structuredContent { videoId, language, format, segments }.
+Use when you need cue-level timing data; not for clean prose (use ytdlp_download_transcript).`;
 
 export const subtitlesTool: ToolDefinition = {
   name: 'ytdlp_get_video_subtitles',

@@ -15,11 +15,9 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
-const description = `List available subtitle/caption languages for a video (manual and auto-generated).
-
-Args: url (string).
-Returns: text listing manual + automatic languages, plus structuredContent { videoId, manual[], automatic[] }.
-Use when: checking what languages exist before fetching a transcript. Don't use when: you want the text itself (use ytdlp_download_transcript).`;
+const description = `List a video's available subtitle languages (manual and auto-generated).
+Returns: manual + automatic language lists + structuredContent { videoId, manual[], automatic[] }.
+Use when checking which languages exist before fetching a transcript; not for the text itself (use ytdlp_download_transcript).`;
 
 function track(t: SubtitleTrack): string {
   return `${t.language}${t.name ? ` (${t.name})` : ''} [${t.ext}]`;

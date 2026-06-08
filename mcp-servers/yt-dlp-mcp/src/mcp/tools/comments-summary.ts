@@ -26,10 +26,9 @@ const inputSchema = {
     .describe("'flat' (default) or 'threaded'."),
 };
 
-const description = `Human-readable summary of a video's top comments.
-
-Args: url; maxComments (1-50, default 10); view ('flat'|'threaded').
-Returns: a formatted digest. Use when: you want a quick read. Don't use when: you need structured data (use ytdlp_get_comments).`;
+const description = `Summarize a video's top comments in human-readable form.
+Returns: a formatted digest + structuredContent { videoId, count }.
+Use when you want a quick read; not for structured data (use ytdlp_get_comments).`;
 
 function renderFlat(result: CommentResult, limit: number): string {
   const lines = result.comments.slice(0, limit).map((c) => {

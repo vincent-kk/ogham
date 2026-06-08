@@ -12,9 +12,7 @@ import { handleToolExecution } from './handle.js';
 import type { ToolDefinition } from './tool-definition.js';
 
 const inputSchema = {
-  url: z
-    .string()
-    .describe('Full video URL (YouTube or any yt-dlp-supported site).'),
+  url: z.string().describe('Full video URL.'),
   language: z
     .string()
     .regex(
@@ -23,7 +21,7 @@ const inputSchema = {
     )
     .optional()
     .describe(
-      "BCP-47-ish language code, e.g. 'en', 'ko', 'ja'. Defaults to the server's configured language (YTDLP_DEFAULT_SUB_LANG, 'en' if unset); also tries <lang>-orig.",
+      "Caption language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset); also tries <lang>-orig.",
     ),
   timestamps: z
     .boolean()
@@ -38,19 +36,8 @@ const inputSchema = {
 };
 
 const description = `Download a clean plain-text transcript from a video's captions.
-
-Args:
-  - url (string): full video URL.
-  - language (string, optional): caption language code; defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset); also tries <lang>-orig.
-  - timestamps (boolean, optional): prefix each line with [H:MM:SS] (default false).
-  - stripArtifacts (boolean, optional): remove non-speech cues and duplicate caption lines (default false).
-
-Returns: the transcript text plus structuredContent { videoId, language, availableSubs, segmentCount, charCount, truncated, warnings, metadata }.
-
-Use when: you need readable text for analysis, summary, or quoting.
-Don't use when: you need timestamped raw subtitles (enable ytdlp_get_video_subtitles) or a media file.
-
-Errors: NO_CAPTIONS (no captions in any fallback language), VIDEO_UNAVAILABLE, BLOCKED, INVALID_INPUT.`;
+Returns: transcript text + structuredContent { videoId, language, availableSubs, segmentCount, charCount, truncated, warnings, metadata }.
+Use when you need readable text to analyze, summarize, or quote; not for timestamped raw cues (enable ytdlp_get_video_subtitles) or a media file.`;
 
 export const transcriptTool: ToolDefinition = {
   name: 'ytdlp_download_transcript',

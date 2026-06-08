@@ -32,17 +32,39 @@ const inputSchema = {
     .describe(
       "'json' (default) or 'markdown_tree' (AI-friendly threaded Markdown).",
     ),
-  maxParents: z.number().int().min(0).max(1000).optional(),
-  maxReplies: z.number().int().min(0).max(1000).optional(),
-  maxRepliesPerThread: z.number().int().min(0).max(1000).optional(),
-  maxDepth: z.number().int().min(1).max(10).optional(),
+  maxParents: z
+    .number()
+    .int()
+    .min(0)
+    .max(1000)
+    .optional()
+    .describe('Max top-level (parent) comments to fetch.'),
+  maxReplies: z
+    .number()
+    .int()
+    .min(0)
+    .max(1000)
+    .optional()
+    .describe('Max replies to fetch across all threads.'),
+  maxRepliesPerThread: z
+    .number()
+    .int()
+    .min(0)
+    .max(1000)
+    .optional()
+    .describe('Max replies to fetch per thread.'),
+  maxDepth: z
+    .number()
+    .int()
+    .min(1)
+    .max(10)
+    .optional()
+    .describe('Max reply nesting depth kept in threaded views.'),
 };
 
-const description = `Extract video comments as JSON or AI-friendly threaded Markdown.
-
-Args: url; maxComments (1-100, default 20); sortOrder ('top'|'new'); view ('flat'|'threaded'); responseFormat ('json'|'markdown_tree'); optional extractor caps maxParents/maxReplies/maxRepliesPerThread/maxDepth.
-Returns: comments plus structuredContent { videoId, count, rootCount, replyCount, comments }.
-Use when: analyzing discussion. Note: comment extraction is primarily YouTube; degrades to root-only elsewhere.`;
+const description = `Extract video comments as JSON or threaded Markdown.
+Returns: comments + structuredContent { videoId, count, rootCount, replyCount, comments }.
+Use when analyzing discussion in depth; for a quick read use ytdlp_get_comments_summary. Mainly YouTube; degrades to root-only elsewhere.`;
 
 export const commentsTool: ToolDefinition = {
   name: 'ytdlp_get_comments',

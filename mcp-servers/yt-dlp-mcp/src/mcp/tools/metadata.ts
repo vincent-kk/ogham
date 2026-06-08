@@ -19,10 +19,8 @@ const inputSchema = {
 };
 
 const description = `Extract curated video metadata as JSON (no download).
-
-Args: url (string); fields (optional string[] selecting which metadata keys to keep).
-Returns: JSON metadata plus structuredContent { videoId, title, channel, viewCount, likeCount, durationSec, uploadDate, tags, … }.
-Use when: you need structured data. Don't use when: you want a readable summary (enable ytdlp_get_video_metadata_summary).`;
+Returns: JSON metadata + structuredContent { videoId, title, channel, viewCount, likeCount, durationSec, uploadDate, tags, … }.
+Use when you need structured fields; not for a readable overview (enable ytdlp_get_video_metadata_summary).`;
 
 function selectFields(
   meta: VideoMetadata,

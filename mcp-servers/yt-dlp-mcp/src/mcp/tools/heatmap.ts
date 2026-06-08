@@ -14,9 +14,8 @@ const inputSchema = {
 };
 
 const description = `Get the most-replayed heatmap (engagement score per time span).
-
-Args: url. Returns: spans with scores plus structuredContent { videoId, spans }.
-Use when: finding popular moments. Returns an empty list when no heatmap is available.`;
+Returns: scored spans + structuredContent { videoId, spans }.
+Use when finding a video's popular moments. Empty list when no heatmap is available.`;
 
 function render(result: Heatmap): string {
   if (result.spans.length === 0) return `No heatmap for ${result.videoId}.`;

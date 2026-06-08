@@ -10,10 +10,9 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
-const description = `Download the video thumbnail (converted to JPG) into the downloads directory.
-
-Args: url. Returns: the saved file path plus structuredContent { path, bytes }.
-Note: writes a file to disk. Use when: you need the cover image.`;
+const description = `Download a video's thumbnail (converted to JPG) into the downloads directory.
+Returns: the saved file path + structuredContent { path, bytes }.
+Writes a file. Use when you need the cover image.`;
 
 export const thumbnailTool: ToolDefinition = {
   name: 'ytdlp_get_thumbnail',

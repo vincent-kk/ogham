@@ -29,11 +29,9 @@ const inputSchema = {
     .describe('Restrict to videos uploaded within this window.'),
 };
 
-const description = `Search YouTube by keyword with pagination and an optional upload-date filter.
-
-Args: query (string); maxResults (1-50, default 10); offset (default 0); uploadDateFilter ('hour'|'today'|'week'|'month'|'year').
-Returns: a ranked list (title, uploader, URL) plus structuredContent { query, count, offset, hasMore, nextOffset, items }.
-Use when: discovering videos by topic or creator. Don't use when: you already have a URL (use ytdlp_get_video_metadata).`;
+const description = `Search YouTube by keyword, with pagination and an optional upload-date filter.
+Returns: a ranked list (title, uploader, URL) + structuredContent { query, count, offset, hasMore, nextOffset, items }.
+Use when discovering videos by topic or creator; not when you already have a URL (use ytdlp_get_video_metadata).`;
 
 function render(result: SearchResult): string {
   const head = `# Search: ${result.query} — ${result.count} result(s), offset ${result.offset}`;

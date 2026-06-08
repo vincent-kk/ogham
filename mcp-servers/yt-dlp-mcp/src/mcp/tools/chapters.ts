@@ -14,9 +14,8 @@ const inputSchema = {
 };
 
 const description = `List a video's chapters (section markers with start times).
-
-Args: url. Returns: a timestamped chapter list plus structuredContent { videoId, chapters }.
-Use when: navigating long videos. Returns an empty list when the video has no chapters.`;
+Returns: a timestamped chapter list + structuredContent { videoId, chapters }.
+Use when navigating long videos. Empty list when the video has no chapters.`;
 
 function render(result: ChapterList): string {
   if (result.chapters.length === 0) return `No chapters for ${result.videoId}.`;

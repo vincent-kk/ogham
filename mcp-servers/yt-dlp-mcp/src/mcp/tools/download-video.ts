@@ -27,10 +27,8 @@ const inputSchema = {
 };
 
 const description = `Download a video file into the downloads directory.
-
-Args: url; resolution ('480p'|'720p'|'1080p'|'best'); startTime/endTime for trimming (HH:MM:SS, needs ffmpeg).
-Returns: the saved file path plus structuredContent { path, bytes, format }.
-Note: writes a file; not idempotent. Trimming and some merges require ffmpeg on PATH.`;
+Returns: the saved file path + structuredContent { path, bytes, format }.
+Writes a file (not idempotent); trimming and some format merges require ffmpeg on PATH.`;
 
 export const downloadVideoTool: ToolDefinition = {
   name: 'ytdlp_download_video',

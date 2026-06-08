@@ -20,9 +20,8 @@ const inputSchema = {
 };
 
 const description = `List entries of a playlist or channel (flat, no per-video download).
-
-Args: url; limit (optional). Returns: entry list plus structuredContent { id, title, uploader, count, entries }.
-Use when: enumerating a playlist/channel. Don't use when: you need one video's details (use ytdlp_get_video_metadata).`;
+Returns: entry list + structuredContent { id, title, uploader, count, entries }.
+Use when enumerating a playlist or channel; not for one video's details (use ytdlp_get_video_metadata).`;
 
 function render(result: PlaylistResult): string {
   const head = `# ${result.title ?? 'Playlist'} — ${result.count} item(s)`;

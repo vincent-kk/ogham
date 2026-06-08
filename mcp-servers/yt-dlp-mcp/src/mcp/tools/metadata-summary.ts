@@ -12,11 +12,9 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
 };
 
-const description = `Get a concise, human-readable summary of a video's key metadata.
-
-Args: url (string).
+const description = `Summarize a video's key metadata in human-readable form.
 Returns: a formatted summary (title, channel, duration, views, likes, upload date, tags, description preview).
-Use when: you want a quick overview. Don't use when: you need full structured data (use ytdlp_get_video_metadata).`;
+Use when you want a quick overview; not for full structured fields (use ytdlp_get_video_metadata).`;
 
 export const metadataSummaryTool: ToolDefinition = {
   name: 'ytdlp_get_video_metadata_summary',
