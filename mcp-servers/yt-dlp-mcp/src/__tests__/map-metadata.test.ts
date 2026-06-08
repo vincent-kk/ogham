@@ -51,7 +51,9 @@ describe('mapVideoMetadata', () => {
   });
 
   it('returns undefined uploadDate for invalid or missing date', () => {
-    expect(mapVideoMetadata({ id: 'x', upload_date: 'NA' }).uploadDate).toBeUndefined();
+    expect(
+      mapVideoMetadata({ id: 'x', upload_date: 'NA' }).uploadDate,
+    ).toBeUndefined();
     expect(mapVideoMetadata({ id: 'x' }).uploadDate).toBeUndefined();
   });
 });
