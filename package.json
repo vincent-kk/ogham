@@ -11,6 +11,7 @@
   "license": "MIT",
   "type": "module",
   "workspaces": [
+    "mcp-servers/*",
     "plugins/*",
     "shared/*"
   ],
@@ -36,7 +37,8 @@
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "node scripts/typecheck-all.mjs"
+    "typecheck": "node scripts/typecheck-all.mjs",
+    "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
