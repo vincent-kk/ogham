@@ -1,6 +1,6 @@
 import { createWriteStream } from 'node:fs';
-import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
 
@@ -59,7 +59,10 @@ export async function downloadToFile(
 ): Promise<void> {
   const res = await fetchOrThrow(url, signal);
   if (!res.body) {
-    throw new YtDlpMcpError(ErrorCode.NETWORK, `Empty response body from ${url}`);
+    throw new YtDlpMcpError(
+      ErrorCode.NETWORK,
+      `Empty response body from ${url}`,
+    );
   }
   await pipeline(
     Readable.fromWeb(res.body as import('stream/web').ReadableStream),
