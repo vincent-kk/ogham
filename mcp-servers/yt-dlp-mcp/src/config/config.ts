@@ -88,8 +88,8 @@ export function loadConfig(env: Env = process.env): Config {
   const raw = {
     paths: { home, downloadsDir },
     binary: {
-      cooldownDays: intEnv(env.YTDLP_COOLDOWN_DAYS, 7),
-      refreshDays: intEnv(env.YTDLP_REFRESH_DAYS, 14),
+      cooldownDays: intEnv(env.YTDLP_COOLDOWN_DAYS, 3),
+      refreshDays: intEnv(env.YTDLP_REFRESH_DAYS, 7),
       pinnedVersion: env.YTDLP_PINNED_VERSION?.trim() || undefined,
     },
     extraction: {
