@@ -4,7 +4,7 @@ import { createThrottle } from '@/utils/throttle.js';
 
 describe('createThrottle', () => {
   it('minIntervalMs <= 0 is instant (sleep never called)', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     const now = vi.fn(() => 0);
     const throttle = createThrottle(0, now, sleep);
     await throttle.acquire();
@@ -13,21 +13,21 @@ describe('createThrottle', () => {
   });
 
   it('negative interval is also instant', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     const throttle = createThrottle(-100, () => 0, sleep);
     await throttle.acquire();
     expect(sleep).not.toHaveBeenCalled();
   });
 
   it('first acquire on an idle throttle does not wait', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     const throttle = createThrottle(1000, () => 5000, sleep);
     await throttle.acquire();
     expect(sleep).not.toHaveBeenCalled();
   });
 
   it('spaced calls past the interval do not wait', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     let clock = 0;
     const now = (): number => clock;
     const throttle = createThrottle(100, now, sleep);
@@ -38,7 +38,7 @@ describe('createThrottle', () => {
   });
 
   it('a synchronous burst of N gets spaced reservations 0, I, 2I…', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     const now = vi.fn(() => 0);
     const interval = 250;
     const throttle = createThrottle(interval, now, sleep);
@@ -52,7 +52,7 @@ describe('createThrottle', () => {
   });
 
   it('a burst of 2 only delays the second caller by one interval', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     const throttle = createThrottle(500, () => 0, sleep);
     await Promise.all([throttle.acquire(), throttle.acquire()]);
     expect(sleep).toHaveBeenCalledTimes(1);
@@ -60,7 +60,7 @@ describe('createThrottle', () => {
   });
 
   it('reservations chain forward when the clock has advanced past nextAllowed', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     let clock = 0;
     const throttle = createThrottle(100, () => clock, sleep);
     await throttle.acquire(); // reserves [0,100)
@@ -71,7 +71,7 @@ describe('createThrottle', () => {
   });
 
   it('mid-window arrival waits only the remaining time', async () => {
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn<(ms: number) => Promise<void>>(async () => {});
     let clock = 0;
     const throttle = createThrottle(1000, () => clock, sleep);
     await throttle.acquire(); // reserves up to 1000

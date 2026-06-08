@@ -8,7 +8,12 @@ import { createRunner } from '@/ytdlp/runner/runner.js';
 import { silentLogger } from './helpers/test-context.js';
 
 const execaMock = vi.hoisted(() =>
-  vi.fn(async () => ({ stdout: '', stderr: '' })),
+  vi.fn<
+    (
+      file: string,
+      args: string[],
+    ) => Promise<{ stdout: string; stderr: string }>
+  >(async () => ({ stdout: '', stderr: '' })),
 );
 vi.mock('execa', () => ({ execa: execaMock }));
 
