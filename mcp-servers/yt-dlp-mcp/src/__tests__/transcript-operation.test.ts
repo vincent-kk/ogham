@@ -34,6 +34,18 @@ describe('transcriptOperation', () => {
     await env.cleanup();
   });
 
+  it('requests only the asked language family without a forced en fallback', async () => {
+    const runner = makeFakeRunner({
+      stdout: SAMPLE_META,
+      files: { [`${SAMPLE_VIDEO_ID}.ko.json3`]: SAMPLE_JSON3 },
+    });
+    const { ctx, env } = await makeOpContext(runner);
+    await transcriptOperation(ctx, { url: SAMPLE_URL, language: 'ko' });
+    const args = runner.calls[0];
+    expect(args[args.indexOf('--sub-langs') + 1]).toBe('ko,ko-orig');
+    await env.cleanup();
+  });
+
   it('throws NO_CAPTIONS when no subtitle files are produced', async () => {
     const { ctx, env } = await makeOpContext(
       makeFakeRunner({ stdout: SAMPLE_META }),

@@ -24,6 +24,9 @@ describe('classifyYtDlpError', () => {
     expect(classifyYtDlpError('Sign in to confirm your age')).toBe(
       ErrorCode.AGE_RESTRICTED,
     );
+    expect(
+      classifyYtDlpError('ERROR: Could not copy Chrome cookie database'),
+    ).toBe(ErrorCode.COOKIE_UNAVAILABLE);
   });
 
   it('falls back to UNKNOWN', () => {

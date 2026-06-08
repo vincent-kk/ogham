@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import { SUB_FORMAT } from '../../constants/ytdlp.js';
+import { SUBTITLE_RATE_LIMIT_ARGS, SUB_FORMAT } from '../../constants/ytdlp.js';
 import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { RawSubtitleResult } from '../../domain/types.js';
 import { removeDir } from '../../paths/index.js';
@@ -36,9 +36,10 @@ export async function subtitlesOperation(
         '--write-subs',
         '--write-auto-subs',
         '--sub-langs',
-        `${lang},${lang}-orig,en`,
+        `${lang},${lang}-orig`,
         '--sub-format',
         SUB_FORMAT,
+        ...SUBTITLE_RATE_LIMIT_ARGS,
         '--no-simulate',
         '--print',
         '%(id)s',

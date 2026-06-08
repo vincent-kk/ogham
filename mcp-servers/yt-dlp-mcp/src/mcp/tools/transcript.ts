@@ -41,7 +41,7 @@ const description = `Download a clean plain-text transcript from a video's capti
 
 Args:
   - url (string): full video URL.
-  - language (string, optional): caption language code (default 'en'); falls back to <lang>-orig then en.
+  - language (string, optional): caption language code (default 'en'); falls back to <lang>-orig.
   - timestamps (boolean, optional): prefix each line with [H:MM:SS] (default false).
   - stripArtifacts (boolean, optional): remove non-speech cues and duplicate caption lines (default false).
 

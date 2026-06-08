@@ -29,6 +29,15 @@ const STDERR_PATTERNS: StderrPattern[] = [
     patterns: [/http error 429/i, /too many requests/i, /rate.?limit/i],
   },
   {
+    code: ErrorCode.COOKIE_UNAVAILABLE,
+    patterns: [
+      /could not copy.*cookie/i,
+      /failed to (?:read|decrypt).*cookie/i,
+      /unable to (?:open|read|find).*cookie/i,
+      /cookie database/i,
+    ],
+  },
+  {
     code: ErrorCode.NO_CAPTIONS,
     patterns: [
       /no subtitles/i,

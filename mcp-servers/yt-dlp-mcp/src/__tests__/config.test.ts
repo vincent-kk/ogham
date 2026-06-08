@@ -6,8 +6,8 @@ import { evasionArgs } from '../ytdlp/runner/evasion-args.js';
 describe('loadConfig', () => {
   it('applies documented defaults', () => {
     const c = loadConfig({});
-    expect(c.binary.cooldownDays).toBe(7);
-    expect(c.binary.refreshDays).toBe(14);
+    expect(c.binary.cooldownDays).toBe(3);
+    expect(c.binary.refreshDays).toBe(7);
     expect(c.extraction.maxConcurrency).toBe(2);
     expect(c.extraction.timeoutMs).toBe(90_000);
     expect(c.logLevel).toBe('info');
