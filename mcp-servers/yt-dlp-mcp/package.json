@@ -1,6 +1,6 @@
 {
   "name": "@ogham/yt-dlp-mcp",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "MCP server that extracts YouTube (and yt-dlp-supported) transcripts, metadata, comments, chapters, and media — auto-acquires a cooldown-pinned, checksum-verified yt-dlp binary for zero system install.",
   "keywords": [
     "mcp",
@@ -47,7 +47,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "RUN_NETWORK_TESTS=1 RUN_BINARY_TESTS=1 vitest run",
     "test:run": "vitest run",
-    "typecheck": "tsc -p tsconfig.build.json --noEmit"
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",
