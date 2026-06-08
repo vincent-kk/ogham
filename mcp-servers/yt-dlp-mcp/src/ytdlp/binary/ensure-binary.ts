@@ -47,7 +47,11 @@ interface BinaryContext {
   config: Config;
   versionResolver: VersionResolver;
   logger: Logger;
-  download: (url: string, destPath: string, signal?: AbortSignal) => Promise<void>;
+  download: (
+    url: string,
+    destPath: string,
+    signal?: AbortSignal,
+  ) => Promise<void>;
   getText: (url: string, signal?: AbortSignal) => Promise<string>;
   now: () => number;
   assetName: string;

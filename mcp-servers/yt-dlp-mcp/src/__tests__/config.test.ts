@@ -68,6 +68,17 @@ describe('loadConfig', () => {
     expect(c.extraction.defaultSubLang).toBe('ko');
     expect(c.lang).toBe('ko');
   });
+
+  it('defaults playerClient to ios,tv,default', () => {
+    expect(loadConfig({}).playerClient).toBe('ios,tv,default');
+  });
+
+  it('honors YTDLP_PLAYER_CLIENT override and treats a blank value as disabled', () => {
+    expect(loadConfig({ YTDLP_PLAYER_CLIENT: 'tv' }).playerClient).toBe('tv');
+    expect(
+      loadConfig({ YTDLP_PLAYER_CLIENT: '  ' }).playerClient,
+    ).toBeUndefined();
+  });
 });
 
 describe('evasionArgs', () => {

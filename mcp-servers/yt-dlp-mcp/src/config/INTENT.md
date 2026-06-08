@@ -21,6 +21,7 @@
   - single → conc 2 / req 750 / sub 2000
   - pool(N) → conc `min(N, 8)` / req 0 / sub 250
 - `extraction.defaultSubLang`은 `YTDLP_DEFAULT_SUB_LANG` > `YTDLP_LANG` > `en` 순으로 해석한다.
+- `playerClient`는 `YTDLP_PLAYER_CLIENT`로 읽어 미설정 시 `DEFAULT_PLAYER_CLIENT`(`ios,tv,default`), 빈값 시 `undefined`(비활성)로 해석한다. runner가 전 호출에 `youtube:player_client`로 주입한다.
 
 ## Boundaries
 

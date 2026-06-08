@@ -7,6 +7,7 @@ import {
   type EnableKey,
   TOOL_DEFAULT_ENABLED,
 } from '@/constants/tool-defaults.js';
+import { DEFAULT_PLAYER_CLIENT } from '@/constants/ytdlp.js';
 
 const LOG_LEVELS = [
   'trace',
@@ -53,6 +54,7 @@ const ConfigSchema = z.object({
   }),
   logLevel: z.enum(LOG_LEVELS),
   lang: z.string().min(1).optional(),
+  playerClient: z.string().min(1).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -155,6 +157,13 @@ export function loadConfig(env: Env = process.env): Config {
   const proxy = env.YTDLP_PROXY?.trim() || undefined;
   const adaptive = adaptiveDefaults(proxyPool, proxy);
 
+  // Unset → curated default; explicit blank → undefined (disabled, yt-dlp's own
+  // client selection); set → trimmed list.
+  const playerClient =
+    env.YTDLP_PLAYER_CLIENT === undefined
+      ? DEFAULT_PLAYER_CLIENT
+      : env.YTDLP_PLAYER_CLIENT.trim() || undefined;
+
   const raw = {
     paths: { home, downloadsDir },
     binary: {
@@ -190,6 +199,7 @@ export function loadConfig(env: Env = process.env): Config {
     },
     logLevel: env.YTDLP_LOG_LEVEL?.trim() || 'info',
     lang: env.YTDLP_LANG?.trim() || undefined,
+    playerClient,
   };
 
   const parsed = ConfigSchema.safeParse(raw);

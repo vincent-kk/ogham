@@ -8,13 +8,13 @@ yt-dlp 바이너리 획득·실행·정보 추출 서브시스템.
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `index.ts`            | barrel: binary/runner 공개 API·타입 재노출(`createBinaryManager`·`createVersionResolver`·`downloadToFile`·`fetchJson`·`fetchText`·`createRunner`) |
 | `binary/` (organ)     | 버전 해석·체크섬·원자적 설치·HTTP(ensure-binary, select-safe-release, checksum, http, version, asset-name)                                        |
-| `runner/` (organ)     | 불변 플래그 적용 실행(runner, evasion-args, js-runtime-arg)                                                                                       |
+| `runner/` (organ)     | 불변 플래그 적용 실행(runner, evasion-args, js-runtime-arg, player-client-arg, merge-extractor-args)                                              |
 | `operations/` (organ) | info-json 기반 도메인 연산(metadata, comments, chapters, heatmap, playlist, search, download, thumbnail) + 공용 `info-json`·`context`             |
 
 ## Conventions
 
 - 버전은 `versionResolver`가 쿨다운으로 고정(또는 pinned tag 조회)한 뒤, `.part` 스테이징 → 체크섬 검증 → `rename` 원자적 설치로만 바이너리를 갱신한다.
-- `runner`는 `BASE_ARGS`(`--ignore-config`/`--no-warnings` 등) + JS 런타임 + 쿠키 플래그를 `commonArgs`로 한 번만 prepend하고, 프록시는 `proxyPool` 위에서 호출마다 라운드로빈으로 회전(`--proxy`)시킨다. 호출자가 이 불변식을 우회할 수 없다.
+- `runner`는 `BASE_ARGS`(`--ignore-config`/`--no-warnings` 등) + JS 런타임 + 쿠키 + player_client 플래그를 `commonArgs`로 prepend하고, 프록시는 `proxyPool` 위에서 호출마다 라운드로빈으로 회전(`--proxy`)시킨다. 실행 직전 `mergeExtractorArgs`로 모든 `youtube:` extractor-args(player_client·lang·comment)를 단일 `--extractor-args`에 병합한다 — yt-dlp는 같은 extractor의 중복 플래그를 마지막 값으로 덮어쓰므로 병합하지 않으면 player_client가 유실된다. 호출자가 이 불변식을 우회할 수 없다.
 - operations는 `--dump-single-json --skip-download`로 얻은 info-json을 `parseInfoJson`으로 파싱해 도메인 결과를 반환한다.
 - HTTP·바이너리 파일 I/O는 `binary` organ에 격리하고 실행 실패는 `toYtDlpError`로 정규화한다.
 

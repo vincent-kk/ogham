@@ -184,19 +184,20 @@ The server manages its own yt-dlp binary; these control how it picks and refresh
 
 ### Rate limiting & proxies
 
-| Variable                     | Default  | Purpose                                                                                                           |
-| ---------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `YTDLP_PROXY_POOL`           | —        | Comma-separated list of proxy URLs, rotated per request. The most effective fix for rate limits.                  |
-| `YTDLP_PROXY`                | —        | A single proxy URL (used when no pool is set).                                                                    |
-| `YTDLP_MAX_CONCURRENCY`      | adaptive | How many yt-dlp processes run at once (1–16). See below.                                                          |
-| `YTDLP_REQUEST_INTERVAL_MS`  | adaptive | Minimum spacing between regular calls. See below.                                                                 |
-| `YTDLP_SUBTITLE_INTERVAL_MS` | adaptive | Minimum spacing between subtitle/transcript calls. See below.                                                     |
-| `YTDLP_COOKIES_FROM_BROWSER` | —        | Read cookies from a local browser profile (`BROWSER[:PROFILE][::CONTAINER]`, e.g. `chrome`). For auth gates only. |
-| `YTDLP_COOKIES_FILE`         | —        | Path to a Netscape-format cookies file. Takes precedence over the browser option.                                 |
+| Variable                     | Default          | Purpose                                                                                                                                                                                                      |
+| ---------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `YTDLP_PLAYER_CLIENT`        | `ios,tv,default` | YouTube player clients yt-dlp impersonates (comma list, tried in order), applied to every call. `ios`/`tv` dodge most 429s; `default` keeps `web` as a fallback so comments/formats resolve. Blank disables. |
+| `YTDLP_PROXY_POOL`           | —                | Comma-separated list of proxy URLs, rotated per request. The most effective fix for rate limits.                                                                                                             |
+| `YTDLP_PROXY`                | —                | A single proxy URL (used when no pool is set).                                                                                                                                                               |
+| `YTDLP_MAX_CONCURRENCY`      | adaptive         | How many yt-dlp processes run at once (1–16). See below.                                                                                                                                                     |
+| `YTDLP_REQUEST_INTERVAL_MS`  | adaptive         | Minimum spacing between regular calls. See below.                                                                                                                                                            |
+| `YTDLP_SUBTITLE_INTERVAL_MS` | adaptive         | Minimum spacing between subtitle/transcript calls. See below.                                                                                                                                                |
+| `YTDLP_COOKIES_FROM_BROWSER` | —                | Read cookies from a local browser profile (`BROWSER[:PROFILE][::CONTAINER]`, e.g. `chrome`). For auth gates only.                                                                                            |
+| `YTDLP_COOKIES_FILE`         | —                | Path to a Netscape-format cookies file. Takes precedence over the browser option.                                                                                                                            |
 
 ## Avoiding rate limits & blocks
 
-YouTube rate-limits by IP address, and the limits add up over time — subtitle and transcript endpoints are the strictest, and once you trip a limit it can last from a few minutes up to about a day. If you see `[RATE_LIMITED]` or `[BLOCKED]` in a tool's response, here's what helps, most effective first:
+YouTube rate-limits by IP address, and the limits add up over time — subtitle and transcript endpoints are the strictest, and once you trip a limit it can last from a few minutes up to about a day. By default the server already impersonates the 429-resistant `ios`/`tv` player clients (`YTDLP_PLAYER_CLIENT`), which avoids most limits out of the box. If you see `[RATE_LIMITED]` or `[BLOCKED]` anyway, here's what helps next, most effective first:
 
 1. **Use a rotating proxy pool (most effective).** Set `YTDLP_PROXY_POOL` to a comma-separated list of proxy URLs. The server rotates through them per request, spreading the load across IP addresses. A single `YTDLP_PROXY` is a lighter fallback.
 

@@ -121,6 +121,22 @@ describe('runner proxy rotation', () => {
     expect(proxyOf(second)).toBe('B');
   });
 
+  it('injects player_client once per call as part of the invariant prefix', async () => {
+    const config = loadConfig({ YTDLP_PROXY_POOL: 'A,B' });
+    const runner = createRunner({
+      binaryManager: fakeBinaryManager,
+      config,
+      logger: silentLogger,
+      nodePath: '/node',
+    });
+    await runner.run(['a']);
+    await runner.run(['b']);
+    const clientCount = (args: string[]): number =>
+      args.filter((a) => a === 'youtube:player_client=ios,tv,default').length;
+    expect(clientCount(argsOf(0))).toBe(1);
+    expect(clientCount(argsOf(1))).toBe(1);
+  });
+
   it('appends caller args after the rotated proxy', async () => {
     const config = loadConfig({ YTDLP_PROXY_POOL: 'A,B' });
     const runner = createRunner({
@@ -133,5 +149,27 @@ describe('runner proxy rotation', () => {
     const args = argsOf(0);
     const proxyIdx = args.indexOf('--proxy');
     expect(args.slice(proxyIdx)).toEqual(['--proxy', 'A', '--print', 'id']);
+  });
+});
+
+describe('runner extractor-args merge', () => {
+  it('merges player_client with a caller youtube arg into one --extractor-args', async () => {
+    const config = loadConfig({});
+    const runner = createRunner({
+      binaryManager: fakeBinaryManager,
+      config,
+      logger: silentLogger,
+      nodePath: '/node',
+    });
+    await runner.run([
+      '--dump-single-json',
+      '--extractor-args',
+      'youtube:lang=ko',
+      'URL',
+    ]);
+    const args = argsOf(0);
+    expect(args.filter((a) => a === '--extractor-args')).toHaveLength(1);
+    const idx = args.indexOf('--extractor-args');
+    expect(args[idx + 1]).toBe('youtube:player_client=ios,tv,default;lang=ko');
   });
 });

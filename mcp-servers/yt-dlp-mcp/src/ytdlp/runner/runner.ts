@@ -9,6 +9,8 @@ import type { BinaryManager } from '../binary/ensure-binary.js';
 
 import { cookieArgs, proxyArg } from './evasion-args.js';
 import { jsRuntimeArg } from './js-runtime-arg.js';
+import { mergeExtractorArgs } from './merge-extractor-args.js';
+import { playerClientArg } from './player-client-arg.js';
 
 export interface RunResult {
   stdout: string;
@@ -35,9 +37,9 @@ export interface RunnerDeps {
 
 /**
  * Real runner: resolves the binary (lazy, cached), prepends invariant flags
- * (ignore-config, no-warnings, node JS runtime, cookies), rotates the proxy per
- * call over `proxyPool`, runs via execa, and normalizes failures into typed
- * errors.
+ * (ignore-config, no-warnings, node JS runtime, cookies, player_client), rotates
+ * the proxy per call over `proxyPool`, runs via execa, and normalizes failures
+ * into typed errors.
  */
 export function createRunner(deps: RunnerDeps): Runner {
   const { binaryManager, config, logger } = deps;
@@ -46,6 +48,7 @@ export function createRunner(deps: RunnerDeps): Runner {
     ...BASE_ARGS,
     ...jsRuntimeArg(nodePath),
     ...cookieArgs(config),
+    ...playerClientArg(config),
   ];
 
   const pool = config.evasion.proxyPool;
@@ -63,7 +66,11 @@ export function createRunner(deps: RunnerDeps): Runner {
     async run(args, opts): Promise<RunResult> {
       const bin = await binaryManager.ensureBinary(opts?.signal);
       const proxy = nextProxy();
-      const finalArgs = [...commonArgs, ...proxyArg(proxy), ...args];
+      const finalArgs = mergeExtractorArgs([
+        ...commonArgs,
+        ...proxyArg(proxy),
+        ...args,
+      ]);
       logger.debug(
         { argc: finalArgs.length, rotated: pool.length > 0 },
         'yt-dlp invoke',

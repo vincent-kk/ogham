@@ -22,6 +22,12 @@ export const META_PRINT_FMT = META_PRINT_FIELDS.map((f) => `%(${f})s`).join(
 // Flags applied to every invocation.
 export const BASE_ARGS: string[] = ['--ignore-config', '--no-warnings'];
 
+// Default YouTube player_client list, injected on every invocation as
+// `--extractor-args youtube:player_client=...`. `ios`/`tv` dodge most 429/bot
+// checks; `default` (includes web) is kept as a fallback so comment extraction
+// and full format sets still resolve. Override via YTDLP_PLAYER_CLIENT.
+export const DEFAULT_PLAYER_CLIENT = 'ios,tv,default';
+
 export const SUB_FORMAT = 'json3';
 
 // Subtitle (timedtext) endpoints are aggressively rate-limited; pace requests
