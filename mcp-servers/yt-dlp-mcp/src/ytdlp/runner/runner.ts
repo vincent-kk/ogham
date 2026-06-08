@@ -54,7 +54,7 @@ export function createRunner(deps: RunnerDeps): Runner {
       try {
         const result = await execa(bin, finalArgs, {
           timeout: opts?.timeoutMs ?? config.extraction.timeoutMs,
-          signal: opts?.signal,
+          cancelSignal: opts?.signal,
           cwd: opts?.cwd,
           reject: true,
         });
