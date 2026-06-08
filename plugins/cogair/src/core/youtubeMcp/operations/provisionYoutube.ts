@@ -10,7 +10,7 @@ export interface YoutubeProvisionSummary {
   codex: ProvisionResult;
 }
 
-// Reconciles the youtube-transcript MCP server across both target CLIs from the saved
+// Reconciles the yt-dlp-mcp MCP server across both target CLIs from the saved
 // addon config. The effective per-CLI state is `enabled && targets.<cli>`. antigravity
 // is provisioned via its mcp_config.json (the file op no-ops when already correct);
 // codex via `codex mcp add|remove`, gated by resolveCodexAction so it only spawns when

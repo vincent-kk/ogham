@@ -49,7 +49,7 @@ function entryMatches(existing: unknown, desired: DesiredServer): boolean {
   return keys.every((k) => env[k] === desired.env[k]);
 }
 
-// Idempotently registers (enabled) or unregisters (disabled) the youtube-transcript
+// Idempotently registers (enabled) or unregisters (disabled) the yt-dlp-mcp
 // MCP server in antigravity's global mcp_config.json. While enabled, cogair owns the
 // entry: it writes the canonical command/args/env (env carries YTDLP_LANG), so a
 // language change is reapplied on the next save. Preserves every other server and

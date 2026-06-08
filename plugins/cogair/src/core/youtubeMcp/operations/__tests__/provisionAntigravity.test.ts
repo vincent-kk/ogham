@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe('provisionAntigravityYoutube', () => {
-  it('adds the youtube-transcript server with the language env when enabling', async () => {
+  it('adds the yt-dlp-mcp server with the language env when enabling', async () => {
     const result = await provisionAntigravityYoutube(true, 'ko', configPath);
     expect(result).toEqual({ ok: true, action: 'added' });
     expect(servers(await readConfig())).toMatchObject({

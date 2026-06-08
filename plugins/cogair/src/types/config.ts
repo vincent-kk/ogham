@@ -92,7 +92,7 @@ export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 
 // YouTube ingestion via the @ogham/yt-dlp-mcp server, modeled as a standalone MCP
 // addon rather than a per-provider LLM feature. When enabled, cogair provisions the
-// youtube-transcript server into each checked target CLI — antigravity's global
+// yt-dlp-mcp server into each checked target CLI — antigravity's global
 // mcp_config.json and/or codex's config.toml (via `codex mcp add`). gemini is
 // excluded: it ingests YouTube natively and is being phased out. `language` sets the
 // server's YTDLP_LANG (transcript + title/metadata language).

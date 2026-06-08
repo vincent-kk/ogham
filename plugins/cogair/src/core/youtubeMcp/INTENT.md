@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`@ogham/yt-dlp-mcp`(youtube-transcript) MCP 서버를 LLM과 분리된 독립 addon으로, 대상 CLI(antigravity·codex)에 멱등 등록·해제한다. antigravity는 글로벌 `mcp_config.json`에, codex는 `codex mcp add|remove`로 `config.toml`에 기록한다(codex가 TOML 소유, 직접 편집 안 함). 두 CLI 모두 헤드리스 모드에서 서버를 스스로 호출하므로 dispatch 경로 변경은 없다. `language`(en/ko)는 서버 env `YTDLP_LANG`로 전달. gemini는 내장 YouTube + fade-out으로 제외. `/setup` 저장 시점에만 호출.
+`@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립 addon으로, 대상 CLI(antigravity·codex)에 멱등 등록·해제한다. antigravity는 글로벌 `mcp_config.json`에, codex는 `codex mcp add|remove`로 `config.toml`에 기록한다(codex가 TOML 소유, 직접 편집 안 함). 두 CLI 모두 헤드리스 모드에서 서버를 스스로 호출하므로 dispatch 경로 변경은 없다. `language`(en/ko)는 서버 env `YTDLP_LANG`로 전달. gemini는 내장 YouTube + fade-out으로 제외. `/setup` 저장 시점에만 호출.
 
 ## Structure
 
@@ -29,7 +29,7 @@
 
 - read/write/spawn 실패를 throw 하지 않고 `{ ok: false }` 로 degrade
 - codex 미설치(ENOENT)는 조용히 degrade (warn 없음); 그 외 실패만 `logger.warn`
-- enabled 동안 youtube-transcript 항목은 cogair 가 소유(canonical 정의로 덮어씀)
+- enabled 동안 yt-dlp-mcp 항목은 cogair 가 소유(canonical 정의로 덮어씀)
 
 ### Ask first
 

@@ -10,7 +10,7 @@ export const COGAIR_HOME = pluginCache('cogair');
 export const AGY_HOME = join(homedir(), '.gemini', 'antigravity-cli');
 
 // agy loads MCP servers from here even in headless `-p` mode; cogair provisions a
-// youtube-transcript server into it when antigravity YouTube support is enabled.
+// yt-dlp-mcp server into it when antigravity YouTube support is enabled.
 export const AGY_MCP_CONFIG_PATH = join(AGY_HOME, 'mcp_config.json');
 
 // cwd → conversation-id map and per-conversation transcript. Used to recover the

@@ -31,7 +31,7 @@ describe('provisionCodexYoutube', () => {
       [
         'mcp',
         'add',
-        'youtube-transcript',
+        'yt-dlp-mcp',
         '--env',
         'YTDLP_LANG=ko',
         '--',
@@ -46,7 +46,7 @@ describe('provisionCodexYoutube', () => {
     const { run, calls } = recordingRunner(OK);
     const result = await provisionCodexYoutube(false, 'en', run);
     expect(result).toEqual({ ok: true, action: 'removed' });
-    expect(calls).toEqual([['mcp', 'remove', 'youtube-transcript']]);
+    expect(calls).toEqual([['mcp', 'remove', 'yt-dlp-mcp']]);
   });
 
   it('degrades to ok:false (quietly) when codex is not installed', async () => {

@@ -1,10 +1,10 @@
 import type { YoutubeAddonLanguage } from '../../../types/index.js';
 
-// Shared definition of the youtube-transcript MCP server (@ogham/yt-dlp-mcp),
+// Shared definition of the yt-dlp-mcp MCP server (@ogham/yt-dlp-mcp),
 // provisioned identically into antigravity's mcp_config.json and codex's config.toml.
 // The CLIs invoke this server on their own in headless mode, so cogair only ensures
 // it is registered — no dispatch-path change.
-export const YOUTUBE_MCP_KEY = 'youtube-transcript';
+export const YOUTUBE_MCP_KEY = 'yt-dlp-mcp';
 export const YOUTUBE_MCP_COMMAND = 'npx';
 export const YOUTUBE_MCP_ARGS: readonly string[] = ['-y', '@ogham/yt-dlp-mcp'];
 

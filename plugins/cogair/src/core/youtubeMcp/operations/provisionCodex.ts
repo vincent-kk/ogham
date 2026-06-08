@@ -33,7 +33,7 @@ const defaultRunner: CodexMcpRunner = async (args) => {
   };
 };
 
-// Registers (enabled) or removes (disabled) the youtube-transcript MCP server in
+// Registers (enabled) or removes (disabled) the yt-dlp-mcp MCP server in
 // codex's config.toml via `codex mcp add|remove` — codex owns the TOML, so cogair
 // never hand-edits it. `codex mcp add` overwrites idempotently (a language change is
 // reapplied) and `codex mcp remove` is a no-op when absent. Never throws; a missing
