@@ -21,7 +21,3 @@ await esbuild.build({
   packages: 'external',
   logLevel: 'info',
 });
-
-console.log(
-  '  yt-dlp-mcp  -> dist/index.js (single-file ESM bundle, minified)',
-);
