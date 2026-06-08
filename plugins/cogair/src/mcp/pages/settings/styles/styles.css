@@ -666,6 +666,60 @@ input[type='range']:focus-visible {
   border-radius: var(--radius);
 }
 
+/* ───────────────────── MCP addon row + scoped panel ───────────────────── */
+
+/* Addon toggle + gear share a row; the gear opens the addon's settings panel. */
+.addon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bare icon-only gear sitting right after the addon label — no button chrome,
+   just the cog. Hover/expanded brighten the icon; focus-visible keeps a ring. */
+.addon-row .advanced-toggle {
+  width: 20px;
+  min-height: 32px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg-muted);
+}
+
+.addon-row .advanced-toggle:hover,
+.addon-row .advanced-toggle[aria-expanded='true'] {
+  background: transparent;
+  border-color: transparent;
+  color: var(--fg);
+}
+
+/* Panel header that scopes the revealed settings to their addon. */
+.addon-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.addon-panel-mark {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--fg-muted);
+}
+
+.addon-panel-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
 .advanced-divider {
   margin: 4px 0;
   border: 0;

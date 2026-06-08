@@ -41,8 +41,12 @@ export const DEFAULT_CONFIG: Config = {
     codex: 'off',
     antigravity: 'auto',
   },
-  antigravity_youtube: {
-    enabled: false,
+  addons: {
+    youtube: {
+      enabled: false,
+      language: 'en',
+      targets: { codex: true, antigravity: true },
+    },
   },
 };
 

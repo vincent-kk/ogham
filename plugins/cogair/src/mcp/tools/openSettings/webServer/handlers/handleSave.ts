@@ -33,6 +33,10 @@ export async function handleSave(
     return;
   }
 
+  // Read the prior config before overwriting it; provisionYoutube uses it to skip
+  // needless `codex mcp` spawns when the effective codex state is unchanged.
+  const previous = await ctx.loadConfig();
+
   try {
     await ctx.saveConfig(parsed.data);
   } catch (err) {
@@ -43,15 +47,16 @@ export async function handleSave(
     return;
   }
 
-  // Sync agy's MCP registry to the saved toggle. provisionYoutube never throws —
-  // an agy-config problem must not fail a successful config save.
+  // Reconcile the YouTube MCP addon across its target CLIs. provisionYoutube never
+  // throws — an addon-provisioning problem must not fail a successful config save.
   const youtube = await ctx.provisionYoutube(
-    parsed.data.antigravity_youtube.enabled,
+    parsed.data.addons.youtube,
+    previous.addons.youtube,
   );
 
   sendJson(res, 200, {
     success: true,
     message: 'Saved',
-    antigravity_youtube: { ok: youtube.ok, action: youtube.action },
+    youtube: { antigravity: youtube.antigravity, codex: youtube.codex },
   });
 }

@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 
 import { isPlainObject } from './isPlainObject.js';
+import { mergeAddons } from './mergeAddons.js';
 import { mergeArtifacts } from './mergeArtifacts.js';
 import { mergeModelMap } from './mergeModelMap.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
@@ -28,11 +29,6 @@ export function mergeWithDefaults(raw: unknown): unknown {
     artifacts: mergeArtifacts(raw.artifacts),
     preamble: mergePreamble(raw.preamble),
     recency_factor: mergeRecencyFactor(raw.recency_factor),
-    antigravity_youtube: {
-      ...DEFAULT_CONFIG.antigravity_youtube,
-      ...(isPlainObject(raw.antigravity_youtube)
-        ? raw.antigravity_youtube
-        : {}),
-    },
+    addons: mergeAddons(raw.addons, raw.antigravity_youtube),
   };
 }

@@ -1,16 +1,20 @@
 import { type Server, createServer } from 'node:http';
 
 import { SETTINGS_SERVER_IDLE_MS } from '../../../../constants/defaults.js';
-import {
-  type ProvisionResult,
-  provisionYoutubeMcp,
-} from '../../../../core/agyMcpConfig/index.js';
 import { generateToken } from '../../../../core/authToken/index.js';
 import {
   loadConfig as loadConfigDefault,
   saveConfig as saveConfigDefault,
 } from '../../../../core/configManager/index.js';
-import type { Config, SettingsServerHandle } from '../../../../types/index.js';
+import {
+  type YoutubeProvisionSummary,
+  provisionYoutube as provisionYoutubeImpl,
+} from '../../../../core/youtubeMcp/index.js';
+import type {
+  Config,
+  SettingsServerHandle,
+  YoutubeAddonConfig,
+} from '../../../../types/index.js';
 
 import { createRouteHandler } from './routing/routes.js';
 
@@ -19,7 +23,10 @@ export interface StartSettingsServerOptions {
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
   saveConfig?: (config: Config) => Promise<void>;
-  provisionYoutube?: (enabled: boolean) => Promise<ProvisionResult>;
+  provisionYoutube?: (
+    next: YoutubeAddonConfig,
+    prev?: YoutubeAddonConfig,
+  ) => Promise<YoutubeProvisionSummary>;
   onClose?: () => void | Promise<void>;
 }
 
@@ -76,7 +83,8 @@ export async function startSettingsServer(
     loadConfig: options.loadConfig ?? loadConfigDefault,
     saveConfig: options.saveConfig ?? saveConfigDefault,
     provisionYoutube:
-      options.provisionYoutube ?? ((enabled) => provisionYoutubeMcp(enabled)),
+      options.provisionYoutube ??
+      ((next, prev) => provisionYoutubeImpl(next, prev)),
     closeServer,
     resetTimer,
   });

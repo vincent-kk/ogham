@@ -4,13 +4,13 @@
 
 ## Structure
 
-| Path              | Role                                                                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                         |
-| `routes.ts`       | `createRouteHandler` — token + Content-Type 가드 + 경로 디스패치                                                                 |
-| `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                        |
-| `handlers/`       | GET `/`, `/config`, `/provider-status` (antigravity 가용 + `agyModels`), POST `/save` (저장 후 agy youtube MCP 동기화), `/close` |
-| `utils/`          | sendJson, parseBody, escapeJsonForHtml, verifyToken (`core/authToken` 위임), buildState                                          |
+| Path              | Role                                                                                                                                                       |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webServer.ts`    | `startSettingsServer` — closure 기반 lifecycle (`{ url, token, close }`)                                                                                   |
+| `routes.ts`       | `createRouteHandler` — token + Content-Type 가드 + 경로 디스패치                                                                                           |
+| `routeContext.ts` | 라우트와 핸들러를 잇는 context 인터페이스                                                                                                                  |
+| `handlers/`       | GET `/`, `/config`, `/provider-status` (antigravity 가용 + `agyModels`), POST `/save` (저장 후 youtube MCP addon 을 codex·antigravity 에 동기화), `/close` |
+| `utils/`          | sendJson, parseBody, escapeJsonForHtml, verifyToken (`core/authToken` 위임), buildState                                                                    |
 
 ## Conventions
 
@@ -44,6 +44,6 @@
 ## Dependencies
 
 - `node:http`, `node:url`
-- `../../../core/{configManager,agyMcpConfig}` (loadConfig, saveConfig, provisionYoutubeMcp)
+- `../../../core/{configManager,youtubeMcp}` (loadConfig, saveConfig, provisionYoutube)
 - `../../../core/authToken` (generateToken, verifyToken)
 - `../../../types/index.ts` (`ConfigSchema`)

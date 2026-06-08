@@ -18,7 +18,7 @@
 - CSS 변수로 다크 모드 토큰화
 - Google 슬롯은 gemini·antigravity 중 하나만 활성 (상호 배타). `google_engine` 은 `ratio.antigravity.enabled` 플래그에서 파생되며, 비활성 엔진의 ratio 는 항상 `enabled: false` 로 저장
 - antigravity 활성 시 per-tier 모델 드롭다운(high / mid / low) 표시 — 선택 항목은 `/provider-status` 의 `agyModels` 배열로 동적 바인딩
-- `antigravity_youtube.enabled` 체크박스 — `/save` 가 agy 글로벌 mcp_config 에 youtube-transcript MCP 를 등록/해제 (cogair 네임스페이스 밖 부수효과)
+- 독립 "MCP Addons" 섹션 (provider 라우팅과 분리) — `addons.youtube` = enabled + language(en/ko) + targets(codex·antigravity). `/save` 가 체크된 대상 CLI 의 MCP 설정(agy mcp_config.json / codex config.toml)에 youtube-transcript 서버를 등록/해제 (cogair 네임스페이스 밖 부수효과). gemini 는 내장 YouTube 로 제외
 
 ## Boundaries
 

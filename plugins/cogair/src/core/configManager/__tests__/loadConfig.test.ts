@@ -56,7 +56,13 @@ describe('loadConfig', () => {
         codex: 'strict' as const,
         antigravity: 'auto' as const,
       },
-      antigravity_youtube: { enabled: true },
+      addons: {
+        youtube: {
+          enabled: true,
+          language: 'ko' as const,
+          targets: { codex: true, antigravity: false },
+        },
+      },
     };
     await writeConfigFile(JSON.stringify(stored));
     expect(await loadConfig()).toEqual(stored);
@@ -77,6 +83,32 @@ describe('loadConfig', () => {
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
     expect(result.artifacts).toEqual(DEFAULT_CONFIG.artifacts);
+    expect(result.addons).toEqual(DEFAULT_CONFIG.addons);
+  });
+
+  it('migrates legacy antigravity_youtube into the youtube addon', async () => {
+    const stored = {
+      ratio: {
+        gemini: { value: 50, enabled: true },
+        codex: { value: 50, enabled: true },
+      },
+      intervention_strength: 0,
+      keywords: { gemini: 'g', codex: 'c' },
+      default_model: 'auto',
+      option_flags: DEFAULT_CONFIG.option_flags,
+      session_ttl_hours: 72,
+      antigravity_youtube: { enabled: true },
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = await loadConfig();
+    expect(result.addons.youtube).toEqual({
+      enabled: true,
+      language: 'en',
+      targets: { codex: false, antigravity: true },
+    });
+    expect(
+      (result as unknown as Record<string, unknown>).antigravity_youtube,
+    ).toBeUndefined();
   });
 
   it('injects preamble and recency_factor defaults for legacy configs', async () => {

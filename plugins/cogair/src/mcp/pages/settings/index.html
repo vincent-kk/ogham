@@ -521,18 +521,6 @@
                     keeps your Deny list as the safety net.
                   </p>
 
-                  <label class="toggle flag-row">
-                    <input id="antigravity-youtube" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label">YouTube summarization</span>
-                    <span class="flag-desc"
-                      >registers a youtube-transcript MCP server in agy's global
-                      config so agy can fetch and summarize YouTube links
-                    </span>
-                  </label>
-
                   <div class="tier-model-map">
                     <p class="flag-field-label">per-tier model mapping</p>
                     <p class="flag-hint">
@@ -574,6 +562,125 @@
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
             </p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">MCP Addons</h2>
+          <p class="section-help">
+            Standalone MCP servers, independent of provider routing. Enable an
+            addon and choose which installed CLIs it is provisioned into.
+          </p>
+
+          <div class="addon-row">
+            <label class="toggle">
+              <input id="youtube-enabled" type="checkbox" />
+              <span class="toggle-track"
+                ><span class="toggle-thumb"></span
+              ></span>
+              <span class="toggle-label">YouTube (yt-dlp)</span>
+            </label>
+            <button
+              type="button"
+              id="youtube-advanced-toggle"
+              class="advanced-toggle"
+              aria-expanded="false"
+              aria-controls="youtube-advanced-panel"
+              aria-label="YouTube addon settings"
+              title="YouTube addon settings"
+            >
+              <span class="advanced-toggle-icon" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                  />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </span>
+            </button>
+          </div>
+          <p class="flag-hint">
+            Fetches transcripts, metadata, and more from YouTube (and other
+            yt-dlp sites) via <code>@ogham/yt-dlp-mcp</code>. gemini is excluded
+            — it ingests YouTube natively. Use the gear to configure it.
+          </p>
+
+          <div
+            class="advanced-panel"
+            id="youtube-advanced-panel"
+            role="region"
+            aria-labelledby="youtube-advanced-toggle"
+            hidden
+          >
+            <div class="advanced-panel-inner">
+              <p class="addon-panel-title">
+                <span class="addon-panel-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+                    />
+                  </svg>
+                </span>
+                <span>mcp settings</span>
+              </p>
+
+              <div class="flag-field" id="youtube-detail-wrap">
+                <span class="flag-field-label">transcript language</span>
+                <div class="radio-row">
+                  <label class="radio"
+                    ><input
+                      type="radio"
+                      name="youtube-language"
+                      value="en"
+                    /><span
+                      >en <small class="default-marker">(default)</small></span
+                    ></label
+                  >
+                  <label class="radio"
+                    ><input
+                      type="radio"
+                      name="youtube-language"
+                      value="ko"
+                    /><span>ko</span></label
+                  >
+                </div>
+                <p class="flag-hint">
+                  Sets <code>YTDLP_LANG</code> — the title / metadata language
+                  and the transcript fallback when a video has multiple caption
+                  tracks.
+                </p>
+
+                <span class="flag-field-label">install on</span>
+                <label class="toggle flag-row">
+                  <input id="youtube-target-codex" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">codex</span>
+                  <span class="flag-desc"
+                    >adds the server to <code>~/.codex/config.toml</code> via
+                    <code>codex mcp add</code></span
+                  >
+                </label>
+                <label class="toggle flag-row">
+                  <input id="youtube-target-antigravity" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label">antigravity</span>
+                  <span class="flag-desc"
+                    >registers the server in agy's global mcp_config.json</span
+                  >
+                </label>
+              </div>
+            </div>
           </div>
         </section>
 

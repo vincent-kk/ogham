@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../../../constants/defaults.js';
-import type { ProvisionResult } from '../../../../../core/agyMcpConfig/index.js';
-import type { Config } from '../../../../../types/index.js';
+import type { YoutubeProvisionSummary } from '../../../../../core/youtubeMcp/index.js';
+import type { Config, YoutubeAddonConfig } from '../../../../../types/index.js';
 import { type SettingsServerInstance, startSettingsServer } from '../index.js';
 
 let handle: SettingsServerInstance | null = null;
 let savedConfig: Config | null = null;
-let provisionedWith: boolean | null = null;
+let provisionedWith: YoutubeAddonConfig | null = null;
 
 afterEach(async () => {
   if (handle) {
@@ -22,7 +22,10 @@ interface StartOverrides {
   idleMs?: number;
   loadConfig?: () => Promise<Config>;
   saveConfig?: (config: Config) => Promise<void>;
-  provisionYoutube?: (enabled: boolean) => Promise<ProvisionResult>;
+  provisionYoutube?: (
+    next: YoutubeAddonConfig,
+    prev?: YoutubeAddonConfig,
+  ) => Promise<YoutubeProvisionSummary>;
   settingsHtml?: string;
 }
 
@@ -40,12 +43,15 @@ async function start(
       (async (cfg) => {
         savedConfig = cfg;
       }),
-    // Stub provisioning so /save tests never touch agy's real global config.
+    // Stub provisioning so /save tests never touch real CLI MCP configs.
     provisionYoutube:
       overrides.provisionYoutube ??
-      (async (enabled) => {
-        provisionedWith = enabled;
-        return { ok: true, action: 'unchanged', path: '/tmp/fake' };
+      (async (next) => {
+        provisionedWith = next;
+        return {
+          antigravity: { ok: true, action: 'unchanged' },
+          codex: { ok: true, action: 'unchanged' },
+        };
       }),
   });
   return handle;
@@ -128,11 +134,17 @@ describe('settings web server', () => {
     expect(savedConfig).toEqual(updated);
   });
 
-  it('POST /save provisions agy youtube MCP with the saved toggle', async () => {
+  it('POST /save provisions the youtube MCP addon from the saved config', async () => {
     const h = await start();
     const updated: Config = {
       ...DEFAULT_CONFIG,
-      antigravity_youtube: { enabled: true },
+      addons: {
+        youtube: {
+          enabled: true,
+          language: 'ko',
+          targets: { codex: true, antigravity: true },
+        },
+      },
     };
     const res = await fetch(urlFor(h, '/save'), {
       method: 'POST',
@@ -140,14 +152,15 @@ describe('settings web server', () => {
       body: JSON.stringify(updated),
     });
     const body = (await res.json()) as {
-      antigravity_youtube: { ok: boolean; action: string };
+      youtube: {
+        antigravity: { ok: boolean; action: string };
+        codex: { ok: boolean; action: string };
+      };
     };
     expect(res.status).toBe(200);
-    expect(provisionedWith).toBe(true);
-    expect(body.antigravity_youtube).toEqual({
-      ok: true,
-      action: 'unchanged',
-    });
+    expect(provisionedWith).toEqual(updated.addons.youtube);
+    expect(body.youtube.antigravity).toEqual({ ok: true, action: 'unchanged' });
+    expect(body.youtube.codex).toEqual({ ok: true, action: 'unchanged' });
   });
 
   it('POST /save returns 400 with errors[] on invalid Config', async () => {

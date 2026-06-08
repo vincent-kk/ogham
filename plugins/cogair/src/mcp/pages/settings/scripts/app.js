@@ -14,7 +14,11 @@
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
   var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off', antigravity: 'auto' };
-  var DEFAULT_ANTIGRAVITY_YOUTUBE = { enabled: false };
+  var DEFAULT_YOUTUBE_ADDON = {
+    enabled: false,
+    language: 'en',
+    targets: { codex: true, antigravity: true },
+  };
   // gemini and antigravity are mutually exclusive Google engines; default to
   // gemini until the user switches (matches DEFAULT_CONFIG: gemini enabled).
   var DEFAULT_GOOGLE_ENGINE = 'gemini';
@@ -36,6 +40,7 @@
   var GOOGLE_ENGINES = ['gemini', 'antigravity'];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
   var RECENCY_LEVELS = ['off', 'auto', 'strict'];
+  var YOUTUBE_LANGUAGES = ['en', 'ko'];
 
   var STRENGTH_LABELS = {
     '-2': 'Subtle',
@@ -75,7 +80,6 @@
   var geminiBackendWrap = $('#gemini-backend-wrap');
   var antigravitySandbox = $('#antigravity-sandbox');
   var antigravitySkipPerms = $('#antigravity-skip-perms');
-  var antigravityYoutube = $('#antigravity-youtube');
   var modelAntigravityHigh = $('#model-antigravity-high');
   var modelAntigravityMid = $('#model-antigravity-mid');
   var modelAntigravityLow = $('#model-antigravity-low');
@@ -85,6 +89,12 @@
   var codexFullAccessWarning = $('#codex-full-access-warning');
   var artifactsEnabled = $('#artifacts-enabled');
   var artifactsLocationWrap = $('#artifacts-location-wrap');
+  var youtubeEnabled = $('#youtube-enabled');
+  var youtubeDetailWrap = $('#youtube-detail-wrap');
+  var youtubeTargetCodex = $('#youtube-target-codex');
+  var youtubeTargetAntigravity = $('#youtube-target-antigravity');
+  var youtubeAdvancedToggle = $('#youtube-advanced-toggle');
+  var youtubeAdvancedPanel = $('#youtube-advanced-panel');
   var preambleGemini = $('#preamble-gemini');
   var preambleCodex = $('#preamble-codex');
   var advancedToggleCodex = $('#advanced-toggle-codex');
@@ -392,9 +402,6 @@
         }
         // Disabled while agy #76 is unfixed; restore when fixed:
         // if (antigravitySandbox.checked) chips.push({ label: 'sandbox: terminal' });
-        if (antigravityYoutube.checked) {
-          chips.push({ label: 'youtube: on' });
-        }
       } else {
         if (geminiYolo.checked) {
           chips.push({ label: 'yolo: on', tone: 'warn' });
@@ -583,10 +590,35 @@
     bindAgyModelOptions(agyModels);
   }
 
-  function applyAntigravityYoutube(raw) {
-    var src =
-      raw && typeof raw === 'object' ? raw : DEFAULT_ANTIGRAVITY_YOUTUBE;
-    antigravityYoutube.checked = Boolean(src.enabled);
+  function syncYoutubeAddonInert() {
+    if (youtubeEnabled.checked) {
+      youtubeDetailWrap.classList.remove('is-inert');
+    } else {
+      youtubeDetailWrap.classList.add('is-inert');
+    }
+  }
+
+  function applyYoutubeAddon(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_YOUTUBE_ADDON;
+    youtubeEnabled.checked = Boolean(src.enabled);
+    setRadio(
+      'youtube-language',
+      typeof src.language === 'string'
+        ? src.language
+        : DEFAULT_YOUTUBE_ADDON.language,
+      YOUTUBE_LANGUAGES,
+    );
+    var targets =
+      src.targets && typeof src.targets === 'object' ? src.targets : {};
+    youtubeTargetCodex.checked =
+      typeof targets.codex === 'boolean'
+        ? targets.codex
+        : DEFAULT_YOUTUBE_ADDON.targets.codex;
+    youtubeTargetAntigravity.checked =
+      typeof targets.antigravity === 'boolean'
+        ? targets.antigravity
+        : DEFAULT_YOUTUBE_ADDON.targets.antigravity;
+    syncYoutubeAddonInert();
   }
 
   function applyConfig(cfg) {
@@ -609,7 +641,7 @@
     applyPreamble(cfg.preamble);
     applyRecencyFactor(cfg.recency_factor);
     applyModels(cfg.model_map);
-    applyAntigravityYoutube(cfg.antigravity_youtube);
+    applyYoutubeAddon(cfg.addons && cfg.addons.youtube);
     var radio = document.querySelector(
       'input[name="model"][value="' + cfg.default_model + '"]',
     );
@@ -735,8 +767,19 @@
         ),
         antigravity: recGoogle,
       },
-      antigravity_youtube: {
-        enabled: Boolean(antigravityYoutube.checked),
+      addons: {
+        youtube: {
+          enabled: Boolean(youtubeEnabled.checked),
+          language: readRadio(
+            'youtube-language',
+            YOUTUBE_LANGUAGES,
+            DEFAULT_YOUTUBE_ADDON.language,
+          ),
+          targets: {
+            codex: Boolean(youtubeTargetCodex.checked),
+            antigravity: Boolean(youtubeTargetAntigravity.checked),
+          },
+        },
       },
     };
   }
@@ -851,6 +894,9 @@
   advancedToggleGemini.addEventListener('click', function () {
     toggleAdvancedPanel(advancedToggleGemini, advancedPanelGemini);
   });
+  youtubeAdvancedToggle.addEventListener('click', function () {
+    toggleAdvancedPanel(youtubeAdvancedToggle, youtubeAdvancedPanel);
+  });
   document
     .querySelectorAll('input[name="google-engine"]')
     .forEach(function (r) {
@@ -865,6 +911,7 @@
       r.addEventListener('change', syncCodexFullAccessWarning);
     });
   artifactsEnabled.addEventListener('change', syncArtifactsLocationInert);
+  youtubeEnabled.addEventListener('change', syncYoutubeAddonInert);
   form.addEventListener('change', renderAllSummaries);
   form.addEventListener('input', renderAllSummaries);
   form.addEventListener('submit', function (e) {

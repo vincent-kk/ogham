@@ -90,18 +90,38 @@ export const RecencyFactorConfigSchema = z.object({
 
 export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 
-// Antigravity, unlike Gemini CLI, has no built-in YouTube ingestion. When
-// enabled, cogair provisions a youtube-transcript MCP server into agy's global
-// mcp_config.json so agy fetches and summarizes YouTube transcripts natively in
-// headless print mode. Opt-in (defaults disabled): toggling it writes to agy's
-// config as a side effect of /setup, outside cogair's own namespace.
-export const AntigravityYoutubeConfigSchema = z.object({
-  enabled: z.boolean(),
+// YouTube ingestion via the @ogham/yt-dlp-mcp server, modeled as a standalone MCP
+// addon rather than a per-provider LLM feature. When enabled, cogair provisions the
+// youtube-transcript server into each checked target CLI — antigravity's global
+// mcp_config.json and/or codex's config.toml (via `codex mcp add`). gemini is
+// excluded: it ingests YouTube natively and is being phased out. `language` sets the
+// server's YTDLP_LANG (transcript + title/metadata language).
+export const YoutubeAddonLanguageSchema = z.enum(['en', 'ko']);
+
+export type YoutubeAddonLanguage = z.infer<typeof YoutubeAddonLanguageSchema>;
+
+export const YoutubeAddonTargetsSchema = z.object({
+  codex: z.boolean(),
+  antigravity: z.boolean(),
 });
 
-export type AntigravityYoutubeConfig = z.infer<
-  typeof AntigravityYoutubeConfigSchema
->;
+export type YoutubeAddonTargets = z.infer<typeof YoutubeAddonTargetsSchema>;
+
+export const YoutubeAddonConfigSchema = z.object({
+  enabled: z.boolean(),
+  language: YoutubeAddonLanguageSchema,
+  targets: YoutubeAddonTargetsSchema,
+});
+
+export type YoutubeAddonConfig = z.infer<typeof YoutubeAddonConfigSchema>;
+
+// Standalone MCP addons, independent of provider routing. Currently just the
+// YouTube (yt-dlp) addon; new addons slot in as sibling keys.
+export const AddonsConfigSchema = z.object({
+  youtube: YoutubeAddonConfigSchema,
+});
+
+export type AddonsConfig = z.infer<typeof AddonsConfigSchema>;
 
 // Base object schema, exported so callers that need `.shape`/`.extend` (e.g.
 // partial merges) keep access. ConfigSchema wraps it with the mutual-exclusion
@@ -118,7 +138,7 @@ export const ConfigObjectSchema = z.object({
   artifacts: ArtifactsConfigSchema,
   preamble: PreambleConfigSchema,
   recency_factor: RecencyFactorConfigSchema,
-  antigravity_youtube: AntigravityYoutubeConfigSchema,
+  addons: AddonsConfigSchema,
 });
 
 // gemini and antigravity are mutually exclusive Google engines: the Gemini CLI
