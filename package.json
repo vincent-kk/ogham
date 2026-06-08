@@ -32,13 +32,13 @@
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
     "prawf": "yarn workspace @ogham/prawf",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
-    "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tag-packages.sh",
     "test": "vitest",
     "test:run": "vitest run",
-    "typecheck": "node scripts/typecheck-all.mjs"
+    "typecheck": "node scripts/typecheck-all.mjs",
+    "yt-dlp-mcp": "yarn workspace @ogham/yt-dlp-mcp"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
