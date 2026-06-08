@@ -3,6 +3,11 @@ import path from 'node:path';
 
 import { z } from 'zod';
 
+import {
+  type EnableKey,
+  TOOL_DEFAULT_ENABLED,
+} from '@/constants/tool-defaults.js';
+
 const LOG_LEVELS = [
   'trace',
   'debug',
@@ -12,6 +17,13 @@ const LOG_LEVELS = [
   'fatal',
   'silent',
 ] as const;
+
+const enableShape = Object.fromEntries(
+  (Object.keys(TOOL_DEFAULT_ENABLED) as EnableKey[]).map((key) => [
+    key,
+    z.boolean(),
+  ]),
+) as Record<EnableKey, z.ZodBoolean>;
 
 const ConfigSchema = z.object({
   paths: z.object({
@@ -32,17 +44,7 @@ const ConfigSchema = z.object({
     subtitleIntervalMs: z.number().int().min(0),
     defaultSubLang: z.string().min(1),
   }),
-  enable: z.object({
-    subtitles: z.boolean(),
-    metadataSummary: z.boolean(),
-    comments: z.boolean(),
-    commentsSummary: z.boolean(),
-    chapters: z.boolean(),
-    heatmap: z.boolean(),
-    thumbnail: z.boolean(),
-    download: z.boolean(),
-    playlist: z.boolean(),
-  }),
+  enable: z.object(enableShape),
   evasion: z.object({
     cookiesFromBrowser: z.string().min(1).optional(),
     cookiesFile: z.string().min(1).optional(),
@@ -69,6 +71,17 @@ function boolEnv(value: string | undefined): boolean {
   if (!value) return false;
   const v = value.trim().toLowerCase();
   return v === '1' || v === 'true' || v === 'yes' || v === 'on';
+}
+
+/** Tri-state: unset/empty → fallback (the tool's default); set → parsed boolean. */
+function flagEnv(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value.trim() === '') return fallback;
+  return boolEnv(value);
+}
+
+function enableEnvName(key: EnableKey): string {
+  const suffix = key.replace(/[A-Z]/g, (m) => `_${m}`).toUpperCase();
+  return `YTDLP_ENABLE_${suffix}`;
 }
 
 function intEnv(value: string | undefined, fallback: number): number {
@@ -131,7 +144,12 @@ export function loadConfig(env: Env = process.env): Config {
     env.YTDLP_DOWNLOADS_DIR?.trim() || path.join(home, 'downloads'),
   );
   const enableAll = boolEnv(env.YTDLP_ENABLE_ALL);
-  const flag = (key: string): boolean => enableAll || boolEnv(env[key]);
+  const enable = Object.fromEntries(
+    (Object.keys(TOOL_DEFAULT_ENABLED) as EnableKey[]).map((key) => [
+      key,
+      enableAll || flagEnv(env[enableEnvName(key)], TOOL_DEFAULT_ENABLED[key]),
+    ]),
+  ) as Record<EnableKey, boolean>;
 
   const proxyPool = listEnv(env.YTDLP_PROXY_POOL);
   const proxy = env.YTDLP_PROXY?.trim() || undefined;
@@ -162,17 +180,7 @@ export function loadConfig(env: Env = process.env): Config {
       ),
       defaultSubLang: env.YTDLP_DEFAULT_SUB_LANG?.trim() || 'en',
     },
-    enable: {
-      subtitles: flag('YTDLP_ENABLE_SUBTITLES'),
-      metadataSummary: flag('YTDLP_ENABLE_METADATA_SUMMARY'),
-      comments: flag('YTDLP_ENABLE_COMMENTS'),
-      commentsSummary: flag('YTDLP_ENABLE_COMMENTS_SUMMARY'),
-      chapters: flag('YTDLP_ENABLE_CHAPTERS'),
-      heatmap: flag('YTDLP_ENABLE_HEATMAP'),
-      thumbnail: flag('YTDLP_ENABLE_THUMBNAIL'),
-      download: flag('YTDLP_ENABLE_DOWNLOAD'),
-      playlist: flag('YTDLP_ENABLE_PLAYLIST'),
-    },
+    enable,
     evasion: {
       cookiesFromBrowser: env.YTDLP_COOKIES_FROM_BROWSER?.trim() || undefined,
       cookiesFile: env.YTDLP_COOKIES_FILE?.trim() || undefined,

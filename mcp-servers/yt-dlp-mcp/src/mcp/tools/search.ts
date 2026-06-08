@@ -49,7 +49,7 @@ function render(result: SearchResult): string {
 
 export const searchVideosTool: ToolDefinition = {
   name: 'ytdlp_search_videos',
-  enabledBy: 'default',
+  enabledBy: 'search',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_search_videos',

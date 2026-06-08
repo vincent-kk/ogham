@@ -32,7 +32,7 @@ Writes a file (not idempotent); trimming and some format merges require ffmpeg o
 
 export const downloadVideoTool: ToolDefinition = {
   name: 'ytdlp_download_video',
-  enabledBy: 'download',
+  enabledBy: 'downloadVideo',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_download_video',

@@ -21,7 +21,7 @@ The first tool call downloads the yt-dlp binary once (shared across all instance
 
 ### Template 1 · Minimal
 
-Just the four default tools: search, subtitle languages, transcript, and metadata. Nothing to switch on.
+Just the five default tools: search, subtitle languages, transcript, metadata, and playlist. Nothing to switch on.
 
 ```jsonc
 {
@@ -36,7 +36,7 @@ Just the four default tools: search, subtitle languages, transcript, and metadat
 
 ### Template 2 · Reading & research
 
-Adds every read-only tool — metadata summary, raw subtitles, comments, chapters, heatmap, and playlists. Nothing is written to disk and **no ffmpeg is needed.** A good default for research and Q&A over videos.
+Adds the remaining read-only tools — metadata summary, raw subtitles, comments, chapters, and heatmap. Nothing is written to disk and **no ffmpeg is needed.** A good default for research and Q&A over videos.
 
 ```jsonc
 {
@@ -51,7 +51,6 @@ Adds every read-only tool — metadata summary, raw subtitles, comments, chapter
         "YTDLP_ENABLE_COMMENTS_SUMMARY": "1",
         "YTDLP_ENABLE_CHAPTERS": "1",
         "YTDLP_ENABLE_HEATMAP": "1",
-        "YTDLP_ENABLE_PLAYLIST": "1",
       },
     },
   },
@@ -78,9 +77,9 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 
 ## Tools
 
-**Four tools are always on.** The rest stay hidden until you switch them on with an environment variable, so your app's tool list stays short and uncluttered.
+**Five tools are on by default.** The rest stay hidden until you switch them on, so your app's tool list stays short and uncluttered. Every tool can be turned on or off with its own `YTDLP_ENABLE_<TOOL>` variable — see [Tool toggles](#tool-toggles).
 
-### Always available
+### On by default
 
 | Tool                            | What it does                                                                   | Main options                                                                                                  |
 | ------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
@@ -88,6 +87,7 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 | `ytdlp_list_subtitle_languages` | List which subtitle/caption languages a video has (manual + auto-generated).   | `url`                                                                                                         |
 | `ytdlp_download_transcript`     | Get a clean, readable plain-text transcript from a video's captions.           | `url`, `language` (default `YTDLP_DEFAULT_SUB_LANG`, else `en`), `timestamps`, `stripArtifacts`               |
 | `ytdlp_get_video_metadata`      | Get curated video metadata as JSON (title, views, duration, upload date, …).   | `url`, `fields` (keep only the keys you ask for)                                                              |
+| `ytdlp_get_playlist`            | List the entries of a playlist or channel (flat, no per-video download).       | `url`, `limit`                                                                                                |
 
 > `ytdlp_download_transcript` returns cleaned readable plain text; `ytdlp_get_video_subtitles` returns raw subtitles with per-cue timestamps preserved.
 
@@ -102,9 +102,8 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 | `ytdlp_get_chapters`               | `YTDLP_ENABLE_CHAPTERS`         | The video's chapter list (section markers with start times).                                                                       |
 | `ytdlp_get_heatmap`                | `YTDLP_ENABLE_HEATMAP`          | The "most replayed" heatmap (engagement score per time span).                                                                      |
 | `ytdlp_get_thumbnail` 💾           | `YTDLP_ENABLE_THUMBNAIL`        | Download the thumbnail as a JPG into your downloads folder.                                                                        |
-| `ytdlp_download_video` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | Download a video file. Options: `resolution` (`480p`/`720p`/`1080p`/`best`), `startTime`/`endTime` to trim. Trimming needs ffmpeg. |
-| `ytdlp_download_audio` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | Download just the audio track. Option: `audioFormat` (`m4a`/`mp3`). Needs ffmpeg.                                                  |
-| `ytdlp_get_playlist`               | `YTDLP_ENABLE_PLAYLIST`         | List the entries of a playlist or channel. Option: `limit`.                                                                        |
+| `ytdlp_download_video` 💾          | `YTDLP_ENABLE_DOWNLOAD_VIDEO`   | Download a video file. Options: `resolution` (`480p`/`720p`/`1080p`/`best`), `startTime`/`endTime` to trim. Trimming needs ffmpeg. |
+| `ytdlp_download_audio` 💾          | `YTDLP_ENABLE_DOWNLOAD_AUDIO`   | Download just the audio track. Option: `audioFormat` (`m4a`/`mp3`). Needs ffmpeg.                                                  |
 
 > 💾 = writes a file to disk. The download tools also touch the target platform's Terms of Service — see [Legal](#legal).
 
@@ -113,8 +112,9 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 The [templates above](#quick-start) cover the common cases. To pick tools individually, set each one's `YTDLP_ENABLE_*` variable (see [Tool toggles](#tool-toggles)) inside the `env` block:
 
 - Set it to `1` (or `true` / `yes` / `on`) to register the tool.
-- Leave it unset to keep it hidden.
-- Set `YTDLP_ENABLE_ALL=1` to register every tool at once.
+- Set it to `0` (or `false` / `no` / `off`) to hide a tool that is on by default.
+- Leave it unset to use the tool's default (see [Tool toggles](#tool-toggles)).
+- Set `YTDLP_ENABLE_ALL=1` to register every tool at once (overrides individual flags).
 
 After changing any value, restart your MCP app so it re-reads the tool list.
 
@@ -124,18 +124,25 @@ Everything is configured through environment variables in the `env` block above 
 
 ### Tool toggles
 
-| Variable                        | Registers                                          |
-| ------------------------------- | -------------------------------------------------- |
-| `YTDLP_ENABLE_SUBTITLES`        | `ytdlp_get_video_subtitles`                        |
-| `YTDLP_ENABLE_METADATA_SUMMARY` | `ytdlp_get_video_metadata_summary`                 |
-| `YTDLP_ENABLE_COMMENTS`         | `ytdlp_get_comments`                               |
-| `YTDLP_ENABLE_COMMENTS_SUMMARY` | `ytdlp_get_comments_summary`                       |
-| `YTDLP_ENABLE_CHAPTERS`         | `ytdlp_get_chapters`                               |
-| `YTDLP_ENABLE_HEATMAP`          | `ytdlp_get_heatmap`                                |
-| `YTDLP_ENABLE_THUMBNAIL`        | `ytdlp_get_thumbnail`                              |
-| `YTDLP_ENABLE_DOWNLOAD`         | `ytdlp_download_video`, `ytdlp_download_audio`     |
-| `YTDLP_ENABLE_PLAYLIST`         | `ytdlp_get_playlist`                               |
-| `YTDLP_ENABLE_ALL`              | all of the above                                   |
+Every tool has its own flag. Set it to `1` to turn the tool on, `0` to turn it off; leave it unset to use the **Default** shown below.
+
+| Variable                               | Registers                          | Default |
+| -------------------------------------- | ---------------------------------- | ------- |
+| `YTDLP_ENABLE_SEARCH`                  | `ytdlp_search_videos`              | on      |
+| `YTDLP_ENABLE_LIST_SUBTITLE_LANGUAGES` | `ytdlp_list_subtitle_languages`    | on      |
+| `YTDLP_ENABLE_TRANSCRIPT`              | `ytdlp_download_transcript`        | on      |
+| `YTDLP_ENABLE_METADATA`                | `ytdlp_get_video_metadata`         | on      |
+| `YTDLP_ENABLE_PLAYLIST`                | `ytdlp_get_playlist`               | on      |
+| `YTDLP_ENABLE_SUBTITLES`               | `ytdlp_get_video_subtitles`        | off     |
+| `YTDLP_ENABLE_METADATA_SUMMARY`        | `ytdlp_get_video_metadata_summary` | off     |
+| `YTDLP_ENABLE_COMMENTS`                | `ytdlp_get_comments`               | off     |
+| `YTDLP_ENABLE_COMMENTS_SUMMARY`        | `ytdlp_get_comments_summary`       | off     |
+| `YTDLP_ENABLE_CHAPTERS`                | `ytdlp_get_chapters`               | off     |
+| `YTDLP_ENABLE_HEATMAP`                 | `ytdlp_get_heatmap`                | off     |
+| `YTDLP_ENABLE_THUMBNAIL`               | `ytdlp_get_thumbnail`              | off     |
+| `YTDLP_ENABLE_DOWNLOAD_VIDEO`          | `ytdlp_download_video`             | off     |
+| `YTDLP_ENABLE_DOWNLOAD_AUDIO`          | `ytdlp_download_audio`             | off     |
+| `YTDLP_ENABLE_ALL`                     | every tool (overrides all flags)   | —       |
 
 ### Where files go
 

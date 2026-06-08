@@ -16,16 +16,24 @@ describe('loadConfig', () => {
   it('keeps opt-in tools off by default', () => {
     const c = loadConfig({});
     expect(c.enable.comments).toBe(false);
-    expect(c.enable.download).toBe(false);
+    expect(c.enable.downloadVideo).toBe(false);
+    expect(c.enable.downloadAudio).toBe(false);
+  });
+
+  it('keeps core tools on by default but lets a flag disable them', () => {
+    expect(loadConfig({}).enable.search).toBe(true);
+    expect(loadConfig({}).enable.playlist).toBe(true);
+    expect(loadConfig({ YTDLP_ENABLE_SEARCH: '0' }).enable.search).toBe(false);
   });
 
   it('honors individual enable flags', () => {
     const c = loadConfig({
       YTDLP_ENABLE_COMMENTS: '1',
-      YTDLP_ENABLE_DOWNLOAD: 'true',
+      YTDLP_ENABLE_DOWNLOAD_VIDEO: 'true',
     });
     expect(c.enable.comments).toBe(true);
-    expect(c.enable.download).toBe(true);
+    expect(c.enable.downloadVideo).toBe(true);
+    expect(c.enable.downloadAudio).toBe(false);
     expect(c.enable.heatmap).toBe(false);
   });
 

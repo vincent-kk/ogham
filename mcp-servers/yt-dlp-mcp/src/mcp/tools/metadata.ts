@@ -35,7 +35,7 @@ function selectFields(
 
 export const metadataTool: ToolDefinition = {
   name: 'ytdlp_get_video_metadata',
-  enabledBy: 'default',
+  enabledBy: 'metadata',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_get_video_metadata',

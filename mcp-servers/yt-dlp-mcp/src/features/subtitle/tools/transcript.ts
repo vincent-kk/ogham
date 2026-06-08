@@ -41,7 +41,7 @@ Use when you need readable text to analyze, summarize, or quote; not for timesta
 
 export const transcriptTool: ToolDefinition = {
   name: 'ytdlp_download_transcript',
-  enabledBy: 'default',
+  enabledBy: 'transcript',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_download_transcript',

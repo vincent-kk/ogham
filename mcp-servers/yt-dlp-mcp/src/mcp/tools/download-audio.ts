@@ -20,7 +20,7 @@ Writes a file (not idempotent); audio extraction requires ffmpeg on PATH.`;
 
 export const downloadAudioTool: ToolDefinition = {
   name: 'ytdlp_download_audio',
-  enabledBy: 'download',
+  enabledBy: 'downloadAudio',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_download_audio',

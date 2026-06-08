@@ -25,8 +25,8 @@ import type {
 
 /**
  * Every tool the server knows about (ARCHITECTURE §7 order). Boot registers each
- * one only if its gate is 'default' or its config flag is on (ADR-8). This array
- * order is the tools/list order.
+ * one only when its enable flag is on (ADR-8). This array order is the tools/list
+ * order.
  */
 export const TOOL_REGISTRY: ToolDefinition[] = [
   searchVideosTool,
@@ -45,12 +45,11 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
   playlistTool,
 ];
 
-/** Pure gate check (ADR-8): default tools are always on; others follow their flag. */
+/** Pure gate check (ADR-8): a tool registers only when its enable flag is on. */
 export function isToolEnabled(
   tool: ToolDefinition,
   enable: EnableFlags,
 ): boolean {
-  if (tool.enabledBy === 'default') return true;
   return enable[tool.enabledBy];
 }
 

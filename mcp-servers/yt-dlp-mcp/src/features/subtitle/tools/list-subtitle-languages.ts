@@ -28,7 +28,7 @@ function render(result: SubtitleLanguageList): string {
 
 export const listSubtitleLanguagesTool: ToolDefinition = {
   name: 'ytdlp_list_subtitle_languages',
-  enabledBy: 'default',
+  enabledBy: 'listSubtitleLanguages',
   register(server, { service, config }) {
     server.registerTool(
       'ytdlp_list_subtitle_languages',

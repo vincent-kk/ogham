@@ -21,7 +21,7 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 
 ### 템플릿 1 · 최소
 
-기본 도구 4개만 사용합니다: 검색, 자막 언어, 스크립트, 메타데이터. 켤 것이 없습니다.
+기본 도구 5개만 사용합니다: 검색, 자막 언어, 스크립트, 메타데이터, 재생목록. 켤 것이 없습니다.
 
 ```jsonc
 {
@@ -36,7 +36,7 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 
 ### 템플릿 2 · 읽기 및 리서치
 
-읽기 전용 도구를 모두 추가합니다 — 메타데이터 요약, 원본 자막, 댓글, 챕터, 히트맵, 재생목록. 디스크에 아무것도 쓰지 않으며 **ffmpeg가 필요 없습니다.** 영상 리서치·질의응답에 적합한 기본 구성입니다.
+나머지 읽기 전용 도구를 추가합니다 — 메타데이터 요약, 원본 자막, 댓글, 챕터, 히트맵. 디스크에 아무것도 쓰지 않으며 **ffmpeg가 필요 없습니다.** 영상 리서치·질의응답에 적합한 기본 구성입니다.
 
 ```jsonc
 {
@@ -48,9 +48,9 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
         "YTDLP_ENABLE_METADATA_SUMMARY": "1",
         "YTDLP_ENABLE_SUBTITLES": "1",
         "YTDLP_ENABLE_COMMENTS": "1",
+        "YTDLP_ENABLE_COMMENTS_SUMMARY": "1",
         "YTDLP_ENABLE_CHAPTERS": "1",
         "YTDLP_ENABLE_HEATMAP": "1",
-        "YTDLP_ENABLE_PLAYLIST": "1",
       },
     },
   },
@@ -77,9 +77,9 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 
 ## 도구
 
-**4개 도구는 항상 켜져 있습니다.** 나머지는 환경변수로 켜기 전까지 숨겨져 있어, 앱의 도구 목록이 짧고 깔끔하게 유지됩니다.
+**5개 도구가 기본으로 켜져 있습니다.** 나머지는 켜기 전까지 숨겨져 있어 앱의 도구 목록이 짧고 깔끔하게 유지됩니다. 모든 도구는 자체 `YTDLP_ENABLE_<TOOL>` 변수로 켜고 끌 수 있습니다 — [도구 토글](#도구-토글) 참조.
 
-### 항상 사용 가능
+### 기본 켜짐
 
 | 도구                            | 설명                                                                  | 주요 옵션                                                                                                |
 | ------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -87,6 +87,7 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 | `ytdlp_list_subtitle_languages` | 영상에 있는 자막 언어 목록(수동 + 자동 생성).                         | `url`                                                                                                    |
 | `ytdlp_download_transcript`     | 영상 자막에서 깔끔하게 읽히는 플레인 텍스트 스크립트를 가져옵니다.    | `url`, `language`(기본 `YTDLP_DEFAULT_SUB_LANG`, 미설정 시 `en`), `timestamps`, `stripArtifacts`         |
 | `ytdlp_get_video_metadata`      | 정제된 영상 메타데이터를 JSON으로 반환(제목·조회수·길이·업로드일 등). | `url`, `fields`(원하는 키만 선택)                                                                        |
+| `ytdlp_get_playlist`            | 재생목록·채널의 항목을 나열(flat, 개별 영상 다운로드 없음).           | `url`, `limit`                                                                                           |
 
 ### 선택 활성화(환경변수로 켜기)
 
@@ -95,13 +96,12 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 | `ytdlp_get_video_subtitles`        | `YTDLP_ENABLE_SUBTITLES`        | 타임스탬프가 보존된 원본 자막(자막 cue 한 줄당 한 행).                                                                            |
 | `ytdlp_get_video_metadata_summary` | `YTDLP_ENABLE_METADATA_SUMMARY` | 영상 핵심 메타데이터를 사람이 읽기 좋게 요약.                                                                                     |
 | `ytdlp_get_comments`               | `YTDLP_ENABLE_COMMENTS`         | 댓글을 JSON 또는 AI 친화적 스레드 Markdown으로 추출.                                                                              |
-| `ytdlp_get_comments_summary`       | `YTDLP_ENABLE_COMMENTS`         | 인기 댓글을 빠르게 읽을 수 있는 요약본.                                                                                           |
+| `ytdlp_get_comments_summary`       | `YTDLP_ENABLE_COMMENTS_SUMMARY` | 인기 댓글을 빠르게 읽을 수 있는 요약본.                                                                                           |
 | `ytdlp_get_chapters`               | `YTDLP_ENABLE_CHAPTERS`         | 영상 챕터 목록(시작 시간이 있는 구간 마커).                                                                                       |
 | `ytdlp_get_heatmap`                | `YTDLP_ENABLE_HEATMAP`          | "가장 많이 다시 본" 히트맵(구간별 참여 점수).                                                                                     |
 | `ytdlp_get_thumbnail` 💾           | `YTDLP_ENABLE_THUMBNAIL`        | 썸네일을 JPG로 다운로드 폴더에 저장.                                                                                              |
-| `ytdlp_download_video` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | 영상 파일 다운로드. 옵션: `resolution`(`480p`/`720p`/`1080p`/`best`), 잘라내기용 `startTime`/`endTime`. 잘라내기에는 ffmpeg 필요. |
-| `ytdlp_download_audio` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | 오디오 트랙만 다운로드. 옵션: `audioFormat`(`m4a`/`mp3`). ffmpeg 필요.                                                            |
-| `ytdlp_get_playlist`               | `YTDLP_ENABLE_PLAYLIST`         | 재생목록·채널의 항목 나열. 옵션: `limit`.                                                                                         |
+| `ytdlp_download_video` 💾          | `YTDLP_ENABLE_DOWNLOAD_VIDEO`   | 영상 파일 다운로드. 옵션: `resolution`(`480p`/`720p`/`1080p`/`best`), 잘라내기용 `startTime`/`endTime`. 잘라내기에는 ffmpeg 필요. |
+| `ytdlp_download_audio` 💾          | `YTDLP_ENABLE_DOWNLOAD_AUDIO`   | 오디오 트랙만 다운로드. 옵션: `audioFormat`(`m4a`/`mp3`). ffmpeg 필요.                                                            |
 
 > 💾 = 디스크에 파일을 씁니다. 다운로드 도구는 대상 플랫폼의 이용약관과도 관련됩니다 — [법적 고지](#법적-고지) 참조.
 
@@ -110,8 +110,9 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 [위 템플릿](#빠른-시작)이 일반적인 경우를 대부분 다룹니다. 도구를 개별적으로 고르려면 `env` 블록 안에서 각 도구의 `YTDLP_ENABLE_*` 변수([도구 토글](#도구-토글) 참조)를 설정하세요:
 
 - `1`(또는 `true` / `yes` / `on`)로 설정하면 도구가 등록됩니다.
-- 설정하지 않으면 숨겨진 상태로 둡니다.
-- `YTDLP_ENABLE_ALL=1`로 설정하면 모든 도구가 한 번에 등록됩니다.
+- `0`(또는 `false` / `no` / `off`)으로 설정하면 기본으로 켜진 도구를 끕니다.
+- 설정하지 않으면 도구의 기본값을 따릅니다([도구 토글](#도구-토글) 참조).
+- `YTDLP_ENABLE_ALL=1`로 설정하면 모든 도구가 한 번에 등록됩니다(개별 플래그 무시).
 
 값을 변경한 뒤에는 MCP 앱이 도구 목록을 다시 읽도록 앱을 재시작하세요.
 
@@ -121,17 +122,25 @@ MCP 앱 설정에 서버를 추가한 뒤(Claude Desktop이라면 `claude_deskto
 
 ### 도구 토글
 
-| 변수                            | 등록되는 도구                                      |
-| ------------------------------- | -------------------------------------------------- |
-| `YTDLP_ENABLE_SUBTITLES`        | `ytdlp_get_video_subtitles`                        |
-| `YTDLP_ENABLE_METADATA_SUMMARY` | `ytdlp_get_video_metadata_summary`                 |
-| `YTDLP_ENABLE_COMMENTS`         | `ytdlp_get_comments`, `ytdlp_get_comments_summary` |
-| `YTDLP_ENABLE_CHAPTERS`         | `ytdlp_get_chapters`                               |
-| `YTDLP_ENABLE_HEATMAP`          | `ytdlp_get_heatmap`                                |
-| `YTDLP_ENABLE_THUMBNAIL`        | `ytdlp_get_thumbnail`                              |
-| `YTDLP_ENABLE_DOWNLOAD`         | `ytdlp_download_video`, `ytdlp_download_audio`     |
-| `YTDLP_ENABLE_PLAYLIST`         | `ytdlp_get_playlist`                               |
-| `YTDLP_ENABLE_ALL`              | 위의 모든 도구                                     |
+모든 도구에는 각자의 플래그가 있습니다. `1`로 설정하면 켜고, `0`으로 설정하면 끄며, 설정하지 않으면 아래 **기본값**을 따릅니다.
+
+| 변수                                   | 등록되는 도구                      | 기본값 |
+| -------------------------------------- | ---------------------------------- | ------ |
+| `YTDLP_ENABLE_SEARCH`                  | `ytdlp_search_videos`              | 켜짐   |
+| `YTDLP_ENABLE_LIST_SUBTITLE_LANGUAGES` | `ytdlp_list_subtitle_languages`    | 켜짐   |
+| `YTDLP_ENABLE_TRANSCRIPT`              | `ytdlp_download_transcript`        | 켜짐   |
+| `YTDLP_ENABLE_METADATA`                | `ytdlp_get_video_metadata`         | 켜짐   |
+| `YTDLP_ENABLE_PLAYLIST`                | `ytdlp_get_playlist`               | 켜짐   |
+| `YTDLP_ENABLE_SUBTITLES`               | `ytdlp_get_video_subtitles`        | 꺼짐   |
+| `YTDLP_ENABLE_METADATA_SUMMARY`        | `ytdlp_get_video_metadata_summary` | 꺼짐   |
+| `YTDLP_ENABLE_COMMENTS`                | `ytdlp_get_comments`               | 꺼짐   |
+| `YTDLP_ENABLE_COMMENTS_SUMMARY`        | `ytdlp_get_comments_summary`       | 꺼짐   |
+| `YTDLP_ENABLE_CHAPTERS`                | `ytdlp_get_chapters`               | 꺼짐   |
+| `YTDLP_ENABLE_HEATMAP`                 | `ytdlp_get_heatmap`                | 꺼짐   |
+| `YTDLP_ENABLE_THUMBNAIL`               | `ytdlp_get_thumbnail`              | 꺼짐   |
+| `YTDLP_ENABLE_DOWNLOAD_VIDEO`          | `ytdlp_download_video`             | 꺼짐   |
+| `YTDLP_ENABLE_DOWNLOAD_AUDIO`          | `ytdlp_download_audio`             | 꺼짐   |
+| `YTDLP_ENABLE_ALL`                     | 모든 도구(개별 플래그 무시)        | —      |
 
 ### 파일이 저장되는 위치
 

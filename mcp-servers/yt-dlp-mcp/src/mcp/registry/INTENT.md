@@ -12,7 +12,7 @@
 ## Conventions
 
 - `TOOL_REGISTRY` 배열 순서가 곧 `tools/list` 노출 순서이므로 임의로 재정렬하지 않는다
-- `enabledBy: 'default'` 도구는 플래그와 무관하게 항상 등록한다
+- 모든 도구는 자기 `enabledBy` flag를 가지며('default' 특수값 없음), 기본 활성값은 `constants`의 `TOOL_DEFAULT_ENABLED`가 정한다
 - 활성화 판정은 `isToolEnabled` 단일 함수에 모으고 호출부에서 따로 분기하지 않는다
 - 서버 등록 루프는 `registerEnabledTools`만 담당하며 등록 결과를 로거로 남긴다
 
@@ -21,7 +21,7 @@
 ### Always do
 
 - 배열 순서를 `tools/list` 노출 순서로 유지한다
-- `enabledBy: 'default'` 도구는 항상 켠다
+- 새 도구는 `TOOL_REGISTRY` 배열과 `constants`의 `TOOL_DEFAULT_ENABLED`에 함께 등재한다
 
 ### Ask first
 
