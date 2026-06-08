@@ -5,9 +5,9 @@ import { buildThreads } from '@/ytdlp/operations/build-threads.js';
 import { commentsOperation } from '@/ytdlp/operations/comments.js';
 import { renderMarkdownTree } from '@/ytdlp/operations/render-markdown-tree.js';
 
-import { READ_ONLY } from './annotations.js';
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+import { READ_ONLY } from './utils/annotations.js';
+import { handleToolExecution } from './utils/handle.js';
+import type { ToolDefinition } from './utils/tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

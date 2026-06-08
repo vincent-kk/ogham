@@ -5,9 +5,9 @@ import { formatTimestamp } from '@/postprocess/format-timestamp.js';
 import { cacheKey } from '@/utils/cache-key.js';
 import { heatmapOperation } from '@/ytdlp/operations/heatmap.js';
 
-import { READ_ONLY } from './annotations.js';
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+import { READ_ONLY } from './utils/annotations.js';
+import { handleToolExecution } from './utils/handle.js';
+import type { ToolDefinition } from './utils/tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),

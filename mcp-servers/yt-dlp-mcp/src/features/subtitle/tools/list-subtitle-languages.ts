@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 import type { SubtitleLanguageList, SubtitleTrack } from '@/domain/types.js';
-import { READ_ONLY } from '@/mcp/tools/annotations.js';
-import { handleToolExecution } from '@/mcp/tools/handle.js';
-import type { ToolDefinition } from '@/mcp/tools/tool-definition.js';
+import { READ_ONLY } from '@/mcp/tools/utils/annotations.js';
+import { handleToolExecution } from '@/mcp/tools/utils/handle.js';
+import type { ToolDefinition } from '@/mcp/tools/utils/tool-definition.js';
 import { cacheKey } from '@/utils/cache-key.js';
 
 import { listSubtitlesOperation } from '../operations/list-subtitles.js';

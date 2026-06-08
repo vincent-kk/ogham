@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { loadConfig } from '@/config/index.js';
 import { isToolEnabled } from '@/mcp/registry/index.js';
-import type { EnableKey, ToolDefinition } from '@/mcp/tools/tool-definition.js';
+import type {
+  EnableKey,
+  ToolDefinition,
+} from '@/mcp/tools/utils/tool-definition.js';
 
 const fakeTool = (enabledBy: EnableKey): ToolDefinition => ({
   name: 'fake',

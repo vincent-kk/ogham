@@ -4,6 +4,7 @@ import {
   SUMS_ASSET,
 } from '@/constants/github.js';
 import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
+import type { Logger } from '@/obs/logger.js';
 
 import { assetNameForPlatform } from './asset-name.js';
 import { selectSafeRelease } from './select-safe-release.js';
@@ -36,6 +37,7 @@ export interface VersionResolverDeps {
   fetchJson: (url: string, signal?: AbortSignal) => Promise<unknown>;
   now?: () => number;
   platform?: { platform: NodeJS.Platform; arch: string };
+  logger?: Logger;
 }
 
 export function createVersionResolver(
@@ -51,12 +53,20 @@ export function createVersionResolver(
     const asset = release.assets?.find((a) => a.name === assetName);
     const sums = release.assets?.find((a) => a.name === SUMS_ASSET);
     if (!asset) {
+      deps.logger?.warn(
+        { tag: release.tag_name, asset: assetName },
+        'release missing required asset',
+      );
       throw new YtDlpMcpError(
         ErrorCode.BINARY_UNAVAILABLE,
         `Release ${release.tag_name} has no asset '${assetName}'`,
       );
     }
     if (!sums) {
+      deps.logger?.warn(
+        { tag: release.tag_name, sums: SUMS_ASSET },
+        'release missing checksum manifest',
+      );
       throw new YtDlpMcpError(
         ErrorCode.CHECKSUM_MISMATCH,
         `Release ${release.tag_name} has no '${SUMS_ASSET}' manifest`,

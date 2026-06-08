@@ -26,6 +26,7 @@ async function main(): Promise<void> {
       pinnedVersion: config.binary.pinnedVersion,
     },
     fetchJson,
+    logger,
   });
   const binaryManager = createBinaryManager({
     paths,

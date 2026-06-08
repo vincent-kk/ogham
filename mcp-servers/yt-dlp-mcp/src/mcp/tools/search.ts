@@ -4,9 +4,9 @@ import type { SearchResult } from '@/domain/types.js';
 import { cacheKey } from '@/utils/cache-key.js';
 import { searchOperation } from '@/ytdlp/operations/search.js';
 
-import { READ_ONLY } from './annotations.js';
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+import { READ_ONLY } from './utils/annotations.js';
+import { handleToolExecution } from './utils/handle.js';
+import type { ToolDefinition } from './utils/tool-definition.js';
 
 const inputSchema = {
   query: z.string().min(1).max(200).describe('Search keywords or phrase.'),

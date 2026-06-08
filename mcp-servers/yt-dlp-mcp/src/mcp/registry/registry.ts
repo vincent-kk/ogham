@@ -18,7 +18,10 @@ import { metadataTool } from '../tools/metadata.js';
 import { playlistTool } from '../tools/playlist.js';
 import { searchVideosTool } from '../tools/search.js';
 import { thumbnailTool } from '../tools/thumbnail.js';
-import type { ToolDefinition, ToolDeps } from '../tools/tool-definition.js';
+import type {
+  ToolDefinition,
+  ToolDeps,
+} from '../tools/utils/tool-definition.js';
 
 /**
  * Every tool the server knows about (ARCHITECTURE §7 order). Boot registers each

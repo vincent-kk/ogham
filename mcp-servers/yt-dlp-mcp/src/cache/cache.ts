@@ -8,13 +8,17 @@ interface Entry<V> {
  * `now` is injectable for deterministic tests.
  */
 export class TtlLruCache<V> {
-  private readonly store = new Map<string, Entry<V>>();
+  private readonly store: Map<string, Entry<V>>;
+  private readonly maxSize: number;
+  private readonly ttlMs: number;
+  private readonly now: () => number;
 
-  constructor(
-    private readonly maxSize: number,
-    private readonly ttlMs: number,
-    private readonly now: () => number = Date.now,
-  ) {}
+  constructor(maxSize: number, ttlMs: number, now: () => number = Date.now) {
+    this.maxSize = maxSize;
+    this.ttlMs = ttlMs;
+    this.now = now;
+    this.store = new Map<string, Entry<V>>();
+  }
 
   get(key: string): V | undefined {
     const entry = this.store.get(key);
@@ -40,7 +44,8 @@ export class TtlLruCache<V> {
   }
 
   has(key: string): boolean {
-    return this.get(key) !== undefined;
+    const entry = this.store.get(key);
+    return entry !== undefined && entry.expiresAt > this.now();
   }
 
   clear(): void {

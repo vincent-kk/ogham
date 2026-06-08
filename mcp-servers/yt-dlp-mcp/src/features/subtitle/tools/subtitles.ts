@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { READ_ONLY } from '@/mcp/tools/annotations.js';
-import { handleToolExecution } from '@/mcp/tools/handle.js';
-import type { ToolDefinition } from '@/mcp/tools/tool-definition.js';
+import { READ_ONLY } from '@/mcp/tools/utils/annotations.js';
+import { handleToolExecution } from '@/mcp/tools/utils/handle.js';
+import type { ToolDefinition } from '@/mcp/tools/utils/tool-definition.js';
 import { cacheKey } from '@/utils/cache-key.js';
 
 import { subtitlesOperation } from '../operations/subtitles.js';

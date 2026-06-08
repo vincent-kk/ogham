@@ -48,6 +48,7 @@ Adds every read-only tool — metadata summary, raw subtitles, comments, chapter
         "YTDLP_ENABLE_METADATA_SUMMARY": "1",
         "YTDLP_ENABLE_SUBTITLES": "1",
         "YTDLP_ENABLE_COMMENTS": "1",
+        "YTDLP_ENABLE_COMMENTS_SUMMARY": "1",
         "YTDLP_ENABLE_CHAPTERS": "1",
         "YTDLP_ENABLE_HEATMAP": "1",
         "YTDLP_ENABLE_PLAYLIST": "1",
@@ -97,7 +98,7 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 | `ytdlp_get_video_subtitles`        | `YTDLP_ENABLE_SUBTITLES`        | Raw subtitles with timestamps preserved (one line per cue).                                                                        |
 | `ytdlp_get_video_metadata_summary` | `YTDLP_ENABLE_METADATA_SUMMARY` | A short, human-readable overview of a video's key metadata.                                                                        |
 | `ytdlp_get_comments`               | `YTDLP_ENABLE_COMMENTS`         | Comments as JSON or AI-friendly threaded Markdown.                                                                                 |
-| `ytdlp_get_comments_summary`       | `YTDLP_ENABLE_COMMENTS`         | A quick readable digest of the top comments.                                                                                       |
+| `ytdlp_get_comments_summary`       | `YTDLP_ENABLE_COMMENTS_SUMMARY` | A quick readable digest of the top comments.                                                                                       |
 | `ytdlp_get_chapters`               | `YTDLP_ENABLE_CHAPTERS`         | The video's chapter list (section markers with start times).                                                                       |
 | `ytdlp_get_heatmap`                | `YTDLP_ENABLE_HEATMAP`          | The "most replayed" heatmap (engagement score per time span).                                                                      |
 | `ytdlp_get_thumbnail` 💾           | `YTDLP_ENABLE_THUMBNAIL`        | Download the thumbnail as a JPG into your downloads folder.                                                                        |
@@ -127,7 +128,8 @@ Everything is configured through environment variables in the `env` block above 
 | ------------------------------- | -------------------------------------------------- |
 | `YTDLP_ENABLE_SUBTITLES`        | `ytdlp_get_video_subtitles`                        |
 | `YTDLP_ENABLE_METADATA_SUMMARY` | `ytdlp_get_video_metadata_summary`                 |
-| `YTDLP_ENABLE_COMMENTS`         | `ytdlp_get_comments`, `ytdlp_get_comments_summary` |
+| `YTDLP_ENABLE_COMMENTS`         | `ytdlp_get_comments`                               |
+| `YTDLP_ENABLE_COMMENTS_SUMMARY` | `ytdlp_get_comments_summary`                       |
 | `YTDLP_ENABLE_CHAPTERS`         | `ytdlp_get_chapters`                               |
 | `YTDLP_ENABLE_HEATMAP`          | `ytdlp_get_heatmap`                                |
 | `YTDLP_ENABLE_THUMBNAIL`        | `ytdlp_get_thumbnail`                              |

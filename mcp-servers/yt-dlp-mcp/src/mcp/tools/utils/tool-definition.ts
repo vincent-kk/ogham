@@ -10,6 +10,7 @@ export type EnableKey =
   | 'subtitles'
   | 'metadataSummary'
   | 'comments'
+  | 'commentsSummary'
   | 'chapters'
   | 'heatmap'
   | 'thumbnail'

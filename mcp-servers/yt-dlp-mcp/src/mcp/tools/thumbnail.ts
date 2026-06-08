@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 import { thumbnailOperation } from '@/ytdlp/operations/thumbnail.js';
 
-import { WRITES_FILE } from './annotations.js';
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+import { WRITES_FILE } from './utils/annotations.js';
+import { handleToolExecution } from './utils/handle.js';
+import type { ToolDefinition } from './utils/tool-definition.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),
