@@ -1,17 +1,29 @@
 # @ogham/yt-dlp-mcp
 
-> MCP server for extracting YouTube (and any [yt-dlp](https://github.com/yt-dlp/yt-dlp)-supported site) **transcripts, metadata, comments, chapters, and media** — with a **yt-dlp binary it acquires itself** (cooldown-pinned + checksum-verified), so there is nothing to install on the host.
+> An MCP server that pulls **transcripts, metadata, comments, chapters, and media** from YouTube — and any other site [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports — straight into Claude Desktop, Cursor, and other MCP apps.
 
-Built for shell-less MCP hosts (Claude Desktop, Cursor, …) where arbitrary shell access is unavailable and an MCP tool is the only safe channel to yt-dlp.
+You don't need Python, `brew`, `pip`, or yt-dlp itself. On the first request the server quietly downloads its own yt-dlp binary (checksum-verified) into `~/.yt-dlp/`, then reuses it. Works on Windows, macOS, and Linux.
 
-## Why this exists
+## What you can do
 
-Pure-HTTP transcript extraction is no longer reliable (poToken / BotGuard). yt-dlp solves the JS challenge itself and remains the one robust path. This server **orchestrates** yt-dlp instead of reimplementing it, and adds: automatic + safe binary acquisition, a consistent typed tool contract, conditional tool registration to keep the tool surface small, and path/option isolation.
+- **Read a video without watching it** — pull a clean transcript, a metadata summary, chapters, or the "most replayed" heatmap.
+- **Search and browse** — find videos by keyword, or list every entry in a playlist or channel.
+- **Skim the discussion** — extract comments as JSON or as an easy-to-read threaded outline.
+- **Save media** — download the video, just the audio, or the thumbnail (these are off by default — see [Turning tools on and off](#turning-tools-on-and-off)).
+
+Everything goes through your MCP app's tool list — no terminal, no shell access required.
 
 ## Quick start
 
+Add the server to your MCP app's config — for Claude Desktop that's `claude_desktop_config.json` — then restart the app. **Copy one of the three templates below to start;** you can change the `env` values and restart anytime.
+
+The first tool call downloads the yt-dlp binary once (shared across all instances), so it may take a few extra seconds — every call after that is fast.
+
+### Template 1 · Minimal
+
+Just the four default tools: search, subtitle languages, transcript, and metadata. Nothing to switch on.
+
 ```jsonc
-// MCP host config (e.g. Claude Desktop)
 {
   "mcpServers": {
     "yt-dlp": {
@@ -22,92 +34,175 @@ Pure-HTTP transcript extraction is no longer reliable (poToken / BotGuard). yt-d
 }
 ```
 
-The first tool call downloads a checksum-verified yt-dlp binary into `~/.yt-dlp/bin/` (one-time, shared across instances). No Python, no `brew`/`pip`/`winget`. Runs on Windows, macOS, and Linux.
+### Template 2 · Reading & research
 
-> Some opt-in tools need extra binaries: `ytdlp_download_audio` and trimming in `ytdlp_download_video` require **ffmpeg** on `PATH`.
+Adds every read-only tool — metadata summary, raw subtitles, comments, chapters, heatmap, and playlists. Nothing is written to disk and **no ffmpeg is needed.** A good default for research and Q&A over videos.
+
+```jsonc
+{
+  "mcpServers": {
+    "yt-dlp": {
+      "command": "npx",
+      "args": ["-y", "@ogham/yt-dlp-mcp"],
+      "env": {
+        "YTDLP_ENABLE_METADATA_SUMMARY": "1",
+        "YTDLP_ENABLE_SUBTITLES": "1",
+        "YTDLP_ENABLE_COMMENTS": "1",
+        "YTDLP_ENABLE_CHAPTERS": "1",
+        "YTDLP_ENABLE_HEATMAP": "1",
+        "YTDLP_ENABLE_PLAYLIST": "1",
+      },
+    },
+  },
+}
+```
+
+### Template 3 · Everything
+
+Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](https://ffmpeg.org/download.html) on your `PATH` first — it's required for audio extraction and trimming. Note the [Legal](#legal) caveats before downloading.
+
+```jsonc
+{
+  "mcpServers": {
+    "yt-dlp": {
+      "command": "npx",
+      "args": ["-y", "@ogham/yt-dlp-mcp"],
+      "env": {
+        "YTDLP_ENABLE_ALL": "1",
+      },
+    },
+  },
+}
+```
 
 ## Tools
 
-Four tools are always on. The rest register only when their `YTDLP_ENABLE_*` flag is set, so the host's tool list stays lean.
+**Four tools are always on.** The rest stay hidden until you switch them on with an environment variable, so your app's tool list stays short and uncluttered.
 
-| Tool                                                | Gate                                     |
-| --------------------------------------------------- | ---------------------------------------- |
-| `ytdlp_search_videos`                               | default                                  |
-| `ytdlp_list_subtitle_languages`                     | default                                  |
-| `ytdlp_download_transcript`                         | default                                  |
-| `ytdlp_get_video_metadata`                          | default                                  |
-| `ytdlp_get_video_subtitles`                         | `YTDLP_ENABLE_SUBTITLES`                 |
-| `ytdlp_get_video_metadata_summary`                  | `YTDLP_ENABLE_METADATA_SUMMARY`          |
-| `ytdlp_get_comments` / `ytdlp_get_comments_summary` | `YTDLP_ENABLE_COMMENTS`                  |
-| `ytdlp_get_chapters`                                | `YTDLP_ENABLE_CHAPTERS`                  |
-| `ytdlp_get_heatmap`                                 | `YTDLP_ENABLE_HEATMAP`                   |
-| `ytdlp_get_thumbnail`                               | `YTDLP_ENABLE_THUMBNAIL` (writes a file) |
-| `ytdlp_download_video` / `ytdlp_download_audio`     | `YTDLP_ENABLE_DOWNLOAD` (writes a file)  |
-| `ytdlp_get_playlist`                                | `YTDLP_ENABLE_PLAYLIST`                  |
+### Always available
 
-Set `YTDLP_ENABLE_ALL=1` to register everything at once.
+| Tool                            | What it does                                                                   | Main options                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `ytdlp_search_videos`           | Search YouTube by keyword, with pagination and an optional upload-date filter. | `query`, `maxResults` (1–50, default 10), `offset`, `uploadDateFilter` (`hour`/`today`/`week`/`month`/`year`) |
+| `ytdlp_list_subtitle_languages` | List which subtitle/caption languages a video has (manual + auto-generated).   | `url`                                                                                                         |
+| `ytdlp_download_transcript`     | Get a clean, readable plain-text transcript from a video's captions.           | `url`, `language` (default `en`), `timestamps`, `stripArtifacts`                                              |
+| `ytdlp_get_video_metadata`      | Get curated video metadata as JSON (title, views, duration, upload date, …).   | `url`, `fields` (keep only the keys you ask for)                                                              |
+
+### Opt-in (switch on with an environment variable)
+
+| Tool                               | Turn on with                    | What it does                                                                                                                       |
+| ---------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `ytdlp_get_video_subtitles`        | `YTDLP_ENABLE_SUBTITLES`        | Raw subtitles with timestamps preserved (one line per cue).                                                                        |
+| `ytdlp_get_video_metadata_summary` | `YTDLP_ENABLE_METADATA_SUMMARY` | A short, human-readable overview of a video's key metadata.                                                                        |
+| `ytdlp_get_comments`               | `YTDLP_ENABLE_COMMENTS`         | Comments as JSON or AI-friendly threaded Markdown.                                                                                 |
+| `ytdlp_get_comments_summary`       | `YTDLP_ENABLE_COMMENTS`         | A quick readable digest of the top comments.                                                                                       |
+| `ytdlp_get_chapters`               | `YTDLP_ENABLE_CHAPTERS`         | The video's chapter list (section markers with start times).                                                                       |
+| `ytdlp_get_heatmap`                | `YTDLP_ENABLE_HEATMAP`          | The "most replayed" heatmap (engagement score per time span).                                                                      |
+| `ytdlp_get_thumbnail` 💾           | `YTDLP_ENABLE_THUMBNAIL`        | Download the thumbnail as a JPG into your downloads folder.                                                                        |
+| `ytdlp_download_video` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | Download a video file. Options: `resolution` (`480p`/`720p`/`1080p`/`best`), `startTime`/`endTime` to trim. Trimming needs ffmpeg. |
+| `ytdlp_download_audio` 💾          | `YTDLP_ENABLE_DOWNLOAD`         | Download just the audio track. Option: `audioFormat` (`m4a`/`mp3`). Needs ffmpeg.                                                  |
+| `ytdlp_get_playlist`               | `YTDLP_ENABLE_PLAYLIST`         | List the entries of a playlist or channel. Option: `limit`.                                                                        |
+
+> 💾 = writes a file to disk. The download tools also touch the target platform's Terms of Service — see [Legal](#legal).
+
+## Turning tools on and off
+
+The [templates above](#quick-start) cover the common cases. To pick tools individually, set each one's `YTDLP_ENABLE_*` variable (see [Tool toggles](#tool-toggles)) inside the `env` block:
+
+- Set it to `1` (or `true` / `yes` / `on`) to register the tool.
+- Leave it unset to keep it hidden.
+- Set `YTDLP_ENABLE_ALL=1` to register every tool at once.
+
+After changing any value, restart your MCP app so it re-reads the tool list.
 
 ## Configuration
 
-All settings are environment variables (see [.env.example](./.env.example)); pass them via the host's `env` block.
+Everything is configured through environment variables in the `env` block above — there are no config files to edit. **All of them are optional**; the defaults are sensible for everyday use. A copy of every variable lives in [`.env.example`](./.env.example).
 
-| Variable                                            | Default                 | Purpose                                              |
-| --------------------------------------------------- | ----------------------- | ---------------------------------------------------- |
-| `YTDLP_HOME`                                        | `~/.yt-dlp`             | Root for `bin/`, `temp/`, `downloads/`               |
-| `YTDLP_DOWNLOADS_DIR`                               | `$YTDLP_HOME/downloads` | Override download output dir                         |
-| `YTDLP_COOLDOWN_DAYS`                               | `3`                     | Only adopt releases older than this (supply-chain)   |
-| `YTDLP_REFRESH_DAYS`                                | `7`                     | Refresh the cached binary after this many days       |
-| `YTDLP_PINNED_VERSION`                              | —                       | Pin to an exact yt-dlp tag                           |
-| `YTDLP_MAX_CONCURRENCY`                             | adaptive                | Concurrent yt-dlp child processes (see below)        |
-| `YTDLP_REQUEST_INTERVAL_MS`                         | adaptive                | Min spacing between light/metadata calls (see below) |
-| `YTDLP_SUBTITLE_INTERVAL_MS`                        | adaptive                | Min spacing between subtitle/transcript calls        |
-| `YTDLP_TIMEOUT_MS`                                  | `90000`                 | Per-extraction timeout                               |
-| `YTDLP_CHARACTER_LIMIT`                             | `25000`                 | Response truncation limit                            |
-| `YTDLP_MAX_TRANSCRIPT_LENGTH`                       | `50000`                 | Transcript/subtitle truncation limit                 |
-| `YTDLP_LOG_LEVEL`                                   | `info`                  | `trace`…`fatal`/`silent` (stderr only)               |
-| `YTDLP_PROXY_POOL` / `YTDLP_PROXY`                  | —                       | Rotating / single proxy — primary 429 mitigation     |
-| `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` | —                       | Cookies for auth gates only (opt-in; see Legal)      |
+### Tool toggles
 
-### Avoiding rate limits & blocks
+| Variable                        | Registers                                          |
+| ------------------------------- | -------------------------------------------------- |
+| `YTDLP_ENABLE_SUBTITLES`        | `ytdlp_get_video_subtitles`                        |
+| `YTDLP_ENABLE_METADATA_SUMMARY` | `ytdlp_get_video_metadata_summary`                 |
+| `YTDLP_ENABLE_COMMENTS`         | `ytdlp_get_comments`, `ytdlp_get_comments_summary` |
+| `YTDLP_ENABLE_CHAPTERS`         | `ytdlp_get_chapters`                               |
+| `YTDLP_ENABLE_HEATMAP`          | `ytdlp_get_heatmap`                                |
+| `YTDLP_ENABLE_THUMBNAIL`        | `ytdlp_get_thumbnail`                              |
+| `YTDLP_ENABLE_DOWNLOAD`         | `ytdlp_download_video`, `ytdlp_download_audio`     |
+| `YTDLP_ENABLE_PLAYLIST`         | `ytdlp_get_playlist`                               |
+| `YTDLP_ENABLE_ALL`              | all of the above                                   |
 
-YouTube rate limits (HTTP 429) are **IP-based and cumulative** — subtitle/`timedtext` endpoints are the most aggressive, and a tripped limit can persist from minutes up to ~24h. Mitigation effectiveness, in order:
+### Where files go
 
-1. **Rotating proxy (primary).** Set `YTDLP_PROXY_POOL` to a comma-separated list of proxy URLs. They are round-robined per request, spreading load across IPs. A single static `YTDLP_PROXY` is the fallback when no pool is set.
-2. **Request pacing.** The server queues bursts and spaces dispatches; single calls stay instant. Concurrency and the spacing intervals **auto-adapt to proxy state**, and each can be overridden via env:
+| Variable              | Default                 | Purpose                                                    |
+| --------------------- | ----------------------- | ---------------------------------------------------------- |
+| `YTDLP_HOME`          | `~/.yt-dlp`             | Root folder for the binary, temp workspace, and downloads. |
+| `YTDLP_DOWNLOADS_DIR` | `$YTDLP_HOME/downloads` | Override just the folder where downloads are saved.        |
 
-   | proxy state | `YTDLP_MAX_CONCURRENCY` | `YTDLP_REQUEST_INTERVAL_MS` | `YTDLP_SUBTITLE_INTERVAL_MS` |
-   | ----------- | ----------------------- | --------------------------- | ---------------------------- |
-   | none        | 1                       | 1500                        | 4000                         |
-   | single      | 2                       | 750                         | 2000                         |
-   | pool (N)    | `min(N, 8)`             | 0                           | 250                          |
+### Binary acquisition
 
-3. **Cookies — auth gates only.** `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` unlock age-restricted, members-only, or sign-in-walled content. They **rarely help** with subtitle 429s — reach for the proxy pool instead.
+The server manages its own yt-dlp binary; these control how it picks and refreshes it.
 
-A `[BLOCKED]` bot-check often needs a **Proof-of-Origin (PO) token**; cookies alone may not clear it, whereas a cleaner proxy IP frequently does.
+| Variable               | Default | Purpose                                                                     |
+| ---------------------- | ------- | --------------------------------------------------------------------------- |
+| `YTDLP_COOLDOWN_DAYS`  | `3`     | Only adopt yt-dlp releases older than this many days (supply-chain safety). |
+| `YTDLP_REFRESH_DAYS`   | `7`     | Re-check for a newer binary after this many days.                           |
+| `YTDLP_PINNED_VERSION` | —       | Pin to one exact yt-dlp release tag (e.g. `2025.01.01`).                    |
 
-## Security & supply chain
+### Response size & timeouts
 
-- **Cooldown pin + checksum**: releases are selected only after `YTDLP_COOLDOWN_DAYS` have passed, then verified against the release's `SHA2-256SUMS`. Mismatches are discarded. `releases/latest` is never fetched directly.
-- **Atomic, locked install**: the binary downloads to a per-attempt unique staging file, is checksum-verified, then atomically renamed; a cross-process lock plus in-process dedupe prevent duplicate downloads.
-- **Isolation**: extraction works in throwaway temp dirs (cleaned up); downloads stay under `~/.yt-dlp`. Tools accept only whitelisted arguments — yt-dlp flags are server-fixed and `--exec`-style options are never exposed.
-- **stdio integrity**: all logs go to stderr; stdout carries only JSON-RPC.
+| Variable                      | Default | Purpose                                                     |
+| ----------------------------- | ------- | ----------------------------------------------------------- |
+| `YTDLP_TIMEOUT_MS`            | `90000` | Time budget for a single extraction (milliseconds).         |
+| `YTDLP_CHARACTER_LIMIT`       | `25000` | Max characters in a normal tool response before truncation. |
+| `YTDLP_MAX_TRANSCRIPT_LENGTH` | `50000` | Max characters for transcript / subtitle responses.         |
 
-## Legal / Terms of Service
+### Logging
 
-Cookies, proxy, and the download/thumbnail tools are **off by default**. Enabling them may implicate the target platform's Terms of Service and local law (scraping, DMCA §1201). You are responsible for how you configure and use this server. Respect copyright and platform terms.
+| Variable          | Default | Purpose                                                                                  |
+| ----------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `YTDLP_LOG_LEVEL` | `info`  | `trace`, `debug`, `info`, `warn`, `error`, `fatal`, or `silent`. Logs go to stderr only. |
 
-## Development
+### Rate limiting & proxies
 
-```bash
-yarn yt-dlp-mcp build       # tsc -> dist/ (+ executable bin)
-yarn yt-dlp-mcp typecheck
-yarn yt-dlp-mcp test:run    # unit + fixture + MCP contract (no network)
-yarn yt-dlp-mcp test:e2e    # gated: real binary download + live YouTube
-```
+| Variable                     | Default  | Purpose                                                                                                           |
+| ---------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `YTDLP_PROXY_POOL`           | —        | Comma-separated list of proxy URLs, rotated per request. The most effective fix for rate limits.                  |
+| `YTDLP_PROXY`                | —        | A single proxy URL (used when no pool is set).                                                                    |
+| `YTDLP_MAX_CONCURRENCY`      | adaptive | How many yt-dlp processes run at once (1–16). See below.                                                          |
+| `YTDLP_REQUEST_INTERVAL_MS`  | adaptive | Minimum spacing between regular calls. See below.                                                                 |
+| `YTDLP_SUBTITLE_INTERVAL_MS` | adaptive | Minimum spacing between subtitle/transcript calls. See below.                                                     |
+| `YTDLP_COOKIES_FROM_BROWSER` | —        | Read cookies from a local browser profile (`BROWSER[:PROFILE][::CONTAINER]`, e.g. `chrome`). For auth gates only. |
+| `YTDLP_COOKIES_FILE`         | —        | Path to a Netscape-format cookies file. Takes precedence over the browser option.                                 |
 
-The architecture injects `Runner` / `BinaryManager` ports, so every failure path is testable without the real binary. Network/binary e2e tests are skipped unless `RUN_NETWORK_TESTS=1` / `RUN_BINARY_TESTS=1` (override the target video with `YTDLP_E2E_URL`).
+## Avoiding rate limits & blocks
 
-See `docs/PLAN.md` and `docs/ARCHITECTURE.md` for the full design.
+YouTube rate-limits by IP address, and the limits add up over time — subtitle and transcript endpoints are the strictest, and once you trip a limit it can last from a few minutes up to about a day. If you see `[RATE_LIMITED]` or `[BLOCKED]` in a tool's response, here's what helps, most effective first:
+
+1. **Use a rotating proxy pool (most effective).** Set `YTDLP_PROXY_POOL` to a comma-separated list of proxy URLs. The server rotates through them per request, spreading the load across IP addresses. A single `YTDLP_PROXY` is a lighter fallback.
+
+2. **Let the server pace itself (automatic).** It already queues bursts and spaces out requests; single calls stay instant. The pacing **adapts automatically** to whether you've configured a proxy. You can override any value, but you rarely need to:
+
+   | Proxy setup    | `YTDLP_MAX_CONCURRENCY` | `YTDLP_REQUEST_INTERVAL_MS` | `YTDLP_SUBTITLE_INTERVAL_MS` |
+   | -------------- | ----------------------- | --------------------------- | ---------------------------- |
+   | none           | 1                       | 1500                        | 4000                         |
+   | single proxy   | 2                       | 750                         | 2000                         |
+   | proxy pool (N) | `min(N, 8)`             | 0                           | 250                          |
+
+3. **Cookies are for sign-in walls, not rate limits.** `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` unlock age-restricted, members-only, or sign-in-required videos. They rarely help with subtitle rate limits — reach for the proxy pool instead.
+
+A `[BLOCKED]` bot-check often needs a Proof-of-Origin (PO) token; a cleaner proxy IP usually clears it more reliably than cookies do.
+
+## Security & trust
+
+- **Verified downloads.** The yt-dlp binary is only adopted after a cooldown (`YTDLP_COOLDOWN_DAYS`) and verified against the release's official `SHA2-256SUMS`. A mismatch is discarded; the bleeding-edge `releases/latest` is never fetched blindly.
+- **Safe install.** The binary downloads to a temporary file, is checksum-verified, then atomically swapped in. A cross-process lock prevents duplicate or partial downloads.
+- **Isolation.** Extraction happens in throwaway temp folders that get cleaned up; saved files stay under `~/.yt-dlp`. Tools only accept a fixed set of options — the underlying yt-dlp command flags are server-controlled, and there's no way to inject arbitrary shell commands.
+
+## Legal
+
+The cookie, proxy, and download/thumbnail features are **off by default**. Turning them on may implicate the target platform's Terms of Service and your local law (scraping rules, DMCA §1201, copyright). How you configure and use this server is your responsibility — please respect copyright and platform terms.
 
 ## License
 
