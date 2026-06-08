@@ -25,11 +25,13 @@ function firstText(result: CallToolResult): string {
   return item && item.type === 'text' ? item.text : '';
 }
 
-async function connectClient(env: TestEnv): Promise<Client> {
-  const runner = makeFakeRunner({
-    stdout: SAMPLE_META,
-    files: { [`${SAMPLE_VIDEO_ID}.en.json3`]: SAMPLE_JSON3 },
-  });
+async function connectClient(
+  env: TestEnv,
+  files: Record<string, string> = {
+    [`${SAMPLE_VIDEO_ID}.en.json3`]: SAMPLE_JSON3,
+  },
+): Promise<Client> {
+  const runner = makeFakeRunner({ stdout: SAMPLE_META, files });
   const service = createService({
     runner,
     config: env.config,
@@ -85,6 +87,42 @@ describe('MCP contract', () => {
     })) as CallToolResult;
     expect(result.isError).toBe(true);
     expect(firstText(result)).toContain('INVALID_INPUT');
+    await client.close();
+    await env.cleanup();
+  });
+
+  it('exposes language-fallback warnings in structuredContent', async () => {
+    const env = await makeTestEnv();
+    const client = await connectClient(env);
+    const result = (await client.callTool({
+      name: 'ytdlp_download_transcript',
+      arguments: { url: SAMPLE_URL, language: 'ko' },
+    })) as CallToolResult;
+    expect(result.structuredContent?.warnings).toEqual([
+      "Requested language 'ko' but served 'en'.",
+    ]);
+    await client.close();
+    await env.cleanup();
+  });
+
+  it('flags truncation and char count in structuredContent', async () => {
+    const longJson3 = JSON.stringify({
+      events: Array.from({ length: 300 }, (_, i) => ({
+        tStartMs: i * 1000,
+        dDurationMs: 1000,
+        segs: [{ utf8: `word${i} ` }],
+      })),
+    });
+    const env = await makeTestEnv({ YTDLP_MAX_TRANSCRIPT_LENGTH: '100' });
+    const client = await connectClient(env, {
+      [`${SAMPLE_VIDEO_ID}.en.json3`]: longJson3,
+    });
+    const result = (await client.callTool({
+      name: 'ytdlp_download_transcript',
+      arguments: { url: SAMPLE_URL, language: 'en' },
+    })) as CallToolResult;
+    expect(result.structuredContent?.truncated).toBe(true);
+    expect(result.structuredContent?.charCount).toBeGreaterThan(100);
     await client.close();
     await env.cleanup();
   });

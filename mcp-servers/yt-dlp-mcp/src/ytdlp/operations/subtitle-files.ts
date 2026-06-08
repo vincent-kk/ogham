@@ -16,7 +16,7 @@ export function pickSubtitleFile(
     const file = byLang.get(candidate);
     if (file) return { file, language: candidate };
   }
-  const first = files[0];
+  const first = [...files].sort()[0];
   return { file: first, language: fileLang(first) };
 }
 

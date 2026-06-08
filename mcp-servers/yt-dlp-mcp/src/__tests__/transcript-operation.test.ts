@@ -70,6 +70,23 @@ describe('transcriptOperation', () => {
     await env.cleanup();
   });
 
+  it('warns when the served language differs from the requested one', async () => {
+    const runner = makeFakeRunner({
+      stdout: SAMPLE_META,
+      files: { [`${SAMPLE_VIDEO_ID}.en.json3`]: SAMPLE_JSON3 },
+    });
+    const { ctx, env } = await makeOpContext(runner);
+    const result = await transcriptOperation(ctx, {
+      url: SAMPLE_URL,
+      language: 'ko',
+    });
+    expect(result.language).toBe('en');
+    expect(result.warnings).toEqual([
+      "Requested language 'ko' but served 'en'.",
+    ]);
+    await env.cleanup();
+  });
+
   it('removes the temp working directory afterward', async () => {
     const runner = makeFakeRunner({
       stdout: SAMPLE_META,

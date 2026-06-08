@@ -45,7 +45,7 @@ Args:
   - timestamps (boolean, optional): prefix each line with [H:MM:SS] (default false).
   - stripArtifacts (boolean, optional): remove non-speech cues and duplicate caption lines (default false).
 
-Returns: the transcript text plus structuredContent { videoId, language, availableSubs, segmentCount, metadata }.
+Returns: the transcript text plus structuredContent { videoId, language, availableSubs, segmentCount, charCount, truncated, warnings, metadata }.
 
 Use when: you need readable text for analysis, summary, or quoting.
 Don't use when: you need timestamped raw subtitles (enable ytdlp_get_video_subtitles) or a media file.
@@ -93,13 +93,18 @@ export const transcriptTool: ToolDefinition = {
               timestamps: args.timestamps ?? false,
             });
             const header = `# ${result.metadata.title}\n${result.metadata.channel} · ${result.language}`;
+            const text = `${header}\n\n${body}`;
+            const limit = config.extraction.maxTranscriptLength;
             return {
-              text: `${header}\n\n${body}`,
+              text,
               structuredContent: {
                 videoId: result.videoId,
                 language: result.language,
                 availableSubs: result.availableSubs,
                 segmentCount: segments.length,
+                charCount: text.length,
+                truncated: text.length > limit,
+                warnings: result.warnings,
                 metadata: result.metadata,
               },
             };

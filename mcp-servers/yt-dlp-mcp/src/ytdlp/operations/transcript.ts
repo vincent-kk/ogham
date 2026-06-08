@@ -54,7 +54,9 @@ export async function transcriptOperation(
     );
 
     const metadata = parseMetaPrint(stdout, params.url);
-    const files = (await readdir(tmpDir)).filter((f) => f.endsWith('.json3'));
+    const files = (await readdir(tmpDir))
+      .filter((f) => f.endsWith('.json3'))
+      .sort();
     if (files.length === 0) {
       throw new YtDlpMcpError(
         ErrorCode.NO_CAPTIONS,
@@ -72,6 +74,11 @@ export async function transcriptOperation(
       );
     }
 
+    const warnings =
+      picked.language === lang
+        ? []
+        : [`Requested language '${lang}' but served '${picked.language}'.`];
+
     return {
       videoId: metadata.videoId,
       language: picked.language,
@@ -79,7 +86,7 @@ export async function transcriptOperation(
       segments,
       metadata,
       source: 'yt-dlp',
-      warnings: [],
+      warnings,
     };
   } finally {
     await removeDir(tmpDir);
