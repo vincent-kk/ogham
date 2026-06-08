@@ -1337,6 +1337,7 @@ __metadata:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@types/node": "npm:^20.11.0"
     "@vitest/coverage-v8": "npm:^4.1.2"
+    esbuild: "npm:^0.24.0"
     execa: "npm:^9.5.0"
     p-limit: "npm:^6.2.0"
     pino: "npm:^9.5.0"

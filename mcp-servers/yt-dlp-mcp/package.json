@@ -38,7 +38,7 @@
     ".env.example"
   ],
   "scripts": {
-    "build": "yarn clean && tsc -p tsconfig.build.json && node scripts/finalize-bin.mjs",
+    "build": "yarn clean && tsc -p tsconfig.build.json && node scripts/build-bundle.mjs && node scripts/finalize-bin.mjs",
     "clean": "rm -rf dist .tsbuildinfo",
     "dev": "tsc -p tsconfig.build.json --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
@@ -59,6 +59,7 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^4.1.2",
+    "esbuild": "^0.24.0",
     "typescript": "^5.7.2",
     "vitest": "^4.1.2"
   },
