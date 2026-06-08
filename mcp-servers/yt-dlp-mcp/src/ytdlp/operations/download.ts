@@ -22,7 +22,10 @@ export interface DownloadParams {
 
 // Downloads can be large; allow more wall-clock than metadata extraction.
 const DOWNLOAD_TIMEOUT_FACTOR = 10;
-const OUTPUT_TEMPLATE = '%(title).80B [%(id)s].%(ext)s';
+// Postfix the kind so a video file and an audio extraction of the same video
+// don't collide on one name (audio's intermediate download shares the template).
+const outputTemplate = (kind: DownloadParams['kind']): string =>
+  `%(title).80B [%(id)s].${kind}.%(ext)s`;
 
 function videoFormat(resolution: Resolution = '720p'): string {
   if (resolution === 'best') return 'bv*+ba/b';
@@ -45,7 +48,7 @@ export async function downloadOperation(
     '--no-playlist',
     '--no-simulate',
     '-o',
-    path.join(ctx.paths.downloadsDir, OUTPUT_TEMPLATE),
+    path.join(ctx.paths.downloadsDir, outputTemplate(params.kind)),
     '--print',
     'after_move:filepath',
   ];

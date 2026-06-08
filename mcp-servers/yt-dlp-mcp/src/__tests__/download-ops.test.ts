@@ -43,6 +43,7 @@ describe('download/thumbnail/subtitles operations', () => {
     expect(result.path).toBe(filePath);
     expect(result.format).toBe('mp4');
     expect(result.bytes).toBe('binarydata'.length);
+    expect(runner.calls[0].join(' ')).toContain('.video.%(ext)s');
   });
 
   it('passes audio extraction flags', async () => {
@@ -57,6 +58,7 @@ describe('download/thumbnail/subtitles operations', () => {
     });
     expect(runner.calls[0]).toContain('-x');
     expect(runner.calls[0]).toContain('--audio-format');
+    expect(runner.calls[0].join(' ')).toContain('.audio.%(ext)s');
   });
 
   it('detects the new thumbnail file', async () => {
