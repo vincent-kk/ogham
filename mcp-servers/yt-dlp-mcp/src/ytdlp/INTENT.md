@@ -6,7 +6,7 @@ yt-dlp 바이너리 획득·실행·정보 추출 서브시스템.
 
 | 파일/디렉터리         | 역할                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.ts`            | barrel: binary/runner 공개 API·타입 재노출                                                                                            |
+| `index.ts`            | barrel: binary/runner 공개 API·타입 재노출(`createBinaryManager`·`createVersionResolver`·`downloadToFile`·`fetchJson`·`fetchText`·`createRunner`)  |
 | `binary/` (organ)     | 버전 해석·체크섬·원자적 설치·HTTP(ensure-binary, select-safe-release, checksum, http, version, asset-name)                            |
 | `runner/` (organ)     | 불변 플래그 적용 실행(runner, evasion-args, js-runtime-arg)                                                                           |
 | `operations/` (organ) | info-json 기반 도메인 연산(metadata, comments, chapters, heatmap, playlist, search, download, thumbnail) + 공용 `info-json`·`context` |
