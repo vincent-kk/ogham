@@ -17,7 +17,9 @@ const inputSchema = {
     .min(1)
     .max(100)
     .optional()
-    .describe('Max comments (1-100, default 20).'),
+    .describe(
+      'Overall cap on total comments returned (1-100, default 20). maxParents / maxReplies / maxRepliesPerThread are per-level yt-dlp fetch limits applied before this cap.',
+    ),
   sortOrder: z
     .enum(['top', 'new'])
     .optional()
@@ -25,12 +27,14 @@ const inputSchema = {
   view: z
     .enum(['flat', 'threaded'])
     .optional()
-    .describe("'flat' (default) or 'threaded' reply trees."),
+    .describe(
+      "'flat' (default) or 'threaded' reply trees. Either 'threaded' here or 'markdown_tree' for responseFormat activates the same threaded structure — no need to set both.",
+    ),
   responseFormat: z
     .enum(['json', 'markdown_tree'])
     .optional()
     .describe(
-      "'json' (default) or 'markdown_tree' (AI-friendly threaded Markdown).",
+      "'json' (default) or 'markdown_tree' (AI-friendly threaded Markdown). Either this or view='threaded' activates the same threaded structure — no need to set both.",
     ),
   maxParents: z
     .number()

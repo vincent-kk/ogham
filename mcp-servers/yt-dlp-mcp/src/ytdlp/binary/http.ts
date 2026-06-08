@@ -1,4 +1,6 @@
-import { writeFile } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
 import { ErrorCode, YtDlpMcpError } from '@/domain/errors.js';
 
@@ -49,13 +51,18 @@ export async function fetchJson(
   return res.json();
 }
 
-/** Downloads a URL to disk. Buffers fully (assets are ~35 MB). */
+/** Downloads a URL to disk via streaming (avoids buffering ~35 MB into heap). */
 export async function downloadToFile(
   url: string,
   destPath: string,
   signal?: AbortSignal,
 ): Promise<void> {
   const res = await fetchOrThrow(url, signal);
-  const buffer = Buffer.from(await res.arrayBuffer());
-  await writeFile(destPath, buffer);
+  if (!res.body) {
+    throw new YtDlpMcpError(ErrorCode.NETWORK, `Empty response body from ${url}`);
+  }
+  await pipeline(
+    Readable.fromWeb(res.body as import('stream/web').ReadableStream),
+    createWriteStream(destPath),
+  );
 }

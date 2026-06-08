@@ -45,5 +45,5 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 
 ## Dependencies
 
-- 내부: `config`, `paths`, `core/service`, `mcp/registry`, `mcp/server`, `obs/logger`, `ytdlp/binary`, `ytdlp/runner`, `version`
-- 외부: `@modelcontextprotocol/sdk`(stdio transport)
+- 내부: `config`, `paths`, `mcp/registry`, `mcp/server`, `obs/logger`, `ytdlp/binary`, `ytdlp/runner`, `version`
+- 외부: `@modelcontextprotocol/sdk`(stdio transport) | 소비처(downstream): `core/service`

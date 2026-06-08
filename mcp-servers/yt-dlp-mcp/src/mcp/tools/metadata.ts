@@ -14,7 +14,7 @@ const inputSchema = {
     .array(z.string())
     .optional()
     .describe(
-      "Subset of metadata keys to return, e.g. ['title','viewCount','uploadDate']. Omit for all.",
+      "Subset of metadata keys to return, e.g. ['title','viewCount','uploadDate']. Omit for all. Unknown keys are silently excluded from the result.",
     ),
 };
 

@@ -12,7 +12,10 @@ const inputSchema = {
   url: z.string().describe('Full video URL.'),
   language: z
     .string()
-    .regex(/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/)
+    .regex(
+      /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/,
+      'Use a language code like "en", "ko", or "pt-BR".',
+    )
     .optional()
     .describe(
       "Subtitle language (e.g. 'en', 'ko'). Defaults to YTDLP_DEFAULT_SUB_LANG ('en' if unset).",

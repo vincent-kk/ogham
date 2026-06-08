@@ -88,6 +88,8 @@ Every tool, including video / audio / thumbnail downloads. Install [**ffmpeg**](
 | `ytdlp_download_transcript`     | Get a clean, readable plain-text transcript from a video's captions.           | `url`, `language` (default `YTDLP_DEFAULT_SUB_LANG`, else `en`), `timestamps`, `stripArtifacts`               |
 | `ytdlp_get_video_metadata`      | Get curated video metadata as JSON (title, views, duration, upload date, …).   | `url`, `fields` (keep only the keys you ask for)                                                              |
 
+> `ytdlp_download_transcript` returns cleaned readable plain text; `ytdlp_get_video_subtitles` returns raw subtitles with per-cue timestamps preserved.
+
 ### Opt-in (switch on with an environment variable)
 
 | Tool                               | Turn on with                    | What it does                                                                                                                       |

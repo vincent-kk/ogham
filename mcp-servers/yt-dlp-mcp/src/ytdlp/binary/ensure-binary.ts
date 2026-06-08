@@ -96,6 +96,7 @@ export function createBinaryManager(deps: BinaryManagerDeps): BinaryManager {
   async function acquireLock(signal?: AbortSignal): Promise<void> {
     const deadline = now() + LOCK_STALE_MS * 2;
     for (;;) {
+      signal?.throwIfAborted();
       try {
         await mkdir(paths.lockPath);
         return;
