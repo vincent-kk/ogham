@@ -42,6 +42,7 @@
     "clean": "rm -rf dist .tsbuildinfo",
     "dev": "tsc -p tsconfig.build.json --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "publish:npm": "yarn npm publish --access public",
     "start": "node dist/index.js",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
