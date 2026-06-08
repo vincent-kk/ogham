@@ -1,5 +1,7 @@
 import type { SearchResult, SearchResultItem } from '../../domain/types.js';
-import { asNumber, asRecordArray, asString } from '../../utils/coerce.js';
+import { asNumber } from '../../utils/as-number.js';
+import { asRecordArray } from '../../utils/as-record-array.js';
+import { asString } from '../../utils/as-string.js';
 import { normalizeUploadDate } from '../../utils/normalize-date.js';
 
 import type { OpContext } from './context.js';

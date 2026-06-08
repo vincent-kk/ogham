@@ -1,10 +1,8 @@
 import type { VideoMetadata } from '../../domain/types.js';
-import {
-  asBoolean,
-  asNumber,
-  asString,
-  asStringArray,
-} from '../../utils/coerce.js';
+import { asBoolean } from '../../utils/as-boolean.js';
+import { asNumber } from '../../utils/as-number.js';
+import { asStringArray } from '../../utils/as-string-array.js';
+import { asString } from '../../utils/as-string.js';
 import { normalizeUploadDate } from '../../utils/normalize-date.js';
 
 /** Maps a yt-dlp info-json object to the curated VideoMetadata domain type. Pure. */

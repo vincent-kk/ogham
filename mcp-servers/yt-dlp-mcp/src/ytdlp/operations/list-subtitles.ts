@@ -3,7 +3,9 @@ import type {
   SubtitleLanguageList,
   SubtitleTrack,
 } from '../../domain/types.js';
-import { asRecord, asRecordArray, asString } from '../../utils/coerce.js';
+import { asRecordArray } from '../../utils/as-record-array.js';
+import { asRecord } from '../../utils/as-record.js';
+import { asString } from '../../utils/as-string.js';
 import { parseVideoId } from '../../utils/parse-video-id.js';
 import { isValidUrl } from '../../utils/validate-url.js';
 

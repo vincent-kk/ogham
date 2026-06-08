@@ -4,7 +4,7 @@ import {
   dedupeAdjacent,
   stripCaptionArtifacts,
 } from '../../postprocess/ad-stripper.js';
-import { segmentsToText } from '../../postprocess/formatter.js';
+import { segmentsToText } from '../../postprocess/segments-to-text.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { transcriptOperation } from '../../ytdlp/operations/transcript.js';
 import { handleToolExecution } from '../handle.js';

@@ -19,11 +19,6 @@ export const META_PRINT_FMT = META_PRINT_FIELDS.map((f) => `%(${f})s`).join(
   FIELD_SEP,
 );
 
-// JS challenge runtime: reuse the MCP server's own Node (ADR-3, no extra install).
-export function jsRuntimeArg(nodePath: string): string[] {
-  return ['--js-runtimes', `node:${nodePath}`];
-}
-
 // Flags applied to every invocation.
 export const BASE_ARGS: string[] = ['--ignore-config', '--no-warnings'];
 

@@ -1,6 +1,7 @@
 import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
 import type { CommentResult } from '../../domain/types.js';
-import { asRecordArray, asString } from '../../utils/coerce.js';
+import { asRecordArray } from '../../utils/as-record-array.js';
+import { asString } from '../../utils/as-string.js';
 import { parseVideoId } from '../../utils/parse-video-id.js';
 import { isValidUrl } from '../../utils/validate-url.js';
 

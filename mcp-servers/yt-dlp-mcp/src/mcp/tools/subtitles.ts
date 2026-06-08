@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { segmentsToText } from '../../postprocess/formatter.js';
+import { segmentsToText } from '../../postprocess/segments-to-text.js';
 import { cacheKey } from '../../utils/cache-key.js';
 import { subtitlesOperation } from '../../ytdlp/operations/subtitles.js';
 import { handleToolExecution } from '../handle.js';

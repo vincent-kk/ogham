@@ -1,6 +1,6 @@
 import type { VideoMetadata } from '../domain/types.js';
 
-import { formatDuration } from './formatter.js';
+import { formatDuration } from './format-timestamp.js';
 
 /** Renders a human-readable summary of curated video metadata. */
 export function formatMetadataSummary(meta: VideoMetadata): string {

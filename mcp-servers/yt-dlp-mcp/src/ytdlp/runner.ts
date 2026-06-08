@@ -1,12 +1,13 @@
 import { execa } from 'execa';
 
 import type { Config } from '../config.js';
-import { BASE_ARGS, jsRuntimeArg } from '../constants/ytdlp.js';
+import { BASE_ARGS } from '../constants/ytdlp.js';
 import { toYtDlpError } from '../domain/to-ytdlp-error.js';
 import type { Logger } from '../obs/logger.js';
 
 import type { BinaryManager } from './ensure-binary.js';
 import { evasionArgs } from './evasion-args.js';
+import { jsRuntimeArg } from './js-runtime-arg.js';
 
 export interface RunResult {
   stdout: string;
