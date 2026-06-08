@@ -2,6 +2,20 @@
 
 환경변수를 읽어 Zod로 검증한 `Config`를 생성한다. 잘못된 값은 조용히 넘기지 않고 예외로 던진다.
 
+## Structure
+
+| 파일/디렉터리 | 역할                                                  |
+| ------------- | ----------------------------------------------------- |
+| `config.ts`   | `ConfigSchema`(Zod)·`loadConfig`·`~` 확장·기본값 구현 |
+| `index.ts`    | barrel: `loadConfig`, 타입 `Config`/`EnableFlags`     |
+
+## Conventions
+
+- 환경변수는 `boolEnv`/`intEnv`로 1차 정규화한 뒤 `ConfigSchema.safeParse`로만 검증하며, 직접 파싱 결과를 외부로 반환하지 않는다.
+- 검증 실패 시 `parsed.error.issues`를 `경로: 메시지` 형식으로 모아 단일 `Error`로 throw하고 부분 결과는 절대 돌려주지 않는다.
+- `~` 홈 확장과 경로 기본값은 `expandHome`을 거쳐 `loadConfig` 한 곳에서만 적용한다.
+- 도구 on/off는 `enable` 그룹(`EnableFlags`)으로 노출하며 `YTDLP_ENABLE_ALL`이 개별 플래그를 일괄 활성화한다.
+
 ## Boundaries
 
 ### Always do
@@ -18,3 +32,9 @@
 
 - 검증을 우회하거나 부분 파싱 결과를 반환한다
 - 설정을 소비하는 런타임 로직을 이 모듈에 둔다
+
+## Dependencies
+
+- 내부: 없음(leaf)
+- 외부: `zod`, `node:os`/`node:path`(홈 확장)
+- 소비처(downstream): root `index.ts`, `core/service`

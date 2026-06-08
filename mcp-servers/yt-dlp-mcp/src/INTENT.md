@@ -4,14 +4,27 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 
 ## Structure
 
-- `config/` — 환경변수 → 검증된 설정
-- `paths/` — ~/.yt-dlp 경로·임시 디렉터리
-- `domain/` — 도메인 타입과 에러 분류 (organ)
-- `core/` — 캐시·동시성을 묶는 실행 서비스 (organ)
-- `ytdlp/` — 바이너리 획득·실행·연산
-- `mcp/` — 도구 정의·레지스트리·서버
-- `postprocess/` — 자막/텍스트 후처리 (organ)
-- `cache/` `obs/` `constants/` `utils/` — 보조 organ
+| 파일/디렉터리                 | 역할                                              |
+| ----------------------------- | ------------------------------------------------- |
+| `index.ts`                    | 런타임 결선 진입점(`main`)·stdio 연결·종료 처리   |
+| `version.ts`                  | 서버 버전·이름 단일 출처(`VERSION`/`SERVER_NAME`) |
+| `config/`                     | 환경변수 → 검증된 `Config`                        |
+| `paths/`                      | `~/.yt-dlp` 경로 트리 해석·생성                   |
+| `ytdlp/`                      | 바이너리 획득·실행·도메인 연산                    |
+| `mcp/`                        | 도구 정의·레지스트리·서버                         |
+| `core/` (organ)               | 캐시·동시성 결합 실행 Service(`createService`)    |
+| `domain/` (organ)             | 도메인 타입·에러 분류                             |
+| `postprocess/` (organ)        | 자막/텍스트 후처리                                |
+| `cache/` (organ)              | TtlLruCache                                       |
+| `obs/` (organ)                | pino 로거                                         |
+| `constants/` `utils/` (organ) | 상수·coerce 헬퍼                                  |
+
+## Conventions
+
+- 모든 모듈 인스턴스화는 `createX(deps)` 팩토리로 의존성을 주입받으며, 결선은 오직 `index.ts`의 `main()`에서만 수행한다.
+- 서버 버전·이름은 `version.ts` 한 곳에서만 읽고, 다른 모듈은 이를 import해 재선언하지 않는다.
+- 부팅 순서는 config → logger → paths → versionResolver → binaryManager → runner → service → server를 따르며 paths는 `ensureBaseDirs()`로 선행 보장한다.
+- 전송은 `StdioServerTransport` 한 종류만 쓰고 SIGINT/SIGTERM에서 `server.close()`로 정상 종료한다.
 
 ## Boundaries
 
@@ -29,3 +42,8 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 
 - 무음 `|| ''` fallback으로 에러를 숨긴다
 - 체크섬 검증 없이 바이너리를 설치한다
+
+## Dependencies
+
+- 내부: `config`, `paths`, `core/service`, `mcp/registry`, `mcp/server`, `obs/logger`, `ytdlp/binary`, `ytdlp/runner`, `version`
+- 외부: `@modelcontextprotocol/sdk`(stdio transport)
