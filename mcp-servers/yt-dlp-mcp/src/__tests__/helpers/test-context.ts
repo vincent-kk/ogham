@@ -22,7 +22,14 @@ export async function makeTestEnv(
   env: Record<string, string | undefined> = {},
 ): Promise<TestEnv> {
   const home = await mkdtemp(path.join(tmpdir(), 'ytmcp-'));
-  const config = loadConfig({ ...env, YTDLP_HOME: home });
+  const config = loadConfig({
+    // Disable request pacing by default so throttle-unaware tests keep their
+    // timing; placed before `...env` so callers can still override.
+    YTDLP_REQUEST_INTERVAL_MS: '0',
+    YTDLP_SUBTITLE_INTERVAL_MS: '0',
+    ...env,
+    YTDLP_HOME: home,
+  });
   const paths = createPaths(config);
   await paths.ensureBaseDirs();
   return {

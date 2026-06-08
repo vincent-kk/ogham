@@ -4,20 +4,20 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 
 ## Structure
 
-| 파일/디렉터리                 | 역할                                              |
-| ----------------------------- | ------------------------------------------------- |
-| `index.ts`                    | 런타임 결선 진입점(`main`)·stdio 연결·종료 처리   |
-| `version.ts`                  | 서버 버전·이름 단일 출처(`VERSION`/`SERVER_NAME`) |
-| `config/`                     | 환경변수 → 검증된 `Config`                        |
-| `paths/`                      | `~/.yt-dlp` 경로 트리 해석·생성                   |
-| `ytdlp/`                      | 바이너리 획득·실행·도메인 연산                    |
-| `mcp/`                        | 도구 정의·레지스트리·서버                         |
-| `core/` (organ)               | 캐시·동시성 결합 실행 Service(`createService`)    |
-| `domain/` (organ)             | 도메인 타입·에러 분류                             |
-| `postprocess/` (organ)        | 자막/텍스트 후처리                                |
-| `cache/` (organ)              | TtlLruCache                                       |
-| `obs/` (organ)                | pino 로거                                         |
-| `constants/` `utils/` (organ) | 상수·coerce 헬퍼                                  |
+| 파일/디렉터리                 | 역할                                                                 |
+| ----------------------------- | -------------------------------------------------------------------- |
+| `index.ts`                    | 런타임 결선 진입점(`main`)·stdio 연결·종료 처리                      |
+| `version.ts`                  | 서버 버전·이름 단일 출처(`VERSION`/`SERVER_NAME`)                    |
+| `config/`                     | 환경변수 → 검증된 `Config`                                           |
+| `paths/`                      | `~/.yt-dlp` 경로 트리 해석·생성                                      |
+| `ytdlp/`                      | 바이너리 획득·실행·도메인 연산                                       |
+| `mcp/`                        | 도구 정의·레지스트리·서버                                            |
+| `core/` (organ)               | 캐시·요청 페이싱(throttle)·동시성 결합 실행 Service(`createService`) |
+| `domain/` (organ)             | 도메인 타입·에러 분류                                                |
+| `postprocess/` (organ)        | 자막/텍스트 후처리                                                   |
+| `cache/` (organ)              | TtlLruCache                                                          |
+| `obs/` (organ)                | pino 로거                                                            |
+| `constants/` `utils/` (organ) | 상수·coerce 헬퍼                                                     |
 
 ## Conventions
 

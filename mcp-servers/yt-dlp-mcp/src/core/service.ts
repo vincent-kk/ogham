@@ -4,6 +4,7 @@ import { TtlLruCache } from '../cache/cache.js';
 import type { Config } from '../config/index.js';
 import type { Logger } from '../obs/logger.js';
 import type { Paths } from '../paths/index.js';
+import { createThrottle } from '../utils/throttle.js';
 import type { OpContext } from '../ytdlp/operations/context.js';
 import type { Runner } from '../ytdlp/runner/runner.js';
 
@@ -35,8 +36,20 @@ export interface Service {
   ): Promise<T>;
 }
 
+const SUBTITLE_PREFIXES = ['transcript:', 'subtitles:', 'list-subs:'] as const;
+
+function isSubtitleCall(cacheKey: string): boolean {
+  return SUBTITLE_PREFIXES.some((prefix) => cacheKey.startsWith(prefix));
+}
+
 export function createService(deps: ServiceDeps): Service {
   const limit = pLimit(deps.config.extraction.maxConcurrency);
+  const lightThrottle = createThrottle(
+    deps.config.extraction.requestIntervalMs,
+  );
+  const subtitleThrottle = createThrottle(
+    deps.config.extraction.subtitleIntervalMs,
+  );
   const cache = new TtlLruCache<unknown>(
     deps.cacheMaxSize ?? 200,
     deps.cacheTtlMs ?? 15 * 60_000,
@@ -57,6 +70,9 @@ export function createService(deps: ServiceDeps): Service {
           return hit as T;
         }
       }
+      const throttle =
+        cacheKey && isSubtitleCall(cacheKey) ? subtitleThrottle : lightThrottle;
+      await throttle.acquire();
       const ctx: OpContext = {
         runner: deps.runner,
         config: deps.config,

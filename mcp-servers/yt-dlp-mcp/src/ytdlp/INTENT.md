@@ -14,7 +14,7 @@ yt-dlp 바이너리 획득·실행·정보 추출 서브시스템.
 ## Conventions
 
 - 버전은 `versionResolver`가 쿨다운으로 고정(또는 pinned tag 조회)한 뒤, `.part` 스테이징 → 체크섬 검증 → `rename` 원자적 설치로만 바이너리를 갱신한다.
-- `runner`는 `BASE_ARGS`(`--ignore-config`/`--no-warnings` 등) + JS 런타임 + evasion 플래그를 `commonArgs`로 강제 prepend하며, 호출자가 이 불변식을 우회할 수 없다.
+- `runner`는 `BASE_ARGS`(`--ignore-config`/`--no-warnings` 등) + JS 런타임 + 쿠키 플래그를 `commonArgs`로 한 번만 prepend하고, 프록시는 `proxyPool` 위에서 호출마다 라운드로빈으로 회전(`--proxy`)시킨다. 호출자가 이 불변식을 우회할 수 없다.
 - operations는 `--dump-single-json --skip-download`로 얻은 info-json을 `parseInfoJson`으로 파싱해 도메인 결과를 반환한다.
 - HTTP·바이너리 파일 I/O는 `binary` organ에 격리하고 실행 실패는 `toYtDlpError`로 정규화한다.
 

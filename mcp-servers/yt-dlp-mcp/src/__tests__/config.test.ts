@@ -8,7 +8,7 @@ describe('loadConfig', () => {
     const c = loadConfig({});
     expect(c.binary.cooldownDays).toBe(3);
     expect(c.binary.refreshDays).toBe(7);
-    expect(c.extraction.maxConcurrency).toBe(2);
+    expect(c.extraction.maxConcurrency).toBe(1);
     expect(c.extraction.timeoutMs).toBe(90_000);
     expect(c.logLevel).toBe('info');
   });

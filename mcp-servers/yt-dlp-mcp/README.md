@@ -51,19 +51,39 @@ Set `YTDLP_ENABLE_ALL=1` to register everything at once.
 
 All settings are environment variables (see [.env.example](./.env.example)); pass them via the host's `env` block.
 
-| Variable                                                            | Default                 | Purpose                                            |
-| ------------------------------------------------------------------- | ----------------------- | -------------------------------------------------- |
-| `YTDLP_HOME`                                                        | `~/.yt-dlp`             | Root for `bin/`, `temp/`, `downloads/`             |
-| `YTDLP_DOWNLOADS_DIR`                                               | `$YTDLP_HOME/downloads` | Override download output dir                       |
-| `YTDLP_COOLDOWN_DAYS`                                               | `7`                     | Only adopt releases older than this (supply-chain) |
-| `YTDLP_REFRESH_DAYS`                                                | `14`                    | Refresh the cached binary after this many days     |
-| `YTDLP_PINNED_VERSION`                                              | —                       | Pin to an exact yt-dlp tag                         |
-| `YTDLP_MAX_CONCURRENCY`                                             | `2`                     | Concurrent yt-dlp child processes                  |
-| `YTDLP_TIMEOUT_MS`                                                  | `90000`                 | Per-extraction timeout                             |
-| `YTDLP_CHARACTER_LIMIT`                                             | `25000`                 | Response truncation limit                          |
-| `YTDLP_MAX_TRANSCRIPT_LENGTH`                                       | `50000`                 | Transcript/subtitle truncation limit               |
-| `YTDLP_LOG_LEVEL`                                                   | `info`                  | `trace`…`fatal`/`silent` (stderr only)             |
-| `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` / `YTDLP_PROXY` | —                       | Evasion (opt-in; see Legal)                        |
+| Variable                                            | Default                 | Purpose                                              |
+| --------------------------------------------------- | ----------------------- | ---------------------------------------------------- |
+| `YTDLP_HOME`                                        | `~/.yt-dlp`             | Root for `bin/`, `temp/`, `downloads/`               |
+| `YTDLP_DOWNLOADS_DIR`                               | `$YTDLP_HOME/downloads` | Override download output dir                         |
+| `YTDLP_COOLDOWN_DAYS`                               | `3`                     | Only adopt releases older than this (supply-chain)   |
+| `YTDLP_REFRESH_DAYS`                                | `7`                     | Refresh the cached binary after this many days       |
+| `YTDLP_PINNED_VERSION`                              | —                       | Pin to an exact yt-dlp tag                           |
+| `YTDLP_MAX_CONCURRENCY`                             | adaptive                | Concurrent yt-dlp child processes (see below)        |
+| `YTDLP_REQUEST_INTERVAL_MS`                         | adaptive                | Min spacing between light/metadata calls (see below) |
+| `YTDLP_SUBTITLE_INTERVAL_MS`                        | adaptive                | Min spacing between subtitle/transcript calls        |
+| `YTDLP_TIMEOUT_MS`                                  | `90000`                 | Per-extraction timeout                               |
+| `YTDLP_CHARACTER_LIMIT`                             | `25000`                 | Response truncation limit                            |
+| `YTDLP_MAX_TRANSCRIPT_LENGTH`                       | `50000`                 | Transcript/subtitle truncation limit                 |
+| `YTDLP_LOG_LEVEL`                                   | `info`                  | `trace`…`fatal`/`silent` (stderr only)               |
+| `YTDLP_PROXY_POOL` / `YTDLP_PROXY`                  | —                       | Rotating / single proxy — primary 429 mitigation     |
+| `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` | —                       | Cookies for auth gates only (opt-in; see Legal)      |
+
+### Avoiding rate limits & blocks
+
+YouTube rate limits (HTTP 429) are **IP-based and cumulative** — subtitle/`timedtext` endpoints are the most aggressive, and a tripped limit can persist from minutes up to ~24h. Mitigation effectiveness, in order:
+
+1. **Rotating proxy (primary).** Set `YTDLP_PROXY_POOL` to a comma-separated list of proxy URLs. They are round-robined per request, spreading load across IPs. A single static `YTDLP_PROXY` is the fallback when no pool is set.
+2. **Request pacing.** The server queues bursts and spaces dispatches; single calls stay instant. Concurrency and the spacing intervals **auto-adapt to proxy state**, and each can be overridden via env:
+
+   | proxy state | `YTDLP_MAX_CONCURRENCY` | `YTDLP_REQUEST_INTERVAL_MS` | `YTDLP_SUBTITLE_INTERVAL_MS` |
+   | ----------- | ----------------------- | --------------------------- | ---------------------------- |
+   | none        | 1                       | 1500                        | 4000                         |
+   | single      | 2                       | 750                         | 2000                         |
+   | pool (N)    | `min(N, 8)`             | 0                           | 250                          |
+
+3. **Cookies — auth gates only.** `YTDLP_COOKIES_FROM_BROWSER` / `YTDLP_COOKIES_FILE` unlock age-restricted, members-only, or sign-in-walled content. They **rarely help** with subtitle 429s — reach for the proxy pool instead.
+
+A `[BLOCKED]` bot-check often needs a **Proof-of-Origin (PO) token**; cookies alone may not clear it, whereas a cleaner proxy IP frequently does.
 
 ## Security & supply chain
 

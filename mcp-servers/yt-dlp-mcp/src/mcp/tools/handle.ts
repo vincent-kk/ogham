@@ -4,14 +4,15 @@ import { ErrorCode } from '../../domain/errors.js';
 import { toYtDlpError } from '../../domain/to-ytdlp-error.js';
 import { truncate } from '../../postprocess/truncate.js';
 
-// Actionable next-step appended to errors a cookie/proxy can resolve.
+// Actionable next-step appended to errors a proxy/cookie can resolve. Order
+// reflects mitigation effectiveness: rotating proxy > request pacing > cookies.
 const CODE_HINTS: Partial<Record<ErrorCode, string>> = {
   [ErrorCode.RATE_LIMITED]:
-    ' Tip: set YTDLP_COOKIES_FROM_BROWSER or YTDLP_COOKIES_FILE (or YTDLP_PROXY) to reduce rate limiting.',
+    ' Tip: rate limits are IP-based — set YTDLP_PROXY_POOL (comma-separated rotating proxies) to spread requests across IPs, or lower concurrency / raise the interval knobs to pace bursts. Cookies rarely help with subtitle (timedtext) 429s.',
   [ErrorCode.BLOCKED]:
-    ' Tip: YouTube requires sign-in; set YTDLP_COOKIES_FROM_BROWSER or YTDLP_COOKIES_FILE.',
+    ' Tip: YouTube bot-check — try YTDLP_PROXY_POOL for a cleaner IP. This often needs a Proof-of-Origin (PO) token; cookies (YTDLP_COOKIES_FROM_BROWSER / YTDLP_COOKIES_FILE) may not suffice on their own.',
   [ErrorCode.AGE_RESTRICTED]:
-    ' Tip: age-restricted; set YTDLP_COOKIES_FROM_BROWSER or YTDLP_COOKIES_FILE for an authenticated session.',
+    ' Tip: age-restricted (a real auth gate) — set YTDLP_COOKIES_FROM_BROWSER or YTDLP_COOKIES_FILE for an authenticated session.',
   [ErrorCode.COOKIE_UNAVAILABLE]:
     ' Tip: close the browser that owns the profile, or switch to YTDLP_COOKIES_FILE.',
 };

@@ -31,7 +31,9 @@ export const SUBTITLE_RATE_LIMIT_ARGS: string[] = [
   '--sleep-subtitles',
   '1',
   '--retries',
+  '5',
+  '--extractor-retries',
   '3',
   '--retry-sleep',
-  'linear=1::2',
+  'exp=1.5:30',
 ];

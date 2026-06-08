@@ -28,6 +28,8 @@ const ConfigSchema = z.object({
     timeoutMs: z.number().int().min(1000),
     characterLimit: z.number().int().min(100),
     maxTranscriptLength: z.number().int().min(100),
+    requestIntervalMs: z.number().int().min(0),
+    subtitleIntervalMs: z.number().int().min(0),
   }),
   enable: z.object({
     subtitles: z.boolean(),
@@ -43,6 +45,7 @@ const ConfigSchema = z.object({
     cookiesFromBrowser: z.string().min(1).optional(),
     cookiesFile: z.string().min(1).optional(),
     proxy: z.string().min(1).optional(),
+    proxyPool: z.array(z.string().min(1)),
   }),
   logLevel: z.enum(LOG_LEVELS),
 });
@@ -71,6 +74,48 @@ function intEnv(value: string | undefined, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function listEnv(value: string | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s !== '');
+}
+
+interface AdaptiveDefaults {
+  maxConcurrency: number;
+  requestIntervalMs: number;
+  subtitleIntervalMs: number;
+}
+
+/**
+ * Derives expected rate-limit defaults from proxy state (PLAN §D).
+ * Precedence: non-empty pool > single proxy > none. Each value is a
+ * fallback passed to `intEnv`, so explicit env vars still override.
+ */
+function adaptiveDefaults(
+  proxyPool: string[],
+  proxy: string | undefined,
+): AdaptiveDefaults {
+  if (proxyPool.length > 0)
+    return {
+      maxConcurrency: Math.min(proxyPool.length, 8),
+      requestIntervalMs: 0,
+      subtitleIntervalMs: 250,
+    };
+  if (proxy)
+    return {
+      maxConcurrency: 2,
+      requestIntervalMs: 750,
+      subtitleIntervalMs: 2000,
+    };
+  return {
+    maxConcurrency: 1,
+    requestIntervalMs: 1500,
+    subtitleIntervalMs: 4000,
+  };
+}
+
 /**
  * Loads and validates configuration from environment variables (PLAN §6-4).
  * Throws on invalid values rather than silently falling back.
@@ -85,6 +130,10 @@ export function loadConfig(env: Env = process.env): Config {
   const enableAll = boolEnv(env.YTDLP_ENABLE_ALL);
   const flag = (key: string): boolean => enableAll || boolEnv(env[key]);
 
+  const proxyPool = listEnv(env.YTDLP_PROXY_POOL);
+  const proxy = env.YTDLP_PROXY?.trim() || undefined;
+  const adaptive = adaptiveDefaults(proxyPool, proxy);
+
   const raw = {
     paths: { home, downloadsDir },
     binary: {
@@ -93,10 +142,21 @@ export function loadConfig(env: Env = process.env): Config {
       pinnedVersion: env.YTDLP_PINNED_VERSION?.trim() || undefined,
     },
     extraction: {
-      maxConcurrency: intEnv(env.YTDLP_MAX_CONCURRENCY, 2),
+      maxConcurrency: intEnv(
+        env.YTDLP_MAX_CONCURRENCY,
+        adaptive.maxConcurrency,
+      ),
       timeoutMs: intEnv(env.YTDLP_TIMEOUT_MS, 90_000),
       characterLimit: intEnv(env.YTDLP_CHARACTER_LIMIT, 25_000),
       maxTranscriptLength: intEnv(env.YTDLP_MAX_TRANSCRIPT_LENGTH, 50_000),
+      requestIntervalMs: intEnv(
+        env.YTDLP_REQUEST_INTERVAL_MS,
+        adaptive.requestIntervalMs,
+      ),
+      subtitleIntervalMs: intEnv(
+        env.YTDLP_SUBTITLE_INTERVAL_MS,
+        adaptive.subtitleIntervalMs,
+      ),
     },
     enable: {
       subtitles: flag('YTDLP_ENABLE_SUBTITLES'),
@@ -111,7 +171,8 @@ export function loadConfig(env: Env = process.env): Config {
     evasion: {
       cookiesFromBrowser: env.YTDLP_COOKIES_FROM_BROWSER?.trim() || undefined,
       cookiesFile: env.YTDLP_COOKIES_FILE?.trim() || undefined,
-      proxy: env.YTDLP_PROXY?.trim() || undefined,
+      proxy,
+      proxyPool,
     },
     logLevel: env.YTDLP_LOG_LEVEL?.trim() || 'info',
   };
