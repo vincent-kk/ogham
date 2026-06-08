@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { segmentsToText } from '../postprocess/segments-to-text.js';
+import { segmentsToText } from '../features/subtitle/postprocess/segments-to-text.js';
 
 describe('segmentsToText', () => {
   const segs = [

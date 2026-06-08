@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
-import { segmentsToText } from '../../postprocess/segments-to-text.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { subtitlesOperation } from '../../ytdlp/operations/subtitles.js';
-
-import { READ_ONLY } from './annotations.js';
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+import { READ_ONLY } from '../../../mcp/tools/annotations.js';
+import { handleToolExecution } from '../../../mcp/tools/handle.js';
+import type { ToolDefinition } from '../../../mcp/tools/tool-definition.js';
+import { cacheKey } from '../../../utils/cache-key.js';
+import { subtitlesOperation } from '../operations/subtitles.js';
+import { segmentsToText } from '../postprocess/segments-to-text.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),
@@ -44,6 +43,7 @@ export const subtitlesTool: ToolDefinition = {
                 cacheKey: cacheKey('subtitles', args.url, { language }),
                 cacheable: true,
                 signal: extra.signal,
+                throttle: 'subtitle',
               },
               (ctx) => subtitlesOperation(ctx, { url: args.url, language }),
             );

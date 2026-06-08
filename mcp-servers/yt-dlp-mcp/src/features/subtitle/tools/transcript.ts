@@ -1,15 +1,14 @@
 import { z } from 'zod';
 
+import { handleToolExecution } from '../../../mcp/tools/handle.js';
+import type { ToolDefinition } from '../../../mcp/tools/tool-definition.js';
+import { cacheKey } from '../../../utils/cache-key.js';
+import { transcriptOperation } from '../operations/transcript.js';
 import {
   dedupeAdjacent,
   stripCaptionArtifacts,
-} from '../../postprocess/ad-stripper.js';
-import { segmentsToText } from '../../postprocess/segments-to-text.js';
-import { cacheKey } from '../../utils/cache-key.js';
-import { transcriptOperation } from '../../ytdlp/operations/transcript.js';
-
-import { handleToolExecution } from './handle.js';
-import type { ToolDefinition } from './tool-definition.js';
+} from '../postprocess/ad-stripper.js';
+import { segmentsToText } from '../postprocess/segments-to-text.js';
 
 const inputSchema = {
   url: z.string().describe('Full video URL.'),
@@ -65,6 +64,7 @@ export const transcriptTool: ToolDefinition = {
                 cacheKey: cacheKey('transcript', args.url, { language }),
                 cacheable: true,
                 signal: extra.signal,
+                throttle: 'subtitle',
               },
               (ctx) => transcriptOperation(ctx, { url: args.url, language }),
             );

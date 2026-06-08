@@ -5,13 +5,13 @@ import {
   META_PRINT_FMT,
   SUBTITLE_RATE_LIMIT_ARGS,
   SUB_FORMAT,
-} from '../../constants/ytdlp.js';
-import { ErrorCode, YtDlpMcpError } from '../../domain/errors.js';
-import type { TranscriptResult } from '../../domain/types.js';
-import { removeDir } from '../../paths/index.js';
-import { isValidUrl } from '../../utils/validate-url.js';
+} from '../../../constants/ytdlp.js';
+import { ErrorCode, YtDlpMcpError } from '../../../domain/errors.js';
+import type { TranscriptResult } from '../../../domain/types.js';
+import { removeDir } from '../../../paths/index.js';
+import { isValidUrl } from '../../../utils/validate-url.js';
+import type { OpContext } from '../../../ytdlp/operations/context.js';
 
-import type { OpContext } from './context.js';
 import { parseJson3 } from './parse-json3.js';
 import { parseMetaPrint } from './parse-meta-print.js';
 import { pickSubtitleFile, uniqueLangs } from './subtitle-files.js';

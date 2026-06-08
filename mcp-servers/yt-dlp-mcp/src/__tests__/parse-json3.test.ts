@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseJson3 } from '../ytdlp/operations/parse-json3.js';
+import { parseJson3 } from '../features/subtitle/operations/parse-json3.js';
 
 import { SAMPLE_JSON3 } from './helpers/fixtures.js';
 

@@ -34,7 +34,7 @@ function makeService() {
 }
 
 describe('Service throttle wiring', () => {
-  it('spaces concurrent transcript: calls by the subtitle interval', async () => {
+  it('spaces concurrent subtitle-throttled calls by the subtitle interval', async () => {
     const service = makeService();
     const starts: number[] = [];
     const fn = async (): Promise<number> => {
@@ -42,9 +42,9 @@ describe('Service throttle wiring', () => {
       return 1;
     };
     await Promise.all([
-      service.execute({ cacheKey: 'transcript:a' }, fn),
-      service.execute({ cacheKey: 'transcript:b' }, fn),
-      service.execute({ cacheKey: 'transcript:c' }, fn),
+      service.execute({ cacheKey: 'transcript:a', throttle: 'subtitle' }, fn),
+      service.execute({ cacheKey: 'transcript:b', throttle: 'subtitle' }, fn),
+      service.execute({ cacheKey: 'transcript:c', throttle: 'subtitle' }, fn),
     ]);
     starts.sort((a, b) => a - b);
     expect(starts).toHaveLength(3);
@@ -57,7 +57,7 @@ describe('Service throttle wiring', () => {
     );
   });
 
-  it('uses the lighter request throttle for non-subtitle cache keys', async () => {
+  it('uses the lighter request throttle when throttle is unspecified', async () => {
     const service = makeService();
     const starts: number[] = [];
     const fn = async (): Promise<number> => {
@@ -75,13 +75,34 @@ describe('Service throttle wiring', () => {
     expect(gap).toBeLessThan(SUBTITLE_INTERVAL);
   });
 
+  it('selects throttle by option, independent of cacheKey prefix', async () => {
+    const service = makeService();
+    const starts: number[] = [];
+    const fn = async (): Promise<number> => {
+      starts.push(Date.now());
+      return 1;
+    };
+    // cacheKey looks non-subtitle, but throttle:'subtitle' still applies the subtitle interval.
+    await Promise.all([
+      service.execute({ cacheKey: 'metadata:a', throttle: 'subtitle' }, fn),
+      service.execute({ cacheKey: 'metadata:b', throttle: 'subtitle' }, fn),
+    ]);
+    starts.sort((a, b) => a - b);
+    expect(starts[1] - starts[0]).toBeGreaterThanOrEqual(
+      SUBTITLE_INTERVAL - 15,
+    );
+  });
+
   it('a cache hit bypasses the throttle entirely', async () => {
     const service = makeService();
     const fn = vi.fn(async () => ({ value: 7 }));
-    await service.execute({ cacheKey: 'transcript:x', cacheable: true }, fn);
+    await service.execute(
+      { cacheKey: 'transcript:x', cacheable: true, throttle: 'subtitle' },
+      fn,
+    );
     const start = Date.now();
     const hit = await service.execute(
-      { cacheKey: 'transcript:x', cacheable: true },
+      { cacheKey: 'transcript:x', cacheable: true, throttle: 'subtitle' },
       fn,
     );
     const elapsed = Date.now() - start;

@@ -1,4 +1,4 @@
-import type { TranscriptSegment } from '../domain/types.js';
+import type { TranscriptSegment } from '../../../domain/types.js';
 
 // Non-speech caption cues like [Music], [Applause]. Conservative on purpose.
 const BRACKET_CUE =

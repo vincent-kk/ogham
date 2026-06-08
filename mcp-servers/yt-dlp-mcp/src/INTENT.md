@@ -12,11 +12,11 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 | `paths/`                      | `~/.yt-dlp` 경로 트리 해석·생성                                      |
 | `ytdlp/`                      | 바이너리 획득·실행·도메인 연산                                       |
 | `mcp/`                        | 도구 정의·레지스트리·서버                                            |
+| `features/`                   | 기능별 수직 슬라이스(현재 `subtitle/`)                               |
 | `core/` (organ)               | 캐시·요청 페이싱(throttle)·동시성 결합 실행 Service(`createService`) |
 | `domain/` (organ)             | 도메인 타입·에러 분류                                                |
 | `postprocess/` (organ)        | 자막/텍스트 후처리                                                   |
-| `cache/` (organ)              | TtlLruCache                                                          |
-| `obs/` (organ)                | pino 로거                                                            |
+| `cache/` `obs/` (organ)       | TtlLruCache·pino 로거                                                |
 | `constants/` `utils/` (organ) | 상수·coerce 헬퍼                                                     |
 
 ## Conventions

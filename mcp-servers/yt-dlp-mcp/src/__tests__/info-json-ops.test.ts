@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { listSubtitlesOperation } from '../features/subtitle/operations/list-subtitles.js';
 import { chaptersOperation } from '../ytdlp/operations/chapters.js';
 import { heatmapOperation } from '../ytdlp/operations/heatmap.js';
-import { listSubtitlesOperation } from '../ytdlp/operations/list-subtitles.js';
 import { metadataOperation } from '../ytdlp/operations/metadata.js';
 import { playlistOperation } from '../ytdlp/operations/playlist.js';
 import { searchOperation } from '../ytdlp/operations/search.js';

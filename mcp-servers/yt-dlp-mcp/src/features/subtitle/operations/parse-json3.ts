@@ -1,4 +1,4 @@
-import type { TranscriptSegment } from '../../domain/types.js';
+import type { TranscriptSegment } from '../../../domain/types.js';
 
 interface Json3Seg {
   utf8?: string;

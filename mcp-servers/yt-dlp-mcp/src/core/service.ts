@@ -21,6 +21,7 @@ export interface ExecuteOptions {
   cacheKey?: string;
   cacheable?: boolean;
   signal?: AbortSignal;
+  throttle?: 'subtitle' | 'light';
 }
 
 /**
@@ -34,12 +35,6 @@ export interface Service {
     options: ExecuteOptions,
     fn: (ctx: OpContext) => Promise<T>,
   ): Promise<T>;
-}
-
-const SUBTITLE_PREFIXES = ['transcript:', 'subtitles:', 'list-subs:'] as const;
-
-function isSubtitleCall(cacheKey: string): boolean {
-  return SUBTITLE_PREFIXES.some((prefix) => cacheKey.startsWith(prefix));
 }
 
 export function createService(deps: ServiceDeps): Service {
@@ -62,7 +57,7 @@ export function createService(deps: ServiceDeps): Service {
       options: ExecuteOptions,
       fn: (ctx: OpContext) => Promise<T>,
     ): Promise<T> {
-      const { cacheKey, cacheable = false, signal } = options;
+      const { cacheKey, cacheable = false, signal, throttle: kind } = options;
       if (cacheable && cacheKey) {
         const hit = cache.get(cacheKey);
         if (hit !== undefined) {
@@ -70,8 +65,7 @@ export function createService(deps: ServiceDeps): Service {
           return hit as T;
         }
       }
-      const throttle =
-        cacheKey && isSubtitleCall(cacheKey) ? subtitleThrottle : lightThrottle;
+      const throttle = kind === 'subtitle' ? subtitleThrottle : lightThrottle;
       await throttle.acquire();
       const ctx: OpContext = {
         runner: deps.runner,

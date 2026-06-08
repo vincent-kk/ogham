@@ -36,6 +36,6 @@ MCP 서버 결선 계층. 도구 정의를 모아 enable 게이트에 따라 등
 
 ## Dependencies
 
-- 내부: `registry/index`, `server/index`, `tools/tool-definition`; 도구는 `core`(`Service` via `ToolDeps`)·`postprocess`·`domain` 사용
+- 내부: `registry/index`, `server/index`, `tools/tool-definition`; `registry`는 `features` 슬라이스 도구도 등록; 도구는 `core`(`Service` via `ToolDeps`)·`postprocess`·`domain` 사용
 - 외부: `@modelcontextprotocol/sdk`(server 경유), `zod`(입력 스키마)
 - 소비처: root
