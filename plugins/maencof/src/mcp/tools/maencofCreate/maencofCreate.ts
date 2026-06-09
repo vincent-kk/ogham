@@ -3,14 +3,16 @@
  * @description `create` 도구 핸들러 — 새 기억 문서 생성
  */
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 import {
   L3_SUBDIR,
   L5_SUBDIR,
   LAYER_DIR,
 } from '../../../constants/architecture.js';
+import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
+import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
 import {
@@ -40,41 +42,57 @@ function inputToFrontmatterObject(
   if (input.title !== undefined) fm.title = input.title;
   if (input.source !== undefined) fm.source = input.source;
   if (input.expires !== undefined) fm.expires = input.expires;
-  if (input.mentioned_persons && input.mentioned_persons.length > 0) {
+  if (input.mentioned_persons && input.mentioned_persons.length > 0)
     fm.mentioned_persons = input.mentioned_persons;
-  }
   return fm;
 }
 
 /**
- * 파일명 힌트로부터 안전한 파일명을 생성한다.
- */
-function sanitizeFilename(hint: string): string {
-  const parts = hint.split('/');
-  const sanitized = parts
-    .map((part) =>
-      part
-        .toLowerCase()
-        .replace(/[^a-z0-9가-힣\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .slice(0, 80),
-    )
-    .filter((v) => !!v);
-  return sanitized.join('/');
-}
-
-/**
- * 제목으로부터 파일명을 자동 생성한다.
+ * 제목 또는 태그로부터 flat 파일명을 자동 생성한다.
+ * 슬러그가 비면 다음 후보로, 모두 비면 타임스탬프로 폴백한다.
  */
 function generateFilename(title?: string, tags?: string[]): string {
   if (title) {
-    return sanitizeFilename(title) + '.md';
+    const segment = sanitizeSegment(title);
+    if (segment) return `${segment}.md`;
   }
   if (tags && tags.length > 0) {
-    return sanitizeFilename(tags[0]) + '.md';
+    const segment = sanitizeSegment(tags[0]);
+    if (segment) return `${segment}.md`;
   }
   return `note-${Date.now()}.md`;
+}
+
+/**
+ * 파일명을 결정한다. path-traversal 검사와 명시적 filename 처리를 포함한다.
+ */
+function resolveFilename(
+  input: MaencofCreateInput,
+): { filename: string } | { error: string } {
+  if (
+    input.filename &&
+    input.filename.split(/[/\\]/).some((segment) => segment === '..')
+  )
+    return {
+      error:
+        'Path traversal detected: ".." segments are not allowed in filename',
+    };
+
+  if (input.filename) {
+    const segments = input.filename
+      .replace(/\.md$/i, '')
+      .split('/')
+      .map(sanitizeSegment)
+      .filter((segment) => segment.length > 0);
+    if (segments.length === 0)
+      return { filename: generateFilename(input.title, input.tags) };
+    if (segments.length - 1 > MAX_FILENAME_SUBDIR_DEPTH)
+      return {
+        error: `Filename subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${input.filename}`,
+      };
+    return { filename: `${segments.join('/')}.md` };
+  }
+  return { filename: generateFilename(input.title, input.tags) };
 }
 
 /** Frontmatter build result */
@@ -141,9 +159,7 @@ async function updateBacklinkIndex(
 
   for (const target of targetPaths) {
     if (!index[target]) index[target] = [];
-    if (!index[target].includes(sourcePath)) {
-      index[target].push(sourcePath);
-    }
+    if (!index[target].includes(sourcePath)) index[target].push(sourcePath);
   }
 
   await mkdir(metaDir, { recursive: true });
@@ -161,39 +177,26 @@ export async function handleMaencofCreate(
   input: MaencofCreateInput,
 ): Promise<MaencofCrudResult> {
   const layerDir = LAYER_DIR[input.layer as Layer];
-  if (!layerDir) {
+  if (!layerDir)
     return {
       success: false,
       path: '',
       message: `Invalid Layer: ${input.layer}`,
     };
-  }
 
-  // Path traversal 방어 (sanitize 전 raw input 검사)
-  if (input.filename && input.filename.includes('..')) {
-    return {
-      success: false,
-      path: '',
-      message:
-        'Path traversal detected: ".." segments are not allowed in filename',
-    };
-  }
-
-  // 파일명 결정
-  const filename = input.filename
-    ? sanitizeFilename(input.filename) +
-      (input.filename.endsWith('.md') ? '' : '.md')
-    : generateFilename(input.title, input.tags);
+  const filenameResult = resolveFilename(input);
+  if ('error' in filenameResult)
+    return { success: false, path: '', message: filenameResult.error };
+  const { filename } = filenameResult;
 
   // Sub-layer 디렉토리 결정
   let subDir = '';
   if (input.sub_layer) {
     const layerNum = input.layer as Layer;
-    if (layerNum === 3 && input.sub_layer in L3_SUBDIR) {
+    if (layerNum === 3 && input.sub_layer in L3_SUBDIR)
       subDir = L3_SUBDIR[input.sub_layer as L3SubLayer];
-    } else if (layerNum === 5 && input.sub_layer in L5_SUBDIR) {
+    else if (layerNum === 5 && input.sub_layer in L5_SUBDIR)
       subDir = L5_SUBDIR[input.sub_layer as L5SubLayer];
-    }
   }
 
   const relativePath = subDir
@@ -201,15 +204,21 @@ export async function handleMaencofCreate(
     : `${layerDir}/${filename}`;
   const absolutePath = join(vaultPath, relativePath);
 
+  if (!resolve(absolutePath).startsWith(resolve(vaultPath) + sep))
+    return {
+      success: false,
+      path: '',
+      message: 'Resolved path escapes vault root',
+    };
+
   // ─── Frontmatter 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
   const fmValidation = validateFrontmatter(inputToFrontmatterObject(input));
-  if (!fmValidation.ok) {
+  if (!fmValidation.ok)
     return {
       success: false,
       path: '',
       message: `Frontmatter validation failed: ${fmValidation.errors.join('; ')}`,
     };
-  }
 
   // 중복 파일 확인
   try {
