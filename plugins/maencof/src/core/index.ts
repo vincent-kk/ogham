@@ -9,6 +9,7 @@ export * from './dialogueConfig/index.js';
 export * from './errorLog/index.js';
 export * from './dailynoteWriter/index.js';
 export * from './documentParser/index.js';
+export * from './filenameSlug/index.js';
 export * from './graphBuilder/index.js';
 export * from './insightStats/index.js';
 export * from './spreadingActivation/index.js';
