@@ -10,7 +10,9 @@ import {
   L5_SUBDIR,
   LAYER_DIR,
 } from '../../../constants/architecture.js';
+import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
+import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
 import type { L3SubLayer, L5SubLayer, Layer } from '../../../types/common.js';
 import {
@@ -47,32 +49,17 @@ function inputToFrontmatterObject(
 }
 
 /**
- * 파일명 힌트로부터 안전한 파일명을 생성한다.
- */
-function sanitizeFilename(hint: string): string {
-  const parts = hint.split('/');
-  const sanitized = parts
-    .map((part) =>
-      part
-        .toLowerCase()
-        .replace(/[^a-z0-9가-힣\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .slice(0, 80),
-    )
-    .filter((v) => !!v);
-  return sanitized.join('/');
-}
-
-/**
- * 제목으로부터 파일명을 자동 생성한다.
+ * 제목 또는 태그로부터 flat 파일명을 자동 생성한다.
+ * 슬러그가 비면 다음 후보로, 모두 비면 타임스탬프로 폴백한다.
  */
 function generateFilename(title?: string, tags?: string[]): string {
   if (title) {
-    return sanitizeFilename(title) + '.md';
+    const segment = sanitizeSegment(title);
+    if (segment) return `${segment}.md`;
   }
   if (tags && tags.length > 0) {
-    return sanitizeFilename(tags[0]) + '.md';
+    const segment = sanitizeSegment(tags[0]);
+    if (segment) return `${segment}.md`;
   }
   return `note-${Date.now()}.md`;
 }
@@ -169,8 +156,11 @@ export async function handleMaencofCreate(
     };
   }
 
-  // Path traversal 방어 (sanitize 전 raw input 검사)
-  if (input.filename && input.filename.includes('..')) {
+  // Path traversal 방어 (sanitize 전 raw input 검사) — 경로 구분자로 분리된 ".." 세그먼트만 거부
+  if (
+    input.filename &&
+    input.filename.split(/[/\\]/).some((segment) => segment === '..')
+  ) {
     return {
       success: false,
       path: '',
@@ -179,11 +169,29 @@ export async function handleMaencofCreate(
     };
   }
 
-  // 파일명 결정
-  const filename = input.filename
-    ? sanitizeFilename(input.filename) +
-      (input.filename.endsWith('.md') ? '' : '.md')
-    : generateFilename(input.title, input.tags);
+  // 파일명 결정 — 명시적 filename은 subdir 허용(세그먼트별 sanitize),
+  // 제목/태그 파생은 항상 flat
+  let filename: string;
+  if (input.filename) {
+    const segments = input.filename
+      .replace(/\.md$/i, '')
+      .split('/')
+      .map(sanitizeSegment)
+      .filter((segment) => segment.length > 0);
+    if (segments.length === 0) {
+      filename = generateFilename(input.title, input.tags);
+    } else if (segments.length - 1 > MAX_FILENAME_SUBDIR_DEPTH) {
+      return {
+        success: false,
+        path: '',
+        message: `Filename subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${input.filename}`,
+      };
+    } else {
+      filename = `${segments.join('/')}.md`;
+    }
+  } else {
+    filename = generateFilename(input.title, input.tags);
+  }
 
   // Sub-layer 디렉토리 결정
   let subDir = '';

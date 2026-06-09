@@ -11,6 +11,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { MAX_FILENAME_SEGMENT_BYTES } from '../../../constants/filename.js';
 import { handleBoundaryCreate } from '../../../mcp/tools/boundaryCreate/boundaryCreate.js';
 
 async function makeTempVault(): Promise<string> {
@@ -44,5 +45,21 @@ describe('handleBoundaryCreate — validation gate', () => {
     expect(content).toContain('layer: 5');
     expect(content).toContain('sub_layer: boundary');
     expect(content).toContain('boundary_type: project_moc');
+  });
+
+  it('Bug B: 80자 초과 긴 제목도 바이트 한도 내 파일명으로 절단된다', async () => {
+    const result = await handleBoundaryCreate(vault, {
+      title: '가'.repeat(250),
+      boundary_type: 'synthesis',
+      connected_layers: [1],
+      tags: ['t'],
+    });
+
+    expect(result.success).toBe(true);
+    const base = result.path.split('/').pop() ?? '';
+    const slug = base.replace(/\.md$/, '');
+    expect(Buffer.byteLength(slug, 'utf8')).toBeLessThanOrEqual(
+      MAX_FILENAME_SEGMENT_BYTES,
+    );
   });
 });

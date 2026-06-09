@@ -6,6 +6,7 @@ import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { L5_SUBDIR, LAYER_DIR } from '../../../constants/architecture.js';
+import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
 import { Layer } from '../../../types/common.js';
 import { validateFrontmatter } from '../../../types/frontmatter.js';
@@ -31,18 +32,6 @@ export interface BoundaryCreateResult {
 }
 
 /**
- * Sanitize title into a safe filename.
- */
-function sanitizeFilename(hint: string): string {
-  return hint
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-    .slice(0, 80);
-}
-
-/**
  * boundary_create handler
  *
  * Creates a boundary document in 05_Context/boundary/ with appropriate frontmatter.
@@ -53,7 +42,8 @@ export async function handleBoundaryCreate(
 ): Promise<BoundaryCreateResult> {
   const layerDir = LAYER_DIR[Layer.L5_CONTEXT];
   const subDir = L5_SUBDIR['boundary'];
-  const filename = sanitizeFilename(input.title) + '.md';
+  const slug = sanitizeSegment(input.title);
+  const filename = `${slug || `boundary-${Date.now()}`}.md`;
   const relativePath = `${layerDir}/${subDir}/${filename}`;
   const absolutePath = join(vaultPath, relativePath);
 
