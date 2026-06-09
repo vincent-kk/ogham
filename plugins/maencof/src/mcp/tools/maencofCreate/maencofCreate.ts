@@ -3,7 +3,7 @@
  * @description `create` 도구 핸들러 — 새 기억 문서 생성
  */
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 
 import {
   L3_SUBDIR,
@@ -42,9 +42,8 @@ function inputToFrontmatterObject(
   if (input.title !== undefined) fm.title = input.title;
   if (input.source !== undefined) fm.source = input.source;
   if (input.expires !== undefined) fm.expires = input.expires;
-  if (input.mentioned_persons && input.mentioned_persons.length > 0) {
+  if (input.mentioned_persons && input.mentioned_persons.length > 0)
     fm.mentioned_persons = input.mentioned_persons;
-  }
   return fm;
 }
 
@@ -62,6 +61,38 @@ function generateFilename(title?: string, tags?: string[]): string {
     if (segment) return `${segment}.md`;
   }
   return `note-${Date.now()}.md`;
+}
+
+/**
+ * 파일명을 결정한다. path-traversal 검사와 명시적 filename 처리를 포함한다.
+ */
+function resolveFilename(
+  input: MaencofCreateInput,
+): { filename: string } | { error: string } {
+  if (
+    input.filename &&
+    input.filename.split(/[/\\]/).some((segment) => segment === '..')
+  )
+    return {
+      error:
+        'Path traversal detected: ".." segments are not allowed in filename',
+    };
+
+  if (input.filename) {
+    const segments = input.filename
+      .replace(/\.md$/i, '')
+      .split('/')
+      .map(sanitizeSegment)
+      .filter((segment) => segment.length > 0);
+    if (segments.length === 0)
+      return { filename: generateFilename(input.title, input.tags) };
+    if (segments.length - 1 > MAX_FILENAME_SUBDIR_DEPTH)
+      return {
+        error: `Filename subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${input.filename}`,
+      };
+    return { filename: `${segments.join('/')}.md` };
+  }
+  return { filename: generateFilename(input.title, input.tags) };
 }
 
 /** Frontmatter build result */
@@ -128,9 +159,7 @@ async function updateBacklinkIndex(
 
   for (const target of targetPaths) {
     if (!index[target]) index[target] = [];
-    if (!index[target].includes(sourcePath)) {
-      index[target].push(sourcePath);
-    }
+    if (!index[target].includes(sourcePath)) index[target].push(sourcePath);
   }
 
   await mkdir(metaDir, { recursive: true });
@@ -148,60 +177,26 @@ export async function handleMaencofCreate(
   input: MaencofCreateInput,
 ): Promise<MaencofCrudResult> {
   const layerDir = LAYER_DIR[input.layer as Layer];
-  if (!layerDir) {
+  if (!layerDir)
     return {
       success: false,
       path: '',
       message: `Invalid Layer: ${input.layer}`,
     };
-  }
 
-  // Path traversal 방어 (sanitize 전 raw input 검사) — 경로 구분자로 분리된 ".." 세그먼트만 거부
-  if (
-    input.filename &&
-    input.filename.split(/[/\\]/).some((segment) => segment === '..')
-  ) {
-    return {
-      success: false,
-      path: '',
-      message:
-        'Path traversal detected: ".." segments are not allowed in filename',
-    };
-  }
-
-  // 파일명 결정 — 명시적 filename은 subdir 허용(세그먼트별 sanitize),
-  // 제목/태그 파생은 항상 flat
-  let filename: string;
-  if (input.filename) {
-    const segments = input.filename
-      .replace(/\.md$/i, '')
-      .split('/')
-      .map(sanitizeSegment)
-      .filter((segment) => segment.length > 0);
-    if (segments.length === 0) {
-      filename = generateFilename(input.title, input.tags);
-    } else if (segments.length - 1 > MAX_FILENAME_SUBDIR_DEPTH) {
-      return {
-        success: false,
-        path: '',
-        message: `Filename subdirectory depth exceeds limit (${MAX_FILENAME_SUBDIR_DEPTH}): ${input.filename}`,
-      };
-    } else {
-      filename = `${segments.join('/')}.md`;
-    }
-  } else {
-    filename = generateFilename(input.title, input.tags);
-  }
+  const filenameResult = resolveFilename(input);
+  if ('error' in filenameResult)
+    return { success: false, path: '', message: filenameResult.error };
+  const { filename } = filenameResult;
 
   // Sub-layer 디렉토리 결정
   let subDir = '';
   if (input.sub_layer) {
     const layerNum = input.layer as Layer;
-    if (layerNum === 3 && input.sub_layer in L3_SUBDIR) {
+    if (layerNum === 3 && input.sub_layer in L3_SUBDIR)
       subDir = L3_SUBDIR[input.sub_layer as L3SubLayer];
-    } else if (layerNum === 5 && input.sub_layer in L5_SUBDIR) {
+    else if (layerNum === 5 && input.sub_layer in L5_SUBDIR)
       subDir = L5_SUBDIR[input.sub_layer as L5SubLayer];
-    }
   }
 
   const relativePath = subDir
@@ -209,15 +204,21 @@ export async function handleMaencofCreate(
     : `${layerDir}/${filename}`;
   const absolutePath = join(vaultPath, relativePath);
 
+  if (!resolve(absolutePath).startsWith(resolve(vaultPath) + sep))
+    return {
+      success: false,
+      path: '',
+      message: 'Resolved path escapes vault root',
+    };
+
   // ─── Frontmatter 객체 단계 검증 (read-path와 동일한 FrontmatterSchema 호출) ───
   const fmValidation = validateFrontmatter(inputToFrontmatterObject(input));
-  if (!fmValidation.ok) {
+  if (!fmValidation.ok)
     return {
       success: false,
       path: '',
       message: `Frontmatter validation failed: ${fmValidation.errors.join('; ')}`,
     };
-  }
 
   // 중복 파일 확인
   try {

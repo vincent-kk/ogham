@@ -10,6 +10,7 @@
 
 - 입력 Zod 스키마 검증
 - core/ 모듈에 로직 위임
+- 파일명 슬러그 생성은 `sanitizeSegment` (core/filenameSlug)에 위임
 
 ### Ask first
 
