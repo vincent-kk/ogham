@@ -131,10 +131,10 @@ function resolveGeminiModel(alias: ModelAlias): string | null {
 
 ### Spawn
 
-- 실행: `agy -p "<prompt>" [--sandbox] [--dangerously-skip-permissions] [--model=<model>]`.
+- 실행: `agy -p "<prompt>" [--dangerously-skip-permissions] [--model=<model>]`.
 - cwd 는 `~/.claude/plugins/cogair/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리.
 - agy 는 `--output-format` 플래그가 없어(1.x 가 미정의 플래그로 거부) plain text 를 출력 — `parseJsonOutput` 가 text/json 모두 파싱. 모델은 `--model=<name>` (등호; `-m` 별칭 없음).
-- Sandbox: `flags.sandbox` → `--sandbox` (terminal-only 제한), `flags.skip_permissions` → `--dangerously-skip-permissions`. gemini 와 달리 sandbox-backend 가 없어 두 플래그가 독립적으로 동작.
+- Sandbox: 미부착. `flags.sandbox` 는 스키마에 남되 항상 false — 복원 게이트는 #76 종결 ([agy-upstream-watch.md](./agy-upstream-watch.md)). `flags.skip_permissions` → `--dangerously-skip-permissions`.
 
 ### Session 매핑
 
@@ -146,10 +146,10 @@ agy 는 `--print` 모드에서 conversation id 를 노출하지 않는다 (Issue
 
 ### stdout 파싱 — Issue #76 대응
 
-`agy -p` 가 non-TTY(파이프/서브프로세스) 환경에서 stdout 을 무음으로 버릴 수 있는 버그(Issue #76; 현재 버전에서는 파이프 환경에서도 정상 출력으로 미재현). 3단계 폴백:
+`agy -p` 가 non-TTY(파이프/서브프로세스) 환경에서 stdout 을 무음으로 버리거나 행에 걸릴 수 있는 버그(Issue #76, open — 1.0.7 에서도 행 변종 재현, 추적: [agy-upstream-watch.md](./agy-upstream-watch.md)). 3단계 폴백:
 
 1. **JSON 파싱**: stdout 비어 있지 않으면 `response`/`output`/`text`/`message`/`result` 키를 순서대로 탐색. plain text 이면 그대로 반환.
-2. **Transcript 폴백**: `resolveTranscript(cwd, since)` 로 agy 세션 transcript 파일에서 응답 복구 (real-CLI 검증 후 경로·형식 확정 전까지는 null 반환).
+2. **Transcript 폴백**: `resolveTranscript(cwd, since)` → `agyTranscriptStore` 가 agy brain transcript(JSONL)에서 읽기 전용으로 복구.
 3. **cli_error**: 두 단계 모두 실패하면 Issue #76 메시지를 포함한 `cli_error` 반환.
 
 ### Model alias 매핑 — `dispatcher/antigravity/operations/modelAlias.ts`

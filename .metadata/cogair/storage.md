@@ -153,19 +153,19 @@ gemini-cli 가 자체 세션 파일을 만드는 작업 디렉토리. cogair 가
 agy CLI 가 대화 기록을 저장하는 세션별 격리 작업 디렉토리. gemini-cwd 와 대칭 구조.
 
 - `start_conversation` 시 `ensureCwd(sessionId)` 가 생성하고, 그 경로를 `externalSessionRef` 로 세션에 기록한다.
-- `continue_conversation` 시 동일 경로에서 `agy --continue -p <prompt> --output-format json` 을 실행한다. cwd 가 세션 정체성이므로 경로 결정은 deterministic (`antigravityCwdPath(sessionId)`).
+- `continue_conversation` 시 동일 경로에서 `agy --continue -p <prompt>` 를 실행한다. cwd 가 세션 정체성이므로 경로 결정은 deterministic (`antigravityCwdPath(sessionId)`).
 - 타임아웃 시: `start` 는 cwd 를 삭제한다(`rm -rf`). `resume` 은 cwd 를 보존한다 — 삭제하면 이후 `--continue` 가 컨텍스트 없이 새 대화를 시작하게 된다.
 - 세션 TTL 만료 시 cogair 가 `rm -rf` (자체 작업 디렉토리이므로 안전).
 
 ### Antigravity CLI 호출 규약
 
 ```
-agy -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]
-agy --continue -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]
+agy -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
+agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 ```
 
-- `--output-format json` 은 항상 지정한다.
-- `--sandbox` 는 `option_flags.antigravity.sandbox` 가 true 일 때 추가. gemini 와 달리 sandbox-backend 없음.
+- `--output-format` 플래그는 존재하지 않는다 — plain text 출력을 `parseJsonOutput` 이 처리한다.
+- `--sandbox` 는 부착하지 않는다 (#76 종결까지 — [agy-upstream-watch.md](./agy-upstream-watch.md)). gemini 와 달리 sandbox-backend 없음.
 - `--dangerously-skip-permissions` 는 `option_flags.antigravity.skip_permissions` 가 true 일 때 추가.
 - 빈 stdout (Issue #76): agy 가 non-TTY(pipe) 컨텍스트에서 stdout 을 drop 할 수 있다. `parseJsonOutput` 이 null 을 반환하면 `resolveTranscript` 로 폴백하며, 폴백도 실패하면 `cli_error` 를 반환한다.
 

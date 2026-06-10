@@ -18,14 +18,15 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Gemini CLI 를 Cl
 
 ## 문서
 
-| 파일                                           | 내용                                                                                            |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [spec.md](./spec.md)                           | 책임 분리, 데이터 흐름, 비채택 사항                                                             |
-| [architecture.md](./architecture.md)           | 모듈 트리 + 의존 방향 + 빌드 파이프라인                                                         |
-| [mcp-tools.md](./mcp-tools.md)                 | `start_conversation`, `continue_conversation`, `open_settings`, `list_antigravity_models` (4개) |
-| [storage.md](./storage.md)                     | `~/.claude/plugins/cogair/` 디스크 레이아웃 + JSON 스키마                                       |
-| [hooks.md](./hooks.md)                         | SessionStart / UserPromptSubmit 훅 (filid 패턴)                                                 |
-| [skills.md](./skills.md)                       | `setup`, `codex`, `gemini`, `antigravity`, `crosscheck` 스킬                                    |
-| [web-ui.md](./web-ui.md)                       | 로컬 설정 웹 UI (Google 엔진 토글, antigravity per-tier 모델 드롭다운 포함)                     |
-| [provider-dispatch.md](./provider-dispatch.md) | codex-cli / gemini-cli / agy (Antigravity CLI) 호출 매핑                                        |
-| [roadmap.md](./roadmap.md)                     | 단계별 구현 순서                                                                                |
+| 파일                                             | 내용                                                                                            |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| [spec.md](./spec.md)                             | 책임 분리, 데이터 흐름, 비채택 사항                                                             |
+| [architecture.md](./architecture.md)             | 모듈 트리 + 의존 방향 + 빌드 파이프라인                                                         |
+| [mcp-tools.md](./mcp-tools.md)                   | `start_conversation`, `continue_conversation`, `open_settings`, `list_antigravity_models` (4개) |
+| [storage.md](./storage.md)                       | `~/.claude/plugins/cogair/` 디스크 레이아웃 + JSON 스키마                                       |
+| [hooks.md](./hooks.md)                           | SessionStart / UserPromptSubmit 훅 (filid 패턴)                                                 |
+| [skills.md](./skills.md)                         | `setup`, `codex`, `gemini`, `antigravity`, `crosscheck` 스킬                                    |
+| [web-ui.md](./web-ui.md)                         | 로컬 설정 웹 UI (Google 엔진 토글, antigravity per-tier 모델 드롭다운 포함)                     |
+| [provider-dispatch.md](./provider-dispatch.md)   | codex-cli / gemini-cli / agy (Antigravity CLI) 호출 매핑                                        |
+| [agy-upstream-watch.md](./agy-upstream-watch.md) | agy 업스트림 결함(#76, #7) 추적 — 워크어라운드 해제 조건 + 검증 로그 + 재검증 절차              |
+| [roadmap.md](./roadmap.md)                       | 단계별 구현 순서                                                                                |

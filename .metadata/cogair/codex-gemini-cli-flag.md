@@ -36,32 +36,31 @@ Gemini CLI에서 `--yolo`는 **승인 우회**만을 의미합니다. 자동화 
 
 ## 2. Antigravity CLI(`agy`) 주요 플래그 및 사용법
 
-`agy`는 Gemini CLI 서비스 종료 이후 Google 엔진 슬롯을 대체하는 CLI 어댑터입니다. cogair는 `agy -p --output-format json` 형태로 비대화형 호출하며, 세션 재개는 `--continue` 플래그로 수행합니다.
+`agy`는 Gemini CLI 서비스 종료 이후 Google 엔진 슬롯을 대체하는 CLI 어댑터입니다. cogair는 `agy -p` 형태로 비대화형 호출하며(plain text 출력 — `--output-format` 플래그 없음), 세션 재개는 `--continue` 플래그로 수행합니다.
 
 ### 💡 주요 플래그 요약 표
 
-| 플래그 (Flag)                    | 단축 (Alias) | 입력 값    | 설명 및 핵심 사용법                                                                                                 |
-| :------------------------------- | :----------- | :--------- | :------------------------------------------------------------------------------------------------------------------ |
-| `--prompt`                       | `-p`         | `string`   | 프롬프트를 입력하고 결과 출력 후 종료하는 **비대화형 모드**를 실행합니다. cogair가 항상 사용하는 기본 진입점입니다. |
-| `--output-format`                | -            | `json`     | 응답을 JSON 객체로 출력합니다. cogair는 항상 이 플래그를 함께 전달합니다.                                           |
-| `--sandbox`                      | -            | `boolean`  | terminal-only 제한 모드로 실행합니다. 별도의 샌드박스 백엔드(docker 등)는 없습니다.                                 |
-| `--dangerously-skip-permissions` | -            | `boolean`  | 모든 권한 확인을 생략하는 가장 위험한 모드입니다. cogair 설정의 `skip_permissions`에 대응합니다.                    |
-| `--continue`                     | -            | `boolean`  | 현재 작업 디렉토리(cwd)의 가장 최근 대화를 이어서 실행합니다. cogair `continue_conversation`이 사용합니다.          |
-| `--model`                        | `-m`         | `string`   | 사용할 모델 full-name을 지정합니다. `model_map.antigravity`의 tier 해석 결과가 주입됩니다.                          |
-| `models`                         | -            | 서브커맨드 | 사용 가능한 모델 목록을 반환합니다. `core/agyModels`가 1시간 TTL 캐시로 호출합니다.                                 |
+| 플래그 (Flag)                    | 단축 (Alias) | 입력 값    | 설명 및 핵심 사용법                                                                                                                                |
+| :------------------------------- | :----------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--prompt`                       | `-p`         | `string`   | 프롬프트를 입력하고 결과 출력 후 종료하는 **비대화형 모드**를 실행합니다. cogair가 항상 사용하는 기본 진입점입니다.                                |
+| `--sandbox`                      | -            | `boolean`  | cogair 는 부착하지 않습니다 — #76 종결까지 비활성([agy-upstream-watch.md](./agy-upstream-watch.md)). 별도의 샌드박스 백엔드(docker 등)는 없습니다. |
+| `--dangerously-skip-permissions` | -            | `boolean`  | 모든 권한 확인을 생략하는 가장 위험한 모드입니다. cogair 설정의 `skip_permissions`에 대응합니다.                                                   |
+| `--continue`                     | -            | `boolean`  | 현재 작업 디렉토리(cwd)의 가장 최근 대화를 이어서 실행합니다. cogair `continue_conversation`이 사용합니다.                                         |
+| `--model`                        | -            | `string`   | `--model=<name>` 등호 형식(`-m` 별칭 없음). `model_map.antigravity`의 tier 해석 결과가 주입됩니다.                                                 |
+| `models`                         | -            | 서브커맨드 | 사용 가능한 모델 목록을 반환합니다. `core/agyModels`가 1시간 TTL 캐시로 호출합니다.                                                                |
 
 ### ⚙️ cogair 내부 호출 패턴
 
 **새 대화 시작 (`start`):**
 
 ```
-agy -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]
+agy -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 ```
 
 **대화 재개 (`resume`):**
 
 ```
-agy --continue -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]
+agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 ```
 
 ### 🔑 세션 격리 방식 (`externalSessionRef`)
@@ -73,10 +72,10 @@ agy --continue -p <prompt> --output-format json [--sandbox] [--dangerously-skip-
 
 ### 🚨 알려진 버그 — 빈 stdout (Antigravity Issue #76)
 
-비TTY(파이프/subprocess) 환경에서 `agy -p`가 stdout을 무음으로 누락할 수 있습니다. cogair의 3단계 복구 흐름:
+비TTY(파이프/subprocess) 환경에서 `agy -p`가 stdout을 무음으로 누락하거나 행에 걸릴 수 있습니다 (1.0.7 에서도 미해결 — 추적: [agy-upstream-watch.md](./agy-upstream-watch.md)). cogair의 3단계 복구 흐름:
 
-1. **JSON 파싱**: `--output-format json` 응답의 `response` / `output` / `text` / `message` / `result` 키를 순서대로 탐색합니다.
-2. **트랜스크립트 폴백**: `resolveTranscript(cwd, since)`로 agy 트랜스크립트 파일을 읽으려 시도합니다 (경로 확정 후 활성화 예정).
+1. **JSON 파싱**: stdout 이 JSON 이면 `response` / `output` / `text` / `message` / `result` 키를 순서대로 탐색하고, plain text 면 그대로 반환합니다.
+2. **트랜스크립트 폴백**: `resolveTranscript(cwd, since)` → `agyTranscriptStore` 가 agy brain transcript(JSONL)에서 읽기 전용으로 복구합니다.
 3. **`cli_error` 반환**: 위 두 방법이 모두 실패하면 명시적 오류를 반환합니다.
 
 ### 📦 모델 목록 (`list_antigravity_models` — 4번째 MCP 도구)
@@ -123,7 +122,7 @@ cogair 설정(`option_flags`)과 각 CLI 플래그의 대응 관계입니다.
 | `gemini.yolo`                  | `--yolo`         | —                                | —                                     |
 | `gemini.sandbox`               | `--sandbox`      | —                                | —                                     |
 | `gemini.sandbox_backend`       | 환경 변수로 전달 | —                                | —                                     |
-| `antigravity.sandbox`          | —                | `--sandbox` (terminal-only)      | —                                     |
+| `antigravity.sandbox`          | —                | `--sandbox` — 미부착(#76 게이트) | —                                     |
 | `antigravity.skip_permissions` | —                | `--dangerously-skip-permissions` | —                                     |
 | `codex.yolo`                   | —                | —                                | `--yolo`                              |
 | `codex.sandbox`                | —                | —                                | `--ask-for-approval` 계열 (버그 주의) |

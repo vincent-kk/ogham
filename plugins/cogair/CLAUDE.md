@@ -51,8 +51,8 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 - **Mock CLI**: dispatcher 통합 테스트는 fake `PATH` 의 scripted CLI 로 success / auth-fail / rate-limit / network-fail / cli-missing / ignored-options 커버
 - **Sessions**: project-hash 스코프 (`sha256(cwd).slice(0, 12)`). `continue_conversation` 은 다른 cwd 세션이면 `error.code: 'unknown'` 반환 (자동 cross-project fallback 없음)
 - **Gemini sandbox**: `GEMINI_CLI_TRUST_WORKSPACE=true` 가 gemini spawn 에 항상 주입됨 (non-interactive agent mode). `/setup` 으로 토글 불가
-- **Antigravity sandbox**: 비활성. agy 는 sandbox 백엔드가 없고 `--sandbox`(terminal-only)가 non-TTY 출력 드롭(#76)을 유발하므로 부착하지 않음. `AntigravityFlags.sandbox` 는 config 하위호환용으로 스키마에 남되 항상 false. `--dangerously-skip-permissions` 만 지원
-- **Antigravity #76**: `agy -p` 가 non-TTY 긴 응답에서 stdout 을 비결정적으로 드롭(빈 출력, exit 0). 응답은 agy brain transcript 에 보존되므로, 빈 stdout 시 `resolveTranscript`→`agyTranscriptStore` 가 `~/.gemini/antigravity-cli/brain/<convId>/.system_generated/logs/transcript.jsonl` 에서 읽기 전용 복구. 비문서화 내부 구조 의존 — agy 업데이트(특히 SQLite 전환) 시 깨질 수 있고, 그때는 명확한 cli_error 로 실패
+- **Antigravity sandbox**: 비활성. `--sandbox` 가 #76 non-TTY 출력 드롭을 악화시켜 부착하지 않음 — 복원 게이트는 #76 종결. `AntigravityFlags.sandbox` 는 config 하위호환용으로 스키마에 남되 항상 false. `--dangerously-skip-permissions` 만 지원
+- **Antigravity #76**: `agy -p` 가 non-TTY 긴 응답에서 stdout 을 비결정적으로 드롭(빈 출력, exit 0). 응답은 agy brain transcript 에 보존되므로, 빈 stdout 시 `resolveTranscript`→`agyTranscriptStore` 가 `~/.gemini/antigravity-cli/brain/<convId>/.system_generated/logs/transcript.jsonl` 에서 읽기 전용 복구. 비문서화 내부 구조 의존 — agy 업데이트(특히 SQLite 전환) 시 깨질 수 있고, 그때는 명확한 cli_error 로 실패. 업스트림 이슈 상태·해제 조건·재검증 절차: [agy-upstream-watch.md](../../.metadata/cogair/agy-upstream-watch.md)
 - **Model IDs**: 하드코딩 model 문자열은 **오직** `src/dispatcher/<provider>/modelAlias.ts` 에만. 다른 파일은 tier (`high` / `mid` / `low` / `auto`) 만 사용. antigravity 는 `src/dispatcher/antigravity/modelAlias.ts` 가 config `model_map` 을 읽어 tier 를 해석
 
 ## References
@@ -67,4 +67,5 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 - [storage.md](../../.metadata/cogair/storage.md)
 - [web-ui.md](../../.metadata/cogair/web-ui.md)
 - [provider-dispatch.md](../../.metadata/cogair/provider-dispatch.md)
+- [agy-upstream-watch.md](../../.metadata/cogair/agy-upstream-watch.md)
 - [roadmap.md](../../.metadata/cogair/roadmap.md)

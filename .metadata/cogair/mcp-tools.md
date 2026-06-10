@@ -38,7 +38,7 @@ provider별 플래그 스키마:
 | `codex`       | `yolo`, `sandbox`                    |
 | `antigravity` | `sandbox`, `skip_permissions`        |
 
-antigravity 의 `sandbox` 는 terminal-only 모드(`--sandbox`), `skip_permissions` 는 `--dangerously-skip-permissions` 로 매핑된다. sandbox-backend 개념 없음.
+antigravity 의 `sandbox` 는 하위호환용으로 항상 false 취급 — `--sandbox` 를 부착하지 않는다 (#76 종결까지, [agy-upstream-watch.md](./agy-upstream-watch.md)). `skip_permissions` 는 `--dangerously-skip-permissions` 로 매핑된다. sandbox-backend 개념 없음.
 
 ### 출력
 

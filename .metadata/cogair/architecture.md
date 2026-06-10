@@ -268,9 +268,9 @@ filid 의 `tsconfig.json`, `tsconfig.build.json` 형태 동일. ESM `.js` 확장
 
 cogair 가 agy CLI 를 다음과 같이 호출한다.
 
-**start**: `agy -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]`
+**start**: `agy -p <prompt> [--dangerously-skip-permissions] [--model=<name>]`
 
-**resume**: `agy --continue -p <prompt> --output-format json [--sandbox] [--dangerously-skip-permissions] [-m <model>]`
+**resume**: `agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]`
 
 agy 는 headless conversation-id 를 발급하지 않는다 (Issue #7). cogair 는 세션별로 격리된 cwd (`ANTIGRAVITY_CWD_DIR/<sessionId>`) 를 생성하고 이것을 `externalSessionRef` 로 저장한다. resume 시 동일 cwd 에서 `--continue` 를 실행하면 해당 cwd 에 기록된 최근 대화가 이어진다.
 
