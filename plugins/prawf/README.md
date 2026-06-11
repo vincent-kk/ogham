@@ -34,6 +34,7 @@ delegated as a capability, never bound to a specific tool.
 /prawf:review                      # auto-detect the field, run the full panel
 /prawf:review --solo               # fast single-pass pre-check
 /prawf:review --profile cs-ml      # force a field profile
+/prawf:review --gate minor         # strict gate: minor findings block accept too
 /prawf:review --workdir ~/reviews  # pin the output root (or set PRAWF_WORKDIR)
 /prawf:simulate-defense paper.pdf  # generate questions, then rehearse
 /prawf:rebuttal paper.pdf reviews.txt
@@ -54,11 +55,14 @@ ADJ Adjudicate            dedup → verdict (Accept / Minor / Major / Reject)
 ```
 
 **Soundness-only verdict.** The verdict is a pure function of _unresolved
-soundness_ findings. Significance (novelty, impact) is scored separately and is
-**advisory** — a low-impact paper is never rejected for being unexciting. A
-defense only downgrades a finding when it is backed by a verifiable artifact
-(an actual re-analysis, an external citation, or direct text), so the committee
-cannot be talked out of a real flaw.
+soundness findings at or above the gate_ (`--gate`, default `major`). Minor
+findings are **advisory** — preserved in the report's Advisory Notes, never
+blocking — so a clean paper actually reaches **accept** (presented as "accept
+(with notes)" when advisory items remain). Significance (novelty, impact) is
+scored separately and is likewise **advisory** — a low-impact paper is never
+rejected for being unexciting. A defense only downgrades a finding when it is
+backed by a verifiable artifact (an actual re-analysis, an external citation,
+or direct text), so the committee cannot be talked out of a real flaw.
 
 ### The panel
 

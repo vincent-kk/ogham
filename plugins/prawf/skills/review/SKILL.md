@@ -2,7 +2,7 @@
 name: review
 user_invocable: true
 description: "[prawf:review] Run multi-agent academic peer review. The chair profiles and normalizes the paper, then convenes a native Claude Code team: six soundness reviewers attack across axes, the rebuttal-strategist defends, original reviewers re-review, and the chair adjudicates a verdict (Accept / Minor / Major / Reject) plus an anticipated-question sheet. Triggers: 동료평가, peer review, 논문 평가, paper review, soundness review."
-argument-hint: "[--solo] [--profile <name>] [--scope abstract|full] [--workdir <dir>]"
+argument-hint: "[--solo] [--profile <name>] [--scope abstract|full] [--workdir <dir>] [--gate critical|major|minor]"
 version: "1.0.0"
 complexity: complex
 plugin: prawf
@@ -82,8 +82,12 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
    of the field, prefer the universal fallback over a wrong specialization.
 4. **Normalize** the input into `paper-normalized.md` — a chair-numbered snapshot
    with `§<section>¶<paragraph>` + line coordinates. Every persona cites THIS file,
-   never the original PDF. Write `paper-profile.md` (input source path, type,
-   profile, convened panel, `absorb_map` applied).
+   never the original PDF. **Parse `--gate <critical|major|minor>`** (default
+   `major`) — the lowest severity that can block acceptance. Only UNRESOLVED
+   soundness findings at or above the gate drive the verdict; UNRESOLVED findings
+   below the gate are advisory (reported, never blocking). Write `paper-profile.md`
+   (input source path, type, profile, `gate`, convened panel, `absorb_map` applied)
+   — ADJ and the solo adjudicator read the gate from there / from the spawn prompt.
 5. **Convene the panel** from the profile's `paper_types` axes:
    - `LIGHT` (abstract / single issue) → `argument` + one core axis + impact.
    - `STANDARD` (typical paper) → 3-4 axes + impact.
@@ -98,7 +102,8 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
 ### Step 2 — R1: Attack (team, parallel)
 
 **Solo branch (`--solo`, or an auto-detected TRIVIAL paper)**: spawn `adjudicator`
-as a standalone `Task` (NO team) with the prompt from `prompt-templates.md` §5. It
+as a standalone `Task` (NO team) with the prompt from `prompt-templates.md` §5,
+substituting the active GATE value (from `paper-profile.md`) into the prompt. It
 writes `review-report.md` directly — the chair's ADJ block (dedup, `qa-sheet.md`,
 `TeamDelete`) is skipped, and `--solo` produces no `qa-sheet.md`. Emit the terminal
 marker `prawf verdict: <verdict>` once `review-report.md` exists, then stop.
@@ -108,7 +113,8 @@ reviewer plus `impact-assessor` as **parallel** team workers
 (`Task(subagent_type: "prawf:<persona-id>", team_name: ...)`), using the literal
 templates in `prompt-templates.md` §1-2. Substitute concrete values for every
 `<placeholder>` — extract each axis's framework menu and `severity_examples` from
-the profile and inject them as values. **Await all** R1 workers. Each writes
+the profile and inject them as values, and substitute the active GATE value (from
+`paper-profile.md`) into every spawn prompt. **Await all** R1 workers. Each writes
 `findings/round-1-<axis>.md` (impact writes `findings/round-1-impact.md`).
 
 **→ After R1 `await all`, immediately proceed to Step 3.**
@@ -127,12 +133,17 @@ proposed when backed by a verifiable artifact.
 
 First, apply the `orchestration.md` §4.3 downgrade check: a `defended`/`mitigated`
 proposal whose defense rests only on a `sidestep` or an unbacked `justification` is
-reclassified `contested`. Then re-spawn ONLY the original reviewers whose axis has a
-finding with status in `{unresolved, mitigated, withdrawn-proposed, contested}`, per
-`prompt-templates.md` §4. They write `findings/round-3-<axis>.md` with
-`accept_defense`, `withdrawn_confirmed`, and `final_status`. If every finding is a
-verifiably-backed `defended`, **skip R3**. A finding left `contested` and not actively
-accepted in R3 is conservatively confirmed `unresolved`. R3 is a single pass; allow at
+reclassified `contested`. Then re-spawn ONLY the original reviewers whose axis has an
+**at-or-above-gate** finding with status in `{unresolved, mitigated,
+withdrawn-proposed, contested}`, per `prompt-templates.md` §4. Below-gate findings
+keep their R2 `proposed_status` as final — except one caught by the §4.3 downgrade
+check, which the chair finalizes as `unresolved` without convening R3. They cannot
+affect the verdict and remain visible in the report and qa-sheet. The re-convened
+reviewers write `findings/round-3-<axis>.md` with
+`accept_defense`, `withdrawn_confirmed`, and `final_status`. If every at-or-above-gate
+finding is a verifiably-backed `defended` (or none exists), **skip R3**. A finding
+left `contested` and not actively accepted in R3 is conservatively confirmed
+`unresolved`. R3 is a single pass; allow at
 most one extra defense+re-review cycle only when an original reviewer surfaces a
 genuinely new MITIGATED residual risk in `findings/round-3-<axis>.md` (see
 `orchestration.md` §7).
@@ -144,12 +155,22 @@ genuinely new MITIGATED residual risk in `findings/round-3-<axis>.md` (see
 1. **Dedup** findings by `canonical-location + defect-class` (merge into one, keep
    the highest severity, record all contributing axes; use the ownership table in
    `orchestration.md` §4.1).
-2. **Derive the verdict** from UNRESOLVED **soundness** findings only (impact is
-   excluded): `critical ≥ 1` → reject; `major ≥ 1` → major-revision; all majors
-   MITIGATED and no critical/major UNRESOLVED → minor-revision; only minor
-   UNRESOLVED → minor-revision; none UNRESOLVED → accept (PASS). Apply the
-   fatal-flaw override (Temporality, p-hacking + preregistration mismatch, data
-   leakage, data fabrication stay critical unless verifiably defended).
+2. **Derive the verdict** from UNRESOLVED **soundness** findings **at or above
+   the gate** only (impact is excluded; default gate `major`): `critical ≥ 1` →
+   reject; `major ≥ 1` (when gate ≤ major) → major-revision; no UNRESOLVED
+   at/above gate but ≥ 1 MITIGATED at/above gate → minor-revision; `minor`
+   UNRESOLVED ≥ 1 and gate = minor → minor-revision; no UNRESOLVED at/above gate
+   → accept (PASS) — below-gate advisory items may exist. An Accept with a
+   non-empty advisory list is presented as **Accept (with notes)** in the report
+   header/body; the frontmatter and terminal marker stay `accept`. Below-gate
+   UNRESOLVED findings go to the **Advisory Notes** section of `review-report.md`
+   (and remain in the Findings by Axis audit table and qa-sheet). PASS
+   justification: "the 6 soundness axes have **0 unresolved findings at or above
+   the gate**; the residual advisory items are completeness/reporting notes that
+   do not change the conclusion." Apply the fatal-flaw override at ANY gate
+   (Temporality, p-hacking + preregistration mismatch, data leakage, data
+   fabrication stay critical → reject unless verifiably defended; raising the
+   gate never unblocks a fatal flaw).
 3. Record `external_verification`; when `unavailable`, label an Accept a
    **provisional-accept**.
 4. Read `templates.md`, then write `review-report.md` (verdict + Significance &
@@ -171,6 +192,7 @@ execution is COMPLETE.**
 | `--profile <name>` | auto       | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
 | `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD or FULL (profile-determined)                           |
 | `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env); `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`                |
+| `--gate <sev>`     | `major`    | Lowest severity that can block acceptance (`critical`/`major`/`minor`); UNRESOLVED findings below the gate are advisory — reported, never blocking. `minor` restores strict legacy behavior; `critical` is a screening mode |
 
 ## Quick Reference
 
@@ -179,6 +201,7 @@ execution is COMPLETE.**
 /prawf:review --solo                       # fast single-pass adjudicator
 /prawf:review --profile cs-ml              # force the CS/ML profile
 /prawf:review --scope abstract             # LIGHT panel (abstract / single issue)
+/prawf:review --gate minor                 # strict legacy mode: minors block acceptance
 /prawf:review --workdir ~/reviews/.prawf   # fix the output root (or set PRAWF_WORKDIR)
 
 Pipeline:  P0 (profile+normalize) → R1 (attack, parallel) → R2 (defense)
@@ -188,6 +211,9 @@ Outputs:   under REVIEW_DIR = <WORKDIR>/review/<paper-slug>/ —
            paper-profile.md, paper-normalized.md, findings/round-1-<axis>.md,
            rebuttal.md, findings/round-3-<axis>.md, review-report.md, qa-sheet.md
            (qa-sheet.md in team mode only; --solo writes review-report.md alone)
-Verdict:   accept | minor-revision | major-revision | reject (soundness-only;
-           impact is advisory and never raises the verdict above minor-revision)
+Verdict:   accept | minor-revision | major-revision | reject — derived from
+           UNRESOLVED soundness findings at/above the gate (--gate, default major;
+           below-gate findings are advisory → Advisory Notes; accept + advisory
+           items = "Accept (with notes)", marker stays accept). Impact is advisory
+           and never raises the verdict above minor-revision.
 ```

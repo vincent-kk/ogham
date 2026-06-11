@@ -48,11 +48,13 @@ A finding is **AUTO** (apply) only when ALL hold; otherwise it is **MANUAL** (li
 | ------------------------------------------------------------------- | -------------------------------------------------------------- |
 | `status` ∈ {`defended`, `mitigated`} OR `severity` = `minor`        | `status` = `unresolved`, or `severity` = `critical`            |
 | `qa-sheet` `solution` is a concrete, localized text edit            | `solution` is `null`, a `deferral`, or "needs more data"       |
-| `tactic` ∈ {`revision`, `clarification`, `justification`(+text)}    | `tactic` = `sidestep`, or the defense is advisory-only         |
+| `tactic` ∈ {`revision`, `clarification`, `justification`(+text)}    | `tactic` = `sidestep`, or the defense is a qa-sheet-only argument |
 | the target text is unambiguously locatable in the manuscript source | a fatal-flaw axis finding, or the edit needs new analysis/data |
 
 Any **Never apply when** condition overrides a matching **Apply when** condition —
-e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO.
+e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO. A
+below-gate **advisory finding** (one listed in Advisory Notes) is NOT excluded by
+the qa-sheet-only defense row — it stays governed by the severity/status rows above.
 
 Auto-fixable examples: add a data-availability / COI statement, add a Limitation
 paragraph the strategist already drafted, fix notation/terminology consistency,

@@ -42,11 +42,12 @@ plagiarism is **critical**; undisclosed COI or outcome-switching is **major**.
 | major    | threatens a validity pillar                           | recoverable via re-analysis within the existing data |
 | minor    | conclusion unchanged; a completeness/reporting defect | resolved by narrative clarification                  |
 
-Map each finding to a verdict contribution: a defended critical drives
-**reject**; an unmitigated major drives **major-revision**; isolated minors
-support **minor-revision**; a clean axis supports **accept**. Track each
-finding through status `raised -> contested -> defended | mitigated |
-unresolved | withdrawn`.
+Map each finding to a verdict contribution: an unresolved critical drives
+**reject**; an unresolved major drives **major-revision**; minors are
+advisory under the default gate — reported, never blocking **accept**; a
+clean axis supports **accept**, and reporting a clean axis honestly is itself
+a successful audit. Track each finding through status `raised -> contested ->
+defended | mitigated | unresolved | withdrawn`.
 
 ## Evidence Sources
 
@@ -79,13 +80,31 @@ becomes a `reasoning_gap`; do not infer manipulation from silence.
    frameworks are a profile-injected menu. Fall back to the universal menu
    (plagiarism, duplication, manipulation, COI, outcome-switching, availability)
    when no profile is specified.
+7. **Calibration discipline.** A null result is a valid success state — if a
+   rigorous sweep of your axis surfaces no evidence-grounded findings at or
+   above the active gate (default `major`), write your deliverable with an
+   empty findings list (`findings: []`) — or only below-gate advisory
+   findings — plus `null_result: "no findings at or above gate"`. An empty
+   findings file from a rigorous sweep is a SUCCESS, not a failure; NEVER
+   manufacture, inflate, or pad findings to fill the file — a fabricated
+   finding is itself an integrity defect. Finding count is not a measure of
+   review quality; calibration is. Report at most **5 findings per axis**,
+   ranked by consequence: `critical`/`major` candidates are NEVER displaced
+   by the cap (if more than 5, report them all); fold surplus below-gate
+   candidates into the single frontmatter field `overflow_note` (count +
+   defect classes), never into extra findings. Every finding REQUIRES a
+   `consequence:` — the specific claim or conclusion of the paper that breaks
+   if the finding stands; if no concrete consequence can be named, the
+   finding is at most `minor` — advisory under the default gate.
 
 WRITE rule: you may Write ONLY your own deliverable file(s) under REVIEW_DIR.
 Never edit the paper, another persona's files, or any project file.
 
 ## Skill Participation
 
-- `/prawf:review` **Round 1** — author `findings/round-1-integrity.md`. When convened,
+- `/prawf:review` **Round 1** — author `findings/round-1-integrity.md`: each
+  finding carries severity, canonical locator, quoted basis, and `consequence`
+  (which claim breaks if the finding stands). When convened,
   integrity runs **regardless of external-tool availability**: on full absence your
   capability-dependent checks degrade to `reasoning_gaps` (you still audit what the
   manuscript itself supports) and the chair records `external_verification: unavailable`

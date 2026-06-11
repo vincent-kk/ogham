@@ -18,7 +18,7 @@
 | Persona relationship | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1) |
 | Unit of consensus    | **Survival of each individual finding**                                                               |
 | Core mechanism       | finding state transitions + chair synthesis                                                           |
-| Verdict input        | **Only the 6 soundness axes drive the verdict; significance is advisory**                             |
+| Verdict input        | **Only UNRESOLVED findings on the 6 soundness axes at or above the gate (default `major`, see §4.5) drive the verdict; below-gate findings and significance are advisory** |
 | Final verdict        | Accept / Minor / Major / Reject                                                                       |
 
 prawf rounds simulate a journal's **review → rebuttal → re-review cycle**, not a vote.
@@ -46,7 +46,8 @@ ADJ ADJUDICATE chair              dedup → finalize finding status → verdict 
    **The mandatory soundness axes (argument, methodology, integrity) cannot be turned off via `disabled_axes`** — only statistics, causality, and bias may be conditionally disabled, and only when accompanied by an `absorb_map`. A profile that violates this is rejected and the universal fallback is used instead.
 3. **Normalize input**: convert PDF/LaTeX/markdown input into **`paper-normalized.md`** (a normalized snapshot to which the chair assigns line numbers).
    Every Reviewer cites the **`§<section>¶<paragraph>` and line numbers of this snapshot**, not the original — this establishes a shared coordinate system.
-4. Output: `paper-profile.md` (input source path, type, profile, convened panel) + `paper-normalized.md`.
+4. **Record the gate**: parse `--gate <critical|major|minor>` (default **`major`**) — the lowest severity that can block acceptance (see §4.5) — and record it in `paper-profile.md`. ADJ and the solo `adjudicator` read it from there / from the spawn prompt.
+5. Output: `paper-profile.md` (input source path, type, profile, convened panel, gate) + `paper-normalized.md`.
 
 ### Panel Convocation (elected from the nine)
 
@@ -80,6 +81,7 @@ Each finding holds a single status, and the chair decides transitions by grep-pa
 - **MITIGATED**: partially mitigated. Severity is downgraded one step (major→minor effect).
 - **UNRESOLVED**: defense failed, no clear remedy. **Mark honestly as unresolved** (no forced defense).
 - **WITHDRAWN**: requires the strategist to prove the attack's factual error **and the original attacker to confirm it in R3** (prevents a false PASS). The strategist alone cannot delete a finding.
+- **Below-gate shortcut (gate, §4.5)**: a below-gate finding reclassified `CONTESTED` by the §4.3 downgrade check is finalized `UNRESOLVED` directly by the chair — no R3 is convened for it (§6 step 4); the chair records the reclassification in the review-report Deliberation Log.
 
 ## 4. Adjudication — dedup → verdict (chair)
 
@@ -101,32 +103,45 @@ When convened axes overlap and report the same defect twice, the verdict tally i
 
 ### 4.2 Verdict Derivation
 
-Tally **only the UNRESOLVED findings on the 6 soundness axes** (`impact-assessor` is excluded — see §4.4).
+Tally **only the UNRESOLVED findings on the 6 soundness axes at or above the gate** (default gate: `major` — see §4.5; `impact-assessor` is excluded — see §4.4).
 
-| Condition (UNRESOLVED, soundness axes)                  | Verdict            |
-| ------------------------------------------------------- | ------------------ |
-| `critical` ≥ 1                                          | **Reject**         |
-| `major` ≥ 1                                             | **Major Revision** |
-| all `major` are MITIGATED, no critical/major UNRESOLVED | **Minor Revision** |
-| only `minor` UNRESOLVED exist                           | **Minor Revision** |
-| no UNRESOLVED (all DEFENDED/WITHDRAWN, or 0 findings)   | **Accept (PASS)**  |
+| Condition (UNRESOLVED, soundness axes, at/above gate)             | Verdict            |
+| ----------------------------------------------------------------- | ------------------ |
+| `critical` ≥ 1                                                     | **Reject**         |
+| `major` ≥ 1 (when gate ≤ major)                                    | **Major Revision** |
+| no UNRESOLVED at/above gate, but ≥ 1 MITIGATED at/above gate       | **Minor Revision** |
+| `minor` UNRESOLVED ≥ 1 and gate = minor                            | **Minor Revision** |
+| no UNRESOLVED at/above gate (below-gate advisory items may exist)  | **Accept (PASS)**  |
 
-- **PASS justification**: even an Accept must state, on an evidence basis, that "the 6 soundness axes have 0 critical/major and the residual minor findings do not change the conclusion."
+- An Accept with a non-empty advisory list is presented as **Accept (with notes)** in the report header/body; the frontmatter and the terminal marker stay `accept` (see §4.5).
+- **PASS justification**: even an Accept must state, on an evidence basis, that "the 6 soundness axes have **0 unresolved findings at or above the gate**; the residual advisory items are completeness/reporting notes that do not change the conclusion."
+- Below-gate UNRESOLVED findings go to the **Advisory Notes** section of `review-report.md` (and remain in the Findings by Axis audit table and in `qa-sheet.md`).
 
 ### 4.3 Burden of Proof & Tie-break (mitigating false-Reject)
 
 This reflects the skeptic note (the structural Accept-opposing gravity of 6 attackers vs 1 defender) and the user's "pass should be possible" requirement:
 
 - **Split the burden of proof in two directions**:
-  - _The burden of downgrading (MITIGATED/DEFENDED) lies with the strategist._ A downgrade is granted only when the defense is accompanied by a **verifiable deliverable** (an actually performed re-analysis, an external citation, or direct textual grounding). A mere defense _argument_ — a tactic of `sidestep`, or a `justification` without external grounding — **does not qualify for a downgrade**: it stays `CONTESTED` and is recorded as advisory in the qa-sheet only.
+  - _The burden of downgrading (MITIGATED/DEFENDED) lies with the strategist._ A downgrade is granted only when the defense is accompanied by a **verifiable deliverable** (an actually performed re-analysis, an external citation, or direct textual grounding). A mere defense _argument_ — a tactic of `sidestep`, or a `justification` without external grounding — **does not qualify for a downgrade**: the finding is reclassified `CONTESTED` (and, when at/above the gate, proceeds to R3 — §6 step 4); the defense argument itself is recorded in the qa-sheet for oral-defense reference only.
   - _The burden of confirming an UNRESOLVED finding lies with the attacker (Reviewer)._ However, if a Reviewer does not actively accept a finding that remains `CONTESTED` in R3, it is **conservatively finalized as UNRESOLVED** (preventing a false PASS, given the attacker's asymmetric access to source data).
-- **Exception — fatal-flaw axes are strict**: `causal-reviewer` Temporality violations, `statistical-auditor` p-hacking + pre-registration mismatch / data leakage, and `integrity-auditor` data fabrication **remain critical unless the defense is clearly verifiable with external grounding** → blocking Accept. They cannot be downgraded by forced defense.
+- **Exception — fatal-flaw axes are strict**: `causal-reviewer` Temporality violations, `statistical-auditor` p-hacking + pre-registration mismatch / data leakage, and `integrity-auditor` data fabrication **remain critical unless the defense is clearly verifiable with external grounding** → blocking Accept. They cannot be downgraded by forced defense. The fatal-flaw override is **gate-independent**: these classes stay `critical` (→ Reject) at ANY gate — raising the gate never unblocks a fatal flaw.
 
 ### 4.4 Significance Separation (advisory-only)
 
 - `impact-assessor` produces an **impact rating** (`high|moderate|low|niche`), not a `severity`.
 - **Low significance alone never triggers a Reject/Major and never raises the verdict to Minor or above** (a significance-only reject is unjust and dangerous — cf. ACL's Soundness/Excitement separation and PLOS ONE's soundness-only criterion).
 - The result is reflected only in the _Significance & Scope_ section of `review-report.md` and in `qa-sheet.md`.
+
+### 4.5 Gate & Advisory
+
+The **gate** is the lowest severity that can block acceptance: `--gate <critical|major|minor>` on `/prawf:review`, default **`major`**. It is parsed in P0 and recorded in `paper-profile.md`; ADJ and the solo `adjudicator` read it from there / from the spawn prompt.
+
+- **Only UNRESOLVED soundness findings at or above the gate drive the verdict** (§4.2). UNRESOLVED findings **below the gate** are **advisory**: reported, never blocking.
+- `--gate minor` restores the strict legacy behavior (minors block → Minor Revision). `--gate critical` is a screening mode (majors become advisory; the report must flag below-gate major/critical advisory items prominently at the top of Advisory Notes).
+- **Advisory-ness is NOT a status** — no new status value is introduced; advisory-ness is a property computed at adjudication time: `severity < gate ∧ status = unresolved`. The one gate-induced transition change is the chair-direct below-gate §4.3 finalization documented in §3 and §6 step 4.
+- **Accept (with notes)**: the combination `verdict: accept` + non-empty below-gate advisory items — following the existing provisional-accept pattern (`accept` + `external_verification: unavailable`, §8). The verdict enum gains no new value, and the terminal marker stays `prawf verdict: accept`.
+- Below-gate UNRESOLVED findings go to the **Advisory Notes** section of `review-report.md` — a filtered view, not a replacement. The Findings by Axis table remains the complete deduped audit trail (all findings incl. advisory, with their real final statuses), which keeps `/prawf:auto-fix` and `/prawf:rebuttal` working unchanged. Advisory items also remain in `qa-sheet.md` (§9).
+- **Fatal flaws are gate-independent** (§4.3): raising the gate never unblocks a fatal flaw.
 
 ## 5. Deliverable Contracts
 
@@ -150,18 +165,26 @@ round: 1
 axis: argument | methodology | statistics | causality | bias | integrity
 persona: <persona-id>
 profile: <field profile>
-findings:
+findings: # [] is VALID — see the null-result protocol below; at most 5 per axis (top-K by consequence)
   - id: <AXIS>-<n> # e.g. STAT-1, INTEG-2
     severity: critical | major | minor # anchored to the persona Severity rubric
     location: "§4¶2 L45-52" # paper-normalized.md coordinate (Evidence obligation)
     defect_class: <dedup key> # e.g. correlation-causation, sample-size
     claim: <what is the problem>
     evidence: <cited grounding; source when from external investigation>
+    consequence: <which claim/conclusion breaks if this stands — REQUIRED; no concrete consequence → at most minor>
     anticipated_question: <anticipated question>
     status: raised
+null_result: "no findings at or above gate" # only when findings is empty / below-gate only
+overflow_note: "<N> additional below-gate candidates omitted: <defect-class list>" # optional, cap surplus
 reasoning_gaps: [<items lacking grounding>]
 ---
 ```
+
+**R1 discipline** (binding for every soundness Reviewer):
+
+- **Null-result protocol** — A null result is a valid success state. If a rigorous sweep of your axis surfaces no evidence-grounded findings at or above the gate, say exactly that: write your deliverable with an empty findings list (`findings: []`) — or only below-gate advisory findings — plus `null_result: "no findings at or above gate"`. An empty findings file from a rigorous sweep is a SUCCESS, not a failure. NEVER manufacture, inflate, or pad findings to fill the file — a fabricated finding is itself an integrity defect. Finding count is not a measure of review quality; calibration is.
+- **Per-axis cap** — Report at most **5 findings per axis**, ranked by consequence. `critical`/`major` candidates are NEVER displaced by the cap (in the rare case of more than 5, report them all). Fold surplus below-gate candidates into the single frontmatter field `overflow_note` (count + defect classes) — never into extra findings.
 
 ### 5.2 Impact assessment frontmatter (impact-assessor R1)
 
@@ -211,8 +234,9 @@ verdicts:
 
 ```yaml
 ---
-verdict: accept | minor-revision | major-revision | reject # an Accept lacking external verification (=provisional) is the combination accept + external_verification:unavailable
-soundness_tally: { critical: 0, major: 1, minor: 2 } # UNRESOLVED, after dedup
+verdict: accept | minor-revision | major-revision | reject # enum unchanged — an Accept lacking external verification (=provisional) is the combination accept + external_verification:unavailable; "accept (with notes)" is the combination accept + non-empty below-gate advisory (§4.5)
+gate: critical | major | minor # active blocking threshold (--gate; default major), recorded in paper-profile.md at P0
+soundness_tally: { critical: 0, major: 1, minor: 2 } # UNRESOLVED, after dedup; only severities at/above gate drive the verdict — the rest are advisory
 status_counts: { defended: 5, mitigated: 1, unresolved: 3, withdrawn: 1 }
 impact: moderate # advisory — unrelated to verdict
 override: none | fatal-flaw
@@ -229,8 +253,8 @@ chair = **main session = team lead** (the chair orchestrates the rounds; it is n
 1. After P0, `TeamCreate prawf-<paper-slug>`.
 2. **R1**: spawn the convened soundness Reviewers + impact-assessor as `Task(team worker)` **in parallel** → each produces its deliverable. `await all`.
 3. **R2**: spawn one `rebuttal-strategist` (input: R1 soundness findings) → `rebuttal.md`.
-4. **R3 (conditional)**: first apply the §4.3 downgrade check — a finding whose `proposed_status` is `defended`/`mitigated` but whose defense rests only on a `sidestep` or an unbacked `justification` is reclassified `contested`. Then re-spawn only the Reviewers of axes with a finding whose status is `unresolved|mitigated|withdrawn-proposed|contested`.
-   If every finding is a verifiably-backed `defended`, skip R3 and go straight to consensus.
+4. **R3 (conditional)**: first apply the §4.3 downgrade check — a finding whose `proposed_status` is `defended`/`mitigated` but whose defense rests only on a `sidestep` or an unbacked `justification` is reclassified `contested`. Then re-spawn only the Reviewers of axes with a finding **at or above the gate** whose status is `unresolved|mitigated|withdrawn-proposed|contested`. Below-gate findings keep their R2 `proposed_status` as final — except one caught by the §4.3 downgrade check (a `sidestep` or an unbacked `justification`), which the chair finalizes as `unresolved` without convening R3 (recording the reclassification in the review-report Deliberation Log), so the audit trail never records an unverified `defended`. They cannot affect the verdict (they remain visible in the report and the qa-sheet).
+   If every at/above-gate finding is a verifiably-backed `defended` (or none exists), skip R3 and go straight to consensus.
 5. chair: dedup → verdict → `review-report.md` + `qa-sheet.md` → `TeamDelete`.
 
 **chair invariants**:
@@ -271,4 +295,5 @@ Separately from the review report, output an independent sheet of **the anticipa
 | INTEG-1    | integrity  | "What about data availability?"              | good | clarification  | Add OSF link                              | defended     |
 
 Fill the Solution column **only when clear**; when unclear, leave it honestly empty as _unresolved / elevated to a Limitation_.
+Below-gate advisory findings (§4.5) still appear in the qa-sheet with their real final statuses — being excluded from the verdict does not remove them from the author's question sheet.
 Separately, append a _Significance & Scope_ note (impact rating + applicability range) at the end.

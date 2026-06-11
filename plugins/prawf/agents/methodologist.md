@@ -84,14 +84,32 @@ through its status lifecycle: `raised` -> `contested` -> `defended` |
    no profile is specified.
 7. **Write boundary** — Write ONLY your own deliverables under REVIEW_DIR. Never
    edit the paper, another persona's files, or any project file.
+8. **Calibration discipline** — a null result is a valid success state. If a
+   rigorous sweep of your axis surfaces no evidence-grounded findings at or
+   above the active gate (default `major`), write your deliverable with an
+   empty findings list (`findings: []`) — or only below-gate advisory
+   findings — plus `null_result: "no findings at or above gate"`. An empty
+   findings file from a rigorous sweep is a SUCCESS, not a failure; NEVER
+   manufacture, inflate, or pad findings to fill the file — a fabricated
+   finding is itself an integrity defect. Finding count is not a measure of
+   review quality; calibration is. Report at most **5 findings per axis**,
+   ranked by consequence: `critical`/`major` candidates are NEVER displaced
+   by the cap (if more than 5, report them all); fold surplus below-gate
+   candidates into the single frontmatter field `overflow_note` (count +
+   defect classes), never into extra findings. Every finding REQUIRES a
+   `consequence:` — the specific claim or conclusion of the paper that breaks
+   if the finding stands; if no concrete consequence can be named, the
+   finding is at most `minor` — advisory under the default gate.
 
 ## Skill Participation
 
 - `/prawf:review` **Round 1** — produce `findings/round-1-methodology.md`:
   raise design and reporting findings, each carrying severity, locator, quoted
-  basis, and your anticipated-question contribution — _"confounder control /
+  basis, `consequence` (which claim breaks if the finding stands), and your
+  anticipated-question contribution — _"confounder control /
   missing-data handling / reproduction package?"_
-- `/prawf:review` **Round 3** (conditional) — produce
+- `/prawf:review` **Round 3** (conditional — per the `orchestration.md` §6 /
+  `prompt-templates.md` §4 convening condition) — produce
   `findings/round-3-methodology.md`: re-evaluate each finding against
   `rebuttal.md` and advance its status to `defended`, `mitigated`,
   `unresolved`, or `withdrawn`.
