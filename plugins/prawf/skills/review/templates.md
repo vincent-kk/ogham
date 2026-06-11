@@ -12,8 +12,9 @@
 
 ```markdown
 ---
-verdict: reject # enum: accept | minor-revision | major-revision | reject (orchestration §5.5)
-soundness_tally: { critical: 1, major: 0, minor: 0 } # based on UNRESOLVED, after dedup
+verdict: reject # enum: accept | minor-revision | major-revision | reject (orchestration §5.5); "accept (with notes)" = accept + non-empty advisory, NOT a new enum value (cf. provisional-accept)
+gate: major # active blocking threshold (--gate; default major)
+soundness_tally: { critical: 1, major: 0, minor: 0 } # UNRESOLVED after dedup; only severities at/above gate drive the verdict — the rest are advisory
 status_counts: { defended: 2, mitigated: 1, unresolved: 1, withdrawn: 0 }
 impact: moderate
 override: fatal-flaw # none | fatal-flaw
@@ -25,11 +26,12 @@ profile: empirical-science
 # prawf Review Report — <paper title>
 
 **Date**: <ISO 8601> **Profile**: <field profile> **Type**: <paper type>
-**Verdict**: <ACCEPT | MINOR REVISION | MAJOR REVISION | REJECT>
+**Verdict**: <ACCEPT | ACCEPT (WITH NOTES) | MINOR REVISION | MAJOR REVISION | REJECT>
 
 ## Verdict Summary
 
 - **Verdict**: <verdict> — unresolved soundness critical <N> · major <N> · minor <N>
+- **Advisory (below gate)**: <N> items — see Advisory Notes
 - **Override**: <none | fatal-flaw (which finding on which axis)>
 - **External verification**: <complete | partial | unavailable>
 
@@ -45,7 +47,9 @@ profile: empirical-science
 ## Findings by Axis
 
 > All locations use `paper-normalized.md` coordinates (`§<section>¶<paragraph> + line`). Duplicates are listed once on
-> the owning axis after dedup.
+> the owning axis after dedup. This table is the **complete deduped audit trail** — it includes below-gate advisory
+> findings with their real final statuses (Advisory Notes is a filtered view, not a replacement; `/prawf:auto-fix` and
+> `/prawf:rebuttal` consume this table unchanged).
 
 | finding-id | axis        | severity | location  | final status | one-line summary                                          |
 | ---------- | ----------- | -------- | --------- | ------------ | --------------------------------------------------------- |
@@ -53,6 +57,18 @@ profile: empirical-science
 | STAT-1     | statistics  | major    | §3¶2 L45  | MITIGATED    | Unadjusted multiple comparisons → mitigated by reanalysis |
 | METH-3     | methodology | minor    | §2¶4 L31  | DEFENDED     | Missing-data handling — confirmed described in text       |
 | INTEG-1    | integrity   | minor    | §6¶1 L120 | DEFENDED     | Data availability — supplemented with OSF link            |
+
+## Advisory Notes _(below gate — excluded from verdict)_
+
+> UNRESOLVED findings below the active gate (`<gate>`). They never block the verdict; they are preserved here (and in
+> the qa-sheet) for the author. When the gate is raised above `major`, any below-gate major/critical advisory items
+> are flagged at the top of this list with a warning.
+
+| finding-id | axis        | severity | location | note                                          |
+| ---------- | ----------- | -------- | -------- | --------------------------------------------- |
+| METH-4     | methodology | minor    | §2¶3 L28 | reporting completeness — conclusion unchanged |
+
+_None._ <!-- when empty -->
 
 ## Deliberation Log
 
@@ -71,6 +87,10 @@ profile: empirical-science
 
 - STAT-1: original Reviewer accepts → **MITIGATED** (major→minor effect)
 - CAUS-2: original Reviewer rejects → **UNRESOLVED** (fatal-flaw: Temporality, cannot downgrade)
+
+### ADJ — CHAIR ACTIONS _(only when applicable)_
+
+- Below-gate reclassified (§4.3): METH-4 sidestep defense → finalized **UNRESOLVED** by the chair (advisory; no R3 convened)
 
 ### Verdict
 
@@ -91,10 +111,14 @@ profile: empirical-science
 ```markdown
 ## Verdict Rationale — ACCEPT (PASS)
 
-**Zero unresolved critical/major** across the 6 soundness axes. The remaining <N> minor items (<finding-id…>) are
-completeness defects that do not change the conclusion. Integrity is confirmed on an evidence basis, so we conclude
-PASS. (Demonstrating integrity is itself part of verification.)
+The 6 soundness axes have **0 unresolved findings at or above the gate** (`<gate>`); the residual <N> advisory items
+(<finding-id…>) are completeness/reporting notes that do not change the conclusion. Integrity is confirmed on an
+evidence basis, so we conclude PASS. (Demonstrating integrity is itself part of verification.)
 ```
+
+> When the advisory list is non-empty, present the verdict as **ACCEPT (WITH NOTES)** in the report header/body and
+> list the items in Advisory Notes — the frontmatter `verdict` and the terminal marker stay `accept` (no new enum
+> value; cf. the provisional-accept pattern in §1.2).
 
 ### 1.2 Provisional variant — `external_verification: unavailable`
 
@@ -196,7 +220,7 @@ external_refs: ["Bonferroni 1936", "OSF/abc123"]
 
 | File                         | Key body                                                                                                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `paper-profile.md`           | input source path · type · profile · convened panel · injection path + applied `absorb_map` details        |
+| `paper-profile.md`           | input source path · type · profile · gate · convened panel · injection path + applied `absorb_map` details |
 | `paper-normalized.md`        | `§<section>¶<paragraph>` headers + chair-assigned line numbers. Shared coordinate system for all citations |
 | `findings/round-1-<axis>.md` | frontmatter (§5.1) + per-axis finding narrative (claim · evidence · anticipated_question)                  |
 | `findings/round-3-<axis>.md` | frontmatter (§5.4) + defense accept/reject rationale                                                       |

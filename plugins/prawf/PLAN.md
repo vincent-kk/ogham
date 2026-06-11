@@ -29,7 +29,7 @@
 ## 3. 확정 결정 로그 (왜 이렇게 되었나 — 재논의 금지선)
 
 - **페르소나 9인**: soundness 공격 6(`argument-analyst`·`methodologist`·`statistical-auditor`·`causal-reviewer`·`bias-grader`·`integrity-auditor`) + `impact-assessor`(advisory) + `rebuttal-strategist`(방어) + `chair`(중재). `--solo` 전용 `adjudicator` 1.
-- **soundness-only verdict**: verdict는 soundness 6축 UNRESOLVED만 집계. `impact`는 advisory(Minor 이상 못 올림). — gemini/critic 외부 검증 근거.
+- **soundness-only verdict**: verdict는 soundness 6축 UNRESOLVED만 집계. `impact`는 advisory(Minor 이상 못 올림). — gemini/critic 외부 검증 근거. _(#65 갱신: 게이트(`--gate`, 기본 `major`) 이상 UNRESOLVED만 집계 — minor 는 advisory, `orchestration.md` §4.2/§4.5 가 최종.)_
 - **3 skill**: `review`(메인) · `simulate-defense` · `rebuttal`. setup/profile skill 제거.
 - **프로파일 내용 기반 자동 판정**: review P0가 논문 내용으로 분야·프로파일 추론. `--profile <name>` override 선택. **config 파일 불요**.
 - **MCP 0 · hook 0**: 평가는 추론(분석 도구 없음), 시행 규칙 없음. 순수 마크다운. (근거: `scaffold.md` §6·§7)

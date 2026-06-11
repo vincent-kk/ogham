@@ -38,16 +38,18 @@ every citation in the review refers back to.
 
 Dedup findings by **canonical-location + defect-class**: merge duplicates into
 one, keep the highest severity, record all contributing axes (multi-axis
-agreement is signal, not added weight; use the ownership table). Then derive the
-verdict by counting **UNRESOLVED soundness findings ONLY** — `impact` is excluded:
+agreement is signal, not added weight; use the ownership table). Read the active
+gate from `paper-profile.md` (`--gate`, default `major`) — the lowest severity
+that can block acceptance. Then derive the verdict by counting **UNRESOLVED
+soundness findings at or above the gate ONLY** — `impact` is excluded:
 
-| condition (UNRESOLVED, soundness axes)                   | verdict        |
-| -------------------------------------------------------- | -------------- |
-| critical >= 1                                            | reject         |
-| major >= 1                                               | major-revision |
-| all majors MITIGATED, no critical/major UNRESOLVED       | minor-revision |
-| only minor UNRESOLVED                                    | minor-revision |
-| no UNRESOLVED (all defended/withdrawn, or zero findings) | accept (PASS)  |
+| condition (UNRESOLVED, soundness axes, at/above gate)             | verdict        |
+| ----------------------------------------------------------------- | -------------- |
+| critical >= 1                                                     | reject         |
+| major >= 1 (when gate <= major)                                   | major-revision |
+| no UNRESOLVED at/above gate, but >= 1 MITIGATED at/above gate     | minor-revision |
+| minor UNRESOLVED >= 1 and gate = minor                            | minor-revision |
+| no UNRESOLVED at/above gate (below-gate advisory items may exist) | accept (PASS)  |
 
 Severity rubric used across the panel:
 
@@ -60,13 +62,26 @@ Severity rubric used across the panel:
 **Burden of proof / tie-break**: the downgrade burden is on the strategist
 (verifiable artifact only); the unresolved-confirmation burden is on the attacker
 (a finding left `contested` and not actively accepted in R3 is conservatively
-confirmed UNRESOLVED). Fatal-flaw axes stay strict.
+confirmed UNRESOLVED). Fatal-flaw axes stay strict at ANY gate — raising the
+gate never unblocks a fatal flaw.
+
+**Advisory / accept (with notes)**: UNRESOLVED findings below the gate are
+advisory — reported, never blocking. They go to the **Advisory Notes** section
+of `review-report.md` (and remain in the Findings by Axis audit table and the
+qa-sheet). An Accept with a non-empty advisory list is presented as **accept
+(with notes)** in the report header/body; the frontmatter verdict and the
+terminal marker stay `accept` — the verdict enum gains no new value.
+
+**Null result is success**: an attack round that returns zero findings at or
+above the gate is a valid, successful outcome — adjudicate Accept on that
+evidence basis without demanding more findings.
 
 **Significance**: report the impact-assessor's rating only in "Significance &
 Scope" — it never moves the verdict above minor-revision.
 
-**Pass justification**: justify Accept on evidence ("no unresolved
-critical/major; residual minors do not change the conclusion"). Record
+**Pass justification**: justify Accept on evidence ("the 6 soundness axes have
+**0 unresolved findings at or above the gate**; the residual advisory items are
+completeness/reporting notes that do not change the conclusion"). Record
 `external_verification` (complete | partial | unavailable); when unavailable,
 label the Accept a **provisional-accept**.
 
@@ -112,8 +127,12 @@ yourself.
 ## Skill Participation
 
 - `/prawf:review` **P0** — detect type/field, load and validate the profile,
-  write `paper-profile.md`, and produce `paper-normalized.md` (the shared
-  coordinate system). Convene the panel at LIGHT / STANDARD / FULL.
+  write `paper-profile.md` (recording the active `--gate`, default `major`),
+  and produce `paper-normalized.md` (the shared coordinate system). Convene the
+  panel at LIGHT / STANDARD / FULL.
 - `/prawf:review` **ADJ** — dedup, reconcile severity, derive the verdict from
-  the table above, and write `review-report.md` and `qa-sheet.md`. Read
+  the table above (gate read from `paper-profile.md`), write the **Advisory
+  Notes** section for below-gate UNRESOLVED findings (recording any below-gate
+  §4.3 reclassification you finalized as `unresolved` in the Deliberation Log),
+  and write `review-report.md` and `qa-sheet.md`. Read
   `skills/review/templates.md` before writing outputs.

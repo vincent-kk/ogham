@@ -39,6 +39,7 @@
 - `plugin.json` 에 `agents` 필드 추가 (agents 는 자동 발견).
 - 특정 외부 검색 도구를 페르소나에 하드코딩.
 - `impact-assessor`(중요성)가 verdict 를 minor-revision 이상으로 올리는 것.
+- 게이트(기본 `major`) 미만 finding 이 verdict 를 차단하는 것.
 
 ## Dependencies
 

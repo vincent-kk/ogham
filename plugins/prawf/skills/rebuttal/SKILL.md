@@ -62,7 +62,10 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
 ### Step 2 — R2 Defense (strategist)
 
 Spawn `rebuttal-strategist` with `external-findings.md` as input, per
-`../review/prompt-templates.md` §3. It writes `rebuttal.md`: per comment a
+`../review/prompt-templates.md` §3. Substitute the §3 `SOUNDNESS_FINDINGS` slot
+with the `external-findings.md` path, and the `GATE` slot from a prior review's
+`paper-profile.md` when one exists in this REVIEW_DIR; otherwise default
+`major` (this skill has no `--gate` option). It writes `rebuttal.md`: per comment a
 `tactic` (`revision | justification | clarification | sidestep | deferral`), a
 point-by-point defense, and a `solution` only when one is clear (null otherwise).
 A downgrade claim still requires a verifiable artifact; fatal flaws are answered

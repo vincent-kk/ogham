@@ -65,7 +65,9 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
    standalone `Task`s (no team is needed for question generation) in **question-only
    mode**: adapt the `../review/prompt-templates.md` §1 prompt to ask each reviewer for
    ONLY its `anticipated_question` set (one per axis concern), returned inline in the Task
-   response — in this mode they do NOT write a `findings/round-1-<axis>.md` file. Then
+   response — strip §1's PRIMARY DELIVERABLE / file-write REMINDER lines and substitute
+   `GATE` with `major` (no verdict is derived in this mode); they do NOT write a
+   `findings/round-1-<axis>.md` file. Then
    spawn `rebuttal-strategist` (passing the collected questions in its spawn prompt) to
    refine and classify each question as `good | bad | cringy`.
 
