@@ -186,12 +186,12 @@ execution is COMPLETE.**
 > Options are LLM-interpreted hints, not strict flags. Natural language works too
 > ("review just the abstract", "treat this as a CS/ML paper").
 
-| Option             | Default    | Description                                                                                        |
-| ------------------ | ---------- | -------------------------------------------------------------------------------------------------- |
-| `--solo`           | off        | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                    |
-| `--profile <name>` | auto       | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom) |
-| `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD or FULL (profile-determined)                           |
-| `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env); `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`                |
+| Option             | Default    | Description                                                                                                                                                                                                                 |
+| ------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--solo`           | off        | Single-pass `adjudicator` (6 soundness axes, one Task, no team)                                                                                                                                                             |
+| `--profile <name>` | auto       | Override field profile (`empirical-science`/`cs-ml`/`math-theory`/`humanities-qualitative`/custom)                                                                                                                          |
+| `--scope`          | `full`     | `abstract` → LIGHT panel; `full` → STANDARD or FULL (profile-determined)                                                                                                                                                    |
+| `--workdir <dir>`  | `./.prawf` | Output root (or `PRAWF_WORKDIR` env); `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`                                                                                                                                         |
 | `--gate <sev>`     | `major`    | Lowest severity that can block acceptance (`critical`/`major`/`minor`); UNRESOLVED findings below the gate are advisory — reported, never blocking. `minor` restores strict legacy behavior; `critical` is a screening mode |
 
 ## Quick Reference

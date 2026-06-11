@@ -44,12 +44,12 @@ own work.
 
 A finding is **AUTO** (apply) only when ALL hold; otherwise it is **MANUAL** (list only):
 
-| Apply when…                                                         | Never apply when…                                              |
-| ------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `status` ∈ {`defended`, `mitigated`} OR `severity` = `minor`        | `status` = `unresolved`, or `severity` = `critical`            |
-| `qa-sheet` `solution` is a concrete, localized text edit            | `solution` is `null`, a `deferral`, or "needs more data"       |
+| Apply when…                                                         | Never apply when…                                                 |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `status` ∈ {`defended`, `mitigated`} OR `severity` = `minor`        | `status` = `unresolved`, or `severity` = `critical`               |
+| `qa-sheet` `solution` is a concrete, localized text edit            | `solution` is `null`, a `deferral`, or "needs more data"          |
 | `tactic` ∈ {`revision`, `clarification`, `justification`(+text)}    | `tactic` = `sidestep`, or the defense is a qa-sheet-only argument |
-| the target text is unambiguously locatable in the manuscript source | a fatal-flaw axis finding, or the edit needs new analysis/data |
+| the target text is unambiguously locatable in the manuscript source | a fatal-flaw axis finding, or the edit needs new analysis/data    |
 
 Any **Never apply when** condition overrides a matching **Apply when** condition —
 e.g. a `minor` finding that is still `unresolved` is **MANUAL**, never AUTO. A

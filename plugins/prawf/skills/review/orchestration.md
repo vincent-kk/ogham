@@ -13,13 +13,13 @@
 
 ## 1. The prawf Review Model
 
-| Aspect               | prawf                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------- |
-| Persona relationship | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1) |
-| Unit of consensus    | **Survival of each individual finding**                                                               |
-| Core mechanism       | finding state transitions + chair synthesis                                                           |
+| Aspect               | prawf                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Persona relationship | **Vertical** attack (6) → defense (1) → adjudication (1), plus a separate significance assessment (1)                                                                      |
+| Unit of consensus    | **Survival of each individual finding**                                                                                                                                    |
+| Core mechanism       | finding state transitions + chair synthesis                                                                                                                                |
 | Verdict input        | **Only UNRESOLVED findings on the 6 soundness axes at or above the gate (default `major`, see §4.5) drive the verdict; below-gate findings and significance are advisory** |
-| Final verdict        | Accept / Minor / Major / Reject                                                                       |
+| Final verdict        | Accept / Minor / Major / Reject                                                                                                                                            |
 
 prawf rounds simulate a journal's **review → rebuttal → re-review cycle**, not a vote.
 
@@ -107,11 +107,11 @@ Tally **only the UNRESOLVED findings on the 6 soundness axes at or above the gat
 
 | Condition (UNRESOLVED, soundness axes, at/above gate)             | Verdict            |
 | ----------------------------------------------------------------- | ------------------ |
-| `critical` ≥ 1                                                     | **Reject**         |
-| `major` ≥ 1 (when gate ≤ major)                                    | **Major Revision** |
-| no UNRESOLVED at/above gate, but ≥ 1 MITIGATED at/above gate       | **Minor Revision** |
-| `minor` UNRESOLVED ≥ 1 and gate = minor                            | **Minor Revision** |
-| no UNRESOLVED at/above gate (below-gate advisory items may exist)  | **Accept (PASS)**  |
+| `critical` ≥ 1                                                    | **Reject**         |
+| `major` ≥ 1 (when gate ≤ major)                                   | **Major Revision** |
+| no UNRESOLVED at/above gate, but ≥ 1 MITIGATED at/above gate      | **Minor Revision** |
+| `minor` UNRESOLVED ≥ 1 and gate = minor                           | **Minor Revision** |
+| no UNRESOLVED at/above gate (below-gate advisory items may exist) | **Accept (PASS)**  |
 
 - An Accept with a non-empty advisory list is presented as **Accept (with notes)** in the report header/body; the frontmatter and the terminal marker stay `accept` (see §4.5).
 - **PASS justification**: even an Accept must state, on an evidence basis, that "the 6 soundness axes have **0 unresolved findings at or above the gate**; the residual advisory items are completeness/reporting notes that do not change the conclusion."

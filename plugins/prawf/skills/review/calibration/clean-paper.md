@@ -101,6 +101,6 @@ The authors declare no conflicts of interest. The study was supported by a Verda
 
 ## References
 
-- Duval, P. (2019). Study strategies and course outcomes: A narrative review. *Journal of Learning Research, 14*(2), 101–118.
-- Okonkwo, A., Reyes, S., & Brandt, L. (2023). Estimation over significance in education research. *Educational Methods, 8*(1), 33–49.
-- Reyes, S., & Lindqvist, E. (2021). Observable study behaviors as coaching targets. *Teaching of Statistics, 29*(4), 210–224.
+- Duval, P. (2019). Study strategies and course outcomes: A narrative review. _Journal of Learning Research, 14_(2), 101–118.
+- Okonkwo, A., Reyes, S., & Brandt, L. (2023). Estimation over significance in education research. _Educational Methods, 8_(1), 33–49.
+- Reyes, S., & Lindqvist, E. (2021). Observable study behaviors as coaching targets. _Teaching of Statistics, 29_(4), 210–224.

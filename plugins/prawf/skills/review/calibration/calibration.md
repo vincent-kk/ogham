@@ -32,11 +32,11 @@ cp <plugin-root>/skills/review/calibration/mutated-paper.md /tmp/prawf-calib/<da
 ```
 
 1. **Clean run** — `/prawf:review --solo --workdir /tmp/prawf-calib/<date>/clean/.prawf
-   /tmp/prawf-calib/<date>/clean/clean-paper.md` — pass the copied paper path explicitly (P0 yields to ask the user
+/tmp/prawf-calib/<date>/clean/clean-paper.md` — pass the copied paper path explicitly (P0 yields to ask the user
    when no paper is given). MUST end `prawf verdict: accept`. Below-gate advisory items are allowed — an
    "Accept (with notes)" still passes.
 2. **Mutation run** — `/prawf:review --solo --workdir /tmp/prawf-calib/<date>/mutated/.prawf
-   /tmp/prawf-calib/<date>/mutated/mutated-paper.md`. Expected: the five detections listed in
+/tmp/prawf-calib/<date>/mutated/mutated-paper.md`. Expected: the five detections listed in
    `seeded-defects.md`, ending `prawf verdict: reject` (two fatal-flaw criticals — gate-independent, per
    [orchestration §4.3 / §4.5](../orchestration.md)).
 
