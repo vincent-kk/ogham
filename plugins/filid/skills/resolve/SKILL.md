@@ -98,12 +98,11 @@ Classify each item by type:
 > promote / restructure — an agent cannot harvest or attest its own
 > acceptance criteria.
 
-> **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
+> **Tolerant parser**: `fix-requests.md` is hand-authored by
 > the review phase and may carry a leading `filid:` prefix on type values
 > (e.g., `filid:promote`). Strip the `filid:` prefix before enum matching —
 > treat `filid:promote` and `promote` as identical. Unknown tokens after
-> stripping fall back to `code-fix` (the default). This normalization is
-> permanent, not a migration grace period. See
+> stripping fall back to `code-fix` (the default). See
 > `src/lib/normalizeFixRequest.ts` `normalizeFixRequestType` for the
 > canonical token matcher (it returns null for unknown tokens — the
 > `code-fix` default is applied by this skill at the call site).

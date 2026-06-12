@@ -18,7 +18,7 @@ import { getCacheDir } from '../../core/infra/cacheManager/cacheManager.js';
 /**
  * End-to-end mechanical simulation of the spike-harvest loop against a REAL
  * git repository and the BUILT hook bundles. Covers the machine-enforced
- * half of issue #67: mode gate, per-prompt banner lifecycle (missing →
+ * half of the spike-harvest workflow: mode gate, per-prompt banner lifecycle (missing →
  * current → stale manifest), criteria ledger lint, and the mode audit
  * trail. The LLM-contract half (review claim verdicts, harvest interview)
  * is NOT covered here — its regression proxy is the calibration fixture

@@ -35,7 +35,7 @@ PreToolUse 이벤트를 받아 `intentInjector` + `preToolValidator` + `structur
 ### Ask first
 
 - 실행 순서 재배치 (intent 주입이 항상 최우선이어야 함)
-- spike 판정 권위 원천 변경 (브랜치명 단일 — config 모드 필드 도입 금지가 이슈 합의)
+- spike 판정 권위 원천 변경 (브랜치명 단일 권위 — config 모드 필드 도입 금지)
 
 ### Never do
 

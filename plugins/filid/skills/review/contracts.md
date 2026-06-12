@@ -276,7 +276,7 @@ it as follows:
     normally (and aborts on any `harvest-required`); revalidate
     re-judges `CLM-*` rows directly against the ledger instead of
     metric re-measurement (`skills/revalidate/SKILL.md` Step 6.4).
-- **APPROVED therefore requires**: empty blocking set, which now implies
+- **APPROVED therefore requires**: empty blocking set, which implies
   _every in-scope active claim is PASS_ in addition to "no fix_item >=
   MEDIUM". Claims judged PASS appear in `review-report.md` →
   `## Claim Verdicts` for the audit trail.
