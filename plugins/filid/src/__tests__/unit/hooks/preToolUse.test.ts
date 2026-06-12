@@ -1,11 +1,20 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { getCacheDir } from '../../../core/infra/cacheManager/cacheManager.js';
 import { handlePreToolUse } from '../../../hooks/preToolUse/preToolUse.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
+
+function readLastAuditEntry(cwd: string): Record<string, unknown> {
+  const raw = readFileSync(join(getCacheDir(cwd), 'mode-audit.jsonl'), 'utf-8');
+  return JSON.parse(raw.trim().split('\n').at(-1) ?? '{}') as Record<
+    string,
+    unknown
+  >;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -220,6 +229,51 @@ describe('handlePreToolUse', () => {
     } finally {
       rmSync(nonFcaDir, { recursive: true, force: true });
     }
+  });
+
+  it('spike branch → over-50-line INTENT.md Write is exempted and audited', async () => {
+    mkdirSync(join(tmpDir, '.git'), { recursive: true });
+    writeFileSync(join(tmpDir, '.git', 'HEAD'), 'ref: refs/heads/spike/poc\n');
+    const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
+      '\n',
+    );
+
+    const result = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Write',
+        tool_input: { file_path: join(tmpDir, 'INTENT.md'), content },
+      }),
+    );
+
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+
+    const entry = readLastAuditEntry(tmpDir);
+    expect(entry.mode).toBe('spike');
+    expect(entry.decision).toBe('exempt');
+    expect(entry.rule).toBe('intent-hygiene');
+  });
+
+  it('normal branch → over-50-line INTENT.md Write stays denied and audited', async () => {
+    mkdirSync(join(tmpDir, '.git'), { recursive: true });
+    writeFileSync(join(tmpDir, '.git', 'HEAD'), 'ref: refs/heads/main\n');
+    const content = Array.from({ length: 60 }, (_, i) => `Line ${i + 1}`).join(
+      '\n',
+    );
+
+    const result = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Write',
+        tool_input: { file_path: join(tmpDir, 'INTENT.md'), content },
+      }),
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+
+    const entry = readLastAuditEntry(tmpDir);
+    expect(entry.mode).toBe('normal');
+    expect(entry.decision).toBe('deny');
+    expect(entry.reason).toBeDefined();
   });
 
   it('Write .ts with ancestor import in FCA project → all 3 hooks produce context', async () => {

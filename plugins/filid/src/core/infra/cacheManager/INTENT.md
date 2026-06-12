@@ -6,7 +6,7 @@
 
 ## Structure
 
-`cacheManager.ts`는 slim facade로, `caches/` organ의 6개 파일을 re-export한다.
+`cacheManager.ts`는 slim facade로, `caches/` organ의 7개 파일을 re-export한다.
 
 | 파일 | 담당 |
 |------|------|
@@ -16,6 +16,7 @@
 | `caches/fractalMapCache.ts` | FractalMap 읽기/쓰기/삭제 + FractalMap 타입 |
 | `caches/runHashCache.ts` | 스킬 실행 해시 저장/읽기 |
 | `caches/guideCache.ts` | 가이드 주입 마커 확인/기록 |
+| `caches/modeAuditCache.ts` | spike 모드 게이트 판정 audit (JSONL append) |
 
 ## Boundaries
 

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-세션/프롬프트/경계/프랙탈맵/런해시/가이드 6종 캐시를 `~/.claude/plugins/filid/{cwdHash}/` 디렉토리에 파일로 저장한다.
+세션/프롬프트/경계/프랙탈맵/런해시/가이드/모드감사 7종 캐시를 `~/.claude/plugins/filid/{cwdHash}/` 디렉토리에 파일로 저장한다.
 
 ## API Contracts
 
@@ -33,6 +33,9 @@
 | `getLastRunHash` | runHashCache | `(cwd, skillName) => string \| null` |
 | `hasGuideInjected` | guideCache | `(sessionId, cwd) => boolean` |
 | `markGuideInjected` | guideCache | `(sessionId, cwd) => void` |
+| `appendModeAudit` | modeAuditCache | `(cwd, entry: ModeAuditEntry) => void` |
+
+`appendModeAudit`는 spike 모드 게이트의 allow/deny/exempt 판정을 `{cacheDir}/mode-audit.jsonl`에 JSONL로 누적한다 (절대 throw하지 않음). `ModeAuditEntry`: `{ timestamp, sessionId, tool, path, mode: 'spike'|'normal', decision: 'allow'|'deny'|'exempt', rule, reason? }`.
 
 ## Intentional Cross-Concern Coupling
 
@@ -40,4 +43,4 @@
 
 ## Last Updated
 
-2026-04-28
+2026-06-12
