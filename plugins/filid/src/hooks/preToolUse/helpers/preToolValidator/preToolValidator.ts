@@ -9,7 +9,11 @@ import {
 } from '../../../../core/rules/documentValidator/documentValidator.js';
 import type { CriteriaMdValidation } from '../../../../types/documents.js';
 import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
-import { isCriteriaMd, isDetailMd, isIntentMd } from '../../../shared/shared.js';
+import {
+  isCriteriaMd,
+  isDetailMd,
+  isIntentMd,
+} from '../../../shared/shared.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
 
 const INTENT_MD_LINE_LIMIT = 50;

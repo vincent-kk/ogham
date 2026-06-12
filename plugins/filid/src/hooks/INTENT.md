@@ -6,19 +6,19 @@ Claude Code 플러그인 훅 이벤트를 처리하는 fractal. SessionStart 초
 
 ## Structure
 
-| 모듈 | 이벤트 | 역할 |
-|------|--------|------|
-| `setup` | SessionStart | 캐시 초기화 + INTENT.md 자동 감지 + pruning |
-| `userPromptSubmit` | UserPromptSubmit | 턴당 fmap reset + 세션 첫 FCA 포인터 + spike 배너(매 프롬프트) |
-| `intentInjector` | PreToolUse (내부) | INTENT.md 체인·map 주입 |
-| `preToolValidator` | PreToolUse (내부) | INTENT/DETAIL 위생·criteria 원장 블록 (spike 면제 게이트) |
-| `structureGuard` | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고 |
-| `preToolUse` | PreToolUse | 위 3개 서브모듈 오케스트레이션 |
-| `agentEnforcer` | SubagentStart | 에이전트 역할·언어 태그 주입 |
-| `changeTracker` | PostToolUse | 변경 추적 (현재 비활성) |
-| `sessionCleanup` | SessionEnd | 세션 캐시 파일 정리 |
-| `shared` organ | - | `isFcaProject`/`isIntentMd`/`isDetailMd`/`isCriteriaMd` |
-| `utils` organ | - | `validateCwd`, git 메타 판독(branch/HEAD/reflog/manifest), organ 구조 검사 등 |
+| 모듈               | 이벤트            | 역할                                                                          |
+| ------------------ | ----------------- | ----------------------------------------------------------------------------- |
+| `setup`            | SessionStart      | 캐시 초기화 + INTENT.md 자동 감지 + pruning                                   |
+| `userPromptSubmit` | UserPromptSubmit  | 턴당 fmap reset + 세션 첫 FCA 포인터 + spike 배너(매 프롬프트)                |
+| `intentInjector`   | PreToolUse (내부) | INTENT.md 체인·map 주입                                                       |
+| `preToolValidator` | PreToolUse (내부) | INTENT/DETAIL 위생·criteria 원장 블록 (spike 면제 게이트)                     |
+| `structureGuard`   | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고                                          |
+| `preToolUse`       | PreToolUse        | 위 3개 서브모듈 오케스트레이션                                                |
+| `agentEnforcer`    | SubagentStart     | 에이전트 역할·언어 태그 주입                                                  |
+| `changeTracker`    | PostToolUse       | 변경 추적 (현재 비활성)                                                       |
+| `sessionCleanup`   | SessionEnd        | 세션 캐시 파일 정리                                                           |
+| `shared` organ     | -                 | `isFcaProject`/`isIntentMd`/`isDetailMd`/`isCriteriaMd`                       |
+| `utils` organ      | -                 | `validateCwd`, git 메타 판독(branch/HEAD/reflog/manifest), organ 구조 검사 등 |
 
 ## Conventions
 

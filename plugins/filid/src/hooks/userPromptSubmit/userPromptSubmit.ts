@@ -34,7 +34,9 @@ export function handleUserPromptSubmit(
   if (banner === null) return base;
 
   const merged = [base.hookSpecificOutput?.additionalContext, banner]
-    .filter((part): part is string => typeof part === 'string' && part.length > 0)
+    .filter(
+      (part): part is string => typeof part === 'string' && part.length > 0,
+    )
     .join('\n');
   return {
     continue: true,

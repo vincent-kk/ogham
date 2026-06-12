@@ -583,7 +583,7 @@ This step runs for both solo and team deliberation paths.
    **Claim folding** — when verification.md lists in-scope acceptance
    claims, aggregate `claim_verdicts` per claim across all final-round
    **non-ABSTAIN** opinions with worst-wins ordering (`FAIL >
-   INSUFFICIENT-EVIDENCE > PASS`; a claim missing from a non-ABSTAIN
+INSUFFICIENT-EVIDENCE > PASS`; a claim missing from a non-ABSTAIN
    opinion counts as INSUFFICIENT-EVIDENCE from that persona; ABSTAIN
    opinions are excluded exactly as in quorum math). Fold non-PASS aggregates
    into the fix_item set BEFORE partitioning: `FAIL` → severity HIGH,
@@ -591,6 +591,7 @@ This step runs for both solo and team deliberation paths.
    `expected`; `INSUFFICIENT-EVIDENCE` → severity MEDIUM,
    `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — resolved by
    `/filid:harvest`, never dispatched to code-surgeon).
+
 2. Partition the deduplicated set by the severity gate
    (`../contracts.md` → "Severity Gate & Finding Discipline"):
    - **blocking** (`CRITICAL | HIGH | MEDIUM`) → assign sequential

@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import { validateCriteriaMd } from '../../../core/rules/documentValidator/documentValidator.js';
 
-function claim(id: string, fields: Partial<Record<string, string>> = {}): string {
+function claim(
+  id: string,
+  fields: Partial<Record<string, string>> = {},
+): string {
   const merged = {
     status: 'active',
     scope: 'src/hooks/preToolUse',
     claim: 'Spike-branch writes to INTENT.md over 50 lines are not denied',
-    observable: 'preToolValidator unit test "spikeExempt allows INTENT.md Write over 50 lines"',
+    observable:
+      'preToolValidator unit test "spikeExempt allows INTENT.md Write over 50 lines"',
     expected: 'hook returns continue:true without permissionDecision deny',
     ...fields,
   };

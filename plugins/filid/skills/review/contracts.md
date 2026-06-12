@@ -277,7 +277,7 @@ it as follows:
     re-judges `CLM-*` rows directly against the ledger instead of
     metric re-measurement (`skills/revalidate/SKILL.md` Step 6.4).
 - **APPROVED therefore requires**: empty blocking set, which now implies
-  *every in-scope active claim is PASS* in addition to "no fix_item >=
+  _every in-scope active claim is PASS_ in addition to "no fix_item >=
   MEDIUM". Claims judged PASS appear in `review-report.md` →
   `## Claim Verdicts` for the audit trail.
 - **Spike-branch demotion guard**: when the review target branch itself

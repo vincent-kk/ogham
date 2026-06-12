@@ -47,8 +47,7 @@ export async function handlePreToolUse(
     }
     const docTarget =
       isIntentMd(filePath) || isDetailMd(filePath) || isCriteriaMd(filePath);
-    const spikeMode =
-      docTarget && isSpikeBranch(readCurrentBranch(safeCwd));
+    const spikeMode = docTarget && isSpikeBranch(readCurrentBranch(safeCwd));
     const spikeExempt =
       spikeMode && (isIntentMd(filePath) || isDetailMd(filePath));
 
@@ -56,7 +55,8 @@ export async function handlePreToolUse(
     results.push(guardStructure(input));
 
     const merged = mergeResults(results);
-    if (docTarget) auditDocDecision(safeCwd, input, filePath, merged, spikeMode);
+    if (docTarget)
+      auditDocDecision(safeCwd, input, filePath, merged, spikeMode);
     return merged;
   }
 

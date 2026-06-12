@@ -15,7 +15,7 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 - Write INTENT.md: `validateIntentMd` — `error`는 블록, `warning`은 continue + 메시지
 - Write DETAIL.md: `oldContent` 제공 시 `validateDetailMd` append-only 검사
 - criteria.md: Write/Edit 모두 `validateCriteriaMd` (Edit은 시뮬레이션) — claim 삭제·필수 필드 누락·status enum·중복 id·동어반복 차단
-- `spikeExempt=true`(spike/* 브랜치 + INTENT/DETAIL 대상, 오케스트레이터가 판정)면 문서 위생 deny 면제; criteria.md는 어떤 모드에서도 면제 불가
+- `spikeExempt=true`(spike/\* 브랜치 + INTENT/DETAIL 대상, 오케스트레이터가 판정)면 문서 위생 deny 면제; criteria.md는 어떤 모드에서도 면제 불가
 - 차단 시 `permissionDecision: 'deny'` + `permissionDecisionReason`에 사유 설정
 
 ## Boundaries

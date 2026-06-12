@@ -32,23 +32,22 @@
 
 ### Writer Responsibility
 
-| Role              | Writes                       | Must write         | Must NOT write           |
-| ----------------- | ---------------------------- | ------------------ | ------------------------ |
-| Step 3 subagent   | `verification-ledger.md` row | `post_count: TBD`, `status: TBD`, `pre_count`, `target_path`, `rule_id`, `file_was_modified` | numeric `post_count`, `RESOLVED`, `UNRESOLVED` |
-| Step 6 main       | Same row, overwrite          | derived `post_count` (number), derived `status` | anything that overrides a prior main-derived row |
+| Role            | Writes                       | Must write                                                                                   | Must NOT write                                   |
+| --------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Step 3 subagent | `verification-ledger.md` row | `post_count: TBD`, `status: TBD`, `pre_count`, `target_path`, `rule_id`, `file_was_modified` | numeric `post_count`, `RESOLVED`, `UNRESOLVED`   |
+| Step 6 main     | Same row, overwrite          | derived `post_count` (number), derived `status`                                              | anything that overrides a prior main-derived row |
 
 ### status derivation
 
-| pre_count | post_count | file_was_modified | derived status   |
-| --------- | ---------- | ----------------- | ---------------- |
-| > 0       | 0          | true              | `RESOLVED`       |
-| > 0       | > 0        | true              | `UNRESOLVED`     |
-| > 0       | > 0        | false             | `UNRESOLVED`     |
+| pre_count | post_count | file_was_modified | derived status                        |
+| --------- | ---------- | ----------------- | ------------------------------------- |
+| > 0       | 0          | true              | `RESOLVED`                            |
+| > 0       | > 0        | true              | `UNRESOLVED`                          |
+| > 0       | > 0        | false             | `UNRESOLVED`                          |
 | > 0       | 0          | false             | `UNRESOLVED` (file-diff insufficient) |
-| 0         | 0          | any               | `RESOLVED` (vacuous) |
+| 0         | 0          | any               | `RESOLVED` (vacuous)                  |
 
 ### parse-fail gate
 
 If the ledger cannot be parsed (missing file, malformed row, unexpected
 column count) → verdict pinned to `FAIL` with `reason: verification-ledger.md parse failed`.
-

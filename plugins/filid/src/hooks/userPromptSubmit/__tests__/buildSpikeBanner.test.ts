@@ -18,10 +18,7 @@ function makeRepo(branch: string, createdEpochSec: number): void {
   mkdirSync(join(root, '.git', 'refs', 'heads', ...segments.slice(0, -1)), {
     recursive: true,
   });
-  writeFileSync(
-    join(root, '.git', 'refs', 'heads', ...segments),
-    `${SHA_A}\n`,
-  );
+  writeFileSync(join(root, '.git', 'refs', 'heads', ...segments), `${SHA_A}\n`);
   mkdirSync(
     join(root, '.git', 'logs', 'refs', 'heads', ...segments.slice(0, -1)),
     { recursive: true },
@@ -70,10 +67,7 @@ describe('buildSpikeBanner', () => {
   });
 
   it('emphasizes the timebox after 7 elapsed days', () => {
-    makeRepo(
-      'spike/poc',
-      Math.floor(Date.now() / 1000) - 8 * 24 * 60 * 60,
-    );
+    makeRepo('spike/poc', Math.floor(Date.now() / 1000) - 8 * 24 * 60 * 60);
     const banner = buildSpikeBanner(root);
     expect(banner).toContain('day 9');
     expect(banner).toContain('TIMEBOX EXCEEDED');

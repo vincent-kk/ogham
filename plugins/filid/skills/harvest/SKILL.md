@@ -28,7 +28,7 @@ plugin: filid
 > **HIGH-RISK YIELD POINTS**:
 >
 > - After the interview's last answer — chain ledger write + INTENT deltas
->   + harvest commit + manifest write in the same turn (primary stall point)
+>   - harvest commit + manifest write in the same turn (primary stall point)
 > - After the harvest commit — the manifest MUST be written in the same
 >   turn, or the gate stays closed despite a finished harvest
 
@@ -152,7 +152,13 @@ AskUserQuestion(
      "diff_hash": "<sha256 of git diff <base_sha>..HEAD>",
      "criteria_delta_hash": "<sha256 of the appended claim block text>",
      "created_at": "<ISO 8601>",
-     "decisions": [{ "id": "D-01", "disposition": "keep|discard|defer", "claim": "<CLM-id or null>" }]
+     "decisions": [
+       {
+         "id": "D-01",
+         "disposition": "keep|discard|defer",
+         "claim": "<CLM-id or null>"
+       }
+     ]
    }
    ```
 

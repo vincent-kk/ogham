@@ -88,7 +88,7 @@ Classify each item by type:
 > **Harvest gate**: if ANY parsed item has `Type: harvest-required`,
 > ABORT resolve immediately (both `--auto` and interactive): report
 > "fix-requests.md contains harvest-required items — these are oracle
-> gaps, not code defects. On a spike/* branch, run /filid:harvest
+> gaps, not code defects. On a spike/\* branch, run /filid:harvest
 > (keep/discard/defer interview). On a merge-track branch (a claim
 > judged INSUFFICIENT-EVIDENCE), supply the claim's `observable`
 > evidence — implement or restore the named test/command/artifact — or

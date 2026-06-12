@@ -40,9 +40,7 @@ export function auditDocDecision(
     ...(denied
       ? {
           reason:
-            merged.hookSpecificOutput?.permissionDecisionReason?.split(
-              '\n',
-            )[0],
+            merged.hookSpecificOutput?.permissionDecisionReason?.split('\n')[0],
         }
       : {}),
   });

@@ -46,10 +46,10 @@ main` in a fresh session, exactly as for the other runs.
 
 ## 2. Answer Key
 
-| Claim   | Ground truth                                                                                          | Required verdict |
-| ------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
-| CLM-001 | The implementation lowercases, hyphenates, trims — satisfied                                           | PASS             |
-| CLM-002 | `é` matches `[^a-z0-9]` and becomes a hyphen: `slugify('Café au lait')` → `'caf-au-lait'` — broken     | FAIL             |
+| Claim   | Ground truth                                                                                       | Required verdict |
+| ------- | -------------------------------------------------------------------------------------------------- | ---------------- |
+| CLM-001 | The implementation lowercases, hyphenates, trims — satisfied                                       | PASS             |
+| CLM-002 | `é` matches `[^a-z0-9]` and becomes a hyphen: `slugify('Café au lait')` → `'caf-au-lait'` — broken | FAIL             |
 
 Required artifacts:
 

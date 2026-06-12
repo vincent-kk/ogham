@@ -29,15 +29,15 @@ only `active` claims whose scope intersects the diff.
 The PreToolUse hook denies writes that violate the mechanical tier;
 the semantic tier is interview discipline:
 
-| Tier       | Rule                                                                       | Enforced by      |
-| ---------- | -------------------------------------------------------------------------- | ---------------- |
-| mechanical | claim/observable/expected/scope/status all present and non-empty           | hook (deny)      |
-| mechanical | status ∈ active \| superseded \| retired                                   | hook (deny)      |
-| mechanical | claim ids unique; existing ids never disappear (append-only)               | hook (deny)      |
-| mechanical | claim == expected or observable == expected (normalized) → tautology       | hook (deny)      |
-| semantic   | claim is falsifiable — a competent reviewer could mark it FAIL             | interview        |
-| semantic   | observable names a concrete probe, not a restatement of the claim         | interview        |
-| semantic   | scope is the narrowest module path that contains the behavior              | interview        |
+| Tier       | Rule                                                                 | Enforced by |
+| ---------- | -------------------------------------------------------------------- | ----------- |
+| mechanical | claim/observable/expected/scope/status all present and non-empty     | hook (deny) |
+| mechanical | status ∈ active \| superseded \| retired                             | hook (deny) |
+| mechanical | claim ids unique; existing ids never disappear (append-only)         | hook (deny) |
+| mechanical | claim == expected or observable == expected (normalized) → tautology | hook (deny) |
+| semantic   | claim is falsifiable — a competent reviewer could mark it FAIL       | interview   |
+| semantic   | observable names a concrete probe, not a restatement of the claim    | interview   |
+| semantic   | scope is the narrowest module path that contains the behavior        | interview   |
 
 Status transitions (`active → superseded/retired`) require human
 confirmation — never retire a claim as a side effect of automation.
@@ -49,14 +49,14 @@ state, deliberately NOT committed (committing it would move HEAD past
 its own `head_sha`). Branch normalization is the same `/` → `--`
 mapping used by `.filid/review/` (`mcp_t_review_manage normalize-branch`).
 
-| Field                 | Meaning                                                                    |
-| --------------------- | --------------------------------------------------------------------------- |
-| `base_sha`            | merge-base the spike grew from                                             |
-| `head_sha`            | HEAD after the harvest commit — the currency anchor                         |
-| `diff_hash`           | sha256 of `git diff <base_sha>..HEAD` at seal time                          |
-| `criteria_delta_hash` | sha256 of the claim block text appended this harvest                        |
+| Field                 | Meaning                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `base_sha`            | merge-base the spike grew from                                                                                                                                                                               |
+| `head_sha`            | HEAD after the harvest commit — the currency anchor                                                                                                                                                          |
+| `diff_hash`           | sha256 of `git diff <base_sha>..HEAD` at seal time                                                                                                                                                           |
+| `criteria_delta_hash` | sha256 of the claim block text appended this harvest                                                                                                                                                         |
 | `created_at`          | ISO 8601 seal time — review/pipeline treat manifests older than 7 days as expired (re-harvest required); the banner's day counter uses the branch reflog instead, since an unharvested spike has no manifest |
-| `decisions`           | full interview record: `{id, disposition, claim}` per extracted decision (empty array for a dead-end spike) |
+| `decisions`           | full interview record: `{id, disposition, claim}` per extracted decision (empty array for a dead-end spike)                                                                                                  |
 
 Currency rule consumed by the gates (pipeline Signal 0, review Step 1
 guard, the per-prompt banner): the manifest is **current** iff
@@ -80,7 +80,7 @@ Surface choices the code made that the INTENT tree does not record:
   threshold/policy as `expected`.
 - **Rejected path**: code that was tried and abandoned inside the spike
   (visible in intermediate commits) → usually Discard, but a Keep here
-  becomes a *negative* claim ("X must NOT …") — these are valuable.
+  becomes a _negative_ claim ("X must NOT …") — these are valuable.
 
 NOT decisions: formatting, renames without semantic change, comment
 edits, dependency bumps without behavior delta.
@@ -98,11 +98,11 @@ A stale manifest (commits after seal) does not restart from zero:
 
 ## Disposal Mechanics
 
-| Choice    | Git effect                                                                                       | When                                                    |
-| --------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Discard   | new work branch from `base_sha` + cherry-pick of the single harvest commit + `git branch -D` spike | default — probe code was scaffolding, claims are the yield |
-| Promote   | `git branch -m` off the `spike/` namespace                                                        | probe code is production-quality; full review still applies |
-| Keep as-is | none                                                                                              | more probing planned; banner keeps tracking               |
+| Choice     | Git effect                                                                                         | When                                                        |
+| ---------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Discard    | new work branch from `base_sha` + cherry-pick of the single harvest commit + `git branch -D` spike | default — probe code was scaffolding, claims are the yield  |
+| Promote    | `git branch -m` off the `spike/` namespace                                                         | probe code is production-quality; full review still applies |
+| Keep as-is | none                                                                                               | more probing planned; banner keeps tracking                 |
 
 After Discard, the work branch enters the normal pipeline (Path A):
 pr-create → review (claims judged) → resolve → revalidate. After

@@ -37,7 +37,8 @@ function parseClaims(content: string): {
     const field = /^[-*]\s*\*{0,2}([a-zA-Z]+)\*{0,2}\s*:\s*(.*)$/.exec(
       line.trim(),
     );
-    if (field !== null) current.fields[field[1].toLowerCase()] = field[2].trim();
+    if (field !== null)
+      current.fields[field[1].toLowerCase()] = field[2].trim();
   }
   return { claims, duplicates };
 }
@@ -100,8 +101,12 @@ export function validateCriteriaMd(
     const observable = fields.observable ?? '';
     const expected = fields.expected ?? '';
     if (
-      (claim.length > 0 && expected.length > 0 && flatten(claim) === flatten(expected)) ||
-      (observable.length > 0 && expected.length > 0 && flatten(observable) === flatten(expected))
+      (claim.length > 0 &&
+        expected.length > 0 &&
+        flatten(claim) === flatten(expected)) ||
+      (observable.length > 0 &&
+        expected.length > 0 &&
+        flatten(observable) === flatten(expected))
     ) {
       violations.push({
         rule: 'tautology',

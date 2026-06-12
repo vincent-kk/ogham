@@ -98,15 +98,15 @@ order — first match wins. If no match, immediately check the next signal.
 2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
-| Priority | Signal                                                                                          | Entry stage                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Priority | Signal                                                                                                                            | Entry stage                                                                       |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | 0        | Branch matches `spike/*` AND harvest manifest missing, stale (`head_sha` != `git rev-parse HEAD`), or expired (`created_at` > 7d) | Route to `Skill("filid:harvest")` — pr-create/review/merge-track entry is blocked |
-| 0'       | Branch matches `spike/*` AND current harvest manifest exists                                     | Spike already harvested — continue with rules 1–5 below                          |
-| 1        | `.filid/review/<branch>/re-validate.md` exists                                                   | Pipeline **complete** — report existing results and END execution                |
-| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits                             | Execute `git push` and enter `revalidate` (see details below)                   |
-| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)                                   | `revalidate`                                                                    |
-| 4        | `.filid/review/<branch>/fix-requests.md` exists                                                  | `resolve` — unless it contains `Type: harvest-required` (see Priority 4 guard) |
-| 5        | None of the above → check PR: `gh pr view` (Bash)                                                | `review` if PR exists, `pr-create` if not                                       |
+| 0'       | Branch matches `spike/*` AND current harvest manifest exists                                                                      | Spike already harvested — continue with rules 1–5 below                           |
+| 1        | `.filid/review/<branch>/re-validate.md` exists                                                                                    | Pipeline **complete** — report existing results and END execution                 |
+| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits                                                              | Execute `git push` and enter `revalidate` (see details below)                     |
+| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)                                                                    | `revalidate`                                                                      |
+| 4        | `.filid/review/<branch>/fix-requests.md` exists                                                                                   | `resolve` — unless it contains `Type: harvest-required` (see Priority 4 guard)    |
+| 5        | None of the above → check PR: `gh pr view` (Bash)                                                                                 | `review` if PR exists, `pr-create` if not                                         |
 
 **Priority 4 guard**: before entering resolve, Grep `fix-requests.md`
 for `Type: harvest-required`. If present, do NOT invoke resolve (its

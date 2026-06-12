@@ -26,7 +26,10 @@ describe('readHeadSha', () => {
     mkdirSync(join(root, '.git', 'refs', 'heads', 'spike'), {
       recursive: true,
     });
-    writeFileSync(join(root, '.git', 'refs', 'heads', 'spike', 'x'), `${SHA_A}\n`);
+    writeFileSync(
+      join(root, '.git', 'refs', 'heads', 'spike', 'x'),
+      `${SHA_A}\n`,
+    );
     expect(readHeadSha(root)).toBe(SHA_A);
   });
 

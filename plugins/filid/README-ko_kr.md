@@ -184,7 +184,7 @@ git checkout -b spike/my-idea
 | `/filid:review`           | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
 | `/filid:resolve`          | —                 | 수정 요청 해결                                       |
 | `/filid:revalidate`       | —                 | 수정 후 재검증 (PASS/FAIL)                           |
-| `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록            |
+| `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록             |
 
 ---
 

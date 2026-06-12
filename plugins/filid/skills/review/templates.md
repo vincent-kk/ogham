@@ -81,8 +81,8 @@ Structure violations elevated to committee agenda: <N critical/high items>
 > blocking fix items (FAIL → HIGH code-fix, INSUFFICIENT-EVIDENCE →
 > MEDIUM harvest-required).
 
-| Claim   | Scope    | Verdict                            | Evidence             |
-| ------- | -------- | ---------------------------------- | -------------------- |
+| Claim   | Scope    | Verdict                             | Evidence             |
+| ------- | -------- | ----------------------------------- | -------------------- |
 | CLM-001 | `<path>` | PASS / FAIL / INSUFFICIENT-EVIDENCE | <artifact reference> |
 
 ## Advisory Notes

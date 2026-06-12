@@ -135,115 +135,121 @@ afterEach(() => {
   rmSync(repo, { recursive: true, force: true });
 });
 
-describe.skipIf(!runnable)('spike-harvest loop (real git + built bundles)', () => {
-  it('banner: unharvested spike shows day, ref updates, and the harvest exit', () => {
-    const banner = promptBanner();
-    expect(banner).toContain('SPIKE MODE — branch spike/poc (day 1');
-    expect(banner).toContain('Unharvested decisions (ref updates): 2');
-    expect(banner).toContain('INSUFFICIENT-EVIDENCE (harvest-required)');
-  });
-
-  it('banner lifecycle: manifest current at HEAD, then auto-invalidated by the next commit', () => {
-    writeManifest(git('rev-parse', 'HEAD'));
-    expect(promptBanner()).toContain('Harvest manifest current');
-
-    writeFileSync(join(repo, 'probe2.txt'), 'more\n');
-    git('add', 'probe2.txt');
-    git('commit', '-qm', 'probe: post-harvest commit');
-    expect(promptBanner()).toContain('Harvest manifest STALE');
-  });
-
-  it('banner disappears when checkout leaves the spike namespace', () => {
-    git('checkout', '-q', 'main');
-    expect(promptBanner()).not.toContain('[filid:spike]');
-  });
-
-  it('mode gate: oversized INTENT.md Write is exempt on spike, denied on main, both audited', () => {
-    const spikeResult = writeViaHook(
-      join(repo, 'INTENT.md'),
-      OVERSIZED_INTENT,
-    );
-    expect(
-      spikeResult.hookSpecificOutput?.permissionDecision,
-    ).toBeUndefined();
-
-    git('checkout', '-q', 'main');
-    const mainResult = writeViaHook(join(repo, 'INTENT.md'), OVERSIZED_INTENT);
-    expect(mainResult.hookSpecificOutput?.permissionDecision).toBe('deny');
-
-    const audit = readFileSync(
-      join(getCacheDir(repo), 'mode-audit.jsonl'),
-      'utf-8',
-    )
-      .trim()
-      .split('\n')
-      .map((line) => JSON.parse(line) as Record<string, unknown>);
-    expect(audit.map((entry) => entry.decision)).toEqual(['exempt', 'deny']);
-    expect(audit.map((entry) => entry.mode)).toEqual(['spike', 'normal']);
-  });
-
-  it('criteria lint holds in spike mode: valid append allowed, claim deletion denied', () => {
-    const ledgerPath = join(repo, '.filid', 'criteria.md');
-    const appendResult = writeViaHook(ledgerPath, VALID_CLAIM);
-    expect(
-      appendResult.hookSpecificOutput?.permissionDecision,
-    ).toBeUndefined();
-
-    writeFileSync(ledgerPath, VALID_CLAIM);
-    const deleteResult = writeViaHook(
-      ledgerPath,
-      '# Acceptance Criteria Ledger\n',
-    );
-    expect(deleteResult.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(
-      deleteResult.hookSpecificOutput?.permissionDecisionReason,
-    ).toContain('CLM-001');
-  });
-
-  it('criteria lint simulates Edit with replace_all — claim removal via rename is denied', () => {
-    const ledgerPath = join(repo, '.filid', 'criteria.md');
-    // Cross-reference BEFORE the heading: a first-occurrence-only
-    // projection would alter only the mention and falsely allow.
-    writeFileSync(
-      ledgerPath,
-      `# Acceptance Criteria Ledger\n\nSee CLM-001 below.\n\n${VALID_CLAIM.split('\n').slice(2).join('\n')}\n`,
-    );
-    const result = runHook(preToolBundle, {
-      cwd: repo,
-      session_id: 'sim-edit',
-      tool_name: 'Edit',
-      tool_input: {
-        file_path: ledgerPath,
-        old_string: 'CLM-001',
-        new_string: 'CLM-RENAMED',
-        replace_all: true,
-      },
-      hook_event_name: 'PreToolUse',
+describe.skipIf(!runnable)(
+  'spike-harvest loop (real git + built bundles)',
+  () => {
+    it('banner: unharvested spike shows day, ref updates, and the harvest exit', () => {
+      const banner = promptBanner();
+      expect(banner).toContain('SPIKE MODE — branch spike/poc (day 1');
+      expect(banner).toContain('Unharvested decisions (ref updates): 2');
+      expect(banner).toContain('INSUFFICIENT-EVIDENCE (harvest-required)');
     });
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'CLM-001',
-    );
-  });
 
-  it('criteria lint rejects gamed claims (missing observable) even on the spike branch', () => {
-    const gamed = VALID_CLAIM.split('\n')
-      .filter((line) => !line.startsWith('- observable'))
-      .join('\n');
-    const result = writeViaHook(join(repo, '.filid', 'criteria.md'), gamed);
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'observable',
-    );
-  });
+    it('banner lifecycle: manifest current at HEAD, then auto-invalidated by the next commit', () => {
+      writeManifest(git('rev-parse', 'HEAD'));
+      expect(promptBanner()).toContain('Harvest manifest current');
 
-  it('criteria lint denies the empty-content Write that would wipe the ledger', () => {
-    const ledgerPath = join(repo, '.filid', 'criteria.md');
-    writeFileSync(ledgerPath, VALID_CLAIM);
-    const result = writeViaHook(ledgerPath, '');
-    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
-    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
-      'CLM-001',
-    );
-  });
-});
+      writeFileSync(join(repo, 'probe2.txt'), 'more\n');
+      git('add', 'probe2.txt');
+      git('commit', '-qm', 'probe: post-harvest commit');
+      expect(promptBanner()).toContain('Harvest manifest STALE');
+    });
+
+    it('banner disappears when checkout leaves the spike namespace', () => {
+      git('checkout', '-q', 'main');
+      expect(promptBanner()).not.toContain('[filid:spike]');
+    });
+
+    it('mode gate: oversized INTENT.md Write is exempt on spike, denied on main, both audited', () => {
+      const spikeResult = writeViaHook(
+        join(repo, 'INTENT.md'),
+        OVERSIZED_INTENT,
+      );
+      expect(
+        spikeResult.hookSpecificOutput?.permissionDecision,
+      ).toBeUndefined();
+
+      git('checkout', '-q', 'main');
+      const mainResult = writeViaHook(
+        join(repo, 'INTENT.md'),
+        OVERSIZED_INTENT,
+      );
+      expect(mainResult.hookSpecificOutput?.permissionDecision).toBe('deny');
+
+      const audit = readFileSync(
+        join(getCacheDir(repo), 'mode-audit.jsonl'),
+        'utf-8',
+      )
+        .trim()
+        .split('\n')
+        .map((line) => JSON.parse(line) as Record<string, unknown>);
+      expect(audit.map((entry) => entry.decision)).toEqual(['exempt', 'deny']);
+      expect(audit.map((entry) => entry.mode)).toEqual(['spike', 'normal']);
+    });
+
+    it('criteria lint holds in spike mode: valid append allowed, claim deletion denied', () => {
+      const ledgerPath = join(repo, '.filid', 'criteria.md');
+      const appendResult = writeViaHook(ledgerPath, VALID_CLAIM);
+      expect(
+        appendResult.hookSpecificOutput?.permissionDecision,
+      ).toBeUndefined();
+
+      writeFileSync(ledgerPath, VALID_CLAIM);
+      const deleteResult = writeViaHook(
+        ledgerPath,
+        '# Acceptance Criteria Ledger\n',
+      );
+      expect(deleteResult.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(
+        deleteResult.hookSpecificOutput?.permissionDecisionReason,
+      ).toContain('CLM-001');
+    });
+
+    it('criteria lint simulates Edit with replace_all — claim removal via rename is denied', () => {
+      const ledgerPath = join(repo, '.filid', 'criteria.md');
+      // Cross-reference BEFORE the heading: a first-occurrence-only
+      // projection would alter only the mention and falsely allow.
+      writeFileSync(
+        ledgerPath,
+        `# Acceptance Criteria Ledger\n\nSee CLM-001 below.\n\n${VALID_CLAIM.split('\n').slice(2).join('\n')}\n`,
+      );
+      const result = runHook(preToolBundle, {
+        cwd: repo,
+        session_id: 'sim-edit',
+        tool_name: 'Edit',
+        tool_input: {
+          file_path: ledgerPath,
+          old_string: 'CLM-001',
+          new_string: 'CLM-RENAMED',
+          replace_all: true,
+        },
+        hook_event_name: 'PreToolUse',
+      });
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'CLM-001',
+      );
+    });
+
+    it('criteria lint rejects gamed claims (missing observable) even on the spike branch', () => {
+      const gamed = VALID_CLAIM.split('\n')
+        .filter((line) => !line.startsWith('- observable'))
+        .join('\n');
+      const result = writeViaHook(join(repo, '.filid', 'criteria.md'), gamed);
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'observable',
+      );
+    });
+
+    it('criteria lint denies the empty-content Write that would wipe the ledger', () => {
+      const ledgerPath = join(repo, '.filid', 'criteria.md');
+      writeFileSync(ledgerPath, VALID_CLAIM);
+      const result = writeViaHook(ledgerPath, '');
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'CLM-001',
+      );
+    });
+  },
+);
