@@ -241,16 +241,27 @@ measurements, never for suspicions.
 claims harvested from spike branches by `/filid:harvest`. Phase D consumes
 it as follows:
 
-- **Scope filter (Step D.0)**: the chairperson loads the ledger and keeps
-  only claims with `status: active` whose `scope` path-prefix matches at
-  least one diff-touched file. The filtered set is written to
-  `verification.md` → `## Acceptance Claims (in scope)` (the section says
-  `none` when the ledger is absent or nothing matches). `superseded` /
-  `retired` claims are never judged.
+- **Scope filter (Step D.0)**: the chairperson loads the ledger from BOTH
+  the base (`git show <BASE_REF>:.filid/criteria.md`, when present) and
+  HEAD. The judged set = (claims `active` at base ∪ claims added in the
+  diff with `active` status) whose `scope` path-prefix matches at least
+  one diff-touched file. A claim transitioned out of `active` WITHIN the
+  reviewed diff is therefore still judged in this review — a status flip
+  cannot dodge the judgment it was failing; the transition is surfaced
+  in `## Claim Verdicts` with a `transition:` note for human inspection.
+  Claims already `superseded` / `retired` at base are never judged. The
+  filtered set is written to `verification.md` →
+  `## Acceptance Claims (in scope)` (the section says `none` when the
+  ledger is absent or nothing matches).
 - **Judgment**: every opinion (solo adjudicator or team persona) emits
   `claim_verdicts` for the in-scope set. The chairperson aggregates
-  per-claim across personas with worst-wins ordering:
-  `FAIL > INSUFFICIENT-EVIDENCE > PASS`.
+  per-claim across **non-ABSTAIN** opinions with worst-wins ordering:
+  `FAIL > INSUFFICIENT-EVIDENCE > PASS`. A claim missing from a
+  non-ABSTAIN opinion counts as INSUFFICIENT-EVIDENCE from that persona;
+  ABSTAIN opinions are excluded from claim aggregation exactly as they
+  are excluded from the quorum denominator (otherwise one forced ABSTAIN
+  would demote every claim and reintroduce the constant-REQUEST_CHANGES
+  bias the severity gate removed).
 - **Verdict folding (Step D.6.1)**: aggregated non-PASS claims synthesize
   blocking fix_items so the existing severity gate stays the single
   verdict function —
@@ -258,7 +269,13 @@ it as follows:
     `Rule: <CLM-id>` (acceptance criterion observably broken).
   - `INSUFFICIENT-EVIDENCE` → `FIX-XXX` with `Severity: MEDIUM`,
     `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — not a code
-    defect; resolved by `/filid:harvest`, never by code-surgeon).
+    defect, never code-surgeon: on merge-track branches resolved by
+    supplying the claim's `observable` evidence or a human-confirmed
+    claim revision; on spike branches via `/filid:harvest`).
+  - Downstream: resolve dispatches FAIL-derived `code-fix` items
+    normally (and aborts on any `harvest-required`); revalidate
+    re-judges `CLM-*` rows directly against the ledger instead of
+    metric re-measurement (`skills/revalidate/SKILL.md` Step 6.4).
 - **APPROVED therefore requires**: empty blocking set, which now implies
   *every in-scope active claim is PASS* in addition to "no fix_item >=
   MEDIUM". Claims judged PASS appear in `review-report.md` →
@@ -266,9 +283,10 @@ it as follows:
 - **Spike-branch demotion guard**: when the review target branch itself
   matches `spike/*` and no current harvest manifest exists
   (`.filid/harvest/<normalized>/manifest.json` with `head_sha` == current
-  HEAD), the review degrades to `REQUEST_CHANGES` with a single
-  `harvest-required` fix item without running Phases A–D (see
-  `SKILL.md` Step 1 and `templates.md` → "Harvest-Required Variant").
+  HEAD and `created_at` within 7 days), the review degrades to
+  `REQUEST_CHANGES` with a single `harvest-required` fix item without
+  running Phases A–D (see `SKILL.md` Step 1 and `templates.md` →
+  "Harvest-Required Variant").
 
 ## Subagent Prompt Rules
 

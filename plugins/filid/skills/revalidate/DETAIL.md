@@ -14,7 +14,13 @@
   - detect missing rows (`ledger rows < accepted fix count`) and mark the
     absent fix entries as auto-`UNRESOLVED`;
   - derive `post_count` from the returned violation set filtered by
-    `ruleId == <target rule>` and `path starts with <target_path>`;
+    `ruleId == <target rule>` and `path starts with <target_path>` —
+    EXCEPT acceptance-claim rows (`rule_id` matching `CLM-\d+`), whose
+    `post_count` comes from direct claim re-judgment against
+    `.filid/criteria.md` (`observable` evaluated, compared to
+    `expected`; PASS with cited evidence → 0, otherwise 1 — measurement
+    tools can never report a CLM rule, so counting would auto-resolve
+    claim fixes);
   - derive `status` from the triple
     `(pre_count, post_count, file_was_modified)` using the matrix below.
 - If any derived row has `status == "UNRESOLVED"`, the verdict MUST be

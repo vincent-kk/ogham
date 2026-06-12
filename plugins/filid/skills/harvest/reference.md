@@ -55,14 +55,17 @@ mapping used by `.filid/review/` (`mcp_t_review_manage normalize-branch`).
 | `head_sha`            | HEAD after the harvest commit — the currency anchor                         |
 | `diff_hash`           | sha256 of `git diff <base_sha>..HEAD` at seal time                          |
 | `criteria_delta_hash` | sha256 of the claim block text appended this harvest                        |
-| `created_at`          | ISO 8601 seal time — drives the 7-day timebox emphasis                      |
-| `decisions`           | full interview record: `{id, disposition, claim}` per extracted decision    |
+| `created_at`          | ISO 8601 seal time — review/pipeline treat manifests older than 7 days as expired (re-harvest required); the banner's day counter uses the branch reflog instead, since an unharvested spike has no manifest |
+| `decisions`           | full interview record: `{id, disposition, claim}` per extracted decision (empty array for a dead-end spike) |
 
 Currency rule consumed by the gates (pipeline Signal 0, review Step 1
 guard, the per-prompt banner): the manifest is **current** iff
-`head_sha == git rev-parse HEAD`. Missing, unparsable, or stale ⇒ the
-merge track stays closed. `sha256` via `shasum -a 256` (macOS) or
-`sha256sum` (Linux).
+`head_sha == git rev-parse HEAD` AND `created_at` is within
+7 days (older ⇒ expired — long-idle spikes need a re-harvest before
+merge-track entry). Missing, unparsable, stale, or expired ⇒ the merge
+track stays closed. `sha256` via `shasum -a 256` (macOS) or `sha256sum`
+(Linux). The directory carries a self-ignoring `.gitignore` (`*`) so
+the local manifest never dirties the worktree.
 
 ## Decision-Extraction Heuristics
 

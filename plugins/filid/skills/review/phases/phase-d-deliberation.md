@@ -84,6 +84,12 @@ phase_d_token_usage:
   recorded_at: <ISO-8601 timestamp>
 ```
 
+`run_id` derivation is deterministic:
+`<normalized-branch>@<git rev-parse --short HEAD at Phase D start>`. A
+resumed or re-entered Phase D on the same head therefore reuses the id
+(the advisory ledger's once-per-run guard stays idempotent across
+resumes), while any new commit produces a new id.
+
 ---
 
 Phase D produces the final review verdict through a **real multi-agent
@@ -119,14 +125,19 @@ structure-check.md` (if present). Preserve exactly from sub-files:
    - `## Code Metrics Results` (from C1 body)
    - `## Structure & Dependency Verification` (from C2 body)
    - `## Debt Status` (from C2 body)
-4. Load the acceptance-criteria ledger (`<PROJECT_ROOT>/.filid/criteria.md`,
-   if present) and append a `## Acceptance Claims (in scope)` section:
-   keep only claims with `status: active` whose `scope` path-prefix
-   matches at least one changed file from `session.md`. For each kept
-   claim, copy `id`, `claim`, `observable`, `expected`, `scope`. When the
-   ledger is absent or nothing matches, write the section with the single
-   line `none`. (Contract: `../contracts.md` → "Acceptance Claims
-   (criteria ledger)".)
+4. Load the acceptance-criteria ledger from BOTH the base
+   (`git show <BASE_REF>:.filid/criteria.md`, when present) and HEAD
+   (`<PROJECT_ROOT>/.filid/criteria.md`), and append a
+   `## Acceptance Claims (in scope)` section: the judged set = (claims
+   `active` at base ∪ claims newly added with `active` status) whose
+   `scope` path-prefix matches at least one changed file from
+   `session.md`. A claim flipped out of `active` within the reviewed
+   diff stays in the judged set (status transitions cannot dodge the
+   judgment) — annotate it `transition: active → <new status>`. For each
+   kept claim, copy `id`, `claim`, `observable`, `expected`, `scope`.
+   When the ledger is absent or nothing matches, write the section with
+   the single line `none`. (Contract: `../contracts.md` → "Acceptance
+   Claims (criteria ledger)".)
 
 **→ After verification.md is written, immediately proceed to Step D.1. Do NOT yield.**
 
@@ -571,9 +582,10 @@ This step runs for both solo and team deliberation paths.
 
    **Claim folding** — when verification.md lists in-scope acceptance
    claims, aggregate `claim_verdicts` per claim across all final-round
-   opinions with worst-wins ordering (`FAIL > INSUFFICIENT-EVIDENCE >
-   PASS`; a claim missing from an opinion counts as
-   INSUFFICIENT-EVIDENCE from that persona). Fold non-PASS aggregates
+   **non-ABSTAIN** opinions with worst-wins ordering (`FAIL >
+   INSUFFICIENT-EVIDENCE > PASS`; a claim missing from a non-ABSTAIN
+   opinion counts as INSUFFICIENT-EVIDENCE from that persona; ABSTAIN
+   opinions are excluded exactly as in quorum math). Fold non-PASS aggregates
    into the fix_item set BEFORE partitioning: `FAIL` → severity HIGH,
    `Type: code-fix`, `Rule: <CLM-id>`, consequence = the claim's broken
    `expected`; `INSUFFICIENT-EVIDENCE` → severity MEDIUM,

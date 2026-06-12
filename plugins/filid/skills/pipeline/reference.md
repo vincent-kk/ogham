@@ -23,11 +23,12 @@ Check signals:
 
   Signal 0 (spike harvest guard): Does the branch match spike/*?
     → YES: Read .filid/harvest/<normalized>/manifest.json.
-      → Manifest missing, unparsable, or head_sha != git rev-parse HEAD:
+      → Manifest missing, unparsable, head_sha != git rev-parse HEAD,
+        or created_at older than 7 days (expired):
         Route to Skill("filid:harvest") — merge-track entry blocked. The
         guard is lifted ONLY by a current manifest; leaving the branch
         does not lift it (checkout simply changes which branch is judged).
-      → head_sha == git rev-parse HEAD (current manifest):
+      → head_sha == git rev-parse HEAD AND created_at within 7 days:
         Spike already harvested — continue to Signal 1.
     → NO:  Continue to Signal 1.
 
@@ -44,7 +45,13 @@ Check signals:
     → NO:  Continue to Signal 3.
 
   Signal 3: Does <review_dir>/fix-requests.md exist?
-    → YES: Start from RESOLVE.
+    → YES: Grep it for "Type: harvest-required".
+      → Present: Do NOT start resolve (its harvest gate would abort and
+        the pipeline would loop). Report the oracle work required
+        (spike branch → /filid:harvest; merge-track INSUFFICIENT-EVIDENCE
+        claims → supply observable evidence or a human-confirmed claim
+        revision, then /filid:review --force) and END.
+      → Absent: Start from RESOLVE.
     → NO:  Continue to Signal 4.
 
   Signal 4: Does a PR exist for this branch?

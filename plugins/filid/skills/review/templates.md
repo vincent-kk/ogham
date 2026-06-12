@@ -200,10 +200,12 @@ for the dispatch policy):
   promotion/splitting
 - `restructure` — LCOM4 >= 2 or structural drift → resolved by
   module reorganization
-- `harvest-required` — oracle gap, not a code defect: a claim judged
-  INSUFFICIENT-EVIDENCE or a spike branch lacking a current harvest
-  manifest → resolved ONLY by the `/filid:harvest` interview (never
-  dispatched to code-surgeon)
+- `harvest-required` — oracle gap, not a code defect (never dispatched
+  to code-surgeon): a spike branch lacking a current harvest manifest →
+  resolved by the `/filid:harvest` interview; a merge-track claim judged
+  INSUFFICIENT-EVIDENCE → resolved by supplying the claim's `observable`
+  evidence or a human-confirmed claim revision, then re-running
+  `/filid:review`
 
 ### Harvest-Required Variant (unharvested spike branch)
 

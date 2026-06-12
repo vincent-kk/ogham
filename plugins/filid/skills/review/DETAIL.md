@@ -89,7 +89,8 @@ A missing or `null` `deliberation_mode` is handled identically to `chairperson-f
 ### Severity Gate & Advisory Channel
 
 The severity gate partitions the final aggregated fix_item set (committee
-fix_items + Phase A CRITICAL/HIGH ingestion) before verdict derivation:
+fix_items + Phase A CRITICAL/HIGH ingestion + acceptance-claim folding)
+before verdict derivation:
 
 | Partition    | Severity                     | Destination                                        | Verdict effect                      |
 | ------------ | ---------------------------- | -------------------------------------------------- | ----------------------------------- |

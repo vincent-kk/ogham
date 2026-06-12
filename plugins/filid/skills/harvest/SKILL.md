@@ -90,9 +90,12 @@ main>` (fallback `master` when `main` is absent).
 4. If a previous (now stale) manifest exists, diff against its recorded
    decisions (`reference.md` → "Incremental Re-Harvest") and interview
    only new or changed decisions.
-5. Zero decisions extracted → report it, then skip to Step 5 (disposal)
-   — an empty harvest still produces a manifest (the spike proved a
-   dead end; that, too, is a finding).
+5. Zero decisions extracted → skip the interview and the ledger/INTENT/
+   commit work (Step 3 and Step 4 items 1–3), but STILL seal the
+   manifest (Step 4 items 4–5) with an empty `decisions` array and
+   `head_sha` = current HEAD — a dead-end spike is itself a finding, and
+   only the manifest unlocks disposal and the merge track. Then proceed
+   to Step 5.
 
 **→ Immediately proceed to Step 3. Do NOT pause to summarize the list.**
 
@@ -135,8 +138,12 @@ AskUserQuestion(
 3. **Harvest commit** — `git add .filid/criteria.md <INTENT files>` and
    commit: `harvest(<branch>): record N acceptance claims`. Nothing else
    goes into this commit.
-4. **Manifest** — write `.filid/harvest/<normalized>/manifest.json`
-   (NOT committed — local gate state, like `.filid/review/*`):
+4. **Manifest** — first ensure `.filid/harvest/.gitignore` exists
+   containing the single line `*` (the local manifest must never dirty
+   the worktree — it would trip this skill's own Step 1 dirty-tree abort
+   on re-runs and resolve's pre-check). Then write
+   `.filid/harvest/<normalized>/manifest.json` (NOT committed — local
+   gate state, like `.filid/review/*`):
 
    ```json
    {

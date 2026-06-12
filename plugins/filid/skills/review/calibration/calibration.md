@@ -23,6 +23,7 @@ never read.
 | `run-a` | `clean-change.md`      | Base fixture tree + a clean one-file change, sound by construction — MUST end `APPROVED`                |
 | `run-b` | `low-only-change.md`   | The same change carrying only golden-LOW items — MUST end `APPROVED` with a `## Advisory Notes` section |
 | `run-c` | `seeded-change.md`     | The same change with seeded blocking defects + golden-LOW items — MUST end `REQUEST_CHANGES`            |
+| `run-d` | `claim-change.md`      | The clean change plus a committed criteria ledger (one satisfied claim, one broken) — MUST end `REQUEST_CHANGES` with one PASS and one FAIL claim verdict |
 | —       | `seeded-violations.md` | Answer-key manifest (defect id, location hint, expected lens/severity, VETO-class flag, golden-LOW set) |
 
 The fixture module is **fully synthetic**: the package, the module, and the
@@ -71,6 +72,7 @@ ledger) — calibration runs never touch a real project's review artifacts.
 | `run-a` | `APPROVED`        | empty (or absent) Advisory Notes is fine; **0 blocking findings**              |
 | `run-b` | `APPROVED`        | `## Advisory Notes` present and non-empty; presented as APPROVED (with notes)  |
 | `run-c` | `REQUEST_CHANGES` | SV-1 surfaces as CRITICAL/VETO at any gate (VETO classes are gate-independent) |
+| `run-d` | `REQUEST_CHANGES` | `## Claim Verdicts` with CLM-001 PASS + CLM-002 FAIL; folded HIGH `Rule: CLM-002` in fix-requests (see `claim-change.md` §3 for claim false-PASS / false-FAIL scoring) |
 
 ## 3. Scoring
 

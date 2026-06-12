@@ -82,8 +82,9 @@ using elected committee personas and a state machine.
 > **Spike harvest guard** (runs before checkpoint/cache): when `<branch>`
 > matches `spike/*`, read
 > `.filid/harvest/<normalized-branch>/manifest.json` and compare its
-> `head_sha` to `git rev-parse HEAD`. If the manifest is missing or stale
-> (head moved), do NOT run Phases A–D: write the degraded
+> `head_sha` to `git rev-parse HEAD`. If the manifest is missing, stale
+> (head moved), or expired (`created_at` older than 7 days — long-idle
+> spikes need a re-harvest), do NOT run Phases A–D: write the degraded
 > `review-report.md` (`verdict: REQUEST_CHANGES`) + `fix-requests.md`
 > with the single `Type: harvest-required` item per `templates.md` →
 > "Harvest-Required Variant", emit the terminal marker

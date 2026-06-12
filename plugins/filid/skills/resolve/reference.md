@@ -86,14 +86,14 @@ Notes`, so they never reach resolve.
 **code-fix** (default):
 
 ```markdown
-### FIX-001: Unused import in validator.ts
+### FIX-001: Unguarded config dereference in validator.ts
 
 - **Severity**: MEDIUM
 - **Path**: `src/core/validator.ts`
-- **Rule**: zero-peer-file
+- **Rule**: error-handling
 - **Type**: code-fix
-- **Consequence**: Dead import keeps a deleted module in the dependency graph
-- **Action**: Remove unused import on line 12
+- **Consequence**: Hook crashes with a TypeError on projects without `.filid/config.json`
+- **Action**: Guard the config access on line 12 with a null check
 - **Patch**: (inline diff)
 ```
 
