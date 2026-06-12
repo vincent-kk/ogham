@@ -47,6 +47,86 @@ function flatten(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 }
 
+function checkDuplicates(duplicates: string[]): DocumentViolation[] {
+  return duplicates.map((id) => ({
+    rule: 'duplicate-id' as const,
+    message: `Claim id ${id} appears more than once — claim ids must be unique.`,
+    severity: 'error' as const,
+  }));
+}
+
+function checkMissingFields(
+  id: string,
+  fields: Record<string, string>,
+): DocumentViolation[] {
+  const missing = CRITERIA_REQUIRED_FIELDS.filter(
+    (name) => !fields[name] || fields[name].length === 0,
+  );
+  if (missing.length === 0) return [];
+  return [
+    {
+      rule: 'missing-field',
+      message: `Claim ${id} is missing required field(s): ${missing.join(', ')}.`,
+      severity: 'error',
+    },
+  ];
+}
+
+function checkInvalidStatus(
+  id: string,
+  fields: Record<string, string>,
+): DocumentViolation[] {
+  const status = fields.status;
+  if (status === undefined || status.length === 0) return [];
+  if ((CRITERIA_STATUS_VALUES as readonly string[]).includes(status)) return [];
+  return [
+    {
+      rule: 'invalid-status',
+      message: `Claim ${id} has invalid status "${status}" — use ${CRITERIA_STATUS_VALUES.join(' | ')}.`,
+      severity: 'error',
+    },
+  ];
+}
+
+function isTautological(fields: Record<string, string>): boolean {
+  const claim = fields.claim ?? '';
+  const observable = fields.observable ?? '';
+  const expected = fields.expected ?? '';
+  if (expected.length === 0) return false;
+  return (
+    (claim.length > 0 && flatten(claim) === flatten(expected)) ||
+    (observable.length > 0 && flatten(observable) === flatten(expected))
+  );
+}
+
+function checkTautology(
+  id: string,
+  fields: Record<string, string>,
+): DocumentViolation[] {
+  if (!isTautological(fields)) return [];
+  return [
+    {
+      rule: 'tautology',
+      message: `Claim ${id} is tautological — claim/observable must describe HOW to observe, expected must state a distinct verifiable outcome.`,
+      severity: 'error',
+    },
+  ];
+}
+
+function checkRemovedClaims(
+  claims: ClaimBlock[],
+  oldContent: string,
+): DocumentViolation[] {
+  const newIds = new Set(claims.map((c) => c.id));
+  return parseClaims(oldContent)
+    .claims.filter((c) => !newIds.has(c.id))
+    .map(({ id }) => ({
+      rule: 'claim-removed' as const,
+      message: `Claim ${id} was deleted — the ledger is append-only. Mark it status: retired (or superseded) instead of removing it.`,
+      severity: 'error' as const,
+    }));
+}
+
 /**
  * Validate the acceptance-criteria ledger (`.filid/criteria.md`).
  *
@@ -63,72 +143,16 @@ export function validateCriteriaMd(
   content: string,
   oldContent?: string,
 ): CriteriaMdValidation {
-  const violations: DocumentViolation[] = [];
   const { claims, duplicates } = parseClaims(content);
-
-  for (const id of duplicates) {
-    violations.push({
-      rule: 'duplicate-id',
-      message: `Claim id ${id} appears more than once — claim ids must be unique.`,
-      severity: 'error',
-    });
-  }
-
-  for (const { id, fields } of claims) {
-    const missing = CRITERIA_REQUIRED_FIELDS.filter(
-      (name) => !fields[name] || fields[name].length === 0,
-    );
-    if (missing.length > 0) {
-      violations.push({
-        rule: 'missing-field',
-        message: `Claim ${id} is missing required field(s): ${missing.join(', ')}.`,
-        severity: 'error',
-      });
-    }
-    const status = fields.status;
-    if (
-      status !== undefined &&
-      status.length > 0 &&
-      !(CRITERIA_STATUS_VALUES as readonly string[]).includes(status)
-    ) {
-      violations.push({
-        rule: 'invalid-status',
-        message: `Claim ${id} has invalid status "${status}" — use ${CRITERIA_STATUS_VALUES.join(' | ')}.`,
-        severity: 'error',
-      });
-    }
-    const claim = fields.claim ?? '';
-    const observable = fields.observable ?? '';
-    const expected = fields.expected ?? '';
-    if (
-      (claim.length > 0 &&
-        expected.length > 0 &&
-        flatten(claim) === flatten(expected)) ||
-      (observable.length > 0 &&
-        expected.length > 0 &&
-        flatten(observable) === flatten(expected))
-    ) {
-      violations.push({
-        rule: 'tautology',
-        message: `Claim ${id} is tautological — claim/observable must describe HOW to observe, expected must state a distinct verifiable outcome.`,
-        severity: 'error',
-      });
-    }
-  }
-
-  if (oldContent !== undefined) {
-    const newIds = new Set(claims.map((c) => c.id));
-    const removed = parseClaims(oldContent).claims.filter(
-      (c) => !newIds.has(c.id),
-    );
-    for (const { id } of removed) {
-      violations.push({
-        rule: 'claim-removed',
-        message: `Claim ${id} was deleted — the ledger is append-only. Mark it status: retired (or superseded) instead of removing it.`,
-        severity: 'error',
-      });
-    }
-  }
+  const violations: DocumentViolation[] = [
+    ...checkDuplicates(duplicates),
+    ...claims.flatMap(({ id, fields }) => [
+      ...checkMissingFields(id, fields),
+      ...checkInvalidStatus(id, fields),
+      ...checkTautology(id, fields),
+    ]),
+    ...(oldContent !== undefined ? checkRemovedClaims(claims, oldContent) : []),
+  ];
 
   return {
     valid: violations.every((v) => v.severity !== 'error'),

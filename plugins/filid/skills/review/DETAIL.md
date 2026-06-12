@@ -152,10 +152,3 @@ violate the Phase D no-measurement constraint.
 | `generated_at`      | ISO-8601 string                                     | yes         | freshness check                       |
 
 Writers MUST emit all required fields. Readers (pipeline main, revalidate) grep-parse these fields; missing required fields trigger an `INCONCLUSIVE` fallback.
-
-## Last Updated
-
-- 2026-04-20 — initial authoring. Codifies the A/B/C subagent ↔ main handoff required by PR-2 (emit in `phases/phase-d-deliberation.md`) and PR-3 (consume in `pipeline/SKILL.md`), and blocks `chairperson-direct` Phase D synthesis via `verdict_gate`.
-- 2026-04-21 — add `review-report.md` frontmatter schema (Round 3 F-10).
-- 2026-06-12 — wire the severity gate into verdict derivation (LOW → advisory channel, `APPROVED (with notes)` presentation), require `consequence` on fix_items, codify the null-result success state, add the advisory ledger + debt promotion contract, and mandate calibration passes.
-- 2026-06-12 — wire the spike-harvest loop: acceptance-claim judgment from `.filid/criteria.md` (claim_verdicts, worst-wins folding into the blocking set), the `harvest-required` fix type, and the Step 1 spike-branch demotion guard.

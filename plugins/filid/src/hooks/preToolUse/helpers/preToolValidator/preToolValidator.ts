@@ -52,6 +52,148 @@ function denyCriteria(result: CriteriaMdValidation): HookOutput {
   };
 }
 
+function readFileSafe(absPath: string): string | undefined {
+  try {
+    return readFileSync(absPath, 'utf-8');
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveAbsPath(filePath: string, safeCwd: string): string {
+  return path.isAbsolute(filePath) ? filePath : path.resolve(safeCwd, filePath);
+}
+
+function handleCriteriaMdEdit(
+  input: PreToolUseInput,
+  safeCwd: string,
+  filePath: string,
+): HookOutput {
+  const newString = (input.tool_input.new_string as string) ?? '';
+  const oldString = (input.tool_input.old_string as string) ?? '';
+  const absPath = resolveAbsPath(filePath, safeCwd);
+  const current = readFileSafe(absPath);
+
+  if (current !== undefined && oldString && current.includes(oldString)) {
+    const projected = projectEdit(current, oldString, newString, input);
+    const result = validateCriteriaMd(projected, current);
+    if (!result.valid) return denyCriteria(result);
+    return { continue: true };
+  }
+
+  return {
+    continue: true,
+    hookSpecificOutput: {
+      additionalContext:
+        'Note: this Edit to .filid/criteria.md could not be simulated — ' +
+        'confirm no claim was deleted and required fields ' +
+        '(claim/observable/expected/scope/status) stay intact.',
+    },
+  };
+}
+
+function handleIntentMdEdit(
+  input: PreToolUseInput,
+  safeCwd: string,
+  filePath: string,
+): HookOutput {
+  const newString = (input.tool_input.new_string as string) ?? '';
+  const oldString = (input.tool_input.old_string as string) ?? '';
+  const absPath = resolveAbsPath(filePath, safeCwd);
+  const current = readFileSafe(absPath);
+
+  if (current !== undefined && oldString && current.includes(oldString)) {
+    const projected = projectEdit(current, oldString, newString, input);
+    const lineCount = projected.split('\n').length;
+    if (lineCount > INTENT_MD_LINE_LIMIT) {
+      return {
+        continue: true,
+        hookSpecificOutput: {
+          permissionDecision: 'deny',
+          permissionDecisionReason:
+            `This edit would grow INTENT.md to ${lineCount} lines, over ` +
+            `the ${INTENT_MD_LINE_LIMIT}-line limit. Extract a sub-fractal ` +
+            `(child dir + INTENT.md + index.ts) and move the overflow ` +
+            `into it. ${DENY_RETRY_GUIDANCE}`,
+        },
+      };
+    }
+    return { continue: true };
+  }
+
+  const lineCount = newString.split('\n').length;
+  if (lineCount > 20) {
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        additionalContext:
+          `Note: this Edit adds ${lineCount} new lines to INTENT.md — ` +
+          `line limit (${INTENT_MD_LINE_LIMIT}) can't be checked on ` +
+          `partial edits. Confirm the final file stays within ` +
+          `${INTENT_MD_LINE_LIMIT} lines.`,
+      },
+    };
+  }
+  return { continue: true };
+}
+
+function handleIntentMdWrite(content: string): HookOutput {
+  const result = validateIntentMd(content);
+
+  if (!result.valid) {
+    const errorMessages = result.violations
+      .filter((v) => v.severity === 'error')
+      .map((v) => v.message)
+      .join('; ');
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        permissionDecision: 'deny',
+        permissionDecisionReason:
+          `INTENT.md write rejected: ${errorMessages}. Add the missing ` +
+          `3-tier sections (Always do / Ask first / Never do) and keep ` +
+          `it under ${INTENT_MD_LINE_LIMIT} lines. ${DENY_RETRY_GUIDANCE}`,
+      },
+    };
+  }
+
+  const warnings = result.violations.filter((v) => v.severity === 'warning');
+  if (warnings.length > 0) {
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        additionalContext: warnings.map((w) => w.message).join('; '),
+      },
+    };
+  }
+
+  return { continue: true };
+}
+
+function handleDetailMdWrite(content: string, oldContent: string): HookOutput {
+  const result = validateDetailMd(content, oldContent);
+
+  if (!result.valid) {
+    const errorMessages = result.violations
+      .filter((v) => v.severity === 'error')
+      .map((v) => v.message)
+      .join('; ');
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        permissionDecision: 'deny',
+        permissionDecisionReason:
+          `DETAIL.md write rejected: ${errorMessages}. Rewrite it to the ` +
+          `current state — keep only the live API contract and ` +
+          `acceptance criteria, drop superseded history, never append. ` +
+          `${DENY_RETRY_GUIDANCE}`,
+      },
+    };
+  }
+
+  return { continue: true };
+}
+
 /**
  * PreToolUse hook logic for INTENT.md/DETAIL.md/criteria.md validation.
  *
@@ -87,32 +229,7 @@ export function validatePreToolUse(
   // criteria.md validation — runs before the spike gate (never exempt)
   if (isCriteriaMd(filePath)) {
     if (input.tool_name === 'Edit') {
-      const newString = (input.tool_input.new_string as string) ?? '';
-      const oldString = (input.tool_input.old_string as string) ?? '';
-      const absPath = path.isAbsolute(filePath)
-        ? filePath
-        : path.resolve(safeCwd, filePath);
-      let current: string | undefined;
-      try {
-        current = readFileSync(absPath, 'utf-8');
-      } catch {
-        /* file unreadable — fall through to warning fallback */
-      }
-      if (current !== undefined && oldString && current.includes(oldString)) {
-        const projected = projectEdit(current, oldString, newString, input);
-        const result = validateCriteriaMd(projected, current);
-        if (!result.valid) return denyCriteria(result);
-        return { continue: true };
-      }
-      return {
-        continue: true,
-        hookSpecificOutput: {
-          additionalContext:
-            'Note: this Edit to .filid/criteria.md could not be simulated — ' +
-            'confirm no claim was deleted and required fields ' +
-            '(claim/observable/expected/scope/status) stay intact.',
-        },
-      };
+      return handleCriteriaMdEdit(input, safeCwd, filePath);
     }
     // No truthiness gate: an empty-content Write is the trivial full-wipe
     // a gaming agent would use to escape FAIL claims — validate it too.
@@ -127,127 +244,24 @@ export function validatePreToolUse(
   }
 
   // Spike mode: doc-hygiene denies for INTENT.md/DETAIL.md are suspended.
-  // The judgment is audited by the orchestrator (mode-audit.jsonl).
   if (spikeExempt) return { continue: true };
 
-  // Edit targeting INTENT.md: simulate the replacement and enforce the 50-line
-  // limit on the projected content. Falls back to a soft warning only when the
-  // file cannot be read or the old_string cannot be located (e.g. new file).
   if (input.tool_name === 'Edit' && isIntentMd(filePath)) {
-    const newString = (input.tool_input.new_string as string) ?? '';
-    const oldString = (input.tool_input.old_string as string) ?? '';
-
-    const absPath = path.isAbsolute(filePath)
-      ? filePath
-      : path.resolve(safeCwd, filePath);
-
-    let current: string | undefined;
-    try {
-      current = readFileSync(absPath, 'utf-8');
-    } catch {
-      /* file unreadable — fall through to warning fallback */
-    }
-
-    if (current !== undefined && oldString && current.includes(oldString)) {
-      const projected = projectEdit(current, oldString, newString, input);
-      const lineCount = projected.split('\n').length;
-      if (lineCount > INTENT_MD_LINE_LIMIT) {
-        return {
-          continue: true,
-          hookSpecificOutput: {
-            permissionDecision: 'deny',
-            permissionDecisionReason:
-              `This edit would grow INTENT.md to ${lineCount} lines, over ` +
-              `the ${INTENT_MD_LINE_LIMIT}-line limit. Extract a sub-fractal ` +
-              `(child dir + INTENT.md + index.ts) and move the overflow ` +
-              `into it. ${DENY_RETRY_GUIDANCE}`,
-          },
-        };
-      }
-      return { continue: true };
-    }
-
-    // Fallback: could not simulate (file missing or old_string not found).
-    // Warn on large new_string insertions so the agent manually verifies.
-    const lineCount = newString.split('\n').length;
-    if (lineCount > 20) {
-      return {
-        continue: true,
-        hookSpecificOutput: {
-          additionalContext:
-            `Note: this Edit adds ${lineCount} new lines to INTENT.md — ` +
-            `line limit (${INTENT_MD_LINE_LIMIT}) can't be checked on ` +
-            `partial edits. Confirm the final file stays within ` +
-            `${INTENT_MD_LINE_LIMIT} lines.`,
-        },
-      };
-    }
-    return { continue: true };
+    return handleIntentMdEdit(input, safeCwd, filePath);
   }
 
   const content = input.tool_input.content;
 
-  // Write만 검증 (Edit은 위에서 처리됨)
   if (input.tool_name !== 'Write' || !content) {
     return { continue: true };
   }
 
-  // INTENT.md validation
   if (isIntentMd(filePath)) {
-    const result = validateIntentMd(content);
-
-    if (!result.valid) {
-      const errorMessages = result.violations
-        .filter((v) => v.severity === 'error')
-        .map((v) => v.message)
-        .join('; ');
-      return {
-        continue: true,
-        hookSpecificOutput: {
-          permissionDecision: 'deny',
-          permissionDecisionReason:
-            `INTENT.md write rejected: ${errorMessages}. Add the missing ` +
-            `3-tier sections (Always do / Ask first / Never do) and keep ` +
-            `it under ${INTENT_MD_LINE_LIMIT} lines. ${DENY_RETRY_GUIDANCE}`,
-        },
-      };
-    }
-
-    // Check for warnings (don't block, but inform)
-    const warnings = result.violations.filter((v) => v.severity === 'warning');
-    if (warnings.length > 0) {
-      return {
-        continue: true,
-        hookSpecificOutput: {
-          additionalContext: warnings.map((w) => w.message).join('; '),
-        },
-      };
-    }
-
-    return { continue: true };
+    return handleIntentMdWrite(content);
   }
 
-  // DETAIL.md validation
   if (isDetailMd(filePath) && oldContent !== undefined) {
-    const result = validateDetailMd(content, oldContent);
-
-    if (!result.valid) {
-      const errorMessages = result.violations
-        .filter((v) => v.severity === 'error')
-        .map((v) => v.message)
-        .join('; ');
-      return {
-        continue: true,
-        hookSpecificOutput: {
-          permissionDecision: 'deny',
-          permissionDecisionReason:
-            `DETAIL.md write rejected: ${errorMessages}. Rewrite it to the ` +
-            `current state — keep only the live API contract and ` +
-            `acceptance criteria, drop superseded history, never append. ` +
-            `${DENY_RETRY_GUIDANCE}`,
-        },
-      };
-    }
+    return handleDetailMdWrite(content, oldContent);
   }
 
   return { continue: true };
