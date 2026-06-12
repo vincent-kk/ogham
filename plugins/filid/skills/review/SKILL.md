@@ -411,5 +411,8 @@ Committee:
   --solo        — manual override → adjudicator (integrated 6-perspective)
 Rounds:   Max 5 deliberation rounds (team mode only)
 Verdict:  APPROVED | REQUEST_CHANGES | INCONCLUSIVE
+Gate:     fix_items >= MEDIUM block; LOW → Advisory Notes (never blocks;
+          APPROVED presented as "APPROVED (with notes)"). VETO classes
+          are gate-independent.
 Recovery: Dead worker → probe → respawn (max 2) → forced ABSTAIN
 ```

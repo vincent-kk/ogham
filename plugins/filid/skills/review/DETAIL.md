@@ -6,7 +6,11 @@
 - The A/B/C subagent MUST emit the Subagent Return Contract (defined below) to the main orchestrator on exit. Omission produces a `null` payload, which the gate treats identically to `chairperson-forbidden`.
 - The main orchestrator MUST apply the `verdict_gate` rule to that return value before dispatching Phase D (team / solo-adjudicator / fail).
 - `chairperson-direct` Phase D synthesis is a protocol violation; `verdict_gate` blocks the merge with an `INCONCLUSIVE` verdict and records the reason in `session.md`.
-- Output artifacts remain under `.filid/review/<normalized-branch>/` with the filenames catalogued in `INTENT.md`.
+- Verdict derivation MUST apply the severity gate (see `### Severity Gate & Advisory Channel`): only blocking fix items (severity >= MEDIUM) can produce `REQUEST_CHANGES`; LOW fix items route to the advisory channel and never block. VETO classes and the critical-security override are gate-independent.
+- Every fix_item MUST carry a `consequence` field naming what concretely breaks if left unaddressed; a fix_item with no concrete consequence is at most LOW (see `contracts.md` → "Severity Gate & Finding Discipline").
+- A null result (`fix_items: []` with SYNTHESIS) is a valid success state for every persona and the adjudicator; it MUST cite the checked surface in the opinion body.
+- Any change to verdict derivation, severity anchoring, or finding discipline under `skills/review/**` or `agents/*.md` MUST be followed by a calibration pass (`skills/review/calibration/calibration.md`): clean fixture → APPROVED, low-only fixture → APPROVED with Advisory Notes, seeded fixture → REQUEST_CHANGES.
+- Output artifacts remain under `.filid/review/<normalized-branch>/` with the filenames catalogued in `INTENT.md`. The cross-review advisory ledger lives at `.filid/review/advisory-ledger.md` (outside per-branch cleanup scope).
 
 ## API Contracts
 
@@ -75,10 +79,62 @@ verdict_gate:
     verdict: INCONCLUSIVE
     rationale: 'team mode elected but committee too small to form a quorum; block merge.'
   else:
-    verdict: derived from Phase D quorum result (APPROVED | REQUEST_CHANGES | INCONCLUSIVE)
+    verdict: derived from Phase D quorum result under the severity gate (APPROVED | REQUEST_CHANGES | INCONCLUSIVE)
 ```
 
 A missing or `null` `deliberation_mode` is handled identically to `chairperson-forbidden` — the subagent failed to emit the handoff and the merge MUST be blocked.
+
+### Severity Gate & Advisory Channel
+
+The severity gate partitions the final aggregated fix_item set (committee
+fix_items + Phase A CRITICAL/HIGH ingestion) before verdict derivation:
+
+| Partition    | Severity                     | Destination                                        | Verdict effect                      |
+| ------------ | ---------------------------- | -------------------------------------------------- | ----------------------------------- |
+| **blocking** | `CRITICAL \| HIGH \| MEDIUM` | `fix-requests.md` (`FIX-XXX`)                      | non-empty → `REQUEST_CHANGES`       |
+| **advisory** | `LOW`                        | `review-report.md` `## Advisory Notes` (`ADV-XXX`) | never blocks — `APPROVED` reachable |
+
+- SYNTHESIS with an empty blocking set → `APPROVED`. When the advisory
+  set is non-empty, the report header/body present it as
+  **APPROVED (with notes)** — presentation only. The frontmatter
+  `verdict`, the verdict enum, and the terminal marker stay `APPROVED`;
+  the enum gains no new value.
+- The gate applies to SYNTHESIS fix_items ONLY. VETO classes (circular
+  dependency, hardcoded secrets, security-critical bugs, irreversible
+  destructive operations) and the critical-security override
+  (`state-machine.md`) are gate-independent: a VETO maps to
+  `REQUEST_CHANGES` regardless of the gate.
+- `INCONCLUSIVE` paths (quorum failure, round-5 exhaust, fail dispatch)
+  are unaffected by the gate.
+
+### Advisory Ledger Contract
+
+`.filid/review/advisory-ledger.md` tracks advisory recurrence across
+reviews (all branches). The chairperson updates it in Step D.6 when
+writing Advisory Notes:
+
+The authoritative column set (including formatting) is `templates.md` →
+"Advisory Ledger Format"; the fields are:
+
+| Field              | Meaning                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `key`              | `<path> + <rule>` — same dedup key as fix_items                                                          |
+| `path`             | file path (denormalized from `key` for readability)                                                      |
+| `rule`             | violated rule id (denormalized from `key`)                                                               |
+| `count`            | number of distinct review runs that raised this advisory item                                            |
+| `first_seen`       | ISO-8601 date of first appearance                                                                        |
+| `last_seen_branch` | normalized branch of the most recent appearance                                                          |
+| `last_run_id`      | review-run identifier of the most recent count — rows matching the current run id are not re-incremented |
+| `status`           | `open \| promoted`                                                                                       |
+| `debt_id`          | debt record id once promoted, else `—`                                                                   |
+
+Promotion rule: when `count` reaches **3** and `status` is `open`, the
+chairperson calls `mcp_t_debt_manage(action: "create", projectRoot,
+debtItem: …)` with `severity: LOW`, sets `status: promoted`, and records
+the returned `debt_id`. Promoted keys are skipped on future appearances
+(no re-counting) — the advisory appendix never becomes an unbounded
+backlog. This is a bookkeeping call, not a measurement call; it does not
+violate the Phase D no-measurement constraint.
 
 ### review-report.md frontmatter (mandatory)
 
@@ -98,3 +154,4 @@ Writers MUST emit all required fields. Readers (pipeline main, revalidate) grep-
 
 - 2026-04-20 — initial authoring. Codifies the A/B/C subagent ↔ main handoff required by PR-2 (emit in `phases/phase-d-deliberation.md`) and PR-3 (consume in `pipeline/SKILL.md`), and blocks `chairperson-direct` Phase D synthesis via `verdict_gate`.
 - 2026-04-21 — add `review-report.md` frontmatter schema (Round 3 F-10).
+- 2026-06-12 — wire the severity gate into verdict derivation (LOW → advisory channel, `APPROVED (with notes)` presentation), require `consequence` on fix_items, codify the null-result success state, add the advisory ledger + debt promotion contract, and mandate calibration passes.

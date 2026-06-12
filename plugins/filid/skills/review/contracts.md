@@ -110,6 +110,7 @@ fix_items:
     path: <file path>
     rule: <violated rule id>
     current: <measured value>
+    consequence: <what concretely breaks if left unaddressed>
     recommended_action: <short imperative>
     evidence: <verification line reference or stage reference>
 compromise_accepted: <true|false> # Optional — set when re-evaluating a VETO compromise
@@ -117,7 +118,7 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
 ---
 ```
 
-> **Note**: `severity` on fix_items uses the UPPERCASE review/debt scale `CRITICAL|HIGH|MEDIUM|LOW` (SSoT: `src/types/debt.ts` → `DebtSeverity`). This is distinct from (a) rule severity `error|warning|info` (`src/types/rules.ts` → `RuleSeverity`, for static rule definitions) and (b) drift severity lowercase `critical|high|medium|low` (`src/types/drift.ts` → `DriftSeverity`, for sync output). See `templates/rules/filid_fca-policy.md` → **Severity Vocabulary** for all three scales and their advisory mapping.
+> **Note**: `severity` on fix_items uses the UPPERCASE review/debt scale `CRITICAL|HIGH|MEDIUM|LOW` (SSoT: `src/types/debt.ts` → `DebtSeverity`). This is distinct from (a) rule severity `error|warning|info` (`src/types/rules.ts` → `RuleSeverity`, for static rule definitions) and (b) drift severity lowercase `critical|high|medium|low` (`src/types/drift.ts` → `DriftSeverity`, for sync output). The advisory mapping of this scale (LOW = advisory, >= MEDIUM = blocking) is defined in "Severity Gate & Finding Discipline" below.
 
 ### Field semantics
 
@@ -132,9 +133,20 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
   when aggregating fix_items from multiple personas.
 - **`rebuttal_targets`** — list of PersonaIds whose prior-round opinion
   this persona explicitly disagrees with. Round 1 MUST leave this empty.
-- **`fix_items`** — structured fixes that will be promoted to `FIX-XXX`
-  entries in `fix-requests.md`. The chairperson deduplicates by
-  `path + rule` across all personas.
+- **`fix_items`** — structured findings. The chairperson deduplicates by
+  `path + rule` across all personas (highest severity wins on collision,
+  `confidence` as tiebreaker), then applies the severity gate: items at
+  or above MEDIUM are promoted to `FIX-XXX` entries in
+  `fix-requests.md`; LOW items route to the advisory channel
+  (`review-report.md` → `## Advisory Notes`, `ADV-XXX`) and never block
+  the verdict. `fix_items: []` with `state: SYNTHESIS` is a valid,
+  successful opinion (null result) — see "Severity Gate & Finding
+  Discipline" below.
+- **`consequence`** (per fix_item, REQUIRED) — names the specific
+  behavior, contract, metric, or guarantee that breaks if the item is
+  left unaddressed. "Improves clarity/consistency" is not a consequence.
+  A fix_item whose consequence cannot be concretely named is at most
+  LOW.
 - **`compromise_accepted`** — only set in VETO re-evaluation rounds. If
   `true`, the opinion's `state` should transition from prior VETO to
   SYNTHESIS with an acknowledgement in the body.
@@ -154,6 +166,63 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
   `round-<N>-business-driver-compromise.md` in response to a VETO, the
   frontmatter is extended with a `compromise_proposals` array (see
   `agents/business-driver.md` for the schema).
+
+## Severity Gate & Finding Discipline
+
+Canonical definition — every persona agent file carries a compact copy
+of these rules; this section is the source of truth when they drift.
+
+### The gate
+
+fix_items with severity `>= MEDIUM` are **blocking** — they are promoted
+to `FIX-XXX` and a non-empty blocking set produces `REQUEST_CHANGES`.
+`LOW` fix_items are **advisory** — they route to `review-report.md` →
+`## Advisory Notes` and can never produce `REQUEST_CHANGES` on their
+own. SYNTHESIS with an empty blocking set maps to `APPROVED` (presented
+as **APPROVED (with notes)** when the advisory set is non-empty —
+presentation only; the verdict enum is unchanged). The gate applies to
+SYNTHESIS fix_items ONLY: VETO classes (circular dependency, hardcoded
+secrets, security-critical bugs, irreversible destructive operations)
+and the critical-security override are gate-independent.
+
+### Null result is success
+
+A rigorous sweep that surfaces zero at-or-above-gate findings is a
+valid, successful outcome. The opinion body MUST state the surface
+inspected in one line — `Checked: <files/contracts/paths>` — so a
+formal zero is distinguishable from an unexamined zero. NEVER
+manufacture, inflate, or pad findings: finding count is not a measure
+of review quality; calibration is.
+
+### Anti-inflation hard rules
+
+Applied mechanically, regardless of how the consequence is narrated:
+
+1. Style, formatting, naming-preference, comment-wording, and
+   doc-phrasing findings → LOW.
+2. Generic, unfalsifiable consequences ("may cause future bugs", "hurts
+   maintainability", "could confuse readers") → demote to LOW.
+3. A consequence built on a speculative chain of 2+ steps ("if X, then
+   Y could, which might Z") → LOW.
+
+**Under-classification exception**: when unclear wording or
+documentation masks a requirement, contract, or security omission, the
+finding is graded by the masked omission's consequence (cite the
+concrete requirement/contract being masked), not by the wording itself.
+
+These hard rules never reclassify calibrated mechanical thresholds —
+DAG cycle, 3+12, LCOM4, CC, INTENT.md 50-line cap keep the severities
+defined in each persona's Decision Criteria.
+
+### No notes escape
+
+Defect suspicion appears ONLY as a fix_item (with severity +
+consequence). Narrative sections (opinion body, Perspective Sweep,
+Evidence Trace) and `reasoning_gaps` MUST NOT carry hedged defect
+language ("might be an issue", "consider improving") about items absent
+from `fix_items`. If a suspicion does not merit a fix_item, it does not
+merit prose — omit it. `reasoning_gaps` is reserved for missing
+measurements, never for suspicions.
 
 ## Subagent Prompt Rules
 

@@ -42,17 +42,18 @@ Step D.2-solo).
 
 Applied after the Lead has collected every Round N opinion file:
 
-| Current round state                                  | Lead action                     | Next round state              |
-| ---------------------------------------------------- | ------------------------------- | ----------------------------- |
-| Round N = 1, all opinions written                    | Tally states                    | Apply quorum rules (below)    |
-| Any opinion has `state: VETO`                        | Enter VETO branch               | COMPROMISE round              |
-| `S / (M - A) >= 2/3`, no VETO                        | CONCLUSION                      | Verdict derivation            |
-| `S / (M - A) < 2/3`, no VETO, `N < 5`                | Start re-DEBATE                 | Create Round N+1 tasks        |
-| `V == 0`, `S / (M - A) < 2/3`, `N >= 5`              | Forced CONCLUSION               | Verdict = `INCONCLUSIVE`      |
-| Compromise accepted by all vetoing personas          | CONCLUSION                      | Verdict = `REQUEST_CHANGES`   |
-| Compromise rejected by any vetoing persona           | Forced CONCLUSION (FAIL)        | Verdict = `REQUEST_CHANGES`   |
+| Current round state                         | Lead action              | Next round state            |
+| ------------------------------------------- | ------------------------ | --------------------------- |
+| Round N = 1, all opinions written           | Tally states             | Apply quorum rules (below)  |
+| Any opinion has `state: VETO`               | Enter VETO branch        | COMPROMISE round            |
+| `S / (M - A) >= 2/3`, no VETO               | CONCLUSION               | Verdict derivation          |
+| `S / (M - A) < 2/3`, no VETO, `N < 5`       | Start re-DEBATE          | Create Round N+1 tasks      |
+| `V == 0`, `S / (M - A) < 2/3`, `N >= 5`     | Forced CONCLUSION        | Verdict = `INCONCLUSIVE`    |
+| Compromise accepted by all vetoing personas | CONCLUSION               | Verdict = `REQUEST_CHANGES` |
+| Compromise rejected by any vetoing persona  | Forced CONCLUSION (FAIL) | Verdict = `REQUEST_CHANGES` |
 
 Where:
+
 - `M` = committee length
 - `S` = count of SYNTHESIS opinions in the current round
 - `V` = count of VETO opinions
@@ -61,13 +62,13 @@ Where:
 
 ## Quorum Rules
 
-| Situation                                         | Lead decision                          | Notes                                   |
-| ------------------------------------------------- | -------------------------------------- | --------------------------------------- |
-| `V >= 1`                                          | Enter VETO branch                      | Single VETO overrides majority SYNTHESIS|
-| `V == 0` and `S / (M - A) >= 2/3`                 | CONCLUSION                             | Abstainers excluded from denominator    |
-| `V == 0` and `S / (M - A) < 2/3` and `N < 5`      | Re-DEBATE (create Round N+1 tasks)     | Write `lead-brief-round-<N+1>.md`       |
-| `V == 0` and `S / (M - A) < 2/3` and `N >= 5`     | CONCLUSION (INCONCLUSIVE)              | Round limit exhausted                   |
-| `effective_denominator == 0` (everyone abstained) | CONCLUSION (INCONCLUSIVE)              | No opinions to aggregate                |
+| Situation                                         | Lead decision                      | Notes                                    |
+| ------------------------------------------------- | ---------------------------------- | ---------------------------------------- |
+| `V >= 1`                                          | Enter VETO branch                  | Single VETO overrides majority SYNTHESIS |
+| `V == 0` and `S / (M - A) >= 2/3`                 | CONCLUSION                         | Abstainers excluded from denominator     |
+| `V == 0` and `S / (M - A) < 2/3` and `N < 5`      | Re-DEBATE (create Round N+1 tasks) | Write `lead-brief-round-<N+1>.md`        |
+| `V == 0` and `S / (M - A) < 2/3` and `N >= 5`     | CONCLUSION (INCONCLUSIVE)          | Round limit exhausted                    |
+| `effective_denominator == 0` (everyone abstained) | CONCLUSION (INCONCLUSIVE)          | No opinions to aggregate                 |
 
 ### Worked quorum examples
 
@@ -107,12 +108,24 @@ When `V >= 1`:
 
 ## Final Verdict Derivation
 
-| Terminal outcome                                   | Verdict           |
-| -------------------------------------------------- | ----------------- |
-| CONCLUSION via SYNTHESIS, no fix items aggregated  | `APPROVED`        |
-| CONCLUSION via SYNTHESIS, fix items present        | `REQUEST_CHANGES` |
-| Forced CONCLUSION via irreconcilable VETO          | `REQUEST_CHANGES` |
-| Forced CONCLUSION via round-limit or zero quorum   | `INCONCLUSIVE`    |
+The verdict is derived from the **blocking** partition of the final
+aggregated fix_item set (committee fix_items + Phase A CRITICAL/HIGH
+ingestion) under the severity gate: blocking = severity `>= MEDIUM`;
+`LOW` items are advisory and never block (see `contracts.md` →
+"Severity Gate & Finding Discipline").
+
+| Terminal outcome                                                                  | Verdict           |
+| --------------------------------------------------------------------------------- | ----------------- |
+| CONCLUSION via SYNTHESIS, blocking set empty (no fix items, or LOW-advisory only) | `APPROVED`        |
+| CONCLUSION via SYNTHESIS, blocking set non-empty (any item >= MEDIUM)             | `REQUEST_CHANGES` |
+| Forced CONCLUSION via irreconcilable VETO                                         | `REQUEST_CHANGES` |
+| Forced CONCLUSION via round-limit or zero quorum                                  | `INCONCLUSIVE`    |
+
+An `APPROVED` verdict with a non-empty advisory set is presented as
+**APPROVED (with notes)** in the report header/body — presentation
+only; the frontmatter `verdict` and the terminal marker stay
+`APPROVED`. The gate applies to SYNTHESIS fix_items ONLY — VETO classes
+and the critical-security override below are gate-independent.
 
 ## Deliberation Log Format
 
@@ -137,10 +150,10 @@ Every round transition MUST be recorded in `review-report.md` under the
 ### Solo deliberation (committee.length == 1)
 
 Skip this state machine entirely. `phase-d-deliberation.md` Step D.2-solo
-maps the single opinion directly:
+maps the single opinion directly under the same severity gate:
 
-- Opinion `state: SYNTHESIS` + no fix_items → `APPROVED`
-- Opinion `state: SYNTHESIS` + fix_items → `REQUEST_CHANGES`
+- Opinion `state: SYNTHESIS` + no blocking fix_items (none, or LOW-advisory only) → `APPROVED`
+- Opinion `state: SYNTHESIS` + any blocking fix_item (>= MEDIUM) → `REQUEST_CHANGES`
 - Opinion `state: VETO` → `REQUEST_CHANGES`
 
 `ABSTAIN` is not permitted in solo mode — the solo agent prompt enforces

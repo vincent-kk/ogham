@@ -8,11 +8,13 @@
 > messages are internal working data; do NOT summarize them mid-round.
 >
 > **Valid reasons to yield in Phase D**:
+>
 > 1. Unrecoverable error requiring human intervention
 > 2. Terminal stage marker emitted (only after Step D.6 completes AND
 >    Step 4.5 content-hash is persisted in ../SKILL.md)
 >
 > **HIGH-RISK YIELD POINTS in Phase D**:
+>
 > 1. After Step D.0 verification.md merge → chain D.1 immediately.
 > 2. After adjudicator Task returns (solo path) → chain D.6 write.
 > 3. After TeamCreate + parallel Task spawns return → chain D.2.5 wait
@@ -20,7 +22,7 @@
 > 4. After all Round N SendMessage deliveries arrive → chain D.3.1 (grep
 >    state frontmatter) + D.3.2 quorum decision in the same response.
 > 5. When creating Round N+1 tasks → chain lead-brief write + TaskCreate
->    + SendMessage for every worker without yielding between them.
+>    - SendMessage for every worker without yielding between them.
 > 6. After VETO compromise file is written → chain D.4.3 re-eval task
 >    creation immediately.
 > 7. After TeamDelete returns → chain ../SKILL.md Step 4.5 (content-hash)
@@ -41,14 +43,14 @@ dispatch fields:
 
 - `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
-  round5-exhaust}`
+round5-exhaust}`
 
 Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 
-| Dispatch | Trigger                                                           | Main action                                                                                      |
-| -------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| team     | `deliberation_mode == team` AND `committee.length >= 2`           | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally         |
-| solo     | `deliberation_mode == solo-adjudicator`                           | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                  |
+| Dispatch | Trigger                                                                                                                                                                                               | Main action                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| team     | `deliberation_mode == team` AND `committee.length >= 2`                                                                                                                                               | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally                                                                                            |
+| solo     | `deliberation_mode == solo-adjudicator`                                                                                                                                                               | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                                                                                                     |
 | fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error (nested spawn refused) surfacing before any round completes. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
 
 > **Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT Step D.7.**
@@ -109,7 +111,7 @@ into a single `verification.md` file that committee members will read:
    `<REVIEW_DIR>/verification-structure.md`.
 2. Write `<REVIEW_DIR>/verification.md` with frontmatter keys
    `scope: combined`, `session_ref: session.md`, `structure_check_ref:
-   structure-check.md` (if present). Preserve exactly from sub-files:
+structure-check.md` (if present). Preserve exactly from sub-files:
    `debt_bias_level`, `critical_failures`, `metrics_passed`,
    `structure_passed`. Drop `tools_executed` / `created_at`
    (reproducible from sub-files).
@@ -191,6 +193,13 @@ ABSTAIN is not permitted in solo mode. Include the Perspective Sweep
 section with six H3 subsections (one per committee lens) so the final
 review report can still surface per-perspective coverage.
 
+A lens with no at-or-above-gate findings is a VALID, successful entry —
+populate it with "no findings at or above the gate" plus one line of
+checked-surface evidence (Checked: <files/contracts/paths>). Do NOT
+manufacture findings to fill a lens; zero findings is a success state.
+Every fix_item MUST carry a `consequence` field (what concretely breaks
+if left unaddressed); no concrete consequence → severity at most LOW.
+
 == REMINDER ==
 Write the output file before finishing. Do NOT call Task, TeamCreate,
 SendMessage, TaskList, or any orchestration tool. You are a standalone
@@ -204,18 +213,22 @@ Language: <from [filid:lang] tag, default English>
 After the Task returns:
 
 1. Read `<REVIEW_DIR>/rounds/round-1-adjudicator.md`.
-2. Parse the frontmatter `state` field.
+2. Parse the frontmatter `state` field and partition `fix_items` by the
+   severity gate (blocking = severity >= MEDIUM; LOW = advisory — see
+   `../contracts.md` → "Severity Gate & Finding Discipline").
 
-| Opinion state | Final verdict    |
-| ------------- | ---------------- |
-| SYNTHESIS (no fix_items) | APPROVED |
-| SYNTHESIS (with fix_items) | REQUEST_CHANGES |
-| VETO          | REQUEST_CHANGES  |
+| Opinion state                                                  | Final verdict   |
+| -------------------------------------------------------------- | --------------- |
+| SYNTHESIS (no blocking fix_items — none, or LOW-advisory only) | APPROVED        |
+| SYNTHESIS (any blocking fix_item >= MEDIUM)                    | REQUEST_CHANGES |
+| VETO                                                           | REQUEST_CHANGES |
 
 3. Skip directly to Step D.6 (write review-report.md + fix-requests.md).
    Because adjudicator emits fix_items with a `perspective` tag on
    each item, Step D.6 can still populate a per-perspective summary
-   table in `review-report.md`.
+   table in `review-report.md`. Step D.6.1 ingestion of Phase A
+   CRITICAL/HIGH findings still applies — it can flip an APPROVED
+   mapping to REQUEST_CHANGES.
 
 **→ After solo verdict is determined, immediately proceed to Step D.6. Do NOT yield.**
 
@@ -344,13 +357,13 @@ Let `effective_denominator` = `M - A`.
 
 Evaluate rules in order — first match wins:
 
-| Condition                                             | Action                          |
-| ----------------------------------------------------- | ------------------------------- |
-| `effective_denominator == 0` (everyone abstained)     | CONCLUSION (INCONCLUSIVE) → D.6 |
-| `V >= 1`                                              | Enter VETO branch (Step D.4)    |
-| `effective_denominator > 0 && S / effective_denominator >= 2/3` | CONCLUSION → Step D.6 |
-| `S / effective_denominator < 2/3 && V == 0 && N < 5`  | Next round → Step D.3.3         |
-| `N >= 5` (round limit)                                | CONCLUSION (INCONCLUSIVE) → D.6 |
+| Condition                                                       | Action                          |
+| --------------------------------------------------------------- | ------------------------------- |
+| `effective_denominator == 0` (everyone abstained)               | CONCLUSION (INCONCLUSIVE) → D.6 |
+| `V >= 1`                                                        | Enter VETO branch (Step D.4)    |
+| `effective_denominator > 0 && S / effective_denominator >= 2/3` | CONCLUSION → Step D.6           |
+| `S / effective_denominator < 2/3 && V == 0 && N < 5`            | Next round → Step D.3.3         |
+| `N >= 5` (round limit)                                          | CONCLUSION (INCONCLUSIVE) → D.6 |
 
 ### D.3.3 — Start Round N+1 (re-DEBATE)
 
@@ -522,24 +535,74 @@ persona excluded from `effective_denominator`.
 
 This step runs for both solo and team deliberation paths.
 
-### D.6.1 — Determine verdict
+### D.6.1 — Aggregate fix_items & apply the severity gate
 
-From the final state machine outcome OR the solo opinion state:
+1. Aggregate fix_items from all `<REVIEW_DIR>/rounds/round-<final>-*.md`
+   opinion files. Deduplicate by `path + rule` (highest severity wins on
+   collision, `confidence` as tiebreaker). Also ingest CRITICAL/HIGH
+   findings from `<REVIEW_DIR>/structure-check.md` (Phase A) and assign
+   them `Raised by: Phase A`. Phase A findings carry no `consequence`
+   field — the chairperson derives it from the violated rule's documented
+   failure mode (e.g. dependency cycle → DAG invariant broken, build and
+   refactor ordering hazards; INTENT.md cap → module decomposition signal
+   suppressed).
+2. Partition the deduplicated set by the severity gate
+   (`../contracts.md` → "Severity Gate & Finding Discipline"):
+   - **blocking** (`CRITICAL | HIGH | MEDIUM`) → assign sequential
+     `FIX-001`, `FIX-002`, ... IDs → `fix-requests.md` (Step D.6.4).
+   - **advisory** (`LOW`) → assign sequential `ADV-001`, `ADV-002`, ...
+     IDs → `review-report.md` `## Advisory Notes` (Step D.6.3). Advisory
+     items are NEVER written to `fix-requests.md`.
 
-| Outcome                                 | Verdict          |
-| --------------------------------------- | ---------------- |
-| SYNTHESIS with no fix_items             | `APPROVED`       |
-| SYNTHESIS with fix_items                | `REQUEST_CHANGES`|
-| Irreconcilable VETO                     | `REQUEST_CHANGES`|
-| Quorum not met / 5-round limit exceeded | `INCONCLUSIVE`   |
+### D.6.2 — Determine verdict
 
-### D.6.2 — Collect all fix_items
+From the final state machine outcome OR the solo opinion state, using
+the blocking partition from D.6.1:
 
-Aggregate fix_items from all `<REVIEW_DIR>/rounds/round-<final>-*.md`
-opinion files. Deduplicate by `path + rule`. Assign sequential `FIX-001`,
-`FIX-002`, ... IDs. Also ingest CRITICAL/HIGH findings from
-`<REVIEW_DIR>/structure-check.md` (Phase A) and assign them `Raised by:
-Phase A`.
+| Outcome                                                                | Verdict           |
+| ---------------------------------------------------------------------- | ----------------- |
+| SYNTHESIS with empty blocking set (no fix_items, or LOW-advisory only) | `APPROVED`        |
+| SYNTHESIS with non-empty blocking set (any >= MEDIUM)                  | `REQUEST_CHANGES` |
+| Irreconcilable VETO                                                    | `REQUEST_CHANGES` |
+| Quorum not met / 5-round limit exceeded                                | `INCONCLUSIVE`    |
+
+`APPROVED` with a non-empty advisory set is presented as **APPROVED
+(with notes)** in the report header/body — presentation only; the
+frontmatter `verdict` and the terminal marker stay `APPROVED`. The
+critical-security override (`../state-machine.md`) remains
+gate-independent.
+
+### D.6.2-adv — Update the advisory ledger (advisory items only)
+
+Skip when the advisory partition is empty. Otherwise maintain
+`.filid/review/advisory-ledger.md` (project-level, shared across
+branches — NOT under the per-branch review directory, so
+`mcp_t_review_manage(cleanup)` never deletes it; format:
+`../templates.md` → "Advisory Ledger Format"):
+
+1. Read the ledger (create with the header row when missing). Determine
+   the current run id — the same review-run identifier recorded in
+   `session.md` under `phase_d_token_usage.run_id`.
+2. For each advisory item, look up its `key` (`<path> + <rule>`):
+   - `status: promoted` → skip (no re-counting).
+   - existing row with `last_run_id` equal to the current run id → skip
+     (a resumed or re-entered Phase D must not double-count the same
+     run).
+   - existing `open` row → increment `count`, update `last_seen_branch`
+     and `last_run_id`.
+   - no row → append with `count: 1`, `first_seen: <today>`,
+     `status: open`, `last_run_id: <current run id>`.
+3. For every `open` row whose `count` reached **3**: promote to the
+   debt system — `mcp_t_debt_manage(action: "create", projectRoot,
+debtItem: { fractal_path, file_path, review_branch,
+original_fix_id: <ADV-id>, severity: "LOW", rule_violated,
+metric_value, title, original_request: <recommended_action>,
+developer_justification: "", refined_adr: "", created_at: <ISO-8601>
+})`, then set the row to `status: promoted` and record the returned
+   `debt_id`. Annotate the corresponding Advisory Notes entry with
+   `promoted to debt <debt_id>`. This is a bookkeeping call, not a
+   measurement call — it does not violate the no-measurement
+   constraint below.
 
 ### D.6.3 — Write review-report.md
 
@@ -554,15 +617,21 @@ Required sections:
 - `## Technical Verification Results` — copied from verification.md tables
 - `## Deliberation Log` — one entry per round (state, persona positions,
   chairperson mediation, transition)
-- `## Final Verdict` — verdict + fix item count
+- `## Advisory Notes` — one `ADV-XXX` entry per advisory (LOW) item from
+  D.6.1, with ledger count and any `promoted to debt <id>` annotation.
+  Omit the section when the advisory partition is empty.
+- `## Final Verdict` — verdict + blocking fix item count + advisory count
 
 ### D.6.4 — Write fix-requests.md (with config-patch validation gate)
 
 Path: `<REVIEW_DIR>/fix-requests.md`
 Format: see `../templates.md` → "Fix Requests Format"
 
-One section per fix item, each with: Severity, Source, Type, Path, Rule,
-Current, Raised by, Recommended Action, Code Patch (if applicable).
+Contains the **blocking partition only** (severity >= MEDIUM, from
+D.6.1) — advisory items live exclusively in `review-report.md` →
+`## Advisory Notes`. One section per fix item, each with: Severity,
+Source, Type, Path, Rule, Current, Consequence, Raised by, Recommended
+Action, Code Patch (if applicable).
 
 > **Config Patch Validation Gate**. For every fix whose Code Patch
 > modifies `.filid/config.json`, the chairperson MUST validate the patch
@@ -573,7 +642,7 @@ Current, Raised by, Recommended Action, Code Patch (if applicable).
 For each fix item whose Code Patch targets `.filid/config.json`:
 
 1. **Call the validator** — `mcp_t_config_patch_validate({ patch_json:
-   "<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
+"<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
 2. **If `valid == true`** → emit the fix unchanged.
 3. **If `valid == false` and `suggestion` is present** → rewrite the
    fix's Code Patch to the `suggestion` string. Append a
@@ -672,10 +741,15 @@ irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 
 - Phase D makes NO direct MCP measurement calls. All metrics come from
   `verification.md` / `verification-metrics.md` / `verification-structure.md` /
-  `structure-check.md`.
+  `structure-check.md`. The only sanctioned Phase D MCP calls are
+  bookkeeping, not measurement: `mcp_t_config_patch_validate` (D.6.4
+  schema gate) and `mcp_t_debt_manage(create)` (D.6.2-adv advisory
+  promotion).
 - The chairperson writes `verification.md`, `review-report.md`,
-  `fix-requests.md`, and (optionally) `lead-brief-round-<N>.md`. Personas
-  write only their own `round-<N>-<persona-id>.md` files.
+  `fix-requests.md`, the advisory ledger
+  (`.filid/review/advisory-ledger.md`), and (optionally)
+  `lead-brief-round-<N>.md`. Personas write only their own
+  `round-<N>-<persona-id>.md` files.
 - Maximum 5 deliberation rounds.
 - Maximum 2 respawn attempts per dead worker.
 - Solo path always writes exactly one round opinion; team path may write
