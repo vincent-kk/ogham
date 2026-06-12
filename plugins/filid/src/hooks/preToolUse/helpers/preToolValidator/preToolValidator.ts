@@ -14,6 +14,22 @@ import { validateCwd } from '../../../utils/validateCwd.js';
 
 const INTENT_MD_LINE_LIMIT = 50;
 
+/**
+ * Project an Edit the way Claude Code's Edit tool applies it: literal
+ * replacement (no `$&`/`$'` substitution patterns — hence the function
+ * replacer) and every occurrence when `replace_all` is set.
+ */
+function projectEdit(
+  current: string,
+  oldString: string,
+  newString: string,
+  input: PreToolUseInput,
+): string {
+  return input.tool_input.replace_all === true
+    ? current.split(oldString).join(newString)
+    : current.replace(oldString, () => newString);
+}
+
 function denyCriteria(result: CriteriaMdValidation): HookOutput {
   const errorMessages = result.violations
     .filter((v) => v.severity === 'error')
@@ -79,7 +95,7 @@ export function validatePreToolUse(
         /* file unreadable — fall through to warning fallback */
       }
       if (current !== undefined && oldString && current.includes(oldString)) {
-        const projected = current.replace(oldString, newString);
+        const projected = projectEdit(current, oldString, newString, input);
         const result = validateCriteriaMd(projected, current);
         if (!result.valid) return denyCriteria(result);
         return { continue: true };
@@ -94,9 +110,13 @@ export function validatePreToolUse(
         },
       };
     }
-    const newContent = input.tool_input.content;
-    if (input.tool_name === 'Write' && newContent) {
-      const result = validateCriteriaMd(newContent, oldContent);
+    // No truthiness gate: an empty-content Write is the trivial full-wipe
+    // a gaming agent would use to escape FAIL claims — validate it too.
+    if (input.tool_name === 'Write') {
+      const result = validateCriteriaMd(
+        input.tool_input.content ?? '',
+        oldContent,
+      );
       if (!result.valid) return denyCriteria(result);
     }
     return { continue: true };
@@ -125,7 +145,7 @@ export function validatePreToolUse(
     }
 
     if (current !== undefined && oldString && current.includes(oldString)) {
-      const projected = current.replace(oldString, newString);
+      const projected = projectEdit(current, oldString, newString, input);
       const lineCount = projected.split('\n').length;
       if (lineCount > INTENT_MD_LINE_LIMIT) {
         return {

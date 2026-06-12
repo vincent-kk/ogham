@@ -7,7 +7,9 @@ import type {
   DocumentViolation,
 } from '../../../types/documents.js';
 
-const CLAIM_HEADING_RE = /^##\s+(CLM-\d+)\b/;
+// Tolerant of heading depth (##/###) and bold wrapping so a claim cannot be
+// hidden from the mechanical lint while staying visible to Phase D judgment.
+const CLAIM_HEADING_RE = /^#{2,3}\s+\*{0,2}(CLM-\d+)\b/;
 
 interface ClaimBlock {
   id: string;

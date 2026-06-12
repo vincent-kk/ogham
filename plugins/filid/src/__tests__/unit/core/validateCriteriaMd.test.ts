@@ -95,6 +95,24 @@ describe('validateCriteriaMd', () => {
     );
   });
 
+  it('parses heading variants (###, bold) so claims cannot hide from the lint', () => {
+    const boldHeading = claim('CLM-001', { observable: undefined }).replace(
+      '## CLM-001',
+      '### **CLM-001**',
+    );
+    const result = validateCriteriaMd([HEADER, boldHeading].join('\n'));
+    expect(result.valid).toBe(false);
+    expect(result.violations).toContainEqual(
+      expect.objectContaining({ rule: 'missing-field', severity: 'error' }),
+    );
+
+    const oldLedger = [HEADER, claim('CLM-001')].join('\n');
+    const removalViaVariant = validateCriteriaMd(HEADER, oldLedger);
+    expect(removalViaVariant.violations).toContainEqual(
+      expect.objectContaining({ rule: 'claim-removed' }),
+    );
+  });
+
   it('rejects degenerate observable == expected duplication', () => {
     const content = [
       HEADER,

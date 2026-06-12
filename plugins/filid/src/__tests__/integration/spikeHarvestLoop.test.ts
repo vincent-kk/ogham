@@ -21,7 +21,9 @@ import { getCacheDir } from '../../core/infra/cacheManager/cacheManager.js';
  * half of issue #67: mode gate, per-prompt banner lifecycle (missing →
  * current → stale manifest), criteria ledger lint, and the mode audit
  * trail. The LLM-contract half (review claim verdicts, harvest interview)
- * is exercised by the skill contracts and the review calibration harness.
+ * is NOT covered here — its regression proxy is the calibration fixture
+ * `skills/review/calibration/claim-change.md` (run-d), executed manually
+ * per calibration.md.
  */
 
 const here = fileURLToPath(import.meta.url);
@@ -198,6 +200,32 @@ describe.skipIf(!runnable)('spike-harvest loop (real git + built bundles)', () =
     ).toContain('CLM-001');
   });
 
+  it('criteria lint simulates Edit with replace_all — claim removal via rename is denied', () => {
+    const ledgerPath = join(repo, '.filid', 'criteria.md');
+    // Cross-reference BEFORE the heading: a first-occurrence-only
+    // projection would alter only the mention and falsely allow.
+    writeFileSync(
+      ledgerPath,
+      `# Acceptance Criteria Ledger\n\nSee CLM-001 below.\n\n${VALID_CLAIM.split('\n').slice(2).join('\n')}\n`,
+    );
+    const result = runHook(preToolBundle, {
+      cwd: repo,
+      session_id: 'sim-edit',
+      tool_name: 'Edit',
+      tool_input: {
+        file_path: ledgerPath,
+        old_string: 'CLM-001',
+        new_string: 'CLM-RENAMED',
+        replace_all: true,
+      },
+      hook_event_name: 'PreToolUse',
+    });
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'CLM-001',
+    );
+  });
+
   it('criteria lint rejects gamed claims (missing observable) even on the spike branch', () => {
     const gamed = VALID_CLAIM.split('\n')
       .filter((line) => !line.startsWith('- observable'))
@@ -206,6 +234,16 @@ describe.skipIf(!runnable)('spike-harvest loop (real git + built bundles)', () =
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'observable',
+    );
+  });
+
+  it('criteria lint denies the empty-content Write that would wipe the ledger', () => {
+    const ledgerPath = join(repo, '.filid', 'criteria.md');
+    writeFileSync(ledgerPath, VALID_CLAIM);
+    const result = writeViaHook(ledgerPath, '');
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'CLM-001',
     );
   });
 });

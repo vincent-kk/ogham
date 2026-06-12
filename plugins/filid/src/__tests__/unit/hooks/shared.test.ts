@@ -10,7 +10,7 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
-const { isFcaProject, isIntentMd, isDetailMd } =
+const { isFcaProject, isIntentMd, isDetailMd, isCriteriaMd } =
   await import('../../../hooks/shared/shared.js');
 const { existsSync } = await import('node:fs');
 
@@ -95,6 +95,27 @@ describe('shared hooks utilities', () => {
       expect(isDetailMd('C:\\app\\DETAIL.md')).toBe(true);
       expect(isDetailMd('C:\\app\\src\\DETAIL.md')).toBe(true);
       expect(isDetailMd('C:\\app\\INTENT.md')).toBe(false);
+    });
+  });
+
+  describe('isCriteriaMd', () => {
+    it('should match the ledger via absolute, relative, and backslash paths', () => {
+      expect(isCriteriaMd('/repo/.filid/criteria.md')).toBe(true);
+      expect(isCriteriaMd('.filid/criteria.md')).toBe(true);
+      expect(isCriteriaMd('C:\\repo\\.filid\\criteria.md')).toBe(true);
+    });
+
+    it('should resolve denormalized segments (//, /./, ..) before matching', () => {
+      expect(isCriteriaMd('/repo/.filid//criteria.md')).toBe(true);
+      expect(isCriteriaMd('/repo/.filid/./criteria.md')).toBe(true);
+      expect(isCriteriaMd('/repo/x/../.filid/criteria.md')).toBe(true);
+      expect(isCriteriaMd('/repo/.filid/../docs/criteria.md')).toBe(false);
+    });
+
+    it('should reject lookalikes outside .filid or with different names', () => {
+      expect(isCriteriaMd('/repo/criteria.md')).toBe(false);
+      expect(isCriteriaMd('/repo/.filid/criteria.markdown')).toBe(false);
+      expect(isCriteriaMd('/repo/.filid/Criteria.md')).toBe(false);
     });
   });
 });

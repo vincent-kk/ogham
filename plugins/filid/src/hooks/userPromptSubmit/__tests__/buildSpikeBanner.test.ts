@@ -34,12 +34,15 @@ function makeRepo(branch: string, createdEpochSec: number): void {
   writeFileSync(join(root, '.filid', 'config.json'), '{}');
 }
 
-function writeManifest(headSha: string): void {
+function writeManifest(headSha: string, createdAt?: string): void {
   const dir = join(root, '.filid', 'harvest', 'spike--poc');
   mkdirSync(dir, { recursive: true });
   writeFileSync(
     join(dir, 'manifest.json'),
-    JSON.stringify({ head_sha: headSha, created_at: '2026-06-12T00:00:00Z' }),
+    JSON.stringify({
+      head_sha: headSha,
+      created_at: createdAt ?? new Date().toISOString(),
+    }),
   );
 }
 
@@ -90,5 +93,16 @@ describe('buildSpikeBanner', () => {
     const banner = buildSpikeBanner(root);
     expect(banner).toContain('Harvest manifest STALE');
     expect(banner).toContain('Re-run /filid:harvest');
+  });
+
+  it('reports an EXPIRED manifest when sealed past the timebox despite a matching head', () => {
+    makeRepo('spike/poc', Math.floor(Date.now() / 1000));
+    writeManifest(
+      SHA_A,
+      new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    );
+    const banner = buildSpikeBanner(root);
+    expect(banner).toContain('Harvest manifest EXPIRED');
+    expect(banner).not.toContain('manifest current');
   });
 });

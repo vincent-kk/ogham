@@ -55,21 +55,34 @@ export function buildSpikeBanner(cwd: string): string | null {
     );
   } else {
     const headSha = readHeadSha(cwd);
+    const sealedMs =
+      manifest.created_at === undefined
+        ? Number.NaN
+        : Date.parse(manifest.created_at);
+    const expired =
+      Number.isFinite(sealedMs) &&
+      Date.now() - sealedMs > SPIKE_TIMEBOX_DAYS * DAY_MS;
     if (
-      manifest.head_sha !== undefined &&
-      headSha !== null &&
-      manifest.head_sha === headSha
+      manifest.head_sha === undefined ||
+      headSha === null ||
+      manifest.head_sha !== headSha
     ) {
-      lines.push(
-        `[filid:spike] Harvest manifest current (head ` +
-          `${headSha.slice(0, 7)}). Finalize spike disposal (discard by ` +
-          `default, or promote); any new commit invalidates the manifest.`,
-      );
-    } else {
       lines.push(
         `[filid:spike] Harvest manifest STALE — head moved past ` +
           `${manifest.head_sha?.slice(0, 7) ?? '?'}. Re-run /filid:harvest ` +
           `before merge-track entry.`,
+      );
+    } else if (expired) {
+      lines.push(
+        `[filid:spike] Harvest manifest EXPIRED — sealed more than ` +
+          `${SPIKE_TIMEBOX_DAYS}d ago; review/pipeline treat it as ` +
+          `unharvested. Re-run /filid:harvest before merge-track entry.`,
+      );
+    } else {
+      lines.push(
+        `[filid:spike] Harvest manifest current (head ` +
+          `${headSha.slice(0, 7)}). Finalize spike disposal (discard by ` +
+          `default, or promote); any new commit invalidates the manifest.`,
       );
     }
   }
