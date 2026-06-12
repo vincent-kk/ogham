@@ -2,13 +2,13 @@
 
 ## Purpose
 
-18개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
+19개 FCA-AI 사용자 호출 스킬의 정의 파일을 포함한다. 각 스킬은 SKILL.md (메인 프롬프트)와 reference.md (상세 참조) 쌍으로 구성된다.
 
 ## Structure (grouped by role)
 
 | 그룹            | 스킬                                                                      |
 | --------------- | ------------------------------------------------------------------------- |
-| 파이프라인/리뷰 | `pipeline`, `review`, `resolve`, `revalidate`, `structure-review`         |
+| 파이프라인/리뷰 | `pipeline`, `review`, `resolve`, `revalidate`, `structure-review`, `harvest` |
 | 문서/동기화     | `update`, `enrich-docs`, `pull-request`, `sync`, `restructure`, `migrate` |
 | 스캔/설정       | `setup`, `scan`, `guide`, `context-query`, `config-wizard`                |
 | 테스트/폴백     | `promote`, `ast-fallback`                                                 |
