@@ -2,25 +2,24 @@
 
 ## Purpose
 
-사용자 프롬프트 제출 시점에 (1) 턴당 fmap 상태를 초기화해 다음 PreToolUse에서 INTENT.md가 재주입되도록 하고, (2) 세션 첫 프롬프트에 한 번 FCA-AI 포인터(`.claude/rules/filid_fca-policy.md`) + 언어 태그 + 비활성화 규칙 목록을 주입한다. 규칙 본문은 Claude Code가 프로젝트 지시사항으로 자동 로드하므로 훅은 위치만 가리키고 본문은 복제하지 않는다.
+사용자 프롬프트 제출 시점에 (1) 턴당 fmap 상태를 초기화하고, (2) 세션 첫 프롬프트에 한 번 FCA-AI 포인터 + 언어 태그 + 비활성 규칙 목록을 주입하며, (3) spike/* 브랜치에서는 **매 프롬프트** spike 배너(경과일·미수확 결정 수·타임박스·manifest 상태)를 주입한다. 규칙 본문은 복제하지 않고 위치만 가리킨다.
 
 ## Structure
 
-- `userPromptSubmit.ts` — `handleUserPromptSubmit` (오케스트레이터: fmap reset → inject)
+- `userPromptSubmit.ts` — `handleUserPromptSubmit` (fmap reset → inject → spike 배너 머지)
 - `userPromptSubmit.entry.ts` — stdin → handler → stdout 파이프
-- `injectContext.ts` — `injectContext`
-- `utils/buildMinimalContext.ts` — `buildMinimalContext` (포인터·언어 태그·비활성 규칙 조립)
+- `utils/injectContext.ts` — 세션 첫 프롬프트 포인터 주입
+- `utils/buildMinimalContext.ts` — 포인터·언어 태그·비활성 규칙 조립
+- `utils/buildSpikeBanner.ts` — spike 배너 조립 (비-spike면 null)
 - `__tests__/` organ — 단위 테스트
 
 ## Conventions
 
 - 오케스트레이터가 `validateCwd` + `isFcaProject`를 단 1회 수행; 비-FCA는 즉시 continue
-- 3줄 output 규약 (첫 프롬프트만):
-  1. 포인터: `FCA-AI active` / `Not initialized` / `Rules not deployed` 중 하나
-  2. `[filid:lang] <lang>` (`config.language ?? 'en'`)
-  3. (선택) `[filid] Disabled rules: ...` (`enabled === false`인 키만)
+- 3줄 output 규약 (첫 프롬프트만): 포인터 / `[filid:lang]` / (선택) Disabled rules
 - `injectContext`의 Gate: `!isFirstInSession && hasPromptContext` → continue
-- 주입 후 `writePromptContext` + `markSessionInjected` 두 캐시 마킹
+- spike 배너는 **세션 캐시 비대상** — 모드가 세션 중 checkout으로 바뀔 수 있어 매 프롬프트 fresh 판정 (fs 읽기 수 회, git spawn 없음)
+- 배너 동적 내용: 경과일(reflog 첫 항목), 미수확 결정 수(reflog 갱신 수), 7일 타임박스 경고, harvest manifest 부재/STALE/current
 - `continue: false` 절대 없음 — 프롬프트 차단 금지
 
 ## Boundaries
@@ -34,17 +33,17 @@
 ### Ask first
 
 - fmap 외 추가 상태 리셋 (boundary 캐시 등)
-- 포인터 이외 추가 컨텍스트 라인
-- Gate 완화 (매 프롬프트 주입 등)
+- 포인터·spike 배너 이외 추가 컨텍스트 라인
+- 포인터 주입 Gate 완화 (spike 배너 외의 매 프롬프트 주입)
 
 ### Never do
 
 - `.claude/rules/filid_fca-policy.md`에 파일 write
 - `continue: false` 반환
-- `injectContext` 로직을 오케스트레이터에 인라인 복제
+- spike 배너를 세션 캐시에 태우기 (모드 전이 brain-split 유발)
 - 훅 번들에 zod import (번들 크기 예산 초과 — `readHookConfig` 패턴 사용)
 
 ## Dependencies
 
-- `../../core/infra/cacheManager/` (`hasPromptContext`, `isFirstInSession`, `markSessionInjected`, `removeFractalMap`, `writePromptContext`)
-- `../shared/`, `../utils/validateCwd.js`, `../utils/readHookConfig.js`
+- `../../core/infra/cacheManager/`, `../../constants/spikeMode.js`
+- `../shared/`, `../utils/` (`validateCwd`, `readHookConfig`, git 메타 판독기, `readHarvestManifest`)
