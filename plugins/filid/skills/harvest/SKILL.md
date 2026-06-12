@@ -153,6 +153,15 @@ AskUserQuestion(
    manifest — that is the gate working, not a bug. Re-run harvest
    incrementally.
 
+5. **Stale degraded review cleanup** — if
+   `.filid/review/<normalized>/fix-requests.md` exists and contains
+   `Type: harvest-required` (the Harvest-Required Variant written by the
+   review guard against the pre-harvest state), clear that review
+   session: `mcp_t_review_manage(action: "cleanup", projectRoot,
+branchName: <branch>)`. Otherwise the now-obsolete degraded artifacts
+   would route the next pipeline run to resolve instead of a fresh
+   review.
+
 **→ Immediately proceed to Step 5.**
 
 ### Step 5 — Spike Disposal
