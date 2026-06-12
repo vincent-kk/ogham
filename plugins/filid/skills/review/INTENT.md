@@ -16,7 +16,7 @@
 | `prompt-templates.md`             | Phase A/B/C1/C2 서브에이전트 프롬프트 리터럴 템플릿                                         |
 | `state-machine.md`                | 의장 라운드 판정 규칙 (5라운드, SYNTHESIS/VETO/ABSTAIN, 심각도 게이트)                      |
 | `phases/phase-{a,b,c1,c2,d}-*.md` | 단계별 서브에이전트 지침                                                                    |
-| `calibration/`                    | 검증기 회귀 픽스처 (clean/low-only/seeded, FPR·FNR·인플레이션 측정)                         |
+| `calibration/`                    | 검증기 회귀 픽스처 (clean/low-only/seeded/claim, FPR·FNR·인플레이션·claim 오판정 측정)      |
 
 페르소나는 `../../agents/<persona-id>.md` 로 정의된다.
 

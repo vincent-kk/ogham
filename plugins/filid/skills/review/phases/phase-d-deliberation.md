@@ -704,10 +704,9 @@ For each fix item whose Code Patch targets `.filid/config.json`:
    resolver sees the precise schema violation. Add
    `Raised by: D.6.4 schema gate` to the fix entry.
 
-This gate covers the incident root cause: hallucinated keys such as
-`rules[*].allowed-no-entry` never reach `resolve`, eliminating the
-no-op config commit class of failures (see
-`plugins/filid/docs/incidents/2026-04-24-no-op-config-incident.md`).
+This gate guarantees hallucinated keys such as
+`rules[*].allowed-no-entry` never reach `resolve` — the class of
+failure that produces no-op config commits.
 
 ### D.6.5 — Team shutdown (team deliberation only)
 

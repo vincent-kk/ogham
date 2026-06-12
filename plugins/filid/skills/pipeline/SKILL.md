@@ -268,9 +268,8 @@ D.7 (fail).
 
 After Phase D has written `review-report.md` (and `fix-requests.md` when
 applicable) via Step D.6 or D.7, the pipeline main finalizes the review
-skill in its own context. These steps used to live inside the subagent
-as review Step 4.5 and Step 5; they now run main-side because the
-subagent exits before Phase D.
+skill in its own context: review Step 4.5 and Step 5 run main-side
+because the subagent exits before Phase D.
 
 1. **Persist content hash** (review Step 4.5):
    `mcp_t_review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>)`.

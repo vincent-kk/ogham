@@ -1,10 +1,10 @@
 # State Machine — Lead's Round Judgment Rules
 
 This document defines the transition rules the **chairperson (team lead)**
-applies during Phase D deliberation. Unlike the previous single-agent
-roleplay model, personas are now real team workers emitting structured
-opinion files. The chairperson parses opinion frontmatter (`state` field)
-and decides the next round transition or final verdict.
+applies during Phase D deliberation. Personas are real team workers
+emitting structured opinion files. The chairperson parses opinion
+frontmatter (`state` field) and decides the next round transition or
+final verdict.
 
 Phase D runs at most **5 rounds** before forced conclusion.
 

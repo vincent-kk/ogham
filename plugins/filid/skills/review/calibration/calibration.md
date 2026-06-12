@@ -11,7 +11,7 @@
 
 ## 1. Fixtures
 
-Run ids are deliberately neutral (`run-a` / `run-b` / `run-c`): the branch
+Run ids are deliberately neutral (`run-a` / `run-b` / `run-c` / `run-d`): the branch
 name reaches the reviewer through `session.md` and every review artifact
 path, so variant-revealing names ("clean", "seeded") would leak the
 expected outcome and contaminate the FPR/FNR measurement. The run-id ↔
@@ -38,13 +38,16 @@ cannot glob the manifest or the sibling variants — a reviewer that can read
 `seeded-violations.md` (or diff the variants) is not being tested:
 
 1. Create `/tmp/filid-calib/<date>/<run-id>/` (`<run-id>` ∈ `run-a |
-run-b | run-c`; `<date>` = one pass id, e.g. `2026-06-12`, substituted
-   consistently across the pass).
+run-b | run-c | run-d`; `<date>` = one pass id, e.g. `2026-06-12`,
+   substituted consistently across the pass).
 2. `git init -b main`, then write the **base tree** from `clean-change.md`
-   §1 (including `.filid/config.json`) and commit on `main`.
+   §1 (including `.filid/config.json`) and commit on `main` — for
+   `run-d`, also commit `.filid/criteria.md` (`claim-change.md` §1) on
+   `main` before branching.
 3. `git checkout -b calib/<run-id>`, overwrite `src/slugify/slugify.ts`
-   with the variant for that run id (`run-a`: `clean-change.md` §2,
-   `run-b`: `low-only-change.md`, `run-c`: `seeded-change.md`), and commit.
+   with the variant for that run id (`run-a` / `run-d`: `clean-change.md`
+   §2, `run-b`: `low-only-change.md`, `run-c`: `seeded-change.md`), and
+   commit.
 4. **In a fresh session opened at the scratch repo root**, run
    `/filid:review --solo --base main`.
 
@@ -108,8 +111,8 @@ ledger) — calibration runs never touch a real project's review artifacts.
 
 ## 4. Regression Ledger
 
-Record one row per calibration pass (all three runs), newest last:
+Record one row per calibration pass (all four runs), newest last:
 
-| date       | runner                | FP  | FN  | inflation | verdicts (run-a / run-b / run-c)                   | notes |
-| ---------- | --------------------- | --- | --- | --------- | -------------------------------------------------- | ----- |
-| <ISO 8601> | <model or session id> | 0   | 0   | 0         | APPROVED / APPROVED (with notes) / REQUEST_CHANGES | —     |
+| date       | runner                | FP  | FN  | inflation | verdicts (run-a / run-b / run-c / run-d)                             | notes |
+| ---------- | --------------------- | --- | --- | --------- | -------------------------------------------------------------------- | ----- |
+| <ISO 8601> | <model or session id> | 0   | 0   | 0         | APPROVED / APPROVED (with notes) / REQUEST_CHANGES / REQUEST_CHANGES | —     |

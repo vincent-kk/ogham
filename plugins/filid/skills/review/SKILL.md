@@ -231,7 +231,7 @@ message and terminate.
 
 1. Read `<REVIEW_DIR>/session.md` frontmatter to extract `committee`,
    `deliberation_mode`, and `failure_reason`. If `deliberation_mode` is
-   missing (legacy session.md without the field), derive it locally:
+   missing, derive it locally:
    - `committee == ['adjudicator']` → `solo-adjudicator`
    - `committee.length >= 2` → `team`
    - otherwise (empty or unrecognized committee) → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline `verdict_gate` blocks the merge as INCONCLUSIVE
