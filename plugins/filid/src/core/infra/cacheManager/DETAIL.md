@@ -34,6 +34,7 @@
 | `hasGuideInjected`    | guideCache         | `(sessionId, cwd) => boolean`                 |
 | `markGuideInjected`   | guideCache         | `(sessionId, cwd) => void`                    |
 | `appendModeAudit`     | modeAuditCache     | `(cwd, entry: ModeAuditEntry) => void`        |
+| `ModeAuditEntry`      | modeAuditCache     | (type) `{ timestamp, sessionId, tool, path, mode, decision, rule, reason? }` |
 
 `appendModeAudit`는 spike 모드 게이트의 allow/deny/exempt 판정을 `{cacheDir}/mode-audit.jsonl`에 JSONL로 누적한다 (절대 throw하지 않음). `ModeAuditEntry`: `{ timestamp, sessionId, tool, path, mode: 'spike'|'normal', decision: 'allow'|'deny'|'exempt', rule, reason? }`.
 

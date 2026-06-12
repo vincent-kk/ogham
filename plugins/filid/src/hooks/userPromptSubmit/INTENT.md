@@ -19,7 +19,7 @@
 - 3줄 output 규약 (첫 프롬프트만): 포인터 / `[filid:lang]` / (선택) Disabled rules
 - `injectContext`의 Gate: `!isFirstInSession && hasPromptContext` → continue
 - spike 배너는 **세션 캐시 비대상** — 모드가 세션 중 checkout으로 바뀔 수 있어 매 프롬프트 fresh 판정 (fs 읽기 수 회, git spawn 없음)
-- 배너 동적 내용: 경과일(reflog 첫 항목), 미수확 결정 수(reflog 갱신 수), 7일 타임박스 경고, harvest manifest 부재/STALE/current
+- 배너 동적 내용: 경과일(reflog 첫 항목), 미수확 결정 수(reflog 갱신 수), 7일 타임박스 경고, harvest manifest 부재/STALE/EXPIRED/current
 - `continue: false` 절대 없음 — 프롬프트 차단 금지
 
 ## Boundaries

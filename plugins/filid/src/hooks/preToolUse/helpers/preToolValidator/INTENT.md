@@ -34,7 +34,7 @@ Write/Edit가 `INTENT.md`(50줄 제한)·`DETAIL.md`(append-only 방지)·`.fili
 
 ### Never do
 
-- `old_string`을 첫 번째 발견 외 전부 치환 (`String.replace` 1회만)
+- `replace_all` 플래그 무시 — `true`면 전체 치환, 기본은 1회 치환 (`projectEdit` 규칙)
 - 검증 실패 시 `deny` 누락 금지
 - criteria.md 검증을 spike 모드에서 건너뛰기
 
