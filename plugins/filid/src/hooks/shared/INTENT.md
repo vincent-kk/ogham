@@ -2,17 +2,17 @@
 
 ## Purpose
 
-모든 hooks 모듈이 공통으로 사용하는 초경량 판별 함수 모음. "FCA 프로젝트 여부", "INTENT.md 파일 여부", "DETAIL.md 파일 여부"만 판정하며 I/O 외 의존성 없음.
+모든 hooks 모듈이 공통으로 사용하는 초경량 판별 함수 모음. "FCA 프로젝트 여부", "INTENT.md / DETAIL.md / `.filid/criteria.md` 파일 여부"만 판정하며 I/O 외 의존성 없음.
 
 ## Structure
 
-- `shared.ts` — `isFcaProject`, `isIntentMd`, `isDetailMd`, `fileBasename` (internal)
+- `shared.ts` — `isFcaProject`, `isIntentMd`, `isDetailMd`, `isCriteriaMd`, `fileBasename` (internal)
 
 ## Conventions
 
 - `isFcaProject(cwd)`: `.filid/` 또는 `INTENT.md` 를 git 루트(`.git`)까지 walk-up 검색 — 하위 디렉토리 cwd에서도 프로젝트 감지, 첫 마커에서 반환
 - `fileBasename(path)`: POSIX `/`와 Windows `\` 양쪽 separator 지원 — `lastIndexOf`의 최댓값 사용
-- 파일 판정은 `fileBasename(path) === 'INTENT.md'` / `'DETAIL.md'` 정확 일치 (대소문자 구분)
+- 파일 판정은 `fileBasename(path) === 'INTENT.md'` / `'DETAIL.md'` 정확 일치 (대소문자 구분); `isCriteriaMd`는 `.filid/criteria.md` 경로 꼬리 일치 (순수 문자열)
 - `isFcaProject` 는 git 루트까지 bounded walk-up(level당 `existsSync`); 그 외 함수는 `existsSync` 한 번 또는 순수 문자열 연산
 - 함수 네이밍: `is*` 접두사로 boolean predicate 명시
 
