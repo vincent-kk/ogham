@@ -122,12 +122,12 @@ emit it as the last line of the response, then end execution.
 
 ### With `--fix` — apply remediations then re-validate
 
-| Violation                      | Auto-fix Action                                                         | Agent             |
-| ------------------------------ | ----------------------------------------------------------------------- | ----------------- |
-| `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                           | `code-surgeon`    |
-| `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                           | `context-manager` |
+| Violation                      | Auto-fix Action                                                                | Agent             |
+| ------------------------------ | ------------------------------------------------------------------------------ | ----------------- |
+| `ORGAN_INTENT_MD_PRESENT`      | Delete the INTENT.md from the organ directory                                  | `code-surgeon`    |
+| `INTENT_MD_MISSING_BOUNDARIES` | Append skeleton boundary sections to the file                                  | `context-manager` |
 | `INTENT_MD_LINE_LIMIT`         | Trim and compress to bring within the 50-line limit (via `mcp_t_doc_compress`) | `context-manager` |
-| `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables           | `code-surgeon`    |
+| `TEST_312_EXCEEDED`            | Parameterize repetitive `it()` blocks into `it.each()` tables                  | `code-surgeon`    |
 
 ### Auto-fix Dispatch — parallel `Task` calls
 
@@ -144,7 +144,7 @@ For an `INTENT_MD_LINE_LIMIT` violation:
 Task(
   subagent_type: "filid:context-manager",
   model: "sonnet",
-  prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Use mcp_t_doc_compress(action: 'auto', mode: 'lossless-first') as the primary tool. Return the final line count and a one-line summary."
+  prompt: "Trim and compress <abs path>/INTENT.md to ≤50 lines while preserving the 3-tier boundary sections (### Always do, ### Ask first, ### Never do). Rewrite the file directly with the Edit tool — mcp_t_doc_compress(mode: 'auto') only returns compaction metadata (compacted reference, cap_applies), not rewritten content. Return the final line count and a one-line summary."
 )
 ```
 

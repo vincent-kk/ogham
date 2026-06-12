@@ -106,7 +106,7 @@ for each generated spec:
     // Must return: { pass: true, basic: <=3, complex: <=12, total: <=15 }
 
     if not result.pass:
-        adjustAndRetry(spec, result)   // Trim lowest-value cases until compliant
+        abortForFile(spec, result)   // Report exceeded cases; skip Phase 6 for this file only
 ```
 
 ### Migration (`implementer`)
@@ -124,7 +124,7 @@ Final report format:
 Promotion complete (2/3 eligible files promoted):
   ✓ src/core/test.ts     → src/core/spec.ts     (15 cases: 3 basic + 12 complex)
   ✓ src/parser/test.ts   → src/parser/spec.ts   (11 cases: 2 basic + 9 complex)
-  ✗ src/schemas/test.ts  → skipped (validation failed after 2 retries — manual review needed)
+  ✗ src/schemas/test.ts  → skipped (validation failed — manual review needed)
 ```
 
 ## MCP Tool Examples

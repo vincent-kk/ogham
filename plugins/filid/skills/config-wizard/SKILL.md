@@ -76,6 +76,9 @@ Reset the config to defaults. Preserves the `language` field if currently set
    report "No config found" and suggest `/filid:setup`.
 4. If `.filid/config.json` does not exist and the subcommand is `set`,
    create a default config first, then apply the change.
+5. If `.filid/config.json` does not exist and the subcommand is `reset`,
+   skip the read/delete in Step 3 and proceed directly to the
+   `mcp_t_project_init` regeneration call.
 
 ### Step 2 — Parse Arguments
 

@@ -10,7 +10,7 @@
 | `agents/`                    | 에이전트 정의 (architect, QA, review committee 등) |
 | `hooks/`                     | Claude Code 훅 이벤트 매핑 (`hooks.json`)          |
 | `skills/`                    | 사용자 스킬 디렉토리                               |
-| `libs/`                      | cross-platform Node 러너 (`find-node.sh`)          |
+| `libs/`                      | cross-platform Node 러너 (`run.cjs`)               |
 | `scripts/`                   | esbuild 빌드 + rule-hash sync 스크립트             |
 | `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files` 포함)  |
 | `templates/`                 | 신규 모듈용 INTENT.md / DETAIL.md 템플릿           |

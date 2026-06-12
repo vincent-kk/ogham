@@ -56,7 +56,7 @@ Each `DriftItem` fields:
 
 ```
 mcp_t_lca_resolve({ path: "<drifted-path>", moduleA: "<neighbor1>", moduleB: "<neighbor2>" })
-// Returns: { lcaPath: string, recommendedParent: string, confidence: number }
+// Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 ```
 
 Correction plan format:
@@ -96,6 +96,7 @@ No changes applied. Remove --dry-run to execute.
 ```
 
 <!-- [INTERACTIVE] AskUserQuestion: Stage 3 correction plan approval -->
+
 Without `--auto-approve`, request explicit user confirmation:
 
 ```
@@ -124,7 +125,8 @@ After execution, `mcp_t_structure_validate` confirms correctness:
 
 ```
 mcp_t_structure_validate({ path: "<target-path>" })
-// Returns: { passed: boolean, checks: ValidationCheck[], violations: Violation[] }
+// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
+// (passed / violations live at report.result)
 ```
 
 ### Final Report Format

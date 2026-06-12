@@ -364,11 +364,11 @@ from the appropriate stage.
 
 ## Available MCP Tools
 
-| Tool                  | Action                   | Purpose                                           |
-| --------------------- | ------------------------ | ------------------------------------------------- |
-| `mcp_t_review_manage` | `normalize-branch`       | Normalize branch name for auto-detection          |
-| `mcp_t_review_manage` | `format-pr-comment`      | Format review findings as a PR comment            |
-| `mcp_t_review_manage` | `generate-human-summary` | Generate human-readable summary of review results |
+| Tool                  | Action              | Purpose                                       |
+| --------------------- | ------------------- | --------------------------------------------- |
+| `mcp_t_review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
+| `mcp_t_review_manage` | `content-hash`      | Persist review content hash (finalize review) |
+| `mcp_t_review_manage` | `format-pr-comment` | Format review findings as a PR comment        |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 
