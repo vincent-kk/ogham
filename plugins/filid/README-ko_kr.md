@@ -119,6 +119,24 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 > - `filid:structure-review` — 전체 프로젝트 스캔 (주기적 점검용)
 > - `filid:review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
 
+### 시추와 수확 (탐사 작업)
+
+완료 기준을 아직 모르는 작업은 `spike/*` 브랜치에서 탐사하세요. 그
+브랜치에서는 문서 위생 차단(INTENT.md 50줄 제한, DETAIL.md append-only)이
+면제되고, 매 프롬프트 배너가 경과일과 미수확 결정 수를 추적합니다.
+
+```
+# 자유롭게 시추
+git checkout -b spike/my-idea
+
+# 시추가 끝나면 — keep/discard/defer 인터뷰
+/filid:harvest
+```
+
+`/filid:harvest`는 keep으로 확정된 결정을 PASS/FAIL 판정 가능한 claim으로
+`.filid/criteria.md`에 기록합니다. 이후 리뷰가 그 claim들을 판정하며,
+수확하지 않은 spike는 파이프라인이 머지 트랙 진입을 거부합니다.
+
 ### FCA-AI가 뭔지 잘 모르겠을 때
 
 ```
@@ -166,6 +184,7 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 | `/filid:review`           | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
 | `/filid:resolve`          | —                 | 수정 요청 해결                                       |
 | `/filid:revalidate`       | —                 | 수정 후 재검증 (PASS/FAIL)                           |
+| `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록             |
 
 ---
 

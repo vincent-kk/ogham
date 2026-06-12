@@ -53,6 +53,8 @@ Scan result categories:
 
 **Execution condition**: runs only when Stage 1 detects `critical` or `high` severity violations.
 
+**Approval gate**: after the drift analysis below produces a correction plan, the plan is presented to the user for approval before `filid:restructurer` executes it — skipped when `--auto-approve` is set.
+
 ```
 mcp_t_drift_detect({ path: "<target-path>", severity: "high" })
 // Returns: { drifts: DriftItem[], bySeverity: { critical, high, medium, low } }
@@ -63,13 +65,13 @@ mcp_t_drift_detect({ path: "<target-path>", severity: "high" })
 `filid:scan` and `filid:sync` use different severity vocabularies. This table maps
 scan violations to Stage 2 gate conditions:
 
-| scan Violation Type               | Stage 2 Gate                      |
+| scan Violation Type                   | Stage 2 Gate                      |
 | ------------------------------------- | --------------------------------- |
 | INTENT.md exceeds 50 lines            | high — triggers Stage 2           |
 | INTENT.md present in organ directory  | critical — triggers Stage 2       |
 | 3+12 rule violation (test count > 15) | high — triggers Stage 2           |
 | Unclassified directory                | medium — does NOT trigger Stage 2 |
-| DETAIL.md append-only growth            | medium — does NOT trigger Stage 2 |
+| DETAIL.md append-only growth          | medium — does NOT trigger Stage 2 |
 
 sync DriftSeverity ordering: `critical > high > medium > low`
 
@@ -80,10 +82,11 @@ Correction calls:
 
 ```
 mcp_t_lca_resolve({ path: "<target-path>", moduleA: "...", moduleB: "..." })
-// Returns: { lcaPath: string, suggestedPlacement: string }
+// Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 
 mcp_t_structure_validate({ path: "<target-path>" })
-// Returns: { passed: boolean, violations: Violation[] }
+// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
+// (passed / violations live at report.result)
 ```
 
 ## Section 3 — Doc & Test Update

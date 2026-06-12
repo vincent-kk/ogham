@@ -119,6 +119,25 @@ Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 > - `filid:structure-review` — full project scan (periodic health check)
 > - `filid:review` — changed files only + multi-persona review (use on every PR)
 
+### Spike & Harvest (exploratory work)
+
+When the acceptance criteria are not known yet, explore on a `spike/*`
+branch: doc-hygiene write blocks (INTENT.md 50-line cap, DETAIL.md
+append-only) are suspended there, and a per-prompt banner tracks the
+spike's age and unharvested decisions.
+
+```
+# Probe freely
+git checkout -b spike/my-idea
+
+# When the probing is done — keep/discard/defer interview
+/filid:harvest
+```
+
+`/filid:harvest` records kept decisions as PASS/FAIL-judgeable claims in
+`.filid/criteria.md`; later reviews judge those claims, and the pipeline
+refuses merge-track entry for any spike that has not been harvested.
+
 ### Learn About FCA-AI
 
 ```
@@ -166,6 +185,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/filid:review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
 | `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
 | `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
+| `/filid:harvest`          | —                 | Spike harvest interview — record acceptance claims         |
 
 ---
 

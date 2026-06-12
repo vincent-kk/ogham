@@ -25,7 +25,7 @@ After `mcp_t_drift_detect` completes, call `mcp_t_lca_resolve` for each move can
 ```
 // Sequential — after mcp_t_drift_detect:
 mcp_t_lca_resolve({ path: "<path>", moduleA: "<sibling1>", moduleB: "<sibling2>" })
-// Returns: { lcaPath: string, recommendedParent: string, confidence: number }
+// Returns: { lca, lcaCategory, lcaDepth, distanceA, distanceB, suggestedPlacement, explanation }
 ```
 
 After analysis, `fractal-architect` generates a structured YAML proposal:
@@ -112,7 +112,8 @@ After `restructurer` completes, `fractal-architect` validates with `mcp_t_struct
 
 ```
 mcp_t_structure_validate({ path: "<target-path>" })
-// Returns: { passed: boolean, checks: ValidationCheck[], violations: Violation[] }
+// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
+// (passed / violations live at report.result)
 ```
 
 Validation checks:

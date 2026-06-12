@@ -9,4 +9,6 @@ export * from './caches/boundaryCache.js';
 export * from './caches/fractalMapCache.js';
 export * from './caches/runHashCache.js';
 export * from './caches/guideCache.js';
+export * from './caches/modeAuditCache.js';
 export type { FractalMap } from './caches/fractalMapCache.js';
+export type { ModeAuditEntry } from './caches/modeAuditCache.js';

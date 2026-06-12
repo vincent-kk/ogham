@@ -6,16 +6,17 @@
 
 ## Structure
 
-| 경로 | 역할 |
-|------|------|
-| `SKILL.md` | 5단계 워크플로우 메인 프롬프트 |
-| `reference.md` | 분할된 참조 문서 인덱스 |
-| `templates.md` | review-report / fix-requests / PR comment 출력 포맷 |
-| `contracts.md` | committee→agent 매핑, opinion frontmatter, 서브에이전트 프롬프트 규칙, post-completion 검증 |
-| `mcp-map.md` | MCP 도구 맵, 배치 파티셔닝, 체크포인트 resume, debt bias |
-| `prompt-templates.md` | Phase A/B/C1/C2 서브에이전트 프롬프트 리터럴 템플릿 |
-| `state-machine.md` | 의장 라운드 판정 규칙 (5라운드, SYNTHESIS/VETO/ABSTAIN) |
-| `phases/phase-{a,b,c1,c2,d}-*.md` | 단계별 서브에이전트 지침 |
+| 경로                              | 역할                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `SKILL.md`                        | 5단계 워크플로우 메인 프롬프트                                                              |
+| `reference.md`                    | 분할된 참조 문서 인덱스                                                                     |
+| `templates.md`                    | review-report / fix-requests / PR comment 출력 포맷                                         |
+| `contracts.md`                    | committee→agent 매핑, opinion frontmatter, 서브에이전트 프롬프트 규칙, post-completion 검증 |
+| `mcp-map.md`                      | MCP 도구 맵, 배치 파티셔닝, 체크포인트 resume, debt bias                                    |
+| `prompt-templates.md`             | Phase A/B/C1/C2 서브에이전트 프롬프트 리터럴 템플릿                                         |
+| `state-machine.md`                | 의장 라운드 판정 규칙 (5라운드, SYNTHESIS/VETO/ABSTAIN, 심각도 게이트)                      |
+| `phases/phase-{a,b,c1,c2,d}-*.md` | 단계별 서브에이전트 지침                                                                    |
+| `calibration/`                    | 검증기 회귀 픽스처 (clean/low-only/seeded/claim, FPR·FNR·인플레이션·claim 오판정 측정)      |
 
 페르소나는 `../../agents/<persona-id>.md` 로 정의된다.
 
@@ -30,7 +31,7 @@
 ### Always do
 
 - 신규 specialist 페르소나 추가 시 세 곳 동시 수정: `src/types/review.ts` + `review-manage.ts` (LOW/MEDIUM/HIGH 배열) + `agents/<id>.md`
-- 상태 전이 규칙 변경 시 `state-machine.md` 와 `phase-d-deliberation.md` Step D.3 동시 갱신
+- 상태 전이·심각도 게이트 변경 시 `state-machine.md` + `phase-d-deliberation.md` + `contracts.md` + 에이전트 7종 동시 갱신 후 `calibration/` 패스 실행
 - Phase D 산출물 포맷 변경 시 `templates.md` + `contracts.md` Opinion Frontmatter Contract 동기화
 
 ### Ask first

@@ -3,14 +3,15 @@
 Reference documentation for `review` is split into focused files.
 This index routes readers to the right file based on what they need.
 
-| File                  | Contents                                                                                           |
-| --------------------- | -------------------------------------------------------------------------------------------------- |
-| `templates.md`        | Review report, fix requests, and PR comment output formats                                         |
-| `contracts.md`        | Committee → agent mapping, opinion frontmatter schema, subagent prompt rules, post-completion verification |
-| `mcp-map.md`          | Available MCP tools, per-phase usage map, batch partitioning thresholds, checkpoint resume table, debt bias levels |
-| `prompt-templates.md` | Literal subagent prompt templates for Phase A / B / C1 / C2                                        |
-| `state-machine.md`    | Phase D round judgment rules (quorum, VETO branch, 5-round limit)                                  |
-| `phases/phase-*.md`   | Per-phase subagent instructions (A / B / C1 / C2 / D)                                              |
+| File                  | Contents                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `templates.md`        | Review report, fix requests, and PR comment output formats                                                                |
+| `contracts.md`        | Committee → agent mapping, opinion frontmatter schema, subagent prompt rules, post-completion verification                |
+| `mcp-map.md`          | Available MCP tools, per-phase usage map, batch partitioning thresholds, checkpoint resume table, debt bias levels        |
+| `prompt-templates.md` | Literal subagent prompt templates for Phase A / B / C1 / C2                                                               |
+| `state-machine.md`    | Phase D round judgment rules (quorum, VETO branch, 5-round limit, severity gate)                                          |
+| `phases/phase-*.md`   | Per-phase subagent instructions (A / B / C1 / C2 / D)                                                                     |
+| `calibration/`        | Verdict regression fixtures (clean / low-only / seeded / claim runs; FPR, FNR, severity-inflation, claim-verdict scoring) |
 
 ## Cross-Reference Map
 
@@ -30,3 +31,7 @@ This index routes readers to the right file based on what they need.
 - Interpreting `debt_bias_level` in verification output? → `mcp-map.md`
   → "Debt Bias Injection"
 - Phase D round quorum math? → `state-machine.md`
+- Severity gate, consequence requirement, null-result, or anti-inflation
+  rules? → `contracts.md` → "Severity Gate & Finding Discipline"
+- Advisory Notes / advisory ledger formats? → `templates.md`
+- Regression-testing the reviewer itself? → `calibration/calibration.md`

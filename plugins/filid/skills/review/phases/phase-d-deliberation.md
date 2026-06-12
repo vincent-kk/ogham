@@ -8,11 +8,13 @@
 > messages are internal working data; do NOT summarize them mid-round.
 >
 > **Valid reasons to yield in Phase D**:
+>
 > 1. Unrecoverable error requiring human intervention
 > 2. Terminal stage marker emitted (only after Step D.6 completes AND
 >    Step 4.5 content-hash is persisted in ../SKILL.md)
 >
 > **HIGH-RISK YIELD POINTS in Phase D**:
+>
 > 1. After Step D.0 verification.md merge → chain D.1 immediately.
 > 2. After adjudicator Task returns (solo path) → chain D.6 write.
 > 3. After TeamCreate + parallel Task spawns return → chain D.2.5 wait
@@ -20,7 +22,7 @@
 > 4. After all Round N SendMessage deliveries arrive → chain D.3.1 (grep
 >    state frontmatter) + D.3.2 quorum decision in the same response.
 > 5. When creating Round N+1 tasks → chain lead-brief write + TaskCreate
->    + SendMessage for every worker without yielding between them.
+>    - SendMessage for every worker without yielding between them.
 > 6. After VETO compromise file is written → chain D.4.3 re-eval task
 >    creation immediately.
 > 7. After TeamDelete returns → chain ../SKILL.md Step 4.5 (content-hash)
@@ -41,14 +43,14 @@ dispatch fields:
 
 - `deliberation_mode ∈ {team, solo-adjudicator, chairperson-forbidden}`
 - `failure_reason ∈ {none, phase-d-team-spawn-unavailable, team-incomplete,
-  round5-exhaust}`
+round5-exhaust}`
 
 Main then dispatches on the pair `(deliberation_mode, failure_reason)`:
 
-| Dispatch | Trigger                                                           | Main action                                                                                      |
-| -------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| team     | `deliberation_mode == team` AND `committee.length >= 2`           | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally         |
-| solo     | `deliberation_mode == solo-adjudicator`                           | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                  |
+| Dispatch | Trigger                                                                                                                                                                                               | Main action                                                                                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| team     | `deliberation_mode == team` AND `committee.length >= 2`                                                                                                                                               | Step D.2-team — TeamCreate + round state machine, ALWAYS `TeamDelete` inside try/finally                                                                                            |
+| solo     | `deliberation_mode == solo-adjudicator`                                                                                                                                                               | Step D.2-solo — single standalone `Task` to `filid:adjudicator`                                                                                                                     |
 | fail     | **Pre-dispatch**: `deliberation_mode` is `chairperson-forbidden` or `null`, OR `failure_reason != none`. **In-flight**: TeamCreate error (nested spawn refused) surfacing before any round completes. | Step D.7 — write `rounds/failure.md` AND a minimal `review-report.md` with `verdict: INCONCLUSIVE`; if a team was created, `TeamDelete` inside try/finally (orphan-log on failure). |
 
 > **Round-5 exhaust, all-ABSTAIN quorum failures, and irreconcilable VETO are NOT Step D.7.**
@@ -82,6 +84,12 @@ phase_d_token_usage:
   recorded_at: <ISO-8601 timestamp>
 ```
 
+`run_id` derivation is deterministic:
+`<normalized-branch>@<git rev-parse --short HEAD at Phase D start>`. A
+resumed or re-entered Phase D on the same head therefore reuses the id
+(the advisory ledger's once-per-run guard stays idempotent across
+resumes), while any new commit produces a new id.
+
 ---
 
 Phase D produces the final review verdict through a **real multi-agent
@@ -109,7 +117,7 @@ into a single `verification.md` file that committee members will read:
    `<REVIEW_DIR>/verification-structure.md`.
 2. Write `<REVIEW_DIR>/verification.md` with frontmatter keys
    `scope: combined`, `session_ref: session.md`, `structure_check_ref:
-   structure-check.md` (if present). Preserve exactly from sub-files:
+structure-check.md` (if present). Preserve exactly from sub-files:
    `debt_bias_level`, `critical_failures`, `metrics_passed`,
    `structure_passed`. Drop `tools_executed` / `created_at`
    (reproducible from sub-files).
@@ -117,6 +125,19 @@ into a single `verification.md` file that committee members will read:
    - `## Code Metrics Results` (from C1 body)
    - `## Structure & Dependency Verification` (from C2 body)
    - `## Debt Status` (from C2 body)
+4. Load the acceptance-criteria ledger from BOTH the base
+   (`git show <BASE_REF>:.filid/criteria.md`, when present) and HEAD
+   (`<PROJECT_ROOT>/.filid/criteria.md`), and append a
+   `## Acceptance Claims (in scope)` section: the judged set = (claims
+   `active` at base ∪ claims newly added with `active` status) whose
+   `scope` path-prefix matches at least one changed file from
+   `session.md`. A claim flipped out of `active` within the reviewed
+   diff stays in the judged set (status transitions cannot dodge the
+   judgment) — annotate it `transition: active → <new status>`. For each
+   kept claim, copy `id`, `claim`, `observable`, `expected`, `scope`.
+   When the ledger is absent or nothing matches, write the section with
+   the single line `none`. (Contract: `../contracts.md` → "Acceptance
+   Claims (criteria ledger)".)
 
 **→ After verification.md is written, immediately proceed to Step D.1. Do NOT yield.**
 
@@ -191,6 +212,20 @@ ABSTAIN is not permitted in solo mode. Include the Perspective Sweep
 section with six H3 subsections (one per committee lens) so the final
 review report can still surface per-perspective coverage.
 
+A lens with no at-or-above-gate findings is a VALID, successful entry —
+populate it with "no findings at or above the gate" plus one line of
+checked-surface evidence (Checked: <files/contracts/paths>). Do NOT
+manufacture findings to fill a lens; zero findings is a success state.
+Every fix_item MUST carry a `consequence` field (what concretely breaks
+if left unaddressed); no concrete consequence → severity at most LOW.
+
+If verification.md lists entries under "Acceptance Claims (in scope)"
+(anything other than `none`), emit a `claim_verdicts` frontmatter block
+judging EVERY listed claim as PASS / FAIL / INSUFFICIENT-EVIDENCE with
+cited evidence. PASS requires observable evidence matching the claim's
+`expected`; never mark PASS on plausibility alone — when the artifacts
+cannot decide, use INSUFFICIENT-EVIDENCE.
+
 == REMINDER ==
 Write the output file before finishing. Do NOT call Task, TeamCreate,
 SendMessage, TaskList, or any orchestration tool. You are a standalone
@@ -204,18 +239,25 @@ Language: <from [filid:lang] tag, default English>
 After the Task returns:
 
 1. Read `<REVIEW_DIR>/rounds/round-1-adjudicator.md`.
-2. Parse the frontmatter `state` field.
+2. Parse the frontmatter `state` field and partition `fix_items` by the
+   severity gate (blocking = severity >= MEDIUM; LOW = advisory — see
+   `../contracts.md` → "Severity Gate & Finding Discipline"). Fold
+   non-PASS `claim_verdicts` into the blocking set first (FAIL → HIGH
+   `code-fix`; INSUFFICIENT-EVIDENCE → MEDIUM `harvest-required` — see
+   `../contracts.md` → "Acceptance Claims (criteria ledger)").
 
-| Opinion state | Final verdict    |
-| ------------- | ---------------- |
-| SYNTHESIS (no fix_items) | APPROVED |
-| SYNTHESIS (with fix_items) | REQUEST_CHANGES |
-| VETO          | REQUEST_CHANGES  |
+| Opinion state                                                            | Final verdict   |
+| ------------------------------------------------------------------------ | --------------- |
+| SYNTHESIS (no blocking fix_items, every in-scope claim PASS)             | APPROVED        |
+| SYNTHESIS (any blocking fix_item >= MEDIUM, incl. folded claim verdicts) | REQUEST_CHANGES |
+| VETO                                                                     | REQUEST_CHANGES |
 
 3. Skip directly to Step D.6 (write review-report.md + fix-requests.md).
    Because adjudicator emits fix_items with a `perspective` tag on
    each item, Step D.6 can still populate a per-perspective summary
-   table in `review-report.md`.
+   table in `review-report.md`. Step D.6.1 ingestion of Phase A
+   CRITICAL/HIGH findings still applies — it can flip an APPROVED
+   mapping to REQUEST_CHANGES.
 
 **→ After solo verdict is determined, immediately proceed to Step D.6. Do NOT yield.**
 
@@ -291,6 +333,10 @@ You are the <persona-id> review persona working as a TEAM WORKER in team
 3. Read the input files.
 4. Write <REVIEW_DIR>/rounds/round-1-<persona-id>.md beginning with the
    Round Output Contract frontmatter defined in your agent instructions.
+   If verification.md lists entries under "Acceptance Claims (in scope)"
+   (anything other than `none`), include a `claim_verdicts` frontmatter
+   block judging every listed claim (PASS / FAIL / INSUFFICIENT-EVIDENCE,
+   each with cited evidence — never PASS on plausibility alone).
 5. TaskUpdate({ taskId, status: "completed" }).
 6. SendMessage({ type: "message", recipient: "team-lead",
    content: "round 1 <persona-id> done: <state>",
@@ -344,13 +390,13 @@ Let `effective_denominator` = `M - A`.
 
 Evaluate rules in order — first match wins:
 
-| Condition                                             | Action                          |
-| ----------------------------------------------------- | ------------------------------- |
-| `effective_denominator == 0` (everyone abstained)     | CONCLUSION (INCONCLUSIVE) → D.6 |
-| `V >= 1`                                              | Enter VETO branch (Step D.4)    |
-| `effective_denominator > 0 && S / effective_denominator >= 2/3` | CONCLUSION → Step D.6 |
-| `S / effective_denominator < 2/3 && V == 0 && N < 5`  | Next round → Step D.3.3         |
-| `N >= 5` (round limit)                                | CONCLUSION (INCONCLUSIVE) → D.6 |
+| Condition                                                       | Action                          |
+| --------------------------------------------------------------- | ------------------------------- |
+| `effective_denominator == 0` (everyone abstained)               | CONCLUSION (INCONCLUSIVE) → D.6 |
+| `V >= 1`                                                        | Enter VETO branch (Step D.4)    |
+| `effective_denominator > 0 && S / effective_denominator >= 2/3` | CONCLUSION → Step D.6           |
+| `S / effective_denominator < 2/3 && V == 0 && N < 5`            | Next round → Step D.3.3         |
+| `N >= 5` (round limit)                                          | CONCLUSION (INCONCLUSIVE) → D.6 |
 
 ### D.3.3 — Start Round N+1 (re-DEBATE)
 
@@ -522,24 +568,87 @@ persona excluded from `effective_denominator`.
 
 This step runs for both solo and team deliberation paths.
 
-### D.6.1 — Determine verdict
+### D.6.1 — Aggregate fix_items & apply the severity gate
 
-From the final state machine outcome OR the solo opinion state:
+1. Aggregate fix_items from all `<REVIEW_DIR>/rounds/round-<final>-*.md`
+   opinion files. Deduplicate by `path + rule` (highest severity wins on
+   collision, `confidence` as tiebreaker). Also ingest CRITICAL/HIGH
+   findings from `<REVIEW_DIR>/structure-check.md` (Phase A) and assign
+   them `Raised by: Phase A`. Phase A findings carry no `consequence`
+   field — the chairperson derives it from the violated rule's documented
+   failure mode (e.g. dependency cycle → DAG invariant broken, build and
+   refactor ordering hazards; INTENT.md cap → module decomposition signal
+   suppressed).
 
-| Outcome                                 | Verdict          |
-| --------------------------------------- | ---------------- |
-| SYNTHESIS with no fix_items             | `APPROVED`       |
-| SYNTHESIS with fix_items                | `REQUEST_CHANGES`|
-| Irreconcilable VETO                     | `REQUEST_CHANGES`|
-| Quorum not met / 5-round limit exceeded | `INCONCLUSIVE`   |
+   **Claim folding** — when verification.md lists in-scope acceptance
+   claims, aggregate `claim_verdicts` per claim across all final-round
+   **non-ABSTAIN** opinions with worst-wins ordering (`FAIL >
+INSUFFICIENT-EVIDENCE > PASS`; a claim missing from a non-ABSTAIN
+   opinion counts as INSUFFICIENT-EVIDENCE from that persona; ABSTAIN
+   opinions are excluded exactly as in quorum math). Fold non-PASS aggregates
+   into the fix_item set BEFORE partitioning: `FAIL` → severity HIGH,
+   `Type: code-fix`, `Rule: <CLM-id>`, consequence = the claim's broken
+   `expected`; `INSUFFICIENT-EVIDENCE` → severity MEDIUM,
+   `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — resolved by
+   `/filid:harvest`, never dispatched to code-surgeon).
 
-### D.6.2 — Collect all fix_items
+2. Partition the deduplicated set by the severity gate
+   (`../contracts.md` → "Severity Gate & Finding Discipline"):
+   - **blocking** (`CRITICAL | HIGH | MEDIUM`) → assign sequential
+     `FIX-001`, `FIX-002`, ... IDs → `fix-requests.md` (Step D.6.4).
+   - **advisory** (`LOW`) → assign sequential `ADV-001`, `ADV-002`, ...
+     IDs → `review-report.md` `## Advisory Notes` (Step D.6.3). Advisory
+     items are NEVER written to `fix-requests.md`.
 
-Aggregate fix_items from all `<REVIEW_DIR>/rounds/round-<final>-*.md`
-opinion files. Deduplicate by `path + rule`. Assign sequential `FIX-001`,
-`FIX-002`, ... IDs. Also ingest CRITICAL/HIGH findings from
-`<REVIEW_DIR>/structure-check.md` (Phase A) and assign them `Raised by:
-Phase A`.
+### D.6.2 — Determine verdict
+
+From the final state machine outcome OR the solo opinion state, using
+the blocking partition from D.6.1:
+
+| Outcome                                                                | Verdict           |
+| ---------------------------------------------------------------------- | ----------------- |
+| SYNTHESIS with empty blocking set (no fix_items, or LOW-advisory only) | `APPROVED`        |
+| SYNTHESIS with non-empty blocking set (any >= MEDIUM)                  | `REQUEST_CHANGES` |
+| Irreconcilable VETO                                                    | `REQUEST_CHANGES` |
+| Quorum not met / 5-round limit exceeded                                | `INCONCLUSIVE`    |
+
+`APPROVED` with a non-empty advisory set is presented as **APPROVED
+(with notes)** in the report header/body — presentation only; the
+frontmatter `verdict` and the terminal marker stay `APPROVED`. The
+critical-security override (`../state-machine.md`) remains
+gate-independent.
+
+### D.6.2-adv — Update the advisory ledger (advisory items only)
+
+Skip when the advisory partition is empty. Otherwise maintain
+`.filid/review/advisory-ledger.md` (project-level, shared across
+branches — NOT under the per-branch review directory, so
+`mcp_t_review_manage(cleanup)` never deletes it; format:
+`../templates.md` → "Advisory Ledger Format"):
+
+1. Read the ledger (create with the header row when missing). Determine
+   the current run id — the same review-run identifier recorded in
+   `session.md` under `phase_d_token_usage.run_id`.
+2. For each advisory item, look up its `key` (`<path> + <rule>`):
+   - `status: promoted` → skip (no re-counting).
+   - existing row with `last_run_id` equal to the current run id → skip
+     (a resumed or re-entered Phase D must not double-count the same
+     run).
+   - existing `open` row → increment `count`, update `last_seen_branch`
+     and `last_run_id`.
+   - no row → append with `count: 1`, `first_seen: <today>`,
+     `status: open`, `last_run_id: <current run id>`.
+3. For every `open` row whose `count` reached **3**: promote to the
+   debt system — `mcp_t_debt_manage(action: "create", projectRoot,
+debtItem: { fractal_path, file_path, review_branch,
+original_fix_id: <ADV-id>, severity: "LOW", rule_violated,
+metric_value, title, original_request: <recommended_action>,
+developer_justification: "", refined_adr: "", created_at: <ISO-8601>
+})`, then set the row to `status: promoted` and record the returned
+   `debt_id`. Annotate the corresponding Advisory Notes entry with
+   `promoted to debt <debt_id>`. This is a bookkeeping call, not a
+   measurement call — it does not violate the no-measurement
+   constraint below.
 
 ### D.6.3 — Write review-report.md
 
@@ -554,15 +663,25 @@ Required sections:
 - `## Technical Verification Results` — copied from verification.md tables
 - `## Deliberation Log` — one entry per round (state, persona positions,
   chairperson mediation, transition)
-- `## Final Verdict` — verdict + fix item count
+- `## Claim Verdicts` — one row per in-scope acceptance claim with the
+  aggregated PASS / FAIL / INSUFFICIENT-EVIDENCE verdict and evidence
+  reference (`../templates.md` → "Claim Verdicts"). Omit the section
+  when verification.md's claim section is `none`.
+- `## Advisory Notes` — one `ADV-XXX` entry per advisory (LOW) item from
+  D.6.1, with ledger count and any `promoted to debt <id>` annotation.
+  Omit the section when the advisory partition is empty.
+- `## Final Verdict` — verdict + blocking fix item count + advisory count
 
 ### D.6.4 — Write fix-requests.md (with config-patch validation gate)
 
 Path: `<REVIEW_DIR>/fix-requests.md`
 Format: see `../templates.md` → "Fix Requests Format"
 
-One section per fix item, each with: Severity, Source, Type, Path, Rule,
-Current, Raised by, Recommended Action, Code Patch (if applicable).
+Contains the **blocking partition only** (severity >= MEDIUM, from
+D.6.1) — advisory items live exclusively in `review-report.md` →
+`## Advisory Notes`. One section per fix item, each with: Severity,
+Source, Type, Path, Rule, Current, Consequence, Raised by, Recommended
+Action, Code Patch (if applicable).
 
 > **Config Patch Validation Gate**. For every fix whose Code Patch
 > modifies `.filid/config.json`, the chairperson MUST validate the patch
@@ -573,7 +692,7 @@ Current, Raised by, Recommended Action, Code Patch (if applicable).
 For each fix item whose Code Patch targets `.filid/config.json`:
 
 1. **Call the validator** — `mcp_t_config_patch_validate({ patch_json:
-   "<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
+"<stringified patch JSON>", source_context: "<persona-id or FIX-ID>" })`.
 2. **If `valid == true`** → emit the fix unchanged.
 3. **If `valid == false` and `suggestion` is present** → rewrite the
    fix's Code Patch to the `suggestion` string. Append a
@@ -585,10 +704,9 @@ For each fix item whose Code Patch targets `.filid/config.json`:
    resolver sees the precise schema violation. Add
    `Raised by: D.6.4 schema gate` to the fix entry.
 
-This gate covers the incident root cause: hallucinated keys such as
-`rules[*].allowed-no-entry` never reach `resolve`, eliminating the
-no-op config commit class of failures (see
-`plugins/filid/docs/incidents/2026-04-24-no-op-config-incident.md`).
+This gate guarantees hallucinated keys such as
+`rules[*].allowed-no-entry` never reach `resolve` — the class of
+failure that produces no-op config commits.
 
 ### D.6.5 — Team shutdown (team deliberation only)
 
@@ -672,10 +790,15 @@ irreconcilable VETO writes `verdict: REQUEST_CHANGES`.
 
 - Phase D makes NO direct MCP measurement calls. All metrics come from
   `verification.md` / `verification-metrics.md` / `verification-structure.md` /
-  `structure-check.md`.
+  `structure-check.md`. The only sanctioned Phase D MCP calls are
+  bookkeeping, not measurement: `mcp_t_config_patch_validate` (D.6.4
+  schema gate) and `mcp_t_debt_manage(create)` (D.6.2-adv advisory
+  promotion).
 - The chairperson writes `verification.md`, `review-report.md`,
-  `fix-requests.md`, and (optionally) `lead-brief-round-<N>.md`. Personas
-  write only their own `round-<N>-<persona-id>.md` files.
+  `fix-requests.md`, the advisory ledger
+  (`.filid/review/advisory-ledger.md`), and (optionally)
+  `lead-brief-round-<N>.md`. Personas write only their own
+  `round-<N>-<persona-id>.md` files.
 - Maximum 5 deliberation rounds.
 - Maximum 2 respawn attempts per dead worker.
 - Solo path always writes exactly one round opinion; team path may write

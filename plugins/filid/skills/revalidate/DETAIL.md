@@ -14,7 +14,13 @@
   - detect missing rows (`ledger rows < accepted fix count`) and mark the
     absent fix entries as auto-`UNRESOLVED`;
   - derive `post_count` from the returned violation set filtered by
-    `ruleId == <target rule>` and `path starts with <target_path>`;
+    `ruleId == <target rule>` and `path starts with <target_path>` —
+    EXCEPT acceptance-claim rows (`rule_id` matching `CLM-\d+`), whose
+    `post_count` comes from direct claim re-judgment against
+    `.filid/criteria.md` (`observable` evaluated, compared to
+    `expected`; PASS with cited evidence → 0, otherwise 1 — measurement
+    tools can never report a CLM rule, so counting would auto-resolve
+    claim fixes);
   - derive `status` from the triple
     `(pre_count, post_count, file_was_modified)` using the matrix below.
 - If any derived row has `status == "UNRESOLVED"`, the verdict MUST be
@@ -26,23 +32,22 @@
 
 ### Writer Responsibility
 
-| Role              | Writes                       | Must write         | Must NOT write           |
-| ----------------- | ---------------------------- | ------------------ | ------------------------ |
-| Step 3 subagent   | `verification-ledger.md` row | `post_count: TBD`, `status: TBD`, `pre_count`, `target_path`, `rule_id`, `file_was_modified` | numeric `post_count`, `RESOLVED`, `UNRESOLVED` |
-| Step 6 main       | Same row, overwrite          | derived `post_count` (number), derived `status` | anything that overrides a prior main-derived row |
+| Role            | Writes                       | Must write                                                                                   | Must NOT write                                   |
+| --------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Step 3 subagent | `verification-ledger.md` row | `post_count: TBD`, `status: TBD`, `pre_count`, `target_path`, `rule_id`, `file_was_modified` | numeric `post_count`, `RESOLVED`, `UNRESOLVED`   |
+| Step 6 main     | Same row, overwrite          | derived `post_count` (number), derived `status`                                              | anything that overrides a prior main-derived row |
 
 ### status derivation
 
-| pre_count | post_count | file_was_modified | derived status   |
-| --------- | ---------- | ----------------- | ---------------- |
-| > 0       | 0          | true              | `RESOLVED`       |
-| > 0       | > 0        | true              | `UNRESOLVED`     |
-| > 0       | > 0        | false             | `UNRESOLVED`     |
+| pre_count | post_count | file_was_modified | derived status                        |
+| --------- | ---------- | ----------------- | ------------------------------------- |
+| > 0       | 0          | true              | `RESOLVED`                            |
+| > 0       | > 0        | true              | `UNRESOLVED`                          |
+| > 0       | > 0        | false             | `UNRESOLVED`                          |
 | > 0       | 0          | false             | `UNRESOLVED` (file-diff insufficient) |
-| 0         | 0          | any               | `RESOLVED` (vacuous) |
+| 0         | 0          | any               | `RESOLVED` (vacuous)                  |
 
 ### parse-fail gate
 
 If the ledger cannot be parsed (missing file, malformed row, unexpected
 column count) → verdict pinned to `FAIL` with `reason: verification-ledger.md parse failed`.
-

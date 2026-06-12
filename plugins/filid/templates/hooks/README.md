@@ -7,8 +7,9 @@ Hooks operate at Layer 1 of the 4-layer architecture and fire without user inter
 
 | Hook Event                     | Entry File                    | Purpose                                                                                                                  |
 | ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `SessionStart`                 | `setup.entry.ts`              | Session initialization: FCA project detection and session context cache setup                                            |
 | `PreToolUse` (Read/Write/Edit) | `pre-tool-use.entry.ts`       | Unified hook: intent injection + INTENT.md(50-line cap) / DETAIL.md(append-only) validation + organ structure protection |
-| `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode                                                                      |
+| `PreToolUse` (EnterPlanMode)   | `plan-gate.entry.ts`          | FCA-AI compliance checklist when entering plan mode (example only — not registered in `hooks.json`)                      |
 | `SubagentStart`                | `agent-enforcer.entry.ts`     | FCA-AI agent role restriction injection                                                                                  |
 | `UserPromptSubmit`             | `user-prompt-submit.entry.ts` | FCA-AI rules injection on session start                                                                                  |
 | `SessionEnd`                   | `session-cleanup.entry.ts`    | Session cache and marker file cleanup                                                                                    |
@@ -130,20 +131,32 @@ Fires when a Claude Code session ends. Cleans up session-specific cache and mark
 ## Hook Registration
 
 Hooks are registered via `hooks/hooks.json` in the package root.
-Each hook command uses `find-node.sh` to locate the Node.js binary (nvm/fnm support),
-then executes the built `.mjs` file in `bridge/`.
+Each hook command runs through `libs/run.cjs` (cross-platform Node runner
+using `process.execPath`), which executes the built `.mjs` file in `bridge/`.
 
 ```json
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Read|Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
-            "timeout": 3
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "timeout": 10
           }
         ]
       }
@@ -154,7 +167,7 @@ then executes the built `.mjs` file in `bridge/`.
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/agent-enforcer.mjs\"",
             "timeout": 3
           }
         ]
@@ -166,7 +179,7 @@ then executes the built `.mjs` file in `bridge/`.
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
             "timeout": 5
           }
         ]
@@ -178,7 +191,7 @@ then executes the built `.mjs` file in `bridge/`.
         "hooks": [
           {
             "type": "command",
-            "command": "[ -z \"${CLAUDE_PLUGIN_ROOT}\" ] && exit 0; \"${CLAUDE_PLUGIN_ROOT}/libs/find-node.sh\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/session-cleanup.mjs\"",
             "timeout": 3
           }
         ]

@@ -21,6 +21,17 @@ checking signals in strict priority order. First match wins.
 
 Check signals:
 
+  Signal 0 (spike harvest guard): Does the branch match spike/*?
+    → YES: Read .filid/harvest/<normalized>/manifest.json.
+      → Manifest missing, unparsable, head_sha != git rev-parse HEAD,
+        or created_at older than 7 days (expired):
+        Route to Skill("filid:harvest") — merge-track entry blocked. The
+        guard is lifted ONLY by a current manifest; leaving the branch
+        does not lift it (checkout simply changes which branch is judged).
+      → head_sha == git rev-parse HEAD AND created_at within 7 days:
+        Spike already harvested — continue to Signal 1.
+    → NO:  Continue to Signal 1.
+
   Signal 1: Does <review_dir>/re-validate.md exist?
     → YES: Pipeline already complete. Read and report existing results. DONE.
     → NO:  Continue to Signal 2.
@@ -34,7 +45,13 @@ Check signals:
     → NO:  Continue to Signal 3.
 
   Signal 3: Does <review_dir>/fix-requests.md exist?
-    → YES: Start from RESOLVE.
+    → YES: Grep it for "Type: harvest-required".
+      → Present: Do NOT start resolve (its harvest gate would abort and
+        the pipeline would loop). Report the oracle work required
+        (spike branch → /filid:harvest; merge-track INSUFFICIENT-EVIDENCE
+        claims → supply observable evidence or a human-confirmed claim
+        revision, then /filid:review --force) and END.
+      → Absent: Start from RESOLVE.
     → NO:  Continue to Signal 4.
 
   Signal 4: Does a PR exist for this branch?
@@ -45,12 +62,14 @@ Check signals:
 
 ### Edge Cases
 
-| Condition | Behavior |
-| --------- | -------- |
-| Branch has no upstream tracking ref | `git log @{upstream}..HEAD` fails → skip push, start from revalidate directly |
-| `gh` CLI not authenticated | Signal 4 fails → default to `pr-create` (will fail at PR creation stage with auth error) |
-| Review directory does not exist | All file checks return false → falls through to Signal 4 |
-| Multiple review directories | Only `<normalized>` branch directory is checked — other branches are ignored |
+| Condition                                                | Behavior                                                                                                               |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Spike branch, manifest stale (new commits after harvest) | Signal 0 routes back to `filid:harvest` — incremental re-harvest required; the old manifest never unlocks the pipeline |
+| Spike branch, `--from` given                             | Rejected while no current manifest exists — `--from` cannot bypass the harvest gate                                    |
+| Branch has no upstream tracking ref                      | `git log @{upstream}..HEAD` fails → skip push, start from revalidate directly                                          |
+| `gh` CLI not authenticated                               | Signal 4 fails → default to `pr-create` (will fail at PR creation stage with auth error)                               |
+| Review directory does not exist                          | All file checks return false → falls through to Signal 4                                                               |
+| Multiple review directories                              | Only `<normalized>` branch directory is checked — other branches are ignored                                           |
 
 ## Flag Passthrough Matrix
 
@@ -77,13 +96,13 @@ These files serve as the inter-stage communication interface.
 
 ### Files Written by Each Stage
 
-| Stage                    | Files written                                              |
-| ------------------------ | ---------------------------------------------------------- |
-| pr-create                | _(none in review dir — creates GitHub PR)_                 |
-| review — A/B/C subagent  | `structure-check.md` (if Phase A ran), `session.md`, `verification-metrics.md`, `verification-structure.md` |
+| Stage                              | Files written                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pr-create                          | _(none in review dir — creates GitHub PR)_                                                                                                                                                                                                                                                   |
+| review — A/B/C subagent            | `structure-check.md` (if Phase A ran), `session.md`, `verification-metrics.md`, `verification-structure.md`                                                                                                                                                                                  |
 | review — Phase D + finalize (main) | `verification.md` (merged), `rounds/round-<N>-<persona>.md` (team) or `rounds/round-1-adjudicator.md` (solo) or `rounds/failure.md` (fail), `review-report.md`, `fix-requests.md` (team/solo non-approved paths only), `content-hash.json`, PR comment (via `gh pr comment` / edit-in-place) |
-| resolve                  | `justifications.md`, `.filid/debt/*.md` (if rejections)    |
-| revalidate               | `re-validate.md`                                           |
+| resolve                            | `justifications.md`, `.filid/debt/*.md` (if rejections)                                                                                                                                                                                                                                      |
+| revalidate                         | `re-validate.md`                                                                                                                                                                                                                                                                             |
 
 > Fail dispatch path: `rounds/failure.md` **and** a minimal `review-report.md`
 > (Failure Variant template in `review/templates.md`) are both written
@@ -93,50 +112,50 @@ These files serve as the inter-stage communication interface.
 
 ### Files Read by Each Stage
 
-| Stage       | Files required                                             |
-| ----------- | ---------------------------------------------------------- |
-| pr-create   | _(reads git state only)_                                   |
-| review      | _(reads git diff)_                                         |
-| resolve     | `fix-requests.md`                                          |
-| revalidate  | `justifications.md`, `fix-requests.md`, `review-report.md` |
+| Stage      | Files required                                             |
+| ---------- | ---------------------------------------------------------- |
+| pr-create  | _(reads git state only)_                                   |
+| review     | _(reads git diff)_                                         |
+| resolve    | `fix-requests.md`                                          |
+| revalidate | `justifications.md`, `fix-requests.md`, `review-report.md` |
 
 ### Stage Success Signals
 
-| Stage       | Success signal                                             |
-| ----------- | ---------------------------------------------------------- |
-| pr-create   | Skill completes without error                              |
-| review — A/B/C subagent | Subagent emits fenced `SubagentReturn` YAML block on exit; referenced artifacts (`session.md`, `verification-metrics.md`, `verification-structure.md`) exist on disk |
-| review — Phase D + finalize (main) | `review-report.md` exists (standard or Failure Variant frontmatter), `content-hash.json` written, PR comment posted/edited (Step 5, `--scope=pr` only) |
-| resolve     | `justifications.md` exists                                 |
-| revalidate  | `re-validate.md` exists                                    |
+| Stage                              | Success signal                                                                                                                                                       |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pr-create                          | Skill completes without error                                                                                                                                        |
+| review — A/B/C subagent            | Subagent emits fenced `SubagentReturn` YAML block on exit; referenced artifacts (`session.md`, `verification-metrics.md`, `verification-structure.md`) exist on disk |
+| review — Phase D + finalize (main) | `review-report.md` exists (standard or Failure Variant frontmatter), `content-hash.json` written, PR comment posted/edited (Step 5, `--scope=pr` only)               |
+| resolve                            | `justifications.md` exists                                                                                                                                           |
+| revalidate                         | `re-validate.md` exists                                                                                                                                              |
 
 ## `--from` Prerequisite Matrix
 
 Before starting at a given stage, the pipeline verifies that required
 artifacts from previous stages exist.
 
-| `--from` value  | Required artifacts                           | Check method                |
-| --------------- | -------------------------------------------- | --------------------------- |
-| `pr-create`     | _(none)_                                     | —                           |
-| `review`        | GitHub PR exists                             | `gh pr view` exit code 0    |
-| `resolve`       | `fix-requests.md` in review dir              | File existence check        |
-| `revalidate`    | `justifications.md` in review dir            | File existence check        |
+| `--from` value | Required artifacts                | Check method             |
+| -------------- | --------------------------------- | ------------------------ |
+| `pr-create`    | _(none)_                          | —                        |
+| `review`       | GitHub PR exists                  | `gh pr view` exit code 0 |
+| `resolve`      | `fix-requests.md` in review dir   | File existence check     |
+| `revalidate`   | `justifications.md` in review dir | File existence check     |
 
 ## Stage Transition Table
 
 Complete enumeration of stage outcomes and pipeline behavior.
 
-| #  | Situation                              | Next action                              |
-| -- | -------------------------------------- | ---------------------------------------- |
-| 1  | pr-create succeeds                     | Proceed to review                        |
-| 2  | review → `APPROVED` (no fix-requests)  | Pipeline **PASS** (skip resolve+revalidate) |
-| 3  | review → `REQUEST_CHANGES`             | Proceed to resolve                       |
-| 4  | resolve → 0 accepted fixes             | Proceed to revalidate                    |
-| 5  | resolve → N accepted fixes             | Proceed to revalidate                    |
-| 6  | revalidate → `PASS`                    | Pipeline **PASS**                        |
-| 7  | revalidate → `FAIL`                    | Pipeline **FAIL** (report unresolved)    |
-| 8  | Any stage execution error              | Pipeline **ERROR** (report + resume cmd) |
-| 9  | `--from` prerequisite missing          | Pipeline **ABORT** (before execution)    |
+| #   | Situation                             | Next action                                 |
+| --- | ------------------------------------- | ------------------------------------------- |
+| 1   | pr-create succeeds                    | Proceed to review                           |
+| 2   | review → `APPROVED` (no fix-requests) | Pipeline **PASS** (skip resolve+revalidate) |
+| 3   | review → `REQUEST_CHANGES`            | Proceed to resolve                          |
+| 4   | resolve → 0 accepted fixes            | Proceed to revalidate                       |
+| 5   | resolve → N accepted fixes            | Proceed to revalidate                       |
+| 6   | revalidate → `PASS`                   | Pipeline **PASS**                           |
+| 7   | revalidate → `FAIL`                   | Pipeline **FAIL** (report unresolved)       |
+| 8   | Any stage execution error             | Pipeline **ERROR** (report + resume cmd)    |
+| 9   | `--from` prerequisite missing         | Pipeline **ABORT** (before execution)       |
 
 ## Stage Execution Pattern
 
@@ -145,13 +164,13 @@ with delegation reliability.
 
 ### Execution Modes
 
-| Stage       | Mode         | Reason                                                    |
-| ----------- | ------------ | --------------------------------------------------------- |
-| pr-create   | Main context | Lightweight, procedural — direct `Skill()` is reliable    |
-| review — A/B/C | Subagent  | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested TeamCreate leaks orphan workers). Exits with `SubagentReturn` YAML. |
-| review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (`TeamCreate`/solo `Task`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter. |
-| resolve     | Main context | Procedural with internal subagents (code-surgeon)         |
-| revalidate  | Main context | Lightweight with internal subagents (parallel verifiers)  |
+| Stage                       | Mode         | Reason                                                                                                                                                               |
+| --------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pr-create                   | Main context | Lightweight, procedural — direct `Skill()` is reliable                                                                                                               |
+| review — A/B/C              | Subagent     | ~100k tokens — must isolate to prevent main context bloat. Subagent MUST NOT run Phase D (nested TeamCreate leaks orphan workers). Exits with `SubagentReturn` YAML. |
+| review — Phase D + finalize | Main context | Phase D requires main-context team orchestration (`TeamCreate`/solo `Task`). Finalize (content-hash + PR comment) reads from `review-report.md` frontmatter.         |
+| resolve                     | Main context | Procedural with internal subagents (code-surgeon)                                                                                                                    |
+| revalidate                  | Main context | Lightweight with internal subagents (parallel verifiers)                                                                                                             |
 
 ### Pseudocode
 
@@ -225,7 +244,7 @@ For each stage in pipeline:
 3. **Skill reuse**: All stages invoke existing skills via `Skill()` — the
    same code path as standalone skill execution, regardless of execution mode.
 
-> **Note**: "Main context execution" eliminates only the *pipeline-level*
+> **Note**: "Main context execution" eliminates only the _pipeline-level_
 > subagent wrapper. Skills that internally spawn subagents (e.g., resolve's
 > code-surgeon, revalidate's parallel verifiers) continue to do so normally.
 

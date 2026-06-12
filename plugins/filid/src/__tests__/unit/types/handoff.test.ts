@@ -8,8 +8,13 @@ import {
 import { normalizeFixRequestType } from '../../../lib/normalizeFixRequest.js';
 
 describe('handoff token enums', () => {
-  it('exposes the three fix request types in canonical order', () => {
-    expect(FIX_REQUEST_TYPES).toEqual(['code-fix', 'promote', 'restructure']);
+  it('exposes the four fix request types in canonical order', () => {
+    expect(FIX_REQUEST_TYPES).toEqual([
+      'code-fix',
+      'promote',
+      'restructure',
+      'harvest-required',
+    ]);
   });
 
   it('exposes the four debt actions', () => {
@@ -42,6 +47,15 @@ describe('normalizeFixRequestType (tolerant parser)', () => {
 
   it('accepts bare restructure', () => {
     expect(normalizeFixRequestType('restructure')).toBe('restructure');
+  });
+
+  it('accepts harvest-required (bare and filid-prefixed)', () => {
+    expect(normalizeFixRequestType('harvest-required')).toBe(
+      'harvest-required',
+    );
+    expect(normalizeFixRequestType('filid:harvest-required')).toBe(
+      'harvest-required',
+    );
   });
 
   it('strips filid: prefix and accepts filid:promote', () => {

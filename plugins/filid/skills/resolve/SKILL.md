@@ -75,21 +75,37 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - Fix ID (e.g., `FIX-001`)
 - Title, severity, file path, rule violated
 - Recommended action and code patch
-- **Type** (one of `code-fix`, `promote`, `restructure`; defaults to `code-fix` if absent)
+- **Type** (one of `code-fix`, `promote`, `restructure`,
+  `harvest-required`; defaults to `code-fix` if absent)
 
 Classify each item by type:
 
 - `code-fix` — standard code patch (applied by `filid:code-surgeon`)
 - `promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
+- `harvest-required` — oracle gap, not a code defect (see harvest gate below)
 
-> **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
+> **Harvest gate**: if ANY parsed item has `Type: harvest-required`,
+> ABORT resolve immediately (both `--auto` and interactive): report
+> "fix-requests.md contains harvest-required items — these are oracle
+> gaps, not code defects. On a spike/\* branch, run /filid:harvest
+> (keep/discard/defer interview). On a merge-track branch (a claim
+> judged INSUFFICIENT-EVIDENCE), supply the claim's `observable`
+> evidence — implement or restore the named test/command/artifact — or
+> revise/retire the claim with explicit human confirmation. Then re-run
+> /filid:review." Emit the terminal marker `Resolve aborted` and END.
+> `harvest-required` items MUST NEVER be dispatched to code-surgeon /
+> promote / restructure — an agent cannot harvest or attest its own
+> acceptance criteria.
+
+> **Tolerant parser**: `fix-requests.md` is hand-authored by
 > the review phase and may carry a leading `filid:` prefix on type values
 > (e.g., `filid:promote`). Strip the `filid:` prefix before enum matching —
 > treat `filid:promote` and `promote` as identical. Unknown tokens after
-> stripping fall back to `code-fix` (the default). This normalization is
-> permanent, not a migration grace period. See `src/types/handoff.ts`
-> `normalizeFixRequestType` for the canonical implementation.
+> stripping fall back to `code-fix` (the default). See
+> `src/lib/normalizeFixRequest.ts` `normalizeFixRequestType` for the
+> canonical token matcher (it returns null for unknown tokens — the
+> `code-fix` default is applied by this skill at the call site).
 
 **→ Immediately proceed to Step 3.**
 

@@ -95,8 +95,11 @@ For each accepted fix item from `justifications.md`, append one row to
 | FIX-001 | <target_path> | <rule_id> | <integer from review-report> | TBD        | <true             | false> | TBD |
 ```
 
-Fill `pre_count` from `review-report.md` / `fix-requests.md`. Fill
-`file_was_modified` from `git diff <resolve_commit_sha>..HEAD --name-only`.
+Fill `pre_count` from `review-report.md` / `fix-requests.md`. For
+acceptance-claim fixes (`rule_id` matching `CLM-\d+` — folded from a
+claim judged FAIL in review) there is no metric count: write
+`pre_count: 1` (one broken claim). Fill `file_was_modified` from
+`git diff <resolve_commit_sha>..HEAD --name-only`.
 **Leave `post_count` and `status` as the literal string `TBD`** — do NOT
 re-run `mcp_t_structure_validate` from this subagent and do NOT judge
 RESOLVED/UNRESOLVED from file diffs. If a row cannot be authored (fix
@@ -169,12 +172,24 @@ MCP tool for LCOM4/CC/3+12 — see table below). Filter violations by
 `ruleId == <rule_id>` and `path starts with <target_path>`. Write the
 integer count into `post_count`.
 
-| rule_id kind        | MCP tool                                                   | success =             |
-| ------------------- | ---------------------------------------------------------- | --------------------- |
-| structure violation | `mcp_t_structure_validate`                                 | 0 matching violations |
-| LCOM4 violation     | `mcp_t_ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
-| CC violation        | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
-| 3+12 violation      | `mcp_t_test_metrics(action: "check-312")`                  | PASS                  |
+| rule_id kind               | MCP tool                                                   | success =             |
+| -------------------------- | ---------------------------------------------------------- | --------------------- |
+| structure violation        | `mcp_t_structure_validate`                                 | 0 matching violations |
+| LCOM4 violation            | `mcp_t_ast_analyze(analysisType: "lcom4", className)`      | LCOM4 < 2             |
+| CC violation               | `mcp_t_ast_analyze(analysisType: "cyclomatic-complexity")` | CC <= 15              |
+| 3+12 violation             | `mcp_t_test_metrics(action: "check-312")`                  | PASS                  |
+| acceptance claim (`CLM-*`) | NONE — claim re-judgment (below)                           | claim judged PASS     |
+
+> **Claim re-judgment (rule_id matching `CLM-\d+`)**: measurement tools
+> can never report a CLM rule, so counting would auto-resolve the exact
+> item class the oracle ledger exists to gate. Instead, main re-judges
+> the claim directly: read it from `.filid/criteria.md`, evaluate its
+> `observable` (run the named test/command via Bash when executable;
+> otherwise inspect the named artifact), and compare against `expected`.
+> `post_count := 0` ONLY when the claim is judged PASS with cited
+> evidence (append the evidence line to `session.md`); otherwise
+> `post_count := 1` — insufficient evidence counts as 1. A claim is
+> NEVER resolved by file modification alone.
 
 **Step 6.5 — Derive status.** Apply the DETAIL.md matrix
 `(pre_count, post_count, file_was_modified) → status`. The only path to

@@ -46,13 +46,13 @@ Collection steps:
 
    ```ts
    type DocEntry = {
-     absPath: string;            // absolute INTENT.md path
-     moduleRoot: string;         // directory containing INTENT.md
-     content: string;            // full file content
+     absPath: string; // absolute INTENT.md path
+     moduleRoot: string; // directory containing INTENT.md
+     content: string; // full file content
      lineCount: number;
-     children: string[];         // immediate child directories of moduleRoot
-     implFiles: string[];        // *.ts, *.tsx, *.js under moduleRoot (non-test, non-nested fractal)
-     classification: "fractal" | "organ" | "hybrid" | "pure-function";
+     children: string[]; // immediate child directories of moduleRoot
+     implFiles: string[]; // *.ts, *.tsx, *.js under moduleRoot (non-test, non-nested fractal)
+     classification: 'fractal' | 'organ' | 'hybrid' | 'pure-function';
    };
    ```
 
@@ -81,12 +81,12 @@ Collection steps:
 Each INTENT.md receives a score ∈ [0, 100] computed from four independent
 axes, each worth 25 points.
 
-| Axis         | What it measures                                                             |
-| ------------ | ---------------------------------------------------------------------------- |
-| Structure    | Does the file cite real child directories or real file/function names?      |
-| Conventions  | Does the file list 3+ concrete rules specific to the module?                 |
-| Boundaries   | Do the 3-tier sections go beyond generic boilerplate?                        |
-| Dependencies | Does the file name concrete upstream or downstream modules?                  |
+| Axis         | What it measures                                                       |
+| ------------ | ---------------------------------------------------------------------- |
+| Structure    | Does the file cite real child directories or real file/function names? |
+| Conventions  | Does the file list 3+ concrete rules specific to the module?           |
+| Boundaries   | Do the 3-tier sections go beyond generic boilerplate?                  |
+| Dependencies | Does the file name concrete upstream or downstream modules?            |
 
 ### 3.2 Structure axis (25 pts)
 
@@ -94,7 +94,7 @@ Parse the `## Structure` section:
 
 - +10 if any child directory listed in `DocEntry.children` appears verbatim
 - +10 if any implementation filename (`implFiles` without extension) appears
-- +5  if the section uses a table (`| ... |`) rather than a raw list
+- +5 if the section uses a table (`| ... |`) rather than a raw list
 - Cap at 25.
 
 ### 3.3 Conventions axis (25 pts)
@@ -147,13 +147,13 @@ Build a `PlanItem` per SPARSE / MISSING entry:
 
 ```ts
 type PlanItem = {
-  docPath: string;               // INTENT.md path (may not yet exist)
-  moduleRoot: string;            // directory to scope the rewrite
-  kind: "sparse" | "missing";
-  currentScore: number;          // 0 for missing
-  axesToRewrite: Axis[];         // axes under their threshold
-  implFilesToRead: string[];     // capped at 6
-  childDirs: string[];           // fed into Structure section
+  docPath: string; // INTENT.md path (may not yet exist)
+  moduleRoot: string; // directory to scope the rewrite
+  kind: 'sparse' | 'missing';
+  currentScore: number; // 0 for missing
+  axesToRewrite: Axis[]; // axes under their threshold
+  implFilesToRead: string[]; // capped at 6
+  childDirs: string[]; // fed into Structure section
 };
 ```
 
@@ -266,7 +266,8 @@ scaffold with:
 ## Last Updated
 ```
 
-and relax the 50-line rule per project configuration.
+The 50-line cap does not apply to DETAIL.md — it has no line limit;
+restructure it in place on each update instead.
 
 ## Section 7 — Validate
 
@@ -274,20 +275,31 @@ For every file the agent reports as `written`:
 
 ```
 mcp_t_doc_compress({ mode: "auto", filePath: "<docPath>", content: "<new content>" })
-// Returns: { needsCompression: boolean, suggestedContent?: string, lineCount: number }
+// Returns: { compacted?: string, summary?: ToolCallSummary, meta?: CompressionMeta,
+//            cap_applies?: { intent: boolean, detail: boolean }, error?: string }
 
 mcp_t_structure_validate({ path: "<moduleRoot>" })
-// Returns: { passed: boolean, violations: Violation[] }
+// Returns: { report: ValidationReport, timestamp, rulesApplied, rulesSkipped, configWarnings }
+// (passed / violations live at report.result)
 ```
 
 Decision logic:
 
-- `needsCompression === true` → dispatch a second-pass `context-manager` with
-  the `suggestedContent` and instruction "compress to 50 lines preserving all
-  four rewritten axes"; retry limit = 1.
-- `mcp_t_structure_validate` reports a missing tier section → mark file as
-  `NEEDS_REWORK`, revert the on-disk content, and report in Stage 8.
-- Both checks pass → mark as `ACCEPTED`.
+- Written INTENT.md content exceeds 50 lines (count the lines of the written
+  content; `cap_applies.intent` confirms the cap targets INTENT.md, never
+  DETAIL.md) → dispatch a second-pass `context-manager` with instruction
+  "compress to 50 lines preserving all four rewritten axes"; retry limit = 1.
+  If the second pass still exceeds 50 lines → mark file as `NEEDS_REWORK`,
+  revert the on-disk content, and report in Stage 8.
+- Written content lacks any of the three tier headings (`### Always do`,
+  `### Ask first`, `### Never do`) → mark file as `NEEDS_REWORK`, revert the
+  on-disk content, and report in Stage 8. Check the headings directly on the
+  content — `mcp_t_structure_validate` evaluates structural rules only and
+  does not inspect tier sections.
+- `report.result.violations` from `mcp_t_structure_validate` reports a
+  structural violation for the module → mark file as `NEEDS_REWORK`, revert,
+  and report in Stage 8.
+- All checks pass → mark as `ACCEPTED`.
 
 ## Section 8 — Report
 

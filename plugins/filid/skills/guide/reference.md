@@ -47,15 +47,16 @@ Rule categories (`RuleCategory`):
 
 ## Section 3 — Classification Summary
 
-Build the category distribution table from `summary` in the scan response:
+Build the category distribution table by counting `tree.nodes` from the scan
+response by node type (the response has no precomputed `summary` object):
 
 ```
 categoryTable = {
-  fractal:      summary.fractalCount,
-  organ:        summary.organCount,
-  pureFunction: summary.pureFunctionCount,
-  hybrid:       summary.hybridCount,
-  total:        summary.totalCount
+  fractal:      count of tree.nodes where type == "fractal",
+  organ:        count of tree.nodes where type == "organ",
+  pureFunction: count of tree.nodes where type == "pure-function",
+  hybrid:       count of tree.nodes where type == "hybrid",
+  total:        tree.totalNodes
 }
 ```
 

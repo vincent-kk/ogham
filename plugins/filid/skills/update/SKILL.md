@@ -1,9 +1,9 @@
 ---
 name: update
 user_invocable: false
-description: "[filid:update] Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs."
-argument-hint: "[path] [--force] [--scan-only] [--no-sync] [--auto-approve]"
-version: "1.0.0"
+description: '[filid:update] Analyze branch-changed files to update INTENT.md and DETAIL.md documentation and organize test.ts and spec.ts following FCA-AI principles, with an incremental cache gate to skip unchanged runs.'
+argument-hint: '[path] [--force] [--scan-only] [--no-sync] [--auto-approve]'
+version: '1.0.0'
 complexity: complex
 plugin: filid
 ---
@@ -14,12 +14,14 @@ plugin: filid
 > `filid:context-manager` delegation, or `filid:implementer` completion.
 >
 > **Valid reasons to yield**:
+>
 > 1. User decision genuinely required (absent `--auto-approve`, Stage 2 sync may prompt)
 > 2. Terminal stage marker emitted: `Update complete` or `No changes since last run` (Stage 0 early-exit)
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - Stage 0 incremental gate result — after reporting "no changes", end in the same turn; after "changes detected", immediately chain Stage 1
-> - Stage 1 `filid:qa-reviewer` return → Stage 2 sync decision — no yield between severity check and `filid:sync` delegation
+> - Stage 1 `filid:qa-reviewer` return → Stage 2 sync decision — no yield between severity check and `filid:drift-analyzer` delegation
 > - Stage 3 `filid:context-manager` / `filid:implementer` agent returns — chain validation immediately
 
 # update — Code-Docs-Tests Synchronization
@@ -67,6 +69,8 @@ See `reference.md` Section 2 Severity Normalization Table for the mapping from s
 
 Agents: `filid:drift-analyzer` (sonnet) → `filid:restructurer` (sonnet)
 MCP: `mcp_t_drift_detect`, `mcp_t_lca_resolve`, `mcp_t_structure_validate`
+The correction plan from `filid:drift-analyzer` is presented for user approval
+before `filid:restructurer` executes it — skipped when `--auto-approve` is set.
 See [reference.md Section 2](./reference.md#section-2--sync).
 
 ### Stage 3 — Doc & Test Update (Parallel)
@@ -94,8 +98,8 @@ See [reference.md Section 3](./reference.md#section-3--doc--test-update).
 
 ## Available MCP Tools
 
-| Tool                 | Stage | Purpose                                            |
-| -------------------- | ----- | -------------------------------------------------- |
+| Tool                       | Stage | Purpose                                            |
+| -------------------------- | ----- | -------------------------------------------------- |
 | `mcp_t_cache_manage`       | 0, 4  | Incremental gate: compute and persist project hash |
 | `mcp_t_fractal_scan`       | 1     | Project structure scan                             |
 | `mcp_t_fractal_navigate`   | 1     | Tree traversal and classification                  |

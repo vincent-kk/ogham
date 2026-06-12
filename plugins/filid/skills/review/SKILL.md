@@ -78,6 +78,21 @@ using elected committee personas and a state machine.
 
 1. `git branch --show-current` (Bash) → `<branch>`
 2. `mcp_t_review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
+
+> **Spike harvest guard** (runs before checkpoint/cache): when `<branch>`
+> matches `spike/*`, read
+> `.filid/harvest/<normalized-branch>/manifest.json` and compare its
+> `head_sha` to `git rev-parse HEAD`. If the manifest is missing, stale
+> (head moved), or expired (`created_at` older than 7 days — long-idle
+> spikes need a re-harvest), do NOT run Phases A–D: write the degraded
+> `review-report.md` (`verdict: REQUEST_CHANGES`) + `fix-requests.md`
+> with the single `Type: harvest-required` item per `templates.md` →
+> "Harvest-Required Variant", emit the terminal marker
+> `Review verdict: REQUEST_CHANGES`, and END. Spike work is judged only
+> AFTER `/filid:harvest` records its acceptance claims — reviewing an
+> unharvested spike would manufacture a verdict with no oracle. A current
+> manifest (head_sha == HEAD) lets review proceed normally.
+
 3. `mcp_t_review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
 4. Resume from the phase indicated by the checkpoint response. See
    `mcp-map.md` → "Checkpoint Resume Table" for the full file-presence
@@ -216,7 +231,7 @@ message and terminate.
 
 1. Read `<REVIEW_DIR>/session.md` frontmatter to extract `committee`,
    `deliberation_mode`, and `failure_reason`. If `deliberation_mode` is
-   missing (legacy session.md without the field), derive it locally:
+   missing, derive it locally:
    - `committee == ['adjudicator']` → `solo-adjudicator`
    - `committee.length >= 2` → `team`
    - otherwise (empty or unrecognized committee) → set `deliberation_mode: chairperson-forbidden`, `failure_reason: team-incomplete` so the pipeline `verdict_gate` blocks the merge as INCONCLUSIVE
@@ -411,5 +426,8 @@ Committee:
   --solo        — manual override → adjudicator (integrated 6-perspective)
 Rounds:   Max 5 deliberation rounds (team mode only)
 Verdict:  APPROVED | REQUEST_CHANGES | INCONCLUSIVE
+Gate:     fix_items >= MEDIUM block; LOW → Advisory Notes (never blocks;
+          APPROVED presented as "APPROVED (with notes)"). VETO classes
+          are gate-independent.
 Recovery: Dead worker → probe → respawn (max 2) → forced ABSTAIN
 ```

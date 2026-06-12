@@ -1,9 +1,9 @@
 ---
 name: enrich-docs
 user_invocable: true
-description: "[filid:enrich-docs] Audit INTENT.md quality under a target directory, classify files as RICH/SPARSE/MISSING, and enrich low-quality docs in parallel via context-manager with an approval gate and 50-line validation."
-argument-hint: "[path] [--depth N] [--min-quality 0-100] [--skip-rich] [--dry-run] [--auto-approve] [--include-detail]"
-version: "1.0.0"
+description: '[filid:enrich-docs] Audit INTENT.md quality under a target directory, classify files as RICH/SPARSE/MISSING, and enrich low-quality docs in parallel via context-manager with an approval gate and 50-line validation.'
+argument-hint: '[path] [--depth N] [--min-quality 0-100] [--skip-rich] [--dry-run] [--auto-approve] [--include-detail]'
+version: '1.0.0'
 complexity: complex
 plugin: filid
 ---
@@ -17,10 +17,12 @@ plugin: filid
 > MODEL applies to every stage without exception.
 >
 > **Valid reasons to yield**:
+>
 > 1. Stage 5 interactive approval active (no `--auto-approve`)
 > 2. Terminal stage marker emitted: `Enrich-docs complete: N files enriched`, `Enrich-docs dry-run complete`, `Enrich-docs skipped: all RICH`, or `Enrich-docs cancelled`
 >
 > **HIGH-RISK YIELD POINTS**:
+>
 > - After Stage 2 Discovery returns the INTENT.md list — immediately chain Stage 3 scoring in the same turn
 > - After Stage 3 Quality Audit classification — chain Stage 4 plan generation without pause
 > - After Stage 5 approval (or `--auto-approve`) — immediately dispatch Stage 6 parallel `context-manager` delegations
@@ -39,11 +41,11 @@ thresholds.
 
 Load these on demand; none are required to execute the workflow end-to-end.
 
-| File                             | When to load                                                             |
-| -------------------------------- | ------------------------------------------------------------------------ |
-| [reference.md](./reference.md)   | Detailed per-stage mechanics, MCP call signatures, delegation templates  |
-| [tables.md](./tables.md)         | Option defaults, MCP tool summary, agent roster, comparison with `update` |
-| [examples.md](./examples.md)     | Concrete invocation patterns, natural-language equivalents, report snippets |
+| File                           | When to load                                                                |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| [reference.md](./reference.md) | Detailed per-stage mechanics, MCP call signatures, delegation templates     |
+| [tables.md](./tables.md)       | Option defaults, MCP tool summary, agent roster, comparison with `update`   |
+| [examples.md](./examples.md)   | Concrete invocation patterns, natural-language equivalents, report snippets |
 
 ## When to Use This Skill
 
@@ -118,11 +120,15 @@ for the full delegation template.
 
 ### Stage 7 — Validate
 
-For every rewritten file, call `mcp_t_doc_compress` (50-line enforcement) and then
-`mcp_t_structure_validate` (3-tier boundary sections present). A `mcp_t_doc_compress`
-failure triggers one second-pass retry via `context-manager`; any other
-validation failure reverts the on-disk content and marks the file as
-`NEEDS_REWORK`.
+For every rewritten file, enforce the 50-line cap directly on the written
+content (`mcp_t_doc_compress` supplies compaction metadata; the cap check is
+the line count itself), verify the three tier headings (`### Always do` /
+`### Ask first` / `### Never do`) are present, then call
+`mcp_t_structure_validate` for structural rule violations — the tool does not
+inspect tier sections. A 50-line overflow triggers one second-pass retry via
+`context-manager`; any other validation failure — missing tier heading,
+structural violation, or a second pass still over 50 lines — reverts the
+on-disk content and marks the file as `NEEDS_REWORK`.
 See [reference.md Section 7](./reference.md#section-7--validate).
 
 ### Stage 8 — Report

@@ -64,6 +64,20 @@ orchestrator — it does not modify individual skill behavior.
 
 ### Step 1 — Determine Entry Point
 
+> **Spike harvest guard (precedes both `--from` and auto-detection)**:
+> after detecting the branch, if it matches `spike/*`, Read
+> `.filid/harvest/<normalized-branch>/manifest.json` and compare its
+> `head_sha` to `git rev-parse HEAD`. When the manifest is missing,
+> stale (head moved past the harvested sha), or expired (`created_at`
+> older than 7 days), the merge track is closed:
+> reject any `--from` value with "spike branch requires /filid:harvest
+> before pipeline entry", and in auto-detection invoke
+> `Skill("filid:harvest")` instead of entering any stage (the harvest
+> interview is interactive — yielding there is its sanctioned escape
+> hatch). Leaving the spike branch alone does NOT lift this guard; only
+> a current manifest does. When the manifest is current, proceed with
+> the normal rules below.
+
 **If `--from` is specified**: validate prerequisites for the target stage,
 then start there.
 
@@ -84,13 +98,23 @@ order — first match wins. If no match, immediately check the next signal.
 2. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 3. Check signals in priority order:
 
-| Priority | Signal                                                               | Entry stage                                                       |
-| -------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 1        | `.filid/review/<branch>/re-validate.md` exists                       | Pipeline **complete** — report existing results and END execution |
-| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits | Execute `git push` and enter `revalidate` (see details below)     |
-| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)       | `revalidate`                                                      |
-| 4        | `.filid/review/<branch>/fix-requests.md` exists                      | `resolve`                                                         |
-| 5        | None of the above → check PR: `gh pr view` (Bash)                    | `review` if PR exists, `pr-create` if not                         |
+| Priority | Signal                                                                                                                            | Entry stage                                                                       |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 0        | Branch matches `spike/*` AND harvest manifest missing, stale (`head_sha` != `git rev-parse HEAD`), or expired (`created_at` > 7d) | Route to `Skill("filid:harvest")` — pr-create/review/merge-track entry is blocked |
+| 0'       | Branch matches `spike/*` AND current harvest manifest exists                                                                      | Spike already harvested — continue with rules 1–5 below                           |
+| 1        | `.filid/review/<branch>/re-validate.md` exists                                                                                    | Pipeline **complete** — report existing results and END execution                 |
+| 2        | `.filid/review/<branch>/justifications.md` exists + unpushed commits                                                              | Execute `git push` and enter `revalidate` (see details below)                     |
+| 3        | `.filid/review/<branch>/justifications.md` exists (all pushed)                                                                    | `revalidate`                                                                      |
+| 4        | `.filid/review/<branch>/fix-requests.md` exists                                                                                   | `resolve` — unless it contains `Type: harvest-required` (see Priority 4 guard)    |
+| 5        | None of the above → check PR: `gh pr view` (Bash)                                                                                 | `review` if PR exists, `pr-create` if not                                         |
+
+**Priority 4 guard**: before entering resolve, Grep `fix-requests.md`
+for `Type: harvest-required`. If present, do NOT invoke resolve (its
+harvest gate would abort and re-running the pipeline would loop):
+report that oracle work is required — spike branch → `/filid:harvest`;
+merge-track INSUFFICIENT-EVIDENCE claims → supply the claim's
+`observable` evidence or a human-confirmed claim revision, then re-run
+`/filid:review --force` — and END execution.
 
 **Priority 2 details**: Detect unpushed commits via
 `git log @{upstream}..HEAD --oneline 2>/dev/null`.
@@ -203,13 +227,14 @@ round5-exhaust}`
    `SubagentReturn.paths_to_artifacts` (the cache path does not include
    `review-report.md` there).
 2. **D.0 merge**: otherwise, merge `verification-metrics.md` +
-   `verification-structure.md` into `verification.md` (this is the
-   same merge that `review/phases/phase-d-deliberation.md` performs
-   as its first step before dispatching workers). Team and solo
-   worker preambles both require `verification.md` in their
-   `== INPUTS ==` block; skipping this step silently strips their
-   primary evidence source. The `fail` dispatch skips merging (no
-   worker is spawned).
+   `verification-structure.md` into `verification.md` AND append the
+   `## Acceptance Claims (in scope)` section from `.filid/criteria.md`
+   (base + HEAD active-claim filtering — this is the same Step D.0 that
+   `review/phases/phase-d-deliberation.md` performs before dispatching
+   workers). Team and solo worker preambles both require
+   `verification.md` in their `== INPUTS ==` block; skipping this step
+   silently strips their primary evidence source and the claim set they
+   must judge. The `fail` dispatch skips merging (no worker is spawned).
 
 Apply the `verdict_gate` rule (spec: `../review/DETAIL.md` → `## API Contracts`) in priority order — first match wins:
 
@@ -243,9 +268,8 @@ D.7 (fail).
 
 After Phase D has written `review-report.md` (and `fix-requests.md` when
 applicable) via Step D.6 or D.7, the pipeline main finalizes the review
-skill in its own context. These steps used to live inside the subagent
-as review Step 4.5 and Step 5; they now run main-side because the
-subagent exits before Phase D.
+skill in its own context: review Step 4.5 and Step 5 run main-side
+because the subagent exits before Phase D.
 
 1. **Persist content hash** (review Step 4.5):
    `mcp_t_review_manage(action: "content-hash", projectRoot: <project_root>, branchName: <branch>)`.
@@ -340,11 +364,11 @@ from the appropriate stage.
 
 ## Available MCP Tools
 
-| Tool                  | Action                   | Purpose                                           |
-| --------------------- | ------------------------ | ------------------------------------------------- |
-| `mcp_t_review_manage` | `normalize-branch`       | Normalize branch name for auto-detection          |
-| `mcp_t_review_manage` | `format-pr-comment`      | Format review findings as a PR comment            |
-| `mcp_t_review_manage` | `generate-human-summary` | Generate human-readable summary of review results |
+| Tool                  | Action              | Purpose                                       |
+| --------------------- | ------------------- | --------------------------------------------- |
+| `mcp_t_review_manage` | `normalize-branch`  | Normalize branch name for auto-detection      |
+| `mcp_t_review_manage` | `content-hash`      | Persist review content hash (finalize review) |
+| `mcp_t_review_manage` | `format-pr-comment` | Format review findings as a PR comment        |
 
 All other operations are delegated to existing skills via `Skill()` tool.
 

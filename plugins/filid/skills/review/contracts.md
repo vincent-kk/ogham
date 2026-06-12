@@ -110,14 +110,19 @@ fix_items:
     path: <file path>
     rule: <violated rule id>
     current: <measured value>
+    consequence: <what concretely breaks if left unaddressed>
     recommended_action: <short imperative>
     evidence: <verification line reference or stage reference>
+claim_verdicts: # Required when verification.md lists in-scope acceptance claims
+  - id: <CLM-id from .filid/criteria.md>
+    verdict: PASS | FAIL | INSUFFICIENT-EVIDENCE
+    evidence: <artifact/test/line reference backing the verdict>
 compromise_accepted: <true|false> # Optional — set when re-evaluating a VETO compromise
 reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not find
 ---
 ```
 
-> **Note**: `severity` on fix_items uses the UPPERCASE review/debt scale `CRITICAL|HIGH|MEDIUM|LOW` (SSoT: `src/types/debt.ts` → `DebtSeverity`). This is distinct from (a) rule severity `error|warning|info` (`src/types/rules.ts` → `RuleSeverity`, for static rule definitions) and (b) drift severity lowercase `critical|high|medium|low` (`src/types/drift.ts` → `DriftSeverity`, for sync output). See `templates/rules/filid_fca-policy.md` → **Severity Vocabulary** for all three scales and their advisory mapping.
+> **Note**: `severity` on fix_items uses the UPPERCASE review/debt scale `CRITICAL|HIGH|MEDIUM|LOW` (SSoT: `src/types/debt.ts` → `DebtSeverity`). This is distinct from (a) rule severity `error|warning|info` (`src/types/rules.ts` → `RuleSeverity`, for static rule definitions) and (b) drift severity lowercase `critical|high|medium|low` (`src/types/drift.ts` → `DriftSeverity`, for sync output). The advisory mapping of this scale (LOW = advisory, >= MEDIUM = blocking) is defined in "Severity Gate & Finding Discipline" below.
 
 ### Field semantics
 
@@ -132,9 +137,27 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
   when aggregating fix_items from multiple personas.
 - **`rebuttal_targets`** — list of PersonaIds whose prior-round opinion
   this persona explicitly disagrees with. Round 1 MUST leave this empty.
-- **`fix_items`** — structured fixes that will be promoted to `FIX-XXX`
-  entries in `fix-requests.md`. The chairperson deduplicates by
-  `path + rule` across all personas.
+- **`fix_items`** — structured findings. The chairperson deduplicates by
+  `path + rule` across all personas (highest severity wins on collision,
+  `confidence` as tiebreaker), then applies the severity gate: items at
+  or above MEDIUM are promoted to `FIX-XXX` entries in
+  `fix-requests.md`; LOW items route to the advisory channel
+  (`review-report.md` → `## Advisory Notes`, `ADV-XXX`) and never block
+  the verdict. `fix_items: []` with `state: SYNTHESIS` is a valid,
+  successful opinion (null result) — see "Severity Gate & Finding
+  Discipline" below.
+- **`consequence`** (per fix_item, REQUIRED) — names the specific
+  behavior, contract, metric, or guarantee that breaks if the item is
+  left unaddressed. "Improves clarity/consistency" is not a consequence.
+  A fix_item whose consequence cannot be concretely named is at most
+  LOW.
+- **`claim_verdicts`** — one entry per in-scope acceptance claim listed
+  in `verification.md` → `## Acceptance Claims (in scope)`. `PASS`
+  requires cited evidence; `FAIL` means the claim's expected outcome is
+  observably broken; `INSUFFICIENT-EVIDENCE` means the claim cannot be
+  judged from the available artifacts. Omit the field entirely when no
+  in-scope claims exist. See "Acceptance Claims (criteria ledger)" below
+  for aggregation and verdict folding.
 - **`compromise_accepted`** — only set in VETO re-evaluation rounds. If
   `true`, the opinion's `state` should transition from prior VETO to
   SYNTHESIS with an acknowledgement in the body.
@@ -154,6 +177,116 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
   `round-<N>-business-driver-compromise.md` in response to a VETO, the
   frontmatter is extended with a `compromise_proposals` array (see
   `agents/business-driver.md` for the schema).
+
+## Severity Gate & Finding Discipline
+
+Canonical definition — every persona agent file carries a compact copy
+of these rules; this section is the source of truth when they drift.
+
+### The gate
+
+fix_items with severity `>= MEDIUM` are **blocking** — they are promoted
+to `FIX-XXX` and a non-empty blocking set produces `REQUEST_CHANGES`.
+`LOW` fix_items are **advisory** — they route to `review-report.md` →
+`## Advisory Notes` and can never produce `REQUEST_CHANGES` on their
+own. SYNTHESIS with an empty blocking set maps to `APPROVED` (presented
+as **APPROVED (with notes)** when the advisory set is non-empty —
+presentation only; the verdict enum is unchanged). The gate applies to
+SYNTHESIS fix_items ONLY: VETO classes (circular dependency, hardcoded
+secrets, security-critical bugs, irreversible destructive operations)
+and the critical-security override are gate-independent.
+
+### Null result is success
+
+A rigorous sweep that surfaces zero at-or-above-gate findings is a
+valid, successful outcome. The opinion body MUST state the surface
+inspected in one line — `Checked: <files/contracts/paths>` — so a
+formal zero is distinguishable from an unexamined zero. NEVER
+manufacture, inflate, or pad findings: finding count is not a measure
+of review quality; calibration is.
+
+### Anti-inflation hard rules
+
+Applied mechanically, regardless of how the consequence is narrated:
+
+1. Style, formatting, naming-preference, comment-wording, and
+   doc-phrasing findings → LOW.
+2. Generic, unfalsifiable consequences ("may cause future bugs", "hurts
+   maintainability", "could confuse readers") → demote to LOW.
+3. A consequence built on a speculative chain of 2+ steps ("if X, then
+   Y could, which might Z") → LOW.
+
+**Under-classification exception**: when unclear wording or
+documentation masks a requirement, contract, or security omission, the
+finding is graded by the masked omission's consequence (cite the
+concrete requirement/contract being masked), not by the wording itself.
+
+These hard rules never reclassify calibrated mechanical thresholds —
+DAG cycle, 3+12, LCOM4, CC, INTENT.md 50-line cap keep the severities
+defined in each persona's Decision Criteria.
+
+### No notes escape
+
+Defect suspicion appears ONLY as a fix_item (with severity +
+consequence). Narrative sections (opinion body, Perspective Sweep,
+Evidence Trace) and `reasoning_gaps` MUST NOT carry hedged defect
+language ("might be an issue", "consider improving") about items absent
+from `fix_items`. If a suspicion does not merit a fix_item, it does not
+merit prose — omit it. `reasoning_gaps` is reserved for missing
+measurements, never for suspicions.
+
+## Acceptance Claims (criteria ledger)
+
+`.filid/criteria.md` is the project-level oracle ledger: PASS/FAIL-judgeable
+claims harvested from spike branches by `/filid:harvest`. Phase D consumes
+it as follows:
+
+- **Scope filter (Step D.0)**: the chairperson loads the ledger from BOTH
+  the base (`git show <BASE_REF>:.filid/criteria.md`, when present) and
+  HEAD. The judged set = (claims `active` at base ∪ claims added in the
+  diff with `active` status) whose `scope` path-prefix matches at least
+  one diff-touched file. A claim transitioned out of `active` WITHIN the
+  reviewed diff is therefore still judged in this review — a status flip
+  cannot dodge the judgment it was failing; the transition is surfaced
+  in `## Claim Verdicts` with a `transition:` note for human inspection.
+  Claims already `superseded` / `retired` at base are never judged. The
+  filtered set is written to `verification.md` →
+  `## Acceptance Claims (in scope)` (the section says `none` when the
+  ledger is absent or nothing matches).
+- **Judgment**: every opinion (solo adjudicator or team persona) emits
+  `claim_verdicts` for the in-scope set. The chairperson aggregates
+  per-claim across **non-ABSTAIN** opinions with worst-wins ordering:
+  `FAIL > INSUFFICIENT-EVIDENCE > PASS`. A claim missing from a
+  non-ABSTAIN opinion counts as INSUFFICIENT-EVIDENCE from that persona;
+  ABSTAIN opinions are excluded from claim aggregation exactly as they
+  are excluded from the quorum denominator (otherwise one forced ABSTAIN
+  would demote every claim and reintroduce the constant-REQUEST_CHANGES
+  bias the severity gate removed).
+- **Verdict folding (Step D.6.1)**: aggregated non-PASS claims synthesize
+  blocking fix_items so the existing severity gate stays the single
+  verdict function —
+  - `FAIL` → `FIX-XXX` with `Severity: HIGH`, `Type: code-fix`,
+    `Rule: <CLM-id>` (acceptance criterion observably broken).
+  - `INSUFFICIENT-EVIDENCE` → `FIX-XXX` with `Severity: MEDIUM`,
+    `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — not a code
+    defect, never code-surgeon: on merge-track branches resolved by
+    supplying the claim's `observable` evidence or a human-confirmed
+    claim revision; on spike branches via `/filid:harvest`).
+  - Downstream: resolve dispatches FAIL-derived `code-fix` items
+    normally (and aborts on any `harvest-required`); revalidate
+    re-judges `CLM-*` rows directly against the ledger instead of
+    metric re-measurement (`skills/revalidate/SKILL.md` Step 6.4).
+- **APPROVED therefore requires**: empty blocking set, which implies
+  _every in-scope active claim is PASS_ in addition to "no fix_item >=
+  MEDIUM". Claims judged PASS appear in `review-report.md` →
+  `## Claim Verdicts` for the audit trail.
+- **Spike-branch demotion guard**: when the review target branch itself
+  matches `spike/*` and no current harvest manifest exists
+  (`.filid/harvest/<normalized>/manifest.json` with `head_sha` == current
+  HEAD and `created_at` within 7 days), the review degrades to
+  `REQUEST_CHANGES` with a single `harvest-required` fix item without
+  running Phases A–D (see `SKILL.md` Step 1 and `templates.md` →
+  "Harvest-Required Variant").
 
 ## Subagent Prompt Rules
 

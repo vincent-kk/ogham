@@ -34,19 +34,35 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 
 // Tiers reflect what each hook pulls from @ogham/cross-platform:
 //   LIGHT         — logHookFailure only (no spawn-dependent helper inlined).
-//   HEAVY         — guard-heavy orchestration with logHookFailure (intent-injector + pre-tool-validator + structure-guard).
+//                   user-prompt-submit additionally carries the per-prompt
+//                   spike banner (fs-only git meta readers, no spawn).
+//   HEAVY         — guard-heavy orchestration with logHookFailure
+//                   (intent-injector + pre-tool-validator + structure-guard
+//                   + spike mode gate + criteria-ledger lint + mode audit).
 //   SESSION_START — selfProbe (spawn-dependent → cross-spawn inlined) + logHookFailure.
 const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 17 * 1024;
-const LIGHT_HOOK_BYTES = 10 * 1024;
+const HEAVY_HOOK_BYTES = 22 * 1024;
+const LIGHT_HOOK_BYTES = 12 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
   { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'agent-enforcer', entry: 'agentEnforcer', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'user-prompt-submit', entry: 'userPromptSubmit', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'session-cleanup', entry: 'sessionCleanup', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'agent-enforcer',
+    entry: 'agentEnforcer',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
+  {
+    name: 'user-prompt-submit',
+    entry: 'userPromptSubmit',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
+  {
+    name: 'session-cleanup',
+    entry: 'sessionCleanup',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
   { name: 'setup', entry: 'setup', maxBytes: SESSION_START_HOOK_BYTES },
 ];
 
