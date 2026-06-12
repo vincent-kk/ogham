@@ -7,6 +7,7 @@ export const FIX_REQUEST_TYPES = [
   'code-fix',
   'promote',
   'restructure',
+  'harvest-required',
 ] as const;
 export type FixRequestType = (typeof FIX_REQUEST_TYPES)[number];
 

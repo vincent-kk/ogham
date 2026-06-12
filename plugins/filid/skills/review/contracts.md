@@ -113,6 +113,10 @@ fix_items:
     consequence: <what concretely breaks if left unaddressed>
     recommended_action: <short imperative>
     evidence: <verification line reference or stage reference>
+claim_verdicts: # Required when verification.md lists in-scope acceptance claims
+  - id: <CLM-id from .filid/criteria.md>
+    verdict: PASS | FAIL | INSUFFICIENT-EVIDENCE
+    evidence: <artifact/test/line reference backing the verdict>
 compromise_accepted: <true|false> # Optional — set when re-evaluating a VETO compromise
 reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not find
 ---
@@ -147,6 +151,13 @@ reasoning_gaps: [<free-form strings>] # Metrics the persona needed but could not
   left unaddressed. "Improves clarity/consistency" is not a consequence.
   A fix_item whose consequence cannot be concretely named is at most
   LOW.
+- **`claim_verdicts`** — one entry per in-scope acceptance claim listed
+  in `verification.md` → `## Acceptance Claims (in scope)`. `PASS`
+  requires cited evidence; `FAIL` means the claim's expected outcome is
+  observably broken; `INSUFFICIENT-EVIDENCE` means the claim cannot be
+  judged from the available artifacts. Omit the field entirely when no
+  in-scope claims exist. See "Acceptance Claims (criteria ledger)" below
+  for aggregation and verdict folding.
 - **`compromise_accepted`** — only set in VETO re-evaluation rounds. If
   `true`, the opinion's `state` should transition from prior VETO to
   SYNTHESIS with an acknowledgement in the body.
@@ -223,6 +234,41 @@ language ("might be an issue", "consider improving") about items absent
 from `fix_items`. If a suspicion does not merit a fix_item, it does not
 merit prose — omit it. `reasoning_gaps` is reserved for missing
 measurements, never for suspicions.
+
+## Acceptance Claims (criteria ledger)
+
+`.filid/criteria.md` is the project-level oracle ledger: PASS/FAIL-judgeable
+claims harvested from spike branches by `/filid:harvest`. Phase D consumes
+it as follows:
+
+- **Scope filter (Step D.0)**: the chairperson loads the ledger and keeps
+  only claims with `status: active` whose `scope` path-prefix matches at
+  least one diff-touched file. The filtered set is written to
+  `verification.md` → `## Acceptance Claims (in scope)` (the section says
+  `none` when the ledger is absent or nothing matches). `superseded` /
+  `retired` claims are never judged.
+- **Judgment**: every opinion (solo adjudicator or team persona) emits
+  `claim_verdicts` for the in-scope set. The chairperson aggregates
+  per-claim across personas with worst-wins ordering:
+  `FAIL > INSUFFICIENT-EVIDENCE > PASS`.
+- **Verdict folding (Step D.6.1)**: aggregated non-PASS claims synthesize
+  blocking fix_items so the existing severity gate stays the single
+  verdict function —
+  - `FAIL` → `FIX-XXX` with `Severity: HIGH`, `Type: code-fix`,
+    `Rule: <CLM-id>` (acceptance criterion observably broken).
+  - `INSUFFICIENT-EVIDENCE` → `FIX-XXX` with `Severity: MEDIUM`,
+    `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — not a code
+    defect; resolved by `/filid:harvest`, never by code-surgeon).
+- **APPROVED therefore requires**: empty blocking set, which now implies
+  *every in-scope active claim is PASS* in addition to "no fix_item >=
+  MEDIUM". Claims judged PASS appear in `review-report.md` →
+  `## Claim Verdicts` for the audit trail.
+- **Spike-branch demotion guard**: when the review target branch itself
+  matches `spike/*` and no current harvest manifest exists
+  (`.filid/harvest/<normalized>/manifest.json` with `head_sha` == current
+  HEAD), the review degrades to `REQUEST_CHANGES` with a single
+  `harvest-required` fix item without running Phases A–D (see
+  `SKILL.md` Step 1 and `templates.md` → "Harvest-Required Variant").
 
 ## Subagent Prompt Rules
 

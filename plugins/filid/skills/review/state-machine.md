@@ -110,9 +110,14 @@ When `V >= 1`:
 
 The verdict is derived from the **blocking** partition of the final
 aggregated fix_item set (committee fix_items + Phase A CRITICAL/HIGH
-ingestion) under the severity gate: blocking = severity `>= MEDIUM`;
-`LOW` items are advisory and never block (see `contracts.md` →
-"Severity Gate & Finding Discipline").
+ingestion + acceptance-claim folding) under the severity gate: blocking
+= severity `>= MEDIUM`; `LOW` items are advisory and never block (see
+`contracts.md` → "Severity Gate & Finding Discipline"). Aggregated
+non-PASS acceptance claims fold into the blocking set before
+derivation — `FAIL` → HIGH `code-fix`, `INSUFFICIENT-EVIDENCE` → MEDIUM
+`harvest-required` (see `contracts.md` → "Acceptance Claims (criteria
+ledger)") — so `APPROVED` additionally implies every in-scope active
+claim is PASS.
 
 | Terminal outcome                                                                  | Verdict           |
 | --------------------------------------------------------------------------------- | ----------------- |

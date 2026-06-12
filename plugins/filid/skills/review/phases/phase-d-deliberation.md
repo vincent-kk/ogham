@@ -119,6 +119,14 @@ structure-check.md` (if present). Preserve exactly from sub-files:
    - `## Code Metrics Results` (from C1 body)
    - `## Structure & Dependency Verification` (from C2 body)
    - `## Debt Status` (from C2 body)
+4. Load the acceptance-criteria ledger (`<PROJECT_ROOT>/.filid/criteria.md`,
+   if present) and append a `## Acceptance Claims (in scope)` section:
+   keep only claims with `status: active` whose `scope` path-prefix
+   matches at least one changed file from `session.md`. For each kept
+   claim, copy `id`, `claim`, `observable`, `expected`, `scope`. When the
+   ledger is absent or nothing matches, write the section with the single
+   line `none`. (Contract: `../contracts.md` → "Acceptance Claims
+   (criteria ledger)".)
 
 **→ After verification.md is written, immediately proceed to Step D.1. Do NOT yield.**
 
@@ -200,6 +208,13 @@ manufacture findings to fill a lens; zero findings is a success state.
 Every fix_item MUST carry a `consequence` field (what concretely breaks
 if left unaddressed); no concrete consequence → severity at most LOW.
 
+If verification.md lists entries under "Acceptance Claims (in scope)"
+(anything other than `none`), emit a `claim_verdicts` frontmatter block
+judging EVERY listed claim as PASS / FAIL / INSUFFICIENT-EVIDENCE with
+cited evidence. PASS requires observable evidence matching the claim's
+`expected`; never mark PASS on plausibility alone — when the artifacts
+cannot decide, use INSUFFICIENT-EVIDENCE.
+
 == REMINDER ==
 Write the output file before finishing. Do NOT call Task, TeamCreate,
 SendMessage, TaskList, or any orchestration tool. You are a standalone
@@ -215,13 +230,16 @@ After the Task returns:
 1. Read `<REVIEW_DIR>/rounds/round-1-adjudicator.md`.
 2. Parse the frontmatter `state` field and partition `fix_items` by the
    severity gate (blocking = severity >= MEDIUM; LOW = advisory — see
-   `../contracts.md` → "Severity Gate & Finding Discipline").
+   `../contracts.md` → "Severity Gate & Finding Discipline"). Fold
+   non-PASS `claim_verdicts` into the blocking set first (FAIL → HIGH
+   `code-fix`; INSUFFICIENT-EVIDENCE → MEDIUM `harvest-required` — see
+   `../contracts.md` → "Acceptance Claims (criteria ledger)").
 
-| Opinion state                                                  | Final verdict   |
-| -------------------------------------------------------------- | --------------- |
-| SYNTHESIS (no blocking fix_items — none, or LOW-advisory only) | APPROVED        |
-| SYNTHESIS (any blocking fix_item >= MEDIUM)                    | REQUEST_CHANGES |
-| VETO                                                           | REQUEST_CHANGES |
+| Opinion state                                                            | Final verdict   |
+| ------------------------------------------------------------------------ | --------------- |
+| SYNTHESIS (no blocking fix_items, every in-scope claim PASS)             | APPROVED        |
+| SYNTHESIS (any blocking fix_item >= MEDIUM, incl. folded claim verdicts) | REQUEST_CHANGES |
+| VETO                                                                     | REQUEST_CHANGES |
 
 3. Skip directly to Step D.6 (write review-report.md + fix-requests.md).
    Because adjudicator emits fix_items with a `perspective` tag on
@@ -304,6 +322,10 @@ You are the <persona-id> review persona working as a TEAM WORKER in team
 3. Read the input files.
 4. Write <REVIEW_DIR>/rounds/round-1-<persona-id>.md beginning with the
    Round Output Contract frontmatter defined in your agent instructions.
+   If verification.md lists entries under "Acceptance Claims (in scope)"
+   (anything other than `none`), include a `claim_verdicts` frontmatter
+   block judging every listed claim (PASS / FAIL / INSUFFICIENT-EVIDENCE,
+   each with cited evidence — never PASS on plausibility alone).
 5. TaskUpdate({ taskId, status: "completed" }).
 6. SendMessage({ type: "message", recipient: "team-lead",
    content: "round 1 <persona-id> done: <state>",
@@ -546,6 +568,17 @@ This step runs for both solo and team deliberation paths.
    failure mode (e.g. dependency cycle → DAG invariant broken, build and
    refactor ordering hazards; INTENT.md cap → module decomposition signal
    suppressed).
+
+   **Claim folding** — when verification.md lists in-scope acceptance
+   claims, aggregate `claim_verdicts` per claim across all final-round
+   opinions with worst-wins ordering (`FAIL > INSUFFICIENT-EVIDENCE >
+   PASS`; a claim missing from an opinion counts as
+   INSUFFICIENT-EVIDENCE from that persona). Fold non-PASS aggregates
+   into the fix_item set BEFORE partitioning: `FAIL` → severity HIGH,
+   `Type: code-fix`, `Rule: <CLM-id>`, consequence = the claim's broken
+   `expected`; `INSUFFICIENT-EVIDENCE` → severity MEDIUM,
+   `Type: harvest-required`, `Rule: <CLM-id>` (oracle gap — resolved by
+   `/filid:harvest`, never dispatched to code-surgeon).
 2. Partition the deduplicated set by the severity gate
    (`../contracts.md` → "Severity Gate & Finding Discipline"):
    - **blocking** (`CRITICAL | HIGH | MEDIUM`) → assign sequential
@@ -617,6 +650,10 @@ Required sections:
 - `## Technical Verification Results` — copied from verification.md tables
 - `## Deliberation Log` — one entry per round (state, persona positions,
   chairperson mediation, transition)
+- `## Claim Verdicts` — one row per in-scope acceptance claim with the
+  aggregated PASS / FAIL / INSUFFICIENT-EVIDENCE verdict and evidence
+  reference (`../templates.md` → "Claim Verdicts"). Omit the section
+  when verification.md's claim section is `none`.
 - `## Advisory Notes` — one `ADV-XXX` entry per advisory (LOW) item from
   D.6.1, with ledger count and any `promoted to debt <id>` annotation.
   Omit the section when the advisory partition is empty.

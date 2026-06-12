@@ -75,13 +75,24 @@ Parse `fix-requests.md` to extract fix items. Each item has:
 - Fix ID (e.g., `FIX-001`)
 - Title, severity, file path, rule violated
 - Recommended action and code patch
-- **Type** (one of `code-fix`, `promote`, `restructure`; defaults to `code-fix` if absent)
+- **Type** (one of `code-fix`, `promote`, `restructure`,
+  `harvest-required`; defaults to `code-fix` if absent)
 
 Classify each item by type:
 
 - `code-fix` — standard code patch (applied by `filid:code-surgeon`)
 - `promote` — test.ts → spec.ts promotion (3+12 rule compliance)
 - `restructure` — module split/reorganization (LCOM4 >= 2 or structural drift)
+- `harvest-required` — oracle gap, not a code defect (see harvest gate below)
+
+> **Harvest gate**: if ANY parsed item has `Type: harvest-required`,
+> ABORT resolve immediately (both `--auto` and interactive): report
+> "fix-requests.md contains harvest-required items — these are oracle
+> gaps, not code defects. Run /filid:harvest (keep/discard/defer
+> interview), then re-run /filid:review." Emit the terminal marker
+> `Resolve aborted` and END. `harvest-required` items MUST NEVER be
+> dispatched to code-surgeon / promote / restructure — an agent cannot
+> harvest its own acceptance criteria.
 
 > **Tolerant parser (permanent rule)**: `fix-requests.md` is hand-authored by
 > the review phase and may carry a leading `filid:` prefix on type values

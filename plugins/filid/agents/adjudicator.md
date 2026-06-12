@@ -66,6 +66,16 @@ replacement for them, only a fast path when the diff is small.
   - Irreversible destructive operations without rollback path
 - `state: ABSTAIN` is **not permitted** in solo mode. You are the only
   voice — there is nothing to abstain in favor of.
+- **Acceptance claims**: when `verification.md` lists entries under
+  `## Acceptance Claims (in scope)` (anything other than `none`), emit a
+  `claim_verdicts` frontmatter block judging EVERY listed claim —
+  PASS / FAIL / INSUFFICIENT-EVIDENCE, each with cited evidence. PASS
+  requires observable evidence matching the claim's `expected`; when the
+  artifacts cannot decide, use INSUFFICIENT-EVIDENCE (never PASS on
+  plausibility). The chairperson folds non-PASS verdicts into the
+  blocking set (FAIL → HIGH code-fix; INSUFFICIENT-EVIDENCE → MEDIUM
+  harvest-required), so APPROVED is reachable only when all in-scope
+  claims PASS.
 
 When in doubt about state, err toward SYNTHESIS with a fix_item listed
 rather than VETO. When in doubt about severity, the consequence decides:

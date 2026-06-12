@@ -73,6 +73,18 @@ Structure violations elevated to committee agenda: <N critical/high items>
 
 [final agreement...]
 
+## Claim Verdicts
+
+> Omit this section when verification.md lists no in-scope acceptance
+> claims. Aggregation is worst-wins across personas (FAIL >
+> INSUFFICIENT-EVIDENCE > PASS); non-PASS rows also appear as folded
+> blocking fix items (FAIL → HIGH code-fix, INSUFFICIENT-EVIDENCE →
+> MEDIUM harvest-required).
+
+| Claim   | Scope    | Verdict                            | Evidence             |
+| ------- | -------- | ---------------------------------- | -------------------- |
+| CLM-001 | `<path>` | PASS / FAIL / INSUFFICIENT-EVIDENCE | <artifact reference> |
+
 ## Advisory Notes
 
 > Omit this section when no advisory (LOW) items exist. Advisory items
@@ -166,8 +178,8 @@ live in `review-report.md` → `## Advisory Notes` and never appear here.
 ## FIX-001: <title>
 
 - **Severity**: MEDIUM | HIGH | CRITICAL
-- **Source**: structure | code-quality ← origin of the finding
-- **Type**: code-fix | promote | restructure ← dispatch type (default: code-fix)
+- **Source**: structure | code-quality | acceptance-claim ← origin of the finding
+- **Type**: code-fix | promote | restructure | harvest-required ← dispatch type (default: code-fix)
 - **Path**: `<file path>`
 - **Rule**: <violated rule>
 - **Current**: <current value>
@@ -188,6 +200,39 @@ for the dispatch policy):
   promotion/splitting
 - `restructure` — LCOM4 >= 2 or structural drift → resolved by
   module reorganization
+- `harvest-required` — oracle gap, not a code defect: a claim judged
+  INSUFFICIENT-EVIDENCE or a spike branch lacking a current harvest
+  manifest → resolved ONLY by the `/filid:harvest` interview (never
+  dispatched to code-surgeon)
+
+### Harvest-Required Variant (unharvested spike branch)
+
+When `/filid:review` runs on a `spike/*` branch without a current harvest
+manifest (see `SKILL.md` Step 1 guard), Phases A–D are skipped and the
+chairperson writes a degraded pair directly:
+
+- `review-report.md` — standard header with `**Verdict**:
+REQUEST_CHANGES`, a `## Claim Verdicts` section containing the single
+  row `ALL | <branch> | INSUFFICIENT-EVIDENCE | no current harvest
+manifest`, and a Deliberation Log entry `### Harvest Guard` stating the
+  manifest state (missing or stale vs HEAD).
+- `fix-requests.md` — exactly one item:
+
+  ```markdown
+  ## FIX-001: Harvest the spike before merge-track entry
+
+  - **Severity**: MEDIUM
+  - **Source**: acceptance-claim
+  - **Type**: harvest-required
+  - **Path**: `.filid/harvest/<normalized-branch>/manifest.json`
+  - **Rule**: spike-harvest-gate
+  - **Current**: manifest missing or stale (head moved past harvested sha)
+  - **Consequence**: spike decisions remain unharvested — no oracle exists
+    to judge this work, and merge-track entry is blocked
+  - **Raised by**: Step 1 harvest guard
+  - **Recommended Action**: Run /filid:harvest (keep/discard/defer
+    interview), then re-run /filid:review
+  ```
 
 ## Advisory Ledger Format (`.filid/review/advisory-ledger.md`)
 

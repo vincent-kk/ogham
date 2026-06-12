@@ -78,6 +78,20 @@ using elected committee personas and a state machine.
 
 1. `git branch --show-current` (Bash) → `<branch>`
 2. `mcp_t_review_manage(action: "normalize-branch", projectRoot, branchName: <branch>)`
+
+> **Spike harvest guard** (runs before checkpoint/cache): when `<branch>`
+> matches `spike/*`, read
+> `.filid/harvest/<normalized-branch>/manifest.json` and compare its
+> `head_sha` to `git rev-parse HEAD`. If the manifest is missing or stale
+> (head moved), do NOT run Phases A–D: write the degraded
+> `review-report.md` (`verdict: REQUEST_CHANGES`) + `fix-requests.md`
+> with the single `Type: harvest-required` item per `templates.md` →
+> "Harvest-Required Variant", emit the terminal marker
+> `Review verdict: REQUEST_CHANGES`, and END. Spike work is judged only
+> AFTER `/filid:harvest` records its acceptance claims — reviewing an
+> unharvested spike would manufacture a verdict with no oracle. A current
+> manifest (head_sha == HEAD) lets review proceed normally.
+
 3. `mcp_t_review_manage(action: "checkpoint", projectRoot, branchName: <branch>)`
 4. Resume from the phase indicated by the checkpoint response. See
    `mcp-map.md` → "Checkpoint Resume Table" for the full file-presence

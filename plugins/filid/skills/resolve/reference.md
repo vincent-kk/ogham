@@ -65,13 +65,17 @@ Consequences: <technical debt created, future impact, estimated resolution>
 Each fix item in `fix-requests.md` has an optional `type` field that determines
 how the `filid:resolve` skill processes it:
 
-| Type          | Default | Handler                      | Description                                   |
-| ------------- | ------- | ---------------------------- | --------------------------------------------- |
-| `code-fix`    | yes     | `code-surgeon` subagent      | Standard code patch (inline edit)             |
-| `promote`     | no      | `Skill("filid:promote")`     | test.ts → spec.ts promotion (3+12 compliance) |
-| `restructure` | no      | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2)      |
+| Type               | Default | Handler                      | Description                                                          |
+| ------------------ | ------- | ---------------------------- | --------------------------------------------------------------------- |
+| `code-fix`         | yes     | `code-surgeon` subagent      | Standard code patch (inline edit)                                    |
+| `promote`          | no      | `Skill("filid:promote")`     | test.ts → spec.ts promotion (3+12 compliance)                        |
+| `restructure`      | no      | `Skill("filid:restructure")` | Module split/reorganization (LCOM4 >= 2)                             |
+| `harvest-required` | no      | NONE — aborts resolve        | Oracle gap (unharvested spike / claim INSUFFICIENT-EVIDENCE) — human-gated `/filid:harvest` interview, never auto-dispatched |
 
-When `type` is absent, the item is treated as `code-fix`.
+When `type` is absent, the item is treated as `code-fix`. Any
+`harvest-required` item aborts resolve before dispatch (see SKILL.md
+Step 2 harvest gate) — it marks a missing oracle, and re-review is
+required after the harvest updates `.filid/criteria.md`.
 
 ### Fix Item Format by Type
 
