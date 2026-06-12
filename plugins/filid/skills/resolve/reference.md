@@ -75,15 +75,20 @@ When `type` is absent, the item is treated as `code-fix`.
 
 ### Fix Item Format by Type
 
+`fix-requests.md` carries blocking items only (severity >= MEDIUM) —
+LOW items are advisory and stay in `review-report.md` → `## Advisory
+Notes`, so they never reach resolve.
+
 **code-fix** (default):
 
 ```markdown
 ### FIX-001: Unused import in validator.ts
 
-- **Severity**: LOW
+- **Severity**: MEDIUM
 - **Path**: `src/core/validator.ts`
 - **Rule**: zero-peer-file
 - **Type**: code-fix
+- **Consequence**: Dead import keeps a deleted module in the dependency graph
 - **Action**: Remove unused import on line 12
 - **Patch**: (inline diff)
 ```
