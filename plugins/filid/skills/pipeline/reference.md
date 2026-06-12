@@ -21,6 +21,16 @@ checking signals in strict priority order. First match wins.
 
 Check signals:
 
+  Signal 0 (spike harvest guard): Does the branch match spike/*?
+    → YES: Read .filid/harvest/<normalized>/manifest.json.
+      → Manifest missing, unparsable, or head_sha != git rev-parse HEAD:
+        Route to Skill("filid:harvest") — merge-track entry blocked. The
+        guard is lifted ONLY by a current manifest; leaving the branch
+        does not lift it (checkout simply changes which branch is judged).
+      → head_sha == git rev-parse HEAD (current manifest):
+        Spike already harvested — continue to Signal 1.
+    → NO:  Continue to Signal 1.
+
   Signal 1: Does <review_dir>/re-validate.md exist?
     → YES: Pipeline already complete. Read and report existing results. DONE.
     → NO:  Continue to Signal 2.
@@ -47,6 +57,8 @@ Check signals:
 
 | Condition | Behavior |
 | --------- | -------- |
+| Spike branch, manifest stale (new commits after harvest) | Signal 0 routes back to `filid:harvest` — incremental re-harvest required; the old manifest never unlocks the pipeline |
+| Spike branch, `--from` given | Rejected while no current manifest exists — `--from` cannot bypass the harvest gate |
 | Branch has no upstream tracking ref | `git log @{upstream}..HEAD` fails → skip push, start from revalidate directly |
 | `gh` CLI not authenticated | Signal 4 fails → default to `pr-create` (will fail at PR creation stage with auth error) |
 | Review directory does not exist | All file checks return false → falls through to Signal 4 |
