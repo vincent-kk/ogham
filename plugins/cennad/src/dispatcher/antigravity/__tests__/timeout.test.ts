@@ -70,7 +70,7 @@ function sleep(ms: number): Promise<void> {
 function baseOptions(): DispatchOptions<AntigravityFlags> {
   return {
     prompt: 'hello',
-    model: 'mid',
+    tier: 'mid',
     options: {},
     sessionId: 'timeout-session',
     cwd: process.cwd(),
@@ -146,7 +146,7 @@ describe('antigravityDispatcher timeout — start()', () => {
   it('resolvedModel maps a concrete tier when modelMap is provided', async () => {
     const result = await antigravityDispatcher.start({
       ...baseOptions(),
-      model: 'high',
+      tier: 'high',
       modelMap: { high: 'Gemini 3.1 Pro', mid: 'x', low: 'y' },
     });
     expect(result.resolvedModel).toBe('Gemini 3.1 Pro');
@@ -194,7 +194,7 @@ describe('antigravityDispatcher timeout — resume()', () => {
   it('resolvedModel maps tier via modelMap on resume timeout', async () => {
     const result = await antigravityDispatcher.resume({
       ...resumeOptions('/stored/cwd'),
-      model: 'mid',
+      tier: 'mid',
       modelMap: { high: 'Gemini 3.1 Pro', mid: 'Gemini 2.5 Flash', low: 'y' },
     });
     expect(result.resolvedModel).toBe('Gemini 2.5 Flash');

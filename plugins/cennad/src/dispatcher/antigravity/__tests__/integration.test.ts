@@ -87,7 +87,7 @@ beforeEach(async () => {
 function baseOptions(): DispatchOptions<AntigravityFlags> {
   return {
     prompt: 'hello',
-    model: 'mid',
+    tier: 'mid',
     options: {},
     sessionId: 'agy-session',
     cwd: process.cwd(),
@@ -157,7 +157,7 @@ describe('antigravityDispatcher.start', () => {
     process.env.CENNAD_FAKE_AGY_MODE = 'success';
     const result = await antigravityDispatcher.start({
       ...baseOptions(),
-      model: 'high',
+      tier: 'high',
       modelMap: { high: 'Gemini 3.1 Pro', mid: 'x', low: 'y' },
     });
     expect(result.status).toBe('success');

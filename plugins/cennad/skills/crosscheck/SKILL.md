@@ -2,7 +2,7 @@
 name: crosscheck
 description: '[cennad] Cross-validate a prompt by dispatching to codex AND the active Google engine (gemini or antigravity) in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
-argument-hint: '[--model high|mid|low] -- "prompt"'
+argument-hint: '[--tier high|mid|low] -- "prompt"'
 ---
 
 # crosscheck
@@ -35,7 +35,7 @@ the two `ConversationResponse` envelopes into one consolidated answer.
 
 Parse the invocation. Recognize:
 
-- `--model high|mid|low` — required; applied to BOTH providers. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required; applied to BOTH providers. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other
@@ -73,11 +73,11 @@ disabled and fall back to the one-enabled flow above.
 
 Issue the two calls **in parallel** (single message, two tool uses):
 
-- `mcp_tools_start_conversation({ provider: 'codex', prompt, model })`
-- `mcp_tools_start_conversation({ provider: <google>, prompt, model })` —
+- `mcp_tools_start_conversation({ provider: 'codex', prompt, tier })`
+- `mcp_tools_start_conversation({ provider: <google>, prompt, tier })` —
   `<google>` is the active Google engine (`gemini` or `antigravity`).
 
-`model` is required — choose `high`/`mid`/`low` by task complexity.
+`tier` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 
@@ -154,8 +154,8 @@ include a `## Artifacts` section linking to each available
 `artifact_path` so the user can open the full responses. List only the
 paths actually present in the envelopes.
 
-## Model alias
+## Tier
 
-Both providers receive the SAME alias. See `/cennad:codex` and
+Both providers receive the SAME tier. See `/cennad:codex` and
 `/cennad:gemini` for the per-provider tier → model mapping (env override
 via `CENNAD_<PROVIDER>_<TIER>`).

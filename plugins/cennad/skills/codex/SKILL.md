@@ -2,7 +2,7 @@
 name: codex
 description: '[cennad] Delegate to OpenAI Codex CLI via cennad. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: "ask codex", "codex 호출", "코덱스에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 ---
 
 # codex
@@ -25,15 +25,15 @@ Delegate to Codex CLI through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required tier. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, tier })`. `tier` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 
@@ -46,9 +46,9 @@ On `status: 'failure'`, dispatch by `error.code`:
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `gemini` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 
-## Model alias
+## Tier
 
-| alias  | resolves to               |
+| tier   | resolves to               |
 | ------ | ------------------------- |
 | `high` | reasoning effort `high`   |
 | `mid`  | reasoning effort `medium` |

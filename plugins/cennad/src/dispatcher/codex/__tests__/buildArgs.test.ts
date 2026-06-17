@@ -4,17 +4,17 @@ import type {
   CodexFlags,
   DispatchOptions,
   DispatchResumeOptions,
-  ModelAlias,
+  Tier,
 } from '../../../types/index.js';
 import { buildResumeArgs } from '../utils/buildResumeArgs.js';
 import { buildStartArgs } from '../utils/buildStartArgs.js';
 
 const READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
 
-function startArgs(flags: CodexFlags, model: ModelAlias = 'mid'): string[] {
+function startArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
   const opts: DispatchOptions<CodexFlags> = {
     prompt: 'hi',
-    model,
+    tier,
     options: {},
     sessionId: 's',
     cwd: '/tmp',
@@ -24,10 +24,10 @@ function startArgs(flags: CodexFlags, model: ModelAlias = 'mid'): string[] {
   return buildStartArgs(opts);
 }
 
-function resumeArgs(flags: CodexFlags, model: ModelAlias = 'mid'): string[] {
+function resumeArgs(flags: CodexFlags, tier: Tier = 'mid'): string[] {
   const opts: DispatchResumeOptions<CodexFlags> = {
     prompt: 'hi',
-    model,
+    tier,
     options: {},
     sessionId: 's',
     cwd: '/tmp',

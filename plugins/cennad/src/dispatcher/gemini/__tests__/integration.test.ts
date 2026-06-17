@@ -94,7 +94,7 @@ afterAll(async () => {
 function baseOptions(): DispatchOptions<GeminiFlags> {
   return {
     prompt: 'hello',
-    model: 'mid',
+    tier: 'mid',
     options: {},
     sessionId: 'cennad-session',
     cwd: process.cwd(),

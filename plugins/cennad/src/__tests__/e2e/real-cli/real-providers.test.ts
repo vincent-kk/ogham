@@ -48,7 +48,7 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
       arguments: {
         provider: 'gemini',
         prompt: 'reply with the single word OK',
-        model: 'low',
+        tier: 'low',
       },
     });
     const env = assertEnvelopeSuccess(parseToolCallText(result.content), {
@@ -65,7 +65,7 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
       arguments: {
         provider: 'codex',
         prompt: 'reply with the single word OK',
-        model: 'low',
+        tier: 'low',
       },
     });
     const env = assertEnvelopeSuccess(parseToolCallText(result.content), {
@@ -83,7 +83,7 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
       arguments: {
         provider: 'antigravity',
         prompt: 'reply with the single word OK',
-        model: 'mid',
+        tier: 'mid',
       },
     });
     const env = assertEnvelopeSuccess(parseToolCallText(result.content), {

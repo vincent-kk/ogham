@@ -2,7 +2,7 @@
 name: antigravity
 description: '[cennad] Delegate to Google Antigravity CLI (agy) via cennad. Use for live web-grounded research, very-large-context synthesis, or multi-family model serving (Gemini/Claude/GPT-OSS). Trigger: "ask antigravity", "antigravity 호출", "안티그래비티에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 ---
 
 # antigravity
@@ -25,15 +25,15 @@ Delegate to the Antigravity CLI (`agy`) through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required tier. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping are managed via `/setup` (settings UI) — they are not skill arguments. Antigravity has no sandbox-backend option; its `--sandbox` restricts terminal commands only.
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier })`. `tier` is required — choose `high`/`mid`/`low` by task complexity.
 
 > antigravity and gemini are mutually exclusive Google engines in cennad config (the Gemini CLI service ends 2026-06-18). If antigravity is not the enabled engine, `start_conversation` returns `error.code: 'disabled'`.
 
@@ -48,9 +48,9 @@ On `status: 'failure'`, dispatch by `error.code`:
 - `rate_limit` / `budget_exhausted` → model availability depends on the subscription tier; suggest retrying after a pause, a different tier, or switching to the `codex` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
 
-## Model alias
+## Tier
 
-| alias  | tier                                                                |
+| tier   | resolves to                                                         |
 | ------ | ------------------------------------------------------------------- |
 | `high` | the model mapped to this tier in `/setup` (per-tier model dropdown) |
 | `mid`  | the model mapped to this tier in `/setup`                           |

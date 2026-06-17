@@ -1,12 +1,12 @@
-import { ModelAlias } from '../../../types/index.js';
+import { Tier } from '../../../types/index.js';
 
-export function resolveGeminiModel(alias: ModelAlias): string | null {
-  switch (alias) {
-    case ModelAlias.High:
+export function resolveGeminiModel(tier: Tier): string | null {
+  switch (tier) {
+    case Tier.High:
       return process.env.CENNAD_GEMINI_HIGH ?? 'pro';
-    case ModelAlias.Mid:
+    case Tier.Mid:
       return process.env.CENNAD_GEMINI_MID ?? 'flash';
-    case ModelAlias.Low:
+    case Tier.Low:
       return process.env.CENNAD_GEMINI_LOW ?? 'flash-lite';
   }
 }

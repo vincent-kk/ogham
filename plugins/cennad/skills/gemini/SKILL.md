@@ -2,7 +2,7 @@
 name: gemini
 description: '[cennad] Delegate to Google Gemini CLI via cennad. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude''s cutoff. Trigger: "ask gemini", "gemini 호출", "제미니에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 ---
 
 # gemini
@@ -30,15 +30,15 @@ Delegate to Gemini CLI through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required tier. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, tier })`. `tier` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 
@@ -51,14 +51,14 @@ On `status: 'failure'`, dispatch by `error.code`:
 - `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `codex` skill (switching to `antigravity` first requires enabling it as the Google engine via `/cennad:setup`).
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 
-## Model alias
+## Tier
 
-| alias  | tier                                                                |
+| tier   | resolves to                                                         |
 | ------ | ------------------------------------------------------------------- |
 | `high` | most capable gemini model (env override: `CENNAD_GEMINI_HIGH`)      |
 | `mid`  | balanced gemini model (env override: `CENNAD_GEMINI_MID`)           |
 | `low`  | fastest / cheapest gemini model (env override: `CENNAD_GEMINI_LOW`) |
 
 The concrete model IDs each tier resolves to live in the dispatcher
-(`src/dispatcher/gemini/modelAlias.ts`) so they can track upstream renames
+(`src/dispatcher/gemini/operations/modelAlias.ts`) so they can track upstream renames
 without touching this skill.

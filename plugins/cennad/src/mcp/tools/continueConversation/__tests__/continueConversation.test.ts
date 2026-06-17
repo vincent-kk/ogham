@@ -152,7 +152,7 @@ describe('handleContinueConversation', () => {
     expect(updated?.turn_count).toBe(1);
   });
 
-  it('accepts an explicit model tier for the follow-up turn', async () => {
+  it('accepts an explicit tier for the follow-up turn', async () => {
     process.env.CENNAD_FAKE_CODEX_MODE = 'success';
     const session = await createSession({
       provider: 'codex',
@@ -164,7 +164,7 @@ describe('handleContinueConversation', () => {
     const result = await handleContinueConversation({
       session_id: session.session_id,
       prompt: 'follow up',
-      model: 'high',
+      tier: 'high',
     });
 
     expect(result.status).toBe('success');

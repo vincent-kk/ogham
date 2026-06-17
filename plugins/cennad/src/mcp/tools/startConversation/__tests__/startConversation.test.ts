@@ -50,7 +50,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
-      model: 'mid',
+      tier: 'mid',
     });
 
     expect(result.status).toBe('success');
@@ -76,7 +76,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
-      model: 'mid',
+      tier: 'mid',
     });
 
     expect(result.status).toBe('failure');
@@ -93,7 +93,7 @@ describe('handleStartConversation', () => {
   it('does not accept yolo/sandbox keys on MCP input (StartConversationInput excludes options)', () => {
     type Input = Parameters<typeof handleStartConversation>[0];
     // Compile-time assertion: Input must not expose permission keys
-    const inputKeys: Array<keyof Input> = ['provider', 'prompt', 'model'];
+    const inputKeys: Array<keyof Input> = ['provider', 'prompt', 'tier'];
     expect(inputKeys).not.toContain('options' as keyof Input);
     expect(inputKeys).not.toContain('yolo' as keyof Input);
     expect(inputKeys).not.toContain('sandbox' as keyof Input);
@@ -104,7 +104,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
-      model: 'mid',
+      tier: 'mid',
     });
     expect(result.meta.ignored_options).toEqual([]);
   });
@@ -121,7 +121,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
-      model: 'mid',
+      tier: 'mid',
     });
 
     expect(result.status).toBe('failure');

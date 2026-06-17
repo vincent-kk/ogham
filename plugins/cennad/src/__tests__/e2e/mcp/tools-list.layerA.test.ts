@@ -30,7 +30,7 @@ describe('MCP tools/list (Layer A)', () => {
     ]);
   });
 
-  it('start_conversation declares provider, prompt, model in inputSchema', async () => {
+  it('start_conversation declares provider, prompt, tier in inputSchema', async () => {
     const { tools } = await handle.client.listTools();
     const start = tools.find((t) => t.name === 'start_conversation');
     expect(start).toBeDefined();
@@ -38,9 +38,9 @@ describe('MCP tools/list (Layer A)', () => {
       string,
       object
     >;
-    expect(Object.keys(props).sort()).toEqual(['model', 'prompt', 'provider']);
+    expect(Object.keys(props).sort()).toEqual(['prompt', 'provider', 'tier']);
     expect(start!.inputSchema.required).toEqual(
-      expect.arrayContaining(['provider', 'prompt', 'model']),
+      expect.arrayContaining(['provider', 'prompt', 'tier']),
     );
   });
 });

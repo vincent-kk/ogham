@@ -111,7 +111,7 @@ agy 가 non-TTY 환경에서 stdout 을 무음 drop 하는 버그:
 
 ### 모델 해석
 
-- `resolveAntigravityModel(alias, map)`: config `model_map.antigravity` (high/mid/low) 에서 구체 모델명 해석.
+- `resolveAntigravityModel(tier, map)`: config `model_map.antigravity` (high/mid/low) 에서 구체 모델명 해석.
 - map 없음 → `-m` 생략, agy 기본값 사용.
 - 모델명 하드코딩 없음 — 전적으로 config 에 위임.
 

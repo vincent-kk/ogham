@@ -112,7 +112,7 @@ describe('start_conversation error mapping (Layer A)', () => {
         arguments: {
           provider: c.provider,
           prompt: 'trigger failure',
-          model: 'mid',
+          tier: 'mid',
         },
       });
       assertEnvelopeFailure(parseToolCallText(result.content), {

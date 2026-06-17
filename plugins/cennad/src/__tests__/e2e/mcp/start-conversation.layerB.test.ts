@@ -56,7 +56,7 @@ describe('start_conversation (Layer B)', () => {
     });
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'hello gemini', model: 'mid' },
+      arguments: { provider: 'gemini', prompt: 'hello gemini', tier: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'gemini',
@@ -80,7 +80,7 @@ describe('start_conversation (Layer B)', () => {
     });
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'codex', prompt: 'hello codex', model: 'mid' },
+      arguments: { provider: 'codex', prompt: 'hello codex', tier: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'codex',
@@ -100,7 +100,7 @@ describe('start_conversation (Layer B)', () => {
       arguments: {
         provider: 'gemini',
         prompt: 'hi',
-        model: 'mid',
+        tier: 'mid',
         options: { multi_agent: true, yolo: true, sandbox: 'read-only' },
       } as Record<string, unknown>,
     });

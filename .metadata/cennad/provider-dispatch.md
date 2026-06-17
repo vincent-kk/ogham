@@ -14,7 +14,7 @@ interface ConversationOptions {
 
 interface DispatchOptions<F> {
   prompt: string;
-  model: "high" | "mid" | "low";
+  tier: "high" | "mid" | "low";
   options: ConversationOptions; // 기본 {}
   sessionId: string; // cennad UUID (메타 키)
   cwd: string;
@@ -74,13 +74,13 @@ v1 에서 세 provider 모두 `supportedOptions` 가 비어 있다. 사용자가
 codex 는 단일 코딩 모델(`codex debug models` 기준 기본 `medium`)을 쓰고, tier 는 모델명이 아니라 reasoning effort 로 매핑한다.
 
 ```typescript
-function resolveCodexEffort(alias: ModelAlias): string | null {
-  switch (alias) {
-    case ModelAlias.High:
+function resolveCodexEffort(tier: Tier): string | null {
+  switch (tier) {
+    case Tier.High:
       return "high";
-    case ModelAlias.Mid:
+    case Tier.Mid:
       return "medium";
-    case ModelAlias.Low:
+    case Tier.Low:
       return "low";
   }
 }
@@ -112,8 +112,8 @@ function resolveCodexEffort(alias: ModelAlias): string | null {
 ### Model alias 매핑
 
 ```typescript
-function resolveGeminiModel(alias: ModelAlias): string | null {
-  switch (alias) {
+function resolveGeminiModel(tier: Tier): string | null {
+  switch (tier) {
     case "high":
       return process.env.CENNAD_GEMINI_HIGH ?? "pro";
     case "mid":
@@ -156,11 +156,11 @@ codex/gemini 와 달리 환경변수 fallback 없음. 모델 전체 이름은 co
 
 ```typescript
 function resolveAntigravityModel(
-  alias: ModelAlias,
+  tier: Tier,
   map: TierModelMap | undefined,
 ): string | null {
   if (!map) return null;
-  const name = map[alias];
+  const name = map[tier];
   return name && name.trim().length > 0 ? name : null;
 }
 // null → --model 플래그 생략 (agy 기본값). map 미설정 시 항상 null.

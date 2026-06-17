@@ -59,7 +59,7 @@ Opens a local web UI to configure provider ratio (target % per provider, plus a 
 
 ```
 /codex -- "Refactor the OTP flow in src/auth into a state machine"
-/codex --model high -- "Long-running sandboxed refactor task"
+/codex --tier high -- "Long-running sandboxed refactor task"
 /codex --continue <session_id> -- "Now produce the diff for module B"
 ```
 
@@ -69,7 +69,7 @@ Use codex for heavy code generation, refactoring, sandboxed shell work, or a sec
 
 ```
 /gemini -- "Summarize the latest Next.js 15 release notes"
-/gemini --model high -- "Compare these three RFC drafts"
+/gemini --tier high -- "Compare these three RFC drafts"
 /gemini --continue <session_id> -- "Extend that analysis to ..."
 ```
 
@@ -79,7 +79,7 @@ Use gemini for live web-grounded research, very-large-context synthesis, YouTube
 
 ```
 /antigravity -- "Summarize the latest Next.js 15 release notes"
-/antigravity --model high -- "Compare these three RFC drafts"
+/antigravity --tier high -- "Compare these three RFC drafts"
 /antigravity --continue <session_id> -- "Extend that analysis to ..."
 ```
 
@@ -89,7 +89,7 @@ Use antigravity (`agy`) for the same web-grounded research and large-context wor
 
 ```
 /crosscheck -- "Is approach A or B safer for this migration?"
-/crosscheck --model high -- "Review this RFC from both code and research angles"
+/crosscheck --tier high -- "Review this RFC from both code and research angles"
 ```
 
 Use crosscheck when independent second opinions from two model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded to BOTH codex and the active Google engine (gemini or antigravity) in parallel; the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections. Single-shot only — use `/codex --continue` or `/gemini --continue` / `/antigravity --continue` for multi-turn follow-ups on either side.
@@ -169,11 +169,11 @@ Sessions are project-scoped: `continue_conversation` from a different `cwd` retu
 
 ---
 
-## Model Aliases
+## Tiers
 
 Each provider exposes three tier aliases. For codex/gemini, concrete model IDs live in the dispatcher (`src/dispatcher/<provider>/modelAlias.ts`) so upstream CLI renames stay scoped to one file. Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in config (`model_map.antigravity`).
 
-| alias  | meaning                                                                        |
+| tier   | meaning                                                                        |
 | ------ | ------------------------------------------------------------------------------ |
 | `high` | provider's most capable model (antigravity: the model you mapped to this tier) |
 | `mid`  | balanced model                                                                 |

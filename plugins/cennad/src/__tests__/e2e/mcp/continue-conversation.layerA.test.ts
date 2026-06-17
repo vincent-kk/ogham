@@ -60,7 +60,7 @@ describe('continue_conversation (Layer A)', () => {
 
     const startResult = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'first', model: 'mid' },
+      arguments: { provider: 'gemini', prompt: 'first', tier: 'mid' },
     });
     const startEnv = assertEnvelopeSuccess(
       parseToolCallText(startResult.content),

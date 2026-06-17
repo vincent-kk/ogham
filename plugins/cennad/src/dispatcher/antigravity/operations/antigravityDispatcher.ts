@@ -45,7 +45,7 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
       supportedOptions,
     );
     const cwd = await ensureCwd(args.sessionId);
-    const model = resolveAntigravityModel(args.model, args.modelMap);
+    const model = resolveAntigravityModel(args.tier, args.modelMap);
     const since = Date.now();
     const callResult = await callAgy(cwd, buildStartArgs(args, model), {
       timeoutMs: args.spawnTimeoutMs,
@@ -72,7 +72,7 @@ export const antigravityDispatcher: Dispatcher<AntigravityFlags> = {
     // ensureCwd(sessionId) is deterministic, so this equals the stored
     // externalSessionRef that start() recorded — single durable session cwd.
     const cwd = await ensureCwd(args.sessionId);
-    const model = resolveAntigravityModel(args.model, args.modelMap);
+    const model = resolveAntigravityModel(args.tier, args.modelMap);
     const since = Date.now();
     const callResult = await callAgy(cwd, buildResumeArgs(args, model), {
       timeoutMs: args.spawnTimeoutMs,

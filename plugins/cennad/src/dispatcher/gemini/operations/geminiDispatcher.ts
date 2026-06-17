@@ -39,7 +39,7 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
       supportedOptions,
     );
     const cwd = await ensureCwd(args.sessionId);
-    const model = resolveGeminiModel(args.model);
+    const model = resolveGeminiModel(args.tier);
 
     const callResult = await callGemini(
       cwd,
@@ -94,7 +94,7 @@ export const geminiDispatcher: Dispatcher<GeminiFlags> = {
       supportedOptions,
     );
     const cwd = await ensureCwd(args.sessionId);
-    const model = resolveGeminiModel(args.model);
+    const model = resolveGeminiModel(args.tier);
 
     const resolved = await resolveResumeIndex(
       cwd,

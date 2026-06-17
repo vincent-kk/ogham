@@ -1,10 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import {
-  ModelAliasSchema,
-  ProviderSchema,
-} from '../../../types/conversation.js';
+import { ProviderSchema, TierSchema } from '../../../types/conversation.js';
 import { VERSION } from '../../../version.js';
 import { wrapHandler } from '../../shared/index.js';
 import { handleContinueConversation } from '../../tools/continueConversation/index.js';
@@ -32,7 +29,7 @@ export function createServer(): McpServer {
           .describe(
             'Self-contained prompt; the CLI has no access to this conversation, the repo, or prior turns.',
           ),
-        model: ModelAliasSchema.describe(
+        tier: TierSchema.describe(
           'Capability tier — REQUIRED, chosen per task from its complexity: ' +
             'low = simple lookups or short edits, mid = standard work, ' +
             'high = complex reasoning or large-context synthesis. ' +
@@ -68,7 +65,7 @@ export function createServer(): McpServer {
           .describe(
             'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
           ),
-        model: ModelAliasSchema.optional().describe(
+        tier: TierSchema.optional().describe(
           'Capability tier for THIS follow-up turn (low/mid/high), re-applied each call — ' +
             'codex reasoning effort, gemini/antigravity model. Optional; omitted defaults to mid. ' +
             'Pick per this turn complexity.',

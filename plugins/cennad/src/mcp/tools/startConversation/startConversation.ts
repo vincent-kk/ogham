@@ -14,15 +14,15 @@ import {
 import type {
   ConversationResponse,
   DispatchResult,
-  ModelAlias,
   Provider,
+  Tier,
 } from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 
 export interface StartConversationInput {
   provider: Provider;
   prompt: string;
-  model: ModelAlias;
+  tier: Tier;
 }
 
 export async function handleStartConversation(
@@ -52,7 +52,7 @@ export async function handleStartConversation(
   }
 
   const cwd = process.cwd();
-  const model: ModelAlias = input.model;
+  const tier: Tier = input.tier;
   const options = {};
 
   await incrementCounter(input.provider);
@@ -65,7 +65,7 @@ export async function handleStartConversation(
 
   const base = {
     prompt: composedPrompt,
-    model,
+    tier,
     options,
     sessionId,
     cwd,
@@ -95,7 +95,7 @@ export async function handleStartConversation(
     provider: input.provider,
     cwd,
     externalSessionRef: result.externalSessionRef,
-    model: result.resolvedModel ?? model,
+    model: result.resolvedModel ?? tier,
     options,
   });
 
@@ -113,7 +113,7 @@ export async function handleStartConversation(
       sessionId,
       turn: 1,
       provider: input.provider,
-      model: result.resolvedModel ?? model,
+      model: result.resolvedModel ?? tier,
       createdAt,
       elapsedMs: Math.round(performance.now() - startedAt),
       prompt: input.prompt,
