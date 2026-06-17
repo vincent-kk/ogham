@@ -5,6 +5,7 @@ export interface MapErrorInput {
   exitCode: number;
   stderr: string;
   spawnError?: NodeJS.ErrnoException | null;
+  abortedByCaller?: boolean;
 }
 
 export function classify(input: MapErrorInput): ErrorCode {
@@ -32,6 +33,7 @@ export function classify(input: MapErrorInput): ErrorCode {
     return ErrorCode.CliError;
   if (/ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(input.stderr))
     return ErrorCode.Network;
+  if (input.abortedByCaller) return ErrorCode.RateLimit;
   if (input.spawnError)
     return SPAWN_ERROR_MAP[input.spawnError.code ?? ''] ?? ErrorCode.Unknown;
   return ErrorCode.Unknown;

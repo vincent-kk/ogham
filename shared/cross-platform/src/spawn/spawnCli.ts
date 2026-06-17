@@ -37,18 +37,23 @@ export function spawnCli(
     let stdout = "";
     let stderr = "";
     let timedOut = false;
+    let abortedByCaller = false;
     let spawnError: Error | undefined;
     let settled = false;
     let timeoutSettleTimer: ReturnType<typeof setTimeout> | null = null;
 
+    function killChild() {
+      if (process.platform === "win32" && child.pid !== undefined)
+        nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+          stdio: "ignore",
+        });
+      else child.kill("SIGKILL");
+    }
+
     const timer = timeoutMs
       ? setTimeout(() => {
           timedOut = true;
-          if (process.platform === "win32" && child.pid !== undefined)
-            nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
-              stdio: "ignore",
-            });
-          else child.kill("SIGKILL");
+          killChild();
           timeoutSettleTimer = setTimeout(() => settle(null), 1000);
         }, timeoutMs)
       : null;
@@ -66,6 +71,7 @@ export function spawnCli(
         stderr: normalize ? normalizeEol(stderr) : stderr,
         timedOut,
         spawnError,
+        abortedByCaller,
       });
     }
 
@@ -78,7 +84,17 @@ export function spawnCli(
       stdout += stdoutDecoder.write(chunk);
     });
     child.stderr?.on("data", (chunk: Buffer) => {
-      stderr += stderrDecoder.write(chunk);
+      const text = stderrDecoder.write(chunk);
+      stderr += text;
+      if (
+        !settled &&
+        !abortedByCaller &&
+        options.onStderr?.(text, stderr) === true
+      ) {
+        abortedByCaller = true;
+        killChild();
+        timeoutSettleTimer = setTimeout(() => settle(null), 1000);
+      }
     });
 
     if (options.input !== undefined && child.stdin) {

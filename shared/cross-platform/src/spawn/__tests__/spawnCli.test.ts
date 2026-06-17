@@ -97,4 +97,23 @@ describe("spawnCli", () => {
     const result = await spawnCli("gemini", ["just-one-line"]);
     expect(result.stdout).toBe("just-one-line");
   });
+
+  it("aborts the child when onStderr returns true", async () => {
+    const result = await spawnCli(node, [fixture("stderr-then-hang.mjs")], {
+      timeoutMs: 10_000,
+      onStderr: (_chunk, accumulated) =>
+        (accumulated.match(/retry/g)?.length ?? 0) >= 2,
+    });
+    expect(result.abortedByCaller).toBe(true);
+    expect(result.timedOut).toBe(false);
+    expect(result.stderr).toContain("retry");
+  }, 15_000);
+
+  it("leaves abortedByCaller false on a normal exit", async () => {
+    const result = await spawnCli(node, [fixture("print-stderr.mjs"), "oops"], {
+      onStderr: () => false,
+    });
+    expect(result.abortedByCaller).toBe(false);
+    expect(result.stderr).toBe("oops");
+  });
 });

@@ -1,6 +1,7 @@
 import { spawnCli } from '@ogham/cross-platform';
 
 import type { GeminiSandboxBackend } from '../../../types/index.js';
+import { createRetryStormDetector } from '../../utils/createRetryStormDetector.js';
 import { resolveSandboxEnv } from '../utils/resolveSandboxEnv.js';
 
 export interface GeminiSpawnResult {
@@ -8,6 +9,7 @@ export interface GeminiSpawnResult {
   stdout: string;
   stderr: string;
   spawnError: NodeJS.ErrnoException | null;
+  abortedByCaller: boolean;
 }
 
 export interface GeminiSpawnOptions {
@@ -35,6 +37,7 @@ export async function spawnGemini(
       ...options.env,
     },
     timeoutMs: options.timeoutMs,
+    onStderr: createRetryStormDetector(),
   });
   if (result.timedOut) {
     const err = new Error(
@@ -46,6 +49,16 @@ export async function spawnGemini(
       stdout: result.stdout,
       stderr: result.stderr,
       spawnError: err,
+      abortedByCaller: false,
+    };
+  }
+  if (result.abortedByCaller) {
+    return {
+      exitCode: -1,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      spawnError: null,
+      abortedByCaller: true,
     };
   }
   if (result.spawnError) {
@@ -54,6 +67,7 @@ export async function spawnGemini(
       stdout: result.stdout,
       stderr: result.stderr,
       spawnError: result.spawnError as NodeJS.ErrnoException,
+      abortedByCaller: false,
     };
   }
   return {
@@ -61,5 +75,6 @@ export async function spawnGemini(
     stdout: result.stdout,
     stderr: result.stderr,
     spawnError: null,
+    abortedByCaller: false,
   };
 }

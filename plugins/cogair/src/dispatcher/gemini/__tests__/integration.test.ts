@@ -57,6 +57,10 @@ if (mode === 'success') {
   process.exit(55);
 } else if (mode === 'exit-53') {
   process.exit(53);
+} else if (mode === 'retry-storm') {
+  process.stderr.write('Attempt 1 failed: quota exhausted. Retrying after 5000ms...\\n');
+  process.stderr.write('Attempt 2 failed: quota exhausted. Retrying after 9000ms...\\n');
+  setInterval(() => {}, 1000);
 } else {
   process.exit(2);
 }
@@ -136,6 +140,13 @@ describe('geminiDispatcher.start', () => {
     const result = await geminiDispatcher.start(baseOptions());
     expect(result.error?.code).toBe('auth');
   });
+
+  it('aborts a retry storm and maps it to rate_limit', async () => {
+    process.env.COGAIR_FAKE_GEMINI_MODE = 'retry-storm';
+    const result = await geminiDispatcher.start(baseOptions());
+    expect(result.status).toBe('failure');
+    expect(result.error?.code).toBe('rate_limit');
+  }, 15_000);
 
   it('fails when --list-sessions returns no entries (cannot capture UUID)', async () => {
     process.env.COGAIR_FAKE_GEMINI_MODE = 'success';

@@ -39,6 +39,7 @@ export async function callGemini(
         exitCode: result.exitCode,
         stderr: result.stderr,
         spawnError: result.spawnError,
+        abortedByCaller: result.abortedByCaller,
       }),
       timedOut: result.spawnError?.code === 'ETIMEDOUT',
     };

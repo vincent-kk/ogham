@@ -39,6 +39,7 @@ export async function dispatch(
         exitCode: spawnResult.exitCode,
         stderr: spawnResult.stderr,
         spawnError: spawnResult.spawnError,
+        abortedByCaller: spawnResult.abortedByCaller,
       }),
       externalSessionRef: resolvedRef,
       ignoredOptions,

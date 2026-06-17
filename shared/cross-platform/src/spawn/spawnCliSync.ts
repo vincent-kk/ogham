@@ -43,5 +43,6 @@ export function spawnCliSync(
     stderr: normalize ? normalizeEol(rawStderr) : rawStderr,
     timedOut: result.signal === "SIGTERM" && timeoutMs !== undefined,
     spawnError: result.error ?? undefined,
+    abortedByCaller: false,
   };
 }

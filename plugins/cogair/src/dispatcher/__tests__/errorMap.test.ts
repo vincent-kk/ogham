@@ -33,9 +33,9 @@ describe('mapError', () => {
   });
 
   it('maps HTTP 401 / 403 in stderr to auth', () => {
-    expect(mapError({ exitCode: 1, stderr: 'HTTP 401 Unauthorized' }).code).toBe(
-      ErrorCode.Auth,
-    );
+    expect(
+      mapError({ exitCode: 1, stderr: 'HTTP 401 Unauthorized' }).code,
+    ).toBe(ErrorCode.Auth);
     expect(mapError({ exitCode: 1, stderr: 'got 403 status' }).code).toBe(
       ErrorCode.Auth,
     );
@@ -51,32 +51,29 @@ describe('mapError', () => {
     expect(mapError({ exitCode: 1, stderr: 'ECONNRESET' }).code).toBe(
       ErrorCode.Network,
     );
-    expect(mapError({ exitCode: 1, stderr: 'getaddrinfo ETIMEDOUT' }).code).toBe(
-      ErrorCode.Network,
-    );
-    expect(mapError({ exitCode: 1, stderr: 'ENOTFOUND example.com' }).code).toBe(
-      ErrorCode.Network,
-    );
+    expect(
+      mapError({ exitCode: 1, stderr: 'getaddrinfo ETIMEDOUT' }).code,
+    ).toBe(ErrorCode.Network);
+    expect(
+      mapError({ exitCode: 1, stderr: 'ENOTFOUND example.com' }).code,
+    ).toBe(ErrorCode.Network);
   });
 
-  it('maps spawn ENOENT to cli_error', () => {
-    const err = Object.assign(new Error('not found'), { code: 'ENOENT' });
+  it('maps spawn errors via the node-code table', () => {
+    const enoent = Object.assign(new Error('not found'), { code: 'ENOENT' });
     expect(
       mapError({
         exitCode: -1,
         stderr: '',
-        spawnError: err as NodeJS.ErrnoException,
+        spawnError: enoent as NodeJS.ErrnoException,
       }).code,
     ).toBe(ErrorCode.CliError);
-  });
-
-  it('maps spawn ECONNRESET to network', () => {
-    const err = Object.assign(new Error('reset'), { code: 'ECONNRESET' });
+    const reset = Object.assign(new Error('reset'), { code: 'ECONNRESET' });
     expect(
       mapError({
         exitCode: -1,
         stderr: '',
-        spawnError: err as NodeJS.ErrnoException,
+        spawnError: reset as NodeJS.ErrnoException,
       }).code,
     ).toBe(ErrorCode.Network);
   });
@@ -131,5 +128,15 @@ describe('mapError', () => {
         spawnError: err as NodeJS.ErrnoException,
       }).code,
     ).toBe(ErrorCode.Network);
+  });
+
+  it('maps a caller-aborted retry storm to rate_limit', () => {
+    expect(
+      mapError({
+        exitCode: -1,
+        stderr: 'transient failure, retrying repeatedly',
+        abortedByCaller: true,
+      }).code,
+    ).toBe(ErrorCode.RateLimit);
   });
 });

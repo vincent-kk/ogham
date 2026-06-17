@@ -5,6 +5,7 @@ export interface SpawnOptions {
   input?: string | Buffer;
   encoding?: BufferEncoding;
   normalizeEol?: boolean;
+  onStderr?: (chunk: string, accumulated: string) => boolean | void;
 }
 
 export interface SpawnResult {
@@ -13,4 +14,5 @@ export interface SpawnResult {
   stderr: string;
   timedOut: boolean;
   spawnError?: Error;
+  abortedByCaller?: boolean;
 }
