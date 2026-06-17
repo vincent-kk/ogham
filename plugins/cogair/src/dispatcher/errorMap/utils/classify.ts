@@ -1,4 +1,4 @@
-import type { ErrorCode } from '../../../types/index.js';
+import { ErrorCode } from '../../../types/index.js';
 import { EXIT_CODE_MAP, SPAWN_ERROR_MAP } from '../constants/codeMaps.js';
 
 export interface MapErrorInput {
@@ -8,10 +8,8 @@ export interface MapErrorInput {
 }
 
 export function classify(input: MapErrorInput): ErrorCode {
-  if (input.spawnError)
-    return SPAWN_ERROR_MAP[input.spawnError.code ?? ''] ?? 'unknown';
   if (EXIT_CODE_MAP[input.exitCode]) return EXIT_CODE_MAP[input.exitCode];
-  if (/\b(401|403)\b/.test(input.stderr)) return 'auth';
+  if (/\b(401|403)\b/.test(input.stderr)) return ErrorCode.Auth;
   // agy authenticates via Google OAuth (no API key); surface its sign-in
   // prompts as auth so skills can route to the login flow.
   if (
@@ -19,14 +17,22 @@ export function classify(input: MapErrorInput): ErrorCode {
       input.stderr,
     )
   )
-    return 'auth';
-  if (/\b429\b/.test(input.stderr)) return 'rate_limit';
+    return ErrorCode.Auth;
+  if (
+    /\b429\b|\bRESOURCE_EXHAUSTED\b|\bquota\b|rate[\s_-]?limit|exhausted your capacity/i.test(
+      input.stderr,
+    )
+  )
+    return ErrorCode.RateLimit;
   if (
     /flags? provided but not defined|unknown (flag|subcommand)|not defined: -/i.test(
       input.stderr,
     )
   )
-    return 'cli_error';
-  if (/ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(input.stderr)) return 'network';
-  return 'unknown';
+    return ErrorCode.CliError;
+  if (/ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(input.stderr))
+    return ErrorCode.Network;
+  if (input.spawnError)
+    return SPAWN_ERROR_MAP[input.spawnError.code ?? ''] ?? ErrorCode.Unknown;
+  return ErrorCode.Unknown;
 }

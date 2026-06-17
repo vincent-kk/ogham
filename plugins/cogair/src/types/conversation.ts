@@ -2,23 +2,25 @@ import { z } from 'zod';
 
 export const PROVIDERS = ['antigravity', 'gemini', 'codex'] as const;
 export const MODEL_ALIASES = ['high', 'mid', 'low', 'auto'] as const;
-export const ERROR_CODES = [
-  'budget_exhausted',
-  'rate_limit',
-  'auth',
-  'disabled',
-  'network',
-  'cli_error',
-  'unknown',
-] as const;
+export const ErrorCode = {
+  BudgetExhausted: 'budget_exhausted',
+  RateLimit: 'rate_limit',
+  Auth: 'auth',
+  Disabled: 'disabled',
+  Network: 'network',
+  CliError: 'cli_error',
+  Unknown: 'unknown',
+} as const;
 
 export type Provider = (typeof PROVIDERS)[number];
 export type ModelAlias = (typeof MODEL_ALIASES)[number];
-export type ErrorCode = (typeof ERROR_CODES)[number];
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 export const ProviderSchema = z.enum(PROVIDERS);
 export const ModelAliasSchema = z.enum(MODEL_ALIASES);
-export const ErrorCodeSchema = z.enum(ERROR_CODES);
+export const ErrorCodeSchema = z.enum(
+  Object.values(ErrorCode) as [ErrorCode, ...ErrorCode[]],
+);
 
 export const ConversationOptionsSchema = z.object({}).passthrough();
 

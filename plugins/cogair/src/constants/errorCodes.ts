@@ -1,12 +1,15 @@
-import type { ErrorCode } from '../types/index.js';
+import { ErrorCode } from '../types/index.js';
 
 export const ERROR_MESSAGES: Record<ErrorCode, string> = {
-  budget_exhausted: 'Provider reported budget or turn-limit exhaustion.',
-  rate_limit: 'Provider rate limit hit. Retry after a short backoff.',
-  auth: 'Authentication required. Re-login through the provider CLI.',
-  disabled:
+  [ErrorCode.BudgetExhausted]:
+    'Provider reported budget or turn-limit exhaustion.',
+  [ErrorCode.RateLimit]:
+    'Provider rate limit hit. Retry after a short backoff.',
+  [ErrorCode.Auth]:
+    'Authentication required. Re-login through the provider CLI.',
+  [ErrorCode.Disabled]:
     'Provider is disabled in cogair config. Enable it via /cogair:setup.',
-  network: 'Network failure while contacting the provider.',
-  cli_error: 'External CLI failed to execute.',
-  unknown: 'Unclassified failure.',
+  [ErrorCode.Network]: 'Network failure while contacting the provider.',
+  [ErrorCode.CliError]: 'External CLI failed to execute.',
+  [ErrorCode.Unknown]: 'Unclassified failure.',
 };
