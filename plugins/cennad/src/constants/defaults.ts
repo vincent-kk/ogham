@@ -12,7 +12,6 @@ export const DEFAULT_CONFIG: Config = {
     codex: 'code, refactor, sandbox',
     antigravity: 'research, search, youtube, large-context',
   },
-  default_model: 'auto',
   option_flags: {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },

@@ -1,14 +1,12 @@
-import type { ModelAlias } from '../../../types/index.js';
+import { ModelAlias } from '../../../types/index.js';
 
 export function resolveGeminiModel(alias: ModelAlias): string | null {
   switch (alias) {
-    case 'high':
+    case ModelAlias.High:
       return process.env.CENNAD_GEMINI_HIGH ?? 'pro';
-    case 'mid':
+    case ModelAlias.Mid:
       return process.env.CENNAD_GEMINI_MID ?? 'flash';
-    case 'low':
+    case ModelAlias.Low:
       return process.env.CENNAD_GEMINI_LOW ?? 'flash-lite';
-    case 'auto':
-      return null;
   }
 }

@@ -75,7 +75,7 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
     expect(env.response).not.toBeNull();
   }, 180_000);
 
-  it('antigravity auto — start_conversation returns success envelope', async () => {
+  it('antigravity mid — start_conversation returns success envelope', async () => {
     await enableAntigravityConfig();
     handle = await makeLayerBClient();
     const result = await handle.client.callTool({
@@ -83,6 +83,7 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
       arguments: {
         provider: 'antigravity',
         prompt: 'reply with the single word OK',
+        model: 'mid',
       },
     });
     const env = assertEnvelopeSuccess(parseToolCallText(result.content), {

@@ -15,7 +15,6 @@ function makeConfig(
     },
     intervention_strength: 0,
     keywords: { gemini: 'g', codex: 'c', antigravity: 'a' },
-    default_model: 'auto',
     option_flags: {
       gemini: { yolo: false, sandbox: false, sandbox_backend: 'auto' },
       codex: { yolo: false, sandbox: 'read-only' },

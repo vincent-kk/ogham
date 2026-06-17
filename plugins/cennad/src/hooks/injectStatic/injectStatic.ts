@@ -36,7 +36,6 @@ export function buildStaticPayload(config: HookConfig): string {
     ...keywordLines,
     '',
     'Routing guidance',
-    `- Default model alias: ${config.default_model}`,
     `- Option flags:        ${flags}`,
     "- Delegate when (a) a keyword matches the provider's domain,",
     "  (b) the task suits the provider's strength (gemini/antigravity: live search, large context;",

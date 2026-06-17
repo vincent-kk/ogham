@@ -58,7 +58,7 @@ describe('start_conversation (Layer A)', () => {
     );
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'hello gemini' },
+      arguments: { provider: 'gemini', prompt: 'hello gemini', model: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'gemini',
@@ -87,7 +87,7 @@ describe('start_conversation (Layer A)', () => {
     );
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'codex', prompt: 'hello codex' },
+      arguments: { provider: 'codex', prompt: 'hello codex', model: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
       provider: 'codex',
@@ -110,6 +110,7 @@ describe('start_conversation (Layer A)', () => {
       arguments: {
         provider: 'gemini',
         prompt: 'hi',
+        model: 'mid',
         // The MCP inputSchema for start_conversation does not declare `options`.
         // Anything passed here is dropped before the handler runs.
         options: { multi_agent: true, yolo: true, sandbox: 'read-only' },

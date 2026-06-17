@@ -10,7 +10,7 @@
 | `constants/`     | 경로·기본값·에러 코드 organ                                        |
 | `core/`          | config / counter / session / project hash / auth token / agyModels |
 | `dispatcher/`    | codex / gemini / antigravity CLI 호출 본체                         |
-| `mcp/`           | MCP 서버 + 4 도구 핸들러 + settings web UI                         |
+| `mcp/`           | MCP 서버 + 3 도구 핸들러 + settings web UI                         |
 | `hooks/`         | SessionStart / UserPromptSubmit 훅 구현체 (esbuild 입력)           |
 | `lib/`           | atomic write, logger organ                                         |
 | `utils/`         | parent-pid, iso-now organ                                          |

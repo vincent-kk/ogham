@@ -78,9 +78,9 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 2. **트랜스크립트 폴백**: `resolveTranscript(cwd, since)` → `agyTranscriptStore` 가 agy brain transcript(JSONL)에서 읽기 전용으로 복구합니다.
 3. **`cli_error` 반환**: 위 두 방법이 모두 실패하면 명시적 오류를 반환합니다.
 
-### 📦 모델 목록 (`list_antigravity_models` — 4번째 MCP 도구)
+### 📦 모델 목록 (`core/agyModels` 내부 캐시)
 
-`core/agyModels`는 `agy models` 서브커맨드를 실행하여 모델 목록을 가져오고, 결과를 1시간 TTL로 캐시합니다(`~/.claude/plugins/cennad/agy-models-cache.json`). `list_antigravity_models` MCP 도구가 이 캐시를 반환합니다. `agy`가 없거나 미인증 상태이면 빈 배열을 반환하며 절대 throw하지 않습니다.
+`core/agyModels`는 `agy models` 서브커맨드를 실행하여 모델 목록을 가져오고, 결과를 1시간 TTL로 캐시합니다(`~/.claude/plugins/cennad/agy-models-cache.json`). `getAvailableModels` 가 이 캐시를 반환하며, settings UI 의 `/provider-status` 웹 라우트가 이를 직접 호출합니다. `agy`가 없거나 미인증 상태이면 빈 배열을 반환하며 절대 throw하지 않습니다.
 
 ---
 

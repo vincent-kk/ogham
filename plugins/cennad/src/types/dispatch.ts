@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import type { ConversationError, ConversationOptions } from './conversation.js';
+import type {
+  ConversationError,
+  ConversationOptions,
+  ModelAlias,
+} from './conversation.js';
 
 export const GeminiSandboxBackendSchema = z.enum([
   'auto',
@@ -51,7 +55,7 @@ export type TierModelMap = z.infer<typeof TierModelMapSchema>;
 
 export interface DispatchOptions<F = unknown> {
   prompt: string;
-  model: 'high' | 'mid' | 'low' | 'auto';
+  model: ModelAlias;
   options: ConversationOptions;
   sessionId: string;
   cwd: string;

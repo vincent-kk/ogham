@@ -19,7 +19,6 @@ codex-cli / gemini-cli / agy 호출 본체. MCP 도구 핸들러에서 받은 `D
 - 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 `DispatchOptions.flags` 채널 — config 단독, MCP input 노출 금지
 - 외부 CLI 호출은 `node:child_process.spawn` 직접 사용 (의존성 추가 없음)
 - 환경 변수: codex 상속만, gemini `GEMINI_CLI_TRUST_WORKSPACE=true` + `flags.sandbox && backend!=='auto'` 시 `GEMINI_SANDBOX=<backend>`
-- 모델 alias `auto` 는 `-m` 플래그 자체를 생략
 - prompt prefix 합성은 MCP tool 진입에서 `composePrompt` 1회 — dispatcher 는 합성 후 문자열만 받음
 
 ## Boundaries

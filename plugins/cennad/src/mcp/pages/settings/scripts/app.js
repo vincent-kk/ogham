@@ -3,7 +3,6 @@
 
   // Mirror src/constants/defaults.ts (DEFAULT_CONFIG) — keep in sync.
   var DEFAULT_RATIO_VALUE = 50;
-  var DEFAULT_MODEL = 'auto';
   var DEFAULT_SESSION_TTL_HOURS = 72;
   var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
   var DEFAULT_OPTION_FLAGS = {
@@ -642,11 +641,6 @@
     applyRecencyFactor(cfg.recency_factor);
     applyModels(cfg.model_map);
     applyYoutubeAddon(cfg.addons && cfg.addons.youtube);
-    var radio = document.querySelector(
-      'input[name="model"][value="' + cfg.default_model + '"]',
-    );
-    if (radio) radio.checked = true;
-
     applyGoogleEngine(googleEngine);
     renderRatio();
     updateStrengthLabel();
@@ -704,7 +698,6 @@
   }
 
   function buildConfig() {
-    var modelEl = document.querySelector('input[name="model"]:checked');
     var isGemini = googleEngine === 'gemini';
     var googleSlot = {
       value: ratioState.gemini.value,
@@ -735,7 +728,6 @@
         codex: kwCodex.value.trim(),
         antigravity: kwGoogle,
       },
-      default_model: modelEl ? modelEl.value : DEFAULT_MODEL,
       option_flags: buildOptionFlags(),
       model_map: buildModelMap(),
       session_ttl_hours: Math.max(

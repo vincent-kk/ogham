@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { ModelAliasSchema } from './conversation.js';
 import {
   AntigravityFlagsSchema,
   CodexFlagsSchema,
@@ -130,7 +129,6 @@ export const ConfigObjectSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
   keywords: KeywordsSchema,
-  default_model: ModelAliasSchema,
   option_flags: OptionFlagsSchema,
   model_map: ModelMapSchema,
   session_ttl_hours: z.number().int().positive(),

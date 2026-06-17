@@ -90,7 +90,6 @@ const BASE_CONFIG: HookConfig = {
   },
   intervention_strength: 0,
   keywords: { gemini: 'gemini', codex: 'codex', antigravity: 'agy' },
-  default_model: 'auto',
   option_flags: {
     gemini: { yolo: false, sandbox: false, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'read-only' },

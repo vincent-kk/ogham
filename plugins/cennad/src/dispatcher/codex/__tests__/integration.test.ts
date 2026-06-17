@@ -71,7 +71,7 @@ beforeEach(() => {
 function baseOptions(): DispatchOptions<CodexFlags> {
   return {
     prompt: 'hello',
-    model: 'auto',
+    model: 'mid',
     options: {},
     sessionId: 'cennad-session',
     cwd: process.cwd(),

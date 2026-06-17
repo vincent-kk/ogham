@@ -13,7 +13,6 @@ const BASE_CONFIG: HookConfig = {
   },
   intervention_strength: 0,
   keywords: { gemini: 'research', codex: 'code', antigravity: 'search' },
-  default_model: 'auto',
   option_flags: {
     gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },

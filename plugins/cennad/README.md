@@ -2,7 +2,7 @@
 
 > **Renamed from `cogair`.** This plugin was previously published as `cogair`. With the rename, the old `/cogair:*` skills, the `cogair` MCP server, and the on-disk settings at `~/.claude/plugins/cogair/` no longer apply — there is no automatic migration. Reinstall as `cennad` and run `/cennad:setup` to reconfigure your provider ratio, keywords, and options.
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google's Gemini / Antigravity CLI** through four MCP tools, five user-invocable skills, and two lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google's Gemini / Antigravity CLI** through three MCP tools, five user-invocable skills, and two lifecycle hooks.
 
 Where `atlassian` or `filid` encapsulate domain knowledge, cennad is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → gemini or antigravity) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
 
@@ -53,7 +53,7 @@ cennad never installs or logs in for you. When auth is missing the failure respo
 /setup
 ```
 
-Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), the Google engine toggle (gemini ↔ antigravity), intervention strength (`-2` … `+2`), keyword routing hints, default model alias, per-tier antigravity model mapping, and default options. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
+Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), the Google engine toggle (gemini ↔ antigravity), intervention strength (`-2` … `+2`), keyword routing hints, per-tier antigravity model mapping, and default options. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
 
 ### Delegating to Codex
 
@@ -104,7 +104,7 @@ Claude Code session
    ├── Skills (/setup, /codex, /gemini, /antigravity, /crosscheck)   Layer 3 (user)
    │       │
    │       ▼
-   ├── MCP "tools" server                       Layer 2 (logic) — 4 MCP tools
+   ├── MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
    │       │
    │       ▼
    ├── Dispatcher (codex / gemini / antigravity)  spawn external CLI + parse output
@@ -119,12 +119,11 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 
 ### MCP Tools
 
-| Tool                      | Purpose                                                                          |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| `start_conversation`      | Spawn `codex`, `gemini`, or `antigravity` with a prompt and return an envelope.  |
-| `continue_conversation`   | Resume an existing session by `session_id` (project-hash-scoped).                |
-| `open_settings`           | Start the local settings UI and return its URL with a one-time token.            |
-| `list_antigravity_models` | List the `agy` model full-names available to your account (for auto-tier picks). |
+| Tool                    | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `start_conversation`    | Spawn `codex`, `gemini`, or `antigravity` with a prompt and return an envelope. |
+| `continue_conversation` | Resume an existing session by `session_id` (project-hash-scoped).               |
+| `open_settings`         | Start the local settings UI and return its URL with a one-time token.           |
 
 ### Skills
 
@@ -172,16 +171,15 @@ Sessions are project-scoped: `continue_conversation` from a different `cwd` retu
 
 ## Model Aliases
 
-Each provider exposes four tier aliases. For codex/gemini, concrete model IDs live in the dispatcher (`src/dispatcher/<provider>/modelAlias.ts`) so upstream CLI renames stay scoped to one file. Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in config (`model_map.antigravity`).
+Each provider exposes three tier aliases. For codex/gemini, concrete model IDs live in the dispatcher (`src/dispatcher/<provider>/modelAlias.ts`) so upstream CLI renames stay scoped to one file. Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in config (`model_map.antigravity`).
 
-| alias  | meaning                                                                             |
-| ------ | ----------------------------------------------------------------------------------- |
-| `high` | provider's most capable model (antigravity: the model you mapped to this tier)      |
-| `mid`  | balanced model                                                                      |
-| `low`  | fastest / cheapest model                                                            |
-| `auto` | CLI default (omit `-m`); antigravity lets Claude pick via `list_antigravity_models` |
+| alias  | meaning                                                                        |
+| ------ | ------------------------------------------------------------------------------ |
+| `high` | provider's most capable model (antigravity: the model you mapped to this tier) |
+| `mid`  | balanced model                                                                 |
+| `low`  | fastest / cheapest model                                                       |
 
-Env overrides (codex/gemini): `CENNAD_CODEX_{HIGH,MID,LOW}`, `CENNAD_GEMINI_{HIGH,MID,LOW}`. Antigravity tiers are mapped in `/setup`, not via env vars.
+Env overrides (gemini): `CENNAD_GEMINI_{HIGH,MID,LOW}`. codex maps tiers to reasoning effort (no env vars). Antigravity tiers are mapped in `/setup`, not via env vars.
 
 ---
 
@@ -210,7 +208,7 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [README](../../.metadata/cennad/README.md)                       | Spec index + core decisions                     |
 | [spec](../../.metadata/cennad/spec.md)                           | Responsibilities, data flow, non-goals          |
 | [architecture](../../.metadata/cennad/architecture.md)           | Module tree + dependency direction + build flow |
-| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 4 MCP tools (input schema, behavior, envelope)  |
+| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
 | [skills](../../.metadata/cennad/skills.md)                       | Skill body + tool-call mapping                  |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / gemini-cli / agy invocation matrix  |

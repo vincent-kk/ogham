@@ -6,7 +6,7 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 
 | File / Path          | Role                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------- |
-| `modelAlias.ts`      | `high/mid/low/auto` → 기본 null (codex-cli default 사용), env override 가능                 |
+| `reasoningEffort.ts` | `high/mid/low` → reasoning effort(high/medium/low)                                          |
 | `jsonlParser/`       | JSONL 라인 단위 파싱 → `{ threadId, response, resolvedModel }` (utils/constants organ 포함) |
 | `spawn.ts`           | `node:child_process.spawn('codex', ...)`, ENOENT 캐치                                       |
 | `codexDispatcher.ts` | `Dispatcher<CodexFlags>` 구현 + `supportedOptions = new Set()`                              |
@@ -15,8 +15,8 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 
 ## Conventions
 
-- `start`: `codex exec --skip-git-repo-check --json [--yolo | --sandbox <mode>] [-m <model>] <prompt>`
-- `resume`: `codex exec resume --json [-m <model>] <externalSessionRef> <prompt>` (sandbox/yolo 미부여)
+- `start`: `codex exec --skip-git-repo-check --json [--yolo | --sandbox <mode>] [-c model_reasoning_effort=<v>] <prompt>`
+- `resume`: `codex exec resume --json [-c model_reasoning_effort=<v>] <externalSessionRef> <prompt>` (sandbox/yolo 미부여)
 - `flags.yolo=true` → `--yolo`; 아니고 `flags.sandbox !== 'off'` → `--sandbox <mode>` (config 단독 결정)
 - `--json` 강제 (JSONL 스트림). `--ask-for-approval` 은 `codex exec` 에서 unexpected argument
 - JSONL stdout 파싱: `thread.started`/`session_id` 변종 모두 허용 (업스트림 rename 대비)

@@ -13,12 +13,14 @@ import {
 import type {
   ConversationResponse,
   DispatchResult,
+  ModelAlias,
 } from '../../../types/index.js';
 import { isoNow } from '../../../utils/isoNow.js';
 
 export interface ContinueConversationInput {
   session_id: string;
   prompt: string;
+  model?: ModelAlias;
 }
 
 export async function handleContinueConversation(
@@ -78,7 +80,7 @@ export async function handleContinueConversation(
   });
   const base = {
     prompt: composedPrompt,
-    model: 'auto' as const,
+    model: input.model ?? 'mid',
     options: {},
     sessionId: session.session_id,
     cwd: session.cwd,

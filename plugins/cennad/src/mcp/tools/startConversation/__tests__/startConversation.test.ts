@@ -50,6 +50,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
+      model: 'mid',
     });
 
     expect(result.status).toBe('success');
@@ -75,6 +76,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
+      model: 'mid',
     });
 
     expect(result.status).toBe('failure');
@@ -102,6 +104,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
+      model: 'mid',
     });
     expect(result.meta.ignored_options).toEqual([]);
   });
@@ -118,6 +121,7 @@ describe('handleStartConversation', () => {
     const result = await handleStartConversation({
       provider: 'codex',
       prompt: 'hi',
+      model: 'mid',
     });
 
     expect(result.status).toBe('failure');

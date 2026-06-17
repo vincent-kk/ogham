@@ -87,7 +87,7 @@ beforeEach(async () => {
 function baseOptions(): DispatchOptions<AntigravityFlags> {
   return {
     prompt: 'hello',
-    model: 'auto',
+    model: 'mid',
     options: {},
     sessionId: 'agy-session',
     cwd: process.cwd(),

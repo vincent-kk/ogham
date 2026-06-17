@@ -2,7 +2,7 @@
 name: crosscheck
 description: '[cennad] Cross-validate a prompt by dispatching to codex AND the active Google engine (gemini or antigravity) in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
-argument-hint: '[--model high|mid|low|auto] -- "prompt"'
+argument-hint: '[--model high|mid|low] -- "prompt"'
 ---
 
 # crosscheck
@@ -35,8 +35,7 @@ the two `ConversationResponse` envelopes into one consolidated answer.
 
 Parse the invocation. Recognize:
 
-- `--model high|mid|low|auto` — applied to BOTH providers (defaults to
-  config `default_model`).
+- `--model high|mid|low` — required; applied to BOTH providers. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other
@@ -74,11 +73,11 @@ disabled and fall back to the one-enabled flow above.
 
 Issue the two calls **in parallel** (single message, two tool uses):
 
-- `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`
-- `mcp_tools_start_conversation({ provider: <google>, prompt, model? })` —
+- `mcp_tools_start_conversation({ provider: 'codex', prompt, model })`
+- `mcp_tools_start_conversation({ provider: <google>, prompt, model })` —
   `<google>` is the active Google engine (`gemini` or `antigravity`).
 
-Omit `model` when alias is `auto` or unspecified.
+`model` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 

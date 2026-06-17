@@ -22,7 +22,7 @@ import { isoNow } from '../../../utils/isoNow.js';
 export interface StartConversationInput {
   provider: Provider;
   prompt: string;
-  model?: ModelAlias;
+  model: ModelAlias;
 }
 
 export async function handleStartConversation(
@@ -52,7 +52,7 @@ export async function handleStartConversation(
   }
 
   const cwd = process.cwd();
-  const model: ModelAlias = input.model ?? config.default_model;
+  const model: ModelAlias = input.model;
   const options = {};
 
   await incrementCounter(input.provider);

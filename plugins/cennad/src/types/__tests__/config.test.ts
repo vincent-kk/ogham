@@ -23,12 +23,6 @@ describe('ConfigSchema', () => {
     ).toThrow();
   });
 
-  it('rejects unknown default_model alias', () => {
-    expect(() =>
-      ConfigSchema.parse({ ...DEFAULT_CONFIG, default_model: 'ultra' }),
-    ).toThrow();
-  });
-
   it('requires positive session_ttl_hours', () => {
     expect(() =>
       ConfigSchema.parse({ ...DEFAULT_CONFIG, session_ttl_hours: 0 }),

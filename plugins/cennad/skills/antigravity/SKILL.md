@@ -2,7 +2,7 @@
 name: antigravity
 description: '[cennad] Delegate to Google Antigravity CLI (agy) via cennad. Use for live web-grounded research, very-large-context synthesis, or multi-family model serving (Gemini/Claude/GPT-OSS). Trigger: "ask antigravity", "antigravity 호출", "안티그래비티에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
 ---
 
 # antigravity
@@ -25,7 +25,7 @@ Delegate to the Antigravity CLI (`agy`) through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low|auto` — model alias (defaults to config `default_model`).
+- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping are managed via `/setup` (settings UI) — they are not skill arguments. Antigravity has no sandbox-backend option; its `--sandbox` restricts terminal commands only.
@@ -33,7 +33,7 @@ Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping 
 ## Call mapping
 
 - With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, model? })`. Omit `model` when alias is `auto` or unspecified.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
 
 > antigravity and gemini are mutually exclusive Google engines in cennad config (the Gemini CLI service ends 2026-06-18). If antigravity is not the enabled engine, `start_conversation` returns `error.code: 'disabled'`.
 
@@ -50,15 +50,15 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | tier                                                                            |
-| ------ | ------------------------------------------------------------------------------- |
-| `high` | the model mapped to this tier in `/setup` (per-tier model dropdown)             |
-| `mid`  | the model mapped to this tier in `/setup`                                       |
-| `low`  | the model mapped to this tier in `/setup`                                       |
-| `auto` | agy default (omit `-m`) — Claude may pick a model via `list_antigravity_models` |
+| alias  | tier                                                                |
+| ------ | ------------------------------------------------------------------- |
+| `high` | the model mapped to this tier in `/setup` (per-tier model dropdown) |
+| `mid`  | the model mapped to this tier in `/setup`                           |
+| `low`  | the model mapped to this tier in `/setup`                           |
 
 Antigravity serves multiple model families (e.g. Gemini 3.5 Flash / 3.1 Pro,
 Claude Sonnet 4.5 / Opus 4.6, GPT-OSS 120B), subject to your subscription. The
 concrete model each tier maps to is configured in `/setup` from the live
-`agy models` list and stored in cennad config (`model_map.antigravity`). Call
-the `list_antigravity_models` MCP tool to see what is currently available.
+`agy models` list and stored in cennad config (`model_map.antigravity`). To see
+what is currently available, open the settings UI via `/setup` or run `agy
+models` directly.

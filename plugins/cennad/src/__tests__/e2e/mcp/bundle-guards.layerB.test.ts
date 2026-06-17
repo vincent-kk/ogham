@@ -46,13 +46,13 @@ describe('Hook bundle guards (Layer B)', () => {
 });
 
 describe('MCP bundle handshake (Layer B)', () => {
-  it('mcp-server.cjs spawn completes initialize handshake and lists 4 tools', async () => {
+  it('mcp-server.cjs spawn completes initialize handshake and lists 3 tools', async () => {
     const handle: LayerBClient = await makeLayerBClient();
     try {
       const info = handle.client.getServerVersion();
       expect(info?.name).toBe('tools');
       const { tools } = await handle.client.listTools();
-      expect(tools.length).toBe(4);
+      expect(tools.length).toBe(3);
     } finally {
       await handle.close();
     }

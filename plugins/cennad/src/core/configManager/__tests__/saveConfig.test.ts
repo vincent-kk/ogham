@@ -35,7 +35,6 @@ describe('saveConfig', () => {
     const config: Config = {
       ...DEFAULT_CONFIG,
       session_ttl_hours: 12,
-      default_model: 'low',
     };
     await saveConfig(config);
     expect(await loadConfig()).toEqual(config);

@@ -6,8 +6,6 @@ export type Ratio = {
   antigravity: ProviderRatio;
 };
 
-export type ModelAlias = 'high' | 'mid' | 'low' | 'auto';
-
 export type InterventionStrength = -2 | -1 | 0 | 1 | 2;
 
 export type GeminiSandboxBackend =
@@ -62,7 +60,6 @@ export interface HookConfig {
   ratio: Ratio;
   intervention_strength: InterventionStrength;
   keywords: { gemini: string; codex: string; antigravity: string };
-  default_model: ModelAlias;
   option_flags: OptionFlags;
   preamble: PreambleConfig;
   recency_factor: RecencyFactorConfig;

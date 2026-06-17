@@ -102,7 +102,11 @@ describe('start_conversation error mapping (Layer B)', () => {
       handle = await makeLayerBClient({ env: c.env });
       const result = await handle.client.callTool({
         name: 'start_conversation',
-        arguments: { provider: c.provider, prompt: 'trigger failure' },
+        arguments: {
+          provider: c.provider,
+          prompt: 'trigger failure',
+          model: 'mid',
+        },
       });
       assertEnvelopeFailure(parseToolCallText(result.content), {
         code: c.code,

@@ -2,7 +2,7 @@
 name: gemini
 description: '[cennad] Delegate to Google Gemini CLI via cennad. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude''s cutoff. Trigger: "ask gemini", "gemini 호출", "제미니에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
 ---
 
 # gemini
@@ -30,7 +30,7 @@ Delegate to Gemini CLI through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low|auto` — model alias (defaults to config `default_model`).
+- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
@@ -38,7 +38,7 @@ Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher opt
 ## Call mapping
 
 - With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, model? })`. Omit `model` when alias is `auto` or unspecified.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'gemini', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 
@@ -58,7 +58,6 @@ On `status: 'failure'`, dispatch by `error.code`:
 | `high` | most capable gemini model (env override: `CENNAD_GEMINI_HIGH`)      |
 | `mid`  | balanced gemini model (env override: `CENNAD_GEMINI_MID`)           |
 | `low`  | fastest / cheapest gemini model (env override: `CENNAD_GEMINI_LOW`) |
-| `auto` | gemini-cli default (omit `-m`)                                      |
 
 The concrete model IDs each tier resolves to live in the dispatcher
 (`src/dispatcher/gemini/modelAlias.ts`) so they can track upstream renames

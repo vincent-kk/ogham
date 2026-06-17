@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`agy models` CLI 출력을 실행·파싱·캐싱해 사용 가능한 Antigravity 모델 풀네임 목록을 제공한다. settings UI 드롭다운과 auto-tier 동적 모델 선택의 단일 소스. 네트워크·OAuth 의존이므로 실패 시 빈 배열로 graceful degrade 한다.
+`agy models` CLI 출력을 실행·파싱·캐싱해 사용 가능한 Antigravity 모델 풀네임 목록을 제공한다. settings UI 드롭다운 및 provider-status 조회의 단일 소스. 네트워크·OAuth 의존이므로 실패 시 빈 배열로 graceful degrade 한다.
 
 ## Structure
 

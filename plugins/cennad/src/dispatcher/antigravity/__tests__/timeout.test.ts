@@ -70,7 +70,7 @@ function sleep(ms: number): Promise<void> {
 function baseOptions(): DispatchOptions<AntigravityFlags> {
   return {
     prompt: 'hello',
-    model: 'auto',
+    model: 'mid',
     options: {},
     sessionId: 'timeout-session',
     cwd: process.cwd(),
@@ -138,7 +138,7 @@ describe('antigravityDispatcher timeout — start()', () => {
     expect(result.ignoredOptions).toEqual([]);
   });
 
-  it('resolvedModel is null when model is auto and no modelMap is provided', async () => {
+  it('resolvedModel is null when no modelMap is provided', async () => {
     const result = await antigravityDispatcher.start(baseOptions());
     expect(result.resolvedModel).toBeNull();
   });

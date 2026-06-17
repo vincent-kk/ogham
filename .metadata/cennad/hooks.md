@@ -104,7 +104,6 @@ HookConfig {
   preamble: { gemini, codex, antigravity }
   recency_factor: { gemini, codex, antigravity }
   intervention_strength: -2 | -1 | 0 | 1 | 2
-  default_model: 'high' | 'mid' | 'low' | 'auto'
 }
 
 HookCounter {
@@ -141,7 +140,6 @@ Keyword mapping
 - codex  → <config.keywords.codex>
 
 Routing guidance
-- Default model alias: <config.default_model>
 - Option flags:        <JSON.stringify(config.option_flags)>
 - Delegate when (a) a keyword matches the provider's domain,
   (b) the task suits the provider's strength (gemini/antigravity: live search, large context;

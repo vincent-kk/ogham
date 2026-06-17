@@ -16,7 +16,7 @@ function startArgs(
 ): string[] {
   const opts: DispatchOptions<AntigravityFlags> = {
     prompt: 'hi',
-    model: 'auto',
+    model: 'mid',
     options: {},
     sessionId: 's',
     cwd: '/tmp',
@@ -32,7 +32,7 @@ function resumeArgs(
 ): string[] {
   const opts: DispatchResumeOptions<AntigravityFlags> = {
     prompt: 'hi',
-    model: 'auto',
+    model: 'mid',
     options: {},
     sessionId: 's',
     cwd: '/tmp',

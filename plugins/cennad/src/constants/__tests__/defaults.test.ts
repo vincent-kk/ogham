@@ -17,10 +17,6 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
-  it('defaults to auto model', () => {
-    expect(DEFAULT_CONFIG.default_model).toBe('auto');
-  });
-
   it('defaults option_flags to safe per-provider sandbox', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
       gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },

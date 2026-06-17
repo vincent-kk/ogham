@@ -34,7 +34,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 1,
       keywords: { gemini: 'g', codex: 'c', antigravity: 'a' },
-      default_model: 'high',
       option_flags: {
         gemini: { yolo: true, sandbox: true, sandbox_backend: 'docker' },
         codex: { yolo: false, sandbox: 'workspace-write' },
@@ -76,7 +75,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: { gemini: 'g', codex: 'c' },
-      default_model: 'auto',
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
     };
@@ -94,7 +92,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: { gemini: 'g', codex: 'c' },
-      default_model: 'auto',
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
       antigravity_youtube: { enabled: true },
@@ -119,7 +116,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: { gemini: 'g', codex: 'c' },
-      default_model: 'auto',
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
     };
@@ -137,7 +133,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: DEFAULT_CONFIG.keywords,
-      default_model: 'auto',
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
       recency_factor: { gemini: 'aggressive', codex: 'strict' },
@@ -158,7 +153,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: { gemini: 'g', codex: 'c' },
-      default_model: 'auto',
       default_options: { multi_agent: true },
       session_ttl_hours: 72,
     };
@@ -178,7 +172,6 @@ describe('loadConfig', () => {
       },
       intervention_strength: 0,
       keywords: { gemini: 'g', codex: 'c' },
-      default_model: 'auto',
       option_flags: { gemini: { yolo: true } },
       session_ttl_hours: 72,
     };

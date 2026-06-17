@@ -151,4 +151,22 @@ describe('handleContinueConversation', () => {
     const updated = await getSession(hash, session.session_id);
     expect(updated?.turn_count).toBe(1);
   });
+
+  it('accepts an explicit model tier for the follow-up turn', async () => {
+    process.env.CENNAD_FAKE_CODEX_MODE = 'success';
+    const session = await createSession({
+      provider: 'codex',
+      cwd: process.cwd(),
+      externalSessionRef: 'tid-resume',
+      model: 'gpt-5-codex',
+    });
+
+    const result = await handleContinueConversation({
+      session_id: session.session_id,
+      prompt: 'follow up',
+      model: 'high',
+    });
+
+    expect(result.status).toBe('success');
+  });
 });

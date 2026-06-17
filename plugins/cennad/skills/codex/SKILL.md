@@ -2,7 +2,7 @@
 name: codex
 description: '[cennad] Delegate to OpenAI Codex CLI via cennad. Use for heavy code generation/refactoring, sandboxed shell work, or independent second opinions from a different model family. Trigger: "ask codex", "codex 호출", "코덱스에게"'
 user_invocable: true
-argument-hint: '[--continue <session_id>] [--model high|mid|low|auto] -- "prompt"'
+argument-hint: '[--continue <session_id>] [--model high|mid|low] -- "prompt"'
 ---
 
 # codex
@@ -25,7 +25,7 @@ Delegate to Codex CLI through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--model high|mid|low|auto` — model alias (defaults to config `default_model`).
+- `--model high|mid|low` — required model alias. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
@@ -33,7 +33,7 @@ Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher opt
 ## Call mapping
 
 - With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `model`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, model? })`. Omit `model` when alias is `auto` or unspecified.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, model })`. `model` is required — choose `high`/`mid`/`low` by task complexity.
 
 ## Response handling
 
@@ -48,22 +48,14 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Model alias
 
-| alias  | resolves to                                                 |
-| ------ | ----------------------------------------------------------- |
-| `high` | codex-cli default unless `CENNAD_CODEX_HIGH` env var is set |
-| `mid`  | codex-cli default unless `CENNAD_CODEX_MID` env var is set  |
-| `low`  | codex-cli default unless `CENNAD_CODEX_LOW` env var is set  |
-| `auto` | codex-cli default (omit `-m`)                               |
+| alias  | resolves to               |
+| ------ | ------------------------- |
+| `high` | reasoning effort `high`   |
+| `mid`  | reasoning effort `medium` |
+| `low`  | reasoning effort `low`    |
 
-codex-cli does not expose stable user-facing model aliases the way
-gemini-cli does — its ChatGPT-account mode whitelist accepts only concrete
-model IDs that change with each upstream release. To avoid shipping a
-version-numbered ID that ages on the next release, every cennad tier
-delegates to codex-cli's own default. Differentiate per tier by exporting
-the env vars to whichever concrete model IDs the active codex login can
-reach. The resolution lives in `src/dispatcher/codex/modelAlias.ts`.
-
-When the relevant env var (`CENNAD_CODEX_HIGH` / `_MID` / `_LOW`) is unset,
-the `high` / `mid` / `low` tiers fall through to the codex-cli default —
-behaviorally identical to `auto`. Without env var overrides, all tiers
-resolve to the same model.
+codex-cli runs a single coding model; the tier does not switch models.
+Instead it selects the model's reasoning effort, injected as
+`-c model_reasoning_effort=<value>` on the `codex exec` invocation:
+`high` → `high`, `mid` → `medium`, `low` → `low`. The resolution lives in
+`src/dispatcher/codex/operations/reasoningEffort.ts`.

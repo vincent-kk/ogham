@@ -40,8 +40,4 @@ describe('resolveGeminiModel', () => {
     expect(resolveGeminiModel('mid')).toBe('custom-flash');
     expect(resolveGeminiModel('low')).toBe('custom-lite');
   });
-
-  it('returns null for auto so dispatcher omits the -m flag', () => {
-    expect(resolveGeminiModel('auto')).toBeNull();
-  });
 });

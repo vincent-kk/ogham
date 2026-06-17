@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP 도구 4개(`start_conversation`, `continue_conversation`, `open_settings`, `list_models`)를 묶는 컨테이너 fractal. 각 도구는 독립 서브-fractal로 분리된다.
+MCP 도구 3개(`start_conversation`, `continue_conversation`, `open_settings`)를 묶는 컨테이너 fractal. 각 도구는 독립 서브-fractal로 분리된다.
 
 ## Structure
 
@@ -9,7 +9,6 @@ MCP 도구 4개(`start_conversation`, `continue_conversation`, `open_settings`, 
 | `startConversation/`    | 새 외부 LLM 세션 시작                   |
 | `continueConversation/` | 기존 세션 이어 호출 (project_hash 검증) |
 | `openSettings/`         | 설정 웹 UI 기동 (일회용 토큰 인증)      |
-| `listModels/`           | provider별 사용 가능 모델 목록 반환     |
 
 ## Conventions
 

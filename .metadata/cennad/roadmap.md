@@ -2,7 +2,7 @@
 
 filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가능 단위. 단계 종료 시 `yarn cennad build` 가 통과해야 한다.
 
-프로바이더: `codex`, `gemini`, `antigravity` (3개). `gemini` 와 `antigravity` 는 상호 배타 Google 슬롯 — Gemini CLI 서비스 종료일 2026-06-18 이후 `antigravity` 가 기본. MCP 도구는 4개(`start_conversation`, `continue_conversation`, `open_settings`, `list_antigravity_models`).
+프로바이더: `codex`, `gemini`, `antigravity` (3개). `gemini` 와 `antigravity` 는 상호 배타 Google 슬롯 — Gemini CLI 서비스 종료일 2026-06-18 이후 `antigravity` 가 기본. MCP 도구는 3개(`start_conversation`, `continue_conversation`, `open_settings`).
 
 ## Phase 0 — Skeleton
 

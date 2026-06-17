@@ -8,7 +8,6 @@
     "gemini": "research, news",
     "codex": "code, tests"
   },
-  "default_model": "mid",
   "default_options": {},
   "session_ttl_hours": 72
 }

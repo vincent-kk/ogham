@@ -40,7 +40,6 @@ interface Config {
     codex: string; // 기본 "code, refactor, sandbox"
     antigravity: string; // 기본 "research, search, youtube, large-context"
   };
-  default_model: "high" | "mid" | "low" | "auto"; // 기본 'auto'
   option_flags: {
     gemini: { yolo: boolean; sandbox: boolean; sandbox_backend: string };
     codex: { yolo: boolean; sandbox: string };
@@ -123,7 +122,7 @@ interface AgyModelsCache {
 }
 ```
 
-`core/agyModels` 가 관리. TTL 은 1시간이며, TTL 이내이면 캐시를 반환하고 만료 시 `agy models` 를 재실행한다. 재실행 실패 시 stale 캐시로 폴백하며, 캐시도 없으면 빈 배열을 반환한다. `list_antigravity_models` MCP 도구가 이 캐시를 통해 모델 목록을 노출한다.
+`core/agyModels` 가 관리. TTL 은 1시간이며, TTL 이내이면 캐시를 반환하고 만료 시 `agy models` 를 재실행한다. 재실행 실패 시 stale 캐시로 폴백하며, 캐시도 없으면 빈 배열을 반환한다. settings UI 의 `/provider-status` 웹 라우트가 `getAvailableModels` 를 직접 호출해 이 캐시를 통해 모델 목록을 노출한다.
 
 ## `runtime/settings_server.json`
 

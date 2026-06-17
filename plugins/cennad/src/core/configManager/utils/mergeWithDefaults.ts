@@ -20,7 +20,6 @@ export function mergeWithDefaults(raw: unknown): unknown {
       ...DEFAULT_CONFIG.keywords,
       ...(isPlainObject(raw.keywords) ? raw.keywords : {}),
     },
-    default_model: raw.default_model ?? DEFAULT_CONFIG.default_model,
     option_flags: mergeOptionFlags(raw.option_flags),
     model_map: mergeModelMap(raw.model_map),
     session_ttl_hours:

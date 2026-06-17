@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { pickKeywords } from '../pickKeywords.js';
-import { pickModel } from '../pickModel.js';
 import { pickOptionFlags } from '../pickOptionFlags.js';
 import { pickPreamble } from '../pickPreamble.js';
 import { pickProviderRatio } from '../pickProviderRatio.js';
@@ -75,17 +74,6 @@ describe('pickKeywords', () => {
 
   it('returns default when input is not an object', () => {
     expect(pickKeywords(42)).toEqual(DEFAULT_CONFIG.keywords);
-  });
-});
-
-describe('pickModel', () => {
-  it('returns a valid ModelAlias as-is', () => {
-    expect(pickModel('high')).toBe('high');
-    expect(pickModel('auto')).toBe('auto');
-  });
-
-  it('returns default_model for an unknown alias string', () => {
-    expect(pickModel('ultra')).toBe(DEFAULT_CONFIG.default_model);
   });
 });
 

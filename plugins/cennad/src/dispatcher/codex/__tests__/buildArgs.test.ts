@@ -4,16 +4,17 @@ import type {
   CodexFlags,
   DispatchOptions,
   DispatchResumeOptions,
+  ModelAlias,
 } from '../../../types/index.js';
 import { buildResumeArgs } from '../utils/buildResumeArgs.js';
 import { buildStartArgs } from '../utils/buildStartArgs.js';
 
 const READ_ONLY: CodexFlags = { yolo: false, sandbox: 'read-only' };
 
-function startArgs(flags: CodexFlags): string[] {
+function startArgs(flags: CodexFlags, model: ModelAlias = 'mid'): string[] {
   const opts: DispatchOptions<CodexFlags> = {
     prompt: 'hi',
-    model: 'auto',
+    model,
     options: {},
     sessionId: 's',
     cwd: '/tmp',
@@ -23,10 +24,10 @@ function startArgs(flags: CodexFlags): string[] {
   return buildStartArgs(opts);
 }
 
-function resumeArgs(flags: CodexFlags): string[] {
+function resumeArgs(flags: CodexFlags, model: ModelAlias = 'mid'): string[] {
   const opts: DispatchResumeOptions<CodexFlags> = {
     prompt: 'hi',
-    model: 'auto',
+    model,
     options: {},
     sessionId: 's',
     cwd: '/tmp',
@@ -74,6 +75,17 @@ describe('codex buildStartArgs', () => {
     const args = startArgs(READ_ONLY);
     expect(args[args.length - 1]).toBe('hi');
   });
+
+  it('maps concrete tiers to -c model_reasoning_effort=<level>', () => {
+    const high = startArgs(READ_ONLY, 'high');
+    const i = high.indexOf('-c');
+    expect(i).toBeGreaterThanOrEqual(0);
+    expect(high[i + 1]).toBe('model_reasoning_effort=high');
+    expect(startArgs(READ_ONLY, 'mid')).toContain(
+      'model_reasoning_effort=medium',
+    );
+    expect(startArgs(READ_ONLY, 'low')).toContain('model_reasoning_effort=low');
+  });
 });
 
 describe('codex buildResumeArgs', () => {
@@ -91,5 +103,11 @@ describe('codex buildResumeArgs', () => {
   it('appends externalSessionRef then prompt as positionals', () => {
     const args = resumeArgs(READ_ONLY);
     expect(args.slice(-2)).toEqual(['thread-id', 'hi']);
+  });
+
+  it('injects the effort override for concrete tiers', () => {
+    const args = resumeArgs(READ_ONLY, 'high');
+    expect(args).toContain('-c');
+    expect(args).toContain('model_reasoning_effort=high');
   });
 });

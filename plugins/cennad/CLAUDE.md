@@ -23,7 +23,7 @@ yarn version:sync       # package.json → src/version.ts
 Skills (/setup, /codex, /gemini, /antigravity, /crosscheck)  Layer 3 (user) — thin tool-call mappers
         │
         ▼
-MCP "tools" server                                Layer 2 (logic) — 4 MCP 도구
+MCP "tools" server                                Layer 2 (logic) — 3 MCP 도구
         │
         ▼
 Dispatcher (codex / gemini / antigravity)         외부 CLI spawn, JSONL 파싱, envelope 빌드
@@ -53,7 +53,7 @@ Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only c
 - **Gemini sandbox**: `GEMINI_CLI_TRUST_WORKSPACE=true` 가 gemini spawn 에 항상 주입됨 (non-interactive agent mode). `/setup` 으로 토글 불가
 - **Antigravity sandbox**: 비활성. `--sandbox` 가 #76 non-TTY 출력 드롭을 악화시켜 부착하지 않음 — 복원 게이트는 #76 종결. `AntigravityFlags.sandbox` 는 config 하위호환용으로 스키마에 남되 항상 false. `--dangerously-skip-permissions` 만 지원
 - **Antigravity #76**: `agy -p` 가 non-TTY 긴 응답에서 stdout 을 비결정적으로 드롭(빈 출력, exit 0). 응답은 agy brain transcript 에 보존되므로, 빈 stdout 시 `resolveTranscript`→`agyTranscriptStore` 가 `~/.gemini/antigravity-cli/brain/<convId>/.system_generated/logs/transcript.jsonl` 에서 읽기 전용 복구. 비문서화 내부 구조 의존 — agy 업데이트(특히 SQLite 전환) 시 깨질 수 있고, 그때는 명확한 cli_error 로 실패. 업스트림 이슈 상태·해제 조건·재검증 절차: [agy-upstream-watch.md](../../.metadata/cennad/agy-upstream-watch.md)
-- **Model IDs**: 하드코딩 model 문자열은 **오직** `src/dispatcher/<provider>/modelAlias.ts` 에만. 다른 파일은 tier (`high` / `mid` / `low` / `auto`) 만 사용. antigravity 는 `src/dispatcher/antigravity/modelAlias.ts` 가 config `model_map` 을 읽어 tier 를 해석
+- **Tier 해석**: 다른 파일은 tier(`high` / `mid` / `low`)만 사용. 구체 해석은 provider 별 단일 지점에만 — gemini `dispatcher/gemini/operations/modelAlias.ts`(`pro`/`flash`/`flash-lite` alias), codex `dispatcher/codex/operations/reasoningEffort.ts`(tier→reasoning effort `high`/`medium`/`low`), antigravity `dispatcher/antigravity/operations/modelAlias.ts`(config `model_map`). MCP `model` 은 required — 호출 측(Claude)이 작업 복잡도로 tier 를 매 호출 선택; 전역 기본값·코드 fallback 없음
 
 ## References
 

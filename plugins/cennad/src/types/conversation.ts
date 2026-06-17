@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
 export const PROVIDERS = ['antigravity', 'gemini', 'codex'] as const;
-export const MODEL_ALIASES = ['high', 'mid', 'low', 'auto'] as const;
+export const ModelAlias = {
+  High: 'high',
+  Mid: 'mid',
+  Low: 'low',
+} as const;
 export const ErrorCode = {
   BudgetExhausted: 'budget_exhausted',
   RateLimit: 'rate_limit',
@@ -13,11 +17,13 @@ export const ErrorCode = {
 } as const;
 
 export type Provider = (typeof PROVIDERS)[number];
-export type ModelAlias = (typeof MODEL_ALIASES)[number];
+export type ModelAlias = (typeof ModelAlias)[keyof typeof ModelAlias];
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 export const ProviderSchema = z.enum(PROVIDERS);
-export const ModelAliasSchema = z.enum(MODEL_ALIASES);
+export const ModelAliasSchema = z.enum(
+  Object.values(ModelAlias) as [ModelAlias, ...ModelAlias[]],
+);
 export const ErrorCodeSchema = z.enum(
   Object.values(ErrorCode) as [ErrorCode, ...ErrorCode[]],
 );

@@ -2,14 +2,14 @@ import type {
   CodexFlags,
   DispatchResumeOptions,
 } from '../../../types/index.js';
-import { resolveCodexModel } from '../operations/modelAlias.js';
+import { resolveCodexEffort } from '../operations/reasoningEffort.js';
 
 export function buildResumeArgs(
   args: DispatchResumeOptions<CodexFlags>,
 ): string[] {
   const argv = ['exec', 'resume', '--json'];
-  const model = resolveCodexModel(args.model);
-  if (model) argv.push('-m', model);
+  const effort = resolveCodexEffort(args.model);
+  if (effort) argv.push('-c', `model_reasoning_effort=${effort}`);
   argv.push(args.externalSessionRef, args.prompt);
   return argv;
 }
