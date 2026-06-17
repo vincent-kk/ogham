@@ -9,8 +9,8 @@
 - **PR-A**: 워크스페이스 뼈대 생성, `package.json`, CI 파이프라인 구성 및 매트릭스 확장.
 - **PR-B**: 핵심 7개 어댑터(`spawn`, `paths`, `env`, `eol`, `binaries`, `hooks`, `shim`) 구현 완료 및 `process.platform` mock 기반 단위 테스트 구성.
 
-## Phase 2 — cogair 전환 (PR-C)
-- `shared/cross-platform` 의 첫 소비처로 cogair 적용.
+## Phase 2 — cennad 전환 (PR-C)
+- `shared/cross-platform` 의 첫 소비처로 cennad 적용.
 - `checkExecutable` 개선, `codex`/`gemini` spawn 호출 어댑터 전환, 출출 결과 EOL 정규화.
 
 ## Phase 3 — maencof & maencof-lens Hook Bootstrap 강화 (PR-D, PR-E)

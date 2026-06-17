@@ -29,7 +29,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 // Only @ogham/cross-platform needs to emit dist (its .d.ts files are
 // consumed via "exports" in its package.json). The plugin packages
-// (cogair, maencof, etc.) intentionally skip dist emission because
+// (cennad, maencof, etc.) intentionally skip dist emission because
 // they ship via bridge/ (esbuild runtime), not npm. Inter-workspace
 // type usage is wired through tsconfig paths instead of dist (see
 // plugins/maencof-lens/tsconfig.json mapping @ogham/maencof to
@@ -41,7 +41,7 @@ const PROVIDERS = [
 // @ogham/prawf is a pure-markdown plugin (no TypeScript) and is
 // intentionally absent — it has no `typecheck` script to run.
 const CONSUMERS = [
-  "@ogham/cogair",
+  "@ogham/cennad",
   "@ogham/maencof",
   "@ogham/maencof-lens",
   "@ogham/filid",

@@ -20,8 +20,8 @@
       ]
     },
     {
-      "name": "cogair",
-      "source": "./plugins/cogair",
+      "name": "cennad",
+      "source": "./plugins/cennad",
       "category": "productivity",
       "tags": [
         "codex",

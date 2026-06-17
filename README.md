@@ -143,43 +143,50 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 For full documentation, see the [atlassian README](./plugins/atlassian/README.md) ([Korean](./plugins/atlassian/README-ko_kr.md)).
 
-### [`@ogham/cogair`](./plugins/cogair/) — Codex / Gemini CLI Delegation
+### [`@ogham/cennad`](./plugins/cennad/) — Codex / Gemini / Antigravity CLI Delegation
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google Gemini CLI** through MCP tools, skills, and lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google's Gemini / Antigravity CLI** through MCP tools, skills, and lifecycle hooks.
 
-Different models have different strengths: Codex excels at heavy code generation in a sandboxed shell; Gemini excels at live web-grounded research and very-large-context synthesis. cogair makes that delegation explicit, ratio-aware, and reproducible across sessions.
+Different models have different strengths: Codex excels at heavy code generation in a sandboxed shell; Gemini and Antigravity excel at live web-grounded research and very-large-context synthesis. cennad makes that delegation explicit, ratio-aware, and reproducible across sessions.
+
+> **Renamed from `cogair`.** If you used the old `cogair` plugin, its `/cogair:*` skills and `~/.claude/plugins/cogair/` settings no longer apply — reinstall as `cennad` and run `/cennad:setup` to reconfigure.
 
 **What it provides:**
 
-| Component | Count | Examples                                                                 |
-| --------- | ----- | ------------------------------------------------------------------------ |
-| Skills    | 4     | `/cogair:setup`, `/cogair:codex`, `/cogair:gemini`, `/cogair:crosscheck` |
-| MCP Tools | 3     | `start_conversation`, `continue_conversation`, `open_settings`           |
-| Agents    | 0     | (skills delegate directly to external CLIs)                              |
-| Hooks     | 2     | SessionStart, UserPromptSubmit                                           |
+| Component | Count | Examples                                                                                        |
+| --------- | ----- | ----------------------------------------------------------------------------------------------- |
+| Skills    | 5     | `/cennad:setup`, `/cennad:codex`, `/cennad:gemini`, `/cennad:antigravity`, `/cennad:crosscheck` |
+| MCP Tools | 4     | `start_conversation`, `continue_conversation`, `list_antigravity_models`, `open_settings`       |
+| Agents    | 0     | (skills delegate directly to external CLIs)                                                     |
+| Hooks     | 2     | SessionStart, UserPromptSubmit                                                                  |
+
+> `gemini` and `antigravity` are mutually exclusive Google engines (the Gemini CLI service ends **2026-06-18**); enable one in `/cennad:setup`.
 
 **Key features:**
 
-- **Multi-model delegation** — Route code-heavy tasks to Codex (sandboxed shell, refactor) and research-heavy tasks to Gemini (live web search, large context) via keyword-driven routing
-- **Cross-validation** — `/cogair:crosscheck` dispatches the same prompt to both providers in parallel and synthesizes their answers
+- **Multi-model delegation** — Route code-heavy tasks to Codex (sandboxed shell, refactor) and research-heavy tasks to Gemini or Antigravity (live web search, large context) via keyword-driven routing
+- **Cross-validation** — `/cennad:crosscheck` dispatches the same prompt to both providers in parallel and synthesizes their answers
 - **Local settings UI** — Web UI bound to 127.0.0.1 with one-time-token auth for editing provider ratio, intervention strength (-2 to +2), keyword routing, and default model alias
 - **Session bookkeeping** — Project-hash-scoped sessions with resume capability; SessionStart / UserPromptSubmit hooks inject ratio + drift + counter state into context
 
 ```
 # Open the local settings UI
-/cogair:setup
+/cennad:setup
 
 # Delegate to Codex CLI
-/cogair:codex
+/cennad:codex
 
-# Delegate to Gemini CLI
-/cogair:gemini
+# Delegate to Gemini CLI (legacy — service ends 2026-06-18)
+/cennad:gemini
+
+# Delegate to Antigravity CLI
+/cennad:antigravity
 
 # Cross-validate a prompt across both providers
-/cogair:crosscheck
+/cennad:crosscheck
 ```
 
-For full documentation, see the [cogair README](./plugins/cogair/README.md) ([Korean](./plugins/cogair/README-ko_kr.md)).
+For full documentation, see the [cennad README](./plugins/cennad/README.md) ([Korean](./plugins/cennad/README-ko_kr.md)).
 
 ### [`@ogham/imbas`](./plugins/imbas/) — Planning → Issue Pipeline
 
@@ -255,14 +262,14 @@ For full documentation, see the [maencof-lens package](./plugins/maencof-lens/).
 
 ## All Packages
 
-| Package                                       | Type          | Description                                                       |
-| --------------------------------------------- | ------------- | ----------------------------------------------------------------- |
-| **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management            |
-| **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph             |
-| **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents           |
-| **[`cogair`](./plugins/cogair/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini CLI from Claude Code |
-| **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                       |
-| **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts   |
+| Package                                       | Type          | Description                                                                     |
+| --------------------------------------------- | ------------- | ------------------------------------------------------------------------------- |
+| **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management                          |
+| **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph                           |
+| **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents                         |
+| **[`cennad`](./plugins/cennad/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini / Antigravity CLI from Claude Code |
+| **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                                     |
+| **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts                 |
 
 ---
 

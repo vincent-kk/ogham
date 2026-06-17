@@ -49,8 +49,8 @@ jobs:
       - name: Typecheck
         run: yarn typecheck
 
-      - name: Typecheck (cogair tests)
-        run: yarn cogair typecheck:tests
+      - name: Typecheck (cennad tests)
+        run: yarn cennad typecheck:tests
 
       - name: Build
         run: yarn build:all

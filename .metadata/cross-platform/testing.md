@@ -20,8 +20,8 @@ Windows와 Unix (macOS, Linux) 런타임 간의 호환성 무결성을 보장하
 
 ## 2. Acceptance Criteria (패키지별 합격 기준)
 
-### `cogair`
-- [ ] `/cogair:setup` 의 도구 패널에서 Windows(Node 20/22) 환경상 `codex`, `gemini` 정상 인식 여부(`installed`).
+### `cennad`
+- [ ] `/cennad:setup` 의 도구 패널에서 Windows(Node 20/22) 환경상 `codex`, `gemini` 정상 인식 여부(`installed`).
 - [ ] 파서에서 CRLF 라인 엔딩 정상 취급, 에러 또는 오동작 방지.
 
 ### `filid`

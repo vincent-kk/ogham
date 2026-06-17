@@ -1,0 +1,21 @@
+{
+  "name": "cennad",
+  "version": "0.4.3",
+  "description": "Cennad — delegate to Gemini / Codex / Antigravity CLI from Claude Code via MCP, skills, and hooks",
+  "author": {
+    "name": "Vincent K. Kelvin"
+  },
+  "repository": "https://github.com/vincent-kk/ogham",
+  "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/cennad",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "gemini",
+    "codex",
+    "antigravity",
+    "multi-agent"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

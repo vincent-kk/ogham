@@ -29,8 +29,8 @@ describe("paths", () => {
     const originalEnv = process.env.CLAUDE_CONFIG_DIR;
     delete process.env.CLAUDE_CONFIG_DIR;
     try {
-      expect(paths.pluginCache("cogair")).toBe(
-        join(homedir(), ".claude", "plugins", "cogair"),
+      expect(paths.pluginCache("cennad")).toBe(
+        join(homedir(), ".claude", "plugins", "cennad"),
       );
     } finally {
       if (originalEnv !== undefined)
@@ -42,8 +42,8 @@ describe("paths", () => {
     const originalEnv = process.env.CLAUDE_CONFIG_DIR;
     delete process.env.CLAUDE_CONFIG_DIR;
     try {
-      expect(paths.pluginCache("cogair", "0.2.1")).toBe(
-        join(homedir(), ".claude", "plugins", "cogair", "0.2.1"),
+      expect(paths.pluginCache("cennad", "0.2.1")).toBe(
+        join(homedir(), ".claude", "plugins", "cennad", "0.2.1"),
       );
     } finally {
       if (originalEnv !== undefined)
