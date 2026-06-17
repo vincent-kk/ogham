@@ -870,6 +870,7 @@
           /* server closed before responding — expected */
         }
         setStatus('success', 'Saved. Server closed.');
+        window.close();
         return;
       }
     } catch (err) {
