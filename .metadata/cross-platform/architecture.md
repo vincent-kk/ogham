@@ -8,13 +8,13 @@
 
 | 카테고리 | 발생 패키지 | 원인 및 해결 방향 |
 | --- | --- | --- |
-| **C1. spawn shell 누락** | cogair, maencof 등 5개 | Windows `.cmd` 무시됨. `cross-spawn` 래퍼로 대체. |
-| **C2. hooks.json PATH 의존** | cogair, filid, maencof 등 | 훅 실행 시 빈 PATH. `.cmd` shim 생성으로 부트스트랩. |
-| **C3. 라인 엔딩 미정규화** | cogair | CRLF(`\r\n`)를 LF(`\n`)로 일괄 파싱 전 정규화. |
+| **C1. spawn shell 누락** | cennad, maencof 등 5개 | Windows `.cmd` 무시됨. `cross-spawn` 래퍼로 대체. |
+| **C2. hooks.json PATH 의존** | cennad, filid, maencof 등 | 훅 실행 시 빈 PATH. `.cmd` shim 생성으로 부트스트랩. |
+| **C3. 라인 엔딩 미정규화** | cennad | CRLF(`\r\n`)를 LF(`\n`)로 일괄 파싱 전 정규화. |
 | **C4. 절대경로/구분자 하드코딩** | imbas, filid, maencof-lens | `/usr` 하드코딩 및 `/` split 사용. `path` 내장 모듈 사용으로 전환. |
 | **C5. 환경변수 차이** | imbas | Windows `USERPROFILE` 누락. `os.homedir()` 필수 적용. |
 | **C6. 바이너리 디스커버리 부재**| 전체 패키지 | CLI PATH 부재. 1회 탐색 후 캐싱 및 미발견 시 OS 가이드 제공. |
-| **C7. 타임아웃 OS-flat** | cogair | Windows 프로세스 생성 오버헤드 무시. `osMultiplier` 헬퍼 적용. |
+| **C7. 타임아웃 OS-flat** | cennad | Windows 프로세스 생성 오버헤드 무시. `osMultiplier` 헬퍼 적용. |
 | **C8. silent failure 로깅 부재**| maencof | 훅 실패가 가려짐. `self-probe` 헬퍼와 `error-log.json` 도입. |
 
 ## 2. 플랫폼 어댑터 시스템 설계 (3축 구조)

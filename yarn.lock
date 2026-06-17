@@ -1229,9 +1229,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ogham/cogair@workspace:plugins/cogair":
+"@ogham/cennad@workspace:plugins/cennad":
   version: 0.0.0-use.local
-  resolution: "@ogham/cogair@workspace:plugins/cogair"
+  resolution: "@ogham/cennad@workspace:plugins/cennad"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@ogham/cross-platform": "workspace:^"

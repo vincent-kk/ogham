@@ -22,7 +22,7 @@
     "changeset:publish": "yarn build:all && changeset publish",
     "changeset:version": "changeset version",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
-    "cogair": "yarn workspace @ogham/cogair",
+    "cennad": "yarn workspace @ogham/cennad",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
     "filid": "yarn workspace @ogham/filid",
     "imbas": "yarn workspace @ogham/imbas",

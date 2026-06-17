@@ -5,7 +5,7 @@ export default defineConfig({
     projects: [
       "./mcp-servers/yt-dlp-mcp",
       "./plugins/atlassian",
-      "./plugins/cogair",
+      "./plugins/cennad",
       "./plugins/filid",
       "./plugins/imbas",
       "./plugins/maencof",

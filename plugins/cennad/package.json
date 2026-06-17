@@ -1,0 +1,76 @@
+{
+  "name": "@ogham/cennad",
+  "version": "0.4.3",
+  "description": "Cennad — delegate to Gemini CLI / Codex CLI from Claude Code via MCP, skills, and hooks",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "gemini",
+    "codex",
+    "multi-agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "directory": "plugins/cennad"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vincent K. Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "bridge",
+    "public",
+    "hooks",
+    "libs",
+    "skills",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
+    "build:plugin": "node scripts/buildSettingsHtml.mjs && node scripts/buildMcpServer.mjs && node scripts/buildHooks.mjs",
+    "clean": "rm -rf bridge dist public",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest --config vitest.e2e.config.ts",
+    "test:e2e:real": "CENNAD_E2E_REAL_CLI=1 vitest run --config vitest.e2e.config.ts",
+    "test:e2e:run": "vitest run --config vitest.e2e.config.ts",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
+    "version:sync": "node ../../scripts/inject-version.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "~1.22.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@ogham/cross-platform": "workspace:^",
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

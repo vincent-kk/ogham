@@ -1,0 +1,38 @@
+import { rm } from 'node:fs/promises';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
+import { CENNAD_HOME } from '../../../constants/paths.js';
+import {
+  type LayerBClient,
+  makeLayerBClient,
+} from '../helpers/mcpClientLayerB.js';
+
+describe('MCP tools/list (Layer B)', () => {
+  let handle: LayerBClient;
+
+  beforeEach(async () => {
+    await rm(CENNAD_HOME, { recursive: true, force: true });
+    handle = await makeLayerBClient();
+  });
+
+  afterEach(async () => {
+    await handle.close();
+  });
+
+  it('exposes all four tools via spawned bundle', async () => {
+    const { tools } = await handle.client.listTools();
+    const names = tools.map((t) => t.name).sort();
+    expect(names).toEqual([
+      'continue_conversation',
+      'list_antigravity_models',
+      'open_settings',
+      'start_conversation',
+    ]);
+  });
+
+  it('initialize handshake reports server name "tools"', async () => {
+    const info = handle.client.getServerVersion();
+    expect(info?.name).toBe('tools');
+  });
+});

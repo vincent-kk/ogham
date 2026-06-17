@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseCmdShim } from "../parseCmdShim.js";
 
 const NPM_DIR = String.raw`C:\Users\me\AppData\Roaming\npm`;
-const PLUGIN_DIR = String.raw`C:\plugins\cogair`;
+const PLUGIN_DIR = String.raw`C:\plugins\cennad`;
 const BIN_DIR = String.raw`C:\tools\bin`;
 
 /** npm `cmd-shim` output for a shebang script (subroutine `_prog` form). */
