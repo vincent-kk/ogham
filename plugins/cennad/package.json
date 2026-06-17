@@ -1,6 +1,6 @@
 {
   "name": "@ogham/cennad",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Cennad — delegate to Gemini CLI / Codex CLI from Claude Code via MCP, skills, and hooks",
   "keywords": [
     "claude-code",
