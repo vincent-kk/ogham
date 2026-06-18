@@ -13,6 +13,7 @@
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
   var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off', antigravity: 'auto' };
+  var DEFAULT_DEFAULT_TIER = { gemini: 'mid', codex: 'mid', antigravity: 'mid' };
   var DEFAULT_YOUTUBE_ADDON = {
     enabled: false,
     language: 'en',
@@ -39,6 +40,7 @@
   var GOOGLE_ENGINES = ['gemini', 'antigravity'];
   var ARTIFACTS_LOCATIONS = ['project', 'user'];
   var RECENCY_LEVELS = ['off', 'auto', 'strict'];
+  var TIERS = ['high', 'mid', 'low'];
   var YOUTUBE_LANGUAGES = ['en', 'ko'];
 
   var STRENGTH_LABELS = {
@@ -545,6 +547,22 @@
     );
   }
 
+  function applyDefaultTier(raw) {
+    var src = raw && typeof raw === 'object' ? raw : DEFAULT_DEFAULT_TIER;
+    var googleVal =
+      googleEngine === 'antigravity' ? src.antigravity : src.gemini;
+    setRadio(
+      'default-tier-gemini',
+      typeof googleVal === 'string' ? googleVal : DEFAULT_DEFAULT_TIER.gemini,
+      TIERS,
+    );
+    setRadio(
+      'default-tier-codex',
+      typeof src.codex === 'string' ? src.codex : DEFAULT_DEFAULT_TIER.codex,
+      TIERS,
+    );
+  }
+
   function bindAgyModelOptions(list) {
     var selects = [
       { el: modelAntigravityHigh, val: modelMapState.high },
@@ -639,6 +657,7 @@
     applyArtifacts(cfg.artifacts);
     applyPreamble(cfg.preamble);
     applyRecencyFactor(cfg.recency_factor);
+    applyDefaultTier(cfg.default_tier);
     applyModels(cfg.model_map);
     applyYoutubeAddon(cfg.addons && cfg.addons.youtube);
     applyGoogleEngine(googleEngine);
@@ -713,6 +732,11 @@
       RECENCY_LEVELS,
       DEFAULT_RECENCY.gemini,
     );
+    var tierGoogle = readRadio(
+      'default-tier-gemini',
+      TIERS,
+      DEFAULT_DEFAULT_TIER.gemini,
+    );
     return {
       ratio: {
         gemini: isGemini ? googleSlot : googleOff,
@@ -730,6 +754,15 @@
       },
       option_flags: buildOptionFlags(),
       model_map: buildModelMap(),
+      default_tier: {
+        gemini: tierGoogle,
+        codex: readRadio(
+          'default-tier-codex',
+          TIERS,
+          DEFAULT_DEFAULT_TIER.codex,
+        ),
+        antigravity: tierGoogle,
+      },
       session_ttl_hours: Math.max(
         SESSION_TTL_HOURS_MIN,
         Math.min(

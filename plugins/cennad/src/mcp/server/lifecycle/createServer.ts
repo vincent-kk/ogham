@@ -29,12 +29,12 @@ export function createServer(): McpServer {
           .describe(
             'Self-contained prompt; the CLI has no access to this conversation, the repo, or prior turns.',
           ),
-        tier: TierSchema.describe(
-          'Capability/cost tier — REQUIRED. Higher is stronger but much more ' +
-            'likely to hit rate_limit or budget_exhausted. Use mid as the normal ' +
-            'tier for almost all work; low for clearly simple tasks; high only when ' +
-            'you have a specific, positive reason to expect mid will be insufficient ' +
-            '— not merely because the task looks complex.',
+        tier: TierSchema.optional().describe(
+          'Optional capability/cost tier; omit to use the configured default for ' +
+            'that provider. Higher is stronger but much more likely to hit ' +
+            'rate_limit or budget_exhausted. Use mid as the normal tier for almost ' +
+            'all work; low for clearly simple tasks; high only with a specific reason ' +
+            'to expect mid will be insufficient — not merely because the task looks complex.',
         ),
       },
       annotations: {
@@ -67,10 +67,10 @@ export function createServer(): McpServer {
             'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
           ),
         tier: TierSchema.optional().describe(
-          'Optional capability/cost tier for THIS turn; omit to default to mid. ' +
-            'Higher is stronger but much more likely to hit rate_limit or ' +
-            'budget_exhausted. Use mid for normal work, low for clearly simple ' +
-            'tasks; high only with a specific reason to expect mid will be insufficient.',
+          'Optional capability/cost tier for THIS turn; omit to use the configured ' +
+            'default for that provider. Higher is stronger but much more likely to hit ' +
+            'rate_limit or budget_exhausted. Use mid for normal work, low for clearly ' +
+            'simple tasks; high only with a specific reason to expect mid will be insufficient.',
         ),
       },
       annotations: {

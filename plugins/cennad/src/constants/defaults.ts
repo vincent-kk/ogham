@@ -24,6 +24,11 @@ export const DEFAULT_CONFIG: Config = {
       low: 'Gemini 3.5 Flash',
     },
   },
+  default_tier: {
+    gemini: 'mid',
+    codex: 'mid',
+    antigravity: 'mid',
+  },
   session_ttl_hours: 72,
   spawn_timeout_ms: 10 * 60 * 1000,
   artifacts: {

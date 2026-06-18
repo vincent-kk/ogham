@@ -108,6 +108,41 @@
                 </label>
 
                 <div class="flag-field">
+                  <span class="flag-field-label">default tier</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="low"
+                      /><span>low</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Higher
+                    is stronger but more rate-limit/budget-prone — mid suits
+                    almost all work.
+                  </p>
+                </div>
+
+                <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
                     <label class="radio"
@@ -365,6 +400,41 @@
                     the prompt.</span
                   >
                 </label>
+
+                <div class="flag-field">
+                  <span class="flag-field-label">default tier</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-gemini"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-gemini"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-gemini"
+                        value="low"
+                      /><span>low</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Higher
+                    is stronger but more rate-limit/budget-prone — mid suits
+                    almost all work.
+                  </p>
+                </div>
 
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>

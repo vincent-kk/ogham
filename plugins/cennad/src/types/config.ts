@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { TierSchema } from './conversation.js';
 import {
   AntigravityFlagsSchema,
   CodexFlagsSchema,
@@ -57,6 +58,18 @@ export const ModelMapSchema = z.object({
 });
 
 export type ModelMap = z.infer<typeof ModelMapSchema>;
+
+// Per-provider default tier, applied when a dispatch omits an explicit tier
+// (start_conversation's optional tier; continue_conversation, which never
+// restores the original session tier). Per-provider because cost / rate-limit
+// characteristics differ across providers.
+export const DefaultTierSchema = z.object({
+  gemini: TierSchema,
+  codex: TierSchema,
+  antigravity: TierSchema,
+});
+
+export type DefaultTier = z.infer<typeof DefaultTierSchema>;
 
 export const ArtifactLocationSchema = z.enum(['project', 'user']);
 
@@ -131,6 +144,7 @@ export const ConfigObjectSchema = z.object({
   keywords: KeywordsSchema,
   option_flags: OptionFlagsSchema,
   model_map: ModelMapSchema,
+  default_tier: DefaultTierSchema,
   session_ttl_hours: z.number().int().positive(),
   spawn_timeout_ms: z.number().int().positive(),
   artifacts: ArtifactsConfigSchema,
