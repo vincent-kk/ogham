@@ -30,10 +30,11 @@ export function createServer(): McpServer {
             'Self-contained prompt; the CLI has no access to this conversation, the repo, or prior turns.',
           ),
         tier: TierSchema.describe(
-          'Capability tier — REQUIRED, chosen per task from its complexity: ' +
-            'low = simple lookups or short edits, mid = standard work, ' +
-            'high = complex reasoning or large-context synthesis. ' +
-            'You must pick high, mid, or low yourself every call; do not default to high.',
+          'Capability/cost tier — REQUIRED. Higher is stronger but much more ' +
+            'likely to hit rate_limit or budget_exhausted. Use mid as the normal ' +
+            'tier for almost all work; low for clearly simple tasks; high only when ' +
+            'you have a specific, positive reason to expect mid will be insufficient ' +
+            '— not merely because the task looks complex.',
         ),
       },
       annotations: {
@@ -66,9 +67,10 @@ export function createServer(): McpServer {
             'Follow-up message; the CLI keeps its own prior turns but still cannot see this Claude conversation.',
           ),
         tier: TierSchema.optional().describe(
-          'Capability tier for THIS follow-up turn (low/mid/high), re-applied each call — ' +
-            'codex reasoning effort, gemini/antigravity model. Optional; omitted defaults to mid. ' +
-            'Pick per this turn complexity.',
+          'Optional capability/cost tier for THIS turn; omit to default to mid. ' +
+            'Higher is stronger but much more likely to hit rate_limit or ' +
+            'budget_exhausted. Use mid for normal work, low for clearly simple ' +
+            'tasks; high only with a specific reason to expect mid will be insufficient.',
         ),
       },
       annotations: {

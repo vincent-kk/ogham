@@ -35,7 +35,7 @@ the two `ConversationResponse` envelopes into one consolidated answer.
 
 Parse the invocation. Recognize:
 
-- `--tier high|mid|low` — required; applied to BOTH providers. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required; applied to BOTH providers. Use `mid` for normal work, `low` for clearly simple tasks; pick `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other
@@ -77,7 +77,7 @@ Issue the two calls **in parallel** (single message, two tool uses):
 - `mcp_tools_start_conversation({ provider: <google>, prompt, tier })` —
   `<google>` is the active Google engine (`gemini` or `antigravity`).
 
-`tier` is required — choose `high`/`mid`/`low` by task complexity.
+`tier` is required — default to `mid`; pick `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
 ## Response handling
 

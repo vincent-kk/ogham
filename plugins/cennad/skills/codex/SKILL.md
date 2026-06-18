@@ -25,7 +25,7 @@ Delegate to Codex CLI through the cennad MCP server.
 Parse the invocation. Recognize:
 
 - `--continue <session_id>` — resume an existing cennad session.
-- `--tier high|mid|low` — required tier. Pick by task complexity: simple/cheap = `low`, standard = `mid`, complex/deep = `high`.
+- `--tier high|mid|low` — required tier. Use `mid` for normal work, `low` for clearly simple tasks; pick `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 - `-- "prompt"` — everything after `--` is the prompt (required).
 
 Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher options are managed via `/setup` (settings UI) — they are not accepted as skill arguments.
@@ -33,7 +33,7 @@ Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher opt
 ## Call mapping
 
 - With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
-- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, tier })`. `tier` is required — choose `high`/`mid`/`low` by task complexity.
+- Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, tier })`. `tier` is required — default to `mid`; pick `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
 ## Response handling
 
