@@ -13,7 +13,11 @@
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { gemini: '', codex: '', antigravity: '' };
   var DEFAULT_RECENCY = { gemini: 'auto', codex: 'off', antigravity: 'auto' };
-  var DEFAULT_DEFAULT_TIER = { gemini: 'mid', codex: 'mid', antigravity: 'mid' };
+  var DEFAULT_DEFAULT_TIER = {
+    gemini: 'mid',
+    codex: 'mid',
+    antigravity: 'mid',
+  };
   var DEFAULT_YOUTUBE_ADDON = {
     enabled: false,
     language: 'en',

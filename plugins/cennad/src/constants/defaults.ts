@@ -1,4 +1,4 @@
-import { Tier, type Config } from '../types/index.js';
+import { type Config, Tier } from '../types/index.js';
 
 export const DEFAULT_CONFIG: Config = {
   ratio: {
