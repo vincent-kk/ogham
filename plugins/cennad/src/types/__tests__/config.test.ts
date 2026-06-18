@@ -94,4 +94,19 @@ describe('ConfigSchema', () => {
       ).not.toThrow();
     }
   });
+
+  it('rejects missing default_tier', () => {
+    const { default_tier: _omit, ...rest } = DEFAULT_CONFIG;
+    void _omit;
+    expect(() => ConfigSchema.parse(rest)).toThrow();
+  });
+
+  it('rejects an unknown tier value in default_tier (no auto)', () => {
+    expect(() =>
+      ConfigSchema.parse({
+        ...DEFAULT_CONFIG,
+        default_tier: { gemini: 'auto', codex: 'mid', antigravity: 'mid' },
+      }),
+    ).toThrow();
+  });
 });

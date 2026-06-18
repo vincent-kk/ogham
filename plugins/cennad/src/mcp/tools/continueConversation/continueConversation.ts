@@ -80,7 +80,7 @@ export async function handleContinueConversation(
   });
   const base = {
     prompt: composedPrompt,
-    tier: input.tier ?? 'mid',
+    tier: input.tier ?? config.default_tier[session.provider],
     options: {},
     sessionId: session.session_id,
     cwd: session.cwd,

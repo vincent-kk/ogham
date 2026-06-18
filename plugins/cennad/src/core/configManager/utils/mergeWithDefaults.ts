@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { isPlainObject } from './isPlainObject.js';
 import { mergeAddons } from './mergeAddons.js';
 import { mergeArtifacts } from './mergeArtifacts.js';
+import { mergeDefaultTier } from './mergeDefaultTier.js';
 import { mergeModelMap } from './mergeModelMap.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { mergePreamble } from './mergePreamble.js';
@@ -22,6 +23,7 @@ export function mergeWithDefaults(raw: unknown): unknown {
     },
     option_flags: mergeOptionFlags(raw.option_flags),
     model_map: mergeModelMap(raw.model_map),
+    default_tier: mergeDefaultTier(raw.default_tier),
     session_ttl_hours:
       raw.session_ttl_hours ?? DEFAULT_CONFIG.session_ttl_hours,
     spawn_timeout_ms: raw.spawn_timeout_ms ?? DEFAULT_CONFIG.spawn_timeout_ms,

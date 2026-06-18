@@ -22,7 +22,7 @@ import { isoNow } from '../../../utils/isoNow.js';
 export interface StartConversationInput {
   provider: Provider;
   prompt: string;
-  tier: Tier;
+  tier?: Tier;
 }
 
 export async function handleStartConversation(
@@ -52,7 +52,7 @@ export async function handleStartConversation(
   }
 
   const cwd = process.cwd();
-  const tier: Tier = input.tier;
+  const tier: Tier = input.tier ?? config.default_tier[input.provider];
   const options = {};
 
   await incrementCounter(input.provider);

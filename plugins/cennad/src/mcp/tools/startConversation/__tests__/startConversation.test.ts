@@ -109,6 +109,17 @@ describe('handleStartConversation', () => {
     expect(result.meta.ignored_options).toEqual([]);
   });
 
+  it('applies the provider default tier when tier is omitted', async () => {
+    process.env.CENNAD_FAKE_CODEX_MODE = 'success';
+    const result = await handleStartConversation({
+      provider: 'codex',
+      prompt: 'hi',
+    });
+
+    expect(result.status).toBe('success');
+    expect(result.session_id).toBeTruthy();
+  });
+
   it('rejects a disabled provider without dispatching or persisting a session', async () => {
     await saveConfig({
       ...DEFAULT_CONFIG,

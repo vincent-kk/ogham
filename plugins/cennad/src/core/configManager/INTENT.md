@@ -4,18 +4,18 @@
 
 ## Structure
 
-| 파일                                | 역할                                                         |
-| ----------------------------------- | ------------------------------------------------------------ |
-| `operations/loadConfig.ts`          | 파일 read + mergeWithDefaults + Zod 검증 + defaults fallback |
-| `operations/saveConfig.ts`          | ConfigSchema.parse 재검증 후 atomicWrite 저장                |
-| `utils/mergeWithDefaults.ts`        | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)      |
-| `utils/mergeModelMap.ts`            | raw model_map + defaults 병합 (antigravity tier 해석용)      |
-| `utils/normalizeMutualExclusion.ts` | gemini⊕antigravity 충돌 시 antigravity 우선·gemini 비활성화  |
-| `utils/mergePreamble.ts`            | raw → PreambleConfig (provider별 문자열, 기본값 fallback)    |
-| `utils/mergeRecencyFactor.ts`       | raw → RecencyFactorConfig (off/auto/strict 검증)             |
-| `utils/normalizeRatio.ts`           | legacy 정수 비율 → enabled boolean 정규화                    |
-| `utils/isPlainObject.ts`            | plain-object guard (deep merge 전처리)                       |
-| `index.ts`                          | barrel: loadConfig, saveConfig                               |
+| 파일                                       | 역할                                                                                                      |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `operations/loadConfig.ts`·`saveConfig.ts` | load: read + mergeWithDefaults + Zod + defaults fallback · save: ConfigSchema.parse 재검증 후 atomicWrite |
+| `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                   |
+| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (antigravity tier 해석용)                                                   |
+| `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                            |
+| `utils/normalizeMutualExclusion.ts`        | gemini⊕antigravity 충돌 시 antigravity 우선·gemini 비활성화                                               |
+| `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                 |
+| `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                          |
+| `utils/normalizeRatio.ts`                  | legacy 정수 비율 → enabled boolean 정규화                                                                 |
+| `utils/isPlainObject.ts`                   | plain-object guard (deep merge 전처리)                                                                    |
+| `index.ts`                                 | barrel: loadConfig, saveConfig                                                                            |
 
 ## Conventions
 
@@ -44,7 +44,6 @@
 
 ## Dependencies
 
-- `node:fs/promises`
-- `../../lib/atomicWrite`, `../../lib/logger`
+- `node:fs/promises`, `../../lib/atomicWrite`, `../../lib/logger`
 - `../../constants/paths`, `../../constants/defaults`
 - `../../types` (Config, ConfigSchema), `../../utils/isFileNotFound`

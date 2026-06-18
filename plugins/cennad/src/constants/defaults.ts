@@ -1,4 +1,4 @@
-import type { Config } from '../types/index.js';
+import type { Config } from '../types/config.js';
 
 export const DEFAULT_CONFIG: Config = {
   ratio: {
@@ -23,6 +23,11 @@ export const DEFAULT_CONFIG: Config = {
       mid: 'Gemini 3.5 Flash',
       low: 'Gemini 3.5 Flash',
     },
+  },
+  default_tier: {
+    gemini: 'mid',
+    codex: 'mid',
+    antigravity: 'mid',
   },
   session_ttl_hours: 72,
   spawn_timeout_ms: 10 * 60 * 1000,

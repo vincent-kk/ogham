@@ -46,6 +46,11 @@ describe('loadConfig', () => {
           low: 'Gemini 3.5 Flash',
         },
       },
+      default_tier: {
+        gemini: 'high' as const,
+        codex: 'low' as const,
+        antigravity: 'mid' as const,
+      },
       session_ttl_hours: 24,
       spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },

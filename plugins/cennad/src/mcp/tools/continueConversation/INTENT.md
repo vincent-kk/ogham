@@ -14,7 +14,7 @@
 - 입력 키 `snake_case`
 - 현재 `process.cwd()` 의 `project_hash` 와 일치하지 않으면 `error.code='unknown'` 반환 (fallback 검색 금지)
 - `provider` 카운터는 시도 기준 +1
-- tier optional 입력 — 생략 시 `mid` 기본; 매 resume 호출마다 dispatcher 에 재주입(원 세션 tier 비복원 — SessionMeta 는 구체 모델명만 저장); `options` 는 항상 `{}` 전달
+- tier optional 입력 — 생략 시 `config.default_tier[provider]` 적용(기본 `mid`); 매 resume 호출마다 dispatcher 에 재주입(원 세션 tier 비복원 — SessionMeta 는 구체 모델명만 저장); `options` 는 항상 `{}` 전달
 - 권한 플래그는 매 호출 시 현재 `config.option_flags[provider]` 를 다시 읽어 `DispatchOptions.flags` 로 주입
 - prompt 는 `composePrompt` 로 `config.preamble[session.provider]` + `config.recency_factor[session.provider]` 합성 후 dispatcher 에 전달; raw prompt 는 artifactWriter 에 별도 보존
 

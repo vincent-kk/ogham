@@ -28,6 +28,15 @@ describe('DEFAULT_CONFIG', () => {
   it('defaults session TTL to 72 hours', () => {
     expect(DEFAULT_CONFIG.session_ttl_hours).toBe(72);
   });
+
+  // app.js DEFAULT_DEFAULT_TIER mirrors this value — keep in sync.
+  it('defaults default_tier to mid for every provider', () => {
+    expect(DEFAULT_CONFIG.default_tier).toEqual({
+      gemini: 'mid',
+      codex: 'mid',
+      antigravity: 'mid',
+    });
+  });
 });
 
 describe('file modes', () => {
