@@ -21,7 +21,8 @@ export function createServer(): McpServer {
       inputSchema: {
         provider: ProviderSchema.describe(
           "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'gemini'/'antigravity' (Google): live web " +
-            'research, large-context synthesis. gemini and antigravity are mutually exclusive — dispatch to whichever is enabled.',
+            'research, large-context synthesis. gemini and antigravity are mutually exclusive — dispatch to whichever ' +
+            "the session policy lists as active (the 'Active providers' line); a disabled engine returns error.code 'disabled'.",
         ),
         prompt: z
           .string()
