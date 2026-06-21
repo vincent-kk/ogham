@@ -7,7 +7,7 @@ import { writeResult } from '../shared/writeResult.js';
 import type {
   DispatchInput,
   MergedHookOutput,
-} from '../utils/dispatchTypes.js';
+} from '../../types/dispatch.js';
 
 import { orchestrateSessionStart } from './sessionStart.js';
 

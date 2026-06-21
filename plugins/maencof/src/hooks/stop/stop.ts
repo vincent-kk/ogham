@@ -1,10 +1,10 @@
-import { runLifecycleDispatcher } from '../lifecycleDispatcher/lifecycleDispatcher.js';
+import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
 import type {
   DispatchInput,
   MergedHookOutput,
-} from '../utils/dispatchTypes.js';
-import { mergeHookOutput } from '../utils/mergeHookOutput.js';
-import { safeConcern, safeConcernAsync } from '../utils/safeConcern.js';
+} from '../../types/dispatch.js';
+import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
+import { safeConcern, safeConcernAsync } from '../utils/safeConcern/safeConcern.js';
 
 import { runChangelogGate } from './helpers/changelogGate/changelogGate.js';
 

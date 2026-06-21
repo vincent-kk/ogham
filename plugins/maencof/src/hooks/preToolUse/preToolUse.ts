@@ -1,11 +1,11 @@
-import { runLifecycleDispatcher } from '../lifecycleDispatcher/lifecycleDispatcher.js';
+import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
 import type {
   DispatchInput,
   HookConcernResult,
   MergedHookOutput,
-} from '../utils/dispatchTypes.js';
-import { mergeHookOutput } from '../utils/mergeHookOutput.js';
-import { safeConcern } from '../utils/safeConcern.js';
+} from '../../types/dispatch.js';
+import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
+import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
 import { runLayerGuard } from './helpers/layerGuard/layerGuard.js';
 import { runVaultRedirector } from './helpers/vaultRedirector/vaultRedirector.js';

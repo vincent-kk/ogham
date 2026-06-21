@@ -13,8 +13,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import {
   DEFAULT_SKIP_PATTERN_SOURCE,
   VAULT_COMMIT_CONFIG_FILE,
-} from '../../constants/vaultCommitter.js';
-import { appendErrorLogSafe } from '../../core/errorLog/errorLog.js';
+} from '../../../constants/vaultCommitter.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
 import {
   commitVaultChanges,
   generateCommitMessage,
@@ -23,8 +23,8 @@ import {
   isGitRepo,
   isIndexLocked,
 } from '../gitUtils/gitUtils.js';
-import { isMaencofVault } from '../shared/isMaencofVault.js';
-import { metaPath } from '../shared/metaPath.js';
+import { isMaencofVault } from '../../shared/isMaencofVault.js';
+import { metaPath } from '../../shared/metaPath.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 

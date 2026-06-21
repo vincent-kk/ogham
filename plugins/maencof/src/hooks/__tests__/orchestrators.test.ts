@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { orchestratePostToolUse } from '../postToolUse/postToolUse.js';
 import { orchestratePreToolUse } from '../preToolUse/preToolUse.js';
 import { orchestrateSessionEnd } from '../sessionEnd/sessionEnd.js';
-import { safeConcern } from '../utils/safeConcern.js';
+import { safeConcern } from '../utils/safeConcern/safeConcern.js';
 
 let vaultDir: string;
 let cacheDir: string;

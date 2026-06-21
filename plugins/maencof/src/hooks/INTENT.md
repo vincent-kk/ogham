@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart` / `userPromptSubmit` / `preToolUse` / `postToolUse` / `stop` / `sessionEnd`)가 그 이벤트의 브리지 entry + 얇은 orchestrator + `helpers/`(관심사)를 소유한다. 여러 이벤트가 공유하는 관심사는 루트 fractal로 둔다.
+Claude Code 훅 진입점. 이벤트마다 하나의 디렉토리(`sessionStart` / `userPromptSubmit` / `preToolUse` / `postToolUse` / `stop` / `sessionEnd`)가 그 이벤트의 브리지 entry + 얇은 orchestrator + `helpers/`(관심사)를 소유한다. 여러 이벤트가 공유하는 관심사·헬퍼는 `utils/` 하위에 둔다.
 
 ## Structure
 
 - `<event>/` — 이벤트별 디스패처: `<event>.entry.ts`(브리지) + `<event>.ts`(orchestrator) + `helpers/<concern>/`
-- `lifecycleDispatcher/` · `vaultCommitter/` — 여러 이벤트 공유 관심사 (entry 없음)
-- `shared/` · `utils/`(mergeHookOutput·safeConcern·dispatchTypes) · `gitUtils/` · `configProvisioner/` · `configRegistry/` — 공유 organ
-- mcp 와 공유하는 도메인(`cacheManager` / `turnContext`)은 `../core/` 에 있다 (hooks 아님)
+- `utils/` — 여러 이벤트 공유: `lifecycleDispatcher/` · `vaultCommitter/` · `gitUtils/` · `configRegistry/` · `configProvisioner/`(관심사 fractal) + `mergeHookOutput/` · `safeConcern/`(디스패치 헬퍼)
+- `shared/` — 경로·stdin·vault 판별 공유 organ
+- 디스패치 envelope 타입은 `../types/dispatch.ts`, mcp 와 공유하는 도메인(`cacheManager` / `turnContext`)은 `../core/` 에 있다 (둘 다 hooks 아님)
 
 ## Boundaries
 

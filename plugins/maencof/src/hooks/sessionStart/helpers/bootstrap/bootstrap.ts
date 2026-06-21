@@ -32,7 +32,7 @@ import type { CompanionIdentityMinimal } from '../../../../types/companionGuard.
 import { isValidCompanionIdentity } from '../../../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../../../types/setup.js';
 import { VERSION } from '../../../../version.js';
-import { provisionMissingConfigs } from '../../../configProvisioner/configProvisioner.js';
+import { provisionMissingConfigs } from '../../../utils/configProvisioner/configProvisioner.js';
 import { claudeMdPath } from '../../../shared/claudeMdPath.js';
 import { isMaencofVault } from '../../../shared/isMaencofVault.js';
 import { metaPath } from '../../../shared/metaPath.js';

@@ -14,7 +14,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runLifecycleDispatcher } from '../../hooks/lifecycleDispatcher/lifecycleDispatcher.js';
+import { runLifecycleDispatcher } from '../../hooks/utils/lifecycleDispatcher/lifecycleDispatcher.js';
 import type { LifecycleEvent } from '../../types/lifecycle.js';
 
 const MARKER = 'MAENCOF_V030_TEST_MARKER_42';

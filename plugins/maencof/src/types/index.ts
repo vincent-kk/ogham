@@ -129,6 +129,13 @@ export type {
 } from './lifecycle.js';
 
 export type {
+  DispatchEvent,
+  DispatchInput,
+  HookConcernResult,
+  MergedHookOutput,
+} from './dispatch.js';
+
+export type {
   ConfigHealthSeverity,
   ConfigIssueCategory,
   ConfigHealthItem,

@@ -7,8 +7,8 @@ import { join } from 'node:path';
 
 import { spawnCli } from '@ogham/cross-platform';
 
-import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../constants/directories.js';
-import { GIT_EXEC_TIMEOUT_MS } from '../../constants/performance.js';
+import { MAENCOF_DIR, MAENCOF_META_DIR } from '../../../constants/directories.js';
+import { GIT_EXEC_TIMEOUT_MS } from '../../../constants/performance.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 

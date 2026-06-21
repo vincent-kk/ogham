@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { mergeHookOutput } from '../utils/mergeHookOutput.js';
+import { mergeHookOutput } from '../utils/mergeHookOutput/mergeHookOutput.js';
 
 describe('mergeHookOutput', () => {
   it('empty results → bare continue:true', () => {

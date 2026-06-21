@@ -3,11 +3,11 @@ import {
   DEFAULT_LIFECYCLE_CONFIG,
   DEFAULT_USAGE_STATS,
   DEFAULT_VAULT_COMMIT_CONFIG,
-} from '../../constants/configDefaults.js';
+} from '../../../constants/configDefaults.js';
 import {
   DEFAULT_INSIGHT_CONFIG,
   DEFAULT_INSIGHT_STATS,
-} from '../../constants/insight.js';
+} from '../../../constants/insight.js';
 
 export interface ConfigEntry {
   /** Filename within .maencof-meta/ */

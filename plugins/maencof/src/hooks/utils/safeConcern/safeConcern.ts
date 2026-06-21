@@ -1,6 +1,6 @@
-import { appendErrorLogSafe } from '../../core/errorLog/errorLog.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/errorLog.js';
 
-import type { HookConcernResult } from './dispatchTypes.js';
+import type { HookConcernResult } from '../../../types/dispatch.js';
 
 /**
  * Run a synchronous concern in isolation. Before consolidation each concern

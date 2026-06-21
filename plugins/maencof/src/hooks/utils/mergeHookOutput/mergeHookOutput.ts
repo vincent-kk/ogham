@@ -2,7 +2,7 @@ import type {
   DispatchEvent,
   HookConcernResult,
   MergedHookOutput,
-} from './dispatchTypes.js';
+} from '../../../types/dispatch.js';
 
 /**
  * Merge sequential concern results into one Claude Code hook envelope.
