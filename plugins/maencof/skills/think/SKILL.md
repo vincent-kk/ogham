@@ -1,9 +1,9 @@
 ---
 name: think
 user_invocable: true
-description: "[maencof:think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale."
-argument-hint: "[--mode default|divergent|review] [requirement or feature request]"
-version: "1.1.0"
+description: '[maencof:think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale.'
+argument-hint: '[--mode default|divergent|review] [requirement or feature request]'
+version: '1.1.0'
 complexity: medium
 context_layers: []
 orchestrator: think skill
@@ -27,12 +27,12 @@ Claude automatically invokes this skill when:
 
 ### Mode Selection (Table B-2 heuristic)
 
-| Signal | Mode |
-|---|---|
-| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent |
-| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?" | review |
-| miss above + "how to interpret" / "among multiple methods" | default |
-| all miss | default (fallback) |
+| Signal                                                                        | Mode               |
+| ----------------------------------------------------------------------------- | ------------------ |
+| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent          |
+| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?"   | review             |
+| miss above + "how to interpret" / "among multiple methods"                    | default            |
+| all miss                                                                      | default (fallback) |
 
 **Override:** `--mode <default|divergent|review>` on the invocation bypasses heuristics.
 
@@ -68,6 +68,8 @@ You are an expert requirements analyst using the Tree of Thoughts (ToT) methodol
 
 **Step 3 - Select**: Pick the top-scoring interpretation. State the rationale in 3-5 sentences. Predict the next decision, list risks, and define the backtrack trigger. Use templates in `knowledge/interpretation-templates.md`.
 
+> **Review mode caveat**: scores are inverted (higher = higher risk), so the top-scoring interpretation is the **most critical risk requiring mandatory alternative adoption** — not a plan to execute. Mark it as the headline risk finding rather than a "winner to build", and recommend the lowest-risk interpretation as the safer path forward.
+
 ## Evaluation Criteria
 
 Axis definitions are **mode-specific**. Never mix axes across modes. Full rubrics in `knowledge/evaluation-criteria.md`.
@@ -84,27 +86,28 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 ### Divergent mode (weights)
 
-| Criterion | Points | Description |
-|-----------|--------|-------------|
-| Novelty | 30 | Departure from repo precedent (imitation 10 / combinatorial novelty 20 / fully novel 30) |
-| Feasibility | 25 | Prototyping cost (reuses Default complexity rubric rescaled) |
-| Requirements Coverage | 15 | Core need alignment |
-| UX Quality | 15 | Interaction quality |
-| Team Capability Fit | 15 | Stack alignment |
+| Criterion             | Points | Description                                                                              |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Novelty               | 30     | Departure from repo precedent (imitation 10 / combinatorial novelty 20 / fully novel 30) |
+| Feasibility           | 25     | Prototyping cost (reuses Default complexity rubric rescaled)                             |
+| Requirements Coverage | 15     | Core need alignment                                                                      |
+| UX Quality            | 15     | Interaction quality                                                                      |
+| Team Capability Fit   | 15     | Stack alignment                                                                          |
 
 ### Review mode (weights; inverted Risk Exposure)
 
-| Criterion | Points | Description |
-|-----------|--------|-------------|
-| Risk Exposure | 30 | **Higher score = higher risk.** mitigated 10 / partial 20 / unmitigated 30 |
-| Requirements Coverage | 25 | Plan coverage of stated needs |
-| Maintainability | 20 | Long-term change cost |
-| Implementation Complexity | 15 | Buildability |
-| Team Capability Fit | 10 | Stack alignment |
+| Criterion                 | Points | Description                                                                |
+| ------------------------- | ------ | -------------------------------------------------------------------------- |
+| Risk Exposure             | 30     | **Higher score = higher risk.** mitigated 10 / partial 20 / unmitigated 30 |
+| Requirements Coverage     | 25     | Plan coverage of stated needs                                              |
+| Maintainability           | 20     | Long-term change cost                                                      |
+| Implementation Complexity | 15     | Buildability                                                               |
+| Team Capability Fit       | 10     | Stack alignment                                                            |
 
 ## Score Interpretation (mode-specific)
 
 ### Default
+
 - **85-100** Certain — proceed immediately
 - **75-84** Very Feasible — safe
 - **70-74** Feasible — proceed with care
@@ -112,6 +115,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 - **<60** Not Recommended
 
 ### Divergent
+
 - **85-100** Bold & Feasible — prototype-worthy
 - **75-84** Novel & Actionable — experiment
 - **70-74** Derivative but safe
@@ -119,6 +123,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 - **<60** Weak — discard
 
 ### Review (inverted — higher = worse)
+
 - **85-100** Critical risk — **mandatory alternative adoption**
 - **75-84** Major risk — mitigation must be specified
 - **70-74** Moderate — monitoring / conditional

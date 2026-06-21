@@ -169,7 +169,7 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 | ---------------------- | ----------------------------- | -------------------------------------------------------------- |
 | 세션 시작 시           | Vault 컨텍스트 + 인덱스 로드  | 첫 턴부터 에이전트가 지식을 인지                               |
 | 파일을 Write/Edit할 때 | Layer 보호 검사               | L1 문서의 무단 수정 방지                                       |
-| maencof 쓰기 도구 후   | 데일리 노트 기록              | Vault 쓰기(create/update/move/delete) 변경 이력 추적           |
+| maencof 쓰기 도구 후   | 활동 로그 기록                | Vault 쓰기(create/update/move/delete) 변경 이력 추적           |
 | 세션 종료 시           | 세션 정리 + 영속화            | 휘발성 상태 저장, 만료 항목 정리                               |
 | 매 사용자 프롬프트 시  | 컨텍스트 주입 체인 (4개 hook) | 턴 컨텍스트 로드, 등록 액션 실행, 통찰 캡처, vault 커밋 게이팅 |
 | 에이전트 종료 시       | 라이프사이클 디스패처         | 종료 이벤트에 등록된 액션 실행                                 |
@@ -180,34 +180,35 @@ maencof은 지식을 5개 Layer로 구분하며, 각 Layer는 Spreading Activati
 
 ## 전체 스킬 목록
 
-| 스킬                   | 분류     | 설명                                                                                                      |
-| ---------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `/maencof:setup`       | 설정     | 7단계 온보딩 위저드                                                                                       |
-| `/maencof:remember`    | 핵심     | 새 지식 기록 (자동 Layer, 태그, 중복 검사)                                                                |
-| `/maencof:recall`      | 핵심     | Spreading Activation 검색                                                                                 |
-| `/maencof:explore`     | 핵심     | 인터랙티브 그래프 탐색 (최대 3라운드)                                                                     |
-| `/maencof:organize`    | 핵심     | 에이전트 기반 문서 재구성                                                                                 |
-| `/maencof:reflect`     | 핵심     | 읽기 전용 지식 건강도 분석                                                                                |
-| `/maencof:suggest`     | 핵심     | SA + Jaccard 유사도 기반 링크 추천                                                                        |
-| `/maencof:build`       | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
-| `/maencof:checkup`     | 건강     | 7개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수)                        |
-| `/maencof:cleanup`     | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리                                                                         |
-| `/maencof:ingest`      | 고급     | URL, GitHub, 텍스트에서 가져오기                                                                          |
-| `/maencof:connect`     | 고급     | 외부 데이터 소스 등록                                                                                     |
-| `/maencof:mcp-setup`   | 고급     | 외부 MCP 서버 설치                                                                                        |
-| `/maencof:manage`      | 고급     | 스킬/에이전트 활성화 및 사용 리포트                                                                       |
-| `/maencof:insight`     | 고급     | 자동 인사이트 캡처 관리                                                                                   |
-| `/maencof:changelog`   | 고급     | 자기 변경 기록 (일별 changelog)                                                                           |
-| `/maencof:migrate`     | 고급     | Vault 아키텍처 마이그레이션                                                                               |
-| `/maencof:configure`   | 환경설정 | 통합 환경 설정 진입점 (router)                                                                            |
-| `/maencof:bridge`      | 환경설정 | MCP 설치+등록+워크플로우 스킬 생성                                                                        |
-| `/maencof:craft-skill` | 환경설정 | 커스텀 스킬 생성기                                                                                        |
-| `/maencof:craft-agent` | 환경설정 | 커스텀 에이전트 생성기                                                                                    |
-| `/maencof:instruct`    | 환경설정 | CLAUDE.md 관리                                                                                            |
-| `/maencof:rule`        | 환경설정 | 규칙 관리                                                                                                 |
-| `/maencof:lifecycle`   | 환경설정 | 라이프사이클 액션 관리                                                                                    |
-| `/maencof:think`       | 분석     | Tree of Thoughts 요구사항 분석                                                                            |
-| `/maencof:refine`      | 분석     | 모호한 입력 정제 인터뷰 루프                                                                              |
+| 스킬                       | 분류     | 설명                                                                                                      |
+| -------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `/maencof:setup`           | 설정     | 7단계 온보딩 위저드                                                                                       |
+| `/maencof:remember`        | 핵심     | 새 지식 기록 (자동 Layer, 태그, 중복 검사)                                                                |
+| `/maencof:recall`          | 핵심     | Spreading Activation 검색                                                                                 |
+| `/maencof:explore`         | 핵심     | 인터랙티브 그래프 탐색 (최대 3라운드)                                                                     |
+| `/maencof:organize`        | 핵심     | 에이전트 기반 문서 재구성                                                                                 |
+| `/maencof:reflect`         | 핵심     | 읽기 전용 지식 건강도 분석                                                                                |
+| `/maencof:suggest`         | 핵심     | SA + Jaccard 유사도 기반 링크 추천                                                                        |
+| `/maencof:build`           | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
+| `/maencof:checkup`         | 건강     | 7개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수)                        |
+| `/maencof:cleanup`         | 건강     | Vault 문서 삭제 및 CLAUDE.md 정리                                                                         |
+| `/maencof:ingest`          | 고급     | URL, GitHub, 텍스트에서 가져오기                                                                          |
+| `/maencof:connect`         | 고급     | 외부 데이터 소스 등록                                                                                     |
+| `/maencof:mcp-setup`       | 고급     | 외부 MCP 서버 설치                                                                                        |
+| `/maencof:manage`          | 고급     | 스킬/에이전트 활성화 및 사용 리포트                                                                       |
+| `/maencof:insight`         | 고급     | 자동 인사이트 캡처 관리                                                                                   |
+| `/maencof:changelog`       | 고급     | 자기 변경 기록 (일별 changelog)                                                                           |
+| `/maencof:migrate`         | 고급     | Vault 아키텍처 마이그레이션                                                                               |
+| `/maencof:configure`       | 환경설정 | 통합 환경 설정 진입점 (router)                                                                            |
+| `/maencof:bridge`          | 환경설정 | MCP 설치+등록+워크플로우 스킬 생성                                                                        |
+| `/maencof:craft-skill`     | 환경설정 | 커스텀 스킬 생성기                                                                                        |
+| `/maencof:craft-agent`     | 환경설정 | 커스텀 에이전트 생성기                                                                                    |
+| `/maencof:craft-dashboard` | 환경설정 | 인터뷰 기반 개인 vault 대시보드 생성/갱신                                                                 |
+| `/maencof:instruct`        | 환경설정 | CLAUDE.md 관리                                                                                            |
+| `/maencof:rule`            | 환경설정 | 규칙 관리                                                                                                 |
+| `/maencof:lifecycle`       | 환경설정 | 라이프사이클 액션 관리                                                                                    |
+| `/maencof:think`           | 분석     | Tree of Thoughts 요구사항 분석                                                                            |
+| `/maencof:refine`          | 분석     | 모호한 입력 정제 인터뷰 루프                                                                              |
 
 ---
 

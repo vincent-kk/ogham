@@ -34,6 +34,8 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 | "buffer", "stale buffer" keyword | **buffer-cleanup** mode |
 | not specified                    | ask user to select mode |
 
+> The user-facing keyword is `buffer`; it activates the internal **buffer-cleanup** mode named in the workflow and option descriptions below.
+
 ## Workflow
 
 ### document mode — Vault Document Deletion
