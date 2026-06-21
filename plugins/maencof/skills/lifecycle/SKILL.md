@@ -1,9 +1,9 @@
 ---
 name: lifecycle
 user_invocable: true
-description: "[maencof:lifecycle] Attaches custom actions to Claude Code lifecycle events (session start, stop, tool use) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally."
-argument-hint: "[mode] [id]"
-version: "1.1.0"
+description: '[maencof:lifecycle] Attaches custom actions to Claude Code lifecycle events (session start/end, prompt submit, tool use, stop) via the dispatcher pattern without modifying hooks.json. Supports toggling and removing actions conversationally.'
+argument-hint: '[mode] [id]'
+version: '1.1.0'
 complexity: medium
 context_layers: []
 orchestrator: configurator
@@ -28,34 +28,39 @@ Register, edit, and remove dynamic actions on Claude Code lifecycle events via c
 
 ## Scope
 
-| Area | Path | Write |
-|------|------|-------|
-| Execution | `{CWD}/.maencof-meta/lifecycle.json` | **Yes** |
-| Execution | `{CWD}/.claude/settings.local.json` | **Never** |
+| Area      | Path                                 | Write     |
+| --------- | ------------------------------------ | --------- |
+| Execution | `{CWD}/.maencof-meta/lifecycle.json` | **Yes**   |
+| Execution | `{CWD}/.claude/settings.local.json`  | **Never** |
 
 ## Workflow
 
 ### Step 1 — Display Registered Actions
+
 Read `lifecycle.json` and show actions with status (active/inactive).
 
 ### Step 2 — Identify Intent and Map Event
+
 Detect target event from natural language (SessionStart, Stop, PreToolUse, etc.).
 
 ### Step 3 — Define Action
+
 Collect type (echo/remind), message, optional condition, and matcher for tool events.
 
 ### Step 4 — Update lifecycle.json
+
 Write action to `lifecycle.json` after user confirmation.
 
 ### Step 5 — Confirmation
+
 Report registered action with ID, event, type, and status. Offer instant test.
 
 > Load `reference.md` for dispatcher pattern details, event/action specs, matcher documentation, and examples.
 
 ## Resources
 
-| File | Content |
-|------|---------|
+| File           | Content                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `reference.md` | Dispatcher pattern, supported events, action types, matcher field, detailed workflow, examples, error handling, acceptance criteria |
 
 ## Options
@@ -64,12 +69,12 @@ Report registered action with ID, event, type, and status. Offer instant test.
 /maencof:lifecycle [mode] [id]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `list` | Display current action list |
-| `add` | Add a new action (interactive) |
-| `edit <id>` | Edit an existing action |
-| `remove <id>` | Remove an action |
-| `enable <id>` | Activate an action |
-| `disable <id>` | Deactivate an action |
-| `--test <id>` | Instantly test an action |
+| Option         | Description                    |
+| -------------- | ------------------------------ |
+| `list`         | Display current action list    |
+| `add`          | Add a new action (interactive) |
+| `edit <id>`    | Edit an existing action        |
+| `remove <id>`  | Remove an action               |
+| `enable <id>`  | Activate an action             |
+| `disable <id>` | Deactivate an action           |
+| `--test <id>`  | Instantly test an action       |

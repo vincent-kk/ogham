@@ -1,5 +1,7 @@
 # Subagent Constructor Reference
 
+> Reference for craft-agent. Adapted from the subagent-constructor concept; the persona/behavior separation is the maencof value-add.
+
 Complete specification reference for Claude Code custom subagents. This is the authoritative source for all field definitions, tool catalogs, and validation rules.
 
 ---
@@ -28,12 +30,14 @@ All subagent `.md` files begin with a YAML frontmatter block delimited by `---`.
 ### Required Fields
 
 **`name`** (string)
+
 - Unique identifier for the subagent
 - Format: lowercase letters and hyphens only (`/^[a-z][a-z0-9-]*$/`)
 - Must be unique across all loaded agent sources
 - Examples: `code-reviewer`, `test-runner`, `security-auditor`
 
 **`description`** (string)
+
 - Tells Claude WHEN to delegate to this subagent
 - Be specific about trigger conditions — vague descriptions cause mis-delegation
 - Include "Use proactively" for auto-delegation without user request
@@ -63,6 +67,7 @@ description: >
 ### Optional Fields
 
 **`tools`** (comma-separated string)
+
 - Allowlist of tools the subagent can use
 - If omitted, inherits ALL tools from the parent conversation
 - Format: `tools: Read, Grep, Glob, Bash`
@@ -70,65 +75,78 @@ description: >
 - Supports Agent restriction: `Agent(worker, researcher)` limits which subagent types can be spawned
 
 **`disallowedTools`** (comma-separated string)
+
 - Denylist of tools from the inherited set
 - Takes precedence over `tools` if both specified
 - Format: `disallowedTools: Write, Edit, Bash`
 
 **`model`** (string)
+
 - AI model to use for this subagent
 - Values: `sonnet`, `opus`, `haiku`, full model ID (e.g., `claude-opus-4-6`), or `inherit`
 - Default: `inherit` (uses parent's model)
 
 **`permissionMode`** (string)
+
 - Controls how tool permissions are handled
 - Values: `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan`
 - See [Section 3](#3-permission-modes) for detailed behavior
 
 **`maxTurns`** (number)
+
 - Maximum agentic turns before the subagent stops
 - When reached, subagent returns accumulated results to parent
 
 **`skills`** (list)
+
 - Skills to preload into the subagent's context at startup
 - Format: YAML list of skill names
 - Preloaded skills count toward the subagent's context window
 
 **`mcpServers`** (list)
+
 - MCP servers available to the subagent
 - Format: string references to configured servers, or inline definitions
 - See [Section 8](#8-mcp-server-configuration)
 
 **`hooks`** (object)
+
 - Lifecycle hooks scoped to this subagent
 - Structure mirrors global hook configuration
 - See [Section 4](#4-hook-configuration)
 
 **`memory`** (string)
+
 - Enable persistent memory for this subagent
 - Values: `user`, `project`, `local`
 - See [Section 5](#5-memory-configuration)
 
 **`background`** (boolean)
+
 - When `true`, always runs as a background task
 - Default: `false`
 - Background agents cannot prompt the user — unapproved tools are auto-denied
 
 **`effort`** (string)
+
 - Reasoning depth override
 - Values: `low`, `medium`, `high`, `max`
 - `max` is for Opus 4.6 only
 - Higher effort = deeper analysis but slower and more expensive
 
 **`isolation`** (string)
+
 - Set to `worktree` for execution in a temporary Git worktree
 - The worktree is auto-cleaned if no changes are made
 - If changes exist, worktree path and branch are returned to parent
 
 **`color`** (string)
+
 - UI display color for visual identification
 - Values: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`
 
 **`initialPrompt`** (string)
+
 - Auto-submitted as the first user turn when running via `--agent` flag
 - Supports command/skill references
 - Only meaningful for session-level agents (`claude --agent <name>`)
@@ -136,6 +154,7 @@ description: >
 ### Plugin Restrictions
 
 Subagents defined in plugins have these fields **ignored** for security:
+
 - `hooks`
 - `mcpServers`
 - `permissionMode`
@@ -148,75 +167,75 @@ Complete list of tools available in Claude Code.
 
 ### Core Tools
 
-| Tool | Category | Permission | Description |
-| --- | --- | --- | --- |
-| Read | Read-only | No | Read file contents |
-| Grep | Read-only | No | Search file contents (ripgrep) |
-| Glob | Read-only | No | Pattern-based file search |
-| Edit | Modification | Yes | String replacement in files |
-| Write | Modification | Yes | Create/overwrite files |
-| NotebookEdit | Modification | Yes | Modify Jupyter notebook cells |
-| Bash | Execution | Yes | Execute shell commands |
-| Agent | Spawning | No | Spawn subagents |
-| AskUserQuestion | Interaction | No | Multi-select questions to user |
-| WebFetch | Network | Yes | Fetch URL content |
-| WebSearch | Network | Yes | Web search |
-| Skill | Execution | Yes | Execute a skill |
+| Tool            | Category     | Permission | Description                    |
+| --------------- | ------------ | ---------- | ------------------------------ |
+| Read            | Read-only    | No         | Read file contents             |
+| Grep            | Read-only    | No         | Search file contents (ripgrep) |
+| Glob            | Read-only    | No         | Pattern-based file search      |
+| Edit            | Modification | Yes        | String replacement in files    |
+| Write           | Modification | Yes        | Create/overwrite files         |
+| NotebookEdit    | Modification | Yes        | Modify Jupyter notebook cells  |
+| Bash            | Execution    | Yes        | Execute shell commands         |
+| Agent           | Spawning     | No         | Spawn subagents                |
+| AskUserQuestion | Interaction  | No         | Multi-select questions to user |
+| WebFetch        | Network      | Yes        | Fetch URL content              |
+| WebSearch       | Network      | Yes        | Web search                     |
+| Skill           | Execution    | Yes        | Execute a skill                |
 
 ### Session Management Tools
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| TaskCreate | No | Create task in task list |
-| TaskGet | No | Get task details |
-| TaskList | No | List all tasks |
-| TaskUpdate | No | Update task status/details |
-| TaskOutput | No | Read background task output (deprecated) |
-| TaskStop | No | Stop running background task |
-| TodoWrite | No | Session task checklist (SDK/non-interactive only — not available in standard Claude Code sessions) |
-| CronCreate | No | Create scheduled task in session |
-| CronDelete | No | Cancel scheduled task |
-| CronList | No | List scheduled tasks |
+| Tool       | Permission | Description                                                                                        |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| TaskCreate | No         | Create task in task list                                                                           |
+| TaskGet    | No         | Get task details                                                                                   |
+| TaskList   | No         | List all tasks                                                                                     |
+| TaskUpdate | No         | Update task status/details                                                                         |
+| TaskOutput | No         | Read background task output (deprecated)                                                           |
+| TaskStop   | No         | Stop running background task                                                                       |
+| TodoWrite  | No         | Session task checklist (SDK/non-interactive only — not available in standard Claude Code sessions) |
+| CronCreate | No         | Create scheduled task in session                                                                   |
+| CronDelete | No         | Cancel scheduled task                                                                              |
+| CronList   | No         | List scheduled tasks                                                                               |
 
 ### Remote Trigger Tools
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| RemoteTrigger | No | Call the claude.ai remote-trigger API (list, get, create, update, run triggers) |
+| Tool          | Permission | Description                                                                     |
+| ------------- | ---------- | ------------------------------------------------------------------------------- |
+| RemoteTrigger | No         | Call the claude.ai remote-trigger API (list, get, create, update, run triggers) |
 
 ### Navigation and Intelligence Tools
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| LSP | No | Code intelligence (go-to-definition, find references, type info) |
-| ToolSearch | No | Search and load deferred tools |
-| EnterPlanMode | No | Switch to plan mode |
-| ExitPlanMode | Yes | Exit plan mode with plan |
-| EnterWorktree | No | Create isolated Git worktree |
-| ExitWorktree | No | Exit worktree session |
+| Tool          | Permission | Description                                                      |
+| ------------- | ---------- | ---------------------------------------------------------------- |
+| LSP           | No         | Code intelligence (go-to-definition, find references, type info) |
+| ToolSearch    | No         | Search and load deferred tools                                   |
+| EnterPlanMode | No         | Switch to plan mode                                              |
+| ExitPlanMode  | Yes        | Exit plan mode with plan                                         |
+| EnterWorktree | No         | Create isolated Git worktree                                     |
+| ExitWorktree  | No         | Exit worktree session                                            |
 
 ### MCP and Resource Tools
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| ListMcpResourcesTool | No | List connected MCP server resources |
-| ReadMcpResourceTool | No | Read specific MCP resource URI |
+| Tool                 | Permission | Description                         |
+| -------------------- | ---------- | ----------------------------------- |
+| ListMcpResourcesTool | No         | List connected MCP server resources |
+| ReadMcpResourceTool  | No         | Read specific MCP resource URI      |
 
 ### Collaboration Tools (Experimental)
 
 Require `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`:
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| SendMessage | No | Message teammate or resume subagent |
-| TeamCreate | No | Create agent team |
-| TeamDelete | No | Disband agent team |
+| Tool        | Permission | Description                         |
+| ----------- | ---------- | ----------------------------------- |
+| SendMessage | No         | Message teammate or resume subagent |
+| TeamCreate  | No         | Create agent team                   |
+| TeamDelete  | No         | Disband agent team                  |
 
 ### Platform-Specific Tools
 
-| Tool | Permission | Description |
-| --- | --- | --- |
-| PowerShell | Yes | Windows PowerShell commands (preview) |
+| Tool       | Permission | Description                           |
+| ---------- | ---------- | ------------------------------------- |
+| PowerShell | Yes        | Windows PowerShell commands (preview) |
 
 ### Tool Restriction Syntax
 
@@ -238,14 +257,14 @@ tools: Read, Grep, mcp__database__query, mcp__slack__post_message
 
 ## 3. Permission Modes
 
-| Mode | Behavior |
-| --- | --- |
-| `default` | Standard — prompts user for each sensitive tool use |
-| `acceptEdits` | Auto-approves file operations (Read/Edit/Write/mkdir/rm/mv). Protected directories excluded. Other tools use standard prompts |
-| `auto` | AI-powered 2-stage classifier judges user intent alignment. Escalates to human after 3 consecutive denials or 20 cumulative. **Research preview** |
-| `dontAsk` | Auto-denies tools not on allowlist. For locked-down environments |
-| `bypassPermissions` | All tools auto-approved. `.git`, `.claude`, `.vscode`, `.idea`, `.husky` writes still confirmed. **Container/VM only** |
-| `plan` | Read-only. Cannot modify files or execute commands |
+| Mode                | Behavior                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default`           | Standard — prompts user for each sensitive tool use                                                                                               |
+| `acceptEdits`       | Auto-approves file operations (Read/Edit/Write/mkdir/rm/mv). Protected directories excluded. Other tools use standard prompts                     |
+| `auto`              | AI-powered 2-stage classifier judges user intent alignment. Escalates to human after 3 consecutive denials or 20 cumulative. **Research preview** |
+| `dontAsk`           | Auto-denies tools not on allowlist. For locked-down environments                                                                                  |
+| `bypassPermissions` | All tools auto-approved. `.git`, `.claude`, `.vscode`, `.idea`, `.husky` writes still confirmed. **Container/VM only**                            |
+| `plan`              | Read-only. Cannot modify files or execute commands                                                                                                |
 
 ### Inheritance Rules
 
@@ -259,87 +278,88 @@ tools: Read, Grep, mcp__database__query, mcp__slack__post_message
 
 ### Event Types
 
-| Event | When | Matcher |
-| --- | --- | --- |
-| `PreToolUse` | Before tool execution | Tool name (regex) |
-| `PostToolUse` | After successful tool execution | Tool name (regex) |
-| `PostToolUseFailure` | After failed tool execution | Tool name (regex) |
-| `SubagentStart` | Subagent spawned | Agent type name |
-| `SubagentStop` | Subagent completed | Agent type name |
-| `Stop` | Claude response complete. In frontmatter, auto-converted to `SubagentStop` | none |
-| `StopFailure` | API error ends turn | `rate_limit`, `authentication_failed`, `billing_error`, `invalid_request`, `server_error`, `max_output_tokens`, `unknown` |
-| `SessionStart` | Session start/resume | `startup`, `resume`, `clear`, `compact` |
-| `SessionEnd` | Session end | `clear`, `resume`, `logout`, `prompt_input_exit`, `bypass_permissions_disabled`, `other` |
-| `UserPromptSubmit` | User submits prompt | none |
-| `InstructionsLoaded` | CLAUDE.md loaded | `session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact` |
-| `PermissionRequest` | Permission dialog shown | Tool name (regex) |
-| `PermissionDenied` | Auto mode denies tool | Tool name (regex) |
-| `TaskCreated` | TaskCreate called | none |
-| `TaskCompleted` | Task marked complete | none |
-| `TeammateIdle` | Team agent idle | none |
-| `ConfigChange` | Settings file changed | `user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills` |
-| `CwdChanged` | Working directory changed | none |
-| `FileChanged` | Watched file changed | filename (basename) |
-| `PreCompact` | Before context compression | `manual`, `auto` |
-| `PostCompact` | After compression | `manual`, `auto` |
-| `WorktreeCreate` | Worktree created | none |
-| `WorktreeRemove` | Worktree removed | none |
-| `Elicitation` | MCP server input request | MCP server name |
-| `ElicitationResult` | User elicitation response | MCP server name |
-| `Notification` | System notification sent | `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog` |
+| Event                | When                                                                       | Matcher                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `PreToolUse`         | Before tool execution                                                      | Tool name (regex)                                                                                                         |
+| `PostToolUse`        | After successful tool execution                                            | Tool name (regex)                                                                                                         |
+| `PostToolUseFailure` | After failed tool execution                                                | Tool name (regex)                                                                                                         |
+| `SubagentStart`      | Subagent spawned                                                           | Agent type name                                                                                                           |
+| `SubagentStop`       | Subagent completed                                                         | Agent type name                                                                                                           |
+| `Stop`               | Claude response complete. In frontmatter, auto-converted to `SubagentStop` | none                                                                                                                      |
+| `StopFailure`        | API error ends turn                                                        | `rate_limit`, `authentication_failed`, `billing_error`, `invalid_request`, `server_error`, `max_output_tokens`, `unknown` |
+| `SessionStart`       | Session start/resume                                                       | `startup`, `resume`, `clear`, `compact`                                                                                   |
+| `SessionEnd`         | Session end                                                                | `clear`, `resume`, `logout`, `prompt_input_exit`, `bypass_permissions_disabled`, `other`                                  |
+| `UserPromptSubmit`   | User submits prompt                                                        | none                                                                                                                      |
+| `InstructionsLoaded` | CLAUDE.md loaded                                                           | `session_start`, `nested_traversal`, `path_glob_match`, `include`, `compact`                                              |
+| `PermissionRequest`  | Permission dialog shown                                                    | Tool name (regex)                                                                                                         |
+| `PermissionDenied`   | Auto mode denies tool                                                      | Tool name (regex)                                                                                                         |
+| `TaskCreated`        | TaskCreate called                                                          | none                                                                                                                      |
+| `TaskCompleted`      | Task marked complete                                                       | none                                                                                                                      |
+| `TeammateIdle`       | Team agent idle                                                            | none                                                                                                                      |
+| `ConfigChange`       | Settings file changed                                                      | `user_settings`, `project_settings`, `local_settings`, `policy_settings`, `skills`                                        |
+| `CwdChanged`         | Working directory changed                                                  | none                                                                                                                      |
+| `FileChanged`        | Watched file changed                                                       | filename (basename)                                                                                                       |
+| `PreCompact`         | Before context compression                                                 | `manual`, `auto`                                                                                                          |
+| `PostCompact`        | After compression                                                          | `manual`, `auto`                                                                                                          |
+| `WorktreeCreate`     | Worktree created                                                           | none                                                                                                                      |
+| `WorktreeRemove`     | Worktree removed                                                           | none                                                                                                                      |
+| `Elicitation`        | MCP server input request                                                   | MCP server name                                                                                                           |
+| `ElicitationResult`  | User elicitation response                                                  | MCP server name                                                                                                           |
+| `Notification`       | System notification sent                                                   | `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`                                                  |
 
 ### Handler Types
 
-| Type | Description |
-| --- | --- |
+| Type      | Description                                   |
+| --------- | --------------------------------------------- |
 | `command` | Execute shell script. Receives JSON via stdin |
-| `http` | Send HTTP POST request |
-| `prompt` | Feed JSON input as Claude prompt |
-| `agent` | Invoke subagent for evaluation |
+| `http`    | Send HTTP POST request                        |
+| `prompt`  | Feed JSON input as Claude prompt              |
+| `agent`   | Invoke subagent for evaluation                |
 
 ### Hook Input Schema (Common Fields)
 
 All hook handlers receive JSON via stdin with these common fields:
 
-| Field | Description |
-| --- | --- |
-| `session_id` | Current session identifier |
-| `transcript_path` | Path to conversation JSONL |
-| `cwd` | Current working directory |
-| `permission_mode` | Current permission mode (not all events) |
-| `hook_event_name` | Name of fired event |
-| `agent_id` | (Subagent calls only) Unique subagent identifier |
-| `agent_type` | (Subagent calls or --agent) Agent name |
+| Field             | Description                                      |
+| ----------------- | ------------------------------------------------ |
+| `session_id`      | Current session identifier                       |
+| `transcript_path` | Path to conversation JSONL                       |
+| `cwd`             | Current working directory                        |
+| `permission_mode` | Current permission mode (not all events)         |
+| `hook_event_name` | Name of fired event                              |
+| `agent_id`        | (Subagent calls only) Unique subagent identifier |
+| `agent_type`      | (Subagent calls or --agent) Agent name           |
 
 Tool events additionally include: `tool_name`, `tool_input`, `tool_use_id`.
 
 ### Common Handler Fields (All Types)
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `type` | Yes | `command`, `http`, `prompt`, `agent` |
-| `if` | No | Conditional filter: `"Bash(git *)"`, `"Edit(*.ts)"` — tool events only |
-| `timeout` | No | Seconds (command: 600, prompt: 30, agent: 60) |
-| `statusMessage` | No | Custom spinner message |
-| `once` | No | Skills only: run once per session |
+| Field           | Required | Description                                                            |
+| --------------- | -------- | ---------------------------------------------------------------------- |
+| `type`          | Yes      | `command`, `http`, `prompt`, `agent`                                   |
+| `if`            | No       | Conditional filter: `"Bash(git *)"`, `"Edit(*.ts)"` — tool events only |
+| `timeout`       | No       | Seconds (command: 600, prompt: 30, agent: 60)                          |
+| `statusMessage` | No       | Custom spinner message                                                 |
+| `once`          | No       | Skills only: run once per session                                      |
 
 ### Command Hook Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `command` | Yes | Shell command to execute. Supports `$TOOL_INPUT` variable for tool events |
-| `async` | No | Run in background (boolean, default: false) |
-| `shell` | No | `"bash"` (default) or `"powershell"` |
+| Field     | Required | Description                                                               |
+| --------- | -------- | ------------------------------------------------------------------------- |
+| `command` | Yes      | Shell command to execute. Supports `$TOOL_INPUT` variable for tool events |
+| `async`   | No       | Run in background (boolean, default: false)                               |
+| `shell`   | No       | `"bash"` (default) or `"powershell"`                                      |
 
 ### HTTP Hook Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `url` | Yes | POST endpoint URL |
-| `headers` | No | HTTP headers object (supports `$ENV_VAR` interpolation) |
-| `allowedEnvVars` | No | Array of env var names allowed in header interpolation |
+| Field            | Required | Description                                             |
+| ---------------- | -------- | ------------------------------------------------------- |
+| `url`            | Yes      | POST endpoint URL                                       |
+| `headers`        | No       | HTTP headers object (supports `$ENV_VAR` interpolation) |
+| `allowedEnvVars` | No       | Array of env var names allowed in header interpolation  |
 
 HTTP response handling:
+
 - `2xx` + empty body: success (equivalent to exit 0)
 - `2xx` + plain text: success, text added as context
 - `2xx` + JSON: success, parsed as hook output
@@ -348,25 +368,25 @@ HTTP response handling:
 
 ### Prompt Hook Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `prompt` | Yes | Prompt text with `$ARGUMENTS` placeholder for hook input |
-| `model` | No | Model override for evaluation |
+| Field    | Required | Description                                              |
+| -------- | -------- | -------------------------------------------------------- |
+| `prompt` | Yes      | Prompt text with `$ARGUMENTS` placeholder for hook input |
+| `model`  | No       | Model override for evaluation                            |
 
 ### Agent Hook Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `prompt` | Yes | Prompt text with `$ARGUMENTS` placeholder for hook input |
-| `model` | No | Model override for evaluation |
+| Field    | Required | Description                                              |
+| -------- | -------- | -------------------------------------------------------- |
+| `prompt` | Yes      | Prompt text with `$ARGUMENTS` placeholder for hook input |
+| `model`  | No       | Model override for evaluation                            |
 
 ### Exit Codes (command type)
 
-| Code | Meaning | Action |
-| --- | --- | --- |
-| 0 | Success | Parse stdout JSON; allow operation |
-| 2 | Blocking error | Use stderr as error message; block operation (only for events that support blocking — see table below) |
-| Other | Non-blocking | Show stderr in verbose mode; continue |
+| Code  | Meaning        | Action                                                                                                 |
+| ----- | -------------- | ------------------------------------------------------------------------------------------------------ |
+| 0     | Success        | Parse stdout JSON; allow operation                                                                     |
+| 2     | Blocking error | Use stderr as error message; block operation (only for events that support blocking — see table below) |
+| Other | Non-blocking   | Show stderr in verbose mode; continue                                                                  |
 
 ### Hook Output Schema
 
@@ -374,12 +394,12 @@ HTTP response handling:
 
 All hook handlers can return these fields via stdout JSON (exit code 0):
 
-| Field | Default | Description |
-| --- | --- | --- |
-| `continue` | `true` | If false, Claude stops processing entirely |
-| `stopReason` | — | Message shown to user when continue=false |
-| `suppressOutput` | `false` | Hide stdout from verbose mode output |
-| `systemMessage` | — | Warning message shown to user |
+| Field            | Default | Description                                |
+| ---------------- | ------- | ------------------------------------------ |
+| `continue`       | `true`  | If false, Claude stops processing entirely |
+| `stopReason`     | —       | Message shown to user when continue=false  |
+| `suppressOutput` | `false` | Hide stdout from verbose mode output       |
+| `systemMessage`  | —       | Warning message shown to user              |
 
 #### PreToolUse Decision Control
 
@@ -397,12 +417,12 @@ Return JSON with `hookSpecificOutput` to control whether the tool call proceeds:
 }
 ```
 
-| Field | Values | Description |
-| --- | --- | --- |
-| `permissionDecision` | `allow`, `deny`, `ask`, `defer` | Whether to allow, deny, prompt user, or defer the tool call |
-| `permissionDecisionReason` | string | For allow/ask: shown to user. For deny: shown to Claude |
-| `updatedInput` | object | Modifies tool input parameters before execution |
-| `additionalContext` | string | String added to Claude's context before tool executes |
+| Field                      | Values                          | Description                                                 |
+| -------------------------- | ------------------------------- | ----------------------------------------------------------- |
+| `permissionDecision`       | `allow`, `deny`, `ask`, `defer` | Whether to allow, deny, prompt user, or defer the tool call |
+| `permissionDecisionReason` | string                          | For allow/ask: shown to user. For deny: shown to Claude     |
+| `updatedInput`             | object                          | Modifies tool input parameters before execution             |
+| `additionalContext`        | string                          | String added to Claude's context before tool executes       |
 
 Decision precedence when multiple hooks return different decisions: **deny > defer > ask > allow**
 
@@ -440,47 +460,47 @@ Hook output injected into context is capped at **10,000 characters**. Exceeding 
 
 ### Blocking Capability by Event
 
-| Event | Can Block (exit 2) | Effect |
-| --- | --- | --- |
-| `PreToolUse` | Yes | Blocks tool call |
-| `PermissionRequest` | Yes | Denies permission |
-| `UserPromptSubmit` | Yes | Blocks prompt, erases from context |
-| `Stop` | Yes | Prevents Claude from stopping |
-| `SubagentStop` | Yes | Prevents subagent from stopping |
-| `TeammateIdle` | Yes | Prevents teammate from going idle |
-| `TaskCreated` | Yes | Rolls back task creation |
-| `TaskCompleted` | Yes | Prevents task completion |
-| `ConfigChange` | Yes | Blocks config change (except policy_settings) |
-| `Elicitation` | Yes | Denies elicitation |
-| `ElicitationResult` | Yes | Blocks response (becomes decline) |
-| `WorktreeCreate` | Yes | Fails worktree creation |
-| All others | No | stderr shown in verbose mode only |
+| Event               | Can Block (exit 2) | Effect                                        |
+| ------------------- | ------------------ | --------------------------------------------- |
+| `PreToolUse`        | Yes                | Blocks tool call                              |
+| `PermissionRequest` | Yes                | Denies permission                             |
+| `UserPromptSubmit`  | Yes                | Blocks prompt, erases from context            |
+| `Stop`              | Yes                | Prevents Claude from stopping                 |
+| `SubagentStop`      | Yes                | Prevents subagent from stopping               |
+| `TeammateIdle`      | Yes                | Prevents teammate from going idle             |
+| `TaskCreated`       | Yes                | Rolls back task creation                      |
+| `TaskCompleted`     | Yes                | Prevents task completion                      |
+| `ConfigChange`      | Yes                | Blocks config change (except policy_settings) |
+| `Elicitation`       | Yes                | Denies elicitation                            |
+| `ElicitationResult` | Yes                | Blocks response (becomes decline)             |
+| `WorktreeCreate`    | Yes                | Fails worktree creation                       |
+| All others          | No                 | stderr shown in verbose mode only             |
 
 ### Frontmatter Hook Example
 
 ```yaml
 hooks:
   PreToolUse:
-    - matcher: "Bash"
+    - matcher: 'Bash'
       hooks:
         - type: command
-          command: "./scripts/validate-command.sh"
+          command: './scripts/validate-command.sh'
   PostToolUse:
-    - matcher: "Edit|Write"
+    - matcher: 'Edit|Write'
       hooks:
         - type: command
-          command: "./scripts/run-linter.sh"
+          command: './scripts/run-linter.sh'
 ```
 
 ### Environment Variables in Hooks
 
-| Variable | Description |
-| --- | --- |
-| `CLAUDE_PROJECT_DIR` | Project root directory |
-| `CLAUDE_PLUGIN_ROOT` | Plugin installation directory |
-| `CLAUDE_PLUGIN_DATA` | Plugin persistent data directory |
-| `CLAUDE_ENV_FILE` | Environment variable persistence file |
-| `CLAUDE_CODE_REMOTE` | `"true"` on web, unset locally |
+| Variable             | Description                           |
+| -------------------- | ------------------------------------- |
+| `CLAUDE_PROJECT_DIR` | Project root directory                |
+| `CLAUDE_PLUGIN_ROOT` | Plugin installation directory         |
+| `CLAUDE_PLUGIN_DATA` | Plugin persistent data directory      |
+| `CLAUDE_ENV_FILE`    | Environment variable persistence file |
+| `CLAUDE_CODE_REMOTE` | `"true"` on web, unset locally        |
 
 ---
 
@@ -488,11 +508,11 @@ hooks:
 
 ### Scopes
 
-| Scope | Storage Path | Use Case |
-| --- | --- | --- |
-| `user` | `~/.claude/agent-memory/<agent-name>/` | Cross-project knowledge |
-| `project` | `.claude/agent-memory/<agent-name>/` | VCS-shareable, **recommended default** |
-| `local` | `.claude/agent-memory-local/<agent-name>/` | Project-specific, VCS-excluded |
+| Scope     | Storage Path                               | Use Case                               |
+| --------- | ------------------------------------------ | -------------------------------------- |
+| `user`    | `~/.claude/agent-memory/<agent-name>/`     | Cross-project knowledge                |
+| `project` | `.claude/agent-memory/<agent-name>/`       | VCS-shareable, **recommended default** |
+| `local`   | `.claude/agent-memory-local/<agent-name>/` | Project-specific, VCS-excluded         |
 
 ### Behavior When Enabled
 
@@ -526,11 +546,11 @@ Memory content here.
 
 ### Model Capabilities
 
-| Model | Context | Max Output | Best For |
-| --- | --- | --- | --- |
-| `haiku` | 200K | 8K | Fast lookups, simple scans, high-volume tasks |
-| `sonnet` | 200K | 16K | Standard implementation, reviews, balanced work |
-| `opus` | 1M | 64-128K | Architecture, deep analysis, complex reasoning |
+| Model    | Context | Max Output | Best For                                        |
+| -------- | ------- | ---------- | ----------------------------------------------- |
+| `haiku`  | 200K    | 8K         | Fast lookups, simple scans, high-volume tasks   |
+| `sonnet` | 200K    | 16K        | Standard implementation, reviews, balanced work |
+| `opus`   | 1M      | 64-128K    | Architecture, deep analysis, complex reasoning  |
 
 ---
 
@@ -567,14 +587,15 @@ References servers configured in the parent's settings.
 mcpServers:
   - name: custom-server
     command: node
-    args: ["./mcp-server.js"]
+    args: ['./mcp-server.js']
     env:
-      API_KEY: "${API_KEY}"
+      API_KEY: '${API_KEY}'
 ```
 
 ### MCP Tool Naming
 
 MCP tools follow the pattern `mcp__<server-name>__<tool-name>`:
+
 ```yaml
 tools: Read, Grep, mcp__database__query, mcp__database__list_tables
 ```
@@ -585,13 +606,13 @@ tools: Read, Grep, mcp__database__query, mcp__database__list_tables
 
 ### Agent File Resolution
 
-| Priority | Location | Scope | Notes |
-| --- | --- | --- | --- |
-| 1 (highest) | Managed settings | Organization-wide | MDM/managed deployment |
-| 2 | `--agents` CLI flag | Current session | JSON format |
-| 3 | `.claude/agents/` | Current project | Interactive or manual |
-| 4 | `~/.claude/agents/` | All projects | Interactive or manual |
-| 5 (lowest) | Plugin `agents/` | Where plugin enabled | Restricted fields |
+| Priority    | Location            | Scope                | Notes                  |
+| ----------- | ------------------- | -------------------- | ---------------------- |
+| 1 (highest) | Managed settings    | Organization-wide    | MDM/managed deployment |
+| 2           | `--agents` CLI flag | Current session      | JSON format            |
+| 3           | `.claude/agents/`   | Current project      | Interactive or manual  |
+| 4           | `~/.claude/agents/` | All projects         | Interactive or manual  |
+| 5 (lowest)  | Plugin `agents/`    | Where plugin enabled | Restricted fields      |
 
 Same-name agents: higher priority wins. `--add-dir` directories are NOT searched for agents.
 
@@ -653,12 +674,12 @@ Subagent definitions from any scope (project, user, plugin, CLI) are also availa
 
 ### Foreground vs Background
 
-| Aspect | Foreground | Background |
-| --- | --- | --- |
-| Blocks parent | Yes | No |
-| User prompts | Forwarded to user | Auto-denied |
+| Aspect             | Foreground        | Background                   |
+| ------------------ | ----------------- | ---------------------------- |
+| Blocks parent      | Yes               | No                           |
+| User prompts       | Forwarded to user | Auto-denied                  |
 | Permission prompts | Forwarded to user | Pre-requested or auto-denied |
-| Switching | — | Ctrl+B to toggle |
+| Switching          | —                 | Ctrl+B to toggle             |
 
 ### Transcript Storage
 
@@ -689,13 +710,13 @@ Subagent definitions from any scope (project, user, plugin, CLI) are also availa
 
 ### Common Validation Failures
 
-| Issue | Fix |
-| --- | --- |
-| Name contains uppercase | Convert to lowercase hyphen-case |
-| Description too vague | Add specific trigger conditions and context |
-| Unknown tool name | Check Section 2 catalog; verify MCP tool format |
-| Invalid model value | Use `sonnet`, `opus`, `haiku`, or `inherit` |
-| Hook event not recognized | Check Section 4 event table |
+| Issue                     | Fix                                             |
+| ------------------------- | ----------------------------------------------- |
+| Name contains uppercase   | Convert to lowercase hyphen-case                |
+| Description too vague     | Add specific trigger conditions and context     |
+| Unknown tool name         | Check Section 2 catalog; verify MCP tool format |
+| Invalid model value       | Use `sonnet`, `opus`, `haiku`, or `inherit`     |
+| Hook event not recognized | Check Section 4 event table                     |
 
 ---
 
@@ -708,7 +729,7 @@ Phase 1: Gather requirements → purpose, scope, constraints
 Phase 2: Design persona → role, judgment criteria, boundaries, failure modes
          (Load knowledge/persona-crafting.md for guidance)
 Phase 3: Separate concerns → keep perspective in agent; extract reusable procedures into skills
-         (See knowledge/persona-crafting.md Section 6 and knowledge/design-patterns.md Pattern 10)
+         (See knowledge/persona-crafting.md Section 6)
 Phase 4: Select template → match to templates/
 Phase 5: Configure frontmatter → set all relevant fields
 Phase 6: Write system prompt → build focused instructions

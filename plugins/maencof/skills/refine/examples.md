@@ -3,34 +3,39 @@
 ## Example 1: Vague Feature Request
 
 ### User Input
+
 ```
-/recursive-requirement-refine Make a good README for my project
+/maencof:refine Make a good README for my project
 ```
 
 ### Phase 1 — Analysis
-| Dimension | Status |
-|-----------|--------|
-| Goal | README generation — defined but underspecified |
-| Context | Unknown project type, audience, tech stack |
-| Constraints | No format/length/style specified |
-| Immutable Objects | None detected |
+
+| Dimension         | Status                                         |
+| ----------------- | ---------------------------------------------- |
+| Goal              | README generation — defined but underspecified |
+| Context           | Unknown project type, audience, tech stack     |
+| Constraints       | No format/length/style specified               |
+| Immutable Objects | None detected                                  |
 
 ### Phase 2 — Inquiry Loop
 
 **Q1 (Goal specificity):**
+
 > This README is for: (a) an open-source library seeking contributors, (b) an internal tool for team onboarding, or (c) a portfolio project showcasing your work?
 
-*User: (a) open-source library*
+_User: (a) open-source library_
 
 **Q2 (Context):**
+
 > What does the library do in one sentence? And what language/framework is it built with?
 
-*User: It's a TypeScript utility for parsing CLI arguments. Built with Node.js.*
+_User: It's a TypeScript utility for parsing CLI arguments. Built with Node.js._
 
 **Q3 (Constraints):**
+
 > Should the README include: (a) just usage basics (install + quick start), (b) full API reference, or (c) usage basics + contributing guide?
 
-*User: (c)*
+_User: (c)_
 
 ### Phase 3 — Output
 
@@ -64,55 +69,66 @@ Style: concise, scannable, developer-friendly. Use code blocks for all examples.
 ## Example 2: Input with Immutable Objects
 
 ### User Input
+
 ```
-/recursive-requirement-refine Improve the prompt that generates PRs via the /pr command. It must reference the ./src/utils/pr-generator.ts file.
+/maencof:refine Improve the prompt that generates PRs via the /pr command. It must reference the ./src/utils/pr-generator.ts file.
 ```
 
 ### Phase 1 — Analysis
-| Dimension | Status |
-|-----------|--------|
-| Goal | Improve a prompt that generates PRs via `/pr` command |
-| Context | Partially defined — references a specific file |
-| Constraints | Not specified |
-| Immutable Objects | `/pr`, `./src/utils/pr-generator.ts` |
+
+| Dimension         | Status                                                |
+| ----------------- | ----------------------------------------------------- |
+| Goal              | Improve a prompt that generates PRs via `/pr` command |
+| Context           | Partially defined — references a specific file        |
+| Constraints       | Not specified                                         |
+| Immutable Objects | `/pr`, `./src/utils/pr-generator.ts`                  |
 
 ### Phase 2 — Inquiry Loop
 
 **Q1 (Goal specificity):**
+
 > What is lacking in the current `/pr` prompt? (a) generated PR descriptions are too brief, (b) commit categorization is inaccurate, (c) it doesn't follow a specific format/convention?
 
-*User: (a) and (c). It must follow our team's PR template.*
+_User: (a) and (c). It must follow our team's PR template._
 
 **Q2 (Constraints):**
+
 > What are the required sections of your team's PR template? (e.g., Summary, Changes, Test Plan, etc.)
 
-*User: Summary, Changes (bullet), Breaking Changes, Test Plan*
+_User: Summary, Changes (bullet), Breaking Changes, Test Plan_
 
 ### Phase 3 — Output
 
 ```markdown
 ---
+
 ## Refined Prompt
+
 When generating a Pull Request via the `/pr` command, follow these rules.
 
 Reference file: `./src/utils/pr-generator.ts`
 
 1. Analyze the git diff and commit history to identify the changes.
 2. Generate the PR body using the following template:
-
 ```
+
 ## Summary
+
 (Describe the purpose and background of the change in 2-3 sentences)
 
 ## Changes
+
 - (List concrete changes as bullet points)
 - (Describe major changes together with the file name)
 
 ## Breaking Changes
+
 - (Specify any backward-incompatible changes; write "None" if there are none)
 
 ## Test Plan
+
 - (Test method or verification plan)
+
 ```
 
 3. Summary focuses on "why" the change was made. Changes focus on "what" was changed.
@@ -130,17 +146,19 @@ Reference file: `./src/utils/pr-generator.ts`
 ## Example 3: Fast Exit (Well-Defined Input)
 
 ### User Input
+
 ```
-/recursive-requirement-refine Write a TypeScript function that validates email addresses using regex. Return boolean. No external deps. Add JSDoc.
+/maencof:refine Write a TypeScript function that validates email addresses using regex. Return boolean. No external deps. Add JSDoc.
 ```
 
 ### Phase 1 — Analysis
-| Dimension | Status |
-|-----------|--------|
-| Goal | Email validation function — clearly defined |
-| Context | TypeScript, no dependencies |
-| Constraints | Regex-based, boolean return, JSDoc required |
-| Immutable Objects | None |
+
+| Dimension         | Status                                      |
+| ----------------- | ------------------------------------------- |
+| Goal              | Email validation function — clearly defined |
+| Context           | TypeScript, no dependencies                 |
+| Constraints       | Regex-based, boolean return, JSDoc required |
+| Immutable Objects | None                                        |
 
 **All dimensions sufficiently defined → Skip Phase 2, proceed to Phase 3.**
 
@@ -172,18 +190,21 @@ Export the function as a named export.
 ## Example 4: User Exits Early
 
 ### User Input
+
 ```
-/recursive-requirement-refine I want to create API documentation
+/maencof:refine I want to create API documentation
 ```
 
 ### Phase 2 — Inquiry Loop
 
 **Q1:**
+
 > What kind of API documentation? (a) REST API endpoint reference, (b) SDK/library usage guide, (c) internal team API spec?
 
-*User: Auto*
+_User: Auto_
 
 **→ User signaled early exit. Proceed with reasonable defaults.**
 
 ### Phase 3 — Output
-*(Generated with explicit assumptions noted in Logic & Strategy section)*
+
+_(Generated with explicit assumptions noted in Logic & Strategy section)_

@@ -13,11 +13,13 @@ A subagent's system prompt (the markdown body after YAML frontmatter) is its ent
 Open with a clear identity statement that establishes expertise and scope.
 
 **Good:**
+
 ```
 You are a security-focused code reviewer specializing in Node.js backend applications. Your expertise covers OWASP Top 10 vulnerabilities, authentication flows, and input validation patterns.
 ```
 
 **Bad:**
+
 ```
 You are a helpful assistant that reviews code.
 ```
@@ -64,7 +66,6 @@ For each finding, provide:
 - Vulnerability type (CWE classification)
 - Severity: Critical / High / Medium / Low
 - Concrete fix with code example
-- Reference to relevant OWASP guideline
 ```
 
 ### 5. Decision-Making Guidance
@@ -117,6 +118,7 @@ An agent's system prompt should define WHO it is — its perspective, judgment c
 **Litmus test:** If two agents with different roles would follow a procedure identically, that procedure belongs in a skill.
 
 **What stays in the agent prompt (perspective):**
+
 - Role identity and expertise domain
 - Value priorities and tradeoff resolution rules
 - Failure modes specific to this agent's judgment
@@ -124,11 +126,13 @@ An agent's system prompt should define WHO it is — its perspective, judgment c
 - Boundaries and handoff rules
 
 **What moves to a skill (behavior):**
+
 - Step-by-step workflows reused across agents (e.g., git commit conventions, linting procedures)
 - Output format templates shared by multiple agents
 - Domain reference data (API catalogs, style guides)
 
 **Before (monolithic):**
+
 ```yaml
 ---
 name: api-reviewer
@@ -138,15 +142,14 @@ You are an API reviewer focused on REST best practices.
 
 Review process:
 1. Check naming conventions...
-2. Validate response formats...
 
 Git workflow:
 1. Stage changed files...
 2. Write conventional commit message...
-3. Run pre-commit hooks...
 ```
 
 **After (separated):**
+
 ```yaml
 ---
 name: api-reviewer
@@ -171,94 +174,6 @@ inconsistency compounds as the API grows.
 
 The git workflow moved to a skill. The agent kept its judgment, values, and failure modes — the parts that make it think like an API reviewer.
 
-## Persona Patterns by Agent Type
-
-### Read-Only Analyst
-
-Focus: observation, analysis, reporting. No modifications.
-
-```
-You are a [DOMAIN] analyst. Examine the codebase and produce findings without making changes.
-
-Your analysis process:
-1. [Systematic scan step]
-2. [Pattern recognition step]
-3. [Report generation step]
-
-Report format:
-- [Structured output specification]
-```
-
-Key traits: systematic process, structured output, no action verbs (fix, change, update).
-
-### Implementation Specialist
-
-Focus: executing specific changes following clear patterns.
-
-```
-You are a [DOMAIN] implementation specialist. Apply targeted changes following established patterns.
-
-Before making changes:
-1. Read existing code to understand conventions
-2. Identify all files requiring modification
-3. Plan changes to maintain consistency
-
-When implementing:
-- Follow existing code style exactly
-- Make minimal changes — do not refactor surrounding code
-- Verify each change compiles/passes before moving to the next
-
-After completion:
-- List all modified files
-- Summarize what changed and why
-```
-
-Key traits: explicit pre/post steps, minimal change philosophy, verification loop.
-
-### Diagnostic Debugger
-
-Focus: root cause analysis with minimal, targeted fixes.
-
-```
-You are a debugging specialist for [DOMAIN]. Diagnose issues by tracing symptoms to root causes.
-
-Diagnostic process:
-1. Reproduce or confirm the reported symptom
-2. Form hypotheses based on error patterns
-3. Gather evidence — read logs, trace call paths, check state
-4. Narrow to root cause through elimination
-5. Propose minimal fix addressing the root cause
-6. Verify fix resolves the symptom without regressions
-
-Important: Fix the root cause, not the symptom. If multiple issues exist, address them separately.
-```
-
-Key traits: hypothesis-driven, evidence-based, minimal fix scope.
-
-### Orchestrator / Coordinator
-
-Focus: planning and delegating work across files or systems.
-
-```
-You are a task coordinator for [DOMAIN]. Break complex requests into actionable steps and execute them systematically.
-
-Planning phase:
-1. Analyze the full scope of the request
-2. Identify dependencies between steps
-3. Determine optimal execution order
-
-Execution phase:
-- Complete each step fully before proceeding
-- Verify intermediate results
-- Adapt plan if unexpected issues arise
-
-Reporting:
-- Track completed vs remaining steps
-- Flag blockers immediately
-```
-
-Key traits: planning before execution, dependency awareness, progress tracking.
-
 ## Writing Tips
 
 ### Teach the "Why"
@@ -266,11 +181,13 @@ Key traits: planning before execution, dependency awareness, progress tracking.
 Instead of bare rules, explain reasoning. This helps Claude handle edge cases.
 
 **Rule only:**
+
 ```
 Never use SELECT * in queries.
 ```
 
 **With reasoning:**
+
 ```
 Avoid SELECT * in queries — it couples code to schema changes, increases data transfer, and can expose sensitive columns. Use explicit column lists matching the consuming code's needs.
 ```
@@ -286,42 +203,19 @@ XML tags create clear semantic boundaries in long prompts.
 - Maximum 3 files modified per task
 - No changes to shared utility functions without explicit approval
 </constraints>
-
-<examples>
-<good>
-Clear function name: `calculateMonthlyRevenue(orders: Order[])`
-</good>
-<bad>
-Vague function name: `process(data: any)`
-</bad>
-</examples>
-```
-
-### Include Concrete Examples
-
-Show, don't just tell. Examples anchor abstract instructions.
-
-```
-When writing commit messages, follow this pattern:
-
-Good: "Fix race condition in WebSocket reconnection by adding mutex lock"
-Bad: "Fixed bug"
-Bad: "Update websocket.ts"
 ```
 
 ### Calibrate Verbosity to Model
 
-| Model | Prompt Style |
-|-------|-------------|
-| `opus` | Concise principles — it infers details |
-| `sonnet` | Balanced — explicit workflow with brief rationale |
-| `haiku` | Very explicit — step-by-step with examples for each |
+| Model    | Prompt Style                                        |
+| -------- | --------------------------------------------------- |
+| `opus`   | Concise principles — it infers details              |
+| `sonnet` | Balanced — explicit workflow with brief rationale   |
+| `haiku`  | Very explicit — step-by-step with examples for each |
 
 ### Keep Prompts Focused
 
-A 200-word focused prompt outperforms a 2000-word unfocused one. Every sentence should either define a behavior, set a boundary, or provide an example.
-
-Remove filler phrases: "It would be great if...", "Please try to...", "You should consider...". Use direct imperatives.
+A 200-word focused prompt outperforms a 2000-word unfocused one. Every sentence should either define a behavior, set a boundary, or provide an example. Remove filler phrases: "It would be great if...", "Please try to...". Use direct imperatives.
 
 ## Anti-Patterns
 
@@ -341,14 +235,6 @@ Code should be reviewed and issues should be identified and reported.
 
 Problem: who does what? Use active voice with clear agent actions.
 
-### The Conditional Maze
-
-```
-If the file is TypeScript and uses React and has more than 100 lines and imports from a shared module, then check for...
-```
-
-Problem: deeply nested conditions create confusion. Use structured categories instead.
-
 ### The Copy-Paste Persona
 
 Duplicating the same instructions across multiple subagents. Instead, use shared skills injection (`skills` field) for common behaviors and keep each persona unique to its role.
@@ -362,10 +248,8 @@ Before finalizing a persona:
 - [ ] Boundaries are defined (what NOT to do)
 - [ ] Workflow has numbered steps
 - [ ] Output format is specified
-- [ ] At least one concrete example is included
 - [ ] No filler phrases or passive voice
 - [ ] Prompt length matches model capability
-- [ ] Domain terminology is accurate
 - [ ] No duplicate instructions (use skills for shared behavior)
 - [ ] Decision-making criteria defined (not just procedural steps)
 - [ ] Value priorities declared for conflict resolution

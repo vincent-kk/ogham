@@ -1,9 +1,9 @@
 ---
 name: checkup
 user_invocable: true
-description: "[maencof:checkup] Runs 7 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, structural inconsistencies, and auto-insight system health, then provides prioritized auto-fix suggestions. Use --quick for a lightweight read-only status check that short-circuits to mcp_t_kg_status only (absorbs the former maencof-diagnose skill)."
-argument-hint: "[--fix] [--quick] [--verbose] [--check <item>]"
-version: "1.1.0"
+description: '[maencof:checkup] Runs 7 comprehensive diagnostic checks across the knowledge vault covering broken links, orphan nodes, frontmatter errors, structural inconsistencies, and auto-insight system health, then provides prioritized auto-fix suggestions. Use --quick for a lightweight read-only status check that short-circuits to mcp_t_kg_status only (absorbs the former maencof-diagnose skill).'
+argument-hint: '[--fix] [--quick] [--verbose] [--check <item>]'
+version: '1.1.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: checkup
@@ -25,7 +25,6 @@ Also supports a lightweight `--quick` mode that short-circuits to a single
 - Regular vault maintenance
 - Quick lightweight index status check (`--quick`) — index freshness, stale node ratio, sub-layer distribution
 - Pre-flight status check before search/exploration (`--quick`)
-- Simple pre-check before running the full `/maencof:checkup` (`--quick`)
 
 ## Prerequisites
 
@@ -80,13 +79,13 @@ When `--quick` is specified, checkup short-circuits to a lightweight index statu
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_kg_status` | Index status, stale/orphan nodes (D1, D2); sole tool in `--quick` mode |
-| `mcp_t_read` | Frontmatter validation (D4, D6) |
-| `mcp_t_update` | Auto-fix Frontmatter (D4, D6) |
-| `mcp_t_kg_navigate` | Verify link validity, detect broken links (D3) |
-| `mcp_t_kg_search` | Tag-based search for duplicate detection (D5) |
+| Tool                | Purpose                                                                |
+| ------------------- | ---------------------------------------------------------------------- |
+| `mcp_t_kg_status`   | Index status, stale/orphan nodes (D1, D2); sole tool in `--quick` mode |
+| `mcp_t_read`        | Frontmatter validation (D4, D6)                                        |
+| `mcp_t_update`      | Auto-fix Frontmatter (D4, D6)                                          |
+| `mcp_t_kg_navigate` | Verify link validity, detect broken links (D3)                         |
+| `mcp_t_kg_search`   | Tag-based search for duplicate detection (D5)                          |
 
 ## Options
 
@@ -94,12 +93,12 @@ When `--quick` is specified, checkup short-circuits to a lightweight index statu
 /maencof:checkup [--fix] [--quick] [--verbose] [--check <item>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--fix` | false | Run auto-fix (after confirmation). Ignored in `--quick` mode. |
-| `--quick` | false | Short-circuit to `mcp_t_kg_status` only and render a compact health report (absorbs the former `maencof-diagnose` skill) |
-| `--verbose` | false | In `--quick` mode, include stale node paths, Layer distribution, and sub-layer consistency warnings |
-| `--check` | all | Run only specific diagnostic items (full mode only) |
+| Option      | Default | Description                                                                                                              |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `--fix`     | false   | Run auto-fix (after confirmation). Ignored in `--quick` mode.                                                            |
+| `--quick`   | false   | Short-circuit to `mcp_t_kg_status` only and render a compact health report (absorbs the former `maencof-diagnose` skill) |
+| `--verbose` | false   | In `--quick` mode, include stale node paths, Layer distribution, and sub-layer consistency warnings                      |
+| `--check`   | all     | Run only specific diagnostic items (full mode only)                                                                      |
 
 ## Usage Examples
 
@@ -110,12 +109,6 @@ When `--quick` is specified, checkup short-circuits to a lightweight index statu
 /maencof:checkup --quick
 /maencof:checkup --quick --verbose
 ```
-
-## Migration Note
-
-The former `maencof-diagnose` skill has been merged into this skill.
-Replace any prior `maencof-diagnose` invocation with `/maencof:checkup --quick`,
-and `maencof-diagnose --verbose` with `/maencof:checkup --quick --verbose`.
 
 ## Resources
 

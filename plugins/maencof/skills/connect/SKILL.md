@@ -1,9 +1,9 @@
 ---
 name: connect
 user_invocable: true
-description: "[maencof:connect] Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json."
-argument-hint: "[list|add|remove|disable|enable] [sourceId]"
-version: "1.0.0"
+description: '[maencof:connect] Registers external data sources (GitHub, Jira, Slack) for maencof ingestion by configuring connection details, auth tokens, and schedules in .maencof-meta/data-sources.json.'
+argument-hint: '[list|add|remove|disable|enable] [sourceId]'
+version: '1.0.0'
 complexity: medium
 context_layers: []
 orchestrator: connect skill
@@ -13,9 +13,10 @@ plugin: maencof
 # connect — Data Source Registration/Management
 
 Connects external data sources (GitHub, Jira, Slack, etc.) to maencof and configures ingestion schedules.
-This skill can run the data source registration step of `/maencof:setup` independently.
+Runs standalone or as part of the `/maencof:bridge` pipeline.
 
 > **Area distinction**:
+>
 > - **Execution Area** (what this skill modifies): `{CWD}/.maencof-meta/data-sources.json`
 >
 > This skill modifies the Execution Area only.
@@ -34,14 +35,14 @@ This skill can run the data source registration step of `/maencof:setup` indepen
 
 ## Supported Data Sources
 
-| Source | MCP Tool | Collected Content |
-|--------|---------|------------------|
-| GitHub | `mcp__github__*` | Issues, PRs, Discussions, code changes |
-| Jira | `mcp__jira__*` | Issues, sprints, projects |
-| Slack | `mcp__slack__*` | Channel messages, threads |
-| Notion | `mcp__notion__*` | Pages, databases |
-| Local directory | filesystem direct | Markdown, text files |
-| RSS/Web | HTTP | Blogs, news feeds |
+| Source          | MCP Tool          | Collected Content                      |
+| --------------- | ----------------- | -------------------------------------- |
+| GitHub          | `mcp__github__*`  | Issues, PRs, Discussions, code changes |
+| Jira            | `mcp__jira__*`    | Issues, sprints, projects              |
+| Slack           | `mcp__slack__*`   | Channel messages, threads              |
+| Notion          | `mcp__notion__*`  | Pages, databases                       |
+| Local directory | filesystem direct | Markdown, text files                   |
+| RSS/Web         | HTTP              | Blogs, news feeds                      |
 
 ## Workflow
 
@@ -58,102 +59,20 @@ This skill can run the data source registration step of `/maencof:setup` indepen
 
 ### Interactive Mode Flow
 
-#### Step 1 — Display Current Status
+1. **Step 1 — Display current status**: read `.maencof-meta/data-sources.json` and show currently connected sources with a top-level action menu.
+2. **Step 2 — Select source**: choose one or more sources to connect (GitHub, Jira, Slack, Notion, Local directory, RSS/Web).
+3. **Step 3 — Configure ingestion frequency**: pick the ingestion frequency for each selected source (every session, daily, weekly, manual).
+4. **Step 4 — Source-specific configuration**: collect per-source settings (e.g., GitHub repo/collect/status filter, Local directory path/pattern/recursive).
+5. **Step 5 — Save data-sources.json**: create/update `.maencof-meta/data-sources.json` with the assembled source entries.
+6. **Step 6 — Completion guide**: confirm connected sources and point to next steps (`/maencof:mcp-setup`, `/maencof:ingest`).
 
-Read `.maencof-meta/data-sources.json` and display currently connected sources.
+> Load **reference.md** for interactive prompt templates, source-specific configuration, the data-sources.json schema, and completion guides.
 
-```
-Currently connected data sources:
-  [active] GitHub (every session)
-  [inactive] Slack
+## Resources
 
-What would you like to do?
-  1. Add a new source
-  2. Modify an existing source
-  3. Disable/remove a source
-  4. Done
-```
-
-#### Step 2 — Select Source
-
-```
-Which source would you like to connect? (multiple selection allowed)
-  [ ] GitHub (Issues, PRs)
-  [ ] Jira
-  [ ] Slack
-  [ ] Notion
-  [ ] Local directory
-  [ ] RSS/Web
-  [ ] None (configure later)
-```
-
-#### Step 3 — Configure Ingestion Frequency
-
-For each selected source:
-
-```
-Select the ingestion frequency for {source name}:
-  1. Every session start (default)
-  2. Once a day
-  3. Once a week
-  4. Manual only
-```
-
-#### Step 4 — Source-specific Configuration
-
-**GitHub**:
-```
-GitHub repository settings:
-- Repository: {owner}/{repo} (e.g., vincent-kk/ogham)
-- Collect: [x] Issues  [x] PRs  [ ] Discussions
-- Status filter: [x] open  [ ] closed  [ ] all
-```
-
-**Local directory**:
-```
-Local directory settings:
-- Path: {absolute path or CWD-relative path}
-- File pattern: *.md, *.txt (default)
-- Recursive: [Yes/No]
-```
-
-#### Step 5 — Save data-sources.json
-
-Create/update `.maencof-meta/data-sources.json`.
-
-```json
-{
-  "sources": [
-    {
-      "id": "github-main",
-      "type": "github",
-      "enabled": true,
-      "schedule": "session",
-      "config": {
-        "repo": "vincent-kk/ogham",
-        "collect": ["issues", "prs"]
-      },
-      "last_collected": null,
-      "created_at": "2026-02-28T10:00:00Z"
-    }
-  ],
-  "updated_at": "2026-02-28T10:00:00Z"
-}
-```
-
-#### Step 6 — Completion Guide
-
-```
-Data source configuration complete!
-
-Connected sources:
-  - GitHub (every session) — github-main
-  - Local ./docs/ (manual)
-
-Next steps:
-  - If external MCP tools are needed: `/maencof:mcp-setup`
-  - To ingest now: `/maencof:ingest`
-```
+| File           | Content                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `reference.md` | Interactive prompt templates (Step 1–6), GitHub/Local source-specific config, data-sources.json schema, completion guide |
 
 ## Available MCP Tools
 
@@ -161,11 +80,12 @@ This skill does not use maencof MCP tools directly. It reads and writes `.maenco
 
 ## File Scope (Execution Area only)
 
-| File | Location | Operation |
-|------|----------|-----------|
+| File                | Location               | Operation     |
+| ------------------- | ---------------------- | ------------- |
 | `data-sources.json` | `{CWD}/.maencof-meta/` | create/update |
 
 **Files that are never modified**:
+
 - `{CWD}/.mcp.json` -> handled by `/maencof:mcp-setup`
 - `{CWD}/.claude/settings.json` -> handled by `/maencof:mcp-setup`
 - `{CWD}/.claude/settings.local.json` -> permanently off-limits (user personal settings)
@@ -177,13 +97,13 @@ This skill does not use maencof MCP tools directly. It reads and writes `.maenco
 /maencof:connect [mode] [sourceId]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `list` | Display current source list |
-| `add` | Add a new source (interactive) |
-| `remove <id>` | Remove a source |
-| `disable <id>` | Disable a source |
-| `enable <id>` | Enable a source |
+| Option         | Description                    |
+| -------------- | ------------------------------ |
+| `list`         | Display current source list    |
+| `add`          | Add a new source (interactive) |
+| `remove <id>`  | Remove a source                |
+| `disable <id>` | Disable a source               |
+| `enable <id>`  | Enable a source                |
 
 ## Error Handling
 

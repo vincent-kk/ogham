@@ -36,6 +36,8 @@ Claude automatically invokes this skill when:
 
 **Override:** `--mode <default|divergent|review>` on the invocation bypasses heuristics.
 
+**Brainstorm seed intake (divergent mode):** When `think --mode divergent` is invoked downstream of `explore --for-brainstorm`, the invocation carries explore's 5-8 candidate seeds (each `title + path + 1-line summary`). Treat those seeds as the candidate-generation starting set — expand, recombine, and score them rather than synthesizing candidates from scratch. Without a seed list, generate the 5-8 candidates per Strategy D in `knowledge/tot-methodology.md`.
+
 ### Manual Invocation
 
 ```
@@ -132,10 +134,11 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 ## Output
 
-Two artifacts delivered together:
+Output is **mode-specific** — never emit a different mode's artifacts.
 
-1. **Evaluation Table** (Markdown) - Per-candidate score breakdown with totals and the selected winner marked
-2. **Decision Record** (YAML) - `selected_interpretation`, `alternatives` with fallback conditions, `lookahead`, and `backtrack_plan`
+- **default**: Evaluation Table (Markdown, per-candidate score breakdown with totals and the selected winner marked) + Decision Record YAML (`selected_interpretation`, `alternatives` with fallback conditions, `lookahead`, `backtrack_plan`)
+- **divergent**: Candidate list (5-8) + top-3 rationale, with the remaining candidates summarized; no winner-to-build is forced
+- **review**: Risk table (inverted scoring — higher = worse) + mitigation alternatives, minimum 3 risks, each paired with at least one alternative
 
 Full output templates and scored examples are in `reference.md`.
 
@@ -155,7 +158,7 @@ Full output templates and scored examples are in `reference.md`.
 | `knowledge/evaluation-criteria.md`      | Detailed scoring definitions, domain-specific weight adjustments        |
 | `knowledge/interpretation-templates.md` | Candidate template, evaluation markdown format, YAML output schema      |
 | `reference.md`                          | Full worked examples, standard output template, detailed error handling |
-| `examples.md`                           | Three scenario walkthroughs (single feature, ambiguous, architecture)   |
+| `examples.md`                           | Five scenario walkthroughs (3 default, 1 divergent, 1 review)           |
 
 ## Error Handling Summary
 

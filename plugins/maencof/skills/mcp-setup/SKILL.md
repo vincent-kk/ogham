@@ -1,9 +1,9 @@
 ---
 name: mcp-setup
 user_invocable: true
-description: "[maencof:mcp-setup] Installs and configures MCP servers for GitHub, Atlassian, Slack, or Notion by updating .mcp.json and .claude/settings.json. Runs standalone or as part of the maencof onboarding workflow."
-argument-hint: "[service to configure]"
-version: "1.0.0"
+description: '[maencof:mcp-setup] Installs and configures MCP servers for GitHub, Atlassian, Slack, or Notion by updating .mcp.json and .claude/settings.json. Runs standalone or as part of the `/maencof:bridge` pipeline.'
+argument-hint: '[service to configure]'
+version: '1.0.0'
 complexity: medium
 context_layers: []
 orchestrator: mcp-setup skill
@@ -13,15 +13,15 @@ plugin: maencof
 # mcp-setup — External MCP Server Setup
 
 Installs and configures MCP servers for external data sources (GitHub, Atlassian, Slack, Notion, etc.) in the current project.
-This skill can run the MCP setup step of `/maencof:setup` independently.
+Runs standalone or as part of the `/maencof:bridge` pipeline.
 
 > **Area distinction (important)**:
 >
-> | Area | Path | Modified by this skill |
-> |------|------|----------------------|
-> | **Execution Area** | `{CWD}/.mcp.json` | **yes** |
-> | **Execution Area** | `{CWD}/.claude/settings.json` | **yes** |
-> | **Execution Area** | `{CWD}/.claude/settings.local.json` | **never** |
+> | Area               | Path                                | Modified by this skill |
+> | ------------------ | ----------------------------------- | ---------------------- |
+> | **Execution Area** | `{CWD}/.mcp.json`                   | **yes**                |
+> | **Execution Area** | `{CWD}/.claude/settings.json`       | **yes**                |
+> | **Execution Area** | `{CWD}/.claude/settings.local.json` | **never**              |
 >
 > `{CWD}/.mcp.json` is the external MCP server registration file for the user project.
 
@@ -39,141 +39,42 @@ This skill can run the MCP setup step of `/maencof:setup` independently.
 
 ## Supported MCP Servers
 
-| Data source | MCP package | Install command |
-|-------------|------------|----------------|
-| GitHub | `@modelcontextprotocol/server-github` | `claude mcp add github` |
-| Atlassian (Jira/Confluence) | `atlassian-mcp` | `claude mcp add atlassian` |
-| Slack | `@modelcontextprotocol/server-slack` | `claude mcp add slack` |
-| Notion | `notion-mcp` | `claude mcp add notion` |
-| Linear | `linear-mcp` | `claude mcp add linear` |
+| Data source                 | MCP package                           | Install command            |
+| --------------------------- | ------------------------------------- | -------------------------- |
+| GitHub                      | `@modelcontextprotocol/server-github` | `claude mcp add github`    |
+| Atlassian (Jira/Confluence) | `atlassian-mcp`                       | `claude mcp add atlassian` |
+| Slack                       | `@modelcontextprotocol/server-slack`  | `claude mcp add slack`     |
+| Notion                      | `notion-mcp`                          | `claude mcp add notion`    |
+| Linear                      | `linear-mcp`                          | `claude mcp add linear`    |
+
+> The `claude mcp add` column is the equivalent Claude Code CLI shortcut; this skill performs the same change by editing `.mcp.json` directly (see reference.md Step 3).
 
 ## Workflow
 
-### Step 1 — Check Current Status
+1. **Check current status** — verify registered data sources and already-installed MCP servers
+2. **Select MCP servers** — choose which servers to install (or enter manually)
+3. **Modify Execution Area files** — update `{CWD}/.mcp.json` and `{CWD}/.claude/settings.json`
+4. **Collect API keys/tokens** — guide authentication via environment variables or direct input
+5. **Verify connection** — confirm MCP servers respond, with debugging guidance on failure
+6. **Completion guide** — report installed servers and next steps
 
-Verify registered data sources and already-installed MCP servers.
+> Load **reference.md** for status/selection prompt templates, the .mcp.json and settings.json JSON examples, token-collection guidance, and the non-developer guide.
 
-```
-Current status:
-  Data sources: GitHub (github-main), Slack
-  Installed MCP: (none)
+## Resources
 
-Required MCP servers:
-  - GitHub -> @modelcontextprotocol/server-github (not installed)
-  - Slack  -> @modelcontextprotocol/server-slack  (not installed)
-```
-
-### Step 2 — Select MCP Servers to Install
-
-```
-Which MCP servers would you like to install?
-  [x] @modelcontextprotocol/server-github (GitHub)
-  [x] @modelcontextprotocol/server-slack (Slack)
-  [ ] atlassian-mcp (Jira/Confluence)
-  [ ] notion-mcp (Notion)
-  [ ] Enter manually...
-```
-
-### Step 3 — Modify Execution Area Files
-
-For each selected MCP server:
-
-#### 3a. Update {CWD}/.mcp.json
-
-If a file already exists, preserve the existing content and only add new servers.
-
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      }
-    },
-    "slack": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-slack"],
-      "env": {
-        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
-      }
-    }
-  }
-}
-```
-
-#### 3b. Update {CWD}/.claude/settings.json
-
-Add the required permission settings.
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "mcp__github__*",
-      "mcp__slack__*"
-    ]
-  }
-}
-```
-
-> **Never modify**: `{CWD}/.claude/settings.local.json`
-> This file contains personal user settings that maencof will never modify.
-
-### Step 4 — Collect API Keys/Tokens
-
-Guide authentication information collection via environment variables or direct input.
-
-```
-GitHub authentication setup:
-
-GITHUB_TOKEN is required.
-
-How to set it:
-  1. Set as environment variable (recommended):
-     export GITHUB_TOKEN=ghp_xxxx
-  2. Add to .env file (must be gitignored):
-     GITHUB_TOKEN=ghp_xxxx
-
-Do not enter tokens directly in code.
-.mcp.json references environment variables as ${GITHUB_TOKEN}.
-```
-
-### Step 5 — Verify Connection
-
-Confirm that MCP servers respond correctly.
-
-```
-Verifying connections...
-  GitHub MCP: connected
-  Slack MCP:  failed (SLACK_BOT_TOKEN not set)
-```
-
-Provide debugging guidance on failure.
-
-### Step 6 — Completion Guide
-
-```
-MCP setup complete!
-
-Installed servers:
-  - GitHub MCP (@modelcontextprotocol/server-github)
-  - Slack MCP — SLACK_BOT_TOKEN setup required
-
-Next steps:
-  - Verify after setting token: `/maencof:mcp-setup --verify`
-  - Start data ingestion: `/maencof:ingest`
-```
+| File           | Content                                                                                                                                                                     |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reference.md` | Detailed Step 1–6 workflow, status/selection prompt templates, .mcp.json + settings.json JSON examples, token-collection guidance, non-developer guide, acceptance criteria |
 
 ## File Scope (Execution Area only)
 
-| File | Operation | Note |
-|------|-----------|------|
-| `{CWD}/.mcp.json` | create/update | preserve existing content |
+| File                          | Operation     | Note                      |
+| ----------------------------- | ------------- | ------------------------- |
+| `{CWD}/.mcp.json`             | create/update | preserve existing content |
 | `{CWD}/.claude/settings.json` | create/update | preserve existing content |
 
 **Files that are never modified**:
+
 - `{CWD}/.claude/settings.local.json` — permanently off-limits
 - `plugins/maencof/.mcp.json` — Plugin Area (maencof's own MCP server configuration)
 - All files under `plugins/maencof/` — Plugin Area
@@ -184,25 +85,11 @@ Next steps:
 /maencof:mcp-setup [options]
 ```
 
-| Option | Description |
-|--------|-------------|
-| `--verify` | Verify existing MCP server connection status only |
-| `--list` | List installed MCP servers |
-| `--remove <name>` | Remove a specific MCP server |
-
-## Guide for Non-developers
-
-This skill involves technical configuration. If the following concepts are unfamiliar,
-please ask for help:
-
-- MCP (Model Context Protocol): how Claude uses external services
-- API token: authentication key for external services
-- Environment variable: a secure way to store sensitive information
-
-```
-Say "Help me set up GitHub MCP" and
-you will be guided step by step.
-```
+| Option            | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `--verify`        | Verify existing MCP server connection status only |
+| `--list`          | List installed MCP servers                        |
+| `--remove <name>` | Remove a specific MCP server                      |
 
 ## Error Handling
 

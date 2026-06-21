@@ -1,9 +1,9 @@
 ---
 name: recall
 user_invocable: true
-description: "[maencof:recall] Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers."
-argument-hint: "<query> [--layer N] [--sub-layer NAME] [--summary] [--detail] [--limit N]"
-version: "1.0.0"
+description: '[maencof:recall] Searches the knowledge vault with a natural-language query using Spreading Activation, retrieving and ranking the most relevant documents across all five layers.'
+argument-hint: '<query> [--layer N] [--sub-layer NAME] [--summary] [--detail] [--limit N]'
+version: '1.0.0'
 complexity: simple
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: recall skill
@@ -49,7 +49,9 @@ Extract core keywords and intent from user input.
 
 ### Step 2 — Call kg_search
 
-Call the `mcp_t_kg_search` MCP tool to find seed nodes.
+Call the `mcp_t_kg_search` MCP tool to find seed nodes. The search reports index
+freshness: if no index exists, stop and guide the user to `/maencof:build`; if the
+index is stale, surface a brief warning and continue.
 
 ```
 mcp_t_kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
@@ -76,6 +78,7 @@ mcp_t_kg_context(query: search_query_string, token_budget=2000)
 ### Step 5 — Result Formatting
 
 **Summary mode (default)**:
+
 ```
 ## Search Results: "{query}"
 
@@ -91,6 +94,7 @@ For more detail: `/maencof:recall {query} --detail`
 ```
 
 **Detail mode (`--detail`)**:
+
 ```
 ## Search Results: "{query}"
 
@@ -108,11 +112,11 @@ For more detail: `/maencof:recall {query} --detail`
 
 ## MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_kg_search` | Keyword-based seed node search |
+| Tool                | Purpose                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| `mcp_t_kg_search`   | Keyword-based seed node search                                   |
 | `mcp_t_kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
-| `mcp_t_kg_context` | Assemble node context |
+| `mcp_t_kg_context`  | Assemble node context                                            |
 
 ## Options
 
@@ -120,13 +124,13 @@ For more detail: `/maencof:recall {query} --detail`
 /maencof:recall <query> [options]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--summary` | default | Summary mode (title + 1-2 line summary) |
-| `--detail` | — | Detail mode (full content excerpt) |
-| `--layer=N` | all | Search a specific Layer only (1-5) |
-| `--sub-layer=X` | none | Filter by sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
-| `--limit=N` | 10 | Maximum number of results |
+| Option          | Default | Description                                                                   |
+| --------------- | ------- | ----------------------------------------------------------------------------- |
+| `--summary`     | default | Summary mode (title + 1-2 line summary)                                       |
+| `--detail`      | —       | Detail mode (full content excerpt)                                            |
+| `--layer=N`     | all     | Search a specific Layer only (1-5)                                            |
+| `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
+| `--limit=N`     | 10      | Maximum number of results                                                     |
 
 ## Usage Examples
 

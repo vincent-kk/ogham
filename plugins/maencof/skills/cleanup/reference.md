@@ -59,7 +59,7 @@ Proceed anyway? (y/n) or use --force to skip this warning.
 After user confirmation:
 
 ```
-delete(path: target path, force: --force flag)
+mcp_t_delete(path: target path, force: --force flag)
 ```
 
 ### Step 6 — Completion Report
@@ -81,7 +81,7 @@ If backlinks were broken, list the affected documents.
 ### read submode
 
 ```
-claudemd_read()
+mcp_t_claudemd_read()
 ```
 
 Display the section content or "No maencof section found in CLAUDE.md."
@@ -91,7 +91,7 @@ Display the section content or "No maencof section found in CLAUDE.md."
 **Step 1** — Dry run first:
 
 ```
-claudemd_remove(dry_run: true)
+mcp_t_claudemd_remove(dry_run: true)
 ```
 
 Display what would be removed.
@@ -108,7 +108,7 @@ Proceed? (y/n)
 **Step 3** — Execute removal:
 
 ```
-claudemd_remove(dry_run: false)
+mcp_t_claudemd_remove(dry_run: false)
 ```
 
 Report success or failure.

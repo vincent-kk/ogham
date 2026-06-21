@@ -1,9 +1,9 @@
 ---
 name: manage
 user_invocable: true
-description: "[maencof:manage] Audits, enables, disables, or deletes maencof skills and agents. Reports usage frequency to identify obsolete entries and supports bulk lifecycle operations across the registry."
-argument-hint: "<list|report|disable|enable|delete|create> [name] [--skills|--agents|--all] [--days N] [--force] [--type skill|agent]"
-version: "1.0.0"
+description: '[maencof:manage] Audits, enables, disables, or deletes maencof skills and agents. Reports usage frequency to identify obsolete entries and supports bulk lifecycle operations across the registry.'
+argument-hint: '<list|report|disable|enable|delete|create> [name] [--skills|--agents|--all] [--days N] [--force] [--type skill|agent]'
+version: '1.0.0'
 complexity: medium
 context_layers: []
 orchestrator: manage skill
@@ -25,62 +25,65 @@ Supports usage frequency reporting based on usage-stats.json, as well as disable
 ## Modes
 
 ### list mode
+
 ```
 /maencof:manage list [--skills|--agents|--all]
 ```
+
 Display a list of all installed skills/agents and their activation status.
 
 ### report mode
+
 ```
 /maencof:manage report [--days <N>]
 ```
+
 Analyze usage-stats.json and generate a usage frequency report:
 
 ```markdown
 ## Skill/Agent Usage Report (last N days)
 
-| Name | Call count | Last used | Status |
-|------|-----------|-----------|--------|
-| explore | 12 | 2026-02-28 | active |
-| organize | 3 | 2026-02-20 | active |
-| ingest | 0 | — | disable recommended |
+| Name     | Call count | Last used  | Status              |
+| -------- | ---------- | ---------- | ------------------- |
+| explore  | 12         | 2026-02-28 | active              |
+| organize | 3          | 2026-02-20 | active              |
+| ingest   | 0          | —          | disable recommended |
 ```
 
 ### disable mode
+
 ```
 /maencof:manage disable <name>
 ```
+
 Disable a skill or agent.
 Registers it in disabled-registry.json to be skipped during plugin load.
 
-```typescript
-// Based on DisabledRegistryEntry type
-{
-  name: string,
-  disabledAt: string,
-  reason?: string,
-  disabledBy: 'user' | 'system'
-}
-```
-
 ### enable mode
+
 ```
 /maencof:manage enable <name>
 ```
+
 Re-enable a disabled skill/agent.
 
 ### delete mode
+
 ```
 /maencof:manage delete <name> [--force]
 ```
+
 Permanently delete a custom skill/agent.
 Built-in items cannot be deleted (use disable instead).
 
 ### create mode
+
 ```
 /maencof:manage create <name> --type <skill|agent>
 ```
+
 Generate a new custom skill/agent template:
+
 - Skill: create `{CWD}/.claude/skills/<name>/SKILL.md` (with default template)
 - Agent: create `{CWD}/.claude/agents/<name>.md` (with default template)
 
@@ -109,9 +112,9 @@ Generate a new custom skill/agent template:
 
 ## Available Tools
 
-| Tool | Purpose |
-|------|---------|
-| `Read` | Read `.maencof-meta/usage-stats.json`, `.maencof-meta/disabled-registry.json` |
+| Tool    | Purpose                                                                                                                                                                                                          |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Read`  | Read `.maencof-meta/usage-stats.json`, `.maencof-meta/disabled-registry.json`                                                                                                                                    |
 | `Write` | Write `.maencof-meta/disabled-registry.json` (disable/enable operations); create new skill/agent template files in the Execution Area (`{CWD}/.claude/skills/<name>/SKILL.md`, `{CWD}/.claude/agents/<name>.md`) |
 
 > Note: `usage-stats.json` and `disabled-registry.json` are metadata files in `.maencof-meta/`
@@ -128,15 +131,3 @@ Generate a new custom skill/agent template:
 - **Attempt to delete built-in skill/agent**: "Built-in items cannot be deleted. Use `disable` instead."
 - **Name not found**: "No skill or agent named '{name}' found."
 - **Write failure during create mode**: report error; no partial file created
-
-## ManageResult Type
-
-```typescript
-// Based on src/types/manage.ts
-{
-  mode: ManageMode,
-  success: boolean,
-  message: string,
-  affected?: string[]
-}
-```
