@@ -10,7 +10,7 @@ import { isSessionRecapDisabled } from '../../core/dialogueConfig/index.js';
 import { appendErrorLogSafe } from '../../core/errorLog/index.js';
 import { readPendingNotification } from '../../core/insightStats/index.js';
 import { recordSessionEnd } from '../../core/sessionStore/index.js';
-import { buildDailyRollup } from '../../core/workIndex/index.js';
+import { buildDailyDigest } from '../../core/workIndex/index.js';
 import {
   removeSessionFiles,
   removeTurnContext,
@@ -49,15 +49,15 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   }
 
   // 1. Finalize the session in the per-day session store (JSON, keyed by session_id),
-  //    then rebuild that day's work-history rollup. recordSessionEnd returns the date
-  //    it wrote to (handles midnight-crossover), so the rollup targets the right day.
+  //    then rebuild that day's work-history digest. recordSessionEnd returns the date
+  //    it wrote to (handles midnight-crossover), so the digest targets the right day.
   try {
     const date = recordSessionEnd(cwd, {
       sessionId: input.session_id ?? 'unknown',
       skillsUsed: input.skills_used ?? [],
       filesModified: input.files_modified ?? [],
     });
-    buildDailyRollup(cwd, date);
+    buildDailyDigest(cwd, date);
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-end',

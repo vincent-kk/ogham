@@ -34,7 +34,7 @@ path 가 다음 prefix 중 하나로 시작하면 skip 한다:
 - `02_Derived/changelog/` — changelog 문서
 - `02_Derived/dailynotes/` — 볼트 측 파생 노트
 - `.maencof/` — 그래프 인덱스, stale-nodes 등
-- `.maencof-meta/` — 운영 메타데이터 (활동 로그·세션·rollup·config 등)
+- `.maencof-meta/` — 운영 메타데이터 (활동 로그·세션·digest·config 등)
 
 ### Graceful degradation
 

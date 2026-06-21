@@ -14,7 +14,7 @@ export function registerWorkHistoryTools(server: McpServer): void {
     'work_history',
     {
       description:
-        'Summarizes work over time from work-history rollups. Default: a period summary (sessions, active days, vault ops, top topics, layers) over the last N days or a from/to range. With `topic` or `layer`, returns when it was last worked on plus its full date history. Render the result to the user as a concise summary.',
+        'Summarizes work over time from work-history digests. Default: a period summary (sessions, active days, vault ops, top topics, layers) over the last N days or a from/to range. With `topic` or `layer`, returns when it was last worked on plus its full date history. Render the result to the user as a concise summary.',
       inputSchema: z.object({
         last_days: z
           .number()

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily rollup 기반으로 답한다.
+work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily digest 기반으로 답한다.
 기간 요약(기본) 또는 토픽/레이어 작업 이력 조회.
 
 ## Boundaries
@@ -20,7 +20,7 @@ work_history 읽기 도구. "그동안 무슨 작업을 했나"를 daily rollup 
 ### Never do
 
 - 파일 I/O 직접 수행 (core/ 위임)
-- daily rollup 생성/쓰기 (읽기 전용 — 생성은 SessionEnd 의 workIndex)
+- daily digest 생성/쓰기 (읽기 전용 — 생성은 SessionEnd 의 workIndex)
 
 ## Output Contract
 

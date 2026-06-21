@@ -95,7 +95,7 @@ export type {
 } from './session.js';
 
 export type {
-  DailyRollup,
+  DailyDigest,
   ReverseIndex,
   WorkPeriodSummary,
   WorkHistoryReadInput,

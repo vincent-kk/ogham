@@ -1,12 +1,12 @@
 /**
  * @file workHistory.ts
- * @description 작업 이력 타입 — daily rollup, 역색인, 기간 요약, work_history 도구 I/O.
+ * @description 작업 이력 타입 — daily digest, 역색인, 기간 요약, work_history 도구 I/O.
  *
  * per-session 레코드(SessionRecord)와 활동 로그(NDJSON)에서 파생되는 읽기 전용 집계 계층.
  */
 
-/** 일일 작업 롤업 — `work-index/daily/YYYY-MM-DD.json`. */
-export interface DailyRollup {
+/** 일일 작업 digest — `activity/digests/daily/YYYY-MM-DD.json`. */
+export interface DailyDigest {
   /** YYYY-MM-DD */
   date: string;
   /** 그날 세션 수 */
@@ -33,7 +33,7 @@ export interface ReverseIndex {
   index: Record<string, string[]>;
 }
 
-/** 기간 작업 요약 — daily rollup 합산 결과. */
+/** 기간 작업 요약 — daily digest 합산 결과. */
 export interface WorkPeriodSummary {
   from: string;
   to: string;

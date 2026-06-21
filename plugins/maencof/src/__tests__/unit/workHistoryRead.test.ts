@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { appendActivityEvent } from '../../core/activityLog/index.js';
-import { buildDailyRollup } from '../../core/workIndex/index.js';
+import { buildDailyDigest } from '../../core/workIndex/index.js';
 import { handleWorkHistory } from '../../mcp/tools/workHistory/workHistory.js';
 
 let vaultDir: string;
@@ -29,7 +29,7 @@ function seedDay(date: string, path: string): void {
     { time: '10:00', category: 'document', description: 'c', path },
     new Date(`${date}T10:00:00`),
   );
-  buildDailyRollup(vaultDir, date);
+  buildDailyDigest(vaultDir, date);
 }
 
 describe('handleWorkHistory', () => {

@@ -3,7 +3,7 @@
  * @description work_history MCP 도구 핸들러 — 기간 작업 요약 / 토픽·레이어 작업 이력.
  *
  * topic 또는 layer 가 주어지면 해당 키의 작업일자 이력을 반환하고(역색인 활용),
- * 아니면 last_days 또는 from/to 범위의 daily rollup 을 합산한 기간 요약을 반환한다.
+ * 아니면 last_days 또는 from/to 범위의 daily digest 를 합산한 기간 요약을 반환한다.
  */
 import { aggregatePeriod, queryWork } from '../../../core/workIndex/index.js';
 import type {

@@ -1,6 +1,6 @@
 /**
  * @file workIndex.test.ts
- * @description workIndex — daily rollup 생성, 기간 집계, 토픽/레이어 역색인, 추론.
+ * @description workIndex — daily digest 생성, 기간 집계, 토픽/레이어 역색인, 추론.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -15,10 +15,10 @@ import {
 } from '../../../core/sessionStore/index.js';
 import {
   aggregatePeriod,
-  buildDailyRollup,
+  buildDailyDigest,
   inferTopicsLayers,
   queryWork,
-  readDailyRollup,
+  readDailyDigest,
 } from '../../../core/workIndex/index.js';
 
 let vaultDir: string;
@@ -62,7 +62,7 @@ describe('inferTopicsLayers', () => {
   });
 });
 
-describe('buildDailyRollup', () => {
+describe('buildDailyDigest', () => {
   it('세션(vaultOps·소요시간)과 활동(경로→레이어/토픽)을 합쳐 롤업한다', () => {
     const start = new Date(2026, 5, 21, 10, 0);
     writeUsage({ create: 0 });
@@ -99,16 +99,16 @@ describe('buildDailyRollup', () => {
       start,
     );
 
-    buildDailyRollup(vaultDir, '2026-06-21');
-    const rollup = readDailyRollup(vaultDir, '2026-06-21');
+    buildDailyDigest(vaultDir, '2026-06-21');
+    const digest = readDailyDigest(vaultDir, '2026-06-21');
 
-    expect(rollup).not.toBeNull();
-    expect(rollup!.sessionCount).toBe(1);
-    expect(rollup!.totalDurationMin).toBe(60);
-    expect(rollup!.vaultOps).toEqual({ create: 3, update: 1 });
-    expect(rollup!.layers.sort()).toEqual(['01_Core', '03_External']);
-    expect(rollup!.topics.sort()).toEqual(['alpha', 'beta']);
-    expect(rollup!.filePaths).toHaveLength(2); // search(경로 없음)는 제외
+    expect(digest).not.toBeNull();
+    expect(digest!.sessionCount).toBe(1);
+    expect(digest!.totalDurationMin).toBe(60);
+    expect(digest!.vaultOps).toEqual({ create: 3, update: 1 });
+    expect(digest!.layers.sort()).toEqual(['01_Core', '03_External']);
+    expect(digest!.topics.sort()).toEqual(['alpha', 'beta']);
+    expect(digest!.filePaths).toHaveLength(2); // search(경로 없음)는 제외
   });
 
   it('멱등 재계산 — 두 번 호출해도 동일 결과', () => {
@@ -117,11 +117,11 @@ describe('buildDailyRollup', () => {
       sessionId: 's1',
       now: new Date(2026, 5, 21, 9, 30),
     });
-    buildDailyRollup(vaultDir, '2026-06-21');
-    buildDailyRollup(vaultDir, '2026-06-21');
-    const rollup = readDailyRollup(vaultDir, '2026-06-21');
-    expect(rollup!.sessionCount).toBe(1);
-    expect(rollup!.totalDurationMin).toBe(30);
+    buildDailyDigest(vaultDir, '2026-06-21');
+    buildDailyDigest(vaultDir, '2026-06-21');
+    const digest = readDailyDigest(vaultDir, '2026-06-21');
+    expect(digest!.sessionCount).toBe(1);
+    expect(digest!.totalDurationMin).toBe(30);
   });
 });
 
@@ -132,10 +132,10 @@ describe('aggregatePeriod', () => {
       { time: '10:00', category: 'document', description: 'c', path },
       new Date(`${date}T10:00:00`),
     );
-    buildDailyRollup(vaultDir, date);
+    buildDailyDigest(vaultDir, date);
   }
 
-  it('기간 내 daily rollup 을 합산하고 상위 토픽을 집계한다', () => {
+  it('기간 내 daily digest 을 합산하고 상위 토픽을 집계한다', () => {
     seedDay('2026-06-20', '01_Core/alpha.md');
     seedDay('2026-06-21', '01_Core/alpha.md');
     seedDay('2026-06-22', '03_External/topical/beta.md');
@@ -154,7 +154,7 @@ describe('queryWork', () => {
       { time: '10:00', category: 'document', description: 'c', path },
       new Date(`${date}T10:00:00`),
     );
-    buildDailyRollup(vaultDir, date);
+    buildDailyDigest(vaultDir, date);
   }
 
   it('토픽의 작업일자 이력을 내림차순으로 반환한다 (역색인 재파생)', () => {

@@ -9,7 +9,7 @@
 ### Always do
 
 - sessionStore로 세션 종료 마감 (`recordSessionEnd`, session_id 키, 볼트작업 차분 산출)
-- workIndex로 당일 작업 롤업 재생성 (`buildDailyRollup`, 마감된 일자 대상)
+- workIndex로 당일 작업 digest 재생성 (`buildDailyDigest`, 마감된 일자 대상)
 - cacheManager로 세션 파일 삭제 (`removeSessionFiles`)
 - cacheManager.removeTurnContext로 turnContext 캐시 삭제 (turnContext는 session-scope)
 - 세션 종료 시 수렴 요건·합의 전제·잠정 원리·미해결 긴장을 요약한 recap 메시지 빌드 (session_recap.enabled=true 일 때)
