@@ -17,15 +17,15 @@ yarn version:sync       # package.json → src/version.ts
 ## Build System
 
 - `scripts/build-mcp-server.mjs`: MCP 서버 번들 → `bridge/mcp-server.cjs`
-- `scripts/build-hooks.mjs`: 각 훅 entry → `bridge/<name>.mjs`
-- SessionStart 훅은 esbuild `.md → text` loader 로 `src/hooks/sessionStart/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt)
+- `scripts/build-hooks.mjs`: 이벤트별 디스패처 entry(`src/hooks/eventDispatch/entries/`) → `bridge/<event>.mjs` (이벤트당 단일 번들; 관심사 핸들러를 한 프로세스에서 순차 실행)
+- SessionStart 디스패처는 esbuild `.md → text` loader 로 `src/hooks/sessionStart/metaSkillBody.md` 를 인라인 (dialogue discipline meta-prompt)
 
 ## Auto-invocation Mapping
 
 6 인지 역할 → 스킬 매핑 (사용자가 명시하지 않아도 트리거됨):
 
 - **Brainstorm / ideation**: `explore --for-brainstorm` → `think --mode divergent`
-- **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insightInjector` bridge)
+- **Insight capture management**: `insight` (capture 자체는 `capture_insight` MCP 도구 + `insightInjector`, UserPromptSubmit 디스패처에 포함)
 - **Spec refinement / interview convergence**: `refine` (Phase 2.5 Socratic 포함)
 - **Plan review**: `think --mode review`
 

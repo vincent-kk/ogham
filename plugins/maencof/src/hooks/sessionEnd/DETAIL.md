@@ -15,7 +15,7 @@
 
 ## API Contracts
 
-- entry: `dist/sessionEnd/index.mjs` (esbuild 산출).
+- 독립 bridge 없음 — SessionEnd 디스패처(`eventDispatch`)가 `runSessionEnd` 를 호출한다.
 - export: `runSessionEnd(input: SessionEndInput): SessionEndResult`.
 - 의존 모듈: `sessionStore` (세션 레코드 마감 + 차분), `workIndex` (일일 digest 재생성), `cacheManager` (세션 파일 + turnContext 삭제), recap 빌더 (옵션).
 - 실패 정책: 모든 I/O 실패는 `appendErrorLogSafe`로 흡수, 항상 `continue: true` 반환.

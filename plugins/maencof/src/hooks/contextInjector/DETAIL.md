@@ -11,7 +11,7 @@
 
 ## API Contracts
 
-- entry: `dist/context-injector/index.mjs` (esbuild 산출).
+- 독립 bridge 없음 — UserPromptSubmit 디스패처(`eventDispatch`)가 `injectContext` 를 호출한다.
 - export: `injectContext(input: UserPromptSubmitInput): HookOutput`.
 - 내부 organ: `./turnContext/` — `buildTurnContext`, `readIndexMetadata`, `readCompanionIdentity`, `compressMarkdown`, `readL1Summary`, `buildCompanionIdentityTag` 등.
 - 캐시 의존: `cacheManager` (`readTurnContext` / `writeTurnContext` / `writePromptContext` / `isFirstInSession` / `markSessionInjected`).
