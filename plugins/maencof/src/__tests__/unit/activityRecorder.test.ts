@@ -13,7 +13,7 @@ import {
   readActivityEvents,
 } from '../../core/activityLog/activityLog.js';
 import { formatDate } from '../../core/dateFormat/dateFormat.js';
-import { runActivityRecorder } from '../../hooks/activityRecorder/activityRecorder.js';
+import { runActivityRecorder } from '../../hooks/postToolUse/helpers/activityRecorder/activityRecorder.js';
 
 function createTempVault(): string {
   const dir = mkdtempSync(join(tmpdir(), 'maencof-actrec-test-'));

@@ -7,8 +7,9 @@ import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { spawnCli } from '@ogham/cross-platform/spawn';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { runChangelogGate } from '../../hooks/changelogGate/changelogGate.js';
-import { isMaencofVault, metaPath } from '../../hooks/shared/shared.js';
+import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
+import { metaPath } from '../../hooks/shared/metaPath.js';
+import { runChangelogGate } from '../../hooks/stop/helpers/changelogGate/changelogGate.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
@@ -22,8 +23,11 @@ vi.mock('@ogham/cross-platform/spawn', () => ({
   spawnCli: vi.fn(),
 }));
 
-vi.mock('../../hooks/shared/shared.js', () => ({
+vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(),
+}));
+
+vi.mock('../../hooks/shared/metaPath.js', () => ({
   metaPath: vi.fn(),
 }));
 

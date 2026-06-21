@@ -60,32 +60,32 @@ const PRE_TOOL_USE_BYTES = 12 * 1024;
 const hookEntries = [
   {
     name: 'session-start',
-    entryPath: 'eventDispatch/entries/sessionStart.entry.ts',
+    entryPath: 'sessionStart/sessionStart.entry.ts',
     maxBytes: SESSION_START_BYTES,
   },
   {
     name: 'user-prompt-submit',
-    entryPath: 'eventDispatch/entries/userPromptSubmit.entry.ts',
+    entryPath: 'userPromptSubmit/userPromptSubmit.entry.ts',
     maxBytes: USER_PROMPT_SUBMIT_BYTES,
   },
   {
     name: 'pre-tool-use',
-    entryPath: 'eventDispatch/entries/preToolUse.entry.ts',
+    entryPath: 'preToolUse/preToolUse.entry.ts',
     maxBytes: PRE_TOOL_USE_BYTES,
   },
   {
     name: 'post-tool-use',
-    entryPath: 'eventDispatch/entries/postToolUse.entry.ts',
+    entryPath: 'postToolUse/postToolUse.entry.ts',
     maxBytes: POST_TOOL_USE_BYTES,
   },
   {
     name: 'stop',
-    entryPath: 'eventDispatch/entries/stop.entry.ts',
+    entryPath: 'stop/stop.entry.ts',
     maxBytes: STOP_BYTES,
   },
   {
     name: 'session-end',
-    entryPath: 'eventDispatch/entries/sessionEnd.entry.ts',
+    entryPath: 'sessionEnd/sessionEnd.entry.ts',
     maxBytes: SESSION_END_BYTES,
   },
 ];

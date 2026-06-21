@@ -19,7 +19,7 @@ import {
   MAENCOF_END_MARKER,
   MAENCOF_START_MARKER,
 } from '../../core/claudeMdMerger/claudeMdMerger.js';
-import { runSessionStart } from '../../hooks/sessionStart/sessionStart.js';
+import { runSessionStart } from '../../hooks/sessionStart/helpers/bootstrap/bootstrap.js';
 import { VERSION } from '../../version.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */

@@ -8,13 +8,13 @@ import {
   getSessionCaptureCount,
   readInsightConfig,
 } from '../../core/insightStats/insightStats.js';
-import { runInsightInjector } from '../../hooks/insightInjector/insightInjector.js';
-import { isMaencofVault } from '../../hooks/shared/shared.js';
+import { isMaencofVault } from '../../hooks/shared/isMaencofVault.js';
+import { runInsightInjector } from '../../hooks/userPromptSubmit/helpers/insightInjector/insightInjector.js';
 import { DEFAULT_INSIGHT_CONFIG } from '../../types/insight.js';
 
 // ─── Mock 설정 ────────────────────────────────────────────────────────────────
 
-vi.mock('../../hooks/shared/shared.js', () => ({
+vi.mock('../../hooks/shared/isMaencofVault.js', () => ({
   isMaencofVault: vi.fn(),
 }));
 

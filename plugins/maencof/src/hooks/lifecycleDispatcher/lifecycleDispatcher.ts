@@ -7,14 +7,15 @@
 import { existsSync, readFileSync } from 'node:fs';
 
 import { VALID_LIFECYCLE_EVENTS as VALID_EVENTS } from '../../constants/lifecycle.js';
-import { appendErrorLogSafe } from '../../core/errorLog/index.js';
+import { appendErrorLogSafe } from '../../core/errorLog/errorLog.js';
 import type {
   LifecycleAction,
   LifecycleConfig,
   LifecycleDispatchResult,
   LifecycleEvent,
 } from '../../types/lifecycle.js';
-import { isMaencofVault, metaPath } from '../shared/index.js';
+import { isMaencofVault } from '../shared/isMaencofVault.js';
+import { metaPath } from '../shared/metaPath.js';
 
 /** Input received from Claude Code hook stdin */
 export interface LifecycleDispatcherInput {

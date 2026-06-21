@@ -16,8 +16,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runSessionEnd } from '../../hooks/sessionEnd/sessionEnd.js';
-import { runSessionStart } from '../../hooks/sessionStart/sessionStart.js';
+import { runSessionEnd } from '../../hooks/sessionEnd/helpers/finalize/finalize.js';
+import { runSessionStart } from '../../hooks/sessionStart/helpers/bootstrap/bootstrap.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {

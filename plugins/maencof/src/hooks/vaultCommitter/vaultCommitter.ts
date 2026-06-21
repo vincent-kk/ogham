@@ -14,7 +14,7 @@ import {
   DEFAULT_SKIP_PATTERN_SOURCE,
   VAULT_COMMIT_CONFIG_FILE,
 } from '../../constants/vaultCommitter.js';
-import { appendErrorLogSafe } from '../../core/errorLog/index.js';
+import { appendErrorLogSafe } from '../../core/errorLog/errorLog.js';
 import {
   commitVaultChanges,
   generateCommitMessage,
@@ -22,8 +22,9 @@ import {
   hasVaultChanges,
   isGitRepo,
   isIndexLocked,
-} from '../gitUtils/index.js';
-import { isMaencofVault, metaPath } from '../shared/index.js';
+} from '../gitUtils/gitUtils.js';
+import { isMaencofVault } from '../shared/isMaencofVault.js';
+import { metaPath } from '../shared/metaPath.js';
 
 // ── Types ────────────────────────────────────────────────────────────
 
