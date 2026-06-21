@@ -3,8 +3,7 @@
  * @description SessionStart Hook — Knowledge tree check, WAL recovery detection, schedule review, previous session summary load
  * C1 constraint: Must complete within 5 seconds. Heavy index builds are delegated to Skills.
  */
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 import { EXPECTED_ARCHITECTURE_VERSION } from '../../constants/architecture.js';
 import { buildDefaultDirective } from '../../constants/directiveTemplate.js';
@@ -16,10 +15,6 @@ import {
   mergeMaencofSection,
   readMaencofSection,
 } from '../../core/claudeMdMerger/index.js';
-import {
-  appendDailynoteEntry,
-  formatTime,
-} from '../../core/dailynoteWriter/index.js';
 import { isDialogueInjectionDisabled } from '../../core/dialogueConfig/index.js';
 import { appendErrorLogSafe } from '../../core/errorLog/index.js';
 import {
@@ -29,6 +24,10 @@ import {
   readInsightConfig,
   readPendingNotification,
 } from '../../core/insightStats/index.js';
+import {
+  getRecentSessionSummary,
+  recordSessionStart,
+} from '../../core/sessionStore/index.js';
 import type { CompanionIdentityMinimal } from '../../types/companionGuard.js';
 import { isValidCompanionIdentity } from '../../types/companionGuard.js';
 import type { VaultVersionInfo } from '../../types/setup.js';
@@ -159,13 +158,10 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     }
   }
 
-  // 5. Load recent session summary
-  const sessionsDir = metaPath(cwd, 'sessions');
-  if (existsSync(sessionsDir)) {
-    const recentSummary = loadRecentSessionSummary(sessionsDir);
-    if (recentSummary) {
-      messages.push(`[maencof] Previous session summary:\n${recentSummary}`);
-    }
+  // 5. Load recent session summary from the per-day session store (JSON).
+  const recentSummary = getRecentSessionSummary(cwd);
+  if (recentSummary) {
+    messages.push(`[maencof] Previous session summary:\n${recentSummary}`);
   }
 
   // 6. Check data-sources.json
@@ -233,14 +229,12 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
     });
   }
 
-  // 7. Record session start in dailynote
+  // 7. Record session start in the per-day session store (JSON, keyed by session_id).
+  //    Session lifecycle is no longer logged to the dailynote .md — that log is
+  //    reserved for actual vault document/search/index activity.
   try {
     const sessionId = input.session_id ?? 'unknown';
-    appendDailynoteEntry(cwd, {
-      time: formatTime(new Date()),
-      category: 'session',
-      description: `Session started (session_id: ${sessionId})`,
-    });
+    recordSessionStart(cwd, sessionId);
   } catch (e) {
     appendErrorLogSafe(cwd, {
       hook: 'session-start',
@@ -505,28 +499,5 @@ function checkVersionMismatch(cwd: string, messages: string[]): void {
       error: String(e),
       timestamp: new Date().toISOString(),
     });
-  }
-}
-
-/**
- * Load the most recent session summary from the sessions/ directory.
- */
-function loadRecentSessionSummary(sessionsDir: string): string | null {
-  try {
-    const files = readdirSync(sessionsDir)
-      .filter((f: string) => f.endsWith('.md'))
-      .sort()
-      .reverse();
-
-    if (files.length === 0) return null;
-
-    const latestFile = join(sessionsDir, files[0]);
-    const content = readFileSync(latestFile, 'utf-8');
-
-    // Extract summary section (first 10 lines)
-    const lines = content.split('\n').slice(0, 10).join('\n');
-    return lines.trim() || null;
-  } catch {
-    return null;
   }
 }

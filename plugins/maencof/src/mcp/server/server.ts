@@ -25,10 +25,11 @@ import {
   registerCrudTools,
   registerDailynoteTools,
   registerKgTools,
+  registerWorkHistoryTools,
 } from './registrations/index.js';
 
 /**
- * Creates the maencof MCP server and registers 18 tools.
+ * Creates the maencof MCP server and registers all tools.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: 'maencof', version: VERSION });
@@ -37,6 +38,7 @@ export function createServer(): McpServer {
   registerClaudeMdTools(server);
   registerDailynoteTools(server);
   registerCacheTools(server);
+  registerWorkHistoryTools(server);
   return server;
 }
 

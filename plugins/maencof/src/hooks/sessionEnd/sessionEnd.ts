@@ -1,31 +1,21 @@
 /**
  * @file sessionEnd.ts
- * @description SessionEnd Hook — Save session summary + clean up sessions older than 30 days
+ * @description SessionEnd Hook — record the session into the per-day session
+ * store (JSON), clean session-scoped cache, and build the user-facing recap.
+ *
+ * 세션 요약은 더 이상 `.maencof-meta/sessions/*.md` 에 쓰지 않는다(자연 폐기).
+ * 세션 라이프사이클은 dailynote .md 가 아니라 sessionStore JSON 에만 남는다.
  */
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-  unlinkSync,
-  writeFileSync,
-} from 'node:fs';
-import { join } from 'node:path';
-
-import { SESSION_RETENTION_DAYS } from '../../constants/performance.js';
-import {
-  appendDailynoteEntry,
-  formatTime,
-} from '../../core/dailynoteWriter/index.js';
 import { isSessionRecapDisabled } from '../../core/dialogueConfig/index.js';
 import { appendErrorLogSafe } from '../../core/errorLog/index.js';
 import { readPendingNotification } from '../../core/insightStats/index.js';
+import { recordSessionEnd } from '../../core/sessionStore/index.js';
+import { buildDailyRollup } from '../../core/workIndex/index.js';
 import {
   removeSessionFiles,
   removeTurnContext,
 } from '../cacheManager/index.js';
-import { isMaencofVault, maencofPath, metaPath } from '../shared/index.js';
+import { isMaencofVault } from '../shared/index.js';
 
 export interface SessionEndInput {
   session_id?: string;
@@ -47,8 +37,9 @@ export interface SessionEndResult {
 
 /**
  * SessionEnd Hook handler.
- * 1. Save current session summary to .maencof-meta/sessions/{timestamp}.md
- * 2. Clean up session files older than 30 days
+ * 1. Finalize the session record in `dailynotes/sessions/{date}.json`
+ * 2. Clean up session-scoped context-injection cache
+ * 3. Build the user-facing session recap (off-switch honored)
  */
 export function runSessionEnd(input: SessionEndInput): SessionEndResult {
   const cwd = input.cwd ?? process.cwd();
@@ -57,27 +48,25 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     return { continue: true };
   }
 
-  const sessionsDir = metaPath(cwd, 'sessions');
-
-  // Save session summary only when the session has meaningful data.
-  const summary = buildSessionSummary(input, cwd);
-  if (summary !== null) {
-    ensureDir(sessionsDir);
-    const fileName = buildSessionFileName();
-    const filePath = join(sessionsDir, fileName);
-
-    try {
-      writeFileSync(filePath, summary, 'utf-8');
-    } catch (e) {
-      appendErrorLogSafe(cwd, {
-        hook: 'session-end',
-        error: String(e),
-        timestamp: new Date().toISOString(),
-      });
-    }
+  // 1. Finalize the session in the per-day session store (JSON, keyed by session_id),
+  //    then rebuild that day's work-history rollup. recordSessionEnd returns the date
+  //    it wrote to (handles midnight-crossover), so the rollup targets the right day.
+  try {
+    const date = recordSessionEnd(cwd, {
+      sessionId: input.session_id ?? 'unknown',
+      skillsUsed: input.skills_used ?? [],
+      filesModified: input.files_modified ?? [],
+    });
+    buildDailyRollup(cwd, date);
+  } catch (e) {
+    appendErrorLogSafe(cwd, {
+      hook: 'session-end',
+      error: String(e),
+      timestamp: new Date().toISOString(),
+    });
   }
 
-  // Clean up context injection cache (session-specific files only)
+  // 2. Clean up context injection cache (session-specific files only)
   try {
     const sessionId = input.session_id ?? '';
     if (sessionId) {
@@ -93,32 +82,7 @@ export function runSessionEnd(input: SessionEndInput): SessionEndResult {
     });
   }
 
-  // Clean up old session files
-  cleanOldSessions(sessionsDir);
-
-  // Record session end in dailynote
-  try {
-    const skills = input.skills_used ?? [];
-    const files = input.files_modified ?? [];
-    const parts: string[] = [];
-    if (files.length > 0) parts.push(`files: ${files.length}`);
-    if (skills.length > 0) parts.push(`skills: ${skills.join(', ')}`);
-    const detail = parts.length > 0 ? ` (${parts.join(', ')})` : '';
-
-    appendDailynoteEntry(cwd, {
-      time: formatTime(new Date()),
-      category: 'session',
-      description: `Session ended${detail}`,
-    });
-  } catch (e) {
-    appendErrorLogSafe(cwd, {
-      hook: 'session-end',
-      error: String(e),
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Build session recap (off-switch honored)
+  // 3. Build session recap (off-switch honored)
   const result: SessionEndResult = { continue: true };
   try {
     if (!isSessionRecapDisabled(cwd)) {
@@ -173,164 +137,4 @@ function buildSessionRecap(input: SessionEndInput, cwd: string): string | null {
   lines.push('- Unresolved tensions: (none)');
   lines.push('To save this recap, run /maencof:remember.');
   return lines.join('\n');
-}
-
-/**
- * Build a session summary markdown string.
- * Includes usage-stats.json (cumulative) and stale-nodes.json data when available.
- */
-function buildSessionSummary(
-  input: SessionEndInput,
-  cwd: string,
-): string | null {
-  const now = new Date().toISOString();
-  const sessionId = input.session_id ?? 'unknown';
-
-  const lines: string[] = [
-    `# Session Summary`,
-    ``,
-    `- **Session ID**: ${sessionId}`,
-    `- **Ended at**: ${now}`,
-    ``,
-  ];
-
-  // Skills used in this session
-  const skills = input.skills_used ?? [];
-  if (skills.length > 0) {
-    lines.push(`## Skills Used`);
-    lines.push(``);
-    for (const skill of skills) {
-      lines.push(`- ${skill}`);
-    }
-    lines.push(``);
-  }
-
-  // Files modified in this session
-  const files = input.files_modified ?? [];
-  if (files.length > 0) {
-    lines.push(`## Files Modified`);
-    lines.push(``);
-    for (const file of files) {
-      lines.push(`- ${file}`);
-    }
-    lines.push(``);
-  }
-
-  // Read usage-stats.json (cumulative)
-  const usageStats = readJsonSafe<Record<string, number>>(
-    metaPath(cwd, 'usage-stats.json'),
-  );
-
-  // Read stale-nodes.json — supports both legacy { paths } and current { entries } shapes.
-  const staleNodes = readJsonSafe<{
-    paths?: string[];
-    entries?: { path: string; op: 'mutate' | 'delete' }[];
-    updatedAt: string;
-  }>(maencofPath(cwd, 'stale-nodes.json'));
-
-  const stalePaths: string[] = staleNodes
-    ? Array.isArray(staleNodes.entries)
-      ? staleNodes.entries.map((entry) => entry.path)
-      : Array.isArray(staleNodes.paths)
-        ? staleNodes.paths
-        : []
-    : [];
-
-  const hasUsageStats =
-    usageStats !== null && Object.keys(usageStats).length > 0;
-  const hasStaleNodes = stalePaths.length > 0;
-
-  const hasSessionActivity = skills.length > 0 || files.length > 0;
-  const hasMeaningfulSessionData =
-    hasUsageStats || hasStaleNodes || hasSessionActivity;
-
-  if (!hasMeaningfulSessionData) {
-    return null;
-  }
-
-  if (hasUsageStats) {
-    lines.push(`## Vault Tool Usage (Cumulative)`);
-    lines.push(``);
-    for (const [tool, count] of Object.entries(usageStats!)) {
-      lines.push(`- ${tool}: ${count}`);
-    }
-    lines.push(``);
-  }
-
-  if (hasStaleNodes) {
-    lines.push(`## Pending Index Updates (Stale Nodes)`);
-    lines.push(``);
-    for (const path of stalePaths) {
-      lines.push(`- ${path}`);
-    }
-    lines.push(``);
-  }
-
-  if (hasUsageStats || hasStaleNodes) {
-    lines.push(
-      `> Per-session statistics will be improved in a future release.`,
-    );
-    lines.push(``);
-  }
-
-  return lines.join('\n');
-}
-
-/**
- * Safely read a JSON file. Returns null if the file is missing or unparseable.
- */
-function readJsonSafe<T>(filePath: string): T | null {
-  if (!existsSync(filePath)) return null;
-  try {
-    return JSON.parse(readFileSync(filePath, 'utf-8')) as T;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Generate a session file name (YYYY-MM-DD-HHmmss.md).
- */
-function buildSessionFileName(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const HH = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
-  const ss = String(now.getSeconds()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}-${HH}${min}${ss}.md`;
-}
-
-/**
- * Delete session files older than 30 days from the sessions/ directory.
- */
-function cleanOldSessions(sessionsDir: string): void {
-  if (!existsSync(sessionsDir)) return;
-
-  const cutoffMs = SESSION_RETENTION_DAYS * 24 * 60 * 60 * 1000;
-  const now = Date.now();
-
-  try {
-    const files = readdirSync(sessionsDir).filter((f) => f.endsWith('.md'));
-    for (const file of files) {
-      const filePath = join(sessionsDir, file);
-      try {
-        const stat = statSync(filePath);
-        if (now - stat.mtimeMs > cutoffMs) {
-          unlinkSync(filePath);
-        }
-      } catch {
-        // Ignore individual file errors
-      }
-    }
-  } catch {
-    // Ignore directory read errors
-  }
-}
-
-function ensureDir(dirPath: string): void {
-  if (!existsSync(dirPath)) {
-    mkdirSync(dirPath, { recursive: true });
-  }
 }

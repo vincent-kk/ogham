@@ -1,7 +1,7 @@
 import type { DailynoteCategory } from '../types/dailynote.js';
 
 /**
- * MCP 도구명 → dailynote 카테고리 매핑 (전체 18개 도구 중 16개).
+ * MCP 도구명 → dailynote 카테고리 매핑 (전체 19개 도구 중 16개).
  *
  * PostToolUse hook matcher 는 write 도구 8개 사용
  * (`create`|`update`|`delete`|`move`|`capture_insight`|`boundary_create`|

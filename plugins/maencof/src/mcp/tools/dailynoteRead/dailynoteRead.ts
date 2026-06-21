@@ -5,6 +5,11 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 
 import {
+  getActivityDir,
+  getActivityPath,
+  readActivityEntries,
+} from '../../../core/activityLog/index.js';
+import {
   formatDate,
   getDailynoteDir,
   getDailynotePath,
@@ -12,6 +17,7 @@ import {
 } from '../../../core/dailynoteWriter/index.js';
 import type {
   DailynoteCategory,
+  DailynoteEntry,
   DailynoteReadInput,
   DailynoteReadResult,
 } from '../../../types/dailynote.js';
@@ -53,35 +59,47 @@ export function handleDailynoteRead(
 }
 
 /**
- * 단일 날짜의 dailynote를 읽고 파싱한다.
+ * 단일 날짜의 활동 로그를 읽고 파싱한다.
+ *
+ * 신규 활동 로그(NDJSON `activity/*.jsonl`)와 레거시 `dailynotes/*.md`(전환기)를
+ * 병합하고 시간순 정렬한다. 둘 다 없으면 null.
  */
 function readSingleDailynote(
   vaultPath: string,
   date: string,
   category?: DailynoteCategory,
 ): DailynoteReadResult['notes'][number] | null {
-  const filePath = getDailynotePath(vaultPath, date);
+  const activityExists = existsSync(getActivityPath(vaultPath, date));
+  const legacyPath = getDailynotePath(vaultPath, date);
+  const legacyExists = existsSync(legacyPath);
 
-  if (!existsSync(filePath)) {
+  if (!activityExists && !legacyExists) {
     return null;
   }
 
-  try {
-    const content = readFileSync(filePath, 'utf-8');
-    let entries = parseDailynote(content);
-
-    if (category) {
-      entries = entries.filter((e) => e.category === category);
+  const activityEntries = readActivityEntries(vaultPath, date);
+  let legacyEntries: DailynoteEntry[] = [];
+  if (legacyExists) {
+    try {
+      legacyEntries = parseDailynote(readFileSync(legacyPath, 'utf-8'));
+    } catch {
+      /* ignore corrupt legacy file */
     }
-
-    return {
-      date,
-      entries,
-      entry_count: entries.length,
-    };
-  } catch {
-    return null;
   }
+
+  let entries = [...activityEntries, ...legacyEntries].sort((a, b) =>
+    a.time < b.time ? -1 : a.time > b.time ? 1 : 0,
+  );
+
+  if (category) {
+    entries = entries.filter((e) => e.category === category);
+  }
+
+  return {
+    date,
+    entries,
+    entry_count: entries.length,
+  };
 }
 
 /**
@@ -101,20 +119,32 @@ function getRecentDates(days: number): string[] {
 }
 
 /**
- * dailynotes 디렉토리에 존재하는 날짜 목록을 반환한다.
- * (향후 날짜 범위 조회 등에 활용 가능)
+ * 활동 로그가 존재하는 날짜 목록을 반환한다 (신규 `*.jsonl` + 레거시 `*.md` 합집합).
  */
 export function listDailynotes(vaultPath: string): string[] {
-  const dir = getDailynoteDir(vaultPath);
-  if (!existsSync(dir)) return [];
+  const dates = new Set<string>();
 
-  try {
-    return readdirSync(dir)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace('.md', ''))
-      .sort()
-      .reverse();
-  } catch {
-    return [];
+  const legacyDir = getDailynoteDir(vaultPath);
+  if (existsSync(legacyDir)) {
+    try {
+      for (const f of readdirSync(legacyDir)) {
+        if (f.endsWith('.md')) dates.add(f.replace(/\.md$/, ''));
+      }
+    } catch {
+      /* ignore */
+    }
   }
+
+  const activityDir = getActivityDir(vaultPath);
+  if (existsSync(activityDir)) {
+    try {
+      for (const f of readdirSync(activityDir)) {
+        if (f.endsWith('.jsonl')) dates.add(f.replace(/\.jsonl$/, ''));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return [...dates].sort().reverse();
 }

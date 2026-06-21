@@ -1,24 +1,18 @@
 /**
  * @file dailynoteRecorder.test.ts
- * @description dailynote-recorder hook 로직 테스트
+ * @description dailynote-recorder hook 로직 테스트 (활동 로그 = NDJSON)
  */
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  formatDate,
-  getDailynotePath,
-  parseDailynote,
-} from '../../core/dailynoteWriter/dailynoteWriter.js';
+  getActivityPath,
+  readActivityEntries,
+} from '../../core/activityLog/activityLog.js';
+import { formatDate } from '../../core/dailynoteWriter/dailynoteWriter.js';
 import { runDailynoteRecorder } from '../../hooks/dailynoteRecorder/dailynoteRecorder.js';
 
 function createTempVault(): string {
@@ -27,6 +21,8 @@ function createTempVault(): string {
   mkdirSync(join(dir, '.maencof-meta'), { recursive: true });
   return dir;
 }
+
+const today = (): string => formatDate(new Date());
 
 describe('runDailynoteRecorder', () => {
   let vaultDir: string;
@@ -47,19 +43,15 @@ describe('runDailynoteRecorder', () => {
   it('vault가 아닌 경우 continue: true를 반환하고 기록하지 않는다', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'non-vault-'));
     try {
-      const result = runDailynoteRecorder({
-        tool_name: 'create',
-        cwd: tmpDir,
-      });
+      const result = runDailynoteRecorder({ tool_name: 'create', cwd: tmpDir });
       expect(result.continue).toBe(true);
-      const today = formatDate(new Date());
-      expect(existsSync(getDailynotePath(tmpDir, today))).toBe(false);
+      expect(existsSync(getActivityPath(tmpDir, today()))).toBe(false);
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it('maencof write 도구 호출 시 dailynote에 기록한다', () => {
+  it('maencof write 도구 호출 시 활동 로그(JSONL)에 기록한다', () => {
     const result = runDailynoteRecorder({
       tool_name: 'create',
       tool_input: { layer: 2, tags: ['test'] },
@@ -68,9 +60,7 @@ describe('runDailynoteRecorder', () => {
 
     expect(result.continue).toBe(true);
 
-    const today = formatDate(new Date());
-    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
-    const entries = parseDailynote(content);
+    const entries = readActivityEntries(vaultDir, today());
     expect(entries).toHaveLength(1);
     expect(entries[0].category).toBe('document');
     expect(entries[0].description).toContain('Document created');
@@ -83,8 +73,7 @@ describe('runDailynoteRecorder', () => {
     });
 
     expect(result.continue).toBe(true);
-    const today = formatDate(new Date());
-    expect(existsSync(getDailynotePath(vaultDir, today))).toBe(false);
+    expect(existsSync(getActivityPath(vaultDir, today()))).toBe(false);
   });
 
   it('tool_input에서 path를 추출한다', () => {
@@ -94,9 +83,7 @@ describe('runDailynoteRecorder', () => {
       cwd: vaultDir,
     });
 
-    const today = formatDate(new Date());
-    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
-    const entries = parseDailynote(content);
+    const entries = readActivityEntries(vaultDir, today());
     expect(entries[0].path).toBe('02_Derived/test.md');
   });
 
@@ -108,14 +95,27 @@ describe('runDailynoteRecorder', () => {
       cwd: vaultDir,
     });
 
-    const today = formatDate(new Date());
-    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
-    const entries = parseDailynote(content);
+    const entries = readActivityEntries(vaultDir, today());
     expect(entries[0].path).toBe('02_Derived/new.md');
   });
 
+  it('두 번 호출하면 JSONL에 두 줄이 누적된다', () => {
+    runDailynoteRecorder({
+      tool_name: 'create',
+      tool_input: { layer: 2 },
+      cwd: vaultDir,
+    });
+    runDailynoteRecorder({
+      tool_name: 'update',
+      tool_input: { path: '02_Derived/test.md' },
+      cwd: vaultDir,
+    });
+
+    const entries = readActivityEntries(vaultDir, today());
+    expect(entries).toHaveLength(2);
+  });
+
   it('에러 발생 시 graceful degradation으로 continue: true 반환', () => {
-    // cwd를 존재하지 않는 경로로 설정하되 vault처럼 보이게 하지 않음
     const result = runDailynoteRecorder({
       tool_name: 'create',
       tool_input: {},
@@ -131,9 +131,7 @@ describe('runDailynoteRecorder', () => {
       cwd: vaultDir,
     });
 
-    const today = formatDate(new Date());
-    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
-    const entries = parseDailynote(content);
+    const entries = readActivityEntries(vaultDir, today());
     expect(entries[0].category).toBe('config');
     expect(entries[0].description).toContain('CLAUDE.md');
   });
@@ -145,7 +143,7 @@ describe('runDailynoteRecorder', () => {
     ['.maencof/stale-nodes.json'],
     ['.maencof-meta/usage-stats.json'],
   ])(
-    'exclusion 경로 %s 에 대한 write 는 dailynote 에 기록하지 않는다',
+    'exclusion 경로 %s 에 대한 write 는 활동 로그에 기록하지 않는다',
     (path) => {
       const result = runDailynoteRecorder({
         tool_name: 'update',
@@ -154,8 +152,7 @@ describe('runDailynoteRecorder', () => {
       });
 
       expect(result.continue).toBe(true);
-      const today = formatDate(new Date());
-      expect(existsSync(getDailynotePath(vaultDir, today))).toBe(false);
+      expect(existsSync(getActivityPath(vaultDir, today()))).toBe(false);
     },
   );
 
@@ -166,9 +163,7 @@ describe('runDailynoteRecorder', () => {
       cwd: vaultDir,
     });
 
-    const today = formatDate(new Date());
-    const content = readFileSync(getDailynotePath(vaultDir, today), 'utf-8');
-    const entries = parseDailynote(content);
+    const entries = readActivityEntries(vaultDir, today());
     expect(entries).toHaveLength(1);
     expect(entries[0].path).toBe('03_External/topical/foo.md');
   });

@@ -90,7 +90,17 @@ export type {
   AgentUsageEntry,
   UsageStats,
   SessionSummary,
+  SessionRecord,
+  SessionDayLog,
 } from './session.js';
+
+export type {
+  DailyRollup,
+  ReverseIndex,
+  WorkPeriodSummary,
+  WorkHistoryReadInput,
+  WorkHistoryReadResult,
+} from './workHistory.js';
 
 export type {
   ManageMode,

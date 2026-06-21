@@ -4,15 +4,17 @@
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { getActivityPath } from '../../core/activityLog/activityLog.js';
 import {
   formatDate,
   getDailynotePath,
 } from '../../core/dailynoteWriter/dailynoteWriter.js';
 import { handleDailynoteRead } from '../../mcp/tools/dailynoteRead/dailynoteRead.js';
+import type { DailynoteEntry } from '../../types/dailynote.js';
 
 function createTempVault(): string {
   const dir = mkdtempSync(join(tmpdir(), 'maencof-dnread-test-'));
@@ -24,6 +26,21 @@ function createTempVault(): string {
 function writeDailynote(vaultDir: string, date: string, content: string): void {
   const filePath = getDailynotePath(vaultDir, date);
   writeFileSync(filePath, content, 'utf-8');
+}
+
+/** 신규 활동 로그(NDJSON) 작성 헬퍼. */
+function writeActivity(
+  vaultDir: string,
+  date: string,
+  entries: DailynoteEntry[],
+): void {
+  const filePath = getActivityPath(vaultDir, date);
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(
+    filePath,
+    entries.map((e) => JSON.stringify(e)).join('\n') + '\n',
+    'utf-8',
+  );
 }
 
 const sampleContent = [
@@ -144,5 +161,43 @@ describe('handleDailynoteRead', () => {
     // date가 우선하므로 단일 날짜만 조회
     expect(result.notes).toHaveLength(1);
     expect(result.notes[0].date).toBe('2026-03-02');
+  });
+
+  it('신규 활동 로그(JSONL)를 읽어 반환한다', () => {
+    writeActivity(vaultDir, '2026-06-21', [
+      { time: '09:00', category: 'document', description: 'Document created' },
+      {
+        time: '09:30',
+        category: 'document',
+        description: 'Document updated',
+        path: '02_Derived/x.md',
+      },
+    ]);
+
+    const result = handleDailynoteRead(vaultDir, { date: '2026-06-21' });
+    expect(result.notes[0].entries).toHaveLength(2);
+    expect(result.notes[0].entries[1].path).toBe('02_Derived/x.md');
+  });
+
+  it('활동 JSONL 과 레거시 .md 를 병합해 시간순 정렬한다', () => {
+    writeDailynote(
+      vaultDir,
+      '2026-06-21',
+      [
+        '# Dailynote — 2026-06-21',
+        '',
+        '## Activity Log',
+        '',
+        '- **[08:00]** `document` 레거시 항목',
+      ].join('\n'),
+    );
+    writeActivity(vaultDir, '2026-06-21', [
+      { time: '10:00', category: 'search', description: 'KG search' },
+    ]);
+
+    const result = handleDailynoteRead(vaultDir, { date: '2026-06-21' });
+    expect(result.notes[0].entries).toHaveLength(2);
+    expect(result.notes[0].entries[0].time).toBe('08:00');
+    expect(result.notes[0].entries[1].time).toBe('10:00');
   });
 });

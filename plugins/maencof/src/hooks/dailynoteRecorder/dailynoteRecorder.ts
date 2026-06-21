@@ -11,8 +11,8 @@
  */
 import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
 import { DAILYNOTE_RECORDER_EXCLUSION_PREFIXES } from '../../constants/dailynoteRecorder.js';
+import { appendActivityEntry } from '../../core/activityLog/index.js';
 import {
-  appendDailynoteEntry,
   buildToolDescription,
   formatTime,
 } from '../../core/dailynoteWriter/index.js';
@@ -72,7 +72,7 @@ export function runDailynoteRecorder(
       return { continue: true };
     }
 
-    appendDailynoteEntry(cwd, {
+    appendActivityEntry(cwd, {
       time: formatTime(new Date()),
       category,
       description,

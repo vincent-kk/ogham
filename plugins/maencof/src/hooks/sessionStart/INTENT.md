@@ -12,6 +12,7 @@
 - 아키텍처 버전 검증 및 마이그레이션 트리거
 - companion identity 검증
 - metaSkillBody.md 내용을 `hookSpecificOutput.additionalContext` 로 주입 (off-switch 해제 시)
+- sessionStore로 세션 시작 기록 + 직전 세션 요약 surface (`recordSessionStart` / `getRecentSessionSummary`)
 
 ### Ask first
 
