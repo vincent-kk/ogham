@@ -134,7 +134,7 @@ describe('recordSessionEnd', () => {
   });
 
   it('손상된 일자 파일은 빈 로그로 폴백하고 정상 기록한다', () => {
-    mkdirSync(join(vaultDir, '.maencof-meta', 'dailynotes', 'sessions'), {
+    mkdirSync(join(vaultDir, '.maencof-meta', 'activity', 'sessions'), {
       recursive: true,
     });
     writeFileSync(

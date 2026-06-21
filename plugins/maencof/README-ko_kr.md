@@ -36,8 +36,8 @@ claude --plugin-dir ./plugins/maencof
 
 빌드하면 두 가지 산출물이 생성됩니다:
 
-- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 18개)
-- `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, context-injector, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+- `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 19개)
+- `bridge/*.mjs` — Hook 스크립트 10개 (session-start, session-end, layer-guard, context-injector, activity-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 > **성능 안내**: maencof는 `UserPromptSubmit`에서 4개 hook을 순차 실행합니다 (context-injector → lifecycle-dispatcher → vault-committer → insight-injector). 모두 fast-path 최적화되어 있으며 일반 프롬프트의 hook 오버헤드는 약 60ms (세션 첫 프롬프트는 컨텍스트 캐시 빌드로 ~110ms) 수준입니다. `hooks.json`의 timeout 값 (2–3s) 은 kill-switch이지 expected latency가 아닙니다. git을 실제로 실행하는 경로는 `vault-committer` 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
 

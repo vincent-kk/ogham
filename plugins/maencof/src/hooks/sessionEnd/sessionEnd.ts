@@ -4,7 +4,7 @@
  * store (JSON), clean session-scoped cache, and build the user-facing recap.
  *
  * 세션 요약은 더 이상 `.maencof-meta/sessions/*.md` 에 쓰지 않는다(자연 폐기).
- * 세션 라이프사이클은 dailynote .md 가 아니라 sessionStore JSON 에만 남는다.
+ * 세션 라이프사이클은 활동 로그가 아니라 sessionStore JSON 에만 남는다.
  */
 import { isSessionRecapDisabled } from '../../core/dialogueConfig/index.js';
 import { appendErrorLogSafe } from '../../core/errorLog/index.js';
@@ -37,7 +37,7 @@ export interface SessionEndResult {
 
 /**
  * SessionEnd Hook handler.
- * 1. Finalize the session record in `dailynotes/sessions/{date}.json`
+ * 1. Finalize the session record in `activity/sessions/{date}.json`
  * 2. Clean up session-scoped context-injection cache
  * 3. Build the user-facing session recap (off-switch honored)
  */

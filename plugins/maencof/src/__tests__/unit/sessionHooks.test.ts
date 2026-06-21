@@ -244,9 +244,9 @@ describe('runSessionEnd', () => {
     });
   });
 
-  /** 일자별 세션 JSON 디렉터리 — `.maencof-meta/dailynotes/sessions/`. */
+  /** 일자별 세션 JSON 디렉터리 — `.maencof-meta/activity/sessions/`. */
   function sessionsDirOf(vault: string): string {
-    return join(vault, '.maencof-meta', 'dailynotes', 'sessions');
+    return join(vault, '.maencof-meta', 'activity', 'sessions');
   }
 
   /** 일자 파일을 읽어 session_id 키 맵을 반환한다 (단일 day 파일 가정). */
@@ -261,7 +261,7 @@ describe('runSessionEnd', () => {
     return log.sessions;
   }
 
-  it('세션 종료를 dailynotes/sessions/{date}.json 에 session_id로 기록한다', () => {
+  it('세션 종료를 activity/sessions/{date}.json 에 session_id로 기록한다', () => {
     const result = runSessionEnd({
       session_id: 'test-session',
       cwd: vaultDir,
@@ -288,21 +288,16 @@ describe('runSessionEnd', () => {
     expect(existsSync(join(vaultDir, '.maencof-meta', 'sessions'))).toBe(false);
   });
 
-  it('세션 라이프사이클을 dailynote .md 에 기록하지 않는다', () => {
+  it('세션 종료가 활동 이벤트 로그를 만들지 않는다', () => {
     runSessionEnd({
-      session_id: 'no-dailynote',
+      session_id: 'no-event',
       cwd: vaultDir,
       files_modified: ['02_Derived/note.md'],
     });
-    // dailynotes/ 에 세션 .md 라인이 생기지 않아야 한다 (sessions/ 하위 JSON 만 존재).
-    const dailynotesDir = join(vaultDir, '.maencof-meta', 'dailynotes');
-    const mdFiles = existsSync(dailynotesDir)
-      ? readdirSync(dailynotesDir).filter((f) => f.endsWith('.md'))
-      : [];
-    for (const md of mdFiles) {
-      const content = readFileSync(join(dailynotesDir, md), 'utf-8');
-      expect(content).not.toContain('Session ended');
-    }
+    // 세션 라이프사이클은 sessions JSON 에만 — 활동 이벤트 로그(events)는 생성되지 않는다.
+    expect(
+      existsSync(join(vaultDir, '.maencof-meta', 'activity', 'events')),
+    ).toBe(false);
   });
 
   it('maencof vault가 아닌 경우 아무 작업도 하지 않는다', () => {
@@ -311,7 +306,7 @@ describe('runSessionEnd', () => {
       const result = runSessionEnd({ cwd: tmpDir });
       expect(result.continue).toBe(true);
       expect(
-        existsSync(join(tmpDir, '.maencof-meta', 'dailynotes', 'sessions')),
+        existsSync(join(tmpDir, '.maencof-meta', 'activity', 'sessions')),
       ).toBe(false);
     } finally {
       rmSync(tmpDir, { recursive: true, force: true });

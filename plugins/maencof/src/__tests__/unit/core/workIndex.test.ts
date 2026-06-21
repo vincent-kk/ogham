@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { appendActivityEntry } from '../../../core/activityLog/index.js';
+import { appendActivityEvent } from '../../../core/activityLog/index.js';
 import {
   recordSessionEnd,
   recordSessionStart,
@@ -73,7 +73,7 @@ describe('buildDailyRollup', () => {
       now: new Date(2026, 5, 21, 11, 0),
     });
 
-    appendActivityEntry(
+    appendActivityEvent(
       vaultDir,
       {
         time: '10:30',
@@ -83,7 +83,7 @@ describe('buildDailyRollup', () => {
       },
       start,
     );
-    appendActivityEntry(
+    appendActivityEvent(
       vaultDir,
       {
         time: '10:40',
@@ -93,7 +93,7 @@ describe('buildDailyRollup', () => {
       },
       start,
     );
-    appendActivityEntry(
+    appendActivityEvent(
       vaultDir,
       { time: '10:45', category: 'search', description: 'kg search' },
       start,
@@ -127,7 +127,7 @@ describe('buildDailyRollup', () => {
 
 describe('aggregatePeriod', () => {
   function seedDay(date: string, path: string): void {
-    appendActivityEntry(
+    appendActivityEvent(
       vaultDir,
       { time: '10:00', category: 'document', description: 'c', path },
       new Date(`${date}T10:00:00`),
@@ -149,7 +149,7 @@ describe('aggregatePeriod', () => {
 
 describe('queryWork', () => {
   function seedDay(date: string, path: string): void {
-    appendActivityEntry(
+    appendActivityEvent(
       vaultDir,
       { time: '10:00', category: 'document', description: 'c', path },
       new Date(`${date}T10:00:00`),

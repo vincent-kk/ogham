@@ -1,8 +1,8 @@
 /**
  * @file sessionStore.ts
- * @description 세션 기록 저장소 — 일자별 JSON(`dailynotes/sessions/YYYY-MM-DD.json`).
+ * @description 세션 기록 저장소 — 일자별 JSON(`activity/sessions/YYYY-MM-DD.json`).
  *
- * dailynoteWriter 와 동급의 파일시스템 I/O 모듈. 하루 1파일에 세션을 `session_id`
+ * activityLog 와 동급의 파일시스템 I/O 모듈. 하루 1파일에 세션을 `session_id`
  * 키 맵으로 보관해 전수조사 없이 직접 조회한다. SessionStart 에 baseline 스냅샷을
  * 찍고 SessionEnd 에 차분으로 볼트 작업량을 산출한다.
  *
@@ -18,16 +18,17 @@ import {
 import { join } from 'node:path';
 
 import {
-  DAILYNOTES_DIR,
+  ACTIVITY_DIR,
   MAENCOF_META_DIR,
   SESSIONS_DIR,
 } from '../../constants/directories.js';
 import { USAGE_STATS_FILE } from '../../constants/usageStats.js';
 import type { SessionDayLog, SessionRecord } from '../../types/session.js';
+import { formatDate } from '../dateFormat/index.js';
 
-/** 세션 JSON 디렉터리 경로 (`.maencof-meta/dailynotes/sessions/`). */
+/** 세션 JSON 디렉터리 경로 (`.maencof-meta/activity/sessions/`). */
 export function getSessionsDir(cwd: string): string {
-  return join(cwd, MAENCOF_META_DIR, DAILYNOTES_DIR, SESSIONS_DIR);
+  return join(cwd, MAENCOF_META_DIR, ACTIVITY_DIR, SESSIONS_DIR);
 }
 
 /** 특정 일자의 세션 로그 파일 경로. */
@@ -44,7 +45,7 @@ export function recordSessionStart(
   sessionId: string,
   now: Date = new Date(),
 ): void {
-  const date = toDateString(now);
+  const date = formatDate(now);
   const log = readDayLog(cwd, date);
   const existing = log.sessions[sessionId];
 
@@ -77,7 +78,7 @@ export function recordSessionEnd(
   },
 ): string {
   const now = params.now ?? new Date();
-  const date = toDateString(now);
+  const date = formatDate(now);
   const log = findOpenSessionDay(cwd, params.sessionId, date);
 
   let record = log.sessions[params.sessionId];
@@ -242,11 +243,4 @@ function formatSummary(record: SessionRecord): string {
     lines.push(`- Vault ops: ${ops}`);
   }
   return lines.join('\n');
-}
-
-function toDateString(date: Date): string {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
 }

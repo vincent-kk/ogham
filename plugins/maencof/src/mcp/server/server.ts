@@ -1,6 +1,6 @@
 /**
  * @file server.ts
- * @description maencof MCP server — orchestrates 18 tool registrations.
+ * @description maencof MCP server — orchestrates all tool registrations.
  *
  * Tool list:
  * CRUD x5: `create`, `read`, `update`, `delete`, `move`
@@ -9,7 +9,8 @@
  * Build x1: kg_build
  * Boundary x1: boundary_create
  * CLAUDE.md x3: claudemd_merge, claudemd_read, claudemd_remove
- * Dailynote x1: dailynote_read
+ * Activity x1: activity_read
+ * Work history x1: work_history
  * Cache x1: context_cache_manage
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -20,10 +21,10 @@ import { VERSION } from '../../version.js';
 import { getVaultPath } from './graphCache/index.js';
 import { walkVaultForExternalChanges } from './middlewares/index.js';
 import {
+  registerActivityReadTools,
   registerCacheTools,
   registerClaudeMdTools,
   registerCrudTools,
-  registerDailynoteTools,
   registerKgTools,
   registerWorkHistoryTools,
 } from './registrations/index.js';
@@ -36,7 +37,7 @@ export function createServer(): McpServer {
   registerCrudTools(server);
   registerKgTools(server);
   registerClaudeMdTools(server);
-  registerDailynoteTools(server);
+  registerActivityReadTools(server);
   registerCacheTools(server);
   registerWorkHistoryTools(server);
   return server;

@@ -36,8 +36,8 @@ claude --plugin-dir ./plugins/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
-- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, context-injector, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+- `bridge/mcp-server.cjs` — MCP server (19 knowledge tools)
+- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, context-injector, activity-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
 
 > **Performance note**: maencof chains 4 hooks on `UserPromptSubmit` (context-injector → lifecycle-dispatcher → vault-committer → insight-injector), all fast-path optimized. Typical per-prompt overhead is ~60ms (~110ms on the first prompt of a session due to context cache build). The hook timeouts in `hooks.json` (2–3s) are kill-switches, not expected latency. The only path that runs git is `vault-committer`, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
 

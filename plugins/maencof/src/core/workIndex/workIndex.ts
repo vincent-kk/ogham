@@ -16,9 +16,9 @@ import {
 import { join } from 'node:path';
 
 import {
-  DAILYNOTES_DIR,
+  ACTIVITY_DIR,
   MAENCOF_META_DIR,
-  WORK_INDEX_DIR,
+  ROLLUPS_DIR,
 } from '../../constants/directories.js';
 import {
   DAILY_ROLLUP_SUBDIR,
@@ -31,14 +31,14 @@ import type {
   ReverseIndex,
   WorkPeriodSummary,
 } from '../../types/workHistory.js';
-import { readActivityEntries } from '../activityLog/index.js';
+import { readActivityEvents } from '../activityLog/index.js';
 import { readSessionDayLog } from '../sessionStore/index.js';
 
 import { inferTopicsLayers } from './inferTopicsLayers.js';
 
-/** work-index 디렉터리 (`.maencof-meta/dailynotes/work-index/`). */
-export function getWorkIndexDir(cwd: string): string {
-  return join(cwd, MAENCOF_META_DIR, DAILYNOTES_DIR, WORK_INDEX_DIR);
+/** rollup 디렉터리 (`.maencof-meta/activity/rollups/`). */
+export function getRollupsDir(cwd: string): string {
+  return join(cwd, MAENCOF_META_DIR, ACTIVITY_DIR, ROLLUPS_DIR);
 }
 
 /** 특정 일자의 daily rollup 파일 경로. */
@@ -53,7 +53,7 @@ export function getDailyRollupPath(cwd: string, date: string): string {
  */
 export function buildDailyRollup(cwd: string, date: string): void {
   const sessions = Object.values(readSessionDayLog(cwd, date).sessions);
-  const activity = readActivityEntries(cwd, date);
+  const activity = readActivityEvents(cwd, date);
 
   let totalDurationMin = 0;
   const vaultOps: Record<string, number> = {};
@@ -178,7 +178,7 @@ export function queryWork(
   key: string,
 ): { lastWorkedOn: string | null; dates: string[] } {
   const fileName = kind === 'topic' ? TOPIC_INDEX_FILE : LAYER_INDEX_FILE;
-  let index = readReverseIndex(join(getWorkIndexDir(cwd), fileName));
+  let index = readReverseIndex(join(getRollupsDir(cwd), fileName));
 
   const newest = listDailyRollupDates(cwd)[0] ?? null;
   if (!index || index.coversThrough !== newest) {
@@ -191,7 +191,7 @@ export function queryWork(
 }
 
 function getDailyRollupDir(cwd: string): string {
-  return join(getWorkIndexDir(cwd), DAILY_ROLLUP_SUBDIR);
+  return join(getRollupsDir(cwd), DAILY_ROLLUP_SUBDIR);
 }
 
 function readReverseIndex(path: string): ReverseIndex | null {
@@ -228,14 +228,14 @@ function buildReverseIndex(cwd: string): {
   const topic: ReverseIndex = { updatedAt, coversThrough, index: topicIndex };
   const layer: ReverseIndex = { updatedAt, coversThrough, index: layerIndex };
 
-  mkdirSync(getWorkIndexDir(cwd), { recursive: true });
+  mkdirSync(getRollupsDir(cwd), { recursive: true });
   writeFileSync(
-    join(getWorkIndexDir(cwd), TOPIC_INDEX_FILE),
+    join(getRollupsDir(cwd), TOPIC_INDEX_FILE),
     JSON.stringify(topic, null, 2) + '\n',
     'utf-8',
   );
   writeFileSync(
-    join(getWorkIndexDir(cwd), LAYER_INDEX_FILE),
+    join(getRollupsDir(cwd), LAYER_INDEX_FILE),
     JSON.stringify(layer, null, 2) + '\n',
     'utf-8',
   );

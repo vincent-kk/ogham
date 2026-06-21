@@ -1,9 +1,11 @@
 export const MAENCOF_DIR = '.maencof';
 export const MAENCOF_META_DIR = '.maencof-meta';
-export const DAILYNOTES_DIR = 'dailynotes';
-export const SESSIONS_DIR = 'sessions';
-/** 활동 이벤트 로그 디렉터리 (NDJSON). 레거시 `dailynotes/*.md` 를 대체. */
+/** 활동 기록 umbrella 디렉터리 — events / sessions / rollups 를 담는다. */
 export const ACTIVITY_DIR = 'activity';
-/** 작업 이력 파생물 디렉터리 (daily rollup + 역색인). */
-export const WORK_INDEX_DIR = 'work-index';
+/** 활동 이벤트 로그(NDJSON) 디렉터리. */
+export const EVENTS_DIR = 'events';
+/** 세션 레코드 디렉터리. */
+export const SESSIONS_DIR = 'sessions';
+/** 작업 이력 파생물(daily rollup + 역색인) 디렉터리. */
+export const ROLLUPS_DIR = 'rollups';
 export const LAYER1_PREFIX = '01_Core';

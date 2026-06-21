@@ -1,20 +1,20 @@
 /**
- * @file dailynote.ts
- * @description Registers the dailynote_read plain-read tool.
+ * @file activity.ts
+ * @description Registers the activity_read plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { handleDailynoteRead } from '../../tools/dailynoteRead/index.js';
+import { handleActivityRead } from '../../tools/activityRead/index.js';
 import { registerReadTool } from '../middlewares/index.js';
 
-export function registerDailynoteTools(server: McpServer): void {
+export function registerActivityReadTools(server: McpServer): void {
   registerReadTool(
     server,
-    'dailynote_read',
+    'activity_read',
     {
       description:
-        'Queries the dailynote (daily activity log). Supports date, category filter, and last N days lookup. Returns time-grouped entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
+        'Queries the activity log (daily record of vault actions). Supports date, category filter, and last N days lookup. Returns time-ordered entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',
       inputSchema: z.object({
         date: z
           .string()
@@ -22,14 +22,7 @@ export function registerDailynoteTools(server: McpServer): void {
           .optional()
           .describe('Date to query YYYY-MM-DD (default: today)'),
         category: z
-          .enum([
-            'document',
-            'search',
-            'index',
-            'config',
-            'session',
-            'diagnostic',
-          ])
+          .enum(['document', 'search', 'index', 'config', 'diagnostic'])
           .optional()
           .describe('Category filter'),
         last_days: z
@@ -42,7 +35,7 @@ export function registerDailynoteTools(server: McpServer): void {
       }),
     },
     async (vaultPath, args) =>
-      Promise.resolve(handleDailynoteRead(vaultPath, args)),
+      Promise.resolve(handleActivityRead(vaultPath, args)),
     { needsFreshness: false },
   );
 }

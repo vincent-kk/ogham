@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { appendActivityEntry } from '../../core/activityLog/index.js';
+import { appendActivityEvent } from '../../core/activityLog/index.js';
 import { buildDailyRollup } from '../../core/workIndex/index.js';
 import { handleWorkHistory } from '../../mcp/tools/workHistory/workHistory.js';
 
@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 function seedDay(date: string, path: string): void {
-  appendActivityEntry(
+  appendActivityEvent(
     vaultDir,
     { time: '10:00', category: 'document', description: 'c', path },
     new Date(`${date}T10:00:00`),

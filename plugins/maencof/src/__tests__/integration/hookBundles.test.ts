@@ -52,7 +52,7 @@ const HOOK_CASES: HookCase[] = [
     }),
   },
   {
-    name: 'dailynote-recorder',
+    name: 'activity-recorder',
     buildInput: (cwd) => ({
       cwd,
       session_id: 'smoke',

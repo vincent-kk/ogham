@@ -138,13 +138,13 @@ export type {
   MigrationAction,
 } from './configurator.js';
 
-export { TOOL_CATEGORY_MAP } from '../constants/dailynote.js';
+export { TOOL_CATEGORY_MAP } from '../constants/activity.js';
 export type {
-  DailynoteEntry,
-  DailynoteCategory,
-  DailynoteReadInput,
-  DailynoteReadResult,
-} from './dailynote.js';
+  ActivityEntry,
+  ActivityCategory,
+  ActivityReadInput,
+  ActivityReadResult,
+} from './activity.js';
 
 export {
   CHANGELOG_CATEGORY_LABELS,

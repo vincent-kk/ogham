@@ -230,7 +230,7 @@ export function runSessionStart(input: SessionStartInput): SessionStartResult {
   }
 
   // 7. Record session start in the per-day session store (JSON, keyed by session_id).
-  //    Session lifecycle is no longer logged to the dailynote .md — that log is
+  //    Session lifecycle is no longer logged to the activity log — that log is
   //    reserved for actual vault document/search/index activity.
   try {
     const sessionId = input.session_id ?? 'unknown';

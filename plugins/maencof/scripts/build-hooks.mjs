@@ -47,17 +47,49 @@ const LIGHT_HOOK_BYTES = 10 * 1024;
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [
-  { name: 'session-start', entry: 'sessionStart', maxBytes: SESSION_START_HOOK_BYTES },
+  {
+    name: 'session-start',
+    entry: 'sessionStart',
+    maxBytes: SESSION_START_HOOK_BYTES,
+  },
   { name: 'session-end', entry: 'sessionEnd', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'insight-injector', entry: 'insightInjector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'context-injector', entry: 'contextInjector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'dailynote-recorder', entry: 'dailynoteRecorder', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'insight-injector',
+    entry: 'insightInjector',
+    maxBytes: HEAVY_HOOK_BYTES,
+  },
+  {
+    name: 'context-injector',
+    entry: 'contextInjector',
+    maxBytes: HEAVY_HOOK_BYTES,
+  },
+  {
+    name: 'activity-recorder',
+    entry: 'activityRecorder',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
   // spawnCli (git) callers — cross-spawn inlined
-  { name: 'vault-committer', entry: 'vaultCommitter', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'changelog-gate', entry: 'changelogGate', maxBytes: HEAVY_HOOK_BYTES },
+  {
+    name: 'vault-committer',
+    entry: 'vaultCommitter',
+    maxBytes: HEAVY_HOOK_BYTES,
+  },
+  {
+    name: 'changelog-gate',
+    entry: 'changelogGate',
+    maxBytes: HEAVY_HOOK_BYTES,
+  },
   // logHookFailure only
-  { name: 'lifecycle-dispatcher', entry: 'lifecycleDispatcher', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'vault-redirector', entry: 'vaultRedirector', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'lifecycle-dispatcher',
+    entry: 'lifecycleDispatcher',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
+  {
+    name: 'vault-redirector',
+    entry: 'vaultRedirector',
+    maxBytes: LIGHT_HOOK_BYTES,
+  },
   { name: 'layer-guard', entry: 'layerGuard', maxBytes: LIGHT_HOOK_BYTES },
 ];
 

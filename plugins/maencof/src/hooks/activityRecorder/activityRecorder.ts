@@ -1,32 +1,32 @@
 /**
- * @file dailynoteRecorder.ts
- * @description PostToolUse Hook — write 도구 호출 시 dailynote에 자동 기록
+ * @file activityRecorder.ts
+ * @description PostToolUse Hook — write 도구 호출 시 활동 로그(NDJSON)에 자동 기록
  *
- * matcher: `create`|`update`|`delete`|`move`|`capture_insight`|`claudemd_merge`|`claudemd_remove` (write 도구 7개)
+ * matcher: `create`|`update`|`delete`|`move`|`capture_insight`|`claudemd_merge`|`claudemd_remove` (write 도구)
  * graceful degradation: 모든 에러 catch → { continue: true }
  *
- * P4 — self-reference guard: 자기 자신(dailynote)이나 changelog 등 maencof 가 자동
- * 관리하는 경로에 대한 write 는 dailynote 에 기록하지 않는다. 기록하면 매 dailynote
- * append 가 또 다른 dailynote 이벤트를 유발해 엔트리가 무한 복제된다.
+ * P4 — self-reference guard: maencof 가 자동 관리하는 경로(.maencof / .maencof-meta /
+ * changelog / 볼트 dailynotes)에 대한 write 는 기록하지 않는다. 기록하면 append 가
+ * 또 다른 write 이벤트를 유발해 엔트리가 무한 복제된다.
  */
-import { TOOL_CATEGORY_MAP } from '../../constants/dailynote.js';
-import { DAILYNOTE_RECORDER_EXCLUSION_PREFIXES } from '../../constants/dailynoteRecorder.js';
-import { appendActivityEntry } from '../../core/activityLog/index.js';
+import { TOOL_CATEGORY_MAP } from '../../constants/activity.js';
+import { ACTIVITY_RECORDER_EXCLUSION_PREFIXES } from '../../constants/activityRecorder.js';
 import {
+  appendActivityEvent,
   buildToolDescription,
-  formatTime,
-} from '../../core/dailynoteWriter/index.js';
+} from '../../core/activityLog/index.js';
+import { formatTime } from '../../core/dateFormat/index.js';
 import { appendErrorLogSafe } from '../../core/errorLog/index.js';
 import { isMaencofVault } from '../shared/index.js';
 
 function isExcludedPath(path: string | undefined): boolean {
   if (!path) return false;
-  return DAILYNOTE_RECORDER_EXCLUSION_PREFIXES.some((prefix) =>
+  return ACTIVITY_RECORDER_EXCLUSION_PREFIXES.some((prefix) =>
     path.startsWith(prefix),
   );
 }
 
-export interface DailynoteRecorderInput {
+export interface ActivityRecorderInput {
   tool_name?: string;
   tool_input?: Record<string, unknown>;
   tool_response?: Record<string, unknown>;
@@ -34,17 +34,17 @@ export interface DailynoteRecorderInput {
   session_id?: string;
 }
 
-export interface DailynoteRecorderResult {
+export interface ActivityRecorderResult {
   continue: boolean;
 }
 
 /**
- * Dailynote Recorder Hook handler.
- * PostToolUse에서 maencof write 도구 호출 시 dailynote 파일에 자동 기록.
+ * Activity Recorder Hook handler.
+ * PostToolUse에서 maencof write 도구 호출 시 활동 로그에 자동 기록.
  */
-export function runDailynoteRecorder(
-  input: DailynoteRecorderInput,
-): DailynoteRecorderResult {
+export function runActivityRecorder(
+  input: ActivityRecorderInput,
+): ActivityRecorderResult {
   try {
     const cwd = input.cwd ?? process.cwd();
     const toolName = input.tool_name ?? '';
@@ -66,13 +66,13 @@ export function runDailynoteRecorder(
       extractPathFromResponse(input.tool_response) ??
       undefined;
 
-    // P4: maencof 자체 관리 경로(dailynote/changelog/.maencof-meta/.maencof)에
-    // 대한 write 는 skip — 그렇지 않으면 append 자체가 재귀적으로 append 를 유발한다.
+    // P4: maencof 자체 관리 경로에 대한 write 는 skip — 그렇지 않으면 append 자체가
+    // 재귀적으로 append 를 유발한다.
     if (isExcludedPath(path)) {
       return { continue: true };
     }
 
-    appendActivityEntry(cwd, {
+    appendActivityEvent(cwd, {
       time: formatTime(new Date()),
       category,
       description,
@@ -80,7 +80,7 @@ export function runDailynoteRecorder(
     });
   } catch (e) {
     appendErrorLogSafe(input.cwd ?? process.cwd(), {
-      hook: 'dailynote-recorder',
+      hook: 'activity-recorder',
       error: String(e),
       timestamp: new Date().toISOString(),
     });

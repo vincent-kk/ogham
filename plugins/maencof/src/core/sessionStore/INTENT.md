@@ -2,7 +2,7 @@
 
 ## Purpose
 
-세션 기록 저장소. 일자별 JSON(`dailynotes/sessions/YYYY-MM-DD.json`)에 세션을
+세션 기록 저장소. 일자별 JSON(`activity/sessions/YYYY-MM-DD.json`)에 세션을
 session_id 키 맵으로 보관하고 볼트 작업 차분을 산출한다.
 
 ## Structure

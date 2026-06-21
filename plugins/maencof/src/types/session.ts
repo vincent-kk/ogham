@@ -48,7 +48,7 @@ export interface UsageStats {
 }
 
 /**
- * 단일 세션 레코드 — `dailynotes/sessions/YYYY-MM-DD.json` 의 `sessions[sessionId]` 값.
+ * 단일 세션 레코드 — `activity/sessions/YYYY-MM-DD.json` 의 `sessions[sessionId]` 값.
  *
  * SessionStart 에 생성(`usageBaseline` 스냅샷 포함)되고 SessionEnd 에 마감된다.
  * 마감 시 baseline 대비 누적 통계 차분으로 `vaultOps` 를 산출하고 `usageBaseline` 은 제거한다.
@@ -72,7 +72,7 @@ export interface SessionRecord {
 }
 
 /**
- * 일자별 세션 로그 파일 — `dailynotes/sessions/YYYY-MM-DD.json`.
+ * 일자별 세션 로그 파일 — `activity/sessions/YYYY-MM-DD.json`.
  *
  * 하루 1파일로 세션을 `session_id` 키 맵에 보관해 전수조사 없이 직접 조회한다.
  */
