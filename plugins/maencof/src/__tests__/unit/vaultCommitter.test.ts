@@ -14,7 +14,7 @@ import {
   readVaultCommitConfig,
   runVaultCommitter,
   shouldCommitOnPrompt,
-} from '../../hooks/vaultCommitter/vaultCommitter.js';
+} from '../../hooks/utils/vaultCommitter/vaultCommitter.js';
 
 // ── Mock @ogham/cross-platform/spawn ─────────────────────────────────
 //

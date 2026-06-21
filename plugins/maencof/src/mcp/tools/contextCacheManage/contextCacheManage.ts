@@ -8,14 +8,14 @@ import { resolve } from 'node:path';
 import { z } from 'zod';
 
 import { MAX_PINNED_NODES } from '../../../constants/performance.js';
-import type { PinnedNode } from '../../../hooks/cacheManager/index.js';
+import type { PinnedNode } from '../../../core/cacheManager/cacheManager.js';
 import {
   readPinnedNodes,
   readTurnContext,
   writePinnedNodes,
   writeTurnContext,
-} from '../../../hooks/cacheManager/index.js';
-import { buildTurnContext } from '../../../hooks/contextInjector/index.js';
+} from '../../../core/cacheManager/cacheManager.js';
+import { buildTurnContext } from '../../../core/turnContext/build.js';
 
 export const contextCacheManageInputSchema = {
   action: z

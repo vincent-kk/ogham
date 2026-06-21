@@ -1,16 +1,18 @@
 ---
 name: craft-agent
 user_invocable: true
-description: "[maencof:craft-agent] Creates, edits, validates, or lists Claude Code subagent definitions. Supports four modes: CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management."
-argument-hint: "[request describing what to create/edit/validate/list]"
-version: "2.0.0"
+description: '[maencof:craft-agent] Creates, edits, validates, or lists Claude Code subagent definitions. Supports four modes: CREATE, EDIT, VALIDATE, and LIST for full agent lifecycle management.'
+argument-hint: '[request describing what to create/edit/validate/list]'
+version: '2.0.0'
 complexity: complex
 context_layers: []
 orchestrator: configurator
 plugin: maencof
 ---
 
-# Subagent Constructor
+# Craft Agent
+
+> Standalone adaptation of the subagent-constructor concept, bundled for maencof.
 
 ## When to Use
 
@@ -72,55 +74,55 @@ Claude automatically invokes this skill when:
 
 ### Frontmatter Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `name` | Yes | Unique identifier, lowercase-hyphen-case |
-| `description` | Yes | When Claude should delegate — be specific |
-| `tools` | No | Allowlist of tool names (comma-separated). Inherits all if omitted |
-| `disallowedTools` | No | Denylist of tools from inherited set |
-| `model` | No | `sonnet`, `opus`, `haiku`, full model ID, or `inherit` (default) |
-| `permissionMode` | No | `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan` |
-| `maxTurns` | No | Max agentic turns before stopping |
-| `skills` | No | Skills to preload into agent context |
-| `mcpServers` | No | MCP servers available to agent |
-| `hooks` | No | Lifecycle hooks scoped to agent |
-| `memory` | No | Persistent memory scope: `user`, `project`, or `local` |
-| `background` | No | Always run as background task (boolean, default: false) |
-| `effort` | No | Reasoning depth: `low`, `medium`, `high`, `max` |
-| `isolation` | No | `worktree` for isolated Git worktree execution |
-| `color` | No | UI color: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` |
-| `initialPrompt` | No | Auto-submitted first user turn when run via `--agent` |
+| Field             | Required | Description                                                                    |
+| ----------------- | -------- | ------------------------------------------------------------------------------ |
+| `name`            | Yes      | Unique identifier, lowercase-hyphen-case                                       |
+| `description`     | Yes      | When Claude should delegate — be specific                                      |
+| `tools`           | No       | Allowlist of tool names (comma-separated). Inherits all if omitted             |
+| `disallowedTools` | No       | Denylist of tools from inherited set                                           |
+| `model`           | No       | `sonnet`, `opus`, `haiku`, full model ID, or `inherit` (default)               |
+| `permissionMode`  | No       | `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `plan`       |
+| `maxTurns`        | No       | Max agentic turns before stopping                                              |
+| `skills`          | No       | Skills to preload into agent context                                           |
+| `mcpServers`      | No       | MCP servers available to agent                                                 |
+| `hooks`           | No       | Lifecycle hooks scoped to agent                                                |
+| `memory`          | No       | Persistent memory scope: `user`, `project`, or `local`                         |
+| `background`      | No       | Always run as background task (boolean, default: false)                        |
+| `effort`          | No       | Reasoning depth: `low`, `medium`, `high`, `max`                                |
+| `isolation`       | No       | `worktree` for isolated Git worktree execution                                 |
+| `color`           | No       | UI color: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan` |
+| `initialPrompt`   | No       | Auto-submitted first user turn when run via `--agent`                          |
 
 See **reference.md** Section 1 for complete field specifications and interaction rules.
 
 ### Model Selection Guide
 
-| Use Case | Model | Rationale |
-| --- | --- | --- |
-| Fast lookups, simple scans | `haiku` | Low latency, cost-effective |
-| Standard implementation, reviews | `sonnet` | Balanced capability and speed |
-| Architecture, deep analysis | `opus` | Maximum reasoning capability |
-| Match parent conversation | `inherit` | Context-appropriate (default) |
+| Use Case                         | Model     | Rationale                     |
+| -------------------------------- | --------- | ----------------------------- |
+| Fast lookups, simple scans       | `haiku`   | Low latency, cost-effective   |
+| Standard implementation, reviews | `sonnet`  | Balanced capability and speed |
+| Architecture, deep analysis      | `opus`    | Maximum reasoning capability  |
+| Match parent conversation        | `inherit` | Context-appropriate (default) |
 
 ### Scope Deployment
 
-| Location | Scope | Priority |
-| --- | --- | --- |
-| Managed settings | Organization-wide | 1 (highest) |
-| `--agents` CLI flag | Current session only | 2 |
-| `.claude/agents/` | Current project | 3 |
-| `~/.claude/agents/` | All projects | 4 |
-| Plugin `agents/` | Where plugin enabled | 5 (lowest) |
+| Location            | Scope                | Priority    |
+| ------------------- | -------------------- | ----------- |
+| Managed settings    | Organization-wide    | 1 (highest) |
+| `--agents` CLI flag | Current session only | 2           |
+| `.claude/agents/`   | Current project      | 3           |
+| `~/.claude/agents/` | All projects         | 4           |
+| Plugin `agents/`    | Where plugin enabled | 5 (lowest)  |
 
 ### Invocation Methods
 
-| Method | Description |
-| --- | --- |
-| Automatic delegation | Claude matches task to subagent's `description` |
-| Natural language | Name the subagent in the prompt |
-| `@-mention` | `@"agent-name (agent)"` — guarantees the subagent runs |
-| `--agent` flag | `claude --agent <name>` — whole session uses subagent's config |
-| `/agents` command | Interactive UI to create, edit, delete, and list subagents |
+| Method               | Description                                                    |
+| -------------------- | -------------------------------------------------------------- |
+| Automatic delegation | Claude matches task to subagent's `description`                |
+| Natural language     | Name the subagent in the prompt                                |
+| `@-mention`          | `@"agent-name (agent)"` — guarantees the subagent runs         |
+| `--agent` flag       | `claude --agent <name>` — whole session uses subagent's config |
+| `/agents` command    | Interactive UI to create, edit, delete, and list subagents     |
 
 ## Design Principles
 
@@ -151,10 +153,6 @@ Load when seeking implementation patterns or starting from a working example.
 Deep-dive topics for advanced subagent engineering:
 
 - **persona-crafting.md**: How to write effective personas — role declaration, judgment criteria, value priorities, failure modes, perspective/behavior separation, and model-specific calibration
-- **frontmatter-spec.md**: Field interaction rules, validation logic, and CLI agent format
-- **tool-catalog.md**: Tool restriction patterns, context-dependent availability, and common combinations
-- **design-patterns.md**: 10 design patterns (including perspective/behavior separation), anti-patterns, and decision matrix for template selection
-- **hooks-integration.md**: Practical hook patterns (SQL validator, path validator, command allowlist, linter) and testing methods
 
 ### templates/
 

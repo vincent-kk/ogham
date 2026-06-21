@@ -36,10 +36,10 @@ claude --plugin-dir ./plugins/maencof
 
 Building produces two outputs:
 
-- `bridge/mcp-server.cjs` — MCP server (18 knowledge tools)
-- `bridge/*.mjs` — 10 hook scripts (session-start, session-end, layer-guard, context-injector, dailynote-recorder, lifecycle-dispatcher, vault-committer, vault-redirector, insight-injector, changelog-gate)
+- `bridge/mcp-server.cjs` — MCP server (19 knowledge tools)
+- `bridge/*.mjs` — 6 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use, stop, session-end), each running that event's concern handlers in a single process
 
-> **Performance note**: maencof chains 4 hooks on `UserPromptSubmit` (context-injector → lifecycle-dispatcher → vault-committer → insight-injector), all fast-path optimized. Typical per-prompt overhead is ~60ms (~110ms on the first prompt of a session due to context cache build). The hook timeouts in `hooks.json` (2–3s) are kill-switches, not expected latency. The only path that runs git is `vault-committer`, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
+> **Performance note**: maencof registers one hook per event. The `UserPromptSubmit` dispatcher runs context injection → lifecycle actions → vault auto-commit → the insight banner sequentially in a single process — one node start per event instead of one per concern. The first prompt of a session additionally builds the context cache. The per-event timeouts in `hooks.json` are kill-switches, not expected latency, and every concern fast-fails outside a vault. The only path that runs git is the vault auto-commit, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
 
 ---
 
@@ -169,7 +169,7 @@ With the plugin active, these hooks fire **without user intervention**:
 | ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------ |
 | Session starts         | Loads Vault context + index       | Agent knows your knowledge from the first turn                                       |
 | Writing/editing a file | Layer guard check                 | Prevents unauthorized L1 modifications                                               |
-| After maencof write    | Daily-note recording              | Tracks vault writes (create/update/move/delete) for change history                   |
+| After maencof write    | Activity log recording            | Tracks vault writes (create/update/move/delete) for change history                   |
 | Session ends           | Session cleanup + persistence     | Saves volatile state, prunes expired entries                                         |
 | On every user prompt   | Context-injection chain (4 hooks) | Loads turn context, fires registered actions, captures insights, gates vault commits |
 | On agent stop          | Lifecycle dispatcher              | Executes registered stop-event actions                                               |
@@ -180,34 +180,35 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 
 ## Skills Reference
 
-| Skill                  | Category | What it does                                                                                         |
-| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `/maencof:setup`       | Setup    | 7-step onboarding wizard                                                                             |
-| `/maencof:remember`    | Core     | Record new knowledge (auto-layer, tags, dedup)                                                       |
-| `/maencof:recall`      | Core     | Spreading Activation search                                                                          |
-| `/maencof:explore`     | Core     | Interactive graph traversal (up to 3 rounds)                                                         |
-| `/maencof:organize`    | Core     | Agent-guided document reorganization                                                                 |
-| `/maencof:reflect`     | Core     | Read-only knowledge health analysis                                                                  |
-| `/maencof:suggest`     | Core     | SA + Jaccard similarity link suggestions                                                             |
-| `/maencof:build`       | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
-| `/maencof:checkup`     | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
-| `/maencof:cleanup`     | Health   | Vault document deletion and CLAUDE.md cleanup                                                        |
-| `/maencof:ingest`      | Advanced | Import from URL, GitHub, or text                                                                     |
-| `/maencof:connect`     | Advanced | Register external data sources                                                                       |
-| `/maencof:mcp-setup`   | Advanced | Install external MCP servers                                                                         |
-| `/maencof:manage`      | Advanced | Skill/agent activation and usage reports                                                             |
-| `/maencof:insight`     | Advanced | Auto-insight capture management                                                                      |
-| `/maencof:changelog`   | Advanced | Self-change daily changelog recorder                                                                 |
-| `/maencof:migrate`     | Advanced | Vault architecture migration                                                                         |
-| `/maencof:configure`   | Config   | Unified environment configuration entry point                                                        |
-| `/maencof:bridge`      | Config   | MCP install + register + workflow skill in one                                                       |
-| `/maencof:craft-skill` | Config   | Custom skill generator                                                                               |
-| `/maencof:craft-agent` | Config   | Custom agent generator                                                                               |
-| `/maencof:instruct`    | Config   | CLAUDE.md management                                                                                 |
-| `/maencof:rule`        | Config   | Behavioral rule management                                                                           |
-| `/maencof:lifecycle`   | Config   | Lifecycle action management                                                                          |
-| `/maencof:think`       | Analysis | Tree of Thoughts requirement analysis                                                                |
-| `/maencof:refine`      | Analysis | Ambiguous input refinement interview loop                                                            |
+| Skill                      | Category | What it does                                                                                         |
+| -------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `/maencof:setup`           | Setup    | 7-step onboarding wizard                                                                             |
+| `/maencof:remember`        | Core     | Record new knowledge (auto-layer, tags, dedup)                                                       |
+| `/maencof:recall`          | Core     | Spreading Activation search                                                                          |
+| `/maencof:explore`         | Core     | Interactive graph traversal (up to 3 rounds)                                                         |
+| `/maencof:organize`        | Core     | Agent-guided document reorganization                                                                 |
+| `/maencof:reflect`         | Core     | Read-only knowledge health analysis                                                                  |
+| `/maencof:suggest`         | Core     | SA + Jaccard similarity link suggestions                                                             |
+| `/maencof:build`           | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
+| `/maencof:checkup`         | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
+| `/maencof:cleanup`         | Health   | Vault document deletion and CLAUDE.md cleanup                                                        |
+| `/maencof:ingest`          | Advanced | Import from URL, GitHub, or text                                                                     |
+| `/maencof:connect`         | Advanced | Register external data sources                                                                       |
+| `/maencof:mcp-setup`       | Advanced | Install external MCP servers                                                                         |
+| `/maencof:manage`          | Advanced | Skill/agent activation and usage reports                                                             |
+| `/maencof:insight`         | Advanced | Auto-insight capture management                                                                      |
+| `/maencof:changelog`       | Advanced | Self-change daily changelog recorder                                                                 |
+| `/maencof:migrate`         | Advanced | Vault architecture migration                                                                         |
+| `/maencof:configure`       | Config   | Unified environment configuration entry point                                                        |
+| `/maencof:bridge`          | Config   | MCP install + register + workflow skill in one                                                       |
+| `/maencof:craft-skill`     | Config   | Custom skill generator                                                                               |
+| `/maencof:craft-agent`     | Config   | Custom agent generator                                                                               |
+| `/maencof:craft-dashboard` | Config   | Generate or update a personal vault dashboard from an interview                                      |
+| `/maencof:instruct`        | Config   | CLAUDE.md management                                                                                 |
+| `/maencof:rule`            | Config   | Behavioral rule management                                                                           |
+| `/maencof:lifecycle`       | Config   | Lifecycle action management                                                                          |
+| `/maencof:think`           | Analysis | Tree of Thoughts requirement analysis                                                                |
+| `/maencof:refine`          | Analysis | Ambiguous input refinement interview loop                                                            |
 
 ---
 

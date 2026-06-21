@@ -1,9 +1,9 @@
 ---
 name: build
 user_invocable: true
-description: "[maencof:build] Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, performs a full rebuild when --full or --force is specified, and discards the .maencof cache entirely before rebuilding when --reset-cache is set (absorbs the former maencof-rebuild skill)."
-argument-hint: "[--full] [--force] [--reset-cache] [--no-backup] [--dry-run]"
-version: "1.1.0"
+description: '[maencof:build] Builds or refreshes the knowledge graph index. Runs incrementally by default to reprocess only changed files, performs a full rebuild when --full or --force is specified, and discards the .maencof cache entirely before rebuilding when --reset-cache is set (absorbs the former maencof-rebuild skill).'
+argument-hint: '[--full] [--force] [--reset-cache] [--no-backup] [--dry-run]'
+version: '1.1.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
 orchestrator: build skill
@@ -47,6 +47,7 @@ Otherwise, check the current index status with the `mcp_t_kg_status` MCP tool.
 ### Step 2 — Run Build
 
 Build pipeline:
+
 ```
 1. VaultScanner: collect file list + mtime
 2. DocumentParser: parse Frontmatter + links (changed files only)
@@ -87,10 +88,10 @@ If the change is large (nodes ±20% or more), warn and recommend investigating t
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_kg_status` | Check current index status (pre- and post-rebuild snapshots) |
-| `mcp_t_kg_build` | Run index build (incremental: `force=false`, full: `force=true`) |
+| Tool              | Purpose                                                          |
+| ----------------- | ---------------------------------------------------------------- |
+| `mcp_t_kg_status` | Check current index status (pre- and post-rebuild snapshots)     |
+| `mcp_t_kg_build`  | Run index build (incremental: `force=false`, full: `force=true`) |
 
 ## Error Handling
 
@@ -107,13 +108,13 @@ If the change is large (nodes ±20% or more), warn and recommend investigating t
 /maencof:build [--full] [--force] [--reset-cache] [--no-backup] [--dry-run]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--full` | false | Force a full rebuild (equivalent to `--force`) |
-| `--force` | false | Alias of `--full`; skip the stale-ratio confirmation prompt and run a full rebuild immediately |
-| `--reset-cache` | false | Discard `.maencof/` cache contents before rebuilding (recovery / migration mode). Implies a full rebuild. |
-| `--no-backup` | false | Skip `.maencof/index.json.bak` snapshot when `--reset-cache` is used |
-| `--dry-run` | false | Preview changes only; no cache reset and no index write |
+| Option          | Default | Description                                                                                               |
+| --------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `--full`        | false   | Force a full rebuild (equivalent to `--force`)                                                            |
+| `--force`       | false   | Alias of `--full`; skip the stale-ratio confirmation prompt and run a full rebuild immediately            |
+| `--reset-cache` | false   | Discard `.maencof/` cache contents before rebuilding (recovery / migration mode). Implies a full rebuild. |
+| `--no-backup`   | false   | Skip `.maencof/index.json.bak` snapshot when `--reset-cache` is used                                      |
+| `--dry-run`     | false   | Preview changes only; no cache reset and no index write                                                   |
 
 ## Usage Examples
 
@@ -124,9 +125,3 @@ If the change is large (nodes ±20% or more), warn and recommend investigating t
 /maencof:build --force --reset-cache
 /maencof:build --dry-run
 ```
-
-## Migration Note
-
-The former `maencof-rebuild` skill has been merged into this skill.
-Replace any prior `maencof-rebuild` invocation with `/maencof:build --force --reset-cache`.
-The `--no-backup` flag is preserved for faster rebuilds when an explicit backup is unnecessary.

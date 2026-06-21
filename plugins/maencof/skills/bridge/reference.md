@@ -15,11 +15,11 @@ Each sub-skill handles its own file writes. Bridge coordinates the pipeline and 
 
 ## Sub-Skill Comparison
 
-| Skill | Scope |
-|-------|-------|
-| `/maencof:mcp-setup` | MCP server installation only |
-| `/maencof:connect` | Data source registration only |
-| `/maencof:bridge` | **Install + register + workflow skill — all in one** |
+| Skill                | Scope                                                |
+| -------------------- | ---------------------------------------------------- |
+| `/maencof:mcp-setup` | MCP server installation only                         |
+| `/maencof:connect`   | Data source registration only                        |
+| `/maencof:bridge`    | **Install + register + workflow skill — all in one** |
 
 ## Detailed Workflow
 
@@ -75,6 +75,7 @@ Proceed? [Yes / Edit]
 ```
 
 Configurable fields:
+
 - **Target**: channel, repository, project, board
 - **Layer**: L1–L5 (appropriate for data type)
 - **Tags**: auto-tagging keywords
@@ -94,6 +95,7 @@ Generating workflow skill...
 ```
 
 Generated skill example:
+
 ```yaml
 ---
 name: slack-digest
@@ -107,7 +109,8 @@ version: 1.0.0
 # slack-digest — Slack Channel Digest
 
 ## Workflow
-1. Fetch #dev messages via mcp__slack__get_channel_messages
+
+1. Fetch #dev messages via mcp**slack**get_channel_messages
 2. Summarize key points (5 bullets max)
 3. Save to L4 via /maencof:remember (tags: slack, dev-updates)
 4. Confirm save
@@ -146,7 +149,7 @@ Test now? [Yes / Later]
 
 ## Agent Collaboration
 
-Executed by the **configurator** agent. Bridge orchestrates three sub-skills in sequence, passing context between each step.
+Executed by the **configurator** agent. Bridge orchestrates three sub-skills in sequence, passing context between each step. When invoked via bridge, the sub-skills (`mcp-setup`, `connect`, `craft-skill`) run under this configurator context — their own `orchestrator` declarations apply only when they are invoked directly/standalone.
 
 ## Usage Examples
 
@@ -157,6 +160,7 @@ Executed by the **configurator** agent. Bridge orchestrates three sub-skills in 
 ```
 
 Natural language:
+
 ```
 "Connect Jira and set up a sprint summary workflow"
 "Install the Slack MCP and create a daily digest skill"
@@ -165,13 +169,13 @@ Natural language:
 
 ## Error Handling
 
-| Condition | Resolution |
-|-----------|------------|
-| MCP installation failure | Refer to `/maencof:mcp-setup` error handling; offer manual install |
-| API token not set | Provide token acquisition guide, retry after setup |
-| `data-sources.json` parse error | Create backup, offer regeneration |
-| Skill name conflict | Show existing skill, confirm overwrite |
-| MCP connection failure | Verify token/permissions, suggest `/maencof:mcp-setup --verify` |
+| Condition                       | Resolution                                                         |
+| ------------------------------- | ------------------------------------------------------------------ |
+| MCP installation failure        | Refer to `/maencof:mcp-setup` error handling; offer manual install |
+| API token not set               | Provide token acquisition guide, retry after setup                 |
+| `data-sources.json` parse error | Create backup, offer regeneration                                  |
+| Skill name conflict             | Show existing skill, confirm overwrite                             |
+| MCP connection failure          | Verify token/permissions, suggest `/maencof:mcp-setup --verify`    |
 
 ## Acceptance Criteria
 

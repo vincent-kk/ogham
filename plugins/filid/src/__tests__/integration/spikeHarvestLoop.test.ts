@@ -105,7 +105,7 @@ function writeManifest(headSha: string): void {
       head_sha: headSha,
       diff_hash: 'd'.repeat(64),
       criteria_delta_hash: 'c'.repeat(64),
-      created_at: '2026-06-12T00:00:00Z',
+      created_at: new Date().toISOString(),
     }),
   );
 }

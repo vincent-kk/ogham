@@ -3,7 +3,7 @@
  * @description Changelog 생성/추가 유틸리티
  *
  * 02_Derived/changelog/YYYY-MM-DD.md 파일을 생성하고 엔트리를 추가한다.
- * dailynoteWriter.ts와 동급의 파일시스템 I/O 예외 모듈.
+ * 파일시스템 I/O 예외 모듈. 날짜 포맷은 dateFormat 의 formatDate 를 재사용.
  */
 import {
   appendFileSync,
@@ -23,7 +23,7 @@ import {
   CHANGELOG_CATEGORY_ORDER,
   CHANGELOG_DIR,
 } from '../../types/changelog.js';
-import { formatDate } from '../dailynoteWriter/index.js';
+import { formatDate } from '../dateFormat/index.js';
 
 /**
  * changelog 디렉토리 경로를 반환한다.

@@ -5,12 +5,14 @@
  *
  * Output: bridge/<name>.mjs
  *
+ * One bundle per Claude Code event: each bridge is a dispatcher that folds that
+ * event's concern handlers into a single process (see src/hooks/eventDispatch).
+ *
  * Hook isolation guards: hooks must remain thin scripts (Node builtins only).
  * Pulling external runtimes (zod, fast-glob, MCP SDK) into a hook bundle breaks
- * per-event cold-start budget. Per-hook size caps + FORBIDDEN_PATTERNS enforce
+ * per-event cold-start budget. Per-event size caps + FORBIDDEN_PATTERNS enforce
  * this at build time. session-start carries an inlined meta-skill-body.md
- * payload so it gets a higher cap; other heavy hooks (session-end /
- * insight-injector) cap at 20 KB; light hooks cap at 10 KB.
+ * payload so it gets the highest cap.
  */
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,32 +35,59 @@ generateWindowsCmd({
 });
 console.log('  Windows hook shim -> bridge/run-hook.cmd');
 
-// Tiers reflect what each hook pulls from @ogham/cross-platform:
-//   LIGHT    — logHookFailure only (error-log entry; no spawn).
-//   MEDIUM   — spawnCli from cross-platform/spawn — adds cross-spawn (~5 KB).
-//   HEAVY    — session-end / insight-injector run pure orchestration but carry
-//              extra src code (recap composer, insight stats).
-//   SESSION_START — selfProbe (spawn-dependent) + inlined meta-skill-body.md.
-const SESSION_START_HOOK_BYTES = 40 * 1024;
-const HEAVY_HOOK_BYTES = 20 * 1024;
-const MEDIUM_HOOK_BYTES = 15 * 1024;
-const LIGHT_HOOK_BYTES = 10 * 1024;
+// Per-event dispatcher bundles: each bridge folds that event's concern handlers
+// (+ the lifecycle dispatcher) into one process. Caps reflect the union of those
+// concerns' code; the FORBIDDEN_PATTERNS guard below still holds — combining
+// clean concerns must not pull zod / fast-glob / MCP SDK.
+//   session-start      — sessionStart (selfProbe + inlined meta-skill-body.md
+//                        + claudeMd merge + insight stats) + lifecycle.
+//   user-prompt-submit — contextInjector + insightInjector + lifecycle +
+//                        vaultCommitter (spawnCli/git).
+//   session-end        — sessionEnd (recap + digest) + lifecycle +
+//                        vaultCommitter (spawnCli/git).
+//   stop               — changelogGate (spawnCli/git) + lifecycle.
+//   post-tool-use      — activityRecorder + lifecycle.
+//   pre-tool-use       — layerGuard + vaultRedirector + lifecycle (all light).
+const SESSION_START_BYTES = 46 * 1024;
+const USER_PROMPT_SUBMIT_BYTES = 32 * 1024;
+const SESSION_END_BYTES = 32 * 1024;
+const STOP_BYTES = 24 * 1024;
+const POST_TOOL_USE_BYTES = 12 * 1024;
+const PRE_TOOL_USE_BYTES = 12 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
-// kept stable). `entry` is the camelCase src module/dir basename.
+// kept stable). `entryPath` is the esbuild entry relative to src/hooks.
 const hookEntries = [
-  { name: 'session-start', entry: 'sessionStart', maxBytes: SESSION_START_HOOK_BYTES },
-  { name: 'session-end', entry: 'sessionEnd', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'insight-injector', entry: 'insightInjector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'context-injector', entry: 'contextInjector', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'dailynote-recorder', entry: 'dailynoteRecorder', maxBytes: LIGHT_HOOK_BYTES },
-  // spawnCli (git) callers — cross-spawn inlined
-  { name: 'vault-committer', entry: 'vaultCommitter', maxBytes: HEAVY_HOOK_BYTES },
-  { name: 'changelog-gate', entry: 'changelogGate', maxBytes: HEAVY_HOOK_BYTES },
-  // logHookFailure only
-  { name: 'lifecycle-dispatcher', entry: 'lifecycleDispatcher', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'vault-redirector', entry: 'vaultRedirector', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'layer-guard', entry: 'layerGuard', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'session-start',
+    entryPath: 'sessionStart/sessionStart.entry.ts',
+    maxBytes: SESSION_START_BYTES,
+  },
+  {
+    name: 'user-prompt-submit',
+    entryPath: 'userPromptSubmit/userPromptSubmit.entry.ts',
+    maxBytes: USER_PROMPT_SUBMIT_BYTES,
+  },
+  {
+    name: 'pre-tool-use',
+    entryPath: 'preToolUse/preToolUse.entry.ts',
+    maxBytes: PRE_TOOL_USE_BYTES,
+  },
+  {
+    name: 'post-tool-use',
+    entryPath: 'postToolUse/postToolUse.entry.ts',
+    maxBytes: POST_TOOL_USE_BYTES,
+  },
+  {
+    name: 'stop',
+    entryPath: 'stop/stop.entry.ts',
+    maxBytes: STOP_BYTES,
+  },
+  {
+    name: 'session-end',
+    entryPath: 'sessionEnd/sessionEnd.entry.ts',
+    maxBytes: SESSION_END_BYTES,
+  },
 ];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
@@ -70,9 +99,9 @@ const ESM_CJS_REQUIRE_BANNER =
   'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
-  hookEntries.map(({ name, entry }) =>
+  hookEntries.map(({ name, entryPath }) =>
     esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
+      entryPoints: [resolve(root, 'src/hooks', entryPath)],
       bundle: true,
       platform: 'node',
       target: 'node20',
@@ -156,5 +185,5 @@ if (violations.length > 0) {
 }
 
 console.log(
-  `  Hook bundle guards passed (session-start <= ${SESSION_START_HOOK_BYTES}, heavy <= ${HEAVY_HOOK_BYTES}, medium <= ${MEDIUM_HOOK_BYTES}, light <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+  `  Hook bundle guards passed (per-event caps: session-start <= ${SESSION_START_BYTES}, user-prompt-submit <= ${USER_PROMPT_SUBMIT_BYTES}, session-end <= ${SESSION_END_BYTES}, stop <= ${STOP_BYTES}, post-tool-use <= ${POST_TOOL_USE_BYTES}, pre-tool-use <= ${PRE_TOOL_USE_BYTES} bytes, no forbidden modules)`,
 );

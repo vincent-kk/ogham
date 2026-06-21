@@ -1,9 +1,9 @@
 ---
 name: remember
 user_invocable: true
-description: "[maencof:remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter."
-argument-hint: "[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE]"
-version: "1.0.0"
+description: '[maencof:remember] Records a concept, insight, or reference into the vault by recommending the right layer, extracting tags, deduplicating, and saving a properly structured markdown document with frontmatter.'
+argument-hint: '[content] [--layer 2-5] [--sub-layer NAME] [--title TITLE] [--tags TAGS] [--source URL] [--expires DATE] [--no-check]'
+version: '1.0.0'
 complexity: medium
 context_layers: [2, 3, 4, 5]
 orchestrator: remember skill
@@ -41,12 +41,12 @@ Identify the content to record from user input or current conversation context:
 
 Recommend a Layer based on the nature of the content:
 
-| Layer | Criteria | Directory |
-|-------|----------|-----------|
-| L2 Derived | Internalized skills/knowledge/insights | `02_Derived/` |
-| L3 External | External references, links, temporary knowledge | `03_External/` |
-| L4 Action | To-dos, current session context, temporary notes | `04_Action/` |
-| L5 Context | Environmental context, domain metadata, people profiles | `05_Context/` |
+| Layer       | Criteria                                                | Directory      |
+| ----------- | ------------------------------------------------------- | -------------- |
+| L2 Derived  | Internalized skills/knowledge/insights                  | `02_Derived/`  |
+| L3 External | External references, links, temporary knowledge         | `03_External/` |
+| L4 Action   | To-dos, current session context, temporary notes        | `04_Action/`   |
+| L5 Context  | Environmental context, domain metadata, people profiles | `05_Context/`  |
 
 **L2 recommendation criteria**: knowledge the user has directly acquired, validated concepts, expected to be referenced repeatedly
 **L3 recommendation criteria**: contains URL, references external materials, has explicit `source:`
@@ -58,11 +58,11 @@ Recommend a Layer based on the nature of the content:
 
 When creating an L3 document, determine the appropriate sub-layer:
 
-| Sub-Layer | Criteria | Directory |
-|-----------|----------|-----------|
-| L3A Relational | People, relationships, social context | `03_External/relational/` |
-| L3B Structural | Organizations, teams, systems, processes | `03_External/structural/` |
-| L3C Topical | Concepts, technologies, external knowledge | `03_External/topical/` |
+| Sub-Layer      | Criteria                                   | Directory                 |
+| -------------- | ------------------------------------------ | ------------------------- |
+| L3A Relational | People, relationships, social context      | `03_External/relational/` |
+| L3B Structural | Organizations, teams, systems, processes   | `03_External/structural/` |
+| L3C Topical    | Concepts, technologies, external knowledge | `03_External/topical/`    |
 
 Pass `sub_layer` to `mcp_t_create`. If the content doesn't clearly fit a sub-layer, default to **topical** (`03_External/topical/`). This aligns with the L3 Classification Rules used by `/maencof:migrate`.
 
@@ -70,15 +70,16 @@ Pass `sub_layer` to `mcp_t_create`. If the content doesn't clearly fit a sub-lay
 
 When creating an L5 document, determine the role:
 
-| Sub-Layer | Criteria | Directory |
-|-----------|----------|-----------|
-| L5-Buffer | Uncategorized temporary items, inbox | `05_Context/buffer/` |
+| Sub-Layer   | Criteria                             | Directory              |
+| ----------- | ------------------------------------ | ---------------------- |
+| L5-Buffer   | Uncategorized temporary items, inbox | `05_Context/buffer/`   |
 | L5-Boundary | Cross-layer bridge, project MOC, hub | `05_Context/boundary/` |
 
 Default to **Buffer** for general L5 content. Use **Boundary** only when the document explicitly bridges multiple layers (e.g., project MOC linking L1 values to L3 references).
 
 If the user specifies `--layer`, use that Layer.
 Confirm the recommended Layer with the user before proceeding:
+
 ```
 "I'll save this to Layer {N} ({name}). Is that correct? (y/n or a different Layer number)"
 ```
@@ -105,6 +106,7 @@ mcp_t_kg_search(
 ```
 
 If a similar document is found:
+
 ```
 "A similar document exists:
   - {title} ({path})
@@ -117,6 +119,7 @@ Would you like to create a new document or update the existing one? (Create new 
 Create the document with the `mcp_t_create` MCP tool:
 
 **L2 Frontmatter**:
+
 ```yaml
 layer: 2
 tags: [extracted tags]
@@ -124,37 +127,45 @@ title: auto-generated or user-provided
 ```
 
 **L3 Frontmatter** (fields written into the document by `mcp_t_create`):
+
 ```yaml
 layer: 3
-sub_layer: relational | structural | topical  # defaults to topical if unclear
+sub_layer: relational | structural | topical # defaults to topical if unclear
 tags: [extracted tags]
-source: "original source URL (if available)"
-confidence: 0.3  # document-level metadata, not a create parameter; initial value, increases after validation
+source: 'original source URL (if available)'
+confidence: 0.3 # document-level metadata, not a create parameter; initial value, increases after validation
 # L3A (relational) additional fields:
-person: { name: "...", relationship_type: "friend|colleague|...", intimacy_level: 1-5 }
+person:
+  {
+    name: '...',
+    relationship_type: 'friend|colleague|...',
+    intimacy_level: 1-5,
+  }
 # L3B (structural) additional fields:
-org_name: "organization name"
+org_name: 'organization name'
 org_role: "user's role in the org"
 ```
 
 **L4 Frontmatter**:
+
 ```yaml
 layer: 4
 tags: [extracted tags]
-expires: YYYY-MM-DD  # expiration date (if applicable)
-schedule: "once"     # or "daily", "weekly"
+expires: YYYY-MM-DD # expiration date (if applicable)
+schedule: 'once' # or "daily", "weekly"
 ```
 
 **L5 Frontmatter**:
+
 ```yaml
 layer: 5
-sub_layer: buffer | boundary  # default: buffer
+sub_layer: buffer | boundary # default: buffer
 tags: [extracted tags]
-domain: "domain or context category"
-subject: "person name or entity (if applicable)"
+domain: 'domain or context category'
+subject: 'person name or entity (if applicable)'
 # L5-Boundary additional fields:
-boundary_type: "project_moc | hub | domain_bridge"
-connected_layers: [1, 3]  # layers this boundary bridges
+boundary_type: 'project_moc | hub | domain_bridge'
+connected_layers: [1, 3] # layers this boundary bridges
 ```
 
 ### Step 6 — Confirmation Report
@@ -172,12 +183,12 @@ To explore related documents: /maencof:explore {tag}
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_create` | Create document (primary tool) |
-| `mcp_t_kg_search` | Pre-creation duplicate check |
-| `mcp_t_update` | Update existing document (when duplicate found) |
-| `mcp_t_read` | Read existing document content (when duplicate found) |
+| Tool              | Purpose                                               |
+| ----------------- | ----------------------------------------------------- |
+| `mcp_t_create`    | Create document (primary tool)                        |
+| `mcp_t_kg_search` | Pre-creation duplicate check                          |
+| `mcp_t_update`    | Update existing document (when duplicate found)       |
+| `mcp_t_read`      | Read existing document content (when duplicate found) |
 
 ## Options
 
@@ -187,16 +198,16 @@ To explore related documents: /maencof:explore {tag}
 /maencof:remember [content] [--layer <2-5>] [--sub-layer <name>] [--title <title>] [--tags <tag1,tag2>] [--source <url>] [--expires <YYYY-MM-DD>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `content` | conversation context | Content to record |
-| `--layer` | auto-recommended | Specify Layer (2-5; L1 not allowed) |
-| `--sub-layer` | auto-recommended | Sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
-| `--title` | auto-generated | Document title |
-| `--tags` | auto-extracted | Tag list (comma-separated) |
-| `--source` | none | External source URL (for L3) |
-| `--expires` | none | Expiration date YYYY-MM-DD (for L4) |
-| `--no-check` | false | Skip duplicate check |
+| Option        | Default              | Description                                                         |
+| ------------- | -------------------- | ------------------------------------------------------------------- |
+| `content`     | conversation context | Content to record                                                   |
+| `--layer`     | auto-recommended     | Specify Layer (2-5; L1 not allowed)                                 |
+| `--sub-layer` | auto-recommended     | Sub-layer: relational/structural/topical (L3), buffer/boundary (L5) |
+| `--title`     | auto-generated       | Document title                                                      |
+| `--tags`      | auto-extracted       | Tag list (comma-separated)                                          |
+| `--source`    | none                 | External source URL (for L3)                                        |
+| `--expires`   | none                 | Expiration date YYYY-MM-DD (for L4)                                 |
+| `--no-check`  | false                | Skip duplicate check                                                |
 
 ## Usage Examples
 

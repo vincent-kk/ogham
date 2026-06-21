@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runLayerGuard } from '../../hooks/layerGuard/layerGuard.js';
+import { runLayerGuard } from '../../hooks/preToolUse/helpers/layerGuard/layerGuard.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {

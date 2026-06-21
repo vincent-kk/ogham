@@ -1,9 +1,9 @@
 ---
 name: cleanup
 user_invocable: true
-description: "[maencof:cleanup] Deletes vault documents from Layers 2-5 and removes the managed section from CLAUDE.md. Handles both document removal and configuration cleanup safely."
-argument-hint: "[document|claudemd|buffer] [path] [--force] [--dry-run] [--max-age <days>]"
-version: "1.0.0"
+description: '[maencof:cleanup] Deletes vault documents from Layers 2-5 and removes the managed section from CLAUDE.md. Handles both document removal and configuration cleanup safely.'
+argument-hint: '[document|claudemd|buffer] [path] [--force] [--dry-run] [--max-age <days>]'
+version: '1.0.0'
 complexity: simple
 context_layers: [2, 3, 4, 5]
 orchestrator: cleanup skill
@@ -27,12 +27,14 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 ## Mode Selection
 
-| Input Pattern | Mode |
-|---------------|------|
-| file path or document keyword | **document** mode |
-| "claudemd", "CLAUDE.md" keyword | **claudemd** mode |
+| Input Pattern                    | Mode                    |
+| -------------------------------- | ----------------------- |
+| file path or document keyword    | **document** mode       |
+| "claudemd", "CLAUDE.md" keyword  | **claudemd** mode       |
 | "buffer", "stale buffer" keyword | **buffer-cleanup** mode |
-| not specified | ask user to select mode |
+| not specified                    | ask user to select mode |
+
+> The user-facing keyword is `buffer`; it activates the internal **buffer-cleanup** mode named in the workflow and option descriptions below.
 
 ## Workflow
 
@@ -62,15 +64,15 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 
 ## Available MCP Tools
 
-| Tool | Purpose |
-|------|---------|
-| `mcp_t_delete` | Delete vault document (document mode) |
-| `mcp_t_read` | Preview document before deletion (document mode) |
-| `mcp_t_kg_search` | Keyword search to identify deletion target (document mode) |
-| `mcp_t_kg_navigate` | Check inbound links / backlink warnings (document mode) |
-| `mcp_t_move` | Promote buffer items to target layer (buffer-cleanup mode) |
-| `mcp_t_claudemd_read` | Read CLAUDE.md maencof section (claudemd mode) |
-| `mcp_t_claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode) |
+| Tool                    | Purpose                                                    |
+| ----------------------- | ---------------------------------------------------------- |
+| `mcp_t_delete`          | Delete vault document (document mode)                      |
+| `mcp_t_read`            | Preview document before deletion (document mode)           |
+| `mcp_t_kg_search`       | Keyword search to identify deletion target (document mode) |
+| `mcp_t_kg_navigate`     | Check inbound links / backlink warnings (document mode)    |
+| `mcp_t_move`            | Promote buffer items to target layer (buffer-cleanup mode) |
+| `mcp_t_claudemd_read`   | Read CLAUDE.md maencof section (claudemd mode)             |
+| `mcp_t_claudemd_remove` | Remove CLAUDE.md maencof section (claudemd mode)           |
 
 ## Options
 
@@ -78,13 +80,13 @@ Manages cleanup operations across two domains: deleting vault documents and mana
 /maencof:cleanup [mode] [path] [--force] [--dry-run] [--max-age <days>]
 ```
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `mode` | interactive | `document`, `buffer-cleanup`, or `claudemd` |
-| `path` | none | Target document path (document mode only) |
-| `--force` | false | Skip backlink warning (document mode only) |
-| `--dry-run` | false | Preview without executing (claudemd remove and buffer-cleanup modes) |
-| `--max-age` | 30 | Max age in days for buffer-cleanup mode |
+| Option      | Default     | Description                                                          |
+| ----------- | ----------- | -------------------------------------------------------------------- |
+| `mode`      | interactive | `document`, `buffer`, or `claudemd`                                  |
+| `path`      | none        | Target document path (document mode only)                            |
+| `--force`   | false       | Skip backlink warning (document mode only)                           |
+| `--dry-run` | false       | Preview without executing (claudemd remove and buffer-cleanup modes) |
+| `--max-age` | 30          | Max age in days for buffer-cleanup mode                              |
 
 ## Usage Examples
 

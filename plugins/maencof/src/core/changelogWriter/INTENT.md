@@ -9,7 +9,7 @@
 ### Always do
 
 - changelog 카테고리 타입 준수
-- dailynoteWriter의 formatDate 재사용
+- dateFormat의 formatDate 재사용
 
 ### Ask first
 

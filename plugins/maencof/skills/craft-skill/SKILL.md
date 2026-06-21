@@ -1,16 +1,18 @@
 ---
 name: craft-skill
 user_invocable: true
-description: "[maencof:craft-skill] Creates, refactors, improves, or fixes Claude Code skills. Supports four modes: CREATE with complexity-aware scaffolding, REFACTOR, IMPROVE, and FIX with automated validation."
-argument-hint: "[request describing what to create/refactor/improve/fix]"
-version: "2.0.0"
+description: '[maencof:craft-skill] Creates, refactors, improves, or fixes Claude Code skills. Supports four modes: CREATE with complexity-aware scaffolding, REFACTOR, IMPROVE, and FIX with automated validation.'
+argument-hint: '[request describing what to create/refactor/improve/fix]'
+version: '2.0.0'
 complexity: complex
 context_layers: []
 orchestrator: configurator
 plugin: maencof
 ---
 
-# Skill Constructor
+# Craft Skill
+
+> Standalone adaptation of the skill-constructor concept. Mode detection, complexity scoring, and structure generation are performed inline by the model; `enhanced_validator.mjs` is the one bundled deterministic gate.
 
 Intelligent skill engineering system that transforms skill creation from manual scaffolding into a systematic workflow with mode-based operation, complexity-aware structuring, and automated validation.
 
@@ -27,7 +29,7 @@ Claude automatically invokes this skill when:
 
 ## Overview
 
-skill-constructor provides four specialized operating modes for different skill development scenarios:
+craft-skill provides four specialized operating modes for different skill development scenarios:
 
 - **CREATE**: Build new skills from requirements to deployment
 - **REFACTOR**: Restructure existing skills for better organization
@@ -47,11 +49,11 @@ Build new skills through systematic requirements discovery, complexity evaluatio
 **Quick Process**:
 
 1. Requirements Discovery → Gather concrete examples and identify reusable resources
-2. Complexity Evaluation → Calculate score and recommend structure
-3. Structure Generation → Create directory hierarchy based on complexity
+2. Complexity Evaluation → Evaluate complexity inline and recommend structure
+3. Structure Generation → Lay out the directory hierarchy inline based on complexity
 4. Implementation → Build SKILL.md, scripts, references, examples
-5. Automated Validation → Run comprehensive checks
-6. Intelligent Deployment → Package and distribute
+5. Automated Validation → Run `node scripts/enhanced_validator.mjs <skill-path>`
+6. Finalize → Confirm the skill directory is complete (deploy by copying the directory)
 
 ### REFACTOR Mode
 
@@ -64,9 +66,9 @@ Transform existing skills to improved structure while preserving functionality.
 1. Current Structure Analysis → Assess issues and complexity
 2. Refactoring Plan → Generate diff preview and get approval
 3. Diff-based Transformation → Execute structural changes
-4. Validation & Testing → Verify correctness
+4. Validation & Testing → Verify correctness with `enhanced_validator.mjs`
 5. Impact Analysis → Measure improvements
-6. Deployment → Package with migration guide
+6. Finalize → Summarize structural changes for the user
 
 ### IMPROVE Mode
 
@@ -81,7 +83,7 @@ Extend skills with new capabilities while maintaining backward compatibility.
 3. Incremental Implementation → Add resources and update documentation
 4. Integration Validation → Test new and existing features
 5. Version Management → Update version and changelog
-6. Deployment → Package with upgrade guide
+6. Finalize → Note new capabilities and any backward-compatibility caveats
 
 ### FIX Mode
 
@@ -95,8 +97,8 @@ Repair skill issues with minimal changes and comprehensive testing.
 2. Minimal Fix Design → Plan smallest possible fix
 3. Targeted Implementation → Apply fix
 4. Regression Testing → Verify fix and unchanged behavior
-5. Documentation Update → Update docs and troubleshooting
-6. Hotfix Deployment → Package and distribute
+5. Documentation Update → Update affected docs
+6. Finalize → Confirm the fix and its narrow surface area
 
 ## Core Workflow
 
@@ -104,16 +106,16 @@ All modes follow a consistent 6-phase pattern:
 
 **Phase 0: Mode Detection**
 
-- Analyze user request and context
+- Analyze user request and context inline
 - Select appropriate mode (CREATE/REFACTOR/IMPROVE/FIX)
 - Clarify if ambiguous
 
 **Phases 1-6: Mode-Specific Execution**
 
 - Each mode implements its specialized workflow
-- Complexity evaluation guides structure decisions
-- Automated validation ensures quality
-- Deployment helpers package and distribute
+- Inline complexity evaluation guides structure decisions
+- `enhanced_validator.mjs` provides the deterministic quality gate
+- Skills deploy by copying their directory — no packaging step
 
 See **reference.md** for detailed phase-by-phase workflows for each mode.
 
@@ -145,7 +147,7 @@ complexity = (file_count/20 × 0.3) + (mcp_integration × 0.2)
 
 **Complex (> 0.7)**
 
-- Structure: Full hierarchy (SKILL.md + reference.md + examples.md + knowledge/ + docs/)
+- Structure: Full hierarchy (SKILL.md + reference.md + examples.md + scripts/; optionally deeper topic or supplementary docs)
 - Size: 4-5k words SKILL.md (compressed)
 - Example: full-stack-generator, MCP-integrated skills
 
@@ -178,44 +180,13 @@ Real-world skill creation examples:
 
 Load examples.md when learning skill construction patterns or seeking concrete implementation guidance.
 
-### knowledge/
-
-Deep-dive topics for advanced skill engineering:
-
-- **skill-anatomy.md**: Structural theory and design patterns
-- **progressive-disclosure.md**: 3-layer loading system principles
-- **mcp-integration.md**: MCP server integration patterns
-- **bundled-resources.md**: scripts/, references/, assets/ design
-- **quality-standards.md**: Quality metrics and best practices
-
-Load knowledge/ files when designing complex skills or establishing architectural patterns.
-
 ### scripts/
 
-Automation tools for skill construction:
+The one bundled deterministic tool:
 
-- **mode_detector.mjs**: Detect CREATE/REFACTOR/IMPROVE/FIX from context
-- **complexity_scorer.mjs**: Calculate complexity and recommend structure
-- **structure_generator.mjs**: Generate directory hierarchy
-- **enhanced_validator.mjs**: Comprehensive validation checks
-- **init_skill.mjs**: Enhanced skill initialization
-- **package_skill.mjs**: Validation + packaging
-- **deployment_helper.mjs**: Intelligent deployment support
-- **quick_validate.mjs**: Fast validation during development
+- **enhanced_validator.mjs**: Comprehensive validation checks for any skill directory
 
-Execute scripts directly without loading into context for efficiency.
-
-### docs/
-
-Supplementary documentation:
-
-- **migration-guide.md**: Migrating existing skills to v2.0
-- **mode-comparison.md**: Detailed comparison of four modes
-- **complexity-tuning.md**: Customizing complexity formula
-- **troubleshooting.md**: Common issues and solutions
-- **advanced-patterns.md**: Advanced techniques and anti-patterns
-
-Load docs/ when handling special cases or troubleshooting.
+Run it with `node scripts/enhanced_validator.mjs <skill-path>` without loading it into context.
 
 ## Quick Reference
 
@@ -223,11 +194,11 @@ Load docs/ when handling special cases or troubleshooting.
 
 ```
 1. Gather 3-5 concrete usage examples
-2. Run: scripts/complexity_scorer.mjs --interactive
-3. Run: scripts/structure_generator.mjs --name <name> --complexity <level> --path ./
+2. Evaluate complexity inline (see Complexity Evaluation)
+3. Lay out the directory structure inline based on complexity
 4. Implement: SKILL.md, scripts, references (based on complexity)
-5. Validate: scripts/enhanced_validator.mjs <skill-path>
-6. Package: scripts/package_skill.mjs <skill-path>
+5. Validate: node scripts/enhanced_validator.mjs <skill-path>
+6. Deploy by copying the skill directory into place
 ```
 
 ### Restructuring a Skill (REFACTOR Mode)
@@ -238,7 +209,7 @@ Load docs/ when handling special cases or troubleshooting.
 3. Get user approval
 4. Execute transformations
 5. Validate and measure impact
-6. Package with migration guide
+6. Summarize structural changes
 ```
 
 ### Adding Features (IMPROVE Mode)
@@ -249,7 +220,7 @@ Load docs/ when handling special cases or troubleshooting.
 3. Implement incrementally
 4. Validate (new + existing features)
 5. Update version and changelog
-6. Package with upgrade guide
+6. Note new capabilities and caveats
 ```
 
 ### Fixing Issues (FIX Mode)
@@ -260,7 +231,7 @@ Load docs/ when handling special cases or troubleshooting.
 3. Apply targeted changes
 4. Regression test
 5. Update documentation
-6. Package hotfix
+6. Confirm the narrow fix surface
 ```
 
 ## Progressive Disclosure Design
@@ -279,7 +250,7 @@ Skills use a 3-layer loading system for context efficiency:
 
 **Layer 3: Deep Resources** (On-demand, unlimited)
 
-- reference.md, examples.md, knowledge/, scripts/, docs/
+- reference.md, examples.md, scripts/
 - Loaded selectively as needed
 
 Keep SKILL.md under 5k words by moving detailed content to reference.md and examples.md.
@@ -299,7 +270,7 @@ Before packaging, ensure:
 
 - SKILL.md exists and is <5k words
 - Referenced files exist (reference.md, examples.md, etc.)
-- Scripts are executable (chmod +x)
+- Scripts run under Node (`.mjs`, ESM) with a `#!/usr/bin/env node` shebang
 
 ✅ **Content Quality**
 
@@ -314,7 +285,7 @@ Before packaging, ensure:
 - No duplicate information
 - Clear separation of concerns
 
-Run `scripts/enhanced_validator.mjs <skill-path>` for automated validation.
+Run `node scripts/enhanced_validator.mjs <skill-path>` for automated validation.
 
 ## Quality Standards
 
@@ -327,10 +298,10 @@ Run `scripts/enhanced_validator.mjs <skill-path>` for automated validation.
 
 **Script Requirements**:
 
-- Executable permissions (chmod +x)
+- ESM modules (.mjs) with a `#!/usr/bin/env node` shebang
+- Node.js built-in imports (no inline interpreters)
 - JSDoc comments for all functions
 - Error handling
-- ESM modules (.mjs) with Node.js built-in imports
 
 **Documentation Requirements**:
 
@@ -339,21 +310,14 @@ Run `scripts/enhanced_validator.mjs <skill-path>` for automated validation.
 - Inline examples
 - No broken references
 
-See **knowledge/quality-standards.md** for comprehensive standards.
-
 ## Support
 
 **For detailed workflows**: Load reference.md
 **For usage examples**: Load examples.md
-**For architectural guidance**: Load knowledge/\*.md
-**For troubleshooting**: Load docs/troubleshooting.md
-**For migration help**: Load docs/migration-guide.md
 
 **Automated assistance**:
 
-- Mode detection: `scripts/mode_detector.mjs --request "<request>" [--skill-path <path>]`
-- Complexity scoring: `scripts/complexity_scorer.mjs --interactive`
-- Validation: `scripts/enhanced_validator.mjs <skill-path>`
-- Packaging: `scripts/package_skill.mjs <skill-path>`
+- Mode detection, complexity scoring, and structure generation: performed inline by the model (see Four Operating Modes and Complexity Evaluation)
+- Validation: `node scripts/enhanced_validator.mjs <skill-path>`
 
-All scripts provide JSON output for programmatic use and human-readable reports for manual review.
+The validator emits JSON output for programmatic use and a human-readable report for manual review.

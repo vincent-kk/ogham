@@ -1,9 +1,9 @@
 ---
 name: think
 user_invocable: true
-description: "[maencof:think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale."
-argument-hint: "[--mode default|divergent|review] [requirement or feature request]"
-version: "1.1.0"
+description: '[maencof:think] Resolves ambiguous requirements using Tree of Thoughts with 3 entry modes (default/divergent/review): generates candidates, scores each on mode-specific axes, and selects the optimal approach with full rationale.'
+argument-hint: '[--mode default|divergent|review] [requirement or feature request]'
+version: '1.1.0'
 complexity: medium
 context_layers: []
 orchestrator: think skill
@@ -27,14 +27,16 @@ Claude automatically invokes this skill when:
 
 ### Mode Selection (Table B-2 heuristic)
 
-| Signal | Mode |
-|---|---|
-| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent |
-| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?" | review |
-| miss above + "how to interpret" / "among multiple methods" | default |
-| all miss | default (fallback) |
+| Signal                                                                        | Mode               |
+| ----------------------------------------------------------------------------- | ------------------ |
+| "idea" / "brainstorm" / "stuck" / "what to do" + no candidate count specified | divergent          |
+| plan/spec path ref + "review" / "check" / "is it okay?" / "what's missing?"   | review             |
+| miss above + "how to interpret" / "among multiple methods"                    | default            |
+| all miss                                                                      | default (fallback) |
 
 **Override:** `--mode <default|divergent|review>` on the invocation bypasses heuristics.
+
+**Brainstorm seed intake (divergent mode):** When `think --mode divergent` is invoked downstream of `explore --for-brainstorm`, the invocation carries explore's 5-8 candidate seeds (each `title + path + 1-line summary`). Treat those seeds as the candidate-generation starting set — expand, recombine, and score them rather than synthesizing candidates from scratch. Without a seed list, generate the 5-8 candidates per Strategy D in `knowledge/tot-methodology.md`.
 
 ### Manual Invocation
 
@@ -68,6 +70,8 @@ You are an expert requirements analyst using the Tree of Thoughts (ToT) methodol
 
 **Step 3 - Select**: Pick the top-scoring interpretation. State the rationale in 3-5 sentences. Predict the next decision, list risks, and define the backtrack trigger. Use templates in `knowledge/interpretation-templates.md`.
 
+> **Review mode caveat**: scores are inverted (higher = higher risk), so the top-scoring interpretation is the **most critical risk requiring mandatory alternative adoption** — not a plan to execute. Mark it as the headline risk finding rather than a "winner to build", and recommend the lowest-risk interpretation as the safer path forward.
+
 ## Evaluation Criteria
 
 Axis definitions are **mode-specific**. Never mix axes across modes. Full rubrics in `knowledge/evaluation-criteria.md`.
@@ -84,27 +88,28 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 ### Divergent mode (weights)
 
-| Criterion | Points | Description |
-|-----------|--------|-------------|
-| Novelty | 30 | Departure from repo precedent (imitation 10 / combinatorial novelty 20 / fully novel 30) |
-| Feasibility | 25 | Prototyping cost (reuses Default complexity rubric rescaled) |
-| Requirements Coverage | 15 | Core need alignment |
-| UX Quality | 15 | Interaction quality |
-| Team Capability Fit | 15 | Stack alignment |
+| Criterion             | Points | Description                                                                              |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| Novelty               | 30     | Departure from repo precedent (imitation 10 / combinatorial novelty 20 / fully novel 30) |
+| Feasibility           | 25     | Prototyping cost (reuses Default complexity rubric rescaled)                             |
+| Requirements Coverage | 15     | Core need alignment                                                                      |
+| UX Quality            | 15     | Interaction quality                                                                      |
+| Team Capability Fit   | 15     | Stack alignment                                                                          |
 
 ### Review mode (weights; inverted Risk Exposure)
 
-| Criterion | Points | Description |
-|-----------|--------|-------------|
-| Risk Exposure | 30 | **Higher score = higher risk.** mitigated 10 / partial 20 / unmitigated 30 |
-| Requirements Coverage | 25 | Plan coverage of stated needs |
-| Maintainability | 20 | Long-term change cost |
-| Implementation Complexity | 15 | Buildability |
-| Team Capability Fit | 10 | Stack alignment |
+| Criterion                 | Points | Description                                                                |
+| ------------------------- | ------ | -------------------------------------------------------------------------- |
+| Risk Exposure             | 30     | **Higher score = higher risk.** mitigated 10 / partial 20 / unmitigated 30 |
+| Requirements Coverage     | 25     | Plan coverage of stated needs                                              |
+| Maintainability           | 20     | Long-term change cost                                                      |
+| Implementation Complexity | 15     | Buildability                                                               |
+| Team Capability Fit       | 10     | Stack alignment                                                            |
 
 ## Score Interpretation (mode-specific)
 
 ### Default
+
 - **85-100** Certain — proceed immediately
 - **75-84** Very Feasible — safe
 - **70-74** Feasible — proceed with care
@@ -112,6 +117,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 - **<60** Not Recommended
 
 ### Divergent
+
 - **85-100** Bold & Feasible — prototype-worthy
 - **75-84** Novel & Actionable — experiment
 - **70-74** Derivative but safe
@@ -119,6 +125,7 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 - **<60** Weak — discard
 
 ### Review (inverted — higher = worse)
+
 - **85-100** Critical risk — **mandatory alternative adoption**
 - **75-84** Major risk — mitigation must be specified
 - **70-74** Moderate — monitoring / conditional
@@ -127,10 +134,11 @@ Axis definitions are **mode-specific**. Never mix axes across modes. Full rubric
 
 ## Output
 
-Two artifacts delivered together:
+Output is **mode-specific** — never emit a different mode's artifacts.
 
-1. **Evaluation Table** (Markdown) - Per-candidate score breakdown with totals and the selected winner marked
-2. **Decision Record** (YAML) - `selected_interpretation`, `alternatives` with fallback conditions, `lookahead`, and `backtrack_plan`
+- **default**: Evaluation Table (Markdown, per-candidate score breakdown with totals and the selected winner marked) + Decision Record YAML (`selected_interpretation`, `alternatives` with fallback conditions, `lookahead`, `backtrack_plan`)
+- **divergent**: Candidate list (5-8) + top-3 rationale, with the remaining candidates summarized; no winner-to-build is forced
+- **review**: Risk table (inverted scoring — higher = worse) + mitigation alternatives, minimum 3 risks, each paired with at least one alternative
 
 Full output templates and scored examples are in `reference.md`.
 
@@ -150,7 +158,7 @@ Full output templates and scored examples are in `reference.md`.
 | `knowledge/evaluation-criteria.md`      | Detailed scoring definitions, domain-specific weight adjustments        |
 | `knowledge/interpretation-templates.md` | Candidate template, evaluation markdown format, YAML output schema      |
 | `reference.md`                          | Full worked examples, standard output template, detailed error handling |
-| `examples.md`                           | Three scenario walkthroughs (single feature, ambiguous, architecture)   |
+| `examples.md`                           | Five scenario walkthroughs (3 default, 1 divergent, 1 review)           |
 
 ## Error Handling Summary
 

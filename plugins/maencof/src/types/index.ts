@@ -90,7 +90,17 @@ export type {
   AgentUsageEntry,
   UsageStats,
   SessionSummary,
+  SessionRecord,
+  SessionDayLog,
 } from './session.js';
+
+export type {
+  DailyDigest,
+  ReverseIndex,
+  WorkPeriodSummary,
+  WorkHistoryReadInput,
+  WorkHistoryReadResult,
+} from './workHistory.js';
 
 export type {
   ManageMode,
@@ -119,6 +129,13 @@ export type {
 } from './lifecycle.js';
 
 export type {
+  DispatchEvent,
+  DispatchInput,
+  HookConcernResult,
+  MergedHookOutput,
+} from './dispatch.js';
+
+export type {
   ConfigHealthSeverity,
   ConfigIssueCategory,
   ConfigHealthItem,
@@ -128,13 +145,13 @@ export type {
   MigrationAction,
 } from './configurator.js';
 
-export { TOOL_CATEGORY_MAP } from '../constants/dailynote.js';
+export { TOOL_CATEGORY_MAP } from '../constants/activity.js';
 export type {
-  DailynoteEntry,
-  DailynoteCategory,
-  DailynoteReadInput,
-  DailynoteReadResult,
-} from './dailynote.js';
+  ActivityEntry,
+  ActivityCategory,
+  ActivityReadInput,
+  ActivityReadResult,
+} from './activity.js';
 
 export {
   CHANGELOG_CATEGORY_LABELS,

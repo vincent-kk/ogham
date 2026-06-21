@@ -2,10 +2,14 @@
 import { logHookFailure } from '@ogham/cross-platform/error-log';
 import { selfProbe } from '@ogham/cross-platform/self-probe';
 
-import { readStdin, writeResult } from '../shared/index.js';
+import { readStdin } from '../shared/readStdin.js';
+import { writeResult } from '../shared/writeResult.js';
+import type {
+  DispatchInput,
+  MergedHookOutput,
+} from '../../types/dispatch.js';
 
-import type { SessionStartInput } from './sessionStart.js';
-import { runSessionStart } from './sessionStart.js';
+import { orchestrateSessionStart } from './sessionStart.js';
 
 // SessionStart first hook entry — diagnose node/git/PATH/CLAUDE_PLUGIN_ROOT.
 // Errors are appended to ~/.claude/plugins/maencof/error-log.json so silent
@@ -13,10 +17,10 @@ import { runSessionStart } from './sessionStart.js';
 const probe = await selfProbe({ writeLog: true, pkg: 'maencof' });
 
 const raw = await readStdin();
-let result;
+let result: MergedHookOutput;
 try {
-  const input = JSON.parse(raw) as SessionStartInput;
-  result = runSessionStart(input);
+  const input = JSON.parse(raw) as DispatchInput;
+  result = orchestrateSessionStart(input);
 } catch (e) {
   logHookFailure('maencof', 'session-start', e);
   result = { continue: true };

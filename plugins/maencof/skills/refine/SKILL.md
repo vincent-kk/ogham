@@ -1,9 +1,9 @@
 ---
 name: refine
 user_invocable: true
-description: "[maencof:refine] Transforms vague or ambiguous input into precise, executable specifications through structured one-question-at-a-time interview loops, clarifying scope and acceptance criteria before implementation begins."
-argument-hint: "[initial requirement or idea]"
-version: "1.0.0"
+description: '[maencof:refine] Transforms vague or ambiguous input into precise, executable specifications through structured one-question-at-a-time interview loops, clarifying scope and acceptance criteria before implementation begins.'
+argument-hint: '[initial requirement or idea]'
+version: '1.0.0'
 complexity: medium
 context_layers: []
 orchestrator: refine skill
@@ -13,6 +13,8 @@ plugin: maencof
 # Recursive Requirement Refine
 
 ## When to Use
+
+Adds a Socratic counter-example layer (Phase 2.5), immutable-token preservation, and vault document auto-update over a generic refinement loop.
 
 ### Auto-trigger Conditions
 
@@ -52,13 +54,7 @@ Transform vague or incomplete user inputs into precise, logical, and executable 
    - **Preserve them exactly** as Immutable Objects in the refined prompt
    - **Clarify their intent** through questions if their usage context is ambiguous
    - **Example**: If input contains `/plan "improve auth"`, ask about the planning scope, constraints, and expected outcome, but do NOT execute the `/plan` command
-6. **Immutable Object Protection:** Preserve all Immutable Objects exactly as provided. This includes:
-   - Commands and skills (e.g., `/pr`, `/commit`, `/sc:analyze`)
-   - File paths (e.g., `./src/main.ts`, `~/.claude/config.json`)
-   - URLs and links (e.g., `https://example.com`, `[text](link)`)
-   - Technical tokens (e.g., `@decorator`, `#hashtag`, `$variable`)
-
-   See [reference.md](reference.md) Section "Phase 1: Input Analysis" for the Immutable Objects dimension definition.
+6. **Immutable Object Protection:** Preserve all Immutable Objects exactly as provided. See [knowledge/immutable-objects.md](knowledge/immutable-objects.md) for token categories, handling rules, and verification checklist.
 
 7. **Absolute Implementation Ban:** After writing the refined prompt to the source file (Phase 4), your work is COMPLETE.
    - NEVER proceed to implement, execute, or act on the refined prompt content.

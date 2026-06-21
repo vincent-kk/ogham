@@ -15,8 +15,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { provisionMissingConfigs } from '../../hooks/configProvisioner/configProvisioner.js';
-import { CONFIG_REGISTRY } from '../../hooks/configRegistry/configRegistry.js';
+import { provisionMissingConfigs } from '../../hooks/utils/configProvisioner/configProvisioner.js';
+import { CONFIG_REGISTRY } from '../../hooks/utils/configRegistry/configRegistry.js';
 
 // ─── 헬퍼 ─────────────────────────────────────────────────────────────────────
 

@@ -12,7 +12,7 @@ import {
   isVaultDocDirectory,
   isVaultInternalPath,
   runVaultRedirector,
-} from '../../hooks/vaultRedirector/vaultRedirector.js';
+} from '../../hooks/preToolUse/helpers/vaultRedirector/vaultRedirector.js';
 
 /** 테스트용 임시 vault 디렉토리 생성 */
 function createTempVault(): string {
