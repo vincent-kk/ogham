@@ -14,13 +14,13 @@
 
 ### Input (`WorkHistoryReadInput`)
 
-| Field       | Type     | Required | Notes                                          |
-| ----------- | -------- | -------- | ---------------------------------------------- |
-| `last_days` | `number` | no       | 정수 1-90, 기본 7 (period 모드)                |
-| `from`      | `string` | no       | `^\d{4}-\d{2}-\d{2}$`, `to` 와 함께 사용       |
-| `to`        | `string` | no       | `^\d{4}-\d{2}-\d{2}$`                          |
-| `topic`     | `string` | no       | 토픽(파일명 stem) 작업일자 이력 조회           |
-| `layer`     | `string` | no       | 레이어 디렉터리(예: `01_Core`) 작업일자 조회   |
+| Field       | Type     | Required | Notes                                        |
+| ----------- | -------- | -------- | -------------------------------------------- |
+| `last_days` | `number` | no       | 정수 1-90, 기본 7 (period 모드)              |
+| `from`      | `string` | no       | `^\d{4}-\d{2}-\d{2}$`, `to` 와 함께 사용     |
+| `to`        | `string` | no       | `^\d{4}-\d{2}-\d{2}$`                        |
+| `topic`     | `string` | no       | 토픽(파일명 stem) 작업일자 이력 조회         |
+| `layer`     | `string` | no       | 레이어 디렉터리(예: `01_Core`) 작업일자 조회 |
 
 ### Output (`WorkHistoryReadResult`)
 
