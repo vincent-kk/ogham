@@ -6,7 +6,7 @@
 
 | Path        | Role                                              |
 | ----------- | ------------------------------------------------- |
-| `viewer/`   | 리포트 뷰어 FE (HTML/CSS/JS + lazy 렌더러 entry)  |
+| `viewer/`   | 문서 뷰어 FE (HTML/CSS/JS + lazy 렌더러 entry)    |
 | `settings/` | 설정 FE (HTML/CSS/JS)                             |
 | `index.ts`  | 빌드 입력 표식 (`export {}`) — 런타임 export 없음 |
 

@@ -7,20 +7,20 @@ argument-hint: ""
 
 # present
 
-Render the viewer Claude just produced as a readable local page, then
+Render the document Claude just produced as a readable local page, then
 automatically collect the user's line-anchored comments (and any attached
-images) and fold them back into the viewer.
+images) and fold them back into the document.
 
 ## Steps
 
-1. **Pick the source.** Use the most recent viewer/plan in the conversation, or
+1. **Pick the source.** Use the most recent document/plan in the conversation, or
    the file the user points at.
    - In the conversation → pass it as `content`.
    - A file on disk → pass its path as `path`.
    - **Large documents → prefer `path`.** Inlining `content` duplicates the whole
      body into tool input; if it is long, write it to a file first and pass
      `path` instead.
-   - Do **not** re-print the full viewer in chat before rendering it — that
+   - Do **not** re-print the full document in chat before rendering it — that
      doubles token cost.
 
 2. **Render.** Call `mcp_tools_render_viewer` with `{ content | path, title? }`
@@ -38,7 +38,7 @@ images) and fold them back into the viewer.
    - After about 5 pending rounds, stop polling and tell the user to let you
      know when they have submitted, then wait for their message.
 
-4. **Apply.** Revise the viewer using the returned comments. Each comment names
+4. **Apply.** Revise the document using the returned comments. Each comment names
    a source-line range (e.g. `L12-14`) and an excerpt — use it to make surgical
    edits at the right place. Attached images arrive as image blocks; read them
    as visual context. Honor `[resolved]` markers as lower priority.
@@ -48,14 +48,14 @@ images) and fold them back into the viewer.
 
 ## Notes
 
-- Plans are markdown too — render them with `render_viewer` directly. In plan
+- Plans are markdown too — render them with `mcp_tools_render_viewer` directly. In plan
   mode, present after the plan is confirmed (or render a saved plan file), since
   plan mode can restrict tool use.
 - Reply to the user in their own language.
 
 ## Do not
 
-- Block indefinitely on a single call — one `collect_feedback` is bounded; the
+- Block indefinitely on a single call — one `mcp_tools_collect_feedback` is bounded; the
   loop provides the waiting.
-- Re-print the full viewer body in chat just to render it.
+- Re-print the full document body in chat just to render it.
 - Mention or expose the `token` query parameter — it is opaque to the user.

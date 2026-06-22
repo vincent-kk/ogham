@@ -19,10 +19,13 @@ Open the deilen settings UI in a local browser.
    in the page and clicks **Save settings**. Settings apply to subsequent
    renders.
 
+## Notes
+
+- Reply to the user in their own language.
+
 ## Do not
 
 - Ask the user for theme, timeout, port, or any other value — the web UI
   collects all of it.
 - Call any other deilen tool from this skill.
 - Mention or expose the `token` query parameter — it is opaque to the user.
-- Reply in English by default; answer the user in their own language.

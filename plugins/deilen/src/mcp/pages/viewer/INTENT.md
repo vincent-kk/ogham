@@ -1,12 +1,12 @@
 ## Purpose
 
-리포트 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `bridge/viewer.html` 로 inline+minify 된다.
+문서 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `bridge/viewer.html` 로 inline+minify 된다.
 
 ## Structure
 
 | Path                                       | Role                                              |
 | ------------------------------------------ | ------------------------------------------------- |
-| `index.html`                               | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯        |
+| `index.html`                               | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯       |
 | `styles/styles.css`                        | 테마(light/dark/auto) 토큰·타이포                 |
 | `scripts/app.js`                           | 진입점 — state hydrate·마운트·테마·heartbeat      |
 | `scripts/enhance.js`                       | `/assets/*` lazy import (highlight/mermaid/katex) |

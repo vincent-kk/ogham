@@ -25,7 +25,7 @@
       "name": "deilen",
       "source": "./plugins/deilen",
       "category": "productivity",
-      "tags": ["markdown", "report", "viewer", "feedback"]
+      "tags": ["markdown", "viewer", "feedback"]
     },
     {
       "name": "filid",

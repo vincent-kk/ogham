@@ -12,12 +12,12 @@ When Claude produces a long markdown document, `deilen` serves it as a clean loc
 
 ## How it works
 
-A local MCP server (`tools`) renders the viewer, opens it in your browser, and waits (bounded long-poll) for your feedback. Your comments and images come back to Claude as structured text plus image blocks it can actually see.
+A local MCP server (`tools`) renders the document, opens it in your browser, and waits (bounded long-poll) for your feedback. Your comments and images come back to Claude as structured text plus image blocks it can actually see.
 
 ## Usage
 
 ```
-# Show the current viewer as a page and collect feedback
+# Show the current document as a page and collect feedback
 /deilen:present
 
 # Open the local settings UI (theme, auto-open, timeouts, renderers)
