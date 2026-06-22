@@ -38,5 +38,6 @@ export function handleGetAsset(
     "Content-Type": type,
     "Cache-Control": "public, max-age=3600",
   });
+  res.on("close", () => stream.destroy());
   stream.pipe(res);
 }

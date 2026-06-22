@@ -141,4 +141,28 @@ describe("feedback flow", () => {
     expect(post.status).toBe(400);
     await atomicWrite(CONFIG_PATH, JSON.stringify({ auto_open: false }));
   });
+
+  it("rejects multipart whose total image bytes exceed max_payload_mb", async () => {
+    const sid = await render("z");
+    await atomicWrite(
+      CONFIG_PATH,
+      JSON.stringify({ auto_open: false, max_image_mb: 1, max_payload_mb: 1 }),
+    );
+    // Each image is under max_image_mb (1 MB) but together they exceed the
+    // aggregate max_payload_mb (1 MB) cap, exercising the totalBytes guard.
+    const half = Buffer.alloc(700 * 1024, 1);
+    const form = new FormData();
+    form.append(
+      "payload",
+      JSON.stringify({ session_id: sid, status: "complete", comments: [] }),
+    );
+    form.append("img_x1", new Blob([half], { type: "image/png" }), "a.png");
+    form.append("img_x2", new Blob([half], { type: "image/png" }), "b.png");
+    const post = await fetch(
+      `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
+      { method: "POST", body: form },
+    );
+    expect(post.status).toBe(400);
+    await atomicWrite(CONFIG_PATH, JSON.stringify({ auto_open: false }));
+  });
 });

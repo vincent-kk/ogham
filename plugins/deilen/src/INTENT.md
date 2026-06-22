@@ -21,7 +21,7 @@
 - 디스크 JSON 키는 snake_case (외부 인터페이스 일관성)
 - 공개 API 는 `index.ts` 에서 re-export
 - `version.ts` 는 `yarn version:sync` 로만 갱신
-- 도메인 루트(`core`/`render`/`mcp`/`mcp/httpServer`)만 INTENT.md; 하위 단일관심 디렉터리는 organ
+- 모든 fractal 노드는 INTENT.md + index.ts barrel; leaf organ(`types`/`constants`/`lib`/`utils`/`handlers`/`routing`)만 INTENT.md 면제
 
 ## Boundaries
 

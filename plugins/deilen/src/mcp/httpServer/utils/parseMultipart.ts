@@ -113,18 +113,22 @@ export function parseMultipart(
     bb.on("error", (err) => fail(err as Error));
 
     bb.on("close", () => {
-      void Promise.all(writes).then(async () => {
-        if (failure) {
-          await Promise.all(cleanup.map((p) => rm(p, { force: true })));
-          reject(failure);
-          return;
-        }
-        try {
-          resolve({ payload: JSON.parse(payloadRaw), images });
-        } catch {
-          reject(new Error("invalid payload json"));
-        }
-      });
+      Promise.all(writes)
+        .then(async () => {
+          if (failure) {
+            await Promise.all(cleanup.map((p) => rm(p, { force: true })));
+            reject(failure);
+            return;
+          }
+          try {
+            resolve({ payload: JSON.parse(payloadRaw), images });
+          } catch {
+            reject(new Error("invalid payload json"));
+          }
+        })
+        .catch((err: unknown) =>
+          reject(err instanceof Error ? err : new Error(String(err))),
+        );
     });
 
     req.pipe(bb);
