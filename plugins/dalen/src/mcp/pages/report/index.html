@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dalen</title>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <script>
+      window.__DALEN_STATE__ = "__DALEN_STATE__";
+    </script>
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="brand" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"
+            />
+            <path d="M14 4v5h5" />
+            <path d="M8 13h6M8 17h4" />
+          </svg>
+        </span>
+        <h1 class="doc-title" id="doc-title">Report</h1>
+      </div>
+      <div class="topbar-actions">
+        <button
+          type="button"
+          class="icon-btn"
+          id="copy-all"
+          aria-label="Copy whole report"
+          title="Copy whole report"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="11" height="11" rx="2" />
+            <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+          </svg>
+          <span class="icon-btn-label">Copy</span>
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          id="theme-toggle"
+          aria-label="Toggle theme"
+          title="Toggle theme"
+        >
+          <svg
+            class="theme-ico-light"
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"
+            />
+          </svg>
+          <svg
+            class="theme-ico-dark"
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8Z" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="icon-btn sidebar-toggle"
+          id="sidebar-toggle"
+          aria-label="Toggle comments"
+          title="Comments"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2Z"
+            />
+          </svg>
+          <span class="badge" id="comment-count" hidden>0</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <article class="reading" id="reading">
+        <div class="report" id="report"></div>
+      </article>
+
+      <aside class="sidebar" id="sidebar" aria-label="Comments">
+        <div class="sidebar-head">
+          <h2 class="sidebar-title">Comments</h2>
+          <button type="button" class="text-btn" id="add-overall">
+            Overall note
+          </button>
+        </div>
+        <div class="sidebar-list" id="comment-list">
+          <p class="sidebar-empty" id="sidebar-empty">
+            Select text or use a line's <span class="inline-plus">+</span> to
+            leave a comment.
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="submitbar" id="submitbar">
+      <div class="submit-status" id="submit-status">No comments yet</div>
+      <div class="submit-actions">
+        <button
+          type="button"
+          class="btn btn-primary"
+          id="submit-feedback"
+          disabled
+        >
+          Submit feedback
+        </button>
+      </div>
+    </footer>
+
+    <div class="overlay" id="overlay" hidden>
+      <div class="overlay-card">
+        <div class="overlay-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="28"
+            height="28"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        </div>
+        <h2 class="overlay-title">Feedback sent</h2>
+        <p class="overlay-text">
+          Return to your Claude conversation — your comments are on their way.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="./scripts/app.js"></script>
+  </body>
+</html>
