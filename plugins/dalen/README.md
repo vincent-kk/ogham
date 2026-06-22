@@ -2,8 +2,6 @@
 
 Render Claude-generated markdown reports as a readable browser page, and send line-anchored feedback back to Claude.
 
-> **Status: early scaffold (Phase 0).** The package skeleton and build/test config are in place; features are being implemented per the phase plan. Not yet functional.
-
 ## What it does
 
 When Claude produces a long markdown report, `dalen` serves it as a clean local web page (127.0.0.1) instead of a wall of text in the terminal:
@@ -16,13 +14,13 @@ When Claude produces a long markdown report, `dalen` serves it as a clean local 
 
 A local MCP server (`tools`) renders the report, opens it in your browser, and waits (bounded long-poll) for your feedback. Your comments and images come back to Claude as structured text plus image blocks it can actually see.
 
-## Usage (planned)
+## Usage
 
 ```
 # Show the current report as a page and collect feedback
 /dalen:present
 
-# Open the local settings UI (theme, auto-open, timeouts)
+# Open the local settings UI (theme, auto-open, timeouts, renderers)
 /dalen:setup
 ```
 

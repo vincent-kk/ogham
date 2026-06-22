@@ -14,8 +14,6 @@
 | `lib/`       | atomicWrite, logger (organ)                                    |
 | `utils/`     | isoNow, randomId (organ)                                       |
 
-> Phase 0 스캐폴드: 현재 `version.ts` + `index.ts` 만 존재. 나머지는 [HANDOFF.md](../HANDOFF.md) 의 단계 계획에 따라 추가.
-
 ## Conventions
 
 - ESM (`"type": "module"`), import 확장자 `.js`

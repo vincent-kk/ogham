@@ -4,7 +4,7 @@
 
 ## Status
 
-**Phase 0 scaffold.** Source skeleton (`src/version.ts`, `src/index.ts`) + build/test config only. Features land per the phase plan in [HANDOFF.md](./HANDOFF.md). The MCP server bundle (`bridge/mcp-server.cjs`) does not exist until Phase 2.
+Implemented: render core, the local HTTP server + report viewer, line-anchored feedback (long-poll), the settings UI, and the `present` / `setup` skills. Four MCP tools: `render_report`, `collect_feedback`, `close_report`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
 
 ## What dalen does
 
