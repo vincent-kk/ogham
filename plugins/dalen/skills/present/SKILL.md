@@ -1,0 +1,61 @@
+---
+name: present
+description: '[dalen] Render a markdown report (or plan) as a browser page and auto-collect line-anchored feedback back into the conversation. Trigger: "present this", "show this in the browser", "let me review this in a page", "이 보고서 페이지로 보여줘"'
+user_invocable: true
+argument-hint: ""
+---
+
+# present
+
+Render the report Claude just produced as a readable local page, then
+automatically collect the user's line-anchored comments (and any attached
+images) and fold them back into the report.
+
+## Steps
+
+1. **Pick the source.** Use the most recent report/plan in the conversation, or
+   the file the user points at.
+   - In the conversation → pass it as `content`.
+   - A file on disk → pass its path as `path`.
+   - **Large reports → prefer `path`.** Inlining `content` duplicates the whole
+     body into tool input; if it is long, write it to a file first and pass
+     `path` instead.
+   - Do **not** re-print the full report in chat before rendering it — that
+     doubles token cost.
+
+2. **Render.** Call `mcp_tools_render_report` with `{ content | path, title? }`
+   (exactly one of `content`/`path`). It returns `{ session_id, url, status }`
+   immediately. Give the user the `url` (the page also opens automatically) and
+   tell them to select text or use a block's **+** to leave comments, paste or
+   drop image screenshots, then click **Submit feedback**.
+
+3. **Collect (poll loop).** Call `mcp_tools_collect_feedback` with
+   `{ session_id, wait_seconds }`:
+   - `status: "complete"` → stop the loop; you now have the feedback.
+   - `status: "pending"` → call it again immediately (this is the normal
+     waiting path). Use a generous `wait_seconds` (e.g. 45) so it usually
+     resolves in one or two rounds.
+   - After about 5 pending rounds, stop polling and tell the user to let you
+     know when they have submitted, then wait for their message.
+
+4. **Apply.** Revise the report using the returned comments. Each comment names
+   a source-line range (e.g. `L12-14`) and an excerpt — use it to make surgical
+   edits at the right place. Attached images arrive as image blocks; read them
+   as visual context. Honor `[resolved]` markers as lower priority.
+
+5. **Clean up (optional).** Call `mcp_tools_close_report` with `{ session_id }`
+   once the feedback is applied.
+
+## Notes
+
+- Plans are markdown too — render them with `render_report` directly. In plan
+  mode, present after the plan is confirmed (or render a saved plan file), since
+  plan mode can restrict tool use.
+- Reply to the user in their own language.
+
+## Do not
+
+- Block indefinitely on a single call — one `collect_feedback` is bounded; the
+  loop provides the waiting.
+- Re-print the full report body in chat just to render it.
+- Mention or expose the `token` query parameter — it is opaque to the user.

@@ -16,5 +16,6 @@
     "viewer",
     "feedback"
   ],
+  "skills": "./skills/",
   "mcpServers": "./.mcp.json"
 }
