@@ -6,5 +6,6 @@ export default defineConfig({
     exclude: ["**/fixtures/**"],
     globals: true,
     testTimeout: 15_000,
+    setupFiles: ["./vitest.setup.ts"],
   },
 });
