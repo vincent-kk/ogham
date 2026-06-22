@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>deilen · settings</title>
+    <link rel="stylesheet" href="./styles/styles.css" />
+  </head>
+  <body>
+    <script>
+      window.__DEILEN_STATE__ = "__DEILEN_STATE__";
+    </script>
+
+    <main class="shell">
+      <header class="masthead">
+        <span class="brand" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"
+            />
+            <path d="M14 4v5h5" />
+          </svg>
+        </span>
+        <div>
+          <h1 class="title">deilen settings</h1>
+          <p class="lede">
+            Theme, behavior, renderers, and size limits for the report viewer.
+          </p>
+        </div>
+      </header>
+
+      <form id="form" class="form" novalidate>
+        <section class="section">
+          <h2 class="section-title">Appearance</h2>
+          <div class="field">
+            <span class="field-label">Theme</span>
+            <div class="radio-row" id="theme">
+              <label class="radio"
+                ><input type="radio" name="theme" value="light" /> Light</label
+              >
+              <label class="radio"
+                ><input type="radio" name="theme" value="dark" /> Dark</label
+              >
+              <label class="radio"
+                ><input type="radio" name="theme" value="auto" /> Auto</label
+              >
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="content_width_px"
+              >Content width (px)</label
+            >
+            <input
+              class="input"
+              type="number"
+              id="content_width_px"
+              min="480"
+              max="1600"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="font_family"
+              >Body font family</label
+            >
+            <input
+              class="input"
+              type="text"
+              id="font_family"
+              placeholder="System default"
+            />
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Behavior</h2>
+          <label class="toggle-row">
+            <span class="field-label"
+              >Open the browser automatically on render</span
+            >
+            <input type="checkbox" id="auto_open" class="toggle" />
+          </label>
+          <div class="grid">
+            <div class="field">
+              <label class="field-label" for="collect_timeout_seconds"
+                >Collect timeout (s)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="collect_timeout_seconds"
+                min="1"
+                max="55"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="idle_shutdown_minutes"
+                >Idle shutdown (min)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="idle_shutdown_minutes"
+                min="1"
+                max="120"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="session_ttl_hours"
+                >Session TTL (h)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="session_ttl_hours"
+                min="1"
+                max="720"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="preferred_port"
+                >Port (0 = dynamic)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="preferred_port"
+                min="0"
+                max="65535"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Renderers</h2>
+          <p class="section-help">
+            Disabling a renderer skips its client-side enhancement; source stays
+            readable.
+          </p>
+          <label class="toggle-row">
+            <span class="field-label">Syntax highlighting</span>
+            <input type="checkbox" id="renderer_highlight" class="toggle" />
+          </label>
+          <label class="toggle-row">
+            <span class="field-label">Mermaid diagrams</span>
+            <input type="checkbox" id="renderer_mermaid" class="toggle" />
+          </label>
+          <label class="toggle-row">
+            <span class="field-label">Math (KaTeX)</span>
+            <input type="checkbox" id="renderer_math" class="toggle" />
+          </label>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Limits</h2>
+          <div class="grid">
+            <div class="field">
+              <label class="field-label" for="max_image_mb"
+                >Max image (MB)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="max_image_mb"
+                min="1"
+                max="100"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="max_payload_mb"
+                >Max payload (MB)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="max_payload_mb"
+                min="1"
+                max="200"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="max_report_mb"
+                >Max report (MB)</label
+              >
+              <input
+                class="input"
+                type="number"
+                id="max_report_mb"
+                min="1"
+                max="50"
+              />
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <footer class="savebar">
+        <span
+          class="save-status"
+          id="status"
+          role="status"
+          aria-live="polite"
+        ></span>
+        <button type="button" class="btn btn-primary" id="save">
+          Save settings
+        </button>
+      </footer>
+    </main>
+
+    <script type="module" src="./scripts/app.js"></script>
+  </body>
+</html>

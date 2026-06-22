@@ -24,7 +24,7 @@
     "changeset:version": "changeset version",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
-    "dalen": "yarn workspace @ogham/dalen",
+    "deilen": "yarn workspace @ogham/deilen",
     "filid": "yarn workspace @ogham/filid",
     "imbas": "yarn workspace @ogham/imbas",
     "lint": "eslint .",

@@ -1310,9 +1310,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ogham/dalen@workspace:plugins/dalen":
+"@ogham/deilen@workspace:plugins/deilen":
   version: 0.0.0-use.local
-  resolution: "@ogham/dalen@workspace:plugins/dalen"
+  resolution: "@ogham/deilen@workspace:plugins/deilen"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:~1.22.0"
     "@types/busboy": "npm:^1.5.4"

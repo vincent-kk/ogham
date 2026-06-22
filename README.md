@@ -270,7 +270,7 @@ For full documentation, see the [maencof-lens package](./plugins/maencof-lens/).
 | **[`cennad`](./plugins/cennad/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini / Antigravity CLI from Claude Code |
 | **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                                     |
 | **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts                 |
-| **[`dalen`](./plugins/dalen/)**               | Claude plugin | Render Claude markdown reports in a browser with line-anchored feedback         |
+| **[`deilen`](./plugins/deilen/)**               | Claude plugin | Render Claude markdown reports in a browser with line-anchored feedback         |
 
 ---
 
