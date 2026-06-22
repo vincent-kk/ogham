@@ -1,0 +1,41 @@
+import type { Config } from "../types/config.js";
+
+export const DEFAULT_CONFIG: Config = {
+  theme: "auto",
+  auto_open: true,
+  collect_timeout_seconds: 45,
+  session_ttl_hours: 72,
+  idle_shutdown_minutes: 10,
+  preferred_port: 0,
+  content_width_px: 820,
+  font_family: "",
+  renderers: { mermaid: true, highlight: true, math: true },
+  max_image_mb: 10,
+  max_payload_mb: 50,
+  max_report_mb: 5,
+};
+
+export const DIR_MODE = 0o700;
+export const FILE_MODE = 0o600;
+
+/** Hard cap on collect_feedback long-poll wait, below the client MCP_TIMEOUT. */
+export const MAX_COLLECT_WAIT_SECONDS = 55;
+
+/** Viewer heartbeat cadence (POST /api/ping). Server idle uses idle_shutdown_minutes. */
+export const HEARTBEAT_INTERVAL_MS = 30_000;
+
+/** Allowed inbound image mime types for feedback uploads. */
+export const ALLOWED_IMAGE_MIME = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+] as const;
+
+/** mime -> stored file extension. */
+export const IMAGE_EXT_BY_MIME: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
