@@ -10,13 +10,13 @@
     "Liberation Mono", monospace;
 
   --bg: #ffffff;
-  --bg-subtle: #f6f7f9;
-  --bg-inset: #eceef2;
-  --text: #1f2733;
-  --text-muted: #5a6473;
-  --text-faint: #8a93a2;
-  --border: #e4e7ec;
-  --border-strong: #d2d7de;
+  --bg-subtle: #f7f7f8;
+  --bg-inset: #ededee;
+  --text: #1a1a1d;
+  --text-muted: #5c5c63;
+  --text-faint: #8a8a90;
+  --border: #e5e5e7;
+  --border-strong: #d4d4d7;
 
   --accent: #5b5bd6;
   --accent-hover: #4a4ac4;
@@ -48,18 +48,18 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1729;
-  --bg-subtle: #151d31;
-  --bg-inset: #1e2940;
-  --text: #e6eaf1;
-  --text-muted: #9aa6ba;
-  --text-faint: #67738a;
-  --border: #273249;
-  --border-strong: #38445e;
+  --bg: #16161a;
+  --bg-subtle: #1c1c20;
+  --bg-inset: #242429;
+  --text: #f4f4f6;
+  --text-muted: #9a9aa3;
+  --text-faint: #5e5e67;
+  --border: #2a2a31;
+  --border-strong: #3a3a43;
 
   --accent: #8b8cea;
   --accent-hover: #a3a4f0;
-  --accent-contrast: #0f1729;
+  --accent-contrast: #16161a;
   --accent-soft: rgba(139, 140, 234, 0.16);
 
   --highlight: rgba(234, 179, 8, 0.16);
@@ -80,17 +80,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
-    --bg: #0f1729;
-    --bg-subtle: #151d31;
-    --bg-inset: #1e2940;
-    --text: #e6eaf1;
-    --text-muted: #9aa6ba;
-    --text-faint: #67738a;
-    --border: #273249;
-    --border-strong: #38445e;
+    --bg: #16161a;
+    --bg-subtle: #1c1c20;
+    --bg-inset: #242429;
+    --text: #f4f4f6;
+    --text-muted: #9a9aa3;
+    --text-faint: #5e5e67;
+    --border: #2a2a31;
+    --border-strong: #3a3a43;
     --accent: #8b8cea;
     --accent-hover: #a3a4f0;
-    --accent-contrast: #0f1729;
+    --accent-contrast: #16161a;
     --accent-soft: rgba(139, 140, 234, 0.16);
     --highlight: rgba(234, 179, 8, 0.16);
     --highlight-border: #ca9024;
@@ -767,37 +767,75 @@ button {
   color: var(--danger);
 }
 
-.composer {
-  border: 1px solid var(--accent);
+.composer,
+.overall-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border-radius: var(--radius);
   background: var(--bg);
-  box-shadow: var(--shadow-md);
   padding: 12px;
 }
 
-.composer textarea {
-  width: 100%;
-  min-height: 70px;
-  resize: vertical;
+.composer {
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.overall-editor {
   border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Chip hugs its content instead of stretching across the flex column. */
+.composer > .anchor-chip,
+.overall-editor > .anchor-chip {
+  align-self: flex-start;
+}
+
+.composer textarea,
+.overall-editor textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin: 0;
+  resize: vertical;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--bg-subtle);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
   line-height: 1.6;
-  padding: 8px 10px;
+  padding: 9px 11px;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
-.composer textarea:focus {
+.composer textarea::placeholder,
+.overall-editor textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.composer textarea:focus,
+.overall-editor textarea:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .thumbs {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.thumbs:empty {
+  display: none;
+}
+
+.comment-card .thumbs {
   margin-top: 8px;
 }
 
@@ -837,7 +875,6 @@ button {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 10px;
 }
 
 /* ── Buttons ────────────────────────────────────────────── */

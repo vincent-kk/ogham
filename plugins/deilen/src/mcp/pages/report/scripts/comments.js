@@ -233,7 +233,7 @@ function commentCard(comment) {
 }
 
 function overallCard() {
-  const card = el("div", { class: "comment-card" });
+  const card = el("div", { class: "overall-editor" });
   card.append(
     el("div", { class: "anchor-chip overall", text: "Overall note" }),
   );
@@ -241,7 +241,6 @@ function overallCard() {
     attrs: { placeholder: "Overall feedback (optional)…" },
   });
   textarea.value = store.overall;
-  textarea.style.marginTop = "8px";
   textarea.addEventListener("input", () => {
     store.overall = textarea.value;
     scheduleAutoSave(view, buildPayload);

@@ -1,64 +1,60 @@
-/* deilen settings — shares the report viewer token system. */
+/* deilen settings — shares the report viewer token system; cennad-style chrome.
+   Chrome (buttons, switches, radios, focus) is monochrome: --accent maps to the
+   text color per theme, so high-contrast controls fall out of the token values. */
 
 :root {
   --font-body:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --bg: #ffffff;
-  --bg-subtle: #f6f7f9;
-  --bg-inset: #eceef2;
-  --text: #1f2733;
-  --text-muted: #5a6473;
-  --text-faint: #8a93a2;
-  --border: #e4e7ec;
-  --border-strong: #d2d7de;
+  --bg-subtle: #f7f7f8;
+  --bg-inset: #ededee;
+  --text: #1a1a1d;
+  --text-muted: #5c5c63;
+  --text-faint: #8a8a90;
+  --border: #e5e5e7;
+  --border-strong: #d4d4d7;
   --accent: #5b5bd6;
   --accent-hover: #4a4ac4;
   --accent-contrast: #ffffff;
   --accent-soft: rgba(91, 91, 214, 0.1);
-  --success: #15803d;
   --danger: #d61f1f;
-  --shadow-md:
-    0 4px 12px rgba(15, 23, 42, 0.1), 0 2px 4px rgba(15, 23, 42, 0.06);
   --radius-sm: 6px;
   --radius: 10px;
+  --transition: 160ms ease;
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1729;
-  --bg-subtle: #151d31;
-  --bg-inset: #1e2940;
-  --text: #e6eaf1;
-  --text-muted: #9aa6ba;
-  --text-faint: #67738a;
-  --border: #273249;
-  --border-strong: #38445e;
+  --bg: #16161a;
+  --bg-subtle: #1c1c20;
+  --bg-inset: #242429;
+  --text: #f4f4f6;
+  --text-muted: #9a9aa3;
+  --text-faint: #5e5e67;
+  --border: #2a2a31;
+  --border-strong: #3a3a43;
   --accent: #8b8cea;
   --accent-hover: #a3a4f0;
-  --accent-contrast: #0f1729;
+  --accent-contrast: #16161a;
   --accent-soft: rgba(139, 140, 234, 0.16);
-  --success: #5bd07f;
   --danger: #f08a8a;
-  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
-    --bg: #0f1729;
-    --bg-subtle: #151d31;
-    --bg-inset: #1e2940;
-    --text: #e6eaf1;
-    --text-muted: #9aa6ba;
-    --text-faint: #67738a;
-    --border: #273249;
-    --border-strong: #38445e;
+    --bg: #16161a;
+    --bg-subtle: #1c1c20;
+    --bg-inset: #242429;
+    --text: #f4f4f6;
+    --text-muted: #9a9aa3;
+    --text-faint: #5e5e67;
+    --border: #2a2a31;
+    --border-strong: #3a3a43;
     --accent: #8b8cea;
     --accent-hover: #a3a4f0;
-    --accent-contrast: #0f1729;
+    --accent-contrast: #16161a;
     --accent-soft: rgba(139, 140, 234, 0.16);
-    --success: #5bd07f;
     --danger: #f08a8a;
-    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -66,13 +62,19 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
   background: var(--bg);
   color: var(--text);
+}
+
+body {
   font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -82,17 +84,33 @@ body {
   border-radius: 4px;
 }
 
+code {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  background: var(--bg-inset);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
 .shell {
   max-width: 680px;
   margin: 0 auto;
-  padding: 40px 24px 96px;
+  padding: 48px 24px 64px;
 }
 
+/* ── Masthead ───────────────────────────────────────────── */
 .masthead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 8px;
+}
+
+.brand-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .brand {
@@ -100,62 +118,74 @@ body {
   color: var(--accent);
 }
 
-.title {
-  margin: 0;
+.brand-name {
   font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.brand-tag {
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 .lede {
-  margin: 2px 0 0;
+  margin: 0;
   color: var(--text-muted);
   font-size: 13px;
 }
 
+/* ── Sections (divider-separated, no cards) ─────────────── */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .section {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-subtle);
-  padding: 18px 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-of-type {
+  border-bottom: none;
 }
 
 .section-title {
   margin: 0 0 14px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-muted);
+  color: var(--text);
 }
 
 .section-help {
-  margin: -8px 0 14px;
-  font-size: 13px;
-  color: var(--text-faint);
+  margin: -8px 0 16px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
+/* ── Fields ─────────────────────────────────────────────── */
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 14px;
 }
 
-.field:last-child {
-  margin-bottom: 0;
+.field + .field,
+.toggle + .toggle {
+  margin-top: 14px;
+}
+
+.toggle + .grid {
+  margin-top: 16px;
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
 }
 
 .grid {
@@ -164,15 +194,23 @@ body {
   gap: 14px;
 }
 
+.grid .field + .field {
+  margin-top: 0;
+}
+
 .input {
+  width: 100%;
   height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--bg-subtle);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .input:focus {
@@ -181,104 +219,181 @@ body {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+/* ── Pill radios ────────────────────────────────────────── */
 .radio-row {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .radio {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 38px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  font-size: 13px;
+  position: relative;
   cursor: pointer;
 }
 
-.radio:has(input:checked) {
+.radio input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.radio span {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 13px;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition);
+}
+
+.radio:hover span {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.radio input:checked + span {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
 }
 
-.radio input {
-  accent-color: var(--accent);
+.radio input:focus-visible + span {
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  cursor: pointer;
-}
-
-.toggle-row + .toggle-row {
-  border-top: 1px solid var(--border);
-}
-
+/* ── Custom switch ──────────────────────────────────────── */
 .toggle {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.savebar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 14px 24px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--border);
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
 }
 
-.save-status {
-  font-size: 13px;
-  color: var(--text-muted);
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  pointer-events: none;
 }
 
-.save-status.ok {
-  color: var(--success);
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
 }
 
-.save-status.err {
-  color: var(--danger);
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition:
+    transform var(--transition),
+    background var(--transition);
+}
+
+.toggle input:checked ~ .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(16px);
+  background: var(--bg);
+}
+
+.toggle input:focus-visible ~ .toggle-track {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ── Actions + status ───────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
 }
 
 .btn {
-  height: 38px;
-  padding: 0 18px;
-  border: 1px solid var(--accent);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 18px;
+  min-height: 44px;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
+  background: var(--bg-subtle);
+  color: var(--text);
   cursor: pointer;
-  transition: background 0.16s ease;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
 }
 
 .btn:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-inset);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 500;
+}
+
+.btn-primary:hover {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.status {
+  margin-top: 20px;
+  min-height: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.status.ok {
+  color: var(--text);
+}
+
+.status.err {
+  color: var(--danger);
 }
 
 @media (max-width: 560px) {

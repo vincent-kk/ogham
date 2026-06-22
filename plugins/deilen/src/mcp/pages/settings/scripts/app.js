@@ -60,11 +60,13 @@ function collect() {
   };
 }
 
-async function save() {
+async function save(close) {
   const status = $("status");
-  const btn = $("save");
-  btn.disabled = true;
-  status.className = "save-status";
+  const saveBtn = $("save");
+  const closeBtn = $("save-close");
+  saveBtn.disabled = true;
+  closeBtn.disabled = true;
+  status.className = "status";
   status.textContent = "Saving…";
   try {
     const res = await fetch(
@@ -77,17 +79,28 @@ async function save() {
     );
     const body = await res.json().catch(() => ({}));
     if (res.ok) {
-      status.className = "save-status ok";
-      status.textContent = "Saved";
+      status.className = "status ok";
+      if (close) {
+        status.textContent = "Saved — closing…";
+        // Best-effort: browsers only honor close() for script-opened tabs, so
+        // a settings tab opened by the OS stays put — the fallback says so.
+        window.close();
+        setTimeout(() => {
+          status.textContent = "Saved. You can close this tab.";
+        }, 300);
+      } else {
+        status.textContent = "Saved";
+      }
     } else {
-      status.className = "save-status err";
+      status.className = "status err";
       status.textContent = body.message || "Save failed";
     }
   } catch {
-    status.className = "save-status err";
+    status.className = "status err";
     status.textContent = "Network error";
   } finally {
-    btn.disabled = false;
+    saveBtn.disabled = false;
+    closeBtn.disabled = false;
   }
 }
 
@@ -96,7 +109,8 @@ function init() {
   for (const radio of document.querySelectorAll('input[name="theme"]')) {
     radio.addEventListener("change", () => setTheme(collect().theme));
   }
-  $("save").addEventListener("click", save);
+  $("save").addEventListener("click", () => save(false));
+  $("save-close").addEventListener("click", () => save(true));
 }
 
 init();

@@ -13,29 +13,31 @@
 
     <main class="shell">
       <header class="masthead">
-        <span class="brand" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"
-            />
-            <path d="M14 4v5h5" />
-          </svg>
-        </span>
-        <div>
-          <h1 class="title">deilen settings</h1>
-          <p class="lede">
-            Theme, behavior, renderers, and size limits for the report viewer.
-          </p>
+        <div class="brand-row">
+          <span class="brand" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h11l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"
+              />
+              <path d="M14 4v5h5" />
+              <path d="M8 13h6M8 17h4" />
+            </svg>
+          </span>
+          <span class="brand-name">deilen</span>
+          <span class="brand-tag">/ settings</span>
         </div>
+        <p class="lede">
+          Theme, behavior, renderers, and size limits for the report viewer.
+        </p>
       </header>
 
       <form id="form" class="form" novalidate>
@@ -45,13 +47,19 @@
             <span class="field-label">Theme</span>
             <div class="radio-row" id="theme">
               <label class="radio"
-                ><input type="radio" name="theme" value="light" /> Light</label
+                ><input type="radio" name="theme" value="light" /><span
+                  >Light</span
+                ></label
               >
               <label class="radio"
-                ><input type="radio" name="theme" value="dark" /> Dark</label
+                ><input type="radio" name="theme" value="dark" /><span
+                  >Dark</span
+                ></label
               >
               <label class="radio"
-                ><input type="radio" name="theme" value="auto" /> Auto</label
+                ><input type="radio" name="theme" value="auto" /><span
+                  >Auto</span
+                ></label
               >
             </div>
           </div>
@@ -82,11 +90,12 @@
 
         <section class="section">
           <h2 class="section-title">Behavior</h2>
-          <label class="toggle-row">
-            <span class="field-label"
+          <label class="toggle">
+            <input type="checkbox" id="auto_open" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label"
               >Open the browser automatically on render</span
             >
-            <input type="checkbox" id="auto_open" class="toggle" />
           </label>
           <div class="grid">
             <div class="field">
@@ -146,17 +155,20 @@
             Disabling a renderer skips its client-side enhancement; source stays
             readable.
           </p>
-          <label class="toggle-row">
-            <span class="field-label">Syntax highlighting</span>
-            <input type="checkbox" id="renderer_highlight" class="toggle" />
+          <label class="toggle">
+            <input type="checkbox" id="renderer_highlight" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Syntax highlighting</span>
           </label>
-          <label class="toggle-row">
-            <span class="field-label">Mermaid diagrams</span>
-            <input type="checkbox" id="renderer_mermaid" class="toggle" />
+          <label class="toggle">
+            <input type="checkbox" id="renderer_mermaid" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Mermaid diagrams</span>
           </label>
-          <label class="toggle-row">
-            <span class="field-label">Math (KaTeX)</span>
-            <input type="checkbox" id="renderer_math" class="toggle" />
+          <label class="toggle">
+            <input type="checkbox" id="renderer_math" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">Math (KaTeX)</span>
           </label>
         </section>
 
@@ -203,17 +215,13 @@
         </section>
       </form>
 
-      <footer class="savebar">
-        <span
-          class="save-status"
-          id="status"
-          role="status"
-          aria-live="polite"
-        ></span>
-        <button type="button" class="btn btn-primary" id="save">
-          Save settings
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="save">Save</button>
+        <button type="button" class="btn btn-secondary" id="save-close">
+          Save &amp; Close
         </button>
-      </footer>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
     </main>
 
     <script type="module" src="./scripts/app.js"></script>
