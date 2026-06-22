@@ -10,7 +10,6 @@
 plugins/dalen/
 ├── .claude-plugin/plugin.json     # { name: "dalen", skills, mcpServers }
 ├── .mcp.json                      # { mcpServers: { tools: { command: node, args: bridge/mcp-server.cjs } } }
-├── libs/run.cjs                   # cross-platform Node runner (cennad/filid 동일 파일)
 ├── skills/
 │   ├── setup/SKILL.md
 │   └── present/SKILL.md
@@ -27,7 +26,7 @@ plugins/dalen/
 └── README.md / README-ko_kr.md
 ```
 
-`package.json` 의 `files`: `["dist", "bridge", "libs", "skills", ".claude-plugin", ".mcp.json", "README.md"]`
+`package.json` 의 `files`: `["dist", "bridge", "skills", ".claude-plugin", ".mcp.json", "README.md"]` (hook 없음 → `libs/run.cjs` 미포함)
 
 (hooks 없음 — cennad 와 달리 `hooks/` 미포함.)
 
