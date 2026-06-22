@@ -53,7 +53,7 @@ export async function handleGetViewer(
   };
   const html = ctx
     .loadViewerHtml()
-    .replace(/["']__DEILEN_STATE__["']/, escapeJsonForHtml(state));
+    .replace(/["']__DEILEN_STATE__["']/, () => escapeJsonForHtml(state));
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Content-Length": Buffer.byteLength(html),

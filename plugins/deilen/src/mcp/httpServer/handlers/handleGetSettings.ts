@@ -11,8 +11,7 @@ export async function handleGetSettings(
   const config = await ctx.loadConfig();
   const html = ctx
     .loadSettingsHtml()
-    .replace(
-      /["']__DEILEN_STATE__["']/,
+    .replace(/["']__DEILEN_STATE__["']/, () =>
       escapeJsonForHtml({ config, token: ctx.token }),
     );
   res.writeHead(200, {

@@ -3,6 +3,7 @@ import { createWriteStream } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
+import { pipeline } from "node:stream/promises";
 
 import {
   ALLOWED_IMAGE_MIME,
@@ -85,25 +86,18 @@ export function parseMultipart(
       writes.push(
         (async () => {
           await mkdir(dir, { recursive: true });
-          await new Promise<void>((res, rej) => {
-            const ws = createWriteStream(fullPath);
-            stream.on("data", (chunk: Buffer) => {
-              bytes += chunk.length;
-              totalBytes += chunk.length;
-              if (totalBytes > options.maxPayloadBytes) {
-                ws.destroy();
-                rej(new Error("payload exceeds max_payload_mb"));
-              }
-            });
-            stream.on("limit", () => {
-              ws.destroy();
-              rej(new Error("image exceeds max_image_mb"));
-            });
-            stream.on("error", rej);
-            ws.on("error", rej);
-            ws.on("finish", () => res());
-            stream.pipe(ws);
+          const ws = createWriteStream(fullPath);
+          stream.on("data", (chunk: Buffer) => {
+            bytes += chunk.length;
+            totalBytes += chunk.length;
+            if (totalBytes > options.maxPayloadBytes) {
+              stream.destroy(new Error("payload exceeds max_payload_mb"));
+            }
           });
+          stream.on("limit", () => {
+            stream.destroy(new Error("image exceeds max_image_mb"));
+          });
+          await pipeline(stream, ws);
           images.push({
             id: name.slice(4),
             mimeType: info.mimeType,
