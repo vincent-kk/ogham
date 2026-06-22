@@ -9,4 +9,4 @@ export {
 } from "./feedbackResolver.js";
 export { getSession } from "./getSession.js";
 export { pruneExpired } from "./pruneExpired.js";
-export { readReportMarkdown } from "./readReportMarkdown.js";
+export { readViewerMarkdown } from "./readViewerMarkdown.js";

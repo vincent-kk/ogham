@@ -4,11 +4,11 @@
 
 ## Status
 
-Implemented: render core, the local HTTP server + report viewer, line-anchored feedback (long-poll), the settings UI, and the `present` / `setup` skills. Four MCP tools: `render_report`, `collect_feedback`, `close_report`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
+Implemented: render core, the local HTTP server + viewer, line-anchored feedback (long-poll), the settings UI, and the `present` / `setup` skills. Four MCP tools: `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
 
 ## What deilen does
 
-A local MCP server renders Claude-generated markdown reports as a readable browser page (127.0.0.1) and collects line-anchored feedback — including file and clipboard images — back to Claude via a bounded long-poll. Heavy renderers (Mermaid / highlight.js / KaTeX) are lazy-loaded browser assets.
+A local MCP server renders Claude-generated markdown documents as a readable browser page (127.0.0.1) and collects line-anchored feedback — including file and clipboard images — back to Claude via a bounded long-poll. Heavy renderers (Mermaid / highlight.js / KaTeX) are lazy-loaded browser assets.
 
 ## Commands
 

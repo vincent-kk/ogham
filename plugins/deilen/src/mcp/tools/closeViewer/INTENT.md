@@ -1,13 +1,13 @@
 ## Purpose
 
-`close_report` 도구 핸들러. 피드백 수집 후 세션을 닫고 대기 중인 long-poll resolver 를 정리한다.
+`close_viewer` 도구 핸들러. 피드백 수집 후 세션을 닫고 대기 중인 long-poll resolver 를 정리한다.
 
 ## Structure
 
 | File             | Role                                                  |
 | ---------------- | ----------------------------------------------------- |
-| `closeReport.ts` | 핸들러 — 세션 검증 → `closeResolver` → `closeSession` |
-| `index.ts`       | barrel — `handleCloseReport`, 입출력 타입             |
+| `closeViewer.ts` | 핸들러 — 세션 검증 → `closeResolver` → `closeSession` |
+| `index.ts`       | barrel — `handleCloseViewer`, 입출력 타입             |
 
 ## Conventions
 

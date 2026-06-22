@@ -15,7 +15,7 @@ plugins/deilen/
 │   └── present/SKILL.md
 ├── scripts/
 │   ├── buildMcpServer.mjs         # esbuild → bridge/mcp-server.cjs (CJS)
-│   ├── buildReportHtml.mjs        # 뷰어 FE → src/mcp/httpServer/__generated__/reportHtml.ts
+│   ├── buildViewerHtml.mjs        # 뷰어 FE → src/mcp/httpServer/__generated__/viewerHtml.ts
 │   ├── buildSettingsHtml.mjs      # 설정 FE → src/mcp/httpServer/__generated__/settingsHtml.ts
 │   └── buildRenderers.mjs         # 렌더러 *.entry.ts → bridge/assets/*.js (browser ESM)
 ├── bridge/                        # build artifact (committed — package.json:files)
@@ -67,10 +67,10 @@ src/
 │   ├── serverEntry/serverEntry.ts # esbuild 진입점 → bridge/mcp-server.cjs
 │   ├── shared/toolResponse.ts
 │   ├── tools/
-│   │   ├── renderReport/
+│   │   ├── renderViewer/
 │   │   ├── collectFeedback/
 │   │   ├── openSettings/
-│   │   └── closeReport/
+│   │   └── closeViewer/
 │   ├── httpServer/                # 127.0.0.1 단일 서버 (뷰어 + 피드백 + 설정)
 │   │   ├── INTENT.md
 │   │   ├── index.ts
@@ -78,8 +78,8 @@ src/
 │   │   ├── routes.ts
 │   │   ├── routeContext.ts
 │   │   ├── handlers/
-│   │   │   ├── handleGetReport.ts        # GET /r/<session>      뷰어 HTML
-│   │   │   ├── handleGetReportData.ts    # GET /api/report       렌더 HTML+메타
+│   │   │   ├── handleGetViewer.ts        # GET /r/<session>      뷰어 HTML
+│   │   │   ├── handleGetViewerData.ts    # GET /api/viewer       렌더 HTML+메타
 │   │   │   ├── handleGetAsset.ts         # GET /assets/<chunk>   lazy 렌더러 자산
 │   │   │   ├── handlePostFeedback.ts     # POST /api/feedback    multipart
 │   │   │   ├── handlePing.ts             # POST /api/ping        heartbeat
@@ -88,7 +88,7 @@ src/
 │   │   │   ├── handleSaveConfig.ts       # POST /api/config
 │   │   │   └── handleClose.ts            # POST /api/close
 │   │   ├── __generated__/
-│   │   │   ├── reportHtml.ts
+│   │   │   ├── viewerHtml.ts
 │   │   │   └── settingsHtml.ts
 │   │   └── utils/
 │   │       ├── parseMultipart.ts         # busboy 래퍼
@@ -96,7 +96,7 @@ src/
 │   │       ├── escapeJsonForHtml.ts
 │   │       └── verifyToken.ts
 │   └── pages/
-│       ├── report/                # 뷰어 FE (index.html, styles/, scripts/, renderers/)
+│       ├── viewer/                # 뷰어 FE (index.html, styles/, scripts/, renderers/)
 │       └── settings/              # 설정 FE (index.html, styles/, scripts/)
 ├── lib/                           # organ
 │   ├── logger.ts
@@ -116,7 +116,7 @@ render/*        →  lib, utils
 core/*          →  lib, utils, constants
 ```
 
-- `mcp/tools/renderReport` 가 `httpServer` 를 1회 기동(이미 떠 있으면 재사용)하고 `sessionStore` 에 세션 등록.
+- `mcp/tools/renderViewer` 가 `httpServer` 를 1회 기동(이미 떠 있으면 재사용)하고 `sessionStore` 에 세션 등록.
 - `mcp/tools/collectFeedback` 는 `sessionStore` 의 pendingResolver 에 의존(직접 HTTP I/O 없음).
 - `httpServer/handlePostFeedback` 가 `feedbackStore` 저장 후 `sessionStore` resolver 호출.
 - FCA: 도메인 루트(`core`/`render`/`mcp`/`mcp/httpServer`)만 `INTENT.md` 보유(fractal). 하위 단일관심 디렉터리(`configManager`·`sessionStore`·각 도구·`handlers`·`renderers` 등)와 `types`/`constants`/`lib`/`utils`/`__generated__`/`pages` 는 organ(INTENT.md 없음) — cennad 동일 관례.
@@ -127,7 +127,7 @@ core/*          →  lib, utils, constants
 
 ```json
 {
-  "build": "yarn clean && yarn version:sync && node scripts/buildReportHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
+  "build": "yarn clean && yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
   "build:plugin": "node scripts/buildMcpServer.mjs",
   "clean": "rm -rf bridge",
   "version:sync": "node ../../scripts/inject-version.mjs"
@@ -137,13 +137,13 @@ core/*          →  lib, utils, constants
 | 단계 | 명령                                 | 산출물                             |
 | ---- | ------------------------------------ | ---------------------------------- |
 | 1    | `yarn version:sync`                  | `src/version.ts`                   |
-| 2    | `node scripts/buildReportHtml.mjs`   | `__generated__/reportHtml.ts`      |
+| 2    | `node scripts/buildViewerHtml.mjs`   | `__generated__/viewerHtml.ts`      |
 | 3    | `node scripts/buildSettingsHtml.mjs` | `__generated__/settingsHtml.ts`    |
 | 4    | `node scripts/buildRenderers.mjs`    | `bridge/assets/*.js` (browser ESM) |
 | 5    | `tsc -p tsconfig.build.json`         | `dist/`                            |
 | 6    | `node scripts/buildMcpServer.mjs`    | `bridge/mcp-server.cjs` (esbuild)  |
 
-뷰어 FE 의 무거운 렌더러(Mermaid/highlight/KaTeX)는 전용 `buildRenderers.mjs` 가 **렌더러당 독립 브라우저 엔트리**(`pages/report/renderers/*.entry.ts`)로 빌드해 `bridge/assets/*.js` 산출물을 만들고, base HTML 과 분리해 `handleGetAsset` 가 동적 서빙한다(lazy-load 자산). base `reportHtml.ts` 에는 인라인되지 않는다. 빌드·서빙·누수 방지 상세는 [mcp-runtime.md](./mcp-runtime.md).
+뷰어 FE 의 무거운 렌더러(Mermaid/highlight/KaTeX)는 전용 `buildRenderers.mjs` 가 **렌더러당 독립 브라우저 엔트리**(`pages/viewer/renderers/*.entry.ts`)로 빌드해 `bridge/assets/*.js` 산출물을 만들고, base HTML 과 분리해 `handleGetAsset` 가 동적 서빙한다(lazy-load 자산). base `viewerHtml.ts` 에는 인라인되지 않는다. 빌드·서빙·누수 방지 상세는 [mcp-runtime.md](./mcp-runtime.md).
 
 ### 렌더러 자산 적재 정책 (전부 동봉)
 
@@ -162,7 +162,7 @@ core/*          →  lib, utils, constants
 - `RenderOptions`: `{ theme?: 'light'|'dark'|'auto', content_width_px?: number, renderers?: { mermaid?: boolean; highlight?: boolean; math?: boolean } }` — 호출별 override(미지정 시 config).
 - `ImageRef`(서버 내부 메타): `{ id, mimeType, filename?, source: 'clipboard'|'file', bytes, path }` — `feedback.json` 의 이미지 메타.
 - `RenderMeta`: `{ html, lineCount, title, sourceLineIndex: Array<{ line, selector }> }` — render 파이프라인 반환.
-- 도구 등록명은 snake_case(`render_report`), 파일·심볼은 camelCase(`renderReport.ts`); `mcp/server` 가 둘을 매핑.
+- 도구 등록명은 snake_case(`render_viewer`), 파일·심볼은 camelCase(`renderViewer.ts`); `mcp/server` 가 둘을 매핑.
 
 ## 메인 진입점 export (cennad 동일)
 

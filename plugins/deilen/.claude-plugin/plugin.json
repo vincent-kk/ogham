@@ -1,7 +1,7 @@
 {
   "name": "deilen",
   "version": "0.0.0",
-  "description": "Deilen — render Claude markdown reports as a readable browser page with line-anchored feedback back to Claude",
+  "description": "Deilen — render Claude markdown documents as a readable browser page with line-anchored feedback back to Claude",
   "author": {
     "name": "Vincent K. Kelvin"
   },
@@ -12,7 +12,7 @@
     "claude-code",
     "plugin",
     "markdown",
-    "report",
+    "viewer",
     "viewer",
     "feedback"
   ],

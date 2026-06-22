@@ -37,7 +37,7 @@ function blockAnchor(block) {
 
 function nearestAnchor(node) {
   let cur = node instanceof Element ? node : node?.parentElement;
-  while (cur && cur.id !== "report") {
+  while (cur && cur.id !== "viewer") {
     if (cur.hasAttribute?.("data-source-line")) return cur;
     cur = cur.parentElement;
   }
@@ -297,8 +297,8 @@ function updateStatus() {
 
 /* ── Anchors + selection ──────────────────────────────── */
 function decorateAnchors() {
-  const report = document.getElementById("report");
-  for (const block of report.children) {
+  const viewer = document.getElementById("viewer");
+  for (const block of viewer.children) {
     if (!block.hasAttribute("data-source-line")) continue;
     const add = el("button", { class: "line-add", type: "button", text: "+" });
     add.setAttribute("aria-label", "Comment on this block");
@@ -310,19 +310,19 @@ function decorateAnchors() {
 function scrollToAnchor(anchor) {
   if (!anchor) return;
   const block = document.querySelector(
-    `#report [data-source-line="${anchor.startLine}"]`,
+    `#viewer [data-source-line="${anchor.startLine}"]`,
   );
   block?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function markAnchored() {
   document
-    .querySelectorAll("#report [data-has-comment]")
+    .querySelectorAll("#viewer [data-has-comment]")
     .forEach((node) => node.removeAttribute("data-has-comment"));
   for (const comment of store.comments.values()) {
     if (!comment.anchor) continue;
     const block = document.querySelector(
-      `#report [data-source-line="${comment.anchor.startLine}"]`,
+      `#viewer [data-source-line="${comment.anchor.startLine}"]`,
     );
     block?.setAttribute("data-has-comment", "true");
   }

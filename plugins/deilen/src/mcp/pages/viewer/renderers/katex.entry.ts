@@ -5,7 +5,7 @@ import katex from "katex";
  * font — no bundled KaTeX fonts or CSS. Browser asset entry.
  */
 export function typesetAll(): void {
-  const nodes = document.querySelectorAll<HTMLElement>("#report .deilen-math");
+  const nodes = document.querySelectorAll<HTMLElement>("#viewer .deilen-math");
   nodes.forEach((el) => {
     const display = el.getAttribute("data-display") === "1";
     const tex = el.textContent ?? "";

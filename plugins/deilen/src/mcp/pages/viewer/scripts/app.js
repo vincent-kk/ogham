@@ -1,4 +1,4 @@
-// Report viewer entry: hydrate the injected state, mount the rendered HTML,
+// Viewer entry: hydrate the injected state, mount the rendered HTML,
 // apply theme/typography, enable copy + lazy enhancement, and keep the server
 // alive with a heartbeat.
 
@@ -22,7 +22,7 @@ function applyDocumentChrome() {
     root.style.setProperty("--font-body", state.font_family);
   }
   applyTheme(state.theme || "auto");
-  const title = state.title || "Report";
+  const title = state.title || "Document";
   document.title = `${title} · deilen`;
   const titleEl = document.getElementById("doc-title");
   if (titleEl) titleEl.textContent = title;
@@ -57,8 +57,8 @@ function startHeartbeat() {
 
 function init() {
   applyDocumentChrome();
-  const report = document.getElementById("report");
-  if (report) report.innerHTML = state.html || "";
+  const viewer = document.getElementById("viewer");
+  if (viewer) viewer.innerHTML = state.html || "";
   initCopy(state);
   enhance(state.renderers || {});
   initComments(state);

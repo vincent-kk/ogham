@@ -35,7 +35,7 @@ function populate() {
   $("renderer_math").checked = renderers.math !== false;
   $("max_image_mb").value = config.max_image_mb ?? 10;
   $("max_payload_mb").value = config.max_payload_mb ?? 50;
-  $("max_report_mb").value = config.max_report_mb ?? 5;
+  $("max_viewer_mb").value = config.max_viewer_mb ?? 5;
 }
 
 function collect() {
@@ -56,7 +56,7 @@ function collect() {
     },
     max_image_mb: num("max_image_mb"),
     max_payload_mb: num("max_payload_mb"),
-    max_report_mb: num("max_report_mb"),
+    max_viewer_mb: num("max_viewer_mb"),
   };
 }
 

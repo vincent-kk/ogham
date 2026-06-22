@@ -1,4 +1,4 @@
-/* deilen settings — shares the report viewer token system; cennad-style chrome.
+/* deilen settings — shares the viewer token system; cennad-style chrome.
    Chrome (buttons, switches, radios, focus) is monochrome: --accent maps to the
    text color per theme, so high-contrast controls fall out of the token values. */
 

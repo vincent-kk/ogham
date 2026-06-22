@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const entryDir = join(root, "src/mcp/pages/report/renderers");
+const entryDir = join(root, "src/mcp/pages/viewer/renderers");
 const assetsDir = join(root, "bridge/assets");
 await mkdir(assetsDir, { recursive: true });
 

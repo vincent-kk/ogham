@@ -4,8 +4,8 @@ import { verifyToken } from "../../../core/authToken/verifyToken.js";
 import { handleClose } from "../handlers/handleClose.js";
 import { handleGetAsset } from "../handlers/handleGetAsset.js";
 import { handleGetConfig } from "../handlers/handleGetConfig.js";
-import { handleGetReport } from "../handlers/handleGetReport.js";
-import { handleGetReportData } from "../handlers/handleGetReportData.js";
+import { handleGetViewer } from "../handlers/handleGetViewer.js";
+import { handleGetViewerData } from "../handlers/handleGetViewerData.js";
 import { handleGetSettings } from "../handlers/handleGetSettings.js";
 import { handlePing } from "../handlers/handlePing.js";
 import { handlePostFeedback } from "../handlers/handlePostFeedback.js";
@@ -14,7 +14,7 @@ import { sendJson } from "../utils/sendJson.js";
 
 import type { RouteContext } from "./routeContext.js";
 
-const REPORT_PATH = /^\/r\/([^/]+)$/;
+const VIEWER_PATH = /^\/r\/([^/]+)$/;
 const ASSET_PATH = /^\/assets\/([^/]+)$/;
 
 /** Build the request dispatcher: idle touch, token + CSRF guards, routing. */
@@ -59,15 +59,15 @@ export function createRouteHandler(
       }
     }
 
-    const reportMatch = REPORT_PATH.exec(path);
-    if (reportMatch && method === "GET") {
-      handleGetReport(ctx, decodeURIComponent(reportMatch[1]), res).catch(
+    const viewerMatch = VIEWER_PATH.exec(path);
+    if (viewerMatch && method === "GET") {
+      handleGetViewer(ctx, decodeURIComponent(viewerMatch[1]), res).catch(
         onError,
       );
       return;
     }
-    if (path === "/api/report" && method === "GET") {
-      handleGetReportData(ctx, url, res).catch(onError);
+    if (path === "/api/viewer" && method === "GET") {
+      handleGetViewerData(ctx, url, res).catch(onError);
       return;
     }
     if (path === "/settings" && method === "GET") {

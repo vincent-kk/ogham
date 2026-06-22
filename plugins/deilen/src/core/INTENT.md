@@ -1,6 +1,6 @@
 ## Purpose
 
-deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·report.md) 영속과 long-poll resolver 레지스트리(Phase 3), one-time token, project 스코프 해시를 담당한다. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
+deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·viewer.md) 영속과 long-poll resolver 레지스트리(Phase 3), one-time token, project 스코프 해시를 담당한다. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
 
 ## Structure
 

@@ -12,7 +12,7 @@
     └── sessions/
         └── <session_id>/               # 렌더 세션 (project_hash 스코프)
             ├── meta.json               # { session_id, project_hash, title, url, created_at, status }
-            ├── report.md               # 렌더 원본 markdown
+            ├── viewer.md               # 렌더 원본 markdown
             ├── feedback.json           # 누적 피드백 (FeedbackPayload + 이미지 메타)
             └── images/
                 └── <image_id>.<ext>    # 제출된 파일/클립보드 이미지
@@ -39,7 +39,7 @@
 | `renderers.math`          | `boolean`                 | `true` |                                   |
 | `max_image_mb`            | `number`                  | `10`   | 1–100, part 당 상한               |
 | `max_payload_mb`          | `number`                  | `50`   | 1–200, `≥ max_image_mb`           |
-| `max_report_mb`           | `number`                  | `5`    | 1–50, render content/path         |
+| `max_viewer_mb`           | `number`                  | `5`    | 1–50, render content/path         |
 
 - 모든 디스크 쓰기는 `lib/atomicWrite.ts`(temp→rename).
 - config 부재 시 `constants/defaults.ts` 로 부팅, 첫 저장 시 파일 생성.

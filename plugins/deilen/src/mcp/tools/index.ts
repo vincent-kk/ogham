@@ -1,8 +1,8 @@
 export {
-  handleCloseReport,
-  type CloseReportInput,
-  type CloseReportOutput,
-} from "./closeReport/index.js";
+  handleCloseViewer,
+  type CloseViewerInput,
+  type CloseViewerOutput,
+} from "./closeViewer/index.js";
 export {
   handleCollectFeedback,
   type CollectFeedbackInput,
@@ -13,7 +13,7 @@ export {
   type OpenSettingsOutput,
 } from "./openSettings/index.js";
 export {
-  handleRenderReport,
-  type RenderReportInput,
-  type RenderReportOutput,
-} from "./renderReport/index.js";
+  handleRenderViewer,
+  type RenderViewerInput,
+  type RenderViewerOutput,
+} from "./renderViewer/index.js";

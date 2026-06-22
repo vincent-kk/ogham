@@ -1,4 +1,4 @@
-// Copy affordances: the whole report (raw markdown) and per code block.
+// Copy affordances: the whole viewer (raw markdown) and per code block.
 
 function flash(btn, labelEl) {
   const target = labelEl || btn;
@@ -17,7 +17,7 @@ function write(text, onOk) {
 }
 
 function addCodeCopyButtons() {
-  document.querySelectorAll("#report pre").forEach((pre) => {
+  document.querySelectorAll("#viewer pre").forEach((pre) => {
     if (pre.classList.contains("deilen-mermaid")) return;
     const code = pre.querySelector("code");
     if (!code) return;

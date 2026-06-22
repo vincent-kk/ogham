@@ -4,8 +4,8 @@ import { CONFIG_PATH } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
 import type { ToolExtra } from "../../shared/wrapHandler.js";
 import { handleCollectFeedback } from "../../tools/collectFeedback/collectFeedback.js";
-import { handleCloseReport } from "../../tools/closeReport/closeReport.js";
-import { handleRenderReport } from "../../tools/renderReport/renderReport.js";
+import { handleCloseViewer } from "../../tools/closeViewer/closeViewer.js";
+import { handleRenderViewer } from "../../tools/renderViewer/renderViewer.js";
 import { getHttpServer } from "../httpServer.js";
 
 const PNG = Buffer.from(
@@ -22,7 +22,7 @@ function sessionIdFrom(url: string): string {
 }
 
 async function render(content: string): Promise<string> {
-  const out = await handleRenderReport({ content });
+  const out = await handleRenderViewer({ content });
   const url = new URL(out.url);
   token = url.searchParams.get("token") ?? "";
   baseUrl = url.origin;
@@ -111,9 +111,9 @@ describe("feedback flow", () => {
     ).rejects.toThrow(/unknown/);
   });
 
-  it("closes a session so further collects report closed", async () => {
+  it("closes a session so further collects viewer closed", async () => {
     const sid = await render("x");
-    expect(await handleCloseReport({ session_id: sid })).toEqual({
+    expect(await handleCloseViewer({ session_id: sid })).toEqual({
       status: "closed",
     });
     await expect(

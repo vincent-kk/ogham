@@ -4,7 +4,7 @@ import type { Config } from "../../../types/config.js";
 export interface RouteContext {
   token: string;
   projectHash: string;
-  loadReportHtml: () => string;
+  loadViewerHtml: () => string;
   loadSettingsHtml: () => string;
   loadConfig: () => Promise<Config>;
   saveConfig: (config: Config) => Promise<void>;

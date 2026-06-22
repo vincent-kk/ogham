@@ -1,15 +1,15 @@
 import type { ServerResponse } from "node:http";
 
 import { getSession } from "../../../core/sessionStore/getSession.js";
-import { readReportMarkdown } from "../../../core/sessionStore/readReportMarkdown.js";
+import { readViewerMarkdown } from "../../../core/sessionStore/readViewerMarkdown.js";
 import { renderMarkdown } from "../../../render/operations/renderMarkdown.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 
 const SESSION_ID = /^[A-Za-z0-9_-]+$/;
 
-/** GET /api/report — re-fetch render HTML+meta, or raw markdown (`format=md`). */
-export async function handleGetReportData(
+/** GET /api/viewer — re-fetch render HTML+meta, or raw markdown (`format=md`). */
+export async function handleGetViewerData(
   ctx: RouteContext,
   url: URL,
   res: ServerResponse,
@@ -24,9 +24,9 @@ export async function handleGetReportData(
     sendJson(res, 404, { ok: false, message: "Unknown session" });
     return;
   }
-  const markdown = await readReportMarkdown(sessionId);
+  const markdown = await readViewerMarkdown(sessionId);
   if (markdown === null) {
-    sendJson(res, 404, { ok: false, message: "Report content missing" });
+    sendJson(res, 404, { ok: false, message: "Viewer content missing" });
     return;
   }
   if (url.searchParams.get("format") === "md") {

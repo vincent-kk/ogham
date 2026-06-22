@@ -7,7 +7,7 @@ import { getProjectHash } from "../../core/projectHash/getProjectHash.js";
 import { logger } from "../../lib/logger.js";
 
 import { createRouteHandler } from "./routing/routes.js";
-import { loadReportHtml } from "./utils/loadReportHtml.js";
+import { loadViewerHtml } from "./utils/loadViewerHtml.js";
 import { loadSettingsHtml } from "./utils/loadSettingsHtml.js";
 import { resolveAssetPath } from "./utils/resolveAssetPath.js";
 
@@ -15,7 +15,7 @@ export interface HttpServerInstance {
   baseUrl: string;
   port: number;
   token: string;
-  reportUrl: (sessionId: string) => string;
+  viewerUrl: (sessionId: string) => string;
   settingsUrl: () => string;
   touch: () => void;
   close: () => Promise<void>;
@@ -90,7 +90,7 @@ async function startHttpServer(): Promise<HttpServerInstance> {
   const handler = createRouteHandler({
     token,
     projectHash,
-    loadReportHtml,
+    loadViewerHtml,
     loadSettingsHtml,
     loadConfig,
     saveConfig,
@@ -116,7 +116,7 @@ async function startHttpServer(): Promise<HttpServerInstance> {
     baseUrl,
     port,
     token,
-    reportUrl: (sessionId) => `${baseUrl}/r/${sessionId}?token=${token}`,
+    viewerUrl: (sessionId) => `${baseUrl}/r/${sessionId}?token=${token}`,
     settingsUrl: () => `${baseUrl}/settings?token=${token}`,
     touch,
     close,

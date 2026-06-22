@@ -16,7 +16,7 @@ mermaid.initialize({
 /** Render every mermaid block to SVG (strict mode). Browser asset entry. */
 export async function renderAll(): Promise<void> {
   const nodes = Array.from(
-    document.querySelectorAll<HTMLElement>("#report .deilen-mermaid"),
+    document.querySelectorAll<HTMLElement>("#viewer .deilen-mermaid"),
   );
   for (let i = 0; i < nodes.length; i += 1) {
     const node = nodes[i];

@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/deilen` 소스 루트. Claude 가 생성한 markdown 보고서를 로컬 HTTP 서버가 브라우저 페이지로 렌더링하고, 라인 단위 피드백(파일·클립보드 이미지 포함)을 수집해 Claude 에 되돌려주는 MCP 패키지의 진입 모듈.
+`@ogham/deilen` 소스 루트. Claude 가 생성한 markdown 문서를 로컬 HTTP 서버가 브라우저 페이지로 렌더링하고, 라인 단위 피드백(파일·클립보드 이미지 포함)을 수집해 Claude 에 되돌려주는 MCP 패키지의 진입 모듈.
 
 ## Structure
 

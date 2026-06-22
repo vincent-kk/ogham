@@ -3,18 +3,18 @@ import { closeSession } from "../../../core/sessionStore/closeSession.js";
 import { closeResolver } from "../../../core/sessionStore/feedbackResolver.js";
 import { getSession } from "../../../core/sessionStore/getSession.js";
 
-export interface CloseReportInput {
+export interface CloseViewerInput {
   session_id: string;
 }
 
-export interface CloseReportOutput {
+export interface CloseViewerOutput {
   status: "closed";
 }
 
-/** close_report: deactivate a session and settle any pending collect. */
-export async function handleCloseReport(
-  input: CloseReportInput,
-): Promise<CloseReportOutput> {
+/** close_viewer: deactivate a session and settle any pending collect. */
+export async function handleCloseViewer(
+  input: CloseViewerInput,
+): Promise<CloseViewerOutput> {
   const projectHash = getProjectHash(process.cwd());
   const meta = await getSession(input.session_id, projectHash);
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);

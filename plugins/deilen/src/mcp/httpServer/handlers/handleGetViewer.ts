@@ -1,7 +1,7 @@
 import type { ServerResponse } from "node:http";
 
 import { getSession } from "../../../core/sessionStore/getSession.js";
-import { readReportMarkdown } from "../../../core/sessionStore/readReportMarkdown.js";
+import { readViewerMarkdown } from "../../../core/sessionStore/readViewerMarkdown.js";
 import { HEARTBEAT_INTERVAL_MS } from "../../../constants/defaults.js";
 import { renderMarkdown } from "../../../render/operations/renderMarkdown.js";
 import type { RouteContext } from "../routing/routeContext.js";
@@ -11,7 +11,7 @@ import { sendJson } from "../utils/sendJson.js";
 const SESSION_ID = /^[A-Za-z0-9_-]+$/;
 
 /** GET /r/<session> — serve the viewer HTML with injected `__DEILEN_STATE__`. */
-export async function handleGetReport(
+export async function handleGetViewer(
   ctx: RouteContext,
   sessionId: string,
   res: ServerResponse,
@@ -25,9 +25,9 @@ export async function handleGetReport(
     sendJson(res, 404, { ok: false, message: "Unknown session" });
     return;
   }
-  const markdown = await readReportMarkdown(sessionId);
+  const markdown = await readViewerMarkdown(sessionId);
   if (markdown === null) {
-    sendJson(res, 404, { ok: false, message: "Report content missing" });
+    sendJson(res, 404, { ok: false, message: "Viewer content missing" });
     return;
   }
   const config = await ctx.loadConfig();
@@ -52,7 +52,7 @@ export async function handleGetReport(
     heartbeat_interval_ms: HEARTBEAT_INTERVAL_MS,
   };
   const html = ctx
-    .loadReportHtml()
+    .loadViewerHtml()
     .replace(/["']__DEILEN_STATE__["']/, escapeJsonForHtml(state));
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",

@@ -1,6 +1,6 @@
 ---
 name: setup
-description: '[deilen] Open the local settings UI to configure theme, auto-open, timeouts, renderer toggles, and size limits. Trigger: "deilen settings", "open deilen settings", "change the report theme", "deilen 설정"'
+description: '[deilen] Open the local settings UI to configure theme, auto-open, timeouts, renderer toggles, and size limits. Trigger: "deilen settings", "open deilen settings", "change the viewer theme", "deilen 설정"'
 user_invocable: true
 argument-hint: ""
 ---

@@ -29,7 +29,7 @@ base HTML 은 경량으로 즉시 표시되고, 무거운 렌더러는 **해당 
 | 수식(KaTeX)     | `.deilen-math` 존재         | `/assets/katex.js`(+css) |
 
 ```js
-// pages/report/scripts/enhance.js (개념)
+// pages/viewer/scripts/enhance.js (개념)
 if (document.querySelector("pre code[data-lang]"))
   import("/assets/highlight.js").then((m) => m.highlightAll());
 if (document.querySelector(".deilen-mermaid"))
@@ -39,7 +39,7 @@ if (document.querySelector(".deilen-math"))
 ```
 
 - 미사용 렌더러는 **0 바이트 로드** — 브라우저 메모리·초기 페인트 최소화(요구사항).
-- chunk 는 전용 `buildRenderers.mjs` 가 렌더러당 독립 브라우저 엔트리로 빌드한 `bridge/assets/*.js`. base `reportHtml.ts` 에 인라인되지 않는다. 상세는 [mcp-runtime.md](./mcp-runtime.md).
+- chunk 는 전용 `buildRenderers.mjs` 가 렌더러당 독립 브라우저 엔트리로 빌드한 `bridge/assets/*.js`. base `viewerHtml.ts` 에 인라인되지 않는다. 상세는 [mcp-runtime.md](./mcp-runtime.md).
 - 렌더 실패(예: 잘못된 mermaid 문법)는 해당 블록만 원문 fallback + 인라인 에러 배지, 페이지 전체는 유지.
 - **클라이언트 렌더 보안**: Mermaid `securityLevel:'strict'`, KaTeX `trust:false`. 서버 sanitize 는 클라이언트 생성 SVG/HTML 에 미치지 않으므로 생성물도 클라이언트에서 정제.
 - **KaTeX CSS·폰트**: `buildRenderers.mjs` 가 `katex.css` + woff2 폰트도 `bridge/assets/` 에 산출, 로더가 `<link>` 주입(자산 인증은 web-ui 자산 라우트 정책에 따름).

@@ -1,14 +1,14 @@
 ## Purpose
 
-렌더 세션 영속(meta.json·report.md)과 long-poll resolver 레지스트리를 담당하는 모듈. 세션은 `project_hash` 로 스코프된다.
+렌더 세션 영속(meta.json·viewer.md)과 long-poll resolver 레지스트리를 담당하는 모듈. 세션은 `project_hash` 로 스코프된다.
 
 ## Structure
 
 | File                    | Role                                                         |
 | ----------------------- | ------------------------------------------------------------ |
-| `createSession.ts`      | report.md + meta.json 영속 (status `serving`)                |
+| `createSession.ts`      | viewer.md + meta.json 영속 (status `serving`)                |
 | `getSession.ts`         | meta.json 로드, `project_hash` 스코프 검증, 불일치 시 `null` |
-| `readReportMarkdown.ts` | report.md 원본 읽기, 부재 시 `null`                          |
+| `readViewerMarkdown.ts` | viewer.md 원본 읽기, 부재 시 `null`                          |
 | `pruneExpired.ts`       | `ttlHours` 초과 세션 디렉토리 제거, 제거 수 반환             |
 | `closeSession.ts`       | meta.json status 를 `closed` 로 갱신                         |
 | `feedbackResolver.ts`   | process-global long-poll 레지스트리 (멱등 `settle`)          |

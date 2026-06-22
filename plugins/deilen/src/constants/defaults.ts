@@ -12,7 +12,7 @@ export const DEFAULT_CONFIG: Config = {
   renderers: { mermaid: true, highlight: true, math: true },
   max_image_mb: 10,
   max_payload_mb: 50,
-  max_report_mb: 5,
+  max_viewer_mb: 5,
 };
 
 export const DIR_MODE = 0o700;

@@ -8,7 +8,7 @@ export interface DeriveTitleInput {
   markdown: string;
 }
 
-/** Page title: explicit title > first ATX H1 > file base name > "Report". */
+/** Page title: explicit title > first ATX H1 > file base name > "Document". */
 export function deriveTitle(input: DeriveTitleInput): string {
   const explicit = input.title?.trim();
   if (explicit) return explicit;
@@ -16,5 +16,5 @@ export function deriveTitle(input: DeriveTitleInput): string {
   if (h1) return h1[1].trim();
   if (input.sourcePath)
     return basename(input.sourcePath).replace(/\.[^.]+$/, "");
-  return "Report";
+  return "Document";
 }

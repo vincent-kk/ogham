@@ -10,35 +10,35 @@ import { ensureHttpServer } from "../../httpServer/index.js";
 import { deriveTitle } from "./deriveTitle.js";
 import { resolveMarkdown } from "./resolveMarkdown.js";
 
-export interface RenderReportInput {
+export interface RenderViewerInput {
   content?: string;
   path?: string;
   title?: string;
   options?: RenderOptions;
 }
 
-export interface RenderReportOutput {
+export interface RenderViewerOutput {
   session_id: string;
   url: string;
   status: "serving";
 }
 
 /**
- * render_report: register a report as a render session, ensure the viewer
+ * render_viewer: register a viewer as a render session, ensure the viewer
  * server is up, and return its URL immediately (non-blocking).
  */
-export async function handleRenderReport(
-  input: RenderReportInput,
-): Promise<RenderReportOutput> {
+export async function handleRenderViewer(
+  input: RenderViewerInput,
+): Promise<RenderViewerOutput> {
   const config = await loadConfig();
   const { markdown, sourcePath } = await resolveMarkdown(
     input,
-    config.max_report_mb,
+    config.max_viewer_mb,
   );
   const title = deriveTitle({ title: input.title, sourcePath, markdown });
   const sessionId = randomId("rs_");
   const server = await ensureHttpServer();
-  const url = server.reportUrl(sessionId);
+  const url = server.viewerUrl(sessionId);
   await createSession({
     sessionId,
     projectHash: getProjectHash(process.cwd()),

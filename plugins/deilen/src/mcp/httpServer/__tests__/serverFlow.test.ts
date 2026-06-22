@@ -6,10 +6,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { CONFIG_PATH } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
-import { handleRenderReport } from "../../tools/renderReport/renderReport.js";
+import { handleRenderViewer } from "../../tools/renderViewer/renderViewer.js";
 import { getHttpServer } from "../httpServer.js";
 
-const REPORT_HTML = `<!doctype html><html data-theme="auto"><head><title>t</title></head><body><script>window.__DEILEN_STATE__="__DEILEN_STATE__";</script><div id="report"></div></body></html>`;
+const VIEWER_HTML = `<!doctype html><html data-theme="auto"><head><title>t</title></head><body><script>window.__DEILEN_STATE__="__DEILEN_STATE__";</script><div id="viewer"></div></body></html>`;
 
 let baseUrl = "";
 let token = "";
@@ -21,7 +21,7 @@ function sessionIdFrom(url: string): string {
 beforeAll(async () => {
   const pluginRoot = mkdtempSync(join(tmpdir(), "deilen-bridge-"));
   mkdirSync(join(pluginRoot, "bridge", "assets"), { recursive: true });
-  writeFileSync(join(pluginRoot, "bridge", "report.html"), REPORT_HTML);
+  writeFileSync(join(pluginRoot, "bridge", "viewer.html"), VIEWER_HTML);
   writeFileSync(
     join(pluginRoot, "bridge", "assets", "highlight.js"),
     "export function highlightAll(){}",
@@ -34,9 +34,9 @@ afterAll(async () => {
   await getHttpServer()?.close();
 });
 
-describe("report server flow", () => {
-  it("serves a rendered report with injected, escaped state", async () => {
-    const out = await handleRenderReport({
+describe("viewer server flow", () => {
+  it("serves a rendered viewer with injected, escaped state", async () => {
+    const out = await handleRenderViewer({
       content: "# Hello\n\nA paragraph.",
     });
     expect(out.status).toBe("serving");
@@ -57,11 +57,11 @@ describe("report server flow", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns report data as JSON", async () => {
-    const out = await handleRenderReport({ content: "## Section\n\ntext" });
+  it("returns viewer data as JSON", async () => {
+    const out = await handleRenderViewer({ content: "## Section\n\ntext" });
     const sid = sessionIdFrom(out.url);
     const res = await fetch(
-      `${baseUrl}/api/report?session=${sid}&token=${token}`,
+      `${baseUrl}/api/viewer?session=${sid}&token=${token}`,
     );
     expect(res.status).toBe(200);
     const body = (await res.json()) as { ok: boolean; html: string };
@@ -70,10 +70,10 @@ describe("report server flow", () => {
   });
 
   it("returns raw markdown with format=md", async () => {
-    const out = await handleRenderReport({ content: "raw *body* text" });
+    const out = await handleRenderViewer({ content: "raw *body* text" });
     const sid = sessionIdFrom(out.url);
     const res = await fetch(
-      `${baseUrl}/api/report?session=${sid}&token=${token}&format=md`,
+      `${baseUrl}/api/viewer?session=${sid}&token=${token}&format=md`,
     );
     expect(res.status).toBe(200);
     expect(await res.text()).toBe("raw *body* text");
@@ -88,7 +88,7 @@ describe("report server flow", () => {
   });
 
   it("blocks asset path traversal and acknowledges a ping", async () => {
-    const traversal = await fetch(`${baseUrl}/assets/..%2f..%2freport.html`);
+    const traversal = await fetch(`${baseUrl}/assets/..%2f..%2fviewer.html`);
     expect(traversal.status).toBe(404);
     const ping = await fetch(`${baseUrl}/api/ping?token=${token}`, {
       method: "POST",

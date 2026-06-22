@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/deilen` 패키지 루트. Claude 가 생성한 markdown 보고서를 로컬 HTTP 서버가 브라우저 페이지로 렌더링하고, 라인 단위 피드백(파일·클립보드 이미지 포함)을 수집해 Claude 에 되돌려주는 Claude Code 플러그인. 설계 명세는 [`.metadata/deilen/`](../../.metadata/deilen/).
+`@ogham/deilen` 패키지 루트. Claude 가 생성한 markdown 문서를 로컬 HTTP 서버가 브라우저 페이지로 렌더링하고, 라인 단위 피드백(파일·클립보드 이미지 포함)을 수집해 Claude 에 되돌려주는 Claude Code 플러그인. 설계 명세는 [`.metadata/deilen/`](../../.metadata/deilen/).
 
 ## Structure
 
@@ -15,7 +15,7 @@
 
 ## Conventions
 
-- 빌드: `clean → version:sync → buildReportHtml → buildSettingsHtml → buildRenderers → tsc → buildMcpServer`
+- 빌드: `clean → version:sync → buildViewerHtml → buildSettingsHtml → buildRenderers → tsc → buildMcpServer`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `present`)
 - Agent 없음, Hook 없음 (그래서 `libs/run.cjs` 도 없음)
 - 무거운 렌더러는 브라우저 자산(`bridge/assets/`) — MCP 서버 번들에 미포함, 동봉 폰트 없음(KaTeX 는 MathML)

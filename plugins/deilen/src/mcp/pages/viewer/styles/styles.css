@@ -1,4 +1,4 @@
-/* deilen report viewer — editorial-developer reading surface. */
+/* deilen viewer — editorial-developer reading surface. */
 
 :root {
   --content-width: 820px;
@@ -262,7 +262,7 @@ button {
   padding: 40px 32px calc(var(--submitbar-h) + 48px);
 }
 
-.report {
+.viewer {
   max-width: var(--content-width);
   margin: 0 auto;
 }
@@ -338,76 +338,76 @@ button {
 }
 
 /* ── Reading typography ─────────────────────────────────── */
-.report > * {
+.viewer > * {
   position: relative;
 }
 
-.report h1,
-.report h2,
-.report h3,
-.report h4,
-.report h5,
-.report h6 {
+.viewer h1,
+.viewer h2,
+.viewer h3,
+.viewer h4,
+.viewer h5,
+.viewer h6 {
   line-height: 1.3;
   letter-spacing: -0.014em;
   margin: 1.8em 0 0.6em;
   font-weight: 650;
 }
 
-.report > :first-child {
+.viewer > :first-child {
   margin-top: 0;
 }
 
-.report h1 {
+.viewer h1 {
   font-size: 1.9rem;
   font-weight: 700;
 }
-.report h2 {
+.viewer h2 {
   font-size: 1.45rem;
   padding-bottom: 0.28em;
   border-bottom: 1px solid var(--border);
 }
-.report h3 {
+.viewer h3 {
   font-size: 1.2rem;
 }
-.report h4 {
+.viewer h4 {
   font-size: 1.02rem;
 }
-.report h5,
-.report h6 {
+.viewer h5,
+.viewer h6 {
   font-size: 0.92rem;
   color: var(--text-muted);
 }
 
-.report p {
+.viewer p {
   margin: 0 0 1.05em;
 }
 
-.report a {
+.viewer a {
   color: var(--accent);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-.report a:hover {
+.viewer a:hover {
   border-bottom-color: var(--accent);
 }
 
-.report ul,
-.report ol {
+.viewer ul,
+.viewer ol {
   margin: 0 0 1.05em;
   padding-left: 1.5em;
 }
 
-.report li {
+.viewer li {
   margin: 0.25em 0;
 }
 
-.report li::marker {
+.viewer li::marker {
   color: var(--text-faint);
 }
 
-.report blockquote {
+.viewer blockquote {
   margin: 1.2em 0;
   padding: 0.4em 1.1em;
   border-left: 3px solid var(--accent);
@@ -416,35 +416,35 @@ button {
   color: var(--text-muted);
 }
 
-.report blockquote p:last-child {
+.viewer blockquote p:last-child {
   margin-bottom: 0;
 }
 
-.report hr {
+.viewer hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 2em 0;
 }
 
-.report img {
+.viewer img {
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-sm);
 }
 
-.report code {
+.viewer code {
   font-family: var(--font-mono);
   font-size: 0.86em;
 }
 
-.report :not(pre) > code {
+.viewer :not(pre) > code {
   background: var(--bg-inset);
   padding: 0.15em 0.4em;
   border-radius: 4px;
   white-space: break-spaces;
 }
 
-.report kbd {
+.viewer kbd {
   font-family: var(--font-mono);
   font-size: 0.8em;
   padding: 0.1em 0.4em;
@@ -455,7 +455,7 @@ button {
 }
 
 /* ── Tables ─────────────────────────────────────────────── */
-.report table {
+.viewer table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.2em 0;
@@ -464,24 +464,24 @@ button {
   overflow-x: auto;
 }
 
-.report thead th {
+.viewer thead th {
   background: var(--bg-subtle);
   font-weight: 600;
   text-align: left;
 }
 
-.report th,
-.report td {
+.viewer th,
+.viewer td {
   border: 1px solid var(--border);
   padding: 0.5em 0.8em;
 }
 
-.report tbody tr:nth-child(even) {
+.viewer tbody tr:nth-child(even) {
   background: color-mix(in srgb, var(--bg-subtle) 55%, transparent);
 }
 
 /* ── Code blocks ────────────────────────────────────────── */
-.report pre {
+.viewer pre {
   position: relative;
   margin: 1.2em 0;
   padding: 14px 16px;
@@ -493,7 +493,7 @@ button {
   line-height: 1.6;
 }
 
-.report pre code {
+.viewer pre code {
   display: block;
   font-size: inherit;
 }
@@ -518,7 +518,7 @@ button {
     color 0.16s ease;
 }
 
-.report pre:hover .code-copy,
+.viewer pre:hover .code-copy,
 .code-copy:focus-visible {
   opacity: 1;
 }
@@ -640,7 +640,7 @@ button {
     transform 0.14s ease;
 }
 
-.report > :hover > .line-add,
+.viewer > :hover > .line-add,
 .line-add:focus-visible {
   opacity: 1;
   transform: translateX(0);
@@ -717,6 +717,7 @@ button {
   background: var(--bg-inset);
   color: var(--text-muted);
   font-family: var(--font-body);
+  border: 1px solid var(--border-strong);
 }
 
 .anchor-excerpt {
@@ -791,6 +792,7 @@ button {
 .composer > .anchor-chip,
 .overall-editor > .anchor-chip {
   align-self: flex-start;
+  cursor: default;
 }
 
 .composer textarea,
@@ -802,7 +804,7 @@ button {
   resize: vertical;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--bg-subtle);
+  background: var(--bg-inset);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
@@ -815,7 +817,7 @@ button {
 
 .composer textarea::placeholder,
 .overall-editor textarea::placeholder {
-  color: var(--text-faint);
+  color: var(--text-muted);
 }
 
 .composer textarea:focus,
@@ -823,6 +825,33 @@ button {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Dark elevation: raise cards above the sidebar and sink the field into a
+   genuine inset well (lighter = raised), since dark surfaces can't lean on
+   drop shadow for separation. Light mode already lifts the white card above
+   the subtle sidebar, so it keeps the default mapping. */
+:root[data-theme="dark"] .comment-card,
+:root[data-theme="dark"] .composer,
+:root[data-theme="dark"] .overall-editor {
+  background: var(--bg-inset);
+}
+
+:root[data-theme="dark"] .composer textarea,
+:root[data-theme="dark"] .overall-editor textarea {
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] .comment-card,
+  :root[data-theme="auto"] .composer,
+  :root[data-theme="auto"] .overall-editor {
+    background: var(--bg-inset);
+  }
+  :root[data-theme="auto"] .composer textarea,
+  :root[data-theme="auto"] .overall-editor textarea {
+    background: var(--bg);
+  }
 }
 
 .thumbs {

@@ -1,4 +1,4 @@
-import { sessionMetaPath, sessionReportPath } from "../../constants/paths.js";
+import { sessionMetaPath, sessionViewerPath } from "../../constants/paths.js";
 import { atomicWrite } from "../../lib/atomicWrite.js";
 import type { RenderOptions } from "../../types/renderOptions.js";
 import { type SessionMeta, SessionMetaSchema } from "../../types/session.js";
@@ -13,7 +13,7 @@ export interface CreateSessionInput {
   options?: RenderOptions;
 }
 
-/** Persist a new render session: raw report.md + meta.json. */
+/** Persist a new render session: raw viewer.md + meta.json. */
 export async function createSession(
   input: CreateSessionInput,
 ): Promise<SessionMeta> {
@@ -26,7 +26,7 @@ export async function createSession(
     status: "serving",
     options: input.options,
   });
-  await atomicWrite(sessionReportPath(input.sessionId), input.markdown);
+  await atomicWrite(sessionViewerPath(input.sessionId), input.markdown);
   await atomicWrite(
     sessionMetaPath(input.sessionId),
     `${JSON.stringify(meta, null, 2)}\n`,

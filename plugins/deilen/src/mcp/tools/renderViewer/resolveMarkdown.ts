@@ -14,26 +14,26 @@ export interface ResolvedMarkdown {
 const MB = 1024 * 1024;
 
 /**
- * Resolve report markdown from exactly one of `content`/`path`, enforcing the
- * max_report_mb cap. The caller (Claude) is a trusted fs principal, so any
+ * Resolve viewer markdown from exactly one of `content`/`path`, enforcing the
+ * max_viewer_mb cap. The caller (Claude) is a trusted fs principal, so any
  * readable regular file is allowed after canonicalization + utf8 read.
  */
 export async function resolveMarkdown(
   input: ResolveMarkdownInput,
-  maxReportMb: number,
+  maxViewerMb: number,
 ): Promise<ResolvedMarkdown> {
   const hasContent = typeof input.content === "string";
   const hasPath = typeof input.path === "string" && input.path.length > 0;
   if (hasContent === hasPath) {
     throw new Error("invalid_input: provide exactly one of content or path");
   }
-  const maxBytes = maxReportMb * MB;
+  const maxBytes = maxViewerMb * MB;
 
   if (hasContent) {
     const content = input.content as string;
     if (Buffer.byteLength(content, "utf8") > maxBytes) {
       throw new Error(
-        `invalid_input: content exceeds max_report_mb (${maxReportMb}MB)`,
+        `invalid_input: content exceeds max_viewer_mb (${maxViewerMb}MB)`,
       );
     }
     return { markdown: content };
@@ -53,7 +53,7 @@ export async function resolveMarkdown(
   }
   if (info.size > maxBytes) {
     throw new Error(
-      `read_error: ${sourcePath} exceeds max_report_mb (${maxReportMb}MB)`,
+      `read_error: ${sourcePath} exceeds max_viewer_mb (${maxViewerMb}MB)`,
     );
   }
   try {

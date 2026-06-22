@@ -19,8 +19,8 @@ export function sessionMetaPath(sessionId: string): string {
   return join(sessionDir(sessionId), "meta.json");
 }
 
-export function sessionReportPath(sessionId: string): string {
-  return join(sessionDir(sessionId), "report.md");
+export function sessionViewerPath(sessionId: string): string {
+  return join(sessionDir(sessionId), "viewer.md");
 }
 
 export function sessionFeedbackPath(sessionId: string): string {

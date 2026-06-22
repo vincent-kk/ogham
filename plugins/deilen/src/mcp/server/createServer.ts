@@ -5,19 +5,19 @@ import { RenderOptionsSchema } from "../../types/renderOptions.js";
 import { VERSION } from "../../version.js";
 import { wrapHandler } from "../shared/index.js";
 import { handleCollectFeedback } from "../tools/collectFeedback/index.js";
-import { handleCloseReport } from "../tools/closeReport/index.js";
+import { handleCloseViewer } from "../tools/closeViewer/index.js";
 import { handleOpenSettings } from "../tools/openSettings/index.js";
-import { handleRenderReport } from "../tools/renderReport/index.js";
+import { handleRenderViewer } from "../tools/renderViewer/index.js";
 
 /** Create the MCP "tools" server and register deilen's tools. */
 export function createServer(): McpServer {
   const server = new McpServer({ name: "tools", version: VERSION });
 
   server.registerTool(
-    "render_report",
+    "render_viewer",
     {
       description:
-        "Render a Claude-generated markdown report as a readable local browser " +
+        "Render a Claude-generated markdown document as a readable local browser " +
         "page and return its URL immediately (non-blocking). Pair with " +
         "collect_feedback to gather line-anchored comments. Provide exactly one " +
         "of content or path.",
@@ -27,7 +27,7 @@ export function createServer(): McpServer {
           .optional()
           .describe(
             "Markdown body to render. Mutually exclusive with path. Prefer path " +
-              "for large reports to avoid duplicating the body into tool input.",
+              "for large documents to avoid duplicating the body into tool input.",
           ),
         path: z
           .string()
@@ -53,7 +53,7 @@ export function createServer(): McpServer {
         idempotentHint: false,
       },
     },
-    wrapHandler(handleRenderReport),
+    wrapHandler(handleRenderViewer),
   );
 
   server.registerTool(
@@ -67,7 +67,7 @@ export function createServer(): McpServer {
       inputSchema: {
         session_id: z
           .string()
-          .describe("The session_id returned by render_report."),
+          .describe("The session_id returned by render_viewer."),
         wait_seconds: z
           .number()
           .int()
@@ -89,7 +89,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "close_report",
+    "close_viewer",
     {
       description:
         "Close a render session after feedback is collected: deactivates the " +
@@ -97,7 +97,7 @@ export function createServer(): McpServer {
       inputSchema: {
         session_id: z
           .string()
-          .describe("The session_id returned by render_report."),
+          .describe("The session_id returned by render_viewer."),
       },
       annotations: {
         readOnlyHint: false,
@@ -105,7 +105,7 @@ export function createServer(): McpServer {
         idempotentHint: true,
       },
     },
-    wrapHandler(handleCloseReport),
+    wrapHandler(handleCloseViewer),
   );
 
   server.registerTool(

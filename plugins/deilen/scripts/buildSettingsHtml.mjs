@@ -2,7 +2,7 @@
 /**
  * Inline src/mcp/pages/settings/{index.html, styles/styles.css, scripts/app.js}
  * into a single minified bridge/settings.html, read at runtime by
- * mcp/httpServer. Mirrors buildReportHtml.mjs.
+ * mcp/httpServer. Mirrors buildViewerHtml.mjs.
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";

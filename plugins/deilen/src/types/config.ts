@@ -32,7 +32,7 @@ export const ConfigSchema = z
     renderers: RenderersConfigSchema,
     max_image_mb: z.number().int().min(1).max(100).default(10),
     max_payload_mb: z.number().int().min(1).max(200).default(50),
-    max_report_mb: z.number().int().min(1).max(50).default(5),
+    max_viewer_mb: z.number().int().min(1).max(50).default(5),
   })
   .refine((c) => c.max_payload_mb >= c.max_image_mb, {
     message: "max_payload_mb must be >= max_image_mb",

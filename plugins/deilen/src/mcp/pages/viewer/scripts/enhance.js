@@ -14,16 +14,16 @@ function lazy(selector, chunk, run) {
 export function enhance(renderers) {
   const flags = renderers || {};
   if (flags.highlight !== false) {
-    lazy("#report pre code[data-lang]", "/assets/highlight.js", (m) =>
+    lazy("#viewer pre code[data-lang]", "/assets/highlight.js", (m) =>
       m.highlightAll?.(),
     );
   }
   if (flags.mermaid !== false) {
-    lazy("#report .deilen-mermaid", "/assets/mermaid.js", (m) =>
+    lazy("#viewer .deilen-mermaid", "/assets/mermaid.js", (m) =>
       m.renderAll?.(),
     );
   }
   if (flags.math !== false) {
-    lazy("#report .deilen-math", "/assets/katex.js", (m) => m.typesetAll?.());
+    lazy("#viewer .deilen-math", "/assets/katex.js", (m) => m.typesetAll?.());
   }
 }

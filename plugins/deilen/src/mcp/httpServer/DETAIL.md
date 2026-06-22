@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- 첫 `render_report`/`open_settings` 에서 1회 기동, 이후 재사용(싱글톤).
-- 세션 생존 = 뷰어 heartbeat + 도구 활동. 둘 다 `idle_shutdown_minutes` 단절 시 폴백 종료(Claude 크래시·`close_report` 누락 누수 방지).
+- 첫 `render_viewer`/`open_settings` 에서 1회 기동, 이후 재사용(싱글톤).
+- 세션 생존 = 뷰어 heartbeat + 도구 활동. 둘 다 `idle_shutdown_minutes` 단절 시 폴백 종료(Claude 크래시·`close_viewer` 누락 누수 방지).
 - one-time token 으로 `/r`·API 보호; `/assets` 는 토큰 면제(동적 import·폰트 하위요청).
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`.
 
@@ -11,14 +11,14 @@
 
 - `ensureHttpServer(): Promise<HttpServerInstance>` — 기동 또는 재사용+touch.
 - `getHttpServer(): HttpServerInstance | null`.
-- `HttpServerInstance`: `{ baseUrl, port, token, reportUrl(sid), settingsUrl(), touch(), close() }`.
+- `HttpServerInstance`: `{ baseUrl, port, token, viewerUrl(sid), settingsUrl(), touch(), close() }`.
 
 ## Routes (Phase 2)
 
 | Method | Path                          | Handler             | Token |
 | ------ | ----------------------------- | ------------------- | ----- |
-| GET    | `/r/<session>?token=`         | handleGetReport     | yes   |
-| GET    | `/api/report?session=&token=` | handleGetReportData | yes   |
+| GET    | `/r/<session>?token=`         | handleGetViewer     | yes   |
+| GET    | `/api/viewer?session=&token=` | handleGetViewerData | yes   |
 | GET    | `/assets/<chunk>`             | handleGetAsset      | no    |
 | POST   | `/api/ping?token=`            | handlePing          | yes   |
 
@@ -32,6 +32,6 @@
 
 ## Acceptance
 
-- 보고서 페이지가 가독 HTML 로 렌더된다.
+- 문서 페이지가 가독 HTML 로 렌더된다.
 - 잘못된 token 은 401, 알 수 없는 세션은 404.
-- idle 초과 시 서버가 종료되고 다음 `render_report` 가 재기동한다.
+- idle 초과 시 서버가 종료되고 다음 `render_viewer` 가 재기동한다.

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 모든 영속 상태(config, 세션 meta/report/feedback, 이미지)는 `~/.claude/plugins/deilen/` 하위에 atomicWrite 로 기록.
+- 모든 영속 상태(config, 세션 meta/viewer/feedback, 이미지)는 `~/.claude/plugins/deilen/` 하위에 atomicWrite 로 기록.
 - 세션은 `project_hash`(cwd sha256 12-hex) 스코프 — 다른 cwd 의 세션 조회는 차단.
 - long-poll resolver 는 프로세스 전역 단일 슬롯/세션 + 멱등 `settle()`.
 
@@ -15,9 +15,9 @@
 
 ### sessionStore
 
-- `createSession({ sessionId, projectHash, title, url, markdown, createdAt, options? }): Promise<SessionMeta>` — report.md + meta.json.
+- `createSession({ sessionId, projectHash, title, url, markdown, createdAt, options? }): Promise<SessionMeta>` — viewer.md + meta.json.
 - `getSession(sessionId, projectHash): Promise<SessionMeta | null>` — 스코프 불일치/부재 시 null.
-- `readReportMarkdown(sessionId): Promise<string | null>`.
+- `readViewerMarkdown(sessionId): Promise<string | null>`.
 - `closeSession(sessionId): Promise<boolean>` — meta.status='closed'.
 - `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
 - resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`,

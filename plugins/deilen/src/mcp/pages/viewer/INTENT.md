@@ -1,6 +1,6 @@
 ## Purpose
 
-리포트 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `bridge/report.html` 로 inline+minify 된다.
+리포트 뷰어 프런트엔드. 렌더된 HTML 을 마운트하고 테마·복사·라인 단위 코멘트를 제공하며, 무거운 렌더러는 lazy-load 한다. 빌드 시 단일 `bridge/viewer.html` 로 inline+minify 된다.
 
 ## Structure
 
@@ -36,9 +36,9 @@
 ### Never do
 
 - `eval`·inline 핸들러·외부 origin fetch
-- 빌드 산출물(`bridge/report.html`, `bridge/assets/*`) 직접 수정
+- 빌드 산출물(`bridge/viewer.html`, `bridge/assets/*`) 직접 수정
 
 ## Dependencies
 
-- **빌드 시점**: `scripts/buildReportHtml.mjs`·`buildRenderers.mjs` (`esbuild`), `highlight.js`/`mermaid`/`katex`
+- **빌드 시점**: `scripts/buildViewerHtml.mjs`·`buildRenderers.mjs` (`esbuild`), `highlight.js`/`mermaid`/`katex`
 - **런타임 의존성 없음**: 브라우저 native API 만

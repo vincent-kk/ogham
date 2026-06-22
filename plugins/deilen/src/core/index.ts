@@ -10,7 +10,7 @@ export {
   deliverComplete,
   getSession,
   pruneExpired,
-  readReportMarkdown,
+  readViewerMarkdown,
   settleAllResolvers,
   type CreateSessionInput,
   type SettleValue,

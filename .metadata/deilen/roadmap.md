@@ -17,12 +17,12 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 ## Phase 2 — HTTP 서버 + 뷰어(읽기)
 
 - `mcp/httpServer/`(기동·라우팅·token·idle 종료).
-- `pages/report/`(base 표시 + lazy enhance). `buildReportHtml.mjs` + `buildRenderers.mjs`(독립 엔트리 → bridge/assets).
-- `render_report` 도구(논블로킹) + `open` 흐름. 수동 확인: 브라우저에서 보고서 가독 표시 + lazy 렌더러 동작.
+- `pages/viewer/`(base 표시 + lazy enhance). `buildViewerHtml.mjs` + `buildRenderers.mjs`(독립 엔트리 → bridge/assets).
+- `render_viewer` 도구(논블로킹) + `open` 흐름. 수동 확인: 브라우저에서 문서 가독 표시 + lazy 렌더러 동작.
 
 ## Phase 3 — 피드백 수집·수거
 
-- `pages/report/`(comments/images/submit) — 라인 코멘트 + 클립보드/파일 이미지.
+- `pages/viewer/`(comments/images/submit) — 라인 코멘트 + 클립보드/파일 이미지.
 - `handlePostFeedback` + `parseMultipart`(busboy) + `feedbackStore`.
 - `sessionStore` resolver + `collect_feedback`(long-poll) + MCP image 반환.
 - 테스트: multipart 파싱, 한도/mime, resolver 랑데부, pending 타임아웃.
@@ -37,7 +37,7 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 
 ## Phase 6 — 마감
 
-- `close_report`, 세션 TTL 정리, idle 종료 검증.
+- `close_viewer`, 세션 TTL 정리, idle 종료 검증.
 - README / README-ko_kr, INTENT.md/DETAIL.md(필요 노드), `/filid:scan` 통과.
 - Changeset.
 

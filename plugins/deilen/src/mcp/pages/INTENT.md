@@ -6,13 +6,13 @@
 
 | Path        | Role                                              |
 | ----------- | ------------------------------------------------- |
-| `report/`   | 리포트 뷰어 FE (HTML/CSS/JS + lazy 렌더러 entry)  |
+| `viewer/`   | 리포트 뷰어 FE (HTML/CSS/JS + lazy 렌더러 entry)  |
 | `settings/` | 설정 FE (HTML/CSS/JS)                             |
 | `index.ts`  | 빌드 입력 표식 (`export {}`) — 런타임 export 없음 |
 
 ## Conventions
 
-- 빌드 산출: `buildReportHtml` → `bridge/report.html`, `buildSettingsHtml` → `bridge/settings.html`, `buildRenderers` → `bridge/assets/*.js`
+- 빌드 산출: `buildViewerHtml` → `bridge/viewer.html`, `buildSettingsHtml` → `bridge/settings.html`, `buildRenderers` → `bridge/assets/*.js`
 - 산출물은 런타임에 `mcp/httpServer` 가 디스크에서 읽어 서빙 (MCP 번들 미포함)
 - 외부 CDN·동봉 폰트 금지 (KaTeX 는 MathML)
 
@@ -34,5 +34,5 @@
 
 ## Dependencies
 
-- **빌드 시점**: `scripts/buildReportHtml.mjs`, `buildSettingsHtml.mjs`, `buildRenderers.mjs` (`esbuild`)
+- **빌드 시점**: `scripts/buildViewerHtml.mjs`, `buildSettingsHtml.mjs`, `buildRenderers.mjs` (`esbuild`)
 - **런타임 의존성 없음**: 서빙은 `mcp/httpServer` 책임
