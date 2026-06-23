@@ -51,7 +51,7 @@ describe("feedback flow", () => {
       JSON.stringify({
         session_id: sid,
         status: "complete",
-        overall: "looks good",
+        overall: [{ id: "o1", text: "looks good" }],
         comments: [
           {
             id: "c1",

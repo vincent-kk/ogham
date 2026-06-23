@@ -19,7 +19,9 @@ POST /api/feedback?token=<…>        Content-Type: multipart/form-data
 {
   "session_id": "rs_a1b2c3",
   "status": "in_progress" | "complete",
-  "overall": "전반 코멘트(선택)",
+  "overall": [
+    { "id": "o1", "text": "주제별 총평(선택, 다중)" }
+  ],
   "comments": [
     {
       "id": "c1",
@@ -37,7 +39,7 @@ POST /api/feedback?token=<…>        Content-Type: multipart/form-data
 
 ## 코멘트 생애주기 (작성 · 편집 · 삭제 · 전체)
 
-- **작성**: 라인 선택/거터 클릭 → `anchor` 보유 코멘트. 전체 코멘트는 `anchor: null`(다중 허용). `overall` 은 단일 총평(선택).
+- **작성**: 라인 선택/거터 클릭 → `anchor` 보유 코멘트. `overall` 은 주제별 총평 노트(`{ id, text }` 다중, 선택) — 서로 다른 주제를 별개 메시지로 보존한다.
 - **편집**: 사이드바에서 `text`/이미지 수정 → in-memory map 갱신.
 - **삭제**: 항목 제거 → map 에서 제외 → 다음 auto-save payload `comments[]` 에 미포함(= 삭제 영속화). 종속 이미지도 함께 정리.
 - **resolve(선택)**: `Comment.resolved?: boolean` — 표시만(수거 시 Claude 의 우선순위 판단에 활용).
@@ -88,7 +90,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 
 `collect_feedback` 결과 → MCP content 배열:
 
-- **text 블록**: `overall` + 코멘트 목록을 `L12-14 「sourceText 발췌」 → 코멘트` 형식으로 정리(Claude 가 라인을 바로 찾도록).
+- **text 블록**: `overall` 노트들(`Overall notes (N):`) + 코멘트 목록을 `L12-14 「sourceText 발췌」 → 코멘트` 형식으로 정리(Claude 가 라인을 바로 찾도록).
 - **image 블록**: 첨부 이미지마다 저장본을 base64 로 읽어 `{ type:"image", data, mimeType }`. → Claude 가 스크린샷을 실제로 본다.
 - 이미지가 코멘트에 종속됨을 text 블록에서 `[img_x1]` 마커로 상호참조.
 

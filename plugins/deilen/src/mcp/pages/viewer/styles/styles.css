@@ -768,35 +768,24 @@ button {
   color: var(--danger);
 }
 
-.composer,
-.overall-editor {
+.composer {
   display: flex;
   flex-direction: column;
   gap: 10px;
   border-radius: var(--radius);
   background: var(--bg);
   padding: 12px;
-}
-
-.composer {
   border: 1px solid var(--accent);
   box-shadow: var(--shadow-md);
 }
 
-.overall-editor {
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-}
-
 /* Chip hugs its content instead of stretching across the flex column. */
-.composer > .anchor-chip,
-.overall-editor > .anchor-chip {
+.composer > .anchor-chip {
   align-self: flex-start;
   cursor: default;
 }
 
-.composer textarea,
-.overall-editor textarea {
+.composer textarea {
   display: block;
   width: 100%;
   min-height: 72px;
@@ -815,13 +804,11 @@ button {
     box-shadow 0.16s ease;
 }
 
-.composer textarea::placeholder,
-.overall-editor textarea::placeholder {
+.composer textarea::placeholder {
   color: var(--text-muted);
 }
 
-.composer textarea:focus,
-.overall-editor textarea:focus {
+.composer textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
@@ -832,24 +819,20 @@ button {
    drop shadow for separation. Light mode already lifts the white card above
    the subtle sidebar, so it keeps the default mapping. */
 :root[data-theme="dark"] .comment-card,
-:root[data-theme="dark"] .composer,
-:root[data-theme="dark"] .overall-editor {
+:root[data-theme="dark"] .composer {
   background: var(--bg-inset);
 }
 
-:root[data-theme="dark"] .composer textarea,
-:root[data-theme="dark"] .overall-editor textarea {
+:root[data-theme="dark"] .composer textarea {
   background: var(--bg);
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] .comment-card,
-  :root[data-theme="auto"] .composer,
-  :root[data-theme="auto"] .overall-editor {
+  :root[data-theme="auto"] .composer {
     background: var(--bg-inset);
   }
-  :root[data-theme="auto"] .composer textarea,
-  :root[data-theme="auto"] .overall-editor textarea {
+  :root[data-theme="auto"] .composer textarea {
     background: var(--bg);
   }
 }

@@ -41,7 +41,7 @@ MCP 서버 이름 `tools`. 도구 4개. 모든 스키마는 `src/types/` 의 Zod
 
 반환 (MCP content 배열):
 
-- `status:"complete"`: 텍스트 블록(overall + 라인 앵커별 코멘트 정리) + **이미지 content 블록**(첨부 이미지마다 `{ type:"image", data:<base64>, mimeType }`).
+- `status:"complete"`: 텍스트 블록(overall 노트들 + 라인 앵커별 코멘트 정리) + **이미지 content 블록**(첨부 이미지마다 `{ type:"image", data:<base64>, mimeType }`).
 - `status:"pending"`: 텍스트 블록 `{ status:"pending", draft_count }` — `present` 가 재호출.
 
 알 수 없는 `session_id` → `unknown` 에러. `closed` 세션 → `closed` 에러.

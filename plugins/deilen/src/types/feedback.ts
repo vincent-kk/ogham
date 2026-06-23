@@ -16,13 +16,19 @@ export const CommentSchema = z.object({
 });
 export type Comment = z.infer<typeof CommentSchema>;
 
+export const OverallNoteSchema = z.object({
+  id: z.string().min(1),
+  text: z.string(),
+});
+export type OverallNote = z.infer<typeof OverallNoteSchema>;
+
 export const FeedbackStatusSchema = z.enum(["in_progress", "complete"]);
 export type FeedbackStatus = z.infer<typeof FeedbackStatusSchema>;
 
 export const FeedbackPayloadSchema = z.object({
   session_id: z.string().min(1),
   status: FeedbackStatusSchema,
-  overall: z.string().optional(),
+  overall: z.array(OverallNoteSchema).default([]),
   comments: z.array(CommentSchema).default([]),
 });
 export type FeedbackPayload = z.infer<typeof FeedbackPayloadSchema>;
@@ -45,7 +51,7 @@ export type ImageRef = z.infer<typeof ImageRefSchema>;
 export const StoredFeedbackSchema = z.object({
   session_id: z.string(),
   status: FeedbackStatusSchema,
-  overall: z.string().optional(),
+  overall: z.array(OverallNoteSchema).default([]),
   comments: z.array(CommentSchema).default([]),
   images: z.array(ImageRefSchema).default([]),
   updated_at: z.string(),

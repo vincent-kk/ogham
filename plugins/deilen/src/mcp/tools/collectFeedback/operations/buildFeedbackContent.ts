@@ -12,7 +12,7 @@ function truncate(text: string, max = 80): string {
 
 /**
  * Render collected feedback as MCP content: a text block summarizing the overall
- * note and each line-anchored comment, followed by an image block per attachment
+ * notes and each line-anchored comment, followed by an image block per attachment
  * (read from disk as base64) so Claude sees the screenshots.
  */
 export async function buildFeedbackContent(
@@ -22,8 +22,10 @@ export async function buildFeedbackContent(
   const lines: string[] = [
     `Feedback (${feedback.comments.length} comment(s)):`,
   ];
-  if (feedback.overall?.trim()) {
-    lines.push(`\nOverall: ${feedback.overall.trim()}`);
+  const overallNotes = feedback.overall.filter((note) => note.text.trim());
+  if (overallNotes.length) {
+    lines.push(`\nOverall notes (${overallNotes.length}):`);
+    for (const note of overallNotes) lines.push(`- ${note.text.trim()}`);
   }
   for (const comment of feedback.comments) {
     const anchor = comment.anchor

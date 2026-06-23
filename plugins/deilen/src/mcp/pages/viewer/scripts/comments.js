@@ -1,13 +1,15 @@
-// Line-anchored commenting: gutter "+" affordance and text selection open a
-// composer; comments live in an in-memory store, render as sidebar cards, and
-// debounce-save as text-only drafts until the final multipart submit.
+// Line-anchored commenting + multiple overall notes: a block's gutter "+" or a
+// text selection opens a comment composer; the "Overall note" button opens a
+// separate overall composer. Both live in in-memory stores, render as sidebar
+// cards, and debounce-save as text-only drafts until the final multipart submit.
 
 import { toAttachment, wireImageCapture } from "./images.js";
 import { scheduleAutoSave, submitFeedback } from "./submit.js";
 
 let view = {};
-const store = { comments: new Map(), overall: "" };
+const store = { comments: new Map(), overall: new Map() };
 let seq = 0;
+let overallSeq = 0;
 let popover = null;
 
 function el(tag, opts = {}) {
@@ -53,7 +55,10 @@ function buildPayload(status) {
   return {
     session_id: view.session_id,
     status,
-    overall: store.overall || undefined,
+    overall: [...store.overall.values()].map((n) => ({
+      id: n.id,
+      text: n.text,
+    })),
     comments: [...store.comments.values()].map((c) => ({
       id: c.id,
       anchor: c.anchor,
@@ -70,7 +75,7 @@ function allAttachments() {
   return out;
 }
 
-/* ── Composer ─────────────────────────────────────────── */
+/* ── Comment composer ─────────────────────────────────── */
 function openComposer(anchor, editing) {
   const list = document.getElementById("comment-list");
   closeComposer();
@@ -160,7 +165,83 @@ function closeComposer() {
   document.querySelector('#comment-list [data-composer="true"]')?.remove();
 }
 
-/* ── Sidebar ──────────────────────────────────────────── */
+/* ── Overall composer (text-only, no anchor) ──────────── */
+function openOverallComposer(editing) {
+  const list = document.getElementById("comment-list");
+  closeComposer();
+
+  const card = el("div", { class: "composer" });
+  card.dataset.composer = "true";
+
+  const chip = el("div", { class: "anchor-chip overall", text: "Overall" });
+  const textarea = el("textarea", {
+    attrs: { placeholder: "Overall note (one topic)…" },
+  });
+  textarea.value = editing ? editing.text : "";
+
+  const actions = el("div", { class: "composer-actions" });
+  const cancel = el("button", { class: "btn", type: "button", text: "Cancel" });
+  const save = el("button", {
+    class: "btn btn-primary",
+    type: "button",
+    text: "Save",
+  });
+  cancel.addEventListener("click", closeComposer);
+  save.addEventListener("click", () => {
+    const text = textarea.value.trim();
+    if (!text) return;
+    if (editing) {
+      editing.text = text;
+    } else {
+      overallSeq += 1;
+      const id = `o${overallSeq}`;
+      store.overall.set(id, { id, text });
+    }
+    closeComposer();
+    dispatchChange();
+  });
+  actions.append(cancel, save);
+
+  textarea.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") save.click();
+    if (e.key === "Escape") closeComposer();
+  });
+
+  card.append(chip, textarea, actions);
+  list.prepend(card);
+  textarea.focus();
+}
+
+/* ── Sidebar cards ────────────────────────────────────── */
+function overallNoteCard(note) {
+  const card = el("div", { class: "comment-card" });
+  const chip = el("div", { class: "anchor-chip overall" });
+  chip.append(el("span", { text: "Overall" }));
+
+  const body = el("div", { class: "comment-body", text: note.text });
+
+  const actions = el("div", { class: "comment-actions" });
+  const edit = el("button", {
+    class: "mini-btn",
+    type: "button",
+    text: "Edit",
+  });
+  const del = el("button", {
+    class: "mini-btn danger",
+    type: "button",
+    text: "Delete",
+  });
+  edit.addEventListener("click", () => openOverallComposer(note));
+  del.addEventListener("click", () => {
+    store.overall.delete(note.id);
+    dispatchChange();
+  });
+  actions.append(edit, del);
+
+  card.append(chip, body, actions);
+  return card;
+}
+
 function commentCard(comment) {
   const card = el("div", {
     class: comment.resolved ? "comment-card resolved" : "comment-card",
@@ -232,32 +313,14 @@ function commentCard(comment) {
   return card;
 }
 
-function overallCard() {
-  const card = el("div", { class: "overall-editor" });
-  card.append(
-    el("div", { class: "anchor-chip overall", text: "Overall note" }),
-  );
-  const textarea = el("textarea", {
-    attrs: { placeholder: "Overall feedback (optional)…" },
-  });
-  textarea.value = store.overall;
-  textarea.addEventListener("input", () => {
-    store.overall = textarea.value;
-    scheduleAutoSave(view, buildPayload);
-    updateStatus();
-  });
-  card.append(textarea);
-  return card;
-}
-
-let overallOpen = false;
-
 function renderSidebar() {
   const list = document.getElementById("comment-list");
   const composer = list.querySelector('[data-composer="true"]');
   list.replaceChildren();
   if (composer) list.append(composer);
-  if (overallOpen) list.append(overallCard());
+
+  const overallNotes = [...store.overall.values()];
+  for (const note of overallNotes) list.append(overallNoteCard(note));
 
   const comments = [...store.comments.values()].sort((a, b) => {
     const al = a.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
@@ -266,7 +329,7 @@ function renderSidebar() {
   });
   for (const comment of comments) list.append(commentCard(comment));
 
-  if (!composer && !overallOpen && comments.length === 0) {
+  if (!composer && overallNotes.length === 0 && comments.length === 0) {
     list.append(
       el("p", {
         class: "sidebar-empty",
@@ -279,20 +342,26 @@ function renderSidebar() {
 
 function updateStatus() {
   const count = store.comments.size;
+  const overallCount = store.overall.size;
   const badge = document.getElementById("comment-count");
   if (badge) {
-    badge.hidden = count === 0;
-    badge.textContent = String(count);
+    const total = count + overallCount;
+    badge.hidden = total === 0;
+    badge.textContent = String(total);
   }
   const status = document.getElementById("submit-status");
   if (status) {
     const parts = [];
     if (count) parts.push(`${count} comment${count === 1 ? "" : "s"}`);
-    if (store.overall.trim()) parts.push("overall note");
+    if (overallCount) {
+      parts.push(
+        `${overallCount} overall note${overallCount === 1 ? "" : "s"}`,
+      );
+    }
     status.textContent = parts.length ? parts.join(" · ") : "No comments yet";
   }
   const submit = document.getElementById("submit-feedback");
-  if (submit) submit.disabled = count === 0 && !store.overall.trim();
+  if (submit) submit.disabled = count === 0 && overallCount === 0;
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
@@ -372,10 +441,9 @@ export function initComments(viewState) {
   view = viewState || {};
   decorateAnchors();
   wireSelection();
-  document.getElementById("add-overall")?.addEventListener("click", () => {
-    overallOpen = !overallOpen;
-    renderSidebar();
-  });
+  document
+    .getElementById("add-overall")
+    ?.addEventListener("click", () => openOverallComposer());
   document
     .getElementById("submit-feedback")
     ?.addEventListener("click", async (e) => {
