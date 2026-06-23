@@ -112,4 +112,19 @@ describe("viewer server flow", () => {
     );
     expect(ping.status).toBe(404);
   });
+
+  it("rejects a ping for a closed session with 404", async () => {
+    const out = await handleRenderViewer({ content: "ping closed" });
+    const sid = sessionIdFrom(out.url);
+    const closed = await fetch(
+      `${baseUrl}/api/close?session=${sid}&token=${token}`,
+      { method: "POST", headers: { "Content-Type": "application/json" } },
+    );
+    expect(closed.status).toBe(200);
+    const ping = await fetch(
+      `${baseUrl}/api/ping?session=${sid}&token=${token}`,
+      { method: "POST", headers: { "Content-Type": "application/json" } },
+    );
+    expect(ping.status).toBe(404);
+  });
 });

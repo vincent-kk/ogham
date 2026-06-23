@@ -36,3 +36,4 @@
 - 잘못된 token 은 401, 알 수 없는 세션은 404.
 - idle 초과 시 서버가 종료되고 다음 `render_viewer` 가 재기동한다.
 - `complete` 제출 시 세션이 `closed` 되어, 이후(동시 제출 포함) 제출은 409 로 거부된다.
+- `/api/ping` 은 serving 세션만 200; closed·없는 세션은 404 (캐시된 페이지의 submit 비활성 게이트).
