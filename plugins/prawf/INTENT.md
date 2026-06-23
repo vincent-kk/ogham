@@ -7,12 +7,12 @@
 
 ## Structure
 
-| Path                         | Role                                                                  |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `agents/`                    | 페르소나 10인 (soundness 6 + impact + rebuttal + chair + adjudicator) |
-| `skills/`                    | 4개 스킬 — review(메인 평가) · simulate-defense · rebuttal · auto-fix |
-| `.claude-plugin/plugin.json` | 플러그인 매니페스트 (skills 전용; `mcpServers` 없음)                  |
-| `package.json`               | 메타 + `version:sync` (빌드 없음)                                     |
+| Path                         | Role                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `agents/`                    | 페르소나 10인 (soundness 6 + impact + rebuttal + chair + adjudicator)      |
+| `skills/`                    | 4개 스킬 — peer-review(메인 평가) · simulate-defense · rebuttal · auto-fix |
+| `.claude-plugin/plugin.json` | 플러그인 매니페스트 (skills 전용; `mcpServers` 없음)                       |
+| `package.json`               | 메타 + `version:sync` (빌드 없음)                                          |
 
 ## Conventions
 

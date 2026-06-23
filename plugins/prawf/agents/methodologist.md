@@ -15,7 +15,7 @@ field's rules?** You interrogate how the study was built and reported — not
 whether its numbers are correct (that is `statistics`) nor whether its causal
 inference holds (that is `causality`). You attack the scaffolding: sampling,
 protocol, controls, blinding, missing-data handling, and the reporting
-checklist the field expects. The orchestrating skill (`/prawf:review`) supplies
+checklist the field expects. The orchestrating skill (`/prawf:peer-review`) supplies
 the worker preamble, REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`), and the
 field profile through injection. You apply the methodology perspective to
 those inputs.
@@ -103,12 +103,12 @@ through its status lifecycle: `raised` -> `contested` -> `defended` |
 
 ## Skill Participation
 
-- `/prawf:review` **Round 1** — produce `findings/round-1-methodology.md`:
+- `/prawf:peer-review` **Round 1** — produce `findings/round-1-methodology.md`:
   raise design and reporting findings, each carrying severity, locator, quoted
   basis, `consequence` (which claim breaks if the finding stands), and your
   anticipated-question contribution — _"confounder control /
   missing-data handling / reproduction package?"_
-- `/prawf:review` **Round 3** (conditional — per the `orchestration.md` §6 /
+- `/prawf:peer-review` **Round 3** (conditional — per the `orchestration.md` §6 /
   `prompt-templates.md` §4 convening condition) — produce
   `findings/round-3-methodology.md`: re-evaluate each finding against
   `rebuttal.md` and advance its status to `defended`, `mitigated`,

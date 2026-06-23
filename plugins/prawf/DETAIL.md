@@ -8,8 +8,8 @@
 - 플러그인은 `skills` 만으로 로드되어야 한다 — `mcpServers`·`hooks`·빌드 산출물 없음.
   `validate-plugin` 이 `.claude-plugin/plugin.json` 에 대해 통과해야 한다.
 - 페르소나 id, 산출물 파일명, axis id, verdict/status enum 은 `agents/*.md`,
-  `skills/review/orchestration.md`, `skills/review/prompt-templates.md`,
-  `skills/review/templates.md`, 그리고 각 `SKILL.md` 에서 동일해야 한다.
+  `skills/peer-review/orchestration.md`, `skills/peer-review/prompt-templates.md`,
+  `skills/peer-review/templates.md`, 그리고 각 `SKILL.md` 에서 동일해야 한다.
 - verdict 는 게이트 이상에서 미해결인 **soundness** finding 만의 순수 함수여야 한다
   (게이트 = `--gate`, 기본 `major` — accept 를 차단할 수 있는 최저 severity). 게이트
   미만 미해결 finding 은 advisory 로 `review-report.md` 의 Advisory Notes 섹션에
@@ -27,12 +27,12 @@
 
 | Command                   | Purpose                                 | Primary output                                 |
 | ------------------------- | --------------------------------------- | ---------------------------------------------- |
-| `/prawf:review`           | 9인 team 평가 (P0 → R1 → R2 → R3 → ADJ) | `review-report.md` + `qa-sheet.md`             |
+| `/prawf:peer-review`      | 9인 team 평가 (P0 → R1 → R2 → R3 → ADJ) | `review-report.md` + `qa-sheet.md`             |
 | `/prawf:simulate-defense` | 심사위원 질문 → 저자 답변 → 코칭        | 모의 Q&A 세션 + 코칭 노트                      |
 | `/prawf:rebuttal`         | 외부 리뷰 코멘트 → 점대점 응답          | `rebuttal-letter.md` + `revision-checklist.md` |
 | `/prawf:auto-fix`         | 리뷰의 자동수정 가능 항목을 원고에 적용 | `applied-fixes.md` + `manual-fixes.md`         |
 
-`/prawf:review` 옵션: `--solo`(단일 패스 `adjudicator`), `--profile <name>`(분야
+`/prawf:peer-review` 옵션: `--solo`(단일 패스 `adjudicator`), `--profile <name>`(분야
 프로파일 override), `--scope <abstract|full>`, `--gate <critical|major|minor>`(accept
 를 차단할 수 있는 최저 severity; 기본 `major`, P0 에서 파싱해 `paper-profile.md` 에
 기록), `--workdir <dir>`(산출물 루트 지정).
@@ -68,14 +68,14 @@ REVIEW_DIR 을 공유한다 — 한 논문의 review·defense·rebuttal·auto-fi
 
 `paper-profile.md`, `paper-normalized.md`, `findings/round-1-<axis>.md`,
 `rebuttal.md`, `findings/round-3-<axis>.md`, `review-report.md`, `qa-sheet.md`
-(review); `defense-session.md`(simulate-defense); `external-findings.md`(중간 산출물) +
+(peer-review); `defense-session.md`(simulate-defense); `external-findings.md`(중간 산출물) +
 `rebuttal-letter.md`, `revision-checklist.md`(rebuttal); `applied-fixes.md`,
-`manual-fixes.md`(auto-fix). `rebuttal.md` 는 review·rebuttal 이 같은 REVIEW_DIR 에서
+`manual-fixes.md`(auto-fix). `rebuttal.md` 는 peer-review·rebuttal 이 같은 REVIEW_DIR 에서
 재생성하는 스킬-런 중간 산출물이며 최종 산출물이 아니다.
 모든 location 은 `paper-normalized.md` 좌표(`§<section>¶<paragraph>` + 줄)를 인용한다.
 Advisory Notes(게이트 미만 미해결 finding 목록)는 `review-report.md` 내부 섹션이며 새
 산출물 파일이 아니다. 검증기 자체의 회귀(FP/FN) 캘리브레이션 fixture 는 저장소의
-`skills/review/calibration/` 에 동봉된다: `calibration.md`(프로토콜 + 회귀 ledger),
+`skills/peer-review/calibration/` 에 동봉된다: `calibration.md`(프로토콜 + 회귀 ledger),
 `clean-paper.md`, `mutated-paper.md`, `seeded-defects.md`.
 
 ### Versioning
@@ -86,4 +86,4 @@ Changesets 버전 bump 후에는 `yarn prawf version:sync` 로 `plugin.json` 을
 
 ## Last Updated
 
-2026-06-11 — review 스킬 오케스트레이션·프롬프트·템플릿 개선, calibration fixture 세트(`skills/review/calibration/`) 추가, agent 명세 보강.
+2026-06-11 — peer-review 스킬 오케스트레이션·프롬프트·템플릿 개선, calibration fixture 세트(`skills/peer-review/calibration/`) 추가, agent 명세 보강.

@@ -19,7 +19,7 @@ markdown only. `build:all` skips this package (it defines no `build` script).
 ## Architecture
 
 ```
-/prawf:review            → skills/review/        — 9-persona native team (P0→R1→R2→R3→ADJ)
+/prawf:peer-review            → skills/peer-review/        — 9-persona native team (P0→R1→R2→R3→ADJ)
 /prawf:simulate-defense  → skills/simulate-defense/ — committee Q&A → author answers → coaching
 /prawf:rebuttal          → skills/rebuttal/      — external review comments → rebuttal letter
 /prawf:auto-fix          → skills/auto-fix/      — apply auto-fixable review revisions to the manuscript
@@ -37,7 +37,7 @@ plagiarism) are delegated as a capability; never hardcode a specific tool name.
   already wired in `plugin.json`.
 - **Agents** — drop `agents/<name>.md` (English). Auto-discovered; do NOT add an
   `agents` field to `plugin.json`.
-- **Anti-yield** — `skills/review/SKILL.md` uses the Tier-2a anti-yield
+- **Anti-yield** — `skills/peer-review/SKILL.md` uses the Tier-2a anti-yield
   discipline (round-to-round chaining, never yield mid-pipeline). An interactive
   `simulate-defense` uses the Tier-2b `<!-- [INTERACTIVE] -->` escape hatch.
 - **Cross-references** — persona ids and deliverable filenames must stay identical

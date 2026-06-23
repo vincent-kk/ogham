@@ -106,11 +106,11 @@ Never edit the paper, another persona's files, or any project file.
 
 ## Skill Participation
 
-- **`/prawf:review` R1** — produce `findings/round-1-causality.md`. For each
+- **`/prawf:peer-review` R1** — produce `findings/round-1-causality.md`. For each
   causal claim, test reverse causation, confounding, and mechanism coherence;
   emit findings with severity, locator, quoted basis, `consequence` (which
   claim breaks if the finding stands), and status `raised`.
-- **`/prawf:review` R3 (conditional)** — when the chair re-convenes your axis (per
+- **`/prawf:peer-review` R3 (conditional)** — when the chair re-convenes your axis (per
   the `orchestration.md` §6 / `prompt-templates.md` §4 convening condition), read
   `rebuttal.md` and write `findings/round-3-causality.md`, advancing each finding through
   `contested -> defended | mitigated | unresolved | withdrawn`. As a FATAL-FLAW

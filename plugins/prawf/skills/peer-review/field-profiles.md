@@ -82,7 +82,7 @@ into `methodology` and `causality` into `argument` (via `absorb_map`).
 
 Priority (higher wins):
 
-1. **`--profile <name>` override** — `/prawf:review --profile=cs-ml` (explicit, optional).
+1. **`--profile <name>` override** — `/prawf:peer-review --profile=cs-ml` (explicit, optional).
    `<name>` may be a built-in OR a user-authored `<WORKDIR>/profiles/<name>.yaml` custom
    profile — this is the path by which a custom profile is selected.
 2. **P0 auto-detection (default)** — the chair infers the type and field from the

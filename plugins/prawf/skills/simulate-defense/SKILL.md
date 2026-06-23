@@ -38,17 +38,17 @@ coaches each answer — what is strong, what is missing, which tactic
 (revision / justification / clarification) fits, and what evidence to cite. This
 is preparation, NOT a verdict — it never issues Accept/Reject.
 
-> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
-> - `../review/prompt-templates.md` — R1 anticipated-question and R2 defense prompts
-> - `../review/orchestration.md` — question types (good/bad/cringy), defense tactics
+> - `../peer-review/prompt-templates.md` — R1 anticipated-question and R2 defense prompts
+> - `../peer-review/orchestration.md` — question types (good/bad/cringy), defense tactics
 > - `../../agents/<persona-id>.md` — the reviewer personas and the strategist
 
 ## When to Use
 
 - Preparing for a thesis defense, conference Q&A, or committee meeting.
 - Pressure-testing answers to the hardest anticipated questions before the real event.
-- Turning a prior `/prawf:review` `qa-sheet.md` into an interactive rehearsal.
+- Turning a prior `/prawf:peer-review` `qa-sheet.md` into an interactive rehearsal.
 
 ## Core Workflow
 
@@ -58,12 +58,12 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
 (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`); session outputs go under
 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/`, reusing a prior review's directory when present.
 
-1. If a `qa-sheet.md` from a prior `/prawf:review` is supplied or found, load its
+1. If a `qa-sheet.md` from a prior `/prawf:peer-review` is supplied or found, load its
    anticipated questions directly — no spawning needed.
 2. Otherwise, take the paper, run P0-lite (detect profile, normalize to
    `paper-normalized.md`), and spawn a LIGHT panel of soundness reviewers as
    standalone `Task`s (no team is needed for question generation) in **question-only
-   mode**: adapt the `../review/prompt-templates.md` §1 prompt to ask each reviewer for
+   mode**: adapt the `../peer-review/prompt-templates.md` §1 prompt to ask each reviewer for
    ONLY its `anticipated_question` set (one per axis concern), returned inline in the Task
    response — strip §1's PRIMARY DELIVERABLE / file-write REMINDER lines and substitute
    `GATE` with `major` (no verdict is derived in this mode); they do NOT write a

@@ -15,7 +15,7 @@ degrees of freedom (RDF)?** You forensically reconstruct the analytical path
 from raw data to reported numbers and expose every undisclosed choice that
 could have manufactured the result.
 
-The orchestrating skill (`/prawf:review`) supplies your axis assignment, the
+The orchestrating skill (`/prawf:peer-review`) supplies your axis assignment, the
 round, REVIEW_DIR (`<WORKDIR>/review/<paper-slug>/`), and the deliverable schema
 through the worker preamble. You apply the statistical-forensics lens to
 `paper-normalized.md` and emit findings, never editing the paper itself.
@@ -113,11 +113,11 @@ Never edit the paper, another persona's files, or any project file.
 
 ## Skill Participation
 
-- `/prawf:review` **Round 1** — author `findings/round-1-statistics.md`:
+- `/prawf:peer-review` **Round 1** — author `findings/round-1-statistics.md`:
   audit the reported analysis for RDF, p-hacking, HARKing, selective
   reporting, and data leakage; raise each finding with severity, locator, and
   `consequence` (which claim breaks if the finding stands).
-- `/prawf:review` **Round 3 (conditional)** — when the chair re-convenes your axis
+- `/prawf:peer-review` **Round 3 (conditional)** — when the chair re-convenes your axis
   (per the `orchestration.md` §6 / `prompt-templates.md` §4 convening condition),
   author `findings/round-3-statistics.md`: re-evaluate contested findings. Because
   this is a FATAL-FLAW axis, p-hacking-plus-preregistration-mismatch and data

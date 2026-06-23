@@ -122,7 +122,7 @@ the report header/body; the frontmatter verdict and the terminal marker stay
 
 ## Skill Participation
 
-- `/prawf:review --solo` (and auto-selected TRIVIAL) — a single standalone
+- `/prawf:peer-review --solo` (and auto-selected TRIVIAL) — a single standalone
   Task that sweeps axes ① to ⑥, dedups overlaps by defect_class, scores impact
   advisory-only and separately, derives the verdict from unresolved at-or-above-gate
   soundness findings under the fatal-flaw override (below-gate UNRESOLVED items go to

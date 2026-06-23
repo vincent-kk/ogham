@@ -1,7 +1,7 @@
 ---
-name: review
+name: peer-review
 user_invocable: true
-description: "[prawf:review] Run multi-agent academic peer review. The chair profiles and normalizes the paper, then convenes a native Claude Code team: six soundness reviewers attack across axes, the rebuttal-strategist defends, original reviewers re-review, and the chair adjudicates a verdict (Accept / Minor / Major / Reject) plus an anticipated-question sheet. Triggers: 동료평가, peer review, 논문 평가, paper review, soundness review."
+description: "[prawf:peer-review] Run multi-agent academic peer review. The chair profiles and normalizes the paper, then convenes a native Claude Code team: six soundness reviewers attack across axes, the rebuttal-strategist defends, original reviewers re-review, and the chair adjudicates a verdict (Accept / Minor / Major / Reject) plus an anticipated-question sheet. Triggers: 동료평가, peer review, 논문 평가, paper review, soundness review."
 argument-hint: "[--solo] [--profile <name>] [--scope abstract|full] [--workdir <dir>] [--gate critical|major|minor]"
 version: "1.0.0"
 complexity: complex
@@ -36,7 +36,7 @@ plugin: prawf
 >    chain ADJ as a direct chair operation: dedup → verdict → write reports →
 >    `TeamDelete` → terminal marker, all in the same response.
 
-# review — Multi-Agent Academic Peer Review
+# peer-review — Multi-Agent Academic Peer Review
 
 You are the **chair / handling editor** (see `../../agents/chair.md`). You run
 the journal review → rebuttal → re-review cycle as the team lead: you convene
@@ -44,7 +44,7 @@ the panel, spawn the persona agents as team workers, and adjudicate the verdict
 yourself. You NEVER call external-search or measurement tools directly — you
 synthesize the attack and defense deliverables only.
 
-> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
 > - `orchestration.md` — pipeline, finding state machine, dedup + verdict rules, deliverable contracts
 > - `field-profiles.md` — profile schema, injection priority, universal fallback
@@ -197,12 +197,12 @@ execution is COMPLETE.**
 ## Quick Reference
 
 ```
-/prawf:review                              # auto-detect profile, full team review
-/prawf:review --solo                       # fast single-pass adjudicator
-/prawf:review --profile cs-ml              # force the CS/ML profile
-/prawf:review --scope abstract             # LIGHT panel (abstract / single issue)
-/prawf:review --gate minor                 # strict legacy mode: minors block acceptance
-/prawf:review --workdir ~/reviews/.prawf   # fix the output root (or set PRAWF_WORKDIR)
+/prawf:peer-review                              # auto-detect profile, full team review
+/prawf:peer-review --solo                       # fast single-pass adjudicator
+/prawf:peer-review --profile cs-ml              # force the CS/ML profile
+/prawf:peer-review --scope abstract             # LIGHT panel (abstract / single issue)
+/prawf:peer-review --gate minor                 # strict legacy mode: minors block acceptance
+/prawf:peer-review --workdir ~/reviews/.prawf   # fix the output root (or set PRAWF_WORKDIR)
 
 Pipeline:  P0 (profile+normalize) → R1 (attack, parallel) → R2 (defense)
            → R3 (re-review, conditional) → ADJ (dedup+verdict)

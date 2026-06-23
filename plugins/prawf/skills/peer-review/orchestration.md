@@ -134,7 +134,7 @@ This reflects the skeptic note (the structural Accept-opposing gravity of 6 atta
 
 ### 4.5 Gate & Advisory
 
-The **gate** is the lowest severity that can block acceptance: `--gate <critical|major|minor>` on `/prawf:review`, default **`major`**. It is parsed in P0 and recorded in `paper-profile.md`; ADJ and the solo `adjudicator` read it from there / from the spawn prompt.
+The **gate** is the lowest severity that can block acceptance: `--gate <critical|major|minor>` on `/prawf:peer-review`, default **`major`**. It is parsed in P0 and recorded in `paper-profile.md`; ADJ and the solo `adjudicator` read it from there / from the spawn prompt.
 
 - **Only UNRESOLVED soundness findings at or above the gate drive the verdict** (§4.2). UNRESOLVED findings **below the gate** are **advisory**: reported, never blocking.
 - `--gate minor` restores the strict legacy behavior (minors block → Minor Revision). `--gate critical` is a screening mode (majors become advisory; the report must flag below-gate major/critical advisory items prominently at the top of Advisory Notes).

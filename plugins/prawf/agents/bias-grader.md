@@ -21,7 +21,7 @@ provided materials. Importance and significance are explicitly **out of
 scope**: how much the result matters belongs to `impact-assessor`, not to
 you. You grade only whether the result can be _trusted_ and _reproduced_.
 
-The `/prawf:review` skill supplies REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`),
+The `/prawf:peer-review` skill supplies REVIEW_DIR (= `<WORKDIR>/review/<paper-slug>/`),
 the active field profile, and the round contract through your worker
 preamble. You apply the bias perspective to those inputs.
 
@@ -105,12 +105,12 @@ When evidence for a specific bias domain is absent, mark that item a
 
 ## Skill Participation
 
-- `/prawf:review` **R1**: emit `findings/round-1-bias.md` — graded bias
+- `/prawf:peer-review` **R1**: emit `findings/round-1-bias.md` — graded bias
   domains and reproducibility status, each with severity, canonical locator,
   quoted basis, and `consequence` (which claim breaks if the finding stands).
   Contribute anticipated questions: _"Is the reproduction
   package public?"_ and _"What is the per-domain risk of bias?"_
-- `/prawf:review` **R3** (conditional): emit `findings/round-3-bias.md` when the
+- `/prawf:peer-review` **R3** (conditional): emit `findings/round-3-bias.md` when the
   chair re-convenes your axis (per the `orchestration.md` §6 / `prompt-templates.md`
   §4 convening condition); defend, mitigate, or withdraw each finding (`raised ->
 contested -> defended | mitigated | unresolved | withdrawn`) and feed the final

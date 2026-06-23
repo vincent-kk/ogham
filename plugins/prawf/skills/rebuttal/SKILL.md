@@ -23,17 +23,17 @@ plugin: prawf
 # rebuttal — Response to External Reviewers
 
 You received real reviewer comments from a venue and must respond. Unlike
-`/prawf:review`, the attack round (R1) is SKIPPED — the external reviewers have
+`/prawf:peer-review`, the attack round (R1) is SKIPPED — the external reviewers have
 already filed the findings. You run the prawf **defense round (R2)** over their
 comments and assemble a courteous, point-by-point rebuttal letter plus an
 actionable revision checklist. The chair (`../../agents/chair.md`) assembles; the
 rebuttal-strategist (`../../agents/rebuttal-strategist.md`) defends.
 
-> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
-> - `../review/orchestration.md` §4.3 — downgrade burden, fatal-flaw discipline
-> - `../review/prompt-templates.md` §3 — R2 defense prompt
-> - `../review/templates.md` — rebuttal letter format (Revision / Justification / Clarification tagging)
+> - `../peer-review/orchestration.md` §4.3 — downgrade burden, fatal-flaw discipline
+> - `../peer-review/prompt-templates.md` §3 — R2 defense prompt
+> - `../peer-review/templates.md` — rebuttal letter format (Revision / Justification / Clarification tagging)
 
 ## When to Use
 
@@ -62,7 +62,7 @@ First, **resolve `WORKDIR`** per [`[OP: resolve_workdir]`](../_shared/operations
 ### Step 2 — R2 Defense (strategist)
 
 Spawn `rebuttal-strategist` with `external-findings.md` as input, per
-`../review/prompt-templates.md` §3. Substitute the §3 `SOUNDNESS_FINDINGS` slot
+`../peer-review/prompt-templates.md` §3. Substitute the §3 `SOUNDNESS_FINDINGS` slot
 with the `external-findings.md` path, and the `GATE` slot from a prior review's
 `paper-profile.md` when one exists in this REVIEW_DIR; otherwise default
 `major` (this skill has no `--gate` option). It writes `rebuttal.md`: per comment a
@@ -75,7 +75,7 @@ honestly, not waved away.
 
 ### Step 3 — Assemble letter + checklist (chair, direct)
 
-Read `../review/templates.md`, then write into `REVIEW_DIR`:
+Read `../peer-review/templates.md`, then write into `REVIEW_DIR`:
 
 1. `rebuttal-letter.md` — a courteous point-by-point response. Each item is tagged
    **Revision** (a change made), **Justification** (defended with evidence), or
@@ -98,7 +98,7 @@ Emit the terminal marker `prawf rebuttal: complete`.
 
 ## Quick Reference
 
-> **Note**: If `/prawf:review` already ran on the same paper in the same
+> **Note**: If `/prawf:peer-review` already ran on the same paper in the same
 > `REVIEW_DIR`, pass a separate `--workdir` to avoid overwriting `rebuttal.md`.
 
 ```

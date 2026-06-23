@@ -2,7 +2,7 @@
 
 > The verifier itself is under regression test. These fixtures measure the review pipeline's **false-positive rate
 > (FPR)** — blocking a paper that is sound by construction — and **false-negative rate (FNR)** — missing a defect that
-> was deliberately seeded. Run a calibration pass after any change to `skills/review/**` or `agents/*.md` that touches
+> was deliberately seeded. Run a calibration pass after any change to `skills/peer-review/**` or `agents/*.md` that touches
 > finding discipline, severity anchoring, or verdict derivation ([orchestration §4.2 / §4.5](../orchestration.md)).
 
 ## 1. Fixtures
@@ -27,15 +27,15 @@ reviewer that can read `seeded-defects.md` (or diff the twins) is not being test
 # <plugin-root> = this plugin's root (the directory containing .claude-plugin/plugin.json) — resolve via Glob.
 # <date>        = one run id (e.g. 2026-06-11) substituted consistently in EVERY command of this pass.
 mkdir -p /tmp/prawf-calib/<date>/clean /tmp/prawf-calib/<date>/mutated
-cp <plugin-root>/skills/review/calibration/clean-paper.md /tmp/prawf-calib/<date>/clean/
-cp <plugin-root>/skills/review/calibration/mutated-paper.md /tmp/prawf-calib/<date>/mutated/
+cp <plugin-root>/skills/peer-review/calibration/clean-paper.md /tmp/prawf-calib/<date>/clean/
+cp <plugin-root>/skills/peer-review/calibration/mutated-paper.md /tmp/prawf-calib/<date>/mutated/
 ```
 
-1. **Clean run** — `/prawf:review --solo --workdir /tmp/prawf-calib/<date>/clean/.prawf
+1. **Clean run** — `/prawf:peer-review --solo --workdir /tmp/prawf-calib/<date>/clean/.prawf
 /tmp/prawf-calib/<date>/clean/clean-paper.md` — pass the copied paper path explicitly (P0 yields to ask the user
    when no paper is given). MUST end `prawf verdict: accept`. Below-gate advisory items are allowed — an
    "Accept (with notes)" still passes.
-2. **Mutation run** — `/prawf:review --solo --workdir /tmp/prawf-calib/<date>/mutated/.prawf
+2. **Mutation run** — `/prawf:peer-review --solo --workdir /tmp/prawf-calib/<date>/mutated/.prawf
 /tmp/prawf-calib/<date>/mutated/mutated-paper.md`. Expected: the five detections listed in
    `seeded-defects.md`, ending `prawf verdict: reject` (two fatal-flaw criticals — gate-independent, per
    [orchestration §4.3 / §4.5](../orchestration.md)).

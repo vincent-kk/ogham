@@ -1,7 +1,7 @@
 ---
 name: auto-fix
 user_invocable: true
-description: "[prawf:auto-fix] After a /prawf:review, apply the auto-fixable revisions directly to the manuscript source. Only mechanical, artifact-backed text edits (clarifications, added statements, notation/citation fixes) are applied; anything needing new data, analysis, or author judgment is listed as manual. Triggers: 자동 수정, 자동수정, auto-fix, 리뷰 수정 적용, apply review fixes, apply fixes."
+description: "[prawf:auto-fix] After a /prawf:peer-review, apply the auto-fixable revisions directly to the manuscript source. Only mechanical, artifact-backed text edits (clarifications, added statements, notation/citation fixes) are applied; anything needing new data, analysis, or author judgment is listed as manual. Triggers: 자동 수정, 자동수정, auto-fix, 리뷰 수정 적용, apply review fixes, apply fixes."
 argument-hint: "[--dry-run] [--workdir <dir>] [<paper-slug | review-dir>] [<manuscript-path>]"
 version: "1.0.0"
 complexity: medium
@@ -23,21 +23,21 @@ plugin: prawf
 
 # auto-fix — Apply Auto-Fixable Review Revisions
 
-A post-review step. You read the verdict artifacts a prior `/prawf:review`
+A post-review step. You read the verdict artifacts a prior `/prawf:peer-review`
 produced (`review-report.md` + `qa-sheet.md`) and apply ONLY the revisions that
 are mechanical and already backed by a concrete solution to the manuscript
 source. You are a careful copy-editor, not a reviewer: you never re-judge the
 paper, never invent content, and never touch a finding that needs the author's
 own work.
 
-> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/review/<file>`, fallback `Glob`):
+> **References** (resolve via `${CLAUDE_PLUGIN_ROOT}/skills/peer-review/<file>`, fallback `Glob`):
 >
-> - `../review/templates.md` — the `review-report.md` and `qa-sheet.md` formats you read
-> - `../review/orchestration.md` §3-4 — finding `status` / `severity` semantics
+> - `../peer-review/templates.md` — the `review-report.md` and `qa-sheet.md` formats you read
+> - `../peer-review/orchestration.md` §3-4 — finding `status` / `severity` semantics
 
 ## When to Use
 
-- Right after `/prawf:review`, to clear the easy, unambiguous revisions in one pass.
+- Right after `/prawf:peer-review`, to clear the easy, unambiguous revisions in one pass.
 - To separate "apply now" reporting fixes from "author must do this" work items.
 
 ## Auto-Fixable Rubric
@@ -69,8 +69,8 @@ evidence, insert a correction the author already supplied in the rebuttal.
    (`--workdir` > `PRAWF_WORKDIR` > `./.prawf`), then the review directory: from
    `<paper-slug | review-dir>` or the most recent `<WORKDIR>/review/<slug>/`. Read
    `review-report.md` and `qa-sheet.md`. If `review-report.md` is missing, stop and tell
-   the user to run `/prawf:review` first. If `review-report.md` exists but `qa-sheet.md`
-   does not (e.g. after `/prawf:review --solo`, which writes no `qa-sheet.md`), proceed on
+   the user to run `/prawf:peer-review` first. If `review-report.md` exists but `qa-sheet.md`
+   does not (e.g. after `/prawf:peer-review --solo`, which writes no `qa-sheet.md`), proceed on
    `review-report.md` alone — the `tactic`/`solution` columns are then unavailable, so any
    finding whose AUTO classification would require a `tactic` or `solution` it cannot read
    defaults to `MANUAL`.

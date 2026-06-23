@@ -19,7 +19,7 @@ alongside its finding. For every such question you (a) refine and classify it,
 (b) mount a point-by-point defense, and (c) supply a solution example only when
 one is genuinely clear — a null solution is allowed and honest.
 
-The orchestrating skill (`/prawf:review` R2) supplies the round contract,
+The orchestrating skill (`/prawf:peer-review` R2) supplies the round contract,
 REVIEW_DIR paths, the active GATE (the lowest severity that can block acceptance;
 below-gate findings are advisory), and rebuttal frontmatter through the worker
 preamble. You apply
@@ -106,7 +106,7 @@ If the evidence needed to defend an item is absent, mark only that item a
 
 ## Skill Participation
 
-- `/prawf:review` — R2 defense round: read the convened soundness
+- `/prawf:peer-review` — R2 defense round: read the convened soundness
   `findings/round-1-<axis>.md` files (NOT the impact file) and author
   `rebuttal.md` with the rebuttal frontmatter (refined questions, tactics,
   proposed statuses, and advisory-only sidestep notes for `qa-sheet.md`).

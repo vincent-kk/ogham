@@ -25,17 +25,17 @@ delegated as a capability, never bound to a specific tool.
 
 | Command                   | What it does                                                              |
 | ------------------------- | ------------------------------------------------------------------------- |
-| `/prawf:review`           | Full committee review of a paper → verdict + anticipated questions        |
+| `/prawf:peer-review`           | Full committee review of a paper → verdict + anticipated questions        |
 | `/prawf:simulate-defense` | Rehearse your defense: the committee asks, you answer, you get coached    |
 | `/prawf:rebuttal`         | Turn real reviewer comments into a rebuttal letter + revision checklist   |
 | `/prawf:auto-fix`         | Apply the auto-fixable revisions from a review straight to the manuscript |
 
 ```bash
-/prawf:review                      # auto-detect the field, run the full panel
-/prawf:review --solo               # fast single-pass pre-check
-/prawf:review --profile cs-ml      # force a field profile
-/prawf:review --gate minor         # strict gate: minor findings block accept too
-/prawf:review --workdir ~/reviews  # pin the output root (or set PRAWF_WORKDIR)
+/prawf:peer-review                      # auto-detect the field, run the full panel
+/prawf:peer-review --solo               # fast single-pass pre-check
+/prawf:peer-review --profile cs-ml      # force a field profile
+/prawf:peer-review --gate minor         # strict gate: minor findings block accept too
+/prawf:peer-review --workdir ~/reviews  # pin the output root (or set PRAWF_WORKDIR)
 /prawf:simulate-defense paper.pdf  # generate questions, then rehearse
 /prawf:rebuttal paper.pdf reviews.txt
 /prawf:auto-fix --dry-run          # preview the auto-fixable revisions, change nothing
@@ -86,7 +86,7 @@ the field is unclear, prawf falls back to a universal menu rather than guess wro
 
 ## Outputs
 
-`/prawf:review` writes `review-report.md` (the verdict, traceable to each finding)
+`/prawf:peer-review` writes `review-report.md` (the verdict, traceable to each finding)
 and `qa-sheet.md` (the anticipated questions and, where one is clear, a solution)
 under `<workdir>/review/<paper-slug>/`. The workdir defaults to `.prawf/`; pin it with
 `--workdir <dir>` or `PRAWF_WORKDIR` to keep outputs in one place as your `pwd` changes.
