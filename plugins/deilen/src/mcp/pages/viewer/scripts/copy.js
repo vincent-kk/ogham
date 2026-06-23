@@ -1,34 +1,36 @@
 // Copy affordances: the whole viewer (raw markdown) and per code block.
 
-function flash(btn, labelEl) {
-  const target = labelEl || btn;
-  const prev = target.textContent;
-  btn.classList.add("copied");
+const COPIED_LABEL_MS = 1500;
+
+function flash(button, labelElement) {
+  const target = labelElement || button;
+  const previous = target.textContent;
+  button.classList.add("copied");
   target.textContent = "Copied";
   window.setTimeout(() => {
-    btn.classList.remove("copied");
-    target.textContent = prev;
-  }, 1400);
+    button.classList.remove("copied");
+    target.textContent = previous;
+  }, COPIED_LABEL_MS);
 }
 
-function write(text, onOk) {
+function write(text, onSuccess) {
   if (!navigator.clipboard) return;
-  navigator.clipboard.writeText(text).then(onOk, () => {});
+  navigator.clipboard.writeText(text).then(onSuccess, () => {});
 }
 
 function addCodeCopyButtons() {
-  document.querySelectorAll("#viewer pre").forEach((pre) => {
-    if (pre.classList.contains("deilen-mermaid")) return;
-    const code = pre.querySelector("code");
+  document.querySelectorAll("#viewer pre").forEach((preElement) => {
+    if (preElement.classList.contains("deilen-mermaid")) return;
+    const code = preElement.querySelector("code");
     if (!code) return;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "code-copy";
-    btn.textContent = "Copy";
-    btn.addEventListener("click", () =>
-      write(code.textContent || "", () => flash(btn)),
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "code-copy";
+    button.textContent = "Copy";
+    button.addEventListener("click", () =>
+      write(code.textContent || "", () => flash(button)),
     );
-    pre.appendChild(btn);
+    preElement.appendChild(button);
   });
 }
 

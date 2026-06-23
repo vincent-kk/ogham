@@ -6,26 +6,29 @@
 import { wireImageCapture } from "./images.js";
 import { scheduleAutoSave, submitFeedback } from "./submit.js";
 
+const POPOVER_OFFSET_PX = 8;
+
 let view = {};
 const store = { comments: new Map(), overall: new Map() };
-let seq = 0;
-let overallSeq = 0;
+let sequence = 0;
+let overallSequence = 0;
 let popover = null;
 
-function el(tag, opts = {}) {
+function getElement(tag, options = {}) {
   const node = document.createElement(tag);
-  if (opts.class) node.className = opts.class;
-  if (opts.text != null) node.textContent = opts.text;
-  if (opts.type) node.type = opts.type;
-  if (opts.attrs) {
-    for (const [k, v] of Object.entries(opts.attrs)) node.setAttribute(k, v);
+  if (options.class) node.className = options.class;
+  if (options.text != null) node.textContent = options.text;
+  if (options.type) node.type = options.type;
+  if (options.attrs) {
+    for (const [key, value] of Object.entries(options.attrs))
+      node.setAttribute(key, value);
   }
   return node;
 }
 
 function rawSlice(startLine, endLine) {
-  const lines = (view.raw || "").split("\n");
-  return lines
+  return (view.raw || "")
+    .split("\n")
     .slice(startLine - 1, endLine)
     .join("\n")
     .trim();
@@ -37,11 +40,25 @@ function blockAnchor(block) {
   return { startLine, endLine, sourceText: rawSlice(startLine, endLine) };
 }
 
+function rangeAnchor(startBlock, endBlock) {
+  const startBlockLine = Number(startBlock.dataset.sourceLine);
+  const endBlockLine = Number(
+    endBlock.dataset.sourceEnd || endBlock.dataset.sourceLine,
+  );
+  const firstLine = Math.min(startBlockLine, endBlockLine);
+  const lastLine = Math.max(startBlockLine, endBlockLine);
+  return {
+    startLine: firstLine,
+    endLine: lastLine,
+    sourceText: rawSlice(firstLine, lastLine),
+  };
+}
+
 function nearestAnchor(node) {
-  let cur = node instanceof Element ? node : node?.parentElement;
-  while (cur && cur.id !== "viewer") {
-    if (cur.hasAttribute?.("data-source-line")) return cur;
-    cur = cur.parentElement;
+  let cursor = node instanceof Element ? node : node?.parentElement;
+  while (cursor && cursor.id !== "viewer") {
+    if (cursor.hasAttribute?.("data-source-line")) return cursor;
+    cursor = cursor.parentElement;
   }
   return null;
 }
@@ -55,24 +72,25 @@ function buildPayload(status) {
   return {
     session_id: view.session_id,
     status,
-    overall: [...store.overall.values()].map((n) => ({
-      id: n.id,
-      text: n.text,
+    overall: [...store.overall.values()].map((note) => ({
+      id: note.id,
+      text: note.text,
     })),
-    comments: [...store.comments.values()].map((c) => ({
-      id: c.id,
-      anchor: c.anchor,
-      text: c.text,
-      imageIds: c.attachments.map((a) => a.id),
-      resolved: c.resolved || undefined,
+    comments: [...store.comments.values()].map((comment) => ({
+      id: comment.id,
+      anchor: comment.anchor,
+      text: comment.text,
+      imageIds: comment.attachments.map((attachment) => attachment.id),
+      resolved: comment.resolved || undefined,
     })),
   };
 }
 
 function allAttachments() {
-  const out = [];
-  for (const c of store.comments.values()) out.push(...c.attachments);
-  return out;
+  const collected = [];
+  for (const comment of store.comments.values())
+    collected.push(...comment.attachments);
+  return collected;
 }
 
 /* ── Comment composer ─────────────────────────────────── */
@@ -81,43 +99,47 @@ function openComposer(anchor, editing) {
   closeComposer();
   const attachments = editing ? [...editing.attachments] : [];
 
-  const card = el("div", { class: "composer" });
+  const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
 
-  const chip = el("div", {
+  const chip = getElement("div", {
     class: anchor ? "anchor-chip" : "anchor-chip overall",
     text: anchor ? `L${anchor.startLine}-${anchor.endLine}` : "general",
   });
-  const textarea = el("textarea", {
+  const textarea = getElement("textarea", {
     attrs: { placeholder: "Leave a comment…" },
   });
   textarea.value = editing ? editing.text : "";
-  const thumbs = el("div", { class: "thumbs" });
+  const thumbs = getElement("div", { class: "thumbs" });
 
   function renderThumbs() {
     thumbs.replaceChildren();
-    attachments.forEach((att, i) => {
-      const wrap = el("div", { class: "thumb" });
-      const img = el("img");
-      img.src = att.url;
-      img.alt = att.name;
-      const rm = el("button", {
+    attachments.forEach((attachment, index) => {
+      const wrapper = getElement("div", { class: "thumb" });
+      const imageElement = getElement("img");
+      imageElement.src = attachment.url;
+      imageElement.alt = attachment.name;
+      const removeButton = getElement("button", {
         class: "thumb-remove",
         type: "button",
-        text: "×",
+        text: "x",
       });
-      rm.addEventListener("click", () => {
-        attachments.splice(i, 1);
+      removeButton.addEventListener("click", () => {
+        attachments.splice(index, 1);
         renderThumbs();
       });
-      wrap.append(img, rm);
-      thumbs.append(wrap);
+      wrapper.append(imageElement, removeButton);
+      thumbs.append(wrapper);
     });
   }
 
-  const actions = el("div", { class: "composer-actions" });
-  const cancel = el("button", { class: "btn", type: "button", text: "Cancel" });
-  const save = el("button", {
+  const actions = getElement("div", { class: "composer-actions" });
+  const cancel = getElement("button", {
+    class: "btn",
+    type: "button",
+    text: "Cancel",
+  });
+  const save = getElement("button", {
     class: "btn btn-primary",
     type: "button",
     text: "Save",
@@ -130,8 +152,8 @@ function openComposer(anchor, editing) {
       editing.text = text;
       editing.attachments = attachments;
     } else {
-      seq += 1;
-      const id = `c${seq}`;
+      sequence += 1;
+      const id = `c${sequence}`;
       store.comments.set(id, {
         id,
         anchor,
@@ -146,13 +168,13 @@ function openComposer(anchor, editing) {
   });
   actions.append(cancel, save);
 
-  wireImageCapture(card, (att) => {
-    attachments.push(att);
+  wireImageCapture(card, (attachment) => {
+    attachments.push(attachment);
     renderThumbs();
   });
-  textarea.addEventListener("keydown", (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") save.click();
-    if (e.key === "Escape") closeComposer();
+  textarea.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") save.click();
+    if (event.key === "Escape") closeComposer();
   });
 
   card.append(chip, textarea, thumbs, actions);
@@ -170,18 +192,25 @@ function openOverallComposer(editing) {
   const list = document.getElementById("comment-list");
   closeComposer();
 
-  const card = el("div", { class: "composer" });
+  const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
 
-  const chip = el("div", { class: "anchor-chip overall", text: "Overall" });
-  const textarea = el("textarea", {
+  const chip = getElement("div", {
+    class: "anchor-chip overall",
+    text: "Overall",
+  });
+  const textarea = getElement("textarea", {
     attrs: { placeholder: "Overall note (one topic)…" },
   });
   textarea.value = editing ? editing.text : "";
 
-  const actions = el("div", { class: "composer-actions" });
-  const cancel = el("button", { class: "btn", type: "button", text: "Cancel" });
-  const save = el("button", {
+  const actions = getElement("div", { class: "composer-actions" });
+  const cancel = getElement("button", {
+    class: "btn",
+    type: "button",
+    text: "Cancel",
+  });
+  const save = getElement("button", {
     class: "btn btn-primary",
     type: "button",
     text: "Save",
@@ -190,11 +219,10 @@ function openOverallComposer(editing) {
   save.addEventListener("click", () => {
     const text = textarea.value.trim();
     if (!text) return;
-    if (editing) {
-      editing.text = text;
-    } else {
-      overallSeq += 1;
-      const id = `o${overallSeq}`;
+    if (editing) editing.text = text;
+    else {
+      overallSequence += 1;
+      const id = `o${overallSequence}`;
       store.overall.set(id, { id, text });
     }
     closeComposer();
@@ -202,9 +230,9 @@ function openOverallComposer(editing) {
   });
   actions.append(cancel, save);
 
-  textarea.addEventListener("keydown", (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") save.click();
-    if (e.key === "Escape") closeComposer();
+  textarea.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") save.click();
+    if (event.key === "Escape") closeComposer();
   });
 
   card.append(chip, textarea, actions);
@@ -214,19 +242,19 @@ function openOverallComposer(editing) {
 
 /* ── Sidebar cards ────────────────────────────────────── */
 function overallNoteCard(note) {
-  const card = el("div", { class: "comment-card" });
-  const chip = el("div", { class: "anchor-chip overall" });
-  chip.append(el("span", { text: "Overall" }));
+  const card = getElement("div", { class: "comment-card" });
+  const chip = getElement("div", { class: "anchor-chip overall" });
+  chip.append(getElement("span", { text: "Overall" }));
 
-  const body = el("div", { class: "comment-body", text: note.text });
+  const body = getElement("div", { class: "comment-body", text: note.text });
 
-  const actions = el("div", { class: "comment-actions" });
-  const edit = el("button", {
+  const actions = getElement("div", { class: "comment-actions" });
+  const edit = getElement("button", {
     class: "mini-btn",
     type: "button",
     text: "Edit",
   });
-  const del = el("button", {
+  const del = getElement("button", {
     class: "mini-btn danger",
     type: "button",
     text: "Delete",
@@ -243,14 +271,14 @@ function overallNoteCard(note) {
 }
 
 function commentCard(comment) {
-  const card = el("div", {
+  const card = getElement("div", {
     class: comment.resolved ? "comment-card resolved" : "comment-card",
   });
-  const chip = el("div", {
+  const chip = getElement("div", {
     class: comment.anchor ? "anchor-chip" : "anchor-chip overall",
   });
   chip.append(
-    el("span", {
+    getElement("span", {
       text: comment.anchor
         ? `L${comment.anchor.startLine}-${comment.anchor.endLine}`
         : "general",
@@ -258,7 +286,7 @@ function commentCard(comment) {
   );
   if (comment.anchor?.sourceText) {
     chip.append(
-      el("span", {
+      getElement("span", {
         class: "anchor-excerpt",
         text: comment.anchor.sourceText.split("\n")[0],
       }),
@@ -266,46 +294,48 @@ function commentCard(comment) {
   }
   chip.addEventListener("click", () => scrollToAnchor(comment.anchor));
 
-  const body = el("div", { class: "comment-body", text: comment.text });
+  const body = getElement("div", { class: "comment-body", text: comment.text });
 
-  const actions = el("div", { class: "comment-actions" });
-  const edit = el("button", {
+  const actions = getElement("div", { class: "comment-actions" });
+  const editButton = getElement("button", {
     class: "mini-btn",
     type: "button",
     text: "Edit",
   });
-  const resolve = el("button", {
+  const resolve = getElement("button", {
     class: "mini-btn",
     type: "button",
     text: comment.resolved ? "Unresolve" : "Resolve",
   });
-  const del = el("button", {
+  const deleteButton = getElement("button", {
     class: "mini-btn danger",
     type: "button",
     text: "Delete",
   });
-  edit.addEventListener("click", () => openComposer(comment.anchor, comment));
+  editButton.addEventListener("click", () =>
+    openComposer(comment.anchor, comment),
+  );
   resolve.addEventListener("click", () => {
     comment.resolved = !comment.resolved;
     dispatchChange();
   });
-  del.addEventListener("click", () => {
+  deleteButton.addEventListener("click", () => {
     store.comments.delete(comment.id);
     markAnchored();
     dispatchChange();
   });
-  actions.append(edit, resolve, del);
+  actions.append(editButton, resolve, deleteButton);
 
   card.append(chip, body);
   if (comment.attachments.length) {
-    const thumbs = el("div", { class: "thumbs" });
-    for (const att of comment.attachments) {
-      const wrap = el("div", { class: "thumb" });
-      const img = el("img");
-      img.src = att.url;
-      img.alt = att.name;
-      wrap.append(img);
-      thumbs.append(wrap);
+    const thumbs = getElement("div", { class: "thumbs" });
+    for (const attachment of comment.attachments) {
+      const wrapper = getElement("div", { class: "thumb" });
+      const imageElement = getElement("img");
+      imageElement.src = attachment.url;
+      imageElement.alt = attachment.name;
+      wrapper.append(imageElement);
+      thumbs.append(wrapper);
     }
     card.append(thumbs);
   }
@@ -322,16 +352,16 @@ function renderSidebar() {
   const overallNotes = [...store.overall.values()];
   for (const note of overallNotes) list.append(overallNoteCard(note));
 
-  const comments = [...store.comments.values()].sort((a, b) => {
-    const al = a.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
-    const bl = b.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
-    return al - bl;
+  const comments = [...store.comments.values()].sort((anchorA, anchorB) => {
+    const lineA = anchorA.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
+    const lineB = anchorB.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
+    return lineA - lineB;
   });
   for (const comment of comments) list.append(commentCard(comment));
 
   if (!composer && overallNotes.length === 0 && comments.length === 0) {
     list.append(
-      el("p", {
+      getElement("p", {
         class: "sidebar-empty",
         text: "Select text or hover a block's + to leave a comment.",
       }),
@@ -369,10 +399,14 @@ function decorateAnchors() {
   const viewer = document.getElementById("viewer");
   for (const block of viewer.children) {
     if (!block.hasAttribute("data-source-line")) continue;
-    const add = el("button", { class: "line-add", type: "button", text: "+" });
-    add.setAttribute("aria-label", "Comment on this block");
-    add.addEventListener("click", () => openComposer(blockAnchor(block)));
-    block.prepend(add);
+    const addButton = getElement("button", {
+      class: "line-add",
+      type: "button",
+      text: "+",
+    });
+    addButton.setAttribute("aria-label", "Comment on this block");
+    addButton.addEventListener("click", () => openComposer(blockAnchor(block)));
+    block.prepend(addButton);
   }
 }
 
@@ -402,36 +436,44 @@ function hidePopover() {
   popover = null;
 }
 
-function showPopover(rect, anchor, sourceText) {
+function showPopover(rectangle, anchor, sourceText) {
   hidePopover();
-  popover = el("div", { class: "sel-popover" });
-  const btn = el("button", { type: "button", text: "Comment" });
-  btn.addEventListener("mousedown", (e) => {
-    e.preventDefault();
+  popover = getElement("div", { class: "sel-popover" });
+  const buttonElement = getElement("button", {
+    type: "button",
+    text: "Comment",
+  });
+  buttonElement.addEventListener("mousedown", (event) => {
+    event.preventDefault();
     hidePopover();
     openComposer({ ...anchor, sourceText: sourceText || anchor.sourceText });
   });
-  popover.append(btn);
-  popover.style.left = `${rect.left + rect.width / 2 + window.scrollX}px`;
-  popover.style.top = `${rect.top + window.scrollY - 8}px`;
+  popover.append(buttonElement);
+  popover.style.left = `${rectangle.left + rectangle.width / 2 + window.scrollX}px`;
+  popover.style.top = `${rectangle.top + window.scrollY - POPOVER_OFFSET_PX}px`;
   document.body.append(popover);
 }
 
 function wireSelection() {
   document.addEventListener("mouseup", () => {
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
       hidePopover();
       return;
     }
-    const range = sel.getRangeAt(0);
-    const text = sel.toString().trim();
-    const block = nearestAnchor(range.commonAncestorContainer);
-    if (!text || !block) {
+    const range = selection.getRangeAt(0);
+    const text = selection.toString().trim();
+    const startBlock = nearestAnchor(range.startContainer);
+    const endBlock = nearestAnchor(range.endContainer) || startBlock;
+    if (!text || !startBlock) {
       hidePopover();
       return;
     }
-    showPopover(range.getBoundingClientRect(), blockAnchor(block), text);
+    showPopover(
+      range.getBoundingClientRect(),
+      rangeAnchor(startBlock, endBlock),
+      text,
+    );
   });
   document.addEventListener("scroll", hidePopover, { passive: true });
 }
@@ -446,17 +488,21 @@ export function initComments(viewState) {
     ?.addEventListener("click", () => openOverallComposer());
   document
     .getElementById("submit-feedback")
-    ?.addEventListener("click", async (e) => {
-      const btn = e.currentTarget;
-      btn.disabled = true;
-      const ok = await submitFeedback(view, buildPayload, allAttachments());
-      if (ok) {
+    ?.addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      const succeeded = await submitFeedback(
+        view,
+        buildPayload,
+        allAttachments(),
+      );
+      if (succeeded) {
         const note = document.getElementById("submit-note");
         if (note) note.hidden = false;
         const overlay = document.getElementById("overlay");
         if (overlay) overlay.hidden = false;
       } else {
-        btn.disabled = false;
+        button.disabled = false;
       }
     });
   document.getElementById("overlay-confirm")?.addEventListener("click", () => {

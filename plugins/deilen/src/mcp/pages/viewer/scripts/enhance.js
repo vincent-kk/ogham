@@ -5,7 +5,7 @@
 function lazy(selector, chunk, run) {
   if (!document.querySelector(selector)) return;
   import(chunk)
-    .then((mod) => run(mod))
+    .then((module) => run(module))
     .catch(() => {
       /* offline / not built — source fallback already visible */
     });
@@ -14,16 +14,18 @@ function lazy(selector, chunk, run) {
 export function enhance(renderers) {
   const flags = renderers || {};
   if (flags.highlight !== false) {
-    lazy("#viewer pre code[data-lang]", "/assets/highlight.js", (m) =>
-      m.highlightAll?.(),
+    lazy("#viewer pre code[data-lang]", "/assets/highlight.js", (module) =>
+      module.highlightAll?.(),
     );
   }
   if (flags.mermaid !== false) {
-    lazy("#viewer .deilen-mermaid", "/assets/mermaid.js", (m) =>
-      m.renderAll?.(),
+    lazy("#viewer .deilen-mermaid", "/assets/mermaid.js", (module) =>
+      module.renderAll?.(),
     );
   }
   if (flags.math !== false) {
-    lazy("#viewer .deilen-math", "/assets/katex.js", (m) => m.typesetAll?.());
+    lazy("#viewer .deilen-math", "/assets/katex.js", (module) =>
+      module.typesetAll?.(),
+    );
   }
 }

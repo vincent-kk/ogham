@@ -3,12 +3,13 @@
 
 const state = window.__DEILEN_STATE__ || {};
 const config = state.config || {};
+const SAVED_CLOSE_HINT_MS = 250;
 
 function $(id) {
   return document.getElementById(id);
 }
 
-function num(id) {
+function readNumber(id) {
   return Number($(id).value);
 }
 
@@ -43,33 +44,33 @@ function collect() {
     theme:
       document.querySelector('input[name="theme"]:checked')?.value || "auto",
     auto_open: $("auto_open").checked,
-    collect_timeout_seconds: num("collect_timeout_seconds"),
-    session_ttl_hours: num("session_ttl_hours"),
-    idle_shutdown_minutes: num("idle_shutdown_minutes"),
-    preferred_port: num("preferred_port"),
-    content_width_px: num("content_width_px"),
+    collect_timeout_seconds: readNumber("collect_timeout_seconds"),
+    session_ttl_hours: readNumber("session_ttl_hours"),
+    idle_shutdown_minutes: readNumber("idle_shutdown_minutes"),
+    preferred_port: readNumber("preferred_port"),
+    content_width_px: readNumber("content_width_px"),
     font_family: $("font_family").value,
     renderers: {
       mermaid: $("renderer_mermaid").checked,
       highlight: $("renderer_highlight").checked,
       math: $("renderer_math").checked,
     },
-    max_image_mb: num("max_image_mb"),
-    max_payload_mb: num("max_payload_mb"),
-    max_viewer_mb: num("max_viewer_mb"),
+    max_image_mb: readNumber("max_image_mb"),
+    max_payload_mb: readNumber("max_payload_mb"),
+    max_viewer_mb: readNumber("max_viewer_mb"),
   };
 }
 
 async function save(close) {
   const status = $("status");
-  const saveBtn = $("save");
-  const closeBtn = $("save-close");
-  saveBtn.disabled = true;
-  closeBtn.disabled = true;
+  const saveButton = $("save");
+  const closeButton = $("save-close");
+  saveButton.disabled = true;
+  closeButton.disabled = true;
   status.className = "status";
   status.textContent = "Saving…";
   try {
-    const res = await fetch(
+    const response = await fetch(
       `/api/config?token=${encodeURIComponent(state.token || "")}`,
       {
         method: "POST",
@@ -77,8 +78,8 @@ async function save(close) {
         body: JSON.stringify(collect()),
       },
     );
-    const body = await res.json().catch(() => ({}));
-    if (res.ok) {
+    const responseBody = await response.json().catch(() => ({}));
+    if (response.ok) {
       status.className = "status ok";
       if (close) {
         status.textContent = "Saved — closing…";
@@ -87,20 +88,20 @@ async function save(close) {
         window.close();
         setTimeout(() => {
           status.textContent = "Saved. You can close this tab.";
-        }, 300);
+        }, SAVED_CLOSE_HINT_MS);
       } else {
         status.textContent = "Saved";
       }
     } else {
       status.className = "status err";
-      status.textContent = body.message || "Save failed";
+      status.textContent = responseBody.message || "Save failed";
     }
   } catch {
     status.className = "status err";
     status.textContent = "Network error";
   } finally {
-    saveBtn.disabled = false;
-    closeBtn.disabled = false;
+    saveButton.disabled = false;
+    closeButton.disabled = false;
   }
 }
 

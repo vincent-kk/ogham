@@ -1,6 +1,8 @@
 // Feedback network: debounced text-only auto-save (in_progress) and the final
 // multipart submission (complete) with image blobs.
 
+const AUTOSAVE_DEBOUNCE_MS = 500;
+
 let saveTimer = null;
 
 function feedbackUrl(state) {
@@ -18,19 +20,21 @@ export function scheduleAutoSave(state, buildPayload) {
       body: JSON.stringify(buildPayload("in_progress")),
       keepalive: true,
     }).catch(() => {});
-  }, 600);
+  }, AUTOSAVE_DEBOUNCE_MS);
 }
 
 export async function submitFeedback(state, buildPayload, attachments) {
   if (saveTimer) window.clearTimeout(saveTimer);
   const form = new FormData();
   form.append("payload", JSON.stringify(buildPayload("complete")));
-  for (const att of attachments) {
-    form.append(`img_${att.id}`, att.blob, att.name);
-  }
+  for (const attachment of attachments)
+    form.append(`img_${attachment.id}`, attachment.blob, attachment.name);
   try {
-    const res = await fetch(feedbackUrl(state), { method: "POST", body: form });
-    return res.ok;
+    const response = await fetch(feedbackUrl(state), {
+      method: "POST",
+      body: form,
+    });
+    return response.ok;
   } catch {
     return false;
   }

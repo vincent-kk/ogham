@@ -8,16 +8,16 @@ function nextId() {
   return `i${Date.now().toString(36)}${counter}`;
 }
 
-function extFor(mime) {
-  if (mime === "image/jpeg") return "jpg";
-  return (mime.split("/")[1] || "png").replace(/[^a-z0-9]/gi, "");
+function extensionForMime(mimeType) {
+  if (mimeType === "image/jpeg") return "jpg";
+  return (mimeType.split("/")[1] || "png").replace(/[^a-z0-9]/gi, "");
 }
 
 function toAttachment(blob, source) {
   return {
     id: nextId(),
     blob,
-    name: blob.name || `${source}-${nextId()}.${extFor(blob.type)}`,
+    name: blob.name || `${source}-${nextId()}.${extensionForMime(blob.type)}`,
     url: URL.createObjectURL(blob),
     source,
   };
