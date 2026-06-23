@@ -100,12 +100,17 @@ async function startHttpServer(): Promise<HttpServerInstance> {
 
   server = createServer(handler);
   const port = await new Promise<number>((resolve, reject) => {
-    server!.on("error", reject);
+    const onListenError = (err: Error): void => reject(err);
+    server!.once("error", onListenError);
     server!.listen(config.preferred_port, "127.0.0.1", () => {
+      server!.removeListener("error", onListenError);
       const addr = server!.address();
       if (addr && typeof addr === "object") resolve(addr.port);
       else reject(new Error("failed to read server address"));
     });
+  });
+  server.on("error", (err) => {
+    logger.error("http server error", { error: err.message });
   });
 
   touch();

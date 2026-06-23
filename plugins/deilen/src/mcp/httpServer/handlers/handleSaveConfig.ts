@@ -25,7 +25,11 @@ export async function handleSaveConfig(
     sendJson(res, 400, {
       ok: false,
       message: "Invalid config",
-      errors: parsed.error.issues.map((issue) => issue.message),
+      errors: parsed.error.issues.map((issue) =>
+        issue.path.length > 0
+          ? `${issue.path.join(".")}: ${issue.message}`
+          : issue.message,
+      ),
     });
     return;
   }

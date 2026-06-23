@@ -20,16 +20,7 @@
     "email": "lunox273@gmail.com"
   },
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
-    "dist",
     "bridge",
     "skills",
     ".claude-plugin",
@@ -38,7 +29,7 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
-    "build:plugin": "node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && node scripts/buildMcpServer.mjs",
+    "build:plugin": "yarn version:sync && node scripts/buildViewerHtml.mjs && node scripts/buildSettingsHtml.mjs && node scripts/buildRenderers.mjs && node scripts/buildMcpServer.mjs",
     "clean": "rm -rf bridge dist",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",

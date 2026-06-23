@@ -17,10 +17,6 @@ describe("renderMarkdown", () => {
     expect(html).toContain("const x = 1;");
   });
 
-  it("extracts the first H1 as title", () => {
-    expect(renderMarkdown("# Hello World\n\ntext").title).toBe("Hello World");
-  });
-
   it("marks mermaid fences for client rendering without producing svg", () => {
     const { html } = renderMarkdown("```mermaid\ngraph TD; A-->B;\n```");
     expect(html).toContain('class="deilen-mermaid"');
@@ -75,14 +71,9 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("<script>x");
   });
 
-  it("returns empty title when there is no H1", () => {
-    expect(renderMarkdown("## sub only").title).toBe("");
-  });
-
   it("handles empty input", () => {
-    const { html, lineCount, title } = renderMarkdown("");
+    const { html, lineCount } = renderMarkdown("");
     expect(html).toBe("");
     expect(lineCount).toBe(0);
-    expect(title).toBe("");
   });
 });

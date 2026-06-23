@@ -5,7 +5,7 @@ import {
   readViewerMarkdown,
 } from "../../../core/sessionStore/index.js";
 import { HEARTBEAT_INTERVAL_MS } from "../../../constants/defaults.js";
-import { renderMarkdown } from "../../../render/operations/renderMarkdown.js";
+import { renderMarkdown } from "../../../render/index.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { escapeJsonForHtml } from "../utils/escapeJsonForHtml.js";
 import { sendJson } from "../utils/sendJson.js";

@@ -94,7 +94,12 @@ async function save(close) {
       }
     } else {
       status.className = "status err";
-      status.textContent = responseBody.message || "Save failed";
+      const issues = Array.isArray(responseBody.errors)
+        ? responseBody.errors
+        : [];
+      status.textContent = issues.length
+        ? `Save failed — ${issues.join("; ")}`
+        : responseBody.message || "Save failed";
     }
   } catch {
     status.className = "status err";

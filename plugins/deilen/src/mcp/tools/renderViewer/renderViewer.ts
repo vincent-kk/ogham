@@ -1,6 +1,10 @@
 import { loadConfig } from "../../../core/configManager/index.js";
 import { getProjectHash } from "../../../core/projectHash/index.js";
-import { createSession } from "../../../core/sessionStore/index.js";
+import {
+  createSession,
+  pruneExpired,
+} from "../../../core/sessionStore/index.js";
+import { logger } from "../../../lib/logger.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { isoNow } from "../../../utils/isoNow.js";
 import { openBrowser } from "../../../utils/openBrowser.js";
@@ -31,6 +35,11 @@ export async function handleRenderViewer(
   input: RenderViewerInput,
 ): Promise<RenderViewerOutput> {
   const config = await loadConfig();
+  // Bound disk usage during a long-lived process: startup prune is only a
+  // backstop, so reclaim expired sessions on render too (best-effort).
+  void pruneExpired(config.session_ttl_hours).catch((err: unknown) =>
+    logger.warn("session prune failed", { error: (err as Error).message }),
+  );
   const { markdown, sourcePath } = await resolveMarkdown(
     input,
     config.max_viewer_mb,

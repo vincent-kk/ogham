@@ -4,7 +4,7 @@ import {
   getSession,
   readViewerMarkdown,
 } from "../../../core/sessionStore/index.js";
-import { renderMarkdown } from "../../../render/operations/renderMarkdown.js";
+import { renderMarkdown } from "../../../render/index.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 

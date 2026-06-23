@@ -62,7 +62,10 @@ function nearestAnchor(node) {
 
 function dispatchChange() {
   renderSidebar();
-  scheduleAutoSave(view, buildPayload);
+  // Don't fire doomed auto-saves at a closed/dead session; mirror the
+  // submit-button disable gate.
+  if (connectionState !== "ended" && connectionState !== "offline")
+    scheduleAutoSave(view, buildPayload);
 }
 
 function buildPayload(status) {
@@ -122,6 +125,7 @@ function openComposer(anchor, editing) {
         text: "x",
       });
       removeButton.addEventListener("click", () => {
+        URL.revokeObjectURL(attachment.url);
         attachments.splice(index, 1);
         renderThumbs();
       });
@@ -609,6 +613,8 @@ export function initComments(viewState) {
       );
       if (succeeded) {
         submitted = true;
+        for (const attachment of allAttachments())
+          URL.revokeObjectURL(attachment.url);
         const note = document.getElementById("submit-note");
         if (note) note.hidden = false;
         const overlay = document.getElementById("overlay");

@@ -45,6 +45,13 @@ function wireChrome() {
 
 function startHeartbeat() {
   const interval = state.heartbeat_interval_ms || DEFAULT_HEARTBEAT_MS;
+  let timer = null;
+  const stop = () => {
+    if (timer !== null) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+  };
   const ping = () => {
     fetch(
       `/api/ping?session=${encodeURIComponent(
@@ -56,11 +63,19 @@ function startHeartbeat() {
         keepalive: true,
       },
     )
-      .then((response) => setConnectionState(response.ok ? "alive" : "ended"))
-      .catch(() => setConnectionState("offline"));
+      .then((response) => {
+        setConnectionState(response.ok ? "alive" : "ended");
+        // Session closed or gone: stop pinging so a stale tab can't keep the
+        // singleton server alive past its idle window.
+        if (!response.ok) stop();
+      })
+      .catch(() => {
+        setConnectionState("offline");
+        stop();
+      });
   };
   ping();
-  window.setInterval(ping, interval);
+  timer = window.setInterval(ping, interval);
 }
 
 function init() {
