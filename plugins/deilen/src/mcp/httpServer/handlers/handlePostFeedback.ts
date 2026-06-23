@@ -98,6 +98,7 @@ export async function handlePostFeedback(
       // even if collect-side feedback cleanup runs immediately afterward.
       await closeSession(sessionId);
       deliverComplete(sessionId, stored);
+      ctx.release(sessionId);
     }
     sendJson(res, 200, { ok: true, status: payload.status });
   } finally {

@@ -57,6 +57,7 @@ export async function handleRenderViewer(
     createdAt: isoNow(),
     options: input.options,
   });
+  server.retain(sessionId);
   if (config.auto_open) openBrowser(url);
   return { session_id: sessionId, url, status: "serving" };
 }

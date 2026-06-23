@@ -10,5 +10,5 @@ export interface RouteContext {
   saveConfig: (config: Config) => Promise<void>;
   resolveAssetPath: (name: string) => string | null;
   touch: () => void;
-  closeServer: () => Promise<void>;
+  release: (sessionId: string) => void;
 }

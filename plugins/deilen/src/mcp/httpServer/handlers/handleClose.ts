@@ -27,5 +27,6 @@ export async function handleClose(
   }
   closeResolver(sessionId);
   await closeSession(sessionId);
+  ctx.release(sessionId);
   sendJson(res, 200, { ok: true, status: "closed" });
 }

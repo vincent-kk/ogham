@@ -27,7 +27,7 @@ export const ConfigSchema = z
     auto_open: z.boolean().default(true),
     collect_timeout_seconds: z.number().int().min(1).max(55).default(45),
     session_ttl_hours: z.number().int().min(1).max(720).default(72),
-    idle_shutdown_minutes: z.number().int().min(1).max(120).default(10),
+    idle_shutdown_minutes: z.number().int().min(1).max(120).default(1),
     preferred_port: PortSchema.default(0),
     content_width_px: z.number().int().min(480).max(1600).default(820),
     font_family: z

@@ -1,6 +1,6 @@
 ## Purpose
 
-`render_viewer`/`open_settings` 가 공유하는 단일 로컬 HTTP 서버(127.0.0.1). 세션 내내 살아있는 싱글톤으로, 뷰어 HTML·피드백 API·설정 UI 를 서빙하고, heartbeat + 폴백 idle 로 자동 종료해 누수를 차단한다.
+`render_viewer`/`open_settings` 가 공유하는 단일 로컬 HTTP 서버(127.0.0.1). 세션 내내 살아있는 싱글톤으로, 뷰어 HTML·피드백 API·설정 UI 를 서빙하고, serving 세션 refcount 가 0 이 되면(명시적 close) 즉시 회수, 그 외엔 heartbeat + idle 폴백으로 종료해 누수를 차단한다.
 
 ## Structure
 
@@ -17,7 +17,7 @@
 - 바인딩 `127.0.0.1` 전용, 포트 `config.preferred_port`(0=동적)
 - 세션 토큰 검증 — **`/assets` 는 면제**(비민감 공개 라이브러리)
 - POST 는 `application/json` 또는 `multipart/form-data` 만(CSRF)
-- 모든 요청·도구 활동이 `touch()` → idle 타이머 리셋; `idle_shutdown_minutes` 초과 시 `close()`
+- serving 세션 refcount(`retain`/`release`) 0 → grace 후 `close()`(즉시 회수); 그 외 모든 요청·도구 활동이 `touch()` → idle 폴백(`idle_shutdown_minutes`, 기본 1 분)
 - 뷰어 HTML 은 런타임 로드(`bridge/viewer.html`) — 번들 비대화 회피
 
 ## Boundaries

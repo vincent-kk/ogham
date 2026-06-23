@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG: Config = {
   auto_open: true,
   collect_timeout_seconds: 45,
   session_ttl_hours: 72,
-  idle_shutdown_minutes: 10,
+  idle_shutdown_minutes: 1,
   preferred_port: 0,
   content_width_px: 820,
   font_family: "",
@@ -23,6 +23,9 @@ export const MAX_COLLECT_WAIT_SECONDS = 55;
 
 /** Viewer heartbeat cadence (POST /api/ping). Server idle uses idle_shutdown_minutes. */
 export const HEARTBEAT_INTERVAL_MS = 30_000;
+
+/** Grace after the last serving session closes before reaping the shared server. */
+export const REAP_GRACE_MS = 3_000;
 
 /** Allowed inbound image mime types for feedback uploads. */
 export const ALLOWED_IMAGE_MIME = [
