@@ -4,7 +4,13 @@ import { MAX_COLLECT_WAIT_SECONDS } from "../../../constants/defaults.js";
 import { loadConfig } from "../../../core/configManager/index.js";
 import { readFeedback } from "../../../core/feedbackStore/index.js";
 import { getProjectHash } from "../../../core/projectHash/index.js";
-import { awaitFeedback, getSession } from "../../../core/sessionStore/index.js";
+import {
+  awaitFeedback,
+  getSession,
+  removeSession,
+} from "../../../core/sessionStore/index.js";
+import { logger } from "../../../lib/logger.js";
+import type { StoredFeedback } from "../../../types/feedback.js";
 import { ensureHttpServer } from "../../httpServer/index.js";
 import type { ToolExtra } from "../../shared/index.js";
 
@@ -48,9 +54,21 @@ export async function handleCollectFeedback(
     meta.status === "closed" ? 0 : wait,
     extra.signal,
   );
-  if (result.kind === "complete") {
-    return buildFeedbackContent(input.session_id, result.feedback);
-  }
+  // A delivered complete is returned as MCP content with its images inlined as
+  // base64, so the on-disk session is purged once content is built. Best-effort
+  // — the TTL prune backstops a failed purge.
+  const deliver = async (feedback: StoredFeedback): Promise<CallToolResult> => {
+    const content = await buildFeedbackContent(input.session_id, feedback);
+    await removeSession(input.session_id).catch((err: unknown) =>
+      logger.warn("session purge failed", {
+        session_id: input.session_id,
+        error: (err as Error).message,
+      }),
+    );
+    return content;
+  };
+
+  if (result.kind === "complete") return deliver(result.feedback);
   if (result.kind === "closing") {
     throw new Error("closed: server is shutting down");
   }
@@ -58,8 +76,7 @@ export async function handleCollectFeedback(
     // The in-memory buffer is gone (server restart or closeResolver), but a
     // complete submission is durable on disk — recover it instead of failing.
     const persisted = await readFeedback(input.session_id);
-    if (persisted?.status === "complete")
-      return buildFeedbackContent(input.session_id, persisted);
+    if (persisted?.status === "complete") return deliver(persisted);
     throw new Error(`closed: session ${input.session_id} is closed`);
   }
   const draft = await readFeedback(input.session_id);

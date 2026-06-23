@@ -6,6 +6,7 @@ export {
 export { getSession } from "./persistence/getSession.js";
 export { pruneExpired } from "./persistence/pruneExpired.js";
 export { readViewerMarkdown } from "./persistence/readViewerMarkdown.js";
+export { removeSession } from "./persistence/removeSession.js";
 export {
   awaitFeedback,
   closeResolver,

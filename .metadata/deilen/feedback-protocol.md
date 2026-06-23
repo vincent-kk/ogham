@@ -70,7 +70,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 
 ## 서버 파싱·영속화
 
-`handlePostFeedback` → `utils/parseMultipart.ts`(busboy 래퍼):
+`handlePostFeedback` → `utils/parseMultipart.ts`(자체 multipart 파서 — `parseMultipartBody` 가 버퍼를 파싱, 외부 의존성 없음):
 
 1. `payload` JSON 검증(Zod `FeedbackPayloadSchema`).
 2. 각 `img_*` part 를 mime 화이트리스트(`image/png|jpeg|gif|webp`) + 크기 상한(`config.max_image_mb`, 기본 10MB) 검사 후 `runtime/sessions/<sid>/images/<id>.<ext>` 저장.
@@ -85,6 +85,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 - complete 버퍼 선재 시 즉시 반환.
 - 아니면 resolver 등록 + `wait_seconds` 타이머(타임아웃 → `pending`).
 - 동일 세션에 다중 collect 동시성은 없음(display 는 직렬 호출). 방어적으로 마지막 resolver 만 유지.
+- complete 가 content 로 반환되면(이미지 base64 인라인 직후) 세션 디렉토리를 즉시 정리(`removeSession`). complete 제출 측은 `removeSession` 과의 디렉토리 경합을 피하려 깨우기 전에 `closeSession` 을 먼저 끝낸다. 미수거 세션은 TTL prune 이 백스톱.
 
 ## MCP 반환 매핑
 

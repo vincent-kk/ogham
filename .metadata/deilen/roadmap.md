@@ -23,7 +23,7 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 ## Phase 3 — 피드백 수집·수거
 
 - `pages/viewer/`(comments/images/submit) — 라인 코멘트 + 클립보드/파일 이미지.
-- `handlePostFeedback` + `parseMultipart`(busboy) + `feedbackStore`.
+- `handlePostFeedback` + `parseMultipart`(자체 파서) + `feedbackStore`.
 - `sessionStore` resolver + `collect_feedback`(long-poll) + MCP image 반환.
 - 테스트: multipart 파싱, 한도/mime, resolver 랑데부, pending 타임아웃.
 
@@ -44,5 +44,5 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 ## 잠정 확정 (아키텍처 반영 — 변경 시 재논의)
 
 - 하이라이터: **`highlight.js`** 잠정 채택(대안 `shiki` — 번들 크기·테마 품질 트레이드오프).
-- multipart 파서: **`busboy`** 잠정 채택(대안 경량 자작 — 로컬·자체 클라이언트라 포맷 통제 가능).
+- multipart 파서: **자체 경량 파서** 채택(로컬·자체 클라이언트라 포맷 통제 가능 — 외부 의존성 없이 번들 경량화).
 - 뷰어 자산 서빙: 로컬 chunk 확정(외부 CDN 미사용).

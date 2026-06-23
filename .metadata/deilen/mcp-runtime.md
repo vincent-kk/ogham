@@ -43,8 +43,8 @@ cennad/atlassian `webServer` 의 idle 패턴(`setTimeout` shutdown + `server.lis
 
 ## 4. 세션·이미지 자원
 
-- 세션 Map: `session_ttl_hours` TTL + **상한(LRU evict)** 으로 무한 증식 차단. `close_viewer`/idle/TTL 정리.
-- 이미지: busboy **스트리밍 → 디스크**(`runtime/sessions/<sid>/images/`). 메모리 전체 버퍼 상주 금지. 크기 초과 시 스트림 abort + 부분 파일 삭제.
+- 세션 Map: `session_ttl_hours` TTL + **상한(LRU evict)** 으로 무한 증식 차단. `close_viewer`/idle/TTL 정리; `complete` 수거 시 `removeSession` 즉시 정리.
+- 이미지: 요청 본문을 `max_payload` 한도로 버퍼링 후 파싱 → 디스크 기록(`runtime/sessions/<sid>/images/`). 검증 통과분만 기록(부분 파일 미생성); mime/크기 위반 시 거부.
 - 자산 서빙: 소형 `readFile`, 대형 chunk `createReadStream` + `error`/`close` 정리.
 - `collect_feedback` 반환 이미지 base64 는 **그때 디스크에서 읽어** 직렬화(상주 캐시 없음).
 

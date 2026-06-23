@@ -1,9 +1,6 @@
-import busboy from "busboy";
-import { createWriteStream } from "node:fs";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
-import { pipeline } from "node:stream/promises";
 
 import {
   ALLOWED_IMAGE_MIME,
@@ -12,6 +9,10 @@ import {
 import { sessionImagesDir } from "../../../constants/paths.js";
 import type { ImageRef } from "../../../types/feedback.js";
 import { randomId } from "../../../utils/randomId.js";
+
+import { parseMultipartBody } from "./parseMultipartBody.js";
+
+const ALLOWED_MIME: readonly string[] = ALLOWED_IMAGE_MIME;
 
 export interface ParseMultipartOptions {
   sessionId: string;
@@ -24,118 +25,123 @@ export interface ParsedMultipart {
   images: ImageRef[];
 }
 
+interface AcceptedImage {
+  id: string;
+  mimeType: string;
+  filename?: string;
+  data: Buffer;
+}
+
+function extractBoundary(contentType: string | undefined): string {
+  const match = /;\s*boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType ?? "");
+  const boundary = (match?.[1] ?? match?.[2])?.trim();
+  if (!boundary) throw new Error("missing multipart boundary");
+  return boundary;
+}
+
+/**
+ * Buffer the request body under the max-payload cap. Over-limit bodies keep
+ * draining (bytes dropped) so the response can be sent and the keep-alive
+ * connection stays usable, then reject at end.
+ */
+function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let size = 0;
+    let over = false;
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (over) return;
+      if (size > maxBytes) {
+        over = true;
+        chunks.length = 0;
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      if (over) reject(new Error("payload exceeds max_payload_mb"));
+      else resolve(Buffer.concat(chunks));
+    });
+    req.on("error", reject);
+  });
+}
+
 function inferSource(filename: string | undefined): ImageRef["source"] {
   return filename?.startsWith("clipboard") ? "clipboard" : "file";
 }
 
 /**
  * Parse a multipart feedback submission: a JSON "payload" field plus `img_<id>`
- * image parts streamed to disk under the session's images dir. Enforces the mime
- * allowlist, per-image and total-payload size caps, and deletes partial files on
- * any failure.
+ * image parts. The body is buffered under the max-payload cap and parsed in
+ * memory; only after every part clears the mime allowlist and per-image size cap
+ * are images written to the session's images dir — so a rejected submission
+ * never leaves partial files behind. Reading the request to end means no
+ * mid-stream unpipe, so keep-alive needs no manual drain.
  */
-export function parseMultipart(
+export async function parseMultipart(
   req: IncomingMessage,
   options: ParseMultipartOptions,
 ): Promise<ParsedMultipart> {
-  return new Promise((resolve, reject) => {
-    const bb = busboy({
-      headers: req.headers,
-      limits: {
-        fileSize: options.maxImageBytes,
-        files: 32,
-        fields: 4,
-        fieldSize: options.maxPayloadBytes,
-      },
-    });
+  const boundary = extractBoundary(req.headers["content-type"]);
+  const body = await readBody(req, options.maxPayloadBytes);
+  const parts = parseMultipartBody(body, boundary);
 
-    const dir = sessionImagesDir(options.sessionId);
-    const images: ImageRef[] = [];
-    const writes: Promise<void>[] = [];
-    const cleanup: string[] = [];
-    let payloadRaw = "";
-    let totalBytes = 0;
-    let failure: Error | null = null;
-
-    const fail = (err: Error): void => {
-      if (!failure) {
-        failure = err;
-        req.unpipe(bb);
-        bb.destroy();
-        // busboy's unpipe leaves the request paused mid-stream; Node's
-        // end-of-response auto-dump does NOT drain that, so the unread upload
-        // bytes stall the next keep-alive request. Verified load-bearing:
-        // removing this re-hangs the following request with ECONNRESET.
-        req.resume();
-      }
+  let payloadRaw: string | undefined;
+  const accepted: AcceptedImage[] = [];
+  for (const part of parts) {
+    if (part.name === "payload") {
+      payloadRaw = part.data.toString("utf8");
+      continue;
+    }
+    if (!part.name.startsWith("img_")) continue;
+    const mimeType = part.mimeType ?? "";
+    if (!ALLOWED_MIME.includes(mimeType)) {
+      throw new Error(`unsupported image type: ${mimeType}`);
+    }
+    if (part.data.length > options.maxImageBytes) {
+      throw new Error("image exceeds max_image_mb");
+    }
+    const image: AcceptedImage = {
+      id: part.name.slice(4),
+      mimeType,
+      data: part.data,
     };
+    if (part.filename !== undefined) image.filename = part.filename;
+    accepted.push(image);
+  }
 
-    bb.on("field", (name, value) => {
-      if (name === "payload") payloadRaw = value;
-    });
+  if (payloadRaw === undefined) throw new Error("missing payload field");
+  let payload: unknown;
+  try {
+    payload = JSON.parse(payloadRaw);
+  } catch {
+    throw new Error("invalid payload json");
+  }
 
-    bb.on("file", (name, stream, info) => {
-      if (!name.startsWith("img_")) {
-        stream.resume();
-        return;
-      }
-      if (!ALLOWED_IMAGE_MIME.includes(info.mimeType as never)) {
-        stream.resume();
-        fail(new Error(`unsupported image type: ${info.mimeType}`));
-        return;
-      }
-      const storageName = `${randomId()}.${IMAGE_EXT_BY_MIME[info.mimeType]}`;
+  const dir = sessionImagesDir(options.sessionId);
+  const written: string[] = [];
+  const images: ImageRef[] = [];
+  try {
+    if (accepted.length) await mkdir(dir, { recursive: true });
+    for (const image of accepted) {
+      const storageName = `${randomId()}.${IMAGE_EXT_BY_MIME[image.mimeType]}`;
       const fullPath = join(dir, storageName);
-      cleanup.push(fullPath);
-      let bytes = 0;
-      writes.push(
-        (async () => {
-          await mkdir(dir, { recursive: true });
-          const ws = createWriteStream(fullPath);
-          stream.on("data", (chunk: Buffer) => {
-            bytes += chunk.length;
-            totalBytes += chunk.length;
-            if (totalBytes > options.maxPayloadBytes) {
-              stream.destroy(new Error("payload exceeds max_payload_mb"));
-            }
-          });
-          stream.on("limit", () => {
-            stream.destroy(new Error("image exceeds max_image_mb"));
-          });
-          await pipeline(stream, ws);
-          images.push({
-            id: name.slice(4),
-            mimeType: info.mimeType,
-            filename: info.filename,
-            source: inferSource(info.filename),
-            bytes,
-            path: storageName,
-          });
-        })().catch((err: unknown) => fail(err as Error)),
-      );
-    });
+      await writeFile(fullPath, image.data);
+      written.push(fullPath);
+      images.push({
+        id: image.id,
+        mimeType: image.mimeType,
+        filename: image.filename,
+        source: inferSource(image.filename),
+        bytes: image.data.length,
+        path: storageName,
+      });
+    }
+  } catch (err) {
+    await Promise.all(written.map((p) => rm(p, { force: true })));
+    throw err;
+  }
 
-    bb.on("error", (err) => fail(err as Error));
-
-    bb.on("close", () => {
-      Promise.all(writes)
-        .then(async () => {
-          if (failure) {
-            await Promise.all(cleanup.map((p) => rm(p, { force: true })));
-            reject(failure);
-            return;
-          }
-          try {
-            resolve({ payload: JSON.parse(payloadRaw), images });
-          } catch {
-            reject(new Error("invalid payload json"));
-          }
-        })
-        .catch((err: unknown) =>
-          reject(err instanceof Error ? err : new Error(String(err))),
-        );
-    });
-
-    req.pipe(bb);
-  });
+  return { payload, images };
 }

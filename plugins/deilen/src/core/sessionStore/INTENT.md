@@ -11,6 +11,7 @@
 | `persistence/readViewerMarkdown.ts` | viewer.md 원본 읽기, 부재 시 `null`                          |
 | `persistence/pruneExpired.ts`       | `ttlHours` 초과 세션 디렉토리 제거, 제거 수 반환             |
 | `persistence/closeSession.ts`       | meta.json status 를 `closed` 로 갱신                         |
+| `persistence/removeSession.ts`      | 세션 디렉토리 전체 삭제 (수거 후 즉시 정리)                  |
 | `resolver/feedbackResolver.ts`      | process-global long-poll 레지스트리 (멱등 `settle`)          |
 | `index.ts`                          | barrel                                                       |
 

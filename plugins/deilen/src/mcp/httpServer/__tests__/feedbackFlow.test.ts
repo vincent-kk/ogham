@@ -1,6 +1,8 @@
+import { stat } from "node:fs/promises";
+
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { CONFIG_PATH } from "../../../constants/paths.js";
+import { CONFIG_PATH, sessionDir } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
 import type { ToolExtra } from "../../shared/index.js";
 import { handleCollectFeedback } from "../../tools/collectFeedback/collectFeedback.js";
@@ -148,8 +150,8 @@ describe("feedback flow", () => {
       CONFIG_PATH,
       JSON.stringify({ auto_open: false, max_image_mb: 1, max_payload_mb: 1 }),
     );
-    // Each image is under max_image_mb (1 MB) but together they exceed the
-    // aggregate max_payload_mb (1 MB) cap, exercising the totalBytes guard.
+    // Each image is under max_image_mb (1 MB), but together they push the raw
+    // request body over the max_payload_mb (1 MB) cap, so readBody rejects.
     const half = Buffer.alloc(700 * 1024, 1);
     const form = new FormData();
     form.append(
@@ -246,5 +248,36 @@ describe("feedback flow", () => {
       });
     const [a, b] = await Promise.all([submit(), submit()]);
     expect([a.status, b.status].sort()).toEqual([200, 409]);
+  });
+
+  it("purges the session directory once a complete is collected", async () => {
+    const sid = await render("# Purge\n\nbody");
+    const collecting = handleCollectFeedback(
+      { session_id: sid, wait_seconds: 5 },
+      extra,
+    );
+    const form = new FormData();
+    form.append(
+      "payload",
+      JSON.stringify({ session_id: sid, status: "complete", comments: [] }),
+    );
+    form.append(
+      "img_x1",
+      new Blob([PNG], { type: "image/png" }),
+      "clipboard-1.png",
+    );
+    const post = await fetch(
+      `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
+      { method: "POST", body: form },
+    );
+    expect(post.status).toBe(200);
+
+    const result = await collecting;
+    // the image is inlined as base64 before the purge runs
+    expect(
+      "content" in result && result.content.some((c) => c.type === "image"),
+    ).toBe(true);
+    // the on-disk session is gone once the feedback has been delivered
+    await expect(stat(sessionDir(sid))).rejects.toThrow();
   });
 });

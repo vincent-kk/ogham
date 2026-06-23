@@ -53,12 +53,10 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "~1.22.0",
-    "busboy": "^1.6.0",
     "markdown-it": "^14.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/busboy": "^1.5.4",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^3.2.4",

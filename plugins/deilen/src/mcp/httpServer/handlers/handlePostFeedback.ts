@@ -94,8 +94,10 @@ export async function handlePostFeedback(
       payload.status === "complete" ? images : [],
     );
     if (payload.status === "complete") {
-      deliverComplete(sessionId, stored);
+      // Close before waking the waiter: this closeSession meta write must not
+      // race the collect-side session purge (removeSession) on the same dir.
       await closeSession(sessionId);
+      deliverComplete(sessionId, stored);
     }
     sendJson(res, 200, { ok: true, status: payload.status });
   } finally {
