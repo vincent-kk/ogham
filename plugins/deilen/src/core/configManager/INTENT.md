@@ -4,11 +4,11 @@
 
 ## Structure
 
-| File            | Role                                                          |
-| --------------- | ------------------------------------------------------------- |
-| `loadConfig.ts` | `config.json` 읽기 + `ConfigSchema` 검증, 부재·손상 시 기본값 |
-| `saveConfig.ts` | `ConfigSchema.parse` 후 `atomicWrite` 로 영속                 |
-| `index.ts`      | barrel — `loadConfig`, `saveConfig` re-export                 |
+| File                       | Role                                                          |
+| -------------------------- | ------------------------------------------------------------- |
+| `operations/loadConfig.ts` | `config.json` 읽기 + `ConfigSchema` 검증, 부재·손상 시 기본값 |
+| `operations/saveConfig.ts` | `ConfigSchema.parse` 후 `atomicWrite` 로 영속                 |
+| `index.ts`                 | barrel — `loadConfig`, `saveConfig` re-export                 |
 
 ## Conventions
 

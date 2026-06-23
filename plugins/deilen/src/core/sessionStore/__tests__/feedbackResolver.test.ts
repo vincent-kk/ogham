@@ -5,7 +5,7 @@ import {
   awaitFeedback,
   deliverComplete,
   settleAllResolvers,
-} from "../feedbackResolver.js";
+} from "../resolver/feedbackResolver.js";
 
 function fb(sessionId: string): StoredFeedback {
   return {

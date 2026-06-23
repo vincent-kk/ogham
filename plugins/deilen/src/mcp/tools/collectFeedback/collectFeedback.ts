@@ -1,15 +1,14 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { MAX_COLLECT_WAIT_SECONDS } from "../../../constants/defaults.js";
-import { loadConfig } from "../../../core/configManager/loadConfig.js";
-import { readFeedback } from "../../../core/feedbackStore/readFeedback.js";
-import { getProjectHash } from "../../../core/projectHash/getProjectHash.js";
-import { awaitFeedback } from "../../../core/sessionStore/feedbackResolver.js";
-import { getSession } from "../../../core/sessionStore/getSession.js";
+import { loadConfig } from "../../../core/configManager/index.js";
+import { readFeedback } from "../../../core/feedbackStore/index.js";
+import { getProjectHash } from "../../../core/projectHash/index.js";
+import { awaitFeedback, getSession } from "../../../core/sessionStore/index.js";
 import { ensureHttpServer } from "../../httpServer/index.js";
-import type { ToolExtra } from "../../shared/wrapHandler.js";
+import type { ToolExtra } from "../../shared/index.js";
 
-import { buildFeedbackContent } from "./buildFeedbackContent.js";
+import { buildFeedbackContent } from "./operations/buildFeedbackContent.js";
 
 export interface CollectFeedbackInput {
   session_id: string;

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import { sessionViewerPath } from "../../constants/paths.js";
-import { isFileNotFound } from "../../utils/isFileNotFound.js";
+import { sessionViewerPath } from "../../../constants/paths.js";
+import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
 /** Read the raw viewer.md for a session, or null when it is missing. */
 export async function readViewerMarkdown(

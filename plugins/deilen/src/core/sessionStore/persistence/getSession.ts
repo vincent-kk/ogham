@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 
-import { sessionMetaPath } from "../../constants/paths.js";
-import { logger } from "../../lib/logger.js";
-import { type SessionMeta, SessionMetaSchema } from "../../types/session.js";
-import { isFileNotFound } from "../../utils/isFileNotFound.js";
+import { sessionMetaPath } from "../../../constants/paths.js";
+import { logger } from "../../../lib/logger.js";
+import { type SessionMeta, SessionMetaSchema } from "../../../types/session.js";
+import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
 /**
  * Load a session's meta.json, enforcing the project_hash scope. Returns null for

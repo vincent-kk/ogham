@@ -1,10 +1,10 @@
 import { readFile } from "node:fs/promises";
 
-import { DEFAULT_CONFIG } from "../../constants/defaults.js";
-import { CONFIG_PATH } from "../../constants/paths.js";
-import { logger } from "../../lib/logger.js";
-import { type Config, ConfigSchema } from "../../types/config.js";
-import { isFileNotFound } from "../../utils/isFileNotFound.js";
+import { DEFAULT_CONFIG } from "../../../constants/defaults.js";
+import { CONFIG_PATH } from "../../../constants/paths.js";
+import { logger } from "../../../lib/logger.js";
+import { type Config, ConfigSchema } from "../../../types/config.js";
+import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
 /** Read + validate config.json, filling Zod defaults; fall back to defaults. */
 export async function loadConfig(): Promise<Config> {

@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File                | Role                                                    |
-| ------------------- | ------------------------------------------------------- |
-| `getProjectHash.ts` | `sha256(cwd)` digest 의 앞 12 hex 문자 스코프 해시 반환 |
-| `index.ts`          | barrel — `getProjectHash` re-export                     |
+| File                           | Role                                                    |
+| ------------------------------ | ------------------------------------------------------- |
+| `operations/getProjectHash.ts` | `sha256(cwd)` digest 의 앞 12 hex 문자 스코프 해시 반환 |
+| `index.ts`                     | barrel — `getProjectHash` re-export                     |
 
 ## Conventions
 

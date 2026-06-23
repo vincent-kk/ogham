@@ -4,12 +4,12 @@
 
 ## Structure
 
-| File                 | Role                                                        |
-| -------------------- | ----------------------------------------------------------- |
-| `renderViewer.ts`    | 핸들러 — markdown 해석 → 세션 생성 → 서버 기동 → URL 반환   |
-| `resolveMarkdown.ts` | `content`/`path` 정확히 하나(XOR) + `max_viewer_mb` 캡 적용 |
-| `deriveTitle.ts`     | 명시 title > 첫 ATX H1 > 파일 base name > `"Document"`        |
-| `index.ts`           | barrel — `handleRenderViewer`, 입출력 타입                  |
+| File                            | Role                                                        |
+| ------------------------------- | ----------------------------------------------------------- |
+| `renderViewer.ts`               | 핸들러 — markdown 해석 → 세션 생성 → 서버 기동 → URL 반환   |
+| `operations/resolveMarkdown.ts` | `content`/`path` 정확히 하나(XOR) + `max_viewer_mb` 캡 적용 |
+| `operations/deriveTitle.ts`     | 명시 title > 첫 ATX H1 > 파일 base name > `"Document"`      |
+| `index.ts`                      | barrel — `handleRenderViewer`, 입출력 타입                  |
 
 ## Conventions
 

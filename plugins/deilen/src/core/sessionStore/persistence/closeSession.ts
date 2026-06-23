@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 
-import { sessionMetaPath } from "../../constants/paths.js";
-import { atomicWrite } from "../../lib/atomicWrite.js";
-import { SessionMetaSchema } from "../../types/session.js";
-import { isFileNotFound } from "../../utils/isFileNotFound.js";
+import { sessionMetaPath } from "../../../constants/paths.js";
+import { atomicWrite } from "../../../lib/atomicWrite.js";
+import { SessionMetaSchema } from "../../../types/session.js";
+import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
 /** Mark a session closed in meta.json. Returns false when it does not exist. */
 export async function closeSession(sessionId: string): Promise<boolean> {

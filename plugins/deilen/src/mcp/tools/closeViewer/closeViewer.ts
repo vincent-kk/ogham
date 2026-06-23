@@ -1,7 +1,9 @@
-import { getProjectHash } from "../../../core/projectHash/getProjectHash.js";
-import { closeSession } from "../../../core/sessionStore/closeSession.js";
-import { closeResolver } from "../../../core/sessionStore/feedbackResolver.js";
-import { getSession } from "../../../core/sessionStore/getSession.js";
+import { getProjectHash } from "../../../core/projectHash/index.js";
+import {
+  closeResolver,
+  closeSession,
+  getSession,
+} from "../../../core/sessionStore/index.js";
 
 export interface CloseViewerInput {
   session_id: string;

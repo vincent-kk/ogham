@@ -4,11 +4,11 @@
 
 ## Structure
 
-| File               | Role                                                          |
-| ------------------ | ------------------------------------------------------------- |
-| `generateToken.ts` | `randomBytes(16).toString('hex')` — 32자 hex 토큰 반환        |
-| `verifyToken.ts`   | `timingSafeEqual` 로 `expected` vs `provided` UTF-8 버퍼 비교 |
-| `index.ts`         | barrel — `generateToken`, `verifyToken` re-export             |
+| File                          | Role                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| `operations/generateToken.ts` | `randomBytes(16).toString('hex')` — 32자 hex 토큰 반환        |
+| `operations/verifyToken.ts`   | `timingSafeEqual` 로 `expected` vs `provided` UTF-8 버퍼 비교 |
+| `index.ts`                    | barrel — `generateToken`, `verifyToken` re-export             |
 
 ## Conventions
 

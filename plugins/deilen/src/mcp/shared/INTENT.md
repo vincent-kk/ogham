@@ -4,12 +4,12 @@
 
 ## Structure
 
-| File             | Role                                                           |
-| ---------------- | -------------------------------------------------------------- |
-| `toolResult.ts`  | 평문 데이터를 단일 JSON text content 블록으로 직렬화           |
-| `toolError.ts`   | thrown 값 → `isError: true` 에러 봉투 (`Error: <message>`)     |
-| `wrapHandler.ts` | throw 흡수 + `extra`/`signal` 전달; content 결과는 passthrough |
-| `index.ts`       | barrel — `toolResult`, `toolError`, `wrapHandler`, `ToolExtra` |
+| File                     | Role                                                           |
+| ------------------------ | -------------------------------------------------------------- |
+| `helpers/toolResult.ts`  | 평문 데이터를 단일 JSON text content 블록으로 직렬화           |
+| `helpers/toolError.ts`   | thrown 값 → `isError: true` 에러 봉투 (`Error: <message>`)     |
+| `helpers/wrapHandler.ts` | throw 흡수 + `extra`/`signal` 전달; content 결과는 passthrough |
+| `index.ts`               | barrel — `toolResult`, `toolError`, `wrapHandler`, `ToolExtra` |
 
 ## Conventions
 

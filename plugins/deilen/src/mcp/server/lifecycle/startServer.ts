@@ -1,8 +1,8 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import { loadConfig } from "../../core/configManager/loadConfig.js";
-import { pruneExpired } from "../../core/sessionStore/pruneExpired.js";
-import { logger } from "../../lib/logger.js";
+import { loadConfig } from "../../../core/configManager/index.js";
+import { pruneExpired } from "../../../core/sessionStore/index.js";
+import { logger } from "../../../lib/logger.js";
 
 import { createServer } from "./createServer.js";
 import { registerShutdown } from "./registerShutdown.js";

@@ -1,14 +1,14 @@
-import { loadConfig } from "../../../core/configManager/loadConfig.js";
-import { getProjectHash } from "../../../core/projectHash/getProjectHash.js";
-import { createSession } from "../../../core/sessionStore/createSession.js";
+import { loadConfig } from "../../../core/configManager/index.js";
+import { getProjectHash } from "../../../core/projectHash/index.js";
+import { createSession } from "../../../core/sessionStore/index.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { isoNow } from "../../../utils/isoNow.js";
 import { openBrowser } from "../../../utils/openBrowser.js";
 import { randomId } from "../../../utils/randomId.js";
 import { ensureHttpServer } from "../../httpServer/index.js";
 
-import { deriveTitle } from "./deriveTitle.js";
-import { resolveMarkdown } from "./resolveMarkdown.js";
+import { deriveTitle } from "./operations/deriveTitle.js";
+import { resolveMarkdown } from "./operations/resolveMarkdown.js";
 
 export interface RenderViewerInput {
   content?: string;

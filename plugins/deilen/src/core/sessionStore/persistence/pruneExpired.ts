@@ -1,8 +1,8 @@
 import { readdir, rm, stat } from "node:fs/promises";
 
-import { SESSIONS_DIR, sessionDir } from "../../constants/paths.js";
-import { logger } from "../../lib/logger.js";
-import { isFileNotFound } from "../../utils/isFileNotFound.js";
+import { SESSIONS_DIR, sessionDir } from "../../../constants/paths.js";
+import { logger } from "../../../lib/logger.js";
+import { isFileNotFound } from "../../../utils/isFileNotFound.js";
 
 const HOUR_MS = 60 * 60 * 1000;
 

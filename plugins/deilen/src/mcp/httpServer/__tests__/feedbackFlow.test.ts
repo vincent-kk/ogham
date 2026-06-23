@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { CONFIG_PATH } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
-import type { ToolExtra } from "../../shared/wrapHandler.js";
+import type { ToolExtra } from "../../shared/index.js";
 import { handleCollectFeedback } from "../../tools/collectFeedback/collectFeedback.js";
 import { handleCloseViewer } from "../../tools/closeViewer/closeViewer.js";
 import { handleRenderViewer } from "../../tools/renderViewer/renderViewer.js";

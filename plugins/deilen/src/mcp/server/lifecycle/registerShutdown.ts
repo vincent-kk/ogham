@@ -1,5 +1,5 @@
-import { settleAllResolvers } from "../../core/sessionStore/feedbackResolver.js";
-import { getHttpServer } from "../httpServer/index.js";
+import { settleAllResolvers } from "../../../core/sessionStore/index.js";
+import { getHttpServer } from "../../httpServer/index.js";
 
 let registered = false;
 

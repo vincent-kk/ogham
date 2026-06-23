@@ -1,13 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
-import { RenderOptionsSchema } from "../../types/renderOptions.js";
-import { VERSION } from "../../version.js";
-import { wrapHandler } from "../shared/index.js";
-import { handleCollectFeedback } from "../tools/collectFeedback/index.js";
-import { handleCloseViewer } from "../tools/closeViewer/index.js";
-import { handleOpenSettings } from "../tools/openSettings/index.js";
-import { handleRenderViewer } from "../tools/renderViewer/index.js";
+import { RenderOptionsSchema } from "../../../types/renderOptions.js";
+import { VERSION } from "../../../version.js";
+import { wrapHandler } from "../../shared/index.js";
+import { handleCollectFeedback } from "../../tools/collectFeedback/index.js";
+import { handleCloseViewer } from "../../tools/closeViewer/index.js";
+import { handleOpenSettings } from "../../tools/openSettings/index.js";
+import { handleRenderViewer } from "../../tools/renderViewer/index.js";
 
 /** Create the MCP "tools" server and register deilen's tools. */
 export function createServer(): McpServer {

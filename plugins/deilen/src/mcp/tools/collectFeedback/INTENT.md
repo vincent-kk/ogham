@@ -4,11 +4,11 @@
 
 ## Structure
 
-| File                      | Role                                                         |
-| ------------------------- | ------------------------------------------------------------ |
-| `collectFeedback.ts`      | 핸들러 — 세션 검증 → `awaitFeedback` → complete/pending 분기 |
-| `buildFeedbackContent.ts` | 코멘트 요약 text 블록 + 첨부 이미지 base64 image 블록        |
-| `index.ts`                | barrel — `handleCollectFeedback`, 입력·pending 타입          |
+| File                                 | Role                                                         |
+| ------------------------------------ | ------------------------------------------------------------ |
+| `collectFeedback.ts`                 | 핸들러 — 세션 검증 → `awaitFeedback` → complete/pending 분기 |
+| `operations/buildFeedbackContent.ts` | 코멘트 요약 text 블록 + 첨부 이미지 base64 image 블록        |
+| `index.ts`                           | barrel — `handleCollectFeedback`, 입력·pending 타입          |
 
 ## Conventions
 

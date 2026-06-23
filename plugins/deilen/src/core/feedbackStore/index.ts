@@ -1,2 +1,2 @@
-export { readFeedback } from "./readFeedback.js";
-export { saveFeedback } from "./saveFeedback.js";
+export { readFeedback } from "./operations/readFeedback.js";
+export { saveFeedback } from "./operations/saveFeedback.js";

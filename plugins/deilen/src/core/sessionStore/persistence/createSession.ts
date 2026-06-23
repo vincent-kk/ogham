@@ -1,7 +1,10 @@
-import { sessionMetaPath, sessionViewerPath } from "../../constants/paths.js";
-import { atomicWrite } from "../../lib/atomicWrite.js";
-import type { RenderOptions } from "../../types/renderOptions.js";
-import { type SessionMeta, SessionMetaSchema } from "../../types/session.js";
+import {
+  sessionMetaPath,
+  sessionViewerPath,
+} from "../../../constants/paths.js";
+import { atomicWrite } from "../../../lib/atomicWrite.js";
+import type { RenderOptions } from "../../../types/renderOptions.js";
+import { type SessionMeta, SessionMetaSchema } from "../../../types/session.js";
 
 export interface CreateSessionInput {
   sessionId: string;

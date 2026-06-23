@@ -1,4 +1,4 @@
-import type { StoredFeedback } from "../../types/feedback.js";
+import type { StoredFeedback } from "../../../types/feedback.js";
 
 export type SettleValue =
   | { kind: "complete"; feedback: StoredFeedback }

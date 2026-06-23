@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
-import { sessionImagePath } from "../../../constants/paths.js";
-import type { StoredFeedback } from "../../../types/feedback.js";
+import { sessionImagePath } from "../../../../constants/paths.js";
+import type { StoredFeedback } from "../../../../types/feedback.js";
 
 function truncate(text: string, max = 80): string {
   const line = text.replace(/\s+/g, " ").trim();

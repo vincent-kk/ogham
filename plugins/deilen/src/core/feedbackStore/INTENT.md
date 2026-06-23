@@ -4,11 +4,11 @@
 
 ## Structure
 
-| File              | Role                                                          |
-| ----------------- | ------------------------------------------------------------- |
-| `saveFeedback.ts` | payload + `ImageRef[]` 를 `StoredFeedbackSchema` 검증 후 영속 |
-| `readFeedback.ts` | `feedback.json` 읽기 + 검증, 부재·손상 시 `null`              |
-| `index.ts`        | barrel — `saveFeedback`, `readFeedback` re-export             |
+| File                         | Role                                                          |
+| ---------------------------- | ------------------------------------------------------------- |
+| `operations/saveFeedback.ts` | payload + `ImageRef[]` 를 `StoredFeedbackSchema` 검증 후 영속 |
+| `operations/readFeedback.ts` | `feedback.json` 읽기 + 검증, 부재·손상 시 `null`              |
+| `index.ts`                   | barrel — `saveFeedback`, `readFeedback` re-export             |
 
 ## Conventions
 

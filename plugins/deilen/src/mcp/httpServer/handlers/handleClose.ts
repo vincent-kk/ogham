@@ -1,8 +1,10 @@
 import type { ServerResponse } from "node:http";
 
-import { closeSession } from "../../../core/sessionStore/closeSession.js";
-import { closeResolver } from "../../../core/sessionStore/feedbackResolver.js";
-import { getSession } from "../../../core/sessionStore/getSession.js";
+import {
+  closeResolver,
+  closeSession,
+  getSession,
+} from "../../../core/sessionStore/index.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 

@@ -1,9 +1,8 @@
 import { type Server, createServer } from "node:http";
 
-import { generateToken } from "../../core/authToken/generateToken.js";
-import { loadConfig } from "../../core/configManager/loadConfig.js";
-import { saveConfig } from "../../core/configManager/saveConfig.js";
-import { getProjectHash } from "../../core/projectHash/getProjectHash.js";
+import { generateToken } from "../../core/authToken/index.js";
+import { loadConfig, saveConfig } from "../../core/configManager/index.js";
+import { getProjectHash } from "../../core/projectHash/index.js";
 import { logger } from "../../lib/logger.js";
 
 import { createRouteHandler } from "./routing/routes.js";
