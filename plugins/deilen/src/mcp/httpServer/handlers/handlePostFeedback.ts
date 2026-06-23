@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { saveFeedback } from "../../../core/feedbackStore/index.js";
 import {
+  closeSession,
   deliverComplete,
   getSession,
 } from "../../../core/sessionStore/index.js";
@@ -16,6 +17,10 @@ import { sendJson } from "../utils/sendJson.js";
 
 const SESSION_ID = /^[A-Za-z0-9_-]+$/;
 const MB = 1024 * 1024;
+
+// Sessions whose complete submit is mid-close. Added synchronously before any
+// await so two concurrent complete POSTs can't both pass the closed-check.
+const closingSessions = new Set<string>();
 
 /**
  * POST /api/feedback — persist a submission. JSON bodies are text-only
@@ -75,12 +80,25 @@ export async function handlePostFeedback(
     return;
   }
 
-  const stored = await saveFeedback(
-    sessionId,
-    payload,
-    payload.status === "complete" ? images : [],
-  );
-  if (payload.status === "complete") deliverComplete(sessionId, stored);
-
-  sendJson(res, 200, { ok: true, status: payload.status });
+  if (payload.status === "complete") {
+    if (closingSessions.has(sessionId)) {
+      sendJson(res, 409, { ok: false, message: "Session closing" });
+      return;
+    }
+    closingSessions.add(sessionId);
+  }
+  try {
+    const stored = await saveFeedback(
+      sessionId,
+      payload,
+      payload.status === "complete" ? images : [],
+    );
+    if (payload.status === "complete") {
+      deliverComplete(sessionId, stored);
+      await closeSession(sessionId);
+    }
+    sendJson(res, 200, { ok: true, status: payload.status });
+  } finally {
+    if (payload.status === "complete") closingSessions.delete(sessionId);
+  }
 }

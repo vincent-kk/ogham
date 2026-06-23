@@ -32,9 +32,6 @@ export async function handleCollectFeedback(
   const projectHash = getProjectHash(process.cwd());
   const meta = await getSession(input.session_id, projectHash);
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);
-  if (meta.status === "closed") {
-    throw new Error(`closed: session ${input.session_id} is closed`);
-  }
 
   const config = await loadConfig();
   const wait = Math.min(
@@ -43,12 +40,27 @@ export async function handleCollectFeedback(
   );
   await ensureHttpServer();
 
-  const result = await awaitFeedback(input.session_id, wait, extra.signal);
+  // A complete submission closes the session server-side. A closed session
+  // still hands back a buffered complete that no collect has claimed yet (no
+  // wait), then becomes terminal once that buffer is drained.
+  const result = await awaitFeedback(
+    input.session_id,
+    meta.status === "closed" ? 0 : wait,
+    extra.signal,
+  );
   if (result.kind === "complete") {
     return buildFeedbackContent(input.session_id, result.feedback);
   }
   if (result.kind === "closing") {
     throw new Error("closed: server is shutting down");
+  }
+  if (meta.status === "closed") {
+    // The in-memory buffer is gone (server restart or closeResolver), but a
+    // complete submission is durable on disk — recover it instead of failing.
+    const persisted = await readFeedback(input.session_id);
+    if (persisted?.status === "complete")
+      return buildFeedbackContent(input.session_id, persisted);
+    throw new Error(`closed: session ${input.session_id} is closed`);
   }
   const draft = await readFeedback(input.session_id);
   return { status: "pending", draft_count: draft?.comments.length ?? 0 };

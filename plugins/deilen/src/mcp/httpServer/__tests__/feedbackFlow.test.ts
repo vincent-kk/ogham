@@ -165,4 +165,86 @@ describe("feedback flow", () => {
     expect(post.status).toBe(400);
     await atomicWrite(CONFIG_PATH, JSON.stringify({ auto_open: false }));
   });
+
+  it("closes the session on complete submit and rejects a re-submit with 409", async () => {
+    const sid = await render("# Doc\n\nbody");
+    const submit = (): Promise<Response> =>
+      fetch(`${baseUrl}/api/feedback?session=${sid}&token=${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sid,
+          status: "complete",
+          comments: [],
+        }),
+      });
+    expect((await submit()).status).toBe(200);
+    expect((await submit()).status).toBe(409);
+  });
+
+  it("hands a buffered complete to a late collect after the session closed", async () => {
+    const sid = await render("late");
+    const post = await fetch(
+      `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sid,
+          status: "complete",
+          comments: [{ id: "c1", anchor: null, text: "buffered note" }],
+        }),
+      },
+    );
+    expect(post.status).toBe(200);
+    const result = await handleCollectFeedback({ session_id: sid }, extra);
+    expect("content" in result).toBe(true);
+    if ("content" in result) {
+      const text = result.content.find((c) => c.type === "text");
+      expect(text && "text" in text ? text.text : "").toContain(
+        "buffered note",
+      );
+    }
+  });
+
+  it("recovers a complete from disk after the buffer is cleared", async () => {
+    const sid = await render("disk recovery");
+    const form = new FormData();
+    form.append(
+      "payload",
+      JSON.stringify({
+        session_id: sid,
+        status: "complete",
+        comments: [{ id: "c1", anchor: null, text: "disk note" }],
+      }),
+    );
+    const post = await fetch(
+      `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
+      { method: "POST", body: form },
+    );
+    expect(post.status).toBe(200);
+    await handleCloseViewer({ session_id: sid });
+    const result = await handleCollectFeedback({ session_id: sid }, extra);
+    expect("content" in result).toBe(true);
+    if ("content" in result) {
+      const text = result.content.find((c) => c.type === "text");
+      expect(text && "text" in text ? text.text : "").toContain("disk note");
+    }
+  });
+
+  it("rejects a concurrent second complete submit", async () => {
+    const sid = await render("concurrent");
+    const submit = (): Promise<Response> =>
+      fetch(`${baseUrl}/api/feedback?session=${sid}&token=${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sid,
+          status: "complete",
+          comments: [],
+        }),
+      });
+    const [a, b] = await Promise.all([submit(), submit()]);
+    expect([a.status, b.status].sort()).toEqual([200, 409]);
+  });
 });

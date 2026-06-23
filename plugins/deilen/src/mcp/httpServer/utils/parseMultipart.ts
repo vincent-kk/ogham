@@ -62,6 +62,11 @@ export function parseMultipart(
         failure = err;
         req.unpipe(bb);
         bb.destroy();
+        // busboy's unpipe leaves the request paused mid-stream; Node's
+        // end-of-response auto-dump does NOT drain that, so the unread upload
+        // bytes stall the next keep-alive request. Verified load-bearing:
+        // removing this re-hangs the following request with ECONNRESET.
+        req.resume();
       }
     };
 
