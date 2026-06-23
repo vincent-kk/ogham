@@ -1,6 +1,6 @@
 {
   "name": "@ogham/deilen",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Deilen — render Claude markdown documents as a readable browser page with line-anchored feedback back to Claude",
   "keywords": [
     "claude-code",
