@@ -33,7 +33,7 @@ export function mathInline(state: StateInline, silent: boolean): boolean {
   }
   const start = state.pos + 1;
   let match = start;
-  let found = -1;
+  let found: number;
   while ((found = state.src.indexOf("$", match)) !== -1) {
     let pos = found - 1;
     while (state.src.charCodeAt(pos) === BACKSLASH) pos -= 1;

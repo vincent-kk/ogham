@@ -46,6 +46,7 @@ export async function resolveMarkdown(
   } catch (err) {
     throw new Error(
       `read_error: cannot stat ${sourcePath}: ${(err as Error).message}`,
+      { cause: err },
     );
   }
   if (!info.isFile()) {
@@ -61,6 +62,7 @@ export async function resolveMarkdown(
   } catch (err) {
     throw new Error(
       `read_error: cannot read ${sourcePath}: ${(err as Error).message}`,
+      { cause: err },
     );
   }
 }
