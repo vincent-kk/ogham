@@ -4,7 +4,7 @@
 
 - 첫 `render_viewer`/`open_settings` 에서 1회 기동, 이후 재사용(싱글톤).
 - 세션 생존 = 뷰어 heartbeat + 도구 활동. 둘 다 `idle_shutdown_minutes` 단절 시 폴백 종료(Claude 크래시·`close_viewer` 누락 누수 방지).
-- one-time token 으로 `/r`·API 보호; `/assets` 는 토큰 면제(동적 import·폰트 하위요청).
+- 세션 토큰 으로 `/r`·API 보호; `/assets` 는 토큰 면제(동적 import·폰트 하위요청).
 - `__DEILEN_STATE__` 주입은 `escapeJsonForHtml`.
 
 ## API Contracts
@@ -13,16 +13,19 @@
 - `getHttpServer(): HttpServerInstance | null`.
 - `HttpServerInstance`: `{ baseUrl, port, token, viewerUrl(sid), settingsUrl(), touch(), close() }`.
 
-## Routes (Phase 2)
+## Routes
 
-| Method | Path                          | Handler             | Token |
-| ------ | ----------------------------- | ------------------- | ----- |
-| GET    | `/r/<session>?token=`         | handleGetViewer     | yes   |
-| GET    | `/api/viewer?session=&token=` | handleGetViewerData | yes   |
-| GET    | `/assets/<chunk>`             | handleGetAsset      | no    |
-| POST   | `/api/ping?session=&token=`   | handlePing          | yes   |
-
-이후 단계: POST `/api/feedback`(Phase 3), `/settings`·`/api/config`·POST `/api/close`(Phase 5/6).
+| Method | Path                            | Handler             | Token |
+| ------ | ------------------------------- | ------------------- | ----- |
+| GET    | `/r/<session>?token=`           | handleGetViewer     | yes   |
+| GET    | `/api/viewer?session=&token=`   | handleGetViewerData | yes   |
+| GET    | `/settings?token=`              | handleGetSettings   | yes   |
+| GET    | `/api/config?token=`            | handleGetConfig     | yes   |
+| GET    | `/assets/<chunk>`               | handleGetAsset      | no    |
+| POST   | `/api/ping?session=&token=`     | handlePing          | yes   |
+| POST   | `/api/feedback?session=&token=` | handlePostFeedback  | yes   |
+| POST   | `/api/config?token=`            | handleSaveConfig    | yes   |
+| POST   | `/api/close?session=&token=`    | handleClose         | yes   |
 
 ## Security
 

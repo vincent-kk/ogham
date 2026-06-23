@@ -13,17 +13,17 @@
 
 ## 라우트
 
-| 메서드 | 경로                          | 동작                                                                                              |
-| ------ | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| 메서드 | 경로                          | 동작                                                                                               |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------- |
 | GET    | `/r/<session>?token=`         | 뷰어 HTML(`viewerHtml`). `__DEILEN_STATE__` 에 session_id·token·title·렌더 HTML·raw markdown 주입. |
-| GET    | `/api/viewer?session=&token=` | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                  |
-| GET    | `/assets/<chunk>`             | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.               |
-| POST   | `/api/feedback?token=`        | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).   |
-| POST   | `/api/ping?token=`            | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                             |
+| GET    | `/api/viewer?session=&token=` | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                   |
+| GET    | `/assets/<chunk>`             | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.                |
+| POST   | `/api/feedback?token=`        | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).    |
+| POST   | `/api/ping?token=`            | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                              |
 | GET    | `/settings?token=`            | 설정 HTML(`settingsHtml`). `__DEILEN_STATE__` 에 현재 Config 주입.                                 |
-| GET    | `/api/config?token=`          | 현재 `Config` JSON.                                                                               |
-| POST   | `/api/config?token=`          | body=`Config`. 검증 후 저장.                                                                      |
-| POST   | `/api/close?token=`           | body=`{ session_id }`(필수). 해당 세션만 종료(서버 종료는 idle/MCP-exit 내부 처리).               |
+| GET    | `/api/config?token=`          | 현재 `Config` JSON.                                                                                |
+| POST   | `/api/config?token=`          | body=`Config`. 검증 후 저장.                                                                       |
+| POST   | `/api/close?token=`           | body=`{ session_id }`(필수). 해당 세션만 종료(서버 종료는 idle/MCP-exit 내부 처리).                |
 
 ## 뷰어 페이지 (`pages/viewer/`)
 
@@ -77,7 +77,7 @@ cennad settings 구조 차용. `Config` 폼 매핑:
 
 ## FE 빌드
 
-`buildViewerHtml.mjs` / `buildSettingsHtml.mjs` 가 각 페이지 html+css+js 를 esbuild 로 minify·inline → `__generated__/viewerHtml.ts`, `settingsHtml.ts`. 뷰어의 무거운 렌더러는 `buildRenderers.mjs` 가 독립 브라우저 엔트리로 `bridge/assets/` 에 빌드, `handleGetAsset` 가 서빙(번들 비포함).
+`buildViewerHtml.mjs` / `buildSettingsHtml.mjs` 가 각 페이지 html+css+js 를 esbuild 로 minify·inline → `bridge/viewer.html`, `bridge/settings.html`(런타임 `loadViewerHtml`/`loadSettingsHtml` 로 `fs` 로드, 번들 미포함). 뷰어의 무거운 렌더러는 `buildRenderers.mjs` 가 독립 브라우저 엔트리로 `bridge/assets/` 에 빌드, `handleGetAsset` 가 서빙(번들 비포함).
 
 ## 보안
 

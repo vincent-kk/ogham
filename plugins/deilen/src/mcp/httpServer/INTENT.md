@@ -15,7 +15,7 @@
 ## Conventions
 
 - 바인딩 `127.0.0.1` 전용, 포트 `config.preferred_port`(0=동적)
-- one-time token 검증 — **`/assets` 는 면제**(비민감 공개 라이브러리)
+- 세션 토큰 검증 — **`/assets` 는 면제**(비민감 공개 라이브러리)
 - POST 는 `application/json` 또는 `multipart/form-data` 만(CSRF)
 - 모든 요청·도구 활동이 `touch()` → idle 타이머 리셋; `idle_shutdown_minutes` 초과 시 `close()`
 - 뷰어 HTML 은 런타임 로드(`bridge/viewer.html`) — 번들 비대화 회피

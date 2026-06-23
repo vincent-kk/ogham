@@ -1,6 +1,6 @@
 ## Purpose
 
-로컬 HTTP 서버용 일회용 인증 토큰 발급·검증 모듈. timing-safe 비교로 timing attack 을 방지한다.
+로컬 HTTP 서버용 세션 단위 베어러 토큰 발급·검증 모듈. 서버 기동마다 1개 발급해 종료까지 재사용한다. timing-safe 비교로 timing attack 을 방지한다.
 
 ## Structure
 

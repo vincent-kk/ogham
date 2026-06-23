@@ -1,12 +1,12 @@
 ## Purpose
 
-deilen 의 MCP 도구 4개를 담는 organ 컨테이너. 각 도구는 자체 서브 fractal 이며, 이 노드의 barrel 은 핸들러를 서버에 노출한다.
+deilen 의 MCP 도구 4개를 담는 fractal 컨테이너. 각 도구는 자체 서브 fractal 이며, 이 노드의 barrel 은 핸들러를 서버에 노출한다.
 
 ## Structure
 
 | Path               | Role                                               |
 | ------------------ | -------------------------------------------------- |
-| `renderViewer/`    | `render_viewer` — 문서 렌더 세션 생성 (논블로킹) |
+| `renderViewer/`    | `render_viewer` — 문서 렌더 세션 생성 (논블로킹)   |
 | `collectFeedback/` | `collect_feedback` — bounded long-poll 피드백 수집 |
 | `closeViewer/`     | `close_viewer` — 세션 닫기 + resolver 정리         |
 | `openSettings/`    | `open_settings` — 설정 UI 기동·브라우저 오픈       |

@@ -17,7 +17,7 @@
 ## Conventions
 
 - ESM (`"type": "module"`), import 확장자 `.js`
-- 디렉토리·파일 이름은 camelCase (organ `__tests__`, `__generated__` 예외)
+- 디렉토리·파일 이름은 camelCase (organ `__tests__` 예외)
 - 디스크 JSON 키는 snake_case (외부 인터페이스 일관성)
 - 공개 API 는 `index.ts` 에서 re-export
 - `version.ts` 는 `yarn version:sync` 로만 갱신
@@ -44,4 +44,4 @@
 ## Dependencies
 
 - Node.js >= 20, TypeScript 5.7
-- `@modelcontextprotocol/sdk`, `zod`; (Phase 1+) `markdown-it`, `busboy`
+- `@modelcontextprotocol/sdk`, `zod`, `markdown-it`

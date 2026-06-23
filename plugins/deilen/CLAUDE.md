@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/deilen
 
-`@ogham/deilen` package work guide. Package contract: [INTENT.md](./INTENT.md); source structure: [src/INTENT.md](./src/INTENT.md). Full design spec: [`.metadata/deilen/`](../../.metadata/deilen/). Development plan: [HANDOFF.md](./HANDOFF.md).
+`@ogham/deilen` package work guide. Package contract: [INTENT.md](./INTENT.md); source structure: [src/INTENT.md](./src/INTENT.md). Full design spec: [`.metadata/deilen/`](../../.metadata/deilen/); step order in [roadmap.md](../../.metadata/deilen/roadmap.md).
 
 ## Status
 

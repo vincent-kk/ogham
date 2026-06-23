@@ -1,17 +1,17 @@
 ## Purpose
 
-deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·viewer.md) 영속과 long-poll resolver 레지스트리(Phase 3), one-time token, project 스코프 해시를 담당한다. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
+deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/저장, 렌더 세션(meta.json·viewer.md) 영속과 long-poll resolver 레지스트리, 세션 토큰, project 스코프 해시를 담당한다. 디스크 루트는 `~/.claude/plugins/deilen/` ([constants/paths](../constants/paths.ts)).
 
 ## Structure
 
-| Path             | Role                                                    |
-| ---------------- | ------------------------------------------------------- |
-| `configManager/` | `loadConfig` / `saveConfig` (organ)                     |
-| `sessionStore/`  | 세션 영속 + pendingResolver 레지스트리(Phase 3) (organ) |
-| `authToken/`     | one-time token 생성·검증 (organ)                        |
-| `projectHash/`   | cwd → 12-hex 스코프 해시 (organ)                        |
-| `feedbackStore/` | 피드백·이미지 영속 (Phase 3, organ)                     |
-| `index.ts`       | barrel                                                  |
+| Path             | Role                                           |
+| ---------------- | ---------------------------------------------- |
+| `configManager/` | `loadConfig` / `saveConfig` (organ)            |
+| `sessionStore/`  | 세션 영속 + pendingResolver 레지스트리 (organ) |
+| `authToken/`     | 세션 토큰 생성·검증 (organ)                    |
+| `projectHash/`   | cwd → 12-hex 스코프 해시 (organ)               |
+| `feedbackStore/` | 피드백·이미지 영속 (organ)                     |
+| `index.ts`       | barrel                                         |
 
 ## Conventions
 
@@ -34,7 +34,7 @@ deilen 의 영속·런타임 상태를 관리하는 core fractal. config 로드/
 ### Never do
 
 - 네트워크 I/O (core 는 디스크·메모리 순수 — HTTP 는 `mcp/httpServer`)
-- pendingResolver 를 `settle()` 우회해 직접 resolve (Phase 3)
+- pendingResolver 를 `settle()` 우회해 직접 resolve
 
 ## Dependencies
 

@@ -2,21 +2,21 @@
 
 ## 서버측 base 렌더
 
-`render/markdownRenderer.ts` 의 `markdown-it` 인스턴스가 markdown → base HTML 을 생성한다. 무거운 시각화는 서버에서 렌더하지 않는다(클라이언트 lazy-load). 서버 책임은 ① 구조 HTML, ② source-line 매핑, ③ sanitize.
+`render/markdownIt/markdownInstance.ts` 의 `markdown-it` 인스턴스(오케스트레이터 `render/operations/renderMarkdown.ts`)가 markdown → base HTML 을 생성한다. 무거운 시각화는 서버에서 렌더하지 않는다(클라이언트 lazy-load). 서버 책임은 ① 구조 HTML, ② source-line 매핑, ③ sanitize.
 
 - `markdown-it({ html: false, linkify: true, typographer: true })` — 원본 HTML 비허용(XSS 차단 1차).
 - 표(GFM table) 활성. 코드펜스/수식/mermaid 는 **렌더하지 않고 표식만 남긴다**:
   - 코드펜스: `<pre><code class="language-XXX" data-lang="XXX">…원문…</code></pre>` (하이라이트는 클라이언트).
   - mermaid 펜스(` ```mermaid `): `<div class="deilen-mermaid" data-src="…원문…">` (그래프는 클라이언트).
   - 수식(`$…$`, `$$…$$`): `<span class="deilen-math" data-display="0|1">…원문…</span>` (조판은 클라이언트).
-- sanitize: `render/sanitize.ts` 가 출력 HTML 을 허용 태그/속성 화이트리스트로 정제(2차). Claude 산출이라도 신뢰 경계로 취급.
+- sanitize: `render/sanitize/sanitizeHtml.ts` 가 출력 HTML 을 허용 태그/속성 화이트리스트로 정제(2차). Claude 산출이라도 신뢰 경계로 취급.
 
 ## source-line 매핑
 
 markdown-it 블록 토큰의 `token.map = [startLine, endLine]` 를 이용한다. core ruler 를 추가해 `nesting !== -1` 이고 `map` 이 있는 토큰에 `token.attrSet('data-source-line', String(map[0]))`, 끝줄은 `data-source-end` 로 주입.
 
 - 결과: 모든 블록 요소가 원본 markdown 라인 범위를 보유 → 피드백 UI 의 라인 앵커가 된다.
-- `render/sourceLineMap.ts` 가 이 ruler 를 정의. 렌더 메타(`{ html, lineCount, title, sourceLineIndex }`)를 함께 반환해 뷰어가 라인↔요소를 양방향 조회.
+- `render/markdownIt/sourceLinePlugin.ts` 가 이 ruler 를 정의. 렌더 메타(`{ html, lineCount, sourceLineIndex }`)를 함께 반환해 뷰어가 라인↔요소를 양방향 조회.
 
 ## 클라이언트 점진적 향상 (lazy-load)
 
@@ -25,8 +25,8 @@ base HTML 은 경량으로 즉시 표시되고, 무거운 렌더러는 **해당 
 | 기능            | 감지 조건                  | 동적 import 대상         |
 | --------------- | -------------------------- | ------------------------ |
 | 코드 하이라이트 | `pre code[data-lang]` 존재 | `/assets/highlight.js`   |
-| Mermaid         | `.deilen-mermaid` 존재      | `/assets/mermaid.js`     |
-| 수식(KaTeX)     | `.deilen-math` 존재         | `/assets/katex.js`(+css) |
+| Mermaid         | `.deilen-mermaid` 존재     | `/assets/mermaid.js`     |
+| 수식(KaTeX)     | `.deilen-math` 존재        | `/assets/katex.js`(+css) |
 
 ```js
 // pages/viewer/scripts/enhance.js (개념)

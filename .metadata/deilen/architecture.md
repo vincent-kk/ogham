@@ -15,8 +15,8 @@ plugins/deilen/
 │   └── display/SKILL.md
 ├── scripts/
 │   ├── buildMcpServer.mjs         # esbuild → bridge/mcp-server.cjs (CJS)
-│   ├── buildViewerHtml.mjs        # 뷰어 FE → src/mcp/httpServer/__generated__/viewerHtml.ts
-│   ├── buildSettingsHtml.mjs      # 설정 FE → src/mcp/httpServer/__generated__/settingsHtml.ts
+│   ├── buildViewerHtml.mjs        # 뷰어 FE → bridge/viewer.html (런타임 fs 로드)
+│   ├── buildSettingsHtml.mjs      # 설정 FE → bridge/settings.html (런타임 fs 로드)
 │   └── buildRenderers.mjs         # 렌더러 *.entry.ts → bridge/assets/*.js (browser ESM)
 ├── bridge/                        # build artifact (committed — package.json:files)
 ├── src/
@@ -26,7 +26,7 @@ plugins/deilen/
 └── README.md / README-ko_kr.md
 ```
 
-`package.json` 의 `files`: `["dist", "bridge", "skills", ".claude-plugin", ".mcp.json", "README.md"]` (hook 없음 → `libs/run.cjs` 미포함)
+`package.json` 의 `files`: `["bridge", "skills", ".claude-plugin", ".mcp.json", "README.md"]` (플러그인 런타임은 `bridge/` — `dist/` 미사용; hook 없음 → `libs/run.cjs` 미포함)
 
 (hooks 없음 — cennad 와 달리 `hooks/` 미포함.)
 
@@ -57,15 +57,16 @@ src/
 ├── render/                        # fractal — markdown → source-line 매핑 HTML
 │   ├── INTENT.md
 │   ├── index.ts
-│   ├── markdownRenderer.ts        # markdown-it 인스턴스
-│   ├── sourceLineMap.ts           # token.map → data-source-line 주입
-│   └── sanitize.ts
+│   ├── operations/                # renderMarkdown (오케스트레이터) + RenderMeta
+│   ├── markdownIt/                # markdown-it 인스턴스 + math/task/source-line 규칙
+│   ├── sanitize/                  # allowlist HTML 정제
+│   └── utils/                     # lineAttrs, collectSourceLines
 ├── mcp/                           # fractal — MCP server + tools + HTTP server
 │   ├── INTENT.md
 │   ├── index.ts
 │   ├── server/                    # createServer, startServer (stdio)
 │   ├── serverEntry/serverEntry.ts # esbuild 진입점 → bridge/mcp-server.cjs
-│   ├── shared/toolResponse.ts
+│   ├── shared/helpers/         # toolResult, toolError, wrapHandler
 │   ├── tools/
 │   │   ├── renderViewer/
 │   │   ├── collectFeedback/
@@ -75,8 +76,7 @@ src/
 │   │   ├── INTENT.md
 │   │   ├── index.ts
 │   │   ├── httpServer.ts          # startHttpServer (1회 기동, 세션 등록)
-│   │   ├── routes.ts
-│   │   ├── routeContext.ts
+│   │   ├── routing/               # routes, routeContext, guardRequest, apiRoutes, assetRoute
 │   │   ├── handlers/
 │   │   │   ├── handleGetViewer.ts        # GET /r/<session>      뷰어 HTML
 │   │   │   ├── handleGetViewerData.ts    # GET /api/viewer       렌더 HTML+메타
@@ -87,11 +87,9 @@ src/
 │   │   │   ├── handleGetConfig.ts        # GET /api/config
 │   │   │   ├── handleSaveConfig.ts       # POST /api/config
 │   │   │   └── handleClose.ts            # POST /api/close
-│   │   ├── __generated__/
-│   │   │   ├── viewerHtml.ts
-│   │   │   └── settingsHtml.ts
 │   │   └── utils/
-│   │       ├── parseMultipart.ts         # busboy 래퍼
+│   │       ├── parseMultipart.ts         # 자체 multipart 파서 (req→디스크)
+│   │       ├── parseMultipartBody.ts     # 순수 버퍼 파서 (boundary 분해)
 │   │       ├── sendJson.ts
 │   │       ├── escapeJsonForHtml.ts
 │   │       └── verifyToken.ts
@@ -153,7 +151,7 @@ core/*          →  lib, utils, constants
 
 ## 외부 의존성
 
-- runtime: `@modelcontextprotocol/sdk` ~1.22, `zod` ^3.23, `markdown-it` ^14, `busboy`(멀티파트 파싱).
+- runtime: `@modelcontextprotocol/sdk` ~1.22, `zod` ^3.23, `markdown-it` ^14 (멀티파트는 자체 파서 — 외부 의존성 없음).
 - client(번들 자산, 로컬 서빙): `highlight.js`(또는 shiki), `mermaid`, `katex` — Node 런타임 의존 아님, 동적 import chunk.
 - dev: `esbuild`, `typescript`, `vitest`, `@vitest/coverage-v8`, `@types/node`, `@types/markdown-it`.
 

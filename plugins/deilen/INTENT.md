@@ -25,7 +25,7 @@
 ### Always do
 
 - 디스크 경로는 `~/.claude/plugins/deilen/` 하위
-- 개발 착수 전 [HANDOFF.md](./HANDOFF.md) + `.metadata/deilen/` 확인
+- 개발 착수 전 `.metadata/deilen/` 확인
 
 ### Ask first
 
@@ -39,6 +39,6 @@
 
 ## Dependencies
 
-- 런타임: `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`, `markdown-it`, `busboy`
+- 런타임: `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`, `markdown-it`
 - 개발: `esbuild`, `typescript`, `vitest`, `@types/node`; 브라우저 자산용 `highlight.js`, `mermaid`, `katex`(번들 미포함)
 - 환경: Node.js >= 20, Yarn 4.12 workspaces

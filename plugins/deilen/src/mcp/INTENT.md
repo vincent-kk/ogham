@@ -4,15 +4,15 @@ deilen 의 MCP 서버(stdio) fractal. 도구 등록·실행, 장수 HTTP 서버 
 
 ## Structure
 
-| Path           | Role                                                            |
-| -------------- | --------------------------------------------------------------- |
-| `server/`      | createServer(도구 등록) + startServer(stdio) + shutdown (organ) |
-| `serverEntry/` | esbuild 진입점 → `bridge/mcp-server.cjs` (organ)                |
-| `shared/`      | toolResult·toolError·wrapHandler(extra 전달) (organ)            |
-| `tools/`       | `renderViewer` 외 도구 organ 들                                 |
-| `httpServer/`  | 127.0.0.1 단일 서버 (fractal)                                   |
-| `pages/`       | 뷰어·설정 FE (organ — 빌드 입력)                                |
-| `index.ts`     | barrel                                                          |
+| Path           | Role                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| `server/`      | createServer(도구 등록) + startServer(stdio) + shutdown (fractal) |
+| `serverEntry/` | esbuild 진입점 → `bridge/mcp-server.cjs` (organ)                  |
+| `shared/`      | toolResult·toolError·wrapHandler(extra 전달) (fractal)            |
+| `tools/`       | `renderViewer` 외 도구 fractal 들                                 |
+| `httpServer/`  | 127.0.0.1 단일 서버 (fractal)                                     |
+| `pages/`       | 뷰어·설정 FE (fractal — 빌드 입력)                                |
+| `index.ts`     | barrel                                                            |
 
 ## Conventions
 
