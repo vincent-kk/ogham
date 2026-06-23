@@ -292,5 +292,19 @@ describe("feedback flow", () => {
     await expect(stat(sessionViewerPath(sid))).resolves.toBeTruthy();
     const refreshed = await fetch(`${baseUrl}/r/${sid}?token=${token}`);
     expect(refreshed.status).toBe(200);
+    const raw = await fetch(
+      `${baseUrl}/api/viewer?session=${sid}&token=${token}&format=md`,
+    );
+    expect(raw.status).toBe(200);
+    expect(await raw.text()).toBe("# Purge\n\nbody");
+
+    const ping = await fetch(
+      `${baseUrl}/api/ping?session=${sid}&token=${token}`,
+      { method: "POST", headers: { "Content-Type": "application/json" } },
+    );
+    expect(ping.status).toBe(404);
+    await expect(
+      handleCollectFeedback({ session_id: sid, wait_seconds: 0.1 }, extra),
+    ).rejects.toThrow(/closed/);
   });
 });

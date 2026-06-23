@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import type { handleCloseViewer as HandleCloseViewer } from "../src/mcp/tools/closeViewer/closeViewer.js";
 import type { handleCollectFeedback as HandleCollectFeedback } from "../src/mcp/tools/collectFeedback/collectFeedback.js";
 import type { handleRenderViewer as HandleRenderViewer } from "../src/mcp/tools/renderViewer/renderViewer.js";
 import type { atomicWrite as AtomicWrite } from "../src/lib/atomicWrite.js";
@@ -12,6 +13,7 @@ import type { ToolExtra } from "../src/mcp/shared/index.js";
 
 let handleRenderViewer: typeof HandleRenderViewer;
 let handleCollectFeedback: typeof HandleCollectFeedback;
+let handleCloseViewer: typeof HandleCloseViewer;
 let getHttpServer: typeof GetHttpServer;
 let atomicWrite: typeof AtomicWrite;
 let CONFIG_PATH: string;
@@ -26,12 +28,14 @@ async function loadRuntime(): Promise<void> {
   [
     { handleRenderViewer },
     { handleCollectFeedback },
+    { handleCloseViewer },
     { getHttpServer },
     { atomicWrite },
     { CONFIG_PATH },
   ] = await Promise.all([
     import("../src/mcp/tools/renderViewer/renderViewer.js"),
     import("../src/mcp/tools/collectFeedback/collectFeedback.js"),
+    import("../src/mcp/tools/closeViewer/closeViewer.js"),
     import("../src/mcp/httpServer/httpServer.js"),
     import("../src/lib/atomicWrite.js"),
     import("../src/constants/paths.js"),
@@ -101,4 +105,33 @@ test("preserves the viewer after submit is collected and refresh disables submit
   await expect(page.getByText("Body paragraph.")).toBeVisible();
   await expect(page.getByText("This session has ended")).toBeVisible();
   await expect(submit).toBeDisabled();
+});
+
+test("keeps the viewer visible after close_viewer and refresh disables submit", async ({
+  page,
+}) => {
+  const rendered = await handleRenderViewer({
+    content: "# Closed refresh\n\nStill readable.",
+  });
+
+  await page.goto(rendered.url);
+  await expect(
+    page.getByRole("heading", { name: "Closed refresh" }),
+  ).toBeVisible();
+  await expect(
+    handleCloseViewer({ session_id: rendered.session_id }),
+  ).resolves.toEqual({
+    status: "closed",
+  });
+
+  await page.reload();
+
+  await expect(
+    page.getByRole("heading", { name: "Closed refresh" }),
+  ).toBeVisible();
+  await expect(page.getByText("Still readable.")).toBeVisible();
+  await expect(page.getByText("This session has ended")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Submit feedback" }),
+  ).toBeDisabled();
 });

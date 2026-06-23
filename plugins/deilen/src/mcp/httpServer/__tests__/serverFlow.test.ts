@@ -1,11 +1,13 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { CONFIG_PATH } from "../../../constants/paths.js";
+import { CONFIG_PATH, sessionDir } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
+import { pruneExpired } from "../../../core/sessionStore/index.js";
 import { handleRenderViewer } from "../../tools/renderViewer/renderViewer.js";
 import { getHttpServer } from "../httpServer.js";
 
@@ -126,5 +128,54 @@ describe("viewer server flow", () => {
       { method: "POST", headers: { "Content-Type": "application/json" } },
     );
     expect(ping.status).toBe(404);
+  });
+
+  it("keeps a closed viewer reloadable while heartbeat reports ended", async () => {
+    const out = await handleRenderViewer({
+      content: "# Closed but visible\n\nReload body.",
+    });
+    const sid = sessionIdFrom(out.url);
+    const url = new URL(out.url);
+    token = url.searchParams.get("token") ?? "";
+    baseUrl = url.origin;
+
+    const closed = await fetch(
+      `${baseUrl}/api/close?session=${sid}&token=${token}`,
+      { method: "POST", headers: { "Content-Type": "application/json" } },
+    );
+    expect(closed.status).toBe(200);
+
+    const reload = await fetch(out.url);
+    expect(reload.status).toBe(200);
+    expect(await reload.text()).toContain("Closed but visible");
+
+    const data = await fetch(
+      `${baseUrl}/api/viewer?session=${sid}&token=${token}`,
+    );
+    expect(data.status).toBe(200);
+    const body = (await data.json()) as { ok: boolean; raw: string };
+    expect(body.ok).toBe(true);
+    expect(body.raw).toContain("Reload body.");
+
+    const ping = await fetch(
+      `${baseUrl}/api/ping?session=${sid}&token=${token}`,
+      { method: "POST", headers: { "Content-Type": "application/json" } },
+    );
+    expect(ping.status).toBe(404);
+  });
+
+  it("returns 404 for the viewer after TTL prune removes the session", async () => {
+    const out = await handleRenderViewer({ content: "# Expired\n\nbody" });
+    const sid = sessionIdFrom(out.url);
+    const old = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    await utimes(sessionDir(sid), old, old);
+    await expect(pruneExpired(1)).resolves.toBeGreaterThanOrEqual(1);
+
+    const reload = await fetch(out.url);
+    expect(reload.status).toBe(404);
+    const data = await fetch(
+      `${baseUrl}/api/viewer?session=${sid}&token=${token}`,
+    );
+    expect(data.status).toBe(404);
   });
 });
