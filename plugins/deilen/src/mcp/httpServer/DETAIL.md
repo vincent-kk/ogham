@@ -20,7 +20,7 @@
 | GET    | `/r/<session>?token=`         | handleGetViewer     | yes   |
 | GET    | `/api/viewer?session=&token=` | handleGetViewerData | yes   |
 | GET    | `/assets/<chunk>`             | handleGetAsset      | no    |
-| POST   | `/api/ping?token=`            | handlePing          | yes   |
+| POST   | `/api/ping?session=&token=`   | handlePing          | yes   |
 
 이후 단계: POST `/api/feedback`(Phase 3), `/settings`·`/api/config`·POST `/api/close`(Phase 5/6).
 

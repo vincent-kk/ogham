@@ -87,14 +87,29 @@ describe("viewer server flow", () => {
     expect(missing.status).toBe(404);
   });
 
-  it("blocks asset path traversal and acknowledges a ping", async () => {
+  it("blocks asset path traversal and acknowledges a ping for a live session", async () => {
     const traversal = await fetch(`${baseUrl}/assets/..%2f..%2fviewer.html`);
     expect(traversal.status).toBe(404);
-    const ping = await fetch(`${baseUrl}/api/ping?token=${token}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: "rs_x" }),
-    });
+    const out = await handleRenderViewer({ content: "ping target" });
+    const sid = sessionIdFrom(out.url);
+    const ping = await fetch(
+      `${baseUrl}/api/ping?session=${sid}&token=${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
     expect(ping.status).toBe(200);
+  });
+
+  it("rejects a ping for an unknown session with 404", async () => {
+    const ping = await fetch(
+      `${baseUrl}/api/ping?session=rs_dead&token=${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    expect(ping.status).toBe(404);
   });
 });

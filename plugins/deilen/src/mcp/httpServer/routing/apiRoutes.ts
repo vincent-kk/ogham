@@ -39,7 +39,8 @@ const STATIC_ROUTES: Record<string, RouteHandler> = {
     void handlePostFeedback(ctx, sessionOf(url), req, res).catch(onError),
   "POST /api/close": ({ ctx, url, res, onError }) =>
     void handleClose(ctx, sessionOf(url), res).catch(onError),
-  "POST /api/ping": ({ res }) => handlePing(res),
+  "POST /api/ping": ({ ctx, url, res, onError }) =>
+    void handlePing(ctx, sessionOf(url), res).catch(onError),
 };
 
 /**

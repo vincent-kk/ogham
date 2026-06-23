@@ -23,8 +23,6 @@
   --accent-contrast: #ffffff;
   --accent-soft: rgba(91, 91, 214, 0.1);
 
-  --highlight: rgba(217, 119, 6, 0.18);
-  --highlight-border: #d97706;
   --danger: #d61f1f;
   --danger-soft: rgba(214, 31, 31, 0.1);
   --success: #15803d;
@@ -62,8 +60,6 @@
   --accent-contrast: #16161a;
   --accent-soft: rgba(139, 140, 234, 0.16);
 
-  --highlight: rgba(234, 179, 8, 0.16);
-  --highlight-border: #ca9024;
   --danger: #f08a8a;
   --danger-soft: rgba(240, 138, 138, 0.14);
   --success: #5bd07f;
@@ -92,8 +88,6 @@
     --accent-hover: #a3a4f0;
     --accent-contrast: #16161a;
     --accent-soft: rgba(139, 140, 234, 0.16);
-    --highlight: rgba(234, 179, 8, 0.16);
-    --highlight-border: #ca9024;
     --danger: #f08a8a;
     --danger-soft: rgba(240, 138, 138, 0.14);
     --success: #5bd07f;
@@ -684,12 +678,16 @@ button {
   transform: translateX(0);
 }
 
+.viewer ::selection {
+  background: color-mix(in srgb, var(--bg) 82%, var(--text));
+}
+
 [data-has-comment="true"] {
-  background: color-mix(in srgb, var(--bg) 84%, var(--highlight-border));
+  background: color-mix(in srgb, var(--bg) 82%, var(--accent));
 }
 
 .range-selecting {
-  background: color-mix(in srgb, var(--bg) 84%, var(--accent));
+  background: color-mix(in srgb, var(--bg) 82%, var(--text));
 }
 
 /* ── Selection popover ──────────────────────────────────── */

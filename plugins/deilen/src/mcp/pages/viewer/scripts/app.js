@@ -46,12 +46,16 @@ function wireChrome() {
 function startHeartbeat() {
   const interval = state.heartbeat_interval_ms || DEFAULT_HEARTBEAT_MS;
   const ping = () => {
-    fetch(`/api/ping?token=${encodeURIComponent(state.token || "")}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ session_id: state.session_id }),
-      keepalive: true,
-    })
+    fetch(
+      `/api/ping?session=${encodeURIComponent(
+        state.session_id || "",
+      )}&token=${encodeURIComponent(state.token || "")}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+      },
+    )
       .then((response) => setConnectionAlive(response.ok))
       .catch(() => setConnectionAlive(false));
   };
