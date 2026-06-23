@@ -2,7 +2,7 @@
 // apply theme/typography, enable copy + lazy enhancement, and keep the server
 // alive with a heartbeat.
 
-import { initComments, setConnectionAlive } from "./comments.js";
+import { initComments, setConnectionState } from "./comments.js";
 import { initCopy } from "./copy.js";
 import { enhance } from "./enhance.js";
 
@@ -56,8 +56,8 @@ function startHeartbeat() {
         keepalive: true,
       },
     )
-      .then((response) => setConnectionAlive(response.ok))
-      .catch(() => setConnectionAlive(false));
+      .then((response) => setConnectionState(response.ok ? "alive" : "ended"))
+      .catch(() => setConnectionState("offline"));
   };
   ping();
   window.setInterval(ping, interval);

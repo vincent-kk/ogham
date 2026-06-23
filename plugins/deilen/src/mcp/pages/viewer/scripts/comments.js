@@ -13,7 +13,8 @@ const store = { comments: new Map(), overall: new Map() };
 let sequence = 0;
 let overallSequence = 0;
 let popover = null;
-let connectionAlive = false;
+// "connecting" | "alive" | "ended" (session closed) | "offline" (server down)
+let connectionState = "connecting";
 let submitted = false;
 
 function getElement(tag, options = {}) {
@@ -394,21 +395,38 @@ function updateStatus() {
   }
   const status = document.getElementById("submit-status");
   if (status && !submitted) {
-    if (!connectionAlive) status.textContent = "Waiting for server…";
-    else {
-      const parts = [];
-      if (count) parts.push(`${count} comment${count === 1 ? "" : "s"}`);
-      if (overallCount)
-        parts.push(
-          `${overallCount} overall note${overallCount === 1 ? "" : "s"}`,
-        );
-      status.textContent = parts.length ? parts.join(" · ") : "No comments yet";
+    const error =
+      connectionState === "ended"
+        ? "This session has ended — submit disabled"
+        : connectionState === "offline"
+          ? "Server offline — submit disabled"
+          : "";
+    if (error) {
+      status.textContent = error;
+      status.classList.add("status-error");
+    } else {
+      status.classList.remove("status-error");
+      if (connectionState === "connecting") {
+        status.textContent = "Checking server…";
+      } else {
+        const parts = [];
+        if (count) parts.push(`${count} comment${count === 1 ? "" : "s"}`);
+        if (overallCount)
+          parts.push(
+            `${overallCount} overall note${overallCount === 1 ? "" : "s"}`,
+          );
+        status.textContent = parts.length
+          ? parts.join(" · ")
+          : "No comments yet";
+      }
     }
   }
   const submit = document.getElementById("submit-feedback");
   if (submit)
     submit.disabled =
-      submitted || !connectionAlive || (count === 0 && overallCount === 0);
+      submitted ||
+      connectionState !== "alive" ||
+      (count === 0 && overallCount === 0);
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
@@ -567,8 +585,8 @@ function wireSelection() {
 }
 
 /* ── Public ───────────────────────────────────────────── */
-export function setConnectionAlive(alive) {
-  connectionAlive = alive;
+export function setConnectionState(state) {
+  connectionState = state;
   updateStatus();
 }
 

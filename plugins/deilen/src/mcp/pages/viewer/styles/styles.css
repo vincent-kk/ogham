@@ -986,6 +986,10 @@ button {
   color: var(--text-muted);
 }
 
+.submit-status.status-error {
+  color: var(--danger);
+}
+
 .submit-actions {
   display: flex;
   align-items: center;
