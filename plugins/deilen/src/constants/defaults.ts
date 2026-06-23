@@ -24,9 +24,6 @@ export const MAX_COLLECT_WAIT_SECONDS = 55;
 /** Viewer heartbeat cadence (POST /api/ping). Server idle uses idle_shutdown_minutes. */
 export const HEARTBEAT_INTERVAL_MS = 30_000;
 
-/** Grace after the last serving session closes before reaping the shared server. */
-export const REAP_GRACE_MS = 3_000;
-
 /** Allowed inbound image mime types for feedback uploads. */
 export const ALLOWED_IMAGE_MIME = [
   "image/png",

@@ -24,24 +24,24 @@
 
 ## Config 스키마 (`types/config.ts`)
 
-| 필드                      | 타입                      | 기본   | 범위/비고                                   |
-| ------------------------- | ------------------------- | ------ | ------------------------------------------- |
-| `theme`                   | `'light'\|'dark'\|'auto'` | `auto` |                                             |
-| `auto_open`               | `boolean`                 | `true` | 렌더 시 브라우저 자동 오픈                  |
-| `collect_timeout_seconds` | `number`                  | `45`   | 1–55, 클라이언트 MCP_TIMEOUT 미만           |
-| `session_ttl_hours`       | `number`                  | `72`   | 1–720                                       |
-| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, idle 폴백 종료(refcount reap 백스톱) |
-| `preferred_port`          | `number`                  | `0`    | 0=동적, 그 외 1024–65535                    |
-| `content_width_px`        | `number`                  | `820`  | 480–1600                                    |
-| `font_family`             | `string`                  | 시스템 |                                             |
-| `renderers.mermaid`       | `boolean`                 | `true` | false=강제 비활성                           |
-| `renderers.highlight`     | `boolean`                 | `true` |                                             |
-| `renderers.math`          | `boolean`                 | `true` |                                             |
-| `max_image_mb`            | `number`                  | `10`   | 1–100, part 당 상한                         |
-| `max_payload_mb`          | `number`                  | `50`   | 1–200, `≥ max_image_mb`                     |
-| `max_viewer_mb`           | `number`                  | `5`    | 1–50, render content/path                   |
+| 필드                      | 타입                      | 기본   | 범위/비고                         |
+| ------------------------- | ------------------------- | ------ | --------------------------------- |
+| `theme`                   | `'light'\|'dark'\|'auto'` | `auto` |                                   |
+| `auto_open`               | `boolean`                 | `true` | 렌더 시 브라우저 자동 오픈        |
+| `collect_timeout_seconds` | `number`                  | `45`   | 1–55, 클라이언트 MCP_TIMEOUT 미만 |
+| `session_ttl_hours`       | `number`                  | `72`   | 1–720                             |
+| `idle_shutdown_minutes`   | `number`                  | `1`    | 1–120, 무활동 idle 폴백 종료      |
+| `preferred_port`          | `number`                  | `0`    | 0=동적, 그 외 1024–65535          |
+| `content_width_px`        | `number`                  | `820`  | 480–1600                          |
+| `font_family`             | `string`                  | 시스템 |                                   |
+| `renderers.mermaid`       | `boolean`                 | `true` | false=강제 비활성                 |
+| `renderers.highlight`     | `boolean`                 | `true` |                                   |
+| `renderers.math`          | `boolean`                 | `true` |                                   |
+| `max_image_mb`            | `number`                  | `10`   | 1–100, part 당 상한               |
+| `max_payload_mb`          | `number`                  | `50`   | 1–200, `≥ max_image_mb`           |
+| `max_viewer_mb`           | `number`                  | `5`    | 1–50, render content/path         |
 
 - 모든 디스크 쓰기는 `lib/atomicWrite.ts`(temp→rename).
 - config 부재 시 `constants/defaults.ts` 로 부팅, 첫 저장 시 파일 생성.
 - 키는 외부 인터페이스이므로 snake_case 유지(코드 식별자 camelCase 와 별개).
-- 뷰어 heartbeat 주기는 상수(~30s); 서버 idle 판정은 max(마지막 도구호출, 마지막 ping) 기준 `idle_shutdown_minutes`(폴백). 마지막 serving 세션이 명시적으로 닫히면(submit/`close_viewer`) grace 후 즉시 reap.
+- 뷰어 heartbeat 주기는 상수(~30s); 서버 idle 판정은 max(마지막 도구호출, 마지막 ping) 기준 `idle_shutdown_minutes`.

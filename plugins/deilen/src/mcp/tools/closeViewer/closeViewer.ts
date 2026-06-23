@@ -4,7 +4,6 @@ import {
   closeSession,
   getSession,
 } from "../../../core/sessionStore/index.js";
-import { getHttpServer } from "../../httpServer/index.js";
 
 export interface CloseViewerInput {
   session_id: string;
@@ -23,6 +22,5 @@ export async function handleCloseViewer(
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);
   closeResolver(input.session_id);
   await closeSession(input.session_id);
-  getHttpServer()?.release(input.session_id);
   return { status: "closed" };
 }

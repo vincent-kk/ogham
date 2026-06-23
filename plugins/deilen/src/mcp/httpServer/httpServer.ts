@@ -1,6 +1,5 @@
 import { type Server, createServer } from "node:http";
 
-import { REAP_GRACE_MS } from "../../constants/defaults.js";
 import { generateToken } from "../../core/authToken/index.js";
 import { loadConfig, saveConfig } from "../../core/configManager/index.js";
 import { getProjectHash } from "../../core/projectHash/index.js";
@@ -18,8 +17,6 @@ export interface HttpServerInstance {
   viewerUrl: (sessionId: string) => string;
   settingsUrl: () => string;
   touch: () => void;
-  retain: (sessionId: string) => void;
-  release: (sessionId: string) => void;
   close: () => Promise<void>;
 }
 
@@ -57,9 +54,7 @@ async function startHttpServer(): Promise<HttpServerInstance> {
 
   let server: Server | null = null;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
-  let reapTimer: ReturnType<typeof setTimeout> | null = null;
   let closed = false;
-  const live = new Set<string>();
 
   const close = async (): Promise<void> => {
     if (closed) return;
@@ -68,11 +63,6 @@ async function startHttpServer(): Promise<HttpServerInstance> {
       clearTimeout(idleTimer);
       idleTimer = null;
     }
-    if (reapTimer) {
-      clearTimeout(reapTimer);
-      reapTimer = null;
-    }
-    live.clear();
     instance = null;
     if (server) {
       const s = server;
@@ -96,28 +86,6 @@ async function startHttpServer(): Promise<HttpServerInstance> {
     idleTimer.unref();
   };
 
-  // Refcount serving sessions: an explicit close of the last one reaps the
-  // shared server after a short grace, so it doesn't wait out the idle window.
-  const retain = (sessionId: string): void => {
-    if (closed) return;
-    live.add(sessionId);
-    if (reapTimer) {
-      clearTimeout(reapTimer);
-      reapTimer = null;
-    }
-  };
-
-  const release = (sessionId: string): void => {
-    if (closed) return;
-    live.delete(sessionId);
-    if (live.size > 0) return;
-    if (reapTimer) clearTimeout(reapTimer);
-    reapTimer = setTimeout(() => {
-      void close();
-    }, REAP_GRACE_MS);
-    reapTimer.unref();
-  };
-
   const handler = createRouteHandler({
     token,
     projectHash,
@@ -127,7 +95,6 @@ async function startHttpServer(): Promise<HttpServerInstance> {
     saveConfig,
     resolveAssetPath,
     touch,
-    release,
   });
 
   server = createServer(handler);
@@ -155,8 +122,6 @@ async function startHttpServer(): Promise<HttpServerInstance> {
     viewerUrl: (sessionId) => `${baseUrl}/r/${sessionId}?token=${token}`,
     settingsUrl: () => `${baseUrl}/settings?token=${token}`,
     touch,
-    retain,
-    release,
     close,
   };
 }

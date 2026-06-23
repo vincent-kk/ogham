@@ -92,9 +92,9 @@ export function createServer(): McpServer {
     "close_viewer",
     {
       description:
-        "End a render session: mark it closed, settle any pending " +
-        "collect_feedback, and reap the local server if it was the last open " +
-        "session. Optional — submitting feedback also closes the session.",
+        "Close a render session: mark it closed and settle any pending " +
+        "collect_feedback. Optional — submitting feedback also closes the " +
+        "session; the shared local server idles out shortly after.",
       inputSchema: {
         session_id: z
           .string()
