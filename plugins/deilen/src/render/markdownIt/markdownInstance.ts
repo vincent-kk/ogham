@@ -5,18 +5,24 @@ import { lineAttrs } from "../utils/lineAttrs.js";
 import { mathBlock } from "./mathBlockRule.js";
 import { mathInline } from "./mathInlineRule.js";
 import { sourceLinePlugin } from "./sourceLinePlugin.js";
+import { taskList } from "./taskListRule.js";
 
 function createMarkdownIt(): MarkdownIt {
-  const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
-  const escapeHtml = md.utils.escapeHtml;
+  const markdown = new MarkdownIt({
+    html: false,
+    linkify: true,
+    typographer: true,
+  });
+  const escapeHtml = markdown.utils.escapeHtml;
 
-  sourceLinePlugin(md);
-  md.inline.ruler.after("escape", "math_inline", mathInline);
-  md.block.ruler.after("blockquote", "math_block", mathBlock, {
+  sourceLinePlugin(markdown);
+  markdown.inline.ruler.after("escape", "math_inline", mathInline);
+  markdown.block.ruler.after("blockquote", "math_block", mathBlock, {
     alt: ["paragraph", "reference", "blockquote", "list"],
   });
+  taskList(markdown);
 
-  md.renderer.rules.fence = (tokens, idx) => {
+  markdown.renderer.rules.fence = (tokens, idx) => {
     const token = tokens[idx];
     const lang = token.info.trim().split(/\s+/, 1)[0] ?? "";
     const attrs = lineAttrs(token);
@@ -29,15 +35,15 @@ function createMarkdownIt(): MarkdownIt {
     return `<pre${attrs}><code${langClass}${langAttr}>${escaped}</code></pre>\n`;
   };
 
-  md.renderer.rules.math_inline = (tokens, idx) =>
+  markdown.renderer.rules.math_inline = (tokens, idx) =>
     `<span class="deilen-math" data-display="0">${escapeHtml(tokens[idx].content)}</span>`;
 
-  md.renderer.rules.math_block = (tokens, idx) => {
+  markdown.renderer.rules.math_block = (tokens, idx) => {
     const token = tokens[idx];
     return `<p class="deilen-math-block"${lineAttrs(token)}><span class="deilen-math" data-display="1">${escapeHtml(token.content)}</span></p>\n`;
   };
 
-  return md;
+  return markdown;
 }
 
 /** Shared, stateless markdown-it instance configured for deilen base rendering. */

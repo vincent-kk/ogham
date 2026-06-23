@@ -40,6 +40,15 @@ describe("renderMarkdown", () => {
     expect(html).toContain("\\int_0^1 x dx");
   });
 
+  it("renders task list items as checkbox markers", () => {
+    const { html } = renderMarkdown("- [x] done\n- [ ] todo");
+    expect(html).toContain('class="deilen-task-item checked"');
+    expect(html).toContain('class="deilen-task-checkbox checked"');
+    expect(html).toContain('class="deilen-task-item"');
+    expect(html).not.toContain("[x]");
+    expect(html).not.toContain("[ ]");
+  });
+
   it("injects data-source-line on block elements", () => {
     const { html } = renderMarkdown("# Title\n\nparagraph here");
     expect(html).toMatch(/<h1[^>]*data-source-line="1"/);

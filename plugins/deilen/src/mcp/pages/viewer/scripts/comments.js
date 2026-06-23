@@ -395,10 +395,18 @@ function updateStatus() {
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
+function anchorTargets(viewer) {
+  const targets = [...viewer.querySelectorAll("li[data-source-line]")];
+  for (const child of viewer.children) {
+    if (child.tagName === "UL" || child.tagName === "OL") continue;
+    if (child.hasAttribute("data-source-line")) targets.push(child);
+  }
+  return targets;
+}
+
 function decorateAnchors() {
   const viewer = document.getElementById("viewer");
-  for (const block of viewer.children) {
-    if (!block.hasAttribute("data-source-line")) continue;
+  for (const block of anchorTargets(viewer)) {
     const addButton = getElement("button", {
       class: "line-add",
       type: "button",

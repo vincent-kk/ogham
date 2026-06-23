@@ -401,6 +401,39 @@ button {
 
 .viewer li {
   margin: 0.25em 0;
+  position: relative;
+}
+
+.viewer li.deilen-task-item {
+  list-style: none;
+}
+
+.deilen-task-checkbox {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 1.05em;
+  height: 1.05em;
+  margin: 0 0.5em 0 -0.2em;
+  vertical-align: -0.18em;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--bg);
+}
+
+.deilen-task-checkbox.checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.deilen-task-checkbox.checked::after {
+  content: "";
+  display: block;
+  width: 0.3em;
+  height: 0.55em;
+  margin: -0.04em auto 0;
+  border: solid var(--accent-contrast);
+  border-width: 0 0.16em 0.16em 0;
+  transform: rotate(45deg);
 }
 
 .viewer li::marker {
@@ -641,6 +674,7 @@ button {
 }
 
 .viewer > :hover > .line-add,
+.viewer li:hover > .line-add,
 .line-add:focus-visible {
   opacity: 1;
   transform: translateX(0);
