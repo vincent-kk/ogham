@@ -1,0 +1,409 @@
+/* deilen settings — shares the viewer token system; cennad-style chrome.
+   Chrome (buttons, switches, radios, focus) is monochrome: --accent maps to the
+   text color per theme, so high-contrast controls fall out of the token values. */
+
+:root {
+  --font-body:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --bg: #ffffff;
+  --bg-subtle: #f7f7f8;
+  --bg-inset: #ededee;
+  --text: #1a1a1d;
+  --text-muted: #5c5c63;
+  --text-faint: #8a8a90;
+  --border: #e5e5e7;
+  --border-strong: #d4d4d7;
+  --accent: #5b5bd6;
+  --accent-hover: #4a4ac4;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(91, 91, 214, 0.1);
+  --danger: #d61f1f;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --transition: 160ms ease;
+}
+
+:root[data-theme="dark"] {
+  --bg: #16161a;
+  --bg-subtle: #1c1c20;
+  --bg-inset: #242429;
+  --text: #f4f4f6;
+  --text-muted: #9a9aa3;
+  --text-faint: #5e5e67;
+  --border: #2a2a31;
+  --border-strong: #3a3a43;
+  --accent: #8b8cea;
+  --accent-hover: #a3a4f0;
+  --accent-contrast: #16161a;
+  --accent-soft: rgba(139, 140, 234, 0.16);
+  --danger: #f08a8a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --bg: #16161a;
+    --bg-subtle: #1c1c20;
+    --bg-inset: #242429;
+    --text: #f4f4f6;
+    --text-muted: #9a9aa3;
+    --text-faint: #5e5e67;
+    --border: #2a2a31;
+    --border-strong: #3a3a43;
+    --accent: #8b8cea;
+    --accent-hover: #a3a4f0;
+    --accent-contrast: #16161a;
+    --accent-soft: rgba(139, 140, 234, 0.16);
+    --danger: #f08a8a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+code {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  background: var(--bg-inset);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.shell {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+/* ── Masthead ───────────────────────────────────────────── */
+.masthead {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 24px;
+  margin-bottom: 8px;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.brand {
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.brand-tag {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.lede {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Sections (divider-separated, no cards) ─────────────── */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section-title {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-help {
+  margin: -8px 0 16px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ── Fields ─────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field + .field,
+.toggle + .toggle {
+  margin-top: 14px;
+}
+
+.toggle + .grid {
+  margin-top: 16px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.grid .field + .field {
+  margin-top: 0;
+}
+
+.input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ── Pill radios ────────────────────────────────────────── */
+.radio-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.radio {
+  position: relative;
+  cursor: pointer;
+}
+
+.radio input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.radio span {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 13px;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition);
+}
+
+.radio:hover span {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.radio input:checked + span {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.radio input:focus-visible + span {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ── Custom switch ──────────────────────────────────────── */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition:
+    transform var(--transition),
+    background var(--transition);
+}
+
+.toggle input:checked ~ .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(16px);
+  background: var(--bg);
+}
+
+.toggle input:focus-visible ~ .toggle-track {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ── Actions + status ───────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 18px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    opacity var(--transition);
+}
+
+.btn:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-inset);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin-top: 20px;
+  min-height: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.status.ok {
+  color: var(--text);
+}
+
+.status.err {
+  color: var(--danger);
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
