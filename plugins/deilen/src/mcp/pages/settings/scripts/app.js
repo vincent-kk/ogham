@@ -27,7 +27,7 @@ function populate() {
   $("font_family").value = config.font_family ?? "";
   $("auto_open").checked = config.auto_open !== false;
   $("collect_timeout_seconds").value = config.collect_timeout_seconds ?? 45;
-  $("idle_shutdown_minutes").value = config.idle_shutdown_minutes ?? 10;
+  $("idle_shutdown_minutes").value = config.idle_shutdown_minutes ?? 1;
   $("session_ttl_hours").value = config.session_ttl_hours ?? 72;
   $("preferred_port").value = config.preferred_port ?? 0;
   const renderers = config.renderers || {};
