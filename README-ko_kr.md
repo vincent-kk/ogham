@@ -41,12 +41,12 @@ claude plugin install maencof
 
 **제공 컴포넌트:**
 
-| 컴포넌트 | 수량     | 예시                                                                  |
-| -------- | -------- | --------------------------------------------------------------------- |
-| Skills   | 18       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline`     |
-| MCP 도구 | 18       | 구조 분석, 드리프트 감지, AST 메트릭, 기술 부채 추적                  |
-| Agents   | 14       | Architect, Implementer, QA Reviewer, 7인 페르소나 리뷰 위원회         |
-| Hooks    | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd |
+| 컴포넌트 | 수량     | 예시                                                                    |
+| -------- | -------- | ----------------------------------------------------------------------- |
+| Skills   | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
+| MCP 도구 | 18       | 구조 분석, 드리프트 감지, AST 메트릭, 기술 부채 추적                    |
+| Agents   | 14       | Architect, Implementer, QA Reviewer, 7인 페르소나 리뷰 위원회           |
+| Hooks    | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd   |
 
 **주요 기능:**
 

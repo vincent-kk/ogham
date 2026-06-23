@@ -1,7 +1,7 @@
 # prawf 산출물 템플릿
 
 > chair·strategist가 작성하는 산출물의 **리터럴 포맷**. [`orchestration.md`](./orchestration.md) §5(frontmatter 계약)의
-> *본문 구조*를 정의한다. filid review `templates.md` 대응.
+> *본문 구조*를 정의한다. filid cross-review `templates.md` 대응.
 >
 > **출력 언어**: 산출물은 `[filid:lang]`(또는 시스템 언어, 기본 영어) 설정을 따른다 — 아래 예시는 한국어다.
 > 축 id·프레임워크명·finding-id·verdict enum 은 원형을 유지한다. chair는 산출물 작성 전 본 파일을 읽는다.

@@ -41,12 +41,12 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 **What it provides:**
 
-| Component | Count    | Examples                                                              |
-| --------- | -------- | --------------------------------------------------------------------- |
-| Skills    | 18       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline`     |
-| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking       |
-| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee       |
-| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd |
+| Component | Count    | Examples                                                                |
+| --------- | -------- | ----------------------------------------------------------------------- |
+| Skills    | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
+| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking         |
+| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee         |
+| Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd   |
 
 **Key features:**
 

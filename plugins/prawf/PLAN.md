@@ -13,25 +13,25 @@
 
 ## 2. 설계 SSoT — 먼저 읽을 것 (`.metadata/prawf/`, 순서대로)
 
-| #   | 파일                  | 역할                                               | 이식                                                    |
-| --- | --------------------- | -------------------------------------------------- | ------------------------------------------------------- |
-| 1   | `co-review-report.md` | 평가 이론 원자료(5축 + 8장 실무)                   | 참고용(이식 X)                                          |
-| 2   | `note.md`             | 5축 요약                                           | 참고용                                                  |
-| 3   | `personas.md`         | **9인 + adjudicator 정의**                         | → `agents/*.md`                                         |
-| 4   | `orchestration.md`    | **파이프라인·상태머신·산출물 계약**                | → `skills/review/orchestration.md` + `SKILL.md`         |
-| 5   | `field-profiles.md`   | **분야 프로파일 스키마·데이터**                    | → `skills/review/field-profiles.md` + `profiles/*.yaml` |
-| 6   | `templates.md`        | 산출물 포맷                                        | → `skills/review/templates.md`                          |
-| 7   | `prompt-templates.md` | spawn 프롬프트                                     | → `skills/review/prompt-templates.md`                   |
-| 8   | `scaffold.md`         | **패키지 구조 확정**(디렉토리·skill·MCP/hook 결정) | 본 PLAN의 근거                                          |
+| #   | 파일                  | 역할                                               | 이식                                                         |
+| --- | --------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| 1   | `co-review-report.md` | 평가 이론 원자료(5축 + 8장 실무)                   | 참고용(이식 X)                                               |
+| 2   | `note.md`             | 5축 요약                                           | 참고용                                                       |
+| 3   | `personas.md`         | **9인 + adjudicator 정의**                         | → `agents/*.md`                                              |
+| 4   | `orchestration.md`    | **파이프라인·상태머신·산출물 계약**                | → `skills/peer-review/orchestration.md` + `SKILL.md`         |
+| 5   | `field-profiles.md`   | **분야 프로파일 스키마·데이터**                    | → `skills/peer-review/field-profiles.md` + `profiles/*.yaml` |
+| 6   | `templates.md`        | 산출물 포맷                                        | → `skills/peer-review/templates.md`                          |
+| 7   | `prompt-templates.md` | spawn 프롬프트                                     | → `skills/peer-review/prompt-templates.md`                   |
+| 8   | `scaffold.md`         | **패키지 구조 확정**(디렉토리·skill·MCP/hook 결정) | 본 PLAN의 근거                                               |
 
-참고 구조: filid `plugins/filid/skills/review/` 가 가장 가까운 선례(단 prawf는 정적분석 인프라 제거).
+참고 구조: filid `plugins/filid/skills/cross-review/` 가 가장 가까운 선례(단 prawf는 정적분석 인프라 제거).
 
 ## 3. 확정 결정 로그 (왜 이렇게 되었나 — 재논의 금지선)
 
 - **페르소나 9인**: soundness 공격 6(`argument-analyst`·`methodologist`·`statistical-auditor`·`causal-reviewer`·`bias-grader`·`integrity-auditor`) + `impact-assessor`(advisory) + `rebuttal-strategist`(방어) + `chair`(중재). `--solo` 전용 `adjudicator` 1.
 - **soundness-only verdict**: verdict는 soundness 6축 UNRESOLVED만 집계. `impact`는 advisory(Minor 이상 못 올림). — gemini/critic 외부 검증 근거. _(#65 갱신: 게이트(`--gate`, 기본 `major`) 이상 UNRESOLVED만 집계 — minor 는 advisory, `orchestration.md` §4.2/§4.5 가 최종.)_
-- **3 skill**: `review`(메인) · `simulate-defense` · `rebuttal`. setup/profile skill 제거.
-- **프로파일 내용 기반 자동 판정**: review P0가 논문 내용으로 분야·프로파일 추론. `--profile <name>` override 선택. **config 파일 불요**.
+- **4 skill**: `peer-review`(메인) · `simulate-defense` · `rebuttal` · `auto-fix`. setup/profile skill 제거.
+- **프로파일 내용 기반 자동 판정**: peer-review P0가 논문 내용으로 분야·프로파일 추론. `--profile <name>` override 선택. **config 파일 불요**.
 - **MCP 0 · hook 0**: 평가는 추론(분석 도구 없음), 시행 규칙 없음. 순수 마크다운. (근거: `scaffold.md` §6·§7)
 - **영문 구현 / 한국어 설계 SSoT 분리**: `.metadata/prawf/`(한국어) ↔ `plugins/prawf/`(영문).
 - **2회 독립 검증(critic×2 + gemini) 반영 완료**: severity 루브릭·canonical locator·dedup·WITHDRAWN 확인·tie-break·significance 분리 등 P0/P1 봉합됨. 상태머신/계약은 `orchestration.md` 가 최종.
@@ -44,7 +44,7 @@
 ### 4.1 `field-profiles.md`
 
 - 헤더 `L1` 제목 `(config 주입)` → `(분야 프로파일 데이터)`.
-- `L5–6` "MCP setup(또는 CLAUDE.md / `.prawf/config.json`)으로 config 형태로 공급", "MCP는 config 주입용" → "review P0가 자동 판정에 사용하는 분야 데이터"로 교체. MCP 문구 삭제.
+- `L5–6` "MCP setup(또는 CLAUDE.md / `.prawf/config.json`)으로 config 형태로 공급", "MCP는 config 주입용" → "peer-review P0가 자동 판정에 사용하는 분야 데이터"로 교체. MCP 문구 삭제.
 - `L21` 스키마 주석 "(또는 MCP setup이 주입하는 JSON)" → 삭제.
 - `§5 주입 메커니즘 (L186–201)` **전면 교체**:
   - 삭제: `CLI > .prawf/config.json(default_profile) > CLAUDE.md > 자동 > 폴백`, "MCP setup 웹 UI", "atlassian setup 대응".
@@ -83,20 +83,21 @@
 - Hard Rules: `Write`는 자기 산출물(`findings/`·`rebuttal.md` 등)에만, location은 `paper-normalized.md` 좌표, 외부도구는 capability 위임.
 - **완료**: 10개 frontmatter valid, `subagent-constructor` 검증 통과.
 
-### Phase 3 — `skills/review/`
+### Phase 3 — `skills/peer-review/`
 
-- `SKILL.md`: P0~ADJ 워크플로우 엔트리. filid `review/SKILL.md` 의 **anti-yield 3-layer 패턴**(Tier-2a) 복제 — 라운드 사이 yield 금지. `--solo`/`--profile`/`--scope` 옵션.
+- `SKILL.md`: P0~ADJ 워크플로우 엔트리. filid `cross-review/SKILL.md` 의 **anti-yield 3-layer 패턴**(Tier-2a) 복제 — 라운드 사이 yield 금지. `--solo`/`--profile`/`--scope` 옵션.
 - `orchestration.md`·`field-profiles.md`·`templates.md`·`prompt-templates.md` 영문 이식(Phase 0 정리 반영).
 - `profiles/*.yaml` ×4: `empirical-science`·`cs-ml`·`math-theory`·`humanities-qualitative` (`field-profiles.md` 데이터 그대로).
 - `INTENT.md`·`DETAIL.md`.
 - **완료**: SKILL.md frontmatter valid, 명세 cross-ref 일관(persona id·산출물 파일명), `validate-plugin` 통과.
 
-### Phase 4 — `skills/simulate-defense/` · `skills/rebuttal/`
+### Phase 4 — `skills/simulate-defense/` · `skills/rebuttal/` · `skills/auto-fix/`
 
-- 각 `SKILL.md` (+ `INTENT.md`·`DETAIL.md`). review의 agents·오케스트레이션 재사용.
+- 각 `SKILL.md` (+ `INTENT.md`·`DETAIL.md`). peer-review의 agents·오케스트레이션 재사용.
 - `simulate-defense`: `qa-sheet`(또는 논문) → 심사위원 에이전트 질문 → 저자(사용자) 답변 → 평가·코칭. **대화형이면** filid Tier-2b escape-hatch 패턴 적용(§8).
 - `rebuttal`: 논문 + 외부 리뷰 코멘트 입력 → R1 생략, **R2 방어부터** → `rebuttal-letter.md` + `revision-checklist.md`.
-- **완료**: frontmatter·트리거 description(`"동료평가"`/`"peer review"`/`"답변 시뮬레이션"`/`"반박문"`) valid.
+- `auto-fix`: peer-review 산출물 → 자동수정 가능한 기계적·근거 기반 편집만 원고에 직접 적용, 나머지는 manual 목록 → `applied-fixes.md` + `manual-fixes.md`.
+- **완료**: frontmatter·트리거 description(`"동료평가"`/`"peer review"`/`"답변 시뮬레이션"`/`"반박문"`/`"자동 수정"`) valid.
 
 ### Phase 5 — 배포 메타
 

@@ -3,7 +3,7 @@
 > `packages/prawf/` 전체 구조 · skill 구성 · MCP/hook 검토. filid 골격 기반이되 **prawf 성격(멀티에이전트
 > 평가 오케스트레이션)에 맞춰 정적분석 인프라를 들어낸 순수 마크다운 플러그인**. (코드 미작성 — 설계 명세.)
 >
-> **확정**: 3 skill · 프로파일 내용 기반 자동 판정 · MCP 0개 · hook 0개 · 명세는 `skills/review/` 영문 이식.
+> **확정**: 4 skill · 프로파일 내용 기반 자동 판정 · MCP 0개 · hook 0개 · 명세는 `skills/peer-review/` 영문 이식.
 
 ## 1. 설계 철학 — filid와 prawf는 무게가 다르다
 
@@ -20,14 +20,14 @@ prawf의 평가는 페르소나의 *추론*이지 결정적 측정이 아니다.
 
 ### filid 취사
 
-| filid 요소                                   | prawf     | 사유                                                       |
-| -------------------------------------------- | --------- | ---------------------------------------------------------- |
-| `.claude-plugin/plugin.json`                 | ✅ mirror | 플러그인 매니페스트                                        |
-| `skills/` · `agents/`                        | ✅ mirror | 워크플로우 + 10인 페르소나                                 |
-| `INTENT.md`/`DETAIL.md`/`CLAUDE.md`/`README` | ✅ mirror | FCA dogfooding + 가이드                                    |
-| `src/`·`bridge/`·`scripts/`·`.mcp.json`      | ❌ drop   | MCP 0개 → 빌드 산출물 없음 (§6)                            |
-| `hooks/`·`@ast-grep/napi`                    | ❌ drop   | 시행 규칙 없음(§7)·분석 도구 없음                          |
-| `templates/`                                 | ⚠️ 변형   | FCA 모듈 템플릿 대신 `skills/review/profiles/` 분야 데이터 |
+| filid 요소                                   | prawf     | 사유                                                            |
+| -------------------------------------------- | --------- | --------------------------------------------------------------- |
+| `.claude-plugin/plugin.json`                 | ✅ mirror | 플러그인 매니페스트                                             |
+| `skills/` · `agents/`                        | ✅ mirror | 워크플로우 + 10인 페르소나                                      |
+| `INTENT.md`/`DETAIL.md`/`CLAUDE.md`/`README` | ✅ mirror | FCA dogfooding + 가이드                                         |
+| `src/`·`bridge/`·`scripts/`·`.mcp.json`      | ❌ drop   | MCP 0개 → 빌드 산출물 없음 (§6)                                 |
+| `hooks/`·`@ast-grep/napi`                    | ❌ drop   | 시행 규칙 없음(§7)·분석 도구 없음                               |
+| `templates/`                                 | ⚠️ 변형   | FCA 모듈 템플릿 대신 `skills/peer-review/profiles/` 분야 데이터 |
 
 ## 2. 디렉토리 구조 (확정 — 순수 마크다운)
 
@@ -48,7 +48,7 @@ packages/prawf/
 │   └── adjudicator.md               # --solo 통합 1패스
 ├── skills/
 │   ├── INTENT.md
-│   ├── review/                      # ★ 메인 — 9인 team 평가
+│   ├── peer-review/                 # ★ 메인 — 9인 team 평가
 │   │   ├── SKILL.md                 # 워크플로우 엔트리
 │   │   ├── INTENT.md · DETAIL.md
 │   │   ├── orchestration.md         # 파이프라인·상태머신·계약 (영문 이식)
@@ -73,28 +73,29 @@ packages/prawf/
 
 **사용자 프로젝트 측** (`.prawf/`, 런타임 생성·선택):
 
-- 기본은 **설정 파일 불요** — review가 논문 내용으로 프로파일을 자동 판정.
-- 커스텀 분야가 필요할 때만 `.prawf/profiles/<name>.yaml` 을 사용자가 작성(또는 review가 폴백 안내).
+- 기본은 **설정 파일 불요** — peer-review가 논문 내용으로 프로파일을 자동 판정.
+- 커스텀 분야가 필요할 때만 `.prawf/profiles/<name>.yaml` 을 사용자가 작성(또는 peer-review가 폴백 안내).
 
-## 3. Skill 구성 — 3개 (+ 아이디에이션 3개)
+## 3. Skill 구성 — 4개 (+ 아이디에이션 3개)
 
-| skill                  | 역할                                                                             | 산출                                           |
-| ---------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **`review`**           | 9인 team 평가 (교차검증 메인). P0(자동 프로파일 판정)~ADJ                        | `review-report.md` + `qa-sheet.md`             |
-| **`simulate-defense`** | 답변 시뮬레이션 — 심사위원 에이전트 질문 → 저자 답변 → 평가·코칭                 | 모의 Q&A 세션 + 코칭                           |
-| **`rebuttal`**         | 외부에서 받은 실제 리뷰 코멘트 → point-by-point 응답서 (R1 건너뛰고 R2 방어부터) | `rebuttal-letter.md` + `revision-checklist.md` |
+| skill                  | 역할                                                                                           | 산출                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **`peer-review`**      | 9인 team 평가 (교차검증 메인). P0(자동 프로파일 판정)~ADJ                                      | `review-report.md` + `qa-sheet.md`             |
+| **`simulate-defense`** | 답변 시뮬레이션 — 심사위원 에이전트 질문 → 저자 답변 → 평가·코칭                               | 모의 Q&A 세션 + 코칭                           |
+| **`rebuttal`**         | 외부에서 받은 실제 리뷰 코멘트 → point-by-point 응답서 (R1 건너뛰고 R2 방어부터)               | `rebuttal-letter.md` + `revision-checklist.md` |
+| **`auto-fix`**         | peer-review 후 자동수정 가능한 기계적·근거 기반 편집만 원고에 직접 적용 (나머지는 manual 목록) | `applied-fixes.md` + `manual-fixes.md`         |
 
 - 프로파일: **내용 기반 자동 판정이 기본**. `--profile <name>` 인자는 override(선택). 별도 setup/profile skill 없음.
-- `--solo`(adjudicator)는 `review`의 옵션이지 별도 skill 아님.
-- `simulate-defense`·`rebuttal` 은 review의 **agents·오케스트레이션을 재사용**(strategist + 축 reviewer) — 구현 부담 작음.
+- `--solo`(adjudicator)는 `peer-review`의 옵션이지 별도 skill 아님.
+- `simulate-defense`·`rebuttal` 은 peer-review의 **agents·오케스트레이션을 재사용**(strategist + 축 reviewer) — 구현 부담 작음.
 
 ### 아이디에이션 (추후 선택)
 
-| skill            | 아이디어                                                 |
-| ---------------- | -------------------------------------------------------- |
-| `pre-submission` | 제출 전 셀프 체크리스트 (review의 lightweight 단일 패스) |
-| `revise-guide`   | Major/Minor Revision verdict → 구체적 수정 로드맵        |
-| `compare`        | 다중 논문 비교 평가 (학회 프로그램위원)                  |
+| skill            | 아이디어                                                      |
+| ---------------- | ------------------------------------------------------------- |
+| `pre-submission` | 제출 전 셀프 체크리스트 (peer-review의 lightweight 단일 패스) |
+| `revise-guide`   | Major/Minor Revision verdict → 구체적 수정 로드맵             |
+| `compare`        | 다중 논문 비교 평가 (학회 프로그램위원)                       |
 
 ## 4. Agents — 10개 (영문 전개)
 
@@ -130,18 +131,18 @@ packages/prawf/
 
 → `hooks/` 디렉토리 자체를 두지 않는다.
 
-## 8. 명세 이식 — `skills/review/` 영문 전개
+## 8. 명세 이식 — `skills/peer-review/` 영문 전개
 
-`.metadata/prawf/` 의 한국어 설계 명세를 `skills/review/` 로 **영문 이식**(filid 방식):
+`.metadata/prawf/` 의 한국어 설계 명세를 `skills/peer-review/` 로 **영문 이식**(filid 방식):
 
-| `.metadata/prawf/` (한국어 설계) | → `packages/prawf/` (영문 구현)                       |
-| -------------------------------- | ----------------------------------------------------- |
-| `personas.md`                    | `agents/<id>.md` ×10                                  |
-| `orchestration.md`               | `skills/review/orchestration.md` + `SKILL.md`         |
-| `field-profiles.md`              | `skills/review/field-profiles.md` + `profiles/*.yaml` |
-| `templates.md`                   | `skills/review/templates.md`                          |
-| `prompt-templates.md`            | `skills/review/prompt-templates.md`                   |
-| `co-review-report.md`/`note.md`  | (출처 — 이식 안 함)                                   |
+| `.metadata/prawf/` (한국어 설계) | → `packages/prawf/` (영문 구현)                            |
+| -------------------------------- | ---------------------------------------------------------- |
+| `personas.md`                    | `agents/<id>.md` ×10                                       |
+| `orchestration.md`               | `skills/peer-review/orchestration.md` + `SKILL.md`         |
+| `field-profiles.md`              | `skills/peer-review/field-profiles.md` + `profiles/*.yaml` |
+| `templates.md`                   | `skills/peer-review/templates.md`                          |
+| `prompt-templates.md`            | `skills/peer-review/prompt-templates.md`                   |
+| `co-review-report.md`/`note.md`  | (출처 — 이식 안 함)                                        |
 
 `.metadata/prawf/` 는 한국어 설계 SSoT로 보존, `packages/prawf/` 는 영문 구현체.
 
@@ -149,6 +150,6 @@ packages/prawf/
 
 1. `package.json` + `.claude-plugin/plugin.json` + 루트 `INTENT.md`/`DETAIL.md`/`CLAUDE.md`
 2. `agents/*.md` ×10 (영문)
-3. `skills/review/` (SKILL.md + 명세 5종 영문 + profiles/\*.yaml)
-4. `skills/simulate-defense/` · `skills/rebuttal/` (SKILL.md)
+3. `skills/peer-review/` (SKILL.md + 명세 5종 영문 + profiles/\*.yaml)
+4. `skills/simulate-defense/` · `skills/rebuttal/` · `skills/auto-fix/` (SKILL.md)
 5. `README.md` (+ README-ko_kr.md) + marketplace.json 등록

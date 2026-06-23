@@ -1,7 +1,7 @@
 # prawf 오케스트레이션 설계
 
 > [`personas.md`](./personas.md) 의 9인을 Claude Code 네이티브 팀으로 운영하는 **라운드 흐름 ·
-> 상태 머신 · 산출물 계약** 명세. filid `review` 의 `state-machine.md` + `phase-d-deliberation.md` +
+> 상태 머신 · 산출물 계약** 명세. filid `cross-review` 의 `state-machine.md` + `phase-d-deliberation.md` +
 > `contracts.md` 를 prawf 도메인으로 미러링한 한국어 설계 명세다.
 >
 > 실행 환경: **claude-code 세션 내부**. 모든 라운드는 native Team(`TeamCreate`/`Task`/`SendMessage`)으로
@@ -10,7 +10,7 @@
 
 ## 1. filid와의 구조적 차이
 
-| 측면          | filid review                              | prawf                                                           |
+| 측면          | filid cross-review                        | prawf                                                           |
 | ------------- | ----------------------------------------- | --------------------------------------------------------------- |
 | 페르소나 관계 | 동등 위원의 **수평 합의**                 | **수직** 공격(6) → 방어(1) → 중재(1), 별도 significance 평가(1) |
 | 합의 단위     | 한 명제에 대한 위원 투표                  | **개별 finding의 생존 여부**                                    |

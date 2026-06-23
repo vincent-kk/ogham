@@ -1,7 +1,7 @@
 # prawf 서브에이전트 프롬프트 템플릿
 
 > chair(team lead)가 각 페르소나를 `Task(subagent_type: "prawf:<persona-id>", team_name: "prawf-<paper-slug>")`
-> 로 spawn할 때 채우는 **리터럴 프롬프트**. filid review `prompt-templates.md` 대응.
+> 로 spawn할 때 채우는 **리터럴 프롬프트**. filid cross-review `prompt-templates.md` 대응.
 >
 > 메타 규칙은 본 파일 §7(프롬프트 구성 규칙)에. 각 페르소나의 정체성·하드룰은 `agents/<id>.md`(영문)에,
 > 분야별 framework 메뉴·severity 앵커는 [`field-profiles.md`](./field-profiles.md)에 있다 — chair가 프로파일에서
