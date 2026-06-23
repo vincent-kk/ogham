@@ -13,7 +13,7 @@ function extFor(mime) {
   return (mime.split("/")[1] || "png").replace(/[^a-z0-9]/gi, "");
 }
 
-export function toAttachment(blob, source) {
+function toAttachment(blob, source) {
   return {
     id: nextId(),
     blob,

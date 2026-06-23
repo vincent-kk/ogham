@@ -3,7 +3,7 @@
 // separate overall composer. Both live in in-memory stores, render as sidebar
 // cards, and debounce-save as text-only drafts until the final multipart submit.
 
-import { toAttachment, wireImageCapture } from "./images.js";
+import { wireImageCapture } from "./images.js";
 import { scheduleAutoSave, submitFeedback } from "./submit.js";
 
 let view = {};
