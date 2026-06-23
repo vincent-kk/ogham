@@ -1,11 +1,11 @@
 ---
-name: present
-description: '[deilen] Render a markdown document (or plan) as a browser page and auto-collect line-anchored feedback back into the conversation. Trigger: "present this", "show this in the browser", "let me review this in a page", "이 문서 페이지로 보여줘"'
+name: display
+description: '[deilen] Render a markdown document (or plan) as a browser page and auto-collect line-anchored feedback back into the conversation. Trigger: "display this", "show this in the browser", "let me review this in a page", "이 문서 페이지로 보여줘"'
 user_invocable: true
 argument-hint: ""
 ---
 
-# present
+# display
 
 Render the document Claude just produced as a readable local page, then
 automatically collect the user's line-anchored comments (and any attached
@@ -49,7 +49,7 @@ images) and fold them back into the document.
 ## Notes
 
 - Plans are markdown too — render them with `mcp_tools_render_viewer` directly. In plan
-  mode, present after the plan is confirmed (or render a saved plan file), since
+  mode, display after the plan is confirmed (or render a saved plan file), since
   plan mode can restrict tool use.
 - Reply to the user in their own language.
 

@@ -4,7 +4,7 @@
 
 ## Status
 
-Implemented: render core, the local HTTP server + viewer, line-anchored feedback (long-poll), the settings UI, and the `present` / `setup` skills. Four MCP tools: `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
+Implemented: render core, the local HTTP server + viewer, line-anchored feedback (long-poll), the settings UI, and the `display` / `setup` skills. Four MCP tools: `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. Build artifacts (`bridge/`) are built and committed by the user.
 
 ## What deilen does
 
@@ -24,7 +24,7 @@ yarn deilen version:sync  # package.json → src/version.ts + plugin.json
 
 ## Plugin Runtime
 
-- Skill names have no plugin prefix (`setup`, `present`) — directory name = skill name.
+- Skill names have no plugin prefix (`setup`, `display`) — directory name = skill name.
 - MCP server name is `tools` — skills reference it as `mcp_tools_<name>`.
 - **No agents, no hooks** (hence no `libs/run.cjs`).
 - Heavy renderers live in `bridge/assets/` (built by `buildRenderers.mjs`) and are **never** bundled into `mcp-server.cjs` — enforced by a `buildMcpServer.mjs` guard.

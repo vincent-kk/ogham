@@ -18,7 +18,7 @@ Claude 가 긴 markdown 문서를 만들면, 터미널의 텍스트 벽 대신 `
 
 ```
 # 현재 문서를 페이지로 띄우고 피드백 수집
-/deilen:present
+/deilen:display
 
 # 로컬 설정 UI (테마·자동 오픈·타임아웃·렌더러)
 /deilen:setup

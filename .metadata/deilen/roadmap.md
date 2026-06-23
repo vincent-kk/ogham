@@ -29,7 +29,7 @@ cennad/filid 동일 패키지 골격 위에서 단계적으로 구현한다. 각
 
 ## Phase 4 — 스킬
 
-- `skills/present/SKILL.md`(렌더→poll 루프→반영), `skills/setup/SKILL.md`.
+- `skills/display/SKILL.md`(렌더→poll 루프→반영), `skills/setup/SKILL.md`.
 
 ## Phase 5 — 설정 UI
 

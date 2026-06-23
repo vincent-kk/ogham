@@ -84,7 +84,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 
 - complete 버퍼 선재 시 즉시 반환.
 - 아니면 resolver 등록 + `wait_seconds` 타이머(타임아웃 → `pending`).
-- 동일 세션에 다중 collect 동시성은 없음(present 는 직렬 호출). 방어적으로 마지막 resolver 만 유지.
+- 동일 세션에 다중 collect 동시성은 없음(display 는 직렬 호출). 방어적으로 마지막 resolver 만 유지.
 
 ## MCP 반환 매핑
 

@@ -12,7 +12,7 @@ plugins/deilen/
 ├── .mcp.json                      # { mcpServers: { tools: { command: node, args: bridge/mcp-server.cjs } } }
 ├── skills/
 │   ├── setup/SKILL.md
-│   └── present/SKILL.md
+│   └── display/SKILL.md
 ├── scripts/
 │   ├── buildMcpServer.mjs         # esbuild → bridge/mcp-server.cjs (CJS)
 │   ├── buildViewerHtml.mjs        # 뷰어 FE → src/mcp/httpServer/__generated__/viewerHtml.ts

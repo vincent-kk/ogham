@@ -23,7 +23,7 @@ export interface CollectFeedbackPending {
 /**
  * collect_feedback: bounded long-poll. Returns the submitted feedback as MCP
  * content once a complete submission arrives, or a pending marker on timeout so
- * the present skill can re-call.
+ * the display skill can re-call.
  */
 export async function handleCollectFeedback(
   input: CollectFeedbackInput,
