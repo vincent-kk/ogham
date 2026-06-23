@@ -2,7 +2,13 @@ import { stat } from "node:fs/promises";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { CONFIG_PATH, sessionDir } from "../../../constants/paths.js";
+import {
+  CONFIG_PATH,
+  sessionDir,
+  sessionFeedbackPath,
+  sessionImagesDir,
+  sessionViewerPath,
+} from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
 import type { ToolExtra } from "../../shared/index.js";
 import { handleCollectFeedback } from "../../tools/collectFeedback/collectFeedback.js";
@@ -250,7 +256,7 @@ describe("feedback flow", () => {
     expect([a.status, b.status].sort()).toEqual([200, 409]);
   });
 
-  it("purges the session directory once a complete is collected", async () => {
+  it("clears collected feedback while preserving the closed viewer", async () => {
     const sid = await render("# Purge\n\nbody");
     const collecting = handleCollectFeedback(
       { session_id: sid, wait_seconds: 5 },
@@ -273,11 +279,18 @@ describe("feedback flow", () => {
     expect(post.status).toBe(200);
 
     const result = await collecting;
-    // the image is inlined as base64 before the purge runs
+    // the image is inlined as base64 before feedback artifacts are cleared
     expect(
       "content" in result && result.content.some((c) => c.type === "image"),
     ).toBe(true);
-    // the on-disk session is gone once the feedback has been delivered
-    await expect(stat(sessionDir(sid))).rejects.toThrow();
+    // collected feedback artifacts are gone once the feedback has been delivered
+    await expect(stat(sessionFeedbackPath(sid))).rejects.toThrow();
+    await expect(stat(sessionImagesDir(sid))).rejects.toThrow();
+
+    // meta.json + viewer.md remain so a refresh can re-render the closed viewer
+    await expect(stat(sessionDir(sid))).resolves.toBeTruthy();
+    await expect(stat(sessionViewerPath(sid))).resolves.toBeTruthy();
+    const refreshed = await fetch(`${baseUrl}/r/${sid}?token=${token}`);
+    expect(refreshed.status).toBe(200);
   });
 });

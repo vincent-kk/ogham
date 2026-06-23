@@ -85,7 +85,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 - complete 버퍼 선재 시 즉시 반환.
 - 아니면 resolver 등록 + `wait_seconds` 타이머(타임아웃 → `pending`).
 - 동일 세션에 다중 collect 동시성은 없음(display 는 직렬 호출). 방어적으로 마지막 resolver 만 유지.
-- complete 가 content 로 반환되면(이미지 base64 인라인 직후) 세션 디렉토리를 즉시 정리(`removeSession`). complete 제출 측은 `removeSession` 과의 디렉토리 경합을 피하려 깨우기 전에 `closeSession` 을 먼저 끝낸다. 미수거 세션은 TTL prune 이 백스톱.
+- complete 가 content 로 반환되면(이미지 base64 인라인 직후) `feedback.json` 과 `images/` 를 정리(`clearCollectedFeedback`)한다. complete 제출 측은 깨우기 전에 `closeSession` 을 먼저 끝내므로, 이후 새로고침은 보존된 `viewer.md` 를 다시 렌더하고 heartbeat 404로 submit만 비활성화된다. 세션 디렉토리 전체 정리는 TTL prune 이 백스톱.
 
 ## MCP 반환 매핑
 

@@ -94,8 +94,8 @@ export async function handlePostFeedback(
       payload.status === "complete" ? images : [],
     );
     if (payload.status === "complete") {
-      // Close before waking the waiter: this closeSession meta write must not
-      // race the collect-side session purge (removeSession) on the same dir.
+      // Close before waking the waiter so a refreshed viewer renders as ended
+      // even if collect-side feedback cleanup runs immediately afterward.
       await closeSession(sessionId);
       deliverComplete(sessionId, stored);
     }

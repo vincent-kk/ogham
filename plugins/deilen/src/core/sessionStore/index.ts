@@ -1,4 +1,5 @@
 export { closeSession } from "./persistence/closeSession.js";
+export { clearCollectedFeedback } from "./persistence/clearCollectedFeedback.js";
 export {
   createSession,
   type CreateSessionInput,

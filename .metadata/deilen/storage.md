@@ -19,7 +19,7 @@
 ```
 
 - `server.json` 은 단일 서버 인스턴스 핸들. 기동 시 갱신, 종료 시 삭제.
-- 세션 디렉토리는 `complete` 수거 시 즉시 정리; 미수거 세션은 `session_ttl_hours` 만료 후 다음 MCP 기동 시 정리(백스톱).
+- `complete` 수거 시 `feedback.json` 과 `images/` 는 즉시 정리하고 `meta.json`/`viewer.md` 는 닫힌 viewer 새로고침용으로 보존한다. 세션 디렉토리 전체 정리는 `session_ttl_hours` 만료 후 다음 MCP 기동 시 수행한다(백스톱).
 - 이미지 파일명은 서버 생성 `image_id` 만 사용(클라이언트 filename 은 `feedback.json` 메타로만).
 
 ## Config 스키마 (`types/config.ts`)

@@ -6,8 +6,8 @@ import { readFeedback } from "../../../core/feedbackStore/index.js";
 import { getProjectHash } from "../../../core/projectHash/index.js";
 import {
   awaitFeedback,
+  clearCollectedFeedback,
   getSession,
-  removeSession,
 } from "../../../core/sessionStore/index.js";
 import { logger } from "../../../lib/logger.js";
 import type { StoredFeedback } from "../../../types/feedback.js";
@@ -55,12 +55,12 @@ export async function handleCollectFeedback(
     extra.signal,
   );
   // A delivered complete is returned as MCP content with its images inlined as
-  // base64, so the on-disk session is purged once content is built. Best-effort
-  // — the TTL prune backstops a failed purge.
+  // base64, so collected feedback artifacts can be cleared while preserving the
+  // closed viewer for refreshes. Best-effort — the TTL prune backstops failure.
   const deliver = async (feedback: StoredFeedback): Promise<CallToolResult> => {
     const content = await buildFeedbackContent(input.session_id, feedback);
-    await removeSession(input.session_id).catch((err: unknown) =>
-      logger.warn("session purge failed", {
+    await clearCollectedFeedback(input.session_id).catch((err: unknown) =>
+      logger.warn("collected feedback cleanup failed", {
         session_id: input.session_id,
         error: (err as Error).message,
       }),
