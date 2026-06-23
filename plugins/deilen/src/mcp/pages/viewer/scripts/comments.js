@@ -383,11 +383,17 @@ export function initComments(viewState) {
       btn.disabled = true;
       const ok = await submitFeedback(view, buildPayload, allAttachments());
       if (ok) {
+        const note = document.getElementById("submit-note");
+        if (note) note.hidden = false;
         const overlay = document.getElementById("overlay");
         if (overlay) overlay.hidden = false;
       } else {
         btn.disabled = false;
       }
     });
+  document.getElementById("overlay-confirm")?.addEventListener("click", () => {
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.hidden = true;
+  });
   renderSidebar();
 }

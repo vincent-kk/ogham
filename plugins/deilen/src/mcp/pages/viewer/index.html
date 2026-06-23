@@ -144,6 +144,9 @@
     <footer class="submitbar" id="submitbar">
       <div class="submit-status" id="submit-status">No comments yet</div>
       <div class="submit-actions">
+        <span class="submit-note" id="submit-note" hidden>
+          You've already submitted your review.
+        </span>
         <button
           type="button"
           class="btn btn-primary"
@@ -175,6 +178,11 @@
         <p class="overlay-text">
           Return to your Claude conversation — your comments are on their way.
         </p>
+        <div class="overlay-actions">
+          <button type="button" class="btn btn-primary" id="overlay-confirm">
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
 
