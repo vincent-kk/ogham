@@ -404,6 +404,10 @@ button {
   position: relative;
 }
 
+.viewer li > .line-add {
+  left: -2.8em;
+}
+
 .viewer li.deilen-task-item {
   list-style: none;
 }
@@ -680,10 +684,9 @@ button {
   transform: translateX(0);
 }
 
-[data-has-comment="true"] {
-  box-shadow: inset 3px 0 0 var(--highlight-border);
+[data-has-comment="true"],
+.range-selecting {
   background: var(--highlight);
-  border-radius: var(--radius-sm);
 }
 
 /* ── Selection popover ──────────────────────────────────── */

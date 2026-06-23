@@ -13,6 +13,7 @@ const store = { comments: new Map(), overall: new Map() };
 let sequence = 0;
 let overallSequence = 0;
 let popover = null;
+let connectionAlive = false;
 
 function getElement(tag, options = {}) {
   const node = document.createElement(tag);
@@ -32,12 +33,6 @@ function rawSlice(startLine, endLine) {
     .slice(startLine - 1, endLine)
     .join("\n")
     .trim();
-}
-
-function blockAnchor(block) {
-  const startLine = Number(block.dataset.sourceLine);
-  const endLine = Number(block.dataset.sourceEnd || block.dataset.sourceLine);
-  return { startLine, endLine, sourceText: rawSlice(startLine, endLine) };
 }
 
 function rangeAnchor(startBlock, endBlock) {
@@ -96,7 +91,7 @@ function allAttachments() {
 /* ── Comment composer ─────────────────────────────────── */
 function openComposer(anchor, editing) {
   const list = document.getElementById("comment-list");
-  closeComposer();
+  commitOpenComposer();
   const attachments = editing ? [...editing.attachments] : [];
 
   const card = getElement("div", { class: "composer" });
@@ -183,6 +178,21 @@ function openComposer(anchor, editing) {
   textarea.focus();
 }
 
+// Before opening another composer, don't discard the one in progress: auto-save
+// it when it has text, otherwise drop the empty shell.
+function commitOpenComposer() {
+  const existing = document.querySelector(
+    '#comment-list [data-composer="true"]',
+  );
+  if (!existing) return;
+  const textarea = existing.querySelector("textarea");
+  if (textarea && textarea.value.trim()) {
+    existing.querySelector(".btn-primary")?.click();
+  } else {
+    existing.remove();
+  }
+}
+
 function closeComposer() {
   document.querySelector('#comment-list [data-composer="true"]')?.remove();
 }
@@ -190,7 +200,7 @@ function closeComposer() {
 /* ── Overall composer (text-only, no anchor) ──────────── */
 function openOverallComposer(editing) {
   const list = document.getElementById("comment-list");
-  closeComposer();
+  commitOpenComposer();
 
   const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
@@ -381,39 +391,95 @@ function updateStatus() {
   }
   const status = document.getElementById("submit-status");
   if (status) {
-    const parts = [];
-    if (count) parts.push(`${count} comment${count === 1 ? "" : "s"}`);
-    if (overallCount) {
-      parts.push(
-        `${overallCount} overall note${overallCount === 1 ? "" : "s"}`,
-      );
+    if (!connectionAlive) status.textContent = "Waiting for server…";
+    else {
+      const parts = [];
+      if (count) parts.push(`${count} comment${count === 1 ? "" : "s"}`);
+      if (overallCount)
+        parts.push(
+          `${overallCount} overall note${overallCount === 1 ? "" : "s"}`,
+        );
+      status.textContent = parts.length ? parts.join(" · ") : "No comments yet";
     }
-    status.textContent = parts.length ? parts.join(" · ") : "No comments yet";
   }
   const submit = document.getElementById("submit-feedback");
-  if (submit) submit.disabled = count === 0 && overallCount === 0;
+  if (submit)
+    submit.disabled = !connectionAlive || (count === 0 && overallCount === 0);
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
+let anchorBlocks = [];
+
 function anchorTargets(viewer) {
   const targets = [...viewer.querySelectorAll("li[data-source-line]")];
   for (const child of viewer.children) {
     if (child.tagName === "UL" || child.tagName === "OL") continue;
     if (child.hasAttribute("data-source-line")) targets.push(child);
   }
-  return targets;
+  return targets.sort(
+    (first, second) =>
+      Number(first.dataset.sourceLine) - Number(second.dataset.sourceLine),
+  );
+}
+
+function highlightRange(startBlock, endBlock) {
+  const from = Number(startBlock.dataset.sourceLine);
+  const to = Number(endBlock.dataset.sourceLine);
+  const minLine = Math.min(from, to);
+  const maxLine = Math.max(from, to);
+  for (const block of anchorBlocks) {
+    const line = Number(block.dataset.sourceLine);
+    block.classList.toggle(
+      "range-selecting",
+      line >= minLine && line <= maxLine,
+    );
+  }
+}
+
+function clearRangeHighlight() {
+  for (const block of anchorBlocks) block.classList.remove("range-selecting");
+}
+
+function beginBlockDrag(startBlock, event) {
+  event.preventDefault();
+  let endBlock = startBlock;
+  highlightRange(startBlock, endBlock);
+
+  const onMove = (moveEvent) => {
+    const over = nearestAnchor(
+      document.elementFromPoint(moveEvent.clientX, moveEvent.clientY),
+    );
+    if (over && anchorBlocks.includes(over)) {
+      endBlock = over;
+      highlightRange(startBlock, endBlock);
+    }
+  };
+  const onUp = () => {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+    clearRangeHighlight();
+    openComposer(rangeAnchor(startBlock, endBlock));
+  };
+  document.addEventListener("mousemove", onMove);
+  document.addEventListener("mouseup", onUp);
 }
 
 function decorateAnchors() {
   const viewer = document.getElementById("viewer");
-  for (const block of anchorTargets(viewer)) {
+  anchorBlocks = anchorTargets(viewer);
+  for (const block of anchorBlocks) {
     const addButton = getElement("button", {
       class: "line-add",
       type: "button",
       text: "+",
     });
-    addButton.setAttribute("aria-label", "Comment on this block");
-    addButton.addEventListener("click", () => openComposer(blockAnchor(block)));
+    addButton.setAttribute(
+      "aria-label",
+      "Comment on this block; drag to span lines",
+    );
+    addButton.addEventListener("mousedown", (event) =>
+      beginBlockDrag(block, event),
+    );
     block.prepend(addButton);
   }
 }
@@ -487,6 +553,11 @@ function wireSelection() {
 }
 
 /* ── Public ───────────────────────────────────────────── */
+export function setConnectionAlive(alive) {
+  connectionAlive = alive;
+  updateStatus();
+}
+
 export function initComments(viewState) {
   view = viewState || {};
   decorateAnchors();
