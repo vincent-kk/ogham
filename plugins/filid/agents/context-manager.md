@@ -84,7 +84,7 @@ and write descriptive content in the language set by `[filid:lang]`.
 ## Delegation Axis
 
 - **vs knowledge-manager**: Knowledge-manager is the review-committee
-  persona that **judges** documentation during `/filid:review`
+  persona that **judges** documentation during `/filid:cross-review`
   Phase D — read-only, emits fix_items. You are the doc-writing
   counterpart invoked by other skills to actually repair or update the
   files.

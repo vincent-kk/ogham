@@ -1,4 +1,4 @@
-# review — MCP Tools & Operational Reference
+# cross-review — MCP Tools & Operational Reference
 
 MCP tool catalog, per-phase usage map, batch partitioning thresholds,
 checkpoint resume table, and debt bias injection levels. SKILL.md and

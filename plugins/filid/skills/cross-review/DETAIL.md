@@ -1,4 +1,4 @@
-# review — Public Contract Specification
+# cross-review — Public Contract Specification
 
 ## Requirements
 
@@ -11,7 +11,7 @@
 - A null result (`fix_items: []` with SYNTHESIS) is a valid success state for every persona and the adjudicator; it MUST cite the checked surface in the opinion body.
 - When `.filid/criteria.md` holds `active` claims whose `scope` intersects the diff, Phase D MUST judge every such claim (PASS / FAIL / INSUFFICIENT-EVIDENCE, worst-wins across personas) and fold non-PASS aggregates into the blocking set (FAIL → HIGH `code-fix`; INSUFFICIENT-EVIDENCE → MEDIUM `harvest-required`). `APPROVED` therefore implies all in-scope active claims are PASS in addition to a MEDIUM-free blocking set (see `contracts.md` → "Acceptance Claims (criteria ledger)").
 - Reviews targeting a `spike/*` branch without a current harvest manifest (`.filid/harvest/<normalized>/manifest.json`, `head_sha` == HEAD) MUST skip Phases A–D and emit the Harvest-Required Variant (`templates.md`) — `verdict: REQUEST_CHANGES` with one `Type: harvest-required` fix item routing to `/filid:harvest`.
-- Any change to verdict derivation, severity anchoring, or finding discipline under `skills/review/**` or `agents/*.md` MUST be followed by a calibration pass (`skills/review/calibration/calibration.md`): clean fixture → APPROVED, low-only fixture → APPROVED with Advisory Notes, seeded fixture → REQUEST_CHANGES, claim fixture → REQUEST_CHANGES with one PASS and one FAIL claim verdict.
+- Any change to verdict derivation, severity anchoring, or finding discipline under `skills/cross-review/**` or `agents/*.md` MUST be followed by a calibration pass (`skills/cross-review/calibration/calibration.md`): clean fixture → APPROVED, low-only fixture → APPROVED with Advisory Notes, seeded fixture → REQUEST_CHANGES, claim fixture → REQUEST_CHANGES with one PASS and one FAIL claim verdict.
 - Output artifacts remain under `.filid/review/<normalized-branch>/` with the filenames catalogued in `INTENT.md`. The cross-review advisory ledger lives at `.filid/review/advisory-ledger.md` (outside per-branch cleanup scope).
 
 ## API Contracts

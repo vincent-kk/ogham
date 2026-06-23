@@ -38,7 +38,7 @@ Convert an exploratory spike into durable intent: the spike's diff is
 compared against the INTENT tree, each implicit decision is surfaced,
 and a human decides keep / discard / defer per decision. Kept decisions
 become PASS/FAIL-judgeable acceptance claims in `.filid/criteria.md`
-(the oracle ledger that `/filid:review` judges) plus INTENT.md deltas
+(the oracle ledger that `/filid:cross-review` judges) plus INTENT.md deltas
 in the affected modules. Completion is recorded as a verifiable
 manifest — the ONLY artifact that lifts the pipeline/review spike gate.
 

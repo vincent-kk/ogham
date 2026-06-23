@@ -40,7 +40,7 @@ them into ADRs, create technical debt records, and auto-commit/push changes.
 
 ## When to Use
 
-- After `/filid:review` generates `fix-requests.md`
+- After `/filid:cross-review` generates `fix-requests.md`
 - To selectively accept or reject fix requests with formal justification
 - To create tracked technical debt for deferred fixes
 - To auto-accept all fixes and run the full resolve→revalidate cycle (`--auto`)
@@ -64,7 +64,7 @@ them into ADRs, create technical debt records, and auto-commit/push changes.
 2. Detect branch: `git branch --show-current` (Bash)
 3. Normalize: `mcp_t_review_manage(action: "normalize-branch", projectRoot: <project_root>, branchName: <branch>)` MCP tool
 4. Verify: Read `.filid/review/<normalized>/fix-requests.md`
-5. If not found: abort with "No fix requests found. Run /filid:review first."
+5. If not found: abort with "No fix requests found. Run /filid:cross-review first."
 
 **→ Immediately proceed to Step 2.**
 
@@ -93,7 +93,7 @@ Classify each item by type:
 > judged INSUFFICIENT-EVIDENCE), supply the claim's `observable`
 > evidence — implement or restore the named test/command/artifact — or
 > revise/retire the claim with explicit human confirmation. Then re-run
-> /filid:review." Emit the terminal marker `Resolve aborted` and END.
+> /filid:cross-review." Emit the terminal marker `Resolve aborted` and END.
 > `harvest-required` items MUST NEVER be dispatched to code-surgeon /
 > promote / restructure — an agent cannot harvest or attest its own
 > acceptance criteria.
@@ -364,7 +364,7 @@ Current branch auto-detected. No other parameters required.
 
 Input:    .filid/review/<branch>/fix-requests.md
 Outputs:  justifications.md, .filid/debt/*.md (per rejected item), git commit + push
-Prereq:   /filid:review must have completed
+Prereq:   /filid:cross-review must have completed
 Next:     /filid:revalidate (auto-chained or manual)
 
 Steps:    1 (Branch + dirty check) → 2 (Parse) → 3 (Select) → 4 (Code-surgeon + base SHA)

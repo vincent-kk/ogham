@@ -15,20 +15,20 @@ references) MUST refer to this table rather than duplicating aliases.
 
 ## Stage Alias Table
 
-| Stage alias (bare) | Canonical skill invocation     | `--from` accepts | Entry prerequisite                                        |
-| ------------------ | ------------------------------ | ---------------- | --------------------------------------------------------- |
-| `pr-create`        | `Skill("filid:pull-request")`  | `pr-create`      | None                                                      |
-| `review`           | `Skill("filid:review", ...)`   | `review`         | PR exists (`gh pr view` exit 0)                           |
-| `resolve`          | `Skill("filid:resolve", ...)`  | `resolve`        | `.filid/review/<branch>/fix-requests.md` exists           |
-| `revalidate`       | `Skill("filid:revalidate")`    | `revalidate`     | `.filid/review/<branch>/justifications.md` exists         |
+| Stage alias (bare) | Canonical skill invocation         | `--from` accepts | Entry prerequisite                                |
+| ------------------ | ---------------------------------- | ---------------- | ------------------------------------------------- |
+| `pr-create`        | `Skill("filid:pull-request")`      | `pr-create`      | None                                              |
+| `review`           | `Skill("filid:cross-review", ...)` | `review`         | PR exists (`gh pr view` exit 0)                   |
+| `resolve`          | `Skill("filid:resolve", ...)`      | `resolve`        | `.filid/review/<branch>/fix-requests.md` exists   |
+| `revalidate`       | `Skill("filid:revalidate")`        | `revalidate`     | `.filid/review/<branch>/justifications.md` exists |
 
 ## Invocation Argument Form
 
 When passing arguments to a skill, use the **two-argument** form —
 `Skill("filid:<name>", "<args>")` — not a single string with embedded flags.
 
-- CORRECT: `Skill("filid:review", "--scope=pr")`
-- WRONG: `Skill("filid:review --scope=pr")` (flag leaks into skill name)
+- CORRECT: `Skill("filid:cross-review", "--scope=pr")`
+- WRONG: `Skill("filid:cross-review --scope=pr")` (flag leaks into skill name)
 
 ## Ordering
 
@@ -49,6 +49,9 @@ Each stage's output is the next stage's input:
   `filid:pull-request`. The alias exists because "create" describes the
   pipeline's intent (creating a new review cycle) while `pull-request`
   describes the skill's concrete output.
+- `review` is likewise a stage alias, **not** a skill name. The actual skill
+  is `filid:cross-review`. The bare alias stays `review` to keep the
+  `--from=review` entry interface stable regardless of the skill's slug.
 - Fix-request type values (`code-fix`, `promote`, `restructure`) follow the
   same bare-word token policy — see `skills/resolve/SKILL.md` Step 2.
 - `mcp_t_debt_manage` action values (`create`, `list`, `resolve`, `calculate-bias`)

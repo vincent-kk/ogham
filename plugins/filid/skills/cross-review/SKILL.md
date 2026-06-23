@@ -1,7 +1,7 @@
 ---
-name: review
+name: cross-review
 user_invocable: true
-description: '[filid:review] Run multi-persona consensus code review governance: structure check (Phase A), analysis & committee election (Phase B), parallel technical verification (Phase C1 metrics + C2 structure), then Phase D political consensus executed as a real Claude Code team (committee.length >= 2) or a single Task (committee.length == 1).'
+description: '[filid:cross-review] Run multi-persona consensus code review governance: structure check (Phase A), analysis & committee election (Phase B), parallel technical verification (Phase C1 metrics + C2 structure), then Phase D political consensus executed as a real Claude Code team (committee.length >= 2) or a single Task (committee.length == 1).'
 argument-hint: '[--scope branch|pr|commit] [--base REF] [--force] [--verbose] [--no-structure-check] [--solo]'
 version: '2.1.0'
 complexity: complex
@@ -47,7 +47,7 @@ plugin: filid
 > assistant message (see Step 3.9) and terminates. In user-invoked mode
 > (no pipeline flag) the skill runs all five steps as before.
 
-# review — AI Code Review Governance
+# cross-review — AI Code Review Governance
 
 Execute the multi-persona consensus-based code review governance
 pipeline. The chairperson delegates Phase A (structure check), Phase B
@@ -141,8 +141,8 @@ runs.
 | B     | haiku  | `phases/phase-b-analysis.md`  | `session.md`         |
 
 Resolve each phase file path via
-`${CLAUDE_PLUGIN_ROOT}/skills/review/phases/<phase>.md` (fallback:
-`Glob(**/skills/review/phases/<phase>.md)`).
+`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/<phase>.md` (fallback:
+`Glob(**/skills/cross-review/phases/<phase>.md)`).
 
 **Prompt construction**: Use the literal templates in
 `prompt-templates.md` → Phase A / Phase B. Substitute concrete values
@@ -275,7 +275,7 @@ subagent. Return control to the pipeline main.**
 > 1. **User-invoked (standalone) path** — this skill runs all five steps
 >    end-to-end; Step 4 executes here verbatim.
 > 2. **Pipeline main context** — the pipeline orchestrator does NOT
->    re-invoke `review`. It reads `phases/phase-d-deliberation.md`
+>    re-invoke `cross-review`. It reads `phases/phase-d-deliberation.md`
 >    directly and drives Phase D Dispatch per `pipeline/SKILL.md` →
 >    "Stage: Phase D Dispatch". In this case the present SKILL.md Step 4
 >    is a documentation reference, not an entry point.
@@ -287,7 +287,7 @@ is the team lead — it NEVER delegates Phase D to a general-purpose
 subagent.
 
 **Read the detailed phase file**: Resolve
-`${CLAUDE_PLUGIN_ROOT}/skills/review/phases/phase-d-deliberation.md`
+`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/phase-d-deliberation.md`
 (fallback `Glob`) and follow its step-by-step procedure. The phase file
 defines:
 
@@ -378,7 +378,7 @@ COMPLETE.**
 > `--scope=pr`).
 
 ```
-/filid:review [--scope=branch|pr|commit] [--base=<ref>] [--force] [--verbose] [--no-structure-check] [--solo]
+/filid:cross-review [--scope=branch|pr|commit] [--base=<ref>] [--force] [--verbose] [--no-structure-check] [--solo]
 ```
 
 | Option                 | Default  | Description                                                                                                       |
@@ -401,12 +401,12 @@ value.
 ## Quick Reference
 
 ```
-/filid:review                            # Full review (A + B + C1/C2 + D team)
-/filid:review --scope=pr                 # Review + post PR comment
-/filid:review --force                    # Force restart from Phase A
-/filid:review --no-structure-check       # Skip Phase A structure pre-check
-/filid:review --solo                     # Fast-path adjudicator (6-perspective)
-/filid:review --base=main --verbose      # Verbose review against main
+/filid:cross-review                            # Full review (A + B + C1/C2 + D team)
+/filid:cross-review --scope=pr                 # Review + post PR comment
+/filid:cross-review --force                    # Force restart from Phase A
+/filid:cross-review --no-structure-check       # Skip Phase A structure pre-check
+/filid:cross-review --solo                     # Fast-path adjudicator (6-perspective)
+/filid:cross-review --base=main --verbose      # Verbose review against main
 
 Phases:   A (Structure/sonnet) ┐
           B (Analysis/haiku)   ┘→ C1 (Metrics/sonnet)    ┐

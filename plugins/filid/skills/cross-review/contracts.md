@@ -1,4 +1,4 @@
-# review — Data Contracts & Meta Rules
+# cross-review — Data Contracts & Meta Rules
 
 Schemas and rules that govern committee composition, opinion files,
 subagent prompt construction, and post-completion verification fallback.
@@ -327,9 +327,9 @@ This fallback applies **only** to Phase A, B, C1, and C2. **Phase D is
 excluded** from the chairperson-direct fallback path — main MUST NOT
 fabricate a Phase D verdict when the A/B/C subagent fails. Instead, route
 the failure through the `verdict_gate` rule in
-`plugins/filid/skills/review/DETAIL.md` (`## API Contracts`) with
+`plugins/filid/skills/cross-review/DETAIL.md` (`## API Contracts`) with
 dispatch `fail` and verdict `INCONCLUSIVE`. See
-`plugins/filid/skills/review/phases/phase-d-deliberation.md` Step D.7.
+`plugins/filid/skills/cross-review/phases/phase-d-deliberation.md` Step D.7.
 
 After each A/B/C subagent completes, verify its output file exists before
 proceeding:

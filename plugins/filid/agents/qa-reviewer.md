@@ -93,7 +93,7 @@ Never approve a PR containing a critical finding.
   finding; the architect proposes the split.
 - **vs review committee personas**: Committee personas deliberate on
   politics, compromise, and cross-perspective trade-offs during
-  `/filid:review` Phase D. You are the single-perspective gate
+  `/filid:cross-review` Phase D. You are the single-perspective gate
   measurement used by `/filid:structure-review` and related skills.
 
 ## Skill Participation

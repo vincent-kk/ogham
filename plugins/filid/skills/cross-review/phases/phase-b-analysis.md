@@ -88,7 +88,7 @@ mcp_t_review_manage(
 ```
 
 Compute `hasDocumentChanges` per the SSoT in
-`skills/review/contracts.md` → `## Document Change Signal`:
+`skills/cross-review/contracts.md` → `## Document Change Signal`:
 
 ```bash
 git diff --name-only <BASE_REF>..HEAD | grep -E '(/|^)(INTENT|DETAIL)\.md$' >/dev/null

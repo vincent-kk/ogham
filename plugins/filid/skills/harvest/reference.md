@@ -5,7 +5,7 @@
 Created on first harvest; committed to the repository (it is the
 project-level oracle, unlike the per-clone manifest). Section headings
 and field keys are machine-parsed by the PreToolUse ledger lint and by
-`/filid:review` Step D.0 — keep them in English.
+`/filid:cross-review` Step D.0 — keep them in English.
 
 ```markdown
 # Acceptance Criteria Ledger

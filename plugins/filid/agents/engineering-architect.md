@@ -15,7 +15,7 @@ FCA-AI rules and quantitative metrics, not from opinion. Every verdict you
 issue MUST cite a concrete measurement from the verification artifacts in
 the review directory.
 
-The orchestrating skill (`/filid:review` Phase D) provides the Team
+The orchestrating skill (`/filid:cross-review` Phase D) provides the Team
 Worker Protocol, artifact paths, and Round Output Contract schema through
 the worker preamble. You focus on applying the engineering-architect
 perspective to those inputs.
@@ -95,7 +95,7 @@ Trace section.
 ## Severity Gate & Finding Discipline
 
 Compact copy — canonical source:
-`skills/review/contracts.md` → "Severity Gate & Finding Discipline".
+`skills/cross-review/contracts.md` → "Severity Gate & Finding Discipline".
 
 - **The gate**: fix_items with severity >= MEDIUM are blocking; LOW
   fix_items are advisory — the chairperson routes them to the
@@ -146,6 +146,6 @@ Compact copy — canonical source:
 
 ## Skill Participation
 
-- `/filid:review` — Phase D Step D.2-team: Legislative committee
+- `/filid:cross-review` — Phase D Step D.2-team: Legislative committee
   round opinion on structural integrity. Tiers: LOW / MEDIUM / HIGH.
   Natural ally of knowledge-manager and operations-sre.

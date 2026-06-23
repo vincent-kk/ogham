@@ -83,7 +83,7 @@ Detects structural drift and updates the affected INTENT.md/DETAIL.md files. Use
 
 Scans the **entire project** across 6 stages: boundary check → document validation → dependency analysis → test metrics → complexity assessment → final verdict.
 
-> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:review` instead.
+> Use for periodic structural health checks or before/after large refactors. Running this on every PR is expensive — use `filid:cross-review` instead.
 
 ### AI Code Review (per PR)
 
@@ -91,13 +91,13 @@ The most powerful feature. A multi-persona consensus committee reviews only the 
 
 ```
 # Review current branch
-/filid:review
+/filid:cross-review
 
 # Review a specific PR
-/filid:review https://github.com/owner/repo/pull/123
+/filid:cross-review https://github.com/owner/repo/pull/123
 
 # Force restart (discard previous review)
-/filid:review 처음부터 다시 해줘
+/filid:cross-review 처음부터 다시 해줘
 
 # After review — handle fix requests
 /filid:resolve
@@ -108,16 +108,16 @@ The most powerful feature. A multi-persona consensus committee reviews only the 
 
 **Flow:**
 
-1. **`/filid:review`** — Structure check (diff) → committee election → technical verification → consensus → review report
+1. **`/filid:cross-review`** — Structure check (diff) → committee election → technical verification → consensus → review report
 2. **`/filid:resolve`** — Accept or reject each fix request (with justification for rejections)
 3. **`/filid:revalidate`** — Final PASS/FAIL verdict after fixes
 
 Outputs go to `.filid/review/<branch>/`, technical debt to `.filid/debt/`.
 
-> **`filid:structure-review` vs `filid:review` at a glance:**
+> **`filid:structure-review` vs `filid:cross-review` at a glance:**
 >
 > - `filid:structure-review` — full project scan (periodic health check)
-> - `filid:review` — changed files only + multi-persona review (use on every PR)
+> - `filid:cross-review` — changed files only + multi-persona review (use on every PR)
 
 ### Spike & Harvest (exploratory work)
 
@@ -182,7 +182,7 @@ When a block occurs, a message explaining the reason is displayed. No action nee
 | `/filid:context-query`    | —                 | Q&A about project structure                                |
 | `/filid:guide`            | —                 | FCA-AI guidance on any topic                               |
 | `/filid:restructure`      | —                 | Module refactoring guide with migration steps              |
-| `/filid:review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
+| `/filid:cross-review`           | **Changed files** | Multi-persona governance code review — use on every PR     |
 | `/filid:resolve`          | —                 | Resolve fix requests from a review                         |
 | `/filid:revalidate`       | —                 | Post-fix re-validation (PASS/FAIL)                         |
 | `/filid:harvest`          | —                 | Spike harvest interview — record acceptance claims         |

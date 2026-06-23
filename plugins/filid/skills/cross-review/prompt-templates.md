@@ -1,4 +1,4 @@
-# review — Subagent Prompt Templates
+# cross-review — Subagent Prompt Templates
 
 Literal prompt templates the chairperson fills in when spawning Phase
 A / B / C1 / C2 subagents via `Task(subagent_type: "general-purpose",
@@ -29,8 +29,8 @@ REMINDER: Write `<REVIEW_DIR>/<OUTPUT_FILE>` before you finish.
 ```
 
 The chairperson resolves each phase file path via
-`${CLAUDE_PLUGIN_ROOT}/skills/review/phases/<phase>.md` with a
-`Glob(**/skills/review/phases/<phase>.md)` fallback.
+`${CLAUDE_PLUGIN_ROOT}/skills/cross-review/phases/<phase>.md` with a
+`Glob(**/skills/cross-review/phases/<phase>.md)` fallback.
 
 ## Phase A — Structure Pre-Check
 

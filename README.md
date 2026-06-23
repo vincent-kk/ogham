@@ -43,7 +43,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 | Component | Count    | Examples                                                              |
 | --------- | -------- | --------------------------------------------------------------------- |
-| Skills    | 18       | `/filid:setup`, `/filid:review`, `/filid:scan`, `/filid:pipeline`     |
+| Skills    | 18       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline`     |
 | MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking       |
 | Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee       |
 | Hooks     | 5 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit, SessionEnd |
@@ -64,7 +64,7 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 /filid:scan
 
 # Run multi-persona code review on current branch
-/filid:review
+/filid:cross-review
 
 # Run the full PR pipeline (review → resolve → revalidate)
 /filid:pipeline

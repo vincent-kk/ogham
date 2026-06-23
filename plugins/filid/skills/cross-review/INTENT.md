@@ -1,4 +1,4 @@
-# review — Multi-Persona Code Review Governance
+# cross-review — Multi-Persona Code Review Governance
 
 ## Purpose
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`filid:review` 워크플로우의 세션 상태 관리. 브랜치 정규화, 체크포인트
+`filid:cross-review` 워크플로우의 세션 상태 관리. 브랜치 정규화, 체크포인트
 판정, 위원회 선출, 콘텐츠 해시/캐시, 세션 정리, PR 코멘트 포맷팅 담당.
 
 ## Structure
@@ -19,7 +19,7 @@
 - 변경 후 관련 테스트 업데이트
 - `format/` · `utils/` · `handlers/` 수정은 reviewManage 계약과 동기화
 - `computeContentHash` · `gitExec`는 반드시 `utils/contentHash.ts`에 위치
-- `hasDocumentChanges` 시그널 산정 규칙은 `skills/review/contracts.md` SSoT
+- `hasDocumentChanges` 시그널 산정 규칙은 `skills/cross-review/contracts.md` SSoT
 
 ### Ask first
 

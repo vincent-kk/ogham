@@ -70,13 +70,13 @@ INTENT.md/DETAIL.md가 아닌 일반 파일 Write 시:
 
 ### 서버 기동 시간
 
-| 항목           | 설명                                                        |
-| -------------- | ----------------------------------------------------------- |
-| 번들 형식      | CJS (CommonJS), minified                                    |
-| 번들 크기      | ~726KB (`bridge/mcp-server.cjs`)                            |
-| 외부 의존성    | `typescript`, `@ast-grep/napi` (external, 별도 설치)        |
-| 기동 방식      | `node bridge/mcp-server.cjs` → stdio transport              |
-| 예상 기동 시간 | ~200-500ms (TypeScript + @ast-grep/napi 모듈 로딩 포함)     |
+| 항목           | 설명                                                    |
+| -------------- | ------------------------------------------------------- |
+| 번들 형식      | CJS (CommonJS), minified                                |
+| 번들 크기      | ~726KB (`bridge/mcp-server.cjs`)                        |
+| 외부 의존성    | `typescript`, `@ast-grep/napi` (external, 별도 설치)    |
+| 기동 방식      | `node bridge/mcp-server.cjs` → stdio transport          |
+| 예상 기동 시간 | ~200-500ms (TypeScript + @ast-grep/napi 모듈 로딩 포함) |
 
 > MCP 서버는 세션당 1회 기동 후 상주. 기동 비용은 초기 1회만 발생.
 
@@ -147,12 +147,12 @@ Rules:
 
 ### pre-tool-validator 경고/차단 메시지
 
-| 시나리오              | 메시지 예시                                                   | 추정 토큰 |
-| --------------------- | ------------------------------------------------------------- | --------- |
-| INTENT.md 50줄 초과   | "BLOCKED: INTENT.md exceeds 50-line limit (142 lines)..."     | ~25 토큰  |
-| 3-tier 섹션 누락      | "INTENT.md is missing 3-tier boundary sections: Ask first"    | ~15 토큰  |
-| DETAIL.md append-only | "BLOCKED: DETAIL.md must not be append-only..."               | ~20 토큰  |
-| Organ guard 차단      | "BLOCKED: Cannot create INTENT.md inside organ directory..."  | ~25 토큰  |
+| 시나리오              | 메시지 예시                                                  | 추정 토큰 |
+| --------------------- | ------------------------------------------------------------ | --------- |
+| INTENT.md 50줄 초과   | "BLOCKED: INTENT.md exceeds 50-line limit (142 lines)..."    | ~25 토큰  |
+| 3-tier 섹션 누락      | "INTENT.md is missing 3-tier boundary sections: Ask first"   | ~15 토큰  |
+| DETAIL.md append-only | "BLOCKED: DETAIL.md must not be append-only..."              | ~20 토큰  |
+| Organ guard 차단      | "BLOCKED: Cannot create INTENT.md inside organ directory..." | ~25 토큰  |
 
 > 차단/경고 시에만 발생. 정상 통과 시 추가 토큰 없음.
 
@@ -171,8 +171,8 @@ Rules:
 
 ### MCP 서버 번들
 
-| 파일              | 크기  | 형식 | 포함 내용                                             |
-| ----------------- | ----- | ---- | ----------------------------------------------------- |
+| 파일                    | 크기   | 형식 | 포함 내용                                             |
+| ----------------------- | ------ | ---- | ----------------------------------------------------- |
 | `bridge/mcp-server.cjs` | ~726KB | CJS  | MCP SDK + core + ast + metrics + compress + mcp/tools |
 
 > `typescript`, `@ast-grep/napi`는 `external`로 제외 → 실행 시 `node_modules`에서 로드.
@@ -181,25 +181,25 @@ Rules:
 
 ### Hook 스크립트 번들
 
-| 파일                             | 크기        | 형식 | 포함 내용                                      |
-| -------------------------------- | ----------- | ---- | ---------------------------------------------- |
-| `scripts/pre-tool-use.mjs`       | ~12KB       | ESM  | intent-injector + pre-tool-validator + structure-guard 통합 |
-| `scripts/pre-tool-validator.mjs` | 4.1KB       | ESM  | document-validator + hook 로직                 |
-| `scripts/structure-guard.mjs`    | 1.5KB       | ESM  | organ-classifier + hook 로직                   |
-| `scripts/intent-injector.mjs`    | ~3KB        | ESM  | INTENT.md/DETAIL.md 주입 로직                  |
-| `scripts/agent-enforcer.mjs`     | 1.3KB       | ESM  | ROLE_RESTRICTIONS + hook 로직                  |
-| `scripts/context-injector.mjs`   | 988B        | ESM  | 규칙 문자열 + hook 로직                        |
-| `scripts/change-tracker.mjs`     | 633B        | ESM  | ChangeQueue 타입 + hook 로직 _(disabled)_      |
-| `scripts/setup.mjs`              | ~2KB        | ESM  | 세션 초기화 + 캐시 유지 관리 로직              |
-| **Hook 합계**                    | **~29KB**   |      |                                                |
+| 파일                             | 크기      | 형식 | 포함 내용                                                   |
+| -------------------------------- | --------- | ---- | ----------------------------------------------------------- |
+| `scripts/pre-tool-use.mjs`       | ~12KB     | ESM  | intent-injector + pre-tool-validator + structure-guard 통합 |
+| `scripts/pre-tool-validator.mjs` | 4.1KB     | ESM  | document-validator + hook 로직                              |
+| `scripts/structure-guard.mjs`    | 1.5KB     | ESM  | organ-classifier + hook 로직                                |
+| `scripts/intent-injector.mjs`    | ~3KB      | ESM  | INTENT.md/DETAIL.md 주입 로직                               |
+| `scripts/agent-enforcer.mjs`     | 1.3KB     | ESM  | ROLE_RESTRICTIONS + hook 로직                               |
+| `scripts/context-injector.mjs`   | 988B      | ESM  | 규칙 문자열 + hook 로직                                     |
+| `scripts/change-tracker.mjs`     | 633B      | ESM  | ChangeQueue 타입 + hook 로직 _(disabled)_                   |
+| `scripts/setup.mjs`              | ~2KB      | ESM  | 세션 초기화 + 캐시 유지 관리 로직                           |
+| **Hook 합계**                    | **~29KB** |      |                                                             |
 
 ### 전체 번들 합계
 
-| 카테고리            | 크기        |
-| ------------------- | ----------- |
-| MCP 서버            | ~726KB      |
-| Hook 스크립트 (6개) | ~29KB       |
-| **총 번들**         | **~755KB**  |
+| 카테고리            | 크기       |
+| ------------------- | ---------- |
+| MCP 서버            | ~726KB     |
+| Hook 스크립트 (6개) | ~29KB      |
+| **총 번들**         | **~755KB** |
 
 > `typescript`, `@ast-grep/napi` 패키지는 별도. `npm install` 시 설치.
 
@@ -262,7 +262,7 @@ Hook 스크립트 특성:
 
 MCP 도구는 에이전트가 명시적으로 호출할 때만 실행:
 
-- TypeScript AST 파싱은 `/filid:review` 또는 `/filid:scan` 시에만 수행
+- TypeScript AST 파싱은 `/filid:structure-review` 또는 `/filid:scan` 시에만 수행
 - 일반 개발 중에는 Hook만 실행 (경량)
 - 불필요한 분석을 자동 트리거하지 않음
 
@@ -270,14 +270,14 @@ MCP 도구는 에이전트가 명시적으로 호출할 때만 실행:
 
 ## 성능 영향 요약
 
-| 시나리오          | 추가 지연          | 추가 토큰 | 영향도             |
-| ----------------- | ------------------ | --------- | ------------------ |
-| 일반 프롬프트     | ~20ms (injector)   | ~110 토큰 | 무시 가능          |
-| 일반 파일 Write   | ~55ms (pre-tool-use) | 0 토큰  | 무시 가능          |
-| INTENT.md Write   | ~120ms (검증 포함) | 0-25 토큰 | 낮음               |
-| 서브에이전트 생성 | ~30ms (enforcer)   | ~35 토큰  | 무시 가능          |
-| /filid:review 실행      | ~1-5초 (AST 분석)  | ~500 토큰 | 중간 (1회성)       |
-| /filid:sync 실행        | ~0.5-2초           | ~200 토큰 | 중간 (PR 시점 1회) |
+| 시나리오                     | 추가 지연            | 추가 토큰 | 영향도             |
+| ---------------------------- | -------------------- | --------- | ------------------ |
+| 일반 프롬프트                | ~20ms (injector)     | ~110 토큰 | 무시 가능          |
+| 일반 파일 Write              | ~55ms (pre-tool-use) | 0 토큰    | 무시 가능          |
+| INTENT.md Write              | ~120ms (검증 포함)   | 0-25 토큰 | 낮음               |
+| 서브에이전트 생성            | ~30ms (enforcer)     | ~35 토큰  | 무시 가능          |
+| /filid:structure-review 실행 | ~1-5초 (AST 분석)    | ~500 토큰 | 중간 (1회성)       |
+| /filid:sync 실행             | ~0.5-2초             | ~200 토큰 | 중간 (PR 시점 1회) |
 
 ---
 

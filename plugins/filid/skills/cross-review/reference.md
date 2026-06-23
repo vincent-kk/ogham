@@ -1,6 +1,6 @@
-# review — Reference Index
+# cross-review — Reference Index
 
-Reference documentation for `review` is split into focused files.
+Reference documentation for `cross-review` is split into focused files.
 This index routes readers to the right file based on what they need.
 
 | File                  | Contents                                                                                                                  |

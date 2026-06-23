@@ -5,7 +5,7 @@
 > sound by construction — its **false-negative rate (FNR)** — missing a defect
 > that was deliberately seeded — and its **severity-inflation rate** — items
 > that must stay LOW (advisory) being promoted to MEDIUM or above. Run a
-> calibration pass after any change to `skills/review/**` or `agents/*.md`
+> calibration pass after any change to `skills/cross-review/**` or `agents/*.md`
 > that touches finding discipline, severity anchoring, or verdict derivation
 > (see `../DETAIL.md` → Requirements).
 
@@ -49,7 +49,7 @@ run-b | run-c | run-d`; `<date>` = one pass id, e.g. `2026-06-12`,
    §2, `run-b`: `low-only-change.md`, `run-c`: `seeded-change.md`), and
    commit.
 4. **In a fresh session opened at the scratch repo root**, run
-   `/filid:review --solo --base main`.
+   `/filid:cross-review --solo --base main`.
 
 **Session separation is mandatory**: the session that materialized the
 fixtures has the expected outcomes in context (every variant doc states its

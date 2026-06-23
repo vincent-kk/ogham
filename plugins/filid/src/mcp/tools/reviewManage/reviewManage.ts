@@ -38,7 +38,7 @@ export interface ReviewManageInput {
    * cap-rule misapplications from passing unchallenged.
    *
    * Computation rule (caller-side; defined in
-   * `skills/review/contracts.md`):
+   * `skills/cross-review/contracts.md`):
    *   git diff --name-only <base>...HEAD | grep -E '(/|^)(INTENT|DETAIL)\.md$'
    *   exit 0 → true · exit 1 → false · uninspectable → true (fail-safe)
    */

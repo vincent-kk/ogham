@@ -79,7 +79,7 @@ boundary sections or confirm public-API-to-docs drift).
 ## Severity Gate & Finding Discipline
 
 Compact copy — canonical source:
-`skills/review/contracts.md` → "Severity Gate & Finding Discipline".
+`skills/cross-review/contracts.md` → "Severity Gate & Finding Discipline".
 
 - **The gate**: fix_items with severity >= MEDIUM are blocking; LOW
   fix_items are advisory — the chairperson routes them to the
@@ -130,7 +130,7 @@ Compact copy — canonical source:
 
 ## Skill Participation
 
-- `/filid:review` — Phase D Step D.2-team: Judicial committee
+- `/filid:cross-review` — Phase D Step D.2-team: Judicial committee
   round opinion on documentation integrity. Tiers: MEDIUM / HIGH.
   Natural ally of engineering-architect and operations-sre. See
   `context-manager` for the write-capable doc steward used elsewhere.

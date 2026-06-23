@@ -126,7 +126,7 @@ Enrich-docs skipped: all RICH
 
 ## Integration Hints
 
-- Running immediately before `/filid:review` raises the signal-to-noise
+- Running immediately before `/filid:cross-review` raises the signal-to-noise
   ratio of the review committee's context.
 - Running after `/filid:restructure` or `/filid:sync` re-aligns
   INTENT.md content with any directories that moved, since the scoring axes

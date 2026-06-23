@@ -1,4 +1,4 @@
-# review — Output Templates
+# cross-review — Output Templates
 
 Canonical output file templates for Phase D artifacts and the PR comment
 format. The chairperson reads this file before writing `review-report.md`
@@ -205,11 +205,11 @@ for the dispatch policy):
   resolved by the `/filid:harvest` interview; a merge-track claim judged
   INSUFFICIENT-EVIDENCE → resolved by supplying the claim's `observable`
   evidence or a human-confirmed claim revision, then re-running
-  `/filid:review`
+  `/filid:cross-review`
 
 ### Harvest-Required Variant (unharvested spike branch)
 
-When `/filid:review` runs on a `spike/*` branch without a current harvest
+When `/filid:cross-review` runs on a `spike/*` branch without a current harvest
 manifest (see `SKILL.md` Step 1 guard), Phases A–D are skipped and the
 chairperson writes a degraded pair directly:
 
@@ -233,7 +233,7 @@ manifest`, and a Deliberation Log entry `### Harvest Guard` stating the
     to judge this work, and merge-track entry is blocked
   - **Raised by**: Step 1 harvest guard
   - **Recommended Action**: Run /filid:harvest (keep/discard/defer
-    interview), then re-run /filid:review
+    interview), then re-run /filid:cross-review
   ```
 
 ## Advisory Ledger Format (`.filid/review/advisory-ledger.md`)

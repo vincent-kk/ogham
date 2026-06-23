@@ -53,7 +53,7 @@ Load these on demand; none are required to execute the workflow end-to-end.
 - When a directory tree contains INTENT.md files written before the underlying
   implementation stabilized
 - To raise documentation quality across a subtree without waiting for a git diff
-- Before `review` or `context-query` to ensure the module chain
+- Before `cross-review` or `context-query` to ensure the module chain
   carries enough signal for downstream consumers
 
 For the precise distinction from `update`, see

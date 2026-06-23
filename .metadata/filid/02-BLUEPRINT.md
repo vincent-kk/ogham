@@ -33,15 +33,15 @@ src/
 
 ### documents.ts (7 타입)
 
-| 타입                  | 용도                                         |
-| --------------------- | -------------------------------------------- |
-| `ThreeTierBoundary`   | alwaysDo / askFirst / neverDo 문자열 배열    |
-| `IntentMdSchema`      | INTENT.md 파싱 결과 구조                     |
-| `DetailMdSchema`      | DETAIL.md 파싱 결과 구조                     |
-| `CompressionMeta`     | 압축 메타데이터 (method, lines, recoverable) |
-| `IntentMdValidation`  | 검증 결과 (valid + violations)               |
-| `DetailMdValidation`  | 검증 결과 (valid + violations)               |
-| `DocumentViolation`   | 위반 상세 (rule, message, severity)          |
+| 타입                 | 용도                                         |
+| -------------------- | -------------------------------------------- |
+| `ThreeTierBoundary`  | alwaysDo / askFirst / neverDo 문자열 배열    |
+| `IntentMdSchema`     | INTENT.md 파싱 결과 구조                     |
+| `DetailMdSchema`     | DETAIL.md 파싱 결과 구조                     |
+| `CompressionMeta`    | 압축 메타데이터 (method, lines, recoverable) |
+| `IntentMdValidation` | 검증 결과 (valid + violations)               |
+| `DetailMdValidation` | 검증 결과 (valid + violations)               |
+| `DocumentViolation`  | 위반 상세 (rule, message, severity)          |
 
 ### metrics.ts (7 타입)
 
@@ -185,10 +185,10 @@ buildChain(filePath: string) → ChainResult | null
 
 ```typescript
 interface ChainResult {
-  boundary: string;         // package.json 포함 디렉토리
-  chain: string[];          // leaf → root 디렉토리 목록
-  intents: Map<string, boolean>;  // INTENT.md 존재 여부
-  details: Map<string, boolean>;  // DETAIL.md 존재 여부
+  boundary: string; // package.json 포함 디렉토리
+  chain: string[]; // leaf → root 디렉토리 목록
+  intents: Map<string, boolean>; // INTENT.md 존재 여부
+  details: Map<string, boolean>; // DETAIL.md 존재 여부
 }
 ```
 
@@ -202,14 +202,14 @@ interface ChainResult {
 
 **캐시 파일 종류**:
 
-| 파일 패턴 | 용도 |
-| --------- | ---- |
-| `session-context-{hash}` | 세션 시작 마커 |
-| `prompt-context-{hash}` | FCA 규칙 텍스트 캐시 |
-| `boundary-{hash}` | 디렉토리 → boundary 경로 매핑 (JSON) |
-| `fmap-{hash}.json` | FractalMap (reads/intents/details) |
-| `guide-{hash}` | `[filid:guide]` 주입 완료 마커 |
-| `run-{skillName}.hash` | 스킬 증분 실행용 해시 |
+| 파일 패턴                | 용도                                 |
+| ------------------------ | ------------------------------------ |
+| `session-context-{hash}` | 세션 시작 마커                       |
+| `prompt-context-{hash}`  | FCA 규칙 텍스트 캐시                 |
+| `boundary-{hash}`        | 디렉토리 → boundary 경로 매핑 (JSON) |
+| `fmap-{hash}.json`       | FractalMap (reads/intents/details)   |
+| `guide-{hash}`           | `[filid:guide]` 주입 완료 마커       |
+| `run-{skillName}.hash`   | 스킬 증분 실행용 해시                |
 
 **주요 함수**:
 
@@ -470,15 +470,15 @@ summarizeLossy(ToolCallEntry[]) → LossySummaryResult
 
 ### 로직 모듈 (8개)
 
-| 모듈                 | Hook 이벤트      | 동작                                              |
-| -------------------- | ---------------- | ------------------------------------------------- |
-| `pre-tool-validator` | PreToolUse       | INTENT.md/DETAIL.md Write 검증                    |
-| `structure-guard`    | PreToolUse       | Organ 디렉토리 INTENT.md 차단                     |
-| `intent-injector`    | PreToolUse       | 파일 접근 시 INTENT.md 컨텍스트 + 프랙탈맵 주입  |
-| `change-tracker`     | _(disabled)_     | ChangeQueue에 변경 기록 (hooks.json에서 제거됨)   |
-| `agent-enforcer`     | SubagentStart    | 에이전트 역할 제한 주입                           |
-| `context-injector`   | UserPromptSubmit | 세션 첫 프롬프트에 FCA-AI 규칙 리마인더 주입      |
-| `setup`              | SessionStart     | 캐시 디렉토리 초기화 + 만료 세션 파일 정리        |
+| 모듈                 | Hook 이벤트      | 동작                                                 |
+| -------------------- | ---------------- | ---------------------------------------------------- |
+| `pre-tool-validator` | PreToolUse       | INTENT.md/DETAIL.md Write 검증                       |
+| `structure-guard`    | PreToolUse       | Organ 디렉토리 INTENT.md 차단                        |
+| `intent-injector`    | PreToolUse       | 파일 접근 시 INTENT.md 컨텍스트 + 프랙탈맵 주입      |
+| `change-tracker`     | _(disabled)_     | ChangeQueue에 변경 기록 (hooks.json에서 제거됨)      |
+| `agent-enforcer`     | SubagentStart    | 에이전트 역할 제한 주입                              |
+| `context-injector`   | UserPromptSubmit | 세션 첫 프롬프트에 FCA-AI 규칙 리마인더 주입         |
+| `setup`              | SessionStart     | 캐시 디렉토리 초기화 + 만료 세션 파일 정리           |
 | `shared`             | _(유틸)_         | `isFcaProject`, `isIntentMd`, `isDetailMd` 공용 헬퍼 |
 
 ### 엔트리 스크립트 (7개: `hooks/entries/*.entry.ts`)
@@ -490,7 +490,7 @@ const chunks: Buffer[] = [];
 for await (const chunk of process.stdin) {
   chunks.push(chunk as Buffer);
 }
-const input = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
+const input = JSON.parse(Buffer.concat(chunks).toString("utf-8"));
 const result = handler(input);
 process.stdout.write(JSON.stringify(result));
 ```
@@ -539,14 +539,14 @@ stdin에서 JSON 읽기 → 핸들러 호출 → stdout에 JSON 쓰기.
 
 ## 7. 거버넌스 모듈 — 코드 리뷰 스킬
 
-### skills/code-review/
+### skills/cross-review/
 
 **목적**: 다중 페르소나 합의체 기반 코드 리뷰 거버넌스
 
 **구조**:
 
 ```
-skills/code-review/
+skills/cross-review/
 ├── SKILL.md                      # 의장 오케스트레이터 (~105줄)
 ├── reference.md                  # 출력 포맷, MCP tool 맵, 부채 바이어스 테이블
 ├── state-machine.md              # PROPOSAL→DEBATE→VETO/SYNTHESIS/ABSTAIN→CONCLUSION
@@ -564,28 +564,28 @@ skills/code-review/
 
 **MCP tool 의존**: `review_manage` (5 actions), `debt_manage` (1 action: calculate-bias), 기존 12개 MCP tool
 
-### skills/resolve-review/
+### skills/resolve/
 
 **목적**: 수정 사항 수용/거부 + 소명 + ADR 정제 + 부채 기록
 
 **구조**:
 
 ```
-skills/resolve-review/
+skills/resolve/
 ├── SKILL.md       # 6-step 워크플로우 (~119줄)
 └── reference.md   # justifications.md 포맷, ADR 가이드라인, AskUserQuestion 패턴
 ```
 
 **MCP tool 의존**: `review_manage` (normalize-branch), `debt_manage` (create)
 
-### skills/re-validate/
+### skills/revalidate/
 
 **목적**: Delta 기반 경량 재검증, PASS/FAIL 최종 판정
 
 **구조**:
 
 ```
-skills/re-validate/
+skills/revalidate/
 ├── SKILL.md       # 7-step 워크플로우 (~126줄)
 └── reference.md   # re-validate.md 포맷, PR 코멘트 포맷, 비협상 규칙
 ```

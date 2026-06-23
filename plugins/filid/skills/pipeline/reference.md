@@ -50,7 +50,7 @@ Check signals:
         the pipeline would loop). Report the oracle work required
         (spike branch → /filid:harvest; merge-track INSUFFICIENT-EVIDENCE
         claims → supply observable evidence or a human-confirmed claim
-        revision, then /filid:review --force) and END.
+        revision, then /filid:cross-review --force) and END.
       → Absent: Start from RESOLVE.
     → NO:  Continue to Signal 4.
 
@@ -105,7 +105,7 @@ These files serve as the inter-stage communication interface.
 | revalidate                         | `re-validate.md`                                                                                                                                                                                                                                                                             |
 
 > Fail dispatch path: `rounds/failure.md` **and** a minimal `review-report.md`
-> (Failure Variant template in `review/templates.md`) are both written
+> (Failure Variant template in `cross-review/templates.md`) are both written
 > so `mcp_t_review_manage(format-pr-comment)` and the verdict decision step
 > have a consistent frontmatter to read. `fix-requests.md` is NOT written on
 > the fail path.
@@ -175,7 +175,7 @@ with delegation reliability.
 ### Pseudocode
 
 The review stage is split: Phase A/B/C runs inside a `general-purpose`
-subagent via `Skill("filid:review", "--pipeline-mode=abc-only ...")`,
+subagent via `Skill("filid:cross-review", "--pipeline-mode=abc-only ...")`,
 then Phase D + finalize (Step 4.5 content-hash, Step 5 PR comment) run in
 the pipeline main. The subagent MUST NOT call `TeamCreate` internally —
 nested Phase D from a subagent leaks orphan workers and violates the
@@ -189,7 +189,7 @@ For each stage in pipeline:
     subagent_output = Agent(
       subagent_type: "general-purpose",
       prompt: "Read and execute the following skill:
-               Skill('filid:review', '--scope=pr --pipeline-mode=abc-only <flags>').
+               Skill('filid:cross-review', '--scope=pr --pipeline-mode=abc-only <flags>').
                Project root: <project_root>. Branch: <branch>.
                CRITICAL: This is PIPELINE SUBAGENT MODE. You MUST stop after
                Phase C (Step 3) completes. Do NOT execute Phase D, Step 4.5
@@ -198,7 +198,7 @@ For each stage in pipeline:
                be a fenced YAML block containing the SubagentReturn contract
                (committee, deliberation_mode, failure_reason,
                paths_to_artifacts) as specified in
-               ../review/DETAIL.md (## API Contracts).",
+               ../cross-review/DETAIL.md (## API Contracts).",
       description: "FCA review stage — Phase A/B/C only (context isolation)"
     )
 
@@ -259,7 +259,7 @@ $ /filid:pipeline --from=pr-create --base=main --draft
   ✓ Success
 
 [2/4] review — A/B/C (subagent)
-  → Agent(general-purpose) → Skill("filid:review",
+  → Agent(general-purpose) → Skill("filid:cross-review",
       "--scope=pr --pipeline-mode=abc-only --base=main")
   → SubagentReturn: { committee: [engineering-architect, ...],
       deliberation_mode: team, failure_reason: none, paths_to_artifacts: {...} }

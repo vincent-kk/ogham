@@ -211,16 +211,16 @@ yarn test:run   # 1회 실행
 }
 ```
 
-| Hook 이벤트      | matcher                   | 스크립트                            | timeout |
-| ---------------- | ------------------------- | ----------------------------------- | ------- |
-| SessionStart     | `*` (모든 세션)           | setup                               | 5초     |
-| PreToolUse       | `Read\|Write\|Edit`       | intent-injector                     | 3초     |
-| PreToolUse       | `Write\|Edit`             | pre-tool-validator, structure-guard | 3초     |
-| PreToolUse       | `ExitPlanMode`            | plan-gate                           | 3초     |
-| PostToolUse      | —                         | _(disabled)_                        | —       |
-| SubagentStart    | `*` (모든 에이전트)       | agent-enforcer                      | 3초     |
-| UserPromptSubmit | `*` (모든 프롬프트)       | context-injector                    | 5초     |
-| SessionEnd       | `*` (모든 세션)           | session-cleanup                     | 3초     |
+| Hook 이벤트      | matcher             | 스크립트                            | timeout |
+| ---------------- | ------------------- | ----------------------------------- | ------- |
+| SessionStart     | `*` (모든 세션)     | setup                               | 5초     |
+| PreToolUse       | `Read\|Write\|Edit` | intent-injector                     | 3초     |
+| PreToolUse       | `Write\|Edit`       | pre-tool-validator, structure-guard | 3초     |
+| PreToolUse       | `ExitPlanMode`      | plan-gate                           | 3초     |
+| PostToolUse      | —                   | _(disabled)_                        | —       |
+| SubagentStart    | `*` (모든 에이전트) | agent-enforcer                      | 3초     |
+| UserPromptSubmit | `*` (모든 프롬프트) | context-injector                    | 5초     |
+| SessionEnd       | `*` (모든 세션)     | session-cleanup                     | 3초     |
 
 ---
 
@@ -323,10 +323,10 @@ yarn test:run   # 1회 실행
 
 **결과**: 기존 CLAUDE.md/SPEC.md를 INTENT.md/DETAIL.md로 마이그레이션.
 
-### /filid:review — PR 검증 파이프라인
+### /filid:structure-review — PR 검증 파이프라인
 
 ```
-/filid:review [--stage=1-6] [--verbose]
+/filid:structure-review [--stage=1-6] [--verbose]
 ```
 
 | 옵션        | 기본값 | 설명                   |
@@ -337,9 +337,9 @@ yarn test:run   # 1회 실행
 **예시**:
 
 ```
-/filid:review
-/filid:review --stage=3
-/filid:review --verbose
+/filid:structure-review
+/filid:structure-review --stage=3
+/filid:structure-review --verbose
 ```
 
 **결과**: 6단계 검증 보고서 (PASS/FAIL + 이슈 목록).
@@ -399,7 +399,7 @@ yarn test:run   # 1회 실행
 /filid:pipeline --scope=pr --verbose
 ```
 
-**결과**: `/filid:review` → `/filid:resolve` → `/filid:revalidate` 전체 파이프라인 자동 실행.
+**결과**: `/filid:cross-review` → `/filid:resolve` → `/filid:revalidate` 전체 파이프라인 자동 실행.
 
 ### /filid:pull-request — PR 생성 자동화
 
@@ -407,10 +407,10 @@ yarn test:run   # 1회 실행
 /filid:pull-request [--base=ref] [--draft]
 ```
 
-| 옵션      | 기본값 | 설명              |
-| --------- | ------ | ----------------- |
-| `--base`  | `main` | 베이스 브랜치     |
-| `--draft` | (없음) | 드래프트 PR 생성  |
+| 옵션      | 기본값 | 설명             |
+| --------- | ------ | ---------------- |
+| `--base`  | `main` | 베이스 브랜치    |
+| `--draft` | (없음) | 드래프트 PR 생성 |
 
 **예시**:
 
@@ -584,7 +584,7 @@ yarn test:run   # 1회 실행
 ```yaml
 ---
 name: architect
-description: 'FCA-AI Architect agent — read-only design and planning'
+description: "FCA-AI Architect agent — read-only design and planning"
 disallowedTools: # 선택적 — 도구 제한
   - Write
   - Edit
@@ -592,15 +592,15 @@ disallowedTools: # 선택적 — 도구 제한
 ---
 ```
 
-| 에이전트        | disallowedTools   | 주 용도                           |
-| --------------- | ----------------- | --------------------------------- |
-| architect       | Write, Edit, Bash | 설계, 분석, DETAIL.md 초안 제안   |
-| qa-reviewer     | Write, Edit, Bash | 규칙 검증, 메트릭 분석, PR 리뷰   |
-| implementer     | (없음)            | DETAIL.md 범위 내 코드 구현       |
-| context-manager | (없음)            | INTENT.md/DETAIL.md 문서 관리     |
-| drift-analyzer  | Write, Edit, Bash | 구조 이탈 감지 및 분석            |
-| restructurer    | (없음)            | 승인된 구조 변경 실행             |
-| code-surgeon    | (없음)            | 정밀 코드 수술 및 리팩토링        |
+| 에이전트        | disallowedTools   | 주 용도                         |
+| --------------- | ----------------- | ------------------------------- |
+| architect       | Write, Edit, Bash | 설계, 분석, DETAIL.md 초안 제안 |
+| qa-reviewer     | Write, Edit, Bash | 규칙 검증, 메트릭 분석, PR 리뷰 |
+| implementer     | (없음)            | DETAIL.md 범위 내 코드 구현     |
+| context-manager | (없음)            | INTENT.md/DETAIL.md 문서 관리   |
+| drift-analyzer  | Write, Edit, Bash | 구조 이탈 감지 및 분석          |
+| restructurer    | (없음)            | 승인된 구조 변경 실행           |
+| code-surgeon    | (없음)            | 정밀 코드 수술 및 리팩토링      |
 
 ---
 

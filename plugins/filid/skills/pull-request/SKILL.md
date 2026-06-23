@@ -43,7 +43,7 @@ sync failure unless explicitly skipped.
 ### Relationship with Other Skills
 
 - `/filid:update`: Automatically invoked in Stage 1 to sync context documents
-- `/filid:review`: Can be chained after PR creation for the code review pipeline
+- `/filid:cross-review`: Can be chained after PR creation for the code review pipeline
 - `/filid:structure-review`: Run separately before PR creation for structural verification
 
 ## Core Workflow

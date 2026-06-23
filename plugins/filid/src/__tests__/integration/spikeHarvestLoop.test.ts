@@ -22,7 +22,7 @@ import { getCacheDir } from '../../core/infra/cacheManager/cacheManager.js';
  * current → stale manifest), criteria ledger lint, and the mode audit
  * trail. The LLM-contract half (review claim verdicts, harvest interview)
  * is NOT covered here — its regression proxy is the calibration fixture
- * `skills/review/calibration/claim-change.md` (run-d), executed manually
+ * `skills/cross-review/calibration/claim-change.md` (run-d), executed manually
  * per calibration.md.
  */
 

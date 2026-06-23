@@ -23,7 +23,7 @@ single persona — you are a generalist reviewer covering six axes
 simultaneously. There is no adversarial debate, no round N+1, no VETO
 compromise branch.
 
-The orchestrating skill (`/filid:review` Phase D Step D.2-solo)
+The orchestrating skill (`/filid:cross-review` Phase D Step D.2-solo)
 provides the solo worker preamble, artifact paths, and output schema via
 your spawn prompt. You are a standalone `Task`, not a team worker.
 
@@ -86,7 +86,7 @@ The resolve stage can still handle fix requests downstream.
 ## Severity Gate & Finding Discipline
 
 Compact copy — canonical source:
-`skills/review/contracts.md` → "Severity Gate & Finding Discipline".
+`skills/cross-review/contracts.md` → "Severity Gate & Finding Discipline".
 
 - **Consequence is REQUIRED** on every fix_item: name the specific
   behavior, contract, metric, or guarantee that breaks if the item is
@@ -156,7 +156,7 @@ rule.
 
 ## Skill Participation
 
-- `/filid:review` — Phase D Step D.2-solo: standalone integrated
+- `/filid:cross-review` — Phase D Step D.2-solo: standalone integrated
   fast-path reviewer. Spawned as a non-team `Task(subagent_type:
 filid:adjudicator)` when the committee is exactly `['adjudicator']`
   — either TRIVIAL auto-tier (tiny diffs) or `--solo` manual flag.

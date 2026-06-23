@@ -14,9 +14,9 @@ plugin: filid
 > NEVER yield the turn after an MCP tool call, subagent return, or Skill() completion.
 > On error, report it and END — do not ask for confirmation.
 >
-> **HYBRID EXECUTION**: Only Phase A/B/C of the `filid:review`
+> **HYBRID EXECUTION**: Only Phase A/B/C of the `filid:cross-review`
 > stage runs in a subagent (context isolation for its ~100k token consumption).
-> Phase D of `filid:review` runs **in the main orchestrator** — the A/B/C
+> Phase D of `filid:cross-review` runs **in the main orchestrator** — the A/B/C
 > subagent returns `{ committee, deliberation_mode, failure_reason,
 paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
 > fail via the `verdict_gate` rule. All other stages (`pr-create`,
@@ -32,8 +32,8 @@ paths_to_artifacts }` on exit and main dispatches team / solo-adjudicator /
 
 Orchestrate the full FCA review cycle from PR creation to final verdict
 in a single command. Uses a **hybrid execution model**: only Phase A/B/C of
-`filid:review` runs in an independent subagent for context isolation (~100k
-tokens). Phase D of `filid:review` runs in the main orchestrator, as do
+`filid:cross-review` runs in an independent subagent for context isolation (~100k
+tokens). Phase D of `filid:cross-review` runs in the main orchestrator, as do
 `pr-create`, `filid:resolve`, and `filid:revalidate`. Stages communicate via
 `.filid/review/<branch>/` files.
 
@@ -114,7 +114,7 @@ harvest gate would abort and re-running the pipeline would loop):
 report that oracle work is required — spike branch → `/filid:harvest`;
 merge-track INSUFFICIENT-EVIDENCE claims → supply the claim's
 `observable` evidence or a human-confirmed claim revision, then re-run
-`/filid:review --force` — and END execution.
+`/filid:cross-review --force` — and END execution.
 
 **Priority 2 details**: Detect unpushed commits via
 `git log @{upstream}..HEAD --oneline 2>/dev/null`.
@@ -137,7 +137,7 @@ See `reference.md` for the full auto-detection algorithm with edge cases.
 Execute stages sequentially from the determined entry point. The pipeline
 uses a **hybrid execution model**:
 
-- **Subagent stage** (Phase A/B/C of `filid:review` only): Delegated to an
+- **Subagent stage** (Phase A/B/C of `filid:cross-review` only): Delegated to an
   independent `general-purpose` Task subagent for context isolation. Phase
   A/B/C consume ~100k tokens and would degrade the main context if run
   inline. The subagent MUST NOT execute Phase D internally — nested
@@ -145,7 +145,7 @@ uses a **hybrid execution model**:
   orphan workers. On exit the subagent returns
   `{ committee, deliberation_mode, failure_reason, paths_to_artifacts }` and
   the pipeline main dispatches Phase D itself (see Phase D Dispatch below).
-- **Main context stages** (Phase D of `filid:review`, plus `pr-create`,
+- **Main context stages** (Phase D of `filid:cross-review`, plus `pr-create`,
   `filid:resolve`, `filid:revalidate`): Executed directly via `Skill()` in
   the orchestrator's context. These stages are lightweight and procedural —
   subagent delegation adds fragile two-level indirection (Agent → Skill() →
@@ -178,7 +178,7 @@ uses a **hybrid execution model**:
 
 #### Stage: review A/B/C (subagent — Phase D pulled up to main)
 
-- **Subagent invokes**: `Skill("filid:review", "--scope=pr --pipeline-mode=abc-only")`
+- **Subagent invokes**: `Skill("filid:cross-review", "--scope=pr --pipeline-mode=abc-only")`
   - The `--pipeline-mode=abc-only` hint (alias: `PIPELINE_MODE=abc-only`
     context key) tells the review skill to stop after Phase C and emit
     the Subagent Return Contract instead of executing Phase D / Step 4.5
@@ -189,7 +189,7 @@ uses a **hybrid execution model**:
 - **Success signal**: the subagent's final assistant message contains a
   fenced `SubagentReturn` YAML block with `committee`,
   `deliberation_mode`, `failure_reason`, and `paths_to_artifacts` (spec:
-  `../review/DETAIL.md` → `## API Contracts`).
+  `../cross-review/DETAIL.md` → `## API Contracts`).
   Cross-check that `session.md`, `verification-metrics.md`, and
   `verification-structure.md` exist at the returned paths before
   dispatching Phase D.
@@ -205,7 +205,7 @@ uses a **hybrid execution model**:
   written later by the Phase D Dispatch and finalize review stages.
 - **→ After SubagentReturn is received and A/B/C artifacts are verified, IMMEDIATELY proceed to Phase D Dispatch. Do NOT yield.**
 
-#### Stage: Phase D Dispatch (main context — within `filid:review`)
+#### Stage: Phase D Dispatch (main context — within `filid:cross-review`)
 
 After the A/B/C subagent exits, the pipeline main reads the return payload
 and dispatches Phase D itself — the subagent does NOT execute Phase D. Main
@@ -230,13 +230,13 @@ round5-exhaust}`
    `verification-structure.md` into `verification.md` AND append the
    `## Acceptance Claims (in scope)` section from `.filid/criteria.md`
    (base + HEAD active-claim filtering — this is the same Step D.0 that
-   `review/phases/phase-d-deliberation.md` performs before dispatching
+   `cross-review/phases/phase-d-deliberation.md` performs before dispatching
    workers). Team and solo worker preambles both require
    `verification.md` in their `== INPUTS ==` block; skipping this step
    silently strips their primary evidence source and the claim set they
    must judge. The `fail` dispatch skips merging (no worker is spawned).
 
-Apply the `verdict_gate` rule (spec: `../review/DETAIL.md` → `## API Contracts`) in priority order — first match wins:
+Apply the `verdict_gate` rule (spec: `../cross-review/DETAIL.md` → `## API Contracts`) in priority order — first match wins:
 
 | Condition                                                   | Dispatch | Verdict                                                   |
 | ----------------------------------------------------------- | -------- | --------------------------------------------------------- |
@@ -247,7 +247,7 @@ Apply the `verdict_gate` rule (spec: `../review/DETAIL.md` → `## API Contracts
 | `deliberation_mode == "team"` AND `committee.length >= 2`   | team     | from Phase D quorum result                                |
 | _any other state (e.g. `team` with `committee.length < 2`)_ | fail     | `INCONCLUSIVE` (rationale: incomplete deliberation state) |
 
-Dispatch actions (see `review/phases/phase-d-deliberation.md` Step D.1):
+Dispatch actions (see `cross-review/phases/phase-d-deliberation.md` Step D.1):
 
 - **team** → `TeamCreate(review-<branch>)` + one `Task` per persona; run the
   round state machine; ALWAYS `TeamDelete` inside try/finally.
@@ -259,12 +259,12 @@ Dispatch actions (see `review/phases/phase-d-deliberation.md` Step D.1):
 `chairperson-direct` synthesis — main writing a verdict without running
 team or solo dispatch — is a **protocol violation** blocked by `verdict_gate`.
 Phase D then writes `review-report.md` / `fix-requests.md` per
-`review/phases/phase-d-deliberation.md` Step D.6 (team/solo) or
+`cross-review/phases/phase-d-deliberation.md` Step D.6 (team/solo) or
 D.7 (fail).
 
 - **→ After Phase D dispatch completes and review-report.md is confirmed, immediately proceed to the finalize review stage below. Do NOT yield.**
 
-#### Stage: finalize review (main context — within `filid:review`)
+#### Stage: finalize review (main context — within `filid:cross-review`)
 
 After Phase D has written `review-report.md` (and `fix-requests.md` when
 applicable) via Step D.6 or D.7, the pipeline main finalizes the review
@@ -403,7 +403,7 @@ All other operations are delegated to existing skills via `Skill()` tool.
 
 Pipeline:  [pr-create] → [review A/B/C] → [Phase D dispatch] → [finalize review] → [resolve --auto] → [revalidate]
 Execution: review A/B/C = subagent (context isolation); Phase D dispatch, finalize review, and all other stages = main context (direct Skill())
-Skills:    filid:pull-request, filid:review (--scope=pr), filid:resolve (--auto), filid:revalidate
+Skills:    filid:pull-request, filid:cross-review (--scope=pr), filid:resolve (--auto), filid:revalidate
 Files:     .filid/review/<branch>/ (inter-stage communication)
 Resolve:   Always --auto (accept all, commit, push, auto-revalidate)
 Resume:    On failure, re-run — auto-detection picks up from the right stage

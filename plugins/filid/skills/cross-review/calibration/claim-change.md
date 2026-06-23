@@ -41,7 +41,7 @@ deleted — supersede or retire them via the status field.
 ```
 
 Then `git checkout -b calib/run-d`, apply the clean variant
-(`clean-change.md` §2), and commit. Run `/filid:review --solo --base
+(`clean-change.md` §2), and commit. Run `/filid:cross-review --solo --base
 main` in a fresh session, exactly as for the other runs.
 
 ## 2. Answer Key

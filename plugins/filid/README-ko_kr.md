@@ -91,13 +91,13 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 
 ```
 # 현재 브랜치 리뷰
-/filid:review
+/filid:cross-review
 
 # 특정 PR 리뷰
-/filid:review https://github.com/owner/repo/pull/123
+/filid:cross-review https://github.com/owner/repo/pull/123
 
 # 처음부터 다시 시작
-/filid:review 처음부터 다시 해줘
+/filid:cross-review 처음부터 다시 해줘
 
 # 리뷰 후 — 수정 요청 처리
 /filid:resolve
@@ -108,16 +108,16 @@ INTENT.md 50줄 초과, 3-tier 경계 섹션 누락, organ 디렉토리 내 INTE
 
 **흐름:**
 
-1. **`/filid:review`** — 구조 검사(diff) → 위원회 선출 → 기술 검증 → 합의 → 리뷰 보고서 생성
+1. **`/filid:cross-review`** — 구조 검사(diff) → 위원회 선출 → 기술 검증 → 합의 → 리뷰 보고서 생성
 2. **`/filid:resolve`** — 각 수정 요청에 대해 수용 또는 거부(사유 입력) 선택
 3. **`/filid:revalidate`** — 수정 사항 반영 후 PASS/FAIL 최종 판정
 
 산출물은 `.filid/review/<branch>/`에, 기술 부채는 `.filid/debt/`에 저장됩니다.
 
-> **`filid:structure-review` vs `filid:review` 요약:**
+> **`filid:structure-review` vs `filid:cross-review` 요약:**
 >
 > - `filid:structure-review` — 전체 프로젝트 스캔 (주기적 점검용)
-> - `filid:review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
+> - `filid:cross-review` — 변경된 파일만 검사 + 다중 페르소나 리뷰 (PR마다 사용)
 
 ### 시추와 수확 (탐사 작업)
 
@@ -181,7 +181,7 @@ git checkout -b spike/my-idea
 | `/filid:context-query`    | —                 | 구조 관련 질의응답                                   |
 | `/filid:guide`            | —                 | FCA-AI 가이드                                        |
 | `/filid:restructure`      | —                 | 모듈 리팩토링 가이드 + 마이그레이션 단계             |
-| `/filid:review`           | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
+| `/filid:cross-review`           | **변경 파일만**   | 다중 페르소나 거버넌스 코드 리뷰 — PR마다 사용       |
 | `/filid:resolve`          | —                 | 수정 요청 해결                                       |
 | `/filid:revalidate`       | —                 | 수정 후 재검증 (PASS/FAIL)                           |
 | `/filid:harvest`          | —                 | spike 수확 인터뷰 — 수용 기준 claim 기록             |
