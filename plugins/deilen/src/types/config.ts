@@ -19,6 +19,8 @@ const PortSchema = z
     message: "preferred_port must be 0 (dynamic) or 1024-65535",
   });
 
+const FONT_FAMILY_PATTERN = /^[^;{}<>\\@/]*$/;
+
 export const ConfigSchema = z
   .object({
     theme: ThemeSchema.default("auto"),
@@ -28,7 +30,11 @@ export const ConfigSchema = z
     idle_shutdown_minutes: z.number().int().min(1).max(120).default(10),
     preferred_port: PortSchema.default(0),
     content_width_px: z.number().int().min(480).max(1600).default(820),
-    font_family: z.string().default(""),
+    font_family: z
+      .string()
+      .max(200)
+      .regex(FONT_FAMILY_PATTERN, "font_family has invalid characters")
+      .default(""),
     renderers: RenderersConfigSchema,
     max_image_mb: z.number().int().min(1).max(100).default(10),
     max_payload_mb: z.number().int().min(1).max(200).default(50),

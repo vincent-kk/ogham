@@ -14,6 +14,7 @@ let sequence = 0;
 let overallSequence = 0;
 let popover = null;
 let connectionAlive = false;
+let submitted = false;
 
 function getElement(tag, options = {}) {
   const node = document.createElement(tag);
@@ -186,7 +187,9 @@ function commitOpenComposer() {
   );
   if (!existing) return;
   const textarea = existing.querySelector("textarea");
-  if (textarea && textarea.value.trim()) {
+  const hasText = Boolean(textarea && textarea.value.trim());
+  const hasAttachment = Boolean(existing.querySelector(".thumb"));
+  if (hasText || hasAttachment) {
     existing.querySelector(".btn-primary")?.click();
   } else {
     existing.remove();
@@ -390,7 +393,7 @@ function updateStatus() {
     badge.textContent = String(total);
   }
   const status = document.getElementById("submit-status");
-  if (status) {
+  if (status && !submitted) {
     if (!connectionAlive) status.textContent = "Waiting for server…";
     else {
       const parts = [];
@@ -404,7 +407,8 @@ function updateStatus() {
   }
   const submit = document.getElementById("submit-feedback");
   if (submit)
-    submit.disabled = !connectionAlive || (count === 0 && overallCount === 0);
+    submit.disabled =
+      submitted || !connectionAlive || (count === 0 && overallCount === 0);
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
@@ -454,14 +458,23 @@ function beginBlockDrag(startBlock, event) {
       highlightRange(startBlock, endBlock);
     }
   };
-  const onUp = () => {
+  const finish = (commit) => {
     document.removeEventListener("mousemove", onMove);
     document.removeEventListener("mouseup", onUp);
+    document.removeEventListener("keydown", onKey);
+    window.removeEventListener("blur", onCancel);
     clearRangeHighlight();
-    openComposer(rangeAnchor(startBlock, endBlock));
+    if (commit) openComposer(rangeAnchor(startBlock, endBlock));
+  };
+  const onUp = () => finish(true);
+  const onCancel = () => finish(false);
+  const onKey = (keyEvent) => {
+    if (keyEvent.key === "Escape") finish(false);
   };
   document.addEventListener("mousemove", onMove);
   document.addEventListener("mouseup", onUp);
+  document.addEventListener("keydown", onKey);
+  window.addEventListener("blur", onCancel);
 }
 
 function decorateAnchors() {
@@ -486,22 +499,23 @@ function decorateAnchors() {
 
 function scrollToAnchor(anchor) {
   if (!anchor) return;
-  const block = document.querySelector(
-    `#viewer [data-source-line="${anchor.startLine}"]`,
+  const block = anchorBlocks.find(
+    (candidate) => Number(candidate.dataset.sourceLine) === anchor.startLine,
   );
   block?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function markAnchored() {
-  document
-    .querySelectorAll("#viewer [data-has-comment]")
-    .forEach((node) => node.removeAttribute("data-has-comment"));
+  for (const block of anchorBlocks) block.removeAttribute("data-has-comment");
   for (const comment of store.comments.values()) {
     if (!comment.anchor) continue;
-    const block = document.querySelector(
-      `#viewer [data-source-line="${comment.anchor.startLine}"]`,
-    );
-    block?.setAttribute("data-has-comment", "true");
+    const { startLine, endLine } = comment.anchor;
+    for (const block of anchorBlocks) {
+      const line = Number(block.dataset.sourceLine);
+      if (line >= startLine && line <= endLine) {
+        block.setAttribute("data-has-comment", "true");
+      }
+    }
   }
 }
 
@@ -576,6 +590,7 @@ export function initComments(viewState) {
         allAttachments(),
       );
       if (succeeded) {
+        submitted = true;
         const note = document.getElementById("submit-note");
         if (note) note.hidden = false;
         const overlay = document.getElementById("overlay");

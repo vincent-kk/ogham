@@ -405,7 +405,7 @@ button {
 }
 
 .viewer li > .line-add {
-  left: -2.8em;
+  left: -3.4em;
 }
 
 .viewer li.deilen-task-item {
@@ -684,9 +684,12 @@ button {
   transform: translateX(0);
 }
 
-[data-has-comment="true"],
+[data-has-comment="true"] {
+  background: color-mix(in srgb, var(--bg) 84%, var(--highlight-border));
+}
+
 .range-selecting {
-  background: var(--highlight);
+  background: color-mix(in srgb, var(--bg) 84%, var(--accent));
 }
 
 /* ── Selection popover ──────────────────────────────────── */
@@ -1078,6 +1081,9 @@ button {
   }
   .line-add {
     left: -28px;
+  }
+  .viewer li > .line-add {
+    left: -3em;
   }
 }
 
