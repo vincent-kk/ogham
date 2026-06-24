@@ -33,8 +33,11 @@ export async function handleSaveConfig(
     });
     return;
   }
+  // The settings form doesn't carry last_intent (auto-managed at submit time),
+  // so preserve the stored value instead of letting the schema default reset it.
+  const current = await ctx.loadConfig();
   try {
-    await ctx.saveConfig(parsed.data);
+    await ctx.saveConfig({ ...parsed.data, last_intent: current.last_intent });
   } catch (err) {
     sendJson(res, 500, { ok: false, message: (err as Error).message });
     return;

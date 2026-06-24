@@ -9,7 +9,8 @@ argument-hint: ""
 
 Render the document Claude just produced as a readable local page, then
 automatically collect the user's line-anchored comments (and any attached
-images) and fold them back into the document.
+images) and act on them — revising the document or continuing the conversation,
+whichever the user chose.
 
 ## Steps
 
@@ -27,7 +28,9 @@ images) and fold them back into the document.
    (exactly one of `content`/`path`). It returns `{ session_id, url, status }`
    immediately. Give the user the `url` (the page also opens automatically) and
    tell them to select text or use a block's **+** to leave comments, paste or
-   drop image screenshots, then click **Submit feedback**.
+   drop image screenshots, then choose **Revise & reopen** (apply the comments
+   and re-display the updated page), **Continue in chat** (talk the comments
+   through — works even with none), or **Close** (just dismiss the viewer).
 
 3. **Collect (poll loop).** Call `mcp_tools_collect_feedback` with
    `{ session_id, wait_seconds }`:
@@ -38,13 +41,24 @@ images) and fold them back into the document.
    - After about 5 pending rounds, stop polling and tell the user to let you
      know when they have submitted, then wait for their message.
 
-4. **Apply.** Revise the document using the returned comments. Each comment names
-   a source-line range (e.g. `L12-14`) and an excerpt — use it to make surgical
-   edits at the right place. Attached images arrive as image blocks; read them
-   as visual context. Honor `[resolved]` markers as lower priority.
+4. **Act on the intent.** The collected feedback opens with a directive that
+   reflects the button the user pressed:
+   - **Revise** → apply the comments to the document (each names a source-line
+     range like `L12-14` and an excerpt — edit surgically at that spot), then
+     re-display the result: call `mcp_tools_render_viewer` again and resume the
+     collect loop. This is an iterative review loop — repeat until the user
+     continues in chat or closes the viewer.
+   - **Discuss** → answer or discuss the comments in the conversation; don't
+     silently rewrite the document unless the user asks.
+   - **Dismiss / no comments** → the user ended the review without changes;
+     acknowledge briefly and continue, or wait for their next message.
 
-5. **Clean up (optional).** Call `mcp_tools_close_viewer` with `{ session_id }`
-   once the feedback is applied.
+   Attached images arrive as image blocks; read them as visual context. Honor
+   `[resolved]` markers as lower priority.
+
+5. **Clean up (optional).** A submitted review already closes its session; only
+   call `mcp_tools_close_viewer` with `{ session_id }` if you stopped polling
+   before the user ever submitted.
 
 ## Notes
 

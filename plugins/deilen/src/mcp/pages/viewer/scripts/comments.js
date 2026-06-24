@@ -2,6 +2,8 @@
 // text selection opens a comment composer; the "Overall note" button opens a
 // separate overall composer. Both live in in-memory stores, render as sidebar
 // cards, and debounce-save as text-only drafts until the final multipart submit.
+// The submit carries an intent — revise (apply + reopen), discuss (continue the
+// conversation), or dismiss (close) — that tells Claude what to do next.
 
 import { wireImageCapture } from "./images.js";
 import { scheduleAutoSave, submitFeedback } from "./submit.js";
@@ -65,13 +67,16 @@ function dispatchChange() {
   // Don't fire doomed auto-saves at a closed/dead session; mirror the
   // submit-button disable gate.
   if (connectionState !== "ended" && connectionState !== "offline")
-    scheduleAutoSave(view, buildPayload);
+    scheduleAutoSave(view, (status) =>
+      buildPayload(status, view.last_intent || "revise"),
+    );
 }
 
-function buildPayload(status) {
+function buildPayload(status, intent) {
   return {
     session_id: view.session_id,
     status,
+    intent,
     overall: [...store.overall.values()].map((note) => ({
       id: note.id,
       text: note.text,
@@ -425,12 +430,16 @@ function updateStatus() {
       }
     }
   }
-  const submit = document.getElementById("submit-feedback");
-  if (submit)
-    submit.disabled =
-      submitted ||
-      connectionState !== "alive" ||
-      (count === 0 && overallCount === 0);
+  const total = count + overallCount;
+  const alive = connectionState === "alive";
+  const revise = document.getElementById("submit-revise");
+  const discuss = document.getElementById("submit-discuss");
+  // Both buttons share one style — only the disabled tone differs (no swapping
+  // accent). Revise needs something to apply; discuss can continue with nothing.
+  if (revise) revise.disabled = submitted || !alive || total === 0;
+  if (discuss) discuss.disabled = submitted || !alive;
+  const close = document.getElementById("close-viewer");
+  if (close) close.disabled = submitted;
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
@@ -588,6 +597,85 @@ function wireSelection() {
   document.addEventListener("scroll", hidePopover, { passive: true });
 }
 
+/* ── Submission ───────────────────────────────────────── */
+function showOverlay(title, text) {
+  const titleEl = document.getElementById("overlay-title");
+  const textEl = document.getElementById("overlay-text");
+  if (titleEl) titleEl.textContent = title;
+  if (textEl) textEl.textContent = text;
+  const overlay = document.getElementById("overlay");
+  if (overlay) overlay.hidden = false;
+}
+
+function setActionsDisabled(disabled) {
+  for (const id of ["submit-revise", "submit-discuss", "close-viewer"]) {
+    const element = document.getElementById(id);
+    if (element) element.disabled = disabled;
+  }
+}
+
+function finalizeSubmitted() {
+  submitted = true;
+  for (const attachment of allAttachments())
+    URL.revokeObjectURL(attachment.url);
+}
+
+// Revise / discuss: send the comments with the chosen disposition, then lock the
+// page behind the "return to Claude" overlay. A failed POST re-enables the bar.
+async function submitWithIntent(intent, title, text) {
+  if (submitted) return;
+  setActionsDisabled(true);
+  const ok = await submitFeedback(
+    view,
+    (status) => buildPayload(status, intent),
+    allAttachments(),
+  );
+  if (!ok) {
+    updateStatus();
+    return;
+  }
+  finalizeSubmitted();
+  const note = document.getElementById("submit-note");
+  if (note) note.hidden = false;
+  showOverlay(title, text);
+}
+
+// Dismiss: best-effort signal that the viewer was closed with no changes so a
+// waiting collect_feedback resolves cleanly. Proceeds even if the POST fails —
+// the session is already gone in that case and the tab just needs closing.
+async function dismissViewer() {
+  if (submitted) return;
+  const drafts = store.comments.size + store.overall.size;
+  if (
+    drafts &&
+    !window.confirm(
+      `Close the viewer without sending your ${drafts} comment(s)?`,
+    )
+  )
+    return;
+  setActionsDisabled(true);
+  finalizeSubmitted();
+  await submitFeedback(
+    view,
+    (status) => ({
+      session_id: view.session_id,
+      status,
+      intent: "dismiss",
+      overall: [],
+      comments: [],
+    }),
+    [],
+  );
+  showOverlay("Viewer closed", "You can close this tab now.");
+  window.setTimeout(() => {
+    try {
+      window.close();
+    } catch {
+      /* OS-opened tabs can't be closed by script — the overlay says so */
+    }
+  }, 400);
+}
+
 /* ── Public ───────────────────────────────────────────── */
 export function setConnectionState(state) {
   connectionState = state;
@@ -602,27 +690,28 @@ export function initComments(viewState) {
     .getElementById("add-overall")
     ?.addEventListener("click", () => openOverallComposer());
   document
-    .getElementById("submit-feedback")
-    ?.addEventListener("click", async (event) => {
-      const button = event.currentTarget;
-      button.disabled = true;
-      const succeeded = await submitFeedback(
-        view,
-        buildPayload,
-        allAttachments(),
-      );
-      if (succeeded) {
-        submitted = true;
-        for (const attachment of allAttachments())
-          URL.revokeObjectURL(attachment.url);
-        const note = document.getElementById("submit-note");
-        if (note) note.hidden = false;
-        const overlay = document.getElementById("overlay");
-        if (overlay) overlay.hidden = false;
-      } else {
-        button.disabled = false;
-      }
-    });
+    .getElementById("submit-revise")
+    ?.addEventListener("click", () =>
+      submitWithIntent(
+        "revise",
+        "Sent for revision",
+        "Claude will apply your comments and reopen the updated document.",
+      ),
+    );
+  document
+    .getElementById("submit-discuss")
+    ?.addEventListener("click", () =>
+      submitWithIntent(
+        "discuss",
+        store.comments.size + store.overall.size
+          ? "Sent to chat"
+          : "Continuing",
+        "Return to your Claude conversation to continue.",
+      ),
+    );
+  document
+    .getElementById("close-viewer")
+    ?.addEventListener("click", dismissViewer);
   document.getElementById("overlay-confirm")?.addEventListener("click", () => {
     const overlay = document.getElementById("overlay");
     if (overlay) overlay.hidden = true;

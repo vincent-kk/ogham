@@ -7,7 +7,7 @@
 | File                                 | Role                                                         |
 | ------------------------------------ | ------------------------------------------------------------ |
 | `collectFeedback.ts`                 | 핸들러 — 세션 검증 → `awaitFeedback` → complete/pending 분기 |
-| `operations/buildFeedbackContent.ts` | 코멘트 요약 text 블록 + 첨부 이미지 base64 image 블록        |
+| `operations/buildFeedbackContent.ts` | intent 지시 첫 줄 + 코멘트 요약 text + 첨부 이미지 base64    |
 | `index.ts`                           | barrel — `handleCollectFeedback`, 입력·pending 타입          |
 
 ## Conventions

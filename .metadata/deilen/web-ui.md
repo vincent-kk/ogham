@@ -13,23 +13,23 @@
 
 ## 라우트
 
-| 메서드 | 경로                          | 동작                                                                                               |
-| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/r/<session>?token=`         | 뷰어 HTML(`viewerHtml`). `__DEILEN_STATE__` 에 session_id·token·title·렌더 HTML·raw markdown 주입. |
-| GET    | `/api/viewer?session=&token=` | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                   |
-| GET    | `/assets/<chunk>`             | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.                |
-| POST   | `/api/feedback?token=`        | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).    |
-| POST   | `/api/ping?token=`            | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                              |
-| GET    | `/settings?token=`            | 설정 HTML(`settingsHtml`). `__DEILEN_STATE__` 에 현재 Config 주입.                                 |
-| GET    | `/api/config?token=`          | 현재 `Config` JSON.                                                                                |
-| POST   | `/api/config?token=`          | body=`Config`. 검증 후 저장.                                                                       |
-| POST   | `/api/close?token=`           | body=`{ session_id }`(필수). 세션 종료(서버 종료는 idle/MCP-exit 내부 처리).                       |
+| 메서드 | 경로                          | 동작                                                                                                           |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET    | `/r/<session>?token=`         | 뷰어 HTML(`viewerHtml`). `__DEILEN_STATE__` 에 session_id·token·title·렌더 HTML·raw markdown·last_intent 주입. |
+| GET    | `/api/viewer?session=&token=` | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                               |
+| GET    | `/assets/<chunk>`             | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.                            |
+| POST   | `/api/feedback?token=`        | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).                |
+| POST   | `/api/ping?token=`            | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                                          |
+| GET    | `/settings?token=`            | 설정 HTML(`settingsHtml`). `__DEILEN_STATE__` 에 현재 Config 주입.                                             |
+| GET    | `/api/config?token=`          | 현재 `Config` JSON.                                                                                            |
+| POST   | `/api/config?token=`          | body=`Config`. 검증 후 저장.                                                                                   |
+| POST   | `/api/close?token=`           | body=`{ session_id }`(필수). 세션 종료(서버 종료는 idle/MCP-exit 내부 처리).                                   |
 
 ## 뷰어 페이지 (`pages/viewer/`)
 
 ```
 pages/viewer/
-├── index.html               # 헤더 + 본문 컨테이너 + 코멘트 사이드바 + 제출 바
+├── index.html               # 헤더(테마·복사·코멘트·닫기) + 본문 + 코멘트 사이드바 + 제출 바(2 의도)
 ├── styles/styles.css        # CSS 변수 테마 토큰
 ├── scripts/
 │   ├── app.js               # 상태 주입 해석, 본문 마운트, /api/viewer 재조회
@@ -42,7 +42,8 @@ pages/viewer/
 
 - 본문은 서버 렌더 HTML(라인 앵커 포함)을 그대로 마운트. 무거운 렌더러만 클라이언트 lazy.
 - 코멘트: 텍스트 선택 또는 라인 거터 클릭 → popover(텍스트 + 이미지 첨부) → 사이드바 누적. 디바운스 auto-save(`in_progress`).
-- 제출: "Submit feedback" → multipart POST(`complete`) → "Claude 로 돌아가세요" 오버레이(skill-creator UX 차용).
+- 제출: 푸터의 두 의도 버튼 — **Revise & reopen**(코멘트 반영 후 재표시) / **Continue in chat**(대화로 이어감, 코멘트 0개도 가능) → multipart POST(`complete` + `intent`) → 오버레이. 상단바 **Close(✕)** 는 `intent:"dismiss"` 로 제출해 대기 중 collect 를 깔끔히 해제(미전송 코멘트 있으면 확인). 마지막 사용 intent(`last_intent`)가 primary 로 강조된다.
+- 코멘트가 달린 블록 하이라이트는 앰버(`--mark`) — 보라 인용구(blockquote)와 색으로 구분.
 
 ### 원본 복사 (server parse + raw 동봉)
 
@@ -74,6 +75,8 @@ cennad settings 구조 차용. `Config` 폼 매핑:
 | `content_width_px` / `font_family`   | number / select                       |
 | `renderers.{mermaid,highlight,math}` | toggle (감지에 더해 강제 비활성 옵션) |
 | `max_image_mb` / `max_payload_mb`    | number                                |
+
+- `last_intent`(`revise`/`discuss`)은 폼에 없는 자동 관리 필드 — 피드백 제출이 갱신한다. `POST /api/config` 는 폼이 안 보내는 `last_intent` 를 기존 값으로 보존(merge)해 설정 저장이 덮어쓰지 않게 한다.
 
 ## FE 빌드
 

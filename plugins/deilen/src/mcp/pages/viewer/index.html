@@ -117,6 +117,26 @@
           </svg>
           <span class="badge" id="comment-count" hidden>0</span>
         </button>
+        <button
+          type="button"
+          class="icon-btn"
+          id="close-viewer"
+          aria-label="Close viewer"
+          title="Close viewer"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="17"
+            height="17"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -147,13 +167,42 @@
         <span class="submit-note" id="submit-note" hidden>
           You've already submitted your review.
         </span>
-        <button
-          type="button"
-          class="btn btn-primary"
-          id="submit-feedback"
-          disabled
-        >
-          Submit feedback
+        <button type="button" class="btn" id="submit-revise" disabled>
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+            <path d="M21 3v5h-5" />
+            <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+            <path d="M3 21v-5h5" />
+          </svg>
+          Revise &amp; reopen
+        </button>
+        <button type="button" class="btn" id="submit-discuss" disabled>
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-9 8.3 9 9 0 0 1-4-.9L3 20l1.1-4.5a8.38 8.38 0 0 1-.9-4A8.5 8.5 0 0 1 12 3a8.38 8.38 0 0 1 9 8.5Z"
+            />
+          </svg>
+          Continue in chat
         </button>
       </div>
     </footer>
@@ -174,8 +223,8 @@
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </div>
-        <h2 class="overlay-title">Feedback sent</h2>
-        <p class="overlay-text">
+        <h2 class="overlay-title" id="overlay-title">Feedback sent</h2>
+        <p class="overlay-text" id="overlay-text">
           Return to your Claude conversation — your comments are on their way.
         </p>
         <div class="overlay-actions">

@@ -10,6 +10,7 @@ export const DEFAULT_CONFIG: Config = {
   content_width_px: 820,
   font_family: "",
   renderers: { mermaid: true, highlight: true, math: true },
+  last_intent: "revise",
   max_image_mb: 10,
   max_payload_mb: 50,
   max_viewer_mb: 5,

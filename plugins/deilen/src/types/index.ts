@@ -16,6 +16,7 @@ export {
 export {
   AnchorSchema,
   CommentSchema,
+  FeedbackIntentSchema,
   FeedbackPayloadSchema,
   FeedbackStatusSchema,
   ImageRefSchema,
@@ -23,6 +24,7 @@ export {
   StoredFeedbackSchema,
   type Anchor,
   type Comment,
+  type FeedbackIntent,
   type FeedbackPayload,
   type FeedbackStatus,
   type ImageRef,

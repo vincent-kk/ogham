@@ -307,4 +307,28 @@ describe("feedback flow", () => {
       handleCollectFeedback({ session_id: sid, wait_seconds: 0.1 }, extra),
     ).rejects.toThrow(/closed/);
   });
+
+  it("persists the submit intent and injects it into the next viewer", async () => {
+    const sid = await render("# Persist\n\nbody");
+    const post = await fetch(
+      `${baseUrl}/api/feedback?session=${sid}&token=${token}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sid,
+          status: "complete",
+          intent: "discuss",
+          comments: [],
+        }),
+      },
+    );
+    expect(post.status).toBe(200);
+
+    const next = await render("# Next\n\nbody");
+    const page = await (
+      await fetch(`${baseUrl}/r/${next}?token=${token}`)
+    ).text();
+    expect(page).toContain('"last_intent":"discuss"');
+  });
 });

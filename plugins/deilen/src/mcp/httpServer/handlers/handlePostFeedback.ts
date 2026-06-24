@@ -22,6 +22,22 @@ const MB = 1024 * 1024;
 // await so two concurrent complete POSTs can't both pass the closed-check.
 const closingSessions = new Set<string>();
 
+// Persist the chosen submit intent so the next viewer defaults to it. Best-effort
+// — a config write must never fail the feedback submission itself.
+async function persistLastIntent(
+  ctx: RouteContext,
+  intent: "revise" | "discuss",
+): Promise<void> {
+  try {
+    const config = await ctx.loadConfig();
+    if (config.last_intent !== intent) {
+      await ctx.saveConfig({ ...config, last_intent: intent });
+    }
+  } catch {
+    /* swallow: last_intent is a convenience default, not part of the contract */
+  }
+}
+
 /**
  * POST /api/feedback — persist a submission. JSON bodies are text-only
  * auto-saves (in_progress); multipart bodies carry image parts and a complete
@@ -98,6 +114,9 @@ export async function handlePostFeedback(
       // even if collect-side feedback cleanup runs immediately afterward.
       await closeSession(sessionId);
       deliverComplete(sessionId, stored);
+      if (payload.intent === "revise" || payload.intent === "discuss") {
+        await persistLastIntent(ctx, payload.intent);
+      }
     }
     sendJson(res, 200, { ok: true, status: payload.status });
   } finally {

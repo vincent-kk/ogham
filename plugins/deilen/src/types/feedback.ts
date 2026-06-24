@@ -25,9 +25,15 @@ export type OverallNote = z.infer<typeof OverallNoteSchema>;
 export const FeedbackStatusSchema = z.enum(["in_progress", "complete"]);
 export type FeedbackStatus = z.infer<typeof FeedbackStatusSchema>;
 
+// Disposition of a complete submission: revise the document and re-display it,
+// continue the conversation about the comments, or dismiss the viewer.
+export const FeedbackIntentSchema = z.enum(["revise", "discuss", "dismiss"]);
+export type FeedbackIntent = z.infer<typeof FeedbackIntentSchema>;
+
 export const FeedbackPayloadSchema = z.object({
   session_id: z.string().min(1),
   status: FeedbackStatusSchema,
+  intent: FeedbackIntentSchema.optional(),
   overall: z.array(OverallNoteSchema).default([]),
   comments: z.array(CommentSchema).default([]),
 });
@@ -51,6 +57,7 @@ export type ImageRef = z.infer<typeof ImageRefSchema>;
 export const StoredFeedbackSchema = z.object({
   session_id: z.string(),
   status: FeedbackStatusSchema,
+  intent: FeedbackIntentSchema.optional(),
   overall: z.array(OverallNoteSchema).default([]),
   comments: z.array(CommentSchema).default([]),
   images: z.array(ImageRefSchema).default([]),

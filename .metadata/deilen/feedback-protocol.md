@@ -19,6 +19,7 @@ POST /api/feedback?token=<…>        Content-Type: multipart/form-data
 {
   "session_id": "rs_a1b2c3",
   "status": "in_progress" | "complete",
+  "intent": "revise" | "discuss" | "dismiss",   // complete 제출의 처분(선택)
   "overall": [
     { "id": "o1", "text": "주제별 총평(선택, 다중)" }
   ],
@@ -36,6 +37,7 @@ POST /api/feedback?token=<…>        Content-Type: multipart/form-data
 - `Anchor.sourceText` 는 라인 범위 원문 발췌(Claude 가 위치를 정확히 특정하도록).
 - `imageIds` 는 **bare id 배열**; id `x` 는 part `img_x` 와 1:1 (접두 `img_` 는 part 이름에만 붙는다 — `fd.append(`img\_${id}`, …)`).
 - 라인 무관 전역 코멘트는 `anchor: null`.
+- `intent` 은 **complete 제출의 처분**(선택): `revise`(코멘트 반영 후 문서 재표시), `discuss`(코멘트로 대화 이어감, 문서 자동 수정 안 함), `dismiss`(코멘트 없이 뷰어 닫기). in_progress auto-save 에는 무의미. `revise`/`discuss` 는 `config.last_intent` 로 영속돼 다음 뷰어의 기본 강조 버튼이 된다(`dismiss` 는 미영속). 코멘트마다가 아니라 **제출 단위**의 성격이다.
 
 ## 코멘트 생애주기 (작성 · 편집 · 삭제 · 전체)
 
@@ -75,7 +77,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 1. `payload` JSON 검증(Zod `FeedbackPayloadSchema`).
 2. 각 `img_*` part 를 mime 화이트리스트(`image/png|jpeg|gif|webp`) + 크기 상한(`config.max_image_mb`, 기본 10MB) 검사 후 `runtime/sessions/<sid>/images/<id>.<ext>` 저장.
 3. `feedbackStore` 가 `feedback.json` 갱신(코멘트 + 이미지 메타).
-4. `status:"complete"` 이면 `sessionStore` 의 pendingResolver 호출 → 대기 중 `collect_feedback` 깨움.
+4. `status:"complete"` 이면 `sessionStore` 의 pendingResolver 호출 → 대기 중 `collect_feedback` 깨움. `intent` 이 `revise`/`discuss` 면 `config.last_intent` 도 best-effort 영속(실패해도 제출은 성공).
 5. `in_progress`(auto-save) 는 **JSON 텍스트만** 영속화(이미지 Blob 미전송, `imageIds` 는 예약 참조), resolver 미발화. 이미지 Blob 은 최종 `complete` 멀티파트에 일괄 포함된다(**미제출 시 이미지 미보존** — M8 결정).
 
 ## 수거 — long-poll resolver
@@ -91,6 +93,7 @@ fetch(`/api/feedback?token=${token}`, { method: "POST", body: fd });
 
 `collect_feedback` 결과 → MCP content 배열:
 
+- **첫 줄(intent 지시)**: `revise`→「코멘트 반영 후 render_viewer 재호출로 재표시(리뷰 루프)」, `discuss`→「대화로 답변, 무단 재작성 금지」, `dismiss`→「뷰어 닫힘, 변경 없음」. 코멘트가 0개여도 이 지시로 Claude 가 다음 행동을 결정한다.
 - **text 블록**: `overall` 노트들(`Overall notes (N):`) + 코멘트 목록을 `L12-14 「sourceText 발췌」 → 코멘트` 형식으로 정리(Claude 가 라인을 바로 찾도록).
 - **image 블록**: 첨부 이미지마다 저장본을 base64 로 읽어 `{ type:"image", data, mimeType }`. → Claude 가 스크린샷을 실제로 본다.
 - 이미지가 코멘트에 종속됨을 text 블록에서 `[img_x1]` 마커로 상호참조.

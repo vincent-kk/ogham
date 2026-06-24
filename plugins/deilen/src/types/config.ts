@@ -36,6 +36,7 @@ export const ConfigSchema = z
       .regex(FONT_FAMILY_PATTERN, "font_family has invalid characters")
       .default(""),
     renderers: RenderersConfigSchema,
+    last_intent: z.enum(["revise", "discuss"]).default("revise"),
     max_image_mb: z.number().int().min(1).max(100).default(10),
     max_payload_mb: z.number().int().min(1).max(200).default(50),
     max_viewer_mb: z.number().int().min(1).max(50).default(5),

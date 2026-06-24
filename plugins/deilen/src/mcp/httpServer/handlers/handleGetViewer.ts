@@ -46,6 +46,7 @@ export async function handleGetViewer(
     theme: overrides?.theme ?? config.theme,
     content_width_px: overrides?.content_width_px ?? config.content_width_px,
     font_family: config.font_family,
+    last_intent: config.last_intent,
     renderers: {
       mermaid: overrides?.renderers?.mermaid ?? config.renderers.mermaid,
       highlight: overrides?.renderers?.highlight ?? config.renderers.highlight,

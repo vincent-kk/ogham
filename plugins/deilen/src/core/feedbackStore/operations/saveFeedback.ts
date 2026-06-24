@@ -17,6 +17,7 @@ export async function saveFeedback(
   const stored = StoredFeedbackSchema.parse({
     session_id: payload.session_id,
     status: payload.status,
+    intent: payload.intent,
     overall: payload.overall,
     comments: payload.comments,
     images,
