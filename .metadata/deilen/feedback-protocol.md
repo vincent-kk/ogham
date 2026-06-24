@@ -37,7 +37,7 @@ POST /api/feedback?token=<…>        Content-Type: multipart/form-data
 - `Anchor.sourceText` 는 라인 범위 원문 발췌(Claude 가 위치를 정확히 특정하도록).
 - `imageIds` 는 **bare id 배열**; id `x` 는 part `img_x` 와 1:1 (접두 `img_` 는 part 이름에만 붙는다 — `fd.append(`img\_${id}`, …)`).
 - 라인 무관 전역 코멘트는 `anchor: null`.
-- `intent` 은 **complete 제출의 처분**(선택): `revise`(코멘트 반영 후 문서 재표시), `discuss`(코멘트로 대화 이어감, 문서 자동 수정 안 함), `dismiss`(코멘트 없이 뷰어 닫기). in_progress auto-save 에는 무의미. `revise`/`discuss` 는 `config.last_intent` 로 영속돼 다음 뷰어의 기본 강조 버튼이 된다(`dismiss` 는 미영속). 코멘트마다가 아니라 **제출 단위**의 성격이다.
+- `intent` 은 **complete 제출의 처분**(선택): `revise`(코멘트 반영 후 문서 재표시), `discuss`(코멘트로 대화 이어감, 문서 자동 수정 안 함), `dismiss`(코멘트 없이 뷰어 닫기). in_progress auto-save 에는 무의미. `revise`/`discuss` 는 `config.last_intent` 로 영속된다(`dismiss` 는 미영속). 코멘트마다가 아니라 **제출 단위**의 성격이다.
 
 ## 코멘트 생애주기 (작성 · 편집 · 삭제 · 전체)
 

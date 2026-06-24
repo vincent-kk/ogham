@@ -4,13 +4,14 @@ import {
   closeSession,
   getSession,
 } from "../../../core/sessionStore/index.js";
+import { SessionStatus } from "../../../types/enums.js";
 
 export interface CloseViewerInput {
   session_id: string;
 }
 
 export interface CloseViewerOutput {
-  status: "closed";
+  status: typeof SessionStatus.Closed;
 }
 
 /** close_viewer: deactivate a session and settle any pending collect. */
@@ -22,5 +23,5 @@ export async function handleCloseViewer(
   if (!meta) throw new Error(`unknown: no session ${input.session_id}`);
   closeResolver(input.session_id);
   await closeSession(input.session_id);
-  return { status: "closed" };
+  return { status: SessionStatus.Closed };
 }

@@ -5,6 +5,7 @@ import {
   pruneExpired,
 } from "../../../core/sessionStore/index.js";
 import { logger } from "../../../lib/logger.js";
+import { SessionStatus } from "../../../types/enums.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { isoNow } from "../../../utils/isoNow.js";
 import { openBrowser } from "../../../utils/openBrowser.js";
@@ -24,7 +25,7 @@ export interface RenderViewerInput {
 export interface RenderViewerOutput {
   session_id: string;
   url: string;
-  status: "serving";
+  status: typeof SessionStatus.Serving;
 }
 
 /**
@@ -58,5 +59,5 @@ export async function handleRenderViewer(
     options: input.options,
   });
   if (config.auto_open) openBrowser(url);
-  return { session_id: sessionId, url, status: "serving" };
+  return { session_id: sessionId, url, status: SessionStatus.Serving };
 }

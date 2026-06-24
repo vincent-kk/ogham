@@ -1,6 +1,7 @@
 import type { ServerResponse } from "node:http";
 
 import { getSession } from "../../../core/sessionStore/index.js";
+import { SessionStatus } from "../../../types/enums.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 
@@ -22,7 +23,7 @@ export async function handlePing(
     return;
   }
   const meta = await getSession(sessionId, ctx.projectHash);
-  if (!meta || meta.status === "closed") {
+  if (!meta || meta.status === SessionStatus.Closed) {
     sendJson(res, 404, { ok: false, message: "Session unavailable" });
     return;
   }

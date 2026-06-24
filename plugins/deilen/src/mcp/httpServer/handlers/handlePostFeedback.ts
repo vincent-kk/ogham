@@ -7,6 +7,11 @@ import {
   getSession,
 } from "../../../core/sessionStore/index.js";
 import {
+  FeedbackIntent,
+  FeedbackStatus,
+  SessionStatus,
+} from "../../../types/enums.js";
+import {
   FeedbackPayloadSchema,
   type ImageRef,
 } from "../../../types/feedback.js";
@@ -26,7 +31,7 @@ const closingSessions = new Set<string>();
 // — a config write must never fail the feedback submission itself.
 async function persistLastIntent(
   ctx: RouteContext,
-  intent: "revise" | "discuss",
+  intent: typeof FeedbackIntent.Revise | typeof FeedbackIntent.Discuss,
 ): Promise<void> {
   try {
     const config = await ctx.loadConfig();
@@ -58,7 +63,7 @@ export async function handlePostFeedback(
     sendJson(res, 404, { ok: false, message: "Unknown session" });
     return;
   }
-  if (meta.status === "closed") {
+  if (meta.status === SessionStatus.Closed) {
     sendJson(res, 409, { ok: false, message: "Session closed" });
     return;
   }
@@ -96,7 +101,7 @@ export async function handlePostFeedback(
     return;
   }
 
-  if (payload.status === "complete") {
+  if (payload.status === FeedbackStatus.Complete) {
     if (closingSessions.has(sessionId)) {
       sendJson(res, 409, { ok: false, message: "Session closing" });
       return;
@@ -107,19 +112,23 @@ export async function handlePostFeedback(
     const stored = await saveFeedback(
       sessionId,
       payload,
-      payload.status === "complete" ? images : [],
+      payload.status === FeedbackStatus.Complete ? images : [],
     );
-    if (payload.status === "complete") {
+    if (payload.status === FeedbackStatus.Complete) {
       // Close before waking the waiter so a refreshed viewer renders as ended
       // even if collect-side feedback cleanup runs immediately afterward.
       await closeSession(sessionId);
       deliverComplete(sessionId, stored);
-      if (payload.intent === "revise" || payload.intent === "discuss") {
+      if (
+        payload.intent === FeedbackIntent.Revise ||
+        payload.intent === FeedbackIntent.Discuss
+      ) {
         await persistLastIntent(ctx, payload.intent);
       }
     }
     sendJson(res, 200, { ok: true, status: payload.status });
   } finally {
-    if (payload.status === "complete") closingSessions.delete(sessionId);
+    if (payload.status === FeedbackStatus.Complete)
+      closingSessions.delete(sessionId);
   }
 }

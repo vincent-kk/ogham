@@ -3,6 +3,7 @@ import {
   sessionViewerPath,
 } from "../../../constants/paths.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
+import { SessionStatus } from "../../../types/enums.js";
 import type { RenderOptions } from "../../../types/renderOptions.js";
 import { type SessionMeta, SessionMetaSchema } from "../../../types/session.js";
 
@@ -26,7 +27,7 @@ export async function createSession(
     title: input.title,
     url: input.url,
     created_at: input.createdAt,
-    status: "serving",
+    status: SessionStatus.Serving,
     options: input.options,
   });
   await atomicWrite(sessionViewerPath(input.sessionId), input.markdown);

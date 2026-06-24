@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import { SessionStatus } from "./enums.js";
 import { RenderOptionsSchema } from "./renderOptions.js";
 
-export const SessionStatusSchema = z.enum(["serving", "closed"]);
-export type SessionStatus = z.infer<typeof SessionStatusSchema>;
+export const SessionStatusSchema = z.nativeEnum(SessionStatus);
 
 export const SessionMetaSchema = z.object({
   session_id: z.string(),

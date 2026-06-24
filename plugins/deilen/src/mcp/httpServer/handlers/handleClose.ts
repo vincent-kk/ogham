@@ -5,6 +5,7 @@ import {
   closeSession,
   getSession,
 } from "../../../core/sessionStore/index.js";
+import { SessionStatus } from "../../../types/enums.js";
 import type { RouteContext } from "../routing/routeContext.js";
 import { sendJson } from "../utils/sendJson.js";
 
@@ -27,5 +28,5 @@ export async function handleClose(
   }
   closeResolver(sessionId);
   await closeSession(sessionId);
-  sendJson(res, 200, { ok: true, status: "closed" });
+  sendJson(res, 200, { ok: true, status: SessionStatus.Closed });
 }

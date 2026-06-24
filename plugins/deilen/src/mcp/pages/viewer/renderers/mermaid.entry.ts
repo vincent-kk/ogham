@@ -1,9 +1,11 @@
 import mermaid from "mermaid";
 
+import { Theme } from "../../../../types/enums.js";
+
 function isDark(): boolean {
   const theme = document.documentElement.getAttribute("data-theme");
-  if (theme === "dark") return true;
-  if (theme === "light") return false;
+  if (theme === Theme.Dark) return true;
+  if (theme === Theme.Light) return false;
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 

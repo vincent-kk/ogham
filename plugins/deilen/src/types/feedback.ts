@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { FeedbackIntent, FeedbackStatus, ImageSource } from "./enums.js";
+
 export const AnchorSchema = z.object({
   startLine: z.number().int().min(1),
   endLine: z.number().int().min(1),
@@ -22,13 +24,9 @@ export const OverallNoteSchema = z.object({
 });
 export type OverallNote = z.infer<typeof OverallNoteSchema>;
 
-export const FeedbackStatusSchema = z.enum(["in_progress", "complete"]);
-export type FeedbackStatus = z.infer<typeof FeedbackStatusSchema>;
+export const FeedbackStatusSchema = z.nativeEnum(FeedbackStatus);
 
-// Disposition of a complete submission: revise the document and re-display it,
-// continue the conversation about the comments, or dismiss the viewer.
-export const FeedbackIntentSchema = z.enum(["revise", "discuss", "dismiss"]);
-export type FeedbackIntent = z.infer<typeof FeedbackIntentSchema>;
+export const FeedbackIntentSchema = z.nativeEnum(FeedbackIntent);
 
 export const FeedbackPayloadSchema = z.object({
   session_id: z.string().min(1),
@@ -39,8 +37,7 @@ export const FeedbackPayloadSchema = z.object({
 });
 export type FeedbackPayload = z.infer<typeof FeedbackPayloadSchema>;
 
-export const ImageSourceSchema = z.enum(["clipboard", "file"]);
-export type ImageSource = z.infer<typeof ImageSourceSchema>;
+export const ImageSourceSchema = z.nativeEnum(ImageSource);
 
 /** Server-internal image metadata recorded in feedback.json. */
 export const ImageRefSchema = z.object({

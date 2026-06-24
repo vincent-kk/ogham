@@ -1,11 +1,12 @@
+import { SettleKind } from "../../../types/enums.js";
 import type { StoredFeedback } from "../../../types/feedback.js";
 
 export type SettleValue =
-  | { kind: "complete"; feedback: StoredFeedback }
-  | { kind: "pending" }
-  | { kind: "superseded" }
-  | { kind: "closing" }
-  | { kind: "aborted" };
+  | { kind: typeof SettleKind.Complete; feedback: StoredFeedback }
+  | { kind: typeof SettleKind.Pending }
+  | { kind: typeof SettleKind.Superseded }
+  | { kind: typeof SettleKind.Closing }
+  | { kind: typeof SettleKind.Aborted };
 
 interface ResolverSlot {
   resolve: (value: SettleValue) => void;
@@ -41,21 +42,21 @@ export function awaitFeedback(
   const buffered = completeBuffer.get(sessionId);
   if (buffered) {
     completeBuffer.delete(sessionId);
-    return Promise.resolve({ kind: "complete", feedback: buffered });
+    return Promise.resolve({ kind: SettleKind.Complete, feedback: buffered });
   }
-  if (slots.has(sessionId)) settle(sessionId, { kind: "superseded" });
+  if (slots.has(sessionId)) settle(sessionId, { kind: SettleKind.Superseded });
 
   return new Promise<SettleValue>((resolve) => {
     if (signal?.aborted) {
-      resolve({ kind: "aborted" });
+      resolve({ kind: SettleKind.Aborted });
       return;
     }
     const timer = setTimeout(
-      () => settle(sessionId, { kind: "pending" }),
+      () => settle(sessionId, { kind: SettleKind.Pending }),
       waitSeconds * 1000,
     );
     timer.unref();
-    const onAbort = (): void => settle(sessionId, { kind: "aborted" });
+    const onAbort = (): void => settle(sessionId, { kind: SettleKind.Aborted });
     if (signal) signal.addEventListener("abort", onAbort, { once: true });
     slots.set(sessionId, { resolve, timer, signal, onAbort });
   });
@@ -66,20 +67,21 @@ export function deliverComplete(
   sessionId: string,
   feedback: StoredFeedback,
 ): void {
-  if (slots.has(sessionId)) settle(sessionId, { kind: "complete", feedback });
+  if (slots.has(sessionId))
+    settle(sessionId, { kind: SettleKind.Complete, feedback });
   else completeBuffer.set(sessionId, feedback);
 }
 
 /** Settle a session's waiter as closing and drop any buffered feedback. */
 export function closeResolver(sessionId: string): void {
-  settle(sessionId, { kind: "closing" });
+  settle(sessionId, { kind: SettleKind.Closing });
   completeBuffer.delete(sessionId);
 }
 
 /** Settle every waiter as closing (graceful shutdown). */
 export function settleAllResolvers(): void {
   for (const sessionId of [...slots.keys()]) {
-    settle(sessionId, { kind: "closing" });
+    settle(sessionId, { kind: SettleKind.Closing });
   }
   completeBuffer.clear();
 }

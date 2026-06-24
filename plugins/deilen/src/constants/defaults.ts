@@ -1,7 +1,8 @@
 import type { Config } from "../types/config.js";
+import { FeedbackIntent, Theme } from "../types/enums.js";
 
 export const DEFAULT_CONFIG: Config = {
-  theme: "auto",
+  theme: Theme.Auto,
   auto_open: true,
   collect_timeout_seconds: 45,
   session_ttl_hours: 72,
@@ -10,7 +11,7 @@ export const DEFAULT_CONFIG: Config = {
   content_width_px: 820,
   font_family: "",
   renderers: { mermaid: true, highlight: true, math: true },
-  last_intent: "revise",
+  last_intent: FeedbackIntent.Revise,
   max_image_mb: 10,
   max_payload_mb: 50,
   max_viewer_mb: 5,

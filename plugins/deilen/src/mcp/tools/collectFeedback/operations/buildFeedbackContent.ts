@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { sessionImagePath } from "../../../../constants/paths.js";
+import { FeedbackIntent } from "../../../../types/enums.js";
 import type { StoredFeedback } from "../../../../types/feedback.js";
 
 function truncate(text: string, max = 80): string {
@@ -11,14 +12,11 @@ function truncate(text: string, max = 80): string {
 }
 
 /** Lead directive telling Claude what the user wants done with this submission. */
-function leadLine(
-  intent: "revise" | "discuss" | "dismiss",
-  hasItems: boolean,
-): string {
-  if (intent === "dismiss") {
+function leadLine(intent: FeedbackIntent, hasItems: boolean): string {
+  if (intent === FeedbackIntent.Dismiss) {
     return "The user closed the viewer without submitting feedback — no changes requested. Continue, or wait for their next message.";
   }
-  if (intent === "discuss") {
+  if (intent === FeedbackIntent.Discuss) {
     return hasItems
       ? "The user reviewed the document and wants to CONTINUE THE CONVERSATION about the points below. Discuss or answer them in chat — do not rewrite the document unless they ask."
       : "The user reviewed the document, left no comments, and chose to continue in chat. Proceed with the conversation.";
@@ -40,7 +38,9 @@ export async function buildFeedbackContent(
 ): Promise<CallToolResult> {
   const overallNotes = feedback.overall.filter((note) => note.text.trim());
   const hasItems = feedback.comments.length > 0 || overallNotes.length > 0;
-  const lines: string[] = [leadLine(feedback.intent ?? "revise", hasItems)];
+  const lines: string[] = [
+    leadLine(feedback.intent ?? FeedbackIntent.Revise, hasItems),
+  ];
 
   if (overallNotes.length) {
     lines.push(`\nOverall notes (${overallNotes.length}):`);

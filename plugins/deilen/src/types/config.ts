@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-export const ThemeSchema = z.enum(["light", "dark", "auto"]);
-export type Theme = z.infer<typeof ThemeSchema>;
+import { FeedbackIntent, Theme } from "./enums.js";
+
+export const ThemeSchema = z.nativeEnum(Theme);
 
 export const RenderersConfigSchema = z
   .object({
@@ -23,7 +24,7 @@ const FONT_FAMILY_PATTERN = /^[^;{}<>\\@/]*$/;
 
 export const ConfigSchema = z
   .object({
-    theme: ThemeSchema.default("auto"),
+    theme: ThemeSchema.default(Theme.Auto),
     auto_open: z.boolean().default(true),
     collect_timeout_seconds: z.number().int().min(1).max(55).default(45),
     session_ttl_hours: z.number().int().min(1).max(720).default(72),
@@ -36,7 +37,9 @@ export const ConfigSchema = z
       .regex(FONT_FAMILY_PATTERN, "font_family has invalid characters")
       .default(""),
     renderers: RenderersConfigSchema,
-    last_intent: z.enum(["revise", "discuss"]).default("revise"),
+    last_intent: z
+      .enum([FeedbackIntent.Revise, FeedbackIntent.Discuss])
+      .default(FeedbackIntent.Revise),
     max_image_mb: z.number().int().min(1).max(100).default(10),
     max_payload_mb: z.number().int().min(1).max(200).default(50),
     max_viewer_mb: z.number().int().min(1).max(50).default(5),

@@ -7,6 +7,7 @@ import {
   IMAGE_EXT_BY_MIME,
 } from "../../../constants/defaults.js";
 import { sessionImagesDir } from "../../../constants/paths.js";
+import { ImageSource } from "../../../types/enums.js";
 import type { ImageRef } from "../../../types/feedback.js";
 import { randomId } from "../../../utils/randomId.js";
 
@@ -68,7 +69,9 @@ function readBody(req: IncomingMessage, maxBytes: number): Promise<Buffer> {
 }
 
 function inferSource(filename: string | undefined): ImageRef["source"] {
-  return filename?.startsWith("clipboard") ? "clipboard" : "file";
+  return filename?.startsWith(ImageSource.Clipboard)
+    ? ImageSource.Clipboard
+    : ImageSource.File;
 }
 
 /**

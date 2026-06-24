@@ -20,7 +20,7 @@
 - 무거운 렌더러는 `/assets/*` 로 lazy — 실패 시 읽을 수 있는 source fallback 유지
 - 동봉 폰트 없음: KaTeX 는 MathML, highlight 는 page CSS, mermaid 는 SVG
 - `prefers-reduced-motion`·`prefers-color-scheme` 존중
-- 푸터 제출은 2 의도(`revise`/`discuss`) + 상단바 Close(`dismiss`); 마지막 사용(`last_intent`)이 primary 강조. 코멘트 하이라이트는 앰버(`--mark`, 인용구 보라와 구분)
+- 푸터 제출은 2 의도(`revise`/`discuss`, 동일 스타일·disabled 만 색조 구분) + 상단바 Close(`dismiss`). 코멘트 하이라이트는 앰버(`--mark`, 인용구 보라와 구분)
 
 ## Boundaries
 

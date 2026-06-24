@@ -10,6 +10,11 @@ import {
   getSession,
 } from "../../../core/sessionStore/index.js";
 import { logger } from "../../../lib/logger.js";
+import {
+  FeedbackStatus,
+  SessionStatus,
+  SettleKind,
+} from "../../../types/enums.js";
 import type { StoredFeedback } from "../../../types/feedback.js";
 import { ensureHttpServer } from "../../httpServer/index.js";
 import type { ToolExtra } from "../../shared/index.js";
@@ -22,7 +27,7 @@ export interface CollectFeedbackInput {
 }
 
 export interface CollectFeedbackPending {
-  status: "pending";
+  status: typeof SettleKind.Pending;
   draft_count: number;
 }
 
@@ -51,7 +56,7 @@ export async function handleCollectFeedback(
   // wait), then becomes terminal once that buffer is drained.
   const result = await awaitFeedback(
     input.session_id,
-    meta.status === "closed" ? 0 : wait,
+    meta.status === SessionStatus.Closed ? 0 : wait,
     extra.signal,
   );
   // A delivered complete is returned as MCP content with its images inlined as
@@ -68,17 +73,21 @@ export async function handleCollectFeedback(
     return content;
   };
 
-  if (result.kind === "complete") return deliver(result.feedback);
-  if (result.kind === "closing") {
+  if (result.kind === SettleKind.Complete) return deliver(result.feedback);
+  if (result.kind === SettleKind.Closing) {
     throw new Error("closed: server is shutting down");
   }
-  if (meta.status === "closed") {
+  if (meta.status === SessionStatus.Closed) {
     // The in-memory buffer is gone (server restart or closeResolver), but a
     // complete submission is durable on disk — recover it instead of failing.
     const persisted = await readFeedback(input.session_id);
-    if (persisted?.status === "complete") return deliver(persisted);
+    if (persisted?.status === FeedbackStatus.Complete)
+      return deliver(persisted);
     throw new Error(`closed: session ${input.session_id} is closed`);
   }
   const draft = await readFeedback(input.session_id);
-  return { status: "pending", draft_count: draft?.comments.length ?? 0 };
+  return {
+    status: SettleKind.Pending,
+    draft_count: draft?.comments.length ?? 0,
+  };
 }
