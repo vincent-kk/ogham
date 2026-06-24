@@ -6,9 +6,11 @@
 // conversation), or dismiss (close) — that tells Claude what to do next.
 
 import { wireImageCapture } from "./images.js";
-import { scheduleAutoSave, submitFeedback } from "./submit.js";
+import { scheduleAutoSave, sendDismiss, submitFeedback } from "./submit.js";
 
 const POPOVER_OFFSET_PX = 8;
+// Let the "Viewer closed" overlay paint before attempting window.close().
+const CLOSE_TAB_DELAY_MS = 1250;
 
 let view = {};
 const store = { comments: new Map(), overall: new Map() };
@@ -434,12 +436,12 @@ function updateStatus() {
   const alive = connectionState === "alive";
   const revise = document.getElementById("submit-revise");
   const discuss = document.getElementById("submit-discuss");
+  const close = document.getElementById("close-viewer");
   // Both buttons share one style — only the disabled tone differs (no swapping
   // accent). Revise needs something to apply; discuss can continue with nothing.
   if (revise) revise.disabled = submitted || !alive || total === 0;
   if (discuss) discuss.disabled = submitted || !alive;
-  const close = document.getElementById("close-viewer");
-  if (close) close.disabled = submitted;
+  if (close) close.disabled = false;
 }
 
 /* ── Anchors + selection ──────────────────────────────── */
@@ -670,14 +672,35 @@ async function submitWithIntent(intent, title, text) {
   finalizeSubmitted();
   const note = document.getElementById("submit-note");
   if (note) note.hidden = false;
+  // Re-enable Close so the user can still dismiss the tab after submitting.
+  const close = document.getElementById("close-viewer");
+  if (close) close.disabled = false;
   showOverlay(title, text);
 }
 
-// Dismiss: best-effort signal that the viewer was closed with no changes so a
-// waiting collect_feedback resolves cleanly. Proceeds even if the POST fails —
-// the session is already gone in that case and the tab just needs closing.
+// Show the closing overlay, then attempt to close the tab. window.close() is a
+// no-op for OS-opened tabs, so the overlay carries the "you can close" message.
+function closeTab() {
+  showOverlay("Viewer closed", "You can close this tab now.");
+  window.setTimeout(() => {
+    try {
+      window.close();
+    } catch {
+      /* OS-opened tabs can't be closed by script — the overlay says so */
+    }
+  }, CLOSE_TAB_DELAY_MS);
+}
+
+// Dismiss: best-effort signal that the viewer closed with no changes so a
+// waiting collect_feedback settles cleanly. The signal is fire-and-forget and
+// skipped once the session is already gone — the tab must close regardless of
+// server state. Once feedback has already been submitted there is nothing left
+// to send, so the X just closes the tab.
 async function dismissViewer() {
-  if (submitted) return;
+  if (submitted) {
+    closeTab();
+    return;
+  }
   const drafts = store.comments.size + store.overall.size;
   if (drafts) {
     const proceed = await confirmClose(
@@ -687,25 +710,16 @@ async function dismissViewer() {
   }
   setActionsDisabled(true);
   finalizeSubmitted();
-  await submitFeedback(
-    view,
-    (status) => ({
+  // Only the live session has a waiter to settle; never block the close on it.
+  if (connectionState !== "ended" && connectionState !== "offline")
+    sendDismiss(view, {
       session_id: view.session_id,
-      status,
+      status: "complete",
       intent: "dismiss",
       overall: [],
       comments: [],
-    }),
-    [],
-  );
-  showOverlay("Viewer closed", "You can close this tab now.");
-  window.setTimeout(() => {
-    try {
-      window.close();
-    } catch {
-      /* OS-opened tabs can't be closed by script — the overlay says so */
-    }
-  }, 400);
+    });
+  closeTab();
 }
 
 /* ── Public ───────────────────────────────────────────── */

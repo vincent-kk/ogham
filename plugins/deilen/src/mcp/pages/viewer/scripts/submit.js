@@ -23,6 +23,22 @@ export function scheduleAutoSave(state, buildPayload) {
   }, AUTOSAVE_DEBOUNCE_MS);
 }
 
+// Best-effort dismiss: a fire-and-forget keepalive POST so a waiting
+// collect_feedback still settles as the tab closes. Never awaited — a closed,
+// offline, or hung session must not block the viewer from closing.
+export function sendDismiss(state, payload) {
+  try {
+    void fetch(feedbackUrl(state), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* ignore — the tab closes regardless */
+  }
+}
+
 export async function submitFeedback(state, buildPayload, attachments) {
   if (saveTimer) window.clearTimeout(saveTimer);
   const form = new FormData();
