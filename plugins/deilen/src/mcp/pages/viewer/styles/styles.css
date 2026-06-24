@@ -412,12 +412,16 @@ button {
   list-style: none;
 }
 
+/* Pulled into the list gutter like a bullet/number marker so the comment
+   highlight on the <li> covers only the text, never the checkbox. The negative
+   left margin offsets the box out of the content column; the right margin pulls
+   the text back to the content edge. */
 .deilen-task-checkbox {
   display: inline-block;
   box-sizing: border-box;
   width: 1.05em;
   height: 1.05em;
-  margin: 0 0.5em 0 -0.2em;
+  margin: 0 0.4em 0 -1.45em;
   vertical-align: -0.18em;
   border: 1.5px solid var(--border-strong);
   border-radius: 4px;
