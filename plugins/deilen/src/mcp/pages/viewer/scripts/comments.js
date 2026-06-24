@@ -607,6 +607,39 @@ function showOverlay(title, text) {
   if (overlay) overlay.hidden = false;
 }
 
+// In-page confirm modal (replaces window.confirm so the dialog matches the
+// viewer chrome). Resolves true on "Close anyway", false on Cancel/Escape.
+function confirmClose(message) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirm-overlay");
+    const ok = document.getElementById("confirm-ok");
+    const cancel = document.getElementById("confirm-cancel");
+    if (!overlay || !ok || !cancel) {
+      resolve(true);
+      return;
+    }
+    const text = document.getElementById("confirm-text");
+    if (text) text.textContent = message;
+    overlay.hidden = false;
+    cancel.focus();
+    const settle = (result) => {
+      overlay.hidden = true;
+      ok.removeEventListener("click", onOk);
+      cancel.removeEventListener("click", onCancel);
+      document.removeEventListener("keydown", onKey);
+      resolve(result);
+    };
+    const onOk = () => settle(true);
+    const onCancel = () => settle(false);
+    const onKey = (event) => {
+      if (event.key === "Escape") settle(false);
+    };
+    ok.addEventListener("click", onOk);
+    cancel.addEventListener("click", onCancel);
+    document.addEventListener("keydown", onKey);
+  });
+}
+
 function setActionsDisabled(disabled) {
   for (const id of ["submit-revise", "submit-discuss", "close-viewer"]) {
     const element = document.getElementById(id);
@@ -646,13 +679,12 @@ async function submitWithIntent(intent, title, text) {
 async function dismissViewer() {
   if (submitted) return;
   const drafts = store.comments.size + store.overall.size;
-  if (
-    drafts &&
-    !window.confirm(
-      `Close the viewer without sending your ${drafts} comment(s)?`,
-    )
-  )
-    return;
+  if (drafts) {
+    const proceed = await confirmClose(
+      `You have ${drafts} unsent comment${drafts === 1 ? "" : "s"}. Close the viewer anyway?`,
+    );
+    if (!proceed) return;
+  }
   setActionsDisabled(true);
   finalizeSubmitted();
   await submitFeedback(

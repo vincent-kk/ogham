@@ -1067,6 +1067,17 @@ button {
   margin-top: 20px;
 }
 
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.overlay-icon-warn {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 940px) {
   .layout {
