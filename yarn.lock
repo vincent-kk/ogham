@@ -1401,6 +1401,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ogham/r-statistics@workspace:plugins/r-statistics":
+  version: 0.0.0-use.local
+  resolution: "@ogham/r-statistics@workspace:plugins/r-statistics"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:~1.22.0"
+    "@ogham/cross-platform": "workspace:^"
+    "@types/node": "npm:^20.11.0"
+    "@vitest/coverage-v8": "npm:^3.2.4"
+    esbuild: "npm:^0.24.0"
+    typescript: "npm:^5.7.2"
+    vitest: "npm:^4.1.2"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
 "@ogham/yt-dlp-mcp@workspace:mcp-servers/yt-dlp-mcp":
   version: 0.0.0-use.local
   resolution: "@ogham/yt-dlp-mcp@workspace:mcp-servers/yt-dlp-mcp"

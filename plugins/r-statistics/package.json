@@ -1,0 +1,62 @@
+{
+  "name": "@ogham/r-statistics",
+  "version": "0.0.1",
+  "description": "r-statistics — turn Claude into a domain-agnostic statistics expert: hypothesis testing, R code generation, reproducible analysis via headless Rscript",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "statistics",
+    "r",
+    "hypothesis-testing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "directory": "plugins/r-statistics"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vincent K. Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "type": "module",
+  "files": [
+    "bridge",
+    "skills",
+    "agents",
+    "shared",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn version:sync && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
+    "build:plugin": "yarn version:sync && node scripts/buildMcpServer.mjs",
+    "clean": "rm -rf bridge dist",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
+    "version:sync": "node ../../scripts/inject-version.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "~1.22.0",
+    "@ogham/cross-platform": "workspace:^",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
