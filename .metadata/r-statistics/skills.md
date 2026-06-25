@@ -34,7 +34,7 @@ skills/analyze/
 ├── SKILL.md                  # Tier-2a preamble + intent 분류 + 파이프라인 진입
 └── references/
     ├── state-machine.md      # 상태·전이표·iteration guard (→ dispatcher.md)
-    ├── intent.md             # full/partial/troubleshoot/methodology 분류 휴리스틱
+    ├── intent-classification.md  # full/partial/troubleshoot/methodology 분류 휴리스틱
     ├── modes.md              # interactive(기본) / --auto
     └── methods/{technique}/  # 기법별 lazy 리소스
         ├── meta.yaml         # 가정·필수 아티팩트·severity 선언 (assert 연동)

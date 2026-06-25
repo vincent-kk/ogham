@@ -103,7 +103,7 @@
 
 ## Phase 6 — 스킬 (노출 6)
 **목적**: 인터페이스 + 오케스트레이션.
-- [ ] `skills/analyze/` — `SKILL.md`(Tier-2a preamble) + `references/{state-machine.md, intent.md, modes.md}` ← **Dispatcher**
+- [ ] `skills/analyze/` — `SKILL.md`(Tier-2a preamble) + `references/{state-machine.md, intent-classification.md, modes.md}` ← **Dispatcher**
 - [ ] `skills/data-preparation/SKILL.md`
 - [ ] `skills/assumption-check/SKILL.md`
 - [ ] `skills/visualization/SKILL.md`

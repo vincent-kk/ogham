@@ -44,7 +44,7 @@ agents own their `run_r` calls and the sub-skill contracts.
 
 ## References (load as needed)
 
-- [intent.md](./references/intent.md) — intent classification heuristics.
+- [intent-classification.md](./references/intent-classification.md) — intent classification heuristics.
 - [state-machine.md](./references/state-machine.md) — states, transition table,
   iteration guards, divergence handling.
 - [modes.md](./references/modes.md) — `interactive` vs `--auto` behavior.
@@ -54,7 +54,7 @@ agents own their `run_r` calls and the sub-skill contracts.
 ## Step 1 — Intake & classify
 
 Bind `workspaceId` for the session. Normalize the request (data path(s),
-hypothesis, flags). Classify intent per [intent.md](./references/intent.md):
+hypothesis, flags). Classify intent per [intent-classification.md](./references/intent-classification.md):
 
 | intent                | route                                                                         |
 | --------------------- | ----------------------------------------------------------------------------- |

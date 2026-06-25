@@ -46,7 +46,7 @@ plugins/r-statistics/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── state-machine.md         # 상태·전이표·iteration guard
-│   │       ├── intent.md                # intent 분류 휴리스틱
+│   │       ├── intent-classification.md # intent 분류 휴리스틱
 │   │       ├── modes.md                 # interactive / --auto
 │   │       └── methods/{technique}/     # 기법별 lazy
 │   │           ├── meta.yaml            # 가정·필수 아티팩트 선언 (assert 연동)
