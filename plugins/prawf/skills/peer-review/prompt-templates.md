@@ -7,8 +7,6 @@
 > hard rules live in `../../agents/<id>.md` (English); the per-axis framework menus and
 > severity anchors live in [`field-profiles.md`](./field-profiles.md) — the chair extracts
 > them from the profile and injects them into the prompt **as values**.
->
-> Ported from the Korean SSoT in `.metadata/prawf/`.
 
 ## Common Structure
 

@@ -2,7 +2,7 @@
 
 > Specifies how the nine personas defined in `../../agents/` are operated as a
 > Claude Code native team: the **round flow, state machine, and deliverable
-> contracts**. Ported from the Korean SSoT in `.metadata/prawf/`.
+> contracts**.
 >
 > Execution environment: **inside a claude-code session**. Every round runs as a
 > native Team (`TeamCreate`/`Task`/`SendMessage`); external LLM and search calls
