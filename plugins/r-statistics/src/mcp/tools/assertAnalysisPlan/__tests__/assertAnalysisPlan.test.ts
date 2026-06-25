@@ -128,6 +128,20 @@ describe("assert_analysis_plan", () => {
     expect(out.reasons.map((r) => r.code)).toContain("SAMPLE_TOO_SMALL");
   });
 
+  it("hard-blocks a Cox model with severely low EPV (survival family)", async () => {
+    const out = await handleAssertAnalysisPlan(
+      plan({
+        method: { technique: "cox_model", family: MethodFamily.Survival },
+        datasetMeta: {
+          outcomeType: OutcomeType.TimeToEvent,
+          eventsPerVariable: 3,
+        },
+      }),
+    );
+    expect(out.severity).toBe(AssertSeverity.HardBlock);
+    expect(out.reasons.map((r) => r.code)).toContain("SAMPLE_TOO_SMALL");
+  });
+
   it("hard-blocks chi-square with low expected counts", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
