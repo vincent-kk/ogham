@@ -10,7 +10,7 @@ import { scheduleAutoSave, sendDismiss, submitFeedback } from "./submit.js";
 
 const POPOVER_OFFSET_PX = 8;
 // Let the "Viewer closed" overlay paint before attempting window.close().
-const CLOSE_TAB_DELAY_MS = 1250;
+const CLOSE_TAB_DELAY_MS = 500;
 
 let view = {};
 const store = { comments: new Map(), overall: new Map() };
