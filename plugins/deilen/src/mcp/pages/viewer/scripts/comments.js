@@ -600,11 +600,13 @@ function wireSelection() {
 }
 
 /* ── Submission ───────────────────────────────────────── */
-function showOverlay(title, text) {
+function showOverlay(title, text, { showConfirm = true } = {}) {
   const titleEl = document.getElementById("overlay-title");
   const textEl = document.getElementById("overlay-text");
   if (titleEl) titleEl.textContent = title;
   if (textEl) textEl.textContent = text;
+  const actions = document.getElementById("overlay-actions");
+  if (actions) actions.hidden = !showConfirm;
   const overlay = document.getElementById("overlay");
   if (overlay) overlay.hidden = false;
 }
@@ -681,7 +683,9 @@ async function submitWithIntent(intent, title, text) {
 // Show the closing overlay, then attempt to close the tab. window.close() is a
 // no-op for OS-opened tabs, so the overlay carries the "you can close" message.
 function closeTab() {
-  showOverlay("Viewer closed", "You can close this tab now.");
+  showOverlay("Viewer closed", "You can close this tab now.", {
+    showConfirm: false,
+  });
   window.setTimeout(() => {
     try {
       window.close();
