@@ -65,12 +65,22 @@ describe("buildFeedbackContent intent", () => {
     const text = await textOf(
       feedback({
         intent: "revise",
-        overall: [{ id: "o1", text: "make it shorter" }],
+        overall: [{ id: "o1", text: "make it shorter", imageIds: [] }],
         comments: [comment],
       }),
     );
     expect(text).toContain("Overall notes (1):");
     expect(text).toContain("make it shorter");
     expect(text).toContain("Comments (1):");
+  });
+
+  it("labels overall-note image attachments", async () => {
+    const text = await textOf(
+      feedback({
+        intent: "discuss",
+        overall: [{ id: "o1", text: "see screenshot", imageIds: ["abc123"] }],
+      }),
+    );
+    expect(text).toContain("see screenshot [img_abc123]");
   });
 });

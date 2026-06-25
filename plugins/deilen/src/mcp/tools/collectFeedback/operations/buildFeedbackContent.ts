@@ -36,7 +36,9 @@ export async function buildFeedbackContent(
   sessionId: string,
   feedback: StoredFeedback,
 ): Promise<CallToolResult> {
-  const overallNotes = feedback.overall.filter((note) => note.text.trim());
+  const overallNotes = feedback.overall.filter(
+    (note) => note.text.trim() || note.imageIds.length,
+  );
   const hasItems = feedback.comments.length > 0 || overallNotes.length > 0;
   const lines: string[] = [
     leadLine(feedback.intent ?? FeedbackIntent.Revise, hasItems),
@@ -44,7 +46,12 @@ export async function buildFeedbackContent(
 
   if (overallNotes.length) {
     lines.push(`\nOverall notes (${overallNotes.length}):`);
-    for (const note of overallNotes) lines.push(`- ${note.text.trim()}`);
+    for (const note of overallNotes) {
+      const imgs = note.imageIds.length
+        ? ` ${note.imageIds.map((id) => `[img_${id}]`).join(" ")}`
+        : "";
+      lines.push(`- ${note.text.trim()}${imgs}`);
+    }
   }
   if (feedback.comments.length) {
     lines.push(`\nComments (${feedback.comments.length}):`);

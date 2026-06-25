@@ -21,6 +21,7 @@ export type Comment = z.infer<typeof CommentSchema>;
 export const OverallNoteSchema = z.object({
   id: z.string().min(1),
   text: z.string(),
+  imageIds: z.array(z.string()).default([]),
 });
 export type OverallNote = z.infer<typeof OverallNoteSchema>;
 

@@ -82,6 +82,7 @@ function buildPayload(status, intent) {
     overall: [...store.overall.values()].map((note) => ({
       id: note.id,
       text: note.text,
+      imageIds: (note.attachments || []).map((attachment) => attachment.id),
     })),
     comments: [...store.comments.values()].map((comment) => ({
       id: comment.id,
@@ -97,7 +98,51 @@ function allAttachments() {
   const collected = [];
   for (const comment of store.comments.values())
     collected.push(...comment.attachments);
+  for (const note of store.overall.values())
+    collected.push(...(note.attachments || []));
   return collected;
+}
+
+// One thumbnail tile. With onRemove it gets an "x" button (composer); without
+// it the tile is read-only (sidebar card).
+function thumbElement(attachment, onRemove) {
+  const wrapper = getElement("div", { class: "thumb" });
+  const imageElement = getElement("img");
+  imageElement.src = attachment.url;
+  imageElement.alt = attachment.name;
+  wrapper.append(imageElement);
+  if (onRemove) {
+    const removeButton = getElement("button", {
+      class: "thumb-remove",
+      type: "button",
+      text: "x",
+    });
+    removeButton.addEventListener("click", onRemove);
+    wrapper.append(removeButton);
+  }
+  return wrapper;
+}
+
+// Editable thumb strip shared by the comment and overall composers: each tile
+// removes itself (revoking its object URL) and re-renders in place.
+function renderEditableThumbs(thumbs, attachments, rerender) {
+  thumbs.replaceChildren();
+  attachments.forEach((attachment, index) => {
+    thumbs.append(
+      thumbElement(attachment, () => {
+        URL.revokeObjectURL(attachment.url);
+        attachments.splice(index, 1);
+        rerender();
+      }),
+    );
+  });
+}
+
+// Read-only thumb strip shared by the comment and overall sidebar cards.
+function thumbStrip(attachments) {
+  const thumbs = getElement("div", { class: "thumbs" });
+  for (const attachment of attachments) thumbs.append(thumbElement(attachment));
+  return thumbs;
 }
 
 /* ── Comment composer ─────────────────────────────────── */
@@ -120,25 +165,7 @@ function openComposer(anchor, editing) {
   const thumbs = getElement("div", { class: "thumbs" });
 
   function renderThumbs() {
-    thumbs.replaceChildren();
-    attachments.forEach((attachment, index) => {
-      const wrapper = getElement("div", { class: "thumb" });
-      const imageElement = getElement("img");
-      imageElement.src = attachment.url;
-      imageElement.alt = attachment.name;
-      const removeButton = getElement("button", {
-        class: "thumb-remove",
-        type: "button",
-        text: "x",
-      });
-      removeButton.addEventListener("click", () => {
-        URL.revokeObjectURL(attachment.url);
-        attachments.splice(index, 1);
-        renderThumbs();
-      });
-      wrapper.append(imageElement, removeButton);
-      thumbs.append(wrapper);
-    });
+    renderEditableThumbs(thumbs, attachments, renderThumbs);
   }
 
   const actions = getElement("div", { class: "composer-actions" });
@@ -216,6 +243,7 @@ function closeComposer() {
 function openOverallComposer(editing) {
   const list = document.getElementById("comment-list");
   commitOpenComposer();
+  const attachments = editing ? [...(editing.attachments || [])] : [];
 
   const card = getElement("div", { class: "composer" });
   card.dataset.composer = "true";
@@ -228,6 +256,11 @@ function openOverallComposer(editing) {
     attrs: { placeholder: "Overall note (one topic)…" },
   });
   textarea.value = editing ? editing.text : "";
+  const thumbs = getElement("div", { class: "thumbs" });
+
+  function renderThumbs() {
+    renderEditableThumbs(thumbs, attachments, renderThumbs);
+  }
 
   const actions = getElement("div", { class: "composer-actions" });
   const cancel = getElement("button", {
@@ -243,25 +276,32 @@ function openOverallComposer(editing) {
   cancel.addEventListener("click", closeComposer);
   save.addEventListener("click", () => {
     const text = textarea.value.trim();
-    if (!text) return;
-    if (editing) editing.text = text;
-    else {
+    if (!text && attachments.length === 0) return;
+    if (editing) {
+      editing.text = text;
+      editing.attachments = attachments;
+    } else {
       overallSequence += 1;
       const id = `o${overallSequence}`;
-      store.overall.set(id, { id, text });
+      store.overall.set(id, { id, text, attachments });
     }
     closeComposer();
     dispatchChange();
   });
   actions.append(cancel, save);
 
+  wireImageCapture(card, (attachment) => {
+    attachments.push(attachment);
+    renderThumbs();
+  });
   textarea.addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key === "Enter") save.click();
     if (event.key === "Escape") closeComposer();
   });
 
-  card.append(chip, textarea, actions);
+  card.append(chip, textarea, thumbs, actions);
   list.prepend(card);
+  renderThumbs();
   textarea.focus();
 }
 
@@ -291,7 +331,9 @@ function overallNoteCard(note) {
   });
   actions.append(edit, del);
 
-  card.append(chip, body, actions);
+  card.append(chip, body);
+  if (note.attachments?.length) card.append(thumbStrip(note.attachments));
+  card.append(actions);
   return card;
 }
 
@@ -352,18 +394,7 @@ function commentCard(comment) {
   actions.append(editButton, resolve, deleteButton);
 
   card.append(chip, body);
-  if (comment.attachments.length) {
-    const thumbs = getElement("div", { class: "thumbs" });
-    for (const attachment of comment.attachments) {
-      const wrapper = getElement("div", { class: "thumb" });
-      const imageElement = getElement("img");
-      imageElement.src = attachment.url;
-      imageElement.alt = attachment.name;
-      wrapper.append(imageElement);
-      thumbs.append(wrapper);
-    }
-    card.append(thumbs);
-  }
+  if (comment.attachments.length) card.append(thumbStrip(comment.attachments));
   card.append(actions);
   return card;
 }
