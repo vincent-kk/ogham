@@ -698,6 +698,14 @@ button {
   border-radius: 3px;
 }
 
+/* Nested anchors in one comment range all carry data-has-comment; the
+   outermost block's box already spans its descendants, so let only it paint —
+   otherwise the translucent amber stacks layer-on-layer into a darker patch. */
+.viewer [data-has-comment="true"] [data-has-comment="true"] {
+  background: none;
+  box-shadow: none;
+}
+
 .range-selecting {
   background: color-mix(in srgb, var(--bg) 82%, var(--text));
 }
