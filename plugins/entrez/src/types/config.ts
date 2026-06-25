@@ -32,6 +32,8 @@ export const EntrezConfigSchema = z.object({
   default_date_range: DateRangeSchema.optional(),
 });
 export type EntrezConfig = z.infer<typeof EntrezConfigSchema>;
+/** Input shape (defaults optional) — what setup/save accept before parsing. */
+export type EntrezConfigInput = z.input<typeof EntrezConfigSchema>;
 
 /** Secret configuration (credentials.json, 0o600). LLM never reads this. */
 export const EntrezCredentialsSchema = z.object({
