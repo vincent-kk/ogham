@@ -58,11 +58,23 @@ export function spawnCli(
         }, timeoutMs)
       : null;
 
+    function onAbort() {
+      if (settled || abortedByCaller) return;
+      abortedByCaller = true;
+      killChild();
+      timeoutSettleTimer = setTimeout(() => settle(null), 1000);
+    }
+    if (options.signal) {
+      if (options.signal.aborted) onAbort();
+      else options.signal.addEventListener("abort", onAbort, { once: true });
+    }
+
     function settle(code: number | null) {
       if (settled) return;
       settled = true;
       if (timer) clearTimeout(timer);
       if (timeoutSettleTimer) clearTimeout(timeoutSettleTimer);
+      options.signal?.removeEventListener("abort", onAbort);
       stdout += stdoutDecoder.end();
       stderr += stderrDecoder.end();
       resolve({

@@ -5,6 +5,8 @@ export interface SpawnOptions {
   input?: string | Buffer;
   encoding?: BufferEncoding;
   normalizeEol?: boolean;
+  /** Abort the child early (tree-kill via the same path as timeout). */
+  signal?: AbortSignal;
   onStderr?: (chunk: string, accumulated: string) => boolean | void;
 }
 
