@@ -1,0 +1,80 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { beforeAll, describe, expect, it } from "vitest";
+
+import { discoverRscript } from "../../../../core/index.js";
+import { JobStatus, RErrorCode } from "../../../../types/enums.js";
+import type { RunROutput } from "../../../../types/rExecution.js";
+import { handleGetRJob } from "../../getRJob/index.js";
+import { handleRunR } from "../runR.js";
+
+// Resolve the real plugin root so the wrapper can source shared/contract.R.
+const pluginRoot = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../../..",
+);
+const hasR = discoverRscript() !== null;
+
+const DEMO_SCRIPT = `
+df <- data.frame(group = c("a","a","a","b","b","b"), value = c(1.1,2.0,1.5,3.3,4.4,3.9))
+res <- t.test(value ~ group, data = df)
+cat("t =", round(res$statistic, 3), " p =", round(res$p.value, 4), "\\n")
+utils::write.csv(df, artifact_path("demo.csv"), row.names = FALSE)
+add_artifact("data.demo", "data", "demo.csv", "demo dataset")
+`;
+
+async function poll(jobId: string): Promise<RunROutput> {
+  for (let i = 0; i < 50; i += 1) {
+    const out = await handleGetRJob({ jobId });
+    if (out.status !== JobStatus.Running && out.status !== JobStatus.Queued) {
+      return out;
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error("job did not finish in time");
+}
+
+describe("run_r", () => {
+  beforeAll(() => {
+    process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
+  });
+
+  it("rejects an empty script", async () => {
+    await expect(handleRunR({ scriptCode: "  " })).rejects.toThrow();
+  });
+
+  it("blocks a forbidden call without executing", async () => {
+    const out = await handleRunR({ scriptCode: 'system("ls")' });
+    expect(out.status).toBe(JobStatus.Failed);
+    expect(out.result?.error?.code).toBe(RErrorCode.CommandBlocked);
+  });
+
+  it.skipIf(!hasR)(
+    "executes a real script synchronously and collects an artifact",
+    async () => {
+      const out = await handleRunR({
+        scriptCode: DEMO_SCRIPT,
+        executionMode: "sync",
+      });
+      expect(out.status).toBe(JobStatus.Succeeded);
+      expect(out.result?.exitCode).toBe(0);
+      expect(out.result?.stdout.text).toContain("p =");
+      const csv = out.result?.artifacts.find((a) => a.path.endsWith("demo.csv"));
+      expect(csv).toBeDefined();
+      expect(csv?.sha256).toHaveLength(64);
+      expect(csv?.kind).toBe("data");
+    },
+  );
+
+  it.skipIf(!hasR)(
+    "runs asynchronously and reaches a terminal status via polling",
+    async () => {
+      const started = await handleRunR({ scriptCode: DEMO_SCRIPT });
+      expect(started.status).toBe(JobStatus.Running);
+      const finished = await poll(started.jobId);
+      expect(finished.status).toBe(JobStatus.Succeeded);
+      expect(finished.result?.artifacts.length).toBeGreaterThan(0);
+    },
+  );
+});
