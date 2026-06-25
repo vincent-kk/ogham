@@ -70,8 +70,7 @@ export function evaluateHardRules(input: AssertInput): AssertReason[] {
   }
 
   if (
-    (family === MethodFamily.Regression ||
-      family === MethodFamily.Survival) &&
+    (family === MethodFamily.Regression || family === MethodFamily.Survival) &&
     datasetMeta.eventsPerVariable !== undefined &&
     datasetMeta.eventsPerVariable < SEVERE_EPV
   ) {

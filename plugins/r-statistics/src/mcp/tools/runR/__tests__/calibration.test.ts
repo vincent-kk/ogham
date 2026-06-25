@@ -20,7 +20,9 @@ const hasR = discoverRscript() !== null;
 async function runValue(scriptCode: string): Promise<number> {
   const out = await handleRunR({ scriptCode, executionMode: "sync" });
   if (out.status !== JobStatus.Succeeded) {
-    throw new Error(`R failed (${out.status}): ${out.result?.stderr.text ?? ""}`);
+    throw new Error(
+      `R failed (${out.status}): ${out.result?.stderr.text ?? ""}`,
+    );
   }
   return Number.parseFloat(out.result!.stdout.text.trim());
 }
@@ -32,7 +34,7 @@ describe.skipIf(!hasR)("statistical calibration (real R)", () => {
 
   it("t_test — two-sample t-statistic equals -5", async () => {
     const t = await runValue(
-      'a <- c(1,2,3,4,5); b <- c(6,7,8,9,10)\n' +
+      "a <- c(1,2,3,4,5); b <- c(6,7,8,9,10)\n" +
         'cat(sprintf("%.4f", t.test(a, b, var.equal = TRUE)$statistic))',
     );
     expect(t).toBeCloseTo(-5, 4);

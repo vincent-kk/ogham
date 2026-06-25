@@ -24,7 +24,9 @@ const dataRefSchema = z.object({
   id: z
     .string()
     .regex(/^[A-Za-z0-9_-]+$/)
-    .describe("Stable id user code references this dataset by (no path separators)."),
+    .describe(
+      "Stable id user code references this dataset by (no path separators).",
+    ),
   format: z.nativeEnum(DataFormat).describe("On-disk format of the dataset."),
   path: z
     .string()
