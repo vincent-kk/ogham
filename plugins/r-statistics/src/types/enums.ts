@@ -48,13 +48,6 @@ export const ExecutionMode = {
 } as const;
 export type ExecutionMode = (typeof ExecutionMode)[keyof typeof ExecutionMode];
 
-/** run_r data-isolation mode. */
-export const SessionMode = {
-  Stateless: "stateless",
-  WorkspaceFiles: "workspace_files",
-} as const;
-export type SessionMode = (typeof SessionMode)[keyof typeof SessionMode];
-
 /** run_r sync (await) vs async (poll) execution. */
 export const RunMode = {
   Sync: "sync",

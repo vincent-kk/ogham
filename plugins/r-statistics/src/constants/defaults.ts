@@ -63,6 +63,8 @@ export const FORBIDDEN_R_CALLS = [
   "download.file",
   "url",
   "socketConnection",
+  "eval",
+  "parse",
 ] as const;
 
 /** Artifact file extensions run_r is allowed to collect from ARTIFACTS_DIR. */

@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { ERROR_MESSAGES } from "../../../constants/messages.js";
 import { ArtifactKind } from "../../../types/enums.js";
 import { collectArtifacts, createWorkspace, readManifest } from "../index.js";
 
@@ -52,5 +53,16 @@ describe("workspace", () => {
     expect(artifacts.find((a) => a.path.endsWith("fit.rds"))?.kind).toBe(
       ArtifactKind.Model,
     );
+  });
+
+  it("rejects a workspaceId containing path traversal characters", async () => {
+    await expect(createWorkspace("../../../../tmp/x")).rejects.toThrow(
+      ERROR_MESSAGES.INVALID_WORKSPACE_ID,
+    );
+  });
+
+  it("accepts a valid workspaceId with alphanumeric, underscore, and hyphen", async () => {
+    const ws = await createWorkspace("ws_abc-123");
+    expect(ws.workspaceId).toBe("ws_abc-123");
   });
 });

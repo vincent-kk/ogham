@@ -36,8 +36,17 @@ describe("validateRScript", () => {
     ["system.time({ x <- 1 })", "system"],
     ["system2.helper <- 1", "system2"],
     ["my_url_value <- 3", "url"],
+    ["do.call(rbind, list(df1, df2))", "do.call"],
   ])("does not false-positive on %s", (code) => {
     expect(validateRScript(code).ok).toBe(true);
+  });
+
+  it.each([
+    ['do.call("system", list("cmd"))'],
+    ['get("system")("cmd")'],
+    ["eval(parse(text=\"system('cmd')\"))"],
+  ])("blocks string-dispatch pattern: %s", (code) => {
+    expect(validateRScript(code).ok).toBe(false);
   });
 
   it("blocks shell.exec despite the dotted name", () => {

@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 
 import { DIR_MODE } from "../../../constants/defaults.js";
+import { ERROR_MESSAGES } from "../../../constants/messages.js";
 import {
   workspaceArtifactsDir,
   workspaceDataDir,
@@ -22,6 +23,9 @@ export interface WorkspaceHandle {
 export async function createWorkspace(
   workspaceId?: string,
 ): Promise<WorkspaceHandle> {
+  if (workspaceId !== undefined && !/^[A-Za-z0-9_-]+$/.test(workspaceId)) {
+    throw new Error(`${ERROR_MESSAGES.INVALID_WORKSPACE_ID}: ${workspaceId}`);
+  }
   const id = workspaceId ?? randomId("ws_");
   const dir = workspaceDir(id);
   const artifactsDir = workspaceArtifactsDir(id);

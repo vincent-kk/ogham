@@ -2,10 +2,11 @@ import {
   HardRuleCode,
   MethodFamily,
   Severity,
+  type OutcomeType,
 } from "../../../../types/enums.js";
 import type { AssertInput, AssertReason } from "../../../../types/assert.js";
 
-import { TECHNIQUE_RULES } from "./ruleset.js";
+import { TECHNIQUE_RULES, type TechniqueRule } from "./ruleset.js";
 
 const GROUP_FAMILIES: ReadonlySet<MethodFamily> = new Set([
   MethodFamily.Parametric,
@@ -17,6 +18,60 @@ const SEVERE_EPV = 5;
 
 function hard(code: HardRuleCode, message: string): AssertReason {
   return { code, severity: Severity.Hard, message };
+}
+
+function checkOutcomeMismatch(
+  rule: TechniqueRule | undefined,
+  technique: string,
+  outcomeType: OutcomeType,
+): AssertReason | null {
+  if (rule && !rule.outcomeTypes.includes(outcomeType)) {
+    return hard(
+      HardRuleCode.OutcomeMethodMismatch,
+      `Outcome type '${outcomeType}' is incompatible with ` +
+        `'${technique}' (expects ${rule.outcomeTypes.join(", ")}).`,
+    );
+  }
+  return null;
+}
+
+function checkGroupSize(
+  family: MethodFamily,
+  sampleSize: number | undefined,
+  groupCount: number | undefined,
+): AssertReason | null {
+  if (
+    GROUP_FAMILIES.has(family) &&
+    sampleSize !== undefined &&
+    groupCount !== undefined &&
+    groupCount > 0 &&
+    sampleSize / groupCount < MIN_PER_GROUP
+  ) {
+    return hard(
+      HardRuleCode.SampleTooSmall,
+      `Per-group sample size is below ${MIN_PER_GROUP} ` +
+        `(n=${sampleSize}, groups=${groupCount}).`,
+    );
+  }
+  return null;
+}
+
+function checkEpv(
+  family: MethodFamily,
+  eventsPerVariable: number | undefined,
+): AssertReason | null {
+  if (
+    (family === MethodFamily.Regression || family === MethodFamily.Survival) &&
+    eventsPerVariable !== undefined &&
+    eventsPerVariable < SEVERE_EPV
+  ) {
+    return hard(
+      HardRuleCode.SampleTooSmall,
+      `Events-per-variable (${eventsPerVariable}) is severely ` +
+        `insufficient for a stable regression fit.`,
+    );
+  }
+  return null;
 }
 
 /**
@@ -38,50 +93,18 @@ export function evaluateHardRules(input: AssertInput): AssertReason[] {
     );
   }
 
-  if (
-    rule &&
-    datasetMeta.outcomeType &&
-    !rule.outcomeTypes.includes(datasetMeta.outcomeType)
-  ) {
-    reasons.push(
-      hard(
-        HardRuleCode.OutcomeMethodMismatch,
-        `Outcome type '${datasetMeta.outcomeType}' is incompatible with ` +
-          `'${method.technique}' (expects ${rule.outcomeTypes.join(", ")}).`,
-      ),
-    );
+  if (datasetMeta.outcomeType) {
+    const r = checkOutcomeMismatch(rule, method.technique, datasetMeta.outcomeType);
+    if (r) reasons.push(r);
   }
 
   const family = rule?.family ?? method.family;
-  if (
-    GROUP_FAMILIES.has(family) &&
-    datasetMeta.sampleSize !== undefined &&
-    datasetMeta.groupCount !== undefined &&
-    datasetMeta.groupCount > 0 &&
-    datasetMeta.sampleSize / datasetMeta.groupCount < MIN_PER_GROUP
-  ) {
-    reasons.push(
-      hard(
-        HardRuleCode.SampleTooSmall,
-        `Per-group sample size is below ${MIN_PER_GROUP} ` +
-          `(n=${datasetMeta.sampleSize}, groups=${datasetMeta.groupCount}).`,
-      ),
-    );
-  }
 
-  if (
-    (family === MethodFamily.Regression || family === MethodFamily.Survival) &&
-    datasetMeta.eventsPerVariable !== undefined &&
-    datasetMeta.eventsPerVariable < SEVERE_EPV
-  ) {
-    reasons.push(
-      hard(
-        HardRuleCode.SampleTooSmall,
-        `Events-per-variable (${datasetMeta.eventsPerVariable}) is severely ` +
-          `insufficient for a stable regression fit.`,
-      ),
-    );
-  }
+  const groupSizeReason = checkGroupSize(family, datasetMeta.sampleSize, datasetMeta.groupCount);
+  if (groupSizeReason) reasons.push(groupSizeReason);
+
+  const epvReason = checkEpv(family, datasetMeta.eventsPerVariable);
+  if (epvReason) reasons.push(epvReason);
 
   if (method.technique === "chi_square" && datasetMeta.expectedCountsBelow5) {
     reasons.push(

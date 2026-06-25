@@ -19,6 +19,8 @@ export const ERROR_MESSAGES = {
     "A referenced input dataset could not be resolved on disk.",
   INVALID_DATA_REF_ID:
     "A data ref id must be alphanumeric (with _ or -) and contain no path separators.",
+  INVALID_WORKSPACE_ID:
+    "A workspace id must be alphanumeric (with _ or -) and contain no path separators.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

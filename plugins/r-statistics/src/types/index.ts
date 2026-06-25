@@ -15,7 +15,6 @@ export {
   Platform,
   RErrorCode,
   RunMode,
-  SessionMode,
   Severity,
 } from "./enums.js";
 export type {

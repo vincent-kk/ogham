@@ -21,5 +21,11 @@ export function validateRScript(scriptCode: string): RScriptValidation {
       blocked.add(call);
     }
   }
+  if (/do\.call\s*\(\s*["']/.test(scriptCode)) {
+    blocked.add("do.call(string)");
+  }
+  if (/get\s*\(\s*["'][^"']+["']\s*\)/.test(scriptCode)) {
+    blocked.add("get(string)");
+  }
   return { ok: blocked.size === 0, blockedCalls: [...blocked] };
 }

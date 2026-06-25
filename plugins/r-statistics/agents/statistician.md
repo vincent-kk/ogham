@@ -49,8 +49,9 @@ Return a Statistical Analysis Plan:
 Select by **(outcome type × design structure × assumptions)**:
 
 - Continuous outcome, 2 groups → `t_test` (independent) / `paired_t` (paired);
-  nonparametric fallback `mann_whitney` / `wilcoxon_signed_rank`, or the general
-  `wilcoxon` rank test (rank-sum when independent, signed-rank when paired).
+  nonparametric fallback: independent → `mann_whitney`; paired → `wilcoxon_signed_rank`.
+  Use `wilcoxon` only when the user explicitly names "Wilcoxon" without specifying
+  independent vs. paired design.
 - Continuous, 3+ groups → `anova` (→ `welch_anova` / `kruskal_wallis`).
 - Continuous, predictors → `linear_regression` (or `mixed_model` with clustering).
 - Binary outcome → `logistic_regression`.
