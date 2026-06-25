@@ -28,6 +28,8 @@
   --success: #15803d;
   --mark: rgba(240, 169, 14, 0.22);
   --mark-line: rgba(214, 138, 0, 0.55);
+  --pending: rgba(192, 86, 130, 0.13);
+  --pending-line: rgba(192, 86, 130, 0.55);
   --syn-keyword: #8250df;
   --syn-string: #0a7d33;
   --syn-number: #b5530f;
@@ -67,6 +69,8 @@
   --success: #5bd07f;
   --mark: rgba(245, 184, 74, 0.2);
   --mark-line: rgba(245, 184, 74, 0.5);
+  --pending: rgba(232, 140, 175, 0.16);
+  --pending-line: rgba(232, 140, 175, 0.55);
   --syn-keyword: #d2a8ff;
   --syn-string: #7ee787;
   --syn-number: #ffa657;
@@ -97,6 +101,8 @@
     --success: #5bd07f;
     --mark: rgba(245, 184, 74, 0.2);
     --mark-line: rgba(245, 184, 74, 0.5);
+    --pending: rgba(232, 140, 175, 0.16);
+    --pending-line: rgba(232, 140, 175, 0.55);
     --syn-keyword: #d2a8ff;
     --syn-string: #7ee787;
     --syn-number: #ffa657;
@@ -692,16 +698,33 @@ button {
   background: color-mix(in srgb, var(--bg) 82%, var(--text));
 }
 
-.viewer [data-has-comment="true"] {
+/* Committed (amber) and pending (dusty rose) comment highlights share one box
+   model — a translucent wash + bottom inset underline on the anchored block.
+   The flag sits on the same <li>/block as the bullet/checkbox gutter offset, so
+   neither ever paints over a marker. Rose is an otherwise-unused hue, so the
+   pending block never collides with the amber comment, the grey selection, or
+   the indigo accent. */
+.viewer [data-has-comment="true"],
+.viewer [data-pending-comment="true"] {
   background: var(--mark);
   box-shadow: inset 0 -2px 0 var(--mark-line);
   border-radius: 3px;
 }
 
-/* Nested anchors in one comment range all carry data-has-comment; the
-   outermost block's box already spans its descendants, so let only it paint —
-   otherwise the translucent amber stacks layer-on-layer into a darker patch. */
-.viewer [data-has-comment="true"] [data-has-comment="true"] {
+/* Pending = the block whose composer is open, before save. Declared after the
+   shared rule (equal specificity) so it wins when a block carries both, e.g.
+   editing a saved comment reopens its composer. */
+.viewer [data-pending-comment="true"] {
+  background: var(--pending);
+  box-shadow: inset 0 -2px 0 var(--pending-line);
+}
+
+/* Nested anchors in one range all carry the flag; let only the outermost block
+   paint, or the translucent tint stacks layer-on-layer into a darker patch.
+   Most specific, so it overrides the color rules above for inner blocks of
+   either kind. */
+.viewer [data-has-comment="true"] [data-has-comment="true"],
+.viewer [data-pending-comment="true"] [data-pending-comment="true"] {
   background: none;
   box-shadow: none;
 }

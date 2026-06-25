@@ -216,6 +216,7 @@ function openComposer(anchor, editing) {
   list.prepend(card);
   renderThumbs();
   textarea.focus();
+  markPending(anchor);
 }
 
 // Before opening another composer, don't discard the one in progress: auto-save
@@ -237,6 +238,7 @@ function commitOpenComposer() {
 
 function closeComposer() {
   document.querySelector('#comment-list [data-composer="true"]')?.remove();
+  markPending(null);
 }
 
 /* ── Overall composer (text-only, no anchor) ──────────── */
@@ -303,6 +305,7 @@ function openOverallComposer(editing) {
   list.prepend(card);
   renderThumbs();
   textarea.focus();
+  markPending(null);
 }
 
 /* ── Sidebar cards ────────────────────────────────────── */
@@ -567,18 +570,41 @@ function scrollToAnchor(anchor) {
   block?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function markAnchored() {
-  for (const block of anchorBlocks) block.removeAttribute("data-has-comment");
-  for (const comment of store.comments.values()) {
-    if (!comment.anchor) continue;
-    const { startLine, endLine } = comment.anchor;
-    for (const block of anchorBlocks) {
-      const line = Number(block.dataset.sourceLine);
-      if (line >= startLine && line <= endLine) {
-        block.setAttribute("data-has-comment", "true");
-      }
-    }
+// Flag every anchor block whose source line falls inside [startLine, endLine].
+// Shared by the committed-comment and pending-comment highlights so both land
+// on the same <li>/block element, keeping the bullet/checkbox gutter clear.
+function flagRange(attribute, startLine, endLine) {
+  for (const block of anchorBlocks) {
+    const line = Number(block.dataset.sourceLine);
+    if (line >= startLine && line <= endLine)
+      block.setAttribute(attribute, "true");
   }
+}
+
+function clearFlag(attribute) {
+  for (const block of anchorBlocks) block.removeAttribute(attribute);
+}
+
+function markAnchored() {
+  clearFlag("data-has-comment");
+  for (const comment of store.comments.values()) {
+    if (comment.anchor)
+      flagRange(
+        "data-has-comment",
+        comment.anchor.startLine,
+        comment.anchor.endLine,
+      );
+  }
+}
+
+// Light up the block(s) the open composer is anchored to, so the body keeps
+// showing where an in-progress comment will land after the sidebar scrolls
+// away. Clears first, so only the one open composer's range is ever lit; an
+// overall note (no anchor) just clears it.
+function markPending(anchor) {
+  clearFlag("data-pending-comment");
+  if (anchor)
+    flagRange("data-pending-comment", anchor.startLine, anchor.endLine);
 }
 
 function hidePopover() {

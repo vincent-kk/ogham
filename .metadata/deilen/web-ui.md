@@ -43,7 +43,7 @@ pages/viewer/
 - 본문은 서버 렌더 HTML(라인 앵커 포함)을 그대로 마운트. 무거운 렌더러만 클라이언트 lazy.
 - 코멘트: 텍스트 선택 또는 라인 거터 클릭 → popover(텍스트 + 이미지 첨부) → 사이드바 누적. 디바운스 auto-save(`in_progress`).
 - 제출: 푸터의 두 의도 버튼 — **Revise & reopen**(코멘트 반영 후 재표시) / **Continue in chat**(대화로 이어감, 코멘트 0개도 가능) → multipart POST(`complete` + `intent`) → 오버레이. 상단바 **Close(✕)** 는 `intent:"dismiss"` 로 제출해 대기 중 collect 를 깔끔히 해제(미전송 코멘트 있으면 확인). 두 의도 버튼은 동일 스타일이며 disabled 상태만 색조로 구분한다(강조 색 반전 혼동 방지).
-- 코멘트가 달린 블록 하이라이트는 앰버(`--mark`) — 보라 인용구(blockquote)와 색으로 구분.
+- 코멘트가 달린 블록 하이라이트는 앰버(`--mark`), 작성 중(composer 열림) 블록은 더스티 로즈(`--pending`) — 팔레트 미사용 hue라 앰버·회색 선택·보라 accent 와 모두 구분. 둘은 박스 모델·중첩 진해짐 방지를 공유하고 같은 `<li>`/블록에 플래그를 얹어 불릿·체크박스 거터를 침범하지 않는다.
 
 ### 원본 복사 (server parse + raw 동봉)
 
