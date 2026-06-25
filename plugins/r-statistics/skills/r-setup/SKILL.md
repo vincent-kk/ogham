@@ -2,8 +2,8 @@
 name: r-setup
 user_invocable: true
 description: '[r-statistics:r-setup] Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager. Trigger: "install R", "set up R", "R is not found", "R 설치", "Rscript 없음"'
-argument-hint: '[--os windows|macos|linux]'
-version: '1.0.0'
+argument-hint: "[--os windows|macos|linux]"
+version: "1.0.0"
 complexity: simple
 plugin: r-statistics
 ---

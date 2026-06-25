@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File            | Role                                           |
-| --------------- | ---------------------------------------------- |
-| `cancelRJob.ts` | 핸들러 — `cancelJob` 위임, CancelStatus 반환    |
-| `index.ts`      | barrel                                         |
+| File            | Role                                         |
+| --------------- | -------------------------------------------- |
+| `cancelRJob.ts` | 핸들러 — `cancelJob` 위임, CancelStatus 반환 |
+| `index.ts`      | barrel                                       |
 
 ## Conventions
 

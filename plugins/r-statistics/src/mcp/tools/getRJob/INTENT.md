@@ -4,10 +4,10 @@
 
 ## Structure
 
-| File          | Role                                                  |
-| ------------- | ----------------------------------------------------- |
-| `getRJob.ts`  | 핸들러 — jobStore 조회, includeStdout=false 시 스트림 제거 |
-| `index.ts`    | barrel                                                |
+| File         | Role                                                       |
+| ------------ | ---------------------------------------------------------- |
+| `getRJob.ts` | 핸들러 — jobStore 조회, includeStdout=false 시 스트림 제거 |
+| `index.ts`   | barrel                                                     |
 
 ## Conventions
 

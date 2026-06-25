@@ -2,8 +2,8 @@
 name: assumption-check
 user_invocable: true
 description: '[r-statistics:assumption-check] Run the assumption tests a method requires — normality, homogeneity of variance, independence, multicollinearity, proportional hazards — and emit pass/fail artifacts that feed the analysis gate. Trigger: "check normality", "test the assumptions", "is the variance equal", "정규성 검정", "등분산 검정"'
-argument-hint: '[--method TECHNIQUE]'
-version: '1.0.0'
+argument-hint: "[--method TECHNIQUE]"
+version: "1.0.0"
 complexity: moderate
 plugin: r-statistics
 ---
@@ -22,17 +22,17 @@ Run the statistical assumptions a chosen method requires and produce
    assumptions from the method the user names.
 2. **Run each check** in R (via `run_r`), mapping check → test:
 
-   | check | R |
-   | --- | --- |
-   | `shapiro` | `stats::shapiro.test` (residuals for regression/ANOVA) |
-   | `levene` | `car::leveneTest` |
-   | `breusch_pagan` | `car::ncvTest` |
-   | `durbin_watson` | `car::durbinWatsonTest` |
-   | `vif` | `car::vif` |
-   | `dispersion` | Pearson dispersion statistic |
-   | `cox_zph` | `survival::cox.zph` |
-   | `expected_counts` | expected cell counts of the contingency table |
-   | `box_tidwell` | `car::boxTidwell` |
+   | check             | R                                                      |
+   | ----------------- | ------------------------------------------------------ |
+   | `shapiro`         | `stats::shapiro.test` (residuals for regression/ANOVA) |
+   | `levene`          | `car::leveneTest`                                      |
+   | `breusch_pagan`   | `car::ncvTest`                                         |
+   | `durbin_watson`   | `car::durbinWatsonTest`                                |
+   | `vif`             | `car::vif`                                             |
+   | `dispersion`      | Pearson dispersion statistic                           |
+   | `cox_zph`         | `survival::cox.zph`                                    |
+   | `expected_counts` | expected cell counts of the contingency table          |
+   | `box_tidwell`     | `car::boxTidwell`                                      |
 
 3. **Emit artifacts.** For each assumption, write
    `assumption.{id}` (kind `assumption_check`) with the test statistic, p-value,

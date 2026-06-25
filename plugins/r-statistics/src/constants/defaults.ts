@@ -101,10 +101,7 @@ export const COMMON_RSCRIPT_PATHS: Record<Platform, string[]> = {
     "/usr/local/bin/Rscript",
     "/opt/R/bin/Rscript",
   ],
-  [Platform.Windows]: [
-    "C:\\Program Files\\R",
-    "C:\\Program Files (x86)\\R",
-  ],
+  [Platform.Windows]: ["C:\\Program Files\\R", "C:\\Program Files (x86)\\R"],
 };
 
 /** Environment variable that overrides Rscript discovery. */

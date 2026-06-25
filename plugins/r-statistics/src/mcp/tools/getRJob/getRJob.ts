@@ -1,6 +1,9 @@
 import { ERROR_MESSAGES } from "../../../constants/messages.js";
 import { getJob } from "../../../core/index.js";
-import type { RExecutionResult, RunROutput } from "../../../types/rExecution.js";
+import type {
+  RExecutionResult,
+  RunROutput,
+} from "../../../types/rExecution.js";
 
 export interface GetRJobInput {
   jobId: string;
@@ -10,8 +13,16 @@ export interface GetRJobInput {
 function stripStreams(result: RExecutionResult): RExecutionResult {
   return {
     ...result,
-    stdout: { text: "", truncated: false, encodingUsed: result.stdout.encodingUsed },
-    stderr: { text: "", truncated: false, encodingUsed: result.stderr.encodingUsed },
+    stdout: {
+      text: "",
+      truncated: false,
+      encodingUsed: result.stdout.encodingUsed,
+    },
+    stderr: {
+      text: "",
+      truncated: false,
+      encodingUsed: result.stderr.encodingUsed,
+    },
   };
 }
 

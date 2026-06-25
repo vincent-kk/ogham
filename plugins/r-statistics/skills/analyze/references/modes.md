@@ -3,12 +3,12 @@
 The dispatcher runs in one of two modes. `interactive` is the default;
 `--auto` switches to the unattended pipeline.
 
-| | `interactive` (default) | `--auto` (pipeline) |
-| --- | --- | --- |
-| Hard gate (`assert` `hard_block`) | block → re-select | block → re-select |
-| Soft warning (`assert` / validator) | **discuss with the user**, proceed allowed | **strict re-select**, unattended |
-| Checkpoints (SAP, results) | present, then discuss | auto-pass, no pause |
-| Termination | return results + explanation first | converge the quality loop, then emit artifacts |
+|                                     | `interactive` (default)                    | `--auto` (pipeline)                            |
+| ----------------------------------- | ------------------------------------------ | ---------------------------------------------- |
+| Hard gate (`assert` `hard_block`)   | block → re-select                          | block → re-select                              |
+| Soft warning (`assert` / validator) | **discuss with the user**, proceed allowed | **strict re-select**, unattended               |
+| Checkpoints (SAP, results)          | present, then discuss                      | auto-pass, no pause                            |
+| Termination                         | return results + explanation first         | converge the quality loop, then emit artifacts |
 
 ## interactive
 

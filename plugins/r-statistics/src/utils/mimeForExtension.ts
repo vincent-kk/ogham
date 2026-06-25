@@ -16,5 +16,7 @@ const MIME_BY_EXTENSION: Record<string, string> = {
 };
 
 export function mimeForExtension(extension: string): string {
-  return MIME_BY_EXTENSION[extension.toLowerCase()] ?? "application/octet-stream";
+  return (
+    MIME_BY_EXTENSION[extension.toLowerCase()] ?? "application/octet-stream"
+  );
 }

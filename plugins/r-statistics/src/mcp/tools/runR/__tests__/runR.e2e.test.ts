@@ -60,7 +60,9 @@ describe("run_r", () => {
       expect(out.status).toBe(JobStatus.Succeeded);
       expect(out.result?.exitCode).toBe(0);
       expect(out.result?.stdout.text).toContain("p =");
-      const csv = out.result?.artifacts.find((a) => a.path.endsWith("demo.csv"));
+      const csv = out.result?.artifacts.find((a) =>
+        a.path.endsWith("demo.csv"),
+      );
       expect(csv).toBeDefined();
       expect(csv?.sha256).toHaveLength(64);
       expect(csv?.kind).toBe("data");

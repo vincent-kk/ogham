@@ -14,7 +14,8 @@ export async function startServer(): Promise<void> {
 
   try {
     const removed = await pruneExpired(WORKSPACE_TTL_HOURS);
-    if (removed > 0) logger.info("pruned expired workspaces", { count: removed });
+    if (removed > 0)
+      logger.info("pruned expired workspaces", { count: removed });
   } catch (error) {
     logger.warn("workspace prune failed on startup", {
       error: (error as Error).message,

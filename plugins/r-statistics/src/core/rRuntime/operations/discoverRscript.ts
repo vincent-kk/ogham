@@ -1,4 +1,10 @@
-import { accessSync, constants, existsSync, readdirSync, statSync } from "node:fs";
+import {
+  accessSync,
+  constants,
+  existsSync,
+  readdirSync,
+  statSync,
+} from "node:fs";
 import { delimiter, join } from "node:path";
 
 import { spawnCliSync } from "@ogham/cross-platform";

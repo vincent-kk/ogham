@@ -15,7 +15,12 @@ import {
   validateRScript,
 } from "../../../core/index.js";
 import { atomicWrite } from "../../../lib/atomicWrite.js";
-import { Encoding, JobStatus, RErrorCode, RunMode } from "../../../types/enums.js";
+import {
+  Encoding,
+  JobStatus,
+  RErrorCode,
+  RunMode,
+} from "../../../types/enums.js";
 import type {
   RExecutionError,
   RExecutionResult,

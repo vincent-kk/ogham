@@ -2,8 +2,8 @@
 name: visualization
 user_invocable: true
 description: '[r-statistics:visualization] Produce publication-ready statistical plots with ggplot2 — distributions, boxplots, scatter/regression, survival curves, forest plots — saved as image artifacts. Trigger: "plot this", "make a boxplot", "show the distribution", "scatter plot", "박스플롯 그려줘", "분포 시각화"'
-argument-hint: '[--kind boxplot|scatter|distribution|survival|forest]'
-version: '1.0.0'
+argument-hint: "[--kind boxplot|scatter|distribution|survival|forest]"
+version: "1.0.0"
 complexity: simple
 plugin: r-statistics
 ---
@@ -17,13 +17,13 @@ Execution runs through `mcp_tools_run_r`.
 
 1. **Pick the plot** for the data and question:
 
-   | kind | ggplot2 |
-   | --- | --- |
-   | distribution | histogram / density (`geom_histogram`, `geom_density`) |
-   | boxplot | `geom_boxplot` (+ jittered points) for group comparison |
-   | scatter | `geom_point` + `geom_smooth` for two continuous variables |
-   | survival | step survival curve from a `survival::survfit` object |
-   | forest | point + error-bar plot of effect estimates and CIs |
+   | kind         | ggplot2                                                   |
+   | ------------ | --------------------------------------------------------- |
+   | distribution | histogram / density (`geom_histogram`, `geom_density`)    |
+   | boxplot      | `geom_boxplot` (+ jittered points) for group comparison   |
+   | scatter      | `geom_point` + `geom_smooth` for two continuous variables |
+   | survival     | step survival curve from a `survival::survfit` object     |
+   | forest       | point + error-bar plot of effect estimates and CIs        |
 
 2. **Build the plot** in R from `read_data("<id>")`, with clear axis labels, a
    readable theme (`theme_minimal()` or similar), and the grouping/colour the

@@ -5,11 +5,7 @@ function claudeRoot(): string {
   return process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude");
 }
 
-export const R_STATISTICS_HOME = join(
-  claudeRoot(),
-  "plugins",
-  "r-statistics",
-);
+export const R_STATISTICS_HOME = join(claudeRoot(), "plugins", "r-statistics");
 export const CONFIG_PATH = join(R_STATISTICS_HOME, "config.json");
 export const RUNTIME_DIR = join(R_STATISTICS_HOME, "runtime");
 export const WORKSPACES_DIR = join(RUNTIME_DIR, "workspaces");

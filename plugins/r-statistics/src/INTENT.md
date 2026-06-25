@@ -4,14 +4,14 @@
 
 ## Structure
 
-| Directory    | Role                                                         |
-| ------------ | ----------------------------------------------------------- |
-| `types/`     | `enums.ts`(object enum) + 실행/assert 인터페이스 (organ)    |
-| `constants/` | paths·defaults·messages (organ)                             |
-| `core/`      | rRuntime / workspace / commandGate / jobStore (실행 기반)   |
-| `mcp/`       | MCP 서버 + 도구 4종 + serverEntry                           |
-| `lib/`       | atomicWrite, logger (organ)                                 |
-| `utils/`     | isoNow, randomId, sha256File, detectPlatform 등 (organ)     |
+| Directory    | Role                                                      |
+| ------------ | --------------------------------------------------------- |
+| `types/`     | `enums.ts`(object enum) + 실행/assert 인터페이스 (organ)  |
+| `constants/` | paths·defaults·messages (organ)                           |
+| `core/`      | rRuntime / workspace / commandGate / jobStore (실행 기반) |
+| `mcp/`       | MCP 서버 + 도구 4종 + serverEntry                         |
+| `lib/`       | atomicWrite, logger (organ)                               |
+| `utils/`     | isoNow, randomId, sha256File, detectPlatform 등 (organ)   |
 
 ## Conventions
 

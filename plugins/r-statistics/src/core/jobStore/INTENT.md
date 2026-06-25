@@ -4,14 +4,14 @@
 
 ## Structure
 
-| File                       | Role                                                |
-| -------------------------- | --------------------------------------------------- |
-| `jobStore.ts`              | `jobs` Map(프로세스 수명 상태) + RJob 타입 (eponymous) |
-| `operations/createJob.ts`  | Queued 상태로 등록                                  |
-| `operations/getJob.ts`     | id 조회                                             |
-| `operations/updateJob.ts`  | 상태 전이 + 결과 부착                               |
-| `operations/cancelJob.ts`  | controller.abort + Cancelled 처리, CancelStatus 반환 |
-| `index.ts`                 | barrel                                              |
+| File                      | Role                                                   |
+| ------------------------- | ------------------------------------------------------ |
+| `jobStore.ts`             | `jobs` Map(프로세스 수명 상태) + RJob 타입 (eponymous) |
+| `operations/createJob.ts` | Queued 상태로 등록                                     |
+| `operations/getJob.ts`    | id 조회                                                |
+| `operations/updateJob.ts` | 상태 전이 + 결과 부착                                  |
+| `operations/cancelJob.ts` | controller.abort + Cancelled 처리, CancelStatus 반환   |
+| `index.ts`                | barrel                                                 |
 
 ## Conventions
 

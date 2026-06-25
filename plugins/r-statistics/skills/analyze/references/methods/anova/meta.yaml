@@ -11,5 +11,6 @@ required_assumptions:
     check: levene
     on_violation: { recommend: [welch_anova] }
 hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
-required_artifacts: [result.anova_table, table.test_summary, plot.residual_diagnostics]
+required_artifacts:
+  [result.anova_table, table.test_summary, plot.residual_diagnostics]
 packages: [stats, broom, car, rstatix, ggplot2]

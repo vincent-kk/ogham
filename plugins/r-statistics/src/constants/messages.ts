@@ -5,7 +5,8 @@ export const ERROR_MESSAGES = {
   R_NOT_FOUND:
     "Rscript was not found. Run the r-setup skill to install R or set " +
     "R_STATISTICS_RSCRIPT to the Rscript path.",
-  INVALID_TIMEOUT: "timeoutMs must be a positive number within the allowed ceiling.",
+  INVALID_TIMEOUT:
+    "timeoutMs must be a positive number within the allowed ceiling.",
   EMPTY_SCRIPT: "scriptCode must be a non-empty R script.",
   JOB_NOT_FOUND: "No R job exists for the given jobId.",
   WORKSPACE_NOT_FOUND: "The referenced workspace does not exist.",
@@ -14,7 +15,8 @@ export const ERROR_MESSAGES = {
     "Refusing to collect an artifact outside ARTIFACTS_DIR (path traversal or symlink escape).",
   OUTPUT_DECODE_FAILED:
     "Process output could not be decoded as UTF-8 or CP949.",
-  DATA_REF_NOT_FOUND: "A referenced input dataset could not be resolved on disk.",
+  DATA_REF_NOT_FOUND:
+    "A referenced input dataset could not be resolved on disk.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

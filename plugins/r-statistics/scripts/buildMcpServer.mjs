@@ -55,7 +55,12 @@ if (size > MAX_BYTES) {
 
 // Sanity check: the bundle must contain the four tool names it registers.
 const bundle = await readFile(outfile, "utf8");
-for (const tool of ["run_r", "get_r_job", "cancel_r_job", "assert_analysis_plan"]) {
+for (const tool of [
+  "run_r",
+  "get_r_job",
+  "cancel_r_job",
+  "assert_analysis_plan",
+]) {
   if (!bundle.includes(tool)) {
     throw new Error(`[r-statistics] mcp-server.cjs is missing tool: ${tool}`);
   }

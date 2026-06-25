@@ -4,13 +4,13 @@
 
 ## Structure
 
-| Fractal        | Role                                                       |
-| -------------- | ---------------------------------------------------------- |
-| `rRuntime/`    | Rscript 탐색·spawn(shell:false)·UTF-8/CP949 디코딩         |
-| `workspace/`   | temp 격리·아티팩트 수집(해시·정책)·세션 정리               |
-| `commandGate/` | 금지 R 호출 정적 차단 + r-setup 설치 명령 화이트리스트     |
-| `jobStore/`    | 비동기 R 잡 인메모리 생명주기 레지스트리                   |
-| `index.ts`     | barrel — 4 프랙탈 공개 API re-export                       |
+| Fractal        | Role                                                   |
+| -------------- | ------------------------------------------------------ |
+| `rRuntime/`    | Rscript 탐색·spawn(shell:false)·UTF-8/CP949 디코딩     |
+| `workspace/`   | temp 격리·아티팩트 수집(해시·정책)·세션 정리           |
+| `commandGate/` | 금지 R 호출 정적 차단 + r-setup 설치 명령 화이트리스트 |
+| `jobStore/`    | 비동기 R 잡 인메모리 생명주기 레지스트리               |
+| `index.ts`     | barrel — 4 프랙탈 공개 API re-export                   |
 
 ## Conventions
 

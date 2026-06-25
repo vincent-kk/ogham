@@ -1,9 +1,11 @@
 # r-statistics — 아키텍처
 
 ## 정체성 (설계의 닻)
+
 **Claude를 도메인 중립 "통계 전문가"로 만드는 plugin.** 유일한 도메인은 통계 방법론 그 자체. 응용 도메인(의료·물리·화학·공학·사회과학…)에 앵커링하지 않는다. 어휘·게이트·룰셋·리소스는 순수 통계 기준으로만 작성한다.
 
 ## 3-Layer (filid 3-Layer plugin 동형)
+
 판단 프레임워크: MCP=결정적 실행, Skill=실행계약 골격, Agent=비결정 추론, Dispatcher=결정적 오케스트레이션.
 
 ```
@@ -23,7 +25,9 @@
 **핵심 원리**: 비결정 LLM(Agent)을 결정적 상태머신(Dispatcher)+결정적 실행(MCP)이 감싼다.
 
 ## Dispatcher 구현 결정
+
 Claude Code plugin에서 결정적 코드 실행 자리는 MCP 서버뿐이다(hook 미사용). 따라서 Dispatcher 상태머신은:
+
 - **상태/전이 규칙** = `skills/analyze/references/state-machine.md` (문서로 명시, LLM이 따름 — filid cross-review chairperson 패턴)
 - **결정적 강제 게이트** = `assert_analysis_plan` MCP 도구 (통계적 hard gate를 코드로 차단)
 - **상태 영속** = MCP `workspace`에 분석 세션 상태 저장 (핸들러는 stateless, 상태는 외부 저장)
@@ -31,6 +35,7 @@ Claude Code plugin에서 결정적 코드 실행 자리는 MCP 서버뿐이다(h
 → "비결정 위험"은 상태 규칙을 명시적 전이표 + iteration guard로 박아 억제. 상세 [dispatcher.md](./dispatcher.md).
 
 ## 디렉토리 구조 (deilen 차용)
+
 ```
 plugins/r-statistics/
 ├── .claude-plugin/plugin.json          # 매니페스트 (name, version, skills, mcpServers)
@@ -96,22 +101,27 @@ plugins/r-statistics/
 ```
 
 ## 코드 규약
+
 ### FCA (Fractal Context Architecture)
+
 - **프랙탈 분리**: `src/core/{rRuntime,workspace,commandGate}`·`src/mcp/{server,tools,shared}` 각각 자기유사 독립 단위(Bounded Context). 각 프랙탈에 `index.ts` 배럴 + `INTENT.md`(Purpose/Structure/Conventions/Boundaries/Dependencies, Korean).
 - **부속품 격리**: 공유 유틸은 `lib/`·`utils/` 리프에 격리, INTENT.md 미부여.
 - **상향식 지연 로딩**: 리프→루트 최소 컨텍스트.
 
 ### 1함수 1파일
+
 - `operations/*.ts` 는 단일 export 함수. 예: `core/rRuntime/operations/discoverRscript.ts` → `discoverRscript()`.
 - 도구 핸들러는 `tools/{tool}/{tool}.ts` 메인 + `operations/` 헬퍼.
 
 ### 문자열 리터럴 상수화
+
 - **값 집합(enum류)**: `src/types/enums.ts` 에 `as const` 객체 (deilen `enums.ts` 패턴). 예: `JobStatus`, `Severity`(`hard`/`soft`), `ExecutionMode`(`interactive`/`auto`), `AssumptionId`.
 - **사용자/에러 메시지**: `src/constants/messages.ts`.
 - **경로**: `src/constants/paths.ts` (상수 + `workspaceDir(id)` 류 헬퍼).
 - 인라인 문자열 리터럴 금지 — 전부 위 3곳에서 import.
 
 ### 기타
+
 - **hook 미사용** (사용자 결정).
 - 빌드: `scripts/buildMcpServer.mjs` → `bridge/mcp-server.cjs` (deilen 패턴).
 - 테스트: vitest (`__tests__/`).

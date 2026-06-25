@@ -43,7 +43,11 @@ const datasetMetaSchema = z.object({
   outcomeType: z
     .nativeEnum(OutcomeType)
     .describe("Type of the dependent variable."),
-  groupCount: z.number().int().optional().describe("Number of compared groups."),
+  groupCount: z
+    .number()
+    .int()
+    .optional()
+    .describe("Number of compared groups."),
   sampleSize: z.number().int().optional().describe("Total observations."),
   expectedCountsBelow5: z
     .boolean()
@@ -75,11 +79,15 @@ export function createServer(): McpServer {
         "collect artifacts. Statically blocks unsafe calls; async by default " +
         "(poll with get_r_job). Execution safety only — not statistical policy.",
       inputSchema: {
-        scriptCode: z.string().describe("R code to run (written to a temp .R)."),
+        scriptCode: z
+          .string()
+          .describe("R code to run (written to a temp .R)."),
         dataRefs: z
           .array(dataRefSchema)
           .optional()
-          .describe("Input datasets the MCP resolves; user code never builds paths."),
+          .describe(
+            "Input datasets the MCP resolves; user code never builds paths.",
+          ),
         workspaceId: z
           .string()
           .optional()

@@ -4,12 +4,12 @@
 
 ## Structure
 
-| File                             | Role                                                          |
-| -------------------------------- | ------------------------------------------------------------- |
-| `operations/validateRScript.ts`  | 금지 R 호출 정적 스캔(`<call>(` word-boundary 매칭)           |
-| `operations/resolveInstaller.ts` | 패키지 매니저 → 승인된 R 설치 명령(winget/choco/brew) 매핑    |
-| `operations/validateCommand.ts`  | 명령 베이스가 승인 설치 바이너리인지 화이트리스트 확인        |
-| `index.ts`                       | barrel                                                        |
+| File                             | Role                                                       |
+| -------------------------------- | ---------------------------------------------------------- |
+| `operations/validateRScript.ts`  | 금지 R 호출 정적 스캔(`<call>(` word-boundary 매칭)        |
+| `operations/resolveInstaller.ts` | 패키지 매니저 → 승인된 R 설치 명령(winget/choco/brew) 매핑 |
+| `operations/validateCommand.ts`  | 명령 베이스가 승인 설치 바이너리인지 화이트리스트 확인     |
+| `index.ts`                       | barrel                                                     |
 
 ## Conventions
 

@@ -4,14 +4,14 @@
 
 ## Structure
 
-| File                              | Role                                                            |
-| --------------------------------- | -------------------------------------------------------------- |
-| `runR.ts`                         | 핸들러 — 검증·게이트·워크스페이스·잡 오케스트레이션            |
-| `operations/buildWrapperScript.ts`| user 코드를 contract 헤더/푸터로 감싼 래퍼 R 소스 생성         |
-| `operations/resolveDataRefs.ts`   | 입력 데이터 `data/` 복사 + `refs.json` 작성                    |
-| `operations/buildRunEnv.ts`       | child 프로세스 env(ARTIFACTS_DIR·SEED·CONTRACT 등) 구성        |
-| `operations/executeRun.ts`        | spawn·디코딩·manifest·아티팩트 수집·상태 분류 → 결과 조립      |
-| `index.ts`                        | barrel                                                         |
+| File                               | Role                                                      |
+| ---------------------------------- | --------------------------------------------------------- |
+| `runR.ts`                          | 핸들러 — 검증·게이트·워크스페이스·잡 오케스트레이션       |
+| `operations/buildWrapperScript.ts` | user 코드를 contract 헤더/푸터로 감싼 래퍼 R 소스 생성    |
+| `operations/resolveDataRefs.ts`    | 입력 데이터 `data/` 복사 + `refs.json` 작성               |
+| `operations/buildRunEnv.ts`        | child 프로세스 env(ARTIFACTS_DIR·SEED·CONTRACT 등) 구성   |
+| `operations/executeRun.ts`         | spawn·디코딩·manifest·아티팩트 수집·상태 분류 → 결과 조립 |
+| `index.ts`                         | barrel                                                    |
 
 ## Conventions
 

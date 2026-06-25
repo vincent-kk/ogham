@@ -4,13 +4,13 @@
 
 ## Structure
 
-| File                                | Role                                                            |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `assertAnalysisPlan.ts`             | 핸들러 — hard → soft 순 평가, severity·allowed 산출            |
-| `operations/ruleset.ts`             | 기법별 family·outcomeTypes·soft 가정 룰셋(meta.yaml 미러)      |
-| `operations/evaluateHardRules.ts`   | OUTCOME_METHOD_MISMATCH·SAMPLE_TOO_SMALL·EXPECTED_COUNT_LOW 등 |
-| `operations/evaluateSoftRules.ts`   | 가정 아티팩트 대조(violated/unverified) + 권고 대안 수집       |
-| `index.ts`                          | barrel                                                         |
+| File                              | Role                                                           |
+| --------------------------------- | -------------------------------------------------------------- |
+| `assertAnalysisPlan.ts`           | 핸들러 — hard → soft 순 평가, severity·allowed 산출            |
+| `operations/ruleset.ts`           | 기법별 family·outcomeTypes·soft 가정 룰셋(meta.yaml 미러)      |
+| `operations/evaluateHardRules.ts` | OUTCOME_METHOD_MISMATCH·SAMPLE_TOO_SMALL·EXPECTED_COUNT_LOW 등 |
+| `operations/evaluateSoftRules.ts` | 가정 아티팩트 대조(violated/unverified) + 권고 대안 수집       |
+| `index.ts`                        | barrel                                                         |
 
 ## Conventions
 

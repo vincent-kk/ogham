@@ -3,7 +3,7 @@ name: analyze
 user_invocable: true
 description: '[r-statistics:analyze] Orchestrate a full statistical analysis from data + hypothesis to verified results and reproducible R: classify intent, select a method, gate assumptions, execute via R, validate, and report. Trigger: "analyze this data", "run a hypothesis test", "is this difference significant", "이 데이터 분석해줘", "가설검정 해줘"'
 argument-hint: '[--auto] [--data PATH] [--question "..."]'
-version: '1.0.0'
+version: "1.0.0"
 complexity: complex
 plugin: r-statistics
 ---
@@ -56,13 +56,13 @@ agents own their `run_r` calls and the sub-skill contracts.
 Bind `workspaceId` for the session. Normalize the request (data path(s),
 hypothesis, flags). Classify intent per [intent.md](./references/intent.md):
 
-| intent | route |
-| --- | --- |
-| `full-analysis` | full pipeline (Step 2) |
-| `partial-step` | the matching sub-skill directly (e.g. visualization, assumption-check) → done |
-| `troubleshoot` | spawn `r-expert` on the failing job → done |
-| `methodology-query` | spawn `statistician` for advice → done |
-| `needs-clarification` | ask the user the missing piece → wait |
+| intent                | route                                                                         |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `full-analysis`       | full pipeline (Step 2)                                                        |
+| `partial-step`        | the matching sub-skill directly (e.g. visualization, assumption-check) → done |
+| `troubleshoot`        | spawn `r-expert` on the failing job → done                                    |
+| `methodology-query`   | spawn `statistician` for advice → done                                        |
+| `needs-clarification` | ask the user the missing piece → wait                                         |
 
 ## Step 2 — Full-analysis pipeline
 
@@ -72,7 +72,7 @@ The happy path:
 1. **Data preparation** — load + profile the data (the `data-preparation`
    contract, executed by `r-expert` via `run_r`). Produce `dataset_profile`.
 2. **STATISTICIAN_PLAN** — `Task(subagent_type: "r-statistics:statistician")`
-   with the profile + hypothesis → SAP. *(interactive: present the SAP, discuss.)*
+   with the profile + hypothesis → SAP. _(interactive: present the SAP, discuss.)_
 3. **Assumption check** — run the SAP's required assumption tests (the
    `assumption-check` contract via `r-expert`) → `assumption.{id}` artifacts.
 4. **ASSERT_PLAN** — call `mcp_tools_assert_analysis_plan` with normalized

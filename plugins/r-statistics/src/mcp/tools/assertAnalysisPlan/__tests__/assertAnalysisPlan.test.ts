@@ -28,8 +28,16 @@ describe("assert_analysis_plan", () => {
     const out = await handleAssertAnalysisPlan(
       plan({
         assumptionArtifacts: [
-          { assumptionId: AssumptionId.Normality, artifactPath: "n", passed: true },
-          { assumptionId: AssumptionId.Homogeneity, artifactPath: "h", passed: true },
+          {
+            assumptionId: AssumptionId.Normality,
+            artifactPath: "n",
+            passed: true,
+          },
+          {
+            assumptionId: AssumptionId.Homogeneity,
+            artifactPath: "h",
+            passed: true,
+          },
         ],
       }),
     );
@@ -49,7 +57,9 @@ describe("assert_analysis_plan", () => {
       );
       expect(out.allowed).toBe(false);
       expect(out.severity).toBe(AssertSeverity.HardBlock);
-      expect(out.reasons.map((r) => r.code)).toContain("OUTCOME_METHOD_MISMATCH");
+      expect(out.reasons.map((r) => r.code)).toContain(
+        "OUTCOME_METHOD_MISMATCH",
+      );
     }
   });
 
@@ -57,8 +67,16 @@ describe("assert_analysis_plan", () => {
     const out = await handleAssertAnalysisPlan(
       plan({
         assumptionArtifacts: [
-          { assumptionId: AssumptionId.Normality, artifactPath: "n", passed: false },
-          { assumptionId: AssumptionId.Homogeneity, artifactPath: "h", passed: true },
+          {
+            assumptionId: AssumptionId.Normality,
+            artifactPath: "n",
+            passed: false,
+          },
+          {
+            assumptionId: AssumptionId.Homogeneity,
+            artifactPath: "h",
+            passed: true,
+          },
         ],
       }),
     );
@@ -72,8 +90,16 @@ describe("assert_analysis_plan", () => {
       plan({
         mode: ExecutionMode.Auto,
         assumptionArtifacts: [
-          { assumptionId: AssumptionId.Normality, artifactPath: "n", passed: false },
-          { assumptionId: AssumptionId.Homogeneity, artifactPath: "h", passed: true },
+          {
+            assumptionId: AssumptionId.Normality,
+            artifactPath: "n",
+            passed: false,
+          },
+          {
+            assumptionId: AssumptionId.Homogeneity,
+            artifactPath: "h",
+            passed: true,
+          },
         ],
       }),
     );
@@ -90,7 +116,13 @@ describe("assert_analysis_plan", () => {
 
   it("hard-blocks when per-group sample size is below 2", async () => {
     const out = await handleAssertAnalysisPlan(
-      plan({ datasetMeta: { outcomeType: OutcomeType.Continuous, groupCount: 2, sampleSize: 3 } }),
+      plan({
+        datasetMeta: {
+          outcomeType: OutcomeType.Continuous,
+          groupCount: 2,
+          sampleSize: 3,
+        },
+      }),
     );
     expect(out.severity).toBe(AssertSeverity.HardBlock);
     expect(out.reasons.map((r) => r.code)).toContain("SAMPLE_TOO_SMALL");
@@ -100,7 +132,10 @@ describe("assert_analysis_plan", () => {
     const out = await handleAssertAnalysisPlan(
       plan({
         method: { technique: "chi_square", family: MethodFamily.Categorical },
-        datasetMeta: { outcomeType: OutcomeType.Categorical, expectedCountsBelow5: true },
+        datasetMeta: {
+          outcomeType: OutcomeType.Categorical,
+          expectedCountsBelow5: true,
+        },
       }),
     );
     expect(out.severity).toBe(AssertSeverity.HardBlock);
@@ -110,7 +145,10 @@ describe("assert_analysis_plan", () => {
   it("hard-blocks logistic regression with severely low EPV", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
-        method: { technique: "logistic_regression", family: MethodFamily.Regression },
+        method: {
+          technique: "logistic_regression",
+          family: MethodFamily.Regression,
+        },
         datasetMeta: { outcomeType: OutcomeType.Binary, eventsPerVariable: 3 },
       }),
     );
@@ -121,10 +159,17 @@ describe("assert_analysis_plan", () => {
   it("recommends negative_binomial when poisson overdispersion is detected", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
-        method: { technique: "poisson_regression", family: MethodFamily.Regression },
+        method: {
+          technique: "poisson_regression",
+          family: MethodFamily.Regression,
+        },
         datasetMeta: { outcomeType: OutcomeType.Count },
         assumptionArtifacts: [
-          { assumptionId: AssumptionId.MeanEqualsVariance, artifactPath: "d", passed: false },
+          {
+            assumptionId: AssumptionId.MeanEqualsVariance,
+            artifactPath: "d",
+            passed: false,
+          },
         ],
       }),
     );
@@ -135,7 +180,10 @@ describe("assert_analysis_plan", () => {
   it("passes an unknown technique with no ruleset entry", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
-        method: { technique: "bootstrap_ci", family: MethodFamily.Nonparametric },
+        method: {
+          technique: "bootstrap_ci",
+          family: MethodFamily.Nonparametric,
+        },
         datasetMeta: { outcomeType: OutcomeType.Continuous },
       }),
     );

@@ -4,8 +4,8 @@
 
 ## Structure
 
-| File                            | Role                                                                  |
-| ------------------------------- | --------------------------------------------------------------------- |
+| File                            | Role                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------- |
 | `operations/discoverRscript.ts` | env → PATH → 공통 경로 → (Windows) 레지스트리 탐색; 실패 시 null       |
 | `operations/spawnRscript.ts`    | `spawn(shell:false)` + 타임아웃(SIGKILL) + AbortSignal; 원시 버퍼 반환 |
 | `operations/decodeOutput.ts`    | UTF-8(fatal) 우선 → euc-kr(CP949) fallback + 길이 truncate             |

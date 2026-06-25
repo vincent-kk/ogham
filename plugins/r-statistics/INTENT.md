@@ -4,15 +4,15 @@
 
 ## Structure
 
-| Path                         | Role                                                       |
-| ---------------------------- | ---------------------------------------------------------- |
-| `src/`                       | MCP 서버 TypeScript 소스 (fractal 루트)                   |
-| `skills/`                    | 노출 스킬 6 (analyze=Dispatcher + lazy `methods/`)        |
-| `agents/`                    | statistician · r-expert · methodology-validator           |
-| `shared/contract.R`          | 공통 R 실행계약 (init/finalize + 아티팩트 헬퍼)           |
-| `scripts/buildMcpServer.mjs` | esbuild 번들 스크립트                                     |
-| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)               |
-| `.claude-plugin/plugin.json` | 매니페스트 / `.mcp.json` MCP 서버 등록(name `tools`)       |
+| Path                         | Role                                                 |
+| ---------------------------- | ---------------------------------------------------- |
+| `src/`                       | MCP 서버 TypeScript 소스 (fractal 루트)              |
+| `skills/`                    | 노출 스킬 6 (analyze=Dispatcher + lazy `methods/`)   |
+| `agents/`                    | statistician · r-expert · methodology-validator      |
+| `shared/contract.R`          | 공통 R 실행계약 (init/finalize + 아티팩트 헬퍼)      |
+| `scripts/buildMcpServer.mjs` | esbuild 번들 스크립트                                |
+| `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`)         |
+| `.claude-plugin/plugin.json` | 매니페스트 / `.mcp.json` MCP 서버 등록(name `tools`) |
 
 ## Conventions
 

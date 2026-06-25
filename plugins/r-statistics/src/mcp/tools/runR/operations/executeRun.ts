@@ -41,7 +41,11 @@ function classify(
   if (spawn.timedOut) {
     return {
       status: JobStatus.Timeout,
-      error: { code: RErrorCode.Timeout, message: TIMEOUT_MESSAGE, retryable: true },
+      error: {
+        code: RErrorCode.Timeout,
+        message: TIMEOUT_MESSAGE,
+        retryable: true,
+      },
     };
   }
   if (spawn.spawnError) {

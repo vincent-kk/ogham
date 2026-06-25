@@ -1,4 +1,8 @@
-import { HardRuleCode, MethodFamily, Severity } from "../../../../types/enums.js";
+import {
+  HardRuleCode,
+  MethodFamily,
+  Severity,
+} from "../../../../types/enums.js";
 import type { AssertInput, AssertReason } from "../../../../types/assert.js";
 
 import { TECHNIQUE_RULES } from "./ruleset.js";

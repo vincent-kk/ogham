@@ -2,8 +2,8 @@
 name: data-preparation
 user_invocable: true
 description: '[r-statistics:data-preparation] Load, profile, clean, and impute a dataset for analysis — variable types, distributions, missingness, and explicit (never silent) transformations. Trigger: "profile this data", "clean the dataset", "check for missing values", "데이터 정제", "결측치 확인"'
-argument-hint: '[--data PATH]'
-version: '1.0.0'
+argument-hint: "[--data PATH]"
+version: "1.0.0"
 complexity: moderate
 plugin: r-statistics
 ---

@@ -4,13 +4,13 @@ r-statistics 의 MCP 서버(stdio) 프랙탈. 도메인 무지·stateless 결정
 
 ## Structure
 
-| Path           | Role                                                  |
-| -------------- | ----------------------------------------------------- |
+| Path           | Role                                                   |
+| -------------- | ------------------------------------------------------ |
 | `server/`      | createServer(도구 등록) + startServer(stdio) (fractal) |
-| `serverEntry/` | esbuild 진입점 → `bridge/mcp-server.cjs` (organ)      |
-| `shared/`      | toolResult·toolError·wrapHandler (fractal)            |
-| `tools/`       | run_r·get_r_job·cancel_r_job·assert_analysis_plan     |
-| `index.ts`     | barrel                                                |
+| `serverEntry/` | esbuild 진입점 → `bridge/mcp-server.cjs` (organ)       |
+| `shared/`      | toolResult·toolError·wrapHandler (fractal)             |
+| `tools/`       | run_r·get_r_job·cancel_r_job·assert_analysis_plan      |
+| `index.ts`     | barrel                                                 |
 
 ## Conventions
 
