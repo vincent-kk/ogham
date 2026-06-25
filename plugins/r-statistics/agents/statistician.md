@@ -65,7 +65,10 @@ its declared `required_assumptions`, `outcome_types`, and `required_artifacts`.
 ## The gate
 
 Call `mcp_tools_assert_analysis_plan` with normalized fields (method,
-datasetMeta, assumptionArtifacts, mode). It is the deterministic hard gate:
+datasetMeta, assumptionArtifacts, mode) to **self-validate** your SAP before
+returning it. It is the deterministic hard gate; the dispatcher runs the
+authoritative gate at ASSERT_PLAN and owns every state transition — you only
+recommend:
 
 - `hard_block` → your method is statistically inappropriate. **Re-select** a
   different technique; never argue past a hard block.

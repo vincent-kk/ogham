@@ -5,6 +5,6 @@ required_assumptions:
   - id: no_multicollinearity
     severity: soft
     check: vif
-hard_rules: [OUTCOME_METHOD_MISMATCH]
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
 required_artifacts: [model.fit, table.coefficients]
 packages: [MASS, broom, car]

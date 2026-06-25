@@ -6,6 +6,6 @@ required_assumptions:
     severity: soft
     check: dispersion
     on_violation: { recommend: [negative_binomial] }
-hard_rules: [OUTCOME_METHOD_MISMATCH]
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
 required_artifacts: [model.fit, table.coefficients]
 packages: [stats, broom, MASS]

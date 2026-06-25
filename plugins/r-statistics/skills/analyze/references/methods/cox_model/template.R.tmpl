@@ -21,7 +21,11 @@ df <- df[!is.na(df[[time_col]]) & !is.na(df[[event_col]]), , drop = FALSE]
 if (is.logical(df[[event_col]])) {
   df[[event_col]] <- as.integer(df[[event_col]])
 } else if (is.factor(df[[event_col]])) {
-  df[[event_col]] <- as.integer(df[[event_col]]) - 1L
+  # A factor event indicator is order-ambiguous: map the LAST level to 1 (event).
+  # Prefer a numeric 0/1 column, or relevel so the event is the last level —
+  # verify the encoding (1 = event observed, 0 = censored) before relying on it.
+  lv <- levels(df[[event_col]])
+  df[[event_col]] <- as.integer(df[[event_col]] == lv[length(lv)])
 } else {
   df[[event_col]] <- as.numeric(df[[event_col]])
 }
