@@ -84,7 +84,10 @@ The happy path:
    `methods/{technique}/template.R.tmpl` and run `mcp_tools_run_r`. On a
    recoverable error, r-expert retries within `rRepairIter`.
 6. **VALIDATION** — `Task(subagent_type: "r-statistics:methodology-validator")`
-   for the soft review. `block` → STATISTICIAN_PLAN (`validatorIter++`).
+   for the soft review.
+   - `block` → STATISTICIAN_PLAN (`validatorIter++`).
+   - `soft_warning` → interactive: discuss; auto: re-select (`validatorIter++`).
+   - `ok` → REPORTING.
 7. **REPORTING / return** — interactive: return results + explanation and
    improve via conversation; on request, invoke `reporting` for Quarto output.
    auto: converge the quality loop, then emit artifacts.

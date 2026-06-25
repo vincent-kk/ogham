@@ -5,6 +5,6 @@ required_assumptions:
   - id: independence
     severity: soft
     check: design
-hard_rules: [OUTCOME_METHOD_MISMATCH]
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
 required_artifacts: [result.hypothesis_test, table.test_summary]
 packages: [stats, rstatix, broom]

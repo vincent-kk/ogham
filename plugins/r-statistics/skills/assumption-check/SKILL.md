@@ -33,11 +33,20 @@ Run the statistical assumptions a chosen method requires and produce
    | `cox_zph`         | `survival::cox.zph`                                    |
    | `expected_counts` | expected cell counts of the contingency table          |
    | `box_tidwell`     | `car::boxTidwell`                                      |
+   | `residual_plot`   | residuals vs fitted via `ggplot2` (visual linearity / scale) |
+   | `scatter`         | `ggplot2` scatter + loess smooth (visual linearity)    |
+   | `martingale_residual` | `survival` martingale residuals vs covariate (functional form) |
+   | `epv`             | events ÷ predictors (pass when ≥ 10)                   |
+   | `design`          | design assumption — `note_assumption(id)`, pass by design (no test) |
 
 3. **Emit artifacts.** For each assumption, write
    `assumption.{id}` (kind `assumption_check`) with the test statistic, p-value,
    and a `passed` boolean, then `note_assumption("{id}")`. Use a conventional
-   threshold (e.g. p ≥ 0.05 for normality/homogeneity) and state it.
+   threshold (e.g. p ≥ 0.05 for normality/homogeneity) and state it. Visual
+   checks (`residual_plot`, `scatter`, `martingale_residual`) emit the diagnostic
+   plot plus a heuristic `passed`; `epv` emits the events-per-variable ratio with
+   `passed` (≥ 10); `design` records `passed: true` as a design assumption. These
+   non-test checks carry no p-value.
 
 ## Output
 

@@ -29,7 +29,8 @@ mode's checkpoint behavior.
 | R_EXECUTION       | success                          | VALIDATION                | collect artifacts                              |
 | R_EXECUTION       | recoverable error                | R_EXECUTION               | rRepairIter++ (r-expert retry)                 |
 | R_EXECUTION       | unrecoverable                    | FAILED                    | —                                              |
-| VALIDATION        | ok / soft_warning                | REPORTING (or return)     | _(interactive: discuss → improve)_             |
+| VALIDATION        | ok · (interactive) soft_warning  | REPORTING (or return)     | _(interactive: discuss → improve)_             |
+| VALIDATION        | (auto) soft_warning              | STATISTICIAN_PLAN         | validatorIter++                                |
 | VALIDATION        | block                            | STATISTICIAN_PLAN         | validatorIter++                                |
 | REPORTING         | done                             | COMPLETE                  | Quarto output (on request)                     |
 | (any)             | guard exceeded                   | FAILED                    | report reason                                  |
