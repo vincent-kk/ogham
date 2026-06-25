@@ -73,9 +73,12 @@ plugins/r-statistics/
 │   │   ├── workspace/                   # temp 격리·아티팩트 수집·세션 상태
 │   │   │   ├── index.ts
 │   │   │   └── operations/{createWorkspace,collectArtifacts,readManifest,pruneExpired}.ts
-│   │   └── commandGate/                 # POSIX/MS-DOS 명령어 화이트리스트
+│   │   ├── commandGate/                 # POSIX/MS-DOS 명령어 + R 스크립트 게이트
+│   │   │   ├── index.ts
+│   │   │   └── operations/{validateCommand,resolveInstaller,validateRScript}.ts
+│   │   └── jobStore/                     # 비동기 R 잡 인메모리 레지스트리
 │   │       ├── index.ts
-│   │       └── operations/{validateCommand,resolveInstaller}.ts
+│   │       └── operations/{createJob,getJob,updateJob,cancelJob,cancelAllJobs}.ts
 │   ├── mcp/                             # FCA 프랙탈
 │   │   ├── server/lifecycle/{createServer,startServer}.ts
 │   │   ├── tools/
@@ -112,3 +115,6 @@ plugins/r-statistics/
 - **hook 미사용** (사용자 결정).
 - 빌드: `scripts/buildMcpServer.mjs` → `bridge/mcp-server.cjs` (deilen 패턴).
 - 테스트: vitest (`__tests__/`).
+- **subprocess 호출**: 모든 CLI/spawn 은 `@ogham/cross-platform`(`spawnCli`/`spawnCliSync`) 경유 — `child_process` 직접 사용 금지(Windows shim·tree-kill·EOL 일관). 취소는 `AbortSignal`.
+- **assert 룰셋 권위**: `assert_analysis_plan` 의 결정적 룰셋은 `mcp/tools/assertAnalysisPlan/operations/ruleset.ts`(TS 정본, 런타임 의존성 0). `methods/{technique}/meta.yaml` 은 에이전트용 미러 — 둘을 동기 유지.
+- **에이전트 등록**: `plugin.json` 에 `agents` 필드 없음 — `agents/` 자동 발견(filid 동일).
