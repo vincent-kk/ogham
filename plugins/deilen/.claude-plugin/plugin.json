@@ -1,6 +1,6 @@
 {
   "name": "deilen",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Deilen — render Claude markdown documents as a readable browser page with line-anchored feedback back to Claude",
   "author": {
     "name": "Vincent K. Kelvin"
