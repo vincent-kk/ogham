@@ -25,6 +25,7 @@
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
     "deilen": "yarn workspace @ogham/deilen",
+    "entrez": "yarn workspace @ogham/entrez",
     "filid": "yarn workspace @ogham/filid",
     "imbas": "yarn workspace @ogham/imbas",
     "lint": "eslint .",

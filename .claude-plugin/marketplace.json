@@ -28,6 +28,12 @@
       "tags": ["markdown", "viewer", "feedback"]
     },
     {
+      "name": "entrez",
+      "source": "./plugins/entrez",
+      "category": "productivity",
+      "tags": ["pubmed", "ncbi", "research", "paper-search", "eutils"]
+    },
+    {
       "name": "filid",
       "source": "./plugins/filid",
       "category": "productivity",
