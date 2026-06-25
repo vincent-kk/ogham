@@ -25,6 +25,11 @@ export async function resolveDataRefs(
 
   const manifest: Record<string, DataRefManifestEntry> = {};
   for (const ref of refs) {
+    // Reject ids with path separators — they become the copied file name and a
+    // `../` would escape the workspace data dir (isolation breach).
+    if (!/^[A-Za-z0-9_-]+$/.test(ref.id)) {
+      throw new Error(`${ERROR_MESSAGES.INVALID_DATA_REF_ID}: ${ref.id}`);
+    }
     try {
       await access(ref.path);
     } catch {
