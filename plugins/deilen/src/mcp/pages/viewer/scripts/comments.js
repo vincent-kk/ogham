@@ -408,11 +408,9 @@ function renderSidebar() {
   const overallNotes = [...store.overall.values()];
   for (const note of overallNotes) list.append(overallNoteCard(note));
 
-  const comments = [...store.comments.values()].sort((anchorA, anchorB) => {
-    const lineA = anchorA.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
-    const lineB = anchorB.anchor?.startLine ?? Number.MAX_SAFE_INTEGER;
-    return lineA - lineB;
-  });
+  // Newest first: the store preserves insertion order, so the most recently
+  // added comment sits at the top of the list.
+  const comments = [...store.comments.values()].reverse();
   for (const comment of comments) list.append(commentCard(comment));
 
   if (!composer && overallNotes.length === 0 && comments.length === 0) {
