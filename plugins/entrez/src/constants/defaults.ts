@@ -48,6 +48,11 @@ export const AUTO_POST_ID_THRESHOLD = 200;
 export const AUTO_POST_URL_THRESHOLD = 2_000;
 /** Recursive date-segmentation depth guard. */
 export const MAX_SEGMENT_DEPTH = 6;
+/** Max date buckets created per segmentation level. */
+export const SEGMENT_MAX_BUCKETS = 12;
+/** Default lower bound for segmentation when a query has no date range
+ *  (PubMed's earliest records predate 1800; 1781 is a safe floor). */
+export const DEFAULT_SEGMENT_FROM_DATE = "1781/01/01";
 
 /** Convergence guards. */
 export const RECALL_ITER_MAX = 4;
