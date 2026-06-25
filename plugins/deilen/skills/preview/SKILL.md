@@ -1,16 +1,16 @@
 ---
-name: display
-description: '[deilen] Render a markdown document (or plan) as a browser page and auto-collect line-anchored feedback back into the conversation. Trigger: "display this", "show this in the browser", "let me review this in a page", "이 문서 페이지로 보여줘"'
+name: preview
+description: '[deilen] Preview a markdown document (or plan) as a readable browser page; if the user leaves line-anchored comments, collect them back into the conversation. Trigger: "preview this", "show this in the browser", "open this as a page", "이 문서 페이지로 보여줘"'
 user_invocable: true
 argument-hint: ""
 ---
 
-# display
+# preview
 
-Render the document Claude just produced as a readable local page, then
-automatically collect the user's line-anchored comments (and any attached
-images) and act on them — revising the document or continuing the conversation,
-whichever the user chose.
+Preview the document Claude just produced as a readable local page. The user can
+read it and close, or leave line-anchored comments (and any attached images) —
+when they do, collect the feedback and act on it: revise the document or continue
+the conversation, whichever they chose.
 
 ## Steps
 
@@ -29,7 +29,7 @@ whichever the user chose.
    immediately. Give the user the `url` (the page also opens automatically) and
    tell them to select text or use a block's **+** to leave comments, paste or
    drop image screenshots, then choose **Revise & reopen** (apply the comments
-   and re-display the updated page), **Continue in chat** (talk the comments
+   and re-render the updated page), **Continue in chat** (talk the comments
    through — works even with none), or **Close** (just dismiss the viewer).
 
 3. **Collect (poll loop).** Call `mcp_tools_collect_feedback` with
@@ -45,8 +45,8 @@ whichever the user chose.
    reflects the button the user pressed:
    - **Revise** → apply the comments to the document (each names a source-line
      range like `L12-14` and an excerpt — edit surgically at that spot), then
-     re-display the result: call `mcp_tools_render_viewer` again and resume the
-     collect loop. This is an iterative review loop — repeat until the user
+     re-render the result: call `mcp_tools_render_viewer` again and resume the
+     collect loop. This is an iterative revise loop — repeat until the user
      continues in chat or closes the viewer.
    - **Discuss** → answer or discuss the comments in the conversation; don't
      silently rewrite the document unless the user asks.
@@ -63,7 +63,7 @@ whichever the user chose.
 ## Notes
 
 - Plans are markdown too — render them with `mcp_tools_render_viewer` directly. In plan
-  mode, display after the plan is confirmed (or render a saved plan file), since
+  mode, preview after the plan is confirmed (or render a saved plan file), since
   plan mode can restrict tool use.
 - Reply to the user in their own language.
 

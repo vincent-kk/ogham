@@ -18,7 +18,7 @@ A local MCP server (`tools`) renders the document, opens it in your browser, and
 
 ```
 # Show the current document as a page and collect feedback
-/deilen:display
+/deilen:preview
 
 # Open the local settings UI (theme, auto-open, timeouts, renderers)
 /deilen:setup

@@ -8,7 +8,7 @@
 | ---------------------------- | -------------------------------------------- |
 | `src/`                       | TypeScript 소스 (fractal 루트)               |
 | `scripts/`                   | esbuild 빌드 스크립트                        |
-| `skills/`                    | `setup`, `display` 스킬                      |
+| `skills/`                    | `setup`, `preview` 스킬                      |
 | `bridge/`                    | esbuild 산출물 (커밋 — `package.json:files`) |
 | `.claude-plugin/plugin.json` | 플러그인 매니페스트                          |
 | `.mcp.json`                  | MCP 서버 등록 (name: `tools`)                |
@@ -16,7 +16,7 @@
 ## Conventions
 
 - 빌드: `clean → version:sync → buildViewerHtml → buildSettingsHtml → buildRenderers → tsc → buildMcpServer`
-- 플러그인 prefix 없는 스킬 이름 (`setup`, `display`)
+- 플러그인 prefix 없는 스킬 이름 (`setup`, `preview`)
 - Agent 없음, Hook 없음 (그래서 `libs/run.cjs` 도 없음)
 - 무거운 렌더러는 브라우저 자산(`bridge/assets/`) — MCP 서버 번들에 미포함, 동봉 폰트 없음(KaTeX 는 MathML)
 
