@@ -44,9 +44,10 @@ Run the statistical assumptions a chosen method requires and produce
    and a `passed` boolean, then `note_assumption("{id}")`. Use a conventional
    threshold (e.g. p ≥ 0.05 for normality/homogeneity) and state it. Visual
    checks (`residual_plot`, `scatter`, `martingale_residual`) emit the diagnostic
-   plot plus a heuristic `passed`; `epv` emits the events-per-variable ratio with
-   `passed` (≥ 10); `design` records `passed: true` as a design assumption. These
-   non-test checks carry no p-value.
+   plot plus a heuristic `passed`; metric/count-threshold checks (`vif`,
+   `dispersion`, `expected_counts`, `epv`) emit their ratio/count with `passed`
+   against the threshold; `design` records `passed: true` as a design assumption.
+   These non-test checks carry no p-value.
 
 ## Output
 

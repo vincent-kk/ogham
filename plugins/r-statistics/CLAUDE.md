@@ -1,6 +1,6 @@
 # CLAUDE.md — @ogham/r-statistics
 
-`@ogham/r-statistics` package work guide. Package contract: [INTENT.md](./INTENT.md); source structure: [src/INTENT.md](./src/INTENT.md). Full design spec: [`.metadata/r-statistics/`](../../.metadata/r-statistics/); step order in [PLAN.md](./PLAN.md).
+`@ogham/r-statistics` package work guide. Package contract: [INTENT.md](./INTENT.md); source structure: [src/INTENT.md](./src/INTENT.md). Full design spec: [`.metadata/r-statistics/`](../../.metadata/r-statistics/).
 
 ## What r-statistics does
 
