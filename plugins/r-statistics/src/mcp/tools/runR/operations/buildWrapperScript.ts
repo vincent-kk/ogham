@@ -8,7 +8,9 @@
 export function buildWrapperScript(userCode: string): string {
   return [
     "# r-statistics generated wrapper — do not edit",
-    'Sys.setlocale("LC_ALL", "")',
+    // invisible(): Rscript auto-prints top-level visible values; without it the
+    // locale string leaks to the front of stdout.
+    'invisible(Sys.setlocale("LC_ALL", ""))',
     'options(encoding = "UTF-8", warn = 1)',
     '.rstat_contract <- Sys.getenv("R_STATISTICS_CONTRACT")',
     "if (nzchar(.rstat_contract) && file.exists(.rstat_contract)) {",
