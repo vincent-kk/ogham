@@ -1,0 +1,90 @@
+# Welch's two-sample t-test (unequal variances): stats::t.test(var.equal = FALSE)
+# Compares the mean of a continuous outcome between two independent groups.
+
+# ---- data -----------------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+
+# Outcome (continuous) and grouping factor (exactly two levels).
+outcome <- "{{OUTCOME}}"
+group <- "{{GROUP}}"
+
+df <- df[!is.na(df[[outcome]]) & !is.na(df[[group]]), ]
+df[[group]] <- factor(df[[group]])
+
+grp_levels <- levels(df[[group]])
+if (length(grp_levels) != 2L) {
+  stop(sprintf("Welch t-test needs exactly 2 groups; got %d", length(grp_levels)))
+}
+
+# ---- assumption: per-group normality (Shapiro-Wilk) -----------------------
+# Soft assumption; on violation the statistician recommends mann_whitney.
+shapiro_by_group <- lapply(grp_levels, function(lv) {
+  vals <- df[[outcome]][df[[group]] == lv]
+  st <- stats::shapiro.test(vals)
+  list(group = lv, n = length(vals), W = unname(st$statistic), p_value = st$p.value)
+})
+note_assumption("normality")
+
+cat("Shapiro-Wilk normality by group:\n")
+for (s in shapiro_by_group) {
+  cat(sprintf("  %s (n=%d): W=%.4f, p=%.4g\n", s$group, s$n, s$W, s$p_value))
+}
+
+# ---- Welch's t-test -------------------------------------------------------
+# var.equal = FALSE -> Welch-Satterthwaite df, does not assume equal variances.
+fml <- stats::as.formula(sprintf("%s ~ %s", outcome, group))
+fit <- stats::t.test(fml, data = df, var.equal = FALSE)
+
+tidy_fit <- broom::tidy(fit)
+
+cat("\nWelch's two-sample t-test:\n")
+print(fit)
+
+# ---- artifact: result.hypothesis_test -------------------------------------
+hypothesis_test <- list(
+  method = unname(fit$method),
+  outcome = outcome,
+  group = group,
+  group_levels = grp_levels,
+  estimate = unname(fit$estimate),
+  mean_difference = unname(tidy_fit$estimate[1]),
+  statistic = unname(fit$statistic),
+  parameter_df = unname(fit$parameter),
+  p_value = unname(fit$p.value),
+  conf_low = unname(fit$conf.int[1]),
+  conf_high = unname(fit$conf.int[2]),
+  conf_level = attr(fit$conf.int, "conf.level"),
+  alternative = fit$alternative,
+  shapiro_by_group = shapiro_by_group
+)
+write_json_artifact(
+  "result.hypothesis_test", "table", hypothesis_test,
+  "welch_t_test_result.json",
+  description = "Welch's t-test result with per-group Shapiro-Wilk checks"
+)
+
+# ---- artifact: table.test_summary -----------------------------------------
+# Flat tidy summary of the test (one row), written as CSV via rstatix-style cols.
+summary_tbl <- data.frame(
+  outcome = outcome,
+  group = group,
+  estimate = tidy_fit$estimate,
+  estimate1 = tidy_fit$estimate1,
+  estimate2 = tidy_fit$estimate2,
+  statistic = tidy_fit$statistic,
+  df = tidy_fit$parameter,
+  p_value = tidy_fit$p.value,
+  conf_low = tidy_fit$conf.low,
+  conf_high = tidy_fit$conf.high,
+  method = tidy_fit$method,
+  stringsAsFactors = FALSE
+)
+summary_path <- artifact_path("welch_t_test_summary.csv")
+utils::write.csv(summary_tbl, summary_path, row.names = FALSE)
+add_artifact(
+  "table.test_summary", "table", "welch_t_test_summary.csv",
+  description = "One-row tidy summary of the Welch t-test"
+)
+
+cat("\nTest summary table:\n")
+print(summary_tbl)

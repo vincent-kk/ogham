@@ -1,0 +1,11 @@
+technique: chi_square
+family: categorical
+outcome_types: [categorical, binary]
+required_assumptions:
+  - id: expected_count_ge_5
+    severity: soft
+    check: expected_counts
+    on_violation: { recommend: [fisher_exact] }
+hard_rules: [OUTCOME_METHOD_MISMATCH, EXPECTED_COUNT_LOW]
+required_artifacts: [result.hypothesis_test, table.contingency]
+packages: [stats, rstatix]

@@ -1,0 +1,13 @@
+technique: cox_model
+family: survival
+outcome_types: [time_to_event]
+required_assumptions:
+  - id: proportional_hazards
+    severity: soft
+    check: cox_zph
+  - id: loglinearity
+    severity: soft
+    check: martingale_residual
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [model.fit, table.hazard_ratios, plot.schoenfeld]
+packages: [survival, broom, ggplot2]

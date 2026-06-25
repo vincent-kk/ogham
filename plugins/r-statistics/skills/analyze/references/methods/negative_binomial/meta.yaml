@@ -1,0 +1,10 @@
+technique: negative_binomial
+family: regression
+outcome_types: [count]
+required_assumptions:
+  - id: no_multicollinearity
+    severity: soft
+    check: vif
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [model.fit, table.coefficients]
+packages: [MASS, broom, car]

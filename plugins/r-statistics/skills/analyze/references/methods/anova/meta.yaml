@@ -1,0 +1,15 @@
+technique: anova
+family: parametric
+outcome_types: [continuous]
+required_assumptions:
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+    on_violation: { recommend: [kruskal_wallis] }
+  - id: homogeneity
+    severity: soft
+    check: levene
+    on_violation: { recommend: [welch_anova] }
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [result.anova_table, table.test_summary, plot.residual_diagnostics]
+packages: [stats, broom, car, rstatix, ggplot2]

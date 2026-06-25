@@ -1,0 +1,18 @@
+technique: mann_whitney
+family: nonparametric
+outcome_types:
+  - continuous
+  - categorical
+required_assumptions:
+  - id: independence
+    severity: soft
+    check: design
+hard_rules:
+  - OUTCOME_METHOD_MISMATCH
+required_artifacts:
+  - result.hypothesis_test
+  - table.test_summary
+packages:
+  - stats
+  - rstatix
+  - broom

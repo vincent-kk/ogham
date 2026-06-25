@@ -1,0 +1,22 @@
+technique: linear_regression
+family: regression
+outcome_types: [continuous]
+required_assumptions:
+  - id: linearity
+    severity: soft
+    check: residual_plot
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+  - id: homoscedasticity
+    severity: soft
+    check: breusch_pagan
+  - id: independence
+    severity: soft
+    check: durbin_watson
+  - id: no_multicollinearity
+    severity: soft
+    check: vif
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [model.fit, table.coefficients, plot.residual_diagnostics]
+packages: [stats, broom, car, ggplot2]

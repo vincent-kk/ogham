@@ -1,0 +1,84 @@
+# Paired t-test: compares two related (repeated/matched) measurements on the
+# same subjects. Tests whether the mean of the within-pair differences is zero.
+# Slot body only — seed, contract, manifest and sessionInfo are injected.
+
+df <- read_data("{{DATA_REF_ID}}")
+
+# Paired measurements: two numeric columns on the same subjects (e.g. before / after).
+before <- as.numeric(df[["{{OUTCOME_BEFORE}}"]])
+after  <- as.numeric(df[["{{OUTCOME_AFTER}}"]])
+
+# Drop pairs with any missing value so both vectors stay aligned and complete.
+complete <- stats::complete.cases(before, after)
+before <- before[complete]
+after  <- after[complete]
+
+# Within-pair differences drive both the test and its normality assumption.
+diffs <- after - before
+n_pairs <- length(diffs)
+
+# ---- assumption: normality of the paired differences ----------------------
+# Shapiro-Wilk on the differences (valid for 3 <= n <= 5000). On violation the
+# meta.yaml recommends switching to the Wilcoxon signed-rank test.
+shapiro_p <- NA_real_
+if (n_pairs >= 3 && n_pairs <= 5000) {
+  shapiro <- stats::shapiro.test(diffs)
+  shapiro_p <- unname(shapiro$p.value)
+  cat(sprintf("Shapiro-Wilk normality of differences: W = %.4f, p = %.4g\n",
+              unname(shapiro$statistic), shapiro_p))
+}
+note_assumption("normality_of_diff")
+
+# ---- paired t-test --------------------------------------------------------
+fit <- stats::t.test(after, before, paired = TRUE)
+
+# Human-readable summary.
+print(fit)
+
+# Tidy one-row summary of the test (estimate = mean difference, CI, t, df, p).
+tidy_fit <- broom::tidy(fit)
+cat("\nTidy summary:\n")
+print(tidy_fit)
+
+# Standardized effect size (Cohen's d for paired data) for interpretation.
+es <- rstatix::cohens_d(
+  data = data.frame(
+    value = c(after, before),
+    time = factor(rep(c("after", "before"), each = n_pairs),
+                  levels = c("before", "after"))
+  ),
+  formula = value ~ time,
+  paired = TRUE
+)
+cat(sprintf("\nCohen's d (paired) = %.4f\n", es$effsize[[1]]))
+
+# ---- artifact: result.hypothesis_test -------------------------------------
+# Full machine-readable test result.
+hypothesis_test <- list(
+  method = "paired t-test",
+  rfn = "stats::t.test(paired=TRUE)",
+  n_pairs = n_pairs,
+  mean_difference = unname(fit$estimate),
+  conf_low = unname(fit$conf.int[1]),
+  conf_high = unname(fit$conf.int[2]),
+  statistic = unname(fit$statistic),
+  df = unname(fit$parameter),
+  p_value = unname(fit$p.value),
+  alternative = fit$alternative,
+  cohens_d = es$effsize[[1]],
+  shapiro_p = shapiro_p
+)
+write_json_artifact(
+  "result.hypothesis_test", "report", hypothesis_test,
+  "hypothesis_test.json",
+  description = "Paired t-test result: mean difference, CI, t, df, p, effect size."
+)
+
+# ---- artifact: table.test_summary -----------------------------------------
+# Tidy test summary table for reporting.
+test_summary <- as.data.frame(tidy_fit)
+write_json_artifact(
+  "table.test_summary", "table", test_summary,
+  "test_summary.json",
+  description = "Tidy summary table of the paired t-test (broom::tidy)."
+)
