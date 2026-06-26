@@ -11,12 +11,12 @@ const BRIDGE = join(PKG_ROOT, "bridge", "mcp-server.cjs");
 
 const EXPECTED_TOOLS = [
   "auth-check",
-  "fetch_fulltext",
-  "mesh_lookup",
-  "paper_search",
-  "paper_search_results",
-  "paper_search_start",
-  "paper_search_status",
+  "fetch-fulltext",
+  "mesh-lookup",
+  "paper-search",
+  "paper-search-results",
+  "paper-search-start",
+  "paper-search-status",
   "setup",
 ].sort();
 

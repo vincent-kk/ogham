@@ -4,7 +4,7 @@ import { Messages } from "../../../../constants/messages.js";
 import { resolveJobPath, type JobRunOptions } from "./jobLocation.js";
 
 /**
- * paper_search_results — read a completed job's output with cursor pagination
+ * paper-search-results — read a completed job's output with cursor pagination
  * over the union records (delegated to searchJob.pollResults).
  */
 export async function readJob(

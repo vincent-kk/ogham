@@ -103,7 +103,7 @@
 - [ ] `src/core/espell/` — `operations/{runEspell,shouldRespell}.ts` (union 0/저조·OOV·spelling-warning 시 교정 재시도 판단).
 - [ ] `src/core/queryLint/` — `operations/{lintQuery,checkParens,checkFieldTags}.ts` (괄호 짝·예약어·**따옴표/wildcard/tag가 ATM·explosion 무력화** 사전 검증).
 - [ ] `src/core/searchJob/` — `operations/{createJob,getJob,updateJob,pollResults}.ts` (대량 async job·진행률·cursor).
-- **참고**: `mcp-tools.md`(paper_search 내부 단계), `dispatcher.md`(guard·operationBudget), `roadmap.md`(core 모듈).
+- **참고**: `mcp-tools.md`(paper-search 내부 단계), `dispatcher.md`(guard·operationBudget), `roadmap.md`(core 모듈).
 - **테스트(유닛 — recall 정확성 집중)**: segmenter(10001건→날짜 분할·경계·전수 합) / dedup(PMID 동일·DOI 동일 PMID 상이·title만 동일, 3키 우선순위) / normalizeTitle(특수문자·공백·대소문자) / tagHitBy(다중 검색식 누적) / queryLint(`"x*"` wildcard 경고·괄호 불일치·`[mh]` 오용) / shouldRespell(0건·임계) / searchJob 상태 전이(queued→running→done/failed·cursor).
 - **DoD**: core 유닛 90%+. **recall calibration**(고정 fixture: N개 검색식 union이 기대 PMID 집합을 누락 0으로 포함).
 
@@ -128,12 +128,12 @@
 
 - [ ] `src/mcp/server/lifecycle/{createServer,startServer}.ts` (`registerTool` 패턴, deilen/atlassian).
 - [ ] `src/mcp/shared/helpers/{wrapHandler,toolResult,toolError}.ts`.
-- [ ] `tools/paperSearch/` — `paperSearch.ts` + `operations/`(query_lint→count_probe→date_segment→fetch_ids→fetch_records(POST·batch)→union→partial_recovery). 입력 `fetchMode`·`capStrategy`·`dateRange`·`maxRecords`·`cursor`. 출력 `per_query`·`union`·`segments`·`warnings`·`errors`·`partial`·`missing_pmids`·`reproducibility(SearchManifest)`. **async**: `paper_search_start`/`paper_search_status`/`paper_search_results`.
+- [ ] `tools/paperSearch/` — `paperSearch.ts` + `operations/`(query_lint→count_probe→date_segment→fetch_ids→fetch_records(POST·batch)→union→partial_recovery). 입력 `fetchMode`·`capStrategy`·`dateRange`·`maxRecords`·`cursor`. 출력 `per_query`·`union`·`segments`·`warnings`·`errors`·`partial`·`missing_pmids`·`reproducibility(SearchManifest)`. **async**: `paper-search-start`/`paper-search-status`/`paper-search-results`.
 - [ ] `tools/meshLookup/` (db=mesh → descriptor·scr·entry 구분).
 - [ ] `tools/fetchFulltext/` — `operations/`(idconv→oaService→다운로드, per-format 실패·license).
 - [ ] `tools/setup/`·`tools/authCheck/` (Phase 6 web UI와 연계, authCheck=EInfo reachability).
 - **참고**: `mcp-tools.md`(TS 계약·annotations), `spec.md`(데이터 흐름·비채택).
-- **테스트(통합 — 모킹 httpClient)**: paper_search(count probe→10k 초과 segment→POST batch→union, `partial`·`missing_pmids` 격리, async start/status/results 폴링, SearchManifest 생성) / mesh_lookup(매핑 딕셔너리) / fetch_fulltext(OA 저장·비OA 링크·format별 실패) / setup·auth-check / annotations(readOnly·idempotent·async) 정확. **부분 실패**: 일부 batch 5xx → 성공분 보존+실패 격리.
+- **테스트(통합 — 모킹 httpClient)**: paper-search(count probe→10k 초과 segment→POST batch→union, `partial`·`missing_pmids` 격리, async start/status/results 폴링, SearchManifest 생성) / mesh-lookup(매핑 딕셔너리) / fetch-fulltext(OA 저장·비OA 링크·format별 실패) / setup·auth-check / annotations(readOnly·idempotent·async) 정확. **부분 실패**: 일부 batch 5xx → 성공분 보존+실패 격리.
 - **DoD**: 5 도구 통합 그린, async·부분실패·재현성 필드 검증.
 
 ## Phase 6 — setup web UI
@@ -154,7 +154,7 @@
 - [ ] `skills/search/` — `SKILL.md`(complexity complex, Dispatcher) + `references/{state-machine.md, intent.md, modes.md}` (상태 6+종결 2·전이표·guard·USER_REFINE·interactive/--auto).
 - [ ] `skills/query/SKILL.md`(① 검색식만) · `skills/download/SKILL.md`(OA PDF+링크) · `skills/setup/SKILL.md`(web UI 안내).
 - [ ] `skills/_shared/{mcp-tools.md, eutils.md}` (도구 계약 미러·E-utilities 사실, lazy SSoT).
-- [ ] `agents/paper-search-expert.md` — frontmatter(name·model·tools `[Read,mcp_mesh_lookup,mcp_paper_search]`·maxTurns) + 내부 2모드.
+- [ ] `agents/paper-search-expert.md` — frontmatter(name·model·tools `[Read,mcp_mesh-lookup,mcp_paper-search]`·maxTurns) + 내부 2모드.
 - [ ] `skills/_shared/{query-strategy.md, rerank.md}` — 생성(QueryRole 6종·ESpell·recall 게이트)·재랭킹(pre-score 후 top-N 기준) **SSoT**. (`agents/`는 서브디렉토리 불가)
 - **참고**: `skills.md`(frontmatter·노출 4·progressive disclosure), `agents.md`(2모드·hand-off), `dispatcher.md`(상태머신), `spec.md`(흐름).
 - **테스트**: SKILL.md/agent frontmatter 스키마 검증(필수 필드·`user_invocable`·trigger) / 노출 스킬 4 인식 / `Task(subagent_type:"entrez:paper-search-expert")` 호출 가능 / (수동 시나리오) intent 분류 4종·USER_REFINE 루프.
@@ -168,7 +168,7 @@
   - full search(자연어→검색식 다중→union→재랭킹→레코드, recall 누락 0).
   - query-only(검색식만 반환, 검색 안 함).
   - download(OA PDF 저장·sha256 / 비OA 링크 리포트).
-  - mesh_lookup(용어→표준 MeSH).
+  - mesh-lookup(용어→표준 MeSH).
   - **대량**(10k 초과→date segmentation→async job→cursor 전수).
   - **recall 게이트**(union 0→broad 재생성→`recallIter` 수렴).
   - **부분 실패**(일부 batch 실패→`partial` 성공분 보존).

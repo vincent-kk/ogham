@@ -57,8 +57,8 @@ describe("paper-search-expert agent", () => {
     expect(fm).toMatch(/name:\s*paper-search-expert/);
     expect(fm).toMatch(/model:\s*sonnet/);
     expect(fm).toMatch(/maxTurns:\s*15/);
-    expect(fm).toContain("mcp_tools_paper_search");
-    expect(fm).toContain("mcp_tools_mesh_lookup");
+    expect(fm).toContain("mcp_tools_paper-search");
+    expect(fm).toContain("mcp_tools_mesh-lookup");
     expect(fm).toContain("Read");
   });
 

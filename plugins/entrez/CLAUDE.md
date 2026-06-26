@@ -21,7 +21,7 @@ yarn entrez version:sync   # package.json → src/version.ts + plugin.json
 Dispatcher (search skill, state machine)
     → Agent  : paper-search-expert (generation / rerank modes)
     → Skill  : search / query / download / setup
-    → MCP    : paper_search · mesh_lookup · fetch_fulltext · setup · auth-check
+    → MCP    : paper-search · mesh-lookup · fetch-fulltext · setup · auth-check
     → core/httpClient (retry · 429 backoff · auto-POST · SSRF allowlist)
     → NCBI E-utilities (ESearch → EFetch/ESummary/ESpell/ELink)
 ```

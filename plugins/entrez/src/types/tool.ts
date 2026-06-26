@@ -20,7 +20,7 @@ import {
 import type { UnionResult, DateSegment } from "./search.js";
 import type { JobStatus, RateLimit, MeshMatch, ErrorCode } from "./enums.js";
 
-/* ── paper_search ─────────────────────────────────────────────── */
+/* ── paper-search ─────────────────────────────────────────────── */
 
 export const SearchQuerySchema = z.object({
   term: z.string().min(1),
@@ -131,7 +131,7 @@ export const PaperSearchResultsInputSchema = z.object({
   cursor: z.string().optional(),
 });
 
-/* ── mesh_lookup ──────────────────────────────────────────────── */
+/* ── mesh-lookup ──────────────────────────────────────────────── */
 
 export const MeshLookupInputSchema = z.object({
   terms: z.array(z.string().min(1)).min(1),
@@ -161,7 +161,7 @@ export interface MeshLookupOutput {
   mappings: MeshMapping[];
 }
 
-/* ── fetch_fulltext ───────────────────────────────────────────── */
+/* ── fetch-fulltext ───────────────────────────────────────────── */
 
 export const FetchFulltextInputSchema = z.object({
   ids: z.array(z.string().min(1)).min(1),

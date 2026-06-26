@@ -30,7 +30,7 @@ const MESH_SUMMARY = JSON.stringify({
   },
 });
 
-describe("mesh_lookup", () => {
+describe("mesh-lookup", () => {
   it("maps a term to a MeSH descriptor", async () => {
     const fetch = routeFetch((url) => {
       if (url.pathname.endsWith("esearch.fcgi"))
@@ -79,7 +79,7 @@ function fulltextRouter(oaXml: string) {
   });
 }
 
-describe("fetch_fulltext", () => {
+describe("fetch-fulltext", () => {
   it("downloads an OA PDF with sha256 and writes it under outDir", async () => {
     const ctx = makeCtx(fulltextRouter(OA_OK));
     const out = await runFetchFulltext(

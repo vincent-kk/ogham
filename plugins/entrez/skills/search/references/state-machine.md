@@ -6,7 +6,7 @@ States: `INTAKE · CLASSIFY · QUERY_GEN · SEARCH · RANK · COMPLETE` + termin
 
 ## SEARCH internal stages (code, not states)
 
-`paper_search` runs these deterministically; they never appear in the transition
+`paper-search` runs these deterministically; they never appear in the transition
 table, only consume `operationBudget`:
 `query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → union·dedup → partial_recovery`.
 
@@ -17,7 +17,7 @@ table, only consume `operationBudget`:
 | INTAKE    | request                                          | CLASSIFY                    | normalize `{topic, db, dateRange, mode}`                     |
 | CLASSIFY  | FULL_SEARCH                                      | QUERY_GEN                   | —                                                            |
 | CLASSIFY  | QUERY_ONLY                                       | (query skill) → COMPLETE    | queries only, no search                                      |
-| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch_fulltext                                               |
+| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch-fulltext                                               |
 | CLASSIFY  | NEEDS_CLARIFICATION                              | BLOCKED_NEEDS_USER          | ask topic/scope/db                                           |
 | QUERY_GEN | query set emitted                                | SEARCH                      | agent generation mode _(interactive: present + USER_REFINE)_ |
 | QUERY_GEN | user edits (interactive)                         | QUERY_GEN                   | regenerate                                                   |
@@ -29,6 +29,7 @@ table, only consume `operationBudget`:
 | RANK      | pre-score candidates 0                           | QUERY_GEN                   | `recallIter++`                                               |
 | (any)     | `recallIter>4` · budget exceeded · `rateRetry>5` | FAILED                      | reason + manifest                                            |
 | (any)     | same query twice → 0 hits                        | BLOCKED_NEEDS_USER          | ask to redefine                                              |
+| (any)     | MCP `NOT_CONFIGURED` (no tool/email)             | (setup skill) → resume      | route to `setup` pre-flight + wizard, then re-enter prior state (never bare FAILED) |
 
 ## Recall gate (the point of the whole flow)
 

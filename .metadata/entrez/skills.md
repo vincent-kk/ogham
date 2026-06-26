@@ -20,9 +20,9 @@ plugin: entrez
 
 | 스킬         | complexity | 역할                                                                                          | 파이프라인  | 호출 agent                      | MCP                       |
 | ------------ | ---------- | --------------------------------------------------------------------------------------------- | ----------- | ------------------------------- | ------------------------- |
-| **search**   | complex    | 메인 오케스트레이터(Dispatcher): intent 분류 → `QueryRole` union → 재랭킹 → 레코드(메타+초록) | ①②③         | paper-search-expert (두 모드)   | paper_search, mesh_lookup |
-| **query**    | moderate   | 자연어 → PubMed 검색식만(검색 X)                                                              | ① 만        | paper-search-expert (생성 모드) | mesh_lookup               |
-| **download** | simple     | PMID/PMCID/DOI → OA PDF + 비OA 링크                                                           | search 후속 | —                               | fetch_fulltext            |
+| **search**   | complex    | 메인 오케스트레이터(Dispatcher): intent 분류 → `QueryRole` union → 재랭킹 → 레코드(메타+초록) | ①②③         | paper-search-expert (두 모드)   | paper-search, mesh-lookup |
+| **query**    | moderate   | 자연어 → PubMed 검색식만(검색 X)                                                              | ① 만        | paper-search-expert (생성 모드) | mesh-lookup               |
+| **download** | simple     | PMID/PMCID/DOI → OA PDF + 비OA 링크                                                           | search 후속 | —                               | fetch-fulltext            |
 | **setup**    | simple     | web UI 설정(api_key·tool·email) + reachability                                                | —           | —                               | setup, auth-check         |
 
 - `QUERY_ONLY`(검색식만)·`DOWNLOAD`는 `query`·`download` 스킬을 **직접 호출**(최소 경로). `FULL_SEARCH`는 `search`가 전체 오케스트레이션([dispatcher.md](./dispatcher.md)).
@@ -57,13 +57,13 @@ skills/_shared/
 
 ## query / download / setup (thin)
 
-- **query**: `paper-search-expert` 생성 모드만 호출해 `QueryRole` 검색식 집합 + PubMed `QueryTranslation` 반환. `paper_search` 미실행(① 만). `mesh_lookup`으로 MeSH descriptor/SCR/entry 매핑 표시.
-- **download**: `fetch_fulltext` 래퍼. `downloaded[]`(OA PDF/XML/TAR + sha256·license·oaStatus) 저장, `unavailable[]`(비OA)는 DOI·publisher 링크로 리포트. "OA면 저장, 비OA 링크 리포트" — 라이선스·copyright 표시(PMCID≠재배포 가능, [spec.md](./spec.md)).
+- **query**: `paper-search-expert` 생성 모드만 호출해 `QueryRole` 검색식 집합 + PubMed `QueryTranslation` 반환. `paper-search` 미실행(① 만). `mesh-lookup`으로 MeSH descriptor/SCR/entry 매핑 표시.
+- **download**: `fetch-fulltext` 래퍼. `downloaded[]`(OA PDF/XML/TAR + sha256·license·oaStatus) 저장, `unavailable[]`(비OA)는 DOI·publisher 링크로 리포트. "OA면 저장, 비OA 링크 리포트" — 라이선스·copyright 표시(PMCID≠재배포 가능, [spec.md](./spec.md)).
 - **setup**: `setup` MCP web UI(api_key→`credentials.json` 0o600, 나머지→`config.json`) + `auth-check`(EInfo reachability·rate 표시). 상세 [setup.md](./setup.md).
 
 ## mesh 미노출 · export 흡수
 
-- **mesh 미노출**: MeSH descriptor/SCR/entry term 매핑은 `mesh_lookup` MCP로 충분. agent가 검색식 생성 시 직접 호출하므로 별도 스킬로 노출하면 `SKILL.md` description이 상시 컨텍스트만 차지하고 라우팅 가치가 없음("모듈 입도 ≠ 스킬 입도").
+- **mesh 미노출**: MeSH descriptor/SCR/entry term 매핑은 `mesh-lookup` MCP로 충분. agent가 검색식 생성 시 직접 호출하므로 별도 스킬로 노출하면 `SKILL.md` description이 상시 컨텍스트만 차지하고 라우팅 가치가 없음("모듈 입도 ≠ 스킬 입도").
 - **export 미노출**: 결과 내보내기는 별도 스킬 X — `search` 출력(레코드 메타+초록)이 흡수. 출력 포맷·`date_tag` 파일화는 `search`의 `modes.md`(--auto)가 담당.
 
 ## progressive disclosure (lazy 로딩)
@@ -78,6 +78,6 @@ skills/_shared/
 | ------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------- |
 | **Agent** (paper-search-expert)                                    | 검색식 다양화(`QueryRole` 선택·`breadth`·rationale)·재랭킹 점수·근거 | 가변(추론 WHAT)  |
 | **Skill** (search + query·download·setup)                          | 오케스트레이션 절차·intent 분기·출력 포맷·모드                       | 절차(HOW)        |
-| **MCP** (paper_search·mesh_lookup·fetch_fulltext·setup·auth-check) | union·dedup 복합키·10k cap·POST·rate·OA 판별                         | 불변(결정론 I/O) |
+| **MCP** (paper-search·mesh-lookup·fetch-fulltext·setup·auth-check) | union·dedup 복합키·10k cap·POST·rate·OA 판별                         | 불변(결정론 I/O) |
 
 원칙: **agent=추론(WHAT) · skill=절차(HOW) · MCP=계약(I/O)**. 코드 규칙(10k cap·POST·rate·lint)은 LLM이 아니라 deterministic service가 소유.

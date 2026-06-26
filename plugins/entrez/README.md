@@ -24,7 +24,7 @@ NCBI E-utilities (PubMed · PMC · MeSH) academic paper search plugin for Claude
 
 ## MCP tools
 
-`paper_search` (+ async `paper_search_start`/`_status`/`_results`) · `mesh_lookup` · `fetch_fulltext` · `setup` · `auth-check`.
+`paper-search` (+ async `paper-search-start`/`_status`/`_results`) · `mesh-lookup` · `fetch-fulltext` · `setup` · `auth-check`.
 
 ## Setup
 

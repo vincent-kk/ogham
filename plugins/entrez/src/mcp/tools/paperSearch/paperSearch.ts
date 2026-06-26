@@ -35,7 +35,7 @@ function stub(
 }
 
 /**
- * Deterministic paper_search orchestration:
+ * Deterministic paper-search orchestration:
  * lint → count probe → date segment → fetch ids → union/dedup → fetch records
  * (batched, partial recovery) → manifest. Zero-loss is the contract: the LLM
  * never decides what to drop.

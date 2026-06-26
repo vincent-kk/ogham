@@ -1,6 +1,6 @@
 ## Purpose
 
-MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇게 오케스트레이션해 도구 5종(`paper_search`·`mesh_lookup`·`fetch_fulltext`·`setup`·`auth-check`)을 노출한다.
+MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇게 오케스트레이션해 도구 5종(`paper-search`·`mesh-lookup`·`fetch-fulltext`·`setup`·`auth-check`)을 노출한다.
 
 ## Structure
 

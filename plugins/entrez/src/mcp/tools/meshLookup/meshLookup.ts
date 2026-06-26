@@ -3,7 +3,7 @@ import type { ToolContext } from "../../shared/index.js";
 import { lookupTerm } from "./operations/lookupTerm.js";
 
 /**
- * mesh_lookup — map natural-language terms to MeSH descriptors (input material
+ * mesh-lookup — map natural-language terms to MeSH descriptors (input material
  * for query generation / explosion decisions). One ESearch + ESummary per term.
  */
 export async function runMeshLookup(

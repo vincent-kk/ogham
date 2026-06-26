@@ -53,14 +53,14 @@ const WRITE_VOLATILE = {
 
 /**
  * Create and configure the entrez MCP server with all tool registrations:
- * paper_search (+ async start/status/results), mesh_lookup, fetch_fulltext,
+ * paper-search (+ async start/status/results), mesh-lookup, fetch-fulltext,
  * auth-check. (setup is registered in Phase 6 alongside the web UI.)
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: SERVER_NAME, version: VERSION });
 
   server.registerTool(
-    "paper_search",
+    "paper-search",
     {
       description: `${INTERNAL} Recall-first PubMed search: multi-role query union with deterministic dedup.`,
       inputSchema: PaperSearchInputSchema,
@@ -72,9 +72,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper_search_start",
+    "paper-search-start",
     {
-      description: `${INTERNAL} Start a large async paper_search job; returns a jobId.`,
+      description: `${INTERNAL} Start a large async paper-search job; returns a jobId.`,
       inputSchema: PaperSearchInputSchema,
       annotations: WRITE_VOLATILE,
     },
@@ -84,9 +84,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper_search_status",
+    "paper-search-status",
     {
-      description: `${INTERNAL} Poll an async paper_search job's status/progress.`,
+      description: `${INTERNAL} Poll an async paper-search job's status/progress.`,
       inputSchema: PaperSearchStatusInputSchema,
       annotations: READ_ONLY,
     },
@@ -94,9 +94,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper_search_results",
+    "paper-search-results",
     {
-      description: `${INTERNAL} Read a completed async paper_search job (cursor paginated).`,
+      description: `${INTERNAL} Read a completed async paper-search job (cursor paginated).`,
       inputSchema: PaperSearchResultsInputSchema,
       annotations: READ_ONLY,
     },
@@ -106,7 +106,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "mesh_lookup",
+    "mesh-lookup",
     {
       description: `${INTERNAL} Map terms to MeSH descriptors (db=mesh).`,
       inputSchema: MeshLookupInputSchema,
@@ -118,7 +118,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "fetch_fulltext",
+    "fetch-fulltext",
     {
       description: `${INTERNAL} Download PMC Open Access full text (OA + license gated).`,
       inputSchema: FetchFulltextInputSchema,

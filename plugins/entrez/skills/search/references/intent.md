@@ -7,7 +7,7 @@ Classify the request deterministically before entering the state machine.
 | --------------------- | ---------------------------------------------------------------------- | --------------------------------- |
 | `FULL_SEARCH`         | a topic/question + "find / search / papers / review" + expects records | full pipeline ①②③                 |
 | `QUERY_ONLY`          | "just the query", "make a PubMed query", no intent to run it           | `query` skill → ① only            |
-| `DOWNLOAD`            | PMID/PMCID/DOI given + "PDF / full text / download"                    | `download` skill → fetch_fulltext |
+| `DOWNLOAD`            | PMID/PMCID/DOI given + "PDF / full text / download"                    | `download` skill → fetch-fulltext |
 | `NEEDS_CLARIFICATION` | topic vague, scope unclear, db undecided                               | ask the user                      |
 
 ## Heuristics
