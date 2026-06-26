@@ -2,8 +2,8 @@
 
 Turn Claude into a domain-agnostic **statistics expert** — hypothesis testing, R
 code generation, and reproducible analysis via headless `Rscript`. The only
-domain is statistical methodology itself; it never anchors to an application
-field (medicine, physics, social science…).
+domain is statistical methodology itself; it never anchors to a particular
+application field.
 
 ## What it does
 
@@ -35,7 +35,7 @@ pre-built package whitelist.
 
 ```
 # Full analysis from data + hypothesis (interactive)
-/r-statistics:analyze --data results.csv --question "does treatment change the outcome?"
+/r-statistics:analyze --data results.csv --question "does the group change the outcome?"
 
 # Unattended strict pipeline
 /r-statistics:analyze --auto --data results.csv

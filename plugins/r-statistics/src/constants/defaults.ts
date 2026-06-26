@@ -33,6 +33,15 @@ export const ITERATION_GUARDS = {
 } as const;
 
 /**
+ * Events-per-variable (EPV) gates. The common EPV >= 10 screening heuristic is
+ * traced to Peduzzi et al. 1996 and clinical prediction-model practice; it can
+ * be conservative when applied to other regression contexts. The lower hard
+ * threshold only blocks fits that are severely unstable.
+ */
+export const EPV_SOFT_GUIDANCE_THRESHOLD = 10;
+export const EPV_SEVERE_BLOCK_THRESHOLD = 5;
+
+/**
  * Always installed by r-setup — the execution contract and the bulk of the
  * shipped methods depend on these (`jsonlite` backs run_r's own I/O).
  */
@@ -50,6 +59,7 @@ const BASELINE_OPTIONAL = [
   "survival",
   "lme4",
   "MASS",
+  "forecast",
   "gtsummary",
   "arrow",
   "quarto",
@@ -99,6 +109,12 @@ export const PACKAGE_USE_CASES = [
     label: "Count models (negative binomial, Poisson)",
     summary: "Count regression with overdispersion and robust SE",
     packages: ["MASS", "sandwich", "lmtest"],
+  },
+  {
+    key: "timeSeries",
+    label: "Time-series forecasting",
+    summary: "Forecasting workflows for ordered observations over time",
+    packages: ["forecast", "tsibble"],
   },
   {
     key: "tables",

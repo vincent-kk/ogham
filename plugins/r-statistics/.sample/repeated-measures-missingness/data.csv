@@ -1,4 +1,4 @@
-subject_id,treatment,timepoint_week,visit_index,response_score,adherence_rate,observed
+subject_id,condition,timepoint_week,visit_index,response_score,adherence_rate,observed
 RM-001,standard,0,0,37.9,,yes
 RM-001,standard,2,1,29.0,0.83,yes
 RM-001,standard,4,2,30.2,0.47,yes

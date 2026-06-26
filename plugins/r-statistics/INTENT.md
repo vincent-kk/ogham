@@ -27,6 +27,7 @@
 
 - 디스크 경로는 `~/.claude/plugins/r-statistics/` 하위
 - 개발 착수 전 `.metadata/r-statistics/` 확인
+- 샘플·예시·기본값은 응용 도메인을 암시하지 않는다
 
 ### Ask first
 

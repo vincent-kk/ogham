@@ -22,8 +22,9 @@ export async function resolvePmcid(
   if (PMCID_PATTERN.test(id)) return { pmcid: id.toUpperCase() };
   const result = await idconv({ ids: [id], idtype: PMID_IDTYPE }, ctx.deps);
   const record = result.records[0];
-  const versionedPmcid = record?.versions?.find((version) => version.current)
-    ?.pmcid;
+  const versionedPmcid = record?.versions?.find(
+    (version) => version.current,
+  )?.pmcid;
   return {
     pmcid: record?.pmcid,
     versionedPmcid,

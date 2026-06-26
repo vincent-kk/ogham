@@ -92,6 +92,9 @@ export const TECHNIQUE_RULES: Record<string, TechniqueRule> = {
       soft(AssumptionId.NoMulticollinearity, "vif"),
     ],
   },
+  // EPV >= 10 follows the Peduzzi et al. 1996 clinical prediction-model
+  // heuristic. It is retained as a soft disclosure check because it may be
+  // conservative for general-purpose regression outside that origin context.
   logistic_regression: {
     family: MethodFamily.Regression,
     outcomeTypes: [OutcomeType.Binary],

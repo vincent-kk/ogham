@@ -2,7 +2,7 @@
 
 Claude 를 도메인 중립 **통계 전문가** 로 만드는 플러그인 — 가설검정, R 코드 생성,
 헤드리스 `Rscript` 기반 재현 가능한 분석. 유일한 도메인은 통계 방법론 그 자체이며,
-어떤 응용 도메인(의료·물리·사회과학…)에도 앵커링하지 않습니다.
+특정 응용 도메인에 앵커링하지 않습니다.
 
 ## 무엇을 하나
 
@@ -32,7 +32,7 @@ Claude 를 도메인 중립 **통계 전문가** 로 만드는 플러그인 — 
 
 ```
 # 데이터 + 가설로 전체 분석 (interactive)
-/r-statistics:analyze --data results.csv --question "처치가 결과를 바꾸는가?"
+/r-statistics:analyze --data results.csv --question "집단이 결과를 바꾸는가?"
 
 # 무인 엄격 파이프라인
 /r-statistics:analyze --auto --data results.csv

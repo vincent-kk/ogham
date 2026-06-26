@@ -170,6 +170,13 @@ describe(McpToolName.ASSERT_ANALYSIS_PLAN, () => {
     );
     expect(out.severity).toBe(AssertSeverity.HardBlock);
     expect(out.reasons.map((r) => r.code)).toContain("SAMPLE_TOO_SMALL");
+    expect(out.reasons.at(0)?.message).toContain("Peduzzi et al. 1996");
+    expect(out.reasons.at(0)?.message).toContain(
+      "clinical prediction-model practice",
+    );
+    expect(out.reasons.at(0)?.message).toContain(
+      "may be conservative outside that context",
+    );
   });
 
   it("recommends negative_binomial when poisson overdispersion is detected", async () => {

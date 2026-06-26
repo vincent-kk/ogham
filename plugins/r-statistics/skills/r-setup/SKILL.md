@@ -47,7 +47,8 @@ Rscript, so if detection fails, install R first.
    required <- c("broom","rstatix","car","data.table","jsonlite")
    usecase  <- c("ggplot2","ggpubr","patchwork","survival","survminer",
                  "lme4","lmerTest","emmeans","MASS","sandwich","lmtest",
-                 "gtsummary","gt","flextable","arrow","quarto","knitr","rmarkdown")
+                 "forecast","tsibble","gtsummary","gt","flextable","arrow",
+                 "quarto","knitr","rmarkdown")
    miss <- function(p) p[!vapply(p, requireNamespace, logical(1), quietly = TRUE)]
    rm <- miss(required); um <- miss(usecase)
    cat("REQUIRED_MISSING:", if (length(rm)) paste(rm, collapse = " ") else "-", "\n")
@@ -73,6 +74,7 @@ Rscript, so if detection fails, install R first.
    | Survival analysis                     | survival survminer       |
    | Mixed-effects / multilevel models     | lme4 lmerTest emmeans    |
    | Count models (neg. binomial, Poisson) | MASS sandwich lmtest     |
+   | Time-series forecasting               | forecast tsibble         |
    | Publication summary tables            | gtsummary gt flextable   |
    | Large / columnar data input           | arrow                    |
    | Report rendering                      | quarto knitr rmarkdown   |

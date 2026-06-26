@@ -6,6 +6,7 @@ import {
 } from "../../../../types/enums.js";
 import type { AssertInput, AssertReason } from "../../../../types/assert.js";
 
+import { EPV_SEVERE_BLOCK_THRESHOLD } from "../../../../constants/defaults.js";
 import { TECHNIQUE_RULES, type TechniqueRule } from "./ruleset.js";
 
 const GROUP_FAMILIES: ReadonlySet<MethodFamily> = new Set([
@@ -14,7 +15,6 @@ const GROUP_FAMILIES: ReadonlySet<MethodFamily> = new Set([
 ]);
 
 const MIN_PER_GROUP = 2;
-const SEVERE_EPV = 5;
 
 function hard(code: HardRuleCode, message: string): AssertReason {
   return { code, severity: Severity.Hard, message };
@@ -63,12 +63,14 @@ function checkEpv(
   if (
     (family === MethodFamily.Regression || family === MethodFamily.Survival) &&
     eventsPerVariable !== undefined &&
-    eventsPerVariable < SEVERE_EPV
+    eventsPerVariable < EPV_SEVERE_BLOCK_THRESHOLD
   ) {
     return hard(
       HardRuleCode.SampleTooSmall,
-      `Events-per-variable (${eventsPerVariable}) is severely ` +
-        `insufficient for a stable regression fit.`,
+      `Events-per-variable (${eventsPerVariable}) is below the severe ` +
+        `stability threshold (${EPV_SEVERE_BLOCK_THRESHOLD}). EPV heuristics ` +
+        `trace to Peduzzi et al. 1996 and clinical prediction-model practice; ` +
+        `they may be conservative outside that context.`,
     );
   }
   return null;

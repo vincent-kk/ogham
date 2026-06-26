@@ -36,7 +36,7 @@ Run the statistical assumptions a chosen method requires and produce
    | `residual_plot`       | residuals vs fitted via `ggplot2` (visual linearity / scale)        |
    | `scatter`             | `ggplot2` scatter + loess smooth (visual linearity)                 |
    | `martingale_residual` | `survival` martingale residuals vs covariate (functional form)      |
-   | `epv`                 | events ÷ predictors (pass when ≥ 10)                                |
+   | `epv`                 | events ÷ predictors (common screening threshold ≥ 10; Peduzzi et al. 1996, clinical prediction-model practice, may be conservative elsewhere) |
    | `design`              | design assumption — `note_assumption(id)`, pass by design (no test) |
 
 3. **Emit artifacts.** For each assumption, write
@@ -47,7 +47,9 @@ Run the statistical assumptions a chosen method requires and produce
    plot plus a heuristic `passed`; metric/count-threshold checks (`vif`,
    `dispersion`, `expected_counts`, `epv`) emit their ratio/count with `passed`
    against the threshold; `design` records `passed: true` as a design assumption.
-   These non-test checks carry no p-value.
+   EPV thresholds come from clinical prediction-model practice (Peduzzi et al.
+   1996) and may be conservative for other application domains. These non-test
+   checks carry no p-value.
 
 ## Output
 
