@@ -94,13 +94,21 @@ export function evaluateHardRules(input: AssertInput): AssertReason[] {
   }
 
   if (datasetMeta.outcomeType) {
-    const r = checkOutcomeMismatch(rule, method.technique, datasetMeta.outcomeType);
+    const r = checkOutcomeMismatch(
+      rule,
+      method.technique,
+      datasetMeta.outcomeType,
+    );
     if (r) reasons.push(r);
   }
 
   const family = rule?.family ?? method.family;
 
-  const groupSizeReason = checkGroupSize(family, datasetMeta.sampleSize, datasetMeta.groupCount);
+  const groupSizeReason = checkGroupSize(
+    family,
+    datasetMeta.sampleSize,
+    datasetMeta.groupCount,
+  );
   if (groupSizeReason) reasons.push(groupSizeReason);
 
   const epvReason = checkEpv(family, datasetMeta.eventsPerVariable);
