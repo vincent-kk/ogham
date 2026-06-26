@@ -30,7 +30,9 @@ generation mode to inform explosion/synonym decisions.
 ## fetch_fulltext (write, idempotent)
 
 PMC Open Access download. **in**: `ids[]` (PMID/PMCID), `formats?`
-(PDF|XML|TAR, default PDF), `outDir?`, `overwrite?`. **out**:
+(PDF|XML|TAR, default PDF), `outDir?`, `overwrite?`, `extractFromTgz?`.
+Missing PDF/XML links fall back to TAR; `extractFromTgz` extracts the requested
+member from that package when possible. **out**:
 `downloaded[]{pmcid, format, path, sha256, bytes, oaStatus, license}`,
 `unavailable[]{id, reason, format?, links}`. OA + license gated: no license ⇒
 link only.

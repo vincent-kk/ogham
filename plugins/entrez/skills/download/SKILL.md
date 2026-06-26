@@ -16,18 +16,22 @@ imply redistribution rights).
 
 ## Procedure
 
-1. Call `mcp_tools_fetch_fulltext` with `{ ids[], formats?, outDir?, overwrite? }`
-   (formats default `[PDF]`).
+1. Call `mcp_tools_fetch_fulltext` with
+   `{ ids[], formats?, outDir?, overwrite?, extractFromTgz? }` (formats default
+   `[PDF]`).
 2. Report:
    - `downloaded[]` — saved files with `path`, `sha256`, `bytes`, `license`,
      `oaStatus`.
-   - `unavailable[]` — `reason` (NO_PMCID | NOT_OA | NOT_FOUND | FETCH_FAILED |
+   - `unavailable[]` — `reason` (NO_PMCID | NOT_OA | NOT_FOUND |
+     FETCH_FAILED | OA_LINK_DEAD | FORMAT_NOT_OFFERED | IDCONV_MOVED |
      LICENSE_UNVERIFIED) with fallback `links` (doi / publisher).
 3. Surface the license for each saved item; if a license cannot be verified the
    tool withholds the file and returns a link instead.
 
 ## Notes
 
-- The tool resolves PMID → PMCID (idconv) then checks oa.fcgi; per-format
-  failures are isolated. Contract: [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md).
+- The tool resolves PMID → PMCID (idconv), checks OA/license, and resolves legacy
+  OA package links to PMC AWS Open Data HTTPS URLs. Missing PDF/XML links fall
+  back to `tgz`; set `extractFromTgz` to extract the requested PDF/XML member.
+  Contract: [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md).
 - Files are written only inside the declared `outDir` (path-escape is refused).

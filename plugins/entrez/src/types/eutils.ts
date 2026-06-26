@@ -39,6 +39,13 @@ export interface IdConvMapping {
   doi?: string;
   status?: string;
   errmsg?: string;
+  requestedId?: string;
+  versions?: IdConvVersion[];
+}
+
+export interface IdConvVersion {
+  pmcid?: string;
+  current?: boolean;
 }
 
 export interface IdConvResult {

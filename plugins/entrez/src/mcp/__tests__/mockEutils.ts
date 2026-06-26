@@ -4,11 +4,13 @@ import { EntrezConfigSchema } from "../../types/config.js";
 import {
   EUTILS_HOST,
   NCBI_SERVICE_HOST,
+  PMC_OA_S3_HOST,
+  PMC_SERVICE_HOST,
   DEFAULT_EUTILS_BASE,
 } from "../../constants/defaults.js";
 
 export interface MockResponse {
-  body: string;
+  body: BodyInit;
   status?: number;
   contentType?: string;
 }
@@ -42,7 +44,12 @@ export function makeCtx(
     deps: {
       tool: config.tool,
       email: config.email,
-      allowedHosts: [EUTILS_HOST, NCBI_SERVICE_HOST],
+      allowedHosts: [
+        EUTILS_HOST,
+        NCBI_SERVICE_HOST,
+        PMC_SERVICE_HOST,
+        PMC_OA_S3_HOST,
+      ],
       allowPrivateIp: true,
       sleep: async () => {},
       fetchImpl,

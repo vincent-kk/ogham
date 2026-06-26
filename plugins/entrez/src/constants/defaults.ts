@@ -18,14 +18,21 @@ import { DOWNLOAD_DIR } from "./paths.js";
 export const DEFAULT_EUTILS_BASE =
   "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 export const IDCONV_BASE =
-  "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/";
+  "https://pmc.ncbi.nlm.nih.gov/tools/idconv/api/v1/articles/";
 export const OA_SERVICE_BASE =
   "https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi";
 
 /** SSRF allowlist hosts. */
 export const EUTILS_HOST = "eutils.ncbi.nlm.nih.gov";
 export const NCBI_SERVICE_HOST = "www.ncbi.nlm.nih.gov";
-export const ALLOWED_HOSTS = [EUTILS_HOST, NCBI_SERVICE_HOST] as const;
+export const PMC_SERVICE_HOST = "pmc.ncbi.nlm.nih.gov";
+export const PMC_OA_S3_HOST = "pmc-oa-opendata.s3.amazonaws.com";
+export const ALLOWED_HOSTS = [
+  EUTILS_HOST,
+  NCBI_SERVICE_HOST,
+  PMC_SERVICE_HOST,
+  PMC_OA_S3_HOST,
+] as const;
 
 /** Defaults derived from enums. */
 export const DEFAULT_OUTPUT_DIR = DOWNLOAD_DIR;

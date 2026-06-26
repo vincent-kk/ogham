@@ -168,6 +168,7 @@ export const FetchFulltextInputSchema = z.object({
   formats: z.array(FulltextFormatSchema).optional(),
   outDir: z.string().optional(),
   overwrite: z.boolean().optional(),
+  extractFromTgz: z.boolean().optional(),
 });
 export type FetchFulltextInput = z.infer<typeof FetchFulltextInputSchema>;
 

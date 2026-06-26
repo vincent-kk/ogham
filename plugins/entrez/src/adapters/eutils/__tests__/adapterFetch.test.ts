@@ -9,7 +9,11 @@ import { idconv } from "../idconv.js";
 import { oaService } from "../oaService.js";
 import type { HttpDeps } from "../../../types/http.js";
 import { Db, SortOrder, DateType } from "../../../types/enums.js";
-import { EUTILS_HOST, NCBI_SERVICE_HOST } from "../../../constants/defaults.js";
+import {
+  EUTILS_HOST,
+  NCBI_SERVICE_HOST,
+  PMC_SERVICE_HOST,
+} from "../../../constants/defaults.js";
 import {
   ESEARCH_JSON,
   EFETCH_XML,
@@ -32,7 +36,7 @@ function deps(
     tool: "entrez-test",
     email: "user@example.com",
     apiKey,
-    allowedHosts: [EUTILS_HOST, NCBI_SERVICE_HOST],
+    allowedHosts: [EUTILS_HOST, NCBI_SERVICE_HOST, PMC_SERVICE_HOST],
     allowPrivateIp: true,
     sleep: async () => {},
     fetchImpl: (async (u: string | URL) => {
@@ -99,7 +103,8 @@ describe("eutils adapter fetch wrappers", () => {
     );
     expect(r.records[0].pmcid).toBe("PMC1");
     const q = new URL(lastUrl);
-    expect(q.hostname).toBe(NCBI_SERVICE_HOST);
+    expect(q.hostname).toBe(PMC_SERVICE_HOST);
+    expect(q.pathname).toBe("/tools/idconv/api/v1/articles/");
     expect(q.searchParams.get("api_key")).toBeNull();
     expect(q.searchParams.get("tool")).toBe("entrez-test");
   });

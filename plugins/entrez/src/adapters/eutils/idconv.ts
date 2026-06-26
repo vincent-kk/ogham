@@ -16,11 +16,22 @@ const NO_VERSIONS = "no";
 const DEFAULT_IDTYPE = "pmid";
 
 interface RawRecord {
-  pmid?: string;
+  pmid?: string | number;
   pmcid?: string;
   doi?: string;
   status?: string;
   errmsg?: string;
+  "requested-id"?: string;
+  versions?: RawVersion[];
+}
+
+interface RawVersion {
+  pmcid?: string;
+  current?: boolean;
+}
+
+function stringValue(value: string | number | undefined): string | undefined {
+  return value === undefined ? undefined : String(value);
 }
 
 /** Parse the PMC ID Converter JSON response. */
@@ -33,11 +44,16 @@ export function parseIdConv(jsonText: string): IdConvResult {
   }
   const body = parsed as { status?: string; records?: RawRecord[] };
   const records: IdConvMapping[] = (body.records ?? []).map((r) => ({
-    pmid: r.pmid,
+    pmid: stringValue(r.pmid),
     pmcid: r.pmcid,
     doi: r.doi,
     status: r.status,
     errmsg: r.errmsg,
+    requestedId: r["requested-id"],
+    versions: r.versions?.map((version) => ({
+      pmcid: version.pmcid,
+      current: version.current,
+    })),
   }));
   return { status: body.status ?? "", records };
 }

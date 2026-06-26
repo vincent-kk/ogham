@@ -99,6 +99,9 @@ export const UnavailableReason = {
   NOT_OA: "NOT_OA",
   NOT_FOUND: "NOT_FOUND",
   FETCH_FAILED: "FETCH_FAILED",
+  OA_LINK_DEAD: "OA_LINK_DEAD",
+  FORMAT_NOT_OFFERED: "FORMAT_NOT_OFFERED",
+  IDCONV_MOVED: "IDCONV_MOVED",
   LICENSE_UNVERIFIED: "LICENSE_UNVERIFIED",
 } as const;
 export type UnavailableReason =

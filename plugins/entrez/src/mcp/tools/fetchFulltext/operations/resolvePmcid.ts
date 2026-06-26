@@ -6,6 +6,7 @@ const PMID_IDTYPE = "pmid";
 
 export interface ResolvedIds {
   pmcid?: string;
+  versionedPmcid?: string;
   pmid?: string;
   doi?: string;
 }
@@ -21,5 +22,12 @@ export async function resolvePmcid(
   if (PMCID_PATTERN.test(id)) return { pmcid: id.toUpperCase() };
   const result = await idconv({ ids: [id], idtype: PMID_IDTYPE }, ctx.deps);
   const record = result.records[0];
-  return { pmcid: record?.pmcid, pmid: record?.pmid ?? id, doi: record?.doi };
+  const versionedPmcid = record?.versions?.find((version) => version.current)
+    ?.pmcid;
+  return {
+    pmcid: record?.pmcid,
+    versionedPmcid,
+    pmid: record?.pmid ?? id,
+    doi: record?.doi,
+  };
 }

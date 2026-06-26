@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 
+import { ALLOWED_HOSTS } from "../../../constants/defaults.js";
 import { validateUrl } from "../operations/ssrfGuard.js";
 
 const ALLOW = ["eutils.ncbi.nlm.nih.gov"];
@@ -10,6 +11,23 @@ describe("validateUrl", () => {
       validateUrl(
         "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
         ALLOW,
+        true,
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it("allows current PMC and OA file hosts by default", async () => {
+    await expect(
+      validateUrl(
+        "https://pmc.ncbi.nlm.nih.gov/tools/idconv/api/v1/articles/",
+        ALLOWED_HOSTS,
+        true,
+      ),
+    ).resolves.toBeUndefined();
+    await expect(
+      validateUrl(
+        "https://pmc-oa-opendata.s3.amazonaws.com/PMC1.1/PMC1.1.xml",
+        ALLOWED_HOSTS,
         true,
       ),
     ).resolves.toBeUndefined();
