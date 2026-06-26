@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 import { loadConfig } from "../../config/configLoader/configLoader.js";
+import { McpToolName } from "../../constants/mcpToolNames.js";
 import { handleLensContext } from "../../tools/lensContext/lensContext.js";
 import { handleLensNavigate } from "../../tools/lensNavigate/lensNavigate.js";
 import { handleLensRead } from "../../tools/lensRead/lensRead.js";
@@ -34,7 +35,7 @@ export function createLensServer(configRoot: string) {
 
   // --- search ---
   server.registerTool(
-    "search",
+    McpToolName.SEARCH,
     {
       description:
         "Search vault knowledge via Spreading Activation from seed keywords.",
@@ -63,7 +64,7 @@ export function createLensServer(configRoot: string) {
 
   // --- context ---
   server.registerTool(
-    "context",
+    McpToolName.CONTEXT,
     {
       description:
         "Assemble a token-budgeted context block from vault documents matching a query.",
@@ -94,7 +95,7 @@ export function createLensServer(configRoot: string) {
 
   // --- navigate ---
   server.registerTool(
-    "navigate",
+    McpToolName.NAVIGATE,
     {
       description:
         "Explore graph neighbors (inbound/outbound links, parent/child) of a specific node.",
@@ -120,7 +121,7 @@ export function createLensServer(configRoot: string) {
 
   // --- read ---
   server.registerTool(
-    "read",
+    McpToolName.READ,
     {
       description: "Read a single vault document by path.",
       inputSchema: z.object({
@@ -142,7 +143,7 @@ export function createLensServer(configRoot: string) {
 
   // --- status ---
   server.registerTool(
-    "status",
+    McpToolName.STATUS,
     {
       description:
         "Check vault index status including node count, staleness, and health.",

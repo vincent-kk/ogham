@@ -16,7 +16,7 @@ imply redistribution rights).
 
 ## Procedure
 
-1. Call `mcp_tools_fetch-fulltext` with `{ ids[], formats?, outDir?, overwrite? }`
+1. Call `mcp_tools_fetch_fulltext` with `{ ids[], formats?, outDir?, overwrite? }`
    (formats default `[PDF]`).
 2. Report:
    - `downloaded[]` — saved files with `path`, `sha256`, `bytes`, `license`,

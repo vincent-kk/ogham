@@ -1,6 +1,6 @@
 ## Purpose
 
-`mesh-lookup` 도구. 자연어 용어를 MeSH 어휘(Descriptor·entry term·scopeNote)로 매핑한다. agent의 검색식 생성·explosion 판단 재료. `db=mesh` ESearch→ESummary.
+`mesh_lookup` 도구. 자연어 용어를 MeSH 어휘(Descriptor·entry term·scopeNote)로 매핑한다. agent의 검색식 생성·explosion 판단 재료. `db=mesh` ESearch→ESummary.
 
 ## Structure
 

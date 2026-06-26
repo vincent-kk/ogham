@@ -1,7 +1,7 @@
 # E-utilities facts (lazy reference)
 
 Load only when designing/linting queries or debugging the `SEARCH` stages. SSoT
-for db/field/constraint facts. The deterministic service (`paper-search` +
+for db/field/constraint facts. The deterministic service (`paper_search` +
 `core/httpClient`) enforces all hard rules — this is background, not action.
 
 ## Databases (single family)

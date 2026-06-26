@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { McpToolName } from "../../../../constants/mcpToolNames.js";
+
 import {
   AssertSeverity,
   AssumptionId,
@@ -23,7 +25,7 @@ function plan(overrides: Partial<AssertInput> = {}): AssertInput {
   };
 }
 
-describe("assert-analysis-plan", () => {
+describe(McpToolName.ASSERT_ANALYSIS_PLAN, () => {
   it("passes a clean parametric plan with satisfied assumptions", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({

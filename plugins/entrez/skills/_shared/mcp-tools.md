@@ -5,7 +5,7 @@ lazy reference for skills/agent. Tools are exposed under the `tools` server:
 call them as `mcp_tools_<name>`. All are `[Internal]` — invoked by the entrez
 agent/skills, not the user directly.
 
-## paper-search (readOnly, non-idempotent)
+## paper_search (readOnly, non-idempotent)
 
 Deterministic union of a `QueryRole` query set. Zero loss is its contract.
 
@@ -17,17 +17,17 @@ Deterministic union of a `QueryRole` query set. Zero loss is its contract.
   `segments[]`, `warnings[]`, `errors[]`, `partial`, `missing_pmids[]`,
   `failed_batches[]`, `reproducibility{manifestPath, fetchedPmidChecksum, …}`,
   `cursor?`.
-- **async (large)**: `paper-search-start` → `paper-search-status` (poll) →
-  `paper-search-results` (cursor paginated).
+- **async (large)**: `paper_search_start` → `paper_search_status` (poll) →
+  `paper_search_results` (cursor paginated).
 
-## mesh-lookup (readOnly, idempotent)
+## mesh_lookup (readOnly, idempotent)
 
 Map terms to MeSH. **in**: `terms[]`, `includeScopeNote?`, `includeScr?`.
 **out**: `mappings[]{input, matched, descriptorName?, descriptorUi?,
 treeNumbers?, entryTerms?, scopeNote?, scrMappings?}`. Called by the agent's
 generation mode to inform explosion/synonym decisions.
 
-## fetch-fulltext (write, idempotent)
+## fetch_fulltext (write, idempotent)
 
 PMC Open Access download. **in**: `ids[]` (PMID/PMCID), `formats?`
 (PDF|XML|TAR, default PDF), `outDir?`, `overwrite?`. **out**:
@@ -35,7 +35,7 @@ PMC Open Access download. **in**: `ids[]` (PMID/PMCID), `formats?`
 `unavailable[]{id, reason, format?, links}`. OA + license gated: no license ⇒
 link only.
 
-## auth-check (readOnly, idempotent)
+## auth_check (readOnly, idempotent)
 
 **in**: `probeEInfo?`. **out**: `{configured, reachable, hasApiKey, rateLimit,
 toolEmailConfigured, dbList?}`. api_key value never returned.

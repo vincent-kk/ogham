@@ -24,8 +24,8 @@ MCP tools) — so the analysis stays reproducible and the gate stays honest.
 
 ## How it works
 
-A local MCP server (`tools`) exposes four execution tools — `run-r`,
-`get-r-job`, `cancel-r-job`, `assert-analysis-plan`. The `analyze` skill is the
+A local MCP server (`tools`) exposes four execution tools — `run_r`,
+`get_r_job`, `cancel_r_job`, `assert_analysis_plan`. The `analyze` skill is the
 dispatcher; `statistician`, `r-expert`, and `methodology-validator` are the
 reasoning agents. R runs `--vanilla` in a temp workspace behind a command gate
 (no process spawning, filesystem escape, dynamic install, or network), against a

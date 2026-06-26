@@ -6,15 +6,15 @@
 | ---------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------- |
 | **analyze 스킬** (Dispatcher)      | `skills/analyze/`                   | intent 분류 → 파이프라인 상태 전이 → 에이전트 오케스트레이션 → 모드별 checkpoint |
 | **statistician 에이전트**          | `agents/statistician.md`            | 데이터+가설 → 기법 선택(결정트리), 분석계획(SAP) 작성 — **WHAT**                 |
-| **r-expert 에이전트**              | `agents/r-expert.md`                | R 코드 생성·`run-r` 실행·트러블슈팅, R 공식문서 참조 — **HOW**                   |
+| **r-expert 에이전트**              | `agents/r-expert.md`                | R 코드 생성·`run_r` 실행·트러블슈팅, R 공식문서 참조 — **HOW**                   |
 | **methodology-validator 에이전트** | `agents/methodology-validator.md`   | SAP 부합성·다중비교 전략·결과 타당성 (soft) — **VALID**                          |
 | **data-preparation 스킬**          | `skills/data-preparation/`          | 로드(fread/arrow)·프로파일·정제·결측 대치                                        |
 | **assumption-check 스킬**          | `skills/assumption-check/`          | 정규성·등분산·독립성 검정 → assert 입력 아티팩트 생성                            |
 | **visualization 스킬**             | `skills/visualization/`             | ggplot2 디바이스 보일러플레이트 (분포/박스/산점/생존/forest)                     |
 | **reporting 스킬**                 | `skills/reporting/`                 | Table 1·효과크기·다중비교 보정 → Quarto(DOCX/HTML/PDF)                           |
 | **r-setup 스킬**                   | `skills/r-setup/`                   | R 설치 확인 + 환경별 가이드 + 동의 기반 설치 실행                                |
-| **run-r**                          | `src/mcp/tools/runR/`               | 크로스플랫폼 Rscript 실행, 아티팩트 수집, 실행 안전 게이트                       |
-| **assert-analysis-plan**           | `src/mcp/tools/assertAnalysisPlan/` | 통계적 hard gate (기법↔가정 결정론적 검증)                                       |
+| **run_r**                          | `src/mcp/tools/runR/`               | 크로스플랫폼 Rscript 실행, 아티팩트 수집, 실행 안전 게이트                       |
+| **assert_analysis_plan**           | `src/mcp/tools/assertAnalysisPlan/` | 통계적 hard gate (기법↔가정 결정론적 검증)                                       |
 | **workspace (core)**               | `src/core/workspace/`               | temp 격리·아티팩트·세션 상태 영속                                                |
 | **rRuntime (core)**                | `src/core/rRuntime/`                | Rscript 탐색·spawn·인코딩(UTF-8/CP949)                                           |
 
@@ -23,13 +23,13 @@
 ```
 1. 사용자: "이 데이터로 가설 검정해줘" (+ 데이터 경로)
 2. analyze(Dispatcher): intent=full-analysis → 상태머신 진입
-3. → data-preparation 스킬: run-r(로드·프로파일) → dataset_profile 아티팩트
+3. → data-preparation 스킬: run_r(로드·프로파일) → dataset_profile 아티팩트
 4. → statistician 에이전트: profile+가설 → 기법 선택 + SAP
-5. → assumption-check 스킬: run-r(가정검정) → assumption 아티팩트
-6. → assert-analysis-plan(MCP): SAP+assumption 검증
+5. → assumption-check 스킬: run_r(가정검정) → assumption 아티팩트
+6. → assert_analysis_plan(MCP): SAP+assumption 검증
       ├ hard 위반 → 차단, statistician 재선택 (루프)
       └ pass → 진행
-7. → r-expert 에이전트: methods/{기법}/template 기반 R 코드 → run-r → result/plot 아티팩트
+7. → r-expert 에이전트: methods/{기법}/template 기반 R 코드 → run_r → result/plot 아티팩트
 8. → methodology-validator 에이전트: soft 검증 → 경고/권고
 9. → 결과 반환·설명 (interactive: 여기서 사용자와 대화로 품질 향상)
 10. (사용자 요청 시) reporting 스킬: Quarto → DOCX/HTML/PDF
@@ -41,7 +41,7 @@
 
 ## 아티팩트 계약
 
-모든 R 실행은 `ARTIFACTS_DIR`에 산출물 + `manifest.json`(스키마·결과·가정 소비 내역) 기록. `run-r`은 선언된 디렉토리에서만 수집(symlink 탈출 거부·해시·확장자 화이트리스트). 상세 [mcp-tools.md](./mcp-tools.md).
+모든 R 실행은 `ARTIFACTS_DIR`에 산출물 + `manifest.json`(스키마·결과·가정 소비 내역) 기록. `run_r`은 선언된 디렉토리에서만 수집(symlink 탈출 거부·해시·확장자 화이트리스트). 상세 [mcp-tools.md](./mcp-tools.md).
 
 ## 비채택 (Explicit Non-Adoption)
 

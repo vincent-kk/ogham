@@ -14,7 +14,7 @@ plugin: r-statistics
 
 Confirm R is available for the execution tools, and when it is missing, guide an
 install through the OS package manager. Installation is a **separate channel
-from `run-r`** and is **gated on explicit user consent** — a system change is
+from `run_r`** and is **gated on explicit user consent** — a system change is
 irreversible.
 
 ## Steps
@@ -22,7 +22,7 @@ irreversible.
 `--packages` runs only the package check (Steps 6–9); it still needs a working
 Rscript, so if detection fails, install R first.
 
-1. **Detect.** Call `mcp__plugin_r-statistics_tools__run-r` with a trivial script
+1. **Detect.** Call `mcp__plugin_r-statistics_tools__run_r` with a trivial script
    (e.g. `cat(R.version.string)`, `executionMode: "sync"`).
    - Result returned → R works. Report the version and continue to **Step 6**.
    - `R_NOT_FOUND` error → R is missing or off-PATH. Do Steps 2–5, then Step 6.
@@ -38,7 +38,7 @@ Rscript, so if detection fails, install R first.
 5. **Verify.** After install, re-run Step 1's detection. If R is on a
    non-standard path, tell the user to set `R_STATISTICS_RSCRIPT` to the
    `Rscript` location.
-6. **Check packages.** Via `mcp__plugin_r-statistics_tools__run-r`
+6. **Check packages.** Via `mcp__plugin_r-statistics_tools__run_r`
    (`executionMode: "sync"`, read-only — `requireNamespace` is not blocked).
    Probe the required set and every use-case package, reporting what is missing
    in each group:
@@ -83,7 +83,7 @@ Rscript, so if detection fails, install R first.
    same install. These may sit beyond the baseline whitelist — expected for
    on-demand, consent-gated installs.
 
-8. **Install** (consent-gated, terminal — **not** `run-r`, which blocks
+8. **Install** (consent-gated, terminal — **not** `run_r`, which blocks
    `install.packages`). Build **one** command from the union of required-missing ∪
    every selected bundle's missing packages ∪ any dynamic packages, de-duplicated:
 
@@ -115,7 +115,7 @@ Rscript, so if detection fails, install R first.
 ### Never do
 
 - Install R or change the system without confirmation.
-- Run install commands (R or R packages) through `run-r` (it blocks them) —
+- Run install commands (R or R packages) through `run_r` (it blocks them) —
   installation is a separate, consent-gated channel.
 - Ask about the required packages, or about optional packages one-by-one —
   required are automatic; optional are grouped by use case.

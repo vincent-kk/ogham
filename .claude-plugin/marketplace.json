@@ -31,7 +31,7 @@
       "name": "entrez",
       "source": "./plugins/entrez",
       "category": "productivity",
-      "tags": ["pubmed", "ncbi", "research", "paper-search", "eutils"]
+      "tags": ["pubmed", "ncbi", "research", "paper_search", "eutils"]
     },
     {
       "name": "filid",

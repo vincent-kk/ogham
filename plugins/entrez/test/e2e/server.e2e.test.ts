@@ -4,21 +4,14 @@ import { fileURLToPath } from "node:url";
 
 import { describe, it, expect } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+
+import { MCP_TOOL_NAMES } from "../../src/constants/mcpToolNames.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const PKG_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const BRIDGE = join(PKG_ROOT, "bridge", "mcp-server.cjs");
 
-const EXPECTED_TOOLS = [
-  "auth-check",
-  "fetch-fulltext",
-  "mesh-lookup",
-  "paper-search",
-  "paper-search-results",
-  "paper-search-start",
-  "paper-search-status",
-  "setup",
-].sort();
+const EXPECTED_TOOLS = [...MCP_TOOL_NAMES].sort();
 
 describe("@e2e bundled MCP server (build artifact)", () => {
   it.skipIf(!existsSync(BRIDGE))(

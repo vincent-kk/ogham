@@ -6,7 +6,7 @@ import { getJob } from "../../../../core/searchJob/index.js";
 import { Messages } from "../../../../constants/messages.js";
 import { resolveJobPath, type JobRunOptions } from "./jobLocation.js";
 
-/** paper-search-status — report a job's status and progress. */
+/** paper_search_status — report a job's status and progress. */
 export async function pollJob(
   jobId: string,
   options: Pick<JobRunOptions, "dir"> = {},

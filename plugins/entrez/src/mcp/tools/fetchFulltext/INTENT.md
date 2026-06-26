@@ -1,6 +1,6 @@
 ## Purpose
 
-`fetch-fulltext` 도구. PMID/PMCID → idconv→oa.fcgi→PMC OA 본문(PDF/XML/TAR) 다운로드. "OA면 저장, 비OA·license 미확인이면 링크만". per-format 실패 격리.
+`fetch_fulltext` 도구. PMID/PMCID → idconv→oa.fcgi→PMC OA 본문(PDF/XML/TAR) 다운로드. "OA면 저장, 비OA·license 미확인이면 링크만". per-format 실패 격리.
 
 ## Structure
 

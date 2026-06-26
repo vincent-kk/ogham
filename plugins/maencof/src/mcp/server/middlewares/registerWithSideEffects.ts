@@ -9,6 +9,7 @@ import type {
 } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ZodObject, ZodRawShape, z } from 'zod';
 
+import type { McpToolName } from '../../../constants/mcpToolNames.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import { toolError, toolResult } from '../../shared/index.js';
 import { getVaultPath, invalidateCache } from '../graphCache/index.js';
@@ -48,7 +49,7 @@ export interface ReadOptionsPlain {
  */
 export function registerMutateTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
-  name: string,
+  name: McpToolName,
   meta: ToolMeta<TShape>,
   handler: (
     vaultPath: string,
@@ -95,7 +96,7 @@ export function registerMutateTool<TShape extends ZodRawShape, TResult>(
  */
 export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
-  name: string,
+  name: McpToolName,
   meta: ToolMeta<TShape>,
   handler: (
     vaultPath: string,
@@ -106,7 +107,7 @@ export function registerReadTool<TShape extends ZodRawShape, TResult>(
 ): RegisteredTool;
 export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
-  name: string,
+  name: McpToolName,
   meta: ToolMeta<TShape>,
   handler: (
     vaultPath: string,
@@ -116,7 +117,7 @@ export function registerReadTool<TShape extends ZodRawShape, TResult>(
 ): RegisteredTool;
 export function registerReadTool<TShape extends ZodRawShape, TResult>(
   server: McpServer,
-  name: string,
+  name: McpToolName,
   meta: ToolMeta<TShape>,
   handler:
     | ((

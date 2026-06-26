@@ -24,11 +24,11 @@ NCBI E-utilities (PubMed · PMC · MeSH) academic paper search plugin for Claude
 
 ## MCP tools
 
-`paper-search` (+ async `paper-search-start`/`_status`/`_results`) · `mesh-lookup` · `fetch-fulltext` · `setup` · `auth-check`.
+`paper_search` (+ async `paper_search_start`/`_status`/`_results`) · `mesh_lookup` · `fetch_fulltext` · `setup` · `auth_check`.
 
 ## Setup
 
-Run the `setup` skill (or `auth-check`). A local browser form collects your NCBI
+Run the `setup` skill (or `auth_check`). A local browser form collects your NCBI
 `tool` / `email` (required) and optional `api_key`. The API key is written to
 `credentials.json` (0o600) and is **never** exposed to the chat or logs.
 

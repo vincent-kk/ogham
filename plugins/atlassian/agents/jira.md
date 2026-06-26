@@ -8,7 +8,7 @@ tools:
   - Grep
   - Glob
   - mcp_tools_fetch
-  - mcp_tools_auth-check
+  - mcp_tools_auth_check
   - mcp_tools_setup
 maxTurns: 30
 ---

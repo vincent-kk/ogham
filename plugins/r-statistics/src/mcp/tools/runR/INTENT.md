@@ -1,6 +1,6 @@
 ## Purpose
 
-`run-r` 도구 핸들러. LLM 이 생성한 R 코드를 격리 워크스페이스에서 헤드리스 Rscript 로 실행하고 아티팩트를 수집한다. 금지 호출 정적 차단 → 데이터 resolve → 실행계약 주입 → sync(대기)/async(폴링) 실행. 실행 안전만 — 통계 정책은 assert 소관.
+`run_r` 도구 핸들러. LLM 이 생성한 R 코드를 격리 워크스페이스에서 헤드리스 Rscript 로 실행하고 아티팩트를 수집한다. 금지 호출 정적 차단 → 데이터 resolve → 실행계약 주입 → sync(대기)/async(폴링) 실행. 실행 안전만 — 통계 정책은 assert 소관.
 
 ## Structure
 
@@ -17,7 +17,7 @@
 
 - 실행 전 `validateRScript` 정적 게이트 통과 필수 (실패 → `COMMAND_BLOCKED`)
 - Rscript 미탐색 → `R_NOT_FOUND` (r-setup 안내)
-- 기본 `executionMode=async` (jobId 반환 후 get-r-job 폴링), `sync` 는 즉시 결과
+- 기본 `executionMode=async` (jobId 반환 후 get_r_job 폴링), `sync` 는 즉시 결과
 - 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
 
 ## Boundaries

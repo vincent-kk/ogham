@@ -7,6 +7,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
+import { McpToolName } from "../../constants/mcpToolNames.js";
 import { VERSION } from "../../version.js";
 import { ConvertFormatSchema } from "../../types/index.js";
 import { detectService } from "../../utils/index.js";
@@ -27,7 +28,7 @@ export function createServer(): McpServer {
 
   // --- fetch ---
   server.registerTool(
-    "fetch",
+    McpToolName.FETCH,
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. HTTP request for Atlassian REST APIs.",
@@ -85,7 +86,7 @@ export function createServer(): McpServer {
 
   // --- convert ---
   server.registerTool(
-    "convert",
+    McpToolName.CONVERT,
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Format conversion: ADF/Storage/Wiki ↔ Markdown.",
@@ -103,9 +104,9 @@ export function createServer(): McpServer {
     wrapHandler(handleConvert),
   );
 
-  // --- auth-check ---
+  // --- auth_check ---
   server.registerTool(
-    "auth-check",
+    McpToolName.AUTH_CHECK,
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Check authentication status and test connectivity.",
@@ -123,7 +124,7 @@ export function createServer(): McpServer {
 
   // --- setup ---
   server.registerTool(
-    "setup",
+    McpToolName.SETUP,
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Auth/connection setup wizard.",

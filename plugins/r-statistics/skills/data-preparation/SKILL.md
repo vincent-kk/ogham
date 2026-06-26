@@ -11,12 +11,12 @@ plugin: r-statistics
 # data-preparation — Load · Profile · Clean · Impute
 
 Prepare a dataset for statistical analysis and produce a `dataset_profile` the
-`statistician` uses to select a method. Execution runs through `mcp__plugin_r-statistics_tools__run-r`
+`statistician` uses to select a method. Execution runs through `mcp__plugin_r-statistics_tools__run_r`
 (via the `r-expert` agent in a full pipeline, or directly for a partial step).
 
 ## Steps
 
-1. **Load.** Pass the dataset as a `run-r` `dataRefs` entry (the MCP resolves
+1. **Load.** Pass the dataset as a `run_r` `dataRefs` entry (the MCP resolves
    and copies it; never hand-build a path). In R, read it with
    `read_data("<id>")` — it dispatches on the declared format
    (`data.table::fread` for CSV, `arrow` for parquet/feather, etc.).
@@ -41,7 +41,7 @@ Prepare a dataset for statistical analysis and produce a `dataset_profile` the
 
 ### Always do
 
-- Resolve data only via `run-r` `dataRefs` + `read_data`.
+- Resolve data only via `run_r` `dataRefs` + `read_data`.
 - Make every cleaning/imputation step explicit and reversible in description.
 
 ### Never do

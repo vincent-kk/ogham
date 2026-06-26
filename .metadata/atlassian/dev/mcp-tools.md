@@ -14,7 +14,7 @@ The MCP layer exposes 4 tools under a single server named `"tools"`:
 |---|---|---|
 | `fetch` | HTTP | All HTTP operations (GET/POST/PUT/PATCH/DELETE) via `method` param |
 | `convert` | Local | ADF/Storage/Wiki Markup <-> Markdown format conversion |
-| `auth-check` | Local | Authentication status check with optional live connectivity test |
+| `auth_check` | Local | Authentication status check with optional live connectivity test |
 | `setup` | Local | Local web server for auth/connection setup |
 
 **Design principle**: MCP has zero domain knowledge. It does not know what a "Jira issue" or "Confluence page" is. It executes `(method, path, params, body)` tuples as HTTP requests.
@@ -110,9 +110,9 @@ Unified HTTP tool supporting all methods via the `method` parameter.
 
 ---
 
-### 3.3 `auth-check` — Authentication Status Check
+### 3.3 `auth_check` — Authentication Status Check
 
-**Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/auth-check.ts`.
+**Not an HTTP tool.** Inspects stored credentials and optionally performs a live connectivity probe. Source of truth: `src/types/auth_check.ts`.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -149,7 +149,7 @@ interface AuthCheckServiceEntry {
 **Usage pattern**:
 
 - `setup` skill: calls with `connection_test: true` to validate end-to-end before persisting the saved configuration.
-- General skills (`jira`, `confluence`, `download`): do NOT call `auth-check` proactively. They use optimistic execution and only invoke `setup` when `fetch` returns HTTP 401 with `reauth_required: true`.
+- General skills (`jira`, `confluence`, `download`): do NOT call `auth_check` proactively. They use optimistic execution and only invoke `setup` when `fetch` returns HTTP 401 with `reauth_required: true`.
 
 **Annotations**: `readOnlyHint: true, destructiveHint: false, idempotentHint: true`.
 

@@ -10,11 +10,11 @@
 | **query 스킬** | `skills/query/` | 자연어 → PubMed 검색식만 생성(검색 X). ① 단계만 |
 | **download 스킬** | `skills/download/` | PMID/PMCID → OA PDF 저장 + 비OA 링크 리포트. search 후속 |
 | **setup 스킬** | `skills/setup/` | web UI 설정 (api_key·tool·email) — 상세 [setup.md](./setup.md) |
-| **paper-search-expert 에이전트** | `agents/paper-search-expert.md` | **생성 모드**(WHAT·recall): 주제 분해→`mesh-lookup`→`QueryRole` 다중 검색식 / **재랭킹 모드**(RANK·precision): pre-score 후보→top-N 의미 점수. prompt·schema·reference 분리(물리 1 agent) — [agents.md](./agents.md) |
-| **paper-search** (MCP) | `src/mcp/tools/paperSearch/` | ESearch(count probe)→segment→union→dedup. 대량 async job |
-| **mesh-lookup** (MCP) | `src/mcp/tools/meshLookup/` | MeSH Descriptor/SCR/entry 매핑 (`db=mesh`) |
-| **fetch-fulltext** (MCP) | `src/mcp/tools/fetchFulltext/` | idconv→oa.fcgi→PMC OA 다운로드 (per-format 실패 표현) |
-| **setup / auth-check** (MCP) | `src/mcp/tools/{setup,authCheck}/` | 설정 저장 / EInfo 도달성·rate 표시 |
+| **paper-search-expert 에이전트** | `agents/paper-search-expert.md` | **생성 모드**(WHAT·recall): 주제 분해→`mesh_lookup`→`QueryRole` 다중 검색식 / **재랭킹 모드**(RANK·precision): pre-score 후보→top-N 의미 점수. prompt·schema·reference 분리(물리 1 agent) — [agents.md](./agents.md) |
+| **paper_search** (MCP) | `src/mcp/tools/paperSearch/` | ESearch(count probe)→segment→union→dedup. 대량 async job |
+| **mesh_lookup** (MCP) | `src/mcp/tools/meshLookup/` | MeSH Descriptor/SCR/entry 매핑 (`db=mesh`) |
+| **fetch_fulltext** (MCP) | `src/mcp/tools/fetchFulltext/` | idconv→oa.fcgi→PMC OA 다운로드 (per-format 실패 표현) |
+| **setup / auth_check** (MCP) | `src/mcp/tools/{setup,authCheck}/` | 설정 저장 / EInfo 도달성·rate 표시 |
 | **httpClient** (core) | `src/core/httpClient/` | 모든 외부 HTTP 단일 통로: fetch·retry·429 backoff·**auto-POST**·**SSRF** eutils allowlist·tool+email 주입 (atlassian 차용) |
 | **segmenter** (core) | `src/core/segmenter/` | `Count>10000` 시 날짜(dp/edat/crdt) 버킷 분할(재귀) → 전수 확보 |
 | **union** (core) | `src/core/union/` | dedup **복합키 PMID>DOI>title**·`hit_by`·`query_role` 병합·저자 구조화(LastName/ForeName/Initials/Collective/ORCID 분리) |
@@ -35,12 +35,12 @@ RAG ①②③: ①LLM 검색식 다양화(`QueryRole`·ESpell) → ②MCP 결정
 1. 사용자: "X 주제 논문 찾아줘" (자연어 주제)
 2. search(Dispatcher): intent=FULL_SEARCH → 상태머신 진입 (INTAKE→CLASSIFY)
 3. → QUERY_GEN: paper-search-expert(생성 모드)
-      ├ 주제 분해 → mesh-lookup(MCP): Descriptor/SCR/entry 매핑
+      ├ 주제 분해 → mesh_lookup(MCP): Descriptor/SCR/entry 매핑
       └ QueryRole 다중 검색식 생성 (ATM_BROAD·MESH_EXPLODED·MESH_NOEXP·TIAB_SYNONYM·ALL_FIELDS·SIMILAR)
       *(interactive: 검색식 제시 → USER_REFINE 검토 루프 → SEARCH)*
-4. → SEARCH: paper-search(MCP) 내부 단계(코드, 상태 비노출):
+4. → SEARCH: paper_search(MCP) 내부 단계(코드, 상태 비노출):
       query_lint → count_probe → (10k 초과)date_segment → fetch_ids → fetch_records(POST·batch) → union·dedup → partial_recovery
-      *(대량: paper-search-start → async job → 진행률 피드백 → paper-search-results)*
+      *(대량: paper_search_start → async job → 진행률 피드백 → paper_search_results)*
       ├ recall 게이트: union 빈약 → QUERY_GEN 복귀(broad화)
       └ guard: recallIter≤4 + operationBudget(maxRequests·maxRecords·maxWallMs) + rateRetry≤5
 5. → RANK: paper-search-expert(재랭킹 모드)
@@ -61,7 +61,7 @@ RAG ①②③: ①LLM 검색식 다양화(`QueryRole`·ESpell) → ②MCP 결정
 ```
 1. 사용자: "이 주제 PubMed 검색식 만들어줘" (검색 실행 의사 없음)
 2. search/query: intent=QUERY_ONLY → CLASSIFY 종결 분기
-3. → QUERY_GEN: paper-search-expert(생성 모드) + mesh-lookup → QueryRole 검색식 집합
+3. → QUERY_GEN: paper-search-expert(생성 모드) + mesh_lookup → QueryRole 검색식 집합
 4. → query_lint 통과 검색식 반환 (① 만; SEARCH·RANK 미진입)
 ```
 
@@ -72,7 +72,7 @@ RAG ①②③: ①LLM 검색식 다양화(`QueryRole`·ESpell) → ②MCP 결정
 ```
 1. 사용자: PMID/PMCID 목록 또는 직전 search 결과의 레코드
 2. download 스킬: intent=DOWNLOAD
-3. → fetch-fulltext(MCP): idconv(PMID→PMCID) → oa.fcgi(OA·license 판별)
+3. → fetch_fulltext(MCP): idconv(PMID→PMCID) → oa.fcgi(OA·license 판별)
       ├ OA: PDF/XML/TAR 저장 (license·sha256 기록)
       └ 비OA: DOI·LinkOut 링크만 리포트 (저장 X)
 4. → downloaded[](license·oaStatus·sha256) + unavailable[](reason·links). per-format 실패 개별 표현.
@@ -82,7 +82,7 @@ RAG ①②③: ①LLM 검색식 다양화(`QueryRole`·ESpell) → ②MCP 결정
 
 ## 아티팩트 계약 — SearchManifest
 
-모든 검색은 **SearchManifest**(JSON) 를 기록한다 → 재현·디버깅·논문 방법론 인용. `paper-search` 출력의 `reproducibility.manifestPath` 가 이를 가리킨다. WebEnv 가 ~1시간 만료되므로 **fetched PMID checksum(snapshot)** 이 재현성의 1차 근거다. TS 정본은 `src/types/manifest.ts`, 도구 계약은 [mcp-tools.md](./mcp-tools.md).
+모든 검색은 **SearchManifest**(JSON) 를 기록한다 → 재현·디버깅·논문 방법론 인용. `paper_search` 출력의 `reproducibility.manifestPath` 가 이를 가리킨다. WebEnv 가 ~1시간 만료되므로 **fetched PMID checksum(snapshot)** 이 재현성의 1차 근거다. TS 정본은 `src/types/manifest.ts`, 도구 계약은 [mcp-tools.md](./mcp-tools.md).
 
 ```ts
 interface SearchManifest {

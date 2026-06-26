@@ -1,6 +1,6 @@
 ## Purpose
 
-비동기 R 잡 인메모리 레지스트리. 장수 MCP 서버 프로세스 동안 잡의 생명주기(queued→running→succeeded/failed/timeout/cancelled)와 AbortController·결과를 추적한다. `run-r`·`get-r-job`·`cancel-r-job` 세 도구가 공유한다.
+비동기 R 잡 인메모리 레지스트리. 장수 MCP 서버 프로세스 동안 잡의 생명주기(queued→running→succeeded/failed/timeout/cancelled)와 AbortController·결과를 추적한다. `run_r`·`get_r_job`·`cancel_r_job` 세 도구가 공유한다.
 
 ## Structure
 

@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { ProviderSchema, TierSchema } from '../../../types/conversation.js';
 import { VERSION } from '../../../version.js';
 import { wrapHandler } from '../../shared/index.js';
@@ -12,7 +13,7 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: 'tools', version: VERSION });
 
   server.registerTool(
-    'start_conversation',
+    McpToolName.START_CONVERSATION,
     {
       description:
         'Delegate a prompt to an external LLM CLI (codex = code/shell; gemini or antigravity = web research & ' +
@@ -48,7 +49,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'continue_conversation',
+    McpToolName.CONTINUE_CONVERSATION,
     {
       description:
         'Continue an external LLM session by session_id, keeping its original provider. ' +
@@ -84,7 +85,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'open_settings',
+    McpToolName.OPEN_SETTINGS,
     {
       description:
         'Open the cennad settings UI in a local browser to configure provider ratio, intervention strength, ' +

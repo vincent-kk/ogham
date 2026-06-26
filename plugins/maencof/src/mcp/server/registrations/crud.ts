@@ -4,6 +4,7 @@
  * 5 mutate (create, capture_insight, update, delete, move) + 1 plain read (read).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import {
@@ -21,7 +22,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── create (mutate) ───────────────────────────────────────
   registerMutateTool(
     server,
-    'create',
+    McpToolName.CREATE,
     {
       description:
         'Creates a new memory document in the knowledge tree. Frontmatter and H1 title are auto-generated — do NOT include them in the content field.',
@@ -78,7 +79,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── capture_insight (mutate) ──────────────────────────────
   registerMutateTool(
     server,
-    'capture_insight',
+    McpToolName.CAPTURE_INSIGHT,
     {
       description:
         'Captures a conversation insight as a knowledge document. Auto-adds auto-insight tag, tracks stats, and handles session capture limits. Use this when you detect a meaningful insight in conversation.',
@@ -91,7 +92,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── read (plain read) ─────────────────────────────────────
   registerReadTool(
     server,
-    'read',
+    McpToolName.READ,
     {
       description:
         'Reads a document and returns Frontmatter + body. When include_related=true, also includes SA-based related documents.',
@@ -117,7 +118,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── update (mutate) ───────────────────────────────────────
   registerMutateTool(
     server,
-    'update',
+    McpToolName.UPDATE,
     {
       description:
         'Updates an existing document. The updated field in Frontmatter is automatically refreshed.',
@@ -191,7 +192,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── delete (mutate) ───────────────────────────────────────
   registerMutateTool(
     server,
-    'delete',
+    McpToolName.DELETE,
     {
       description:
         'Deletes a document. Layer 1 documents cannot be deleted. Requires force=true if backlinks exist.',
@@ -210,7 +211,7 @@ export function registerCrudTools(server: McpServer): void {
   // ─── move (mutate) ─────────────────────────────────────────
   registerMutateTool(
     server,
-    'move',
+    McpToolName.MOVE,
     {
       description:
         'Moves a document to a different Layer (transition). Layer 1 documents cannot be moved.',

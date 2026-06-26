@@ -12,7 +12,7 @@ plugin: r-statistics
 
 Run the statistical assumptions a chosen method requires and produce
 `assumption.{id}` artifacts (each with a `passed` boolean) that
-`assert-analysis-plan` consumes. Execution runs through `mcp__plugin_r-statistics_tools__run-r`.
+`assert_analysis_plan` consumes. Execution runs through `mcp__plugin_r-statistics_tools__run_r`.
 
 ## Steps
 
@@ -20,7 +20,7 @@ Run the statistical assumptions a chosen method requires and produce
    `../analyze/references/methods/{technique}/meta.yaml`
    `required_assumptions` (id + check). For a partial-step call, infer the
    assumptions from the method the user names.
-2. **Run each check** in R (via `run-r`), mapping check → test:
+2. **Run each check** in R (via `run_r`), mapping check → test:
 
    | check                 | R                                                                   |
    | --------------------- | ------------------------------------------------------------------- |
@@ -52,7 +52,7 @@ Run the statistical assumptions a chosen method requires and produce
 ## Output
 
 - One `assumption.{id}` artifact per required assumption (`passed` flag).
-- A summary table the dispatcher passes to `assert-analysis-plan` as
+- A summary table the dispatcher passes to `assert_analysis_plan` as
   `assumptionArtifacts`.
 
 ## Boundaries

@@ -15,6 +15,7 @@ import {
   MAX_DATA_REFS,
   MAX_SCRIPT_CHARS,
 } from "../../../constants/defaults.js";
+import { McpToolName } from "../../../constants/mcpToolNames.js";
 import { VERSION } from "../../../version.js";
 import { wrapHandler } from "../../shared/index.js";
 import {
@@ -81,12 +82,12 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: "tools", version: VERSION });
 
   server.registerTool(
-    "run-r",
+    McpToolName.RUN_R,
     {
       description:
         "Execute R code in an isolated workspace via headless Rscript and " +
         "collect artifacts. Statically blocks unsafe calls; async by default " +
-        "(poll with get-r-job). Execution safety only — not statistical policy.",
+        "(poll with get_r_job). Execution safety only — not statistical policy.",
       inputSchema: {
         scriptCode: z
           .string()
@@ -137,13 +138,13 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "get-r-job",
+    McpToolName.GET_R_JOB,
     {
       description:
         "Poll an async R job's status and (when finished) its result and " +
         "collected artifacts.",
       inputSchema: {
-        jobId: z.string().describe("The jobId returned by run-r."),
+        jobId: z.string().describe("The jobId returned by run_r."),
         includeStdout: z
           .boolean()
           .optional()
@@ -159,13 +160,13 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "cancel-r-job",
+    McpToolName.CANCEL_R_JOB,
     {
       description:
         "Cancel a running R job (terminates its Rscript process). Returns " +
         "cancelled / already_finished / not_found.",
       inputSchema: {
-        jobId: z.string().describe("The jobId returned by run-r."),
+        jobId: z.string().describe("The jobId returned by run_r."),
       },
       annotations: {
         readOnlyHint: false,
@@ -177,7 +178,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "assert-analysis-plan",
+    McpToolName.ASSERT_ANALYSIS_PLAN,
     {
       description:
         "Deterministic statistical gate: validates method ↔ outcome/assumption " +

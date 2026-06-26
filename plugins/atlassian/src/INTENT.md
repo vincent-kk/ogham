@@ -1,6 +1,6 @@
 ## Purpose
 
-Atlassian plugin source root. 4 MCP tools (fetch + convert + auth-check + setup), core infrastructure, and format converter.
+Atlassian plugin source root. 4 MCP tools (fetch + convert + auth_check + setup), core infrastructure, and format converter.
 
 ## Structure
 

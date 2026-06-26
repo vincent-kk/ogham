@@ -5,6 +5,7 @@
  * + 2 plain reads (kg_status, kg_build).
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
@@ -21,7 +22,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_search (fresh read) ──────────────────────────────────────
   registerReadTool(
     server,
-    'kg_search',
+    McpToolName.KG_SEARCH,
     {
       description:
         'Explores related documents via Spreading Activation (SA) from seed nodes (paths or keywords).',
@@ -79,7 +80,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_navigate (fresh read) ────────────────────────────────────
   registerReadTool(
     server,
-    'kg_navigate',
+    McpToolName.KG_NAVIGATE,
     {
       description:
         'Retrieves neighbors (inbound/outbound links, parent/child, siblings) of a specific node.',
@@ -106,7 +107,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_context (fresh read) ─────────────────────────────────────
   registerReadTool(
     server,
-    'kg_context',
+    McpToolName.KG_CONTEXT,
     {
       description:
         'Returns a context block assembled from documents relevant to the query within a token budget.',
@@ -132,7 +133,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_status (plain read; uses cached graph without freshness gate) ─
   registerReadTool(
     server,
-    'kg_status',
+    McpToolName.KG_STATUS,
     {
       description:
         'Retrieves index status (node count, edge count, stale ratio, freshness). Diagnostic only — not recommended for autonomous LLM use.',
@@ -148,7 +149,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_build (plain read — invokes the rebuild itself) ───────────
   registerReadTool(
     server,
-    'kg_build',
+    McpToolName.KG_BUILD,
     {
       description:
         'Builds the knowledge graph index. Default is incremental; the MCP server also auto-triggers a background rebuild after stale-node accumulation, so explicit invocation is rarely needed. force=true triggers an explicit full rebuild.',
@@ -163,7 +164,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── boundary_create (mutate) ────────────────────────────────────
   registerMutateTool(
     server,
-    'boundary_create',
+    McpToolName.BOUNDARY_CREATE,
     {
       description:
         'Creates a boundary document in 05_Context/boundary/. Boundary documents bridge multiple layers and enable CROSS_LAYER edges.',
@@ -186,7 +187,7 @@ export function registerKgTools(server: McpServer): void {
   // ─── kg_suggest_links (fresh read) ───────────────────────────────
   registerReadTool(
     server,
-    'kg_suggest_links',
+    McpToolName.KG_SUGGEST_LINKS,
     {
       description:
         'Suggests link candidates from the existing knowledge base for a target document. Two-stage algorithm: tag Jaccard similarity + SA reinforcement.',

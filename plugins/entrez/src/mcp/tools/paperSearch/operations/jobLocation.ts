@@ -2,7 +2,7 @@ import { join } from "node:path";
 
 import { jobPath } from "../../../../constants/paths.js";
 
-/** Options for async paper-search job operations. */
+/** Options for async paper_search job operations. */
 export interface JobRunOptions {
   /** Override job directory (tests); defaults to the plugin cache. */
   dir?: string;

@@ -17,10 +17,10 @@ verify EInfo reachability. The api_key is handled entirely by a local web UI —
 ## Flow
 
 1. Parse arguments:
-   - `--test` → call `mcp_tools_auth-check` with `probeEInfo: true` and report
+   - `--test` → call `mcp_tools_auth_check` with `probeEInfo: true` and report
      status (configured, reachable, rate, db list). Skip the wizard.
    - `--reset` → call `mcp_tools_setup` with `mode: "new"` (overwrite).
-   - no flags → call `mcp_tools_auth-check` first; if `configured: false` invoke
+   - no flags → call `mcp_tools_auth_check` first; if `configured: false` invoke
      `mcp_tools_setup` `mode: "new"`; if already configured, confirm with the
      user then invoke `mode: "edit"`.
 2. The setup tool launches a local `127.0.0.1` web server and opens the browser
@@ -37,5 +37,5 @@ verify EInfo reachability. The api_key is handled entirely by a local web UI —
 
 ## Recovery
 
-`auth-check` is the pre-flight and the recovery entry point (rate issues,
+`auth_check` is the pre-flight and the recovery entry point (rate issues,
 missing identifiers). See [`../_shared/mcp-tools.md`](../_shared/mcp-tools.md).

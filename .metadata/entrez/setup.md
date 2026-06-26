@@ -63,13 +63,13 @@ const EntrezCredentialsSchema = z.object({
 4. **수명** — 유휴 5분 자동 종료(`AUTO_SHUTDOWN_MS`), 요청마다 `resetTimer`.
 5. **LLM 무접근 보장** — 키는 브라우저 폼→로컬서버→`credentials.json`(0o600)로만 흐른다. 채팅 메시지·도구 인자·반환값 어디에도 `api_key` 평문이 실리지 않는다.
 
-## auth-check 연계
+## auth_check 연계
 
-`auth-check` 도구(`mcp/tools/authCheck/`)가 설정 상태를 보고하고 reachability를 점검한다(atlassian `auth-check` 대응).
+`auth_check` 도구(`mcp/tools/authCheck/`)가 설정 상태를 보고하고 reachability를 점검한다(atlassian `auth_check` 대응).
 
 - `loadConfig` → `{ configured: tool/email 존재?, api_key_present(불리언·값 마스킹), default_db, base_url }`.
 - `connection_test: true` → **EInfo(`einfo.fcgi`) reachability** + latency + **유효 rate**(`NO_KEY`=3/s, `WITH_KEY`=10/s) 표시. EInfo 200 = base_url 도달·식별자 수용.
-- **setup 스킬 pre-flight**(atlassian 흐름 차용): 인자 없을 때 먼저 `auth-check` → 미설정이면 `setup{mode:"new"}`, 설정돼 있으면 사용자 확인 후 `setup{mode:"edit"}`. `--test`는 wizard 생략하고 `auth-check{connection_test:true}`만. `--reset`은 `setup{mode:"new"}`. rate 초과·식별자 누락 등 실패 시 auth-check가 복구 진입점.
+- **setup 스킬 pre-flight**(atlassian 흐름 차용): 인자 없을 때 먼저 `auth_check` → 미설정이면 `setup{mode:"new"}`, 설정돼 있으면 사용자 확인 후 `setup{mode:"edit"}`. `--test`는 wizard 생략하고 `auth_check{connection_test:true}`만. `--reset`은 `setup{mode:"new"}`. rate 초과·식별자 누락 등 실패 시 auth_check가 복구 진입점.
 
 ## 차용 매핑 (atlassian → entrez)
 
@@ -82,5 +82,5 @@ const EntrezCredentialsSchema = z.object({
 | `SetupFormDataSchema`(zod) + `restoreMaskedValues` | `EntrezConfigSchema`(zod) + `api_key` 마스킹 복원 |
 | configManager `config.json`(0o600) | `core/config` `config.json`(0o600) |
 | authManager `credentials.json`(0o600) | `api_key` → `credentials.json`(0o600) |
-| `auth-check`(authenticated + services) | `auth-check`(configured + EInfo + rate) |
+| `auth_check`(authenticated + services) | `auth_check`(configured + EInfo + rate) |
 | CSRF: POST = application/json, 127.0.0.1 전용 | 동일 |

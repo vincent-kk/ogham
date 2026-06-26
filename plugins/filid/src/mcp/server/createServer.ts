@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { SUPPORTED_LANGUAGES } from '../../ast/astGrepShared/astGrepShared.js';
+import { McpToolName } from '../../constants/mcpToolNames.js';
 import { VERSION } from '../../version.js';
 import { handleAstAnalyze } from '../tools/astAnalyze/astAnalyze.js';
 import { handleAstGrepReplace } from '../tools/astGrepReplace/astGrepReplace.js';
@@ -31,7 +32,7 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: 'filid', version: VERSION });
 
   server.registerTool(
-    'ast_analyze',
+    McpToolName.AST_ANALYZE,
     {
       description:
         'Analyze source code AST: dependencies, LCOM4, cyclomatic complexity, or semantic diff.',
@@ -53,7 +54,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'fractal_navigate',
+    McpToolName.FRACTAL_NAVIGATE,
     {
       description:
         'Navigate the FCA-AI fractal tree: classify, sibling-list, or full tree.',
@@ -88,7 +89,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'doc_compress',
+    McpToolName.DOC_COMPRESS,
     {
       description:
         'Compress documents for context management via reversible, lossy, or auto mode.',
@@ -112,7 +113,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'test_metrics',
+    McpToolName.TEST_METRICS,
     {
       description:
         'Analyze test metrics: count cases, check 3+12 rule, or run decision tree.',
@@ -134,7 +135,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'project_init',
+    McpToolName.PROJECT_INIT,
     {
       description:
         'Initialize FCA-AI project config only (.filid/config.json). Rule doc deployment is handled separately by rule_docs_sync via the setup skill.',
@@ -152,7 +153,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'rule_docs_sync',
+    McpToolName.RULE_DOCS_SYNC,
     {
       description:
         'Filid-setup skill only: inspect or synchronise `.claude/rules/*.md` deployment against the user selection. Actions: status | sync | manifest.',
@@ -177,7 +178,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'fractal_scan',
+    McpToolName.FRACTAL_SCAN,
     {
       description:
         'Scan project directory to build FractalTree and return ScanReportDto.',
@@ -191,7 +192,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'drift_detect',
+    McpToolName.DRIFT_DETECT,
     {
       description: 'Detect structural drift between project and FCA-AI rules.',
       inputSchema: z.object({
@@ -204,7 +205,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'lca_resolve',
+    McpToolName.LCA_RESOLVE,
     {
       description:
         'Compute Lowest Common Ancestor of two modules in the fractal tree.',
@@ -218,7 +219,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'rule_query',
+    McpToolName.RULE_QUERY,
     {
       description: 'Query or check compliance of FCA-AI structure rules.',
       inputSchema: z.object({
@@ -242,7 +243,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'structure_validate',
+    McpToolName.STRUCTURE_VALIDATE,
     {
       description:
         'Validate fractal structure compliance and return violations (read-only; auto-fix not supported).',
@@ -255,7 +256,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'review_manage',
+    McpToolName.REVIEW_MANAGE,
     {
       description: 'Manage code review governance sessions.',
       inputSchema: z.object({
@@ -285,7 +286,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'debt_manage',
+    McpToolName.DEBT_MANAGE,
     {
       description:
         'Manage technical debt items: create, list, resolve, or calculate bias.',
@@ -340,7 +341,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'cache_manage',
+    McpToolName.CACHE_MANAGE,
     {
       description:
         'Manage filid incremental cache: compute, save, or retrieve hashes.',
@@ -356,7 +357,7 @@ export function createServer(): McpServer {
 
   // AST Grep tools — gracefully degrade if @ast-grep/napi is unavailable
   server.registerTool(
-    'ast_grep_search',
+    McpToolName.AST_GREP_SEARCH,
     {
       description:
         'Search for code patterns using AST matching with meta-variables.',
@@ -372,7 +373,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'ast_grep_replace',
+    McpToolName.AST_GREP_REPLACE,
     {
       description:
         'Replace code patterns using AST matching. dry_run=true by default.',
@@ -388,7 +389,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'config_patch_validate',
+    McpToolName.CONFIG_PATCH_VALIDATE,
     {
       description:
         'Validate a prospective .filid/config.json patch against FilidConfigSchema. Returns { valid, errors[], suggestion? } — errors[] is non-empty when the patch breaks strict schema; suggestion is a sanitised JSON string that would pass. Use this before emitting any .filid/config.json code patch in Phase D (review Step D.6.4).',
@@ -401,7 +402,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'coverage_verify',
+    McpToolName.COVERAGE_VERIFY,
     {
       description: 'Verify per-consumer test coverage for a shared module.',
       inputSchema: z.object({

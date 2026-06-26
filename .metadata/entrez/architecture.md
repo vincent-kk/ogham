@@ -19,7 +19,7 @@
 [Skill]      search · query · download · setup
                 └ lazy: _shared/{mcp-tools,eutils,query-strategy,rerank}.md
      ↓ (mcp_*)
-[MCP]        paper-search · mesh-lookup · fetch-fulltext · setup · auth-check  (결정론·계약)
+[MCP]        paper_search · mesh_lookup · fetch_fulltext · setup · auth_check  (결정론·계약)
      ↓ (HTTP)
 [HTTP]       atlassian httpClient — fetch + retry + 429 backoff + auto-POST + SSRF(eutils allowlist)
      ↓
@@ -37,7 +37,7 @@
 Claude Code plugin에서 결정적 코드 실행 자리는 MCP 서버뿐이다(hook 미사용). 따라서 `search` Dispatcher는 **경량 유지 + 내부 단계화** 원칙을 따른다:
 
 - **상태/전이 규칙** = `skills/search/references/state-machine.md` (문서로 명시, LLM이 따름). 상태 6 + 종결 2: `INTAKE·CLASSIFY·QUERY_GEN·SEARCH·RANK·COMPLETE` + `FAILED·BLOCKED_NEEDS_USER`. `interactive`엔 `QUERY_GEN → USER_REFINE → SEARCH` 검토 루프.
-- **검색 도메인 하드 규칙** = MCP `paper-search` 내부 결정론 단계(`query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → partial_recovery`). 상태로 노출하지 않아 Dispatcher를 경량으로 유지한다.
+- **검색 도메인 하드 규칙** = MCP `paper_search` 내부 결정론 단계(`query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → partial_recovery`). 상태로 노출하지 않아 Dispatcher를 경량으로 유지한다.
 - **수렴 guard** = `recallIter ≤ 4` + `operationBudget`(maxRequests·maxRecords·maxWallMs) + `rateRetry ≤ 5`. 전이 수가 아닌 budget으로 종료. 대량 검색은 `SEARCH`가 async job을 생성해 진행률(MCP progress)을 피드백한다.
 
 → "비결정 위험"은 명시적 전이표 + iteration guard + operationBudget로 박아 억제. 상세 [dispatcher.md](./dispatcher.md).

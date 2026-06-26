@@ -71,11 +71,11 @@ Confluence REST API domain router. Resolves the correct endpoint, parameters, an
 
 ## Auth Recovery
 
-No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../_shared/auth-check.md).
+No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth_check.md`](../_shared/auth_check.md).
 
 ## References
 
-- `../_shared/auth-check.md` — Pre-flight authentication check
+- `../_shared/auth_check.md` — Pre-flight authentication check
 - `../_shared/error-handling.md` — HTTP error handling protocol
 - `../_shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
 - `../_shared/mcp-tools.md` — Available MCP tools and usage

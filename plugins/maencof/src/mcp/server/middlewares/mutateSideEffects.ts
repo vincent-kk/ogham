@@ -2,6 +2,7 @@
  * @file mutateSideEffects.ts
  * @description Mutate 도구 1회 후 stale-entries append + usage-stats + 임계치 도달 시 background rebuild.
  */
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { STALE_REBUILD_THRESHOLD } from '../../../constants/thresholds.js';
 import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
@@ -23,11 +24,11 @@ function classifyEntries(
   also: string | null | undefined,
 ): StaleEntry[] {
   const entries: StaleEntry[] = [];
-  if (toolName === 'delete') {
+  if (toolName === McpToolName.DELETE) {
     if (primary) entries.push({ path: primary, op: 'delete' });
     return entries;
   }
-  if (toolName === 'move') {
+  if (toolName === McpToolName.MOVE) {
     if (primary) entries.push({ path: primary, op: 'delete' });
     if (also && also !== primary) entries.push({ path: also, op: 'mutate' });
     return entries;

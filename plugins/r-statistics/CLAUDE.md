@@ -23,13 +23,13 @@ yarn rStatistics version:sync  # package.json → src/version.ts + plugin.json
 - **Dispatcher** — `skills/analyze/` state machine (intent → transitions → gate → mode).
 - **Agents** — `agents/{statistician,r-expert,methodology-validator}.md` (recommend only).
 - **Skills** — 6 exposed (analyze, data-preparation, assumption-check, visualization, reporting, r-setup) + lazy `skills/analyze/references/methods/{technique}/`.
-- **MCP** — `tools` server, 4 tools: `run-r`, `get-r-job`, `cancel-r-job`, `assert-analysis-plan`.
+- **MCP** — `tools` server, 4 tools: `run_r`, `get_r_job`, `cancel_r_job`, `assert_analysis_plan`.
 - **R-CLI** — headless `Rscript --vanilla` in a temp workspace with the `shared/contract.R` execution contract.
 
 ## Plugin Runtime
 
 - Skill names have no plugin prefix (directory name = skill name).
-- MCP server name is `tools`; registered tool names are kebab-case — skills/agents reference them as `mcp__plugin_r-statistics_tools__<name>` (e.g. `mcp__plugin_r-statistics_tools__run-r`).
+- MCP server name is `tools`; registered tool names are kebab-case — skills/agents reference them as `mcp__plugin_r-statistics_tools__<name>` (e.g. `mcp__plugin_r-statistics_tools__run_r`).
 - Agents auto-discover from `agents/` — **do not** add an `agents` field to `plugin.json` (matches filid).
 - **No hooks.**
 
@@ -39,7 +39,7 @@ yarn rStatistics version:sync  # package.json → src/version.ts + plugin.json
 - **Build artifacts**: `bridge/mcp-server.cjs` is the runtime; `dist/` is library export. Heavy/statistics deps never enter the bundle (size guard in `buildMcpServer.mjs`).
 - **Disk paths**: under `~/.claude/plugins/r-statistics/`.
 - **The assert ruleset** (`src/mcp/tools/assertAnalysisPlan/operations/ruleset.ts`) is the deterministic runtime authority; keep it in sync with the `methods/{technique}/meta.yaml` catalog.
-- **R packages**: `r-setup` always installs `REQUIRED_PACKAGES` and offers the rest by use case via `PACKAGE_USE_CASES` (`src/constants/defaults.ts`); `PACKAGE_WHITELIST` is the run-r baseline. Keep the skill's inlined required/use-case lists in sync with those constants.
+- **R packages**: `r-setup` always installs `REQUIRED_PACKAGES` and offers the rest by use case via `PACKAGE_USE_CASES` (`src/constants/defaults.ts`); `PACKAGE_WHITELIST` is the run_r baseline. Keep the skill's inlined required/use-case lists in sync with those constants.
 - **FCA**: domain roots (`core`, `core/*`, `mcp`, `mcp/server`, `mcp/shared`, `mcp/tools`, each tool) carry `INTENT.md`; `types`/`constants`/`lib`/`utils`/`operations` are organs.
 
 ## References

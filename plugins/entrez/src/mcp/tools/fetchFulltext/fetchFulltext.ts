@@ -11,7 +11,7 @@ import { downloadFulltext } from "./operations/downloadFulltext.js";
 const DEFAULT_FORMATS = [FulltextFormat.PDF];
 
 /**
- * fetch-fulltext — for each id: resolve PMCID → check OA/license → download
+ * fetch_fulltext — for each id: resolve PMCID → check OA/license → download
  * requested formats (OA only, license-gated) or report fallback links.
  */
 export async function runFetchFulltext(

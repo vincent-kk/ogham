@@ -21,7 +21,7 @@ Dispatcher (Claude Code main agent)
     ├── Agent: jira / confluence / media
     ├── Skill: setup / jira / confluence / download / media-analysis
     └── MCP "tools" server
-            └── fetch / convert / auth-check / setup
+            └── fetch / convert / auth_check / setup
 ```
 
 의존성 방향은 단방향: **Dispatcher → Agent → Skill → MCP → Atlassian REST API**. 하위 레이어는 상위 레이어를 인지하지 않는다.

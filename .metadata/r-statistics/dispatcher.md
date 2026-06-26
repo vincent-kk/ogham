@@ -1,6 +1,6 @@
 # r-statistics — Dispatcher (상태머신)
 
-`analyze` 스킬이 구현. 상태/전이 규칙은 `skills/analyze/references/state-machine.md`, 결정적 강제는 `assert-analysis-plan` MCP, 상태 영속은 `workspace`. 비결정 위험은 명시적 전이표 + iteration guard로 억제.
+`analyze` 스킬이 구현. 상태/전이 규칙은 `skills/analyze/references/state-machine.md`, 결정적 강제는 `assert_analysis_plan` MCP, 상태 영속은 `workspace`. 비결정 위험은 명시적 전이표 + iteration guard로 억제.
 
 **불변 규칙**: 상태 전이는 Dispatcher만. 에이전트는 추천만. Dispatcher는 에이전트만 호출(Skill/MCP 직접 호출은 에이전트가).
 

@@ -1,6 +1,6 @@
 # entrez — Dispatcher (상태머신)
 
-`search` 스킬이 구현. 상태/전이 규칙은 `skills/search/references/state-machine.md`, 검색식 다양화·재랭킹 추론은 [agents.md](./agents.md)의 `paper-search-expert`, 결정론적 강제(10k cap·POST 전환·rate backoff·dedup)는 `paper-search` MCP([mcp-tools.md](./mcp-tools.md)). 상태는 **경량**으로 유지하고 검색 도메인 규칙은 코드 단계(`SEARCH` 내부)로 흡수한다. 비결정 위험은 명시적 전이표 + iteration guard로 억제.
+`search` 스킬이 구현. 상태/전이 규칙은 `skills/search/references/state-machine.md`, 검색식 다양화·재랭킹 추론은 [agents.md](./agents.md)의 `paper-search-expert`, 결정론적 강제(10k cap·POST 전환·rate backoff·dedup)는 `paper_search` MCP([mcp-tools.md](./mcp-tools.md)). 상태는 **경량**으로 유지하고 검색 도메인 규칙은 코드 단계(`SEARCH` 내부)로 흡수한다. 비결정 위험은 명시적 전이표 + iteration guard로 억제.
 
 **불변 규칙**: 상태 전이는 Dispatcher만. agent는 추천만(검색식 생성·재랭킹). Dispatcher는 agent만 `Task`로 호출하고, MCP 직접 호출은 agent가 한다. 모든 전이·검색은 `SearchManifest`에 기록(재현성, [spec.md](./spec.md)).
 
@@ -12,7 +12,7 @@ enum `IntentType`.
 |--------|------|------|
 | `FULL_SEARCH` | 주제/질문 + "찾아줘·검색·논문·리뷰" + 결과(레코드) 기대 | 전체 파이프라인(①②③) |
 | `QUERY_ONLY` | "검색식만", "PubMed 쿼리 만들어", 실행 요청 없음 | `query` 스킬 직행 → ① 만 |
-| `DOWNLOAD` | PMID/PMCID/DOI 제시 + "PDF·전문·받아줘" | `download` 스킬 직행 → `fetch-fulltext` |
+| `DOWNLOAD` | PMID/PMCID/DOI 제시 + "PDF·전문·받아줘" | `download` 스킬 직행 → `fetch_fulltext` |
 | `NEEDS_CLARIFICATION` | 주제 모호·범위 불명·db 미정 | 사용자에게 질문 |
 
 ## 상태 (6 + 종결 2)
@@ -25,7 +25,7 @@ enum `IntentType`.
 
 ## SEARCH 내부 단계 (코드 단계 — 상태로 노출 안 함)
 
-`SEARCH`는 단일 상태지만 내부는 `paper-search` MCP의 결정론 파이프라인. 경량 상태머신 유지를 위해 아래는 **상태가 아닌 코드 단계**로 캡슐화(전이표에 등장하지 않음, 자원 소비만 `operationBudget`에 합산):
+`SEARCH`는 단일 상태지만 내부는 `paper_search` MCP의 결정론 파이프라인. 경량 상태머신 유지를 위해 아래는 **상태가 아닌 코드 단계**로 캡슐화(전이표에 등장하지 않음, 자원 소비만 `operationBudget`에 합산):
 
 | 단계 | 동작 | 근거 |
 |------|------|------|
@@ -45,7 +45,7 @@ enum `IntentType`.
 | INTAKE | request | CLASSIFY | normalize, bind `{topic, db, dateRange, mode}` |
 | CLASSIFY | `FULL_SEARCH` | QUERY_GEN | — |
 | CLASSIFY | `QUERY_ONLY` | (`query` 스킬) → COMPLETE | 검색식만 반환(검색 X) |
-| CLASSIFY | `DOWNLOAD` | (`download` 스킬·`fetch-fulltext`) → COMPLETE | search 후속 |
+| CLASSIFY | `DOWNLOAD` | (`download` 스킬·`fetch_fulltext`) → COMPLETE | search 후속 |
 | CLASSIFY | `NEEDS_CLARIFICATION` | BLOCKED_NEEDS_USER | 주제·범위·db 질문 |
 | QUERY_GEN | 검색식 생성(`QueryRole` 다중) | SEARCH | agent 생성 모드 *(interactive: 검색식 제시·USER_REFINE)* |
 | QUERY_GEN | (interactive) 사용자 수정 | QUERY_GEN | USER_REFINE 반영·재생성 |
@@ -108,7 +108,7 @@ enum `ExecutionMode`.
 
 `SEARCH`가 대량(수천~만 건·10k segment)을 감지하면 동기 응답 대신 async job:
 
-- `paper-search-start` → job_id 발급 → `paper-search-status` 폴링(MCP progress로 진행률 피드백) → `paper-search-results`.
+- `paper_search_start` → job_id 발급 → `paper_search_status` 폴링(MCP progress로 진행률 피드백) → `paper_search_results`.
 - `ids_only` + `cursor`로 후보를 먼저 축소, **deterministic pre-score**로 top-N만 추려 `RANK`(LLM)에 전달(전건 LLM 재랭킹 금지).
 - job 실패·timeout은 `partial_recovery`로 부분 결과 보존, budget 초과 시 `FAILED`.
 

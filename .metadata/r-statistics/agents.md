@@ -18,9 +18,9 @@ maxTurns: <N>
 
 | 에이전트                  | 책임                                                                       | 질문  | model  | 주요 도구                                                                                    |
 | ------------------------- | -------------------------------------------------------------------------- | ----- | ------ | -------------------------------------------------------------------------------------------- |
-| **statistician**          | 데이터+가설 → 기법 선택(결정트리), 분석계획(SAP) 작성, 가정 위반 시 재선택 | WHAT  | opus   | Read, Grep, mcp**plugin_r-statistics_tools**assert-analysis-plan                             |
-| **r-expert**              | R 코드 생성·`run-r` 실행·트러블슈팅, 패키지 선택, R 공식문서 참조          | HOW   | sonnet | Read, Bash, mcp**plugin_r-statistics_tools**run-r, mcp**plugin_r-statistics_tools**get-r-job |
-| **methodology-validator** | SAP 부합성·다중비교 전략·효과크기·결과 타당성 (soft)                       | VALID | sonnet | Read, mcp**plugin_r-statistics_tools**assert-analysis-plan                                   |
+| **statistician**          | 데이터+가설 → 기법 선택(결정트리), 분석계획(SAP) 작성, 가정 위반 시 재선택 | WHAT  | opus   | Read, Grep, mcp**plugin_r-statistics_tools**assert_analysis_plan                             |
+| **r-expert**              | R 코드 생성·`run_r` 실행·트러블슈팅, 패키지 선택, R 공식문서 참조          | HOW   | sonnet | Read, Bash, mcp**plugin_r-statistics_tools**run_r, mcp**plugin_r-statistics_tools**get_r_job |
+| **methodology-validator** | SAP 부합성·다중비교 전략·효과크기·결과 타당성 (soft)                       | VALID | sonnet | Read, mcp**plugin_r-statistics_tools**assert_analysis_plan                                   |
 
 ## statistician
 
@@ -32,8 +32,8 @@ maxTurns: <N>
 ## r-expert
 
 - 입력: SAP + 데이터 + `methods/{technique}/template.R.tmpl`.
-- 출력: R 코드(템플릿 slot 채움) → `run-r` → result/plot/table 아티팩트.
-- 트러블슈팅: `run-r` 에러(stderr/exitCode) → 진단·수정·재실행(rRepair guard 한계 내).
+- 출력: R 코드(템플릿 slot 채움) → `run_r` → result/plot/table 아티팩트.
+- 트러블슈팅: `run_r` 에러(stderr/exitCode) → 진단·수정·재실행(rRepair guard 한계 내).
 - R 공식 리소스(방법론 기준, 도메인 중립):
   - R Project https://www.r-project.org/ · CRAN https://cran.r-project.org/ · 매뉴얼 https://cran.r-project.org/manuals.html
   - CRAN Task Views https://cran.r-project.org/web/views/ — **방법론**: Distributions·Bayesian·MixedModels·Survival·TimeSeries·MetaAnalysis·Multivariate (응용 도메인 뷰 비참조)
@@ -44,7 +44,7 @@ maxTurns: <N>
 - 입력: SAP + 실행 결과 아티팩트 + assumption 아티팩트.
 - 출력: `{ status: "ok"|"soft_warning"|"block", findings:[{severity, category, message, recommendedAction}], requiresStatisticianRevision }`.
 - 범위(soft): SAP 일탈·가정 처리 적절성·다중비교 보정·효과크기 보고·해석 타당성.
-- hard gate는 담당 아님(그건 `assert-analysis-plan` MCP). validator는 판단형 검토.
+- hard gate는 담당 아님(그건 `assert_analysis_plan` MCP). validator는 판단형 검토.
 
 ## hand-off 계약
 

@@ -52,7 +52,7 @@ export async function runJob(
 }
 
 /**
- * paper-search-start — register a QUEUED job, kick off the search (detached by
+ * paper_search_start — register a QUEUED job, kick off the search (detached by
  * default), and return the job id immediately so large searches don't hit the
  * MCP synchronous timeout.
  */

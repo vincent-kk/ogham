@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { MCP_TOOL_NAMES } from '../constants/mcpToolNames.js';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = join(__dirname, '..', '..');
 const SKILLS_DIR = join(PKG_ROOT, 'skills');
@@ -25,24 +27,7 @@ function skillNames(): string[] {
 // Bare tool names registered in src/mcp/server/server.ts. Kept in sync with
 // EXPECTED_TOOLS in server-registration.test.ts. The fully-qualified form
 // `mcp__plugin_imbas_tools__<name>` is also matched for agent tool lists.
-const BARE_TOOL_NAMES = [
-  'ping',
-  'run_create',
-  'run_get',
-  'run_transition',
-  'run_list',
-  'manifest_get',
-  'manifest_save',
-  'manifest_validate',
-  'manifest_plan',
-  'manifest_implement_plan',
-  'config_get',
-  'config_set',
-  'cache_get',
-  'cache_set',
-  'ast_search',
-  'ast_analyze',
-] as const;
+const BARE_TOOL_NAMES = MCP_TOOL_NAMES;
 
 const TOOL_REGEX = new RegExp(
   `\\b(${BARE_TOOL_NAMES.join('|')}|mcp__plugin_imbas_tools__[a-z_]+)\\b`,

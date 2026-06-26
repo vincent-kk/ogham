@@ -1,3 +1,6 @@
+import { McpToolName } from '../../constants/mcpToolNames.js';
+import type { McpToolName as McpToolNameValue } from '../../constants/mcpToolNames.js';
+
 /**
  * Set of maencof MCP write-tool names — the PostToolUse allowlist.
  * SYNC: the PostToolUse orchestrator (postToolUse.ts) gates activityRecorder on
@@ -8,13 +11,19 @@
  * excluded because it clears stale-nodes on completion — tracking it here would
  * be contradictory.
  */
-export const MAENCOF_MCP_TOOLS = new Set([
-  'create',
-  'update',
-  'delete',
-  'move',
-  'capture_insight',
-  'boundary_create',
-  'claudemd_merge',
-  'claudemd_remove',
+export const MAENCOF_MCP_TOOLS = new Set<McpToolNameValue>([
+  McpToolName.CREATE,
+  McpToolName.UPDATE,
+  McpToolName.DELETE,
+  McpToolName.MOVE,
+  McpToolName.CAPTURE_INSIGHT,
+  McpToolName.BOUNDARY_CREATE,
+  McpToolName.CLAUDEMD_MERGE,
+  McpToolName.CLAUDEMD_REMOVE,
 ]);
+
+export function isMaencofMcpToolName(
+  toolName: string,
+): toolName is McpToolNameValue {
+  return MAENCOF_MCP_TOOLS.has(toolName as McpToolNameValue);
+}

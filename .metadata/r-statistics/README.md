@@ -15,11 +15,11 @@
 | 문서                                 | 내용                                                                                                  |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | [architecture.md](./architecture.md) | 3-Layer 아키텍처, 디렉토리 구조, FCA·코드 규약                                                        |
-| [mcp-tools.md](./mcp-tools.md)       | MCP 도구 4종 스펙 (`run-r`·`get-r-job`·`cancel-r-job`·`assert-analysis-plan`) + TypeScript 인터페이스 |
+| [mcp-tools.md](./mcp-tools.md)       | MCP 도구 4종 스펙 (`run_r`·`get_r_job`·`cancel_r_job`·`assert_analysis_plan`) + TypeScript 인터페이스 |
 | [skills.md](./skills.md)             | 노출 스킬 6종 + `methods/` lazy 리소스 + `shared/`                                                    |
 | [agents.md](./agents.md)             | 에이전트 3종 (통계학자·R전문가·통계방법론검증가)                                                      |
 | [dispatcher.md](./dispatcher.md)     | 상태머신 오케스트레이션, intent 분류, 실행 모드                                                       |
-| [assert-rules.md](./assert-rules.md) | `assert-analysis-plan` 표준 룰셋 (기법별 가정 매핑)                                                   |
+| [assert-rules.md](./assert-rules.md) | `assert_analysis_plan` 표준 룰셋 (기법별 가정 매핑)                                                   |
 | [spec.md](./spec.md)                 | 컴포넌트 책임, 데이터 흐름, 비채택 결정                                                               |
 | [roadmap.md](./roadmap.md)           | 남은 구현 디테일 / 이후 항목                                                                          |
 
@@ -30,7 +30,7 @@
 [Agent]       statistician(WHAT) · r-expert(HOW) · methodology-validator(VALID)
 [Skill]       analyze · data-preparation · assumption-check · visualization · reporting · r-setup
                  └ lazy: methods/{technique}/ · shared/contract.R
-[MCP]         run-r · get-r-job · cancel-r-job · assert-analysis-plan  (도메인 무지·stateless)
+[MCP]         run_r · get_r_job · cancel_r_job · assert_analysis_plan  (도메인 무지·stateless)
 [R-CLI]       Rscript (temp 격리 + 명령어 게이트 + --vanilla + renv)
 ```
 

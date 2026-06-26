@@ -3,6 +3,7 @@
  * @description Registers 3 CLAUDE.md tools: claudemd_merge / claudemd_read / claudemd_remove.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import { CLAUDE_MD_RELATIVE_PATH } from '../../../constants/claudeMd.js';
@@ -15,7 +16,7 @@ export function registerClaudeMdTools(server: McpServer): void {
   // ─── claudemd_merge (mutate) ───────────────────────────────────────
   registerMutateTool(
     server,
-    'claudemd_merge',
+    McpToolName.CLAUDEMD_MERGE,
     {
       description:
         'Inserts or updates the maencof directive section in CLAUDE.md at CWD. Section managed via markers (MAENCOF:START/END).',
@@ -36,7 +37,7 @@ export function registerClaudeMdTools(server: McpServer): void {
   // ─── claudemd_read (plain read) ────────────────────────────────────
   registerReadTool(
     server,
-    'claudemd_read',
+    McpToolName.CLAUDEMD_READ,
     {
       description: 'Reads the maencof directive section from CLAUDE.md at CWD.',
       inputSchema: z.object({}),
@@ -48,7 +49,7 @@ export function registerClaudeMdTools(server: McpServer): void {
   // ─── claudemd_remove (mutate) ──────────────────────────────────────
   registerMutateTool(
     server,
-    'claudemd_remove',
+    McpToolName.CLAUDEMD_REMOVE,
     {
       description:
         'Removes the maencof directive section from CLAUDE.md at CWD.',

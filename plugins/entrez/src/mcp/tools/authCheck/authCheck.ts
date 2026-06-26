@@ -31,7 +31,7 @@ function parseEInfoDbs(jsonText: string): string[] | undefined {
 }
 
 /**
- * auth-check — report configuration state, EInfo reachability, and the
+ * auth_check — report configuration state, EInfo reachability, and the
  * effective rate limit. Works when unconfigured (configured:false). Never
  * exposes the api_key value — only its presence.
  */

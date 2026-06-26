@@ -3,6 +3,7 @@
  * @description MCP 도구명 + 입력에서 사람이 읽기 좋은 활동 설명을 생성한다.
  */
 import { TOOL_CATEGORY_MAP } from '../../constants/activity.js';
+import { McpToolName } from '../../constants/mcpToolNames.js';
 
 export function buildToolDescription(
   toolName: string,
@@ -11,44 +12,44 @@ export function buildToolDescription(
   const category = TOOL_CATEGORY_MAP[toolName];
 
   switch (toolName) {
-    case 'create': {
+    case McpToolName.CREATE: {
       const layer = toolInput['layer'] ?? '?';
       const tags = Array.isArray(toolInput['tags'])
         ? (toolInput['tags'] as string[]).join(', ')
         : '';
       return `Document created (L${layer}${tags ? `, tags: ${tags}` : ''})`;
     }
-    case 'update':
+    case McpToolName.UPDATE:
       return 'Document updated';
-    case 'delete':
+    case McpToolName.DELETE:
       return 'Document deleted';
-    case 'move': {
+    case McpToolName.MOVE: {
       const target = toolInput['target_layer'] ?? '?';
       return `Document moved (→ L${target})`;
     }
-    case 'claudemd_merge':
+    case McpToolName.CLAUDEMD_MERGE:
       return 'CLAUDE.md directive merged';
-    case 'claudemd_remove':
+    case McpToolName.CLAUDEMD_REMOVE:
       return 'CLAUDE.md directive removed';
-    case 'claudemd_read':
+    case McpToolName.CLAUDEMD_READ:
       return 'CLAUDE.md directive read';
-    case 'kg_search': {
+    case McpToolName.KG_SEARCH: {
       const seed = Array.isArray(toolInput['seed'])
         ? (toolInput['seed'] as string[]).join(', ')
         : '';
       return `KG search (seed: ${seed})`;
     }
-    case 'kg_navigate':
+    case McpToolName.KG_NAVIGATE:
       return 'KG navigation';
-    case 'kg_context':
+    case McpToolName.KG_CONTEXT:
       return 'Context assembly';
-    case 'kg_build':
+    case McpToolName.KG_BUILD:
       return toolInput['force']
         ? 'Full index rebuild'
         : 'Incremental index build';
-    case 'kg_status':
+    case McpToolName.KG_STATUS:
       return 'Vault status check';
-    case 'kg_suggest_links':
+    case McpToolName.KG_SUGGEST_LINKS:
       return 'Link suggestion';
     default:
       return category ? `${category} task` : toolName;

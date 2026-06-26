@@ -12,7 +12,7 @@ and combined; recall comes from expressing each facet broadly, then ANDing facet
 
 ## 2. MeSH lookup per facet
 
-Call `mesh-lookup`. Use:
+Call `mesh_lookup`. Use:
 - `descriptorName` / `descriptorUi` → the controlled term.
 - `treeNumbers` → judge explosion scope (does `[mh]` pull in the right narrower terms?).
 - `entryTerms` → synonyms for the `[tiab]` free-text role.
@@ -41,7 +41,7 @@ OR across queries). Cover synonyms, spelling variants (US/UK), abbreviations.
 
 ## 5. Recall gate & ESpell
 
-After `paper-search`, inspect `union.total_unique` and `warnings`:
+After `paper_search`, inspect `union.total_unique` and `warnings`:
 - weak union → broaden: raise `breadth`, add `ATM_BROAD`/`MESH_EXPLODED`/`ALL_FIELDS`,
   relax narrow tags.
 - ESpell OOV / spelling-warning / union 0 → apply the correction and regenerate.

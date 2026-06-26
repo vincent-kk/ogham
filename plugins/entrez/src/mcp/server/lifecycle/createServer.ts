@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
+import { McpToolName } from "../../../constants/mcpToolNames.js";
 import { VERSION } from "../../../version.js";
 import {
   PaperSearchInputSchema,
@@ -53,14 +54,14 @@ const WRITE_VOLATILE = {
 
 /**
  * Create and configure the entrez MCP server with all tool registrations:
- * paper-search (+ async start/status/results), mesh-lookup, fetch-fulltext,
- * auth-check. (setup is registered in Phase 6 alongside the web UI.)
+ * paper_search (+ async start/status/results), mesh_lookup, fetch_fulltext,
+ * auth_check. (setup is registered in Phase 6 alongside the web UI.)
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: SERVER_NAME, version: VERSION });
 
   server.registerTool(
-    "paper-search",
+    McpToolName.PAPER_SEARCH,
     {
       description: `${INTERNAL} Recall-first PubMed search: multi-role query union with deterministic dedup.`,
       inputSchema: PaperSearchInputSchema,
@@ -72,9 +73,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper-search-start",
+    McpToolName.PAPER_SEARCH_START,
     {
-      description: `${INTERNAL} Start a large async paper-search job; returns a jobId.`,
+      description: `${INTERNAL} Start a large async paper_search job; returns a jobId.`,
       inputSchema: PaperSearchInputSchema,
       annotations: WRITE_VOLATILE,
     },
@@ -84,9 +85,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper-search-status",
+    McpToolName.PAPER_SEARCH_STATUS,
     {
-      description: `${INTERNAL} Poll an async paper-search job's status/progress.`,
+      description: `${INTERNAL} Poll an async paper_search job's status/progress.`,
       inputSchema: PaperSearchStatusInputSchema,
       annotations: READ_ONLY,
     },
@@ -94,9 +95,9 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "paper-search-results",
+    McpToolName.PAPER_SEARCH_RESULTS,
     {
-      description: `${INTERNAL} Read a completed async paper-search job (cursor paginated).`,
+      description: `${INTERNAL} Read a completed async paper_search job (cursor paginated).`,
       inputSchema: PaperSearchResultsInputSchema,
       annotations: READ_ONLY,
     },
@@ -106,7 +107,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "mesh-lookup",
+    McpToolName.MESH_LOOKUP,
     {
       description: `${INTERNAL} Map terms to MeSH descriptors (db=mesh).`,
       inputSchema: MeshLookupInputSchema,
@@ -118,7 +119,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "fetch-fulltext",
+    McpToolName.FETCH_FULLTEXT,
     {
       description: `${INTERNAL} Download PMC Open Access full text (OA + license gated).`,
       inputSchema: FetchFulltextInputSchema,
@@ -130,7 +131,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "auth-check",
+    McpToolName.AUTH_CHECK,
     {
       description: `${INTERNAL} Report config state, EInfo reachability, and rate limit.`,
       inputSchema: AuthCheckInputSchema,
@@ -140,7 +141,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "setup",
+    McpToolName.SETUP,
     {
       description: `${INTERNAL} Launch the local web UI to configure tool/email/api_key.`,
       inputSchema: SetupInputSchema,

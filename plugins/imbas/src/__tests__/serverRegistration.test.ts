@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { MCP_TOOL_NAMES } from '../constants/mcpToolNames.js';
+
 // Track registerTool and tool calls across the mock instance
 const registeredTools: string[] = [];
 let toolCallCount = 0;
@@ -23,24 +25,7 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
   };
 });
 
-const EXPECTED_TOOLS = [
-  'ping',
-  'run_create',
-  'run_get',
-  'run_transition',
-  'run_list',
-  'manifest_get',
-  'manifest_save',
-  'manifest_validate',
-  'manifest_plan',
-  'manifest_implement_plan',
-  'config_get',
-  'config_set',
-  'cache_get',
-  'cache_set',
-  'ast_search',
-  'ast_analyze',
-];
+const EXPECTED_TOOLS = MCP_TOOL_NAMES;
 
 describe('MCP server tool registration', () => {
   beforeEach(() => {

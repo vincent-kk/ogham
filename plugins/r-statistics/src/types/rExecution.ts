@@ -18,7 +18,7 @@ export interface RDataRef {
   sha256?: string;
 }
 
-/** run-r input contract. */
+/** run_r input contract. */
 export interface RunRInput {
   scriptCode: string;
   dataRefs?: RDataRef[];
@@ -79,7 +79,7 @@ export interface RExecutionResult {
   error?: RExecutionError;
 }
 
-/** run-r / get-r-job output. */
+/** run_r / get_r_job output. */
 export interface RunROutput {
   jobId: string;
   status: JobStatus;

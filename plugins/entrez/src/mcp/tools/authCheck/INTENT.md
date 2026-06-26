@@ -1,6 +1,6 @@
 ## Purpose
 
-`auth-check` 도구. 설정 상태(tool/email·api_key 존재)·EInfo 도달성·유효 rate를 보고한다. 미설정에서도 동작(configured:false). setup의 pre-flight·복구 진입점.
+`auth_check` 도구. 설정 상태(tool/email·api_key 존재)·EInfo 도달성·유효 rate를 보고한다. 미설정에서도 동작(configured:false). setup의 pre-flight·복구 진입점.
 
 ## Structure
 

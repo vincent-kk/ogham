@@ -5,7 +5,7 @@ import { evaluateHardRules } from "./operations/evaluateHardRules.js";
 import { evaluateSoftRules } from "./operations/evaluateSoftRules.js";
 
 /**
- * assert-analysis-plan: the deterministic statistical hard gate. Hard rules
+ * assert_analysis_plan: the deterministic statistical hard gate. Hard rules
  * always block (interactive + auto). Soft rules warn — allowed in interactive
  * (improve via conversation), blocked in auto (strict reselect). No execution,
  * no natural-language judgement: a pure function of normalized input.

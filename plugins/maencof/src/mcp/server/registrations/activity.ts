@@ -3,6 +3,7 @@
  * @description Registers the activity_read plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import { handleActivityRead } from '../../tools/activityRead/index.js';
@@ -11,7 +12,7 @@ import { registerReadTool } from '../middlewares/index.js';
 export function registerActivityReadTools(server: McpServer): void {
   registerReadTool(
     server,
-    'activity_read',
+    McpToolName.ACTIVITY_READ,
     {
       description:
         'Queries the activity log (daily record of vault actions). Supports date, category filter, and last N days lookup. Returns time-ordered entries with category and source path; render to the user as a date-grouped markdown table with Time/Category/Activity/Path columns.',

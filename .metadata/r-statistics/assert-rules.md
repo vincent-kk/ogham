@@ -1,6 +1,6 @@
-# r-statistics — assert-analysis-plan 표준 룰셋
+# r-statistics — assert_analysis_plan 표준 룰셋
 
-순수 통계 기준(도메인 중립). 기법별 가정은 `methods/{technique}/meta.yaml`에 선언, `assert-analysis-plan`이 정규화 필드로 결정론적 검증.
+순수 통계 기준(도메인 중립). 기법별 가정은 `methods/{technique}/meta.yaml`에 선언, `assert_analysis_plan`이 정규화 필드로 결정론적 검증.
 
 ## severity 2단계
 
@@ -59,7 +59,7 @@ packages: [stats, broom, rstatix]
 
 ## 입력 아티팩트 연동
 
-`assumption-check` 스킬이 `run-r`로 가정검정을 수행해 `assumption.{id}` 아티팩트(passed: bool) 생성 → `assert-analysis-plan`의 `assumptionArtifacts`로 전달 → 룰 평가. 가정 아티팩트 부재 시 해당 soft 룰은 "미검증" 경고.
+`assumption-check` 스킬이 `run_r`로 가정검정을 수행해 `assumption.{id}` 아티팩트(passed: bool) 생성 → `assert_analysis_plan`의 `assumptionArtifacts`로 전달 → 룰 평가. 가정 아티팩트 부재 시 해당 soft 룰은 "미검증" 경고.
 
 ## 다중비교
 

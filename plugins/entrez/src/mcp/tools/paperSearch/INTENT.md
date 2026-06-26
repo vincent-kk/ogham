@@ -1,6 +1,6 @@
 ## Purpose
 
-`paper-search` 도구. agent의 `QueryRole` 다중 검색식을 받아 **결정론 union**을 만든다(누락 0). 대량은 async job(start/status/results).
+`paper_search` 도구. agent의 `QueryRole` 다중 검색식을 받아 **결정론 union**을 만든다(누락 0). 대량은 async job(start/status/results).
 
 ## Structure
 

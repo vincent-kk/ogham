@@ -30,7 +30,7 @@ export interface AssumptionArtifact {
   passed: boolean;
 }
 
-/** assert-analysis-plan input contract. */
+/** assert_analysis_plan input contract. */
 export interface AssertInput {
   method: AssertMethod;
   datasetMeta: AssertDatasetMeta;
@@ -45,7 +45,7 @@ export interface AssertReason {
   message: string;
 }
 
-/** assert-analysis-plan output contract. */
+/** assert_analysis_plan output contract. */
 export interface AssertOutput {
   allowed: boolean;
   severity: AssertSeverity;

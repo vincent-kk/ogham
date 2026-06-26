@@ -20,7 +20,7 @@ import {
 import type { UnionResult, DateSegment } from "./search.js";
 import type { JobStatus, RateLimit, MeshMatch, ErrorCode } from "./enums.js";
 
-/* ── paper-search ─────────────────────────────────────────────── */
+/* ── paper_search ─────────────────────────────────────────────── */
 
 export const SearchQuerySchema = z.object({
   term: z.string().min(1),
@@ -131,7 +131,7 @@ export const PaperSearchResultsInputSchema = z.object({
   cursor: z.string().optional(),
 });
 
-/* ── mesh-lookup ──────────────────────────────────────────────── */
+/* ── mesh_lookup ──────────────────────────────────────────────── */
 
 export const MeshLookupInputSchema = z.object({
   terms: z.array(z.string().min(1)).min(1),
@@ -161,7 +161,7 @@ export interface MeshLookupOutput {
   mappings: MeshMapping[];
 }
 
-/* ── fetch-fulltext ───────────────────────────────────────────── */
+/* ── fetch_fulltext ───────────────────────────────────────────── */
 
 export const FetchFulltextInputSchema = z.object({
   ids: z.array(z.string().min(1)).min(1),
@@ -194,7 +194,7 @@ export interface FetchFulltextOutput {
   unavailable: UnavailableItem[];
 }
 
-/* ── auth-check ───────────────────────────────────────────────── */
+/* ── auth_check ───────────────────────────────────────────────── */
 
 export const AuthCheckInputSchema = z.object({
   probeEInfo: z.boolean().optional(),

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
+import { McpToolName } from "../../../constants/mcpToolNames.js";
 import { RenderOptionsSchema } from "../../../types/renderOptions.js";
 import { VERSION } from "../../../version.js";
 import { wrapHandler } from "../../shared/index.js";
@@ -14,7 +15,7 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: "tools", version: VERSION });
 
   server.registerTool(
-    "render_viewer",
+    McpToolName.RENDER_VIEWER,
     {
       description:
         "Render a Claude-generated markdown document as a readable local browser " +
@@ -57,7 +58,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "collect_feedback",
+    McpToolName.COLLECT_FEEDBACK,
     {
       description:
         "Collect line-anchored feedback for a render session via a bounded " +
@@ -89,7 +90,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "close_viewer",
+    McpToolName.CLOSE_VIEWER,
     {
       description:
         "Close a render session: mark it closed and settle any pending " +
@@ -110,7 +111,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "open_settings",
+    McpToolName.OPEN_SETTINGS,
     {
       description:
         "Open the deilen settings UI in a local browser to configure theme, " +

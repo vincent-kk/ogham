@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, it, expect } from "vitest";
 
+import { McpToolName } from "../constants/mcpToolNames.js";
+
 const PKG_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const SKILLS = join(PKG_ROOT, "skills");
 const AGENTS = join(PKG_ROOT, "agents");
@@ -57,8 +59,8 @@ describe("paper-search-expert agent", () => {
     expect(fm).toMatch(/name:\s*paper-search-expert/);
     expect(fm).toMatch(/model:\s*sonnet/);
     expect(fm).toMatch(/maxTurns:\s*15/);
-    expect(fm).toContain("mcp_tools_paper-search");
-    expect(fm).toContain("mcp_tools_mesh-lookup");
+    expect(fm).toContain(`mcp_tools_${McpToolName.PAPER_SEARCH}`);
+    expect(fm).toContain(`mcp_tools_${McpToolName.MESH_LOOKUP}`);
     expect(fm).toContain("Read");
   });
 

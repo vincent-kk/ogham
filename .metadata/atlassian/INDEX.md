@@ -37,7 +37,7 @@ Claude Code Main Agent (= Dispatcher, no separate implementation)
     +-- MCP Server "tools"
             +-- fetch       (HTTP GET/POST/PUT/PATCH/DELETE)
             +-- convert     (ADF/Storage/Wiki <-> Markdown)
-            +-- auth-check  (authentication status + optional connectivity test)
+            +-- auth_check  (authentication status + optional connectivity test)
             +-- setup       (local web server auth setup)
 ```
 
@@ -89,7 +89,7 @@ This ensures frequently-used tools load quickly while rarely-used tools consume 
 | Agent | No prefix | `jira`, `confluence`, `media` |
 | Skill | No prefix | `setup`, `jira`, `confluence`, `download`, `media-analysis` |
 | MCP server name | `tools` | `.mcp.json` key: `"tools"` |
-| MCP tool name | No prefix | `fetch`, `convert`, `auth-check`, `setup` |
+| MCP tool name | No prefix | `fetch`, `convert`, `auth_check`, `setup` |
 
 ---
 
@@ -115,7 +115,7 @@ Read documents in the following order for a complete understanding:
 | 1 | [INDEX.md](INDEX.md) | ARCH | This file — overview and reading guide |
 | 2 | [plugin-structure.md](plugin-structure.md) | ARCH | Directory layout, plugin.json, .mcp.json, src/ structure |
 | 3 | [auth-ui.md](auth-ui.md) | ARCH | Setup web server + HTML form design |
-| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 4 MCP tools (fetch/convert/auth-check/setup) |
+| 4 | [dev/mcp-tools.md](dev/mcp-tools.md) | DEV | 4 MCP tools (fetch/convert/auth_check/setup) |
 | 5 | [dev/skills.md](dev/skills.md) | DEV | 5 Skills + tools/ reference mapping |
 | 6 | [dev/agents.md](dev/agents.md) | DEV | 3 Agents (jira, confluence, media) |
 

@@ -1,5 +1,7 @@
 import type { ActivityCategory } from '../types/activity.js';
 
+import { McpToolName } from './mcpToolNames.js';
+
 /**
  * MCP 도구명 → 활동 카테고리 매핑.
  *
@@ -7,20 +9,20 @@ import type { ActivityCategory } from '../types/activity.js';
  * 읽기 전용 도구(`activity_read`, `work_history`)는 제외 — 재귀/노이즈 방지.
  */
 export const TOOL_CATEGORY_MAP: Record<string, ActivityCategory> = {
-  create: 'document',
-  read: 'document',
-  update: 'document',
-  delete: 'document',
-  move: 'document',
-  capture_insight: 'document',
-  kg_search: 'search',
-  kg_navigate: 'search',
-  kg_context: 'search',
-  kg_build: 'index',
-  kg_status: 'index',
-  kg_suggest_links: 'search',
-  boundary_create: 'document',
-  claudemd_merge: 'config',
-  claudemd_read: 'config',
-  claudemd_remove: 'config',
+  [McpToolName.CREATE]: 'document',
+  [McpToolName.READ]: 'document',
+  [McpToolName.UPDATE]: 'document',
+  [McpToolName.DELETE]: 'document',
+  [McpToolName.MOVE]: 'document',
+  [McpToolName.CAPTURE_INSIGHT]: 'document',
+  [McpToolName.KG_SEARCH]: 'search',
+  [McpToolName.KG_NAVIGATE]: 'search',
+  [McpToolName.KG_CONTEXT]: 'search',
+  [McpToolName.KG_BUILD]: 'index',
+  [McpToolName.KG_STATUS]: 'index',
+  [McpToolName.KG_SUGGEST_LINKS]: 'search',
+  [McpToolName.BOUNDARY_CREATE]: 'document',
+  [McpToolName.CLAUDEMD_MERGE]: 'config',
+  [McpToolName.CLAUDEMD_READ]: 'config',
+  [McpToolName.CLAUDEMD_REMOVE]: 'config',
 };

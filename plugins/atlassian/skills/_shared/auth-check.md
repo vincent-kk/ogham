@@ -1,19 +1,19 @@
 # Auth Check
 
-Authentication check using the `mcp_tools_auth-check` MCP tool.
+Authentication check using the `mcp_tools_auth_check` MCP tool.
 
 ## Tool
 
 | Tool | Parameter | Default | Description |
 |---|---|---|---|
-| `mcp_tools_auth-check` | `connection_test` | `false` | When `true`, tests live connectivity and returns user info |
+| `mcp_tools_auth_check` | `connection_test` | `false` | When `true`, tests live connectivity and returns user info |
 
 ## General Skills Flow (jira, confluence, download)
 
 Optimistic execution — skip pre-flight auth check and attempt the operation directly.
 Handle authentication errors only when they occur (HTTP 401 with `reauth_required: true`).
 
-1. Proceed with the requested operation immediately (no upfront `mcp_tools_auth-check` call)
+1. Proceed with the requested operation immediately (no upfront `mcp_tools_auth_check` call)
 2. If the operation succeeds → done
 3. If HTTP 401 (`reauth_required: true`) →
    - Inform user: "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?"
@@ -23,7 +23,7 @@ Handle authentication errors only when they occur (HTTP 401 with `reauth_require
 
 ## Setup Skill Flow (setup)
 
-1. Call `mcp_tools_auth-check` with `connection_test: true`
+1. Call `mcp_tools_auth_check` with `connection_test: true`
 2. If `authenticated: false` → proceed with new setup flow immediately
 3. If `authenticated: true` →
    - Present existing configuration to user:

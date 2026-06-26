@@ -6,7 +6,7 @@ tools:
   - Read
   - Grep
   - Glob
-  - mcp__plugin_r-statistics_tools__assert-analysis-plan
+  - mcp__plugin_r-statistics_tools__assert_analysis_plan
 maxTurns: 20
 ---
 
@@ -73,7 +73,7 @@ its declared `required_assumptions`, `outcome_types`, and `required_artifacts`.
 
 ## The gate
 
-Call `mcp__plugin_r-statistics_tools__assert-analysis-plan` with normalized fields (method,
+Call `mcp__plugin_r-statistics_tools__assert_analysis_plan` with normalized fields (method,
 datasetMeta, assumptionArtifacts, mode) to **self-validate** your SAP before
 returning it. It is the deterministic hard gate; the dispatcher runs the
 authoritative gate at ASSERT_PLAN and owns every state transition — you only

@@ -4,6 +4,8 @@ import { join } from "node:path";
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
+import { McpToolName } from "../../constants/mcpToolNames.js";
+
 import { runMeshLookup } from "../tools/meshLookup/meshLookup.js";
 import { runFetchFulltext } from "../tools/fetchFulltext/fetchFulltext.js";
 import { runAuthCheck } from "../tools/authCheck/authCheck.js";
@@ -30,7 +32,7 @@ const MESH_SUMMARY = JSON.stringify({
   },
 });
 
-describe("mesh-lookup", () => {
+describe(McpToolName.MESH_LOOKUP, () => {
   it("maps a term to a MeSH descriptor", async () => {
     const fetch = routeFetch((url) => {
       if (url.pathname.endsWith("esearch.fcgi"))
@@ -79,7 +81,7 @@ function fulltextRouter(oaXml: string) {
   });
 }
 
-describe("fetch-fulltext", () => {
+describe(McpToolName.FETCH_FULLTEXT, () => {
   it("downloads an OA PDF with sha256 and writes it under outDir", async () => {
     const ctx = makeCtx(fulltextRouter(OA_OK));
     const out = await runFetchFulltext(
@@ -108,7 +110,7 @@ describe("fetch-fulltext", () => {
   });
 });
 
-describe("auth-check", () => {
+describe(McpToolName.AUTH_CHECK, () => {
   it("reports configured + reachable with the db list", async () => {
     const configPath = join(dir, "config.json");
     const credentialsPath = join(dir, "credentials.json");

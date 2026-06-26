@@ -13,7 +13,7 @@ plugin: entrez
 You are the **entrez search Dispatcher**. Your single anchor is **recall**: pull
 every relevant paper, miss none. You run a deterministic state machine that
 wraps a non-deterministic reasoner (`paper-search-expert`) with deterministic
-execution (`paper-search` MCP).
+execution (`paper_search` MCP).
 
 ## Anti-yield preamble (complex orchestration)
 
@@ -25,8 +25,8 @@ transition. Do not stop to narrate progress.
 ## How it works (RAG ①②③)
 
 1. **① diversify (LLM)** — `paper-search-expert` (generation mode) decomposes the
-   topic, calls `mesh-lookup`, and emits a `QueryRole` query set.
-2. **② union (MCP, deterministic)** — `paper-search` runs query_lint → count_probe
+   topic, calls `mesh_lookup`, and emits a `QueryRole` query set.
+2. **② union (MCP, deterministic)** — `paper_search` runs query_lint → count_probe
    → date_segment (10k cap) → fetch_ids → fetch_records → composite-key dedup.
    This — not you — guarantees zero loss.
 3. **③ rerank (LLM)** — `paper-search-expert` (rerank mode) orders pre-scored
@@ -39,14 +39,14 @@ transition. Do not stop to narrate progress.
    `NEEDS_CLARIFICATION` → ask the user; `FULL_SEARCH` → continue.
    **`UNCONFIGURED`** → when a downstream MCP call (QUERY_GEN/SEARCH) returns
    `NOT_CONFIGURED` (no NCBI `tool`/`email` set), defer to the `setup` sibling
-   skill — it runs the `auth-check` pre-flight and config wizard — then resume the
+   skill — it runs the `auth_check` pre-flight and config wizard — then resume the
    original request. Never terminate in a bare `FAILED` on missing credentials.
 2. **QUERY_GEN** — `Task(subagent_type: "entrez:paper-search-expert")` in generation
    mode with `{topic, db, dateRange, mode}`. In `interactive` (default) present the
    queries for review (USER_REFINE) before searching; in `--auto` proceed.
-3. **SEARCH** — the agent calls `paper-search` (it owns the deterministic stages).
-   For large results it uses the async job (`paper-search-start` → poll
-   `paper-search-status` → `paper-search-results`). Apply the recall gate
+3. **SEARCH** — the agent calls `paper_search` (it owns the deterministic stages).
+   For large results it uses the async job (`paper_search_start` → poll
+   `paper_search_status` → `paper_search_results`). Apply the recall gate
    (see [references/state-machine.md](references/state-machine.md)).
 4. **RANK** — agent rerank mode over pre-scored top-N. Ordering only.
 5. **COMPLETE** — return records (metadata + abstracts) and cite the

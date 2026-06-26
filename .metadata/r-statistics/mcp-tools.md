@@ -4,12 +4,12 @@
 
 | 도구                   | 핸들러                                           | 역할                                      |
 | ---------------------- | ------------------------------------------------ | ----------------------------------------- |
-| `run-r`                | `tools/runR/runR.ts`                             | 크로스플랫폼 Rscript 실행 + 아티팩트 수집 |
-| `get-r-job`            | `tools/getRJob/getRJob.ts`                       | async 잡 상태·결과 폴링                   |
-| `cancel-r-job`         | `tools/cancelRJob/cancelRJob.ts`                 | 잡 취소                                   |
-| `assert-analysis-plan` | `tools/assertAnalysisPlan/assertAnalysisPlan.ts` | 통계 hard gate (결정론적)                 |
+| `run_r`                | `tools/runR/runR.ts`                             | 크로스플랫폼 Rscript 실행 + 아티팩트 수집 |
+| `get_r_job`            | `tools/getRJob/getRJob.ts`                       | async 잡 상태·결과 폴링                   |
+| `cancel_r_job`         | `tools/cancelRJob/cancelRJob.ts`                 | 잡 취소                                   |
+| `assert_analysis_plan` | `tools/assertAnalysisPlan/assertAnalysisPlan.ts` | 통계 hard gate (결정론적)                 |
 
-## `run-r`
+## `run_r`
 
 LLM이 생성한 R 코드를 temp 격리 환경에서 `Rscript` subprocess로 실행. 임베딩(Rserve) 아님.
 
@@ -97,7 +97,7 @@ MCP가 user code를 래퍼로 감쌈 (`shared/contract.R` 골격 주입):
 
 정적 차단: `system`/`system2`/`shell`/`pipe`/`install.packages`/`setwd`/`unlink`. 네트워크 차단. `ARTIFACTS_DIR` 외 쓰기 거부. 경로 traversal·symlink 탈출 거부. 패키지는 사전구축 화이트리스트(renv lockfile).
 
-## `get-r-job` / `cancel-r-job`
+## `get_r_job` / `cancel_r_job`
 
 ```ts
 interface GetRJobInput {
@@ -118,7 +118,7 @@ interface CancelRJobOutput {
 }
 ```
 
-## `assert-analysis-plan`
+## `assert_analysis_plan`
 
 통계 hard gate. 정규화 필드로 결정론적 검증(자연어 아님). 룰셋 [assert-rules.md](./assert-rules.md).
 
@@ -168,7 +168,7 @@ interface AssertOutput {
 
 | 도구                 | readOnly | destructive | idempotent |
 | -------------------- | :------: | :---------: | :--------: |
-| run-r                |  false   |    false    |   false    |
-| get-r-job            |   true   |    false    |    true    |
-| cancel-r-job         |  false   |    false    |    true    |
-| assert-analysis-plan |   true   |    false    |    true    |
+| run_r                |  false   |    false    |   false    |
+| get_r_job            |   true   |    false    |    true    |
+| cancel_r_job         |  false   |    false    |    true    |
+| assert_analysis_plan |   true   |    false    |    true    |

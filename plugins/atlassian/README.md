@@ -87,7 +87,7 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 1. **Dispatcher**: Claude Code's built-in agent routing.
 2. **Agent Layer**: Domain experts (`jira`, `confluence`, `media`) with embedded knowledge (formatting, workflow rules, error recovery strategies, multimodal scene analysis). They orchestrate multi-step tasks.
 3. **Skill Layer**: API spec capsules (`setup`, `download`, `jira`, `confluence`, `media-analysis`) that use **Lazy Reference Loading** to keep the context window small. Tool schemas and reference docs are only loaded when needed.
-4. **MCP Layer**: Zero-domain-knowledge utility layer providing generic HTTP execution (`fetch`), bidirectional format conversion (`convert`), authentication status (`auth-check`), and auth setup (`setup`).
+4. **MCP Layer**: Zero-domain-knowledge utility layer providing generic HTTP execution (`fetch`), bidirectional format conversion (`convert`), authentication status (`auth_check`), and auth setup (`setup`).
 
 ---
 
@@ -139,7 +139,7 @@ For technical details and architectural decisions, see the [`.metadata/atlassian
 | [INDEX](../../.metadata/atlassian/INDEX.md)                       | Architecture overview and layer responsibilities             |
 | [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration                    |
 | [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | Setup web server and HTML form design                        |
-| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 4 Core MCP tools (`fetch`, `convert`, `auth-check`, `setup`) |
+| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 4 Core MCP tools (`fetch`, `convert`, `auth_check`, `setup`) |
 | [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5 Skills and lazy reference loading mapping                  |
 | [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira and Confluence agent domain logic                       |
 

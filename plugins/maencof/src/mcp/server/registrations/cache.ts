@@ -3,6 +3,7 @@
  * @description Registers the context_cache_manage plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import {
@@ -14,7 +15,7 @@ import { registerReadTool } from '../middlewares/index.js';
 export function registerCacheTools(server: McpServer): void {
   registerReadTool(
     server,
-    'context_cache_manage',
+    McpToolName.CONTEXT_CACHE_MANAGE,
     {
       description:
         'Manage the turn context injection cache. Pin/unpin nodes for persistent inclusion in turn context, force-refresh the cache, or list current cache state.',

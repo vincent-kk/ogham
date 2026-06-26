@@ -11,18 +11,18 @@ plugin: entrez
 # query — PubMed query generation (no search)
 
 Produce a `QueryRole` query set for a topic and stop. This is stage ① only — no
-`paper-search`, no records. Use it when the user wants the search strings to run
+`paper_search`, no records. Use it when the user wants the search strings to run
 themselves elsewhere, or to preview before promoting to `search`.
 
 ## Procedure
 
 1. `Task(subagent_type: "entrez:paper-search-expert")` in **generation mode** with
    `{topic, db, dateRange}`.
-2. The agent decomposes the topic, calls `mesh-lookup` for MeSH descriptors/entry
+2. The agent decomposes the topic, calls `mesh_lookup` for MeSH descriptors/entry
    terms, and emits queries across roles (`ATM_BROAD`, `MESH_EXPLODED`,
    `MESH_NOEXP`, `TIAB_SYNONYM`, `ALL_FIELDS`, optional `SIMILAR`).
 3. Return each query with its `role`, `breadth`, rationale, and (when available)
-   the expected PubMed `QueryTranslation`. Do **not** call `paper-search`.
+   the expected PubMed `QueryTranslation`. Do **not** call `paper_search`.
 
 ## Notes
 

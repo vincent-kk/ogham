@@ -6,7 +6,7 @@ States: `INTAKE · CLASSIFY · QUERY_GEN · SEARCH · RANK · COMPLETE` + termin
 
 ## SEARCH internal stages (code, not states)
 
-`paper-search` runs these deterministically; they never appear in the transition
+`paper_search` runs these deterministically; they never appear in the transition
 table, only consume `operationBudget`:
 `query_lint → count_probe → date_segment → fetch_ids → fetch_records(POST·batch) → union·dedup → partial_recovery`.
 
@@ -17,7 +17,7 @@ table, only consume `operationBudget`:
 | INTAKE    | request                                          | CLASSIFY                    | normalize `{topic, db, dateRange, mode}`                                            |
 | CLASSIFY  | FULL_SEARCH                                      | QUERY_GEN                   | —                                                                                   |
 | CLASSIFY  | QUERY_ONLY                                       | (query skill) → COMPLETE    | queries only, no search                                                             |
-| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch-fulltext                                                                      |
+| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch_fulltext                                                                      |
 | CLASSIFY  | NEEDS_CLARIFICATION                              | BLOCKED_NEEDS_USER          | ask topic/scope/db                                                                  |
 | QUERY_GEN | query set emitted                                | SEARCH                      | agent generation mode _(interactive: present + USER_REFINE)_                        |
 | QUERY_GEN | user edits (interactive)                         | QUERY_GEN                   | regenerate                                                                          |

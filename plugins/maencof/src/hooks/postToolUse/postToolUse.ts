@@ -1,5 +1,5 @@
 import { runLifecycleDispatcher } from '../utils/lifecycleDispatcher/lifecycleDispatcher.js';
-import { MAENCOF_MCP_TOOLS } from '../shared/maencofMcpTools.js';
+import { isMaencofMcpToolName } from '../shared/maencofMcpTools.js';
 import type {
   DispatchInput,
   HookConcernResult,
@@ -18,7 +18,7 @@ import { runActivityRecorder } from './helpers/activityRecorder/activityRecorder
 export function orchestratePostToolUse(input: DispatchInput): MergedHookOutput {
   const results: HookConcernResult[] = [];
 
-  if (input.tool_name && MAENCOF_MCP_TOOLS.has(input.tool_name)) {
+  if (input.tool_name && isMaencofMcpToolName(input.tool_name)) {
     results.push(
       safeConcern(input.cwd, 'activity-recorder', () =>
         runActivityRecorder(input),

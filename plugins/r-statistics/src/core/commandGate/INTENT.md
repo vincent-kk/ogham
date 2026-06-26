@@ -31,7 +31,7 @@
 
 ### Never do
 
-- 통계 가정·기법 적합성 평가 (assert-analysis-plan 소관)
+- 통계 가정·기법 적합성 평가 (assert_analysis_plan 소관)
 - 임의 셸 명령 생성·실행
 
 ## Dependencies

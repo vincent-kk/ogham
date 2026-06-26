@@ -10,7 +10,7 @@ export const WORKSPACE_TTL_HOURS = 72;
 /** Max async jobs retained in the in-memory registry (oldest terminal evicted). */
 export const MAX_TRACKED_JOBS = 200;
 
-/** Input bounds for run-r (reject runaway/abuse payloads before execution). */
+/** Input bounds for run_r (reject runaway/abuse payloads before execution). */
 export const MAX_SCRIPT_CHARS = 1_000_000;
 export const MAX_DATA_REFS = 64;
 
@@ -34,7 +34,7 @@ export const ITERATION_GUARDS = {
 
 /**
  * Always installed by r-setup — the execution contract and the bulk of the
- * shipped methods depend on these (`jsonlite` backs run-r's own I/O).
+ * shipped methods depend on these (`jsonlite` backs run_r's own I/O).
  */
 export const REQUIRED_PACKAGES = [
   "broom",
@@ -44,7 +44,7 @@ export const REQUIRED_PACKAGES = [
   "jsonlite",
 ] as const;
 
-/** Method-referenced optional packages — part of the run-r baseline. */
+/** Method-referenced optional packages — part of the run_r baseline. */
 const BASELINE_OPTIONAL = [
   "ggplot2",
   "survival",
@@ -60,7 +60,7 @@ const BASELINE_OPTIONAL = [
  * method-referenced optional ∪ base `stats`. What executed R code may assume
  * present after a standard setup. Use-case bundles (PACKAGE_USE_CASES) may pull
  * companions beyond this baseline; those install on demand through r-setup's
- * consent-gated terminal channel — run-r itself never installs.
+ * consent-gated terminal channel — run_r itself never installs.
  */
 export const PACKAGE_WHITELIST = [
   "stats",
@@ -159,7 +159,7 @@ export const FORBIDDEN_R_CALLS = [
   "parse",
 ] as const;
 
-/** Artifact file extensions run-r is allowed to collect from ARTIFACTS_DIR. */
+/** Artifact file extensions run_r is allowed to collect from ARTIFACTS_DIR. */
 export const ALLOWED_ARTIFACT_EXTENSIONS = [
   ".png",
   ".jpg",

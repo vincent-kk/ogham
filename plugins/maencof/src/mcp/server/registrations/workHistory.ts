@@ -3,6 +3,7 @@
  * @description Registers the work_history plain-read tool.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { z } from 'zod';
 
 import { handleWorkHistory } from '../../tools/workHistory/index.js';
@@ -11,7 +12,7 @@ import { registerReadTool } from '../middlewares/index.js';
 export function registerWorkHistoryTools(server: McpServer): void {
   registerReadTool(
     server,
-    'work_history',
+    McpToolName.WORK_HISTORY,
     {
       description:
         'Summarizes work over time from work-history digests. Default: a period summary (sessions, active days, vault ops, top topics, layers) over the last N days or a from/to range. With `topic` or `layer`, returns when it was last worked on plus its full date history. Render the result to the user as a concise summary.',

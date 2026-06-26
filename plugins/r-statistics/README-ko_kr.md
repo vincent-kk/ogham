@@ -22,8 +22,8 @@ Claude 를 도메인 중립 **통계 전문가** 로 만드는 플러그인 — 
 
 ## 동작 방식
 
-로컬 MCP 서버(`tools`)가 실행 도구 4종을 노출합니다 — `run-r`, `get-r-job`,
-`cancel-r-job`, `assert-analysis-plan`. `analyze` 스킬이 Dispatcher 이고,
+로컬 MCP 서버(`tools`)가 실행 도구 4종을 노출합니다 — `run_r`, `get_r_job`,
+`cancel_r_job`, `assert_analysis_plan`. `analyze` 스킬이 Dispatcher 이고,
 `statistician`·`r-expert`·`methodology-validator` 가 추론 에이전트입니다. R 은
 명령 게이트(프로세스 생성·파일시스템 탈출·동적 설치·네트워크 차단) 뒤에서
 사전구축 패키지 화이트리스트로 `--vanilla` temp 워크스페이스에서 실행됩니다.

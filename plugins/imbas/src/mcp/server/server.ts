@@ -6,6 +6,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
+import { McpToolName } from '../../constants/mcpToolNames.js';
 import { CacheTypeSchema } from '../../types/index.js';
 import { VERSION } from '../../version.js';
 import { wrapHandler } from '../shared/index.js';
@@ -40,7 +41,7 @@ export function createServer(): McpServer {
   // --- Pipeline: ping ---
 
   server.registerTool(
-    'ping',
+    McpToolName.PING,
     {
       description: 'Health check — returns server status and version',
       inputSchema: z.object({}),
@@ -56,7 +57,7 @@ export function createServer(): McpServer {
   // --- Pipeline: run ---
 
   server.registerTool(
-    'run_create',
+    McpToolName.RUN_CREATE,
     {
       description: 'Create run directory and state.json',
       inputSchema: z.object({
@@ -75,7 +76,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'run_get',
+    McpToolName.RUN_GET,
     {
       description: 'Read state.json for a run',
       inputSchema: z.object({
@@ -92,7 +93,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'run_transition',
+    McpToolName.RUN_TRANSITION,
     {
       // Flat leaf-primitive schema to avoid zod-to-json-schema $ref dedup.
       // Handler validates via RunTransitionSchema.parse(). See manifest_save above.
@@ -120,7 +121,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'run_list',
+    McpToolName.RUN_LIST,
     {
       description: 'List runs for a project',
       inputSchema: z.object({
@@ -138,7 +139,7 @@ export function createServer(): McpServer {
   // --- Manifest tools ---
 
   server.registerTool(
-    'manifest_get',
+    McpToolName.MANIFEST_GET,
     {
       description: 'Load manifest with summary',
       inputSchema: z.object({
@@ -156,7 +157,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'manifest_save',
+    McpToolName.MANIFEST_SAVE,
     {
       description: 'Save manifest (full replace)',
       inputSchema: z.object({
@@ -178,7 +179,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'manifest_validate',
+    McpToolName.MANIFEST_VALIDATE,
     {
       description: 'Validate manifest structure',
       inputSchema: z.object({
@@ -196,7 +197,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'manifest_plan',
+    McpToolName.MANIFEST_PLAN,
     {
       description: 'Execution plan from devplan manifest',
       inputSchema: z.object({
@@ -213,7 +214,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'manifest_implement_plan',
+    McpToolName.MANIFEST_IMPLEMENT_PLAN,
     {
       description:
         'Build DAG-based implementation schedule (groups with parallel+order) from stories/devplan manifests',
@@ -236,7 +237,7 @@ export function createServer(): McpServer {
   // --- Config tools ---
 
   server.registerTool(
-    'config_get',
+    McpToolName.CONFIG_GET,
     {
       description: 'Read config.json',
       inputSchema: z.object({
@@ -252,7 +253,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'config_set',
+    McpToolName.CONFIG_SET,
     {
       description: 'Update config.json fields',
       inputSchema: z.object({
@@ -272,7 +273,7 @@ export function createServer(): McpServer {
   // --- Cache tools ---
 
   server.registerTool(
-    'cache_get',
+    McpToolName.CACHE_GET,
     {
       description: 'Read Jira metadata cache',
       inputSchema: z.object({
@@ -289,7 +290,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'cache_set',
+    McpToolName.CACHE_SET,
     {
       description: 'Write Jira metadata cache',
       inputSchema: z.object({
@@ -311,7 +312,7 @@ export function createServer(): McpServer {
   // --- AST tools ---
 
   server.registerTool(
-    'ast_search',
+    McpToolName.AST_SEARCH,
     {
       description: 'AST pattern search via @ast-grep/napi',
       inputSchema: z.object({
@@ -331,7 +332,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    'ast_analyze',
+    McpToolName.AST_ANALYZE,
     {
       description: 'Dependency graph / cyclomatic complexity',
       inputSchema: z.object({

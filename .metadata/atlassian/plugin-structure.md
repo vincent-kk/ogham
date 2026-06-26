@@ -131,12 +131,12 @@ packages/atlassian/
 │   │   └── tools/
 │   │       ├── fetch/           # HTTP GET/POST/PUT/PATCH/DELETE tool
 │   │       ├── convert/         # ADF / Storage Format / Wiki ↔ Markdown
-│   │       ├── auth-check/      # Stored-credential probe + optional live connectivity test
+│   │       ├── auth_check/      # Stored-credential probe + optional live connectivity test
 │   │       └── setup/           # Auth setup tool (local web server)
 │   ├── core/
 │   │   ├── auth-manager/        # Token storage and injection
 │   │   ├── config-manager/      # config.json + credentials.json (plain JSON) management
-│   │   ├── connection-tester/   # Live connectivity probe used by auth-check + setup
+│   │   ├── connection-tester/   # Live connectivity probe used by auth_check + setup
 │   │   ├── environment-resolver/ # is_cloud detection, URL normalization
 │   │   └── http-client/         # Fetch wrapper + ssrf-guard, retry, rate limit
 │   ├── converter/
@@ -213,7 +213,7 @@ packages/atlassian/
 ```
 
 **Notes**:
-- Single MCP server named `"tools"` — all 4 tools (fetch, convert, auth-check, setup) are registered under this server
+- Single MCP server named `"tools"` — all 4 tools (fetch, convert, auth_check, setup) are registered under this server
 - Uses CJS bundle via bridge for Node.js compatibility
 - `${CLAUDE_PLUGIN_ROOT}` is resolved by Claude Code at runtime
 

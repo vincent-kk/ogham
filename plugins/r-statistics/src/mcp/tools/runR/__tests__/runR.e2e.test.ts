@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { discoverRscript } from "../../../../core/index.js";
+import { McpToolName } from "../../../../constants/mcpToolNames.js";
 import { JobStatus, RErrorCode } from "../../../../types/enums.js";
 import type { RunROutput } from "../../../../types/rExecution.js";
 import { handleGetRJob } from "../../getRJob/index.js";
@@ -35,7 +36,7 @@ async function poll(jobId: string): Promise<RunROutput> {
   throw new Error("job did not finish in time");
 }
 
-describe("run-r", () => {
+describe(McpToolName.RUN_R, () => {
   beforeAll(() => {
     process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   });
