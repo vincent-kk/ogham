@@ -12,23 +12,23 @@ table, only consume `operationBudget`:
 
 ## Transition table
 
-| From      | Event / Guard                                    | To                          | Action                                                       |
-| --------- | ------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| INTAKE    | request                                          | CLASSIFY                    | normalize `{topic, db, dateRange, mode}`                     |
-| CLASSIFY  | FULL_SEARCH                                      | QUERY_GEN                   | —                                                            |
-| CLASSIFY  | QUERY_ONLY                                       | (query skill) → COMPLETE    | queries only, no search                                      |
-| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch-fulltext                                               |
-| CLASSIFY  | NEEDS_CLARIFICATION                              | BLOCKED_NEEDS_USER          | ask topic/scope/db                                           |
-| QUERY_GEN | query set emitted                                | SEARCH                      | agent generation mode _(interactive: present + USER_REFINE)_ |
-| QUERY_GEN | user edits (interactive)                         | QUERY_GEN                   | regenerate                                                   |
-| SEARCH    | union sufficient (growth <5%)                    | RANK                        | dedup union complete                                         |
-| SEARCH    | union weak                                       | QUERY_GEN                   | `recallIter++` → broaden (recall gate)                       |
-| SEARCH    | large (thousands)                                | SEARCH                      | async job + progress                                         |
-| SEARCH    | 429 / partial failure                            | SEARCH                      | `rateRetry++` backoff · partial_recovery                     |
-| RANK      | rerank done                                      | COMPLETE                    | top-N ordered _(interactive: discuss)_                       |
-| RANK      | pre-score candidates 0                           | QUERY_GEN                   | `recallIter++`                                               |
-| (any)     | `recallIter>4` · budget exceeded · `rateRetry>5` | FAILED                      | reason + manifest                                            |
-| (any)     | same query twice → 0 hits                        | BLOCKED_NEEDS_USER          | ask to redefine                                              |
+| From      | Event / Guard                                    | To                          | Action                                                                              |
+| --------- | ------------------------------------------------ | --------------------------- | ----------------------------------------------------------------------------------- |
+| INTAKE    | request                                          | CLASSIFY                    | normalize `{topic, db, dateRange, mode}`                                            |
+| CLASSIFY  | FULL_SEARCH                                      | QUERY_GEN                   | —                                                                                   |
+| CLASSIFY  | QUERY_ONLY                                       | (query skill) → COMPLETE    | queries only, no search                                                             |
+| CLASSIFY  | DOWNLOAD                                         | (download skill) → COMPLETE | fetch-fulltext                                                                      |
+| CLASSIFY  | NEEDS_CLARIFICATION                              | BLOCKED_NEEDS_USER          | ask topic/scope/db                                                                  |
+| QUERY_GEN | query set emitted                                | SEARCH                      | agent generation mode _(interactive: present + USER_REFINE)_                        |
+| QUERY_GEN | user edits (interactive)                         | QUERY_GEN                   | regenerate                                                                          |
+| SEARCH    | union sufficient (growth <5%)                    | RANK                        | dedup union complete                                                                |
+| SEARCH    | union weak                                       | QUERY_GEN                   | `recallIter++` → broaden (recall gate)                                              |
+| SEARCH    | large (thousands)                                | SEARCH                      | async job + progress                                                                |
+| SEARCH    | 429 / partial failure                            | SEARCH                      | `rateRetry++` backoff · partial_recovery                                            |
+| RANK      | rerank done                                      | COMPLETE                    | top-N ordered _(interactive: discuss)_                                              |
+| RANK      | pre-score candidates 0                           | QUERY_GEN                   | `recallIter++`                                                                      |
+| (any)     | `recallIter>4` · budget exceeded · `rateRetry>5` | FAILED                      | reason + manifest                                                                   |
+| (any)     | same query twice → 0 hits                        | BLOCKED_NEEDS_USER          | ask to redefine                                                                     |
 | (any)     | MCP `NOT_CONFIGURED` (no tool/email)             | (setup skill) → resume      | route to `setup` pre-flight + wizard, then re-enter prior state (never bare FAILED) |
 
 ## Recall gate (the point of the whole flow)
