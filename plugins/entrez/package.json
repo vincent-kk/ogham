@@ -1,0 +1,64 @@
+{
+  "name": "@ogham/entrez",
+  "version": "0.0.1",
+  "description": "entrez — NCBI E-utilities (PubMed/PMC/MeSH) academic paper search plugin for Claude Code",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "pubmed",
+    "ncbi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vincent-kk/ogham.git",
+    "directory": "plugins/entrez"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vincent K. Kelvin",
+    "email": "lunox273@gmail.com"
+  },
+  "type": "module",
+  "files": [
+    "bridge",
+    "public",
+    "skills",
+    "agents",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn version:sync && node scripts/buildSettingsHtml.mjs && tsc -p tsconfig.build.json && node scripts/buildMcpServer.mjs",
+    "build:plugin": "node scripts/buildSettingsHtml.mjs && node scripts/buildMcpServer.mjs",
+    "clean": "rm -rf bridge dist public",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,mjs,md}\"",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:run": "vitest run",
+    "test:e2e": "vitest run test/e2e test/calibration",
+    "test:live": "RUN_LIVE=1 vitest run test/live",
+    "typecheck": "tsc --noEmit",
+    "version:major": "yarn version major",
+    "version:minor": "yarn version minor",
+    "version:patch": "yarn version patch",
+    "version:sync": "node ../../scripts/inject-version.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "~1.22.0",
+    "fast-xml-parser": "^4.5.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@ogham/cross-platform": "workspace:^",
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

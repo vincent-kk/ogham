@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>entrez — settings</title>
+    <script>
+      window.__ENTREZ_STATE__ = null;
+    </script>
+    <link href="./styles/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main class="card" role="main">
+      <header class="card__head">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
+            </svg>
+          </span>
+          <div class="brand__text">
+            <h1 class="brand__name">entrez</h1>
+            <p class="brand__sub">PubMed search — one-time setup</p>
+          </div>
+        </div>
+        <span id="rate-badge" class="badge" title="Effective NCBI rate limit"
+          >3 req/s</span
+        >
+      </header>
+
+      <form id="setup-form" novalidate>
+        <fieldset class="group">
+          <legend class="group__title">
+            Contact <span class="group__hint">required by NCBI</span>
+          </legend>
+
+          <div class="field">
+            <label for="email"
+              >Email address
+              <span class="req" aria-hidden="true">*</span></label
+            >
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
+            <p class="help">
+              NCBI asks for a contact so they can reach you about heavy usage.
+              It's the only detail entrez can't figure out on its own.
+            </p>
+            <p class="error" data-error-for="email" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="api_key"
+              >API key <span class="group__hint">optional</span></label
+            >
+            <div class="input-affix">
+              <input
+                id="api_key"
+                name="api_key"
+                type="password"
+                autocomplete="off"
+                placeholder="Leave blank for 3 req/s"
+              />
+              <button
+                type="button"
+                id="toggle-key"
+                class="affix-btn"
+                aria-label="Show API key"
+                aria-pressed="false"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <p class="help">
+              A free NCBI key raises the rate limit 3 → 10 req/s. Stored only on
+              this machine, owner-readable, never shown to the assistant.
+            </p>
+            <p class="error" data-error-for="api_key" hidden></p>
+          </div>
+        </fieldset>
+
+        <details class="advanced">
+          <summary class="advanced__summary">
+            <span class="advanced__label">
+              <span class="advanced__title">Advanced</span>
+              <span class="advanced__hint"
+                >database · search window · downloads</span
+              >
+            </span>
+            <svg
+              class="advanced__chevron"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+
+          <div class="advanced__body">
+            <div class="field">
+              <label for="default_db">Default database</label>
+              <select id="default_db" name="default_db">
+                <option value="pubmed">PubMed</option>
+                <option value="pmc">PMC</option>
+                <option value="mesh">MeSH</option>
+              </select>
+              <p class="help">Most searches run against PubMed.</p>
+            </div>
+
+            <div class="field">
+              <label for="window_preset">Search window</label>
+              <select id="window_preset" name="window_preset">
+                <option value="">No limit — all dates (recommended)</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last 365 days</option>
+                <option value="custom">Custom…</option>
+              </select>
+              <input
+                id="window_days"
+                name="window_days"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Number of days"
+                hidden
+              />
+              <p class="help">
+                Limits searches to recently added papers (by PubMed entry date),
+                relative to the day you run them. Only applies when a search
+                doesn't set its own dates. Keep "No limit" to never miss
+                results.
+              </p>
+              <p class="error" data-error-for="window_days" hidden></p>
+            </div>
+
+            <div class="field">
+              <label for="output_path">Download directory</label>
+              <input
+                id="output_path"
+                name="output_path"
+                type="text"
+                list="output_path_options"
+                autocomplete="off"
+                placeholder="(default cache directory)"
+              />
+              <datalist id="output_path_options"></datalist>
+              <p class="help">
+                Where downloaded full text is saved. Start typing to pick a
+                common folder, or leave blank for the default.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="base_url">Base URL</label>
+              <input
+                id="base_url"
+                name="base_url"
+                type="url"
+                autocomplete="off"
+                placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+              />
+              <p class="help">
+                Override only for an institutional mirror or proxy.
+              </p>
+              <p class="error" data-error-for="base_url" hidden></p>
+            </div>
+
+            <label class="checkbox">
+              <input id="date_tag" name="date_tag" type="checkbox" checked />
+              <span>Append a date tag to output file names</span>
+            </label>
+          </div>
+        </details>
+
+        <div
+          id="status"
+          class="status"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+
+        <div class="actions">
+          <button type="button" id="test-btn" class="btn btn--ghost">
+            <span class="btn__label">Test connection</span>
+          </button>
+          <button type="submit" id="save-btn" class="btn btn--primary">
+            <span class="btn__label">Save configuration</span>
+          </button>
+        </div>
+      </form>
+    </main>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>
