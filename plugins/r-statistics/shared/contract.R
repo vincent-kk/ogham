@@ -15,6 +15,12 @@
 # ---- lifecycle ------------------------------------------------------------
 
 .rstat_init <- function() {
+  .rstat_lib <- Sys.getenv("R_STATISTICS_LIB")
+  if (nzchar(.rstat_lib)) {
+    dir.create(.rstat_lib, recursive = TRUE, showWarnings = FALSE)
+    .libPaths(c(.rstat_lib, .libPaths()))
+  }
+
   .rstat_env$artifacts_dir <- Sys.getenv("R_STATISTICS_ARTIFACTS_DIR")
   .rstat_env$data_dir <- Sys.getenv("R_STATISTICS_DATA_DIR")
   seed <- suppressWarnings(as.integer(Sys.getenv("R_STATISTICS_SEED", "20260101")))
@@ -62,6 +68,9 @@
     file.path(.rstat_env$artifacts_dir, "manifest.json"),
     auto_unbox = TRUE, pretty = TRUE, null = "null"
   )
+  if (!file.create(file.path(.rstat_env$artifacts_dir, "finalize.ok"))) {
+    stop("r-statistics contract: failed to write finalize.ok", call. = FALSE)
+  }
   invisible(NULL)
 }
 

@@ -85,11 +85,18 @@ Rscript, so if detection fails, install R first.
 
 8. **Install** (consent-gated, terminal — **not** `run_r`, which blocks
    `install.packages`). Build **one** command from the union of required-missing ∪
-   every selected bundle's missing packages ∪ any dynamic packages, de-duplicated:
+   every selected bundle's missing packages ∪ any dynamic packages, de-duplicated.
+   Install into the r-statistics managed library only; this keeps terminal
+   installs consistent with `run_r`, which prepends `R_STATISTICS_LIB` and sets
+   `R_LIBS_USER` to the same directory:
 
    ```bash
-   Rscript -e 'install.packages(c("ggplot2","ggpubr","patchwork"), repos="https://cloud.r-project.org")'
+   Rscript -e 'managed <- file.path(path.expand(Sys.getenv("CLAUDE_CONFIG_DIR", "~/.claude")), "plugins", "r-statistics", "runtime", "r-lib"); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c("ggplot2","ggpubr","patchwork"), lib=managed, repos="https://cloud.r-project.org")'
    ```
+
+   Do not copy or move an existing user `win-library`/site-library tree into this
+   directory. Packages should be freshly installed there so compiled dependencies
+   match the active R installation.
 
    Show the exact command, explain it, and run via `Bash` only on an explicit
    "yes". The `quarto` entry is the R package — the **Quarto CLI** (reporting) is
@@ -105,7 +112,8 @@ Rscript, so if detection fails, install R first.
 - Use only the approved package-manager command for the OS (R itself).
 - Install the required package set unconditionally; offer optional packages by
   _use case_ and install each selected bundle in one pass. Build the command from
-  the _missing_ set only, with a CRAN mirror (`https://cloud.r-project.org`).
+  the _missing_ set only, with a CRAN mirror (`https://cloud.r-project.org`) and
+  `install.packages(..., lib=managed)` after forcing `.libPaths(managed)`.
 
 ### Ask first
 

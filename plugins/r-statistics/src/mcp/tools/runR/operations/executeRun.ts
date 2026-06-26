@@ -1,3 +1,6 @@
+import { access } from "node:fs/promises";
+import { join } from "node:path";
+
 import {
   collectArtifacts,
   decodeOutput,
@@ -11,13 +14,21 @@ import {
   PROCESS_FAILED_MESSAGE,
   TIMEOUT_MESSAGE,
 } from "../../../../constants/messages.js";
-import { Encoding, JobStatus, RErrorCode } from "../../../../types/enums.js";
+import {
+  Encoding,
+  JobStatus,
+  Platform,
+  RErrorCode,
+} from "../../../../types/enums.js";
 import type {
   RArtifact,
   RExecutionError,
   RExecutionResult,
 } from "../../../../types/rExecution.js";
 import { detectPlatform } from "../../../../utils/detectPlatform.js";
+
+const WINDOWS_ACCESS_VIOLATION_EXIT_CODE = 3221225477;
+const FINALIZE_SENTINEL_FILE = "finalize.ok";
 
 export interface ExecuteRunInput {
   workspace: WorkspaceHandle;
@@ -36,6 +47,8 @@ export interface ExecuteRunOutput {
 function classify(
   spawn: SpawnRscriptResult,
   policyError: RExecutionError | undefined,
+  platform: Platform,
+  finalizeSucceeded: boolean,
 ): { status: JobStatus; error?: RExecutionError } {
   if (spawn.aborted) return { status: JobStatus.Cancelled };
   if (spawn.timedOut) {
@@ -59,6 +72,13 @@ function classify(
     };
   }
   if (policyError) return { status: JobStatus.Failed, error: policyError };
+  if (
+    platform === Platform.Windows &&
+    spawn.exitCode === WINDOWS_ACCESS_VIOLATION_EXIT_CODE &&
+    finalizeSucceeded
+  ) {
+    return { status: JobStatus.Succeeded };
+  }
   if (spawn.exitCode === 0) return { status: JobStatus.Succeeded };
   return {
     status: JobStatus.Failed,
@@ -68,6 +88,15 @@ function classify(
       retryable: true,
     },
   };
+}
+
+async function hasFinalizeSentinel(artifactsDir: string): Promise<boolean> {
+  try {
+    await access(join(artifactsDir, FINALIZE_SENTINEL_FILE));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -124,7 +153,15 @@ export async function executeRun(
     };
   }
 
-  const { status, error } = classify(spawn, policyError);
+  const finalizeSucceeded = await hasFinalizeSentinel(
+    input.workspace.artifactsDir,
+  );
+  const { status, error } = classify(
+    spawn,
+    policyError,
+    platform,
+    finalizeSucceeded,
+  );
   return {
     status,
     result: {

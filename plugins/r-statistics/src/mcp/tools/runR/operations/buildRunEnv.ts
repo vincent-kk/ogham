@@ -1,6 +1,11 @@
 import { DEFAULT_SEED } from "../../../../constants/defaults.js";
-import { contractScriptPath } from "../../../../constants/paths.js";
+import {
+  contractScriptPath,
+  MANAGED_R_LIB_DIR,
+} from "../../../../constants/paths.js";
 import type { WorkspaceHandle } from "../../../../core/index.js";
+import { Platform } from "../../../../types/enums.js";
+import { detectPlatform } from "../../../../utils/detectPlatform.js";
 
 /** Non-secret parent env vars R genuinely needs; the full env is NOT inherited. */
 const INHERITED_ENV_KEYS = [
@@ -17,6 +22,10 @@ const INHERITED_ENV_KEYS = [
   "TMPDIR",
   "TMP",
   "TEMP",
+  "LOCALAPPDATA",
+  "APPDATA",
+  "USERPROFILE",
+  "PROCESSOR_ARCHITECTURE",
 ] as const;
 
 /**
@@ -29,18 +38,24 @@ const INHERITED_ENV_KEYS = [
 export function buildRunEnv(
   workspace: WorkspaceHandle,
   seed: number | undefined,
+  platform: Platform = detectPlatform(),
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const key of INHERITED_ENV_KEYS) {
     const value = process.env[key];
     if (value !== undefined) env[key] = value;
   }
-  return {
+  const runEnv: NodeJS.ProcessEnv = {
     ...env,
     LANG: process.env.LANG ?? "en_US.UTF-8",
     R_STATISTICS_ARTIFACTS_DIR: workspace.artifactsDir,
     R_STATISTICS_DATA_DIR: workspace.dataDir,
     R_STATISTICS_SEED: String(seed ?? DEFAULT_SEED),
     R_STATISTICS_CONTRACT: contractScriptPath(),
+    R_STATISTICS_LIB: MANAGED_R_LIB_DIR,
   };
+  if (platform === Platform.Windows) {
+    runEnv.R_LIBS_USER = MANAGED_R_LIB_DIR;
+  }
+  return runEnv;
 }

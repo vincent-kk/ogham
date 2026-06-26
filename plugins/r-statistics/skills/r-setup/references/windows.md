@@ -23,11 +23,22 @@ choco install r.project
 
 After R is installed, r-setup checks the required package set. CRAN ships Windows
 binaries (Rtools usually unneeded). Mind PowerShell quoting — outer double, inner
-single:
+single. Install packages fresh into the r-statistics managed library; do not copy
+or move an existing `win-library` tree into it, because compiled packages from a
+different R/Rtools setup can load but crash during shutdown.
 
 ```powershell
-Rscript -e "install.packages(c('jsonlite','data.table','ggplot2'), repos='https://cloud.r-project.org')"
+Rscript -e "managed <- file.path(path.expand(Sys.getenv('CLAUDE_CONFIG_DIR', '~/.claude')), 'plugins', 'r-statistics', 'runtime', 'r-lib'); dir.create(managed, recursive=TRUE, showWarnings=FALSE); .libPaths(managed); install.packages(c('jsonlite','data.table','ggplot2'), lib=managed, repos='https://cloud.r-project.org')"
 ```
+
+Using `.libPaths(managed)` plus `install.packages(..., lib=managed)` ensures the
+dependency closure lands in the same managed library that `run_r` prepends via
+`R_STATISTICS_LIB`.
+
+If packages still crash after a fresh managed install, check that the package
+binaries match the active R version and that any locally compiled packages were
+built with a compatible Rtools version. This is a troubleshooting variable, not a
+code-enforced requirement.
 
 ## Verify
 
