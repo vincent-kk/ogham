@@ -7,3 +7,4 @@ export * from "./search.js";
 export * from "./job.js";
 export * from "./http.js";
 export * from "./eutils.js";
+export * from "./tool.js";
