@@ -8,3 +8,4 @@ export * from "./job.js";
 export * from "./http.js";
 export * from "./eutils.js";
 export * from "./tool.js";
+export * from "./setup.js";

@@ -13,7 +13,9 @@ import {
   type FetchFulltextInput,
   type AuthCheckInput,
 } from "../../../types/tool.js";
+import { SetupInputSchema, type SetupParams } from "../../../types/setup.js";
 import { wrapHandler, buildToolContext } from "../../shared/index.js";
+import { handleSetup } from "../../tools/setup/index.js";
 import {
   runPaperSearch,
   startJob,
@@ -119,6 +121,16 @@ export function createServer(): McpServer {
       annotations: READ_ONLY,
     },
     wrapHandler(async (args: AuthCheckInput) => runAuthCheck(args)),
+  );
+
+  server.registerTool(
+    "setup",
+    {
+      description: `${INTERNAL} Launch the local web UI to configure tool/email/api_key.`,
+      inputSchema: SetupInputSchema,
+      annotations: WRITE_VOLATILE,
+    },
+    wrapHandler(async (args: SetupParams) => handleSetup(args)),
   );
 
   return server;

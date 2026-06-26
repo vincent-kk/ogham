@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>entrez — settings</title>
+    <script>
+      window.__ENTREZ_STATE__ = null;
+    </script>
+    <style>
+:root{--bg: #f1f5f9;--surface: #ffffff;--surface-2: #f8fafc;--fg: #0f172a;--fg-muted: #64748b;--border: #e2e8f0;--border-strong: #cbd5e1;--primary: #1e293b;--primary-fg: #ffffff;--accent: #16a34a;--accent-fg: #ffffff;--danger: #dc2626;--danger-bg: #fef2f2;--ok-bg: #f0fdf4;--ring: #2563eb;--radius: 12px;--radius-sm: 8px;--font: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;--mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace}@media (prefers-color-scheme: dark){:root{--bg: #0f172a;--surface: #1e293b;--surface-2: #18233b;--fg: #f8fafc;--fg-muted: #94a3b8;--border: #334155;--border-strong: #475569;--primary: #e2e8f0;--primary-fg: #0f172a;--accent: #22c55e;--accent-fg: #052e14;--danger: #f87171;--danger-bg: #2a1414;--ok-bg: #11271a;--ring: #60a5fa}}*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;display:flex;justify-content:center;padding:32px 16px;-webkit-font-smoothing:antialiased}.card{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 2px #0f172a0a,0 8px 24px #0f172a0f;overflow:hidden;height:fit-content}.card__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px;border-bottom:1px solid var(--border);background:var(--surface-2)}.brand{display:flex;align-items:center;gap:12px}.brand__mark{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--primary);color:var(--primary-fg)}.brand__name{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}.brand__sub{margin:2px 0 0;font-size:12.5px;color:var(--fg-muted)}.badge{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);white-space:nowrap}form{padding:8px 24px 24px}.group{border:0;margin:0;padding:16px 0;border-bottom:1px solid var(--border)}.group:last-of-type{border-bottom:0}.group__title{padding:0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted);margin-bottom:12px}.group__hint{text-transform:none;letter-spacing:0;font-weight:400;color:var(--fg-muted);opacity:.85}.field{margin-bottom:14px}.field:last-child{margin-bottom:0}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}label{display:block;font-size:13.5px;font-weight:500;margin-bottom:6px}.req{color:var(--danger)}input[type=text],input[type=email],input[type=url],input[type=password],select{width:100%;padding:10px 12px;font:inherit;font-size:14px;color:var(--fg);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-sm);transition:border-color .15s ease,box-shadow .15s ease}input::placeholder{color:var(--fg-muted);opacity:.7}input:focus-visible,select:focus-visible,.affix-btn:focus-visible,.btn:focus-visible,.checkbox input:focus-visible{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 30%,transparent)}input[aria-invalid=true]{border-color:var(--danger)}.input-affix{position:relative;display:flex;align-items:center}.input-affix input{padding-right:42px}.affix-btn{position:absolute;right:4px;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:7px;background:transparent;color:var(--fg-muted);cursor:pointer}.affix-btn:hover{color:var(--fg);background:var(--surface-2)}.help{margin:6px 0 0;font-size:12.5px;color:var(--fg-muted)}.help code,code{font-family:var(--mono);font-size:.9em;background:var(--surface-2);border:1px solid var(--border);padding:0 4px;border-radius:4px}.error{margin:6px 0 0;font-size:12.5px;color:var(--danger);font-weight:500}.checkbox{display:flex;align-items:center;gap:10px;font-weight:400;font-size:14px;cursor:pointer;margin-top:10px}.checkbox input{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}.status{margin:16px 0 4px;padding:12px 14px;border-radius:var(--radius-sm);font-size:13.5px;border:1px solid var(--border);background:var(--surface-2)}.status[data-kind=ok]{background:var(--ok-bg);border-color:color-mix(in srgb,var(--accent) 40%,transparent);color:var(--accent)}.status[data-kind=error]{background:var(--danger-bg);border-color:color-mix(in srgb,var(--danger) 40%,transparent);color:var(--danger)}.actions{display:flex;gap:12px;margin-top:20px}.btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;font:inherit;font-size:14px;font-weight:600;border-radius:var(--radius-sm);border:1px solid transparent;cursor:pointer;transition:background .15s ease,border-color .15s ease,opacity .15s ease}.btn--primary{background:var(--accent);color:var(--accent-fg)}.btn--primary:hover{background:color-mix(in srgb,var(--accent) 88%,black)}.btn--ghost{background:var(--surface);color:var(--fg);border-color:var(--border-strong)}.btn--ghost:hover{background:var(--surface-2)}.btn[disabled]{opacity:.55;cursor:progress}.spinner{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}@media (max-width: 480px){.field-row{grid-template-columns:1fr}.actions{flex-direction:column-reverse}}
+</style>
+  </head>
+  <body>
+    <main class="card" role="main">
+      <header class="card__head">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
+            </svg>
+          </span>
+          <div class="brand__text">
+            <h1 class="brand__name">entrez</h1>
+            <p class="brand__sub">NCBI E-utilities configuration</p>
+          </div>
+        </div>
+        <span id="rate-badge" class="badge" title="Effective NCBI rate limit">3 req/s</span>
+      </header>
+
+      <form id="setup-form" novalidate>
+        <fieldset class="group">
+          <legend class="group__title">Identity <span class="group__hint">required by NCBI</span></legend>
+
+          <div class="field">
+            <label for="tool">Tool name <span class="req" aria-hidden="true">*</span></label>
+            <input id="tool" name="tool" type="text" autocomplete="off" placeholder="my-app" required />
+            <p class="help">Sent with every request as the <code>tool</code> identifier.</p>
+            <p class="error" data-error-for="tool" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="email">Contact email <span class="req" aria-hidden="true">*</span></label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            <p class="help">NCBI uses this to reach you about heavy usage.</p>
+            <p class="error" data-error-for="email" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="group__title">API key <span class="group__hint">optional · raises rate 3 → 10/s</span></legend>
+          <div class="field">
+            <label for="api_key">NCBI API key</label>
+            <div class="input-affix">
+              <input id="api_key" name="api_key" type="password" autocomplete="off" placeholder="Leave blank for 3 req/s" />
+              <button type="button" id="toggle-key" class="affix-btn" aria-label="Show API key" aria-pressed="false">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <p class="help">Stored only on this machine, owner-readable. Never shown to the assistant.</p>
+            <p class="error" data-error-for="api_key" hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="group__title">Search defaults</legend>
+
+          <div class="field">
+            <label for="default_db">Default database</label>
+            <select id="default_db" name="default_db">
+              <option value="pubmed">PubMed</option>
+              <option value="pmc">PMC</option>
+              <option value="mesh">MeSH</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="base_url">Base URL</label>
+            <input id="base_url" name="base_url" type="url" autocomplete="off" placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/" />
+            <p class="help">Override only for an institutional mirror or proxy.</p>
+            <p class="error" data-error-for="base_url" hidden></p>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="date_from">Default date — from</label>
+              <input id="date_from" name="date_from" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" />
+            </div>
+            <div class="field">
+              <label for="date_to">Default date — to</label>
+              <input id="date_to" name="date_to" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend class="group__title">Output</legend>
+          <div class="field">
+            <label for="output_path">Download directory</label>
+            <input id="output_path" name="output_path" type="text" autocomplete="off" placeholder="(default cache directory)" />
+          </div>
+          <label class="checkbox">
+            <input id="date_tag" name="date_tag" type="checkbox" checked />
+            <span>Append a date tag to output file names</span>
+          </label>
+        </fieldset>
+
+        <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+        <div class="actions">
+          <button type="button" id="test-btn" class="btn btn--ghost">
+            <span class="btn__label">Test connection</span>
+          </button>
+          <button type="submit" id="save-btn" class="btn btn--primary">
+            <span class="btn__label">Save configuration</span>
+          </button>
+        </div>
+      </form>
+    </main>
+    <script>
+(function(){"use strict";var S="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",b="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",n=window.__ENTREZ_STATE__||null,i=function(e){return document.getElementById(e)},f=i("setup-form"),y=i("rate-badge"),_=i("status"),c=i("test-btn"),v=i("save-btn"),u=i("api_key");function l(e,t){var a=i(e);a&&t!==void 0&&t!==null&&(a.value=t)}(function(){if(l("base_url",b),!n){p();return}l("tool",n.tool),l("email",n.email),l("default_db",n.default_db||"pubmed"),n.base_url&&l("base_url",n.base_url),l("output_path",n.output_path),n.api_key&&(u.value=S),n.default_date_range&&(l("date_from",n.default_date_range.from),l("date_to",n.default_date_range.to));var t=i("date_tag");t&&typeof n.date_tag=="boolean"&&(t.checked=n.date_tag),p()})();function p(){var e=u.value.trim().length>0;y.textContent=e?"10 req/s":"3 req/s",y.title=e?"With an API key NCBI allows 10 requests/second":"Without an API key NCBI allows 3 requests/second"}u.addEventListener("input",p);var m=i("toggle-key");m.addEventListener("click",function(){var e=u.type==="password";u.type=e?"text":"password",m.setAttribute("aria-pressed",String(e)),m.setAttribute("aria-label",e?"Hide API key":"Show API key")});function s(e){var t=i(e);return t?t.value.trim():""}function C(){var e={tool:s("tool"),email:s("email"),default_db:i("default_db").value,base_url:s("base_url")||b,output_path:s("output_path"),date_tag:i("date_tag").checked},t=u.value;t&&(e.api_key=t);var a=s("date_from"),r=s("date_to");return(a||r)&&(e.default_date_range={from:a,to:r}),e.output_path||delete e.output_path,e}function w(){for(var e=f.querySelectorAll(".error"),t=0;t<e.length;t++)e[t].hidden=!0,e[t].textContent="";for(var a=f.querySelectorAll("[aria-invalid]"),r=0;r<a.length;r++)a[r].removeAttribute("aria-invalid")}function h(e,t){var a=f.querySelector('[data-error-for="'+e+'"]');a&&(a.textContent=t,a.hidden=!1);var r=i(e);r&&r.setAttribute("aria-invalid","true")}function A(){w();var e=!0;s("tool")||(h("tool","Tool name is required."),e=!1);var t=s("email");return t?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)||(h("email","Enter a valid email address."),e=!1):(h("email","Contact email is required."),e=!1),e}function o(e,t){_.hidden=!1,_.setAttribute("data-kind",e),_.textContent=t}function d(e,t,a){e.disabled=t;var r=e.querySelector(".btn__label");if(t){e.dataset.label=r.textContent,r.textContent=a;var g=document.createElement("span");g.className="spinner",g.setAttribute("aria-hidden","true"),e.insertBefore(g,r)}else{e.dataset.label&&(r.textContent=e.dataset.label);var E=e.querySelector(".spinner");E&&E.remove()}}function k(e,t){return fetch(e,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)})}c.addEventListener("click",function(){if(!A()){o("error","Fix the highlighted fields, then test.");return}d(c,!0,"Testing\u2026"),o("info","Contacting NCBI EInfo\u2026"),k("/test",C()).then(function(e){return e.json()}).then(function(e){if(e&&e.success){var t=typeof e.dbCount=="number"?" \xB7 "+e.dbCount+" databases":"";o("ok","Connection OK"+t+".")}else o("error",e&&e.message||"Connection failed.")}).catch(function(){o("error","Could not reach the local server.")}).finally(function(){d(c,!1)})}),f.addEventListener("submit",function(e){if(e.preventDefault(),!A()){o("error","Fix the highlighted fields, then save.");return}d(v,!0,"Saving\u2026"),o("info","Validating and saving\u2026"),k("/submit",C()).then(function(t){return t.json().then(function(a){return{status:t.status,res:a}})}).then(function(t){var a=t.res||{};t.status===200&&a.success?(o("ok","Saved. You can close this window \u2014 the server will shut down."),v.disabled=!0,c.disabled=!0):(Array.isArray(a.errors)&&a.errors.forEach(function(r){h(r.field,r.message)}),o("error",a.message||"Save failed."),d(v,!1))}).catch(function(){o("error","Could not reach the local server."),d(v,!1)})})})();
+</script>
+  </body>
+</html>
