@@ -5,3 +5,5 @@ export * from "./record.js";
 export * from "./manifest.js";
 export * from "./search.js";
 export * from "./job.js";
+export * from "./http.js";
+export * from "./eutils.js";
