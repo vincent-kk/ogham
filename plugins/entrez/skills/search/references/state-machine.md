@@ -57,5 +57,5 @@ budget remaining.
 - Agent repeats the same broad query: force a different `QueryRole`.
 - 429 streak past `rateRetry`: `FAILED` (suggest off-peak: US Eastern 21:00–05:00 / weekends).
 
-Methodology SSoT: agent `references/query-strategy.md` (generation) and
-`rerank.md` (rerank). Tool contracts: `../_shared/mcp-tools.md`.
+Methodology SSoT: `../../_shared/query-strategy.md` (generation) and
+`../../_shared/rerank.md` (rerank). Tool contracts: `../../_shared/mcp-tools.md`.

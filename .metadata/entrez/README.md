@@ -32,7 +32,7 @@
 [Dispatcher]  search 스킬 — 상태머신 오케스트레이션 (intent 분류 + 전이 + interactive/--auto)
 [Agent]       paper-search-expert ×1 — 생성 모드(WHAT·recall) / 재랭킹 모드(RANK·precision)
 [Skill]       search · query · download · setup
-                 └ lazy: _shared/{mcp-tools,eutils}.md · agents/references/
+                 └ lazy: _shared/{mcp-tools,eutils,query-strategy,rerank}.md
 [MCP]         paper_search · mesh_lookup · fetch_fulltext · setup · auth-check  (결정론·계약)
 [HTTP]        atlassian httpClient (fetch + retry + 429 backoff + auto-POST + SSRF eutils allowlist)
 [NCBI]        E-utilities: ESearch → EFetch/ESummary/ESpell/ELink (단일 호스트 + db)

@@ -30,7 +30,7 @@
 | `src/core` | `sourceResolver`·`config` | `db` 분기 · config.json/credentials.json(0o600) 로드·저장. |
 | `src/adapters/eutils` | `esearch`·`efetch`·`esummary`·`espell`·`elink`·`idconv`·`oaService` | EFetch/ESummary batchSize 200~500·retmax 명시. `oaService`=oa.fcgi(OA·license 판별), `idconv`=PMID↔PMCID↔DOI. oa.fcgi/idconv 명세 구현 시 검증. |
 | `src/mcp/tools` | `paperSearch`·`meshLookup`·`fetchFulltext`·`setup`·`authCheck` | I/O 계약 [mcp-tools.md](./mcp-tools.md). `paperSearch` 내부: count probe→segment→POST·batch→union. |
-| `agents/references` | `query-strategy.md`·`rerank.md` | 검색식 방법론(QueryRole·ESpell·recall 게이트)·재랭킹 기준 SSoT. lazy. |
+| `skills/_shared` | `query-strategy.md`·`rerank.md` | 검색식 방법론(QueryRole·ESpell·recall 게이트)·재랭킹 기준 SSoT. lazy. (`agents/`는 서브디렉토리 불가) |
 | `skills` | `search`·`query`·`download`·`setup` + `_shared/{mcp-tools,eutils}.md` | search=Dispatcher 겸(`references/{state-machine,intent,modes}.md`). `mesh`는 MCP로만. |
 | `types` | `SearchManifest` | plugin version·base URL·db·raw queries·QueryTranslation·counts·timestamp·retmax/retstart/batchSize·api_key 사용여부(값 제외)·WebEnv/query_key·fetched PMID checksum·warnings/caps. |
 | `core` | 캐싱 | `mesh_lookup`=versioned(연간 MeSH 갱신), ESearch count=short TTL, PMID metadata=긴 TTL(ahead-of-print 갱신 표시). |

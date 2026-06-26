@@ -26,6 +26,6 @@ themselves elsewhere, or to preview before promoting to `search`.
 
 ## Notes
 
-- Methodology SSoT: agent [`query-strategy.md`](../../agents/references/query-strategy.md).
+- Methodology SSoT: [`query-strategy.md`](../_shared/query-strategy.md) (`_shared`).
 - Field-tag pitfalls (quotes/wildcards reduce recall): [`../_shared/eutils.md`](../_shared/eutils.md).
 - To actually run the queries and get records, use the `search` skill.

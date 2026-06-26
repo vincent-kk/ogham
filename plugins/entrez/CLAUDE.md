@@ -47,4 +47,4 @@ Dependency direction is one-way; lower layers never import upward.
 
 ## SSoT boundaries
 
-Query methodology = `agents/references/query-strategy.md`; rerank = `rerank.md`; orchestration procedure = `search` SKILL.md; tool I/O contract = MCP + `skills/_shared/mcp-tools.md`; E-utilities facts = `skills/_shared/eutils.md`. Do not duplicate.
+Query methodology = `skills/_shared/query-strategy.md`; rerank = `skills/_shared/rerank.md`; orchestration procedure = `search` SKILL.md; tool I/O contract = MCP + `skills/_shared/mcp-tools.md`; E-utilities facts = `skills/_shared/eutils.md`. Do not duplicate. (Agent reference docs live under `skills/_shared/`, not `agents/` — the plugin loader treats every `agents/*.md` as an agent and does not allow subdirectories.)

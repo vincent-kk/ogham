@@ -29,7 +29,7 @@
 - **문자열 리터럴 상수화**: 전량 `src/types/enums.ts`(`as const`) 또는 `src/constants/{messages,defaults,paths}.ts`. **인라인 리터럴 금지** (ESLint 룰로 강제 — Phase 0에서 설정).
 - **의존성 단방향**: Dispatcher → Agent → Skill → MCP → httpClient → NCBI. 역방향 import 금지(ESLint `import/no-restricted-paths`).
 - **hook 미사용.** subprocess는 `@ogham/cross-platform` 경유(`child_process` 직접 금지), 취소는 `AbortSignal`.
-- **SSoT**: 검색식 방법론=`agents/references/query-strategy.md`, 재랭킹=`rerank.md`, 절차=`search` SKILL.md, 계약=MCP+`_shared/mcp-tools.md`, E-utilities 사실=`_shared/eutils.md`. 중복 금지.
+- **SSoT**: 검색식 방법론=`skills/_shared/query-strategy.md`, 재랭킹=`skills/_shared/rerank.md`, 절차=`search` SKILL.md, 계약=MCP+`_shared/mcp-tools.md`, E-utilities 사실=`_shared/eutils.md`. 중복 금지. (에이전트 참조 문서는 `agents/` 하위 디렉토리 불가 — 플러그인 로더가 `agents/*.md`를 전부 에이전트로 취급 — 이므로 `skills/_shared/`에 둔다.)
 - **형식 레퍼런스**: `plugins/deilen`(MCP·빌드 esbuild), `plugins/r-statistics`(3-Layer·Dispatcher·테스트), `plugins/atlassian`(httpClient·setup web UI·configManager/authManager). 모호하면 이 실제 파일을 참고.
 
 ## 0.2 테스트 전략 (전체 — 완성도의 핵심)
@@ -154,7 +154,7 @@
 - [ ] `skills/query/SKILL.md`(① 검색식만) · `skills/download/SKILL.md`(OA PDF+링크) · `skills/setup/SKILL.md`(web UI 안내).
 - [ ] `skills/_shared/{mcp-tools.md, eutils.md}` (도구 계약 미러·E-utilities 사실, lazy SSoT).
 - [ ] `agents/paper-search-expert.md` — frontmatter(name·model·tools `[Read,mcp_mesh_lookup,mcp_paper_search]`·maxTurns) + 내부 2모드.
-- [ ] `agents/references/{query-strategy.md, rerank.md}` — 생성(QueryRole 6종·ESpell·recall 게이트)·재랭킹(pre-score 후 top-N 기준) **SSoT**.
+- [ ] `skills/_shared/{query-strategy.md, rerank.md}` — 생성(QueryRole 6종·ESpell·recall 게이트)·재랭킹(pre-score 후 top-N 기준) **SSoT**. (`agents/`는 서브디렉토리 불가)
 - **참고**: `skills.md`(frontmatter·노출 4·progressive disclosure), `agents.md`(2모드·hand-off), `dispatcher.md`(상태머신), `spec.md`(흐름).
 - **테스트**: SKILL.md/agent frontmatter 스키마 검증(필수 필드·`user_invocable`·trigger) / 노출 스킬 4 인식 / `Task(subagent_type:"entrez:paper-search-expert")` 호출 가능 / (수동 시나리오) intent 분류 4종·USER_REFINE 루프.
 - **DoD**: 노출 4 + 에이전트 인식, frontmatter 검증 그린.

@@ -60,8 +60,14 @@ describe("paper-search-expert agent", () => {
     expect(fm).toContain("Read");
   });
 
-  it("ships the generation + rerank methodology references (SSoT)", () => {
-    expect(existsSync(join(AGENTS, "references", "query-strategy.md"))).toBe(true);
-    expect(existsSync(join(AGENTS, "references", "rerank.md"))).toBe(true);
+  it("ships the generation + rerank methodology references in _shared (SSoT)", () => {
+    expect(existsSync(join(SKILLS, "_shared", "query-strategy.md"))).toBe(true);
+    expect(existsSync(join(SKILLS, "_shared", "rerank.md"))).toBe(true);
+  });
+
+  it("keeps agents/ flat — no subdirectories (plugin loader requirement)", () => {
+    const entries = readdirSync(AGENTS, { withFileTypes: true });
+    expect(entries.filter((e) => e.isDirectory())).toEqual([]);
+    expect(entries.every((e) => e.isFile() && e.name.endsWith(".md"))).toBe(true);
   });
 });

@@ -46,12 +46,14 @@ skills/search/
 
 ```
 skills/_shared/
-├── mcp-tools.md   # 5종 도구 I/O 계약 요약 (SSoT는 → mcp-tools.md)
-└── eutils.md      # E-utilities db·필드 태그·🔴 10k cap·POST 전환·rate·History 만료 (lazy)
+├── mcp-tools.md       # 5종 도구 I/O 계약 요약 (SSoT는 → mcp-tools.md)
+├── eutils.md          # E-utilities db·필드 태그·🔴 10k cap·POST 전환·rate·History 만료 (lazy)
+├── query-strategy.md  # 생성 모드 방법론 SSoT (QueryRole·ESpell·recall 게이트) — agent가 로드
+└── rerank.md          # 재랭킹 모드 방법론 SSoT (pre-score 후 정렬만) — agent가 로드
 ```
 
 - `eutils.md`는 검색식 lint·`SEARCH` 내부 단계 디버깅 시에만 로드(상시 컨텍스트 점유 회피).
-- **중복 방지 SSoT**: I/O 계약 단독 소유 = MCP + `_shared/mcp-tools.md`, E-utilities db·필드·제약 단독 소유 = `_shared/eutils.md`, 검색식 방법론·재랭킹 기준 단독 소유 = agent `references/{query-strategy,rerank}.md`([agents.md](./agents.md)), 오케스트레이션 절차 단독 소유 = `search/SKILL.md`.
+- **중복 방지 SSoT**: I/O 계약 단독 소유 = MCP + `_shared/mcp-tools.md`, E-utilities db·필드·제약 단독 소유 = `_shared/eutils.md`, 검색식 방법론·재랭킹 기준 단독 소유 = `_shared/{query-strategy,rerank}.md`(agent가 로드 — [agents.md](./agents.md)), 오케스트레이션 절차 단독 소유 = `search/SKILL.md`.
 
 ## query / download / setup (thin)
 
@@ -68,7 +70,7 @@ skills/_shared/
 
 - 노출 비용 = description × 상시 로드. 4개만 노출, 나머지는 호출 시 lazy.
 - 로드 순서: `SKILL.md`(얇음) → 분기에 따라 `references/{state-machine|intent|modes}.md` → 도구 호출 직전 `_shared/{mcp-tools|eutils}.md`.
-- agent 리소스(`query-strategy.md`·`rerank.md`)는 스킬이 아니라 `paper-search-expert`가 모드 진입 시 로드([agents.md](./agents.md)).
+- agent 리소스(`_shared/query-strategy.md`·`_shared/rerank.md`)는 노출 스킬이 아니라 `paper-search-expert`가 모드 진입 시 로드([agents.md](./agents.md)). `agents/`는 서브디렉토리 불가라 `_shared`에 둔다.
 
 ## Agent ↔ Skill ↔ MCP 경계
 
