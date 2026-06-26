@@ -2,7 +2,6 @@
 
 > The **literal output formats** for the deliverables written by the chair and the strategist. This file defines the
 > _body structure_ that pairs with the frontmatter contract in [`orchestration.md`](./orchestration.md) §5.
-> Ported from the Korean SSoT in `.metadata/prawf/`.
 >
 > **Output language**: write deliverables in the user's language — match the language of the request (or the paper);
 > default to English when unspecified. The examples below are in English. Axis ids, framework names, finding-ids, and

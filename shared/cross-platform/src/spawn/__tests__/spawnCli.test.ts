@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -116,4 +118,53 @@ describe("spawnCli", () => {
     expect(result.abortedByCaller).toBe(false);
     expect(result.stderr).toBe("oops");
   });
+
+  it("captures output normally when detached", async () => {
+    const result = await spawnCli(node, [fixture("print-hello.mjs")], {
+      detached: true,
+    });
+    expect(result.code).toBe(0);
+    expect(result.stdout).toBe("hello\n");
+  });
+
+  it.skipIf(process.platform === "win32")(
+    "group-kills grandchildren on abort when detached (POSIX)",
+    async () => {
+      const pidFile = resolve(
+        tmpdir(),
+        `omc-gc-${process.pid}-${Math.random().toString(36).slice(2)}.pid`,
+      );
+      const controller = new AbortController();
+      const promise = spawnCli(
+        node,
+        [fixture("spawn-grandchild.mjs"), pidFile],
+        { detached: true, signal: controller.signal },
+      );
+      while (!existsSync(pidFile)) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      const gcPid = Number(readFileSync(pidFile, "utf8"));
+      controller.abort();
+      const result = await promise;
+      expect(result.abortedByCaller).toBe(true);
+
+      let alive = true;
+      for (let i = 0; i < 50 && alive; i += 1) {
+        try {
+          process.kill(gcPid, 0);
+          await new Promise((r) => setTimeout(r, 40));
+        } catch {
+          alive = false;
+        }
+      }
+      // cleanup so a regression never leaves an orphan behind in CI
+      try {
+        process.kill(gcPid, "SIGKILL");
+      } catch {
+        /* already reaped */
+      }
+      expect(alive).toBe(false);
+    },
+    15_000,
+  );
 });

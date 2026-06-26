@@ -114,6 +114,12 @@ Classify each item by type:
 > If `--auto` is set: **Accept ALL fix items. Skip `AskUserQuestion`.
 > Proceed directly to Step 4.**
 
+> **`--auto` ignores `INTENT.md` "Ask first" gates** — it applies every fix,
+> including schema / contract / API changes a module marks "Ask first". A fix
+> can pass typecheck + tests yet be the wrong _resolution_ (e.g. deleting a
+> planned-but-unimplemented contract field). Review auto-applied contract
+> changes against the design specs before merge.
+
 <!-- [INTERACTIVE] AskUserQuestion: per-fix accept/reject decision -->
 
 Use `AskUserQuestion` to present each fix item for decision:

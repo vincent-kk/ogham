@@ -1,0 +1,16 @@
+technique: mixed_model
+family: regression
+outcome_types: [continuous]
+required_assumptions:
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+  - id: homoscedasticity
+    severity: soft
+    check: residual_plot
+  - id: no_multicollinearity
+    severity: soft
+    check: vif
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [model.fit, table.fixed_effects]
+packages: [lme4, broom, car]

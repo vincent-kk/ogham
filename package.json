@@ -33,6 +33,7 @@
     "maencof-lens": "yarn workspace @ogham/maencof-lens",
     "prawf": "yarn workspace @ogham/prawf",
     "publish:all": "yarn workspaces foreach -A --no-private run publish:npm",
+    "rStatistics": "yarn workspace @ogham/r-statistics",
     "run:all": "yarn workspaces foreach -A --topological-dev run",
     "sort:packages": "npx sort-package-json '**/package.json'",
     "tag:packages": "./scripts/tag-packages.sh",

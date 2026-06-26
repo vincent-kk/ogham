@@ -308,6 +308,10 @@ in place** via`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -f body
 - **Always passes `--auto`** (pipeline implies full automation). `--auto`
   MUST bypass every `AskUserQuestion` / `[y/N]` gate inside `resolve`;
   changing this requires a pipeline version bump.
+- **Design-intent caveat**: the pipeline always runs `resolve --auto`, so
+  "Ask first" schema / contract / API changes auto-apply with no Reject gate
+  (see `resolve/SKILL.md` Step 3). PASS attests rules + tests, not design fit —
+  review such changes before merge.
 - **Success signal**: `.filid/review/<branch>/justifications.md` exists
 - **Zero accepted fixes**: proceed to `filid:revalidate` normally
   (`justifications.md` will exist with all-rejected entries)

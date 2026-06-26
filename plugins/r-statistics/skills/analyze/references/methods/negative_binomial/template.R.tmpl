@@ -1,0 +1,71 @@
+# Negative binomial regression slot: fit MASS::glm.nb for over-dispersed counts,
+# report coefficients on the response (rate-ratio) scale via broom::tidy,
+# check predictor multicollinearity with car::vif.
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{FORMULA}} {{PREDICTORS}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Outcome must be a non-negative count; coerce to numeric for the GLM.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+
+# Keep only complete cases across the outcome and the modelled predictors so
+# every downstream helper (glm.nb, vif, tidy) sees the same rows.
+model_cols <- c("{{OUTCOME}}", {{PREDICTORS}})
+df <- df[stats::complete.cases(df[, model_cols, drop = FALSE]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to e.g. count ~ x1 + x2 (+ offset(log(exposure))).
+# glm.nb estimates the dispersion parameter theta, relaxing the Poisson
+# variance = mean constraint when counts are over-dispersed.
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- MASS::glm.nb(model_formula, data = df)
+
+cat("=== Negative binomial regression (MASS::glm.nb) ===\n")
+print(summary(fit))
+cat(sprintf("\nEstimated dispersion (theta) = %.4f (SE %.4f)\n",
+            fit$theta, fit$SE.theta))
+
+# Coefficient table on the log scale with model-fit columns.
+coef_tidy <- broom::tidy(fit)
+# Incidence-rate ratios (exp of coefficients) are the interpretable effect size.
+coef_tidy$rate_ratio <- exp(coef_tidy$estimate)
+cat("\n=== Coefficients (log scale + incidence-rate ratios) ===\n")
+print(coef_tidy)
+
+# ---- assumption: no multicollinearity (VIF) -------------------------------
+# car::vif needs >= 2 predictor terms; with a single term it is undefined.
+n_terms <- length(attr(stats::terms(fit), "term.labels"))
+vif_tbl <- if (n_terms >= 2) {
+  vif_raw <- car::vif(fit)
+  # car::vif returns a vector (numeric terms) or a matrix (factors / GVIF).
+  if (is.matrix(vif_raw)) {
+    data.frame(term = rownames(vif_raw), vif_raw, row.names = NULL,
+               check.names = FALSE)
+  } else {
+    data.frame(term = names(vif_raw), vif = as.numeric(vif_raw),
+               row.names = NULL)
+  }
+} else {
+  data.frame(term = character(0), vif = numeric(0))
+}
+cat("\n=== Multicollinearity (variance inflation factors) ===\n")
+print(vif_tbl)
+note_assumption("no_multicollinearity")
+
+# ---- artifact: model.fit --------------------------------------------------
+# Persist the fitted model object (RDS) so it can be reloaded for prediction.
+model_file <- artifact_path("model_fit.rds")
+saveRDS(fit, model_file)
+add_artifact(
+  "model.fit", "model", "model_fit.rds",
+  "Fitted MASS::glm.nb negative binomial model object (RDS)"
+)
+
+# ---- artifact: table.coefficients -----------------------------------------
+# Coefficient estimates, SEs, test statistics, p-values and rate ratios.
+write_json_artifact(
+  "table.coefficients", "table",
+  coef_tidy, "coefficients.json",
+  "Negative binomial coefficients (estimate, std.error, statistic, p.value, rate_ratio)"
+)

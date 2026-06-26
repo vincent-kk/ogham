@@ -7,8 +7,6 @@
 > auto-detects the field from the paper content** — it is _reference data_, not an
 > evaluation behavior, and it feeds P0 auto-detection directly without any separate
 > injection channel.
->
-> Ported from the Korean SSoT in `.metadata/prawf/`.
 
 ## 1. Concept — Axes Are Core, Frameworks Are Data
 

@@ -69,6 +69,18 @@
         "research",
         "paper-review"
       ]
+    },
+    {
+      "name": "r-statistics",
+      "source": "./plugins/r-statistics",
+      "category": "productivity",
+      "tags": [
+        "statistics",
+        "r",
+        "hypothesis-testing",
+        "reproducible-analysis",
+        "multi-agent"
+      ]
     }
   ]
 }

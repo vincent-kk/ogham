@@ -1,0 +1,120 @@
+# Linear mixed model slot: fit a random-intercept model with lme4::lmer,
+# report fixed effects (broom::tidy), and check residual normality (Shapiro),
+# homoscedasticity (residuals-vs-fitted plot), and multicollinearity (car::vif).
+# Placeholders: {{DATA_REF_ID}} {{OUTCOME}} {{PREDICTORS}} {{GROUP}} {{FORMULA}}
+
+# ---- data -----------------------------------------------------------------
+df <- as.data.frame(read_data("{{DATA_REF_ID}}"))
+
+# Outcome must be numeric; the grouping variable is the random-intercept factor.
+df[["{{OUTCOME}}"]] <- as.numeric(df[["{{OUTCOME}}"]])
+df[["{{GROUP}}"]] <- factor(df[["{{GROUP}}"]])
+
+# Keep only complete cases across every column used by the model formula.
+model_vars <- all.vars(stats::as.formula("{{FORMULA}}"))
+model_vars <- intersect(model_vars, names(df))
+df <- df[stats::complete.cases(df[, model_vars, drop = FALSE]), , drop = FALSE]
+
+# ---- model fit ------------------------------------------------------------
+# {{FORMULA}} expands to a random-intercept model, e.g.
+#   outcome ~ predictor1 + predictor2 + (1 | group)
+# REML = TRUE gives unbiased variance-component estimates (default reporting fit).
+model_formula <- stats::as.formula("{{FORMULA}}")
+fit <- lme4::lmer(model_formula, data = df, REML = TRUE)
+
+cat("=== Linear mixed model (random intercept) ===\n")
+print(summary(fit))
+
+# broom::tidy on a merMod returns fixed + random effect terms; keep fixed effects.
+tidy_all <- broom::tidy(fit)
+fixed_tbl <- tidy_all[tidy_all$effect == "fixed", , drop = FALSE]
+cat("\n=== Fixed effects ===\n")
+print(fixed_tbl)
+
+# ---- assumption: residual normality (Shapiro-Wilk) ------------------------
+resid_vec <- stats::residuals(fit)
+# Shapiro-Wilk is only valid for 3..5000 observations; guard the bounds.
+n_resid <- length(resid_vec)
+shapiro <- if (n_resid >= 3 && n_resid <= 5000) {
+  broom::tidy(stats::shapiro.test(resid_vec))
+} else {
+  data.frame(statistic = NA_real_, p.value = NA_real_,
+             method = "shapiro-wilk (skipped: n out of range)")
+}
+cat("\n=== Residual normality (Shapiro-Wilk) ===\n")
+print(shapiro)
+note_assumption("residual_normality")
+
+# ---- assumption: homoscedasticity (residuals-vs-fitted plot) --------------
+# A horizontal, even band around zero indicates constant residual variance.
+diag_df <- data.frame(
+  .fitted = stats::fitted(fit),
+  .resid = resid_vec
+)
+resid_fitted_plot <- ggplot2::ggplot(diag_df, ggplot2::aes(x = .fitted, y = .resid)) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::labs(title = "Residuals vs Fitted (conditional)",
+                x = "Fitted", y = "Residual") +
+  ggplot2::theme_minimal()
+note_assumption("homoscedasticity")
+
+# ---- assumption: no multicollinearity (VIF on fixed effects) --------------
+# car::vif needs >= 2 fixed-effect predictor terms; skip gracefully otherwise.
+n_fixed_terms <- length(attr(stats::terms(fit), "term.labels"))
+vif_vals <- if (n_fixed_terms >= 2) {
+  v <- car::vif(fit)
+  # vif() returns a vector (continuous terms) or a matrix (factors w/ >1 df).
+  if (is.matrix(v)) {
+    data.frame(term = rownames(v), vif = v[, "GVIF"], row.names = NULL)
+  } else {
+    data.frame(term = names(v), vif = as.numeric(v), row.names = NULL)
+  }
+} else {
+  data.frame(term = character(0), vif = numeric(0))
+}
+cat("\n=== Multicollinearity (VIF) ===\n")
+print(vif_vals)
+note_assumption("no_multicollinearity")
+
+# ---- artifact: table.fixed_effects ----------------------------------------
+# Fixed-effect coefficient table is the primary inferential result.
+write_json_artifact(
+  "table.fixed_effects", "table",
+  fixed_tbl, "fixed_effects.json",
+  "Fixed-effect estimates (term, estimate, std.error, statistic) from lme4::lmer"
+)
+
+# ---- artifact: model.fit --------------------------------------------------
+# Persist the fitted model object plus a compact run summary for downstream use.
+saveRDS(fit, artifact_path("model_fit.rds"))
+add_artifact(
+  "model.fit", "model", "model_fit.rds",
+  "Fitted lme4::lmer random-intercept model object (RDS)"
+)
+
+# Variance components for the random intercept and residual.
+var_corr <- as.data.frame(lme4::VarCorr(fit))
+model_summary <- list(
+  technique = "mixed_model",
+  outcome = "{{OUTCOME}}",
+  group = "{{GROUP}}",
+  formula = deparse(model_formula),
+  n = nrow(df),
+  n_groups = nlevels(df[["{{GROUP}}"]]),
+  fixed_effects = fixed_tbl,
+  variance_components = var_corr[, c("grp", "var1", "vcov", "sdcor")],
+  shapiro_p_value = shapiro$p.value,
+  normality_ok = is.na(shapiro$p.value) || shapiro$p.value >= 0.05,
+  vif = vif_vals
+)
+write_json_artifact(
+  "model.fit", "model",
+  model_summary, "model_summary.json",
+  "Mixed-model run summary: fixed effects, variance components, assumption checks"
+)
+save_plot_artifact(
+  "model.fit", resid_fitted_plot,
+  "residual_vs_fitted.png",
+  "Residuals vs fitted values (homoscedasticity check)"
+)

@@ -1,0 +1,104 @@
+# Welch's one-way ANOVA — compares the mean of a continuous outcome across
+# 3+ groups WITHOUT assuming equal group variances (var.equal = FALSE).
+# Slot body only: the harness handles seed / contract / manifest / sessionInfo.
+
+# ---- load data ------------------------------------------------------------
+df <- read_data("{{DATA_REF_ID}}")
+df <- as.data.frame(df)
+
+# Bind columns. {{OUTCOME}} is the continuous response, {{GROUP}} the factor.
+outcome_col <- "{{OUTCOME}}"
+group_col <- "{{GROUP}}"
+
+# Drop rows with missing outcome/group and ensure a clean factor grouping.
+df <- df[!is.na(df[[outcome_col]]) & !is.na(df[[group_col]]), , drop = FALSE]
+df[[group_col]] <- factor(df[[group_col]])
+
+# response ~ group
+fml <- stats::as.formula(sprintf("%s ~ %s", outcome_col, group_col))
+
+# ---- fit Welch ANOVA ------------------------------------------------------
+welch <- stats::oneway.test(fml, data = df, var.equal = FALSE)
+
+# Tidy into a one-row data frame: statistic (F), df numerator/denominator, p.
+welch_tidy <- broom::tidy(welch)
+
+# Per-group descriptives (n, mean, sd) for context in the summary table.
+group_desc <- do.call(rbind, lapply(split(df[[outcome_col]], df[[group_col]]), function(v) {
+  data.frame(n = length(v), mean = mean(v), sd = stats::sd(v))
+}))
+group_desc <- cbind(group = rownames(group_desc), group_desc)
+rownames(group_desc) <- NULL
+
+# ---- assumption: residual normality (Shapiro-Wilk) ------------------------
+# Welch ANOVA still assumes within-group normality; test the model residuals.
+# Center each observation on its group mean to obtain residuals.
+group_means <- tapply(df[[outcome_col]], df[[group_col]], mean)
+residuals_vec <- df[[outcome_col]] - group_means[as.character(df[[group_col]])]
+
+shapiro_p <- NA_real_
+shapiro_w <- NA_real_
+# shapiro.test requires 3..5000 finite values.
+if (length(residuals_vec) >= 3L && length(residuals_vec) <= 5000L) {
+  sw <- stats::shapiro.test(residuals_vec)
+  shapiro_w <- unname(sw$statistic)
+  shapiro_p <- sw$p.value
+}
+normality_ok <- is.na(shapiro_p) || shapiro_p >= 0.05
+note_assumption("residual_normality")
+
+# ---- human-readable summary ----------------------------------------------
+cat("Welch's one-way ANOVA (unequal variances)\n")
+cat(sprintf("  formula: %s\n", deparse(fml)))
+cat(sprintf("  groups : %d  |  n total: %d\n", nlevels(df[[group_col]]), nrow(df)))
+cat(sprintf(
+  "  F = %.4f, num df = %.0f, denom df = %.2f, p = %.4g\n",
+  welch_tidy$statistic, welch_tidy$num.df, welch_tidy$den.df, welch_tidy$p.value
+))
+cat("\nGroup descriptives:\n")
+print(group_desc, row.names = FALSE)
+cat(sprintf(
+  "\nResidual normality (Shapiro-Wilk): W = %s, p = %s -> %s\n",
+  ifelse(is.na(shapiro_w), "NA", sprintf("%.4f", shapiro_w)),
+  ifelse(is.na(shapiro_p), "NA", sprintf("%.4g", shapiro_p)),
+  ifelse(normality_ok, "OK", "VIOLATED (consider kruskal_wallis)")
+))
+
+# ---- artifact: result.anova_table ----------------------------------------
+# The Welch ANOVA test statistics as a tidy one-row table.
+anova_table <- list(
+  method = "Welch one-way ANOVA (var.equal = FALSE)",
+  formula = deparse(fml),
+  statistic = unname(welch_tidy$statistic),
+  num_df = unname(welch_tidy$num.df),
+  den_df = unname(welch_tidy$den.df),
+  p_value = unname(welch_tidy$p.value)
+)
+write_json_artifact(
+  "result.anova_table", "table", anova_table, "anova_table.json",
+  description = "Welch one-way ANOVA statistic, degrees of freedom, and p-value"
+)
+
+# ---- artifact: table.test_summary ----------------------------------------
+# Group descriptives plus the assumption check, for reporting.
+test_summary <- list(
+  outcome = outcome_col,
+  group = group_col,
+  n_groups = nlevels(df[[group_col]]),
+  n_total = nrow(df),
+  groups = group_desc,
+  assumptions = list(
+    residual_normality = list(
+      check = "shapiro",
+      statistic = shapiro_w,
+      p_value = shapiro_p,
+      satisfied = normality_ok,
+      recommend_on_violation = "kruskal_wallis"
+    )
+  ),
+  test = anova_table
+)
+write_json_artifact(
+  "table.test_summary", "table", test_summary, "test_summary.json",
+  description = "Group descriptives, assumption check, and Welch ANOVA result"
+)

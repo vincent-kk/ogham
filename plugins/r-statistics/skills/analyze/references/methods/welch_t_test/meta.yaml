@@ -1,0 +1,11 @@
+technique: welch_t_test
+family: parametric
+outcome_types: [continuous]
+required_assumptions:
+  - id: normality
+    severity: soft
+    check: shapiro
+    on_violation: { recommend: [mann_whitney] }
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [result.hypothesis_test, table.test_summary]
+packages: [stats, broom, rstatix]
