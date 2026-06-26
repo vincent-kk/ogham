@@ -1,6 +1,6 @@
 {
   "name": "entrez",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "entrez — NCBI E-utilities (PubMed/PMC/MeSH) academic paper search plugin for Claude Code. Recall-first multi-query union search with deterministic dedup.",
   "author": {
     "name": "Vincent K. Kelvin"
@@ -8,7 +8,13 @@
   "repository": "https://github.com/vincent-kk/ogham",
   "homepage": "https://github.com/vincent-kk/ogham/tree/main/plugins/entrez",
   "license": "MIT",
-  "keywords": ["claude-code", "plugin", "pubmed", "ncbi", "research"],
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "pubmed",
+    "ncbi",
+    "research"
+  ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json"
 }
