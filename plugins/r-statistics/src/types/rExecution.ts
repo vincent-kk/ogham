@@ -6,6 +6,7 @@ import type {
   Platform,
   RErrorCode,
   RunMode,
+  SessionMode,
 } from "./enums.js";
 
 /** A reference to an input dataset the MCP resolves (LLM never builds paths). */
@@ -22,6 +23,7 @@ export interface RunRInput {
   scriptCode: string;
   dataRefs?: RDataRef[];
   workspaceId?: string;
+  sessionMode?: SessionMode;
   executionMode?: RunMode;
   timeoutMs?: number;
   seed?: number;

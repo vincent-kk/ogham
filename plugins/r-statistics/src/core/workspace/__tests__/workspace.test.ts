@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -64,5 +64,19 @@ describe("workspace", () => {
   it("accepts a valid workspaceId with alphanumeric, underscore, and hyphen", async () => {
     const ws = await createWorkspace("ws_abc-123");
     expect(ws.workspaceId).toBe("ws_abc-123");
+  });
+
+  it("reset wipes prior artifacts on workspace reuse (stateless)", async () => {
+    const first = await createWorkspace("ws_reset_case");
+    await writeFile(join(first.artifactsDir, "stale.csv"), "old");
+    const second = await createWorkspace("ws_reset_case", { reset: true });
+    expect(await readdir(second.artifactsDir)).not.toContain("stale.csv");
+  });
+
+  it("preserves prior data on workspace reuse (workspace_files)", async () => {
+    const first = await createWorkspace("ws_keep_case");
+    await writeFile(join(first.dataDir, "kept.csv"), "keep");
+    const second = await createWorkspace("ws_keep_case");
+    expect(await readdir(second.dataDir)).toContain("kept.csv");
   });
 });

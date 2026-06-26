@@ -9,6 +9,7 @@ import {
   MethodFamily,
   OutcomeType,
   RunMode,
+  SessionMode,
 } from "../../../types/enums.js";
 import { VERSION } from "../../../version.js";
 import { wrapHandler } from "../../shared/index.js";
@@ -97,6 +98,13 @@ export function createServer(): McpServer {
           .regex(/^[A-Za-z0-9_-]+$/)
           .optional()
           .describe("Reuse an existing workspace for session isolation."),
+        sessionMode: z
+          .nativeEnum(SessionMode)
+          .optional()
+          .describe(
+            "stateless (default, fresh workspace each run) or workspace_files " +
+              "(reuse workspaceId's data/+artifacts/ across calls; requires workspaceId).",
+          ),
         executionMode: z
           .nativeEnum(RunMode)
           .optional()

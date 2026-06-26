@@ -55,6 +55,17 @@ export const RunMode = {
 } as const;
 export type RunMode = (typeof RunMode)[keyof typeof RunMode];
 
+/**
+ * run_r workspace lifecycle. `stateless` (default) resets the workspace each
+ * run for reproducible isolation; `workspace_files` reuses a `workspaceId`'s
+ * `data/` + `artifacts/` across calls so a multi-step session shares files.
+ */
+export const SessionMode = {
+  Stateless: "stateless",
+  WorkspaceFiles: "workspace_files",
+} as const;
+export type SessionMode = (typeof SessionMode)[keyof typeof SessionMode];
+
 /** Intent classification (analyze Dispatcher CLASSIFY state). */
 export const Intent = {
   FullAnalysis: "full-analysis",

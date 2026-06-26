@@ -79,4 +79,47 @@ describe("run_r", () => {
       expect(finished.result?.artifacts.length).toBeGreaterThan(0);
     },
   );
+
+  it.skipIf(!hasR)(
+    "workspace_files persists artifacts across calls; stateless resets them",
+    async () => {
+      const workspaceId = "ws_persist_e2e";
+      const writeA =
+        'utils::write.csv(data.frame(x=1), artifact_path("a.csv"), row.names=FALSE)\n' +
+        'add_artifact("a", "data", "a.csv", "first")';
+      const writeB =
+        'utils::write.csv(data.frame(x=2), artifact_path("b.csv"), row.names=FALSE)\n' +
+        'add_artifact("b", "data", "b.csv", "second")';
+
+      await handleRunR({
+        scriptCode: writeA,
+        workspaceId,
+        sessionMode: "workspace_files",
+        executionMode: "sync",
+      });
+      const persisted = await handleRunR({
+        scriptCode: writeB,
+        workspaceId,
+        sessionMode: "workspace_files",
+        executionMode: "sync",
+      });
+      const persistedNames = (persisted.result?.artifacts ?? [])
+        .map((a) => a.path)
+        .join(",");
+      expect(persistedNames).toContain("a.csv"); // carried over from call 1
+      expect(persistedNames).toContain("b.csv");
+
+      const reset = await handleRunR({
+        scriptCode: writeB,
+        workspaceId,
+        sessionMode: "stateless",
+        executionMode: "sync",
+      });
+      const resetNames = (reset.result?.artifacts ?? [])
+        .map((a) => a.path)
+        .join(",");
+      expect(resetNames).not.toContain("a.csv"); // stateless wiped the workspace
+      expect(resetNames).toContain("b.csv");
+    },
+  );
 });

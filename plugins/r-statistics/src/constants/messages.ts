@@ -21,6 +21,8 @@ export const ERROR_MESSAGES = {
     "A data ref id must be alphanumeric (with _ or -) and contain no path separators.",
   INVALID_WORKSPACE_ID:
     "A workspace id must be alphanumeric (with _ or -) and contain no path separators.",
+  WORKSPACE_FILES_REQUIRES_ID:
+    "sessionMode 'workspace_files' requires a workspaceId to address the persistent session.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

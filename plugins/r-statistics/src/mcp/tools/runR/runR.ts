@@ -20,6 +20,7 @@ import {
   JobStatus,
   RErrorCode,
   RunMode,
+  SessionMode,
 } from "../../../types/enums.js";
 import type {
   RExecutionError,
@@ -80,6 +81,10 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
   if (!input.scriptCode || !input.scriptCode.trim()) {
     throw new Error(ERROR_MESSAGES.EMPTY_SCRIPT);
   }
+  const sessionMode = input.sessionMode ?? SessionMode.Stateless;
+  if (sessionMode === SessionMode.WorkspaceFiles && !input.workspaceId) {
+    throw new Error(ERROR_MESSAGES.WORKSPACE_FILES_REQUIRES_ID);
+  }
   const timeoutMs = clampTimeout(input.timeoutMs);
 
   const validation = validateRScript(input.scriptCode);
@@ -106,7 +111,9 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
     );
   }
 
-  const workspace = await createWorkspace(input.workspaceId);
+  const workspace = await createWorkspace(input.workspaceId, {
+    reset: sessionMode !== SessionMode.WorkspaceFiles,
+  });
   await resolveDataRefs(workspace.dataDir, input.dataRefs);
   await atomicWrite(
     workspaceScriptPath(workspace.workspaceId),
