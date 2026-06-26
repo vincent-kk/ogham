@@ -84,9 +84,9 @@ export async function collectArtifacts(
     collected.push({
       id: randomId("art_"),
       kind: kindByFile.get(name) ?? kindFromExtension(extension),
-      path: fullPath,
+      path: real,
       mimeType: mimeForExtension(extension),
-      sha256: await sha256File(fullPath),
+      sha256: await sha256File(real),
     });
   }
   return collected;

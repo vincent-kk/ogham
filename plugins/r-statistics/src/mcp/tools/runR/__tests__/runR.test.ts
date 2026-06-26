@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createJob, updateJob } from "../../../../core/index.js";
+import {
+  MAX_DATA_REFS,
+  MAX_SCRIPT_CHARS,
+} from "../../../../constants/defaults.js";
 import { ERROR_MESSAGES } from "../../../../constants/messages.js";
-import { JobStatus, SessionMode } from "../../../../types/enums.js";
+import { createJob, updateJob } from "../../../../core/index.js";
+import { DataFormat, JobStatus, SessionMode } from "../../../../types/enums.js";
 import { handleRunR } from "../runR.js";
 
 // Pure input-validation paths — these reject before Rscript discovery, so they
@@ -31,5 +35,22 @@ describe("handleRunR input validation", () => {
     await expect(
       handleRunR({ scriptCode: "1 + 1", workspaceId }),
     ).rejects.toThrow(ERROR_MESSAGES.WORKSPACE_BUSY);
+  });
+
+  it("rejects an oversized script", async () => {
+    await expect(
+      handleRunR({ scriptCode: "x".repeat(MAX_SCRIPT_CHARS + 1) }),
+    ).rejects.toThrow(ERROR_MESSAGES.SCRIPT_TOO_LARGE);
+  });
+
+  it("rejects too many dataRefs", async () => {
+    const refs = Array.from({ length: MAX_DATA_REFS + 1 }, (_, i) => ({
+      id: `d${i}`,
+      format: DataFormat.Csv,
+      path: "/tmp/x.csv",
+    }));
+    await expect(
+      handleRunR({ scriptCode: "1 + 1", dataRefs: refs }),
+    ).rejects.toThrow(ERROR_MESSAGES.TOO_MANY_DATA_REFS);
   });
 });

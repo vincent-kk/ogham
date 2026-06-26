@@ -1,5 +1,7 @@
 import {
   DEFAULT_TIMEOUT_MS,
+  MAX_DATA_REFS,
+  MAX_SCRIPT_CHARS,
   MAX_TIMEOUT_MS,
 } from "../../../constants/defaults.js";
 import {
@@ -81,6 +83,12 @@ function failFast(error: RExecutionError, rscriptPath: string): RunROutput {
 export async function handleRunR(input: RunRInput): Promise<RunROutput> {
   if (!input.scriptCode || !input.scriptCode.trim()) {
     throw new Error(ERROR_MESSAGES.EMPTY_SCRIPT);
+  }
+  if (input.scriptCode.length > MAX_SCRIPT_CHARS) {
+    throw new Error(ERROR_MESSAGES.SCRIPT_TOO_LARGE);
+  }
+  if (input.dataRefs && input.dataRefs.length > MAX_DATA_REFS) {
+    throw new Error(ERROR_MESSAGES.TOO_MANY_DATA_REFS);
   }
   const sessionMode = input.sessionMode ?? SessionMode.Stateless;
   if (sessionMode === SessionMode.WorkspaceFiles && !input.workspaceId) {

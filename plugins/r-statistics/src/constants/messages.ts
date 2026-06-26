@@ -25,6 +25,8 @@ export const ERROR_MESSAGES = {
     "sessionMode 'workspace_files' requires a workspaceId to address the persistent session.",
   WORKSPACE_BUSY:
     "The workspace is in use by an active job and cannot be reset; wait for it to finish or use a different workspaceId.",
+  SCRIPT_TOO_LARGE: "scriptCode exceeds the maximum allowed size.",
+  TOO_MANY_DATA_REFS: "dataRefs exceeds the maximum allowed number of entries.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

@@ -10,6 +10,10 @@ export const WORKSPACE_TTL_HOURS = 72;
 /** Max async jobs retained in the in-memory registry (oldest terminal evicted). */
 export const MAX_TRACKED_JOBS = 200;
 
+/** Input bounds for run_r (reject runaway/abuse payloads before execution). */
+export const MAX_SCRIPT_CHARS = 1_000_000;
+export const MAX_DATA_REFS = 64;
+
 /** Fixed default RNG seed for reproducibility (set.seed in the contract header). */
 export const DEFAULT_SEED = 20260101;
 

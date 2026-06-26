@@ -11,6 +11,10 @@ import {
   RunMode,
   SessionMode,
 } from "../../../types/enums.js";
+import {
+  MAX_DATA_REFS,
+  MAX_SCRIPT_CHARS,
+} from "../../../constants/defaults.js";
 import { VERSION } from "../../../version.js";
 import { wrapHandler } from "../../shared/index.js";
 import {
@@ -86,9 +90,11 @@ export function createServer(): McpServer {
       inputSchema: {
         scriptCode: z
           .string()
+          .max(MAX_SCRIPT_CHARS)
           .describe("R code to run (written to a temp .R)."),
         dataRefs: z
           .array(dataRefSchema)
+          .max(MAX_DATA_REFS)
           .optional()
           .describe(
             "Input datasets the MCP resolves; user code never builds paths.",
