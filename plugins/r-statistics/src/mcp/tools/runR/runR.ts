@@ -11,6 +11,7 @@ import {
   createJob,
   createWorkspace,
   discoverRscript,
+  hasActiveWorkspaceJob,
   updateJob,
   validateRScript,
 } from "../../../core/index.js";
@@ -84,6 +85,13 @@ export async function handleRunR(input: RunRInput): Promise<RunROutput> {
   const sessionMode = input.sessionMode ?? SessionMode.Stateless;
   if (sessionMode === SessionMode.WorkspaceFiles && !input.workspaceId) {
     throw new Error(ERROR_MESSAGES.WORKSPACE_FILES_REQUIRES_ID);
+  }
+  if (
+    sessionMode !== SessionMode.WorkspaceFiles &&
+    input.workspaceId &&
+    hasActiveWorkspaceJob(input.workspaceId)
+  ) {
+    throw new Error(ERROR_MESSAGES.WORKSPACE_BUSY);
   }
   const timeoutMs = clampTimeout(input.timeoutMs);
 

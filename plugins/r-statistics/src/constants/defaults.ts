@@ -7,6 +7,9 @@ export const MAX_TIMEOUT_MS = 600_000;
 /** Workspace retention before startup pruning reclaims disk. */
 export const WORKSPACE_TTL_HOURS = 72;
 
+/** Max async jobs retained in the in-memory registry (oldest terminal evicted). */
+export const MAX_TRACKED_JOBS = 200;
+
 /** Fixed default RNG seed for reproducibility (set.seed in the contract header). */
 export const DEFAULT_SEED = 20260101;
 
@@ -51,6 +54,22 @@ export const PACKAGE_WHITELIST = [
  */
 export const FORBIDDEN_R_CALLS = [
   "system",
+  "source",
+  "sys.source",
+  "makeCluster",
+  "makePSOCKcluster",
+  "makeForkCluster",
+  "serverSocket",
+  "Sys.setenv",
+  "file.symlink",
+  "Sys.junction",
+  "get0",
+  "mget",
+  "match.fun",
+  "getFunction",
+  "getAnywhere",
+  "getFromNamespace",
+  "getExportedValue",
   "system2",
   "shell",
   "shell.exec",

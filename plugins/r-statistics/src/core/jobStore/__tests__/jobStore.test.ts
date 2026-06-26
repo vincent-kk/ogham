@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { MAX_TRACKED_JOBS } from "../../../constants/defaults.js";
 import { CancelStatus, JobStatus } from "../../../types/enums.js";
 import { randomId } from "../../../utils/randomId.js";
 import {
@@ -7,6 +8,7 @@ import {
   cancelJob,
   createJob,
   getJob,
+  hasActiveWorkspaceJob,
   updateJob,
 } from "../index.js";
 
@@ -63,5 +65,43 @@ describe("jobStore", () => {
     cancelAllJobs();
     expect(ca.signal.aborted).toBe(true);
     expect(cb.signal.aborted).toBe(true);
+  });
+
+  it("evicts oldest terminal jobs past the cap, preserving in-flight", () => {
+    const liveId = newJobId();
+    createJob({
+      jobId: liveId,
+      workspaceId: "ws",
+      controller: new AbortController(),
+    });
+    updateJob(liveId, JobStatus.Running);
+    const firstTerminal = newJobId();
+    createJob({
+      jobId: firstTerminal,
+      workspaceId: "ws",
+      controller: new AbortController(),
+    });
+    updateJob(firstTerminal, JobStatus.Succeeded);
+    for (let i = 0; i < MAX_TRACKED_JOBS + 5; i += 1) {
+      const id = newJobId();
+      createJob({
+        jobId: id,
+        workspaceId: "ws",
+        controller: new AbortController(),
+      });
+      updateJob(id, JobStatus.Succeeded);
+    }
+    expect(getJob(firstTerminal)).toBeUndefined();
+    expect(getJob(liveId)?.status).toBe(JobStatus.Running);
+  });
+
+  it("detects an active job on a workspace", () => {
+    const jobId = newJobId();
+    const ws = `wsbusy_${jobId}`;
+    createJob({ jobId, workspaceId: ws, controller: new AbortController() });
+    updateJob(jobId, JobStatus.Running);
+    expect(hasActiveWorkspaceJob(ws)).toBe(true);
+    updateJob(jobId, JobStatus.Succeeded);
+    expect(hasActiveWorkspaceJob(ws)).toBe(false);
   });
 });

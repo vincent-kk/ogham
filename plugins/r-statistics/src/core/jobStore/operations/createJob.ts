@@ -1,6 +1,7 @@
 import { JobStatus } from "../../../types/enums.js";
 import { isoNow } from "../../../utils/isoNow.js";
 import { jobs, type RJob } from "../jobStore.js";
+import { pruneJobs } from "./pruneJobs.js";
 
 export interface CreateJobInput {
   jobId: string;
@@ -18,5 +19,6 @@ export function createJob(input: CreateJobInput): RJob {
     createdAt: isoNow(),
   };
   jobs.set(job.jobId, job);
+  pruneJobs();
   return job;
 }

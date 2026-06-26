@@ -23,6 +23,8 @@ export const ERROR_MESSAGES = {
     "A workspace id must be alphanumeric (with _ or -) and contain no path separators.",
   WORKSPACE_FILES_REQUIRES_ID:
     "sessionMode 'workspace_files' requires a workspaceId to address the persistent session.",
+  WORKSPACE_BUSY:
+    "The workspace is in use by an active job and cannot be reset; wait for it to finish or use a different workspaceId.",
 } as const;
 
 export const TIMEOUT_MESSAGE =

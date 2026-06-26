@@ -25,6 +25,7 @@ export {
   updateJob,
   cancelJob,
   cancelAllJobs,
+  hasActiveWorkspaceJob,
   type RJob,
   type CreateJobInput,
 } from "./jobStore/index.js";
