@@ -11,6 +11,9 @@ tools:
   - Read
   - mcp_tools_mesh_lookup
   - mcp_tools_paper_search
+  - mcp_tools_paper_search_start
+  - mcp_tools_paper_search_status
+  - mcp_tools_paper_search_results
 maxTurns: 15
 ---
 
@@ -39,8 +42,11 @@ Goal: miss nothing. Procedure:
 4. **Keep mappings on** — no quotes/wildcards/over-narrow tags that disable ATM
    or MeSH explosion (they cut recall).
 5. **`mcp_tools_paper_search`** with the query set; read `union` + `warnings`.
-   If the recall gate is unmet and budget remains, broaden (raise `breadth`, add
-   roles, apply ESpell corrections) and regenerate.
+   For very large result sets, use the async job instead
+   (`mcp_tools_paper_search_start` → poll `mcp_tools_paper_search_status` →
+   `mcp_tools_paper_search_results`, cursor-paginated). If the recall gate is
+   unmet and budget remains, broaden (raise `breadth`, add roles, apply ESpell
+   corrections) and regenerate.
 
 Output: `{ queries: [{ term, role, breadth, rationale }] }`.
 

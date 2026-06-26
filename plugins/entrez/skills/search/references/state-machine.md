@@ -34,9 +34,14 @@ table, only consume `operationBudget`:
 
 Before leaving `SEARCH`/`RANK`, check union sufficiency:
 
+"Weak" is a **qualitative** judgment, not a fixed number — a sufficient yield is
+topic-dependent, so no absolute threshold is hardcoded. The deterministic
+terminator is the convergence criterion (union growth <5%); weakness only
+decides whether to *enter* the broadening loop.
+
 | Signal | Action |
 |---|---|
-| `total_unique` below threshold (weak) | re-enter QUERY_GEN → broaden (weight `ATM_BROAD`·`MESH_EXPLODED`·`ALL_FIELDS`; relax `[mh:noexp]`/over-narrow `[tiab]`) |
+| `total_unique` weak (qualitative — too few for the topic) | re-enter QUERY_GEN → broaden (weight `ATM_BROAD`·`MESH_EXPLODED`·`ALL_FIELDS`; relax `[mh:noexp]`/over-narrow `[tiab]`) |
 | ESpell OOV / spelling-warning / union 0 | apply ESpell correction → retry QUERY_GEN |
 | union growth ≥5% | keep looping (within guards) |
 | union growth <5% OR cap exceeded OR user stop | converged → RANK |

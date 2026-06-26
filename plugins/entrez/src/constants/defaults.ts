@@ -68,6 +68,9 @@ export const RETRY_MAX_RETRIES = 3;
 export const RETRY_BASE_DELAY_MS = 1_000;
 export const RETRY_BACKOFF_MULTIPLIER = 2;
 export const RETRY_MAX_DELAY_MS = 10_000;
+// 429 is listed for completeness but is handled before this set in request.ts
+// (as a rate-limit retry with its own budget); the 5xx codes use the normal
+// retry budget.
 export const RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504] as const;
 export const TOO_MANY_REQUESTS = 429;
 

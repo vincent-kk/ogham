@@ -18,6 +18,11 @@ checkpoint. On guard breach finish in `FAILED` with the reason and partial
 results (`partial: true`). Output goes to `output_path` with an optional date
 tag (config `date_tag`).
 
+**Unattended terminals**: in `--auto` there is no user to prompt, so any
+condition the transition table routes to `BLOCKED_NEEDS_USER` (e.g. the same
+query twice → 0 hits, oscillation) instead terminates as `FAILED` with the
+reason and partial results. `BLOCKED_NEEDS_USER` is `interactive`-only.
+
 ## interactive quality loop
 
 After `COMPLETE`, keep improving with the user via conversation: add query roles,
