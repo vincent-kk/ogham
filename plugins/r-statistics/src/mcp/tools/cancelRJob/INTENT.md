@@ -1,6 +1,6 @@
 ## Purpose
 
-`cancel_r_job` 도구 핸들러. 실행 중 R 잡을 AbortController 로 SIGKILL 종료하고 상태를 Cancelled 로 전이한다. idempotent.
+`cancel-r-job` 도구 핸들러. 실행 중 R 잡을 AbortController 로 SIGKILL 종료하고 상태를 Cancelled 로 전이한다. idempotent.
 
 ## Structure
 
@@ -26,7 +26,7 @@
 
 ### Never do
 
-- 결과 조회·재실행 (get_r_job / run_r 소관)
+- 결과 조회·재실행 (get-r-job / run-r 소관)
 
 ## Dependencies
 

@@ -10,7 +10,7 @@ export const WORKSPACE_TTL_HOURS = 72;
 /** Max async jobs retained in the in-memory registry (oldest terminal evicted). */
 export const MAX_TRACKED_JOBS = 200;
 
-/** Input bounds for run_r (reject runaway/abuse payloads before execution). */
+/** Input bounds for run-r (reject runaway/abuse payloads before execution). */
 export const MAX_SCRIPT_CHARS = 1_000_000;
 export const MAX_DATA_REFS = 64;
 
@@ -90,7 +90,7 @@ export const FORBIDDEN_R_CALLS = [
   "parse",
 ] as const;
 
-/** Artifact file extensions run_r is allowed to collect from ARTIFACTS_DIR. */
+/** Artifact file extensions run-r is allowed to collect from ARTIFACTS_DIR. */
 export const ALLOWED_ARTIFACT_EXTENSIONS = [
   ".png",
   ".jpg",

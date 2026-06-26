@@ -36,7 +36,7 @@
 ### Never do
 
 - `version.ts` 직접 수정
-- 통계 정책을 run_r 에, 실행을 assert 에 누설
+- 통계 정책을 run-r 에, 실행을 assert 에 누설
 - 순환 의존성 도입
 
 ## Dependencies

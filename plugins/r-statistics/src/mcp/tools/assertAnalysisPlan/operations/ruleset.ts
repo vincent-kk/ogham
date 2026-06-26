@@ -157,4 +157,40 @@ export const TECHNIQUE_RULES: Record<string, TechniqueRule> = {
     outcomeTypes: [OutcomeType.Continuous, OutcomeType.Categorical],
     assumptions: [],
   },
+  gam: {
+    family: MethodFamily.Regression,
+    outcomeTypes: [
+      OutcomeType.Continuous,
+      OutcomeType.Count,
+      OutcomeType.Binary,
+    ],
+    assumptions: [
+      soft(AssumptionId.ResidualNormality, "shapiro"),
+      soft(AssumptionId.Homoscedasticity, "residual_plot"),
+    ],
+  },
+  spline_regression: {
+    family: MethodFamily.Regression,
+    outcomeTypes: [OutcomeType.Continuous],
+    assumptions: [
+      soft(AssumptionId.ResidualNormality, "shapiro"),
+      soft(AssumptionId.Homoscedasticity, "breusch_pagan"),
+    ],
+  },
+  ancova: {
+    family: MethodFamily.Regression,
+    outcomeTypes: [OutcomeType.Continuous],
+    assumptions: [
+      soft(AssumptionId.Linearity, "residual_plot"),
+      soft(AssumptionId.ResidualNormality, "shapiro"),
+      soft(AssumptionId.Homoscedasticity, "breusch_pagan"),
+      soft(AssumptionId.HomogeneityOfSlopes, "interaction_test"),
+      soft(AssumptionId.NoMulticollinearity, "vif"),
+    ],
+  },
+  cmh: {
+    family: MethodFamily.Categorical,
+    outcomeTypes: [OutcomeType.Categorical, OutcomeType.Binary],
+    assumptions: [soft(AssumptionId.Independence, "design")],
+  },
 };

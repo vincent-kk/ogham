@@ -1,6 +1,6 @@
 ## Purpose
 
-`get_r_job` 도구 핸들러. 비동기 R 잡의 상태와(종료 시) 결과를 jobStore 에서 조회한다. 읽기 전용·idempotent.
+`get-r-job` 도구 핸들러. 비동기 R 잡의 상태와(종료 시) 결과를 jobStore 에서 조회한다. 읽기 전용·idempotent.
 
 ## Structure
 
@@ -26,7 +26,7 @@
 
 ### Never do
 
-- 잡 상태 전이·취소 (cancel_r_job 소관)
+- 잡 상태 전이·취소 (cancel-r-job 소관)
 - 새 실행 트리거
 
 ## Dependencies

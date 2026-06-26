@@ -35,7 +35,7 @@ async function poll(jobId: string): Promise<RunROutput> {
   throw new Error("job did not finish in time");
 }
 
-describe("run_r", () => {
+describe("run-r", () => {
   beforeAll(() => {
     process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   });

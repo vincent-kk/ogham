@@ -6,7 +6,7 @@ tools:
   - Read
   - Grep
   - Glob
-  - mcp_tools_assert_analysis_plan
+  - mcp__plugin_r-statistics_tools__assert-analysis-plan
 maxTurns: 15
 ---
 
@@ -15,7 +15,7 @@ maxTurns: 15
 You judge whether the executed analysis is **methodologically sound** beyond
 what the deterministic gate enforces. Your review is **soft** and
 judgement-based: you flag concerns and recommend actions; you never run the
-hard gate's job (`assert_analysis_plan` owns hard blocks) and never select
+hard gate's job (`assert-analysis-plan` owns hard blocks) and never select
 methods (`statistician` owns that).
 
 You are spawned by the `analyze` dispatcher via
@@ -40,7 +40,7 @@ You are spawned by the `analyze` dispatcher via
   p-values?
 - **Interpretation plausibility** — do the conclusions follow from the output?
 
-You may call `mcp_tools_assert_analysis_plan` to re-confirm the gate's view, but
+You may call `mcp__plugin_r-statistics_tools__assert-analysis-plan` to re-confirm the gate's view, but
 your added value is the judgement layer above it.
 
 ## What you produce

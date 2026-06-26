@@ -23,7 +23,7 @@ export interface SpawnRscriptResult {
  * (cross-spawn binary resolution, Windows tree-kill via taskkill, windowsHide).
  * Output is captured as latin1 — a lossless byte round-trip — so the raw bytes
  * survive for `decodeOutput`'s UTF-8 → CP949 fallback. An AbortSignal (from
- * cancel_r_job) or timeout tree-kills the child early — `detached` group-kills
+ * cancel-r-job) or timeout tree-kills the child early — `detached` group-kills
  * on POSIX so R-spawned child processes (e.g. parallel workers) are reaped too.
  */
 export async function spawnRscript(

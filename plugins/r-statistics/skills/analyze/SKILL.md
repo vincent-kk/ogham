@@ -26,7 +26,7 @@ plugin: r-statistics
 >
 > **HIGH-RISK YIELD POINTS** (chain immediately, do not stop):
 > after the statistician returns the SAP → call the gate; after the gate passes
-> → spawn r-expert; after r-expert's `run_r` job finishes → spawn the validator;
+> → spawn r-expert; after r-expert's `run-r` job finishes → spawn the validator;
 > after the validator returns → report or loop.
 
 # analyze — Statistical Analysis Dispatcher
@@ -39,8 +39,8 @@ deterministic statistical gate, and adapts to `interactive` (default) vs
 
 **Invariants**: only the dispatcher transitions state; agents recommend only.
 The dispatcher spawns agents (`statistician`, `r-expert`,
-`methodology-validator`) and enforces the `assert_analysis_plan` gate directly;
-agents own their `run_r` calls and the sub-skill contracts.
+`methodology-validator`) and enforces the `assert-analysis-plan` gate directly;
+agents own their `run-r` calls and the sub-skill contracts.
 
 ## References (load as needed)
 
@@ -70,18 +70,18 @@ Drive the state machine in [state-machine.md](./references/state-machine.md).
 The happy path:
 
 1. **Data preparation** — load + profile the data (the `data-preparation`
-   contract, executed by `r-expert` via `run_r`). Produce `dataset_profile`.
+   contract, executed by `r-expert` via `run-r`). Produce `dataset_profile`.
 2. **STATISTICIAN_PLAN** — `Task(subagent_type: "r-statistics:statistician")`
    with the profile + hypothesis → SAP. _(interactive: present the SAP, discuss.)_
 3. **Assumption check** — run the SAP's required assumption tests (the
    `assumption-check` contract via `r-expert`) → `assumption.{id}` artifacts.
-4. **ASSERT_PLAN** — call `mcp_tools_assert_analysis_plan` with normalized
+4. **ASSERT_PLAN** — call `mcp__plugin_r-statistics_tools__assert-analysis-plan` with normalized
    `method` / `datasetMeta` / `assumptionArtifacts` / `mode`.
    - `hard_block` → back to STATISTICIAN_PLAN (`methodologyIter++`).
    - `soft_warning` → interactive: proceed with a warning; auto: re-select.
    - `ok` → proceed.
 5. **R_EXECUTION** — `Task(subagent_type: "r-statistics:r-expert")` to fill
-   `methods/{technique}/template.R.tmpl` and run `mcp_tools_run_r`. On a
+   `methods/{technique}/template.R.tmpl` and run `mcp__plugin_r-statistics_tools__run-r`. On a
    recoverable error, r-expert retries within `rRepairIter`.
 6. **VALIDATION** — `Task(subagent_type: "r-statistics:methodology-validator")`
    for the soft review.

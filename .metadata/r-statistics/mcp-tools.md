@@ -4,12 +4,12 @@
 
 | 도구                   | 핸들러                                           | 역할                                      |
 | ---------------------- | ------------------------------------------------ | ----------------------------------------- |
-| `run_r`                | `tools/runR/runR.ts`                             | 크로스플랫폼 Rscript 실행 + 아티팩트 수집 |
-| `get_r_job`            | `tools/getRJob/getRJob.ts`                       | async 잡 상태·결과 폴링                   |
-| `cancel_r_job`         | `tools/cancelRJob/cancelRJob.ts`                 | 잡 취소                                   |
-| `assert_analysis_plan` | `tools/assertAnalysisPlan/assertAnalysisPlan.ts` | 통계 hard gate (결정론적)                 |
+| `run-r`                | `tools/runR/runR.ts`                             | 크로스플랫폼 Rscript 실행 + 아티팩트 수집 |
+| `get-r-job`            | `tools/getRJob/getRJob.ts`                       | async 잡 상태·결과 폴링                   |
+| `cancel-r-job`         | `tools/cancelRJob/cancelRJob.ts`                 | 잡 취소                                   |
+| `assert-analysis-plan` | `tools/assertAnalysisPlan/assertAnalysisPlan.ts` | 통계 hard gate (결정론적)                 |
 
-## `run_r`
+## `run-r`
 
 LLM이 생성한 R 코드를 temp 격리 환경에서 `Rscript` subprocess로 실행. 임베딩(Rserve) 아님.
 
@@ -85,6 +85,7 @@ MCP가 user code를 래퍼로 감쌈 (`shared/contract.R` 골격 주입):
 - `ARTIFACTS_DIR` env 전달 → 산출물은 여기에만
 - `manifest.json` 기록 헬퍼 (`add_artifact`, `write_json_artifact`, `save_plot_artifact`)
 - 종료 시 `sessionInfo()` 기록
+- 입력 데이터: `read_data(id)`는 `data/refs.json`(jsonlite) 기반 ref 해석 후 CSV를 `utils::read.csv`(선언 encoding 존중 — CP949/EUC-KR 포함)로 적재. jsonlite 부재 시 init에서 명확히 `stop`(오해성 "Unknown data ref" 대신), 미선언 id와 부재 ref를 구분 보고
 
 ### 크로스플랫폼 (core/rRuntime)
 
@@ -96,7 +97,7 @@ MCP가 user code를 래퍼로 감쌈 (`shared/contract.R` 골격 주입):
 
 정적 차단: `system`/`system2`/`shell`/`pipe`/`install.packages`/`setwd`/`unlink`. 네트워크 차단. `ARTIFACTS_DIR` 외 쓰기 거부. 경로 traversal·symlink 탈출 거부. 패키지는 사전구축 화이트리스트(renv lockfile).
 
-## `get_r_job` / `cancel_r_job`
+## `get-r-job` / `cancel-r-job`
 
 ```ts
 interface GetRJobInput {
@@ -117,7 +118,7 @@ interface CancelRJobOutput {
 }
 ```
 
-## `assert_analysis_plan`
+## `assert-analysis-plan`
 
 통계 hard gate. 정규화 필드로 결정론적 검증(자연어 아님). 룰셋 [assert-rules.md](./assert-rules.md).
 
@@ -161,12 +162,13 @@ interface AssertOutput {
 
 - `hard_block` → `allowed:false` (interactive·auto 모두 차단 → statistician 재선택)
 - `soft_warning` → interactive: `allowed:true`+경고(대화) / auto: `allowed:false`(엄격 재선택)
+- 미등록 technique (`TECHNIQUE_RULES` 부재) → `soft_warning` + `unregistered_technique` 사유 (과거 `ok` 무검증 통과 수정)
 
 ## 도구 annotations
 
 | 도구                 | readOnly | destructive | idempotent |
 | -------------------- | :------: | :---------: | :--------: |
-| run_r                |  false   |    false    |   false    |
-| get_r_job            |   true   |    false    |    true    |
-| cancel_r_job         |  false   |    false    |    true    |
-| assert_analysis_plan |   true   |    false    |    true    |
+| run-r                |  false   |    false    |   false    |
+| get-r-job            |   true   |    false    |    true    |
+| cancel-r-job         |  false   |    false    |    true    |
+| assert-analysis-plan |   true   |    false    |    true    |

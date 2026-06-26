@@ -23,7 +23,7 @@ function plan(overrides: Partial<AssertInput> = {}): AssertInput {
   };
 }
 
-describe("assert_analysis_plan", () => {
+describe("assert-analysis-plan", () => {
   it("passes a clean parametric plan with satisfied assumptions", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
@@ -191,17 +191,73 @@ describe("assert_analysis_plan", () => {
     expect(out.recommendedAlternatives).toContain("negative_binomial");
   });
 
-  it("passes an unknown technique with no ruleset entry", async () => {
+  it("soft-warns an unregistered technique in both modes", async () => {
+    for (const mode of [ExecutionMode.Interactive, ExecutionMode.Auto]) {
+      const out = await handleAssertAnalysisPlan(
+        plan({
+          method: {
+            technique: "bootstrap_ci",
+            family: MethodFamily.Nonparametric,
+          },
+          datasetMeta: { outcomeType: OutcomeType.Continuous },
+          mode,
+        }),
+      );
+      expect(out.severity).toBe(AssertSeverity.SoftWarning);
+      expect(out.reasons.map((r) => r.code)).toContain(
+        "unregistered_technique",
+      );
+      expect(out.allowed).toBe(mode === ExecutionMode.Interactive);
+    }
+  });
+
+  it("now gates a registered gam with violated assumptions (was silently ok)", async () => {
     const out = await handleAssertAnalysisPlan(
       plan({
-        method: {
-          technique: "bootstrap_ci",
-          family: MethodFamily.Nonparametric,
-        },
+        method: { technique: "gam", family: MethodFamily.Regression },
         datasetMeta: { outcomeType: OutcomeType.Continuous },
+        assumptionArtifacts: [
+          {
+            assumptionId: AssumptionId.ResidualNormality,
+            artifactPath: "r",
+            passed: false,
+          },
+          {
+            assumptionId: AssumptionId.Homoscedasticity,
+            artifactPath: "h",
+            passed: false,
+          },
+        ],
       }),
     );
-    expect(out.allowed).toBe(true);
-    expect(out.severity).toBe(AssertSeverity.Ok);
+    expect(out.severity).toBe(AssertSeverity.SoftWarning);
+    expect(out.reasons.map((r) => r.code)).toContain(
+      "residual_normality_violated",
+    );
+    expect(out.reasons.map((r) => r.code)).toContain(
+      "homoscedasticity_violated",
+    );
   });
+
+  it.each([
+    ["gam", MethodFamily.Regression, OutcomeType.TimeToEvent],
+    ["spline_regression", MethodFamily.Regression, OutcomeType.Categorical],
+    ["ancova", MethodFamily.Regression, OutcomeType.Binary],
+    ["cmh", MethodFamily.Categorical, OutcomeType.Continuous],
+  ] as const)(
+    "hard-blocks %s on an incompatible outcome type",
+    async (technique, family, outcomeType) => {
+      const out = await handleAssertAnalysisPlan(
+        plan({
+          method: { technique, family },
+          datasetMeta: { outcomeType },
+          mode: ExecutionMode.Auto,
+        }),
+      );
+      expect(out.severity).toBe(AssertSeverity.HardBlock);
+      expect(out.reasons.map((r) => r.code)).toContain(
+        "OUTCOME_METHOD_MISMATCH",
+      );
+    },
+  );
 });

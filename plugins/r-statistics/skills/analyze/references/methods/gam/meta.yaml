@@ -1,0 +1,13 @@
+technique: gam
+family: regression
+outcome_types: [continuous, count, binary]
+required_assumptions:
+  - id: residual_normality
+    severity: soft
+    check: shapiro
+  - id: homoscedasticity
+    severity: soft
+    check: residual_plot
+hard_rules: [OUTCOME_METHOD_MISMATCH, SAMPLE_TOO_SMALL]
+required_artifacts: [model.fit, table.smooth_terms, plot.smooth_effects]
+packages: [mgcv, broom, ggplot2]

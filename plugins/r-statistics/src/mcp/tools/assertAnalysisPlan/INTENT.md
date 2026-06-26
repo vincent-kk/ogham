@@ -1,6 +1,6 @@
 ## Purpose
 
-`assert_analysis_plan` 도구 핸들러. 정규화 입력만으로 통계 hard gate 를 결정론적으로 평가한다. hard 위반은 항상 차단, soft 위반은 interactive 허용·auto 차단. 실행·자연어 판단 없음 — 입력의 순수 함수.
+`assert-analysis-plan` 도구 핸들러. 정규화 입력만으로 통계 hard gate 를 결정론적으로 평가한다. hard 위반은 항상 차단, soft 위반은 interactive 허용·auto 차단. 실행·자연어 판단 없음 — 입력의 순수 함수.
 
 ## Structure
 
@@ -24,6 +24,7 @@
 
 - 입력 필드만으로 판정 (자연어·외부 IO 없음)
 - 가정 아티팩트 부재는 "미검증" soft 경고
+- 미등록 기법(룰셋 부재)은 `unregistered_technique` soft 경고
 
 ### Ask first
 
@@ -32,7 +33,7 @@
 
 ### Never do
 
-- R 실행·아티팩트 생성 (run_r 소관)
+- R 실행·아티팩트 생성 (run-r 소관)
 - soft 위반을 interactive 에서 차단 (대화로 개선)
 
 ## Dependencies

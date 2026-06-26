@@ -17,7 +17,7 @@
 ## Conventions
 
 - 빌드: `clean → version:sync → tsc → buildMcpServer`
-- 스킬 이름 prefix 없음 (plugin namespace 자동); MCP 도구는 `mcp_tools_*`
+- 스킬 이름 prefix 없음 (plugin namespace 자동); MCP 도구는 `mcp__plugin_r-statistics_tools__*`
 - 에이전트는 `agents/` 자동 발견 (plugin.json 에 agents 필드 없음 — filid 동일)
 - Hook 없음
 

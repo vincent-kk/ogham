@@ -81,12 +81,12 @@ export function createServer(): McpServer {
   const server = new McpServer({ name: "tools", version: VERSION });
 
   server.registerTool(
-    "run_r",
+    "run-r",
     {
       description:
         "Execute R code in an isolated workspace via headless Rscript and " +
         "collect artifacts. Statically blocks unsafe calls; async by default " +
-        "(poll with get_r_job). Execution safety only — not statistical policy.",
+        "(poll with get-r-job). Execution safety only — not statistical policy.",
       inputSchema: {
         scriptCode: z
           .string()
@@ -137,13 +137,13 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "get_r_job",
+    "get-r-job",
     {
       description:
         "Poll an async R job's status and (when finished) its result and " +
         "collected artifacts.",
       inputSchema: {
-        jobId: z.string().describe("The jobId returned by run_r."),
+        jobId: z.string().describe("The jobId returned by run-r."),
         includeStdout: z
           .boolean()
           .optional()
@@ -159,13 +159,13 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "cancel_r_job",
+    "cancel-r-job",
     {
       description:
         "Cancel a running R job (terminates its Rscript process). Returns " +
         "cancelled / already_finished / not_found.",
       inputSchema: {
-        jobId: z.string().describe("The jobId returned by run_r."),
+        jobId: z.string().describe("The jobId returned by run-r."),
       },
       annotations: {
         readOnlyHint: false,
@@ -177,7 +177,7 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    "assert_analysis_plan",
+    "assert-analysis-plan",
     {
       description:
         "Deterministic statistical gate: validates method ↔ outcome/assumption " +

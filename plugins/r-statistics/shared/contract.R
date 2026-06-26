@@ -1,6 +1,6 @@
 # r-statistics — R execution contract
 #
-# Sourced by every run_r execution (the generated wrapper does:
+# Sourced by every run-r execution (the generated wrapper does:
 #   source(Sys.getenv("R_STATISTICS_CONTRACT")); .rstat_init(); <user code>; .rstat_finalize()
 # ). Defines the artifact helpers and the init/finalize lifecycle so method
 # templates never hand-roll output paths, manifests, or seeding. All paths and
@@ -24,11 +24,18 @@
   .rstat_env$consumed <- character(0)
 
   refs_path <- file.path(.rstat_env$data_dir, "refs.json")
-  if (nzchar(.rstat_env$data_dir) && file.exists(refs_path) &&
-    requireNamespace("jsonlite", quietly = TRUE)) {
+  .rstat_env$refs <- list()
+  if (nzchar(.rstat_env$data_dir) && file.exists(refs_path)) {
+    if (!requireNamespace("jsonlite", quietly = TRUE)) {
+      stop(
+        "r-statistics contract: data inputs were provided (data/refs.json is ",
+        "present) but the 'jsonlite' package is not installed, so data ",
+        "references cannot be resolved. Install the R package set via the ",
+        "r-setup skill, then re-run.",
+        call. = FALSE
+      )
+    }
     .rstat_env$refs <- jsonlite::fromJSON(refs_path, simplifyVector = FALSE)
-  } else {
-    .rstat_env$refs <- list()
   }
   invisible(NULL)
 }
@@ -60,20 +67,44 @@
 
 # ---- input data -----------------------------------------------------------
 
+# Resolve a declared data ref by id, distinguishing "no inputs declared" from
+# "id not among the declared inputs" so the message names the real cause.
+.rstat_ref <- function(id) {
+  ref <- .rstat_env$refs[[id]]
+  if (!is.null(ref)) return(ref)
+  if (length(.rstat_env$refs) == 0L) {
+    stop(sprintf(
+      "Data ref '%s' was requested but no inputs were declared for this run.",
+      id
+    ), call. = FALSE)
+  }
+  stop(sprintf(
+    "Unknown data ref '%s'. Declared refs: %s.",
+    id, paste(names(.rstat_env$refs), collapse = ", ")
+  ), call. = FALSE)
+}
+
 # Absolute path to a declared input dataset by its ref id.
 data_path <- function(id) {
-  ref <- .rstat_env$refs[[id]]
-  if (is.null(ref)) stop(sprintf("Unknown data ref: %s", id))
+  ref <- .rstat_ref(id)
   file.path(.rstat_env$data_dir, ref$file)
 }
 
 # Read a declared input dataset, dispatching on its declared format.
 read_data <- function(id) {
-  ref <- .rstat_env$refs[[id]]
-  if (is.null(ref)) stop(sprintf("Unknown data ref: %s", id))
+  ref <- .rstat_ref(id)
   path <- file.path(.rstat_env$data_dir, ref$file)
   switch(ref$format,
-    csv = data.table::fread(path),
+    csv = {
+      enc <- ref$encoding
+      if (is.null(enc) || !nzchar(enc)) enc <- ""
+      utils::read.csv(
+        path,
+        check.names = FALSE,
+        stringsAsFactors = FALSE,
+        fileEncoding = enc
+      )
+    },
     parquet = as.data.frame(arrow::read_parquet(path)),
     feather = as.data.frame(arrow::read_feather(path)),
     rds = readRDS(path),

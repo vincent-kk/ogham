@@ -17,6 +17,17 @@ brew install --cask r
 - If `Rscript` is not found afterward, set `R_STATISTICS_RSCRIPT` to its full
   path.
 
+## R packages
+
+After R is installed, r-setup checks the required package set. macOS uses CRAN
+binaries (no build tools needed); install missing packages with:
+
+```bash
+Rscript -e 'install.packages(c("jsonlite","data.table","ggplot2"), repos="https://cloud.r-project.org")'
+```
+
+`arrow` is a large binary but installs cleanly from CRAN.
+
 ## Verify
 
 ```bash

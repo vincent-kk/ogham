@@ -11,7 +11,7 @@ plugin: r-statistics
 # reporting — Tables · Effect Sizes · Quarto Export
 
 Turn analysis results into a reproducible report. Execution runs through
-`mcp_tools_run_r`; a full pipeline also routes the draft past
+`mcp__plugin_r-statistics_tools__run-r`; a full pipeline also routes the draft past
 `methodology-validator` for the multiplicity / effect-size review.
 
 ## Steps

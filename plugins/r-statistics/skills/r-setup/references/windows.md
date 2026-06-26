@@ -19,6 +19,16 @@ choco install r.project
   `R_STATISTICS_RSCRIPT` to its full path, e.g.
   `C:\Program Files\R\R-4.4.1\bin\Rscript.exe`.
 
+## R packages
+
+After R is installed, r-setup checks the required package set. CRAN ships Windows
+binaries (Rtools usually unneeded). Mind PowerShell quoting — outer double, inner
+single:
+
+```powershell
+Rscript -e "install.packages(c('jsonlite','data.table','ggplot2'), repos='https://cloud.r-project.org')"
+```
+
 ## Verify
 
 ```powershell

@@ -16,7 +16,7 @@
 [Skill]      analyze · data-preparation · assumption-check · visualization · reporting · r-setup
                 └ lazy: methods/{technique}/, shared/contract.R
      ↓ (mcp_*)
-[MCP]        run_r · get_r_job · cancel_r_job · assert_analysis_plan  (도메인 무지·stateless)
+[MCP]        run-r · get-r-job · cancel-r-job · assert-analysis-plan  (도메인 무지·stateless)
      ↓ (spawn)
 [R-CLI]      Rscript (temp 격리 + 명령어 게이트 + --vanilla + renv)
 ```
@@ -29,7 +29,7 @@
 Claude Code plugin에서 결정적 코드 실행 자리는 MCP 서버뿐이다(hook 미사용). 따라서 Dispatcher 상태머신은:
 
 - **상태/전이 규칙** = `skills/analyze/references/state-machine.md` (문서로 명시, LLM이 따름 — filid cross-review chairperson 패턴)
-- **결정적 강제 게이트** = `assert_analysis_plan` MCP 도구 (통계적 hard gate를 코드로 차단)
+- **결정적 강제 게이트** = `assert-analysis-plan` MCP 도구 (통계적 hard gate를 코드로 차단)
 - **상태 영속** = MCP `workspace`에 분석 세션 상태 저장 (핸들러는 stateless, 상태는 외부 저장)
 
 → "비결정 위험"은 상태 규칙을 명시적 전이표 + iteration guard로 박아 억제. 상세 [dispatcher.md](./dispatcher.md).
@@ -126,5 +126,5 @@ plugins/r-statistics/
 - 빌드: `scripts/buildMcpServer.mjs` → `bridge/mcp-server.cjs` (deilen 패턴).
 - 테스트: vitest (`__tests__/`).
 - **subprocess 호출**: 모든 CLI/spawn 은 `@ogham/cross-platform`(`spawnCli`/`spawnCliSync`) 경유 — `child_process` 직접 사용 금지(Windows shim·tree-kill·EOL 일관). 취소는 `AbortSignal`.
-- **assert 룰셋 권위**: `assert_analysis_plan` 의 결정적 룰셋은 `mcp/tools/assertAnalysisPlan/operations/ruleset.ts`(TS 정본, 런타임 의존성 0). `methods/{technique}/meta.yaml` 은 에이전트용 미러 — 둘을 동기 유지.
+- **assert 룰셋 권위**: `assert-analysis-plan` 의 결정적 룰셋은 `mcp/tools/assertAnalysisPlan/operations/ruleset.ts`(TS 정본, 런타임 의존성 0). `methods/{technique}/meta.yaml` 은 에이전트용 미러 — 둘을 동기 유지.
 - **에이전트 등록**: `plugin.json` 에 `agents` 필드 없음 — `agents/` 자동 발견(filid 동일).

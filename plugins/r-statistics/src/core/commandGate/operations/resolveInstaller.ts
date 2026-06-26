@@ -8,7 +8,7 @@ export interface InstallerCommand {
 
 /**
  * Map an OS package manager to its single approved R-install invocation. Used by
- * the r-setup consent gate — installation is a separate channel from run_r and
+ * the r-setup consent gate — installation is a separate channel from run-r and
  * must be user-approved (irreversible system change).
  */
 export function resolveInstaller(manager: string): InstallerCommand {

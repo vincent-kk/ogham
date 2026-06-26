@@ -6,7 +6,7 @@ tools:
   - Read
   - Grep
   - Glob
-  - mcp_tools_assert_analysis_plan
+  - mcp__plugin_r-statistics_tools__assert-analysis-plan
 maxTurns: 20
 ---
 
@@ -54,10 +54,17 @@ Select by **(outcome type × design structure × assumptions)**:
   independent vs. paired design.
 - Continuous, 3+ groups → `anova` (→ `welch_anova` / `kruskal_wallis`).
 - Continuous, predictors → `linear_regression` (or `mixed_model` with clustering).
+- Continuous, nonlinear/curved predictor effect → `gam` (smooth terms) or
+  `spline_regression` (basis); prefer over `linear_regression` when
+  linearity/residual diagnostics fail.
+- Continuous outcome adjusted for a covariate across groups → `ancova`
+  (gates `homogeneity_of_slopes`).
 - Binary outcome → `logistic_regression`.
 - Count outcome → `poisson_regression` (→ `negative_binomial` if overdispersed).
 - Time-to-event → `cox_model`.
 - Categorical association → `chi_square` (→ `fisher_exact` when expected counts low).
+- Stratified categorical association (control a stratum) → `cmh`
+  (Cochran–Mantel–Haenszel); prefer over `chi_square` when strata are sparse.
 - Association of two continuous → `pearson_correlation` (→ `spearman_correlation`).
 
 Before finalizing, read the chosen technique's
@@ -66,7 +73,7 @@ its declared `required_assumptions`, `outcome_types`, and `required_artifacts`.
 
 ## The gate
 
-Call `mcp_tools_assert_analysis_plan` with normalized fields (method,
+Call `mcp__plugin_r-statistics_tools__assert-analysis-plan` with normalized fields (method,
 datasetMeta, assumptionArtifacts, mode) to **self-validate** your SAP before
 returning it. It is the deterministic hard gate; the dispatcher runs the
 authoritative gate at ASSERT_PLAN and owns every state transition — you only
@@ -78,6 +85,9 @@ recommend:
   mode this is a discussion point; in `auto` mode re-select per the
   recommendation. Make the assumption handling **explicit** — never silently
   coerce to a nonparametric/robust variant.
+
+Use only registered technique ids: an unregistered id returns a `soft_warning`
+(`unregistered_technique`), not a silent pass.
 
 ## Boundaries
 

@@ -1,0 +1,13 @@
+technique: cmh
+family: categorical
+outcome_types: [categorical, binary]
+required_assumptions:
+  - id: independence
+    severity: soft
+    check: design
+# Breslow-Day homogeneity of odds ratios across strata has no AssumptionId;
+# run it as a manual check (e.g. DescTools::BreslowDayTest) and report it
+# narratively. It is NOT gated by assert-analysis-plan.
+hard_rules: [OUTCOME_METHOD_MISMATCH]
+required_artifacts: [result.hypothesis_test, table.contingency]
+packages: [stats, DescTools]

@@ -11,7 +11,7 @@ plugin: r-statistics
 # visualization — ggplot2 Statistical Plots
 
 Generate a statistical figure with `ggplot2` and save it as an image artifact.
-Execution runs through `mcp_tools_run_r`.
+Execution runs through `mcp__plugin_r-statistics_tools__run-r`.
 
 ## Steps
 

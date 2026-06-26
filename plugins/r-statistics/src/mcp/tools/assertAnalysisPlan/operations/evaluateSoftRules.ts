@@ -12,6 +12,8 @@ function soft(code: string, message: string): AssertReason {
   return { code, severity: Severity.Soft, message };
 }
 
+const UNREGISTERED_TECHNIQUE = "unregistered_technique";
+
 /**
  * Evaluate the chosen technique's soft assumptions against the supplied
  * assumption-check artifacts: a violated (passed=false) assumption warns and
@@ -19,7 +21,19 @@ function soft(code: string, message: string): AssertReason {
  */
 export function evaluateSoftRules(input: AssertInput): SoftEvaluation {
   const rule = TECHNIQUE_RULES[input.method.technique];
-  if (!rule) return { reasons: [], recommendedAlternatives: [] };
+  if (!rule) {
+    return {
+      reasons: [
+        soft(
+          UNREGISTERED_TECHNIQUE,
+          `Technique '${input.method.technique}' is not registered in the validated ` +
+            `ruleset; its assumptions cannot be gated. Disclose and proceed in ` +
+            `interactive mode; auto mode must re-select a registered technique.`,
+        ),
+      ],
+      recommendedAlternatives: [],
+    };
+  }
 
   const byId = new Map(
     (input.assumptionArtifacts ?? []).map((a) => [a.assumptionId, a]),

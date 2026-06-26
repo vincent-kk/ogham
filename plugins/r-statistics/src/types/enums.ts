@@ -3,7 +3,7 @@
 // these via z.nativeEnum. Inline string literals are forbidden elsewhere — every
 // value set lives here.
 
-/** Async R job lifecycle status (run_r / get_r_job / cancel_r_job). */
+/** Async R job lifecycle status (run-r / get-r-job / cancel-r-job). */
 export const JobStatus = {
   Queued: "queued",
   Running: "running",
@@ -14,7 +14,7 @@ export const JobStatus = {
 } as const;
 export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus];
 
-/** Execution-safety error codes surfaced by run_r (not statistical policy). */
+/** Execution-safety error codes surfaced by run-r (not statistical policy). */
 export const RErrorCode = {
   RNotFound: "R_NOT_FOUND",
   ProcessFailed: "PROCESS_FAILED",
@@ -32,7 +32,7 @@ export const Severity = {
 } as const;
 export type Severity = (typeof Severity)[keyof typeof Severity];
 
-/** assert_analysis_plan verdict severity. */
+/** assert-analysis-plan verdict severity. */
 export const AssertSeverity = {
   Ok: "ok",
   SoftWarning: "soft_warning",
@@ -48,7 +48,7 @@ export const ExecutionMode = {
 } as const;
 export type ExecutionMode = (typeof ExecutionMode)[keyof typeof ExecutionMode];
 
-/** run_r sync (await) vs async (poll) execution. */
+/** run-r sync (await) vs async (poll) execution. */
 export const RunMode = {
   Sync: "sync",
   Async: "async",
@@ -56,7 +56,7 @@ export const RunMode = {
 export type RunMode = (typeof RunMode)[keyof typeof RunMode];
 
 /**
- * run_r workspace lifecycle. `stateless` (default) resets the workspace each
+ * run-r workspace lifecycle. `stateless` (default) resets the workspace each
  * run for reproducible isolation; `workspace_files` reuses a `workspaceId`'s
  * `data/` + `artifacts/` across calls so a multi-step session shares files.
  */
@@ -91,7 +91,7 @@ export const PipelineState = {
 } as const;
 export type PipelineState = (typeof PipelineState)[keyof typeof PipelineState];
 
-/** Collected artifact kind (manifest.json + run_r output). */
+/** Collected artifact kind (manifest.json + run-r output). */
 export const ArtifactKind = {
   Plot: "plot",
   Table: "table",
@@ -140,6 +140,7 @@ export const AssumptionId = {
   ProportionalHazards: "proportional_hazards",
   Loglinearity: "loglinearity",
   ExpectedCountGe5: "expected_count_ge_5",
+  HomogeneityOfSlopes: "homogeneity_of_slopes",
 } as const;
 export type AssumptionId = (typeof AssumptionId)[keyof typeof AssumptionId];
 
@@ -178,7 +179,7 @@ export const Platform = {
 } as const;
 export type Platform = (typeof Platform)[keyof typeof Platform];
 
-/** cancel_r_job outcome. */
+/** cancel-r-job outcome. */
 export const CancelStatus = {
   Cancelled: "cancelled",
   AlreadyFinished: "already_finished",
