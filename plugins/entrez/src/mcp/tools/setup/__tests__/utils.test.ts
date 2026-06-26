@@ -44,7 +44,7 @@ describe("testConnection", () => {
 
   it("reports success + rate (with key) and db count", async () => {
     const r = await testConnection(
-      { tool: "t", email: "e@x.com", api_key: "KEY" },
+      { email: "e@x.com", api_key: "KEY" },
       { fetchImpl: fetchOk, sleep: async () => {} },
     );
     expect(r.success).toBe(true);
@@ -56,7 +56,7 @@ describe("testConnection", () => {
     const fetchBad = (async () =>
       new Response("err", { status: 500 })) as unknown as typeof fetch;
     const r = await testConnection(
-      { tool: "t", email: "e@x.com" },
+      { email: "e@x.com" },
       { fetchImpl: fetchBad, sleep: async () => {} },
     );
     expect(r.success).toBe(false);

@@ -16,6 +16,7 @@ import {
   loadCredentials,
   saveCredentials,
 } from "../../../../core/config/index.js";
+import { ENTREZ_TOOL_NAME } from "../../../../constants/defaults.js";
 
 const HTML =
   "<html><head><script>window.__ENTREZ_STATE__ = null;</script></head><body>setup</body></html>";
@@ -66,7 +67,6 @@ function postJson(path: string, body: unknown) {
 }
 
 const VALID = {
-  tool: "my-app",
   email: "user@example.com",
   api_key: "SECRETKEY",
   default_db: "pubmed",
@@ -118,13 +118,13 @@ describe("setup web server", () => {
     expect(JSON.stringify(body)).not.toContain("SECRETKEY");
 
     const cfg = await loadConfig(configPath);
-    expect(cfg?.tool).toBe("my-app");
+    expect(cfg?.tool).toBe(ENTREZ_TOOL_NAME);
     expect((await loadCredentials(credPath)).api_key).toBe("SECRETKEY");
     expect((await stat(credPath)).mode & 0o777).toBe(0o600);
   });
 
   it("rejects an invalid submit without saving (400)", async () => {
-    const res = await postJson("/submit", { tool: "x", email: "not-email" });
+    const res = await postJson("/submit", { email: "not-email" });
     expect(res.status).toBe(400);
     expect(await loadConfig(configPath)).toBeNull();
   });

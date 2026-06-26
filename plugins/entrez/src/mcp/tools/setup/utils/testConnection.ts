@@ -10,6 +10,7 @@ import { extractHost } from "../../../../utils/url.js";
 import {
   DEFAULT_EUTILS_BASE,
   NCBI_SERVICE_HOST,
+  ENTREZ_TOOL_NAME,
 } from "../../../../constants/defaults.js";
 import { Messages } from "../../../../constants/messages.js";
 
@@ -29,7 +30,7 @@ export async function testConnection(
 ): Promise<ConnectionTestResult> {
   const baseUrl = data.base_url ?? DEFAULT_EUTILS_BASE;
   const deps: HttpDeps = {
-    tool: data.tool,
+    tool: ENTREZ_TOOL_NAME,
     email: data.email,
     apiKey: data.api_key || undefined,
     allowedHosts: [extractHost(baseUrl), NCBI_SERVICE_HOST],

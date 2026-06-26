@@ -10,6 +10,7 @@ import { pollJob } from "../tools/paperSearch/operations/pollJob.js";
 import { readJob } from "../tools/paperSearch/operations/readJob.js";
 import { FetchMode, JobStatus, QueryRole } from "../../types/enums.js";
 import type { PaperSearchInput } from "../../types/tool.js";
+import { EntrezConfigSchema } from "../../types/config.js";
 import {
   routeFetch,
   makeCtx,
@@ -161,5 +162,55 @@ describe("runPaperSearch", () => {
 
     const results = await readJob(start.jobId, undefined, { dir: jobDir });
     expect(results.union.total_unique).toBe(4);
+  });
+
+  it("applies the configured search window (edat) to a query without dates", async () => {
+    const seen: URLSearchParams[] = [];
+    const fetch = routeFetch((url) => {
+      if (url.pathname.endsWith("esearch.fcgi")) {
+        seen.push(url.searchParams);
+        return { body: esearchJson(1, ["1"]) };
+      }
+      if (url.pathname.endsWith("esummary.fcgi"))
+        return { body: esummaryJson(["1"]) };
+      return { body: "{}" };
+    });
+    const ctx = makeCtx(fetch, {
+      manifestDir,
+      config: EntrezConfigSchema.parse({
+        tool: "t",
+        email: "e@x.com",
+        default_window_days: 7,
+      }),
+    });
+    await runPaperSearch(
+      { queries: [{ term: "x", role: QueryRole.ATM_BROAD }] },
+      ctx,
+    );
+    // nowMs is fixed to 2023/11/14; a 7-day window looks back to 2023/11/07.
+    expect(seen[0].get("datetype")).toBe("edat");
+    expect(seen[0].get("mindate")).toBe("2023/11/07");
+    expect(seen[0].get("maxdate")).toBe("2023/11/14");
+  });
+
+  it("applies no date filter by default, preserving recall", async () => {
+    const seen: URLSearchParams[] = [];
+    const fetch = routeFetch((url) => {
+      if (url.pathname.endsWith("esearch.fcgi")) {
+        seen.push(url.searchParams);
+        return { body: esearchJson(1, ["1"]) };
+      }
+      if (url.pathname.endsWith("esummary.fcgi"))
+        return { body: esummaryJson(["1"]) };
+      return { body: "{}" };
+    });
+    const ctx = makeCtx(fetch, { manifestDir });
+    await runPaperSearch(
+      { queries: [{ term: "x", role: QueryRole.ATM_BROAD }] },
+      ctx,
+    );
+    expect(seen[0].get("datetype")).toBeNull();
+    expect(seen[0].get("mindate")).toBeNull();
+    expect(seen[0].get("maxdate")).toBeNull();
   });
 });

@@ -30,6 +30,16 @@ export const ALLOWED_HOSTS = [EUTILS_HOST, NCBI_SERVICE_HOST] as const;
 /** Defaults derived from enums. */
 export const DEFAULT_OUTPUT_DIR = DOWNLOAD_DIR;
 export const DEFAULT_DB = Db.PUBMED;
+
+/** NCBI `tool` identifier — a fixed software name, never user-entered. */
+export const ENTREZ_TOOL_NAME = "ogham-entrez";
+
+/** Download-directory autocomplete suggestions (joined with the OS home dir). */
+export const OUTPUT_PATH_SUGGESTION_DIRS = [
+  "Downloads",
+  "Desktop",
+  "Documents",
+] as const;
 export const DEFAULT_FETCH_MODE = FetchMode.SUMMARY;
 export const DEFAULT_CAP_STRATEGY = CapStrategy.DATE_SEGMENT;
 export const DEFAULT_DATE_FIELD = DateField.PUBLICATION;

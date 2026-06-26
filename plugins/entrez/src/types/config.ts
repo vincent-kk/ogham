@@ -13,13 +13,6 @@ import {
   DEFAULT_OUTPUT_DIR,
 } from "../constants/defaults.js";
 
-/** Search-limiting date range (distinct from 10k segmentation). */
-export const DateRangeSchema = z.object({
-  from: z.string().optional(),
-  to: z.string().optional(),
-});
-export type DateRange = z.infer<typeof DateRangeSchema>;
-
 /** Non-secret configuration (config.json). */
 export const EntrezConfigSchema = z.object({
   tool: z.string().min(1),
@@ -29,7 +22,12 @@ export const EntrezConfigSchema = z.object({
   output_path: z.string().default(DEFAULT_OUTPUT_DIR),
   date_tag: z.boolean().default(true),
   rate_limit: RateLimitSchema.optional(),
-  default_date_range: DateRangeSchema.optional(),
+  /**
+   * Optional relative search window in days. When set, searches that don't
+   * carry their own date range default to "run date − N days … run date"
+   * (filtered by PubMed entry date). Unset = no limit, to preserve recall.
+   */
+  default_window_days: z.number().int().positive().optional(),
 });
 export type EntrezConfig = z.infer<typeof EntrezConfigSchema>;
 /** Input shape (defaults optional) — what setup/save accept before parsing. */

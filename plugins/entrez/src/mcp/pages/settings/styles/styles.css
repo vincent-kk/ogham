@@ -155,6 +155,60 @@ form {
   opacity: 0.85;
 }
 
+/* Collapsible advanced settings — hidden by default for a one-field first run. */
+.advanced {
+  border-top: 1px solid var(--border);
+}
+.advanced__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.advanced__summary::-webkit-details-marker {
+  display: none;
+}
+.advanced__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.advanced__title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+}
+.advanced__hint {
+  font-size: 12.5px;
+  color: var(--fg-muted);
+  opacity: 0.85;
+}
+.advanced__chevron {
+  flex: none;
+  color: var(--fg-muted);
+  transition: transform 0.15s ease;
+}
+.advanced[open] .advanced__chevron {
+  transform: rotate(180deg);
+}
+.advanced__summary:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 30%, transparent);
+}
+.advanced__body {
+  padding: 2px 0 16px;
+}
+#window_days {
+  margin-top: 10px;
+}
+
 .field {
   margin-bottom: 14px;
 }
@@ -181,6 +235,7 @@ input[type="text"],
 input[type="email"],
 input[type="url"],
 input[type="password"],
+input[type="number"],
 select {
   width: 100%;
   padding: 10px 12px;

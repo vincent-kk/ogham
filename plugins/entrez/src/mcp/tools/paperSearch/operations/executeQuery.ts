@@ -1,6 +1,12 @@
-import { CapStrategy, ErrorCode, type Db } from "../../../../types/enums.js";
+import {
+  CapStrategy,
+  DateType,
+  ErrorCode,
+  type Db,
+} from "../../../../types/enums.js";
 import type {
   SearchQuery,
+  SearchDateRange,
   PaperSearchInput,
   PerQueryResult,
   SearchWarning,
@@ -46,11 +52,28 @@ function datedTerm(
   return `(${term}) AND ("${from}"[${field}] : "${to}"[${field}])`;
 }
 
+function formatDay(date: Date): string {
+  return date.toISOString().slice(0, 10).replace(/-/g, "/");
+}
+
 function todayDate(nowMs?: number): string {
-  return new Date(nowMs ?? Date.now())
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "/");
+  return formatDay(new Date(nowMs ?? Date.now()));
+}
+
+/**
+ * Derive a relative search window (`run date − N days … run date`, by PubMed
+ * entry date) from the configured default. Returns undefined when no window is
+ * configured, so the default behavior stays "no date limit" to preserve recall.
+ */
+function defaultWindowRange(
+  windowDays: number | undefined,
+  nowMs?: number,
+): SearchDateRange | undefined {
+  if (!windowDays) return undefined;
+  const now = new Date(nowMs ?? Date.now());
+  const from = new Date(now.getTime());
+  from.setUTCDate(from.getUTCDate() - windowDays);
+  return { from: formatDay(from), to: formatDay(now), type: DateType.ENTREZ };
 }
 
 /**
@@ -69,7 +92,9 @@ export async function executeQuery(
     message: i.message,
     query_role: query.role,
   }));
-  const dateRange = input.dateRange;
+  const dateRange =
+    input.dateRange ??
+    defaultWindowRange(ctx.config.default_window_days, ctx.nowMs);
 
   const initial = await esearch(
     {

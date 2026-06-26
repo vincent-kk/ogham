@@ -3,6 +3,7 @@
 
   var MASK = "••••••••••";
   var DEFAULT_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
+  var WINDOW_PRESETS = ["7", "30", "90", "365"];
   var state = window.__ENTREZ_STATE__ || null;
 
   var $ = function (id) {
@@ -14,6 +15,8 @@
   var testBtn = $("test-btn");
   var saveBtn = $("save-btn");
   var apiKeyInput = $("api_key");
+  var windowPreset = $("window_preset");
+  var windowDays = $("window_days");
 
   // --- prefill from injected state ---------------------------------------
   function setValue(id, value) {
@@ -21,27 +24,56 @@
     if (el && value !== undefined && value !== null) el.value = value;
   }
 
+  function fillPathSuggestions(list) {
+    var dl = $("output_path_options");
+    if (!dl || !Array.isArray(list)) return;
+    for (var i = 0; i < list.length; i++) {
+      var opt = document.createElement("option");
+      opt.value = list[i];
+      dl.appendChild(opt);
+    }
+  }
+
+  function prefillWindow(days) {
+    if (typeof days !== "number" || days <= 0) {
+      windowPreset.value = "";
+    } else if (WINDOW_PRESETS.indexOf(String(days)) !== -1) {
+      windowPreset.value = String(days);
+    } else {
+      windowPreset.value = "custom";
+      windowDays.value = String(days);
+    }
+    syncWindowVisibility();
+  }
+
   (function prefill() {
     setValue("base_url", DEFAULT_BASE);
     if (!state) {
+      syncWindowVisibility();
       updateRateBadge();
       return;
     }
-    setValue("tool", state.tool);
+    fillPathSuggestions(state.path_suggestions);
     setValue("email", state.email);
     setValue("default_db", state.default_db || "pubmed");
     if (state.base_url) setValue("base_url", state.base_url);
     setValue("output_path", state.output_path);
     if (state.api_key) apiKeyInput.value = MASK;
-    if (state.default_date_range) {
-      setValue("date_from", state.default_date_range.from);
-      setValue("date_to", state.default_date_range.to);
-    }
+    prefillWindow(state.default_window_days);
     var dateTag = $("date_tag");
     if (dateTag && typeof state.date_tag === "boolean")
       dateTag.checked = state.date_tag;
     updateRateBadge();
   })();
+
+  // --- search window: reveal the custom day input on demand --------------
+  function syncWindowVisibility() {
+    windowDays.hidden = windowPreset.value !== "custom";
+  }
+  windowPreset.addEventListener("change", function () {
+    syncWindowVisibility();
+    if (windowPreset.value === "custom") windowDays.focus();
+  });
 
   // --- rate badge --------------------------------------------------------
   function updateRateBadge() {
@@ -68,9 +100,16 @@
     return el ? el.value.trim() : "";
   }
 
+  /** Resolve the search window: undefined = no limit, NaN = invalid custom. */
+  function windowDaysValue() {
+    var preset = windowPreset.value;
+    if (preset === "") return undefined;
+    if (preset === "custom") return parseInt(windowDays.value, 10);
+    return parseInt(preset, 10);
+  }
+
   function collect() {
     var body = {
-      tool: trimmed("tool"),
       email: trimmed("email"),
       default_db: $("default_db").value,
       base_url: trimmed("base_url") || DEFAULT_BASE,
@@ -79,9 +118,8 @@
     };
     var key = apiKeyInput.value;
     if (key) body.api_key = key; // mask sent as-is = "unchanged"
-    var from = trimmed("date_from");
-    var to = trimmed("date_to");
-    if (from || to) body.default_date_range = { from: from, to: to };
+    var win = windowDaysValue();
+    if (typeof win === "number" && win > 0) body.default_window_days = win;
     if (!body.output_path) delete body.output_path;
     return body;
   }
@@ -105,23 +143,31 @@
       el.hidden = false;
     }
     var input = $(field);
-    if (input) input.setAttribute("aria-invalid", "true");
+    if (input) {
+      input.setAttribute("aria-invalid", "true");
+      // Reveal the error even if it lives inside the collapsed advanced section.
+      var details = input.closest ? input.closest("details") : null;
+      if (details && !details.open) details.open = true;
+    }
   }
 
   function localValidate() {
     clearErrors();
     var ok = true;
-    if (!trimmed("tool")) {
-      showFieldError("tool", "Tool name is required.");
-      ok = false;
-    }
     var email = trimmed("email");
     if (!email) {
-      showFieldError("email", "Contact email is required.");
+      showFieldError("email", "Email address is required.");
       ok = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showFieldError("email", "Enter a valid email address.");
       ok = false;
+    }
+    if (windowPreset.value === "custom") {
+      var n = parseInt(windowDays.value, 10);
+      if (!isFinite(n) || n <= 0) {
+        showFieldError("window_days", "Enter a positive number of days.");
+        ok = false;
+      }
     }
     return ok;
   }

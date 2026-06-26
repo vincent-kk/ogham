@@ -30,7 +30,7 @@
           </span>
           <div class="brand__text">
             <h1 class="brand__name">entrez</h1>
-            <p class="brand__sub">NCBI E-utilities configuration</p>
+            <p class="brand__sub">PubMed search — one-time setup</p>
           </div>
         </div>
         <span id="rate-badge" class="badge" title="Effective NCBI rate limit"
@@ -41,30 +41,12 @@
       <form id="setup-form" novalidate>
         <fieldset class="group">
           <legend class="group__title">
-            Identity <span class="group__hint">required by NCBI</span>
+            Contact <span class="group__hint">required by NCBI</span>
           </legend>
 
           <div class="field">
-            <label for="tool"
-              >Tool name <span class="req" aria-hidden="true">*</span></label
-            >
-            <input
-              id="tool"
-              name="tool"
-              type="text"
-              autocomplete="off"
-              placeholder="my-app"
-              required
-            />
-            <p class="help">
-              Sent with every request as the <code>tool</code> identifier.
-            </p>
-            <p class="error" data-error-for="tool" hidden></p>
-          </div>
-
-          <div class="field">
             <label for="email"
-              >Contact email
+              >Email address
               <span class="req" aria-hidden="true">*</span></label
             >
             <input
@@ -75,18 +57,17 @@
               placeholder="you@example.com"
               required
             />
-            <p class="help">NCBI uses this to reach you about heavy usage.</p>
+            <p class="help">
+              NCBI asks for a contact so they can reach you about heavy usage.
+              It's the only detail entrez can't figure out on its own.
+            </p>
             <p class="error" data-error-for="email" hidden></p>
           </div>
-        </fieldset>
 
-        <fieldset class="group">
-          <legend class="group__title">
-            API key
-            <span class="group__hint">optional · raises rate 3 → 10/s</span>
-          </legend>
           <div class="field">
-            <label for="api_key">NCBI API key</label>
+            <label for="api_key"
+              >API key <span class="group__hint">optional</span></label
+            >
             <div class="input-affix">
               <input
                 id="api_key"
@@ -118,83 +99,116 @@
               </button>
             </div>
             <p class="help">
-              Stored only on this machine, owner-readable. Never shown to the
-              assistant.
+              A free NCBI key raises the rate limit 3 → 10 req/s. Stored only on
+              this machine, owner-readable, never shown to the assistant.
             </p>
             <p class="error" data-error-for="api_key" hidden></p>
           </div>
         </fieldset>
 
-        <fieldset class="group">
-          <legend class="group__title">Search defaults</legend>
+        <details class="advanced">
+          <summary class="advanced__summary">
+            <span class="advanced__label">
+              <span class="advanced__title">Advanced</span>
+              <span class="advanced__hint"
+                >database · search window · downloads</span
+              >
+            </span>
+            <svg
+              class="advanced__chevron"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
 
-          <div class="field">
-            <label for="default_db">Default database</label>
-            <select id="default_db" name="default_db">
-              <option value="pubmed">PubMed</option>
-              <option value="pmc">PMC</option>
-              <option value="mesh">MeSH</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="base_url">Base URL</label>
-            <input
-              id="base_url"
-              name="base_url"
-              type="url"
-              autocomplete="off"
-              placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-            />
-            <p class="help">
-              Override only for an institutional mirror or proxy.
-            </p>
-            <p class="error" data-error-for="base_url" hidden></p>
-          </div>
-
-          <div class="field-row">
+          <div class="advanced__body">
             <div class="field">
-              <label for="date_from">Default date — from</label>
+              <label for="default_db">Default database</label>
+              <select id="default_db" name="default_db">
+                <option value="pubmed">PubMed</option>
+                <option value="pmc">PMC</option>
+                <option value="mesh">MeSH</option>
+              </select>
+              <p class="help">Most searches run against PubMed.</p>
+            </div>
+
+            <div class="field">
+              <label for="window_preset">Search window</label>
+              <select id="window_preset" name="window_preset">
+                <option value="">No limit — all dates (recommended)</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last 365 days</option>
+                <option value="custom">Custom…</option>
+              </select>
               <input
-                id="date_from"
-                name="date_from"
-                type="text"
+                id="window_days"
+                name="window_days"
+                type="number"
+                min="1"
+                step="1"
                 inputmode="numeric"
                 autocomplete="off"
-                placeholder="YYYY/MM/DD"
+                placeholder="Number of days"
+                hidden
               />
+              <p class="help">
+                Limits searches to recently added papers (by PubMed entry date),
+                relative to the day you run them. Only applies when a search
+                doesn't set its own dates. Keep "No limit" to never miss
+                results.
+              </p>
+              <p class="error" data-error-for="window_days" hidden></p>
             </div>
-            <div class="field">
-              <label for="date_to">Default date — to</label>
-              <input
-                id="date_to"
-                name="date_to"
-                type="text"
-                inputmode="numeric"
-                autocomplete="off"
-                placeholder="YYYY/MM/DD"
-              />
-            </div>
-          </div>
-        </fieldset>
 
-        <fieldset class="group">
-          <legend class="group__title">Output</legend>
-          <div class="field">
-            <label for="output_path">Download directory</label>
-            <input
-              id="output_path"
-              name="output_path"
-              type="text"
-              autocomplete="off"
-              placeholder="(default cache directory)"
-            />
+            <div class="field">
+              <label for="output_path">Download directory</label>
+              <input
+                id="output_path"
+                name="output_path"
+                type="text"
+                list="output_path_options"
+                autocomplete="off"
+                placeholder="(default cache directory)"
+              />
+              <datalist id="output_path_options"></datalist>
+              <p class="help">
+                Where downloaded full text is saved. Start typing to pick a
+                common folder, or leave blank for the default.
+              </p>
+            </div>
+
+            <div class="field">
+              <label for="base_url">Base URL</label>
+              <input
+                id="base_url"
+                name="base_url"
+                type="url"
+                autocomplete="off"
+                placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+              />
+              <p class="help">
+                Override only for an institutional mirror or proxy.
+              </p>
+              <p class="error" data-error-for="base_url" hidden></p>
+            </div>
+
+            <label class="checkbox">
+              <input id="date_tag" name="date_tag" type="checkbox" checked />
+              <span>Append a date tag to output file names</span>
+            </label>
           </div>
-          <label class="checkbox">
-            <input id="date_tag" name="date_tag" type="checkbox" checked />
-            <span>Append a date tag to output file names</span>
-          </label>
-        </fieldset>
+        </details>
 
         <div
           id="status"

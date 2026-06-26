@@ -8,7 +8,6 @@ import { z } from "zod";
 import { DbSchema } from "./enumSchemas.js";
 
 export const SetupFormDataSchema = z.object({
-  tool: z.string().min(1),
   email: z.string().email(),
   /** May be the mask sentinel (unchanged) or empty (cleared). */
   api_key: z.string().optional(),
@@ -16,9 +15,8 @@ export const SetupFormDataSchema = z.object({
   base_url: z.string().url().optional(),
   output_path: z.string().optional(),
   date_tag: z.boolean().optional(),
-  default_date_range: z
-    .object({ from: z.string().optional(), to: z.string().optional() })
-    .optional(),
+  /** Relative search window in days; omitted/0 means no limit (full recall). */
+  default_window_days: z.number().int().positive().optional(),
 });
 export type SetupFormData = z.infer<typeof SetupFormDataSchema>;
 
