@@ -6,10 +6,10 @@ temp 격리 워크스페이스 모듈. 세션별 디렉토리를 만들고(`data
 
 | File                             | Role                                                 |
 | -------------------------------- | ---------------------------------------------------- |
-| `operations/createWorkspace.ts`  | `data/`·`artifacts/` 생성, WorkspaceHandle 반환      |
+| `operations/createWorkspace.ts`  | `data/`·`artifacts/` 생성 + `meta.json`(createdAt), WorkspaceHandle 반환 |
 | `operations/collectArtifacts.ts` | ARTIFACTS_DIR 수집 + 해시 + 확장자·symlink 정책 강제 |
 | `operations/readManifest.ts`     | `artifacts/manifest.json` 파싱 (없으면 undefined)    |
-| `operations/pruneExpired.ts`     | mtime 기준 ttl 초과 워크스페이스 제거                |
+| `operations/pruneExpired.ts`     | createdAt(meta.json) 기준 ttl 초과 제거(폴백 mtime) |
 | `index.ts`                       | barrel                                               |
 
 ## Conventions
@@ -39,4 +39,4 @@ temp 격리 워크스페이스 모듈. 세션별 디렉토리를 만들고(`data
 ## Dependencies
 
 - `node:fs/promises`, `node:path`
-- `../../constants/{defaults,paths,messages}`, `../../types/{enums,rExecution}`, `../../utils/{mimeForExtension,randomId,sha256File,isFileNotFound}`
+- `../../constants/{defaults,paths,messages}`, `../../types/{enums,rExecution}`, `../../utils/{mimeForExtension,randomId,sha256File,isFileNotFound,isoNow}`

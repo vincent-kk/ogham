@@ -1,11 +1,16 @@
-import { readdir, writeFile } from "node:fs/promises";
+import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
 import { ERROR_MESSAGES } from "../../../constants/messages.js";
 import { ArtifactKind } from "../../../types/enums.js";
-import { collectArtifacts, createWorkspace, readManifest } from "../index.js";
+import {
+  collectArtifacts,
+  createWorkspace,
+  pruneExpired,
+  readManifest,
+} from "../index.js";
 
 // Disk root is redirected to a per-file tmp dir by vitest.setup.ts.
 describe("workspace", () => {
@@ -78,5 +83,25 @@ describe("workspace", () => {
     await writeFile(join(first.dataDir, "kept.csv"), "keep");
     const second = await createWorkspace("ws_keep_case");
     expect(await readdir(second.dataDir)).toContain("kept.csv");
+  });
+
+  it("preserves createdAt across workspace_files reuse", async () => {
+    const first = await createWorkspace("ws_meta_keep");
+    const a = JSON.parse(await readFile(join(first.dir, "meta.json"), "utf8"));
+    const second = await createWorkspace("ws_meta_keep");
+    const b = JSON.parse(await readFile(join(second.dir, "meta.json"), "utf8"));
+    expect(typeof a.createdAt).toBe("string");
+    expect(b.createdAt).toBe(a.createdAt);
+  });
+
+  it("prunes a workspace whose recorded createdAt exceeds the ttl", async () => {
+    const ws = await createWorkspace("ws_old");
+    await writeFile(
+      join(ws.dir, "meta.json"),
+      JSON.stringify({ createdAt: "2000-01-01T00:00:00.000Z" }),
+    );
+    const removed = await pruneExpired(72);
+    expect(removed).toBeGreaterThanOrEqual(1);
+    await expect(readFile(join(ws.dir, "meta.json"), "utf8")).rejects.toThrow();
   });
 });
