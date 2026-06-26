@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/checkParens.ts` | `checkParens` — 스택 기반 괄호/대괄호 짝·중첩 검증(error) |
-| `operations/checkFieldTags.ts` | `checkFieldTags` — 따옴표 구문·wildcard recall 저하 경고 |
-| `operations/lintQuery.ts` | `lintQuery` — 두 검사 통합·`ok` 산정(메인) |
+| 파일                           | 역할                                                      |
+| ------------------------------ | --------------------------------------------------------- |
+| `operations/checkParens.ts`    | `checkParens` — 스택 기반 괄호/대괄호 짝·중첩 검증(error) |
+| `operations/checkFieldTags.ts` | `checkFieldTags` — 따옴표 구문·wildcard recall 저하 경고  |
+| `operations/lintQuery.ts`      | `lintQuery` — 두 검사 통합·`ok` 산정(메인)                |
 
 ## Conventions
 

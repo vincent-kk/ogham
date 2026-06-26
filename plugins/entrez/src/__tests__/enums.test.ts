@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
 
 import * as enums from "../types/enums.js";
-import { Db, QueryRole, CapStrategy, JobStatus, FetchMode, FieldTag } from "../types/enums.js";
+import {
+  Db,
+  QueryRole,
+  CapStrategy,
+  JobStatus,
+  FetchMode,
+  FieldTag,
+} from "../types/enums.js";
 
 /** The 22 canonical enums from PLAN.md + OaStatus (referenced by DownloadedItem). */
 const REQUIRED_ENUMS = [
@@ -55,7 +62,11 @@ describe("enums catalog", () => {
   });
 
   it("CapStrategy covers warn/segment/abort", () => {
-    expect(Object.values(CapStrategy)).toEqual(["WARN", "DATE_SEGMENT", "ABORT"]);
+    expect(Object.values(CapStrategy)).toEqual([
+      "WARN",
+      "DATE_SEGMENT",
+      "ABORT",
+    ]);
   });
 
   it("JobStatus includes partial + cancelled (async surface)", () => {

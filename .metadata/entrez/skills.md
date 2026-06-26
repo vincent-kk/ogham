@@ -6,24 +6,24 @@
 
 ```yaml
 ---
-name: <kebab-case>            # 접두 없음 (plugin namespace 자동)
+name: <kebab-case> # 접두 없음 (plugin namespace 자동)
 user_invocable: true
 description: '[entrez:<skill>] <한 줄 목적>. Trigger: "<구1>", "<구2>"'
 argument-hint: "[--auto] [--db pubmed] [--date 2020:2026] ..."
 version: "1.0.0"
-complexity: simple|moderate|complex   # complex → Dispatcher anti-yield preamble
+complexity: simple|moderate|complex # complex → Dispatcher anti-yield preamble
 plugin: entrez
 ---
 ```
 
 ## 노출 스킬 4
 
-| 스킬 | complexity | 역할 | 파이프라인 | 호출 agent | MCP |
-|------|-----------|------|-----------|-----------|-----|
-| **search** | complex | 메인 오케스트레이터(Dispatcher): intent 분류 → `QueryRole` union → 재랭킹 → 레코드(메타+초록) | ①②③ | paper-search-expert (두 모드) | paper_search, mesh_lookup |
-| **query** | moderate | 자연어 → PubMed 검색식만(검색 X) | ① 만 | paper-search-expert (생성 모드) | mesh_lookup |
-| **download** | simple | PMID/PMCID/DOI → OA PDF + 비OA 링크 | search 후속 | — | fetch_fulltext |
-| **setup** | simple | web UI 설정(api_key·tool·email) + reachability | — | — | setup, auth-check |
+| 스킬         | complexity | 역할                                                                                          | 파이프라인  | 호출 agent                      | MCP                       |
+| ------------ | ---------- | --------------------------------------------------------------------------------------------- | ----------- | ------------------------------- | ------------------------- |
+| **search**   | complex    | 메인 오케스트레이터(Dispatcher): intent 분류 → `QueryRole` union → 재랭킹 → 레코드(메타+초록) | ①②③         | paper-search-expert (두 모드)   | paper_search, mesh_lookup |
+| **query**    | moderate   | 자연어 → PubMed 검색식만(검색 X)                                                              | ① 만        | paper-search-expert (생성 모드) | mesh_lookup               |
+| **download** | simple     | PMID/PMCID/DOI → OA PDF + 비OA 링크                                                           | search 후속 | —                               | fetch_fulltext            |
+| **setup**    | simple     | web UI 설정(api_key·tool·email) + reachability                                                | —           | —                               | setup, auth-check         |
 
 - `QUERY_ONLY`(검색식만)·`DOWNLOAD`는 `query`·`download` 스킬을 **직접 호출**(최소 경로). `FULL_SEARCH`는 `search`가 전체 오케스트레이션([dispatcher.md](./dispatcher.md)).
 - `--auto` 플래그는 `search`가 받아 모드 전환(Dispatcher 실행 플래그).
@@ -42,7 +42,7 @@ skills/search/
 - `search`만 `complexity: complex` → `SKILL.md` 상단에 Dispatcher anti-yield preamble(상태머신 무인 진행).
 - progressive disclosure: `SKILL.md`는 얇게, 실행 시 `references/*`와 `_shared/{필요한 것}`만 로드.
 
-## _shared/ (lazy, plugin 공통)
+## \_shared/ (lazy, plugin 공통)
 
 ```
 skills/_shared/
@@ -74,10 +74,10 @@ skills/_shared/
 
 ## Agent ↔ Skill ↔ MCP 경계
 
-| 레이어 | 책임 | 가변성 |
-|--------|------|--------|
-| **Agent** (paper-search-expert) | 검색식 다양화(`QueryRole` 선택·`breadth`·rationale)·재랭킹 점수·근거 | 가변(추론 WHAT) |
-| **Skill** (search + query·download·setup) | 오케스트레이션 절차·intent 분기·출력 포맷·모드 | 절차(HOW) |
-| **MCP** (paper_search·mesh_lookup·fetch_fulltext·setup·auth-check) | union·dedup 복합키·10k cap·POST·rate·OA 판별 | 불변(결정론 I/O) |
+| 레이어                                                             | 책임                                                                 | 가변성           |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------- |
+| **Agent** (paper-search-expert)                                    | 검색식 다양화(`QueryRole` 선택·`breadth`·rationale)·재랭킹 점수·근거 | 가변(추론 WHAT)  |
+| **Skill** (search + query·download·setup)                          | 오케스트레이션 절차·intent 분기·출력 포맷·모드                       | 절차(HOW)        |
+| **MCP** (paper_search·mesh_lookup·fetch_fulltext·setup·auth-check) | union·dedup 복합키·10k cap·POST·rate·OA 판별                         | 불변(결정론 I/O) |
 
 원칙: **agent=추론(WHAT) · skill=절차(HOW) · MCP=계약(I/O)**. 코드 규칙(10k cap·POST·rate·lint)은 LLM이 아니라 deterministic service가 소유.

@@ -41,13 +41,18 @@ export async function startSetupServer(
     timer = setTimeout(() => void closeServer(), SETUP_AUTO_SHUTDOWN_MS);
   }
 
-  const routeContext: RouteContext = { ...options.context, resetTimer, closeServer };
+  const routeContext: RouteContext = {
+    ...options.context,
+    resetTimer,
+    closeServer,
+  };
   server = createServer(createRouteHandler(routeContext));
 
   const url = await new Promise<string>((resolve, reject) => {
     server!.listen(0, "127.0.0.1", () => {
       const addr = server!.address();
-      if (addr && typeof addr === "object") resolve(`http://127.0.0.1:${addr.port}`);
+      if (addr && typeof addr === "object")
+        resolve(`http://127.0.0.1:${addr.port}`);
       else reject(new Error("Failed to get server address"));
     });
     server!.on("error", reject);

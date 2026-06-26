@@ -20,7 +20,11 @@ export async function runJob(
   options: JobRunOptions = {},
 ): Promise<void> {
   const path = resolveJobPath(jobId, options.dir);
-  await updateJob(jobId, { status: JobStatus.RUNNING }, { nowMs: ctx.nowMs, path });
+  await updateJob(
+    jobId,
+    { status: JobStatus.RUNNING },
+    { nowMs: ctx.nowMs, path },
+  );
   try {
     const result = await runPaperSearch(input, ctx);
     await updateJob(

@@ -20,7 +20,11 @@ describe("shouldRespell", () => {
 
   it("keeps a healthy union (above threshold, no warning)", () => {
     expect(
-      shouldRespell({ unionTotal: 100, hasSpellingWarning: false, threshold: 10 }),
+      shouldRespell({
+        unionTotal: 100,
+        hasSpellingWarning: false,
+        threshold: 10,
+      }),
     ).toBe(false);
   });
 

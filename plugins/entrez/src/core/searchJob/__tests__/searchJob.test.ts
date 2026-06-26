@@ -103,13 +103,15 @@ describe("pollResults", () => {
     );
 
     const first = await pollResults("job-4", { pageSize: 2, path });
-    expect((first.result as { union: { records: unknown[] } }).union.records)
-      .toHaveLength(2);
+    expect(
+      (first.result as { union: { records: unknown[] } }).union.records,
+    ).toHaveLength(2);
     expect(first.cursor).toBe("2");
 
     const last = await pollResults("job-4", { cursor: "4", pageSize: 2, path });
-    expect((last.result as { union: { records: unknown[] } }).union.records)
-      .toHaveLength(1);
+    expect(
+      (last.result as { union: { records: unknown[] } }).union.records,
+    ).toHaveLength(1);
     expect(last.cursor).toBeUndefined();
   });
 

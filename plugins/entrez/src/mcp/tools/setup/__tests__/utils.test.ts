@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 
-import { API_KEY_MASK, maskApiKey, restoreApiKey } from "../webServer/utils/maskApiKey.js";
+import {
+  API_KEY_MASK,
+  maskApiKey,
+  restoreApiKey,
+} from "../webServer/utils/maskApiKey.js";
 import { escapeJsonForHtml } from "../webServer/utils/escapeJsonForHtml.js";
 import { testConnection } from "../utils/testConnection.js";
 import { RateLimit } from "../../../../types/enums.js";
@@ -30,10 +34,13 @@ describe("escapeJsonForHtml", () => {
 
 describe("testConnection", () => {
   const fetchOk = (async () =>
-    new Response(JSON.stringify({ einforesult: { dblist: ["pubmed", "pmc"] } }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    })) as unknown as typeof fetch;
+    new Response(
+      JSON.stringify({ einforesult: { dblist: ["pubmed", "pmc"] } }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      },
+    )) as unknown as typeof fetch;
 
   it("reports success + rate (with key) and db count", async () => {
     const r = await testConnection(

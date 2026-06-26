@@ -8,7 +8,12 @@ export {
   resolveRateLimit,
 } from "./config/index.js";
 export type { ResolvedRateLimit } from "./config/index.js";
-export { mergeRecords, dedupKey, normalizeTitle, tagHitBy } from "./union/index.js";
+export {
+  mergeRecords,
+  dedupKey,
+  normalizeTitle,
+  tagHitBy,
+} from "./union/index.js";
 export { bucketByDate, probeCount, planSegments } from "./segmenter/index.js";
 export type {
   DateBucket,

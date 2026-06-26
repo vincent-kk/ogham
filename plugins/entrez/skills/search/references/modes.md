@@ -2,13 +2,13 @@
 
 `ExecutionMode` ∈ `interactive` (default) · `auto` (`--auto`).
 
-| | `interactive` (default) | `--auto` (pipeline) |
-|---|---|---|
-| QUERY_GEN checkpoint | present queries · USER_REFINE dialog | auto-pass (unattended generation) |
-| recall gate | show union · confirm before broadening | unattended convergence (loop until growth <5%) |
-| RANK result | discuss top-N · explain rationale | auto-produce |
-| large jobs | progress feedback + confirm | unattended async + progress log |
-| termination | return records · explain first | write to file (+ `date_tag`) + SearchManifest |
+|                      | `interactive` (default)                | `--auto` (pipeline)                            |
+| -------------------- | -------------------------------------- | ---------------------------------------------- |
+| QUERY_GEN checkpoint | present queries · USER_REFINE dialog   | auto-pass (unattended generation)              |
+| recall gate          | show union · confirm before broadening | unattended convergence (loop until growth <5%) |
+| RANK result          | discuss top-N · explain rationale      | auto-produce                                   |
+| large jobs           | progress feedback + confirm            | unattended async + progress log                |
+| termination          | return records · explain first         | write to file (+ `date_tag`) + SearchManifest  |
 
 ## --auto convergence
 

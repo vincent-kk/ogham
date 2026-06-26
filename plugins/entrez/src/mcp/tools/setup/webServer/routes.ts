@@ -21,14 +21,21 @@ export function createRouteHandler(
 ): (req: IncomingMessage, res: ServerResponse) => void {
   return (req, res) => {
     ctx.resetTimer();
-    const path = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`)
-      .pathname;
+    const path = new URL(
+      req.url ?? "/",
+      `http://${req.headers.host ?? "localhost"}`,
+    ).pathname;
 
     if (
       req.method === "POST" &&
-      !(req.headers["content-type"] ?? "").toLowerCase().startsWith(JSON_CONTENT_TYPE)
+      !(req.headers["content-type"] ?? "")
+        .toLowerCase()
+        .startsWith(JSON_CONTENT_TYPE)
     ) {
-      sendJson(res, 415, { success: false, message: "Content-Type must be application/json" });
+      sendJson(res, 415, {
+        success: false,
+        message: "Content-Type must be application/json",
+      });
       return;
     }
 
@@ -39,10 +46,14 @@ export function createRouteHandler(
       });
     };
 
-    if (path === "/" && req.method === "GET") handleGetRoot(ctx, res).catch(onError);
-    else if (path === "/status" && req.method === "GET") handleStatus(ctx, res).catch(onError);
-    else if (path === "/test" && req.method === "POST") handleTest(ctx, req, res).catch(onError);
-    else if (path === "/submit" && req.method === "POST") handleSubmit(ctx, req, res).catch(onError);
+    if (path === "/" && req.method === "GET")
+      handleGetRoot(ctx, res).catch(onError);
+    else if (path === "/status" && req.method === "GET")
+      handleStatus(ctx, res).catch(onError);
+    else if (path === "/test" && req.method === "POST")
+      handleTest(ctx, req, res).catch(onError);
+    else if (path === "/submit" && req.method === "POST")
+      handleSubmit(ctx, req, res).catch(onError);
     else sendJson(res, 404, { success: false, message: "Not found" });
   };
 }

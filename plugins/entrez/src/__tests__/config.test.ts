@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 
-import { EntrezConfigSchema, EntrezCredentialsSchema } from "../types/config.js";
+import {
+  EntrezConfigSchema,
+  EntrezCredentialsSchema,
+} from "../types/config.js";
 import { Db } from "../types/enums.js";
 import { DEFAULT_EUTILS_BASE } from "../constants/defaults.js";
 

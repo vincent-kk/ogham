@@ -1,6 +1,10 @@
 import { FetchMode } from "../../../types/enums.js";
 import type { PaperRecord } from "../../../types/record.js";
-import type { UnionResult, DateSegment, CapEvent } from "../../../types/index.js";
+import type {
+  UnionResult,
+  DateSegment,
+  CapEvent,
+} from "../../../types/index.js";
 import type {
   PaperSearchInput,
   PaperSearchOutput,
@@ -22,7 +26,11 @@ import { writeManifest } from "./operations/writeManifest.js";
 
 const MAX_RECORDS_CODE = "MAX_RECORDS";
 
-function stub(pmid: string, term: string, role: PerQueryResult["query_role"]): PaperRecord {
+function stub(
+  pmid: string,
+  term: string,
+  role: PerQueryResult["query_role"],
+): PaperRecord {
   return { pmid, title: "", authors: [], hit_by: [term], query_role: [role] };
 }
 
@@ -63,7 +71,10 @@ export async function runPaperSearch(
       dedup_collisions: union.dedup_collisions,
     };
     partial = true;
-    warnings.push({ code: MAX_RECORDS_CODE, message: Messages.BUDGET_EXCEEDED });
+    warnings.push({
+      code: MAX_RECORDS_CODE,
+      message: Messages.BUDGET_EXCEEDED,
+    });
   }
 
   let missing_pmids: string[] = [];
@@ -71,7 +82,11 @@ export async function runPaperSearch(
   const fetchMode = input.fetchMode ?? DEFAULT_FETCH_MODE;
 
   if (fetchMode !== FetchMode.IDS_ONLY && union.records.length > 0) {
-    const meta = await fetchMetadata(union.records.map((r) => r.pmid), ctx, input);
+    const meta = await fetchMetadata(
+      union.records.map((r) => r.pmid),
+      ctx,
+      input,
+    );
     union.records = union.records.map((r) => {
       const m = meta.records.get(r.pmid);
       return m ? { ...m, hit_by: r.hit_by, query_role: r.query_role } : r;

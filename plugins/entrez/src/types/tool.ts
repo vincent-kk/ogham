@@ -116,7 +116,12 @@ export const PaperSearchStatusInputSchema = z.object({ jobId: z.string() });
 export interface PaperSearchStatusOutput {
   jobId: string;
   status: JobStatus;
-  progress?: { fetched: number; total: number; currentSegment?: number; segments: number };
+  progress?: {
+    fetched: number;
+    total: number;
+    currentSegment?: number;
+    segments: number;
+  };
   partial?: boolean;
   error?: SearchError;
 }

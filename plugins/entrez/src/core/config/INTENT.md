@@ -4,13 +4,13 @@ config.json(비밀 외)·credentials.json(api_key, 0o600) 로드·저장과 rate
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/loadConfig.ts` | `loadConfig` — 없으면 null(미설정), 0o600 강화 |
-| `operations/saveConfig.ts` | `saveConfig` — zod 검증 후 0o600 기록 |
-| `operations/loadCredentials.ts` | `loadCredentials` — 없으면 {}, 0o600 강화 |
-| `operations/saveCredentials.ts` | `saveCredentials` — api_key 0o600 기록 |
-| `operations/resolveRateLimit.ts` | `resolveRateLimit` — 키 유무→3/10 per sec |
+| 파일                             | 역할                                           |
+| -------------------------------- | ---------------------------------------------- |
+| `operations/loadConfig.ts`       | `loadConfig` — 없으면 null(미설정), 0o600 강화 |
+| `operations/saveConfig.ts`       | `saveConfig` — zod 검증 후 0o600 기록          |
+| `operations/loadCredentials.ts`  | `loadCredentials` — 없으면 {}, 0o600 강화      |
+| `operations/saveCredentials.ts`  | `saveCredentials` — api_key 0o600 기록         |
+| `operations/resolveRateLimit.ts` | `resolveRateLimit` — 키 유무→3/10 per sec      |
 
 ## Conventions
 

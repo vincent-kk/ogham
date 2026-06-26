@@ -39,7 +39,11 @@ describe("parseIdConv", () => {
   it("maps ok and error rows", () => {
     const r = parseIdConv(IDCONV_JSON);
     expect(r.status).toBe("ok");
-    expect(r.records[0]).toMatchObject({ pmcid: "PMC1", pmid: "11", doi: "10.1/a" });
+    expect(r.records[0]).toMatchObject({
+      pmcid: "PMC1",
+      pmid: "11",
+      doi: "10.1/a",
+    });
     expect(r.records[1]).toMatchObject({ pmid: "99", status: "error" });
   });
 

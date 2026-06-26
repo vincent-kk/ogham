@@ -88,7 +88,11 @@ export const ELINK_JSON = JSON.stringify({
       dbfrom: "pubmed",
       ids: ["111"],
       linksetdbs: [
-        { dbto: "pubmed", linkname: "pubmed_pubmed", links: ["111", "222", "333"] },
+        {
+          dbto: "pubmed",
+          linkname: "pubmed_pubmed",
+          links: ["111", "222", "333"],
+        },
       ],
     },
   ],

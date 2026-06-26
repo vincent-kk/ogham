@@ -6,7 +6,10 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { startSetupServer } from "../webServer/index.js";
 import type { SetupServerHandle } from "../../../../types/setup.js";
-import type { SetupFormData, ConnectionTestResult } from "../../../../types/setup.js";
+import type {
+  SetupFormData,
+  ConnectionTestResult,
+} from "../../../../types/setup.js";
 import {
   loadConfig,
   saveConfig,
@@ -39,7 +42,11 @@ beforeEach(async () => {
       testConnection: async (data): Promise<ConnectionTestResult> => {
         lastTested = data;
         const success = data.email.includes("@");
-        return { success, message: success ? "EInfo reachable" : "bad email", dbCount: 3 };
+        return {
+          success,
+          message: success ? "EInfo reachable" : "bad email",
+          dbCount: 3,
+        };
       },
     },
   });

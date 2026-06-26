@@ -4,7 +4,10 @@ import type {
   ManifestQuery,
   CapEvent,
 } from "../../../../types/index.js";
-import type { PerQueryResult, ReproducibilityRef } from "../../../../types/tool.js";
+import type {
+  PerQueryResult,
+  ReproducibilityRef,
+} from "../../../../types/tool.js";
 import { SearchManifestSchema } from "../../../../types/manifest.js";
 import { writeJson } from "../../../../lib/fileIo.js";
 import { sha256Hex } from "../../../../utils/sha256.js";

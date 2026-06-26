@@ -25,6 +25,9 @@ describe.skipIf(!LIVE)("@live NCBI E-utilities contract", () => {
     const r = await esearch({ db: Db.PUBMED, term: "crispr", retmax: 5 }, deps);
     expect(r.count).toBeGreaterThan(0);
     expect(r.idList.length).toBeGreaterThan(0);
-    expect(typeof r.queryTranslation === "string" || r.queryTranslation === undefined).toBe(true);
+    expect(
+      typeof r.queryTranslation === "string" ||
+        r.queryTranslation === undefined,
+    ).toBe(true);
   }, 30_000);
 });

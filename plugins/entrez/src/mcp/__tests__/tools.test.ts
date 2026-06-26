@@ -34,10 +34,17 @@ describe("mesh_lookup", () => {
   it("maps a term to a MeSH descriptor", async () => {
     const fetch = routeFetch((url) => {
       if (url.pathname.endsWith("esearch.fcgi"))
-        return { body: JSON.stringify({ esearchresult: { count: "1", idlist: ["D1"] } }) };
+        return {
+          body: JSON.stringify({
+            esearchresult: { count: "1", idlist: ["D1"] },
+          }),
+        };
       return { body: MESH_SUMMARY };
     });
-    const out = await runMeshLookup({ terms: ["calcium ionophore"] }, makeCtx(fetch));
+    const out = await runMeshLookup(
+      { terms: ["calcium ionophore"] },
+      makeCtx(fetch),
+    );
     expect(out.mappings[0].matched).toBe(MeshMatch.DESCRIPTOR);
     expect(out.mappings[0].descriptorName).toBe("Calcimycin");
     expect(out.mappings[0].descriptorUi).toBe("D000001");
@@ -60,8 +67,14 @@ const OA_NOT_OA = `<OA><error code="idIsNotOpenAccess">no</error></OA>`;
 function fulltextRouter(oaXml: string) {
   return routeFetch((url) => {
     if (url.pathname.includes("idconv"))
-      return { body: JSON.stringify({ status: "ok", records: [{ pmid: "1", pmcid: "PMC9", doi: "10.1/a" }] }) };
-    if (url.pathname.includes("oa.fcgi")) return { body: oaXml, contentType: "application/xml" };
+      return {
+        body: JSON.stringify({
+          status: "ok",
+          records: [{ pmid: "1", pmcid: "PMC9", doi: "10.1/a" }],
+        }),
+      };
+    if (url.pathname.includes("oa.fcgi"))
+      return { body: oaXml, contentType: "application/xml" };
     return { body: "PDFBYTES", contentType: "application/octet-stream" }; // binary download
   });
 }
@@ -102,7 +115,9 @@ describe("auth-check", () => {
     await saveConfig({ tool: "t", email: "e@x.com" }, configPath);
     await saveCredentials({ api_key: "KEY" }, credentialsPath);
     const fetch = routeFetch(() => ({
-      body: JSON.stringify({ einforesult: { dblist: ["pubmed", "pmc", "mesh"] } }),
+      body: JSON.stringify({
+        einforesult: { dblist: ["pubmed", "pmc", "mesh"] },
+      }),
     }));
 
     const out = await runAuthCheck(
@@ -119,7 +134,10 @@ describe("auth-check", () => {
   it("reports not configured when config is absent", async () => {
     const out = await runAuthCheck(
       {},
-      { configPath: join(dir, "missing.json"), credentialsPath: join(dir, "none.json") },
+      {
+        configPath: join(dir, "missing.json"),
+        credentialsPath: join(dir, "none.json"),
+      },
     );
     expect(out.configured).toBe(false);
     expect(out.reachable).toBe(false);

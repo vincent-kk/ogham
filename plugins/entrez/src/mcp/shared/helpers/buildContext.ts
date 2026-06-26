@@ -50,5 +50,11 @@ export async function buildToolContext(
     signal: options.signal,
   };
 
-  return { config, credentials, deps, baseUrl: config.base_url, db: config.default_db };
+  return {
+    config,
+    credentials,
+    deps,
+    baseUrl: config.base_url,
+    db: config.default_db,
+  };
 }

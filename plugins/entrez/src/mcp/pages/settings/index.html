@@ -14,7 +14,16 @@
       <header class="card__head">
         <div class="brand">
           <span class="brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <circle cx="11" cy="11" r="7"></circle>
               <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
             </svg>
@@ -24,42 +33,94 @@
             <p class="brand__sub">NCBI E-utilities configuration</p>
           </div>
         </div>
-        <span id="rate-badge" class="badge" title="Effective NCBI rate limit">3 req/s</span>
+        <span id="rate-badge" class="badge" title="Effective NCBI rate limit"
+          >3 req/s</span
+        >
       </header>
 
       <form id="setup-form" novalidate>
         <fieldset class="group">
-          <legend class="group__title">Identity <span class="group__hint">required by NCBI</span></legend>
+          <legend class="group__title">
+            Identity <span class="group__hint">required by NCBI</span>
+          </legend>
 
           <div class="field">
-            <label for="tool">Tool name <span class="req" aria-hidden="true">*</span></label>
-            <input id="tool" name="tool" type="text" autocomplete="off" placeholder="my-app" required />
-            <p class="help">Sent with every request as the <code>tool</code> identifier.</p>
+            <label for="tool"
+              >Tool name <span class="req" aria-hidden="true">*</span></label
+            >
+            <input
+              id="tool"
+              name="tool"
+              type="text"
+              autocomplete="off"
+              placeholder="my-app"
+              required
+            />
+            <p class="help">
+              Sent with every request as the <code>tool</code> identifier.
+            </p>
             <p class="error" data-error-for="tool" hidden></p>
           </div>
 
           <div class="field">
-            <label for="email">Contact email <span class="req" aria-hidden="true">*</span></label>
-            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            <label for="email"
+              >Contact email
+              <span class="req" aria-hidden="true">*</span></label
+            >
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
             <p class="help">NCBI uses this to reach you about heavy usage.</p>
             <p class="error" data-error-for="email" hidden></p>
           </div>
         </fieldset>
 
         <fieldset class="group">
-          <legend class="group__title">API key <span class="group__hint">optional · raises rate 3 → 10/s</span></legend>
+          <legend class="group__title">
+            API key
+            <span class="group__hint">optional · raises rate 3 → 10/s</span>
+          </legend>
           <div class="field">
             <label for="api_key">NCBI API key</label>
             <div class="input-affix">
-              <input id="api_key" name="api_key" type="password" autocomplete="off" placeholder="Leave blank for 3 req/s" />
-              <button type="button" id="toggle-key" class="affix-btn" aria-label="Show API key" aria-pressed="false">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <input
+                id="api_key"
+                name="api_key"
+                type="password"
+                autocomplete="off"
+                placeholder="Leave blank for 3 req/s"
+              />
+              <button
+                type="button"
+                id="toggle-key"
+                class="affix-btn"
+                aria-label="Show API key"
+                aria-pressed="false"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </button>
             </div>
-            <p class="help">Stored only on this machine, owner-readable. Never shown to the assistant.</p>
+            <p class="help">
+              Stored only on this machine, owner-readable. Never shown to the
+              assistant.
+            </p>
             <p class="error" data-error-for="api_key" hidden></p>
           </div>
         </fieldset>
@@ -78,19 +139,41 @@
 
           <div class="field">
             <label for="base_url">Base URL</label>
-            <input id="base_url" name="base_url" type="url" autocomplete="off" placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/" />
-            <p class="help">Override only for an institutional mirror or proxy.</p>
+            <input
+              id="base_url"
+              name="base_url"
+              type="url"
+              autocomplete="off"
+              placeholder="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+            />
+            <p class="help">
+              Override only for an institutional mirror or proxy.
+            </p>
             <p class="error" data-error-for="base_url" hidden></p>
           </div>
 
           <div class="field-row">
             <div class="field">
               <label for="date_from">Default date — from</label>
-              <input id="date_from" name="date_from" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" />
+              <input
+                id="date_from"
+                name="date_from"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="YYYY/MM/DD"
+              />
             </div>
             <div class="field">
               <label for="date_to">Default date — to</label>
-              <input id="date_to" name="date_to" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" />
+              <input
+                id="date_to"
+                name="date_to"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="YYYY/MM/DD"
+              />
             </div>
           </div>
         </fieldset>
@@ -99,7 +182,13 @@
           <legend class="group__title">Output</legend>
           <div class="field">
             <label for="output_path">Download directory</label>
-            <input id="output_path" name="output_path" type="text" autocomplete="off" placeholder="(default cache directory)" />
+            <input
+              id="output_path"
+              name="output_path"
+              type="text"
+              autocomplete="off"
+              placeholder="(default cache directory)"
+            />
           </div>
           <label class="checkbox">
             <input id="date_tag" name="date_tag" type="checkbox" checked />
@@ -107,7 +196,13 @@
           </label>
         </fieldset>
 
-        <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+        <div
+          id="status"
+          class="status"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
 
         <div class="actions">
           <button type="button" id="test-btn" class="btn btn--ghost">

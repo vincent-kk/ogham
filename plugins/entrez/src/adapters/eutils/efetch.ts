@@ -19,7 +19,9 @@ const ORCID_SOURCE = "ORCID";
 type Node = Record<string, unknown>;
 
 function parseAuthor(raw: Node): Author {
-  const identifiers = asArray<Node>(raw.Identifier as Node | Node[] | undefined);
+  const identifiers = asArray<Node>(
+    raw.Identifier as Node | Node[] | undefined,
+  );
   const orcidNode = identifiers.find((id) => id["@_Source"] === ORCID_SOURCE);
   return {
     lastName: textOf(raw.LastName),
@@ -86,10 +88,15 @@ function parseArticle(article: Node): PaperRecord | null {
   if (!pmid || !articleNode) return null;
 
   const authors = asArray<Node>(
-    (articleNode.AuthorList as Node | undefined)?.Author as Node | Node[] | undefined,
+    (articleNode.AuthorList as Node | undefined)?.Author as
+      | Node
+      | Node[]
+      | undefined,
   ).map(parseAuthor);
 
-  const { doi, pmcid } = parseArticleIds(article.PubmedData as Node | undefined);
+  const { doi, pmcid } = parseArticleIds(
+    article.PubmedData as Node | undefined,
+  );
 
   return {
     pmid,

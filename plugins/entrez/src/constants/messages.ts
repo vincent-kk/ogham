@@ -11,8 +11,7 @@ export const Messages = {
     "NCBI requires both `tool` and `email`. Configure them via the setup skill.",
   SSRF_PATH_TRAVERSAL: "SSRF: path traversal detected in URL.",
   SSRF_INVALID_PROTOCOL: "SSRF: invalid protocol. Only http/https allowed.",
-  SSRF_HOST_NOT_ALLOWED:
-    "SSRF: host is not in the NCBI E-utilities allowlist.",
+  SSRF_HOST_NOT_ALLOWED: "SSRF: host is not in the NCBI E-utilities allowlist.",
   SSRF_PRIVATE_IP: "SSRF: access to private/reserved IP is blocked.",
   RATE_RETRY_EXCEEDED:
     "NCBI rate limit retries exhausted. Try off-peak hours (US Eastern 21:00–05:00 or weekends).",

@@ -1,5 +1,8 @@
 import type { Db, RateLimit } from "../../../../../types/enums.js";
-import type { EntrezConfig, EntrezCredentials } from "../../../../../types/config.js";
+import type {
+  EntrezConfig,
+  EntrezCredentials,
+} from "../../../../../types/config.js";
 import { resolveRateLimit } from "../../../../../core/config/index.js";
 import { maskApiKey } from "./maskApiKey.js";
 

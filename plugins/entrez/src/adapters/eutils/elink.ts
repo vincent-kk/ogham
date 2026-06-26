@@ -25,7 +25,9 @@ interface RawLinkSet {
 
 function extractLinks(linksetdb: RawLinkSetDb): string[] {
   const links = linksetdb.links ?? [];
-  return links.map((l) => (typeof l === "string" ? l : (l.id ?? ""))).filter(Boolean);
+  return links
+    .map((l) => (typeof l === "string" ? l : (l.id ?? "")))
+    .filter(Boolean);
 }
 
 /** Parse the ELink JSON envelope into seed + linked PMIDs (deduped, seeds removed). */

@@ -4,12 +4,12 @@
 
 ## Structure
 
-| 위치 | 역할 |
-| --- | --- |
-| `setup.ts` | `handleSetup` — 서버 기동 + 브라우저 오픈, `{success,url}` 반환 |
-| `utils/loadSettingsHtml.ts` | `public/settings.html` 런타임 로드 |
-| `utils/testConnection.ts` | EInfo 도달성 probe(저장 전) |
-| `webServer/` | node:http 서버·라우트·핸들러(/ ·/status ·/test ·/submit) |
+| 위치                        | 역할                                                            |
+| --------------------------- | --------------------------------------------------------------- |
+| `setup.ts`                  | `handleSetup` — 서버 기동 + 브라우저 오픈, `{success,url}` 반환 |
+| `utils/loadSettingsHtml.ts` | `public/settings.html` 런타임 로드                              |
+| `utils/testConnection.ts`   | EInfo 도달성 probe(저장 전)                                     |
+| `webServer/`                | node:http 서버·라우트·핸들러(/ ·/status ·/test ·/submit)        |
 
 ## Conventions
 

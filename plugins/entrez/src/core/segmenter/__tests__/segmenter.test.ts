@@ -33,13 +33,23 @@ describe("bucketByDate — complete non-overlapping partition", () => {
 });
 
 describe("planSegments — 10k cap, zero loss", () => {
-  const opts = { dateField: DateField.PUBLICATION, from: "2000/01/01", to: "2009/12/31" };
+  const opts = {
+    dateField: DateField.PUBLICATION,
+    from: "2000/01/01",
+    to: "2009/12/31",
+  };
 
   it("returns a single segment when under the cap (no probing)", async () => {
     const countFn: CountFn = async () => 0;
     const segments = await planSegments("cancer", 500, opts, countFn);
     expect(segments).toEqual([
-      { field: DateField.PUBLICATION, from: opts.from, to: opts.to, count: 500, capped: false },
+      {
+        field: DateField.PUBLICATION,
+        from: opts.from,
+        to: opts.to,
+        count: 500,
+        capped: false,
+      },
     ]);
   });
 
@@ -59,7 +69,12 @@ describe("planSegments — 10k cap, zero loss", () => {
   }
 
   it("splits an over-cap query so every segment is at or under the cap", async () => {
-    const segments = await planSegments("cancer", 60_000, opts, proportionalCount(60_000));
+    const segments = await planSegments(
+      "cancer",
+      60_000,
+      opts,
+      proportionalCount(60_000),
+    );
     expect(segments.length).toBeGreaterThan(1);
     expect(segments.every((s) => s.count <= UID_HARD_CAP)).toBe(true);
     expect(segments.every((s) => !s.capped)).toBe(true);
@@ -67,7 +82,12 @@ describe("planSegments — 10k cap, zero loss", () => {
 
   it("recurses across levels and conserves the total (zero loss)", async () => {
     const total = 200_000;
-    const segments = await planSegments("cancer", total, opts, proportionalCount(total));
+    const segments = await planSegments(
+      "cancer",
+      total,
+      opts,
+      proportionalCount(total),
+    );
     expect(segments.every((s) => s.count <= UID_HARD_CAP)).toBe(true);
     expect(segments.every((s) => !s.capped)).toBe(true);
     const sum = segments.reduce((acc, s) => acc + s.count, 0);
@@ -76,11 +96,21 @@ describe("planSegments — 10k cap, zero loss", () => {
   });
 
   it("marks a single-day range that is still over cap as capped", async () => {
-    const oneDay = { dateField: DateField.PUBLICATION, from: "2020/05/05", to: "2020/05/05" };
+    const oneDay = {
+      dateField: DateField.PUBLICATION,
+      from: "2020/05/05",
+      to: "2020/05/05",
+    };
     const countFn: CountFn = async () => 50_000;
     const segments = await planSegments("cancer", 50_000, oneDay, countFn);
     expect(segments).toEqual([
-      { field: DateField.PUBLICATION, from: "2020/05/05", to: "2020/05/05", count: 50_000, capped: true },
+      {
+        field: DateField.PUBLICATION,
+        from: "2020/05/05",
+        to: "2020/05/05",
+        count: 50_000,
+        capped: true,
+      },
     ]);
   });
 

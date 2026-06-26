@@ -140,6 +140,7 @@ plugins/entrez/
 **모든 문자열 리터럴은 `as const` object enum 또는 constants에서 import** — 인라인 금지. 값 집합(enum류)은 `src/types/enums.ts`, 사용자/에러 메시지는 `src/constants/messages.ts`, 기본값·한계값은 `src/constants/defaults.ts`, 경로는 `src/constants/paths.ts`.
 
 패턴:
+
 ```ts
 export const Db = { PUBMED: "pubmed", PMC: "pmc", MESH: "mesh" } as const;
 export type Db = (typeof Db)[keyof typeof Db];
@@ -147,30 +148,30 @@ export type Db = (typeof Db)[keyof typeof Db];
 
 enum 카탈로그 (`src/types/enums.ts`, 전 22종):
 
-| enum | 용도 (대표 멤버) |
-|------|------|
-| `Db` | 검색 대상 db (`PUBMED`·`PMC`·`MESH`) |
-| `SortOrder` | ESearch 정렬 (relevance·pub_date…) |
-| `DateType` | 날짜 종류 (pdat·edat·crdt) |
-| `DateField` | segmentation 기준 필드 (`dp`·`edat`·`crdt`) |
-| `RecordField` | `PaperRecord` 필드 키 |
-| `QueryRole` | 검색식 역할 (`ATM_BROAD`·`MESH_EXPLODED`·`MESH_NOEXP`·`TIAB_SYNONYM`·`ALL_FIELDS`·`SIMILAR`) |
-| `Breadth` | 검색식 넓이 (broad·narrow) |
-| `MeshMatch` | MeSH 매칭 종류 (descriptor·scr·entry) |
-| `FulltextFormat` | 전문 포맷 (`PDF`·`XML`·`TAR`) |
-| `UnavailableReason` | 전문 미제공 사유 |
-| `RateLimit` | rate 한계 (no_key=3/s·with_key=10/s) |
-| `EutilFn` | E-utility 함수 (esearch·efetch·esummary·espell·elink) |
-| `RetMode` | retmode (xml·json) |
-| `HttpMethod` | `GET`·`POST` (auto-POST 전환) |
-| `FieldTag` | PubMed 필드 태그 (`mh`·`tiab`·`mh:noexp`…) — 코드 조립용 |
-| `FetchMode` | 수집 깊이 (`IDS_ONLY`·`SUMMARY`·`ABSTRACTS`·`FULL`) |
-| `CapStrategy` | 10k 초과 대응 (`WARN`·`DATE_SEGMENT`·`ABORT`) |
-| `JobStatus` | async 잡 상태 (queued·running·done·failed) |
-| `ExpansionSource` | 확장 출처 (similar_articles…) |
-| `IntentType` | Dispatcher intent (`FULL_SEARCH`·`QUERY_ONLY`·`DOWNLOAD`·`NEEDS_CLARIFICATION`) |
-| `ExecutionMode` | 실행 모드 (`interactive`·`auto`) |
-| `ErrorCode` | 표준 에러 코드 |
+| enum                | 용도 (대표 멤버)                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `Db`                | 검색 대상 db (`PUBMED`·`PMC`·`MESH`)                                                         |
+| `SortOrder`         | ESearch 정렬 (relevance·pub_date…)                                                           |
+| `DateType`          | 날짜 종류 (pdat·edat·crdt)                                                                   |
+| `DateField`         | segmentation 기준 필드 (`dp`·`edat`·`crdt`)                                                  |
+| `RecordField`       | `PaperRecord` 필드 키                                                                        |
+| `QueryRole`         | 검색식 역할 (`ATM_BROAD`·`MESH_EXPLODED`·`MESH_NOEXP`·`TIAB_SYNONYM`·`ALL_FIELDS`·`SIMILAR`) |
+| `Breadth`           | 검색식 넓이 (broad·narrow)                                                                   |
+| `MeshMatch`         | MeSH 매칭 종류 (descriptor·scr·entry)                                                        |
+| `FulltextFormat`    | 전문 포맷 (`PDF`·`XML`·`TAR`)                                                                |
+| `UnavailableReason` | 전문 미제공 사유                                                                             |
+| `RateLimit`         | rate 한계 (no_key=3/s·with_key=10/s)                                                         |
+| `EutilFn`           | E-utility 함수 (esearch·efetch·esummary·espell·elink)                                        |
+| `RetMode`           | retmode (xml·json)                                                                           |
+| `HttpMethod`        | `GET`·`POST` (auto-POST 전환)                                                                |
+| `FieldTag`          | PubMed 필드 태그 (`mh`·`tiab`·`mh:noexp`…) — 코드 조립용                                     |
+| `FetchMode`         | 수집 깊이 (`IDS_ONLY`·`SUMMARY`·`ABSTRACTS`·`FULL`)                                          |
+| `CapStrategy`       | 10k 초과 대응 (`WARN`·`DATE_SEGMENT`·`ABORT`)                                                |
+| `JobStatus`         | async 잡 상태 (queued·running·done·failed)                                                   |
+| `ExpansionSource`   | 확장 출처 (similar_articles…)                                                                |
+| `IntentType`        | Dispatcher intent (`FULL_SEARCH`·`QUERY_ONLY`·`DOWNLOAD`·`NEEDS_CLARIFICATION`)              |
+| `ExecutionMode`     | 실행 모드 (`interactive`·`auto`)                                                             |
+| `ErrorCode`         | 표준 에러 코드                                                                               |
 
 **예외**: agent가 생성하는 검색식 *본문*은 데이터이지 enum이 아니다(자유 텍스트). 다만 코드가 검색식을 *조립*할 때 쓰는 `FieldTag`(`[mh]`·`[tiab]` 등)만 상수로 둔다.
 

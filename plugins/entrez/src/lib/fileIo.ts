@@ -3,7 +3,10 @@ import { dirname } from "node:path";
 import type { ZodType } from "zod";
 
 /** Read and parse a JSON file with optional Zod validation. */
-export async function readJson<T>(path: string, schema?: ZodType<T>): Promise<T>;
+export async function readJson<T>(
+  path: string,
+  schema?: ZodType<T>,
+): Promise<T>;
 export async function readJson<T>(
   path: string,
   schema: ZodType<T> | undefined,

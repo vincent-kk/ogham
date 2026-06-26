@@ -4,15 +4,15 @@ E-utility 함수별 어댑터(1함수 1파일). 각 어댑터는 `core/httpClien
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `esearch.ts` | ESearch(JSON) — count·UID·QueryTranslation·WebEnv |
-| `efetch.ts` | EFetch(XML) — 구조화 저자·MeSH·abstract·doi·pmcid |
-| `esummary.ts` | ESummary(JSON) — 경량 메타 |
-| `espell.ts` | ESpell(XML) — 교정어 |
-| `elink.ts` | ELink(JSON) — Similar Articles |
-| `idconv.ts` | idconv(JSON) — PMID↔PMCID↔DOI (PMC utils 호스트) |
-| `oaService.ts` | oa.fcgi(XML) — OA 여부·license·format 링크 |
+| 파일           | 역할                                              |
+| -------------- | ------------------------------------------------- |
+| `esearch.ts`   | ESearch(JSON) — count·UID·QueryTranslation·WebEnv |
+| `efetch.ts`    | EFetch(XML) — 구조화 저자·MeSH·abstract·doi·pmcid |
+| `esummary.ts`  | ESummary(JSON) — 경량 메타                        |
+| `espell.ts`    | ESpell(XML) — 교정어                              |
+| `elink.ts`     | ELink(JSON) — Similar Articles                    |
+| `idconv.ts`    | idconv(JSON) — PMID↔PMCID↔DOI (PMC utils 호스트)  |
+| `oaService.ts` | oa.fcgi(XML) — OA 여부·license·format 링크        |
 
 ## Conventions
 

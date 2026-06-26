@@ -1,4 +1,7 @@
-import type { EntrezConfig, EntrezConfigInput } from "../../../../types/config.js";
+import type {
+  EntrezConfig,
+  EntrezConfigInput,
+} from "../../../../types/config.js";
 import type { EntrezCredentials } from "../../../../types/config.js";
 import type {
   SetupFormData,

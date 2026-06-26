@@ -61,7 +61,10 @@ export async function runAuthCheck(
     };
     try {
       const res = await httpRequest(
-        { url: buildBaseUrl(EutilFn.EINFO, config.base_url), params: { retmode: RetMode.JSON } },
+        {
+          url: buildBaseUrl(EutilFn.EINFO, config.base_url),
+          params: { retmode: RetMode.JSON },
+        },
         deps,
       );
       if (res.ok && res.text !== undefined) {
@@ -73,5 +76,12 @@ export async function runAuthCheck(
     }
   }
 
-  return { configured, reachable, hasApiKey, rateLimit: limit, toolEmailConfigured, dbList };
+  return {
+    configured,
+    reachable,
+    hasApiKey,
+    rateLimit: limit,
+    toolEmailConfigured,
+    dbList,
+  };
 }

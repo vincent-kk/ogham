@@ -4,13 +4,13 @@ NCBI 외부 HTTP의 **유일한 통로**. fetch 래퍼 + 재시도 + 429 backoff
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/request.ts` | `httpRequest` — 주입·method 결정·SSRF·재시도 실행(메인) |
-| `operations/ssrfGuard.ts` | `validateUrl` — allowlist·사설IP·traversal 차단 |
-| `operations/autoPost.ts` | `decideMethod` — id>200 or URL>2000자 → POST |
-| `operations/backoff429.ts` | `computeBackoffMs`·`parseRetryAfterMs` |
-| `operations/withRetry.ts` | `withRetry` — 5xx/네트워크·429 별도 budget |
+| 파일                       | 역할                                                    |
+| -------------------------- | ------------------------------------------------------- |
+| `operations/request.ts`    | `httpRequest` — 주입·method 결정·SSRF·재시도 실행(메인) |
+| `operations/ssrfGuard.ts`  | `validateUrl` — allowlist·사설IP·traversal 차단         |
+| `operations/autoPost.ts`   | `decideMethod` — id>200 or URL>2000자 → POST            |
+| `operations/backoff429.ts` | `computeBackoffMs`·`parseRetryAfterMs`                  |
+| `operations/withRetry.ts`  | `withRetry` — 5xx/네트워크·429 별도 budget              |
 
 ## Conventions
 

@@ -15,12 +15,12 @@ NCBI E-utilities (PubMed · PMC · MeSH) academic paper search plugin for Claude
 
 ## Skills
 
-| Skill | Role |
-| --- | --- |
-| `search` | Main orchestrator (Dispatcher): intent → multi-role union → rerank → records |
-| `query` | Natural language → PubMed query set only (no search) |
-| `download` | PMID/PMCID → OA full text (PDF/XML/TAR) + non-OA links |
-| `setup` | Web UI configuration (`tool` · `email` · `api_key`) + reachability |
+| Skill      | Role                                                                         |
+| ---------- | ---------------------------------------------------------------------------- |
+| `search`   | Main orchestrator (Dispatcher): intent → multi-role union → rerank → records |
+| `query`    | Natural language → PubMed query set only (no search)                         |
+| `download` | PMID/PMCID → OA full text (PDF/XML/TAR) + non-OA links                       |
+| `setup`    | Web UI configuration (`tool` · `email` · `api_key`) + reachability           |
 
 ## MCP tools
 

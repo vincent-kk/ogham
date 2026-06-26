@@ -32,7 +32,10 @@ export function makeCtx(
   fetchImpl: typeof fetch,
   overrides: Partial<ToolContext> = {},
 ): ToolContext {
-  const config = EntrezConfigSchema.parse({ tool: "entrez-test", email: "user@example.com" });
+  const config = EntrezConfigSchema.parse({
+    tool: "entrez-test",
+    email: "user@example.com",
+  });
   return {
     config,
     credentials: {},
@@ -52,7 +55,11 @@ export function makeCtx(
 }
 
 /** ESearch JSON with the given count + ids. */
-export function esearchJson(count: number, ids: string[], translation = "x[mh]"): string {
+export function esearchJson(
+  count: number,
+  ids: string[],
+  translation = "x[mh]",
+): string {
   return JSON.stringify({
     esearchresult: {
       count: String(count),

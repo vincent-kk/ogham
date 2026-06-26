@@ -4,10 +4,10 @@
 
 ## Structure
 
-| 디렉토리 | 역할 |
-| --- | --- |
-| `eutils/` | E-utility 함수별 어댑터(esearch·efetch·esummary·espell·elink·idconv·oaService) |
-| `index.ts` | 배럴(외부 경계) |
+| 디렉토리   | 역할                                                                           |
+| ---------- | ------------------------------------------------------------------------------ |
+| `eutils/`  | E-utility 함수별 어댑터(esearch·efetch·esummary·espell·elink·idconv·oaService) |
+| `index.ts` | 배럴(외부 경계)                                                                |
 
 ## Conventions
 

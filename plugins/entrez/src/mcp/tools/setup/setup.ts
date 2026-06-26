@@ -21,7 +21,9 @@ import { testConnection } from "./utils/testConnection.js";
  * browser. The LLM only triggers this and reports { success, url }; the
  * api_key flows browser → server → credentials.json (0o600), never the chat.
  */
-export async function handleSetup(params: SetupParams = {}): Promise<SetupResult> {
+export async function handleSetup(
+  params: SetupParams = {},
+): Promise<SetupResult> {
   const mode = params.mode ?? "new";
 
   let handle: SetupServerHandle;
@@ -39,7 +41,8 @@ export async function handleSetup(params: SetupParams = {}): Promise<SetupResult
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Failed to start setup server",
+      message:
+        error instanceof Error ? error.message : "Failed to start setup server",
     };
   }
 

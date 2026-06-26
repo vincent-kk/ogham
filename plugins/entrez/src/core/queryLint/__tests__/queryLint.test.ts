@@ -54,8 +54,12 @@ describe("lintQuery", () => {
   it("aggregates checks and sets ok=false when an error is present", () => {
     const result = lintQuery("(neoplasm* OR tumor");
     expect(result.ok).toBe(false);
-    expect(result.issues.some((i) => i.code === "UNBALANCED_PARENS")).toBe(true);
-    expect(result.issues.some((i) => i.code === "WILDCARD_DISABLES_EXPANSION")).toBe(true);
+    expect(result.issues.some((i) => i.code === "UNBALANCED_PARENS")).toBe(
+      true,
+    );
+    expect(
+      result.issues.some((i) => i.code === "WILDCARD_DISABLES_EXPANSION"),
+    ).toBe(true);
   });
 
   it("stays ok=true when only warnings are present", () => {

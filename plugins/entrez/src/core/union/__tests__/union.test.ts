@@ -7,7 +7,9 @@ import { tagHitBy } from "../operations/tagHitBy.js";
 import { QueryRole } from "../../../types/enums.js";
 import type { PaperRecord } from "../../../types/record.js";
 
-function rec(p: Partial<PaperRecord> & { pmid?: string; title?: string }): PaperRecord {
+function rec(
+  p: Partial<PaperRecord> & { pmid?: string; title?: string },
+): PaperRecord {
   return {
     pmid: p.pmid ?? "",
     doi: p.doi,
@@ -32,8 +34,12 @@ describe("normalizeTitle / dedupKey", () => {
   });
 
   it("prioritizes PMID over DOI over normalized title", () => {
-    expect(dedupKey(rec({ pmid: "1", doi: "10.1/x", title: "t" }))).toBe("pmid:1");
-    expect(dedupKey(rec({ pmid: "", doi: "10.1/X", title: "t" }))).toBe("doi:10.1/x");
+    expect(dedupKey(rec({ pmid: "1", doi: "10.1/x", title: "t" }))).toBe(
+      "pmid:1",
+    );
+    expect(dedupKey(rec({ pmid: "", doi: "10.1/X", title: "t" }))).toBe(
+      "doi:10.1/x",
+    );
     expect(dedupKey(rec({ pmid: "", title: "Hello World" }))).toBe(
       "title:helloworld",
     );
@@ -42,7 +48,11 @@ describe("normalizeTitle / dedupKey", () => {
 
 describe("tagHitBy", () => {
   it("accumulates hit_by/query_role and fills missing fields", () => {
-    const base = rec({ pmid: "1", hit_by: ["a"], query_role: [QueryRole.ATM_BROAD] });
+    const base = rec({
+      pmid: "1",
+      hit_by: ["a"],
+      query_role: [QueryRole.ATM_BROAD],
+    });
     const incoming = rec({
       pmid: "1",
       abstract: "filled",

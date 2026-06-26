@@ -2,7 +2,11 @@ import { describe, it, expect } from "vitest";
 
 import { runPaperSearch } from "../../src/mcp/tools/paperSearch/paperSearch.js";
 import { FetchMode, QueryRole } from "../../src/types/enums.js";
-import { routeFetch, makeCtx, esearchJson } from "../../src/mcp/__tests__/mockEutils.js";
+import {
+  routeFetch,
+  makeCtx,
+  esearchJson,
+} from "../../src/mcp/__tests__/mockEutils.js";
 
 /**
  * Recall calibration: a known topic expressed as several queries with

@@ -4,11 +4,11 @@ MCP 계층 공유 유틸: 응답 포맷 표준화(toolResult/toolError/wrapHandl
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `helpers/toolResult.ts` | `toolResult`·`mapReplacer` |
-| `helpers/toolError.ts` | `toolError` |
-| `helpers/wrapHandler.ts` | `wrapHandler` — try/catch + 포맷 |
+| 파일                      | 역할                             |
+| ------------------------- | -------------------------------- |
+| `helpers/toolResult.ts`   | `toolResult`·`mapReplacer`       |
+| `helpers/toolError.ts`    | `toolError`                      |
+| `helpers/wrapHandler.ts`  | `wrapHandler` — try/catch + 포맷 |
 | `helpers/buildContext.ts` | `buildToolContext`·`ToolContext` |
 
 ## Conventions

@@ -1,5 +1,9 @@
 import { HttpMethod, ErrorCode } from "../../../types/enums.js";
-import type { HttpRequest, HttpDeps, HttpResponse } from "../../../types/http.js";
+import type {
+  HttpRequest,
+  HttpDeps,
+  HttpResponse,
+} from "../../../types/http.js";
 import {
   DEFAULT_TIMEOUT_MS,
   RETRY_MAX_RETRIES,
@@ -56,7 +60,12 @@ async function classify(
 
   if (status >= 200 && status < 300) {
     if (acceptBinary) {
-      return { kind: "success", status, binary: await res.arrayBuffer(), contentType };
+      return {
+        kind: "success",
+        status,
+        binary: await res.arrayBuffer(),
+        contentType,
+      };
     }
     return { kind: "success", status, text: await res.text(), contentType };
   }
@@ -82,7 +91,12 @@ async function classify(
     };
   }
 
-  return { kind: "fatal", status, code: mapStatusToCode(status), message: `HTTP ${status}` };
+  return {
+    kind: "fatal",
+    status,
+    code: mapStatusToCode(status),
+    message: `HTTP ${status}`,
+  };
 }
 
 /**
@@ -106,12 +120,15 @@ export async function httpRequest(
   await validateUrl(finalUrl, deps.allowedHosts, deps.allowPrivateIp);
 
   const fetchImpl = deps.fetchImpl ?? fetch;
-  const sleep = deps.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
+  const sleep =
+    deps.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const acceptBinary = req.acceptBinary ?? false;
 
   const headers: Record<string, string> = {
-    Accept: acceptBinary ? "*/*" : "application/xml, application/json, text/plain",
+    Accept: acceptBinary
+      ? "*/*"
+      : "application/xml, application/json, text/plain",
   };
   if (isPost) headers["Content-Type"] = FORM_CONTENT_TYPE;
 
@@ -137,7 +154,11 @@ export async function httpRequest(
         };
       }
     },
-    { maxRetries: deps.maxRetries ?? RETRY_MAX_RETRIES, rateRetryMax: deps.rateRetryMax ?? RATE_RETRY_MAX, sleep },
+    {
+      maxRetries: deps.maxRetries ?? RETRY_MAX_RETRIES,
+      rateRetryMax: deps.rateRetryMax ?? RATE_RETRY_MAX,
+      sleep,
+    },
   );
 
   if (outcome.kind === "success") {

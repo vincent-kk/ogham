@@ -50,9 +50,7 @@ export const SearchManifestSchema = z.object({
     batchSize: z.number().int(),
   }),
   apiKeyUsed: z.boolean(),
-  history: z
-    .object({ webEnv: z.string(), queryKey: z.string() })
-    .optional(),
+  history: z.object({ webEnv: z.string(), queryKey: z.string() }).optional(),
   fetchedPmidChecksum: z.string(),
   caps: z.array(CapEventSchema),
   warnings: z.array(z.string()),

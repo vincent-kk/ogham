@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 
 import { decideMethod } from "../operations/autoPost.js";
-import { computeBackoffMs, parseRetryAfterMs } from "../operations/backoff429.js";
+import {
+  computeBackoffMs,
+  parseRetryAfterMs,
+} from "../operations/backoff429.js";
 import { HttpMethod } from "../../../types/enums.js";
 import { RETRY_MAX_DELAY_MS } from "../../../constants/defaults.js";
 

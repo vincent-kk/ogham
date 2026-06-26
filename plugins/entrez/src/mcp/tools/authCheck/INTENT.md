@@ -4,10 +4,10 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
+| 파일           | 역할                                                   |
+| -------------- | ------------------------------------------------------ |
 | `authCheck.ts` | `runAuthCheck` — config/credentials 로드 + EInfo probe |
-| `index.ts` | 배럴 |
+| `index.ts`     | 배럴                                                   |
 
 ## Conventions
 

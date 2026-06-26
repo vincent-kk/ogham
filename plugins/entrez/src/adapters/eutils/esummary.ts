@@ -50,7 +50,9 @@ export function parseEsummary(jsonText: string): EsummaryRecord[] {
     const raw = (result[uid] ?? {}) as RawSummary;
     const ids = raw.articleids ?? [];
     const doi = ids.find((i) => i.idtype === "doi")?.value;
-    const pmcid = ids.find((i) => i.idtype === "pmc" || i.idtype === "pmcid")?.value;
+    const pmcid = ids.find(
+      (i) => i.idtype === "pmc" || i.idtype === "pmcid",
+    )?.value;
     return {
       pmid: raw.uid ?? uid,
       title: raw.title,
@@ -88,7 +90,9 @@ export async function esummary(
     deps,
   );
   if (!res.ok || res.text === undefined) {
-    throw new Error(res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: esummary`);
+    throw new Error(
+      res.error?.message ?? `${ErrorCode.EUTILS_ERROR}: esummary`,
+    );
   }
   return parseEsummary(res.text);
 }

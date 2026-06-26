@@ -17,7 +17,10 @@ export async function handleTest(
     sendJson(res, 400, {
       success: false,
       message: "Validation failed",
-      errors: parsed.error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+      errors: parsed.error.issues.map((i) => ({
+        field: i.path.join("."),
+        message: i.message,
+      })),
     });
     return;
   }

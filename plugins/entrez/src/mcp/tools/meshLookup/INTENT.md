@@ -4,9 +4,9 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `meshLookup.ts` | `runMeshLookup` — 용어별 매핑 수집(메인) |
+| 파일                       | 역할                                             |
+| -------------------------- | ------------------------------------------------ |
+| `meshLookup.ts`            | `runMeshLookup` — 용어별 매핑 수집(메인)         |
 | `operations/lookupTerm.ts` | `lookupTerm`·`parseMeshSummary` — 단일 용어 매핑 |
 
 ## Conventions

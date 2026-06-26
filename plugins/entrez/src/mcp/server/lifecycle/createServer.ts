@@ -30,10 +30,26 @@ const SERVER_NAME = "entrez";
 const INTERNAL =
   "[Internal] Do not call directly. Used by entrez skills/agent only.";
 
-const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true } as const;
-const READ_VOLATILE = { readOnlyHint: true, destructiveHint: false, idempotentHint: false } as const;
-const WRITE_IDEMPOTENT = { readOnlyHint: false, destructiveHint: false, idempotentHint: true } as const;
-const WRITE_VOLATILE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false } as const;
+const READ_ONLY = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+} as const;
+const READ_VOLATILE = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: false,
+} as const;
+const WRITE_IDEMPOTENT = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+} as const;
+const WRITE_VOLATILE = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+} as const;
 
 /**
  * Create and configure the entrez MCP server with all tool registrations:

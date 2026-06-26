@@ -4,12 +4,12 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/mergeRecords.ts` | `mergeRecords` — 복합키 dedup·attribution 누적(메인) |
-| `operations/dedupKey.ts` | `dedupKey` — PMID→DOI→정규화 title 우선순위 키 |
-| `operations/normalizeTitle.ts` | `normalizeTitle` — NFKD·소문자·영숫자만 |
-| `operations/tagHitBy.ts` | `tagHitBy` — hit_by/query_role 병합·결측 필드 보강 |
+| 파일                           | 역할                                                 |
+| ------------------------------ | ---------------------------------------------------- |
+| `operations/mergeRecords.ts`   | `mergeRecords` — 복합키 dedup·attribution 누적(메인) |
+| `operations/dedupKey.ts`       | `dedupKey` — PMID→DOI→정규화 title 우선순위 키       |
+| `operations/normalizeTitle.ts` | `normalizeTitle` — NFKD·소문자·영숫자만              |
+| `operations/tagHitBy.ts`       | `tagHitBy` — hit_by/query_role 병합·결측 필드 보강   |
 
 ## Conventions
 

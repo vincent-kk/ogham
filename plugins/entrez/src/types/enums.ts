@@ -90,7 +90,8 @@ export const FulltextFormat = {
   XML: "xml",
   TAR: "tgz",
 } as const;
-export type FulltextFormat = (typeof FulltextFormat)[keyof typeof FulltextFormat];
+export type FulltextFormat =
+  (typeof FulltextFormat)[keyof typeof FulltextFormat];
 
 /** Reason a full text could not be provided. */
 export const UnavailableReason = {

@@ -4,14 +4,14 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `paperSearch.ts` | `runPaperSearch` — 동기 오케스트레이션(메인) |
-| `operations/executeQuery.ts` | lint→count→segment→id 수집(쿼리별) |
-| `operations/fetchMetadata.ts` | union pmid 배치 메타 수집·부분복구 |
-| `operations/writeManifest.ts` | SearchManifest 생성·영속 |
-| `operations/{startJob,pollJob,readJob}.ts` | async job 트리오 |
-| `operations/jobLocation.ts` | 잡 경로 해석 |
+| 파일                                       | 역할                                         |
+| ------------------------------------------ | -------------------------------------------- |
+| `paperSearch.ts`                           | `runPaperSearch` — 동기 오케스트레이션(메인) |
+| `operations/executeQuery.ts`               | lint→count→segment→id 수집(쿼리별)           |
+| `operations/fetchMetadata.ts`              | union pmid 배치 메타 수집·부분복구           |
+| `operations/writeManifest.ts`              | SearchManifest 생성·영속                     |
+| `operations/{startJob,pollJob,readJob}.ts` | async job 트리오                             |
+| `operations/jobLocation.ts`                | 잡 경로 해석                                 |
 
 ## Conventions
 

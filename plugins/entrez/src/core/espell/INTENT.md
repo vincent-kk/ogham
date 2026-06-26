@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
+| 파일                          | 역할                                                      |
+| ----------------------------- | --------------------------------------------------------- |
 | `operations/shouldRespell.ts` | `shouldRespell`·`ShouldRespellParams` — 재시도 판단(순수) |
-| `operations/runEspell.ts` | `runEspell`·`EspellFn` — ESpell 교정 해석, espellFn 주입 |
-| `index.ts` | 배럴 |
+| `operations/runEspell.ts`     | `runEspell`·`EspellFn` — ESpell 교정 해석, espellFn 주입  |
+| `index.ts`                    | 배럴                                                      |
 
 ## Conventions
 

@@ -14,7 +14,10 @@ function uniqRoles(values: QueryRole[]): QueryRole[] {
  * `hit_by` / `query_role` (recall attribution) and fill any missing fields,
  * preferring the fuller value. Returns a new record; never drops attribution.
  */
-export function tagHitBy(base: PaperRecord, incoming: PaperRecord): PaperRecord {
+export function tagHitBy(
+  base: PaperRecord,
+  incoming: PaperRecord,
+): PaperRecord {
   return {
     ...base,
     doi: base.doi ?? incoming.doi,

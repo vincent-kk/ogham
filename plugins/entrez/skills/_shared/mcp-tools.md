@@ -8,6 +8,7 @@ agent/skills, not the user directly.
 ## paper_search (readOnly, non-idempotent)
 
 Deterministic union of a `QueryRole` query set. Zero loss is its contract.
+
 - **in**: `queries[]{term, role, breadth?, rationale?, seedPmids?}` (1+), `db?`,
   `fetchMode?` (IDS_ONLY|SUMMARY|ABSTRACTS|FULL, default SUMMARY), `capStrategy?`
   (WARN|DATE_SEGMENT|ABORT, default DATE_SEGMENT), `dateRange?`, `dateField?`,

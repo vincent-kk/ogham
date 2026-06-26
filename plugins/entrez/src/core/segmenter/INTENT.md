@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/planSegments.ts` | `planSegments` — 재귀 분할(메인), countFn 주입 |
+| 파일                         | 역할                                              |
+| ---------------------------- | ------------------------------------------------- |
+| `operations/planSegments.ts` | `planSegments` — 재귀 분할(메인), countFn 주입    |
 | `operations/bucketByDate.ts` | `bucketByDate` — 날짜 범위를 비중첩 연속 버킷으로 |
-| `operations/probeCount.ts` | `probeCount`·`CountFn` 시ms — 버킷별 Count 재조회 |
+| `operations/probeCount.ts`   | `probeCount`·`CountFn` 시ms — 버킷별 Count 재조회 |
 
 ## Conventions
 

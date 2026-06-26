@@ -20,7 +20,10 @@ export function parseEspell(xml: string): string {
 }
 
 /** ESpell — spelling correction (XML-only endpoint). */
-export async function espell(args: EspellArgs, deps: HttpDeps): Promise<string> {
+export async function espell(
+  args: EspellArgs,
+  deps: HttpDeps,
+): Promise<string> {
   const url = buildBaseUrl(EutilFn.ESPELL, args.baseUrl);
   const res = await httpRequest(
     { url, params: { db: args.db, term: args.term } },

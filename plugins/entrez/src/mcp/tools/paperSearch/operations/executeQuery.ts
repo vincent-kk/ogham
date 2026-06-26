@@ -9,7 +9,10 @@ import type {
 import type { DateSegment, CapEvent } from "../../../../types/index.js";
 import type { ToolContext } from "../../../shared/index.js";
 import { lintQuery } from "../../../../core/queryLint/index.js";
-import { planSegments, type CountFn } from "../../../../core/segmenter/index.js";
+import {
+  planSegments,
+  type CountFn,
+} from "../../../../core/segmenter/index.js";
 import { esearch } from "../../../../adapters/eutils/index.js";
 import {
   UID_HARD_CAP,
@@ -34,12 +37,20 @@ export interface ExecuteQueryResult {
 }
 
 /** Build a date-bounded PubMed term: `(term) AND ("from"[field] : "to"[field])`. */
-function datedTerm(term: string, field: string, from: string, to: string): string {
+function datedTerm(
+  term: string,
+  field: string,
+  from: string,
+  to: string,
+): string {
   return `(${term}) AND ("${from}"[${field}] : "${to}"[${field}])`;
 }
 
 function todayDate(nowMs?: number): string {
-  return new Date(nowMs ?? Date.now()).toISOString().slice(0, 10).replace(/-/g, "/");
+  return new Date(nowMs ?? Date.now())
+    .toISOString()
+    .slice(0, 10)
+    .replace(/-/g, "/");
 }
 
 /**
@@ -75,7 +86,9 @@ export async function executeQuery(
 
   const count = initial.count;
   const translation =
-    input.includeQueryTranslation === false ? undefined : initial.queryTranslation;
+    input.includeQueryTranslation === false
+      ? undefined
+      : initial.queryTranslation;
   let ids = initial.idList;
   let segments: DateSegment[] = [];
   let capEvent: CapEvent | undefined;
@@ -87,38 +100,80 @@ export async function executeQuery(
 
     if (strategy === CapStrategy.ABORT) {
       return {
-        perQuery: { query: query.term, query_role: query.role, count, translation, capped: true, segmented: false, retrieved: 0 },
+        perQuery: {
+          query: query.term,
+          query_role: query.role,
+          count,
+          translation,
+          capped: true,
+          segmented: false,
+          retrieved: 0,
+        },
         ids: [],
         segments: [],
         warnings,
-        error: { code: ErrorCode.CAP_EXCEEDED, message: Messages.CAP_EXCEEDED, retryable: false, query: query.term },
+        error: {
+          code: ErrorCode.CAP_EXCEEDED,
+          message: Messages.CAP_EXCEEDED,
+          retryable: false,
+          query: query.term,
+        },
       };
     }
 
     if (strategy === CapStrategy.WARN) {
       capped = true;
-      warnings.push({ code: WARN_CODE.CAP_WARN, message: Messages.CAP_EXCEEDED, query_role: query.role });
+      warnings.push({
+        code: WARN_CODE.CAP_WARN,
+        message: Messages.CAP_EXCEEDED,
+        query_role: query.role,
+      });
     } else {
       const dateField = input.dateField ?? DEFAULT_DATE_FIELD;
       const from = dateRange?.from ?? DEFAULT_SEGMENT_FROM_DATE;
       const to = dateRange?.to ?? todayDate(ctx.nowMs);
       const countFn: CountFn = async (term, range) => {
-        const dated = range ? datedTerm(term, range.dateField, range.from, range.to) : term;
-        const r = await esearch({ db, term: dated, retmax: 0, baseUrl: ctx.baseUrl }, ctx.deps);
+        const dated = range
+          ? datedTerm(term, range.dateField, range.from, range.to)
+          : term;
+        const r = await esearch(
+          { db, term: dated, retmax: 0, baseUrl: ctx.baseUrl },
+          ctx.deps,
+        );
         return r.count;
       };
-      segments = await planSegments(query.term, count, { dateField, from, to }, countFn);
+      segments = await planSegments(
+        query.term,
+        count,
+        { dateField, from, to },
+        countFn,
+      );
       segmented = true;
-      capEvent = { query_role: query.role, count, strategy: CapStrategy.DATE_SEGMENT, segments: segments.length, dateField };
+      capEvent = {
+        query_role: query.role,
+        count,
+        strategy: CapStrategy.DATE_SEGMENT,
+        segments: segments.length,
+        dateField,
+      };
 
       const collected: string[] = [];
       for (const seg of segments) {
         if (seg.capped) {
           capped = true;
-          warnings.push({ code: WARN_CODE.SEGMENT_CAPPED, message: Messages.SEGMENT_DEPTH_EXCEEDED, query_role: query.role });
+          warnings.push({
+            code: WARN_CODE.SEGMENT_CAPPED,
+            message: Messages.SEGMENT_DEPTH_EXCEEDED,
+            query_role: query.role,
+          });
         }
         const r = await esearch(
-          { db, term: datedTerm(query.term, seg.field, seg.from, seg.to), retmax: UID_HARD_CAP, baseUrl: ctx.baseUrl },
+          {
+            db,
+            term: datedTerm(query.term, seg.field, seg.from, seg.to),
+            retmax: UID_HARD_CAP,
+            baseUrl: ctx.baseUrl,
+          },
           ctx.deps,
         );
         collected.push(...r.idList);

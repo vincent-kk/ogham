@@ -32,7 +32,9 @@ describe("exposed skills", () => {
       expect(fm, `${name} description`).toContain("[entrez:");
       expect(fm, `${name} plugin`).toMatch(/plugin:\s*entrez/);
       expect(fm, `${name} version`).toMatch(/version:/);
-      expect(fm, `${name} complexity`).toMatch(/complexity:\s*(simple|moderate|complex)/);
+      expect(fm, `${name} complexity`).toMatch(
+        /complexity:\s*(simple|moderate|complex)/,
+      );
     }
   });
 
@@ -68,6 +70,8 @@ describe("paper-search-expert agent", () => {
   it("keeps agents/ flat — no subdirectories (plugin loader requirement)", () => {
     const entries = readdirSync(AGENTS, { withFileTypes: true });
     expect(entries.filter((e) => e.isDirectory())).toEqual([]);
-    expect(entries.every((e) => e.isFile() && e.name.endsWith(".md"))).toBe(true);
+    expect(entries.every((e) => e.isFile() && e.name.endsWith(".md"))).toBe(
+      true,
+    );
   });
 });

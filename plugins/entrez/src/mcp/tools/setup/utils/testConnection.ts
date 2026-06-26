@@ -1,6 +1,9 @@
 import { EutilFn, RetMode, RateLimit } from "../../../../types/enums.js";
 import type { HttpDeps } from "../../../../types/http.js";
-import type { SetupFormData, ConnectionTestResult } from "../../../../types/setup.js";
+import type {
+  SetupFormData,
+  ConnectionTestResult,
+} from "../../../../types/setup.js";
 import { httpRequest } from "../../../../core/httpClient/index.js";
 import { buildBaseUrl } from "../../../../core/sourceResolver/index.js";
 import { extractHost } from "../../../../utils/url.js";
@@ -36,14 +39,18 @@ export async function testConnection(
 
   try {
     const res = await httpRequest(
-      { url: buildBaseUrl(EutilFn.EINFO, baseUrl), params: { retmode: RetMode.JSON } },
+      {
+        url: buildBaseUrl(EutilFn.EINFO, baseUrl),
+        params: { retmode: RetMode.JSON },
+      },
       deps,
     );
     if (res.ok && res.text !== undefined) {
       let dbCount: number | undefined;
       try {
-        const dbs = (JSON.parse(res.text) as { einforesult?: { dblist?: string[] } })
-          .einforesult?.dblist;
+        const dbs = (
+          JSON.parse(res.text) as { einforesult?: { dblist?: string[] } }
+        ).einforesult?.dblist;
         dbCount = dbs?.length;
       } catch {
         dbCount = undefined;
@@ -55,11 +62,15 @@ export async function testConnection(
         dbCount,
       };
     }
-    return { success: false, message: res.error?.message ?? Messages.EINFO_UNREACHABLE };
+    return {
+      success: false,
+      message: res.error?.message ?? Messages.EINFO_UNREACHABLE,
+    };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : Messages.EINFO_UNREACHABLE,
+      message:
+        error instanceof Error ? error.message : Messages.EINFO_UNREACHABLE,
     };
   }
 }

@@ -61,11 +61,17 @@ describe("httpRequest — injection & method", () => {
     }) as unknown as typeof fetch;
 
     const get200 = Array.from({ length: 200 }, (_, i) => i + 1).join(",");
-    await httpRequest({ url: EUTILS, params: { id: get200 } }, baseDeps(fetchImpl));
+    await httpRequest(
+      { url: EUTILS, params: { id: get200 } },
+      baseDeps(fetchImpl),
+    );
     expect(method).toBe("GET");
 
     const post201 = Array.from({ length: 201 }, (_, i) => i + 1).join(",");
-    await httpRequest({ url: EUTILS, params: { id: post201 } }, baseDeps(fetchImpl));
+    await httpRequest(
+      { url: EUTILS, params: { id: post201 } },
+      baseDeps(fetchImpl),
+    );
     expect(method).toBe("POST");
     expect(urlStr).not.toContain("?");
     expect(new URLSearchParams(body).get("id")?.split(",").length).toBe(201);
@@ -129,10 +135,7 @@ describe("httpRequest — retry & rate limiting", () => {
   it("blocks a host outside the allowlist (SSRF)", async () => {
     const fetchImpl = (async () => ok()) as unknown as typeof fetch;
     await expect(
-      httpRequest(
-        { url: "https://evil.example.com/x" },
-        baseDeps(fetchImpl),
-      ),
+      httpRequest({ url: "https://evil.example.com/x" }, baseDeps(fetchImpl)),
     ).rejects.toThrow(/SSRF/);
   });
 });

@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/resolveDb.ts` | `resolveDb` — 입력→`Db`(미지정=pubmed, 미지원 throw) |
+| 파일                         | 역할                                                        |
+| ---------------------------- | ----------------------------------------------------------- |
+| `operations/resolveDb.ts`    | `resolveDb` — 입력→`Db`(미지정=pubmed, 미지원 throw)        |
 | `operations/buildBaseUrl.ts` | `buildBaseUrl` — `<base><fn>.fcgi` 조립(미러 override 허용) |
-| `index.ts` | 배럴 |
+| `index.ts`                   | 배럴                                                        |
 
 ## Conventions
 

@@ -10,7 +10,10 @@ export function maskApiKey(apiKey?: string): string | undefined {
  * Resolve a submitted api_key against the stored one: the mask means
  * "unchanged" (keep existing); empty means "cleared"; anything else is new.
  */
-export function restoreApiKey(submitted: string | undefined, existing?: string): string | undefined {
+export function restoreApiKey(
+  submitted: string | undefined,
+  existing?: string,
+): string | undefined {
   if (submitted === API_KEY_MASK) return existing;
   if (submitted === undefined || submitted === "") return undefined;
   return submitted;

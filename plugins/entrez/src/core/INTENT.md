@@ -4,12 +4,12 @@
 
 ## Structure
 
-| 프랙탈 | 역할 |
-| --- | --- |
-| `httpClient/` | 외부 HTTP 단일 통로(retry·429·auto-POST·SSRF) |
-| `sourceResolver/` | `db` 해석·E-utility URL 조립 |
-| `config/` | config/credentials 로드·저장·rate 판정 |
-| `union/` · `segmenter/` · `espell/` · `queryLint/` · `searchJob/` | (Phase 3) recall 엔진 |
+| 프랙탈                                                            | 역할                                          |
+| ----------------------------------------------------------------- | --------------------------------------------- |
+| `httpClient/`                                                     | 외부 HTTP 단일 통로(retry·429·auto-POST·SSRF) |
+| `sourceResolver/`                                                 | `db` 해석·E-utility URL 조립                  |
+| `config/`                                                         | config/credentials 로드·저장·rate 판정        |
+| `union/` · `segmenter/` · `espell/` · `queryLint/` · `searchJob/` | (Phase 3) recall 엔진                         |
 
 ## Conventions
 

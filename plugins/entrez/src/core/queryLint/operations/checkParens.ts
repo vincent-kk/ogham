@@ -16,7 +16,11 @@ const PAIR = { ")": "(", "]": "[" } as const;
 
 /** Build a single error issue for the given delimiter code. */
 function issue(code: keyof typeof LINT_CODE): LintIssue {
-  return { code: LINT_CODE[code], message: LINT_MESSAGE[code], severity: "error" };
+  return {
+    code: LINT_CODE[code],
+    message: LINT_MESSAGE[code],
+    severity: "error",
+  };
 }
 
 /**
@@ -33,12 +37,16 @@ export function checkParens(term: string): LintIssue[] {
     }
     if (char === ")" || char === "]") {
       if (stack.pop() !== PAIR[char]) {
-        return [issue(char === ")" ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS")];
+        return [
+          issue(char === ")" ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS"),
+        ];
       }
     }
   }
   if (stack.length > 0) {
-    return [issue(stack.includes("(") ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS")];
+    return [
+      issue(stack.includes("(") ? "UNBALANCED_PARENS" : "UNBALANCED_BRACKETS"),
+    ];
   }
   return [];
 }

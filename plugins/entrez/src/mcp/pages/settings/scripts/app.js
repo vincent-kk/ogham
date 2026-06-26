@@ -38,7 +38,8 @@
       setValue("date_to", state.default_date_range.to);
     }
     var dateTag = $("date_tag");
-    if (dateTag && typeof state.date_tag === "boolean") dateTag.checked = state.date_tag;
+    if (dateTag && typeof state.date_tag === "boolean")
+      dateTag.checked = state.date_tag;
     updateRateBadge();
   })();
 
@@ -171,7 +172,10 @@
       })
       .then(function (res) {
         if (res && res.success) {
-          var dbs = typeof res.dbCount === "number" ? " · " + res.dbCount + " databases" : "";
+          var dbs =
+            typeof res.dbCount === "number"
+              ? " · " + res.dbCount + " databases"
+              : "";
           setStatus("ok", "Connection OK" + dbs + ".");
         } else {
           setStatus("error", (res && res.message) || "Connection failed.");
@@ -203,7 +207,10 @@
       .then(function (out) {
         var res = out.res || {};
         if (out.status === 200 && res.success) {
-          setStatus("ok", "Saved. You can close this window — the server will shut down.");
+          setStatus(
+            "ok",
+            "Saved. You can close this window — the server will shut down.",
+          );
           saveBtn.disabled = true;
           testBtn.disabled = true;
         } else {

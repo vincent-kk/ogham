@@ -4,10 +4,10 @@ esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시 MCP 서버
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
+| 파일             | 역할                                     |
+| ---------------- | ---------------------------------------- |
 | `serverEntry.ts` | `startServer()` 호출 및 치명적 오류 처리 |
-| `index.ts` | 배럴(빈 re-export) |
+| `index.ts`       | 배럴(빈 re-export)                       |
 
 ## Conventions
 

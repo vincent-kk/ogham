@@ -1,4 +1,10 @@
-import { EutilFn, RetMode, type Db, type SortOrder, type DateType } from "../../types/enums.js";
+import {
+  EutilFn,
+  RetMode,
+  type Db,
+  type SortOrder,
+  type DateType,
+} from "../../types/enums.js";
 import type { HttpDeps } from "../../types/http.js";
 import type { EsearchResult } from "../../types/eutils.js";
 import { ErrorCode } from "../../types/enums.js";
@@ -33,14 +39,16 @@ export function parseEsearch(jsonText: string): EsearchResult {
   }
   const result = (parsed as { esearchresult?: Record<string, unknown> })
     .esearchresult;
-  if (!result) throw new Error(`${ErrorCode.PARSE_ERROR}: missing esearchresult`);
+  if (!result)
+    throw new Error(`${ErrorCode.PARSE_ERROR}: missing esearchresult`);
 
   const warnings: string[] = [];
   const warningList = result.warninglist as
     | { outputmessages?: string[]; phrasesnotfound?: string[] }
     | undefined;
   if (warningList?.outputmessages) warnings.push(...warningList.outputmessages);
-  if (warningList?.phrasesnotfound) warnings.push(...warningList.phrasesnotfound);
+  if (warningList?.phrasesnotfound)
+    warnings.push(...warningList.phrasesnotfound);
 
   return {
     count: Number(result.count ?? 0),

@@ -32,7 +32,9 @@ export function parseMeshSummary(
   const rec = parsed.result?.[uid];
   if (!rec) return { input: term, matched: MeshMatch.NONE };
 
-  const entryTerms = Array.isArray(rec.ds_meshterms) ? rec.ds_meshterms : undefined;
+  const entryTerms = Array.isArray(rec.ds_meshterms)
+    ? rec.ds_meshterms
+    : undefined;
   const descriptorName = entryTerms?.[0] ?? rec.title ?? rec.name;
 
   return {
@@ -61,7 +63,12 @@ export async function lookupTerm(
   const res = await httpRequest(
     {
       url: buildBaseUrl(EutilFn.ESUMMARY, ctx.baseUrl),
-      params: { db: Db.MESH, id: uid, retmode: RetMode.JSON, version: VERSION_2 },
+      params: {
+        db: Db.MESH,
+        id: uid,
+        retmode: RetMode.JSON,
+        version: VERSION_2,
+      },
     },
     ctx.deps,
   );

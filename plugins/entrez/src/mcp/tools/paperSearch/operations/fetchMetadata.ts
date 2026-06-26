@@ -16,7 +16,8 @@ export interface MetadataResult {
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
-  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  for (let i = 0; i < items.length; i += size)
+    out.push(items.slice(i, i + size));
   return out;
 }
 
@@ -37,7 +38,10 @@ async function fetchBatch(
   if (fetchMode === FetchMode.ABSTRACTS || fetchMode === FetchMode.FULL) {
     return efetch({ db, ids: pmids, baseUrl: ctx.baseUrl }, ctx.deps);
   }
-  const summaries = await esummary({ db, ids: pmids, baseUrl: ctx.baseUrl }, ctx.deps);
+  const summaries = await esummary(
+    { db, ids: pmids, baseUrl: ctx.baseUrl },
+    ctx.deps,
+  );
   return summaries.map((s) => ({
     pmid: s.pmid,
     doi: s.doi,

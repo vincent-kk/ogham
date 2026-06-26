@@ -4,10 +4,10 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `fetchFulltext.ts` | `runFetchFulltext` — id별 처리(메인) |
-| `operations/resolvePmcid.ts` | PMID→PMCID(idconv), doi 폴백 |
+| 파일                             | 역할                                   |
+| -------------------------------- | -------------------------------------- |
+| `fetchFulltext.ts`               | `runFetchFulltext` — id별 처리(메인)   |
+| `operations/resolvePmcid.ts`     | PMID→PMCID(idconv), doi 폴백           |
 | `operations/downloadFulltext.ts` | oa 판별·license 게이트·다운로드·sha256 |
 
 ## Conventions

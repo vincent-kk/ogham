@@ -10,17 +10,17 @@
 
 구현 전, `.metadata/entrez/`의 9개 문서를 정본으로 삼는다. Phase별 매핑:
 
-| Phase | 참고 `.metadata` 문서 |
-|---|---|
-| 0 스캐폴딩 | `architecture.md`(디렉토리 트리), `README.md` |
-| 1 상수·타입 | `architecture.md`(규약·enum 22종), `mcp-tools.md`(I/O 타입), `spec.md`(SearchManifest) |
-| 2 core 네트워크 | `architecture.md`(httpClient 차용), `mcp-tools.md`(제약·보안) |
+| Phase           | 참고 `.metadata` 문서                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| 0 스캐폴딩      | `architecture.md`(디렉토리 트리), `README.md`                                                 |
+| 1 상수·타입     | `architecture.md`(규약·enum 22종), `mcp-tools.md`(I/O 타입), `spec.md`(SearchManifest)        |
+| 2 core 네트워크 | `architecture.md`(httpClient 차용), `mcp-tools.md`(제약·보안)                                 |
 | 3 core 검색엔진 | `mcp-tools.md`(segment·union·partial), `dispatcher.md`(guard·budget), `roadmap.md`(core 모듈) |
-| 4 adapters | `mcp-tools.md`(E-utilities 흐름), `roadmap.md`(adapters 7) |
-| 5 MCP 도구 | `mcp-tools.md`(5종 계약·annotations), `spec.md`(데이터 흐름) |
-| 6 setup web UI | `setup.md`(atlassian 차용·config/credentials) |
-| 7 스킬·에이전트 | `skills.md`, `agents.md`, `dispatcher.md`(상태머신), `spec.md` |
-| 8 e2e·빌드 | `roadmap.md`, `spec.md`(비채택 대조) |
+| 4 adapters      | `mcp-tools.md`(E-utilities 흐름), `roadmap.md`(adapters 7)                                    |
+| 5 MCP 도구      | `mcp-tools.md`(5종 계약·annotations), `spec.md`(데이터 흐름)                                  |
+| 6 setup web UI  | `setup.md`(atlassian 차용·config/credentials)                                                 |
+| 7 스킬·에이전트 | `skills.md`, `agents.md`, `dispatcher.md`(상태머신), `spec.md`                                |
+| 8 e2e·빌드      | `roadmap.md`, `spec.md`(비채택 대조)                                                          |
 
 ## 0.1 불변 규약 (모든 Phase 공통)
 
@@ -36,14 +36,15 @@
 
 > 사용자 요구: **유닛 + e2e 모두**, 완성도 높은 결과물. 테스트는 후순위가 아니라 각 Phase의 DoD다.
 
-| 계층 | 도구·위치 | 대상 | 네트워크 |
-|---|---|---|---|
-| **유닛** | vitest, `src/**/__tests__/` | 순수 함수(union·segmenter·queryLint·dedup·normalizeTitle), httpClient(모킹 fetch), adapters(fixture 파싱), config(zod·권한) | 모킹 |
-| **통합** | vitest, `src/mcp/**/__tests__/` | MCP 도구 핸들러 — 모킹 httpClient로 NCBI 응답 주입, 계약(I/O 스키마)·부분실패·async 검증 | 모킹 |
-| **e2e(fixture)** | vitest `test/e2e/`, `@e2e` 태그 | 전체 파이프라인을 **녹화된 NCBI 응답 fixture**로 결정론 재현 | 없음(fixture) |
-| **e2e(live smoke)** | vitest `test/live/`, `@live` 태그(기본 skip, CI 옵션) | 실제 `eutils` 소량 호출 — 계약·스키마·필드 존재, rate limit 준수 | 실호출 |
+| 계층                | 도구·위치                                             | 대상                                                                                                                        | 네트워크      |
+| ------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **유닛**            | vitest, `src/**/__tests__/`                           | 순수 함수(union·segmenter·queryLint·dedup·normalizeTitle), httpClient(모킹 fetch), adapters(fixture 파싱), config(zod·권한) | 모킹          |
+| **통합**            | vitest, `src/mcp/**/__tests__/`                       | MCP 도구 핸들러 — 모킹 httpClient로 NCBI 응답 주입, 계약(I/O 스키마)·부분실패·async 검증                                    | 모킹          |
+| **e2e(fixture)**    | vitest `test/e2e/`, `@e2e` 태그                       | 전체 파이프라인을 **녹화된 NCBI 응답 fixture**로 결정론 재현                                                                | 없음(fixture) |
+| **e2e(live smoke)** | vitest `test/live/`, `@live` 태그(기본 skip, CI 옵션) | 실제 `eutils` 소량 호출 — 계약·스키마·필드 존재, rate limit 준수                                                            | 실호출        |
 
 **원칙**
+
 - **fixture 우선**: `test/fixtures/`에 NCBI 응답(ESearch/EFetch XML, ESummary, mesh, oa.fcgi, idconv) 1회 녹화 → 결정론 테스트. live는 계약 회귀 감시용 smoke로 분리(네트워크·rate 비결정성 격리).
 - **calibration**(filid 패턴): 알려진 주제 → 기대 PMID 집합/최소 recall을 fixture로 고정해 회귀 감지(`test/calibration/`).
 - **커버리지 목표**: `src/core`·`src/adapters` **90%+**, 전체 **85%+**. CI 게이트.

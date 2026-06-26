@@ -81,7 +81,11 @@ export async function downloadFulltext(
 
   const { pmcid, pmid, doi } = await resolvePmcid(id, ctx);
   if (!pmcid) {
-    unavailable.push({ id, reason: UnavailableReason.NO_PMCID, links: { doi } });
+    unavailable.push({
+      id,
+      reason: UnavailableReason.NO_PMCID,
+      links: { doi },
+    });
     return { downloaded, unavailable };
   }
 
@@ -91,22 +95,45 @@ export async function downloadFulltext(
     return { downloaded, unavailable };
   }
   if (!oa.license) {
-    unavailable.push({ id, reason: UnavailableReason.LICENSE_UNVERIFIED, links: { doi } });
+    unavailable.push({
+      id,
+      reason: UnavailableReason.LICENSE_UNVERIFIED,
+      links: { doi },
+    });
     return { downloaded, unavailable };
   }
 
   for (const format of formats) {
     const link = oa.formats.find((f) => f.format === format);
     if (!link) {
-      unavailable.push({ id, reason: UnavailableReason.FETCH_FAILED, format, links: { doi } });
+      unavailable.push({
+        id,
+        reason: UnavailableReason.FETCH_FAILED,
+        format,
+        links: { doi },
+      });
       continue;
     }
     try {
       downloaded.push(
-        await downloadOne(pmcid, pmid, format, link.href, oa.license, outDir, overwrite, ctx),
+        await downloadOne(
+          pmcid,
+          pmid,
+          format,
+          link.href,
+          oa.license,
+          outDir,
+          overwrite,
+          ctx,
+        ),
       );
     } catch {
-      unavailable.push({ id, reason: UnavailableReason.FETCH_FAILED, format, links: { doi } });
+      unavailable.push({
+        id,
+        reason: UnavailableReason.FETCH_FAILED,
+        format,
+        links: { doi },
+      });
     }
   }
 

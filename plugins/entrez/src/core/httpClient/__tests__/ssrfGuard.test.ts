@@ -51,25 +51,36 @@ describe("validateUrl", () => {
 
   it("blocks DNS rebinding to a private IP (injected resolver)", async () => {
     await expect(
-      validateUrl("https://eutils.ncbi.nlm.nih.gov/x", ALLOW, false, async () => [
-        "10.0.0.5",
-      ]),
+      validateUrl(
+        "https://eutils.ncbi.nlm.nih.gov/x",
+        ALLOW,
+        false,
+        async () => ["10.0.0.5"],
+      ),
     ).rejects.toThrow(/private/i);
   });
 
   it("passes when the host resolves to a public IP", async () => {
     await expect(
-      validateUrl("https://eutils.ncbi.nlm.nih.gov/x", ALLOW, false, async () => [
-        "130.14.29.110",
-      ]),
+      validateUrl(
+        "https://eutils.ncbi.nlm.nih.gov/x",
+        ALLOW,
+        false,
+        async () => ["130.14.29.110"],
+      ),
     ).resolves.toBeUndefined();
   });
 
   it("ignores DNS resolution failures (unresolvable host)", async () => {
     await expect(
-      validateUrl("https://eutils.ncbi.nlm.nih.gov/x", ALLOW, false, async () => {
-        throw new Error("ENOTFOUND");
-      }),
+      validateUrl(
+        "https://eutils.ncbi.nlm.nih.gov/x",
+        ALLOW,
+        false,
+        async () => {
+          throw new Error("ENOTFOUND");
+        },
+      ),
     ).resolves.toBeUndefined();
   });
 });

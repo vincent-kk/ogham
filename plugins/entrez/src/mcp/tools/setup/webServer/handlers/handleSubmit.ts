@@ -20,7 +20,10 @@ export async function handleSubmit(
     sendJson(res, 400, {
       success: false,
       message: "Validation failed",
-      errors: parsed.error.issues.map((i) => ({ field: i.path.join("."), message: i.message })),
+      errors: parsed.error.issues.map((i) => ({
+        field: i.path.join("."),
+        message: i.message,
+      })),
     });
     return;
   }
@@ -49,6 +52,9 @@ export async function handleSubmit(
   });
   await ctx.saveCredentials({ api_key: apiKey });
 
-  sendJson(res, 200, { success: true, message: "Configuration saved successfully" });
+  sendJson(res, 200, {
+    success: true,
+    message: "Configuration saved successfully",
+  });
   void ctx.closeServer();
 }

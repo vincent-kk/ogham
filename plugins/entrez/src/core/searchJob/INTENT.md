@@ -4,11 +4,11 @@
 
 ## Structure
 
-| 파일 | 역할 |
-| --- | --- |
-| `operations/createJob.ts` | `createJob` — QUEUED 레코드 생성·0o600 기록 |
-| `operations/getJob.ts` | `getJob` — id로 로드, 없으면 null |
-| `operations/updateJob.ts` | `updateJob` — 부분 패치·status 전이·updatedAt 갱신 |
+| 파일                        | 역할                                                          |
+| --------------------------- | ------------------------------------------------------------- |
+| `operations/createJob.ts`   | `createJob` — QUEUED 레코드 생성·0o600 기록                   |
+| `operations/getJob.ts`      | `getJob` — id로 로드, 없으면 null                             |
+| `operations/updateJob.ts`   | `updateJob` — 부분 패치·status 전이·updatedAt 갱신            |
 | `operations/pollResults.ts` | `pollResults` — status/진행률 + `union.records` cursor 페이지 |
 
 ## Conventions

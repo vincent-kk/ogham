@@ -10,7 +10,12 @@ import { pollJob } from "../tools/paperSearch/operations/pollJob.js";
 import { readJob } from "../tools/paperSearch/operations/readJob.js";
 import { FetchMode, JobStatus, QueryRole } from "../../types/enums.js";
 import type { PaperSearchInput } from "../../types/tool.js";
-import { routeFetch, makeCtx, esearchJson, esummaryJson } from "./mockEutils.js";
+import {
+  routeFetch,
+  makeCtx,
+  esearchJson,
+  esummaryJson,
+} from "./mockEutils.js";
 
 let manifestDir: string;
 let jobDir: string;
@@ -39,7 +44,8 @@ function unionRouter() {
     const q = url.searchParams;
     if (p.endsWith("esearch.fcgi")) {
       const term = q.get("term") ?? "";
-      if (term.includes("alpha")) return { body: esearchJson(3, ["1", "2", "3"]) };
+      if (term.includes("alpha"))
+        return { body: esearchJson(3, ["1", "2", "3"]) };
       if (term.includes("beta")) return { body: esearchJson(2, ["3", "4"]) };
       return { body: esearchJson(0, []) };
     }
@@ -69,7 +75,9 @@ describe("runPaperSearch", () => {
   it("enriches records via ESummary (SUMMARY mode)", async () => {
     const ctx = makeCtx(unionRouter(), { manifestDir });
     const out = await runPaperSearch(twoQueryInput(FetchMode.SUMMARY), ctx);
-    expect(out.union.records.find((r) => r.pmid === "1")?.title).toBe("Title 1");
+    expect(out.union.records.find((r) => r.pmid === "1")?.title).toBe(
+      "Title 1",
+    );
     expect(out.reproducibility.fetchedPmidChecksum).toMatch(/^sha256:/);
   });
 
@@ -103,13 +111,17 @@ describe("runPaperSearch", () => {
     );
     expect(out.per_query[0].segmented).toBe(true);
     expect(out.segments.length).toBeGreaterThan(1);
-    expect(new Set(out.union.records.map((r) => r.pmid))).toEqual(new Set(["s1", "s2"]));
+    expect(new Set(out.union.records.map((r) => r.pmid))).toEqual(
+      new Set(["s1", "s2"]),
+    );
   });
 
   it("isolates a failed metadata batch (partial recovery)", async () => {
     const fetch = routeFetch((url) => {
-      if (url.pathname.endsWith("esearch.fcgi")) return { body: esearchJson(2, ["1", "2"]) };
-      if (url.pathname.endsWith("esummary.fcgi")) return { body: "err", status: 500 };
+      if (url.pathname.endsWith("esearch.fcgi"))
+        return { body: esearchJson(2, ["1", "2"]) };
+      if (url.pathname.endsWith("esummary.fcgi"))
+        return { body: "err", status: 500 };
       return { body: "{}" };
     });
     const ctx = makeCtx(fetch, { manifestDir });
@@ -123,8 +135,14 @@ describe("runPaperSearch", () => {
   });
 
   it("produces the same checksum for the same input (reproducible)", async () => {
-    const a = await runPaperSearch(twoQueryInput(), makeCtx(unionRouter(), { manifestDir }));
-    const b = await runPaperSearch(twoQueryInput(), makeCtx(unionRouter(), { manifestDir }));
+    const a = await runPaperSearch(
+      twoQueryInput(),
+      makeCtx(unionRouter(), { manifestDir }),
+    );
+    const b = await runPaperSearch(
+      twoQueryInput(),
+      makeCtx(unionRouter(), { manifestDir }),
+    );
     expect(a.reproducibility.fetchedPmidChecksum).toBe(
       b.reproducibility.fetchedPmidChecksum,
     );
@@ -132,7 +150,10 @@ describe("runPaperSearch", () => {
 
   it("runs as an async job: start (awaited) -> status -> results", async () => {
     const ctx = makeCtx(unionRouter(), { manifestDir });
-    const start = await startJob(twoQueryInput(), ctx, { dir: jobDir, awaitRun: true });
+    const start = await startJob(twoQueryInput(), ctx, {
+      dir: jobDir,
+      awaitRun: true,
+    });
     expect(start.status).toBe(JobStatus.QUEUED);
 
     const status = await pollJob(start.jobId, { dir: jobDir });

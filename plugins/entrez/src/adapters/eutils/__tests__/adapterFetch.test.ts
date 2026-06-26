@@ -37,14 +37,20 @@ function deps(
     sleep: async () => {},
     fetchImpl: (async (u: string | URL) => {
       lastUrl = String(u);
-      return new Response(body, { status, headers: { "content-type": contentType } });
+      return new Response(body, {
+        status,
+        headers: { "content-type": contentType },
+      });
     }) as unknown as typeof fetch,
   };
 }
 
 describe("eutils adapter fetch wrappers", () => {
   it("esearch hits esearch.fcgi (json) with injected identity", async () => {
-    const r = await esearch({ db: Db.PUBMED, term: "cancer" }, deps(ESEARCH_JSON));
+    const r = await esearch(
+      { db: Db.PUBMED, term: "cancer" },
+      deps(ESEARCH_JSON),
+    );
     expect(r.count).toBe(1234);
     const q = new URL(lastUrl);
     expect(q.pathname).toContain("esearch.fcgi");
@@ -54,19 +60,28 @@ describe("eutils adapter fetch wrappers", () => {
   });
 
   it("efetch hits efetch.fcgi (xml) and returns structured records", async () => {
-    const r = await efetch({ db: Db.PUBMED, ids: ["12345678"] }, deps(EFETCH_XML, "application/xml"));
+    const r = await efetch(
+      { db: Db.PUBMED, ids: ["12345678"] },
+      deps(EFETCH_XML, "application/xml"),
+    );
     expect(r).toHaveLength(2);
     expect(new URL(lastUrl).searchParams.get("retmode")).toBe("xml");
   });
 
   it("esummary hits esummary.fcgi and returns records", async () => {
-    const r = await esummary({ db: Db.PUBMED, ids: ["111"] }, deps(ESUMMARY_JSON));
+    const r = await esummary(
+      { db: Db.PUBMED, ids: ["111"] },
+      deps(ESUMMARY_JSON),
+    );
     expect(r[0].pmid).toBe("111");
     expect(new URL(lastUrl).pathname).toContain("esummary.fcgi");
   });
 
   it("espell hits espell.fcgi and returns the correction", async () => {
-    const r = await espell({ db: Db.PUBMED, term: "astma" }, deps(ESPELL_XML, "application/xml"));
+    const r = await espell(
+      { db: Db.PUBMED, term: "astma" },
+      deps(ESPELL_XML, "application/xml"),
+    );
     expect(r).toBe("asthma");
     expect(new URL(lastUrl).pathname).toContain("espell.fcgi");
   });
@@ -78,7 +93,10 @@ describe("eutils adapter fetch wrappers", () => {
   });
 
   it("idconv uses the PMC host and never sends api_key", async () => {
-    const r = await idconv({ ids: ["11"] }, deps(IDCONV_JSON, "application/json", "SECRET"));
+    const r = await idconv(
+      { ids: ["11"] },
+      deps(IDCONV_JSON, "application/json", "SECRET"),
+    );
     expect(r.records[0].pmcid).toBe("PMC1");
     const q = new URL(lastUrl);
     expect(q.hostname).toBe(NCBI_SERVICE_HOST);
@@ -87,14 +105,20 @@ describe("eutils adapter fetch wrappers", () => {
   });
 
   it("oaService uses the PMC host and parses the OA record", async () => {
-    const r = await oaService({ pmcid: "PMC13900" }, deps(OA_XML, "application/xml"));
+    const r = await oaService(
+      { pmcid: "PMC13900" },
+      deps(OA_XML, "application/xml"),
+    );
     expect(r.license).toBe("CC BY");
     expect(new URL(lastUrl).hostname).toBe(NCBI_SERVICE_HOST);
   });
 
   it("throws when the endpoint returns a fatal error", async () => {
     await expect(
-      esearch({ db: Db.PUBMED, term: "x" }, deps("bad", "text/plain", undefined, 400)),
+      esearch(
+        { db: Db.PUBMED, term: "x" },
+        deps("bad", "text/plain", undefined, 400),
+      ),
     ).rejects.toThrow();
   });
 
@@ -126,13 +150,27 @@ describe("eutils adapter fetch wrappers", () => {
 
   it("esummary and efetch forward history paging params", async () => {
     await esummary(
-      { db: Db.PUBMED, ids: [], webEnv: "WE", queryKey: "1", retstart: 0, retmax: 50 },
+      {
+        db: Db.PUBMED,
+        ids: [],
+        webEnv: "WE",
+        queryKey: "1",
+        retstart: 0,
+        retmax: 50,
+      },
       deps(ESUMMARY_JSON),
     );
     expect(new URL(lastUrl).searchParams.get("WebEnv")).toBe("WE");
 
     await efetch(
-      { db: Db.PUBMED, ids: [], webEnv: "WE", queryKey: "1", retstart: 200, retmax: 200 },
+      {
+        db: Db.PUBMED,
+        ids: [],
+        webEnv: "WE",
+        queryKey: "1",
+        retstart: 200,
+        retmax: 200,
+      },
       deps(EFETCH_XML, "application/xml"),
     );
     const q = new URL(lastUrl).searchParams;
@@ -141,7 +179,10 @@ describe("eutils adapter fetch wrappers", () => {
   });
 
   it("oaService forwards a format filter", async () => {
-    await oaService({ pmcid: "PMC13900", format: "pdf" }, deps(OA_XML, "application/xml"));
+    await oaService(
+      { pmcid: "PMC13900", format: "pdf" },
+      deps(OA_XML, "application/xml"),
+    );
     expect(new URL(lastUrl).searchParams.get("format")).toBe("pdf");
   });
 });

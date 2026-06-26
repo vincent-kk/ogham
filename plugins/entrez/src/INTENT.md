@@ -4,14 +4,14 @@ entrez 플러그인의 TypeScript 소스 루트(프랙탈 루트). NCBI E-utilit
 
 ## Structure
 
-| 디렉토리 | 역할 |
-| --- | --- |
-| `types/` | enums(`as const`)·zod 스키마·`PaperRecord`·`SearchManifest` |
-| `constants/` | paths·defaults·messages (인라인 문자열 금지) |
-| `core/` | httpClient·sourceResolver·config·union·segmenter·espell·queryLint·searchJob |
-| `adapters/eutils/` | E-utility 함수별 어댑터(1함수 1파일) |
-| `mcp/` | MCP 서버 lifecycle + 도구 5종 + shared helpers |
-| `lib/` · `utils/` | 부속품(Organ) 격리 — atomicWrite·logger·xmlParse·sha256·isoNow |
+| 디렉토리           | 역할                                                                        |
+| ------------------ | --------------------------------------------------------------------------- |
+| `types/`           | enums(`as const`)·zod 스키마·`PaperRecord`·`SearchManifest`                 |
+| `constants/`       | paths·defaults·messages (인라인 문자열 금지)                                |
+| `core/`            | httpClient·sourceResolver·config·union·segmenter·espell·queryLint·searchJob |
+| `adapters/eutils/` | E-utility 함수별 어댑터(1함수 1파일)                                        |
+| `mcp/`             | MCP 서버 lifecycle + 도구 5종 + shared helpers                              |
+| `lib/` · `utils/`  | 부속품(Organ) 격리 — atomicWrite·logger·xmlParse·sha256·isoNow              |
 
 ## Conventions
 

@@ -4,14 +4,14 @@
 
 ## Structure
 
-| 경로 | 역할 |
-| --- | --- |
-| `src/` | TypeScript 소스(프랙탈 루트; 자체 INTENT.md) |
-| `skills/` | 노출 스킬 4 (search·query·download·setup) — 마크다운 |
-| `agents/` | `paper-search-expert`(생성/재랭킹 2모드) + references |
-| `scripts/` | esbuild MCP 서버 + settings HTML 번들 |
-| `bridge/` · `public/` | 빌드 산출물(둘 다 커밋) |
-| `.claude-plugin/plugin.json` · `.mcp.json` | 매니페스트·MCP 등록 |
+| 경로                                       | 역할                                                  |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `src/`                                     | TypeScript 소스(프랙탈 루트; 자체 INTENT.md)          |
+| `skills/`                                  | 노출 스킬 4 (search·query·download·setup) — 마크다운  |
+| `agents/`                                  | `paper-search-expert`(생성/재랭킹 2모드) + references |
+| `scripts/`                                 | esbuild MCP 서버 + settings HTML 번들                 |
+| `bridge/` · `public/`                      | 빌드 산출물(둘 다 커밋)                               |
+| `.claude-plugin/plugin.json` · `.mcp.json` | 매니페스트·MCP 등록                                   |
 
 ## Conventions
 
