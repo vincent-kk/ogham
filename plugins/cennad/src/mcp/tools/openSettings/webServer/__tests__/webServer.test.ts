@@ -134,6 +134,39 @@ describe('settings web server', () => {
     expect(savedConfig).toEqual(updated);
   });
 
+  it('POST /save reloads the in-memory config for later settings requests', async () => {
+    let stored: Config = DEFAULT_CONFIG;
+    let loadCalls = 0;
+    const h = await start({
+      loadConfig: async () => {
+        loadCalls += 1;
+        return stored;
+      },
+      saveConfig: async (cfg) => {
+        stored = cfg;
+        savedConfig = cfg;
+      },
+    });
+    const updated: Config = { ...DEFAULT_CONFIG, session_ttl_hours: 24 };
+
+    const saveRes = await fetch(urlFor(h, '/save'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    });
+    expect(saveRes.status).toBe(200);
+    expect(savedConfig).toEqual(updated);
+    expect(loadCalls).toBe(2);
+
+    const configRes = await fetch(urlFor(h, '/config'));
+    expect(configRes.status).toBe(200);
+    expect(await configRes.json()).toEqual(updated);
+
+    const rootRes = await fetch(urlFor(h, '/'));
+    expect(rootRes.status).toBe(200);
+    expect(await rootRes.text()).toContain('"session_ttl_hours":24');
+  });
+
   it('POST /save provisions the youtube MCP addon from the saved config', async () => {
     const h = await start();
     const updated: Config = {

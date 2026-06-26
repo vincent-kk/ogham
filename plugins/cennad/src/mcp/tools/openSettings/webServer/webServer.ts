@@ -43,6 +43,19 @@ export async function startSettingsServer(
 
   const idleMs = options.idleMs ?? SETTINGS_SERVER_IDLE_MS;
   const token = generateToken();
+  const loadConfigImpl = options.loadConfig ?? loadConfigDefault;
+  const saveConfigImpl = options.saveConfig ?? saveConfigDefault;
+  let currentConfig: Config | null = null;
+
+  async function loadCurrentConfig(): Promise<Config> {
+    currentConfig = await loadConfigImpl();
+    return currentConfig;
+  }
+
+  async function saveAndReloadConfig(config: Config): Promise<void> {
+    await saveConfigImpl(config);
+    currentConfig = await loadConfigImpl();
+  }
 
   async function closeServer(): Promise<void> {
     if (closed) return;
@@ -80,8 +93,8 @@ export async function startSettingsServer(
   const handler = createRouteHandler({
     token,
     settingsHtml: options.settingsHtml,
-    loadConfig: options.loadConfig ?? loadConfigDefault,
-    saveConfig: options.saveConfig ?? saveConfigDefault,
+    loadConfig: loadCurrentConfig,
+    saveConfig: saveAndReloadConfig,
     provisionYoutube:
       options.provisionYoutube ??
       ((next, prev) => provisionYoutubeImpl(next, prev)),
