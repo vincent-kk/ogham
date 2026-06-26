@@ -255,10 +255,14 @@
         if (out.status === 200 && res.success) {
           setStatus(
             "ok",
-            "Saved. You can close this window — the server will shut down.",
+            "Saved. This tab will close automatically.",
           );
+          busy(saveBtn, false);
           saveBtn.disabled = true;
           testBtn.disabled = true;
+          setTimeout(function () {
+            window.close();
+          }, 1000);
         } else {
           if (Array.isArray(res.errors)) {
             res.errors.forEach(function (er) {
