@@ -33,23 +33,92 @@ export const ITERATION_GUARDS = {
 } as const;
 
 /**
- * Pre-built package whitelist (renv lockfile baseline). Dynamic install is
- * forbidden; only these are assumed available to executed R code.
+ * Always installed by r-setup — the execution contract and the bulk of the
+ * shipped methods depend on these (`jsonlite` backs run-r's own I/O).
  */
-export const PACKAGE_WHITELIST = [
-  "stats",
+export const REQUIRED_PACKAGES = [
   "broom",
-  "ggplot2",
   "rstatix",
+  "car",
+  "data.table",
+  "jsonlite",
+] as const;
+
+/** Method-referenced optional packages — part of the run-r baseline. */
+const BASELINE_OPTIONAL = [
+  "ggplot2",
   "survival",
   "lme4",
   "MASS",
-  "car",
   "gtsummary",
   "arrow",
-  "data.table",
-  "jsonlite",
   "quarto",
+] as const;
+
+/**
+ * Pre-built package whitelist (renv lockfile baseline): REQUIRED ∪
+ * method-referenced optional ∪ base `stats`. What executed R code may assume
+ * present after a standard setup. Use-case bundles (PACKAGE_USE_CASES) may pull
+ * companions beyond this baseline; those install on demand through r-setup's
+ * consent-gated terminal channel — run-r itself never installs.
+ */
+export const PACKAGE_WHITELIST = [
+  "stats",
+  ...REQUIRED_PACKAGES,
+  ...BASELINE_OPTIONAL,
+] as const;
+
+/**
+ * r-setup use-case catalog. Instead of asking package-by-package, r-setup asks
+ * which analyses/outputs the user needs and installs each selected bundle's
+ * packages in one pass. Labels/summaries are English; the skill localizes them
+ * at prompt time. Bundles may include companions beyond PACKAGE_WHITELIST.
+ * Needs not covered here are resolved dynamically by the skill.
+ */
+export const PACKAGE_USE_CASES = [
+  {
+    key: "visualization",
+    label: "Graphs & visualization",
+    summary: "Plot and chart artifacts (most methods' figures need this)",
+    packages: ["ggplot2", "ggpubr", "patchwork"],
+  },
+  {
+    key: "survival",
+    label: "Survival analysis",
+    summary: "Cox proportional hazards and survival curves",
+    packages: ["survival", "survminer"],
+  },
+  {
+    key: "mixedModels",
+    label: "Mixed-effects / multilevel models",
+    summary: "lme4 mixed models with p-values and marginal means",
+    packages: ["lme4", "lmerTest", "emmeans"],
+  },
+  {
+    key: "countModels",
+    label: "Count models (negative binomial, Poisson)",
+    summary: "Count regression with overdispersion and robust SE",
+    packages: ["MASS", "sandwich", "lmtest"],
+  },
+  {
+    key: "tables",
+    label: "Publication summary tables",
+    summary: "gtsummary tables with gt and Word (flextable) rendering",
+    packages: ["gtsummary", "gt", "flextable"],
+  },
+  {
+    key: "bigData",
+    label: "Large / columnar data input",
+    summary: "Parquet and Feather data files",
+    packages: ["arrow"],
+  },
+  {
+    key: "reporting",
+    label: "Report rendering",
+    summary:
+      "Quarto / R Markdown documents (R packages; Quarto CLI is separate)",
+    packages: ["quarto", "knitr", "rmarkdown"],
+  },
 ] as const;
 
 /**

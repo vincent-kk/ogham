@@ -18,14 +18,14 @@ plugin: r-statistics
 
 ## 노출 스킬 6
 
-| 스킬                 | complexity | 역할                                                         | 호출 에이전트       | MCP                       |
-| -------------------- | ---------- | ------------------------------------------------------------ | ------------------- | ------------------------- |
-| **analyze**          | complex    | 메인 오케스트레이터(Dispatcher): intent 분류→파이프라인→모드 | 3종 전부            | run-r, assert, get/cancel |
-| **data-preparation** | moderate   | 로드(fread/arrow)·프로파일·정제·결측 대치                    | r-expert            | run-r                     |
-| **assumption-check** | moderate   | 정규성·등분산·독립성 검정 → assert 입력 아티팩트             | r-expert            | run-r                     |
-| **visualization**    | simple     | ggplot2 디바이스 보일러플레이트                              | r-expert            | run-r                     |
-| **reporting**        | moderate   | Table1·효과크기·다중비교 → Quarto(DOCX/HTML/PDF)             | r-expert, validator | run-r                     |
-| **r-setup**          | simple     | R 설치 확인 + 환경별 가이드 + 동의 기반 설치                 | —                   | run-r(탐지)               |
+| 스킬                 | complexity | 역할                                                                       | 호출 에이전트       | MCP                       |
+| -------------------- | ---------- | -------------------------------------------------------------------------- | ------------------- | ------------------------- |
+| **analyze**          | complex    | 메인 오케스트레이터(Dispatcher): intent 분류→파이프라인→모드               | 3종 전부            | run-r, assert, get/cancel |
+| **data-preparation** | moderate   | 로드(fread/arrow)·프로파일·정제·결측 대치                                  | r-expert            | run-r                     |
+| **assumption-check** | moderate   | 정규성·등분산·독립성 검정 → assert 입력 아티팩트                           | r-expert            | run-r                     |
+| **visualization**    | simple     | ggplot2 디바이스 보일러플레이트                                            | r-expert            | run-r                     |
+| **reporting**        | moderate   | Table1·효과크기·다중비교 → Quarto(DOCX/HTML/PDF)                           | r-expert, validator | run-r                     |
+| **r-setup**          | simple     | R 설치 확인 + 환경별 가이드 + 동의 기반 설치 + 필수/유스케이스 패키지 설치 | —                   | run-r(탐지)               |
 
 - partial-step(그래프만/가정검정만)은 `visualization`·`assumption-check`를 직접 호출.
 - full-analysis는 `analyze`가 전체 오케스트레이션.

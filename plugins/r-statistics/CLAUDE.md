@@ -39,7 +39,7 @@ yarn rStatistics version:sync  # package.json → src/version.ts + plugin.json
 - **Build artifacts**: `bridge/mcp-server.cjs` is the runtime; `dist/` is library export. Heavy/statistics deps never enter the bundle (size guard in `buildMcpServer.mjs`).
 - **Disk paths**: under `~/.claude/plugins/r-statistics/`.
 - **The assert ruleset** (`src/mcp/tools/assertAnalysisPlan/operations/ruleset.ts`) is the deterministic runtime authority; keep it in sync with the `methods/{technique}/meta.yaml` catalog.
-- **R packages**: `r-setup` checks/installs the `PACKAGE_WHITELIST` set (`src/constants/defaults.ts`); keep the skill's inlined package list in sync with that constant.
+- **R packages**: `r-setup` always installs `REQUIRED_PACKAGES` and offers the rest by use case via `PACKAGE_USE_CASES` (`src/constants/defaults.ts`); `PACKAGE_WHITELIST` is the run-r baseline. Keep the skill's inlined required/use-case lists in sync with those constants.
 - **FCA**: domain roots (`core`, `core/*`, `mcp`, `mcp/server`, `mcp/shared`, `mcp/tools`, each tool) carry `INTENT.md`; `types`/`constants`/`lib`/`utils`/`operations` are organs.
 
 ## References

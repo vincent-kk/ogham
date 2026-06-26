@@ -3,7 +3,7 @@ name: r-setup
 user_invocable: true
 description: '[r-statistics:r-setup] Check whether R/Rscript is installed and, with explicit consent, guide a per-OS install via the system package manager. Trigger: "install R", "set up R", "R is not found", "R 설치", "Rscript 없음"'
 argument-hint: "[--os windows|macos|linux] [--packages]"
-version: "1.0.0"
+version: "1.1.0"
 complexity: simple
 plugin: r-statistics
 ---
@@ -19,7 +19,7 @@ irreversible.
 
 ## Steps
 
-`--packages` runs only the package check (Steps 6–8); it still needs a working
+`--packages` runs only the package check (Steps 6–9); it still needs a working
 Rscript, so if detection fails, install R first.
 
 1. **Detect.** Call `mcp__plugin_r-statistics_tools__run-r` with a trivial script
@@ -38,50 +38,86 @@ Rscript, so if detection fails, install R first.
 5. **Verify.** After install, re-run Step 1's detection. If R is on a
    non-standard path, tell the user to set `R_STATISTICS_RSCRIPT` to the
    `Rscript` location.
-6. **Check R packages.** Via `mcp__plugin_r-statistics_tools__run-r`
-   (`executionMode: "sync"`, read-only — `requireNamespace` is not blocked):
+6. **Check packages.** Via `mcp__plugin_r-statistics_tools__run-r`
+   (`executionMode: "sync"`, read-only — `requireNamespace` is not blocked).
+   Probe the required set and every use-case package, reporting what is missing
+   in each group:
 
    ```r
-   pkgs <- c("stats","broom","ggplot2","rstatix","survival","lme4",
-             "MASS","car","gtsummary","arrow","data.table","jsonlite","quarto")
-   missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
-   cat(if (length(missing)) paste("MISSING:", paste(missing, collapse = " "))
-       else "ALL_PRESENT", "\n")
+   required <- c("broom","rstatix","car","data.table","jsonlite")
+   usecase  <- c("ggplot2","ggpubr","patchwork","survival","survminer",
+                 "lme4","lmerTest","emmeans","MASS","sandwich","lmtest",
+                 "gtsummary","gt","flextable","arrow","quarto","knitr","rmarkdown")
+   miss <- function(p) p[!vapply(p, requireNamespace, logical(1), quietly = TRUE)]
+   rm <- miss(required); um <- miss(usecase)
+   cat("REQUIRED_MISSING:", if (length(rm)) paste(rm, collapse = " ") else "-", "\n")
+   cat("USECASE_MISSING:",  if (length(um)) paste(um, collapse = " ") else "-", "\n")
    ```
 
-   This list mirrors `PACKAGE_WHITELIST` in `src/constants/defaults.ts` — keep in
-   sync. `stats` is base R and never missing.
+   These lists mirror `REQUIRED_PACKAGES` and `PACKAGE_USE_CASES` in
+   `src/constants/defaults.ts` — keep in sync. `stats` is base R and never
+   missing.
 
-7. **Propose the install** (consent-gated, terminal — **not** `run-r`, which
-   blocks `install.packages`). Build it from the _missing_ set only:
+7. **Select use cases (the checkbox step).** Required-missing packages are
+   always installed — never ask about them. For the optional packages, do **not**
+   ask package-by-package: ask by _use case_ and install each chosen bundle at
+   once. Use `AskUserQuestion` with `multiSelect: true`, presenting the catalog
+   below localized to the user's language. The tool caps options at 4 per
+   question, so split the bundles across up to two `multiSelect` questions (e.g.
+   model types, then outputs/data); offer only bundles that still have a missing
+   package. Each question's auto "Other" lets the user describe an uncovered need.
+
+   | Use case                              | Installs                 |
+   | ------------------------------------- | ------------------------ |
+   | Graphs & visualization                | ggplot2 ggpubr patchwork |
+   | Survival analysis                     | survival survminer       |
+   | Mixed-effects / multilevel models     | lme4 lmerTest emmeans    |
+   | Count models (neg. binomial, Poisson) | MASS sandwich lmtest     |
+   | Publication summary tables            | gtsummary gt flextable   |
+   | Large / columnar data input           | arrow                    |
+   | Report rendering                      | quarto knitr rmarkdown   |
+
+   **Dynamic needs.** When the user describes a need the catalog does not cover
+   (e.g. a multi-panel dashboard report), map it to the appropriate CRAN packages
+   yourself, state the chosen set with a one-line rationale, and fold it into the
+   same install. These may sit beyond the baseline whitelist — expected for
+   on-demand, consent-gated installs.
+
+8. **Install** (consent-gated, terminal — **not** `run-r`, which blocks
+   `install.packages`). Build **one** command from the union of required-missing ∪
+   every selected bundle's missing packages ∪ any dynamic packages, de-duplicated:
 
    ```bash
-   Rscript -e 'install.packages(c("car","jsonlite"), repos="https://cloud.r-project.org")'
+   Rscript -e 'install.packages(c("ggplot2","ggpubr","patchwork"), repos="https://cloud.r-project.org")'
    ```
 
    Show the exact command, explain it, and run via `Bash` only on an explicit
    "yes". The `quarto` entry is the R package — the **Quarto CLI** (reporting) is
    a separate binary, out of scope here.
 
-8. **Re-verify.** Re-run Step 6; report `ALL_PRESENT` or the still-missing set.
+9. **Re-verify.** Re-run Step 6; report the still-missing set per group.
 
 ## Boundaries
 
 ### Always do
 
 - Get explicit consent before executing any installer.
-- Use only the approved package-manager command for the OS.
-- Check R packages after R is confirmed; build the install command from the
-  _missing_ set only, with a CRAN mirror (`https://cloud.r-project.org`).
+- Use only the approved package-manager command for the OS (R itself).
+- Install the required package set unconditionally; offer optional packages by
+  _use case_ and install each selected bundle in one pass. Build the command from
+  the _missing_ set only, with a CRAN mirror (`https://cloud.r-project.org`).
 
 ### Ask first
 
-- Running the installer (the consent gate) — always.
+- Running any installer (R or R packages) — the consent gate, always.
+- Which use cases to install (the multi-select), before composing the command.
 
 ### Never do
 
 - Install R or change the system without confirmation.
 - Run install commands (R or R packages) through `run-r` (it blocks them) —
   installation is a separate, consent-gated channel.
+- Ask about the required packages, or about optional packages one-by-one —
+  required are automatic; optional are grouped by use case.
 
 Reply in the user's language. Technical terms and identifiers stay as-is.
