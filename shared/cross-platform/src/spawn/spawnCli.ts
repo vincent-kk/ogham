@@ -13,6 +13,7 @@ interface SpawnState {
   abortedByCaller: boolean;
   spawnError: Error | undefined;
   settled: boolean;
+  killed: boolean;
   timeoutSettleTimer: ReturnType<typeof setTimeout> | null;
 }
 
@@ -22,17 +23,36 @@ interface SpawnHandle {
   stdoutDecoder: StringDecoder;
   stderrDecoder: StringDecoder;
   normalize: boolean;
+  detached: boolean;
   options: SpawnOptions;
   resolve: (result: SpawnResult) => void;
   onAbortListener: (() => void) | undefined;
 }
 
-function killChild(child: ChildProcess): void {
-  if (process.platform === "win32" && child.pid !== undefined)
-    nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
-      stdio: "ignore",
-    });
-  else child.kill("SIGKILL");
+/** Idempotent kill (at most once). Windows tree-kills; POSIX group-kills when detached. */
+function killChild(handle: SpawnHandle, state: SpawnState): void {
+  if (state.killed) return;
+  state.killed = true;
+  const { child } = handle;
+  if (process.platform === "win32") {
+    if (child.pid !== undefined)
+      nodeSpawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+        stdio: "ignore",
+      });
+    return;
+  }
+  // A detached child leads its own process group, so a negative-pid signal
+  // reaps grandchildren too. Require pid > 1: `kill(-0)` would target THIS
+  // process's own group and does NOT throw, so try/catch cannot guard it.
+  if (handle.detached && typeof child.pid === "number" && child.pid > 1) {
+    try {
+      process.kill(-child.pid, "SIGKILL");
+      return;
+    } catch {
+      // group already gone (ESRCH) or double-kill — single-process kill below
+    }
+  }
+  child.kill("SIGKILL");
 }
 
 function settle(
@@ -62,7 +82,7 @@ function settle(
 function onAbort(handle: SpawnHandle, state: SpawnState): void {
   if (state.settled || state.abortedByCaller) return;
   state.abortedByCaller = true;
-  killChild(handle.child);
+  killChild(handle, state);
   state.timeoutSettleTimer = setTimeout(
     () => settle(handle, state, null),
     1000,
@@ -78,6 +98,7 @@ export function spawnCli(
   const normalize = options.normalizeEol !== false;
   const timeoutMs =
     options.timeoutMs !== undefined ? osTimeout(options.timeoutMs) : undefined;
+  const useDetached = options.detached === true && process.platform !== "win32";
 
   return new Promise((resolve) => {
     const launcher = resolveLauncher(bin, { env: options.env });
@@ -95,6 +116,7 @@ export function spawnCli(
           cwd: options.cwd,
           env: options.env,
           stdio: ["pipe", "pipe", "pipe"],
+          detached: useDetached,
         });
 
     const state: SpawnState = {
@@ -104,6 +126,7 @@ export function spawnCli(
       abortedByCaller: false,
       spawnError: undefined,
       settled: false,
+      killed: false,
       timeoutSettleTimer: null,
     };
     const handle: SpawnHandle = {
@@ -112,6 +135,7 @@ export function spawnCli(
       stdoutDecoder,
       stderrDecoder,
       normalize,
+      detached: useDetached,
       options,
       resolve,
       onAbortListener: undefined,
@@ -122,7 +146,7 @@ export function spawnCli(
     handle.timer = timeoutMs
       ? setTimeout(() => {
           state.timedOut = true;
-          killChild(child);
+          killChild(handle, state);
           state.timeoutSettleTimer = setTimeout(
             () => settle(handle, state, null),
             1000,
@@ -155,7 +179,7 @@ export function spawnCli(
         options.onStderr?.(text, state.stderr) === true
       ) {
         state.abortedByCaller = true;
-        killChild(child);
+        killChild(handle, state);
         state.timeoutSettleTimer = setTimeout(
           () => settle(handle, state, null),
           1000,

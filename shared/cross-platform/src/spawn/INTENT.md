@@ -21,6 +21,7 @@
 - normalizeEol 기본 true; false 면 raw stdout/stderr.
 - stdin 은 `options.input` 으로 단일 chunk; 미지정 시 stdin 즉시 닫힘.
 - win32: `.cmd`/`.bat` 은 `resolveLauncher` 가 node entry 추출 → `process.execPath` 직접 spawn (cmd.exe 우회 = 멀티라인 개행 보존); 해석 실패 시 cross-spawn fallback.
+- `detached` (POSIX 전용, 기본 off): 자식을 프로세스그룹 리더로 만들어 timeout/abort 시 그룹(손자 포함)을 SIGKILL; win32(taskkill /T)·`spawnCliSync` 는 무시. `kill(-0)` 자기그룹 자살 방지 위해 pid>1 가드 + ESRCH 시 단일 kill 폴백.
 
 ## Boundaries
 
