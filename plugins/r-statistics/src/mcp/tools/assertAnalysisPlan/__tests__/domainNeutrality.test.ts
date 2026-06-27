@@ -4,7 +4,10 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { PACKAGE_USE_CASES, PACKAGE_WHITELIST } from "../../../../constants/defaults.js";
+import {
+  PACKAGE_USE_CASES,
+  PACKAGE_WHITELIST,
+} from "../../../../constants/defaults.js";
 
 const pluginRoot = resolve(
   dirname(fileURLToPath(import.meta.url)),

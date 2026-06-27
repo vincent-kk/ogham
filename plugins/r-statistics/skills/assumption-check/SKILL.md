@@ -22,22 +22,22 @@ Run the statistical assumptions a chosen method requires and produce
    assumptions from the method the user names.
 2. **Run each check** in R (via `run_r`), mapping check → test:
 
-   | check                 | R                                                                   |
-   | --------------------- | ------------------------------------------------------------------- |
-   | `shapiro`             | `stats::shapiro.test` (residuals for regression/ANOVA)              |
-   | `levene`              | `car::leveneTest`                                                   |
-   | `breusch_pagan`       | `car::ncvTest`                                                      |
-   | `durbin_watson`       | `car::durbinWatsonTest`                                             |
-   | `vif`                 | `car::vif`                                                          |
-   | `dispersion`          | Pearson dispersion statistic                                        |
-   | `cox_zph`             | `survival::cox.zph`                                                 |
-   | `expected_counts`     | expected cell counts of the contingency table                       |
-   | `box_tidwell`         | `car::boxTidwell`                                                   |
-   | `residual_plot`       | residuals vs fitted via `ggplot2` (visual linearity / scale)        |
-   | `scatter`             | `ggplot2` scatter + loess smooth (visual linearity)                 |
-   | `martingale_residual` | `survival` martingale residuals vs covariate (functional form)      |
+   | check                 | R                                                                                                                                             |
+   | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `shapiro`             | `stats::shapiro.test` (residuals for regression/ANOVA)                                                                                        |
+   | `levene`              | `car::leveneTest`                                                                                                                             |
+   | `breusch_pagan`       | `car::ncvTest`                                                                                                                                |
+   | `durbin_watson`       | `car::durbinWatsonTest`                                                                                                                       |
+   | `vif`                 | `car::vif`                                                                                                                                    |
+   | `dispersion`          | Pearson dispersion statistic                                                                                                                  |
+   | `cox_zph`             | `survival::cox.zph`                                                                                                                           |
+   | `expected_counts`     | expected cell counts of the contingency table                                                                                                 |
+   | `box_tidwell`         | `car::boxTidwell`                                                                                                                             |
+   | `residual_plot`       | residuals vs fitted via `ggplot2` (visual linearity / scale)                                                                                  |
+   | `scatter`             | `ggplot2` scatter + loess smooth (visual linearity)                                                                                           |
+   | `martingale_residual` | `survival` martingale residuals vs covariate (functional form)                                                                                |
    | `epv`                 | events ÷ predictors (common screening threshold ≥ 10; Peduzzi et al. 1996, clinical prediction-model practice, may be conservative elsewhere) |
-   | `design`              | design assumption — `note_assumption(id)`, pass by design (no test) |
+   | `design`              | design assumption — `note_assumption(id)`, pass by design (no test)                                                                           |
 
 3. **Emit artifacts.** For each assumption, write
    `assumption.{id}` (kind `assumption_check`) with the test statistic, p-value,
@@ -47,8 +47,7 @@ Run the statistical assumptions a chosen method requires and produce
    plot plus a heuristic `passed`; metric/count-threshold checks (`vif`,
    `dispersion`, `expected_counts`, `epv`) emit their ratio/count with `passed`
    against the threshold; `design` records `passed: true` as a design assumption.
-   EPV thresholds come from clinical prediction-model practice (Peduzzi et al.
-   1996) and may be conservative for other application domains. These non-test
+   EPV thresholds come from clinical prediction-model practice (Peduzzi et al. 1996) and may be conservative for other application domains. These non-test
    checks carry no p-value.
 
 ## Output
