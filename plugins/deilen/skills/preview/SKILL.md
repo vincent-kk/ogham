@@ -65,6 +65,10 @@ the conversation, whichever they chose.
 - Plans are markdown too — render them with `mcp_tools_render_viewer` directly. In plan
   mode, preview after the plan is confirmed (or render a saved plan file), since
   plan mode can restrict tool use.
+- Local images (analysis plots, screenshots) display when referenced by an
+  absolute `file://` URI — `![plot](file:///abs/path.png)`; `http(s)` and `data:`
+  URIs also render, but a bare local path (`/abs/...`) will not load. Use the
+  absolute path you already know for the file.
 - Reply to the user in their own language.
 
 ## Do not

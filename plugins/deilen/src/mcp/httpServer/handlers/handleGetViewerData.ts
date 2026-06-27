@@ -39,7 +39,9 @@ export async function handleGetViewerData(
     res.end(markdown);
     return;
   }
-  const render = renderMarkdown(markdown);
+  const render = renderMarkdown(markdown, {
+    imageRewrite: { sessionId, token: ctx.token },
+  });
   sendJson(res, 200, {
     ok: true,
     title: meta.title,

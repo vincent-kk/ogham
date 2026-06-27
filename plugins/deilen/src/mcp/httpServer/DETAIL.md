@@ -16,22 +16,24 @@
 
 ## Routes
 
-| Method | Path                            | Handler             | Token |
-| ------ | ------------------------------- | ------------------- | ----- |
-| GET    | `/r/<session>?token=`           | handleGetViewer     | yes   |
-| GET    | `/api/viewer?session=&token=`   | handleGetViewerData | yes   |
-| GET    | `/settings?token=`              | handleGetSettings   | yes   |
-| GET    | `/api/config?token=`            | handleGetConfig     | yes   |
-| GET    | `/assets/<chunk>`               | handleGetAsset      | no    |
-| POST   | `/api/ping?session=&token=`     | handlePing          | yes   |
-| POST   | `/api/feedback?session=&token=` | handlePostFeedback  | yes   |
-| POST   | `/api/config?token=`            | handleSaveConfig    | yes   |
-| POST   | `/api/close?session=&token=`    | handleClose         | yes   |
+| Method | Path                              | Handler             | Token |
+| ------ | --------------------------------- | ------------------- | ----- |
+| GET    | `/r/<session>?token=`             | handleGetViewer     | yes   |
+| GET    | `/api/viewer?session=&token=`     | handleGetViewerData | yes   |
+| GET    | `/api/image/<sid>/<index>?token=` | handleGetImage      | yes   |
+| GET    | `/settings?token=`                | handleGetSettings   | yes   |
+| GET    | `/api/config?token=`              | handleGetConfig     | yes   |
+| GET    | `/assets/<chunk>`                 | handleGetAsset      | no    |
+| POST   | `/api/ping?session=&token=`       | handlePing          | yes   |
+| POST   | `/api/feedback?session=&token=`   | handlePostFeedback  | yes   |
+| POST   | `/api/config?token=`              | handleSaveConfig    | yes   |
+| POST   | `/api/close?session=&token=`      | handleClose         | yes   |
 
 ## Security
 
 - `session_id` `^[A-Za-z0-9_-]+$` + sessionStore 등록분만.
 - `/assets`: 단일 안전 세그먼트 + 허용 확장자 + `bridge/assets` 내부 존재만.
+- `/api/image`: viewer.md 가 참조한 `file://` 이미지만 서빙(문서 멤버십 = allowlist, 임의 경로 차단) + 표시 확장자 화이트리스트(png/jpg/jpeg/gif/webp/svg) + `realpath` regular-file + `max_image_mb` 캡.
 - token 미검증 401, 미지원 Content-Type 415, 미지원 경로 404.
 
 ## Acceptance

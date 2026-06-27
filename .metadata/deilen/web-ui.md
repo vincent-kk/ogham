@@ -13,17 +13,18 @@
 
 ## 라우트
 
-| 메서드 | 경로                          | 동작                                                                                                           |
-| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| GET    | `/r/<session>?token=`         | 뷰어 HTML(`viewerHtml`). `__DEILEN_STATE__` 에 session_id·token·title·렌더 HTML·raw markdown·last_intent 주입. |
-| GET    | `/api/viewer?session=&token=` | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                               |
-| GET    | `/assets/<chunk>`             | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.                            |
-| POST   | `/api/feedback?token=`        | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).                |
-| POST   | `/api/ping?token=`            | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                                          |
-| GET    | `/settings?token=`            | 설정 HTML(`settingsHtml`). `__DEILEN_STATE__` 에 현재 Config 주입.                                             |
-| GET    | `/api/config?token=`          | 현재 `Config` JSON.                                                                                            |
-| POST   | `/api/config?token=`          | body=`Config`. 검증 후 저장.                                                                                   |
-| POST   | `/api/close?token=`           | body=`{ session_id }`(필수). 세션 종료(서버 종료는 idle/MCP-exit 내부 처리).                                   |
+| 메서드 | 경로                              | 동작                                                                                                           |
+| ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET    | `/r/<session>?token=`             | 뷰어 HTML(`viewerHtml`). `__DEILEN_STATE__` 에 session_id·token·title·렌더 HTML·raw markdown·last_intent 주입. |
+| GET    | `/api/viewer?session=&token=`     | 렌더 HTML+메타 재조회. `&format=md` → raw markdown(원본 복사용).                                               |
+| GET    | `/api/image/<sid>/<index>?token=` | viewer.md 가 참조한 `file://` 이미지를 스트리밍. 문서 멤버십 = allowlist.                                      |
+| GET    | `/assets/<chunk>`                 | lazy 렌더러 chunk/css/폰트(highlight/mermaid/katex). **토큰 면제**, allowlist 서빙.                            |
+| POST   | `/api/feedback?token=`            | multipart 피드백 제출 → 영속화 + resolver 발화([feedback-protocol.md](./feedback-protocol.md)).                |
+| POST   | `/api/ping?token=`                | 뷰어 탭 heartbeat(`{ session_id }`) → 세션 생존 갱신.                                                          |
+| GET    | `/settings?token=`                | 설정 HTML(`settingsHtml`). `__DEILEN_STATE__` 에 현재 Config 주입.                                             |
+| GET    | `/api/config?token=`              | 현재 `Config` JSON.                                                                                            |
+| POST   | `/api/config?token=`              | body=`Config`. 검증 후 저장.                                                                                   |
+| POST   | `/api/close?token=`               | body=`{ session_id }`(필수). 세션 종료(서버 종료는 idle/MCP-exit 내부 처리).                                   |
 
 ## 뷰어 페이지 (`pages/viewer/`)
 
@@ -89,4 +90,5 @@ cennad settings 구조 차용. `Config` 폼 매핑:
 - 렌더 HTML 은 서버 sanitize 후 주입([rendering.md](./rendering.md)).
 - Config 검증 실패 400 + `errors[]`, 저장 실패 500. multipart 한도는 [feedback-protocol.md](./feedback-protocol.md).
 - `/assets/<chunk>`: 빌드 매니페스트 allowlist 만 서빙 — 경로 구분자·`..`·인코딩 traversal·`bridge/assets` 외부 심링크 거부, 알려진 확장자만.
+- `/api/image/<sid>/<index>`: viewer.md 가 참조한 `file://` 이미지만(문서 멤버십 = allowlist, 임의 로컬 경로 차단) + 표시 확장자 화이트리스트(png/jpg/jpeg/gif/webp/svg)·`realpath` regular-file·`max_image_mb` 캡. `/assets` 와 달리 토큰 검증 대상.
 - `session_id`: `^[A-Za-z0-9_-]+$` 검증 + sessionStore 등록분만 허용(경로 traversal 차단).

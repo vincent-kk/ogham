@@ -4,18 +4,19 @@
 
 ## Structure
 
-| Path            | Role                                                                  |
-| --------------- | --------------------------------------------------------------------- |
-| `httpServer.ts` | `ensureHttpServer`/`getHttpServer` — 싱글톤 lifecycle(closure)        |
-| `routing/`      | `routes`(디스패치 + token/CSRF 가드) + `routeContext`(organ)          |
-| `handlers/`     | GET `/r/<sid>`·`/api/viewer`·`/assets/<chunk>`, POST `/api/ping` 외   |
-| `utils/`        | sendJson·escapeJsonForHtml·bridgeRoot·resolveAssetPath·loadViewerHtml |
-| `index.ts`      | barrel                                                                |
+| Path            | Role                                                                             |
+| --------------- | -------------------------------------------------------------------------------- |
+| `httpServer.ts` | `ensureHttpServer`/`getHttpServer` — 싱글톤 lifecycle(closure)                   |
+| `routing/`      | `routes`(디스패치 + token/CSRF 가드) + `routeContext`(organ)                     |
+| `handlers/`     | GET `/r/<sid>`·`/api/viewer`·`/api/image`·`/assets/<chunk>`, POST `/api/ping` 외 |
+| `utils/`        | sendJson·escapeJsonForHtml·bridgeRoot·resolveAssetPath·loadViewerHtml            |
+| `index.ts`      | barrel                                                                           |
 
 ## Conventions
 
 - 바인딩 `127.0.0.1` 전용, 포트 `config.preferred_port`(0=동적)
 - 세션 토큰 검증 — **`/assets` 는 면제**(비민감 공개 라이브러리)
+- `/api/image` 는 viewer.md 멤버십 + 토큰으로 로컬 `file://` 만 서빙(임의 경로 차단)
 - POST 는 `application/json` 또는 `multipart/form-data` 만(CSRF)
 - 모든 요청·도구 활동이 `touch()` → idle 타이머 리셋; `idle_shutdown_minutes`(기본 1분) 초과 시 `close()`
 - 뷰어 HTML 은 런타임 로드(`bridge/viewer.html`) — 번들 비대화 회피

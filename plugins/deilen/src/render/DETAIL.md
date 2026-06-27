@@ -8,14 +8,17 @@
 - 코드펜스/mermaid/수식은 **렌더하지 않고 표식만** 남긴다 (클라이언트 lazy-load 대상).
 - 모든 블록 요소에 1-based 원본 라인 앵커를 부여한다.
 - 출력 HTML 은 allowlist sanitize 로 스크립트·이벤트 핸들러·위험 URL 스킴을 제거한다.
+- `file://` 이미지 src 는 `/api/image/<sid>/<i>` 라우트로 치환해 뷰어가 로컬 이미지를 표시할 수 있게 한다(http/https/data/상대 스킴은 불변).
 
 ## API Contracts
 
-- `renderMarkdown(markdown: string): RenderMeta`
+- `renderMarkdown(markdown: string, options?: { imageRewrite?: { sessionId, token } }): RenderMeta`
   - `html`: sanitize 된 base HTML
   - `lineCount`: 원본 markdown 라인 수 (빈 문자열은 0)
-  - `title`: 첫 H1 의 텍스트 (없으면 `""`)
   - `sourceLineIndex`: `Array<{ startLine, endLine }>` — 앵커 가능한 블록 범위 목록
+  - `options.imageRewrite` 지정 시 `file://` 이미지 src 를 `/api/image/<sid>/<i>`(문서 순서 인덱스)로 치환; 그 외 스킴은 불변
+- `walkLocalImages(markdown, visit): void`
+  - `file://` 이미지 src 를 문서 순서로 방문 — 렌더 치환과 동일 인덱스. `/api/image` 서빙이 "이 문서가 참조한 경로" 멤버십을 복원하는 단일 소스
 - `sanitizeHtml(html: string): string`
   - allowlist 외 태그 제거(내부 텍스트 보존), allowlist 외 속성 제거
   - `href`/`src` 위험 스킴(`javascript:` 등) 제거, `img` 만 `data:image/` 허용

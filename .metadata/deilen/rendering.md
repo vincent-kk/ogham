@@ -11,6 +11,15 @@
   - 수식(`$…$`, `$$…$$`): `<span class="deilen-math" data-display="0|1">…원문…</span>` (조판은 클라이언트).
 - sanitize: `render/sanitize/sanitizeHtml.ts` 가 출력 HTML 을 허용 태그/속성 화이트리스트로 정제(2차). Claude 산출이라도 신뢰 경계로 취급.
 
+## 로컬 이미지 (file://)
+
+마크다운의 `![](file://…)` 이미지는 렌더 단계에서 src 를 세션 스코프 `/api/image/<sid>/<i>` 라우트로 치환한다(`render/markdownIt/imageRule.ts`, `env.imageRewrite`). 그래서 `file://` 원본은 sanitize 에 도달하지 않고, 최종 src 는 상대경로라 allowlist 를 통과한다. 통합 동기: 다른 워크스페이스의 분석 그래프(예: r-statistics 산출 PNG/SVG)를 절대경로로 참조해 표시.
+
+- 인덱스 `<i>` 는 문서 내 `file://` 이미지 등장 순서(0-based). 렌더 치환과 `render/utils/walkLocalImages.ts` 가 동일 순회를 공유해 일치한다.
+- `http(s)`/`data:`/상대경로 src 는 변형 없이 통과. POSIX 절대경로(`/abs/…`)는 사이트루트 상대로 해석돼 표시되지 않으므로 `file://` 로 적는다.
+- 서빙은 `/api/image` 라우트가 viewer.md 멤버십(문서가 실제 참조한 경로)·표시 확장자(png/jpg/jpeg/gif/webp/svg)·`realpath`·`max_image_mb` 로 가드한다([web-ui.md](./web-ui.md)).
+- markdown-it `validateLink` 는 `file://` 만 추가 허용(이미지 토큰 생성). `file://` 링크 href 는 sanitize 가 계속 제거한다.
+
 ## source-line 매핑
 
 markdown-it 블록 토큰의 `token.map = [startLine, endLine]` 를 이용한다. core ruler 를 추가해 `nesting !== -1` 이고 `map` 이 있는 토큰에 `token.attrSet('data-source-line', String(map[0]))`, 끝줄은 `data-source-end` 로 주입.

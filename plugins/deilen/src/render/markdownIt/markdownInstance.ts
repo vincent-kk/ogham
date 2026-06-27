@@ -2,6 +2,7 @@ import MarkdownIt from "markdown-it";
 
 import { lineAttrs } from "../utils/lineAttrs.js";
 
+import { imageRule } from "./imageRule.js";
 import { mathBlock } from "./mathBlockRule.js";
 import { mathInline } from "./mathInlineRule.js";
 import { sourceLinePlugin } from "./sourceLinePlugin.js";
@@ -15,12 +16,19 @@ function createMarkdownIt(): MarkdownIt {
   });
   const escapeHtml = markdown.utils.escapeHtml;
 
+  // Allow file:// so local-image tokens are produced; imageRule rewrites their
+  // src to /api/image and sanitize still strips any file:// link href.
+  const defaultValidateLink = markdown.validateLink.bind(markdown);
+  markdown.validateLink = (url) =>
+    /^file:\/\//i.test(url.trim()) || defaultValidateLink(url);
+
   sourceLinePlugin(markdown);
   markdown.inline.ruler.after("escape", "math_inline", mathInline);
   markdown.block.ruler.after("blockquote", "math_block", mathBlock, {
     alt: ["paragraph", "reference", "blockquote", "list"],
   });
   taskList(markdown);
+  imageRule(markdown);
 
   markdown.renderer.rules.fence = (tokens, idx) => {
     const token = tokens[idx];

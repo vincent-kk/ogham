@@ -41,3 +41,17 @@ export const IMAGE_EXT_BY_MIME: Record<string, string> = {
   "image/gif": "gif",
   "image/webp": "webp",
 };
+
+/**
+ * Preview display: local-image file extension -> mime, for the file:// rewrite
+ * served at /api/image. Separate from ALLOWED_IMAGE_MIME (inbound feedback
+ * uploads) so svg display never widens the upload surface.
+ */
+export const DISPLAY_IMAGE_MIME_BY_EXT: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+};

@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { handleClose } from "../handlers/handleClose.js";
 import { handleGetConfig } from "../handlers/handleGetConfig.js";
+import { handleGetImage } from "../handlers/handleGetImage.js";
 import { handleGetSettings } from "../handlers/handleGetSettings.js";
 import { handleGetViewer } from "../handlers/handleGetViewer.js";
 import { handleGetViewerData } from "../handlers/handleGetViewerData.js";
@@ -13,6 +14,7 @@ import { sendJson } from "../utils/sendJson.js";
 import type { RouteContext } from "./routeContext.js";
 
 const VIEWER_PATH = /^\/r\/([^/]+)$/;
+const IMAGE_PATH = /^\/api\/image\/([^/]+)\/(\d+)$/;
 
 interface RouteArgs {
   ctx: RouteContext;
@@ -58,6 +60,16 @@ export function dispatchApiRoute(args: RouteArgs): void {
       void handleGetViewer(
         args.ctx,
         decodeURIComponent(viewerMatch[1]),
+        res,
+      ).catch(args.onError);
+      return;
+    }
+    const imageMatch = IMAGE_PATH.exec(path);
+    if (imageMatch) {
+      void handleGetImage(
+        args.ctx,
+        decodeURIComponent(imageMatch[1]),
+        Number(imageMatch[2]),
         res,
       ).catch(args.onError);
       return;
