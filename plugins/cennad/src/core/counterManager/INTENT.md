@@ -1,6 +1,6 @@
 ## Purpose
 
-`runtime/counter.json` 으로 provider(gemini / codex / antigravity) 호출 횟수 추적. 파일의 `parent_pid` 가 현재 세션 PID 와 다르면 카운트를 0/0/0 으로 간주하고 다음 write 시 갱신 — 세션마다 자동 격리.
+`runtime/counter.json` 으로 provider(codex / antigravity / claude) 호출 횟수 추적. 파일의 `parent_pid` 가 현재 세션 PID 와 다르면 카운트를 0/0/0 으로 간주하고 다음 write 시 갱신 — 세션마다 자동 격리.
 
 ## Structure
 
@@ -13,7 +13,7 @@
 
 ## Conventions
 
-- 디스크 JSON 키는 snake_case (`gemini`, `codex`, `antigravity`, `parent_pid`)
+- 디스크 JSON 키는 snake_case (`codex`, `antigravity`, `claude`, `parent_pid`)
 - `parent_pid` 미스매치 시 카운트는 0/0 으로 취급하고 다음 write 에서 현재 pid 로 갱신
 - +1 은 호출 시도 기준 — CLI 성공·실패 결과와 무관
 - 모든 write 는 `atomicWrite` 경유 (tmp → rename)
@@ -22,7 +22,7 @@
 
 ### Always do
 
-- `parent_pid` 불일치 시 `{ gemini: 0, codex: 0, antigravity: 0 }` 반환 후 다음 write 에서 pid 갱신
+- `parent_pid` 불일치 시 `{ codex: 0, antigravity: 0, claude: 0 }` 반환 후 다음 write 에서 pid 갱신
 - `incrementCounter` 는 `loadCounter` → 수정 → `atomicWrite` 순서로 실행
 
 ### Ask first

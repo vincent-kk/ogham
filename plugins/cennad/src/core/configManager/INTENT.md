@@ -1,6 +1,6 @@
 ## Purpose
 
-`~/.claude/plugins/cennad/config.json` 로드·저장 담당. 파일 누락·Zod 검증 실패 시 `DEFAULT_CONFIG` 로 fallback. legacy 정수 비율 → enabled flag 마이그레이션, gemini⊕antigravity 상호 배제(`normalizeMutualExclusion`), `model_map` deep merge(`mergeModelMap`) 포함.
+`~/.claude/plugins/cennad/config.json` 로드·저장 담당. 파일 누락·Zod 검증 실패 시 `DEFAULT_CONFIG` 로 fallback. legacy 정수 비율 → enabled flag 마이그레이션, `/setup` 진입 시 `pruneConfigFile` 로 구 키 제거·기본값 보완, `model_map` deep merge(`mergeModelMap`) 포함.
 
 ## Structure
 
@@ -10,7 +10,6 @@
 | `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                   |
 | `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (antigravity tier 해석용)                                                   |
 | `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                            |
-| `utils/normalizeMutualExclusion.ts`        | gemini⊕antigravity 충돌 시 antigravity 우선·gemini 비활성화                                               |
 | `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                 |
 | `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                          |
 | `utils/normalizeRatio.ts`                  | legacy 정수 비율 → enabled boolean 정규화                                                                 |
@@ -29,12 +28,12 @@
 
 - Zod 검증 실패 시 DEFAULT_CONFIG fallback + logger.warn 기록
 - saveConfig 저장 전 ConfigSchema.parse 로 재검증
-- gemini·antigravity 동시 활성 config 진입 시 normalizeMutualExclusion 으로 antigravity 우선 처리
+- `/setup` 진입 시 `pruneConfigFile` 로 제거된 provider 키·legacy 값 정리 후 DEFAULT_CONFIG 보완
 
 ### Ask first
 
 - 새 config 키 추가 또는 ConfigSchema 스키마 변경
-- mergeWithDefaults deep-merge 전략 또는 상호 배제 우선순위 변경
+- mergeWithDefaults deep-merge 전략 또는 pruneConfigFile 프루닝 정책 변경
 
 ### Never do
 

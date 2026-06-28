@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { TierSchema } from './conversation.js';
 import {
   AntigravityFlagsSchema,
+  ClaudeFlagsSchema,
+  ClaudeModelMapSchema,
   CodexFlagsSchema,
   TierModelMapSchema,
 } from './dispatch.js';
@@ -27,6 +29,7 @@ export type ProviderRatio = z.infer<typeof ProviderRatioSchema>;
 export const RatioSchema = z.object({
   codex: ProviderRatioSchema,
   antigravity: ProviderRatioSchema,
+  claude: ProviderRatioSchema,
 });
 
 export type Ratio = z.infer<typeof RatioSchema>;
@@ -34,6 +37,7 @@ export type Ratio = z.infer<typeof RatioSchema>;
 export const KeywordsSchema = z.object({
   codex: z.string(),
   antigravity: z.string(),
+  claude: z.string(),
 });
 
 export type Keywords = z.infer<typeof KeywordsSchema>;
@@ -41,15 +45,18 @@ export type Keywords = z.infer<typeof KeywordsSchema>;
 export const OptionFlagsSchema = z.object({
   codex: CodexFlagsSchema,
   antigravity: AntigravityFlagsSchema,
+  claude: ClaudeFlagsSchema,
 });
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
 
-// Per-tier model-name mapping. antigravity serves multiple model families, so it
-// needs an explicit map; codex keeps its env-based modelAlias resolution.
-// TierModelMapSchema lives in dispatch.ts to avoid an import cycle.
+// Per-tier model mapping. antigravity serves multiple model families (string
+// map) and claude maps each tier to a {model, effort} pair; codex keeps its
+// env-based modelAlias resolution and needs no map. The tier-map schemas live in
+// dispatch.ts to avoid an import cycle.
 export const ModelMapSchema = z.object({
   antigravity: TierModelMapSchema,
+  claude: ClaudeModelMapSchema,
 });
 
 export type ModelMap = z.infer<typeof ModelMapSchema>;
@@ -61,6 +68,7 @@ export type ModelMap = z.infer<typeof ModelMapSchema>;
 export const DefaultTierSchema = z.object({
   codex: TierSchema,
   antigravity: TierSchema,
+  claude: TierSchema,
 });
 
 export type DefaultTier = z.infer<typeof DefaultTierSchema>;
@@ -79,6 +87,7 @@ export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
 export const PreambleConfigSchema = z.object({
   codex: z.string(),
   antigravity: z.string(),
+  claude: z.string(),
 });
 
 export type PreambleConfig = z.infer<typeof PreambleConfigSchema>;
@@ -90,6 +99,7 @@ export type RecencyLevel = z.infer<typeof RecencyLevelSchema>;
 export const RecencyFactorConfigSchema = z.object({
   antigravity: RecencyLevelSchema,
   codex: RecencyLevelSchema,
+  claude: RecencyLevelSchema,
 });
 
 export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;

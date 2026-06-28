@@ -1,4 +1,5 @@
 export { antigravityDispatcher } from './antigravity/index.js';
+export { claudeDispatcher } from './claude/index.js';
 export { codexDispatcher } from './codex/index.js';
 export { buildResponse, type BuildResponseArgs } from './entities/envelope.js';
 export { mapError, type MapErrorInput } from './errorMap/index.js';

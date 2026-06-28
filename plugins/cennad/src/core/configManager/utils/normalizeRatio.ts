@@ -9,7 +9,8 @@ export function normalizeRatio(raw: unknown): unknown {
   const a = raw.antigravity;
   if (typeof g === 'number' && typeof c === 'number') {
     // Legacy pre-antigravity integer ratio. The removed gemini provider's weight
-    // migrates onto the antigravity (Google) slot so the user's split is kept.
+    // migrates onto the antigravity (Google) slot so the user's split is kept;
+    // claude takes its default.
     const gw = Math.max(0, Math.floor(g));
     const cw = Math.max(0, Math.floor(c));
     const total = gw + cw;
@@ -18,6 +19,7 @@ export function normalizeRatio(raw: unknown): unknown {
     return {
       codex: { value: 100 - aPct, enabled: cw > 0 },
       antigravity: { value: aPct, enabled: gw > 0 },
+      claude: { ...DEFAULT_CONFIG.ratio.claude },
     };
   }
   return {
@@ -27,5 +29,8 @@ export function normalizeRatio(raw: unknown): unknown {
     antigravity: isPlainObject(a)
       ? { ...DEFAULT_CONFIG.ratio.antigravity, ...a }
       : DEFAULT_CONFIG.ratio.antigravity,
+    claude: isPlainObject(raw.claude)
+      ? { ...DEFAULT_CONFIG.ratio.claude, ...raw.claude }
+      : DEFAULT_CONFIG.ratio.claude,
   };
 }

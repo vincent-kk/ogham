@@ -12,5 +12,6 @@ export function pickPreamble(raw: unknown): PreambleConfig {
       typeof raw.antigravity === 'string'
         ? raw.antigravity
         : defaults.antigravity,
+    claude: typeof raw.claude === 'string' ? raw.claude : defaults.claude,
   };
 }

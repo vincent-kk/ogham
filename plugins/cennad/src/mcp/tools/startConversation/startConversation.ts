@@ -83,6 +83,12 @@ export async function handleStartConversation(
       flags: config.option_flags.antigravity,
       modelMap: config.model_map.antigravity,
     });
+  } else if (input.provider === 'claude') {
+    result = await dispatchers.claude.start({
+      ...base,
+      flags: config.option_flags.claude,
+      modelMap: config.model_map.claude,
+    });
   } else {
     return {
       status: 'failure',

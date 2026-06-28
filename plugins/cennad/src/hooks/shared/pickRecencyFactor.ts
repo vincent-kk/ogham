@@ -17,5 +17,6 @@ export function pickRecencyFactor(raw: unknown): RecencyFactorConfig {
   return {
     codex: pickLevel(raw.codex, defaults.codex),
     antigravity: pickLevel(raw.antigravity, defaults.antigravity),
+    claude: pickLevel(raw.claude, defaults.claude),
   };
 }

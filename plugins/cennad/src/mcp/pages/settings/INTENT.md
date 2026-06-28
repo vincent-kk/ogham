@@ -16,9 +16,9 @@
 - token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달
 - POST body 는 항상 `Content-Type: application/json`
 - CSS 변수로 다크 모드 토큰화
-- Google 슬롯은 gemini·antigravity 중 하나만 활성 (상호 배타). `google_engine` 은 `ratio.antigravity.enabled` 플래그에서 파생되며, 비활성 엔진의 ratio 는 항상 `enabled: false` 로 저장
 - antigravity 활성 시 per-tier 모델 드롭다운(high / mid / low) 표시 — 선택 항목은 `/provider-status` 의 `agyModels` 배열로 동적 바인딩
-- 독립 "MCP Addons" 섹션 (provider 라우팅과 분리) — `addons.youtube` = enabled + language(en/ko) + targets(codex·antigravity). `/save` 가 체크된 대상 CLI 의 MCP 설정(agy mcp_config.json / codex config.toml)에 yt-dlp-mcp 서버를 등록/해제 (cennad 네임스페이스 밖 부수효과). gemini 는 내장 YouTube 로 제외
+- Anthropic(claude) 레인: `permission_mode` 라디오(default/acceptEdits/auto/dontAsk/plan/bypassPermissions) + per-tier model 및 effort 드롭다운 (effort 선택 항목은 선택된 model 에 따라 적응)
+- 독립 "MCP Addons" 섹션 (provider 라우팅과 분리) — `addons.youtube` = enabled + language(en/ko) + targets(codex·antigravity). `/save` 가 체크된 대상 CLI 의 MCP 설정(agy mcp_config.json / codex config.toml)에 yt-dlp-mcp 서버를 등록/해제 (cennad 네임스페이스 밖 부수효과)
 
 ## Boundaries
 

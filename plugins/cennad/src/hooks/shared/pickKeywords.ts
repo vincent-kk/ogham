@@ -12,5 +12,9 @@ export function pickKeywords(raw: unknown): HookConfig['keywords'] {
       typeof raw.antigravity === 'string'
         ? raw.antigravity
         : DEFAULT_CONFIG.keywords.antigravity,
+    claude:
+      typeof raw.claude === 'string'
+        ? raw.claude
+        : DEFAULT_CONFIG.keywords.claude,
   };
 }

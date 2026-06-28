@@ -21,11 +21,13 @@ export function pickRatio(raw: unknown): Ratio {
     return {
       codex: { value: 100 - aPct, enabled: cw > 0 },
       antigravity: { value: aPct, enabled: gw > 0 },
+      claude: { ...DEFAULT_CONFIG.ratio.claude },
     };
   }
 
   return {
     codex: pickProviderRatio(c, DEFAULT_CONFIG.ratio.codex),
     antigravity: pickProviderRatio(a, DEFAULT_CONFIG.ratio.antigravity),
+    claude: pickProviderRatio(raw.claude, DEFAULT_CONFIG.ratio.claude),
   };
 }

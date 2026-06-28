@@ -17,12 +17,13 @@ export function createServer(): McpServer {
     {
       description:
         'Delegate a prompt to an external LLM CLI (codex = code/shell; antigravity = web research & ' +
-        'large context) and return its answer plus a session_id for follow-ups. ' +
-        'The CLI cannot see this Claude conversation — make the prompt self-contained.',
+        'large context; claude = reasoning/writing/analysis) and return its answer plus a session_id ' +
+        'for follow-ups. The CLI cannot see this Claude conversation — make the prompt self-contained.',
       inputSchema: {
         provider: ProviderSchema.describe(
           "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'antigravity' (Google): live web " +
-            "research, large-context synthesis. A disabled provider returns error.code 'disabled'.",
+            "research, large-context synthesis. 'claude' (Anthropic): reasoning, writing, analysis, " +
+            "and review. A disabled provider returns error.code 'disabled'.",
         ),
         prompt: z
           .string()

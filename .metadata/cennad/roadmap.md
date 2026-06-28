@@ -2,7 +2,7 @@
 
 filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가능 단위. 단계 종료 시 `yarn cennad build` 가 통과해야 한다.
 
-프로바이더: `codex`, `gemini`, `antigravity` (3개). `gemini` 와 `antigravity` 는 상호 배타 Google 슬롯 — Gemini CLI 서비스 종료일 2026-06-18 이후 `antigravity` 가 기본. MCP 도구는 3개(`start_conversation`, `continue_conversation`, `open_settings`).
+프로바이더: `codex`, `antigravity`, `claude` (3개). MCP 도구는 3개(`start_conversation`, `continue_conversation`, `open_settings`).
 
 ## Phase 0 — Skeleton
 
@@ -33,7 +33,7 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 1. `src/core/configManager/`: `loadConfig`, `saveConfig` (atomic write + defaults 병합 + Zod 검증).
 2. `src/core/counterManager/`: `loadCounter`, `incrementCounter` (parent-pid 리셋), `getCounter`.
 3. `src/core/projectHash/`: `getProjectHash(cwd)`.
-4. `src/core/sessionStore/`: `createSession`, `getSession` (project_hash 일치 검사 포함), `updateSession`, `pruneExpired` (cennad 매핑 + gemini-cwd / antigravity-cwd 삭제).
+4. `src/core/sessionStore/`: `createSession`, `getSession` (project_hash 일치 검사 포함), `updateSession`, `pruneExpired` (cennad 매핑 + antigravity-cwd 삭제).
 5. `src/core/authToken/`: `generateToken`, `verifyToken`.
 6. `src/core/index.ts` barrel.
 7. 단위 테스트. tmp dir 으로 디스크 격리.
@@ -42,7 +42,7 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 
 1. `src/dispatcher/envelope.ts`, `src/dispatcher/errorMap.ts`.
 2. `src/dispatcher/codex/`: `spawn.ts`, `jsonlParser.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`).
-3. `src/dispatcher/gemini/`: `spawn.ts`, `sessionResolver.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`).
+3. `src/dispatcher/claude/`: `spawn.ts`, `modelAlias.ts`, `index.ts` (`supportedOptions = new Set()`).
 4. `src/dispatcher/antigravity/`: `spawn.ts`, `modelAlias.ts` (config `model_map.antigravity` 읽기), `antigravityDispatcher.ts`, utils(`ensureCwd`, `buildStartArgs`, `buildResumeArgs`, `callAgy`, `parseJsonOutput`, `resolveTranscript`), `index.ts`.
    - CLI 호출 패턴: `agy -p "<prompt>" --output-format json [--sandbox] [--dangerously-skip-permissions] [-m "<model>"]`; resume 시 `--continue` 선두 추가.
    - 세션 격리: `runtime/antigravity-cwd/<sessionId>/` (`0o700`). `externalSessionRef` = cwd 경로. agy 는 headless conversation-id 미발급(Issue #7)이라 cwd 가 세션 핸들.
@@ -76,16 +76,19 @@ filid 빌드 파이프라인을 기준으로 한다. 각 단계는 독립 PR 가
 
 UI 주요 동작:
 
-- **Google 슬롯**: `gemini` / `antigravity` 라디오 토글 — 상호 배타. 저장 시 활성 엔진 `ratio.enabled = true`, 비활성 엔진 `ratio.enabled = false`. `configManager.normalizeMutualExclusion` 이 양쪽 모두 enabled 인 레거시 파일을 antigravity 우선으로 자동 보정.
-- **antigravity 활성 시**: `/provider-status` 응답의 `agyModels` 배열로 per-tier 드롭다운 (high / mid / low) 동적 바인딩 → `config.model_map.antigravity` 저장.
-- **config 키**: `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 모두 `antigravity` 필드 포함 (3-key 구조).
+- **3-lane UI**: `codex` / `antigravity` / `Anthropic(claude)` 각 레인 — enable 토글 + weight 슬라이더(정규화 %).
+- **antigravity 레인**: `/provider-status` 응답의 `agyModels` 배열로 per-tier 드롭다운 (high / mid / low) 동적 바인딩 → `config.model_map.antigravity` 저장.
+- **claude 레인**: `permission_mode` 라디오(6개: default / acceptEdits / auto / dontAsk / plan / bypassPermissions) + per-tier model & effort 드롭다운 → `config.model_map.claude` 저장.
+- **config 키**: `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 모두 `codex` / `antigravity` / `claude` 3-key 구조.
+- `/setup` 열기 시 `pruneConfigFile` 으로 디스크의 `config.json` 에서 삭제된 프로바이더 키·레거시 integer ratio 를 자동 정리.
 
 ## Phase 6 — Skills
 
 1. `skills/setup/SKILL.md`.
 2. `skills/codex/SKILL.md`.
-3. `skills/gemini/SKILL.md`.
-4. `skills/antigravity/SKILL.md`.
+3. `skills/antigravity/SKILL.md`.
+4. `skills/claude/SKILL.md`.
+5. `skills/crosscheck/SKILL.md`.
 
 ## Phase 7 — Hooks (filid 패턴)
 

@@ -4,15 +4,18 @@ export const DEFAULT_CONFIG: Config = {
   ratio: {
     codex: { value: 50, enabled: true },
     antigravity: { value: 50, enabled: true },
+    claude: { value: 50, enabled: true },
   },
   intervention_strength: 0,
   keywords: {
     codex: 'code, refactor, sandbox',
     antigravity: 'research, search, youtube, large-context',
+    claude: 'reasoning, writing, analysis, review',
   },
   option_flags: {
     codex: { yolo: false, sandbox: 'workspace-write' },
     antigravity: { sandbox: false, skip_permissions: false },
+    claude: { permission_mode: 'acceptEdits' },
   },
   model_map: {
     antigravity: {
@@ -20,10 +23,16 @@ export const DEFAULT_CONFIG: Config = {
       mid: 'Gemini 3.5 Flash',
       low: 'Gemini 3.5 Flash',
     },
+    claude: {
+      high: { model: 'opus', effort: 'max' },
+      mid: { model: 'opus', effort: 'high' },
+      low: { model: 'sonnet', effort: 'high' },
+    },
   },
   default_tier: {
     codex: 'mid',
     antigravity: 'mid',
+    claude: 'mid',
   },
   session_ttl_hours: 72,
   spawn_timeout_ms: 10 * 60 * 1000,
@@ -34,10 +43,12 @@ export const DEFAULT_CONFIG: Config = {
   preamble: {
     codex: '',
     antigravity: '',
+    claude: '',
   },
   recency_factor: {
     codex: 'off',
     antigravity: 'auto',
+    claude: 'off',
   },
   addons: {
     youtube: {

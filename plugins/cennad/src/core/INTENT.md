@@ -38,7 +38,7 @@
 
 ### Never do
 
-- 외부 CLI 의 세션 인덱스(`$CODEX_HOME/sessions/`, gemini 글로벌) 삭제·수정
+- 외부 CLI 의 세션 인덱스(`$CODEX_HOME/sessions/`, AGY_HOME, claude 세션) 삭제·수정
 - 동일 키에 lock 없이 동시 write (MCP 단일 프로세스 가정)
 - 인자 없는 전역 경로 mutation
 

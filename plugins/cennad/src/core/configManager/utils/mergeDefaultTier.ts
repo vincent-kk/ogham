@@ -8,5 +8,6 @@ export function mergeDefaultTier(raw: unknown): unknown {
   return {
     codex: raw.codex ?? defaults.codex,
     antigravity: raw.antigravity ?? defaults.antigravity,
+    claude: raw.claude ?? defaults.claude,
   };
 }

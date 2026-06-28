@@ -16,7 +16,7 @@
 ## Conventions
 
 - 호출 0건이면 `No calls this session yet.` 한 줄만 (current/target/drift 생략)
-- `ratio.gemini.enabled` 와 `ratio.codex.enabled` 가 둘 다 false → 마지막 줄에 `Available providers: none — run /setup`
+- `ratio.codex.enabled`, `ratio.antigravity.enabled`, `ratio.claude.enabled` 가 모두 false → 마지막 줄에 `Available providers: none — run /setup`
 - 목표 비율은 disabled 일 때 0% 로 표시 (drift 계산도 0 기준)
 - 반올림은 `Math.round`. current/target/drift 모두 정수 퍼센트
 
