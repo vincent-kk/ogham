@@ -149,23 +149,23 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ### Body — permission_mode
 
-| 값                  | 설명                           |
-| ------------------- | ------------------------------ |
-| `default`           | Claude Code 기본 동작          |
-| `acceptEdits`       | 파일 편집 자동 수락 (기본값)   |
-| `auto`              | 도구 호출 자동 승인            |
-| `dontAsk`           | 권한 요청 없이 진행            |
-| `plan`              | 계획만 출력, 실행 안 함        |
-| `bypassPermissions` | 모든 권한 우회                 |
+| 값                  | 설명                         |
+| ------------------- | ---------------------------- |
+| `default`           | Claude Code 기본 동작        |
+| `acceptEdits`       | 파일 편집 자동 수락 (기본값) |
+| `auto`              | 도구 호출 자동 승인          |
+| `dontAsk`           | 권한 요청 없이 진행          |
+| `plan`              | 계획만 출력, 실행 안 함      |
+| `bypassPermissions` | 모든 권한 우회               |
 
 격리 플래그(`--strict-mcp-config`, `--safe-mode`)는 항상 첨부되어 부모 세션의 MCP 서버·hooks·CLAUDE.md·스킬을 상속하지 않는다.
 
 ### Body — tier
 
-| cennad tier | 모델                                       | effort                                                |
-| ----------- | ------------------------------------------ | ----------------------------------------------------- |
-| `high`      | config `model_map.claude.high.model` (기본 `opus`) | config `model_map.claude.high.effort` (기본 `max`)  |
-| `mid`       | config `model_map.claude.mid.model` (기본 `opus`)  | config `model_map.claude.mid.effort` (기본 `high`)  |
+| cennad tier | 모델                                                | effort                                             |
+| ----------- | --------------------------------------------------- | -------------------------------------------------- |
+| `high`      | config `model_map.claude.high.model` (기본 `opus`)  | config `model_map.claude.high.effort` (기본 `max`) |
+| `mid`       | config `model_map.claude.mid.model` (기본 `opus`)   | config `model_map.claude.mid.effort` (기본 `high`) |
 | `low`       | config `model_map.claude.low.model` (기본 `sonnet`) | config `model_map.claude.low.effort` (기본 `high`) |
 
 모델 aliases: `opus`, `sonnet`, `haiku`, `fable`, `best`, `opus[1m]`, `sonnet[1m]`. effort 스케일: `low` < `medium` < `high` < `xhigh` < `max`. 모델별 effort 상한: opus/fable/best/opus[1m] 전체 5단계; sonnet/sonnet[1m] xhigh 제외; haiku effort 미지원. env override: `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT`.

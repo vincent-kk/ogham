@@ -2,17 +2,17 @@
 
 ## 컴포넌트 책임
 
-| 컴포넌트                                 | 역할                                                                       | 위치                                 |
-| ---------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
-| Hooks                                    | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터)                         | `hooks/`                             |
-| Claude                                   | provider 선택 및 위임 여부 판단 (판단 주체)                                | —                                    |
-| Skill `codex` / `antigravity` / `claude` | Claude 결정 → MCP 도구 호출 매핑                                           | `skills/{codex,antigravity,claude}/` |
-| Skill `crosscheck`                       | codex + antigravity 병렬 호출 + 응답 합성                                  | `skills/crosscheck/`                 |
-| Skill `setup`                            | `open_settings` 호출 → 브라우저 안내                                       | `skills/setup/`                      |
-| MCP Server `tools`                       | provider 디스패치, config/counter/session 보유                             | `src/mcp/`                           |
-| Provider Dispatcher                      | `codex-cli`, `agy`, `claude` 자식 프로세스 실행 + JSON envelope 정규화     | `src/dispatcher/`                    |
-| External CLI                             | 실제 LLM 호출                                                              | 시스템 PATH                          |
-| Web UI                                   | 사용자 설정 편집                                                           | `src/mcp/pages/settings/`            |
+| 컴포넌트                                 | 역할                                                                   | 위치                                 |
+| ---------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------ |
+| Hooks                                    | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터)                     | `hooks/`                             |
+| Claude                                   | provider 선택 및 위임 여부 판단 (판단 주체)                            | —                                    |
+| Skill `codex` / `antigravity` / `claude` | Claude 결정 → MCP 도구 호출 매핑                                       | `skills/{codex,antigravity,claude}/` |
+| Skill `crosscheck`                       | codex + antigravity 병렬 호출 + 응답 합성                              | `skills/crosscheck/`                 |
+| Skill `setup`                            | `open_settings` 호출 → 브라우저 안내                                   | `skills/setup/`                      |
+| MCP Server `tools`                       | provider 디스패치, config/counter/session 보유                         | `src/mcp/`                           |
+| Provider Dispatcher                      | `codex-cli`, `agy`, `claude` 자식 프로세스 실행 + JSON envelope 정규화 | `src/dispatcher/`                    |
+| External CLI                             | 실제 LLM 호출                                                          | 시스템 PATH                          |
+| Web UI                                   | 사용자 설정 편집                                                       | `src/mcp/pages/settings/`            |
 
 ## 디스패치 흐름
 
@@ -153,8 +153,8 @@ config 의 `model_map.claude` 는 tier → `{ model, effort }` 매핑이다. mod
   "model_map": {
     "claude": {
       "high": { "model": "opus", "effort": "max" },
-      "mid":  { "model": "opus", "effort": "high" },
-      "low":  { "model": "sonnet", "effort": "high" }
+      "mid": { "model": "opus", "effort": "high" },
+      "low": { "model": "sonnet", "effort": "high" }
     }
   }
 }

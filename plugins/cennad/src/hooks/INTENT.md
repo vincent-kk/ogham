@@ -6,10 +6,10 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 
 ## Structure
 
-| 모듈            | 이벤트           | 역할                                                                                                           |
-| --------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                                                 |
-| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                                            |
+| 모듈            | 이벤트           | 역할                                                                                     |
+| --------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                           |
+| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                      |
 | `shared` organ  | -                | `paths`, `safeReadJson`, `nowIso`, 공유 config 로더, `pickPreamble`, `pickRecencyFactor` |
 
 ## Conventions

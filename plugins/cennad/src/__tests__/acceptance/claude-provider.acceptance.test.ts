@@ -16,14 +16,7 @@
  */
 import { rm } from 'node:fs/promises';
 
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { CENNAD_HOME } from '../../constants/index.js';
 import {

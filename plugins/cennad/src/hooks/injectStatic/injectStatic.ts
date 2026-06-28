@@ -7,7 +7,9 @@ import { tonePhrase } from './utils/tonePhrase.js';
 export function buildStaticPayload(config: HookConfig): string {
   const r = config.ratio;
   const active = PROVIDER_ORDER.filter((p) => r[p].enabled);
-  const ratioLine = PROVIDER_ORDER.map((p) => `${p} ${r[p].value}%`).join(' · ');
+  const ratioLine = PROVIDER_ORDER.map((p) => `${p} ${r[p].value}%`).join(
+    ' · ',
+  );
   const activeLine =
     active.length === 0 ? 'none — run /setup' : active.join(', ');
   const skillList = active.map((p) => `/cennad:${p}`).join(' and ');

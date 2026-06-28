@@ -41,12 +41,24 @@ interface Config {
   option_flags: {
     codex: { yolo: boolean; sandbox: string };
     antigravity: { sandbox: boolean; skip_permissions: boolean };
-    claude: { permission_mode: 'default' | 'acceptEdits' | 'auto' | 'dontAsk' | 'plan' | 'bypassPermissions' }; // 기본 'acceptEdits'
+    claude: {
+      permission_mode:
+        | "default"
+        | "acceptEdits"
+        | "auto"
+        | "dontAsk"
+        | "plan"
+        | "bypassPermissions";
+    }; // 기본 'acceptEdits'
   };
   model_map: {
     antigravity: { high: string; mid: string; low: string };
     // 기본: { high: "Gemini 3.1 Pro", mid: "Claude Sonnet 4.5", low: "Gemini 3.5 Flash" }
-    claude: { high: { model: string; effort: string }; mid: { model: string; effort: string }; low: { model: string; effort: string } };
+    claude: {
+      high: { model: string; effort: string };
+      mid: { model: string; effort: string };
+      low: { model: string; effort: string };
+    };
     // 기본: { high: { model: "opus", effort: "max" }, mid: { model: "opus", effort: "high" }, low: { model: "sonnet", effort: "high" } }
   };
   session_ttl_hours: number; // 기본 72

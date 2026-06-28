@@ -24,8 +24,8 @@
 ### `buildStartArgs(args, resolved) / buildResumeArgs(args, resolved)`
 
 - start argv: `-p <prompt> --output-format json --session-id <id> --permission-mode
-  <m> --model <model> [--effort <e>] [--fallback-model <chain>] --strict-mcp-config
-  --safe-mode`.
+<m> --model <model> [--effort <e>] [--fallback-model <chain>] --strict-mcp-config
+--safe-mode`.
 - resume argv: `--session-id` 대신 `--resume <ref>`, `--fallback-model` 미부착.
 
 ### `parseResult(stdout): { response, error }`

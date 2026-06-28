@@ -57,11 +57,11 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 ## Tier
 
-| tier   | resolves to                                              |
-| ------ | ------------------------------------------------------- |
-| `high` | the model + effort mapped to this tier in `/setup`      |
-| `mid`  | the model + effort mapped to this tier in `/setup`      |
-| `low`  | the model + effort mapped to this tier in `/setup`      |
+| tier   | resolves to                                        |
+| ------ | -------------------------------------------------- |
+| `high` | the model + effort mapped to this tier in `/setup` |
+| `mid`  | the model + effort mapped to this tier in `/setup` |
+| `low`  | the model + effort mapped to this tier in `/setup` |
 
 Each tier maps to a `{model, effort}` pair configured in `/setup` (per-tier model
 and effort dropdowns) and stored in cennad config (`model_map.claude`). Effort

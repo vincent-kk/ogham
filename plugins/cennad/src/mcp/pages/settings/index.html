@@ -23,9 +23,9 @@
         <section class="section">
           <h2 class="section-title">Providers</h2>
           <p class="section-help">
-            Set each provider's weight, click a provider to enable or disable it,
-            or the gear to reveal advanced flags. Weights are normalized across
-            enabled providers.
+            Set each provider's weight, click a provider to enable or disable
+            it, or the gear to reveal advanced flags. Weights are normalized
+            across enabled providers.
           </p>
 
           <div class="ratio-panel" id="ratio-panel">
@@ -48,9 +48,15 @@
                 </span>
                 <span class="provider-meta">
                   <span class="provider-name">codex</span>
-                  <span class="provider-hint" id="codex-hint">click to toggle</span>
+                  <span class="provider-hint" id="codex-hint"
+                    >click to toggle</span
+                  >
                 </span>
-                <span class="provider-summary" id="summary-codex" aria-hidden="true"></span>
+                <span
+                  class="provider-summary"
+                  id="summary-codex"
+                  aria-hidden="true"
+                ></span>
                 <output id="codex-pct" class="provider-pct">50%</output>
               </button>
               <button
@@ -63,65 +69,186 @@
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 </span>
               </button>
             </div>
             <p class="install-hint" id="codex-install-hint" hidden>
-              Install: <code>npm install -g @openai/codex</code> — reload after installing.
+              Install: <code>npm install -g @openai/codex</code> — reload after
+              installing.
             </p>
             <div class="ratio-slider-wrap">
-              <input id="ratio-codex" type="range" min="0" max="100" step="1" value="50" aria-label="codex weight" />
+              <input
+                id="ratio-codex"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                aria-label="codex weight"
+              />
             </div>
-            <div class="advanced-panel" id="advanced-panel-codex" role="region" aria-labelledby="advanced-toggle-codex" hidden>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-codex"
+              role="region"
+              aria-labelledby="advanced-toggle-codex"
+              hidden
+            >
               <div class="advanced-panel-inner">
                 <label class="field">
                   <span>trigger keywords</span>
-                  <textarea id="kw-codex" rows="1" placeholder="comma-separated, e.g. code, refactor, sandbox"></textarea>
-                  <span class="flag-hint">Hooks suggest codex when these appear in the prompt.</span>
+                  <textarea
+                    id="kw-codex"
+                    rows="1"
+                    placeholder="comma-separated, e.g. code, refactor, sandbox"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest codex when these appear in the prompt.</span
+                  >
                 </label>
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="default-tier-codex" value="high" /><span>high</span></label>
-                    <label class="radio"><input type="radio" name="default-tier-codex" value="mid" /><span>mid <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="default-tier-codex" value="low" /><span>low</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-codex"
+                        value="low"
+                      /><span>low</span></label
+                    >
                   </div>
-                  <p class="flag-hint">Tier applied when a dispatch omits an explicit tier. Higher is stronger but more rate-limit/budget-prone — mid suits almost all work.</p>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Higher
+                    is stronger but more rate-limit/budget-prone — mid suits
+                    almost all work.
+                  </p>
                 </div>
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="recency-codex" value="off" /><span>off <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="recency-codex" value="auto" /><span>auto</span></label>
-                    <label class="radio"><input type="radio" name="recency-codex" value="strict" /><span>strict</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="off"
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-codex"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
                   </div>
-                  <p class="flag-hint"><code>auto</code> recommends source-checking for time-sensitive facts. <code>strict</code> requires search-verification with citations or an "unverifiable" fallback. codex defaults to off to prioritize cache reuse.</p>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback. codex defaults to off to prioritize cache reuse.
+                  </p>
                 </div>
                 <label class="field">
                   <span>prompt preamble</span>
-                  <textarea id="preamble-codex" rows="2" placeholder="e.g. Prefer TypeScript."></textarea>
+                  <textarea
+                    id="preamble-codex"
+                    rows="2"
+                    placeholder="e.g. Prefer TypeScript."
+                  ></textarea>
                 </label>
                 <hr class="advanced-divider" />
                 <label class="toggle flag-row">
                   <input id="codex-yolo" type="checkbox" />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
                   <span class="toggle-label">Skip approvals (--yolo)</span>
-                  <span class="flag-desc">bypass approvals + sandbox (danger)</span>
+                  <span class="flag-desc"
+                    >bypass approvals + sandbox (danger)</span
+                  >
                 </label>
                 <div class="flag-field" id="codex-sandbox-wrap">
                   <span class="flag-field-label">sandbox</span>
-                  <p class="flag-hint" id="codex-sandbox-hint" hidden>Disabled — <code>yolo</code> bypasses the sandbox.</p>
+                  <p class="flag-hint" id="codex-sandbox-hint" hidden>
+                    Disabled — <code>yolo</code> bypasses the sandbox.
+                  </p>
                   <div class="radio-row" id="codex-sandbox-radio">
-                    <label class="radio"><input type="radio" name="codex-sandbox" value="read-only" /><span>read-only</span></label>
-                    <label class="radio"><input type="radio" name="codex-sandbox" value="workspace-write" /><span>workspace-write</span></label>
-                    <label class="radio"><input type="radio" name="codex-sandbox" value="danger-full-access" /><span>Full access — danger</span></label>
-                    <label class="radio"><input type="radio" name="codex-sandbox" value="off" /><span>off</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="codex-sandbox"
+                        value="read-only"
+                      /><span>read-only</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="codex-sandbox"
+                        value="workspace-write"
+                      /><span>workspace-write</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="codex-sandbox"
+                        value="danger-full-access"
+                      /><span>Full access — danger</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="codex-sandbox"
+                        value="off"
+                      /><span>off</span></label
+                    >
                   </div>
-                  <span class="warning-inline" id="codex-full-access-warning" hidden>&#9888; Full filesystem access — only use in a trusted environment.</span>
+                  <span
+                    class="warning-inline"
+                    id="codex-full-access-warning"
+                    hidden
+                    >&#9888; Full filesystem access — only use in a trusted
+                    environment.</span
+                  >
                 </div>
               </div>
             </div>
@@ -138,14 +265,22 @@
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-0.013z" />
+                    <path
+                      d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814C17.503 2.988 15.139 2 12.545 2 7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-0.013z"
+                    />
                   </svg>
                 </span>
                 <span class="provider-meta">
                   <span class="provider-name">antigravity</span>
-                  <span class="provider-hint" id="antigravity-hint">click to toggle</span>
+                  <span class="provider-hint" id="antigravity-hint"
+                    >click to toggle</span
+                  >
                 </span>
-                <span class="provider-summary" id="summary-antigravity" aria-hidden="true"></span>
+                <span
+                  class="provider-summary"
+                  id="summary-antigravity"
+                  aria-hidden="true"
+                ></span>
                 <output id="antigravity-pct" class="provider-pct">50%</output>
               </button>
               <button
@@ -158,76 +293,199 @@
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 </span>
               </button>
             </div>
             <p class="install-hint" id="antigravity-install-hint" hidden>
-              Install: <code>curl -fsSL https://antigravity.google/cli/install.sh | bash</code> — reload after installing, then sign in with <code>agy</code>.
+              Install:
+              <code
+                >curl -fsSL https://antigravity.google/cli/install.sh |
+                bash</code
+              >
+              — reload after installing, then sign in with <code>agy</code>.
             </p>
             <div class="ratio-slider-wrap">
-              <input id="ratio-antigravity" type="range" min="0" max="100" step="1" value="50" aria-label="antigravity weight" />
+              <input
+                id="ratio-antigravity"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                aria-label="antigravity weight"
+              />
             </div>
-            <div class="advanced-panel" id="advanced-panel-antigravity" role="region" aria-labelledby="advanced-toggle-antigravity" hidden>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-antigravity"
+              role="region"
+              aria-labelledby="advanced-toggle-antigravity"
+              hidden
+            >
               <div class="advanced-panel-inner">
                 <label class="field">
                   <span>trigger keywords</span>
-                  <textarea id="kw-antigravity" rows="1" placeholder="comma-separated, e.g. research, search, large-context"></textarea>
-                  <span class="flag-hint">Hooks suggest antigravity when these appear in the prompt.</span>
+                  <textarea
+                    id="kw-antigravity"
+                    rows="1"
+                    placeholder="comma-separated, e.g. research, search, large-context"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest antigravity when these appear in the
+                    prompt.</span
+                  >
                 </label>
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="default-tier-antigravity" value="high" /><span>high</span></label>
-                    <label class="radio"><input type="radio" name="default-tier-antigravity" value="mid" /><span>mid <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="default-tier-antigravity" value="low" /><span>low</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-antigravity"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-antigravity"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-antigravity"
+                        value="low"
+                      /><span>low</span></label
+                    >
                   </div>
-                  <p class="flag-hint">Tier applied when a dispatch omits an explicit tier. Higher is stronger but more rate-limit/budget-prone — mid suits almost all work.</p>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Higher
+                    is stronger but more rate-limit/budget-prone — mid suits
+                    almost all work.
+                  </p>
                 </div>
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="recency-antigravity" value="off" /><span>off</span></label>
-                    <label class="radio"><input type="radio" name="recency-antigravity" value="auto" /><span>auto <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="recency-antigravity" value="strict" /><span>strict</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-antigravity"
+                        value="off"
+                      /><span>off</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-antigravity"
+                        value="auto"
+                      /><span
+                        >auto
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-antigravity"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
                   </div>
-                  <p class="flag-hint"><code>auto</code> recommends source-checking for time-sensitive facts. <code>strict</code> requires search-verification with citations or an "unverifiable" fallback. Antigravity has web-tool access by default, so auto is recommended for recency.</p>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback. Antigravity has web-tool access by default, so
+                    auto is recommended for recency.
+                  </p>
                 </div>
                 <label class="field">
                   <span>prompt preamble</span>
-                  <textarea id="preamble-antigravity" rows="2" placeholder="e.g. Always answer in Korean."></textarea>
+                  <textarea
+                    id="preamble-antigravity"
+                    rows="2"
+                    placeholder="e.g. Always answer in Korean."
+                  ></textarea>
                 </label>
                 <hr class="advanced-divider" />
                 <label class="toggle flag-row">
                   <input id="antigravity-sandbox" type="checkbox" disabled />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                  <span class="toggle-label">Isolated execution (--sandbox) — disabled</span>
-                  <span class="flag-desc">--sandbox can drop agy's output in non-interactive mode, so it is not used</span>
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Isolated execution (--sandbox) — disabled</span
+                  >
+                  <span class="flag-desc"
+                    >--sandbox can drop agy's output in non-interactive mode, so
+                    it is not used</span
+                  >
                 </label>
                 <label class="toggle flag-row">
                   <input id="antigravity-skip-perms" type="checkbox" />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
-                  <span class="toggle-label">Skip permissions (--dangerously-skip-permissions)</span>
-                  <span class="flag-desc">bypass all approvals incl. your Deny list (danger)</span>
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Skip permissions (--dangerously-skip-permissions)</span
+                  >
+                  <span class="flag-desc"
+                    >bypass all approvals incl. your Deny list (danger)</span
+                  >
                 </label>
-                <p class="flag-hint">Antigravity has no container sandbox. Permission Allow/Deny/Ask lists are managed inside agy via <code>/permissions</code>; cennad follows your agy <code>settings.json</code>. Leaving "skip permissions" off keeps your Deny list as the safety net.</p>
+                <p class="flag-hint">
+                  Antigravity has no container sandbox. Permission
+                  Allow/Deny/Ask lists are managed inside agy via
+                  <code>/permissions</code>; cennad follows your agy
+                  <code>settings.json</code>. Leaving "skip permissions" off
+                  keeps your Deny list as the safety net.
+                </p>
                 <div class="tier-model-map">
                   <p class="flag-field-label">per-tier model mapping</p>
-                  <p class="flag-hint">Antigravity serves multiple model families. Map each tier to a model. Options come from <code>agy models</code> (run agy and sign in to populate them).</p>
+                  <p class="flag-hint">
+                    Antigravity serves multiple model families. Map each tier to
+                    a model. Options come from <code>agy models</code> (run agy
+                    and sign in to populate them).
+                  </p>
                   <div class="tier-field">
                     <label for="model-antigravity-high">high</label>
-                    <select id="model-antigravity-high" class="tier-select"></select>
+                    <select
+                      id="model-antigravity-high"
+                      class="tier-select"
+                    ></select>
                   </div>
                   <div class="tier-field">
                     <label for="model-antigravity-mid">mid</label>
-                    <select id="model-antigravity-mid" class="tier-select"></select>
+                    <select
+                      id="model-antigravity-mid"
+                      class="tier-select"
+                    ></select>
                   </div>
                   <div class="tier-field">
                     <label for="model-antigravity-low">low</label>
-                    <select id="model-antigravity-low" class="tier-select"></select>
+                    <select
+                      id="model-antigravity-low"
+                      class="tier-select"
+                    ></select>
                   </div>
                 </div>
               </div>
@@ -245,14 +503,22 @@
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z" />
+                    <path
+                      d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z"
+                    />
                   </svg>
                 </span>
                 <span class="provider-meta">
-                  <span class="provider-name">Anthropic</span>
-                  <span class="provider-hint" id="claude-hint">click to toggle</span>
+                  <span class="provider-name">Claude</span>
+                  <span class="provider-hint" id="claude-hint"
+                    >click to toggle</span
+                  >
                 </span>
-                <span class="provider-summary" id="summary-claude" aria-hidden="true"></span>
+                <span
+                  class="provider-summary"
+                  id="summary-claude"
+                  aria-hidden="true"
+                ></span>
                 <output id="claude-pct" class="provider-pct">50%</output>
               </button>
               <button
@@ -265,69 +531,209 @@
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 </span>
               </button>
             </div>
             <p class="install-hint" id="claude-install-hint" hidden>
-              Install: <code>npm install -g @anthropic-ai/claude-code</code> — reload after installing.
+              Install: <code>npm install -g @anthropic-ai/claude-code</code> —
+              reload after installing.
             </p>
             <div class="ratio-slider-wrap">
-              <input id="ratio-claude" type="range" min="0" max="100" step="1" value="50" aria-label="Anthropic weight" />
+              <input
+                id="ratio-claude"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                aria-label="Anthropic weight"
+              />
             </div>
-            <div class="advanced-panel" id="advanced-panel-claude" role="region" aria-labelledby="advanced-toggle-claude" hidden>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-claude"
+              role="region"
+              aria-labelledby="advanced-toggle-claude"
+              hidden
+            >
               <div class="advanced-panel-inner">
                 <label class="field">
                   <span>trigger keywords</span>
-                  <textarea id="kw-claude" rows="1" placeholder="comma-separated, e.g. reasoning, writing, analysis, review"></textarea>
-                  <span class="flag-hint">Hooks suggest Anthropic when these appear in the prompt.</span>
+                  <textarea
+                    id="kw-claude"
+                    rows="1"
+                    placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest Anthropic when these appear in the
+                    prompt.</span
+                  >
                 </label>
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="default-tier-claude" value="high" /><span>high</span></label>
-                    <label class="radio"><input type="radio" name="default-tier-claude" value="mid" /><span>mid <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="default-tier-claude" value="low" /><span>low</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="low"
+                      /><span>low</span></label
+                    >
                   </div>
-                  <p class="flag-hint">Tier applied when a dispatch omits an explicit tier. Each tier maps to a model + effort below.</p>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Each
+                    tier maps to a model + effort below.
+                  </p>
                 </div>
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
-                    <label class="radio"><input type="radio" name="recency-claude" value="off" /><span>off <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="recency-claude" value="auto" /><span>auto</span></label>
-                    <label class="radio"><input type="radio" name="recency-claude" value="strict" /><span>strict</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="off"
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
                   </div>
-                  <p class="flag-hint"><code>auto</code> recommends source-checking for time-sensitive facts. <code>strict</code> requires search-verification with citations or an "unverifiable" fallback.</p>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                  </p>
                 </div>
                 <label class="field">
                   <span>prompt preamble</span>
-                  <textarea id="preamble-claude" rows="2" placeholder="e.g. Be concise."></textarea>
+                  <textarea
+                    id="preamble-claude"
+                    rows="2"
+                    placeholder="e.g. Be concise."
+                  ></textarea>
                 </label>
                 <hr class="advanced-divider" />
                 <div class="flag-field">
                   <span class="flag-field-label">permission mode</span>
                   <div class="radio-row" id="claude-permission-radio">
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="default" /><span>default</span></label>
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="acceptEdits" /><span>acceptEdits <small class="default-marker">(default)</small></span></label>
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="auto" /><span>auto</span></label>
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="dontAsk" /><span>dontAsk</span></label>
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="plan" /><span>plan</span></label>
-                    <label class="radio"><input type="radio" name="claude-permission-mode" value="bypassPermissions" /><span>bypassPermissions — danger</span></label>
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="default"
+                      /><span>default</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="acceptEdits"
+                      /><span
+                        >acceptEdits
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="dontAsk"
+                      /><span>dontAsk</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="plan"
+                      /><span>plan</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="bypassPermissions"
+                      /><span>bypassPermissions — danger</span></label
+                    >
                   </div>
-                  <span class="warning-inline" id="claude-bypass-warning" hidden>&#9888; bypassPermissions skips all approvals — only use in a trusted environment.</span>
-                  <p class="flag-hint">claude-code has no sandbox; isolation is permission-based. cennad always adds <code>--strict-mcp-config</code> and <code>--safe-mode</code> so the child never inherits this session's MCP servers, hooks, or CLAUDE.md.</p>
+                  <span class="warning-inline" id="claude-bypass-warning" hidden
+                    >&#9888; bypassPermissions skips all approvals — only use in
+                    a trusted environment.</span
+                  >
+                  <p class="flag-hint">
+                    claude-code has no sandbox; isolation is permission-based.
+                    cennad always adds <code>--strict-mcp-config</code> and
+                    <code>--safe-mode</code> so the child never inherits this
+                    session's MCP servers, hooks, or CLAUDE.md.
+                  </p>
                 </div>
                 <div class="tier-model-map">
                   <p class="flag-field-label">per-tier model &amp; effort</p>
-                  <p class="flag-hint">Map each tier to a model and reasoning effort. Effort options adapt to the model (haiku has none; sonnet skips xhigh). Over-cap requests are silently downgraded by claude-code.</p>
+                  <p class="flag-hint">
+                    Map each tier to a model and reasoning effort. Effort
+                    options adapt to the model (haiku has none; sonnet skips
+                    xhigh). Over-cap requests are silently downgraded by
+                    claude-code.
+                  </p>
                   <div class="tier-field">
                     <label for="model-claude-high">high</label>
                     <select id="model-claude-high" class="tier-select"></select>
-                    <select id="effort-claude-high" class="tier-select"></select>
+                    <select
+                      id="effort-claude-high"
+                      class="tier-select"
+                    ></select>
                   </div>
                   <div class="tier-field">
                     <label for="model-claude-mid">mid</label>
@@ -343,7 +749,9 @@
               </div>
             </div>
 
-            <p id="ratio-warn" class="ratio-warn" hidden>At least one provider must be enabled.</p>
+            <p id="ratio-warn" class="ratio-warn" hidden>
+              At least one provider must be enabled.
+            </p>
           </div>
         </section>
 
@@ -357,7 +765,9 @@
           <div class="addon-row">
             <label class="toggle">
               <input id="youtube-enabled" type="checkbox" />
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-track"
+                ><span class="toggle-thumb"></span
+              ></span>
               <span class="toggle-label">YouTube (yt-dlp)</span>
             </label>
             <button
@@ -370,8 +780,17 @@
               title="YouTube addon settings"
             >
               <span class="advanced-toggle-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                  />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </span>
@@ -383,12 +802,20 @@
             configure it.
           </p>
 
-          <div class="advanced-panel" id="youtube-advanced-panel" role="region" aria-labelledby="youtube-advanced-toggle" hidden>
+          <div
+            class="advanced-panel"
+            id="youtube-advanced-panel"
+            role="region"
+            aria-labelledby="youtube-advanced-toggle"
+            hidden
+          >
             <div class="advanced-panel-inner">
               <p class="addon-panel-title">
                 <span class="addon-panel-mark" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                    <path
+                      d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
+                    />
                   </svg>
                 </span>
                 <span>mcp settings</span>
@@ -397,23 +824,50 @@
               <div class="flag-field" id="youtube-detail-wrap">
                 <span class="flag-field-label">transcript language</span>
                 <div class="radio-row">
-                  <label class="radio"><input type="radio" name="youtube-language" value="en" /><span>en <small class="default-marker">(default)</small></span></label>
-                  <label class="radio"><input type="radio" name="youtube-language" value="ko" /><span>ko</span></label>
+                  <label class="radio"
+                    ><input
+                      type="radio"
+                      name="youtube-language"
+                      value="en"
+                    /><span
+                      >en <small class="default-marker">(default)</small></span
+                    ></label
+                  >
+                  <label class="radio"
+                    ><input
+                      type="radio"
+                      name="youtube-language"
+                      value="ko"
+                    /><span>ko</span></label
+                  >
                 </div>
-                <p class="flag-hint">Sets <code>YTDLP_LANG</code> — the title / metadata language and the transcript fallback when a video has multiple caption tracks.</p>
+                <p class="flag-hint">
+                  Sets <code>YTDLP_LANG</code> — the title / metadata language
+                  and the transcript fallback when a video has multiple caption
+                  tracks.
+                </p>
 
                 <span class="flag-field-label">install on</span>
                 <label class="toggle flag-row">
                   <input id="youtube-target-codex" type="checkbox" />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
                   <span class="toggle-label">codex</span>
-                  <span class="flag-desc">adds the server to <code>~/.codex/config.toml</code> via <code>codex mcp add</code></span>
+                  <span class="flag-desc"
+                    >adds the server to <code>~/.codex/config.toml</code> via
+                    <code>codex mcp add</code></span
+                  >
                 </label>
                 <label class="toggle flag-row">
                   <input id="youtube-target-antigravity" type="checkbox" />
-                  <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
                   <span class="toggle-label">antigravity</span>
-                  <span class="flag-desc">registers the server in agy's global mcp_config.json</span>
+                  <span class="flag-desc"
+                    >registers the server in agy's global mcp_config.json</span
+                  >
                 </label>
               </div>
             </div>
@@ -422,7 +876,9 @@
 
         <section class="section">
           <h2 class="section-title">Intervention strength</h2>
-          <p class="section-help">How aggressively cennad recommends delegation in injected context.</p>
+          <p class="section-help">
+            How aggressively cennad recommends delegation in injected context.
+          </p>
           <input id="strength" type="range" min="-2" max="2" step="1" />
           <div class="ticks">
             <span data-value="-2">Subtle</span>
@@ -445,16 +901,29 @@
 
         <section class="section">
           <h2 class="section-title">CLI spawn timeout</h2>
-          <p class="section-help">Hard timeout (ms) for each provider CLI invocation. Hung processes are killed and surface as <code>error.code: network</code>.</p>
+          <p class="section-help">
+            Hard timeout (ms) for each provider CLI invocation. Hung processes
+            are killed and surface as <code>error.code: network</code>.
+          </p>
           <label class="field">
             <span>ms (1000–1800000)</span>
-            <input id="spawn-timeout-ms" type="number" min="1000" max="1800000" step="1000" />
+            <input
+              id="spawn-timeout-ms"
+              type="number"
+              min="1000"
+              max="1800000"
+              step="1000"
+            />
           </label>
         </section>
 
         <section class="section">
           <h2 class="section-title">Artifacts</h2>
-          <p class="section-help">Mirror successful responses to disk as markdown files with YAML front-matter. Useful for PR attachment and session review. <code>artifact_path</code> is added to the envelope on success.</p>
+          <p class="section-help">
+            Mirror successful responses to disk as markdown files with YAML
+            front-matter. Useful for PR attachment and session review.
+            <code>artifact_path</code> is added to the envelope on success.
+          </p>
           <label class="toggle">
             <input id="artifacts-enabled" type="checkbox" />
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
@@ -463,16 +932,36 @@
           <div class="flag-field" id="artifacts-location-wrap">
             <span class="flag-field-label">location</span>
             <div class="radio-row">
-              <label class="radio"><input type="radio" name="artifacts-location" value="project" /><span>project</span></label>
-              <label class="radio"><input type="radio" name="artifacts-location" value="user" /><span>user</span></label>
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="artifacts-location"
+                  value="project"
+                /><span>project</span></label
+              >
+              <label class="radio"
+                ><input
+                  type="radio"
+                  name="artifacts-location"
+                  value="user"
+                /><span>user</span></label
+              >
             </div>
-            <p class="flag-hint"><code>project</code> → <code>&lt;cwd&gt;/.cennad/artifacts/</code>. <code>user</code> → <code>~/.claude/plugins/cennad/artifacts/&lt;projectHash&gt;/</code>.</p>
+            <p class="flag-hint">
+              <code>project</code> →
+              <code>&lt;cwd&gt;/.cennad/artifacts/</code>. <code>user</code> →
+              <code
+                >~/.claude/plugins/cennad/artifacts/&lt;projectHash&gt;/</code
+              >.
+            </p>
           </div>
         </section>
 
         <div class="actions">
           <button id="save" type="submit" class="btn btn-primary">Save</button>
-          <button id="save-close" type="button" class="btn btn-secondary">Save &amp; Close</button>
+          <button id="save-close" type="button" class="btn btn-secondary">
+            Save &amp; Close
+          </button>
         </div>
       </form>
 

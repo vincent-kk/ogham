@@ -6,11 +6,11 @@ claude-code CLI(`claude -p`) 어댑터. `--session-id` 로 cennad sessionId 를 
 
 ## Structure
 
-| File / Path          | Role                                                                  |
-| -------------------- | -------------------------------------------------------------------- |
-| `operations/`        | `claudeDispatcher`(start/resume), `resolveTier`(model_map.claude 소비), `spawn` |
-| `utils/`             | `buildStartArgs`·`buildResumeArgs`·`parseResult`(단일 JSON)·`dispatch` |
-| `index.ts`           | `export { claudeDispatcher }` barrel                                 |
+| File / Path   | Role                                                                            |
+| ------------- | ------------------------------------------------------------------------------- |
+| `operations/` | `claudeDispatcher`(start/resume), `resolveTier`(model_map.claude 소비), `spawn` |
+| `utils/`      | `buildStartArgs`·`buildResumeArgs`·`parseResult`(단일 JSON)·`dispatch`          |
+| `index.ts`    | `export { claudeDispatcher }` barrel                                            |
 
 ## Conventions
 

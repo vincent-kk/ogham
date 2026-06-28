@@ -97,8 +97,10 @@ export interface DispatchOptions<F = unknown, M = TierModelMap> {
   modelMap?: M;
 }
 
-export interface DispatchResumeOptions<F = unknown, M = TierModelMap>
-  extends DispatchOptions<F, M> {
+export interface DispatchResumeOptions<
+  F = unknown,
+  M = TierModelMap,
+> extends DispatchOptions<F, M> {
   externalSessionRef: string;
 }
 

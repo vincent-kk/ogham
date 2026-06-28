@@ -12,7 +12,10 @@ import { pickStrength } from '../pickStrength.js';
 describe('pickProviderRatio', () => {
   it('extracts value and enabled from a valid object', () => {
     expect(
-      pickProviderRatio({ value: 70, enabled: true }, DEFAULT_CONFIG.ratio.codex),
+      pickProviderRatio(
+        { value: 70, enabled: true },
+        DEFAULT_CONFIG.ratio.codex,
+      ),
     ).toEqual({ value: 70, enabled: true });
   });
 

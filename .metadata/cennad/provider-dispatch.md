@@ -193,15 +193,15 @@ function buildResponse(args: {
 
 ## Error mapping — `dispatcher/errorMap.ts`
 
-| 신호                                   | code                                                                         |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| exit 127 / `ENOENT`                    | `cli_error` (CLI not on PATH)                                                |
-| exit 42 (codex bad args)               | `cli_error`                                                                  |
-| exit 73 (lock busy)                    | `cli_error`                                                                  |
-| HTTP 401 / 403 in stderr               | `auth`                                                                       |
-| HTTP 429 in stderr                     | `rate_limit`                                                                 |
-| `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network`                                                                    |
-| 그 외                                  | `unknown`                                                                    |
+| 신호                                   | code                          |
+| -------------------------------------- | ----------------------------- |
+| exit 127 / `ENOENT`                    | `cli_error` (CLI not on PATH) |
+| exit 42 (codex bad args)               | `cli_error`                   |
+| exit 73 (lock busy)                    | `cli_error`                   |
+| HTTP 401 / 403 in stderr               | `auth`                        |
+| HTTP 429 in stderr                     | `rate_limit`                  |
+| `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND` | `network`                     |
+| 그 외                                  | `unknown`                     |
 
 codex / antigravity / claude 세 provider 가 동일한 errorMap 을 공유한다.
 
