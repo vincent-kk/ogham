@@ -1,12 +1,13 @@
 import type {
   AntigravityFlags,
+  ClaudeFlags,
+  ClaudeModelMap,
   CodexFlags,
   Dispatcher,
-  GeminiFlags,
 } from '../../types/index.js';
 
 export interface Dispatchers {
   codex: Dispatcher<CodexFlags>;
-  gemini: Dispatcher<GeminiFlags>;
   antigravity: Dispatcher<AntigravityFlags>;
+  claude: Dispatcher<ClaudeFlags, ClaudeModelMap>;
 }

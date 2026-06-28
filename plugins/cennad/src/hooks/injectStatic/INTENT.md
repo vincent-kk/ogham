@@ -2,7 +2,7 @@
 
 ## Purpose
 
-세션 시작 시 `~/.claude/plugins/cennad/config.json` 을 읽어 provider 비율·intervention strength·키워드·라우팅 가이드를 `additionalContext` 로 1회 출력한다. config 가 없거나 파싱 실패하면 defaults 로 진행 — 세션을 절대 차단하지 않는다.
+세션 시작 시 `${CLAUDE_PLUGIN_DATA}/config.json` 을 읽어 provider 비율·intervention strength·키워드·라우팅 가이드를 `additionalContext` 로 1회 출력한다. MCP 최초 이전 전에는 legacy config를 fallback으로 읽는다. config 가 없거나 파싱 실패하면 defaults 로 진행 — 세션을 절대 차단하지 않는다.
 
 ## Structure
 

@@ -44,7 +44,7 @@ describe('buildResponse', () => {
   it('packs a failure DispatchResult with the error field', () => {
     const response = buildResponse({
       sessionId: 'cennad-session',
-      provider: 'gemini',
+      provider: 'antigravity',
       result: {
         status: 'failure',
         response: null,

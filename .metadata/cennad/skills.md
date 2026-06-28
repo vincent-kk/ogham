@@ -1,6 +1,6 @@
-# Skills — `setup`, `codex`, `gemini`, `antigravity`, `crosscheck`
+# Skills — `setup`, `codex`, `antigravity`, `claude`, `crosscheck`
 
-플러그인 prefix 미사용. 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/gemini/`, `skills/antigravity/`, `skills/crosscheck/`. SKILL.md 의 `name` 도 prefix 없이 `setup` / `codex` / `gemini` / `antigravity` / `crosscheck`. `user_invocable: true`.
+플러그인 prefix 미사용. 디렉토리는 `skills/setup/`, `skills/codex/`, `skills/antigravity/`, `skills/claude/`, `skills/crosscheck/`. SKILL.md 의 `name` 도 prefix 없이 `setup` / `codex` / `antigravity` / `claude` / `crosscheck`. `user_invocable: true`.
 
 `plugin.json` 에는 `agents` 필드 추가하지 않는다.
 
@@ -73,50 +73,16 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 codex 는 단일 코딩 모델 + reasoning effort 구조라 tier 를 effort 로 매핑한다. 매핑은 `src/dispatcher/codex/operations/reasoningEffort.ts` 에서만 관리.
 
-## skill: `gemini`
-
-Gemini CLI 위임. gemini 와 antigravity 는 상호 배타적 Google 엔진이다 (Gemini CLI 서비스 종료 2026-06-18). 설정 UI 에서 둘 중 하나만 활성화 가능.
-
-### Frontmatter
-
-```yaml
----
-name: gemini
-description: "[cennad] Delegate to Google Gemini CLI via cennad. Use for live web-grounded research, very-large-context synthesis, or knowledge past Claude's cutoff."
-user_invocable: true
-argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
----
-```
-
-### When to use / when not
-
-- gemini-call SKILL.md 압축 (vault 항목 제외).
-
-### Body — 호출 매핑
-
-- codex 와 동일 구조. provider 만 `'gemini'`.
-- 실패 응답 처리: `auth` → `gemini auth login` 안내.
-
-### Body — tier
-
-| cennad tier | gemini 모델                                                                |
-| ----------- | -------------------------------------------------------------------------- |
-| `high`      | gemini-cli 의 가장 강력한 tier (env `CENNAD_GEMINI_HIGH` 설정 시 override) |
-| `mid`       | gemini-cli 의 균형 tier (env `CENNAD_GEMINI_MID` 설정 시 override)         |
-| `low`       | gemini-cli 의 가장 가벼운 tier (env `CENNAD_GEMINI_LOW` 설정 시 override)  |
-
-구체적 model ID 는 `src/dispatcher/gemini/operations/modelAlias.ts` 에서만 관리.
-
 ## skill: `antigravity`
 
-Antigravity CLI(`agy`) 위임. gemini 와 상호 배타적 Google 엔진 (Gemini CLI 서비스 종료 2026-06-18 이후 대체).
+Antigravity CLI(`agy`) 위임. Google 라우팅 전담 provider.
 
 ### Frontmatter
 
 ```yaml
 ---
 name: antigravity
-description: "[cennad] Delegate to the Antigravity CLI (agy) via cennad. Use as the Google-engine alternative to gemini for large-context synthesis, web-grounded research, or post-cutoff knowledge."
+description: "[cennad] Delegate to the Antigravity CLI (agy) via cennad. Use for large-context synthesis, web-grounded research, or knowledge past the cutoff."
 user_invocable: true
 argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 ---
@@ -124,8 +90,7 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ### When to use / when not
 
-- gemini 와 동일 사용 시나리오. 설정 UI 에서 Google 엔진을 `antigravity` 로 선택한 경우에 호출.
-- gemini 가 활성화된 상태에서는 사용하지 않는다 (상호 배타적).
+- 대규모 컨텍스트 합성, 웹 기반 리서치, 지식 컷오프 이후 정보 조회.
 
 ### Body — 호출 매핑
 
@@ -150,16 +115,71 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 모델 풀네임은 config `model_map.antigravity` 에서만 관리. env override 없음; 하드코딩 model 문자열 금지. 사용 가능한 모델 목록은 settings UI(`/setup`) 또는 내부 함수 `core/agyModels.getAvailableModels` 로 조회 (`agy models` 캐시, TTL 1시간).
 
+## skill: `claude`
+
+Anthropic Claude Code CLI 위임.
+
+### Frontmatter
+
+```yaml
+---
+name: claude
+description: "[cennad] Delegate to the Anthropic Claude Code CLI via cennad. Use for reasoning, writing, analysis, and code review tasks where an independent Anthropic model opinion is valuable."
+user_invocable: true
+argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
+---
+```
+
+### When to use / when not
+
+- 추론, 글쓰기, 분석, 리뷰 작업에서 Anthropic 모델의 독립적 second opinion 이 필요할 때.
+- secret 포함 프롬프트, 멀티턴 대화는 비추.
+
+### Body — 호출 매핑
+
+- `--continue <session_id>` 있으면 → `mcp_tools_continue_conversation({ session_id, prompt })`.
+- 그 외 → `mcp_tools_start_conversation({ provider: 'claude', prompt, tier? })`.
+- 권한 플래그(`permission_mode`)는 `/setup` 설정 UI 로만 관리 (MCP input 미노출). sandbox 플래그 없음; 격리는 permission-mode 로 처리.
+- 응답 JSON 의 `session_id` 를 출력에 노출 (백틱으로 감싸 인라인 코드).
+- `externalSessionRef` = 호출 시 주입한 `sessionId` (출력 파싱 불필요).
+- 실패 응답 (`status: 'failure'`):
+  - `auth` → 사용자에게 `claude` 인증 확인 요청.
+  - `rate_limit` / `budget_exhausted` → 잠시 후 재시도 또는 다른 provider 선택.
+  - `cli_error` / `network` / `unknown` → 메시지 그대로 사용자에게 전달.
+
+### Body — permission_mode
+
+| 값                  | 설명                         |
+| ------------------- | ---------------------------- |
+| `default`           | Claude Code 기본 동작        |
+| `acceptEdits`       | 파일 편집 자동 수락 (기본값) |
+| `auto`              | 도구 호출 자동 승인          |
+| `dontAsk`           | 권한 요청 없이 진행          |
+| `plan`              | 계획만 출력, 실행 안 함      |
+| `bypassPermissions` | 모든 권한 우회               |
+
+격리 플래그(`--strict-mcp-config`, `--safe-mode`)는 항상 첨부되어 부모 세션의 MCP 서버·hooks·CLAUDE.md·스킬을 상속하지 않는다.
+
+### Body — tier
+
+| cennad tier | 모델                                                | effort                                             |
+| ----------- | --------------------------------------------------- | -------------------------------------------------- |
+| `high`      | config `model_map.claude.high.model` (기본 `opus`)  | config `model_map.claude.high.effort` (기본 `max`) |
+| `mid`       | config `model_map.claude.mid.model` (기본 `opus`)   | config `model_map.claude.mid.effort` (기본 `high`) |
+| `low`       | config `model_map.claude.low.model` (기본 `sonnet`) | config `model_map.claude.low.effort` (기본 `high`) |
+
+모델 aliases: `opus`, `sonnet`, `haiku`, `fable`, `best`, `opus[1m]`, `sonnet[1m]`. effort 스케일: `low` < `medium` < `high` < `xhigh` < `max`. 모델별 effort 상한: opus/fable/best/opus[1m] 전체 5단계; sonnet/sonnet[1m] xhigh 제외; haiku effort 미지원. env override: `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT`.
+
 ## skill: `crosscheck`
 
-codex + Google 엔진(gemini 또는 antigravity) 병렬 위임. 두 응답을 합성.
+활성 provider(codex / antigravity / claude) 병렬 위임. 응답을 합성. 비활성은 제외.
 
 ### Frontmatter
 
 ```yaml
 ---
 name: crosscheck
-description: '[cennad] Cross-validate a prompt by dispatching to codex AND the active Google engine (gemini or antigravity) in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
+description: '[cennad] Cross-validate a prompt by dispatching it in parallel to every enabled provider (codex, antigravity, claude), then synthesize their answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
 argument-hint: '[--tier high|mid|low] -- "prompt"'
 ---
@@ -167,32 +187,31 @@ argument-hint: '[--tier high|mid|low] -- "prompt"'
 
 ### When to use / when not
 
-- 두 모델 패밀리의 독립적 second opinion 이 가치 있는 결정 / 설계 리뷰.
-- 단일 provider 가 강점이 명확한 작업, 멀티턴, secret 포함 프롬프트는 비추.
+- 여러 모델 패밀리의 독립적 second opinion 이 가치 있는 결정 / 설계 리뷰.
+- 단일 provider 강점만 필요한 작업, 멀티턴, secret 포함 프롬프트(활성 provider 전체에 전달)는 비추.
 
 ### Body — 호출 매핑
 
-- `--continue` 미지원 (항상 두 fresh 세션). 사용자가 전달하면 `/cennad:codex --continue <id>` 또는 활성 Google 엔진 스킬(`/cennad:gemini` / `/cennad:antigravity`) `--continue <id>` 로 안내.
-- 두 호출을 **병렬** (단일 메시지 두 tool use):
-  - `mcp_tools_start_conversation({ provider: 'codex', prompt, tier? })`
-  - `mcp_tools_start_conversation({ provider: 'gemini', prompt, tier? })` — 또는 설정상 활성 Google 엔진이 antigravity 이면 `provider: 'antigravity'`
-- 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 양쪽 실패: 두 오류 노출 후 합성 skip.
+- 활성 게이트: SessionStart `Active providers:` 의 활성 집합(codex / antigravity / claude 중)에만 dispatch. 2개 이상 → N-way 합성, 1개 → 단독 응답 + 추가 활성화 안내, 0개 → MCP 호출 없이 안내.
+- `--continue` 미지원 (항상 fresh 세션). 사용자가 전달하면 `/cennad:<provider> --continue <id>` 로 안내.
+- 활성 provider 각각을 **병렬** dispatch (단일 메시지, 활성 개수만큼 tool use): `mcp_tools_start_conversation({ provider, prompt, tier? })`.
+- 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 전부 실패: 모든 오류 노출 후 합성 skip. `disabled` 오류는 participant set 에서 제외 후 재평가.
 
-### Body — 합성 포맷 (양쪽 성공)
+### Body — 합성 포맷 (2개 이상 성공)
 
-4개 섹션 — `## Agreed` / `## Conflicting` / `## Final direction` / `## Action checklist`. `artifact_path` 가 있으면 `## Artifacts` 추가.
+4개 섹션 — `## Agreed` / `## Conflicting` / `## Final direction` / `## Action checklist`. 각 포인트에 출처 provider 명시. `artifact_path` 가 있으면 `## Artifacts` 추가.
 
 ## 스킬 ↔ 도구 매트릭스
 
-| Skill       | start_conversation                    | continue_conversation | open_settings |
-| ----------- | ------------------------------------- | --------------------- | ------------- |
-| setup       | —                                     | —                     | O             |
-| codex       | O (provider=codex)                    | O                     | —             |
-| gemini      | O (provider=gemini)                   | O                     | —             |
-| antigravity | O (provider=antigravity)              | O                     | —             |
-| crosscheck  | O × 2 (codex + 활성 Google 엔진 병렬) | —                     | —             |
+| Skill       | start_conversation         | continue_conversation | open_settings |
+| ----------- | -------------------------- | --------------------- | ------------- |
+| setup       | —                          | —                     | O             |
+| codex       | O (provider=codex)         | O                     | —             |
+| antigravity | O (provider=antigravity)   | O                     | —             |
+| claude      | O (provider=claude)        | O                     | —             |
+| crosscheck  | O × N (활성 provider 병렬) | —                     | —             |
 
 ## 참고 자료 정책
 
-- 검증된 `~/.claude/skills/codex-call/`, `gemini-call/` 의 `reference/`, `methods/` 디렉토리 구조를 cennad 스킬은 재현하지 않는다. 스킬 책임은 도구 호출 매핑뿐.
+- 검증된 `~/.claude/skills/codex-call/` 의 `reference/`, `methods/` 디렉토리 구조를 cennad 스킬은 재현하지 않는다. 스킬 책임은 도구 호출 매핑뿐.
 - 외부 CLI 동작 자체에 대한 상세는 dispatcher INTENT.md 와 `provider-dispatch.md` 에 둔다 (코드 옆 문서).

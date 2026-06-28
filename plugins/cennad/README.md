@@ -2,9 +2,9 @@
 
 > **Renamed from `cogair`.** This plugin was previously published as `cogair`. With the rename, the old `/cogair:*` skills, the `cogair` MCP server, and the on-disk settings at `~/.claude/plugins/cogair/` no longer apply — there is no automatic migration. Reinstall as `cennad` and run `/cennad:setup` to reconfigure your provider ratio, keywords, and options.
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google's Gemini / Antigravity CLI** through three MCP tools, five user-invocable skills, and two lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through three MCP tools, five user-invocable skills, and two lifecycle hooks.
 
-Where `atlassian` or `filid` encapsulate domain knowledge, cennad is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → gemini or antigravity) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
+Where `atlassian` or `filid` encapsulate domain knowledge, cennad is a **delegation surface**: Claude decides when another model family fits better (heavy code → codex; live web search → antigravity) and the plugin handles session bookkeeping, ratio tracking, and per-session call counters.
 
 ---
 
@@ -38,8 +38,8 @@ Building produces `bridge/mcp-server.cjs`, `bridge/injectStatic.mjs`, and `bridg
 The plugin shells out to external CLIs that you must install and authenticate yourself:
 
 - `codex` (OpenAI Codex CLI) — run `codex login`
-- `gemini` (Google Gemini CLI) — run `gemini auth login`. **The Gemini CLI service ends 2026-06-18**; cennad is migrating to the Antigravity CLI below.
-- `agy` (Google Antigravity CLI) — install with `curl -fsSL https://antigravity.google/cli/install.sh | bash`, then sign in by running `agy` once (Google OAuth; no API key). gemini and antigravity are mutually exclusive Google engines — enable one in `/setup`.
+- `agy` (Google Antigravity CLI) — install with `curl -fsSL https://antigravity.google/cli/install.sh | bash`, then sign in by running `agy` once (Google OAuth; no API key).
+- `claude` (Anthropic Claude Code CLI) — install from https://claude.ai/code, then run `claude` once to authenticate.
 
 cennad never installs or logs in for you. When auth is missing the failure response carries `error.code: 'auth'` and the skill instructs you to run the appropriate login command.
 
@@ -53,7 +53,7 @@ cennad never installs or logs in for you. When auth is missing the failure respo
 /setup
 ```
 
-Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), the Google engine toggle (gemini ↔ antigravity), intervention strength (`-2` … `+2`), keyword routing hints, per-tier antigravity model mapping, and default options. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
+Opens a local web UI to configure provider ratio (target % per provider, plus a per-provider enable toggle), intervention strength (`-2` … `+2`), keyword routing hints, per-tier model mapping (antigravity model, claude model + effort), and default options per provider. The UI runs on `127.0.0.1` with a one-time token and auto-shuts down after 5 minutes idle.
 
 ### Delegating to Codex
 
@@ -65,16 +65,6 @@ Opens a local web UI to configure provider ratio (target % per provider, plus a 
 
 Use codex for heavy code generation, refactoring, sandboxed shell work, or a second opinion from a different model family.
 
-### Delegating to Gemini (legacy — service ends 2026-06-18)
-
-```
-/gemini -- "Summarize the latest Next.js 15 release notes"
-/gemini --tier high -- "Compare these three RFC drafts"
-/gemini --continue <session_id> -- "Extend that analysis to ..."
-```
-
-Use gemini for live web-grounded research, very-large-context synthesis, YouTube/URL ingestion, or knowledge past Claude's cutoff. The Gemini CLI service ends **2026-06-18** — prefer Antigravity below for new work.
-
 ### Delegating to Antigravity
 
 ```
@@ -83,16 +73,26 @@ Use gemini for live web-grounded research, very-large-context synthesis, YouTube
 /antigravity --continue <session_id> -- "Extend that analysis to ..."
 ```
 
-Use antigravity (`agy`) for the same web-grounded research and large-context work as gemini, with access to multiple model families (Gemini, Claude, GPT-OSS) selectable per tier in `/setup`. gemini and antigravity are mutually exclusive Google engines — switch between them in the settings UI.
+Use antigravity (`agy`) for live web-grounded research, very-large-context synthesis, YouTube/URL ingestion, or knowledge past Claude's cutoff. Access to multiple model families (Gemini, Claude, GPT-OSS) selectable per tier in `/setup`.
 
-### Cross-checking with Both Providers
+### Delegating to Claude (Anthropic)
+
+```
+/claude -- "Review this RFC and identify risks"
+/claude --tier high -- "Analyse the tradeoffs between approach A and B"
+/claude --continue <session_id> -- "Now summarise the agreed action items"
+```
+
+Use claude for reasoning-heavy analysis, writing, and review tasks where you want a fresh Anthropic model invocation isolated from the parent session's conversation and customizations. The child `claude` process runs with `--strict-mcp-config --safe-mode`, so it never inherits the parent session's MCP servers, hooks, CLAUDE.md, or skills. It can still use Claude Code's built-in tools in the spawned working directory according to `permission_mode` (default: `dontAsk`), configured in `/setup`.
+
+### Cross-checking Across Providers
 
 ```
 /crosscheck -- "Is approach A or B safer for this migration?"
-/crosscheck --tier high -- "Review this RFC from both code and research angles"
+/crosscheck --tier high -- "Review this RFC from code, research, and reasoning angles"
 ```
 
-Use crosscheck when independent second opinions from two model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded to BOTH codex and the active Google engine (gemini or antigravity) in parallel; the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections. Single-shot only — use `/codex --continue` or `/gemini --continue` / `/antigravity --continue` for multi-turn follow-ups on either side.
+Use crosscheck when independent second opinions across model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded in parallel to every enabled provider (codex, antigravity, claude); disabled ones are skipped. With two or more enabled, the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections; with only one enabled, you get that provider's answer as-is. Single-shot only — use `/codex --continue`, `/antigravity --continue`, or `/claude --continue` for multi-turn follow-ups on any side.
 
 ---
 
@@ -101,16 +101,16 @@ Use crosscheck when independent second opinions from two model families matter (
 ```
 Claude Code session
    │
-   ├── Skills (/setup, /codex, /gemini, /antigravity, /crosscheck)   Layer 3 (user)
+   ├── Skills (/setup, /codex, /antigravity, /claude, /crosscheck)   Layer 3 (user)
    │       │
    │       ▼
    ├── MCP "tools" server                       Layer 2 (logic) — 3 MCP tools
    │       │
    │       ▼
-   ├── Dispatcher (codex / gemini / antigravity)  spawn external CLI + parse output
+   ├── Dispatcher (codex / antigravity / claude)  spawn external CLI + parse output
    │       │
    │       ▼
-   ├── Core storage                             ~/.claude/plugins/cennad/...
+   ├── Core storage                             ${CLAUDE_PLUGIN_DATA}/...
    │
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only context injection
 ```
@@ -121,7 +121,7 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 
 | Tool                    | Purpose                                                                         |
 | ----------------------- | ------------------------------------------------------------------------------- |
-| `start_conversation`    | Spawn `codex`, `gemini`, or `antigravity` with a prompt and return an envelope. |
+| `start_conversation`    | Spawn `codex`, `antigravity`, or `claude` with a prompt and return an envelope. |
 | `continue_conversation` | Resume an existing session by `session_id` (project-hash-scoped).               |
 | `open_settings`         | Start the local settings UI and return its URL with a one-time token.           |
 
@@ -131,13 +131,13 @@ Single-layer dispatch — no agents between skills and the MCP server. Hooks are
 | -------------- | --------------------------------------------------------- |
 | `/setup`       | "cennad 설정", "open cennad settings", "개입 강도"        |
 | `/codex`       | "ask codex", "codex 호출", "코덱스에게"                   |
-| `/gemini`      | "ask gemini", "gemini 호출", "제미니에게"                 |
 | `/antigravity` | "ask antigravity", "antigravity 호출", "안티그래비티에게" |
+| `/claude`      | "ask claude", "claude 호출", "클로드에게"                 |
 | `/crosscheck`  | "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"  |
 
 #### Name collision policy
 
-`/setup`, `/codex`, `/gemini`, `/antigravity`, and `/crosscheck` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cennad:setup`).
+`/setup`, `/codex`, `/antigravity`, `/claude`, and `/crosscheck` are registered globally without a plugin prefix. When another plugin claims the same name, Claude Code's skill-resolution order (plugin registration order) decides which one wins — the earlier registration takes priority. If you suspect a collision, list the active skills with `claude config`, or invoke the namespaced form (e.g. `cennad:setup`).
 
 ### Hooks
 
@@ -152,10 +152,13 @@ Both hook bundles currently land near 3.3 KB minified and use only Node builtins
 
 ## Disk Layout
 
-cennad stores all state under `~/.claude/plugins/cennad/`:
+cennad stores persistent state under Claude Code's `${CLAUDE_PLUGIN_DATA}`
+directory. On the first run after upgrading, persistent data from the legacy
+`~/.claude/plugins/cennad/` directory is copied without overwriting data already
+present in the new location.
 
 ```
-~/.claude/plugins/cennad/
+${CLAUDE_PLUGIN_DATA}/
 ├── config.json                    # user settings
 ├── runtime/
 │   ├── counter.json               # per-parent-PID call counter
@@ -171,7 +174,7 @@ Sessions are project-scoped: `continue_conversation` from a different `cwd` retu
 
 ## Tiers
 
-Each provider exposes three tier aliases. For codex/gemini, concrete model IDs live in the dispatcher (`src/dispatcher/<provider>/modelAlias.ts`) so upstream CLI renames stay scoped to one file. Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in config (`model_map.antigravity`).
+Each provider exposes three tier aliases. For codex, concrete reasoning-effort mappings live in the dispatcher so upstream CLI renames stay scoped to one file. Antigravity serves multiple model families, so each tier maps to a model full-name you pick in `/setup` (from the live `agy models` list), stored in config (`model_map.antigravity`). Claude maps each tier to a `{model, effort}` pair stored in config (`model_map.claude`), selectable per tier in `/setup`.
 
 | tier   | meaning                                                                        |
 | ------ | ------------------------------------------------------------------------------ |
@@ -179,7 +182,7 @@ Each provider exposes three tier aliases. For codex/gemini, concrete model IDs l
 | `mid`  | balanced model                                                                 |
 | `low`  | fastest / cheapest model                                                       |
 
-Env overrides (gemini): `CENNAD_GEMINI_{HIGH,MID,LOW}`. codex maps tiers to reasoning effort (no env vars). Antigravity tiers are mapped in `/setup`, not via env vars.
+codex maps tiers to reasoning effort (no env vars). Antigravity tiers are mapped in `/setup`, not via env vars. Claude tier env overrides: `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT` (e.g. `CENNAD_CLAUDE_HIGH_MODEL`, `CENNAD_CLAUDE_MID_EFFORT`).
 
 ---
 
@@ -211,8 +214,8 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP tools (input schema, behavior, envelope)  |
 | [skills](../../.metadata/cennad/skills.md)                       | Skill body + tool-call mapping                  |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
-| [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / gemini-cli / agy invocation matrix  |
-| [storage](../../.metadata/cennad/storage.md)                     | Disk layout under `~/.claude/plugins/cennad/`   |
+| [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli invocation matrix  |
+| [storage](../../.metadata/cennad/storage.md)                     | Persistent data layout and legacy migration     |
 | [web-ui](../../.metadata/cennad/web-ui.md)                       | Local settings UI design                        |
 | [roadmap](../../.metadata/cennad/roadmap.md)                     | Phase-by-phase implementation plan              |
 

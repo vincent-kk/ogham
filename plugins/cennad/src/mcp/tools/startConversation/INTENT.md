@@ -1,6 +1,6 @@
 ## Purpose
 
-새로운 외부 LLM 대화를 시작한다. cennad `session_id` (UUIDv4) 를 발급하고, dispatcher 를 통해 codex / gemini CLI 를 호출, 결과를 `ConversationResponse` 로 직조.
+새로운 외부 LLM 대화를 시작한다. cennad `session_id` (UUIDv4) 를 발급하고, dispatcher 를 통해 codex / antigravity / claude CLI 를 호출, 결과를 `ConversationResponse` 로 직조.
 
 ## Structure
 
@@ -15,7 +15,7 @@
 - 외부 CLI 실패 시에도 `session_id` 디스크 기록 유지 (스펙)
 - `provider` 카운터는 시도 기준 +1 (성공/실패 무관); 비활성 provider(`ratio[provider].enabled=false`)는 dispatch·기록·카운터 없이 `error.code='disabled'` 거부
 - tier optional — 생략 시 `config.default_tier[provider]` 적용; 제공 시 호출 측(Claude)이 작업 복잡도로 선택
-- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`)는 MCP input 미노출 — `config.option_flags[provider]` 에서만 결정
+- 권한 플래그(`yolo`/`sandbox`/`sandbox_backend`/`permission_mode`)는 MCP input 미노출 — `config.option_flags[provider]` 에서만 결정
 - dispatcher 에 `options` 는 항상 `{}` 로 전달 (MCP-facing layer 분리)
 - prompt 는 `composePrompt` 로 `config.preamble[provider]` + `config.recency_factor[provider]` 합성 후 dispatcher 에 전달; raw prompt 는 artifactWriter 에 별도 보존
 

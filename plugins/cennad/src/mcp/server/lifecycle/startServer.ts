@@ -1,6 +1,7 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { loadConfig } from '../../../core/configManager/index.js';
+import { migrateLegacyData } from '../../../core/dataHome/index.js';
 import { pruneExpired } from '../../../core/sessionStore/index.js';
 import { logger } from '../../../lib/logger.js';
 
@@ -10,6 +11,7 @@ export async function startServer(): Promise<void> {
   const server = createServer();
 
   try {
+    await migrateLegacyData();
     const config = await loadConfig();
     const removed = await pruneExpired(config.session_ttl_hours);
     if (removed > 0)

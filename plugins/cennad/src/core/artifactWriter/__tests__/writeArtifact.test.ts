@@ -51,7 +51,7 @@ describe('writeArtifact', () => {
         projectHash: 'deadbeefcafe',
         sessionId: 'sid-2',
         turn: 1,
-        provider: 'gemini',
+        provider: 'antigravity',
         model: 'm',
         createdAt: '2026-05-22T10:00:00.000Z',
         elapsedMs: 0,

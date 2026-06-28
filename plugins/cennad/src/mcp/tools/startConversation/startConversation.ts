@@ -83,11 +83,29 @@ export async function handleStartConversation(
       flags: config.option_flags.antigravity,
       modelMap: config.model_map.antigravity,
     });
-  } else {
-    result = await dispatchers.gemini.start({
+  } else if (input.provider === 'claude') {
+    result = await dispatchers.claude.start({
       ...base,
-      flags: config.option_flags.gemini,
+      flags: config.option_flags.claude,
+      modelMap: config.model_map.claude,
     });
+  } else {
+    return {
+      status: 'failure',
+      session_id: sessionId,
+      provider: input.provider,
+      response: null,
+      error: {
+        code: 'unknown',
+        message: `Provider '${input.provider}' is not supported by this cennad version.`,
+      },
+      meta: {
+        turn: 0,
+        created_at: isoNow(),
+        elapsed_ms: Math.round(performance.now() - startedAt),
+        ignored_options: [],
+      },
+    };
   }
 
   await createSession({

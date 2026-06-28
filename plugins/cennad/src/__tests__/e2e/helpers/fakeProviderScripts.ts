@@ -1,22 +1,14 @@
-export const GEMINI_FAKE_SCRIPT = `#!/usr/bin/env node
+export const CLAUDE_FAKE_SCRIPT = `#!/usr/bin/env node
 const args = process.argv.slice(2);
-const mode = process.env.CENNAD_FAKE_GEMINI_MODE || 'success';
-const uuid = process.env.CENNAD_FAKE_GEMINI_UUID || '11111111-2222-3333-4444-555566667777';
-const index = process.env.CENNAD_FAKE_GEMINI_INDEX || '1';
+const mode = process.env.CENNAD_FAKE_CLAUDE_MODE || 'success';
+const si = args.indexOf('--session-id');
+const ri = args.indexOf('--resume');
+const sid = si >= 0 ? args[si + 1] : (ri >= 0 ? args[ri + 1] : 'fake-claude-session');
 
-if (args.includes('--list-sessions')) {
-  const listMode = process.env.CENNAD_FAKE_GEMINI_LIST_MODE || 'present';
-  if (listMode === 'empty') process.exit(0);
-  if (listMode === 'fail') {
-    process.stderr.write('list failed\\n');
-    process.exit(1);
-  }
-  process.stdout.write('  ' + index + '. Test session (2026-01-01 12:00:00) [' + uuid + ']\\n');
-  process.exit(0);
-}
+function emit(obj) { process.stdout.write(JSON.stringify(obj) + '\\n'); }
 
 if (mode === 'success') {
-  process.stdout.write('fake gemini response\\n');
+  emit({ type: 'result', subtype: 'success', result: 'fake claude response', session_id: sid });
   process.exit(0);
 } else if (mode === 'auth-stderr') {
   process.stderr.write('HTTP 401 Unauthorized\\n');
@@ -69,7 +61,7 @@ if (mode === 'success') {
 }
 `;
 
-export type GeminiMode =
+export type ClaudeMode =
   | 'success'
   | 'auth-stderr'
   | 'rate-limit-stderr'
@@ -86,21 +78,8 @@ export type CodexMode =
   | 'exit-53'
   | 'no-thread-id';
 
-export interface GeminiEnvOptions {
-  uuid?: string;
-  index?: string;
-  listMode?: 'present' | 'empty' | 'fail';
-}
-
-export function geminiEnv(
-  mode: GeminiMode,
-  opts: GeminiEnvOptions = {},
-): Record<string, string> {
-  const env: Record<string, string> = { CENNAD_FAKE_GEMINI_MODE: mode };
-  if (opts.uuid) env.CENNAD_FAKE_GEMINI_UUID = opts.uuid;
-  if (opts.index) env.CENNAD_FAKE_GEMINI_INDEX = opts.index;
-  if (opts.listMode) env.CENNAD_FAKE_GEMINI_LIST_MODE = opts.listMode;
-  return env;
+export function claudeEnv(mode: ClaudeMode): Record<string, string> {
+  return { CENNAD_FAKE_CLAUDE_MODE: mode };
 }
 
 export interface CodexEnvOptions {

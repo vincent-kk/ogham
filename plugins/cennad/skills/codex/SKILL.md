@@ -32,7 +32,7 @@ Permission flags (`yolo`, `sandbox`, `sandbox_backend`) and other dispatcher opt
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
 - Otherwise → `mcp_tools_start_conversation({ provider: 'codex', prompt, tier? })`. `tier` is optional — omit to use the configured default; if given, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
 ## Response handling
@@ -43,7 +43,7 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 - `auth` → tell the user to run `codex login` and retry.
 - `disabled` → codex is disabled in cennad config. Tell the user to enable it via `/cennad:setup`. Do not retry.
-- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `gemini` skill.
+- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `antigravity` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 
 ## Tier

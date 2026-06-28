@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { TierSchema } from './conversation.js';
 import {
   AntigravityFlagsSchema,
+  ClaudeFlagsSchema,
+  ClaudeModelMapSchema,
   CodexFlagsSchema,
-  GeminiFlagsSchema,
   TierModelMapSchema,
 } from './dispatch.js';
 
@@ -26,35 +27,36 @@ export const ProviderRatioSchema = z.object({
 export type ProviderRatio = z.infer<typeof ProviderRatioSchema>;
 
 export const RatioSchema = z.object({
-  gemini: ProviderRatioSchema,
   codex: ProviderRatioSchema,
   antigravity: ProviderRatioSchema,
+  claude: ProviderRatioSchema,
 });
 
 export type Ratio = z.infer<typeof RatioSchema>;
 
 export const KeywordsSchema = z.object({
-  gemini: z.string(),
   codex: z.string(),
   antigravity: z.string(),
+  claude: z.string(),
 });
 
 export type Keywords = z.infer<typeof KeywordsSchema>;
 
 export const OptionFlagsSchema = z.object({
-  gemini: GeminiFlagsSchema,
   codex: CodexFlagsSchema,
   antigravity: AntigravityFlagsSchema,
+  claude: ClaudeFlagsSchema,
 });
 
 export type OptionFlags = z.infer<typeof OptionFlagsSchema>;
 
-// Per-tier model-name mapping. Only antigravity serves multiple model families,
-// so it is the only provider that needs an explicit map; gemini/codex keep their
-// env-based modelAlias resolution. TierModelMapSchema lives in dispatch.ts to
-// avoid an import cycle.
+// Per-tier model mapping. antigravity serves multiple model families (string
+// map) and claude maps each tier to a {model, effort} pair; codex keeps its
+// env-based modelAlias resolution and needs no map. The tier-map schemas live in
+// dispatch.ts to avoid an import cycle.
 export const ModelMapSchema = z.object({
   antigravity: TierModelMapSchema,
+  claude: ClaudeModelMapSchema,
 });
 
 export type ModelMap = z.infer<typeof ModelMapSchema>;
@@ -64,9 +66,9 @@ export type ModelMap = z.infer<typeof ModelMapSchema>;
 // restores the original session tier). Per-provider because cost / rate-limit
 // characteristics differ across providers.
 export const DefaultTierSchema = z.object({
-  gemini: TierSchema,
   codex: TierSchema,
   antigravity: TierSchema,
+  claude: TierSchema,
 });
 
 export type DefaultTier = z.infer<typeof DefaultTierSchema>;
@@ -83,9 +85,9 @@ export const ArtifactsConfigSchema = z.object({
 export type ArtifactsConfig = z.infer<typeof ArtifactsConfigSchema>;
 
 export const PreambleConfigSchema = z.object({
-  gemini: z.string(),
   codex: z.string(),
   antigravity: z.string(),
+  claude: z.string(),
 });
 
 export type PreambleConfig = z.infer<typeof PreambleConfigSchema>;
@@ -96,8 +98,8 @@ export type RecencyLevel = z.infer<typeof RecencyLevelSchema>;
 
 export const RecencyFactorConfigSchema = z.object({
   antigravity: RecencyLevelSchema,
-  gemini: RecencyLevelSchema,
   codex: RecencyLevelSchema,
+  claude: RecencyLevelSchema,
 });
 
 export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
@@ -105,9 +107,8 @@ export type RecencyFactorConfig = z.infer<typeof RecencyFactorConfigSchema>;
 // YouTube ingestion via the @ogham/yt-dlp-mcp server, modeled as a standalone MCP
 // addon rather than a per-provider LLM feature. When enabled, cennad provisions the
 // yt-dlp-mcp server into each checked target CLI — antigravity's global
-// mcp_config.json and/or codex's config.toml (via `codex mcp add`). gemini is
-// excluded: it ingests YouTube natively and is being phased out. `language` sets the
-// server's YTDLP_LANG (transcript + title/metadata language).
+// mcp_config.json and/or codex's config.toml (via `codex mcp add`). `language`
+// sets the server's YTDLP_LANG (transcript + title/metadata language).
 export const YoutubeAddonLanguageSchema = z.enum(['en', 'ko']);
 
 export type YoutubeAddonLanguage = z.infer<typeof YoutubeAddonLanguageSchema>;
@@ -135,9 +136,6 @@ export const AddonsConfigSchema = z.object({
 
 export type AddonsConfig = z.infer<typeof AddonsConfigSchema>;
 
-// Base object schema, exported so callers that need `.shape`/`.extend` (e.g.
-// partial merges) keep access. ConfigSchema wraps it with the mutual-exclusion
-// refinement below; `.parse`/`.safeParse` still work on the wrapped schema.
 export const ConfigObjectSchema = z.object({
   ratio: RatioSchema,
   intervention_strength: InterventionStrengthSchema,
@@ -153,19 +151,8 @@ export const ConfigObjectSchema = z.object({
   addons: AddonsConfigSchema,
 });
 
-// gemini and antigravity are mutually exclusive Google engines: the Gemini CLI
-// service ends 2026-06-18 and cennad transitions to the Antigravity CLI. Only
-// one may be enabled at a time. configManager.normalizeMutualExclusion auto-
-// corrects legacy files; this refine guards saves coming from the settings UI.
-export const ConfigSchema = ConfigObjectSchema.superRefine((cfg, ctx) => {
-  if (cfg.ratio.gemini.enabled && cfg.ratio.antigravity.enabled) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['ratio', 'antigravity', 'enabled'],
-      message:
-        'gemini and antigravity are mutually exclusive (Gemini CLI service ends 2026-06-18). Enable only one Google engine.',
-    });
-  }
-});
+// Unknown keys are stripped on parse — this is how legacy per-provider sections
+// (e.g. a removed provider lingering on disk) get pruned at load/save.
+export const ConfigSchema = ConfigObjectSchema;
 
 export type Config = z.infer<typeof ConfigSchema>;

@@ -21,16 +21,16 @@ describe('createSession', () => {
 
   it('returns a session with a generated UUID and the expected fields', async () => {
     const meta = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/a',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
       options: {},
     });
     expect(meta.session_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
     );
-    expect(meta.provider).toBe('gemini');
+    expect(meta.provider).toBe('claude');
     expect(meta.cwd).toBe('/proj/a');
     expect(meta.project_hash).toBe(getProjectHash('/proj/a'));
     expect(meta.turn_count).toBe(1);
@@ -51,10 +51,10 @@ describe('createSession', () => {
 
   it('writes _meta.json on the first session in a project', async () => {
     const meta = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/c',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
     });
     const stored = JSON.parse(
       await readFile(projectMetaPath(meta.project_hash), 'utf8'),
@@ -65,10 +65,10 @@ describe('createSession', () => {
 
   it('keeps the original _meta.json across subsequent sessions in the same project', async () => {
     const first = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/d',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
     });
     const firstMeta = JSON.parse(
       await readFile(projectMetaPath(first.project_hash), 'utf8'),
@@ -88,10 +88,10 @@ describe('createSession', () => {
 
   it('defaults options to {} when omitted', async () => {
     const meta = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/e',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
     });
     expect(meta.options).toEqual({});
   });

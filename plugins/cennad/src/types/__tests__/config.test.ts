@@ -18,7 +18,10 @@ describe('ConfigSchema', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
-        ratio: { gemini: -1, codex: 1 },
+        ratio: {
+          ...DEFAULT_CONFIG.ratio,
+          codex: { value: -1, enabled: true },
+        },
       }),
     ).toThrow();
   });
@@ -29,19 +32,30 @@ describe('ConfigSchema', () => {
     ).toThrow();
   });
 
-  it('rejects unknown gemini sandbox_backend', () => {
+  it('rejects an unknown claude permission_mode', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
         option_flags: {
           ...DEFAULT_CONFIG.option_flags,
-          gemini: {
-            ...DEFAULT_CONFIG.option_flags.gemini,
-            sandbox_backend: 'firejail',
-          },
+          claude: { permission_mode: 'sandboxed' },
         },
       }),
     ).toThrow();
+  });
+
+  it('rejects claude permission modes that can stall headless dispatch', () => {
+    for (const permissionMode of ['default', 'plan']) {
+      expect(() =>
+        ConfigSchema.parse({
+          ...DEFAULT_CONFIG,
+          option_flags: {
+            ...DEFAULT_CONFIG.option_flags,
+            claude: { permission_mode: permissionMode },
+          },
+        }),
+      ).toThrow();
+    }
   });
 
   it('rejects unknown codex sandbox mode', () => {
@@ -67,9 +81,9 @@ describe('ConfigSchema', () => {
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
         recency_factor: {
-          gemini: 'aggressive',
           codex: 'off',
-          antigravity: 'auto',
+          antigravity: 'aggressive',
+          claude: 'off',
         },
       }),
     ).toThrow();
@@ -79,7 +93,7 @@ describe('ConfigSchema', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
-        preamble: { gemini: 123, codex: '', antigravity: '' },
+        preamble: { codex: 123, antigravity: '', claude: '' },
       }),
     ).toThrow();
   });
@@ -89,7 +103,7 @@ describe('ConfigSchema', () => {
       expect(() =>
         ConfigSchema.parse({
           ...DEFAULT_CONFIG,
-          recency_factor: { gemini: level, codex: level, antigravity: level },
+          recency_factor: { codex: level, antigravity: level, claude: level },
         }),
       ).not.toThrow();
     }
@@ -105,7 +119,7 @@ describe('ConfigSchema', () => {
     expect(() =>
       ConfigSchema.parse({
         ...DEFAULT_CONFIG,
-        default_tier: { gemini: 'auto', codex: 'mid', antigravity: 'mid' },
+        default_tier: { codex: 'auto', antigravity: 'mid', claude: 'mid' },
       }),
     ).toThrow();
   });

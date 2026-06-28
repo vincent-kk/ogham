@@ -1,8 +1,10 @@
+import { existsSync } from 'node:fs';
+
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type { HookConfig } from './configTypes.js';
 import { isObj } from './isObj.js';
-import { CONFIG_PATH } from './paths.js';
+import { CONFIG_PATH, LEGACY_CONFIG_PATH } from './paths.js';
 import { pickKeywords } from './pickKeywords.js';
 import { pickOptionFlags } from './pickOptionFlags.js';
 import { pickPreamble } from './pickPreamble.js';
@@ -12,7 +14,11 @@ import { pickStrength } from './pickStrength.js';
 import { safeReadJson } from './safeReadJson.js';
 
 export function loadConfig(): HookConfig {
-  const raw = safeReadJson(CONFIG_PATH);
+  const path =
+    existsSync(CONFIG_PATH) || CONFIG_PATH === LEGACY_CONFIG_PATH
+      ? CONFIG_PATH
+      : LEGACY_CONFIG_PATH;
+  const raw = safeReadJson(path);
   if (!isObj(raw)) return DEFAULT_CONFIG;
   return {
     ratio: pickRatio(raw.ratio),

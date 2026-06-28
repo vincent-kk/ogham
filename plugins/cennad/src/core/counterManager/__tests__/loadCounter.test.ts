@@ -25,7 +25,7 @@ describe('loadCounter', () => {
   });
 
   it('returns the parsed counter when valid', async () => {
-    const counter = { parent_pid: 100, gemini: 3, codex: 1, antigravity: 2 };
+    const counter = { parent_pid: 100, claude: 3, codex: 1, antigravity: 2 };
     await writeCounterFile(JSON.stringify(counter));
     expect(await loadCounter()).toEqual(counter);
   });
@@ -37,7 +37,7 @@ describe('loadCounter', () => {
 
   it('returns null when schema validation fails', async () => {
     await writeCounterFile(
-      JSON.stringify({ parent_pid: 'oops', gemini: 1, codex: 0 }),
+      JSON.stringify({ parent_pid: 'oops', claude: 1, codex: 0 }),
     );
     expect(await loadCounter()).toBeNull();
   });

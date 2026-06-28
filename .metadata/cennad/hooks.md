@@ -70,12 +70,11 @@ src/hooks/
 │       ├── loadCounter.ts           # fs read + parent-pid 비교 후 0 표시 결정
 │       └── formatRatio.ts           # current vs target ratio + drift
 └── shared/                          # LCA organ — 두 hook 이 공유
-    ├── paths.ts                     # CENNAD_HOME (= ~/.claude/plugins/cennad) 등 빌드 시 inline
+    ├── paths.ts                     # CENNAD_HOME (= ${CLAUDE_PLUGIN_DATA}) 등 빌드 시 inline
     ├── safeReadJson.ts
     ├── nowIso.ts
     ├── configTypes.ts               # HookConfig, HookCounter, Ratio, ProviderRatio, OptionFlags, ...
     ├── loadConfig.ts                # fs read + safe JSON parse + 레거시 ratio 마이그레이션
-    ├── activeGoogleEngine.ts        # gemini/antigravity 상호배타 해소 → 활성 엔진 반환
     ├── pickKeywords.ts
     ├── pickModel.ts
     ├── pickOptionFlags.ts
@@ -92,64 +91,63 @@ src/hooks/
 
 ## Provider 모델 — 3-key 구조
 
-cennad 는 **gemini**, **codex**, **antigravity** 3개 provider 를 지원한다. gemini 와 antigravity 는 상호 배타적인 Google 엔진이다 — 동시에 enabled 될 수 없다. `activeGoogleEngine(config)` 가 `ratio.antigravity.enabled` 를 먼저 검사하고, 참이면 `'antigravity'`, 거짓이면 `ratio.gemini.enabled` 를 검사한다. 둘 다 false 면 `null`.
+cennad 는 **codex**, **antigravity**, **claude** 3개 provider 를 지원한다.
 
-config 의 `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 는 모두 3-key 구조(`gemini`, `codex`, `antigravity`)를 갖는다. 훅은 이를 read-only 로 소비한다.
+config 의 `ratio`, `keywords`, `option_flags`, `preamble`, `recency_factor` 는 모두 3-key 구조(`codex`, `antigravity`, `claude`)를 갖는다. 훅은 이를 read-only 로 소비한다.
 
 ```
 HookConfig {
-  ratio: { gemini, codex, antigravity }        // ProviderRatio = { value, enabled }
-  keywords: { gemini, codex, antigravity }
-  option_flags: { gemini, codex, antigravity }
-  preamble: { gemini, codex, antigravity }
-  recency_factor: { gemini, codex, antigravity }
+  ratio: { codex, antigravity, claude }        // ProviderRatio = { value, enabled }
+  keywords: { codex, antigravity, claude }
+  option_flags: { codex, antigravity, claude }
+  preamble: { codex, antigravity, claude }
+  recency_factor: { codex, antigravity, claude }
   intervention_strength: -2 | -1 | 0 | 1 | 2
 }
 
 HookCounter {
-  gemini: number
   codex: number
   antigravity: number
+  claude: number
   is_stale: boolean
 }
 ```
 
 `AntigravityFlags` (`option_flags.antigravity`): `{ sandbox: boolean; skip_permissions: boolean }`.
+`ClaudeFlags` (`option_flags.claude`): `{ permission_mode: 'default' | 'acceptEdits' | 'auto' | 'dontAsk' | 'plan' | 'bypassPermissions' }`.
 
 ## `injectStatic` 페이로드
 
 세션당 1회 stdout 출력.
 
-입력: `~/.claude/plugins/cennad/config.json` (없으면 defaults).
+입력: `${CLAUDE_PLUGIN_DATA}/config.json` (없으면 defaults).
 
-`config.ratio` 는 `{ gemini: { value, enabled }, codex: { value, enabled }, antigravity: { value, enabled } }` (백분율 + 활성 플래그). 레거시 정수 비율(`{ gemini: 5, codex: 0 }` — antigravity 이전 형식)은 `pickRatio` 에서 백분율 + enabled 로 마이그레이션해 표시. hook 은 read-only 이므로 디스크 파일은 다음 MCP write 때 정규화된다.
-
-gemini 와 antigravity 는 상호 배타적이므로 활성 Google 엔진만 표시한다. `activeGoogleEngine(config)` 가 `'antigravity'` 또는 `'gemini'` 를 반환하면 그 이름과 ratio 값을 사용. 둘 다 비활성이면 `gemini/antigravity 0%` 로 표시.
+`config.ratio` 는 `{ codex: { value, enabled }, antigravity: { value, enabled }, claude: { value, enabled } }` (백분율 + 활성 플래그). 레거시 정수 비율은 `pickRatio` 에서 백분율 + enabled 로 마이그레이션해 표시. hook 은 read-only 이므로 디스크 파일은 다음 MCP write 때 정규화된다.
 
 출력:
 
 ```
 [cennad] Static policy
 
-Provider ratio: <google-provider> <r_google>% · codex <r_c>%
-Active providers: <antigravity | gemini | codex | antigravity, codex | gemini, codex | none — run /setup>
+Provider ratio: codex <r_c>% · antigravity <r_a>% · claude <r_cl>%
+Active providers: <codex | antigravity | claude | codex, antigravity | ... | none — run /setup>
 Intervention strength: <-2..+2> (<tone phrase>)
 
 Keyword mapping
-- <google-provider> → <config.keywords[google]>
-- codex  → <config.keywords.codex>
+- codex       → <config.keywords.codex>
+- antigravity → <config.keywords.antigravity>
+- claude      → <config.keywords.claude>
 
 Routing guidance
 - Option flags:        <JSON.stringify(config.option_flags)>
 - Delegate when (a) a keyword matches the provider's domain,
-  (b) the task suits the provider's strength (gemini/antigravity: live search, large context;
-  codex: heavy code, sandboxed shell), or
+  (b) the task suits the provider's strength (antigravity: live search, large context;
+  codex: heavy code, sandboxed shell; claude: reasoning, writing, analysis, review), or
   (c) keeping near the configured ratio.
-- Fall back to Claude when neither provider clearly fits.
-- Use /cennad:codex and /cennad:<google-provider> skills, never invoke CLI binaries directly.
+- Use /cennad:codex, /cennad:antigravity, and /cennad:claude skills, never invoke CLI binaries directly.
 ```
 
-`Active providers` 는 `enabled === true` 인 provider 만 나열. 전부 false 면 `none — run /setup`. Google 엔진은 `activeGoogleEngine` 결과만 표시 (둘 다 false 면 생략).
+`Active providers` 는 `enabled === true` 인 provider 만 나열. 전부 false 면 `none — run /setup`.
 
 `option_flags` 표시는 `JSON.stringify(config.option_flags)` 한 줄.
 
@@ -167,20 +165,18 @@ Tone phrase:
 
 매 턴 stdout 출력.
 
-입력: `~/.claude/plugins/cennad/runtime/counter.json` (없으면 0/0 으로 표시).
+입력: `${CLAUDE_PLUGIN_DATA}/runtime/counter.json` (없으면 0/0 으로 표시).
 
 출력 (호출 ≥ 1):
 
 ```
 [cennad] Live state
 
-Calls this session: <google-provider> <c_google> · codex <c_c> · total <total>
-Current ratio:      <google-provider> <pct_google>% · codex <pct_c>%
-Target ratio:       <google-provider> <pct_target_google>% · codex <pct_target_c>%
-Drift:              <google-provider> <±n> · codex <±n>   (target - current)
+Calls this session: codex <c_c> · antigravity <c_a> · claude <c_cl> · total <total>
+Current ratio:      codex <pct_c>% · antigravity <pct_a>% · claude <pct_cl>%
+Target ratio:       codex <pct_target_c>% · antigravity <pct_target_a>% · claude <pct_target_cl>%
+Drift:              codex <±n> · antigravity <±n> · claude <±n>   (target - current)
 ```
-
-`<google-provider>` 는 `activeGoogleEngine(config)` 결과 (`'antigravity'` 또는 `'gemini'`). 둘 다 비활성이면 `gemini/antigravity` 로 표기하고 count = 0.
 
 호출 0건:
 
@@ -194,7 +190,7 @@ No calls this session yet.
 
 목표 비율(`Target ratio`)은 `ratio.<provider>.enabled === false` 인 provider 를 0% 로 표시. drift 계산도 0 기준.
 
-활성 provider 없음 (`activeGoogleEngine` 이 null 이고 `!ratio.codex.enabled`): 마지막 줄에 `Available providers: none — run /setup` 추가.
+활성 provider 없음 (`!ratio.codex.enabled && !ratio.antigravity.enabled && !ratio.claude.enabled`): 마지막 줄에 `Available providers: none — run /setup` 추가.
 
 ## 빌드 가드 — `scripts/buildHooks.mjs`
 

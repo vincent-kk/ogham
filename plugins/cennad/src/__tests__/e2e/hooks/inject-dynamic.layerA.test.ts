@@ -23,16 +23,16 @@ describe('injectDynamic (Layer A)', () => {
   it('with counter — total + current + target + drift', async () => {
     await writeCounter({
       parent_pid: process.ppid,
-      gemini: 3,
       codex: 7,
+      antigravity: 3,
     });
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
       contextIncludes: [
-        'Calls this session: gemini 3 · codex 7 · total 10',
-        'gemini 30%',
+        'Calls this session: codex 7 · antigravity 3 · claude 0 · total 10',
         'codex 70%',
+        'antigravity 30%',
         'Drift:',
       ],
     });
@@ -41,8 +41,8 @@ describe('injectDynamic (Layer A)', () => {
   it('stale counter (parent_pid mismatch) — treated as 0/0', async () => {
     await writeCounter({
       parent_pid: 999999,
-      gemini: 99,
       codex: 99,
+      antigravity: 99,
     });
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {

@@ -7,13 +7,14 @@ import { sendJson } from '../utils/sendJson.js';
 export async function handleGetProviderStatus(
   res: ServerResponse,
 ): Promise<void> {
-  const [antigravity, gemini, codex] = await Promise.all([
+  const [antigravity, codex, claude] = await Promise.all([
     checkExecutable('agy'),
-    checkExecutable('gemini'),
     checkExecutable('codex'),
+    checkExecutable('claude'),
   ]);
   // Only probe agy models when the binary exists; getAvailableModels degrades
   // to [] on any failure so the settings UI never blocks on it.
-  const agyModels = antigravity.available ? await getAvailableModels() : [];
-  sendJson(res, 200, { antigravity, agyModels, gemini, codex });
+  const agyModels =
+    antigravity.status === 'available' ? await getAvailableModels() : [];
+  sendJson(res, 200, { antigravity, agyModels, codex, claude });
 }

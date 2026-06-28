@@ -29,79 +29,79 @@ describe('mergeRecencyFactor', () => {
   it('preserves all three valid levels when all providers are specified', () => {
     expect(
       mergeRecencyFactor({
-        gemini: 'off',
+        claude: 'off',
         codex: 'strict',
         antigravity: 'auto',
       }),
-    ).toEqual({ gemini: 'off', codex: 'strict', antigravity: 'auto' });
+    ).toEqual({ claude: 'off', codex: 'strict', antigravity: 'auto' });
   });
 
   it('preserves off level for each provider', () => {
     const result = mergeRecencyFactor({
-      gemini: 'off',
+      claude: 'off',
       codex: 'off',
       antigravity: 'off',
     });
-    expect(result).toEqual({ gemini: 'off', codex: 'off', antigravity: 'off' });
+    expect(result).toEqual({ claude: 'off', codex: 'off', antigravity: 'off' });
   });
 
   it('preserves strict level for each provider', () => {
     const result = mergeRecencyFactor({
-      gemini: 'strict',
+      claude: 'strict',
       codex: 'strict',
       antigravity: 'strict',
     });
     expect(result).toEqual({
-      gemini: 'strict',
+      claude: 'strict',
       codex: 'strict',
       antigravity: 'strict',
     });
   });
 
-  it('falls back to gemini default when gemini level is invalid', () => {
+  it('falls back to claude default when claude level is invalid', () => {
     const result = mergeRecencyFactor({
-      gemini: 'aggressive',
+      claude: 'aggressive',
       codex: 'strict',
       antigravity: 'auto',
     });
-    expect(result.gemini).toBe(DEFAULTS.gemini);
+    expect(result.claude).toBe(DEFAULTS.claude);
     expect(result.codex).toBe('strict');
     expect(result.antigravity).toBe('auto');
   });
 
   it('falls back to codex default when codex level is invalid', () => {
     const result = mergeRecencyFactor({
-      gemini: 'auto',
+      claude: 'auto',
       codex: 'always',
       antigravity: 'strict',
     });
     expect(result.codex).toBe(DEFAULTS.codex);
-    expect(result.gemini).toBe('auto');
+    expect(result.claude).toBe('auto');
     expect(result.antigravity).toBe('strict');
   });
 
   it('falls back to antigravity default when antigravity level is invalid', () => {
     const result = mergeRecencyFactor({
-      gemini: 'off',
+      claude: 'off',
       codex: 'off',
       antigravity: 123,
     });
     expect(result.antigravity).toBe(DEFAULTS.antigravity);
-    expect(result.gemini).toBe('off');
+    expect(result.claude).toBe('off');
     expect(result.codex).toBe('off');
   });
 
-  it('fills missing gemini with default when omitted from partial raw', () => {
+  it('fills missing claude with default when omitted from partial raw', () => {
     const result = mergeRecencyFactor({ codex: 'strict', antigravity: 'off' });
-    expect(result.gemini).toBe(DEFAULTS.gemini);
+    expect(result.claude).toBe(DEFAULTS.claude);
     expect(result.codex).toBe('strict');
     expect(result.antigravity).toBe('off');
   });
 
   it('fills missing codex with default when omitted from partial raw', () => {
-    const result = mergeRecencyFactor({ gemini: 'strict' });
+    const result = mergeRecencyFactor({ claude: 'strict' });
     expect(result.codex).toBe(DEFAULTS.codex);
-    expect(result.gemini).toBe('strict');
+    expect(result.claude).toBe('strict');
     expect(result.antigravity).toBe(DEFAULTS.antigravity);
   });
 

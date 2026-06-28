@@ -8,20 +8,20 @@ describe('DEFAULT_CONFIG', () => {
     expect(() => ConfigSchema.parse(DEFAULT_CONFIG)).not.toThrow();
   });
 
-  it('uses 50:50 enabled ratio and neutral strength', () => {
+  it('uses an all-enabled equal ratio and neutral strength', () => {
     expect(DEFAULT_CONFIG.ratio).toEqual({
-      gemini: { value: 50, enabled: true },
-      codex: { value: 50, enabled: true },
-      antigravity: { value: 50, enabled: false },
+      codex: { value: 34, enabled: true },
+      antigravity: { value: 33, enabled: true },
+      claude: { value: 33, enabled: true },
     });
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
 
-  it('defaults option_flags to safe per-provider sandbox', () => {
+  it('defaults option_flags to safe per-provider values', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
-      gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
       codex: { yolo: false, sandbox: 'workspace-write' },
       antigravity: { sandbox: false, skip_permissions: false },
+      claude: { permission_mode: 'dontAsk' },
     });
   });
 
@@ -32,9 +32,17 @@ describe('DEFAULT_CONFIG', () => {
   // app.js DEFAULT_DEFAULT_TIER mirrors this value — keep in sync.
   it('defaults default_tier to mid for every provider', () => {
     expect(DEFAULT_CONFIG.default_tier).toEqual({
-      gemini: 'mid',
       codex: 'mid',
       antigravity: 'mid',
+      claude: 'mid',
+    });
+  });
+
+  it('defaults model_map.claude to per-tier {model, effort}', () => {
+    expect(DEFAULT_CONFIG.model_map.claude).toEqual({
+      high: { model: 'opus', effort: 'max' },
+      mid: { model: 'opus', effort: 'high' },
+      low: { model: 'sonnet', effort: 'high' },
     });
   });
 });

@@ -14,8 +14,8 @@
           <span class="brand-tag">/ settings</span>
         </div>
         <p class="lede">
-          Routing, intervention, and provider defaults for codex / Google engine
-          (gemini or antigravity) dispatch.
+          Routing, intervention, and provider defaults for codex (OpenAI),
+          antigravity (Google), and Anthropic (claude) dispatch.
         </p>
       </header>
 
@@ -23,11 +23,13 @@
         <section class="section">
           <h2 class="section-title">Providers</h2>
           <p class="section-help">
-            Drag the slider to balance traffic. Click a provider to enable or
-            disable it, or the gear to reveal advanced flags.
+            Set each provider's weight, click a provider to enable or disable
+            it, or the gear to reveal advanced flags. Weights are normalized
+            across enabled providers.
           </p>
 
           <div class="ratio-panel" id="ratio-panel">
+            <!-- codex -->
             <div class="ratio-row" data-provider="codex">
               <button
                 type="button"
@@ -106,7 +108,6 @@
                     >Hooks suggest codex when these appear in the prompt.</span
                   >
                 </label>
-
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
@@ -141,7 +142,6 @@
                     almost all work.
                   </p>
                 </div>
-
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
@@ -177,7 +177,6 @@
                     fallback. codex defaults to off to prioritize cache reuse.
                   </p>
                 </div>
-
                 <label class="field">
                   <span>prompt preamble</span>
                   <textarea
@@ -186,9 +185,7 @@
                     placeholder="e.g. Prefer TypeScript."
                   ></textarea>
                 </label>
-
                 <hr class="advanced-divider" />
-
                 <label class="toggle flag-row">
                   <input id="codex-yolo" type="checkbox" />
                   <span class="toggle-track"
@@ -199,7 +196,6 @@
                     >bypass approvals + sandbox (danger)</span
                   >
                 </label>
-
                 <div class="flag-field" id="codex-sandbox-wrap">
                   <span class="flag-field-label">sandbox</span>
                   <p class="flag-hint" id="codex-sandbox-hint" hidden>
@@ -246,26 +242,15 @@
               </div>
             </div>
 
-            <div class="ratio-slider-wrap">
-              <input
-                id="ratio-slider"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value="50"
-                aria-label="codex / Google ratio (0% = all codex, 100% = all Google)"
-              />
-            </div>
-
-            <div class="ratio-row" data-provider="google">
+            <!-- antigravity (Google) -->
+            <div class="ratio-row" data-provider="antigravity">
               <button
                 type="button"
-                id="toggle-gemini"
+                id="toggle-antigravity"
                 class="provider-toggle"
                 role="switch"
                 aria-checked="true"
-                aria-label="Google provider"
+                aria-label="antigravity provider"
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
@@ -275,25 +260,25 @@
                   </svg>
                 </span>
                 <span class="provider-meta">
-                  <span class="provider-name">Google</span>
-                  <span class="provider-hint" id="gemini-hint"
+                  <span class="provider-name">antigravity</span>
+                  <span class="provider-hint" id="antigravity-hint"
                     >click to toggle</span
                   >
                 </span>
                 <span
                   class="provider-summary"
-                  id="summary-gemini"
+                  id="summary-antigravity"
                   aria-hidden="true"
                 ></span>
-                <output id="gemini-pct" class="provider-pct">50%</output>
+                <output id="antigravity-pct" class="provider-pct">50%</output>
               </button>
               <button
                 type="button"
-                id="advanced-toggle-gemini"
+                id="advanced-toggle-antigravity"
                 class="advanced-toggle"
                 aria-expanded="false"
-                aria-controls="advanced-panel-gemini"
-                aria-label="Google advanced settings"
+                aria-controls="advanced-panel-antigravity"
+                aria-label="antigravity advanced settings"
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
@@ -313,66 +298,7 @@
                 </span>
               </button>
             </div>
-            <div class="engine-segment-row">
-              <span class="engine-segment-label">engine</span>
-              <div
-                class="engine-segment"
-                role="radiogroup"
-                aria-label="Google engine — gemini or antigravity (mutually exclusive)"
-              >
-                <label class="radio"
-                  ><input
-                    type="radio"
-                    name="google-engine"
-                    value="gemini"
-                  /><span
-                    ><svg
-                      class="engine-mark"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
-                      /></svg
-                    >gemini</span
-                  ></label
-                >
-                <label class="radio"
-                  ><input
-                    type="radio"
-                    name="google-engine"
-                    value="antigravity"
-                  /><span
-                    ><svg
-                      class="engine-mark"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M12 2 2 22h20L12 2zm0 5L17.5 19h-11L12 7z"
-                      /></svg
-                    >antigravity</span
-                  ></label
-                >
-              </div>
-            </div>
-            <p
-              class="install-hint"
-              id="gemini-install-hint"
-              data-engine="gemini"
-              hidden
-            >
-              Install: <code>npm install -g @google/gemini-cli</code> — reload
-              after installing.
-            </p>
-            <p
-              class="install-hint"
-              id="antigravity-install-hint"
-              data-engine="antigravity"
-              hidden
-            >
+            <p class="install-hint" id="antigravity-install-hint" hidden>
               Install:
               <code
                 >curl -fsSL https://antigravity.google/cli/install.sh |
@@ -382,39 +308,38 @@
             </p>
             <div
               class="advanced-panel"
-              id="advanced-panel-gemini"
+              id="advanced-panel-antigravity"
               role="region"
-              aria-labelledby="advanced-toggle-gemini"
+              aria-labelledby="advanced-toggle-antigravity"
               hidden
             >
               <div class="advanced-panel-inner">
                 <label class="field">
                   <span>trigger keywords</span>
                   <textarea
-                    id="kw-gemini"
+                    id="kw-antigravity"
                     rows="1"
                     placeholder="comma-separated, e.g. research, search, large-context"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest the active Google engine when these appear in
-                    the prompt.</span
+                    >Hooks suggest antigravity when these appear in the
+                    prompt.</span
                   >
                 </label>
-
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="high"
                       /><span>high</span></label
                     >
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="mid"
                       /><span
                         >mid
@@ -424,7 +349,7 @@
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="low"
                       /><span>low</span></label
                     >
@@ -435,21 +360,20 @@
                     almost all work.
                   </p>
                 </div>
-
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="off"
                       /><span>off</span></label
                     >
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="auto"
                       /><span
                         >auto
@@ -459,7 +383,7 @@
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="strict"
                       /><span>strict</span></label
                     >
@@ -468,162 +392,323 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback. Google engines have web-tool access by default, so
+                    fallback. Antigravity has web-tool access by default, so
                     auto is recommended for recency.
                   </p>
                 </div>
-
                 <label class="field">
                   <span>prompt preamble</span>
                   <textarea
-                    id="preamble-gemini"
+                    id="preamble-antigravity"
                     rows="2"
                     placeholder="e.g. Always answer in Korean."
                   ></textarea>
                 </label>
-
                 <hr class="advanced-divider" />
-
-                <div class="engine-flags" data-engine="gemini">
-                  <label class="toggle flag-row">
-                    <input id="gemini-yolo" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label">Skip approvals (--yolo)</span>
-                    <span class="flag-desc">skip approval prompts</span>
-                  </label>
-
-                  <label class="toggle flag-row">
-                    <input id="gemini-sandbox" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Isolated execution (--sandbox)</span
-                    >
-                    <span class="flag-desc"
-                      >isolated execution environment</span
-                    >
-                  </label>
-
-                  <div class="flag-field" id="gemini-backend-wrap">
-                    <span class="flag-field-label">sandbox backend</span>
-                    <p class="flag-hint">
-                      Sandbox backend is only configurable when Sandbox is
-                      enabled.
-                    </p>
-                    <div class="radio-row" id="gemini-backend-radio">
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="auto"
-                        /><span>auto</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="docker"
-                        /><span>docker</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="podman"
-                        /><span>podman</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="sandbox-exec"
-                        /><span>sandbox-exec</span></label
-                      >
-                    </div>
-                    <p class="flag-hint">
-                      Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
-                      gemini-cli pick; <code>sandbox-exec</code> is macOS only.
-                    </p>
-                  </div>
-
-                  <p class="warning-inline" data-engine="gemini">
-                    &#9888; Gemini CLI service ends 2026-06-18 — switch the
-                    engine to antigravity.
-                  </p>
-                </div>
-
-                <div class="engine-flags" data-engine="antigravity" hidden>
-                  <label class="toggle flag-row">
-                    <input id="antigravity-sandbox" type="checkbox" disabled />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Isolated execution (--sandbox) — disabled</span
-                    >
-                    <span class="flag-desc"
-                      >--sandbox can drop agy's output in non-interactive mode,
-                      so it is not used</span
-                    >
-                  </label>
-
-                  <label class="toggle flag-row">
-                    <input id="antigravity-skip-perms" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Skip permissions (--dangerously-skip-permissions)</span
-                    >
-                    <span class="flag-desc"
-                      >bypass all approvals incl. your Deny list (danger)</span
-                    >
-                  </label>
-
+                <label class="toggle flag-row">
+                  <input id="antigravity-sandbox" type="checkbox" disabled />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Isolated execution (--sandbox) — disabled</span
+                  >
+                  <span class="flag-desc"
+                    >--sandbox can drop agy's output in non-interactive mode, so
+                    it is not used</span
+                  >
+                </label>
+                <label class="toggle flag-row">
+                  <input id="antigravity-skip-perms" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Skip permissions (--dangerously-skip-permissions)</span
+                  >
+                  <span class="flag-desc"
+                    >bypass all approvals incl. your Deny list (danger)</span
+                  >
+                </label>
+                <p class="flag-hint">
+                  Antigravity has no container sandbox. Permission
+                  Allow/Deny/Ask lists are managed inside agy via
+                  <code>/permissions</code>; cennad follows your agy
+                  <code>settings.json</code>. Leaving "skip permissions" off
+                  keeps your Deny list as the safety net.
+                </p>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model mapping</p>
                   <p class="flag-hint">
-                    Antigravity has no container sandbox. Permission
-                    Allow/Deny/Ask lists are managed inside agy via
-                    <code>/permissions</code>; cennad follows your agy
-                    <code>settings.json</code>. Leaving "skip permissions" off
-                    keeps your Deny list as the safety net.
+                    Antigravity serves multiple model families. Map each tier to
+                    a model. Options come from <code>agy models</code> (run agy
+                    and sign in to populate them).
                   </p>
-
-                  <div class="tier-model-map">
-                    <p class="flag-field-label">per-tier model mapping</p>
-                    <p class="flag-hint">
-                      Antigravity serves multiple model families. Map each tier
-                      to a model. Options come from <code>agy models</code> (run
-                      agy and sign in to populate them).
-                    </p>
-                    <div class="tier-field">
-                      <label for="model-antigravity-high">high</label>
-                      <select
-                        id="model-antigravity-high"
-                        class="tier-select"
-                      ></select>
-                    </div>
-                    <div class="tier-field">
-                      <label for="model-antigravity-mid">mid</label>
-                      <select
-                        id="model-antigravity-mid"
-                        class="tier-select"
-                      ></select>
-                    </div>
-                    <div class="tier-field">
-                      <label for="model-antigravity-low">low</label>
-                      <select
-                        id="model-antigravity-low"
-                        class="tier-select"
-                      ></select>
-                    </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-high">high</label>
+                    <select
+                      id="model-antigravity-high"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-mid">mid</label>
+                    <select
+                      id="model-antigravity-mid"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-low">low</label>
+                    <select
+                      id="model-antigravity-low"
+                      class="tier-select"
+                    ></select>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- Anthropic (claude) -->
+            <div class="ratio-row" data-provider="claude">
+              <button
+                type="button"
+                id="toggle-claude"
+                class="provider-toggle"
+                role="switch"
+                aria-checked="true"
+                aria-label="Anthropic (claude) provider"
+              >
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">Claude</span>
+                  <span class="provider-hint" id="claude-hint"
+                    >click to toggle</span
+                  >
+                </span>
+                <span
+                  class="provider-summary"
+                  id="summary-claude"
+                  aria-hidden="true"
+                ></span>
+                <output id="claude-pct" class="provider-pct">50%</output>
+              </button>
+              <button
+                type="button"
+                id="advanced-toggle-claude"
+                class="advanced-toggle"
+                aria-expanded="false"
+                aria-controls="advanced-panel-claude"
+                aria-label="Anthropic advanced settings"
+                title="Advanced settings"
+              >
+                <span class="advanced-toggle-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <p class="install-hint" id="claude-install-hint" hidden>
+              Install: <code>npm install -g @anthropic-ai/claude-code</code> —
+              reload after installing.
+            </p>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-claude"
+              role="region"
+              aria-labelledby="advanced-toggle-claude"
+              hidden
+            >
+              <div class="advanced-panel-inner">
+                <label class="field">
+                  <span>trigger keywords</span>
+                  <textarea
+                    id="kw-claude"
+                    rows="1"
+                    placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest Anthropic when these appear in the
+                    prompt.</span
+                  >
+                </label>
+                <div class="flag-field">
+                  <span class="flag-field-label">default tier</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="low"
+                      /><span>low</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Each
+                    tier maps to a model + effort below.
+                  </p>
+                </div>
+                <div class="flag-field">
+                  <span class="flag-field-label">recency factor</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="off"
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                  </p>
+                </div>
+                <label class="field">
+                  <span>prompt preamble</span>
+                  <textarea
+                    id="preamble-claude"
+                    rows="2"
+                    placeholder="e.g. Be concise."
+                  ></textarea>
+                </label>
+                <hr class="advanced-divider" />
+                <div class="flag-field">
+                  <span class="flag-field-label">permission mode</span>
+                  <div class="radio-row" id="claude-permission-radio">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="acceptEdits"
+                      /><span>acceptEdits</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="dontAsk"
+                      /><span
+                        >dontAsk
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="bypassPermissions"
+                      /><span>bypassPermissions — danger</span></label
+                    >
+                  </div>
+                  <span class="warning-inline" id="claude-bypass-warning" hidden
+                    >&#9888; bypassPermissions skips all approvals — only use in
+                    a trusted environment.</span
+                  >
+                  <p class="flag-hint">
+                    claude-code has no sandbox; isolation is permission-based.
+                    cennad always adds <code>--strict-mcp-config</code> and
+                    <code>--safe-mode</code> so the child never inherits this
+                    session's MCP servers, hooks, or CLAUDE.md.
+                  </p>
+                </div>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model &amp; effort</p>
+                  <p class="flag-hint">
+                    Map each tier to a model and reasoning effort. Effort
+                    options adapt to the model (haiku has none; sonnet skips
+                    xhigh). Over-cap requests are silently downgraded by
+                    claude-code.
+                  </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-high">high</label>
+                    <select id="model-claude-high" class="tier-select"></select>
+                    <select
+                      id="effort-claude-high"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-mid">mid</label>
+                    <select id="model-claude-mid" class="tier-select"></select>
+                    <select id="effort-claude-mid" class="tier-select"></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-low">low</label>
+                    <select id="model-claude-low" class="tier-select"></select>
+                    <select id="effort-claude-low" class="tier-select"></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ratio-bar-wrap">
+              <div
+                id="ratio-bar"
+                class="ratio-bar"
+                aria-label="Provider routing ratio"
+              ></div>
+            </div>
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
             </p>
@@ -673,8 +758,8 @@
           </div>
           <p class="flag-hint">
             Fetches transcripts, metadata, and more from YouTube (and other
-            yt-dlp sites) via <code>@ogham/yt-dlp-mcp</code>. gemini is excluded
-            — it ingests YouTube natively. Use the gear to configure it.
+            yt-dlp sites) via <code>@ogham/yt-dlp-mcp</code>. Use the gear to
+            configure it.
           </p>
 
           <div
@@ -777,9 +862,8 @@
         <section class="section">
           <h2 class="section-title">CLI spawn timeout</h2>
           <p class="section-help">
-            Hard timeout (ms) for each codex / Google CLI invocation. Hung
-            processes are killed and surface as
-            <code>error.code: network</code>.
+            Hard timeout (ms) for each provider CLI invocation. Hung processes
+            are killed and surface as <code>error.code: network</code>.
           </p>
           <label class="field">
             <span>ms (1000–1800000)</span>
@@ -805,7 +889,6 @@
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">enabled</span>
           </label>
-
           <div class="flag-field" id="artifacts-location-wrap">
             <span class="flag-field-label">location</span>
             <div class="radio-row">
@@ -827,9 +910,7 @@
             <p class="flag-hint">
               <code>project</code> →
               <code>&lt;cwd&gt;/.cennad/artifacts/</code>. <code>user</code> →
-              <code
-                >~/.claude/plugins/cennad/artifacts/&lt;projectHash&gt;/</code
-              >.
+              <code>${CLAUDE_PLUGIN_DATA}/artifacts/&lt;projectHash&gt;/</code>.
             </p>
           </div>
         </section>

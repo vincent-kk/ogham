@@ -6,14 +6,6 @@ import type {
   Tier,
 } from './conversation.js';
 
-export const GeminiSandboxBackendSchema = z.enum([
-  'auto',
-  'docker',
-  'podman',
-  'sandbox-exec',
-]);
-export type GeminiSandboxBackend = z.infer<typeof GeminiSandboxBackendSchema>;
-
 export const CodexSandboxModeSchema = z.enum([
   'read-only',
   'workspace-write',
@@ -21,13 +13,6 @@ export const CodexSandboxModeSchema = z.enum([
   'off',
 ]);
 export type CodexSandboxMode = z.infer<typeof CodexSandboxModeSchema>;
-
-export const GeminiFlagsSchema = z.object({
-  yolo: z.boolean(),
-  sandbox: z.boolean(),
-  sandbox_backend: GeminiSandboxBackendSchema,
-});
-export type GeminiFlags = z.infer<typeof GeminiFlagsSchema>;
 
 export const CodexFlagsSchema = z.object({
   yolo: z.boolean(),
@@ -44,6 +29,49 @@ export const AntigravityFlagsSchema = z.object({
 });
 export type AntigravityFlags = z.infer<typeof AntigravityFlagsSchema>;
 
+// claude-code permission modes. `bypassPermissions` maps to
+// --dangerously-skip-permissions; there is no sandbox flag, so isolation is
+// permission-based only.
+export const ClaudePermissionModeSchema = z.enum([
+  'acceptEdits',
+  'auto',
+  'dontAsk',
+  'bypassPermissions',
+]);
+export type ClaudePermissionMode = z.infer<typeof ClaudePermissionModeSchema>;
+
+export const ClaudeFlagsSchema = z.object({
+  permission_mode: ClaudePermissionModeSchema,
+  fallback_model: z.string().optional(),
+});
+export type ClaudeFlags = z.infer<typeof ClaudeFlagsSchema>;
+
+// claude-code reasoning effort scale (excludes ultracode, which is a separate
+// swarm setting, not an --effort value).
+export const ClaudeEffortSchema = z.enum([
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+]);
+export type ClaudeEffort = z.infer<typeof ClaudeEffortSchema>;
+
+// Per-tier {model, effort}. effort is optional — omitted (or unset for a model
+// that has no effort support, e.g. haiku) means no --effort flag is sent.
+export const ClaudeTierConfigSchema = z.object({
+  model: z.string(),
+  effort: ClaudeEffortSchema.optional(),
+});
+export type ClaudeTierConfig = z.infer<typeof ClaudeTierConfigSchema>;
+
+export const ClaudeModelMapSchema = z.object({
+  high: ClaudeTierConfigSchema,
+  mid: ClaudeTierConfigSchema,
+  low: ClaudeTierConfigSchema,
+});
+export type ClaudeModelMap = z.infer<typeof ClaudeModelMapSchema>;
+
 // Per-tier model-name map. Lives here (not config.ts) so DispatchOptions can
 // carry it without a config→dispatch→config import cycle.
 export const TierModelMapSchema = z.object({
@@ -53,7 +81,7 @@ export const TierModelMapSchema = z.object({
 });
 export type TierModelMap = z.infer<typeof TierModelMapSchema>;
 
-export interface DispatchOptions<F = unknown> {
+export interface DispatchOptions<F = unknown, M = TierModelMap> {
   prompt: string;
   tier: Tier;
   options: ConversationOptions;
@@ -61,12 +89,16 @@ export interface DispatchOptions<F = unknown> {
   cwd: string;
   flags: F;
   spawnTimeoutMs: number;
-  // Tier→model-name map, injected by the MCP tool for providers that resolve
-  // concrete model names from config (antigravity). codex/gemini ignore it.
-  modelMap?: TierModelMap;
+  // Tier→model map, injected by the MCP tool for providers that resolve concrete
+  // models from config (antigravity's TierModelMap, claude's ClaudeModelMap).
+  // codex ignores it.
+  modelMap?: M;
 }
 
-export interface DispatchResumeOptions<F = unknown> extends DispatchOptions<F> {
+export interface DispatchResumeOptions<
+  F = unknown,
+  M = TierModelMap,
+> extends DispatchOptions<F, M> {
   externalSessionRef: string;
 }
 
@@ -79,8 +111,8 @@ export interface DispatchResult {
   resolvedModel: string | null;
 }
 
-export interface Dispatcher<F = unknown> {
+export interface Dispatcher<F = unknown, M = TierModelMap> {
   readonly supportedOptions: ReadonlySet<keyof ConversationOptions>;
-  start(args: DispatchOptions<F>): Promise<DispatchResult>;
-  resume(args: DispatchResumeOptions<F>): Promise<DispatchResult>;
+  start(args: DispatchOptions<F, M>): Promise<DispatchResult>;
+  resume(args: DispatchResumeOptions<F, M>): Promise<DispatchResult>;
 }

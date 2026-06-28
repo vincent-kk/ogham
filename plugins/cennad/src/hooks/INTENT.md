@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, gemini, antigravity)를 지원하며 gemini 와 antigravity 는 상호 배타적인 Google 엔진이다 — `activeGoogleEngine` 이 활성 엔진을 판별한다. SessionStart 에서 정적 정책 1회, UserPromptSubmit 마다 호출 카운터 + drift 상태를 `additionalContext` 로 주입한다. 엔트리 파일(`*.entry.ts`)은 esbuild 가 `bridge/*.mjs` 로 번들링.
+Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigravity, claude)를 지원한다. SessionStart 에서 정적 정책 1회, UserPromptSubmit 마다 호출 카운터 + drift 상태를 `additionalContext` 로 주입한다. 엔트리 파일(`*.entry.ts`)은 esbuild 가 `bridge/*.mjs` 로 번들링.
 
 ## Structure
 
-| 모듈            | 이벤트           | 역할                                                                                                           |
-| --------------- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                                                 |
-| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                                            |
-| `shared` organ  | -                | `paths`, `safeReadJson`, `nowIso`, 공유 config 로더, `pickPreamble`, `pickRecencyFactor`, `activeGoogleEngine` |
+| 모듈            | 이벤트           | 역할                                                                                     |
+| --------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| `injectStatic`  | SessionStart     | config 기반 정적 정책 1회 주입                                                           |
+| `injectDynamic` | UserPromptSubmit | counter 기반 라이브 상태 매 턴 주입                                                      |
+| `shared` organ  | -                | `paths`, `safeReadJson`, `nowIso`, 공유 config 로더, `pickPreamble`, `pickRecencyFactor` |
 
 ## Conventions
 
@@ -35,7 +35,7 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, gemini, 
 ### Never do
 
 - entry 파일에 비즈니스 로직
-- `~/.claude/plugins/cennad/` 외부 경로 read
+- `${CLAUDE_PLUGIN_DATA}/` read (MCP 최초 이전 전에는 legacy config fallback)
 - counter 파일 write (read-only — counterManager 전담)
 
 ## Dependencies

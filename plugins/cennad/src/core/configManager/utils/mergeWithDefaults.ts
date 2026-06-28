@@ -8,13 +8,12 @@ import { mergeModelMap } from './mergeModelMap.js';
 import { mergeOptionFlags } from './mergeOptionFlags.js';
 import { mergePreamble } from './mergePreamble.js';
 import { mergeRecencyFactor } from './mergeRecencyFactor.js';
-import { normalizeMutualExclusion } from './normalizeMutualExclusion.js';
 import { normalizeRatio } from './normalizeRatio.js';
 
 export function mergeWithDefaults(raw: unknown): unknown {
   if (!isPlainObject(raw)) return DEFAULT_CONFIG;
   return {
-    ratio: normalizeMutualExclusion(normalizeRatio(raw.ratio)),
+    ratio: normalizeRatio(raw.ratio),
     intervention_strength:
       raw.intervention_strength ?? DEFAULT_CONFIG.intervention_strength,
     keywords: {

@@ -19,10 +19,10 @@ describe('updateSession', () => {
 
   it('overwrites the session JSON with the provided meta', async () => {
     const created = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/u',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
     });
     const next: SessionMeta = {
       ...created,

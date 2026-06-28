@@ -23,11 +23,11 @@ describe('incrementCounter', () => {
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
-  it('starts gemini count at 1 from empty state', async () => {
-    const result = await incrementCounter('gemini');
+  it('starts claude count at 1 from empty state', async () => {
+    const result = await incrementCounter('claude');
     expect(result).toEqual({
       parent_pid: 4242,
-      gemini: 1,
+      claude: 1,
       codex: 0,
       antigravity: 0,
     });
@@ -37,7 +37,7 @@ describe('incrementCounter', () => {
     const result = await incrementCounter('codex');
     expect(result).toEqual({
       parent_pid: 4242,
-      gemini: 0,
+      claude: 0,
       codex: 1,
       antigravity: 0,
     });
@@ -47,43 +47,43 @@ describe('incrementCounter', () => {
     const result = await incrementCounter('antigravity');
     expect(result).toEqual({
       parent_pid: 4242,
-      gemini: 0,
+      claude: 0,
       codex: 0,
       antigravity: 1,
     });
   });
 
   it('accumulates across calls when parent_pid is stable', async () => {
-    await incrementCounter('gemini');
-    await incrementCounter('gemini');
+    await incrementCounter('claude');
+    await incrementCounter('claude');
     const result = await incrementCounter('codex');
     expect(result).toEqual({
       parent_pid: 4242,
-      gemini: 2,
+      claude: 2,
       codex: 1,
       antigravity: 0,
     });
   });
 
   it('resets and restarts at 1 when parent_pid changes', async () => {
-    await incrementCounter('gemini');
+    await incrementCounter('claude');
     await incrementCounter('codex');
     ppidRef.value = 9999;
-    const result = await incrementCounter('gemini');
+    const result = await incrementCounter('claude');
     expect(result).toEqual({
       parent_pid: 9999,
-      gemini: 1,
+      claude: 1,
       codex: 0,
       antigravity: 0,
     });
   });
 
   it('persists the counter to disk', async () => {
-    await incrementCounter('gemini');
+    await incrementCounter('claude');
     const stored = JSON.parse(await readFile(COUNTER_PATH, 'utf8'));
     expect(stored).toEqual({
       parent_pid: 4242,
-      gemini: 1,
+      claude: 1,
       codex: 0,
       antigravity: 0,
     });

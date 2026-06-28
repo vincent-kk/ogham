@@ -17,7 +17,7 @@ import {
   assertEnvelopeSuccess,
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
-import { codexEnv, geminiEnv } from '../helpers/fakeProviderScripts.js';
+import { claudeEnv, codexEnv } from '../helpers/fakeProviderScripts.js';
 import {
   type FakeProvidersHandle,
   installFakeProviders,
@@ -49,34 +49,28 @@ describe('start_conversation (Layer A)', () => {
     await handle.close();
   });
 
-  it('gemini success — envelope, disk session, counter increment', async () => {
-    Object.assign(
-      process.env,
-      geminiEnv('success', {
-        uuid: 'aaaa1111-bbbb-cccc-dddd-eeeeeeffffff',
-      }),
-    );
+  it('claude success — envelope, disk session, counter increment', async () => {
+    Object.assign(process.env, claudeEnv('success'));
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'hello gemini', tier: 'mid' },
+      arguments: { provider: 'claude', prompt: 'hello claude', tier: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
-      provider: 'gemini',
+      provider: 'claude',
       turn: 1,
     });
-    expect(parsed.response).toContain('fake gemini response');
+    expect(parsed.response).toContain('fake claude response');
 
     const projectHash = getProjectHash(process.cwd());
     const session = await readSessionFile(projectHash, parsed.session_id);
     expect(session).not.toBeNull();
-    expect(session?.provider).toBe('gemini');
-    expect(session?.external_session_ref).toBe(
-      'aaaa1111-bbbb-cccc-dddd-eeeeeeffffff',
-    );
+    expect(session?.provider).toBe('claude');
+    // claude injects --session-id, so the external ref is the cennad sessionId.
+    expect(session?.external_session_ref).toBe(parsed.session_id);
     expect(session?.turn_count).toBe(1);
 
     const counter = await readCounter();
-    expect(counter?.gemini).toBe(1);
+    expect(counter?.claude).toBe(1);
     expect(counter?.codex).toBe(0);
   });
 
@@ -104,11 +98,11 @@ describe('start_conversation (Layer A)', () => {
   });
 
   it('meta.ignored_options stays empty — MCP input strips unknown option keys (e.g., permission flags) at the schema boundary', async () => {
-    Object.assign(process.env, geminiEnv('success'));
+    Object.assign(process.env, claudeEnv('success'));
     const result = await handle.client.callTool({
       name: 'start_conversation',
       arguments: {
-        provider: 'gemini',
+        provider: 'claude',
         prompt: 'hi',
         tier: 'mid',
         // The MCP inputSchema for start_conversation does not declare `options`.
@@ -117,7 +111,7 @@ describe('start_conversation (Layer A)', () => {
       } as Record<string, unknown>,
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
-      provider: 'gemini',
+      provider: 'claude',
       turn: 1,
     });
     expect(parsed.meta.ignored_options).toEqual([]);

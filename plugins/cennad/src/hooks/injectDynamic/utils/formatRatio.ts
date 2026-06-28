@@ -6,21 +6,26 @@ export interface RatioLines {
   drift: string;
 }
 
-// Renders current/target/drift for the codex vs active-Google-engine pair.
-// gemini and antigravity are mutually exclusive, so only one Google engine is
-// ever shown (labelled by `googleName`).
-export function formatRatio(
-  current: { google: number; codex: number },
-  target: { google: number; codex: number },
-  googleName: string,
-): RatioLines {
-  const total = current.google + current.codex;
-  const currG = total === 0 ? 0 : Math.round((current.google / total) * 100);
-  const currC = total === 0 ? 0 : 100 - currG;
+export interface RatioLane {
+  name: string;
+  count: number;
+  // Configured ratio weight (the raw percent), 0 when the provider is disabled.
+  weight: number;
+}
 
+// Renders current/target/drift across N provider lanes. current% is each lane's
+// share of total calls; target% is the lane's configured weight (raw, 0 when
+// disabled); drift = target - current.
+export function formatRatio(lanes: RatioLane[]): RatioLines {
+  const countTotal = lanes.reduce((sum, l) => sum + l.count, 0);
+  const curr = (l: RatioLane): number =>
+    countTotal === 0 ? 0 : Math.round((l.count / countTotal) * 100);
+  const targ = (l: RatioLane): number => l.weight;
   return {
-    current: `${googleName} ${currG}% · codex ${currC}%`,
-    target: `${googleName} ${target.google}% · codex ${target.codex}%`,
-    drift: `${googleName} ${signed(target.google - currG)} · codex ${signed(target.codex - currC)}`,
+    current: lanes.map((l) => `${l.name} ${curr(l)}%`).join(' · '),
+    target: lanes.map((l) => `${l.name} ${targ(l)}%`).join(' · '),
+    drift: lanes
+      .map((l) => `${l.name} ${signed(targ(l) - curr(l))}`)
+      .join(' · '),
   };
 }

@@ -19,10 +19,10 @@ describe('getSession', () => {
 
   it('returns the persisted session when hash and id match', async () => {
     const created = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/x',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'claude-2.5-pro',
     });
     const loaded = await getSession(created.project_hash, created.session_id);
     expect(loaded).toEqual(created);

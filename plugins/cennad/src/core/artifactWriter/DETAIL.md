@@ -22,7 +22,7 @@
 - `projectHash: string` — `core/projectHash` 의 `sha256(cwd).slice(0,12)`.
 - `sessionId: string` — `randomUUID()` 가 발급한 UUIDv4.
 - `turn: number` — `start` 는 1, `continue` 는 `nextTurn`.
-- `provider: 'codex' | 'gemini'`.
+- `provider: 'codex' | 'antigravity' | 'claude'`.
 - `model: string` — 해석된 모델 id (`result.resolvedModel` 우선, 없으면
   alias).
 - `createdAt: string` — `utils/isoNow` 의 ISO 8601 타임스탬프.
@@ -48,7 +48,7 @@
 ### 경로 레이아웃
 
 - `project` → `<cwd>/.cennad/artifacts/<sessionId>-<turn>.md`
-- `user` → `~/.claude/plugins/cennad/artifacts/<projectHash>/<sessionId>-<turn>.md`
+- `user` → `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/<sessionId>-<turn>.md`
 
 `atomicWrite` 가 부모 디렉토리를 `0o700` 으로 생성하고 파일을 `0o600` 으로
 쓴다 (`lib/atomicWrite` 기본값 상속).

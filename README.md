@@ -143,11 +143,11 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 
 For full documentation, see the [atlassian README](./plugins/atlassian/README.md) ([Korean](./plugins/atlassian/README-ko_kr.md)).
 
-### [`@ogham/cennad`](./plugins/cennad/) — Codex / Gemini / Antigravity CLI Delegation
+### [`@ogham/cennad`](./plugins/cennad/) — Codex / Antigravity / Claude CLI Delegation
 
-A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI** or **Google's Gemini / Antigravity CLI** through MCP tools, skills, and lifecycle hooks.
+A Claude Code plugin that lets Claude delegate work to **OpenAI Codex CLI**, **Google Antigravity CLI**, or **Anthropic Claude CLI** through MCP tools, skills, and lifecycle hooks.
 
-Different models have different strengths: Codex excels at heavy code generation in a sandboxed shell; Gemini and Antigravity excel at live web-grounded research and very-large-context synthesis. cennad makes that delegation explicit, ratio-aware, and reproducible across sessions.
+Different models have different strengths: Codex excels at heavy code generation in a sandboxed shell; Antigravity excels at live web-grounded research and very-large-context synthesis; Claude offers fully isolated reasoning, writing, and review. cennad makes that delegation explicit, ratio-aware, and reproducible across sessions.
 
 > **Renamed from `cogair`.** If you used the old `cogair` plugin, its `/cogair:*` skills and `~/.claude/plugins/cogair/` settings no longer apply — reinstall as `cennad` and run `/cennad:setup` to reconfigure.
 
@@ -155,17 +155,15 @@ Different models have different strengths: Codex excels at heavy code generation
 
 | Component | Count | Examples                                                                                        |
 | --------- | ----- | ----------------------------------------------------------------------------------------------- |
-| Skills    | 5     | `/cennad:setup`, `/cennad:codex`, `/cennad:gemini`, `/cennad:antigravity`, `/cennad:crosscheck` |
-| MCP Tools | 4     | `start_conversation`, `continue_conversation`, `list_antigravity_models`, `open_settings`       |
+| Skills    | 5     | `/cennad:setup`, `/cennad:codex`, `/cennad:antigravity`, `/cennad:claude`, `/cennad:crosscheck` |
+| MCP Tools | 3     | `start_conversation`, `continue_conversation`, `open_settings`                                  |
 | Agents    | 0     | (skills delegate directly to external CLIs)                                                     |
 | Hooks     | 2     | SessionStart, UserPromptSubmit                                                                  |
 
-> `gemini` and `antigravity` are mutually exclusive Google engines (the Gemini CLI service ends **2026-06-18**); enable one in `/cennad:setup`.
-
 **Key features:**
 
-- **Multi-model delegation** — Route code-heavy tasks to Codex (sandboxed shell, refactor) and research-heavy tasks to Gemini or Antigravity (live web search, large context) via keyword-driven routing
-- **Cross-validation** — `/cennad:crosscheck` dispatches the same prompt to both providers in parallel and synthesizes their answers
+- **Multi-model delegation** — Route code-heavy tasks to Codex (sandboxed shell, refactor), research-heavy tasks to Antigravity (live web search, large context), or isolated reasoning to Claude, via keyword-driven routing
+- **Cross-validation** — `/cennad:crosscheck` dispatches the same prompt to every enabled provider in parallel and synthesizes their answers
 - **Local settings UI** — Web UI bound to 127.0.0.1 with one-time-token auth for editing provider ratio, intervention strength (-2 to +2), keyword routing, and default model alias
 - **Session bookkeeping** — Project-hash-scoped sessions with resume capability; SessionStart / UserPromptSubmit hooks inject ratio + drift + counter state into context
 
@@ -176,13 +174,13 @@ Different models have different strengths: Codex excels at heavy code generation
 # Delegate to Codex CLI
 /cennad:codex
 
-# Delegate to Gemini CLI (legacy — service ends 2026-06-18)
-/cennad:gemini
-
 # Delegate to Antigravity CLI
 /cennad:antigravity
 
-# Cross-validate a prompt across both providers
+# Delegate to an isolated Claude CLI
+/cennad:claude
+
+# Cross-validate a prompt across enabled providers
 /cennad:crosscheck
 ```
 
@@ -362,17 +360,17 @@ For full documentation, see the [yt-dlp-mcp README](./mcp-servers/yt-dlp-mcp/REA
 
 ## All Packages
 
-| Package                                       | Type          | Description                                                                     |
-| --------------------------------------------- | ------------- | ------------------------------------------------------------------------------- |
-| **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management                          |
-| **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph                           |
-| **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents                         |
-| **[`cennad`](./plugins/cennad/)**             | Claude plugin | Delegate to OpenAI Codex CLI / Google Gemini / Antigravity CLI from Claude Code |
-| **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                                     |
-| **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts                 |
-| **[`deilen`](./plugins/deilen/)**             | Claude plugin | Render Claude markdown documents in a browser with line-anchored feedback       |
-| **[`prawf`](./plugins/prawf/)**               | Claude plugin | Multi-agent academic peer review — 9-persona committee, pure markdown           |
-| **[`yt-dlp-mcp`](./mcp-servers/yt-dlp-mcp/)** | MCP server    | YouTube transcripts, metadata, comments & media for any MCP app                 |
+| Package                                       | Type          | Description                                                                 |
+| --------------------------------------------- | ------------- | --------------------------------------------------------------------------- |
+| **[`filid`](./plugins/filid/)**               | Claude plugin | FCA-AI rule enforcement and fractal context management                      |
+| **[`maencof`](./plugins/maencof/)**           | Claude plugin | Personal knowledge space manager with Knowledge Graph                       |
+| **[`atlassian`](./plugins/atlassian/)**       | Claude plugin | Jira / Confluence integration with domain-expert agents                     |
+| **[`cennad`](./plugins/cennad/)**             | Claude plugin | Delegate to OpenAI Codex / Google Antigravity / Claude CLI from Claude Code |
+| **[`imbas`](./plugins/imbas/)**               | Claude plugin | Planning-doc → Jira / GitHub issue pipeline                                 |
+| **[`maencof-lens`](./plugins/maencof-lens/)** | Claude plugin | Read-only vault knowledge graph access for development contexts             |
+| **[`deilen`](./plugins/deilen/)**             | Claude plugin | Render Claude markdown documents in a browser with line-anchored feedback   |
+| **[`prawf`](./plugins/prawf/)**               | Claude plugin | Multi-agent academic peer review — 9-persona committee, pure markdown       |
+| **[`yt-dlp-mcp`](./mcp-servers/yt-dlp-mcp/)** | MCP server    | YouTube transcripts, metadata, comments & media for any MCP app             |
 
 ---
 

@@ -1,13 +1,19 @@
-# Storage — `~/.claude/plugins/cennad/`
+# Storage — `${CLAUDE_PLUGIN_DATA}/`
 
-모든 경로는 `os.homedir() + '/.claude/plugins/cennad'` 기준. atlassian 의 `~/.claude/plugins/atlassian/` 와 동일한 Claude 플러그인 데이터 규약.
+설치된 플러그인은 Claude Code가 제공하는 `${CLAUDE_PLUGIN_DATA}`를 기준으로
+상태를 저장한다. 로컬 개발처럼 환경 변수가 없는 실행에서는
+`~/.claude/plugins/cennad/`를 호환 경로로 사용한다.
+
+MCP 서버가 새 데이터 경로에서 처음 시작할 때 legacy 경로의 config,
+sessions, artifacts, Antigravity resume 데이터를 복사한다. 새 경로에 이미
+존재하는 파일은 덮어쓰지 않으며 migration marker로 재실행을 방지한다.
 
 디스크 JSON 키는 `snake_case` 를 유지한다 (atlassian 디스크 스키마와 동일 컨벤션). 내부 TS 타입과 변수는 `camelCase`.
 
 ## 디렉토리 레이아웃
 
 ```
-~/.claude/plugins/cennad/
+${CLAUDE_PLUGIN_DATA}/
 ├── config.json
 ├── sessions/
 │   └── <project_hash>/                # sha256(cwd).slice(0, 12)
@@ -17,8 +23,6 @@
     ├── counter.json
     ├── agy-models.json                # antigravity 모델 목록 캐시 (1시간 TTL)
     ├── settings_server.json           # web UI 동작 중일 때만
-    ├── gemini-cwd/                    # gemini dispatcher 작업 디렉토리
-    │   └── <session_id>/
     └── antigravity-cwd/               # antigravity dispatcher 작업 디렉토리
         └── <session_id>/
 ```
@@ -30,52 +34,64 @@
 ```typescript
 interface Config {
   ratio: {
-    gemini: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: true }
-    codex: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: true }
-    antigravity: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: false }
+    codex: { value: number; enabled: boolean }; // 기본 { value: 34, enabled: true }
+    antigravity: { value: number; enabled: boolean }; // 기본 { value: 33, enabled: true }
+    claude: { value: number; enabled: boolean }; // 기본 { value: 33, enabled: true }
   };
   intervention_strength: -2 | -1 | 0 | 1 | 2; // 기본 0
   keywords: {
-    gemini: string; // 기본 "research, search, youtube, large-context"
     codex: string; // 기본 "code, refactor, sandbox"
     antigravity: string; // 기본 "research, search, youtube, large-context"
+    claude: string; // 기본 "reasoning, writing, analysis, review"
   };
   option_flags: {
-    gemini: { yolo: boolean; sandbox: boolean; sandbox_backend: string };
     codex: { yolo: boolean; sandbox: string };
     antigravity: { sandbox: boolean; skip_permissions: boolean };
+    claude: {
+      permission_mode:
+        | "default"
+        | "acceptEdits"
+        | "auto"
+        | "dontAsk"
+        | "plan"
+        | "bypassPermissions";
+    }; // 기본 'acceptEdits'
   };
   model_map: {
     antigravity: { high: string; mid: string; low: string };
     // 기본: { high: "Gemini 3.1 Pro", mid: "Claude Sonnet 4.5", low: "Gemini 3.5 Flash" }
+    claude: {
+      high: { model: string; effort: string };
+      mid: { model: string; effort: string };
+      low: { model: string; effort: string };
+    };
+    // 기본: { high: { model: "opus", effort: "max" }, mid: { model: "opus", effort: "high" }, low: { model: "sonnet", effort: "high" } }
   };
   session_ttl_hours: number; // 기본 72
   spawn_timeout_ms: number; // 기본 600000
   artifacts: { enabled: boolean; location: "project" | "user" };
-  preamble: { gemini: string; codex: string; antigravity: string };
+  preamble: { codex: string; antigravity: string; claude: string };
   recency_factor: {
-    gemini: "off" | "auto" | "strict"; // 기본 "auto"
     codex: "off" | "auto" | "strict"; // 기본 "off"
     antigravity: "off" | "auto" | "strict"; // 기본 "auto"
+    claude: "off" | "auto" | "strict"; // 기본 "off"
   };
 }
 ```
 
-검증: `types/config.ts` 의 Zod 스키마. 누락 필드는 defaults 와 병합. 파싱 실패 시 defaults 사용 + stderr 경고.
-
-**Gemini ↔ Antigravity 상호 배제**: `ratio.gemini.enabled` 와 `ratio.antigravity.enabled` 는 동시에 `true` 가 될 수 없다. Gemini CLI 서비스는 2026-06-18 종료 예정이며, cennad 는 Antigravity CLI 로 전환 중이다. 레거시 또는 직접 편집된 config 파일에서 양쪽이 모두 `enabled: true` 인 경우 `configManager.normalizeMutualExclusion` 이 antigravity 를 우선하여 gemini 를 자동으로 비활성화한다. 설정 UI 에서 저장할 때는 `ConfigSchema` 의 `superRefine` 이 동일 규칙을 강제한다.
+검증: `types/config.ts` 의 Zod 스키마. 누락 필드는 defaults 와 병합. 파싱 실패 시 defaults 사용 + stderr 경고. `/setup` 호출 시 `pruneConfigFile` 이 제거된 프로바이더 키와 레거시 정수 ratio 를 정리한다.
 
 ## 세션 메타데이터 — `sessions/<hash>/<session_id>.json`
 
 ```typescript
 interface SessionMeta {
   session_id: string; // UUIDv4
-  provider: "gemini" | "codex" | "antigravity";
+  provider: "codex" | "antigravity" | "claude";
   created_at: string; // ISO 8601
   last_used_at: string;
   turn_count: number;
-  external_session_ref: string; // codex: thread UUID, gemini: index → 매핑은 sessionResolver
-  // antigravity: 격리된 cwd 절대 경로
+  external_session_ref: string; // codex: thread UUID, antigravity: 격리된 cwd 절대 경로
+  // claude: cennad sessionId (--session-id 로 주입한 값)
   cwd: string; // 원본 절대 경로 (project_hash 검증용)
   project_hash: string; // sha256(cwd).slice(0, 12) — 빠른 매칭
   model: string; // 해결된 모델 ID
@@ -103,9 +119,9 @@ interface ProjectMeta {
 ```typescript
 interface Counter {
   parent_pid: number;
-  gemini: number;
   codex: number;
   antigravity: number;
+  claude: number;
 }
 ```
 
@@ -139,14 +155,6 @@ interface SettingsServer {
 
 `open_settings` 기동 시 작성, 종료 시 삭제. 다음 `open_settings` 호출이 `pid` 가 살아 있고 `last_activity_at` 가 5분 이내면 재사용.
 
-## `runtime/gemini-cwd/<session_id>/`
-
-gemini-cli 가 자체 세션 파일을 만드는 작업 디렉토리. cennad 가 세션마다 격리해 관리.
-
-- `start_conversation` 시 디렉토리 생성.
-- `continue_conversation` 시 같은 디렉토리에서 `gemini --list-sessions` 재실행 후 `--resume <index>`.
-- 세션 TTL 만료 시 cennad 가 디렉토리 `rm -rf` (자체 작업 디렉토리이므로 안전).
-
 ## `runtime/antigravity-cwd/<session_id>/`
 
 agy CLI 가 대화 기록을 저장하는 세션별 격리 작업 디렉토리. gemini-cwd 와 대칭 구조.
@@ -173,19 +181,19 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 `mcp` 서버 기동 시 1회:
 
 1. 모든 `sessions/*/*.json` 의 `last_used_at` 검사.
-2. `now - last_used_at > config.session_ttl_hours` 면 cennad 의 세션 JSON 파일과 `runtime/gemini-cwd/<session_id>/` 또는 `runtime/antigravity-cwd/<session_id>/` (있으면) 삭제.
+2. `now - last_used_at > config.session_ttl_hours` 면 cennad 의 세션 JSON 파일과 `runtime/antigravity-cwd/<session_id>/` (있으면) 삭제.
 3. 비어버린 `sessions/<project_hash>/` 디렉토리는 `_meta.json` 만 남으면 함께 제거.
-4. **외부 CLI 자체 세션 파일은 손대지 않는다** — `$CODEX_HOME/sessions/`, gemini 의 글로벌 세션 인덱스 등. cennad 는 자신의 매핑만 제거하며, 외부 CLI 의 자체 관리(TTL, 명시 삭제 명령 등)에 위임한다.
+4. **외부 CLI 자체 세션 파일은 손대지 않는다** — `$CODEX_HOME/sessions/` 등. cennad 는 자신의 매핑만 제거하며, 외부 CLI 의 자체 관리(TTL, 명시 삭제 명령 등)에 위임한다.
 
 `runtime/counter.json`, `runtime/agy-models.json`, `runtime/settings_server.json` 은 별도 정리 안 함 (재기동 시 자동 갱신).
 
 ## 권한
 
 - 모든 파일 권한 `0o600`, 디렉토리 `0o700`.
-- `config.json` 에 토큰 없음 — 자격증명은 외부 CLI(`codex login`, `gemini auth`, `agy auth`) 가 자체 관리.
+- `config.json` 에 토큰 없음 — 자격증명은 외부 CLI(`codex login`, `agy auth`, `claude`) 가 자체 관리.
 
 ## Artifact Mirror 디스크 사용량
 
-`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `~/.claude/plugins/cennad/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ~/.claude/plugins/cennad/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
+`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ${CLAUDE_PLUGIN_DATA}/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
 
 Retention 자동화는 후속 issue 로 등록 예정.

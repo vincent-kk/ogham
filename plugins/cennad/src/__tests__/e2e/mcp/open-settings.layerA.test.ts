@@ -76,15 +76,15 @@ describe('open_settings (Layer A)', () => {
     expect(root.body.toLowerCase()).toContain('<html');
     // Inline state slot replaced with the current config JSON.
     expect(root.body).toContain('"ratio"');
-    expect(root.body).toContain('"value":50');
+    expect(root.body).toContain('"value":34');
 
     const cfg = await httpGet(buildPath(out.url, '/config'));
     expect(cfg.status).toBe(200);
     const cfgJson = JSON.parse(cfg.body) as {
-      ratio: { gemini: { value: number } };
+      ratio: { codex: { value: number } };
       intervention_strength: number;
     };
-    expect(cfgJson.ratio.gemini.value).toBe(50);
+    expect(cfgJson.ratio.codex.value).toBe(34);
 
     const saveBody = { ...cfgJson, intervention_strength: 2 };
     const save = await httpPostJson(buildPath(out.url, '/save'), saveBody);

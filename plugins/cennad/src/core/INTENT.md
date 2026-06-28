@@ -6,7 +6,8 @@
 
 | Module            | Role                                                                    |
 | ----------------- | ----------------------------------------------------------------------- |
-| `configManager/`  | `~/.claude/plugins/cennad/config.json` 로드·저장                        |
+| `configManager/`  | `${CLAUDE_PLUGIN_DATA}/config.json` 로드·저장                           |
+| `dataHome/`       | 공식 데이터 경로 선택 + legacy 저장소 무손실 이전                       |
 | `counterManager/` | `runtime/counter.json` 으로 provider 호출 카운트 추적 (parent-pid 리셋) |
 | `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                          |
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                            |
@@ -38,7 +39,7 @@
 
 ### Never do
 
-- 외부 CLI 의 세션 인덱스(`$CODEX_HOME/sessions/`, gemini 글로벌) 삭제·수정
+- 외부 CLI 의 세션 인덱스(`$CODEX_HOME/sessions/`, AGY_HOME, claude 세션) 삭제·수정
 - 동일 키에 lock 없이 동시 write (MCP 단일 프로세스 가정)
 - 인자 없는 전역 경로 mutation
 

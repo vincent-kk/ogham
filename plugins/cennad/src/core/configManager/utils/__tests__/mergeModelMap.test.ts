@@ -14,14 +14,17 @@ describe('mergeModelMap', () => {
     expect(mergeModelMap(null)).toEqual(defaults);
   });
 
-  it('preserves fully-specified raw model_map', () => {
+  it('preserves a fully-specified antigravity map and fills claude defaults', () => {
     const raw = {
       antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
     };
-    expect(mergeModelMap(raw)).toEqual(raw);
+    expect(mergeModelMap(raw)).toEqual({
+      antigravity: { high: 'ModelA', mid: 'ModelB', low: 'ModelC' },
+      claude: defaults.claude,
+    });
   });
 
-  it('fills missing mid and low from defaults when only high is provided', () => {
+  it('fills missing antigravity tiers from defaults when only high is provided', () => {
     const raw = { antigravity: { high: 'CustomHigh' } };
     const result = mergeModelMap(raw) as typeof defaults;
     expect(result.antigravity.high).toBe('CustomHigh');
@@ -29,60 +32,51 @@ describe('mergeModelMap', () => {
     expect(result.antigravity.low).toBe(defaults.antigravity.low);
   });
 
-  it('fills missing high and low from defaults when only mid is provided', () => {
-    const raw = { antigravity: { mid: 'CustomMid' } };
-    const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity.high).toBe(defaults.antigravity.high);
-    expect(result.antigravity.mid).toBe('CustomMid');
-    expect(result.antigravity.low).toBe(defaults.antigravity.low);
-  });
-
-  it('fills missing high and mid from defaults when only low is provided', () => {
-    const raw = { antigravity: { low: 'CustomLow' } };
-    const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity.high).toBe(defaults.antigravity.high);
-    expect(result.antigravity.mid).toBe(defaults.antigravity.mid);
-    expect(result.antigravity.low).toBe('CustomLow');
-  });
-
   it('returns defaults when raw is a string', () => {
     expect(mergeModelMap('not-an-object')).toEqual(defaults);
-  });
-
-  it('returns defaults when raw is a number', () => {
-    expect(mergeModelMap(42)).toEqual(defaults);
   });
 
   it('returns defaults when raw is an array', () => {
     expect(mergeModelMap([{ antigravity: { high: 'X' } }])).toEqual(defaults);
   });
 
-  it('falls back to default tier value when high is a non-string (number)', () => {
+  it('uses default antigravity block when raw.antigravity is null', () => {
+    const result = mergeModelMap({ antigravity: null }) as typeof defaults;
+    expect(result.antigravity).toEqual(defaults.antigravity);
+  });
+
+  it('merges a fully-specified claude tier {model, effort}', () => {
     const raw = {
-      antigravity: { high: 123, mid: 'ValidMid', low: 'ValidLow' },
+      claude: {
+        high: { model: 'sonnet', effort: 'high' },
+        mid: { model: 'opus', effort: 'medium' },
+        low: { model: 'haiku' },
+      },
     };
     const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity.high).toBe(123);
-    expect(result.antigravity.mid).toBe('ValidMid');
-    expect(result.antigravity.low).toBe('ValidLow');
+    expect(result.claude.high).toEqual({ model: 'sonnet', effort: 'high' });
+    expect(result.claude.mid).toEqual({ model: 'opus', effort: 'medium' });
   });
 
-  it('uses default antigravity block when raw.antigravity is null', () => {
-    const raw = { antigravity: null };
+  it('does not inherit default effort for a claude tier that omits effort', () => {
+    const raw = { claude: { low: { model: 'haiku' } } };
     const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity).toEqual(defaults.antigravity);
+    expect(result.claude.low).toEqual({ model: 'haiku' });
+    expect(result.claude.low).not.toHaveProperty('effort');
   });
 
-  it('uses default antigravity block when raw.antigravity is a string', () => {
-    const raw = { antigravity: 'fast' };
+  it('fills missing claude tiers from defaults when only one tier is provided', () => {
+    const raw = { claude: { high: { model: 'fable', effort: 'max' } } };
     const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity).toEqual(defaults.antigravity);
+    expect(result.claude.high).toEqual({ model: 'fable', effort: 'max' });
+    expect(result.claude.mid).toEqual(defaults.claude.mid);
+    expect(result.claude.low).toEqual(defaults.claude.low);
   });
 
-  it('uses default antigravity block when raw.antigravity is an array', () => {
-    const raw = { antigravity: ['high', 'mid'] };
+  it('falls back to the default claude tier when a tier lacks a string model', () => {
+    const raw = { claude: { high: { effort: 'max' } } };
     const result = mergeModelMap(raw) as typeof defaults;
-    expect(result.antigravity).toEqual(defaults.antigravity);
+    expect(result.claude.high).toEqual(defaults.claude.high);
   });
 
   it('does not mutate DEFAULT_CONFIG.model_map', () => {

@@ -8,29 +8,41 @@ export function normalizeRatio(raw: unknown): unknown {
   const c = raw.codex;
   const a = raw.antigravity;
   if (typeof g === 'number' && typeof c === 'number') {
-    // Legacy pre-antigravity integer ratio. Migrate gemini/codex to enabled
-    // flags; antigravity keeps its default (disabled).
+    // Legacy pre-antigravity integer ratio. The removed gemini provider's weight
+    // migrates onto the antigravity (Google) slot so the user's split is kept;
+    // claude takes its default.
     const gw = Math.max(0, Math.floor(g));
     const cw = Math.max(0, Math.floor(c));
     const total = gw + cw;
     if (total === 0) return DEFAULT_CONFIG.ratio;
-    const gPct = Math.round((gw / total) * 100);
-    const cPct = 100 - gPct;
+    const aPct = Math.round((gw / total) * 100);
     return {
-      gemini: { value: gPct, enabled: gw > 0 },
-      codex: { value: cPct, enabled: cw > 0 },
-      antigravity: { ...DEFAULT_CONFIG.ratio.antigravity },
+      codex: { value: 100 - aPct, enabled: cw > 0 },
+      antigravity: { value: aPct, enabled: gw > 0 },
+      claude: { ...DEFAULT_CONFIG.ratio.claude },
     };
   }
+  // Before Gemini was removed, canonical configs contained both Google slots:
+  // Gemini enabled and Antigravity disabled by default. In that state the
+  // active Gemini slot must migrate onto Antigravity rather than being hidden
+  // by the mere presence of the disabled Antigravity placeholder.
+  const antigravitySource =
+    isPlainObject(g) &&
+    g.enabled === true &&
+    (!isPlainObject(a) || a.enabled !== true)
+      ? g
+      : isPlainObject(a)
+        ? a
+        : g;
   return {
-    gemini: isPlainObject(g)
-      ? { ...DEFAULT_CONFIG.ratio.gemini, ...g }
-      : DEFAULT_CONFIG.ratio.gemini,
     codex: isPlainObject(c)
       ? { ...DEFAULT_CONFIG.ratio.codex, ...c }
       : DEFAULT_CONFIG.ratio.codex,
-    antigravity: isPlainObject(a)
-      ? { ...DEFAULT_CONFIG.ratio.antigravity, ...a }
+    antigravity: isPlainObject(antigravitySource)
+      ? { ...DEFAULT_CONFIG.ratio.antigravity, ...antigravitySource }
       : DEFAULT_CONFIG.ratio.antigravity,
+    claude: isPlainObject(raw.claude)
+      ? { ...DEFAULT_CONFIG.ratio.claude, ...raw.claude }
+      : DEFAULT_CONFIG.ratio.claude,
   };
 }
