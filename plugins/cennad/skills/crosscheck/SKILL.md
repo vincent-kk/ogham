@@ -13,7 +13,9 @@ parallel via the cennad MCP server, then synthesizing their
 `ConversationResponse` envelopes into one consolidated answer.
 
 Disabled providers are skipped entirely. A real cross-check needs at least two
-enabled providers to compare viewpoints.
+independent viewpoints to compare. When only one provider is enabled, the
+**host LLM** (the session that invoked this skill) supplies the second
+viewpoint so the cross-check can still happen.
 
 ## When to use
 
@@ -58,14 +60,23 @@ The participants are the enabled providers among codex, antigravity, and
 claude. Branch on how many are enabled BEFORE issuing any MCP call:
 
 - **Two or more enabled** → standard crosscheck: dispatch every enabled
-  provider in parallel (Call mapping below) and synthesize.
-- **Exactly one enabled** → a cross-check needs two viewpoints, so there is
-  nothing to cross against. Dispatch the single enabled provider via MCP,
-  present its answer as-is (no synthesis sections), and tell the user to
-  enable at least one more provider via `/cennad:setup` for a real
-  cross-check.
+  provider in parallel (Call mapping below) and synthesize. The host LLM does
+  NOT participate — there are already enough external viewpoints.
+- **Exactly one enabled** → only one external provider exists, so mobilize the
+  host LLM as the second viewpoint:
+  1. BEFORE dispatching, draft your own (the host LLM's) independent answer to
+     the SAME prompt from your own reasoning. Commit to it first so the
+     provider's response cannot anchor you.
+  2. Dispatch the single enabled provider via MCP (Call mapping below).
+  3. Treat the host answer and the provider answer as two participants and
+     synthesize them with the standard Synthesis format, attributing each
+     point to `host` vs the provider (e.g. `host + codex`).
+     Note to the user that the host LLM was mobilized because only one provider
+     is enabled, and suggest enabling another provider via `/cennad:setup` for a
+     fully external cross-check.
 - **None enabled** → issue NO MCP call. Tell the user all providers are
-  disabled and to enable at least two via `/cennad:setup`.
+  disabled and to enable at least one via `/cennad:setup` (one enabled
+  provider is enough — the host LLM supplies the second viewpoint).
 
 If a `start_conversation` call returns `error.code: 'disabled'` (the static
 policy was stale — config changed mid-session), drop that provider from the
@@ -108,9 +119,11 @@ For each provider independently:
 
 - If **two or more** providers succeed → synthesize the successful answers
   normally AND note each failed provider's `error.code` / `error.message`.
-- If **exactly one** provider succeeds → present that answer as-is (no
-  synthesis sections) AND note each failed provider's error. Do NOT abort —
-  the user still gets value from the single response.
+- If **exactly one** provider succeeds → mobilize the host LLM as the second
+  viewpoint: draft your own independent answer to the SAME prompt, then
+  synthesize host vs the surviving provider with the standard Synthesis
+  format (attributing points to `host` vs the provider) AND note each failed
+  provider's error. Do NOT abort.
 - If **all** providers fail → surface every error and skip synthesis. Relay
   the per-code remedy (from Failure dispatch above) for each before retrying.
 
@@ -129,11 +142,12 @@ One `## <Provider> response` block per surviving provider, then one
 > <one-line remedy from the failure dispatch above>
 ```
 
-## Synthesis format (two or more responses)
+## Synthesis format (two or more viewpoints)
 
-When two or more responses succeed, render exactly four sections. Attribute
-each point to the providers behind it (e.g. `codex + claude`) so the user can
-trace every viewpoint to its source:
+When two or more viewpoints are available (enabled providers, or one provider
+plus the mobilized host LLM), render exactly four sections. Attribute each
+point to the viewpoints behind it (e.g. `codex + claude`, or `host + codex`)
+so the user can trace every viewpoint to its source:
 
 ```
 ## Agreed
