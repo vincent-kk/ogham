@@ -7,19 +7,19 @@ import { tonePhrase } from '../utils/tonePhrase.js';
 
 const BASE_CONFIG: HookConfig = {
   ratio: {
-    gemini: { value: 50, enabled: false },
     codex: { value: 50, enabled: false },
     antigravity: { value: 50, enabled: false },
+    claude: { value: 50, enabled: false },
   },
   intervention_strength: 0,
-  keywords: { gemini: 'research', codex: 'code', antigravity: 'search' },
+  keywords: { codex: 'code', antigravity: 'search', claude: 'reason' },
   option_flags: {
-    gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
     antigravity: { sandbox: true, skip_permissions: false },
+    claude: { permission_mode: 'acceptEdits' },
   },
-  preamble: { gemini: '', codex: '', antigravity: '' },
-  recency_factor: { gemini: 'auto', codex: 'off', antigravity: 'auto' },
+  preamble: { codex: '', antigravity: '', claude: '' },
+  recency_factor: { codex: 'off', antigravity: 'auto', claude: 'off' },
 };
 
 describe('joinKeywords', () => {
@@ -67,18 +67,19 @@ describe('tonePhrase', () => {
 });
 
 describe('buildStaticPayload', () => {
-  it('includes provider ratio line with antigravity as the active google engine', () => {
+  it('includes a provider ratio line with each provider value', () => {
     const config: HookConfig = {
       ...BASE_CONFIG,
       ratio: {
-        ...BASE_CONFIG.ratio,
-        antigravity: { value: 60, enabled: true },
         codex: { value: 40, enabled: true },
+        antigravity: { value: 60, enabled: true },
+        claude: { value: 20, enabled: true },
       },
     };
     const payload = buildStaticPayload(config);
-    expect(payload).toContain('antigravity 60%');
     expect(payload).toContain('codex 40%');
+    expect(payload).toContain('antigravity 60%');
+    expect(payload).toContain('claude 20%');
   });
 
   it('lists active providers and intervention strength in output', () => {
@@ -86,12 +87,12 @@ describe('buildStaticPayload', () => {
       ...BASE_CONFIG,
       ratio: {
         ...BASE_CONFIG.ratio,
-        gemini: { value: 50, enabled: true },
+        claude: { value: 50, enabled: true },
       },
       intervention_strength: 1,
     };
     const payload = buildStaticPayload(config);
-    expect(payload).toContain('Active providers: gemini');
+    expect(payload).toContain('Active providers: claude');
     expect(payload).toContain('proactive — delegate when reasonable');
   });
 
@@ -101,22 +102,24 @@ describe('buildStaticPayload', () => {
     expect(payload).toContain('Run /cennad:setup to enable a provider');
   });
 
-  it('includes keyword mapping for enabled google provider and codex', () => {
+  it('includes keyword mapping for each enabled provider', () => {
     const config: HookConfig = {
       ...BASE_CONFIG,
       ratio: {
-        ...BASE_CONFIG.ratio,
-        antigravity: { value: 50, enabled: true },
         codex: { value: 50, enabled: true },
+        antigravity: { value: 50, enabled: true },
+        claude: { value: 50, enabled: false },
       },
       keywords: {
-        gemini: 'research',
         codex: 'code, refactor',
         antigravity: 'search, youtube',
+        claude: 'reasoning',
       },
     };
     const payload = buildStaticPayload(config);
-    expect(payload).toContain('antigravity → search, youtube');
-    expect(payload).toContain('codex  → code, refactor');
+    expect(payload).toContain('- codex → code, refactor');
+    expect(payload).toContain('- antigravity → search, youtube');
+    // claude is disabled, so its keyword line is omitted
+    expect(payload).not.toContain('- claude →');
   });
 });

@@ -32,7 +32,7 @@ describe('getCounter', () => {
   it('returns a fresh counter when nothing is persisted', async () => {
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
-      gemini: 0,
+      claude: 0,
       codex: 0,
       antigravity: 0,
     });
@@ -42,14 +42,14 @@ describe('getCounter', () => {
     await writeCounterFile(
       JSON.stringify({
         parent_pid: 12345,
-        gemini: 4,
+        claude: 4,
         codex: 2,
         antigravity: 1,
       }),
     );
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
-      gemini: 4,
+      claude: 4,
       codex: 2,
       antigravity: 1,
     });
@@ -59,14 +59,14 @@ describe('getCounter', () => {
     await writeCounterFile(
       JSON.stringify({
         parent_pid: 99999,
-        gemini: 7,
+        claude: 7,
         codex: 3,
         antigravity: 2,
       }),
     );
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
-      gemini: 0,
+      claude: 0,
       codex: 0,
       antigravity: 0,
     });
@@ -76,7 +76,7 @@ describe('getCounter', () => {
     await writeCounterFile('garbage');
     expect(await getCounter()).toEqual({
       parent_pid: 12345,
-      gemini: 0,
+      claude: 0,
       codex: 0,
       antigravity: 0,
     });

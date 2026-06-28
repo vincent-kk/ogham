@@ -18,8 +18,8 @@ describe('injectStatic (Layer B)', () => {
     assertHookEnvelope(result.parsed, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: gemini 50% · codex 50%',
-        'Active providers: gemini, codex',
+        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Active providers: codex, antigravity, claude',
         'balanced',
       ],
     });
@@ -32,7 +32,8 @@ describe('injectStatic (Layer B)', () => {
     assertHookEnvelope(result.parsed, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: gemini 70% · codex 30%',
+        'codex 30%',
+        'antigravity 70%',
         'research, news',
         'very conservative',
       ],

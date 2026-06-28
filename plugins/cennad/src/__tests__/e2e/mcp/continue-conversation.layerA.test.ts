@@ -18,7 +18,7 @@ import {
   assertEnvelopeSuccess,
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
-import { geminiEnv } from '../helpers/fakeProviderScripts.js';
+import { claudeEnv } from '../helpers/fakeProviderScripts.js';
 import {
   type FakeProvidersHandle,
   installFakeProviders,
@@ -51,20 +51,15 @@ describe('continue_conversation (Layer A)', () => {
   });
 
   it('resumes the session, bumps turn_count, updates last_used_at', async () => {
-    Object.assign(
-      process.env,
-      geminiEnv('success', {
-        uuid: 'aaaa1111-2222-3333-4444-555566667777',
-      }),
-    );
+    Object.assign(process.env, claudeEnv('success'));
 
     const startResult = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'first', tier: 'mid' },
+      arguments: { provider: 'claude', prompt: 'first', tier: 'mid' },
     });
     const startEnv = assertEnvelopeSuccess(
       parseToolCallText(startResult.content),
-      { provider: 'gemini', turn: 1 },
+      { provider: 'claude', turn: 1 },
     );
 
     const projectHash = getProjectHash(process.cwd());
@@ -81,7 +76,7 @@ describe('continue_conversation (Layer A)', () => {
     });
     const contEnv = assertEnvelopeSuccess(
       parseToolCallText(contResult.content),
-      { provider: 'gemini', turn: 2 },
+      { provider: 'claude', turn: 2 },
     );
     expect(contEnv.session_id).toBe(startEnv.session_id);
 

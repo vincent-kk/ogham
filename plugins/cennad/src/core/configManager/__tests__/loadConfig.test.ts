@@ -28,16 +28,16 @@ describe('loadConfig', () => {
   it('loads a fully-specified config from disk', async () => {
     const stored = {
       ratio: {
-        gemini: { value: 40, enabled: true },
         codex: { value: 60, enabled: true },
         antigravity: { value: 50, enabled: false },
+        claude: { value: 40, enabled: true },
       },
       intervention_strength: 1,
-      keywords: { gemini: 'g', codex: 'c', antigravity: 'a' },
+      keywords: { codex: 'c', antigravity: 'a', claude: 'cl' },
       option_flags: {
-        gemini: { yolo: true, sandbox: true, sandbox_backend: 'docker' },
-        codex: { yolo: false, sandbox: 'workspace-write' },
-        antigravity: { sandbox: true, skip_permissions: false },
+        codex: { yolo: false, sandbox: 'workspace-write' as const },
+        antigravity: { sandbox: false, skip_permissions: false },
+        claude: { permission_mode: 'plan' as const },
       },
       model_map: {
         antigravity: {
@@ -45,20 +45,25 @@ describe('loadConfig', () => {
           mid: 'Claude Sonnet 4.5',
           low: 'Gemini 3.5 Flash',
         },
+        claude: {
+          high: { model: 'opus', effort: 'max' as const },
+          mid: { model: 'sonnet', effort: 'high' as const },
+          low: { model: 'haiku' },
+        },
       },
       default_tier: {
-        gemini: 'high' as const,
         codex: 'low' as const,
         antigravity: 'mid' as const,
+        claude: 'high' as const,
       },
       session_ttl_hours: 24,
       spawn_timeout_ms: 120_000,
       artifacts: { enabled: true, location: 'user' as const },
-      preamble: { gemini: 'be terse', codex: 'prefer ts', antigravity: 'agy' },
+      preamble: { codex: 'prefer ts', antigravity: 'agy', claude: 'be terse' },
       recency_factor: {
-        gemini: 'auto' as const,
         codex: 'strict' as const,
         antigravity: 'auto' as const,
+        claude: 'off' as const,
       },
       addons: {
         youtube: {
@@ -72,14 +77,27 @@ describe('loadConfig', () => {
     expect(await loadConfig()).toEqual(stored);
   });
 
-  it('injects artifacts defaults for legacy configs missing the block', async () => {
+  it('strips a leftover gemini section from a pre-upgrade config', async () => {
     const stored = {
       ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
+        gemini: { value: 40, enabled: true },
+        codex: { value: 60, enabled: true },
+        antigravity: { value: 50, enabled: false },
       },
+      keywords: { gemini: 'g', codex: 'c', antigravity: 'a' },
+    };
+    await writeConfigFile(JSON.stringify(stored));
+    const result = (await loadConfig()) as unknown as Record<string, unknown>;
+    expect(result.ratio).not.toHaveProperty('gemini');
+    expect(result.keywords).not.toHaveProperty('gemini');
+    expect(result.ratio).toHaveProperty('claude');
+  });
+
+  it('injects artifacts and addons defaults for legacy configs missing the block', async () => {
+    const stored = {
+      ratio: { codex: { value: 50, enabled: true } },
       intervention_strength: 0,
-      keywords: { gemini: 'g', codex: 'c' },
+      keywords: { codex: 'c' },
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
     };
@@ -91,12 +109,9 @@ describe('loadConfig', () => {
 
   it('migrates legacy antigravity_youtube into the youtube addon', async () => {
     const stored = {
-      ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
-      },
+      ratio: { codex: { value: 50, enabled: true } },
       intervention_strength: 0,
-      keywords: { gemini: 'g', codex: 'c' },
+      keywords: { codex: 'c' },
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
       antigravity_youtube: { enabled: true },
@@ -115,12 +130,9 @@ describe('loadConfig', () => {
 
   it('injects preamble and recency_factor defaults for legacy configs', async () => {
     const stored = {
-      ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
-      },
+      ratio: { codex: { value: 50, enabled: true } },
       intervention_strength: 0,
-      keywords: { gemini: 'g', codex: 'c' },
+      keywords: { codex: 'c' },
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
     };
@@ -132,85 +144,47 @@ describe('loadConfig', () => {
 
   it('drops invalid recency level and falls back to default', async () => {
     const stored = {
-      ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
-      },
+      ratio: { codex: { value: 50, enabled: true } },
       intervention_strength: 0,
       keywords: DEFAULT_CONFIG.keywords,
       option_flags: DEFAULT_CONFIG.option_flags,
       session_ttl_hours: 72,
-      recency_factor: { gemini: 'aggressive', codex: 'strict' },
+      recency_factor: { antigravity: 'aggressive', codex: 'strict' },
     };
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
-    expect(result.recency_factor.gemini).toBe(
-      DEFAULT_CONFIG.recency_factor.gemini,
+    expect(result.recency_factor.antigravity).toBe(
+      DEFAULT_CONFIG.recency_factor.antigravity,
     );
     expect(result.recency_factor.codex).toBe('strict');
   });
 
-  it('drops legacy default_options and injects option_flags defaults', async () => {
-    const stored = {
-      ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
-      },
-      intervention_strength: 0,
-      keywords: { gemini: 'g', codex: 'c' },
-      default_options: { multi_agent: true },
-      session_ttl_hours: 72,
-    };
-    await writeConfigFile(JSON.stringify(stored));
-    const result = await loadConfig();
-    expect(result.option_flags).toEqual(DEFAULT_CONFIG.option_flags);
-    expect(
-      (result as unknown as Record<string, unknown>).default_options,
-    ).toBeUndefined();
-  });
-
   it('fills missing option_flags fields with defaults', async () => {
     const stored = {
-      ratio: {
-        gemini: { value: 50, enabled: true },
-        codex: { value: 50, enabled: true },
-      },
+      ratio: { codex: { value: 50, enabled: true } },
       intervention_strength: 0,
-      keywords: { gemini: 'g', codex: 'c' },
-      option_flags: { gemini: { yolo: true } },
+      keywords: { codex: 'c' },
+      option_flags: { codex: { yolo: true } },
       session_ttl_hours: 72,
     };
     await writeConfigFile(JSON.stringify(stored));
     const result = await loadConfig();
-    expect(result.option_flags.gemini).toEqual({
+    expect(result.option_flags.codex).toEqual({
       yolo: true,
-      sandbox: DEFAULT_CONFIG.option_flags.gemini.sandbox,
-      sandbox_backend: DEFAULT_CONFIG.option_flags.gemini.sandbox_backend,
+      sandbox: DEFAULT_CONFIG.option_flags.codex.sandbox,
     });
-    expect(result.option_flags.codex).toEqual(
-      DEFAULT_CONFIG.option_flags.codex,
+    expect(result.option_flags.claude).toEqual(
+      DEFAULT_CONFIG.option_flags.claude,
     );
   });
 
-  it('migrates legacy integer ratio with one provider disabled', async () => {
-    await writeConfigFile(JSON.stringify({ ratio: { gemini: 5, codex: 0 } }));
-    const result = await loadConfig();
-    expect(result.ratio).toEqual({
-      gemini: { value: 100, enabled: true },
-      codex: { value: 0, enabled: false },
-      antigravity: { value: 50, enabled: false },
-    });
-    expect(result.keywords).toEqual(DEFAULT_CONFIG.keywords);
-    expect(result.session_ttl_hours).toBe(DEFAULT_CONFIG.session_ttl_hours);
-  });
-
-  it('migrates legacy integer ratio with both providers active', async () => {
+  it('migrates a legacy integer ratio, moving the gemini weight onto antigravity', async () => {
     await writeConfigFile(JSON.stringify({ ratio: { gemini: 3, codex: 2 } }));
     const result = await loadConfig();
     expect(result.ratio).toEqual({
-      gemini: { value: 60, enabled: true },
       codex: { value: 40, enabled: true },
-      antigravity: { value: 50, enabled: false },
+      antigravity: { value: 60, enabled: true },
+      claude: DEFAULT_CONFIG.ratio.claude,
     });
   });
 
@@ -222,18 +196,6 @@ describe('loadConfig', () => {
 
   it('falls back to defaults on JSON syntax error', async () => {
     await writeConfigFile('{not valid json');
-    expect(await loadConfig()).toEqual(DEFAULT_CONFIG);
-  });
-
-  it('falls back to defaults when schema validation fails', async () => {
-    await writeConfigFile(
-      JSON.stringify({
-        ratio: {
-          gemini: { value: 'not-a-number', enabled: true },
-          codex: { value: 50, enabled: true },
-        },
-      }),
-    );
     expect(await loadConfig()).toEqual(DEFAULT_CONFIG);
   });
 

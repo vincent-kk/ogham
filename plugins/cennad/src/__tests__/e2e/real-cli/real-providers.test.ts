@@ -20,9 +20,9 @@ async function enableAntigravityConfig(): Promise<void> {
   const config = {
     ...DEFAULT_CONFIG,
     ratio: {
-      gemini: { value: 0, enabled: false },
       codex: { value: 50, enabled: true },
       antigravity: { value: 50, enabled: true },
+      claude: { value: 50, enabled: false },
     },
   };
   await mkdir(dirname(CONFIG_PATH), { recursive: true });
@@ -41,18 +41,18 @@ describe.skipIf(!enabled)('Real CLI smoke', () => {
     await handle?.close();
   });
 
-  it('gemini low — start_conversation returns success envelope', async () => {
+  it('claude low — start_conversation returns success envelope', async () => {
     handle = await makeLayerBClient();
     const result = await handle.client.callTool({
       name: 'start_conversation',
       arguments: {
-        provider: 'gemini',
+        provider: 'claude',
         prompt: 'reply with the single word OK',
         tier: 'low',
       },
     });
     const env = assertEnvelopeSuccess(parseToolCallText(result.content), {
-      provider: 'gemini',
+      provider: 'claude',
       turn: 1,
     });
     expect(env.response).not.toBeNull();

@@ -101,9 +101,9 @@ describe('settings web server', () => {
     const malicious: Config = {
       ...DEFAULT_CONFIG,
       keywords: {
-        gemini: '</script><script>alert(1)</script>',
         codex: 'safe',
         antigravity: 'safe',
+        claude: '</script><script>alert(1)</script>',
       },
     };
     const h = await start({ loadConfig: async () => malicious });

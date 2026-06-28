@@ -1,13 +1,14 @@
 {
   "ratio": {
-    "gemini": { "value": 70, "enabled": true },
-    "codex": { "value": 30, "enabled": true }
+    "codex": { "value": 30, "enabled": true },
+    "antigravity": { "value": 70, "enabled": true },
+    "claude": { "value": 50, "enabled": false }
   },
   "intervention_strength": -2,
   "keywords": {
-    "gemini": "research, news",
-    "codex": "code, tests"
+    "codex": "code, tests",
+    "antigravity": "research, news",
+    "claude": "reasoning"
   },
-  "default_options": {},
   "session_ttl_hours": 72
 }

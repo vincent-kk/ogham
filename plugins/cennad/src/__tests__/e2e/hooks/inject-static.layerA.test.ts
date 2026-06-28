@@ -12,26 +12,27 @@ describe('injectStatic (Layer A)', () => {
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
-  it('default payload — 50/50 enabled, balanced', () => {
+  it('default payload — all enabled, balanced', () => {
     const result = runHookLayerA('injectStatic');
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: gemini 50% · codex 50%',
-        'Active providers: gemini, codex',
+        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Active providers: codex, antigravity, claude',
         'Intervention strength: 0',
         'balanced',
       ],
     });
   });
 
-  it('custom config reflects ratio 70/30 and intervention -2', async () => {
+  it('custom config reflects ratio 30/70 and intervention -2', async () => {
     await writeConfigFixture('custom');
     const result = runHookLayerA('injectStatic');
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: gemini 70% · codex 30%',
+        'codex 30%',
+        'antigravity 70%',
         'Intervention strength: -2',
         'very conservative',
         'research, news',
@@ -55,8 +56,8 @@ describe('injectStatic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: gemini 50% · codex 50%',
-        'Active providers: gemini, codex',
+        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Active providers: codex, antigravity, claude',
       ],
     });
   });

@@ -16,10 +16,10 @@ import {
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
 import {
+  type ClaudeMode,
   type CodexMode,
-  type GeminiMode,
+  claudeEnv,
   codexEnv,
-  geminiEnv,
 } from '../helpers/fakeProviderScripts.js';
 import {
   type FakeProvidersHandle,
@@ -49,27 +49,27 @@ interface ErrorCase {
 
 const cases: ErrorCase[] = [
   {
-    label: 'gemini auth-stderr → auth',
-    provider: 'gemini',
-    env: geminiEnv('auth-stderr' as GeminiMode),
+    label: 'claude auth-stderr → auth',
+    provider: 'claude',
+    env: claudeEnv('auth-stderr' as ClaudeMode),
     code: 'auth',
   },
   {
-    label: 'gemini rate-limit-stderr → rate_limit',
-    provider: 'gemini',
-    env: geminiEnv('rate-limit-stderr' as GeminiMode),
+    label: 'claude rate-limit-stderr → rate_limit',
+    provider: 'claude',
+    env: claudeEnv('rate-limit-stderr' as ClaudeMode),
     code: 'rate_limit',
   },
   {
-    label: 'gemini network-stderr → network',
-    provider: 'gemini',
-    env: geminiEnv('network-stderr' as GeminiMode),
+    label: 'claude network-stderr → network',
+    provider: 'claude',
+    env: claudeEnv('network-stderr' as ClaudeMode),
     code: 'network',
   },
   {
-    label: 'gemini exit-55 → auth',
-    provider: 'gemini',
-    env: geminiEnv('exit-55' as GeminiMode),
+    label: 'claude exit-55 → auth',
+    provider: 'claude',
+    env: claudeEnv('exit-55' as ClaudeMode),
     code: 'auth',
   },
   {

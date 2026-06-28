@@ -1,13 +1,14 @@
 {
   "ratio": {
-    "gemini": { "value": 50, "enabled": false },
-    "codex": { "value": 50, "enabled": false }
+    "codex": { "value": 50, "enabled": false },
+    "antigravity": { "value": 50, "enabled": false },
+    "claude": { "value": 50, "enabled": false }
   },
   "intervention_strength": 0,
   "keywords": {
-    "gemini": "research, search, youtube, large-context",
-    "codex": "code, refactor, sandbox"
+    "codex": "code, refactor, sandbox",
+    "antigravity": "research, search, youtube, large-context",
+    "claude": "reasoning, writing, analysis, review"
   },
-  "default_options": {},
   "session_ttl_hours": 72
 }

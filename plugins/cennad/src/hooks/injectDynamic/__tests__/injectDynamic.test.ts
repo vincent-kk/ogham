@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { HookConfig, HookCounter } from '../../shared/configTypes.js';
 import { buildDynamicPayload } from '../injectDynamic.js';
 import { asNonNegInt } from '../utils/asNonNegInt.js';
-import { formatRatio } from '../utils/formatRatio.js';
+import { type RatioLane, formatRatio } from '../utils/formatRatio.js';
 import { signed } from '../utils/signed.js';
 
 describe('asNonNegInt', () => {
@@ -43,66 +43,61 @@ describe('signed', () => {
 });
 
 describe('formatRatio', () => {
-  it('returns 0% for both providers when total is zero', () => {
-    const r = formatRatio(
-      { google: 0, codex: 0 },
-      { google: 70, codex: 30 },
-      'gemini',
-    );
-    expect(r.current).toBe('gemini 0% · codex 0%');
+  const lanes = (
+    codex: [number, number],
+    antigravity: [number, number],
+    claude: [number, number],
+  ): RatioLane[] => [
+    { name: 'codex', count: codex[0], weight: codex[1] },
+    { name: 'antigravity', count: antigravity[0], weight: antigravity[1] },
+    { name: 'claude', count: claude[0], weight: claude[1] },
+  ];
+
+  it('returns 0% for every lane when total count is zero', () => {
+    const r = formatRatio(lanes([0, 30], [0, 70], [0, 0]));
+    expect(r.current).toBe('codex 0% · antigravity 0% · claude 0%');
   });
 
-  it('computes rounded percentages from provider counts', () => {
-    const r = formatRatio(
-      { google: 1, codex: 2 },
-      { google: 70, codex: 30 },
-      'antigravity',
-    );
-    // google=1, codex=2, total=3 → google%=Math.round(1/3*100)=33, codex%=100-33=67
-    expect(r.current).toBe('antigravity 33% · codex 67%');
+  it('computes rounded percentages from lane counts', () => {
+    // codex=2, antigravity=1, claude=0, total=3 → 67% / 33% / 0%
+    const r = formatRatio(lanes([2, 0], [1, 0], [0, 0]));
+    expect(r.current).toBe('codex 67% · antigravity 33% · claude 0%');
   });
 
-  it('formats the target ratio line from config values', () => {
-    const r = formatRatio(
-      { google: 1, codex: 1 },
-      { google: 60, codex: 40 },
-      'gemini',
-    );
-    expect(r.target).toBe('gemini 60% · codex 40%');
+  it('renders each lane configured weight as the target line', () => {
+    // raw weights 60 / 40 / 0 are shown verbatim
+    const r = formatRatio(lanes([1, 60], [1, 40], [0, 0]));
+    expect(r.target).toBe('codex 60% · antigravity 40% · claude 0%');
   });
 
   it('formats drift as signed difference (target - current)', () => {
-    const r = formatRatio(
-      { google: 3, codex: 1 },
-      { google: 60, codex: 40 },
-      'gemini',
-    );
-    // google%=Math.round(3/4*100)=75, codex%=25; drift gemini=60-75=-15, codex=40-25=+15
-    expect(r.drift).toBe('gemini -15 · codex +15');
+    // counts 3/1/0 → current 75/25/0; weights 60/40/0 → target 60/40/0
+    const r = formatRatio(lanes([3, 60], [1, 40], [0, 0]));
+    expect(r.drift).toBe('codex -15 · antigravity +15 · claude 0');
   });
 });
 
 const BASE_CONFIG: HookConfig = {
   ratio: {
-    gemini: { value: 70, enabled: false },
     codex: { value: 30, enabled: true },
     antigravity: { value: 70, enabled: true },
+    claude: { value: 50, enabled: false },
   },
   intervention_strength: 0,
-  keywords: { gemini: 'gemini', codex: 'codex', antigravity: 'agy' },
+  keywords: { codex: 'code', antigravity: 'agy', claude: 'reason' },
   option_flags: {
-    gemini: { yolo: false, sandbox: false, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'read-only' },
     antigravity: { sandbox: false, skip_permissions: false },
+    claude: { permission_mode: 'acceptEdits' },
   },
-  preamble: { gemini: '', codex: '', antigravity: '' },
-  recency_factor: { gemini: 'off', codex: 'off', antigravity: 'off' },
+  preamble: { codex: '', antigravity: '', claude: '' },
+  recency_factor: { codex: 'off', antigravity: 'off', claude: 'off' },
 };
 
 const ZERO_COUNTER: HookCounter = {
-  gemini: 0,
   codex: 0,
   antigravity: 0,
+  claude: 0,
   is_stale: false,
 };
 
@@ -121,13 +116,13 @@ describe('buildDynamicPayload', () => {
     expect(out).toContain('Drift:');
   });
 
-  it('appends "Available providers: none" when no google engine and codex is disabled', () => {
+  it('appends "Available providers: none" when every provider is disabled', () => {
     const config: HookConfig = {
       ...BASE_CONFIG,
       ratio: {
-        gemini: { value: 0, enabled: false },
         codex: { value: 0, enabled: false },
         antigravity: { value: 0, enabled: false },
+        claude: { value: 0, enabled: false },
       },
     };
     const out = buildDynamicPayload(config, ZERO_COUNTER);

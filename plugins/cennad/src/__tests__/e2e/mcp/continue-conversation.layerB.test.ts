@@ -13,7 +13,7 @@ import {
   assertEnvelopeSuccess,
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
-import { geminiEnv } from '../helpers/fakeProviderScripts.js';
+import { claudeEnv } from '../helpers/fakeProviderScripts.js';
 import {
   type FakeProvidersHandle,
   installFakeProviders,
@@ -36,15 +36,15 @@ describe('continue_conversation (Layer B)', () => {
   });
 
   it('resumes the session via spawned bundle (same cwd)', async () => {
-    const handle = await makeLayerBClient({ env: geminiEnv('success') });
+    const handle = await makeLayerBClient({ env: claudeEnv('success') });
     try {
       const startResult = await handle.client.callTool({
         name: 'start_conversation',
-        arguments: { provider: 'gemini', prompt: 'first', tier: 'mid' },
+        arguments: { provider: 'claude', prompt: 'first', tier: 'mid'},
       });
       const startEnv = assertEnvelopeSuccess(
         parseToolCallText(startResult.content),
-        { provider: 'gemini', turn: 1 },
+        { provider: 'claude', turn: 1 },
       );
 
       const projectHash = getProjectHash(process.cwd());
@@ -59,7 +59,7 @@ describe('continue_conversation (Layer B)', () => {
       });
       const contEnv = assertEnvelopeSuccess(
         parseToolCallText(contResult.content),
-        { provider: 'gemini', turn: 2 },
+        { provider: 'claude', turn: 2 },
       );
       expect(contEnv.session_id).toBe(startEnv.session_id);
 
@@ -74,22 +74,22 @@ describe('continue_conversation (Layer B)', () => {
 
   it('cross-project: same session_id from different cwd returns unknown', async () => {
     const otherDir = mkdtempSync(join(tmpdir(), 'cennad-other-cwd-'));
-    const first = await makeLayerBClient({ env: geminiEnv('success') });
+    const first = await makeLayerBClient({ env: claudeEnv('success') });
     const startSessionId = await (async () => {
       const startResult = await first.client.callTool({
         name: 'start_conversation',
-        arguments: { provider: 'gemini', prompt: 'first', tier: 'mid' },
+        arguments: { provider: 'claude', prompt: 'first', tier: 'mid'},
       });
       const startEnv = assertEnvelopeSuccess(
         parseToolCallText(startResult.content),
-        { provider: 'gemini', turn: 1 },
+        { provider: 'claude', turn: 1 },
       );
       return startEnv.session_id;
     })().finally(() => first.close());
 
     const second = await makeLayerBClient({
       cwd: otherDir,
-      env: geminiEnv('success'),
+      env: claudeEnv('success'),
     });
     try {
       const contResult = await second.client.callTool({

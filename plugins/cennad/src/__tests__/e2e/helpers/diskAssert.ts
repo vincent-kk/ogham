@@ -66,12 +66,19 @@ export async function writeConfigFixture(name: FixtureName): Promise<void> {
 
 export interface CounterShape {
   parent_pid: number;
-  gemini: number;
-  codex: number;
+  codex?: number;
+  antigravity?: number;
+  claude?: number;
 }
 
 export async function writeCounter(c: CounterShape): Promise<void> {
-  await atomicWrite(COUNTER_PATH, `${JSON.stringify(c, null, 2)}\n`);
+  const full = {
+    parent_pid: c.parent_pid,
+    codex: c.codex ?? 0,
+    antigravity: c.antigravity ?? 0,
+    claude: c.claude ?? 0,
+  };
+  await atomicWrite(COUNTER_PATH, `${JSON.stringify(full, null, 2)}\n`);
 }
 
 export async function writeRawConfig(text: string): Promise<void> {

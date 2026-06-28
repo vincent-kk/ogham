@@ -12,19 +12,13 @@ import { pickStrength } from '../pickStrength.js';
 describe('pickProviderRatio', () => {
   it('extracts value and enabled from a valid object', () => {
     expect(
-      pickProviderRatio(
-        { value: 70, enabled: true },
-        DEFAULT_CONFIG.ratio.gemini,
-      ),
-    ).toEqual({
-      value: 70,
-      enabled: true,
-    });
+      pickProviderRatio({ value: 70, enabled: true }, DEFAULT_CONFIG.ratio.codex),
+    ).toEqual({ value: 70, enabled: true });
   });
 
   it('returns fallback when input is not an object', () => {
-    expect(pickProviderRatio(null, DEFAULT_CONFIG.ratio.gemini)).toEqual(
-      DEFAULT_CONFIG.ratio.gemini,
+    expect(pickProviderRatio(null, DEFAULT_CONFIG.ratio.codex)).toEqual(
+      DEFAULT_CONFIG.ratio.codex,
     );
   });
 
@@ -37,17 +31,13 @@ describe('pickProviderRatio', () => {
 });
 
 describe('pickRatio', () => {
-  it('extracts modern object-format ratio', () => {
+  it('extracts modern object-format ratio for all three providers', () => {
     const raw = {
-      gemini: { value: 60, enabled: true },
       codex: { value: 40, enabled: true },
       antigravity: { value: 30, enabled: false },
+      claude: { value: 60, enabled: true },
     };
-    expect(pickRatio(raw)).toEqual({
-      gemini: { value: 60, enabled: true },
-      codex: { value: 40, enabled: true },
-      antigravity: { value: 30, enabled: false },
-    });
+    expect(pickRatio(raw)).toEqual(raw);
   });
 });
 
@@ -64,12 +54,8 @@ describe('pickStrength', () => {
 
 describe('pickKeywords', () => {
   it('extracts all three keyword strings', () => {
-    const raw = { gemini: 'search', codex: 'build', antigravity: 'find' };
-    expect(pickKeywords(raw)).toEqual({
-      gemini: 'search',
-      codex: 'build',
-      antigravity: 'find',
-    });
+    const raw = { codex: 'build', antigravity: 'find', claude: 'reason' };
+    expect(pickKeywords(raw)).toEqual(raw);
   });
 
   it('returns default when input is not an object', () => {
@@ -80,15 +66,22 @@ describe('pickKeywords', () => {
 describe('pickOptionFlags', () => {
   it('extracts valid flags for all three providers', () => {
     const raw = {
-      gemini: { yolo: false, sandbox: true, sandbox_backend: 'docker' },
       codex: { yolo: true, sandbox: 'read-only' },
       antigravity: { sandbox: false, skip_permissions: true },
+      claude: { permission_mode: 'plan' },
     };
     expect(pickOptionFlags(raw)).toEqual({
-      gemini: { yolo: false, sandbox: true, sandbox_backend: 'docker' },
       codex: { yolo: true, sandbox: 'read-only' },
       antigravity: { sandbox: false, skip_permissions: true },
+      claude: { permission_mode: 'plan' },
     });
+  });
+
+  it('falls back claude permission_mode to default for an unknown value', () => {
+    const result = pickOptionFlags({ claude: { permission_mode: 'nope' } });
+    expect(result.claude.permission_mode).toBe(
+      DEFAULT_CONFIG.option_flags.claude.permission_mode,
+    );
   });
 
   it('returns default when input is not an object', () => {
@@ -98,31 +91,23 @@ describe('pickOptionFlags', () => {
 
 describe('pickPreamble', () => {
   it('extracts preamble strings for all providers', () => {
-    const raw = { gemini: 'g-pre', codex: 'c-pre', antigravity: 'a-pre' };
-    expect(pickPreamble(raw)).toEqual({
-      gemini: 'g-pre',
-      codex: 'c-pre',
-      antigravity: 'a-pre',
-    });
+    const raw = { codex: 'c-pre', antigravity: 'a-pre', claude: 'cl-pre' };
+    expect(pickPreamble(raw)).toEqual(raw);
   });
 });
 
 describe('pickRecencyFactor', () => {
   it('extracts valid RecencyLevel values', () => {
-    const raw = { gemini: 'strict', codex: 'auto', antigravity: 'off' };
-    expect(pickRecencyFactor(raw)).toEqual({
-      gemini: 'strict',
-      codex: 'auto',
-      antigravity: 'off',
-    });
+    const raw = { codex: 'auto', antigravity: 'off', claude: 'strict' };
+    expect(pickRecencyFactor(raw)).toEqual(raw);
   });
 
   it('falls back to defaults for invalid level values', () => {
-    const raw = { gemini: 'never', codex: 123, antigravity: 'strict' };
+    const raw = { codex: 123, antigravity: 'strict', claude: 'never' };
     expect(pickRecencyFactor(raw)).toEqual({
-      gemini: DEFAULT_CONFIG.recency_factor.gemini,
       codex: DEFAULT_CONFIG.recency_factor.codex,
       antigravity: 'strict',
+      claude: DEFAULT_CONFIG.recency_factor.claude,
     });
   });
 });

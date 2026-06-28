@@ -18,7 +18,6 @@ import { rm } from 'node:fs/promises';
 
 import {
   afterAll,
-  afterEach,
   beforeAll,
   beforeEach,
   describe,

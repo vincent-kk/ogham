@@ -21,9 +21,9 @@ describe('saveConfig', () => {
     const config: Config = {
       ...DEFAULT_CONFIG,
       ratio: {
-        gemini: { value: 75, enabled: true },
         codex: { value: 25, enabled: true },
         antigravity: { value: 50, enabled: false },
+        claude: { value: 75, enabled: true },
       },
     };
     await saveConfig(config);

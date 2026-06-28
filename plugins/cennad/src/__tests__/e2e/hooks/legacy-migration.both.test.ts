@@ -14,20 +14,20 @@ describe('legacy ratio migration (both layers)', () => {
     await writeConfigFixture('legacy');
   });
 
-  it('Layer A injectStatic migrates integer {gemini:3, codex:7} → 30%/70%', () => {
+  it('Layer A injectStatic migrates integer {gemini:3, codex:7} onto antigravity 30% / codex 70%', () => {
     const result = runHookLayerA('injectStatic');
     assertHookEnvelope(result, {
       event: 'SessionStart',
-      contextIncludes: ['Provider ratio: gemini 30% · codex 70%'],
+      contextIncludes: ['codex 70%', 'antigravity 30%'],
     });
   });
 
-  it('Layer A injectDynamic shows target ratio 30%/70% from migrated config', async () => {
-    await writeCounter({ parent_pid: process.ppid, gemini: 1, codex: 1 });
+  it('Layer A injectDynamic shows the migrated target ratio from config', async () => {
+    await writeCounter({ parent_pid: process.ppid, codex: 1, antigravity: 1 });
     const result = runHookLayerA('injectDynamic');
     assertHookEnvelope(result, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['Target ratio:', 'gemini 30%', 'codex 70%'],
+      contextIncludes: ['Target ratio:', 'antigravity 30%', 'codex 70%'],
     });
   });
 
@@ -36,17 +36,17 @@ describe('legacy ratio migration (both layers)', () => {
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'SessionStart',
-      contextIncludes: ['Provider ratio: gemini 30% · codex 70%'],
+      contextIncludes: ['codex 70%', 'antigravity 30%'],
     });
   });
 
-  it('Layer B injectDynamic with counter shows target 30%/70%', async () => {
-    await writeCounter({ parent_pid: process.pid, gemini: 1, codex: 1 });
+  it('Layer B injectDynamic with counter shows the migrated target', async () => {
+    await writeCounter({ parent_pid: process.pid, codex: 1, antigravity: 1 });
     const result = runHookLayerB('injectDynamic');
     expect(result.exitCode).toBe(0);
     assertHookEnvelope(result.parsed, {
       event: 'UserPromptSubmit',
-      contextIncludes: ['Target ratio:', 'gemini 30%', 'codex 70%'],
+      contextIncludes: ['Target ratio:', 'antigravity 30%', 'codex 70%'],
     });
   });
 });

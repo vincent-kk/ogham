@@ -11,7 +11,7 @@ describe('mergeDefaultTier', () => {
   });
 
   it('preserves a fully-specified raw default_tier', () => {
-    const raw = { gemini: 'high', codex: 'low', antigravity: 'high' };
+    const raw = { codex: 'low', antigravity: 'high', claude: 'high' };
     expect(mergeDefaultTier(raw)).toEqual(raw);
   });
 
@@ -19,8 +19,8 @@ describe('mergeDefaultTier', () => {
     const raw = { codex: 'high' };
     const result = mergeDefaultTier(raw) as typeof defaults;
     expect(result.codex).toBe('high');
-    expect(result.gemini).toBe(defaults.gemini);
     expect(result.antigravity).toBe(defaults.antigravity);
+    expect(result.claude).toBe(defaults.claude);
   });
 
   it('returns defaults when raw is null', () => {
@@ -40,9 +40,9 @@ describe('mergeDefaultTier', () => {
   });
 
   it('passes an invalid tier string through for the schema to reject', () => {
-    const raw = { gemini: 'auto', codex: 'mid', antigravity: 'mid' };
+    const raw = { codex: 'auto', antigravity: 'mid', claude: 'mid' };
     const result = mergeDefaultTier(raw) as typeof defaults;
-    expect(result.gemini).toBe('auto');
+    expect(result.codex).toBe('auto');
   });
 
   it('does not mutate DEFAULT_CONFIG.default_tier', () => {

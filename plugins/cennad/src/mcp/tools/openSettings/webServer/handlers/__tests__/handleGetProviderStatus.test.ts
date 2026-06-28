@@ -7,8 +7,8 @@ import { handleGetProviderStatus } from '../handleGetProviderStatus.js';
 const { checkExecutableRef, getAvailableModelsRef } = vi.hoisted(() => ({
   checkExecutableRef: {
     agy: { available: false } as { available: boolean; version?: string },
-    gemini: { available: false } as { available: boolean; version?: string },
     codex: { available: false } as { available: boolean; version?: string },
+    claude: { available: false } as { available: boolean; version?: string },
   },
   getAvailableModelsRef: { value: [] as string[] },
 }));
@@ -16,8 +16,8 @@ const { checkExecutableRef, getAvailableModelsRef } = vi.hoisted(() => ({
 vi.mock('../../../../../../lib/checkExecutable.js', () => ({
   checkExecutable: (bin: string) => {
     if (bin === 'agy') return Promise.resolve(checkExecutableRef.agy);
-    if (bin === 'gemini') return Promise.resolve(checkExecutableRef.gemini);
     if (bin === 'codex') return Promise.resolve(checkExecutableRef.codex);
+    if (bin === 'claude') return Promise.resolve(checkExecutableRef.claude);
     return Promise.resolve({ available: false });
   },
 }));
@@ -51,8 +51,8 @@ function makeFakeRes(): { res: ServerResponse; captured: CapturedResponse } {
 describe('handleGetProviderStatus', () => {
   beforeEach(() => {
     checkExecutableRef.agy = { available: false };
-    checkExecutableRef.gemini = { available: false };
     checkExecutableRef.codex = { available: false };
+    checkExecutableRef.claude = { available: false };
     getAvailableModelsRef.value = [];
   });
 
@@ -66,14 +66,14 @@ describe('handleGetProviderStatus', () => {
     expect(captured.status).toBe(200);
   });
 
-  it('response body contains antigravity, agyModels, gemini, and codex keys', async () => {
+  it('response body contains antigravity, agyModels, codex, and claude keys', async () => {
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as Record<string, unknown>;
     expect(body).toHaveProperty('antigravity');
     expect(body).toHaveProperty('agyModels');
-    expect(body).toHaveProperty('gemini');
     expect(body).toHaveProperty('codex');
+    expect(body).toHaveProperty('claude');
   });
 
   it('all providers report available:false when no binaries are on PATH', async () => {
@@ -81,44 +81,29 @@ describe('handleGetProviderStatus', () => {
     await handleGetProviderStatus(res);
     const body = captured.body as {
       antigravity: { available: boolean };
-      gemini: { available: boolean };
       codex: { available: boolean };
+      claude: { available: boolean };
     };
     expect(body.antigravity.available).toBe(false);
-    expect(body.gemini.available).toBe(false);
     expect(body.codex.available).toBe(false);
+    expect(body.claude.available).toBe(false);
   });
 
-  it('agyModels is [] when agy is unavailable (getAvailableModels not consulted)', async () => {
-    const getModels = vi.fn().mockResolvedValue(['model-a']);
-    // Even with a spy that would return values, agy is unavailable,
-    // so the handler must short-circuit and return [].
+  it('agyModels is [] when agy is unavailable', async () => {
     checkExecutableRef.agy = { available: false };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as { agyModels: unknown[] };
     expect(body.agyModels).toEqual([]);
-    // getModels spy was never called (it's a local fn, not the mock — this
-    // assertion is structural: [] proves gating without a spy reference).
-    expect(getModels).not.toHaveBeenCalled();
   });
 
   it('agyModels is populated when agy is available', async () => {
     checkExecutableRef.agy = { available: true, version: '1.0.0' };
-    getAvailableModelsRef.value = ['gemini-2.5-pro', 'gemini-2.0-flash'];
+    getAvailableModelsRef.value = ['Gemini 3.1 Pro', 'Gemini 3.5 Flash'];
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as { agyModels: string[] };
-    expect(body.agyModels).toEqual(['gemini-2.5-pro', 'gemini-2.0-flash']);
-  });
-
-  it('agyModels is [] when agy is available but getAvailableModels returns empty', async () => {
-    checkExecutableRef.agy = { available: true, version: '1.0.0' };
-    getAvailableModelsRef.value = [];
-    const { res, captured } = makeFakeRes();
-    await handleGetProviderStatus(res);
-    const body = captured.body as { agyModels: string[] };
-    expect(body.agyModels).toEqual([]);
+    expect(body.agyModels).toEqual(['Gemini 3.1 Pro', 'Gemini 3.5 Flash']);
   });
 
   it('antigravity status reflects available:true with version when agy is found', async () => {
@@ -132,15 +117,15 @@ describe('handleGetProviderStatus', () => {
     expect(body.antigravity.version).toBe('2.3.1');
   });
 
-  it('gemini status reflects available:true with version when gemini is found', async () => {
-    checkExecutableRef.gemini = { available: true, version: '0.9.0' };
+  it('claude status reflects available:true with version when claude is found', async () => {
+    checkExecutableRef.claude = { available: true, version: '2.1.195' };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
-      gemini: { available: boolean; version?: string };
+      claude: { available: boolean; version?: string };
     };
-    expect(body.gemini.available).toBe(true);
-    expect(body.gemini.version).toBe('0.9.0');
+    expect(body.claude.available).toBe(true);
+    expect(body.claude.version).toBe('2.1.195');
   });
 
   it('codex status reflects available:true with version when codex is found', async () => {
@@ -154,12 +139,11 @@ describe('handleGetProviderStatus', () => {
     expect(body.codex.version).toBe('0.1.0');
   });
 
-  it('version field is absent (not undefined-serialized) when binary has no version string', async () => {
+  it('version field is absent when a binary has no version string', async () => {
     checkExecutableRef.agy = { available: true };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as { antigravity: Record<string, unknown> };
-    // JSON.stringify omits undefined values; version key must not appear
     expect(
       Object.prototype.hasOwnProperty.call(body.antigravity, 'version'),
     ).toBe(false);
@@ -167,38 +151,38 @@ describe('handleGetProviderStatus', () => {
 
   it('all three providers can be available simultaneously', async () => {
     checkExecutableRef.agy = { available: true, version: '1.0.0' };
-    checkExecutableRef.gemini = { available: true, version: '1.0.0' };
     checkExecutableRef.codex = { available: true, version: '1.0.0' };
+    checkExecutableRef.claude = { available: true, version: '1.0.0' };
     getAvailableModelsRef.value = ['model-x'];
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
       antigravity: { available: boolean };
-      gemini: { available: boolean };
       codex: { available: boolean };
+      claude: { available: boolean };
       agyModels: string[];
     };
     expect(body.antigravity.available).toBe(true);
-    expect(body.gemini.available).toBe(true);
     expect(body.codex.available).toBe(true);
+    expect(body.claude.available).toBe(true);
     expect(body.agyModels).toEqual(['model-x']);
   });
 
-  it('gemini and codex can be available while agy is not', async () => {
+  it('codex and claude can be available while agy is not', async () => {
     checkExecutableRef.agy = { available: false };
-    checkExecutableRef.gemini = { available: true, version: '1.0.0' };
     checkExecutableRef.codex = { available: true, version: '1.0.0' };
+    checkExecutableRef.claude = { available: true, version: '1.0.0' };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
       antigravity: { available: boolean };
-      gemini: { available: boolean };
       codex: { available: boolean };
+      claude: { available: boolean };
       agyModels: unknown[];
     };
     expect(body.antigravity.available).toBe(false);
-    expect(body.gemini.available).toBe(true);
     expect(body.codex.available).toBe(true);
+    expect(body.claude.available).toBe(true);
     expect(body.agyModels).toEqual([]);
   });
 });

@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   CENNAD_HOME,
   antigravityCwdPath,
-  geminiCwdPath,
   projectMetaPath,
   sessionDir,
   sessionPath,
@@ -58,31 +57,16 @@ describe('pruneExpired', () => {
 
   it('keeps recently used sessions', async () => {
     const session = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/fresh',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'opus',
     });
     const count = await pruneExpired(72);
     expect(count).toBe(0);
     expect(
       await pathExists(sessionPath(session.project_hash, session.session_id)),
     ).toBe(true);
-  });
-
-  it('removes the gemini-cwd directory for expired gemini sessions', async () => {
-    const session = await createSession({
-      provider: 'gemini',
-      cwd: '/proj/oldgem',
-      externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
-    });
-    const cwdDir = geminiCwdPath(session.session_id);
-    await mkdir(cwdDir, { recursive: true });
-    await updateSession({ ...session, last_used_at: hoursAgo(100) });
-
-    await pruneExpired(72);
-    expect(await pathExists(cwdDir)).toBe(false);
   });
 
   it('removes the antigravity-cwd directory for expired antigravity sessions', async () => {
@@ -116,10 +100,10 @@ describe('pruneExpired', () => {
 
   it('preserves the project dir when at least one session is still live', async () => {
     const live = await createSession({
-      provider: 'gemini',
+      provider: 'claude',
       cwd: '/proj/mix',
       externalSessionRef: '0',
-      model: 'gemini-2.5-pro',
+      model: 'opus',
     });
     const expired = await createSession({
       provider: 'codex',
@@ -140,18 +124,18 @@ describe('pruneExpired', () => {
     expect(await pathExists(projectMetaPath(live.project_hash))).toBe(true);
   });
 
-  it('does not remove gemini-cwd for codex sessions', async () => {
+  it('does not remove the antigravity-cwd for codex sessions', async () => {
     const session = await createSession({
       provider: 'codex',
       cwd: '/proj/codex',
       externalSessionRef: 'thread-uuid',
       model: 'gpt-5',
     });
-    const fakeGeminiDir = geminiCwdPath(session.session_id);
-    await mkdir(fakeGeminiDir, { recursive: true });
+    const fakeAgyDir = antigravityCwdPath(session.session_id);
+    await mkdir(fakeAgyDir, { recursive: true });
     await updateSession({ ...session, last_used_at: hoursAgo(100) });
 
     await pruneExpired(72);
-    expect(await pathExists(fakeGeminiDir)).toBe(true);
+    expect(await pathExists(fakeAgyDir)).toBe(true);
   });
 });

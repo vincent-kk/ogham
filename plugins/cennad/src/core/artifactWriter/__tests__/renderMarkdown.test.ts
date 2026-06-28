@@ -27,8 +27,8 @@ describe('renderMarkdown', () => {
   it('includes prompt and response sections', () => {
     const out = renderMarkdown({
       sessionId: 'sid',
-      provider: 'gemini',
-      model: 'gemini-2.5-pro',
+      provider: 'antigravity',
+      model: 'Gemini 2.5 Pro',
       turn: 1,
       createdAt: '2026-05-22T10:00:00.000Z',
       elapsedMs: 0,
@@ -71,7 +71,7 @@ describe('renderMarkdown', () => {
   it('includes Composed Prompt section when composedPrompt differs from raw', () => {
     const out = renderMarkdown({
       sessionId: 'sid',
-      provider: 'gemini',
+      provider: 'antigravity',
       model: 'm',
       turn: 1,
       createdAt: 't',

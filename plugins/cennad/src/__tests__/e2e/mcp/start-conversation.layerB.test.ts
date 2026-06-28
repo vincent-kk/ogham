@@ -17,7 +17,7 @@ import {
   assertEnvelopeSuccess,
   parseToolCallText,
 } from '../helpers/envelopeShape.js';
-import { codexEnv, geminiEnv } from '../helpers/fakeProviderScripts.js';
+import { claudeEnv, codexEnv } from '../helpers/fakeProviderScripts.js';
 import {
   type FakeProvidersHandle,
   installFakeProviders,
@@ -48,30 +48,24 @@ describe('start_conversation (Layer B)', () => {
     await handle.close();
   });
 
-  it('gemini success via spawned bundle — envelope, session, counter', async () => {
-    handle = await makeLayerBClient({
-      env: geminiEnv('success', {
-        uuid: 'bbbb2222-cccc-dddd-eeee-ffff00001111',
-      }),
-    });
+  it('claude success via spawned bundle — envelope, session, counter', async () => {
+    handle = await makeLayerBClient({ env: claudeEnv('success') });
     const result = await handle.client.callTool({
       name: 'start_conversation',
-      arguments: { provider: 'gemini', prompt: 'hello gemini', tier: 'mid' },
+      arguments: { provider: 'claude', prompt: 'hello claude', tier: 'mid' },
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
-      provider: 'gemini',
+      provider: 'claude',
       turn: 1,
     });
-    expect(parsed.response).toContain('fake gemini response');
+    expect(parsed.response).toContain('fake claude response');
 
     const projectHash = getProjectHash(process.cwd());
     const session = await readSessionFile(projectHash, parsed.session_id);
-    expect(session?.external_session_ref).toBe(
-      'bbbb2222-cccc-dddd-eeee-ffff00001111',
-    );
+    expect(session?.external_session_ref).toBe(parsed.session_id);
 
     const counter = await readCounter();
-    expect(counter?.gemini).toBe(1);
+    expect(counter?.claude).toBe(1);
   });
 
   it('codex success via spawned bundle — JSONL thread_id', async () => {
@@ -94,18 +88,18 @@ describe('start_conversation (Layer B)', () => {
   });
 
   it('meta.ignored_options stays empty — MCP input strips unknown option keys (e.g., permission flags) at the schema boundary', async () => {
-    handle = await makeLayerBClient({ env: geminiEnv('success') });
+    handle = await makeLayerBClient({ env: claudeEnv('success') });
     const result = await handle.client.callTool({
       name: 'start_conversation',
       arguments: {
-        provider: 'gemini',
+        provider: 'claude',
         prompt: 'hi',
         tier: 'mid',
         options: { multi_agent: true, yolo: true, sandbox: 'read-only' },
       } as Record<string, unknown>,
     });
     const parsed = assertEnvelopeSuccess(parseToolCallText(result.content), {
-      provider: 'gemini',
+      provider: 'claude',
       turn: 1,
     });
     expect(parsed.meta.ignored_options).toEqual([]);
