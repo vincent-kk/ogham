@@ -2,18 +2,26 @@
   'use strict';
 
   // Mirror src/constants/defaults.ts (DEFAULT_CONFIG) — keep in sync.
-  var DEFAULT_RATIO_VALUE = 50;
+  var DEFAULT_RATIO = {
+    codex: { value: 34, enabled: true },
+    antigravity: { value: 33, enabled: true },
+    claude: { value: 33, enabled: true },
+  };
   var DEFAULT_SESSION_TTL_HOURS = 72;
   var DEFAULT_SPAWN_TIMEOUT_MS = 10 * 60 * 1000;
   var DEFAULT_OPTION_FLAGS = {
     codex: { yolo: false, sandbox: 'workspace-write' },
     antigravity: { sandbox: false, skip_permissions: false },
-    claude: { permission_mode: 'acceptEdits' },
+    claude: { permission_mode: 'dontAsk' },
   };
   var DEFAULT_ARTIFACTS = { enabled: false, location: 'project' };
   var DEFAULT_PREAMBLE = { codex: '', antigravity: '', claude: '' };
   var DEFAULT_RECENCY = { codex: 'off', antigravity: 'auto', claude: 'off' };
-  var DEFAULT_DEFAULT_TIER = { codex: 'mid', antigravity: 'mid', claude: 'mid' };
+  var DEFAULT_DEFAULT_TIER = {
+    codex: 'mid',
+    antigravity: 'mid',
+    claude: 'mid',
+  };
   var DEFAULT_CLAUDE_MODEL_MAP = {
     high: { model: 'opus', effort: 'max' },
     mid: { model: 'opus', effort: 'high' },
@@ -40,11 +48,9 @@
     'off',
   ];
   var CLAUDE_PERMISSION_MODES = [
-    'default',
     'acceptEdits',
     'auto',
     'dontAsk',
-    'plan',
     'bypassPermissions',
   ];
   // Mirror src/constants/claudeModels.ts — keep in sync.
@@ -92,6 +98,7 @@
   var saveBtn = $('#save');
   var saveCloseBtn = $('#save-close');
   var ratioWarn = $('#ratio-warn');
+  var ratioBar = $('#ratio-bar');
   var strength = $('#strength');
   var strengthLabel = $('#strength-label');
   var ttl = $('#ttl');
@@ -105,7 +112,6 @@
       pct: $('#' + p + '-pct'),
       hint: $('#' + p + '-hint'),
       summary: $('#summary-' + p),
-      slider: $('#ratio-' + p),
       installHint: $('#' + p + '-install-hint'),
       advancedToggle: $('#advanced-toggle-' + p),
       advancedPanel: $('#advanced-panel-' + p),
@@ -153,9 +159,18 @@
   var youtubeAdvancedPanel = $('#youtube-advanced-panel');
 
   var ratioState = {
-    codex: { value: DEFAULT_RATIO_VALUE, enabled: true },
-    antigravity: { value: DEFAULT_RATIO_VALUE, enabled: true },
-    claude: { value: DEFAULT_RATIO_VALUE, enabled: true },
+    codex: {
+      value: DEFAULT_RATIO.codex.value,
+      enabled: DEFAULT_RATIO.codex.enabled,
+    },
+    antigravity: {
+      value: DEFAULT_RATIO.antigravity.value,
+      enabled: DEFAULT_RATIO.antigravity.enabled,
+    },
+    claude: {
+      value: DEFAULT_RATIO.claude.value,
+      enabled: DEFAULT_RATIO.claude.enabled,
+    },
   };
   var providerAvailable = { codex: true, antigravity: true, claude: true };
   var agyModels = [];
@@ -188,43 +203,200 @@
     }
   }
 
-  function enabledWeightTotal() {
-    var total = 0;
-    PROVIDERS.forEach(function (p) {
-      if (ratioState[p].enabled) total += ratioState[p].value;
+  function activeProviders() {
+    return PROVIDERS.filter(function (p) {
+      return ratioState[p].enabled;
     });
-    return total;
+  }
+
+  function distributeEvenly() {
+    var active = activeProviders();
+    if (active.length === 0) return;
+    var base = Math.floor(RATIO_MAX / active.length);
+    var remainder = RATIO_MAX - base * active.length;
+    active.forEach(function (p, index) {
+      ratioState[p].value = base + (index < remainder ? 1 : 0);
+    });
+  }
+
+  function normalizeEnabledRatios() {
+    var active = activeProviders();
+    if (active.length === 0) return;
+    var total = active.reduce(function (sum, p) {
+      return sum + ratioState[p].value;
+    }, 0);
+    if (total <= 0) {
+      distributeEvenly();
+      return;
+    }
+    var assigned = 0;
+    var scaled = active.map(function (p, index) {
+      var exact = (ratioState[p].value / total) * RATIO_MAX;
+      var value = Math.floor(exact);
+      assigned += value;
+      return {
+        provider: p,
+        value: value,
+        remainder: exact - value,
+        index: index,
+      };
+    });
+    scaled
+      .slice()
+      .sort(function (a, b) {
+        if (b.remainder !== a.remainder) return b.remainder - a.remainder;
+        return a.index - b.index;
+      })
+      .slice(0, RATIO_MAX - assigned)
+      .forEach(function (item) {
+        item.value += 1;
+      });
+    scaled.forEach(function (item) {
+      ratioState[item.provider].value = item.value;
+    });
+  }
+
+  function ratioBoundaries(active) {
+    var boundaries = [];
+    var left = 0;
+    for (var i = 0; i < active.length - 1; i += 1) {
+      left += ratioState[active[i]].value;
+      boundaries.push(left);
+    }
+    return boundaries;
+  }
+
+  function clearRatioBar() {
+    while (ratioBar.firstChild) ratioBar.removeChild(ratioBar.firstChild);
+  }
+
+  function renderRatioSegments(active) {
+    var left = 0;
+    active.forEach(function (p) {
+      var segment = document.createElement('div');
+      segment.className = 'ratio-bar-segment';
+      segment.setAttribute('data-provider', p);
+      segment.style.left = left + '%';
+      segment.style.width = ratioState[p].value + '%';
+      ratioBar.appendChild(segment);
+      left += ratioState[p].value;
+    });
+  }
+
+  function renderRatioHandles(active) {
+    var boundaries = ratioBoundaries(active);
+    boundaries.forEach(function (boundary, index) {
+      var leftProvider = active[index];
+      var rightProvider = active[index + 1];
+      var handle = document.createElement('button');
+      handle.type = 'button';
+      handle.className = 'ratio-bar-handle';
+      handle.style.left = boundary + '%';
+      handle.setAttribute('data-boundary-index', String(index));
+      handle.setAttribute(
+        'aria-label',
+        leftProvider + ' / ' + rightProvider + ' ratio',
+      );
+      handle.setAttribute('aria-valuemin', '0');
+      handle.setAttribute('aria-valuemax', '100');
+      handle.setAttribute('aria-valuenow', String(boundary));
+      handle.setAttribute('role', 'slider');
+      ratioBar.appendChild(handle);
+    });
   }
 
   function renderRatio() {
-    var total = enabledWeightTotal();
-    var anyEnabled = false;
+    normalizeEnabledRatios();
+    var active = activeProviders();
     PROVIDERS.forEach(function (p) {
       var st = ratioState[p];
       var el = refs[p];
-      if (st.enabled) anyEnabled = true;
-      var pct = st.enabled
-        ? total > 0
-          ? Math.round((st.value / total) * 100)
-          : 0
-        : null;
-      el.pct.textContent = st.enabled ? pct + '%' : 'OFF';
-      el.slider.value = String(st.value);
-      el.slider.disabled = !st.enabled || !providerAvailable[p];
+      el.pct.textContent = st.enabled ? st.value + '%' : 'OFF';
       el.toggle.setAttribute('aria-checked', String(st.enabled));
       el.toggle.setAttribute('data-unavailable', String(!providerAvailable[p]));
       el.hint.textContent = providerAvailable[p]
         ? 'click to toggle'
         : 'not installed';
     });
-    ratioWarn.hidden = anyEnabled;
+    clearRatioBar();
+    renderRatioSegments(active);
+    renderRatioHandles(active);
+    ratioWarn.hidden = active.length > 0;
   }
 
-  function onSlider(p) {
-    var st = ratioState[p];
-    if (!st.enabled) return;
-    st.value = clamp(Math.floor(Number(refs[p].slider.value) || 0), RATIO_MIN, RATIO_MAX);
+  function setRatioBoundary(index, percent) {
+    var active = activeProviders();
+    var boundaries = ratioBoundaries(active);
+    if (index < 0 || index >= boundaries.length) return;
+    var min = index === 0 ? RATIO_MIN + 1 : boundaries[index - 1] + 1;
+    var max =
+      index === boundaries.length - 1
+        ? RATIO_MAX - 1
+        : boundaries[index + 1] - 1;
+    boundaries[index] = clamp(Math.round(percent), min, max);
+    var previous = 0;
+    active.forEach(function (p, i) {
+      var next = i < boundaries.length ? boundaries[i] : RATIO_MAX;
+      ratioState[p].value = next - previous;
+      previous = next;
+    });
     renderRatio();
+  }
+
+  function ratioPercentFromPointer(ev) {
+    var rect = ratioBar.getBoundingClientRect();
+    if (rect.width <= 0) return 0;
+    return ((ev.clientX - rect.left) / rect.width) * RATIO_MAX;
+  }
+
+  var draggingBoundary = null;
+
+  function onRatioPointerMove(ev) {
+    if (draggingBoundary === null) return;
+    setRatioBoundary(draggingBoundary, ratioPercentFromPointer(ev));
+  }
+
+  function onRatioPointerUp() {
+    draggingBoundary = null;
+    window.removeEventListener('pointermove', onRatioPointerMove);
+    window.removeEventListener('pointerup', onRatioPointerUp);
+  }
+
+  function onRatioPointerDown(ev) {
+    if (
+      !ev.target.classList ||
+      !ev.target.classList.contains('ratio-bar-handle')
+    )
+      return;
+    draggingBoundary = Number(ev.target.getAttribute('data-boundary-index'));
+    if (ev.target.setPointerCapture) ev.target.setPointerCapture(ev.pointerId);
+    window.addEventListener('pointermove', onRatioPointerMove);
+    window.addEventListener('pointerup', onRatioPointerUp);
+    onRatioPointerMove(ev);
+  }
+
+  function onRatioKeydown(ev) {
+    if (
+      !ev.target.classList ||
+      !ev.target.classList.contains('ratio-bar-handle')
+    )
+      return;
+    var index = Number(ev.target.getAttribute('data-boundary-index'));
+    var current = ratioBoundaries(activeProviders())[index];
+    var step = ev.shiftKey ? 10 : 1;
+    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') {
+      ev.preventDefault();
+      setRatioBoundary(index, current - step);
+    } else if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      setRatioBoundary(index, current + step);
+    } else if (ev.key === 'Home') {
+      ev.preventDefault();
+      setRatioBoundary(index, RATIO_MIN);
+    } else if (ev.key === 'End') {
+      ev.preventDefault();
+      setRatioBoundary(index, RATIO_MAX);
+    }
   }
 
   function toggleProvider(p) {
@@ -234,8 +406,8 @@
       st.enabled = false;
     } else {
       st.enabled = true;
-      if (st.value <= 0) st.value = DEFAULT_RATIO_VALUE;
     }
+    distributeEvenly();
     renderRatio();
     syncAdvancedToggleAvailability();
     renderAllSummaries();
@@ -259,9 +431,14 @@
     return { value: fallback.value, enabled: fallback.enabled };
   }
 
-  function setRadio(name, value, allowed) {
+  function setRadio(name, value, allowed, fallback) {
     var radios = document.querySelectorAll('input[name="' + name + '"]');
-    var pick = allowed.indexOf(value) >= 0 ? value : allowed[0];
+    var pick =
+      allowed.indexOf(value) >= 0
+        ? value
+        : allowed.indexOf(fallback) >= 0
+          ? fallback
+          : allowed[0];
     for (var i = 0; i < radios.length; i += 1) {
       radios[i].checked = radios[i].value === pick;
     }
@@ -283,7 +460,9 @@
     var sel = document.querySelector(
       '#codex-sandbox-radio input[type="radio"]:checked',
     );
-    codexFullAccessWarning.hidden = !(sel && sel.value === 'danger-full-access');
+    codexFullAccessWarning.hidden = !(
+      sel && sel.value === 'danger-full-access'
+    );
   }
 
   function syncCodexSandboxInert() {
@@ -345,10 +524,18 @@
 
   function buildSummaryChips(provider) {
     var chips = [];
-    var rc = readRadio('recency-' + provider, RECENCY_LEVELS, DEFAULT_RECENCY[provider]);
+    var rc = readRadio(
+      'recency-' + provider,
+      RECENCY_LEVELS,
+      DEFAULT_RECENCY[provider],
+    );
     if (provider === 'codex') {
       if (codexYolo.checked) chips.push({ label: 'yolo: on', tone: 'warn' });
-      var sb = readRadio('codex-sandbox', CODEX_SANDBOX_MODES, DEFAULT_OPTION_FLAGS.codex.sandbox);
+      var sb = readRadio(
+        'codex-sandbox',
+        CODEX_SANDBOX_MODES,
+        DEFAULT_OPTION_FLAGS.codex.sandbox,
+      );
       if (sb === 'danger-full-access') {
         chips.push({ label: 'sandbox: full-access', tone: 'warn' });
       } else if (sb !== 'off') {
@@ -359,7 +546,11 @@
         chips.push({ label: 'skip-perms: on', tone: 'warn' });
       }
     } else if (provider === 'claude') {
-      var mode = readRadio('claude-permission-mode', CLAUDE_PERMISSION_MODES, DEFAULT_OPTION_FLAGS.claude.permission_mode);
+      var mode = readRadio(
+        'claude-permission-mode',
+        CLAUDE_PERMISSION_MODES,
+        DEFAULT_OPTION_FLAGS.claude.permission_mode,
+      );
       chips.push(
         mode === 'bypassPermissions'
           ? { label: 'perm: bypass', tone: 'warn' }
@@ -419,7 +610,9 @@
     codexYolo.checked = Boolean(c.yolo);
     setRadio(
       'codex-sandbox',
-      typeof c.sandbox === 'string' ? c.sandbox : DEFAULT_OPTION_FLAGS.codex.sandbox,
+      typeof c.sandbox === 'string'
+        ? c.sandbox
+        : DEFAULT_OPTION_FLAGS.codex.sandbox,
       CODEX_SANDBOX_MODES,
     );
     // antigravity --sandbox is forced off (agy #76); keep the control disabled.
@@ -431,6 +624,7 @@
         ? cl.permission_mode
         : DEFAULT_OPTION_FLAGS.claude.permission_mode,
       CLAUDE_PERMISSION_MODES,
+      DEFAULT_OPTION_FLAGS.claude.permission_mode,
     );
     syncCodexSandboxInert();
     syncCodexFullAccessWarning();
@@ -442,7 +636,9 @@
     artifactsEnabled.checked = Boolean(src.enabled);
     setRadio(
       'artifacts-location',
-      typeof src.location === 'string' ? src.location : DEFAULT_ARTIFACTS.location,
+      typeof src.location === 'string'
+        ? src.location
+        : DEFAULT_ARTIFACTS.location,
       ARTIFACTS_LOCATIONS,
     );
     syncArtifactsLocationInert();
@@ -503,7 +699,13 @@
   function bindAgyModelOptions(list) {
     TIERS.forEach(function (tier) {
       var sel = modelAntigravity[tier];
-      if (sel) bindSelectOptions(sel, list, antigravityModelMap[tier], '(run agy to load models)');
+      if (sel)
+        bindSelectOptions(
+          sel,
+          list,
+          antigravityModelMap[tier],
+          '(run agy to load models)',
+        );
     });
   }
 
@@ -547,7 +749,12 @@
     TIERS.forEach(function (tier) {
       var sel = modelClaude[tier];
       if (!sel) return;
-      bindSelectOptions(sel, CLAUDE_MODEL_ALIASES, claudeModelMap[tier].model, '(none)');
+      bindSelectOptions(
+        sel,
+        CLAUDE_MODEL_ALIASES,
+        claudeModelMap[tier].model,
+        '(none)',
+      );
       bindClaudeEffortOptions(tier, sel.value);
     });
   }
@@ -556,14 +763,18 @@
     // Preserve the currently chosen effort across the rebuild so a same-family
     // model switch keeps the user's effort when still valid.
     var sel = effortClaude[tier];
-    claudeModelMap[tier].effort = sel && !sel.disabled ? sel.value : claudeModelMap[tier].effort;
+    claudeModelMap[tier].effort =
+      sel && !sel.disabled ? sel.value : claudeModelMap[tier].effort;
     bindClaudeEffortOptions(tier, modelClaude[tier].value);
     renderProviderSummary('claude');
   }
 
   function applyModels(raw) {
     var src = raw && typeof raw === 'object' ? raw : {};
-    var ag = src.antigravity && typeof src.antigravity === 'object' ? src.antigravity : {};
+    var ag =
+      src.antigravity && typeof src.antigravity === 'object'
+        ? src.antigravity
+        : {};
     antigravityModelMap = {
       high: typeof ag.high === 'string' ? ag.high : '',
       mid: typeof ag.mid === 'string' ? ag.mid : '',
@@ -571,9 +782,15 @@
     };
     var cl = src.claude && typeof src.claude === 'object' ? src.claude : {};
     TIERS.forEach(function (tier) {
-      var t = cl[tier] && typeof cl[tier] === 'object' ? cl[tier] : DEFAULT_CLAUDE_MODEL_MAP[tier];
+      var t =
+        cl[tier] && typeof cl[tier] === 'object'
+          ? cl[tier]
+          : DEFAULT_CLAUDE_MODEL_MAP[tier];
       claudeModelMap[tier] = {
-        model: typeof t.model === 'string' ? t.model : DEFAULT_CLAUDE_MODEL_MAP[tier].model,
+        model:
+          typeof t.model === 'string'
+            ? t.model
+            : DEFAULT_CLAUDE_MODEL_MAP[tier].model,
         effort: typeof t.effort === 'string' ? t.effort : '',
       };
     });
@@ -594,12 +811,17 @@
     youtubeEnabled.checked = Boolean(src.enabled);
     setRadio(
       'youtube-language',
-      typeof src.language === 'string' ? src.language : DEFAULT_YOUTUBE_ADDON.language,
+      typeof src.language === 'string'
+        ? src.language
+        : DEFAULT_YOUTUBE_ADDON.language,
       YOUTUBE_LANGUAGES,
     );
-    var targets = src.targets && typeof src.targets === 'object' ? src.targets : {};
+    var targets =
+      src.targets && typeof src.targets === 'object' ? src.targets : {};
     youtubeTargetCodex.checked =
-      typeof targets.codex === 'boolean' ? targets.codex : DEFAULT_YOUTUBE_ADDON.targets.codex;
+      typeof targets.codex === 'boolean'
+        ? targets.codex
+        : DEFAULT_YOUTUBE_ADDON.targets.codex;
     youtubeTargetAntigravity.checked =
       typeof targets.antigravity === 'boolean'
         ? targets.antigravity
@@ -632,7 +854,11 @@
     return {
       codex: {
         yolo: Boolean(codexYolo.checked),
-        sandbox: readRadio('codex-sandbox', CODEX_SANDBOX_MODES, DEFAULT_OPTION_FLAGS.codex.sandbox),
+        sandbox: readRadio(
+          'codex-sandbox',
+          CODEX_SANDBOX_MODES,
+          DEFAULT_OPTION_FLAGS.codex.sandbox,
+        ),
       },
       antigravity: {
         // Forced off while agy #76 is unfixed.
@@ -652,20 +878,33 @@
   function buildModelMap() {
     var claude = {};
     TIERS.forEach(function (tier) {
-      var model = modelClaude[tier] ? String(modelClaude[tier].value || '') : '';
+      var model = modelClaude[tier]
+        ? String(modelClaude[tier].value || '')
+        : '';
       var tierCfg = { model: model };
       var effortSel = effortClaude[tier];
       var set = MODEL_EFFORT_SETS[model] || [];
-      if (effortSel && !effortSel.disabled && set.length > 0 && effortSel.value) {
+      if (
+        effortSel &&
+        !effortSel.disabled &&
+        set.length > 0 &&
+        effortSel.value
+      ) {
         tierCfg.effort = effortSel.value;
       }
       claude[tier] = tierCfg;
     });
     return {
       antigravity: {
-        high: modelAntigravity.high ? String(modelAntigravity.high.value || '') : '',
-        mid: modelAntigravity.mid ? String(modelAntigravity.mid.value || '') : '',
-        low: modelAntigravity.low ? String(modelAntigravity.low.value || '') : '',
+        high: modelAntigravity.high
+          ? String(modelAntigravity.high.value || '')
+          : '',
+        mid: modelAntigravity.mid
+          ? String(modelAntigravity.mid.value || '')
+          : '',
+        low: modelAntigravity.low
+          ? String(modelAntigravity.low.value || '')
+          : '',
       },
       claude: claude,
     };
@@ -674,7 +913,11 @@
   function buildArtifacts() {
     return {
       enabled: Boolean(artifactsEnabled.checked),
-      location: readRadio('artifacts-location', ARTIFACTS_LOCATIONS, DEFAULT_ARTIFACTS.location),
+      location: readRadio(
+        'artifacts-location',
+        ARTIFACTS_LOCATIONS,
+        DEFAULT_ARTIFACTS.location,
+      ),
     };
   }
 
@@ -698,9 +941,21 @@
       option_flags: buildOptionFlags(),
       model_map: buildModelMap(),
       default_tier: {
-        codex: readRadio('default-tier-codex', TIERS, DEFAULT_DEFAULT_TIER.codex),
-        antigravity: readRadio('default-tier-antigravity', TIERS, DEFAULT_DEFAULT_TIER.antigravity),
-        claude: readRadio('default-tier-claude', TIERS, DEFAULT_DEFAULT_TIER.claude),
+        codex: readRadio(
+          'default-tier-codex',
+          TIERS,
+          DEFAULT_DEFAULT_TIER.codex,
+        ),
+        antigravity: readRadio(
+          'default-tier-antigravity',
+          TIERS,
+          DEFAULT_DEFAULT_TIER.antigravity,
+        ),
+        claude: readRadio(
+          'default-tier-claude',
+          TIERS,
+          DEFAULT_DEFAULT_TIER.claude,
+        ),
       },
       session_ttl_hours: Math.max(
         SESSION_TTL_HOURS_MIN,
@@ -723,14 +978,30 @@
         claude: String(refs.claude.preamble.value || ''),
       },
       recency_factor: {
-        codex: readRadio('recency-codex', RECENCY_LEVELS, DEFAULT_RECENCY.codex),
-        antigravity: readRadio('recency-antigravity', RECENCY_LEVELS, DEFAULT_RECENCY.antigravity),
-        claude: readRadio('recency-claude', RECENCY_LEVELS, DEFAULT_RECENCY.claude),
+        codex: readRadio(
+          'recency-codex',
+          RECENCY_LEVELS,
+          DEFAULT_RECENCY.codex,
+        ),
+        antigravity: readRadio(
+          'recency-antigravity',
+          RECENCY_LEVELS,
+          DEFAULT_RECENCY.antigravity,
+        ),
+        claude: readRadio(
+          'recency-claude',
+          RECENCY_LEVELS,
+          DEFAULT_RECENCY.claude,
+        ),
       },
       addons: {
         youtube: {
           enabled: Boolean(youtubeEnabled.checked),
-          language: readRadio('youtube-language', YOUTUBE_LANGUAGES, DEFAULT_YOUTUBE_ADDON.language),
+          language: readRadio(
+            'youtube-language',
+            YOUTUBE_LANGUAGES,
+            DEFAULT_YOUTUBE_ADDON.language,
+          ),
           targets: {
             codex: Boolean(youtubeTargetCodex.checked),
             antigravity: Boolean(youtubeTargetAntigravity.checked),
@@ -759,7 +1030,9 @@
       if (!res.ok) return;
       var body = await res.json();
       providerAvailable.codex = Boolean(body.codex && body.codex.available);
-      providerAvailable.antigravity = Boolean(body.antigravity && body.antigravity.available);
+      providerAvailable.antigravity = Boolean(
+        body.antigravity && body.antigravity.available,
+      );
       providerAvailable.claude = Boolean(body.claude && body.claude.available);
       agyModels = Array.isArray(body.agyModels) ? body.agyModels : [];
       bindAgyModelOptions(agyModels);
@@ -769,6 +1042,7 @@
     PROVIDERS.forEach(function (p) {
       if (!providerAvailable[p]) ratioState[p].enabled = false;
     });
+    distributeEvenly();
     updateInstallHints();
     renderRatio();
     syncAdvancedToggleAvailability();
@@ -840,9 +1114,6 @@
   }
 
   PROVIDERS.forEach(function (p) {
-    refs[p].slider.addEventListener('input', function () {
-      onSlider(p);
-    });
     refs[p].toggle.addEventListener('click', function () {
       toggleProvider(p);
     });
@@ -850,6 +1121,8 @@
       toggleAdvancedPanel(refs[p].advancedToggle, refs[p].advancedPanel);
     });
   });
+  ratioBar.addEventListener('pointerdown', onRatioPointerDown);
+  ratioBar.addEventListener('keydown', onRatioKeydown);
   TIERS.forEach(function (tier) {
     if (modelClaude[tier]) {
       modelClaude[tier].addEventListener('change', function () {

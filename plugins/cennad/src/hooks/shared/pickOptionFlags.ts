@@ -18,11 +18,9 @@ const CODEX_SANDBOX_MODES: ReadonlySet<CodexSandboxMode> = new Set([
 ]);
 
 const CLAUDE_PERMISSION_MODES: ReadonlySet<ClaudePermissionMode> = new Set([
-  'default',
   'acceptEdits',
   'auto',
   'dontAsk',
-  'plan',
   'bypassPermissions',
 ]);
 

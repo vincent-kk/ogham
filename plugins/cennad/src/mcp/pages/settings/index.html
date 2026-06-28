@@ -89,17 +89,6 @@
               Install: <code>npm install -g @openai/codex</code> — reload after
               installing.
             </p>
-            <div class="ratio-slider-wrap">
-              <input
-                id="ratio-codex"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value="50"
-                aria-label="codex weight"
-              />
-            </div>
             <div
               class="advanced-panel"
               id="advanced-panel-codex"
@@ -317,17 +306,6 @@
               >
               — reload after installing, then sign in with <code>agy</code>.
             </p>
-            <div class="ratio-slider-wrap">
-              <input
-                id="ratio-antigravity"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value="50"
-                aria-label="antigravity weight"
-              />
-            </div>
             <div
               class="advanced-panel"
               id="advanced-panel-antigravity"
@@ -551,17 +529,6 @@
               Install: <code>npm install -g @anthropic-ai/claude-code</code> —
               reload after installing.
             </p>
-            <div class="ratio-slider-wrap">
-              <input
-                id="ratio-claude"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value="50"
-                aria-label="Anthropic weight"
-              />
-            </div>
             <div
               class="advanced-panel"
               id="advanced-panel-claude"
@@ -666,18 +633,8 @@
                       ><input
                         type="radio"
                         name="claude-permission-mode"
-                        value="default"
-                      /><span>default</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
                         value="acceptEdits"
-                      /><span
-                        >acceptEdits
-                        <small class="default-marker">(default)</small></span
-                      ></label
+                      /><span>acceptEdits</span></label
                     >
                     <label class="radio"
                       ><input
@@ -691,14 +648,10 @@
                         type="radio"
                         name="claude-permission-mode"
                         value="dontAsk"
-                      /><span>dontAsk</span></label
-                    >
-                    <label class="radio"
-                      ><input
-                        type="radio"
-                        name="claude-permission-mode"
-                        value="plan"
-                      /><span>plan</span></label
+                      /><span
+                        >dontAsk
+                        <small class="default-marker">(default)</small></span
+                      ></label
                     >
                     <label class="radio"
                       ><input
@@ -727,7 +680,7 @@
                     xhigh). Over-cap requests are silently downgraded by
                     claude-code.
                   </p>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-claude-high">high</label>
                     <select id="model-claude-high" class="tier-select"></select>
                     <select
@@ -735,12 +688,12 @@
                       class="tier-select"
                     ></select>
                   </div>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-claude-mid">mid</label>
                     <select id="model-claude-mid" class="tier-select"></select>
                     <select id="effort-claude-mid" class="tier-select"></select>
                   </div>
-                  <div class="tier-field">
+                  <div class="tier-field" data-layout="model-effort">
                     <label for="model-claude-low">low</label>
                     <select id="model-claude-low" class="tier-select"></select>
                     <select id="effort-claude-low" class="tier-select"></select>
@@ -749,6 +702,13 @@
               </div>
             </div>
 
+            <div class="ratio-bar-wrap">
+              <div
+                id="ratio-bar"
+                class="ratio-bar"
+                aria-label="Provider routing ratio"
+              ></div>
+            </div>
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
             </p>

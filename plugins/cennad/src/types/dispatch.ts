@@ -33,11 +33,9 @@ export type AntigravityFlags = z.infer<typeof AntigravityFlagsSchema>;
 // --dangerously-skip-permissions; there is no sandbox flag, so isolation is
 // permission-based only.
 export const ClaudePermissionModeSchema = z.enum([
-  'default',
   'acceptEdits',
   'auto',
   'dontAsk',
-  'plan',
   'bypassPermissions',
 ]);
 export type ClaudePermissionMode = z.infer<typeof ClaudePermissionModeSchema>;

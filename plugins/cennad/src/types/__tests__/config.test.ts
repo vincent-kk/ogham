@@ -44,6 +44,20 @@ describe('ConfigSchema', () => {
     ).toThrow();
   });
 
+  it('rejects claude permission modes that can stall headless dispatch', () => {
+    for (const permissionMode of ['default', 'plan']) {
+      expect(() =>
+        ConfigSchema.parse({
+          ...DEFAULT_CONFIG,
+          option_flags: {
+            ...DEFAULT_CONFIG.option_flags,
+            claude: { permission_mode: permissionMode },
+          },
+        }),
+      ).toThrow();
+    }
+  });
+
   it('rejects unknown codex sandbox mode', () => {
     expect(() =>
       ConfigSchema.parse({

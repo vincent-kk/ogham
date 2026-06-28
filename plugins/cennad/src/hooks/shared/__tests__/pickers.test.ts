@@ -71,12 +71,12 @@ describe('pickOptionFlags', () => {
     const raw = {
       codex: { yolo: true, sandbox: 'read-only' },
       antigravity: { sandbox: false, skip_permissions: true },
-      claude: { permission_mode: 'plan' },
+      claude: { permission_mode: 'auto' },
     };
     expect(pickOptionFlags(raw)).toEqual({
       codex: { yolo: true, sandbox: 'read-only' },
       antigravity: { sandbox: false, skip_permissions: true },
-      claude: { permission_mode: 'plan' },
+      claude: { permission_mode: 'auto' },
     });
   });
 

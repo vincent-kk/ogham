@@ -17,7 +17,8 @@
 - POST body 는 항상 `Content-Type: application/json`
 - CSS 변수로 다크 모드 토큰화
 - antigravity 활성 시 per-tier 모델 드롭다운(high / mid / low) 표시 — 선택 항목은 `/provider-status` 의 `agyModels` 배열로 동적 바인딩
-- Anthropic(claude) 레인: `permission_mode` 라디오(default/acceptEdits/auto/dontAsk/plan/bypassPermissions) + per-tier model 및 effort 드롭다운 (effort 선택 항목은 선택된 model 에 따라 적응)
+- Provider ratio 는 단일 segmented bar 로 조정 — 활성 provider 수가 `n`이면 경계 handle `n-1`개를 렌더링하고, 저장 포맷은 기존 `ratio.<provider>.value/enabled` 유지
+- Anthropic(claude) 레인: headless 위임에 맞춘 `permission_mode` 라디오(acceptEdits/auto/dontAsk/bypassPermissions, 기본 dontAsk) + per-tier model 및 effort 드롭다운 (effort 선택 항목은 선택된 model 에 따라 적응)
 - 독립 "MCP Addons" 섹션 (provider 라우팅과 분리) — `addons.youtube` = enabled + language(en/ko) + targets(codex·antigravity). `/save` 가 체크된 대상 CLI 의 MCP 설정(agy mcp_config.json / codex config.toml)에 yt-dlp-mcp 서버를 등록/해제 (cennad 네임스페이스 밖 부수효과)
 
 ## Boundaries

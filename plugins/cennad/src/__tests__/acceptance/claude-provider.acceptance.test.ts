@@ -89,24 +89,28 @@ describe('[acceptance] claude config data model (D1/D2/D3/D6)', () => {
     expect(claudeFlags).not.toHaveProperty('sandbox');
   });
 
-  it('ClaudeFlagsSchema accepts all 6 permission modes and rejects junk', async () => {
+  it('ClaudeFlagsSchema accepts headless-safe permission modes and rejects interactive-only modes', async () => {
     const { ClaudeFlagsSchema } = await load(TYPES);
     expect(
       ClaudeFlagsSchema,
       'ClaudeFlagsSchema not exported yet',
     ).toBeDefined();
     for (const mode of [
-      'default',
       'acceptEdits',
       'auto',
       'dontAsk',
-      'plan',
       'bypassPermissions',
     ]) {
       expect(
         ClaudeFlagsSchema.safeParse({ permission_mode: mode }).success,
         mode,
       ).toBe(true);
+    }
+    for (const mode of ['default', 'plan']) {
+      expect(
+        ClaudeFlagsSchema.safeParse({ permission_mode: mode }).success,
+        mode,
+      ).toBe(false);
     }
     expect(
       ClaudeFlagsSchema.safeParse({ permission_mode: 'sandboxed' }).success,

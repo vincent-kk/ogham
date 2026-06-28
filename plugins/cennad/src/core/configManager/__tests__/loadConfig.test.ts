@@ -37,7 +37,7 @@ describe('loadConfig', () => {
       option_flags: {
         codex: { yolo: false, sandbox: 'workspace-write' as const },
         antigravity: { sandbox: false, skip_permissions: false },
-        claude: { permission_mode: 'plan' as const },
+        claude: { permission_mode: 'auto' as const },
       },
       model_map: {
         antigravity: {

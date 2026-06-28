@@ -25,11 +25,9 @@ export interface AntigravityFlags {
 }
 
 export type ClaudePermissionMode =
-  | 'default'
   | 'acceptEdits'
   | 'auto'
   | 'dontAsk'
-  | 'plan'
   | 'bypassPermissions';
 
 export interface ClaudeFlags {

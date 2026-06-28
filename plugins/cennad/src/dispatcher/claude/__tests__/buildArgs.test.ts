@@ -44,7 +44,7 @@ describe('buildStartArgs', () => {
   });
 
   it('omits --effort when the resolved tier has none', () => {
-    const argv = buildStartArgs(baseArgs({ permission_mode: 'default' }), {
+    const argv = buildStartArgs(baseArgs({ permission_mode: 'dontAsk' }), {
       model: 'haiku',
     });
     expect(after(argv, '--model')).toBe('haiku');

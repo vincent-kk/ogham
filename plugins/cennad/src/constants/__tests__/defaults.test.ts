@@ -10,9 +10,9 @@ describe('DEFAULT_CONFIG', () => {
 
   it('uses an all-enabled equal ratio and neutral strength', () => {
     expect(DEFAULT_CONFIG.ratio).toEqual({
-      codex: { value: 50, enabled: true },
-      antigravity: { value: 50, enabled: true },
-      claude: { value: 50, enabled: true },
+      codex: { value: 34, enabled: true },
+      antigravity: { value: 33, enabled: true },
+      claude: { value: 33, enabled: true },
     });
     expect(DEFAULT_CONFIG.intervention_strength).toBe(0);
   });
@@ -21,7 +21,7 @@ describe('DEFAULT_CONFIG', () => {
     expect(DEFAULT_CONFIG.option_flags).toEqual({
       codex: { yolo: false, sandbox: 'workspace-write' },
       antigravity: { sandbox: false, skip_permissions: false },
-      claude: { permission_mode: 'acceptEdits' },
+      claude: { permission_mode: 'dontAsk' },
     });
   });
 

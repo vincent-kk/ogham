@@ -2,9 +2,9 @@ import type { Config } from '../types/config.js';
 
 export const DEFAULT_CONFIG: Config = {
   ratio: {
-    codex: { value: 50, enabled: true },
-    antigravity: { value: 50, enabled: true },
-    claude: { value: 50, enabled: true },
+    codex: { value: 34, enabled: true },
+    antigravity: { value: 33, enabled: true },
+    claude: { value: 33, enabled: true },
   },
   intervention_strength: 0,
   keywords: {
@@ -15,7 +15,7 @@ export const DEFAULT_CONFIG: Config = {
   option_flags: {
     codex: { yolo: false, sandbox: 'workspace-write' },
     antigravity: { sandbox: false, skip_permissions: false },
-    claude: { permission_mode: 'acceptEdits' },
+    claude: { permission_mode: 'dontAsk' },
   },
   model_map: {
     antigravity: {

@@ -18,7 +18,7 @@ describe('mergeOptionFlags', () => {
     const raw = {
       codex: { yolo: true, sandbox: 'full' },
       antigravity: { sandbox: false, skip_permissions: true },
-      claude: { permission_mode: 'plan' },
+      claude: { permission_mode: 'auto' },
     };
     expect(mergeOptionFlags(raw)).toEqual(raw);
   });
