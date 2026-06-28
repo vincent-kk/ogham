@@ -302,7 +302,7 @@ cennad 가 claude CLI 를 다음과 같이 호출한다.
 
 **effort 스케일**: `low < medium < high < xhigh < max`. 모델별 상한: opus/fable/best/opus[1m] = 전체 5단계; sonnet/sonnet[1m] = low/medium/high/max (xhigh 제외); haiku = effort 없음.
 
-**crosscheck**: codex 와 antigravity 에만 참여하며 claude 는 v1 에서 제외된다.
+**crosscheck**: 활성화된 provider(codex / antigravity / claude) 전체가 참여한다. 비활성 provider 는 제외되며, 활성 provider 가 2개 미만이면 교차검증 대신 단독 응답으로 처리된다.
 
 ## 런타임 경로
 

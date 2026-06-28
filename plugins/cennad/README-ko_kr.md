@@ -85,14 +85,14 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 
 추론·분석·작성·코드 리뷰, 또는 격리된 Anthropic 모델 인스턴스의 second opinion 이 필요할 때 사용하세요. `--strict-mcp-config` 와 `--safe-mode` 가 항상 부착되어 자식 프로세스가 부모 세션의 MCP 서버, 훅, CLAUDE.md, 스킬을 상속하지 않습니다.
 
-### 양쪽 Provider 교차 검증
+### Provider 교차 검증
 
 ```
 /crosscheck -- "이 마이그레이션에 A 와 B 중 무엇이 더 안전한가?"
-/crosscheck --tier high -- "이 RFC 를 코드·리서치 양 관점에서 리뷰해줘"
+/crosscheck --tier high -- "이 RFC 를 코드·리서치·추론 관점에서 리뷰해줘"
 ```
 
-두 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 codex 와 antigravity 양쪽에 병렬 전달되며, 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성됩니다. 단일 호출 only — multi-turn follow-up 은 `/codex --continue` 또는 `/antigravity --continue` 로 진행하세요.
+여러 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 활성화된 provider(codex, antigravity, claude) 전체에 병렬 전달되며, 비활성 provider 는 제외됩니다. 2개 이상 활성 시 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성되고, 1개만 활성 시 해당 provider 응답을 그대로 제시합니다. 단일 호출 only — multi-turn follow-up 은 `/codex --continue`, `/antigravity --continue`, `/claude --continue` 로 진행하세요.
 
 ---
 

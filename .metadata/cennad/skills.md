@@ -172,14 +172,14 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 
 ## skill: `crosscheck`
 
-codex + antigravity 병렬 위임. 두 응답을 합성.
+활성 provider(codex / antigravity / claude) 병렬 위임. 응답을 합성. 비활성은 제외.
 
 ### Frontmatter
 
 ```yaml
 ---
 name: crosscheck
-description: '[cennad] Cross-validate a prompt by dispatching to codex AND antigravity in parallel, then synthesize the two answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
+description: '[cennad] Cross-validate a prompt by dispatching it in parallel to every enabled provider (codex, antigravity, claude), then synthesize their answers. Trigger: "crosscheck", "cross check", "교차검증", "양쪽에 물어봐"'
 user_invocable: true
 argument-hint: '[--tier high|mid|low] -- "prompt"'
 ---
@@ -187,30 +187,29 @@ argument-hint: '[--tier high|mid|low] -- "prompt"'
 
 ### When to use / when not
 
-- 두 모델 패밀리의 독립적 second opinion 이 가치 있는 결정 / 설계 리뷰.
-- 단일 provider 가 강점이 명확한 작업, 멀티턴, secret 포함 프롬프트는 비추.
+- 여러 모델 패밀리의 독립적 second opinion 이 가치 있는 결정 / 설계 리뷰.
+- 단일 provider 강점만 필요한 작업, 멀티턴, secret 포함 프롬프트(활성 provider 전체에 전달)는 비추.
 
 ### Body — 호출 매핑
 
-- `--continue` 미지원 (항상 두 fresh 세션). 사용자가 전달하면 `/cennad:codex --continue <id>` 또는 `/cennad:antigravity --continue <id>` 로 안내.
-- 두 호출을 **병렬** (단일 메시지 두 tool use):
-  - `mcp_tools_start_conversation({ provider: 'codex', prompt, tier? })`
-  - `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier? })`
-- 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 양쪽 실패: 두 오류 노출 후 합성 skip.
+- 활성 게이트: SessionStart `Active providers:` 의 활성 집합(codex / antigravity / claude 중)에만 dispatch. 2개 이상 → N-way 합성, 1개 → 단독 응답 + 추가 활성화 안내, 0개 → MCP 호출 없이 안내.
+- `--continue` 미지원 (항상 fresh 세션). 사용자가 전달하면 `/cennad:<provider> --continue <id>` 로 안내.
+- 활성 provider 각각을 **병렬** dispatch (단일 메시지, 활성 개수만큼 tool use): `mcp_tools_start_conversation({ provider, prompt, tier? })`.
+- 부분 실패: 살아남은 응답 + 실패측 `error.code`/`message` 동시 노출. 전부 실패: 모든 오류 노출 후 합성 skip. `disabled` 오류는 participant set 에서 제외 후 재평가.
 
-### Body — 합성 포맷 (양쪽 성공)
+### Body — 합성 포맷 (2개 이상 성공)
 
-4개 섹션 — `## Agreed` / `## Conflicting` / `## Final direction` / `## Action checklist`. `artifact_path` 가 있으면 `## Artifacts` 추가.
+4개 섹션 — `## Agreed` / `## Conflicting` / `## Final direction` / `## Action checklist`. 각 포인트에 출처 provider 명시. `artifact_path` 가 있으면 `## Artifacts` 추가.
 
 ## 스킬 ↔ 도구 매트릭스
 
-| Skill       | start_conversation               | continue_conversation | open_settings |
-| ----------- | -------------------------------- | --------------------- | ------------- |
-| setup       | —                                | —                     | O             |
-| codex       | O (provider=codex)               | O                     | —             |
-| antigravity | O (provider=antigravity)         | O                     | —             |
-| claude      | O (provider=claude)              | O                     | —             |
-| crosscheck  | O × 2 (codex + antigravity 병렬) | —                     | —             |
+| Skill       | start_conversation         | continue_conversation | open_settings |
+| ----------- | -------------------------- | --------------------- | ------------- |
+| setup       | —                          | —                     | O             |
+| codex       | O (provider=codex)         | O                     | —             |
+| antigravity | O (provider=antigravity)   | O                     | —             |
+| claude      | O (provider=claude)        | O                     | —             |
+| crosscheck  | O × N (활성 provider 병렬) | —                     | —             |
 
 ## 참고 자료 정책
 

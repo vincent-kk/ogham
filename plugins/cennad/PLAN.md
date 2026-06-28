@@ -147,12 +147,12 @@ effort 스케일: `low < medium < high < xhigh < max`. 모델별 지원 집합:
 
 - [ ] **2.1 타입** — `conversation.ts` `PROVIDERS`에 `'claude'`. `dispatch.ts`:
       `ts
-    ClaudePermissionModeSchema = z.enum(['default','acceptEdits','auto','dontAsk','plan','bypassPermissions'])
-    ClaudeFlagsSchema = z.object({ permission_mode: ClaudePermissionModeSchema, fallback_model: z.string().optional() })
-    ClaudeEffortSchema = z.enum(['low','medium','high','xhigh','max'])
-    ClaudeTierConfigSchema = z.object({ model: z.string(), effort: ClaudeEffortSchema.optional() })
-    ClaudeModelMapSchema = z.object({ high: ClaudeTierConfigSchema, mid: ClaudeTierConfigSchema, low: ClaudeTierConfigSchema })
-    `
+  ClaudePermissionModeSchema = z.enum(['default','acceptEdits','auto','dontAsk','plan','bypassPermissions'])
+  ClaudeFlagsSchema = z.object({ permission_mode: ClaudePermissionModeSchema, fallback_model: z.string().optional() })
+  ClaudeEffortSchema = z.enum(['low','medium','high','xhigh','max'])
+  ClaudeTierConfigSchema = z.object({ model: z.string(), effort: ClaudeEffortSchema.optional() })
+  ClaudeModelMapSchema = z.object({ high: ClaudeTierConfigSchema, mid: ClaudeTierConfigSchema, low: ClaudeTierConfigSchema })
+  `
       `config.ts`: claude 키 추가(Ratio/Keywords/OptionFlags/DefaultTier/Preamble/RecencyFactor). **`ModelMapSchema`에 `claude: ClaudeModelMapSchema` 추가**(antigravity는 기존 `TierModelMapSchema` 문자열 맵 유지). `counter.ts`에 `claude`. **sandbox 필드 추가 금지(D6).**
 - [ ] **2.2 상수** — `defaults.ts`에 claude 블록(§1 기본값). 신규 상수: `CLAUDE_MODEL_ALIASES = ['opus','sonnet','haiku','fable','best','opus[1m]','sonnet[1m]']`, `CLAUDE_EFFORT_LEVELS`, **`MODEL_EFFORT_SETS`**(§3 상한표). `paths.ts`는 변경 없음(cwd-격리 불필요).
 - [ ] **2.3 코어** — `configManager/utils`의 merge 함수들 + `normalizeRatio`에 claude. **`mergeModelMap`에 claude 딥머지**(`{model,effort}` 구조). `counterManager`에 claude.
@@ -185,7 +185,6 @@ effort 스케일: `low < medium < high < xhigh < max`. 모델별 지원 집합:
 
 전체 동등 핵심에는 불필요하거나 범위가 커서 후속으로 분리.
 
-- **crosscheck에 claude 합류** — v1은 codex+antigravity 유지. 3-way 교차검증은 후속.
 - **도구 스코프 노출** — `--allowedTools`/`--disallowedTools`/`--tools`(읽기전용 리서치 모드 등). v1 미노출.
 - **비용 가드** — `--max-budget-usd` config 노브화. v1 미노출.
 - **YouTube 애드온 claude 타깃** — `--mcp-config`로 yt-dlp 주입 가능하나 provisioning 방식이 provider별로 달라 분리. v1 보류.

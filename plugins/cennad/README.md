@@ -85,14 +85,14 @@ Use antigravity (`agy`) for live web-grounded research, very-large-context synth
 
 Use claude for reasoning-heavy analysis, writing, and review tasks where you want a fully isolated Anthropic model invocation. The child `claude` process runs with `--strict-mcp-config --safe-mode` so it never inherits the parent session's MCP servers, hooks, CLAUDE.md, or skills. Permission behaviour is controlled by the `permission_mode` setting in `/setup` (default: `acceptEdits`).
 
-### Cross-checking with Both Providers
+### Cross-checking Across Providers
 
 ```
 /crosscheck -- "Is approach A or B safer for this migration?"
-/crosscheck --tier high -- "Review this RFC from both code and research angles"
+/crosscheck --tier high -- "Review this RFC from code, research, and reasoning angles"
 ```
 
-Use crosscheck when independent second opinions from two model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded to BOTH codex and antigravity in parallel; the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections. Single-shot only — use `/codex --continue` or `/antigravity --continue` for multi-turn follow-ups on either side.
+Use crosscheck when independent second opinions across model families matter (architectural decisions, spec/PR reviews). The same prompt is forwarded in parallel to every enabled provider (codex, antigravity, claude); disabled ones are skipped. With two or more enabled, the answers are synthesized into Agreed / Conflicting / Final direction / Action checklist sections; with only one enabled, you get that provider's answer as-is. Single-shot only — use `/codex --continue`, `/antigravity --continue`, or `/claude --continue` for multi-turn follow-ups on any side.
 
 ---
 

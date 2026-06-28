@@ -7,7 +7,7 @@
 | Hooks                                    | MCP 상태 → Claude 컨텍스트 주입 (read-only 어댑터)                     | `hooks/`                             |
 | Claude                                   | provider 선택 및 위임 여부 판단 (판단 주체)                            | —                                    |
 | Skill `codex` / `antigravity` / `claude` | Claude 결정 → MCP 도구 호출 매핑                                       | `skills/{codex,antigravity,claude}/` |
-| Skill `crosscheck`                       | codex + antigravity 병렬 호출 + 응답 합성                              | `skills/crosscheck/`                 |
+| Skill `crosscheck`                       | 활성 provider 병렬 호출 + 응답 합성 (비활성 제외)                      | `skills/crosscheck/`                 |
 | Skill `setup`                            | `open_settings` 호출 → 브라우저 안내                                   | `skills/setup/`                      |
 | MCP Server `tools`                       | provider 디스패치, config/counter/session 보유                         | `src/mcp/`                           |
 | Provider Dispatcher                      | `codex-cli`, `agy`, `claude` 자식 프로세스 실행 + JSON envelope 정규화 | `src/dispatcher/`                    |
@@ -202,7 +202,6 @@ env override: `CENNAD_CLAUDE_<TIER>_MODEL` / `CENNAD_CLAUDE_<TIER>_EFFORT`.
 ## 명시적 비채택
 
 - 외부 LLM → Claude 재귀 호출 차단.
-- crosscheck 에 claude 참여 (v1 에서 codex + antigravity 만).
 - MCP 측 예산/캡 추적.
 - 활성 세션 목록 매 턴 주입.
 - Provider 비율의 하드 캡.
