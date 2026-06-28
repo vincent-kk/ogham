@@ -15,7 +15,6 @@ export function pickRecencyFactor(raw: unknown): RecencyFactorConfig {
   const defaults = DEFAULT_CONFIG.recency_factor;
   if (!isObj(raw)) return { ...defaults };
   return {
-    gemini: pickLevel(raw.gemini, defaults.gemini),
     codex: pickLevel(raw.codex, defaults.codex),
     antigravity: pickLevel(raw.antigravity, defaults.antigravity),
   };

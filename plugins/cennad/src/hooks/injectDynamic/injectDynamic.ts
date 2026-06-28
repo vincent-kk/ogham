@@ -8,7 +8,7 @@ export function buildDynamicPayload(
   counter: HookCounter,
 ): string {
   const google = activeGoogleEngine(config);
-  const googleName = google ?? 'gemini/antigravity';
+  const googleName = google ?? 'antigravity';
   const googleCount = google ? counter[google] : 0;
   const total = googleCount + counter.codex;
   const lines = ['[cennad] Live state', ''];

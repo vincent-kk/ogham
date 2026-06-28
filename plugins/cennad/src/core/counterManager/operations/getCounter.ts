@@ -7,7 +7,7 @@ export async function getCounter(): Promise<Counter> {
   const current = await loadCounter();
   const ppid = getParentPid();
   if (!current || current.parent_pid !== ppid) {
-    return { parent_pid: ppid, gemini: 0, codex: 0, antigravity: 0 };
+    return { parent_pid: ppid, codex: 0, antigravity: 0 };
   }
   return current;
 }

@@ -6,14 +6,6 @@ import type {
   Tier,
 } from './conversation.js';
 
-export const GeminiSandboxBackendSchema = z.enum([
-  'auto',
-  'docker',
-  'podman',
-  'sandbox-exec',
-]);
-export type GeminiSandboxBackend = z.infer<typeof GeminiSandboxBackendSchema>;
-
 export const CodexSandboxModeSchema = z.enum([
   'read-only',
   'workspace-write',
@@ -21,13 +13,6 @@ export const CodexSandboxModeSchema = z.enum([
   'off',
 ]);
 export type CodexSandboxMode = z.infer<typeof CodexSandboxModeSchema>;
-
-export const GeminiFlagsSchema = z.object({
-  yolo: z.boolean(),
-  sandbox: z.boolean(),
-  sandbox_backend: GeminiSandboxBackendSchema,
-});
-export type GeminiFlags = z.infer<typeof GeminiFlagsSchema>;
 
 export const CodexFlagsSchema = z.object({
   yolo: z.boolean(),
@@ -62,7 +47,7 @@ export interface DispatchOptions<F = unknown> {
   flags: F;
   spawnTimeoutMs: number;
   // Tier→model-name map, injected by the MCP tool for providers that resolve
-  // concrete model names from config (antigravity). codex/gemini ignore it.
+  // concrete model names from config (antigravity). codex ignores it.
   modelMap?: TierModelMap;
 }
 

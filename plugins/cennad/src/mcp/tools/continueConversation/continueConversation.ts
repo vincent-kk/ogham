@@ -40,7 +40,7 @@ export async function handleContinueConversation(
       error: {
         code: 'unknown',
         message:
-          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember which provider it used, retry with /cennad:codex --continue <id>, /cennad:gemini --continue <id>, or /cennad:antigravity --continue <id>; otherwise start a fresh session.',
+          'Session not found in the current project. The original provider cannot be determined from the session_id alone. If you remember which provider it used, retry with /cennad:codex --continue <id> or /cennad:antigravity --continue <id>; otherwise start a fresh session.',
       },
       meta: {
         turn: 0,
@@ -94,11 +94,6 @@ export async function handleContinueConversation(
       flags: config.option_flags.antigravity,
       modelMap: config.model_map.antigravity,
     });
-  else if (session.provider === 'gemini')
-    result = await dispatchers.gemini.resume({
-      ...base,
-      flags: config.option_flags.gemini,
-    });
   else if (session.provider === 'codex')
     result = await dispatchers.codex.resume({
       ...base,
@@ -112,7 +107,7 @@ export async function handleContinueConversation(
       response: null,
       error: {
         code: 'unknown',
-        message: `Session references an unsupported provider '${session.provider}'. cennad can only resume 'antigravity', 'gemini', or 'codex' sessions; this stored session is likely from an incompatible cennad version. Start a fresh session with /cennad:codex, /cennad:gemini, or /cennad:antigravity.`,
+        message: `Session references an unsupported provider '${session.provider}'. cennad can only resume 'antigravity' or 'codex' sessions; this stored session is likely from an incompatible cennad version. Start a fresh session with /cennad:codex or /cennad:antigravity.`,
       },
       meta: {
         turn: session.turn_count,

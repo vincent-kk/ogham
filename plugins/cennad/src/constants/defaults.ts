@@ -2,18 +2,15 @@ import type { Config } from '../types/config.js';
 
 export const DEFAULT_CONFIG: Config = {
   ratio: {
-    gemini: { value: 50, enabled: true },
     codex: { value: 50, enabled: true },
-    antigravity: { value: 50, enabled: false },
+    antigravity: { value: 50, enabled: true },
   },
   intervention_strength: 0,
   keywords: {
-    gemini: 'research, search, youtube, large-context',
     codex: 'code, refactor, sandbox',
     antigravity: 'research, search, youtube, large-context',
   },
   option_flags: {
-    gemini: { yolo: true, sandbox: true, sandbox_backend: 'auto' },
     codex: { yolo: false, sandbox: 'workspace-write' },
     antigravity: { sandbox: false, skip_permissions: false },
   },
@@ -25,7 +22,6 @@ export const DEFAULT_CONFIG: Config = {
     },
   },
   default_tier: {
-    gemini: 'mid',
     codex: 'mid',
     antigravity: 'mid',
   },
@@ -36,12 +32,10 @@ export const DEFAULT_CONFIG: Config = {
     location: 'project',
   },
   preamble: {
-    gemini: '',
     codex: '',
     antigravity: '',
   },
   recency_factor: {
-    gemini: 'auto',
     codex: 'off',
     antigravity: 'auto',
   },

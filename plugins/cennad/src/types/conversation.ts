@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PROVIDERS = ['antigravity', 'gemini', 'codex'] as const;
+export const PROVIDERS = ['antigravity', 'codex'] as const;
 export const Tier = {
   High: 'high',
   Mid: 'mid',

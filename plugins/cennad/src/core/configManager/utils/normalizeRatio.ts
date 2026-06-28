@@ -8,24 +8,19 @@ export function normalizeRatio(raw: unknown): unknown {
   const c = raw.codex;
   const a = raw.antigravity;
   if (typeof g === 'number' && typeof c === 'number') {
-    // Legacy pre-antigravity integer ratio. Migrate gemini/codex to enabled
-    // flags; antigravity keeps its default (disabled).
+    // Legacy pre-antigravity integer ratio. The removed gemini provider's weight
+    // migrates onto the antigravity (Google) slot so the user's split is kept.
     const gw = Math.max(0, Math.floor(g));
     const cw = Math.max(0, Math.floor(c));
     const total = gw + cw;
     if (total === 0) return DEFAULT_CONFIG.ratio;
-    const gPct = Math.round((gw / total) * 100);
-    const cPct = 100 - gPct;
+    const aPct = Math.round((gw / total) * 100);
     return {
-      gemini: { value: gPct, enabled: gw > 0 },
-      codex: { value: cPct, enabled: cw > 0 },
-      antigravity: { ...DEFAULT_CONFIG.ratio.antigravity },
+      codex: { value: 100 - aPct, enabled: cw > 0 },
+      antigravity: { value: aPct, enabled: gw > 0 },
     };
   }
   return {
-    gemini: isPlainObject(g)
-      ? { ...DEFAULT_CONFIG.ratio.gemini, ...g }
-      : DEFAULT_CONFIG.ratio.gemini,
     codex: isPlainObject(c)
       ? { ...DEFAULT_CONFIG.ratio.codex, ...c }
       : DEFAULT_CONFIG.ratio.codex,

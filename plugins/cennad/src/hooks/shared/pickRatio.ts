@@ -11,21 +11,20 @@ export function pickRatio(raw: unknown): Ratio {
   const a = raw.antigravity;
 
   if (typeof g === 'number' && typeof c === 'number') {
-    // Legacy pre-antigravity integer ratio; antigravity keeps its default.
+    // Legacy pre-antigravity integer ratio; the removed gemini weight migrates
+    // onto the antigravity (Google) slot.
     const gw = Math.max(0, Math.floor(g));
     const cw = Math.max(0, Math.floor(c));
     const total = gw + cw;
     if (total === 0) return DEFAULT_CONFIG.ratio;
-    const gPct = Math.round((gw / total) * 100);
+    const aPct = Math.round((gw / total) * 100);
     return {
-      gemini: { value: gPct, enabled: gw > 0 },
-      codex: { value: 100 - gPct, enabled: cw > 0 },
-      antigravity: { ...DEFAULT_CONFIG.ratio.antigravity },
+      codex: { value: 100 - aPct, enabled: cw > 0 },
+      antigravity: { value: aPct, enabled: gw > 0 },
     };
   }
 
   return {
-    gemini: pickProviderRatio(g, DEFAULT_CONFIG.ratio.gemini),
     codex: pickProviderRatio(c, DEFAULT_CONFIG.ratio.codex),
     antigravity: pickProviderRatio(a, DEFAULT_CONFIG.ratio.antigravity),
   };

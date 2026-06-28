@@ -35,8 +35,6 @@ Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping 
 - With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
 - Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier? })`. `tier` is optional — omit to use the configured default; if given, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
-> antigravity and gemini are mutually exclusive Google engines in cennad config (the Gemini CLI service ends 2026-06-18). If antigravity is not the enabled engine, `start_conversation` returns `error.code: 'disabled'`.
-
 ## Response handling
 
 Always surface the response's `session_id` to the user — it is needed to continue later. Wrap `session_id` in backticks (`` ` ``) so it renders as a copyable inline code span.
@@ -44,7 +42,7 @@ Always surface the response's `session_id` to the user — it is needed to conti
 On `status: 'failure'`, dispatch by `error.code`:
 
 - `auth` → tell the user to sign in to Antigravity: run `agy` once interactively and complete the Google OAuth flow (agy has no API-key auth), then retry.
-- `disabled` → antigravity is not the enabled Google engine. Tell the user to switch the Google engine to antigravity and enable it via `/cennad:setup`. Do not retry.
+- `disabled` → antigravity is disabled in cennad config. Tell the user to enable it via `/cennad:setup`. Do not retry.
 - `rate_limit` / `budget_exhausted` → model availability depends on the subscription tier; suggest retrying after a pause, a different tier, or switching to the `codex` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim.
 

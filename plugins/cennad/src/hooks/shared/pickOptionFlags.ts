@@ -4,18 +4,9 @@ import type {
   AntigravityFlags,
   CodexFlags,
   CodexSandboxMode,
-  GeminiFlags,
-  GeminiSandboxBackend,
   OptionFlags,
 } from './configTypes.js';
 import { isObj } from './isObj.js';
-
-const GEMINI_BACKENDS: ReadonlySet<GeminiSandboxBackend> = new Set([
-  'auto',
-  'docker',
-  'podman',
-  'sandbox-exec',
-]);
 
 const CODEX_SANDBOX_MODES: ReadonlySet<CodexSandboxMode> = new Set([
   'read-only',
@@ -23,21 +14,6 @@ const CODEX_SANDBOX_MODES: ReadonlySet<CodexSandboxMode> = new Set([
   'danger-full-access',
   'off',
 ]);
-
-function pickGemini(raw: unknown): GeminiFlags {
-  const defaults = DEFAULT_CONFIG.option_flags.gemini;
-  if (!isObj(raw)) return defaults;
-  const backend = raw.sandbox_backend;
-  return {
-    yolo: typeof raw.yolo === 'boolean' ? raw.yolo : defaults.yolo,
-    sandbox: typeof raw.sandbox === 'boolean' ? raw.sandbox : defaults.sandbox,
-    sandbox_backend:
-      typeof backend === 'string' &&
-      GEMINI_BACKENDS.has(backend as GeminiSandboxBackend)
-        ? (backend as GeminiSandboxBackend)
-        : defaults.sandbox_backend,
-  };
-}
 
 function pickCodex(raw: unknown): CodexFlags {
   const defaults = DEFAULT_CONFIG.option_flags.codex;
@@ -68,7 +44,6 @@ function pickAntigravity(raw: unknown): AntigravityFlags {
 export function pickOptionFlags(raw: unknown): OptionFlags {
   if (!isObj(raw)) return DEFAULT_CONFIG.option_flags;
   return {
-    gemini: pickGemini(raw.gemini),
     codex: pickCodex(raw.codex),
     antigravity: pickAntigravity(raw.antigravity),
   };

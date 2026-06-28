@@ -16,14 +16,13 @@ export function createServer(): McpServer {
     McpToolName.START_CONVERSATION,
     {
       description:
-        'Delegate a prompt to an external LLM CLI (codex = code/shell; gemini or antigravity = web research & ' +
+        'Delegate a prompt to an external LLM CLI (codex = code/shell; antigravity = web research & ' +
         'large context) and return its answer plus a session_id for follow-ups. ' +
         'The CLI cannot see this Claude conversation — make the prompt self-contained.',
       inputSchema: {
         provider: ProviderSchema.describe(
-          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'gemini'/'antigravity' (Google): live web " +
-            'research, large-context synthesis. gemini and antigravity are mutually exclusive — dispatch to whichever ' +
-            "the session policy lists as active (the 'Active providers' line); a disabled engine returns error.code 'disabled'.",
+          "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'antigravity' (Google): live web " +
+            "research, large-context synthesis. A disabled provider returns error.code 'disabled'.",
         ),
         prompt: z
           .string()

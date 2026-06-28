@@ -6,9 +6,8 @@ export interface RatioLines {
   drift: string;
 }
 
-// Renders current/target/drift for the codex vs active-Google-engine pair.
-// gemini and antigravity are mutually exclusive, so only one Google engine is
-// ever shown (labelled by `googleName`).
+// Renders current/target/drift for the codex vs antigravity pair (the Google
+// engine, labelled by `googleName`).
 export function formatRatio(
   current: { google: number; codex: number },
   target: { google: number; codex: number },

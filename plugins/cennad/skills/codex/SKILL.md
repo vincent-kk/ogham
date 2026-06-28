@@ -43,7 +43,7 @@ On `status: 'failure'`, dispatch by `error.code`:
 
 - `auth` → tell the user to run `codex login` and retry.
 - `disabled` → codex is disabled in cennad config. Tell the user to enable it via `/cennad:setup`. Do not retry.
-- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `gemini` skill.
+- `rate_limit` / `budget_exhausted` → suggest retrying after a pause, or switching to the `antigravity` skill.
 - `network` / `cli_error` / `unknown` → relay `error.message` verbatim to the user.
 
 ## Tier

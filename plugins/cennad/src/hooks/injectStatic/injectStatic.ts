@@ -6,9 +6,8 @@ import { tonePhrase } from './utils/tonePhrase.js';
 
 export function buildStaticPayload(config: HookConfig): string {
   const r = config.ratio;
-  // gemini and antigravity are mutually exclusive; show only the active engine.
   const google = activeGoogleEngine(config);
-  const googleName = google ?? 'gemini/antigravity';
+  const googleName = google ?? 'antigravity';
   const googleValue = google ? r[google].value : 0;
 
   const active: string[] = [];
@@ -38,7 +37,7 @@ export function buildStaticPayload(config: HookConfig): string {
     'Routing guidance',
     `- Option flags:        ${flags}`,
     "- Delegate when (a) a keyword matches the provider's domain,",
-    "  (b) the task suits the provider's strength (gemini/antigravity: live search, large context;",
+    "  (b) the task suits the provider's strength (antigravity: live search, large context;",
     '  codex: heavy code, sandboxed shell), or',
     '  (c) keeping near the configured ratio.',
     '- Fall back to Claude when neither provider clearly fits.',

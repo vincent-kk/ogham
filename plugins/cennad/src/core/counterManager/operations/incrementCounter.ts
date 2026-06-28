@@ -8,7 +8,6 @@ export async function incrementCounter(provider: Provider): Promise<Counter> {
   const current = await getCounter();
   const next: Counter = {
     parent_pid: current.parent_pid,
-    gemini: current.gemini + (provider === 'gemini' ? 1 : 0),
     codex: current.codex + (provider === 'codex' ? 1 : 0),
     antigravity: current.antigravity + (provider === 'antigravity' ? 1 : 0),
   };
