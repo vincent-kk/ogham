@@ -22,12 +22,13 @@ export function normalizeRatio(raw: unknown): unknown {
       claude: { ...DEFAULT_CONFIG.ratio.claude },
     };
   }
+  const antigravitySource = isPlainObject(a) ? a : g;
   return {
     codex: isPlainObject(c)
       ? { ...DEFAULT_CONFIG.ratio.codex, ...c }
       : DEFAULT_CONFIG.ratio.codex,
-    antigravity: isPlainObject(a)
-      ? { ...DEFAULT_CONFIG.ratio.antigravity, ...a }
+    antigravity: isPlainObject(antigravitySource)
+      ? { ...DEFAULT_CONFIG.ratio.antigravity, ...antigravitySource }
       : DEFAULT_CONFIG.ratio.antigravity,
     claude: isPlainObject(raw.claude)
       ? { ...DEFAULT_CONFIG.ratio.claude, ...raw.claude }

@@ -25,9 +25,13 @@ export function pickRatio(raw: unknown): Ratio {
     };
   }
 
+  const antigravitySource = isObj(a) ? a : g;
   return {
     codex: pickProviderRatio(c, DEFAULT_CONFIG.ratio.codex),
-    antigravity: pickProviderRatio(a, DEFAULT_CONFIG.ratio.antigravity),
+    antigravity: pickProviderRatio(
+      antigravitySource,
+      DEFAULT_CONFIG.ratio.antigravity,
+    ),
     claude: pickProviderRatio(raw.claude, DEFAULT_CONFIG.ratio.claude),
   };
 }

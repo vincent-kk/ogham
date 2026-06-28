@@ -21,6 +21,19 @@ describe('normalizeRatio', () => {
     });
   });
 
+  it('migrates legacy object-form gemini ratio onto antigravity', () => {
+    expect(
+      normalizeRatio({
+        gemini: { value: 70, enabled: false },
+        codex: { value: 30, enabled: true },
+      }),
+    ).toEqual({
+      codex: { value: 30, enabled: true },
+      antigravity: { value: 70, enabled: false },
+      claude: { ...DEFAULT_CONFIG.ratio.claude },
+    });
+  });
+
   it('returns DEFAULT_CONFIG.ratio for null input', () => {
     expect(normalizeRatio(null)).toEqual(DEFAULT_CONFIG.ratio);
   });

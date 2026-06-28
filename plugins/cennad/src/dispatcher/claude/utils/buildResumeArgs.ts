@@ -6,7 +6,8 @@ import type {
 import type { ResolvedClaudeTier } from '../operations/resolveTier.js';
 
 // claude -p <prompt> --output-format json --resume <ref> --permission-mode <m>
-//   --model <model> [--effort <e>] --strict-mcp-config --safe-mode
+//   --model <model> [--effort <e>] [--fallback-model <chain>]
+//   --strict-mcp-config --safe-mode
 //
 // <ref> is the externalSessionRef recorded at start (the cennad sessionId).
 // Isolation flags are always attached, exactly as on start.
@@ -27,6 +28,8 @@ export function buildResumeArgs(
     resolved.model,
   ];
   if (resolved.effort) argv.push('--effort', resolved.effort);
+  if (args.flags.fallback_model)
+    argv.push('--fallback-model', args.flags.fallback_model);
   argv.push('--strict-mcp-config', '--safe-mode');
   return argv;
 }

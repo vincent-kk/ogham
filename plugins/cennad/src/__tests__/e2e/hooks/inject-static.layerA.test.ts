@@ -17,7 +17,7 @@ describe('injectStatic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Provider ratio: codex 34% · antigravity 33% · claude 33%',
         'Active providers: codex, antigravity, claude',
         'Intervention strength: 0',
         'balanced',
@@ -56,7 +56,7 @@ describe('injectStatic (Layer A)', () => {
     assertHookEnvelope(result, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Provider ratio: codex 34% · antigravity 33% · claude 33%',
         'Active providers: codex, antigravity, claude',
       ],
     });

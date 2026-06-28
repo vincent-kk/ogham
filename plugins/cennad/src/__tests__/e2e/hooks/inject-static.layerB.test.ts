@@ -18,7 +18,7 @@ describe('injectStatic (Layer B)', () => {
     assertHookEnvelope(result.parsed, {
       event: 'SessionStart',
       contextIncludes: [
-        'Provider ratio: codex 50% · antigravity 50% · claude 50%',
+        'Provider ratio: codex 34% · antigravity 33% · claude 33%',
         'Active providers: codex, antigravity, claude',
         'balanced',
       ],

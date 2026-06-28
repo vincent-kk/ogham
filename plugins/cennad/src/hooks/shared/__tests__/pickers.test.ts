@@ -42,6 +42,19 @@ describe('pickRatio', () => {
     };
     expect(pickRatio(raw)).toEqual(raw);
   });
+
+  it('migrates legacy object-form gemini ratio onto antigravity', () => {
+    expect(
+      pickRatio({
+        gemini: { value: 65, enabled: true },
+        codex: { value: 35, enabled: false },
+      }),
+    ).toEqual({
+      codex: { value: 35, enabled: false },
+      antigravity: { value: 65, enabled: true },
+      claude: DEFAULT_CONFIG.ratio.claude,
+    });
+  });
 });
 
 describe('pickStrength', () => {

@@ -61,7 +61,7 @@ describe('buildStartArgs', () => {
 });
 
 describe('buildResumeArgs', () => {
-  it('sends --resume <ref> and isolation flags, without --session-id/--fallback-model', () => {
+  it('sends --resume <ref> and isolation flags, without --session-id', () => {
     const args: DispatchResumeOptions<ClaudeFlags, ClaudeModelMap> = {
       ...baseArgs({ permission_mode: 'acceptEdits', fallback_model: 'sonnet' }),
       externalSessionRef: 'prior-id',
@@ -69,8 +69,16 @@ describe('buildResumeArgs', () => {
     const argv = buildResumeArgs(args, { model: 'opus', effort: 'max' });
     expect(after(argv, '--resume')).toBe('prior-id');
     expect(argv).not.toContain('--session-id');
-    expect(argv).not.toContain('--fallback-model');
     expect(argv).toContain('--strict-mcp-config');
     expect(argv).toContain('--safe-mode');
+  });
+
+  it('preserves --fallback-model on resume when configured', () => {
+    const args: DispatchResumeOptions<ClaudeFlags, ClaudeModelMap> = {
+      ...baseArgs({ permission_mode: 'acceptEdits', fallback_model: 'sonnet' }),
+      externalSessionRef: 'prior-id',
+    };
+    const argv = buildResumeArgs(args, { model: 'opus', effort: 'max' });
+    expect(after(argv, '--fallback-model')).toBe('sonnet');
   });
 });
