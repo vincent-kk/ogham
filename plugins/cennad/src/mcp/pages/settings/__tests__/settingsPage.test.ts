@@ -21,6 +21,17 @@ describe('settings page ratio controls', () => {
     expect(css).toContain('.ratio-bar-segment');
   });
 
+  it('preserves configured relative ratios after provider status loads', () => {
+    const app = readSettingsFile('scripts/app.js');
+    const statusFunction = app.match(
+      /async function fetchProviderStatus\(\) \{[\s\S]*?\n {2}\}/,
+    );
+
+    expect(statusFunction).not.toBeNull();
+    expect(statusFunction?.[0]).not.toContain('distributeEvenly()');
+    expect(statusFunction?.[0]).toContain('renderRatio()');
+  });
+
   it('keeps claude permission choices to headless-safe modes', () => {
     const html = readSettingsFile('index.html');
     const app = readSettingsFile('scripts/app.js');

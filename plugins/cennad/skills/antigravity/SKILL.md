@@ -32,7 +32,7 @@ Permission flags (`sandbox`, `skip_permissions`) and the per-tier model mapping 
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
 - Otherwise → `mcp_tools_start_conversation({ provider: 'antigravity', prompt, tier? })`. `tier` is optional — omit to use the configured default; if given, `high` only with a specific reason to expect `mid` is insufficient (`high` is far more rate-limit/budget-prone).
 
 ## Response handling

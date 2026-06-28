@@ -55,6 +55,26 @@ describe('pickRatio', () => {
       claude: DEFAULT_CONFIG.ratio.claude,
     });
   });
+
+  it('prefers an enabled legacy gemini slot over a disabled antigravity placeholder', () => {
+    expect(
+      pickRatio({
+        gemini: { value: 65, enabled: true },
+        codex: { value: 35, enabled: true },
+        antigravity: { value: 50, enabled: false },
+      }).antigravity,
+    ).toEqual({ value: 65, enabled: true });
+  });
+
+  it('preserves an enabled antigravity slot when legacy gemini is disabled', () => {
+    expect(
+      pickRatio({
+        gemini: { value: 65, enabled: false },
+        codex: { value: 35, enabled: true },
+        antigravity: { value: 50, enabled: true },
+      }).antigravity,
+    ).toEqual({ value: 50, enabled: true });
+  });
 });
 
 describe('pickStrength', () => {

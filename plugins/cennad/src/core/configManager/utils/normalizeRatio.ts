@@ -22,7 +22,18 @@ export function normalizeRatio(raw: unknown): unknown {
       claude: { ...DEFAULT_CONFIG.ratio.claude },
     };
   }
-  const antigravitySource = isPlainObject(a) ? a : g;
+  // Before Gemini was removed, canonical configs contained both Google slots:
+  // Gemini enabled and Antigravity disabled by default. In that state the
+  // active Gemini slot must migrate onto Antigravity rather than being hidden
+  // by the mere presence of the disabled Antigravity placeholder.
+  const antigravitySource =
+    isPlainObject(g) &&
+    g.enabled === true &&
+    (!isPlainObject(a) || a.enabled !== true)
+      ? g
+      : isPlainObject(a)
+        ? a
+        : g;
   return {
     codex: isPlainObject(c)
       ? { ...DEFAULT_CONFIG.ratio.codex, ...c }

@@ -34,6 +34,29 @@ describe('normalizeRatio', () => {
     });
   });
 
+  it('prefers an enabled legacy gemini slot over a disabled antigravity placeholder', () => {
+    expect(
+      normalizeRatio({
+        gemini: { value: 40, enabled: true },
+        codex: { value: 60, enabled: true },
+        antigravity: { value: 50, enabled: false },
+      }),
+    ).toEqual({
+      codex: { value: 60, enabled: true },
+      antigravity: { value: 40, enabled: true },
+      claude: { ...DEFAULT_CONFIG.ratio.claude },
+    });
+  });
+
+  it('preserves an enabled antigravity slot when legacy gemini is disabled', () => {
+    const result = normalizeRatio({
+      gemini: { value: 40, enabled: false },
+      codex: { value: 60, enabled: true },
+      antigravity: { value: 50, enabled: true },
+    }) as { antigravity: unknown };
+    expect(result.antigravity).toEqual({ value: 50, enabled: true });
+  });
+
   it('returns DEFAULT_CONFIG.ratio for null input', () => {
     expect(normalizeRatio(null)).toEqual(DEFAULT_CONFIG.ratio);
   });

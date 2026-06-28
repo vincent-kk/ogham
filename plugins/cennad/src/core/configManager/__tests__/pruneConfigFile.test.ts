@@ -48,7 +48,11 @@ describe('pruneConfigFile', () => {
     const disk = (await readRaw()) as Record<string, Record<string, unknown>>;
     expect(disk.ratio).not.toHaveProperty('gemini');
     expect(disk.keywords).not.toHaveProperty('gemini');
-    expect(disk.ratio).toHaveProperty('claude');
+    expect(disk.ratio).toEqual({
+      codex: { value: 60, enabled: true },
+      antigravity: { value: 40, enabled: true },
+      claude: DEFAULT_CONFIG.ratio.claude,
+    });
   });
 
   it('migrates a legacy integer ratio onto the antigravity slot', async () => {

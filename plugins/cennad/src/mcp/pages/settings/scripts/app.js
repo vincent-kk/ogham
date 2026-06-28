@@ -1042,7 +1042,6 @@
     PROVIDERS.forEach(function (p) {
       if (!providerAvailable[p]) ratioState[p].enabled = false;
     });
-    distributeEvenly();
     updateInstallHints();
     renderRatio();
     syncAdvancedToggleAvailability();

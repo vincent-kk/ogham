@@ -1,6 +1,6 @@
 ---
 name: claude
-description: '[cennad] Delegate to the Anthropic Claude Code CLI via cennad. Use for an independent, isolated Claude instance to handle reasoning, writing, analysis, or review without inheriting this session''s context. Trigger: "ask claude", "claude 호출", "클로드에게"'
+description: '[cennad] Delegate to the Anthropic Claude Code CLI via cennad. Use for a fresh Claude instance to handle reasoning, writing, analysis, or review without inheriting this session''s context or customizations. Trigger: "ask claude", "claude 호출", "클로드에게"'
 user_invocable: true
 argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 ---
@@ -8,14 +8,14 @@ argument-hint: '[--continue <session_id>] [--tier high|mid|low] -- "prompt"'
 # claude
 
 Delegate to the Anthropic Claude Code CLI (`claude`) through the cennad MCP
-server. The child runs isolated — `--strict-mcp-config` and `--safe-mode` are
-always applied, so it never inherits this session's MCP servers, hooks,
-CLAUDE.md, or skills.
+server. The child is isolated from session customizations:
+`--strict-mcp-config` and `--safe-mode` are always applied, so it never inherits
+this session's MCP servers, hooks, CLAUDE.md, or skills.
 
 ## When to use
 
-- A clean, independent second opinion from a fresh Claude instance with no shared
-  context or tool access.
+- A clean, independent second opinion from a fresh Claude instance without this
+  session's conversation context or MCP tools.
 - Reasoning, writing, analysis, or review where isolation from the current
   session's state is desirable.
 - Running a separate model/effort tier than the current session.
@@ -24,7 +24,9 @@ CLAUDE.md, or skills.
 
 - Work the current session can already do directly with its own context — there
   is no benefit to a context-free child.
-- Tasks needing this session's MCP tools or repo state; the child cannot see them.
+- Tasks needing this session's conversation context or MCP tools; the child does
+  not inherit them. It can still use Claude Code's built-in tools in the spawned
+  working directory according to the configured permission mode.
 
 ## Arguments
 
@@ -39,7 +41,7 @@ Permission mode and the per-tier model + effort mapping are managed via `/setup`
 
 ## Call mapping
 
-- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt })`. Drop `tier`; the resumed session keeps its original configuration.
+- With `--continue <session_id>` → `mcp_tools_continue_conversation({ session_id, prompt, tier? })`. Pass `tier` when supplied; otherwise omit it to use the provider's currently configured default.
 - Otherwise → `mcp_tools_start_conversation({ provider: 'claude', prompt, tier? })`. `tier` is optional — omit to use the configured default.
 
 ## Response handling

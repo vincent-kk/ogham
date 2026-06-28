@@ -74,7 +74,7 @@ describe('[acceptance] gemini config is pruned at setup/load', () => {
       );
     }
     expect(cfg.ratio).toHaveProperty('codex');
-    expect(cfg.ratio).toHaveProperty('antigravity');
+    expect(cfg.ratio.antigravity).toEqual({ value: 40, enabled: true });
   });
 
   it('migrates a legacy integer ratio so gemini weight lands on antigravity', async () => {
