@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>cennad · settings</title>
-    <style>:root{--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent: #f5f5f7;--accent-soft: rgba(245, 245, 247, .08);--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field input,.field textarea{font:inherit;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.field input:focus,.field textarea:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.ratio-panel{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.ratio-row{display:flex;gap:8px;align-items:stretch}.provider-toggle{appearance:none;font:inherit;display:flex;align-items:center;gap:14px;flex:1;min-width:0;min-height:56px;padding:12px 16px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:background var(--transition),border-color var(--transition),opacity var(--transition)}.provider-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi)}.provider-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.provider-toggle[aria-checked=false]{opacity:.4;background:var(--bg)}.provider-toggle[aria-checked=false]:hover{opacity:.6}.provider-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;color:var(--fg)}.provider-icon svg{width:22px;height:22px;display:block}.provider-meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex-shrink:0}.provider-summary{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0;margin:0 4px 0 12px}.provider-summary:empty{display:none}.summary-chip{display:inline-flex;align-items:center;padding:2px 6px;font-size:9px;font-weight:500;letter-spacing:0;color:var(--fg-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;white-space:nowrap;text-transform:lowercase;font-variant-numeric:tabular-nums}.summary-chip[data-tone=warn]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 8%,transparent)}.summary-chip[data-tooltip]{position:relative;cursor:pointer}.summary-chip[data-tooltip]:after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translate(-50%);padding:6px 10px;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--fg);background:var(--muted-hi);border:1px solid var(--border-hi);border-radius:4px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px #0006;z-index:100;opacity:0;pointer-events:none;transition:opacity .12s ease}.summary-chip[data-tooltip]:hover:after{opacity:1}.provider-toggle[aria-checked=false] .provider-summary,.provider-toggle[data-unavailable=true] .provider-summary{opacity:.5}.provider-name{font-size:14px;font-weight:500;color:var(--fg);letter-spacing:-.01em}.provider-hint{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint)}.provider-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);min-width:48px;text-align:right}.provider-toggle[aria-checked=false] .provider-pct{color:var(--fg-faint)}.ratio-slider-wrap{padding:4px 16px}.ratio-slider-wrap input[type=range]{margin:0}.ratio-warn{margin:0;font-size:12px;color:var(--danger);padding:0 4px}.install-hint{margin:4px 0 0;padding:0 16px;font-size:11px;color:var(--fg-faint);line-height:1.6}.provider-toggle[data-unavailable=true]{cursor:not-allowed}.provider-toggle[data-unavailable=true]:hover{border-color:var(--border);background:var(--muted)}.provider-toggle[data-unavailable=true] .provider-hint{color:var(--danger)}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--muted);border-radius:999px;outline:none;cursor:pointer}input[type=range]:disabled{cursor:not-allowed;opacity:.5}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg);transition:transform var(--transition)}input[type=range]:disabled::-webkit-slider-thumb{background:var(--fg-faint)}input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.1)}input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg)}input[type=range]:disabled::-moz-range-thumb{background:var(--fg-faint)}input[type=range]:focus-visible{box-shadow:0 0 0 3px var(--accent-ring)}.ticks{position:relative;height:14px;margin:12px 9px 0;font-size:11px;color:var(--fg-muted)}.ticks span{position:absolute;top:0;transform:translate(-50%);white-space:nowrap}.ticks span[data-value="-2"]{left:0%}.ticks span[data-value="-1"]{left:25%}.ticks span[data-value="0"]{left:50%}.ticks span[data-value="1"]{left:75%}.ticks span[data-value="2"]{left:100%}.strength-current{display:inline-block;margin-top:12px;font-size:13px;color:var(--fg);padding:2px 10px;background:var(--muted);border-radius:4px;border:1px solid var(--border)}.radio-row{display:flex;gap:8px;flex-wrap:wrap}.radio{position:relative;cursor:pointer}.radio input{position:absolute;opacity:0;inset:0;cursor:pointer}.radio span{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg-muted);transition:border-color var(--transition),background var(--transition),color var(--transition)}.radio:hover span{border-color:var(--border-hi);color:var(--fg)}.radio input:checked+span{border-color:var(--fg);background:var(--muted-hi);color:var(--fg)}.radio input:focus-visible+span{box-shadow:0 0 0 3px var(--accent-ring)}.toggle{display:inline-flex;align-items:center;gap:12px;cursor:pointer;user-select:none;position:relative}.toggle.is-disabled{cursor:not-allowed;opacity:.5}.toggle input{position:absolute;opacity:0;inset:0;pointer-events:none}.toggle-track{width:36px;height:20px;background:var(--muted);border:1px solid var(--border);border-radius:999px;position:relative;transition:background var(--transition),border-color var(--transition);flex-shrink:0}.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--fg-muted);transition:transform var(--transition),background var(--transition)}.toggle input:checked~.toggle-track{background:var(--fg);border-color:var(--fg)}.toggle input:checked~.toggle-track .toggle-thumb{transform:translate(16px);background:var(--bg)}.toggle input:focus-visible~.toggle-track{box-shadow:0 0 0 3px var(--accent-ring)}.toggle-label{font-size:14px;color:var(--fg)}.advanced-toggle{appearance:none;font:inherit;display:inline-flex;align-items:center;justify-content:center;width:44px;min-height:56px;padding:0;background:var(--muted);color:var(--fg-muted);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;flex-shrink:0;transition:background var(--transition),border-color var(--transition),color var(--transition)}.advanced-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi);color:var(--fg)}.advanced-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.advanced-toggle[aria-expanded=true]{background:var(--muted-hi);border-color:var(--border-hi);color:var(--fg)}.advanced-toggle[disabled]{opacity:.4;cursor:not-allowed}.advanced-toggle-icon{display:inline-flex;width:20px;height:20px}.advanced-toggle-icon svg{width:100%;height:100%;transition:transform var(--transition)}.advanced-toggle[aria-expanded=true] .advanced-toggle-icon svg{transform:rotate(30deg)}.advanced-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.advanced-panel[hidden]{display:none}.advanced-panel.is-open{grid-template-rows:1fr}.advanced-panel-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px 16px;margin-top:4px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}.addon-row{display:flex;align-items:center;gap:8px}.addon-row .advanced-toggle{width:20px;min-height:32px;background:transparent;border-color:transparent;color:var(--fg-muted)}.addon-row .advanced-toggle:hover,.addon-row .advanced-toggle[aria-expanded=true]{background:transparent;border-color:transparent;color:var(--fg)}.addon-panel-title{display:flex;align-items:center;gap:8px;margin:0;padding-bottom:12px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg)}.addon-panel-mark{display:inline-flex;width:16px;height:16px;flex-shrink:0;color:var(--fg-muted)}.addon-panel-mark svg{width:100%;height:100%}.advanced-divider{margin:4px 0;border:0;border-top:1px solid var(--border)}.flag-row{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:3px;align-items:center;width:100%}.flag-row .toggle-track{grid-column:1;grid-row:1 / span 2;align-self:center}.flag-row .toggle-label{grid-column:2;grid-row:1}.flag-desc{grid-column:2;grid-row:2;font-size:11px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;text-align:left;line-height:1.5}.flag-field{display:flex;flex-direction:column;gap:8px}.flag-field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.flag-hint{margin:0;font-size:11px;color:var(--fg-faint);line-height:1.6}.is-inert{opacity:.4;pointer-events:none}.warning-inline{font-size:11px;color:var(--danger);font-weight:600;line-height:1.5}.actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted)}.status.success{color:var(--fg)}.status.error{color:var(--danger)}.status ul{margin:4px 0 0 16px;padding:0;font-weight:400}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 480px){body{padding:24px 16px 64px}.ratio-slider-wrap{padding:4px 8px}.provider-toggle{padding:12px;gap:10px}.advanced-toggle{width:40px;min-height:52px}.advanced-panel-inner{padding:12px}}.engine-segment-row{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:0 2px}.engine-segment-label{font-size:12px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em}.engine-segment{display:inline-flex;gap:6px}.engine-segment .radio span{display:inline-flex;align-items:center;gap:6px}.engine-mark{width:14px;height:14px;flex-shrink:0}.engine-flags{display:flex;flex-direction:column;gap:16px}.engine-flags[hidden]{display:none}.engine-flags>.flag-hint,.engine-flags>.tier-model-map{padding-top:16px;border-top:1px solid var(--border)}.tier-model-map{display:grid;gap:12px}.tier-field{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:12px}.tier-field label{font-size:13px;color:var(--fg-muted)}.tier-select{width:100%;font-family:var(--mono);font-size:13px;color:var(--fg);background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;transition:border-color var(--transition)}.tier-select:focus{outline:none;border-color:var(--border-hi)}</style>
+    <style>:root{--bg: #0a0a0b;--panel: #131316;--muted: #1c1c20;--muted-hi: #24242a;--border: #26262c;--border-hi: #3a3a42;--fg: #f5f5f7;--fg-muted: #9a9aa3;--fg-faint: #5a5a63;--accent: #f5f5f7;--accent-soft: rgba(245, 245, 247, .08);--accent-ring: rgba(245, 245, 247, .24);--danger: #d97070;--mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;--radius: 8px;--radius-lg: 12px;--transition: .16s ease}*{box-sizing:border-box}html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}body{font:14px/1.55 var(--mono);min-height:100dvh;padding:48px 24px 80px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}code{font-family:inherit;background:var(--muted);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--fg)}.shell{max-width:720px;margin:0 auto}.masthead{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:32px}.brand{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.brand-name{font-size:22px;font-weight:500;letter-spacing:-.02em}.brand-tag{color:var(--fg-muted);font-size:14px}.lede{margin:0;color:var(--fg-muted);font-size:13px}.section{padding:24px 0;border-bottom:1px solid var(--border)}.section:last-of-type{border-bottom:none}.section-title{font-size:14px;font-weight:500;margin:0 0 6px}.section-help{margin:0 0 16px;color:var(--fg-muted);font-size:12px;line-height:1.6}.field{display:flex;flex-direction:column;gap:6px}.field+.field{margin-top:12px}.field>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.field input,.field textarea{font:inherit;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;width:100%;resize:vertical;transition:border-color var(--transition),box-shadow var(--transition)}.field input:focus,.field textarea:focus{border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.ratio-panel{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg)}.ratio-row{display:flex;gap:8px;align-items:stretch}.provider-toggle{appearance:none;font:inherit;display:flex;align-items:center;gap:14px;flex:1;min-width:0;min-height:56px;padding:12px 16px;background:var(--muted);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:background var(--transition),border-color var(--transition),opacity var(--transition)}.provider-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi)}.provider-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.provider-toggle[aria-checked=false]{opacity:.4;background:var(--bg)}.provider-toggle[aria-checked=false]:hover{opacity:.6}.provider-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;color:var(--fg)}.provider-icon svg{width:22px;height:22px;display:block}.provider-meta{display:flex;flex-direction:column;gap:2px;min-width:0;flex-shrink:0}.provider-summary{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0;margin:0 4px 0 12px}.provider-summary:empty{display:none}.summary-chip{display:inline-flex;align-items:center;padding:2px 6px;font-size:9px;font-weight:500;letter-spacing:0;color:var(--fg-muted);background:var(--bg);border:1px solid var(--border);border-radius:4px;white-space:nowrap;text-transform:lowercase;font-variant-numeric:tabular-nums}.summary-chip[data-tone=warn]{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent);background:color-mix(in srgb,var(--danger) 8%,transparent)}.summary-chip[data-tooltip]{position:relative;cursor:pointer}.summary-chip[data-tooltip]:after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translate(-50%);padding:6px 10px;font-size:11px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--fg);background:var(--muted-hi);border:1px solid var(--border-hi);border-radius:4px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px #0006;z-index:100;opacity:0;pointer-events:none;transition:opacity .12s ease}.summary-chip[data-tooltip]:hover:after{opacity:1}.provider-toggle[aria-checked=false] .provider-summary,.provider-toggle[data-unavailable=true] .provider-summary{opacity:.5}.provider-name{font-size:14px;font-weight:500;color:var(--fg);letter-spacing:-.01em}.provider-hint{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg-faint)}.provider-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);min-width:48px;text-align:right}.provider-toggle[aria-checked=false] .provider-pct{color:var(--fg-faint)}.ratio-bar-wrap{padding:8px 16px 4px}.ratio-bar{position:relative;height:30px;border-radius:999px;background:var(--muted);border:1px solid var(--border);overflow:visible}.ratio-bar-segment{position:absolute;inset-block:0;min-width:0;background:var(--muted-hi)}.ratio-bar-segment:first-child{border-radius:999px 0 0 999px}.ratio-bar-segment:last-child{border-radius:0 999px 999px 0}.ratio-bar-segment[data-provider=codex]{background:color-mix(in srgb,var(--fg) 22%,var(--muted))}.ratio-bar-segment[data-provider=antigravity]{background:color-mix(in srgb,var(--fg) 15%,var(--muted))}.ratio-bar-segment[data-provider=claude]{background:color-mix(in srgb,var(--fg) 9%,var(--muted))}.ratio-bar-handle{position:absolute;top:50%;width:18px;height:30px;transform:translate(-50%,-50%);border:2px solid var(--bg);border-radius:999px;background:var(--fg);cursor:ew-resize;touch-action:none;box-shadow:0 0 0 1px var(--border-hi)}.ratio-bar-handle:focus-visible{outline:none;box-shadow:0 0 0 1px var(--border-hi),0 0 0 4px var(--accent-ring)}.ratio-warn{margin:0;font-size:12px;color:var(--danger);padding:0 4px}.install-hint{margin:4px 0 0;padding:0 16px;font-size:11px;color:var(--fg-faint);line-height:1.6}.provider-toggle[data-unavailable=true]{cursor:not-allowed}.provider-toggle[data-unavailable=true]:hover{border-color:var(--border);background:var(--muted)}.provider-toggle[data-unavailable=true] .provider-hint{color:var(--danger)}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--muted);border-radius:999px;outline:none;cursor:pointer}input[type=range]:disabled{cursor:not-allowed;opacity:.5}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg);transition:transform var(--transition)}input[type=range]:disabled::-webkit-slider-thumb{background:var(--fg-faint)}input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.1)}input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--fg);cursor:pointer;border:2px solid var(--bg)}input[type=range]:disabled::-moz-range-thumb{background:var(--fg-faint)}input[type=range]:focus-visible{box-shadow:0 0 0 3px var(--accent-ring)}.ticks{position:relative;height:14px;margin:12px 9px 0;font-size:11px;color:var(--fg-muted)}.ticks span{position:absolute;top:0;transform:translate(-50%);white-space:nowrap}.ticks span[data-value="-2"]{left:0%}.ticks span[data-value="-1"]{left:25%}.ticks span[data-value="0"]{left:50%}.ticks span[data-value="1"]{left:75%}.ticks span[data-value="2"]{left:100%}.strength-current{display:inline-block;margin-top:12px;font-size:13px;color:var(--fg);padding:2px 10px;background:var(--muted);border-radius:4px;border:1px solid var(--border)}.radio-row{display:flex;gap:8px;flex-wrap:wrap}.radio{position:relative;cursor:pointer}.radio input{position:absolute;opacity:0;inset:0;cursor:pointer}.radio span{display:inline-block;padding:8px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg-muted);transition:border-color var(--transition),background var(--transition),color var(--transition)}.radio:hover span{border-color:var(--border-hi);color:var(--fg)}.radio input:checked+span{border-color:var(--fg);background:var(--muted-hi);color:var(--fg)}.radio input:focus-visible+span{box-shadow:0 0 0 3px var(--accent-ring)}.toggle{display:inline-flex;align-items:center;gap:12px;cursor:pointer;user-select:none;position:relative}.toggle.is-disabled{cursor:not-allowed;opacity:.5}.toggle input{position:absolute;opacity:0;inset:0;pointer-events:none}.toggle-track{width:36px;height:20px;background:var(--muted);border:1px solid var(--border);border-radius:999px;position:relative;transition:background var(--transition),border-color var(--transition);flex-shrink:0}.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--fg-muted);transition:transform var(--transition),background var(--transition)}.toggle input:checked~.toggle-track{background:var(--fg);border-color:var(--fg)}.toggle input:checked~.toggle-track .toggle-thumb{transform:translate(16px);background:var(--bg)}.toggle input:focus-visible~.toggle-track{box-shadow:0 0 0 3px var(--accent-ring)}.toggle-label{font-size:14px;color:var(--fg)}.advanced-toggle{appearance:none;font:inherit;display:inline-flex;align-items:center;justify-content:center;width:44px;min-height:56px;padding:0;background:var(--muted);color:var(--fg-muted);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;flex-shrink:0;transition:background var(--transition),border-color var(--transition),color var(--transition)}.advanced-toggle:hover{border-color:var(--border-hi);background:var(--muted-hi);color:var(--fg)}.advanced-toggle:focus-visible{outline:none;border-color:var(--border-hi);box-shadow:0 0 0 3px var(--accent-ring)}.advanced-toggle[aria-expanded=true]{background:var(--muted-hi);border-color:var(--border-hi);color:var(--fg)}.advanced-toggle[disabled]{opacity:.4;cursor:not-allowed}.advanced-toggle-icon{display:inline-flex;width:20px;height:20px}.advanced-toggle-icon svg{width:100%;height:100%;transition:transform var(--transition)}.advanced-toggle[aria-expanded=true] .advanced-toggle-icon svg{transform:rotate(30deg)}.advanced-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.advanced-panel[hidden]{display:none}.advanced-panel.is-open{grid-template-rows:1fr}.advanced-panel-inner{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:12px;padding:14px 16px 16px;margin-top:4px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius)}.addon-row{display:flex;align-items:center;gap:8px}.addon-row .advanced-toggle{width:20px;min-height:32px;background:transparent;border-color:transparent;color:var(--fg-muted)}.addon-row .advanced-toggle:hover,.addon-row .advanced-toggle[aria-expanded=true]{background:transparent;border-color:transparent;color:var(--fg)}.addon-panel-title{display:flex;align-items:center;gap:8px;margin:0;padding-bottom:12px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg)}.addon-panel-mark{display:inline-flex;width:16px;height:16px;flex-shrink:0;color:var(--fg-muted)}.addon-panel-mark svg{width:100%;height:100%}.advanced-divider{margin:4px 0;border:0;border-top:1px solid var(--border)}.flag-row{display:grid;grid-template-columns:auto 1fr;column-gap:12px;row-gap:3px;align-items:center;width:100%}.flag-row .toggle-track{grid-column:1;grid-row:1 / span 2;align-self:center}.flag-row .toggle-label{grid-column:2;grid-row:1}.flag-desc{grid-column:2;grid-row:2;font-size:11px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em;text-align:left;line-height:1.5}.flag-field{display:flex;flex-direction:column;gap:8px}.flag-field-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg-muted)}.flag-hint{margin:0;font-size:11px;color:var(--fg-faint);line-height:1.6}.is-inert{opacity:.4;pointer-events:none}.warning-inline{font-size:11px;color:var(--danger);font-weight:600;line-height:1.5}.actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}.btn{font:inherit;font-size:13px;padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);color:var(--fg);cursor:pointer;transition:background var(--transition),border-color var(--transition),opacity var(--transition);min-height:44px}.btn:hover{border-color:var(--border-hi);background:var(--muted-hi)}.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-ring)}.btn-primary{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:500}.btn-primary:hover{background:#fff;border-color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed}.status{margin-top:24px;min-height:20px;font-size:12px;font-weight:500;color:var(--fg-muted)}.status.success{color:var(--fg)}.status.error{color:var(--danger)}.status ul{margin:4px 0 0 16px;padding:0;font-weight:400}@media (prefers-reduced-motion: reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}@media (max-width: 480px){body{padding:24px 16px 64px}.ratio-bar-wrap{padding:4px 8px}.provider-toggle{padding:12px;gap:10px}.advanced-toggle{width:40px;min-height:52px}.advanced-panel-inner{padding:12px}}.engine-segment-row{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:0 2px}.engine-segment-label{font-size:12px;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em}.engine-segment{display:inline-flex;gap:6px}.engine-segment .radio span{display:inline-flex;align-items:center;gap:6px}.engine-mark{width:14px;height:14px;flex-shrink:0}.engine-flags{display:flex;flex-direction:column;gap:16px}.engine-flags[hidden]{display:none}.engine-flags>.flag-hint,.engine-flags>.tier-model-map{padding-top:16px;border-top:1px solid var(--border)}.tier-model-map{display:grid;gap:12px}.tier-field{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:12px}.tier-field[data-layout=model-effort]{grid-template-columns:minmax(52px,auto) 1fr 1fr}.tier-field label{font-size:13px;color:var(--fg-muted)}.tier-select{width:100%;font-family:var(--mono);font-size:13px;color:var(--fg);background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;transition:border-color var(--transition)}.tier-select:focus{outline:none;border-color:var(--border-hi)}</style>
   </head>
   <body>
     <main class="shell">
@@ -14,8 +14,8 @@
           <span class="brand-tag">/ settings</span>
         </div>
         <p class="lede">
-          Routing, intervention, and provider defaults for codex / Google engine
-          (gemini or antigravity) dispatch.
+          Routing, intervention, and provider defaults for codex (OpenAI),
+          antigravity (Google), and Anthropic (claude) dispatch.
         </p>
       </header>
 
@@ -23,11 +23,13 @@
         <section class="section">
           <h2 class="section-title">Providers</h2>
           <p class="section-help">
-            Drag the slider to balance traffic. Click a provider to enable or
-            disable it, or the gear to reveal advanced flags.
+            Set each provider's weight, click a provider to enable or disable
+            it, or the gear to reveal advanced flags. Weights are normalized
+            across enabled providers.
           </p>
 
           <div class="ratio-panel" id="ratio-panel">
+            <!-- codex -->
             <div class="ratio-row" data-provider="codex">
               <button
                 type="button"
@@ -106,7 +108,6 @@
                     >Hooks suggest codex when these appear in the prompt.</span
                   >
                 </label>
-
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
@@ -141,7 +142,6 @@
                     almost all work.
                   </p>
                 </div>
-
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
@@ -177,7 +177,6 @@
                     fallback. codex defaults to off to prioritize cache reuse.
                   </p>
                 </div>
-
                 <label class="field">
                   <span>prompt preamble</span>
                   <textarea
@@ -186,9 +185,7 @@
                     placeholder="e.g. Prefer TypeScript."
                   ></textarea>
                 </label>
-
                 <hr class="advanced-divider" />
-
                 <label class="toggle flag-row">
                   <input id="codex-yolo" type="checkbox" />
                   <span class="toggle-track"
@@ -199,7 +196,6 @@
                     >bypass approvals + sandbox (danger)</span
                   >
                 </label>
-
                 <div class="flag-field" id="codex-sandbox-wrap">
                   <span class="flag-field-label">sandbox</span>
                   <p class="flag-hint" id="codex-sandbox-hint" hidden>
@@ -246,26 +242,15 @@
               </div>
             </div>
 
-            <div class="ratio-slider-wrap">
-              <input
-                id="ratio-slider"
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value="50"
-                aria-label="codex / Google ratio (0% = all codex, 100% = all Google)"
-              />
-            </div>
-
-            <div class="ratio-row" data-provider="google">
+            <!-- antigravity (Google) -->
+            <div class="ratio-row" data-provider="antigravity">
               <button
                 type="button"
-                id="toggle-gemini"
+                id="toggle-antigravity"
                 class="provider-toggle"
                 role="switch"
                 aria-checked="true"
-                aria-label="Google provider"
+                aria-label="antigravity provider"
               >
                 <span class="provider-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" fill="currentColor">
@@ -275,25 +260,25 @@
                   </svg>
                 </span>
                 <span class="provider-meta">
-                  <span class="provider-name">Google</span>
-                  <span class="provider-hint" id="gemini-hint"
+                  <span class="provider-name">antigravity</span>
+                  <span class="provider-hint" id="antigravity-hint"
                     >click to toggle</span
                   >
                 </span>
                 <span
                   class="provider-summary"
-                  id="summary-gemini"
+                  id="summary-antigravity"
                   aria-hidden="true"
                 ></span>
-                <output id="gemini-pct" class="provider-pct">50%</output>
+                <output id="antigravity-pct" class="provider-pct">50%</output>
               </button>
               <button
                 type="button"
-                id="advanced-toggle-gemini"
+                id="advanced-toggle-antigravity"
                 class="advanced-toggle"
                 aria-expanded="false"
-                aria-controls="advanced-panel-gemini"
-                aria-label="Google advanced settings"
+                aria-controls="advanced-panel-antigravity"
+                aria-label="antigravity advanced settings"
                 title="Advanced settings"
               >
                 <span class="advanced-toggle-icon" aria-hidden="true">
@@ -313,66 +298,7 @@
                 </span>
               </button>
             </div>
-            <div class="engine-segment-row">
-              <span class="engine-segment-label">engine</span>
-              <div
-                class="engine-segment"
-                role="radiogroup"
-                aria-label="Google engine — gemini or antigravity (mutually exclusive)"
-              >
-                <label class="radio"
-                  ><input
-                    type="radio"
-                    name="google-engine"
-                    value="gemini"
-                  /><span
-                    ><svg
-                      class="engine-mark"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M12 0c0 6.627-5.373 12-12 12 6.627 0 12 5.373 12 12 0-6.627 5.373-12 12-12-6.627 0-12-5.373-12-12z"
-                      /></svg
-                    >gemini</span
-                  ></label
-                >
-                <label class="radio"
-                  ><input
-                    type="radio"
-                    name="google-engine"
-                    value="antigravity"
-                  /><span
-                    ><svg
-                      class="engine-mark"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M12 2 2 22h20L12 2zm0 5L17.5 19h-11L12 7z"
-                      /></svg
-                    >antigravity</span
-                  ></label
-                >
-              </div>
-            </div>
-            <p
-              class="install-hint"
-              id="gemini-install-hint"
-              data-engine="gemini"
-              hidden
-            >
-              Install: <code>npm install -g @google/gemini-cli</code> — reload
-              after installing.
-            </p>
-            <p
-              class="install-hint"
-              id="antigravity-install-hint"
-              data-engine="antigravity"
-              hidden
-            >
+            <p class="install-hint" id="antigravity-install-hint" hidden>
               Install:
               <code
                 >curl -fsSL https://antigravity.google/cli/install.sh |
@@ -382,39 +308,38 @@
             </p>
             <div
               class="advanced-panel"
-              id="advanced-panel-gemini"
+              id="advanced-panel-antigravity"
               role="region"
-              aria-labelledby="advanced-toggle-gemini"
+              aria-labelledby="advanced-toggle-antigravity"
               hidden
             >
               <div class="advanced-panel-inner">
                 <label class="field">
                   <span>trigger keywords</span>
                   <textarea
-                    id="kw-gemini"
+                    id="kw-antigravity"
                     rows="1"
                     placeholder="comma-separated, e.g. research, search, large-context"
                   ></textarea>
                   <span class="flag-hint"
-                    >Hooks suggest the active Google engine when these appear in
-                    the prompt.</span
+                    >Hooks suggest antigravity when these appear in the
+                    prompt.</span
                   >
                 </label>
-
                 <div class="flag-field">
                   <span class="flag-field-label">default tier</span>
                   <div class="radio-row">
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="high"
                       /><span>high</span></label
                     >
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="mid"
                       /><span
                         >mid
@@ -424,7 +349,7 @@
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="default-tier-gemini"
+                        name="default-tier-antigravity"
                         value="low"
                       /><span>low</span></label
                     >
@@ -435,21 +360,20 @@
                     almost all work.
                   </p>
                 </div>
-
                 <div class="flag-field">
                   <span class="flag-field-label">recency factor</span>
                   <div class="radio-row">
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="off"
                       /><span>off</span></label
                     >
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="auto"
                       /><span
                         >auto
@@ -459,7 +383,7 @@
                     <label class="radio"
                       ><input
                         type="radio"
-                        name="recency-gemini"
+                        name="recency-antigravity"
                         value="strict"
                       /><span>strict</span></label
                     >
@@ -468,162 +392,323 @@
                     <code>auto</code> recommends source-checking for
                     time-sensitive facts. <code>strict</code> requires
                     search-verification with citations or an "unverifiable"
-                    fallback. Google engines have web-tool access by default, so
+                    fallback. Antigravity has web-tool access by default, so
                     auto is recommended for recency.
                   </p>
                 </div>
-
                 <label class="field">
                   <span>prompt preamble</span>
                   <textarea
-                    id="preamble-gemini"
+                    id="preamble-antigravity"
                     rows="2"
                     placeholder="e.g. Always answer in Korean."
                   ></textarea>
                 </label>
-
                 <hr class="advanced-divider" />
-
-                <div class="engine-flags" data-engine="gemini">
-                  <label class="toggle flag-row">
-                    <input id="gemini-yolo" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label">Skip approvals (--yolo)</span>
-                    <span class="flag-desc">skip approval prompts</span>
-                  </label>
-
-                  <label class="toggle flag-row">
-                    <input id="gemini-sandbox" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Isolated execution (--sandbox)</span
-                    >
-                    <span class="flag-desc"
-                      >isolated execution environment</span
-                    >
-                  </label>
-
-                  <div class="flag-field" id="gemini-backend-wrap">
-                    <span class="flag-field-label">sandbox backend</span>
-                    <p class="flag-hint">
-                      Sandbox backend is only configurable when Sandbox is
-                      enabled.
-                    </p>
-                    <div class="radio-row" id="gemini-backend-radio">
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="auto"
-                        /><span>auto</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="docker"
-                        /><span>docker</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="podman"
-                        /><span>podman</span></label
-                      >
-                      <label class="radio"
-                        ><input
-                          type="radio"
-                          name="gemini-backend"
-                          value="sandbox-exec"
-                        /><span>sandbox-exec</span></label
-                      >
-                    </div>
-                    <p class="flag-hint">
-                      Sets <code>GEMINI_SANDBOX</code>. <code>auto</code> lets
-                      gemini-cli pick; <code>sandbox-exec</code> is macOS only.
-                    </p>
-                  </div>
-
-                  <p class="warning-inline" data-engine="gemini">
-                    &#9888; Gemini CLI service ends 2026-06-18 — switch the
-                    engine to antigravity.
-                  </p>
-                </div>
-
-                <div class="engine-flags" data-engine="antigravity" hidden>
-                  <label class="toggle flag-row">
-                    <input id="antigravity-sandbox" type="checkbox" disabled />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Isolated execution (--sandbox) — disabled</span
-                    >
-                    <span class="flag-desc"
-                      >--sandbox can drop agy's output in non-interactive mode,
-                      so it is not used</span
-                    >
-                  </label>
-
-                  <label class="toggle flag-row">
-                    <input id="antigravity-skip-perms" type="checkbox" />
-                    <span class="toggle-track"
-                      ><span class="toggle-thumb"></span
-                    ></span>
-                    <span class="toggle-label"
-                      >Skip permissions (--dangerously-skip-permissions)</span
-                    >
-                    <span class="flag-desc"
-                      >bypass all approvals incl. your Deny list (danger)</span
-                    >
-                  </label>
-
+                <label class="toggle flag-row">
+                  <input id="antigravity-sandbox" type="checkbox" disabled />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Isolated execution (--sandbox) — disabled</span
+                  >
+                  <span class="flag-desc"
+                    >--sandbox can drop agy's output in non-interactive mode, so
+                    it is not used</span
+                  >
+                </label>
+                <label class="toggle flag-row">
+                  <input id="antigravity-skip-perms" type="checkbox" />
+                  <span class="toggle-track"
+                    ><span class="toggle-thumb"></span
+                  ></span>
+                  <span class="toggle-label"
+                    >Skip permissions (--dangerously-skip-permissions)</span
+                  >
+                  <span class="flag-desc"
+                    >bypass all approvals incl. your Deny list (danger)</span
+                  >
+                </label>
+                <p class="flag-hint">
+                  Antigravity has no container sandbox. Permission
+                  Allow/Deny/Ask lists are managed inside agy via
+                  <code>/permissions</code>; cennad follows your agy
+                  <code>settings.json</code>. Leaving "skip permissions" off
+                  keeps your Deny list as the safety net.
+                </p>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model mapping</p>
                   <p class="flag-hint">
-                    Antigravity has no container sandbox. Permission
-                    Allow/Deny/Ask lists are managed inside agy via
-                    <code>/permissions</code>; cennad follows your agy
-                    <code>settings.json</code>. Leaving "skip permissions" off
-                    keeps your Deny list as the safety net.
+                    Antigravity serves multiple model families. Map each tier to
+                    a model. Options come from <code>agy models</code> (run agy
+                    and sign in to populate them).
                   </p>
-
-                  <div class="tier-model-map">
-                    <p class="flag-field-label">per-tier model mapping</p>
-                    <p class="flag-hint">
-                      Antigravity serves multiple model families. Map each tier
-                      to a model. Options come from <code>agy models</code> (run
-                      agy and sign in to populate them).
-                    </p>
-                    <div class="tier-field">
-                      <label for="model-antigravity-high">high</label>
-                      <select
-                        id="model-antigravity-high"
-                        class="tier-select"
-                      ></select>
-                    </div>
-                    <div class="tier-field">
-                      <label for="model-antigravity-mid">mid</label>
-                      <select
-                        id="model-antigravity-mid"
-                        class="tier-select"
-                      ></select>
-                    </div>
-                    <div class="tier-field">
-                      <label for="model-antigravity-low">low</label>
-                      <select
-                        id="model-antigravity-low"
-                        class="tier-select"
-                      ></select>
-                    </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-high">high</label>
+                    <select
+                      id="model-antigravity-high"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-mid">mid</label>
+                    <select
+                      id="model-antigravity-mid"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field">
+                    <label for="model-antigravity-low">low</label>
+                    <select
+                      id="model-antigravity-low"
+                      class="tier-select"
+                    ></select>
                   </div>
                 </div>
               </div>
             </div>
 
+            <!-- Anthropic (claude) -->
+            <div class="ratio-row" data-provider="claude">
+              <button
+                type="button"
+                id="toggle-claude"
+                class="provider-toggle"
+                role="switch"
+                aria-checked="true"
+                aria-label="Anthropic (claude) provider"
+              >
+                <span class="provider-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M4 18 9.5 4h2.2L17 18h-2.3l-1.2-3.2H7.5L6.3 18H4zm4.2-5h4.4l-2.2-6-2.2 6z"
+                    />
+                  </svg>
+                </span>
+                <span class="provider-meta">
+                  <span class="provider-name">Claude</span>
+                  <span class="provider-hint" id="claude-hint"
+                    >click to toggle</span
+                  >
+                </span>
+                <span
+                  class="provider-summary"
+                  id="summary-claude"
+                  aria-hidden="true"
+                ></span>
+                <output id="claude-pct" class="provider-pct">50%</output>
+              </button>
+              <button
+                type="button"
+                id="advanced-toggle-claude"
+                class="advanced-toggle"
+                aria-expanded="false"
+                aria-controls="advanced-panel-claude"
+                aria-label="Anthropic advanced settings"
+                title="Advanced settings"
+              >
+                <span class="advanced-toggle-icon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <p class="install-hint" id="claude-install-hint" hidden>
+              Install: <code>npm install -g @anthropic-ai/claude-code</code> —
+              reload after installing.
+            </p>
+            <div
+              class="advanced-panel"
+              id="advanced-panel-claude"
+              role="region"
+              aria-labelledby="advanced-toggle-claude"
+              hidden
+            >
+              <div class="advanced-panel-inner">
+                <label class="field">
+                  <span>trigger keywords</span>
+                  <textarea
+                    id="kw-claude"
+                    rows="1"
+                    placeholder="comma-separated, e.g. reasoning, writing, analysis, review"
+                  ></textarea>
+                  <span class="flag-hint"
+                    >Hooks suggest Anthropic when these appear in the
+                    prompt.</span
+                  >
+                </label>
+                <div class="flag-field">
+                  <span class="flag-field-label">default tier</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="high"
+                      /><span>high</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="mid"
+                      /><span
+                        >mid
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="default-tier-claude"
+                        value="low"
+                      /><span>low</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    Tier applied when a dispatch omits an explicit tier. Each
+                    tier maps to a model + effort below.
+                  </p>
+                </div>
+                <div class="flag-field">
+                  <span class="flag-field-label">recency factor</span>
+                  <div class="radio-row">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="off"
+                      /><span
+                        >off
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="recency-claude"
+                        value="strict"
+                      /><span>strict</span></label
+                    >
+                  </div>
+                  <p class="flag-hint">
+                    <code>auto</code> recommends source-checking for
+                    time-sensitive facts. <code>strict</code> requires
+                    search-verification with citations or an "unverifiable"
+                    fallback.
+                  </p>
+                </div>
+                <label class="field">
+                  <span>prompt preamble</span>
+                  <textarea
+                    id="preamble-claude"
+                    rows="2"
+                    placeholder="e.g. Be concise."
+                  ></textarea>
+                </label>
+                <hr class="advanced-divider" />
+                <div class="flag-field">
+                  <span class="flag-field-label">permission mode</span>
+                  <div class="radio-row" id="claude-permission-radio">
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="acceptEdits"
+                      /><span>acceptEdits</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="auto"
+                      /><span>auto</span></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="dontAsk"
+                      /><span
+                        >dontAsk
+                        <small class="default-marker">(default)</small></span
+                      ></label
+                    >
+                    <label class="radio"
+                      ><input
+                        type="radio"
+                        name="claude-permission-mode"
+                        value="bypassPermissions"
+                      /><span>bypassPermissions — danger</span></label
+                    >
+                  </div>
+                  <span class="warning-inline" id="claude-bypass-warning" hidden
+                    >&#9888; bypassPermissions skips all approvals — only use in
+                    a trusted environment.</span
+                  >
+                  <p class="flag-hint">
+                    claude-code has no sandbox; isolation is permission-based.
+                    cennad always adds <code>--strict-mcp-config</code> and
+                    <code>--safe-mode</code> so the child never inherits this
+                    session's MCP servers, hooks, or CLAUDE.md.
+                  </p>
+                </div>
+                <div class="tier-model-map">
+                  <p class="flag-field-label">per-tier model &amp; effort</p>
+                  <p class="flag-hint">
+                    Map each tier to a model and reasoning effort. Effort
+                    options adapt to the model (haiku has none; sonnet skips
+                    xhigh). Over-cap requests are silently downgraded by
+                    claude-code.
+                  </p>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-high">high</label>
+                    <select id="model-claude-high" class="tier-select"></select>
+                    <select
+                      id="effort-claude-high"
+                      class="tier-select"
+                    ></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-mid">mid</label>
+                    <select id="model-claude-mid" class="tier-select"></select>
+                    <select id="effort-claude-mid" class="tier-select"></select>
+                  </div>
+                  <div class="tier-field" data-layout="model-effort">
+                    <label for="model-claude-low">low</label>
+                    <select id="model-claude-low" class="tier-select"></select>
+                    <select id="effort-claude-low" class="tier-select"></select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ratio-bar-wrap">
+              <div
+                id="ratio-bar"
+                class="ratio-bar"
+                aria-label="Provider routing ratio"
+              ></div>
+            </div>
             <p id="ratio-warn" class="ratio-warn" hidden>
               At least one provider must be enabled.
             </p>
@@ -673,8 +758,8 @@
           </div>
           <p class="flag-hint">
             Fetches transcripts, metadata, and more from YouTube (and other
-            yt-dlp sites) via <code>@ogham/yt-dlp-mcp</code>. gemini is excluded
-            — it ingests YouTube natively. Use the gear to configure it.
+            yt-dlp sites) via <code>@ogham/yt-dlp-mcp</code>. Use the gear to
+            configure it.
           </p>
 
           <div
@@ -777,9 +862,8 @@
         <section class="section">
           <h2 class="section-title">CLI spawn timeout</h2>
           <p class="section-help">
-            Hard timeout (ms) for each codex / Google CLI invocation. Hung
-            processes are killed and surface as
-            <code>error.code: network</code>.
+            Hard timeout (ms) for each provider CLI invocation. Hung processes
+            are killed and surface as <code>error.code: network</code>.
           </p>
           <label class="field">
             <span>ms (1000–1800000)</span>
@@ -805,7 +889,6 @@
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">enabled</span>
           </label>
-
           <div class="flag-field" id="artifacts-location-wrap">
             <span class="flag-field-label">location</span>
             <div class="radio-row">
@@ -827,9 +910,7 @@
             <p class="flag-hint">
               <code>project</code> →
               <code>&lt;cwd&gt;/.cennad/artifacts/</code>. <code>user</code> →
-              <code
-                >~/.claude/plugins/cennad/artifacts/&lt;projectHash&gt;/</code
-              >.
+              <code>${CLAUDE_PLUGIN_DATA}/artifacts/&lt;projectHash&gt;/</code>.
             </p>
           </div>
         </section>
@@ -847,6 +928,6 @@
     <script>
       window.__CENNAD_STATE__ = '__CENNAD_STATE__';
     </script>
-    <script>(function(){"use strict";var R=50,Re=72,De=10*60*1e3,f={gemini:{yolo:!0,sandbox:!0,sandbox_backend:"auto"},codex:{yolo:!1,sandbox:"workspace-write"},antigravity:{sandbox:!1,skip_permissions:!1}},D={enabled:!1,location:"project"},de={gemini:"",codex:"",antigravity:""},b={gemini:"auto",codex:"off",antigravity:"auto"},S={gemini:"mid",codex:"mid",antigravity:"mid"},A={enabled:!1,language:"en",targets:{codex:!0,antigravity:!0}},le="gemini",w=0,p=100,je=1,He=720,qe=1e3,We=18e5,j=["auto","docker","podman","sandbox-exec"],H=["read-only","workspace-write","danger-full-access","off"],Ye=["gemini","antigravity"],ce=["project","user"],x=["off","auto","strict"],M=["high","mid","low"],se=["en","ko"],Ve={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},Xe=new URLSearchParams(location.search),Ke=Xe.get("token")||"";function i(e){return document.querySelector(e)}var q=i("#form"),k=i("#ratio-slider"),W=i("#toggle-codex"),Y=i("#toggle-gemini"),Je=i("#gemini-pct"),$e=i("#codex-pct"),ze=i("#codex-hint"),Qe=i("#gemini-hint"),Ze=i("#codex-install-hint"),ea=i("#gemini-install-hint"),aa=i("#antigravity-install-hint"),ta=i("#ratio-warn"),N=i("#strength"),na=i("#strength-label"),V=i("#kw-gemini"),X=i("#kw-codex"),ve=i("#ttl"),ge=i("#spawn-timeout-ms"),K=i("#gemini-yolo"),E=i("#gemini-sandbox"),ue=i("#gemini-backend-wrap"),ia=i("#antigravity-sandbox"),J=i("#antigravity-skip-perms"),$=i("#model-antigravity-high"),z=i("#model-antigravity-mid"),Q=i("#model-antigravity-low"),_=i("#codex-yolo"),fe=i("#codex-sandbox-wrap"),me=i("#codex-sandbox-hint"),oa=i("#codex-full-access-warning"),I=i("#artifacts-enabled"),be=i("#artifacts-location-wrap"),B=i("#youtube-enabled"),ye=i("#youtube-detail-wrap"),pe=i("#youtube-target-codex"),xe=i("#youtube-target-antigravity"),he=i("#youtube-advanced-toggle"),ra=i("#youtube-advanced-panel"),Z=i("#preamble-gemini"),ee=i("#preamble-codex"),L=i("#advanced-toggle-codex"),T=i("#advanced-toggle-gemini"),ae=i("#advanced-panel-codex"),te=i("#advanced-panel-gemini"),da=i("#summary-codex"),la=i("#summary-gemini"),G=i("#status"),Se=i("#save"),ne=i("#save-close"),d={gemini:{value:R,enabled:!0},codex:{value:R,enabled:!0}},l=le,ie=[],U={high:"",mid:"",low:""},c={codex:!0,gemini:!0,antigravity:!0};function F(e,a,t){return Math.max(a,Math.min(t,e))}function h(){return l==="antigravity"?c.antigravity:c.gemini}function g(e,a,t){if(G.className="status"+(e?" "+e:""),G.innerHTML="",!(!a&&(!t||!t.length))){var n=document.createElement("div");if(n.textContent=a||"",G.appendChild(n),t&&t.length){for(var o=document.createElement("ul"),r=0;r<t.length;r+=1){var v=document.createElement("li");v.textContent=String(t[r]),o.appendChild(v)}G.appendChild(o)}}}function C(){var e=d.gemini.enabled,a=d.codex.enabled,t,n;e&&a?(t=d.gemini.value,n=d.codex.value):e?(t=100,n=d.codex.value):a?(t=d.gemini.value,n=100):(t=0,n=0),k.disabled=!(e&&a),e&&a&&(k.value=String(d.gemini.value)),Je.textContent=e?t+"%":"OFF",$e.textContent=a?n+"%":"OFF",Y.setAttribute("aria-checked",String(e)),W.setAttribute("aria-checked",String(a)),W.setAttribute("data-unavailable",String(!c.codex)),Y.setAttribute("data-unavailable",String(!h())),ze.textContent=c.codex?"click to toggle":"not installed",Qe.textContent=h()?"click to toggle":"not installed",ta.hidden=e||a}function ca(){if(!k.disabled){var e=F(Math.floor(Number(k.value)||0),w,p);d.gemini.value=e,d.codex.value=p-e,C()}}function Ae(e){var a=e==="gemini"?h():c[e];if(a){var t=d[e],n=e==="gemini"?d.codex:d.gemini;t.enabled?t.enabled=!1:(t.enabled=!0,t.value<=0&&(t.value=R),n.enabled&&(n.value=F(p-t.value,w,p))),C()}}function ke(){na.textContent=Ve[N.value]||"Neutral"}function Ee(e,a){if(e&&typeof e=="object"&&"value"in e)return{value:F(Math.floor(Number(e.value)||0),w,p),enabled:!!e.enabled};if(typeof e=="number"){var t=F(Math.floor(e),w,p);return{value:t,enabled:t>0}}return{value:a.value,enabled:a.enabled}}function u(e,a,t){for(var n=document.querySelectorAll('input[name="'+e+'"]'),o=t.indexOf(a)>=0?a:t[0],r=0;r<n.length;r+=1)n[r].checked=n[r].value===o}function s(e,a,t){var n=document.querySelector('input[name="'+e+'"]:checked');return n&&a.indexOf(n.value)>=0?n.value:t}function _e(e,a){for(var t=0;t<e.length;t+=1)e[t].hidden=e[t].getAttribute("data-engine")!==a}function Le(){Ze.hidden=c.codex;var e=l==="gemini";ea.hidden=!e||c.gemini,aa.hidden=e||c.antigravity}function Te(e){l=e==="antigravity"?"antigravity":"gemini",u("google-engine",l,Ye),_e(document.querySelectorAll(".engine-flags"),l),_e(document.querySelectorAll(".warning-inline[data-engine]"),l),Le()}function sa(){var e=document.querySelector('input[name="google-engine"]:checked');Te(e?e.value:"gemini"),C(),Ne(),O()}function Ce(){E.checked?ue.classList.remove("is-inert"):ue.classList.add("is-inert")}function oe(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');oa.hidden=!(e&&e.value==="danger-full-access")}function Oe(){for(var e=_.checked,a=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),t=0;t<a.length;t+=1)a[t].disabled=e;e?(fe.classList.add("is-inert"),me.hidden=!1):(fe.classList.remove("is-inert"),me.hidden=!0),oe()}function we(){I.checked?be.classList.remove("is-inert"):be.classList.add("is-inert")}function re(e,a){if(!e.disabled){var t=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",t?"true":"false"),t){a.hidden=!1,a.offsetHeight,a.classList.add("is-open");return}a.classList.remove("is-open");var n=!1,o=function(r){n||r&&r.propertyName&&r.propertyName!=="grid-template-rows"||(n=!0,a.hidden=!0,a.removeEventListener("transitionend",o))};a.addEventListener("transitionend",o),setTimeout(o,260)}}function va(e){var a=[];if(e==="codex"){_.checked&&a.push({label:"yolo: on",tone:"warn"});var t=s("codex-sandbox",H,f.codex.sandbox);t==="danger-full-access"?a.push({label:"sandbox: full-access",tone:"warn"}):t!=="off"&&a.push({label:"sandbox: "+t});var n=s("recency-codex",x,b.codex);n!=="off"&&a.push({label:"rec: "+n});var o=(X.value||"").trim();o&&a.push({label:"keyword: on",title:o});var r=(ee.value||"").trim();r&&a.push({label:"preamble: on",title:r.slice(0,80)})}else{if(a.push({label:"engine: "+l}),l==="antigravity")J.checked&&a.push({label:"skip-perms: on",tone:"warn"});else if(K.checked&&a.push({label:"yolo: on",tone:"warn"}),E.checked){var v=s("gemini-backend",j,f.gemini.sandbox_backend);a.push({label:"sandbox: "+v})}var m=s("recency-gemini",x,b.gemini);m!=="off"&&a.push({label:"rec: "+m});var y=(V.value||"").trim();y&&a.push({label:"keyword: on",title:y});var Pe=(Z.value||"").trim();Pe&&a.push({label:"preamble: on",title:Pe.slice(0,80)})}return a}function Me(e){var a=e==="codex"?da:la;if(a){for(var t=va(e);a.firstChild;)a.removeChild(a.firstChild);for(var n=0;n<t.length;n+=1){var o=document.createElement("span");o.className="summary-chip",t[n].tone&&o.setAttribute("data-tone",t[n].tone),t[n].title&&o.setAttribute("data-tooltip",t[n].title),o.textContent=t[n].label,a.appendChild(o)}}}function O(){Me("codex"),Me("gemini")}function Ne(){L.disabled=!c.codex,T.disabled=!h(),!c.codex&&L.getAttribute("aria-expanded")==="true"&&(L.setAttribute("aria-expanded","false"),ae.classList.remove("is-open"),ae.hidden=!0),!h()&&T.getAttribute("aria-expanded")==="true"&&(T.setAttribute("aria-expanded","false"),te.classList.remove("is-open"),te.hidden=!0)}function ga(e){var a=e&&typeof e=="object"?e:f,t=a.gemini&&typeof a.gemini=="object"?a.gemini:{},n=a.codex&&typeof a.codex=="object"?a.codex:{},o=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{};K.checked=!!t.yolo,E.checked=typeof t.sandbox=="boolean"?t.sandbox:f.gemini.sandbox,u("gemini-backend",typeof t.sandbox_backend=="string"?t.sandbox_backend:f.gemini.sandbox_backend,j),_.checked=!!n.yolo,u("codex-sandbox",typeof n.sandbox=="string"?n.sandbox:f.codex.sandbox,H),ia.checked=!1,J.checked=!!o.skip_permissions,Ce(),Oe(),oe()}function ua(e){var a=e&&typeof e=="object"?e:D;I.checked=!!a.enabled,u("artifacts-location",typeof a.location=="string"?a.location:D.location,ce),we()}function fa(e){var a=e&&typeof e=="object"?e:de,t=l==="antigravity"?a.antigravity:a.gemini;Z.value=typeof t=="string"?t:"",ee.value=typeof a.codex=="string"?a.codex:de.codex}function ma(e){var a=e&&typeof e=="object"?e:b,t=l==="antigravity"?a.antigravity:a.gemini;u("recency-gemini",typeof t=="string"?t:b.gemini,x),u("recency-codex",typeof a.codex=="string"?a.codex:b.codex,x)}function ba(e){var a=e&&typeof e=="object"?e:S,t=l==="antigravity"?a.antigravity:a.gemini;u("default-tier-gemini",typeof t=="string"?t:S.gemini,M),u("default-tier-codex",typeof a.codex=="string"?a.codex:S.codex,M)}function Ie(e){for(var a=[{el:$,val:U.high},{el:z,val:U.mid},{el:Q,val:U.low}],t=0;t<a.length;t+=1){var n=a[t].el;if(n){for(var o=a[t].val;n.firstChild;)n.removeChild(n.firstChild);var r=e.slice();if(o&&r.indexOf(o)<0&&r.unshift(o),r.length===0){var v=document.createElement("option");v.value="",v.textContent="(run agy to load models)",n.appendChild(v)}else for(var m=0;m<r.length;m+=1){var y=document.createElement("option");y.value=r[m],y.textContent=r[m],r[m]===o&&(y.selected=!0),n.appendChild(y)}}}}function ya(e){var a=e&&typeof e=="object"?e:{},t=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{};U={high:typeof t.high=="string"?t.high:"",mid:typeof t.mid=="string"?t.mid:"",low:typeof t.low=="string"?t.low:""},Ie(ie)}function Be(){B.checked?ye.classList.remove("is-inert"):ye.classList.add("is-inert")}function pa(e){var a=e&&typeof e=="object"?e:A;B.checked=!!a.enabled,u("youtube-language",typeof a.language=="string"?a.language:A.language,se);var t=a.targets&&typeof a.targets=="object"?a.targets:{};pe.checked=typeof t.codex=="boolean"?t.codex:A.targets.codex,xe.checked=typeof t.antigravity=="boolean"?t.antigravity:A.targets.antigravity,Be()}function Ge(e){var a=e.ratio||{},t=a.antigravity&&a.antigravity.enabled;l=t?"antigravity":le;var n=l==="antigravity"?a.antigravity:a.gemini;d.gemini=Ee(n,d.gemini),d.codex=Ee(a.codex,d.codex),N.value=String(e.intervention_strength);var o=e.keywords||{},r=l==="antigravity"?o.antigravity:o.gemini;V.value=typeof r=="string"?r:"",X.value=typeof o.codex=="string"?o.codex:"",ve.value=e.session_ttl_hours,ge.value=e.spawn_timeout_ms,ga(e.option_flags),ua(e.artifacts),fa(e.preamble),ma(e.recency_factor),ba(e.default_tier),ya(e.model_map),pa(e.addons&&e.addons.youtube),Te(l),C(),ke(),O()}function xa(){return{gemini:{yolo:!!K.checked,sandbox:!!E.checked,sandbox_backend:s("gemini-backend",j,f.gemini.sandbox_backend)},codex:{yolo:!!_.checked,sandbox:s("codex-sandbox",H,f.codex.sandbox)},antigravity:{sandbox:!1,skip_permissions:!!J.checked}}}function ha(){return{antigravity:{high:$?String($.value||""):"",mid:z?String(z.value||""):"",low:Q?String(Q.value||""):""}}}function Sa(){return{enabled:!!I.checked,location:s("artifacts-location",ce,D.location)}}function Aa(){var e=l==="gemini",a={value:d.gemini.value,enabled:d.gemini.enabled},t={value:d.gemini.value,enabled:!1},n=V.value.trim(),o=String(Z.value||""),r=s("recency-gemini",x,b.gemini),v=s("default-tier-gemini",M,S.gemini);return{ratio:{gemini:e?a:t,codex:{value:d.codex.value,enabled:d.codex.enabled},antigravity:e?t:a},intervention_strength:Number(N.value),keywords:{gemini:n,codex:X.value.trim(),antigravity:n},option_flags:xa(),model_map:ha(),default_tier:{gemini:v,codex:s("default-tier-codex",M,S.codex),antigravity:v},session_ttl_hours:Math.max(je,Math.min(He,Math.floor(Number(ve.value)||Re))),spawn_timeout_ms:Math.max(qe,Math.min(We,Math.floor(Number(ge.value)||De))),artifacts:Sa(),preamble:{gemini:o,codex:String(ee.value||""),antigravity:o},recency_factor:{gemini:r,codex:s("recency-codex",x,b.codex),antigravity:r},addons:{youtube:{enabled:!!B.checked,language:s("youtube-language",se,A.language),targets:{codex:!!pe.checked,antigravity:!!xe.checked}}}}}function P(e){return e+"?token="+encodeURIComponent(Ke)}function ka(){var e=window.__CENNAD_STATE__;return e&&typeof e=="object"&&e.ratio?(Ge(e),!0):!1}async function Ue(){try{var e=await fetch(P("/provider-status"));if(!e.ok)return;var a=await e.json();c.codex=!!(a.codex&&a.codex.available),c.gemini=!!(a.gemini&&a.gemini.available),c.antigravity=!!(a.antigravity&&a.antigravity.available),ie=Array.isArray(a.agyModels)?a.agyModels:[],Ie(ie)}catch{return}c.codex||(d.codex.enabled=!1),h()||(d.gemini.enabled=!1),Le(),C(),Ne()}async function Ea(){if(ka()){g("",""),await Ue();return}g("","Loading\u2026");try{var e=await fetch(P("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var a=await e.json();Ge(a),g("","")}catch(t){g("error","Failed to load config: "+t.message)}await Ue()}async function Fe(e){if(!d.gemini.enabled&&!d.codex.enabled){g("error","At least one provider must be enabled.");return}var a=Aa();g("","Saving\u2026"),Se.disabled=ne.disabled=!0;try{var t=await fetch(P("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)}),n=await t.json();if(!t.ok||n.success===!1){g("error",n.message||"Save failed",n.errors);return}if(g("success","Saved."),e){try{await fetch(P("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}g("success","Saved. Server closed."),window.close();return}}catch(o){g("error","Save failed: "+o.message)}finally{e||(Se.disabled=ne.disabled=!1)}}k.addEventListener("input",ca),Y.addEventListener("click",function(){Ae("gemini")}),W.addEventListener("click",function(){Ae("codex")}),L.addEventListener("click",function(){re(L,ae)}),T.addEventListener("click",function(){re(T,te)}),he.addEventListener("click",function(){re(he,ra)}),document.querySelectorAll('input[name="google-engine"]').forEach(function(e){e.addEventListener("change",sa)}),N.addEventListener("input",ke),E.addEventListener("change",Ce),_.addEventListener("change",Oe),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",oe)}),I.addEventListener("change",we),B.addEventListener("change",Be),q.addEventListener("change",O),q.addEventListener("input",O),q.addEventListener("submit",function(e){e.preventDefault(),Fe(!1)}),ne.addEventListener("click",function(){Fe(!0)}),O(),Ea()})();</script>
+    <script>(function(){"use strict";var y={codex:{value:34,enabled:!0},antigravity:{value:33,enabled:!0},claude:{value:33,enabled:!0}},De=72,Ne=10*60*1e3,h={codex:{yolo:!1,sandbox:"workspace-write"},antigravity:{sandbox:!1,skip_permissions:!1},claude:{permission_mode:"dontAsk"}},H={enabled:!1,location:"project"},Ue={codex:"",antigravity:"",claude:""},A={codex:"off",antigravity:"auto",claude:"off"},O={codex:"mid",antigravity:"mid",claude:"mid"},ee={high:{model:"opus",effort:"max"},mid:{model:"opus",effort:"high"},low:{model:"sonnet",effort:"high"}},_={enabled:!1,language:"en",targets:{codex:!0,antigravity:!0}},R=0,v=100,Ie=1,Fe=720,Be=1e3,je=18e5,f=["codex","antigravity","claude"],W=["read-only","workspace-write","danger-full-access","off"],P=["acceptEdits","auto","dontAsk","bypassPermissions"],He=["opus","sonnet","haiku","fable","best","opus[1m]","sonnet[1m]"],ae=["low","medium","high","xhigh","max"],te={opus:["low","medium","high","xhigh","max"],"opus[1m]":["low","medium","high","xhigh","max"],fable:["low","medium","high","xhigh","max"],best:["low","medium","high","xhigh","max"],sonnet:["low","medium","high","max"],"sonnet[1m]":["low","medium","high","max"],haiku:[]},ne=["project","user"],w=["off","auto","strict"],m=["high","mid","low"],re=["en","ko"],We={"-2":"Subtle","-1":"Soft",0:"Neutral",1:"Active",2:"Strong"},qe=new URLSearchParams(location.search),Ye=qe.get("token")||"";function i(e){return document.querySelector(e)}var q=i("#form"),D=i("#status"),ie=i("#save"),Y=i("#save-close"),Xe=i("#ratio-warn"),b=i("#ratio-bar"),N=i("#strength"),Ve=i("#strength-label"),oe=i("#ttl"),le=i("#spawn-timeout-ms"),d={};f.forEach(function(e){d[e]={toggle:i("#toggle-"+e),pct:i("#"+e+"-pct"),hint:i("#"+e+"-hint"),summary:i("#summary-"+e),installHint:i("#"+e+"-install-hint"),advancedToggle:i("#advanced-toggle-"+e),advancedPanel:i("#advanced-panel-"+e),kw:i("#kw-"+e),preamble:i("#preamble-"+e)}});var L=i("#codex-yolo"),de=i("#codex-sandbox-wrap"),ue=i("#codex-sandbox-hint"),Ge=i("#codex-full-access-warning"),Ke=i("#antigravity-sandbox"),X=i("#antigravity-skip-perms"),p={high:i("#model-antigravity-high"),mid:i("#model-antigravity-mid"),low:i("#model-antigravity-low")},ze=i("#claude-bypass-warning"),x={high:i("#model-claude-high"),mid:i("#model-claude-mid"),low:i("#model-claude-low")},V={high:i("#effort-claude-high"),mid:i("#effort-claude-mid"),low:i("#effort-claude-low")},U=i("#artifacts-enabled"),ce=i("#artifacts-location-wrap"),I=i("#youtube-enabled"),se=i("#youtube-detail-wrap"),fe=i("#youtube-target-codex"),ve=i("#youtube-target-antigravity"),ge=i("#youtube-advanced-toggle"),Je=i("#youtube-advanced-panel"),u={codex:{value:y.codex.value,enabled:y.codex.enabled},antigravity:{value:y.antigravity.value,enabled:y.antigravity.enabled},claude:{value:y.claude.value,enabled:y.claude.enabled}},E={codex:"available",antigravity:"available",claude:"available"},G=[],he={high:"",mid:"",low:""},k={high:{model:"",effort:""},mid:{model:"",effort:""},low:{model:"",effort:""}};function K(e,a,t){return Math.max(a,Math.min(t,e))}function g(e,a,t){if(D.className="status"+(e?" "+e:""),D.innerHTML="",!(!a&&(!t||!t.length))){var n=document.createElement("div");if(n.textContent=a||"",D.appendChild(n),t&&t.length){for(var r=document.createElement("ul"),o=0;o<t.length;o+=1){var l=document.createElement("li");l.textContent=String(t[o]),r.appendChild(l)}D.appendChild(r)}}}function C(){return f.filter(function(e){return u[e].enabled})}function me(){var e=C();if(e.length!==0){var a=Math.floor(v/e.length),t=v-a*e.length;e.forEach(function(n,r){u[n].value=a+(r<t?1:0)})}}function $e(){var e=C();if(e.length!==0){var a=e.reduce(function(r,o){return r+u[o].value},0);if(a<=0){me();return}var t=0,n=e.map(function(r,o){var l=u[r].value/a*v,c=Math.floor(l);return t+=c,{provider:r,value:c,remainder:l-c,index:o}});n.slice().sort(function(r,o){return o.remainder!==r.remainder?o.remainder-r.remainder:r.index-o.index}).slice(0,v-t).forEach(function(r){r.value+=1}),n.forEach(function(r){u[r.provider].value=r.value})}}function z(e){for(var a=[],t=0,n=0;n<e.length-1;n+=1)t+=u[e[n]].value,a.push(t);return a}function Qe(){for(;b.firstChild;)b.removeChild(b.firstChild)}function Ze(e){var a=0;e.forEach(function(t){var n=document.createElement("div");n.className="ratio-bar-segment",n.setAttribute("data-provider",t),n.style.left=a+"%",n.style.width=u[t].value+"%",b.appendChild(n),a+=u[t].value})}function ea(e){var a=z(e);a.forEach(function(t,n){var r=e[n],o=e[n+1],l=document.createElement("button");l.type="button",l.className="ratio-bar-handle",l.style.left=t+"%",l.setAttribute("data-boundary-index",String(n)),l.setAttribute("aria-label",r+" / "+o+" ratio"),l.setAttribute("aria-valuemin","0"),l.setAttribute("aria-valuemax","100"),l.setAttribute("aria-valuenow",String(t)),l.setAttribute("role","slider"),b.appendChild(l)})}function F(){$e();var e=C();f.forEach(function(a){var t=u[a],n=d[a];n.pct.textContent=t.enabled?t.value+"%":"OFF",n.toggle.setAttribute("aria-checked",String(t.enabled));var r=E[a];n.toggle.setAttribute("data-unavailable",String(r==="unavailable")),n.toggle.setAttribute("data-provider-status",r),n.hint.textContent=r==="available"?"click to toggle":r==="unavailable"?t.enabled?"enabled \xB7 not installed":"not installed":t.enabled?"enabled \xB7 status unknown":"status check failed"}),Qe(),Ze(e),ea(e),Xe.hidden=e.length>0}function T(e,a){var t=C(),n=z(t);if(!(e<0||e>=n.length)){var r=e===0?R+1:n[e-1]+1,o=e===n.length-1?v-1:n[e+1]-1;n[e]=K(Math.round(a),r,o);var l=0;t.forEach(function(c,Re){var Pe=Re<n.length?n[Re]:v;u[c].value=Pe-l,l=Pe}),F()}}function aa(e){var a=b.getBoundingClientRect();return a.width<=0?0:(e.clientX-a.left)/a.width*v}var B=null;function J(e){B!==null&&T(B,aa(e))}function be(){B=null,window.removeEventListener("pointermove",J),window.removeEventListener("pointerup",be)}function ta(e){!e.target.classList||!e.target.classList.contains("ratio-bar-handle")||(B=Number(e.target.getAttribute("data-boundary-index")),e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId),window.addEventListener("pointermove",J),window.addEventListener("pointerup",be),J(e))}function na(e){if(!(!e.target.classList||!e.target.classList.contains("ratio-bar-handle"))){var a=Number(e.target.getAttribute("data-boundary-index")),t=z(C())[a],n=e.shiftKey?10:1;e.key==="ArrowLeft"||e.key==="ArrowDown"?(e.preventDefault(),T(a,t-n)):e.key==="ArrowRight"||e.key==="ArrowUp"?(e.preventDefault(),T(a,t+n)):e.key==="Home"?(e.preventDefault(),T(a,R)):e.key==="End"&&(e.preventDefault(),T(a,v))}}function ra(e){var a=u[e];if(a.enabled)a.enabled=!1;else{if(E[e]!=="available")return;a.enabled=!0}me(),F(),_e(),M()}function pe(){Ve.textContent=We[N.value]||"Neutral"}function ia(e,a){if(e&&typeof e=="object"&&"value"in e)return{value:K(Math.floor(Number(e.value)||0),R,v),enabled:!!e.enabled};if(typeof e=="number"){var t=K(Math.floor(e),R,v);return{value:t,enabled:t>0}}return{value:a.value,enabled:a.enabled}}function S(e,a,t,n){for(var r=document.querySelectorAll('input[name="'+e+'"]'),o=t.indexOf(a)>=0?a:t.indexOf(n)>=0?n:t[0],l=0;l<r.length;l+=1)r[l].checked=r[l].value===o}function s(e,a,t){var n=document.querySelector('input[name="'+e+'"]:checked');return n&&a.indexOf(n.value)>=0?n.value:t}function oa(){f.forEach(function(e){d[e].installHint.hidden=E[e]!=="unavailable"})}function $(){var e=document.querySelector('#codex-sandbox-radio input[type="radio"]:checked');Ge.hidden=!(e&&e.value==="danger-full-access")}function ye(){for(var e=L.checked,a=document.querySelectorAll('#codex-sandbox-radio input[type="radio"]'),t=0;t<a.length;t+=1)a[t].disabled=e;e?(de.classList.add("is-inert"),ue.hidden=!1):(de.classList.remove("is-inert"),ue.hidden=!0),$()}function xe(){var e=s("claude-permission-mode",P,h.claude.permission_mode);ze.hidden=e!=="bypassPermissions"}function Ee(){U.checked?ce.classList.remove("is-inert"):ce.classList.add("is-inert")}function Se(e,a){if(!e.disabled){var t=e.getAttribute("aria-expanded")!=="true";if(e.setAttribute("aria-expanded",t?"true":"false"),t){a.hidden=!1,a.offsetHeight,a.classList.add("is-open");return}a.classList.remove("is-open");var n=!1,r=function(o){n||o&&o.propertyName&&o.propertyName!=="grid-template-rows"||(n=!0,a.hidden=!0,a.removeEventListener("transitionend",r))};a.addEventListener("transitionend",r),setTimeout(r,260)}}function la(e){var a=[],t=s("recency-"+e,w,A[e]);if(e==="codex"){L.checked&&a.push({label:"yolo: on",tone:"warn"});var n=s("codex-sandbox",W,h.codex.sandbox);n==="danger-full-access"?a.push({label:"sandbox: full-access",tone:"warn"}):n!=="off"&&a.push({label:"sandbox: "+n})}else if(e==="antigravity")X.checked&&a.push({label:"skip-perms: on",tone:"warn"});else if(e==="claude"){var r=s("claude-permission-mode",P,h.claude.permission_mode);a.push(r==="bypassPermissions"?{label:"perm: bypass",tone:"warn"}:{label:"perm: "+r})}t!=="off"&&a.push({label:"rec: "+t});var o=(d[e].kw.value||"").trim();o&&a.push({label:"keyword: on",title:o});var l=(d[e].preamble.value||"").trim();return l&&a.push({label:"preamble: on",title:l.slice(0,80)}),a}function Ae(e){var a=d[e].summary;if(a){for(var t=la(e);a.firstChild;)a.removeChild(a.firstChild);for(var n=0;n<t.length;n+=1){var r=document.createElement("span");r.className="summary-chip",t[n].tone&&r.setAttribute("data-tone",t[n].tone),t[n].title&&r.setAttribute("data-tooltip",t[n].title),r.textContent=t[n].label,a.appendChild(r)}}}function M(){f.forEach(Ae)}function _e(){f.forEach(function(e){var a=d[e];a.advancedToggle.disabled=E[e]!=="available",E[e]!=="available"&&a.advancedToggle.getAttribute("aria-expanded")==="true"&&(a.advancedToggle.setAttribute("aria-expanded","false"),a.advancedPanel.classList.remove("is-open"),a.advancedPanel.hidden=!0)})}function da(e){var a=e&&typeof e=="object"?e:h,t=a.codex&&typeof a.codex=="object"?a.codex:{},n=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{},r=a.claude&&typeof a.claude=="object"?a.claude:{};L.checked=!!t.yolo,S("codex-sandbox",typeof t.sandbox=="string"?t.sandbox:h.codex.sandbox,W),Ke.checked=!1,X.checked=!!n.skip_permissions,S("claude-permission-mode",typeof r.permission_mode=="string"?r.permission_mode:h.claude.permission_mode,P,h.claude.permission_mode),ye(),$(),xe()}function ua(e){var a=e&&typeof e=="object"?e:H;U.checked=!!a.enabled,S("artifacts-location",typeof a.location=="string"?a.location:H.location,ne),Ee()}function Q(e,a,t){var n=e&&typeof e=="object"?e:a;f.forEach(function(r){t(r,typeof n[r]=="string"?n[r]:a[r])})}function ca(e){Q(e,Ue,function(a,t){d[a].preamble.value=t})}function sa(e){Q(e,A,function(a,t){S("recency-"+a,t,w)})}function fa(e){Q(e,O,function(a,t){S("default-tier-"+a,t,m)})}function va(e){var a=e&&typeof e=="object"?e:{};f.forEach(function(t){d[t].kw.value=typeof a[t]=="string"?a[t]:""})}function we(e,a,t,n){for(;e.firstChild;)e.removeChild(e.firstChild);var r=a.slice();if(t&&r.indexOf(t)<0&&r.unshift(t),r.length===0){var o=document.createElement("option");o.value="",o.textContent=n,e.appendChild(o);return}for(var l=0;l<r.length;l+=1){var c=document.createElement("option");c.value=r[l],c.textContent=r[l],r[l]===t&&(c.selected=!0),e.appendChild(c)}}function Le(e){m.forEach(function(a){var t=p[a];t&&we(t,e,he[a],"(run agy to load models)")})}function ga(e,a){if(a.length===0)return"";if(a.indexOf(e)>=0)return e;var t=ae.indexOf(e);if(t<0)return a[a.length-1];for(var n=a[0],r=0;r<a.length;r+=1)ae.indexOf(a[r])<=t&&(n=a[r]);return n}function ke(e,a){var t=V[e];if(t){for(var n=te[a]||[];t.firstChild;)t.removeChild(t.firstChild);if(n.length===0){var r=document.createElement("option");r.value="",r.textContent="(no effort)",t.appendChild(r),t.disabled=!0;return}t.disabled=!1;for(var o=ga(k[e].effort,n),l=0;l<n.length;l+=1){var c=document.createElement("option");c.value=n[l],c.textContent=n[l],n[l]===o&&(c.selected=!0),t.appendChild(c)}}}function ha(){m.forEach(function(e){var a=x[e];a&&(we(a,He,k[e].model,"(none)"),ke(e,a.value))})}function ma(e){var a=V[e];k[e].effort=a&&!a.disabled?a.value:k[e].effort,ke(e,x[e].value),Ae("claude")}function ba(e){var a=e&&typeof e=="object"?e:{},t=a.antigravity&&typeof a.antigravity=="object"?a.antigravity:{};he={high:typeof t.high=="string"?t.high:"",mid:typeof t.mid=="string"?t.mid:"",low:typeof t.low=="string"?t.low:""};var n=a.claude&&typeof a.claude=="object"?a.claude:{};m.forEach(function(r){var o=n[r]&&typeof n[r]=="object"?n[r]:ee[r];k[r]={model:typeof o.model=="string"?o.model:ee[r].model,effort:typeof o.effort=="string"?o.effort:""}}),Le(G),ha()}function Ce(){I.checked?se.classList.remove("is-inert"):se.classList.add("is-inert")}function pa(e){var a=e&&typeof e=="object"?e:_;I.checked=!!a.enabled,S("youtube-language",typeof a.language=="string"?a.language:_.language,re);var t=a.targets&&typeof a.targets=="object"?a.targets:{};fe.checked=typeof t.codex=="boolean"?t.codex:_.targets.codex,ve.checked=typeof t.antigravity=="boolean"?t.antigravity:_.targets.antigravity,Ce()}function Te(e){var a=e.ratio||{};f.forEach(function(t){u[t]=ia(a[t],u[t])}),N.value=String(e.intervention_strength),va(e.keywords),oe.value=e.session_ttl_hours,le.value=e.spawn_timeout_ms,da(e.option_flags),ua(e.artifacts),ca(e.preamble),sa(e.recency_factor),fa(e.default_tier),ba(e.model_map),pa(e.addons&&e.addons.youtube),F(),pe(),M()}function ya(){return{codex:{yolo:!!L.checked,sandbox:s("codex-sandbox",W,h.codex.sandbox)},antigravity:{sandbox:!1,skip_permissions:!!X.checked},claude:{permission_mode:s("claude-permission-mode",P,h.claude.permission_mode)}}}function xa(){var e={};return m.forEach(function(a){var t=x[a]?String(x[a].value||""):"",n={model:t},r=V[a],o=te[t]||[];r&&!r.disabled&&o.length>0&&r.value&&(n.effort=r.value),e[a]=n}),{antigravity:{high:p.high?String(p.high.value||""):"",mid:p.mid?String(p.mid.value||""):"",low:p.low?String(p.low.value||""):""},claude:e}}function Ea(){return{enabled:!!U.checked,location:s("artifacts-location",ne,H.location)}}function Z(e){return{value:u[e].value,enabled:u[e].enabled}}function Sa(){return{ratio:{codex:Z("codex"),antigravity:Z("antigravity"),claude:Z("claude")},intervention_strength:Number(N.value),keywords:{codex:d.codex.kw.value.trim(),antigravity:d.antigravity.kw.value.trim(),claude:d.claude.kw.value.trim()},option_flags:ya(),model_map:xa(),default_tier:{codex:s("default-tier-codex",m,O.codex),antigravity:s("default-tier-antigravity",m,O.antigravity),claude:s("default-tier-claude",m,O.claude)},session_ttl_hours:Math.max(Ie,Math.min(Fe,Math.floor(Number(oe.value)||De))),spawn_timeout_ms:Math.max(Be,Math.min(je,Math.floor(Number(le.value)||Ne))),artifacts:Ea(),preamble:{codex:String(d.codex.preamble.value||""),antigravity:String(d.antigravity.preamble.value||""),claude:String(d.claude.preamble.value||"")},recency_factor:{codex:s("recency-codex",w,A.codex),antigravity:s("recency-antigravity",w,A.antigravity),claude:s("recency-claude",w,A.claude)},addons:{youtube:{enabled:!!I.checked,language:s("youtube-language",re,_.language),targets:{codex:!!fe.checked,antigravity:!!ve.checked}}}}}function j(e){return e+"?token="+encodeURIComponent(Ye)}function Aa(){var e=window.__CENNAD_STATE__;return e&&typeof e=="object"&&e.ratio?(Te(e),!0):!1}async function Me(){try{var e=await fetch(j("/provider-status"));if(!e.ok)return;var a=await e.json();f.forEach(function(t){var n=a[t]&&a[t].status;E[t]=n==="available"||n==="unavailable"||n==="unknown"?n:"unknown"}),G=Array.isArray(a.agyModels)?a.agyModels:[],Le(G)}catch{return}oa(),F(),_e()}async function _a(){if(Aa()){g("",""),await Me();return}g("","Loading\u2026");try{var e=await fetch(j("/config"));if(!e.ok)throw new Error("HTTP "+e.status);var a=await e.json();Te(a),g("","")}catch(t){g("error","Failed to load config: "+t.message)}await Me()}async function Oe(e){var a=f.some(function(o){return u[o].enabled});if(!a){g("error","At least one provider must be enabled.");return}var t=Sa();g("","Saving\u2026"),ie.disabled=Y.disabled=!0;try{var n=await fetch(j("/save"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(t)}),r=await n.json();if(!n.ok||r.success===!1){g("error",r.message||"Save failed",r.errors);return}if(g("success","Saved."),e){try{await fetch(j("/close"),{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"})}catch{}g("success","Saved. Server closed."),window.close();return}}catch(o){g("error","Save failed: "+o.message)}finally{e||(ie.disabled=Y.disabled=!1)}}f.forEach(function(e){d[e].toggle.addEventListener("click",function(){ra(e)}),d[e].advancedToggle.addEventListener("click",function(){Se(d[e].advancedToggle,d[e].advancedPanel)})}),b.addEventListener("pointerdown",ta),b.addEventListener("keydown",na),m.forEach(function(e){x[e]&&x[e].addEventListener("change",function(){ma(e)})}),ge.addEventListener("click",function(){Se(ge,Je)}),N.addEventListener("input",pe),L.addEventListener("change",ye),document.querySelectorAll('#codex-sandbox-radio input[type="radio"]').forEach(function(e){e.addEventListener("change",$)}),document.querySelectorAll('input[name="claude-permission-mode"]').forEach(function(e){e.addEventListener("change",xe)}),U.addEventListener("change",Ee),I.addEventListener("change",Ce),q.addEventListener("change",M),q.addEventListener("input",M),q.addEventListener("submit",function(e){e.preventDefault(),Oe(!1)}),Y.addEventListener("click",function(){Oe(!0)}),M(),_a()})();</script>
   </body>
 </html>
