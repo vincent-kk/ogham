@@ -27,7 +27,7 @@
 
 ### Always do
 
-- 디스크 경로는 `~/.claude/plugins/cennad/` 하위 (opt-in project artifacts: `<cwd>/.cennad/`)
+- 디스크 경로는 `${CLAUDE_PLUGIN_DATA}/` 하위이며 기존 `~/.claude/plugins/cennad/` 데이터를 최초 실행 시 이전 (opt-in project artifacts: `<cwd>/.cennad/`)
 
 ### Ask first
 

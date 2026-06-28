@@ -14,6 +14,7 @@ export async function handleGetProviderStatus(
   ]);
   // Only probe agy models when the binary exists; getAvailableModels degrades
   // to [] on any failure so the settings UI never blocks on it.
-  const agyModels = antigravity.available ? await getAvailableModels() : [];
+  const agyModels =
+    antigravity.status === 'available' ? await getAvailableModels() : [];
   sendJson(res, 200, { antigravity, agyModels, codex, claude });
 }

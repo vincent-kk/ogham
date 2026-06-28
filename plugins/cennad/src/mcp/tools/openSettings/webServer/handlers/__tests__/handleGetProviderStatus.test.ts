@@ -2,13 +2,14 @@ import type { ServerResponse } from 'node:http';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ExecutableStatus } from '../../../../../../lib/checkExecutable.js';
 import { handleGetProviderStatus } from '../handleGetProviderStatus.js';
 
 const { checkExecutableRef, getAvailableModelsRef } = vi.hoisted(() => ({
   checkExecutableRef: {
-    agy: { available: false } as { available: boolean; version?: string },
-    codex: { available: false } as { available: boolean; version?: string },
-    claude: { available: false } as { available: boolean; version?: string },
+    agy: { status: 'unavailable', available: false } as ExecutableStatus,
+    codex: { status: 'unavailable', available: false } as ExecutableStatus,
+    claude: { status: 'unavailable', available: false } as ExecutableStatus,
   },
   getAvailableModelsRef: { value: [] as string[] },
 }));
@@ -18,7 +19,7 @@ vi.mock('../../../../../../lib/checkExecutable.js', () => ({
     if (bin === 'agy') return Promise.resolve(checkExecutableRef.agy);
     if (bin === 'codex') return Promise.resolve(checkExecutableRef.codex);
     if (bin === 'claude') return Promise.resolve(checkExecutableRef.claude);
-    return Promise.resolve({ available: false });
+    return Promise.resolve({ status: 'unavailable', available: false });
   },
 }));
 
@@ -50,9 +51,9 @@ function makeFakeRes(): { res: ServerResponse; captured: CapturedResponse } {
 
 describe('handleGetProviderStatus', () => {
   beforeEach(() => {
-    checkExecutableRef.agy = { available: false };
-    checkExecutableRef.codex = { available: false };
-    checkExecutableRef.claude = { available: false };
+    checkExecutableRef.agy = { status: 'unavailable', available: false };
+    checkExecutableRef.codex = { status: 'unavailable', available: false };
+    checkExecutableRef.claude = { status: 'unavailable', available: false };
     getAvailableModelsRef.value = [];
   });
 
@@ -89,8 +90,18 @@ describe('handleGetProviderStatus', () => {
     expect(body.claude.available).toBe(false);
   });
 
+  it('preserves an indeterminate probe as unknown', async () => {
+    checkExecutableRef.claude = { status: 'unknown', available: false };
+    const { res, captured } = makeFakeRes();
+    await handleGetProviderStatus(res);
+    const body = captured.body as {
+      claude: { status: string; available: boolean };
+    };
+    expect(body.claude).toEqual({ status: 'unknown', available: false });
+  });
+
   it('agyModels is [] when agy is unavailable', async () => {
-    checkExecutableRef.agy = { available: false };
+    checkExecutableRef.agy = { status: 'unavailable', available: false };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as { agyModels: unknown[] };
@@ -98,7 +109,11 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('agyModels is populated when agy is available', async () => {
-    checkExecutableRef.agy = { available: true, version: '1.0.0' };
+    checkExecutableRef.agy = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
     getAvailableModelsRef.value = ['Gemini 3.1 Pro', 'Gemini 3.5 Flash'];
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
@@ -107,7 +122,11 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('antigravity status reflects available:true with version when agy is found', async () => {
-    checkExecutableRef.agy = { available: true, version: '2.3.1' };
+    checkExecutableRef.agy = {
+      status: 'available',
+      available: true,
+      version: '2.3.1',
+    };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
@@ -118,7 +137,11 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('claude status reflects available:true with version when claude is found', async () => {
-    checkExecutableRef.claude = { available: true, version: '2.1.195' };
+    checkExecutableRef.claude = {
+      status: 'available',
+      available: true,
+      version: '2.1.195',
+    };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
@@ -129,7 +152,11 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('codex status reflects available:true with version when codex is found', async () => {
-    checkExecutableRef.codex = { available: true, version: '0.1.0' };
+    checkExecutableRef.codex = {
+      status: 'available',
+      available: true,
+      version: '0.1.0',
+    };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {
@@ -140,7 +167,7 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('version field is absent when a binary has no version string', async () => {
-    checkExecutableRef.agy = { available: true };
+    checkExecutableRef.agy = { status: 'available', available: true };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as { antigravity: Record<string, unknown> };
@@ -150,9 +177,21 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('all three providers can be available simultaneously', async () => {
-    checkExecutableRef.agy = { available: true, version: '1.0.0' };
-    checkExecutableRef.codex = { available: true, version: '1.0.0' };
-    checkExecutableRef.claude = { available: true, version: '1.0.0' };
+    checkExecutableRef.agy = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
+    checkExecutableRef.codex = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
+    checkExecutableRef.claude = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
     getAvailableModelsRef.value = ['model-x'];
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
@@ -169,9 +208,17 @@ describe('handleGetProviderStatus', () => {
   });
 
   it('codex and claude can be available while agy is not', async () => {
-    checkExecutableRef.agy = { available: false };
-    checkExecutableRef.codex = { available: true, version: '1.0.0' };
-    checkExecutableRef.claude = { available: true, version: '1.0.0' };
+    checkExecutableRef.agy = { status: 'unavailable', available: false };
+    checkExecutableRef.codex = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
+    checkExecutableRef.claude = {
+      status: 'available',
+      available: true,
+      version: '1.0.0',
+    };
     const { res, captured } = makeFakeRes();
     await handleGetProviderStatus(res);
     const body = captured.body as {

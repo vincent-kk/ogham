@@ -9,6 +9,7 @@ import {
   RUNTIME_DIR,
   SESSIONS_DIR,
   projectMetaPath,
+  resolveCennadHome,
   sessionDir,
   sessionPath,
 } from '../paths.js';
@@ -16,6 +17,13 @@ import {
 describe('paths', () => {
   it('places CENNAD_HOME under ~/.claude/plugins/cennad', () => {
     expect(CENNAD_HOME).toBe(join(homedir(), '.claude', 'plugins', 'cennad'));
+  });
+
+  it('prefers CLAUDE_PLUGIN_DATA when supplied and ignores blank values', () => {
+    expect(resolveCennadHome('/tmp/cennad-data')).toBe('/tmp/cennad-data');
+    expect(resolveCennadHome('  ')).toBe(
+      join(homedir(), '.claude', 'plugins', 'cennad'),
+    );
   });
 
   it('nests CONFIG_PATH inside CENNAD_HOME', () => {

@@ -1,6 +1,6 @@
 ## Purpose
 
-`~/.claude/plugins/cennad/config.json` 로드·저장 담당. 파일 누락·Zod 검증 실패 시 `DEFAULT_CONFIG` 로 fallback. legacy 정수 비율 → enabled flag 마이그레이션, `/setup` 진입 시 `pruneConfigFile` 로 구 키 제거·기본값 보완, `model_map` deep merge(`mergeModelMap`) 포함.
+`${CLAUDE_PLUGIN_DATA}/config.json` 로드·저장 담당. 환경 변수가 없으면 legacy `~/.claude/plugins/cennad/config.json` 을 사용한다. 파일 누락·Zod 검증 실패 시 `DEFAULT_CONFIG` 로 fallback. legacy 정수 비율 → enabled flag 마이그레이션, `/setup` 진입 시 `pruneConfigFile` 로 구 키 제거·기본값 보완, `model_map` deep merge(`mergeModelMap`) 포함.
 
 ## Structure
 

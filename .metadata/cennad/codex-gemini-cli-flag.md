@@ -37,7 +37,7 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 
 ### 🔑 세션 격리 방식 (`externalSessionRef`)
 
-`agy`는 headless conversation ID를 발급하지 않습니다(Issue #7). cennad는 세션별 독립 cwd(`~/.claude/plugins/cennad/agy/<sessionId>/`)를 생성하여 이를 세션 핸들로 사용합니다. `externalSessionRef = cwd` 이며, `resume` 시 동일한 cwd를 재사용하면 `--continue`가 해당 디렉토리의 최근 대화를 재개합니다.
+`agy`는 headless conversation ID를 발급하지 않습니다(Issue #7). cennad는 세션별 독립 cwd(`${CLAUDE_PLUGIN_DATA}/agy/<sessionId>/`)를 생성하여 이를 세션 핸들로 사용합니다. `externalSessionRef = cwd` 이며, `resume` 시 동일한 cwd를 재사용하면 `--continue`가 해당 디렉토리의 최근 대화를 재개합니다.
 
 - **start 타임아웃**: cwd를 삭제하여 정리합니다.
 - **resume 타임아웃**: cwd를 보존합니다(대화 이력 손실 방지).
@@ -52,7 +52,7 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 
 ### 📦 모델 목록 (`core/agyModels` 내부 캐시)
 
-`core/agyModels`는 `agy models` 서브커맨드를 실행하여 모델 목록을 가져오고, 결과를 1시간 TTL로 캐시합니다(`~/.claude/plugins/cennad/agy-models-cache.json`). `getAvailableModels` 가 이 캐시를 반환하며, settings UI 의 `/provider-status` 웹 라우트가 이를 직접 호출합니다. `agy`가 없거나 미인증 상태이면 빈 배열을 반환하며 절대 throw하지 않습니다.
+`core/agyModels`는 `agy models` 서브커맨드를 실행하여 모델 목록을 가져오고, 결과를 1시간 TTL로 캐시합니다(`${CLAUDE_PLUGIN_DATA}/agy-models-cache.json`). `getAvailableModels` 가 이 캐시를 반환하며, settings UI 의 `/provider-status` 웹 라우트가 이를 직접 호출합니다. `agy`가 없거나 미인증 상태이면 빈 배열을 반환하며 절대 throw하지 않습니다.
 
 ---
 

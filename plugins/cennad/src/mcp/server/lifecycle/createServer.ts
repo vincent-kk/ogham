@@ -18,7 +18,8 @@ export function createServer(): McpServer {
       description:
         'Delegate a prompt to an external LLM CLI (codex = code/shell; antigravity = web research & ' +
         'large context; claude = reasoning/writing/analysis) and return its answer plus a session_id ' +
-        'for follow-ups. The CLI cannot see this Claude conversation — make the prompt self-contained.',
+        'for follow-ups. The CLI does not inherit this Claude conversation — make the prompt self-contained. ' +
+        'Depending on provider permissions, it may use built-in tools in the spawned working directory.',
       inputSchema: {
         provider: ProviderSchema.describe(
           "'codex' (OpenAI): code-heavy or sandboxed-shell work. 'antigravity' (Google): live web " +
@@ -29,7 +30,8 @@ export function createServer(): McpServer {
           .string()
           .min(1)
           .describe(
-            'Self-contained prompt; the CLI has no access to this conversation, the repo, or prior turns.',
+            'Self-contained prompt; the CLI has no access to this Claude conversation or its prior turns. ' +
+              'It may access the working directory and repository through built-in tools according to provider permissions.',
           ),
         tier: TierSchema.optional().describe(
           'Optional capability/cost tier; omit to use the configured default for ' +

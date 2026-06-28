@@ -6,7 +6,8 @@
 
 | Module            | Role                                                                    |
 | ----------------- | ----------------------------------------------------------------------- |
-| `configManager/`  | `~/.claude/plugins/cennad/config.json` 로드·저장                        |
+| `configManager/`  | `${CLAUDE_PLUGIN_DATA}/config.json` 로드·저장                           |
+| `dataHome/`       | 공식 데이터 경로 선택 + legacy 저장소 무손실 이전                       |
 | `counterManager/` | `runtime/counter.json` 으로 provider 호출 카운트 추적 (parent-pid 리셋) |
 | `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                          |
 | `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                            |

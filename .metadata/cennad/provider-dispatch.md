@@ -90,7 +90,7 @@ function resolveCodexEffort(tier: Tier): string | null {
 ### Spawn
 
 - 실행: `agy -p "<prompt>" [--dangerously-skip-permissions] [--model=<model>]`.
-- cwd 는 `~/.claude/plugins/cennad/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리.
+- cwd 는 `${CLAUDE_PLUGIN_DATA}/runtime/antigravity-cwd/<sessionId>/`. 세션마다 격리.
 - agy 는 `--output-format` 플래그가 없어(1.x 가 미정의 플래그로 거부) plain text 를 출력 — `parseJsonOutput` 가 text/json 모두 파싱. 모델은 `--model=<name>` (등호; `-m` 별칭 없음).
 - Sandbox: 미부착. `flags.sandbox` 는 스키마에 남되 항상 false — 복원 게이트는 #76 종결 ([agy-upstream-watch.md](./agy-upstream-watch.md)). `flags.skip_permissions` → `--dangerously-skip-permissions`.
 
@@ -130,7 +130,7 @@ function resolveAntigravityModel(
 
 ### core/agyModels — 모델 캐시
 
-`agy models` 결과를 1시간 TTL 캐시(`~/.claude/plugins/cennad/agy-models.json`)로 관리.
+`agy models` 결과를 1시간 TTL 캐시(`${CLAUDE_PLUGIN_DATA}/agy-models.json`)로 관리.
 
 - `getAvailableModels()`: 캐시 유효 시 반환, 만료 시 `refreshModels()` 호출. refresh 실패 시 stale 캐시 → 빈 배열 순서로 degradation.
 - `refreshModels(now)`: `agy models` 를 15초 타임아웃으로 spawn. 성공 시 파싱 후 원자적 캐시 기록. 실패 시 빈 배열 반환 (throw 없음).

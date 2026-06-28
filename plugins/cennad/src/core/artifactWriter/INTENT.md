@@ -16,7 +16,7 @@
 - 모든 쓰기는 `lib/atomicWrite` 경유 (파일 0o600, 디렉토리 0o700)
 - 파일명 규칙: `<session_id>-<turn>.md`
 - project 모드: `<cwd>/.cennad/artifacts/`
-- user 모드: `~/.claude/plugins/cennad/artifacts/<projectHash>/`
+- user 모드: `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/`
 - 호출자는 `artifacts.enabled` 와 `result.status === 'success'` 를 사전에
   확인하고 호출한다 — 작성기는 호출되면 항상 쓰기를 시도한다
 - 쓰기 실패는 절대 응답을 막지 않는다 — 로그만 남기고 `undefined` 반환

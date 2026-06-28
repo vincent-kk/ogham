@@ -83,7 +83,7 @@ Use antigravity (`agy`) for live web-grounded research, very-large-context synth
 /claude --continue <session_id> -- "Now summarise the agreed action items"
 ```
 
-Use claude for reasoning-heavy analysis, writing, and review tasks where you want a fully isolated Anthropic model invocation. The child `claude` process runs with `--strict-mcp-config --safe-mode` so it never inherits the parent session's MCP servers, hooks, CLAUDE.md, or skills. Permission behaviour is controlled by the `permission_mode` setting in `/setup` (default: `acceptEdits`).
+Use claude for reasoning-heavy analysis, writing, and review tasks where you want a fresh Anthropic model invocation isolated from the parent session's conversation and customizations. The child `claude` process runs with `--strict-mcp-config --safe-mode`, so it never inherits the parent session's MCP servers, hooks, CLAUDE.md, or skills. It can still use Claude Code's built-in tools in the spawned working directory according to `permission_mode` (default: `dontAsk`), configured in `/setup`.
 
 ### Cross-checking Across Providers
 
@@ -110,7 +110,7 @@ Claude Code session
    ├── Dispatcher (codex / antigravity / claude)  spawn external CLI + parse output
    │       │
    │       ▼
-   ├── Core storage                             ~/.claude/plugins/cennad/...
+   ├── Core storage                             ${CLAUDE_PLUGIN_DATA}/...
    │
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only context injection
 ```
@@ -152,10 +152,13 @@ Both hook bundles currently land near 3.3 KB minified and use only Node builtins
 
 ## Disk Layout
 
-cennad stores all state under `~/.claude/plugins/cennad/`:
+cennad stores persistent state under Claude Code's `${CLAUDE_PLUGIN_DATA}`
+directory. On the first run after upgrading, persistent data from the legacy
+`~/.claude/plugins/cennad/` directory is copied without overwriting data already
+present in the new location.
 
 ```
-~/.claude/plugins/cennad/
+${CLAUDE_PLUGIN_DATA}/
 ├── config.json                    # user settings
 ├── runtime/
 │   ├── counter.json               # per-parent-PID call counter
@@ -212,7 +215,7 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [skills](../../.metadata/cennad/skills.md)                       | Skill body + tool-call mapping                  |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli invocation matrix  |
-| [storage](../../.metadata/cennad/storage.md)                     | Disk layout under `~/.claude/plugins/cennad/`   |
+| [storage](../../.metadata/cennad/storage.md)                     | Persistent data layout and legacy migration     |
 | [web-ui](../../.metadata/cennad/web-ui.md)                       | Local settings UI design                        |
 | [roadmap](../../.metadata/cennad/roadmap.md)                     | Phase-by-phase implementation plan              |
 

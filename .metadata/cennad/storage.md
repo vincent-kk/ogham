@@ -1,13 +1,19 @@
-# Storage — `~/.claude/plugins/cennad/`
+# Storage — `${CLAUDE_PLUGIN_DATA}/`
 
-모든 경로는 `os.homedir() + '/.claude/plugins/cennad'` 기준. atlassian 의 `~/.claude/plugins/atlassian/` 와 동일한 Claude 플러그인 데이터 규약.
+설치된 플러그인은 Claude Code가 제공하는 `${CLAUDE_PLUGIN_DATA}`를 기준으로
+상태를 저장한다. 로컬 개발처럼 환경 변수가 없는 실행에서는
+`~/.claude/plugins/cennad/`를 호환 경로로 사용한다.
+
+MCP 서버가 새 데이터 경로에서 처음 시작할 때 legacy 경로의 config,
+sessions, artifacts, Antigravity resume 데이터를 복사한다. 새 경로에 이미
+존재하는 파일은 덮어쓰지 않으며 migration marker로 재실행을 방지한다.
 
 디스크 JSON 키는 `snake_case` 를 유지한다 (atlassian 디스크 스키마와 동일 컨벤션). 내부 TS 타입과 변수는 `camelCase`.
 
 ## 디렉토리 레이아웃
 
 ```
-~/.claude/plugins/cennad/
+${CLAUDE_PLUGIN_DATA}/
 ├── config.json
 ├── sessions/
 │   └── <project_hash>/                # sha256(cwd).slice(0, 12)
@@ -28,9 +34,9 @@
 ```typescript
 interface Config {
   ratio: {
-    codex: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: true }
-    antigravity: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: true }
-    claude: { value: number; enabled: boolean }; // 기본 { value: 50, enabled: true }
+    codex: { value: number; enabled: boolean }; // 기본 { value: 34, enabled: true }
+    antigravity: { value: number; enabled: boolean }; // 기본 { value: 33, enabled: true }
+    claude: { value: number; enabled: boolean }; // 기본 { value: 33, enabled: true }
   };
   intervention_strength: -2 | -1 | 0 | 1 | 2; // 기본 0
   keywords: {
@@ -188,6 +194,6 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 
 ## Artifact Mirror 디스크 사용량
 
-`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `~/.claude/plugins/cennad/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ~/.claude/plugins/cennad/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
+`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ${CLAUDE_PLUGIN_DATA}/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
 
 Retention 자동화는 후속 issue 로 등록 예정.

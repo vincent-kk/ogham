@@ -48,7 +48,7 @@
 ### 경로 레이아웃
 
 - `project` → `<cwd>/.cennad/artifacts/<sessionId>-<turn>.md`
-- `user` → `~/.claude/plugins/cennad/artifacts/<projectHash>/<sessionId>-<turn>.md`
+- `user` → `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/<sessionId>-<turn>.md`
 
 `atomicWrite` 가 부모 디렉토리를 `0o700` 으로 생성하고 파일을 `0o600` 으로
 쓴다 (`lib/atomicWrite` 기본값 상속).

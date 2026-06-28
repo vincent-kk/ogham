@@ -1,4 +1,6 @@
-import { rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -38,6 +40,23 @@ describe('injectStatic (Layer B)', () => {
         'very conservative',
       ],
     });
+  });
+
+  it('reads legacy config before MCP startup migrates plugin data', async () => {
+    await writeConfigFixture('custom');
+    const dataHome = await mkdtemp(join(tmpdir(), 'cennad-plugin-data-'));
+    try {
+      const result = runHookLayerB('injectStatic', {
+        env: { CLAUDE_PLUGIN_DATA: dataHome },
+      });
+      expect(result.exitCode).toBe(0);
+      assertHookEnvelope(result.parsed, {
+        event: 'SessionStart',
+        contextIncludes: ['codex 30%', 'antigravity 70%'],
+      });
+    } finally {
+      await rm(dataHome, { recursive: true, force: true });
+    }
   });
 
   it('disabled providers — Active providers: none — run /setup', async () => {

@@ -35,7 +35,7 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 ### Never do
 
 - entry 파일에 비즈니스 로직
-- `~/.claude/plugins/cennad/` 외부 경로 read
+- `${CLAUDE_PLUGIN_DATA}/` read (MCP 최초 이전 전에는 legacy config fallback)
 - counter 파일 write (read-only — counterManager 전담)
 
 ## Dependencies

@@ -83,7 +83,7 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 /claude --continue <session_id> -- "이전 분석을 이어서 계속해줘"
 ```
 
-추론·분석·작성·코드 리뷰, 또는 격리된 Anthropic 모델 인스턴스의 second opinion 이 필요할 때 사용하세요. `--strict-mcp-config` 와 `--safe-mode` 가 항상 부착되어 자식 프로세스가 부모 세션의 MCP 서버, 훅, CLAUDE.md, 스킬을 상속하지 않습니다.
+추론·분석·작성·코드 리뷰에서 부모 세션의 대화와 사용자 정의로부터 분리된 새 Anthropic 모델 호출이 필요할 때 사용하세요. `--strict-mcp-config` 와 `--safe-mode` 가 항상 부착되어 자식 프로세스가 부모 세션의 MCP 서버, 훅, CLAUDE.md, 스킬을 상속하지 않습니다. 다만 설정된 `permission_mode`(기본값: `dontAsk`)에 따라 Claude Code 내장 도구로 실행 작업 디렉터리에 접근할 수 있습니다.
 
 ### Provider 교차 검증
 
@@ -110,7 +110,7 @@ Claude Code session
    ├── Dispatcher (codex / antigravity / claude)  외부 CLI spawn + 출력 파싱
    │       │
    │       ▼
-   ├── Core storage                             ~/.claude/plugins/cennad/...
+   ├── Core storage                             ${CLAUDE_PLUGIN_DATA}/...
    │
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only 컨텍스트 주입
 ```
@@ -152,10 +152,13 @@ Claude Code session
 
 ## 디스크 레이아웃
 
-cennad 의 모든 상태는 `~/.claude/plugins/cennad/` 하위에 저장됩니다:
+cennad 의 영구 상태는 Claude Code의 `${CLAUDE_PLUGIN_DATA}` 디렉터리에
+저장됩니다. 업그레이드 후 처음 실행할 때 기존
+`~/.claude/plugins/cennad/`의 영구 데이터는 새 위치의 기존 데이터를
+덮어쓰지 않는 방식으로 복사됩니다.
 
 ```
-~/.claude/plugins/cennad/
+${CLAUDE_PLUGIN_DATA}/
 ├── config.json                    # 사용자 설정
 ├── runtime/
 │   ├── counter.json               # parent-PID 기준 호출 카운터
@@ -212,7 +215,7 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 | [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + 도구 호출 매핑                  |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit 주입        |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli 호출 매트릭스  |
-| [storage](../../.metadata/cennad/storage.md)                     | `~/.claude/plugins/cennad/` 디스크 레이아웃 |
+| [storage](../../.metadata/cennad/storage.md)                     | 영구 데이터 레이아웃 및 legacy 마이그레이션 |
 | [web-ui](../../.metadata/cennad/web-ui.md)                       | 로컬 설정 UI 설계                           |
 | [roadmap](../../.metadata/cennad/roadmap.md)                     | 단계별 구현 계획                            |
 

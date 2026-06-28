@@ -29,6 +29,7 @@ describe('settings page ratio controls', () => {
 
     expect(statusFunction).not.toBeNull();
     expect(statusFunction?.[0]).not.toContain('distributeEvenly()');
+    expect(statusFunction?.[0]).not.toContain('ratioState[p].enabled = false');
     expect(statusFunction?.[0]).toContain('renderRatio()');
   });
 
@@ -50,5 +51,12 @@ describe('settings page ratio controls', () => {
 
     expect(css).toContain(".tier-field[data-layout='model-effort']");
     expect(css).toContain('grid-template-columns: minmax(52px, auto) 1fr 1fr');
+  });
+
+  it('describes user artifacts under CLAUDE_PLUGIN_DATA', () => {
+    const html = readSettingsFile('index.html');
+
+    expect(html).toContain('${CLAUDE_PLUGIN_DATA}/artifacts/');
+    expect(html).not.toContain('~/.claude/plugins/cennad/artifacts/');
   });
 });

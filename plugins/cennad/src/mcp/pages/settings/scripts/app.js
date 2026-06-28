@@ -172,7 +172,11 @@
       enabled: DEFAULT_RATIO.claude.enabled,
     },
   };
-  var providerAvailable = { codex: true, antigravity: true, claude: true };
+  var providerStatus = {
+    codex: 'available',
+    antigravity: 'available',
+    claude: 'available',
+  };
   var agyModels = [];
   var antigravityModelMap = { high: '', mid: '', low: '' };
   var claudeModelMap = {
@@ -313,10 +317,22 @@
       var el = refs[p];
       el.pct.textContent = st.enabled ? st.value + '%' : 'OFF';
       el.toggle.setAttribute('aria-checked', String(st.enabled));
-      el.toggle.setAttribute('data-unavailable', String(!providerAvailable[p]));
-      el.hint.textContent = providerAvailable[p]
-        ? 'click to toggle'
-        : 'not installed';
+      var statusValue = providerStatus[p];
+      el.toggle.setAttribute(
+        'data-unavailable',
+        String(statusValue === 'unavailable'),
+      );
+      el.toggle.setAttribute('data-provider-status', statusValue);
+      el.hint.textContent =
+        statusValue === 'available'
+          ? 'click to toggle'
+          : statusValue === 'unavailable'
+            ? st.enabled
+              ? 'enabled · not installed'
+              : 'not installed'
+            : st.enabled
+              ? 'enabled · status unknown'
+              : 'status check failed';
     });
     clearRatioBar();
     renderRatioSegments(active);
@@ -400,11 +416,11 @@
   }
 
   function toggleProvider(p) {
-    if (!providerAvailable[p]) return;
     var st = ratioState[p];
     if (st.enabled) {
       st.enabled = false;
     } else {
+      if (providerStatus[p] !== 'available') return;
       st.enabled = true;
     }
     distributeEvenly();
@@ -452,7 +468,7 @@
 
   function updateInstallHints() {
     PROVIDERS.forEach(function (p) {
-      refs[p].installHint.hidden = providerAvailable[p];
+      refs[p].installHint.hidden = providerStatus[p] !== 'unavailable';
     });
   }
 
@@ -587,9 +603,9 @@
   function syncAdvancedToggleAvailability() {
     PROVIDERS.forEach(function (p) {
       var el = refs[p];
-      el.advancedToggle.disabled = !providerAvailable[p];
+      el.advancedToggle.disabled = providerStatus[p] !== 'available';
       if (
-        !providerAvailable[p] &&
+        providerStatus[p] !== 'available' &&
         el.advancedToggle.getAttribute('aria-expanded') === 'true'
       ) {
         el.advancedToggle.setAttribute('aria-expanded', 'false');
@@ -1029,19 +1045,20 @@
       var res = await fetch(withToken('/provider-status'));
       if (!res.ok) return;
       var body = await res.json();
-      providerAvailable.codex = Boolean(body.codex && body.codex.available);
-      providerAvailable.antigravity = Boolean(
-        body.antigravity && body.antigravity.available,
-      );
-      providerAvailable.claude = Boolean(body.claude && body.claude.available);
+      PROVIDERS.forEach(function (p) {
+        var statusValue = body[p] && body[p].status;
+        providerStatus[p] =
+          statusValue === 'available' ||
+          statusValue === 'unavailable' ||
+          statusValue === 'unknown'
+            ? statusValue
+            : 'unknown';
+      });
       agyModels = Array.isArray(body.agyModels) ? body.agyModels : [];
       bindAgyModelOptions(agyModels);
     } catch (e) {
       return;
     }
-    PROVIDERS.forEach(function (p) {
-      if (!providerAvailable[p]) ratioState[p].enabled = false;
-    });
     updateInstallHints();
     renderRatio();
     syncAdvancedToggleAvailability();

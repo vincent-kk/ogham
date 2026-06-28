@@ -306,14 +306,14 @@ cennad 가 claude CLI 를 다음과 같이 호출한다.
 
 ## 런타임 경로
 
-| 상수                    | 경로                                                    | 용도                                  |
-| ----------------------- | ------------------------------------------------------- | ------------------------------------- |
-| `CONFIG_PATH`           | `~/.claude/plugins/cennad/config.json`                  | 설정                                  |
-| `SESSIONS_DIR`          | `~/.claude/plugins/cennad/sessions/`                    | 세션 store                            |
-| `COUNTER_PATH`          | `~/.claude/plugins/cennad/runtime/counter.json`         | 사용량 카운터                         |
-| `SETTINGS_SERVER_PATH`  | `~/.claude/plugins/cennad/runtime/settings_server.json` | 설정 서버 PID                         |
-| `ANTIGRAVITY_CWD_DIR`   | `~/.claude/plugins/cennad/runtime/antigravity-cwd/`     | agy 세션별 cwd (= externalSessionRef) |
-| `AGY_MODELS_CACHE_PATH` | `~/.claude/plugins/cennad/runtime/agy-models.json`      | agy 모델 캐시                         |
+| 상수                    | 경로                                                 | 용도                                  |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------- |
+| `CONFIG_PATH`           | `${CLAUDE_PLUGIN_DATA}/config.json`                  | 설정                                  |
+| `SESSIONS_DIR`          | `${CLAUDE_PLUGIN_DATA}/sessions/`                    | 세션 store                            |
+| `COUNTER_PATH`          | `${CLAUDE_PLUGIN_DATA}/runtime/counter.json`         | 사용량 카운터                         |
+| `SETTINGS_SERVER_PATH`  | `${CLAUDE_PLUGIN_DATA}/runtime/settings_server.json` | 설정 서버 PID                         |
+| `ANTIGRAVITY_CWD_DIR`   | `${CLAUDE_PLUGIN_DATA}/runtime/antigravity-cwd/`     | agy 세션별 cwd (= externalSessionRef) |
+| `AGY_MODELS_CACHE_PATH` | `${CLAUDE_PLUGIN_DATA}/runtime/agy-models.json`      | agy 모델 캐시                         |
 
 ## 외부 의존성
 
