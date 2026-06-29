@@ -910,7 +910,11 @@
             <p class="flag-hint">
               <code>project</code> →
               <code>&lt;cwd&gt;/.cennad/artifacts/</code>. <code>user</code> →
-              <code>${CLAUDE_PLUGIN_DATA}/artifacts/&lt;projectHash&gt;/</code>.
+              <code
+                >&lt;active cennad home&gt;/artifacts/&lt;projectHash&gt;/</code
+              >. The active home defaults to
+              <code>~/.claude/plugins/cennad/</code> and follows
+              <code>CENNAD_CONFIG_PATH</code> when set.
             </p>
           </div>
         </section>
