@@ -2,8 +2,8 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-// Redirect `homedir()` to a per-test-file tmp dir so cennad's CENNAD_HOME
-// (= `<home>/.claude/plugins/cennad`) operates inside an isolated sandbox.
+// Redirect `homedir()` to a per-test-file tmp dir so cennad's default
+// CENNAD_HOME (= `<home>/.claude/plugins/cennad`) operates inside a sandbox.
 // `os.homedir()` reads HOME on POSIX but USERPROFILE on Windows, so BOTH must
 // be set — otherwise Windows runs fall back to the real global dir, where
 // parallel workers race on `atomicWrite`'s rename and surface as flaky EPERM.

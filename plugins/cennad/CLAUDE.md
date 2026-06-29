@@ -29,7 +29,7 @@ MCP "tools" server                                Layer 2 (logic) — 3 MCP 도�
 Dispatcher (codex / antigravity / claude)         외부 CLI spawn, JSONL 파싱, envelope 빌드
         │
         ▼
-Core storage                                      ${CLAUDE_PLUGIN_DATA}/{config, runtime, sessions}
+Core storage                                      ~/.claude/plugins/cennad/{config, runtime, sessions}
         │
         ▲
 Hooks (SessionStart, UserPromptSubmit)            Layer 1 (auto) — read-only context injection

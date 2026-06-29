@@ -110,7 +110,7 @@ Claude Code session
    ├── Dispatcher (codex / antigravity / claude)  외부 CLI spawn + 출력 파싱
    │       │
    │       ▼
-   ├── Core storage                             ${CLAUDE_PLUGIN_DATA}/...
+   ├── Core storage                             ~/.claude/plugins/cennad/...
    │
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only 컨텍스트 주입
 ```
@@ -152,13 +152,17 @@ Claude Code session
 
 ## 디스크 레이아웃
 
-cennad 의 영구 상태는 Claude Code의 `${CLAUDE_PLUGIN_DATA}` 디렉터리에
-저장됩니다. 업그레이드 후 처음 실행할 때 기존
-`~/.claude/plugins/cennad/`의 영구 데이터는 새 위치의 기존 데이터를
-덮어쓰지 않는 방식으로 복사됩니다.
+cennad 의 영구 상태는 기본적으로 `~/.claude/plugins/cennad/` 디렉터리에
+저장됩니다. 전용 위치가 필요하면 `CENNAD_CONFIG_PATH` 로 cennad 전용
+디렉터리를 지정할 수 있습니다.
+`CLAUDE_PLUGIN_DATA` 와 `CLAUDE_PLUGIN_DADA` 는 cennad 저장 경로로 사용하지
+않습니다. 별도 home 의 config 를 읽을 수 없을 때는
+`~/.claude/plugins/cennad/config.json` 을 읽기 전용 fallback 으로 시도할 수
+있지만, 파일을 복사·마이그레이션하지 않으며 저장은 계속 active home 에
+수행됩니다.
 
 ```
-${CLAUDE_PLUGIN_DATA}/
+~/.claude/plugins/cennad/
 ├── config.json                    # 사용자 설정
 ├── runtime/
 │   ├── counter.json               # parent-PID 기준 호출 카운터
@@ -206,18 +210,18 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod.
 
 기술 세부사항 및 설계 결정은 [`.metadata/cennad/`](../../.metadata/cennad/) 참조:
 
-| 문서                                                             | 내용                                        |
-| ---------------------------------------------------------------- | ------------------------------------------- |
-| [README](../../.metadata/cennad/README.md)                       | 스펙 인덱스 + 핵심 결정                     |
-| [spec](../../.metadata/cennad/spec.md)                           | 책임 분리·데이터 흐름·비채택 사항           |
-| [architecture](../../.metadata/cennad/architecture.md)           | 모듈 트리·의존 방향·빌드 파이프라인         |
-| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP 도구 (입력 스키마·동작·envelope)      |
-| [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + 도구 호출 매핑                  |
-| [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit 주입        |
-| [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli 호출 매트릭스  |
-| [storage](../../.metadata/cennad/storage.md)                     | 영구 데이터 레이아웃 및 legacy 마이그레이션 |
-| [web-ui](../../.metadata/cennad/web-ui.md)                       | 로컬 설정 UI 설계                           |
-| [roadmap](../../.metadata/cennad/roadmap.md)                     | 단계별 구현 계획                            |
+| 문서                                                             | 내용                                       |
+| ---------------------------------------------------------------- | ------------------------------------------ |
+| [README](../../.metadata/cennad/README.md)                       | 스펙 인덱스 + 핵심 결정                    |
+| [spec](../../.metadata/cennad/spec.md)                           | 책임 분리·데이터 흐름·비채택 사항          |
+| [architecture](../../.metadata/cennad/architecture.md)           | 모듈 트리·의존 방향·빌드 파이프라인        |
+| [mcp-tools](../../.metadata/cennad/mcp-tools.md)                 | 3 MCP 도구 (입력 스키마·동작·envelope)     |
+| [skills](../../.metadata/cennad/skills.md)                       | 스킬 본문 + 도구 호출 매핑                 |
+| [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit 주입       |
+| [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli 호출 매트릭스 |
+| [storage](../../.metadata/cennad/storage.md)                     | 영구 데이터 레이아웃 및 config fallback    |
+| [web-ui](../../.metadata/cennad/web-ui.md)                       | 로컬 설정 UI 설계                          |
+| [roadmap](../../.metadata/cennad/roadmap.md)                     | 단계별 구현 계획                           |
 
 [English documentation (README.md)](./README.md) is also available.
 

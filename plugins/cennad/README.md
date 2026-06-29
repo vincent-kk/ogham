@@ -110,7 +110,7 @@ Claude Code session
    ├── Dispatcher (codex / antigravity / claude)  spawn external CLI + parse output
    │       │
    │       ▼
-   ├── Core storage                             ${CLAUDE_PLUGIN_DATA}/...
+   ├── Core storage                             ~/.claude/plugins/cennad/...
    │
    └── Hooks (SessionStart, UserPromptSubmit)   Layer 1 (auto) — read-only context injection
 ```
@@ -152,13 +152,15 @@ Both hook bundles currently land near 3.3 KB minified and use only Node builtins
 
 ## Disk Layout
 
-cennad stores persistent state under Claude Code's `${CLAUDE_PLUGIN_DATA}`
-directory. On the first run after upgrading, persistent data from the legacy
-`~/.claude/plugins/cennad/` directory is copied without overwriting data already
-present in the new location.
+cennad stores persistent state under `~/.claude/plugins/cennad/` by default.
+Set `CENNAD_CONFIG_PATH` to point cennad at a dedicated alternate directory.
+`CLAUDE_PLUGIN_DATA` and `CLAUDE_PLUGIN_DADA` are ignored for cennad storage.
+If an alternate home has no readable config, cennad may read
+`~/.claude/plugins/cennad/config.json` as a read-only fallback; it does not copy
+or migrate that file, and saves still go to the active home.
 
 ```
-${CLAUDE_PLUGIN_DATA}/
+~/.claude/plugins/cennad/
 ├── config.json                    # user settings
 ├── runtime/
 │   ├── counter.json               # per-parent-PID call counter
@@ -215,7 +217,7 @@ For technical details and design rationale, see [`.metadata/cennad/`](../../.met
 | [skills](../../.metadata/cennad/skills.md)                       | Skill body + tool-call mapping                  |
 | [hooks](../../.metadata/cennad/hooks.md)                         | SessionStart / UserPromptSubmit injection       |
 | [provider-dispatch](../../.metadata/cennad/provider-dispatch.md) | codex-cli / agy / claude-cli invocation matrix  |
-| [storage](../../.metadata/cennad/storage.md)                     | Persistent data layout and legacy migration     |
+| [storage](../../.metadata/cennad/storage.md)                     | Persistent data layout and config fallback      |
 | [web-ui](../../.metadata/cennad/web-ui.md)                       | Local settings UI design                        |
 | [roadmap](../../.metadata/cennad/roadmap.md)                     | Phase-by-phase implementation plan              |
 

@@ -1,11 +1,11 @@
 import type { ProviderRatio } from './configTypes.js';
-import { isObj } from './isObj.js';
+import { isPlainObject } from './isPlainObject.js';
 
 export function pickProviderRatio(
   raw: unknown,
   fallback: ProviderRatio,
 ): ProviderRatio {
-  if (!isObj(raw)) return fallback;
+  if (!isPlainObject(raw)) return fallback;
   const rawValue = raw.value;
   const rawEnabled = raw.enabled;
   const value =

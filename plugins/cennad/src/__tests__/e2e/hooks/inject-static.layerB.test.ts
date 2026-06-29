@@ -42,7 +42,7 @@ describe('injectStatic (Layer B)', () => {
     });
   });
 
-  it('reads legacy config before MCP startup migrates plugin data', async () => {
+  it('ignores CLAUDE_PLUGIN_DATA and reads the default cennad config', async () => {
     await writeConfigFixture('custom');
     const dataHome = await mkdtemp(join(tmpdir(), 'cennad-plugin-data-'));
     try {

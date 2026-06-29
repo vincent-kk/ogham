@@ -1,15 +1,47 @@
-import { mkdir, rm, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { pluginCache } from '@ogham/cross-platform/paths';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_CONFIG } from '../../../constants/defaults.js';
 import { CENNAD_HOME, CONFIG_PATH } from '../../../constants/paths.js';
 import { loadConfig } from '../operations/loadConfig.js';
 
+const ORIGINAL_CENNAD_CONFIG_PATH = process.env.CENNAD_CONFIG_PATH;
+const ORIGINAL_CLAUDE_PLUGIN_DATA = process.env.CLAUDE_PLUGIN_DATA;
+const ORIGINAL_CLAUDE_PLUGIN_DADA = process.env.CLAUDE_PLUGIN_DADA;
+
 async function writeConfigFile(content: string): Promise<void> {
   await mkdir(dirname(CONFIG_PATH), { recursive: true });
   await writeFile(CONFIG_PATH, content);
+}
+
+async function writeConfigAt(path: string, content: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
+}
+
+function restoreEnv(name: string, value: string | undefined): void {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
+}
+
+async function loadConfigForHome(home: string): Promise<{
+  loadConfig: typeof import('../operations/loadConfig.js').loadConfig;
+  CONFIG_PATH: string;
+}> {
+  process.env.CENNAD_CONFIG_PATH = home;
+  vi.resetModules();
+  const [{ loadConfig }, { CONFIG_PATH }] = await Promise.all([
+    import('../operations/loadConfig.js'),
+    import('../../../constants/paths.js'),
+  ]);
+  return { loadConfig, CONFIG_PATH };
 }
 
 describe('loadConfig', () => {
@@ -18,6 +50,10 @@ describe('loadConfig', () => {
   });
 
   afterEach(async () => {
+    restoreEnv('CENNAD_CONFIG_PATH', ORIGINAL_CENNAD_CONFIG_PATH);
+    restoreEnv('CLAUDE_PLUGIN_DATA', ORIGINAL_CLAUDE_PLUGIN_DATA);
+    restoreEnv('CLAUDE_PLUGIN_DADA', ORIGINAL_CLAUDE_PLUGIN_DADA);
+    vi.resetModules();
     await rm(CENNAD_HOME, { recursive: true, force: true });
   });
 
@@ -202,5 +238,64 @@ describe('loadConfig', () => {
   it('falls back to defaults when top-level value is not an object', async () => {
     await writeConfigFile('"hello"');
     expect(await loadConfig()).toEqual(DEFAULT_CONFIG);
+  });
+
+  it('reads plugin cache config as fallback when active config is missing', async () => {
+    const activeHome = await mkdtemp(join(tmpdir(), 'cennad-active-home-'));
+    const active = await loadConfigForHome(activeHome);
+    const fallbackConfig = {
+      ratio: { codex: { value: 25, enabled: true } },
+      keywords: { codex: 'from fallback' },
+    };
+    await writeConfigAt(
+      join(pluginCache('cennad'), 'config.json'),
+      JSON.stringify(fallbackConfig),
+    );
+
+    const result = await active.loadConfig();
+
+    expect(result.ratio.codex).toEqual({ value: 25, enabled: true });
+    expect(result.keywords.codex).toBe('from fallback');
+    await expect(readFile(active.CONFIG_PATH, 'utf8')).rejects.toThrow();
+    await rm(activeHome, { recursive: true, force: true });
+  });
+
+  it('reads plugin cache config as fallback when active config cannot be parsed', async () => {
+    const activeHome = await mkdtemp(join(tmpdir(), 'cennad-active-home-'));
+    const active = await loadConfigForHome(activeHome);
+    await writeConfigAt(active.CONFIG_PATH, '{not valid json');
+    await writeConfigAt(
+      join(pluginCache('cennad'), 'config.json'),
+      JSON.stringify({ keywords: { codex: 'parse fallback' } }),
+    );
+
+    const result = await active.loadConfig();
+
+    expect(result.keywords.codex).toBe('parse fallback');
+    await expect(readFile(active.CONFIG_PATH, 'utf8')).resolves.toBe(
+      '{not valid json',
+    );
+    await rm(activeHome, { recursive: true, force: true });
+  });
+
+  it('does not use Claude plugin data env paths as fallback sources', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'cennad-plugin-data-'));
+    const activeHome = join(root, 'active');
+    const pluginDataHome = join(root, 'official-data');
+    const pluginDadaHome = join(root, 'official-dada');
+    process.env.CLAUDE_PLUGIN_DATA = pluginDataHome;
+    process.env.CLAUDE_PLUGIN_DADA = pluginDadaHome;
+    const active = await loadConfigForHome(activeHome);
+    await writeConfigAt(
+      join(pluginDataHome, 'config.json'),
+      JSON.stringify({ keywords: { codex: 'plugin data' } }),
+    );
+    await writeConfigAt(
+      join(pluginDadaHome, 'config.json'),
+      JSON.stringify({ keywords: { codex: 'plugin dada' } }),
+    );
+
+    await expect(active.loadConfig()).resolves.toEqual(DEFAULT_CONFIG);
+    await rm(root, { recursive: true, force: true });
   });
 });

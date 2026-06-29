@@ -3,16 +3,15 @@ import { join } from 'node:path';
 
 import { pluginCache } from '@ogham/cross-platform/paths';
 
-export const LEGACY_CENNAD_HOME = pluginCache('cennad');
-
 export function resolveCennadHome(
-  pluginData: string | undefined = process.env.CLAUDE_PLUGIN_DATA,
+  configPath: string | undefined = process.env.CENNAD_CONFIG_PATH,
 ): string {
-  return pluginData && pluginData.trim() !== ''
-    ? pluginData
-    : LEGACY_CENNAD_HOME;
+  return configPath && configPath.trim() !== ''
+    ? configPath.trim()
+    : DEFAULT_CENNAD_HOME;
 }
 
+export const DEFAULT_CENNAD_HOME = pluginCache('cennad');
 export const CENNAD_HOME = resolveCennadHome();
 
 // agy's GLOBAL data root (outside CENNAD_HOME), homedir-based on both POSIX and
@@ -43,7 +42,7 @@ export function agyTranscriptPath(convId: string): string {
 }
 
 export const CONFIG_PATH = join(CENNAD_HOME, 'config.json');
-export const LEGACY_CONFIG_PATH = join(LEGACY_CENNAD_HOME, 'config.json');
+export const FALLBACK_CONFIG_PATH = join(DEFAULT_CENNAD_HOME, 'config.json');
 export const SESSIONS_DIR = join(CENNAD_HOME, 'sessions');
 export const RUNTIME_DIR = join(CENNAD_HOME, 'runtime');
 export const COUNTER_PATH = join(RUNTIME_DIR, 'counter.json');

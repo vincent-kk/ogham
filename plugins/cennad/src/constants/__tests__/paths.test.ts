@@ -1,7 +1,7 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   CENNAD_HOME,
@@ -14,16 +14,58 @@ import {
   sessionPath,
 } from '../paths.js';
 
+const ORIGINAL_CLAUDE_PLUGIN_DATA = process.env.CLAUDE_PLUGIN_DATA;
+const ORIGINAL_CLAUDE_PLUGIN_DADA = process.env.CLAUDE_PLUGIN_DADA;
+const ORIGINAL_CENNAD_CONFIG_PATH = process.env.CENNAD_CONFIG_PATH;
+
+function restoreEnv(name: string, value: string | undefined): void {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
+}
+
 describe('paths', () => {
-  it('places CENNAD_HOME under ~/.claude/plugins/cennad', () => {
+  afterEach(() => {
+    restoreEnv('CLAUDE_PLUGIN_DATA', ORIGINAL_CLAUDE_PLUGIN_DATA);
+    restoreEnv('CLAUDE_PLUGIN_DADA', ORIGINAL_CLAUDE_PLUGIN_DADA);
+    restoreEnv('CENNAD_CONFIG_PATH', ORIGINAL_CENNAD_CONFIG_PATH);
+  });
+
+  it('places CENNAD_HOME under ~/.claude/plugins/cennad by default', () => {
     expect(CENNAD_HOME).toBe(join(homedir(), '.claude', 'plugins', 'cennad'));
   });
 
-  it('prefers CLAUDE_PLUGIN_DATA when supplied and ignores blank values', () => {
-    expect(resolveCennadHome('/tmp/cennad-data')).toBe('/tmp/cennad-data');
-    expect(resolveCennadHome('  ')).toBe(
+  it('prefers CENNAD_CONFIG_PATH and ignores CLAUDE_PLUGIN_DATA', () => {
+    process.env.CLAUDE_PLUGIN_DATA = '/tmp/claude-official-data';
+    process.env.CENNAD_CONFIG_PATH = '/tmp/cennad-data';
+
+    expect(resolveCennadHome()).toBe('/tmp/cennad-data');
+  });
+
+  it('ignores CLAUDE_PLUGIN_DATA when resolving the default home', () => {
+    process.env.CLAUDE_PLUGIN_DATA = '/tmp/claude-official-data';
+    process.env.CLAUDE_PLUGIN_DADA = '/tmp/claude-official-dada';
+    delete process.env.CENNAD_CONFIG_PATH;
+
+    expect(resolveCennadHome()).toBe(
       join(homedir(), '.claude', 'plugins', 'cennad'),
     );
+  });
+
+  it('ignores blank CENNAD_CONFIG_PATH values', () => {
+    process.env.CENNAD_CONFIG_PATH = '  ';
+
+    expect(resolveCennadHome()).toBe(
+      join(homedir(), '.claude', 'plugins', 'cennad'),
+    );
+  });
+
+  it('trims CENNAD_CONFIG_PATH consistently with hook path resolution', () => {
+    process.env.CENNAD_CONFIG_PATH = '  /tmp/cennad-data  ';
+
+    expect(resolveCennadHome()).toBe('/tmp/cennad-data');
   });
 
   it('nests CONFIG_PATH inside CENNAD_HOME', () => {

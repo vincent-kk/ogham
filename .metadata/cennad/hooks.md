@@ -70,7 +70,7 @@ src/hooks/
 │       ├── loadCounter.ts           # fs read + parent-pid 비교 후 0 표시 결정
 │       └── formatRatio.ts           # current vs target ratio + drift
 └── shared/                          # LCA organ — 두 hook 이 공유
-    ├── paths.ts                     # CENNAD_HOME (= ${CLAUDE_PLUGIN_DATA}) 등 빌드 시 inline
+    ├── paths.ts                     # CENNAD_HOME (기본 pluginCache('cennad'), env override) 등 빌드 시 inline
     ├── safeReadJson.ts
     ├── nowIso.ts
     ├── configTypes.ts               # HookConfig, HookCounter, Ratio, ProviderRatio, OptionFlags, ...
@@ -120,7 +120,11 @@ HookCounter {
 
 세션당 1회 stdout 출력.
 
-입력: `${CLAUDE_PLUGIN_DATA}/config.json` (없으면 defaults).
+입력: `<CENNAD_HOME>/config.json`. `<CENNAD_HOME>` 은 기본
+`~/.claude/plugins/cennad` 이며 non-blank `CENNAD_CONFIG_PATH` 로 override
+가능하다. 별도 home 의 config 가 없거나 JSON/object 로 읽을 수 없으면 기본
+home 의 config 를 읽기 전용 fallback 으로 시도하고, 둘 다 읽을 수 없으면
+defaults 를 사용한다.
 
 `config.ratio` 는 `{ codex: { value, enabled }, antigravity: { value, enabled }, claude: { value, enabled } }` (백분율 + 활성 플래그). 레거시 정수 비율은 `pickRatio` 에서 백분율 + enabled 로 마이그레이션해 표시. hook 은 read-only 이므로 디스크 파일은 다음 MCP write 때 정규화된다.
 
@@ -165,7 +169,7 @@ Tone phrase:
 
 매 턴 stdout 출력.
 
-입력: `${CLAUDE_PLUGIN_DATA}/runtime/counter.json` (없으면 0/0 으로 표시).
+입력: `<CENNAD_HOME>/runtime/counter.json` (없으면 0/0 으로 표시).
 
 출력 (호출 ≥ 1):
 

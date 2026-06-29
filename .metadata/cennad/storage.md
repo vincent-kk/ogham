@@ -1,19 +1,26 @@
-# Storage — `${CLAUDE_PLUGIN_DATA}/`
+# Storage — `~/.claude/plugins/cennad/`
 
-설치된 플러그인은 Claude Code가 제공하는 `${CLAUDE_PLUGIN_DATA}`를 기준으로
-상태를 저장한다. 로컬 개발처럼 환경 변수가 없는 실행에서는
-`~/.claude/plugins/cennad/`를 호환 경로로 사용한다.
+cennad 는 기본적으로 `pluginCache('cennad')`
+(`~/.claude/plugins/cennad/`) 아래에 영구 상태를 저장한다. 전용 위치가
+필요하면 `CENNAD_CONFIG_PATH` 에 non-blank 디렉터리 경로를 지정한다.
 
-MCP 서버가 새 데이터 경로에서 처음 시작할 때 legacy 경로의 config,
-sessions, artifacts, Antigravity resume 데이터를 복사한다. 새 경로에 이미
-존재하는 파일은 덮어쓰지 않으며 migration marker로 재실행을 방지한다.
+Claude Code 가 주입하는 공식 plugin data path(`CLAUDE_PLUGIN_DATA`)와 오타
+가능성이 있는 `CLAUDE_PLUGIN_DADA` 는 cennad home 결정, config fallback,
+마이그레이션 source 로 사용하지 않는다. `~/.claude/plugins/data/` 류
+경로에서 자동 복사하는 migration 도 없다.
+
+단, `CENNAD_CONFIG_PATH` 를 별도 active home 으로 지정했고 active
+`config.json` 이 없거나 JSON/object 로 읽을 수 없을 때는
+`pluginCache('cennad')/config.json` 을 읽기 전용 fallback source 로 한 번
+시도한다. 이 fallback 은 파일을 생성·복사하지 않으며, 이후 저장은 항상
+active home 의 `config.json` 에 수행된다.
 
 디스크 JSON 키는 `snake_case` 를 유지한다 (atlassian 디스크 스키마와 동일 컨벤션). 내부 TS 타입과 변수는 `camelCase`.
 
 ## 디렉토리 레이아웃
 
 ```
-${CLAUDE_PLUGIN_DATA}/
+~/.claude/plugins/cennad/
 ├── config.json
 ├── sessions/
 │   └── <project_hash>/                # sha256(cwd).slice(0, 12)
@@ -79,7 +86,7 @@ interface Config {
 }
 ```
 
-검증: `types/config.ts` 의 Zod 스키마. 누락 필드는 defaults 와 병합. 파싱 실패 시 defaults 사용 + stderr 경고. `/setup` 호출 시 `pruneConfigFile` 이 제거된 프로바이더 키와 레거시 정수 ratio 를 정리한다.
+검증: `types/config.ts` 의 Zod 스키마. 누락 필드는 defaults 와 병합. active 파일 누락·JSON 파싱 실패·top-level non-object 는 읽기 전용 fallback config read 대상이다. fallback source 도 없거나 읽을 수 없으면 defaults 사용 + stderr 경고. `mergeWithDefaults`/normalize 가 처리하는 구형·부분 invalid config 는 fallback source 로 넘기지 않는다. `/setup` 호출 시 `pruneConfigFile` 이 제거된 프로바이더 키와 레거시 정수 ratio 를 정리한다.
 
 ## 세션 메타데이터 — `sessions/<hash>/<session_id>.json`
 
@@ -194,6 +201,6 @@ agy --continue -p <prompt> [--dangerously-skip-permissions] [--model=<name>]
 
 ## Artifact Mirror 디스크 사용량
 
-`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `${CLAUDE_PLUGIN_DATA}/artifacts/<projectHash>/` 경로에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ${CLAUDE_PLUGIN_DATA}/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
+`artifacts.enabled=true` 인 상태에서 `location: user` 를 사용하면 `~/.claude/plugins/cennad/artifacts/<projectHash>/` 경로(`CENNAD_CONFIG_PATH` 설정 시 해당 home 하위)에 turn 단위로 `.md` 파일이 누적된다. 본 패키지는 자동 retention 정책을 적용하지 않으므로 디스크 사용량은 **사용자가 직접 관리**해야 한다. 정기 정리 예: `find ~/.claude/plugins/cennad/artifacts -type f -name '*.md' -mtime +30 -delete` (30일 초과 파일 삭제). `location: project` 의 경우 프로젝트 git 정책에 따른다 (대부분 `.gitignore` 등록 권장).
 
 Retention 자동화는 후속 issue 로 등록 예정.

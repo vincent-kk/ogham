@@ -4,17 +4,16 @@
 
 ## Structure
 
-| Module            | Role                                                                    |
-| ----------------- | ----------------------------------------------------------------------- |
-| `configManager/`  | `${CLAUDE_PLUGIN_DATA}/config.json` 로드·저장                           |
-| `dataHome/`       | 공식 데이터 경로 선택 + legacy 저장소 무손실 이전                       |
-| `counterManager/` | `runtime/counter.json` 으로 provider 호출 카운트 추적 (parent-pid 리셋) |
-| `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                          |
-| `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                            |
-| `authToken/`      | settings web UI 일회용 토큰 발급·검증                                   |
-| `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                       |
-| `agyModels/`      | `agy models` CLI 출력 캐싱 → 사용 가능한 Antigravity 모델 목록 제공     |
-| `youtubeMcp/`     | yt-dlp-mcp MCP addon 을 antigravity·codex 에 멱등 등록·해제             |
+| Module            | Role                                                                             |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `configManager/`  | `~/.claude/plugins/cennad/config.json` 로드·저장 (`CENNAD_CONFIG_PATH` override) |
+| `counterManager/` | `runtime/counter.json` 으로 provider 호출 카운트 추적 (parent-pid 리셋)          |
+| `projectHash/`    | `sha256(cwd).slice(0,12)` 계산                                                   |
+| `sessionStore/`   | `sessions/<hash>/<id>.json` CRUD + TTL prune                                     |
+| `authToken/`      | settings web UI 일회용 토큰 발급·검증                                            |
+| `artifactWriter/` | opt-in 마크다운 artifact 미러 (project/user 위치)                                |
+| `agyModels/`      | `agy models` CLI 출력 캐싱 → 사용 가능한 Antigravity 모델 목록 제공              |
+| `youtubeMcp/`     | yt-dlp-mcp MCP addon 을 antigravity·codex 에 멱등 등록·해제                      |
 
 ## Conventions
 

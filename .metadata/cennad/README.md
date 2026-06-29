@@ -23,7 +23,7 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Claude CLI 를 Cl
 | [spec.md](./spec.md)                             | 책임 분리, 데이터 흐름, 비채택 사항                                                                                                    |
 | [architecture.md](./architecture.md)             | 모듈 트리 + 의존 방향 + 빌드 파이프라인                                                                                                |
 | [mcp-tools.md](./mcp-tools.md)                   | `start_conversation`, `continue_conversation`, `open_settings` (3개)                                                                   |
-| [storage.md](./storage.md)                       | `${CLAUDE_PLUGIN_DATA}/` 디스크 레이아웃 + JSON 스키마                                                                                 |
+| [storage.md](./storage.md)                       | `~/.claude/plugins/cennad/` 디스크 레이아웃 + config fallback 정책                                                                     |
 | [hooks.md](./hooks.md)                           | SessionStart / UserPromptSubmit 훅 (filid 패턴)                                                                                        |
 | [skills.md](./skills.md)                         | `setup`, `codex`, `antigravity`, `claude`, `crosscheck` 스킬                                                                           |
 | [web-ui.md](./web-ui.md)                         | 로컬 설정 웹 UI (codex / antigravity / Anthropic 3-lane, per-provider 토글·슬라이더, claude permission-mode·모델·effort 드롭다운 포함) |

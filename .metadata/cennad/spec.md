@@ -87,7 +87,7 @@
 ### 세션 격리 (cwd)
 
 - `agy` 는 headless conversation-id 를 발급하지 않는다 (Issue #7).
-- 세션마다 격리된 cwd (`${CLAUDE_PLUGIN_DATA}/runtime/agy/<sessionId>/`) 를 생성.
+- 세션마다 격리된 cwd (`<CENNAD_HOME>/runtime/antigravity-cwd/<sessionId>/`) 를 생성한다. `<CENNAD_HOME>` 은 기본 `~/.claude/plugins/cennad` 이며 `CENNAD_CONFIG_PATH` 로 override 가능하다.
 - `externalSessionRef = cwd` — 이 경로가 cennad 세션과 agy 대화 이력의 단일 핸들.
 - resume 은 동일 sessionId → 동일 cwd 의 `--continue` 로 구현.
 - start() 타임아웃 시 cwd 삭제. resume() 타임아웃 시 cwd 보존 (대화 이력 유지).

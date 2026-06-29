@@ -1,11 +1,11 @@
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type { PreambleConfig } from './configTypes.js';
-import { isObj } from './isObj.js';
+import { isPlainObject } from './isPlainObject.js';
 
 export function pickPreamble(raw: unknown): PreambleConfig {
   const defaults = DEFAULT_CONFIG.preamble;
-  if (!isObj(raw)) return { ...defaults };
+  if (!isPlainObject(raw)) return { ...defaults };
   return {
     codex: typeof raw.codex === 'string' ? raw.codex : defaults.codex,
     antigravity:

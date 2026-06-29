@@ -2,6 +2,9 @@
 
 MCP 서버 이름: `tools`. 도구는 3개. 모든 도구는 `wrapHandler` 로 감싸 표준 에러 응답을 보장한다.
 
+이 문서의 `<CENNAD_HOME>` 은 기본 `~/.claude/plugins/cennad` 이며,
+`CENNAD_CONFIG_PATH` 가 설정되면 해당 디렉터리를 뜻한다.
+
 도구 인자 이름은 `snake_case` 를 유지한다 (외부 LLM 이 호출하는 인터페이스 — atlassian 의 `base_url`, `query_params` 등과 동일 컨벤션). 내부 TypeScript 타입과 변수는 `camelCase`.
 
 ## 1. `start_conversation`
@@ -49,9 +52,9 @@ antigravity 의 `sandbox` 는 하위호환용으로 항상 false 취급 — `--s
 ### 사이드 이펙트
 
 - 신규 `session_id` 발급 (UUIDv4).
-- `${CLAUDE_PLUGIN_DATA}/sessions/<project_hash>/<session_id>.json` 생성. `cwd`, `project_hash` 모두 메타에 기록.
-- antigravity 는 추가로 `${CLAUDE_PLUGIN_DATA}/antigravity/<session_id>/` (per-session cwd) 를 생성한다. 이 디렉터리가 `externalSessionRef` 이자 agy 대화 컨텍스트의 물리적 경계다.
-- `${CLAUDE_PLUGIN_DATA}/runtime/counter.json` 의 provider 카운터 +1 (시도 기준).
+- `<CENNAD_HOME>/sessions/<project_hash>/<session_id>.json` 생성. `cwd`, `project_hash` 모두 메타에 기록.
+- antigravity 는 추가로 `<CENNAD_HOME>/runtime/antigravity-cwd/<session_id>/` (per-session cwd) 를 생성한다. 이 디렉터리가 `externalSessionRef` 이자 agy 대화 컨텍스트의 물리적 경계다.
+- `<CENNAD_HOME>/runtime/counter.json` 의 provider 카운터 +1 (시도 기준).
 - 외부 CLI 실패 시에도 `session_id` 는 유지.
 
 ### Annotations
@@ -113,7 +116,7 @@ z.object({});
 
 ### 동작
 
-1. `${CLAUDE_PLUGIN_DATA}/runtime/settings_server.json` 확인. 이미 동작 중이고 5분 이내면 기존 URL 재사용 (`reused: true`).
+1. `<CENNAD_HOME>/runtime/settings_server.json` 확인. 이미 동작 중이고 5분 이내면 기존 URL 재사용 (`reused: true`).
 2. 아니면 `127.0.0.1:0` 으로 새 서버 기동, one-time token 발급.
 3. 응답으로 접속 URL 반환. `?token=<...>` 쿼리 포함.
 4. Headless 가 아니면 OS 브라우저 자동 오픈 시도. 실패해도 URL 반환.

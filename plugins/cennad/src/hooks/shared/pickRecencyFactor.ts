@@ -1,7 +1,7 @@
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type { RecencyFactorConfig, RecencyLevel } from './configTypes.js';
-import { isObj } from './isObj.js';
+import { isPlainObject } from './isPlainObject.js';
 
 const VALID: ReadonlySet<RecencyLevel> = new Set(['off', 'auto', 'strict']);
 
@@ -13,7 +13,7 @@ function pickLevel(value: unknown, fallback: RecencyLevel): RecencyLevel {
 
 export function pickRecencyFactor(raw: unknown): RecencyFactorConfig {
   const defaults = DEFAULT_CONFIG.recency_factor;
-  if (!isObj(raw)) return { ...defaults };
+  if (!isPlainObject(raw)) return { ...defaults };
   return {
     codex: pickLevel(raw.codex, defaults.codex),
     antigravity: pickLevel(raw.antigravity, defaults.antigravity),

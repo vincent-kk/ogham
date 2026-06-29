@@ -306,14 +306,17 @@ cennad 가 claude CLI 를 다음과 같이 호출한다.
 
 ## 런타임 경로
 
-| 상수                    | 경로                                                 | 용도                                  |
-| ----------------------- | ---------------------------------------------------- | ------------------------------------- |
-| `CONFIG_PATH`           | `${CLAUDE_PLUGIN_DATA}/config.json`                  | 설정                                  |
-| `SESSIONS_DIR`          | `${CLAUDE_PLUGIN_DATA}/sessions/`                    | 세션 store                            |
-| `COUNTER_PATH`          | `${CLAUDE_PLUGIN_DATA}/runtime/counter.json`         | 사용량 카운터                         |
-| `SETTINGS_SERVER_PATH`  | `${CLAUDE_PLUGIN_DATA}/runtime/settings_server.json` | 설정 서버 PID                         |
-| `ANTIGRAVITY_CWD_DIR`   | `${CLAUDE_PLUGIN_DATA}/runtime/antigravity-cwd/`     | agy 세션별 cwd (= externalSessionRef) |
-| `AGY_MODELS_CACHE_PATH` | `${CLAUDE_PLUGIN_DATA}/runtime/agy-models.json`      | agy 모델 캐시                         |
+`<CENNAD_HOME>` 은 기본 `~/.claude/plugins/cennad` 이며 non-blank
+`CENNAD_CONFIG_PATH` 로 override 가능하다.
+
+| 상수                    | 경로                                         | 용도                                  |
+| ----------------------- | -------------------------------------------- | ------------------------------------- |
+| `CONFIG_PATH`           | `<CENNAD_HOME>/config.json`                  | 설정                                  |
+| `SESSIONS_DIR`          | `<CENNAD_HOME>/sessions/`                    | 세션 store                            |
+| `COUNTER_PATH`          | `<CENNAD_HOME>/runtime/counter.json`         | 사용량 카운터                         |
+| `SETTINGS_SERVER_PATH`  | `<CENNAD_HOME>/runtime/settings_server.json` | 설정 서버 PID                         |
+| `ANTIGRAVITY_CWD_DIR`   | `<CENNAD_HOME>/runtime/antigravity-cwd/`     | agy 세션별 cwd (= externalSessionRef) |
+| `AGY_MODELS_CACHE_PATH` | `<CENNAD_HOME>/runtime/agy-models.json`      | agy 모델 캐시                         |
 
 ## 외부 의존성
 

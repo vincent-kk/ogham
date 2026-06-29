@@ -8,7 +8,7 @@ import type {
   CodexSandboxMode,
   OptionFlags,
 } from './configTypes.js';
-import { isObj } from './isObj.js';
+import { isPlainObject } from './isPlainObject.js';
 
 const CODEX_SANDBOX_MODES: ReadonlySet<CodexSandboxMode> = new Set([
   'read-only',
@@ -26,7 +26,7 @@ const CLAUDE_PERMISSION_MODES: ReadonlySet<ClaudePermissionMode> = new Set([
 
 function pickCodex(raw: unknown): CodexFlags {
   const defaults = DEFAULT_CONFIG.option_flags.codex;
-  if (!isObj(raw)) return defaults;
+  if (!isPlainObject(raw)) return defaults;
   const sandbox = raw.sandbox;
   return {
     yolo: typeof raw.yolo === 'boolean' ? raw.yolo : defaults.yolo,
@@ -40,7 +40,7 @@ function pickCodex(raw: unknown): CodexFlags {
 
 function pickAntigravity(raw: unknown): AntigravityFlags {
   const defaults = DEFAULT_CONFIG.option_flags.antigravity;
-  if (!isObj(raw)) return defaults;
+  if (!isPlainObject(raw)) return defaults;
   return {
     sandbox: typeof raw.sandbox === 'boolean' ? raw.sandbox : defaults.sandbox,
     skip_permissions:
@@ -52,7 +52,7 @@ function pickAntigravity(raw: unknown): AntigravityFlags {
 
 function pickClaude(raw: unknown): ClaudeFlags {
   const defaults = DEFAULT_CONFIG.option_flags.claude;
-  if (!isObj(raw)) return defaults;
+  if (!isPlainObject(raw)) return defaults;
   const mode = raw.permission_mode;
   const result: ClaudeFlags = {
     permission_mode:
@@ -67,7 +67,7 @@ function pickClaude(raw: unknown): ClaudeFlags {
 }
 
 export function pickOptionFlags(raw: unknown): OptionFlags {
-  if (!isObj(raw)) return DEFAULT_CONFIG.option_flags;
+  if (!isPlainObject(raw)) return DEFAULT_CONFIG.option_flags;
   return {
     codex: pickCodex(raw.codex),
     antigravity: pickAntigravity(raw.antigravity),

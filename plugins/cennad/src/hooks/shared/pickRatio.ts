@@ -1,11 +1,11 @@
 import { DEFAULT_CONFIG } from '../../constants/defaults.js';
 
 import type { Ratio } from './configTypes.js';
-import { isObj } from './isObj.js';
+import { isPlainObject } from './isPlainObject.js';
 import { pickProviderRatio } from './pickProviderRatio.js';
 
 export function pickRatio(raw: unknown): Ratio {
-  if (!isObj(raw)) return DEFAULT_CONFIG.ratio;
+  if (!isPlainObject(raw)) return DEFAULT_CONFIG.ratio;
   const gemini = raw.gemini;
   const codex = raw.codex;
   const antigravity = raw.antigravity;
@@ -29,11 +29,11 @@ export function pickRatio(raw: unknown): Ratio {
   // Gemini slot beside a disabled Antigravity placeholder. Prefer that active
   // Gemini slot so hook behavior is stable before and after disk pruning.
   const antigravitySource =
-    isObj(gemini) &&
+    isPlainObject(gemini) &&
     gemini.enabled === true &&
-    (!isObj(antigravity) || antigravity.enabled !== true)
+    (!isPlainObject(antigravity) || antigravity.enabled !== true)
       ? gemini
-      : isObj(antigravity)
+      : isPlainObject(antigravity)
         ? antigravity
         : gemini;
   return {

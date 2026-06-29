@@ -53,10 +53,13 @@ describe('settings page ratio controls', () => {
     expect(css).toContain('grid-template-columns: minmax(52px, auto) 1fr 1fr');
   });
 
-  it('describes user artifacts under CLAUDE_PLUGIN_DATA', () => {
+  it('describes user artifacts under the cennad data home', () => {
     const html = readSettingsFile('index.html');
 
-    expect(html).toContain('${CLAUDE_PLUGIN_DATA}/artifacts/');
-    expect(html).not.toContain('~/.claude/plugins/cennad/artifacts/');
+    expect(html).toContain(
+      '&lt;active cennad home&gt;/artifacts/&lt;projectHash&gt;/',
+    );
+    expect(html).toContain('~/.claude/plugins/cennad/');
+    expect(html).toContain('CENNAD_CONFIG_PATH');
   });
 });
