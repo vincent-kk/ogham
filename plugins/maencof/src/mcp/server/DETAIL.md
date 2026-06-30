@@ -7,6 +7,7 @@
 - freshness 불필요 read → `registerReadTool({ needsFreshness: false })` wrapper 가 `incrementUsageStat` 만 수행.
 - 부팅 시 `startServer` 는 transport connect 직후 `walkVaultForExternalChanges(getVaultPath())` 를 detach. snapshot 부재 시 no-op.
 - background rebuild 성공 finalize 에서 `invalidateCache()` 를 호출해 다음 read 가 disk reload.
+- explicit `kg_build` 도구 호출도 성공 시 등록부에서 `invalidateCache()` 를 호출 (background rebuild 와 동일 계약). 핸들러는 disk 에만 `saveGraph` 하므로, 이 invalidate 없이는 동일 세션 후속 read(`loadGraphIfNeeded` 경유 `kg_status` 포함)가 build 직전 캐시 그래프를 계속 반환한다.
 
 ## API Contracts
 

@@ -9,14 +9,17 @@ import { z } from 'zod';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { handleBoundaryCreate } from '../../tools/boundaryCreate/index.js';
-import { handleKgBuild } from '../../tools/kgBuild/index.js';
 import { handleKgContext } from '../../tools/kgContext/index.js';
 import { handleKgNavigate } from '../../tools/kgNavigate/index.js';
 import { handleKgSearch } from '../../tools/kgSearch/index.js';
 import { handleKgStatus } from '../../tools/kgStatus/index.js';
 import { handleKgSuggestLinks } from '../../tools/kgSuggestLinks/index.js';
 import { loadGraphIfNeeded } from '../graphCache/index.js';
-import { registerMutateTool, registerReadTool } from '../middlewares/index.js';
+import {
+  rebuildAndInvalidate,
+  registerMutateTool,
+  registerReadTool,
+} from '../middlewares/index.js';
 
 export function registerKgTools(server: McpServer): void {
   // ─── kg_search (fresh read) ──────────────────────────────────────
@@ -163,7 +166,7 @@ export function registerKgTools(server: McpServer): void {
         force: z.boolean().optional().describe('Full rebuild (default false)'),
       }),
     },
-    async (vaultPath, args) => handleKgBuild(vaultPath, args),
+    async (vaultPath, args) => rebuildAndInvalidate(vaultPath, args),
     { needsFreshness: false },
   );
 

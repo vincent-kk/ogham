@@ -4,6 +4,7 @@ export {
   triggerBootRebuildIfStale,
 } from './backgroundRebuild.js';
 export { mergeStaleNodesIntoGraph } from './partialReindex.js';
+export { rebuildAndInvalidate } from './rebuildAndInvalidate.js';
 export { runMutateSideEffects } from './mutateSideEffects.js';
 export { incrementUsageStat } from './usageStats.js';
 export { walkVaultForExternalChanges } from './vaultWalk.js';
