@@ -84,4 +84,23 @@ describe("runSessionStart — complex", () => {
       spy.mockRestore();
     }
   });
+
+  it("emits a stale-index advisory when a vault index is stale or unbuilt", async () => {
+    maencofDir(); // no marker → "index not built"
+
+    const result = await runSessionStart(workDir);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? "";
+    expect(ctx).toContain("<stale-index-advisory>");
+    expect(ctx).toContain("read-only and cannot rebuild");
+    expect(ctx).toContain("kg_build");
+  });
+
+  it("omits the stale-index advisory when the index is fresh", async () => {
+    const dir = maencofDir();
+    writeFileSync(join(dir, "graph-meta.json"), "{}");
+
+    const result = await runSessionStart(workDir);
+    const ctx = result.hookSpecificOutput?.additionalContext ?? "";
+    expect(ctx).not.toContain("<stale-index-advisory>");
+  });
 });
