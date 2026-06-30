@@ -1,6 +1,6 @@
 {
   "name": "@ogham/prawf",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Prawf — multi-agent academic peer-review orchestration plugin for Claude Code",
   "keywords": [
     "claude-code",
