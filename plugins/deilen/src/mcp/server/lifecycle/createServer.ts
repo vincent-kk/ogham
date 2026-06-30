@@ -27,8 +27,9 @@ export function createServer(): McpServer {
           .string()
           .optional()
           .describe(
-            "Markdown body to render. Mutually exclusive with path. Prefer path " +
-              "for large documents to avoid duplicating the body into tool input.",
+            "Markdown body to render. Mutually exclusive with path. Pass content " +
+              "when the body lives in the conversation; pass path when it is " +
+              "already a file on disk, so only the path enters tool input.",
           ),
         path: z
           .string()
