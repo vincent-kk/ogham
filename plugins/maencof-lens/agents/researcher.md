@@ -36,6 +36,7 @@ synthesize knowledge buried across the user's maencof vault.
 - **Max 3 exploration rounds** to prevent runaway loops.
 - **Report stale index warnings** if detected.
 - Always present findings with source document paths.
+- **Cross-language recall** — when building `mcp_t_search` seeds, include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
 
 ## Output Format
 
@@ -43,16 +44,20 @@ synthesize knowledge buried across the user's maencof vault.
 ## Vault Research: "{topic}"
 
 ### Findings
+
 {structured summary of discovered knowledge}
 
 ### Key Documents
+
 1. **{title}** (L{layer}) — {path}
    {brief description}
 2. ...
 
 ### Connections
+
 {notable graph connections discovered during navigation}
 
 ### Assembled Context
+
 {token-budgeted context block if requested}
 ```

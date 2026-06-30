@@ -1,5 +1,8 @@
 export { ensureFreshGraphNonBlocking } from './freshnessGuard.js';
-export { triggerBackgroundRebuild } from './backgroundRebuild.js';
+export {
+  triggerBackgroundRebuild,
+  triggerBootRebuildIfStale,
+} from './backgroundRebuild.js';
 export { mergeStaleNodesIntoGraph } from './partialReindex.js';
 export { runMutateSideEffects } from './mutateSideEffects.js';
 export { incrementUsageStat } from './usageStats.js';

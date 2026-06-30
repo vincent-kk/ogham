@@ -1,7 +1,12 @@
 /**
  * @file partialReindex.ts
- * @description Hybrid partial reindex — node 교체/삭제 + outbound edge 재계산 + invertedIndex 동기 갱신.
- * weights / pageRank / edgeWeightMap / edgeTypeMap / adjacencyList 는 background rebuild 의존.
+ * @description Hybrid partial reindex — node 교체/삭제 + outbound edge 재계산 + invertedIndex 동기 갱신
+ * + 엣지 파생 런타임 맵(adjacency/edgeWeight/edgeType) 재구성.
+ *
+ * 엣지 파생 맵을 graph.edges 와 동기화하는 이유: loadGraph 가 맵을 재수화한 뒤에는, 맵을 stale 로
+ * 두면 SA 가 폴백(live edges) 대신 stale 맵을 읽어 잘못된 결과를 낸다. background rebuild 가 없는
+ * 읽기 전용 소비자(maencof-lens)에서 이 stale 이 영구화되므로, merge 시점에 맵을 갱신한다.
+ * 노드-레벨 weights / pageRank 는 여전히 background rebuild 가 소유한다(여기서 재계산하지 않음).
  */
 import { readFile, stat } from 'node:fs/promises';
 import { join, posix } from 'node:path';
@@ -13,10 +18,11 @@ import {
 import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import {
   addNodeToInvertedIndex,
+  rebuildEdgeDerivedMaps,
   removeNodeFromInvertedIndex,
 } from '../../../core/graphBuilder/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
-import type { StaleEntry } from '../../../core/indexer/metadataStore/metadataStore.js';
+import type { StaleEntry } from '../../../core/indexer/metadataStore/index.js';
 import { invalidateQueryCache } from '../../../search/queryEngine/index.js';
 import type { NodeId } from '../../../types/common.js';
 import { toNodeId } from '../../../types/common.js';
@@ -31,7 +37,8 @@ import type {
  *
  * - `op === 'mutate'`: node 교체. NodeId == path (toNodeId 가 identity) 이므로 동일 path 재빌드는 graph.nodes 의 기존 엔트리를 자연 덮어쓴다. 사전에 캐시된 oldNode 의 invertedIndex term 을 제거한 뒤 freshNode term 을 추가한다. ENOENT 등 readFile 실패는 로그 + skip — race/외부 삭제와 구분 불가하므로 노드 삭제로 해석하지 않는다.
  * - `op === 'delete'`: graph.nodes 에서 노드 제거 + 해당 노드를 source/target 으로 하는 모든 edges 제거 + invertedIndex 의 term 에서 제거.
- * - weights / pageRank / edgeWeightMap / edgeTypeMap / adjacencyList 는 갱신하지 않는다.
+ * - 델타 적용 후 엣지 파생 맵(adjacency/edgeWeight/edgeType)을 graph.edges 로부터 재구성한다
+ *   (맵이 부착된 경우에만 — `rebuildEdgeDerivedMaps`). 노드-레벨 weights / pageRank 는 갱신하지 않는다.
  * - 디스크 미반영. 호출자는 동일 graph reference 를 즉시 사용 가능.
  *
  * @sideEffect 변경이 적용되면 (replacedSourceIds.size + anyDeleted > 0) module-level queryCache 를 invalidate. 이는 graph.builtAt 미변경 in-place mutation 의 결과로 동일 builtAt 키에 묶인 SA 캐시 결과가 stale 하게 반환되는 read-path 비일관을 차단한다.
@@ -56,19 +63,31 @@ export async function mergeStaleNodesIntoGraph(
 
   const replacedSourceIds = new Set<NodeId>();
   let anyDeleted = false;
+  const mutateDeltas: Array<{
+    freshNode: KnowledgeNode;
+    oldNode: KnowledgeNode | undefined;
+  }> = [];
 
   for (const entry of toProcess) {
     if (entry.op === 'delete') {
       if (handleDelete(graph, pathToNodeId, entry.path)) anyDeleted = true;
       continue;
     }
-    await handleMutate(
+    const delta = await handleMutate(
       vaultPath,
       graph,
       pathToNodeId,
-      replacedSourceIds,
       entry.path,
     );
+    if (delta) mutateDeltas.push(delta);
+  }
+
+  for (const { freshNode, oldNode } of mutateDeltas) {
+    if (oldNode) removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
+    graph.nodes.set(freshNode.id, freshNode);
+    pathToNodeId.set(freshNode.path, freshNode.id);
+    addNodeToInvertedIndex(graph.invertedIndex, freshNode);
+    replacedSourceIds.add(freshNode.id);
   }
 
   if (replacedSourceIds.size === 0 && !anyDeleted) return graph;
@@ -94,6 +113,10 @@ export async function mergeStaleNodesIntoGraph(
   }
 
   graph.edgeCount = graph.edges.length;
+
+  // 엣지가 in-place 로 바뀌었으므로 엣지 파생 런타임 맵을 graph.edges 와 동기화한다.
+  // 맵이 부착돼 있지 않으면 no-op(폴백 경로 유지). invertedIndex 는 위에서 증분 유지됨.
+  rebuildEdgeDerivedMaps(graph);
 
   // Graph structure changed in place but graph.builtAt was NOT bumped.
   // Module-level queryCache keys on builtAt; without explicit invalidation
@@ -126,9 +149,11 @@ async function handleMutate(
   vaultPath: string,
   graph: KnowledgeGraph,
   pathToNodeId: Map<string, NodeId>,
-  replacedSourceIds: Set<NodeId>,
   stalePath: string,
-): Promise<void> {
+): Promise<{
+  freshNode: KnowledgeNode;
+  oldNode: KnowledgeNode | undefined;
+} | null> {
   let freshNode: KnowledgeNode | undefined;
   let oldNode: KnowledgeNode | undefined;
   try {
@@ -137,7 +162,7 @@ async function handleMutate(
     const stats = await stat(absolutePath);
     const doc = parseDocument(stalePath, content, stats.mtimeMs);
     const built = buildKnowledgeNode(doc);
-    if (!built.success || !built.node) return;
+    if (!built.success || !built.node) return null;
 
     freshNode = built.node;
     freshNode.outboundLinks = doc.links
@@ -158,15 +183,10 @@ async function handleMutate(
       error: `${stalePath}: ${String(err)}`,
       timestamp: new Date().toISOString(),
     });
-    return;
+    return null;
   }
 
-  if (!freshNode) return;
+  if (!freshNode) return null;
 
-  if (oldNode) removeNodeFromInvertedIndex(graph.invertedIndex, oldNode);
-
-  graph.nodes.set(freshNode.id, freshNode);
-  pathToNodeId.set(freshNode.path, freshNode.id);
-  addNodeToInvertedIndex(graph.invertedIndex, freshNode);
-  replacedSourceIds.add(freshNode.id);
+  return { freshNode, oldNode };
 }

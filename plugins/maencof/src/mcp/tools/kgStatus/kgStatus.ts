@@ -3,12 +3,35 @@
  * @description kg_status 도구 핸들러 — 인덱스 상태 조회
  */
 import { MetadataStore } from '../../../core/indexer/metadataStore/index.js';
+import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import type { KgStatusInput, KgStatusResult } from '../../../types/mcp.js';
 
-/**
- * kg_status 핸들러
- */
+function collectLinkOrphanStats(graph: KnowledgeGraph): {
+  linkOrphanCount: number;
+  linkInboundOrphanCount: number;
+  linkOutboundOrphanCount: number;
+} {
+  const linkInbound = new Set<NodeId>();
+  const linkOutbound = new Set<NodeId>();
+  for (const edge of graph.edges) {
+    if (edge.type !== 'LINK') continue;
+    linkOutbound.add(edge.from);
+    linkInbound.add(edge.to);
+  }
+  let linkOrphanCount = 0;
+  let linkInboundOrphanCount = 0;
+  let linkOutboundOrphanCount = 0;
+  for (const id of graph.nodes.keys()) {
+    const hasIn = linkInbound.has(id);
+    const hasOut = linkOutbound.has(id);
+    if (!hasIn && !hasOut) linkOrphanCount++;
+    if (!hasIn) linkInboundOrphanCount++;
+    if (!hasOut) linkOutboundOrphanCount++;
+  }
+  return { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount };
+}
+
 export async function handleKgStatus(
   vaultPath: string,
   graph: KnowledgeGraph | null,
@@ -58,6 +81,9 @@ export async function handleKgStatus(
     subLayerDistribution['cross_layer_edges'] = crossLayerEdgeCount;
   }
 
+  const { linkOrphanCount, linkInboundOrphanCount, linkOutboundOrphanCount } =
+    collectLinkOrphanStats(graph);
+
   return {
     nodeCount: graph.nodeCount,
     edgeCount: graph.edgeCount,
@@ -70,5 +96,8 @@ export async function handleKgStatus(
       Object.keys(subLayerDistribution).length > 0
         ? subLayerDistribution
         : undefined,
+    linkOrphanCount,
+    linkInboundOrphanCount,
+    linkOutboundOrphanCount,
   };
 }

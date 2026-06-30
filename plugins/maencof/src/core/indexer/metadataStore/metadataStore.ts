@@ -25,6 +25,7 @@ import type {
   SerializedGraphMeta,
   SerializedNodes,
 } from '../../../types/graph.js';
+import { hydrateRuntimeMaps } from '../../graphBuilder/index.js';
 
 import { atomicWriteJson } from './atomicWrite.js';
 import { withVaultLock } from './fileMutex.js';
@@ -240,7 +241,9 @@ export class MetadataStore {
       ]);
       const nodesArr = JSON.parse(nodesRaw) as SerializedNodes;
       const edgesArr = JSON.parse(edgesRaw) as SerializedEdges;
-      return deserializeShards(nodesArr, edgesArr, meta);
+      // 디스크 샤드는 nodes/edges 만 보존하므로, 런타임 조회 맵(invertedIndex·adjacency·
+      // edgeWeight/Type)을 빌드와 동일 로직으로 재수화해 빌드직후/리로드 동작을 일치시킨다.
+      return hydrateRuntimeMaps(deserializeShards(nodesArr, edgesArr, meta));
     } catch {
       // commit marker 는 있으나 부속 파일 read/parse 실패 — legacy 로 폴백하지 않고 cache miss
       return null;
@@ -271,7 +274,8 @@ export class MetadataStore {
       const graph = deserializeGraph(data);
       // 즉시 신규 layout 으로 재기록 — 다음 호출부터는 fast path
       await this.saveGraph(graph);
-      return graph;
+      // 반환 graph 도 런타임 맵을 재수화해 shard 경로와 동일한 servable 상태로 맞춘다.
+      return hydrateRuntimeMaps(graph);
     } catch {
       return null;
     }

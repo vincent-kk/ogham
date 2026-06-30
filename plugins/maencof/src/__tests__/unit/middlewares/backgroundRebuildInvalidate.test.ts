@@ -8,6 +8,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { MetadataStore } from '../../../core/indexer/index.js';
 import {
   invalidateCache,
   loadGraphIfNeeded,
@@ -15,6 +16,7 @@ import {
 import {
   _peekRebuildInProgress,
   triggerBackgroundRebuild,
+  triggerBootRebuildIfStale,
 } from '../../../mcp/server/middlewares/backgroundRebuild.js';
 
 let vaultDir: string;
@@ -75,5 +77,25 @@ describe('triggerBackgroundRebuild', () => {
     expect(second).toBe(first);
 
     await first;
+  });
+});
+
+describe('triggerBootRebuildIfStale', () => {
+  it('stale 엔트리가 있으면 부팅 시 background rebuild를 트리거한다', async () => {
+    writeFrontmatterDoc('a.md', 2);
+    const store = new MetadataStore(vaultDir);
+    await store.appendStaleEntries([{ path: 'a.md', op: 'mutate' }]);
+
+    await triggerBootRebuildIfStale(vaultDir);
+    const inflight = _peekRebuildInProgress();
+    expect(inflight).not.toBeNull();
+    await inflight!;
+  });
+
+  it('stale 엔트리가 없으면 no-op (rebuild 미트리거)', async () => {
+    writeFrontmatterDoc('a.md', 2);
+
+    await triggerBootRebuildIfStale(vaultDir);
+    expect(_peekRebuildInProgress()).toBeNull();
   });
 });

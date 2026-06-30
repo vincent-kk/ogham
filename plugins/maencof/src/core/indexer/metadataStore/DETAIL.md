@@ -15,6 +15,7 @@
 
 - `new MetadataStore(vaultPath)` — `${vaultPath}/.maencof/`에 캐시 파일 R/W.
 - `loadGraph()` / `saveGraph(graph)` — 3-shard layout: `nodes.json` + `edges.json` + `graph-meta.json`. `graph-meta.json`이 cross-file commit marker (write LAST, read FIRST). 단일 `withVaultLock` 안에서 nodes/edges 병렬 → graph-meta 직렬로 commit, 성공 후 legacy `index.json`은 best-effort unlink.
+- `loadGraph()` 는 디스크에 보존되지 않는 런타임 조회 맵(`adjacencyList` / `edgeWeightMap` / `edgeTypeMap` / `invertedIndex`)을 `graphBuilder.hydrateRuntimeMaps` 로 재수화해 반환한다. 이는 kgBuild 빌드 직후 그래프와 동일한 로직을 공유하므로, 빌드직후/리로드 간 SA·시드 해석 동작이 일치한다. 캐시 파일 구조(3-shard)는 불변 — 맵은 in-memory 파생물이다.
 - `loadGraph()` 분기: graph-meta.json 부재 → legacy 마이그레이션 경로 (partial-shard / fresh / legacy-only 포괄). graph-meta.json 존재 + schemaVersion === 2 → fast path. schemaVersion ≠ 2 또는 nodes/edges read 실패 → null (legacy 로 폴백 없음).
 - `loadGraph()` legacy fallback — 샤드 commit marker 가 없고 `index.json`만 존재할 경우 1회 자동 마이그레이션 (read → saveGraph → unlink). legacy read 와 saveGraph 사이 잠금이 끊긴 윈도우가 있어 동시 writer 와의 이론적 race 존재 (legacy v1 잔존 1회 한정이라 실측 영향 무시). 이후 호출은 fast path.
 - `cacheExists()` — `graph-meta.json` 우선, 없으면 legacy `index.json` 검사.

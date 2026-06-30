@@ -108,6 +108,15 @@ export interface KgStatusResult {
   vaultPath: string;
   /** 서브레이어별 노드 분포 */
   subLayerDistribution?: Record<string, number>;
+  /**
+   * LINK(위키링크) 서브그래프 완전 고립 노드 수 — inbound·outbound LINK 모두 없음.
+   * total-degree orphan(폴더-형제 엣지 포함)이 마스킹하는 의미적 고립을 드러낸다.
+   */
+  linkOrphanCount?: number;
+  /** inbound LINK 가 없는 노드 수 (어디서도 참조되지 않음). */
+  linkInboundOrphanCount?: number;
+  /** outbound LINK 가 없는 노드 수 (어떤 문서도 가리키지 않음). */
+  linkOutboundOrphanCount?: number;
 }
 
 /** kg_suggest_links 입력 */

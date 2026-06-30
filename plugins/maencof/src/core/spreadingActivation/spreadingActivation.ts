@@ -30,6 +30,12 @@ export interface SpreadingActivationParams {
   decayOverride?: number;
   /** 시드별 초기 활성화 값 (미지정 시 1.0) */
   seedActivations?: Map<NodeId, number>;
+  /**
+   * 노드별 SIBLING(폴더-형제) 확산 fanout 상한 (미지정/Infinity = 무제한).
+   * 대형 폴더 클리크가 균일 점수로 결과를 도배하는 것을 막기 위해, 형제 이웃은 pagerank 상위
+   * K개만 전파한다. LINK/계층 등 의미 엣지는 제한하지 않는다.
+   */
+  siblingFanoutCap?: number;
 }
 
 /** BFS 큐 항목 */
@@ -86,6 +92,36 @@ function getDecayForNode(
   const node = graph.nodes.get(nodeId);
   if (!node) return 0.7;
   return getLayerDecay(node.layer, node.subLayer);
+}
+
+/**
+ * 노드의 이웃 목록에 SIBLING fanout 상한을 적용한다.
+ * 형제 이웃이 상한을 초과하면 pagerank 상위 K개만 남기고(동률은 id 사전순), 비-형제 이웃은
+ * 모두 보존한다. 상한이 무한이거나 전체 이웃이 상한 이하이면 원본 순서를 그대로 반환한다.
+ */
+function capSiblingFanout(
+  graph: KnowledgeGraph,
+  from: NodeId,
+  neighbors: NodeId[],
+  cap: number,
+): NodeId[] {
+  if (!Number.isFinite(cap) || neighbors.length <= cap) return neighbors;
+
+  const siblings: NodeId[] = [];
+  const others: NodeId[] = [];
+  for (const to of neighbors) {
+    if (getEdgeType(graph, from, to) === 'SIBLING') siblings.push(to);
+    else others.push(to);
+  }
+  if (siblings.length <= cap) return neighbors;
+
+  siblings.sort((a, b) => {
+    const pa = graph.nodes.get(a)?.pagerank ?? 0;
+    const pb = graph.nodes.get(b)?.pagerank ?? 0;
+    if (pb !== pa) return pb - pa;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+  return [...others, ...siblings.slice(0, cap)];
 }
 
 /**
@@ -164,6 +200,7 @@ export function runSpreadingActivation(
   const maxActiveNodes = params.maxActiveNodes ?? 100;
   const decayOverride = params.decayOverride;
   const seedActivations = params.seedActivations;
+  const siblingFanoutCap = params.siblingFanoutCap ?? Infinity;
   const resolvedParams = {
     threshold,
     maxHops,
@@ -216,7 +253,13 @@ export function runSpreadingActivation(
     // 인접 리스트에서 이웃 탐색 (O(degree) — 기존 O(E) 대비 최적화)
     const neighbors = adj.get(current.nodeId);
     if (neighbors) {
-      for (const neighborId of neighbors) {
+      const ordered = capSiblingFanout(
+        graph,
+        current.nodeId,
+        neighbors,
+        siblingFanoutCap,
+      );
+      for (const neighborId of ordered) {
         processNeighbor(
           graph,
           current,
@@ -229,8 +272,13 @@ export function runSpreadingActivation(
     }
   }
 
-  // score 내림차순 정렬하여 반환
-  return Array.from(activationMap.values()).sort((a, b) => b.score - a.score);
+  // score 내림차순 정렬, 동률은 pagerank 우선 (균일 점수 형제 클리크의 랭킹 붕괴 방지)
+  return Array.from(activationMap.values()).sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const pa = graph.nodes.get(a.nodeId)?.pagerank ?? 0;
+    const pb = graph.nodes.get(b.nodeId)?.pagerank ?? 0;
+    return pb - pa;
+  });
 }
 
 /**
@@ -265,6 +313,9 @@ export class SpreadingActivationEngine {
     seedId: NodeId,
     params?: SpreadingActivationParams,
   ): ActivationResult[] {
-    return this.activate(graph, [seedId], params);
+    return runSpreadingActivation(graph, [seedId], {
+      ...this.defaultParams,
+      ...params,
+    });
   }
 }
