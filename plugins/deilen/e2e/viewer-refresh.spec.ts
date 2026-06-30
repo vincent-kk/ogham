@@ -82,9 +82,12 @@ test("preserves the viewer after submit is collected and refresh disables submit
   await expect(
     page.getByRole("heading", { name: "Refresh survives" }),
   ).toBeVisible();
-  await addOverallNote(page, "Keep the rendered document visible after submit.");
+  await addOverallNote(
+    page,
+    "Keep the rendered document visible after submit.",
+  );
 
-  const submit = page.getByRole("button", { name: "Submit feedback" });
+  const submit = page.getByRole("button", { name: "Continue in chat" });
   await expect(submit).toBeEnabled();
   await submit.click();
 
@@ -132,6 +135,6 @@ test("keeps the viewer visible after close_viewer and refresh disables submit", 
   await expect(page.getByText("Still readable.")).toBeVisible();
   await expect(page.getByText("This session has ended")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Submit feedback" }),
+    page.getByRole("button", { name: "Continue in chat" }),
   ).toBeDisabled();
 });

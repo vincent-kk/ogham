@@ -729,7 +729,25 @@ button {
   box-shadow: none;
 }
 
-.range-selecting {
+/* Tables anchor per row, so the flag sits on the <tr>. Paint the wash on the
+   row's cells, not the row box: a table-row's own background sinks behind the
+   cell borders, the opaque header fill, and the zebra striping. The bottom
+   inset line runs unbroken across the adjacent cells, matching the block
+   underline used elsewhere. Pending (rose) wins over committed (amber) at equal
+   specificity through source order, mirroring the block rules above. */
+.viewer tr[data-has-comment="true"] > *,
+.viewer tr[data-pending-comment="true"] > * {
+  background: var(--mark);
+  box-shadow: inset 0 -2px 0 var(--mark-line);
+}
+
+.viewer tr[data-pending-comment="true"] > * {
+  background: var(--pending);
+  box-shadow: inset 0 -2px 0 var(--pending-line);
+}
+
+.range-selecting,
+.viewer tr.range-selecting > * {
   background: color-mix(in srgb, var(--bg) 82%, var(--text));
 }
 

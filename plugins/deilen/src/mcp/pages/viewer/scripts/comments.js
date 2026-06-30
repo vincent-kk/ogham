@@ -481,8 +481,15 @@ let anchorBlocks = [];
 
 function anchorTargets(viewer) {
   const targets = [...viewer.querySelectorAll("li[data-source-line]")];
+  // Tables anchor per row: cells (th/td) carry no source-line, so each <tr> is
+  // the finest anchorable unit and a text selection already resolves to it. The
+  // <table> itself is deliberately excluded — as an overflow-x:auto block it
+  // clips the gutter "+", and a block highlight on it hides behind the cell
+  // borders/backgrounds. Rows are display-only anchors (see decorateAnchors).
+  targets.push(...viewer.querySelectorAll("tr[data-source-line]"));
   for (const child of viewer.children) {
     if (child.tagName === "UL" || child.tagName === "OL") continue;
+    if (child.tagName === "TABLE") continue;
     if (child.hasAttribute("data-source-line")) targets.push(child);
   }
   return targets.sort(
@@ -546,6 +553,10 @@ function decorateAnchors() {
   const viewer = document.getElementById("viewer");
   anchorBlocks = anchorTargets(viewer);
   for (const block of anchorBlocks) {
+    // A <tr> is a display-only anchor: a <button> child would land between its
+    // cells and break the row, and the table's overflow clips a gutter "+"
+    // anyway. Table rows are reached via text selection, not the "+" affordance.
+    if (block.tagName === "TR") continue;
     const addButton = getElement("button", {
       class: "line-add",
       type: "button",
